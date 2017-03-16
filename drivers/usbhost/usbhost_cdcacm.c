@@ -941,7 +941,7 @@ static void usbhost_txdata_work(FAR void *arg)
           /* Increment counters and indices */
 
           txndx++;
-          if (++txtail > txbuf->size)
+          if (++txtail >= txbuf->size)
             {
              txtail = 0;
             }
@@ -1118,7 +1118,6 @@ static void usbhost_rxdata_work(FAR void *arg)
            * no interest to us.
            */
 
-          DEBUGASSERT(nread <= priv->pktsize);
           priv->nrxbytes = (uint16_t)nread;
           rxndx          = 0;
 

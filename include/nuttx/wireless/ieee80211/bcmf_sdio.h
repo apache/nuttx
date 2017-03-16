@@ -1,8 +1,8 @@
 /****************************************************************************
- * configs/ubw32/src/pic32_usbterm.c
+ * include/nuttx/wireless/ieee80211/bcmf_sdio.h
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,72 +33,54 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_WIRELESS_IEEE80211_BCMF_SDIO_H
+#define __INCLUDE_NUTTX_WIRELESS_IEEE80211_BCMF_SDIO_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/mmcsd.h>
 
-#include <stdbool.h>
-#include <debug.h>
-
-#include <nuttx/usb/usbdev.h>
-
-#include "pic32mx.h"
-#include "ubw32.h"
-
-#if defined(CONFIG_PIC32MX_USBDEV) && defined(CONFIG_EXAMPLES_USBTERM_DEVINIT)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name:
- *
- * Description:
- *   If CONFIG_EXAMPLES_USBTERM_DEVINIT is defined, then the example will
- *   call this user provided function as part of its initialization.
- *
- ****************************************************************************/
-
-int usbterm_devinit(void)
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
 {
-  /* The UBW32 has no way to know when the USB is connected.  So we will fake
-   * it and tell the USB driver that the USB is connected now.
-   *
-   * If examples/usbterm is built as an NSH built-in application, then
-   * pic32mx_usbattach() will be called in board_app_initialize().
-   */
-
-#ifndef CONFIG_NSH_BUILTIN_APPS
-  pic32mx_usbattach();
+#else
+#define EXTERN extern
 #endif
-  return OK;
-}
 
 /****************************************************************************
- * Name:
+ * Public Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function: bcmf_sdio_initialize
  *
  * Description:
- *   If CONFIG_EXAMPLES_USBTERM_DEVINIT is defined, then the example will
- *   call this user provided function as part of its termination sequence.
+ *   Initialize Broadcom FullMAC driver.
+ *
+ * Parameters:
+ *   minor - zero based minor device number which is unique
+ *           for each wlan device.
+ *   dev   - SDIO device used to communicate with the wlan chip
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
  *
  ****************************************************************************/
 
-void usbterm_devuninit(void)
-{
-  /* Tell the USB driver that the USB is no longer connected */
+int bcmf_sdio_initialize(int minor, FAR struct sdio_dev_s *dev);
 
-  pic32mx_usbdetach();
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
 
-#endif /* CONFIG_PIC32MX_USBDEV && CONFIG_EXAMPLES_USBTERM_DEVINIT */
+#endif /* __INCLUDE_NUTTX_WIRELESS_IEEE80211_BCMF_SDIO_H */

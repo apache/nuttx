@@ -7,29 +7,55 @@ to share the same board design.  Other code comes from the STM3240G board
 support (which has the same crystal and clocking) and from the STM32 F4
 Discovery (which has the same STM32 part)
 
+Contents
+========
+
+  o Board Support
+  o microSD Card Interface
+  o OTGFS Host
+  o Configurations
+
 Board Support
 =============
 
 The following peripherals are available in this configuration.
 
- - LEDs:       show the sytem status
+ - LEDs:       Show the sytem status
 
  - Buttons:    TAMPER-button, WKUP-button, J1-Joystick (consists of RIGHT-,
-               UP-, LEFT-, DOWN-, and CENTER-button). Built in app
-               'buttons' works.
+               UP-, LEFT-, DOWN-, and CENTER-button).
 
  - ADC:        ADC1 samples the red trim potentiometer AN_TR
                Built in app 'adc' works.
 
- - USB-FS-OTG: enabled but not really tested, since there is only a
-               USB-A-connector (host) connected to the full speed µC inputs.
-               The other connector (device) is connected to the high speed µC
-               inputs, but it seems that NuttX has currently no driver
-               for it.
+ - USB-FS-OTG: There is a USB-A-connector (host) connected to the full
+               speed STM32 OTG inputs.
 
- - CAN:        Built in app 'can' works, but apart from that not really tested.
+ - USB-HS-OTG: The other connector (device) is connected to the high speed
+               STM32 OTG inputs.
+
+ - CAN:        Built in app 'can' works, but apart from that not really
+               tested.
 
  - Ethernet:   Ping to other station on the network works.
+
+ - microSD:    Not fully functional.  See below.
+
+ - LCD:        Nokia 6610. This is similar the Nokia 6100 LCD used on other
+               Olimex boards.  There is a driver for that LCD at
+               drivers/lcd/nokia6100.c, however, it is not properly
+               integrated.  It uses a 9-bit SPI interface which is difficult
+               to get working properly.
+
+- External     Support is included for the onboard SRAM.  It uses SRAM
+  SRAM:        settings from another board that might need to be tweaked.
+               Difficult to test because the SRAM conflicts with both
+               RS232 ports.
+
+- Other:       Buzzer, Camera, Temperature sensor, audio have not been
+               tested.
+
+ If so, then it requires a 9-bit
 
 microSD Card Interface
 ======================
@@ -106,6 +132,103 @@ microSD Card Interface
     STATUS:
     -------
     2017-01-28:  There is no card communication.  All commands to the SD card timeout.
+
+OTGFS Host
+==========
+  STM32 USB OTG FS Host Board Support
+  -----------------------------------
+  A USB-A-connector (host) is connected to the full speed STM32 inputs.  These
+  are the pins supported by the STM32:
+
+    PIN  SIGNAL      DIRECTION
+    ---- ----------- ----------
+    PA8  OTG_FS_SOF  SOF clock output
+    PA9  OTG_FS_VBUS VBUS input for device, Driven by external regulator by
+                     host (not an alternate function)
+    PA10 OTG_FS_ID   OTG ID pin (only needed in Dual mode)
+    PA11 OTG_FS_DM   D- I/O
+    PA12 OTG_FS_DP   D+ I/O
+
+  These are the signals available on-board:
+
+    OTG_FS_VBUS     Used host VBUS sensing (device input only)
+    OTG_FS_DM       Data minus
+    OTG_FS_DP       Dta plus
+
+  NOTE: PA10 is currently used for DCMI_D1.  The USB OTGFS host will
+  configure this as the ID input.
+
+  VBUS power is provided via an LM3526 and driven by USB_FS_VBUSON:
+
+    USB_FS_VBUSON  PC2  power on output to LM3526 #ENA
+    USB_FS_FAULT   PB10 overcurrent input from LM3526 FLAG_A.
+
+  STM32 USB OTG FS Host Driver Configuration
+  ------------------------------------------
+  Pre-requisites
+
+    CONFIG_USBDEV          - Enable USB device support
+    CONFIG_USBHOST         - Enable USB host support
+    CONFIG_STM32_OTGFS     - Enable the STM32 USB OTG FS block
+    CONFIG_STM32_SYSCFG    - Needed
+    CONFIG_SCHED_WORKQUEUE - Worker thread support is required
+
+  STM32 Options:
+
+    CONFIG_STM32_OTGFS_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
+      Default 128 (512 bytes)
+    CONFIG_STM32_OTGFS_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
+      in 32-bit words.  Default 96 (384 bytes)
+    CONFIG_STM32_OTGFS_PTXFIFO_SIZE - Size of the periodic Tx FIFO in 32-bit
+      words.  Default 96 (384 bytes)
+    CONFIG_STM32_OTGFS_DESCSIZE - Maximum size of a descriptor.  Default: 128
+    CONFIG_STM32_OTGFS_SOFINTR - Enable SOF interrupts.  Why would you ever
+      want to do that?
+    CONFIG_STM32_USBHOST_REGDEBUG - Enable very low-level register access
+      debug.  Depends on CONFIG_DEBUG_FEATURES.
+    CONFIG_STM32_USBHOST_PKTDUMP - Dump all incoming and outgoing USB
+      packets. Depends on CONFIG_DEBUG_FEATURES.
+
+   Olimex STM32 P407 Configuration:
+
+     CONFIG_STM32F4DISCO_OLIMEXP407_PRIO - Priority of the USB host watier
+       thread (default 100).
+     CONFIG_STM32F4DISCO_OLIMEXP407_STACKSIZE - Stacksize of the USB host
+       waiter thread (default 1024)
+
+  Class Driver Configuration
+  --------------------------
+  Individual class drivers have additional configuration requirements.  The
+  USB mass storage class, for example, requires FAT file system support.
+
+    CONFIG_USBHOST_MSC=y
+
+    CONFIG_FS_FAT=y
+    CONFIG_FAT_LCNAMES=y
+    CONFIG_FAT_LFN=y
+    CONFIG_FAT_MAXFNAME=32
+
+  This will enable USB HID keyboard support:
+
+    CONFIG_USBHOST_HIDKBD=y
+    CONFIG_HIDKBD_BUFSIZE=64
+    CONFIG_HIDKBD_DEFPRIO=50
+    CONFIG_HIDKBD_POLLUSEC=100000
+    CONFIG_HIDKBD_STACKSIZE=1024
+
+  And this will enable the USB keyboard example:
+
+    CONFIG_EXAMPLES_HIDKBD=y
+    CONFIG_EXAMPLES_HIDKBD_DEFPRIO=50
+    CONFIG_EXAMPLES_HIDKBD_DEVNAME="/dev/kbda"
+    CONFIG_EXAMPLES_HIDKBD_STACKSIZE=1024
+
+  STATUS: The MSC configurations seems fully functional.  The HIDKBD seems rather
+  flaky.  Sometimes the LEDs become very bright (indicating that it is being
+  swamped with interrupts).  Data input is not clean with apps/examples/hidkbd:
+  There are missing characters and sometimes duplicated characters.  This implies
+  some logic issues, probably in drivers/usbhost/usbhost_hidkbd, with polling and
+  data filtering.
 
 Configurations
 ==============
@@ -252,7 +375,21 @@ must be is one of the following.
 
     NOTES:
 
-    1. Kernel Modules / Shared Libraries
+    1. USB host support for USB FLASH sticks is enbabled.  See the notes
+       above under "OTGFS Host".
+
+       STATUS: I have seen this work with some FLASH sticks but not with
+       others.  I have not studied the failure case carefully.  They seem
+       to fail because the request is NAKed.  That is not a failure, however,
+       that is normal behavior when the FLASH is not ready.
+
+       There have been other cases like this with the STM32 host drivers:
+       in the event of NAKs, other drivers retry and wait for the data.  The
+       STM32 does not but returns the NAK failure immediately.  My guess is
+       that there needs to be be some retry logic to the driver 100%
+       reliable.
+
+    2. Kernel Modules / Shared Libraries
 
        I used this configuration for testing NuttX kernel modules in the
        FLAT build with the following configuration additions to the
@@ -292,7 +429,7 @@ STATUS
   feature configurations.
 
   CCM memory is not included in the heap (CONFIG_STM32_CCMEXCLUDE=y) because
-  it does no suport DMA, leaving only 128KiB for program usage.
+  it does not suport DMA, leaving only 128KiB for program usage.
 
 2107-01-23:  Added the the knsh configuration and support for the PROTECTED
   build mode.

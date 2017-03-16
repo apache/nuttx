@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/pic32mx-starterkit/src/pic32mx_usbterm.c
+ * configs/photon/src/stm32_usb.c
  *
- *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2012-2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,19 +37,18 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <stdbool.h>
+#include "photon.h"
 #include <debug.h>
 
+#include <stdbool.h>
 #include <nuttx/usb/usbdev.h>
-
-#include "pic32mx.h"
-#include "pic32mx-starterkit.h"
-
-#if defined(CONFIG_PIC32MX_USBDEV) && defined(CONFIG_EXAMPLES_USBTERM_DEVINIT)
 
 /************************************************************************************
  * Pre-processor Definitions
+ ************************************************************************************/
+
+/************************************************************************************
+ * Private Data
  ************************************************************************************/
 
 /************************************************************************************
@@ -61,44 +59,33 @@
  * Public Functions
  ************************************************************************************/
 
-/****************************************************************************
- * Name:
+/************************************************************************************
+ * Name: stm32_usbinitialize
  *
  * Description:
- *   If CONFIG_EXAMPLES_USBTERM_DEVINIT is defined, then the example will
- *   call this user provided function as part of its initialization.
+ *   Called from stm32_usbinitialize very early in inialization to setup USB-related
+ *   GPIO pins for the Photon board.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-int usbterm_devinit(void)
+void stm32_usbinitialize(void)
 {
-  /* The PIO32 Starter Kit has no way to know when the USB is connected.  So
-   * we will fake it and tell the USB driver that the USB is connected now.
-   *
-   * If examples/usbterm is built as an NSH built-in application, then
-   * pic32mx_usbattach() will be called in board_app_initialize().
-   */
+}
 
-#ifndef CONFIG_NSH_BUILTIN_APPS
-  pic32mx_usbattach();
+/************************************************************************************
+ * Name:  stm32_usbsuspend
+ *
+ * Description:
+ *   Board logic must provide the stm32_usbsuspend logic if the USBDEV driver is
+ *   used.  This function is called whenever the USB enters or leaves suspend mode.
+ *   This is an opportunity for the board logic to shutdown clocks, power, etc.
+ *   while the USB is suspended.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_USBDEV
+void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
+{
+  uinfo("resume: %d\n", resume);
+}
 #endif
-  return OK;
-}
-
-/****************************************************************************
- * Name:
- *
- * Description:
- *   If CONFIG_EXAMPLES_USBTERM_DEVINIT is defined, then the example will
- *   call this user provided function as part of its termination sequence.
- *
- ****************************************************************************/
-
-void usbterm_devuninit(void)
-{
-  /* Tell the USB driver that the USB is no longer connected */
-
-  pic32mx_usbdetach();
-}
-
-#endif /* CONFIG_PIC32MX_USBDEV && CONFIG_EXAMPLES_USBTERM_DEVINIT */

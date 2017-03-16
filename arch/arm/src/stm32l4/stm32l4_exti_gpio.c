@@ -274,7 +274,6 @@ int stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
   uint32_t exti = STM32L4_EXTI1_BIT(pin);
   int      irq;
   xcpt_t   handler;
-  xcpt_t   oldhandler = NULL;
   int      nshared;
   int      i;
 

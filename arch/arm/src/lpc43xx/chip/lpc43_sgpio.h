@@ -45,9 +45,13 @@
 /****************************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************************/
+
+#define LPC43_SGPIO_SLICES_MASK 0x0000FFFF
+#define LPC43_SGPIO_NUM_SLICES 16
+
 /* Register Offsets *********************************************************************************/
 
-#define LPC43_SGPIO_OUT_MUXCFG_OFFSET(n)   (0x0000 + ((n) << 2)
+#define LPC43_SGPIO_OUT_MUXCFG_OFFSET(n)   (0x0000 + ((n) << 2))
 #define LPC43_SGPIO_OUT_MUXCFG0_OFFSET     0x0000 /* Pin multiplexer configuration register 0 */
 #define LPC43_SGPIO_OUT_MUXCFG1_OFFSET     0x0004 /* Pin multiplexer configuration register 1 */
 #define LPC43_SGPIO_OUT_MUXCFG2_OFFSET     0x0008 /* Pin multiplexer configuration register 2 */
@@ -65,7 +69,7 @@
 #define LPC43_SGPIO_OUT_MUXCFG14_OFFSET    0x0038 /* Pin multiplexer configuration register 14 */
 #define LPC43_SGPIO_OUT_MUXCFG15_OFFSET    0x003c /* Pin multiplexer configuration register 15 */
 
-#define LPC43_SGPIO_MUXCFG_OFFSET(n)       (0x0040 + ((n) << 2)
+#define LPC43_SGPIO_MUXCFG_OFFSET(n)       (0x0040 + ((n) << 2))
 #define LPC43_SGPIO_MUXCFG0_OFFSET         0x0040 /* SGPIO multiplexer configuration register 0 */
 #define LPC43_SGPIO_MUXCFG1_OFFSET         0x0044 /* SGPIO multiplexer configuration register 1 */
 #define LPC43_SGPIO_MUXCFG2_OFFSET         0x0048 /* SGPIO multiplexer configuration register 2 */
@@ -83,7 +87,7 @@
 #define LPC43_SGPIO_MUXCFG14_OFFSET        0x0078 /* SGPIO multiplexer configuration register 14 */
 #define LPC43_SGPIO_MUXCFG15_OFFSET        0x007c /* SGPIO multiplexer configuration register 15 */
 
-#define LPC43_SGPIO_SLICE_MUXCFG_OFFSET(n) (0x0080 + ((n) << 2)
+#define LPC43_SGPIO_SLICE_MUXCFG_OFFSET(n) (0x0080 + ((n) << 2))
 #define LPC43_SGPIO_SLICE_MUXCFG0_OFFSET   0x0080 /* Slice multiplexer configuration register 0 */
 #define LPC43_SGPIO_SLICE_MUXCFG1_OFFSET   0x0084 /* Slice multiplexer configuration register 1 */
 #define LPC43_SGPIO_SLICE_MUXCFG2_OFFSET   0x0088 /* Slice multiplexer configuration register 2 */
@@ -101,7 +105,7 @@
 #define LPC43_SGPIO_SLICE_MUXCFG14_OFFSET  0x00b8 /* Slice multiplexer configuration register 14 */
 #define LPC43_SGPIO_SLICE_MUXCFG15_OFFSET  0x00bc /* Slice multiplexer configuration register 15 */
 
-#define LPC43_SGPIO_REG_OFFSET(n)          (0x00c0 + ((n) << 2)
+#define LPC43_SGPIO_REG_OFFSET(n)          (0x00c0 + ((n) << 2))
 #define LPC43_SGPIO_REG0_OFFSET            0x00c0 /* Slice data register 0 */
 #define LPC43_SGPIO_REG1_OFFSET            0x00c4 /* Slice data register 1 */
 #define LPC43_SGPIO_REG2_OFFSET            0x00c8 /* Slice data register 2 */
@@ -119,7 +123,7 @@
 #define LPC43_SGPIO_REG14_OFFSET           0x00f8 /* Slice data register 14 */
 #define LPC43_SGPIO_REG15_OFFSET           0x00fc /* Slice data register 15 */
 
-#define LPC43_SGPIO_REG_SS_OFFSET(n)       (0x0100 + ((n) << 2)
+#define LPC43_SGPIO_REG_SS_OFFSET(n)       (0x0100 + ((n) << 2))
 #define LPC43_SGPIO_REG_SS0_OFFSET         0x0100 /* Slice data shadow register 0 */
 #define LPC43_SGPIO_REG_SS1_OFFSET         0x0104 /* Slice data shadow register 1 */
 #define LPC43_SGPIO_REG_SS2_OFFSET         0x0108 /* Slice data shadow register 2 */
@@ -137,7 +141,7 @@
 #define LPC43_SGPIO_REG_SS14_OFFSET        0x0138 /* Slice data shadow register 14 */
 #define LPC43_SGPIO_REG_SS15_OFFSET        0x013c /* Slice data shadow register 15 */
 
-#define LPC43_SGPIO_PRESET_OFFSET(n)       (0x0140 + ((n) << 2)
+#define LPC43_SGPIO_PRESET_OFFSET(n)       (0x0140 + ((n) << 2))
 #define LPC43_SGPIO_PRESET0_OFFSET         0x0140 /* COUNT0 reload value */
 #define LPC43_SGPIO_PRESET1_OFFSET         0x0144 /* COUNT1 reload value */
 #define LPC43_SGPIO_PRESET2_OFFSET         0x0148 /* COUNT2 reload value */
@@ -155,7 +159,7 @@
 #define LPC43_SGPIO_PRESET14_OFFSET        0x0178 /* COUNT14 reload value */
 #define LPC43_SGPIO_PRESET15_OFFSET        0x017c /* COUNT15 reload value */
 
-#define LPC43_SGPIO_COUNT_OFFSET(n)        (0x0180 + ((n) << 2)
+#define LPC43_SGPIO_COUNT_OFFSET(n)        (0x0180 + ((n) << 2))
 #define LPC43_SGPIO_COUNT0_OFFSET          0x0180 /* Down counter 0 */
 #define LPC43_SGPIO_COUNT1_OFFSET          0x0184 /* Down counter 1 */
 #define LPC43_SGPIO_COUNT2_OFFSET          0x0188 /* Down counter 2 */
@@ -173,7 +177,7 @@
 #define LPC43_SGPIO_COUNT14_OFFSET         0x01b8 /* Down counter 14 */
 #define LPC43_SGPIO_COUNT15_OFFSET         0x01bc /* Down counter 15 */
 
-#define LPC43_SGPIO_POS_OFFSET(n)          (0x01c0 + ((n) << 2)
+#define LPC43_SGPIO_POS_OFFSET(n)          (0x01c0 + ((n) << 2))
 #define LPC43_SGPIO_POS0_OFFSET            0x01c0 /* Position register 0 */
 #define LPC43_SGPIO_POS1_OFFSET            0x01c4 /* Position register 1 */
 #define LPC43_SGPIO_POS2_OFFSET            0x01c8 /* Position register 2 */
@@ -443,7 +447,7 @@
 #define SGPIO_OUT_MUXCFG_OUTCFG_SHIFT      (0)       /* Bits 0-3: P_OUT_CFG Output control SGPIOn */
 #define SGPIO_OUT_MUXCFG_OUTCFG_MASK       (15 << SGPIO_OUT_MUXCFG_OUTCFG_SHIFT)
 #  define SGPIO_OUT_MUXCFG_OUTCFG_DOUTM1   (0 << SGPIO_OUT_MUXCFG_OUTCFG_SHIFT)  /* dout_doutm1 (1-bit mode) */
-#  define SGPIO_OUT_MUXCFG_OUTCFG_ DOUTM2A (1 << SGPIO_OUT_MUXCFG_OUTCFG_SHIFT)  /* dout_doutm2a (2-bit mode 2a) */
+#  define SGPIO_OUT_MUXCFG_OUTCFG_DOUTM2A  (1 << SGPIO_OUT_MUXCFG_OUTCFG_SHIFT)  /* dout_doutm2a (2-bit mode 2a) */
 #  define SGPIO_OUT_MUXCFG_OUTCFG_DOUTM2B  (2 << SGPIO_OUT_MUXCFG_OUTCFG_SHIFT)  /* dout_doutm2b (2-bit mode 2b) */
 #  define SGPIO_OUT_MUXCFG_OUTCFG_DOUTM2C  (3 << SGPIO_OUT_MUXCFG_OUTCFG_SHIFT)  /* dout_doutm2c (2-bit mode 2c) */
 #  define SGPIO_OUT_MUXCFG_OUTCFG_GPIOOUT  (4 << SGPIO_OUT_MUXCFG_OUTCFG_SHIFT)  /* gpio_out (level set by GPIO_OUTREG) */
@@ -557,14 +561,17 @@
 /* GPIO output control register */
 
 #define SGPIO_GPIO_OUTREG(n)               (1 << (n)) /* Bits 0-15: Bit i sets the output of SGPIO pin i */
+#define SGPIO_GPIO_OUTREG_SHIFT(n)         (n)
                                                       /* Bits 16-31: Reserved */
 /* GPIO output enable register */
 
 #define SGPIO_GPIO_OENREG(n)               (1 << (n)) /* Bits 0-15: Bit i selects the output enable state of SGPIO pin i */
+#define SGPIO_GPIO_OENREG_SHIFT(n)         (n)
                                                       /* Bits 16-31: Reserved */
 /* Slice count enable register */
 
 #define SGPIO_CTRL_ENABLE(n)               (1 << (n)) /* Bits 0-15: Bit n controls slice n */
+#define SGPIO_CTRL_ENABLE_SHIFT(n)         (n)
                                                       /* Bits 16-31: Reserved */
 /* Slice count disable register */
 

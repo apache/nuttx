@@ -85,7 +85,7 @@
 #define LPC43_SCT_CONEN_OFFSET      0x00f8 /* SCT conflict enable register */
 #define LPC43_SCT_CONFLAG_OFFSET    0x00fC /* SCT conflict flag register */
 
-#define LPC43_SCT_MATCH_OFFSET(n)   (0x0100 + ((n) << 4)) /* n = 0..15 */
+#define LPC43_SCT_MATCH_OFFSET(n)   (0x0100 + ((n) << 2)) /* n = 0..15 */
 #define LPC43_SCT_MATCH0_OFFSET     0x0100 /* SCT match value register of match channel 0 */
 #define LPC43_SCT_MATCH1_OFFSET     0x0104 /* SCT match value register of match channel 1 */
 #define LPC43_SCT_MATCH2_OFFSET     0x0108 /* SCT match value register of match channel 2 */
@@ -103,43 +103,43 @@
 #define LPC43_SCT_MATCH14_OFFSET    0x0138 /* SCT match value register of match channel 14 */
 #define LPC43_SCT_MATCH15_OFFSET    0x013c /* SCT match value register of match channel 15 */
 
-#define LPC43_SCT_MATCHL_OFFSET(n) (0x0100 + ((n) << 4)) /* n = 0..15 */
-#define LPC43_SCT_MATCH0L_OFFSET    0x0100 /* SCT match value register of match channel 0; low 16-bit */
-#define LPC43_SCT_MATCH1L_OFFSET    0x0104 /* SCT match value register of match channel 1; low 16-bit */
-#define LPC43_SCT_MATCH2L_OFFSET    0x0108 /* SCT match value register of match channel 2; low 16-bit */
-#define LPC43_SCT_MATCH3L_OFFSET    0x010c /* SCT match value register of match channel 3; low 16-bit */
-#define LPC43_SCT_MATCH4L_OFFSET    0x0110 /* SCT match value register of match channel 4; low 16-bit */
-#define LPC43_SCT_MATCH5L_OFFSET    0x0114 /* SCT match value register of match channel 5; low 16-bit */
-#define LPC43_SCT_MATCH6L_OFFSET    0x0118 /* SCT match value register of match channel 6; low 16-bit */
-#define LPC43_SCT_MATCH7L_OFFSET    0x011c /* SCT match value register of match channel 7; low 16-bit */
-#define LPC43_SCT_MATCH8L_OFFSET    0x0120 /* SCT match value register of match channel 8; low 16-bit */
-#define LPC43_SCT_MATCH9L_OFFSET    0x0124 /* SCT match value register of match channel 9; low 16-bit */
-#define LPC43_SCT_MATCH10L_OFFSET   0x0128 /* SCT match value register of match channel 10; low 16-bit */
-#define LPC43_SCT_MATCH11L_OFFSET   0x012c /* SCT match value register of match channel 11; low 16-bit */
-#define LPC43_SCT_MATCH12L_OFFSET   0x0130 /* SCT match value register of match channel 12; low 16-bit */
-#define LPC43_SCT_MATCH13L_OFFSET   0x0134 /* SCT match value register of match channel 13; low 16-bit */
-#define LPC43_SCT_MATCH14L_OFFSET   0x0138 /* SCT match value register of match channel 14; low 16-bit */
-#define LPC43_SCT_MATCH15L_OFFSET   0x013c /* SCT match value register of match channel 15; low 16-bit */
+#define LPC43_SCT_MATCHL_OFFSET(n) (0x0100 + ((n) << 2)) /* n = 0..15 */
+#define LPC43_SCT_MATCHL0_OFFSET    0x0100 /* SCT match value register of match channel 0; low 16-bit */
+#define LPC43_SCT_MATCHL1_OFFSET    0x0104 /* SCT match value register of match channel 1; low 16-bit */
+#define LPC43_SCT_MATCHL2_OFFSET    0x0108 /* SCT match value register of match channel 2; low 16-bit */
+#define LPC43_SCT_MATCHL3_OFFSET    0x010c /* SCT match value register of match channel 3; low 16-bit */
+#define LPC43_SCT_MATCHL4_OFFSET    0x0110 /* SCT match value register of match channel 4; low 16-bit */
+#define LPC43_SCT_MATCHL5_OFFSET    0x0114 /* SCT match value register of match channel 5; low 16-bit */
+#define LPC43_SCT_MATCHL6_OFFSET    0x0118 /* SCT match value register of match channel 6; low 16-bit */
+#define LPC43_SCT_MATCHL7_OFFSET    0x011c /* SCT match value register of match channel 7; low 16-bit */
+#define LPC43_SCT_MATCHL8_OFFSET    0x0120 /* SCT match value register of match channel 8; low 16-bit */
+#define LPC43_SCT_MATCHL9_OFFSET    0x0124 /* SCT match value register of match channel 9; low 16-bit */
+#define LPC43_SCT_MATCHL10_OFFSET   0x0128 /* SCT match value register of match channel 10; low 16-bit */
+#define LPC43_SCT_MATCHL11_OFFSET   0x012c /* SCT match value register of match channel 11; low 16-bit */
+#define LPC43_SCT_MATCHL12_OFFSET   0x0130 /* SCT match value register of match channel 12; low 16-bit */
+#define LPC43_SCT_MATCHL13_OFFSET   0x0134 /* SCT match value register of match channel 13; low 16-bit */
+#define LPC43_SCT_MATCHL14_OFFSET   0x0138 /* SCT match value register of match channel 14; low 16-bit */
+#define LPC43_SCT_MATCHL15_OFFSET   0x013c /* SCT match value register of match channel 15; low 16-bit */
 
-#define LPC43_SCT_MATCHH_OFFSET(n)  (0x0102 + ((n) << 4)) /* n = 0..15 */
-#define LPC43_SCT_MATCH0H_OFFSET    0x0102 /* SCT match value register of match channel 0; high 16-bit */
-#define LPC43_SCT_MATCH1H_OFFSET    0x0106 /* SCT match value register of match channel 1; high 16-bit */
-#define LPC43_SCT_MATCH2H_OFFSET    0x010a /* SCT match value register of match channel 2; high 16-bit */
-#define LPC43_SCT_MATCH3H_OFFSET    0x010e /* SCT match value register of match channel 3; high 16-bit */
-#define LPC43_SCT_MATCH4H_OFFSET    0x0112 /* SCT match value register of match channel 4; high 16-bit */
-#define LPC43_SCT_MATCH5H_OFFSET    0x0116 /* SCT match value register of match channel 5; high 16-bit */
-#define LPC43_SCT_MATCH6H_OFFSET    0x011a /* SCT match value register of match channel 6; high 16-bit */
-#define LPC43_SCT_MATCH7H_OFFSET    0x011e /* SCT match value register of match channel 7; high 16-bit */
-#define LPC43_SCT_MATCH8H_OFFSET    0x0122 /* SCT match value register of match channel 8; high 16-bit */
-#define LPC43_SCT_MATCH9H_OFFSET    0x0126 /* SCT match value register of match channel 9; high 16-bit */
-#define LPC43_SCT_MATCH10H_OFFSET   0x012a /* SCT match value register of match channel 10; high 16-bit */
-#define LPC43_SCT_MATCH11H_OFFSET   0x012e /* SCT match value register of match channel 11; high 16-bit */
-#define LPC43_SCT_MATCH12H_OFFSET   0x0132 /* SCT match value register of match channel 12; high 16-bit */
-#define LPC43_SCT_MATCH13H_OFFSET   0x0136 /* SCT match value register of match channel 13; high 16-bit */
-#define LPC43_SCT_MATCH14H_OFFSET   0x013a /* SCT match value register of match channel 14; high 16-bit */
-#define LPC43_SCT_MATCH15H_OFFSET   0x013e /* SCT match value register of match channel 15; high 16-bit */
+#define LPC43_SCT_MATCHH_OFFSET(n)  (0x0102 + ((n) << 2)) /* n = 0..15 */
+#define LPC43_SCT_MATCHH0_OFFSET    0x0102 /* SCT match value register of match channel 0; high 16-bit */
+#define LPC43_SCT_MATCHH1_OFFSET    0x0106 /* SCT match value register of match channel 1; high 16-bit */
+#define LPC43_SCT_MATCHH2_OFFSET    0x010a /* SCT match value register of match channel 2; high 16-bit */
+#define LPC43_SCT_MATCHH3_OFFSET    0x010e /* SCT match value register of match channel 3; high 16-bit */
+#define LPC43_SCT_MATCHH4_OFFSET    0x0112 /* SCT match value register of match channel 4; high 16-bit */
+#define LPC43_SCT_MATCHH5_OFFSET    0x0116 /* SCT match value register of match channel 5; high 16-bit */
+#define LPC43_SCT_MATCHH6_OFFSET    0x011a /* SCT match value register of match channel 6; high 16-bit */
+#define LPC43_SCT_MATCHH7_OFFSET    0x011e /* SCT match value register of match channel 7; high 16-bit */
+#define LPC43_SCT_MATCHH8_OFFSET    0x0122 /* SCT match value register of match channel 8; high 16-bit */
+#define LPC43_SCT_MATCHH9_OFFSET    0x0126 /* SCT match value register of match channel 9; high 16-bit */
+#define LPC43_SCT_MATCHH10_OFFSET   0x012a /* SCT match value register of match channel 10; high 16-bit */
+#define LPC43_SCT_MATCHH11_OFFSET   0x012e /* SCT match value register of match channel 11; high 16-bit */
+#define LPC43_SCT_MATCHH12_OFFSET   0x0132 /* SCT match value register of match channel 12; high 16-bit */
+#define LPC43_SCT_MATCHH13_OFFSET   0x0136 /* SCT match value register of match channel 13; high 16-bit */
+#define LPC43_SCT_MATCHH14_OFFSET   0x013a /* SCT match value register of match channel 14; high 16-bit */
+#define LPC43_SCT_MATCHH15_OFFSET   0x013e /* SCT match value register of match channel 15; high 16-bit */
 
-#define LPC43_SCT_CAP_OFFSET(n)     (0x0100 + ((n) << 4)) /* n = 0..15 */
+#define LPC43_SCT_CAP_OFFSET(n)     (0x0100 + ((n) << 2)) /* n = 0..15 */
 #define LPC43_SCT_CAP0_OFFSET       0x0100 /* SCT capture value register Ch0 */
 #define LPC43_SCT_CAP1_OFFSET       0x0104 /* SCT capture value register Ch1 */
 #define LPC43_SCT_CAP2_OFFSET       0x0108 /* SCT capture value register Ch2 */
@@ -157,151 +157,115 @@
 #define LPC43_SCT_CAP14_OFFSET      0x0138 /* SCT capture value register Ch14 */
 #define LPC43_SCT_CAP15_OFFSET      0x013c /* SCT capture value register Ch15 */
 
-#define LPC43_SCT_CAPL_OFFSET(n)    (0x0100 + ((n) << 4)) /* n = 0..15 */
-#define LPC43_SCT_CAP0L_OFFSET      0x0100 /* SCT capture value register Ch0; low 16-bit */
-#define LPC43_SCT_CAP1L_OFFSET      0x0104 /* SCT capture value register Ch1; low 16-bit */
-#define LPC43_SCT_CAP2L_OFFSET      0x0108 /* SCT capture value register Ch2; low 16-bit */
-#define LPC43_SCT_CAP3L_OFFSET      0x010c /* SCT capture value register Ch3; low 16-bit */
-#define LPC43_SCT_CAP4L_OFFSET      0x0110 /* SCT capture value register Ch4; low 16-bit */
-#define LPC43_SCT_CAP5L_OFFSET      0x0114 /* SCT capture value register Ch5; low 16-bit */
-#define LPC43_SCT_CAP6L_OFFSET      0x0118 /* SCT capture value register Ch6; low 16-bit */
-#define LPC43_SCT_CAP7L_OFFSET      0x011c /* SCT capture value register Ch7; low 16-bit */
-#define LPC43_SCT_CAP8L_OFFSET      0x0120 /* SCT capture value register Ch8; low 16-bit */
-#define LPC43_SCT_CAP9L_OFFSET      0x0124 /* SCT capture value register Ch9; low 16-bit */
-#define LPC43_SCT_CAP10L_OFFSET     0x0128 /* SCT capture value register Ch10; low 16-bit */
-#define LPC43_SCT_CAP11L_OFFSET     0x012c /* SCT capture value register Ch11; low 16-bit */
-#define LPC43_SCT_CAP12L_OFFSET     0x0130 /* SCT capture value register Ch12; low 16-bit */
-#define LPC43_SCT_CAP13L_OFFSET     0x0134 /* SCT capture value register Ch13; low 16-bit */
-#define LPC43_SCT_CAP14L_OFFSET     0x0138 /* SCT capture value register Ch14; low 16-bit */
-#define LPC43_SCT_CAP15L_OFFSET     0x013c /* SCT capture value register Ch15; low 16-bit */
+#define LPC43_SCT_CAPL_OFFSET(n)    (0x0100 + ((n) << 2)) /* n = 0..15 */
+#define LPC43_SCT_CAPL0_OFFSET      0x0100 /* SCT capture value register Ch0; low 16-bit */
+#define LPC43_SCT_CAPL1_OFFSET      0x0104 /* SCT capture value register Ch1; low 16-bit */
+#define LPC43_SCT_CAPL2_OFFSET      0x0108 /* SCT capture value register Ch2; low 16-bit */
+#define LPC43_SCT_CAPL3_OFFSET      0x010c /* SCT capture value register Ch3; low 16-bit */
+#define LPC43_SCT_CAPL4_OFFSET      0x0110 /* SCT capture value register Ch4; low 16-bit */
+#define LPC43_SCT_CAPL5_OFFSET      0x0114 /* SCT capture value register Ch5; low 16-bit */
+#define LPC43_SCT_CAPL6_OFFSET      0x0118 /* SCT capture value register Ch6; low 16-bit */
+#define LPC43_SCT_CAPL7_OFFSET      0x011c /* SCT capture value register Ch7; low 16-bit */
+#define LPC43_SCT_CAPL8_OFFSET      0x0120 /* SCT capture value register Ch8; low 16-bit */
+#define LPC43_SCT_CAPL9_OFFSET      0x0124 /* SCT capture value register Ch9; low 16-bit */
+#define LPC43_SCT_CAPL10_OFFSET     0x0128 /* SCT capture value register Ch10; low 16-bit */
+#define LPC43_SCT_CAPL11_OFFSET     0x012c /* SCT capture value register Ch11; low 16-bit */
+#define LPC43_SCT_CAPL12_OFFSET     0x0130 /* SCT capture value register Ch12; low 16-bit */
+#define LPC43_SCT_CAPL13_OFFSET     0x0134 /* SCT capture value register Ch13; low 16-bit */
+#define LPC43_SCT_CAPL14_OFFSET     0x0138 /* SCT capture value register Ch14; low 16-bit */
+#define LPC43_SCT_CAPL15_OFFSET     0x013c /* SCT capture value register Ch15; low 16-bit */
 
-#define LPC43_SCT_CAPH_OFFSET(n)    (0x0102 + ((n) << 4)) /* n = 0..15 */
-#define LPC43_SCT_CAP0H_OFFSET      0x0102 /* SCT capture value register Ch0; high 16-bit */
-#define LPC43_SCT_CAP1H_OFFSET      0x0106 /* SCT capture value register Ch1; high 16-bit */
-#define LPC43_SCT_CAP2H_OFFSET      0x010a /* SCT capture value register Ch2; high 16-bit */
-#define LPC43_SCT_CAP3H_OFFSET      0x010e /* SCT capture value register Ch3; high 16-bit */
-#define LPC43_SCT_CAP4H_OFFSET      0x0112 /* SCT capture value register Ch4; high 16-bit */
-#define LPC43_SCT_CAP5H_OFFSET      0x0116 /* SCT capture value register Ch5; high 16-bit */
-#define LPC43_SCT_CAP6H_OFFSET      0x011a /* SCT capture value register Ch6; high 16-bit */
-#define LPC43_SCT_CAP7H_OFFSET      0x011e /* SCT capture value register Ch7; high 16-bit */
-#define LPC43_SCT_CAP8H_OFFSET      0x0122 /* SCT capture value register Ch8; high 16-bit */
-#define LPC43_SCT_CAP9H_OFFSET      0x0126 /* SCT capture value register Ch9; high 16-bit */
-#define LPC43_SCT_CAP10H_OFFSET     0x012a /* SCT capture value register Ch10; high 16-bit */
-#define LPC43_SCT_CAP11H_OFFSET     0x012e /* SCT capture value register Ch11; high 16-bit */
-#define LPC43_SCT_CAP12H_OFFSET     0x0132 /* SCT capture value register Ch12; high 16-bit */
-#define LPC43_SCT_CAP13H_OFFSET     0x0136 /* SCT capture value register Ch13; high 16-bit */
-#define LPC43_SCT_CAP14H_OFFSET     0x013a /* SCT capture value register Ch14; high 16-bit */
-#define LPC43_SCT_CAP15H_OFFSET     0x013e /* SCT capture value register Ch15; high 16-bit */
+#define LPC43_SCT_CAPH_OFFSET(n)    (0x0102 + ((n) << 2)) /* n = 0..15 */
+#define LPC43_SCT_CAPH0_OFFSET      0x0102 /* SCT capture value register Ch0; high 16-bit */
+#define LPC43_SCT_CAPH1_OFFSET      0x0106 /* SCT capture value register Ch1; high 16-bit */
+#define LPC43_SCT_CAPH2_OFFSET      0x010a /* SCT capture value register Ch2; high 16-bit */
+#define LPC43_SCT_CAPH3_OFFSET      0x010e /* SCT capture value register Ch3; high 16-bit */
+#define LPC43_SCT_CAPH4_OFFSET      0x0112 /* SCT capture value register Ch4; high 16-bit */
+#define LPC43_SCT_CAPH5_OFFSET      0x0116 /* SCT capture value register Ch5; high 16-bit */
+#define LPC43_SCT_CAPH6_OFFSET      0x011a /* SCT capture value register Ch6; high 16-bit */
+#define LPC43_SCT_CAPH7_OFFSET      0x011e /* SCT capture value register Ch7; high 16-bit */
+#define LPC43_SCT_CAPH8_OFFSET      0x0122 /* SCT capture value register Ch8; high 16-bit */
+#define LPC43_SCT_CAPH9_OFFSET      0x0126 /* SCT capture value register Ch9; high 16-bit */
+#define LPC43_SCT_CAPH10_OFFSET     0x012a /* SCT capture value register Ch10; high 16-bit */
+#define LPC43_SCT_CAPH11_OFFSET     0x012e /* SCT capture value register Ch11; high 16-bit */
+#define LPC43_SCT_CAPH12_OFFSET     0x0132 /* SCT capture value register Ch12; high 16-bit */
+#define LPC43_SCT_CAPH13_OFFSET     0x0136 /* SCT capture value register Ch13; high 16-bit */
+#define LPC43_SCT_CAPH14_OFFSET     0x013a /* SCT capture value register Ch14; high 16-bit */
+#define LPC43_SCT_CAPH15_OFFSET     0x013e /* SCT capture value register Ch15; high 16-bit */
 
-#define LPC43_SCT_MATCHA_OFFSET(n)  (0x0180 + ((n) << 4)) /* n = 0..15 */
-#define LPC43_SCT_MATCH0A_OFFSET    0x0180 /* SCT match alias register of match channel 0 */
-#define LPC43_SCT_MATCH1A_OFFSET    0x0184 /* SCT match alias register of match channel 1 */
-#define LPC43_SCT_MATCH2A_OFFSET    0x0188 /* SCT match alias register of match channel 2 */
-#define LPC43_SCT_MATCH3A_OFFSET    0x018c /* SCT match alias register of match channel 3 */
-#define LPC43_SCT_MATCH4A_OFFSET    0x0190 /* SCT match alias register of match channel 4 */
-#define LPC43_SCT_MATCH5A_OFFSET    0x0194 /* SCT match alias register of match channel 5 */
-#define LPC43_SCT_MATCH6A_OFFSET    0x0198 /* SCT match alias register of match channel 6 */
-#define LPC43_SCT_MATCH7A_OFFSET    0x019c /* SCT match alias register of match channel 7 */
-#define LPC43_SCT_MATCH8A_OFFSET    0x01a0 /* SCT match alias register of match channel 8 */
-#define LPC43_SCT_MATCH9A_OFFSET    0x01a4 /* SCT match alias register of match channel 9 */
-#define LPC43_SCT_MATCH10A_OFFSET   0x01a8 /* SCT match alias register of match channel 10 */
-#define LPC43_SCT_MATCH11A_OFFSET   0x01ac /* SCT match alias register of match channel 11 */
-#define LPC43_SCT_MATCH12A_OFFSET   0x01b0 /* SCT match alias register of match channel 12 */
-#define LPC43_SCT_MATCH13A_OFFSET   0x01b4 /* SCT match alias register of match channel 13 */
-#define LPC43_SCT_MATCH14A_OFFSET   0x01b8 /* SCT match alias register of match channel 14 */
-#define LPC43_SCT_MATCH15A_OFFSET   0x01bc /* SCT match alias register of match channel 15 */
+#define LPC43_SCT_MATCHLA_OFFSET(n) (0x0180 + ((n) << 1)) /* n = 0..15 */
+#define LPC43_SCT_MATCHLA0_OFFSET   0x0180 /* SCT match alias register of match channel 0; low 16-bit */
+#define LPC43_SCT_MATCHLA1_OFFSET   0x0182 /* SCT match alias register of match channel 1; low 16-bit */
+#define LPC43_SCT_MATCHLA2_OFFSET   0x0184 /* SCT match alias register of match channel 2; low 16-bit */
+#define LPC43_SCT_MATCHLA3_OFFSET   0x0186 /* SCT match alias register of match channel 3; low 16-bit */
+#define LPC43_SCT_MATCHLA4_OFFSET   0x0188 /* SCT match alias register of match channel 4; low 16-bit */
+#define LPC43_SCT_MATCHLA5_OFFSET   0x018a /* SCT match alias register of match channel 5; low 16-bit */
+#define LPC43_SCT_MATCHLA6_OFFSET   0x018c /* SCT match alias register of match channel 6; low 16-bit */
+#define LPC43_SCT_MATCHLA7_OFFSET   0x018e /* SCT match alias register of match channel 7; low 16-bit */
+#define LPC43_SCT_MATCHLA8_OFFSET   0x0190 /* SCT match alias register of match channel 8; low 16-bit */
+#define LPC43_SCT_MATCHLA9_OFFSET   0x0192 /* SCT match alias register of match channel 9; low 16-bit */
+#define LPC43_SCT_MATCHLA10_OFFSET  0x0194 /* SCT match alias register of match channel 10; low 16-bit */
+#define LPC43_SCT_MATCHLA11_OFFSET  0x0196 /* SCT match alias register of match channel 11; low 16-bit */
+#define LPC43_SCT_MATCHLA12_OFFSET  0x0198 /* SCT match alias register of match channel 12; low 16-bit */
+#define LPC43_SCT_MATCHLA13_OFFSET  0x019a /* SCT match alias register of match channel 13; low 16-bit */
+#define LPC43_SCT_MATCHLA14_OFFSET  0x019c /* SCT match alias register of match channel 14; low 16-bit */
+#define LPC43_SCT_MATCHLA15_OFFSET  0x019e /* SCT match alias register of match channel 15; low 16-bit */
 
-#define LPC43_SCT_MATCHLA_OFFSET(n) (0x0180 + ((n) << 4)) /* n = 0..15 */
-#define LPC43_SCT_MATCH0LA_OFFSET   0x0180 /* SCT match alias register of match channel 0; low 16-bit */
-#define LPC43_SCT_MATCH1LA_OFFSET   0x0184 /* SCT match alias register of match channel 1; low 16-bit */
-#define LPC43_SCT_MATCH2LA_OFFSET   0x0188 /* SCT match alias register of match channel 2; low 16-bit */
-#define LPC43_SCT_MATCH3LA_OFFSET   0x018c /* SCT match alias register of match channel 3; low 16-bit */
-#define LPC43_SCT_MATCH4LA_OFFSET   0x0190 /* SCT match alias register of match channel 4; low 16-bit */
-#define LPC43_SCT_MATCH5LA_OFFSET   0x0194 /* SCT match alias register of match channel 5; low 16-bit */
-#define LPC43_SCT_MATCH6LA_OFFSET   0x0198 /* SCT match alias register of match channel 6; low 16-bit */
-#define LPC43_SCT_MATCH7LA_OFFSET   0x019c /* SCT match alias register of match channel 7; low 16-bit */
-#define LPC43_SCT_MATCH8LA_OFFSET   0x01a0 /* SCT match alias register of match channel 8; low 16-bit */
-#define LPC43_SCT_MATCH9LA_OFFSET   0x01a4 /* SCT match alias register of match channel 9; low 16-bit */
-#define LPC43_SCT_MATCH10LA_OFFSET  0x01a8 /* SCT match alias register of match channel 10; low 16-bit */
-#define LPC43_SCT_MATCH11LA_OFFSET  0x01ac /* SCT match alias register of match channel 11; low 16-bit */
-#define LPC43_SCT_MATCH12LA_OFFSET  0x01b0 /* SCT match alias register of match channel 12; low 16-bit */
-#define LPC43_SCT_MATCH13LA_OFFSET  0x01b4 /* SCT match alias register of match channel 13; low 16-bit */
-#define LPC43_SCT_MATCH14LA_OFFSET  0x01b8 /* SCT match alias register of match channel 14; low 16-bit */
-#define LPC43_SCT_MATCH15LA_OFFSET  0x01bc /* SCT match alias register of match channel 15; low 16-bit */
+#define LPC43_SCT_MATCHHA_OFFSET(n) (0x01c0 + ((n) << 1)) /* n = 0..15 */
+#define LPC43_SCT_MATCHHA0_OFFSET   0x01c0 /* SCT match alias register of match channel 0; high 16-bit */
+#define LPC43_SCT_MATCHHA1_OFFSET   0x01c2 /* SCT match alias register of match channel 1; high 16-bit */
+#define LPC43_SCT_MATCHHA2_OFFSET   0x01c4 /* SCT match alias register of match channel 2; high 16-bit */
+#define LPC43_SCT_MATCHHA3_OFFSET   0x01c6 /* SCT match alias register of match channel 3; high 16-bit */
+#define LPC43_SCT_MATCHHA4_OFFSET   0x01c8 /* SCT match alias register of match channel 4; high 16-bit */
+#define LPC43_SCT_MATCHHA5_OFFSET   0x01ca /* SCT match alias register of match channel 5; high 16-bit */
+#define LPC43_SCT_MATCHHA6_OFFSET   0x01cc /* SCT match alias register of match channel 6; high 16-bit */
+#define LPC43_SCT_MATCHHA7_OFFSET   0x01ce /* SCT match alias register of match channel 7; high 16-bit */
+#define LPC43_SCT_MATCHHA8_OFFSET   0x01d0 /* SCT match alias register of match channel 8; high 16-bit */
+#define LPC43_SCT_MATCHHA9_OFFSET   0x01d2 /* SCT match alias register of match channel 9; high 16-bit */
+#define LPC43_SCT_MATCHHA10_OFFSET  0x01d4 /* SCT match alias register of match channel 10; high 16-bit */
+#define LPC43_SCT_MATCHHA11_OFFSET  0x01d6 /* SCT match alias register of match channel 11; high 16-bit */
+#define LPC43_SCT_MATCHHA12_OFFSET  0x01d8 /* SCT match alias register of match channel 12; high 16-bit */
+#define LPC43_SCT_MATCHHA13_OFFSET  0x01da /* SCT match alias register of match channel 13; high 16-bit */
+#define LPC43_SCT_MATCHHA14_OFFSET  0x01dc /* SCT match alias register of match channel 14; high 16-bit */
+#define LPC43_SCT_MATCHHA15_OFFSET  0x01de /* SCT match alias register of match channel 15; high 16-bit */
 
-#define LPC43_SCT_MATCHHA_OFFSET(n) (0x0182 + ((n) << 4)) /* n = 0..15 */
-#define LPC43_SCT_MATCH0HA_OFFSET   0x0182 /* SCT match alias register of match channel 0; high 16-bit */
-#define LPC43_SCT_MATCH1HA_OFFSET   0x0186 /* SCT match alias register of match channel 1; high 16-bit */
-#define LPC43_SCT_MATCH2HA_OFFSET   0x018a /* SCT match alias register of match channel 2; high 16-bit */
-#define LPC43_SCT_MATCH3HA_OFFSET   0x018e /* SCT match alias register of match channel 3; high 16-bit */
-#define LPC43_SCT_MATCH4HA_OFFSET   0x0192 /* SCT match alias register of match channel 4; high 16-bit */
-#define LPC43_SCT_MATCH5HA_OFFSET   0x0196 /* SCT match alias register of match channel 5; high 16-bit */
-#define LPC43_SCT_MATCH6HA_OFFSET   0x019a /* SCT match alias register of match channel 6; high 16-bit */
-#define LPC43_SCT_MATCH7HA_OFFSET   0x019e /* SCT match alias register of match channel 7; high 16-bit */
-#define LPC43_SCT_MATCH8HA_OFFSET   0x01a2 /* SCT match alias register of match channel 8; high 16-bit */
-#define LPC43_SCT_MATCH9HA_OFFSET   0x01a6 /* SCT match alias register of match channel 9; high 16-bit */
-#define LPC43_SCT_MATCH10HA_OFFSET  0x01aa /* SCT match alias register of match channel 10; high 16-bit */
-#define LPC43_SCT_MATCH11HA_OFFSET  0x01ae /* SCT match alias register of match channel 11; high 16-bit */
-#define LPC43_SCT_MATCH12HA_OFFSET  0x01b2 /* SCT match alias register of match channel 12; high 16-bit */
-#define LPC43_SCT_MATCH13HA_OFFSET  0x01b6 /* SCT match alias register of match channel 13; high 16-bit */
-#define LPC43_SCT_MATCH14HA_OFFSET  0x01ba /* SCT match alias register of match channel 14; high 16-bit */
-#define LPC43_SCT_MATCH15HA_OFFSET  0x01be /* SCT match alias register of match channel 15; high 16-bit */
+#define LPC43_SCT_CAPLA_OFFSET(n)   (0x0180 + ((n) << 1)) /* n = 0..15 */
+#define LPC43_SCT_CAPLA0_OFFSET     0x0180 /* SCT capture alias register Ch0; low 16-bit */
+#define LPC43_SCT_CAPLA1_OFFSET     0x0182 /* SCT capture alias register Ch1; low 16-bit */
+#define LPC43_SCT_CAPLA2_OFFSET     0x0184 /* SCT capture alias register Ch2; low 16-bit */
+#define LPC43_SCT_CAPLA3_OFFSET     0x0186 /* SCT capture alias register Ch3; low 16-bit */
+#define LPC43_SCT_CAPLA4_OFFSET     0x0188 /* SCT capture alias register Ch4; low 16-bit */
+#define LPC43_SCT_CAPLA5_OFFSET     0x018a /* SCT capture alias register Ch5; low 16-bit */
+#define LPC43_SCT_CAPLA6_OFFSET     0x018c /* SCT capture alias register Ch6; low 16-bit */
+#define LPC43_SCT_CAPLA7_OFFSET     0x018e /* SCT capture alias register Ch7; low 16-bit */
+#define LPC43_SCT_CAPLA8_OFFSET     0x0190 /* SCT capture alias register Ch8; low 16-bit */
+#define LPC43_SCT_CAPLA9_OFFSET     0x0192 /* SCT capture alias register Ch9; low 16-bit */
+#define LPC43_SCT_CAPLA10_OFFSET    0x0194 /* SCT capture alias register Ch10; low 16-bit */
+#define LPC43_SCT_CAPLA11_OFFSET    0x0196 /* SCT capture alias register Ch11; low 16-bit */
+#define LPC43_SCT_CAPLA12_OFFSET    0x0198 /* SCT capture alias register Ch12; low 16-bit */
+#define LPC43_SCT_CAPLA13_OFFSET    0x019a /* SCT capture alias register Ch13; low 16-bit */
+#define LPC43_SCT_CAPLA14_OFFSET    0x019c /* SCT capture alias register Ch14; low 16-bit */
+#define LPC43_SCT_CAPLA15_OFFSET    0x019e /* SCT capture alias register Ch15; low 16-bit */
 
-#define LPC43_SCT_CAPA_OFFSET(n)    (0x0180 + ((n) << 4)) /* n = 0..15 */
-#define LPC43_SCT_CAP0A_OFFSET      0x0180 /* SCT capture alias register Ch0 */
-#define LPC43_SCT_CAP1A_OFFSET      0x0184 /* SCT capture alias register Ch1 */
-#define LPC43_SCT_CAP2A_OFFSET      0x0188 /* SCT capture alias register Ch2 */
-#define LPC43_SCT_CAP3A_OFFSET      0x018c /* SCT capture alias register Ch3 */
-#define LPC43_SCT_CAP4A_OFFSET      0x0190 /* SCT capture alias register Ch4 */
-#define LPC43_SCT_CAP5A_OFFSET      0x0194 /* SCT capture alias register Ch5 */
-#define LPC43_SCT_CAP6A_OFFSET      0x0198 /* SCT capture alias register Ch6 */
-#define LPC43_SCT_CAP7A_OFFSET      0x019c /* SCT capture alias register Ch7 */
-#define LPC43_SCT_CAP8A_OFFSET      0x01a0 /* SCT capture alias register Ch8 */
-#define LPC43_SCT_CAP9A_OFFSET      0x01a4 /* SCT capture alias register Ch9 */
-#define LPC43_SCT_CAP10A_OFFSET     0x01a8 /* SCT capture alias register Ch10 */
-#define LPC43_SCT_CAP11A_OFFSET     0x01ac /* SCT capture alias register Ch11 */
-#define LPC43_SCT_CAP12A_OFFSET     0x01b0 /* SCT capture alias register Ch12 */
-#define LPC43_SCT_CAP13A_OFFSET     0x01b4 /* SCT capture alias register Ch13 */
-#define LPC43_SCT_CAP14A_OFFSET     0x01b8 /* SCT capture alias register Ch14 */
-#define LPC43_SCT_CAP15A_OFFSET     0x01bc /* SCT capture alias register Ch15 */
+#define LPC43_SCT_CAPHA_OFFSET(n)   (0x01c0 + ((n) << 1)) /* n = 0..15 */
+#define LPC43_SCT_CAPHA0_OFFSET     0x01c0 /* SCT capture alias register Ch0; high 16-bit */
+#define LPC43_SCT_CAPHA1_OFFSET     0x01c2 /* SCT capture alias register Ch1; high 16-bit */
+#define LPC43_SCT_CAPHA2_OFFSET     0x01c4 /* SCT capture alias register Ch2; high 16-bit */
+#define LPC43_SCT_CAPHA3_OFFSET     0x01c6 /* SCT capture alias register Ch3; high 16-bit */
+#define LPC43_SCT_CAPHA4_OFFSET     0x01c8 /* SCT capture alias register Ch4; high 16-bit */
+#define LPC43_SCT_CAPHA5_OFFSET     0x01ca /* SCT capture alias register Ch5; high 16-bit */
+#define LPC43_SCT_CAPHA6_OFFSET     0x01cc /* SCT capture alias register Ch6; high 16-bit */
+#define LPC43_SCT_CAPHA7_OFFSET     0x01ce /* SCT capture alias register Ch7; high 16-bit */
+#define LPC43_SCT_CAPHA8_OFFSET     0x01d0 /* SCT capture alias register Ch8; high 16-bit */
+#define LPC43_SCT_CAPHA9_OFFSET     0x01d2 /* SCT capture alias register Ch9; high 16-bit */
+#define LPC43_SCT_CAPHA10_OFFSET    0x01d4 /* SCT capture alias register Ch10; high 16-bit */
+#define LPC43_SCT_CAPHA11_OFFSET    0x01d6 /* SCT capture alias register Ch11; high 16-bit */
+#define LPC43_SCT_CAPHA12_OFFSET    0x01d8 /* SCT capture alias register Ch12; high 16-bit */
+#define LPC43_SCT_CAPHA13_OFFSET    0x01da /* SCT capture alias register Ch13; high 16-bit */
+#define LPC43_SCT_CAPHA14_OFFSET    0x01dc /* SCT capture alias register Ch14; high 16-bit */
+#define LPC43_SCT_CAPHA15_OFFSET    0x01de /* SCT capture alias register Ch15; high 16-bit */
 
-#define LPC43_SCT_CAPLA_OFFSET(n)   (0x0180 + ((n) << 4)) /* n = 0..15 */
-#define LPC43_SCT_CAP0LA_OFFSET     0x0180 /* SCT capture alias register Ch0; low 16-bit */
-#define LPC43_SCT_CAP1LA_OFFSET     0x0184 /* SCT capture alias register Ch1; low 16-bit */
-#define LPC43_SCT_CAP2LA_OFFSET     0x0188 /* SCT capture alias register Ch2; low 16-bit */
-#define LPC43_SCT_CAP3LA_OFFSET     0x018c /* SCT capture alias register Ch3; low 16-bit */
-#define LPC43_SCT_CAP4LA_OFFSET     0x0190 /* SCT capture alias register Ch4; low 16-bit */
-#define LPC43_SCT_CAP5LA_OFFSET     0x0194 /* SCT capture alias register Ch5; low 16-bit */
-#define LPC43_SCT_CAP6LA_OFFSET     0x0198 /* SCT capture alias register Ch6; low 16-bit */
-#define LPC43_SCT_CAP7LA_OFFSET     0x019c /* SCT capture alias register Ch7; low 16-bit */
-#define LPC43_SCT_CAP8LA_OFFSET     0x01a0 /* SCT capture alias register Ch8; low 16-bit */
-#define LPC43_SCT_CAP9LA_OFFSET     0x01a4 /* SCT capture alias register Ch9; low 16-bit */
-#define LPC43_SCT_CAP10LA_OFFSET    0x01a8 /* SCT capture alias register Ch10; low 16-bit */
-#define LPC43_SCT_CAP11LA_OFFSET    0x01ac /* SCT capture alias register Ch11; low 16-bit */
-#define LPC43_SCT_CAP12LA_OFFSET    0x01b0 /* SCT capture alias register Ch12; low 16-bit */
-#define LPC43_SCT_CAP13LA_OFFSET    0x01b4 /* SCT capture alias register Ch13; low 16-bit */
-#define LPC43_SCT_CAP14LA_OFFSET    0x01b8 /* SCT capture alias register Ch14; low 16-bit */
-#define LPC43_SCT_CAP15LA_OFFSET    0x01bc /* SCT capture alias register Ch15; low 16-bit */
-
-#define LPC43_SCT_CAPHA_OFFSET(n)   (0x0182 + ((n) << 4)) /* n = 0..15 */
-#define LPC43_SCT_CAP0HA_OFFSET     0x0182 /* SCT capture alias register Ch0; high 16-bit */
-#define LPC43_SCT_CAP1HA_OFFSET     0x0186 /* SCT capture alias register Ch1; high 16-bit */
-#define LPC43_SCT_CAP2HA_OFFSET     0x018a /* SCT capture alias register Ch2; high 16-bit */
-#define LPC43_SCT_CAP3HA_OFFSET     0x018e /* SCT capture alias register Ch3; high 16-bit */
-#define LPC43_SCT_CAP4HA_OFFSET     0x0192 /* SCT capture alias register Ch4; high 16-bit */
-#define LPC43_SCT_CAP5HA_OFFSET     0x0196 /* SCT capture alias register Ch5; high 16-bit */
-#define LPC43_SCT_CAP6HA_OFFSET     0x019a /* SCT capture alias register Ch6; high 16-bit */
-#define LPC43_SCT_CAP7HA_OFFSET     0x019e /* SCT capture alias register Ch7; high 16-bit */
-#define LPC43_SCT_CAP8HA_OFFSET     0x01a2 /* SCT capture alias register Ch8; high 16-bit */
-#define LPC43_SCT_CAP9HA_OFFSET     0x01a6 /* SCT capture alias register Ch9; high 16-bit */
-#define LPC43_SCT_CAP10HA_OFFSET    0x01aa /* SCT capture alias register Ch10; high 16-bit */
-#define LPC43_SCT_CAP11HA_OFFSET    0x01ae /* SCT capture alias register Ch11; high 16-bit */
-#define LPC43_SCT_CAP12HA_OFFSET    0x01b2 /* SCT capture alias register Ch12; high 16-bit */
-#define LPC43_SCT_CAP13HA_OFFSET    0x01b6 /* SCT capture alias register Ch13; high 16-bit */
-#define LPC43_SCT_CAP14HA_OFFSET    0x01ba /* SCT capture alias register Ch14; high 16-bit */
-#define LPC43_SCT_CAP15HA_OFFSET    0x01be /* SCT capture alias register Ch15; high 16-bit */
-
-#define LPC43_SCT_MATCHR_OFFSET(n)  (0x0200 + ((n) << 4)) /* n = 0..15 */
+#define LPC43_SCT_MATCHR_OFFSET(n)  (0x0200 + ((n) << 2)) /* n = 0..15 */
 #define LPC43_SCT_MATCHR0_OFFSET    0x0200 /* SCT match reload register of match channel 0 */
 #define LPC43_SCT_MATCHR1_OFFSET    0x0204 /* SCT match reload register of match channel 1 */
 #define LPC43_SCT_MATCHR2_OFFSET    0x0208 /* SCT match reload register of match channel 2 */
@@ -319,43 +283,43 @@
 #define LPC43_SCT_MATCHR14_OFFSET   0x0238 /* SCT match reload register of match channel 14 */
 #define LPC43_SCT_MATCHR15_OFFSET   0x023c /* SCT match reload register of match channel 15 */
 
-#define LPC43_SCT_MATCHRL_OFFSET(n) (0x0200 + ((n) << 4)) /* n = 0..15 */
-#define LPC43_SCT_MATCHR0L_OFFSET   0x0200 /* SCT match reload register of match channel 0; low 16-bit */
-#define LPC43_SCT_MATCHR1L_OFFSET   0x0204 /* SCT match reload register of match channel 1; low 16-bit */
-#define LPC43_SCT_MATCHR2L_OFFSET   0x0208 /* SCT match reload register of match channel 2; low 16-bit */
-#define LPC43_SCT_MATCHR3L_OFFSET   0x020c /* SCT match reload register of match channel 3; low 16-bit */
-#define LPC43_SCT_MATCHR4L_OFFSET   0x0210 /* SCT match reload register of match channel 4; low 16-bit */
-#define LPC43_SCT_MATCHR5L_OFFSET   0x0214 /* SCT match reload register of match channel 5; low 16-bit */
-#define LPC43_SCT_MATCHR6L_OFFSET   0x0218 /* SCT match reload register of match channel 6; low 16-bit */
-#define LPC43_SCT_MATCHR7L_OFFSET   0x021c /* SCT match reload register of match channel 7; low 16-bit */
-#define LPC43_SCT_MATCHR8L_OFFSET   0x0220 /* SCT match reload register of match channel 8; low 16-bit */
-#define LPC43_SCT_MATCHR9L_OFFSET   0x0224 /* SCT match reload register of match channel 9; low 16-bit */
-#define LPC43_SCT_MATCHR10L_OFFSET  0x0228 /* SCT match reload register of match channel 10; low 16-bit */
-#define LPC43_SCT_MATCHR11L_OFFSET  0x022c /* SCT match reload register of match channel 11; low 16-bit */
-#define LPC43_SCT_MATCHR12L_OFFSET  0x0230 /* SCT match reload register of match channel 12; low 16-bit */
-#define LPC43_SCT_MATCHR13L_OFFSET  0x0234 /* SCT match reload register of match channel 13; low 16-bit */
-#define LPC43_SCT_MATCHR14L_OFFSET  0x0238 /* SCT match reload register of match channel 14; low 16-bit */
-#define LPC43_SCT_MATCHR15L_OFFSET  0x023c /* SCT match reload register of match channel 15; low 16-bit */
+#define LPC43_SCT_MATCHRL_OFFSET(n) (0x0200 + ((n) << 2)) /* n = 0..15 */
+#define LPC43_SCT_MATCHRL0_OFFSET   0x0200 /* SCT match reload register of match channel 0; low 16-bit */
+#define LPC43_SCT_MATCHRL1_OFFSET   0x0204 /* SCT match reload register of match channel 1; low 16-bit */
+#define LPC43_SCT_MATCHRL2_OFFSET   0x0208 /* SCT match reload register of match channel 2; low 16-bit */
+#define LPC43_SCT_MATCHRL3_OFFSET   0x020c /* SCT match reload register of match channel 3; low 16-bit */
+#define LPC43_SCT_MATCHRL4_OFFSET   0x0210 /* SCT match reload register of match channel 4; low 16-bit */
+#define LPC43_SCT_MATCHRL5_OFFSET   0x0214 /* SCT match reload register of match channel 5; low 16-bit */
+#define LPC43_SCT_MATCHRL6_OFFSET   0x0218 /* SCT match reload register of match channel 6; low 16-bit */
+#define LPC43_SCT_MATCHRL7_OFFSET   0x021c /* SCT match reload register of match channel 7; low 16-bit */
+#define LPC43_SCT_MATCHRL8_OFFSET   0x0220 /* SCT match reload register of match channel 8; low 16-bit */
+#define LPC43_SCT_MATCHRL9_OFFSET   0x0224 /* SCT match reload register of match channel 9; low 16-bit */
+#define LPC43_SCT_MATCHRL10_OFFSET  0x0228 /* SCT match reload register of match channel 10; low 16-bit */
+#define LPC43_SCT_MATCHRL11_OFFSET  0x022c /* SCT match reload register of match channel 11; low 16-bit */
+#define LPC43_SCT_MATCHRL12_OFFSET  0x0230 /* SCT match reload register of match channel 12; low 16-bit */
+#define LPC43_SCT_MATCHRL13_OFFSET  0x0234 /* SCT match reload register of match channel 13; low 16-bit */
+#define LPC43_SCT_MATCHRL14_OFFSET  0x0238 /* SCT match reload register of match channel 14; low 16-bit */
+#define LPC43_SCT_MATCHRL15_OFFSET  0x023c /* SCT match reload register of match channel 15; low 16-bit */
 
-#define LPC43_SCT_MATCHRH_OFFSET(n) (0x0202 + ((n) << 4)) /* n = 0..15 */
-#define LPC43_SCT_MATCHR0H_OFFSET   0x0202 /* SCT match reload register of match channel 0; high 16-bit */
-#define LPC43_SCT_MATCHR1H_OFFSET   0x0206 /* SCT match reload register of match channel 1; high 16-bit */
-#define LPC43_SCT_MATCHR2H_OFFSET   0x020a /* SCT match reload register of match channel 2; high 16-bit */
-#define LPC43_SCT_MATCHR3H_OFFSET   0x020e /* SCT match reload register of match channel 3; high 16-bit */
-#define LPC43_SCT_MATCHR4H_OFFSET   0x0212 /* SCT match reload register of match channel 4; high 16-bit */
-#define LPC43_SCT_MATCHR5H_OFFSET   0x0216 /* SCT match reload register of match channel 5; high 16-bit */
-#define LPC43_SCT_MATCHR6H_OFFSET   0x021a /* SCT match reload register of match channel 6; high 16-bit */
-#define LPC43_SCT_MATCHR7H_OFFSET   0x021e /* SCT match reload register of match channel 7; high 16-bit */
-#define LPC43_SCT_MATCHR8H_OFFSET   0x0222 /* SCT match reload register of match channel 8; high 16-bit */
-#define LPC43_SCT_MATCHR9H_OFFSET   0x0226 /* SCT match reload register of match channel 9; high 16-bit */
-#define LPC43_SCT_MATCHR10H_OFFSET  0x022a /* SCT match reload register of match channel 10; high 16-bit */
-#define LPC43_SCT_MATCHR11H_OFFSET  0x022e /* SCT match reload register of match channel 11; high 16-bit */
-#define LPC43_SCT_MATCHR12H_OFFSET  0x0232 /* SCT match reload register of match channel 12; high 16-bit */
-#define LPC43_SCT_MATCHR13H_OFFSET  0x0236 /* SCT match reload register of match channel 13; high 16-bit */
-#define LPC43_SCT_MATCHR14H_OFFSET  0x023a /* SCT match reload register of match channel 14; high 16-bit */
-#define LPC43_SCT_MATCHR15H_OFFSET  0x023e /* SCT match reload register of match channel 15; high 16-bit */
+#define LPC43_SCT_MATCHRH_OFFSET(n) (0x0202 + ((n) << 2)) /* n = 0..15 */
+#define LPC43_SCT_MATCHRH0_OFFSET   0x0202 /* SCT match reload register of match channel 0; high 16-bit */
+#define LPC43_SCT_MATCHRH1_OFFSET   0x0206 /* SCT match reload register of match channel 1; high 16-bit */
+#define LPC43_SCT_MATCHRH2_OFFSET   0x020a /* SCT match reload register of match channel 2; high 16-bit */
+#define LPC43_SCT_MATCHRH3_OFFSET   0x020e /* SCT match reload register of match channel 3; high 16-bit */
+#define LPC43_SCT_MATCHRH4_OFFSET   0x0212 /* SCT match reload register of match channel 4; high 16-bit */
+#define LPC43_SCT_MATCHRH5_OFFSET   0x0216 /* SCT match reload register of match channel 5; high 16-bit */
+#define LPC43_SCT_MATCHRH6_OFFSET   0x021a /* SCT match reload register of match channel 6; high 16-bit */
+#define LPC43_SCT_MATCHRH7_OFFSET   0x021e /* SCT match reload register of match channel 7; high 16-bit */
+#define LPC43_SCT_MATCHRH8_OFFSET   0x0222 /* SCT match reload register of match channel 8; high 16-bit */
+#define LPC43_SCT_MATCHRH9_OFFSET   0x0226 /* SCT match reload register of match channel 9; high 16-bit */
+#define LPC43_SCT_MATCHRH10_OFFSET  0x022a /* SCT match reload register of match channel 10; high 16-bit */
+#define LPC43_SCT_MATCHRH11_OFFSET  0x022e /* SCT match reload register of match channel 11; high 16-bit */
+#define LPC43_SCT_MATCHRH12_OFFSET  0x0232 /* SCT match reload register of match channel 12; high 16-bit */
+#define LPC43_SCT_MATCHRH13_OFFSET  0x0236 /* SCT match reload register of match channel 13; high 16-bit */
+#define LPC43_SCT_MATCHRH14_OFFSET  0x023a /* SCT match reload register of match channel 14; high 16-bit */
+#define LPC43_SCT_MATCHRH15_OFFSET  0x023e /* SCT match reload register of match channel 15; high 16-bit */
 
-#define LPC43_SCT_CAPC_OFFSET(n)    (0x0200 + ((n) << 4)) /* n = 0..15 */
+#define LPC43_SCT_CAPC_OFFSET(n)    (0x0200 + ((n) << 2)) /* n = 0..15 */
 #define LPC43_SCT_CAPC0_OFFSET      0x0200 /* SCT capture control register Ch0 */
 #define LPC43_SCT_CAPC1_OFFSET      0x0204 /* SCT capture control register Ch1 */
 #define LPC43_SCT_CAPC2_OFFSET      0x0208 /* SCT capture control register Ch2 */
@@ -373,149 +337,113 @@
 #define LPC43_SCT_CAPC14_OFFSET     0x0238 /* SCT capture control register Ch14 */
 #define LPC43_SCT_CAPC15_OFFSET     0x023c /* SCT capture control register Ch15 */
 
-#define LPC43_SCT_CAPCL_OFFSET(n)   (0x0200 + ((n) << 4)) /* n = 0..15 */
-#define LPC43_SCT_CAPC0L_OFFSET     0x0200 /* SCT capture control register Ch0; low 16-bit */
-#define LPC43_SCT_CAPC1L_OFFSET     0x0204 /* SCT capture control register Ch1; low 16-bit */
-#define LPC43_SCT_CAPC2L_OFFSET     0x0208 /* SCT capture control register Ch2; low 16-bit */
-#define LPC43_SCT_CAPC3L_OFFSET     0x020c /* SCT capture control register Ch3; low 16-bit */
-#define LPC43_SCT_CAPC4L_OFFSET     0x0210 /* SCT capture control register Ch4; low 16-bit */
-#define LPC43_SCT_CAPC5L_OFFSET     0x0214 /* SCT capture control register Ch5; low 16-bit */
-#define LPC43_SCT_CAPC6L_OFFSET     0x0218 /* SCT capture control register Ch6; low 16-bit */
-#define LPC43_SCT_CAPC7L_OFFSET     0x021c /* SCT capture control register Ch7; low 16-bit */
-#define LPC43_SCT_CAPC8L_OFFSET     0x0220 /* SCT capture control register Ch8; low 16-bit */
-#define LPC43_SCT_CAPC9L_OFFSET     0x0224 /* SCT capture control register Ch9; low 16-bit */
-#define LPC43_SCT_CAPC10L_OFFSET    0x0228 /* SCT capture control register Ch10; low 16-bit */
-#define LPC43_SCT_CAPC11L_OFFSET    0x022c /* SCT capture control register Ch11; low 16-bit */
-#define LPC43_SCT_CAPC12L_OFFSET    0x0230 /* SCT capture control register Ch12; low 16-bit */
-#define LPC43_SCT_CAPC13L_OFFSET    0x0234 /* SCT capture control register Ch13; low 16-bit */
-#define LPC43_SCT_CAPC14L_OFFSET    0x0238 /* SCT capture control register Ch14; low 16-bit */
-#define LPC43_SCT_CAPC15L_OFFSET    0x023c /* SCT capture control register Ch15; low 16-bit */
+#define LPC43_SCT_CAPCL_OFFSET(n)   (0x0200 + ((n) << 2)) /* n = 0..15 */
+#define LPC43_SCT_CAPCL0_OFFSET     0x0200 /* SCT capture control register Ch0; low 16-bit */
+#define LPC43_SCT_CAPCL1_OFFSET     0x0204 /* SCT capture control register Ch1; low 16-bit */
+#define LPC43_SCT_CAPCL2_OFFSET     0x0208 /* SCT capture control register Ch2; low 16-bit */
+#define LPC43_SCT_CAPCL3_OFFSET     0x020c /* SCT capture control register Ch3; low 16-bit */
+#define LPC43_SCT_CAPCL4_OFFSET     0x0210 /* SCT capture control register Ch4; low 16-bit */
+#define LPC43_SCT_CAPCL5_OFFSET     0x0214 /* SCT capture control register Ch5; low 16-bit */
+#define LPC43_SCT_CAPCL6_OFFSET     0x0218 /* SCT capture control register Ch6; low 16-bit */
+#define LPC43_SCT_CAPCL7_OFFSET     0x021c /* SCT capture control register Ch7; low 16-bit */
+#define LPC43_SCT_CAPCL8_OFFSET     0x0220 /* SCT capture control register Ch8; low 16-bit */
+#define LPC43_SCT_CAPCL9_OFFSET     0x0224 /* SCT capture control register Ch9; low 16-bit */
+#define LPC43_SCT_CAPCL10_OFFSET    0x0228 /* SCT capture control register Ch10; low 16-bit */
+#define LPC43_SCT_CAPCL11_OFFSET    0x022c /* SCT capture control register Ch11; low 16-bit */
+#define LPC43_SCT_CAPCL12_OFFSET    0x0230 /* SCT capture control register Ch12; low 16-bit */
+#define LPC43_SCT_CAPCL13_OFFSET    0x0234 /* SCT capture control register Ch13; low 16-bit */
+#define LPC43_SCT_CAPCL14_OFFSET    0x0238 /* SCT capture control register Ch14; low 16-bit */
+#define LPC43_SCT_CAPCL15_OFFSET    0x023c /* SCT capture control register Ch15; low 16-bit */
 
-#define LPC43_SCT_CAPCH_OFFSET(n)   (0x0202 + ((n) << 4)) /* n = 0..15 */
-#define LPC43_SCT_CAPC0H_OFFSET     0x0202 /* SCT capture control register Ch0; high 16-bit */
-#define LPC43_SCT_CAPC1H_OFFSET     0x0206 /* SCT capture control register Ch1; high 16-bit */
-#define LPC43_SCT_CAPC2H_OFFSET     0x020a /* SCT capture control register Ch2; high 16-bit */
-#define LPC43_SCT_CAPC3H_OFFSET     0x020e /* SCT capture control register Ch3; high 16-bit */
-#define LPC43_SCT_CAPC4H_OFFSET     0x0212 /* SCT capture control register Ch4; high 16-bit */
-#define LPC43_SCT_CAPC5H_OFFSET     0x0216 /* SCT capture control register Ch5; high 16-bit */
-#define LPC43_SCT_CAPC6H_OFFSET     0x021a /* SCT capture control register Ch6; high 16-bit */
-#define LPC43_SCT_CAPC7H_OFFSET     0x021e /* SCT capture control register Ch7; high 16-bit */
-#define LPC43_SCT_CAPC8H_OFFSET     0x0222 /* SCT capture control register Ch8; high 16-bit */
-#define LPC43_SCT_CAPC9H_OFFSET     0x0226 /* SCT capture control register Ch9; high 16-bit */
-#define LPC43_SCT_CAPC10H_OFFSET    0x022a /* SCT capture control register Ch10; high 16-bit */
-#define LPC43_SCT_CAPC11H_OFFSET    0x022e /* SCT capture control register Ch11; high 16-bit */
-#define LPC43_SCT_CAPC12H_OFFSET    0x0232 /* SCT capture control register Ch12; high 16-bit */
-#define LPC43_SCT_CAPC13H_OFFSET    0x0236 /* SCT capture control register Ch13; high 16-bit */
-#define LPC43_SCT_CAPC14H_OFFSET    0x023a /* SCT capture control register Ch14; high 16-bit */
-#define LPC43_SCT_CAPC15H_OFFSET    0x023e /* SCT capture control register Ch15; high 16-bit */
+#define LPC43_SCT_CAPCH_OFFSET(n)   (0x0202 + ((n) << 2)) /* n = 0..15 */
+#define LPC43_SCT_CAPCH0_OFFSET     0x0202 /* SCT capture control register Ch0; high 16-bit */
+#define LPC43_SCT_CAPCH1_OFFSET     0x0206 /* SCT capture control register Ch1; high 16-bit */
+#define LPC43_SCT_CAPCH2_OFFSET     0x020a /* SCT capture control register Ch2; high 16-bit */
+#define LPC43_SCT_CAPCH3_OFFSET     0x020e /* SCT capture control register Ch3; high 16-bit */
+#define LPC43_SCT_CAPCH4_OFFSET     0x0212 /* SCT capture control register Ch4; high 16-bit */
+#define LPC43_SCT_CAPCH5_OFFSET     0x0216 /* SCT capture control register Ch5; high 16-bit */
+#define LPC43_SCT_CAPCH6_OFFSET     0x021a /* SCT capture control register Ch6; high 16-bit */
+#define LPC43_SCT_CAPCH7_OFFSET     0x021e /* SCT capture control register Ch7; high 16-bit */
+#define LPC43_SCT_CAPCH8_OFFSET     0x0222 /* SCT capture control register Ch8; high 16-bit */
+#define LPC43_SCT_CAPCH9_OFFSET     0x0226 /* SCT capture control register Ch9; high 16-bit */
+#define LPC43_SCT_CAPCH10_OFFSET    0x022a /* SCT capture control register Ch10; high 16-bit */
+#define LPC43_SCT_CAPCH11_OFFSET    0x022e /* SCT capture control register Ch11; high 16-bit */
+#define LPC43_SCT_CAPCH12_OFFSET    0x0232 /* SCT capture control register Ch12; high 16-bit */
+#define LPC43_SCT_CAPCH13_OFFSET    0x0236 /* SCT capture control register Ch13; high 16-bit */
+#define LPC43_SCT_CAPCH14_OFFSET    0x023a /* SCT capture control register Ch14; high 16-bit */
+#define LPC43_SCT_CAPCH15_OFFSET    0x023e /* SCT capture control register Ch15; high 16-bit */
 
-#define LPC43_SCT_MATCHRA_OFFSET(n) (0x0280 + ((n) << 4)) /* n = 0..15 */
-#define LPC43_SCT_MATCHR0A_OFFSET   0x0280 /* SCT match reload alias register of match channel 0 */
-#define LPC43_SCT_MATCHR1A_OFFSET   0x0284 /* SCT match reload alias register of match channel 1 */
-#define LPC43_SCT_MATCHR2A_OFFSET   0x0288 /* SCT match reload alias register of match channel 2 */
-#define LPC43_SCT_MATCHR3A_OFFSET   0x028c /* SCT match reload alias register of match channel 3 */
-#define LPC43_SCT_MATCHR4A_OFFSET   0x0290 /* SCT match reload alias register of match channel 4 */
-#define LPC43_SCT_MATCHR5A_OFFSET   0x0294 /* SCT match reload alias register of match channel 5 */
-#define LPC43_SCT_MATCHR6A_OFFSET   0x0298 /* SCT match reload alias register of match channel 6 */
-#define LPC43_SCT_MATCHR7A_OFFSET   0x029c /* SCT match reload alias register of match channel 7 */
-#define LPC43_SCT_MATCHR8A_OFFSET   0x02a0 /* SCT match reload alias register of match channel 8 */
-#define LPC43_SCT_MATCHR9A_OFFSET   0x02a4 /* SCT match reload alias register of match channel 9 */
-#define LPC43_SCT_MATCHR10A_OFFSET  0x02a8 /* SCT match reload alias register of match channel 10 */
-#define LPC43_SCT_MATCHR11A_OFFSET  0x02ac /* SCT match reload alias register of match channel 11 */
-#define LPC43_SCT_MATCHR12A_OFFSET  0x02b0 /* SCT match reload alias register of match channel 12 */
-#define LPC43_SCT_MATCHR13A_OFFSET  0x02b4 /* SCT match reload alias register of match channel 13 */
-#define LPC43_SCT_MATCHR14A_OFFSET  0x02b8 /* SCT match reload alias register of match channel 14 */
-#define LPC43_SCT_MATCHR15A_OFFSET  0x02bc /* SCT match reload alias register of match channel 15 */
+#define LPC43_SCT_MATCHRLA_OFFSET(n) (0x0280 + ((n) << 1)) /* n = 0..15 */
+#define LPC43_SCT_MATCHRLA0_OFFSET  0x0280 /* SCT match reload alias register of match channel 0; low 16-bit */
+#define LPC43_SCT_MATCHRLA1_OFFSET  0x0282 /* SCT match reload alias register of match channel 1; low 16-bit */
+#define LPC43_SCT_MATCHRLA2_OFFSET  0x0284 /* SCT match reload alias register of match channel 2; low 16-bit */
+#define LPC43_SCT_MATCHRLA3_OFFSET  0x0286 /* SCT match reload alias register of match channel 3; low 16-bit */
+#define LPC43_SCT_MATCHRLA4_OFFSET  0x0288 /* SCT match reload alias register of match channel 4; low 16-bit */
+#define LPC43_SCT_MATCHRLA5_OFFSET  0x028a /* SCT match reload alias register of match channel 5; low 16-bit */
+#define LPC43_SCT_MATCHRLA6_OFFSET  0x028c /* SCT match reload alias register of match channel 6; low 16-bit */
+#define LPC43_SCT_MATCHRLA7_OFFSET  0x028e /* SCT match reload alias register of match channel 7; low 16-bit */
+#define LPC43_SCT_MATCHRLA8_OFFSET  0x0290 /* SCT match reload alias register of match channel 8; low 16-bit */
+#define LPC43_SCT_MATCHRLA9_OFFSET  0x0292 /* SCT match reload alias register of match channel 9; low 16-bit */
+#define LPC43_SCT_MATCHRLA10_OFFSET 0x0294 /* SCT match reload alias register of match channel 10; low 16-bit */
+#define LPC43_SCT_MATCHRLA11_OFFSET 0x0296 /* SCT match reload alias register of match channel 11; low 16-bit */
+#define LPC43_SCT_MATCHRLA12_OFFSET 0x0298 /* SCT match reload alias register of match channel 12; low 16-bit */
+#define LPC43_SCT_MATCHRLA13_OFFSET 0x029a /* SCT match reload alias register of match channel 13; low 16-bit */
+#define LPC43_SCT_MATCHRLA14_OFFSET 0x029c /* SCT match reload alias register of match channel 14; low 16-bit */
+#define LPC43_SCT_MATCHRLA15_OFFSET 0x029e /* SCT match reload alias register of match channel 15; low 16-bit */
 
-#define LPC43_SCT_MATCHRLA_OFFSET(n) (0x0280 + ((n) << 4)) /* n = 0..15 */
-#define LPC43_SCT_MATCHR0LA_OFFSET  0x0280 /* SCT match reload alias register of match channel 0; low 16-bit */
-#define LPC43_SCT_MATCHR1LA_OFFSET  0x0284 /* SCT match reload alias register of match channel 1; low 16-bit */
-#define LPC43_SCT_MATCHR2LA_OFFSET  0x0288 /* SCT match reload alias register of match channel 2; low 16-bit */
-#define LPC43_SCT_MATCHR3LA_OFFSET  0x028c /* SCT match reload alias register of match channel 3; low 16-bit */
-#define LPC43_SCT_MATCHR4LA_OFFSET  0x0290 /* SCT match reload alias register of match channel 4; low 16-bit */
-#define LPC43_SCT_MATCHR5LA_OFFSET  0x0294 /* SCT match reload alias register of match channel 5; low 16-bit */
-#define LPC43_SCT_MATCHR6LA_OFFSET  0x0298 /* SCT match reload alias register of match channel 6; low 16-bit */
-#define LPC43_SCT_MATCHR7LA_OFFSET  0x029c /* SCT match reload alias register of match channel 7; low 16-bit */
-#define LPC43_SCT_MATCHR8LA_OFFSET  0x02a0 /* SCT match reload alias register of match channel 8; low 16-bit */
-#define LPC43_SCT_MATCHR9LA_OFFSET  0x02a4 /* SCT match reload alias register of match channel 9; low 16-bit */
-#define LPC43_SCT_MATCHR10LA_OFFSET 0x02a8 /* SCT match reload alias register of match channel 10; low 16-bit */
-#define LPC43_SCT_MATCHR11LA_OFFSET 0x02ac /* SCT match reload alias register of match channel 11; low 16-bit */
-#define LPC43_SCT_MATCHR12LA_OFFSET 0x02b0 /* SCT match reload alias register of match channel 12; low 16-bit */
-#define LPC43_SCT_MATCHR13LA_OFFSET 0x02b4 /* SCT match reload alias register of match channel 13; low 16-bit */
-#define LPC43_SCT_MATCHR14LA_OFFSET 0x02b8 /* SCT match reload alias register of match channel 14; low 16-bit */
-#define LPC43_SCT_MATCHR15LA_OFFSET 0x02bc /* SCT match reload alias register of match channel 15; low 16-bit */
+#define LPC43_SCT_MATCHRHA_OFFSET(n) (0x02c0 + ((n) << 1)) /* n = 0..15 */
+#define LPC43_SCT_MATCHRHA0_OFFSET  0x02c0 /* SCT match reload alias register of match channel 0; high 16-bit */
+#define LPC43_SCT_MATCHRHA1_OFFSET  0x02c2 /* SCT match reload alias register of match channel 1; high 16-bit */
+#define LPC43_SCT_MATCHRHA2_OFFSET  0x02c4 /* SCT match reload alias register of match channel 2; high 16-bit */
+#define LPC43_SCT_MATCHRHA3_OFFSET  0x02c6 /* SCT match reload alias register of match channel 3; high 16-bit */
+#define LPC43_SCT_MATCHRHA4_OFFSET  0x02c8 /* SCT match reload alias register of match channel 4; high 16-bit */
+#define LPC43_SCT_MATCHRHA5_OFFSET  0x02ca /* SCT match reload alias register of match channel 5; high 16-bit */
+#define LPC43_SCT_MATCHRHA6_OFFSET  0x02cc /* SCT match reload alias register of match channel 6; high 16-bit */
+#define LPC43_SCT_MATCHRHA7_OFFSET  0x02ce /* SCT match reload alias register of match channel 7; high 16-bit */
+#define LPC43_SCT_MATCHRHA8_OFFSET  0x02d0 /* SCT match reload alias register of match channel 8; high 16-bit */
+#define LPC43_SCT_MATCHRHA9_OFFSET  0x02d2 /* SCT match reload alias register of match channel 9; high 16-bit */
+#define LPC43_SCT_MATCHRHA10_OFFSET 0x02d4 /* SCT match reload alias register of match channel 10; high 16-bit */
+#define LPC43_SCT_MATCHRHA11_OFFSET 0x02d6 /* SCT match reload alias register of match channel 11; high 16-bit */
+#define LPC43_SCT_MATCHRHA12_OFFSET 0x02d8 /* SCT match reload alias register of match channel 12; high 16-bit */
+#define LPC43_SCT_MATCHRHA13_OFFSET 0x02da /* SCT match reload alias register of match channel 13; high 16-bit */
+#define LPC43_SCT_MATCHRHA14_OFFSET 0x02dc /* SCT match reload alias register of match channel 14; high 16-bit */
+#define LPC43_SCT_MATCHRHA15_OFFSET 0x02de /* SCT match reload alias register of match channel 15; high 16-bit */
 
-#define LPC43_SCT_MATCHRHA_OFFSET(n) (0x0282 + ((n) << 4)) /* n = 0..15 */
-#define LPC43_SCT_MATCHR0HA_OFFSET  0x0282 /* SCT match reload alias register of match channel 0; high 16-bit */
-#define LPC43_SCT_MATCHR1HA_OFFSET  0x0286 /* SCT match reload alias register of match channel 1; high 16-bit */
-#define LPC43_SCT_MATCHR2HA_OFFSET  0x028a /* SCT match reload alias register of match channel 2; high 16-bit */
-#define LPC43_SCT_MATCHR3HA_OFFSET  0x028e /* SCT match reload alias register of match channel 3; high 16-bit */
-#define LPC43_SCT_MATCHR4HA_OFFSET  0x0292 /* SCT match reload alias register of match channel 4; high 16-bit */
-#define LPC43_SCT_MATCHR5HA_OFFSET  0x0296 /* SCT match reload alias register of match channel 5; high 16-bit */
-#define LPC43_SCT_MATCHR6HA_OFFSET  0x029a /* SCT match reload alias register of match channel 6; high 16-bit */
-#define LPC43_SCT_MATCHR7HA_OFFSET  0x029e /* SCT match reload alias register of match channel 7; high 16-bit */
-#define LPC43_SCT_MATCHR8HA_OFFSET  0x02a2 /* SCT match reload alias register of match channel 8; high 16-bit */
-#define LPC43_SCT_MATCHR9HA_OFFSET  0x02a6 /* SCT match reload alias register of match channel 9; high 16-bit */
-#define LPC43_SCT_MATCHR10HA_OFFSET 0x02aa /* SCT match reload alias register of match channel 10; high 16-bit */
-#define LPC43_SCT_MATCHR11HA_OFFSET 0x02ae /* SCT match reload alias register of match channel 11; high 16-bit */
-#define LPC43_SCT_MATCHR12HA_OFFSET 0x02b2 /* SCT match reload alias register of match channel 12; high 16-bit */
-#define LPC43_SCT_MATCHR13HA_OFFSET 0x02b6 /* SCT match reload alias register of match channel 13; high 16-bit */
-#define LPC43_SCT_MATCHR14HA_OFFSET 0x02ba /* SCT match reload alias register of match channel 14; high 16-bit */
-#define LPC43_SCT_MATCHR15HA_OFFSET 0x02be /* SCT match reload alias register of match channel 15; high 16-bit */
-
-#define LPC43_SCT_CAPCA_OFFSET(n)   (0x0280 + ((n) << 4)) /* n = 0..15 */
-#define LPC43_SCT_CAPC0A_OFFSET     0x0280 /* SCT capture control alias register Ch0 */
-#define LPC43_SCT_CAPC1A_OFFSET     0x0284 /* SCT capture control alias register Ch1 */
-#define LPC43_SCT_CAPC2A_OFFSET     0x0288 /* SCT capture control alias register Ch2 */
-#define LPC43_SCT_CAPC3A_OFFSET     0x028c /* SCT capture control alias register Ch3 */
-#define LPC43_SCT_CAPC4A_OFFSET     0x0290 /* SCT capture control alias register Ch4 */
-#define LPC43_SCT_CAPC5A_OFFSET     0x0294 /* SCT capture control alias register Ch5 */
-#define LPC43_SCT_CAPC6A_OFFSET     0x0298 /* SCT capture control alias register Ch6 */
-#define LPC43_SCT_CAPC7A_OFFSET     0x029c /* SCT capture control alias register Ch7 */
-#define LPC43_SCT_CAPC8A_OFFSET     0x02a0 /* SCT capture control alias register Ch8 */
-#define LPC43_SCT_CAPC9A_OFFSET     0x02a4 /* SCT capture control alias register Ch9 */
-#define LPC43_SCT_CAPC10A_OFFSET    0x02a8 /* SCT capture control alias register Ch10 */
-#define LPC43_SCT_CAPC11A_OFFSET    0x02ac /* SCT capture control alias register Ch11 */
-#define LPC43_SCT_CAPC12A_OFFSET    0x02b0 /* SCT capture control alias register Ch12 */
-#define LPC43_SCT_CAPC13A_OFFSET    0x02b4 /* SCT capture control alias register Ch13 */
-#define LPC43_SCT_CAPC14A_OFFSET    0x02b8 /* SCT capture control alias register Ch14 */
-#define LPC43_SCT_CAPC15A_OFFSET    0x02bc /* SCT capture control alias register Ch15 */
-
-#define LPC43_SCT_CAPCLA_OFFSET(n)  (0x0280 + ((n) << 4)) /* n = 0..15 */
+#define LPC43_SCT_CAPCLA_OFFSET(n)  (0x0280 + ((n) << 1)) /* n = 0..15 */
 #define LPC43_SCT_CAPC0LA_OFFSET    0x0280 /* SCT capture control alias register Ch0; low 16-bit */
-#define LPC43_SCT_CAPC1LA_OFFSET    0x0284 /* SCT capture control alias register Ch1; low 16-bit */
-#define LPC43_SCT_CAPC2LA_OFFSET    0x0288 /* SCT capture control alias register Ch2; low 16-bit */
-#define LPC43_SCT_CAPC3LA_OFFSET    0x028c /* SCT capture control alias register Ch3; low 16-bit */
-#define LPC43_SCT_CAPC4LA_OFFSET    0x0290 /* SCT capture control alias register Ch4; low 16-bit */
-#define LPC43_SCT_CAPC5LA_OFFSET    0x0294 /* SCT capture control alias register Ch5; low 16-bit */
-#define LPC43_SCT_CAPC6LA_OFFSET    0x0298 /* SCT capture control alias register Ch6; low 16-bit */
-#define LPC43_SCT_CAPC7LA_OFFSET    0x029c /* SCT capture control alias register Ch7; low 16-bit */
-#define LPC43_SCT_CAPC8LA_OFFSET    0x02a0 /* SCT capture control alias register Ch8; low 16-bit */
-#define LPC43_SCT_CAPC9LA_OFFSET    0x02a4 /* SCT capture control alias register Ch9; low 16-bit */
-#define LPC43_SCT_CAPC10LA_OFFSET   0x02a8 /* SCT capture control alias register Ch10; low 16-bit */
-#define LPC43_SCT_CAPC11LA_OFFSET   0x02ac /* SCT capture control alias register Ch11; low 16-bit */
-#define LPC43_SCT_CAPC12LA_OFFSET   0x02b0 /* SCT capture control alias register Ch12; low 16-bit */
-#define LPC43_SCT_CAPC13LA_OFFSET   0x02b4 /* SCT capture control alias register Ch13; low 16-bit */
-#define LPC43_SCT_CAPC14LA_OFFSET   0x02b8 /* SCT capture control alias register Ch14; low 16-bit */
-#define LPC43_SCT_CAPC15LA_OFFSET   0x02bc /* SCT capture control alias register Ch15; low 16-bit */
+#define LPC43_SCT_CAPC1LA_OFFSET    0x0282 /* SCT capture control alias register Ch1; low 16-bit */
+#define LPC43_SCT_CAPC2LA_OFFSET    0x0284 /* SCT capture control alias register Ch2; low 16-bit */
+#define LPC43_SCT_CAPC3LA_OFFSET    0x0286 /* SCT capture control alias register Ch3; low 16-bit */
+#define LPC43_SCT_CAPC4LA_OFFSET    0x0288 /* SCT capture control alias register Ch4; low 16-bit */
+#define LPC43_SCT_CAPC5LA_OFFSET    0x028a /* SCT capture control alias register Ch5; low 16-bit */
+#define LPC43_SCT_CAPC6LA_OFFSET    0x028c /* SCT capture control alias register Ch6; low 16-bit */
+#define LPC43_SCT_CAPC7LA_OFFSET    0x028e /* SCT capture control alias register Ch7; low 16-bit */
+#define LPC43_SCT_CAPC8LA_OFFSET    0x0290 /* SCT capture control alias register Ch8; low 16-bit */
+#define LPC43_SCT_CAPC9LA_OFFSET    0x0292 /* SCT capture control alias register Ch9; low 16-bit */
+#define LPC43_SCT_CAPC10LA_OFFSET   0x0294 /* SCT capture control alias register Ch10; low 16-bit */
+#define LPC43_SCT_CAPC11LA_OFFSET   0x0296 /* SCT capture control alias register Ch11; low 16-bit */
+#define LPC43_SCT_CAPC12LA_OFFSET   0x0298 /* SCT capture control alias register Ch12; low 16-bit */
+#define LPC43_SCT_CAPC13LA_OFFSET   0x029a /* SCT capture control alias register Ch13; low 16-bit */
+#define LPC43_SCT_CAPC14LA_OFFSET   0x029c /* SCT capture control alias register Ch14; low 16-bit */
+#define LPC43_SCT_CAPC15LA_OFFSET   0x029e /* SCT capture control alias register Ch15; low 16-bit */
 
-#define LPC43_SCT_CAPCHA_OFFSET(n)  (0x0282 + ((n) << 4)) /* n = 0..15 */
-#define LPC43_SCT_CAPC0HA_OFFSET    0x0282 /* SCT capture control alias register Ch0; high 16-bit */
-#define LPC43_SCT_CAPC1HA_OFFSET    0x0286 /* SCT capture control alias register Ch1; high 16-bit */
-#define LPC43_SCT_CAPC2HA_OFFSET    0x028a /* SCT capture control alias register Ch2; high 16-bit */
-#define LPC43_SCT_CAPC3HA_OFFSET    0x028e /* SCT capture control alias register Ch3; high 16-bit */
-#define LPC43_SCT_CAPC4HA_OFFSET    0x0292 /* SCT capture control alias register Ch4; high 16-bit */
-#define LPC43_SCT_CAPC5HA_OFFSET    0x0296 /* SCT capture control alias register Ch5; high 16-bit */
-#define LPC43_SCT_CAPC6HA_OFFSET    0x029a /* SCT capture control alias register Ch6; high 16-bit */
-#define LPC43_SCT_CAPC7HA_OFFSET    0x029e /* SCT capture control alias register Ch7; high 16-bit */
-#define LPC43_SCT_CAPC8HA_OFFSET    0x02a2 /* SCT capture control alias register Ch8; high 16-bit */
-#define LPC43_SCT_CAPC9HA_OFFSET    0x02a6 /* SCT capture control alias register Ch9; high 16-bit */
-#define LPC43_SCT_CAPC10HA_OFFSET   0x02aa /* SCT capture control alias register Ch10; high 16-bit */
-#define LPC43_SCT_CAPC11HA_OFFSET   0x02ae /* SCT capture control alias register Ch11; high 16-bit */
-#define LPC43_SCT_CAPC12HA_OFFSET   0x02b2 /* SCT capture control alias register Ch12; high 16-bit */
-#define LPC43_SCT_CAPC13HA_OFFSET   0x02b6 /* SCT capture control alias register Ch13; high 16-bit */
-#define LPC43_SCT_CAPC14HA_OFFSET   0x02ba /* SCT capture control alias register Ch14; high 16-bit */
-#define LPC43_SCT_CAPC15HA_OFFSET   0x02be /* SCT capture control alias register Ch15; high 16-bit */
+#define LPC43_SCT_CAPCHA_OFFSET(n)  (0x02c0 + ((n) << 1)) /* n = 0..15 */
+#define LPC43_SCT_CAPC0HA_OFFSET    0x02c0 /* SCT capture control alias register Ch0; high 16-bit */
+#define LPC43_SCT_CAPC1HA_OFFSET    0x02c2 /* SCT capture control alias register Ch1; high 16-bit */
+#define LPC43_SCT_CAPC2HA_OFFSET    0x02c4 /* SCT capture control alias register Ch2; high 16-bit */
+#define LPC43_SCT_CAPC3HA_OFFSET    0x02c6 /* SCT capture control alias register Ch3; high 16-bit */
+#define LPC43_SCT_CAPC4HA_OFFSET    0x02c8 /* SCT capture control alias register Ch4; high 16-bit */
+#define LPC43_SCT_CAPC5HA_OFFSET    0x02ca /* SCT capture control alias register Ch5; high 16-bit */
+#define LPC43_SCT_CAPC6HA_OFFSET    0x02cc /* SCT capture control alias register Ch6; high 16-bit */
+#define LPC43_SCT_CAPC7HA_OFFSET    0x02ce /* SCT capture control alias register Ch7; high 16-bit */
+#define LPC43_SCT_CAPC8HA_OFFSET    0x02d0 /* SCT capture control alias register Ch8; high 16-bit */
+#define LPC43_SCT_CAPC9HA_OFFSET    0x02d2 /* SCT capture control alias register Ch9; high 16-bit */
+#define LPC43_SCT_CAPC10HA_OFFSET   0x02d4 /* SCT capture control alias register Ch10; high 16-bit */
+#define LPC43_SCT_CAPC11HA_OFFSET   0x02d6 /* SCT capture control alias register Ch11; high 16-bit */
+#define LPC43_SCT_CAPC12HA_OFFSET   0x02d8 /* SCT capture control alias register Ch12; high 16-bit */
+#define LPC43_SCT_CAPC13HA_OFFSET   0x02da /* SCT capture control alias register Ch13; high 16-bit */
+#define LPC43_SCT_CAPC14HA_OFFSET   0x02dc /* SCT capture control alias register Ch14; high 16-bit */
+#define LPC43_SCT_CAPC15HA_OFFSET   0x02de /* SCT capture control alias register Ch15; high 16-bit */
 
 #define LPC43_SCT_EVSM_OFFSET(n)    (0x0300 + ((n) << 3))
 #define LPC43_SCT_EVC_OFFSET(n)     (0x0304 + ((n) << 3))
@@ -1168,7 +1096,12 @@
 #define SCT_CONFIG_INSYNC_SHIFT     (9)       /* Bits 9-16: Synchronization for input n=1..7 */
 #define SCT_CONFIG_INSYNC_MASK      (0xff << SCT_CONFIG_INSYNC_SHIFT)
 #  define SCT_CONFIG_INSYNC(n)      (1 << (SCT_CONFIG_INSYNC_SHIFT+(n)))
-                                              /* Bits 17-31: Reserved */
+#define SCT_CONFIG_AUTOLIMITL       (1 << 17) /* Bit 17: Only available on flash-based parts that contain a SCT with dither engine.
+                                                         Causes a match on match register 0 to be treated as a de-facto
+                                                         LIMIT condition without the need to define an associated event. */
+
+#define SCT_CONFIG_AUTOLIMITH       (1 << 18) /* Bit 18: See Bit 17, but for high timer */
+                                              /* Bits 19-31: Reserved */
 /* SCT control register */
 
 #define SCT_CTRL_DOWNU              (1 << 0)  /* Bit 0:  Unified counter counts down */
@@ -1328,7 +1261,7 @@
 #define SCT_OUTDIRC_REVH            (2)        /* Reversed when H counter is counting down */
 
 #define SCT_OUTDIRC_SETCLR_SHIFT(c) ((c) << 1)
-#define SCT_OUTDIRC_SETCLR_SHIFT(c) (3 << SCT_OUTDIRC_SETCLR_SHIFT(c))
+#define SCT_OUTDIRC_SETCLR_MASK(c)  (3 << SCT_OUTDIRC_SETCLR_SHIFT(c))
 #  define SCT_OUTDIRC_SETCLR(c,n)   ((n) << SCT_OUTDIRC_SETCLR_SHIFT(c))
 
 #define SCT_OUTDIRC_SETCLR0_SHIFT   (0)       /* Bits 0-1: Set/clear operation on output 0 */
@@ -1388,7 +1321,7 @@
 #define SCT_RES_TOGGLE              (2)        /* Toggle output */
 
 #define SCT_RES_OUT_SHIFT(c)        ((c) << 1)
-#define SCT_RES_OUT_SHIFT(c)        (3 << SCT_RES_OUT_SHIFT(c))
+#define SCT_RES_OUT_MASK(c)         (3 << SCT_RES_OUT_SHIFT(c))
 #  define SCT_RES_OUT(c,n)          ((n) << SCT_RES_OUT_SHIFT(c))
 
 #define SCT_RES_OUT0_SHIFT          (0)       /* Bits 0-1: Effect of simultaneous set and clear on output 0 */
@@ -1540,15 +1473,17 @@
 /* SCT event state mask registers 0 to 15 */
 
 #define SCT_EVSM(n)                 (1 << (n))
+#define SCT_EVSM_ALL_STATES         0xFFFFFFFF
 
 /* SCT event control registers 0 to 15 */
 
 #define SCT_EVC_MATCHSEL_SHIFT      (0)       /* Bits 0-3: Selects Match register associated event */
-#define SCT_EVC_MATCHSEL_MASK       (15 << SCT_EVC_MATCHSEL_SHIFT)
+#define SCT_EVC_MATCHSEL_MASK       (0xf << SCT_EVC_MATCHSEL_SHIFT)
+#define SCT_EVC_MATCHSEL(m)         ((m) << SCT_EVC_MATCHSEL_SHIFT)
 #define SCT_EVC_HEVENT              (1 << 4)  /* Bit 4:  Select L/H counter */
 #define SCT_EVC_OUTSEL              (1 << 5)  /* Bit 5:  Input/output select*/
 #define SCT_EVC_IOSEL_SHIFT         (6)       /* Bits 6-9: Selects input or output signal associated event */
-#define SCT_EVC_IOSEL_MASK          (15 << SCT_EVC_IOSEL_SHIFT)
+#define SCT_EVC_IOSEL_MASK          (0xf << SCT_EVC_IOSEL_SHIFT)
 #define SCT_EVC_IOCOND_SHIFT        (10)      /* Bits 10-11: Selects I/O condition for event n */
 #define SCT_EVC_IOCOND_MASK         (3 << SCT_EVC_IOCOND_SHIFT)
 #  define SCT_EVC_IOCOND_LOW        (0 << SCT_EVC_IOCOND_SHIFT)
@@ -1563,19 +1498,19 @@
 #  define SCT_EVC_COMBMODE_AND      (3 << SCT_EVC_COMBMODE_SHIFT)
 #define SCT_EVC_STATELD             (1 << 14)  /* Bit 14:  STATEV control */
 #define SCT_EVC_STATEV_SHIFT        (15)       /* Bits 15-19: State value */
-#define SCT_EVC_STATEV_MASK         (31 << SCT_EVC_STATEV_SHIFT)
+#define SCT_EVC_STATEV_MASK         (0x1f << SCT_EVC_STATEV_SHIFT)
                                                /* Bits 20-31: Reserved */
 /* SCT output set registers 0 to 15 */
 
 #define SCT_OUTSET_SHIFT            (0)        /* Bits 0-15: Bit m selects event m to set output n */
 #define SCT_OUTSET_MASK             (0xffff << SCT_OUTSET_SHIFT)
-#  define SCT_OUTSET_MASK(m)        (1 << ((n)SCT_OUTSET_SHIFT))
+#  define SCT_OUTSET(m)             (1 << ((n)SCT_OUTSET_SHIFT))
                                                /* Bits 16-31: Reserved */
 /* SCT output clear registers 0 to 15 */
 
 #define SCT_OUTCLR_SHIFT            (0)        /* Bits 0-15: Bit m selects event m to clear output n */
 #define SCT_OUTCLR_MASK             (0xffff << SCT_OUTCLR_SHIFT)
-#  define SCT_OUTCLR_MASK(m)        (1 << ((n)SCT_OUTCLR_SHIFT))
+#  define SCT_OUTCLR(m)             (1 << ((n)SCT_OUTCLR_SHIFT))
                                                /* Bits 16-31: Reserved */
 
 /****************************************************************************************************

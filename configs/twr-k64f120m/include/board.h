@@ -150,11 +150,13 @@
 
 
 /* Open SDA serial link */
+
 #define PIN_UART1_RX  PIN_UART1_RX_1
 #define PIN_UART1_TX  PIN_UART1_TX_1
 
 
 /* Ethernet */
+
 #ifdef CONFIG_KINETIS_ENET
 #  define CONFIG_KINETIS_NENET 1
 #endif
@@ -168,7 +170,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

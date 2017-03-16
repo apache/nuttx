@@ -722,12 +722,3 @@ Where <subdir> is one of the following:
       -CONFIG_CDCACM=n
       +CONFIG_CDCACM=y
 
-    The example can also be converted to use the alternative
-    USB serial example at apps/examples/usbterm by changing the
-    following:
-
-      -CONFIG_EXAMPLES_USBSERIAL=y
-      +CONFIG_EXAMPLES_USBSERIAL=n
-
-      -CONFIG_EXAMPLES_USBTERM=n
-      +CONFIG_EXAMPLES_USBTERM=y

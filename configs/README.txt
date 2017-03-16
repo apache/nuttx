@@ -519,6 +519,11 @@ configs/p112
   Dave Brooks was successfully funded through Kickstarter for and another
   run of P112 boards in November of 2012.
 
+configs/photon
+  A configuration for the Photon Wifi board from Particle Devices
+  (https://www.particle.io). This board features the STM32F205RGY6 MCU from
+  STMicro.
+
 configs/pic32mx-starterkit
   This directory contains the port of NuttX to the Microchip PIC32 Ethernet
   Starter Kit (DM320004) with the Multimedia Expansion Board (MEB, DM320005).

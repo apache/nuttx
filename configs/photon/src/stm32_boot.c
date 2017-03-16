@@ -1,8 +1,8 @@
 /************************************************************************************
- * configs/pic32mx7mmb/src/pic32_usbterm.c
+ * configs/photon/src/stm32_boot.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,67 +39,38 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-#include <debug.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
 
-#include <nuttx/usb/usbdev.h>
-
-#include "pic32mx.h"
-#include "pic32mx7mmb.h"
-
-#if defined(CONFIG_PIC32MX_USBDEV) && defined(CONFIG_EXAMPLES_USBTERM_DEVINIT)
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
+#include "up_arch.h"
+#include "photon.h"
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-/****************************************************************************
- * Name:
+/************************************************************************************
+ * Name: stm32_boardinitialize
  *
  * Description:
- *   If CONFIG_EXAMPLES_USBTERM_DEVINIT is defined, then the example will
- *   call this user provided function as part of its initialization.
+ *   All STM32 architectures must provide the following entry point.  This entry point
+ *   is called early in the initialization -- after all memory has been configured
+ *   and mapped but before any devices have been initialized.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-int usbterm_devinit(void)
+void stm32_boardinitialize(void)
 {
-  /* The Mikroelektronika PIC32MX7 MMB has no way to know when the USB is
-   * connected.  So we will fake it and tell the USB driver that the USB is
-   * connected now.
-   *
-   * If examples/usbterm is built as an NSH built-in application, then
-   * pic32mx_usbattach() will be called in board_app_initialize().
+#ifdef CONFIG_STM32_OTGHS
+  /* Initialize USB if the 1) OTG HS controller is in the configuration and 2)
+   * disabled, and 3) the weak function stm32_usbinitialize() has been brought
+   * into the build. Presumably either CONFIG_USBDEV or CONFIG_USBHOST is also
+   * selected.
    */
 
-#ifndef CONFIG_NSH_BUILTIN_APPS
-  pic32mx_usbattach();
+  if (stm32_usbinitialize)
+    {
+      stm32_usbinitialize();
+    }
 #endif
-  return OK;
 }
-
-/****************************************************************************
- * Name:
- *
- * Description:
- *   If CONFIG_EXAMPLES_USBTERM_DEVINIT is defined, then the example will
- *   call this user provided function as part of its termination sequence.
- *
- ****************************************************************************/
-
-void usbterm_devuninit(void)
-{
-  /* Tell the USB driver that the USB is no longer connected */
-
-  pic32mx_usbdetach();
-}
-
-#endif /* CONFIG_PIC32MX_USBDEV && CONFIG_EXAMPLES_USBTERM_DEVINIT */

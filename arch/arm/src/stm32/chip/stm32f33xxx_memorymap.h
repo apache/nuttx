@@ -107,7 +107,9 @@
 
 /* APB2 Base Addresses **************************************************************/
 
-#define STM32_SYSCFG_BASE    0x40010000     /* 0x40010000-0x400103FF SYSCFG + COMP + OPAMP */
+#define STM32_SYSCFG_BASE    0x40010000     /* 0x40010000-0x400103FF SYSCFG, and */
+#define STM32_COMP_BASE      0x40010000     /* COMP, and */
+#define STM32_OPAMP_BASE     0x40010000     /* OPAMP */
 #define STM32_EXTI_BASE      0x40010400     /* 0x40010400-0x400107FF EXTI */
 #define STM32_TIM1_BASE      0x40012c00     /* 0x40012c00-0x40012fff TIM1 */
 #define STM32_SPI1_BASE      0x40013000     /* 0x40013000-0x400133ff SPI1 */
@@ -115,7 +117,7 @@
 #define STM32_TIM15_BASE     0x40014000     /* 0x40014000-0x400143ff TIM15 */
 #define STM32_TIM16_BASE     0x40014400     /* 0x40014400-0x400147ff TIM16 */
 #define STM32_TIM17_BASE     0x40014800     /* 0x40014800-0x40014bff TIM17 */
-#define STM32_HRTIM1_BASE    0x40017400     /* 0x40017400-0x400177ff TIM19 */
+#define STM32_HRTIM1_BASE    0x40017400     /* 0x40017400-0x400177ff HRTIM1 */
 
 /* AHB1 Base Addresses **************************************************************/
 

@@ -7,7 +7,7 @@
  *
  * With extensions, modifications by:
  *
- *   Copyright (C) 2011-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  *   Copyright( C) 2014 Patrizio Simona. All rights reserved.
@@ -678,15 +678,15 @@ static int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
 
   do
     {
+      /* Calculate the elapsed time */
+
+      elapsed = clock_systimer() - start;
+
       /* Poll by simply calling the timer interrupt handler until it
        * reports that it is done.
        */
 
       stm32_i2c_isr(priv);
-
-      /* Calculate the elapsed time */
-
-      elapsed = clock_systimer() - start;
     }
 
   /* Loop until the transfer is complete. */
@@ -737,6 +737,10 @@ static inline void stm32_i2c_sem_waitstop(FAR struct stm32_i2c_priv_s *priv)
   start = clock_systimer();
   do
     {
+      /* Calculate the elapsed time */
+
+      elapsed = clock_systimer() - start;
+
       /* Check for STOP condition */
 
       cr1 = stm32_i2c_getreg(priv, STM32_I2C_CR1_OFFSET);
@@ -752,10 +756,6 @@ static inline void stm32_i2c_sem_waitstop(FAR struct stm32_i2c_priv_s *priv)
         {
           return;
         }
-
-      /* Calculate the elapsed time */
-
-      elapsed = clock_systimer() - start;
     }
 
   /* Loop until the stop is complete or a timeout occurs. */

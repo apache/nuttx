@@ -40,9 +40,6 @@ CSRCS = pic32_boot.c pic32_leds.c pic32_spi.c pic32_mio283qt2.c
 
 ifeq ($(CONFIG_PIC32MX_USBDEV),y)
 CSRCS += pic32_usbdev.c
-ifeq ($(CONFIG_EXAMPLES_USBTERM_DEVINIT),y)
-CSRCS += pic32_usbterm.c
-endif
 endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)

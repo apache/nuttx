@@ -80,8 +80,8 @@ struct max6675_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void    max6675_lock(FAR struct spi_dev_s *spi)
-static void    max6675_unlock(FAR struct spi_dev_s *spi)
+static void    max6675_lock(FAR struct spi_dev_s *spi);
+static void    max6675_unlock(FAR struct spi_dev_s *spi);
 
 /* Character driver methods */
 

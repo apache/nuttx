@@ -152,13 +152,12 @@ uint8_t board_buttons(void)
 #if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_TIVA_GPIOP_IRQS)
 int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  static xcpt_t handler = NULL;
   irqstate_t flags;
   int ret = -EINVAL;
 
   /* Interrupts are supported only on ports P and Q and, hence, only on button SW4 */
 
-  if (id >= BUTTON_SW4)
+  if (id == BUTTON_SW4)
     {
       /* The following should be atomic */
 
@@ -168,16 +167,14 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 
       up_disable_irq(IRQ_SW4);
       irq_detach(IRQ_SW4);
-      handler = NULL;
 
       /* Attach the new handler if so requested */
 
-      if (irqhandler)
+      if (irqhandler != NULL)
         {
           ret = irq_attach(IRQ_SW4, irqhandler, arg);
           if (ret == OK)
             {
-              handler = irqhandler;
               up_enable_irq(IRQ_SW4);
             }
         }

@@ -177,22 +177,22 @@ static int button_handler(int irq, FAR void *context, FAR void *arg)
 
 void stm32_pmbuttons(void)
 {
+#ifdef CONFIG_ARCH_IRQBUTTONS
+  int ret;
+  int i;
+#endif
+
   /* Initialize the button GPIOs */
 
   board_button_initialize();
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-  int i;
   for (i = CONFIG_PM_IRQBUTTONS_MIN; i <= CONFIG_PM_IRQBUTTONS_MAX; i++)
     {
-      xcpt_t oldhandler =
-        board_button_irq(i, button_handler, (void*) i);
-
-      if (oldhandler != NULL)
+      ret = board_button_irq(i, button_handler, (void*)i);
+      if (ret < 0)
         {
-          swarn("WARNING: oldhandler:%p is not NULL!  "
-                "Button events may be lost or aliased!\n",
-                oldhandler);
+          serr("ERROR: board_button_irq failed: %d\n", ret);
         }
     }
 #endif

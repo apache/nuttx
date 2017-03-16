@@ -58,10 +58,6 @@ ifeq ($(CONFIG_CAN),y)
 CSRCS += lpc17_can.c
 endif
 
-ifeq ($(CONFIG_USBHOST_HIDKBD),y)
-CSRCS += lpc17_hidkbd.c
-endif
-
 ifeq ($(CONFIG_USBHOST_HIDMOUSE),y)
 CSRCS += lpc17_hidmouse.c
 endif
