@@ -472,4 +472,4 @@
 /* Transmit FIFO Buffer (32 x 4-bytes) */
 #define USIC_IN_
 
-#endif /* __ARCH_ARM_SRC_XMC4_CHIP_XMC4_SCU_H */
+#endif /* __ARCH_ARM_SRC_XMC4_CHIP_XMC4_USIC_H */

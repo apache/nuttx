@@ -447,11 +447,11 @@
 
 /* Hardware select field values */
 
-#define HWSEL_SOFTWARE             0          /* Software control only */
-#define HWSEL_OVERRIDE0            1          /* HWI0/HWO0 control path can override the
-                                               * software configuration */
-#define HWSEL_OVERRIDE1            2          /* HWI1/HWO1 control path can override the
-                                               * software configuration */
+#define HWSEL_SW                   0          /* Software control only */
+#define HWSEL_HW0                  1          /* HWI0/HWO0 control path can override
+                                               * the software configuration */
+#define HWSEL_HW1                  2          /* HWI1/HWO1 control path can override
+                                               * the software configuration */
 
 /* Port Pin Hardware Select Register */
 
@@ -507,4 +507,4 @@
 #define PORT_HWSEL_HW15_MASK        (3 << PORT_HWSEL_HW15_SHIFT)
 #  define PORT_HWSEL_HW15(n)        ((uint32_t)(n) << PORT_HWSEL_HW15_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_XMC4_CHIP_XMC4_SCU_H */
+#endif /* __ARCH_ARM_SRC_XMC4_CHIP_XMC4_PORTS_H */

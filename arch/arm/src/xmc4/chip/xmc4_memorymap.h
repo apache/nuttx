@@ -228,4 +228,4 @@
 
 #define XMC4_PPB_BASE               0xe000e000
 
-#endif /* __ARCH_ARM_SRC_XMC4_CHIP_XMC4_SCU_H */
+#endif /* __ARCH_ARM_SRC_XMC4_CHIP_XMC4_MEMORYMAP_H */

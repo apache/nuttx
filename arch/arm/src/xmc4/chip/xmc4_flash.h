@@ -200,4 +200,4 @@
 #define FLASH_PROCON2_S12_S13ROM    (1 << 11) /* Bit 11: Sectors 12 and 13 Locked Forever by User 2 */
 #define FLASH_PROCON2_S14_S15ROM    (1 << 12) /* Bit 12: Sectors 14 and 15 Locked Forever by User 2 */
 
-#endif /* __ARCH_ARM_SRC_XMC4_CHIP_XMC4_SCU_H */
+#endif /* __ARCH_ARM_SRC_XMC4_CHIP_XMC4_FLASH_H */
