@@ -46,11 +46,13 @@
 #include <nuttx/init.h>
 #include <arch/board/board.h>
 
+#include "nvic.h"
 #include "up_arch.h"
 #include "up_internal.h"
 #include "chip/xmc4_flash.h"
 
 #include "xmc4_userspace.h"
+#include "xmc4_start.h"
 
 #ifdef CONFIG_ARCH_FPU
 #  include "nvic.h"

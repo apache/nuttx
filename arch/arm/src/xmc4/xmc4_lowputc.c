@@ -48,7 +48,7 @@
 #include "up_arch.h"
 
 #include "xmc4_config.h"
-#include "chip/xmc4_uart.h"
+#include "chip/xmc4_usic.h"
 #include "chip/xmc4_pinmux.h"
 
 /****************************************************************************

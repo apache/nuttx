@@ -59,7 +59,7 @@
 
 #include "xmc4_config.h"
 #include "chip.h"
-#include "chip/xmc4_uart.h"
+#include "chip/xmc4_usic.h"
 
 /****************************************************************************
  * Pre-processor Definitions

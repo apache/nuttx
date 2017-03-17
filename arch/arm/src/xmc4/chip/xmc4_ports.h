@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/xmc4/chip/xmc4_ports.h
  *
- *   Copyright (C    /*2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Reference: XMC4500 Reference Manual V1.5 2014-07 Microcontrollers.
@@ -27,17 +27,17 @@
  * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
  * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION    /*HOWEVER CAUSED
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
  * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE    /*ARISING IN
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * May include some logic from sample code provided by Infineon:
  *
- *   Copyright (C    /*2011-2015 Infineon Technologies AG. All rights reserved.
+ *   Copyright (C) 2011-2015 Infineon Technologies AG. All rights reserved.
  *
- * Infineon Technologies AG (Infineon    /*is supplying this software for use with
+ * Infineon Technologies AG (Infineon) is supplying this software for use with
  * Infineon's microcontrollers.  This file can be freely distributed within
  * development tools that are supporting such microcontrollers.
  *
@@ -258,18 +258,31 @@
 #define OMR_PR(n)                   (1 << ((n) + 16))
 
 /* Basic port input/output field values */
-/* Director Input */
+/* Direct Input */
 
-#define IOCR_NOPULL                 0         /* No internal pull device active */
-#define IOCR_PULLDOWN               1         /* Internal pull-down device active */
-#define IOCR_PULLUP                 2         /* Internal pull-down device active */
-#define IOCR_CONT                   3         /* No internal pull device active; Pn_OUTx
+#define IOCR_INPUT_NOPULL           0         /* No internal pull device active */
+#define IOCR_INPUT_PULLDOWN         1         /* Internal pull-down device active */
+#define IOCR_INPUT_PULLUP           2         /* Internal pull-down device active */
+#define IOCR_INPUT_CONT             3         /* No internal pull device active; Pn_OUTx
                                                * continuously samples the input value */
 
-/* Any of the above may be OR'ed with */
+/* Any of the above input configurations may be OR'ed with */
 /* Inverted Input */
 
-#define IOCR_INVERT                 4         /* Inverted input */
+#define IOCR_INPUT_INVERT           4         /* Inverted input modifier */
+
+/* Push-pull Output (direct input) */
+
+#define IOCR_OUTPUT                 16        /* General-purpose output */
+#define IOCR_OUTPUT_ALT1            17        /* Alternate output function 1 */
+#define IOCR_OUTPUT_ALT2            18        /* Alternate output function 2 */
+#define IOCR_OUTPUT_ALT3            19        /* Alternate output function 3 */
+#define IOCR_OUTPUT_ALT4            20        /* Alternate output function 4 */
+
+/* Any of the above may be OR'ed with */
+/* Open drain output */
+
+#define IOCR_OUTPUT_OPENDRAIN       8         /* Output drain output modifier */
 
 /* Port Input/Output Control Register 0 */
 
