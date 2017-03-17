@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated March 7, 2017)
+NuttX TODO List (Last updated March 14, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -19,7 +19,7 @@ nuttx/:
   (8)  Kernel/Protected Build
   (3)  C++ Support
   (6)  Binary loaders (binfmt/)
- (13)  Network (net/, drivers/net)
+ (14)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
  (12)  Libraries (libc/, libm/)
@@ -507,7 +507,7 @@ o Kernel/Protected Build
                in the nuttx/ directory.  However, the user interfaces must be
                moved into a NuttX library or into apps/.  Currently
                applications calls to the NxTerm user interfaces are
-               undefined.
+               undefined in the Kernel/Protected builds.
   Status:      Open
   Priority:    Medium
 
@@ -1064,6 +1064,20 @@ o Network (net/, drivers/net)
 
   Status:      Open
   Priority:    High if you happen to be using Ethernet in this configuration.
+
+  Title:       REPARTITION DRIVER FUNCTIONALITY
+  Description: Every network driver performs the first level of packet decoding.
+               It examines the packet header and calls ipv4_input(), ipv6_input().
+               icmp_input(), etc. as appropriate.  This is a maintenance problem
+               because it means that any changes to the network input interfaces
+               affects all drivers.
+
+               A better, more maintainable solution would use a single net_input()
+               function that would receive all incoming packets.  This function
+               would then perform that common packet decoding logic that is
+               currently implemented in every network driver.
+  Status:      Open
+  Priority:    Low.  Really just as aesthetic maintainability issue.
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

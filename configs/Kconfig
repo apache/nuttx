@@ -956,6 +956,17 @@ config ARCH_BOARD_SPARK
 		(http://www.spark.io).  This board features the STM32103CBT6
 		MCU from STMicro.
 
+config ARCH_BOARD_PHOTON
+	bool "Photon wifi board"
+	depends on ARCH_CHIP_STM32F205RG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		A configuration for the Photon from Particle Devices
+		(https://www.particle.io). This board features the STM32F205RGY6
+		MCU from STMicro.
+
 config ARCH_BOARD_STM32_BUTTERFLY2
 	bool "Kamami STM32Butterfly2 development board"
 	depends on ARCH_CHIP_STM32F107VC
@@ -1489,6 +1500,7 @@ config ARCH_BOARD
 	default "shenzhou"                 if ARCH_BOARD_SHENZHOU
 	default "skp16c26"                 if ARCH_BOARD_SKP16C26
 	default "spark"                    if ARCH_BOARD_SPARK
+	default "photon"                   if ARCH_BOARD_PHOTON
 	default "stm32butterfly2"          if ARCH_BOARD_STM32_BUTTERFLY2
 	default "stm32_tiny"               if ARCH_BOARD_STM32_TINY
 	default "stm32f103-minimum"        if ARCH_BOARD_STM32F103_MINIMUM
@@ -1836,6 +1848,9 @@ source "configs/skp16c26/Kconfig"
 endif
 if ARCH_BOARD_SPARK
 source "configs/spark/Kconfig"
+endif
+if ARCH_BOARD_PHOTON
+source "configs/photon/Kconfig"
 endif
 if ARCH_BOARD_STM32_BUTTERFLY2
 source "configs/stm32butterfly2/Kconfig"

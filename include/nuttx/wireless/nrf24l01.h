@@ -64,8 +64,6 @@
 #define NRF24L01_DYN_LENGTH      33     /* Specific length value to use to enable dynamic packet length */
 #define NRF24L01_XMIT_MAXRT      255    /* Specific value returned by Number of available pipes */
 
-/* #define NRF24L01_DEBUG        1 */
-
 /* IOCTL commands */
 
 #define NRF24L01IOC_SETRETRCFG       _WLIOC(NRF24L01_FIRST+0)   /* arg: Pointer to nrf24l01_retrcfg_t structure */
@@ -87,18 +85,6 @@
 
 #define NRF24L01IOC_SETTXADDR        WLIOC_SETADDR
 #define NRF24L01IOC_GETTXADDR        WLIOC_GETADDR
-
-/* NRF24L01 debug */
-
-#ifdef NRF24L01_DEBUG
-# define werr(format, ...)           _err(format, ##__VA_ARGS__)
-# define werr(format, ...)           _err(format, ##__VA_ARGS__)
-# define winfo(format, ...)          _info(format, ##__VA_ARGS__)
-#else
-# define werr(x...)
-# define werr(x...)
-# define winfo(x...)
-#endif
 
 /****************************************************************************
  * Public Data Types
@@ -507,12 +493,9 @@ ssize_t nrf24l01_recv(struct nrf24l01_dev_s *dev, uint8_t *buffer,
 
 #endif
 
-#ifdef NRF24L01_DEBUG
-
+#ifdef CONFIG_DEBUG_WIRELESS
 void nrf24l01_dumpregs(FAR struct nrf24l01_dev_s *dev);
-
 void nrf24l01_dumprxfifo(FAR struct nrf24l01_dev_s *dev);
-
 #endif
 
 #undef EXTERN

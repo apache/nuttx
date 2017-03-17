@@ -1,0 +1,58 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_PHOTON
+
+config PHOTON_DFU_BOOTLOADER
+	bool "Stock photon bootloader support"
+	select STM32_DFU
+	---help---
+		Build image that can be uploaded using stock DFU bootloader.
+
+config PHOTON_WDG
+	bool
+
+config PHOTON_IWDG
+	bool "Photon iwdg kicker support"
+	depends on STM32_IWDG
+	depends on WATCHDOG
+	select PHOTON_WDG
+
+config PHOTON_IWDG_TIMEOUT
+	int "Photon iwdg Timeout (ms)"
+	default 32000
+	depends on PHOTON_IWDG
+	---help---
+		Watchdog timeout value in milliseconds.
+
+if PHOTON_WDG
+config PHOTON_WDG_THREAD
+	bool "Watchdog Deamon Thread"
+
+if PHOTON_WDG_THREAD
+config PHOTON_WDG_THREAD_NAME
+	string "Watchdog Thread Name"
+	default "wdog"
+
+config PHOTON_WDG_THREAD_INTERVAL
+	int "Watchdog Thread Interval (ms)"
+	default 2500
+
+config PHOTON_WDG_THREAD_PRIORITY
+	int "Watchdog Thread Priority"
+	default 200
+
+config PHOTON_WDG_THREAD_STACKSIZE
+	int "Watchdog Thread Stacksize"
+	default 1024
+
+endif # PHOTON_WDG_THREAD
+endif # PHOTON_WDG
+
+config PHOTON_WLAN
+	bool "Enable WLAN chip support"
+	depends on IEEE80211_BROADCOM_FULLMAC_SDIO
+
+endif

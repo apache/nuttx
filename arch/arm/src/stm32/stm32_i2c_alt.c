@@ -737,6 +737,10 @@ static inline void stm32_i2c_sem_waitstop(FAR struct stm32_i2c_priv_s *priv)
   start = clock_systimer();
   do
     {
+      /* Calculate the elapsed time */
+
+      elapsed = clock_systimer() - start;
+
       /* Check for STOP condition */
 
       cr1 = stm32_i2c_getreg(priv, STM32_I2C_CR1_OFFSET);
@@ -752,10 +756,6 @@ static inline void stm32_i2c_sem_waitstop(FAR struct stm32_i2c_priv_s *priv)
         {
           return;
         }
-
-      /* Calculate the elapsed time */
-
-      elapsed = clock_systimer() - start;
     }
 
   /* Loop until the stop is complete or a timeout occurs. */

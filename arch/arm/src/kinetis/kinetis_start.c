@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_start.c
- * arch/arm/src/chip/kinetis_start.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -327,6 +326,7 @@ void __start(void)
    * can get debug output as soon as possible (This depends on clock
    * configuration).
    */
+
   kinetis_fpuconfig();
   kinetis_lowsetup();
 #ifdef USE_EARLYSERIALINIT

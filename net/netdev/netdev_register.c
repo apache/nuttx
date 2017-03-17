@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev_register.c
  *
- *   Copyright (C) 2007-2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,14 +63,17 @@
 
 #define NETDEV_ETH_FORMAT   "eth%d"
 #define NETDEV_LO_FORMAT    "lo"
-#define NETDEV_WPAN_FORMAT  "wpan%d"
 #define NETDEV_SLIP_FORMAT  "sl%d"
 #define NETDEV_TUN_FORMAT   "tun%d"
+#define NETDEV_WLAN_FORMAT  "wlan%d"
+#define NETDEV_WPAN_FORMAT  "wpan%d"
 
 #if defined(CONFIG_NET_SLIP)
 #  define NETDEV_DEFAULT_FORMAT NETDEV_SLIP_FORMAT
 #elif defined(CONFIG_NET_ETHERNET)
 #  define NETDEV_DEFAULT_FORMAT NETDEV_ETH_FORMAT
+#elif defined(CONFIG_DRIVERS_IEEE80211)
+#  define NETDEV_DEFAULT_FORMAT NETDEV_WLAN_FORMAT
 #elif defined(CONFIG_NET_6LOWPAN)
 #  define NETDEV_DEFAULT_FORMAT NETDEV_WPAN_FORMAT
 #else /* if defined(CONFIG_NET_LOOPBACK) */
@@ -210,6 +213,17 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
             dev->d_recvwndo = CONFIG_NET_ETH_TCP_RECVWNDO;
 #endif
             devfmt          = NETDEV_ETH_FORMAT;
+            break;
+#endif
+
+#ifdef CONFIG_DRIVERS_IEEE80211
+          case NET_LL_IEEE80211:  /* IEEE 802.11 */
+            dev->d_llhdrlen = ETH_HDRLEN;
+            dev->d_mtu      = CONFIG_NET_ETH_MTU;
+#ifdef CONFIG_NET_TCP
+            dev->d_recvwndo = CONFIG_NET_ETH_TCP_RECVWNDO;
+#endif
+            devfmt          = NETDEV_LPAN_FORMAT;
             break;
 #endif
 
