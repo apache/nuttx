@@ -239,25 +239,37 @@
 
 /* Register Bit-Field Definitions **************************************************/
 
-/* Port Output Register, Port Output Modification Register, Port Input Register,
- * Port Pin Function Decision Control Register, Port Pin Power Save Register.
+/* Port Output Register, , Port Input Register, Port Pin Function Decision Control
+ * Register, Port Pin Power Save Register.
  */
 
 #define PORT_PIN(n)                 (1 << (n))
 
+/* Port Output Modification Register:
+ *
+ * PRx PSx Function
+ * 0   0   Bit Pn_OUT.Px is not changed.
+ * 0   1   Bit Pn_OUT.Px is set.
+ * 1   0   Bit Pn_OUT.Px is reset.
+ * 1   1   Bit Pn_OUT.Px is toggled.
+ */
+
+#define OMR_PS(n)                   (1 << (n))
+#define OMR_PR(n)                   (1 << ((n) + 16))
+
 /* Basic port input/output field values */
 /* Director Input */
 
-#define IOCR_NOPULL                 0 /* No internal pull device active */
-#define IOCR_PULLDOWN               1 /* Internal pull-down device active */
-#define IOCR_PULLUP                 2 /* Internal pull-down device active */
-#define IOCR_CONT                   3 /* No internal pull device active; Pn_OUTx continuously
-                                       * samples the input value */
+#define IOCR_NOPULL                 0         /* No internal pull device active */
+#define IOCR_PULLDOWN               1         /* Internal pull-down device active */
+#define IOCR_PULLUP                 2         /* Internal pull-down device active */
+#define IOCR_CONT                   3         /* No internal pull device active; Pn_OUTx
+                                               * continuously samples the input value */
 
 /* Any of the above may be OR'ed with */
 /* Inverted Input */
 
-#define IOCR_INVERT                 4 /* Inverted input */
+#define IOCR_INVERT                 4         /* Inverted input */
 
 /* Port Input/Output Control Register 0 */
 
