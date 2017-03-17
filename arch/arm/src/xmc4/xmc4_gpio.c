@@ -442,25 +442,34 @@ void xmc4_gpio_write(gpioconfig_t pinconfig, bool value)
   uintptr_t portbase = xmc4_gpio_portbase(pinconfig);
   unsigned int pin   = xmc4_gpio_pin(pinconfig);
   uint32_t regval;
-  uint32_t mask;
 
-  /* Read the OUT register */
+  /* Setup OMR value for this pin:
+   *
+   *   PRx PSx Function
+   *   0   0   Bit Pn_OUT.Px is not changed.
+   *   0   1   Bit Pn_OUT.Px is set.
+   *   1   0   Bit Pn_OUT.Px is reset.
+   *   1   1   Bit Pn_OUT.Px is toggled.
+   */
 
-  regval = xmc4_gpio_getreg(portbase, XMC4_PORT_OUT_OFFSET);
-
-  /* Set/clear output value for this pin */
-
-  mask = PORT_PIN(pin);
   if (value)
     {
-      regval |= mask;
+      /* PRx==0; PSx==1 -> Set output */
+
+      regval = OMR_PS(pin);
     }
   else
     {
-      regval &= ~mask;
+      /* PRx==1; PSx==0 -> Reset output */
+
+      regval = OMR_PR(pin);
     }
 
-  xmc4_gpio_putreg(portbase, XMC4_PORT_OUT_OFFSET, regval);
+  /* Set/clear the OUTPUT.  This is an atomoc operation so no critical
+   * section is needed.
+   */
+
+  xmc4_gpio_putreg(portbase, XMC4_PORT_OMR_OFFSET, regval);
 }
 
 /****************************************************************************
@@ -477,11 +486,13 @@ bool xmc4_gpio_read(gpioconfig_t pinconfig)
   unsigned int pin   = xmc4_gpio_pin(pinconfig);
   uint32_t regval;
 
-  /* Read the OUT register */
+  /* Read the OUT register.  This is an atomoc operation so no critical
+   * section is needed.
+   */
 
   regval = xmc4_gpio_getreg(portbase, XMC4_PORT_IN_OFFSET);
 
-  /* Return in the input state for this pin */
+  /* Return in the input state for this pin at the time is was read */
 
   return ((regval & PORT_PIN(pin)) != 0);
 }
