@@ -87,8 +87,10 @@
  *   .... .... .M.. ....  .... .... .... ....
  */
 
-#define GPIO_INPUT_INVERT           (1 << 22) /* Inverted input modifier */
-#define GPIOS_OUTPUT_OPENDRAIN       (1 << 22) /* Output drain output modifier */
+#define GPIO_INPUT_INVERT           (1 << 22) /* Inverted direct input modifier */
+
+#define GPIOS_OUTPUT_PUSHPULL       (0)       /* Push-ull output is the default */
+#define GPIOS_OUTPUT_OPENDRAIN      (1 << 22) /* Output drain output modifier */
 
 /* Pad driver strength:
  *
