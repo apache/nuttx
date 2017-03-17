@@ -672,13 +672,17 @@ static int sem_restoreholderprioB(FAR struct semholder_s *pholder,
   if (pholder->htcb == rtcb)
     {
 
-      /* The running task has given up a count on the semaphore
-       * Release the holder if all counts have been given up.
-       * before reprioritizing causes a context switch.
+   /* The running task has given up a count on the semaphore */
+
+#if CONFIG_SEM_PREALLOCHOLDERS == 0
+      /* In the case where there are only 2 holders. This step
+       * is necessary to insure we have space. Release the holder
+       * if all counts have been given up. before reprioritizing
+       * causes a context switch.
        */
 
        sem_findandfreeholder(sem, rtcb);
-
+#endif
       (void)sem_restoreholderprio(rtcb, sem, arg);
       return 1;
     }
