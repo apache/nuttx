@@ -142,9 +142,9 @@
 
 /* See chip/xmc4_ports.h for the PDR definitions */
 
-#  define GPIO_PINCTRL_SOFTWARE    (HWSEL_SW         << GPIO_PINCTRL_SHIFT)
-#  define GPIO_PINCTRL_HW0         (HWSEL_HW0        << GPIO_PINCTRL_SHIFT)
-#  define GPIO_PINCTRL_HW1         (HWSEL_HW1        << GPIO_PINCTRL_SHIFT)
+#  define GPIO_PINCTRL_SOFTWARE    (HWSEL_SW               << GPIO_PINCTRL_SHIFT)
+#  define GPIO_PINCTRL_HW0         (HWSEL_HW0              << GPIO_PINCTRL_SHIFT)
+#  define GPIO_PINCTRL_HW1         (HWSEL_HW1              << GPIO_PINCTRL_SHIFT)
 
 /* If the pin is an GPIO output, then this identifies the initial output value:
  *
