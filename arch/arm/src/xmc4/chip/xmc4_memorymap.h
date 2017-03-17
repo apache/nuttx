@@ -148,6 +148,7 @@
 #define XMC4_USIC2_CH0_BASE         0x48024000
 #define XMC4_USIC2_CH1_BASE         0x48024200
 #define XMC4_USIC2_RAM_BASE         0x48024400
+#define XMC4_PORT_BASE(n)           (0x48028000 + ((n) << 8))
 #define XMC4_PORT0_BASE             0x48028000
 #define XMC4_PORT1_BASE             0x48028100
 #define XMC4_PORT2_BASE             0x48028200

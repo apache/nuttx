@@ -58,6 +58,8 @@
 
 #include <nuttx/config.h>
 
+#include "chip/xmc4_memorymap.h"
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -68,13 +70,19 @@
 
 #define XMC4_PORT_OUT_OFFSET        0x0000    /* Port Output Register */
 #define XMC4_PORT_OMR_OFFSET        0x0004    /* Port Output Modification Register */
+
+#define XMC4_PORT_IOCR_OFFSET(n)    (0x0010 + ((n) & 3))
 #define XMC4_PORT_IOCR0_OFFSET      0x0010    /* Port Input/Output Control Register 0 */
 #define XMC4_PORT_IOCR4_OFFSET      0x0014    /* Port Input/Output Control Register 4 */
 #define XMC4_PORT_IOCR8_OFFSET      0x0018    /* Port Input/Output Control Register 8 */
 #define XMC4_PORT_IOCR12_OFFSET     0x001c    /* Port Input/Output Control Register 12 */
+
 #define XMC4_PORT_IN_OFFSET         0x0024    /* Port Input Register */
+
+#define XMC4_PORT_PDR_OFFSET(n)     (0x0010 + (((n) >> 1) & 3))
 #define XMC4_PORT_PDR0_OFFSET       0x0040    /* Port Pad Driver Mode 0 Register */
 #define XMC4_PORT_PDR1_OFFSET       0x0044    /* Port Pad Driver Mode 1 Register */
+
 #define XMC4_PORT_PDISC_OFFSET      0x0060    /* Port Pin Function Decision Control Register */
 #define XMC4_PORT_PPS_OFFSET        0x0070    /* Port Pin Power Save Register */
 #define XMC4_PORT_HWSEL_OFFSET      0x0074    /* Port Pin Hardware Select Register */

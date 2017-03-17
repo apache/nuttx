@@ -50,16 +50,16 @@
 
 /* 32-bit GIO encoding:
  *
- *   .... TTTT TMDD DCC.  .... .... PPPP BBBB
+ *   TTTT TMPD DDCC V....  .... .... PPPP BBBB
  */
 
 
 /* This identifies the GPIO pint type:
  *
- *   .... TTTT T... ....  .... .... .... ....
+ *   TTTT T... .... ....  .... .... .... ....
  */
 
-#define GPIO_PINTYPE_SHIFT         (23)       /* Bits 23-27: Pin type */
+#define GPIO_PINTYPE_SHIFT         (27)       /* Bits 27-31: Pin type */
 #define GPIO_PINTYPE_MASK          (31                  << GPIO_PINTYPE_SHIFT)
 
 /* See chip/xmc4_ports.h for the IOCR definitions */
@@ -84,60 +84,79 @@
 
 /* Pin type modifier:
  *
- *   .... .... .M.. ....  .... .... .... ....
+ *   .... .M.. .... ....  .... .... .... ....
  */
 
-#define GPIO_INPUT_INVERT           (1 << 22) /* Inverted direct input modifier */
+#define GPIO_INPUT_INVERT          (1 << 26) /* Bit 26: Inverted direct input modifier */
 
-#define GPIOS_OUTPUT_PUSHPULL       (0)       /* Push-ull output is the default */
-#define GPIOS_OUTPUT_OPENDRAIN      (1 << 22) /* Output drain output modifier */
+#define GPIO_OUTPUT_OPENDRAIN      (1 << 26) /* Bit 26: Output drain output modifier */
+#define GPIO_OUTPUT_PUSHPULL       (0)       /*         Push-pull output is the default */
+
+/* Disable PAD:
+ *
+ *   .... ..P. .... .....  .... .... .... ....
+ *
+ * For P0-P6, the PDISC register is ready only.
+ * For P14-P15, the bit setting also selects Analog+Digital or Analog only
+ */
+
+#define GPIO_PAD_DISABLE           (1 << 25) /* Bit 25: Disable Pad (P7-P9) */
+#define GPIO_PAD_ANALOG            (1 << 25) /* Bit 25: Analog only (P14-P15) */
 
 /* Pad driver strength:
  *
- *   .... .... ..DD D...  .... .... .... ....
+ *   .... ...D DD.. .....  .... ......... ....
  */
 
-#define GPIO_PADTYPE_SHIFT          (19)       /* Bits 19-21: Pad driver strength */
-#define GPIO_PADTYPE_MASK           (7                      << GPIO_PADTYPE_SHIFT)
+#define GPIO_PADTYPE_SHIFT         (22)       /* Bits 22-24: Pad driver strength */
+#define GPIO_PADTYPE_MASK          (7                      << GPIO_PADTYPE_SHIFT)
 
 /* See chip/xmc4_ports.h for the PDR definitions */
 /* Pad class A1: */
 
-#  define GPIO_PADA1_MEDIUM         (PDR_PADA1_MEDIUM       << GPIO_PADTYPE_SHIFT)
-#  define GPIO_PADA1_WEAK           (PDR_PADA1_WEAK         << GPIO_PADTYPE_SHIFT)
+#  define GPIO_PADA1_MEDIUM        (PDR_PADA1_MEDIUM       << GPIO_PADTYPE_SHIFT)
+#  define GPIO_PADA1_WEAK          (PDR_PADA1_WEAK         << GPIO_PADTYPE_SHIFT)
 
 /* Pad class A1+: */
 
-#  define GPIO_PADA1P_STRONGSOFT    (PDR_PADA1P_STRONGSOFT  << GPIO_PADTYPE_SHIFT)
-#  define GPIO_PADA1P_STRONGSLOW    (PDR_PADA1P_STRONGSLOW  << GPIO_PADTYPE_SHIFT)
-#  define GPIO_PADA1P_MEDIUM        (PDR_PADA1P_MEDIUM      << GPIO_PADTYPE_SHIFT)
-#  define GPIO_PADA1P_WEAK          (PDR_PADA1P_WEAK        << GPIO_PADTYPE_SHIFT)
+#  define GPIO_PADA1P_STRONGSOFT   (PDR_PADA1P_STRONGSOFT  << GPIO_PADTYPE_SHIFT)
+#  define GPIO_PADA1P_STRONGSLOW   (PDR_PADA1P_STRONGSLOW  << GPIO_PADTYPE_SHIFT)
+#  define GPIO_PADA1P_MEDIUM       (PDR_PADA1P_MEDIUM      << GPIO_PADTYPE_SHIFT)
+#  define GPIO_PADA1P_WEAK         (PDR_PADA1P_WEAK        << GPIO_PADTYPE_SHIFT)
 
 /* Pad class A2: */
 
-#  define GPIO_PADA2_STRONGSHARP    (PDR_PADA2_STRONGSHARP  << GPIO_PADTYPE_SHIFT)
-#  define GPIO_PADA2_STRONGMEDIUM   (PDR_PADA2_STRONGMEDIUM << GPIO_PADTYPE_SHIFT)
-#  define GPIO_PADA2_STRONGSOFT     (PDR_PADA2_STRONGSOFT   << GPIO_PADTYPE_SHIFT)
-#  define GPIO_PADA2_MEDIUM         (PDR_PADA2_MEDIUM       << GPIO_PADTYPE_SHIFT)
-#  define GPIO_PADA2_WEAK           (PDR_PADA2_WEAK         << GPIO_PADTYPE_SHIFT)
+#  define GPIO_PADA2_STRONGSHARP   (PDR_PADA2_STRONGSHARP  << GPIO_PADTYPE_SHIFT)
+#  define GPIO_PADA2_STRONGMEDIUM  (PDR_PADA2_STRONGMEDIUM << GPIO_PADTYPE_SHIFT)
+#  define GPIO_PADA2_STRONGSOFT    (PDR_PADA2_STRONGSOFT   << GPIO_PADTYPE_SHIFT)
+#  define GPIO_PADA2_MEDIUM        (PDR_PADA2_MEDIUM       << GPIO_PADTYPE_SHIFT)
+#  define GPIO_PADA2_WEAK          (PDR_PADA2_WEAK         << GPIO_PADTYPE_SHIFT)
 
 /* Pin control:
  *
- *   .... .... .... .CC.  .... .... .... ....
+ *   .... .... ..CC .....  .... .... .... ....
  */
 
-#define GPIO_PINCTRL_SHIFT          (17)       /* Bits 17-18: Pad driver strength */
-#define GPIO_PINCTRL_MASK           (3                      << GPIO_PINCTRL_SHIFT)
+#define GPIO_PINCTRL_SHIFT         (20)       /* Bits 20-21: Pad driver strength */
+#define GPIO_PINCTRL_MASK          (3                      << GPIO_PINCTRL_SHIFT)
 
 /* See chip/xmc4_ports.h for the PDR definitions */
 
-#  define GPIO_PINCTRL_SOFTWARE     (HWSEL_SOFTWARE         << GPIO_PINCTRL_SHIFT)
-#  define GPIO_PINCTRL_OVERRIDE0    (HWSEL_OVERRIDE0        << GPIO_PINCTRL_SHIFT)
-#  define GPIO_PINCTRL_OVERRIDE1    (HWSEL_OVERRIDE1        << GPIO_PINCTRL_SHIFT)
+#  define GPIO_PINCTRL_SOFTWARE    (HWSEL_SOFTWARE         << GPIO_PINCTRL_SHIFT)
+#  define GPIO_PINCTRL_OVERRIDE0   (HWSEL_OVERRIDE0        << GPIO_PINCTRL_SHIFT)
+#  define GPIO_PINCTRL_OVERRIDE1   (HWSEL_OVERRIDE1        << GPIO_PINCTRL_SHIFT)
+
+/* If the pin is an GPIO output, then this identifies the initial output value:
+ *
+ *   .... .... .... V....  .... .... PPPP BBBB
+ */
+
+#define GPIO_OUTPUT_SET            (1 << 19)   /* Bit 19: Initial value of output */
+#define GPIO_OUTPUT_CLEAR          (0)
 
 /* This identifies the GPIO port:
  *
- *   .... ... .... ....  .... .... PPPP ....
+ *   .... .... .... ....  .... .... PPPP ....
  */
 
 #define GPIO_PORT_SHIFT            (4)         /* Bit 4-7:  Port number */
