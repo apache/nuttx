@@ -2,7 +2,8 @@
  * drivers/usbhost/usbhost_xboxcontroller.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Brian Webb <webbbn@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -143,7 +144,8 @@
 #define XBOX_BUTTON_STICK_LEFT_Y       6
 #define XBOX_BUTTON_STICK_RIGHT_X      7
 #define XBOX_BUTTON_STICK_RIGHT_Y      8
-#define XBOX_BUTTON_SET(buffer, index, mask) ((((buffer)[(index)] & (mask)) != 0) ? true : false);
+#define XBOX_BUTTON_SET(buffer, index, mask) \
+  ((((buffer)[(index)] & (mask)) != 0) ? true : false);
 
 /****************************************************************************
  * Private Types
@@ -291,7 +293,7 @@ static struct usbhost_registry_s g_xboxcontroller =
   NULL,                   /* flink    */
   usbhost_create,         /* create   */
   2,                      /* nids     */
-  g_xboxcontroller_id    /* id[]     */
+  g_xboxcontroller_id     /* id[]     */
 };
 
 /* The configuration information for the block file device. */
@@ -342,7 +344,7 @@ static void usbhost_takesem(sem_t *sem)
        * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(errno == EINTR);
     }
 }
 
@@ -558,7 +560,7 @@ static void usbhost_notify(FAR struct usbhost_state_s *priv)
 #ifndef CONFIG_DISABLE_POLL
   for (i = 0; i < CONFIG_XBOXCONTROLLER_NPOLLWAITERS; i++)
     {
-      struct pollfd *fds = priv->fds[i];
+      FAR struct pollfd *fds = priv->fds[i];
       if (fds)
         {
           fds->revents |= POLLIN;
@@ -640,16 +642,15 @@ static int usbhost_xboxcontroller_poll(int argc, char *argv[])
 
           if (nbytes != -EAGAIN)
             {
-	      
-	      uerr("ERROR: DRVR_TRANSFER returned: %d/%u\n",
-		   (int)nbytes, nerrors);
-	    
+              uerr("ERROR: DRVR_TRANSFER returned: %d/%u\n",
+              (int)nbytes, nerrors);
+
               if (++nerrors > 200)
                 {
                   uerr("  Too many errors... aborting: %d\n", nerrors);
                   ret = (int)nbytes;
                   break;
-                }
+               }
             }
         }
 
@@ -657,146 +658,176 @@ static int usbhost_xboxcontroller_poll(int argc, char *argv[])
 
       else
         {
-
           /* Success, reset the error counter */
 
-	  nerrors = 0;
-	  
-	  /* The type of message is in the first byte */
-	  switch (priv->tbuffer[0])
-	    {
+          nerrors = 0;
 
-	    case USBHOST_WAITING_CONNECTION:
-	      
-	      /* Send the initialization message when we received the
-	       * the first waiting connection message.
-	       */
-	      
-	      if (!priv->initialized) {
+          /* The type of message is in the first byte */
 
-		/* Get exclusive access to the controller state data */
+          switch (priv->tbuffer[0])
+            {
+            case USBHOST_WAITING_CONNECTION:
+              /* Send the initialization message when we received the
+               * the first waiting connection message.
+               */
 
-		usbhost_takesem(&priv->exclsem);
+              if (!priv->initialized)
+                {
+                  /* Get exclusive access to the controller state data */
 
-		priv->tbuffer[0] = 0x05;
-		priv->tbuffer[1] = 0x20;
-		priv->tbuffer[2] = priv->out_seq_num++;
-		priv->tbuffer[3] = 0x01;
-		priv->tbuffer[4] = 0x00;
-		nbytes = DRVR_TRANSFER(hport->drvr, priv->epout,
-				       priv->tbuffer, 5);
-		priv->initialized = true;
-		
-		/* Release our lock on the state structure */
+                  usbhost_takesem(&priv->exclsem);
 
-		usbhost_givesem(&priv->exclsem);
-	      }
+                  priv->tbuffer[0] = 0x05;
+                  priv->tbuffer[1] = 0x20;
+                  priv->tbuffer[2] = priv->out_seq_num++;
+                  priv->tbuffer[3] = 0x01;
+                  priv->tbuffer[4] = 0x00;
+                  nbytes = DRVR_TRANSFER(hport->drvr, priv->epout,
+                                         priv->tbuffer, 5);
+                  priv->initialized = true;
 
-	      break;
-	      
-	    case USBHOST_GUIDE_BUTTON_STATUS:
+                  /* Release our lock on the state structure */
 
-	      /* Get exclusive access to the controller state data */
+                  usbhost_givesem(&priv->exclsem);
+                }
 
-	      usbhost_takesem(&priv->exclsem);
+              break;
 
-	      /* Read the data out of the controller report. */
+            case USBHOST_GUIDE_BUTTON_STATUS:
+              /* Get exclusive access to the controller state data */
 
-	      priv->rpt.guide = (priv->tbuffer[XBOX_BUTTON_GUIDE_INDEX] != 0) ? true : false;
-		  
-	      priv->valid = true;
+              usbhost_takesem(&priv->exclsem);
 
-	      /* The One X controller requires an ACK of the guide button status message. */
+              /* Read the data out of the controller report. */
 
-	      if (priv->tbuffer[1] == 0x30)
-		{
-		  
-		  static const uint8_t guide_button_report_ack[] = {
-		    0x01, 0x20, 0x00, 0x09, 0x00, 0x07, 0x20, 0x02,
-		    0x00, 0x00, 0x00, 0x00, 0x00
-		  };
+              priv->rpt.guide = (priv->tbuffer[XBOX_BUTTON_GUIDE_INDEX] != 0) ? true : false;
+              priv->valid = true;
 
-		  /* Remember the input packet sequence number. */
-		  
-		  uint8_t seq_num = priv->tbuffer[2];
+              /* The One X controller requires an ACK of the guide button status
+               * message.
+               */
 
-		  /* Copy the ACK packet into the transfer buffer. */
-		  
-		  memcpy(priv->tbuffer, guide_button_report_ack, sizeof(guide_button_report_ack));
+              if (priv->tbuffer[1] == 0x30)
+                {
+                  static const uint8_t guide_button_report_ack[] =
+                  {
+                    0x01, 0x20, 0x00, 0x09, 0x00, 0x07, 0x20, 0x02,
+                    0x00, 0x00, 0x00, 0x00, 0x00
+                  };
 
-		  /* Ensure the sequence number is the same as the input packet. */
-		  
-		  priv->tbuffer[2] = seq_num;
+                  /* Remember the input packet sequence number. */
 
-		  /* Perform the transfer. */
-		  
-		  nbytes = DRVR_TRANSFER(hport->drvr, priv->epout,
-					 priv->tbuffer, sizeof(guide_button_report_ack));
-		}
-	      
-	      /* Notify any waiters that new controller data is available */
+                  uint8_t seq_num = priv->tbuffer[2];
 
-	      usbhost_notify(priv);
+                  /* Copy the ACK packet into the transfer buffer. */
 
-	      /* Release our lock on the state structure */
+                  memcpy(priv->tbuffer, guide_button_report_ack,
+                         sizeof(guide_button_report_ack));
 
-	      usbhost_givesem(&priv->exclsem);
+                  /* Ensure the sequence number is the same as the input packet. */
 
-	      break;
-	      
-	    case USBHOST_BUTTON_DATA:
+                  priv->tbuffer[2] = seq_num;
 
-	      /* Ignore the controller data if no task has opened the driver. */
+                  /* Perform the transfer. */
 
-	      if (priv->open)
-		{
-		  /* Get exclusive access to the controller state data */
+                  nbytes = DRVR_TRANSFER(hport->drvr, priv->epout, priv->tbuffer,
+                                         sizeof(guide_button_report_ack));
+                }
 
-		  usbhost_takesem(&priv->exclsem);
+              /* Notify any waiters that new controller data is available */
 
-		  /* Read the data out of the controller report. */
+              usbhost_notify(priv);
 
-		  priv->rpt.sync = XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_SYNC_INDEX, XBOX_BUTTON_SYNC_MASK);
-		  priv->rpt.start = XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_START_INDEX, XBOX_BUTTON_START_MASK);
-		  priv->rpt.back = XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_BACK_INDEX, XBOX_BUTTON_BACK_MASK);
-		  priv->rpt.a = XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_A_INDEX, XBOX_BUTTON_A_MASK);
-		  priv->rpt.b = XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_B_INDEX, XBOX_BUTTON_B_MASK);
-		  priv->rpt.x = XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_X_INDEX, XBOX_BUTTON_X_MASK);
-		  priv->rpt.y = XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_Y_INDEX, XBOX_BUTTON_Y_MASK);
-		  priv->rpt.dpad_up = XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_DPAD_UP_INDEX, XBOX_BUTTON_DPAD_UP_MASK);
-		  priv->rpt.dpad_down = XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_DPAD_DOWN_INDEX, XBOX_BUTTON_DPAD_DOWN_MASK);
-		  priv->rpt.dpad_left = XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_DPAD_LEFT_INDEX, XBOX_BUTTON_DPAD_LEFT_MASK);
-		  priv->rpt.dpad_right = XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_DPAD_RIGHT_INDEX, XBOX_BUTTON_DPAD_RIGHT_MASK);
-		  priv->rpt.bumper_left = XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_BUMPER_LEFT_INDEX, XBOX_BUTTON_BUMPER_LEFT_MASK);
-		  priv->rpt.bumper_right = XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_BUMPER_RIGHT_INDEX, XBOX_BUTTON_BUMPER_RIGHT_MASK);
-		  priv->rpt.stick_click_left = XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_STICK_LEFT_INDEX, XBOX_BUTTON_STICK_LEFT_MASK);
-		  priv->rpt.stick_click_right = XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_STICK_RIGHT_INDEX, XBOX_BUTTON_STICK_RIGHT_MASK);
-		  priv->rpt.trigger_left = ((int16_t*)(priv->tbuffer))[XBOX_BUTTON_TRIGGER_LEFT];
-		  priv->rpt.trigger_right = ((int16_t*)(priv->tbuffer))[XBOX_BUTTON_TRIGGER_RIGHT];
-		  priv->rpt.stick_left_x = ((int16_t*)(priv->tbuffer))[XBOX_BUTTON_STICK_LEFT_X];
-		  priv->rpt.stick_left_y = ((int16_t*)(priv->tbuffer))[XBOX_BUTTON_STICK_LEFT_Y];
-		  priv->rpt.stick_right_x = ((int16_t*)(priv->tbuffer))[XBOX_BUTTON_STICK_RIGHT_X];
-		  priv->rpt.stick_right_y = ((int16_t*)(priv->tbuffer))[XBOX_BUTTON_STICK_RIGHT_Y];
-		  
-		  priv->valid = true;
+              /* Release our lock on the state structure */
 
-		  /* Notify any waiters that new controller data is available */
+              usbhost_givesem(&priv->exclsem);
 
-		  usbhost_notify(priv);
+              break;
 
-		  /* Release our lock on the state structure */
+            case USBHOST_BUTTON_DATA:
+              /* Ignore the controller data if no task has opened the driver. */
 
-		  usbhost_givesem(&priv->exclsem);
-		}
+              if (priv->open)
+                {
+                  /* Get exclusive access to the controller state data */
 
-	      break;
+                  usbhost_takesem(&priv->exclsem);
 
-	    default:
-	      
-	      uinfo("Received messge type: %x\n", priv->tbuffer[0]);
-	      
-	    }
-	  
+                  /* Read the data out of the controller report. */
+
+                  priv->rpt.sync =
+                    XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_SYNC_INDEX,
+                                    XBOX_BUTTON_SYNC_MASK);
+                  priv->rpt.start =
+                    XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_START_INDEX,
+                                    XBOX_BUTTON_START_MASK);
+                  priv->rpt.back =
+                    XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_BACK_INDEX,
+                                    XBOX_BUTTON_BACK_MASK);
+                  priv->rpt.a =
+                    XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_A_INDEX,
+                                    XBOX_BUTTON_A_MASK);
+                  priv->rpt.b =
+                    XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_B_INDEX,
+                                    XBOX_BUTTON_B_MASK);
+                  priv->rpt.x =
+                    XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_X_INDEX,
+                                    XBOX_BUTTON_X_MASK);
+                  priv->rpt.y =
+                    XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_Y_INDEX,
+                                    XBOX_BUTTON_Y_MASK);
+                  priv->rpt.dpad_up =
+                    XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_DPAD_UP_INDEX,
+                                    XBOX_BUTTON_DPAD_UP_MASK);
+                  priv->rpt.dpad_down =
+                    XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_DPAD_DOWN_INDEX,
+                                    XBOX_BUTTON_DPAD_DOWN_MASK);
+                  priv->rpt.dpad_left =
+                    XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_DPAD_LEFT_INDEX,
+                                    XBOX_BUTTON_DPAD_LEFT_MASK);
+                  priv->rpt.dpad_right =
+                    XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_DPAD_RIGHT_INDEX,
+                                    XBOX_BUTTON_DPAD_RIGHT_MASK);
+                  priv->rpt.bumper_left =
+                    XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_BUMPER_LEFT_INDEX,
+                                    XBOX_BUTTON_BUMPER_LEFT_MASK);
+                  priv->rpt.bumper_right =
+                    XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_BUMPER_RIGHT_INDEX, XBOX_BUTTON_BUMPER_RIGHT_MASK);
+                  priv->rpt.stick_click_left =
+                    XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_STICK_LEFT_INDEX,
+                                   XBOX_BUTTON_STICK_LEFT_MASK);
+                  priv->rpt.stick_click_right =
+                    XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_STICK_RIGHT_INDEX,
+                                    XBOX_BUTTON_STICK_RIGHT_MASK);
+                  priv->rpt.trigger_left =
+                    ((int16_t*)(priv->tbuffer))[XBOX_BUTTON_TRIGGER_LEFT];
+                  priv->rpt.trigger_right =
+                    ((int16_t*)(priv->tbuffer))[XBOX_BUTTON_TRIGGER_RIGHT];
+                  priv->rpt.stick_left_x =
+                    ((int16_t*)(priv->tbuffer))[XBOX_BUTTON_STICK_LEFT_X];
+                  priv->rpt.stick_left_y =
+                    ((int16_t*)(priv->tbuffer))[XBOX_BUTTON_STICK_LEFT_Y];
+                  priv->rpt.stick_right_x =
+                    ((int16_t*)(priv->tbuffer))[XBOX_BUTTON_STICK_RIGHT_X];
+                  priv->rpt.stick_right_y =
+                    ((int16_t*)(priv->tbuffer))[XBOX_BUTTON_STICK_RIGHT_Y];
+
+                  priv->valid = true;
+
+                  /* Notify any waiters that new controller data is available */
+
+                  usbhost_notify(priv);
+
+                  /* Release our lock on the state structure */
+
+                  usbhost_givesem(&priv->exclsem);
+                }
+
+              break;
+
+            default:
+              uinfo("Received messge type: %x\n", priv->tbuffer[0]);
+            }
         }
 
       /* If USB debug is on, then provide some periodic indication that
@@ -925,7 +956,7 @@ static int usbhost_sample(FAR struct usbhost_state_s *priv,
  ****************************************************************************/
 
 static int usbhost_waitsample(FAR struct usbhost_state_s *priv,
-			      FAR struct xbox_controller_buttonstate_s *sample)
+                  FAR struct xbox_controller_buttonstate_s *sample)
 {
   irqstate_t flags;
   int ret;
@@ -1142,6 +1173,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
                         return -EINVAL;
                       }
+
                     found |= USBHOST_EPOUTFOUND;
 
                     /* Save the bulk OUT endpoint information */
@@ -1199,7 +1231,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
       if (found == USBHOST_ALLFOUND)
         {
-	  done=true;
+          done = true;
         }
 
       /* Increment the address of the next descriptor */
@@ -1563,6 +1595,7 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_hubport_s *
     {
       usbhost_freeclass(priv);
     }
+
   return NULL;
 }
 
@@ -1785,7 +1818,6 @@ static int usbhost_open(FAR struct file *filep)
     }
 
   leave_critical_section(flags);
-
   usbhost_givesem(&priv->exclsem);
   return ret;
 }
@@ -1838,7 +1870,7 @@ static int usbhost_close(FAR struct file *filep)
        *    but there is still an outstanding open reference.
        */
 
-     if (priv->crefs == 0 || (priv->crefs == 1 && priv->polling))
+      if (priv->crefs == 0 || (priv->crefs == 1 && priv->polling))
         {
           /* Yes.. In either case, then the driver is no longer open */
 
@@ -1973,9 +2005,8 @@ errout:
 static ssize_t usbhost_write(FAR struct file *filep, FAR const char *buffer,
                              size_t len)
 {
-
   /* Not implemented. */
-  
+
   return -ENOSYS;
 }
 
@@ -1994,7 +2025,8 @@ static int usbhost_ioctl(FAR struct file* filep, int cmd, unsigned long arg)
   int                          ret = 0;
   int                          nbytes;
   FAR struct usbhost_hubport_s *hport;
-  static uint8_t rumble_cmd[] = {
+  static uint8_t rumble_cmd[] =
+  {
     0x09, 0x00, 0x00, 0x09, 0x00, 0x0f, 0x00,
     0x00, 0x00, 0x00, 0xff, 0x00, 0xff
   };
@@ -2021,6 +2053,7 @@ static int usbhost_ioctl(FAR struct file* filep, int cmd, unsigned long arg)
     }
 
   /* Determine which IOCTL command to execute. */
+
   switch (cmd)
     {
 
@@ -2034,18 +2067,18 @@ static int usbhost_ioctl(FAR struct file* filep, int cmd, unsigned long arg)
       priv->obuffer[2] = priv->out_seq_num++;
       priv->obuffer[8] = (arg >> 1) & 0xff; // Strong (left actuator)
       priv->obuffer[9] = arg & 0xff; // Weak (right actuator)
-      
+
       /* Perform the transfer. */
-		  
+
       nbytes = DRVR_TRANSFER(hport->drvr, priv->epout,
-			     priv->obuffer, sizeof(rumble_cmd));
+                 priv->obuffer, sizeof(rumble_cmd));
 
       /* Did we encounter an error? */
 
       if (nbytes < 0)
-	{
-	  ret = nbytes;
-	}
+        {
+          ret = nbytes;
+        }
 
       break;
 
@@ -2054,7 +2087,7 @@ static int usbhost_ioctl(FAR struct file* filep, int cmd, unsigned long arg)
       ret = -EINVAL;
       goto errout;
     }
-  
+
 errout:
   iinfo("Returning: %d\n", ret);
   return ret;
