@@ -538,10 +538,10 @@
 #define SCU_NMIREQEN_
 /* Retention Memory Access Control Register */
 
-#define SCU_RMACR_RDWR             (1 << 0)  /* Bit 0: Hibernate Retention Memory Register Update Control */
-#define SCU_RMACR_ADDR_SHIFT       (16)      /* Bits 16-19: Hibernate Retention Memory Register Address Select */
-#define SCU_RMACR_ADDR_MASK        (15 << SCU_RMACR_ADDR_SHIFT)
-#  define SCU_RMACR_ADDR(n)        ((uint32_t)(n) << SCU_RMACR_ADDR_SHIFT)
+#define SCU_RMACR_RDWR              (1 << 0)  /* Bit 0: Hibernate Retention Memory Register Update Control */
+#define SCU_RMACR_ADDR_SHIFT        (16)      /* Bits 16-19: Hibernate Retention Memory Register Address Select */
+#define SCU_RMACR_ADDR_MASK         (15 << SCU_RMACR_ADDR_SHIFT)
+#  define SCU_RMACR_ADDR(n)         ((uint32_t)(n) << SCU_RMACR_ADDR_SHIFT)
 
 /* Retention Memory Access Data Register (32-bit data) */
 
@@ -552,19 +552,98 @@
 
 /* Parity Control Registers */
 
-#define SCU_PEEN_
+/* Parity Error Enable Register */
+
+#define SCU_PEEN_PEENPS             (1 << 0)  /* Bit 0:  Parity Error Enable for PSRAM */
+#define SCU_PEEN_PEENDS1            (1 << 1)  /* Bit 1:  Parity Error Enable for DSRAM1 */
+#define SCU_PEEN_PEENDS2            (1 << 2)  /* Bit 2:  Parity Error Enable for DSRAM2 */
+#define SCU_PEEN_PEENU0             (1 << 8)  /* Bit 8:  Parity Error Enable for USIC0 Memory */
+#define SCU_PEEN_PEENU1             (1 << 9)  /* Bit 9:  Parity Error Enable for USIC1 Memory */
+#define SCU_PEEN_PEENU2             (1 << 10) /* Bit 10: Parity Error Enable for USIC2 Memory */
+#define SCU_PEEN_PEENMC             (1 << 12) /* Bit 12: Parity Error Enable for MultiCAN Memory */
+#define SCU_PEEN_PEENPPRF           (1 << 13) /* Bit 13: Parity Error Enable for PMU Prefetch Memory */
+#define SCU_PEEN_PEENUSB            (1 << 16) /* Bit 16: Parity Error Enable for USB Memory */
+#define SCU_PEEN_PEENETH0TX         (1 << 17) /* Bit 17: Parity Error Enable for ETH TX Memory */
+#define SCU_PEEN_PEENETH0RX         (1 << 18) /* Bit 18: Parity Error Enable for ETH RX Memory */
+#define SCU_PEEN_PEENSD0            (1 << 19) /* Bit 19: Parity Error Enable for SDMMC Memory 0 */
+#define SCU_PEEN_PEENSD1            (1 << 20) /* Bit 20: Parity Error Enable for SDMMC Memory 1 */
+
 /* Memory Checking Control Register */
-#define SCU_MCHKCON_
+
+#define SCU_MCHKCON_SELPS           (1 << 0)  /* Bit 0:  Select Memory Check for PSRAM */
+#define SCU_MCHKCON_SELDS1          (1 << 1)  /* Bit 1:  Select Memory Check for DSRAM1 */
+#define SCU_MCHKCON_SELDS2          (1 << 2)  /* Bit 2:  Select Memory Check for DSRAM2 */
+#define SCU_MCHKCON_USIC0DRA        (1 << 8)  /* Bit 8:  Select Memory Check for USIC0 */
+#define SCU_MCHKCON_USIC1DRA        (1 << 9)  /* Bit 9:  Select Memory Check for USIC1 */
+#define SCU_MCHKCON_USIC2DRA        (1 << 10) /* Bit 10: Select Memory Check for USIC2 */
+#define SCU_MCHKCON_MCANDRA         (1 << 12) /* Bit 12: Select Memory Check for MultiCAN */
+#define SCU_MCHKCON_PPRFDRA         (1 << 13) /* Bit 13: Select Memory Check for PMU */
+#define SCU_MCHKCON_SELUSB          (1 << 16) /* Bit 16: Select Memory Check for USB SRAM */
+#define SCU_MCHKCON_SELETH0TX       (1 << 17) /* Bit 17: Select Memory Check for ETH0 TX SRAM */
+#define SCU_MCHKCON_SELETH0RX       (1 << 18) /* Bit 18: Select Memory Check for ETH0 RX SRAM */
+#define SCU_MCHKCON_SELSD0          (1 << 19) /* Bit 19: Select Memory Check for SDMMC SRAM 0 */
+#define SCU_MCHKCON_SELSD1          (1 << 20) /* Bit 20: Select Memory Check for SDMMC SRAM 1 */
+
 /* Parity Error Trap Enable Register */
-#define SCU_PETE_
+
+#define SCU_PETE_PETEPS             (1 << 0)  /* Bit 0:  Parity Error Trap Enable for PSRAM */
+#define SCU_PETE_PETEDS1            (1 << 1)  /* Bit 1:  Parity Error Trap Enable for DSRAM1 */
+#define SCU_PETE_PETEDS2            (1 << 2)  /* Bit 2:  Parity Error Trap Enable for DSRAM2 */
+#define SCU_PETE_PETEU0             (1 << 8)  /* Bit 8:  Parity Error Trap Enable for USIC0 Memory */
+#define SCU_PETE_PETEU1             (1 << 9)  /* Bit 9:  Parity Error Trap Enable for USIC1 Memory */
+#define SCU_PETE_PETEU2             (1 << 10) /* Bit 10: Parity Error Trap Enable for USIC2 Memory */
+#define SCU_PETE_PETEMC             (1 << 12) /* Bit 12: Parity Error Trap Enable for MultiCAN Memory */
+#define SCU_PETE_PETEPPRF           (1 << 13) /* Bit 13: Parity Error Trap Enable for PMU Prefetch Memory */
+#define SCU_PETE_PETEUSB            (1 << 16) /* Bit 16: Parity Error Trap Enable for USB Memory */
+#define SCU_PETE_PETEETH0TX         (1 << 17) /* Bit 17: Parity Error Trap Enable for ETH0 TX Memory */
+#define SCU_PETE_PETEETH0RX         (1 << 18) /* Bit 18: Parity Error Trap Enable for ETH0 RX Memory */
+#define SCU_PETE_PETESD0            (1 << 19) /* Bit 19: Parity Error Trap Enable for SDMMC SRAM 0 Memory */
+#define SCU_PETE_PETESD1            (1 << 20) /* Bit 20: Parity Error Trap Enable for SDMMC SRAM 1 Memory */
+
 /* Reset upon Parity Error Enable Register */
-#define SCU_PERSTEN_
+
+#define SCU_PERSTEN_RSEN            (1 << 0)  /* Bit 0: System Reset Enable upon Parity Error Trap */
+
 /* Parity Error Control Register */
-#define SCU_PEFLAG_
+
+#define SCU_PEFLAG_PEFPS            (1 << 0)  /* Bit 0:  Parity Error Flag for PSRAM */
+#define SCU_PEFLAG_PEFDS1           (1 << 1)  /* Bit 1:  Parity Error Flag for DSRAM1 */
+#define SCU_PEFLAG_PEFDS2           (1 << 2)  /* Bit 2:  Parity Error Flag for DSRAM2 */
+#define SCU_PEFLAG_PEFU0            (1 << 8)  /* Bit 8:  Parity Error Flag for USIC0 Memory */
+#define SCU_PEFLAG_PEFU1            (1 << 9)  /* Bit 9:  Parity Error Flag for USIC1 Memory */
+#define SCU_PEFLAG_PEFU2            (1 << 10) /* Bit 10: Parity Error Flag for USIC2 Memory */
+#define SCU_PEFLAG_PEFMC            (1 << 12) /* Bit 12: Parity Error Flag for MultiCAN Memory */
+#define SCU_PEFLAG_PEFPPRF          (1 << 13) /* Bit 13: Parity Error Flag for PMU Prefetch Memory */
+#define SCU_PEFLAG_PEUSB            (1 << 16) /* Bit 16: Parity Error Flag for USB Memory */
+#define SCU_PEFLAG_PEETH0TX         (1 << 17) /* Bit 17: Parity Error Flag for ETH TX Memory */
+#define SCU_PEFLAG_PEETH0RX         (1 << 18) /* Bit 18: Parity Error Flag for ETH RX Memory */
+#define SCU_PEFLAG_PESD0            (1 << 19) /* Bit 19: Parity Error Flag for SDMMC Memory 0 */
+#define SCU_PEFLAG_PESD1            (1 << 20) /* Bit 20: Parity Error Flag for SDMMC Memory 1 */
+
 /* Parity Memory Test Pattern Register */
-#define SCU_PMTPR_
+
+#define SCU_PMTPR_PWR_SHIFT         (0)       /* Bits 0-7: Parity Read Values for Memory Test */
+#define SCU_PMTPR_PWR_MASK          (0xff << SCU_PMTPR_PWR_SHIFT)
+#  define SCU_PMTPR_PWR(n)          ((uint32_t)(n) << SCU_PMTPR_PWR_SHIFT)
+#define SCU_PMTPR_PRD_SHIFT         (8)       /* Bits 8-15: Parity Write Values for Memory Test */
+#define SCU_PMTPR_PRD_MASK          (0xff << SCU_PMTPR_PRD_SHIFT)
+#  define SCU_PMTPR_PRD(n)          ((uint32_t)(n) << SCU_PMTPR_PRD_SHIFT)
+
 /* Parity Memory Test Select Register */
-#define SCU_PMTSR_
+
+#define SCU_PMTSR_MTENPS            (1 << 0)  /* Bit 0:  Test Enable Control for PSRAM */
+#define SCU_PMTSR_MTENDS1           (1 << 1)  /* Bit 1:  Test Enable Control for DSRAM1 */
+#define SCU_PMTSR_MTENDS2           (1 << 2)  /* Bit 2:  Test Enable Control for DSRAM2 */
+#define SCU_PMTSR_MTEU0             (1 << 8)  /* Bit 8:  Test Enable Control for USIC0 Memory */
+#define SCU_PMTSR_MTEU1             (1 << 9)  /* Bit 9:  Test Enable Control for USIC1 Memory */
+#define SCU_PMTSR_MTEU2             (1 << 10) /* Bit 10: Test Enable Control for USIC2 Memory */
+#define SCU_PMTSR_MTEMC             (1 << 12) /* Bit 12: Test Enable Control for MultiCAN Memory */
+#define SCU_PMTSR_MTEPPRF           (1 << 13) /* Bit 13: Test Enable Control for PMU Prefetch Memory */
+#define SCU_PMTSR_MTUSB             (1 << 16) /* Bit 16: Test Enable Control for USB Memory */
+#define SCU_PMTSR_MTETH0TX          (1 << 17) /* Bit 17: Test Enable Control for ETH TX Memory */
+#define SCU_PMTSR_MTETH0RX          (1 << 18) /* Bit 18: Test Enable Control for ETH RX Memory */
+#define SCU_PMTSR_MTSD0             (1 << 19) /* Bit 19: Test Enable Control for SDMMC Memory 0 */
+#define SCU_PMTSR_MTSD1             (1 << 20) /* Bit 20: Test Enable Control for SDMMC Memory 1 */
 
 /* Trap Control Registers */
 
@@ -791,7 +870,7 @@
 
 /* Peripheral Bus Clock Control */
 
-#define SCU_PBCLKCR_PBDIV_Pos       (1 << 0)  /* Bit 0:  PB Clock Divider Enable */
+#define SCU_PBCLKCR_PBDIV           (1 << 0)  /* Bit 0:  PB Clock Divider Enable */
 #  define SCU_PBCLKCR_PBDIV_FCPU    (0)       /*         0=fCPU */
 #  define SCU_PBCLKCR_PBDIV_DIV2    ((1 << 0) /*         1=fCPU/2 */
 
@@ -812,65 +891,102 @@
 
 /* CCU Clock Control */
 
-#define SCU_CCUCLKCR_CCUDIV_Pos       (1 << 0)  /* Bit 0:  CCU Clock Divider Enable */
-#  define SCU_CCUCLKCR_CCUDIV_FSYS    (0)       /*         0= SYS */
-#  define SCU_CCUCLKCR_CCUDIV_DIV2    (1 << 0)  /*         1=fSYS/2 */
+#define SCU_CCUCLKCR_CCUDIV         (1 << 0)  /* Bit 0:  CCU Clock Divider Enable */
+#  define SCU_CCUCLKCR_CCUDIV_FSYS  (0)       /*         0= SYS */
+#  define SCU_CCUCLKCR_CCUDIV_DIV2  (1 << 0)  /*         1=fSYS/2 */
 
 /* WDT Clock Control */
 
-#define SCU_WDTCLKCR_WDTDIV_SHIFT     (0)       /* Bits 0-7: WDT Clock Divider Value */
-#define SCU_WDTCLKCR_WDTDIV_MASK      (0xff << SCU_WDTCLKCR_WDTDIV_SHIFT)
-#  define SCU_WDTCLKCR_WDTDIV(n)      ((uint32_t)((n)-1) << SCU_WDTCLKCR_WDTDIV_SHIFT)
-#define SCU_WDTCLKCR_WDTSEL_SHIFT     (16)      /* Bits 16-17: WDT Clock Selection Value */
-#define SCU_WDTCLKCR_WDTSEL_MASK      (3 << SCU_WDTCLKCR_WDTSEL_SHIFT)
-#  define SCU_WDTCLKCR_WDTSEL_FOFI    (0 << SCU_WDTCLKCR_WDTSEL_SHIFT) /* fOFI clock */
-#  define SCU_WDTCLKCR_WDTSEL_FSTDY   (1 << SCU_WDTCLKCR_WDTSEL_SHIFT) /* fSTDBY clock */
-#  define SCU_WDTCLKCR_WDTSEL_FPLL    (2 << SCU_WDTCLKCR_WDTSEL_SHIFT) /* fPLL clock */
+#define SCU_WDTCLKCR_WDTDIV_SHIFT   (0)       /* Bits 0-7: WDT Clock Divider Value */
+#define SCU_WDTCLKCR_WDTDIV_MASK    (0xff << SCU_WDTCLKCR_WDTDIV_SHIFT)
+#  define SCU_WDTCLKCR_WDTDIV(n)    ((uint32_t)((n)-1) << SCU_WDTCLKCR_WDTDIV_SHIFT)
+#define SCU_WDTCLKCR_WDTSEL_SHIFT   (16)      /* Bits 16-17: WDT Clock Selection Value */
+#define SCU_WDTCLKCR_WDTSEL_MASK    (3 << SCU_WDTCLKCR_WDTSEL_SHIFT)
+#  define SCU_WDTCLKCR_WDTSEL_FOFI  (0 << SCU_WDTCLKCR_WDTSEL_SHIFT) /* fOFI clock */
+#  define SCU_WDTCLKCR_WDTSEL_FSTDY (1 << SCU_WDTCLKCR_WDTSEL_SHIFT) /* fSTDBY clock */
+#  define SCU_WDTCLKCR_WDTSEL_FPLL  (2 << SCU_WDTCLKCR_WDTSEL_SHIFT) /* fPLL clock */
 
 /* External clock Control Register */
 
-#define SCU_EXTCLKCR_ECKSEL_SHIFT     (0)       /* Bits 0-1: External Clock Selection Value */
-#define SCU_EXTCLKCR_ECKSEL_MASK      (3 << SCU_EXTCLKCR_ECKSEL_SHIFT)
-#  define SCU_EXTCLKCR_ECKSEL_FSYS    (0 << SCU_EXTCLKCR_ECKSEL_SHIFT) /* fSYS clock */
-#  define SCU_EXTCLKCR_ECKSEL_FUSB    (2 << SCU_EXTCLKCR_ECKSEL_SHIFT) /* fUSB clock divided by ECKDIV */
-#  define SCU_EXTCLKCR_ECKSEL_FPLL    (3 << SCU_EXTCLKCR_ECKSEL_SHIFT) /* fPLL clock divided by ECKDIV */
-#define SCU_EXTCLKCR_ECKDIV_SHIFT     (16)      /* Bits 16-24: External Clock Divider Value */
-#define SCU_EXTCLKCR_ECKDIV_MASK      (0x1ff << SCU_EXTCLKCR_ECKDIV_SHIFT)
-#  define SCU_EXTCLKCR_ECKDIV(n)      ((uint32_t)((n)-1) << SCU_EXTCLKCR_ECKDIV_SHIFT)
+#define SCU_EXTCLKCR_ECKSEL_SHIFT   (0)       /* Bits 0-1: External Clock Selection Value */
+#define SCU_EXTCLKCR_ECKSEL_MASK    (3 << SCU_EXTCLKCR_ECKSEL_SHIFT)
+#  define SCU_EXTCLKCR_ECKSEL_FSYS  (0 << SCU_EXTCLKCR_ECKSEL_SHIFT) /* fSYS clock */
+#  define SCU_EXTCLKCR_ECKSEL_FUSB  (2 << SCU_EXTCLKCR_ECKSEL_SHIFT) /* fUSB clock divided by ECKDIV */
+#  define SCU_EXTCLKCR_ECKSEL_FPLL  (3 << SCU_EXTCLKCR_ECKSEL_SHIFT) /* fPLL clock divided by ECKDIV */
+#define SCU_EXTCLKCR_ECKDIV_SHIFT   (16)      /* Bits 16-24: External Clock Divider Value */
+#define SCU_EXTCLKCR_ECKDIV_MASK    (0x1ff << SCU_EXTCLKCR_ECKDIV_SHIFT)
+#  define SCU_EXTCLKCR_ECKDIV(n)    ((uint32_t)((n)-1) << SCU_EXTCLKCR_ECKDIV_SHIFT)
 
 /* Sleep Control Register */
-#define SCU_SLEEPCR_
+
+#define SCU_SLEEPCR_SYSSEL          (1 << 0)  /* Bit 0:  System Clock Selection Value */
+#  define SCU_SLEEPCR_SYSSEL_OFI    (0)       /*         0=fOFI */
+#  define SCU_SLEEPCR_SYSSEL_ PLL   (1 << 0)  /*         1=fPLL */
+#define SCU_SLEEPCR_USBCR           (1 << 16) /* Bit 6:  USB Clock Control in Sleep Mode */
+#define SCU_SLEEPCR_MMCCR           (1 << 17) /* Bit 17: MMC Clock Control in Sleep Mode */
+#define SCU_SLEEPCR_ETH0CR          (1 << 18) /* Bit 18: Ethernet Clock Control in Sleep Mode */
+#define SCU_SLEEPCR_EBUCR           (1 << 19) /* Bit 19: EBU Clock Control in Sleep Mode */
+#define SCU_SLEEPCR_CCUCR           (1 << 20) /* Bit 20: CCU Clock Control in Sleep Mode */
+#define SCU_SLEEPCR_WDTCR           (1 << 21) /* Bit 21: WDT Clock Control in Sleep Mode */
+
 /* Deep Sleep Control Register */
-#define SCU_DSLEEPCR_
-/* Peripheral 0 Clock Gating Status */
-#define SCU_CGATSTAT0_
-/* Peripheral 0 Clock Gating Set */
-#define SCU_CGATSET0_
-/* Peripheral 0 Clock Gating Clear */
-#define SCU_CGATCLR0_
-/* Peripheral 1 Clock Gating Status */
-#define SCU_CGATSTAT1_
-/* Peripheral 1 Clock Gating Set */
-#define SCU_CGATSET1_
-/* Peripheral 1 Clock Gating Clear */
-#define SCU_CGATCLR1_
-/* Peripheral 2 Clock Gating Status */
-#define SCU_CGATSTAT2_
-/* Peripheral 2 Clock Gating Set */
-#define SCU_CGATSET2_
-/* Peripheral 2 Clock Gating Clear */
-#define SCU_CGATCLR2_
-/* Peripheral 3 Clock Gating Status */
-#define SCU_CGATSTAT3_
-/* Peripheral 3 Clock Gating Set */
-#define SCU_CGATSET3_
-/* Peripheral 3 Clock Gating Clear */
-#define SCU_CGATCLR3_
+
+#define SCU_DSLEEPCR_SYSSEL         (1 << 0)  /* Bit 0: System Clock Selection Value */
+#  define SCU_DSLEEPCR_SYSSEL_FOFI  (0)       /*        0=fOFI */
+#  define SCU_DSLEEPCR_SYSSEL_FPLL  (1 << 0)  /*        1=fPLL */
+#define SCU_DSLEEPCR_FPDN           (1 << 11) /* Bit 11: Flash Power Down */
+#define SCU_DSLEEPCR_PLLPDN         (1 << 12) /* Bit 12: PLL Power Down */
+#define SCU_DSLEEPCR_VCOPDN         (1 << 13) /* Bit 13: PLL Power Down */
+#define SCU_DSLEEPCR_USBCR          (1 << 16) /* Bit 16: USB Clock Control in Deep Sleep Mode */
+#define SCU_DSLEEPCR_MMCCR          (1 << 17) /* Bit 17: MMC Clock Control in Deep Sleep Mode */
+#define SCU_DSLEEPCR_ETH0CR         (1 << 18) /* Bit 18: Ethernet Clock Control in Deep Sleep Mode */
+#define SCU_DSLEEPCR_EBUCR          (1 << 19) /* Bit 19: EBU Clock Control in Deep Sleep Mode */
+#define SCU_DSLEEPCR_CCUCR          (1 << 20) /* Bit 20: CCU Clock Control in Deep Sleep Mod */
+#define SCU_DSLEEPCR_WDTCR          (1 << 21) /* Bit 21: WDT Clock Control in Deep Sleep Mode */
+
+/* Peripheral 0 Clock Gating Status, Peripheral 0 Clock Gating Set, Peripheral 0 Clock Gating Clear */
+
+#define SCU_CGAT0_VADC              (1 << 0)  /* Bit 0:   */
+#define SCU_CGAT0_DSD               (1 << 1)  /* Bit 1:   */
+#define SCU_CGAT0_CCU40             (1 << 2)  /* Bit 2:   */
+#define SCU_CGAT0_CCU41             (1 << 3)  /* Bit 3:   */
+#define SCU_CGAT0_CCU42             (1 << 4)  /* Bit 4:   */
+#define SCU_CGAT0_CCU80             (1 << 7)  /* Bit 7:   */
+#define SCU_CGAT0_CCU81             (1 << 8)  /* Bit 8:   */
+#define SCU_CGAT0_POSIF0            (1 << 9)  /* Bit 9:   */
+#define SCU_CGAT0_POSIF1            (1 << 10) /* Bit 10:  */
+#define SCU_CGAT0_USIC0             (1 << 11) /* Bit 11:  */
+#define SCU_CGAT0_ERU1_             (1 << 16) /* Bit 16:  */
+
+/* Peripheral 1 Clock Gating Status, Peripheral 1 Clock Gating Set, Peripheral 1 Clock Gating Clear */
+
+#define SCU_CGATSTAT1_CCU43         (1 << 0)  /* Bit 0:  */
+#define SCU_CGATSTAT1_LEDTSCU0      (1 << 3)  /* Bit 3:  */
+#define SCU_CGATSTAT1_MCAN0         (1 << 4)  /* Bit 4:  */
+#define SCU_CGATSTAT1_DAC           (1 << 5)  /* Bit 5:  */
+#define SCU_CGATSTAT1_MMCI          (1 << 6)  /* Bit 6:  */
+#define SCU_CGATSTAT1_USIC1         (1 << 7)  /* Bit 7:  */
+#define SCU_CGATSTAT1_USIC2         (1 << 8)  /* Bit 8:  */
+#define SCU_CGATSTAT1_PPORTS        (1 << 9)  /* Bit 9:  */
+
+/* Peripheral 2 Clock Gating Status, Peripheral 2 Clock Gating Set, Peripheral 2 Clock Gating Clear */
+
+#define SCU_CGATSTAT2_WDT           (1 << 1)  /* Bit 1:  */
+#define SCU_CGATSTAT2_ETH0          (1 << 2)  /* Bit 2:  */
+#define SCU_CGATSTAT2_DMA0          (1 << 4)  /* Bit 4:  */
+#define SCU_CGATSTAT2_DMA1          (1 << 5)  /* Bit 5:  */
+#define SCU_CGATSTAT2_FCE           (1 << 6)  /* Bit 6:  */
+#define SCU_CGATSTAT2_USB           (1 << 7)  /* Bit 7:  */
+
+/* Peripheral 3 Clock Gating Status, Peripheral 3 Clock Gating Set, Peripheral 3 Clock Gating Clear */
+
+#define SCU_CGATSTAT3_EBU           (1 << 2)  /* Bit 2:  */
 
 /* Oscillator Control SCU Registers */
 
 /* OSC_HP Status Register */
-#define SCU_OSCHPSTAT_
+
+#define SCU_OSCHPSTAT_X1D           (1 << 0)  /* Bit 0:  XTAL1 Data Value */
 
 /* OSC_HP Control Register */
 
@@ -890,7 +1006,10 @@
 #  define SCU_OSCHPCTRL_OSCVAL(n)   ((uint32_t)((n)-1) << SCU_OSCHPCTRL_OSCVAL_SHIFT)
 
 /* Clock Calibration Constant Register */
-#define SCU_CLKCALCONST_
+
+#define SCU_CLKCALCONST_CALIBCONST_SHIFT (0)  /* Bits 0-3: Clock Calibration Constant Value */
+#define SCU_CLKCALCONST_CALIBCONST_MASK  (15 << SCU_CLKCALCONST_CALIBCONST_SHIFT)
+#  define SCU_CLKCALCONST_CALIBCONST(n)  ((uint32_t)(n) << SCU_CLKCALCONST_CALIBCONST_SHIFT)
 
 /* PLL Control SCU Registers */
 
