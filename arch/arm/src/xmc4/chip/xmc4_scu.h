@@ -344,32 +344,161 @@
 
 /* General SCU Registers */
 
-/* Module Identification Register */
-#define SCU_ID_
-/* Chip ID */
-#define SCU_IDCHIP_
+/* Module Identification Register (32-bit Chip ID) */
+
+#define SCU_ID_MOD_REV_SHIFT      (0)       /* Bits 0-7: Module Revision Number */
+#define SCU_ID_MOD_REV_MASK       (0xff << SCU_ID_MOD_REV_SHIFT)
+#define SCU_ID_MOD_TYPE_SHIFT     (8)       /* Bits 8-15: Module Type */
+#define SCU_ID_MOD_TYPE_MASK      (0xff << SCU_ID_MOD_REV_SHIFT)
+#define SCU_ID_MOD_NUMBER_SHIFT   (16)      /* Bits 16-31: Module Number Value */
+#define SCU_ID_MOD_NUMBER_MASK    (0xffff << SCU_ID_MOD_NUMBER_SHIFT)
+
+/* Chip ID (32-bit Chip ID) */
+
 /* Manufactory ID */
-#define SCU_IDMANUF_
+
+#define SCU_IDMANUF_DEPT_SHIFT    (0)       /* Bits 0-4: Department Identification Number */
+#define SCU_IDMANUF_DEPT_MASK     (31 << SCU_IDMANUF_MOD_DEPT_SHIFT)
+#define SCU_IDMANUF_MANUF_SHIFT   (5)       /* Bits 5-15: Manufacturer Identification Number */
+#define SCU_IDMANUF_MANUF_MASK    (0x7ff << SCU_IDMANUF_MOD_MANUF_SHIFT)
+
 /* Start-up Control */
-#define SCU_STCON_
-/* General Purpose Register 0 */
-#define SCU_GPR0_
-/* General Purpose Register 1 */
-#define SCU_GPR1_
+
+#define SCU_STCON_HWCON_SHIFT     (0)       /* Bits 0-1: HW Configuration */
+#define SCU_STCON_HWCON_MASK      (3 << SCU_STCON_HWCON_SHIFT)
+#  define SCU_STCON_HWCON_JTAG    (0 << SCU_STCON_HWCON_SHIFT)  /* Normal mode, JTAG */
+#  define SCU_STCON_HWCON_ACBSL   (1 << SCU_STCON_HWCON_SHIFT)  /* ASC BSL enabled */
+#  define SCU_STCON_HWCON_BMI     (2 << SCU_STCON_HWCON_SHIFT)  /* BMI customized boot enabled */
+#  define SCU_STCON_HWCON_CANBSL  (3 << SCU_STCON_HWCON_SHIFT)  /* CAN BSL enabled */
+#define SCU_STCON_SWCON_SHIFT     (8)       /* Bits 8-11: SW Configuration */
+#define SCU_STCON_SWCON_MASK      (15 << SCU_STCON_SWCON_SHIFT)
+#  define SCU_STCON_SWCON_ ROM    (0 << SCU_STCON_SWCON_SHIFT)  /* Normal boot from Boot ROM */
+#  define SCU_STCON_SWCON_ASCBSL  (1 << SCU_STCON_SWCON_SHIFT)  /* ASC BSL enabled */
+#  define SCU_STCON_SWCON_BMI     (2 << SCU_STCON_SWCON_SHIFT)  /* BMI customized boot enabled */
+#  define SCU_STCON_SWCON_CANBSL  (3 << SCU_STCON_SWCON_SHIFT)  /* CAN BSL enabled */
+#  define SCU_STCON_SWCON_SRAM    (4 << SCU_STCON_SWCON_SHIFT)  /* Boot from Code SRAM */
+#  define SCU_STCON_SWCON_FLASH0  (8 << SCU_STCON_SWCON_SHIFT)  /* Boot from alternate Flash Address 0 */
+#  define SCU_STCON_SWCON_FLASH1  (12 << SCU_STCON_SWCON_SHIFT) /* Boot from alternate Flash Address 1 */
+#  define SCU_STCON_SWCON_ABM     (15 << SCU_STCON_SWCON_SHIFT) /* Enable fallback Alternate Boot Mode (ABM) */
+
+/* General Purpose Register 0 and General Purpose Register 1 (32-bit data) */
+
 /* Ethernet 0 Port Control */
-#define SCU_ETH0CON_
+
+#define SCU_ETH0CON_RXD0_SHIFT    (0)       /* Bits 0-1: MAC Receive Input 0 */
+#define SCU_ETH0CON_RXD0_MASK     (3 << SCU_ETH0CON_RXD0_SHIFT)
+#  define SCU_ETH0CON_RXD0A       (0 << SCU_ETH0CON_RXD0_SHIFT) /* Data input RXD0A is selected */
+#  define SCU_ETH0CON_RXD0B       (1 << SCU_ETH0CON_RXD0_SHIFT) /* Data input RXD0B is selected */
+#  define SCU_ETH0CON_RXD0C       (2 << SCU_ETH0CON_RXD0_SHIFT) /* Data input RXD0C is selected */
+#  define SCU_ETH0CON_RXD0D       (3 << SCU_ETH0CON_RXD0_SHIFT) /* Data input RXD0D is selected */
+#define SCU_ETH0CON_RXD1_SHIFT    (2)       /* Bits 2-3: MAC Receive Input 1 */
+#define SCU_ETH0CON_RXD1_MASK     (3 << SCU_ETH0CON_RXD1_SHIFT)
+#  define SCU_ETH0CON_RXD1A       (0 << SCU_ETH0CON_RXD1_SHIFT) /* Data input RXD1A is selected */
+#  define SCU_ETH0CON_RXD1B       (1 << SCU_ETH0CON_RXD1_SHIFT) /* Data input RXD1B is selected */
+#  define SCU_ETH0CON_RXD1C       (2 << SCU_ETH0CON_RXD1_SHIFT) /* Data input RXD1C is selected */
+#  define SCU_ETH0CON_RXD1D       (3 << SCU_ETH0CON_RXD1_SHIFT) /* Data input RXD1D is selected */
+#define SCU_ETH0CON_RXD2_SHIFT    (4)       /* Bits 4-5: MAC Receive Input 2 */
+#define SCU_ETH0CON_RXD2_MASK     (3 << SCU_ETH0CON_RXD2_SHIFT)
+#  define SCU_ETH0CON_RXD2A       (0 << SCU_ETH0CON_RXD2_SHIFT) /* Data input RXD2A is selected */
+#  define SCU_ETH0CON_RXD2B       (1 << SCU_ETH0CON_RXD2_SHIFT) /* Data input RXD2B is selected */
+#  define SCU_ETH0CON_RXD2C       (2 << SCU_ETH0CON_RXD2_SHIFT) /* Data input RXD2C is selected */
+#  define SCU_ETH0CON_RXD2D       (3 << SCU_ETH0CON_RXD2_SHIFT) /* Data input RXD2D is selected */
+#define SCU_ETH0CON_RXD3_SHIFT    (6)       /* Bits 6-7: MAC Receive Input 3 */
+#define SCU_ETH0CON_RXD3_MASK     (3 << SCU_ETH0CON_RXD3_SHIFT)
+#  define SCU_ETH0CON_RXD3A       (0 << SCU_ETH0CON_RXD3_SHIFT) /* Data input RXD3A is selected */
+#  define SCU_ETH0CON_RXD3B       (1 << SCU_ETH0CON_RXD3_SHIFT) /* Data input RXD3B is selected */
+#  define SCU_ETH0CON_RXD3C       (2 << SCU_ETH0CON_RXD3_SHIFT) /* Data input RXD3C is selected */
+#  define SCU_ETH0CON_RXD3D       (3 << SCU_ETH0CON_RXD3_SHIFT) /* Data input RXD3D is selected */
+#define SCU_ETH0CON_CLKRMII_SHIFT (8)       /* Bits 8-9: RMII clock input */
+#define SCU_ETH0CON_CLKRMII_MASK  (3 << SCU_ETH0CON_CLKRMII_SHIFT)
+#  define SCU_ETH0CON_CLKRMIIA    (0 << SCU_ETH0CON_CLKRMII_SHIFT) /* Data input RMIIA is selected */
+#  define SCU_ETH0CON_CLKRMIIB    (1 << SCU_ETH0CON_CLKRMII_SHIFT) /* Data input RMIIB is selected */
+#  define SCU_ETH0CON_CLKRMIIC    (2 << SCU_ETH0CON_CLKRMII_SHIFT) /* Data input RMIIC is selected */
+#  define SCU_ETH0CON_CLKRMIID    (3 << SCU_ETH0CON_CLKRMII_SHIFT) /* Data input RMIID is selected */
+#define SCU_ETH0CON_CRSDV_SHIFT   (10)      /* Bits 10-11: CRS_DV input */
+#define SCU_ETH0CON_CRSDV_MASK    (3 << SCU_ETH0CON_CRSDV_SHIFT)
+#  define SCU_ETH0CON_CRSDVA      (0 << SCU_ETH0CON_CRSDV_SHIFT) /* Data input CRS_DVA is selected */
+#  define SCU_ETH0CON_CRSDVB      (1 << SCU_ETH0CON_CRSDV_SHIFT) /* Data input CRS_DVB is selected */
+#  define SCU_ETH0CON_CRSDVC      (2 << SCU_ETH0CON_CRSDV_SHIFT) /* Data input CRS_DVC is selected */
+#  define SCU_ETH0CON_CRSDVD      (3 << SCU_ETH0CON_CRSDV_SHIFT) /* Data input CRS_DVD is selected */
+#define SCU_ETH0CON_CRS_SHIFT     (12)      /* Bits 12-13: CRS input */
+#define SCU_ETH0CON_CRS_MASK      (3 << SCU_ETH0CON_CRS_SHIFT)
+#  define SCU_ETH0CON_CRSA        (0 << SCU_ETH0CON_CRS_SHIFT) /* Data input CRSA is selected */
+#  define SCU_ETH0CON_CRSB        (1 << SCU_ETH0CON_CRS_SHIFT) /* Data input CRSB is selected */
+#  define SCU_ETH0CON_CRSC        (2 << SCU_ETH0CON_CRS_SHIFT) /* Data input CRSC is selected */
+#  define SCU_ETH0CON_CRSD        (3 << SCU_ETH0CON_CRS_SHIFT) /* Data input CRSD is selected */
+#define SCU_ETH0CON_RXER_SHIFT    (14)      /* Bits 14-15: RXER Input */
+#define SCU_ETH0CON_RXER_MASK     (3 << SCU_ETH0CON_RXER_SHIFT)
+#  define SCU_ETH0CON_RXERA       (0 << SCU_ETH0CON_RXER_SHIFT) /* Data input RXERA is selected */
+#  define SCU_ETH0CON_RXERB       (1 << SCU_ETH0CON_RXER_SHIFT) /* Data input RXERB is selected */
+#  define SCU_ETH0CON_RXERC       (2 << SCU_ETH0CON_RXER_SHIFT) /* Data input RXERC is selected */
+#  define SCU_ETH0CON_RXERD       (3 << SCU_ETH0CON_RXER_SHIFT) /* Data input RXERD is selected */
+#define SCU_ETH0CON_COL_SHIFT     (16)      /* Bits 16-17: COL input */
+#define SCU_ETH0CON_COL_MASK      (3 << SCU_ETH0CON_COL_SHIFT)
+#  define SCU_ETH0CON_COLA        (0 << SCU_ETH0CON_COL_SHIFT) /* Data input COLA is selected */
+#  define SCU_ETH0CON_COLB        (1 << SCU_ETH0CON_COL_SHIFT) /* Data input COLB is selected */
+#  define SCU_ETH0CON_COLC        (2 << SCU_ETH0CON_COL_SHIFT) /* Data input COLC is selected */
+#  define SCU_ETH0CON_COLD        (3 << SCU_ETH0CON_COL_SHIFT) /* Data input COLD is selected */
+#define SCU_ETH0CON_CLKTX_SHIFT   (18)      /* Bits 18-19: CLK_TX input */
+#define SCU_ETH0CON_CLKTX_MASK    (3 << SCU_ETH0CON_CLKTX_SHIFT)
+#  define SCU_ETH0CON_CLKTXA      (0 << SCU_ETH0CON_CLKTX_SHIFT) /* Data input CLK_TXA is selected */
+#  define SCU_ETH0CON_CLKTXB      (1 << SCU_ETH0CON_CLKTX_SHIFT) /* Data input CLK_TXB is selected */
+#  define SCU_ETH0CON_CLKTXC      (2 << SCU_ETH0CON_CLKTX_SHIFT) /* Data input CLK_TXC is selected */
+#  define SCU_ETH0CON_CLKTXD      (3 << SCU_ETH0CON_CLKTX_SHIFT) /* Data input CLK_TXD is selected */
+#define SCU_ETH0CON_MDIO_SHIFT    (22)      /* Bits 22-23: MDIO Input Select */
+#define SCU_ETH0CON_MDIO_MASK     (3 << SCU_ETH0CON_MDIO_SHIFT)
+#  define SCU_ETH0CON_MDIOA       (0 << SCU_ETH0CON_MDIO_SHIFT) /* Data input MDIOA is selected */
+#  define SCU_ETH0CON_MDIOB       (1 << SCU_ETH0CON_MDIO_SHIFT) /* Data input MDIOB is selected */
+#  define SCU_ETH0CON_MDIOC       (2 << SCU_ETH0CON_MDIO_SHIFT) /* Data input MDIOC is selected */
+#  define SCU_ETH0CON_MDIOD       (3 << SCU_ETH0CON_MDIO_SHIFT) /* Data input MDIOD is selected */
+#define SCU_ETH0CON_INFSEL        (1 << 26) /* Bit 26: Ethernet MAC Interface Selection */
+#  define SCU_ETH0CON_INFSEL_MII  (0)       /*         0=MII */
+#  define SCU_ETH0CON_INFSEL_RMII (1 << 26) /*         1=RMII */
+
 /* CCUx Global Start Control Register */
-#define SCU_CCUCON_
+
+#define SCU_CCUCON_GSC40          (1 << 0)  /* Bit 0:  Global Start Control CCU40 */
+#define SCU_CCUCON_GSC41          (1 << 1)  /* Bit 1:  Global Start Control CCU41 */
+#define SCU_CCUCON_GSC42          (1 << 2)  /* Bit 2:  Global Start Control CCU42 */
+#define SCU_CCUCON_GSC43          (1 << 3)  /* Bit 3:  Global Start Control CCU43 */
+#define SCU_CCUCON_GSC80          (1 << 8)  /* Bit 8:  Global Start Control CCU80 */
+#define SCU_CCUCON_GSC81          (1 << 9)  /* Bit 9:  Global Start Control CCU81 */
+
 /* DTS Control */
-#define SCU_DTSCON_
+
+#define SCU_DTSCON_PWD            (1 << 0)  /* Bit 0:  Sensor Power Down */
+#define SCU_DTSCON_START          (1 << 1)  /* Bit 1:  Sensor Measurement Start */
+#define SCU_DTSCON_OFFSET_SHIFT   (4)       /* Bits 4-10: Offset Calibration Value */
+#define SCU_DTSCON_OFFSET_MASK    (0x7f << SCU_DTSCON_OFFSET_SHIFT)
+#  define SCU_DTSCON_OFFSET(n)    ((uint32_t)(n) << SCU_DTSCON_OFFSET_SHIFT)
+#define SCU_DTSCON_GAIN_SHIFT     (11)      /* Bits 11-16: Gain Calibration Value */
+#define SCU_DTSCON_GAIN_MASK      (0x3f << SCU_DTSCON_GAIN_SHIFT)
+#  define SCU_DTSCON_GAIN(n)      ((uint32_t)(n) << SCU_DTSCON_GAIN_SHIFT)
+#define SCU_DTSCON_REFTRIM_SHIFT  (17)      /* Bits 17-19: Reference Trim Calibration Value */
+#define SCU_DTSCON_REFTRIM_MASK   (7 << SCU_DTSCON_REFTRIM_SHIFT)
+#  define SCU_DTSCON_REFTRIM(n)   ((uint32_t)(n) << SCU_DTSCON_REFTRIM_SHIFT)
+#define SCU_DTSCON_BGTRIM_SHIFT   (20)      /* Bits 20-23: Bandgap Trim Calibration Value */
+#define SCU_DTSCON_BGTRIM_MASK    (15 << SCU_DTSCON_BGTRIM_SHIFT)
+#  define SCU_DTSCON_BGTRIM(n)    ((uint32_t)(n) << SCU_DTSCON_BGTRIM_SHIFT)
+
 /* DTS Status */
-#define SCU_DTSSTAT_
+
+#define SCU_DTSSTAT_RESULT_SHIFT  (0)       /* Bits 0-9: Result of the DTS Measurement */
+#define SCU_DTSSTAT_RESULT_MASK   (0x3ff << SCU_DTSSTAT_RESULT_SHIFT)
+#define SCU_DTSSTAT_RDY           (1 << 14) /* Bit 14: Sensor Ready Status */
+#define SCU_DTSSTAT_BUSY          (1 << 15) /* Bit 15: Sensor Busy Status */
+
 /* SD-MMC Delay Control Register */
-#define SCU_SDMMCDEL_
-/* Out-Of-Range Comparator Enable Register 0 */
-#define SCU_G0ORCEN_
-/* Out-Of-Range Comparator Enable Register 1 */
-#define SCU_G1ORCEN_
+
+#define SCU_SDMMCDEL_TAPEN        (1 << 0)  /* Bit 0: Enable delay on the CMD/DAT out lines */
+#define SCU_SDMMCDEL_TAPDEL_SHIFT (4)       /* Bitx 4-7: Number of Delay Elements Select */
+#define SCU_SDMMCDEL_TAPDEL_MASK  (15 << SCU_SDMMCDEL_TAPDEL_SHIFT)
+#  define SCU_SDMMCDEL_TAPDEL(n)  ((uint32_t)((n)-1) << SCU_SDMMCDEL_TAPDEL_SHIFT)
+
+/* Out-Of-Range Comparator Enable Register 0 and Out-Of-Range Comparator Enable Register 1 */
+
+#define SCU_GORCEN_ENORC6         (1 << 6)  /* Bit 6:  Enable Out of Range Comparator, Channel 6 */
+#define SCU_GORCEN_ENORC7         (1 << 7)  /* Bit 7:  Enable Out of Range Comparator, Channel 7 */
 
 /* Mirror Update Status Register */
 
