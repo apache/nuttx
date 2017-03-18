@@ -164,7 +164,7 @@ config ARCH_CHIP_NUC1XX
 	select ARCH_CORTEXM0
 	select ARCH_HAVE_CMNVECTOR
 	---help---
-		NPX LPC43XX architectures (ARM Cortex-M4).
+		Nuvoton NUC100/120 architectures (ARM Cortex-M0).
 
 config ARCH_CHIP_SAMA5
 	bool "Atmel SAMA5"

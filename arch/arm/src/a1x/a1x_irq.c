@@ -159,16 +159,6 @@ void up_irqinitialize(void)
       (void)getreg32(A1X_INTC_IRQ_PEND(i));   /* Reading status clears pending interrupts */
     }
 
-  /* Colorize the interrupt stack for debug purposes */
-
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
-  {
-    size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
-    up_stack_color((FAR void *)((uintptr_t)&g_intstackbase - intstack_size),
-                   intstack_size);
-  }
-#endif
-
   /* Set the interrupt base address to zero.  We do not use the vectored
    * interrupts.
    */
