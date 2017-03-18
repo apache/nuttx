@@ -1,8 +1,9 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32f10xxx_dma.c
+ * arch/arm/src/stm32/stm32f33xxx_dma.c
  *
- *   Copyright (C) 2009, 2011-2013, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -55,22 +56,18 @@
 #include "stm32_dma.h"
 #include "stm32.h"
 
+#if defined(CONFIG_STM32_DMA1) && defined(CONFIG_STM32_STM32F33XX)
 
-#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F33XX) || defined(CONFIG_STM32_STM32F37XX) || \
-    defined(CONFIG_STM32_STM32L15XX)
+#ifndef CONFIG_ARCH_DMA
+#  warning "STM32 DMA enabled but CONFIG_ARCH_DMA disabled"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #define DMA1_NCHANNELS   7
-#if STM32_NDMA > 1
-#  define DMA2_NCHANNELS 5
-#  define DMA_NCHANNELS  (DMA1_NCHANNELS+DMA2_NCHANNELS)
-#else
-#  define DMA_NCHANNELS  DMA1_NCHANNELS
-#endif
+#define DMA_NCHANNELS  DMA1_NCHANNELS
 
 #ifndef CONFIG_DMA_PRI
 #  define CONFIG_DMA_PRI NVIC_SYSH_PRIORITY_DEFAULT
@@ -139,43 +136,6 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
     .irq      = STM32_IRQ_DMA1CH7,
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(6),
   },
-#if STM32_NDMA > 1
-  {
-    .chan     = 0,
-    .irq      = STM32_IRQ_DMA2CH1,
-    .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(0),
-  },
-  {
-    .chan     = 1,
-    .irq      = STM32_IRQ_DMA2CH2,
-    .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(1),
-  },
-  {
-    .chan     = 2,
-    .irq      = STM32_IRQ_DMA2CH3,
-    .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(2),
-  },
-  {
-    .chan     = 3,
-#if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32L15XX)
-    .irq      = STM32_IRQ_DMA2CH4,
-#else
-    .irq      = STM32_IRQ_DMA2CH45,
-#endif
-    .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(3),
-  },
-  {
-    .chan     = 4,
-#if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32L15XX)
-    .irq      = STM32_IRQ_DMA2CH5,
-#else
-    .irq      = STM32_IRQ_DMA2CH45,
-#endif
-    .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(4),
-  },
-#endif
 };
 
 /****************************************************************************
@@ -289,18 +249,6 @@ static int stm32_dmainterrupt(int irq, void *context, FAR void *arg)
       chndx = irq - STM32_IRQ_DMA1CH1;
     }
   else
-#if STM32_NDMA > 1
-#if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32L15XX)
-  if (irq >= STM32_IRQ_DMA2CH1 && irq <= STM32_IRQ_DMA2CH5)
-#else
-  if (irq >= STM32_IRQ_DMA2CH1 && irq <= STM32_IRQ_DMA2CH45)
-#endif
-    {
-      chndx = irq - STM32_IRQ_DMA2CH1 + DMA1_NCHANNELS;
-    }
-  else
-#endif
     {
       PANIC();
     }
@@ -677,12 +625,6 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
 
   switch (maddr & STM32_REGION_MASK)
     {
-#if defined(CONFIG_STM32_STM32F10XX)
-      case STM32_FSMC_BANK1:
-      case STM32_FSMC_BANK2:
-      case STM32_FSMC_BANK3:
-      case STM32_FSMC_BANK4:
-#endif
       case STM32_SRAM_BASE:
       case STM32_CODE_BASE:
         /* All RAM and flash is supported */
@@ -751,4 +693,4 @@ void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
 }
 #endif
 
-#endif /* CONFIG_STM32_STM32F10XX */
+#endif /* CONFIG_STM32_DMA1 && CONFIG_STM32_STM32F33XX */

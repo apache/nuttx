@@ -56,9 +56,10 @@
  */
 
 #if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-    defined(CONFIG_STM32_STM32F37XX)
+    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
 #  include "stm32f10xxx_dma.c"
+#elif defined(CONFIG_STM32_STM32F33XX)
+#  include "stm32f33xxx_dma.c"
 #elif defined(CONFIG_STM32_STM32F20XX)
 #  include "stm32f20xxx_dma.c"
 #elif defined(CONFIG_STM32_STM32F40XX)
