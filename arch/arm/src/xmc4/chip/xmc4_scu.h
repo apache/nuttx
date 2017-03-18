@@ -537,10 +537,13 @@
 /* Enable Promoting Events to NMI Request */
 #define SCU_NMIREQEN_
 /* Retention Memory Access Control Register */
-#define SCU_RMACR_
-/* Retention Memory Access Data Register */
-#define SCU_RMADATA_
-/* Parity Error Enable Register */
+
+#define SCU_RMACR_RDWR             (1 << 0)  /* Bit 0: Hibernate Retention Memory Register Update Control */
+#define SCU_RMACR_ADDR_SHIFT       (16)      /* Bits 16-19: Hibernate Retention Memory Register Address Select */
+#define SCU_RMACR_ADDR_MASK        (15 << SCU_RMACR_ADDR_SHIFT)
+#  define SCU_RMACR_ADDR(n)        ((uint32_t)(n) << SCU_RMACR_ADDR_SHIFT)
+
+/* Retention Memory Access Data Register (32-bit data) */
 
 /* SDMMC Control SCU Registers */
 
@@ -715,39 +718,62 @@
 #define SCU_RSTCLR_HIBRS            (1 << 9)  /* Bit 9:  Clear Hibernate Reset */
 #define SCU_RSTCLR_LCKEN            (1 << 10) /* Bit 10: Clear Hibernate Reset */
 
-/* Peripheral Reset Status Register 0 */
-#define SCU_PRSTAT0_
-/* Peripheral Reset Set Register 0 */
-#define SCU_PRSET0_
-/* Peripheral Reset Clear Register 0 */
-#define SCU_PRCLR0_
-/* Peripheral Reset Status Register 1 */
-#define SCU_PRSTAT1_
-/* Peripheral Reset Set Register 1 */
-#define SCU_PRSET1_
-/* Peripheral Reset Clear Register 1 */
-#define SCU_PRCLR1_
-/* Peripheral Reset Status Register 2 */
-#define SCU_PRSTAT2_
-/* Peripheral Reset Set Register 2 */
-#define SCU_PRSET2_
-/* Peripheral Reset Clear Register 2 */
-#define SCU_PRCLR2_
-/* Peripheral Reset Status Register 3 */
-#define SCU_PRSTAT3_
-/* Peripheral Reset Set Register 3 */
-#define SCU_PRSET3_
-/* Peripheral Reset Clear Register 3 */
-#define SCU_PRCLR3_
+/* Peripheral Reset Status Register 0, Peripheral Reset Set Register 0, Peripheral
+ * Reset Clear Register 0
+ */
+
+#define SCU_PR0_VADCRS              (1 << 0)  /* Bit 0:  VADC Reset */
+#define SCU_PR0_DSDRS               (1 << 1)  /* Bit 1:  DSD Reset */
+#define SCU_PR0_CCU40RS             (1 << 2)  /* Bit 2:  CCU40 Reset */
+#define SCU_PR0_CCU41RS             (1 << 3)  /* Bit 3:  CCU41 Reset */
+#define SCU_PR0_CCU42RS             (1 << 4)  /* Bit 4:  CCU42 Reset */
+#define SCU_PR0_CCU80RS             (1 << 7)  /* Bit 7:  CCU80 Reset */
+#define SCU_PR0_CCU81RS             (1 << 8)  /* Bit 8:  CCU81 Reset */
+#define SCU_PR0_POSIF0RS            (1 << 9)  /* Bit 9:  POSIF0 Reset */
+#define SCU_PR0_POSIF1RS            (1 << 10) /* Bit 10: POSIF1 Reset */
+#define SCU_PR0_USIC0RS             (1 << 11) /* Bit 11: USIC0 Reset */
+#define SCU_PR0_ERU1RS              (1 << 16) /* Bit 16: ERU1 Reset */
+
+/* Peripheral Reset Status Register 1, Peripheral Reset Set Register 1, Peripheral
+ * Reset Clear Register 1
+ */
+
+#define SCU_PR1_CCU43RS             (1 << 0)  /* Bit 0:  CCU43 Reset */
+#define SCU_PR1_LEDTSCU0RS          (1 << 3)  /* Bit 3:  LEDTS Reset */
+#define SCU_PR1_MCAN0RS             (1 << 4)  /* Bit 4:  MultiCAN Reset */
+#define SCU_PR1_DACRS               (1 << 5)  /* Bit 5:  DAC Reset */
+#define SCU_PR1_MMCIRS              (1 << 6)  /* Bit 6:  MMC Interface Reset */
+#define SCU_PR1_USIC1RS             (1 << 7)  /* Bit 7:  USIC1 Reset */
+#define SCU_PR1_USIC2RS             (1 << 8)  /* Bit 8:  USIC2 Reset */
+#define SCU_PR1_PPORTSRS            (1 << 9)  /* Bit 9:  PORTS Reset */
+
+/* Peripheral Reset Status Register 1, Peripheral Reset Set Register 1, Peripheral
+ * Reset Clear Register 1
+ */
+
+#define SCU_PR2_WDTRS               (1 << 1)  /* Bit 1:  WDT Reset */
+#define SCU_PR2_ETH0RS              (1 << 2)  /* Bit 2:  ETH0 Reset */
+#define SCU_PR2_DMA0RS              (1 << 4)  /* Bit 4:  DMA0 Reset */
+#define SCU_PR2_DMA1RS              (1 << 5)  /* Bit 5:  DMA1 Reset */
+#define SCU_PR2_FCERS               (1 << 6)  /* Bit 6:  FCE Reset */
+#define SCU_PR2_USBRS               (1 << 7)  /* Bit 7:  USB Reset */
+
+/* Peripheral Reset Status Register 3, Peripheral Reset Set Register 3, Peripheral
+ * Reset Clear Register 3
+ */
+
+#define SCU_PR3_EBURS               (1 << 2)  /* Bit 2:  EBU Reset */
 
 /* Clock Control SCU Registers */
 
-/* Clock Status Register */
-#define SCU_CLKSTAT_
-/* Clock Set Control Register */
-#define SCU_CLKSET_
-/* Clock clear Control Register */
-#define SCU_CLKCLR_
+/* Clock Status Register, Clock Set Control Register, Clock clear Control Register */
+
+#define SCU_CLK_USBC                (1 << 0)  /* Bit 0:  USB Clock */
+#define SCU_CLK_MMCC                (1 << 1)  /* Bit 1:  MMC Clock */
+#define SCU_CLK_ETH0C               (1 << 2)  /* Bit 2:  Ethernet Clock */
+#define SCU_CLK_EBUC                (1 << 3)  /* Bit 3:  EBU Clock */
+#define SCU_CLK_CCUC                (1 << 4)  /* Bit 4:  CCU Clock */
+#define SCU_CLK_WDTC                (1 << 5)  /* Bit 5:  WDT Clock */
 
 /* System Clock Control */
 
@@ -764,7 +790,10 @@
 #define SCU_CPUCLKCR_CPUDIV         (1 << 0)  /* Bit 0: CPU Clock Divider Enable */
 
 /* Peripheral Bus Clock Control */
-#define SCU_PBCLKCR_
+
+#define SCU_PBCLKCR_PBDIV_Pos       (1 << 0)  /* Bit 0:  PB Clock Divider Enable */
+#  define SCU_PBCLKCR_PBDIV_FCPU    (0)       /*         0=fCPU */
+#  define SCU_PBCLKCR_PBDIV_DIV2    ((1 << 0) /*         1=fCPU/2 */
 
 /* USB Clock Control */
 
@@ -776,13 +805,39 @@
 #  define SCU_USBCLKCR_USBSEL_PLL   (1 << 16) /*         1= PLL Clock */
 
 /* EBU Clock Control */
-#define SCU_EBUCLKCR_
+
+#define SCU_EBUCLKCR_EBUDIV_SHIFT   (0)       /* Bitx 0-5: EBU Clock Divider Value */
+#define SCU_EBUCLKCR_EBUDIV_MASK    (0x3f << SCU_EBUCLKCR_EBUDIV_SHIFT)
+#  define SCU_EBUCLKCR_EBUDIV(n)    ((uint32_t)((n)-1) << SCU_EBUCLKCR_EBUDIV_SHIFT)
+
 /* CCU Clock Control */
-#define SCU_CCUCLKCR_
+
+#define SCU_CCUCLKCR_CCUDIV_Pos       (1 << 0)  /* Bit 0:  CCU Clock Divider Enable */
+#  define SCU_CCUCLKCR_CCUDIV_FSYS    (0)       /*         0= SYS */
+#  define SCU_CCUCLKCR_CCUDIV_DIV2    (1 << 0)  /*         1=fSYS/2 */
+
 /* WDT Clock Control */
-#define SCU_WDTCLKCR_
+
+#define SCU_WDTCLKCR_WDTDIV_SHIFT     (0)       /* Bits 0-7: WDT Clock Divider Value */
+#define SCU_WDTCLKCR_WDTDIV_MASK      (0xff << SCU_WDTCLKCR_WDTDIV_SHIFT)
+#  define SCU_WDTCLKCR_WDTDIV(n)      ((uint32_t)((n)-1) << SCU_WDTCLKCR_WDTDIV_SHIFT)
+#define SCU_WDTCLKCR_WDTSEL_SHIFT     (16)      /* Bits 16-17: WDT Clock Selection Value */
+#define SCU_WDTCLKCR_WDTSEL_MASK      (3 << SCU_WDTCLKCR_WDTSEL_SHIFT)
+#  define SCU_WDTCLKCR_WDTSEL_FOFI    (0 << SCU_WDTCLKCR_WDTSEL_SHIFT) /* fOFI clock */
+#  define SCU_WDTCLKCR_WDTSEL_FSTDY   (1 << SCU_WDTCLKCR_WDTSEL_SHIFT) /* fSTDBY clock */
+#  define SCU_WDTCLKCR_WDTSEL_FPLL    (2 << SCU_WDTCLKCR_WDTSEL_SHIFT) /* fPLL clock */
+
 /* External clock Control Register */
-#define SCU_EXTCLKCR_
+
+#define SCU_EXTCLKCR_ECKSEL_SHIFT     (0)       /* Bits 0-1: External Clock Selection Value */
+#define SCU_EXTCLKCR_ECKSEL_MASK      (3 << SCU_EXTCLKCR_ECKSEL_SHIFT)
+#  define SCU_EXTCLKCR_ECKSEL_FSYS    (0 << SCU_EXTCLKCR_ECKSEL_SHIFT) /* fSYS clock */
+#  define SCU_EXTCLKCR_ECKSEL_FUSB    (2 << SCU_EXTCLKCR_ECKSEL_SHIFT) /* fUSB clock divided by ECKDIV */
+#  define SCU_EXTCLKCR_ECKSEL_FPLL    (3 << SCU_EXTCLKCR_ECKSEL_SHIFT) /* fPLL clock divided by ECKDIV */
+#define SCU_EXTCLKCR_ECKDIV_SHIFT     (16)      /* Bits 16-24: External Clock Divider Value */
+#define SCU_EXTCLKCR_ECKDIV_MASK      (0x1ff << SCU_EXTCLKCR_ECKDIV_SHIFT)
+#  define SCU_EXTCLKCR_ECKDIV(n)      ((uint32_t)((n)-1) << SCU_EXTCLKCR_ECKDIV_SHIFT)
+
 /* Sleep Control Register */
 #define SCU_SLEEPCR_
 /* Deep Sleep Control Register */
