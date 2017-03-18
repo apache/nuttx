@@ -65,7 +65,7 @@
 /* See chip/xmc4_ports.h for the IOCR definitions */
 /* Direct input */
 
-#  define GPIO_INPUT_NOPULL        (IOCR_INPUT_NOPULL       << GPIO_PINTYPE_SHIFT)
+#  define GPIO_INPUT               (IOCR_INPUT_NOPULL       << GPIO_PINTYPE_SHIFT)
 #  define GPIO_INPUT_PULLDOWN      (IOCR_INPUT_PULLDOWN     << GPIO_PINTYPE_SHIFT)
 #  define GPIO_INPUT_PULLUP        (IOCR_INPUT_PULLUP       << GPIO_PINTYPE_SHIFT)
 #  define GPIO_INPUT_CONT          (IOCR_INPUT_CONT         << GPIO_PINTYPE_SHIFT)
