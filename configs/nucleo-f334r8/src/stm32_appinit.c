@@ -45,7 +45,7 @@
 #include <nuttx/board.h>
 #include <nuttx/leds/userled.h>
 
-#include "nucleo-f303re.h"
+#include "nucleo-f334r8.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -104,6 +104,26 @@ int board_app_initialize(uintptr_t arg)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = stm32_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DAC
+  /* Initialize DAC and register the DAC driver. */
+
+  ret = stm32_dac_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_dac_setup failed: %d\n", ret);
     }
 #endif
 
