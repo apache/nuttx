@@ -521,6 +521,38 @@ config RTL8187_PID
 
 endif # USBHOST_RTL8187
 
+config USBHOST_XBOXCONTROLLER
+	bool "Xbox Controller Support"
+	default n
+	depends on !INT_DISABLE
+	select INPUT
+	---help---
+		Enable support for the Xbox Controller driver.
+
+if USBHOST_XBOXCONTROLLER
+
+config XBOXCONTROLLER_DEFPRIO
+	int "Polling Thread Priority"
+	default 50
+	---help---
+		Priority of the polling thread.  Default: 50.
+
+config XBOXCONTROLLER_STACKSIZE
+	int "Polling thread stack size"
+	default 1024
+	---help---
+		Stack size for polling thread.  Default: 1024
+
+config XBOXCONTROLLER_NPOLLWAITERS
+	int "Max Number of Waiters for Poll Event"
+	default 2
+	depends on !DISABLE_POLL
+	---help---
+		If the poll() method is enabled, this defines the maximum number
+		of threads that can be waiting for mouse events.  Default: 2.
+
+endif # USBHOST_XBOXCONTROLLER
+
 config USBHOST_TRACE
 	bool "Enable USB HCD tracing for debug"
 	default n
