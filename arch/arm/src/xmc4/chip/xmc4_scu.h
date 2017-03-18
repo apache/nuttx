@@ -318,11 +318,11 @@
 #define XMC4_SCU_CGATSET1           (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSET1_OFFSET)
 #define XMC4_SCU_CGATCLR1           (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATCLR1_OFFSET)
 #define XMC4_SCU_CGATSTAT2          (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSTAT2_OFFSET)
-#define XMC4_SCU_CGATSET2           (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSET2_OFFSET
-#define XMC4_SCU_CGATCLR2           (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATCLR2_OFFSET
-#define XMC4_SCU_CGATSTAT3          (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSTAT3_OFFSET
-#define XMC4_SCU_CGATSET3           (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSET3_OFFSET
-#define XMC4_SCU_CGATCLR3           (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATCLR3_OFFSET_
+#define XMC4_SCU_CGATSET2           (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSET2_OFFSET)
+#define XMC4_SCU_CGATCLR2           (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATCLR2_OFFSET)
+#define XMC4_SCU_CGATSTAT3          (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSTAT3_OFFSET)
+#define XMC4_SCU_CGATSET3           (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSET3_OFFSET)
+#define XMC4_SCU_CGATCLR3           (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATCLR3_OFFSET)
 
 /* Oscillator Control SCU Registers */
 
@@ -524,18 +524,38 @@
 
 /* Interrupt Control SCU Registers */
 
-/* Service Request Status */
-#define SCU_SRSTAT_
-/* RAW Service Request Status */
-#define SCU_SRRAW_
-/* Service Request Mask */
-#define SCU_SRMSK_
-/* Service Request Clear */
-#define SCU_SRCLR_
-/* Service Request Set */
-#define SCU_SRSET_
+/* Service Request Status, RAW Service Request Status, Service Request Mask, Service
+ * Request Clear, Service Request Set
+ */
+
+#define SCU_INT_PRWARN       (1 << 0)  /* Bit 0:  WDT pre-warning Interrupt */
+#define SCU_INT_PI           (1 << 1)  /* Bit 1:  RTC Periodic Interrupt */
+#define SCU_INT_AI           (1 << 2)  /* Bit 2:  Alarm Interrupt */
+#define SCU_INT_DLROVR       (1 << 3)  /* Bit 3:  DLR Request Overrun Interrupt */
+#define SCU_INT_HDSTAT       (1 << 16) /* Bit 16: HDSTAT Mirror Register Update */
+#define SCU_INT_HDCLR        (1 << 17) /* Bit 17: HDCLR Mirror Register Update */
+#define SCU_INT_HDSET        (1 << 18) /* Bit 18: HDSET Mirror Register Update */
+#define SCU_INT_HDCR         (1 << 19) /* Bit 19: HDCR Mirror Register Update */
+#define SCU_INT_OSCSICTRL    (1 << 21) /* Bit 21: OSCSICTRL Mirror Register Update */
+#define SCU_INT_OSCULSTAT    (1 << 22) /* Bit 22: OSCULTAT Mirror Register Update */
+#define SCU_INT_OSCULCTRL    (1 << 23) /* Bit 23: OSCULCTRL Mirror Register Update */
+#define SCU_INT_RTC_CTR      (1 << 24) /* Bit 24: RTC CTR Mirror Register Update */
+#define SCU_INT_RTC_ATIM0    (1 << 25) /* Bit 25: RTC ATIM0 Mirror Register Update */
+#define SCU_INT_RTC_ATIM1    (1 << 26) /* Bit 26: RTC ATIM1 Mirror Register Update */
+#define SCU_INT_RTC_TIM0     (1 << 27) /* Bit 27: RTC TIM0 Mirror Register Update */
+#define SCU_INT_RTC_TIM1     (1 << 28) /* Bit 28: RTC TIM1 Mirror Register Update */
+#define SCU_INTT_RMX         (1 << 29) /* Bit 29: Retention Memory Mirror Register */
+
 /* Enable Promoting Events to NMI Request */
-#define SCU_NMIREQEN_
+
+#define SCU_NMIREQEN_PRWARN  (1 << 0)  /* Bit 0:  Promote Pre-Warning Interrupt Request to NMI Request */
+#define SCU_NMIREQEN_PI      (1 << 1)  /* Bit 1:  Promote RTC Periodic Interrupt request to NMI Request */
+#define SCU_NMIREQEN_AI      (1 << 2)  /* Bit 2:  Promote RTC Alarm Interrupt Request to NMIRequest */
+#define SCU_NMIREQEN_ERU00   (1 << 16) /* Bit 16: Promote Channel 0 Interrupt of ERU0 Request to NMI Request */
+#define SCU_NMIREQEN_ERU01   (1 << 17) /* Bit 17: Promote Channel 1 Interrupt of ERU0 Request to NMI Request */
+#define SCU_NMIREQEN_ERU02   (1 << 18) /* Bit 18: Promote Channel 2 Interrupt of ERU0 Request to NMI Request */
+#define SCU_NMIREQEN_ERU03   (1 << 19) /* Bit 19: Promote Channel 3 Interrupt of ERU0 Request to NMI Request */
+
 /* Retention Memory Access Control Register */
 
 #define SCU_RMACR_RDWR              (1 << 0)  /* Bit 0: Hibernate Retention Memory Register Update Control */
@@ -672,11 +692,25 @@
 #define SCU_PWR_USBPUWQ             (1 << 18) /* Bit 18: USB Weak Pull-Up at PADN State */
 
 /* EVR Status Register */
-#define SCU_EVRSTAT_
+
+#define SCU_EVRSTAT_OV13            (1 << 1)  /* Bit 1:  Regulator Overvoltage for 1.3 V */
+
 /* EVR VADC Status Register */
-#define SCU_EVRVADCSTAT_
+
+#define SCU_EVRVADCSTAT_VADC13V_SHIFT (0)     /* Bits 0-7: VADC 1.3 V Conversion Result */
+#define SCU_EVRVADCSTAT_VADC13V_MASK  (0xff << SCU_EVRVADCSTAT_VADC13V_SHIFT)
+#define SCU_EVRVADCSTAT_VADC33V_SHIFT (8)     /* Bits 8-15: VADC 3.3 V Conversion Result */
+#define SCU_EVRVADCSTAT_VADC33V_MASK  (0xff << SCU_EVRVADCSTAT_VADC33V_SHIFT)
+
 /* Power Monitor Value */
-#define SCU_PWRMON_
+
+#define SCU_PWRMON_THRS_SHIFT       (0)       /* Bits 0-7: Threshold */
+#define SCU_PWRMON_THRS_MASK        (0xff << SCU_POWER_PWRMON_THRS_SHIFT)
+#  define SCU_PWRMON_THRS(n)        ((uint32_t)(n) << SCU_POWER_PWRMON_THRS_SHIFT)
+#define SCU_PWRMON_INTV_SHIFT       (8)       /* Bits 8-15: Interval */
+#define SCU_PWRMON_INTV_MASK        (0xff << SCU_POWER_PWRMON_INTV_SHIFT)
+#  define SCU_PWRMON_INTV(n)        ((uint32_t)(n) << SCU_POWER_PWRMON_INTV_SHIFT)
+#define SCU_PWRMON_ENB              (1 << 16) /* Bit 16: Enable */
 
 /* Hibernation SCU Registers */
 /* Hibernate Domain Status Register */
@@ -750,7 +784,8 @@
 #  define SCU_HDCR_HIBIO1SEL_ODGPIO (14 << SCU_HDCR_HIBIO1SEL_SHIFT) /* Open-drain GPIO output */
 
 /* Internal 32.768 kHz Clock Source Control Register */
-#define SCU_OSCSICTRL_
+
+#define SCU_OSCSICTRL_PWD           (1 << 0)  /* Bit 0:  Turn OFF the fOSI Clock Source */
 
 /* OSC_ULP Status Register */
 
