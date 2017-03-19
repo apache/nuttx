@@ -400,150 +400,231 @@
 
 /* Channel Configuration Register */
 
-#define USIC_CCFG_SSC               (1 << 0)  /* Bit 0:   */
-#define USIC_CCFG_ASC               (1 << 1)  /* Bit 1:   */
-#define USIC_CCFG_IIC               (1 << 2)  /* Bit 2:   */
-#define USIC_CCFG_IIS               (1 << 3)  /* Bit 3:   */
-#define USIC_CCFG_RB                (1 << 6)  /* Bit 6:   */
-#define USIC_CCFG_TB                (1 << 7)  /* Bit 7:   */
+#define USIC_CCFG_SSC               (1 << 0)  /* Bit 0:  SSC Protocol Available */
+#define USIC_CCFG_ASC               (1 << 1)  /* Bit 1:  ASC Protocol Available */
+#define USIC_CCFG_I2C               (1 << 2)  /* Bit 2:  IIC Protocol Available */
+#define USIC_CCFG_I2S               (1 << 3)  /* Bit 3:  IIS Protocol Available */
+#define USIC_CCFG_RB                (1 << 6)  /* Bit 6:  Receive FIFO Buffer Available */
+#define USIC_CCFG_TB                (1 << 7)  /* Bit 7:  Transmit FIFO Buffer Available */
 
 /* Kernel State Configuration Register */
 
-#define USIC_KSCFG_MODEN            (1 << 0)  /* Bit 0:   */
-#define USIC_KSCFG_BPMODEN          (1 << 1)  /* Bit 1:   */
-#define USIC_KSCFG_NOMCFG_SHIFT     (4)       /* Bits 4-5:  */
+#define USIC_KSCFG_MODEN            (1 << 0)  /* Bit 0:  Module Enable */
+#define USIC_KSCFG_BPMODEN          (1 << 1)  /* Bit 1:  Bit Protection for MODEN */
+#define USIC_KSCFG_NOMCFG_SHIFT     (4)       /* Bits 4-5: Normal Operation Mode Configuration */
 #define USIC_KSCFG_NOMCFG_MASK      (3 << USIC_KSCFG_NOMCFG_SHIFT)
-#define USIC_KSCFG_BPNOM            (1 << 7)  /* Bit 7:   */
-#define USIC_KSCFG_SUMCFG_SHIFT     (8)       /* Bits 8-9:  */
+#  define USIC_KSCFG_NOMCFG_RUN0    (0 << USIC_KSCFG_NOMCFG_SHIFT) /* Run mode 0 selected */
+#  define USIC_KSCFG_NOMCFG_RUN1    (1 << USIC_KSCFG_NOMCFG_SHIFT) /* Run mode 1 selected */
+#  define USIC_KSCFG_NOMCFG_STOP0   (2 << USIC_KSCFG_NOMCFG_SHIFT) /* Stop mode 0 selected */
+#  define USIC_KSCFG_NOMCFG_STOP1   (3 << USIC_KSCFG_NOMCFG_SHIFT) /* Stop mode 1 selected */
+#define USIC_KSCFG_BPNOM            (1 << 7)  /* Bit 7:  Bit Protection for NOMCFG */
+#define USIC_KSCFG_SUMCFG_SHIFT     (8)       /* Bits 8-9: Suspend Mode Configuration */
 #define USIC_KSCFG_SUMCFG_MASK      (3 << USIC_KSCFG_SUMCFG_SHIFT)
-#define USIC_KSCFG_BPSUM            (1 << 11) /* Bit 11:   */
+#  define USIC_KSCFG_SUMCFG_RUN0    (0 << USIC_KSCFG_SUMCFG_SHIFT) /* Run mode 0 selected */
+#  define USIC_KSCFG_SUMCFG_RUN1    (1 << USIC_KSCFG_SUMCFG_SHIFT) /* Run mode 1 selected */
+#  define USIC_KSCFG_SUMCFG_STOP0   (2 << USIC_KSCFG_SUMCFG_SHIFT) /* Stop mode 0 selected */
+#  define USIC_KSCFG_SUMCFG_STOP1   (3 << USIC_KSCFG_SUMCFG_SHIFT) /* Stop mode 1 selected */
+#define USIC_KSCFG_BPSUM            (1 << 11) /* Bit 11:  Bit Protection for SUMCFG */
 
 /* Fractional Divider Register */
 
-#define USIC_FDR_STEP_SHIFT         (0)       /* Bits 0-9:  */
+#define USIC_FDR_STEP_SHIFT         (0)       /* Bits 0-9: Step Value */
 #define USIC_FDR_STEP_MASK          (0x3ff << USIC_FDR_STEP_SHIFT)
-#define USIC_FDR_DM_SHIFT           (14)      /* Bits 14-15:  */
+#  define USIC_FDR_STEP(n)          ((uint32_t)(n) << USIC_FDR_STEP_SHIFT)
+#define USIC_FDR_DM_SHIFT           (14)      /* Bits 14-15: Divider Mode */
 #define USIC_FDR_DM_MASK            (3 << USIC_FDR_DM_SHIFT)
-#define USIC_FDR_RESULT_SHIFT       (16)      /* Bits 16-25:  */
+#  define USIC_FDR_DM_ OFF          (0 << USIC_FDR_DM_SHIFT) /* Divider switched off */
+#  define USIC_FDR_DM_ NORMAL       (1 << USIC_FDR_DM_SHIFT) /* Normal divider mode selected */
+#  define USIC_FDR_DM_ FRACTIONAL   (2 << USIC_FDR_DM_SHIFT) /* Fractional divider mode selected */
+#define USIC_FDR_RESULT_SHIFT       (16)      /* Bits 16-25: Result Value */
 #define USIC_FDR_RESULT_MASK        (0x3ff << USIC_FDR_RESULT_SHIFT)
 
 /* Baud Rate Generator Register */
 
-#define USIC_BRG_CLKSEL_SHIFT       (0)       /* Bits 0-1:  */
+#define USIC_BRG_CLKSEL_SHIFT       (0)       /* Bits 0-1: Clock Selection */
 #define USIC_BRG_CLKSEL_MASK        (3 << USIC_BRG_CLKSEL_SHIFT)
-#define USIC_BRG_TMEN               (1 << 3)  /* Bit 3:   */
-#define USIC_BRG_PPPEN              (1 << 4)  /* Bit 4:   */
-#define USIC_BRG_CTQSEL_SHIFT       (6)       /* Bits 6-7:  */
+#  define USIC_BRG_CLKSEL_FRAC      (0 << USIC_BRG_CLKSEL_SHIFT) /* Fractional divider frequency fFD */
+#  define USIC_BRG_CLKSEL_DX1T      (2 << USIC_BRG_CLKSEL_SHIFT) /* Trigger signal DX1T defines fPIN */
+#  define USIC_BRG_CLKSEL_DX1S      (3 << USIC_BRG_CLKSEL_SHIFT) /* Frequency fPIN is derived from DX1S */
+#define USIC_BRG_TMEN               (1 << 3)  /* Bit 3:  Timing Measurement Enable */
+#define USIC_BRG_PPPEN              (1 << 4)  /* Bit 4:  Enable 2:1 Divider for fPPP */
+#define USIC_BRG_CTQSEL_SHIFT       (6)       /* Bits 6-7: Input Selection for CTQ */
 #define USIC_BRG_CTQSEL_MASK        (3 << USIC_BRG_CTQSEL_SHIFT)
-#define USIC_BRG_PCTQ_SHIFT         (8)       /* Bits 8-9:  */
+#  define USIC_BRG_CTQSEL_FPDIV     (0 << USIC_BRG_CTQSEL_SHIFT) /* fCTQIN = fPDIV */
+#  define USIC_BRG_CTQSEL_FPPP      (1 << USIC_BRG_CTQSEL_SHIFT) /* fCTQIN = fPPP */
+#  define USIC_BRG_CTQSEL_FSCLK     (2 << USIC_BRG_CTQSEL_SHIFT) /* fCTQIN = fSCLK */
+#  define USIC_BRG_CTQSEL_FMCLK     (3 << USIC_BRG_CTQSEL_SHIFT) /* fCTQIN = fMCLK */
+#define USIC_BRG_PCTQ_SHIFT         (8)       /* Bits 8-9: Pre-Divider for Time Quanta Counter */
 #define USIC_BRG_PCTQ_MASK          (3 << USIC_BRG_PCTQ_SHIFT)
-#define USIC_BRG_DCTQ_SHIFT         (10)      /* Bits 10-15:  */
+#  define USIC_BRG_PCTQ(n)          ((uint32_t)((n)-1) << USIC_BRG_PCTQ_SHIFT)
+#define USIC_BRG_DCTQ_SHIFT         (10)      /* Bits 10-15: Denominator for Time Quanta Counter */
 #define USIC_BRG_DCTQ_MASK          (0x3f << USIC_BRG_DCTQ_SHIFT)
-#define USIC_BRG_PDIV_SHIFT         (16)      /* Bits 16-25:  */
+#  define USIC_BRG_DCTQ(n)          ((uint32_t)(n) << USIC_BRG_DCTQ_SHIFT)
+#define USIC_BRG_PDIV_SHIFT         (16)      /* Bits 16-25: Divider Mode: Divider Factor to Generate fPDIV */
 #define USIC_BRG_PDIV_MASK          (0x3ff << USIC_BRG_PDIV_SHIFT)
-#define USIC_BRG_SCLKOSEL           (1 << 28) /* Bit 28:   */
-#define USIC_BRG_MCLKCFG            (1 << 29) /* Bit 29:   */
-#define USIC_BRG_SCLKCFG            (1 << 30) /* Bit 30:   */
+#  define USIC_BRG_PDIV(n)          ((uint32_t)(n) << USIC_BRG_PDIV_SHIFT)
+#define USIC_BRG_SCLKOSEL           (1 << 28) /* Bit 28:  Shift Clock Output Select */
+#define USIC_BRG_MCLKCFG            (1 << 29) /* Bit 29:  Master Clock Configuration */
+#define USIC_BRG_SCLKCFG            (1 << 30) /* Bit 30:  Shift Clock Output Configuration */
 
 /* Interrupt Node Pointer Register */
 
-#define USIC_INPR_TSINP_SHIFT       (0)       /* Bits 0-2:  */
+#define USIC_INPR_TSINP_SHIFT       (0)       /* Bits 0-2: Transmit Shift Interrupt Node Pointer */
 #define USIC_INPR_TSINP_MASK        (7 << USIC_INPR_TSINP_SHIFT)
-#define USIC_INPR_TBINP_SHIFT       (4)       /* Bits 4-6:  */
+#  define USIC_INPR_TSINP_SR0       (0 << USIC_INPR_TSINP_SHIFT) /* Output SR0 activated */
+#  define USIC_INPR_TSINP_SR1       (1 << USIC_INPR_TSINP_SHIFT) /* Output SR1 activated */
+#  define USIC_INPR_TSINP_SR2       (2 << USIC_INPR_TSINP_SHIFT) /* Output SR2 activated */
+#  define USIC_INPR_TSINP_SR3       (3 << USIC_INPR_TSINP_SHIFT) /* Output SR3 activated */
+#  define USIC_INPR_TSINP_SR4       (4 << USIC_INPR_TSINP_SHIFT) /* Output SR4 activated */
+#  define USIC_INPR_TSINP_SR5       (5 << USIC_INPR_TSINP_SHIFT) /* Output SR5 activated */
+#define USIC_INPR_TBINP_SHIFT       (4)       /* Bits 4-6: Transmit Buffer Interrupt Node Poi */
 #define USIC_INPR_TBINP_MASK        (7 << USIC_INPR_TBINP_SHIFT)
-#define USIC_INPR_RINP_SHIFT        (8)       /* Bits 8-10:  */
+#  define USIC_INPR_TBINP_SR0       (0 << USIC_INPR_TBINP_SHIFT) /* Output SR0 activated */
+#  define USIC_INPR_TBINP_SR1       (1 << USIC_INPR_TBINP_SHIFT) /* Output SR1 activated */
+#  define USIC_INPR_TBINP_SR2       (2 << USIC_INPR_TBINP_SHIFT) /* Output SR2 activated */
+#  define USIC_INPR_TBINP_SR3       (3 << USIC_INPR_TBINP_SHIFT) /* Output SR3 activated */
+#  define USIC_INPR_TBINP_SR4       (4 << USIC_INPR_TBINP_SHIFT) /* Output SR4 activated */
+#  define USIC_INPR_TBINP_SR5       (5 << USIC_INPR_TBINP_SHIFT) /* Output SR5 activated */
+#define USIC_INPR_RINP_SHIFT        (8)       /* Bits 8-10: Receive Interrupt Node Pointer */
 #define USIC_INPR_RINP_MASK         (7 << USIC_INPR_RINP_SHIFT)
-#define USIC_INPR_AINP_SHIFT        (12)      /* Bits 12-14:  */
+#  define USIC_INPR_RINP_SR0        (0 << USIC_INPR_RINP_SHIFT) /* Output SR0 activated */
+#  define USIC_INPR_RINP_SR1        (1 << USIC_INPR_RINP_SHIFT) /* Output SR1 activated */
+#  define USIC_INPR_RINP_SR2        (2 << USIC_INPR_RINP_SHIFT) /* Output SR2 activated */
+#  define USIC_INPR_RINP_SR3        (3 << USIC_INPR_RINP_SHIFT) /* Output SR3 activated */
+#  define USIC_INPR_RINP_SR4        (4 << USIC_INPR_RINP_SHIFT) /* Output SR4 activated */
+#  define USIC_INPR_RINP_SR5        (5 << USIC_INPR_RINP_SHIFT) /* Output SR5 activated */
+#define USIC_INPR_AINP_SHIFT        (12)      /* Bits 12-14: Alternative Receive Interrupt Node Pointer */
 #define USIC_INPR_AINP_MASK         (7 << USIC_INPR_AINP_SHIFT)
-#define USIC_INPR_PINP_SHIFT        (16)      /* Bits 16-18:  */
+#  define USIC_INPR_AINP_SR0        (0 << USIC_INPR_AINP_SHIFT) /* Output SR0 activated */
+#  define USIC_INPR_AINP_SR1        (1 << USIC_INPR_AINP_SHIFT) /* Output SR1 activated */
+#  define USIC_INPR_AINP_SR2        (2 << USIC_INPR_AINP_SHIFT) /* Output SR2 activated */
+#  define USIC_INPR_AINP_SR3        (3 << USIC_INPR_AINP_SHIFT) /* Output SR3 activated */
+#  define USIC_INPR_AINP_SR4        (4 << USIC_INPR_AINP_SHIFT) /* Output SR4 activated */
+#  define USIC_INPR_AINP_SR5        (5 << USIC_INPR_AINP_SHIFT) /* Output SR5 activated */
+#define USIC_INPR_PINP_SHIFT        (16)      /* Bits 16-18: Protocol Interrupt Node Pointer */
 #define USIC_INPR_PINP_MASK         (7 << USIC_INPR_PINP_SHIFT)
+#  define USIC_INPR_PINP_SR0        (0 << USIC_INPR_PINP_SHIFT) /* Output SR0 activated */
+#  define USIC_INPR_PINP_SR1        (1 << USIC_INPR_PINP_SHIFT) /* Output SR1 activated */
+#  define USIC_INPR_PINP_SR2        (2 << USIC_INPR_PINP_SHIFT) /* Output SR2 activated */
+#  define USIC_INPR_PINP_SR3        (3 << USIC_INPR_PINP_SHIFT) /* Output SR3 activated */
+#  define USIC_INPR_PINP_SR4        (4 << USIC_INPR_PINP_SHIFT) /* Output SR4 activated */
+#  define USIC_INPR_PINP_SR5        (5 << USIC_INPR_PINP_SHIFT) /* Output SR5 activated */
 
 /* Input Control Register 0, Input Control Register 1, Input Control Register 2,
  * Input Control Register 3, Input Control Register 4, Input Control Register 5
  */
 
-#define USIC_DXCR_DSEL_SHIFT        (0)      /* Bits 0-2:  */
+#define USIC_DXCR_DSEL_SHIFT        (0)      /* Bits 0-2: Data Selection for Input Signal */
 #define USIC_DXCR_DSEL_MASK         (7 << USIC_DX0CR_DSEL_SHIFT)
-#define USIC_DX1CR_DCEN             (1 << 3)  /* Bit 3:   (DX1CR only) */
-#define USIC_DXCR_INSW              (1 << 4)  /* Bit 4:   */
-#define USIC_DXCR_DFEN              (1 << 5)  /* Bit 5:   */
-#define USIC_DXCR_DSEN              (1 << 6)  /* Bit 6:   */
-#define USIC_DXCR_DPOL              (1 << 8)  /* Bit 8:   */
-#define USIC_DXCR_SFSEL             (1 << 9)  /* Bit 9:   */
-#define USIC_DXCR_CM_SHIFT          (10)      /* Bits 10-12:  */
+#  define USIC_DXCR_DSEL_DXA        (0 << USIC_DX0CR_DSEL_SHIFT) /* Data input DXnA selected */
+#  define USIC_DXCR_DSEL_DXB        (1 << USIC_DX0CR_DSEL_SHIFT) /* Data input DXnB selected */
+#  define USIC_DXCR_DSEL_DXC        (2 << USIC_DX0CR_DSEL_SHIFT) /* Data input DXnC selected */
+#  define USIC_DXCR_DSEL_DXD        (3 << USIC_DX0CR_DSEL_SHIFT) /* Data input DXnD selected */
+#  define USIC_DXCR_DSEL_DXE        (4 << USIC_DX0CR_DSEL_SHIFT) /* Data input DXnE selected */
+#  define USIC_DXCR_DSEL_DXF        (5 << USIC_DX0CR_DSEL_SHIFT) /* Data input DXnF selected */
+#  define USIC_DXCR_DSEL_DXG        (6 << USIC_DX0CR_DSEL_SHIFT) /* Data input DXnG selected */
+#  define USIC_DXCR_DSEL_ONE        (7 << USIC_DX0CR_DSEL_SHIFT) /* Data input is always 1 */
+#define USIC_DX1CR_DCEN             (1 << 3)  /* Bit 3:  Delay Compensation Enable (DX1CR only) */
+#define USIC_DXCR_INSW              (1 << 4)  /* Bit 4:  Input Switch */
+#define USIC_DXCR_DFEN              (1 << 5)  /* Bit 5:  Digital Filter Enable */
+#define USIC_DXCR_DSEN              (1 << 6)  /* Bit 6:  Data Synchronization Enable */
+#define USIC_DXCR_DPOL              (1 << 8)  /* Bit 8:  Data Polarity for DXn */
+#define USIC_DXCR_SFSEL             (1 << 9)  /* Bit 9:  Sampling Frequency Selection */
+#define USIC_DXCR_CM_SHIFT          (10)      /* Bits 10-11: Combination Mode */
 #define USIC_DXCR_CM_MASK           (3 << USIC_DX0CR_CM_SHIFT)
+#  define USIC_DXCR_CM_DISABLE      (0 << USIC_DX0CR_CM_SHIFT) /* Trigger activation disabled */
+#  define USIC_DXCR_CM_RISING       (1 << USIC_DX0CR_CM_SHIFT) /* Rising edge activates DXnT */
+#  define USIC_DXCR_CM_FALLING      (2 << USIC_DX0CR_CM_SHIFT) /* Falling edge activates DXnT */
+#  define USIC_DXCR_CM_BOTH         (3 << USIC_DX0CR_CM_SHIFT) /* Both edges activate DXnT */
+
 #define USIC_DXCR_DXS               (1 << 15) /* Bit 15:   */
 
 /* Shift Control Register */
 
-#define USIC_SCTR_SDIR              (1 << 0)  /* Bit 0:   */
-#define USIC_SCTR_PDL               (1 << 1)  /* Bit `:   */
-#define USIC_SCTR_DSM_SHIFT         (2)       /* Bits 2-3:  */
+#define USIC_SCTR_SDIR              (1 << 0)  /* Bit 0:  Shift Direction */
+#define USIC_SCTR_PDL               (1 << 1)  /* Bit 1:  Passive Data Level */
+#define USIC_SCTR_DSM_SHIFT         (2)       /* Bits 2-3: Data Shift Mode */
 #define USIC_SCTR_DSM_MASK          (3 << USIC_SCTR_DSM_SHIFT)
-#define USIC_SCTR_HPCDIR            (1 << 4)  /* Bit 4:   */
-#define USIC_SCTR_DOCFG_SHIFT       (6)       /* Bits 6-7:  */
+#  define USIC_SCTR_DSM_1BIT        (0 << USIC_SCTR_DSM_SHIFT) /* Data is shifted one bit at a time */
+#  define USIC_SCTR_DSM_2BITS       (2 << USIC_SCTR_DSM_SHIFT) /* Data is shifted two bits at a time */
+#  define USIC_SCTR_DSM_4BITS       (3 << USIC_SCTR_DSM_SHIFT) /* Data is shifted four bits at a time */
+#define USIC_SCTR_HPCDIR            (1 << 4)  /* Bit 4:  Port Control Direction */
+#define USIC_SCTR_DOCFG_SHIFT       (6)       /* Bits 6-7: Data Output Configuration */
 #define USIC_SCTR_DOCFG_MASK        (3 << USIC_SCTR_DOCFG_SHIFT)
-#define USIC_SCTR_TRM_SHIFT         (8)       /* Bits 8-9:  */
+  #define USIC_SCTR_DOCFG_SHIFT     (0 << USIC_SCTR_DOCFG_SHIFT) /* DOUTx = shift data value */
+  #define USIC_SCTR_DOCFG_INVERT    (1 << USIC_SCTR_DOCFG_SHIFT) /* DOUTx = inverted shift data value */
+#define USIC_SCTR_TRM_SHIFT         (8)       /* Bits 8-9: Transmission Mode */
 #define USIC_SCTR_TRM_MASK          (3 << USIC_SCTR_TRM_SHIFT)
-#define USIC_SCTR_FLE_SHIFT         (16)      /* Bits 16-21:  */
+#  define USIC_SCTR_TRM_INACTIVE    (0 << USIC_SCTR_TRM_SHIFT) /* Inactive */
+#  define USIC_SCTR_TRM_0LEVEL      (1 << USIC_SCTR_TRM_SHIFT) /* Active at 1-level */
+#  define USIC_SCTR_TRM_1LEVEL      (2 << USIC_SCTR_TRM_SHIFT) /* Active if it is at 0-level */
+#  define USIC_SCTR_TRM_ACTIVE      (3 << USIC_SCTR_TRM_SHIFT) /* Active without regard to signal level */
+#define USIC_SCTR_FLE_SHIFT         (16)      /* Bits 16-21: Frame Length */
 #define USIC_SCTR_FLE_MASK          (0x3f << USIC_SCTR_FLE_SHIFT)
-#define USIC_SCTR_WLE_SHIFT         (24)      /* Bits 24-27:  */
+#  define USIC_SCTR_FLE(n)          ((uint32_t)(n) << USIC_SCTR_FLE_SHIFT)
+#define USIC_SCTR_WLE_SHIFT         (24)      /* Bits 24-27: Word Length */
 #define USIC_SCTR_WLE_MASK          (15 << USIC_SCTR_WLE_SHIFT)
+#  define USIC_SCTR_WLE(n)          ((uint32_t)((n)-1) << USIC_SCTR_WLE_SHIFT)
 
 /* Transmit Control/Status Register */
 
-#define USIC_TCSR_WLEMD             (1 << 0)  /* Bit 0:   */
-#define USIC_TCSR_SELMD             (1 << 1)  /* Bit 1:   */
-#define USIC_TCSR_FLEMD             (1 << 2)  /* Bit 2:   */
-#define USIC_TCSR_WAMD              (1 << 3)  /* Bit 3:   */
-#define USIC_TCSR_HPCMD             (1 << 4)  /* Bit 4:   */
-#define USIC_TCSR_SOF               (1 << 5)  /* Bit 5:   */
-#define USIC_TCSR_EOF               (1 << 6)  /* Bit 6:   */
-#define USIC_TCSR_TDV               (1 << 7)  /* Bit 7:   */
-#define USIC_TCSR_TDSSM             (1 << 8)  /* Bit 8:   */
-#define USIC_TCSR_TDEN_SHIFT        (10)      /* Bits 10-11:  */
+#define USIC_TCSR_WLEMD             (1 << 0)  /* Bit 0:  WLE Mode */
+#define USIC_TCSR_SELMD             (1 << 1)  /* Bit 1:  Select Mode */
+#define USIC_TCSR_FLEMD             (1 << 2)  /* Bit 2:  FLE Mode */
+#define USIC_TCSR_WAMD              (1 << 3)  /* Bit 3:  WA Mode */
+#define USIC_TCSR_HPCMD             (1 << 4)  /* Bit 4:  Hardware Port Control Mode */
+#define USIC_TCSR_SOF               (1 << 5)  /* Bit 5:  Start Of Frame */
+#define USIC_TCSR_EOF               (1 << 6)  /* Bit 6:  End Of Frame */
+#define USIC_TCSR_TDV               (1 << 7)  /* Bit 7:  Transmit Data Valid */
+#define USIC_TCSR_TDSSM             (1 << 8)  /* Bit 8:  TBUF Data Single Shot Mode */
+#define USIC_TCSR_TDEN_SHIFT        (10)      /* Bits 10-11: TBUF Data Enable */
 #define USIC_TCSR_TDEN_MASK         (3 << USIC_TCSR_TDEN_SHIFT)
-#define USIC_TCSR_TDVTR             (1 << 12) /* Bit 12:  */
-#define USIC_TCSR_WA                (1 << 13) /* Bit 13:  */
-#define USIC_TCSR_TSOF              (1 << 24) /* Bit 24:  */
-#define USIC_TCSR_TV                (1 << 26) /* Bit 26:  */
-#define USIC_TCSR_TVC               (1 << 27) /* Bit 27:  */
-#define USIC_TCSR_TE                (1 << 28) /* Bit 28:  */
+#  define USIC_TCSR_TDEN_DISABLE    (0 << USIC_TCSR_TDEN_SHIFT) /* Transmission of data word disabled */
+#  define USIC_TCSR_TDEN_TDIV       (1 << USIC_TCSR_TDEN_SHIFT) /* Transmission of data word if TDV = 1 */
+#  define USIC_TCSR_TDEN_TDIVDX2S0  (2 << USIC_TCSR_TDEN_SHIFT) /* Transmission of data word if TDV = 1 while DX2S = 0 */
+#  define USIC_TCSR_TDEN_TDIVDX2S1  (3 << USIC_TCSR_TDEN_SHIFT) /* Transmission of data word if TDV = 1 while DX2S = 1 */
+#define USIC_TCSR_TDVTR             (1 << 12) /* Bit 12: TBUF Data Valid Trigger */
+#define USIC_TCSR_WA                (1 << 13) /* Bit 13: Word Addre */
+#define USIC_TCSR_TSOF              (1 << 24) /* Bit 24: Transmitted Start Of Frame */
+#define USIC_TCSR_TV                (1 << 26) /* Bit 26: Transmission Valid */
+#define USIC_TCSR_TVC               (1 << 27) /* Bit 27: Transmission Valid Cumulated */
+#define USIC_TCSR_TE                (1 << 28) /* Bit 28: Trigger Event */
 
 /* Protocol Control Register */
 
-#define USIC_PCR_CTR0               (1 << 0)  /* Bit 0:   */
-#define USIC_PCR_CTR1               (1 << 1)  /* Bit 1:   */
-#define USIC_PCR_CTR2               (1 << 2)  /* Bit 2:   */
-#define USIC_PCR_CTR3               (1 << 3)  /* Bit 3:   */
-#define USIC_PCR_CTR4               (1 << 4)  /* Bit 4:   */
-#define USIC_PCR_CTR5               (1 << 5)  /* Bit 5:   */
-#define USIC_PCR_CTR6               (1 << 6)  /* Bit 6:   */
-#define USIC_PCR_CTR7               (1 << 7)  /* Bit 7:   */
-#define USIC_PCR_CTR8               (1 << 8)  /* Bit 8:   */
-#define USIC_PCR_CTR9               (1 << 9)  /* Bit 9:   */
-#define USIC_PCR_CTR10              (1 << 10) /* Bit 10:  */
-#define USIC_PCR_CTR11              (1 << 11) /* Bit 11:  */
-#define USIC_PCR_CTR12              (1 << 12) /* Bit 12:  */
-#define USIC_PCR_CTR13              (1 << 13) /* Bit 13:  */
-#define USIC_PCR_CTR14              (1 << 14) /* Bit 14:  */
-#define USIC_PCR_CTR15              (1 << 15) /* Bit 15:  */
-#define USIC_PCR_CTR16              (1 << 16) /* Bit 16:  */
-#define USIC_PCR_CTR17              (1 << 17) /* Bit 17:  */
-#define USIC_PCR_CTR18              (1 << 18) /* Bit 18:  */
-#define USIC_PCR_CTR19              (1 << 19) /* Bit 19:  */
-#define USIC_PCR_CTR20              (1 << 20) /* Bit 20:  */
-#define USIC_PCR_CTR21              (1 << 21) /* Bit 21:  */
-#define USIC_PCR_CTR22              (1 << 22) /* Bit 22:  */
-#define USIC_PCR_CTR23              (1 << 23) /* Bit 23:  */
-#define USIC_PCR_CTR24              (1 << 24) /* Bit 24:  */
-#define USIC_PCR_CTR25              (1 << 25) /* Bit 25:  */
-#define USIC_PCR_CTR26              (1 << 26) /* Bit 26:  */
-#define USIC_PCR_CTR27              (1 << 27) /* Bit 27:  */
-#define USIC_PCR_CTR28              (1 << 28) /* Bit 28:  */
-#define USIC_PCR_CTR29              (1 << 29) /* Bit 29:  */
-#define USIC_PCR_CTR30              (1 << 30) /* Bit 30:  */
-#define USIC_PCR_CTR31              (1 << 31) /* Bit 31:  */
+#define USIC_PCR_CTR(n)             (1 << (n))/* Bit n:  Protocol Control Bit n */
+#define USIC_PCR_CTR0               (1 << 0)  /* Bit 0:  Protocol Control Bit 0 */
+#define USIC_PCR_CTR1               (1 << 1)  /* Bit 1:  Protocol Control Bit 1 */
+#define USIC_PCR_CTR2               (1 << 2)  /* Bit 2:  Protocol Control Bit 2 */
+#define USIC_PCR_CTR3               (1 << 3)  /* Bit 3:  Protocol Control Bit 3 */
+#define USIC_PCR_CTR4               (1 << 4)  /* Bit 4:  Protocol Control Bit 4 */
+#define USIC_PCR_CTR5               (1 << 5)  /* Bit 5:  Protocol Control Bit 5 */
+#define USIC_PCR_CTR6               (1 << 6)  /* Bit 6:  Protocol Control Bit 6 */
+#define USIC_PCR_CTR7               (1 << 7)  /* Bit 7:  Protocol Control Bit 7 */
+#define USIC_PCR_CTR8               (1 << 8)  /* Bit 8:  Protocol Control Bit 8 */
+#define USIC_PCR_CTR9               (1 << 9)  /* Bit 9:  Protocol Control Bit 9 */
+#define USIC_PCR_CTR10              (1 << 10) /* Bit 10: Protocol Control Bit 10 */
+#define USIC_PCR_CTR11              (1 << 11) /* Bit 11: Protocol Control Bit 11 */
+#define USIC_PCR_CTR12              (1 << 12) /* Bit 12: Protocol Control Bit 12 */
+#define USIC_PCR_CTR13              (1 << 13) /* Bit 13: Protocol Control Bit 13 */
+#define USIC_PCR_CTR14              (1 << 14) /* Bit 14: Protocol Control Bit 14 */
+#define USIC_PCR_CTR15              (1 << 15) /* Bit 15: Protocol Control Bit 15 */
+#define USIC_PCR_CTR16              (1 << 16) /* Bit 16: Protocol Control Bit 16 */
+#define USIC_PCR_CTR17              (1 << 17) /* Bit 17: Protocol Control Bit 17 */
+#define USIC_PCR_CTR18              (1 << 18) /* Bit 18: Protocol Control Bit 18 */
+#define USIC_PCR_CTR19              (1 << 19) /* Bit 19: Protocol Control Bit 19 */
+#define USIC_PCR_CTR20              (1 << 20) /* Bit 20: Protocol Control Bit 20 */
+#define USIC_PCR_CTR21              (1 << 21) /* Bit 21: Protocol Control Bit 21 */
+#define USIC_PCR_CTR22              (1 << 22) /* Bit 22: Protocol Control Bit 22 */
+#define USIC_PCR_CTR23              (1 << 23) /* Bit 23: Protocol Control Bit 23 */
+#define USIC_PCR_CTR24              (1 << 24) /* Bit 24: Protocol Control Bit 24 */
+#define USIC_PCR_CTR25              (1 << 25) /* Bit 25: Protocol Control Bit 25 */
+#define USIC_PCR_CTR26              (1 << 26) /* Bit 26: Protocol Control Bit 26 */
+#define USIC_PCR_CTR27              (1 << 27) /* Bit 27: Protocol Control Bit 27 */
+#define USIC_PCR_CTR28              (1 << 28) /* Bit 28: Protocol Control Bit 28 */
+#define USIC_PCR_CTR29              (1 << 29) /* Bit 29: Protocol Control Bit 29 */
+#define USIC_PCR_CTR30              (1 << 30) /* Bit 30: Protocol Control Bit 30 */
+#define USIC_PCR_CTR31              (1 << 31) /* Bit 31: Protocol Control Bit 31 */
 
 #define USIC_PCR_ASCMODE_SMD        (1 << 0)  /* Bit 0:   */
 #define USIC_PCR_ASCMODE_STPB       (1 << 1)  /* Bit 1:   */
@@ -609,44 +690,57 @@
 
 /* Channel Control Register */
 
-#define USIC_CCR_MODE_SHIFT         (0)       /* Bits 0-3:  */
+#define USIC_CCR_MODE_SHIFT         (0)       /* Bits 0-3:  Operating Mode */
 #define USIC_CCR_MODE_MASK          (15 << USIC_CCR_MODE_SHIFT)
-#define USIC_CCR_HPCEN_SHIFT        (6)       /* Bits 6-7:  */
+#  define USIC_CCR_MODE_DISABLE     (0 << USIC_CCR_MODE_SHIFT) /* USIC channel is disabled */
+#  define USIC_CCR_MODE_SPI         (1 << USIC_CCR_MODE_SHIFT) /* SSC (SPI) protocol is selected */
+#  define USIC_CCR_MODE_ASC         (2 << USIC_CCR_MODE_SHIFT) /* ASC (SCI, UART) protocol is selected */
+#  define USIC_CCR_MODE_I2S         (3 << USIC_CCR_MODE_SHIFT) /* IIS protocol is selected */
+#  define USIC_CCR_MODE_I2C         (4 << USIC_CCR_MODE_SHIFT) /* IIC protocol is selected */
+#define USIC_CCR_HPCEN_SHIFT        (6)       /* Bits 6-7: Hardware Port Control Enable */
 #define USIC_CCR_HPCEN_MASK         (3 << USIC_CCR_HPCEN_SHIFT)
-#define USIC_CCR_PM_SHIFT           (8)       /* Bits 8-9:  */
+#  define USIC_CCR_HPCEN_DISABLE    (0 << USIC_CCR_HPCEN_SHIFT) /* Port control disabled */
+#  define USIC_CCR_HPCEN_DX0_1      (1 << USIC_CCR_HPCEN_SHIFT) /* Port control enabled for DX0 and DOUT0 */
+#  define USIC_CCR_HPCEN_DX3        (2 << USIC_CCR_HPCEN_SHIFT) /* Port control enabled for DX3, DX0 and DOUT[1:0] */
+#  define USIC_CCR_HPCEN_DX0_2      (3 << USIC_CCR_HPCEN_SHIFT) /* Port control enabled for DX0, DX[5:3] and DOUT[3:0] */
+#define USIC_CCR_PM_SHIFT           (8)       /* Bits 8-9: Parity Mode */
 #define USIC_CCR_PM_MASK            (3 << USIC_CCR_PM_SHIFT)
-#define USIC_CCR_RSIEN              (1 << 10) /* Bit 10:  */
-#define USIC_CCR_DLIEN              (1 << 11) /* Bit 11:  */
-#define USIC_CCR_TSIEN              (1 << 12) /* Bit 12:  */
-#define USIC_CCR_TBIEN              (1 << 13) /* Bit 13:  */
-#define USIC_CCR_RIEN               (1 << 14) /* Bit 14:  */
-#define USIC_CCR_AIEN               (1 << 15) /* Bit 15:  */
-#define USIC_CCR_BRGIEN             (1 << 16) /* Bit 16:  */
+#  define USIC_CCR_PM_ DISABLE      (0 << USIC_CCR_PM_SHIFT) /* Parity generation is disabled */
+#  define USIC_CCR_PM_ EVEN         (2 << USIC_CCR_PM_SHIFT) /* Even parity is selected */
+#  define USIC_CCR_PM_ ODD          (3 << USIC_CCR_PM_SHIFT) /* Odd parity is selected */
+#define USIC_CCR_RSIEN              (1 << 10) /* Bit 10: Receiver Start Interrupt Enable */
+#define USIC_CCR_DLIEN              (1 << 11) /* Bit 11: Data Lost Interrupt Enable */
+#define USIC_CCR_TSIEN              (1 << 12) /* Bit 12: Transmit Shift Interrupt Enable */
+#define USIC_CCR_TBIEN              (1 << 13) /* Bit 13: Transmit Buffer Interrupt Enable */
+#define USIC_CCR_RIEN               (1 << 14) /* Bit 14: Receive Interrupt Enable */
+#define USIC_CCR_AIEN               (1 << 15) /* Bit 15: Alternative Receive Interrupt Enable */
+#define USIC_CCR_BRGIEN             (1 << 16) /* Bit 16: Baud Rate Generator Interrupt Enable */
 
 /* Capture Mode Timer Register */
 
-#define USIC_CMTR_CTV_SHIFT         (0)      /* Bits 0-9:  */
+#define USIC_CMTR_CTV_SHIFT         (0)      /* Bits 0-9: Captured Timer Value */
 #define USIC_CMTR_CTV_MASK          (0x3ff << USIC_CMTR_CTV_SHIFT)
 
 /* Protocol Status Register */
 
-#define USIC_PSR_ST0                (1 << 0)  /* Bit 0:   */
-#define USIC_PSR_ST1                (1 << 1)  /* Bit 1:   */
-#define USIC_PSR_ST2                (1 << 2)  /* Bit 2:   */
-#define USIC_PSR_ST3                (1 << 3)  /* Bit 3:   */
-#define USIC_PSR_ST4                (1 << 4)  /* Bit 4:   */
-#define USIC_PSR_ST5                (1 << 5)  /* Bit 5:   */
-#define USIC_PSR_ST6                (1 << 6)  /* Bit 6:   */
-#define USIC_PSR_ST7                (1 << 7)  /* Bit 7:   */
-#define USIC_PSR_ST8                (1 << 8)  /* Bit 8:   */
-#define USIC_PSR_ST9                (1 << 9)  /* Bit 9:   */
-#define USIC_PSR_RSIF               (1 << 10) /* Bit 10:  */
-#define USIC_PSR_DLIF               (1 << 11) /* Bit 11:  */
-#define USIC_PSR_TSIF               (1 << 12) /* Bit 12:  */
-#define USIC_PSR_TBIF               (1 << 13) /* Bit 13:  */
-#define USIC_PSR_RIF                (1 << 14) /* Bit 14:  */
-#define USIC_PSR_AIF                (1 << 15) /* Bit 15:  */
-#define USIC_PSR_BRGIF              (1 << 16) /* Bit 16:  */
+#define USIC_PSR_ST(n)              (1 << (n))/* Bit n:  Protocol Status Flag n */
+#define USIC_PSR_ST0                (1 << 0)  /* Bit 0:  Protocol Status Flag 0 */
+#define USIC_PSR_ST1                (1 << 1)  /* Bit 1:  Protocol Status Flag 1 */
+#define USIC_PSR_ST2                (1 << 2)  /* Bit 2:  Protocol Status Flag 2 */
+#define USIC_PSR_ST3                (1 << 3)  /* Bit 3:  Protocol Status Flag 3 */
+#define USIC_PSR_ST4                (1 << 4)  /* Bit 4:  Protocol Status Flag 4 */
+#define USIC_PSR_ST5                (1 << 5)  /* Bit 5:  Protocol Status Flag 5 */
+#define USIC_PSR_ST6                (1 << 6)  /* Bit 6:  Protocol Status Flag 6 */
+#define USIC_PSR_ST7                (1 << 7)  /* Bit 7:  Protocol Status Flag 7 */
+#define USIC_PSR_ST8                (1 << 8)  /* Bit 8:  Protocol Status Flag 8 */
+#define USIC_PSR_ST9                (1 << 9)  /* Bit 9:  Protocol Status Flag 9 */
+#define USIC_PSR_RSIF               (1 << 10) /* Bit 10: Receiver Start Indication Flag */
+#define USIC_PSR_DLIF               (1 << 11) /* Bit 11: Data Lost Indication Flag */
+#define USIC_PSR_TSIF               (1 << 12) /* Bit 12: Transmit Shift Indication Flag */
+#define USIC_PSR_TBIF               (1 << 13) /* Bit 13: Transmit Buffer Indication Flag */
+#define USIC_PSR_RIF                (1 << 14) /* Bit 14: Receive Indication Fla */
+#define USIC_PSR_AIF                (1 << 15) /* Bit 15: Alternative Receive Indication Flag */
+#define USIC_PSR_BRGIF              (1 << 16) /* Bit 16: Baud Rate Generator Indication Fl */
 
 #define USIC_PSR_ASCMODE_TXIDLE     (1 << 0)  /* Bit 0:   */
 #define USIC_PSR_ASCMODE_RXIDLE     (1 << 1)  /* Bit 1:   */
@@ -713,114 +807,125 @@
 
 /* Protocol Status Clear Register */
 
-#define USIC_PSCR_CST0              (1 << 0)  /* Bit 0:   */
-#define USIC_PSCR_CST1              (1 << 1)  /* Bit 1:   */
-#define USIC_PSCR_CST2              (1 << 2)  /* Bit 2:   */
-#define USIC_PSCR_CST3              (1 << 3)  /* Bit 3:   */
-#define USIC_PSCR_CST4              (1 << 4)  /* Bit 4:   */
-#define USIC_PSCR_CST5              (1 << 5)  /* Bit 5:   */
-#define USIC_PSCR_CST6              (1 << 6)  /* Bit 6:   */
-#define USIC_PSCR_CST7              (1 << 7)  /* Bit 7:   */
-#define USIC_PSCR_CST8              (1 << 8)  /* Bit 8:   */
-#define USIC_PSCR_CST9              (1 << 9)  /* Bit 9:   */
-#define USIC_PSCR_CRSIF             (1 << 10) /* Bit 10:  */
-#define USIC_PSCR_CDLIF             (1 << 11) /* Bit 11:  */
-#define USIC_PSCR_CTSIF             (1 << 12) /* Bit 12:  */
-#define USIC_PSCR_CTBIF             (1 << 13) /* Bit 13:  */
-#define USIC_PSCR_CRIF              (1 << 14) /* Bit 14:  */
-#define USIC_PSCR_CAIF              (1 << 15) /* Bit 15:  */
-#define USIC_PSCR_CBRGIF            (1 << 16) /* Bit 16:  */
+#define USIC_PSCR_CST(n)            (1 << (n))/* Bit n:  Clear Status Flag n in PSR */
+#define USIC_PSCR_CST0              (1 << 0)  /* Bit 0:  Clear Status Flag 0 in PSR */
+#define USIC_PSCR_CST1              (1 << 1)  /* Bit 1:  Clear Status Flag 1 in PSR */
+#define USIC_PSCR_CST2              (1 << 2)  /* Bit 2:  Clear Status Flag 2 in PSR */
+#define USIC_PSCR_CST3              (1 << 3)  /* Bit 3:  Clear Status Flag 3 in PSR */
+#define USIC_PSCR_CST4              (1 << 4)  /* Bit 4:  Clear Status Flag 4 in PSR */
+#define USIC_PSCR_CST5              (1 << 5)  /* Bit 5:  Clear Status Flag 5 in PSR */
+#define USIC_PSCR_CST6              (1 << 6)  /* Bit 6:  Clear Status Flag 6 in PSR */
+#define USIC_PSCR_CST7              (1 << 7)  /* Bit 7:  Clear Status Flag 7 in PSR */
+#define USIC_PSCR_CST8              (1 << 8)  /* Bit 8:  Clear Status Flag 8 in PSR */
+#define USIC_PSCR_CST9              (1 << 9)  /* Bit 9:  Clear Status Flag 9 in PSR */
+#define USIC_PSCR_CRSIF             (1 << 10) /* Bit 10: Clear Receiver Start Indication Flag */
+#define USIC_PSCR_CDLIF             (1 << 11) /* Bit 11: Clear Data Lost Indication Flag */
+#define USIC_PSCR_CTSIF             (1 << 12) /* Bit 12: Clear Transmit Shift Indication Flag */
+#define USIC_PSCR_CTBIF             (1 << 13) /* Bit 13: Clear Transmit Buffer Indication Flag */
+#define USIC_PSCR_CRIF              (1 << 14) /* Bit 14: Clear Receive Indication Flag */
+#define USIC_PSCR_CAIF              (1 << 15) /* Bit 15: Clear Alternative Receive Indication Flag */
+#define USIC_PSCR_CBRGIF            (1 << 16) /* Bit 16: Clear Baud Rate Generator Indication Flag */
 
 /* Receiver Buffer Status Register */
 
-#define USIC_RBUFSR_WLEN_SHIFT      (0)       /* Bits 0-3:  */
+#define USIC_RBUFSR_WLEN_SHIFT      (0)       /* Bits 0-3: Received Data Word Length in RBUF or RBUFD */
 #define USIC_RBUFSR_WLEN_MASK       (15 << USIC_RBUFSR_WLEN_SHIFT)
-#define USIC_RBUFSR_SOF             (1 << 6)  /* Bit 6:   */
-#define USIC_RBUFSR_PAR             (1 << 8)  /* Bit 8:   */
-#define USIC_RBUFSR_PERR            (1 << 9)  /* Bit 9:   */
-#define USIC_RBUFSR_RDV0            (1 << 13) /* Bit 13:  */
-#define USIC_RBUFSR_RDV1            (1 << 14) /* Bit 14:  */
-#define USIC_RBUFSR_DS              (1 << 15) /* Bit 15:  */
+#define USIC_RBUFSR_SOF             (1 << 6)  /* Bit 6:  Start of Frame in RBUF or RBUFD */
+#define USIC_RBUFSR_PAR             (1 << 8)  /* Bit 8:  Protocol-Related Argument in RBUF or RBUFD */
+#define USIC_RBUFSR_PERR            (1 << 9)  /* Bit 9:  Protocol-related Error in RBUF or RBUFD */
+#define USIC_RBUFSR_RDV0            (1 << 13) /* Bit 13: Receive Data Valid in RBUF or RBUFD */
+#define USIC_RBUFSR_RDV1            (1 << 14) /* Bit 14: Receive Data Valid in RBUF or RBUFD */
+#define USIC_RBUFSR_DS              (1 << 15) /* Bit 15: Data Source of RBUF or RBUFD */
 
 /* Receiver Buffer Register */
 
-#define USIC_RBUF_DSR_SHIFT         (0)       /* Bits 0-15:  */
+#define USIC_RBUF_DSR_SHIFT         (0)       /* Bits 0-15: Received Data */
 #define USIC_RBUF_DSR_MASK          (0xffff << USIC_RBUF_DSR_SHIFT)
 
 /* Receiver Buffer Register for Debugger */
 
-#define USIC_RBUFD_DSR_SHIFT        (0)       /* Bits 0-15:  */
+#define USIC_RBUFD_DSR_SHIFT        (0)       /* Bits 0-15: Data from Shift Register */
 #define USIC_RBUFD_DSR_MASK         (0xffff << USIC_RBUFD_DSR_SHIFT)
 
 /* Receiver Buffer Register 0 */
 
-#define USIC_RBUF0_DSR0_SHIFT       (0)       /* Bits 0-15:  */
+#define USIC_RBUF0_DSR0_SHIFT       (0)       /* Bits 0-15: Data of Shift Registers 0[3:0] */
 #define USIC_RBUF0_DSR0_MASK        (0xffff << USIC_RBUF0_DSR0_SHIFT)
 
 /* Receiver Buffer Register 1 */
 
-#define USIC_RBUF1_DSR1_SHIFT       (0)       /* Bits 0-15:  */
+#define USIC_RBUF1_DSR1_SHIFT       (0)       /* Bits 0-15: Data of Shift Registers 1[3:0] */
 #define USIC_RBUF1_DSR1_MASK        (0xffff << USIC_RBUF1_DSR1_SHIFT)
 
 /*  Receiver Buffer 01 Status Register */
 
-#define USIC_RBUF01SR_WLEN0_SHIFT   (0)       /* Bits 0-3:  */
+#define USIC_RBUF01SR_WLEN0_SHIFT   (0)       /* Bits 0-3: Received Data Word Length in RBUF0 */
 #define USIC_RBUF01SR_WLEN0_MASK    (15 << USIC_RBUF01SR_WLEN0_SHIFT)
-#define USIC_RBUF01SR_SOF0          (1 << 6)  /* Bit 6:   */
-#define USIC_RBUF01SR_PAR0          (1 << 8)  /* Bit 8:   */
-#define USIC_RBUF01SR_PERR0         (1 << 9)  /* Bit 9:   */
-#define USIC_RBUF01SR_RDV00         (1 << 13) /* Bit 13:  */
-#define USIC_RBUF01SR_RDV01         (1 << 14) /* Bit 14:  */
-#define USIC_RBUF01SR_DS0           (1 << 15) /* Bit 15:  */
-#define USIC_RBUF01SR_WLEN1_SHIFT   (16)      /* Bits 16-19:  */
+#define USIC_RBUF01SR_SOF0          (1 << 6)  /* Bit 6:  Start of Frame in RBUF0 */
+#define USIC_RBUF01SR_PAR0          (1 << 8)  /* Bit 8:  Protocol-Related Argument in RBUF0 */
+#define USIC_RBUF01SR_PERR0         (1 << 9)  /* Bit 9:  Protocol-related Error in RBUF0 */
+#define USIC_RBUF01SR_RDV00         (1 << 13) /* Bit 13: Receive Data Valid in RBUF0 */
+#define USIC_RBUF01SR_RDV01         (1 << 14) /* Bit 14: Receive Data Valid in RBUF1 */
+#define USIC_RBUF01SR_DS0           (1 << 15) /* Bit 15: Data Source */
+#define USIC_RBUF01SR_WLEN1_SHIFT   (16)      /* Bits 16-19: Received Data Word Length in RBUF1 */
 #define USIC_RBUF01SR_WLEN1_MASK    (15 << USIC_RBUF01SR_WLEN1_SHIFT)
-#define USIC_RBUF01SR_SOF1          (1 << 22) /* Bit 22:  */
-#define USIC_RBUF01SR_PAR1          (1 << 24) /* Bit 24:  */
-#define USIC_RBUF01SR_PERR1         (1 << 25) /* Bit 25:  */
-#define USIC_RBUF01SR_RDV10         (1 << 29) /* Bit 29:  */
-#define USIC_RBUF01SR_RDV11         (1 << 30) /* Bit 30:  */
-#define USIC_RBUF01SR_DS1           (1 << 31) /* Bit 31:  */
+#define USIC_RBUF01SR_SOF1          (1 << 22) /* Bit 22: Start of Frame in RBUF1 */
+#define USIC_RBUF01SR_PAR1          (1 << 24) /* Bit 24: Protocol-Related Argument in RBUF1 */
+#define USIC_RBUF01SR_PERR1         (1 << 25) /* Bit 25: Protocol-related Error in RBU */
+#define USIC_RBUF01SR_RDV10         (1 << 29) /* Bit 29: Receive Data Valid in RBUF0 */
+#define USIC_RBUF01SR_RDV11         (1 << 30) /* Bit 30: Receive Data Valid in RBUF1 */
+#define USIC_RBUF01SR_DS1           (1 << 31) /* Bit 31: Data Source */
 
 /* Flag Modification Register */
 
-#define USIC_FMR_MTDV_SHIFT         (0)       /* Bits 0-1:  */
+#define USIC_FMR_MTDV_SHIFT         (0)       /* Bits 0-1: Modify Transmit Data Valid */
 #define USIC_FMR_MTDV_MASK          (3 << USIC_FMR_MTDV_SHIFT)
-#define USIC_FMR_ATVC               (1 << 4)  /* Bit 4:   */
-#define USIC_FMR_CRDV0              (1 << 14) /* Bit 14:  */
-#define USIC_FMR_CRDV1              (1 << 15) /* Bit 15:  */
-#define USIC_FMR_SIO0               (1 << 16) /* Bit 16:  */
-#define USIC_FMR_SIO1               (1 << 17) /* Bit 17:  */
-#define USIC_FMR_SIO2               (1 << 18) /* Bit 18:  */
-#define USIC_FMR_SIO3               (1 << 19) /* Bit 19:  */
-#define USIC_FMR_SIO4               (1 << 20) /* Bit 20:  */
-#define USIC_FMR_SIO5               (1 << 21) /* Bit 21:  */
+#  define USIC_FMR_MTDV_NOACTION    (0 << USIC_FMR_MTDV_SHIFT) /* No action */
+#  define USIC_FMR_MTDV_TDV         (1 << USIC_FMR_MTDV_SHIFT) /* Bit TDV is set, TE is unchanged */
+#  define USIC_FMR_MTDV_TDVTE       (2 << USIC_FMR_MTDV_SHIFT) /* Bits TDV and TE are cleared */
+#define USIC_FMR_ATVC               (1 << 4)  /* Bit 4:  Activate Bit TVC */
+#define USIC_FMR_CRDV0              (1 << 14) /* Bit 14: Clear Bits RDV for RBUF0 */
+#define USIC_FMR_CRDV1              (1 << 15) /* Bit 15: Clear Bit RDV for RBUF1 */
+#define USIC_FMR_SIO0               (1 << 16) /* Bit 16: Set Interrupt Output SR0 */
+#define USIC_FMR_SIO1               (1 << 17) /* Bit 17: Set Interrupt Output SR1 */
+#define USIC_FMR_SIO2               (1 << 18) /* Bit 18: Set Interrupt Output SR2 */
+#define USIC_FMR_SIO3               (1 << 19) /* Bit 19: Set Interrupt Output SR3 */
+#define USIC_FMR_SIO4               (1 << 20) /* Bit 20: Set Interrupt Output SR4 */
+#define USIC_FMR_SIO5               (1 << 21) /* Bit 21: Set Interrupt Output SR5 */
 
 /* Transmit Buffer (32 x 4-bytes) */
 
-#define USIC_TBUF_TDATA_SHIFT       (0)       /* Bits 0-15:  */
+#define USIC_TBUF_TDATA_SHIFT       (0)       /* Bits 0-15: Transmit Data */
 #define USIC_TBUF_TDATA_MASK        (0xffff << USIC_TBUF_TDATA_SHIFT)
 
 /* USIC FIFO Registers */
 
 /* Bypass Data Register */
 
-#define USIC_BYP_BDATA_SHIFT        (0)       /* Bits 0-15:  */
+#define USIC_BYP_BDATA_SHIFT        (0)       /* Bits 0-15: Bypass Data */
 #define USIC_BYP_BDATA_MASK         (0xffff << USIC_BYP_BDATA_SHIFT)
 
 /* Bypass Control Register */
 
-#define USIC_BYPCR_BWLE_SHIFT       (0)       /* Bits 0-3:  */
+#define USIC_BYPCR_BWLE_SHIFT       (0)       /* Bits 0-3: Bypass Word Length */
 #define USIC_BYPCR_BWLE_MASK        (15 << USIC_BYPCR_BWLE_SHIFT)
-#define USIC_BYPCR_BDSSM            (1 << 8)  /* Bit 8:   */
-#define USIC_BYPCR_BDEN_SHIFT       (10)      /* Bits 10-11:  */
+  #define USIC_BYPCR_BWLE(n)        ((uint32_t)((n)-1) << USIC_BYPCR_BWLE_SHIFT)
+#define USIC_BYPCR_BDSSM            (1 << 8)  /* Bit 8:  Bypass Data Single Shot Mode */
+#define USIC_BYPCR_BDEN_SHIFT       (10)      /* Bits 10-11: Bypass Data Enable */
 #define USIC_BYPCR_BDEN_MASK        (3 << USIC_BYPCR_BDEN_SHIFT)
-#define USIC_BYPCR_BDVTR            (1 << 12) /* Bit 12:  */
-#define USIC_BYPCR_BPRIO            (1 << 13) /* Bit 13:  */
-#define USIC_BYPCR_BDV              (1 << 15) /* Bit 15:  */
-#define USIC_BYPCR_BSELO_SHIFT      (16)      /* Bits 16-20:  */
+#  define USIC_BYPCR_BDEN_DISABLE   (0 << USIC_BYPCR_BDEN_SHIFT) /* Transfer of bypass data is disabled */
+#  define USIC_BYPCR_BDEN_ENABLED   (1 << USIC_BYPCR_BDEN_SHIFT) /* Transfer of bypass data to TBUF if BDV = 1 */
+#  define USIC_BYPCR_BDEN_GATED0    (2 << USIC_BYPCR_BDEN_SHIFT) /* Bypass data transferred if BDV = 1 and DX2S = 0 */
+#  define USIC_BYPCR_BDEN_GATED1    (3 << USIC_BYPCR_BDEN_SHIFT) /* Bypass data transferred if BDV = 1 and DX2S = 1 */
+#define USIC_BYPCR_BDVTR            (1 << 12) /* Bit 12: Bypass Data Valid Trigger */
+#define USIC_BYPCR_BPRIO            (1 << 13) /* Bit 13: Bypass Priority */
+#define USIC_BYPCR_BDV              (1 << 15) /* Bit 15: Bypass Data Valid */
+#define USIC_BYPCR_BSELO_SHIFT      (16)      /* Bits 16-20: Bypass Select Outputs */
 #define USIC_BYPCR_BSELO_MASK       (31 << USIC_BYPCR_BSELO_SHIFT)
-#define USIC_BYPCR_BHPC_SHIFT       (21)      /* Bits 21-23:  */
+#  define USIC_BYPCR_BSELO(n)       ((uint32_t)(n) << USIC_BYPCR_BSELO_SHIFT)
+#define USIC_BYPCR_BHPC_SHIFT       (21)      /* Bits 21-23: Bypass Hardware Port Control */
 #define USIC_BYPCR_BHPC_MASK        (7 << USIC_BYPCR_BHPC_SHIFT)
+#  define USIC_BYPCR_BHPC(n)        ((uint32_t)(n) << USIC_BYPCR_BHPC_SHIFT)
 
 /* Transmitter Buffer Control Register */
 
@@ -875,34 +980,36 @@
 
 /* Transmit/Receive Buffer Status Register */
 
-#define USIC_TRBSR_SRBI             (1 << 0)  /* Bit 0:   */
-#define USIC_TRBSR_RBERI            (1 << 1)  /* Bit 1:   */
-#define USIC_TRBSR_ARBI             (1 << 2)  /* Bit 2:   */
-#define USIC_TRBSR_REMPTY           (1 << 3)  /* Bit 3:   */
-#define USIC_TRBSR_RFULL            (1 << 4)  /* Bit 4:   */
-#define USIC_TRBSR_RBUS             (1 << 5)  /* Bit 5:   */
-#define USIC_TRBSR_SRBT             (1 << 6)  /* Bit 6:   */
-#define USIC_TRBSR_STBI             (1 << 8)  /* Bit 8:   */
-#define USIC_TRBSR_TBERI            (1 << 9)  /* Bit 9:   */
-#define USIC_TRBSR_TEMPTY           (1 << 11) /* Bit 11:  */
-#define USIC_TRBSR_TFULL            (1 << 12) /* Bit 12:  */
-#define USIC_TRBSR_TBUS             (1 << 13) /* Bit 13:  */
-#define USIC_TRBSR_STBT             (1 << 14) /* Bit 14:  */
-#define USIC_TRBSR_RBFLVL_SHIFT     (16)      /* Bits 16-22:  */
+#define USIC_TRBSR_SRBI             (1 << 0)  /* Bit 0:  Standard Receive Buffer Event */
+#define USIC_TRBSR_RBERI            (1 << 1)  /* Bit 1:  Receive Buffer Error Event */
+#define USIC_TRBSR_ARBI             (1 << 2)  /* Bit 2:  Alternative Receive Buffer Event */
+#define USIC_TRBSR_REMPTY           (1 << 3)  /* Bit 3:  Receive Buffer Empty */
+#define USIC_TRBSR_RFULL            (1 << 4)  /* Bit 4:  Receive Buffer Full */
+#define USIC_TRBSR_RBUS             (1 << 5)  /* Bit 5:  Receive Buffer Busy */
+#define USIC_TRBSR_SRBT             (1 << 6)  /* Bit 6:  Standard Receive Buffer Event Trigger */
+#define USIC_TRBSR_STBI             (1 << 8)  /* Bit 8:  Standard Transmit Buffer Event */
+#define USIC_TRBSR_TBERI            (1 << 9)  /* Bit 9:  Transmit Buffer Error Event */
+#define USIC_TRBSR_TEMPTY           (1 << 11) /* Bit 11: Transmit Buffer Empty */
+#define USIC_TRBSR_TFULL            (1 << 12) /* Bit 12: Transmit Buffer Full */
+#define USIC_TRBSR_TBUS             (1 << 13) /* Bit 13: Transmit Buffer Busy */
+#define USIC_TRBSR_STBT             (1 << 14) /* Bit 14: Standard Transmit Buffer Event Trigger */
+#define USIC_TRBSR_RBFLVL_SHIFT     (16)      /* Bits 16-22: Receive Buffer Filling Level */
 #define USIC_TRBSR_RBFLVL_MASK      (0x7f << USIC_TRBSR_RBFLVL_SHIFT)
-#define USIC_TRBSR_TBFLVL_SHIFT     (24)      /* Bits 22-28:  */
+#  define USIC_TRBSR_RBFLVL(n)      ((uint32_t)(n) << USIC_TRBSR_RBFLVL_SHIFT)
+#define USIC_TRBSR_TBFLVL_SHIFT     (24)      /* Bits 22-28: Transmit Buffer Filling Level */
 #define USIC_TRBSR_TBFLVL_MASK      (0x7f << USIC_TRBSR_TBFLVL_SHIFT)
+#  define USIC_TRBSR_TBFLVL(n)      ((uint32_t)(n) << USIC_TRBSR_TBFLVL_SHIFT)
 
 /* Transmit/Receive Buffer Status Clear Register */
 
-#define USIC_TRBSCR_CSRBI           (1 << 0)  /* Bit 0:   */
-#define USIC_TRBSCR_CRBERI          (1 << 1)  /* Bit 1:   */
-#define USIC_TRBSCR_CARBI           (1 << 2)  /* Bit 2:   */
-#define USIC_TRBSCR_CSTBI           (1 << 8)  /* Bit 8:   */
-#define USIC_TRBSCR_CTBERI          (1 << 9)  /* Bit 9:   */
-#define USIC_TRBSCR_CBDV            (1 << 10) /* Bit 10:  */
-#define USIC_TRBSCR_FLUSHRB         (1 << 14) /* Bit 14:  */
-#define USIC_TRBSCR_FLUSHTB         (1 << 15) /* Bit 15:  */
+#define USIC_TRBSCR_CSRBI           (1 << 0)  /* Bit 0:  Clear Standard Receive Buffer Event */
+#define USIC_TRBSCR_CRBERI          (1 << 1)  /* Bit 1:  Clear Receive Buffer Error Event */
+#define USIC_TRBSCR_CARBI           (1 << 2)  /* Bit 2:  Clear Alternative Receive Buffer Event */
+#define USIC_TRBSCR_CSTBI           (1 << 8)  /* Bit 8:  Clear Standard Transmit Buffer Event */
+#define USIC_TRBSCR_CTBERI          (1 << 9)  /* Bit 9:  Clear Transmit Buffer Error Event */
+#define USIC_TRBSCR_CBDV            (1 << 10) /* Bit 10: Clear Bypass Data Valid */
+#define USIC_TRBSCR_FLUSHRB         (1 << 14) /* Bit 14: Flush Receive Buffer */
+#define USIC_TRBSCR_FLUSHTB         (1 << 15) /* Bit 15: Flush Transmit Buffer */
 
 /* Receiver Buffer Output Register */
 
