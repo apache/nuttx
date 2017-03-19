@@ -127,6 +127,16 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_COMP
+  /* Initialize COMP and register the COMP driver. */
+
+  ret = stm32_comp_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_comp_setup failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
