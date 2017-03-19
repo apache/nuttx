@@ -232,6 +232,7 @@ struct xmc4_dev_s
   uintptr_t uartbase;  /* Base address of UART registers */
   uint32_t  baud;      /* Configured baud */
   uint32_t  clock;     /* Clocking frequency of the UART module */
+  uint8_t   channel;   /* USIC channel identification */
   uint8_t   irqs;      /* Status IRQ associated with this UART (for enable) */
   uint8_t   ie;        /* Interrupts enabled */
   uint8_t   parity;    /* 0=none, 1=odd, 2=even */
@@ -312,8 +313,9 @@ static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
 #ifdef HAVE_UART0
 static struct xmc4_dev_s g_uart0priv =
 {
-  .uartbase       = XMC4_UART0_BASE,
+  .uartbase       = XMC4_USIC0_CH0_BASE,
   .clock          = BOARD_CORECLK_FREQ,
+  .channel        = (uint8_t)USIC0_CHAN0,
   .baud           = CONFIG_UART0_BAUD,
   .irqs           = XMC4_IRQ_USIC0,
   .parity         = CONFIG_UART0_PARITY,
@@ -343,8 +345,9 @@ static uart_dev_t g_uart0port =
 #ifdef HAVE_UART1
 static struct xmc4_dev_s g_uart1priv =
 {
-  .uartbase       = XMC4_UART1_BASE,
+  .uartbase       = XMC4_USIC0_CH1_BASE,
   .clock          = BOARD_CORECLK_FREQ,
+  .channel        = (uint8_t)USIC0_CHAN1,
   .baud           = CONFIG_UART1_BAUD,
   .irqs           = XMC4_IRQ_USIC1,
   .parity         = CONFIG_UART1_PARITY,
@@ -374,8 +377,9 @@ static uart_dev_t g_uart1port =
 #ifdef HAVE_UART2
 static struct xmc4_dev_s g_uart2priv =
 {
-  .uartbase       = XMC4_UART2_BASE,
+  .uartbase       = XMC4_USIC1_CH0_BASE,
   .clock          = BOARD_BUS_FREQ,
+  .channel        = (uint8_t)USIC1_CHAN0,
   .baud           = CONFIG_UART2_BAUD,
   .irqs           = XMC4_IRQ_USIC2,
   .parity         = CONFIG_UART2_PARITY,
@@ -405,8 +409,9 @@ static uart_dev_t g_uart2port =
 #ifdef HAVE_UART3
 static struct xmc4_dev_s g_uart3priv =
 {
-  .uartbase       = XMC4_UART3_BASE,
+  .uartbase       = XMC4_USIC1_CH1_BASE,
   .clock          = BOARD_BUS_FREQ,
+  .channel        = (uint8_t)USIC1_CHAN1,
   .baud           = CONFIG_UART3_BAUD,
   .irqs           = XMC4_IRQ_USIC3,
   .parity         = CONFIG_UART3_PARITY,
@@ -436,8 +441,9 @@ static uart_dev_t g_uart3port =
 #ifdef HAVE_UART4
 static struct xmc4_dev_s g_uart4priv =
 {
-  .uartbase       = XMC4_UART4_BASE,
+  .uartbase       = XMC4_USIC2_CH0_BASE,
   .clock          = BOARD_BUS_FREQ,
+  .channel        = (uint8_t)USIC2_CHAN0,
   .baud           = CONFIG_UART4_BAUD,
   .irqs           = XMC4_IRQ_USIC4,
   .parity         = CONFIG_UART4_PARITY,
@@ -467,8 +473,9 @@ static uart_dev_t g_uart4port =
 #ifdef HAVE_UART5
 static struct xmc4_dev_s g_uart5priv =
 {
-  .uartbase       = XMC4_UART5_BASE,
+  .uartbase       = XMC4_USIC2_CH1_BASE,
   .clock          = BOARD_BUS_FREQ,
+  .channel        = (uint8_t)USIC2_CHAN1,
   .baud           = CONFIG_UART5_BAUD,
   .irqs           = XMC4_IRQ_USIC5,
   .parity         = CONFIG_UART5_PARITY,

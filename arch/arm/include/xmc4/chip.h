@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_XM4_CHIP_H
-#define __ARCH_ARM_INCLUDE_XM4_CHIP_H
+#ifndef __ARCH_ARM_INCLUDE_XMC4_CHIP_H
+#define __ARCH_ARM_INCLUDE_XMC4_CHIP_H
 
 /************************************************************************************
  * Included Files
@@ -49,7 +49,7 @@
 /* Get customizations for each supported chip */
 
 #if defined(CONFIG_ARCH_CHIP_XMC4500)
-#  define XM4_NUSIC           3          /* Three USIC modules: USCI0-2 */
+#  define XMC4_NUSIC          3          /* Three USIC modules: USCI0-2 */
 
 #else
 #  error "Unsupported XMC4xxx chip"
@@ -127,4 +127,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_INCLUDE_XM4_CHIP_H */
+#endif /* __ARCH_ARM_INCLUDE_XMC4_CHIP_H */

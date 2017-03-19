@@ -969,32 +969,32 @@
 #define SCU_CGAT0_POSIF0            (1 << 9)  /* Bit 9:  POSIF0 Gating Status */
 #define SCU_CGAT0_POSIF1            (1 << 10) /* Bit 10: POSIF1 Gating Status */
 #define SCU_CGAT0_USIC0             (1 << 11) /* Bit 11: USIC0 Gating Status */
-#define SCU_CGAT0_ERU1_             (1 << 16) /* Bit 16: ERU1 Gating Status */
+#define SCU_CGAT0_ERU1              (1 << 16) /* Bit 16: ERU1 Gating Status */
 
 /* Peripheral 1 Clock Gating Status, Peripheral 1 Clock Gating Set, Peripheral 1 Clock Gating Clear */
 
-#define SCU_CGATSTAT1_CCU43         (1 << 0)  /* Bit 0:  CCU43 Gating Status */
-#define SCU_CGATSTAT1_LEDTSCU0      (1 << 3)  /* Bit 3:  LEDTS Gating Status */
-#define SCU_CGATSTAT1_MCAN0         (1 << 4)  /* Bit 4:  MultiCAN Gating Status */
-#define SCU_CGATSTAT1_DAC           (1 << 5)  /* Bit 5:  DAC Gating Status */
-#define SCU_CGATSTAT1_MMCI          (1 << 6)  /* Bit 6:  MMC Interface Gating Status */
-#define SCU_CGATSTAT1_USIC1         (1 << 7)  /* Bit 7:  USIC1 Gating Status */
-#define SCU_CGATSTAT1_USIC2         (1 << 8)  /* Bit 8:  USIC1 Gating Status */
-#define SCU_CGATSTAT1_PPORTS        (1 << 9)  /* Bit 9:  PORTS Gating Status */
+#define SCU_CGAT1_CCU43             (1 << 0)  /* Bit 0:  CCU43 Gating Status */
+#define SCU_CGAT1_LEDTSCU0          (1 << 3)  /* Bit 3:  LEDTS Gating Status */
+#define SCU_CGAT1_MCAN0             (1 << 4)  /* Bit 4:  MultiCAN Gating Status */
+#define SCU_CGAT1_DAC               (1 << 5)  /* Bit 5:  DAC Gating Status */
+#define SCU_CGAT1_MMCI              (1 << 6)  /* Bit 6:  MMC Interface Gating Status */
+#define SCU_CGAT1_USIC1             (1 << 7)  /* Bit 7:  USIC1 Gating Status */
+#define SCU_CGAT1_USIC2             (1 << 8)  /* Bit 8:  USIC1 Gating Status */
+#define SCU_CGAT1_PPORTS            (1 << 9)  /* Bit 9:  PORTS Gating Status */
 
 /* Peripheral 2 Clock Gating Status, Peripheral 2 Clock Gating Set, Peripheral 2 Clock Gating Clear */
 
-#define SCU_CGATSTAT2_WDT           (1 << 1)  /* Bit 1:  WDT Gating Status */
-#define SCU_CGATSTAT2_ETH0          (1 << 2)  /* Bit 2:  ETH0 Gating Status */
-#define SCU_CGATSTAT2_DMA0          (1 << 4)  /* Bit 4:  DMA0 Gating Status */
-#define SCU_CGATSTAT2_DMA1          (1 << 5)  /* Bit 5:  DMA1 Gating Status */
-#define SCU_CGATSTAT2_FCE           (1 << 6)  /* Bit 6:  FCE Gating Status */
-#define SCU_CGATSTAT2_USB           (1 << 7)  /* Bit 7:  USB Gating Status */
-#define SCU_CGATSTAT2_ECAT          (1 << 10) /* Bit 10: ECAT Gating Status */
+#define SCU_CGAT2_WDT               (1 << 1)  /* Bit 1:  WDT Gating Status */
+#define SCU_CGAT2_ETH0              (1 << 2)  /* Bit 2:  ETH0 Gating Status */
+#define SCU_CGAT2_DMA0              (1 << 4)  /* Bit 4:  DMA0 Gating Status */
+#define SCU_CGAT2_DMA1              (1 << 5)  /* Bit 5:  DMA1 Gating Status */
+#define SCU_CGAT2_FCE               (1 << 6)  /* Bit 6:  FCE Gating Status */
+#define SCU_CGAT2_USB               (1 << 7)  /* Bit 7:  USB Gating Status */
+#define SCU_CGAT2_ECAT              (1 << 10) /* Bit 10: ECAT Gating Status */
 
 /* Peripheral 3 Clock Gating Status, Peripheral 3 Clock Gating Set, Peripheral 3 Clock Gating Clear */
 
-#define SCU_CGATSTAT3_EBU           (1 << 2)  /* Bit 2:  EBU Gating Status */
+#define SCU_CGAT3_EBU               (1 << 2)  /* Bit 2:  EBU Gating Status */
 
 /* Oscillator Control SCU Registers */
 
