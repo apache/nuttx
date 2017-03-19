@@ -41,8 +41,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdint.h>
+
 #include "xmc4_config.h"
+#include "xmc4_usic.h"
 
 /****************************************************************************
  * Public Function Prototypes
@@ -76,15 +79,36 @@ void xmc4_uart_reset(uintptr_t uart_base);
  * Name: xmc4_uart_configure
  *
  * Description:
- *   Configure a UART as a RS-232 UART.
+ *   Enable and configure a USIC channel as a RS-232 UART.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned to
+ *   indicate the nature of any failure.
  *
  ****************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-void xmc4_uart_configure(uintptr_t uart_base, uint32_t baud,
-                         uint32_t clock, unsigned int parity,
-                         unsigned int nbits, unsigned int stop2);
+int xmc4_uart_configure(enum usic_channel_e channel, uint32_t baud,
+                        uint32_t clock, unsigned int parity,
+                        unsigned int nbits, unsigned int stop2);
 #endif
 
+/****************************************************************************
+ * Name: xmc4_uart_disable
+ *
+ * Description:
+ *   Disable a USIC channel previously configured as a RS-232 UART.  it will
+ *   be necessary to again call xmc4_uart_configure() in order to use this
+ *   UART channel again.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned to
+ *   indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_UART_DEVICE
+#define xmc4_uart_disable(c) xmc4_disable_usic_channel(c)
+#endif
 
 #endif /* __ARCH_ARM_SRC_XMC4_XMC4_LOWPUTC_H */

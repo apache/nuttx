@@ -196,17 +196,37 @@ void xmc4_uart_reset(uintptr_t uart_base)
  * Name: xmc4_uart_configure
  *
  * Description:
- *   Configure a UART as a RS-232 UART.
+ *   Enable and configure a USIC channel as a RS-232 UART.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned to
+ *   indicate the nature of any failure.
  *
  ****************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-void xmc4_uart_configure(uintptr_t uart_base, uint32_t baud,
-                         uint32_t clock, unsigned int parity,
-                         unsigned int nbits, unsigned int stop2)
+int xmc4_uart_configure(enum usic_channel_e channel, uint32_t baud,
+                        uint32_t clock, unsigned int parity,
+                        unsigned int nbits, unsigned int stop2)
 {
-  /* Disable the transmitter and receiver throughout the reconfiguration */
-#warning Missing logic
+  uintptr_t base;
+  int ret;
+
+  /* Get the base address of the USIC registers associated with this channel */
+
+  base = uintptr_t xmc4_channel_baseaddress(channel);
+  if (base == 0)
+    {
+      return -EINVAL;
+    }
+
+  /* Enable the USIC channel */
+
+  ret = xmc4_enable_usic_channel(channel);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Configure number of bits, stop bits and parity */
 #warning Missing logic

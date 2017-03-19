@@ -106,6 +106,38 @@ int xmc4_enable_usic(enum usic_e usic);
 int xmc4_disable_usic(enum usic_e usic);
 
 /****************************************************************************
+ * Name: xmc4_channel2usic
+ *
+ * Description:
+ *   Given a USIC channel enumeration value, return the corresponding USIC
+ *   enumerication value.
+ *
+ * Returned Value:
+ *   The corresponding USIC enumeration value.
+ *
+ ****************************************************************************/
+
+static inline enum usic_e xmc4_channel2usic(enum usic_channel_e channel)
+{
+  return (enum usic_e)((unsigned int)channel >> 1);
+}
+
+/****************************************************************************
+ * Name: xmc4_channel_baseaddress
+ *
+ * Description:
+ *   Given a USIC channel enumeration value, return the base address of the
+ *   channel registers.
+ *
+ * Returned Value:
+ *   The non-zero address of the channel base registers is return on success.
+ *   Zero is returned on any failure.
+ *
+ ****************************************************************************/
+
+uintptr_t xmc4_channel_baseaddress(enum usic_channel_e channel);
+
+/****************************************************************************
  * Name: xmc4_enable_usic_channel
  *
  * Description:

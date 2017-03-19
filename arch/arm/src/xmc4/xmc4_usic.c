@@ -51,6 +51,31 @@
 #include "xmc4_usic.h"
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Provides mapping of USIC enumeration value to USIC channel base address */
+
+static uintptr_t g_channel_baseaddress[2 * XMC4_NUSIC] =
+{
+  XMC4_USIC0_CH0_BASE,
+  XMC4_USIC0_CH1_BASE
+#if XMC4_NUSIC > 1
+  ,
+  XMC4_USIC1_CH0_BASE,
+  XMC4_USIC1_CH1_BASE
+#if XMC4_NUSIC > 2
+  ,
+  XMC4_USIC2_CH0_BASE,
+  XMC4_USIC2_CH1_BASE
+#if XMC4_NUSIC > 3
+#  error Extend table values for addition USICs
+#endif
+#endif
+#endif
+};
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -187,6 +212,29 @@ int xmc4_disable_usic(enum usic_e usic)
 }
 
 /****************************************************************************
+ * Name: xmc4_channel_baseaddress
+ *
+ * Description:
+ *   Given a USIC channel enumeration value, return the base address of the
+ *   channel registers.
+ *
+ * Returned Value:
+ *   The non-zero address of the channel base registers is return on success.
+ *   Zero is returned on any failure.
+ *
+ ****************************************************************************/
+
+uintptr_t xmc4_channel_baseaddress(enum usic_channel_e channel)
+{
+  if ((usigned int)channel < (2 * XM4C_NUSICS))
+    {
+      return g_channel_baseaddress[channel];
+    }
+
+  return 0;
+}
+
+/****************************************************************************
  * Name: xmc4_enable_usic_channel
  *
  * Description:
@@ -204,75 +252,22 @@ int xmc4_enable_usic_channel(enum usic_channel_e channel)
   uintptr_t base;
   uintptr_t regaddr;
   uint32_t regval;
+  int ret;
 
-  switch (channel)
+  /* Get the base address of the registers for this channel */
+
+  base = xmc4_channel_baseaddress(channel);
+  if (base == 0)
     {
-      case USIC0_CHAN0:
-        /* USIC0 Channel 0 base address */
+      return -EINVAL;
+    }
 
-        base = XMC4_USIC0_CH0_BASE;
+  /* Enable the USIC module */
 
-        /* Enable USIC0 */
-
-        xmc4_enable_usic(USIC0);
-        break;
-
-      case USIC0_CHAN1:
-        /* USIC0 Channel 1 base address */
-
-        base = XMC4_USIC0_CH1_BASE;
-
-        /* Enable USIC0 */
-
-        xmc4_enable_usic(USIC0);
-        break;
-
-#if XMC4_NUSIC > 1
-      case USIC1_CHAN0:
-        /* USIC1 Channel 0 base address */
-
-        base = XMC4_USIC1_CH0_BASE;
-
-        /* Enable USIC1 */
-
-        xmc4_enable_usic(USIC1);
-        break;
-
-      case USIC1_CHAN1:
-        /* USIC1 Channel 1 base address */
-
-        base = XMC4_USIC1_CH1_BASE;
-
-        /* Enable USIC1 */
-
-        xmc4_enable_usic(USIC1);
-        break;
-
-#if XMC4_NUSIC > 2
-      case USIC2_CHAN0:
-        /* USIC2 Channel 0 base address */
-
-        base = XMC4_USIC2_CH0_BASE;
-
-        /* Enable USIC2 */
-
-        xmc4_enable_usic(USIC2);
-        break;
-
-      case USIC2_CHAN1:
-        /* USIC2 Channel 1 base address */
-
-        base = XMC4_USIC2_CH1_BASE;
-
-        /* Enable USIC2 */
-
-        xmc4_enable_usic(USIC2);
-        break;
-#endif
-#endif
-
-      default:
-        return -EINVAL;
+  xmc4_enable_usic(xmc4_channel2usic(channel));
+  if (ret < 0)
+    {
+      return ret;
     }
 
   /* Enable USIC channel */
@@ -315,64 +310,13 @@ int xmc4_disable_usic_channel(enum usic_channel_e channel)
   uintptr_t other;
   uintptr_t regaddr;
   uint32_t regval;
-  enum usic_e usic;
 
-  switch (channel)
+  /* Get the base address of the registers for this channel */
+
+  base = xmc4_channel_baseaddress(channel);
+  if (base == 0)
     {
-      case USIC0_CHAN0:
-        /* Enable USIC0 Channel 0 base address */
-
-        base  = XMC4_USIC0_CH0_BASE;
-        other = XMC4_USIC0_CH1_BASE;
-        usic  = USIC0;
-        break;
-
-      case USIC0_CHAN1:
-        /* Enable USIC0 Channel 1 base address */
-
-        base  = XMC4_USIC0_CH1_BASE;
-        other = XMC4_USIC0_CH0_BASE;
-        usic  = USIC0;
-        break;
-
-#if XMC4_NUSIC > 1
-      case USIC1_CHAN0:
-        /* Enable USIC1 Channel 0 base address */
-
-        base  = XMC4_USIC1_CH0_BASE;
-        other = XMC4_USIC1_CH1_BASE;
-        usic  = USIC1;
-        break;
-
-      case USIC1_CHAN1:
-        /* Enable USIC1 Channel 1 base address */
-
-        base  = XMC4_USIC1_CH1_BASE;
-        other = XMC4_USIC1_CH0_BASE;
-        usic  = USIC1;
-        break;
-
-#if XMC4_NUSIC > 2
-      case USIC2_CHAN0:
-        /* Enable USIC2 Channel 0 base address */
-
-        base  = XMC4_USIC2_CH0_BASE;
-        other = XMC4_USIC2_CH1_BASE;
-        usic  = USIC2;
-        break;
-
-      case USIC2_CHAN1:
-        /* Enable USIC2 Channel 1 base address */
-
-        base  = XMC4_USIC2_CH1_BASE;
-        other = XMC4_USIC2_CH0_BASE;
-        usic  = USIC2;
-        break;
-#endif
-#endif
-
-      default:
-        return -EINVAL;
+      return -EINVAL;
     }
 
   /* Disable this channel */
@@ -383,6 +327,11 @@ int xmc4_disable_usic_channel(enum usic_channel_e channel)
   regval |= USIC_KSCFG_BPMODEN;
   putreg32(regval, regaddr);
 
+  /* Get the base address of other channel for this USIC module */
+
+  other = xmc4_channel_baseaddress(channel ^ 1);
+  DEBUASSERT(other != 0);
+
   /* Check if the other channel has also been disabled */
 
   regaddr = other + XMC4_USIC_KSCFG_OFFSET;
@@ -390,7 +339,7 @@ int xmc4_disable_usic_channel(enum usic_channel_e channel)
     {
       /* Yes... Disable the USIC module */
 
-      xmc4_disable_usic(usic);
+      xmc4_disable_usic(xmc4_channel2usic(channel));
     }
 
   return OK;
