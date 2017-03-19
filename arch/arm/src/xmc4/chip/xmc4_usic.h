@@ -69,7 +69,7 @@
 /* PMU Registers -- See ID register */
 /* Prefetch Registers -- See PCON register */
 
-/* Kernal Registers */
+/* Kernel Registers */
 
 #define XMC4_USIC_ID_OFFSET          0x0008    /* Kernel State Configuration Register */
 
@@ -399,79 +399,528 @@
 /* USIC Channel Registers */
 
 /* Channel Configuration Register */
-#define USIC_CCFG_
+
+#define USIC_CCFG_SSC               (1 << 0)  /* Bit 0:   */
+#define USIC_CCFG_ASC               (1 << 1)  /* Bit 1:   */
+#define USIC_CCFG_IIC               (1 << 2)  /* Bit 2:   */
+#define USIC_CCFG_IIS               (1 << 3)  /* Bit 3:   */
+#define USIC_CCFG_RB                (1 << 6)  /* Bit 6:   */
+#define USIC_CCFG_TB                (1 << 7)  /* Bit 7:   */
+
 /* Kernel State Configuration Register */
-#define USIC_KSCFG_
+
+#define USIC_KSCFG_MODEN            (1 << 0)  /* Bit 0:   */
+#define USIC_KSCFG_BPMODEN          (1 << 1)  /* Bit 1:   */
+#define USIC_KSCFG_NOMCFG_SHIFT     (4)       /* Bits 4-5:  */
+#define USIC_KSCFG_NOMCFG_MASK      (3 << USIC_KSCFG_NOMCFG_SHIFT)
+#define USIC_KSCFG_BPNOM            (1 << 7)  /* Bit 7:   */
+#define USIC_KSCFG_SUMCFG_SHIFT     (8)       /* Bits 8-9:  */
+#define USIC_KSCFG_SUMCFG_MASK      (3 << USIC_KSCFG_SUMCFG_SHIFT)
+#define USIC_KSCFG_BPSUM            (1 << 11) /* Bit 11:   */
+
 /* Fractional Divider Register */
-#define USIC_FDR_
+
+#define USIC_FDR_STEP_SHIFT         (0)       /* Bits 0-9:  */
+#define USIC_FDR_STEP_MASK          (0x3ff << USIC_FDR_STEP_SHIFT)
+#define USIC_FDR_DM_SHIFT           (14)      /* Bits 14-15:  */
+#define USIC_FDR_DM_MASK            (3 << USIC_FDR_DM_SHIFT)
+#define USIC_FDR_RESULT_SHIFT       (16)      /* Bits 16-25:  */
+#define USIC_FDR_RESULT_MASK        (0x3ff << USIC_FDR_RESULT_SHIFT)
+
 /* Baud Rate Generator Register */
-#define USIC_BRG_
+
+#define USIC_BRG_CLKSEL_SHIFT       (0)       /* Bits 0-1:  */
+#define USIC_BRG_CLKSEL_MASK        (3 << USIC_BRG_CLKSEL_SHIFT)
+#define USIC_BRG_TMEN               (1 << 3)  /* Bit 3:   */
+#define USIC_BRG_PPPEN              (1 << 4)  /* Bit 4:   */
+#define USIC_BRG_CTQSEL_SHIFT       (6)       /* Bits 6-7:  */
+#define USIC_BRG_CTQSEL_MASK        (3 << USIC_BRG_CTQSEL_SHIFT)
+#define USIC_BRG_PCTQ_SHIFT         (8)       /* Bits 8-9:  */
+#define USIC_BRG_PCTQ_MASK          (3 << USIC_BRG_PCTQ_SHIFT)
+#define USIC_BRG_DCTQ_SHIFT         (10)      /* Bits 10-15:  */
+#define USIC_BRG_DCTQ_MASK          (0x3f << USIC_BRG_DCTQ_SHIFT)
+#define USIC_BRG_PDIV_SHIFT         (16)      /* Bits 16-25:  */
+#define USIC_BRG_PDIV_MASK          (0x3ff << USIC_BRG_PDIV_SHIFT)
+#define USIC_BRG_SCLKOSEL           (1 << 28) /* Bit 28:   */
+#define USIC_BRG_MCLKCFG            (1 << 29) /* Bit 29:   */
+#define USIC_BRG_SCLKCFG            (1 << 30) /* Bit 30:   */
+
 /* Interrupt Node Pointer Register */
-#define USIC_INPR_
-/* Input Control Register 0 */
-#define USIC_DX0CR_
-/* Input Control Register 1 */
-#define USIC_DX1CR_
-/* Input Control Register 2 */
-#define USIC_DX2CR_
-/* Input Control Register 3 */
-#define USIC_DX3CR_
-/* Input Control Register 4 */
-#define USIC_DX4CR_
-/* Input Control Register 5 */
-#define USIC_DX5CR_
+
+#define USIC_INPR_TSINP_SHIFT       (0)       /* Bits 0-2:  */
+#define USIC_INPR_TSINP_MASK        (7 << USIC_INPR_TSINP_SHIFT)
+#define USIC_INPR_TBINP_SHIFT       (4)       /* Bits 4-6:  */
+#define USIC_INPR_TBINP_MASK        (7 << USIC_INPR_TBINP_SHIFT)
+#define USIC_INPR_RINP_SHIFT        (8)       /* Bits 8-10:  */
+#define USIC_INPR_RINP_MASK         (7 << USIC_INPR_RINP_SHIFT)
+#define USIC_INPR_AINP_SHIFT        (12)      /* Bits 12-14:  */
+#define USIC_INPR_AINP_MASK         (7 << USIC_INPR_AINP_SHIFT)
+#define USIC_INPR_PINP_SHIFT        (16)      /* Bits 16-18:  */
+#define USIC_INPR_PINP_MASK         (7 << USIC_INPR_PINP_SHIFT)
+
+/* Input Control Register 0, Input Control Register 1, Input Control Register 2,
+ * Input Control Register 3, Input Control Register 4, Input Control Register 5
+ */
+
+#define USIC_DXCR_DSEL_SHIFT        (0)      /* Bits 0-2:  */
+#define USIC_DXCR_DSEL_MASK         (7 << USIC_DX0CR_DSEL_SHIFT)
+#define USIC_DX1CR_DCEN             (1 << 3)  /* Bit 3:   (DX1CR only) */
+#define USIC_DXCR_INSW              (1 << 4)  /* Bit 4:   */
+#define USIC_DXCR_DFEN              (1 << 5)  /* Bit 5:   */
+#define USIC_DXCR_DSEN              (1 << 6)  /* Bit 6:   */
+#define USIC_DXCR_DPOL              (1 << 8)  /* Bit 8:   */
+#define USIC_DXCR_SFSEL             (1 << 9)  /* Bit 9:   */
+#define USIC_DXCR_CM_SHIFT          (10)      /* Bits 10-12:  */
+#define USIC_DXCR_CM_MASK           (3 << USIC_DX0CR_CM_SHIFT)
+#define USIC_DXCR_DXS               (1 << 15) /* Bit 15:   */
+
 /* Shift Control Register */
-#define USIC_SCTR_
+
+#define USIC_SCTR_SDIR              (1 << 0)  /* Bit 0:   */
+#define USIC_SCTR_PDL               (1 << 1)  /* Bit `:   */
+#define USIC_SCTR_DSM_SHIFT         (2)       /* Bits 2-3:  */
+#define USIC_SCTR_DSM_MASK          (3 << USIC_SCTR_DSM_SHIFT)
+#define USIC_SCTR_HPCDIR            (1 << 4)  /* Bit 4:   */
+#define USIC_SCTR_DOCFG_SHIFT       (6)       /* Bits 6-7:  */
+#define USIC_SCTR_DOCFG_MASK        (3 << USIC_SCTR_DOCFG_SHIFT)
+#define USIC_SCTR_TRM_SHIFT         (8)       /* Bits 8-9:  */
+#define USIC_SCTR_TRM_MASK          (3 << USIC_SCTR_TRM_SHIFT)
+#define USIC_SCTR_FLE_SHIFT         (16)      /* Bits 16-21:  */
+#define USIC_SCTR_FLE_MASK          (0x3f << USIC_SCTR_FLE_SHIFT)
+#define USIC_SCTR_WLE_SHIFT         (24)      /* Bits 24-27:  */
+#define USIC_SCTR_WLE_MASK          (15 << USIC_SCTR_WLE_SHIFT)
+
 /* Transmit Control/Status Register */
-#define USIC_TCSR_
+
+#define USIC_TCSR_WLEMD             (1 << 0)  /* Bit 0:   */
+#define USIC_TCSR_SELMD             (1 << 1)  /* Bit 1:   */
+#define USIC_TCSR_FLEMD             (1 << 2)  /* Bit 2:   */
+#define USIC_TCSR_WAMD              (1 << 3)  /* Bit 3:   */
+#define USIC_TCSR_HPCMD             (1 << 4)  /* Bit 4:   */
+#define USIC_TCSR_SOF               (1 << 5)  /* Bit 5:   */
+#define USIC_TCSR_EOF               (1 << 6)  /* Bit 6:   */
+#define USIC_TCSR_TDV               (1 << 7)  /* Bit 7:   */
+#define USIC_TCSR_TDSSM             (1 << 8)  /* Bit 8:   */
+#define USIC_TCSR_TDEN_SHIFT        (10)      /* Bits 10-11:  */
+#define USIC_TCSR_TDEN_MASK         (3 << USIC_TCSR_TDEN_SHIFT)
+#define USIC_TCSR_TDVTR             (1 << 12) /* Bit 12:  */
+#define USIC_TCSR_WA                (1 << 13) /* Bit 13:  */
+#define USIC_TCSR_TSOF              (1 << 24) /* Bit 24:  */
+#define USIC_TCSR_TV                (1 << 26) /* Bit 26:  */
+#define USIC_TCSR_TVC               (1 << 27) /* Bit 27:  */
+#define USIC_TCSR_TE                (1 << 28) /* Bit 28:  */
+
 /* Protocol Control Register */
-#define USIC_PCR_
+
+#define USIC_PCR_CTR0               (1 << 0)  /* Bit 0:   */
+#define USIC_PCR_CTR1               (1 << 1)  /* Bit 1:   */
+#define USIC_PCR_CTR2               (1 << 2)  /* Bit 2:   */
+#define USIC_PCR_CTR3               (1 << 3)  /* Bit 3:   */
+#define USIC_PCR_CTR4               (1 << 4)  /* Bit 4:   */
+#define USIC_PCR_CTR5               (1 << 5)  /* Bit 5:   */
+#define USIC_PCR_CTR6               (1 << 6)  /* Bit 6:   */
+#define USIC_PCR_CTR7               (1 << 7)  /* Bit 7:   */
+#define USIC_PCR_CTR8               (1 << 8)  /* Bit 8:   */
+#define USIC_PCR_CTR9               (1 << 9)  /* Bit 9:   */
+#define USIC_PCR_CTR10              (1 << 10) /* Bit 10:  */
+#define USIC_PCR_CTR11              (1 << 11) /* Bit 11:  */
+#define USIC_PCR_CTR12              (1 << 12) /* Bit 12:  */
+#define USIC_PCR_CTR13              (1 << 13) /* Bit 13:  */
+#define USIC_PCR_CTR14              (1 << 14) /* Bit 14:  */
+#define USIC_PCR_CTR15              (1 << 15) /* Bit 15:  */
+#define USIC_PCR_CTR16              (1 << 16) /* Bit 16:  */
+#define USIC_PCR_CTR17              (1 << 17) /* Bit 17:  */
+#define USIC_PCR_CTR18              (1 << 18) /* Bit 18:  */
+#define USIC_PCR_CTR19              (1 << 19) /* Bit 19:  */
+#define USIC_PCR_CTR20              (1 << 20) /* Bit 20:  */
+#define USIC_PCR_CTR21              (1 << 21) /* Bit 21:  */
+#define USIC_PCR_CTR22              (1 << 22) /* Bit 22:  */
+#define USIC_PCR_CTR23              (1 << 23) /* Bit 23:  */
+#define USIC_PCR_CTR24              (1 << 24) /* Bit 24:  */
+#define USIC_PCR_CTR25              (1 << 25) /* Bit 25:  */
+#define USIC_PCR_CTR26              (1 << 26) /* Bit 26:  */
+#define USIC_PCR_CTR27              (1 << 27) /* Bit 27:  */
+#define USIC_PCR_CTR28              (1 << 28) /* Bit 28:  */
+#define USIC_PCR_CTR29              (1 << 29) /* Bit 29:  */
+#define USIC_PCR_CTR30              (1 << 30) /* Bit 30:  */
+#define USIC_PCR_CTR31              (1 << 31) /* Bit 31:  */
+
+#define USIC_PCR_ASCMODE_SMD        (1 << 0)  /* Bit 0:   */
+#define USIC_PCR_ASCMODE_STPB       (1 << 1)  /* Bit 1:   */
+#define USIC_PCR_ASCMODE_IDM        (1 << 2)  /* Bit 2:   */
+#define USIC_PCR_ASCMODE_SBIEN      (1 << 3)  /* Bit 3:   */
+#define USIC_PCR_ASCMODE_CDEN       (1 << 4)  /* Bit 4:   */
+#define USIC_PCR_ASCMODE_RNIEN      (1 << 5)  /* Bit 5:   */
+#define USIC_PCR_ASCMODE_FEIEN      (1 << 6)  /* Bit 6:   */
+#define USIC_PCR_ASCMODE_FFIEN      (1 << 7)  /* Bit 7:   */
+#define USIC_PCR_ASCMODE_SP_SHIFT   (8)       /* Bits 8-12:  */
+#define USIC_PCR_ASCMODE_SP_MASK    (31 << USIC_PCR_ASCMODE_SP_SHIFT)
+#define USIC_PCR_ASCMODE_PL_SHIFT   (13)      /* Bits 13-15:  */
+#define USIC_PCR_ASCMODE_PL_MASK    (7 << USIC_PCR_ASCMODE_PL_SHIFT)
+#define USIC_PCR_ASCMODE_RSTEN      (1 << 16) /* Bit 16:  */
+#define USIC_PCR_ASCMODE_TSTEN      (1 << 17) /* Bit 16:  */
+#define USIC_PCR_ASCMODE_MCLK       (1 << 31) /* Bit 31:  */
+
+#define USIC_PCR_SSCMODE_MSLSEN     (1 << 0)  /* Bit 0:   */
+#define USIC_PCR_SSCMODE_SELCTR     (1 << 1)  /* Bit 1:   */
+#define USIC_PCR_SSCMODE_SELINV     (1 << 2)  /* Bit 2:   */
+#define USIC_PCR_SSCMODE_FEM        (1 << 3)  /* Bit 3:   */
+#define USIC_PCR_SSCMODE_CTQSEL1_SHIFT (4)    /* Bits 4-5:  */
+#define USIC_PCR_SSCMODE_CTQSEL1_MASK  (3 << USIC_PCR_SSCMODE_CTQSEL1_SHIFT)
+#define USIC_PCR_SSCMODE_PCTQ1_SHIFT   (6)    /* Bits 6-7:  */
+#define USIC_PCR_SSCMODE_PCTQ1_MASK    (3 << USIC_PCR_SSCMODE_PCTQ1_SHIFT)
+#define USIC_PCR_SSCMODE_DCTQ1_SHIFT   (8)    /* Bits 8-12:  */
+#define USIC_PCR_SSCMODE_DCTQ1_MASK    (0x1f << USIC_PCR_SSCMODE_DCTQ1_SHIFT)
+#define USIC_PCR_SSCMODE_PARIEN     (1 << 13) /* Bit 13:  */
+#define USIC_PCR_SSCMODE_MSLSIEN    (1 << 14) /* Bit 14:  */
+#define USIC_PCR_SSCMODE_DX2TIEN    (1 << 15) /* Bit 15:  */
+#define USIC_PCR_SSCMODE_SELO_SHIFT (16)      /* Bits 16-23:  */
+#define USIC_PCR_SSCMODE_SELO_MASK  (0xff << USIC_PCR_SSCMODE_SELO_SHIFT)
+#define USIC_PCR_SSCMODE_TIWEN      (1 << 24) /* Bit 24:  */
+#define USIC_PCR_SSCMODE_SLPHSEL    (1 << 25) /* Bit 25:  */
+#define USIC_PCR_SSCMODE_MCLK       (1 << 31) /* Bit 31:  */
+
+#define USIC_PCR_IICMODE_SLAD_SHIFT (0)       /* Bits 0-15:  */
+#define USIC_PCR_IICMODE_SLAD_MASK  (0xffff << USIC_PCR_IICMODE_SLAD_SHIFT)
+#define USIC_PCR_IICMODE_ACK00      (1 << 16) /* Bit 16:  */
+#define USIC_PCR_IICMODE_STIM       (1 << 17) /* Bit 17:  */
+#define USIC_PCR_IICMODE_SCRIEN     (1 << 18) /* Bit 18:  */
+#define USIC_PCR_IICMODE_RSCRIEN    (1 << 19) /* Bit 19:  */
+#define USIC_PCR_IICMODE_PCRIEN     (1 << 20) /* Bit 20:  */
+#define USIC_PCR_IICMODE_NACKIEN    (1 << 21) /* Bit 21:  */
+#define USIC_PCR_IICMODE_ARLIEN     (1 << 22) /* Bit 22:  */
+#define USIC_PCR_IICMODE_SRRIEN     (1 << 23) /* Bit 23:  */
+#define USIC_PCR_IICMODE_ERRIEN     (1 << 24) /* Bit 24:  */
+#define USIC_PCR_IICMODE_SACKDIS    (1 << 25) /* Bit 25:  */
+#define USIC_PCR_IICMODE_HDEL_SHIFT (26)      /* Bits 26-29:  */
+#define USIC_PCR_IICMODE_HDEL_MASK  (15 << USIC_PCR_IICMODE_HDEL_SHIFT)
+#define USIC_PCR_IICMODE_ACKIEN     (1 << 30) /* Bit 30:  */
+#define USIC_PCR_IICMODE_MCLK       (1 << 31) /* Bit 31:  */
+
+#define USIC_PCR_IISMODE_WAGEN      (1 << 0)  /* Bit 0:   */
+#define USIC_PCR_IISMODE_DTEN       (1 << 1)  /* Bit 1:   */
+#define USIC_PCR_IISMODE_SELINV     (1 << 2)  /* Bit 2:   */
+#define USIC_PCR_IISMODE_WAFEIEN    (1 << 4)  /* Bit 4:   */
+#define USIC_PCR_IISMODE_WAREIEN    (1 << 5)  /* Bit 5:   */
+#define USIC_PCR_IISMODE_ENDIEN     (1 << 6)  /* Bit 6:   */
+#define USIC_PCR_IISMODE_TDEL_SHIFT (16)      /* Bits 15-21:  */
+#define USIC_PCR_IISMODE_TDEL_MASK  (0x3f << USIC_PCR_IISMODE_TDEL_SHIFT)
+#define USIC_PCR_IISMODE_MCLK       (1 << 31) /* Bit 31:  */
+
 /* Channel Control Register */
-#define USIC_CCR_
+
+#define USIC_CCR_MODE_SHIFT         (0)       /* Bits 0-3:  */
+#define USIC_CCR_MODE_MASK          (15 << USIC_CCR_MODE_SHIFT)
+#define USIC_CCR_HPCEN_SHIFT        (6)       /* Bits 6-7:  */
+#define USIC_CCR_HPCEN_MASK         (3 << USIC_CCR_HPCEN_SHIFT)
+#define USIC_CCR_PM_SHIFT           (8)       /* Bits 8-9:  */
+#define USIC_CCR_PM_MASK            (3 << USIC_CCR_PM_SHIFT)
+#define USIC_CCR_RSIEN              (1 << 10) /* Bit 10:  */
+#define USIC_CCR_DLIEN              (1 << 11) /* Bit 11:  */
+#define USIC_CCR_TSIEN              (1 << 12) /* Bit 12:  */
+#define USIC_CCR_TBIEN              (1 << 13) /* Bit 13:  */
+#define USIC_CCR_RIEN               (1 << 14) /* Bit 14:  */
+#define USIC_CCR_AIEN               (1 << 15) /* Bit 15:  */
+#define USIC_CCR_BRGIEN             (1 << 16) /* Bit 16:  */
+
 /* Capture Mode Timer Register */
-#define USIC_CMTR_
+
+#define USIC_CMTR_CTV_SHIFT         (0)      /* Bits 0-9:  */
+#define USIC_CMTR_CTV_MASK          (0x3ff << USIC_CMTR_CTV_SHIFT)
+
 /* Protocol Status Register */
-#define USIC_PSR_
+
+#define USIC_PSR_ST0                (1 << 0)  /* Bit 0:   */
+#define USIC_PSR_ST1                (1 << 1)  /* Bit 1:   */
+#define USIC_PSR_ST2                (1 << 2)  /* Bit 2:   */
+#define USIC_PSR_ST3                (1 << 3)  /* Bit 3:   */
+#define USIC_PSR_ST4                (1 << 4)  /* Bit 4:   */
+#define USIC_PSR_ST5                (1 << 5)  /* Bit 5:   */
+#define USIC_PSR_ST6                (1 << 6)  /* Bit 6:   */
+#define USIC_PSR_ST7                (1 << 7)  /* Bit 7:   */
+#define USIC_PSR_ST8                (1 << 8)  /* Bit 8:   */
+#define USIC_PSR_ST9                (1 << 9)  /* Bit 9:   */
+#define USIC_PSR_RSIF               (1 << 10) /* Bit 10:  */
+#define USIC_PSR_DLIF               (1 << 11) /* Bit 11:  */
+#define USIC_PSR_TSIF               (1 << 12) /* Bit 12:  */
+#define USIC_PSR_TBIF               (1 << 13) /* Bit 13:  */
+#define USIC_PSR_RIF                (1 << 14) /* Bit 14:  */
+#define USIC_PSR_AIF                (1 << 15) /* Bit 15:  */
+#define USIC_PSR_BRGIF              (1 << 16) /* Bit 16:  */
+
+#define USIC_PSR_ASCMODE_TXIDLE     (1 << 0)  /* Bit 0:   */
+#define USIC_PSR_ASCMODE_RXIDLE     (1 << 1)  /* Bit 1:   */
+#define USIC_PSR_ASCMODE_SBD        (1 << 2)  /* Bit 2:   */
+#define USIC_PSR_ASCMODE_COL        (1 << 3)  /* Bit 3:   */
+#define USIC_PSR_ASCMODE_RNS        (1 << 4)  /* Bit 4:   */
+#define USIC_PSR_ASCMODE_FER0       (1 << 5)  /* Bit 5:   */
+#define USIC_PSR_ASCMODE_FER1       (1 << 6)  /* Bit 6:   */
+#define USIC_PSR_ASCMODE_RFF        (1 << 7)  /* Bit 7:   */
+#define USIC_PSR_ASCMODE_TFF        (1 << 8)  /* Bit 8:   */
+#define USIC_PSR_ASCMODE_BUSY       (1 << 9)  /* Bit 9:   */
+#define USIC_PSR_ASCMODE_RSIF       (1 << 10) /* Bit 10:  */
+#define USIC_PSR_ASCMODE_DLIF       (1 << 11) /* Bit 11:  */
+#define USIC_PSR_ASCMODE_TSIF       (1 << 12) /* Bit 12:  */
+#define USIC_PSR_ASCMODE_TBIF       (1 << 13) /* Bit 13:  */
+#define USIC_PSR_ASCMODE_RIF        (1 << 14) /* Bit 14:  */
+#define USIC_PSR_ASCMODE_AIF        (1 << 15) /* Bit 15:  */
+#define USIC_PSR_ASCMODE_BRGIF      (1 << 16) /* Bit 16:  */
+
+#define USIC_PSR_SSCMODE_MSLS       (1 << 0)  /* Bit 0:   */
+#define USIC_PSR_SSCMODE_DX2S       (1 << 1)  /* Bit 1:   */
+#define USIC_PSR_SSCMODE_MSLSEV     (1 << 2)  /* Bit 2:   */
+#define USIC_PSR_SSCMODE_DX2TEV     (1 << 3)  /* Bit 3:   */
+#define USIC_PSR_SSCMODE_PARERR     (1 << 4)  /* Bit 4:   */
+#define USIC_PSR_SSCMODE_RSIF       (1 << 10) /* Bit 10:  */
+#define USIC_PSR_SSCMODE_DLIF       (1 << 11) /* Bit 11:  */
+#define USIC_PSR_SSCMODE_TSIF       (1 << 12) /* Bit 12:  */
+#define USIC_PSR_SSCMODE_TBIF       (1 << 13) /* Bit 13:  */
+#define USIC_PSR_SSCMODE_RIF        (1 << 14) /* Bit 14:  */
+#define USIC_PSR_SSCMODE_AIF        (1 << 15) /* Bit 15:  */
+#define USIC_PSR_SSCMODE_BRGIF      (1 << 16) /* Bit 16:  */
+
+#define USIC_PSR_IICMODE_SLSEL      (1 << 0)  /* Bit 0:   */
+#define USIC_PSR_IICMODE_WTDF       (1 << 1)  /* Bit 1:   */
+#define USIC_PSR_IICMODE_SCR        (1 << 2)  /* Bit 2:   */
+#define USIC_PSR_IICMODE_RSCR       (1 << 3)  /* Bit 3:   */
+#define USIC_PSR_IICMODE_PCR        (1 << 4)  /* Bit 4:   */
+#define USIC_PSR_IICMODE_NACK       (1 << 5)  /* Bit 5:   */
+#define USIC_PSR_IICMODE_ARL        (1 << 6)  /* Bit 6:   */
+#define USIC_PSR_IICMODE_SRR        (1 << 7)  /* Bit 7:   */
+#define USIC_PSR_IICMODE_ERR        (1 << 8)  /* Bit 8:   */
+#define USIC_PSR_IICMODE_ACK        (1 << 9)  /* Bit 9:   */
+#define USIC_PSR_IICMODE_RSIF       (1 << 10) /* Bit 10:  */
+#define USIC_PSR_IICMODE_DLIF       (1 << 11) /* Bit 11:  */
+#define USIC_PSR_IICMODE_TSIF       (1 << 12) /* Bit 12:  */
+#define USIC_PSR_IICMODE_TBIF       (1 << 13) /* Bit 13:  */
+#define USIC_PSR_IICMODE_RIF        (1 << 14) /* Bit 14:  */
+#define USIC_PSR_IICMODE_AIF        (1 << 15) /* Bit 15:  */
+#define USIC_PSR_IICMODE_BRGIF      (1 << 16) /* Bit 16:  */
+
+#define USIC_PSR_IISMODE_WA         (1 << 0)  /* Bit 0:   */
+#define USIC_PSR_IISMODE_DX2S       (1 << 1)  /* Bit 1:   */
+#define USIC_PSR_IISMODE_DX2TEV     (1 << 3)  /* Bit 3:   */
+#define USIC_PSR_IISMODE_WAFE       (1 << 4)  /* Bit 4:   */
+#define USIC_PSR_IISMODE_WARE       (1 << 5)  /* Bit 5:   */
+#define USIC_PSR_IISMODE_END        (1 << 6)  /* Bit 6:   */
+#define USIC_PSR_IISMODE_RSIF       (1 << 10) /* Bit 10:  */
+#define USIC_PSR_IISMODE_DLIF       (1 << 11) /* Bit 11:  */
+#define USIC_PSR_IISMODE_TSIF       (1 << 12) /* Bit 12:  */
+#define USIC_PSR_IISMODE_TBIF       (1 << 13) /* Bit 13:  */
+#define USIC_PSR_IISMODE_RIF        (1 << 14) /* Bit 14:  */
+#define USIC_PSR_IISMODE_AIF        (1 << 15) /* Bit 15:  */
+#define USIC_PSR_IISMODE_BRGIF      (1 << 16) /* Bit 16:  */
+
 /* Protocol Status Clear Register */
-#define USIC_PSCR_
+
+#define USIC_PSCR_CST0              (1 << 0)  /* Bit 0:   */
+#define USIC_PSCR_CST1              (1 << 1)  /* Bit 1:   */
+#define USIC_PSCR_CST2              (1 << 2)  /* Bit 2:   */
+#define USIC_PSCR_CST3              (1 << 3)  /* Bit 3:   */
+#define USIC_PSCR_CST4              (1 << 4)  /* Bit 4:   */
+#define USIC_PSCR_CST5              (1 << 5)  /* Bit 5:   */
+#define USIC_PSCR_CST6              (1 << 6)  /* Bit 6:   */
+#define USIC_PSCR_CST7              (1 << 7)  /* Bit 7:   */
+#define USIC_PSCR_CST8              (1 << 8)  /* Bit 8:   */
+#define USIC_PSCR_CST9              (1 << 9)  /* Bit 9:   */
+#define USIC_PSCR_CRSIF             (1 << 10) /* Bit 10:  */
+#define USIC_PSCR_CDLIF             (1 << 11) /* Bit 11:  */
+#define USIC_PSCR_CTSIF             (1 << 12) /* Bit 12:  */
+#define USIC_PSCR_CTBIF             (1 << 13) /* Bit 13:  */
+#define USIC_PSCR_CRIF              (1 << 14) /* Bit 14:  */
+#define USIC_PSCR_CAIF              (1 << 15) /* Bit 15:  */
+#define USIC_PSCR_CBRGIF            (1 << 16) /* Bit 16:  */
+
 /* Receiver Buffer Status Register */
-#define USIC_RBUFSR_
+
+#define USIC_RBUFSR_WLEN_SHIFT      (0)       /* Bits 0-3:  */
+#define USIC_RBUFSR_WLEN_MASK       (15 << USIC_RBUFSR_WLEN_SHIFT)
+#define USIC_RBUFSR_SOF             (1 << 6)  /* Bit 6:   */
+#define USIC_RBUFSR_PAR             (1 << 8)  /* Bit 8:   */
+#define USIC_RBUFSR_PERR            (1 << 9)  /* Bit 9:   */
+#define USIC_RBUFSR_RDV0            (1 << 13) /* Bit 13:  */
+#define USIC_RBUFSR_RDV1            (1 << 14) /* Bit 14:  */
+#define USIC_RBUFSR_DS              (1 << 15) /* Bit 15:  */
+
 /* Receiver Buffer Register */
-#define USIC_RBUF_
+
+#define USIC_RBUF_DSR_SHIFT         (0)       /* Bits 0-15:  */
+#define USIC_RBUF_DSR_MASK          (0xffff << USIC_RBUF_DSR_SHIFT)
+
 /* Receiver Buffer Register for Debugger */
-#define USIC_RBUFD_
+
+#define USIC_RBUFD_DSR_SHIFT        (0)       /* Bits 0-15:  */
+#define USIC_RBUFD_DSR_MASK         (0xffff << USIC_RBUFD_DSR_SHIFT)
+
 /* Receiver Buffer Register 0 */
-#define USIC_RBUF0_
+
+#define USIC_RBUF0_DSR0_SHIFT       (0)       /* Bits 0-15:  */
+#define USIC_RBUF0_DSR0_MASK        (0xffff << USIC_RBUF0_DSR0_SHIFT)
+
 /* Receiver Buffer Register 1 */
-#define USIC_RBUF1_
+
+#define USIC_RBUF1_DSR1_SHIFT       (0)       /* Bits 0-15:  */
+#define USIC_RBUF1_DSR1_MASK        (0xffff << USIC_RBUF1_DSR1_SHIFT)
+
 /*  Receiver Buffer 01 Status Register */
-#define USIC_RBUF01SR_
+
+#define USIC_RBUF01SR_WLEN0_SHIFT   (0)       /* Bits 0-3:  */
+#define USIC_RBUF01SR_WLEN0_MASK    (15 << USIC_RBUF01SR_WLEN0_SHIFT)
+#define USIC_RBUF01SR_SOF0          (1 << 6)  /* Bit 6:   */
+#define USIC_RBUF01SR_PAR0          (1 << 8)  /* Bit 8:   */
+#define USIC_RBUF01SR_PERR0         (1 << 9)  /* Bit 9:   */
+#define USIC_RBUF01SR_RDV00         (1 << 13) /* Bit 13:  */
+#define USIC_RBUF01SR_RDV01         (1 << 14) /* Bit 14:  */
+#define USIC_RBUF01SR_DS0           (1 << 15) /* Bit 15:  */
+#define USIC_RBUF01SR_WLEN1_SHIFT   (16)      /* Bits 16-19:  */
+#define USIC_RBUF01SR_WLEN1_MASK    (15 << USIC_RBUF01SR_WLEN1_SHIFT)
+#define USIC_RBUF01SR_SOF1          (1 << 22) /* Bit 22:  */
+#define USIC_RBUF01SR_PAR1          (1 << 24) /* Bit 24:  */
+#define USIC_RBUF01SR_PERR1         (1 << 25) /* Bit 25:  */
+#define USIC_RBUF01SR_RDV10         (1 << 29) /* Bit 29:  */
+#define USIC_RBUF01SR_RDV11         (1 << 30) /* Bit 30:  */
+#define USIC_RBUF01SR_DS1           (1 << 31) /* Bit 31:  */
+
 /* Flag Modification Register */
-#define USIC_FMR_
+
+#define USIC_FMR_MTDV_SHIFT         (0)       /* Bits 0-1:  */
+#define USIC_FMR_MTDV_MASK          (3 << USIC_FMR_MTDV_SHIFT)
+#define USIC_FMR_ATVC               (1 << 4)  /* Bit 4:   */
+#define USIC_FMR_CRDV0              (1 << 14) /* Bit 14:  */
+#define USIC_FMR_CRDV1              (1 << 15) /* Bit 15:  */
+#define USIC_FMR_SIO0               (1 << 16) /* Bit 16:  */
+#define USIC_FMR_SIO1               (1 << 17) /* Bit 17:  */
+#define USIC_FMR_SIO2               (1 << 18) /* Bit 18:  */
+#define USIC_FMR_SIO3               (1 << 19) /* Bit 19:  */
+#define USIC_FMR_SIO4               (1 << 20) /* Bit 20:  */
+#define USIC_FMR_SIO5               (1 << 21) /* Bit 21:  */
+
 /* Transmit Buffer (32 x 4-bytes) */
-#define USIC_TBUF_
+
+#define USIC_TBUF_TDATA_SHIFT       (0)       /* Bits 0-15:  */
+#define USIC_TBUF_TDATA_MASK        (0xffff << USIC_TBUF_TDATA_SHIFT)
 
 /* USIC FIFO Registers */
 
 /* Bypass Data Register */
-#define USIC_BYP_
+
+#define USIC_BYP_BDATA_SHIFT        (0)       /* Bits 0-15:  */
+#define USIC_BYP_BDATA_MASK         (0xffff << USIC_BYP_BDATA_SHIFT)
+
 /* Bypass Control Register */
-#define USIC_BYPCR_
+
+#define USIC_BYPCR_BWLE_SHIFT       (0)       /* Bits 0-3:  */
+#define USIC_BYPCR_BWLE_MASK        (15 << USIC_BYPCR_BWLE_SHIFT)
+#define USIC_BYPCR_BDSSM            (1 << 8)  /* Bit 8:   */
+#define USIC_BYPCR_BDEN_SHIFT       (10)      /* Bits 10-11:  */
+#define USIC_BYPCR_BDEN_MASK        (3 << USIC_BYPCR_BDEN_SHIFT)
+#define USIC_BYPCR_BDVTR            (1 << 12) /* Bit 12:  */
+#define USIC_BYPCR_BPRIO            (1 << 13) /* Bit 13:  */
+#define USIC_BYPCR_BDV              (1 << 15) /* Bit 15:  */
+#define USIC_BYPCR_BSELO_SHIFT      (16)      /* Bits 16-20:  */
+#define USIC_BYPCR_BSELO_MASK       (31 << USIC_BYPCR_BSELO_SHIFT)
+#define USIC_BYPCR_BHPC_SHIFT       (21)      /* Bits 21-23:  */
+#define USIC_BYPCR_BHPC_MASK        (7 << USIC_BYPCR_BHPC_SHIFT)
+
 /* Transmitter Buffer Control Register */
-#define USIC_TBCTR_
+
+#define USIC_TBCTR_DPTR_SHIFT       (0)       /* Bits 0-1:  */
+#define USIC_TBCTR_DPTR_MASK        (3 << USIC_TBCTR_DPTR_SHIFT)
+#define USIC_TBCTR_LIMIT_SHIFT      (8)       /* Bits 8-13:  */
+#define USIC_TBCTR_LIMIT_MASK       (0x3f << USIC_TBCTR_LIMIT_SHIFT)
+#define USIC_TBCTR_STBTM            (1 << 14) /* Bit 14:  */
+#define USIC_TBCTR_STBTEN           (1 << 15) /* Bit 15:  */
+#define USIC_TBCTR_STBINP_SHIFT     (16)      /* Bits 16-18:  */
+#define USIC_TBCTR_STBINP_MASK      (7 << USIC_TBCTR_STBINP_SHIFT)
+#define USIC_TBCTR_ATBINP_SHIFT     (19)      /* Bits 19-21:  */
+#define USIC_TBCTR_ATBINP_MASK      (7 << USIC_TBCTR_ATBINP_SHIFT)
+#define USIC_TBCTR_SIZE_SHIFT       (24)      /* Bits 24-26:  */
+#define USIC_TBCTR_SIZE_MASK        (7 << USIC_TBCTR_SIZE_SHIFT)
+#define USIC_TBCTR_LOF              (1 << 28) /* Bit 28:  */
+#define USIC_TBCTR_STBIEN           (1 << 30) /* Bit 30:  */
+#define USIC_TBCTR_TBERIEN          (1 << 31) /* Bit 31:  */
+
 /* Receiver Buffer Control Register */
-#define USIC_RBCTR_
+
+#define USIC_RBCTR_DPTR_SHIFT       (0)       /* Bits 0-5:  */
+#define USIC_RBCTR_DPTR_MASK        (0x3f << USIC_RBCTR_DPTR_SHIFT)
+#define USIC_RBCTR_LIMIT_SHIFT      (8)       /* Bits 8-13:  */
+#define USIC_RBCTR_LIMIT_MASK       (0x3f << USIC_RBCTR_LIMIT_SHIFT)
+#define USIC_RBCTR_SRBTM            (1 << 14) /* Bit 14:  */
+#define USIC_RBCTR_SRBTEN           (1 << 15) /* Bit 15:  */
+#define USIC_RBCTR_SRBINP_SHIFT     (16)      /* Bits 16-18:  */
+#define USIC_RBCTR_SRBINP_MASK      (7 << USIC_RBCTR_SRBINP_SHIFT)
+#define USIC_RBCTR_ARBINP_SHIFT     (19)      /* Bits 19-21:  */
+#define USIC_RBCTR_ARBINP_MASK      (7 << USIC_RBCTR_ARBINP_SHIFT)
+#define USIC_RBCTR_RCIM_SHIFT       (22)      /* Bits 22-23:  */
+#define USIC_RBCTR_RCIM_MASK        (3 << USIC_RBCTR_RCIM_SHIFT)
+#define USIC_RBCTR_SIZE_SHIFT       (24)      /* Bits 24-26:  */
+#define USIC_RBCTR_SIZE_MASK        (7 << USIC_RBCTR_SIZE_SHIFT)
+#define USIC_RBCTR_RNM              (1 << 27) /* Bit 27:  */
+#define USIC_RBCTR_LOF              (1 << 28) /* Bit 28:  */
+#define USIC_RBCTR_ARBIEN           (1 << 29) /* Bit 29:  */
+#define USIC_RBCTR_SRBIEN           (1 << 30) /* Bit 30:  */
+#define USIC_RBCTR_RBERIEN          (1 << 31) /* Bit 31:  */
+
 /* Transmit/Receive Buffer Pointer Register */
-#define USIC_TRBPTR_
+
+#define USIC_TRBPTR_TDIPTR_SHIFT    (0)       /* Bits 0-5:  */
+#define USIC_TRBPTR_TDIPTR_MASK     (0x3f << USIC_TRBPTR_TDIPTR_SHIFT)
+#define USIC_TRBPTR_TDOPTR_SHIFT    (8)       /* Bits 813xx:  */
+#define USIC_TRBPTR_TDOPTR_MASK     (0x3f << USIC_TRBPTR_TDOPTR_SHIFT)
+#define USIC_TRBPTR_RDIPTR_SHIFT    (16)      /* Bits 16-21:  */
+#define USIC_TRBPTR_RDIPTR_MASK     (0x3f << USIC_TRBPTR_RDIPTR_SHIFT)
+#define USIC_TRBPTR_RDOPTR_SHIFT    (24)      /* Bits 24-29:  */
+#define USIC_TRBPTR_RDOPTR_MASK     (0x3f << USIC_TRBPTR_RDOPTR_SHIFT)
+
 /* Transmit/Receive Buffer Status Register */
-#define USIC_TRBSR_
+
+#define USIC_TRBSR_SRBI             (1 << 0)  /* Bit 0:   */
+#define USIC_TRBSR_RBERI            (1 << 1)  /* Bit 1:   */
+#define USIC_TRBSR_ARBI             (1 << 2)  /* Bit 2:   */
+#define USIC_TRBSR_REMPTY           (1 << 3)  /* Bit 3:   */
+#define USIC_TRBSR_RFULL            (1 << 4)  /* Bit 4:   */
+#define USIC_TRBSR_RBUS             (1 << 5)  /* Bit 5:   */
+#define USIC_TRBSR_SRBT             (1 << 6)  /* Bit 6:   */
+#define USIC_TRBSR_STBI             (1 << 8)  /* Bit 8:   */
+#define USIC_TRBSR_TBERI            (1 << 9)  /* Bit 9:   */
+#define USIC_TRBSR_TEMPTY           (1 << 11) /* Bit 11:  */
+#define USIC_TRBSR_TFULL            (1 << 12) /* Bit 12:  */
+#define USIC_TRBSR_TBUS             (1 << 13) /* Bit 13:  */
+#define USIC_TRBSR_STBT             (1 << 14) /* Bit 14:  */
+#define USIC_TRBSR_RBFLVL_SHIFT     (16)      /* Bits 16-22:  */
+#define USIC_TRBSR_RBFLVL_MASK      (0x7f << USIC_TRBSR_RBFLVL_SHIFT)
+#define USIC_TRBSR_TBFLVL_SHIFT     (24)      /* Bits 22-28:  */
+#define USIC_TRBSR_TBFLVL_MASK      (0x7f << USIC_TRBSR_TBFLVL_SHIFT)
+
 /* Transmit/Receive Buffer Status Clear Register */
-#define USIC_TRBSCR_
+
+#define USIC_TRBSCR_CSRBI           (1 << 0)  /* Bit 0:   */
+#define USIC_TRBSCR_CRBERI          (1 << 1)  /* Bit 1:   */
+#define USIC_TRBSCR_CARBI           (1 << 2)  /* Bit 2:   */
+#define USIC_TRBSCR_CSTBI           (1 << 8)  /* Bit 8:   */
+#define USIC_TRBSCR_CTBERI          (1 << 9)  /* Bit 9:   */
+#define USIC_TRBSCR_CBDV            (1 << 10) /* Bit 10:  */
+#define USIC_TRBSCR_FLUSHRB         (1 << 14) /* Bit 14:  */
+#define USIC_TRBSCR_FLUSHTB         (1 << 15) /* Bit 15:  */
+
 /* Receiver Buffer Output Register */
-#define USIC_OUTR_
+
+#define USIC_OUTR_DSR_SHIFT         (0)       /* Bits 0-15:  */
+#define USIC_OUTR_DSR_MASK          (0xffff << USIC_OUTR_DSR_SHIFT)
+#define USIC_OUTR_RCI_SHIFT         (16)      /* Bits 16-20:  */
+#define USIC_OUTR_RCI_MASK          (31 << USIC_OUTR_RCI_SHIFT)
+
 /* Receiver Buffer Output Register L for Debugger */
-#define USIC_OUTDR_
+
+#define USIC_OUTDR_DSR_SHIFT        (0)       /* Bits 0-15:  */
+#define USIC_OUTDR_DSR_MASK         (0xffff << USIC_OUTDR_DSR_SHIFT)
+#define USIC_OUTDR_RCI_SHIFT        (16)      /* Bits 16-30:  */
+#define USIC_OUTDR_RCI_MASK         (31 << USIC_OUTDR_RCI_SHIFT)
+
 /* Transmit FIFO Buffer (32 x 4-bytes) */
-#define USIC_IN_
+
+#define USIC_IN_TDATA_SHIFT         (0)      /* Bits 0-15:  */
+#define USIC_IN_TDATA_MASK          (0xffff << USIC_IN_TDATA_SHIFT)
 
 #endif /* __ARCH_ARM_SRC_XMC4_CHIP_XMC4_USIC_H */
