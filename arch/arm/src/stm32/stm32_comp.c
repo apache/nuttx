@@ -147,114 +147,114 @@
 
 #ifdef CONFIG_STM32_COMP1
 static struct stm32_comp_s g_comp1priv =
-  {
-    .blanking  = COMP1_BLANKING,
-    .pol  = COMP1_POL,
-    .inm  = COMP1_INM,
-    .out  = COMP1_OUTSEL,
-    .lock = COMP1_LOCK,
-    .csr  = STM32_COMP1_CSR,
+{
+  .blanking  = COMP1_BLANKING,
+  .pol  = COMP1_POL,
+  .inm  = COMP1_INM,
+  .out  = COMP1_OUTSEL,
+  .lock = COMP1_LOCK,
+  .csr  = STM32_COMP1_CSR,
 #ifndef CONFIG_STM32_STM32F33XX
-    .mode = COMP1_MODE,
-    .hyst = COMP1_HYST,
+  .mode = COMP1_MODE,
+  .hyst = COMP1_HYST,
 #endif
-  };
+};
 #endif
 
 #ifdef CONFIG_STM32_COMP2
 static struct stm32_comp_s g_comp2priv =
-  {
-    .blanking  = COMP2_BLANKING,
-    .pol  = COMP2_POL,
-    .inm  = COMP2_INM,
-    .out  = COMP2_OUTSEL,
-    .lock = COMP2_LOCK,
-    .csr  = STM32_COMP2_CSR,
+{
+  .blanking  = COMP2_BLANKING,
+  .pol  = COMP2_POL,
+  .inm  = COMP2_INM,
+  .out  = COMP2_OUTSEL,
+  .lock = COMP2_LOCK,
+  .csr  = STM32_COMP2_CSR,
 #ifndef CONFIG_STM32_STM32F33XX
-    .mode = COMP2_MODE,
-    .hyst = COMP2_HYST,
+  .mode = COMP2_MODE,
+  .hyst = COMP2_HYST,
 #endif
-  };
+};
 #endif
 
 #ifdef CONFIG_STM32_COMP3
-  static struct stm32_comp_s g_comp3priv =
-    {
-      .blanking  = COMP3_BLANKING,
-      .pol  = COMP3_POL,
-      .inm  = COMP3_INM,
-      .out  = COMP3_OUTSEL,
-      .lock = COMP3_LOCK,
-      .csr  = STM32_COMP3_CSR,
+static struct stm32_comp_s g_comp3priv =
+{
+  .blanking  = COMP3_BLANKING,
+  .pol  = COMP3_POL,
+  .inm  = COMP3_INM,
+  .out  = COMP3_OUTSEL,
+  .lock = COMP3_LOCK,
+  .csr  = STM32_COMP3_CSR,
 #ifndef CONFIG_STM32_STM32F33XX
-      .mode = COMP3_MODE,
-      .hyst = COMP3_HYST,
+    .mode = COMP3_MODE,
+    .hyst = COMP3_HYST,
 #endif
-    };
+};
 #endif
 
 #ifdef CONFIG_STM32_COMP4
-  static struct stm32_comp_s g_comp4priv =
-    {
-      .blanking  = COMP4_BLANKING,
-      .pol  = COMP4_POL,
-      .inm  = COMP4_INM,
-      .out  = COMP4_OUTSEL,
-      .lock = COMP4_LOCK,
-      .csr  = STM32_COMP4_CSR,
+static struct stm32_comp_s g_comp4priv =
+{
+  .blanking  = COMP4_BLANKING,
+  .pol  = COMP4_POL,
+  .inm  = COMP4_INM,
+  .out  = COMP4_OUTSEL,
+  .lock = COMP4_LOCK,
+  .csr  = STM32_COMP4_CSR,
 #ifndef CONFIG_STM32_STM32F33XX
-      .mode = COMP4_MODE,
-      .hyst = COMP4_HYST,
+  .mode = COMP4_MODE,
+  .hyst = COMP4_HYST,
 #endif
-    };
+};
 #endif
 
 #ifdef CONFIG_STM32_COMP5
-  static struct stm32_comp_s g_comp5priv =
-    {
-      .blanking  = COMP5_BLANKING,
-      .pol  = COMP5_POL,
-      .inm  = COMP5_INM,
-      .out  = COMP5_OUTSEL,
-      .lock = COMP5_LOCK,
-      .csr  = STM32_COMP5_CSR,
+static struct stm32_comp_s g_comp5priv =
+{
+  .blanking  = COMP5_BLANKING,
+  .pol  = COMP5_POL,
+  .inm  = COMP5_INM,
+  .out  = COMP5_OUTSEL,
+  .lock = COMP5_LOCK,
+  .csr  = STM32_COMP5_CSR,
 #ifndef CONFIG_STM32_STM32F33XX
-      .mode = COMP5_MODE,
-      .hyst = COMP5_HYST,
+  .mode = COMP5_MODE,
+  .hyst = COMP5_HYST,
 #endif
-    };
+};
 #endif
 
 #ifdef CONFIG_STM32_COMP6
-  static struct stm32_comp_s g_comp6priv =
-    {
-      .blanking  = COMP6_BLANKING,
-      .pol  = COMP6_POL,
-      .inm  = COMP6_INM,
-      .out  = COMP6_OUTSEL,
-      .lock = COMP6_LOCK,
-      .csr  = STM32_COMP6_CSR,
+static struct stm32_comp_s g_comp6priv =
+{
+  .blanking  = COMP6_BLANKING,
+  .pol  = COMP6_POL,
+  .inm  = COMP6_INM,
+  .out  = COMP6_OUTSEL,
+  .lock = COMP6_LOCK,
+  .csr  = STM32_COMP6_CSR,
 #ifndef CONFIG_STM32_STM32F33XX
-      .mode = COMP6_MODE,
-      .hyst = COMP6_HYST,
+  .mode = COMP6_MODE,
+  .hyst = COMP6_HYST,
 #endif
-    };
+};
 #endif
 
 #ifdef CONFIG_STM32_COMP7
-  static struct stm32_comp_s g_comp7priv =
-    {
-      .blanking  = COMP7_BLANKING,
-      .pol  = COMP7_POL,
-      .inm  = COMP7_INM,
-      .out  = COMP7_OUTSEL,
-      .lock = COMP7_LOCK,
-      .csr  = STM32_COMP7_CSR,
+static struct stm32_comp_s g_comp7priv =
+{
+  .blanking  = COMP7_BLANKING,
+  .pol  = COMP7_POL,
+  .inm  = COMP7_INM,
+  .out  = COMP7_OUTSEL,
+  .lock = COMP7_LOCK,
+  .csr  = STM32_COMP7_CSR,
 #ifndef CONFIG_STM32_STM32F33XX
-      .mode = COMP7_MODE,
-      .hyst = COMP7_HYST,
+  .mode = COMP7_MODE,
+  .hyst = COMP7_HYST,
 #endif
-    };
+};
 #endif
 
 /****************************************************************************
@@ -267,10 +267,6 @@ static inline uint32_t comp_getreg_csr(FAR struct stm32_comp_s *priv);
 static inline void comp_putreg_csr(FAR struct stm32_comp_s *priv,
                                    uint32_t value);
 static bool stm32_complock_get(FAR struct stm32_comp_s *priv);
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -401,30 +397,37 @@ int stm32_compconfig(FAR struct stm32_comp_s *priv)
       index = 1;
       break;
 #endif
+
     case STM32_COMP2_CSR:
       index = 2;
       break;
+
 #ifdef CONFIG_STM32_COMP3
     case STM32_COMP3_CSR:
       index = 3;
       break;
 #endif
+
     case STM32_COMP4_CSR:
       index = 4;
       break;
+
 #ifdef CONFIG_STM32_COMP5
     case STM32_COMP5_CSR:
       index = 5;
       break;
 #endif
+
     case STM32_COMP6_CSR:
       index = 6;
       break;
+
 #ifdef CONFIG_STM32_COMP7
     case STM32_COMP7_CSR:
       index = 7;
       break;
 #endif
+
     default:
       return -EINVAL;
     }
@@ -438,16 +441,19 @@ int stm32_compconfig(FAR struct stm32_comp_s *priv)
       stm32_configgpio(GPIO_COMP2_INP);
       break;
 #endif
+
 #ifdef CONFIG_STM32_COMP4
     case 4:
       stm32_configgpio(GPIO_COMP4_INP);
       break;
 #endif
+
 #ifdef CONFIG_STM32_COMP6
     case 6:
       stm32_configgpio(GPIO_COMP6_INP);
       break;
 #endif
+
     default:
       return -EINVAL;
     }
@@ -518,7 +524,7 @@ int stm32_compconfig(FAR struct stm32_comp_s *priv)
             return -EINVAL;
           }
 
-      break;
+        break;
       }
 
     default:
@@ -567,9 +573,14 @@ int stm32_compconfig(FAR struct stm32_comp_s *priv)
 
     case COMP_OUTSEL_T2OCC:
       if (index == 2)
-        regval |= COMP2_CSR_OUTSEL_T2OCC;
+        {
+          regval |= COMP2_CSR_OUTSEL_T2OCC;
+        }
       else if (index == 6)
-        regval |= COMP6_CSR_OUTSEL_T2OCC;
+        {
+          regval |= COMP6_CSR_OUTSEL_T2OCC;
+        }
+
       break;
 
     case COMP_OUTSEL_T16OCC:
@@ -594,7 +605,6 @@ int stm32_compconfig(FAR struct stm32_comp_s *priv)
 
     default:
       return -EINVAL;
-
     }
 
   /* Set Comparator output polarity */
@@ -648,7 +658,9 @@ int stm32_compconfig(FAR struct stm32_comp_s *priv)
   /* Lock Comparator if needed */
 
   if (priv->lock == COMP_LOCK_RO)
-    stm32_complock(priv, true);
+    {
+      stm32_complock(priv, true);
+    }
 
   return OK;
 }
@@ -684,42 +696,49 @@ FAR struct stm32_comp_s* stm32_compinitialize(int intf)
       priv = &g_comp1priv;
       break;
 #endif
+
 #ifdef CONFIG_STM32_COMP2
     case 2:
       ainfo("COMP2 selected\n");
       priv = &g_comp2priv;
       break;
 #endif
+
 #ifdef CONFIG_STM32_COMP3
     case 3:
       ainfo("COMP3 selected\n");
       priv = &g_comp3priv;
       break;
 #endif
+
 #ifdef CONFIG_STM32_COMP4
     case 4:
       ainfo("COMP4 selected\n");
       priv = &g_comp4priv;
       break;
 #endif
+
 #ifdef CONFIG_STM32_COMP5
     case 5:
       ainfo("COMP5 selected\n");
       priv = &g_comp5priv;
       break;
 #endif
+
 #ifdef CONFIG_STM32_COMP6
     case 6:
       ainfo("COMP6 selected\n");
       priv = &g_comp6priv;
       break;
 #endif
+
 #ifdef CONFIG_STM32_COMP7
     case 7:
       ainfo("COMP7 selected\n");
       priv = &g_comp7priv;
       break;
 #endif
+
     default:
       aerr("ERROR: No COMP interface defined\n");
       return NULL;
