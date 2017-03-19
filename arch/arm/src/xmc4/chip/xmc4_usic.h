@@ -536,8 +536,7 @@
 #  define USIC_DXCR_CM_RISING       (1 << USIC_DX0CR_CM_SHIFT) /* Rising edge activates DXnT */
 #  define USIC_DXCR_CM_FALLING      (2 << USIC_DX0CR_CM_SHIFT) /* Falling edge activates DXnT */
 #  define USIC_DXCR_CM_BOTH         (3 << USIC_DX0CR_CM_SHIFT) /* Both edges activate DXnT */
-
-#define USIC_DXCR_DXS               (1 << 15) /* Bit 15:   */
+#define USIC_DXCR_DXS               (1 << 15) /* Bit 15:  Synchronized Data Value */
 
 /* Shift Control Register */
 
@@ -626,67 +625,80 @@
 #define USIC_PCR_CTR30              (1 << 30) /* Bit 30: Protocol Control Bit 30 */
 #define USIC_PCR_CTR31              (1 << 31) /* Bit 31: Protocol Control Bit 31 */
 
-#define USIC_PCR_ASCMODE_SMD        (1 << 0)  /* Bit 0:   */
-#define USIC_PCR_ASCMODE_STPB       (1 << 1)  /* Bit 1:   */
-#define USIC_PCR_ASCMODE_IDM        (1 << 2)  /* Bit 2:   */
-#define USIC_PCR_ASCMODE_SBIEN      (1 << 3)  /* Bit 3:   */
-#define USIC_PCR_ASCMODE_CDEN       (1 << 4)  /* Bit 4:   */
-#define USIC_PCR_ASCMODE_RNIEN      (1 << 5)  /* Bit 5:   */
-#define USIC_PCR_ASCMODE_FEIEN      (1 << 6)  /* Bit 6:   */
-#define USIC_PCR_ASCMODE_FFIEN      (1 << 7)  /* Bit 7:   */
-#define USIC_PCR_ASCMODE_SP_SHIFT   (8)       /* Bits 8-12:  */
+#define USIC_PCR_ASCMODE_SMD        (1 << 0)  /* Bit 0:  Sample Mode */
+#define USIC_PCR_ASCMODE_STPB       (1 << 1)  /* Bit 1:  Stop Bits */
+#define USIC_PCR_ASCMODE_IDM        (1 << 2)  /* Bit 2:  Idle Detection Mode */
+#define USIC_PCR_ASCMODE_SBIEN      (1 << 3)  /* Bit 3:  Synchronization Break Interrupt Enable */
+#define USIC_PCR_ASCMODE_CDEN       (1 << 4)  /* Bit 4:  Collision Detection Enable */
+#define USIC_PCR_ASCMODE_RNIEN      (1 << 5)  /* Bit 5:  Receiver Noise Detection Interrupt Enable */
+#define USIC_PCR_ASCMODE_FEIEN      (1 << 6)  /* Bit 6:  Format Error Interrupt Enable */
+#define USIC_PCR_ASCMODE_FFIEN      (1 << 7)  /* Bit 7:  Frame Finished Interrupt Enable */
+#define USIC_PCR_ASCMODE_SP_SHIFT   (8)       /* Bits 8-12: Sample Point */
 #define USIC_PCR_ASCMODE_SP_MASK    (31 << USIC_PCR_ASCMODE_SP_SHIFT)
-#define USIC_PCR_ASCMODE_PL_SHIFT   (13)      /* Bits 13-15:  */
+#  define USIC_PCR_ASCMODE_SP(n)    ((uint32_t)(n) << USIC_PCR_ASCMODE_SP_SHIFT)
+#define USIC_PCR_ASCMODE_PL_SHIFT   (13)      /* Bits 13-15: Pulse Length */
 #define USIC_PCR_ASCMODE_PL_MASK    (7 << USIC_PCR_ASCMODE_PL_SHIFT)
-#define USIC_PCR_ASCMODE_RSTEN      (1 << 16) /* Bit 16:  */
-#define USIC_PCR_ASCMODE_TSTEN      (1 << 17) /* Bit 16:  */
-#define USIC_PCR_ASCMODE_MCLK       (1 << 31) /* Bit 31:  */
+  #define USIC_PCR_ASCMODE_PL(n)    ((uint32_t)((n)-1) << USIC_PCR_ASCMODE_PL_SHIFT)
+#define USIC_PCR_ASCMODE_RSTEN      (1 << 16) /* Bit 16: Receiver Status Enable */
+#define USIC_PCR_ASCMODE_TSTEN      (1 << 17) /* Bit 17: Transmitter Status Enable */
+#define USIC_PCR_ASCMODE_MCLK       (1 << 31) /* Bit 31: Master Clock Enable */
 
-#define USIC_PCR_SSCMODE_MSLSEN     (1 << 0)  /* Bit 0:   */
-#define USIC_PCR_SSCMODE_SELCTR     (1 << 1)  /* Bit 1:   */
-#define USIC_PCR_SSCMODE_SELINV     (1 << 2)  /* Bit 2:   */
-#define USIC_PCR_SSCMODE_FEM        (1 << 3)  /* Bit 3:   */
-#define USIC_PCR_SSCMODE_CTQSEL1_SHIFT (4)    /* Bits 4-5:  */
-#define USIC_PCR_SSCMODE_CTQSEL1_MASK  (3 << USIC_PCR_SSCMODE_CTQSEL1_SHIFT)
-#define USIC_PCR_SSCMODE_PCTQ1_SHIFT   (6)    /* Bits 6-7:  */
+#define USIC_PCR_SSCMODE_MSLSEN     (1 << 0)  /* Bit 0:  MSLS Enable */
+#define USIC_PCR_SSCMODE_SELCTR     (1 << 1)  /* Bit 1:  Select Control */
+#define USIC_PCR_SSCMODE_SELINV     (1 << 2)  /* Bit 2:  Select Inversion */
+#define USIC_PCR_SSCMODE_FEM        (1 << 3)  /* Bit 3:  Frame End Mode */
+#define USIC_PCR_SSCMODE_CTQSEL1_SHIFT   (4)  /* Bits 4-5: Input Frequency Selection */
+#define USIC_PCR_SSCMODE_CTQSEL1_MASK    (3 << USIC_PCR_SSCMODE_CTQSEL1_SHIFT)
+#  define USIC_PCR_SSCMODE_CTQSEL1_FPDIV (0 << USIC_PCR_SSCMODE_CTQSEL1_SHIFT) /* fCTQIN = fPDIV */
+#  define USIC_PCR_SSCMODE_CTQSEL1_FPPP  (1 << USIC_PCR_SSCMODE_CTQSEL1_SHIFT) /* fCTQIN = fPPP */
+#  define USIC_PCR_SSCMODE_CTQSEL1_FSCLK (2 << USIC_PCR_SSCMODE_CTQSEL1_SHIFT) /* fCTQIN = fSCLK */
+#  define USIC_PCR_SSCMODE_CTQSEL1_FMCLK (3 << USIC_PCR_SSCMODE_CTQSEL1_SHIFT) /* fCTQIN = fMCLK */
+#define USIC_PCR_SSCMODE_PCTQ1_SHIFT   (6)    /* Bits 6-7: Divider Factor PCTQ1 for Tiw and Tnf */
 #define USIC_PCR_SSCMODE_PCTQ1_MASK    (3 << USIC_PCR_SSCMODE_PCTQ1_SHIFT)
-#define USIC_PCR_SSCMODE_DCTQ1_SHIFT   (8)    /* Bits 8-12:  */
-#define USIC_PCR_SSCMODE_DCTQ1_MASK    (0x1f << USIC_PCR_SSCMODE_DCTQ1_SHIFT)
-#define USIC_PCR_SSCMODE_PARIEN     (1 << 13) /* Bit 13:  */
-#define USIC_PCR_SSCMODE_MSLSIEN    (1 << 14) /* Bit 14:  */
-#define USIC_PCR_SSCMODE_DX2TIEN    (1 << 15) /* Bit 15:  */
-#define USIC_PCR_SSCMODE_SELO_SHIFT (16)      /* Bits 16-23:  */
+#  define USIC_PCR_SSCMODE_PCTQ1(n)    ((uint32_t)((n)-1) << USIC_PCR_SSCMODE_PCTQ1_SHIFT)
+#define USIC_PCR_SSCMODE_DCTQ1_SHIFT   (8)    /* Bits 8-12: Divider Factor DCTQ1 for Tiw and Tnf */
+#  define USIC_PCR_SSCMODE_DCTQ1(n)    (0x1f << USIC_PCR_SSCMODE_DCTQ1_SHIFT)
+#define USIC_PCR_SSCMODE_DCTQ1_MASK    ((uint32_t)((n)-1) << USIC_PCR_SSCMODE_DCTQ1_SHIFT)
+#define USIC_PCR_SSCMODE_PARIEN     (1 << 13) /* Bit 13: Parity Error Interrupt Enable */
+#define USIC_PCR_SSCMODE_MSLSIEN    (1 << 14) /* Bit 14: MSLS Interrupt Enable */
+#define USIC_PCR_SSCMODE_DX2TIEN    (1 << 15) /* Bit 15: DX2T Interrupt Enable */
+#define USIC_PCR_SSCMODE_SELO_SHIFT (16)      /* Bits 16-23: Select Output */
 #define USIC_PCR_SSCMODE_SELO_MASK  (0xff << USIC_PCR_SSCMODE_SELO_SHIFT)
-#define USIC_PCR_SSCMODE_TIWEN      (1 << 24) /* Bit 24:  */
-#define USIC_PCR_SSCMODE_SLPHSEL    (1 << 25) /* Bit 25:  */
-#define USIC_PCR_SSCMODE_MCLK       (1 << 31) /* Bit 31:  */
+#  define USIC_PCR_SSCMODE_SELO(n)  (1 << ((n) + USIC_PCR_SSCMODE_SELO_SHIFT))
+#define USIC_PCR_SSCMODE_TIWEN      (1 << 24) /* Bit 24: Enable Inter-Word Delay Tiw */
+#define USIC_PCR_SSCMODE_SLPHSEL    (1 << 25) /* Bit 25: Slave Mode Clock Phase Select */
+#define USIC_PCR_SSCMODE_MCLK       (1 << 31) /* Bit 31: Master Clock Enable */
 
-#define USIC_PCR_IICMODE_SLAD_SHIFT (0)       /* Bits 0-15:  */
+#define USIC_PCR_IICMODE_SLAD_SHIFT (0)       /* Bits 0-15: Slave Address */
 #define USIC_PCR_IICMODE_SLAD_MASK  (0xffff << USIC_PCR_IICMODE_SLAD_SHIFT)
-#define USIC_PCR_IICMODE_ACK00      (1 << 16) /* Bit 16:  */
-#define USIC_PCR_IICMODE_STIM       (1 << 17) /* Bit 17:  */
-#define USIC_PCR_IICMODE_SCRIEN     (1 << 18) /* Bit 18:  */
-#define USIC_PCR_IICMODE_RSCRIEN    (1 << 19) /* Bit 19:  */
-#define USIC_PCR_IICMODE_PCRIEN     (1 << 20) /* Bit 20:  */
-#define USIC_PCR_IICMODE_NACKIEN    (1 << 21) /* Bit 21:  */
-#define USIC_PCR_IICMODE_ARLIEN     (1 << 22) /* Bit 22:  */
-#define USIC_PCR_IICMODE_SRRIEN     (1 << 23) /* Bit 23:  */
-#define USIC_PCR_IICMODE_ERRIEN     (1 << 24) /* Bit 24:  */
-#define USIC_PCR_IICMODE_SACKDIS    (1 << 25) /* Bit 25:  */
-#define USIC_PCR_IICMODE_HDEL_SHIFT (26)      /* Bits 26-29:  */
+#  define USIC_PCR_IICMODE_SLAD(n)  ((uint32_t)(n) << USIC_PCR_IICMODE_SLAD_SHIFT)
+#define USIC_PCR_IICMODE_ACK00      (1 << 16) /* Bit 16: Acknowledge 00H */
+#define USIC_PCR_IICMODE_STIM       (1 << 17) /* Bit 17: Symbol Timing */
+#define USIC_PCR_IICMODE_SCRIEN     (1 << 18) /* Bit 18: Start Condition Received Interrupt Enable */
+#define USIC_PCR_IICMODE_RSCRIEN    (1 << 19) /* Bit 19: Repeated Start Condition Received Interrupt */
+#define USIC_PCR_IICMODE_PCRIEN     (1 << 20) /* Bit 20: Stop Condition Received Interrupt Enable */
+#define USIC_PCR_IICMODE_NACKIEN    (1 << 21) /* Bit 21: Non-Acknowledge Interrupt Enable */
+#define USIC_PCR_IICMODE_ARLIEN     (1 << 22) /* Bit 22: Arbitration Lost Interrupt Enable */
+#define USIC_PCR_IICMODE_SRRIEN     (1 << 23) /* Bit 23: Slave Read Request Interrupt Enable */
+#define USIC_PCR_IICMODE_ERRIEN     (1 << 24) /* Bit 24: Error Interrupt Enable */
+#define USIC_PCR_IICMODE_SACKDIS    (1 << 25) /* Bit 25: Slave Acknowledge Disable */
+#define USIC_PCR_IICMODE_HDEL_SHIFT (26)      /* Bits 26-29: Hardware Delay */
 #define USIC_PCR_IICMODE_HDEL_MASK  (15 << USIC_PCR_IICMODE_HDEL_SHIFT)
-#define USIC_PCR_IICMODE_ACKIEN     (1 << 30) /* Bit 30:  */
-#define USIC_PCR_IICMODE_MCLK       (1 << 31) /* Bit 31:  */
+#  define USIC_PCR_IICMODE_HDEL(n)  ((uint32_t)(n) << USIC_PCR_IICMODE_HDEL_SHIFT)
+#define USIC_PCR_IICMODE_ACKIEN     (1 << 30) /* Bit 30: Acknowledge Interrupt Enable */
+#define USIC_PCR_IICMODE_MCLK       (1 << 31) /* Bit 31: Master Clock Enable */
 
-#define USIC_PCR_IISMODE_WAGEN      (1 << 0)  /* Bit 0:   */
-#define USIC_PCR_IISMODE_DTEN       (1 << 1)  /* Bit 1:   */
-#define USIC_PCR_IISMODE_SELINV     (1 << 2)  /* Bit 2:   */
-#define USIC_PCR_IISMODE_WAFEIEN    (1 << 4)  /* Bit 4:   */
-#define USIC_PCR_IISMODE_WAREIEN    (1 << 5)  /* Bit 5:   */
-#define USIC_PCR_IISMODE_ENDIEN     (1 << 6)  /* Bit 6:   */
-#define USIC_PCR_IISMODE_TDEL_SHIFT (16)      /* Bits 15-21:  */
+#define USIC_PCR_IISMODE_WAGEN      (1 << 0)  /* Bit 0:  WA Generation Enable */
+#define USIC_PCR_IISMODE_DTEN       (1 << 1)  /* Bit 1:  Data Transfers Enable */
+#define USIC_PCR_IISMODE_SELINV     (1 << 2)  /* Bit 2:  Select Inversion */
+#define USIC_PCR_IISMODE_WAFEIEN    (1 << 4)  /* Bit 4:  WA Falling Edge Interrupt Enable */
+#define USIC_PCR_IISMODE_WAREIEN    (1 << 5)  /* Bit 5:  WA Rising Edge Interrupt Enable */
+#define USIC_PCR_IISMODE_ENDIEN     (1 << 6)  /* Bit 6:  END Interrupt Enable */
+#define USIC_PCR_IISMODE_DX2TIEN    (1 << 15) /* Bit 15: DX2T Interrupt Enable */
+#define USIC_PCR_IISMODE_TDEL_SHIFT (16)      /* Bits 16-21: Transfer Delay */
 #define USIC_PCR_IISMODE_TDEL_MASK  (0x3f << USIC_PCR_IISMODE_TDEL_SHIFT)
-#define USIC_PCR_IISMODE_MCLK       (1 << 31) /* Bit 31:  */
+#  define USIC_PCR_IISMODE_TDEL(n)  ((uint32_t)(n) << USIC_PCR_IISMODE_TDEL_SHIFT)
+#define USIC_PCR_IISMODE_MCLK       (1 << 31) /* Bit 31: Master Clock Enable */
 
 /* Channel Control Register */
 
@@ -742,68 +754,68 @@
 #define USIC_PSR_AIF                (1 << 15) /* Bit 15: Alternative Receive Indication Flag */
 #define USIC_PSR_BRGIF              (1 << 16) /* Bit 16: Baud Rate Generator Indication Fl */
 
-#define USIC_PSR_ASCMODE_TXIDLE     (1 << 0)  /* Bit 0:   */
-#define USIC_PSR_ASCMODE_RXIDLE     (1 << 1)  /* Bit 1:   */
-#define USIC_PSR_ASCMODE_SBD        (1 << 2)  /* Bit 2:   */
-#define USIC_PSR_ASCMODE_COL        (1 << 3)  /* Bit 3:   */
-#define USIC_PSR_ASCMODE_RNS        (1 << 4)  /* Bit 4:   */
-#define USIC_PSR_ASCMODE_FER0       (1 << 5)  /* Bit 5:   */
-#define USIC_PSR_ASCMODE_FER1       (1 << 6)  /* Bit 6:   */
-#define USIC_PSR_ASCMODE_RFF        (1 << 7)  /* Bit 7:   */
-#define USIC_PSR_ASCMODE_TFF        (1 << 8)  /* Bit 8:   */
-#define USIC_PSR_ASCMODE_BUSY       (1 << 9)  /* Bit 9:   */
-#define USIC_PSR_ASCMODE_RSIF       (1 << 10) /* Bit 10:  */
-#define USIC_PSR_ASCMODE_DLIF       (1 << 11) /* Bit 11:  */
-#define USIC_PSR_ASCMODE_TSIF       (1 << 12) /* Bit 12:  */
-#define USIC_PSR_ASCMODE_TBIF       (1 << 13) /* Bit 13:  */
-#define USIC_PSR_ASCMODE_RIF        (1 << 14) /* Bit 14:  */
-#define USIC_PSR_ASCMODE_AIF        (1 << 15) /* Bit 15:  */
-#define USIC_PSR_ASCMODE_BRGIF      (1 << 16) /* Bit 16:  */
+#define USIC_PSR_ASCMODE_TXIDLE     (1 << 0)  /* Bit 0:  Transmission Idle */
+#define USIC_PSR_ASCMODE_RXIDLE     (1 << 1)  /* Bit 1:  Reception Idle */
+#define USIC_PSR_ASCMODE_SBD        (1 << 2)  /* Bit 2:  Synchronization Break Detected */
+#define USIC_PSR_ASCMODE_COL        (1 << 3)  /* Bit 3:  Collision Detected */
+#define USIC_PSR_ASCMODE_RNS        (1 << 4)  /* Bit 4:  Receiver Noise Detected */
+#define USIC_PSR_ASCMODE_FER0       (1 << 5)  /* Bit 5:  Format Error in Stop Bit 0 */
+#define USIC_PSR_ASCMODE_FER1       (1 << 6)  /* Bit 6:  Format Error in Stop Bit 1 */
+#define USIC_PSR_ASCMODE_RFF        (1 << 7)  /* Bit 7:  Receive Frame Finished */
+#define USIC_PSR_ASCMODE_TFF        (1 << 8)  /* Bit 8:  Transmitter Frame Finished */
+#define USIC_PSR_ASCMODE_BUSY       (1 << 9)  /* Bit 9:  Transfer Status BUSY */
+#define USIC_PSR_ASCMODE_RSIF       (1 << 10) /* Bit 10: Receiver Start Indication Flag */
+#define USIC_PSR_ASCMODE_DLIF       (1 << 11) /* Bit 11: Data Lost Indication Flag */
+#define USIC_PSR_ASCMODE_TSIF       (1 << 12) /* Bit 12: Transmit Shift Indication Flag */
+#define USIC_PSR_ASCMODE_TBIF       (1 << 13) /* Bit 13: Transmit Buffer Indication Flag */
+#define USIC_PSR_ASCMODE_RIF        (1 << 14) /* Bit 14: Receive Indication Flag */
+#define USIC_PSR_ASCMODE_AIF        (1 << 15) /* Bit 15: Alternative Receive Indication Flag */
+#define USIC_PSR_ASCMODE_BRGIF      (1 << 16) /* Bit 16: Baud Rate Generator Indication Flag */
 
-#define USIC_PSR_SSCMODE_MSLS       (1 << 0)  /* Bit 0:   */
-#define USIC_PSR_SSCMODE_DX2S       (1 << 1)  /* Bit 1:   */
-#define USIC_PSR_SSCMODE_MSLSEV     (1 << 2)  /* Bit 2:   */
-#define USIC_PSR_SSCMODE_DX2TEV     (1 << 3)  /* Bit 3:   */
-#define USIC_PSR_SSCMODE_PARERR     (1 << 4)  /* Bit 4:   */
-#define USIC_PSR_SSCMODE_RSIF       (1 << 10) /* Bit 10:  */
-#define USIC_PSR_SSCMODE_DLIF       (1 << 11) /* Bit 11:  */
-#define USIC_PSR_SSCMODE_TSIF       (1 << 12) /* Bit 12:  */
-#define USIC_PSR_SSCMODE_TBIF       (1 << 13) /* Bit 13:  */
-#define USIC_PSR_SSCMODE_RIF        (1 << 14) /* Bit 14:  */
-#define USIC_PSR_SSCMODE_AIF        (1 << 15) /* Bit 15:  */
-#define USIC_PSR_SSCMODE_BRGIF      (1 << 16) /* Bit 16:  */
+#define USIC_PSR_SSCMODE_MSLS       (1 << 0)  /* Bit 0:  MSLS Status */
+#define USIC_PSR_SSCMODE_DX2S       (1 << 1)  /* Bit 1:  DX2S Status */
+#define USIC_PSR_SSCMODE_MSLSEV     (1 << 2)  /* Bit 2:  MSLS Event Detected */
+#define USIC_PSR_SSCMODE_DX2TEV     (1 << 3)  /* Bit 3:  DX2T Event Detected */
+#define USIC_PSR_SSCMODE_PARERR     (1 << 4)  /* Bit 4:  Parity Error Event Detected */
+#define USIC_PSR_SSCMODE_RSIF       (1 << 10) /* Bit 10: Receiver Start Indication Flag */
+#define USIC_PSR_SSCMODE_DLIF       (1 << 11) /* Bit 11: Data Lost Indication Flag */
+#define USIC_PSR_SSCMODE_TSIF       (1 << 12) /* Bit 12: Transmit Shift Indication Flag */
+#define USIC_PSR_SSCMODE_TBIF       (1 << 13) /* Bit 13: Transmit Buffer Indication Flag */
+#define USIC_PSR_SSCMODE_RIF        (1 << 14) /* Bit 14: Receive Indication Flag */
+#define USIC_PSR_SSCMODE_AIF        (1 << 15) /* Bit 15: Alternative Receive Indication Flag */
+#define USIC_PSR_SSCMODE_BRGIF      (1 << 16) /* Bit 16: Baud Rate Generator Indication Flag */
 
-#define USIC_PSR_IICMODE_SLSEL      (1 << 0)  /* Bit 0:   */
-#define USIC_PSR_IICMODE_WTDF       (1 << 1)  /* Bit 1:   */
-#define USIC_PSR_IICMODE_SCR        (1 << 2)  /* Bit 2:   */
-#define USIC_PSR_IICMODE_RSCR       (1 << 3)  /* Bit 3:   */
-#define USIC_PSR_IICMODE_PCR        (1 << 4)  /* Bit 4:   */
-#define USIC_PSR_IICMODE_NACK       (1 << 5)  /* Bit 5:   */
-#define USIC_PSR_IICMODE_ARL        (1 << 6)  /* Bit 6:   */
-#define USIC_PSR_IICMODE_SRR        (1 << 7)  /* Bit 7:   */
-#define USIC_PSR_IICMODE_ERR        (1 << 8)  /* Bit 8:   */
-#define USIC_PSR_IICMODE_ACK        (1 << 9)  /* Bit 9:   */
-#define USIC_PSR_IICMODE_RSIF       (1 << 10) /* Bit 10:  */
-#define USIC_PSR_IICMODE_DLIF       (1 << 11) /* Bit 11:  */
-#define USIC_PSR_IICMODE_TSIF       (1 << 12) /* Bit 12:  */
-#define USIC_PSR_IICMODE_TBIF       (1 << 13) /* Bit 13:  */
-#define USIC_PSR_IICMODE_RIF        (1 << 14) /* Bit 14:  */
-#define USIC_PSR_IICMODE_AIF        (1 << 15) /* Bit 15:  */
-#define USIC_PSR_IICMODE_BRGIF      (1 << 16) /* Bit 16:  */
+#define USIC_PSR_IICMODE_SLSEL      (1 << 0)  /* Bit 0:  Slave Select */
+#define USIC_PSR_IICMODE_WTDF       (1 << 1)  /* Bit 1:  Wrong TDF Code Found */
+#define USIC_PSR_IICMODE_SCR        (1 << 2)  /* Bit 2:  Start Condition Received */
+#define USIC_PSR_IICMODE_RSCR       (1 << 3)  /* Bit 3:  Repeated Start Condition Received */
+#define USIC_PSR_IICMODE_PCR        (1 << 4)  /* Bit 4:  Stop Condition Received */
+#define USIC_PSR_IICMODE_NACK       (1 << 5)  /* Bit 5:  Non-Acknowledge Received */
+#define USIC_PSR_IICMODE_ARL        (1 << 6)  /* Bit 6:  Arbitration Lost */
+#define USIC_PSR_IICMODE_SRR        (1 << 7)  /* Bit 7:  Slave Read Request */
+#define USIC_PSR_IICMODE_ERR        (1 << 8)  /* Bit 8:  Error */
+#define USIC_PSR_IICMODE_ACK        (1 << 9)  /* Bit 9:  Acknowledge Received */
+#define USIC_PSR_IICMODE_RSIF       (1 << 10) /* Bit 10: Receiver Start Indication Flag */
+#define USIC_PSR_IICMODE_DLIF       (1 << 11) /* Bit 11: Data Lost Indication Flag */
+#define USIC_PSR_IICMODE_TSIF       (1 << 12) /* Bit 12: Transmit Shift Indication Flag */
+#define USIC_PSR_IICMODE_TBIF       (1 << 13) /* Bit 13: Transmit Buffer Indication Flag */
+#define USIC_PSR_IICMODE_RIF        (1 << 14) /* Bit 14: Receive Indication Flag */
+#define USIC_PSR_IICMODE_AIF        (1 << 15) /* Bit 15: Alternative Receive Indication Flag */
+#define USIC_PSR_IICMODE_BRGIF      (1 << 16) /* Bit 16: Baud Rate Generator Indication Flag */
 
-#define USIC_PSR_IISMODE_WA         (1 << 0)  /* Bit 0:   */
-#define USIC_PSR_IISMODE_DX2S       (1 << 1)  /* Bit 1:   */
-#define USIC_PSR_IISMODE_DX2TEV     (1 << 3)  /* Bit 3:   */
-#define USIC_PSR_IISMODE_WAFE       (1 << 4)  /* Bit 4:   */
-#define USIC_PSR_IISMODE_WARE       (1 << 5)  /* Bit 5:   */
-#define USIC_PSR_IISMODE_END        (1 << 6)  /* Bit 6:   */
-#define USIC_PSR_IISMODE_RSIF       (1 << 10) /* Bit 10:  */
-#define USIC_PSR_IISMODE_DLIF       (1 << 11) /* Bit 11:  */
-#define USIC_PSR_IISMODE_TSIF       (1 << 12) /* Bit 12:  */
-#define USIC_PSR_IISMODE_TBIF       (1 << 13) /* Bit 13:  */
-#define USIC_PSR_IISMODE_RIF        (1 << 14) /* Bit 14:  */
-#define USIC_PSR_IISMODE_AIF        (1 << 15) /* Bit 15:  */
-#define USIC_PSR_IISMODE_BRGIF      (1 << 16) /* Bit 16:  */
+#define USIC_PSR_IISMODE_WA         (1 << 0)  /* Bit 0:  Word Address */
+#define USIC_PSR_IISMODE_DX2S       (1 << 1)  /* Bit 1:  DX2S Sta */
+#define USIC_PSR_IISMODE_DX2TEV     (1 << 3)  /* Bit 3:  DX2T Event Detected */
+#define USIC_PSR_IISMODE_WAFE       (1 << 4)  /* Bit 4:  WA Falling Edge Event */
+#define USIC_PSR_IISMODE_WARE       (1 << 5)  /* Bit 5:  WA Rising Edge Event */
+#define USIC_PSR_IISMODE_END        (1 << 6)  /* Bit 6:  WA Generation End */
+#define USIC_PSR_IISMODE_RSIF       (1 << 10) /* Bit 10: Receiver Start Indication Flag */
+#define USIC_PSR_IISMODE_DLIF       (1 << 11) /* Bit 11: Data Lost Indication Flag */
+#define USIC_PSR_IISMODE_TSIF       (1 << 12) /* Bit 12: Transmit Shift Indication Flag */
+#define USIC_PSR_IISMODE_TBIF       (1 << 13) /* Bit 13: Transmit Buffer Indication Flag */
+#define USIC_PSR_IISMODE_RIF        (1 << 14) /* Bit 14: Receive Indication Flag */
+#define USIC_PSR_IISMODE_AIF        (1 << 15) /* Bit 15: Alternative Receive Indication Flag */
+#define USIC_PSR_IISMODE_BRGIF      (1 << 16) /* Bit 16: Baud Rate Generator Indication Flag */
 
 /* Protocol Status Clear Register */
 
@@ -929,53 +941,100 @@
 
 /* Transmitter Buffer Control Register */
 
-#define USIC_TBCTR_DPTR_SHIFT       (0)       /* Bits 0-1:  */
+#define USIC_TBCTR_DPTR_SHIFT       (0)       /* Bits 0-1: Data Pointer */
 #define USIC_TBCTR_DPTR_MASK        (3 << USIC_TBCTR_DPTR_SHIFT)
-#define USIC_TBCTR_LIMIT_SHIFT      (8)       /* Bits 8-13:  */
+#  define USIC_TBCTR_DPTR(n)        ((uint32_t)(n) << USIC_TBCTR_DPTR_SHIFT)
+#define USIC_TBCTR_LIMIT_SHIFT      (8)       /* Bits 8-13: Limit For Interrupt Generation */
 #define USIC_TBCTR_LIMIT_MASK       (0x3f << USIC_TBCTR_LIMIT_SHIFT)
-#define USIC_TBCTR_STBTM            (1 << 14) /* Bit 14:  */
-#define USIC_TBCTR_STBTEN           (1 << 15) /* Bit 15:  */
-#define USIC_TBCTR_STBINP_SHIFT     (16)      /* Bits 16-18:  */
+#  define USIC_TBCTR_LIMIT(n)       ((uint32_t)(n) << USIC_TBCTR_LIMIT_SHIFT)
+#define USIC_TBCTR_STBTM            (1 << 14) /* Bit 14: Standard Transmit Buffer Trigger Mode */
+#define USIC_TBCTR_STBTEN           (1 << 15) /* Bit 15: Standard Transmit Buffer Trigger Enable */
+#define USIC_TBCTR_STBINP_SHIFT     (16)      /* Bits 16-18: Standard Transmit Buffer Interrupt Node Pointer */
 #define USIC_TBCTR_STBINP_MASK      (7 << USIC_TBCTR_STBINP_SHIFT)
-#define USIC_TBCTR_ATBINP_SHIFT     (19)      /* Bits 19-21:  */
+#  define USIC_TBCTR_STBINP_SR0     (0 << USIC_TBCTR_STBINP_SHIFT) /* Output SR0 becomes activated */
+#  define USIC_TBCTR_STBINP_SR1     (1 << USIC_TBCTR_STBINP_SHIFT) /* Output SR1 becomes activated */
+#  define USIC_TBCTR_STBINP_SR2     (2 << USIC_TBCTR_STBINP_SHIFT) /* Output SR2 becomes activated */
+#  define USIC_TBCTR_STBINP_SR3     (3 << USIC_TBCTR_STBINP_SHIFT) /* Output SR3 becomes activated */
+#  define USIC_TBCTR_STBINP_SR4     (4 << USIC_TBCTR_STBINP_SHIFT) /* Output SR4 becomes activated */
+#  define USIC_TBCTR_STBINP_SR5     (5 << USIC_TBCTR_STBINP_SHIFT) /* Output SR5 becomes activated */
+#define USIC_TBCTR_ATBINP_SHIFT     (19)      /* Bits 19-21: Alternative Transmit Buffer Interrupt Node Pointer */
 #define USIC_TBCTR_ATBINP_MASK      (7 << USIC_TBCTR_ATBINP_SHIFT)
-#define USIC_TBCTR_SIZE_SHIFT       (24)      /* Bits 24-26:  */
+#  define USIC_TBCTR_ATBINP_SR0     (0 << USIC_TBCTR_ATBINP_SHIFT) /* Output SR0 becomes activated */
+#  define USIC_TBCTR_ATBINP_SR1     (1 << USIC_TBCTR_ATBINP_SHIFT) /* Output SR1 becomes activated */
+#  define USIC_TBCTR_ATBINP_SR2     (2 << USIC_TBCTR_ATBINP_SHIFT) /* Output SR2 becomes activated */
+#  define USIC_TBCTR_ATBINP_SR3     (3 << USIC_TBCTR_ATBINP_SHIFT) /* Output SR3 becomes activated */
+#  define USIC_TBCTR_ATBINP_SR4     (4 << USIC_TBCTR_ATBINP_SHIFT) /* Output SR4 becomes activated */
+#  define USIC_TBCTR_ATBINP_SR5     (5 << USIC_TBCTR_ATBINP_SHIFT) /* Output SR5 becomes activated */
+#define USIC_TBCTR_SIZE_SHIFT       (24)      /* Bits 24-26: Buffer Size */
 #define USIC_TBCTR_SIZE_MASK        (7 << USIC_TBCTR_SIZE_SHIFT)
-#define USIC_TBCTR_LOF              (1 << 28) /* Bit 28:  */
-#define USIC_TBCTR_STBIEN           (1 << 30) /* Bit 30:  */
-#define USIC_TBCTR_TBERIEN          (1 << 31) /* Bit 31:  */
+#  define USIC_TBCTR_SIZE_DISABLE   (0 << USIC_TBCTR_SIZE_SHIFT) /* FIFO mechanism is disabled */
+#  define USIC_TBCTR_SIZE_2         (1 << USIC_TBCTR_SIZE_SHIFT) /* FIFO buffer contains 2 entries */
+#  define USIC_TBCTR_SIZE_4         (2 << USIC_TBCTR_SIZE_SHIFT) /* FIFO buffer contains 4 entries */
+#  define USIC_TBCTR_SIZE_8         (3 << USIC_TBCTR_SIZE_SHIFT) /* FIFO buffer contains 8 entries */
+#  define USIC_TBCTR_SIZE_16        (4 << USIC_TBCTR_SIZE_SHIFT) /* FIFO buffer contains 16 entries */
+#  define USIC_TBCTR_SIZE_32        (5 << USIC_TBCTR_SIZE_SHIFT) /* FIFO buffer contains 32 entries */
+#  define USIC_TBCTR_SIZE_64        (6 << USIC_TBCTR_SIZE_SHIFT) /* FIFO buffer contains 64 entries */
+#define USIC_TBCTR_LOF              (1 << 28) /* Bit 28: Buffer Event on Limit Overflow */
+#define USIC_TBCTR_STBIEN           (1 << 30) /* Bit 30: Standard Transmit Buffer Interrupt Enable */
+#define USIC_TBCTR_TBERIEN          (1 << 31) /* Bit 31: Transmit Buffer Error Interrupt Enable */
 
 /* Receiver Buffer Control Register */
 
-#define USIC_RBCTR_DPTR_SHIFT       (0)       /* Bits 0-5:  */
+#define USIC_RBCTR_DPTR_SHIFT       (0)       /* Bits 0-5: Data Pointer */
 #define USIC_RBCTR_DPTR_MASK        (0x3f << USIC_RBCTR_DPTR_SHIFT)
-#define USIC_RBCTR_LIMIT_SHIFT      (8)       /* Bits 8-13:  */
+#  define USIC_RBCTR_DPTR(n)        ((uint32_t)(n) << USIC_RBCTR_DPTR_SHIFT)
+#define USIC_RBCTR_LIMIT_SHIFT      (8)       /* Bits 8-13: Limit For Interrupt Generation */
 #define USIC_RBCTR_LIMIT_MASK       (0x3f << USIC_RBCTR_LIMIT_SHIFT)
-#define USIC_RBCTR_SRBTM            (1 << 14) /* Bit 14:  */
-#define USIC_RBCTR_SRBTEN           (1 << 15) /* Bit 15:  */
-#define USIC_RBCTR_SRBINP_SHIFT     (16)      /* Bits 16-18:  */
+#  define USIC_RBCTR_LIMIT(n)       ((uint32_t)(n) << USIC_RBCTR_LIMIT_SHIFT)
+#define USIC_RBCTR_SRBTM            (1 << 14) /* Bit 14: Standard Receive Buffer Trigger Mode */
+#define USIC_RBCTR_SRBTEN           (1 << 15) /* Bit 15: Standard Receive Buffer Trigger Enable */
+#define USIC_RBCTR_SRBINP_SHIFT     (16)      /* Bits 16-18: Standard Receive Buffer Interrupt Node Pointer */
 #define USIC_RBCTR_SRBINP_MASK      (7 << USIC_RBCTR_SRBINP_SHIFT)
-#define USIC_RBCTR_ARBINP_SHIFT     (19)      /* Bits 19-21:  */
+#  define USIC_RBCTR_SRBINP_SR0     (0 << USIC_RBCTR_SRBINP_SHIFT) /* Output SR0 becomes activated */
+#  define USIC_RBCTR_SRBINP_SR1     (1 << USIC_RBCTR_SRBINP_SHIFT) /* Output SR1 becomes activated */
+#  define USIC_RBCTR_SRBINP_SR2     (2 << USIC_RBCTR_SRBINP_SHIFT) /* Output SR2 becomes activated */
+#  define USIC_RBCTR_SRBINP_SR3     (3 << USIC_RBCTR_SRBINP_SHIFT) /* Output SR3 becomes activated */
+#  define USIC_RBCTR_SRBINP_SR4     (4 << USIC_RBCTR_SRBINP_SHIFT) /* Output SR4 becomes activated */
+#  define USIC_RBCTR_SRBINP_SR5     (5 << USIC_RBCTR_SRBINP_SHIFT) /* Output SR5 becomes activated */
+#define USIC_RBCTR_ARBINP_SHIFT     (19)      /* Bits 19-21: Alternative Receive Buffer Interrupt Node Pointer */
 #define USIC_RBCTR_ARBINP_MASK      (7 << USIC_RBCTR_ARBINP_SHIFT)
-#define USIC_RBCTR_RCIM_SHIFT       (22)      /* Bits 22-23:  */
+#  define USIC_RBCTR_ARBINP_SR0     (0 << USIC_RBCTR_ARBINP_SHIFT) /* Output SR0 becomes activated */
+#  define USIC_RBCTR_ARBINP_SR1     (1 << USIC_RBCTR_ARBINP_SHIFT) /* Output SR1 becomes activated */
+#  define USIC_RBCTR_ARBINP_SR2     (2 << USIC_RBCTR_ARBINP_SHIFT) /* Output SR2 becomes activated */
+#  define USIC_RBCTR_ARBINP_SR3     (3 << USIC_RBCTR_ARBINP_SHIFT) /* Output SR3 becomes activated */
+#  define USIC_RBCTR_ARBINP_SR4     (4 << USIC_RBCTR_ARBINP_SHIFT) /* Output SR4 becomes activated */
+#  define USIC_RBCTR_ARBINP_SR5     (5 << USIC_RBCTR_ARBINP_SHIFT) /* Output SR5 becomes activated */
+#define USIC_RBCTR_RCIM_SHIFT       (22)      /* Bits 22-23: Receiver Control Information Mode */
 #define USIC_RBCTR_RCIM_MASK        (3 << USIC_RBCTR_RCIM_SHIFT)
-#define USIC_RBCTR_SIZE_SHIFT       (24)      /* Bits 24-26:  */
+#  define USIC_RBCTR_RCIM_MODE0     (0 << USIC_RBCTR_RCIM_SHIFT) /* RCI[4] = PERR, RCI[3:0] = WLEN */
+#  define USIC_RBCTR_RCIM_MODE1     (1 << USIC_RBCTR_RCIM_SHIFT) /* RCI[4] = SOF, RCI[3:0] = WLEN */
+#  define USIC_RBCTR_RCIM_MODE2     (2 << USIC_RBCTR_RCIM_SHIFT) /* RCI[4] = 0, RCI[3:0] = WLEN */
+#  define USIC_RBCTR_RCIM_MODE3     (3 << USIC_RBCTR_RCIM_SHIFT) /* RCI[4] = PERR, RCI[3] = PAR,
+                                                                  * RCI[2:1] = 0, RCI[0] = SOF */
+#define USIC_RBCTR_SIZE_SHIFT       (24)      /* Bits 24-26: Buffer Size */
 #define USIC_RBCTR_SIZE_MASK        (7 << USIC_RBCTR_SIZE_SHIFT)
-#define USIC_RBCTR_RNM              (1 << 27) /* Bit 27:  */
-#define USIC_RBCTR_LOF              (1 << 28) /* Bit 28:  */
-#define USIC_RBCTR_ARBIEN           (1 << 29) /* Bit 29:  */
-#define USIC_RBCTR_SRBIEN           (1 << 30) /* Bit 30:  */
-#define USIC_RBCTR_RBERIEN          (1 << 31) /* Bit 31:  */
+#  define USIC_RBCTR_SIZE_DISABLE   (0 << USIC_RBCTR_SIZE_SHIFT) /* FIFO mechanism is disabled */
+#  define USIC_RBCTR_SIZE_2         (1 << USIC_RBCTR_SIZE_SHIFT) /* FIFO buffer contains 2 entries */
+#  define USIC_RBCTR_SIZE_4         (2 << USIC_RBCTR_SIZE_SHIFT) /* FIFO buffer contains 4 entries */
+#  define USIC_RBCTR_SIZE_8         (3 << USIC_RBCTR_SIZE_SHIFT) /* FIFO buffer contains 8 entries */
+#  define USIC_RBCTR_SIZE_16        (4 << USIC_RBCTR_SIZE_SHIFT) /* FIFO buffer contains 16 entries */
+#  define USIC_RBCTR_SIZE_32        (5 << USIC_RBCTR_SIZE_SHIFT) /* FIFO buffer contains 32 entries */
+#  define USIC_RBCTR_SIZE_64        (6 << USIC_RBCTR_SIZE_SHIFT) /* FIFO buffer contains 64 entries */
+#define USIC_RBCTR_RNM              (1 << 27) /* Bit 27: Receiver Notification Mode */
+#define USIC_RBCTR_LOF              (1 << 28) /* Bit 28: Buffer Event on Limit Overflow */
+#define USIC_RBCTR_ARBIEN           (1 << 29) /* Bit 29: Alternative Receive Buffer Interrupt Enable */
+#define USIC_RBCTR_SRBIEN           (1 << 30) /* Bit 30: Standard Receive Buffer Interrupt Enable */
+#define USIC_RBCTR_RBERIEN          (1 << 31) /* Bit 31: Receive Buffer Error Interrupt Enable */
 
 /* Transmit/Receive Buffer Pointer Register */
 
-#define USIC_TRBPTR_TDIPTR_SHIFT    (0)       /* Bits 0-5:  */
+#define USIC_TRBPTR_TDIPTR_SHIFT    (0)       /* Bits 0-5: Transmitter Data Input Pointer */
 #define USIC_TRBPTR_TDIPTR_MASK     (0x3f << USIC_TRBPTR_TDIPTR_SHIFT)
-#define USIC_TRBPTR_TDOPTR_SHIFT    (8)       /* Bits 813xx:  */
+#define USIC_TRBPTR_TDOPTR_SHIFT    (8)       /* Bits 8-13: Transmitter Data Output Pointer */
 #define USIC_TRBPTR_TDOPTR_MASK     (0x3f << USIC_TRBPTR_TDOPTR_SHIFT)
-#define USIC_TRBPTR_RDIPTR_SHIFT    (16)      /* Bits 16-21:  */
+#define USIC_TRBPTR_RDIPTR_SHIFT    (16)      /* Bits 16-21: Receiver Data Input Pointer */
 #define USIC_TRBPTR_RDIPTR_MASK     (0x3f << USIC_TRBPTR_RDIPTR_SHIFT)
-#define USIC_TRBPTR_RDOPTR_SHIFT    (24)      /* Bits 24-29:  */
+#define USIC_TRBPTR_RDOPTR_SHIFT    (24)      /* Bits 24-29: Receiver Data Output Pointer */
 #define USIC_TRBPTR_RDOPTR_MASK     (0x3f << USIC_TRBPTR_RDOPTR_SHIFT)
 
 /* Transmit/Receive Buffer Status Register */
@@ -1013,21 +1072,21 @@
 
 /* Receiver Buffer Output Register */
 
-#define USIC_OUTR_DSR_SHIFT         (0)       /* Bits 0-15:  */
+#define USIC_OUTR_DSR_SHIFT         (0)       /* Bits 0-15: Received Data */
 #define USIC_OUTR_DSR_MASK          (0xffff << USIC_OUTR_DSR_SHIFT)
-#define USIC_OUTR_RCI_SHIFT         (16)      /* Bits 16-20:  */
+#define USIC_OUTR_RCI_SHIFT         (16)      /* Bits 16-20: Receiver Control Information */
 #define USIC_OUTR_RCI_MASK          (31 << USIC_OUTR_RCI_SHIFT)
 
 /* Receiver Buffer Output Register L for Debugger */
 
-#define USIC_OUTDR_DSR_SHIFT        (0)       /* Bits 0-15:  */
+#define USIC_OUTDR_DSR_SHIFT        (0)       /* Bits 0-15: Data from Shift Register */
 #define USIC_OUTDR_DSR_MASK         (0xffff << USIC_OUTDR_DSR_SHIFT)
-#define USIC_OUTDR_RCI_SHIFT        (16)      /* Bits 16-30:  */
+#define USIC_OUTDR_RCI_SHIFT        (16)      /* Bits 16-30: Receive Control Information from Shift Register */
 #define USIC_OUTDR_RCI_MASK         (31 << USIC_OUTDR_RCI_SHIFT)
 
 /* Transmit FIFO Buffer (32 x 4-bytes) */
 
-#define USIC_IN_TDATA_SHIFT         (0)      /* Bits 0-15:  */
+#define USIC_IN_TDATA_SHIFT         (0)      /* Bits 0-15: Transmit Data */
 #define USIC_IN_TDATA_MASK          (0xffff << USIC_IN_TDATA_SHIFT)
 
 #endif /* __ARCH_ARM_SRC_XMC4_CHIP_XMC4_USIC_H */
