@@ -433,9 +433,9 @@
 #  define USIC_FDR_STEP(n)          ((uint32_t)(n) << USIC_FDR_STEP_SHIFT)
 #define USIC_FDR_DM_SHIFT           (14)      /* Bits 14-15: Divider Mode */
 #define USIC_FDR_DM_MASK            (3 << USIC_FDR_DM_SHIFT)
-#  define USIC_FDR_DM_ OFF          (0 << USIC_FDR_DM_SHIFT) /* Divider switched off */
-#  define USIC_FDR_DM_ NORMAL       (1 << USIC_FDR_DM_SHIFT) /* Normal divider mode selected */
-#  define USIC_FDR_DM_ FRACTIONAL   (2 << USIC_FDR_DM_SHIFT) /* Fractional divider mode selected */
+#  define USIC_FDR_DM_OFF           (0 << USIC_FDR_DM_SHIFT) /* Divider switched off */
+#  define USIC_FDR_DM_NORMAL        (1 << USIC_FDR_DM_SHIFT) /* Normal divider mode selected */
+#  define USIC_FDR_DM_FRACTIONAL    (2 << USIC_FDR_DM_SHIFT) /* Fractional divider mode selected */
 #define USIC_FDR_RESULT_SHIFT       (16)      /* Bits 16-25: Result Value */
 #define USIC_FDR_RESULT_MASK        (0x3ff << USIC_FDR_RESULT_SHIFT)
 
@@ -550,7 +550,7 @@
 #define USIC_SCTR_HPCDIR            (1 << 4)  /* Bit 4:  Port Control Direction */
 #define USIC_SCTR_DOCFG_SHIFT       (6)       /* Bits 6-7: Data Output Configuration */
 #define USIC_SCTR_DOCFG_MASK        (3 << USIC_SCTR_DOCFG_SHIFT)
-  #define USIC_SCTR_DOCFG_SHIFT     (0 << USIC_SCTR_DOCFG_SHIFT) /* DOUTx = shift data value */
+  #define USIC_SCTR_DOCFG_NORMAL    (0 << USIC_SCTR_DOCFG_SHIFT) /* DOUTx = shift data value */
   #define USIC_SCTR_DOCFG_INVERT    (1 << USIC_SCTR_DOCFG_SHIFT) /* DOUTx = inverted shift data value */
 #define USIC_SCTR_TRM_SHIFT         (8)       /* Bits 8-9: Transmission Mode */
 #define USIC_SCTR_TRM_MASK          (3 << USIC_SCTR_TRM_SHIFT)
@@ -717,9 +717,9 @@
 #  define USIC_CCR_HPCEN_DX0_2      (3 << USIC_CCR_HPCEN_SHIFT) /* Port control enabled for DX0, DX[5:3] and DOUT[3:0] */
 #define USIC_CCR_PM_SHIFT           (8)       /* Bits 8-9: Parity Mode */
 #define USIC_CCR_PM_MASK            (3 << USIC_CCR_PM_SHIFT)
-#  define USIC_CCR_PM_ DISABLE      (0 << USIC_CCR_PM_SHIFT) /* Parity generation is disabled */
-#  define USIC_CCR_PM_ EVEN         (2 << USIC_CCR_PM_SHIFT) /* Even parity is selected */
-#  define USIC_CCR_PM_ ODD          (3 << USIC_CCR_PM_SHIFT) /* Odd parity is selected */
+#  define USIC_CCR_PM_DISABLE       (0 << USIC_CCR_PM_SHIFT) /* Parity generation is disabled */
+#  define USIC_CCR_PM_EVEN          (2 << USIC_CCR_PM_SHIFT) /* Even parity is selected */
+#  define USIC_CCR_PM_ODD           (3 << USIC_CCR_PM_SHIFT) /* Odd parity is selected */
 #define USIC_CCR_RSIEN              (1 << 10) /* Bit 10: Receiver Start Interrupt Enable */
 #define USIC_CCR_DLIEN              (1 << 11) /* Bit 11: Data Lost Interrupt Enable */
 #define USIC_CCR_TSIEN              (1 << 12) /* Bit 12: Transmit Shift Interrupt Enable */

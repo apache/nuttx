@@ -50,6 +50,7 @@
 #include "xmc4_config.h"
 #include "chip/xmc4_usic.h"
 #include "chip/xmc4_pinmux.h"
+#include "xmc4_lowputc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -232,4 +233,3 @@ void xmc4_uart_configure(uintptr_t uart_base, uint32_t baud,
 #warning Missing logic
 }
 #endif
-

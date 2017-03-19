@@ -990,7 +990,7 @@
 #define SCU_CGATSTAT2_DMA1          (1 << 5)  /* Bit 5:  DMA1 Gating Status */
 #define SCU_CGATSTAT2_FCE           (1 << 6)  /* Bit 6:  FCE Gating Status */
 #define SCU_CGATSTAT2_USB           (1 << 7)  /* Bit 7:  USB Gating Status */
-#define SCU_CGATSTAT2_USB           (1 << 10) /* Bit 10: ECAT Gating Status */
+#define SCU_CGATSTAT2_ECAT          (1 << 10) /* Bit 10: ECAT Gating Status */
 
 /* Peripheral 3 Clock Gating Status, Peripheral 3 Clock Gating Set, Peripheral 3 Clock Gating Clear */
 

@@ -57,9 +57,10 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "xmc4_config.h"
 #include "chip.h"
+#include "xmc4_config.h"
 #include "chip/xmc4_usic.h"
+#include "xmc4_lowputc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
