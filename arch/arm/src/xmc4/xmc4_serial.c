@@ -110,22 +110,22 @@
 #    define UART5_ASSIGNED      1
 #else
 #  undef CONSOLE_DEV                        /* No console */
-#  if defined(CONFIG_XMC4_USIC0_ISUART)
+#  if defined(HAVE_UART0)
 #    define TTYS0_DEV           g_uart0port /* UART0 is ttyS0 */
 #    define UART0_ASSIGNED      1
-#  elif defined(CONFIG_XMC4_USIC1_ISUART)
+#  elif defined(HAVE_UART1)
 #    define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
 #    define UART1_ASSIGNED      1
-#  elif defined(CONFIG_XMC4_USIC2_ISUART)
+#  elif defined(HAVE_UART2)
 #    define TTYS0_DEV           g_uart2port /* UART2 is ttyS0 */
 #    define UART2_ASSIGNED      1
-#  elif defined(CONFIG_XMC4_USIC3_ISUART)
+#  elif defined(HAVE_UART3)
 #    define TTYS0_DEV           g_uart3port /* UART3 is ttyS0 */
 #    define UART3_ASSIGNED      1
-#  elif defined(CONFIG_XMC4_USIC4_ISUART)
+#  elif defined(HAVE_UART4)
 #    define TTYS0_DEV           g_uart4port /* UART4 is ttyS0 */
 #    define UART4_ASSIGNED      1
-#  elif defined(CONFIG_XMC4_USIC5_ISUART)
+#  elif defined(HAVE_UART5)
 #    define TTYS0_DEV           g_uart5port /* UART5 is ttyS0 */
 #    define UART5_ASSIGNED      1
 #  endif
@@ -133,22 +133,22 @@
 
 /* Pick ttys1.  This could be any of UART0-5 excluding the console UART. */
 
-#if defined(CONFIG_XMC4_USIC0_ISUART) && !defined(UART0_ASSIGNED)
+#if defined(HAVE_UART0) && !defined(UART0_ASSIGNED)
 #  define TTYS1_DEV           g_uart0port /* UART0 is ttyS1 */
 #  define UART0_ASSIGNED      1
-#elif defined(CONFIG_XMC4_USIC1_ISUART) && !defined(UART1_ASSIGNED)
+#elif defined(HAVE_UART1) && !defined(UART1_ASSIGNED)
 #  define TTYS1_DEV           g_uart1port /* UART1 is ttyS1 */
 #  define UART1_ASSIGNED      1
-#elif defined(CONFIG_XMC4_USIC2_ISUART) && !defined(UART2_ASSIGNED)
+#elif defined(HAVE_UART2) && !defined(UART2_ASSIGNED)
 #  define TTYS1_DEV           g_uart2port /* UART2 is ttyS1 */
 #  define UART2_ASSIGNED      1
-#elif defined(CONFIG_XMC4_USIC3_ISUART) && !defined(UART3_ASSIGNED)
+#elif defined(HAVE_UART3) && !defined(UART3_ASSIGNED)
 #  define TTYS1_DEV           g_uart3port /* UART3 is ttyS1 */
 #  define UART3_ASSIGNED      1
-#elif defined(CONFIG_XMC4_USIC4_ISUART) && !defined(UART4_ASSIGNED)
+#elif defined(HAVE_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS1_DEV           g_uart4port /* UART4 is ttyS1 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_XMC4_USIC5_ISUART) && !defined(UART5_ASSIGNED)
+#elif defined(HAVE_UART5) && !defined(UART5_ASSIGNED)
 #  define TTYS1_DEV           g_uart5port /* UART5 is ttyS1 */
 #  define UART5_ASSIGNED      1
 #endif
@@ -158,19 +158,19 @@
  * console.
  */
 
-#if defined(CONFIG_XMC4_USIC1_ISUART) && !defined(UART1_ASSIGNED)
+#if defined(HAVE_UART1) && !defined(UART1_ASSIGNED)
 #  define TTYS2_DEV           g_uart1port /* UART1 is ttyS2 */
 #  define UART1_ASSIGNED      1
-#elif defined(CONFIG_XMC4_USIC2_ISUART) && !defined(UART2_ASSIGNED)
+#elif defined(HAVE_UART2) && !defined(UART2_ASSIGNED)
 #  define TTYS2_DEV           g_uart2port /* UART2 is ttyS2 */
 #  define UART2_ASSIGNED      1
-#elif defined(CONFIG_XMC4_USIC3_ISUART) && !defined(UART3_ASSIGNED)
+#elif defined(HAVE_UART3) && !defined(UART3_ASSIGNED)
 #  define TTYS2_DEV           g_uart3port /* UART3 is ttyS2 */
 #  define UART3_ASSIGNED      1
-#elif defined(CONFIG_XMC4_USIC4_ISUART) && !defined(UART4_ASSIGNED)
+#elif defined(HAVE_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS2_DEV           g_uart4port /* UART4 is ttyS2 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_XMC4_USIC5_ISUART) && !defined(UART5_ASSIGNED)
+#elif defined(HAVE_UART5) && !defined(UART5_ASSIGNED)
 #  define TTYS2_DEV           g_uart5port /* UART5 is ttyS2 */
 #  define UART5_ASSIGNED      1
 #endif
@@ -180,16 +180,16 @@
  * UART 2-5 could also be the console.
  */
 
-#if defined(CONFIG_XMC4_USIC2_ISUART) && !defined(UART2_ASSIGNED)
+#if defined(HAVE_UART2) && !defined(UART2_ASSIGNED)
 #  define TTYS3_DEV           g_uart2port /* UART2 is ttyS3 */
 #  define UART2_ASSIGNED      1
-#elif defined(CONFIG_XMC4_USIC3_ISUART) && !defined(UART3_ASSIGNED)
+#elif defined(HAVE_UART3) && !defined(UART3_ASSIGNED)
 #  define TTYS3_DEV           g_uart3port /* UART3 is ttyS3 */
 #  define UART3_ASSIGNED      1
-#elif defined(CONFIG_XMC4_USIC4_ISUART) && !defined(UART4_ASSIGNED)
+#elif defined(HAVE_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS3_DEV           g_uart4port /* UART4 is ttyS3 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_XMC4_USIC5_ISUART) && !defined(UART5_ASSIGNED)
+#elif defined(HAVE_UART5) && !defined(UART5_ASSIGNED)
 #  define TTYS3_DEV           g_uart5port /* UART5 is ttyS3 */
 #  define UART5_ASSIGNED      1
 #endif
@@ -199,13 +199,13 @@
  * UART 3-5 could also be the console.
  */
 
-#if defined(CONFIG_XMC4_USIC3_ISUART) && !defined(UART3_ASSIGNED)
+#if defined(HAVE_UART3) && !defined(UART3_ASSIGNED)
 #  define TTYS4_DEV           g_uart3port /* UART3 is ttyS4 */
 #  define UART3_ASSIGNED      1
-#elif defined(CONFIG_XMC4_USIC4_ISUART) && !defined(UART4_ASSIGNED)
+#elif defined(HAVE_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS4_DEV           g_uart4port /* UART4 is ttyS4 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_XMC4_USIC5_ISUART) && !defined(UART5_ASSIGNED)
+#elif defined(HAVE_UART5) && !defined(UART5_ASSIGNED)
 #  define TTYS4_DEV           g_uart5port /* UART5 is ttyS4 */
 #  define UART5_ASSIGNED      1
 #endif
@@ -215,10 +215,10 @@
  * UART 4-5 could also be the console.
  */
 
-#if defined(CONFIG_XMC4_USIC4_ISUART) && !defined(UART4_ASSIGNED)
+#if defined(HAVE_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS5_DEV           g_uart4port /* UART4 is ttyS5 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_XMC4_USIC5_ISUART) && !defined(UART5_ASSIGNED)
+#elif defined(HAVE_UART5) && !defined(UART5_ASSIGNED)
 #  define TTYS5_DEV           g_uart5port /* UART5 is ttyS5 */
 #  define UART5_ASSIGNED      1
 #endif
@@ -282,34 +282,34 @@ static const struct uart_ops_s g_uart_ops =
 
 /* I/O buffers */
 
-#ifdef CONFIG_XMC4_USIC0_ISUART
+#ifdef HAVE_UART0
 static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
 static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
 #endif
-#ifdef CONFIG_XMC4_USIC1_ISUART
+#ifdef HAVE_UART1
 static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 #endif
-#ifdef CONFIG_XMC4_USIC2_ISUART
+#ifdef HAVE_UART2
 static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
 static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
 #endif
-#ifdef CONFIG_XMC4_USIC3_ISUART
+#ifdef HAVE_UART3
 static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
 static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
 #endif
-#ifdef CONFIG_XMC4_USIC4_ISUART
+#ifdef HAVE_UART4
 static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
 #endif
-#ifdef CONFIG_XMC4_USIC5_ISUART
+#ifdef HAVE_UART5
 static char g_uart5rxbuffer[CONFIG_UART5_RXBUFSIZE];
 static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
 #endif
 
 /* This describes the state of the Kinetis UART0 port. */
 
-#ifdef CONFIG_XMC4_USIC0_ISUART
+#ifdef HAVE_UART0
 static struct xmc4_dev_s g_uart0priv =
 {
   .uartbase       = XMC4_UART0_BASE,
@@ -340,7 +340,7 @@ static uart_dev_t g_uart0port =
 
 /* This describes the state of the Kinetis UART1 port. */
 
-#ifdef CONFIG_XMC4_USIC1_ISUART
+#ifdef HAVE_UART1
 static struct xmc4_dev_s g_uart1priv =
 {
   .uartbase       = XMC4_UART1_BASE,
@@ -371,7 +371,7 @@ static uart_dev_t g_uart1port =
 
 /* This describes the state of the Kinetis UART2 port. */
 
-#ifdef CONFIG_XMC4_USIC2_ISUART
+#ifdef HAVE_UART2
 static struct xmc4_dev_s g_uart2priv =
 {
   .uartbase       = XMC4_UART2_BASE,
@@ -402,7 +402,7 @@ static uart_dev_t g_uart2port =
 
 /* This describes the state of the Kinetis UART3 port. */
 
-#ifdef CONFIG_XMC4_USIC3_ISUART
+#ifdef HAVE_UART3
 static struct xmc4_dev_s g_uart3priv =
 {
   .uartbase       = XMC4_UART3_BASE,
@@ -433,7 +433,7 @@ static uart_dev_t g_uart3port =
 
 /* This describes the state of the Kinetis UART4 port. */
 
-#ifdef CONFIG_XMC4_USIC4_ISUART
+#ifdef HAVE_UART4
 static struct xmc4_dev_s g_uart4priv =
 {
   .uartbase       = XMC4_UART4_BASE,
@@ -464,7 +464,7 @@ static uart_dev_t g_uart4port =
 
 /* This describes the state of the Kinetis UART5 port. */
 
-#ifdef CONFIG_XMC4_USIC5_ISUART
+#ifdef HAVE_UART5
 static struct xmc4_dev_s g_uart5priv =
 {
   .uartbase       = XMC4_UART5_BASE,
