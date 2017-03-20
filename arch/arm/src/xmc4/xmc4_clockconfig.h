@@ -70,10 +70,21 @@ void xmc4_clock_configure(void);
  * Name: xmc4_get_coreclock
  *
  * Description:
- *   Return the current core clock frequency.
+ *   Return the current core clock frequency, fCPU.
  *
  ****************************************************************************/
 
 uint32_t xmc4_get_coreclock(void);
+
+/****************************************************************************
+ * Name: xmc4_get_periphclock
+ *
+ * Description:
+ *   The peripheral clock is either fCPU or fCPU/2, depending on the state
+ *   of the peripheral divider.
+ *
+ ****************************************************************************/
+
+uint32_t xmc4_get_periphclock(void);
 
 #endif /* __ARCH_ARM_SRC_XMC4_XMC4_CLOCKCONFIG_H */

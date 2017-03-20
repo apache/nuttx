@@ -31,6 +31,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
+ * May include some logic from sample code provided by Infineon:
+ *
+ *   Copyright (C) 2011-2015 Infineon Technologies AG. All rights reserved.
+ *
+ *   Infineon Technologies AG (Infineon) is supplying this software for use with
+ *   Infineon's microcontrollers.  This file can be freely distributed within
+ *   development tools that are supporting such microcontrollers.
+ *
+ *   THIS SOFTWARE IS PROVIDED AS IS. NO WARRANTIES, WHETHER EXPRESS, IMPLIED
+ *   OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
+ *   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
+ *   INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL,
+ *   OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+ *
  ****************************************************************************/
 
 /****************************************************************************
@@ -42,12 +56,14 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <errno.h>
+#include <assert.h>
 
 #include <arch/xmc4/chip.h>
 
 #include "up_arch.h"
 #include "chip/xmc4_usic.h"
 #include "chip/xmc4_scu.h"
+#include "xmc4_clockconfig.h"
 #include "xmc4_usic.h"
 
 /****************************************************************************
@@ -226,7 +242,7 @@ int xmc4_disable_usic(enum usic_e usic)
 
 uintptr_t xmc4_channel_baseaddress(enum usic_channel_e channel)
 {
-  if ((usigned int)channel < (2 * XM4C_NUSICS))
+  if ((unsigned int)channel < (2 * XMC4_NUSIC))
     {
       return g_channel_baseaddress[channel];
     }
@@ -264,7 +280,7 @@ int xmc4_enable_usic_channel(enum usic_channel_e channel)
 
   /* Enable the USIC module */
 
-  xmc4_enable_usic(xmc4_channel2usic(channel));
+  ret = xmc4_enable_usic(xmc4_channel2usic(channel));
   if (ret < 0)
     {
       return ret;
@@ -330,7 +346,7 @@ int xmc4_disable_usic_channel(enum usic_channel_e channel)
   /* Get the base address of other channel for this USIC module */
 
   other = xmc4_channel_baseaddress(channel ^ 1);
-  DEBUASSERT(other != 0);
+  DEBUGASSERT(other != 0);
 
   /* Check if the other channel has also been disabled */
 
@@ -344,3 +360,88 @@ int xmc4_disable_usic_channel(enum usic_channel_e channel)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: xmc4_uisc_baudrate
+ *
+ * Description:
+ *   Set the USIC baudrate for the USIC channel
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned to
+ *   indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+int xmc4_uisc_baudrate(enum usic_channel_e channel, uint32_t baud,
+                       uint32_t oversampling)
+{
+  uintptr_t base;
+  uint32_t periphclock;
+  uint32_t clkdiv;
+  uint32_t clkdiv_min;
+  uint32_t pdiv;
+  uint32_t pdiv_int;
+  uint32_t pdiv_int_min;
+  uint32_t pdiv_frac;
+  uint32_t pdiv_frac_min;
+  uint32_t regval;
+  int ret;
+
+  /* Get the base address of the registers for this channel */
+
+  base = xmc4_channel_baseaddress(channel);
+  if (base == 0)
+    {
+      return -EINVAL;
+    }
+
+  /* The baud and peripheral clock are divided by 100 to be able to use only
+   * 32-bit arithmetic.
+   */
+
+  if (baud >= 100 && oversampling != 0)
+    {
+      periphclock   = xmc4_get_periphclock() / 100;
+      baud          = baud / 100;
+
+      clkdiv_min    = 1;
+      pdiv_int_min  = 1;
+      pdiv_frac_min = 0x3ff;
+
+      for (clkdiv = 1023; clkdiv > 0; --clkdiv)
+        {
+          pdiv      = ((periphclock * clkdiv) / (baud * oversampling));
+          pdiv_int  = pdiv >> 10;
+          pdiv_frac = pdiv & 0x3ff;
+
+          if (pdiv_int < 1024 && pdiv_frac < pdiv_frac_min)
+            {
+              pdiv_frac_min = pdiv_frac;
+              pdiv_int_min  = pdiv_int;
+              clkdiv_min    = clkdiv;
+            }
+        }
+
+      /* Select and setup the fractional divider */
+
+      regval = USIC_FDR_DM_FRACTIONAL |  (clkdiv_min << USIC_FDR_STEP_SHIFT);
+      putreg32(regval, base + XMC4_USIC_FDR_OFFSET);
+
+      /* Setup and enable the baud rate generator */
+
+      regval  = getreg32(base + XMC4_USIC_BRG_OFFSET);
+      regval &=  ~(USIC_BRG_DCTQ_MASK | USIC_BRG_PDIV_MASK | USIC_BRG_PCTQ_MASK | USIC_BRG_PPPEN);
+      regval |= (USIC_BRG_DCTQ(oversampling - 1) |  USIC_BRG_PDIV(pdiv_int_min - 1));
+      putreg32(regval, base + XMC4_USIC_BRG_OFFSET);
+
+      ret = OK;
+    }
+  else
+    {
+      ret = -ERANGE;
+    }
+
+  return ret;
+}
+

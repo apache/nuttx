@@ -101,36 +101,36 @@ uint32_t xmc4_get_coreclock(void)
           temp = BOARD_XTAL_FREQUENCY;
         }
 
-    /* Check if PLL is locked */
+      /* Check if PLL is locked */
 
-    regval = getreg32(XMC4_SCU_PLLSTAT);
-    if ((regval & SCU_PLLSTAT_VCOLOCK) != 0)
-    {
-      /* PLL normal mode */
+      regval = getreg32(XMC4_SCU_PLLSTAT);
+      if ((regval & SCU_PLLSTAT_VCOLOCK) != 0)
+        {
+          /* PLL normal mode */
 
-      regval = getreg32(XMC4_SCU_PLLCON1);
-      pdiv   = ((regval & SCU_PLLCON1_PDIV_MASK) >> SCU_PLLCON1_PDIV_SHIFT) + 1;
-      ndiv   = ((regval & SCU_PLLCON1_NDIV_MASK) >> SCU_PLLCON1_NDIV_SHIFT) + 1;
-      kdiv   = ((regval & SCU_PLLCON1_K2DIV_MASK) >> SCU_PLLCON1_K2DIV_SHIFT) + 1;
+          regval = getreg32(XMC4_SCU_PLLCON1);
+          pdiv   = ((regval & SCU_PLLCON1_PDIV_MASK) >> SCU_PLLCON1_PDIV_SHIFT) + 1;
+          ndiv   = ((regval & SCU_PLLCON1_NDIV_MASK) >> SCU_PLLCON1_NDIV_SHIFT) + 1;
+          kdiv   = ((regval & SCU_PLLCON1_K2DIV_MASK) >> SCU_PLLCON1_K2DIV_SHIFT) + 1;
 
-      temp   = (temp / (pdiv * kdiv)) * ndiv;
+          temp   = (temp / (pdiv * kdiv)) * ndiv;
+        }
+      else
+        {
+          /* PLL prescalar mode */
+
+          regval = getreg32(XMC4_SCU_PLLCON1);
+          kdiv   = ((regval & SCU_PLLCON1_K1DIV_MASK) >> SCU_PLLCON1_K1DIV_SHIFT) + 1;
+
+          temp   = (temp / kdiv);
+        }
     }
-    else
-    {
-      /* PLL prescalar mode */
-
-      regval = getreg32(XMC4_SCU_PLLCON1);
-      kdiv   = ((regval & SCU_PLLCON1_K1DIV_MASK) >> SCU_PLLCON1_K1DIV_SHIFT) + 1;
-
-      temp   = (temp / kdiv);
-    }
-  }
   else
-  {
-    /* fOFI is clock source for fSYS */
+    {
+      /* fOFI is clock source for fSYS */
 
-    temp = OFI_FREQUENCY;
-  }
+      temp = OFI_FREQUENCY;
+    }
 
   /* Divide by SYSDIV to get fSYS */
 
@@ -147,4 +147,36 @@ uint32_t xmc4_get_coreclock(void)
     }
 
   return temp;
+}
+
+/****************************************************************************
+ * Name: xmc4_get_periphclock
+ *
+ * Description:
+ *   The peripheral clock is either fCPU or fCPU/2, depending on the state
+ *   of the peripheral divider.
+ *
+ ****************************************************************************/
+
+uint32_t xmc4_get_periphclock(void)
+{
+  uint32_t periphclock;
+
+  /* Get the CPU clock frequency.  Unless it is divided down, this also the
+   * peripheral clock frequency.
+   */
+
+  periphclock = xmc4_get_coreclock();
+
+  /* Get the peripheral clock divider */
+
+  periphclock = getreg32(XMC4_SCU_PBCLKCR);
+  if ((periphclock & SCU_PBCLKCR_PBDIV) != 0)
+    {
+      /* The peripheral clock is fCPU/2 */
+
+      periphclock <<= 1;
+    }
+
+  return periphclock;
 }
