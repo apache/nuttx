@@ -192,6 +192,17 @@
 #define BUTTON_0_BIT      (1 << BUTTON_0)
 #define BUTTON_1_BIT      (1 << BUTTON_1)
 
+/* USIC0 ****************************************************************************/
+/* USIC0 CH0 is used as UART0
+ *
+ *  RX - P1.4
+ *  TX - P1.5
+ */
+
+#define BOARD_UART0_DX    USIC_DXB
+#define GPIO_UART0_RXD0   GPIO_U0C0_DX0B
+#define GPIO_UART0_TXD0   (GPIO_U0C0_DOUT0_3 | GPIO_PADA1P_STRONGSOFT | GPIO_OUTPUT_SET)
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/

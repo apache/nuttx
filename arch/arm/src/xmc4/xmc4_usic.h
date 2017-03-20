@@ -45,10 +45,6 @@
 #include "xmc4_config.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -56,9 +52,9 @@
 
 enum usic_e
 {
-  USIC0 = 0,    /* USIC0 */
-  USIC1 = 1,    /* USIC1 */
-  USIC2 = 2     /* USIC2 */
+  USIC0       = 0,    /* USIC0 */
+  USIC1       = 1,    /* USIC1 */
+  USIC2       = 2     /* USIC2 */
 };
 
 /* This enumeration identifies USIC channels */
@@ -71,6 +67,19 @@ enum usic_channel_e
   USIC1_CHAN1 = 3,    /* USIC1, Channel 1 */
   USIC2_CHAN0 = 4,    /* USIC2, Channel 0 */
   USIC2_CHAN1 = 5     /* USIC2, Channel 1 */
+};
+
+/* This enumeration defines values for the dx input selection */
+
+enum uart_dx_e
+{
+  USIC_DXA    = 0,    /* USICn_DXmA */
+  USIC_DXB    = 1,    /* USICn_DXmB */
+  USIC_DXC    = 2,    /* USICn_DXmC */
+  USIC_DXD    = 3,    /* USICn_DXmD */
+  USIC_DXE    = 4,    /* USICn_DXmE */
+  USIC_DXF    = 5,    /* USICn_DXmF */
+  USIC_DXG    = 6     /* USICn_DXmG */
 };
 
 /****************************************************************************

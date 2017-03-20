@@ -227,17 +227,18 @@
  * Private Types
  ****************************************************************************/
 
+/* This structure provides the state of one UART device */
+
 struct xmc4_dev_s
 {
   uintptr_t uartbase;  /* Base address of UART registers */
-  uint32_t  baud;      /* Configured baud */
-  uint32_t  clock;     /* Clocking frequency of the UART module */
   uint8_t   channel;   /* USIC channel identification */
   uint8_t   irqs;      /* Status IRQ associated with this UART (for enable) */
   uint8_t   ie;        /* Interrupts enabled */
-  uint8_t   parity;    /* 0=none, 1=odd, 2=even */
-  uint8_t   bits;      /* Number of bits (8 or 9) */
-  uint8_t   stop2;     /* Use 2 stop bits */
+
+  /* UART configuration */
+
+  struct uart_config_s config;
 };
 
 /****************************************************************************
@@ -314,13 +315,16 @@ static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
 static struct xmc4_dev_s g_uart0priv =
 {
   .uartbase       = XMC4_USIC0_CH0_BASE,
-  .clock          = BOARD_CORECLK_FREQ,
   .channel        = (uint8_t)USIC0_CHAN0,
-  .baud           = CONFIG_UART0_BAUD,
-  .irqs           = XMC4_IRQ_USIC0,
-  .parity         = CONFIG_UART0_PARITY,
-  .bits           = CONFIG_UART0_BITS,
-  .stop2          = CONFIG_UART0_2STOP,
+  .irqs           = XMC4_IRQ_USIC0_SR0,
+  .config         =
+  {
+    .baud         = CONFIG_UART0_BAUD,
+    .dx           = BOARD_UART0_DX,
+    .parity       = CONFIG_UART0_PARITY,
+    .nbits        = CONFIG_UART0_BITS,
+    .stop2        = CONFIG_UART0_2STOP,
+  }
 };
 
 static uart_dev_t g_uart0port =
@@ -346,13 +350,16 @@ static uart_dev_t g_uart0port =
 static struct xmc4_dev_s g_uart1priv =
 {
   .uartbase       = XMC4_USIC0_CH1_BASE,
-  .clock          = BOARD_CORECLK_FREQ,
   .channel        = (uint8_t)USIC0_CHAN1,
-  .baud           = CONFIG_UART1_BAUD,
-  .irqs           = XMC4_IRQ_USIC1,
-  .parity         = CONFIG_UART1_PARITY,
-  .bits           = CONFIG_UART1_BITS,
-  .stop2          = CONFIG_UART1_2STOP,
+  .irqs           = XMC4_IRQ_USIC0_SR1,
+  .config         =
+  {
+    .baud         = CONFIG_UART1_BAUD,
+    .dx           = BOARD_UART1_DX,
+    .parity       = CONFIG_UART1_PARITY,
+    .nbits        = CONFIG_UART1_BITS,
+    .stop2        = CONFIG_UART1_2STOP,
+  }
 };
 
 static uart_dev_t g_uart1port =
@@ -378,13 +385,16 @@ static uart_dev_t g_uart1port =
 static struct xmc4_dev_s g_uart2priv =
 {
   .uartbase       = XMC4_USIC1_CH0_BASE,
-  .clock          = BOARD_BUS_FREQ,
   .channel        = (uint8_t)USIC1_CHAN0,
-  .baud           = CONFIG_UART2_BAUD,
-  .irqs           = XMC4_IRQ_USIC2,
-  .parity         = CONFIG_UART2_PARITY,
-  .bits           = CONFIG_UART2_BITS,
-  .stop2          = CONFIG_UART2_2STOP,
+  .irqs           = XMC4_IRQ_USIC1_SR0,
+  .config         =
+  {
+    .baud         = CONFIG_UART2_BAUD,
+    .dx           = BOARD_UART2_DX,
+    .parity       = CONFIG_UART2_PARITY,
+    .nbits        = CONFIG_UART2_BITS,
+    .stop2        = CONFIG_UART2_2STOP,
+  }
 };
 
 static uart_dev_t g_uart2port =
@@ -410,13 +420,16 @@ static uart_dev_t g_uart2port =
 static struct xmc4_dev_s g_uart3priv =
 {
   .uartbase       = XMC4_USIC1_CH1_BASE,
-  .clock          = BOARD_BUS_FREQ,
   .channel        = (uint8_t)USIC1_CHAN1,
-  .baud           = CONFIG_UART3_BAUD,
-  .irqs           = XMC4_IRQ_USIC3,
-  .parity         = CONFIG_UART3_PARITY,
-  .bits           = CONFIG_UART3_BITS,
-  .stop2          = CONFIG_UART3_2STOP,
+  .irqs           = XMC4_IRQ_USIC1_SR1,
+  .config         =
+  {
+    .baud         = CONFIG_UART3_BAUD,
+    .dx           = BOARD_UART3_DX,
+    .parity       = CONFIG_UART3_PARITY,
+    .nbits        = CONFIG_UART3_BITS,
+    .stop2        = CONFIG_UART3_2STOP,
+  }
 };
 
 static uart_dev_t g_uart3port =
@@ -442,13 +455,16 @@ static uart_dev_t g_uart3port =
 static struct xmc4_dev_s g_uart4priv =
 {
   .uartbase       = XMC4_USIC2_CH0_BASE,
-  .clock          = BOARD_BUS_FREQ,
   .channel        = (uint8_t)USIC2_CHAN0,
-  .baud           = CONFIG_UART4_BAUD,
-  .irqs           = XMC4_IRQ_USIC4,
-  .parity         = CONFIG_UART4_PARITY,
-  .bits           = CONFIG_UART4_BITS,
-  .stop2          = CONFIG_UART4_2STOP,
+  .irqs           = XMC4_IRQ_USIC2_SR0,
+  .config         =
+  {
+    .baud         = CONFIG_UART4_BAUD,
+    .dx           = BOARD_UART4_DX,
+    .parity       = CONFIG_UART4_PARITY,
+    .nbits        = CONFIG_UART4_BITS,
+    .stop2        = CONFIG_UART4_2STOP,
+  }
 };
 
 static uart_dev_t g_uart4port =
@@ -474,13 +490,16 @@ static uart_dev_t g_uart4port =
 static struct xmc4_dev_s g_uart5priv =
 {
   .uartbase       = XMC4_USIC2_CH1_BASE,
-  .clock          = BOARD_BUS_FREQ,
   .channel        = (uint8_t)USIC2_CHAN1,
-  .baud           = CONFIG_UART5_BAUD,
-  .irqs           = XMC4_IRQ_USIC5,
-  .parity         = CONFIG_UART5_PARITY,
-  .bits           = CONFIG_UART5_BITS,
-  .stop2          = CONFIG_UART5_2STOP,
+  .irqs           = XMC4_IRQ_USIC2_SR1,
+  .config         =
+  {
+    .baud         = CONFIG_UART5_BAUD,
+    .dx           = BOARD_UART5_DX,
+    .parity       = CONFIG_UART5_PARITY,
+    .nbits        = CONFIG_UART5_BITS,
+    .stop2        = CONFIG_UART5_2STOP,
+  }
 };
 
 static uart_dev_t g_uart5port =
@@ -508,7 +527,7 @@ static uart_dev_t g_uart5port =
  * Name: up_serialin
  ****************************************************************************/
 
-static inline uint8_t up_serialin(struct xmc4_dev_s *priv, int offset)
+static inline uint32_t up_serialin(struct xmc4_dev_s *priv, int offset)
 {
   return getreg8(priv->uartbase + offset);
 }
@@ -517,7 +536,7 @@ static inline uint8_t up_serialin(struct xmc4_dev_s *priv, int offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct xmc4_dev_s *priv, int offset, uint8_t value)
+static inline void up_serialout(struct xmc4_dev_s *priv, int offset, uint32_t value)
 {
   putreg8(value, priv->uartbase + offset);
 }
@@ -586,8 +605,7 @@ static int xmc4_setup(struct uart_dev_s *dev)
 
   /* Configure the UART as an RS-232 UART */
 
-  xmc4_uart_configure(priv->uartbase, priv->baud, priv->clock,
-                        priv->parity, priv->bits, priv->stop2);
+  xmc4_uart_configure(priv->uartbase, &priv->config);
 #endif
 
   /* Make sure that all interrupts are disabled */
@@ -615,7 +633,7 @@ static void xmc4_shutdown(struct uart_dev_s *dev)
 
   /* Reset hardware and disable Rx and Tx */
 
-  xmc4_uart_reset(priv->uartbase);
+  xmc4_uart_disable(priv->channel);
 }
 
 /****************************************************************************
@@ -807,32 +825,23 @@ static int xmc4_ioctl(struct file *filep, int cmd, unsigned long arg)
 static int xmc4_receive(struct uart_dev_s *dev, uint32_t *status)
 {
   struct xmc4_dev_s *priv = (struct xmc4_dev_s *)dev->priv;
-  uint8_t s1;
+  uint32_t outr;
 
-  /* Get error status information:
-   *
-   * FE: Framing error. To clear FE, read S1 with FE set and then read
-   *     read UART data register (D).
-   * NF: Noise flag. To clear NF, read S1 and then read the UART data
-   *     register (D).
-   * PF: Parity error flag. To clear PF, read S1 and then read the UART
-   *     data register (D).
-   */
+  /* Get input data along with receiver control information */
 
-  s1 = up_serialin(priv, XMC4_UART_S1_OFFSET);
+  outr = up_serialin(priv, XMC4_UART_S1_OFFSET);
+  up_serialout(priv, XMC4_USIC_OUTR_OFFSET, (uint32_t)ch);
 
-  /* Return status information */
+  /* Return receiver control information */
 
   if (status)
     {
-      *status = (uint32_t)s1;
+      *status = outr >> USIC_OUTR_RCI_SHIFT;
     }
 
-  /* Then return the actual received byte.  Reading S1 then D clears all
-   * RX errors.
-   */
+  /* Then return the actual received data. */
 
-  return (int)up_serialin(priv, XMC4_UART_D_OFFSET);
+  return outr & USIC_OUTR_DSR_MASK;
 }
 
 /****************************************************************************
@@ -885,14 +894,12 @@ static void xmc4_rxint(struct uart_dev_s *dev, bool enable)
 static bool xmc4_rxavailable(struct uart_dev_s *dev)
 {
   struct xmc4_dev_s *priv = (struct xmc4_dev_s *)dev->priv;
-  /* Return true if the receive data register is full (RDRF).  NOTE:  If
-   * FIFOS are enabled, this does not mean that the FIFO is full,
-   * rather, it means that the number of bytes in the RX FIFO has
-   * exceeded the watermark setting.  There may actually be RX data
-   * available!
-   */
+  uint32_t regval;
 
-  return (up_serialin(priv, XMC4_UART_S1_OFFSET) & UART_S1_RDRF) != 0;
+  /* Return true if the transmit buffer/fifo is not "empty." */
+
+  regval = up_serialin(priv, XMC4_UART_TRBSR_OFFSET);
+  return ((regval & USIC_TRBSR_REMPTY) == 0);
 }
 
 /****************************************************************************
@@ -906,7 +913,7 @@ static bool xmc4_rxavailable(struct uart_dev_s *dev)
 static void xmc4_send(struct uart_dev_s *dev, int ch)
 {
   struct xmc4_dev_s *priv = (struct xmc4_dev_s *)dev->priv;
-  up_serialout(priv, XMC4_UART_D_OFFSET, (uint8_t)ch);
+  up_serialout(priv, XMC4_USIC_IN_OFFSET, (uint32_t)ch);
 }
 
 /****************************************************************************
@@ -960,15 +967,12 @@ static void xmc4_txint(struct uart_dev_s *dev, bool enable)
 static bool xmc4_txready(struct uart_dev_s *dev)
 {
   struct xmc4_dev_s *priv = (struct xmc4_dev_s *)dev->priv;
+  uint32_t regval;
 
-  /* Return true if the transmit data register is "empty."  NOTE:  If
-   * FIFOS are enabled, this does not mean that the FIFO is empty,
-   * rather, it means that the number of bytes in the TX FIFO is
-   * below the watermark setting.  There may actually be space for
-   * additional TX data.
-   */
+  /* Return true if the transmit buffer/fifo is "not full." */
 
-  return (up_serialin(priv, XMC4_UART_S1_OFFSET) & UART_S1_TDRE) != 0;
+  regval = up_serialin(priv, XMC4_UART_TRBSR_OFFSET);
+  return ((regval & USIC_TRBSR_TFULL) == 0);
 }
 
 /****************************************************************************
@@ -982,10 +986,12 @@ static bool xmc4_txready(struct uart_dev_s *dev)
 static bool xmc4_txempty(struct uart_dev_s *dev)
 {
   struct xmc4_dev_s *priv = (struct xmc4_dev_s *)dev->priv;
+  uint32_t regval;
 
   /* Return true if the transmit buffer/fifo is "empty." */
 
-  return (up_serialin(priv, XMC4_UART_SFIFO_OFFSET) & UART_SFIFO_TXEMPT) != 0;
+  regval = up_serialin(priv, XMC4_UART_TRBSR_OFFSET);
+  return ((regval & USIC_TRBSR_TEMPTY) != 0);
 }
 
 /****************************************************************************

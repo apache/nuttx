@@ -48,6 +48,21 @@
 #include "xmc4_usic.h"
 
 /****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* This structure provides the configuration of one UART channel */
+
+struct uart_config_s
+{
+  uint32_t baud;         /* Desired BAUD rate */
+  uint8_t  dx;           /* Input pin 0=DXA, 1=DXB, ... 6=DXG */
+  uint8_t  parity;       /* Parity selection:  0=none, 1=odd, 2=even */
+  uint8_t  nbits;        /* Number of bits per word */
+  bool     stop2;        /* true=2 stop bits; false=1 stop bit */
+};
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -64,18 +79,6 @@
 void xmc4_lowsetup(void);
 
 /****************************************************************************
- * Name: xmc4_uart_reset
- *
- * Description:
- *   Reset a UART.
- *
- ****************************************************************************/
-
-#ifdef HAVE_UART_DEVICE
-void xmc4_uart_reset(uintptr_t uart_base);
-#endif
-
-/****************************************************************************
  * Name: xmc4_uart_configure
  *
  * Description:
@@ -88,9 +91,8 @@ void xmc4_uart_reset(uintptr_t uart_base);
  ****************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-int xmc4_uart_configure(enum usic_channel_e channel, uint32_t baud,
-                        uint32_t clock, unsigned int parity,
-                        unsigned int nbits, unsigned int stop2);
+int xmc4_uart_configure(enum usic_channel_e channel,
+                        FAR const struct uart_config_s *config);
 #endif
 
 /****************************************************************************

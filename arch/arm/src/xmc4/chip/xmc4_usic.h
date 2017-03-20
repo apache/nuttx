@@ -515,15 +515,16 @@
  */
 
 #define USIC_DXCR_DSEL_SHIFT        (0)      /* Bits 0-2: Data Selection for Input Signal */
-#define USIC_DXCR_DSEL_MASK         (7 << USIC_DX0CR_DSEL_SHIFT)
-#  define USIC_DXCR_DSEL_DXA        (0 << USIC_DX0CR_DSEL_SHIFT) /* Data input DXnA selected */
-#  define USIC_DXCR_DSEL_DXB        (1 << USIC_DX0CR_DSEL_SHIFT) /* Data input DXnB selected */
-#  define USIC_DXCR_DSEL_DXC        (2 << USIC_DX0CR_DSEL_SHIFT) /* Data input DXnC selected */
-#  define USIC_DXCR_DSEL_DXD        (3 << USIC_DX0CR_DSEL_SHIFT) /* Data input DXnD selected */
-#  define USIC_DXCR_DSEL_DXE        (4 << USIC_DX0CR_DSEL_SHIFT) /* Data input DXnE selected */
-#  define USIC_DXCR_DSEL_DXF        (5 << USIC_DX0CR_DSEL_SHIFT) /* Data input DXnF selected */
-#  define USIC_DXCR_DSEL_DXG        (6 << USIC_DX0CR_DSEL_SHIFT) /* Data input DXnG selected */
-#  define USIC_DXCR_DSEL_ONE        (7 << USIC_DX0CR_DSEL_SHIFT) /* Data input is always 1 */
+#define USIC_DXCR_DSEL_MASK         (7 << USIC_DXCR_DSEL_SHIFT)
+#  define USIC_DXCR_DSEL_DX(m)      ((uint32_t)(m) << USIC_DXCR_DSEL_SHIFT) /* Data input DXnm selected */
+#  define USIC_DXCR_DSEL_DXA        (0 << USIC_DXCR_DSEL_SHIFT) /* Data input DXnA selected */
+#  define USIC_DXCR_DSEL_DXB        (1 << USIC_DXCR_DSEL_SHIFT) /* Data input DXnB selected */
+#  define USIC_DXCR_DSEL_DXC        (2 << USIC_DXCR_DSEL_SHIFT) /* Data input DXnC selected */
+#  define USIC_DXCR_DSEL_DXD        (3 << USIC_DXCR_DSEL_SHIFT) /* Data input DXnD selected */
+#  define USIC_DXCR_DSEL_DXE        (4 << USIC_DXCR_DSEL_SHIFT) /* Data input DXnE selected */
+#  define USIC_DXCR_DSEL_DXF        (5 << USIC_DXCR_DSEL_SHIFT) /* Data input DXnF selected */
+#  define USIC_DXCR_DSEL_DXG        (6 << USIC_DXCR_DSEL_SHIFT) /* Data input DXnG selected */
+#  define USIC_DXCR_DSEL_ONE        (7 << USIC_DXCR_DSEL_SHIFT) /* Data input is always 1 */
 #define USIC_DX1CR_DCEN             (1 << 3)  /* Bit 3:  Delay Compensation Enable (DX1CR only) */
 #define USIC_DXCR_INSW              (1 << 4)  /* Bit 4:  Input Switch */
 #define USIC_DXCR_DFEN              (1 << 5)  /* Bit 5:  Digital Filter Enable */
@@ -531,17 +532,19 @@
 #define USIC_DXCR_DPOL              (1 << 8)  /* Bit 8:  Data Polarity for DXn */
 #define USIC_DXCR_SFSEL             (1 << 9)  /* Bit 9:  Sampling Frequency Selection */
 #define USIC_DXCR_CM_SHIFT          (10)      /* Bits 10-11: Combination Mode */
-#define USIC_DXCR_CM_MASK           (3 << USIC_DX0CR_CM_SHIFT)
-#  define USIC_DXCR_CM_DISABLE      (0 << USIC_DX0CR_CM_SHIFT) /* Trigger activation disabled */
-#  define USIC_DXCR_CM_RISING       (1 << USIC_DX0CR_CM_SHIFT) /* Rising edge activates DXnT */
-#  define USIC_DXCR_CM_FALLING      (2 << USIC_DX0CR_CM_SHIFT) /* Falling edge activates DXnT */
-#  define USIC_DXCR_CM_BOTH         (3 << USIC_DX0CR_CM_SHIFT) /* Both edges activate DXnT */
+#define USIC_DXCR_CM_MASK           (3 << USIC_DXCR_CM_SHIFT)
+#  define USIC_DXCR_CM_DISABLE      (0 << USIC_DXCR_CM_SHIFT) /* Trigger activation disabled */
+#  define USIC_DXCR_CM_RISING       (1 << USIC_DXCR_CM_SHIFT) /* Rising edge activates DXnT */
+#  define USIC_DXCR_CM_FALLING      (2 << USIC_DXCR_CM_SHIFT) /* Falling edge activates DXnT */
+#  define USIC_DXCR_CM_BOTH         (3 << USIC_DXCR_CM_SHIFT) /* Both edges activate DXnT */
 #define USIC_DXCR_DXS               (1 << 15) /* Bit 15:  Synchronized Data Value */
 
 /* Shift Control Register */
 
 #define USIC_SCTR_SDIR              (1 << 0)  /* Bit 0:  Shift Direction */
 #define USIC_SCTR_PDL               (1 << 1)  /* Bit 1:  Passive Data Level */
+#  define USIC_SCTR_PDL0            (0)       /*         0=Passive data level is 0 */
+#  define USIC_SCTR_PDL1            (1 << 1)  /*         1=Passive data level is 1 */
 #define USIC_SCTR_DSM_SHIFT         (2)       /* Bits 2-3: Data Shift Mode */
 #define USIC_SCTR_DSM_MASK          (3 << USIC_SCTR_DSM_SHIFT)
 #  define USIC_SCTR_DSM_1BIT        (0 << USIC_SCTR_DSM_SHIFT) /* Data is shifted one bit at a time */
@@ -555,8 +558,8 @@
 #define USIC_SCTR_TRM_SHIFT         (8)       /* Bits 8-9: Transmission Mode */
 #define USIC_SCTR_TRM_MASK          (3 << USIC_SCTR_TRM_SHIFT)
 #  define USIC_SCTR_TRM_INACTIVE    (0 << USIC_SCTR_TRM_SHIFT) /* Inactive */
-#  define USIC_SCTR_TRM_0LEVEL      (1 << USIC_SCTR_TRM_SHIFT) /* Active at 1-level */
-#  define USIC_SCTR_TRM_1LEVEL      (2 << USIC_SCTR_TRM_SHIFT) /* Active if it is at 0-level */
+#  define USIC_SCTR_TRM_1LEVEL      (1 << USIC_SCTR_TRM_SHIFT) /* Active at 1-level */
+#  define USIC_SCTR_TRM_0LEVEL      (2 << USIC_SCTR_TRM_SHIFT) /* Active at 0-level */
 #  define USIC_SCTR_TRM_ACTIVE      (3 << USIC_SCTR_TRM_SHIFT) /* Active without regard to signal level */
 #define USIC_SCTR_FLE_SHIFT         (16)      /* Bits 16-21: Frame Length */
 #define USIC_SCTR_FLE_MASK          (0x3f << USIC_SCTR_FLE_SHIFT)
@@ -638,7 +641,8 @@
 #  define USIC_PCR_ASCMODE_SP(n)    ((uint32_t)(n) << USIC_PCR_ASCMODE_SP_SHIFT)
 #define USIC_PCR_ASCMODE_PL_SHIFT   (13)      /* Bits 13-15: Pulse Length */
 #define USIC_PCR_ASCMODE_PL_MASK    (7 << USIC_PCR_ASCMODE_PL_SHIFT)
-  #define USIC_PCR_ASCMODE_PL(n)    ((uint32_t)((n)-1) << USIC_PCR_ASCMODE_PL_SHIFT)
+  #define USIC_PCR_ASCMODE_PLBIT    (0 << USIC_PCR_ASCMODE_PL_SHIFT)                 /* Pulse length = bit length */
+  #define USIC_PCR_ASCMODE_PL(n)    ((uint32_t)((n)-1) << USIC_PCR_ASCMODE_PL_SHIFT) /* Pulse length = n quanta */
 #define USIC_PCR_ASCMODE_RSTEN      (1 << 16) /* Bit 16: Receiver Status Enable */
 #define USIC_PCR_ASCMODE_TSTEN      (1 << 17) /* Bit 17: Transmitter Status Enable */
 #define USIC_PCR_ASCMODE_MCLK       (1 << 31) /* Bit 31: Master Clock Enable */
@@ -717,7 +721,7 @@
 #  define USIC_CCR_HPCEN_DX0_2      (3 << USIC_CCR_HPCEN_SHIFT) /* Port control enabled for DX0, DX[5:3] and DOUT[3:0] */
 #define USIC_CCR_PM_SHIFT           (8)       /* Bits 8-9: Parity Mode */
 #define USIC_CCR_PM_MASK            (3 << USIC_CCR_PM_SHIFT)
-#  define USIC_CCR_PM_DISABLE       (0 << USIC_CCR_PM_SHIFT) /* Parity generation is disabled */
+#  define USIC_CCR_PM_NONE          (0 << USIC_CCR_PM_SHIFT) /* Parity generation is disabled */
 #  define USIC_CCR_PM_EVEN          (2 << USIC_CCR_PM_SHIFT) /* Even parity is selected */
 #  define USIC_CCR_PM_ODD           (3 << USIC_CCR_PM_SHIFT) /* Odd parity is selected */
 #define USIC_CCR_RSIEN              (1 << 10) /* Bit 10: Receiver Start Interrupt Enable */
