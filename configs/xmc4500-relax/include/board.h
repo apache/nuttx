@@ -107,12 +107,13 @@
 
 /* Standby clock source selection
  *
- * BOARD_STDBY_CLOCKSRC_OSI    - Internal slow oscillator (32768Hz)
+ * BOARD_STDBY_CLOCKSRC_OSI    - Internal 32.768KHz slow oscillator
  * BOARD_STDBY_CLOCKSRC_OSCULP - External 32.768KHz crystal
  */
 
 #define BOARD_STDBY_CLOCKSRC_OSI   1
 #undef BOARD_STDBY_CLOCKSRC_OSCULP
+#define BOARD_STDBY_FREQUENCY     32768
 
 /* USB PLL settings.
  *

@@ -57,23 +57,41 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* The SysTick counter runs on the clock selected by SYST_CSR.CLKSOURCE.
+ * That selection may be either:
+ *
+ *    CLKSOURCE=0: fSTDBY / 2
+ *    CLKSOURCE=1: fCPU
+ *
+ * In the first case, the SysTick counter would run at 16.384Khz.  The most
+ * common system clock of 10 msec/tick cannot be exactly represented with
+ * that value.
+ *
+ * In the second case, the SysTick counter may run to rapidly to support
+ * longer timer tick intervals.  For example, if the CPU clock is 144Mhz,
+ * then that 10 msec interval would correspond to a reload value of 1,440,000
+ * or 0x0015f900.
+ */
+
 /* The desired timer interrupt frequency is provided by the definition
  * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
  * system clock ticks per second.  That value is a user configurable setting
  * that defaults to 100 (100 ticks per second = 10 MS interval).
  *
- * The Clock Source: The System Tick Timer's clock source is always the core
- * clock
+ * Lets try fCPU first:
  */
 
-#define SYSTICK_RELOAD ((BOARD_CORECLK_FREQ / CLK_TCK) - 1)
+#define SYSTICK_RELOAD ((BOARD_CPU_FREQUENCY / CLK_TCK) - 1)
+#undef  USE_STDBY_CLOCK
 
-/* The size of the reload field is 24 bits.  Verify that the reload value
- * will fit in the reload register.
- */
+/* Verify that the reload value will fit in the reload register. */
 
 #if SYSTICK_RELOAD > 0x00ffffff
-#  error SYSTICK_RELOAD exceeds the range of the RELOAD register
+  /* No, then revert to fSTDBY */
+
+#  undef SYSTICK_RELOAD
+#  define SYSTICK_RELOAD ((BOARD_STDBY_FREQUENCY / CLK_TCK) - 1)
+#  define USE_STDBY_CLOCK 1
 #endif
 
 /****************************************************************************
@@ -121,12 +139,17 @@ void arm_timer_initialize(void)
   regval |= (NVIC_SYSH_PRIORITY_DEFAULT << NVIC_SYSH_PRIORITY_PR15_SHIFT);
   putreg32(regval, NVIC_SYSH12_15_PRIORITY);
 
+#ifndef USE_STDBY_CLOCK
   /* Note that is should not be neccesary to set the SYSTICK clock source:
    * "The CLKSOURCE bit in SysTick Control and Status register is always set
    *  to select the core clock."
+   *
+   * For the XMC4xx, fhat selection may be either:
+   *
+   *   CLKSOURCE=0: fSTDBY / 2
+   *   CLKSOURCE=1: fCPU
    */
 
-#if 0
   regval = getreg32(NVIC_SYSTICK_CTRL);
   regval |= NVIC_SYSTICK_CTRL_CLKSOURCE;
   putreg32(regval, NVIC_SYSTICK_CTRL);

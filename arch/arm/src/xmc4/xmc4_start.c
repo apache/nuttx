@@ -51,8 +51,9 @@
 #include "up_internal.h"
 #include "chip/xmc4_flash.h"
 
-#include "xmc4_userspace.h"
+#include "xmc4_clockconfig.h"
 #include "xmc4_lowputc.h"
+#include "xmc4_userspace.h"
 #include "xmc4_start.h"
 
 #ifdef CONFIG_ARCH_FPU
@@ -319,8 +320,7 @@ void __start(void)
 #endif
 
   /* Disable the watchdog timer */
-
-  xmc4_wddisable();
+  /* TODO - add logic to disable the watchdog timer */
 
   /* Enable unaligned memory access */
 
