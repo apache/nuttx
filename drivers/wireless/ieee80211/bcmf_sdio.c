@@ -54,6 +54,8 @@
 #include <nuttx/wireless/ieee80211/bcmf_sdio.h>
 #include <nuttx/wireless/ieee80211/bcmf_board.h>
 
+#include "chip_constants.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -62,28 +64,38 @@
 #define BCMF_DEVICE_START_DELAY_MS 10
 #define BCMF_CLOCK_SETUP_DELAY_MS  500
 
-#define SDIO_FN1_CHIPCLKCSR     0x1000E /* Clock Control Source Register */
-#define SDIO_FN1_PULLUP         0x1000F /* Pull-up Control Register for cmd, D0-2 lines */
+/* Agent registers (common for every core) */
+#define BCMA_IOCTL           0x0408 /* IO control */
+#define BCMA_IOST            0x0500 /* IO status */
+#define BCMA_RESET_CTL       0x0800 /* Reset control */
+#define BCMA_RESET_ST        0x0804
 
-#define SDIO_FN1_CHIPCLKCSR_FORCE_ALP           0x01
-#define SDIO_FN1_CHIPCLKCSR_FORCE_HT            0x02
-#define SDIO_FN1_CHIPCLKCSR_FORCE_ILP           0x04
-#define SDIO_FN1_CHIPCLKCSR_ALP_AVAIL_REQ       0x08
-#define SDIO_FN1_CHIPCLKCSR_HT_AVAIL_REQ        0x10
-#define SDIO_FN1_CHIPCLKCSR_FORCE_HW_CLKREQ_OFF 0x20
-#define SDIO_FN1_CHIPCLKCSR_ALP_AVAIL           0x40
-#define SDIO_FN1_CHIPCLKCSR_HT_AVAIL            0x80
+#define BCMA_IOCTL_CLK       0x0001
+#define BCMA_IOCTL_FGC       0x0002
+#define BCMA_IOCTL_CORE_BITS 0x3FFC
+#define BCMA_IOCTL_PME_EN    0x4000
+#define BCMA_IOCTL_BIST_EN   0x8000
+
+#define BCMA_IOST_CORE_BITS  0x0FFF
+#define BCMA_IOST_DMA64      0x1000
+#define BCMA_IOST_GATED_CLK  0x2000
+#define BCMA_IOST_BIST_ERROR 0x4000
+#define BCMA_IOST_BIST_DONE  0x8000
+
+#define BCMA_RESET_CTL_RESET 0x0001
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-/* This structure is contains the unique state of the Broadcom FullMAC driver */
+/* This structure contains the unique state of the Broadcom FullMAC driver */
 
 struct bcmf_dev_s
 {
   FAR struct sdio_dev_s *sdio_dev; /* The SDIO device bound to this instance */
   int minor;                       /* Device minor number */
+
+  uint32_t backplane_current_addr; /* Current function 1 backplane base addr */
 };
 
 /****************************************************************************
@@ -95,16 +107,23 @@ static int  bcmf_transfer_bytes(FAR struct bcmf_dev_s *priv, bool write,
                                 uint8_t *buf, unsigned int len);
 
 static int  bcmf_read_reg(FAR struct bcmf_dev_s *priv, uint8_t function,
-                          uint32_t address, uint8_t *reg,
-                          unsigned int len);
+                          uint32_t address, uint8_t *reg);
 
 static int  bcmf_write_reg(FAR struct bcmf_dev_s *priv, uint8_t function,
-                          uint32_t address, uint32_t reg,
-                          unsigned int len);
+                          uint32_t address, uint8_t reg);
+
+static int  bcmf_read_sbreg(FAR struct bcmf_dev_s *priv, uint32_t address,
+                          uint32_t *reg);
+
+static int  bcmf_write_sbreg(FAR struct bcmf_dev_s *priv, uint32_t address,
+                          uint32_t reg);
 
 static int  bcmf_probe(FAR struct bcmf_dev_s *priv);
 static int  bcmf_hwinitialize(FAR struct bcmf_dev_s *priv);
 static void bcmf_hwuninitialize(FAR struct bcmf_dev_s *priv);
+static int  bcmf_chipinitialize(FAR struct bcmf_dev_s *priv);
+
+static int  bcmf_set_backplane_window(FAR struct bcmf_dev_s *priv, uint32_t addr);
 
 /****************************************************************************
  * Private Data
@@ -130,9 +149,10 @@ int bcmf_transfer_bytes(FAR struct bcmf_dev_s *priv, bool write,
                                function, address, *buf, buf);
     }
 
-    // return sdio_io_rw_extended(priv->sdio_dev, write,
-    //                            function, address, *buf, buf);
-    return -EINVAL;
+    return sdio_io_rw_extended(priv->sdio_dev, write,
+                               function, address, true, buf, len, 1);
+
+    // return -EINVAL;
 }
 
 /****************************************************************************
@@ -140,9 +160,9 @@ int bcmf_transfer_bytes(FAR struct bcmf_dev_s *priv, bool write,
  ****************************************************************************/
 
 int bcmf_read_reg(FAR struct bcmf_dev_s *priv, uint8_t function,
-                  uint32_t address, uint8_t *reg, unsigned int len)
+                  uint32_t address, uint8_t *reg)
 {
-  return bcmf_transfer_bytes(priv, false, function, address, reg, len);
+  return bcmf_transfer_bytes(priv, false, function, address, reg, 1);
 }
 
 /****************************************************************************
@@ -150,15 +170,43 @@ int bcmf_read_reg(FAR struct bcmf_dev_s *priv, uint8_t function,
  ****************************************************************************/
 
 int bcmf_write_reg(FAR struct bcmf_dev_s *priv, uint8_t function,
-                   uint32_t address, uint32_t reg, unsigned int len)
+                   uint32_t address, uint8_t reg)
 {
-  if (len > 4)
+  return bcmf_transfer_bytes(priv, true, function, address, &reg, 1);
+}
+
+/****************************************************************************
+ * Name: bcmf_read_sbreg
+ ****************************************************************************/
+
+int bcmf_read_sbreg(FAR struct bcmf_dev_s *priv, uint32_t address,
+                          uint32_t *reg)
+{
+  int ret = bcmf_set_backplane_window(priv, address);
+  if (ret != OK)
     {
-      return -EINVAL;
+      return ret;
     }
 
-  return bcmf_transfer_bytes(priv, true, function, address,
-                             (uint8_t*)&reg, len);
+  return bcmf_transfer_bytes(priv, false, 1, address, (uint8_t*)reg, 4);
+}
+
+/****************************************************************************
+ * Name: bcmf_write_sbreg
+ ****************************************************************************/
+
+int bcmf_write_sbreg(FAR struct bcmf_dev_s *priv, uint32_t address,
+                          uint32_t reg)
+{
+
+  int ret = bcmf_set_backplane_window(priv, address);
+  if (ret != OK)
+    {
+      return ret;
+    }
+
+  return bcmf_transfer_bytes(priv, true, 1, address,
+                             (uint8_t*)&reg, 4);
 }
 
 /****************************************************************************
@@ -209,8 +257,10 @@ int bcmf_probe(FAR struct bcmf_dev_s *priv)
 
   /* Enable device interrupts for FN0, FN1 and FN2 */
 
-  ret = sdio_io_rw_direct(priv->sdio_dev, true, 0, SDIO_CCCR_INTEN,
-                          (1 << 0) | (1 << 1) | (1 << 2), NULL);
+  // ret = sdio_io_rw_direct(priv->sdio_dev, true, 0, SDIO_CCCR_INTEN,
+  //                         (1 << 0) | (1 << 1) | (1 << 2), NULL);
+  ret = bcmf_write_reg(priv, 0, SDIO_CCCR_INTEN,
+                       (1 << 0) | (1 << 1) | (1 << 2));
   if (ret != OK)
     {
       goto exit_error;
@@ -230,7 +280,8 @@ int bcmf_probe(FAR struct bcmf_dev_s *priv)
     {
       up_mdelay(1);
 
-      ret = sdio_io_rw_direct(priv->sdio_dev, false, 0, SDIO_CCCR_IORDY, 0, &value);
+      // ret = sdio_io_rw_direct(priv->sdio_dev, false, 0, SDIO_CCCR_IORDY, 0, &value);
+      ret = bcmf_read_reg(priv, 0, SDIO_CCCR_IORDY, &value);
       if (ret != OK)
         {
           return ret;
@@ -269,14 +320,14 @@ exit_error:
 
   /* Send Active Low-Power clock request */
 
-  ret = bcmf_write_reg(priv, 1, SDIO_FN1_CHIPCLKCSR,
-            SDIO_FN1_CHIPCLKCSR_FORCE_HW_CLKREQ_OFF |
-            SDIO_FN1_CHIPCLKCSR_ALP_AVAIL_REQ |
-            SDIO_FN1_CHIPCLKCSR_FORCE_ALP, 1);
+  ret = bcmf_write_reg(priv, 1, SDIO_CHIP_CLOCK_CSR,
+            SBSDIO_FORCE_HW_CLKREQ_OFF |
+            SBSDIO_ALP_AVAIL_REQ |
+            SBSDIO_FORCE_ALP);
 
   if (ret != OK)
     {
-      return ret;;
+      return ret;
     }
 
   loops = 10;
@@ -285,14 +336,14 @@ exit_error:
       uint8_t value;
 
       up_mdelay(10);
-      ret = bcmf_read_reg(priv, 1, SDIO_FN1_CHIPCLKCSR, &value, 1);
+      ret = bcmf_read_reg(priv, 1, SDIO_CHIP_CLOCK_CSR, &value);
 
       if (ret != OK)
         {
           return ret;
         }
 
-      if (value & SDIO_FN1_CHIPCLKCSR_ALP_AVAIL)
+      if (value & SBSDIO_ALP_AVAIL)
         {
           /* Active Low-Power clock is ready */
           break;
@@ -307,7 +358,7 @@ exit_error:
 
   /* Clear Active Low-Power clock request */
 
-  ret = bcmf_write_reg(priv, 1, SDIO_FN1_CHIPCLKCSR, 0, 1);
+  ret = bcmf_write_reg(priv, 1, SDIO_CHIP_CLOCK_CSR, 0);
   if (ret != OK)
     {
       return ret;
@@ -315,21 +366,21 @@ exit_error:
 
   /* Disable pull-ups on SDIO cmd, d0-2 lines */
 
-  ret = bcmf_write_reg(priv, 1, SDIO_FN1_PULLUP, 0, 1);
+  ret = bcmf_write_reg(priv, 1, SDIO_PULL_UP, 0);
   if (ret != OK)
     {
       return ret;
     }
 
-  /* Enable oob gpio interrupt */
+  /* Do chip specific initialization */
 
-  // bcmf_board_setup_oob_irq(priv->minor, bcmf_oob_irq, (void*)priv);
+  ret = bcmf_chipinitialize(priv);
+  if (ret != OK)
+    {
+      return ret;
+    }
 
-  /* Enable F2 interrupt only */
-
-  /* Upload firmware */
-
-  /* Enable function 2 */
+  // /* Enable function 2 */
 
   // ret = sdio_enable_function(priv->sdio_dev, 2);
   // if (ret != OK)
@@ -337,6 +388,33 @@ exit_error:
   //     goto exit_error;
   //   }
 
+  // /* Enable out-of-band interrupt signal */
+
+  // ret = sdio_io_rw_direct(priv->sdio_dev, true, 0, SDIOD_SEP_INT_CTL,
+  //                 SEP_INTR_CTL_MASK | SEP_INTR_CTL_EN | SEP_INTR_CTL_POL, NULL);
+  // if (ret != OK)
+  //   {
+  //     return ret;
+  //   }
+
+  // /* Enable function 2 interrupt */
+
+  // ret = sdio_enable_interrupt(priv->sdio_dev, 0);
+  // if (ret != OK)
+  //   {
+  //     return ret;
+  //   }
+  // ret = sdio_enable_interrupt(priv->sdio_dev, 2);
+  // if (ret != OK)
+  //   {
+  //     return ret;
+  //   }
+
+  // bcmf_board_setup_oob_irq(priv->minor, bcmf_oob_irq, (void*)priv);
+
+  /* Upload firmware */
+
+  _info("upload firmware\n");
 
   return OK;
 }
@@ -452,4 +530,62 @@ exit_uninit_hw:
 exit_free_priv:
   kmm_free(priv);
   return ret;
+}
+
+int bcmf_chipinitialize(FAR struct bcmf_dev_s *priv)
+{
+  int ret;
+  uint32_t value = 0;
+
+  ret = bcmf_read_sbreg(priv, CHIPCOMMON_BASE_ADDRESS, &value);
+  if (ret != OK)
+    {
+      return ret;
+    }
+  _info("chip id is 0x%x\n", value);
+
+  int chipid = value & 0xffff;
+  switch (chipid)
+    {
+      case BCM_43362_CHIP_ID:
+        _info("bcm43362 chip detected !!\n");
+        break;
+      default:
+        _err("chip 0x%x is not supported\n", chipid);
+        return -ENODEV;
+   }
+  return OK;
+}
+
+int bcmf_set_backplane_window(FAR struct bcmf_dev_s *priv, uint32_t address)
+{
+  int ret;
+  int i;
+
+  address &= ~BACKPLANE_ADDRESS_MASK;
+
+  for (i = 1; i < 4; i++)
+    {
+      uint8_t addr_part = (address >> (8*i)) & 0xff;
+      uint8_t cur_addr_part = (priv->backplane_current_addr >> (8*i)) & 0xff;
+
+      if (addr_part != cur_addr_part)
+        {
+          /* Update current backplane base address */
+
+          ret = bcmf_write_reg(priv, 1, SDIO_BACKPLANE_ADDRESS_LOW+i-1,
+                  addr_part);
+
+          if (ret != OK)
+            {
+              return ret;
+            }
+
+          priv->backplane_current_addr &= ~(0xff << (8*i));
+          priv->backplane_current_addr |= addr_part << (8*i);
+          _info("update %d %08x\n", i, priv->backplane_current_addr);
+        }
+    }
+
+  return OK;
 }

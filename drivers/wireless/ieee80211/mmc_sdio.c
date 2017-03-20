@@ -116,87 +116,89 @@ int sdio_io_rw_direct(FAR struct sdio_dev_s *dev, bool write,
     return OK;
 }
 
-// int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
-//                         uint8_t function, uint32_t address,
-//                         bool inc_addr, uint8_t *buf,
-//                         unsigned int blocklen, unsigned int nblocks)
-// {
-//     struct sdio_cmd53 arg;
-//     struct sdio_resp_R5 resp;
-//     int ret;
-//     sdio_eventset_t wkupevent;
-// 
-//     /* Setup CMD53 argument */
-// 
-//     arg.byte_block_count = blocklen;
-//     arg.register_address = address & 0x1ff;
-//     arg.op_code          = inc_addr;
-//     arg.function_number  = function & 7;
-//     arg.rw_flag          = write;
-// 
-//     if (nblocks <= 1 && blocklen < 512)
-//       {
-//         /* Use byte mode */
-// 
-//         arg.block_mode = 0;
-//         nblocks = 1;
-//       }
-//     else
-//       {
-//         /* Use block mode */
-// 
-//         arg.block_mode = 1;
-//       }
-// 
-//     /* Send CMD53 command */
-// 
-//     SDIO_BLOCKSETUP(dev, blocklen, nblocks);
-//     SDIO_WAITENABLE(dev,
-//             SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
-// 
-//     sdio_sendcmdpoll(dev, SDIO_ACMD53, (uint32_t)arg);
-//     ret = SDIO_RECVR5(dev, SDIO_ACMD53, (uint32_t*)&resp);
-// 
-//     if (write)
-//       {
-//         sdio_sendcmdpoll(dev, SDIO_ACMD53, (uint32_t)arg);
-//         ret = SDIO_RECVR5(dev, SDIO_ACMD53, (uint32_t*)&resp);
-// 
-//         SDIO_SENDSETUP(dev, buf, blocklen * nblocks);
-//         wkupevent = SDIO_EVENTWAIT(dev, SDIO_CMD53_TIMEOUT_MS);
-//       }
-//     else
-//       {
-//         SDIO_RECVSETUP(dev, buf, blocklen * nblocks);
-//         SDIO_SENDCMD(dev, SDIO_ACMD53, (uint32_t)arg);
-// 
-//         wkupevent = SDIO_EVENTWAIT(dev, SDIO_CMD53_TIMEOUT_MS);
-//         ret = SDIO_RECVR5(dev, SDIO_ACMD53, (uint32_t*)&resp);
-//       }
-// 
-//     if (ret != OK)
-//       {
-//         _err("ERROR: SDIO_RECVR5 failed %d\n", ret);
-//         return ret;
-//       }
-// 
-//     /* Check for errors */
-// 
-//     if (wkupevent & SDIOWAIT_TIMEOUT)
-//       {
-//         return -ETIMEDOUT;
-//       }
-//     if (resp.error || (wkupevent & SDIOWAIT_ERROR))
-//       {
-//         return -EIO;
-//       }
-//     if (resp.function_number || resp.out_of_range)
-//       {
-//         return -EINVAL;
-//       }
-// 
-//     return OK;
-// }
+int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
+                        uint8_t function, uint32_t address,
+                        bool inc_addr, uint8_t *buf,
+                        unsigned int blocklen, unsigned int nblocks)
+{
+    union sdio_cmd5x arg;
+    struct sdio_resp_R5 resp;
+    int ret;
+    sdio_eventset_t wkupevent;
+
+    /* Setup CMD53 argument */
+
+    arg.cmd53.byte_block_count = blocklen;
+    arg.cmd53.register_address = address & 0x1ffff;
+    arg.cmd53.op_code          = inc_addr;
+    arg.cmd53.function_number  = function & 7;
+    arg.cmd53.rw_flag          = write;
+
+    if (nblocks <= 1 && blocklen < 512)
+      {
+        /* Use byte mode */
+
+        _info("byte mode\n");
+        arg.cmd53.block_mode = 0;
+        nblocks = 1;
+      }
+    else
+      {
+        /* Use block mode */
+
+        arg.cmd53.block_mode = 1;
+      }
+
+    /* Send CMD53 command */
+
+    SDIO_BLOCKSETUP(dev, blocklen, nblocks);
+    SDIO_WAITENABLE(dev,
+            SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
+
+    if (write)
+      {
+        sdio_sendcmdpoll(dev, SDIO_ACMD53, (uint32_t)arg.value);
+        ret = SDIO_RECVR5(dev, SDIO_ACMD53, (uint32_t*)&resp);
+
+        SDIO_SENDSETUP(dev, buf, blocklen * nblocks);
+        wkupevent = SDIO_EVENTWAIT(dev, SDIO_CMD53_TIMEOUT_MS);
+      }
+    else
+      {
+        _info("prep read %d\n", blocklen * nblocks);
+        SDIO_RECVSETUP(dev, buf, blocklen * nblocks);
+        SDIO_SENDCMD(dev, SDIO_ACMD53, (uint32_t)arg.value);
+
+        wkupevent = SDIO_EVENTWAIT(dev, SDIO_CMD53_TIMEOUT_MS);
+        ret = SDIO_RECVR5(dev, SDIO_ACMD53, (uint32_t*)&resp);
+      }
+
+    if (ret != OK)
+      {
+        _err("ERROR: SDIO_RECVR5 failed %d\n", ret);
+        return ret;
+      }
+
+    /* Check for errors */
+
+    if (wkupevent & SDIOWAIT_TIMEOUT)
+      {
+        _err("timeout\n");
+        return -ETIMEDOUT;
+      }
+    if (resp.flags.error || (wkupevent & SDIOWAIT_ERROR))
+      {
+        _err("error 1\n");
+        return -EIO;
+      }
+    if (resp.flags.function_number || resp.flags.out_of_range)
+      {
+        _err("error 2\n");
+        return -EINVAL;
+      }
+
+    return OK;
+}
 
 int sdio_set_wide_bus(struct sdio_dev_s *dev)
 {
@@ -352,4 +354,20 @@ int sdio_enable_function(FAR struct sdio_dev_s *dev, uint8_t function)
         }
     }
   return -ETIMEDOUT;
+}
+
+int sdio_enable_interrupt(FAR struct sdio_dev_s *dev, uint8_t function)
+{
+  int ret;
+  uint8_t value;
+
+  /* Read current Int Enable register */
+
+  ret = sdio_io_rw_direct(dev, false, 0, SDIO_CCCR_INTEN, 0, &value);
+  if (ret != OK)
+    {
+      return ret;
+    }
+
+  return sdio_io_rw_direct(dev, true, 0, SDIO_CCCR_INTEN, value | (1 << function), NULL);
 }
