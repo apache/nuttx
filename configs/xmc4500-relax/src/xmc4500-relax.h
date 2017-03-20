@@ -42,6 +42,8 @@
 
 #include <nuttx/config.h>
 
+#include "xmc4_gpio.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -50,17 +52,29 @@
  *
  * The XMC4500 Relax Lite v1 board has two LEDs:
  *
- * LED1 P1.1 High output illuminates
- * LED2 P1.0 High output illuminates
+ * LED1 P1.1, Pad type A1+, High output illuminates
+ * LED2 P1.0, Pad type A1+ High output illuminates
  */
+
+#define GPIO_LED1    (GPIO_OUTPUT | GPIO_OUTPUT_PUSHPULL | \
+                      GPIO_PADA1P_STRONGSOFT | GPIO_PINCTRL_SOFTWARE | \
+                      GPIO_OUTPUT_CLEAR | GPIO_PORT1 | GPIO_PIN1)
+#define GPIO_LED2    (GPIO_OUTPUT | GPIO_OUTPUT_PUSHPULL | \
+                      GPIO_PADA1P_STRONGSOFT | GPIO_PINCTRL_SOFTWARE | \
+                      GPIO_OUTPUT_CLEAR | GPIO_PORT1 | GPIO_PIN0)
 
 /* BUTTONS
  *
  * The XMC4500 Relax Lite v1 board has two buttons:
  *
- * BUTTON1 P1.14 Low input sensed when button pressed
- * BUTTON2 P1.15 Low input sensed when button pressed
+ * BUTTON1 P1.14, Pad type A2, Low input sensed when button pressed
+ * BUTTON2 P1.15, Pad type A2, Low input sensed when button pressed
  */
+
+#define GPIO_BUTTON1 (GPIO_INPUT | GPIO_PINCTRL_SOFTWARE | \
+                      GPIO_PORT1 | GPIO_PIN14)
+#define GPIO_BUTTON2 (GPIO_INPUT | GPIO_PINCTRL_SOFTWARE | \
+                      GPIO_PORT1 | GPIO_PIN15)
 
 /****************************************************************************
  * Public Types

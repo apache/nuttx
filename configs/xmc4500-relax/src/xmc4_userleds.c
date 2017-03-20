@@ -41,6 +41,8 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
+
+#include "xmc4_gpio.h"
 #include "xmc4500-relax.h"
 
 /****************************************************************************
@@ -53,7 +55,10 @@
 
 void board_userled_initialize(void)
 {
-#warning Missing logic
+   /* Configure LED1-2 GPIOs for output */
+
+  (void)xmc4_gpio_config(GPIO_LED1);
+  (void)xmc4_gpio_config(GPIO_LED2);
 }
 
 /****************************************************************************
@@ -62,7 +67,22 @@ void board_userled_initialize(void)
 
 void board_userled(int led, bool ledon)
 {
-#warning Missing logic
+  gpioconfig_t ledcfg;
+
+  if (led == BOARD_LED1)
+    {
+      ledcfg = GPIO_LED1;
+    }
+  else if (led == BOARD_LED2)
+    {
+      ledcfg = GPIO_LED2;
+    }
+  else
+    {
+      return;
+    }
+
+  xmc4_gpio_write(ledcfg, ledon);
 }
 
 /****************************************************************************
@@ -71,5 +91,11 @@ void board_userled(int led, bool ledon)
 
 void board_userled_all(uint8_t ledset)
 {
-#warning Missing logic
+  bool ledon;
+
+  ledon = ((ledset & BOARD_LED1_BIT) != 0);
+  xmc4_gpio_write(GPIO_LED1, ledon);
+
+  ledon = ((ledset & BOARD_LED2_BIT) != 0);
+  xmc4_gpio_write(GPIO_LED2, ledon);
 }

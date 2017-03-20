@@ -33,6 +33,30 @@
  *
  ****************************************************************************/
 
+/* The XMC4500 Relax Lite v1 board has two LEDs:
+ *
+ * LED1 P1.1 High output illuminates
+ * LED2 P1.0 High output illuminates
+ *
+ * These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+ * defined.  In that case, the usage by the board port is defined in
+ * include/board.h and src/sam_autoleds.c. The LEDs are used to encode
+ * OS-related events as follows:
+ *
+ *   SYMBOL                  Meaning                     LED state
+ *                                                      LED2   LED1
+ *   ---------------------  --------------------------  ------ ------ */
+
+#define LED_STARTED       0 /* NuttX has been started   OFF    OFF    */
+#define LED_HEAPALLOCATE  0 /* Heap has been allocated  OFF    OFF    */
+#define LED_IRQSENABLED   0 /* Interrupts enabled       OFF    OFF    */
+#define LED_STACKCREATED  1 /* Idle stack created       ON     OFF    */
+#define LED_INIRQ         2 /* In an interrupt           No change    */
+#define LED_SIGNAL        2 /* In a signal handler       No change    */
+#define LED_ASSERTION     2 /* An assertion failed       No change    */
+#define LED_PANIC         3 /* The system has crashed   N/C  Blinking */
+#undef  LED_IDLE            /* MCU is is sleep mode      Not used     */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -42,9 +66,92 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "xmc4_gpio.h"
 #include "xmc4500-relax.h"
 
 #ifdef CONFIG_ARCH_LEDS
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static void board_led1_on(int led)
+{
+  bool ledon = false;
+
+  switch (led)
+    {
+      case 0:           /* LED1=OFF */
+        break;
+
+      case 1:           /* LED1=ON */
+        ledon  = true;
+        break;
+
+      case 2:           /* LED1=N/C */
+      case 3:           /* LED1=N/C */
+      default:
+        return;
+    }
+
+  xmc4_gpio_write(GPIO_LED1, ledon);
+}
+
+static void board_led2_on(int led)
+{
+  bool ledon = false;
+
+  switch (led)
+    {
+      case 0:           /* LED2=OFF */
+      case 1:           /* LED2=OFF */
+        break;
+
+      case 3:           /* LED2=ON */
+        ledon  = true;
+        break;
+
+      case 2:           /* LED2=N/C */
+      default:
+        return;
+    }
+
+  xmc4_gpio_write(GPIO_LED2, ledon);
+}
+
+void board_led1_off(int led)
+{
+  switch (led)
+    {
+      case 0:           /* LED1=OFF */
+      case 1:           /* LED1=OFF */
+        break;
+
+      case 2:           /* LED1=N/C */
+      case 3:           /* LED1=N/C */
+      default:
+        return;
+    }
+
+  xmc4_gpio_write(GPIO_LED1, false);
+}
+
+void board_led2_off(int led)
+{
+  switch (led)
+    {
+      case 0:           /* LED2=OFF */
+      case 1:           /* LED2=OFF */
+      case 3:           /* LED2=OFF */
+        break;
+
+      case 2:           /* LED2=N/C */
+      default:
+        return;
+    }
+
+   xmc4_gpio_write(GPIO_LED2, false);
+}
 
 /****************************************************************************
  * Public Functions
@@ -56,7 +163,10 @@
 
 void board_autoled_initialize(void)
 {
-#warning Missing logic
+   /* Configure LED1-2 GPIOs for output */
+
+  (void)xmc4_gpio_config(GPIO_LED1);
+  (void)xmc4_gpio_config(GPIO_LED2);
 }
 
 /****************************************************************************
@@ -65,7 +175,8 @@ void board_autoled_initialize(void)
 
 void board_autoled_on(int led)
 {
-#warning Missing logic
+  board_led1_on(led);
+  board_led2_on(led);
 }
 
 /****************************************************************************
@@ -74,7 +185,8 @@ void board_autoled_on(int led)
 
 void board_autoled_off(int led)
 {
-#warning Missing logic
+  board_led1_off(led);
+  board_led2_off(led);
 }
 
 #endif /* CONFIG_ARCH_LEDS */
