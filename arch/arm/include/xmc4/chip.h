@@ -51,9 +51,15 @@
 #if defined(CONFIG_ARCH_CHIP_XMC4500)
 #  define XMC4_NUSIC          3          /* Three USIC modules: USCI0-2 */
 #  undef  XMC4_SCU_GATING                /* No clock gating registers */
+#  define XMC4_NECATN         0          /* No EtherCAT support */
 #elif defined(CONFIG_ARCH_CHIP_XMC4700)
 #  define XMC4_NUSIC          3          /* Three USIC modules: USCI0-2 */
 #  define XMC4_SCU_GATING     1          /* Has clock gating registers */
+#  define XMC4_NECATN         0          /* No EtherCAT support */
+#elif defined(CONFIG_ARCH_CHIP_XMC4700)
+#  define XMC4_NUSIC          3          /* Three USIC modules: USCI0-2 */
+#  define XMC4_SCU_GATING     1          /* Has clock gating registers */
+#  define XMC4_NECATN         1          /* One EtherCAT module */
 #else
 #  error "Unsupported XMC4xxx chip"
 #endif
