@@ -223,6 +223,17 @@
 #  define UART5_ASSIGNED      1
 #endif
 
+/* Event sets */
+
+#ifdef CONFIG_DEBUG_FEATURES
+#  define CCR_RX_EVENTS       (USIC_CCR_RIEN | USIC_CCR_DLIEN)
+#else
+#  define CCR_RX_EVENTS       (USIC_CCR_RIEN)
+#endif
+
+#define CCR_TX_EVENTS         (USIC_CCR_TBIEN)
+#define CCR_ALL_EVENTS        (CCR_RX_EVENTS | CCR_TX_EVENTS)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -233,8 +244,8 @@ struct xmc4_dev_s
 {
   uintptr_t uartbase;  /* Base address of UART registers */
   uint8_t   channel;   /* USIC channel identification */
-  uint8_t   irqs;      /* Status IRQ associated with this UART (for enable) */
-  uint8_t   ie;        /* Interrupts enabled */
+  uint8_t   irq;       /* Status IRQ associated with this UART (for enable) */
+  uint8_t   ccr;       /* Interrupts enabled in CCR */
 
   /* UART configuration */
 
@@ -316,7 +327,7 @@ static struct xmc4_dev_s g_uart0priv =
 {
   .uartbase       = XMC4_USIC0_CH0_BASE,
   .channel        = (uint8_t)USIC0_CHAN0,
-  .irqs           = XMC4_IRQ_USIC0_SR0,
+  .irq            = XMC4_IRQ_USIC0_SR0,
   .config         =
   {
     .baud         = CONFIG_UART0_BAUD,
@@ -351,7 +362,7 @@ static struct xmc4_dev_s g_uart1priv =
 {
   .uartbase       = XMC4_USIC0_CH1_BASE,
   .channel        = (uint8_t)USIC0_CHAN1,
-  .irqs           = XMC4_IRQ_USIC0_SR1,
+  .irq            = XMC4_IRQ_USIC0_SR1,
   .config         =
   {
     .baud         = CONFIG_UART1_BAUD,
@@ -386,7 +397,7 @@ static struct xmc4_dev_s g_uart2priv =
 {
   .uartbase       = XMC4_USIC1_CH0_BASE,
   .channel        = (uint8_t)USIC1_CHAN0,
-  .irqs           = XMC4_IRQ_USIC1_SR0,
+  .irq            = XMC4_IRQ_USIC1_SR0,
   .config         =
   {
     .baud         = CONFIG_UART2_BAUD,
@@ -421,7 +432,7 @@ static struct xmc4_dev_s g_uart3priv =
 {
   .uartbase       = XMC4_USIC1_CH1_BASE,
   .channel        = (uint8_t)USIC1_CHAN1,
-  .irqs           = XMC4_IRQ_USIC1_SR1,
+  .irq            = XMC4_IRQ_USIC1_SR1,
   .config         =
   {
     .baud         = CONFIG_UART3_BAUD,
@@ -456,7 +467,7 @@ static struct xmc4_dev_s g_uart4priv =
 {
   .uartbase       = XMC4_USIC2_CH0_BASE,
   .channel        = (uint8_t)USIC2_CHAN0,
-  .irqs           = XMC4_IRQ_USIC2_SR0,
+  .irq            = XMC4_IRQ_USIC2_SR0,
   .config         =
   {
     .baud         = CONFIG_UART4_BAUD,
@@ -491,7 +502,7 @@ static struct xmc4_dev_s g_uart5priv =
 {
   .uartbase       = XMC4_USIC2_CH1_BASE,
   .channel        = (uint8_t)USIC2_CHAN1,
-  .irqs           = XMC4_IRQ_USIC2_SR1,
+  .irq            = XMC4_IRQ_USIC2_SR1,
   .config         =
   {
     .baud         = CONFIG_UART5_BAUD,
@@ -524,68 +535,96 @@ static uart_dev_t g_uart5port =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_serialin
+ * Name: xmc4_serialin
  ****************************************************************************/
 
-static inline uint32_t up_serialin(struct xmc4_dev_s *priv, int offset)
+static inline uint32_t xmc4_serialin(struct xmc4_dev_s *priv,
+                                     unsigned int offset)
 {
-  return getreg8(priv->uartbase + offset);
+  return getreg32(priv->uartbase + offset);
 }
 
 /****************************************************************************
- * Name: up_serialout
+ * Name: xmc4_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct xmc4_dev_s *priv, int offset, uint32_t value)
+static inline void xmc4_serialout(struct xmc4_dev_s *priv,
+                                  unsigned int offset, uint32_t value)
 {
-  putreg8(value, priv->uartbase + offset);
+  putreg32(value, priv->uartbase + offset);
 }
 
 /****************************************************************************
- * Name: up_setuartint
+ * Name: xmc4_modifyreg
  ****************************************************************************/
 
-static void up_setuartint(struct xmc4_dev_s *priv)
+static inline void xmc4_modifyreg(struct xmc4_dev_s *priv, unsigned int offset,
+                                  uint32_t setbits, uint32_t clrbits)
 {
   irqstate_t flags;
-  uint8_t regval;
+  uintptr_t regaddr = priv->uartbase + offset;
+  uint32_t regval;
 
-  /* Re-enable/re-disable interrupts corresponding to the state of bits in ie */
-#warning Missing logic
+  flags = enter_critical_section();
+
+  regval = getreg32(regaddr);
+  regval &= ~clrbits;
+  regval |= setbits;
+  putreg32(regval, regaddr);
 
   leave_critical_section(flags);
 }
 
 /****************************************************************************
- * Name: up_restoreuartint
+ * Name: xmc4_setuartint
  ****************************************************************************/
 
-static void up_restoreuartint(struct xmc4_dev_s *priv, uint8_t ie)
+static void xmc4_setuartint(struct xmc4_dev_s *priv)
 {
   irqstate_t flags;
 
-  /* Re-enable/re-disable interrupts corresponding to the state of bits in ie */
+  /* Re-enable/re-disable event interrupts corresponding to the state of
+   * bits in priv->ccr.
+   */
 
-  flags    = enter_critical_section();
-#warning Missing logic
+  flags = enter_critical_section();
+  xmc4_modifyreg(priv, XMC4_USIC_CCR_OFFSET, CCR_ALL_EVENTS, priv->ccr);
   leave_critical_section(flags);
 }
 
 /****************************************************************************
- * Name: up_disableuartint
+ * Name: xmc4_restoreuartint
  ****************************************************************************/
 
-static void up_disableuartint(struct xmc4_dev_s *priv, uint8_t *ie)
+static void xmc4_restoreuartint(struct xmc4_dev_s *priv, uint32_t ccr)
+{
+  irqstate_t flags;
+
+  /* Re-enable/re-disable event interrupts corresponding to the state of bits
+   * in the ccr argument.
+   */
+
+  flags = enter_critical_section();
+  priv->ccr = ccr;
+  xmc4_setuartint(priv);
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name: xmc4_disableuartint
+ ****************************************************************************/
+
+static void xmc4_disableuartint(struct xmc4_dev_s *priv, uint32_t *ccr)
 {
   irqstate_t flags;
 
   flags = enter_critical_section();
-  if (ie)
+  if (ccr)
     {
-      *ie = priv->ie;
+      *ccr = priv->ccr;
     }
 
-  up_restoreuartint(priv, 0);
+  xmc4_restoreuartint(priv, 0);
   leave_critical_section(flags);
 }
 
@@ -610,7 +649,7 @@ static int xmc4_setup(struct uart_dev_s *dev)
 
   /* Make sure that all interrupts are disabled */
 
-  up_restoreuartint(priv, 0);
+  xmc4_restoreuartint(priv, 0);
   return OK;
 }
 
@@ -629,7 +668,7 @@ static void xmc4_shutdown(struct uart_dev_s *dev)
 
   /* Disable interrupts */
 
-  up_restoreuartint(priv, 0);
+  xmc4_restoreuartint(priv, 0);
 
   /* Reset hardware and disable Rx and Tx */
 
@@ -660,10 +699,10 @@ static int xmc4_attach(struct uart_dev_s *dev)
    * disabled in the C2 register.
    */
 
-  ret = irq_attach(priv->irqs, xmc4_interrupt, dev);
+  ret = irq_attach(priv->irq, xmc4_interrupt, dev);
   if (ret == OK)
     {
-      up_enable_irq(priv->irqs);
+      up_enable_irq(priv->irq);
     }
 
   return ret;
@@ -685,12 +724,12 @@ static void xmc4_detach(struct uart_dev_s *dev)
 
   /* Disable interrupts */
 
-  up_restoreuartint(priv, 0);
-  up_disable_irq(priv->irqs);
+  xmc4_restoreuartint(priv, 0);
+  up_disable_irq(priv->irq);
 
   /* Detach from the interrupt(s) */
 
-  irq_detach(priv->irqs);
+  irq_detach(priv->irq);
 }
 
 /****************************************************************************
@@ -708,10 +747,10 @@ static void xmc4_detach(struct uart_dev_s *dev)
 static int xmc4_interrupt(int irq, void *context, FAR void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
-  struct xmc4_dev_s   *priv;
-  int                passes;
-  uint8_t            s1;
-  bool               handled;
+  struct xmc4_dev_s *priv;
+  int passes;
+  uint32_t regval;
+  bool handled;
 
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct xmc4_dev_s *)dev->priv;
@@ -725,23 +764,12 @@ static int xmc4_interrupt(int irq, void *context, FAR void *arg)
     {
       handled = false;
 
-      /* Read status register 1 */
-
-      s1 = up_serialin(priv, XMC4_UART_S1_OFFSET);
-
-      /* Handle incoming, receive bytes */
-
-      /* Check if the receive data register is full (RDRF).  NOTE:  If
-       * FIFOS are enabled, this does not mean that the FIFO is full,
-       * rather, it means that the number of bytes in the RX FIFO has
-       * exceeded the watermark setting.  There may actually be RX data
-       * available!
-       *
-       * The RDRF status indication is cleared when the data is read from
-       * the RX data register.
+      /* Handle incoming, receive bytes.
+       * Check if the received FIFO is not empty.
        */
 
-#warning Missing logic
+      regval = xmc4_serialin(priv, XMC4_USIC_TRBSR_OFFSET);
+      if ((regval & USIC_TRBSR_REMPTY) == 0)
         {
           /* Process incoming bytes */
 
@@ -749,25 +777,23 @@ static int xmc4_interrupt(int irq, void *context, FAR void *arg)
           handled = true;
         }
 
-      /* Handle outgoing, transmit bytes */
-
-      /* Check if the transmit data register is "empty."  NOTE:  If FIFOS
-       * are enabled, this does not mean that the FIFO is empty, rather,
-       * it means that the number of bytes in the TX FIFO is below the
-       * watermark setting.  There could actually be space for additional TX
-       * data.
-       *
-       * The TDRE status indication is cleared when the data is written to
-       * the TX data register.
+      /* Handle outgoing, transmit bytes.
+       * Check if the received FIFO is not full.
        */
 
-#warning Missing logic
+      regval = xmc4_serialin(priv, XMC4_USIC_TRBSR_OFFSET);
+      if ((regval & USIC_TRBSR_TFULL) == 0)
         {
           /* Process outgoing bytes */
 
           uart_xmitchars(dev);
           handled = true;
         }
+
+#ifdef CONFIG_DEBUG_FEATURES
+      /* Check for error conditions */
+#warning Misssing logic
+#endif
     }
 
   return OK;
@@ -829,8 +855,7 @@ static int xmc4_receive(struct uart_dev_s *dev, uint32_t *status)
 
   /* Get input data along with receiver control information */
 
-  outr = up_serialin(priv, XMC4_UART_S1_OFFSET);
-  up_serialout(priv, XMC4_USIC_OUTR_OFFSET, (uint32_t)ch);
+  outr = xmc4_serialin(priv, XMC4_USIC_OUTR_OFFSET);
 
   /* Return receiver control information */
 
@@ -860,24 +885,19 @@ static void xmc4_rxint(struct uart_dev_s *dev, bool enable)
   flags = enter_critical_section();
   if (enable)
     {
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
       /* Receive an interrupt when their is anything in the Rx data register (or an Rx
        * timeout occurs).
        */
 
-#ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      priv->ie |= UART_C2_RIE;
-      up_setuartint(priv);
+      priv->ccr |= CCR_RX_EVENTS;
+      xmc4_setuartint(priv);
 #endif
     }
   else
     {
-#ifdef CONFIG_DEBUG_FEATURES
-#  warning "Revisit:  How are errors enabled?"
-      priv->ie &= ~UART_C2_RIE;
-#else
-      priv->ie &= ~UART_C2_RIE;
-#endif
-      up_setuartint(priv);
+      priv->ccr &= ~CCR_RX_EVENTS;
+      xmc4_setuartint(priv);
     }
 
   leave_critical_section(flags);
@@ -898,7 +918,7 @@ static bool xmc4_rxavailable(struct uart_dev_s *dev)
 
   /* Return true if the transmit buffer/fifo is not "empty." */
 
-  regval = up_serialin(priv, XMC4_UART_TRBSR_OFFSET);
+  regval = xmc4_serialin(priv, XMC4_USIC_TRBSR_OFFSET);
   return ((regval & USIC_TRBSR_REMPTY) == 0);
 }
 
@@ -913,7 +933,7 @@ static bool xmc4_rxavailable(struct uart_dev_s *dev)
 static void xmc4_send(struct uart_dev_s *dev, int ch)
 {
   struct xmc4_dev_s *priv = (struct xmc4_dev_s *)dev->priv;
-  up_serialout(priv, XMC4_USIC_IN_OFFSET, (uint32_t)ch);
+  xmc4_serialout(priv, XMC4_USIC_IN_OFFSET, (uint32_t)ch);
 }
 
 /****************************************************************************
@@ -932,11 +952,11 @@ static void xmc4_txint(struct uart_dev_s *dev, bool enable)
   flags = enter_critical_section();
   if (enable)
     {
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
       /* Enable the TX interrupt */
 
-#ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      priv->ie |= UART_C2_TIE;
-      up_setuartint(priv);
+      priv->ccr |= CCR_TX_EVENTS;
+      xmc4_setuartint(priv);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
@@ -949,8 +969,8 @@ static void xmc4_txint(struct uart_dev_s *dev, bool enable)
     {
       /* Disable the TX interrupt */
 
-      priv->ie &= ~UART_C2_TIE;
-      up_setuartint(priv);
+      priv->ccr &= ~CCR_TX_EVENTS;
+      xmc4_setuartint(priv);
     }
 
   leave_critical_section(flags);
@@ -971,7 +991,7 @@ static bool xmc4_txready(struct uart_dev_s *dev)
 
   /* Return true if the transmit buffer/fifo is "not full." */
 
-  regval = up_serialin(priv, XMC4_UART_TRBSR_OFFSET);
+  regval = xmc4_serialin(priv, XMC4_USIC_TRBSR_OFFSET);
   return ((regval & USIC_TRBSR_TFULL) == 0);
 }
 
@@ -990,7 +1010,7 @@ static bool xmc4_txempty(struct uart_dev_s *dev)
 
   /* Return true if the transmit buffer/fifo is "empty." */
 
-  regval = up_serialin(priv, XMC4_UART_TRBSR_OFFSET);
+  regval = xmc4_serialin(priv, XMC4_USIC_TRBSR_OFFSET);
   return ((regval & USIC_TRBSR_TEMPTY) != 0);
 }
 
@@ -1004,9 +1024,9 @@ static bool xmc4_txempty(struct uart_dev_s *dev)
  * Description:
  *   Performs the low level UART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
- *   before up_serialinit.  NOTE:  This function depends on GPIO pin
- *   configuration performed in up_consoleinit() and main clock iniialization
- *   performed in up_clkinitialize().
+ *   before xmc4_serialinit.  NOTE:  This function depends on GPIO pin
+ *   configuration performed in xmc_lowsetup() and main clock iniialization
+ *   performed in xmc_clock_configure().
  *
  ****************************************************************************/
 
@@ -1017,21 +1037,21 @@ void xmc4_earlyserialinit(void)
    * pic32mx_consoleinit()
    */
 
-  up_restoreuartint(TTYS0_DEV.priv, 0);
+  xmc4_restoreuartint(TTYS0_DEV.priv, 0);
 #ifdef TTYS1_DEV
-  up_restoreuartint(TTYS1_DEV.priv, 0);
+  xmc4_restoreuartint(TTYS1_DEV.priv, 0);
 #endif
 #ifdef TTYS2_DEV
-  up_restoreuartint(TTYS2_DEV.priv, 0);
+  xmc4_restoreuartint(TTYS2_DEV.priv, 0);
 #endif
 #ifdef TTYS3_DEV
-  up_restoreuartint(TTYS3_DEV.priv, 0);
+  xmc4_restoreuartint(TTYS3_DEV.priv, 0);
 #endif
 #ifdef TTYS4_DEV
-  up_restoreuartint(TTYS4_DEV.priv, 0);
+  xmc4_restoreuartint(TTYS4_DEV.priv, 0);
 #endif
 #ifdef TTYS5_DEV
-  up_restoreuartint(TTYS5_DEV.priv, 0);
+  xmc4_restoreuartint(TTYS5_DEV.priv, 0);
 #endif
 
   /* Configuration whichever one is the console */
@@ -1060,11 +1080,9 @@ void xmc4_earlyserialinit(void)
 
 void up_serialinit(void)
 {
-  char devname[] = "/dev/ttySx";
-
-  /* Register the console */
-
 #ifdef HAVE_UART_CONSOLE
+  /* Register the serial console */
+
   (void)uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 
@@ -1072,26 +1090,20 @@ void up_serialinit(void)
 
   (void)uart_register("/dev/ttyS0", &TTYS0_DEV);
 #ifdef TTYS1_DEV
-  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
   (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
 #endif
 #ifdef TTYS2_DEV
-  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
   (void)uart_register("/dev/ttyS2", &TTYS2_DEV);
 #endif
 #ifdef TTYS3_DEV
-  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
   (void)uart_register("/dev/ttyS3", &TTYS3_DEV);
 #endif
 #ifdef TTYS4_DEV
-  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
   (void)uart_register("/dev/ttyS4", &TTYS4_DEV);
 #endif
 #ifdef TTYS5_DEV
-  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
   (void)uart_register("/dev/ttyS5", &TTYS5_DEV);
 #endif
-  return first;
 }
 
 /****************************************************************************
@@ -1102,14 +1114,13 @@ void up_serialinit(void)
  *
  ****************************************************************************/
 
-#ifdef HAVE_UART_PUTC
 int up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
   struct xmc4_dev_s *priv = (struct xmc4_dev_s *)CONSOLE_DEV.priv;
-  uint8_t ie;
+  uint32_t ccr;
 
-  up_disableuartint(priv, &ie);
+  xmc4_disableuartint(priv, &ccr);
 
   /* Check for LF */
 
@@ -1121,11 +1132,11 @@ int up_putc(int ch)
     }
 
   up_lowputc(ch);
-  up_restoreuartint(priv, ie);
+  xmc4_restoreuartint(priv, ccr);
 #endif
+
   return ch;
 }
-#endif
 
 #else /* USE_SERIALDRIVER */
 
@@ -1137,7 +1148,6 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-#ifdef HAVE_UART_PUTC
 int up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
@@ -1151,10 +1161,8 @@ int up_putc(int ch)
     }
 
   up_lowputc(ch);
-#endif
   return ch;
 }
 #endif
 
 #endif /* HAVE_UART_DEVICE && USE_SERIALDRIVER */
-
