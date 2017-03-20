@@ -49,7 +49,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: xmc4_boardinitialize
+ * Name: xmc4_board_initialize
  *
  * Description:
  *   All STM32 architectures must provide the following entry point.  This entry point
@@ -58,7 +58,7 @@
  *
  ************************************************************************************/
 
-void xmc4_boardinitialize(void)
+void xmc4_board_initialize(void)
 {
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */

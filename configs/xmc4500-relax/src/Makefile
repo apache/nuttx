@@ -42,7 +42,7 @@ ifeq ($(CONFIG_BUTTONS),y)
 CSRCS += xmc4_buttons.c
 endif
 
-ifeq ($(CONFIG_USERLED),y)
+ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += xmc4_autoleds.c
 else
 CSRCS += xmc4_userleds.c

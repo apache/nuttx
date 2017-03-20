@@ -44,6 +44,7 @@
 
 #include <stdint.h>
 
+#include "up_internal.h"
 #include "xmc4_config.h"
 #include "xmc4_usic.h"
 
@@ -77,6 +78,22 @@ struct uart_config_s
  ****************************************************************************/
 
 void xmc4_lowsetup(void);
+
+/****************************************************************************
+ * Name: xmc4_earlyserialinit
+ *
+ * Description:
+ *   Performs the low level UART initialization early in debug so that the
+ *   serial console will be available during bootup.  This must be called
+ *   before xmc4_serialinit.  NOTE:  This function depends on GPIO pin
+ *   configuration performed in xmc_lowsetup() and main clock iniialization
+ *   performed in xmc_clock_configure().
+ *
+ ****************************************************************************/
+
+#ifdef USE_EARLYSERIALINIT
+void xmc4_earlyserialinit(void);
+#endif
 
 /****************************************************************************
  * Name: xmc4_uart_configure

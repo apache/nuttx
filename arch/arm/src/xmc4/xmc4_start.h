@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_XMC4_XMC4_CLOCKCONFIG_H
-#define __ARCH_ARM_SRC_XMC4_XMC4_CLOCKCONFIG_H
+#ifndef __ARCH_ARM_SRC_XMC4_XMC4_START_H
+#define __ARCH_ARM_SRC_XMC4_XMC4_START_H
 
 /************************************************************************************
  * Included Files
@@ -58,4 +58,4 @@
 
 void xmc4_board_initialize(void);
 
-#endif /* __ARCH_ARM_SRC_XMC4_XMC4_CLOCKCONFIG_H */
+#endif /* __ARCH_ARM_SRC_XMC4_XMC4_START_H */

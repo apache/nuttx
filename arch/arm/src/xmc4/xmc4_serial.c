@@ -1019,7 +1019,7 @@ static bool xmc4_txempty(struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_earlyserialinit
+ * Name: xmc4_earlyserialinit
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
@@ -1031,7 +1031,7 @@ static bool xmc4_txempty(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #if defined(USE_EARLYSERIALINIT)
-void up_earlyserialinit(void)
+void xmc4_earlyserialinit(void)
 {
   /* Disable interrupts from all UARTS.  The console is enabled in
    * pic32mx_consoleinit()
@@ -1068,7 +1068,7 @@ void up_earlyserialinit(void)
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
- *   that up_earlyserialinit was called previously.
+ *   that xmc4_earlyserialinit was called previously.
  *
  * Input Parameters:
  *   None
