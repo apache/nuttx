@@ -13,6 +13,9 @@ choice
 config ARCH_CHIP_XMC4500
 	bool "XMC4500"
 
+config ARCH_CHIP_XMC4700
+	bool "XMC4700"
+
 endchoice
 
 # These "hidden" settings determine is a peripheral option is available for

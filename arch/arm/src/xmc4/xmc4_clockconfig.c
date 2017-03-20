@@ -313,9 +313,9 @@ void xmc4_clock_configure(void)
         {
         }
 
-      regval  = getreg32(SCU_TRAP_SOSCWDGT);
-      regval &= ~bitset;
-      putreg32(regval, SCU_TRAP_SOSCWDGT);
+      regval  = getreg32(XMC4_SCU_TRAPDIS);
+      regval &= ~SCU_TRAP_SOSCWDGT;
+      putreg32(regval, XMC4_SCU_TRAPDIS);
     }
 #else /* BOARD_PLL_CLOCKSRC_XTAL */
 

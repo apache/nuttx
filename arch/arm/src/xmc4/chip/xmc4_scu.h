@@ -163,18 +163,20 @@
 #define XMC4_SCU_EXTCLKCR_OFFSET    0x0028    /* External clock Control Register */
 #define XMC4_SCU_SLEEPCR_OFFSET     0x0030    /* Sleep Control Register */
 #define XMC4_SCU_DSLEEPCR_OFFSET    0x0034    /* Deep Sleep Control Register */
-#define XMC4_SCU_CGATSTAT0_OFFSET   0x0040    /* Peripheral 0 Clock Gating Status */
-#define XMC4_SCU_CGATSET0_OFFSET    0x0044    /* Peripheral 0 Clock Gating Set */
-#define XMC4_SCU_CGATCLR0_OFFSET    0x0048    /* Peripheral 0 Clock Gating Clear */
-#define XMC4_SCU_CGATSTAT1_OFFSET   0x004c    /* Peripheral 1 Clock Gating Status */
-#define XMC4_SCU_CGATSET1_OFFSET    0x0050    /* Peripheral 1 Clock Gating Set */
-#define XMC4_SCU_CGATCLR1_OFFSET    0x0054    /* Peripheral 1 Clock Gating Clear */
-#define XMC4_SCU_CGATSTAT2_OFFSET   0x0058    /* Peripheral 2 Clock Gating Status */
-#define XMC4_SCU_CGATSET2_OFFSET    0x005c    /* Peripheral 2 Clock Gating Set */
-#define XMC4_SCU_CGATCLR2_OFFSET    0x0060    /* Peripheral 2 Clock Gating Clear */
-#define XMC4_SCU_CGATSTAT3_OFFSET   0x0064    /* Peripheral 3 Clock Gating Status */
-#define XMC4_SCU_CGATSET3_OFFSET    0x0068    /* Peripheral 3 Clock Gating Set */
-#define XMC4_SCU_CGATCLR3_OFFSET    0x006c    /* Peripheral 3 Clock Gating Clear */
+#ifdef XMC4_SCU_GATING
+#  define XMC4_SCU_CGATSTAT0_OFFSET 0x0040    /* Peripheral 0 Clock Gating Status */
+#  define XMC4_SCU_CGATSET0_OFFSET  0x0044    /* Peripheral 0 Clock Gating Set */
+#  define XMC4_SCU_CGATCLR0_OFFSET  0x0048    /* Peripheral 0 Clock Gating Clear */
+#  define XMC4_SCU_CGATSTAT1_OFFSET 0x004c    /* Peripheral 1 Clock Gating Status */
+#  define XMC4_SCU_CGATSET1_OFFSET  0x0050    /* Peripheral 1 Clock Gating Set */
+#  define XMC4_SCU_CGATCLR1_OFFSET  0x0054    /* Peripheral 1 Clock Gating Clear */
+#  define XMC4_SCU_CGATSTAT2_OFFSET 0x0058    /* Peripheral 2 Clock Gating Status */
+#  define XMC4_SCU_CGATSET2_OFFSET  0x005c    /* Peripheral 2 Clock Gating Set */
+#  define XMC4_SCU_CGATCLR2_OFFSET  0x0060    /* Peripheral 2 Clock Gating Clear */
+#  define XMC4_SCU_CGATSTAT3_OFFSET 0x0064    /* Peripheral 3 Clock Gating Status */
+#  define XMC4_SCU_CGATSET3_OFFSET  0x0068    /* Peripheral 3 Clock Gating Set */
+#  define XMC4_SCU_CGATCLR3_OFFSET  0x006c    /* Peripheral 3 Clock Gating Clear */
+#endif
 
 /* Oscillator Control SCU Registers */
 
@@ -292,18 +294,20 @@
 #define XMC4_SCU_EXTCLKCR           (XMC4_SCU_CLK_BASE+XMC4_SCU_EXTCLKCR_OFFSET)
 #define XMC4_SCU_SLEEPCR            (XMC4_SCU_CLK_BASE+XMC4_SCU_SLEEPCR_OFFSET)
 #define XMC4_SCU_DSLEEPCR           (XMC4_SCU_CLK_BASE+XMC4_SCU_DSLEEPCR_OFFSET)
-#define XMC4_SCU_CGATSTAT0          (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSTAT0_OFFSET)
-#define XMC4_SCU_CGATSET0           (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSET0_OFFSET)
-#define XMC4_SCU_CGATCLR0           (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATCLR0_OFFSET)
-#define XMC4_SCU_CGATSTAT1          (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSTAT1_OFFSET)
-#define XMC4_SCU_CGATSET1           (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSET1_OFFSET)
-#define XMC4_SCU_CGATCLR1           (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATCLR1_OFFSET)
-#define XMC4_SCU_CGATSTAT2          (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSTAT2_OFFSET)
-#define XMC4_SCU_CGATSET2           (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSET2_OFFSET)
-#define XMC4_SCU_CGATCLR2           (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATCLR2_OFFSET)
-#define XMC4_SCU_CGATSTAT3          (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSTAT3_OFFSET)
-#define XMC4_SCU_CGATSET3           (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSET3_OFFSET)
-#define XMC4_SCU_CGATCLR3           (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATCLR3_OFFSET)
+#ifdef XMC4_SCU_GATING
+#  define XMC4_SCU_CGATSTAT0        (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSTAT0_OFFSET)
+#  define XMC4_SCU_CGATSET0         (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSET0_OFFSET)
+#  define XMC4_SCU_CGATCLR0         (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATCLR0_OFFSET)
+#  define XMC4_SCU_CGATSTAT1        (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSTAT1_OFFSET)
+#  define XMC4_SCU_CGATSET1         (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSET1_OFFSET)
+#  define XMC4_SCU_CGATCLR1         (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATCLR1_OFFSET)
+#  define XMC4_SCU_CGATSTAT2        (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSTAT2_OFFSET)
+#  define XMC4_SCU_CGATSET2         (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSET2_OFFSET)
+#  define XMC4_SCU_CGATCLR2         (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATCLR2_OFFSET)
+#  define XMC4_SCU_CGATSTAT3        (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSTAT3_OFFSET)
+#  define XMC4_SCU_CGATSET3         (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATSET3_OFFSET)
+#  define XMC4_SCU_CGATCLR3         (XMC4_SCU_CLK_BASE+XMC4_SCU_CGATCLR3_OFFSET)
+#endif
 
 /* Oscillator Control SCU Registers */
 
@@ -959,42 +963,50 @@
 
 /* Peripheral 0 Clock Gating Status, Peripheral 0 Clock Gating Set, Peripheral 0 Clock Gating Clear */
 
-#define SCU_CGAT0_VADC              (1 << 0)  /* Bit 0:  VADC Gating Status */
-#define SCU_CGAT0_DSD               (1 << 1)  /* Bit 1:  DSD Gating Status */
-#define SCU_CGAT0_CCU40             (1 << 2)  /* Bit 2:  CCU40 Gating Status */
-#define SCU_CGAT0_CCU41             (1 << 3)  /* Bit 3:  CCU41 Gating Status */
-#define SCU_CGAT0_CCU42             (1 << 4)  /* Bit 4:  CCU42 Gating Status */
-#define SCU_CGAT0_CCU80             (1 << 7)  /* Bit 7:  CCU80 Gating Status */
-#define SCU_CGAT0_CCU81             (1 << 8)  /* Bit 8:  CCU81 Gating Status */
-#define SCU_CGAT0_POSIF0            (1 << 9)  /* Bit 9:  POSIF0 Gating Status */
-#define SCU_CGAT0_POSIF1            (1 << 10) /* Bit 10: POSIF1 Gating Status */
-#define SCU_CGAT0_USIC0             (1 << 11) /* Bit 11: USIC0 Gating Status */
-#define SCU_CGAT0_ERU1              (1 << 16) /* Bit 16: ERU1 Gating Status */
+#ifdef XMC4_SCU_GATING
+#  define SCU_CGAT0_VADC            (1 << 0)  /* Bit 0:  VADC Gating Status */
+#  define SCU_CGAT0_DSD             (1 << 1)  /* Bit 1:  DSD Gating Status */
+#  define SCU_CGAT0_CCU40           (1 << 2)  /* Bit 2:  CCU40 Gating Status */
+#  define SCU_CGAT0_CCU41           (1 << 3)  /* Bit 3:  CCU41 Gating Status */
+#  define SCU_CGAT0_CCU42           (1 << 4)  /* Bit 4:  CCU42 Gating Status */
+#  define SCU_CGAT0_CCU80           (1 << 7)  /* Bit 7:  CCU80 Gating Status */
+#  define SCU_CGAT0_CCU81           (1 << 8)  /* Bit 8:  CCU81 Gating Status */
+#  define SCU_CGAT0_POSIF0          (1 << 9)  /* Bit 9:  POSIF0 Gating Status */
+#  define SCU_CGAT0_POSIF1          (1 << 10) /* Bit 10: POSIF1 Gating Status */
+#  define SCU_CGAT0_USIC0           (1 << 11) /* Bit 11: USIC0 Gating Status */
+#  define SCU_CGAT0_ERU1            (1 << 16) /* Bit 16: ERU1 Gating Status */
+#endif
 
 /* Peripheral 1 Clock Gating Status, Peripheral 1 Clock Gating Set, Peripheral 1 Clock Gating Clear */
 
-#define SCU_CGAT1_CCU43             (1 << 0)  /* Bit 0:  CCU43 Gating Status */
-#define SCU_CGAT1_LEDTSCU0          (1 << 3)  /* Bit 3:  LEDTS Gating Status */
-#define SCU_CGAT1_MCAN0             (1 << 4)  /* Bit 4:  MultiCAN Gating Status */
-#define SCU_CGAT1_DAC               (1 << 5)  /* Bit 5:  DAC Gating Status */
-#define SCU_CGAT1_MMCI              (1 << 6)  /* Bit 6:  MMC Interface Gating Status */
-#define SCU_CGAT1_USIC1             (1 << 7)  /* Bit 7:  USIC1 Gating Status */
-#define SCU_CGAT1_USIC2             (1 << 8)  /* Bit 8:  USIC1 Gating Status */
-#define SCU_CGAT1_PPORTS            (1 << 9)  /* Bit 9:  PORTS Gating Status */
+#ifdef XMC4_SCU_GATING
+#  define SCU_CGAT1_CCU43           (1 << 0)  /* Bit 0:  CCU43 Gating Status */
+#  define SCU_CGAT1_LEDTSCU0        (1 << 3)  /* Bit 3:  LEDTS Gating Status */
+#  define SCU_CGAT1_MCAN0           (1 << 4)  /* Bit 4:  MultiCAN Gating Status */
+#  define SCU_CGAT1_DAC             (1 << 5)  /* Bit 5:  DAC Gating Status */
+#  define SCU_CGAT1_MMCI            (1 << 6)  /* Bit 6:  MMC Interface Gating Status */
+#  define SCU_CGAT1_USIC1           (1 << 7)  /* Bit 7:  USIC1 Gating Status */
+#  define SCU_CGAT1_USIC2           (1 << 8)  /* Bit 8:  USIC1 Gating Status */
+#  define SCU_CGAT1_PPORTS          (1 << 9)  /* Bit 9:  PORTS Gating Status */
+#endif
 
 /* Peripheral 2 Clock Gating Status, Peripheral 2 Clock Gating Set, Peripheral 2 Clock Gating Clear */
 
-#define SCU_CGAT2_WDT               (1 << 1)  /* Bit 1:  WDT Gating Status */
-#define SCU_CGAT2_ETH0              (1 << 2)  /* Bit 2:  ETH0 Gating Status */
-#define SCU_CGAT2_DMA0              (1 << 4)  /* Bit 4:  DMA0 Gating Status */
-#define SCU_CGAT2_DMA1              (1 << 5)  /* Bit 5:  DMA1 Gating Status */
-#define SCU_CGAT2_FCE               (1 << 6)  /* Bit 6:  FCE Gating Status */
-#define SCU_CGAT2_USB               (1 << 7)  /* Bit 7:  USB Gating Status */
-#define SCU_CGAT2_ECAT              (1 << 10) /* Bit 10: ECAT Gating Status */
+#ifdef XMC4_SCU_GATING
+#  define SCU_CGAT2_WDT             (1 << 1)  /* Bit 1:  WDT Gating Status */
+#  define SCU_CGAT2_ETH0            (1 << 2)  /* Bit 2:  ETH0 Gating Status */
+#  define SCU_CGAT2_DMA0            (1 << 4)  /* Bit 4:  DMA0 Gating Status */
+#  define SCU_CGAT2_DMA1            (1 << 5)  /* Bit 5:  DMA1 Gating Status */
+#  define SCU_CGAT2_FCE             (1 << 6)  /* Bit 6:  FCE Gating Status */
+#  define SCU_CGAT2_USB             (1 << 7)  /* Bit 7:  USB Gating Status */
+#  define SCU_CGAT2_ECAT            (1 << 10) /* Bit 10: ECAT Gating Status */
+#endif
 
 /* Peripheral 3 Clock Gating Status, Peripheral 3 Clock Gating Set, Peripheral 3 Clock Gating Clear */
 
-#define SCU_CGAT3_EBU               (1 << 2)  /* Bit 2:  EBU Gating Status */
+#ifdef XMC4_SCU_GATING
+#  define SCU_CGAT3_EBU             (1 << 2)  /* Bit 2:  EBU Gating Status */
+#endif
 
 /* Oscillator Control SCU Registers */
 

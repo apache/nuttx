@@ -112,6 +112,7 @@ int xmc4_enable_usic(enum usic_e usic)
   switch (usic)
     {
       case USIC0:
+#ifdef XMC4_SCU_GATING
         /* Check if USIC0 is already ungated */
 
         if ((getreg32(XMC4_SCU_CGATSTAT0) & SCU_CGAT0_USIC0) == 0)
@@ -124,11 +125,16 @@ int xmc4_enable_usic(enum usic_e usic)
 
             putreg32(SCU_PR0_USIC0RS, XMC4_SCU_PRCLR0);
           }
+#else
+        /* De-assert peripheral reset USIC0 */
 
+        putreg32(SCU_PR0_USIC0RS, XMC4_SCU_PRCLR0);
+#endif
         break;
 
 #if XMC4_NUSIC > 1
       case USIC1:
+#ifdef XMC4_SCU_GATING
         /* Check if USIC1 is already ungated */
 
         if ((getreg32(XMC4_SCU_CGATSTAT1) & SCU_CGAT1_USIC1) == 0)
@@ -141,11 +147,16 @@ int xmc4_enable_usic(enum usic_e usic)
 
             putreg32(SCU_PR1_USIC1RS, XMC4_SCU_PRCLR1);
           }
+#else
+        /* De-assert peripheral reset USIC1 */
 
+        putreg32(SCU_PR1_USIC1RS, XMC4_SCU_PRCLR1);
+#endif
         break;
 
 #if XMC4_NUSIC > 2
       case USIC2:
+#ifdef XMC4_SCU_GATING
         /* Check if USIC2 is already ungated */
 
         if ((getreg32(XMC4_SCU_CGATSTAT1) & SCU_CGAT1_USIC2) == 0)
@@ -158,10 +169,15 @@ int xmc4_enable_usic(enum usic_e usic)
 
             putreg32(SCU_PR1_USIC2RS, XMC4_SCU_PRCLR1);
           }
+#else
+        /* De-assert peripheral reset USIC2 */
 
+        putreg32(SCU_PR1_USIC2RS, XMC4_SCU_PRCLR1);
+#endif
         break;
-#endif
-#endif
+
+#endif /* XMC4_NUSIC > 2 */
+#endif /* XMC4_NUSIC > 1 */
 
       default:
         return -EINVAL;
@@ -191,9 +207,11 @@ int xmc4_disable_usic(enum usic_e usic)
 
         putreg32(SCU_PR0_USIC0RS, XMC4_SCU_PRSET0);
 
+#ifdef XMC4_SCU_GATING
         /* Gate USIC0 clocking */
 
         putreg32(SCU_CGAT0_USIC0, XMC4_SCU_CGATSET0);
+#endif
         break;
 
 #if XMC4_NUSIC > 1
@@ -202,9 +220,11 @@ int xmc4_disable_usic(enum usic_e usic)
 
         putreg32(SCU_PR1_USIC1RS, XMC4_SCU_PRSET1);
 
+#ifdef XMC4_SCU_GATING
         /* Gate USIC0 clocking */
 
         putreg32(SCU_CGAT1_USIC1, XMC4_SCU_CGATSET1);
+#endif
         break;
 
 #if XMC4_NUSIC > 2
@@ -213,12 +233,15 @@ int xmc4_disable_usic(enum usic_e usic)
 
         putreg32(SCU_PR1_USIC2RS, XMC4_SCU_PRSET1);
 
+#ifdef XMC4_SCU_GATING
         /* Gate USIC0 clocking */
 
         putreg32(SCU_CGAT1_USIC2, XMC4_SCU_CGATSET1);
+#endif
         break;
-#endif
-#endif
+
+#endif /* XMC4_NUSIC > 2 */
+#endif /* XMC4_NUSIC > 1 */
 
       default:
         return -EINVAL;
