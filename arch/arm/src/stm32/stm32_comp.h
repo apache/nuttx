@@ -150,7 +150,7 @@ enum stm32_comp_hyst_e
   COMP_HYST_LOW,
   COMP_HYST_MEDIUM,
   COMP_HYST_HIGH
-},
+};
 
 /* Power/Speed Modes */
 
