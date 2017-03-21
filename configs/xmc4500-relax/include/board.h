@@ -171,12 +171,9 @@
 #define LED_PANIC         3 /* The system has crashed   N/C  Blinking */
 #undef  LED_IDLE            /* MCU is is sleep mode      Not used     */
 
-/* Thus if LED0 is statically on, NuttX has successfully booted and is,
- * apparently, running normally.  If LED1 is flashing at approximately
+/* Thus if LED1 is statically on, NuttX has successfully booted and is,
+ * apparently, running normally.  If LED2 is flashing at approximately
  * 2Hz, then a fatal error has been detected and the system has halted.
- *
- * NOTE: That LED0 is not used after completion of booting and may
- * be used by other board-specific logic.
  */
 
 /* Button definitions ***************************************************************/

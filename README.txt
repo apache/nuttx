@@ -1681,6 +1681,8 @@ nuttx/
  |   |   `- README.txt
  |   |- viewtool-stm32f107/
  |   |   `- README.txt
+ |   |- xmc5400-relax/
+ |   |   `- README.txt
  |   |- xtrs/
  |   |   `- README.txt
  |   |- z16f2800100zcog/
