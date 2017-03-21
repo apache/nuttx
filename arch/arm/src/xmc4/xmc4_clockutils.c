@@ -161,6 +161,7 @@ uint32_t xmc4_get_coreclock(void)
 uint32_t xmc4_get_periphclock(void)
 {
   uint32_t periphclock;
+  uint32_t regval;
 
   /* Get the CPU clock frequency.  Unless it is divided down, this also the
    * peripheral clock frequency.
@@ -170,12 +171,12 @@ uint32_t xmc4_get_periphclock(void)
 
   /* Get the peripheral clock divider */
 
-  periphclock = getreg32(XMC4_SCU_PBCLKCR);
-  if ((periphclock & SCU_PBCLKCR_PBDIV) != 0)
+  regval = getreg32(XMC4_SCU_PBCLKCR);
+  if ((regval & SCU_PBCLKCR_PBDIV) != 0)
     {
       /* The peripheral clock is fCPU/2 */
 
-      periphclock <<= 1;
+      periphclock >>= 1;
     }
 
   return periphclock;

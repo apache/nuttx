@@ -234,7 +234,7 @@ static inline void xmc4_gpio_hwsel(uintptr_t portbase, unsigned int pin,
  ****************************************************************************/
 
 static inline void xmc4_gpio_pdisc(uintptr_t portbase, unsigned int pin,
-                                   bool value)
+                                   bool enable)
 {
   uint32_t regval;
   uint32_t mask;
@@ -243,16 +243,21 @@ static inline void xmc4_gpio_pdisc(uintptr_t portbase, unsigned int pin,
 
   regval = xmc4_gpio_getreg(portbase, XMC4_PORT_PDISC_OFFSET);
 
-  /* Set/clear the enable/disable (or analg) value for this field */
+  /* Set or clear the pin field in the PDISC register.
+   *
+   * Disable = set
+   * Analog  = set
+   * Enable = clear
+   */
 
   mask = PORT_PIN(pin);
-  if (value)
+  if (enable)
     {
-      regval |= mask;
+      regval &= ~mask;
     }
   else
     {
-      regval &= ~mask;
+      regval |= mask;
     }
 
   xmc4_gpio_putreg(portbase, XMC4_PORT_PDISC_OFFSET, regval);

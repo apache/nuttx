@@ -14,10 +14,12 @@ Serial Console
   The RX and TX pins is available:
   
     RX     - P1.4, Connector X2, pin 17
-    TX     - P1.5, Connector X2, pin 17
+    TX     - P1.5, Connector X2, pin 16
     GND    -       Available on pins 1-4 of either connector X1 or X2
     VDD3.3 -       Available on pins 37-38 of either connector X1 or X2
     VDD5   -       Available on pins 39-40 of either connector X1 or X2
+
+  A TTL to RS-232 convertor or a USB TTL-to-USB serial adaptor is required.
 
 LEDs
 ====
