@@ -79,8 +79,8 @@
 #  define GPIO_OUTPUT_ALT4         (IOCR_OUTPUT_ALT4        << GPIO_PINTYPE_SHIFT)
 
 #  define _GPIO_OUTPUT_BIT         (16                      << GPIO_PINTYPE_SHIFT)
-#  define GPIO_ISINPUT(p)          (((p) & _GPIO_OUTPUT_BIT) != 0)
-#  define GPIO_ISOUTPUT(p)         (((p) & _GPIO_OUTPUT_BIT) == 0)
+#  define GPIO_ISINPUT(p)          (((p) & _GPIO_OUTPUT_BIT) == 0)
+#  define GPIO_ISOUTPUT(p)         (((p) & _GPIO_OUTPUT_BIT) != 0)
 
 /* Pin type modifier:
  *
@@ -160,7 +160,7 @@
  */
 
 #define GPIO_PORT_SHIFT            (4)         /* Bit 4-7:  Port number */
-#define GPIO_PORT_MASK             (7 << GPIO_PORT_SHIFT)
+#define GPIO_PORT_MASK             (15 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT0               (0 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT1               (1 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT2               (2 << GPIO_PORT_SHIFT)
@@ -180,7 +180,7 @@
  */
 
 #define GPIO_PIN_SHIFT             (0)         /* Bits 0-3: GPIO pin: 0-15 */
-#define GPIO_PIN_MASK              (31 << GPIO_PIN_SHIFT)
+#define GPIO_PIN_MASK              (15 << GPIO_PIN_SHIFT)
 #define GPIO_PIN0                  (0  << GPIO_PIN_SHIFT)
 #define GPIO_PIN1                  (1  << GPIO_PIN_SHIFT)
 #define GPIO_PIN2                  (2  << GPIO_PIN_SHIFT)

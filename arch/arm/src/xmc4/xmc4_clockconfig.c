@@ -182,9 +182,9 @@ void xmc4_clock_configure(void)
   regval = getreg32(XMC4_SCU_PWRSTAT);
   if ((regval & SCU_PWR_HIBEN) == 0)
     {
-      regval  = getreg32(XMC4_SCU_PWRSET);
-      regval |= SCU_PWR_HIBEN;
-      putreg32(regval, XMC4_SCU_PWRSTAT);
+      /* Enable the HIB domain */
+
+      putreg32(SCU_PWR_HIBEN, XMC4_SCU_PWRSET);
 
       /* Wait until HIB domain is enabled */
 
@@ -193,7 +193,7 @@ void xmc4_clock_configure(void)
         }
     }
 
-  /* Remove the reset only if HIB domain were in a state of reset */
+  /* Remove the reset only if HIB domain was in a state of reset */
 
   regval = getreg32(XMC4_SCU_RSTSTAT);
   if ((regval & SCU_RSTSTAT_HIBRS) != 0)
