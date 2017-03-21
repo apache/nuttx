@@ -1030,6 +1030,27 @@ FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
   (void)st7565_send_one_data(priv, ST7565_SETEVREG(0x24));
   (void)st7565_send_one_data(priv, ST7565_SETSTARTLINE);
 
+#elif defined(CONFIG_AQM_1248A)
+
+  (void)st7565_send_one_data(priv, ST7565_DISPOFF);
+  (void)st7565_send_one_data(priv, ST7565_ADCNORMAL);
+  (void)st7565_send_one_data(priv, ST7565_SETCOMREVERSE);
+  (void)st7565_send_one_data(priv, ST7565_BIAS_1_7);
+
+  (void)st7565_send_one_data(priv, ST7565_POWERCTRL_B);
+  up_mdelay(2);
+  (void)st7565_send_one_data(priv, ST7565_POWERCTRL_BR);
+  up_mdelay(2);
+  (void)st7565_send_one_data(priv, ST7565_POWERCTRL_BRF);
+
+  (void)st7565_send_one_data(priv, ST7565_REG_RES_4_5);
+  (void)st7565_send_one_data(priv, ST7565_SETEVMODE);
+  (void)st7565_send_one_data(priv, ST7565_SETEVREG(0x1c));
+  (void)st7565_send_one_data(priv, ST7565_DISPRAM);
+  (void)st7565_send_one_data(priv, ST7565_SETSTARTLINE);
+  (void)st7565_send_one_data(priv, ST7565_DISPNORMAL);
+  (void)st7565_send_one_data(priv, ST7565_DISPON);
+
 #else
 #  error "No initialization sequence selected"
 #endif

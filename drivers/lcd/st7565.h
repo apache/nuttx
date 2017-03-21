@@ -100,6 +100,10 @@
 #define ST7565_POWERCTRL_VR        0x2b /* 0x2b: Only the voltage regulator circuit and the
                                          * voltage follower circuit are used
                                          */
+#define ST7565_POWERCTRL_B         0x2c /* 0x2c: Booster=ON */
+#define ST7565_POWERCTRL_BR        0x2e /* 0x2e: Booster=ON V/R=ON */
+#define ST7565_POWERCTRL_BRF       0x2f /* 0x23: Booster=ON V/R=ON V/F=ON */
+
 #define ST7565_POWERCTRL_INT       0x2f /* 0x2f: Only the internal power supply is used */
 
 /* Regulation Resistior ratio V0 = (1+Rb/Ra)*Vev */
