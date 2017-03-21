@@ -275,7 +275,7 @@ int xmc4_uart_configure(enum usic_channel_e channel,
    * the config structure.
    */
 
-  ret = xmc4_uisc_baudrate(channel, config->baud, UART_OVERSAMPLING);
+  ret = xmc4_usic_baudrate(channel, config->baud, UART_OVERSAMPLING);
 
   /* Configure frame format.
    *

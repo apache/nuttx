@@ -177,7 +177,7 @@ int xmc4_enable_usic_channel(enum usic_channel_e channel);
 int xmc4_disable_usic_channel(enum usic_channel_e channel);
 
 /****************************************************************************
- * Name: xmc4_uisc_baudrate
+ * Name: xmc4_usic_baudrate
  *
  * Description:
  *   Set the USIC baudrate for the USIC channel
@@ -188,7 +188,7 @@ int xmc4_disable_usic_channel(enum usic_channel_e channel);
  *
  ****************************************************************************/
 
-int xmc4_uisc_baudrate(enum usic_channel_e channel, uint32_t baud,
+int xmc4_usic_baudrate(enum usic_channel_e channel, uint32_t baud,
                        uint32_t oversampling);
 
 #endif /* __ARCH_ARM_SRC_XMC4_XMC4_USIC_H */

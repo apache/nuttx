@@ -247,7 +247,7 @@ static inline void xmc4_gpio_pdisc(uintptr_t portbase, unsigned int pin,
    *
    * Disable = set
    * Analog  = set
-   * Enable = clear
+   * Enable  = clear
    */
 
   mask = PORT_PIN(pin);
@@ -272,7 +272,7 @@ static inline void xmc4_gpio_pdisc(uintptr_t portbase, unsigned int pin,
  ****************************************************************************/
 
 static inline void xmc4_gpio_pps(uintptr_t portbase, unsigned int pin,
-                                 bool value)
+                                 bool powersave)
 {
   uint32_t regval;
   uint32_t mask;
@@ -281,10 +281,10 @@ static inline void xmc4_gpio_pps(uintptr_t portbase, unsigned int pin,
 
   regval = xmc4_gpio_getreg(portbase, XMC4_PORT_PPS_OFFSET);
 
-  /* Set/clear the enable/disable (or analg) value for this field */
+  /* Set/clear the enable/disable power save value for this field */
 
   mask = PORT_PIN(pin);
-  if (value)
+  if (powersave)
     {
       regval |= mask;
     }
@@ -312,7 +312,7 @@ static void xmc4_gpio_pdr(uintptr_t portbase, unsigned int pin,
   unsigned int offset;
   unsigned int shift;
 
-  /* Read the PDRregister */
+  /* Read the PDR register */
 
   offset = XMC4_PORT_PDR_OFFSET(pin);
   regval = xmc4_gpio_getreg(portbase, offset);
@@ -417,18 +417,18 @@ int xmc4_gpio_config(gpioconfig_t pinconfig)
   value = xmc4_gpio_pinctrl(pinconfig);
   xmc4_gpio_hwsel(portbase, pin, value);
 
-  /* Select drive strength */
+  /* Select drive strength (PDR) */
 
   value = xmc4_gpio_padtype(pinconfig);
   xmc4_gpio_pdr(portbase, pin, value);
 
   /* Enable/enable pad or Analog only (PDISC) */
 
-  xmc4_gpio_pdisc(portbase, pin, ((pinconfig & GPIO_PAD_DISABLE) != 0));
+  xmc4_gpio_pdisc(portbase, pin, ((pinconfig & GPIO_PAD_DISABLE) == 0));
 
-  /* Make sure pin is not in power save mode (PDR) */
+  /* Make sure pin is not in power save mode (PPS) */
 
-  xmc4_gpio_pdisc(portbase, pin, false);
+  xmc4_gpio_pps(portbase, pin, false);
 
   leave_critical_section(flags);
   return OK;
