@@ -251,19 +251,6 @@
 #define BUTTON_LEFT_BIT   (1 << BUTTON_LEFT)
 #define BUTTON_RIGHT_BIT  (1 << BUTTON_RIGHT)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* Alternate function pin selections ************************************************/
 /* CAN */
 
@@ -396,18 +383,6 @@ extern "C"
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
-
-/************************************************************************************
- * Name: stm32_boardinitialize
- *
- * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
- *
- ************************************************************************************/
-
-void stm32_boardinitialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
