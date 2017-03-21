@@ -53,16 +53,21 @@
 
 /* Clocking *************************************************************************/
 /* Default clock initialization
- * fPLL = 288MHz => fSYS = 288MHz => fCPU     = 144MHz
- *                                => fPERIPH  = 144MHz
- *                                => fCCU     = 144MHz
- *                                => fETH     = 72MHz
- *               => fUSB = 48MHz
- *               => fEBU = 72MHz
+ *
+ *   fXTAL = 12Mhz
+ *      -> fPLL = (fXTAL / (2 * 1) * 48) = 288MHz
+ *         -> fSYS = (fPLL / 1)          = 288MHz
+ *            -> fCPU = (fSYS / 2)       = 144MHz
+ *               -> fPERIPH = (fCPU / 1) = 144MHz
+ *            -> fCCU = (fSYS / 2)       = 144MHz
+ *            -> fETH                    = 72MHz   (REVISIT)
+ *         -> fUSB                       = 48MHz   (REVISIT)
+ *         -> fEBU                       = 72MHz   (REVISIT)
  *
  * fUSBPLL Disabled, only enabled if SCU_CLK_USBCLKCR_USBSEL_USBPLL is selected
  *
- * fOFI = 24MHz => fWDT = 24MHz
+ *   fOFI                                = 24MHz
+ *      -> fWDT                          = 24MHz   (REVISIT)
  */
 
 #undef BOARD_FOFI_CALIBRATION              /* Enable factory calibration */
