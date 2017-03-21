@@ -448,14 +448,14 @@ int xmc4_usic_baudrate(enum usic_channel_e channel, uint32_t baud,
 
       /* Select and setup the fractional divider */
 
-      regval = USIC_FDR_DM_FRACTIONAL |  (clkdiv_min << USIC_FDR_STEP_SHIFT);
+      regval = USIC_FDR_DM_FRACTIONAL | USIC_FDR_STEP(clkdiv_min);
       putreg32(regval, base + XMC4_USIC_FDR_OFFSET);
 
       /* Setup and enable the baud rate generator */
 
       regval  = getreg32(base + XMC4_USIC_BRG_OFFSET);
       regval &=  ~(USIC_BRG_DCTQ_MASK | USIC_BRG_PDIV_MASK | USIC_BRG_PCTQ_MASK | USIC_BRG_PPPEN);
-      regval |= (USIC_BRG_DCTQ(oversampling - 1) |  USIC_BRG_PDIV(pdiv_int_min - 1));
+      regval |= (USIC_BRG_DCTQ(oversampling - 1) | USIC_BRG_PDIV(pdiv_int_min - 1));
       putreg32(regval, base + XMC4_USIC_BRG_OFFSET);
 
       ret = OK;
