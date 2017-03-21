@@ -787,7 +787,6 @@ static inline void sem_restorebaseprio_task(FAR struct tcb_s *stcb,
                                             FAR sem_t *sem)
 {
   FAR struct tcb_s *rtcb = this_task();
-  FAR struct semholder_s *pholder;
 
   /* Perform the following actions only if a new thread was given a count.
    * The thread that received the count should be the highest priority
@@ -831,7 +830,6 @@ static inline void sem_restorebaseprio_task(FAR struct tcb_s *stcb,
    */
 
   sem_findandfreeholder(sem, rtcb);
-
 }
 
 /****************************************************************************
@@ -908,6 +906,7 @@ void sem_destroyholder(FAR sem_t *sem)
       DEBUGPANIC();
       (void)sem_foreachholder(sem, sem_recoverholders, NULL);
     }
+
 #else
   if (sem->holder[0].htcb != NULL || sem->holder[1].htcb != NULL)
     {
