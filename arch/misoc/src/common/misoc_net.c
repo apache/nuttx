@@ -117,7 +117,8 @@ struct misoc_net_driver_s
   bool misoc_net_bifup;               /* true:ifup false:ifdown */
   WDOG_ID misoc_net_txpoll;           /* TX poll timer */
   WDOG_ID misoc_net_txtimeout;        /* TX timeout timer */
-  struct work_s misoc_net_work;       /* For deferring work to the work queue */
+  struct work_s misoc_net_irqwork;    /* For deferring interrupt work to the work queue */
+  struct work_s misoc_net_pollwork;   /* For deferring poll work to the work queue */
 
   uint8_t *rx0_buf;                   /* 2 RX and 2 TX buffer */
   uint8_t *rx1_buf;
@@ -542,8 +543,6 @@ static void misoc_net_receive(FAR struct misoc_net_driver_s *priv)
 
 static void misoc_net_txdone(FAR struct misoc_net_driver_s *priv)
 {
-  int delay;
-
   /* Check for errors and update statistics */
 
   NETDEV_TXDONE(priv->misoc_net_dev);
@@ -555,26 +554,6 @@ static void misoc_net_txdone(FAR struct misoc_net_driver_s *priv)
    */
 
   wd_cancel(priv->misoc_net_txtimeout);
-
-  /* Check if the poll timer is running.  If it is not, then start it now.
-   * There is a race condition here:  We may test the time remaining on the
-   * poll timer and determine that it is still running, but then the timer
-   * expires immiately.  That should not be problem, however, the poll timer
-   * processing should be in the work queue and should execute immediately
-   * after we complete the TX poll. Inefficient, but not fatal.
-   */
-
-  delay = wd_gettime(priv->misoc_net_txpoll);
-  if (delay <= 0)
-    {
-      /* The poll timer is not running .. restart it.  This is necessary to
-       * avoid certain race conditions where the polling sequence can be
-       * interrupted.
-       */
-
-      (void)wd_start(priv->misoc_net_txpoll, MISOC_NET_WDDELAY,
-                     misoc_net_poll_expiry, 1, (wdparm_t)priv);
-    }
 
   /* And disable further TX interrupts. */
 
@@ -673,13 +652,9 @@ static int misoc_net_interrupt(int irq, FAR void *context, FAR void *arg)
        wd_cancel(priv->misoc_net_txtimeout);
     }
 
-  /* Cancel any pending poll work */
-
-  work_cancel(HPWORK, &priv->misoc_net_work);
-
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(HPWORK, &priv->misoc_net_work, misoc_net_interrupt_work, priv, 0);
+  work_queue(HPWORK, &priv->misoc_net_irqwork, misoc_net_interrupt_work, priv, 0);
   return OK;
 }
 
@@ -747,15 +722,9 @@ static void misoc_net_txtimeout_expiry(int argc, wdparm_t arg, ...)
 
   //up_disable_irq(ETHMAC_INTERRUPT);
 
-  /* Cancel any pending poll or interrupt work.  This will have no effect
-   * on work that has already been started.
-   */
-
-  work_cancel(HPWORK, &priv->misoc_net_work);
-
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(HPWORK, &priv->misoc_net_work, misoc_net_txtimeout_work, priv, 0);
+  work_queue(HPWORK, &priv->misoc_net_irqwork, misoc_net_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
@@ -824,25 +793,9 @@ static void misoc_net_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct misoc_net_driver_s *priv = (FAR struct misoc_net_driver_s *)arg;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the interrupt processing on the worker thread. */
 
-  if (work_available(&priv->misoc_net_work))
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      work_queue(HPWORK, &priv->misoc_net_work, misoc_net_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->misoc_net_txpoll, MISOC_NET_WDDELAY,
-                     misoc_net_poll_expiry, 1, arg);
-    }
+  work_queue(HPWORK, &priv->misoc_net_pollwork, misoc_net_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -1012,11 +965,11 @@ static int misoc_net_txavail(FAR struct net_driver_s *dev)
    * availability action.
    */
 
-  if (work_available(&priv->misoc_net_work))
+  if (work_available(&priv->misoc_net_pollwork))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(HPWORK, &priv->misoc_net_work, misoc_net_txavail_work, priv, 0);
+      work_queue(HPWORK, &priv->misoc_net_pollwork, misoc_net_txavail_work, priv, 0);
     }
 
   return OK;

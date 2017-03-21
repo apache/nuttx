@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_emac.c
  *
- *   Copyright (C) 2009-2010, 2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2012, 2014-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -1815,10 +1815,6 @@ static int ez80emac_sysinterrupt(int irq, FAR void *context, FAR void *arg)
 
   up_disable_irq(EZ80_EMACSYS_IRQ);
 
-  /* Cancel any pending poll work */
-
-  work_cancel(ETHWORK, &priv->syswork);
-
   /* Schedule to perform the interrupt processing on the worker thread. */
 
   work_queue(ETHWORK, &priv->syswork,  ez80emac_sysinterrupt_work, priv, 0);
@@ -1898,12 +1894,6 @@ static void ez80emac_txtimeout_expiry(int argc, wdparm_t arg, ...)
    */
 
   up_disable_irq(EZ80_EMACTX_IRQ);
-
-  /* Cancel any pending poll or Tx interrupt work.  This will have no
-   * effect on work that has already been started.
-   */
-
-  work_cancel(ETHWORK, &priv->txwork);
 
   /* Schedule to perform the TX timeout processing on the worker thread. */
 

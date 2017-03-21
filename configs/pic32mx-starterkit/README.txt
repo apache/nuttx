@@ -1063,16 +1063,6 @@ Where <subdir> is one of the following:
          CONFIG_USBDEV=y         : Enable basic USB device support
          CONFIG_PIC32MX_USBDEV=y : Enable PIC32 USB device support
 
-       examples/usbterm - This option can be enabled by adding the
-       following line in the NuttX configuration file:
-
-         CONFIG_EXAMPLES_USBTERM=y
-
-       And by enabling one of the USB serial devices:
-
-         CONFIG_PL2303=y         : Enable the Prolifics PL2303 emulation
-         CONFIG_CDCACM=y         : or the CDC/ACM serial driver (not both)
-
        system/cdcacm -  The system/cdcacm program can be included by
        adding the following to the configuration file:
 

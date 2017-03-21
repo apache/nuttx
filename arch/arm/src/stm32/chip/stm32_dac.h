@@ -177,7 +177,7 @@
 #  define DAC_CR_TSEL1_TIM4       (5 << DAC_CR_TSEL1_SHIFT) /* Timer 4 TRGO event */
 #  define DAC_CR_TSEL1_EXT9       (6 << DAC_CR_TSEL1_SHIFT) /* External line9 */
 #  define DAC_CR_TSEL1_SW         (7 << DAC_CR_TSEL1_SHIFT) /* Software trigger */
-#define DAC_CR_WAVE1_SHIFT        (6)       /* Bits 6-7: DAC channel 1 noise/triangle wave generation  */enable
+#define DAC_CR_WAVE1_SHIFT        (6)       /* Bits 6-7: DAC channel 1 noise/triangle wave generation  */
 #define DAC_CR_WAVE1_MASK         (3 << DAC_CR_WAVE1_SHIFT)
 #  define DAC_CR_WAVE1_DISABLED   (0 << DAC_CR_WAVE1_SHIFT) /* Wave generation disabled */
 #  define DAC_CR_WAVE1_NOISE      (1 << DAC_CR_WAVE1_SHIFT) /* Noise wave generation enabled */

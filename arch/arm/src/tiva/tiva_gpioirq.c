@@ -680,12 +680,11 @@ int tiva_gpioirqinitialize(void)
 
 int tiva_gpioirqattach(uint32_t pinset, xcpt_t isr, void *arg)
 {
-  FAR stuct gpio_handler_s *handler;
+  FAR struct gpio_handler_s *handler;
   irqstate_t flags;
   uint8_t    port  = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   uint8_t    pinno = (pinset & GPIO_PIN_MASK);
   uint8_t    pin   = 1 << pinno;
-  int        index;
 
   /* Assign per-pin interrupt handlers */
 

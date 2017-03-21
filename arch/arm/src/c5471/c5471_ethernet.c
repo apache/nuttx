@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/c5471/c5471_ethernet.c
  *
- *   Copyright (C) 2007, 2009-2010, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2010, 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based one a C5471 Linux driver and released under this BSD license with
@@ -312,7 +312,8 @@ struct c5471_driver_s
   bool    c_bifup;           /* true:ifup false:ifdown */
   WDOG_ID c_txpoll;          /* TX poll timer */
   WDOG_ID c_txtimeout;       /* TX timeout timer */
-  struct work_s c_work;      /* For deferring work to the work queue */
+  struct work_s c_irqwork;   /* For deferring interrupt work to the work queue */
+  struct work_s c_pollwork;  /* For deferring poll work to the work queue */
 
   /* Note: According to the C547x documentation: "The software has to maintain
    * two pointers to the current RX-CPU and TX-CPU descriptors. At init time,
@@ -1660,13 +1661,9 @@ static int c5471_interrupt(int irq, FAR void *context, FAR void *arg)
        wd_cancel(priv->c_txtimeout);
     }
 
-  /* Cancel any pending poll work */
-
-  work_cancel(ETHWORK, &priv->c_work);
-
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->c_work, c5471_interrupt_work, priv, 0);
+  work_queue(ETHWORK, &priv->c_irqwork, c5471_interrupt_work, priv, 0);
   return OK;
 }
 
@@ -1740,15 +1737,11 @@ static void c5471_txtimeout_expiry(int argc, wdparm_t arg, ...)
 
   up_disable_irq(C5471_IRQ_ETHER);
 
-  /* Cancel any pending poll or interrupt work.  This will have no effect
-   * on work that has already been started.
+  /* Schedule to perform the TX timeout processing on the worker thread,
+   * canceling any pending IRQ work.
    */
 
-  work_cancel(ETHWORK, &priv->c_work);
-
-  /* Schedule to perform the TX timeout processing on the worker thread. */
-
-  work_queue(ETHWORK, &priv->c_work, c5471_txtimeout_work, priv, 0);
+  work_queue(ETHWORK, &priv->c_irqwork, c5471_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
@@ -1813,25 +1806,9 @@ static void c5471_poll_expiry(int argc, wdparm_t arg, ...)
 {
   struct c5471_driver_s *priv = (struct c5471_driver_s *)arg;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the interrupt processing on the worker thread. */
 
-  if (work_available(&priv->c_work))
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      work_queue(ETHWORK, &priv->c_work, c5471_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->c_txpoll, C5471_WDDELAY, c5471_poll_expiry,
-                     1, arg);
-    }
+  work_queue(ETHWORK, &priv->c_pollwork, c5471_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -2023,11 +2000,11 @@ static int c5471_txavail(FAR struct net_driver_s *dev)
    * availability action.
    */
 
-  if (work_available(&priv->c_work))
+  if (work_available(&priv->c_pollwork))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(ETHWORK, &priv->c_work, c5471_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->c_pollwork, c5471_txavail_work, priv, 0);
     }
 
   return OK;

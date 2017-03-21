@@ -48,9 +48,6 @@ endif
 
 ifeq ($(CONFIG_PIC32MX_USBDEV),y)
 CSRCS += pic32_usbdev.c
-ifeq ($(CONFIG_EXAMPLES_USBTERM_DEVINIT),y)
-CSRCS += pic32_usbterm.c
-endif
 endif
 
 include $(TOPDIR)/configs/Board.mk

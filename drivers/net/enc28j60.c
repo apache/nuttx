@@ -1275,8 +1275,6 @@ static void enc_linkstatus(FAR struct enc_driver_s *priv)
 
 static void enc_txif(FAR struct enc_driver_s *priv)
 {
-  int delay;
-
   /* Update statistics */
 
   NETDEV_TXDONE(&priv->dev);
@@ -1288,26 +1286,6 @@ static void enc_txif(FAR struct enc_driver_s *priv)
   /* If no further xmits are pending, then cancel the TX timeout */
 
   wd_cancel(priv->txtimeout);
-
-  /* Check if the poll timer is running.  If it is not, then start it now.
-   * There is a race condition here:  We may test the time remaining on the
-   * poll timer and determine that it is still running, but then the timer
-   * expires immiately.  That should not be problem, however, the poll timer
-   * processing should be in the work queue and should execute immediately
-   * after we complete the TX poll. Inefficient, but not fatal.
-   */
-
-  delay = wd_gettime(priv->txpoll);
-  if (delay <= 0)
-    {
-      /* The poll timer is not running .. restart it.  This is necessary to
-       * avoid certain race conditions where the polling sequence can be
-       * interrupted.
-       */
-
-      (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1,
-                     (wdparm_t)priv);
-    }
 
   /* Then poll the network for new XMIT data */
 

@@ -184,11 +184,9 @@ config JULIAN_TIME
 	---help---
 		Enables Julian time conversions
 
-if !RTC
-
 config START_YEAR
 	int "Start year"
-	default 2016
+	default 2017
 	range 1970 2106
 	---help---
 		NuttX uses an unsigned 32-bit integer for time_t which provides a
@@ -203,8 +201,6 @@ config START_DAY
 	int "Start day"
 	default 1
 	range 1 31
-
-endif # !RTC
 
 config MAX_WDOGPARMS
 	int "Maximum number of watchdog parameters"
@@ -1224,7 +1220,17 @@ config SCHED_LPNTHREADS
 		This options is required to support, for example, I/O operations
 		that stall waiting for input.  If there is only a single thread,
 		then the entire low-priority queue processing stalls in such cases.
-		Such behavior is necessary to support asynchronous I/O, AIO (for example).
+		Such behavior is necessary to support asynchronous I/O, AIO (for
+		example).
+
+		CAUTION: Some drivers may use the work queue to serialize
+		operations.  The may also use the low-priority work queue if it is
+		available.  If there are multiple low-priority worker thread, then
+		this can result in the loss of that serialization.  There may be
+		concurrent driver operations running on different LP threads and
+		this could lead to a failure.  You may need to visit the use of the
+		LP work queue on your configuration is you select
+		CONFIG_SCHED_LPNTHREADS > 1
 
 config SCHED_LPWORKPRIORITY
 	int "Low priority worker thread priority"

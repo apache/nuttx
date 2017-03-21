@@ -83,17 +83,19 @@ int sem_init(FAR sem_t *sem, int pshared, unsigned int value)
     {
       /* Initialize the seamphore count */
 
-      sem->semcount      = (int16_t)value;
+      sem->semcount         = (int16_t)value;
 
       /* Initialize to support priority inheritance */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-      sem->flags         = 0;
+      sem->flags            = 0;
 #  if CONFIG_SEM_PREALLOCHOLDERS > 0
-      sem->hhead         = NULL;
+      sem->hhead            = NULL;
 #  else
-      sem->holder.htcb   = NULL;
-      sem->holder.counts = 0;
+      sem->holder[0].htcb   = NULL;
+      sem->holder[0].counts = 0;
+      sem->holder[1].htcb   = NULL;
+      sem->holder[1].counts = 0;
 #  endif
 #endif
       return OK;

@@ -57,6 +57,7 @@ function showusage {
     echo "  -s Use C++ unsigned long size_t in new operator. Default unsigned int"
     echo "  -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps"
     echo "  -n <nxdir> provides the relative path to the NxWidgets/ directory.  Default ../NxWidgets"
+    echo "  -d enables script debug output"
     echo "  -h will show this help test and terminate"
     echo "  <testlist-file> selects the list of configurations to test.  No default"
     echo ""
@@ -79,6 +80,9 @@ while [ ! -z "$1" ]; do
     -c )
     host=windows
     wenv=cygwin
+    ;;
+    -d )
+    set -x
     ;;
     -u )
     host=windows

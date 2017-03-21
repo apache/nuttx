@@ -100,6 +100,13 @@
 #define BOARD_FLEXBUS_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV3)
 #define BOARD_FLASHCLK_FREQ (BOARD_MCG_FREQ / BOARD_OUTDIV4)
 
+/*
+ * Kinetis does not have pullups on their Freedom-K64F board
+ * So allow the the board config to enable them.
+ */
+
+#define BOARD_SDHC_ENABLE_PULLUPS 1
+
 /* SDHC clocking ********************************************************************/
 
 /* SDCLK configurations corresponding to various modes of operation.   Formula is:

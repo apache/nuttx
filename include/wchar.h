@@ -180,8 +180,10 @@ int               mbsinit(FAR const mbstate_t *);
 size_t            mbrlen(FAR const char *, size_t, FAR mbstate_t *);
 size_t            mbrtowc(wchar_t *, FAR const char *, size_t,
                       mbstate_t *);
+size_t            mbsnrtowcs(FAR wchar_t *, FAR const char **, size_t,
+                      size_t, FAR mbstate_t *);
 size_t            mbsrtowcs(wchar_t *, FAR const char **, size_t,
-                      mbstate_t *);
+                      FAR mbstate_t *);
 wint_t            putwc(wchar_t, FILE *);
 wint_t            putwchar(wchar_t);
 int               swprintf(FAR wchar_t *, size_t, FAR const wchar_t *, ...);
@@ -208,6 +210,8 @@ size_t            wcslcat(FAR wchar_t *, FAR const wchar_t *, size_t);
 FAR wchar_t      *wcsncat(FAR wchar_t *, FAR const wchar_t *, size_t);
 int               wcsncmp(FAR const wchar_t *, FAR const wchar_t *, size_t);
 FAR wchar_t      *wcsncpy(FAR wchar_t *, FAR const wchar_t *, size_t);
+size_t            wcsnrtombs(FAR char *, FAR const wchar_t **, size_t,
+                      size_t, FAR mbstate_t *);
 FAR wchar_t      *wcspbrk(FAR const wchar_t *, FAR const wchar_t *);
 FAR wchar_t      *wcsrchr(FAR const wchar_t *, wchar_t);
 size_t            wcsrtombs(FAR char *, FAR const wchar_t **, size_t,
@@ -215,9 +219,13 @@ size_t            wcsrtombs(FAR char *, FAR const wchar_t **, size_t,
 size_t            wcsspn(FAR const wchar_t *, FAR const wchar_t *);
 FAR wchar_t      *wcsstr(FAR const wchar_t *, FAR const wchar_t *);
 double            wcstod(FAR const wchar_t *, FAR wchar_t **);
+float             wcstof(FAR const wchar_t *, FAR wchar_t **);
 FAR wchar_t      *wcstok(FAR wchar_t *, FAR const wchar_t *, FAR wchar_t **);
 long int          wcstol(FAR const wchar_t *, FAR wchar_t **, int);
+long double       wcstold(FAR const wchar_t *, FAR wchar_t **);
+long long int     wcstoll(FAR const wchar_t *, FAR wchar_t **, int);
 unsigned long int wcstoul(FAR const wchar_t *, FAR wchar_t **, int);
+unsigned long long int wcstoull(FAR const wchar_t *, FAR wchar_t **, int);
 FAR wchar_t      *wcswcs(FAR const wchar_t *, FAR const wchar_t *);
 int               wcswidth(FAR const wchar_t *, size_t);
 size_t            wcsxfrm(wchar_t *, FAR const wchar_t *, size_t);

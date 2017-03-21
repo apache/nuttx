@@ -431,16 +431,6 @@ void up_irqinitialize(void)
    * access to the AIC.
    */
 
-  /* Colorize the interrupt stack for debug purposes */
-
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
-  {
-    size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
-    up_stack_color((FAR void *)((uintptr_t)&g_intstackbase - intstack_size),
-                   intstack_size);
-  }
-#endif
-
   /* Redirect all interrupts to the AIC if so configured */
 
   sam_aic_redirection();

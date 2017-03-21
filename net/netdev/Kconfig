@@ -5,10 +5,23 @@
 
 menu "Network Device Operations"
 
+config NETDEV_IOCTL
+	bool
+	default n
+
 config NETDEV_PHY_IOCTL
 	bool "Enable PHY ioctl()"
 	default n
+	select NETDEV_IOCTL
 	---help---
-		Enable support for ioctl() commands to access PHY registers"
+		Enable support for ioctl() commands to access PHY registers
+
+config NETDEV_WIRELESS_IOCTL
+	bool "Enable Wireless ioctl()"
+	default n
+	select NETDEV_IOCTL
+	depends on DRIVERS_WIRELESS
+	---help---
+		Enable support for wireless device ioctl() commands
 
 endmenu # Network Device Operations

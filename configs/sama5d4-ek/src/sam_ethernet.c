@@ -50,6 +50,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>
@@ -262,7 +263,7 @@ int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
 #endif
     {
       nerr("ERROR: Unsupported interface: %s\n", intf);
-      return NULL;
+      return -EINVAL;
     }
 
   /* Disable interrupts until we are done.  This guarantees that the

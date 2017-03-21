@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/irq/irq_attach.c
  *
- *   Copyright (C) 2007-2008, 2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2008, 2010, 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,6 +64,21 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
   if ((unsigned)irq < NR_IRQS)
     {
       irqstate_t flags;
+      int ndx;
+
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+      /* Is there a mapping for this IRQ number? */
+
+      ndx = g_irqmap[irq];
+      if ((unsigned)ndx >= CONFIG_ARCH_NUSER_INTERRUPTS)
+        {
+          /* No.. then return failure. */
+
+          return ret;
+        }
+#else
+      ndx = irq;
+#endif
 
       /* If the new ISR is NULL, then the ISR is being detached.
        * In this case, disable the ISR and direct any interrupts
@@ -94,10 +109,11 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
            arg = NULL;
         }
 
-      /* Save the new ISR in the table. */
+      /* Save the new ISR and its argument in the table. */
 
-      g_irqvector[irq].handler = isr;
-      g_irqvector[irq].arg     = arg;
+      g_irqvector[ndx].handler = isr;
+      g_irqvector[ndx].arg     = arg;
+
       leave_critical_section(flags);
       ret = OK;
     }

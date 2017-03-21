@@ -831,8 +831,8 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
             {
               ninfo("TCP resume\n");
 
-              /* The TCP receive buffer is full.  Return now and don't allow
-               * any further TCP call backs.
+              /* The TCP receive buffer is non-empty.  Return now and don't
+               * allow any further TCP call backs.
                */
 
               pstate->rf_cb->flags   = 0;

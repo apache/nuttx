@@ -51,7 +51,16 @@
 #include <nuttx/spinlock.h>
 
 /****************************************************************************
- * Public Data
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_MINIMAL_VECTORTABLE) && \
+   !defined(CONFIG_ARCH_NUSER_INTERRUPTS)
+#  error CONFIG_ARCH_NUSER_INTERRUPTS is not defined
+#endif
+
+/****************************************************************************
+ * Public Types
  ****************************************************************************/
 
 /* This is the type of the list of interrupt handlers, one for each IRQ.
@@ -60,7 +69,7 @@
  * interrupt.
  */
 
-struct irq
+struct irq_info_s
 {
   xcpt_t handler;  /* Address of the interrupt handler */
   FAR void *arg;   /* The argument provided to the interrupt handler. */
@@ -75,7 +84,24 @@ struct irq
  * occurrence of an interrupt.
  */
 
-extern struct irq g_irqvector[NR_IRQS];
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+extern struct irq_info_s g_irqvector[CONFIG_ARCH_NUSER_INTERRUPTS];
+#else
+extern struct irq_info_s g_irqvector[NR_IRQS];
+#endif
+
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+/* This is the interrupt vector mapping table.  This must be provided by
+ * architecture specific logic if CONFIG_ARCH_MINIMAL_VECTORTABLE is define
+ * in the configuration.
+ *
+ * REVISIT: This should be declared in include/nuttx/irq.h.  The declaration
+ * at that location, however, introduces a circular include dependency so the
+ * declaration is here for the time being.
+ */
+
+extern const irq_mapped_t g_irqmap[NR_IRQS];
+#endif
 
 #ifdef CONFIG_SMP
 /* This is the spinlock that enforces critical sections when interrupts are

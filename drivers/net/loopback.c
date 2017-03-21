@@ -103,7 +103,7 @@ struct lo_driver_s
   bool lo_bifup;               /* true:ifup false:ifdown */
   bool lo_txdone;              /* One RX packet was looped back */
   WDOG_ID lo_polldog;          /* TX poll timer */
-  struct work_s lo_work;       /* For deferring work to the work queue */
+  struct work_s lo_work;       /* For deferring poll work to the work queue */
 
   /* This holds the information visible to the NuttX network */
 
@@ -283,24 +283,9 @@ static void lo_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)arg;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the interrupt processing on the worker thread. */
 
-  if (work_available(&priv->lo_work))
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      work_queue(LPBKWORK, &priv->lo_work, lo_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, arg);
-    }
+  work_queue(LPBKWORK, &priv->lo_work, lo_poll_work, priv, 0);
 }
 
 /****************************************************************************

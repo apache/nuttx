@@ -321,7 +321,8 @@ struct dm9x_driver_s
   uint8_t ncrxpackets;         /* Number of continuous rx packets  */
   WDOG_ID dm_txpoll;           /* TX poll timer */
   WDOG_ID dm_txtimeout;        /* TX timeout timer */
-  struct work_s dm_work;       /* For deferring work to the work queue */
+  struct work_s dm_irqwork;    /* For deferring interrupt work to the work queue */
+  struct work_s dm_pollwork;   /* For deferring poll work to the work queue */
 
   /* Mode-dependent function to move data in 8/16/32 I/O modes */
 
@@ -1267,13 +1268,9 @@ static int dm9x_interrupt(int irq, FAR void *context, FAR void *arg)
        wd_cancel(priv->dm_txtimeout);
     }
 
-  /* Cancel any pending poll work */
-
-  work_cancel(ETHWORK, &priv->dm_work);
-
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->dm_work, dm9x_interrupt_work, priv, 0);
+  work_queue(ETHWORK, &priv->dm_irqwork, dm9x_interrupt_work, priv, 0);
   return OK;
 }
 
@@ -1351,15 +1348,9 @@ static void dm9x_txtimeout_expiry(int argc, wdparm_t arg, ...)
 
   up_disable_irq(CONFIG_DM9X_IRQ);
 
-  /* Cancel any pending poll or interrupt work.  This will have no effect
-   * on work that has already been started.
-   */
-
-  work_cancel(ETHWORK, &priv->dm_work);
-
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->dm_work, dm9x_txtimeout_work, priv, 0);
+  work_queue(ETHWORK, &priv->dm_irqwork, dm9x_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
@@ -1437,25 +1428,9 @@ static void dm9x_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)arg;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the interrupt processing on the worker thread. */
 
-  if (work_available(&priv->dm_work))
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      work_queue(ETHWORK, &priv->dm_work, dm9x_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->dm_txpoll, DM9X_WDDELAY, dm9x_poll_expiry,
-                     1, arg);
-    }
+  work_queue(ETHWORK, &priv->dm_pollwork, dm9x_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -1687,11 +1662,11 @@ static int dm9x_txavail(FAR struct net_driver_s *dev)
    * availability action.
    */
 
-  if (work_available(&priv->dm_work))
+  if (work_available(&priv->dm_pollwork))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(ETHWORK, &priv->dm_work, dm9x_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->dm_pollwork, dm9x_txavail_work, priv, 0);
     }
 
   return OK;

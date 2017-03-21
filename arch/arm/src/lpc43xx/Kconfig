@@ -40,6 +40,9 @@ config ARCH_CHIP_LPC4337JBD144
 config ARCH_CHIP_LPC4337JET100
 	bool "LPC4337JET100"
 
+config ARCH_CHIP_LPC4337FET256
+	bool "LPC4337FET256"
+
 config ARCH_CHIP_LPC4350FBD208
 	bool "LPC4350FBD208"
 
@@ -91,7 +94,7 @@ config ARCH_FAMILY_LPC4330
 
 config ARCH_FAMILY_LPC4337
 	bool
-	default y if ARCH_CHIP_LPC4337JBD144
+	default y if ARCH_CHIP_LPC4337JBD144 || ARCH_CHIP_LPC4337FET256
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_AHB_SRAM_BANK1
 
@@ -334,6 +337,19 @@ config LPC43_WWDT
 	default n
 
 endmenu # LPC43xx Peripheral Support
+
+menu "ADC driver options"
+	depends on LPC43_ADC0 || LPC43_ADC1
+
+config ADC0_MASK
+	hex "ADC0 mask"
+	default 0x01
+
+config ADC0_FREQ
+	int "ADC0 frequency"
+	default 4500000
+
+endmenu # ADC driver options
 
 config LPC43_GPIO_IRQ
 	bool "GPIO interrupt support"

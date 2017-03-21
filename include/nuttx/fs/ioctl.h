@@ -85,7 +85,7 @@
 #define _I2CBASE        (0x2000) /* I2C driver commands */
 #define _SPIBASE        (0x2100) /* SPI driver commands */
 #define _GPIOBASE       (0x2200) /* GPIO driver commands */
-#define _CLIOCBASE      (0x1200) /* Contactless modules ioctl commands */
+#define _CLIOCBASE      (0x2300) /* Contactless modules ioctl commands */
 
 /* boardctl() commands share the same number space */
 

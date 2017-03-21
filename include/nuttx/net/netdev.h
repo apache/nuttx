@@ -330,7 +330,7 @@ struct net_driver_s
   int (*d_addmac)(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
   int (*d_rmmac)(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
   int (*d_ioctl)(FAR struct net_driver_s *dev, int cmd, long arg);
 #endif
 

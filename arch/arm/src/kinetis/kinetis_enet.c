@@ -225,7 +225,8 @@ struct kinetis_driver_s
   uint8_t phyaddr;             /* Selected PHY address */
   WDOG_ID txpoll;              /* TX poll timer */
   WDOG_ID txtimeout;           /* TX timeout timer */
-  struct work_s work;          /* For deferring work to the work queue */
+  struct work_s irqwork;       /* For deferring interrupt work to the work queue */
+  struct work_s pollwork;      /* For deferring poll work to the work queue */
   struct enet_desc_s *txdesc;  /* A pointer to the list of TX descriptor */
   struct enet_desc_s *rxdesc;  /* A pointer to the list of RX descriptors */
 
@@ -946,13 +947,9 @@ static int kinetis_interrupt(int irq, FAR void *context, FAR void *arg)
        wd_cancel(priv->txtimeout);
     }
 
-  /* Cancel any pending poll work */
-
-  work_cancel(ETHWORK, &priv->work);
-
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->work, kinetis_interrupt_work, priv, 0);
+  work_queue(ETHWORK, &priv->irqwork, kinetis_interrupt_work, priv, 0);
   return OK;
 }
 
@@ -1028,15 +1025,11 @@ static void kinetis_txtimeout_expiry(int argc, uint32_t arg, ...)
   up_disable_irq(KINETIS_IRQ_EMACRX);
   up_disable_irq(KINETIS_IRQ_EMACMISC);
 
-  /* Cancel any pending poll or interrupt work.  This will have no effect
-   * on work that has already been started.
+  /* Schedule to perform the TX timeout processing on the worker thread,
+   * canceling any pending interrupt work.
    */
 
-  work_cancel(ETHWORK, &priv->work);
-
-  /* Schedule to perform the TX timeout processing on the worker thread. */
-
-  work_queue(ETHWORK, &priv->work, kinetis_txtimeout_work, priv, 0);
+  work_queue(ETHWORK, &priv->irqwork, kinetis_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
@@ -1104,25 +1097,9 @@ static void kinetis_polltimer_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the poll processing on the worker thread. */
 
-  if (work_available(&priv->work))
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      work_queue(ETHWORK, &priv->work, kinetis_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->txpoll, KINETIS_WDDELAY, kinetis_polltimer_expiry,
-                     1, (wdparm_t)arg);
-    }
+  work_queue(ETHWORK, &priv->pollwork, kinetis_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -1380,11 +1357,11 @@ static int kinetis_txavail(struct net_driver_s *dev)
    * availability action.
    */
 
-  if (work_available(&priv->work))
+  if (work_available(&priv->pollwork))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(ETHWORK, &priv->work, kinetis_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->pollwork, kinetis_txavail_work, priv, 0);
     }
 
   return OK;

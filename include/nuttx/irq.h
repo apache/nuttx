@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/irq.h
  *
- *   Copyright (C) 2007-2011, 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #ifndef __ASSEMBLY__
+# include <stdint.h>
 # include <assert.h>
 # include <arch/irq.h>
 #endif
@@ -50,21 +51,69 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
 /* IRQ detach is a convenience definition.  Detaching an interrupt handler
  * is equivalent to setting a NULL interrupt handler.
  */
 
-#ifndef __ASSEMBLY__
-# define irq_detach(isr) irq_attach(isr, NULL, NULL)
-#endif
+#  define irq_detach(isr) irq_attach(isr, NULL, NULL)
+
+/* Maximum/minimum values of IRQ integer types */
+
+#  if NR_IRQS <= 256
+#    define IRQT_MAX UINT8_MAX
+#  elif NR_IRQS <= 65536
+#    define IRQT_MAX UINT16_MAX
+#  else
+#    define IRQT_MAX UINT32_MAX
+#  endif
+
+#  ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+#    if CONFIG_ARCH_NUSER_INTERRUPTS <= 256
+#      define IRQMAPPED_MAX UINT8_MAX
+#    elif CONFIG_ARCH_NUSER_INTERRUPTS <= 65536
+#      define IRQMAPPED_MAX UINT16_MAX
+#    else
+#      define IRQMAPPED_MAX UINT32_MAX
+#   endif
+#  endif
+
+#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/* This struct defines the way the registers are stored */
-
 #ifndef __ASSEMBLY__
+/* This type is an unsigned integer type large enough to hold the largest
+ * IRQ number.
+ */
+
+#if NR_IRQS <= 256
+typedef uint8_t irq_t;
+#elif NR_IRQS <= 65536
+typedef uint16_t irq_t;
+#else
+typedef uint32_t irq_t;
+#endif
+
+/* This type is an unsigned integer type large enough to hold the largest
+ * mapped vector table index.
+ */
+
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+#if CONFIG_ARCH_NUSER_INTERRUPTS <= 256
+typedef uint8_t irq_mapped_t;
+#elif CONFIG_ARCH_NUSER_INTERRUPTS <= 65536
+typedef uint16_t irq_mapped_t;
+#else
+typedef uint32_t irq_mapped_t;
+#endif
+#endif /* CONFIG_ARCH_MINIMAL_VECTORTABLE */
+
+/* This struct defines the form of an interrupt service routine */
+
 typedef int (*xcpt_t)(int irq, FAR void *context, FAR void *arg);
 #endif
 
@@ -83,6 +132,20 @@ extern "C"
 {
 #else
 #define EXTERN extern
+#endif
+
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+/* This is the interrupt vector mapping table.  This must be provided by
+ * architecture specific logic if CONFIG_ARCH_MINIMAL_VECTORTABLE is define
+ * in the configuration.
+ *
+ * REVISIT: Currently declared in sched/irq/irq.h.  This declaration here
+ * introduces a circular dependency since it depends on NR_IRQS which is
+ * defined in arch/irq.h but arch/irq.h includes nuttx/irq.h and we get
+ * here with NR_IRQS undefined.
+ */
+
+/* EXTERN const irq_mapped_t g_irqmap[NR_IRQS]; */
 #endif
 
 /****************************************************************************

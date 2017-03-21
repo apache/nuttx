@@ -174,7 +174,8 @@ struct ftmac100_driver_s
   WDOG_ID ft_txpoll;           /* TX poll timer */
   WDOG_ID ft_txtimeout;        /* TX timeout timer */
   unsigned int status;         /* Last ISR status */
-  struct work_s ft_work;       /* For deferring work to the work queue */
+  struct work_s ft_irqwork;    /* For deferring work to the work queue */
+  struct work_s ft_pollwork;   /* For deferring work to the work queue */
 
   /* This holds the information visible to the NuttX network */
 
@@ -805,7 +806,6 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
 static void ftmac100_txdone(FAR struct ftmac100_driver_s *priv)
 {
   FAR struct ftmac100_txdes_s *txdes;
-  int delay;
 
   /* Check if a Tx was pending */
 
@@ -843,26 +843,6 @@ static void ftmac100_txdone(FAR struct ftmac100_driver_s *priv)
   /* Cancel the TX timeout */
 
   wd_cancel(priv->ft_txtimeout);
-
-  /* Check if the poll timer is running.  If it is not, then start it now.
-   * There is a race condition here:  We may test the time remaining on the
-   * poll timer and determine that it is still running, but then the timer
-   * expires immiately.  That should not be problem, however, the poll timer
-   * processing should be in the work queue and should execute immediately
-   * after we complete the TX poll. Inefficient, but not fatal.
-   */
-
-  delay = wd_gettime(priv->ft_txpoll);
-  if (delay <= 0)
-    {
-      /* The poll timer is not running .. restart it.  This is necessary to
-       * avoid certain race conditions where the polling sequence can be
-       * interrupted.
-       */
-
-      (void)wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry,
-                     1, (wdparm_t)priv);
-    }
 
   /* Then poll the network for new XMIT data */
 
@@ -1021,13 +1001,9 @@ static int ftmac100_interrupt(int irq, FAR void *context, FAR void *arg)
       wd_cancel(priv->ft_txtimeout);
     }
 
-  /* Cancel any pending poll work */
-
-  work_cancel(FTMAWORK, &priv->ft_work);
-
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(FTMAWORK, &priv->ft_work, ftmac100_interrupt_work, priv, 0);
+  work_queue(FTMAWORK, &priv->ft_irqwork, ftmac100_interrupt_work, priv, 0);
 
   return OK;
 }
@@ -1095,16 +1071,11 @@ static void ftmac100_txtimeout_expiry(int argc, uint32_t arg, ...)
 
   up_disable_irq(CONFIG_FTMAC100_IRQ);
 
-  /* Cancel any pending poll or interrupt work.  This will have no effect
-   * on work that has already been started.
-   */
-
-  work_cancel(FTMAWORK, &priv->ft_work);
-
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(FTMAWORK, &priv->ft_work, ftmac100_txtimeout_work, priv, 0);
+  work_queue(FTMAWORK, &priv->ft_irqwork, ftmac100_txtimeout_work, priv, 0);
 }
+
 /****************************************************************************
  * Function: ftmac100_poll_work
  *
@@ -1170,25 +1141,9 @@ static void ftmac100_poll_expiry(int argc, uint32_t arg, ...)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions.
-   */
+  /* Schedule to perform the interrupt processing on the worker thread. */
 
-  if (work_available(&priv->ft_work))
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      work_queue(FTMAWORK, &priv->ft_work, ftmac100_poll_work, priv, 0);
-    }
-  else
-    {
-      /* No.. Just re-start the watchdog poll timer, missing one polling
-       * cycle.
-       */
-
-      (void)wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry,
-                     1, (wdparm_t)arg);
-    }
+  work_queue(FTMAWORK, &priv->ft_pollwork, ftmac100_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -1365,11 +1320,11 @@ static int ftmac100_txavail(struct net_driver_s *dev)
    * availability action.
    */
 
-  if (work_available(&priv->ft_work))
+  if (work_available(&priv->ft_pollwork))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(FTMAWORK, &priv->ft_work, ftmac100_txavail_work, priv, 0);
+      work_queue(FTMAWORK, &priv->ft_pollwork, ftmac100_txavail_work, priv, 0);
     }
 
   return OK;

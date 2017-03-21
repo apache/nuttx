@@ -401,7 +401,7 @@ int phy_notify_unsubscribe(FAR const char *intf, pid_t pid)
   /* Detach and disable the PHY interrupt */
 
   phy_semtake();
-  (void)arch_phy_irq(intf, NULL, NULL);
+  (void)arch_phy_irq(intf, NULL, NULL, NULL);
 
   /* Un-initialize the client entry */
 

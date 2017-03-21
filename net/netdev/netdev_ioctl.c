@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev_ioctl.c
  *
- *   Copyright (C) 2007-2012, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,8 +60,12 @@
 #include <nuttx/net/arp.h>
 
 #ifdef CONFIG_NET_IGMP
-#  include "sys/sockio.h"
-#  include "nuttx/net/igmp.h"
+#  include <sys/sockio.h>
+#  include <nuttx/net/igmp.h>
+#endif
+
+#ifdef CONFIG_NETDEV_WIRELESS_IOCTL
+#  include <nuttx/wireless/wireless.h>
 #endif
 
 #include "arp/arp.h"
@@ -312,6 +316,80 @@ static void ioctl_setipv6addr(FAR net_ipv6addr_t outaddr,
 #endif
 
 /****************************************************************************
+ * Name: netdev_wifrdev
+ *
+ * Description:
+ *   Verify the struct iwreq and get the Wireless device.
+ *
+ * Parameters:
+ *   req - The argument of the ioctl cmd
+ *
+ * Return:
+ *  A pointer to the driver structure on success; NULL on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_WIRELESS_IOCTL)
+static FAR struct net_driver_s *netdev_wifrdev(FAR struct iwreq *req)
+{
+  if (req != NULL)
+    {
+      /* Find the network device associated with the device name
+       * in the request data.
+       */
+
+      return netdev_findbyname(req->ifrn_name);
+    }
+
+  return NULL;
+}
+#endif
+
+/****************************************************************************
+ * Name: netdev_wifrioctl
+ *
+ * Description:
+ *   Perform wireless network device specific operations.
+ *
+ * Parameters:
+ *   psock    Socket structure
+ *   dev      Ethernet driver device structure
+ *   cmd      The ioctl command
+ *   req      The argument of the ioctl cmd
+ *
+ * Return:
+ *   >=0 on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_WIRELESS_IOCTL)
+static int netdev_wifrioctl(FAR struct socket *psock, int cmd,
+                            FAR struct iwreq *req)
+{
+  FAR struct net_driver_s *dev;
+  int ret = -ENOTTY;
+
+  /* Verify that this is a valid wireless network IOCTL command */
+
+  if (_WLIOCVALID(cmd) && (unsigned)_IOC_NR(cmd) <= WL_NNETCMDS)
+    {
+      /* Get the wireless device associated with the IOCTL command */
+
+      dev = netdev_wifrdev(req);
+      if (dev)
+        {
+          /* Just forward the IOCTL to the wireless driver */
+
+          ret = dev->d_ioctl(dev, cmd, ((long)(uintptr_t)req));
+        }
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Name: netdev_ifrdev
  *
  * Description:
@@ -327,16 +405,16 @@ static void ioctl_setipv6addr(FAR net_ipv6addr_t outaddr,
 
 static FAR struct net_driver_s *netdev_ifrdev(FAR struct ifreq *req)
 {
-  if (!req)
+  if (req != NULL)
     {
-      return NULL;
+      /* Find the network device associated with the device name
+       * in the request data.
+       */
+
+      return netdev_findbyname(req->ifr_name);
     }
 
-  /* Find the network device associated with the device name
-   * in the request data.
-   */
-
-  return netdev_findbyname(req->ifr_name);
+  return NULL;
 }
 
 /****************************************************************************
@@ -347,7 +425,6 @@ static FAR struct net_driver_s *netdev_ifrdev(FAR struct ifreq *req)
  *
  * Parameters:
  *   psock    Socket structure
- *   dev      Ethernet driver device structure
  *   cmd      The ioctl command
  *   req      The argument of the ioctl cmd
  *
@@ -676,7 +753,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
         }
         break;
 
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_PHY_IOCTL)
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
       case SIOCMIINOTIFY: /* Set up for PHY event notifications */
         {
@@ -1079,9 +1156,18 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
       goto errout;
     }
 
-  /* Execute the command */
+  /* Execute the command.  First check for a standard network IOCTL command. */
 
   ret = netdev_ifrioctl(psock, cmd, (FAR struct ifreq *)((uintptr_t)arg));
+
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_WIRELESS_IOCTL)
+  /* Check a wireless network command */
+
+  if (ret == -ENOTTY)
+    {
+      ret = netdev_wifrioctl(psock, cmd, (FAR struct iwreq *)((uintptr_t)arg));
+    }
+#endif
 
 #ifdef CONFIG_NET_IGMP
   /* Check for address filtering commands */
@@ -1174,7 +1260,7 @@ void netdev_ifup(FAR struct net_driver_s *dev)
 {
   /* Make sure that the device supports the d_ifup() method */
 
-  if (dev->d_ifup)
+  if (dev->d_ifup != NULL)
     {
       /* Is the interface already up? */
 
@@ -1196,7 +1282,7 @@ void netdev_ifdown(FAR struct net_driver_s *dev)
 {
   /* Check sure that the device supports the d_ifdown() method */
 
-  if (dev->d_ifdown)
+  if (dev->d_ifdown != NULL)
     {
       /* Is the interface already down? */
 
