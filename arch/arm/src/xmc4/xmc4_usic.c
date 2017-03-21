@@ -121,12 +121,12 @@ int xmc4_enable_usic(enum usic_e usic)
 
             putreg32(SCU_CGAT0_USIC0, XMC4_SCU_CGATCLR0);
 
-            /* De-assert peripheral reset USIC0 */
+            /* Set bit in PRCLR0 to de-assert USIC0 peripheral reset */
 
             putreg32(SCU_PR0_USIC0RS, XMC4_SCU_PRCLR0);
           }
 #else
-        /* De-assert peripheral reset USIC0 */
+        /* Set bit in PRCLR0 to de-assert USIC0 peripheral reset */
 
         putreg32(SCU_PR0_USIC0RS, XMC4_SCU_PRCLR0);
 #endif
@@ -143,12 +143,12 @@ int xmc4_enable_usic(enum usic_e usic)
 
             putreg32(SCU_CGAT1_USIC1, XMC4_SCU_CGATCLR1);
 
-            /* De-assert peripheral reset USIC1 */
+            /* Set bit in PRCLR1 to de-assert USIC1 peripheral reset */
 
             putreg32(SCU_PR1_USIC1RS, XMC4_SCU_PRCLR1);
           }
 #else
-        /* De-assert peripheral reset USIC1 */
+        /* Set bit in PRCLR1 to de-assert USIC1 peripheral reset */
 
         putreg32(SCU_PR1_USIC1RS, XMC4_SCU_PRCLR1);
 #endif
@@ -165,12 +165,12 @@ int xmc4_enable_usic(enum usic_e usic)
 
             putreg32(SCU_CGAT1_USIC2, XMC4_SCU_CGATCLR1);
 
-            /* De-assert peripheral reset USIC2 */
+            /* Set bit in PRCLR1 to de-assert USIC2 peripheral reset */
 
             putreg32(SCU_PR1_USIC2RS, XMC4_SCU_PRCLR1);
           }
 #else
-        /* De-assert peripheral reset USIC2 */
+        /* Set bit in PRCLR1 to de-assert USIC2 peripheral reset */
 
         putreg32(SCU_PR1_USIC2RS, XMC4_SCU_PRCLR1);
 #endif
@@ -203,7 +203,7 @@ int xmc4_disable_usic(enum usic_e usic)
   switch (usic)
     {
       case USIC0:
-        /* Assert peripheral reset USIC0 */
+        /* Set bit in PRSET0 to assert USIC0 peripheral reset */
 
         putreg32(SCU_PR0_USIC0RS, XMC4_SCU_PRSET0);
 
@@ -216,7 +216,7 @@ int xmc4_disable_usic(enum usic_e usic)
 
 #if XMC4_NUSIC > 1
       case USIC1:
-        /* Assert peripheral reset USIC0 */
+        /* Set bit in PRSET1 to assert USIC1 peripheral reset */
 
         putreg32(SCU_PR1_USIC1RS, XMC4_SCU_PRSET1);
 
@@ -229,7 +229,7 @@ int xmc4_disable_usic(enum usic_e usic)
 
 #if XMC4_NUSIC > 2
       case USIC2:
-        /* Assert peripheral reset USIC0 */
+        /* Set bit in PRSET1 to assert USIC2 peripheral reset */
 
         putreg32(SCU_PR1_USIC2RS, XMC4_SCU_PRSET1);
 
@@ -385,7 +385,7 @@ int xmc4_disable_usic_channel(enum usic_channel_e channel)
 }
 
 /****************************************************************************
- * Name: xmc4_uisc_baudrate
+ * Name: xmc4_usic_baudrate
  *
  * Description:
  *   Set the USIC baudrate for the USIC channel
@@ -396,7 +396,7 @@ int xmc4_disable_usic_channel(enum usic_channel_e channel)
  *
  ****************************************************************************/
 
-int xmc4_uisc_baudrate(enum usic_channel_e channel, uint32_t baud,
+int xmc4_usic_baudrate(enum usic_channel_e channel, uint32_t baud,
                        uint32_t oversampling)
 {
   uintptr_t base;
@@ -448,14 +448,14 @@ int xmc4_uisc_baudrate(enum usic_channel_e channel, uint32_t baud,
 
       /* Select and setup the fractional divider */
 
-      regval = USIC_FDR_DM_FRACTIONAL |  (clkdiv_min << USIC_FDR_STEP_SHIFT);
+      regval = USIC_FDR_DM_FRACTIONAL | USIC_FDR_STEP(clkdiv_min);
       putreg32(regval, base + XMC4_USIC_FDR_OFFSET);
 
       /* Setup and enable the baud rate generator */
 
       regval  = getreg32(base + XMC4_USIC_BRG_OFFSET);
       regval &=  ~(USIC_BRG_DCTQ_MASK | USIC_BRG_PDIV_MASK | USIC_BRG_PCTQ_MASK | USIC_BRG_PPPEN);
-      regval |= (USIC_BRG_DCTQ(oversampling - 1) |  USIC_BRG_PDIV(pdiv_int_min - 1));
+      regval |= (USIC_BRG_DCTQ(oversampling - 1) | USIC_BRG_PDIV(pdiv_int_min - 1));
       putreg32(regval, base + XMC4_USIC_BRG_OFFSET);
 
       ret = OK;

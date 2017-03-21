@@ -105,12 +105,17 @@
 #define CLKSET_VALUE      (0x00000000)
 #define SYSCLKCR_VALUE    (0x00010001)
 #define CPUCLKCR_VALUE    (0x00000000)
-#define PBCLKCR_VALUE     (0x00000000)
 #define CCUCLKCR_VALUE    (0x00000000)
 #define WDTCLKCR_VALUE    (0x00000000)
 #define EBUCLKCR_VALUE    (0x00000003)
 #define USBCLKCR_VALUE    (0x00010000)
 #define EXTCLKCR_VALUE    (0x01200003)
+
+#if BOARD_PBDIV == 1
+#  define PBCLKCR_VALUE   SCU_PBCLKCR_PBDIV_FCPU
+#else /* BOARD_PBDIV == 2 */
+#  define PBCLKCR_VALUE   SCU_PBCLKCR_PBDIV_DIV2
+#endif
 
 #if ((USBCLKCR_VALUE & SCU_USBCLKCR_USBSEL) == SCU_USBCLKCR_USBSEL_USBPLL)
 #  define USB_DIV         3
@@ -182,9 +187,9 @@ void xmc4_clock_configure(void)
   regval = getreg32(XMC4_SCU_PWRSTAT);
   if ((regval & SCU_PWR_HIBEN) == 0)
     {
-      regval  = getreg32(XMC4_SCU_PWRSET);
-      regval |= SCU_PWR_HIBEN;
-      putreg32(regval, XMC4_SCU_PWRSTAT);
+      /* Enable the HIB domain */
+
+      putreg32(SCU_PWR_HIBEN, XMC4_SCU_PWRSET);
 
       /* Wait until HIB domain is enabled */
 
@@ -193,7 +198,7 @@ void xmc4_clock_configure(void)
         }
     }
 
-  /* Remove the reset only if HIB domain were in a state of reset */
+  /* Remove the reset only if HIB domain was in a state of reset */
 
   regval = getreg32(XMC4_SCU_RSTSTAT);
   if ((regval & SCU_RSTSTAT_HIBRS) != 0)
@@ -387,7 +392,7 @@ void xmc4_clock_configure(void)
   /* Before scaling to final frequency we need to setup the clock dividers */
 
   putreg32(SYSCLKCR_VALUE, XMC4_SCU_SYSCLKCR);
-  putreg32(PBCLKCR_VALUE, XMC4_SCU_PBCLKCR);
+  putreg32(PBCLKCR_VALUE,  XMC4_SCU_PBCLKCR);
   putreg32(CPUCLKCR_VALUE, XMC4_SCU_CPUCLKCR);
   putreg32(CCUCLKCR_VALUE, XMC4_SCU_CCUCLKCR);
   putreg32(WDTCLKCR_VALUE, XMC4_SCU_WDTCLKCR);

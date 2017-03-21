@@ -51,23 +51,23 @@
 #if defined(CONFIG_ARCH_CHIP_XMC4500)
 #  define XMC4_NUSIC          3          /* Three USIC modules: USCI0-2 */
 #  undef  XMC4_SCU_GATING                /* No clock gating registers */
-#  define XMC4_NECATN         0          /* No EtherCAT support */
+#  define XMC4_NECAT          0          /* No EtherCAT support */
 #elif defined(CONFIG_ARCH_CHIP_XMC4700)
 #  define XMC4_NUSIC          3          /* Three USIC modules: USCI0-2 */
 #  define XMC4_SCU_GATING     1          /* Has clock gating registers */
-#  define XMC4_NECATN         0          /* No EtherCAT support */
+#  define XMC4_NECAT          0          /* No EtherCAT support */
 #elif defined(CONFIG_ARCH_CHIP_XMC4700)
 #  define XMC4_NUSIC          3          /* Three USIC modules: USCI0-2 */
 #  define XMC4_SCU_GATING     1          /* Has clock gating registers */
-#  define XMC4_NECATN         1          /* One EtherCAT module */
+#  define XMC4_NECAT          1          /* One EtherCAT module */
 #else
 #  error "Unsupported XMC4xxx chip"
 #endif
 
 /* NVIC priority levels *************************************************************/
-/* Each priority field holds a priority value, 0-15. The lower the value, the greater
- * the priority of the corresponding interrupt.  The XMC4500 implements only
- * bits[7:2] of this field, bits[1:0] read as zero and ignore writes.
+/* Each priority field holds a priority value.  The lower the value, the greater the
+ * priority of the corresponding interrupt.  The XMC4500 implements only bits[7:2]
+ * of this field, bits[1:0] read as zero and ignore writes.
  */
 
 #define NVIC_SYSH_PRIORITY_MIN     0xfc /* All bits[7:2] set is minimum priority */

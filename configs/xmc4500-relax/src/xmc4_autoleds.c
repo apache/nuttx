@@ -43,19 +43,19 @@
  * include/board.h and src/sam_autoleds.c. The LEDs are used to encode
  * OS-related events as follows:
  *
- *   SYMBOL                  Meaning                     LED state
- *                                                      LED2   LED1
- *   ---------------------  --------------------------  ------ ------ */
-
-#define LED_STARTED       0 /* NuttX has been started   OFF    OFF    */
-#define LED_HEAPALLOCATE  0 /* Heap has been allocated  OFF    OFF    */
-#define LED_IRQSENABLED   0 /* Interrupts enabled       OFF    OFF    */
-#define LED_STACKCREATED  1 /* Idle stack created       ON     OFF    */
-#define LED_INIRQ         2 /* In an interrupt           No change    */
-#define LED_SIGNAL        2 /* In a signal handler       No change    */
-#define LED_ASSERTION     2 /* An assertion failed       No change    */
-#define LED_PANIC         3 /* The system has crashed   N/C  Blinking */
-#undef  LED_IDLE            /* MCU is is sleep mode      Not used     */
+ *   SYMBOL              Meaning                  LED state
+ *                                               LED1   LED2
+ *   ------------------ ------------------------ ------ ------
+ *   LED_STARTED        NuttX has been started   OFF    OFF
+ *   LED_HEAPALLOCATE   Heap has been allocated  OFF    OFF
+ *   LED_IRQSENABLED    Interrupts enabled       OFF    OFF
+ *   LED_STACKCREATED   Idle stack created       ON     OFF
+ *   LED_INIRQ          In an interrupt           No change
+ *   LED_SIGNAL         In a signal handler       No change
+ *   LED_ASSERTION      An assertion failed       No change
+ *   LED_PANIC          The system has crashed   N/C  Blinking
+ *   LED_IDLE           MCU is is sleep mode      Not used
+ */
 
 /****************************************************************************
  * Included Files

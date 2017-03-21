@@ -221,7 +221,7 @@
 #define XMC4_USB0_EP4_BASE          0x50040980
 #define XMC4_USB0_EP5_BASE          0x500409a0
 #define XMC4_USB0_EP6_BASE          0x500409c0
-#define XMC4_USB0_EP6_BASE          0x50100000 /* ECAT0 */
+#define XMC4_ECAT0_BASE             0x50100000 /* ECAT0 */
 
 #define XMC4_PMU0_BASE              0x58000000 /* PMU0 registers */
 #define XMC4_FLASH0_BASE            0x58001000

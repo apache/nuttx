@@ -71,7 +71,7 @@
 #define XMC4_PORT_OUT_OFFSET        0x0000    /* Port Output Register */
 #define XMC4_PORT_OMR_OFFSET        0x0004    /* Port Output Modification Register */
 
-#define XMC4_PORT_IOCR_OFFSET(n)    (0x0010 + ((n) & 3))
+#define XMC4_PORT_IOCR_OFFSET(n)    (0x0010 + ((n) & ~3))
 #define XMC4_PORT_IOCR0_OFFSET      0x0010    /* Port Input/Output Control Register 0 */
 #define XMC4_PORT_IOCR4_OFFSET      0x0014    /* Port Input/Output Control Register 4 */
 #define XMC4_PORT_IOCR8_OFFSET      0x0018    /* Port Input/Output Control Register 8 */
@@ -79,7 +79,7 @@
 
 #define XMC4_PORT_IN_OFFSET         0x0024    /* Port Input Register */
 
-#define XMC4_PORT_PDR_OFFSET(n)     (0x0010 + (((n) >> 1) & 3))
+#define XMC4_PORT_PDR_OFFSET(n)     (0x0040 + (((n) >> 1) & ~3))
 #define XMC4_PORT_PDR0_OFFSET       0x0040    /* Port Pad Driver Mode 0 Register */
 #define XMC4_PORT_PDR1_OFFSET       0x0044    /* Port Pad Driver Mode 1 Register */
 
@@ -399,19 +399,19 @@
 #define PORT_PDR0_PD2_SHIFT        (8)       /* Bit 8-10: Pad Driver Mode for Port n Pin 2 */
 #define PORT_PDR0_PD2_MASK         (7 << PORT_PDR0_PD2_SHIFT)
 #  define PORT_PDR0_PD2(n)         ((uint32_t)(n) << PORT_PDR0_PD2_SHIFT)
-#define PORT_PDR0_PD3_SHIFT        (12)      /* Bit 12-14: Pad Driver Mode for Port 0 Pin 3 */
+#define PORT_PDR0_PD3_SHIFT        (12)      /* Bit 12-14: Pad Driver Mode for Port n Pin 3 */
 #define PORT_PDR0_PD3_MASK         (7 << PORT_PDR0_PD3_SHIFT)
 #  define PORT_PDR0_PD3(n)         ((uint32_t)(n) << PORT_PDR0_PD3_SHIFT)
-#define PORT_PDR0_PD4_SHIFT        (16)      /* Bit 16-18: Pad Driver Mode for Port 0 Pin 4 */
+#define PORT_PDR0_PD4_SHIFT        (16)      /* Bit 16-18: Pad Driver Mode for Port n Pin 4 */
 #define PORT_PDR0_PD4_MASK         (7 << PORT_PDR0_PD4_SHIFT)
 #  define PORT_PDR0_PD4(n)         ((uint32_t)(n) << PORT_PDR0_PD4_SHIFT)
-#define PORT_PDR0_PD5_SHIFT        (20)      /* Bit 20-22: Pad Driver Mode for Port 0 Pin 5 */
+#define PORT_PDR0_PD5_SHIFT        (20)      /* Bit 20-22: Pad Driver Mode for Port n Pin 5 */
 #define PORT_PDR0_PD5_MASK         (7 << PORT_PDR0_PD5_SHIFT)
 #  define PORT_PDR0_PD5(n)         ((uint32_t)(n) << PORT_PDR0_PD5_SHIFT)
-#define PORT_PDR0_PD6_SHIFT        (24)      /* Bit 24-26: Pad Driver Mode for Port 0 Pin 6 */
+#define PORT_PDR0_PD6_SHIFT        (24)      /* Bit 24-26: Pad Driver Mode for Port n Pin 6 */
 #define PORT_PDR0_PD6_MASK         (7 << PORT_PDR0_PD6_SHIFT)
 #  define PORT_PDR0_PD6(n)         ((uint32_t)(n) << PORT_PDR0_PD6_SHIFT)
-#define PORT_PDR0_PD7_SHIFT        (28)      /* Bit 28-30: Pad Driver Mode for Port 0 Pin 7 */
+#define PORT_PDR0_PD7_SHIFT        (28)      /* Bit 28-30: Pad Driver Mode for Port n Pin 7 */
 #define PORT_PDR0_PD7_MASK         (7 << PORT_PDR0_PD7_SHIFT)
 #  define PORT_PDR0_PD7(n)         ((uint32_t)(n) << PORT_PDR0_PD7_SHIFT)
 
@@ -429,19 +429,19 @@
 #define PORT_PDR1_PD10_SHIFT       (8)       /* Bit 8-10: Pad Driver Mode for Port n Pin 10 */
 #define PORT_PDR1_PD10_MASK        (7 << PORT_PDR1_PD10_SHIFT)
 #  define PORT_PDR1_PD10(n)        ((uint32_t)(n) << PORT_PDR1_PD10_SHIFT)
-#define PORT_PDR1_PD11_SHIFT       (12)      /* Bit 12-14: Pad Driver Mode for Port 0 Pin 11 */
+#define PORT_PDR1_PD11_SHIFT       (12)      /* Bit 12-14: Pad Driver Mode for Port n Pin 11 */
 #define PORT_PDR1_PD11_MASK        (7 << PORT_PDR1_PD11_SHIFT)
 #  define PORT_PDR1_PD11(n)        ((uint32_t)(n) << PORT_PDR1_PD11_SHIFT)
-#define PORT_PDR1_PD12_SHIFT       (16)      /* Bit 16-18: Pad Driver Mode for Port 0 Pin 12 */
+#define PORT_PDR1_PD12_SHIFT       (16)      /* Bit 16-18: Pad Driver Mode for Port n Pin 12 */
 #define PORT_PDR1_PD12_MASK        (7 << PORT_PDR1_PD12_SHIFT)
 #  define PORT_PDR1_PD12(n)        ((uint32_t)(n) << PORT_PDR1_PD12_SHIFT)
-#define PORT_PDR1_PD13_SHIFT       (20)      /* Bit 20-22: Pad Driver Mode for Port 0 Pin 13 */
+#define PORT_PDR1_PD13_SHIFT       (20)      /* Bit 20-22: Pad Driver Mode for Port n Pin 13 */
 #define PORT_PDR1_PD13_MASK        (7 << PORT_PDR1_PD13_SHIFT)
 #  define PORT_PDR1_PD13(n)        ((uint32_t)(n) << PORT_PDR1_PD13_SHIFT)
-#define PORT_PDR1_PD14_SHIFT       (24)      /* Bit 24-26: Pad Driver Mode for Port 0 Pin 14 */
+#define PORT_PDR1_PD14_SHIFT       (24)      /* Bit 24-26: Pad Driver Mode for Port n Pin 14 */
 #define PORT_PDR1_PD14_MASK        (7 << PORT_PDR1_PD14_SHIFT)
 #  define PORT_PDR1_PD14(n)        ((uint32_t)(n) << PORT_PDR1_PD14_SHIFT)
-#define PORT_PDR1_PD15_SHIFT       (28)      /* Bit 28-30: Pad Driver Mode for Port 0 Pin 15 */
+#define PORT_PDR1_PD15_SHIFT       (28)      /* Bit 28-30: Pad Driver Mode for Port n Pin 15 */
 #define PORT_PDR1_PD15_MASK        (7 << PORT_PDR1_PD15_SHIFT)
 #  define PORT_PDR1_PD15(n)        ((uint32_t)(n) << PORT_PDR1_PD15_SHIFT)
 

@@ -53,16 +53,21 @@
 
 /* Clocking *************************************************************************/
 /* Default clock initialization
- * fPLL = 288MHz => fSYS = 288MHz => fCPU = 144MHz
- *                                => fPB  = 144MHz
- *                                => fCCU = 144MHz
- *                                => fETH = 72MHz
- *               => fUSB = 48MHz
- *               => fEBU = 72MHz
+ *
+ *   fXTAL = 12Mhz
+ *      -> fPLL = (fXTAL / (2 * 1) * 48) = 288MHz
+ *         -> fSYS = (fPLL / 1)          = 288MHz
+ *            -> fCPU = (fSYS / 2)       = 144MHz
+ *               -> fPERIPH = (fCPU / 1) = 144MHz
+ *            -> fCCU = (fSYS / 2)       = 144MHz
+ *            -> fETH                    = 72MHz   (REVISIT)
+ *         -> fUSB                       = 48MHz   (REVISIT)
+ *         -> fEBU                       = 72MHz   (REVISIT)
  *
  * fUSBPLL Disabled, only enabled if SCU_CLK_USBCLKCR_USBSEL_USBPLL is selected
  *
- * fOFI = 24MHz => fWDT = 24MHz
+ *   fOFI                                = 24MHz
+ *      -> fWDT                          = 24MHz   (REVISIT)
  */
 
 #undef BOARD_FOFI_CALIBRATION              /* Enable factory calibration */
@@ -79,7 +84,7 @@
 /* Select the external crystal as the PLL clock source */
 
 #define BOARD_PLL_CLOCKSRC_XTAL   1        /* PLL Clock source == extnernal crystal */
-#undef BOARD_PLL_CLOCKSRC_OFI              /* PLL Clock source != internal fast oscillator */
+#undef  BOARD_PLL_CLOCKSRC_OFI             /* PLL Clock source != internal fast oscillator */
 
 /* PLL Configuration:
  *
@@ -95,15 +100,20 @@
 #define BOARD_PLL_K2DIV           1
 #define BOARD_PLL_FREQUENCY       288000000
 
-/* System frequency is divided down from PLL output */
+/* System frequency, fSYS, is divided down from PLL output */
 
 #define BOARD_SYSDIV              1        /* PLL Output divider to get fSYS */
 #define BOARD_SYS_FREQUENCY       288000000
 
-/* CPU frequency may be divided down from system frequency */
+/* CPU frequency, fCPU, may be divided down from system frequency */
 
 #define BOARD_CPUDIV_ENABLE       1        /* Enable PLL dive by 2 for fCPU */
 #define BOARD_CPU_FREQUENCY       144000000
+
+/* The peripheral clock, fPERIPH, derives from fCPU with no division */
+
+#define BOARD_PBDIV               1        /* No division */
+#define BOARD_PERIPH_FREQUENCY    144000000
 
 /* Standby clock source selection
  *
@@ -112,7 +122,7 @@
  */
 
 #define BOARD_STDBY_CLOCKSRC_OSI   1
-#undef BOARD_STDBY_CLOCKSRC_OSCULP
+#undef  BOARD_STDBY_CLOCKSRC_OSCULP
 #define BOARD_STDBY_FREQUENCY     32768
 
 /* USB PLL settings.
@@ -171,12 +181,9 @@
 #define LED_PANIC         3 /* The system has crashed   N/C  Blinking */
 #undef  LED_IDLE            /* MCU is is sleep mode      Not used     */
 
-/* Thus if LED0 is statically on, NuttX has successfully booted and is,
- * apparently, running normally.  If LED1 is flashing at approximately
+/* Thus if LED1 is statically on, NuttX has successfully booted and is,
+ * apparently, running normally.  If LED2 is flashing at approximately
  * 2Hz, then a fatal error has been detected and the system has halted.
- *
- * NOTE: That LED0 is not used after completion of booting and may
- * be used by other board-specific logic.
  */
 
 /* Button definitions ***************************************************************/

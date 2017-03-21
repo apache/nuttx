@@ -889,7 +889,7 @@
 
 #define SCU_PBCLKCR_PBDIV           (1 << 0)  /* Bit 0:  PB Clock Divider Enable */
 #  define SCU_PBCLKCR_PBDIV_FCPU    (0)       /*         0=fCPU */
-#  define SCU_PBCLKCR_PBDIV_DIV2    ((1 << 0) /*         1=fCPU/2 */
+#  define SCU_PBCLKCR_PBDIV_DIV2    (1 << 0)  /*         1=fCPU/2 */
 
 /* USB Clock Control */
 

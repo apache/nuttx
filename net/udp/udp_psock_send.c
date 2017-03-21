@@ -78,7 +78,7 @@ ssize_t psock_udp_send(FAR struct socket *psock, FAR const void *buf,
   socklen_t tolen;
 
   DEBUGASSERT(psock != NULL && psock->s_crefs > 0);
-  DEBUGASSERT(psock->s_type != SOCK_DGRAM);
+  DEBUGASSERT(psock->s_type == SOCK_DGRAM);
 
   conn = (FAR struct udp_conn_s *)psock->s_conn;
   DEBUGASSERT(conn);
