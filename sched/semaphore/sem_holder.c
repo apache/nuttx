@@ -156,7 +156,7 @@ static FAR struct semholder_s *sem_findholder(sem_t *sem,
   int i;
   pholder = NULL;
 
-  /* We have two hard-allocated holder structuse in sem_t */
+  /* We have two hard-allocated holder structures in sem_t */
 
   for (i = 0; i < 2; i++)
     {
@@ -338,7 +338,7 @@ static int sem_boostholderprio(FAR struct semholder_s *pholder,
   if (!sched_verifytcb(htcb))
     {
       serr("ERROR: TCB 0x%08x is a stale handle, counts lost\n", htcb);
-      DEBUGASSERT(!sched_verifytcb(htcb));
+      DEBUGASSERT(sched_verifytcb(htcb));
       sem_freeholder(sem, pholder);
     }
 
@@ -498,7 +498,7 @@ static int sem_restoreholderprio(FAR struct tcb_s *htcb,
   if (!sched_verifytcb(htcb))
     {
       serr("ERROR: TCB 0x%08x is a stale handle, counts lost\n", htcb);
-      DEBUGASSERT(!sched_verifytcb(htcb));
+      DEBUGASSERT(sched_verifytcb(htcb));
       pholder = sem_findholder(sem, htcb);
       if (pholder != NULL)
         {
@@ -905,13 +905,13 @@ void sem_destroyholder(FAR sem_t *sem)
   if (sem->hhead != NULL)
     {
       serr("ERROR: Semaphore destroyed with holders\n");
-      DEBUGASSERT(sem->hhead != NULL);
+      DEBUGASSERT(sem->hhead == NULL);
       (void)sem_foreachholder(sem, sem_recoverholders, NULL);
     }
 #else
-  if (sem->holder[0].htcb != NULL || sem->holder[0].htcb != NULL)
+  if (sem->holder[0].htcb != NULL || sem->holder[1].htcb != NULL)
     {
-      DEBUGASSERT(sem->holder[0].htcb != NULL || sem->holder[0].htcb != NULL);
+      DEBUGASSERT(sem->holder[0].htcb == NULL || sem->holder[1].htcb == NULL);
       serr("ERROR: Semaphore destroyed with holder\n");
     }
 
