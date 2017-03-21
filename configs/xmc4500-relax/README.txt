@@ -7,6 +7,15 @@ README for the XMC4500 Relax
 
   The current configurations support only the Lite version of the board.
 
+Status
+======
+
+  2017-03-21:   The XMC4500 Relax boots into NSH, provides the NSH prompt,
+    and the LEDs are working.  But there is a problem with the USIC baud
+    (probably); I get garbage on the serial console.  This probably means
+    that either the peripheral clocking is wrong or the baud configuration
+    is wrong.
+
 Serial Console
 ==============
 
@@ -20,6 +29,9 @@ Serial Console
     VDD5   -       Available on pins 39-40 of either connector X1 or X2
 
   A TTL to RS-232 convertor or a USB TTL-to-USB serial adaptor is required.
+  The notion of what is TX and what is RX depends on your point of view.
+  With the TTL to RS-232 converter, I connect pin 17 to the pin labeled
+  TX on the converter and pin 16 to the RX pin on the converter.
 
 LEDs
 ====
