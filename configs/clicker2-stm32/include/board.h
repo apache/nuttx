@@ -200,7 +200,12 @@
 #endif
 
 /* LED definitions ******************************************************************/
-/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
+/* The Mikroe Clicker2 STM32 has two user controllable LEDs:
+ *
+ *   LD1 - PE12, Active high output illuminates
+ *   LD2 - PE15, Active high output illuminates
+ *
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
  * way.  The following definitions are used to access individual LEDs.
  */
 
@@ -218,7 +223,7 @@
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 2 LEDs on board the
  * Clicker2 for STM32.  The following definitions describe how NuttX controls the LEDs:
  *
- *   SYMBOL                Meaning                 LED state
+ *   SYMBOL               Meaning                      LED state
  *                                                   LED1     LED2
  *   -------------------  -----------------------  -------- --------
  *   LED_STARTED          NuttX has been started     OFF      OFF
@@ -242,14 +247,18 @@
 #define LED_PANIC                4
 
 /* Button definitions ***************************************************************/
-/* The STM32F4 Discovery supports one button: */
+/* The Mikroe Clicker2 STM32 has two buttons available to software:
+ *
+ *   T2 - PE0, Low sensed when pressed
+ *   T3 - PA10, Low sensed when pressed
+ */
 
-#define BUTTON_LEFT       0
-#define BUTTON_RIGHT      1
+#define BUTTON_T2         0
+#define BUTTON_T3         1
 #define NUM_BUTTONS       2
 
-#define BUTTON_LEFT_BIT   (1 << BUTTON_LEFT)
-#define BUTTON_RIGHT_BIT  (1 << BUTTON_RIGHT)
+#define BUTTON_T2_BIT    (1 << BUTTON_T2)
+#define BUTTON_T3_BIT    (1 << BUTTON_T3)
 
 /* Alternate function pin selections ************************************************/
 /* CAN */
