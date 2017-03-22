@@ -119,7 +119,7 @@ static void board_led2_on(int led)
   xmc4_gpio_write(GPIO_LED2, ledon);
 }
 
-void board_led1_off(int led)
+static void board_led1_off(int led)
 {
   switch (led)
     {
@@ -136,7 +136,7 @@ void board_led1_off(int led)
   xmc4_gpio_write(GPIO_LED1, false);
 }
 
-void board_led2_off(int led)
+static void board_led2_off(int led)
 {
   switch (led)
     {
