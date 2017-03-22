@@ -132,8 +132,8 @@
  *
  *   T2 - PE0, Low sensed when pressed
  *   T3 - PA10, Low sensed when pressed
- * 
- * NOTE that all have EXTI interrupts configured 
+ *
+ * NOTE that all have EXTI interrupts configured
  */
 
 #define GPIO_BTN_T2       (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTE|GPIO_PIN0)
@@ -165,16 +165,68 @@
 #define GPIO_PWR_FAULT   (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTC|GPIO_PIN6)
 #define GPIO_PWR_BATSTAT (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTD|GPIO_PIN4)
 
+/* mikroBUS *************************************************************************/
+/* U[S]ARTs
+ *
+ *   USART2 - mikroBUS1
+ *   USART3 - mikroBUS2
+ */
+
 /* SPI Chip Selects
  *
- * mikroBUS1 Chipselect: SPI3 PE8
- * mikroBUS2 Chipselect: SPI2 PE11
+ *   mikroBUS1 Chipselect: PE8-MB1_CS  (SPI3)
+ *   mikroBUS2 Chipselect: PE11-MB2_CS (SPI2)
  */
 
 #define GPIO_MB1_CS      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                           GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN8)
 #define GPIO_MB2_CS      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                           GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN11)
+
+/* I2C
+ *
+ *   mikroBUS1 I2C: PA8-I2C3_SCL, PC9-I2C3_SDA  (I2C3)
+ *   mikroBUS2 I2C: PB10-I2C2_SCL, PB11-I2C2_SDA ()
+ */
+
+/* Analog
+ *
+ *   mikroBUS1 ADC: PA2-MB1_AN
+ *   mikroBUS1 ADC: PA3-MB2_AN
+ */
+
+/* PWM
+ *
+ *   mikroBUS1 ADC: PE9-MB1-PWM  (TIM1, channel 1)
+ *   mikroBUS1 ADC: PD12-MB2-PWM (TIM4, channel 1)
+ */
+
+/* Reset
+ *
+ *   mikroBUS1 Interrupt: PE7-MB1_RST
+ *   mikroBUS2 Interrupt: PE13-MB2_RST
+ *
+ * I assume that the interrupt lines are active low.  The initial state holds the
+ * device in reset.
+ */
+
+#define GPIO_MB1_RST     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                          GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN7)
+#define GPIO_MB1_RST     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                          GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN13)
+
+/* Interrupts
+ *
+ *   mikroBUS1 Interrupt: PE10-MB1_INT
+ *   mikroBUS2 Interrupt: PE14-MB2_INT
+ *
+ * I assume that the interrupt lines are active low.  No pull-ups are provided on
+ * board so pull-ups ar provided in the pin configurations.
+ */
+
+#define GPIO_MB1_INT     (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|GPIO_PORTE|GPIO_PIN10)
+#define GPIO_MB2_INT     (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|GPIO_PORTE|GPIO_PIN14)
+
 #ifndef __ASSEMBLY__
 
 /************************************************************************************

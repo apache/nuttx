@@ -261,7 +261,16 @@
 #define BUTTON_T3_BIT    (1 << BUTTON_T3)
 
 /* Alternate function pin selections ************************************************/
-/* UART3:  Assuming RS-232 connverted connected on mikroMB2 */
+/* U[S]ARTs
+ *
+ *   USART2 - mikroBUS1
+ *   USART3 - mikroBUS2
+ *
+ * Assuming RS-232 connverted connected on mikroMB1/12
+ */
+
+#define GPIO_USART2_RX   GPIO_USART2_RX_2   /* PD6 */
+#define GPIO_USART2_TX   GPIO_USART2_TX_2   /* PD5 */
 
 #define GPIO_USART3_RX   GPIO_USART3_RX_3  /* PD9 */
 #define GPIO_USART3_TX   GPIO_USART3_TX_3  /* PD8 /
@@ -279,6 +288,33 @@
 #define GPIO_SPI3_MISO   GPIO_SPI3_MISO_2  /* PB15 */
 #define GPIO_SPI3_MOSI   GPIO_SPI3_MOSI_2  /* PB14 */
 #define GPIO_SPI3_SCK    GPIO_SPI3_SCK_2   /* PB13 */
+
+/* I2C
+ *
+ *   I2C2 - mikroBUS2
+ *   I2C3 - mikroBUS1
+ */
+
+#define GPIO_I2C2_SCL    GPIO_I2C2_SCL_1   /* PB10 */
+#define GPIO_I2C2_SDA    GPIO_I2C2_SDA_1   /* PB11 */
+
+#define GPIO_I2C3_SCL    GPIO_I2C3_SCL_1   /* PA8 */
+#define GPIO_I2C3_SDA    GPIO_I2C3_SDA_1   /* PC9 */
+
+/* Analog
+ *
+ *   mikroBUS1 ADC: PA2-MB1_AN
+ *   mikroBUS1 ADC: PA3-MB2_AN
+ */
+
+/* PWM
+ *
+ *   mikroBUS1 ADC: PE9-MB1-PWM  (TIM1, channel 1)
+ *   mikroBUS1 ADC: PD12-MB2-PWM (TIM4, channel 1)
+ */
+
+#define GPIO_TIM1_CH1OUT GPIO_TIM1_CH1OUT_2 /* PE9 */
+#define GPIO_TIM4_CH1OUT GPIO_TIM4_CH1OUT_2 /* PD12 */
 
 /* DMA Channl/Stream Selections *****************************************************/
 /* Stream selections are arbitrary for now but might become important in the future
