@@ -2633,6 +2633,12 @@ config STM32_FLASH_PREFETCH
 	on F1 parts).  Some early revisions of F4 parts do not support FLASH pre-fetch
 	properly and enabling this option may interfere with ADC accuracy.
 
+config STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW
+    bool "Enable the workaround to fix flash data cache corruption when reading from one flash bank while writing on other flash bank"
+    default n
+    ---help---
+    See your STM32 errata to check if your STM32 is affected by this problem.
+
 choice
 	prompt "JTAG Configuration"
 	default STM32_JTAG_DISABLE
