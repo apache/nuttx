@@ -12,12 +12,15 @@ choice
 
 config ARCH_CHIP_XMC4500
 	bool "XMC4500"
+	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_XMC4700
 	bool "XMC4700"
+	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_XMC4800
-	bool "XMC4700"
+	bool "XMC4800"
+	select ARCH_HAVE_FPU
 
 endchoice
 
