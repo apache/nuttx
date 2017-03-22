@@ -56,6 +56,10 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 
+ifeq ($(CONFIG_IEEE802154_MRF24J40),y)
+CSRCS += stm32_mrf24j40.c
+endif
+
 ifeq ($(CONFIG_ADC),y)
 CSRCS +=  stm32_adc.c
 endif

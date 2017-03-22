@@ -52,12 +52,12 @@
  *
  * The MRF24J40 interrupt is an active low, *level* interrupt. From Datasheet:
  * "Note 1: The INTEDGE polarity defaults to:
- * 0 = Falling Edge. Ensure that the inter-
- * rupt polarity matches the interrupt pin
- * polarity of the host microcontroller.
- * Note 2: The INT pin will remain high or low,
- * depending on INTEDGE polarity setting,
- * until INTSTAT register is read."
+ *
+ *   0 = Falling Edge. Ensure that the interrupt polarity matches the
+ *       interrupt pin polarity of the host microcontroller.
+ *
+ *  Note 2: The INT pin will remain high or low, depending on INTEDGE
+ *   polarity setting, until INTSTAT register is read."
  */
 
 struct mrf24j40_lower_s

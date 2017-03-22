@@ -153,6 +153,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_CLICKER2_STM32_MB1_BEE) || defined(CONFIG_CLICKER2_STM32_MB2_BEE)
+  /* Configure MRF24J40 wireless */
+
+  ret = stm32_mrf24j40_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_mrf24j40_initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_BUTTONS
   /* Register the BUTTON driver */
 

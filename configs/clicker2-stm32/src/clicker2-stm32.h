@@ -286,5 +286,21 @@ int stm32_adc_setup(void);
 int stm32_can_setup(void);
 #endif
 
+/****************************************************************************
+ * Name: stm32_mrf24j40_initialize
+ *
+ * Description:
+ *   Initialize the MRF24J40 device.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_CLICKER2_STM32_MB1_BEE) || defined(CONFIG_CLICKER2_STM32_MB2_BEE)
+int stm32_mrf24j40_initialize(void)
+#endif
+
 #endif  /* __ASSEMBLY__ */
 #endif /* __CONFIGS_OLIMEX_STM32_P407_SRC_H */
