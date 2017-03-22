@@ -1041,7 +1041,7 @@ FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
   up_mdelay(2);
   (void)st7565_send_one_data(priv, ST7565_POWERCTRL_BR);
   up_mdelay(2);
-  (void)st7565_send_one_data(priv, ST7565_POWERCTRL_BRF);
+  (void)st7565_send_one_data(priv, ST7565_POWERCTRL_INT);
 
   (void)st7565_send_one_data(priv, ST7565_REG_RES_4_5);
   (void)st7565_send_one_data(priv, ST7565_SETEVMODE);

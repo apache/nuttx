@@ -563,7 +563,7 @@
 #  define USIC_SCTR_TRM_ACTIVE      (3 << USIC_SCTR_TRM_SHIFT) /* Active without regard to signal level */
 #define USIC_SCTR_FLE_SHIFT         (16)      /* Bits 16-21: Frame Length */
 #define USIC_SCTR_FLE_MASK          (0x3f << USIC_SCTR_FLE_SHIFT)
-#  define USIC_SCTR_FLE(n)          ((uint32_t)(n) << USIC_SCTR_FLE_SHIFT)
+#  define USIC_SCTR_FLE(n)          ((uint32_t)((n)-1) << USIC_SCTR_FLE_SHIFT)
 #define USIC_SCTR_WLE_SHIFT         (24)      /* Bits 24-27: Word Length */
 #define USIC_SCTR_WLE_MASK          (15 << USIC_SCTR_WLE_SHIFT)
 #  define USIC_SCTR_WLE(n)          ((uint32_t)((n)-1) << USIC_SCTR_WLE_SHIFT)
