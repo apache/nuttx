@@ -60,6 +60,15 @@ config ARCH_BOARD_C5471EVM
 		NuttX runs on the ARM core and is built with a GNU arm-nuttx-elf toolchain*.
 		This port is complete and verified.
 
+config ARCH_BOARD_CLICKER2_STM32
+	bool "Mikrow Clicker2 STM32"
+	depends on ARCH_CHIP_STM32F407VG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Mikroe Clicker2 STM32 board based on the STMicro STM32F407VGT6 MCU.
+
 config ARCH_BOARD_CLOUDCTRL
 	bool "Darcy's CloudController stm32f10x board"
 	depends on ARCH_CHIP_STM32F107VC
@@ -1423,6 +1432,7 @@ config ARCH_BOARD
 	default "avr32dev1"                if ARCH_BOARD_AVR32DEV1
 	default "bambino-200e"             if ARCH_BOARD_BAMBINO_200E
 	default "c5471evm"                 if ARCH_BOARD_C5471EVM
+	default "clicker2-stm32"           if ARCH_BOARD_CLICKER2_STM32
 	default "cloudctrl"                if ARCH_BOARD_CLOUDCTRL
 	default "demo9s12ne64"             if ARCH_BOARD_DEMOS92S12NEC64
 	default "dk-tm4c129x"              if ARCH_BOARD_DK_TM4C129X
@@ -1603,6 +1613,9 @@ source "configs/bambino-200e/Kconfig"
 endif
 if ARCH_BOARD_C5471EVM
 source "configs/c5471evm/Kconfig"
+endif
+if ARCH_BOARD_CLICKER2_STM32
+source "configs/clicker2-stm32/Kconfig"
 endif
 if ARCH_BOARD_CLOUDCTRL
 source "configs/cloudctrl/Kconfig"
