@@ -11,10 +11,8 @@ Status
 ======
 
   2017-03-21:   The XMC4500 Relax boots into NSH, provides the NSH prompt,
-    and the LEDs are working.  But there is a problem with the USIC baud
-    (probably); I get garbage on the serial console.  This probably means
-    that either the peripheral clocking is wrong or the baud configuration
-    is wrong.
+    and the LEDs are working.  But there is a problem with sserial input.
+    The most likely reason for this is there are no serial RX interripts.
 
 Serial Console
 ==============
