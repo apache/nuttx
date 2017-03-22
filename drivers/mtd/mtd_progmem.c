@@ -245,14 +245,18 @@ static ssize_t progmem_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 static ssize_t progmem_read(FAR struct mtd_dev_s *dev, off_t offset,
                             size_t nbytes, FAR uint8_t *buffer)
 {
+  FAR struct progmem_dev_s *priv = (FAR struct progmem_dev_s *)dev;
   FAR const uint8_t *src;
+  off_t startblock;
 
   /* Read the specified bytes into the provided user buffer and return
    * status (The positive, number of bytes actually read or a negated
    * errno)
    */
 
-  src = (FAR const uint8_t *)up_progmem_getaddress(offset);
+  startblock = offset >> priv->blkshift;
+  src = (FAR const uint8_t *)up_progmem_getaddress(startblock) +
+                                (offset & ((1 << priv->blkshift) - 1));
   memcpy(buffer, src, nbytes);
   return nbytes;
 }
@@ -271,13 +275,16 @@ static ssize_t progmem_write(FAR struct mtd_dev_s *dev, off_t offset,
                              size_t nbytes, FAR const uint8_t *buffer)
 {
   FAR struct progmem_dev_s *priv = (FAR struct progmem_dev_s *)dev;
+  off_t startblock;
   ssize_t result;
 
   /* Write the specified blocks from the provided user buffer and return status
    * (The positive, number of blocks actually written or a negated errno)
    */
 
-  result = up_progmem_write(up_progmem_getaddress(offset), buffer, nbytes);
+  startblock = offset >> priv->blkshift;
+  result = up_progmem_write(up_progmem_getaddress(startblock) +
+                  (offset & ((1 << priv->blkshift) - 1)), buffer, nbytes);
   return result < 0 ? result : nbytes;
 }
 #endif
