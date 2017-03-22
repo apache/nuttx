@@ -263,7 +263,7 @@ if SMP
 config SMP_NCPUS
 	int "Number of CPUs"
 	default 4
-	range 2 32
+	range 1 32
 	---help---
 		This value identifies the number of CPUs supported by the processor
 		that will be used for SMP.
