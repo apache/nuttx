@@ -328,10 +328,11 @@
 #  define FLASH_CR_SER              (1 << 1)                /* Bit 1: Sector Erase */
 #  define FLASH_CR_MER              (1 << 2)                /* Bit 2: Mass Erase sectors 0..11 */
 #  define FLASH_CR_SNB_SHIFT        (3)                     /* Bits 3-6: Sector number */
-#  define FLASH_CR_SNB_MASK         (15 << FLASH_CR_SNB_SHIFT)
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
+#    define FLASH_CR_SNB_MASK       (31 << FLASH_CR_SNB_SHIFT)
 #    define FLASH_CR_SNB(n)         (((n % 12) << FLASH_CR_SNB_SHIFT) | ((n / 12) << 7)) /* Sector n, n=0..23 */
 #else
+#    define FLASH_CR_SNB_MASK       (15 << FLASH_CR_SNB_SHIFT)
 #    define FLASH_CR_SNB(n)         ((n) << FLASH_CR_SNB_SHIFT) /* Sector n, n=0..11 */
 #endif
 #  define FLASH_CR_PSIZE_SHIFT      (8)                     /* Bits 8-9: Program size */

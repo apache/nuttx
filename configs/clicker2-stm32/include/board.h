@@ -1,8 +1,13 @@
 /************************************************************************************
- * configs/olimex-stm32-p407/include/board.h
+ * configs/clicker2-stm32/include/board.h
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Verge Inc. All rights reserved.
+ *   Author: Anthony Merlino <anthony@vergeaero.com>
+ *
+ *   Modified from:
+ *     configs/stm32f4discovery/include/board.h
+ *     Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *     Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +38,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_OLIMEX_STM32_P407_INCLUDE_BOARD_H
-#define __CONFIGS_OLIMEX_STM32_P407_INCLUDE_BOARD_H 1
+#ifndef __CONFIG_CLICKER2_STM32_INCLUDE_BOARD_H
+#define __CONFIG_CLICKER2_STM32_INCLUDE_BOARD_H
 
 /************************************************************************************
  * Included Files
@@ -43,7 +48,14 @@
 #include <nuttx/config.h>
 
 #ifndef __ASSEMBLY__
-# include <stdint.h>
+#  include <stdint.h>
+#  include <stdbool.h>
+#endif
+
+#ifdef __KERNEL__
+#  include "stm32_rcc.h"
+#  include "stm32_sdio.h"
+#  include "stm32.h"
 #endif
 
 /************************************************************************************
@@ -51,9 +63,31 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
+/* The Clicker 2 for STM32 board features a 25Hz crystal and 32.768kHz RTC crystal.
+ *
+ * This is the canonical configuration:
+ *   System Clock source           : PLL (HSE)
+ *   SYSCLK(Hz)                    : 168000000    Determined by PLL configuration
+ *   HCLK(Hz)                      : 168000000    (STM32_RCC_CFGR_HPRE)
+ *   AHB Prescaler                 : 1            (STM32_RCC_CFGR_HPRE)
+ *   APB1 Prescaler                : 4            (STM32_RCC_CFGR_PPRE1)
+ *   APB2 Prescaler                : 2            (STM32_RCC_CFGR_PPRE2)
+ *   HSE Frequency(Hz)             : 25000000     (STM32_BOARD_XTAL)
+ *   PLLM                          : 25           (STM32_PLLCFG_PLLM)
+ *   PLLN                          : 336          (STM32_PLLCFG_PLLN)
+ *   PLLP                          : 2            (STM32_PLLCFG_PLLP)
+ *   PLLQ                          : 7            (STM32_PLLCFG_PLLQ)
+ *   Main regulator output voltage : Scale1 mode  Needed for high speed SYSCLK
+ *   Flash Latency(WS)             : 5
+ *   Prefetch Buffer               : OFF
+ *   Instruction cache             : ON
+ *   Data cache                    : ON
+ *   Require 48MHz for USB OTG FS, : Enabled
+ *   SDIO and RNG clock
+ */
 
 /* HSI - 16 MHz RC factory-trimmed
- * LSI - 32 KHz RC (30-60KHz, uncalibrated)
+ * LSI - 32 KHz RC
  * HSE - On-board crystal frequency is 25MHz
  * LSE - 32.768 kHz
  */
@@ -127,12 +161,12 @@
  */
 
 #define BOARD_TIM1_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM2_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM3_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM4_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM5_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM6_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM7_FREQUENCY    STM32_HCLK_FREQUENCY
+#define BOARD_TIM2_FREQUENCY    (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM3_FREQUENCY    (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM4_FREQUENCY    (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM5_FREQUENCY    (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM6_FREQUENCY    (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM7_FREQUENCY    (STM32_HCLK_FREQUENCY / 2)
 #define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
 
 /* SDIO dividers.  Note that slower clocking is required when DMA is disabled
@@ -166,7 +200,12 @@
 #endif
 
 /* LED definitions ******************************************************************/
-/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
+/* The Mikroe Clicker2 STM32 has two user controllable LEDs:
+ *
+ *   LD1 - PE12, Active high output illuminates
+ *   LD2 - PE15, Active high output illuminates
+ *
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
  * way.  The following definitions are used to access individual LEDs.
  */
 
@@ -174,138 +213,110 @@
 
 #define BOARD_LED1        0
 #define BOARD_LED2        1
-#define BOARD_LED3        2
-#define BOARD_LED4        3
-#define BOARD_NLEDS       4
-
-#define BOARD_LED_GREEN1  BOARD_LED1
-#define BOARD_LED_YELLOW  BOARD_LED2
-#define BOARD_LED_RED     BOARD_LED3
-#define BOARD_LED_GREEN2  BOARD_LED4
+#define BOARD_NLEDS       2
 
 /* LED bits for use with board_userled_all() */
 
 #define BOARD_LED1_BIT    (1 << BOARD_LED1)
 #define BOARD_LED2_BIT    (1 << BOARD_LED2)
-#define BOARD_LED3_BIT    (1 << BOARD_LED3)
-#define BOARD_LED4_BIT    (1 << BOARD_LED4)
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on board the
- * Olimex STM32-P407.  The following definitions describe how NuttX controls the LEDs:
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 2 LEDs on board the
+ * Clicker2 for STM32.  The following definitions describe how NuttX controls the LEDs:
+ *
+ *   SYMBOL               Meaning                      LED state
+ *                                                   LED1     LED2
+ *   -------------------  -----------------------  -------- --------
+ *   LED_STARTED          NuttX has been started     OFF      OFF
+ *   LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF
+ *   LED_IRQSENABLED      Interrupts enabled         OFF      OFF
+ *   LED_STACKCREATED     Idle stack created         ON       OFF
+ *   LED_INIRQ            In an interrupt            N/C      ON
+ *   LED_SIGNAL           In a signal handler          No change
+ *   LED_ASSERTION        An assertion failed          No change
+ *   LED_PANIC            The system has crashed     OFF      Blinking
+ *   LED_IDLE             STM32 is is sleep mode       Not used
  */
 
-#define LED_STARTED       0  /* LED1 */
-#define LED_HEAPALLOCATE  1  /* LED2 */
-#define LED_IRQSENABLED   2  /* LED1 + LED2 */
-#define LED_STACKCREATED  3  /* LED3 */
-#define LED_INIRQ         4  /* LED1 + LED3 */
-#define LED_SIGNAL        5  /* LED2 + LED3 */
-#define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
-#define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
+#define LED_STARTED              0
+#define LED_HEAPALLOCATE         0
+#define LED_IRQSENABLED          0
+#define LED_STACKCREATED         1
+#define LED_INIRQ                2
+#define LED_SIGNAL               3
+#define LED_ASSERTION            3
+#define LED_PANIC                4
 
 /* Button definitions ***************************************************************/
-/* The Olimex STM32-P407 supports seven buttons: */
+/* The Mikroe Clicker2 STM32 has two buttons available to software:
+ *
+ *   T2 - PE0, Low sensed when pressed
+ *   T3 - PA10, Low sensed when pressed
+ */
 
-#define BUTTON_TAMPER     0
-#define BUTTON_WKUP       1
-#define BUTTON_RIGHT      2
-#define BUTTON_UP         3
-#define BUTTON_LEFT       4
-#define BUTTON_DOWN       5
-#define BUTTON_CENTER     6
+#define BUTTON_T2         0
+#define BUTTON_T3         1
+#define NUM_BUTTONS       2
 
-#define NUM_BUTTONS       7
-
-#define BUTTON_TAMPER_BIT (1 << BUTTON_TAMPER)
-#define BUTTON_WKUP_BIT   (1 << BUTTON_WKUP)
-#define BUTTON_RIGHT_BIT  (1 << BUTTON_RIGHT)
-#define BUTTON_UP_BIT     (1 << BUTTON_UP)
-#define BUTTON_LEFT_BIT   (1 << BUTTON_LEFT)
-#define BUTTON_DOWN_BIT   (1 << BUTTON_DOWN)
-#define BUTTON_CENTER_BIT (1 << BUTTON_CENTER)
+#define BUTTON_T2_BIT    (1 << BUTTON_T2)
+#define BUTTON_T3_BIT    (1 << BUTTON_T3)
 
 /* Alternate function pin selections ************************************************/
-
-/* USART3: */
-
-#define GPIO_USART3_RX    GPIO_USART3_RX_3  /* PD9  */
-#define GPIO_USART3_TX    GPIO_USART3_TX_3  /* PD8  */
-#define GPIO_USART3_CTS   GPIO_USART3_CTS_2 /* PD11 */
-#define GPIO_USART3_RTS   GPIO_USART3_RTS_2 /* PD12 */
-
-/* USART6: */
-
-#define GPIO_USART6_RX    GPIO_USART6_RX_2  /* PG9  */
-#define GPIO_USART6_TX    GPIO_USART6_TX_1  /* PC6  */
-
-/* CAN: */
-
-#define GPIO_CAN1_RX      GPIO_CAN1_RX_2    /* PB8 */
-#define GPIO_CAN1_TX      GPIO_CAN1_TX_2    /* PB9 */
-
-/* microSD Connector:
+/* U[S]ARTs
  *
- *   ----------------- ----------------- ------------------------
- *   SD/MMC CONNECTOR        BOARD        GPIO CONFIGURATION(s
- *   PIN SIGNAL             SIGNAL          (no remapping)
- *   --- ------------- ----------------- -------------------------
- *   1   DAT2/RES      SD_D2/USART3_TX/  PC10 GPIO_SDIO_D2
- *                     SPI3_SCK
- *   2   CD/DAT3/CS    SD_D3/USART3_RX/  PC11 GPIO_SDIO_D3
- *                     SPI3_MISO
- *   3   CMD/DI        SD_CMD            PD2  GPIO_SDIO_CMD
- *   4   VDD           N/A               N/A
- *   5   CLK/SCLK      SD_CLK/SPI3_MOSI  PC12 GPIO_SDIO_CK
- *   6   VSS           N/A               N/A
- *   7   DAT0/D0       SD_D0/DCMI_D2     PC8  GPIO_SDIO_D0
- *   8   DAT1/RES      SD_D1/DCMI_D3     PC9  GPIO_SDIO_D1
- *   --- ------------- ----------------- -------------------------
+ *   USART2 - mikroBUS1
+ *   USART3 - mikroBUS2
  *
- *   NOTES:
- *   1. DAT4, DAT4, DAT6, and DAT7 not connected.
- *   2. There are no alternative pin selections.
- *   3. There is no card detect (CD) GPIO input so we will not
- *      sense if there is a card in the SD slot or not.  This will
- *      make usage very awkward.
+ * Assuming RS-232 connverted connected on mikroMB1/12
  */
 
-/* Ethernet:
+#define GPIO_USART2_RX   GPIO_USART2_RX_2   /* PD6 */
+#define GPIO_USART2_TX   GPIO_USART2_TX_2   /* PD5 */
+
+#define GPIO_USART3_RX   GPIO_USART3_RX_3  /* PD9 */
+#define GPIO_USART3_TX   GPIO_USART3_TX_3  /* PD8 /
+
+/* SPI
  *
- * - PA2  is ETH_MDIO
- * - PC1  is ETH_MDC
- * - PB5  is ETH_PPS_OUT     - NC (not connected)
- * - PA0  is ETH_MII_CRS     - NC
- * - PA3  is ETH_MII_COL     - NC
- * - PB10 is ETH_MII_RX_ER   - NC
- * - PB0  is ETH_MII_RXD2    - NC
- * - PH7  is ETH_MII_RXD3    - NC
- * - PC3  is ETH_MII_TX_CLK  - NC
- * - PC2  is ETH_MII_TXD2    - NC
- * - PB8  is ETH_MII_TXD3    - NC
- * - PA1  is ETH_MII_RX_CLK/ETH_RMII_REF_CLK
- * - PA7  is ETH_MII_RX_DV/ETH_RMII_CRS_DV
- * - PC4  is ETH_MII_RXD0/ETH_RMII_RXD0
- * - PC5  is ETH_MII_RXD1/ETH_RMII_RXD1
- * - PB11 is ETH_MII_TX_EN/ETH_RMII_TX_EN
- * - PG13 is ETH_MII_TXD0/ETH_RMII_TXD0
- * - PG14 is ETH_MII_TXD1/ETH_RMII_TXD1
+ *   SPI2 - mikroBUS2
+ *   SPI3 - mikroBUS1
  */
 
-#define GPIO_ETH_PPS_OUT    GPIO_ETH_PPS_OUT_1
-#define GPIO_ETH_MII_CRS    GPIO_ETH_MII_CRS_1
-#define GPIO_ETH_MII_COL    GPIO_ETH_MII_COL_1
-#define GPIO_ETH_MII_RX_ER  GPIO_ETH_MII_RX_ER_1
-#define GPIO_ETH_MII_RXD2   GPIO_ETH_MII_RXD2_1
-#define GPIO_ETH_MII_RXD3   GPIO_ETH_MII_RXD3_1
-#define GPIO_ETH_MII_TXD3   GPIO_ETH_MII_TXD3_1
-#define GPIO_ETH_MII_TX_EN  GPIO_ETH_MII_TX_EN_2
-#define GPIO_ETH_MII_TXD0   GPIO_ETH_MII_TXD0_2
-#define GPIO_ETH_MII_TXD1   GPIO_ETH_MII_TXD1_2
-#define GPIO_ETH_RMII_TX_EN GPIO_ETH_RMII_TX_EN_1
-#define GPIO_ETH_RMII_TXD0  GPIO_ETH_RMII_TXD0_2
-#define GPIO_ETH_RMII_TXD1  GPIO_ETH_RMII_TXD1_2
+#define GPIO_SPI2_MISO   GPIO_SPI2_MISO_1  /* PC12 */
+#define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1  /* PC11 */
+#define GPIO_SPI2_SCK    GPIO_SPI2_SCK_2   /* PC10 */
 
-/* DMA Channel/Stream Selections ****************************************************/
+#define GPIO_SPI3_MISO   GPIO_SPI3_MISO_2  /* PB15 */
+#define GPIO_SPI3_MOSI   GPIO_SPI3_MOSI_2  /* PB14 */
+#define GPIO_SPI3_SCK    GPIO_SPI3_SCK_2   /* PB13 */
+
+/* I2C
+ *
+ *   I2C2 - mikroBUS2
+ *   I2C3 - mikroBUS1
+ */
+
+#define GPIO_I2C2_SCL    GPIO_I2C2_SCL_1   /* PB10 */
+#define GPIO_I2C2_SDA    GPIO_I2C2_SDA_1   /* PB11 */
+
+#define GPIO_I2C3_SCL    GPIO_I2C3_SCL_1   /* PA8 */
+#define GPIO_I2C3_SDA    GPIO_I2C3_SDA_1   /* PC9 */
+
+/* Analog
+ *
+ *   mikroBUS1 ADC: PA2-MB1_AN
+ *   mikroBUS1 ADC: PA3-MB2_AN
+ */
+
+/* PWM
+ *
+ *   mikroBUS1 ADC: PE9-MB1-PWM  (TIM1, channel 1)
+ *   mikroBUS1 ADC: PD12-MB2-PWM (TIM4, channel 1)
+ */
+
+#define GPIO_TIM1_CH1OUT GPIO_TIM1_CH1OUT_2 /* PE9 */
+#define GPIO_TIM4_CH1OUT GPIO_TIM4_CH1OUT_2 /* PD12 */
+
+/* DMA Channl/Stream Selections *****************************************************/
 /* Stream selections are arbitrary for now but might become important in the future
  * if we set aside more DMA channels/streams.
  *
@@ -314,7 +325,7 @@
  *   DMAMAP_SDIO_2 = Channel 4, Stream 6
  */
 
-#define DMAMAP_SDIO       DMAMAP_SDIO_1
+#define DMAMAP_SDIO      DMAMAP_SDIO_1
 
 /************************************************************************************
  * Public Data
@@ -353,4 +364,4 @@ void stm32_boardinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_OLIMEX_STM32_P407_INCLUDE_BOARD_H */
+#endif  /* __CONFIG_CLICKER2_STM32_INCLUDE_BOARD_H */
