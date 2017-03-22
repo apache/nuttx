@@ -83,14 +83,16 @@ uint8_t board_buttons(void)
 {
   uint8_t ret = 0;
 
-  /* Check that state of each key */
+  /* Check that state of each key.  A low value will be sensed when the
+   * button is pressed.
+   */
 
-  if (!stm32_gpioread(g_buttons[GPIO_BTN_T2]))
+  if (!stm32_gpioread(GPIO_BTN_T2))
     {
       ret |= BUTTON_T2_BIT;
     }
 
-  if (stm32_gpioread(g_buttons[GPIO_BTN_T2]))
+  if (!stm32_gpioread(GPIO_BTN_T3))
     {
       ret |= BUTTON_T3_BIT;
     }
@@ -126,7 +128,7 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
   uint32_t btncfg;
 
   btncfg = (id == BUTTON_T2) ? GPIO_BTN_T2 : GPIO_BTN_T3;
-  return stm32_gpiosetevent(g_buttons[id], true, true, true, irqhandler, arg);
+  return stm32_gpiosetevent(btncfg, true, true, true, irqhandler, arg);
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

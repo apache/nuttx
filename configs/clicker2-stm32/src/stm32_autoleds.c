@@ -80,8 +80,7 @@
  * Private Functions
  ****************************************************************************/
 
-static 
-static static void board_led1_on(int led)
+static void board_led1_on(int led)
 {
   bool ledon = false;
 
@@ -104,7 +103,7 @@ static static void board_led1_on(int led)
   stm32_gpiowrite(GPIO_LED1, ledon);
 }
 
-static static void board_led2_on(int led)
+static void board_led2_on(int led)
 {
   bool ledon = false;
 
@@ -173,12 +172,10 @@ static void board_led2_off(int led)
 
 void board_autoled_initialize(void)
 {
-   /* Configure LED1-4 GPIOs for output */
+   /* Configure LED1-2 GPIOs for output */
 
    stm32_configgpio(GPIO_LED1);
    stm32_configgpio(GPIO_LED2);
-   stm32_configgpio(GPIO_LED3);
-   stm32_configgpio(GPIO_LED4);
 }
 
 /****************************************************************************
