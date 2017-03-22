@@ -165,6 +165,16 @@
 #define GPIO_PWR_FAULT   (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTC|GPIO_PIN6)
 #define GPIO_PWR_BATSTAT (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTD|GPIO_PIN4)
 
+/* SPI Chip Selects
+ *
+ * mikroBUS1 Chipselect: SPI3 PE8
+ * mikroBUS2 Chipselect: SPI2 PE11
+ */
+
+#define GPIO_MB1_CS      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                          GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN8)
+#define GPIO_MB2_CS      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                          GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN11)
 #ifndef __ASSEMBLY__
 
 /************************************************************************************

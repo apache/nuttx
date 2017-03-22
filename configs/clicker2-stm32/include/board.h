@@ -261,107 +261,24 @@
 #define BUTTON_T3_BIT    (1 << BUTTON_T3)
 
 /* Alternate function pin selections ************************************************/
-/* CAN */
+/* UART3:  Assuming RS-232 connverted connected on mikroMB2 */
 
-#ifndef CONFIG_STM32_FSMC
-#  define GPIO_CAN1_RX GPIO_CAN1_RX_3
-#  define GPIO_CAN1_TX GPIO_CAN1_TX_3
-#endif
+#define GPIO_USART3_RX   GPIO_USART3_RX_3  /* PD9 */
+#define GPIO_USART3_TX   GPIO_USART3_TX_3  /* PD8 /
 
-#ifndef CONFIG_STM32_ETHMAC
-#  define GPIO_CAN2_RX GPIO_CAN2_RX_1
-#  define GPIO_CAN2_TX GPIO_CAN2_TX_1
-#endif
-
-/* UART2:
+/* SPI
  *
- * The board breaks out pins PD5 and PD6 for UART2 on Click board slot 1.
+ *   SPI2 - mikroBUS2
+ *   SPI3 - mikroBUS1
  */
 
-#ifndef CONFIG_STM32F4DISBB
-#  define GPIO_USART2_RX GPIO_USART2_RX_2
-#  define GPIO_USART2_TX GPIO_USART2_TX_2
-#endif
+#define GPIO_SPI2_MISO   GPIO_SPI2_MISO_1  /* PC12 */
+#define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1  /* PC11 */
+#define GPIO_SPI2_SCK    GPIO_SPI2_SCK_2   /* PC10 */
 
-/* UART3: (Used in pseudoterm configuration) */
-
-#define GPIO_USART3_TX GPIO_USART3_TX_1
-#define GPIO_USART3_RX GPIO_USART3_RX_1
-
-/* UART6:
- *
- * The STM32F4DIS-BB base board provides RS-232 drivers and a DB9 connector
- * for USART6.  This is the preferred serial console for use with the STM32F4DIS-BB.
- */
-
-#define GPIO_USART6_RX GPIO_USART6_RX_1
-#define GPIO_USART6_TX GPIO_USART6_TX_1
-
-/* PWM
- *
- * The STM32F4 Discovery has no real on-board PWM devices, but the board can be
- * configured to output a pulse train using TIM4 CH2 on PD13.
- */
-
-#define GPIO_TIM4_CH2OUT GPIO_TIM4_CH2OUT_2
-
-/* RGB LED
- *
- * R = TIM1 CH1 on PE9 | G = TIM2 CH2 on PA1 | B = TIM3 CH3 on PB0
- */
-
-#define GPIO_TIM1_CH1OUT GPIO_TIM1_CH1OUT_2
-#define GPIO_TIM2_CH2OUT GPIO_TIM2_CH2OUT_1
-#define GPIO_TIM3_CH3OUT GPIO_TIM3_CH3OUT_1
-
-/* SPI - There is a MEMS device on SPI1 using these pins: */
-
-#define GPIO_SPI1_MISO GPIO_SPI1_MISO_1
-#define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1
-#define GPIO_SPI1_SCK  GPIO_SPI1_SCK_1
-
-/* SPI2 - Test MAX31855 on SPI2 PB10 = SCK, PB14 = MISO */
-
-#define GPIO_SPI2_MISO   GPIO_SPI2_MISO_1
-#define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1
-#define GPIO_SPI2_SCK    GPIO_SPI2_SCK_1
-
-/* I2C config to use with Nunchuk PB7 (SDA) and PB8 (SCL) */
-
-#define GPIO_I2C1_SCL  GPIO_I2C1_SCL_2
-#define GPIO_I2C1_SDA  GPIO_I2C1_SDA_1
-
-/* Timer Inputs/Outputs (see the README.txt file for options) */
-
-#define GPIO_TIM2_CH1IN  GPIO_TIM2_CH1IN_2
-#define GPIO_TIM2_CH2IN  GPIO_TIM2_CH2IN_1
-
-#define GPIO_TIM8_CH1IN  GPIO_TIM8_CH1IN_1
-#define GPIO_TIM8_CH2IN  GPIO_TIM8_CH2IN_1
-
-/* Ethernet *************************************************************************/
-
-#if defined(CONFIG_STM32F4DISBB) && defined(CONFIG_STM32_ETHMAC)
-  /* RMII interface to the LAN8720 PHY */
-
-#  ifndef CONFIG_STM32_RMII
-#    error CONFIG_STM32_RMII must be defined
-#  endif
-
-  /* Clocking is provided by an external 25Mhz XTAL */
-
-#  ifndef CONFIG_STM32_RMII_EXTCLK
-#    error CONFIG_STM32_RMII_EXTCLK must be defined
-#  endif
-
-  /* Pin disambiguation */
-
-#  define GPIO_ETH_RMII_TX_EN GPIO_ETH_RMII_TX_EN_1
-#  define GPIO_ETH_RMII_TXD0  GPIO_ETH_RMII_TXD0_1
-#  define GPIO_ETH_RMII_TXD1  GPIO_ETH_RMII_TXD1_1
-#  define GPIO_ETH_PPS_OUT    GPIO_ETH_PPS_OUT_1
-
-#endif
+#define GPIO_SPI3_MISO   GPIO_SPI3_MISO_2  /* PB15 */
+#define GPIO_SPI3_MOSI   GPIO_SPI3_MOSI_2  /* PB14 */
+#define GPIO_SPI3_SCK    GPIO_SPI3_SCK_2   /* PB13 */
 
 /* DMA Channl/Stream Selections *****************************************************/
 /* Stream selections are arbitrary for now but might become important in the future
@@ -372,7 +289,7 @@
  *   DMAMAP_SDIO_2 = Channel 4, Stream 6
  */
 
-#define DMAMAP_SDIO DMAMAP_SDIO_1
+#define DMAMAP_SDIO      DMAMAP_SDIO_1
 
 /************************************************************************************
  * Public Data
