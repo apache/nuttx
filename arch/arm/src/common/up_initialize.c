@@ -100,7 +100,7 @@ static void up_calibratedelay(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
 static inline void up_color_intstack(void)
 {
   uint32_t *ptr = (uint32_t *)&g_intstackalloc;

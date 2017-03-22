@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/olimex-stm32-p107/src/olimex-stm32-p407.h
+ * configs/olimex-stm32-p407/src/olimex-stm32-p407.h
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -136,8 +136,13 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
           else
 #endif
             {
-              /* No, then we would deadlock... return an error (default behavior
-               * is like PTHREAD_MUTEX_ERRORCHECK)
+              /* No, then we would deadlock... return an error (default
+               * behavior is like PTHREAD_MUTEX_ERRORCHECK)
+               *
+               * NOTE:  This is non-compliant behavior for the case of a
+               * NORMAL mutex.  In that case, it the deadlock condition should
+               * not be detected and the thread should be permitted to
+               * deadlock.
                */
 
               serr("ERROR: Returning EDEADLK\n");
@@ -169,4 +174,3 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
   sinfo("Returning %d\n", ret);
   return ret;
 }
-

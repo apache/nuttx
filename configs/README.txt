@@ -201,6 +201,9 @@ configs/c5471evm
   NuttX runs on the ARM core and is built with a GNU arm-nuttx-elf toolchain*.
   This port is complete and verified.
 
+config/clicker2-stm32
+  Mikroe Clicker2 STM32 board based on the STMicro STM32F407VGT6 MCU.
+
 configs/cloudctrl
   Darcy's CloudController board.  This is a small network relay development
   board. Based on the Shenzhou IV development board design.  It is based on
@@ -762,6 +765,9 @@ configs/viewtool-stm32f107
   NuttX configurations for the ViewTool STM32F103/F107 V1.2 board.  This
   board may be fitted with either: (1) STM32F107VCT6 or (2) STM32F103VCT6.
   See http://www.viewtool.com/ for further information.
+
+config/xmc4500-relax
+  Infineon XMC4000 Relax Lite v1
 
 configs/xtrs
   TRS80 Model 3.  This port uses a vintage computer based on the Z80.

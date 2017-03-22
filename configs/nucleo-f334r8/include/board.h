@@ -243,8 +243,8 @@
 /* DMA channels *************************************************************/
 /* ADC */
 
-#define ADC1_DMA_CHAN DMACHAN_ADC1
-#define ADC2_DMA_CHAN DMACHAN_ADC2_
+#define ADC1_DMA_CHAN DMACHAN_ADC1     /* DMA1_CH1 */
+#define ADC2_DMA_CHAN DMACHAN_ADC2_1   /* DMA1_CH2 */
 
 /****************************************************************************
  * Public Data

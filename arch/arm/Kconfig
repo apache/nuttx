@@ -151,12 +151,20 @@ config ARCH_CHIP_LPC43XX
 	---help---
 		NPX LPC43XX architectures (ARM Cortex-M4).
 
+config ARCH_CHIP_MOXART
+	bool "MoxART"
+	select ARCH_ARM7TDMI
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		MoxART family
+
 config ARCH_CHIP_NUC1XX
 	bool "Nuvoton NUC100/120"
 	select ARCH_CORTEXM0
 	select ARCH_HAVE_CMNVECTOR
 	---help---
-		NPX LPC43XX architectures (ARM Cortex-M4).
+		Nuvoton NUC100/120 architectures (ARM Cortex-M0).
 
 config ARCH_CHIP_SAMA5
 	bool "Atmel SAMA5"
@@ -270,13 +278,18 @@ config ARCH_CHIP_TMS570
 	---help---
 		TI TMS570 family
 
-config ARCH_CHIP_MOXART
-	bool "MoxART"
-	select ARCH_ARM7TDMI
-	select ARCH_HAVE_RESET
-	select ARCH_HAVE_SERIAL_TERMIOS
+config ARCH_CHIP_XMC4
+	bool "Infineon XMC4xxx"
+	select ARCH_HAVE_CMNVECTOR
+	select ARCH_CORTEXM4
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_RAMFUNCS
+	select ARCH_HAVE_I2CRESET
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_CMNVECTOR
+	select ARMV7M_HAVE_STACKCHECK
 	---help---
-		MoxART family
+		Infineon XMC4xxx(ARM Cortex-M4) architectures
 
 endchoice
 
@@ -421,6 +434,7 @@ config ARCH_CHIP
 	default "lpc2378"	if ARCH_CHIP_LPC2378
 	default "lpc31xx"	if ARCH_CHIP_LPC31XX
 	default "lpc43xx"	if ARCH_CHIP_LPC43XX
+	default "moxart"	if ARCH_CHIP_MOXART
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
 	default "sama5"		if ARCH_CHIP_SAMA5
 	default "samdl"		if ARCH_CHIP_SAMD || ARCH_CHIP_SAML
@@ -431,7 +445,7 @@ config ARCH_CHIP
 	default "stm32l4"	if ARCH_CHIP_STM32L4
 	default "str71x"	if ARCH_CHIP_STR71X
 	default "tms570"	if ARCH_CHIP_TMS570
-	default "moxart"	if ARCH_CHIP_MOXART
+	default "xmc4"		if ARCH_CHIP_XMC4
 
 config ARM_TOOLCHAIN_IAR
 	bool
@@ -662,6 +676,9 @@ endif
 if ARCH_CHIP_LPC43XX
 source arch/arm/src/lpc43xx/Kconfig
 endif
+if ARCH_CHIP_MOXART
+source arch/arm/src/moxart/Kconfig
+endif
 if ARCH_CHIP_NUC1XX
 source arch/arm/src/nuc1xx/Kconfig
 endif
@@ -692,8 +709,8 @@ endif
 if ARCH_CHIP_TMS570
 source arch/arm/src/tms570/Kconfig
 endif
-if ARCH_CHIP_MOXART
-source arch/arm/src/moxart/Kconfig
+if ARCH_CHIP_XMC4
+source arch/arm/src/xmc4/Kconfig
 endif
 
 endif # ARCH_ARM
