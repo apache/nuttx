@@ -47,7 +47,9 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
+
 #include <errno.h>
+#include <stdbool.h>
 
 #include "stm32_flash.h"
 #include "stm32_rcc.h"
@@ -84,10 +86,30 @@
  * Private Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
-void stm32_flash_unlock(void)
+static sem_t g_sem;
+/*
+ * After all SMT32 boards starts calling stm32_flash_initialize() this can
+ * be removed.
+ */
+static bool g_initialized = false;
+
+static void sem_lock(void)
+{
+  if (g_initialized)
+    {
+      sem_wait(&g_sem);
+    }
+}
+
+static void sem_unlock(void)
+{
+  if (g_initialized)
+    {
+      sem_post(&g_sem);
+    }
+}
+
+static void flash_unlock(void)
 {
   while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
     {
@@ -103,11 +125,36 @@ void stm32_flash_unlock(void)
     }
 }
 
-void stm32_flash_lock(void)
+static void flash_lock(void)
 {
   modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_LOCK);
 }
 
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
+void stm32_flash_initialize(void)
+{
+  g_initialized = true;
+  /*
+   * Initialize the semaphore that manages exclusive access flash registers
+   */
+  sem_init(&g_sem, 0, 1);
+}
+
+void stm32_flash_unlock(void)
+{
+  sem_lock();
+  flash_unlock();
+  sem_unlock();
+}
+
+void stm32_flash_lock(void)
+{
+  sem_lock();
+  flash_lock();
+  sem_unlock();
+}
 
 #if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
 
@@ -231,6 +278,8 @@ ssize_t up_progmem_erasepage(size_t page)
       return -EFAULT;
     }
 
+  sem_lock();
+
 #if !defined(CONFIG_STM32_STM32F40XX)
   if (!(getreg32(STM32_RCC_CR) & RCC_CR_HSION))
     {
@@ -240,7 +289,7 @@ ssize_t up_progmem_erasepage(size_t page)
 
   /* Get flash ready and begin erasing single page */
 
-  stm32_flash_unlock();
+  flash_unlock();
 
   modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_PAGE_ERASE);
 
@@ -259,6 +308,7 @@ ssize_t up_progmem_erasepage(size_t page)
   while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY) up_waste();
 
   modifyreg32(STM32_FLASH_CR, FLASH_CR_PAGE_ERASE, 0);
+  sem_unlock();
 
   /* Verify */
   if (up_progmem_ispageerased(page) == 0)
@@ -320,16 +370,19 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
       return -EFAULT;
     }
 
+  sem_lock();
+
 #if !defined(CONFIG_STM32_STM32F40XX)
   if (!(getreg32(STM32_RCC_CR) & RCC_CR_HSION))
     {
+      sem_unlock();
       return -EPERM;
     }
 #endif
 
   /* Get flash ready and begin flashing */
 
-  stm32_flash_unlock();
+  flash_unlock();
 
   modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_PG);
 
@@ -351,17 +404,20 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
       if (getreg32(STM32_FLASH_SR) & FLASH_SR_WRITE_PROTECTION_ERROR)
         {
           modifyreg32(STM32_FLASH_CR, FLASH_CR_PG, 0);
+          sem_unlock();
           return -EROFS;
         }
 
       if (getreg16(addr) != *hword)
         {
           modifyreg32(STM32_FLASH_CR, FLASH_CR_PG, 0);
+          sem_unlock();
           return -EIO;
         }
     }
 
   modifyreg32(STM32_FLASH_CR, FLASH_CR_PG, 0);
+  sem_unlock();
   return written;
 }
 
