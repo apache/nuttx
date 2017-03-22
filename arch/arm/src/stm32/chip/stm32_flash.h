@@ -392,7 +392,6 @@
  * Public Functions
  ************************************************************************************/
 
-void stm32_flash_initialize(void);
 void stm32_flash_lock(void);
 void stm32_flash_unlock(void);
 

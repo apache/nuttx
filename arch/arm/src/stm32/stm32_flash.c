@@ -48,8 +48,10 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
-#include <errno.h>
 #include <stdbool.h>
+#include <semaphore.h>
+#include <assert.h>
+#include <errno.h>
 
 #include "stm32_flash.h"
 #include "stm32_rcc.h"
@@ -83,30 +85,26 @@
 #endif
 
 /************************************************************************************
+ * Private Data
+ ************************************************************************************/
+
+static sem_t g_sem = SEM_INITIALIZER(1);
+
+/************************************************************************************
  * Private Functions
  ************************************************************************************/
 
-static sem_t g_sem;
-/*
- * After all SMT32 boards starts calling stm32_flash_initialize() this can
- * be removed.
- */
-static bool g_initialized = false;
-
 static void sem_lock(void)
 {
-  if (g_initialized)
+  while (sem_wait(&g_sem) < 0)
     {
-      sem_wait(&g_sem);
+      DEBUGASSERT(errno == EINTR);
     }
 }
 
-static void sem_unlock(void)
+static inline void sem_unlock(void)
 {
-  if (g_initialized)
-    {
-      sem_post(&g_sem);
-    }
+  sem_post(&g_sem);
 }
 
 static void flash_unlock(void)
@@ -137,24 +135,18 @@ static void data_cache_disable(void)
 
 static void data_cache_enable(void)
 {
-  /* reset data cache */
+  /* Reset data cache */
+
   modifyreg32(STM32_FLASH_ACR, 0, FLASH_ACR_DCRST);
 
-  /* enable data cache */
+  /* Enable data cache */
+
   modifyreg32(STM32_FLASH_ACR, 0, FLASH_ACR_DCEN);
 }
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
-void stm32_flash_initialize(void)
-{
-  g_initialized = true;
-  /*
-   * Initialize the semaphore that manages exclusive access flash registers
-   */
-  sem_init(&g_sem, 0, 1);
-}
 
 void stm32_flash_unlock(void)
 {
@@ -171,7 +163,6 @@ void stm32_flash_lock(void)
 }
 
 #if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
-
 size_t up_progmem_pagesize(size_t page)
 {
   return STM32_FLASH_PAGESIZE;

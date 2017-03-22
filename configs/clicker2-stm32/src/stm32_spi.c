@@ -63,7 +63,7 @@
  * Name: stm32_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the stm32f4discovery board.
+ *   Called to configure SPI chip select GPIO pins for the Mikroe Clicker2 STM32 board.
  *
  ************************************************************************************/
 
