@@ -65,7 +65,12 @@
 #  error Wireless support requires CONFIG_DRIVERS_WIRELESS
 #endif
 
-#if !defined(CONFIG_CLICKER2_STM32_MB1_BEE) && !defined(CONFIG_CLICKER2_STM32_MB2_BEE)
+#ifndef CONFIG_IEEE802154_DEV
+#  error IEEE802.15.4 radio character device required (CONFIG_IEEE802154_DEV)
+#endif
+
+#if !defined(CONFIG_CLICKER2_STM32_MB1_BEE) && \
+    !defined(CONFIG_CLICKER2_STM32_MB2_BEE)
 #  error Only the Mikroe BEE board is supported
 #endif
 
@@ -80,6 +85,8 @@
 #    error Mikroe BEE on mikroBUS1 requires CONFIG_STM32_SPI2
 #  endif
 #endif
+
+#define RADIO_DEVNAME "/dev/mrf24j40"
 
 /****************************************************************************
  * Private Types
@@ -239,8 +246,19 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
       return -ENODEV;
     }
 
-  /* Now.. do what with the MRF24J40 instance? */
-#warning Missing logic
+#ifdef CONFIG_IEEE802154_DEV
+  /* Register a character driver to access the IEEE 802.15.4 radio from
+   *   user-space
+   */
+
+  ret = radio802154dev_register(radio, RADIO_DEVNAME);
+  if (ret < 0)
+    {
+      wlerr("ERROR: Failed to register the radio device %s: %d\n",
+            RADIO_DEVNAME, ret);
+      return ret;
+    }
+#endif
 
   return OK;
 }

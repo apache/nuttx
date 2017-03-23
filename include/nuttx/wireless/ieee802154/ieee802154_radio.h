@@ -170,6 +170,28 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: radio802154dev_register
+ *
+ * Description:
+ *   Register a character driver to access the IEEE 802.15.4 radio from
+ *   user-space
+ *
+ * Input Parameters:
+ *   radio - Pointer to the radio struct to be registerd.
+ *   devname - The name of the IEEE 802.15.4 radio to be registered.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned on success.  Otherwise a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IEEE802154_DEV
+int radio802154dev_register(FAR struct ieee802154_radio_s *radio,
+                            FAR char *devname);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

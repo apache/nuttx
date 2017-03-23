@@ -91,8 +91,9 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct ieee802154_radio_s *at86rf23x_init(FAR struct spi_dev_s *spi,
-                                              FAR const struct at86rf23x_lower_s *lower);
+FAR struct ieee802154_radio_s *
+  at86rf23x_init(FAR struct spi_dev_s *spi,
+                 FAR const struct at86rf23x_lower_s *lower);
 
 #undef EXTERN
 #ifdef __cplusplus
