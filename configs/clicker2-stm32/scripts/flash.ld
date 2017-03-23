@@ -42,8 +42,7 @@
  *
  * When booting from FLASH, FLASH memory is aliased to address 0x0000:0000
  * where the code expects to begin execution by jumping to the entry point in
- * the 0x0800:0000 address
- * range.
+ * the 0x0800:0000 address range.
  */
 
 MEMORY

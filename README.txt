@@ -1453,6 +1453,8 @@ nuttx/
  |   |   `- README.txt
  |   |- cc3200-launchpad/
  |   |   `- README.txt
+ |   |- clicker2-stm32
+ |   |   `- README.txt
  |   |- cloudctrl
  |   |   `- README.txt
  |   |- demo0s12ne64/

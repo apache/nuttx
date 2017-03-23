@@ -1,0 +1,160 @@
+README
+======
+
+  This is the README file for the port of NuttX to the Mikroe Clicker2 STM32
+  board based on the STMicro STM32F407VGT6 MCU.
+
+  Reference: https://shop.mikroe.com/development-boards/starter/clicker-2/stm32f4
+
+Serial Console
+==============
+
+  The are no RS-232 drivers on-board.  An RS-232 Click board is available:
+  https://shop.mikroe.com/click/interface/rs232 or you can cannot an off-
+  board TTL-to-RS-232 converter as follows:
+
+    USART2:  mikroBUS1 PD6/RX and PD5/TX
+    USART3:  mikroBUS2 PD9/RX and PD8TX
+
+  GND, 3.3V, and 5V.  Are also available
+
+  By default, USART3 on mikroBUS2 is used as the serial console in each
+  configuration unless stated otherwise in the description of the
+  configuration.
+
+LEDs
+====
+
+  The Mikroe Clicker2 STM32 has two user controllable LEDs:
+
+     LD1/PE12, Active high output illuminates
+     LD2/PE15, Active high output illuminates
+
+  If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
+  way.  If CONFIG_ARCH_LEDs is defined, then NuttX will control the 2 LEDs on
+  board the Clicker2 for STM32.  The following definitions describe how NuttX
+  controls the LEDs:
+
+    SYMBOL               Meaning                      LED state
+                                                    LD1      LD2
+    -------------------  -----------------------  -------- --------
+    LED_STARTED          NuttX has been started     OFF      OFF
+    LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF
+    LED_IRQSENABLED      Interrupts enabled         OFF      OFF
+    LED_STACKCREATED     Idle stack created         ON       OFF
+    LED_INIRQ            In an interrupt            N/C      ON
+    LED_SIGNAL           In a signal handler          No change
+    LED_ASSERTION        An assertion failed          No change
+    LED_PANIC            The system has crashed     OFF      Blinking
+    LED_IDLE             STM32 is is sleep mode       Not used
+
+  Thus is LD1 is illuminated, the Clicker2 has completed boot-up.  IF LD2
+  is glowly softly, then interrupts are being taken; the level of illumination
+  depends amount of time processing interupts.  If LD1 is off and LD2 is
+  blinking at about 2Hz, then the system has crashed.
+
+Buttons
+=======
+
+  The Mikroe Clicker2 STM32 has two buttons available to software:
+
+    T2/E0, Low sensed when pressed
+    T3/PA10, Low sensed when pressed
+
+onfigurations
+==============
+
+  Information Common to All Configurations
+  ----------------------------------------
+  Each Clicker2 configuration is maintained in a sub-directory and can be
+  selected as follow:
+
+    cd tools
+    ./configure.sh clicker2-stm32/<subdir>
+    cd -
+    . ./setenv.sh
+
+  Before sourcing the setenv.sh file above, you should examine it and
+  perform edits as necessary so that TOOLCHAIN_BIN is the correct path
+  to the directory than holds your toolchain binaries.
+
+  And then build NuttX by simply typing the following.  At the conclusion of
+  the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
+
+    make oldconfig
+    make
+
+  The <subdir> that is provided above as an argument to the tools/configure.sh
+  must be is one of the following.
+
+  NOTES:
+
+    1. These configurations use the mconf-based configuration tool.  To
+      change any of these configurations using that tool, you should:
+
+      a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+         see additional README.txt files in the NuttX tools repository.
+
+      b. Execute 'make menuconfig' in nuttx/ in order to start the
+         reconfiguration process.
+
+    2. Unless stated otherwise, all configurations generate console
+       output on USART3, channel 0) as described above under "Serial
+       Console".  The relevant configuration settings are listed below:
+
+         CONFIG_STM32_USART3=y
+         CONFIG_STM32_USART3_SERIALDRIVER=y
+         CONFIG_STM32_USART=y
+
+         CONFIG_USART3_SERIALDRIVER=y
+         CONFIG_USART3_SERIAL_CONSOLE=y
+
+         CONFIG_USART3_RXBUFSIZE=256
+         CONFIG_USART3_TXBUFSIZE=256
+         CONFIG_USART3_BAUD=115200
+         CONFIG_USART3_BITS=8
+         CONFIG_USART3_PARITY=0
+         CONFIG_USART3_2STOP=0
+
+
+  3. All of these configurations are set up to build under Linux using the
+     "GNU Tools for ARM Embedded Processors" that is maintained by ARM
+     (unless stated otherwise in the description of the configuration).
+
+       https://launchpad.net/gcc-arm-embedded
+
+     That toolchain selection can easily be reconfigured using
+     'make menuconfig'.  Here are the relevant current settings:
+
+     Build Setup:
+       CONFIG_HOST_LINUX  =y               : Linux environment
+
+     System Type -> Toolchain:
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y : GNU ARM EABI toolchain
+
+  Configuration sub-directories
+  -----------------------------
+
+  nsh:
+
+    Configures the NuttShell (nsh) located at examples/nsh.  This
+    configuration is focused on low level, command-line driver testing.  It
+    has no network.
+
+    NOTES:
+
+    1. Support for NSH built-in applications is provided:
+
+       Binary Formats:
+         CONFIG_BUILTIN=y           : Enable support for built-in programs
+
+       Application Configuration:
+         CONFIG_NSH_BUILTIN_APPS=y  : Enable starting apps from NSH command line
+
+       No built applications are enabled in the base configuration, however.
+
+    2. C++ support for applications is enabled:
+
+      CONFIG_HAVE_CXX=y
+      CONFIG_HAVE_CXXINITIALIZE=y
+      CONFIG_EXAMPLES_NSH_CXXINITIALIZE=y
