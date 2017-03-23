@@ -1204,6 +1204,9 @@ static inline void stm32_i2c_enablefsmc(uint32_t ahbenr)
 
 static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 {
+#ifndef CONFIG_I2C_POLLED
+  uint32_t regval;
+#endif
   uint32_t status;
 
   i2cinfo("I2C ISR called\n");
