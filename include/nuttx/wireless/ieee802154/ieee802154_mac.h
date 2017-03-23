@@ -378,17 +378,26 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Instanciate a 802.15.4 MAC from a 802.15.4 radio device.
- * To create a 802.15.4 MAC, you need to pass:
- *  - an instance of a radio driver in radiodev
- *  - a pointer to a structure that contains MAC callback routines to
- *     handle confirmations and indications. NULL entries indicate no callback.
- * In return you get a mac structure that has pointers to MAC operations and
- *  responses.
- * This API does not create any device accessible to userspace. If you want to
- * call these APIs from userspace, you have to wrap your mac in a character
- * device via mac802154_device.c .
- */
+/****************************************************************************
+ * Name: mac802154_register
+ *
+ * Description:
+ *   Create a 802.15.4 MAC device from a 802.15.4 compatible radio device.
+ *   To create a 802.15.4 MAC, you need to pass:
+ *
+ *     - an instance of a radio driver in radiodev
+ *     - a pointer to a structure that contains MAC callback routines to
+ *       handle confirmations and indications. NULL entries indicate no
+ *       callback.
+ *
+ *   In return you get a mac structure that has pointers to MAC operations
+ *   and responses.
+ *
+ *   This API does not create any device accessible to userspace. If you
+ *   want to call these APIs from userspace, you have to wrap your mac in a
+ *   character device via mac802154_device.c.
+ *
+ ****************************************************************************/
 
 FAR struct ieee802154_mac_s *
   mac802154_register(FAR struct ieee802154_radio_s *radiodev,

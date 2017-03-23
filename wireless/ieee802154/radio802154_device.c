@@ -487,7 +487,8 @@ static int radio802154dev_ioctl(FAR struct file *filep, int cmd,
  *
  ****************************************************************************/
 
-int radio802154dev_register(FAR struct ieee802154_radio_s *radio, FAR char *devname)
+int radio802154dev_register(FAR struct ieee802154_radio_s *radio,
+                            FAR char *devname)
 {
   FAR struct radio802154_devwrapper_s *dev;
 
