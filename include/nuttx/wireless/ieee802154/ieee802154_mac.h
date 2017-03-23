@@ -161,29 +161,6 @@ enum
  * Public Types
  ****************************************************************************/
 
-/* IEEE 802.15.4 Device address
- * The addresses in ieee802154 have several formats:
- * No address                : [none]
- * Short address + PAN id    : PPPP/SSSS
- * Extended address + PAN id : PPPP/LLLLLLLLLLLLLLLL
- */
-
-struct ieee802154_addr_s
-{
-  uint8_t ia_len;            /* structure length, 0/2/8 */
-  uint16_t ia_panid;         /* PAN identifier, can be IEEE802154_PAN_UNSPEC */
-  union
-  {
-    uint16_t _ia_saddr;      /* short address */
-    uint8_t  _ia_eaddr[8];   /* extended address */
-  } ia_addr;
-
-#define ia_saddr ia_addr._ia_saddr
-#define ia_eaddr ia_addr._ia_eaddr
-};
-
-#define IEEE802154_ADDRSTRLEN 22 /* (2*2+1+8*2, PPPP/EEEEEEEEEEEEEEEE) */
-
 /* Operations */
 
 struct ieee802154_mac_s; /* Forward reference */
