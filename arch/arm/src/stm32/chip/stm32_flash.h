@@ -324,29 +324,30 @@
 #    define FLASH_CR_OBL_LAUNCH     (1 << 13) /* Bit 13: Force option byte loading */
 #  endif
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-#  define FLASH_CR_PG               (1 << 0)                /* Bit 0: Programming */
-#  define FLASH_CR_SER              (1 << 1)                /* Bit 1: Sector Erase */
-#  define FLASH_CR_MER              (1 << 2)                /* Bit 2: Mass Erase sectors 0..11 */
-#  define FLASH_CR_SNB_SHIFT        (3)                     /* Bits 3-6: Sector number */
-#  define FLASH_CR_SNB_MASK         (15 << FLASH_CR_SNB_SHIFT)
+#  define FLASH_CR_PG               (1 << 0)               /* Bit 0: Programming */
+#  define FLASH_CR_SER              (1 << 1)               /* Bit 1: Sector Erase */
+#  define FLASH_CR_MER              (1 << 2)               /* Bit 2: Mass Erase sectors 0..11 */
+#  define FLASH_CR_SNB_SHIFT        (3)                    /* Bits 3-6: Sector number */
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
+#    define FLASH_CR_SNB_MASK       (31 << FLASH_CR_SNB_SHIFT)
 #    define FLASH_CR_SNB(n)         (((n % 12) << FLASH_CR_SNB_SHIFT) | ((n / 12) << 7)) /* Sector n, n=0..23 */
 #else
+#    define FLASH_CR_SNB_MASK       (15 << FLASH_CR_SNB_SHIFT)
 #    define FLASH_CR_SNB(n)         ((n) << FLASH_CR_SNB_SHIFT) /* Sector n, n=0..11 */
 #endif
-#  define FLASH_CR_PSIZE_SHIFT      (8)                     /* Bits 8-9: Program size */
+#  define FLASH_CR_PSIZE_SHIFT      (8)                    /* Bits 8-9: Program size */
 #  define FLASH_CR_PSIZE_MASK       (3 << FLASH_CR_PSIZE_SHIFT)
 #    define FLASH_CR_PSIZE_X8       (0 << FLASH_CR_PSIZE_SHIFT) /* 00 program x8 */
 #    define FLASH_CR_PSIZE_X16      (1 << FLASH_CR_PSIZE_SHIFT) /* 01 program x16 */
 #    define FLASH_CR_PSIZE_X32      (2 << FLASH_CR_PSIZE_SHIFT) /* 10 program x32 */
 #    define FLASH_CR_PSIZE_X64      (3 << FLASH_CR_PSIZE_SHIFT) /* 11 program x64 */
-#  define FLASH_CR_STRT             (1 << 16)               /* Bit 16: Start Erase */
-#  define FLASH_CR_EOPIE            (1 << 24)               /* Bit 24: End of operation interrupt enable */
-#  define FLASH_CR_ERRIE            (1 << 25)               /* Bit 25: Error interrupt enable */
-#  define FLASH_CR_LOCK             (1 << 31)               /* Bit 31: Lock */
+#  define FLASH_CR_STRT             (1 << 16)              /* Bit 16: Start Erase */
+#  define FLASH_CR_EOPIE            (1 << 24)              /* Bit 24: End of operation interrupt enable */
+#  define FLASH_CR_ERRIE            (1 << 25)              /* Bit 25: Error interrupt enable */
+#  define FLASH_CR_LOCK             (1 << 31)              /* Bit 31: Lock */
 #endif
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
-#  define FLASH_CR_MER1             (1 << 15)               /* Bit 15: Mass Erase sectors 12..23 */
+#  define FLASH_CR_MER1             (1 << 15)              /* Bit 15: Mass Erase sectors 12..23 */
 #endif
 
 /* Flash Option Control Register (OPTCR) */
@@ -374,7 +375,7 @@
 /* Flash Option Control Register (OPTCR1) */
 
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
-#  define FLASH_OPTCR1_NWRP_SHIFT    (16)                   /* Bits 16-27: Not write protect (high bank) */
+#  define FLASH_OPTCR1_NWRP_SHIFT    (16)                  /* Bits 16-27: Not write protect (high bank) */
 #  define FLASH_OPTCR1_NWRP_MASK     (0xfff << FLASH_OPTCR_NWRP_SHIFT)
 
 #  define FLASH_OPTCR1_BFB2_SHIFT    (4)                   /* Bits 4: Dual-bank Boot option byte */
@@ -383,7 +384,7 @@
 #endif
 
 #if defined(CONFIG_STM32_STM32F446)
-#  define FLASH_OPTCR1_NWRP_SHIFT    (16)                   /* Bits 16-23: Not write protect (high bank) */
+#  define FLASH_OPTCR1_NWRP_SHIFT    (16)                  /* Bits 16-23: Not write protect (high bank) */
 #  define FLASH_OPTCR1_NWRP_MASK     (0xff << FLASH_OPTCR_NWRP_SHIFT)
 #endif
 
