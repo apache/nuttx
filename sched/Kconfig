@@ -263,10 +263,16 @@ if SMP
 config SMP_NCPUS
 	int "Number of CPUs"
 	default 4
-	range 1 32
+	range 1 32 if DEBUG_FEATURES
+	range 2 32 if !DEBUG_FEATURES
 	---help---
 		This value identifies the number of CPUs supported by the processor
 		that will be used for SMP.
+
+		If CONFIG_DEBUG_FEATURES is enbled, then the value one is permitted
+		for CONFIG_SMP_NCPUS.  This is not normally a valid setting for an
+		SMP configuration.  However, running the SMP logic in a single CPU
+		configuration is useful during certain testing.
 
 config SMP_IDLETHREAD_STACKSIZE
 	int "CPU IDLE stack size"

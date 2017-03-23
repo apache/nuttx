@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/xmc4500-relax/include/xmc4_autoleds.c
+ * configs/clicker2-stm32/src/stm32_autoleds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,29 +32,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-
-/* The XMC4500 Relax Lite v1 board has two LEDs:
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 2 LEDs on
+ * board the Clicker2 for STM32.  The following definitions describe how
+ * NuttX controls the LEDs:
  *
- * LED1 P1.1 High output illuminates
- * LED2 P1.0 High output illuminates
+ *   SYMBOL               Meaning                      LED state
+ *                                                   LED1     LED2
+ *   -------------------  -----------------------  -------- --------
+ *   LED_STARTED          NuttX has been started     OFF      OFF
+ *   LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF
+ *   LED_IRQSENABLED      Interrupts enabled         OFF      OFF
+ *   LED_STACKCREATED     Idle stack created         ON       OFF
+ *   LED_INIRQ            In an interrupt            N/C      ON
+ *   LED_SIGNAL           In a signal handler          No change
+ *   LED_ASSERTION        An assertion failed          No change
+ *   LED_PANIC            The system has crashed     OFF      Blinking
+ *   LED_IDLE             STM32 is is sleep mode       Not used
  *
- * These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
- * defined.  In that case, the usage by the board port is defined in
- * include/board.h and src/sam_autoleds.c. The LEDs are used to encode
- * OS-related events as follows:
- *
- *   SYMBOL              Meaning                  LED state
- *                                               LED1   LED2
- *   ------------------ ------------------------ ------ ------
- *   LED_STARTED        NuttX has been started   OFF    OFF
- *   LED_HEAPALLOCATE   Heap has been allocated  OFF    OFF
- *   LED_IRQSENABLED    Interrupts enabled       OFF    OFF
- *   LED_STACKCREATED   Idle stack created       ON     OFF
- *   LED_INIRQ          In an interrupt           No change
- *   LED_SIGNAL         In a signal handler       No change
- *   LED_ASSERTION      An assertion failed       No change
- *   LED_PANIC          The system has crashed   N/C  Blinking
- *   LED_IDLE           MCU is is sleep mode      Not used
+ *   VALUE
+ *   --------------------------------------------  -------- --------
+ *   0                                               OFF      OFF
+ *   1                                               ON       OFF
+ *   2                                               N/C      ON
+ *   3                                               N/C      N/C
+ *   4                                               OFF      ON
  */
 
 /****************************************************************************
@@ -63,11 +64,15 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
+
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "xmc4_gpio.h"
-#include "xmc4500-relax.h"
+#include "stm32.h"
+#include "clicker2-stm32.h"
 
 #ifdef CONFIG_ARCH_LEDS
 
@@ -82,6 +87,7 @@ static void board_led1_on(int led)
   switch (led)
     {
       case 0:           /* LED1=OFF */
+      case 4:           /* LED1=OFF */
         break;
 
       case 1:           /* LED1=ON */
@@ -94,7 +100,7 @@ static void board_led1_on(int led)
         return;
     }
 
-  xmc4_gpio_write(GPIO_LED1, ledon);
+  stm32_gpiowrite(GPIO_LED1, ledon);
 }
 
 static void board_led2_on(int led)
@@ -107,16 +113,17 @@ static void board_led2_on(int led)
       case 1:           /* LED2=OFF */
         break;
 
-      case 3:           /* LED2=ON */
+      case 2:           /* LED2=ON */
+      case 4:           /* LED2=ON */
         ledon  = true;
         break;
 
-      case 2:           /* LED2=N/C */
+      case 3:           /* LED2=N/C */
       default:
         return;
     }
 
-  xmc4_gpio_write(GPIO_LED2, ledon);
+  stm32_gpiowrite(GPIO_LED2, ledon);
 }
 
 static void board_led1_off(int led)
@@ -125,6 +132,7 @@ static void board_led1_off(int led)
     {
       case 0:           /* LED1=OFF */
       case 1:           /* LED1=OFF */
+      case 4:           /* LED1=OFF */
         break;
 
       case 2:           /* LED1=N/C */
@@ -133,7 +141,7 @@ static void board_led1_off(int led)
         return;
     }
 
-  xmc4_gpio_write(GPIO_LED1, false);
+  stm32_gpiowrite(GPIO_LED1, false);
 }
 
 static void board_led2_off(int led)
@@ -142,15 +150,16 @@ static void board_led2_off(int led)
     {
       case 0:           /* LED2=OFF */
       case 1:           /* LED2=OFF */
-      case 3:           /* LED2=OFF */
+      case 2:           /* LED2=OFF */
+      case 4:           /* LED2=OFF */
         break;
 
-      case 2:           /* LED2=N/C */
+      case 3:           /* LED2=N/C */
       default:
         return;
     }
 
-   xmc4_gpio_write(GPIO_LED2, false);
+   stm32_gpiowrite(GPIO_LED2, false);
 }
 
 /****************************************************************************
@@ -165,8 +174,8 @@ void board_autoled_initialize(void)
 {
    /* Configure LED1-2 GPIOs for output */
 
-  (void)xmc4_gpio_config(GPIO_LED1);
-  (void)xmc4_gpio_config(GPIO_LED2);
+   stm32_configgpio(GPIO_LED1);
+   stm32_configgpio(GPIO_LED2);
 }
 
 /****************************************************************************

@@ -201,6 +201,9 @@ configs/c5471evm
   NuttX runs on the ARM core and is built with a GNU arm-nuttx-elf toolchain*.
   This port is complete and verified.
 
+config/clicker2-stm32
+  Mikroe Clicker2 STM32 board based on the STMicro STM32F407VGT6 MCU.
+
 configs/cloudctrl
   Darcy's CloudController board.  This is a small network relay development
   board. Based on the Shenzhou IV development board design.  It is based on

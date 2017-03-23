@@ -100,12 +100,21 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
 
       if (mutex->pid != (int)getpid())
         {
-          /* No... return an error (default behavior is like PTHREAD_MUTEX_ERRORCHECK) */
+          /* No... return an EPERM error.
+           *
+           * Per POSIX:  "EPERM should be returned if the mutex type is
+           * PTHREAD_MUTEX_ERRORCHECK or PTHREAD_MUTEX_RECURSIVE, or the
+           * mutex is a robust mutex, and the current thread does not own
+           * the mutex."
+           *
+           * For the case of the non-robust PTHREAD_MUTEX_NORMAL mutex,
+           * the behavior is undefined.  Here we treat that type as though
+           * it were PTHREAD_MUTEX_ERRORCHECK type and just return an error.
+           */
 
           serr("ERROR: Holder=%d returning EPERM\n", mutex->pid);
           ret = EPERM;
         }
-
 
       /* Yes, the caller owns the semaphore.. Is this a recursive mutex? */
 
@@ -116,6 +125,7 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
            * the mutex lock, just decrement the count of locks held, and return
            * success.
            */
+
           mutex->nlocks--;
         }
 #endif
@@ -134,6 +144,7 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
 #endif
           ret = pthread_givesemaphore((FAR sem_t *)&mutex->sem);
         }
+
       sched_unlock();
     }
 

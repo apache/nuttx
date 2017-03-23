@@ -56,7 +56,7 @@
 #  define XMC4_NUSIC          3          /* Three USIC modules: USCI0-2 */
 #  define XMC4_SCU_GATING     1          /* Has clock gating registers */
 #  define XMC4_NECAT          0          /* No EtherCAT support */
-#elif defined(CONFIG_ARCH_CHIP_XMC4700)
+#elif defined(CONFIG_ARCH_CHIP_XMC4800)
 #  define XMC4_NUSIC          3          /* Three USIC modules: USCI0-2 */
 #  define XMC4_SCU_GATING     1          /* Has clock gating registers */
 #  define XMC4_NECAT          1          /* One EtherCAT module */
