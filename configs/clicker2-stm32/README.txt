@@ -73,18 +73,25 @@ Buttons
 Using JTAG
 ==========
 
-  The Clicker2 comes with the mikroBootloader installed.  But it also offers
-  a 2x5 JTAG connector.  You may use Dupont jumpers to connect this port to
-  JTAG as described here:
+  The Clicker2 comes with the mikroBootloader installed.  That bootloader
+  has not been used and is possibly incompatible with the Clicker2-STM32
+  linker script at configs/clicker2-stm32/scripts/flash.ld.  Often code must
+  be built to execute at an offset in to FLASH when a bootloader is used.
+  Certainly that is the case for the ST-Micro DFU bootloader but I am not
+  aware of the requirements for use with the mikroBootloader.
+
+  JTAG has been used in the development of this board support.  The
+  Clicker2-STM32 board offers a 2x5 JTAG connector.  You may use Dupont
+  jumpers to connect this port to JTAG as described here:
 
     https://www.mikroe.com/how-to-use-st-link-v2-with-clicker-2-for-stm32-a-detailed-walkthrough/
     http://www.playembedded.org/blog/en/2016/02/06/mikroe-clicker-2-for-stm32-and-stlink-v2/
 
   NOTE that the FLASH is locked.  You may need to follow the instructions at
-  the second link to unlock it (although I think you can do this with the ST-Micro
-  ST-Link Utility as well).
+  the second link to unlock it (although I think you may be able to do this
+  with the ST-Micro ST-Link Utility as well).
 
-  You can avoid the mess of jumpers using the mikroProg to ST-Link v2 adapte
+  You can avoid the mess of jumpers using the mikroProg to ST-Link v2 adapter
   along with a 2x5, 10-wire ribbon cable connector:
 
     https://shop.mikroe.com/add-on-boards/adapter/mikroprog-st-link-v2-adapter
