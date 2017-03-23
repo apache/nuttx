@@ -6,6 +6,15 @@ README
 
   Reference: https://shop.mikroe.com/development-boards/starter/clicker-2/stm32f4
 
+Contents
+========
+
+  o Serial Console
+  o LEDs
+  o Buttons
+  o Using JTAG
+  o Configurations
+
 Serial Console
 ==============
 
@@ -61,7 +70,30 @@ Buttons
     T2/E0, Low sensed when pressed
     T3/PA10, Low sensed when pressed
 
-onfigurations
+Using JTAG
+==========
+
+  The Clicker2 comes with the mikroBootloader installed.  But it also offers
+  a 2x5 JTAG connector.  You may use Dupont jumpers to connect this port to
+  JTAG as described here:
+
+    https://www.mikroe.com/how-to-use-st-link-v2-with-clicker-2-for-stm32-a-detailed-walkthrough/
+    http://www.playembedded.org/blog/en/2016/02/06/mikroe-clicker-2-for-stm32-and-stlink-v2/
+
+  NOTE that the FLASH is locked.  You may need to follow the instructions at
+  the second link to unlock it (although I think you can do this with the ST-Micro
+  ST-Link Utility as well).
+
+  You can avoid the mess of jumpers using the mikroProg to ST-Link v2 adapte
+  along with a 2x5, 10-wire ribbon cable connector:
+
+    https://shop.mikroe.com/add-on-boards/adapter/mikroprog-st-link-v2-adapter
+
+  OpenOCD can be used with the ST-Link to provide a debug environment.  I suspect,
+  however, that adapter can be used with other JTAG debuggers such as J-Link,
+  but that remains to be verified.
+
+Configurations
 ==============
 
   Information Common to All Configurations
