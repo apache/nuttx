@@ -1204,6 +1204,9 @@ static inline void stm32_i2c_enablefsmc(uint32_t ahbenr)
 
 static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 {
+#ifndef CONFIG_I2C_POLLED
+  uint32_t regval;
+#endif
   uint32_t status;
 
   i2cinfo("I2C ISR called\n");
@@ -1867,7 +1870,6 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 #else
       /* Clear all interrupts */
 
-      uint32_t regval;
       regval  = stm32_i2c_getreg(priv, STM32_I2C_CR2_OFFSET);
       regval &= ~I2C_CR2_ALLINTS;
       stm32_i2c_putreg(priv, STM32_I2C_CR2_OFFSET, regval);
