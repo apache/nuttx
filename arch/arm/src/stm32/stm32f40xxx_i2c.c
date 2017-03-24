@@ -1261,6 +1261,15 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
   priv->status = status;
 
+  /* Any new message should begin with "Start" condition
+   * Situation priv->msgc == 0 came from DMA RX handler and should be managed
+   */
+
+  if (priv->dcnt == -1 && priv->msgc != 0 && (status & I2C_SR1_SB) == 0)
+    {
+      return OK;
+    }
+
   /* Check if this is a new transmission so to set up the
    * trace table accordingly.
    */
@@ -1516,9 +1525,16 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
           status |= (stm32_i2c_getreg(priv, STM32_I2C_SR2_OFFSET) << 16);
 
-          /* Send Stop */
+          /* Send Stop/Restart */
 
-          stm32_i2c_sendstop(priv);
+          if (priv->msgc > 0)
+            {
+              stm32_i2c_sendstart(priv);
+            }
+          else
+            {
+              stm32_i2c_sendstop(priv);
+            }
 
           i2cinfo("Address ACKed beginning data reception\n");
           i2cinfo("short read N=1: programming stop bit\n");
@@ -1828,7 +1844,17 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
         {
           i2cinfo("short read N=2: DR and SR full setting stop bit and reading twice\n");
 
-          stm32_i2c_sendstop(priv);
+          /* Send Stop/Restart */
+
+          if (priv->msgc > 0)
+            {
+              stm32_i2c_sendstart(priv);
+            }
+          else
+            {
+              stm32_i2c_sendstop(priv);
+            }
+
           *priv->ptr++ = stm32_i2c_getreg(priv, STM32_I2C_DR_OFFSET);
           priv->dcnt--;
           *priv->ptr++ = stm32_i2c_getreg(priv, STM32_I2C_DR_OFFSET);
@@ -1905,9 +1931,16 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
           stm32_i2c_traceevent(priv, I2CEVENT_READ_3, priv->dcnt);
 
-          /* Program stop */
+          /* Program Stop/Restart */
 
-          stm32_i2c_sendstop(priv);
+          if (priv->msgc > 0)
+            {
+              stm32_i2c_sendstart(priv);
+            }
+          else
+            {
+              stm32_i2c_sendstop(priv);
+            }
 
           /* read dcnt = 2 */
 
@@ -2061,7 +2094,14 @@ static void stm32_i2c_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *arg
    * interrupt routine if enabled.
    */
 
-  stm32_i2c_sendstop(priv);
+  if (priv->msgc > 0)
+    {
+      stm32_i2c_sendstart(priv);
+    }
+  else
+    {
+      stm32_i2c_sendstop(priv);
+    }
 
   /* Let the I2C periph know to stop DMA transfers, also is used by ISR to check
    * if DMA is done.
@@ -2115,10 +2155,6 @@ static void stm32_i2c_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg
   regval |= (I2C_CR2_ITERREN | I2C_CR2_ITEVFEN);
   stm32_i2c_putreg(priv, STM32_I2C_CR2_OFFSET, regval);
 #endif
-
-  /* let the ISR routine take care of shutting down or switching to next msg */
-
-  stm32_i2c_isr(priv);
 }
 #endif /* ifdef CONFIG_STM32_I2C_DMA */
 
