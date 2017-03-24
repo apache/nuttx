@@ -57,6 +57,7 @@
 
 #include <nuttx/wireless/ieee802154/mrf24j40.h>
 #include <nuttx/wireless/ieee802154/ieee802154_radio.h>
+#include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 #include "mrf24j40.h"
 
@@ -91,44 +92,6 @@
 #define MRF24J40_PA_AUTO  1
 #define MRF24J40_PA_ED    2
 #define MRF24J40_PA_SLEEP 3
-
-/* IEEE 802.15.4 frame specifics */
-
-/* Security Enabled */
-
-#define IEEE802154_SEC_OFF       0x00
-#define IEEE802154_SEC_ON        0x08
-
-/* Flags */
-
-#define IEEE802154_PEND          0x10
-#define IEEE802154_ACK_REQ       0x20
-#define IEEE802154_INTRA         0x40
-
-/* Dest Addressing modes */
-
-#define IEEE802154_DADDR_NONE    0x00
-#define IEEE802154_DADDR_SHORT   0x08
-#define IEEE802154_DADDR_EXT     0x0A
-
-/* Src Addressing modes */
-
-#define IEEE802154_SADDR_NONE    0x00
-#define IEEE802154_SADDR_SHORT   0x80
-#define IEEE802154_SADDR_EXT     0xA0
-
-/* Frame control field masks, 2 bytes 
- * Seee IEEE 802.15.4/2003 7.2.1.1 page 112
- */
-
-#define IEEE802154_FC1_FTYPE   0x03 /* Frame type, bits 0-2 */
-#define IEEE802154_FC1_SEC     0x08 /* Security Enabled, bit 3 */
-#define IEEE802154_FC1_PEND    0x10 /* Frame pending, bit 4 */
-#define IEEE802154_FC1_ACKREQ  0x20 /* Acknowledge request, bit 5 */
-#define IEEE802154_FC1_INTRA   0x40 /* Intra PAN, bit 6 */
-#define IEEE802154_FC2_DADDR   0x0C /* Dest   addressing mode, bits 10-11 */
-#define IEEE802154_FC2_VERSION 0x30 /* Source addressing mode, bits 12-13 */
-#define IEEE802154_FC2_SADDR   0xC0 /* Source addressing mode, bits 14-15 */
 
 /****************************************************************************
  * Private Types
@@ -1110,7 +1073,7 @@ static int mrf24j40_transmit(FAR struct ieee802154_radio_s *ieee,
   uint8_t  reg;
   int      ret;
   int      hlen = 3; /* Include frame control and seq number */
-  uint8_t  fc1, fc2;
+  uint16_t frame_ctrl;
 
   mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
 
@@ -1124,40 +1087,31 @@ static int mrf24j40_transmit(FAR struct ieee802154_radio_s *ieee,
 
   /* Analyze frame control to compute header length */
 
-  fc1 = packet->data[0];
-  fc2 = packet->data[1];
+  frame_ctrl = packet->data[0];
+  frame_ctrl |= packet->data[1] << 8;
 
-  //wlinfo("fc1 %02X fc2 %02X\n", fc1,fc2);
-
-  if ((fc2 & IEEE802154_FC2_DADDR) == IEEE802154_DADDR_SHORT)
+  if ((frame_ctrl & IEEE802154_FRAMECTRL_DADDR)== IEEE802154_ADDRMODE_SHORT)
     {
       hlen += 2 + 2; /* Destination PAN + shortaddr */
     }
-  else if ((fc2 & IEEE802154_FC2_DADDR) == IEEE802154_DADDR_EXT)
+  else if ((frame_ctrl & IEEE802154_FRAMECTRL_DADDR) == IEEE802154_ADDRMODE_EXTENDED)
     {
       hlen += 2 + 8; /* Destination PAN + extaddr */
     }
 
-  if ((fc2 & IEEE802154_FC2_SADDR) == IEEE802154_SADDR_SHORT)
+  if (!(frame_ctrl & IEEE802154_FRAMECTRL_INTRA))
     {
-      if ((fc1 & IEEE802154_FC1_INTRA) != IEEE802154_INTRA)
-        {
-          hlen += 2; /* No PAN compression, source PAN is different from dest PAN */
-        }
+      hlen += 2; /* No PAN compression, source PAN is different from dest PAN */
+    }
 
+  if ((frame_ctrl & IEEE802154_FRAMECTRL_SADDR)== IEEE802154_ADDRMODE_SHORT)
+    {
       hlen += 2; /* Source saddr */
     }
-  else if ((fc2 & IEEE802154_FC2_SADDR) == IEEE802154_SADDR_EXT)
+  else if ((frame_ctrl & IEEE802154_FRAMECTRL_SADDR) == IEEE802154_ADDRMODE_EXTENDED)
     {
-      if ((fc1 & IEEE802154_FC1_INTRA) != IEEE802154_INTRA)
-        {
-          hlen += 2; /* No PAN compression, source PAN is different from dest PAN */
-        }
-
       hlen += 8; /* Ext saddr */
     }
-
-  //wlinfo("hlen %d\n",hlen);
 
   /* Header len, 0, TODO for security modes */
 
@@ -1180,7 +1134,7 @@ static int mrf24j40_transmit(FAR struct ieee802154_radio_s *ieee,
    */
 
   reg = MRF24J40_TXNCON_TXNTRIG;
-  if (fc1 & IEEE802154_FC1_ACKREQ)
+  if (frame_ctrl & IEEE802154_FRAMECTRL_ACKREQ)
     {
       reg |= MRF24J40_TXNCON_TXNACKREQ;
     }
