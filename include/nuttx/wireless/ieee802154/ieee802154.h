@@ -69,7 +69,8 @@ struct ieee802154_packet_s
  * Extended address + PAN id : PPPP/LLLLLLLLLLLLLLLL
  */
 
-enum ieee802154_addr_mode_e {
+enum ieee802154_addr_mode_e
+{
   IEEE802154_ADDRMODE_NONE = 0,
   IEEE802154_ADDRMODE_SHORT = 2,
   IEEE802154_ADDRMODE_EXTENDED

@@ -55,16 +55,16 @@
 /* Configuration ************************************************************/
 /* None at the moment */
 
-
 /* IEEE 802.15.4 MAC Character Driver IOCTL Commands ************************/
 
 /* The IEEE 802.15.4 standard specifies a MLME Service Access Point (SAP) 
  * including a series of primitives that are used as an interface between
  * the MLME and the next highest layer.  There are 4 types of primitives:
- * - Request
- * - Indication
- * - Response
- * - Confirm
+ *
+ *   - Request
+ *   - Indication
+ *   - Response
+ *   - Confirm
  * 
  * Of these, Request and Response primitives are sent from the next highest layer
  * to the MLME.  Indication and Confirm primitives are used to notify the next
@@ -294,9 +294,11 @@ struct ieee802154_pan_desc_s
 
 struct ieee802154_pend_addr_s
 {
-  union {
+  union
+  {
     uint8_t pa_spec;
-    struct {
+    struct
+    {
       uint8_t num_short_addr  : 3;  /* Number of short addresses pending */
       uint8_t reserved_3      : 1;  /* Reserved bit */
       uint8_t num_ext_addr    : 3;  /* Number of extended addresses pending */       
