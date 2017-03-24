@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/nucleo-l476rg/src/stm32_wireless.c
+ * configs/nucleo-l476rg/src/stm32_cc3000.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Laurent Latil <laurent@latil.nom.fr>

@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/spark/src/stm32_wireless.c
+ * configs/spark/src/stm32_cc3000.c
  *
  *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Laurent Latil <laurent@latil.nom.fr>

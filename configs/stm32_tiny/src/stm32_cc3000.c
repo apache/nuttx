@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/stm32f103-minimum//src/stm32_wireless.c
+ * configs/stm32_tiny/src/stm32_cc3000.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Laurent Latil <laurent@latil.nom.fr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,16 +51,14 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "stm32.h"
-
-#include "stm32f103_minimum.h"
-
-#ifdef CONFIG_WL_NRF24L01
+#include "stm32_tiny.h"
 
 /************************************************************************************
  * Private Function Prototypes
  ************************************************************************************/
 
 static int stm32tiny_wl_irq_attach(xcpt_t isr, FAR void *arg);
+
 static void stm32tiny_wl_chip_enable(bool enable);
 
 /************************************************************************************
@@ -82,7 +80,7 @@ static FAR void *g_arg;
 
 static int stm32tiny_wl_irq_attach(xcpt_t isr, FAR void *arg)
 {
-  winfo("Attach IRQ\n");
+  _info("Attach IRQ\n");
   g_isr = isr;
   g_arg = arg;
   (void)stm32_gpiosetevent(GPIO_NRF24L01_IRQ, false, true, false, g_isr, g_arg);
@@ -91,7 +89,7 @@ static int stm32tiny_wl_irq_attach(xcpt_t isr, FAR void *arg)
 
 static void stm32tiny_wl_chip_enable(bool enable)
 {
-  winfo("CE:%d\n", enable);
+  _info("CE:%d\n", enable);
   stm32_gpiowrite(GPIO_NRF24L01_CE, enable);
 }
 
@@ -99,28 +97,14 @@ static void stm32tiny_wl_chip_enable(bool enable)
  * Public Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Name: stm32_wlinitialize
- *
- * Description:
- *   Initialize the NRF24L01 wireless module
- *
- * Input Parmeters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ************************************************************************************/
-
 void stm32_wlinitialize(void)
 {
-#ifndef CONFIG_STM32_SPI1
-# error "STM32_SPI1 is required to support nRF24L01 module on this board"
-#endif
+#  ifndef CONFIG_STM32_SPI2
+#   error "STM32_SPI2 is required to support nRF24L01 module on this board"
+#  endif
 
-  FAR struct spi_dev_s *spidev;
   int result;
+  FAR struct spi_dev_s *spidev;
 
   /* Setup CE & IRQ line IOs */
 
@@ -129,19 +113,18 @@ void stm32_wlinitialize(void)
 
   /* Init SPI bus */
 
-  spidev = stm32_spibus_initialize(1);
+  spidev = stm32_spibus_initialize(2);
   if (!spidev)
     {
-      werr("ERROR: Failed to initialize SPI bus\n");
+      _err("ERROR: Failed to initialize SPI bus\n");
       return;
     }
 
   result = nrf24l01_register(spidev, &nrf_cfg);
   if (result != OK)
     {
-      werr("ERROR: Failed to register initialize SPI bus\n");
+      _err("ERROR: Failed to register initialize SPI bus\n");
       return;
     }
 }
 
-#endif /* CONFIG_WL_NRF24L01 */

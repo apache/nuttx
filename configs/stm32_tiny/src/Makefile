@@ -44,7 +44,7 @@ CSRCS += stm32_pwm.c
 endif
 
 ifeq ($(CONFIG_WL_NRF24L01),y)
-CSRCS += stm32_wireless.c
+CSRCS += stm32_cc3000.c
 endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
