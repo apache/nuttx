@@ -47,9 +47,9 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/wireless/ieee80154/ieee802154_radio.h>
-#include <nuttx/wireless/ieee80154/ieee802154_mac.h>
-#include <nuttx/wireless/ieee80154/mrf24j40.h>
+#include <nuttx/wireless/ieee802154/ieee802154_radio.h>
+#include <nuttx/wireless/ieee802154/ieee802154_mac.h>
+#include <nuttx/wireless/ieee802154/mrf24j40.h>
 
 #include "stm32_gpio.h"
 #include "stm32_exti.h"
@@ -120,7 +120,7 @@ static int  stm32_attach_irq(FAR const struct mrf24j40_lower_s *lower,
                              xcpt_t handler);
 static void stm32_enable_irq(FAR const struct mrf24j40_lower_s *lower,
                              int state);
-static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)'
+static int  stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -172,12 +172,12 @@ static struct stm32_priv_s g_mrf24j40_mb2_priv =
  *   irq_enable       - Enable or disable the GPIO interrupt
  */
 
-static int stm32_attach_irq(FAR struct mrf24j40_lower_s *lower,
+static int stm32_attach_irq(FAR const struct mrf24j40_lower_s *lower,
                             xcpt_t handler)
 {
-  FAR struct stm32_priv_s *priv = (FAR struct mrf24j40_lower_s *)lower;
+  FAR struct stm32_priv_s *priv = (FAR struct stm32_priv_s *)lower;
 
-  DEBUASSERT(priv != NULL);
+  DEBUGASSERT(priv != NULL);
 
   /* Just save the handler for use when the interrupt is enabled */
 
@@ -185,9 +185,9 @@ static int stm32_attach_irq(FAR struct mrf24j40_lower_s *lower,
   return OK;
 }
 
-static void stm32_enable_irq(FAR struct mrf24j40_lower_s *lower, int state)
+static void stm32_enable_irq(FAR const struct mrf24j40_lower_s *lower, int state)
 {
-  FAR struct stm32_priv_s *priv = (FAR struct mrf24j40_lower_s *)lower;
+  FAR struct stm32_priv_s *priv = (FAR struct stm32_priv_s *)lower;
 
   /* The caller should not attempt to enable interrupts if the handler
    * has not yet been 'attached'
@@ -201,7 +201,7 @@ static void stm32_enable_irq(FAR struct mrf24j40_lower_s *lower, int state)
   if (state != 0)
     {
       (void)stm32_gpiosetevent(priv->intcfg, true, true, true,
-                               priv->handler, lower);
+                               priv->handler, NULL);
     }
   else
     {
@@ -229,6 +229,8 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
   FAR struct ieee802154_mac_s *mac;
 #endif
   FAR struct spi_dev_s *spi;
+
+  int ret;
 
   /* Configure the interrupt pin */
 
