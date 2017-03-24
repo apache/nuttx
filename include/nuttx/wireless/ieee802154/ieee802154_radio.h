@@ -2,7 +2,9 @@
  * include/nuttx/wireless/ieee802154/ieee802154_radio.h
  *
  *   Copyright (C) 2014-2016 Sebastien Lorquet. All rights reserved.
+ *   Copyright (C) 2017 Verge Inc. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
+ *   Author: Anthony Merlino <anthony@vergeaero.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,6 +46,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <semaphore.h>
+#include <nuttx/fs/ioctl.h>
+#include <nuttx/wireless/ieee802154/ieee802154.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -62,17 +66,37 @@
 #define IEEE802154_MODE_COORD         0x01 /* avail in mrf24j40, but why? */
 #define IEEE802154_MODE_PANCOORD      0x02
 
+/* IEEE 802.15.4 Radio Character Driver IOCTL ********************************/
+
+#define PHY802154IOC_SET_CHAN         _PHY802154IOC(0x0001)
+#define PHY802154IOC_GET_CHAN         _PHY802154IOC(0x0002)
+
+#define PHY802154IOC_SET_PANID        _PHY802154IOC(0x0003)
+#define PHY802154IOC_GET_PANID        _PHY802154IOC(0x0004)
+
+#define PHY802154IOC_SET_SADDR        _PHY802154IOC(0x0005)
+#define PHY802154IOC_GET_SADDR        _PHY802154IOC(0x0006)
+
+#define PHY802154IOC_SET_EADDR        _PHY802154IOC(0x0007)
+#define PHY802154IOC_GET_EADDR        _PHY802154IOC(0x0008)
+
+#define PHY802154IOC_SET_PROMISC      _PHY802154IOC(0x0009)
+#define PHY802154IOC_GET_PROMISC      _PHY802154IOC(0x000A)
+
+#define PHY802154IOC_SET_DEVMODE      _PHY802154IOC(0x000B)
+#define PHY802154IOC_GET_DEVMODE      _PHY802154IOC(0x000C)
+
+#define PHY802154IOC_SET_TXPWR        _PHY802154IOC(0x000D)
+#define PHY802154IOC_GET_TXPWR        _PHY802154IOC(0x000E)
+
+#define PHY802154IOC_SET_CCA          _PHY802154IOC(0x000F)
+#define PHY802154IOC_GET_CCA          _PHY802154IOC(0x0010)
+
+#define PHY802154IOC_ENERGYDETECT     _PHY802154IOC(0x0011)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
-struct ieee802154_packet_s
-{
-  uint8_t len;
-  uint8_t data[127];
-  uint8_t lqi;
-  uint8_t rssi;
-};
 
 struct ieee802154_cca_s
 {
