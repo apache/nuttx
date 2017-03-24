@@ -51,7 +51,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wireless/ieee802154/ieee802154_radio.h>
-#include <nuttx/ieee802154/ieee802154_dev.h>
 
 /****************************************************************************
  * Private Types
@@ -383,78 +382,78 @@ static int radio802154dev_ioctl(FAR struct file *filep, int cmd,
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   dev   = inode->i_private;
-  DEBUGASSERT(dev != NULL && dev->child != NULL;
+  DEBUGASSERT(dev != NULL && dev->child != NULL);
   child = dev->child;
 
   /* Get exclusive access to the driver data structures */
 
   switch (cmd)
     {
-      case MAC854IOCSCHAN:
+      case PHY802154IOC_SET_CHAN:
         ret = child->ops->setchannel(child, (uint8_t)arg);
         break;
 
-      case MAC854IOCGCHAN:
+      case PHY802154IOC_GET_CHAN:
         ret = child->ops->getchannel(child, (FAR uint8_t*)arg);
         break;
 
-      case MAC854IOCSPANID:
+      case PHY802154IOC_SET_PANID:
         ret = child->ops->setpanid(child, (uint16_t)arg);
         break;
 
-      case MAC854IOCGPANID:
+      case PHY802154IOC_GET_PANID:
         ret = child->ops->getpanid(child, (FAR uint16_t*)arg);
         break;
 
-      case MAC854IOCSSADDR:
+      case PHY802154IOC_SET_SADDR:
         ret = child->ops->setsaddr(child, (uint16_t)arg);
         break;
 
-      case MAC854IOCGSADDR:
+      case PHY802154IOC_GET_SADDR:
         ret = child->ops->getsaddr(child, (FAR uint16_t*)arg);
         break;
 
-      case MAC854IOCSEADDR:
+      case PHY802154IOC_SET_EADDR:
         ret = child->ops->seteaddr(child, (FAR uint8_t*)arg);
         break;
 
-      case MAC854IOCGEADDR:
+      case PHY802154IOC_GET_EADDR:
         ret = child->ops->geteaddr(child, (FAR uint8_t*)arg);
         break;
 
-      case MAC854IOCSPROMISC:
+      case PHY802154IOC_SET_PROMISC:
         ret = child->ops->setpromisc(child, (bool)arg);
         break;
 
-      case MAC854IOCGPROMISC:
+      case PHY802154IOC_GET_PROMISC:
         ret = child->ops->getpromisc(child, (FAR bool*)arg);
         break;
 
-      case MAC854IOCSDEVMODE:
+      case PHY802154IOC_SET_DEVMODE:
         ret = child->ops->setdevmode(child, (uint8_t)arg);
         break;
 
-      case MAC854IOCGDEVMODE:
+      case PHY802154IOC_GET_DEVMODE:
         ret = child->ops->getdevmode(child, (FAR uint8_t*)arg);
         break;
 
-      case MAC854IOCSTXP:
+      case PHY802154IOC_SET_TXPWR:
         ret = child->ops->settxpower(child, (int32_t)arg);
         break;
 
-      case MAC854IOCGTXP:
+      case PHY802154IOC_GET_TXPWR:
         ret = child->ops->gettxpower(child, (FAR int32_t*)arg);
         break;
 
-      case MAC854IOCSCCA:
+      case PHY802154IOC_SET_CCA:
         ret = child->ops->setcca(child, (FAR struct ieee802154_cca_s*)arg);
         break;
 
-      case MAC854IOCGCCA:
+      case PHY802154IOC_GET_CCA:
         ret = child->ops->getcca(child, (FAR struct ieee802154_cca_s*)arg);
         break;
 
-      case MAC854IOCGED:
+      case PHY802154IOC_ENERGYDETECT:
         ret = child->ops->energydetect(child, (FAR uint8_t*)arg);
         break;
 

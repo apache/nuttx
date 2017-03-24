@@ -299,7 +299,7 @@ int stm32_can_setup(void);
  ****************************************************************************/
 
 #if defined(CONFIG_CLICKER2_STM32_MB1_BEE) || defined(CONFIG_CLICKER2_STM32_MB2_BEE)
-int stm32_mrf24j40_initialize(void)
+int stm32_mrf24j40_initialize(void);
 #endif
 
 #endif  /* __ASSEMBLY__ */

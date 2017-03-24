@@ -45,7 +45,7 @@ CSRCS += ieee802154/mac802154.c
 endif
 
 ifeq ($(CONFIG_IEEE802154_DEV),y)
-CSRCS += ieee802154/ieee802154_device.c
+CSRCS += ieee802154/radio802154_device.c
 endif
 
 DEPPATH += --dep-path wireless/ieee802154

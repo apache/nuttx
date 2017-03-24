@@ -1,11 +1,10 @@
 /****************************************************************************
- * include/nuttx/net/ieee802154.h
+ * include/nuttx/wireless/ieee802154/ieee802154.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Includes some definitions that a compatible with the LGPL GNU C Library
- * header file of the same name.
+ *   Copyright (C) 2014-2016 Sebastien Lorquet. All rights reserved.
+ *   Copyright (C) 2017 Verge Inc. All rights reserved.
+ *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
+ *   Author: Anthony Merlino <anthony@vergeaero.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,19 +43,69 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <nuttx/net/netconfig.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 /****************************************************************************
- * Public Type Definitions
+ * Pre-Processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Public Types
  ****************************************************************************/
+
+struct ieee802154_packet_s
+{
+  uint8_t len;
+  uint8_t data[127];
+  uint8_t lqi;
+  uint8_t rssi;
+};
+
+/* IEEE 802.15.4 Device address
+ * The addresses in ieee802154 have several formats:
+ * No address                : [none]
+ * Short address + PAN id    : PPPP/SSSS
+ * Extended address + PAN id : PPPP/LLLLLLLLLLLLLLLL
+ */
+
+enum ieee802154_addr_mode_e {
+  IEEE802154_ADDRMODE_NONE = 0,
+  IEEE802154_ADDRMODE_SHORT = 2,
+  IEEE802154_ADDRMODE_EXTENDED
+};
+
+struct ieee802154_addr_s
+{
+  enum ieee802154_addr_mode_e ia_mode;  /* Address mode. Short or Extended */
+  uint16_t ia_panid;                    /* PAN identifier, can be IEEE802154_PAN_UNSPEC */
+  union
+  {
+    uint16_t _ia_saddr;                 /* short address */
+    uint8_t  _ia_eaddr[8];              /* extended address */
+  } ia_addr;
+
+#define ia_saddr ia_addr._ia_saddr
+#define ia_eaddr ia_addr._ia_eaddr
+};
+
+#define IEEE802154_ADDRSTRLEN 22 /* (2*2+1+8*2, PPPP/EEEEEEEEEEEEEEEE) */
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_H */
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_H*/
