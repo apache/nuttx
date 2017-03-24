@@ -66,7 +66,7 @@ CSRCS += stm32_composite.c
 endif
 
 ifeq ($(CONFIG_WL_CC3000),y)
-CSRCS += stm32_wireless.c
+CSRCS += stm32_cc3000.c
 endif
 
 ifeq ($(CONFIG_CC3000_PROBES),)
