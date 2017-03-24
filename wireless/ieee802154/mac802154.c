@@ -38,16 +38,18 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <assert.h>
-#include <debug.h>
-#include <stdlib.h>
 
+#include <stdlib.h>
+#include <assert.h>
+#include <errno.h>
+#include <debug.h>
+
+#include <nuttx/kmalloc.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
 
 /****************************************************************************
  * Private Types
@@ -143,21 +145,21 @@ static int mac802154_rsporphan(FAR struct ieee802154_mac_s *mac,
 
 static const struct ieee802154_macops_s mac802154ops =
 {
-  .req_data        = mac802154_reqdata
-  .req_purge       = mac802154_reqpurge
-  .req_associate   = mac802154_reqassociate
-  .req_disassociate= mac802154_reqdisassociate
-  .req_get         = mac802154_reqget
-  .req_gts         = mac802154_reqgts
-  .req_reset       = mac802154_reqreset
-  .req_rxenable    = mac802154_reqrxenable
-  .req_scan        = mac802154_reqscan
-  .req_set         = mac802154_reqset
-  .req_start       = mac802154_reqstart
-  .req_sync        = mac802154_reqsync
-  .req_poll        = mac802154_reqpoll
-  .rsp_associate   = mac802154_rspassociate
-  .rsp_orphan      = mac802154_rsporphan
+  .req_data         = mac802154_reqdata,
+  .req_purge        = mac802154_reqpurge,
+  .req_associate    = mac802154_reqassociate,
+  .req_disassociate = mac802154_reqdisassociate,
+  .req_get          = mac802154_reqget,
+  .req_gts          = mac802154_reqgts,
+  .req_reset        = mac802154_reqreset,
+  .req_rxenable     = mac802154_reqrxenable,
+  .req_scan         = mac802154_reqscan,
+  .req_set          = mac802154_reqset,
+  .req_start        = mac802154_reqstart,
+  .req_sync         = mac802154_reqsync,
+  .req_poll         = mac802154_reqpoll,
+  .rsp_associate    = mac802154_rspassociate,
+  .rsp_orphan       = mac802154_rsporphan,
 };
 
 /****************************************************************************
@@ -192,12 +194,13 @@ static int mac802154_defaultmib(FAR struct ieee802154_privmac_s *priv)
 
   priv->macBeaconPayloadLength = 0;
   priv->macBSN                 = 0; /* Shall be random */
-  priv->macCoordExtendedAddress[8];
+  //priv->macCoordExtendedAddress[8];
   priv->macCoordShortAddress   = 0xffff;
   priv->macDSN                 = 0; /* Shall be random */
   priv->macPANId               = 0xffff;
   priv->macShortAddress        = 0xffff;
   priv->macTransactionPersistenceTime = 0x01f4;
+
 #if 0
   /* Security MIB */
 
@@ -207,6 +210,8 @@ static int mac802154_defaultmib(FAR struct ieee802154_privmac_s *priv)
   priv->macDefaultSecurityMaterialLength = 0x15;
   priv->macSecurityMode                  = 0;
 #endif
+
+  return OK;
 }
 
 /****************************************************************************
@@ -274,8 +279,7 @@ static int mac802154_reqpurge(FAR struct ieee802154_mac_s *mac,
  ****************************************************************************/
 
 static int mac802154_reqassociate(FAR struct ieee802154_mac_s *mac,
-                                  uint16_t panid,
-                                  uint8_t *coordeadr)
+                                  uint16_t panid, FAR uint8_t *coordeadr)
 {
   FAR struct ieee802154_privmac_s * priv = (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;

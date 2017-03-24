@@ -95,6 +95,7 @@
 
 /* Frame Type */
 
+#define IEEE802154_FC1_FTYPE          0x03
 #define IEEE802154_FRAME_BEACON       0x00
 #define IEEE802154_FRAME_DATA         0x01
 #define IEEE802154_FRAME_ACK          0x02
@@ -469,12 +470,12 @@ struct ieee802154_macops_s
   /* Start association with coordinator */
 
   CODE int (*req_associate)(FAR struct ieee802154_mac_s *mac,
-                            FAR struct ieee802154_assoc_request_s *request);
+                            uint16_t panid, FAR uint8_t *coordeadr);
 
   /* Start disassociation with coordinator */
 
   CODE int (*req_disassociate)(FAR struct ieee802154_mac_s *mac,
-                               FAR struct ieee802154_disassoc_request_s *request);
+                               FAR uint8_t *eadr, uint8_t reason);
 
   /* Read the PIB */
 
@@ -664,9 +665,15 @@ extern "C"
  *
  ****************************************************************************/
 
+#if 0 /* REVISIT: This form is not currently used by the driver */
 FAR struct ieee802154_mac_s *
   mac802154_register(FAR struct ieee802154_radio_s *radiodev,
                      FAR struct ieee802154_maccb_s *callbacks);
+#else /* This is the form used by the driver */
+FAR struct ieee802154_mac_s *
+  mac802154_register(FAR struct ieee802154_radio_s *radiodev,
+                     unsigned int minor);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus
