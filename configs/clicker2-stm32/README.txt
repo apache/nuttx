@@ -87,18 +87,68 @@ Using JTAG
     https://www.mikroe.com/how-to-use-st-link-v2-with-clicker-2-for-stm32-a-detailed-walkthrough/
     http://www.playembedded.org/blog/en/2016/02/06/mikroe-clicker-2-for-stm32-and-stlink-v2/
 
-  NOTE that the FLASH is locked.  You may need to follow the instructions at
-  the second link to unlock it (although I think you may be able to do this
-  with the ST-Micro ST-Link Utility as well).
+  NOTE that the FLASH probably has read protection enabled locked.  You may
+  need to follow the instructions at the second link to unlock it.  You can
+  also use the STM32 ST-Link CLI tool to remove the read protection using
+  the -OB command:
+
+    $ ./ST-LINK_CLI.exe -c SN=53FF6F064966545035320387 SWD LPM
+    STM32 ST-LINK CLI v2.3.0
+    STM32 ST-LINK Command Line Interface
+
+    ST-LINK SN : 53FF6F064966545035320387
+    ST-LINK Firmware version : V2J24S4
+    Connected via SWD.
+    SWD Frequency = 4000K.
+    Target voltage = 3.2 V.
+    Connection mode : Normal.
+    Debug in Low Power mode enabled.
+    Device ID:0x413
+    Device family :STM32F40xx/F41xx
+
+    $ ./ST-LINK_CLI.exe -OB RDP=0
+    STM32 ST-LINK CLI v2.3.0
+    STM32 ST-LINK Command Line Interface
+
+    ST-LINK SN : 53FF6F064966545035320387
+    ST-LINK Firmware version : V2J24S4
+    Connected via SWD.
+    SWD Frequency = 4000K.
+    Target voltage = 3.2 V.
+    Connection mode : Normal.
+    Device ID:0x413
+    Device family :STM32F40xx/F41xx
+    Updating option bytes...
+    Option bytes updated successfully.
+
+  NOTE:
+  1. The ST-LINK Utility command line interface is located at:
+     [Install_Directory]\STM32 ST-LINK Utility\ST-LINK Utility\ST-LINK_CLI.exe
+  2. You can get a summary of all of the command options by running
+     ST-LINK_CLI.exe with no arguments.
+  3. You can get the serial number of the ST-Link when from the information
+     window if you connect via the ST-Link Utility:
+
+       11:04:28 : ST-LINK SN : 53FF6F064966545035320387
+       11:04:28 : ST-LINK Firmware version : V2J24S4
+       11:04:28 : Connected via SWD.
+       11:04:28 : SWD Frequency = 100 KHz.
+       11:04:28 : Connection mode : Normal.
+       11:04:28 : Debug in Low Power mode enabled.
+       11:04:30 : Device ID:0x413
+       11:04:30 : Device family :STM32F40xx/F41xx
+       11:04:30 : Can not read memory!
+                  Disable Read Out Protection and retry.
 
   You can avoid the mess of jumpers using the mikroProg to ST-Link v2 adapter
   along with a 2x5, 10-wire ribbon cable connector:
 
     https://shop.mikroe.com/add-on-boards/adapter/mikroprog-st-link-v2-adapter
 
-  OpenOCD can be used with the ST-Link to provide a debug environment.  I suspect,
-  however, that adapter can be used with other JTAG debuggers such as J-Link,
-  but that remains to be verified.
+  Then you can use the ST-Link Utility or other debugger software to write
+  the NuttX binary to FLASH.  OpenOCD can be used with the ST-Link to provide
+  a debug environment.  The debug adaptor is NOT compatible with other JTAG
+  debuggers such as the Segger J-Link.
 
 Configurations
 ==============
