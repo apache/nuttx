@@ -129,6 +129,7 @@ static void flash_lock(void)
 }
 #if defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
 
+#if defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
 static void data_cache_disable(void)
 {
   modifyreg32(STM32_FLASH_ACR, FLASH_ACR_DCEN, 0);
@@ -144,6 +145,7 @@ static void data_cache_enable(void)
 
   modifyreg32(STM32_FLASH_ACR, 0, FLASH_ACR_DCEN);
 }
+#endif
 
 #endif
 /************************************************************************************
