@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/freedom-kl25z/src/kl_tsi.c
+ * configs/freedom-kl25z/src/kl_cc3000.c
  *
  *   Copyright (C) 2014 Alan Carvalho de Assis
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/board/kl_wifi.h>
+#include <arch/board/kl_cc3000.h>
 
 #include <stdio.h>
 #include <stdint.h>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/freedom-kl25z/include/kl_wifi.h
+ * configs/freedom-kl25z/include/kl_cc300.h
  *
  *   Copyright (C) 2013 Alan Carvalho de Assis
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
@@ -38,34 +38,36 @@
  *
  ****************************************************************************/
 
+#ifndef __CONFIGS_FREEDOM_KL25Z_INCLUDE_KL_CC3000_H
+#define __CONFIGS_FREEDOM_KL25Z_INCLUDE_KL_CC3000_H 1
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+
 #include <stdio.h>
 #include <stdint.h>
 
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 long ReadWlanInterruptPin(void);
 
-/*
- * Enable WiFi Interrupt
- */
+/* Enable WiFi Interrupt */
 
 void WlanInterruptEnable(void);
 
-/*
- * Disable WiFi Interrupt
- */
+/* Disable WiFi Interrupt */
+
 void WlanInterruptDisable(void);
 
-/*
- * Enable/Disable WiFi
- */
+/* Enable/Disable WiFi */
+
 void WriteWlanEnablePin(uint8_t val);
 
-/*
- * Assert CC3000 CS
- */
+/* Assert CC3000 CS */
+
 void AssertWlanCS(void);
 
 /*
@@ -73,8 +75,9 @@ void AssertWlanCS(void);
  */
 void DeassertWlanCS(void);
 
-/*
- * Setup needed pins
- */
+/* Setup needed pins */
+
 void Wlan_Setup(void);
+
+#endif /* __CONFIGS_FREEDOM_KL25Z_INCLUDE_KL_CC3000_H */
 
