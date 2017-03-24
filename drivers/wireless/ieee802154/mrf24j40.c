@@ -138,7 +138,7 @@ static int  mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev);
 static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev);
 static void mrf24j40_irqwork_tx(FAR struct mrf24j40_radio_s *dev);
 static void mrf24j40_irqworker(FAR void *arg);
-static int  mrf24j40_interrupt(int irq, FAR void *context);
+static int  mrf24j40_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Driver operations */
 
@@ -1344,10 +1344,15 @@ static void mrf24j40_irqworker(FAR void *arg)
  *
  ****************************************************************************/
 
-static int mrf24j40_interrupt(int irq, FAR void *context)
+static int mrf24j40_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   /* To support multiple devices,
    * retrieve the priv structure using the irq number
+   *
+   * REVISIT: This will not handler multiple MRF24J40 devices.  The correct
+   * solutions is to pass the struct mrf24j40_radio_s in the call to
+   * irq_attach() as the third 'arg' parameter.  That will be provided here
+   * and the correct instance can be obtained with a simply case of 'arg'.
    */
 
   register FAR struct mrf24j40_radio_s *dev = &g_mrf24j40_devices[0];
@@ -1398,7 +1403,11 @@ FAR struct ieee802154_radio_s *mrf24j40_init(FAR struct spi_dev_s *spi,
   dev = &g_mrf24j40_devices[0];
 #endif
 
-  /* Attach irq */
+  /* Attach irq.
+   *
+   * REVISIT: A third argument is required to pass the instance of 'lower'
+   * to the interrupt handler.
+   */
 
   if (lower->attach(lower, mrf24j40_interrupt) != OK)
     {

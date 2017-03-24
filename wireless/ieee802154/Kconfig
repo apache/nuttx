@@ -6,7 +6,6 @@
 config WIRELESS_IEEE802154
 	bool "IEEE 802.15.4 Wireless Support"
 	default n
-	depends on EXPERIMENTAL
 	---help---
 		Enables support for the IEEE 802.14.5 Wireless library.
 
