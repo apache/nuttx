@@ -69,14 +69,20 @@ struct ieee802154_packet_s
  * Extended address + PAN id : PPPP/LLLLLLLLLLLLLLLL
  */
 
+enum ieee802154_addr_mode_e {
+  IEEE802154_ADDRMODE_NONE = 0,
+  IEEE802154_ADDRMODE_SHORT = 2,
+  IEEE802154_ADDRMODE_EXTENDED
+};
+
 struct ieee802154_addr_s
 {
-  uint8_t ia_len;            /* structure length, 0/2/8 */
-  uint16_t ia_panid;         /* PAN identifier, can be IEEE802154_PAN_UNSPEC */
+  enum ieee802154_addr_mode_e ia_mode;  /* Address mode. Short or Extended */
+  uint16_t ia_panid;                    /* PAN identifier, can be IEEE802154_PAN_UNSPEC */
   union
   {
-    uint16_t _ia_saddr;      /* short address */
-    uint8_t  _ia_eaddr[8];   /* extended address */
+    uint16_t _ia_saddr;                 /* short address */
+    uint8_t  _ia_eaddr[8];              /* extended address */
   } ia_addr;
 
 #define ia_saddr ia_addr._ia_saddr
@@ -84,7 +90,6 @@ struct ieee802154_addr_s
 };
 
 #define IEEE802154_ADDRSTRLEN 22 /* (2*2+1+8*2, PPPP/EEEEEEEEEEEEEEEE) */
-
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
