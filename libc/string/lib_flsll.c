@@ -1,8 +1,8 @@
 /****************************************************************************
- * libc/string/lib_ffs.c
+ * libc/string/lib_fls.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Haltian Ltd. All rights reserved.
+ *   Author: Jussi Kivilinna <jussi.kivilinna@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,43 +44,45 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NBITS (8 * sizeof(unsigned int))
+#define NBITS (8 * sizeof(unsigned long long))
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_HAVE_LONG_LONG
+
 /****************************************************************************
- * Name: ffs
+ * Name: flsll
  *
  * Description:
- *   The ffs() function will find the first bit set (beginning with the least
- *   significant bit) in j, and return the index of that bit. Bits are
- *   numbered starting at one (the least significant bit).
+ *   The flsll() function will find the last bit set in value and return
+ *   the index of that bit. Bits are numbered starting at one (the least
+ *   significant bit).
  *
  * Returned Value:
- *   The ffs() function will return the index of the first bit set. If j is
- *   0, then ffs() will return 0.
+ *   The flsll() function will return the index of the last bit set. If j is
+ *   0, then flsll() will return 0.
  *
  ****************************************************************************/
 
-int ffs(int j)
+int flsll(long long j)
 {
   int ret = 0;
 
   if (j != 0)
     {
-#ifdef CONFIG_HAVE_BUILTIN_CTZ
-      /* Count trailing zeros function can be used to implement ffs. */
+#ifdef CONFIG_HAVE_BUILTIN_CLZ
+      /* Count leading zeros function can be used to implement fls. */
 
-      ret = __builtin_ctz(j) + 1;
+      ret = NBITS - __builtin_clzll(j);
 #else
-      unsigned int value = (unsigned int)j;
+      unsigned long long value = (unsigned long long)j;
       int bitno;
 
       for (bitno = 1; bitno <= NBITS; bitno++, value >>= 1)
         {
-          if ((value & 1) != 0)
+          if (value == 1)
             {
               ret = bitno;
               break;
@@ -91,3 +93,6 @@ int ffs(int j)
 
   return ret;
 }
+
+#endif
+
