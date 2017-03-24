@@ -127,7 +127,6 @@ static void flash_lock(void)
 {
   modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_LOCK);
 }
-#if defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
 
 #if defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
 static void data_cache_disable(void)
@@ -145,9 +144,8 @@ static void data_cache_enable(void)
 
   modifyreg32(STM32_FLASH_ACR, 0, FLASH_ACR_DCEN);
 }
-#endif
+#endif /* defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW) */
 
-#endif
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
