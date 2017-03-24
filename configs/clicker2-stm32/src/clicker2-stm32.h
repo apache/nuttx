@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_OLIMEX_STM32_P407_SRC_H
-#define __CONFIGS_OLIMEX_STM32_P407_SRC_H
+#ifndef __CONFIGS_CLICKER2_STM32_SRC_CLICKER2_H
+#define __CONFIGS_CLICKER2_STM32_SRC_CLICKER2_H
 
 /****************************************************************************
  * Included Files
@@ -212,7 +212,7 @@
 
 #define GPIO_MB1_RST     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                           GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN7)
-#define GPIO_MB1_RST     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+#define GPIO_MB2_RST     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                           GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN13)
 
 /* Interrupts
@@ -287,4 +287,4 @@ int stm32_can_setup(void);
 #endif
 
 #endif  /* __ASSEMBLY__ */
-#endif /* __CONFIGS_OLIMEX_STM32_P407_SRC_H */
+#endif /* __CONFIGS_CLICKER2_STM32_SRC_CLICKER2_H */
