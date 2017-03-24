@@ -144,7 +144,7 @@ static void data_cache_enable(void)
 
   modifyreg32(STM32_FLASH_ACR, 0, FLASH_ACR_DCEN);
 }
-#endif
+#endif /* defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW) */
 
 /************************************************************************************
  * Public Functions
