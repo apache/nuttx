@@ -290,6 +290,7 @@ ssize_t up_progmem_erasepage(size_t page)
 #if !defined(CONFIG_STM32_STM32F40XX)
   if (!(getreg32(STM32_RCC_CR) & RCC_CR_HSION))
     {
+      sem_unlock();
       return -EPERM;
     }
 #endif
