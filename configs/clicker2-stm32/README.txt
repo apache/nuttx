@@ -89,8 +89,8 @@ Using JTAG
 
   NOTE that the FLASH probably has read protection enabled locked.  You may
   need to follow the instructions at the second link to unlock it.  You can
-  also use the STM32 ST-Link CLI tool to remove the read protection using
-  the -OB command:
+  also use the STM32 ST-Link CLI tool on Windows to remove the read protection
+  using the -OB command:
 
     $ ./ST-LINK_CLI.exe -c SN=53FF6F064966545035320387 SWD LPM
     STM32 ST-LINK CLI v2.3.0
@@ -122,11 +122,13 @@ Using JTAG
     Option bytes updated successfully.
 
   NOTE:
-  1. The ST-LINK Utility command line interface is located at:
+  1. You can get the ST-Link Utilies here:
+     http://www.st.com/en/embedded-software/stsw-link004.html
+  2. The ST-LINK Utility command line interface is located at:
      [Install_Directory]\STM32 ST-LINK Utility\ST-LINK Utility\ST-LINK_CLI.exe
-  2. You can get a summary of all of the command options by running
+  3. You can get a summary of all of the command options by running
      ST-LINK_CLI.exe with no arguments.
-  3. You can get the serial number of the ST-Link when from the information
+  4. You can get the serial number of the ST-Link when from the information
      window if you connect via the ST-Link Utility:
 
        11:04:28 : ST-LINK SN : 53FF6F064966545035320387
