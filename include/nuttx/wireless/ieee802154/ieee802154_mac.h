@@ -41,8 +41,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdint.h>
 #include <stdbool.h>
+
+#include <nuttx/fs/ioctl.h>
+#include <nuttx/wireless/ieee802154/ieee802154.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -51,7 +55,62 @@
 /* Configuration ************************************************************/
 /* None at the moment */
 
+
+/* IEEE 802.15.4 MAC Character Driver IOCTL Commands ************************/
+
+/* The IEEE 802.15.4 standard specifies a MLME Service Access Point (SAP) 
+ * including a series of primitives that are used as an interface between
+ * the MLME and the next highest layer.  There are 4 types of primitives:
+ * - Request
+ * - Indication
+ * - Response
+ * - Confirm
+ * 
+ * Of these, Request and Response primitives are sent from the next highest layer
+ * to the MLME.  Indication and Confirm primitives are used to notify the next
+ * highest layer of changes or actions that have taken place.
+ *
+ * The MAC802154 character driver exposed here provides IOCTL hooks for all
+ * Request and Response primitives.
+ */
+
+#define MAC802154IOC_MLME_ASSOC_REQUEST        _MAC802154IOC(0x0001)
+#define MAC802154IOC_MLME_ASSOC_RESPONSE       _MAC802154IOC(0x0002)
+#define MAC802154IOC_MLME_DISASSOC_REQUEST     _MAC802154IOC(0x0003)
+#define MAC802154IOC_MLME_GET_REQUEST          _MAC802154IOC(0x0004)
+#define MAC802154IOC_MLME_GTS_REQUEST          _MAC802154IOC(0x0005)
+#define MAC802154IOC_MLME_ORPHAN_RESPONSE      _MAC802154IOC(0x0006)
+#define MAC802154IOC_MLME_RESET_REQUEST        _MAC802154IOC(0x0007)
+#define MAC802154IOC_MLME_RXENABLE_REQUEST     _MAC802154IOC(0x0008)
+#define MAC802154IOC_MLME_SCAN_REQUEST         _MAC802154IOC(0x0009)
+#define MAC802154IOC_MLME_SET_REQUEST          _MAC802154IOC(0x000A)
+#define MAC802154IOC_MLME_START_REQUEST        _MAC802154IOC(0x000B)
+#define MAC802154IOC_MLME_SYNC_REQUEST         _MAC802154IOC(0x000C)
+#define MAC802154IOC_MLME_POLL_REQUEST         _MAC802154IOC(0x000D)
+#define MAC802154IOC_MLME_DPS_REQUEST          _MAC802154IOC(0x000E)
+#define MAC802154IOC_MLME_SOUNDING_REQUEST     _MAC802154IOC(0x000F)
+#define MAC802154IOC_MLME_CALIBRATE_REQUEST    _MAC802154IOC(0x0010)
+
 /* IEEE 802.15.4 MAC Interface **********************************************/
+
+/* Frame Type */
+
+#define IEEE802154_FRAME_BEACON       0x00
+#define IEEE802154_FRAME_DATA         0x01
+#define IEEE802154_FRAME_ACK          0x02
+#define IEEE802154_FRAME_COMMAND      0x03
+
+/* MAC commands */
+
+#define IEEE802154_CMD_ASSOC_REQ      0x01
+#define IEEE802154_CMD_ASSOC_RSP      0x02
+#define IEEE802154_CMD_DISASSOC_NOT   0x03
+#define IEEE802154_CMD_DATA_REQ       0x04
+#define IEEE802154_CMD_PANID_CONF_NOT 0x05
+#define IEEE802154_CMD_ORPHAN_NOT     0x06
+#define IEEE802154_CMD_BEACON_REQ     0x07
+#define IEEE802154_CMD_COORD_REALIGN  0x08
+#define IEEE802154_CMD_GTS_REQ        0x09
 
 /* Some addresses */
 
@@ -60,31 +119,53 @@
 #define IEEE802154_SADDR_BCAST  (uint16_t)0xFFFE
 #define IEEE802154_EADDR_UNSPEC (uint8_t*)"\xff\xff\xff\xff\xff\xff\xff\xff"
 
+/* Frame control field masks, 2 bytes 
+ * Seee IEEE 802.15.4/2011 5.2.1.1 page 57
+ */
+
+#define IEEE802154_FRAMECTRL_FTYPE      0x0007 /* Frame type, bits 0-2 */
+#define IEEE802154_FRAMECTRL_SEC        0x0008 /* Security Enabled, bit 3 */
+#define IEEE802154_FRAMECTRL_PEND       0x0010 /* Frame pending, bit 4 */
+#define IEEE802154_FRAMECTRL_ACKREQ     0x0020 /* Acknowledge request, bit 5 */
+#define IEEE802154_FRAMECTRL_INTRA      0x0040 /* Intra PAN, bit 6 */
+#define IEEE802154_FRAMECTRL_DADDR      0x0C00 /* Dest addressing mode, bits 10-11 */
+#define IEEE802154_FRAMECTRL_VERSION    0x3000 /* Source addressing mode, bits 12-13 */
+#define IEEE802154_FRAMECTRL_SADDR      0xC000 /* Source addressing mode, bits 14-15 */
+
+#define IEEE802154_FRAMECTRL_SHIFT_FTYPE     0      /* Frame type, bits 0-2 */
+#define IEEE802154_FRAMECTRL_SHIFT_SEC       3      /* Security Enabled, bit 3 */
+#define IEEE802154_FRAMECTRL_SHIFT_PEND      4      /* Frame pending, bit 4 */
+#define IEEE802154_FRAMECTRL_SHIFT_ACKREQ    5      /* Acknowledge request, bit 5 */
+#define IEEE802154_FRAMECTRL_SHIFT_INTRA     6      /* Intra PAN, bit 6 */
+#define IEEE802154_FRAMECTRL_SHIFT_DADDR     10     /* Dest addressing mode, bits 10-11 */
+#define IEEE802154_FRAMECTRL_SHIFT_VERSION   12     /* Source addressing mode, bits 12-13 */
+#define IEEE802154_FRAMECTRL_SHIFT_SADDR     14     /* Source addressing mode, bits 14-15 */
+
 /* IEEE 802.15.4 PHY constants */
 
-#define MAC802154_aMaxPHYPacketSize       127
-#define MAC802154_aTurnaroundTime         12 /*symbol periods*/
+#define IEEE802154_aMaxPHYPacketSize       127
+#define IEEE802154_aTurnaroundTime         12 /*symbol periods*/
 
 /* IEEE 802.15.4 MAC constants */
 
-#define MAC802154_aBaseSlotDuration       60
-#define MAC802154_aNumSuperframeSlots     16
-#define MAC802154_aBaseSuperframeDuration (MAC802154_aBaseSlotDuration * MAC802154_aNumSuperframeSlots)
-#define MAC802154_aMaxBE                  5
-#define MAC802154_aMaxBeaconOverhead      75
-#define MAC802154_aMaxBeaconPayloadLength (MAC802154_aMaxPHYPacketSize - MAC802154_aMaxBeaconOverhead)
-#define MAC802154_aGTSDescPersistenceTime 4
-#define MAC802154_aMaxFrameOverhead       25
-#define MAC802154_aMaxFrameResponseTime   1220
-#define MAC802154_aMaxFrameRetries        3
-#define MAC802154_aMaxLostBeacons         4
-#define MAC802154_aMaxMACFrameSize        (MAC802154_aMaxPHYPacketSize - MAC802154_aMaxFrameOverhead)
-#define MAC802154_aMaxSIFSFrameSize       18
-#define MAC802154_aMinCAPLength           440
-#define MAC802154_aMinLIFSPeriod          40
-#define MAC802154_aMinSIFSPeriod          12
-#define MAC802154_aResponseWaitTime       (32 * MAC802154_aBaseSuperframeDuration)
-#define MAC802154_aUnitBackoffPeriod      20
+#define IEEE802154_aBaseSlotDuration       60
+#define IEEE802154_aNumSuperframeSlots     16
+#define IEEE802154_aBaseSuperframeDuration (IEEE802154_aBaseSlotDuration * IEEE802154_aNumSuperframeSlots)
+#define IEEE802154_aMaxBE                  5
+#define IEEE802154_aMaxBeaconOverhead      75
+#define IEEE802154_aMaxBeaconPayloadLength (IEEE802154_aMaxPHYPacketSize - IEEE802154_aMaxBeaconOverhead)
+#define IEEE802154_aGTSDescPersistenceTime 4
+#define IEEE802154_aMaxFrameOverhead       25
+#define IEEE802154_aMaxFrameResponseTime   1220
+#define IEEE802154_aMaxFrameRetries        3
+#define IEEE802154_aMaxLostBeacons         4
+#define IEEE802154_aMaxMACFrameSize        (IEEE802154_aMaxPHYPacketSize - IEEE802154_aMaxFrameOverhead)
+#define IEEE802154_aMaxSIFSFrameSize       18
+#define IEEE802154_aMinCAPLength           440
+#define IEEE802154_aMinLIFSPeriod          40
+#define IEEE802154_aMinSIFSPeriod          12
+#define IEEE802154_aResponseWaitTime       (32 * IEEE802154_aBaseSuperframeDuration)
+#define IEEE802154_aUnitBackoffPeriod      20
 
 /****************************************************************************
  * Public Types
@@ -92,74 +173,279 @@
 
 /* IEEE 802.15.4 MAC status codes */
 
-enum
+enum ieee802154_status_e
 {
-  MAC802154_STATUS_OK = 0,
-  MAC802154_STATUS_BEACON_LOSS = 0xE0,
-  MAC802154_STATUS_CHANNEL_ACCESS_FAILURE,
-  MAC802154_STATUS_DENIED,
-  MAC802154_STATUS_DISABLE_TRX_FAILURE,
-  MAC802154_STATUS_FAILED_SECURITY_CHECK,
-  MAC802154_STATUS_FRAME_TOO_LONG,
-  MAC802154_STATUS_INVALID_GTS,
-  MAC802154_STATUS_INVALID_HANDLE,
-  MAC802154_STATUS_INVALID_PARAMETER,
-  MAC802154_STATUS_NO_ACK,
-  MAC802154_STATUS_NO_BEACON,
-  MAC802154_STATUS_NO_DATA,
-  MAC802154_STATUS_NO_SHORT_ADDRESS,
-  MAC802154_STATUS_OUT_OF_CAP,
-  MAC802154_STATUS_PAN_ID_CONFLICT,
-  MAC802154_STATUS_REALIGNMENT,
-  MAC802154_STATUS_TRANSACTION_EXPIRED,
-  MAC802154_STATUS_TRANSACTION_OVERFLOW,
-  MAC802154_STATUS_TX_ACTIVE,
-  MAC802154_STATUS_UNAVAILABLE_KEY,
-  MAC802154_STATUS_UNSUPPORTED_ATTRIBUTE
+  IEEE802154_STATUS_OK = 0,
+  IEEE802154_STATUS_BEACON_LOSS = 0xE0,
+  IEEE802154_STATUS_CHANNEL_ACCESS_FAILURE,
+  IEEE802154_STATUS_DENIED,
+  IEEE802154_STATUS_DISABLE_TRX_FAILURE,
+  IEEE802154_STATUS_FAILED_SECURITY_CHECK,
+  IEEE802154_STATUS_FRAME_TOO_LONG,
+  IEEE802154_STATUS_INVALID_GTS,
+  IEEE802154_STATUS_INVALID_HANDLE,
+  IEEE802154_STATUS_INVALID_PARAMETER,
+  IEEE802154_STATUS_NO_ACK,
+  IEEE802154_STATUS_NO_BEACON,
+  IEEE802154_STATUS_NO_DATA,
+  IEEE802154_STATUS_NO_SHORT_ADDRESS,
+  IEEE802154_STATUS_OUT_OF_CAP,
+  IEEE802154_STATUS_PAN_ID_CONFLICT,
+  IEEE802154_STATUS_REALIGNMENT,
+  IEEE802154_STATUS_TRANSACTION_EXPIRED,
+  IEEE802154_STATUS_TRANSACTION_OVERFLOW,
+  IEEE802154_STATUS_TX_ACTIVE,
+  IEEE802154_STATUS_UNAVAILABLE_KEY,
+  IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE
 };
 
 /* IEEE 802.15.4 PHY/MAC PIB attributes IDs */
 
 enum
 {
-  MAC802154_phyCurrentChannel = 0x00,
-  MAC802154_phyChannelsSupported,
-  MAC802154_phyTransmitPower,
-  MAC802154_phyCCAMode,
-  MAC802154_macAckWaitDuration = 0x40,
-  MAC802154_macAssociationPermit,
-  MAC802154_macAutoRequest,
-  MAC802154_macBattLifeExt,
-  MAC802154_macBattLifeExtPeriods,
-  MAC802154_macBeaconPayload,
-  MAC802154_macBeaconPayloadLength,
-  MAC802154_macBeaconOrder,
-  MAC802154_macBeaconTxTime,
-  MAC802154_macBSN,
-  MAC802154_macCoordExtendedAddress,
-  MAC802154_macCoordShortAddress,
-  MAC802154_macDSN,
-  MAC802154_macGTSPermit,
-  MAC802154_macMaxCSMABackoffs,
-  MAC802154_macMinBE,
-  MAC802154_macPANId,
-  MAC802154_macPromiscuousMode,
-  MAC802154_macRxOnWhenIdle,
-  MAC802154_macShortAddress,
-  MAC802154_macSuperframeOrder,
-  MAC802154_macTransactionPersistenceTime,
-  MAC802154_macACLEntryDescriptorSet = 0x70,
-  MAC802154_macACLEntryDescriptorSetSize,
-  MAC802154_macDefaultSecurity,
-  MAC802154_macDefaultSecurityMaterialLength,
-  MAC802154_macDefaultSecurityMaterial,
-  MAC802154_macDefaultSecuritySuite,
-  MAC802154_macSecurityMode
+  IEEE802154_phyCurrentChannel = 0x00,
+  IEEE802154_phyChannelsSupported,
+  IEEE802154_phyTransmitPower,
+  IEEE802154_phyCCAMode,
+  IEEE802154_macAckWaitDuration = 0x40,
+  IEEE802154_macAssociationPermit,
+  IEEE802154_macAutoRequest,
+  IEEE802154_macBattLifeExt,
+  IEEE802154_macBattLifeExtPeriods,
+  IEEE802154_macBeaconPayload,
+  IEEE802154_macBeaconPayloadLength,
+  IEEE802154_macBeaconOrder,
+  IEEE802154_macBeaconTxTime,
+  IEEE802154_macBSN,
+  IEEE802154_macCoordExtendedAddress,
+  IEEE802154_macCoordShortAddress,
+  IEEE802154_macDSN,
+  IEEE802154_macGTSPermit,
+  IEEE802154_macMaxCSMABackoffs,
+  IEEE802154_macMinBE,
+  IEEE802154_macPANId,
+  IEEE802154_macPromiscuousMode,
+  IEEE802154_macRxOnWhenIdle,
+  IEEE802154_macShortAddress,
+  IEEE802154_macSuperframeOrder,
+  IEEE802154_macTransactionPersistenceTime,
+  IEEE802154_macACLEntryDescriptorSet = 0x70,
+  IEEE802154_macACLEntryDescriptorSetSize,
+  IEEE802154_macDefaultSecurity,
+  IEEE802154_macDefaultSecurityMaterialLength,
+  IEEE802154_macDefaultSecurityMaterial,
+  IEEE802154_macDefaultSecuritySuite,
+  IEEE802154_macSecurityMode
 };
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+struct ieee802154_capability_info_s
+{
+  uint8_t reserved_0 : 1;     /* Reserved */
+  uint8_t device_type : 1;    /* 0=RFD, 1=FFD */
+  uint8_t power_source : 1;   /* 1=AC, 0=Other */
+  uint8_t rx_on_idle : 1;     /* 0=Receiver off when idle
+                               * 1=Receiver on when idle */
+  uint8_t reserved_45 : 2;    /* Reserved */
+  uint8_t security : 1;       /* 0=disabled, 1=enabled */
+  uint8_t allocate_addr : 1;  /* 1=Coordinator allocates short address
+                               * 0=otherwise */
+};
+
+#ifdef CONFIG_IEEE802154_SECURITY
+struct ieee802154_security_s
+{
+  uint8_t level;            /* Security level to be used */
+  uint8_t key_id_mode;      /* Mode used to identify the key to be used */
+  uint8_t key_source[8];    /* Originator of the key to be used */
+  uint8_t key_index;        /* Index of the key to be used */
+};
+#endif
+
+struct ieee802154_superframe_spec_s
+{
+  uint16_t beacon_order     : 4;  /* Transmission interval of beacon */
+  uint16_t superframe_order : 4;  /* Length of superframe */
+  uint16_t final_cap_slot   : 4;  /* Last slot utilized by CAP */
+  uint16_t ble              : 1;  /* Battery Life Extension (BLE) */
+  uint16_t reserved         : 1;  /* Reserved bit */
+  uint16_t pan_coordinator  : 1;  /* 1 if beacon sent by pan coordinator */
+  uint16_t assoc_permit     : 1;  /* 1 if coordinator is accepting associaton */
+};
+
+struct ieee802154_pan_desc_s
+{
+  /* The coordinator address of the received beacon frame */
+
+  struct ieee802154_addr_s coord_addr;
+
+  uint8_t channel;          /* current channel occupied by the network */
+  uint8_t channel_page;     /* current channel page occupied by the network */
+
+  /* The superframe specifications received in the beacon frame */
+
+  struct ieee802154_superframe_spec_s superframe_spec;
+
+  uint8_t gts_permit;       /* 0=No GTS requests allowed
+                             * 1=GTS request allowed */
+  uint8_t link_quality;     /* LQI at which beacon was received */
+  uint32_t timestamp;       /* Time at which the beacon frame was received
+                             * in symbols */
+};
+
+struct ieee802154_pend_addr_s
+{
+  union {
+    uint8_t pa_spec;
+    struct {
+      uint8_t num_short_addr  : 3;  /* Number of short addresses pending */
+      uint8_t reserved_3      : 1;  /* Reserved bit */
+      uint8_t num_ext_addr    : 3;  /* Number of extended addresses pending */       
+      uint8_t reserved_7      : 1;  /* Reserved bit */
+    };
+  };
+  struct ieee802154_addr_s addr[7]; /* Array of at most 7 addresses */
+};
+
+/* Primitive Semantics */
+
+struct ieee802154_assoc_request_s
+{
+  uint8_t channel;          /* Channel number to attempt association */
+  uint8_t channel_page;     /* Channel page to attempt association */
+
+  /* Coordinator Address with which to associate */
+
+  struct ieee802154_addr_s coord_addr;
+
+  /* Capabilities of associating device */
+
+  struct ieee802154_capability_info_s capabilities;
+
+#ifdef CONFIG_IEEE802154_SECURITY
+  /* Security information if enabled */
+
+  struct ieee802154_security_s security;
+#endif
+};
+
+struct ieee802154_assoc_indication_s
+{
+  /* Address of device requesting association. Always in extended mode */
+
+  struct ieee802154_addr_s dev_addr;
+
+  /* Capabilities of associating device */
+
+  struct ieee802154_capability_info_s capabilities;
+
+#ifdef CONFIG_IEEE802154_SECURITY
+  /* Security information if enabled */
+
+  struct ieee802154_security_s security;
+#endif
+};
+
+struct ieee802154_assoc_response_s
+{
+  /* Address of device requesting association. Always in extended mode */
+
+  struct ieee802154_addr_s dev_addr;
+
+  /* Status of association attempt */
+
+  enum ieee802154_status_e status; 
+
+#ifdef CONFIG_IEEE802154_SECURITY
+  /* Security information if enabled */
+
+  struct ieee802154_security_s security;
+#endif
+};
+
+struct ieee802154_assoc_confirm_s
+{
+  /* Associated device address ALWAYS passed in short address mode. The
+   * address will be IEEE802154_SADDR_UNSPEC if association was unsuccessful */
+
+  struct ieee802154_addr_s dev_addr;
+
+  /* Status of association attempt */
+
+  enum ieee802154_status_e status;
+
+#ifdef CONFIG_IEEE802154_SECURITY
+  /* Security information if enabled */
+
+  struct ieee802154_security_s security;
+#endif
+};
+
+struct ieee802154_disassoc_request_s
+{
+  /* Address of device to send disassociation notification */
+
+  struct ieee802154_addr_s dev_addr;
+
+  /* Reason for the disassosiation */
+
+  enum ieee802154_status_e disassoc_reason;
+
+  uint8_t tx_indirect;        /* 0=Send Direct, 1=Send Indirect */
+
+#ifdef CONFIG_IEEE802154_SECURITY
+  /* Security information if enabled */
+
+  struct ieee802154_security_s security;
+#endif
+};
+
+struct ieee802154_disassoc_indication_s
+{
+  /* Address of device requesting disassociation. Always extended mode */
+
+  struct ieee802154_addr_s dev_addr;
+
+  /* Reason for the disassosiation */
+
+  enum ieee802154_status_e disassoc_reason;
+
+#ifdef CONFIG_IEEE802154_SECURITY
+  /* Security information if enabled */
+
+  struct ieee802154_security_s security;
+#endif
+};
+
+struct ieee802154_disassoc_confirm_s
+{
+  /* Status of the disassociation attempt */
+
+  enum ieee802154_status_e status;
+
+  /* Address of device either requesting or being intructed to disassociate */
+
+  struct ieee802154_addr_s dev_addr;
+};
+
+struct ieee802154_beaconnotify_indication_s
+{
+  uint8_t bsn;        /* Beacon sequence number */
+
+  /* PAN descriptor for the received beacon */
+
+  struct ieee802154_pan_desc_s pan_desc;
+
+  /* Beacon pending addresses */
+
+  struct ieee802154_pend_addr_s pend_addr;
+
+  uint8_t sdu_length; /* Number of octets contained in the beacon
+                       * payload of the received beacond frame */
+      
+  /* Beacon payload */
+
+  uint8_t sdu[IEEE802154_aMaxBeaconPayloadLength];
+};
 
 /* Operations */
 
@@ -180,13 +466,13 @@ struct ieee802154_macops_s
 
   /* Start association with coordinator */
 
-  CODE int (*req_associate)(FAR struct ieee802154_mac_s *mac, uint16_t panid,
-                            uint8_t *coordeadr);
+  CODE int (*req_associate)(FAR struct ieee802154_mac_s *mac,
+                            FAR struct ieee802154_assoc_request_s *request);
 
   /* Start disassociation with coordinator */
 
   CODE int (*req_disassociate)(FAR struct ieee802154_mac_s *mac,
-                               FAR uint8_t *eadr, uint8_t reason);
+                               FAR struct ieee802154_disassoc_request_s *request);
 
   /* Read the PIB */
 
@@ -314,7 +600,7 @@ struct ieee802154_maccb_s
   /* Beacon notification */
 
   CODE int (*ind_beaconnotify)(FAR struct ieee802154_mac_s *mac,
-                               FAR uint8_t *bsn, FAR uint_t *pandesc,
+                               FAR uint8_t *bsn, FAR struct ieee802154_pan_desc_s *pandesc,
                                FAR uint8_t *sdu, int sdulen);
 
   /* GTS management request received */

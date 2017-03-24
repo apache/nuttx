@@ -48,24 +48,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Frame Type */
-
-#define IEEE802154_FRAME_BEACON  0x00
-#define IEEE802154_FRAME_DATA    0x01
-#define IEEE802154_FRAME_ACK     0x02
-#define IEEE802154_FRAME_COMMAND 0x03
-
-/* MAC commands */
-
-#define IEEE802154_CMD_ASSOC_REQ      0x01
-#define IEEE802154_CMD_ASSOC_RSP      0x02
-#define IEEE802154_CMD_DIS_NOT        0x03
-#define IEEE802154_CMD_DATA_REQ       0x04
-#define IEEE802154_CMD_PANID_CONF_NOT 0x05
-#define IEEE802154_CMD_ORPHAN_NOT     0x06
-#define IEEE802154_CMD_BEACON_REQ     0x07
-#define IEEE802154_CMD_COORD_REALIGN  0x08
-#define IEEE802154_CMD_GTS_REQ        0x09
 
 /****************************************************************************
  * Private Types
@@ -97,7 +79,7 @@ struct ieee802154_privmac_s
              uint32_t macPad             : 3;
   /* 0x48 */ uint32_t macBeaconTxTime    : 24;
 
-  /* 0x45 */ uint8_t  macBeaconPayload[MAC802154_aMaxBeaconPayloadLength];
+  /* 0x45 */ uint8_t  macBeaconPayload[IEEE802154_aMaxBeaconPayloadLength];
   /* 0x46 */ uint8_t  macBeaconPayloadLength;
   /* 0x49 */ uint8_t  macBSN;
   /* 0x4A */ uint8_t  macCoordExtendedAddress[8];
