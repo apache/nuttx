@@ -693,17 +693,17 @@ static int stm32_interrupt(int irq, FAR void *context, FAR void *arg)
   stm32_putreg16(priv, STM32_GTIM_SR_OFFSET, regval & ~GTIM_SR_UIF);
 
   /* Check the direction bit in the CR1 register and add or subtract the
-   * maximum value, as appropriate.
+   * maximum value + 1, as appropriate.
    */
 
   regval = stm32_getreg16(priv, STM32_GTIM_CR1_OFFSET);
   if ((regval & ATIM_CR1_DIR) != 0)
     {
-      priv->position -= (int32_t)0x0000ffff;
+      priv->position -= (int32_t)0x00010000;
     }
    else
     {
-      priv->position += (int32_t)0x0000ffff;
+      priv->position += (int32_t)0x00010000;
     }
 
   return OK;

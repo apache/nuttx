@@ -1,8 +1,13 @@
 /****************************************************************************
- * libc/string/lib_ffs.c
+ * configs/freedom-kl25z/include/kl_cc300.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2013 Alan Carvalho de Assis
+ *   Author: Alan Carvalho de Assis <acassis@gmail.com>
+ *           with adaptions from Gregory Nutt <gnutt@nuttx.org>
+ *
+ * Reference: https://community.freescale.com/community/
+ *            the-embedded-beat/blog/2012/10/15/
+ *            using-the-touch-interface-on-the-freescale-freedom-development-platform
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,61 +38,46 @@
  *
  ****************************************************************************/
 
+#ifndef __CONFIGS_FREEDOM_KL25Z_INCLUDE_KL_CC3000_H
+#define __CONFIGS_FREEDOM_KL25Z_INCLUDE_KL_CC3000_H 1
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/compiler.h>
-#include <strings.h>
+#include <stdio.h>
+#include <stdint.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Function Prototypes
  ****************************************************************************/
 
-#define NBITS (8 * sizeof(unsigned int))
+long ReadWlanInterruptPin(void);
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+/* Enable WiFi Interrupt */
 
-/****************************************************************************
- * Name: ffs
- *
- * Description:
- *   The ffs() function will find the first bit set (beginning with the least
- *   significant bit) in j, and return the index of that bit. Bits are
- *   numbered starting at one (the least significant bit).
- *
- * Returned Value:
- *   The ffs() function will return the index of the first bit set. If j is
- *   0, then ffs() will return 0.
- *
- ****************************************************************************/
+void WlanInterruptEnable(void);
 
-int ffs(int j)
-{
-  int ret = 0;
+/* Disable WiFi Interrupt */
 
-  if (j != 0)
-    {
-#ifdef CONFIG_HAVE_BUILTIN_CTZ
-      /* Count trailing zeros function can be used to implement ffs. */
+void WlanInterruptDisable(void);
 
-      ret = __builtin_ctz(j) + 1;
-#else
-      unsigned int value = (unsigned int)j;
-      int bitno;
+/* Enable/Disable WiFi */
 
-      for (bitno = 1; bitno <= NBITS; bitno++, value >>= 1)
-        {
-          if ((value & 1) != 0)
-            {
-              ret = bitno;
-              break;
-            }
-        }
-#endif
-    }
+void WriteWlanEnablePin(uint8_t val);
 
-  return ret;
-}
+/* Assert CC3000 CS */
+
+void AssertWlanCS(void);
+
+/*
+ * Deassert CC3000 CS
+ */
+void DeassertWlanCS(void);
+
+/* Setup needed pins */
+
+void Wlan_Setup(void);
+
+#endif /* __CONFIGS_FREEDOM_KL25Z_INCLUDE_KL_CC3000_H */
+

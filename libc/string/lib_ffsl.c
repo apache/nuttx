@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/strings.h
+ * libc/string/lib_ffsl.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,103 +33,61 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_STRINGS_H
-#define __INCLUDE_STRINGS_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <string.h>
+#include <nuttx/compiler.h>
+#include <strings.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if !defined(CONFIG_HAVE_INLINE) && !defined(__cplusplus)
-/* Compatibility definitions
- *
- * Marked LEGACY in Open Group Base Specifications Issue 6/IEEE Std 1003.1-2004
- * Removed from Open Group Base Specifications Issue 7/IEEE Std 1003.1-2008
- */
-
-#  define bcmp(b1,b2,len)  memcmp(b1,b2,(size_t)len)
-#  define bcopy(b1,b2,len) (void)memmove(b2,b1,len)
-#  define bzero(s,n)       (void)memset(s,0,n)
-#  define index(s,c)       strchr(s,c)
-#  define rindex(s,c)      strrchr(s,c)
-
-#endif /* !CONFIG_HAVE_INLINE && !__cplusplus */
+#define NBITS (8 * sizeof(unsigned long))
 
 /****************************************************************************
- * Inline Functions
+ * Public Functions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+/****************************************************************************
+ * Name: ffsl
+ *
+ * Description:
+ *   The ffsl() function will find the first bit set (beginning with the least
+ *   significant bit) in j, and return the index of that bit. Bits are
+ *   numbered starting at one (the least significant bit).
+ *
+ * Returned Value:
+ *   The ffsl() function will return the index of the first bit set. If j is
+ *   0, then ffsl() will return 0.
+ *
+ ****************************************************************************/
+
+int ffsl(long j)
 {
+  int ret = 0;
+
+  if (j != 0)
+    {
+#ifdef CONFIG_HAVE_BUILTIN_CTZ
+      /* Count trailing zeros function can be used to implement ffs. */
+
+      ret = __builtin_ctzl(j) + 1;
 #else
-#define EXTERN extern
+      unsigned long value = (unsigned long)j;
+      int bitno;
+
+      for (bitno = 1; bitno <= NBITS; bitno++, value >>= 1)
+        {
+          if ((value & 1) != 0)
+            {
+              ret = bitno;
+              break;
+            }
+        }
 #endif
+    }
 
-#if defined(CONFIG_HAVE_INLINE) || defined(__cplusplus)
-/* Compatibility inline functions.
- *
- * Marked LEGACY in Open Group Base Specifications Issue 6/IEEE Std 1003.1-2004
- * Removed from Open Group Base Specifications Issue 7/IEEE Std 1003.1-2008
- */
-
-static inline int bcmp(FAR const void *b1, FAR const void *b2, size_t len)
-{
-  return memcmp(b1, b2, len);
+  return ret;
 }
-
-static inline void bcopy(FAR const void *b1, FAR void *b2, size_t len)
-{
-  (void)memmove(b2, b1, len);
-}
-
-static inline void bzero(FAR void *s, size_t len)
-{
-  (void)memset(s, 0, len);
-}
-
-static inline FAR char *index(FAR const char *s, int c)
-{
-  return strchr(s, c);
-}
-
-static inline FAR char *rindex(FAR const char *s, int c)
-{
-  return strrchr(s, c);
-}
-#endif /* CONFIG_HAVE_INLINE || __cplusplus */
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-int ffs(int j);
-int ffsl(long j);
-#ifdef CONFIG_HAVE_LONG_LONG
-int ffsll(long long j);
-#endif
-
-int fls(int j);
-int flsl(long j);
-#ifdef CONFIG_HAVE_LONG_LONG
-int flsll(long long j);
-#endif
-
-int strcasecmp(FAR const char *, FAR const char *);
-int strncasecmp(FAR const char *, FAR const char *, size_t);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-#endif /* __INCLUDE_STRINGS_H */

@@ -1,8 +1,9 @@
-/****************************************************************************
- * configs/freedom-kl25z/src/kl_tsi.c
+/************************************************************************************
+ * configs/spark/src/stm32_cc3000.c
  *
- *   Copyright (C) 2014 Alan Carvalho de Assis
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
+ *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Author: Laurent Latil <laurent@latil.nom.fr>
+ *           David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,42 +32,40 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-/****************************************************************************
+/************************************************************************************
  * Included Files
- ****************************************************************************/
+ ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/board/kl_wifi.h>
 
-#include <stdio.h>
 #include <stdint.h>
-#include <errno.h>
+#include <stdbool.h>
 #include <debug.h>
+#include <errno.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/fs/fs.h>
+#include <nuttx/irq.h>
+#include <nuttx/spi/spi.h>
+#include <nuttx/wireless/wireless.h>
 #include <nuttx/wireless/cc3000.h>
 #include <nuttx/wireless/cc3000/include/cc3000_upif.h>
 
-#include "up_arch.h"
-#include "kl_gpio.h"
-#include "chip/kl_pinmux.h"
-#include "chip/kl_sim.h"
-#include "freedom-kl25z.h"
+#include "stm32.h"
+#include "spark.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
 
 #ifdef CONFIG_WL_CC3000
 #ifndef CONFIG_DRIVERS_WIRELESS
 #  error "Wireless support requires CONFIG_DRIVERS_WIRELESS"
 #endif
 
-#ifndef CONFIG_KL_SPI0
-#  error "CC3000 Wireless support requires CONFIG_KL_SPI0"
+#ifndef CONFIG_STM32_SPI2
+#  error "CC3000 Wireless support requires CONFIG_STM32_SPI2"
 #endif
 
 #ifndef CC3000_SPI_FREQUENCY
@@ -74,11 +73,11 @@
 #endif
 
 #ifndef CC3000_SPIDEV
-#  define CC3000_SPIDEV 0
+#  define CC3000_SPIDEV 2
 #endif
 
-#if CC3000_SPIDEV != 0
-#  error "CC3000_SPIDEV must be 0"
+#if CC3000_SPIDEV != 2
+#  error "CC3000_SPIDEV must be 2"
 #endif
 
 #ifndef CC3000_DEVMINOR
@@ -86,17 +85,18 @@
 #endif
 
 #ifndef CONFIG_CC3000_RX_BUFFER_SIZE
-#  define CONFIG_CC3000_RX_BUFFER_SIZE 132
+#define CONFIG_CC3000_RX_BUFFER_SIZE 132
 #endif
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct kl_config_s
+struct stm32_config_s
 {
   struct cc3000_config_s dev;
   xcpt_t handler;
+  void *arg;
 };
 
 /****************************************************************************
@@ -111,14 +111,12 @@ struct kl_config_s
  * indicating that the CC3000 core module is ready to accept data. T2
  * duration is approximately 7 ms.
  *
- *   irq_attach       - Attach the CC3000 interrupt handler to the GPIO
- *                      interrupt
- *   irq_enable       - Enable or disable the GPIO interrupt
- *   irq_clear        - Acknowledge/clear any pending GPIO interrupt
- *   power_enable     - Enable or disable Module enable.
- *   chip_chip_select - The Chip Select
- *   irq_read         - Return the state of the interrupt GPIO input
- *   probe            - Debug support
+ *   irq_attach         - Attach the CC3000 interrupt handler to the GPIO interrupt
+ *   irq_enable         - Enable or disable the GPIO interrupt
+ *   clear_irq          - Acknowledge/clear any pending GPIO interrupt
+ *   power_enable       - Enable or disable Module enable.
+ *   chip_chip_select   - The Chip Select
+ *   wl_read_irq        - Return the state of the interrupt GPIO input
  */
 
 static int  wl_attach_irq(FAR struct cc3000_config_s *state, xcpt_t handler,
@@ -146,7 +144,7 @@ static bool probe(FAR struct cc3000_config_s *state,int n, bool s);
  * may modify frequency or X plate resistance values.
  */
 
-static struct kl_config_s g_cc3000_info =
+static struct stm32_config_s g_cc3000_info =
 {
   .dev.spi_frequency    = CONFIG_CC3000_SPI_FREQUENCY,
   .dev.spi_mode         = CONFIG_CC3000_SPI_MODE,
@@ -174,20 +172,16 @@ static struct kl_config_s g_cc3000_info =
  * interrupts should be configured on both rising and falling edges
  * so that contact and loss-of-contact events can be detected.
  *
- *   irq_attach       - Attach the CC3000 interrupt handler to the GPIO
- *                      interrupt
- *   irq_enable       - Enable or disable the GPIO interrupt
- *   irq_clear        - Acknowledge/clear any pending GPIO interrupt
- *   power_enable     - Enable or disable Module enable.
- *   chip_chip_select - The Chip Select
- *   irq_read         - Return the state of the interrupt GPIO input
- *   probe            - Debug support
+ * attach  - Attach the CC3000 interrupt handler to the GPIO interrupt
+ * enable  - Enable or disable the GPIO interrupt
+ * clear   - Acknowledge/clear any pending GPIO interrupt
+ * pendown - Return the state of the pen down GPIO input
  */
 
 static int wl_attach_irq(FAR struct cc3000_config_s *state, xcpt_t handler,
                          FAR void *arg)
 {
-  FAR struct kl_config_s *priv = (FAR struct kl_config_s *)state;
+  FAR struct stm32_config_s *priv = (FAR struct stm32_config_s *)state;
 
   /* Just save the handler for use when the interrupt is enabled */
 
@@ -198,7 +192,7 @@ static int wl_attach_irq(FAR struct cc3000_config_s *state, xcpt_t handler,
 
 static void wl_enable_irq(FAR struct cc3000_config_s *state, bool enable)
 {
-  FAR struct kl_config_s *priv = (FAR struct kl_config_s *)state;
+  FAR struct stm32_config_s *priv = (FAR struct stm32_config_s *)state;
 
   /* The caller should not attempt to enable interrupts if the handler
    * has not yet been 'attached'
@@ -211,13 +205,13 @@ static void wl_enable_irq(FAR struct cc3000_config_s *state, bool enable)
   iinfo("enable:%d\n", enable);
   if (enable)
     {
-      (void)kl_gpioirqattach(GPIO_WIFI_INT, priv->handler, priv->arg);
-      kl_gpioirqenable(GPIO_WIFI_INT); 
+      (void)stm32_gpiosetevent(GPIO_WIFI_INT, false, true, false,
+                               priv->handler, priv->arg);
     }
   else
     {
-      (void)kl_gpioirqattach(GPIO_WIFI_INT, NULL, NULL);
-      kl_gpioirqdisable(GPIO_WIFI_INT); 
+      (void)stm32_gpiosetevent(GPIO_WIFI_INT, false, false, false,
+                               NULL, NULL);
     }
 }
 
@@ -227,7 +221,7 @@ static void wl_enable_power(FAR struct cc3000_config_s *state, bool enable)
 
   /* Active high enable */
 
-  kl_gpiowrite(GPIO_WIFI_EN, enable);
+  stm32_gpiowrite(GPIO_WIFI_EN, enable);
 }
 
 static void wl_select(FAR struct cc3000_config_s *state, bool enable)
@@ -236,7 +230,7 @@ static void wl_select(FAR struct cc3000_config_s *state, bool enable)
 
   /* Active high enable */
 
-  kl_gpiowrite(GPIO_WIFI_CS, enable);
+  stm32_gpiowrite(GPIO_WIFI_CS, enable);
 }
 
 static void wl_clear_irq(FAR struct cc3000_config_s *state)
@@ -248,7 +242,7 @@ static bool wl_read_irq(FAR struct cc3000_config_s *state)
 {
   /* Active low*/
 
-  return  kl_gpioread(GPIO_WIFI_INT) ? false : true;
+  return  stm32_gpioread(GPIO_WIFI_INT) ? false : true;
 }
 
 #ifdef CONFIG_CC3000_PROBES
@@ -256,12 +250,12 @@ static bool probe(FAR struct cc3000_config_s *state,int n, bool s)
 {
   if (n == 0)
     {
-      kl_gpiowrite(GPIO_D0, s);
+      stm32_gpiowrite(GPIO_D0, s);
     }
 
   if (n == 1)
     {
-      kl_gpiowrite(GPIO_D1, s);
+      stm32_gpiowrite(GPIO_D1, s);
     }
 
   return true;
@@ -281,6 +275,7 @@ static bool probe(FAR struct cc3000_config_s *state,int n, bool s)
  *   configure the wireless device.  This function will register the driver
  *   as /dev/wirelessN where N is the minor device number.
  *
+ *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
  *   returned to indicate the nature of the failure.
@@ -297,15 +292,15 @@ int wireless_archinitialize(size_t max_rx_size)
   DEBUGASSERT(CONFIG_CC3000_DEVMINOR == 0);
 
 #ifdef CONFIG_CC3000_PROBES
-  kl_configgpio(GPIO_D0);
-  kl_configgpio(GPIO_D1);
-  kl_gpiowrite(GPIO_D0, 1);
-  kl_gpiowrite(GPIO_D1, 1);
+  stm32_configgpio(GPIO_D0);
+  stm32_configgpio(GPIO_D1);
+  stm32_gpiowrite(GPIO_D0, 1);
+  stm32_gpiowrite(GPIO_D1, 1);
 #endif
 
   /* Get an instance of the SPI interface */
 
-  spi = kl_spibus_initialize(CONFIG_CC3000_SPIDEV);
+  spi = stm32_spibus_initialize(CONFIG_CC3000_SPIDEV);
   if (!spi)
     {
       ierr("ERROR: Failed to initialize SPI bus %d\n", CONFIG_CC3000_SPIDEV);
@@ -313,7 +308,6 @@ int wireless_archinitialize(size_t max_rx_size)
     }
 
   /* Initialize and register the SPI CC3000 device */
-
   g_cc3000_info.dev.max_rx_size = max_rx_size ? max_rx_size : CONFIG_CC3000_RX_BUFFER_SIZE;
   int ret = cc3000_register(spi, &g_cc3000_info.dev, CONFIG_CC3000_DEVMINOR);
   if (ret < 0)

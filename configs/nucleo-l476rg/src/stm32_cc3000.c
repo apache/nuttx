@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/spark/src/stm32_wireless.c
+ * configs/nucleo-l476rg/src/stm32_cc3000.c
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Laurent Latil <laurent@latil.nom.fr>
  *           David Sidrane <david_s5@nscdg.com>
  *
@@ -51,8 +51,8 @@
 #include <nuttx/wireless/cc3000.h>
 #include <nuttx/wireless/cc3000/include/cc3000_upif.h>
 
-#include "stm32.h"
-#include "spark.h"
+#include "stm32l4.h"
+#include "nucleo-l476rg.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -60,8 +60,8 @@
 /* Configuration ************************************************************/
 
 #ifdef CONFIG_WL_CC3000
-#ifndef CONFIG_DRIVERS_WIRELESS
-#  error "Wireless support requires CONFIG_DRIVERS_WIRELESS"
+#ifndef CONFIG_WIRELESS
+#  error "Wireless support requires CONFIG_WIRELESS"
 #endif
 
 #ifndef CONFIG_STM32_SPI2
@@ -96,7 +96,6 @@ struct stm32_config_s
 {
   struct cc3000_config_s dev;
   xcpt_t handler;
-  void *arg;
 };
 
 /****************************************************************************
@@ -250,12 +249,12 @@ static bool probe(FAR struct cc3000_config_s *state,int n, bool s)
 {
   if (n == 0)
     {
-      stm32_gpiowrite(GPIO_D0, s);
+      stm32_gpiowrite(GPIO_D14, s);
     }
 
   if (n == 1)
     {
-      stm32_gpiowrite(GPIO_D1, s);
+      stm32_gpiowrite(GPIO_D15, s);
     }
 
   return true;
@@ -275,7 +274,6 @@ static bool probe(FAR struct cc3000_config_s *state,int n, bool s)
  *   configure the wireless device.  This function will register the driver
  *   as /dev/wirelessN where N is the minor device number.
  *
- *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
  *   returned to indicate the nature of the failure.
@@ -292,15 +290,15 @@ int wireless_archinitialize(size_t max_rx_size)
   DEBUGASSERT(CONFIG_CC3000_DEVMINOR == 0);
 
 #ifdef CONFIG_CC3000_PROBES
-  stm32_configgpio(GPIO_D0);
-  stm32_configgpio(GPIO_D1);
-  stm32_gpiowrite(GPIO_D0, 1);
-  stm32_gpiowrite(GPIO_D1, 1);
+  stm32_configgpio(GPIO_D14);
+  stm32_configgpio(GPIO_D15);
+  stm32_gpiowrite(GPIO_D14, 1);
+  stm32_gpiowrite(GPIO_D15, 1);
 #endif
 
   /* Get an instance of the SPI interface */
 
-  spi = stm32_spibus_initialize(CONFIG_CC3000_SPIDEV);
+  spi = up_spiinitialize(CONFIG_CC3000_SPIDEV);
   if (!spi)
     {
       ierr("ERROR: Failed to initialize SPI bus %d\n", CONFIG_CC3000_SPIDEV);
@@ -308,6 +306,7 @@ int wireless_archinitialize(size_t max_rx_size)
     }
 
   /* Initialize and register the SPI CC3000 device */
+
   g_cc3000_info.dev.max_rx_size = max_rx_size ? max_rx_size : CONFIG_CC3000_RX_BUFFER_SIZE;
   int ret = cc3000_register(spi, &g_cc3000_info.dev, CONFIG_CC3000_DEVMINOR);
   if (ret < 0)
@@ -328,7 +327,7 @@ int wireless_archinitialize(size_t max_rx_size)
  *   Warning: This function must be called before ANY other wlan driver
  *   function
  *
- * Input Parmeters:
+ * Input Parameters:
  *   sWlanCB   Asynchronous events callback.
  *             0 no event call back.
  *             - Call back parameters:

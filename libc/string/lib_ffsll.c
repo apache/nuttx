@@ -1,13 +1,8 @@
 /****************************************************************************
- * configs/freedom-kl25z/include/kl_wifi.h
+ * libc/string/lib_ffsll.c
  *
- *   Copyright (C) 2013 Alan Carvalho de Assis
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
- *           with adaptions from Gregory Nutt <gnutt@nuttx.org>
- *
- * Reference: https://community.freescale.com/community/
- *            the-embedded-beat/blog/2012/10/15/
- *            using-the-touch-interface-on-the-freescale-freedom-development-platform
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,40 +36,62 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-#include <stdio.h>
-#include <stdint.h>
 
+#include <nuttx/compiler.h>
+#include <strings.h>
 
-long ReadWlanInterruptPin(void);
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
-/*
- * Enable WiFi Interrupt
- */
+#define NBITS (8 * sizeof(unsigned long long))
 
-void WlanInterruptEnable(void);
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-/*
- * Disable WiFi Interrupt
- */
-void WlanInterruptDisable(void);
+#ifdef CONFIG_HAVE_LONG_LONG
 
-/*
- * Enable/Disable WiFi
- */
-void WriteWlanEnablePin(uint8_t val);
+/****************************************************************************
+ * Name: ffsll
+ *
+ * Description:
+ *   The ffsll() function will find the first bit set (beginning with the least
+ *   significant bit) in i, and return the index of that bit. Bits are
+ *   numbered starting at one (the least significant bit).
+ *
+ * Returned Value:
+ *   The ffsll() function will return the index of the first bit set. If j is
+ *   0, then ffsll() will return 0.
+ *
+ ****************************************************************************/
 
-/*
- * Assert CC3000 CS
- */
-void AssertWlanCS(void);
+int ffsll(long long j)
+{
+  int ret = 0;
 
-/*
- * Deassert CC3000 CS
- */
-void DeassertWlanCS(void);
+  if (j != 0)
+    {
+#ifdef CONFIG_HAVE_BUILTIN_CTZ
+      /* Count trailing zeros function can be used to implement ffs. */
 
-/*
- * Setup needed pins
- */
-void Wlan_Setup(void);
+      ret = __builtin_ctzll(j) + 1;
+#else
+      unsigned long long value = (unsigned long long)j;
+      int bitno;
 
+      for (bitno = 1; bitno <= NBITS; bitno++, value >>= 1)
+        {
+          if ((value & 1) != 0)
+            {
+              ret = bitno;
+              break;
+            }
+        }
+#endif
+    }
+
+  return ret;
+}
+
+#endif

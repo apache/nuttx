@@ -89,7 +89,7 @@ OBJS = $(AOBJS) $(COBJS)
 BIN = libconfigs$(LIBEXT)
 
 all: $(BIN)
-.PHONY: depend ccontext clean_context clean distclean
+.PHONY: depend context clean_context clean distclean
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
