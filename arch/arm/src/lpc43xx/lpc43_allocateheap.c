@@ -186,7 +186,7 @@
 #ifndef CONFIG_LPC43_BOOT_SRAM
 
 /* Configuration A */
-/* CONFIG_RAM_START shoudl be set to the base of local SRAM, Bank 0. */
+/* CONFIG_RAM_START should be set to the base of local SRAM, Bank 0. */
 
 #  if CONFIG_RAM_START != LPC43_LOCSRAM_BANK0_BASE
 #    error "CONFIG_RAM_START must be set to the base address of RAM bank 0"
