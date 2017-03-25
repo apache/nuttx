@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/clicker2-stm32/mrf24j40_dev/setenv.sh
+# configs/clicker2-stm32/mrf24j40-radio/setenv.sh
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

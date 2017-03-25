@@ -226,6 +226,48 @@ Configurations
   Configuration sub-directories
   -----------------------------
 
+  mrf24j40-radio
+
+    This is a version of nsh that was used for testing the MRF24J40 be as a
+    character device.  The most important configuration differences are
+    summarized below:
+
+    1. Support for the BEE click and SPI are in enabled in the mikroBUS1 slot:
+
+         CONFIG_CLICKER2_STM32_MB1_BEE=y
+         CONFIG_CLICKER2_STM32_MB1_SPI=y
+
+    2. SPI support and STM32 SPI3, in particular, are enabled:
+
+         CONFIG_SPI=y
+         CONFIG_SPI_EXCHANGE=y
+
+         CONFIG_STM32_SPI=y
+         CONFIG_STM32_SPI3=y
+
+    4. Support for the IEEE802.15.4 "upper half" character driver is enabled:
+
+         CONFIG_WIRELESS=y
+         CONFIG_WIRELESS_IEEE802154=y
+         CONFIG_IEEE802154_DEV=y
+
+    5. Support for the lower half MRF24J40 character driver is enabled
+
+         CONFIG_DRIVERS_WIRELESS=y
+         CONFIG_DRIVERS_IEEE802154=y
+         CONFIG_IEEE802154_MRF24J40=y
+
+    6. Support for the test program at apps/ieee802154 is enabled:
+
+         CONFIG_IEEE802154_COMMON=y
+         CONFIG_IEEE802154_COORD=y
+         CONFIG_IEEE802154_I8SAK=y
+
+    7. Initialization hooks are provided to enable the MRF24J40 and to
+       register the radio character driver.
+
+         CONFIG_NSH_ARCHINIT=y
+
   nsh:
 
     Configures the NuttShell (nsh) located at examples/nsh.  This
