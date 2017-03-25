@@ -45,6 +45,8 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
+#include <nuttx/analog/comp.h>
+#include <nuttx/analog/ioctl.h>
 
 #include "chip.h"
 #include "stm32_gpio.h"
@@ -59,6 +61,10 @@
     defined(CONFIG_STM32_COMP3) || defined(CONFIG_STM32_COMP4) || \
     defined(CONFIG_STM32_COMP5) || defined(CONFIG_STM32_COMP6) || \
     defined(CONFIG_STM32_COMP7)
+
+#ifndef CONFIG_STM32_SYSCFG
+#  error "SYSCFG clock enable must be set"
+#endif
 
 /* @TODO: support for STM32F30XX and STM32F37XX comparators */
 
@@ -145,6 +151,61 @@
  * Private Types
  ****************************************************************************/
 
+/* This structure describes the configuration of one COMP device */
+
+struct stm32_comp_s
+{
+  uint8_t blanking;             /* Blanking source */
+  uint8_t pol;                  /* Output polarity */
+  uint8_t inm;                  /* Inverting input selection */
+  uint8_t out;                  /* Comparator output */
+  uint8_t lock;                 /* Comparator Lock */
+  uint32_t csr;                 /* Control and status register */
+#ifndef CONFIG_STM32_STM32F33XX
+  uint8_t mode;                 /* Comparator mode */
+  uint8_t hyst;                 /* Comparator hysteresis */
+                                /* @TODO: Window mode + INP selection */
+#endif
+};
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/* COMP Register access */
+
+static inline void comp_modify_csr(FAR struct stm32_comp_s *priv,
+                                   uint32_t clearbits, uint32_t setbits);
+static inline uint32_t comp_getreg_csr(FAR struct stm32_comp_s *priv);
+static inline void comp_putreg_csr(FAR struct stm32_comp_s *priv,
+                                   uint32_t value);
+static bool stm32_complock_get(FAR struct stm32_comp_s *priv);
+static int stm32_complock(FAR struct stm32_comp_s *priv, bool lock);
+
+/* COMP Driver Methods */
+
+static void comp_shutdown(FAR struct comp_dev_s *dev);
+static int comp_setup(FAR struct comp_dev_s *dev);
+static int comp_read(FAR struct comp_dev_s *dev);
+static int comp_ioctl(FAR struct comp_dev_s *dev, int cmd, unsigned long arg);
+
+/* Initialization */
+
+static int stm32_compconfig(FAR struct stm32_comp_s *priv);
+static int stm32_compenable(FAR struct stm32_comp_s *priv, bool enable);
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+static const struct comp_ops_s g_compops =
+{
+  .ao_shutdown  = comp_shutdown,
+  .ao_setup     = comp_setup,
+  .ao_read      = comp_read,
+  .ao_ioctl     = comp_ioctl,
+};
+
 #ifdef CONFIG_STM32_COMP1
 static struct stm32_comp_s g_comp1priv =
 {
@@ -158,6 +219,12 @@ static struct stm32_comp_s g_comp1priv =
   .mode = COMP1_MODE,
   .hyst = COMP1_HYST,
 #endif
+};
+
+static struct comp_dev_s g_comp1dev =
+{
+  .ad_ops  = &g_compops,
+  .ad_priv = &g_comp1priv,
 };
 #endif
 
@@ -175,6 +242,12 @@ static struct stm32_comp_s g_comp2priv =
   .hyst = COMP2_HYST,
 #endif
 };
+
+static struct comp_dev_s g_comp2dev =
+{
+  .ad_ops  = &g_compops,
+  .ad_priv = &g_comp2priv,
+};
 #endif
 
 #ifdef CONFIG_STM32_COMP3
@@ -187,9 +260,15 @@ static struct stm32_comp_s g_comp3priv =
   .lock = COMP3_LOCK,
   .csr  = STM32_COMP3_CSR,
 #ifndef CONFIG_STM32_STM32F33XX
-    .mode = COMP3_MODE,
-    .hyst = COMP3_HYST,
+  .mode = COMP3_MODE,
+  .hyst = COMP3_HYST,
 #endif
+};
+
+static struct comp_dev_s g_comp3dev =
+{
+  .ad_ops  = &g_compops,
+  .ad_priv = &g_comp3priv,
 };
 #endif
 
@@ -207,6 +286,12 @@ static struct stm32_comp_s g_comp4priv =
   .hyst = COMP4_HYST,
 #endif
 };
+
+static struct comp_dev_s g_comp4dev =
+{
+  .ad_ops  = &g_compops,
+  .ad_priv = &g_comp4priv,
+};
 #endif
 
 #ifdef CONFIG_STM32_COMP5
@@ -222,6 +307,12 @@ static struct stm32_comp_s g_comp5priv =
   .mode = COMP5_MODE,
   .hyst = COMP5_HYST,
 #endif
+};
+
+static struct comp_dev_s g_comp5dev =
+{
+  .ad_ops  = &g_compops,
+  .ad_priv = &g_comp5priv,
 };
 #endif
 
@@ -239,6 +330,12 @@ static struct stm32_comp_s g_comp6priv =
   .hyst = COMP6_HYST,
 #endif
 };
+
+static struct comp_dev_s g_comp6dev =
+{
+  .ad_ops  = &g_compops,
+  .ad_priv = &g_comp6priv,
+};
 #endif
 
 #ifdef CONFIG_STM32_COMP7
@@ -255,18 +352,13 @@ static struct stm32_comp_s g_comp7priv =
   .hyst = COMP7_HYST,
 #endif
 };
+
+static struct comp_dev_s g_comp7dev =
+{
+  .ad_ops  = &g_compops,
+  .ad_priv = &g_comp7priv,
+};
 #endif
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-static inline void comp_modify_csr(FAR struct stm32_comp_s *priv,
-                                   uint32_t clearbits, uint32_t setbits);
-static inline uint32_t comp_getreg_csr(FAR struct stm32_comp_s *priv);
-static inline void comp_putreg_csr(FAR struct stm32_comp_s *priv,
-                                   uint32_t value);
-static bool stm32_complock_get(FAR struct stm32_comp_s *priv);
 
 /****************************************************************************
  * Private Functions
@@ -360,12 +452,51 @@ static bool stm32_complock_get(FAR struct stm32_comp_s *priv)
 
   regval = comp_getreg_csr(priv);
 
-  return ((regval & COMP_CSR_LOCK == 0) ? false : true);
+  return (((regval & COMP_CSR_LOCK) == 0) ? false : true);
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: stm32_complock
+ *
+ * Description:
+ *   Lock comparator CSR register
+ *
+ * Input Parameters:
+ *   priv   - A reference to the COMP structure
+ *   enable - lock flag
+ *
+ * Returned Value:
+ *  0 on success, a negated errno value on failure
+ *
  ****************************************************************************/
+
+static int stm32_complock(FAR struct stm32_comp_s *priv, bool lock)
+{
+  bool current;
+
+  current = stm32_complock_get(priv);
+
+  if (current)
+    {
+      if (lock == false)
+        {
+          aerr("ERROR: COMP LOCK can be cleared only by a system reset\n");
+
+          return -EPERM;
+        }
+    }
+  else
+    {
+      if (lock == true)
+        {
+          comp_modify_csr(priv, 0, COMP_CSR_LOCK);
+
+          priv->lock = COMP_LOCK_RO;
+        }
+    }
+
+  return OK;
+}
 
 /****************************************************************************
  * Name: stm32_compconfig
@@ -383,9 +514,9 @@ static bool stm32_complock_get(FAR struct stm32_comp_s *priv)
  *
  ****************************************************************************/
 
-int stm32_compconfig(FAR struct stm32_comp_s *priv)
+static int stm32_compconfig(FAR struct stm32_comp_s *priv)
 {
-  uint32_t regval;
+  uint32_t regval = 0;
   int index;
 
   /* Get comparator index */
@@ -666,98 +797,6 @@ int stm32_compconfig(FAR struct stm32_comp_s *priv)
 }
 
 /****************************************************************************
- * Name: stm32_compinitialize
- *
- * Description:
- *   Initialize the COMP.
- *
- * Input Parameters:
- *   intf - The COMP interface number.
- *
- * Returned Value:
- *   Valid COMP device structure reference on succcess; a NULL on failure.
- *
- * Assumptions:
- *   1. Clock to the COMP block has enabled,
- *   2. Board-specific logic has already configured
- *
- ****************************************************************************/
-
-FAR struct stm32_comp_s* stm32_compinitialize(int intf)
-{
-  FAR struct stm32_comp_s  *priv;
-  int ret;
-
-  switch (intf)
-    {
-#ifdef CONFIG_STM32_COMP1
-    case 1:
-      ainfo("COMP1 selected\n");
-      priv = &g_comp1priv;
-      break;
-#endif
-
-#ifdef CONFIG_STM32_COMP2
-    case 2:
-      ainfo("COMP2 selected\n");
-      priv = &g_comp2priv;
-      break;
-#endif
-
-#ifdef CONFIG_STM32_COMP3
-    case 3:
-      ainfo("COMP3 selected\n");
-      priv = &g_comp3priv;
-      break;
-#endif
-
-#ifdef CONFIG_STM32_COMP4
-    case 4:
-      ainfo("COMP4 selected\n");
-      priv = &g_comp4priv;
-      break;
-#endif
-
-#ifdef CONFIG_STM32_COMP5
-    case 5:
-      ainfo("COMP5 selected\n");
-      priv = &g_comp5priv;
-      break;
-#endif
-
-#ifdef CONFIG_STM32_COMP6
-    case 6:
-      ainfo("COMP6 selected\n");
-      priv = &g_comp6priv;
-      break;
-#endif
-
-#ifdef CONFIG_STM32_COMP7
-    case 7:
-      ainfo("COMP7 selected\n");
-      priv = &g_comp7priv;
-      break;
-#endif
-
-    default:
-      aerr("ERROR: No COMP interface defined\n");
-      return NULL;
-    }
-
-  /* Configure selected comparator */
-
-  ret = stm32_compconfig(priv);
-  if (ret < 0)
-    {
-      aerr("ERROR: Failed to initialize COMP%d: %d\n", intf, ret);
-      errno = -ret;
-      return NULL;
-    }
-
-  return priv;
-}
-
-/****************************************************************************
  * Name: stm32_compenable
  *
  * Description:
@@ -772,7 +811,7 @@ FAR struct stm32_comp_s* stm32_compinitialize(int intf)
  *
  ****************************************************************************/
 
-int stm32_compenable(FAR struct stm32_comp_s *priv, bool enable)
+static int stm32_compenable(FAR struct stm32_comp_s *priv, bool enable)
 {
   bool lock;
 
@@ -792,13 +831,13 @@ int stm32_compenable(FAR struct stm32_comp_s *priv, bool enable)
         {
           /* Enable the COMP */
 
-          comp_modify_csr(priv, COMP_CSR_COMPEN, 0);
+          comp_modify_csr(priv, 0, COMP_CSR_COMPEN);
         }
       else
         {
           /* Disable the COMP */
 
-          comp_modify_csr(priv, 0, COMP_CSR_COMPEN);
+          comp_modify_csr(priv, COMP_CSR_COMPEN, 0);
         }
     }
 
@@ -806,46 +845,190 @@ int stm32_compenable(FAR struct stm32_comp_s *priv, bool enable)
 }
 
 /****************************************************************************
- * Name: stm32_complock
+ * Name: adc_setup
  *
  * Description:
- *   Lock comparator CSR register
+ *   Configure the COMP. This method is called the first time that the COMP
+ *   device is opened.  This will occur when the port is first opened.
+ *   This setup includes configuring and attaching COMP interrupts.
+ *   Interrupts are all disabled upon return.
  *
  * Input Parameters:
- *   priv   - A reference to the COMP structure
- *   enable - lock flag
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
-int stm32_complock(FAR struct stm32_comp_s *priv, bool lock)
+static int comp_setup(FAR struct comp_dev_s *dev)
 {
-  bool current;
+#warning "Missing logic"
+    return OK;
+}
 
-  current = stm32_complock_get(priv);
+/****************************************************************************
+ * Name: comp_shutdown
+ *
+ * Description:
+ *   Disable the COMP.  This method is called when the COMP device is closed.
+ *   This method reverses the operation the setup method.
+ *   Works only if COMP device is not locked.
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
-  if (current)
+static void comp_shutdown(FAR struct comp_dev_s *dev)
+{
+#warning "Missing logic"
+}
+
+/****************************************************************************
+ * Name: comp_read
+ *
+ * Description:
+ *  Get the COMP output state.
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *   0 if output is low (non-inverting input below inverting input),
+ *   1 if output is high (non inverting input above inverting input).
+ *
+ ****************************************************************************/
+
+static int comp_read(FAR struct comp_dev_s *dev)
+{
+  FAR struct stm32_comp_s *priv;
+  uint32_t regval;
+
+  priv = dev->ad_priv;
+  regval = comp_getreg_csr(priv);
+
+  return (((regval & COMP_CSR_OUT) == 0) ? 0 : 1);
+}
+
+/****************************************************************************
+ * Name: comp_ioctl
+ *
+ * Description:
+ *   All ioctl calls will be routed through this method.
+ *
+ * Input Parameters:
+ *   dev - pointer to device structure used by the driver
+ *   cmd - command
+ *   arg - arguments passed with command
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int comp_ioctl(FAR struct comp_dev_s *dev, int cmd, unsigned long arg)
+{
+#warning "Missing logic"
+  return -ENOTTY;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_compinitialize
+ *
+ * Description:
+ *   Initialize the COMP.
+ *
+ * Input Parameters:
+ *   intf - The COMP interface number.
+ *
+ * Returned Value:
+ *   Valid COMP device structure reference on succcess; a NULL on failure.
+ *
+ * Assumptions:
+ *   1. Clock to the COMP block has enabled,
+ *   2. Board-specific logic has already configured
+ *
+ ****************************************************************************/
+
+FAR struct comp_dev_s* stm32_compinitialize(int intf)
+{
+  FAR struct comp_dev_s  *dev;
+  FAR struct stm32_comp_s *comp;
+  int ret;
+
+  switch (intf)
     {
-      if (lock == false)
-        {
-          aerr("ERROR: COMP LOCK can be cleared only by a system reset\n");
+#ifdef CONFIG_STM32_COMP1
+    case 1:
+      ainfo("COMP1 selected\n");
+      dev = &g_comp1dev;
+      break;
+#endif
 
-          return -EPERM;
-        }
+#ifdef CONFIG_STM32_COMP2
+    case 2:
+      ainfo("COMP2 selected\n");
+      dev = &g_comp2dev;
+      break;
+#endif
+
+#ifdef CONFIG_STM32_COMP3
+    case 3:
+      ainfo("COMP3 selected\n");
+      dev = &g_comp3dev;
+      break;
+#endif
+
+#ifdef CONFIG_STM32_COMP4
+    case 4:
+      ainfo("COMP4 selected\n");
+      dev = &g_comp4dev;
+      break;
+#endif
+
+#ifdef CONFIG_STM32_COMP5
+    case 5:
+      ainfo("COMP5 selected\n");
+      dev = &g_comp5dev;
+      break;
+#endif
+
+#ifdef CONFIG_STM32_COMP6
+    case 6:
+      ainfo("COMP6 selected\n");
+      dev = &g_comp6dev;
+      break;
+#endif
+
+#ifdef CONFIG_STM32_COMP7
+    case 7:
+      ainfo("COMP7 selected\n");
+      dev = &g_comp7dev;
+      break;
+#endif
+
+    default:
+      aerr("ERROR: No COMP interface defined\n");
+      return NULL;
     }
-  else
+
+  /* Configure selected comparator */
+
+  comp = dev->ad_priv;
+
+  ret = stm32_compconfig(comp);
+  if (ret < 0)
     {
-      if (lock == true)
-        {
-          comp_modify_csr(priv, COMP_CSR_LOCK, 0);
-
-          priv->lock = COMP_LOCK_RO;
-        }
+      aerr("ERROR: Failed to initialize COMP%d: %d\n", intf, ret);
+      errno = -ret;
+      return NULL;
     }
 
-  return OK;
+  return dev;
 }
 
 #endif  /* CONFIG_STM32_STM32F30XX || CONFIG_STM32_STM32F33XX ||
