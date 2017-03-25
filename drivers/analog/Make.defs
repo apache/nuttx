@@ -50,6 +50,16 @@ ifeq ($(CONFIG_DAC_AD5410),y)
 endif
 endif
 
+# Check for COMP devices
+
+ifeq ($(CONFIG_COMP),y)
+
+# Include the common COMP character driver
+
+CSRCS += comp.c
+
+endif
+
 # Check for ADC devices
 
 ifeq ($(CONFIG_ADC),y)
@@ -86,6 +96,12 @@ ifeq ($(CONFIG_ADC),y)
   DEPPATH += --dep-path analog
   VPATH += :analog
   CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)analog}
+else
+ifeq ($(CONFIG_COMP),y)
+  DEPPATH += --dep-path analog
+  VPATH += :analog
+  CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)analog}
+endif
 endif
 endif
 
