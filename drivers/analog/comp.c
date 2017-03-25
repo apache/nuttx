@@ -77,7 +77,10 @@ static const struct file_operations comp_fops =
   NULL,                         /* seek */
   comp_ioctl                    /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , 0
+  , NULL                        /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL                        /* unlink */
 #endif
 };
 

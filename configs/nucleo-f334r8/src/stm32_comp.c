@@ -86,6 +86,8 @@ int stm32_comp_setup(void)
 
   if (!initialized)
     {
+      /* Get the comparator interface */
+
 #ifdef CONFIG_STM32_COMP2
       comp = stm32_compinitialize(2);
       if (comp == NULL)
@@ -112,6 +114,8 @@ int stm32_comp_setup(void)
           return -ENODEV;
         }
 #endif
+
+      /* Register the comparator character driver at /dev/comp0 */
 
       ret = comp_register("/dev/comp0", comp);
       if (ret < 0)

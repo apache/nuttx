@@ -110,11 +110,10 @@ endif # if ADC_PGA11X
 endif # ADC
 
 config COMP
-       bool "Analog Comparator"
-       default n
-       ---help---
+	bool "Analog Comparator"
+	default n
+	---help---
 		Select to enable support for Analog Comparators (COMPs).
-
 
 config DAC
 	bool "Digital-to-Analog Conversion"
