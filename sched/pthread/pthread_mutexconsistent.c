@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread/pthread_mutexdestroy.c
+ * sched/pthread/pthread_mutexconsistent.c
  *
- *   Copyright (C) 2007-2009, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,11 +40,9 @@
 #include <nuttx/config.h>
 
 #include <pthread.h>
-#include <semaphore.h>
-#include <signal.h>
 #include <sched.h>
+#include <assert.h>
 #include <errno.h>
-#include <debug.h>
 
 #include <nuttx/semaphore.h>
 
@@ -55,22 +53,39 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_mutex_destroy
+ * Name: pthread_mutex_consistent
  *
  * Description:
- *   Destroy a mutex.
+ *   If mutex is a robust mutex in an inconsistent state, the
+ *   pthread_mutex_consistent() function can be used to mark the state
+ *   protected by the mutex referenced by mutex as consistent again.
  *
- * Parameters:
- *   None
+ *   If an owner of a robust mutex terminates while holding the mutex, the
+ *   mutex becomes inconsistent and the next thread that acquires the mutex
+ *   lock will be notified of the state by the return value EOWNERDEAD.
+ *   In this case, the mutex does not become normally usable again until the
+ *   state is marked consistent.
  *
- * Return Value:
- *   None
+ *   If the thread which acquired the mutex lock with the return value
+ *   EOWNERDEAD terminates before calling either pthread_mutex_consistent()
+ *   or pthread_mutex_unlock(), the next thread that acquires the mutex lock
+ *   will be notified about the state of the mutex by the return value
+ *   EOWNERDEAD.
  *
- * Assumptions:
+ *   The behavior is undefined if the value specified by the mutex argument
+ *   to pthread_mutex_consistent() does not refer to an initialized mutex.
+ *
+ * Input Parameters:
+ *   mutex -- a reference to the mutex to be made consistent
+ *
+ * Returned Value:
+ *   Upon successful completion, the pthread_mutex_consistent() function
+ *   will return zero. Otherwise, an error value will be returned to
+ *   indicate the error.
  *
  ****************************************************************************/
 
-int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
+int pthread_mutex_consistent(FAR pthread_mutex_t *mutex)
 {
   int ret = EINVAL;
   int status;
@@ -80,21 +95,19 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
 
   if (mutex != NULL)
     {
-      /* Make sure the semaphore is stable while we make the following checks */
+      /* Make sure the mutex is stable while we make the following checks. */
 
       sched_lock();
 
       /* Is the mutex available? */
 
+      DEBUGASSERT(mutex->pid != 0); /* < 0: available, >0 owned, ==0 error */
       if (mutex->pid >= 0)
         {
-          DEBUGASSERT(mutex->pid != 0); /* < 0: available, >0 owned, ==0 error */
-
           /* No.. Verify that the PID still exists.  We may be destroying
            * the mutex after cancelling a pthread and the mutex may have
            * been in a bad state owned by the dead pthread.  NOTE: The
-           * following behavior is unspecified for pthread_mutex_destroy()
-           * (see pthread_mutex_consistent()).
+           * folling is unspecified behavior (see pthread_mutex_consistent()).
            *
            * If the holding thread is still valid, then we should be able to
            * map its PID to the underlying TCB. That is what sched_gettcb()
@@ -105,56 +118,20 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
             {
               /* The thread associated with the PID no longer exists */
 
-              mutex->pid = -1;
+              mutex->pid   = -1;
+              mutex->flags = 0;
 
-              /* Reset the semaphore.  If threads are were on this
-               * semaphore, then this will awakened them and make
-               * destruction of the semaphore impossible here.
+              /* Reset the semaphore.  This has the same affect as if the
+               * dead task had called pthread_mutex_unlock().
                */
 
               status = sem_reset((FAR sem_t *)&mutex->sem, 1);
-              if (status < 0)
-                {
-                  ret = -status;
-                }
-
-              /* Check if the reset caused some other thread to lock the
-               * mutex.
-               */
-
-              else if (mutex->pid != -1)
-                {
-                  /* Yes.. then we cannot destroy the mutex now. */
-
-                  ret = EBUSY;
-                }
-
-              /* Destroy the underlying semaphore */
-
-              else
-                {
-                  status = sem_destroy((FAR sem_t *)&mutex->sem);
-                  ret = (status != OK) ? get_errno() : OK;
-                }
+              ret = (status != OK) ? get_errno() : OK;
             }
-          else
-            {
-              ret = EBUSY;
-            }
-        }
-      else
-        {
-          /* Destroy the semaphore
-           *
-           * REVISIT:  What if there are threads waiting on the semaphore?
-           * Perhaps this logic should all sem_reset() first?
-           */
-
-          status = sem_destroy((FAR sem_t *)&mutex->sem);
-          ret = ((status != OK) ? get_errno() : OK);
         }
 
       sched_unlock();
+      ret = OK;
     }
 
   sinfo("Returning %d\n", ret);

@@ -87,7 +87,7 @@ int pthread_detach(pthread_t thread)
 
   /* Find the entry associated with this pthread. */
 
-  (void)pthread_takesemaphore(&group->tg_joinsem);
+  (void)pthread_takesemaphore(&group->tg_joinsem, false);
   pjoin = pthread_findjoininfo(group, (pid_t)thread);
   if (!pjoin)
     {

@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/pthread.h
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -143,6 +143,13 @@
 #define PTHREAD_PRIO_INHERIT          SEM_PRIO_INHERIT
 #define PTHREAD_PRIO_PROTECT          SEM_PRIO_PROTECT
 
+/* Values for struct pthread_mutex_s flags.  These are non-standard and
+ * intended only for internal use within the OS.
+ */
+
+#define _PTHREAD_MFLAGS_INCONSISTENT  (1 << 0) /* Mutex is in an inconsistent state */
+#define _PTHREAD_MFLAGS_NOTRECOVRABLE (1 << 1) /* Inconsistent mutex has been unlocked */
+
 /* Definitions to map some non-standard, BSD thread management interfaces to
  * the non-standard Linux-like prctl() interface.  Since these are simple
  * mappings to prctl, they will return 0 on success and -1 on failure with the
@@ -233,11 +240,18 @@ typedef struct pthread_mutexattr_s pthread_mutexattr_t;
 
 struct pthread_mutex_s
 {
-  int pid;          /* ID of the holder of the mutex */
+  /* Supports a singly linked list */
+
+  FAR struct pthread_mutex_s *flink;
+
+  /* Payload */
+
   sem_t sem;        /* Semaphore underlying the implementation of the mutex */
+  pid_t pid;        /* ID of the holder of the mutex */
+  uint8_t flags;    /* See _PTHREAD_MFLAGS_* */
 #ifdef CONFIG_MUTEX_TYPES
   uint8_t type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
-  int nlocks;       /* The number of recursive locks held */
+  int16_t nlocks;   /* The number of recursive locks held */
 #endif
 };
 
@@ -423,6 +437,10 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex);
 int pthread_mutex_lock(FAR pthread_mutex_t *mutex);
 int pthread_mutex_trylock(FAR pthread_mutex_t *mutex);
 int pthread_mutex_unlock(FAR pthread_mutex_t *mutex);
+
+/* Make sure that the pthread mutex is in a consistent state */
+
+int pthread_mutex_consistent(FAR pthread_mutex_t *mutex);
 
 /* Operations on condition variables */
 
