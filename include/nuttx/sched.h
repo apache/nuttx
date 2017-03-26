@@ -697,6 +697,10 @@ struct pthread_tcb_s
   pthread_addr_t arg;                    /* Startup argument                    */
   FAR void *joininfo;                    /* Detach-able info to support join    */
 
+  /* Robust mutex support *******************************************************/
+
+  FAR struct pthread_mutex_s *mhead;     /* List of mutexes held by thread      */
+
   /* Clean-up stack *************************************************************/
 
 #ifdef CONFIG_PTHREAD_CLEANUP

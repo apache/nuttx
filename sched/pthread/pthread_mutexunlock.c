@@ -139,7 +139,7 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
 #ifdef CONFIG_MUTEX_TYPES
           mutex->nlocks = 0;
 #endif
-          ret = pthread_givesemaphore((FAR sem_t *)&mutex->sem);
+          ret = pthread_givemutex(mutex);
         }
 
       sched_unlock();

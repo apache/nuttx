@@ -136,8 +136,15 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
                 {
                   /* Increment the number of locks held and return successfully. */
 
-                  mutex->nlocks++;
-                  ret = OK;
+                  if (mutex->nlocks < INT16_MAX)
+                    {
+                      mutex->nlocks++;
+                      ret = OK;
+                    }
+                  else
+                    {
+                      ret = EOVERFLOW;
+                    }
                 }
               else
 #endif

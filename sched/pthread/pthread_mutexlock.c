@@ -133,8 +133,15 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
                * success.
                */
 
-              mutex->nlocks++;
-              ret = OK;
+              if (mutex->nlocks < INT16_MAX)
+                {
+                  mutex->nlocks++;
+                  ret = OK;
+                }
+              else
+                {
+                  ret = EOVERFLOW;
+                }
             }
           else
 #endif
@@ -176,7 +183,7 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
         {
           /* Take the underlying semaphore, waiting if necessary */
 
-          ret = pthread_takesemaphore((FAR sem_t *)&mutex->sem, true);
+          ret = pthread_takemutex(mutex, true);
 
           /* If we successfully obtained the semaphore, then indicate
            * that we own it.
@@ -189,14 +196,6 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
               mutex->nlocks = 1;
 #endif
             }
-
-          /* Check if we were awakened by a signal.  This might happen if the
-           * tasking holding the mutex just exitted.
-           */
-
-         else if (ret == EINTR)
-           {
-           }
         }
 
       sched_unlock();

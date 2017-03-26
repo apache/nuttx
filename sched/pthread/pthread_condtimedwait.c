@@ -260,7 +260,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                   /* Give up the mutex */
 
                   mutex->pid = -1;
-                  ret = pthread_givesemaphore((FAR sem_t *)&mutex->sem);
+                  ret = pthread_givemutex(mutex);
                   if (ret != 0)
                     {
                       /* Restore interrupts  (pre-emption will be enabled when
@@ -316,7 +316,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                   /* Reacquire the mutex (retaining the ret). */
 
                   sinfo("Re-locking...\n");
-                  status = pthread_takesemaphore((FAR sem_t *)&mutex->sem, false);
+                  status = pthread_takemutex(mutex, false);
                   if (status == OK)
                     {
                       mutex->pid = mypid;

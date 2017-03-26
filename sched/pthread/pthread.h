@@ -107,8 +107,10 @@ void pthread_destroyjoin(FAR struct task_group_s *group,
 FAR struct join_s *pthread_findjoininfo(FAR struct task_group_s *group,
                                         pid_t pid);
 void pthread_release(FAR struct task_group_s *group);
-int pthread_givesemaphore(sem_t *sem);
 int pthread_takesemaphore(sem_t *sem, bool intr);
+int pthread_givesemaphore(sem_t *sem);
+int pthread_takemutex(FAR struct pthread_mutex_s *mutex, bool intr);
+int pthread_givemutex(FAR struct pthread_mutex_s *mutex);
 
 #ifdef CONFIG_MUTEX_TYPES
 int pthread_mutexattr_verifytype(int type);

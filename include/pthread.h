@@ -143,6 +143,13 @@
 #define PTHREAD_PRIO_INHERIT          SEM_PRIO_INHERIT
 #define PTHREAD_PRIO_PROTECT          SEM_PRIO_PROTECT
 
+/* Values for struct pthread_mutex_s flags.  These are non-standard and
+ * intended only for internal use within the OS.
+ */
+
+#define _PTHREAD_MFLAGS_INCONSISTENT  (1 << 0) /* Mutex is in an inconsistent state */
+#define _PTHREAD_MFLAGS_NOTRECOVRABLE (1 << 1) /* Inconsistent mutex has been unlocked */
+
 /* Definitions to map some non-standard, BSD thread management interfaces to
  * the non-standard Linux-like prctl() interface.  Since these are simple
  * mappings to prctl, they will return 0 on success and -1 on failure with the
@@ -221,7 +228,7 @@ struct pthread_mutexattr_s
 {
   uint8_t pshared;  /* PTHREAD_PROCESS_PRIVATE or PTHREAD_PROCESS_SHARED */
 #ifdef CONFIG_PRIORITY_INHERITANCE
-  uint8_t proto;    /* See PTHREAD_PRIO_* definitions */
+  uint8_t proto;    /* See _PTHREAD_PRIO_* definitions */
 #endif
 #ifdef CONFIG_MUTEX_TYPES
   uint8_t type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
@@ -233,11 +240,18 @@ typedef struct pthread_mutexattr_s pthread_mutexattr_t;
 
 struct pthread_mutex_s
 {
-  int pid;          /* ID of the holder of the mutex */
+  /* Supports a singly linked list */
+
+  FAR struct pthread_mutex_s *flink;
+
+  /* Payload */
+
   sem_t sem;        /* Semaphore underlying the implementation of the mutex */
+  pid_t pid;        /* ID of the holder of the mutex */
+  uint8_t flags;    /* See PTHREAD_MFLAGS_* */
 #ifdef CONFIG_MUTEX_TYPES
   uint8_t type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
-  int nlocks;       /* The number of recursive locks held */
+  int16_t nlocks;   /* The number of recursive locks held */
 #endif
 };
 
