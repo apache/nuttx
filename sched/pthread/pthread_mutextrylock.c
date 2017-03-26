@@ -124,7 +124,7 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
 
       else
         {
-          /* Did it fail because the semaphore was not avaialabl? */
+          /* Did it fail because the semaphore was not avaialable? */
 
           int errcode = get_errno();
           if (errcode == EAGAIN)
@@ -148,6 +148,8 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
                 }
               else
 #endif
+
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
               /* The calling thread does not hold the semaphore.  The correct
                * behavior for the 'robust' mutex is to verify that the holder of
                * the mutex is still valid.  This is protection from the case
@@ -172,6 +174,8 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
               /* The mutex is locked by another, active thread */
 
               else
+#endif /* CONFIG_PTHREAD_MUTEX_UNSAFE */
+
                 {
                   ret = EBUSY;
                 }

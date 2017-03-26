@@ -120,13 +120,15 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
 
       sched_lock();
 
-      /* Does this thread already hold the semaphore? */
+#ifdef CONFIG_MUTEX_TYPES
+      /* All mutex types except for NORMAL (and DEFAULT) will return
+       * and an error  error if the caller does not hold the mutex.
+       */
 
-      if (mutex->pid == mypid)
+      if (mutex->type != PTHREAD_MUTEX_NORMAL && mutex->pid == mypid)
         {
           /* Yes.. Is this a recursive mutex? */
 
-#ifdef CONFIG_MUTEX_TYPES
           if (mutex->type == PTHREAD_MUTEX_RECURSIVE)
             {
               /* Yes... just increment the number of locks held and return
@@ -144,7 +146,6 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
                 }
             }
           else
-#endif
             {
               /* No, then we would deadlock... return an error (default
                * behavior is like PTHREAD_MUTEX_ERRORCHECK)
@@ -160,14 +161,17 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
               ret = EDEADLK;
             }
         }
+      else
+#endif /* CONFIG_MUTEX_TYPES */
 
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
       /* The calling thread does not hold the semaphore.  The correct
        * behavior for the 'robust' mutex is to verify that the holder of the
        * mutex is still valid.  This is protection from the case
        * where the holder of the mutex has exitted without unlocking it.
        */
 
-      else if (mutex->pid > 0 && sched_gettcb(mutex->pid) == NULL)
+      if (mutex->pid > 0 && sched_gettcb(mutex->pid) == NULL)
         {
           DEBUGASSERT(mutex->pid != 0); /* < 0: available, >0 owned, ==0 error */
           DEBUGASSERT((mutex->flags & _PTHREAD_MFLAGS_INCONSISTENT) != 0);
@@ -182,8 +186,13 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
           ret           = EOWNERDEAD;
         }
       else
+#endif /* !CONFIG_PTHREAD_MUTEX_UNSAFE */
+
         {
-          /* Take the underlying semaphore, waiting if necessary */
+          /* Take the underlying semaphore, waiting if necessary.  NOTE that
+           * is required to deadlock for the case of the non-robust NORMAL or
+           * default mutex.
+           */
 
           ret = pthread_mutex_take(mutex, true);
 
