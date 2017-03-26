@@ -52,10 +52,8 @@
 #include "stm32_gpio.h"
 #include "stm32_comp.h"
 
-#ifdef CONFIG_STM32_COMP
-
 /* Some COMP peripheral must be enabled */
-/* Up to 7 comparators in STM32F2 Series */
+/* Up to 7 comparators in STM32F3 Series */
 
 #if defined(CONFIG_STM32_COMP1) || defined(CONFIG_STM32_COMP2) || \
     defined(CONFIG_STM32_COMP3) || defined(CONFIG_STM32_COMP4) || \
@@ -195,7 +193,7 @@ static int stm32_compconfig(FAR struct stm32_comp_s *priv);
 static int stm32_compenable(FAR struct stm32_comp_s *priv, bool enable);
 
 /****************************************************************************
- * Private Types
+ * Private Data
  ****************************************************************************/
 
 static const struct comp_ops_s g_compops =
@@ -1036,5 +1034,3 @@ FAR struct comp_dev_s* stm32_compinitialize(int intf)
 
 #endif  /* CONFIG_STM32_COMP2 || CONFIG_STM32_COMP4 ||
          * CONFIG_STM32_COMP6 */
-
-#endif /* CONFIG_STM32_COMP */
