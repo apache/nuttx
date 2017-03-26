@@ -156,7 +156,7 @@
 #define ENOMEM_STR          "Out of memory"
 #define EACCES              13
 #define EACCES_STR          "Permission denied"
-#define EFAULT              14
+#define EFAULT              14                         /* Linux errno extension */
 #define EFAULT_STR          "Bad address"
 #define ENOTBLK             15
 #define ENOTBLK_STR         "Block device required"
@@ -198,53 +198,48 @@
 #define EDOM_STR            "Math argument out of domain of func"
 #define ERANGE              34
 #define ERANGE_STR          "Math result not representable"
-#define EDEADLK             35
-#define EDEADLOCK           EDEADLK
-#define EDEADLK_STR         "Resource deadlock would occur"
-#define ENAMETOOLONG        36
-#define ENAMETOOLONG_STR    "File name too long"
-#define ENOLCK              37
-#define ENOLCK_STR          "No record locks available"
-#define ENOSYS              38
-#define ENOSYS_STR          "Function not implemented"
-#define ENOTEMPTY           39
-#define ENOTEMPTY_STR       "Directory not empty"
-#define ELOOP               40
-#define ELOOP_STR           "Too many symbolic links encountered"
-#define ENOMSG              42
+#define ENOMSG              35
 #define ENOMSG_STR          "No message of desired type"
-#define EIDRM               43
+#define EIDRM               36
 #define EIDRM_STR           "Identifier removed"
-#define ECHRNG              44
+#define ECHRNG              37                         /* Linux errno extension */
 #define ECHRNG_STR          "Channel number out of range"
-#define EL2NSYNC            45
+#define EL2NSYNC            38                         /* Linux errno extension */
 #define EL2NSYNC_STR        "Level 2 not synchronized"
-#define EL3HLT              46
+#define EL3HLT              39                         /* Linux errno extension */
 #define EL3HLT_STR          "Level 3 halted"
-#define EL3RST              47
+#define EL3RST              40                         /* Linux errno extension */
 #define EL3RST_STR          "Level 3 reset"
-#define ELNRNG              48
+#define ELNRNG              41                         /* Linux errno extension */
 #define ELNRNG_STR          "Link number out of range"
-#define EUNATCH             49
+#define EUNATCH             42                         /* Linux errno extension */
 #define EUNATCH_STR         "Protocol driver not attached"
-#define ENOCSI              50
+#define ENOCSI              43                         /* Linux errno extension */
 #define ENOCSI_STR          "No CSI structure available"
-#define EL2HLT              51
+#define EL2HLT              44                         /* Linux errno extension */
 #define EL2HLT_STR          "Level 2 halted"
-#define EBADE               52
+#define EDEADLK             45
+#define EDEADLK_STR         "Resource deadlock would occur"
+#define ENOLCK              46
+#define ENOLCK_STR          "No record locks available"
+
+#define EBADE               50                         /* Linux errno extension */
 #define EBADE_STR           "Invalid exchange"
-#define EBADR               53
+#define EBADR               51                         /* Linux errno extension */
 #define EBADR_STR           "Invalid request descriptor"
-#define EXFULL              54
+#define EXFULL              52                         /* Linux errno extension */
 #define EXFULL_STR          "Exchange full"
-#define ENOANO              55
+#define ENOANO              53                         /* Linux errno extension */
 #define ENOANO_STR          "No anode"
-#define EBADRQC             56
+#define EBADRQC             54                         /* Linux errno extension */
 #define EBADRQC_STR         "Invalid request code"
-#define EBADSLT             57
+#define EBADSLT             55                         /* Linux errno extension */
 #define EBADSLT_STR         "Invalid slot"
-#define EBFONT              59
+#define EDEADLOCK           56                         /* Linux errno extension */
+#define EDEADLOCK_STR       "File locking deadlock error"
+#define EBFONT              57                         /* Linux errno extension */
 #define EBFONT_STR          "Bad font file format"
+
 #define ENOSTR              60
 #define ENOSTR_STR          "Device not a stream"
 #define ENODATA             61
@@ -253,130 +248,148 @@
 #define ETIME_STR           "Timer expired"
 #define ENOSR               63
 #define ENOSR_STR           "Out of streams resources"
-#define ENONET              64
+#define ENONET              64                         /* Linux errno extension */
 #define ENONET_STR          "Machine is not on the network"
-#define ENOPKG              65
+#define ENOPKG              65                         /* Linux errno extension */
 #define ENOPKG_STR          "Package not installed"
-#define EREMOTE             66
+#define EREMOTE             66                         /* Linux errno extension */
 #define EREMOTE_STR         "Object is remote"
 #define ENOLINK             67
 #define ENOLINK_STR         "Link has been severed"
-#define EADV                68
+#define EADV                68                         /* Linux errno extension */
 #define EADV_STR            "Advertise error"
-#define ESRMNT              69
+#define ESRMNT              69                         /* Linux errno extension */
 #define ESRMNT_STR          "Srmount error"
-#define ECOMM               70
+#define ECOMM               70                         /* Linux errno extension */
 #define ECOMM_STR           "Communication error on send"
 #define EPROTO              71
 #define EPROTO_STR          "Protocol error"
-#define EMULTIHOP           72
+
+#define EMULTIHOP           74
 #define EMULTIHOP_STR       "Multihop attempted"
-#define EDOTDOT             73
+#define ELBIN               75                         /* Linux errno extension */
+#define ELBIN_STR           "Inode is remote"
+#define EDOTDOT             76                         /* Linux errno extension */
 #define EDOTDOT_STR         "RFS specific error"
-#define EBADMSG             74
+#define EBADMSG             77
 #define EBADMSG_STR         "Not a data message"
-#define EOVERFLOW           75
-#define EOVERFLOW_STR       "Value too large for defined data type"
-#define ENOTUNIQ            76
+
+#define EFTYPE              79
+#define EFTYPE_STR          "Inappropriate file type or format"
+#define ENOTUNIQ            80                         /* Linux errno extension */
 #define ENOTUNIQ_STR        "Name not unique on network"
-#define EBADFD              77
+#define EBADFD              81                         /* Linux errno extension */
 #define EBADFD_STR          "File descriptor in bad state"
-#define EREMCHG             78
+#define EREMCHG             82                         /* Linux errno extension */
 #define EREMCHG_STR         "Remote address changed"
-#define ELIBACC             79
+#define ELIBACC             83                         /* Linux errno extension */
 #define ELIBACC_STR         "Can not access a needed shared library"
-#define ELIBBAD             80
+#define ELIBBAD             84                         /* Linux errno extension */
 #define ELIBBAD_STR         "Accessing a corrupted shared library"
-#define ELIBSCN             81
+#define ELIBSCN             85                         /* Linux errno extension */
 #define ELIBSCN_STR         ".lib section in a.out corrupted"
-#define ELIBMAX             82
+#define ELIBMAX             86                         /* Linux errno extension */
 #define ELIBMAX_STR         "Attempting to link in too many shared libraries"
-#define ELIBEXEC            83
+#define ELIBEXEC            87                         /* Linux errno extension */
 #define ELIBEXEC_STR        "Cannot exec a shared library directly"
-#define EILSEQ              84
-#define EILSEQ_STR          "Illegal byte sequence"
-#define ERESTART            85
-#define ERESTART_STR        "Interrupted system call should be restarted"
-#define ESTRPIPE            86
-#define ESTRPIPE_STR        "Streams pipe error"
-#define EUSERS              87
-#define EUSERS_STR          "Too many users"
-#define ENOTSOCK            88
-#define ENOTSOCK_STR        "Socket operation on non-socket"
-#define EDESTADDRREQ        89
-#define EDESTADDRREQ_STR    "Destination address required"
-#define EMSGSIZE            90
-#define EMSGSIZE_STR        "Message too long"
-#define EPROTOTYPE          91
-#define EPROTOTYPE_STR      "Protocol wrong type for socket"
-#define ENOPROTOOPT         92
-#define ENOPROTOOPT_STR     "Protocol not available"
-#define EPROTONOSUPPORT      93
-#define EPROTONOSUPPORT_STR "Protocol not supported"
-#define ESOCKTNOSUPPORT     94
-#define ESOCKTNOSUPPORT_STR "Socket type not supported"
+#define ENOSYS              88
+#define ENOSYS_STR          "Function not implemented"
+#define ENMFILE             89                         /* Cygwin */
+#define ENMFILE_STR         "No more files"
+#define ENOTEMPTY           90
+#define ENOTEMPTY_STR       "Directory not empty"
+#define ENAMETOOLONG        91
+#define ENAMETOOLONG_STR    "File name too long"
+#define ELOOP               92
+#define ELOOP_STR           "Too many symbolic links encountered"
+
 #define EOPNOTSUPP          95
 #define EOPNOTSUPP_STR      "Operation not supported on transport endpoint"
 #define EPFNOSUPPORT        96
 #define EPFNOSUPPORT_STR    "Protocol family not supported"
-#define EAFNOSUPPORT        97
-#define EAFNOSUPPORT_STR    "Address family not supported by protocol"
-#define EADDRINUSE          98
-#define EADDRINUSE_STR      "Address already in use"
-#define EADDRNOTAVAIL       99
-#define EADDRNOTAVAIL_STR   "Cannot assign requested address"
-#define ENETDOWN            100
-#define ENETDOWN_STR        "Network is down"
-#define ENETUNREACH         101
-#define ENETUNREACH_STR     "Network is unreachable"
-#define ENETRESET           102
-#define ENETRESET_STR       "Network dropped connection because of reset"
-#define ECONNABORTED        103
-#define ECONNABORTED_STR    "Software caused connection abort"
+
 #define ECONNRESET          104
 #define ECONNRESET_STR      "Connection reset by peer"
 #define ENOBUFS             105
 #define ENOBUFS_STR         "No buffer space available"
-#define EISCONN             106
-#define EISCONN_STR         "Transport endpoint is already connected"
-#define ENOTCONN            107
-#define ENOTCONN_STR        "Transport endpoint is not connected"
-#define ESHUTDOWN           108
+#define EAFNOSUPPORT        106
+#define EAFNOSUPPORT_STR    "Address family not supported by protocol"
+#define EPROTOTYPE          107
+#define EPROTOTYPE_STR      "Protocol wrong type for socket"
+#define ENOTSOCK            108
+#define ENOTSOCK_STR        "Socket operation on non-socket"
+#define ENOPROTOOPT         109
+#define ENOPROTOOPT_STR     "Protocol not available"
+#define ESHUTDOWN           110                         /* Linux errno extension */
 #define ESHUTDOWN_STR       "Cannot send after transport endpoint shutdown"
-#define ETOOMANYREFS        109
-#define ETOOMANYREFS_STR    "Too many references: cannot splice"
-#define ETIMEDOUT           110
-#define ETIMEDOUT_STR       "Connection timed out"
 #define ECONNREFUSED        111
 #define ECONNREFUSED_STR    "Connection refused"
-#define EHOSTDOWN           112
+#define EADDRINUSE          112
+#define EADDRINUSE_STR      "Address already in use"
+#define ECONNABORTED        113
+#define ECONNABORTED_STR    "Software caused connection abort"
+#define ENETUNREACH         114
+#define ENETUNREACH_STR     "Network is unreachable"
+#define ENETDOWN            115
+#define ENETDOWN_STR        "Network is down"
+#define ETIMEDOUT           116
+#define ETIMEDOUT_STR       "Connection timed out"
+#define EHOSTDOWN           117
 #define EHOSTDOWN_STR       "Host is down"
-#define EHOSTUNREACH        113
+#define EHOSTUNREACH        118
 #define EHOSTUNREACH_STR    "No route to host"
-#define EALREADY            114
-#define EALREADY_STR        "Operation already in progress"
-#define EINPROGRESS         115
+#define EINPROGRESS         119
 #define EINPROGRESS_STR     "Operation now in progress"
-#define ESTALE              116
-#define ESTALE_STR          "Stale NFS file handle"
-#define EUCLEAN             117
-#define EUCLEAN_STR         "Structure needs cleaning"
-#define ENOTNAM             118
-#define ENOTNAM_STR         "Not a XENIX named type file"
-#define ENAVAIL             119
-#define ENAVAIL_STR         "No XENIX semaphores available"
-#define EISNAM              120
-#define EISNAM_STR          "Is a named type file"
-#define EREMOTEIO           121
-#define EREMOTEIO_STR       "Remote I/O error"
-#define EDQUOT              122
+#define EALREADY            120
+#define EALREADY_STR        "Socket already connected"
+#define EDESTADDRREQ        121
+#define EDESTADDRREQ_STR    "Destination address required"
+#define EMSGSIZE            122
+#define EMSGSIZE_STR        "Message too long"
+#define EPROTONOSUPPORT     123
+#define EPROTONOSUPPORT_STR "Protocol not supported"
+#define ESOCKTNOSUPPORT     124                         /* Linux errno extension */
+#define ESOCKTNOSUPPORT_STR "Socket type not supported"
+#define EADDRNOTAVAIL       125
+#define EADDRNOTAVAIL_STR   "Cannot assign requested address"
+#define ENETRESET           126
+#define ENETRESET_STR       "Network dropped connection because of reset"
+#define EISCONN             127
+#define EISCONN_STR         "Transport endpoint is already connected"
+#define ENOTCONN            128
+#define ENOTCONN_STR        "Transport endpoint is not connected"
+#define ETOOMANYREFS        129
+#define ETOOMANYREFS_STR    "Too many references: cannot splice"
+#define EPROCLIM            130
+#define EPROCLIM_STR        "Limit would be exceeded by attempted fork"
+#define EUSERS              131
+#define EUSERS_STR          "Too many users"
+#define EDQUOT              132
 #define EDQUOT_STR          "Quota exceeded"
-#define ENOMEDIUM           123
+#define ESTALE              133
+#define ESTALE_STR          "Stale NFS file handle"
+#define ENOTSUP             134
+#define ENOTSUP_STR         "Not supported"
+#define ENOMEDIUM           135                         /* Linux errno extension */
 #define ENOMEDIUM_STR       "No medium found"
-#define EMEDIUMTYPE         124
-#define EMEDIUMTYPE_STR     "Wrong medium type"
-#define ECANCELED           125
+#define ENOSHARE            136                         /* Cygwin */
+#define ENOSHARE_STR        "No such host or network path"
+#define ECASECLASH          137                         /* Cygwin */
+#define ECASECLASH_STR      "Filename exists with different case"
+#define EILSEQ              138
+#define EILSEQ_STR          "Illegal byte sequence"
+#define EOVERFLOW           139
+#define EOVERFLOW_STR       "Value too large for defined data type"
+#define ECANCELED           140
 #define ECANCELED_STR       "Operation cancelled"
+#define ENOTRECOVERABLE     141
+#define ENOTRECOVERABLE_STR "State not recoverable"
+#define EOWNERDEAD          142
+#define EOWNERDEAD_STR      "Previous owner died"
+#define ESTRPIPE            143                         /* Linux errno extension */
+#define ESTRPIPE_STR        "Streams pipe error"
+
+#define __ELASTERROR        2000                        /* Users can add values starting here */
 
 /****************************************************************************
  * Public Type Definitions
