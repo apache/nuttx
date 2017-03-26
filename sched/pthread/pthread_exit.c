@@ -123,6 +123,10 @@ void pthread_exit(FAR void *exit_value)
       exit(EXIT_FAILURE);
     }
 
+  /* Recover any mutexes still held by the canceled thread */
+
+  pthread_mutex_inconsistent(tcb);
+
   /* Perform common task termination logic.  This will get called again later
    * through logic kicked off by _exit().  However, we need to call it before
    * calling _exit() in order certain operations if this is the last thread

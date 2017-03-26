@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_mutexinit.c
  *
- *   Copyright (C) 2007-2009, 2011, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -123,6 +123,10 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
           ret = get_errno();
         }
 #endif
+      /* Initial internal fields of the mutex */
+
+      mutex->flink  = NULL;
+      mutex->flags  = 0;
 
       /* Set up attributes unique to the mutex type */
 
