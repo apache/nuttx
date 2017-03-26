@@ -53,7 +53,7 @@
 #include "stm32_comp.h"
 
 /* Some COMP peripheral must be enabled */
-/* Up to 7 comparators in STM32F2 Series */
+/* Up to 7 comparators in STM32F3 Series */
 
 #if defined(CONFIG_STM32_COMP1) || defined(CONFIG_STM32_COMP2) || \
     defined(CONFIG_STM32_COMP3) || defined(CONFIG_STM32_COMP4) || \
