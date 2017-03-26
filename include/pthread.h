@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/pthread.h
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -423,6 +423,10 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex);
 int pthread_mutex_lock(FAR pthread_mutex_t *mutex);
 int pthread_mutex_trylock(FAR pthread_mutex_t *mutex);
 int pthread_mutex_unlock(FAR pthread_mutex_t *mutex);
+
+/* Make sure that the pthread mutex is in a consistent state */
+
+int pthread_mutex_consistent(FAR pthread_mutex_t *mutex);
 
 /* Operations on condition variables */
 

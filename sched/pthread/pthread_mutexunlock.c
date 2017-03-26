@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_mutexunlock.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,15 +80,12 @@
 
 int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
 {
-  int ret = OK;
+  int ret = EINVAL;
 
   sinfo("mutex=0x%p\n", mutex);
+  DEBUGASSERT(mutex != NULL);
 
-  if (!mutex)
-    {
-      ret = EINVAL;
-    }
-  else
+  if (mutex != NULL)
     {
       /* Make sure the semaphore is stable while we make the following
        * checks.  This all needs to be one atomic action.
@@ -108,8 +105,7 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
            * the mutex."
            *
            * For the case of the non-robust PTHREAD_MUTEX_NORMAL mutex,
-           * the behavior is undefined.  Here we treat that type as though
-           * it were PTHREAD_MUTEX_ERRORCHECK type and just return an error.
+           * the behavior is undefined.
            */
 
           serr("ERROR: Holder=%d returning EPERM\n", mutex->pid);
@@ -127,6 +123,7 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
            */
 
           mutex->nlocks--;
+          ret = OK;
         }
 #endif
 

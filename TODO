@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated March 14, 2017)
+NuttX TODO List (Last updated March 26, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -14,7 +14,7 @@ nuttx/:
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
-  (2)  pthreads (sched/pthread)
+  (4)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
   (8)  Kernel/Protected Build
   (3)  C++ Support
@@ -346,7 +346,7 @@ o Signals (sched/signal, arch/)
   Priority:    Low. Even if there are only 31 usable signals, that is still a lot.
 
 o pthreads (sched/pthreads)
-  ^^^^^^^^^^^^^^^^^
+  ^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       PTHREAD_PRIO_PROTECT
   Description: Extend pthread_mutexattr_setprotocol().  It should support
@@ -447,6 +447,36 @@ o pthreads (sched/pthreads)
                point.
   Status:      Not really open.  This is just the way it is.
   Priority:    Nothing additional is planned.
+
+  Title:       PTHREAD FILES IN WRONG LOCATTION
+  Description: There are many pthread interface functions in files located in
+               sched/pthread.  These should be moved from that location to
+               libc/pthread.  In the flat build, this really does not matter,
+               but in the protected build that location means that system calls
+               are required to access the pthread interface functions.
+  Status:      Open
+  Priority:    Medium-low. Priority may be higher if system call overheade becomes
+               an issue.
+
+  Title:       ROBUST MUTEX ATTRIBUTE NOT SUPPORTED
+  Description: In NuttX, all mutexes are 'robust' in the sense that an attmpt
+               to lock a mutex will return EOWNDERDEAD if the holder of the
+               mutex has died.  Unlocking of a mutex will fail if the caller
+               is not the holder of the mutex.
+
+               POSIX, however, requires that there be a mutex attribute called
+               robust that determines which behavior is supported.  non-robust
+               should be the default.  NuttX does not support this attribute
+               and robust behavior is the default and only supported behavior.
+
+               The spec is not clear, but I think there there is also missing
+               logic when the thread exits.  I believe that the next highest
+               prority thread waiting for the mutex should be awakend and
+               pthread_mutex_lock() should return EOWNERDEAD.
+               That does not happen now.  They will just remain blocked.
+  Status:      Open
+  Priority:    Low.  The non-robust behavior is dangerous and really should never
+               be used.
 
 o Message Queues (sched/mqueue)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
