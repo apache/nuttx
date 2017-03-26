@@ -170,6 +170,7 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
       else if (mutex->pid > 0 && sched_gettcb(mutex->pid) == NULL)
         {
           DEBUGASSERT(mutex->pid != 0); /* < 0: available, >0 owned, ==0 error */
+          DEBUGASSERT((mutex->flags & _PTHREAD_MFLAGS_INCONSISTENT) != 0);
 
           /* A thread holds the mutex, but there is no such thread.  POSIX
            * requires that the 'robust' mutex return EOWNERDEAD in this case.
@@ -177,7 +178,8 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
            * fo fix the mutex.
            */
 
-          ret = EOWNERDEAD;
+          mutex->flags |= _PTHREAD_MFLAGS_INCONSISTENT;
+          ret           = EOWNERDEAD;
         }
       else
         {
