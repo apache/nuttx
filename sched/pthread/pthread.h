@@ -109,8 +109,8 @@ FAR struct join_s *pthread_findjoininfo(FAR struct task_group_s *group,
 void pthread_release(FAR struct task_group_s *group);
 int pthread_takesemaphore(sem_t *sem, bool intr);
 int pthread_givesemaphore(sem_t *sem);
-int pthread_takemutex(FAR struct pthread_mutex_s *mutex, bool intr);
-int pthread_givemutex(FAR struct pthread_mutex_s *mutex);
+int pthread_mutex_take(FAR struct pthread_mutex_s *mutex, bool intr);
+int pthread_mutex_give(FAR struct pthread_mutex_s *mutex);
 void pthread_mutex_inconsistent(FAR struct pthread_tcb_s *tcb);
 
 #ifdef CONFIG_MUTEX_TYPES

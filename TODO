@@ -468,12 +468,6 @@ o pthreads (sched/pthreads)
                robust that determines which behavior is supported.  non-robust
                should be the default.  NuttX does not support this attribute
                and robust behavior is the default and only supported behavior.
-
-               The spec is not clear, but I think there there is also missing
-               logic when the thread exits.  I believe that the next highest
-               prority thread waiting for the mutex should be awakend and
-               pthread_mutex_lock() should return EOWNERDEAD.
-               That does not happen now.  They will just remain blocked.
   Status:      Open
   Priority:    Low.  The non-robust behavior is dangerous and really should never
                be used.

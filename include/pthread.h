@@ -228,7 +228,7 @@ struct pthread_mutexattr_s
 {
   uint8_t pshared;  /* PTHREAD_PROCESS_PRIVATE or PTHREAD_PROCESS_SHARED */
 #ifdef CONFIG_PRIORITY_INHERITANCE
-  uint8_t proto;    /* See _PTHREAD_PRIO_* definitions */
+  uint8_t proto;    /* See PTHREAD_PRIO_* definitions */
 #endif
 #ifdef CONFIG_MUTEX_TYPES
   uint8_t type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
@@ -248,7 +248,7 @@ struct pthread_mutex_s
 
   sem_t sem;        /* Semaphore underlying the implementation of the mutex */
   pid_t pid;        /* ID of the holder of the mutex */
-  uint8_t flags;    /* See PTHREAD_MFLAGS_* */
+  uint8_t flags;    /* See _PTHREAD_MFLAGS_* */
 #ifdef CONFIG_MUTEX_TYPES
   uint8_t type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
   int16_t nlocks;   /* The number of recursive locks held */

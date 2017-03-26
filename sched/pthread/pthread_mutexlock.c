@@ -185,7 +185,7 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
         {
           /* Take the underlying semaphore, waiting if necessary */
 
-          ret = pthread_takemutex(mutex, true);
+          ret = pthread_mutex_take(mutex, true);
 
           /* If we successfully obtained the semaphore, then indicate
            * that we own it.
