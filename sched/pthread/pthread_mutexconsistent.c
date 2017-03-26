@@ -118,7 +118,8 @@ int pthread_mutex_consistent(FAR pthread_mutex_t *mutex)
             {
               /* The thread associated with the PID no longer exists */
 
-              mutex->pid = -1;
+              mutex->pid   = -1;
+              mutex->flags = 0;
 
               /* Reset the semaphore.  This has the same affect as if the
                * dead task had called pthread_mutex_unlock().
