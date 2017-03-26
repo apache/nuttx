@@ -240,15 +240,19 @@ typedef struct pthread_mutexattr_s pthread_mutexattr_t;
 
 struct pthread_mutex_s
 {
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
   /* Supports a singly linked list */
 
   FAR struct pthread_mutex_s *flink;
+#endif
 
   /* Payload */
 
   sem_t sem;        /* Semaphore underlying the implementation of the mutex */
   pid_t pid;        /* ID of the holder of the mutex */
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
   uint8_t flags;    /* See _PTHREAD_MFLAGS_* */
+#endif
 #ifdef CONFIG_MUTEX_TYPES
   uint8_t type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
   int16_t nlocks;   /* The number of recursive locks held */
@@ -438,9 +442,11 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex);
 int pthread_mutex_trylock(FAR pthread_mutex_t *mutex);
 int pthread_mutex_unlock(FAR pthread_mutex_t *mutex);
 
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
 /* Make sure that the pthread mutex is in a consistent state */
 
 int pthread_mutex_consistent(FAR pthread_mutex_t *mutex);
+#endif
 
 /* Operations on condition variables */
 
