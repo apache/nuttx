@@ -99,20 +99,18 @@ void bcmf_board_initialize(int minor)
  * Name: bcmf_board_setup_oob_irq
  ****************************************************************************/
 
-void bcmf_board_setup_oob_irq(int minor)
+void bcmf_board_setup_oob_irq(int minor, xcpt_t func, void *arg)
 {
   if (minor != SDIO_WLAN0_MINOR)
     {
       return;
     }
 
-  /* Configure reset pin */
+  /* Configure interrupt pin */
 
-  stm32_configgpio(GPIO_WLAN0_RESET);
+  stm32_configgpio(GPIO_WLAN0_OOB_INT);
 
-  /* Put wlan chip in reset state */
-
-  bcmf_board_reset(minor, true);
+  stm32_gpiosetevent(GPIO_WLAN0_OOB_INT, true, false, false, func, arg);
 }
 
 /****************************************************************************

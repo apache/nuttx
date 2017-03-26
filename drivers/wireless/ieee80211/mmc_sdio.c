@@ -78,7 +78,14 @@ int sdio_io_rw_direct(FAR struct sdio_dev_s *dev, bool write,
 
     /* Setup CMD52 argument */
 
-    arg.cmd52.write_data       = inb;
+    if (write)
+      {
+        arg.cmd52.write_data       = inb;
+      }
+    else
+      {
+        arg.cmd52.write_data       = 0;
+      }
     arg.cmd52.register_address = address & 0x1ffff;
     arg.cmd52.raw_flag         = (write && outb);
     arg.cmd52.function_number  = function & 7;
@@ -128,18 +135,18 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
 
     /* Setup CMD53 argument */
 
-    arg.cmd53.byte_block_count = blocklen;
     arg.cmd53.register_address = address & 0x1ffff;
     arg.cmd53.op_code          = inc_addr;
     arg.cmd53.function_number  = function & 7;
     arg.cmd53.rw_flag          = write;
 
-    if (nblocks <= 1 && blocklen < 512)
+    if (nblocks == 0 && blocklen < 512)
       {
         /* Use byte mode */
 
-        _info("byte mode\n");
+        // _info("byte mode\n");
         arg.cmd53.block_mode = 0;
+        arg.cmd53.byte_block_count = blocklen;
         nblocks = 1;
       }
     else
@@ -147,6 +154,7 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
         /* Use block mode */
 
         arg.cmd53.block_mode = 1;
+        arg.cmd53.byte_block_count = nblocks;
       }
 
     /* Send CMD53 command */
@@ -157,6 +165,7 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
 
     if (write)
       {
+        // _info("prep write %d %d\n", blocklen, nblocks);
         sdio_sendcmdpoll(dev, SDIO_ACMD53, (uint32_t)arg.value);
         ret = SDIO_RECVR5(dev, SDIO_ACMD53, (uint32_t*)&resp);
 
@@ -165,7 +174,7 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
       }
     else
       {
-        _info("prep read %d\n", blocklen * nblocks);
+        // _info("prep read %d\n", blocklen * nblocks);
         SDIO_RECVSETUP(dev, buf, blocklen * nblocks);
         SDIO_SENDCMD(dev, SDIO_ACMD53, (uint32_t)arg.value);
 

@@ -55,6 +55,7 @@ endif
 
 ifeq ($(CONFIG_PHOTON_WLAN),y)
 CSRCS += stm32_wlan.c
+CSRCS += stm32_wlan_firmware.c
 endif
 
 ifeq ($(CONFIG_STM32_OTGHS),y)
