@@ -307,4 +307,8 @@ struct sixlowpan_nhcompressor_s
                          FAR uint8_t *uncompressed_len);
 };
 
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
 #endif /* __INCLUDE_NUTTX_NET_SIXLOWOAN_H */
