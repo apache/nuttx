@@ -76,11 +76,21 @@ int pthread_mutexattr_init(FAR pthread_mutexattr_t *attr)
   else
     {
       attr->pshared = 0;
+
 #ifdef CONFIG_PRIORITY_INHERITANCE
       attr->proto   = SEM_PRIO_INHERIT;
 #endif
+
 #ifdef CONFIG_MUTEX_TYPES
       attr->type    = PTHREAD_MUTEX_DEFAULT;
+#endif
+
+#ifdef CONFIG_PTHREAD_MUTEX_BOTH
+#ifdef CONFIG_PTHREAD_MUTEX_DEFAULT_UNSAFE
+      attr->robust  = PTHREAD_MUTEX_STALLED;
+#else
+      attr->robust  = PTHREAD_MUTEX_ROBUST;
+#endif
 #endif
     }
 
