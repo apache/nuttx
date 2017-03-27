@@ -302,6 +302,7 @@ uintptr_t STUB_pthread_mutex_init(int nbr, uintptr_t parm1,
 uintptr_t STUB_pthread_mutex_lock(int nbr, uintptr_t parm1);
 uintptr_t STUB_pthread_mutex_trylock(int nbr, uintptr_t parm1);
 uintptr_t STUB_pthread_mutex_unlock(int nbr, uintptr_t parm1);
+uintptr_t STUB_pthread_mutex_consistent(int nbr, uintptr_t parm1);
 uintptr_t STUB_pthread_once(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_pthread_setschedparam(int nbr, uintptr_t parm1,
             uintptr_t parm2, uintptr_t parm3);

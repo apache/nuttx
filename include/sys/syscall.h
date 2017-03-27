@@ -418,12 +418,20 @@
 #  define SYS_pthread_mutex_lock       (__SYS_pthread+19)
 #  define SYS_pthread_mutex_trylock    (__SYS_pthread+20)
 #  define SYS_pthread_mutex_unlock     (__SYS_pthread+21)
-#  define SYS_pthread_once             (__SYS_pthread+22)
-#  define SYS_pthread_setschedparam    (__SYS_pthread+23)
-#  define SYS_pthread_setschedprio     (__SYS_pthread+24)
-#  define SYS_pthread_setspecific      (__SYS_pthread+25)
-#  define SYS_pthread_yield            (__SYS_pthread+26)
-#  define __SYS_pthread_smp            (__SYS_pthread+27)
+
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+#  define SYS_pthread_mutex_consistent (__SYS_pthread+22)
+#  define __SYS_pthread_once           (__SYS_pthread+23)
+#else
+#  define __SYS_pthread_once           (__SYS_pthread+22)
+#endif
+
+#  define SYS_pthread_once             (__SYS_pthread_once+0)
+#  define SYS_pthread_setschedparam    (__SYS_pthread_once+1)
+#  define SYS_pthread_setschedprio     (__SYS_pthread_once+2)
+#  define SYS_pthread_setspecific      (__SYS_pthread_once+3)
+#  define SYS_pthread_yield            (__SYS_pthread_once+4)
+#  define __SYS_pthread_smp            (__SYS_pthread_once+5)
 
 #  ifdef CONFIG_SMP
 #    define SYS_pthread_setaffinity_np (__SYS_pthread_smp+0)
