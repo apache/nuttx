@@ -37,25 +37,36 @@
 #ifndef __INCLUDE_NUTTX_IEEE802154_AT86RF23X_H
 #define __INCLUDE_NUTTX_IEEE802154_AT86RF23X_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+#include <stdbool.h>
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
 /* The at86rf23x provides interrupts to the MCU via a GPIO pin.  The
  * following structure provides an MCU-independent mechanixm for controlling
  * the at86rf23x GPIO interrupt.
  *
  * The at86rf23x interrupt is an active low, *level* interrupt. From Datasheet:
- * "Note 1: The INTEDGE polarity defaults to:
- * 0 = Falling Edge. Ensure that the inter-
- * rupt polarity matches the interrupt pin
- * polarity of the host microcontroller.
- * Note 2: The INT pin will remain high or low,
- * depending on INTEDGE polarity setting,
- * until INTSTAT register is read."
+ * "Note 1: The INTEDGE polarity defaults to: 0 = Falling Edge. Ensure that
+ *  the interrupt polarity matches the interrupt pin polarity of the host
+ *  microcontroller.
+ * "Note 2: The INT pin will remain high or low, depending on INTEDGE polarity
+ *  setting, until INTSTAT register is read."
  */
 
 struct at86rf23x_lower_s
 {
-  int  (*irq)(FAR const struct at86rf23x_lower_s *lower, xcpt_t handler, int state);
-  void (*slptr)(FAR const struct at86rf23x_lower_s *lower, int state);
-  void (*reset)(FAR const struct at86rf23x_lower_s *lower, int state);
+  int  (*attach)(FAR const struct at86rf23x_lower_s *lower, xcpt_t handler,
+                FAR void *arg);
+  void (*enable)(FAR const struct at86rf23x_lower_s *lower, bool state);
+  void (*slptr)(FAR const struct at86rf23x_lower_s *lower, bool state);
+  void (*reset)(FAR const struct at86rf23x_lower_s *lower, bool state);
 };
 
 #ifdef __cplusplus

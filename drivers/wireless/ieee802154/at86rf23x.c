@@ -146,7 +146,7 @@ static int  at86rf23x_regdump(FAR struct at86rf23x_dev_s *dev);
 static void at86rf23x_irqwork_rx(FAR struct at86rf23x_dev_s *dev);
 static void at86rf23x_irqwork_tx(FAR struct at86rf23x_dev_s *dev);
 static void at86rf23x_irqworker(FAR void *arg);
-static int  at86rf23x_interrupt(int irq, FAR void *context);
+static int  at86rf23x_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Driver operations */
 
@@ -1221,11 +1221,11 @@ static int at86rf23x_resetrf(FAR struct at86rf23x_dev_s *dev)
 
   /* Reset the radio */
 
-  lower->reset(lower, 0);
-  lower->slptr(lower, 0);
+  lower->reset(lower, false);
+  lower->slptr(lower, false);
 
   up_udelay(RF23X_TIME_RESET);
-  lower->reset(lower, 1);
+  lower->reset(lower, true);
 
   /* Dummy read of IRQ register */
 
@@ -1287,13 +1287,11 @@ static int at86rf23x_rxenable(FAR struct ieee802154_radio_s *ieee, bool state,
  *
  ****************************************************************************/
 
-static int at86rf23x_interrupt(int irq, FAR void *context)
+static int at86rf23x_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  /* To support multiple devices, retrieve the priv structure using the irq
-   * number.
-   */
+  FAR struct at86rf23x_dev_s *dev = (FAR struct at86rf23x_dev_s *)arg;
 
-  register FAR struct at86rf23x_dev_s *dev = &g_at86rf23x_devices[0];
+  DEBUGASSERT(dev != NULL);
 
   /* In complex environments, we cannot do SPI transfers from the interrupt
    * handler because semaphores are probably used to lock the SPI bus.  In
@@ -1309,8 +1307,7 @@ static int at86rf23x_interrupt(int irq, FAR void *context)
    * Interrupts are re-enabled in enc_irqworker() when the work is completed.
    */
 
-  dev->lower->irq(dev->lower, NULL, FALSE);
-  //dev->lower->enable(dev->lower, FALSE);
+  dev->lower->enable(dev->lower, false);
 
   return work_queue(HPWORK, &dev->irqwork, at86rf23x_irqworker,
                     (FAR void *)dev, 0);
@@ -1393,11 +1390,11 @@ static void at86rf23x_irqworker(FAR void *arg)
     {
       wlerr("ERROR: Unknown IRQ Status: %d\n", irq_status);
 
-      /* Re enable the IRQ even if we don't know how to handle previous
+      /* Re-enable the IRQ even if we don't know how to handle previous
        * status.
        */
 
-      dev->lower->irq(dev->lower, NULL, true);
+      dev->lower->enable(dev->lower, true);
     }
 }
 
@@ -1428,9 +1425,9 @@ static void at86rf23x_irqwork_rx(FAR struct at86rf23x_dev_s *dev)
    *   soon.
    */
 
-  /* Re enable the IRQ */
+  /* Re-enable the IRQ */
 
-  dev->lower->irq(dev->lower, NULL, true);
+  dev->lower->enable(dev->lower, true);
 }
 
 /****************************************************************************
@@ -1452,7 +1449,7 @@ static void at86rf23x_irqwork_tx(FAR struct at86rf23x_dev_s *dev)
 
   /* Re enable the IRQ */
 
-  dev->lower->irq(dev->lower, NULL, true);
+  dev->lower->enable(dev->lower, true);
 
   sem_post(&dev->ieee.txsem);
 }
@@ -1528,7 +1525,7 @@ FAR struct ieee802154_radio_s *at86rf23x_init(FAR struct spi_dev_s *spi,
 
   /* Attach irq */
 
-  if (lower->irq(lower, at86rf23x_interrupt, false) != OK)
+  if (lower->attach(lower, at86rf23x_interrupt, dev) != OK)
     {
       return NULL;
     }
@@ -1598,6 +1595,6 @@ FAR struct ieee802154_radio_s *at86rf23x_init(FAR struct spi_dev_s *spi,
 
   /* Enable Radio IRQ */
 
-  lower->irq(lower, at86rf23x_interrupt, true);
+  lower->enable(lower, true);
   return &dev->ieee;
 }
