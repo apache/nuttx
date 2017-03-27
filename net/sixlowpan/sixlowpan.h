@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/6lowpan/6lowpan.h
+ * net/sixlowpan/sixlowpan.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_6LOWPAN_6LOWPAN_H
-#define __NET_6LOWPAN_6LOWPAN_H
+#ifndef _NET_SIXLOWPAN_SIXLOWPAN_H
+#define _NET_SIXLOWPAN_SIXLOWPAN_H
 
 /****************************************************************************
  * Included Files
@@ -53,4 +53,4 @@
  ****************************************************************************/
 
 #endif /* CONFIG_NET_6LOWPAN */
-#endif /* __NET_6LOWPAN_6LOWPAN_H */
+#endif /* _NET_SIXLOWPAN_SIXLOWPAN_H */
