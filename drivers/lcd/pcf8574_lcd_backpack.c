@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/lcd/pcf8574_lcd_backpack.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <poll.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
