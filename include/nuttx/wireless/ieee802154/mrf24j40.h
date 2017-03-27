@@ -40,6 +40,8 @@
  * Included files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+#include <stdbool.h>
 #include <nuttx/arch.h>
 
 /****************************************************************************
@@ -62,8 +64,9 @@
 
 struct mrf24j40_lower_s
 {
-  int  (*attach)(FAR const struct mrf24j40_lower_s *lower, xcpt_t handler);
-  void (*enable)(FAR const struct mrf24j40_lower_s *lower, int state);
+  int  (*attach)(FAR const struct mrf24j40_lower_s *lower, xcpt_t handler,
+                 FAR void *arg);
+  void (*enable)(FAR const struct mrf24j40_lower_s *lower, bool state);
 };
 
 #ifdef __cplusplus

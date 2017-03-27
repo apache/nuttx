@@ -99,6 +99,7 @@ struct stm32_priv_s
 {
   struct mrf24j40_lower_s dev;
   xcpt_t handler;
+  FAR void *arg;
   uint32_t intcfg;
   uint8_t spidev;
 };
@@ -117,9 +118,9 @@ struct stm32_priv_s
  */
 
 static int  stm32_attach_irq(FAR const struct mrf24j40_lower_s *lower,
-                             xcpt_t handler);
+                             xcpt_t handler, FAR void *arg);
 static void stm32_enable_irq(FAR const struct mrf24j40_lower_s *lower,
-                             int state);
+                             bool state);
 static int  stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv);
 
 /****************************************************************************
@@ -173,7 +174,7 @@ static struct stm32_priv_s g_mrf24j40_mb2_priv =
  */
 
 static int stm32_attach_irq(FAR const struct mrf24j40_lower_s *lower,
-                            xcpt_t handler)
+                            xcpt_t handler, FAR void *arg)
 {
   FAR struct stm32_priv_s *priv = (FAR struct stm32_priv_s *)lower;
 
@@ -182,10 +183,12 @@ static int stm32_attach_irq(FAR const struct mrf24j40_lower_s *lower,
   /* Just save the handler for use when the interrupt is enabled */
 
   priv->handler = handler;
+  priv->arg     = arg;
   return OK;
 }
 
-static void stm32_enable_irq(FAR const struct mrf24j40_lower_s *lower, int state)
+static void stm32_enable_irq(FAR const struct mrf24j40_lower_s *lower,
+                             bool state)
 {
   FAR struct stm32_priv_s *priv = (FAR struct stm32_priv_s *)lower;
 
@@ -193,15 +196,15 @@ static void stm32_enable_irq(FAR const struct mrf24j40_lower_s *lower, int state
    * has not yet been 'attached'
    */
 
-  DEBUGASSERT(priv != NULL && (priv->handler != NULL || state == 0));
+  DEBUGASSERT(priv != NULL && (priv->handler != NULL || !state));
 
   /* Attach and enable, or detach and disable */
 
-  wlinfo("state:%d\n", state);
-  if (state != 0)
+  wlinfo("state:%d\n", (int)state);
+  if (state)
     {
       (void)stm32_gpiosetevent(priv->intcfg, true, true, true,
-                               priv->handler, NULL);
+                               priv->handler, priv->arg);
     }
   else
     {

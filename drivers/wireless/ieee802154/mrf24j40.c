@@ -196,7 +196,7 @@ static int  mrf24j40_transmit(FAR struct ieee802154_radio_s *ieee,
 
 static struct mrf24j40_radio_s g_mrf24j40_devices[1];
 
-static const struct ieee802154_radioops_s mrf24j40_devops = 
+static const struct ieee802154_radioops_s mrf24j40_devops =
 {
   mrf24j40_setchannel, mrf24j40_getchannel,
   mrf24j40_setpanid  , mrf24j40_getpanid,
@@ -1322,9 +1322,9 @@ static void mrf24j40_irqworker(FAR void *arg)
       mrf24j40_irqwork_tx(dev);
     }
 
-  /* Re-Enable GPIO interrupts */
+  /* Re-enable GPIO interrupts */
 
-  dev->lower->enable(dev->lower, TRUE);
+  dev->lower->enable(dev->lower, true);
 }
 
 /****************************************************************************
@@ -1346,16 +1346,9 @@ static void mrf24j40_irqworker(FAR void *arg)
 
 static int mrf24j40_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  /* To support multiple devices,
-   * retrieve the priv structure using the irq number
-   *
-   * REVISIT: This will not handler multiple MRF24J40 devices.  The correct
-   * solutions is to pass the struct mrf24j40_radio_s in the call to
-   * irq_attach() as the third 'arg' parameter.  That will be provided here
-   * and the correct instance can be obtained with a simply case of 'arg'.
-   */
+  FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)arg;
 
-  register FAR struct mrf24j40_radio_s *dev = &g_mrf24j40_devices[0];
+  DEBUGASSERT(dev != NULL);
 
   /* In complex environments, we cannot do SPI transfers from the interrupt
    * handler because semaphores are probably used to lock the SPI bus.  In
@@ -1371,7 +1364,7 @@ static int mrf24j40_interrupt(int irq, FAR void *context, FAR void *arg)
    * Interrupts are re-enabled in enc_irqworker() when the work is completed.
    */
 
-  dev->lower->enable(dev->lower, FALSE);
+  dev->lower->enable(dev->lower, false);
   return work_queue(HPWORK, &dev->irqwork, mrf24j40_irqworker, (FAR void *)dev, 0);
 }
 
@@ -1403,13 +1396,9 @@ FAR struct ieee802154_radio_s *mrf24j40_init(FAR struct spi_dev_s *spi,
   dev = &g_mrf24j40_devices[0];
 #endif
 
-  /* Attach irq.
-   *
-   * REVISIT: A third argument is required to pass the instance of 'lower'
-   * to the interrupt handler.
-   */
+  /* Attach irq */
 
-  if (lower->attach(lower, mrf24j40_interrupt) != OK)
+  if (lower->attach(lower, mrf24j40_interrupt, dev) != OK)
     {
 #if 0
       free(dev);
@@ -1454,7 +1443,6 @@ FAR struct ieee802154_radio_s *mrf24j40_init(FAR struct spi_dev_s *spi,
 
   mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
 
-  dev->lower->enable(dev->lower, TRUE);
-
+  dev->lower->enable(dev->lower, true);
   return &dev->ieee;
 }
