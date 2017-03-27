@@ -91,6 +91,7 @@
 "pthread_mutex_lock","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_mutex_t*"
 "pthread_mutex_trylock","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_mutex_t*"
 "pthread_mutex_unlock","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_mutex_t*"
+"pthread_mutex_consistent","pthread.h","!defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)","int","FAR pthread_mutex_t*"
 "pthread_once","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_once_t*","CODE void (*)(void)"
 "pthread_setaffinity_np","pthread.h","!defined(CONFIG_DISABLE_PTHREAD) && defined(CONFIG_SMP)","int","pthread_t","size_t","FAR const cpu_set_t*"
 "pthread_setschedparam","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","pthread_t","int","FAR const struct sched_param*"
