@@ -111,7 +111,7 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
 
           mutex->pid = mypid;
 
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
           if (mutex->type == PTHREAD_MUTEX_RECURSIVE)
             {
               mutex->nlocks = 1;
@@ -129,7 +129,7 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
           int errcode = get_errno();
           if (errcode == EAGAIN)
             {
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
               /* Check if recursive mutex was locked by the calling thread. */
 
               if (mutex->type == PTHREAD_MUTEX_RECURSIVE && mutex->pid == mypid)
@@ -157,7 +157,7 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
                */
 
 #ifdef CONFIG_PTHREAD_MUTEX_BOTH
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
               /* Check if this NORMAL mutex is robust */
 
               if (mutex->pid > 0 &&
@@ -165,14 +165,14 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
                     mutex->type != PTHREAD_MUTEX_NORMAL) &&
                   sched_gettcb(mutex->pid) == NULL)
 
-#else /* CONFIG_MUTEX_TYPES */
+#else /* CONFIG_PTHREAD_MUTEX_TYPES */
               /* Check if this NORMAL mutex is robust */
 
               if (mutex->pid > 0 &&
                   (mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 &&
                   sched_gettcb(mutex->pid) == NULL)
 
-#endif /* CONFIG_MUTEX_TYPES */
+#endif /* CONFIG_PTHREAD_MUTEX_TYPES */
 #else /* CONFIG_PTHREAD_MUTEX_ROBUST */
               /* This mutex is always robust, whatever type it is. */
 

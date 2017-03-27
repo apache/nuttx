@@ -120,7 +120,7 @@ int pthread_mutex_consistent(FAR pthread_mutex_t *mutex)
 
               mutex->pid    = -1;
               mutex->flags &= _PTHREAD_MFLAGS_ROBUST;
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
               mutex->nlocks = 0;
 #endif
               /* Reset the semaphore.  This has the same affect as if the

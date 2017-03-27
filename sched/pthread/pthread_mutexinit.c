@@ -72,7 +72,7 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
                        FAR const pthread_mutexattr_t *attr)
 {
   int pshared = 0;
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
   uint8_t type = PTHREAD_MUTEX_DEFAULT;
 #endif
 #ifdef CONFIG_PRIORITY_INHERITANCE
@@ -104,7 +104,7 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
 #ifdef CONFIG_PRIORITY_INHERITANCE
           proto   = attr->proto;
 #endif
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
           type    = attr->type;
 #endif
 #ifdef CONFIG_PTHREAD_MUTEX_BOTH
@@ -141,7 +141,7 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
       mutex->flags  = (robust == PTHREAD_MUTEX_ROBUST ? _PTHREAD_MFLAGS_ROBUST : 0);
 #endif
 
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
       /* Set up attributes unique to the mutex type */
 
       mutex->type   = type;
