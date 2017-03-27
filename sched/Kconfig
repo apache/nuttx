@@ -536,12 +536,12 @@ choice
 	default PTHREAD_MUTEX_ROBUST if !DEFAULT_SMALL
 	default PTHREAD_UNSAFE if DEFAULT_SMALL
 
-	config PTHREAD_MUTEX_ROBUST
+config PTHREAD_MUTEX_ROBUST
 	bool "Robust mutexes"
 	---help---
 		Support only the robust form of the NORMAL mutex.
 
-	config PTHREAD_MUTEX_UNSAFE
+config PTHREAD_MUTEX_UNSAFE
 	bool "Traditional unsafe mutexes"
 	---help---
 		Support only the traditional non-robust form of the NORMAL mutex.
@@ -549,7 +549,7 @@ choice
 		software you may be porting or, perhaps, if you are trying to minimize
 		footprint.
 
-	config PTHREAD_MUTEX_BOTH
+config PTHREAD_MUTEX_BOTH
 	bool "Both robust and unsafe mutexes"
 	---help---
 		Support both forms of NORMAL mutexes.
@@ -561,12 +561,12 @@ choice
 	default PTHREAD_MUTEX_DEFAULT_ROBUST
 	depends on PTHREAD_MUTEX_BOTH
 
-	config PTHREAD_MUTEX_DEFAULT_ROBUST
+config PTHREAD_MUTEX_DEFAULT_ROBUST
 	bool "Robust default"
 	---help---
 		The default is robust NORMAL mutexes (non-standard)
 
-	config PTHREAD_MUTEX_DEFAULT_UNSAFE
+config PTHREAD_MUTEX_DEFAULT_UNSAFE
 	bool "Unsafe default"
 	---help---
 		The default is traditional unsafe NORMAL mutexes (standard)
