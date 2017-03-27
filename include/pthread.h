@@ -143,12 +143,42 @@
 #define PTHREAD_PRIO_INHERIT          SEM_PRIO_INHERIT
 #define PTHREAD_PRIO_PROTECT          SEM_PRIO_PROTECT
 
+/* Values for robust argument of pthread_mutexattr_get/setrobust
+ *
+ * PTHREAD_MUTEX_STALLED - No special actions are taken if the owner of the
+ * mutex is terminated while holding the mutex lock. This can lead to
+ * deadlocks if no other thread can unlock the mutex.  This is the standard
+ * default value (NuttX permits you to override that default behavior
+ * with a configuration option).
+ *
+ * PTHREAD_MUTEX_ROBUST - If the process containing the owning thread of a
+ * robust mutex terminates while holding the mutex lock, the next thread
+ * that acquires the mutex will be notified about the termination by the
+ * return value EOWNERDEAD from the locking function. If the owning thread
+ * of a robust mutex terminates while holding the mutex lock, the next
+ * thread that attempts to acquire the mutex may be notified about the
+ * termination by the return value EOWNERDEAD. The notified thread can
+ * then attempt to make the state protected by the mutex consistent again,
+ * and if successful can mark the mutex state as consistent by calling
+ * pthread_mutex_consistent(). After a subsequent successful call to
+ * pthread_mutex_unlock(), the mutex lock will be released and can be used
+ * normally by other threads. If the mutex is unlocked without a call to
+ * pthread_mutex_consistent(), it will be in a permanently unusable state
+ * and all attempts to lock the mutex will fail with the error
+ * ENOTRECOVERABLE. The only permissible operation on such a mutex is
+ * pthread_mutex_destroy().
+ */
+
+#define PTHREAD_MUTEX_STALLED         0
+#define PTHREAD_MUTEX_ROBUST          1
+
 /* Values for struct pthread_mutex_s flags.  These are non-standard and
  * intended only for internal use within the OS.
  */
 
-#define _PTHREAD_MFLAGS_INCONSISTENT  (1 << 0) /* Mutex is in an inconsistent state */
-#define _PTHREAD_MFLAGS_NOTRECOVRABLE (1 << 1) /* Inconsistent mutex has been unlocked */
+#define _PTHREAD_MFLAGS_ROBUST        (1 << 0) /* Robust (NORMAL) mutex */
+#define _PTHREAD_MFLAGS_INCONSISTENT  (1 << 1) /* Mutex is in an inconsistent state */
+#define _PTHREAD_MFLAGS_NRECOVERABLE  (1 << 2) /* Inconsistent mutex has been unlocked */
 
 /* Definitions to map some non-standard, BSD thread management interfaces to
  * the non-standard Linux-like prctl() interface.  Since these are simple
@@ -226,12 +256,15 @@ typedef struct pthread_cond_s pthread_cond_t;
 
 struct pthread_mutexattr_s
 {
-  uint8_t pshared;  /* PTHREAD_PROCESS_PRIVATE or PTHREAD_PROCESS_SHARED */
+  uint8_t pshared : 1;  /* PTHREAD_PROCESS_PRIVATE or PTHREAD_PROCESS_SHARED */
 #ifdef CONFIG_PRIORITY_INHERITANCE
-  uint8_t proto;    /* See PTHREAD_PRIO_* definitions */
+  uint8_t proto   : 2;  /* See PTHREAD_PRIO_* definitions */
 #endif
 #ifdef CONFIG_MUTEX_TYPES
-  uint8_t type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
+  uint8_t type    : 2;  /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
+#endif
+#ifdef CONFIG_PTHREAD_MUTEX_BOTH
+  uint8_t robust  : 1;  /* PTHREAD_MUTEX_STALLED or PTHREAD_MUTEX_ROBUST */
 #endif
 };
 
@@ -240,15 +273,19 @@ typedef struct pthread_mutexattr_s pthread_mutexattr_t;
 
 struct pthread_mutex_s
 {
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
   /* Supports a singly linked list */
 
   FAR struct pthread_mutex_s *flink;
+#endif
 
   /* Payload */
 
   sem_t sem;        /* Semaphore underlying the implementation of the mutex */
   pid_t pid;        /* ID of the holder of the mutex */
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
   uint8_t flags;    /* See _PTHREAD_MFLAGS_* */
+#endif
 #ifdef CONFIG_MUTEX_TYPES
   uint8_t type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
   int16_t nlocks;   /* The number of recursive locks held */
@@ -428,6 +465,10 @@ int pthread_mutexattr_getprotocol(FAR const pthread_mutexattr_t *attr,
                                   FAR int *protocol);
 int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
                                   int protocol);
+int pthread_mutexattr_getrobust(FAR const pthread_mutexattr_t *attr,
+                                FAR int *robust);
+int pthread_mutexattr_setrobust(FAR pthread_mutexattr_t *attr,
+                                int robust);
 
 /* The following routines create, delete, lock and unlock mutexes. */
 
@@ -438,9 +479,11 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex);
 int pthread_mutex_trylock(FAR pthread_mutex_t *mutex);
 int pthread_mutex_unlock(FAR pthread_mutex_t *mutex);
 
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
 /* Make sure that the pthread mutex is in a consistent state */
 
 int pthread_mutex_consistent(FAR pthread_mutex_t *mutex);
+#endif
 
 /* Operations on condition variables */
 

@@ -531,6 +531,48 @@ config MUTEX_TYPES:
 		Set to enable support for recursive and errorcheck mutexes. Enables
 		pthread_mutexattr_settype().
 
+choice
+	prompt "pthread mutex robustness"
+	default PTHREAD_MUTEX_ROBUST if !DEFAULT_SMALL
+	default PTHREAD_UNSAFE if DEFAULT_SMALL
+
+	config PTHREAD_MUTEX_ROBUST
+	bool "Robust mutexes"
+	---help---
+		Support only the robust form of the NORMAL mutex.
+
+	config PTHREAD_MUTEX_UNSAFE
+	bool "Traditional unsafe mutexes"
+	---help---
+		Support only the traditional non-robust form of the NORMAL mutex.
+		You should select this option only for backward compatibility with
+		software you may be porting or, perhaps, if you are trying to minimize
+		footprint.
+
+	config PTHREAD_MUTEX_BOTH
+	bool "Both robust and unsafe mutexes"
+	---help---
+		Support both forms of NORMAL mutexes.
+
+endchoice # pthread mutex robustness
+
+choice
+	prompt "Default NORMAL mutex robustness"
+	default PTHREAD_MUTEX_DEFAULT_ROBUST
+	depends on PTHREAD_MUTEX_BOTH
+
+	config PTHREAD_MUTEX_DEFAULT_ROBUST
+	bool "Robust default"
+	---help---
+		The default is robust NORMAL mutexes (non-standard)
+
+	config PTHREAD_MUTEX_DEFAULT_UNSAFE
+	bool "Unsafe default"
+	---help---
+		The default is traditional unsafe NORMAL mutexes (standard)
+
+endchoice # Default NORMAL mutex robustness
+
 config NPTHREAD_KEYS
 	int "Maximum number of pthread keys"
 	default 4
