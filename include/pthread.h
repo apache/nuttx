@@ -178,7 +178,7 @@
 
 #define _PTHREAD_MFLAGS_ROBUST        (1 << 0) /* Robust (NORMAL) mutex */
 #define _PTHREAD_MFLAGS_INCONSISTENT  (1 << 1) /* Mutex is in an inconsistent state */
-#define _PTHREAD_MFLAGS_NOTRECOVRABLE (1 << 2) /* Inconsistent mutex has been unlocked */
+#define _PTHREAD_MFLAGS_NRECOVERABLE  (1 << 2) /* Inconsistent mutex has been unlocked */
 
 /* Definitions to map some non-standard, BSD thread management interfaces to
  * the non-standard Linux-like prctl() interface.  Since these are simple
