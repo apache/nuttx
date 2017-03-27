@@ -549,7 +549,29 @@ choice
 		software you may be porting or, perhaps, if you are trying to minimize
 		footprint.
 
-endchoice # thread mutex robustness
+	config PTHREAD_MUTEX_BOTH
+	bool "Both robust and unsafe mutexes"
+	---help---
+		Support both forms of NORMAL mutexes.
+
+endchoice # pthread mutex robustness
+
+choice
+	prompt "Default NORMAL mutex robustness"
+	default PTHREAD_MUTEX_DEFAULT_ROBUST
+	depends on PTHREAD_MUTEX_BOTH
+
+	config PTHREAD_MUTEX_DEFAULT_ROBUST
+	bool "Robust default"
+	---help---
+		The default is robust NORMAL mutexes (non-standard)
+
+	config PTHREAD_MUTEX_DEFAULT_UNSAFE
+	bool "Unsafe default"
+	---help---
+		The default is traditional unsafe NORMAL mutexes (standard)
+
+endchoice # Default NORMAL mutex robustness
 
 config NPTHREAD_KEYS
 	int "Maximum number of pthread keys"
