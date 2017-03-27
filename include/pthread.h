@@ -260,7 +260,7 @@ struct pthread_mutexattr_s
 #ifdef CONFIG_PRIORITY_INHERITANCE
   uint8_t proto   : 2;  /* See PTHREAD_PRIO_* definitions */
 #endif
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
   uint8_t type    : 2;  /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
 #endif
 #ifdef CONFIG_PTHREAD_MUTEX_BOTH
@@ -286,7 +286,7 @@ struct pthread_mutex_s
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
   uint8_t flags;    /* See _PTHREAD_MFLAGS_* */
 #endif
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
   uint8_t type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
   int16_t nlocks;   /* The number of recursive locks held */
 #endif
@@ -295,7 +295,7 @@ struct pthread_mutex_s
 typedef struct pthread_mutex_s pthread_mutex_t;
 #define __PTHREAD_MUTEX_T_DEFINED 1
 
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
 #  define PTHREAD_MUTEX_INITIALIZER {-1, SEM_INITIALIZER(1), PTHREAD_MUTEX_DEFAULT, 0}
 #else
 #  define PTHREAD_MUTEX_INITIALIZER {-1, SEM_INITIALIZER(1)}

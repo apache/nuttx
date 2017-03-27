@@ -81,7 +81,7 @@ int pthread_mutexattr_init(FAR pthread_mutexattr_t *attr)
       attr->proto   = SEM_PRIO_INHERIT;
 #endif
 
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
       attr->type    = PTHREAD_MUTEX_DEFAULT;
 #endif
 

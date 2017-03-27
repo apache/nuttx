@@ -67,7 +67,7 @@ int pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int *type)
 {
   if (attr != NULL && type != NULL)
     {
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
       *type = attr->type;
 #else
       *type = PTHREAD_MUTEX_NORMAL;

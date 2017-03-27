@@ -120,7 +120,7 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
 
       sched_lock();
 
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
       /* All mutex types except for NORMAL (and DEFAULT) will return
        * and an error  error if the caller does not hold the mutex.
        */
@@ -162,7 +162,7 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
             }
         }
       else
-#endif /* CONFIG_MUTEX_TYPES */
+#endif /* CONFIG_PTHREAD_MUTEX_TYPES */
 
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
       /* The calling thread does not hold the semaphore.  The correct
@@ -172,7 +172,7 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
        */
 
 #ifdef CONFIG_PTHREAD_MUTEX_BOTH
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
       /* Include check if this is a NORMAL mutex and that it is robust */
 
       if (mutex->pid > 0 &&
@@ -180,14 +180,14 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
             mutex->type != PTHREAD_MUTEX_NORMAL) &&
           sched_gettcb(mutex->pid) == NULL)
 
-#else /* CONFIG_MUTEX_TYPES */
+#else /* CONFIG_PTHREAD_MUTEX_TYPES */
       /* This can only be a NORMAL mutex.  Include check if it is robust */
 
       if (mutex->pid > 0 &&
           (mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 &&
           sched_gettcb(mutex->pid) == NULL)
 
-#endif /* CONFIG_MUTEX_TYPES */
+#endif /* CONFIG_PTHREAD_MUTEX_TYPES */
 #else /* CONFIG_PTHREAD_MUTEX_ROBUST */
       /* This mutex is always robust, whatever type it is. */
 
@@ -224,7 +224,7 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
           if (ret == OK)
             {
               mutex->pid    = mypid;
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
               mutex->nlocks = 1;
 #endif
             }
