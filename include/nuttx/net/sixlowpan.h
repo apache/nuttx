@@ -284,7 +284,8 @@ struct sixlowpan_addr_context
 };
 
 
-/* The structure of a next header compressor.
+/* The structure of a next header compressor.  This compressor is provided
+ * by architecture-specific logic outside of the network stack.
  *
  * TODO: needs more parameters when compressing extension headers, etc.
  */
@@ -307,8 +308,51 @@ struct sixlowpan_nhcompressor_s
                          FAR uint8_t *uncompressed_len);
 };
 
+/* RIME sniffer callbacks */
+
+struct sixlowpan_rime_sniffer_s
+{
+  CODE void (*input)(void);
+  CODE void (*output)(int mac_status);
+};
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Function: sixlowpan_set_compressor
+ *
+ * Description:
+ *   Configure to use the architecture-specific compressor.
+ *
+ * Input parameters:
+ *   compressor - A reference to the new compressor to be used.  This may
+ *                be a NULL value to disable the compressor.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sixlowpan_set_compressor(FAR struct sixlowpan_nhcompressor_s *compressor);
+
+/****************************************************************************
+ * Function: sixlowpan_set_sniffer
+ *
+ * Description:
+ *   Configure to use an architecture-specific sniffer to enable tracing of
+ *   IP.
+ *
+ * Input parameters:
+ *   sniffer - A reference to the new sniffer to be used.  This may
+ *             be a NULL value to disable the sniffer.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sixlowpan_set_sniffer(FAR struct sixlowpan_rime_sniffer_s *sniffer);
 
 #endif /* __INCLUDE_NUTTX_NET_SIXLOWOAN_H */
