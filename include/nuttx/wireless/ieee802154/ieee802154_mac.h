@@ -95,7 +95,6 @@
 
 /* Frame Type */
 
-#define IEEE802154_FC1_FTYPE          0x03
 #define IEEE802154_FRAME_BEACON       0x00
 #define IEEE802154_FRAME_DATA         0x01
 #define IEEE802154_FRAME_ACK          0x02
