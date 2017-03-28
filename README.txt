@@ -197,6 +197,9 @@ Ubuntu Bash under Windows 10
 
     C:\Users\Username\AppData\Local\lxss\rootfs
 
+  However, I am unable to see my files under the rootfs/home directory
+  so this is not very useful.
+
   Install Linux Software.
   -----------------------
   Use "sudo apt-get install <package name>".  As examples, this is how

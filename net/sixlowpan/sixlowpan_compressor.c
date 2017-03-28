@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/6lowpan/6lowpan.h
+ * net/sixlowpan/sixlowpan_compressor.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,24 +33,56 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_6LOWPAN_6LOWPAN_H
-#define __NET_6LOWPAN_6LOWPAN_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include "nuttx/net/net.h"
+#include "nuttx/net/sixlowpan.h"
+
+#include "sixlowpan/sixlopan.h"
+
 #ifdef CONFIG_NET_6LOWPAN
 
 /****************************************************************************
- * Public Types
+ * Public Data
+ ****************************************************************************/
+
+/* A pointer to the optional, architecture-specific compressor */
+
+FAR struct sixlowpan_nhcompressor_s *g_sixlowpan_compressor;
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Function Prototypes
+ * Function: sixlowpan_set_compressor
+ *
+ * Description:
+ *   Configure to use the architecture-specific compressor.
+ *
+ * Input parameters:
+ *   compressor - A reference to the new compressor to be used.  This may
+ *                be a NULL value to disable the compressor.
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
+void sixlowpan_set_compressor(FAR struct sixlowpan_nhcompressor_s *compressor)
+{
+  /* Make sure that the compressor is not in use */
+
+  net_lock();
+
+  /* Then instantiate the new compressor */
+
+  g_sixlowpan_compressor = compressor;
+  net_unlock();
+}
+
 #endif /* CONFIG_NET_6LOWPAN */
-#endif /* __NET_6LOWPAN_6LOWPAN_H */

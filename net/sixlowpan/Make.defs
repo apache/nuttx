@@ -1,5 +1,5 @@
 ############################################################################
-# net/6lowpan/Make.defs
+# net/sixlowpan/Make.defs
 #
 #   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,11 +39,11 @@ ifeq ($(CONFIG_NET_6LOWPAN),y)
 
 # Include IEEE 802.15.4 file in the build
 
-# NET_CSRCS +=
+NET_CSRCS += sixlowpan_compressor.c sixlowpan_sniffer.c
 
-# Include the 6lowpan directory in the build
+# Include the sixlowpan directory in the build
 
-DEPPATH += --dep-path 6lowpan
-VPATH += :6lowpan
+DEPPATH += --dep-path sixlowpan
+VPATH += :sixlowpan
 
 endif # CONFIG_NET_6LOWPAN
