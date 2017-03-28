@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/sixlowpan/sixlowpan_initialize.c
+ * net/sixlowpan/sixlowpan_input.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

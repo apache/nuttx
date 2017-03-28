@@ -57,6 +57,7 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/net/netdev.h>
 #include <nuttx/net/sixlowpan.h>
 
 #include "sixlowpan/sixlowpan.h"
@@ -165,5 +166,85 @@ void sixlowpan_hc06_initialize(void)
 #endif /* CONFIG_NET_6LOWPAN_MAXADDRCONTEXT > 1 */
 #endif /* CONFIG_NET_6LOWPAN_MAXADDRCONTEXT > 0 */
 }
+
+/****************************************************************************
+ * Name: sixlowpan_hc06_initialize
+ *
+ * Description:
+ *   Compress IP/UDP header
+ *
+ *   This function is called by the 6lowpan code to create a compressed
+ *   6lowpan packet in the packetbuf buffer from a full IPv6 packet in the
+ *   uip_buf buffer.
+ *
+ *     HC-06 (draft-ietf-6lowpan-hc, version 6)
+ *     http://tools.ietf.org/html/draft-ietf-6lowpan-hc-06
+ *
+ *   NOTE: sixlowpan_compresshdr_hc06() does not support ISA100_UDP header
+ *   compression
+ *
+ *   For LOWPAN_UDP compression, we either compress both ports or none.
+ *   General format with LOWPAN_UDP compression is
+ *                      1                   2                   3
+ *    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *   |0|1|1|TF |N|HLI|C|S|SAM|M|D|DAM| SCI   | DCI   | comp. IPv6 hdr|
+ *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *   | compressed IPv6 fields .....                                  |
+ *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *   | LOWPAN_UDP    | non compressed UDP fields ...                 |
+ *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *   | L4 data ...                                                   |
+ *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *
+ *   NOTE: The g_addr_context number 00 is reserved for the link local prefix.
+ *   For unicast addresses, if we cannot compress the prefix, we neither
+ *   compress the IID.
+ *
+ * Input Parameters:
+ *   dev      - A reference to the IEE802.15.4 network device state
+ *   destaddr - L2 destination address, needed to compress IP dest
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sixlowpan_compresshdr_hc06(FAR struct net_driver_s *dev,
+                                FAR struct rimeaddr_s *destaddr)
+{
+  /* REVISIT: To be provided */
+}
+
+/****************************************************************************
+ * Name: sixlowpan_hc06_initialize
+ *
+ * Description:
+ *   Uncompress HC06 (i.e., IPHC and LOWPAN_UDP) headers and put them in
+ *   sixlowpan_buf
+ *
+ *   This function is called by the input function when the dispatch is HC06.
+ *   We process the packet in the rime buffer, uncompress the header fields,
+ *   and copy the result in the sixlowpan buffer.  At the end of the
+ *   decompression, g_rime_hdrlen and g_uncompressed_hdrlen are set to the
+ *   appropriate values
+ *
+ * Input Parmeters:
+ *   dev   - A reference to the IEE802.15.4 network device state
+ *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
+ *           inferred from the L2 length), non 0 if the packet is a 1st
+ *           fragment.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sixlowpan_uncompresshdr_hc06(FAR struct net_driver_s *dev,
+                                  uint16_t iplen)
+{
+  /* REVISIT: To be provided */
+}
+
 
 #endif /* CONFIG_NET_6LOWPAN_COMPRESSION_HC06 */

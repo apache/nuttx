@@ -46,6 +46,15 @@
 #ifdef CONFIG_NET_6LOWPAN
 
 /****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct rimeaddr_s
+{
+  uint8_t u8[CONFIG_NET_6LOWPAN_RIMEADDR_SIZE];
+};
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -66,6 +75,8 @@ extern FAR struct sixlowpan_rime_sniffer_s *g_sixlowpan_sniffer;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+struct net_driver_s;  /* Forward reference */
 
 /****************************************************************************
  * Name: sixlowpan_initialize
@@ -89,6 +100,26 @@ extern FAR struct sixlowpan_rime_sniffer_s *g_sixlowpan_sniffer;
 void sixlowpan_initialize(void);
 
 /****************************************************************************
+ * Name: sixlowpan_output
+ *
+ * Description:
+ *   Process an outgoing UDP or TCP packet.  Called from UDP/TCP logic to
+ *   determine if the the packet should be formatted for 6loWPAN output.
+ *
+ * Input Parameters:
+ *   dev - The IEEE802.15.4 MAC network driver interface.
+ *
+ * Returned Value:
+ *   Ok is returned on success; Othewise a negated errno value is returned.
+ *   This function is expected to fail if the driver is not an IEEE802.15.4
+ *   MAC network driver.  In that case, the UDP/TCP will fall back to normal
+ *   IPv4/IPv6 formatting.
+ *
+ ****************************************************************************/
+
+int sixlowpan_output(FAR struct net_driver_s *dev);
+
+/****************************************************************************
  * Name: sixlowpan_hc06_initialize
  *
  * Description:
@@ -109,6 +140,118 @@ void sixlowpan_initialize(void);
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
 void sixlowpan_hc06_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: sixlowpan_hc06_initialize
+ *
+ * Description:
+ *   Compress IP/UDP header
+ *
+ *   This function is called by the 6lowpan code to create a compressed
+ *   6lowpan packet in the packetbuf buffer from a full IPv6 packet in the
+ *   uip_buf buffer.
+ *
+ *     HC-06 (draft-ietf-6lowpan-hc, version 6)
+ *     http://tools.ietf.org/html/draft-ietf-6lowpan-hc-06
+ *
+ *   NOTE: sixlowpan_compresshdr_hc06() does not support ISA100_UDP header
+ *   compression
+ *
+ * Input Parameters:
+ *   dev      - A reference to the IEE802.15.4 network device state
+ *   destaddr - L2 destination address, needed to compress IP dest
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
+void sixlowpan_compresshdr_hc06(FAR struct net_driver_s *dev,
+                                FAR struct rimeaddr_s *destaddr);
+#endif
+
+/****************************************************************************
+ * Name: sixlowpan_hc06_initialize
+ *
+ * Description:
+ *   Uncompress HC06 (i.e., IPHC and LOWPAN_UDP) headers and put them in
+ *   sixlowpan_buf
+ *
+ *   This function is called by the input function when the dispatch is HC06.
+ *   We process the packet in the rime buffer, uncompress the header fields,
+ *   and copy the result in the sixlowpan buffer.  At the end of the
+ *   decompression, g_rime_hdrlen and g_uncompressed_hdrlen are set to the
+ *   appropriate values
+ *
+ * Input Parmeters:
+ *   dev   - A reference to the IEE802.15.4 network device state
+ *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
+ *           inferred from the L2 length), non 0 if the packet is a 1st
+ *           fragment.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
+void sixlowpan_uncompresshdr_hc06(FAR struct net_driver_s *dev,
+                                  uint16_t iplen);
+#endif
+
+/****************************************************************************
+ * Name: sixlowpan_compresshdr_hc1
+ *
+ * Description:
+ *   Compress IP/UDP header using HC1 and HC_UDP
+ *
+ *   This function is called by the 6lowpan code to create a compressed
+ *   6lowpan packet in the packetbuf buffer from a full IPv6 packet in the
+ *   uip_buf buffer.
+ *
+ * Input Parmeters:
+ *   dev      - A reference to the IEE802.15.4 network device state
+ *   destaddr - L2 destination address, needed to compress the IP
+ *              destination field
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
+void sixlowpan_compresshdr_hc1(FAR struct net_driver_s *dev,
+                               FAR struct rimeaddr_s *destaddr);
+#endif
+
+/****************************************************************************
+ * Name: sixlowpan_uncompresshdr_hc1
+ *
+ * Description:
+ *   Uncompress HC1 (and HC_UDP) headers and put them in sixlowpan_buf
+ *
+ *   This function is called by the input function when the dispatch is
+ *   HC1.  It processes the packet in the rime buffer, uncompresses the
+ *   header fields, and copies the result in the sixlowpan buffer.  At the
+ *   end of the decompression, g_rime_hdrlen and uncompressed_hdr_len
+ *   are set to the appropriate values
+ *
+ * Input Parameters:
+ *   dev   - A reference to the IEE802.15.4 network device state
+ *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
+ *           inferred from the L2 length), non 0 if the packet is a 1st
+ *           fragment.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
+void sixlowpan_uncompresshdr_hc1(FAR struct net_driver_s *dev,
+                                 uint16_t ip_len);
 #endif
 
 #endif /* CONFIG_NET_6LOWPAN */

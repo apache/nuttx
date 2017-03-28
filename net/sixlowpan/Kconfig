@@ -121,6 +121,10 @@ config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_1
 endif # NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_0
 endif # NET_6LOWPAN_COMPRESSION_HC06
 
+config NET_6LOWPAN_RIMEADDR_SIZE
+	int "Rime address size"
+	default 2
+
 config NET_SIXLOWPAN_MAXAGE
 	int "Packet reassembly timeout"
 	default 20

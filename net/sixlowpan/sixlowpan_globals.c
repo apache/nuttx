@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/sixlowpan/sixlowpan_sniffer.c
+ * net/sixlowpan/sixlowpan_globals.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
