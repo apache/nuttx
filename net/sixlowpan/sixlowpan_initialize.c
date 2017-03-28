@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/sixlowpan/sixlowpan_compressor.c
+ * net/net_sockets.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,9 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include "nuttx/net/net.h"
-#include "nuttx/net/sixlowpan.h"
-
 #include "sixlowpan/sixlowpan.h"
 
 #ifdef CONFIG_NET_6LOWPAN
@@ -51,30 +48,27 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sixlowpan_set_compressor
+ * Name: sixlowpan_initialize
  *
  * Description:
- *   Configure to use the architecture-specific compressor.
+ *   sixlowpan_initialize() is called during OS initialization at power-up
+ *   reset.  It is called from the common net_setup() function.
+ *   sixlowpan_initialize() configures 6loWPAN networking data structures.
+ *   It is called prior to platform-specific driver initialization so that
+ *   the 6loWPAN networking subsystem is prepared to deal with network
+ *    driver initialization actions.
  *
- * Input parameters:
- *   compressor - A reference to the new compressor to be used.  This may
- *                be a NULL value to disable the compressor.
+ * Input Parameters:
+ *   None
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void sixlowpan_set_compressor(FAR struct sixlowpan_nhcompressor_s *compressor)
+void sixlowpan_initialize(void)
 {
-  /* Make sure that the compressor is not in use */
-
-  net_lock();
-
-  /* Then instantiate the new compressor */
-
-  g_sixlowpan_compressor = compressor;
-  net_unlock();
+  /* REVIST: To be provided */
 }
 
 #endif /* CONFIG_NET_6LOWPAN */

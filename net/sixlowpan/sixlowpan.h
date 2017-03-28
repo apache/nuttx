@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
 
 #ifdef CONFIG_NET_6LOWPAN
 
@@ -55,7 +56,8 @@ extern FAR struct sixlowpan_nhcompressor_s *g_sixlowpan_compressor;
 
 /* Rime Sniffer support for one single listener to enable trace of IP */
 
-extern struct sixlowpan_rime_sniffer_s *g_sixlopan_sniffer;
+struct sixlowpan_rime_sniffer_s; /* Foward reference */
+extern FAR struct sixlowpan_rime_sniffer_s *g_sixlowpan_sniffer;
 
 /****************************************************************************
  * Public Types
@@ -64,6 +66,27 @@ extern struct sixlowpan_rime_sniffer_s *g_sixlopan_sniffer;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: sixlowpan_initialize
+ *
+ * Description:
+ *   sixlowpan_initialize() is called during OS initialization at power-up
+ *   reset.  It is called from the common net_setup() function.
+ *   sixlowpan_initialize() configures 6loWPAN networking data structures.
+ *   It is called prior to platform-specific driver initialization so that
+ *   the 6loWPAN networking subsystem is prepared to deal with network
+ *    driver initialization actions.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sixlowpan_initialize(void);
 
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* _NET_SIXLOWPAN_SIXLOWPAN_H */

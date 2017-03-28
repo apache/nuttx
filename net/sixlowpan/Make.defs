@@ -39,6 +39,7 @@ ifeq ($(CONFIG_NET_6LOWPAN),y)
 
 # Include IEEE 802.15.4 file in the build
 
+NET_CSRCS += sixlowpan_initialize.c sixlowpan_globals.c
 NET_CSRCS += sixlowpan_compressor.c sixlowpan_sniffer.c
 
 # Include the sixlowpan directory in the build
