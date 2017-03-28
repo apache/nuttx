@@ -13,6 +13,42 @@ menuconfig NET_6LOWPAN
 
 if NET_6LOWPAN
 
+config NET_6LOWPAN_FRAG
+	bool "6loWPAN Fragmentation"
+	default y
+	---help---
+		CONFIG_NET_6LOWPAN_FRAG specifies if 6lowpan fragmentation should be
+		used or not. Fragmentation is on by default.
+
+choice
+	prompt "6loWPAN Compression"
+	default NET_6LOWPAN_COMPRESSION_HC06
+
+config NET_6LOWPAN_COMPRESSION_IPv6
+	bool "IPv6 Dispatch"
+	---help---
+		Packets compression when only IPv6 dispatch is used.  There is no
+		compression in this case, all fields are sent inline. We just add
+		the IPv6 dispatch byte before the packet.
+
+config NET_6LOWPAN_COMPRESSION_HC1
+	bool "6loWPAN HC1"
+	---help---
+		Compress IP/UDP header using HC1 and HC_UDP
+
+config NET_6LOWPAN_COMPRESSION_HC06
+	bool "6loWPAN HC06"
+	---help---
+		Compress IP/UDP header using HC06 compression
+
+endchoice # 6loWPAN Compression
+
+config NET_6LOWPAN_MAXADDRCONTEXT
+	int "Maximum address contexts"
+	default 1
+	---help---
+		If we use IPHC compression, how many address contexts do we support?
+
 config NET_6LOWPAN_MTU
 	int "6LoWPAN packet buffer size (MTU)"
 	default 1294

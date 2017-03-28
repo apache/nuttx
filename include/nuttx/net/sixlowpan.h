@@ -63,12 +63,6 @@
 #define SIXLOWPAN_UDP_8_BIT_PORT_MIN     0xF000
 #define SIXLOWPAN_UDP_8_BIT_PORT_MAX     0xf0ff   /* F000 + 255 */
 
-/* 6lowpan compressions */
-
-#define SIXLOWPAN_COMPRESSION_IPV6       0
-#define SIXLOWPAN_COMPRESSION_HC1        1
-#define SIXLOWPAN_COMPRESSION_HC06       2
-
 /* 6lowpan dispatches */
 
 #define SIXLOWPAN_DISPATCH_IPV6          0x41 /* 01000001 = 65 */
