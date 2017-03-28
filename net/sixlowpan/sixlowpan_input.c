@@ -39,6 +39,9 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
+
+#include "nuttx/net/netdev.h"
 #include "sixlowpan/sixlowpan.h"
 
 #ifdef CONFIG_NET_6LOWPAN
@@ -48,31 +51,33 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sixlowpan_initialize
+ * Name: sixlowpan_input
  *
  * Description:
- *   sixlowpan_initialize() is called during OS initialization at power-up
- *   reset.  It is called from the common net_setup() function.
- *   sixlowpan_initialize() configures 6loWPAN networking data structures.
- *   It is called prior to platform-specific driver initialization so that
- *   the 6loWPAN networking subsystem is prepared to deal with network
- *   driver initialization actions.
+ *   Process an incoming IP packet.
+ *
+ *   This function is called when the device driver has received a 6loWPAN
+ *   packet from the network. The packet from the device driver must be
+ *   present in the d_buf buffer, and the length of the packet should be
+ *   placed in the d_len field.
+ *
+ *   When the function returns, there may be an outbound packet placed
+ *   in the d_buf packet buffer. If so, the d_len field is set to
+ *   the length of the packet. If no packet is to be sent out, the
+ *   d_len field is set to 0.
  *
  * Input Parameters:
- *   None
+ *   dev - The IEEE802.15.4 MAC network driver interface.
  *
  * Returned Value:
- *   None
+ *   Ok is returned on success; Othewise a negated errno value is returned.
  *
  ****************************************************************************/
 
-void sixlowpan_initialize(void)
+int sixlowpan_input(FAR struct net_driver_s *dev)
 {
-#ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
-  /* Initialize HC06 data data structures */
-
-  sixlowpan_hc06_initialize();
-#endif
+  /* REVISIT: To be provided */
+  return -ENOSYS;
 }
 
 #endif /* CONFIG_NET_6LOWPAN */

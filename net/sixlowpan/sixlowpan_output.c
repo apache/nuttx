@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/sixlowpan/sixlowpan_initialize.c
+ * net/sixlowpan/sixlowpan_output.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,6 +39,9 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
+
+#include "nuttx/net/netdev.h"
 #include "sixlowpan/sixlowpan.h"
 
 #ifdef CONFIG_NET_6LOWPAN
@@ -48,31 +51,27 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sixlowpan_initialize
+ * Name: sixlowpan_output
  *
  * Description:
- *   sixlowpan_initialize() is called during OS initialization at power-up
- *   reset.  It is called from the common net_setup() function.
- *   sixlowpan_initialize() configures 6loWPAN networking data structures.
- *   It is called prior to platform-specific driver initialization so that
- *   the 6loWPAN networking subsystem is prepared to deal with network
- *   driver initialization actions.
+ *   Process an outgoing UDP or TCP packet.  Called from UDP/TCP logic to
+ *   determine if the the packet should be formatted for 6loWPAN output.
  *
  * Input Parameters:
- *   None
+ *   dev - The IEEE802.15.4 MAC network driver interface.
  *
  * Returned Value:
- *   None
+ *   Ok is returned on success; Othewise a negated errno value is returned.
+ *   This function is expected to fail if the driver is not an IEEE802.15.4
+ *   MAC network driver.  In that case, the UDP/TCP will fall back to normal
+ *   IPv4/IPv6 formatting.
  *
  ****************************************************************************/
 
-void sixlowpan_initialize(void)
+int sixlowpan_output(FAR struct net_driver_s *dev)
 {
-#ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
-  /* Initialize HC06 data data structures */
-
-  sixlowpan_hc06_initialize();
-#endif
+  /* REVISIT: To be provided */
+  return -ENOSYS;
 }
 
 #endif /* CONFIG_NET_6LOWPAN */

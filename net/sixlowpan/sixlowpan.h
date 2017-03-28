@@ -76,7 +76,7 @@ extern FAR struct sixlowpan_rime_sniffer_s *g_sixlowpan_sniffer;
  *   sixlowpan_initialize() configures 6loWPAN networking data structures.
  *   It is called prior to platform-specific driver initialization so that
  *   the 6loWPAN networking subsystem is prepared to deal with network
- *    driver initialization actions.
+ *   driver initialization actions.
  *
  * Input Parameters:
  *   None
