@@ -43,6 +43,14 @@ config NET_6LOWPAN_COMPRESSION_HC06
 
 endchoice # 6loWPAN Compression
 
+config NET_6LOWPAN_COMPRESSION_THRESHOLD
+	int "Lower compression threshold"
+	default 63
+	depends on !NET_6LOWPAN_COMPRESSION_IPv6
+	---help---
+		CONFIG_NET_6LOWPAN_COMPRESSION_THRESHOLD sets a lower threshold for
+		when packets should not be compressed.
+
 if NET_6LOWPAN_COMPRESSION_HC06
 
 config NET_6LOWPAN_MAXADDRCONTEXT
@@ -119,27 +127,31 @@ config NET_SIXLOWPAN_MAXAGE
 	---help---
 		Timeout for packet reassembly at the 6lowpan layer (should be < 60s)
 
-config NET_6LOWPAN_MTU
-	int "6LoWPAN packet buffer size (MTU)"
-	default 1294
-	range 590 1518
+config NET_6LOWPAN_MAX_MACTRANSMITS
+	int "Max MAC transmissions"
+	default 4
 	---help---
-		Packet buffer size.  This size includes the TCP/UDP payload plus the
-		size of TCP/UDP header, the IP header, and data link layer headers.
-		This value is normally referred to as the MTU (Maximum Transmission
-		Unit); the payload is the MSS (Maximum Segment Size).
+		CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS specifies how many times the MAC
+		layer should resend packets if no link-layer ACK wasreceived. This
+		only makes sense with the csma_driver.
 
-		IPv6 hosts are required to be able to handle an MSS of 1220 octets,
-		resulting in a minimum buffer size of of 1220+20+40+xx = xx. REVISIT!
+config NET_SIXLOWPAN_MAXPAYLOAD
+	int "Max packet size"
+	default 102
+	---help---
+		CONFIG_NET_SIXLOWPAN_MAXPAYLOAD specifies the maximum size of packets
+		before they get fragmented. The default is 127 bytes (the maximum size
+		of a 802.15.4 frame) - 25 bytes (for the 802.15.4 MAClayer header). This
+		can be increased for systems with larger packet sizes.
 
 config NET_6LOWPAN_TCP_RECVWNDO
 	int "6LoWPAN TCP receive window size"
-	default 1220
+	default 102
 	depends on NET_TCP
 	---help---
 		The size of the advertised receiver's window.   Should be set low
-		(i.e., to the size of the MSS) if the application is slow to process
-		incoming data, or high (32768 bytes) if the application processes
-		data quickly. REVISIT!
+		(i.e., to the size of the IEEE802.15.4 frame payload) if the application
+		is slow to process incoming data, or high (32768 bytes) if the
+		application processes data quickly. REVISIT!
 
 endif # NET_6LOWPAN
