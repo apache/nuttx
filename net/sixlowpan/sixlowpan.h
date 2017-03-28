@@ -77,6 +77,7 @@ extern FAR struct sixlowpan_rime_sniffer_s *g_sixlowpan_sniffer;
  ****************************************************************************/
 
 struct net_driver_s;  /* Forward reference */
+struct socket;        /* Forward reference */
 
 /****************************************************************************
  * Name: sixlowpan_initialize
@@ -98,6 +99,56 @@ struct net_driver_s;  /* Forward reference */
  ****************************************************************************/
 
 void sixlowpan_initialize(void);
+
+/****************************************************************************
+ * Function: psock_6lowpan_tcp_send
+ *
+ * Description:
+ *   psock_6lowpan_tcp_send() call may be used only when the TCP socket is in a
+ *   connected state (so that the intended recipient is known).
+ *
+ * Parameters:
+ *   psock - An instance of the internal socket structure.
+ *   buf   - Data to send
+ *   len   - Length of data to send
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error,
+ *   -1 is returned, and errno is set appropriately.  Returned error numbers
+ *   must be consistent with definition of errors reported by send() or
+ *   sendto().
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP
+ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
+                               size_t len);
+#endif
+
+/****************************************************************************
+ * Function: psock_6lowpan_udp_send
+ *
+ * Description:
+ *   psock_6lowpan_udp_send() call may be used with connectionlesss UDP
+ *   sockets.
+ *
+ * Parameters:
+ *   psock - An instance of the internal socket structure.
+ *   buf   - Data to send
+ *   len   - Length of data to send
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error,
+ *   -1 is returned, and errno is set appropriately.  Returned error numbers
+ *   must be consistent with definition of errors reported by send() or
+ *   sendto().
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_UDP
+ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
+                               size_t len);
+#endif
 
 /****************************************************************************
  * Name: sixlowpan_output
