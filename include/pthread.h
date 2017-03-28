@@ -295,10 +295,26 @@ struct pthread_mutex_s
 typedef struct pthread_mutex_s pthread_mutex_t;
 #define __PTHREAD_MUTEX_T_DEFINED 1
 
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
-#  define PTHREAD_MUTEX_INITIALIZER {-1, SEM_INITIALIZER(1), PTHREAD_MUTEX_DEFAULT, 0}
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+#  ifdef CONFIG_PTHREAD_MUTEX_DEFAULT_UNSAFE
+#    define __PTHREAD_MUTEX_DEFAULT_FLAGS 0
+#  else
+#    define __PTHREAD_MUTEX_DEFAULT_FLAGS _PTHREAD_MFLAGS_ROBUST
+#  endif
+#endif
+
+#if defined(CONFIG_PTHREAD_MUTEX_TYPES) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
+#  define PTHREAD_MUTEX_INITIALIZER {NULL, SEM_INITIALIZER(1), -1, \
+                                     __PTHREAD_MUTEX_DEFAULT_FLAGS, \
+                                     PTHREAD_MUTEX_DEFAULT, 0}
+#elif defined(CONFIG_PTHREAD_MUTEX_TYPES)
+#  define PTHREAD_MUTEX_INITIALIZER {SEM_INITIALIZER(1), -1, \
+                                     PTHREAD_MUTEX_DEFAULT, 0}
+#elif !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
+#  define PTHREAD_MUTEX_INITIALIZER {NULL, SEM_INITIALIZER(1), -1,\
+                                     __PTHREAD_MUTEX_DEFAULT_FLAGS}
 #else
-#  define PTHREAD_MUTEX_INITIALIZER {-1, SEM_INITIALIZER(1)}
+#  define PTHREAD_MUTEX_INITIALIZER {SEM_INITIALIZER(1), -1}
 #endif
 
 struct pthread_barrierattr_s
