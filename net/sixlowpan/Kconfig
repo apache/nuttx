@@ -124,6 +124,9 @@ endif # NET_6LOWPAN_COMPRESSION_HC06
 config NET_6LOWPAN_RIMEADDR_SIZE
 	int "Rime address size"
 	default 2
+	range 2 8
+	---help---
+		Only the values 2 and 8 are supported
 
 config NET_SIXLOWPAN_MAXAGE
 	int "Packet reassembly timeout"
