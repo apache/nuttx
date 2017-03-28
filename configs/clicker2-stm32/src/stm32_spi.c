@@ -135,7 +135,18 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  /* To be provided */
+
+  switch(devid)
+  {
+#ifdef CONFIG_IEEE802154_MRF24J40
+    case SPIDEV_IEEE802154:
+      /* Set the GPIO low to select and high to de-select */
+      stm32_gpiowrite(GPIO_MB1_CS, !selected);
+      break;
+#endif
+    default:
+      break;
+  }
 }
 
 uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)

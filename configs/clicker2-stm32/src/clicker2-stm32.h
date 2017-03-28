@@ -233,6 +233,17 @@
  * Public Functions
  ************************************************************************************/
 
+/****************************************************************************
+ * Name: stm32_spidev_initialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins for the Mikroe Clicker2 STM32 
+ *   board.
+ *
+ ****************************************************************************/
+
+void weak_function stm32_spidev_initialize(void);
+
 /************************************************************************************
  * Name: stm32_bringup
  *
@@ -254,7 +265,7 @@ int stm32_bringup(void);
  *
  * Description:
  *   Called from stm32_boardinitialize very early in inialization to setup USB-related
- *   GPIO pins for the Olimex STM32 P407 board.
+ *   GPIO pins for the Mikroe Clicker2 STM32 board.
  *
  ************************************************************************************/
 
