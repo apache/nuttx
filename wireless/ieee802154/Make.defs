@@ -42,11 +42,11 @@ CSRCS =
 # Include wireless devices build support
 
 ifeq ($(CONFIG_IEEE802154_MAC),y)
-CSRCS += ieee802154/mac802154.c
+CSRCS += mac802154.c
 endif
 
 ifeq ($(CONFIG_IEEE802154_DEV),y)
-CSRCS += ieee802154/radio802154_device.c
+CSRCS += radio802154_device.c
 endif
 
 DEPPATH += --dep-path wireless/ieee802154
