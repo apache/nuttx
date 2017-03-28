@@ -36,6 +36,7 @@
 ifeq ($(CONFIG_WIRELESS_IEEE802154),y)
 
 # Include IEEE 802.15.4 support
+
 CSRCS =
 
 # Include wireless devices build support

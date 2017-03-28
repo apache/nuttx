@@ -52,14 +52,6 @@ VPATH = .
 
 include ieee802154$(DELIM)Make.defs
 
-# Include support for various drivers.  Each Make.defs file will add its
-# files to the source file list, add its DEPPATH info, and will add
-# the appropriate paths to the VPATH variable
-
-ifeq ($(CONFIG_WIRELESS_FORMAT_PCM),y)
-  CSRCS += pcm_decode.c
-endif
-
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
