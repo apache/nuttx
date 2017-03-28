@@ -53,17 +53,17 @@
 
 #include "nucleo-l476rg.h"
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
+#if defined(CONFIG_STM32L4_SPI1) || defined(CONFIG_STM32L4_SPI2) || defined(CONFIG_STM32L4_SPI3)
 
 /************************************************************************************
  * Public Data
  ************************************************************************************/
 /* Global driver instances */
 
-#ifdef CONFIG_STM32_SPI1
+#ifdef CONFIG_STM32L4_SPI1
 struct spi_dev_s *g_spi1;
 #endif
-#ifdef CONFIG_STM32_SPI2
+#ifdef CONFIG_STM32L4_SPI2
 struct spi_dev_s *g_spi2;
 #endif
 
@@ -82,10 +82,10 @@ struct spi_dev_s *g_spi2;
 
 void weak_function stm32_spiinitialize(void)
 {
-#ifdef CONFIG_STM32_SPI1
+#ifdef CONFIG_STM32L4_SPI1
   /* Configure SPI-based devices */
 
-  g_spi1 = up_spiinitialize(1);
+  g_spi1 = stm32l4_spibus_initialize(1);
   if (!g_spi1)
     {
       spierr("ERROR: FAILED to initialize SPI port 1\n");
@@ -100,10 +100,10 @@ void weak_function stm32_spiinitialize(void)
 #endif
 #endif
 
-#ifdef CONFIG_STM32_SPI2
+#ifdef CONFIG_STM32L4_SPI2
   /* Configure SPI-based devices */
 
-  g_spi2 = up_spiinitialize(2);
+  g_spi2 = stm32l4_spibus_initialize(2);
 
   /* Setup CS, EN & IRQ line IOs */
 
@@ -140,7 +140,7 @@ void weak_function stm32_spiinitialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_SPI1
+#ifdef CONFIG_STM32L4_SPI1
 void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
@@ -166,7 +166,7 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 }
 #endif
 
-#ifdef CONFIG_STM32_SPI2
+#ifdef CONFIG_STM32L4_SPI2
 void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
@@ -185,7 +185,7 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 }
 #endif
 
-#ifdef CONFIG_STM32_SPI3
+#ifdef CONFIG_STM32L4_SPI3
 void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
@@ -221,21 +221,21 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-#ifdef CONFIG_STM32_SPI1
+#ifdef CONFIG_STM32L4_SPI1
 int stm32_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
   return OK;
 }
 #endif
 
-#ifdef CONFIG_STM32_SPI2
+#ifdef CONFIG_STM32L4_SPI2
 int stm32_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
   return OK;
 }
 #endif
 
-#ifdef CONFIG_STM32_SPI3
+#ifdef CONFIG_STM32L4_SPI3
 int stm32_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
   return OK;
@@ -243,4 +243,4 @@ int stm32_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 #endif
 #endif /* CONFIG_SPI_CMDDATA */
 
-#endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2 || CONFIG_STM32_SPI3 */
+#endif /* CONFIG_STM32L4_SPI1 || CONFIG_STM32L4_SPI2 || CONFIG_STM32L4_SPI3 */
