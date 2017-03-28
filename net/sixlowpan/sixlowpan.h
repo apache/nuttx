@@ -88,5 +88,28 @@ extern FAR struct sixlowpan_rime_sniffer_s *g_sixlowpan_sniffer;
 
 void sixlowpan_initialize(void);
 
+/****************************************************************************
+ * Name: sixlowpan_hc06_initialize
+ *
+ * Description:
+ *   sixlowpan_hc06_initialize() is called during OS initialization at power-up
+ *   reset.  It is called from the common sixlowpan_initialize() function.
+ *   sixlowpan_hc06_initialize() configures HC06 networking data structures.
+ *   It is called prior to platform-specific driver initialization so that
+ *   the 6loWPAN networking subsystem is prepared to deal with network
+ *   driver initialization actions.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
+void sixlowpan_hc06_initialize(void);
+#endif
+
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* _NET_SIXLOWPAN_SIXLOWPAN_H */

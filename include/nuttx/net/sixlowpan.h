@@ -247,7 +247,7 @@ struct sixlowpan_frag_hdr
  * sixlowpan_hc1_hc_udp structure
  */
 
-struct sixlowpan_hc1_hdr
+struct sixlowpan_hc1hdr_s
 {
   uint8_t dispatch;
   uint8_t encoding;
@@ -256,7 +256,7 @@ struct sixlowpan_hc1_hdr
 
 /* HC1 followed by HC_UDP */
 
-struct sixlowpan_hc1_hc_udp_hdr
+struct sixlowpan_hc1_hcudp_hdr_s
 {
   uint8_t dispatch;
   uint8_t hc1_encoding;
@@ -265,18 +265,6 @@ struct sixlowpan_hc1_hc_udp_hdr
   uint8_t ports;
   uint16_t udpchksum;
 };
-
-/* An address context for IPHC address compression each context can have up
- * to 8 bytes
- */
-
-struct sixlowpan_addr_context
-{
-  uint8_t used;       /* Possibly use as prefix-length */
-  uint8_t number;
-  uint8_t prefix[8];
-};
-
 
 /* The structure of a next header compressor.  This compressor is provided
  * by architecture-specific logic outside of the network stack.

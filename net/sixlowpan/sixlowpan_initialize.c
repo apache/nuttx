@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/net_sockets.c
+ * net/sixlowpan/sixlowpan_initialize.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -68,7 +68,11 @@
 
 void sixlowpan_initialize(void)
 {
-  /* REVIST: To be provided */
+#ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
+  /* Initialize HC06 data data structures */
+
+  sixlowpan_hc06_initialize();
+#endif
 }
 
 #endif /* CONFIG_NET_6LOWPAN */
