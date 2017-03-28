@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/sixlowpan/sixlowpan_compressor.c
+ * net/sixlowpan/sixlowpan_input.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,9 +39,9 @@
 
 #include <nuttx/config.h>
 
-#include "nuttx/net/net.h"
-#include "nuttx/net/sixlowpan.h"
+#include <errno.h>
 
+#include "nuttx/net/netdev.h"
 #include "sixlowpan/sixlowpan.h"
 
 #ifdef CONFIG_NET_6LOWPAN
@@ -51,30 +51,33 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sixlowpan_set_compressor
+ * Name: sixlowpan_input
  *
  * Description:
- *   Configure to use the architecture-specific compressor.
+ *   Process an incoming IP packet.
  *
- * Input parameters:
- *   compressor - A reference to the new compressor to be used.  This may
- *                be a NULL value to disable the compressor.
+ *   This function is called when the device driver has received a 6loWPAN
+ *   packet from the network. The packet from the device driver must be
+ *   present in the d_buf buffer, and the length of the packet should be
+ *   placed in the d_len field.
+ *
+ *   When the function returns, there may be an outbound packet placed
+ *   in the d_buf packet buffer. If so, the d_len field is set to
+ *   the length of the packet. If no packet is to be sent out, the
+ *   d_len field is set to 0.
+ *
+ * Input Parameters:
+ *   dev - The IEEE802.15.4 MAC network driver interface.
  *
  * Returned Value:
- *   None
+ *   Ok is returned on success; Othewise a negated errno value is returned.
  *
  ****************************************************************************/
 
-void sixlowpan_set_compressor(FAR struct sixlowpan_nhcompressor_s *compressor)
+int sixlowpan_input(FAR struct net_driver_s *dev)
 {
-  /* Make sure that the compressor is not in use */
-
-  net_lock();
-
-  /* Then instantiate the new compressor */
-
-  g_sixlowpan_compressor = compressor;
-  net_unlock();
+  /* REVISIT: To be provided */
+  return -ENOSYS;
 }
 
 #endif /* CONFIG_NET_6LOWPAN */

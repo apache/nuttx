@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/sixlowpan/sixlowpan_compressor.c
+ * net/sixlowpan/sixlowpan_globals.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include "nuttx/net/net.h"
 #include "nuttx/net/sixlowpan.h"
 
 #include "sixlowpan/sixlowpan.h"
@@ -47,34 +46,15 @@
 #ifdef CONFIG_NET_6LOWPAN
 
 /****************************************************************************
- * Public Functions
+ * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Function: sixlowpan_set_compressor
- *
- * Description:
- *   Configure to use the architecture-specific compressor.
- *
- * Input parameters:
- *   compressor - A reference to the new compressor to be used.  This may
- *                be a NULL value to disable the compressor.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
+/* A pointer to the optional, architecture-specific compressor */
 
-void sixlowpan_set_compressor(FAR struct sixlowpan_nhcompressor_s *compressor)
-{
-  /* Make sure that the compressor is not in use */
+FAR struct sixlowpan_nhcompressor_s *g_sixlowpan_compressor;
 
-  net_lock();
+/* A pointer to the optional, architecture-specific sniffer */
 
-  /* Then instantiate the new compressor */
-
-  g_sixlowpan_compressor = compressor;
-  net_unlock();
-}
+FAR struct sixlowpan_rime_sniffer_s *g_sixlowpan_sniffer;
 
 #endif /* CONFIG_NET_6LOWPAN */

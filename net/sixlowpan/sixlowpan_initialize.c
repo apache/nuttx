@@ -1,11 +1,8 @@
 /****************************************************************************
- * include/nuttx/net/6lowpan.h
+ * net/sixlowpan/sixlowpan_initialize.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Includes some definitions that a compatible with the LGPL GNU C Library
- * header file of the same name.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,27 +33,46 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NET_6LOWPAN_H
-#define __INCLUDE_NUTTX_NET_6LOWPAN_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <nuttx/net/netconfig.h>
+#include "sixlowpan/sixlowpan.h"
+
+#ifdef CONFIG_NET_6LOWPAN
 
 /****************************************************************************
- * Public Type Definitions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Name: sixlowpan_initialize
+ *
+ * Description:
+ *   sixlowpan_initialize() is called during OS initialization at power-up
+ *   reset.  It is called from the common net_setup() function.
+ *   sixlowpan_initialize() configures 6loWPAN networking data structures.
+ *   It is called prior to platform-specific driver initialization so that
+ *   the 6loWPAN networking subsystem is prepared to deal with network
+ *   driver initialization actions.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+void sixlowpan_initialize(void)
+{
+#ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
+  /* Initialize HC06 data data structures */
 
-#endif /* __INCLUDE_NUTTX_NET_6LOWPAN_H */
+  sixlowpan_hc06_initialize();
+#endif
+}
+
+#endif /* CONFIG_NET_6LOWPAN */

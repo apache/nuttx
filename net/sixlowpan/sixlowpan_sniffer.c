@@ -42,17 +42,9 @@
 #include "nuttx/net/net.h"
 #include "nuttx/net/sixlowpan.h"
 
-#include "sixlowpan/sixlopan.h"
+#include "sixlowpan/sixlowpan.h"
 
 #ifdef CONFIG_NET_6LOWPAN
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* A pointer to the optional, architecture-specific sniffer */
-
-FAR struct sixlowpan_rime_sniffer_s *g_sixlowpan_sniffer;
 
 /****************************************************************************
  * Public Functions

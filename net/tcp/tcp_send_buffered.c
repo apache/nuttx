@@ -952,7 +952,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
   int        errcode;
   int        ret = OK;
 
-  if (!psock || psock->s_crefs <= 0)
+  if (psock == NULL || psock->s_crefs <= 0)
     {
       nerr("ERROR: Invalid socket\n");
       errcode = EBADF;

@@ -66,6 +66,25 @@ config ADS1255_FREQUENCY
 
 endif # ADC_ADS125X
 
+config ADC_LTC1867L
+	bool "LTC 1863L/1867L support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the LTC 1863L (12 bit) and LTC 1867L (16 bit) SPI powered ADC.
+
+		Note that the ADC conversion is started via the ANIOC_TRIGGER iotcl.
+
+if ADC_LTC1867L
+
+config LTC1867L_FREQUENCY
+	int "LTC 1863L/1867L SPI frequency"
+	default 1000000
+	---help---
+		LTC 1863L/1867L SPI frequency. Maximum is 20 MHz.
+
+endif # ADC_LTC1867L
+
 config ADC_PGA11X
 	bool "TI PGA112/3/6/7 support"
 	default n

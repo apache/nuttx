@@ -63,12 +63,6 @@
 #define SIXLOWPAN_UDP_8_BIT_PORT_MIN     0xF000
 #define SIXLOWPAN_UDP_8_BIT_PORT_MAX     0xf0ff   /* F000 + 255 */
 
-/* 6lowpan compressions */
-
-#define SIXLOWPAN_COMPRESSION_IPV6       0
-#define SIXLOWPAN_COMPRESSION_HC1        1
-#define SIXLOWPAN_COMPRESSION_HC06       2
-
 /* 6lowpan dispatches */
 
 #define SIXLOWPAN_DISPATCH_IPV6          0x41 /* 01000001 = 65 */
@@ -229,6 +223,10 @@
    (((a)->u16[6]) == 0) && \
    (((a)->u8[14]) == 0))
 
+/* Maximum size of an IEEE802.15.4 frame */
+
+#define SIXLOWPAN_MAC_MAXFRAME 127
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -253,7 +251,7 @@ struct sixlowpan_frag_hdr
  * sixlowpan_hc1_hc_udp structure
  */
 
-struct sixlowpan_hc1_hdr
+struct sixlowpan_hc1hdr_s
 {
   uint8_t dispatch;
   uint8_t encoding;
@@ -262,7 +260,7 @@ struct sixlowpan_hc1_hdr
 
 /* HC1 followed by HC_UDP */
 
-struct sixlowpan_hc1_hc_udp_hdr
+struct sixlowpan_hc1_hcudp_hdr_s
 {
   uint8_t dispatch;
   uint8_t hc1_encoding;
@@ -271,18 +269,6 @@ struct sixlowpan_hc1_hc_udp_hdr
   uint8_t ports;
   uint16_t udpchksum;
 };
-
-/* An address context for IPHC address compression each context can have up
- * to 8 bytes
- */
-
-struct sixlowpan_addr_context
-{
-  uint8_t used;       /* Possibly use as prefix-length */
-  uint8_t number;
-  uint8_t prefix[8];
-};
-
 
 /* The structure of a next header compressor.  This compressor is provided
  * by architecture-specific logic outside of the network stack.
