@@ -506,29 +506,32 @@ static int mac802154_rsporphan(FAR struct ieee802154_mac_s *mac,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mac802154_register
+ * Name: mac802154_create
  *
  * Description:
  *   Create a 802.15.4 MAC device from a 802.15.4 compatible radio device.
- *   To create a 802.15.4 MAC, you need to pass:
  *
- *     - an instance of a radio driver in radiodev
- *     - a pointer to a structure that contains MAC callback routines to
- *       handle confirmations and indications. NULL entries indicate no
- *       callback.
+ *   The returned MAC structure should be passed to either the next highest
+ *   layer in the network stack, or registered with a mac802154dev character
+ *   driver.  In either of these scenarios, the next highest layer should 
+ *   register a set of callbacks with the MAC layer by setting the mac->cbs
+ *   member.
  *
- *   In return you get a mac structure that has pointers to MAC operations
- *   and responses.
- *
- *   This API does not create any device accessible to userspace. If you
+ *   NOTE: This API does not create any device accessible to userspace. If you
  *   want to call these APIs from userspace, you have to wrap your mac in a
  *   character device via mac802154_device.c.
+ *
+ * Input Parameters:
+ *   radiodev - an instance of an IEEE 802.15.4 radio
+ *
+ * Returned Value:
+ *   A MAC structure that has pointers to MAC operations
+ *   and responses.
  *
  ****************************************************************************/
 
 FAR struct ieee802154_mac_s *
-  mac802154_register(FAR struct ieee802154_radio_s *radiodev,
-                     unsigned int minor)
+  mac802154_create(FAR struct ieee802154_radio_s *radiodev)
 {
   FAR struct ieee802154_privmac_s *mac;
 
