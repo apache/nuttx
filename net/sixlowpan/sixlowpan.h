@@ -61,13 +61,6 @@
  * Public Types
  ****************************************************************************/
 
-/* Rime address representation */
-
-struct rimeaddr_s
-{
-  uint8_t u8[CONFIG_NET_6LOWPAN_RIMEADDR_SIZE];
-};
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -77,10 +70,16 @@ struct rimeaddr_s
 struct sixlowpan_nhcompressor_s; /* Foward reference */
 extern FAR struct sixlowpan_nhcompressor_s *g_sixlowpan_compressor;
 
+#ifdef CONFIG_NET_6LOWPAN_SNIFFER
 /* Rime Sniffer support for one single listener to enable trace of IP */
 
 struct sixlowpan_rime_sniffer_s; /* Foward reference */
 extern FAR struct sixlowpan_rime_sniffer_s *g_sixlowpan_sniffer;
+#endif
+
+/* All zero rime address */
+
+extern const struct rimeaddr_s g_rimeaddr_null;
 
 /****************************************************************************
  * Public Types
@@ -90,8 +89,10 @@ extern FAR struct sixlowpan_rime_sniffer_s *g_sixlowpan_sniffer;
  * Public Function Prototypes
  ****************************************************************************/
 
-struct net_driver_s;  /* Forward reference */
-struct socket;        /* Forward reference */
+struct net_driver_s;         /* Forward reference */
+struct ieee802154_driver_s;  /* Forward reference */
+struct rimeaddr_s;           /* Forward reference */
+struct socket;               /* Forward reference */
 
 /****************************************************************************
  * Name: sixlowpan_initialize
@@ -132,6 +133,9 @@ void sixlowpan_initialize(void);
  *   must be consistent with definition of errors reported by send() or
  *   sendto().
  *
+ * Assumptions:
+ *   Called with the network locked.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
@@ -156,6 +160,9 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
  *   -1 is returned, and errno is set appropriately.  Returned error numbers
  *   must be consistent with definition of errors reported by send() or
  *   sendto().
+ *
+ * Assumptions:
+ *   Called with the network locked.
  *
  ****************************************************************************/
 
@@ -318,6 +325,17 @@ void sixlowpan_compresshdr_hc1(FAR struct net_driver_s *dev,
 void sixlowpan_uncompresshdr_hc1(FAR struct net_driver_s *dev,
                                  uint16_t ip_len);
 #endif
+
+/****************************************************************************
+ * Name: sixlowpan_pktbuf_reset
+ *
+ * Description:
+ *   Reset all attributes and addresses in the packet buffer metadata in the
+ *   provided IEEE802.15.4 MAC driver structure.
+ *
+ ****************************************************************************/
+
+void sixlowpan_pktbuf_reset(FAR struct ieee802154_driver_s *ieee);
 
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* _NET_SIXLOWPAN_SIXLOWPAN_H */

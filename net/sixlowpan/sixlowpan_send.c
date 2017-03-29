@@ -39,12 +39,17 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
-#include "nuttx/net/net.h"
 #include "nuttx/net/netdev.h"
+#include "nuttx/net/ip.h"
+#include "nuttx/net/tcp.h"
+#include "nuttx/net/udp.h"
+#include "nuttx/net/icmpv6.h"
+#include "nuttx/net/sixlowpan.h"
 
 #include "netdev/netdev.h"
 #include "socket/socket.h"
@@ -54,10 +59,132 @@
 
 #ifdef CONFIG_NET_6LOWPAN
 
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* IPv6 + TCP header */
+
+struct ipv6tcp_hdr_s
+{
+  struct ipv6_hdr_s     ipv6;
+  struct tcp_hdr_s      tcp;
+};
+
+/* IPv6 + UDP header */
+
+struct ipv6udp_hdr_s
+{
+  struct ipv6_hdr_s     ipv6;
+  struct udp_hdr_s      udp;
+};
+
+/* IPv6 + ICMPv6 header */
+
+struct ipv6icmp_hdr_s
+{
+  struct ipv6_hdr_s     ipv6;
+  struct icmpv6_iphdr_s icmp;
+};
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: sixlowpan_set_pktattrs
+ *
+ * Description:
+ *   Setup some packet buffer attributes
+ * Input Parameters:
+ *   ieee - Pointer to IEEE802.15.4 MAC driver structure.
+ *   ipv6 - Pointer to the IPv6 header to "compress"
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void sixlowpan_set_pktattrs(FAR struct ieee802154_driver_s *ieee,
+                                   FAR const struct ipv6_hdr_s *ipv6)
+{
+  int attr = 0;
+
+  /* Set protocol in NETWORK_ID */
+
+  ieee->i_pktattrs[PACKETBUF_ATTR_NETWORK_ID] = ipv6->proto;
+
+  /* Assign values to the channel attribute (port or type + code) */
+
+  if (ipv6->proto == IP_PROTO_UDP)
+    {
+      FAR struct udp_hdr_s *udp = &((FAR struct ipv6udp_hdr_s *)ipv6)->udp;
+
+      attr = udp->srcport;
+      if (udp->destport < attr)
+        {
+          attr = udp->destport;
+        }
+    }
+  else if (ipv6->proto == IP_PROTO_TCP)
+    {
+      FAR struct tcp_hdr_s *tcp = &((FAR struct ipv6tcp_hdr_s *)ipv6)->tcp;
+
+      attr = tcp->srcport;
+      if (tcp->destport < attr)
+        {
+          attr = tcp->destport;
+        }
+    }
+  else if (ipv6->proto == IP_PROTO_ICMP6)
+    {
+      FAR struct icmpv6_iphdr_s *icmp = &((FAR struct ipv6icmp_hdr_s *)ipv6)->icmp;
+
+      attr = icmp->type << 8 | icmp->code;
+    }
+
+  ieee->i_pktattrs[PACKETBUF_ATTR_CHANNEL] = attr;
+}
+
+/****************************************************************************
+ * Name: sixlowpan_compress_ipv6hdr
+ *
+ * Description:
+ *   IPv6 dispatch "compression" function.  Packets "Compression" when only
+ *   IPv6 dispatch is used
+ *
+ *   There is no compression in this case, all fields are sent
+ *   inline. We just add the IPv6 dispatch byte before the packet.
+ *
+ *   0               1                   2                   3
+ *   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *   | IPv6 Dsp      | IPv6 header and payload ...
+ *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *
+ * Input Parameters:
+ *   ieee - Pointer to IEEE802.15.4 MAC driver structure.
+ *   ipv6 - Pointer to the IPv6 header to "compress"
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void sixlowpan_compress_ipv6hdr(FAR struct ieee802154_driver_s *ieee,
+                                       FAR const struct ipv6_hdr_s *ipv6)
+{
+  /* Indicate the IPv6 dispatch and length */
+
+  *ieee->i_rimeptr       = SIXLOWPAN_DISPATCH_IPV6;
+  ieee->i_rime_hdrlen   += SIXLOWPAN_IPV6_HDR_LEN;
+
+  /* Copy the IPv6 header and adjust pointers */
+
+  memcpy(ieee->i_rimeptr + ieee->i_rime_hdrlen, ipv6, IPv6_HDRLEN);
+  ieee->i_rime_hdrlen   += IPv6_HDRLEN;
+  ieee->i_uncomp_hdrlen += IPv6_HDRLEN;
+}
 
 /****************************************************************************
  * Name: sixlowpan_send
@@ -76,6 +203,7 @@
  *
  * Input Parameters:
  *   dev   - The IEEE802.15.4 MAC network driver interface.
+ *   ipv6  - IPv6 plus TCP or UDP headers.
  *   raddr - The MAC address of the destination
  *
  * Returned Value:
@@ -89,13 +217,60 @@
  *
  ****************************************************************************/
 
-int sixlowpan_send(FAR struct net_driver_s *dev, net_ipv6addr_t raddr)
+int sixlowpan_send(FAR struct net_driver_s *dev,
+                   FAR const struct ipv6_hdr_s *ipv6, net_ipv6addr_t raddr)
 {
   FAR struct ieee802154_driver_s *ieee = (FAR struct ieee802154_driver_s *)dev;
 
-  net_lock();
-  /* REVISIT: To be provided */
-  net_unlock();
+  int framer_hdrlen;       /* Framer header length */
+  struct rimeaddr_s dest;  /* The MAC address of the destination of the packet */
+  uint16_t outlen;         /* Number of bytes processed. */
+
+  /* Initialize device-specific data */
+
+  ieee->i_uncomp_hdrlen = 0;
+  ieee->i_rime_hdrlen   = 0;
+
+  /* Reset rime buffer, packet buffer metatadata */
+
+  dev->d_len = 0;
+
+  sixlowpan_pktbuf_reset(ieee);
+
+  ieee->i_rimeptr = &dev->d_buf[PACKETBUF_HDR_SIZE];
+  ieee->i_pktattrs[PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS] = CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS;
+
+#ifdef CONFIG_NET_6LOWPAN_SNIFFER
+  if (g_sixlowpan_sniffer != NULL)
+    {
+      /* Call the attribution when the callback comes, but set attributes here */
+
+      sixlowpan_set_pktattrs(ieee, ipv6);
+    }
+#endif
+
+  /* Set stream mode for all TCP packets, except FIN packets. */
+
+  if (ipv6->proto == IP_PROTO_TCP)
+    {
+      FAR const struct tcp_hdr_s *tcp = &((FAR const struct ipv6tcp_hdr_s *)ipv6)->tcp;
+
+      if ((tcp->flags & TCP_FIN) == 0 &&
+          (tcp->flags & TCP_CTL) != TCP_ACK)
+        {
+          ieee->i_pktattrs[PACKETBUF_ATTR_PACKET_TYPE] = PACKETBUF_ATTR_PACKET_TYPE_STREAM;
+        }
+      else if ((tcp->flags & TCP_FIN) == TCP_FIN)
+        {
+          ieee->i_pktattrs[PACKETBUF_ATTR_PACKET_TYPE] = PACKETBUF_ATTR_PACKET_TYPE_STREAM_END;
+        }
+    }
+
+  /* The destination address will be tagged to each outbound packet. If the
+   * argument raddr is NULL, we are sending a broadcast packet.
+   */
+
+#warning Missing logic
   return -ENOSYS;
 }
 
@@ -121,6 +296,9 @@ int sixlowpan_send(FAR struct net_driver_s *dev, net_ipv6addr_t raddr)
  *   must be consistent with definition of errors reported by send() or
  *   sendto().
  *
+ * Assumptions:
+ *   Called with the network locked.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
@@ -129,6 +307,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 {
   FAR struct tcp_conn_s *conn;
   FAR struct net_driver_s *dev;
+  struct ipv6tcp_hdr_s ipv6tcp;
   int ret;
 
   DEBUGASSERT(psock != NULL && psock->s_crefs > 0);
@@ -194,6 +373,9 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
     }
 #endif
 
+  /* Initialize the IPv6/TCP headers */
+#warning Missing logic
+
   /* Set the socket state to sending */
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
@@ -202,7 +384,8 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
    * packet.
    */
 
-  ret = sixlowpan_send(dev, conn->u.ipv6.raddr);
+  ret = sixlowpan_send(dev, (FAR const struct ipv6_hdr_s *)&ipv6tcp,
+                       conn->u.ipv6.raddr);
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_send() failed: %d\n", ret);
@@ -230,6 +413,9 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
  *   must be consistent with definition of errors reported by send() or
  *   sendto().
  *
+ * Assumptions:
+ *   Called with the network locked.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
@@ -238,6 +424,7 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
 {
   FAR struct udp_conn_s *conn;
   FAR struct net_driver_s *dev;
+  struct ipv6udp_hdr_s ipv6udp;
   int ret;
 
   DEBUGASSERT(psock != NULL && psock->s_crefs > 0);
@@ -304,6 +491,9 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
     }
 #endif
 
+  /* Initialize the IPv6/UDP headers */
+#warning Missing logic
+
   /* Set the socket state to sending */
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
@@ -312,7 +502,8 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
    * packet.
    */
 
-  ret = sixlowpan_send(dev, conn->u.ipv6.raddr);
+  ret = sixlowpan_send(dev, (FAR const struct ipv6_hdr_s *)&ipv6udp,
+                       conn->u.ipv6.raddr);
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_send() failed: %d\n", ret);

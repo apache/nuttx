@@ -53,8 +53,10 @@
 
 FAR struct sixlowpan_nhcompressor_s *g_sixlowpan_compressor;
 
+#ifdef CONFIG_NET_6LOWPAN_SNIFFER
 /* A pointer to the optional, architecture-specific sniffer */
 
 FAR struct sixlowpan_rime_sniffer_s *g_sixlowpan_sniffer;
+#endif
 
 #endif /* CONFIG_NET_6LOWPAN */

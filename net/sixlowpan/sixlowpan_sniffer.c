@@ -44,7 +44,7 @@
 
 #include "sixlowpan/sixlowpan.h"
 
-#ifdef CONFIG_NET_6LOWPAN
+#ifdef CONFIG_NET_6LOWPAN_SNIFFER
 
 /****************************************************************************
  * Public Functions
@@ -78,4 +78,4 @@ void sixlowpan_set_sniffer(FAR struct sixlowpan_rime_sniffer_s *sniffer)
   net_unlock();
 }
 
-#endif /* CONFIG_NET_6LOWPAN */
+#endif /* CONFIG_NET_6LOWPAN_SNIFFER */
