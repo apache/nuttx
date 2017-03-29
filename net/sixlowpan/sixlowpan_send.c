@@ -236,8 +236,6 @@ static int sixlowpan_send(FAR struct net_driver_s *dev,
 
   /* Reset rime buffer, packet buffer metatadata */
 
-  dev->d_len = 0;
-
   sixlowpan_pktbuf_reset(ieee);
 
   ieee->i_rimeptr = &dev->d_buf[PACKETBUF_HDR_SIZE];
@@ -300,6 +298,7 @@ static int sixlowpan_send(FAR struct net_driver_s *dev,
 
   ninfo("Header of len %d\n", ieee->i_rime_hdrlen);
 
+  /* Calculate frame header length. */
 #warning Missing logic
   return -ENOSYS;
 }

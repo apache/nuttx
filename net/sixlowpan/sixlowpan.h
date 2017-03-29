@@ -50,9 +50,12 @@
  ****************************************************************************/
 
 /* Rime addres macros */
+/* Copy a Rime address */
 
 #define rimeaddr_copy(dest,src) \
   memcpy(dest, src, CONFIG_NET_6LOWPAN_RIMEADDR_SIZE)
+
+/* Compare two Rime addresses */
 
 #define rimeaddr_cmp(addr1,addr2) \
   (memcmp(addr1, addr2, CONFIG_NET_6LOWPAN_RIMEADDR_SIZE) == 0)
@@ -76,10 +79,6 @@ extern FAR struct sixlowpan_nhcompressor_s *g_sixlowpan_compressor;
 struct sixlowpan_rime_sniffer_s; /* Foward reference */
 extern FAR struct sixlowpan_rime_sniffer_s *g_sixlowpan_sniffer;
 #endif
-
-/* All zero rime address */
-
-extern const struct rimeaddr_s g_rimeaddr_null;
 
 /****************************************************************************
  * Public Types
@@ -170,26 +169,6 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
                                size_t len);
 #endif
-
-/****************************************************************************
- * Name: sixlowpan_output
- *
- * Description:
- *   Process an outgoing UDP or TCP packet.  Called from UDP/TCP logic to
- *   determine if the the packet should be formatted for 6loWPAN output.
- *
- * Input Parameters:
- *   dev - The IEEE802.15.4 MAC network driver interface.
- *
- * Returned Value:
- *   Ok is returned on success; Othewise a negated errno value is returned.
- *   This function is expected to fail if the driver is not an IEEE802.15.4
- *   MAC network driver.  In that case, the UDP/TCP will fall back to normal
- *   IPv4/IPv6 formatting.
- *
- ****************************************************************************/
-
-int sixlowpan_output(FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Name: sixlowpan_hc06_initialize
