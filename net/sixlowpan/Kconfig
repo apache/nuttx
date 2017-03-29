@@ -169,4 +169,10 @@ config NET_6LOWPAN_TCP_RECVWNDO
 		is slow to process incoming data, or high (32768 bytes) if the
 		application processes data quickly. REVISIT!
 
+config NET_6LOWPAN_SNIFFER
+	default n
+	---help---
+		Enable use use an architecture-specific sniffer to support tracing
+		of IP.
+
 endif # NET_6LOWPAN

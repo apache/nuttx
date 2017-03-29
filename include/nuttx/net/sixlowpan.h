@@ -232,18 +232,91 @@
 
 #define SIXLOWPAN_MAC_STDFRAME 127
 
+/* Packet buffer Definitions */
+
+#define PACKETBUF_HDR_SIZE                    48
+
+#define PACKETBUF_ATTR_PACKET_TYPE_DATA       0
+#define PACKETBUF_ATTR_PACKET_TYPE_ACK        1
+#define PACKETBUF_ATTR_PACKET_TYPE_STREAM     2
+#define PACKETBUF_ATTR_PACKET_TYPE_STREAM_END 3
+#define PACKETBUF_ATTR_PACKET_TYPE_TIMESTAMP  4
+
+/* Packet buffer attributes (indices into i_pktattr) */
+
+#define PACKETBUF_ATTR_NONE                   0
+
+/* Scope 0 attributes: used only on the local node. */
+
+#define PACKETBUF_ATTR_CHANNEL                1
+#define PACKETBUF_ATTR_NETWORK_ID             2
+#define PACKETBUF_ATTR_LINK_QUALITY           3
+#define PACKETBUF_ATTR_RSSI                   4
+#define PACKETBUF_ATTR_TIMESTAMP              5
+#define PACKETBUF_ATTR_RADIO_TXPOWER          6
+#define PACKETBUF_ATTR_LISTEN_TIME            7
+#define PACKETBUF_ATTR_TRANSMIT_TIME          8
+#define PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS  9
+#define PACKETBUF_ATTR_MAC_SEQNO              10
+#define PACKETBUF_ATTR_MAC_ACK                11
+
+/* Scope 1 attributes: used between two neighbors only. */
+
+#define PACKETBUF_ATTR_RELIABLE               12
+#define PACKETBUF_ATTR_PACKET_ID              13
+#define PACKETBUF_ATTR_PACKET_TYPE            14
+#define PACKETBUF_ATTR_REXMIT                 15
+#define PACKETBUF_ATTR_MAX_REXMIT             16
+#define PACKETBUF_ATTR_NUM_REXMIT             17
+#define PACKETBUF_ATTR_PENDING                18
+
+/* Scope 2 attributes: used between end-to-end nodes. */
+
+#define PACKETBUF_ATTR_HOPS                   11
+#define PACKETBUF_ATTR_TTL                    20
+#define PACKETBUF_ATTR_EPACKET_ID             21
+#define PACKETBUF_ATTR_EPACKET_TYPE           22
+#define PACKETBUF_ATTR_ERELIABLE              23
+
+#define PACKETBUF_NUM_ATTRS                   24
+
+  /* Addresses (indices into i_pktaddr) */
+
+#define PACKETBUF_ADDR_SENDER                 0
+#define PACKETBUF_ADDR_RECEIVER               1
+#define PACKETBUF_ADDR_ESENDER                2
+#define PACKETBUF_ADDR_ERECEIVER              3
+
+#define PACKETBUF_NUM_ADDRS                   4
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* Rime address representation */
+
+struct rimeaddr_s
+{
+  uint8_t u8[CONFIG_NET_6LOWPAN_RIMEADDR_SIZE];
+};
 
 /* The device structure for IEEE802.15.4 MAC network device differs from the
  * standard Ethernet MAC device structure.  The main reason for this
  * difference is that fragmentation must be supported.
  *
  * The IEEE802.15.4 MAC does not use the d_buf packet buffer directly.
- * Rather, it uses a smaller frame buffer.  The packet data is provided to
- * the frame buffer each time that the IEEE802.15.4 MAC needs to send
- * more data.
+ * Rather, it uses a smaller frame buffer, i_frame.
+ *
+ *   - The packet fragment data is provided to the i_frame buffer each time
+ *     that the IEEE802.15.4 MAC needs to send more data.  The length of
+ *     the frame is provided in i_frame.
+ *
+ *     In this case, the d_buf holds the packet data yet to be sent; d_len
+ *     holds the size of entire packet.
+ *
+ *   - Received frames are provided by IEEE802.15.4 MAC to the network
+ *     via i_frame with length i_framelen for reassembly in d_buf;  d_len
+ *     will hold the size of the reassembled packet.
  *
  * This is accomplished by "inheriting" the standard 'struct net_driver_s'
  * and appending the frame buffer as well as other metadata needed to
@@ -286,6 +359,40 @@ struct ieee802154_driver_s
    */
 
   uint16_t i_framelen;
+
+  /* The following fields are device-specific metadata used by the 6loWPAN
+   * stack and should not be modified by the IEEE802.15.4 MAC network drvier.
+   */
+
+  /* A pointer to the rime buffer.
+   *
+   * We initialize it to the beginning of the rime buffer, then access
+   * different fields by updating the offset ieee->i_rime_hdrlen.
+   */
+
+  FAR uint8_t *i_rimeptr;
+
+  /* i_uncomp_hdrlen is the length of the headers before compression (if HC2
+   * is used this includes the UDP header in addition to the IP header).
+   */
+
+  uint8_t i_uncomp_hdrlen;
+
+  /* i_rime_hdrlen is the total length of (the processed) 6lowpan headers
+   * (fragment headers, IPV6 or HC1, HC2, and HC1 and HC2 non compressed
+   * fields).
+   */
+
+  uint8_t i_rime_hdrlen;
+
+  /* Next available pointer into header */
+
+  uint8_t i_hdrptr;
+
+  /* Packet buffer metadata: Attributes and addresses */
+
+  uint16_t i_pktattrs[PACKETBUF_NUM_ATTRS];
+  struct rimeaddr_s i_pktaddrs[PACKETBUF_NUM_ADDRS];
 };
 
 /* The structure of a next header compressor.  This compressor is provided
@@ -357,6 +464,8 @@ void sixlowpan_set_compressor(FAR struct sixlowpan_nhcompressor_s *compressor);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_6LOWPAN_SNIFFER
 void sixlowpan_set_sniffer(FAR struct sixlowpan_rime_sniffer_s *sniffer);
+#endif
 
 #endif /* __INCLUDE_NUTTX_NET_SIXLOWOAN_H */
