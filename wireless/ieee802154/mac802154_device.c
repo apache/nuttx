@@ -117,10 +117,10 @@ static const struct file_operations mac802154dev_fops =
   mac802154dev_close, /* close */
   mac802154dev_read , /* read */
   mac802154dev_write, /* write */
-  NULL,                 /* seek */
+  NULL,               /* seek */
   mac802154dev_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , NULL               /* poll */
+  , NULL              /* poll */
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL               /* unlink */
@@ -187,7 +187,9 @@ static int mac802154dev_open(FAR struct file *filep)
 
   /* Allocate a new open struct */
 
-  opriv = (FAR struct mac802154_open_s *)kmm_zalloc(sizeof(struct mac802154_open_s));
+  opriv = (FAR struct mac802154_open_s *)
+    kmm_zalloc(sizeof(struct mac802154_open_s));
+
   if (!opriv)
     {
       wlerr("ERROR: Failed to allocate new open struct\n");
@@ -294,7 +296,6 @@ static int mac802154dev_close(FAR struct file *filep)
   /* And free the open structure */
 
   kmm_free(opriv);
-
   ret = OK;
 
 errout_with_exclsem:
@@ -310,7 +311,8 @@ errout_with_exclsem:
  *
  ****************************************************************************/
 
-static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer, size_t len)
+static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
+                                 size_t len)
 {
   FAR struct inode *inode;
   FAR struct mac802154_devwrapper_s *dev;
@@ -356,7 +358,7 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer, size_
  ****************************************************************************/
 
 static ssize_t mac802154dev_write(FAR struct file *filep,
-                                   FAR const char *buffer, size_t len)
+                                  FAR const char *buffer, size_t len)
 {
   FAR struct inode *inode;
   FAR struct mac802154_devwrapper_s *dev;
@@ -413,7 +415,8 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
   FAR struct ieee802154_mac_s *mac;
   int ret;
 
-  DEBUGASSERT(filep != NULL && filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep != NULL && filep->f_priv != NULL &&
+              filep->f_inode != NULL);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
   dev = (FAR struct mac802154_devwrapper_s *)inode->i_private;
@@ -479,7 +482,8 @@ int mac802154dev_register(FAR struct ieee802154_mac_s *mac, int minor)
   /* Initialize the new mac driver instance */
 
   dev->md_mac = mac;
-  sem_init(&dev->md_exclsem, 0, 1); /* Allow the device to be opened once before blocking */
+  sem_init(&dev->md_exclsem, 0, 1); /* Allow the device to be opened once
+                                     * before blocking */
   
   /* Create the character device name */
 
