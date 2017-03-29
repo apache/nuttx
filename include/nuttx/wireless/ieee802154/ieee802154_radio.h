@@ -47,7 +47,6 @@
 #include <stdbool.h>
 #include <semaphore.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/wireless/ieee802154/ieee802154.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -104,6 +103,14 @@ struct ieee802154_cca_s
   uint8_t use_cs  : 1; /* CCA using carrier sense */
   uint8_t edth;        /* Energy detection threshold for CCA */
   uint8_t csth;        /* Carrier sense threshold for CCA */
+};
+
+struct ieee802154_packet_s 
+{ 
+  uint8_t len; 
+  uint8_t data[127]; 
+  uint8_t lqi; 
+  uint8_t rssi; 
 };
 
 struct ieee802154_radio_s;
