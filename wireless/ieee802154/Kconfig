@@ -21,6 +21,14 @@ config IEEE802154_MAC
 		such as 6lowpan. It is not required to use 802.15.4 radios,
 		but is strongly suggested to ensure exchange of valid frames.
 
+config IEEE802154_MAC_DEV
+	bool "Character driver for IEEE 802.15.4 MAC layer"
+	default n
+	depends on IEEE802154_MAC
+	---help---
+		Enable the device driver to expose the IEEE 802.15.4 MAC layer
+		access to user space as IOCTLs
+
 config IEEE802154_DEV
 	bool "Debug character driver for ieee802.15.4 radio interfaces"
 	default n

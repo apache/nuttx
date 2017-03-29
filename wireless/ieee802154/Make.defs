@@ -45,6 +45,10 @@ ifeq ($(CONFIG_IEEE802154_MAC),y)
 CSRCS += mac802154.c
 endif
 
+ifeq ($(CONFIG_IEEE802154_MAC_DEV),y)
+CSRCS += mac802154_device.c
+endif
+
 ifeq ($(CONFIG_IEEE802154_DEV),y)
 CSRCS += radio802154_device.c
 endif
