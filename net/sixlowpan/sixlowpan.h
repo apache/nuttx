@@ -46,8 +46,22 @@
 #ifdef CONFIG_NET_6LOWPAN
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Rime addres macros */
+
+#define rimeaddr_copy(dest,src) \
+  memcpy(dest, src, CONFIG_NET_6LOWPAN_RIMEADDR_SIZE)
+
+#define rimeaddr_cmp(addr1,addr2) \
+  (memcmp(addr1, addr2, CONFIG_NET_6LOWPAN_RIMEADDR_SIZE) == 0)
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* Rime address representation */
 
 struct rimeaddr_s
 {

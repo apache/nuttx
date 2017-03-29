@@ -164,13 +164,22 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
               /* Try 6loWPAN TCP packet send */
 
               ret = psock_6lowpan_tcp_send(psock, buf, len);
+
+#ifdef CONFIG_NETDEV_MULTINIC
               if (ret < 0)
-#endif
                 {
-                  /* Try TCP/IP packet send */
+                  /* UDP/IP packet send */
 
                   ret = psock_tcp_send(psock, buf, len);
                 }
+
+#endif /* CONFIG_NETDEV_MULTINIC */
+#else  /* CONFIG_NET_6LOWPAN */
+
+              /* Only TCP/IP packet send */
+
+              ret = psock_tcp_send(psock, buf, len);
+#endif /* CONFIG_NET_6LOWPAN */
             }
 #endif /* CONFIG_NET_TCP */
         }
@@ -200,13 +209,22 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
               /* Try 6loWPAN UDP packet send */
 
               ret = psock_6lowpan_udp_send(psock, buf, len);
+
+#ifdef CONFIG_NETDEV_MULTINIC
               if (ret < 0)
-#endif
                 {
                   /* UDP/IP packet send */
 
                   ret = psock_udp_send(psock, buf, len);
                 }
+
+#endif /* CONFIG_NETDEV_MULTINIC */
+#else  /* CONFIG_NET_6LOWPAN */
+
+              /* Only UDP/IP packet send */
+
+              ret = psock_udp_send(psock, buf, len);
+#endif /* CONFIG_NET_6LOWPAN */
             }
 #endif /* CONFIG_NET_UDP */
         }

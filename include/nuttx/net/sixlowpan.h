@@ -50,7 +50,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdint.h>
+
+#include <nuttx/net/netdev.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -223,51 +226,66 @@
    (((a)->u16[6]) == 0) && \
    (((a)->u8[14]) == 0))
 
-/* Maximum size of an IEEE802.15.4 frame */
+/* This maximum size of an IEEE802.15.4 frame.  Certain, non-standard
+ * devices may exceed this value, however.
+ */
 
-#define SIXLOWPAN_MAC_MAXFRAME 127
+#define SIXLOWPAN_MAC_STDFRAME 127
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/* The header for fragments
+/* The device structure for IEEE802.15.4 MAC network device differs from the
+ * standard Ethernet MAC device structure.  The main reason for this
+ * difference is that fragmentation must be supported.
  *
- * NOTE: We do not define different structures for FRAG1 and FRAGN headers,
- * which are different. For FRAG1, the offset field is just not used
+ * The IEEE802.15.4 MAC does not use the d_buf packet buffer directly.
+ * Rather, it uses a smaller frame buffer.  The packet data is provided to
+ * the frame buffer each time that the IEEE802.15.4 MAC needs to send
+ * more data.
+ *
+ * This is accomplished by "inheriting" the standard 'struct net_driver_s'
+ * and appending the frame buffer as well as other metadata needed to
+ * manage the fragmentation.  'struct ieee802154_driver_s' is cast
+ * compatible with 'struct net_driver_s' when CONFIG_NET_MULTINIC is not
+ * defined or when dev->d_lltype == NET_LL_IEEE802154.
  */
 
-struct sixlowpan_frag_hdr
+struct ieee802154_driver_s
 {
-  uint16_t dispatch_size;
-  uint16_t tag;
-  uint8_t offset;
-};
+  /* This definitiona must appear first in the structure definition to
+   * assure cast compatibility.
+   */
 
-/* The HC1 header when HC_UDP is not used
- *
- * When all fields are compressed and HC_UDP is not used, we use this
- * structure. If HC_UDP is used, the ttl is in another spot, and we use the
- * sixlowpan_hc1_hc_udp structure
- */
+  struct net_driver_s i_dev;
 
-struct sixlowpan_hc1hdr_s
-{
-  uint8_t dispatch;
-  uint8_t encoding;
-  uint8_t ttl;
-};
+  /* IEEE802.15.4 MAC-specific definitions follow. */
 
-/* HC1 followed by HC_UDP */
+  /* The i_frame array is used to hold outgoing frame.   When the
+   * IEEE802.15.4 device polls for new data, the outgoing frame containing
+   * the next fragment is placed in i_frame.
+   *
+   * The network will handle only a single outgong frame at a time.  The
+   * IEEE802.15.4 MAC driver design may be concurrently sending and
+   * requesting new framesusing break-off fram buffers.  That frame buffer
+   * management must be controlled by the IEEE802.15.4 MAC driver.
+   *
+   * Driver provied frame buffers should be 16-bit aligned.
+   */
 
-struct sixlowpan_hc1_hcudp_hdr_s
-{
-  uint8_t dispatch;
-  uint8_t hc1_encoding;
-  uint8_t hc_udp_encoding;
-  uint8_t ttl;
-  uint8_t ports;
-  uint16_t udpchksum;
+  FAR uint8_t *i_frame;
+
+  /* The length of valid data in the i_frame buffer.
+   *
+   * When the network device driver calls the network input function,
+   * i_framelen should be set to zero.  If there is frame to be sent
+   * by the network, i_framelen will be set to indicate the size of
+   * frame to be sent.  The value zero means that there is no frame
+   * to be sent.
+   */
+
+  uint16_t i_framelen;
 };
 
 /* The structure of a next header compressor.  This compressor is provided

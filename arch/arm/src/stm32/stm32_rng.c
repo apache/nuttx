@@ -46,6 +46,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/drivers.h>
 
@@ -97,13 +98,20 @@ static const struct file_operations g_rngops =
 #ifndef CONFIG_DISABLE_POLL
   , 0              /* poll */
 #endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , 0              /* unlink */
+#endif
 };
 
 /****************************************************************************
  * Private functions
  ****************************************************************************/
 
-static int stm32_rng_initialize()
+/****************************************************************************
+ * Name: stm32_rng_initialize
+ ****************************************************************************/
+
+static int stm32_rng_initialize(void)
 {
   uint32_t regval;
 
@@ -133,7 +141,11 @@ static int stm32_rng_initialize()
   return OK;
 }
 
-static void stm32_enable()
+/****************************************************************************
+ * Name: stm32_enable
+ ****************************************************************************/
+
+static void stm32_enable(void)
 {
   uint32_t regval;
 
@@ -144,13 +156,21 @@ static void stm32_enable()
   putreg32(regval, STM32_RNG_CR);
 }
 
-static void stm32_disable()
+/****************************************************************************
+ * Name: stm32_disable
+ ****************************************************************************/
+
+static void stm32_disable(void)
 {
   uint32_t regval;
   regval = getreg32(STM32_RNG_CR);
   regval &= ~RNG_CR_RNGEN;
   putreg32(regval, STM32_RNG_CR);
 }
+
+/****************************************************************************
+ * Name: stm32_interrupt
+ ****************************************************************************/
 
 static int stm32_interrupt(int irq, void *context, FAR void *arg)
 {
@@ -234,11 +254,14 @@ static ssize_t stm32_read(struct file *filep, char *buffer, size_t buflen)
     {
       /* We've got the semaphore. */
 
-      /* Initialize semaphore with 0 for blocking until the buffer is filled from
-       * interrupts.
+      /* Initialize the operation semaphore with 0 for blocking until the
+       * buffer is filled from interrupts.  The readsem semaphore is used
+       * for signaling and, hence, should not have priority inheritance
+       * enabled.
        */
 
-      sem_init(&g_rngdev.rd_readsem, 0, 1);
+      sem_init(&g_rngdev.rd_readsem, 0, 0);
+      sem_setprotocol(&g_rngdev.rd_readsem, SEM_PRIO_NONE);
 
       g_rngdev.rd_buflen = buflen;
       g_rngdev.rd_buf = buffer;

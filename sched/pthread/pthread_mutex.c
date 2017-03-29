@@ -51,6 +51,39 @@
 #include "pthread/pthread.h"
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: pthread_mutex_add
+ *
+ * Description:
+ *   Add the mutex to the list of mutexes held by this thread.
+ *
+ * Parameters:
+ *  mutex - The mux to be locked
+ *
+ * Return Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void pthread_mutex_add(FAR struct pthread_mutex_s *mutex)
+{
+  FAR struct pthread_tcb_s *rtcb = (FAR struct pthread_tcb_s *)this_task();
+  irqstate_t flags;
+
+  DEBUGASSERT(mutex->flink == NULL);
+
+  /* Add the mutex to the list of mutexes held by this task */
+
+  flags        = enter_critical_section();
+  mutex->flink = rtcb->mhead;
+  rtcb->mhead  = mutex;
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -58,8 +91,8 @@
  * Name: pthread_mutex_take
  *
  * Description:
- *   Take the pthread_mutex and, if successful, add the mutex to the ist of
- *   mutexes held by this thread.
+ *   Take the pthread_mutex, waiting if necessary.  If successful, add the
+ *   mutex to the list of mutexes held by this thread.
  *
  * Parameters:
  *  mutex - The mux to be locked
@@ -84,38 +117,104 @@ int pthread_mutex_take(FAR struct pthread_mutex_s *mutex, bool intr)
 
       sched_lock();
 
-      /* Take semaphore underlying the mutex */
+      /* Error out if the mutex is already in an inconsistent state. */
 
-      ret = pthread_takesemaphore(&mutex->sem, intr);
-      if (ret == OK)
+      if ((mutex->flags & _PTHREAD_MFLAGS_INCONSISTENT) != 0)
         {
-          DEBUGASSERT(mutex->flink == NULL);
+          ret = EOWNERDEAD;
+        }
+      else
+        {
+          /* Take semaphore underlying the mutex */
 
-          /* Check if the holder of the mutex has terminated.  In that case,
-           * the state of the mutex is inconsistent and we return EOWNERDEAD.
-           */
-
-          if ((mutex->flags & _PTHREAD_MFLAGS_INCONSISTENT) != 0)
+          ret = pthread_takesemaphore(&mutex->sem, intr);
+          if (ret < OK)
             {
-              ret = EOWNERDEAD; 
+              ret = get_errno();
             }
-
-          /* Add the mutex to the list of mutexes held by this task */
-
           else
             {
-              FAR struct pthread_tcb_s *rtcb = (FAR struct pthread_tcb_s *)this_task();
-              irqstate_t flags;
+              /* Check if the holder of the mutex has terminated without
+               * releasing.  In that case, the state of the mutex is
+               * inconsistent and we return EOWNERDEAD.
+               */
 
-              flags = enter_critical_section();
-              mutex->flink = rtcb->mhead;
-              rtcb->mhead = mutex;
-              leave_critical_section(flags);
+              if ((mutex->flags & _PTHREAD_MFLAGS_INCONSISTENT) != 0)
+                {
+                  ret = EOWNERDEAD;
+                }
+
+              /* Add the mutex to the list of mutexes held by this task */
+
+              else
+                {
+                  pthread_mutex_add(mutex);
+                }
             }
         }
+
+      sched_unlock();
     }
 
-  sched_unlock();
+  return ret;
+}
+
+/****************************************************************************
+ * Name: pthread_mutex_trytake
+ *
+ * Description:
+ *   Try to take the pthread_mutex without waiting.  If successful, add the
+ *   mutex to the list of mutexes held by this thread.
+ *
+ * Parameters:
+ *  mutex - The mux to be locked
+ *  intr  - false: ignore EINTR errors when locking; true tread EINTR as
+ *          other errors by returning the errno value
+ *
+ * Return Value:
+ *   0 on success or an errno value on failure.
+ *
+ ****************************************************************************/
+
+int pthread_mutex_trytake(FAR struct pthread_mutex_s *mutex)
+{
+  int ret = EINVAL;
+
+  /* Verify input parameters */
+
+  DEBUGASSERT(mutex != NULL);
+  if (mutex != NULL)
+    {
+      /* Make sure that no unexpected context switches occur */
+
+      sched_lock();
+
+      /* Error out if the mutex is already in an inconsistent state. */
+
+      if ((mutex->flags & _PTHREAD_MFLAGS_INCONSISTENT) != 0)
+        {
+          ret = EOWNERDEAD;
+        }
+      else
+        {
+          /* Try to take the semaphore underlying the mutex */
+
+          ret = sem_trywait(&mutex->sem);
+          if (ret < OK)
+            {
+              ret = get_errno();
+            }
+          else
+            {
+              /* Add the mutex to the list of mutexes held by this task */
+
+              pthread_mutex_add(mutex);
+            }
+        }
+
+      sched_unlock();
+    }
+
   return ret;
 }
 
@@ -173,7 +272,7 @@ int pthread_mutex_give(FAR struct pthread_mutex_s *mutex)
 
       mutex->flink = NULL;
       leave_critical_section(flags);
- 
+
       /* Now release the underlying semaphore */
 
       ret = pthread_givesemaphore(&mutex->sem);

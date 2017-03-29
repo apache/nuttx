@@ -230,7 +230,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #ifdef CONFIG_NET_6LOWPAN
           case NET_LL_IEEE802154: /* IEEE 802.15.4 MAC */
             dev->d_llhdrlen = 0;  /* REVISIT */
-            dev->d_mtu      = SIXLOWPAN_MAC_MAXFRAME;
+            dev->d_mtu      = CONFIG_NET_6LOWPAN_FRAMELEN;
 #ifdef CONFIG_NET_TCP
             dev->d_recvwndo = CONFIG_NET_6LOWPAN_TCP_RECVWNDO;
 #endif
