@@ -71,7 +71,7 @@
 #  undef HAVE_RTC_DRIVER
 #endif
 
-#if !defined(CONFIG_STM32_SDIO) || !defined(CONFIG_MMCSD) || \
+#if !defined(CONFIG_STM32L4_SDIO) || !defined(CONFIG_MMCSD) || \
     !defined(CONFIG_MMCSD_SDIO)
 #  undef HAVE_MMCSD
 #endif
@@ -293,10 +293,10 @@
 
 /* Global driver instances */
 
-#ifdef CONFIG_STM32_SPI1
+#ifdef CONFIG_STM32L4_SPI1
 extern struct spi_dev_s *g_spi1;
 #endif
-#ifdef CONFIG_STM32_SPI2
+#ifdef CONFIG_STM32L4_SPI2
 extern struct spi_dev_s *g_spi2;
 #endif
 #ifdef HAVE_MMCSD
@@ -308,27 +308,27 @@ extern struct sdio_dev_s *g_sdio;
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_spiinitialize
+ * Name: stm32l4_spiinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins.
  *
  ************************************************************************************/
 
-void stm32_spiinitialize(void);
+void stm32l4_spiinitialize(void);
 
 /************************************************************************************
- * Name: stm32_usbinitialize
+ * Name: stm32l4_usbinitialize
  *
  * Description:
  *   Called to setup USB-related GPIO pins.
  *
  ************************************************************************************/
 
-void stm32_usbinitialize(void);
+void stm32l4_usbinitialize(void);
 
 /************************************************************************************
- * Name: stm32_pwm_setup
+ * Name: stm32l4_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
@@ -336,11 +336,11 @@ void stm32_usbinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_PWM
-int stm32_pwm_setup(void);
+int stm32l4_pwm_setup(void);
 #endif
 
 /************************************************************************************
- * Name: stm32_adc_setup
+ * Name: stm32l4_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
@@ -348,7 +348,7 @@ int stm32_pwm_setup(void);
  ************************************************************************************/
 
 #ifdef CONFIG_ADC
-int stm32_adc_setup(void);
+int stm32l4_adc_setup(void);
 #endif
 
 /****************************************************************************

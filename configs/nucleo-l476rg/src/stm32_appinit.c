@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-l476rg/src/stm32_appinit.c
+ * configs/nucleo-l476rg/src/stm32l4_appinit.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -199,20 +199,20 @@ int board_app_initialize(uintptr_t arg)
 #ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */
 
-  ret = stm32_pwm_setup();
+  ret = stm32l4_pwm_setup();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32l4_pwm_setup() failed: %d\n", ret);
     }
 #endif
 
 #ifdef CONFIG_ADC
   /* Initialize ADC and register the ADC driver. */
 
-  ret = stm32_adc_setup();
+  ret = stm32l4_adc_setup();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32l4_adc_setup failed: %d\n", ret);
     }
 #endif
 
