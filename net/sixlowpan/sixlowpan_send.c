@@ -204,6 +204,8 @@ static void sixlowpan_compress_ipv6hdr(FAR struct ieee802154_driver_s *ieee,
  * Input Parameters:
  *   dev   - The IEEE802.15.4 MAC network driver interface.
  *   ipv6  - IPv6 plus TCP or UDP headers.
+ *   buf   - Data to send
+ *   len   - Length of data to send
  *   raddr - The MAC address of the destination
  *
  * Returned Value:
@@ -217,8 +219,9 @@ static void sixlowpan_compress_ipv6hdr(FAR struct ieee802154_driver_s *ieee,
  *
  ****************************************************************************/
 
-int sixlowpan_send(FAR struct net_driver_s *dev,
-                   FAR const struct ipv6_hdr_s *ipv6, net_ipv6addr_t raddr)
+static int sixlowpan_send(FAR struct net_driver_s *dev,
+                          FAR const struct ipv6_hdr_s *ipv6, FAR const void *buf,
+                          size_t len, net_ipv6addr_t raddr)
 {
   FAR struct ieee802154_driver_s *ieee = (FAR struct ieee802154_driver_s *)dev;
 
@@ -269,6 +272,33 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
   /* The destination address will be tagged to each outbound packet. If the
    * argument raddr is NULL, we are sending a broadcast packet.
    */
+
+#warning Missing logic
+
+  ninfo("Sending packet len %d\n", len);
+
+#ifndef CONFIG_NET_6LOWPAN_COMPRESSION_IPv6
+  if (len >= CONFIG_NET_6LOWPAN_COMPRESSION_THRESHOLD)
+    {
+      /* Try to compress the headers */
+
+#if defined(CONFIG_NET_6LOWPAN_COMPRESSION_HC1)
+      sixlowpan_compresshdr_hc1(dev, &dest);
+#elif defined(CONFIG_NET_6LOWPAN_COMPRESSION_HC06)
+      sixlowpan_compresshdr_hc06(dev, &dest);
+#else
+#  error No compression specified
+#endif
+    }
+  else
+#endif /* !CONFIG_NET_6LOWPAN_COMPRESSION_IPv6 */
+    {
+      /* Small.. use IPv6 dispatch (no compression) */
+
+      sixlowpan_compress_ipv6hdr(ieee, ipv6);
+    }
+
+  ninfo("Header of len %d\n", ieee->i_rime_hdrlen);
 
 #warning Missing logic
   return -ENOSYS;
@@ -385,7 +415,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
    */
 
   ret = sixlowpan_send(dev, (FAR const struct ipv6_hdr_s *)&ipv6tcp,
-                       conn->u.ipv6.raddr);
+                       buf, len, conn->u.ipv6.raddr);
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_send() failed: %d\n", ret);
@@ -503,7 +533,7 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
    */
 
   ret = sixlowpan_send(dev, (FAR const struct ipv6_hdr_s *)&ipv6udp,
-                       conn->u.ipv6.raddr);
+                       buf, len, conn->u.ipv6.raddr);
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_send() failed: %d\n", ret);
