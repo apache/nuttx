@@ -89,7 +89,6 @@
 #endif
 
 #define RADIO_DEVNAME "/dev/mrf24j40"
-#define MAC_DEVNAME   "/dev/mrf24j40mac"
 
 /****************************************************************************
  * Private Types
@@ -256,7 +255,30 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
       return -ENODEV;
     }
 
-#if defined(CONFIG_IEEE802154_DEV)
+#if defined(CONFIG_IEEE802154_MAC)
+  /* Create a 802.15.4 MAC device from a 802.15.4 compatible radio device. */
+
+  mac = mac802154_create(radio);
+  if (mac == NULL)
+    {
+      wlerr("ERROR: Failed to initialize IEEE802.15.4 MAC\n");
+      return -ENODEV;
+    }
+#endif
+
+#if defined(CONFIG_IEEE802154_MAC_DEV)
+  /* If want to call these APIs from userspace, you have to wrap your mac
+   * in a character device via mac802154_device.c.
+   */
+
+  ret = mac802154dev_register(mac, 0);
+  if (ret < 0)
+    {
+      wlerr("ERROR: Failed to register the MAC character driver ieee%d: %d\n",
+            0, ret);
+      return ret;
+    }
+#elif defined(CONFIG_IEEE802154_DEV)
   /* Register a character driver to access the IEEE 802.15.4 radio from
    * user-space
    */
@@ -268,27 +290,6 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
             RADIO_DEVNAME, ret);
       return ret;
     }
-
-#elif 0 /* defined(CONFIG_IEEE802154_MAC) */
-  /* Create a 802.15.4 MAC device from a 802.15.4 compatible radio device. */
-
-  mac = mac802154_register(radio, 0);
-  if (radio == NULL)
-    {
-      wlerr("ERROR: Failed to initialize IEEE802.15.4 MAC\n");
-      return -ENODEV;
-    }
-
-  /* If want to call these APIs from userspace, you have to wrap your mac
-   * in a character device via mac802154_device.c.
-   */
-
-  ret = mac802154dev_register(mac, MAC_DEVNAME);
-  if (ret < 0)
-    {
-      wlerr("ERROR: Failed to register the radio device %s: %d\n",
-            RADIO_DEVNAME, ret);
-      return ret;
 #endif
 
   return OK;
