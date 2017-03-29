@@ -1099,7 +1099,7 @@ static int mrf24j40_transmit(FAR struct ieee802154_radio_s *ieee,
       hlen += 2 + 8; /* Destination PAN + extaddr */
     }
 
-  if (!(frame_ctrl & IEEE802154_FRAMECTRL_INTRA))
+  if (!(frame_ctrl & IEEE802154_FRAMECTRL_PANIDCOMP))
     {
       hlen += 2; /* No PAN compression, source PAN is different from dest PAN */
     }

@@ -77,7 +77,7 @@ struct ieee802154_privmac_s
   /* 0x4F */ uint32_t macMinBE           : 2;
   /* 0x4D */ uint32_t macGTSPermit       : 1;
   /* 0x51 */ uint32_t macPromiscuousMode : 1;
-  /* 0x52 */ uint32_t  macRxOnWhenIdle    : 1;
+  /* 0x52 */ uint32_t macRxOnWhenIdle    : 1;
              uint32_t macPad             : 3;
   /* 0x48 */ uint32_t macBeaconTxTime    : 24;
 

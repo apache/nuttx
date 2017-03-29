@@ -46,7 +46,6 @@
 #include <stdbool.h>
 
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/wireless/ieee802154/ieee802154.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -123,23 +122,23 @@
  * Seee IEEE 802.15.4/2011 5.2.1.1 page 57
  */
 
-#define IEEE802154_FRAMECTRL_FTYPE      0x0007 /* Frame type, bits 0-2 */
-#define IEEE802154_FRAMECTRL_SEC        0x0008 /* Security Enabled, bit 3 */
-#define IEEE802154_FRAMECTRL_PEND       0x0010 /* Frame pending, bit 4 */
-#define IEEE802154_FRAMECTRL_ACKREQ     0x0020 /* Acknowledge request, bit 5 */
-#define IEEE802154_FRAMECTRL_INTRA      0x0040 /* Intra PAN, bit 6 */
-#define IEEE802154_FRAMECTRL_DADDR      0x0C00 /* Dest addressing mode, bits 10-11 */
-#define IEEE802154_FRAMECTRL_VERSION    0x3000 /* Source addressing mode, bits 12-13 */
-#define IEEE802154_FRAMECTRL_SADDR      0xC000 /* Source addressing mode, bits 14-15 */
+#define IEEE802154_FRAMECTRL_FTYPE      0x0007  /* Frame type, bits 0-2 */
+#define IEEE802154_FRAMECTRL_SEC        0x0008  /* Security Enabled, bit 3 */
+#define IEEE802154_FRAMECTRL_PEND       0x0010  /* Frame pending, bit 4 */
+#define IEEE802154_FRAMECTRL_ACKREQ     0x0020  /* Acknowledge request, bit 5 */
+#define IEEE802154_FRAMECTRL_PANIDCOMP  0x0040  /* PAN ID Compression, bit 6 */
+#define IEEE802154_FRAMECTRL_DADDR      0x0C00  /* Dest addressing mode, bits 10-11 */
+#define IEEE802154_FRAMECTRL_VERSION    0x3000  /* Source addressing mode, bits 12-13 */
+#define IEEE802154_FRAMECTRL_SADDR      0xC000  /* Source addressing mode, bits 14-15 */
 
-#define IEEE802154_FRAMECTRL_SHIFT_FTYPE     0      /* Frame type, bits 0-2 */
-#define IEEE802154_FRAMECTRL_SHIFT_SEC       3      /* Security Enabled, bit 3 */
-#define IEEE802154_FRAMECTRL_SHIFT_PEND      4      /* Frame pending, bit 4 */
-#define IEEE802154_FRAMECTRL_SHIFT_ACKREQ    5      /* Acknowledge request, bit 5 */
-#define IEEE802154_FRAMECTRL_SHIFT_INTRA     6      /* Intra PAN, bit 6 */
-#define IEEE802154_FRAMECTRL_SHIFT_DADDR     10     /* Dest addressing mode, bits 10-11 */
-#define IEEE802154_FRAMECTRL_SHIFT_VERSION   12     /* Source addressing mode, bits 12-13 */
-#define IEEE802154_FRAMECTRL_SHIFT_SADDR     14     /* Source addressing mode, bits 14-15 */
+#define IEEE802154_FRAMECTRL_SHIFT_FTYPE     0  /* Frame type, bits 0-2 */
+#define IEEE802154_FRAMECTRL_SHIFT_SEC       3  /* Security Enabled, bit 3 */
+#define IEEE802154_FRAMECTRL_SHIFT_PEND      4  /* Frame pending, bit 4 */
+#define IEEE802154_FRAMECTRL_SHIFT_ACKREQ    5  /* Acknowledge request, bit 5 */
+#define IEEE802154_FRAMECTRL_SHIFT_PANIDCOMP 6  /* PAN ID Compression, bit 6 */
+#define IEEE802154_FRAMECTRL_SHIFT_DADDR     10 /* Dest addressing mode, bits 10-11 */
+#define IEEE802154_FRAMECTRL_SHIFT_VERSION   12 /* Source addressing mode, bits 12-13 */
+#define IEEE802154_FRAMECTRL_SHIFT_SADDR     14 /* Source addressing mode, bits 14-15 */
 
 /* IEEE 802.15.4 PHY constants */
 
@@ -236,6 +235,87 @@ enum
   IEEE802154_macDefaultSecurityMaterial,
   IEEE802154_macDefaultSecuritySuite,
   IEEE802154_macSecurityMode
+};
+
+/* IEEE 802.15.4 Device address
+ * The addresses in ieee802154 have several formats:
+ * No address                : [none]
+ * Short address + PAN id    : PPPP/SSSS
+ * Extended address + PAN id : PPPP/LLLLLLLLLLLLLLLL
+ */
+
+enum ieee802154_addr_mode_e
+{
+  IEEE802154_ADDRMODE_NONE = 0,
+  IEEE802154_ADDRMODE_SHORT = 2,
+  IEEE802154_ADDRMODE_EXTENDED
+};
+
+struct ieee802154_addr_s
+{
+  enum ieee802154_addr_mode_e ia_mode;  /* Address mode. Short or Extended */
+  uint16_t ia_panid;                    /* PAN identifier, can be IEEE802154_PAN_UNSPEC */
+  union
+  {
+    uint16_t _ia_saddr;                 /* short address */
+    uint8_t  _ia_eaddr[8];              /* extended address */
+  } ia_addr;
+
+#define ia_saddr ia_addr._ia_saddr
+#define ia_eaddr ia_addr._ia_eaddr
+};
+
+#define IEEE802154_ADDRSTRLEN 22 /* (2*2+1+8*2, PPPP/EEEEEEEEEEEEEEEE) */
+
+struct ieee802154_framecontrol_s
+{
+  /* Frame type
+   *
+   * Should be a value from: ieee802154_frametype_e
+   *
+   * Bits 0-1
+   */
+
+  uint16_t frame_type     : 3;  
+
+  uint16_t security_en    : 1;  /* Security Enabled flag, bit 3 */
+  uint16_t frame_pending  : 1;  /* Frame Pending flag, bit 4 */
+  uint16_t ack_req        : 1;  /* Acknowledge Request flag, bit 5 */
+  uint16_t panid_comp     : 1;  /* PAN ID Compression flag, bit 6 */
+  uint16_t reserved       : 3;  /* Reserved, bits 7-9 */
+
+  /* Destination Addressing Mode
+   *
+   * Should be a value from: ieee802154_addr_mode_e
+   *
+   * Bits 10-11
+   */
+
+  uint16_t dest_addr_mode : 2;
+
+  uint16_t frame_version  : 2;  /* Frame Version, bits 12-13 */
+
+  /* Source Addressing Mode
+   *
+   * Should be a value from: ieee802154_addr_mode_e
+   *
+   * Bits 14-15
+   */
+
+  uint16_t src_addr_mode  : 2;
+};
+
+struct ieee802154_frame_s
+{
+  struct ieee802154_framecontrol_s frame_control;
+  uint8_t seq_num;
+  struct ieee802154_addr_s dest_addr;
+  struct ieee802154_addr_s src_addr;
+#ifdef CONFIG_IEEE802154_SECURITY
+  struct ieee802154_auxsec_s aux_sec_hdr;
+#endif
+  void *payload;
+  uint16_t fcs;
 };
 
 struct ieee802154_capability_info_s
@@ -679,4 +759,4 @@ FAR struct ieee802154_mac_s *
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_WIRELESS_IEEE802154_MRF24J40_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_MAC_H */

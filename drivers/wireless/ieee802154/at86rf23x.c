@@ -56,7 +56,7 @@
 #include <nuttx/spi/spi.h>
 
 #include <nuttx/wireless/ieee802154/at86rf23x.h>
-#include <nuttx/wireless/ieee802154/ieee802154.h>
+
 #include <nuttx/wireless/ieee802154/ieee802154_radio.h>
 
 #include "at86rf23x.h"
