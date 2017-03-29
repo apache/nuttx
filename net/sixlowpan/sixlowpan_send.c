@@ -54,6 +54,7 @@
 
 #ifdef CONFIG_NET_6LOWPAN
 
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -62,11 +63,20 @@
  * Name: sixlowpan_send
  *
  * Description:
- *   Process an outgoing UDP or TCP packet.  Called from UDP/TCP logic to
- *   determine if the the packet should be formatted for 6loWPAN output.
+ *   Process an outgoing UDP or TCP packet.  Takes an IP packet and formats
+ *   it to be sent on an 802.15.4 network using 6lowpan.  Called from common
+ *   UDP/TCP send logic.
+ *
+ *  The payload data is in the caller 'buf' and is of length 'len'.
+ *  Compressed headers will be added and if necessary the packet is
+ *  fragmented. The resulting packet/fragments are put in dev->d_buf and
+ *  the first frame will be delivered to the 802.15.4 MAC. via ieee->i_frame.
+ *
+ * Input Parmeters:
  *
  * Input Parameters:
- *   dev - The IEEE802.15.4 MAC network driver interface.
+ *   dev   - The IEEE802.15.4 MAC network driver interface.
+ *   raddr - The MAC address of the destination
  *
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.
@@ -79,8 +89,10 @@
  *
  ****************************************************************************/
 
-int sixlowpan_send(FAR struct net_driver_s *dev)
+int sixlowpan_send(FAR struct net_driver_s *dev, net_ipv6addr_t raddr)
 {
+  FAR struct ieee802154_driver_s *ieee = (FAR struct ieee802154_driver_s *)dev;
+
   net_lock();
   /* REVISIT: To be provided */
   net_unlock();
@@ -143,6 +155,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
   conn = (FAR struct tcp_conn_s *)psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
   /* Ignore if not IPv6 domain */
 
   if (conn->domain != PF_INET6)
@@ -150,6 +163,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
       nwarn("WARNING: Not IPv6\n");
       return (ssize_t)-EPROTOTYPE;
     }
+#endif
 
   /* Route outgoing message to the correct device */
 
@@ -188,7 +202,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
    * packet.
    */
 
-  ret = sixlowpan_send(dev);
+  ret = sixlowpan_send(dev, conn->u.ipv6.raddr);
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_send() failed: %d\n", ret);
@@ -251,6 +265,7 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
   conn = (FAR struct udp_conn_s *)psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
   /* Ignore if not IPv6 domain */
 
   if (conn->domain != PF_INET6)
@@ -258,6 +273,7 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
       nwarn("WARNING: Not IPv6\n");
       return (ssize_t)-EPROTOTYPE;
     }
+#endif
 
   /* Route outgoing message to the correct device */
 
@@ -296,7 +312,7 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
    * packet.
    */
 
-  ret = sixlowpan_send(dev);
+  ret = sixlowpan_send(dev, conn->u.ipv6.raddr);
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_send() failed: %d\n", ret);

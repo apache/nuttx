@@ -20,6 +20,14 @@ config NET_6LOWPAN_FRAG
 		CONFIG_NET_6LOWPAN_FRAG specifies if 6lowpan fragmentation should be
 		used or not. Fragmentation is on by default.
 
+config NET_6LOWPAN_FRAMELEN
+	int "IEEE802.15.4 MAC Frame Length"
+	default 127
+	range 127 999999
+	---help---
+		Some wireless devices may use non-standard frame lengths.  This
+		setting should never be smaller than 127.
+
 choice
 	prompt "6loWPAN Compression"
 	default NET_6LOWPAN_COMPRESSION_HC06
