@@ -48,6 +48,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/random.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/sensors/lis3dsh.h>
@@ -245,6 +246,10 @@ static void lis3dsh_read_measurement_data(FAR struct lis3dsh_dev_s *dev)
   /* Give back the semaphore */
 
   sem_post(&dev->datasem);
+
+  /* Feed sensor data to entropy pool */
+
+  add_sensor_randomness((x_acc << 16) ^ (y_acc << 8) ^ (z_acc << 0));
 }
 
 /****************************************************************************

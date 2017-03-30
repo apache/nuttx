@@ -64,6 +64,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
+#include <nuttx/random.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/input/touchscreen.h>
@@ -627,6 +628,8 @@ static void max11802_worker(FAR void *arg)
             }
         }
       while (readycount < 2);
+
+      add_ui_randomness((x << 16) | y);
 
       /* Continue to sample the position while the pen is down */
 

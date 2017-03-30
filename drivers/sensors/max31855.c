@@ -54,6 +54,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/sensors/max31855.h>
+#include <nuttx/random.h>
 
 #if defined(CONFIG_SPI) && defined(CONFIG_MAX31855)
 
@@ -219,6 +220,10 @@ static ssize_t max31855_read(FAR struct file *filep, FAR char *buffer, size_t bu
   regval |= (regmsb & 0xFF) << 24;
 
   sninfo("Read from MAX31855 = 0x%08X\n", regval);
+
+  /* Feed sensor data to entropy pool */
+
+  add_sensor_randomness(regval);
 
   /* If negative, fix signal bits */
 

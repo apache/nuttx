@@ -51,6 +51,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/mb7040.h>
+#include <nuttx/random.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_MB7040)
 
@@ -323,6 +324,10 @@ static int mb7040_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           if (ret == OK)
             {
               *ptr = (int32_t)range;
+
+              /* Feed sensor data to entropy pool */
+
+              add_sensor_randomness(range);
             }
 
           sninfo("range: %04x ret: %d\n", *ptr, ret);

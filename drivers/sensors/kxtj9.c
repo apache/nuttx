@@ -51,6 +51,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/kxtj9.h>
+#include <nuttx/random.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSOR_KXTJ9)
 
@@ -459,6 +460,12 @@ static int kxtj9_read_sensor_data(FAR struct kxtj9_dev_s *priv,
 
   kxtj9_reg_read(priv, INT_REL, &data, 1);
   sem_post(&priv->exclsem);
+
+  /* Feed sensor data to entropy pool */
+
+  add_sensor_randomness((acc_data[0] << 16) ^ (acc_data[1] << 8) ^
+                        acc_data[2]);
+
   return OK;
 }
 

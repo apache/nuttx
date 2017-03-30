@@ -53,6 +53,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/bmp180.h>
+#include <nuttx/random.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_BMP180)
 
@@ -463,6 +464,10 @@ static int bmp180_getpressure(FAR struct bmp180_dev_s *priv)
   /* Read temperature and pressure */
 
   bmp180_read_press_temp(priv);
+
+  /* Feed raw sensor data to entropy pool */
+
+  add_sensor_randomness((priv->bmp180_utemp << 16) ^ priv->bmp180_upress);
 
   /* Calculate true temperature */
 

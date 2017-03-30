@@ -1,8 +1,9 @@
 /****************************************************************************
- * sched/irq/irq_dispatch.c
+ * libc/string/lib_explicit_bzero.c
  *
- *   Copyright (C) 2007, 2008, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2015,2017 Haltian Ltd. All rights reserved.
+ *   Author: Juha Niskanen <juha.niskanen@haltian.com>
+ *           Jussi Kivilinna <jussi.kivilinna@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,78 +34,23 @@
  *
  ****************************************************************************/
 
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <debug.h>
-#include <nuttx/arch.h>
-#include <nuttx/irq.h>
-#include <nuttx/random.h>
-
-#include "irq/irq.h"
+#include <string.h>
 
 /****************************************************************************
- * Public Functions
+ * Global Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: irq_dispatch
- *
- * Description:
- *   This function must be called from the architecture-specific logic in
- *   order to dispatch an interrupt to the appropriate, registered handling
- *   logic.
- *
- ****************************************************************************/
+/* memset that must not be optimized away by compiler (not even with LTO). */
 
-void irq_dispatch(int irq, FAR void *context)
+void explicit_bzero(FAR void *s, size_t n)
 {
-  xcpt_t vector;
-  FAR void *arg;
+  static FAR void *(*FAR const volatile memset_v)(FAR void *, int, size_t) =
+      &memset;
 
-  /* Perform some sanity checks */
-
-#if NR_IRQS > 0
-  if ((unsigned)irq >= NR_IRQS)
-    {
-      vector = irq_unexpected_isr;
-      arg    = NULL;
-    }
-  else
-    {
-#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
-      irq_mapped_t ndx = g_irqmap[irq];
-      if (ndx >= CONFIG_ARCH_NUSER_INTERRUPTS)
-        {
-          vector = irq_unexpected_isr;
-          arg    = NULL;
-        }
-      else
-        {
-          vector = g_irqvector[ndx].handler;
-          arg    = g_irqvector[ndx].arg;
-        }
-#else
-      vector = g_irqvector[irq].handler;
-      arg    = g_irqvector[irq].arg;
-#endif
-    }
-
-#else
-  vector = irq_unexpected_isr;
-  arg    = NULL;
-#endif
-
-#ifdef CONFIG_CRYPTO_RANDOM_POOL_COLLECT_IRQ_RANDOMNESS
-  /* Add interrupt timing randomness to entropy pool */
-
-  add_irq_randomness(irq);
-#endif
-
-  /* Then dispatch to the interrupt handler */
-
-  vector(irq, context, arg);
+  memset_v(s, 0, n);
 }

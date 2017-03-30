@@ -64,6 +64,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/random.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/input/touchscreen.h>
@@ -888,6 +889,8 @@ static void mxt_touch_event(FAR struct mxt_dev_s *priv,
       sample->area     = area;
       sample->pressure = pressure;
       sample->valid    = true;
+
+      add_ui_randomness((x << 16) ^ y ^ (area << 9) ^ (pressure << 1));
 
       /* If this is not the first touch report, then report it as a move:
        * Same contact, same ID, but with a new, updated position.

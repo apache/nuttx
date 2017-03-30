@@ -50,6 +50,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/sensors/mpl115a.h>
+#include <nuttx/random.h>
 
 #if defined(CONFIG_SPI) && defined(CONFIG_MPL115A)
 
@@ -227,6 +228,11 @@ static void mpl115a_read_press_temp(FAR struct mpl115a_dev_s *priv)
   priv->mpl115a_temperature >>= 6; /* Tadc is 10bit unsigned */
 
   sninfo("Temperature = %d\n", priv->mpl115a_temperature);
+
+  /* Feed sensor data to entropy pool */
+
+  add_sensor_randomness((priv->mpl115a_pressure << 16) ^
+                        priv->mpl115a_temperature);
 }
 
 /****************************************************************************

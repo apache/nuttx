@@ -51,6 +51,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/lm92.h>
+#include <nuttx/random.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_LM92)
 
@@ -271,6 +272,8 @@ static int lm92_readtemp(FAR struct lm92_dev_s *priv, FAR b16_t *temp)
       snerr("ERROR: lm92_readb16 failed: %d\n", ret);
       return ret;
     }
+
+  add_sensor_randomness(temp16);
 
   sninfo("Centigrade: %08x\n", temp16);
 

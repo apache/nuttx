@@ -524,10 +524,19 @@
 /* The following is defined only if CONFIG_TASK_NAME_SIZE > 0 */
 
 #if CONFIG_TASK_NAME_SIZE > 0
-#  define SYS_prctl                    (SYS_nnetsocket+0)
-#  define SYS_maxsyscall               (SYS_nnetsocket+1)
+#  define SYS_prctl                    (SYS_nnetsocket+1)
 #else
-#  define SYS_maxsyscall               SYS_nnetsocket
+#  define SYS_prctl                    SYS_nnetsocket
+#endif
+
+/* The following is defined only if entropy pool random number generator
+ * is enabled. */
+
+#ifdef CONFIG_CRYPTO_RANDOM_POOL
+#  define SYS_getrandom                (SYS_prctl+1)
+#  define SYS_maxsyscall               (SYS_prctl+2)
+#else
+#  define SYS_maxsyscall               SYS_prctl
 #endif
 
 /* Note that the reported number of system calls does *NOT* include the
