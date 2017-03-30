@@ -46,14 +46,15 @@
  ****************************************************************************/
 /* Frame Organization:
  *
- *     Content          Offset
- *   +----------------+ 0
- *   | Frame Header   |
- *   +----------------+ i_dataoffset
- *   | Data           |
- *   +----------------+ i_framelen
- *   | Unused         |
- *   +----------------+ CONFIG_NET_6LOWPAN_FRAMELEN
+ *     Content            Offset
+ *   +------------------+ 0
+ *   | Frame Header     |
+ *   +------------------+ i_dataoffset
+ *   | Procotol Headers |
+ *   | Data Payload     |
+ *   +------------------+ i_framelen
+ *   | Unused           |
+ *   +------------------+ CONFIG_NET_6LOWPAN_FRAMELEN
  */
 
 /****************************************************************************

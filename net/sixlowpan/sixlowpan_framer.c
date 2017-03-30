@@ -110,35 +110,6 @@ static inline uint8_t sixlowpan_addrlen(uint8_t addrmode)
 }
 
 /****************************************************************************
- * Function: sixlowpan_isbroadcast
- *
- * Description:
- *   Return the address length associated with a 2-bit address mode
- *
- * Input parameters:
- *   addrmode - The address mode
- *
- * Returned Value:
- *   The address length associated with the address mode.
- *
- ****************************************************************************/
-
-static bool sixlowpan_isbroadcast(uint8_t mode, FAR uint8_t *addr)
-{
-  int i = ((mode == FRAME802154_SHORTADDRMODE) ? 2 : 8);
-
-  while (i-- > 0)
-    {
-      if (addr[i] != 0xff)
-        {
-          return false;
-        }
-    }
-
-  return true;
-}
-
-/****************************************************************************
  * Function: sixlowpan_addrnull
  *
  * Description:

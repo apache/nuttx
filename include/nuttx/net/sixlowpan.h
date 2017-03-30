@@ -333,17 +333,28 @@ struct rimeaddr_s
  * 2) i_dsn must be set to a random value.  After that, it will be managed
  *    by the network.
  * 3) i_nodeaddr must be set after the MAC is assigned an address.
+ * 4) On network TX poll operations, the IEEE802.15.4 MAC needs to provide
+ *    the i_frame buffer with size greater than or equal to
+ *    CONFIG_NET_6LOWPAN_FRAMELEN.  No dev.d_buf need be provided in this
+ *    case.  The entire is TX is performed using only the i_frame buffer.
+ * 5) On network input RX oprations, both buffers must be provided.  The size
+ *    of the i_frame buffer is, again, greater than or equal to
+ *    CONFIG_NET_6LOWPAN_FRAMELEN.  The larger dev.d_buf must have a size
+ *    of at least <tbd>.  The dev.d_buf is used for de-compressing each
+ *    frame and reassembling any fragmented packets to create the full input
+ *    packet that is provided to the applicatino.
  *
  * Frame Organization:
  *
- *     Content          Offset
- *   +----------------+ 0
- *   | Frame Header   |
- *   +----------------+ i_dataoffset
- *   | Data           |
- *   +----------------+ i_framelen
- *   | Unused         |
- *   +----------------+ CONFIG_NET_6LOWPAN_FRAMELEN
+ *     Content            Offset
+ *   +------------------+ 0
+ *   | Frame Header     |
+ *   +------------------+ i_dataoffset
+ *   | Procotol Headers |
+ *   | Data Payload     |
+ *   +------------------+ i_framelen
+ *   | Unused           |
+ *   +------------------+ CONFIG_NET_6LOWPAN_FRAMELEN
  */
 
 struct ieee802154_driver_s
