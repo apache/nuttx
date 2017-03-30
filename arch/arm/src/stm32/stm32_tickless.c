@@ -161,7 +161,8 @@ static inline void stm32_putreg16(uint8_t offset, uint16_t value)
  *
  ************************************************************************************/
 
-static inline void stm32_modifyreg16(uint8_t offset, uint16_t clearbits, uint16_t setbits)
+static inline void stm32_modifyreg16(uint8_t offset, uint16_t clearbits,
+                                     uint16_t setbits)
 {
   modifyreg16(g_tickless.base + offset, clearbits, setbits);
 }
@@ -236,14 +237,17 @@ static int stm32_tickless_setchannel(uint8_t channel)
       || g_tickless.base == STM32_TIM7_BASE
 #endif
 #if STM32_NBTIM > 0
-  )
+     )
     {
       return -EINVAL;
     }
 #endif
 
-  /* frozen mode because we don't want to change the gpio, preload register disabled */
-  ccmr_val  =  (ATIM_CCMR_MODE_FRZN << ATIM_CCMR1_OC1M_SHIFT);
+  /* Frozen mode because we don't want to change the GPIO, preload register
+   * disabled.
+   */
+
+  ccmr_val = (ATIM_CCMR_MODE_FRZN << ATIM_CCMR1_OC1M_SHIFT);
         
   /* Set polarity */
 
@@ -251,7 +255,7 @@ static int stm32_tickless_setchannel(uint8_t channel)
 
   /* Define its position (shift) and get register offset */
 
-  if (channel & 1)
+  if ((channel & 1) != 0)
     {
       ccmr_val  <<= 8;
       ccmr_mask <<= 8;
@@ -293,7 +297,7 @@ static void stm32_interval_handler(void)
 {
   tmrinfo("Expired...\n");
 
-   /* Disable the compare interrupt now. */
+  /* Disable the compare interrupt now. */
 
   stm32_tickless_disableint(g_tickless.channel);
   stm32_tickless_ackint(g_tickless.channel);
@@ -302,7 +306,6 @@ static void stm32_interval_handler(void)
 
   sched_timer_expiration();
 }
-
 
 /****************************************************************************
  * Name: stm32_timing_handler
@@ -328,7 +331,6 @@ static void stm32_timing_handler(void)
 }
 #endif /* CONFIG_CLOCK_TIMEKEEPING */
 
-
 /****************************************************************************
  * Name: stm32_tickless_handler
  *
@@ -350,11 +352,15 @@ static int stm32_tickless_handler(int irq, void *context, void *arg)
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
   if (interrupt_flags & ATIM_SR_UIF)
-    stm32_timing_handler();
+    {
+      stm32_timing_handler();
+    }
 #endif /* CONFIG_CLOCK_TIMEKEEPING */
 
   if (interrupt_flags & (1 << g_tickless.channel))
-    stm32_interval_handler();
+    {
+      stm32_interval_handler();
+    }
 
   return OK;
 }
@@ -395,98 +401,108 @@ void arm_timer_initialize(void)
 #ifdef CONFIG_STM32_TIM1
       case 1:
         g_tickless.base = STM32_TIM1_BASE;
-	break;
+        break;
 #endif
+
 #ifdef CONFIG_STM32_TIM2
       case 2:
         g_tickless.base = STM32_TIM2_BASE;
-	break;
+        break;
 #endif
+
 #ifdef CONFIG_STM32_TIM3
       case 3:
         g_tickless.base = STM32_TIM3_BASE;
-	break;
+        break;
 #endif
+
 #ifdef CONFIG_STM32_TIM4
       case 4:
         g_tickless.base = STM32_TIM4_BASE;
-	break;
+        break;
 #endif
 #ifdef CONFIG_STM32_TIM5
       case 5:
         g_tickless.base = STM32_TIM5_BASE;
-	break;
+        break;
 #endif
+
 #ifdef CONFIG_STM32_TIM6
       case 6:
 
-	/* Basic timers not supported by this implementation */
+        /* Basic timers not supported by this implementation */
 
         ASSERT(0);
-	break;
+        break;
 #endif
+
 #ifdef CONFIG_STM32_TIM7
       case 7:
 
-	/* Basic timers not supported by this implementation */
+        /* Basic timers not supported by this implementation */
 
         ASSERT(0);
-	break;
+        break;
 #endif
+
 #ifdef CONFIG_STM32_TIM8
       case 8:
         g_tickless.base = STM32_TIM8_BASE;
-	break;
+        break;
 #endif
+
 #ifdef CONFIG_STM32_TIM9
       case 9:
         g_tickless.base = STM32_TIM9_BASE;
-	break;
+        break;
 #endif
 #ifdef CONFIG_STM32_TIM10
       case 10:
         g_tickless.base = STM32_TIM10_BASE;
-	break;
+        break;
 #endif
+
 #ifdef CONFIG_STM32_TIM11
       case 11:
         g_tickless.base = STM32_TIM11_BASE;
-	break;
+        break;
 #endif
 #ifdef CONFIG_STM32_TIM12
       case 12:
         g_tickless.base = STM32_TIM12_BASE;
-	break;
+        break;
 #endif
 #ifdef CONFIG_STM32_TIM13
       case 13:
         g_tickless.base = STM32_TIM13_BASE;
-	break;
+        break;
 #endif
+
 #ifdef CONFIG_STM32_TIM14
       case 14:
         g_tickless.base = STM32_TIM14_BASE;
-	break;
+        break;
 #endif
 #ifdef CONFIG_STM32_TIM15
       case 15:
         g_tickless.base = STM32_TIM15_BASE;
-	break;
+        break;
 #endif
+
 #ifdef CONFIG_STM32_TIM16
       case 16:
         g_tickless.base = STM32_TIM16_BASE;
-	break;
+        break;
 #endif
+
 #ifdef CONFIG_STM32_TIM17
       case 17:
         g_tickless.base = STM32_TIM17_BASE;
-	break;
+        break;
 #endif
 
       default:
         ASSERT(0);
-
     }
 
   /* Get the TC frequency that corresponds to the requested resolution */
@@ -749,6 +765,7 @@ int up_timer_cancel(FAR struct timespec *ts)
           ts->tv_sec  = 0;
           ts->tv_nsec = 0;
         }
+
       leave_critical_section(flags);
       return OK;
     }
@@ -773,7 +790,7 @@ int up_timer_cancel(FAR struct timespec *ts)
    * remaining?
    */
 
-  if (ts)
+  if (ts != NULL)
     {
       /* Yes.. then calculate and return the time remaining on the
        * oneshot timer.
@@ -786,7 +803,7 @@ int up_timer_cancel(FAR struct timespec *ts)
         {
           /* Handle rollover */
 
-	  period += UINT16_MAX;
+          period += UINT16_MAX;
         }
       else if (count == period)
         {
@@ -794,27 +811,27 @@ int up_timer_cancel(FAR struct timespec *ts)
 
           ts->tv_sec  = 0;
           ts->tv_nsec = 0;
-	  return OK;
+          return OK;
         }
 
-        /* The total time remaining is the difference.  Convert that
-         * to units of microseconds.
-         *
-         *   frequency = ticks / second
-         *   seconds   = ticks * frequency
-         *   usecs     = (ticks * USEC_PER_SEC) / frequency;
-         */
+      /* The total time remaining is the difference.  Convert that
+       * to units of microseconds.
+       *
+       *   frequency = ticks / second
+       *   seconds   = ticks * frequency
+       *   usecs     = (ticks * USEC_PER_SEC) / frequency;
+       */
 
-        usec        = (((uint64_t)(period - count)) * USEC_PER_SEC) /
-                      g_tickless.frequency;
+      usec        = (((uint64_t)(period - count)) * USEC_PER_SEC) /
+                    g_tickless.frequency;
 
-        /* Return the time remaining in the correct form */
+      /* Return the time remaining in the correct form */
 
-        sec         = usec / USEC_PER_SEC;
-        nsec        = ((usec) - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
+      sec         = usec / USEC_PER_SEC;
+      nsec        = ((usec) - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
-        ts->tv_sec  = (time_t)sec;
-        ts->tv_nsec = (unsigned long)nsec;
+      ts->tv_sec  = (time_t)sec;
+      ts->tv_nsec = (unsigned long)nsec;
 
       tmrinfo("remaining (%lu, %lu)\n",
              (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
@@ -897,7 +914,8 @@ int up_timer_start(FAR const struct timespec *ts)
 
   g_tickless.period = (uint16_t)(period + count);
  
-  STM32_TIM_SETCOMPARE(g_tickless.tch, g_tickless.channel, g_tickless.period);
+  STM32_TIM_SETCOMPARE(g_tickless.tch, g_tickless.channel,
+                       g_tickless.period);
 
   /* Enable interrupts.  We should get the callback when the interrupt
    * occurs.

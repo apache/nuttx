@@ -2829,8 +2829,6 @@ config STM32_TICKLESS_CHANNEL
 
 endif # SCHED_TICKLESS
 
-if !SCHED_TICKLESS
-
 config STM32_ONESHOT
 	bool "TIM one-shot wrapper"
 	default n
@@ -2844,8 +2842,6 @@ config STM32_FREERUN
 	---help---
 		Enable a wrapper around the low level timer/counter functions to
 		support a free-running timer.
-
-endif # !SCHED_TICKLESS
 
 config STM32_ONESHOT_MAXTIMERS
 	int "Maximum number of oneshot timers"
