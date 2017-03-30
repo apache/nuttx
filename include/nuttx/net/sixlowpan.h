@@ -340,9 +340,12 @@ struct rimeaddr_s
  * 5) On network input RX oprations, both buffers must be provided.  The size
  *    of the i_frame buffer is, again, greater than or equal to
  *    CONFIG_NET_6LOWPAN_FRAMELEN.  The larger dev.d_buf must have a size
- *    of at least <tbd>.  The dev.d_buf is used for de-compressing each
- *    frame and reassembling any fragmented packets to create the full input
- *    packet that is provided to the applicatino.
+ *    of at least the advertised MTU of the protocol, CONFIG_NET_6LOWPAN_MTU.
+ *    If fragmentation is enabled, then the logical packet size may be
+ *    significantly larger than the size of the frame buffer.  The dev.d_buf
+ *    is used for de-compressing each frame and reassembling any fragmented
+ *    packets to create the full input packet that is provided to the
+ *    application.
  *
  * Frame Organization:
  *

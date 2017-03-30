@@ -159,15 +159,32 @@ config NET_6LOWPAN_MAXPAYLOAD
 		of a 802.15.4 frame) - 25 bytes (for the 802.15.4 MAClayer header). This
 		can be increased for systems with larger packet sizes.
 
+config NET_6LOWPAN_MTU
+	int "6LoWPAN packet buffer size"
+	default 1294
+	range 590 1518
+	depends on NET_6LOWPAN_FRAG
+	---help---
+		Packet buffer size.  This size includes the TCP/UDP payload plus the
+		size of TCP/UDP header, the IP header, and the Ethernet header.
+		This value is normally referred to as the MTU (Maximum Transmission
+		Unit); the payload is the MSS (Maximum Segment Size).
+
+		NOTE that this option depends on fragmentation support.  By
+		supporting fragmentation, we can handle quite large "logical" packet
+		sizes.  Without fragmentation support, the MTU is equal to the frame
+		size and that has already been selected.
+
 config NET_6LOWPAN_TCP_RECVWNDO
 	int "6LoWPAN TCP receive window size"
-	default 102
+	default 1220 if NET_6LOWPAN_FRAG
+	default 102 if !NET_6LOWPAN_FRAG
 	depends on NET_TCP
 	---help---
 		The size of the advertised receiver's window.   Should be set low
-		(i.e., to the size of the IEEE802.15.4 frame payload) if the application
-		is slow to process incoming data, or high (32768 bytes) if the
-		application processes data quickly. REVISIT!
+		(i.e., to the size of the IEEE802.15.4 MTU or frame payload) if
+		the application is slow to process incoming data, or high (32768
+		bytes) if the application processes data quickly.
 
 config NET_6LOWPAN_SNIFFER
 	default n

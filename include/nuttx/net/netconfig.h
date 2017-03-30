@@ -116,6 +116,22 @@
 #  endif
 #endif
 
+#ifndef CONFIG_NET_6LOWPAN_FRAG
+#  undef CONFIG_NET_6LOWPAN_MTU
+#  undef CONFIG_NET_6LOWPAN_TCP_RECVWNDO
+#endif
+
+#ifndef CONFIG_NET_6LOWPAN_MTU
+#  undef CONFIG_NET_6LOWPAN_TCP_RECVWNDO
+#  ifdef CONFIG_NET_6LOWPAN_FRAG
+#    define CONFIG_NET_6LOWPAN_MTU 1294
+#    define CONFIG_NET_6LOWPAN_TCP_RECVWNDO 1220
+#  else
+#    define CONFIG_NET_6LOWPAN_MTU CONFIG_NET_6LOWPAN_FRAMELEN
+#    define CONFIG_NET_6LOWPAN_TCP_RECVWNDO (CONFIG_NET_6LOWPAN_FRAMELEN - 25)
+#  endif
+#endif
+
 #if defined(CONFIG_NET_MULTILINK)
    /* We are supporting multiple network devices using different link layer
     * protocols.  Get the size of the link layer header from the device
@@ -142,15 +158,23 @@
 #  endif
 
 #  ifdef CONFIG_NET_SLIP
-#    define _MIN_SLIP_MTU  MIN(_MIN_LO_MTU,CONFIG_NET_SLIP_MTU)
-#    define _MAX_SLIP_MTU  MAX(_MAX_LO_MTU,CONFIG_NET_SLIP_MTU)
+#    define _MIN_SLIP_MTU  MIN(_MIN_LO_MTU,CONFIG_NET_6LOWPAN_MTU)
+#    define _MAX_SLIP_MTU  MAX(_MAX_LO_MTU,CONFIG_NET_6LOWPAN_MTU)
 #  else
 #    define _MIN_SLIP_MTU  _MIN_LO_MTU
 #    define _MAX_SLIP_MTU  _MAX_LO_MTU
 #  endif
 
-#  define MIN_NET_DEV_MTU  _MIN_SLIP_MTU
-#  define MAX_NET_DEV_MTU  _MAX_SLIP_MTU
+#  ifdef CONFIG_NET_6LOWPAN
+#    define _MIN_6LOWPAN_MTU  MIN(_MIN_LO_MTU,CONFIG_NET_SLIP_MTU)
+#    define _MAX_6LOWPAN_MTU  MAX(_MAX_LO_MTU,CONFIG_NET_SLIP_MTU)
+#  else
+#    define _MIN_6LOWPAN_MTU  _MIN_LO_MTU
+#    define _MAX_6LOWPAN_MTU  _MAX_LO_MTU
+#  endif
+
+#  define MIN_NET_DEV_MTU  _MIN_6LOWPAN_MTU
+#  define MAX_NET_DEV_MTU  _MAX_6LOWPAN_MTU
 
 /* For the loopback device, we will use the largest MTU */
 
@@ -190,8 +214,20 @@
 #  define MIN_NET_DEV_MTU   NET_LO_MTU
 #  define MAX_NET_DEV_MTU   NET_LO_MTU
 
+#elif defined(CONFIG_NET_6LOWPAN)
+   /* There is no link layer header with SLIP */
+
+#  ifndef CONFIG_NET_IPv6
+#    error 6loWPAN requires IPv support
+#  endif
+
+#  define NET_LL_HDRLEN(d)  0
+#  define NET_DEV_MTU(d)    CONFIG_NET_6LOWPAN_MTU
+#  define MIN_NET_DEV_MTU   CONFIG_NET_6LOWPAN_MTU
+#  define MAX_NET_DEV_MTU   CONFIG_NET_6LOWPAN_MTU
+
 #else
-  /* Perhaps only Unix domain sockets of the loopback device */
+  /* Perhaps only Unix domain sockets or the loopback device */
 
 #  define NET_LL_HDRLEN(d)  0
 #  define NET_DEV_MTU(d)    0
