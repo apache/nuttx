@@ -1,8 +1,9 @@
 /****************************************************************************
- * net/sixlowpan/sixlowpan_sniffer.c
+ * include/sys/random.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2015-2017 Haltian Ltd. All rights reserved.
+ *   Authors: Juha Niskanen <juha.niskanen@haltian.com>
+ *            Jussi Kivilinna <jussi.kivilinna@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,49 +34,44 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_SYS_RANDOM_H
+#define __INCLUDE_SYS_RANDOM_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include "nuttx/net/net.h"
-#include "nuttx/net/sixlowpan.h"
-
-#include "sixlowpan/sixlowpan_internal.h"
-
-#ifdef CONFIG_NET_6LOWPAN_SNIFFER
+#include <stddef.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_CRYPTO_RANDOM_POOL
+
 /****************************************************************************
- * Function: sixlowpan_set_sniffer
+ * Function: getrandom
  *
  * Description:
- *   Configure to use an architecture-specific sniffer to enable tracing of
- *   IP.
+ *   Fill a buffer of arbitrary length with randomness. This is the
+ *   preferred interface for getting random numbers. The traditional
+ *   /dev/random approach is susceptible for things like the attacker
+ *   exhausting file descriptors on purpose.
  *
- * Input parameters:
- *   sniffer - A reference to the new sniffer to be used.  This may
- *             be a NULL value to disable the sniffer.
+ *   Note that this function cannot fail, other than by asserting.
+ *
+ * Parameters:
+ *   bytes  - Buffer for returned random bytes
+ *   nbytes - Number of bytes requested.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void sixlowpan_set_sniffer(FAR struct sixlowpan_rime_sniffer_s *sniffer)
-{
-  /* Make sure that the sniffer is not in use */
+void getrandom(FAR void *bytes, size_t nbytes);
 
-  net_lock();
+#endif /* CONFIG_CRYPTO_RANDOM_POOL */
 
-  /* Then instantiate the new sniffer */
-
-  g_sixlowpan_sniffer = sniffer;
-  net_unlock();
-}
-
-#endif /* CONFIG_NET_6LOWPAN_SNIFFER */
+#endif /* __INCLUDE_SYS_RANDOM_H */

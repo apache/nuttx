@@ -323,6 +323,38 @@ struct rimeaddr_s
  * manage the fragmentation.  'struct ieee802154_driver_s' is cast
  * compatible with 'struct net_driver_s' when CONFIG_NET_MULTINIC is not
  * defined or when dev->d_lltype == NET_LL_IEEE802154.
+ *
+ * The IEEE802.15.4 MAC network driver has reponsibility for initializing
+ * this structure.  In general, all fields must be set to NULL.  In
+ * addtion:
+ *
+ * 1) i_panid must be set to identify the network.  It may be set to 0xfff
+ *    if the device is not associated.
+ * 2) i_dsn must be set to a random value.  After that, it will be managed
+ *    by the network.
+ * 3) i_nodeaddr must be set after the MAC is assigned an address.
+ * 4) On network TX poll operations, the IEEE802.15.4 MAC needs to provide
+ *    the i_frame buffer with size greater than or equal to
+ *    CONFIG_NET_6LOWPAN_FRAMELEN.  No dev.d_buf need be provided in this
+ *    case.  The entire is TX is performed using only the i_frame buffer.
+ * 5) On network input RX oprations, both buffers must be provided.  The size
+ *    of the i_frame buffer is, again, greater than or equal to
+ *    CONFIG_NET_6LOWPAN_FRAMELEN.  The larger dev.d_buf must have a size
+ *    of at least <tbd>.  The dev.d_buf is used for de-compressing each
+ *    frame and reassembling any fragmented packets to create the full input
+ *    packet that is provided to the applicatino.
+ *
+ * Frame Organization:
+ *
+ *     Content            Offset
+ *   +------------------+ 0
+ *   | Frame Header     |
+ *   +------------------+ i_dataoffset
+ *   | Procotol Headers |
+ *   | Data Payload     |
+ *   +------------------+ i_framelen
+ *   | Unused           |
+ *   +------------------+ CONFIG_NET_6LOWPAN_FRAMELEN
  */
 
 struct ieee802154_driver_s
@@ -344,7 +376,8 @@ struct ieee802154_driver_s
    * requesting new framesusing break-off fram buffers.  That frame buffer
    * management must be controlled by the IEEE802.15.4 MAC driver.
    *
-   * Driver provied frame buffers should be 16-bit aligned.
+   * Driver provided frame buffers should of size CONFIG_NET_6LOWPAN_FRAMELEN
+   * and should be 16-bit aligned.
    */
 
   FAR uint8_t *i_frame;
@@ -359,6 +392,31 @@ struct ieee802154_driver_s
    */
 
   uint16_t i_framelen;
+
+  /* i_panid.  The PAN ID is 16-bit number that identifies the network. It
+   * must be unique to differentiate a network. All the nodes in the same
+   * network should have the same PAN ID.  This value must be provided to
+   * the network from the IEEE802.15.4 MAC driver.
+   *
+   * If this value is 0xffff, the device is not associated.
+   */
+
+  uint16_t i_panid;
+
+  /* i_node_addr.  The address assigned to this node. */
+
+  struct rimeaddr_s i_nodeaddr;
+
+  /* i_dsn.  The sequence number in the range 0x00-0xff added to the
+   * transmitted data or MAC command frame. The default is a random value
+   * within that range.
+   *
+   * This field must be initialized to a random number by the IEEE802.15.4
+   * MAC driver.  It sill be subsequently incremented on each frame by the
+   * network logic.
+   */
+
+  uint8_t i_dsn;
 
   /* The following fields are device-specific metadata used by the 6loWPAN
    * stack and should not be modified by the IEEE802.15.4 MAC network drvier.
@@ -385,9 +443,9 @@ struct ieee802154_driver_s
 
   uint8_t i_rime_hdrlen;
 
-  /* Next available pointer into header */
+  /* Offset first available byte for the payload after header region. */
 
-  uint8_t i_hdrptr;
+  uint8_t i_dataoffset;
 
   /* Packet buffer metadata: Attributes and addresses */
 

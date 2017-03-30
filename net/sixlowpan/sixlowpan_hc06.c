@@ -20,6 +20,7 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -44,7 +45,7 @@
  ****************************************************************************/
 
 /* FOR HC-06 COMPLIANCE TODO:
- *  
+ *
  * -Add compression options to UDP, currently only supports
  *  both ports compressed or both ports elided
  * -Verify TC/FL compression works
@@ -60,7 +61,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/sixlowpan.h>
 
-#include "sixlowpan/sixlowpan.h"
+#include "sixlowpan/sixlowpan_internal.h"
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
 

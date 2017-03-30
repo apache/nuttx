@@ -1,8 +1,9 @@
 /****************************************************************************
- * net/sixlowpan/sixlowpan_sniffer.c
+ * libc/string/lib_explicit_bzero.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2015,2017 Haltian Ltd. All rights reserved.
+ *   Author: Juha Niskanen <juha.niskanen@haltian.com>
+ *           Jussi Kivilinna <jussi.kivilinna@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,45 +38,18 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include "nuttx/net/net.h"
-#include "nuttx/net/sixlowpan.h"
-
-#include "sixlowpan/sixlowpan_internal.h"
-
-#ifdef CONFIG_NET_6LOWPAN_SNIFFER
+#include <string.h>
 
 /****************************************************************************
- * Public Functions
+ * Global Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Function: sixlowpan_set_sniffer
- *
- * Description:
- *   Configure to use an architecture-specific sniffer to enable tracing of
- *   IP.
- *
- * Input parameters:
- *   sniffer - A reference to the new sniffer to be used.  This may
- *             be a NULL value to disable the sniffer.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
+/* memset that must not be optimized away by compiler (not even with LTO). */
 
-void sixlowpan_set_sniffer(FAR struct sixlowpan_rime_sniffer_s *sniffer)
+void explicit_bzero(FAR void *s, size_t n)
 {
-  /* Make sure that the sniffer is not in use */
+  static FAR void *(*FAR const volatile memset_v)(FAR void *, int, size_t) =
+      &memset;
 
-  net_lock();
-
-  /* Then instantiate the new sniffer */
-
-  g_sixlowpan_sniffer = sniffer;
-  net_unlock();
+  memset_v(s, 0, n);
 }
-
-#endif /* CONFIG_NET_6LOWPAN_SNIFFER */

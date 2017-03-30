@@ -48,6 +48,7 @@
 #include <debug.h>
 
 #include <nuttx/input/stmpe811.h>
+#include <nuttx/random.h>
 
 #include "stmpe811.h"
 
@@ -138,6 +139,8 @@ uint16_t stmpe811_tempread(STMPE811_HANDLE handle)
 
   temp1 = stmpe811_getreg8(priv, STMPE811_SYS_CTRL2);
   temp2 = stmpe811_getreg8(priv, STMPE811_SYS_CTRL2+1);
+
+  add_sensor_randomness((temp1 << 8) | temp2);
 
   /* Scale the temperature (where Vio is assumed to be .33) */
 

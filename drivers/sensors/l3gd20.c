@@ -49,6 +49,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/random.h>
 
 #include <nuttx/fs/fs.h>
 
@@ -257,6 +258,10 @@ static void l3gd20_read_measurement_data(FAR struct l3gd20_dev_s *dev)
   /* Give back the semaphore */
 
   sem_post(&dev->datasem);
+
+  /* Feed sensor data to entropy pool */
+
+  add_sensor_randomness((x_gyr << 16) ^ (y_gyr << 8) ^ (z_gyr << 0));
 }
 
 /****************************************************************************

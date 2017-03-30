@@ -60,6 +60,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/input/ajoystick.h>
+#include <nuttx/random.h>
 
 #include <nuttx/irq.h>
 
@@ -320,6 +321,8 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
 
   DEBUGASSERT(lower->al_buttons);
   sample = lower->al_buttons(lower);
+
+  add_ui_randomness(sample);
 
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
   /* Determine which buttons have been newly pressed and which have been

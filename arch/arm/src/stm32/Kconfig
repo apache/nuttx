@@ -2810,35 +2810,24 @@ menu "Timer Configuration"
 
 if SCHED_TICKLESS
 
-config STM32_ONESHOT
-	bool
-	default y
-
-config STM32_FREERUN
-	bool
-	default y
-
-config STM32_TICKLESS_ONESHOT
-	int "Tickless one-shot timer channel"
+config STM32_TICKLESS_TIMER
+	int "Tickless hardware timer"
 	default 2
 	range 1 14
-	depends on STM32_ONESHOT
 	---help---
-		If the Tickless OS feature is enabled, the one clock must be
-		assigned to provided the one-shot timer needed by the OS.
+		If the Tickless OS feature is enabled, then one clock must be
+		assigned to provided the timer needed by the OS.
 
-config STM32_TICKLESS_FREERUN
-	int "Tickless free-running timer channel"
-	default 5
-	range 1 14
-	depends on STM32_FREERUN
+config STM32_TICKLESS_CHANNEL
+	int "Tickless timer channel"
+	default 1
+	range 1 4
 	---help---
 		If the Tickless OS feature is enabled, the one clock must be
-		assigned to provided the free-running timer needed by the OS.
+		assigned to provided the free-running timer needed by the OS
+		and one channel on that clock is needed to handle intervals.
 
 endif # SCHED_TICKLESS
-
-if !SCHED_TICKLESS
 
 config STM32_ONESHOT
 	bool "TIM one-shot wrapper"
@@ -2853,8 +2842,6 @@ config STM32_FREERUN
 	---help---
 		Enable a wrapper around the low level timer/counter functions to
 		support a free-running timer.
-
-endif # !SCHED_TICKLESS
 
 config STM32_ONESHOT_MAXTIMERS
 	int "Maximum number of oneshot timers"

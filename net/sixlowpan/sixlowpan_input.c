@@ -42,9 +42,42 @@
 #include <errno.h>
 
 #include "nuttx/net/netdev.h"
-#include "sixlowpan/sixlowpan.h"
+#include "sixlowpan/sixlowpan_internal.h"
 
 #ifdef CONFIG_NET_6LOWPAN
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function: sixlowpan_isbroadcast
+ *
+ * Description:
+ *   Return the address length associated with a 2-bit address mode
+ *
+ * Input parameters:
+ *   addrmode - The address mode
+ *
+ * Returned Value:
+ *   The address length associated with the address mode.
+ *
+ ****************************************************************************/
+
+static bool sixlowpan_isbroadcast(uint8_t mode, FAR uint8_t *addr)
+{
+  int i = ((mode == FRAME802154_SHORTADDRMODE) ? 2 : 8);
+
+  while (i-- > 0)
+    {
+      if (addr[i] != 0xff)
+        {
+          return false;
+        }
+    }
+
+  return true;
+}
 
 /****************************************************************************
  * Public Functions

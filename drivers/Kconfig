@@ -69,6 +69,15 @@ config DEV_URANDOM_CONGRUENTIAL
 
 		NOTE: Not cyptographically secure
 
+config DEV_URANDOM_RANDOM_POOL
+	bool "Entropy pool"
+	depends on CRYPTO_RANDOM_POOL
+	---help---
+		Use the entropy pool CPRNG output for urandom algorithm.
+
+		NOTE: May or may not be cyptographically secure, depending upon the
+		quality entropy available to entropy pool.
+
 config DEV_URANDOM_ARCH
 	bool "Architecture-specific"
 	depends on ARCH_HAVE_RNG

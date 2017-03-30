@@ -40,8 +40,16 @@ ifeq ($(CONFIG_NET_6LOWPAN),y)
 # Include IEEE 802.15.4 file in the build
 
 NET_CSRCS += sixlowpan_initialize.c sixlowpan_globals.c sixlowpan_utils.c
-NET_CSRCS += sixlowpan_input.c sixlowpan_send.c
+NET_CSRCS += sixlowpan_input.c sixlowpan_send.c sixlowpan_framer.c
 NET_CSRCS += sixlowpan_compressor.c
+
+ifeq ($(CONFIG_NET_TCP),y)
+NET_CSRCS += sixlowpan_tcpsend.c
+endif
+
+ifeq ($(CONFIG_NET_UDP),y)
+NET_CSRCS += sixlowpan_udpsend.c
+endif
 
 ifeq ($(CONFIG_NET_6LOWPAN_COMPRESSION_HC1),y)
 NET_CSRCS += sixlowpan_hc1.c
