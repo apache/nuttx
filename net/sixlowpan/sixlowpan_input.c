@@ -42,7 +42,7 @@
 #include <errno.h>
 
 #include "nuttx/net/netdev.h"
-#include "sixlowpan/sixlowpan.h"
+#include "sixlowpan/sixlowpan_internal.h"
 
 #ifdef CONFIG_NET_6LOWPAN
 
