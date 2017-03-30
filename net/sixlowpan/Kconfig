@@ -136,7 +136,7 @@ config NET_6LOWPAN_RIMEADDR_SIZE
 	---help---
 		Only the values 2 and 8 are supported
 
-config NET_SIXLOWPAN_MAXAGE
+config NET_6LOWPAN_MAXAGE
 	int "Packet reassembly timeout"
 	default 20
 	---help---
@@ -150,11 +150,11 @@ config NET_6LOWPAN_MAX_MACTRANSMITS
 		layer should resend packets if no link-layer ACK wasreceived. This
 		only makes sense with the csma_driver.
 
-config NET_SIXLOWPAN_MAXPAYLOAD
+config NET_6LOWPAN_MAXPAYLOAD
 	int "Max packet size"
 	default 102
 	---help---
-		CONFIG_NET_SIXLOWPAN_MAXPAYLOAD specifies the maximum size of packets
+		NET_6LOWPAN_MAXPAYLOAD specifies the maximum size of packets
 		before they get fragmented. The default is 127 bytes (the maximum size
 		of a 802.15.4 frame) - 25 bytes (for the 802.15.4 MAClayer header). This
 		can be increased for systems with larger packet sizes.

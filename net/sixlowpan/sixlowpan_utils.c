@@ -44,6 +44,17 @@
  * SUCH DAMAGE.
  *
  ****************************************************************************/
+/* Frame Organization:
+ *
+ *     Content          Offset
+ *   +----------------+ 0
+ *   | Frame Header   |
+ *   +----------------+ i_dataoffset
+ *   | Data           |
+ *   +----------------+ i_framelen
+ *   | Unused         |
+ *   +----------------+ CONFIG_NET_6LOWPAN_FRAMELEN
+ */
 
 /****************************************************************************
  * Included Files
@@ -52,6 +63,7 @@
 #include <nuttx/config.h>
 
 #include <string.h>
+#include <errno.h>
 
 #include "nuttx/net/sixlowpan.h"
 
@@ -64,22 +76,24 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sixlowpan_pktbuf_reset
+ * Name: sixlowpan_frame_hdralloc
  *
  * Description:
- *   Reset all attributes and addresses in the packet buffer metadata in the
- *   provided IEEE802.15.4 MAC driver structure.
+ *   Allocate space for a header within the packet buffer (dev->d_buf).
  *
  ****************************************************************************/
 
-void sixlowpan_pktbuf_reset(FAR struct ieee802154_driver_s *ieee)
+int sixlowpan_frame_hdralloc(FAR struct ieee802154_driver_s *ieee,
+                             int size)
 {
-  ieee->i_dev.d_len = 0;
-  ieee->i_rimeptr   = 0;
-  ieee->i_hdrptr    = PACKETBUF_HDR_SIZE;
+  if (size <= FRAME_REMAINING(ieee))
+    {
+      ieee->i_dataoffset += size;
+      ieee->i_framelen   += size;
+      return OK;
+    }
 
-  memset(ieee->i_pktattrs, 0, PACKETBUF_NUM_ATTRS * sizeof(uint16_t));
-  memset(ieee->i_pktaddrs, 0, PACKETBUF_NUM_ADDRS * sizeof(struct rimeaddr_s));
+  return -ENOMEM;
 }
 
 #endif /* CONFIG_NET_6LOWPAN */
