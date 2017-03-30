@@ -749,6 +749,19 @@ Selecting the GMAC peripheral
     CONFIG_NSH_NOMAC=n                   : We will get the IP address from EEPROM
                                          : Defaults should be okay for other options
 
+SAMV71 Versions
+---------------
+
+WARNING: "The newer SAMV71 have 6 GMAC queues, not 5. All queues must be
+configured for the GMAC to work correctly, even the queues that you are not
+using (you can just configure these queues with a very small ring buffer.)
+
+The older uses the Cortex-M7 core r0p1 and the newer r1p1 revisions.  The
+SAMV71 revisions are called "rev A" (or sometimes "MRLA") and "rev B"
+("MRLB"). There should be a small "A" or "B" on the chip package just below
+the reference and you can also differentiate them at runtime with the
+VERSION field in the CHIPID CIDR register."
+
 Cache-Related Issues
 --------------------
 
