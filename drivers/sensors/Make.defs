@@ -81,6 +81,10 @@ ifeq ($(CONFIG_BMP180),y)
   CSRCS += bmp180.c
 endif
 
+ifeq ($(CONFIG_HTS221),y)
+  CSRCS += hts221.c
+endif
+
 ifeq ($(CONFIG_I2C_LM75),y)
   CSRCS += lm75.c
 endif

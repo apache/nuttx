@@ -65,7 +65,7 @@
 
 #ifndef CONFIG_CRYPTO_RANDOM_POOL
 #  define up_rngaddint(k, x)            ((void)(k),(void)(x))
-#  define up_rngaddentropy(k, buf, n)   ((void)(k),(void)(buf),(void)(x))
+#  define up_rngaddentropy(k, buf, x)   ((void)(k),(void)(buf),(void)(x))
 #endif
 
 /****************************************************************************
