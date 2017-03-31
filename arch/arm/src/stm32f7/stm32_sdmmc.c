@@ -1510,7 +1510,7 @@ static int stm32_sdmmc_rdyinterrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-static int stm32_sdmmc_interrupt(int irq, void *context, void *arg);
+static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
 {
   struct stm32_dev_s *priv =(struct stm32_dev_s *)arg;
   uint32_t enabled;
