@@ -372,19 +372,19 @@
 #define _LOOPIOCVALID(c)  (_IOC_TYPE(c)==_LOOPBASE)
 #define _LOOPIOC(nr)      _IOC(_LOOPBASE,nr)
 
-/* Modem driver ioctl definitions ********************************************/
+/* Modem driver ioctl definitions *******************************************/
 /* see nuttx/include/modem/ioctl.h */
 
 #define _MODEMIOCVALID(c) (_IOC_TYPE(c)==_MODEMBASE)
 #define _MODEMIOC(nr)     _IOC(_MODEMBASE,nr)
 
-/* I2C driver ioctl definitions **********************************************/
+/* I2C driver ioctl definitions *********************************************/
 /* see nuttx/include/i2c/i2c_master.h */
 
 #define _I2CIOCVALID(c)   (_IOC_TYPE(c)==_I2CBASE)
 #define _I2CIOC(nr)       _IOC(_I2CBASE,nr)
 
-/* SPI driver ioctl definitions **********************************************/
+/* SPI driver ioctl definitions *********************************************/
 /* see nuttx/include/spi/spi_transfer.h */
 
 #define _SPIIOCVALID(c)   (_IOC_TYPE(c)==_SPIBASE)
@@ -396,7 +396,7 @@
 #define _GPIOCVALID(c)    (_IOC_TYPE(c)==_GPIOBASE)
 #define _GPIOC(nr)        _IOC(_GPIOBASE,nr)
 
-/* Contactless driver ioctl definitions ****************************************/
+/* Contactless driver ioctl definitions *************************************/
 /* (see nuttx/include/contactless/ioctl.h */
 
 #define _CLIOCVALID(c)    (_IOC_TYPE(c)==_CLIOCBASE)

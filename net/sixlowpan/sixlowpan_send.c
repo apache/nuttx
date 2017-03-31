@@ -218,7 +218,7 @@ static int sixlowpan_send_frame(FAR struct ieee802154_driver_s *ieee,
 #if 0 /* Just some notes of what needs to be done in interrupt handler */
   framer_hdrlen = sixlowpan_createframe(ieee, ieee->i_panid);
   memcpy(ieee->i_rimeptr + ieee->i_rime_hdrlen, (uint8_t *)ipv6 + ieee->i_uncomp_hdrlen, len - ieee->i_uncomp_hdrlen);
-  dev->i_framelen = len - ieee->i_uncomp_hdrlen + ieee->i_rime_hdrlen;
+  iob->io_len = len - ieee->i_uncomp_hdrlen + ieee->i_rime_hdrlen;
 #endif
 #warning Missing logic
   /* Notify the IEEE802.14.5 MAC driver that we have data to be sent */
@@ -240,12 +240,11 @@ static int sixlowpan_send_frame(FAR struct ieee802154_driver_s *ieee,
  *   it to be sent on an 802.15.4 network using 6lowpan.  Called from common
  *   UDP/TCP send logic.
  *
- *  The payload data is in the caller 'buf' and is of length 'len'.
- *  Compressed headers will be added and if necessary the packet is
- *  fragmented. The resulting packet/fragments are put in dev->d_buf and
- *  the first frame will be delivered to the 802.15.4 MAC. via ieee->i_frame.
- *
- * Input Parmeters:
+ *   The payload data is in the caller 'buf' and is of length 'len'.
+ *   Compressed headers will be added and if necessary the packet is
+ *   fragmented. The resulting packet/fragments are put in ieee->i_framelist
+ *   and the entire list of frames will be delivered to the 802.15.4 MAC via
+ *   ieee->i_framelist.
  *
  * Input Parameters:
  *   dev   - The IEEE802.15.4 MAC network driver interface.
@@ -380,7 +379,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
     {
       /* Failed to determine the size of the header failed. */
 
-      nerr("ERROR: sixlowpan_framecreate() failed: %d\n", framer_hdrlen);
+      nerr("ERROR: sixlowpan_hdrlen() failed: %d\n", framer_hdrlen);
       return framer_hdrlen;
     }
 

@@ -87,24 +87,23 @@
   do \
     { \
       (ieee)->i_dataoffset = 0; \
-      (ieee)->i_framelen   = 0; \
     } \
   while (0)
 
-#define FRAME_HDR_START(ieee) \
-  ((ieee)->i_frame)
-#define FRAME_HDR_SIZE(ieee) \
+#define FRAME_HDR_START(ieee,iob) \
+  ((iob)->io_data)
+#define FRAME_HDR_SIZE(ieee,iob) \
   ((ieee)->i_dataoffset)
 
-#define FRAME_DATA_START(ieee) \
-  ((FAR uint8_t *)((ieee)->i_frame) + (ieee)->i_dataoffset)
-#define FRAME_DATA_SIZE(ieee) \
-  ((ieee)->i_framelen - (ieee)->i_dataoffset)
+#define FRAME_DATA_START(ieee,iob) \
+  ((FAR uint8_t *)((iob)->io_data) + (ieee)->i_dataoffset)
+#define FRAME_DATA_SIZE(ieee,iob) \
+  ((iob)->io_len - (ieee)->i_dataoffset)
 
-#define FRAME_REMAINING(ieee) \
-  (CONFIG_NET_6LOWPAN_FRAMELEN - (ieee)->i_framelen)
-#define FRAME_SIZE(ieee) \
-  ((ieee)->i_framelen)
+#define FRAME_REMAINING(ieee,iob) \
+  (CONFIG_NET_6LOWPAN_FRAMELEN - (iob)->io_len)
+#define FRAME_SIZE(ieee,iob) \
+  ((iob)->io_len)
 
 /* These are some definitions of element values used in the FCF.  See the
  * IEEE802.15.4 spec for details.
@@ -254,6 +253,7 @@ extern FAR struct sixlowpan_rime_sniffer_s *g_sixlowpan_sniffer;
 struct net_driver_s;         /* Forward reference */
 struct ieee802154_driver_s;  /* Forward reference */
 struct rimeaddr_s;           /* Forward reference */
+struct iob_s;                /* Forward reference */
 
 /****************************************************************************
  * Name: sixlowpan_send
@@ -263,12 +263,11 @@ struct rimeaddr_s;           /* Forward reference */
  *   it to be sent on an 802.15.4 network using 6lowpan.  Called from common
  *   UDP/TCP send logic.
  *
- *  The payload data is in the caller 'buf' and is of length 'len'.
- *  Compressed headers will be added and if necessary the packet is
- *  fragmented. The resulting packet/fragments are put in dev->d_buf and
- *  the first frame will be delivered to the 802.15.4 MAC. via ieee->i_frame.
- *
- * Input Parmeters:
+ *   The payload data is in the caller 'buf' and is of length 'len'.
+ *   Compressed headers will be added and if necessary the packet is
+ *   fragmented. The resulting packet/fragments are put in ieee->i_framelist
+ *   and the entire list of frames will be delivered to the 802.15.4 MAC via
+ *   ieee->i_framelist.
  *
  * Input Parameters:
  *   dev   - The IEEE802.15.4 MAC network driver interface.
@@ -323,6 +322,7 @@ int sixlowpan_hdrlen(FAR struct ieee802154_driver_s *ieee,
  *
  * Input parameters:
  *   ieee       - A reference IEEE802.15.4 MAC network device structure.
+ *   iob        - The IOB in which to create the frame.
  *   dest_panid - PAN ID of the destination.  May be 0xffff if the destination
  *                is not associated.
  *
@@ -333,7 +333,7 @@ int sixlowpan_hdrlen(FAR struct ieee802154_driver_s *ieee,
  ****************************************************************************/
 
 int sixlowpan_framecreate(FAR struct ieee802154_driver_s *ieee,
-                          uint16_t dest_panid);
+                          FAR struct iob_s *iob, uint16_t dest_panid);
 
 /****************************************************************************
  * Name: sixlowpan_hc06_initialize
@@ -474,12 +474,12 @@ void sixlowpan_uncompresshdr_hc1(FAR struct net_driver_s *dev,
  * Name: sixlowpan_frame_hdralloc
  *
  * Description:
- *   Allocate space for a header within the frame buffer (i_frame).
+ *   Allocate space for a header within the frame buffer (IOB).
  *
  ****************************************************************************/
 
 int sixlowpan_frame_hdralloc(FAR struct ieee802154_driver_s *ieee,
-                             int size);
+                             FAR struct iob_s *iob, int size);
 
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* _NET_SIXLOWPAN_SIXLOWPAN_INTERNAL_H */

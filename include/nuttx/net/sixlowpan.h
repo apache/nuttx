@@ -53,6 +53,7 @@
 
 #include <stdint.h>
 
+#include <nuttx/net/iob.h>
 #include <nuttx/net/netdev.h>
 
 /****************************************************************************
@@ -280,7 +281,7 @@
 
 #define PACKETBUF_NUM_ATTRS                   24
 
-  /* Addresses (indices into i_pktaddr) */
+/* Addresses (indices into i_pktaddr) */
 
 #define PACKETBUF_ADDR_SENDER                 0
 #define PACKETBUF_ADDR_RECEIVER               1
@@ -288,6 +289,62 @@
 #define PACKETBUF_ADDR_ERECEIVER              3
 
 #define PACKETBUF_NUM_ADDRS                   4
+
+/* Frame buffer helper macros.
+ *
+ * The IEEE802.15.4 MAC driver structures includes a list of IOB
+ * structures, i_framelist, containing frames to be sent by the driver or
+ * that were received by the driver.  The IOB structure is defined in
+ * include/nuttx/net/iob.h.  The length of data in the IOB is provided by
+ * the io_len field of the IOB structure.
+ *
+ * NOTE that IOBs must be configured such that CONFIG_IOB_BUFSIZE >=
+ * CONFIG_NET_6LOWPAN_FRAMELEN
+ *
+ * 1. On a TX poll, the IEEE802.15.4 MAC driver should provide its driver
+ *    structure with i_framelist set to NULL.  At the conclusion of the
+ *    poll, if there are frames to be sent, they will have been added to
+ *    the i_framelist.  The non-empty frame list is the indication that
+ *    there is data to be sent.
+ *
+ *    The IEEE802.15.4 may use the FRAME_IOB_EMPTY() macro to determine
+ *    if there there frames to be sent.  If so, it should remove each
+ *    frame from the frame list using the FRAME_IOB_REMOVE() macro and send
+ *    it.  That macro will return NULL when all of the frames have been
+ *    sent.
+ *
+ *    After sending each frame, the driver must return the IOB to the pool
+ *    of free IOBs using the FROM_IOB_FREE() macro.
+ */
+
+
+#define FRAME_IOB_EMPTY(ieee)  ((ieee)->framelist == NULL)
+#define FRAME_IOB_REMOVE(ieee, iob) \
+  do \
+    { \
+      (iob)               = (ieee)->i_framelist; \
+      (ieee)->i_framelist = (iob)->io_flink; \
+      (iob)->io_flink     = NULL; \
+    } \
+  while (0)
+#define FRAME_IOB_FREE(iob)    iob_free(iob)
+
+/* 2. When receiving data, the IEEE802.15.4 MAC driver should receive the
+ *    frame data directly into the payload area of an IOB structure.  That
+ *    IOB structure may be obtained using the FRAME_IOB_ALLOC() macro.  The
+ *    single frame should be added to the frame list using FRAME_IOB_ADD()
+ *    (it will be a list of length one) .  The MAC driver should then inform
+ *    the network of the by calling sixlowpan_input().
+ */
+
+#define FRAME_IOB_ALLOC()      iob_alloc(false)
+#define FRAME_IOB_ADD(ieee, iob) \
+  do \
+    { \
+      (iob)->io_flink     = (ieee)->i_framelist; \
+      (ieee)->i_framelist = (iob); \
+    } \
+  while (0)
 
 /****************************************************************************
  * Public Types
@@ -305,18 +362,20 @@ struct rimeaddr_s
  * difference is that fragmentation must be supported.
  *
  * The IEEE802.15.4 MAC does not use the d_buf packet buffer directly.
- * Rather, it uses a smaller frame buffer, i_frame.
+ * Rather, it uses a list smaller frame buffers, i_framelist.
  *
- *   - The packet fragment data is provided to the i_frame buffer each time
- *     that the IEEE802.15.4 MAC needs to send more data.  The length of
- *     the frame is provided in i_frame.
+ *   - The packet fragment data is provided to an IOB in the i_framelist
+ *     buffer each time that the IEEE802.15.4 MAC needs to send more data.
+ *     The length of the frame is provided in the io_len field of the IOB.
  *
- *     In this case, the d_buf holds the packet data yet to be sent; d_len
- *     holds the size of entire packet.
+ *     In this case, the d_buf is not used at all and, if fact, may be
+ *     NULL.
  *
  *   - Received frames are provided by IEEE802.15.4 MAC to the network
- *     via i_frame with length i_framelen for reassembly in d_buf;  d_len
- *     will hold the size of the reassembled packet.
+ *     via and IOB in i_framelist with length io_len for reassembly in
+ *     d_buf;  d_len will hold the size of the reassembled packet.
+ *
+ *     In this case, a d_buf of size CONFIG_NET_6LOWPAN_MTU must be provided.
  *
  * This is accomplished by "inheriting" the standard 'struct net_driver_s'
  * and appending the frame buffer as well as other metadata needed to
@@ -328,26 +387,49 @@ struct rimeaddr_s
  * this structure.  In general, all fields must be set to NULL.  In
  * addtion:
  *
- * 1) i_panid must be set to identify the network.  It may be set to 0xfff
+ * 1. i_panid must be set to identify the network.  It may be set to 0xfff
  *    if the device is not associated.
- * 2) i_dsn must be set to a random value.  After that, it will be managed
- *    by the network.
- * 3) i_nodeaddr must be set after the MAC is assigned an address.
- * 4) On network TX poll operations, the IEEE802.15.4 MAC needs to provide
- *    the i_frame buffer with size greater than or equal to
- *    CONFIG_NET_6LOWPAN_FRAMELEN.  No dev.d_buf need be provided in this
- *    case.  The entire is TX is performed using only the i_frame buffer.
- * 5) On network input RX oprations, both buffers must be provided.  The size
- *    of the i_frame buffer is, again, greater than or equal to
- *    CONFIG_NET_6LOWPAN_FRAMELEN.  The larger dev.d_buf must have a size
- *    of at least the advertised MTU of the protocol, CONFIG_NET_6LOWPAN_MTU.
- *    If fragmentation is enabled, then the logical packet size may be
- *    significantly larger than the size of the frame buffer.  The dev.d_buf
- *    is used for de-compressing each frame and reassembling any fragmented
- *    packets to create the full input packet that is provided to the
- *    application.
  *
- * Frame Organization:
+ * 2. i_dsn must be set to a random value.  After that, it will be managed
+ *    by the network.
+ *
+ * 3. i_nodeaddr must be set after the MAC is assigned an address.
+ *
+ * 4. On a TX poll, the IEEE802.15.4 MAC driver should provide its driver
+ *    structure with i_framelist set to NULL.  At the conclusion of the
+ *    poll, if there are frames to be sent, they will have been added to
+ *    the i_framelist.  The non-empty frame list at the conclusion of the
+ *    TX poll is the indication that is data to be sent.
+ *
+ *    The IEEE802.15.4 may use the FRAME_IOB_EMPTY() macro to determine
+ *    if there there frames to be sent.  If so, it should remove each
+ *    frame from the frame list using the FRAME_IOB_REMOVE() macro and send
+ *    it.  That macro will return NULL when all of the frames have been
+ *    sent.
+ *
+ *    After sending each frame, the driver must return the IOB to the pool
+ *    of free IOBs using the FROM_IOB_FREE() macro.
+ *
+ * 5. When receiving data both buffers must be provided:
+ *
+ *    The IEEE802.15.4 MAC driver should receive the frame data directly
+ *    into the payload area of an IOB structure.  That IOB structure may be
+ *    obtained using the FRAME_IOB_ALLOC() macro.  The single frame should
+ *    be added to the frame list using FRAME_IOB_ADD() (it will be a list of
+ *    length one).
+ *
+ *    The larger dev.d_buf must have a size of at least the advertised MTU
+ *    of the protocol, CONFIG_NET_6LOWPAN_MTU.  If fragmentation is enabled,
+ *    then the logical packet size may be significantly larger than the
+ *    size of the frame buffer.  The dev.d_buf is used for de-compressing
+ *    each frame and reassembling any fragmented packets to create the full
+ *    input packet that is provided to the application.
+ *
+ *    The MAC driver should then inform the network of the by calling
+ *    sixlowpan_input().
+ *
+ * Frame Organization.  The IOB data is retained in the io_data[] field of the
+ * IOB structure like:
  *
  *     Content            Offset
  *   +------------------+ 0
@@ -355,7 +437,7 @@ struct rimeaddr_s
  *   +------------------+ i_dataoffset
  *   | Procotol Headers |
  *   | Data Payload     |
- *   +------------------+ i_framelen
+ *   +------------------+ io_len
  *   | Unused           |
  *   +------------------+ CONFIG_NET_6LOWPAN_FRAMELEN
  */
@@ -370,31 +452,21 @@ struct ieee802154_driver_s
 
   /* IEEE802.15.4 MAC-specific definitions follow. */
 
-  /* The i_frame array is used to hold outgoing frame.   When the
-   * IEEE802.15.4 device polls for new data, the outgoing frame containing
-   * the next fragment is placed in i_frame.
+  /* The i_framelist is used to hold a outgoing frames contained in IOB
+   * structures.   When the IEEE802.15.4 device polls for new TX data, the
+   * outgoing frame(s) containing the packet fragments are placed in IOBs
+   * and queued in i_framelist.
    *
-   * The network will handle only a single outgong frame at a time.  The
-   * IEEE802.15.4 MAC driver design may be concurrently sending and
-   * requesting new framesusing break-off fram buffers.  That frame buffer
-   * management must be controlled by the IEEE802.15.4 MAC driver.
+   * The i_framelist is similary used to hold incoming frames in IOB
+   * structures.  The IEEE802.15.4 MAC driver must receive frames in an IOB,
+   * place the IOB in the i_framelist, and call sixlowpan_input().
    *
-   * Driver provided frame buffers should of size CONFIG_NET_6LOWPAN_FRAMELEN
-   * and should be 16-bit aligned.
+   * The IEEE802.15.4 MAC driver design may be concurrently sending and
+   * requesting new frames using lists of IOBs.  That IOB frame buffer
+   * management must be managed by the IEEE802.15.4 MAC driver.
    */
 
-  FAR uint8_t *i_frame;
-
-  /* The length of valid data in the i_frame buffer.
-   *
-   * When the network device driver calls the network input function,
-   * i_framelen should be set to zero.  If there is frame to be sent
-   * by the network, i_framelen will be set to indicate the size of
-   * frame to be sent.  The value zero means that there is no frame
-   * to be sent.
-   */
-
-  uint16_t i_framelen;
+  FAR struct iob_s *i_framelist;
 
   /* i_panid.  The PAN ID is 16-bit number that identifies the network. It
    * must be unique to differentiate a network. All the nodes in the same
