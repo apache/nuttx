@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/stm32f7/stm32_lsi.c
+ * arch/arm/src/stm32f7/stm32_lse.c
  *
- *   Copyright (C) 2012, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -43,47 +43,44 @@
 #include "up_arch.h"
 
 #include "stm32_rcc.h"
+#include "stm32_pwr.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_rcc_enablelsi
+ * Name: stm32_rcc_enablelse
  *
  * Description:
- *   Enable the Internal Low-Speed (LSI) RC Oscillator.
+ *   Enable the External Low-Speed (LSE) oscillator.
  *
  ****************************************************************************/
 
-void stm32_rcc_enablelsi(void)
+void stm32_rcc_enablelse(void)
 {
-  /* Enable the Internal Low-Speed (LSI) RC Oscillator by setting the LSION
-   * bit the RCC CSR register.
+  uint32_t regval;
+
+  /* The LSE is in the RTC domain and write access is denied to this domain
+   * after reset, you have to enable write access using DBP bit in the PWR CR
+   * register before to configuring the LSE.
    */
 
-  modifyreg32(STM32_RCC_CSR, 0, RCC_CSR_LSION);
+  stm32_pwr_enablebkp(true);
 
-  /* Wait for the internal RC 40 kHz oscillator to be stable. */
-
-  while ((getreg32(STM32_RCC_CSR) & RCC_CSR_LSIRDY) == 0);
-}
-
-/****************************************************************************
- * Name: stm32_rcc_disablelsi
- *
- * Description:
- *   Disable the Internal Low-Speed (LSI) RC Oscillator.
- *
- ****************************************************************************/
-
-void stm32_rcc_disablelsi(void)
-{
-  /* Enable the Internal Low-Speed (LSI) RC Oscillator by setting the LSION
-   * bit the RCC CSR register.
+  /* Enable the External Low-Speed (LSE) oscillator by setting the LSEON bit
+   * the RCC BDCR register.
    */
 
-  modifyreg32(STM32_RCC_CSR, RCC_CSR_LSION, 0);
+  regval  = getreg32(STM32_RCC_BDCR);
+  regval |= RCC_BDCR_LSEON;
+  putreg32(regval,STM32_RCC_BDCR);
 
-  /* LSIRDY should go low after 3 LSI clock cycles */
+  /* Wait for the LSE clock to be ready */
+
+  while (((regval = getreg32(STM32_RCC_BDCR)) & RCC_BDCR_LSERDY) == 0);
+
+  /* Disable backup domain access if it was disabled on entry */
+
+  stm32_pwr_enablebkp(false);
 }
