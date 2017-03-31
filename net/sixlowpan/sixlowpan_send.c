@@ -390,12 +390,12 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
       (int)ieee->i_rime_hdrlen)
     {
 #if CONFIG_NET_6LOWPAN_FRAG
-      /* qhead will hold the generated frames; Subsequent frames will be
+      /* ieee->i_framelist will hold the generated frames; frames will be
        * added at qtail.
        */
 
-      FAR struct iob_s *qhead;
       FAR struct iob_s *qtail;
+      int verify;
 
       /* The outbound IPv6 packet is too large to fit into a single 15.4
        * packet, so we fragment it into multiple packets and send them.
@@ -411,8 +411,19 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
       iob = iob_alloc(false);
       DEBUGASSERT(iob != NULL);
 
+      /* Initialize the IOB */
+
+      iob->io_flink  = NULL;
+      iob->io_len    = 0;
+      iob->io_offset = 0;
+      iob->io_pktlen = 0;
+
       /* Create 1st Fragment */
-#  warning Missing logic
+      /* Add the frame header. */
+
+      verify = sixlowpan_hdrlen(ieee, ieee->i_panid);
+      DEBUGASSERT(vreify == framer_hdrlen);
+      UNUSED(verify);
 
       /* Move HC1/HC06/IPv6 header */
 #  warning Missing logic
@@ -433,9 +444,12 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
 
       /* Add the first frame to the IOB queue */
 
-      qhead         = iob;
-      qtail         = iob;
-      iob->io_flink = NULL;
+      ieee->i_framelist = iob;
+      qtail             = iob;
+
+      /* Keep track of the total amount of data queue */
+
+      iob->io_pktlen    = iob->io_len;
 
       /* Create following fragments
        * Datagram tag is already in the buffer, we need to set the
@@ -452,6 +466,13 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
           iob = iob_alloc(false);
           DEBUGASSERT(iob != NULL);
 
+          /* Initialize the IOB */
+
+          iob->io_flink  = NULL;
+          iob->io_len    = 0;
+          iob->io_offset = 0;
+          iob->io_pktlen = 0;
+
           /* Copy payload */
 #  warning Missing logic
 
@@ -461,7 +482,10 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
           /* Add the next frame to the tail of the IOB queue */
 
           qtail->io_flink = iob;
-          iob->io_flink   = NULL;
+
+          /* Keep track of the total amount of data queue */
+
+          ieee->i_framelist->io_pktlen += iob->io_len;
 
           /* Check tx result. */
 #  warning Missing logic
@@ -469,7 +493,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
 
       /* Send the list of frames */
 
-      return sixlowpan_send_frame(ieee, qhead);
+      return sixlowpan_send_frame(ieee, ieee->i_framelist);
 #else
       nerr("ERROR: Packet too large: %d\n", len);
       nerr("       Cannot to be sent without fragmentation support\n");
@@ -489,12 +513,27 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
       iob = iob_alloc(false);
       DEBUGASSERT(iob != NULL);
 
+      /* Initialize the IOB */
+
+      iob->io_flink  = NULL;
+      iob->io_len    = 0;
+      iob->io_offset = 0;
+      iob->io_pktlen = 0;
+
       /* Format the single frame */
 #  warning Missing logic
 
       /* Send the single frame */
+#  warning Missing logic
 
-      iob->io_flink = NULL;
+      /* Add the first frame to the IOB queue */
+
+      ieee->i_framelist = iob;
+
+      /* Keep track of the total amount of data queue */
+
+      iob->io_pktlen    = iob->io_len;
+
       return sixlowpan_send_frame(ieee, iob);
     }
 }
