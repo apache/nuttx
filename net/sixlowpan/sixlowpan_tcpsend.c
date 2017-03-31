@@ -126,14 +126,22 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
 #ifdef CONFIG_NETDEV_MULTINIC
   dev = netdev_findby_ipv6addr(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
+#ifdef CONFIG_NETDEV_MULTILINK
   if (dev == NULL || dev->d_lltype != NET_LL_IEEE802154)
+#else
+  if (dev == NULL)
+#endif
     {
       nwarn("WARNING: Not routable or not IEEE802.15.4 MAC\n");
       return (ssize_t)-ENETUNREACH;
     }
 #else
   dev = netdev_findby_ipv6addr(conn->u.ipv6.raddr);
+#ifdef CONFIG_NETDEV_MULTILINK
+  if (dev == NULL || dev->d_lltype != NET_LL_IEEE802154)
+#else
   if (dev == NULL)
+#endif
     {
       nwarn("WARNING: Not routable\n");
       return (ssize_t)-ENETUNREACH;

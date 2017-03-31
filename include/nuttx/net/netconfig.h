@@ -226,6 +226,12 @@
 #  define MIN_NET_DEV_MTU   CONFIG_NET_6LOWPAN_MTU
 #  define MAX_NET_DEV_MTU   CONFIG_NET_6LOWPAN_MTU
 
+/* For the IEEE802.15.4 MAC device, we will use the packet MTU
+ * (which is probably much larger than the IEEE802.15.4 fram size)
+ */
+
+#  define NET_LO_MTU        MAX_NET_DEV_MTU
+
 #else
   /* Perhaps only Unix domain sockets or the loopback device */
 
@@ -418,24 +424,105 @@
  * the minimum MSS for that case.
  */
 
-#define TCP_MSS(d,h)        (NET_DEV_MTU(d) - NET_LL_HDRLEN(d) - TCP_HDRLEN - (h))
-#define LO_TCP_MSS(h)       (NET_LO_MTU - (h))
+#define TCP_MSS(d,h)            (NET_DEV_MTU(d) - NET_LL_HDRLEN(d) - TCP_HDRLEN - (h))
+#define LO_TCP_MSS(h)           (NET_LO_MTU - (h))
 
-/* If Ethernet is supported, then it will have the smaller MSS */
-
-#if defined(CONFIG_NET_SLIP)
-#  define SLIP_TCP_MSS(h)   (CONFIG_NET_SLIP_MTU - (h))
-#  define __MIN_TCP_MSS(h)  SLIP_TCP_MSS(h)
-#elif defined(CONFIG_NET_LOOPBACK)
-#  define LO_TCP_MSS(h)      (NET_LO_MTU - (h))
-#  define __MIN_TCP_MSS(h)   LO_TCP_MSS(h)
-#endif
+/* Get the smallest and largest  */
 
 #ifdef CONFIG_NET_ETHERNET
-#  define ETH_TCP_MSS(h)    (CONFIG_NET_ETH_MTU - ETH_HDRLEN - (h))
-#  undef __MIN_TCP_MSS
-#  define __MIN_TCP_MSS(h)  ETH_TCP_MSS(h)
-#  define __MAX_TCP_MSS(h)  ETH_TCP_MSS(h)
+#  define ETH_TCP_MSS(h)        (CONFIG_NET_ETH_MTU - ETH_HDRLEN - (h))
+#  ifndef CONFIG_NET_MULTILINK
+#    define __MIN_TCP_MSS(h)    ETH_TCP_MSS(h)
+#    define __MAX_TCP_MSS(h)    ETH_TCP_MSS(h)
+#  endif
+#endif
+
+#ifdef CONFIG_NET_6LOWPAN
+#  define IEEE802154_TCP_MSS(h) CONFIG_NET_6LOWPAN_MAXPAYLOAD
+#  ifndef CONFIG_NET_MULTILINK
+#    define __MIN_TCP_MSS(h)    IEEE802154_TCP_MSS(h)
+#    define __MAX_TCP_MSS(h)    IEEE802154_TCP_MSS(h)
+#  endif
+#endif
+
+#ifdef CONFIG_NET_LOOPBACK
+#  define LO_TCP_MSS(h)         (NET_LO_MTU - (h))
+#  ifndef CONFIG_NET_MULTILINK
+#    define __MIN_TCP_MSS(h)    LO_TCP_MSS(h)
+#    define __MAX_TCP_MSS(h)    LO_TCP_MSS(h)
+#  endif
+#endif
+
+#ifdef CONFIG_NET_SLIP
+#  define SLIP_TCP_MSS(h)       (CONFIG_NET_SLIP_MTU - (h))
+#  ifndef CONFIG_NET_MULTILINK
+#    define __MIN_TCP_MSS(h)    SLIP_TCP_MSS(h)
+#    define __MAX_TCP_MSS(h)    SLIP_TCP_MSS(h)
+#  endif
+#endif
+
+#ifdef CONFIG_NET_MULTILINK
+#  undef __LAST_MIN_TCP_MSS
+#  undef __LAST_MAX_TCP_MSS
+
+#  ifdef CONFIG_NET_ETHERNET
+#    ifdef __LAST_MIN_TCP_MSS
+#      define __MIN_TCP_MSS(h)  MIN(ETH_TCP_MSS(h),__LAST_MIN_TCP_MSS(h))
+#      define __MAX_TCP_MSS(h)  MAX(ETH_TCP_MSS(h),__LAST_MAX_TCP_MSS(h))
+#    else
+#      define __MIN_TCP_MSS(h)  ETH_TCP_MSS(h)
+#      define __MAX_TCP_MSS(h)  ETH_TCP_MSS(h)
+#    endif
+#    undef __LAST_MIN_TCP_MSS
+#    undef __LAST_MAX_TCP_MSS
+#    define __LAST_MIN_TCP_MSS(h) __MIN_TCP_MSS(h)
+#    define __LAST_MAX_TCP_MSS(h) __MAX_TCP_MSS(h)
+#  endif
+
+#  ifdef CONFIG_NET_6LOWPAN
+#    ifdef __LAST_MIN_TCP_MSS
+#      define __MIN_TCP_MSS(h)  MIN(IEEE802154_TCP_MSS(h),__LAST_MIN_TCP_MSS(h))
+#      define __MAX_TCP_MSS(h)  MAX(IEEE802154_TCP_MSS(h),__LAST_MAX_TCP_MSS(h))
+#    else
+#      define __MIN_TCP_MSS(h)  IEEE802154_TCP_MSS(h)
+#      define __MAX_TCP_MSS(h)  IEEE802154_TCP_MSS(h)
+#    endif
+#    undef __LAST_MIN_TCP_MSS
+#    undef __LAST_MAX_TCP_MSS
+#    define __LAST_MIN_TCP_MSS(h) __MIN_TCP_MSS(h)
+#    define __LAST_MAX_TCP_MSS(h) __MAX_TCP_MSS(h)
+#  endif
+
+#  ifdef CONFIG_NET_LOOPBACK
+#    ifdef __LAST_MIN_TCP_MSS
+#      define __MIN_TCP_MSS(h)  MIN(LO_TCP_MSS(h),__LAST_MIN_TCP_MSS(h))
+#      define __MAX_TCP_MSS(h)  MAX(LO_TCP_MSS(h),__LAST_MAX_TCP_MSS(h))
+#    else
+#      define __MIN_TCP_MSS(h)  LO_TCP_MSS(h)
+#      define __MAX_TCP_MSS(h)  LO_TCP_MSS(h)
+#    endif
+#    undef __LAST_MIN_TCP_MSS
+#    undef __LAST_MAX_TCP_MSS
+#    define __LAST_MIN_TCP_MSS(h) __MIN_TCP_MSS(h)
+#    define __LAST_MAX_TCP_MSS(h) __MAX_TCP_MSS(h)
+#  endif
+
+#  ifdef CONFIG_NET_SLIP
+#    ifdef __LAST_MIN_TCP_MSS
+#      define __MIN_TCP_MSS(h)  MIN(SLIP_TCP_MSS(h),__LAST_MIN_TCP_MSS(h))
+#      define __MAX_TCP_MSS(h)  MAX(SLIP_TCP_MSS(h),__LAST_MAX_TCP_MSS(h))
+#    else
+#      define __MIN_TCP_MSS(h)  SLIP_TCP_MSS(h)
+#      define __MAX_TCP_MSS(h)  SLIP_TCP_MSS(h)
+#    endif
+#    undef __LAST_MIN_TCP_MSS
+#    undef __LAST_MAX_TCP_MSS
+#    define __LAST_MIN_TCP_MSS(h) __MIN_TCP_MSS(h)
+#    define __LAST_MAX_TCP_MSS(h) __MAX_TCP_MSS(h)
+#  endif
+
+#  undef __LAST_MIN_TCP_MSS
+#  undef __LAST_MAX_TCP_MSS
 #endif
 
 /* If SLIP is supported, then it will have the larger MSS */
