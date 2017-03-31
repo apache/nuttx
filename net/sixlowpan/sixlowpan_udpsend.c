@@ -86,6 +86,7 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
   FAR struct net_driver_s *dev;
   struct ipv6udp_hdr_s ipv6udp;
   struct rimeaddr_s dest;
+  uint16_t timeout;
   int ret;
 
   DEBUGASSERT(psock != NULL && psock->s_crefs > 0);
@@ -174,8 +175,14 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
    * packet.
    */
 
+#ifdef CONFIG_NET_SOCKOPTS
+  timeout = psock->s_sndtimeo;
+#else
+  timeout = 0;
+#endif
+
   ret = sixlowpan_send(dev, (FAR const struct ipv6_hdr_s *)&ipv6udp,
-                       buf, len, &dest);
+                       buf, len, &dest, timeout);
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_send() failed: %d\n", ret);

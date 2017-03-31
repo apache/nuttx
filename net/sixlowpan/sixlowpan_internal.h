@@ -82,24 +82,45 @@
 #define rimeaddr_cmp(addr1,addr2) \
   (memcmp(addr1, addr2, CONFIG_NET_6LOWPAN_RIMEADDR_SIZE) == 0)
 
-/* Frame buffer helpers */
+/* Pointers in the Rime buffer */
 
-#define FRAME_RESET() \
-  do \
-    { \
-      g_dataoffset = 0; \
-    } \
-  while (0)
+/* Fragment header.
+ *
+ * The fragment header is used when the payload is too large to fit in a
+ * single IEEE 802.15.4 frame. The fragment header contains three fields:
+ * Datagram size, datagram tag and datagram offset.
+ * 
+ * 1. Datagram size describes the total (un-fragmented) payload.
+ * 2. Datagram tag identifies the set of fragments and is used to match
+ *    fragments of the same payload.
+ * 3. Datagram offset identifies the fragment’s offset within the un-
+ *    fragmented payload.
+ *
+ * The fragment header length is 4 bytes for the first header and 5
+ * bytes for all subsequent headers.
+ */
 
-#define FRAME_HDR_START(iob)  ((iob)->io_data)
-#define FRAME_HDR_SIZE(iob)   g_dataoffset
+#define RIME_FRAG_PTR                   g_rimeptr
+#define RIME_FRAG_DISPATCH_SIZE         0  /* 16 bit */
+#define RIME_FRAG_TAG                   2  /* 16 bit */
+#define RIME_FRAG_OFFSET                4  /* 8 bit */
 
-#define FRAME_DATA_START(iob) ((FAR uint8_t *)((iob)->io_data) + g_dataoffset)
-#define FRAME_DATA_SIZE(iob)  ((iob)->io_len - g_dataoffset)
+/* Define the Rime buffer as a byte array */
 
-#define FRAME_REMAINING(iob)  (CONFIG_NET_6LOWPAN_FRAMELEN - (iob)->io_len)
-#define FRAME_SIZE(ieee,iob) \
-  ((iob)->io_len)
+#define RIME_IPHC_BUF                   (g_rimeptr + g_rime_hdrlen)
+
+#define RIME_HC1_PTR                    (g_rimeptr + g_rime_hdrlen)
+#define RIME_HC1_DISPATCH               0  /* 8 bit */
+#define RIME_HC1_ENCODING               1  /* 8 bit */
+#define RIME_HC1_TTL                    2  /* 8 bit */
+
+#define RIME_HC1_HC_UDP_PTR             (g_rimeptr + g_rime_hdrlen)
+#define RIME_HC1_HC_UDP_DISPATCH        0  /* 8 bit */
+#define RIME_HC1_HC_UDP_HC1_ENCODING    1  /* 8 bit */
+#define RIME_HC1_HC_UDP_UDP_ENCODING    2  /* 8 bit */
+#define RIME_HC1_HC_UDP_TTL             3  /* 8 bit */
+#define RIME_HC1_HC_UDP_PORTS           4  /* 8 bit */
+#define RIME_HC1_HC_UDP_CHKSUM          5  /* 16 bit */
 
 /* These are some definitions of element values used in the FCF.  See the
  * IEEE802.15.4 spec for details.
@@ -184,6 +205,37 @@
 #define PACKETBUF_ADDR_ERECEIVER              3
 
 #define PACKETBUF_NUM_ADDRS                   4
+
+/* Frame buffer helpers *****************************************************/
+
+#define FRAME_RESET() \
+  do \
+    { \
+      g_dataoffset = 0; \
+    } \
+  while (0)
+
+#define FRAME_HDR_START(iob)  ((iob)->io_data)
+#define FRAME_HDR_SIZE(iob)   g_dataoffset
+
+#define FRAME_DATA_START(iob) ((FAR uint8_t *)((iob)->io_data) + g_dataoffset)
+#define FRAME_DATA_SIZE(iob)  ((iob)->io_len - g_dataoffset)
+
+#define FRAME_REMAINING(iob)  (CONFIG_NET_6LOWPAN_FRAMELEN - (iob)->io_len)
+#define FRAME_SIZE(ieee,iob) \
+  ((iob)->io_len)
+
+/* General helper macros ****************************************************/
+
+#define GETINT16(ptr,index) \
+  ((((uint16_t)((ptr)[index]) << 8)) | ((uint16_t)(((ptr)[(index) + 1]))))
+#define PUTINT16(ptr,index,value) \
+  do \
+    { \
+      (ptr)[index]     = ((uint16_t)(value) >> 8) & 0xff; \
+      (ptr)[index + 1] = (uint16_t)(value) & 0xff; \
+    } \
+  while(0)
 
 /****************************************************************************
  * Public Types
@@ -310,6 +362,15 @@ extern FAR struct sixlowpan_rime_sniffer_s *g_sixlowpan_sniffer;
 
 extern FAR uint8_t *g_rimeptr;
 
+/* The length of the payload in the Rime buffer.
+ *
+ * The payload is what comes after the compressed or uncompressed headers
+ * (can be the IP payload if the IP header only is compressed or the UDP
+ * payload if the UDP header is also compressed)
+ */
+
+extern uint8_t g_rime_payloadlen;
+
 /* g_uncomp_hdrlen is the length of the headers before compression (if HC2
  * is used this includes the UDP header in addition to the IP header).
  */
@@ -360,11 +421,12 @@ struct iob_s;                /* Forward reference */
  *   ieee->i_framelist.
  *
  * Input Parameters:
- *   dev   - The IEEE802.15.4 MAC network driver interface.
- *   ipv6  - IPv6 plus TCP or UDP headers.
- *   buf   - Data to send
- *   len   - Length of data to send
- *   raddr - The MAC address of the destination
+ *   dev     - The IEEE802.15.4 MAC network driver interface.
+ *   ipv6    - IPv6 plus TCP or UDP headers.
+ *   buf     - Data to send
+ *   len     - Length of data to send
+ *   raddr   - The MAC address of the destination
+ *   timeout - Send timeout in deciseconds
  *
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.
@@ -379,7 +441,8 @@ struct iob_s;                /* Forward reference */
 
 int sixlowpan_send(FAR struct net_driver_s *dev,
                    FAR const struct ipv6_hdr_s *ipv6, FAR const void *buf,
-                   size_t len, FAR const struct rimeaddr_s *raddr);
+                   size_t len, FAR const struct rimeaddr_s *raddr,
+                   uint16_t timeout);
 
 /****************************************************************************
  * Function: sixlowpan_hdrlen

@@ -54,13 +54,15 @@
 #include <errno.h>
 #include <debug.h>
 
-#include "nuttx/net/iob.h"
+#include "nuttx/semaphore.h"
+#include "nuttx/net/net.h"
 #include "nuttx/net/netdev.h"
+#include "nuttx/net/iob.h"
 #include "nuttx/net/ip.h"
 
 #include "iob/iob.h"
 #include "netdev/netdev.h"
-#include "socket/socket.h"
+#include "devif/devif.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "sixlowpan/sixlowpan_internal.h"
@@ -88,6 +90,30 @@
 #endif
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* This is the state data provided to the send interrupt logic.  No actions
+ * can be taken until the until we receive the TX poll, then we can call
+ * sixlowpan_queue_frames() with this data strurcture.
+ */
+
+struct sixlowpan_send_s
+{
+  FAR struct devif_callback_s *s_cb;      /* Reference to callback instance */
+  sem_t                        s_waitsem; /* Supports waiting for driver events */
+  int                          s_result;  /* The result of the transfer */
+#ifdef CONFIG_NET_SOCKOPTS
+  uint16_t                     s_timeout; /* Send timeout in deciseconds */
+  systime_t                    s_time;    /* Last send time for determining timeout */
+#endif
+  FAR const struct ipv6_hdr_s *s_destip;  /* Destination IP address */
+  FAR const struct rimeaddr_s *s_destmac; /* Destination MAC address */
+  FAR const void              *s_buf;     /* Data to send */
+  size_t                       s_len;     /* Length of data in buf */
+};
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -106,6 +132,7 @@
  *
  ****************************************************************************/
 
+/* REVISIT:  This is use in input function, but only for sniffer on output */
 static void sixlowpan_set_pktattrs(FAR struct ieee802154_driver_s *ieee,
                                    FAR const struct ipv6_hdr_s *ipv6)
 {
@@ -207,16 +234,6 @@ static int sixlowpan_send_frame(FAR struct ieee802154_driver_s *ieee,
 {
   /* Prepare the frame */
 #warning Missing logic
-  /* Set up for the TX poll */
-  /* When polled, then we need to call sixlowpan_framecreate() to create the
-   * frame and copy the payload data into the frame.
-   */
-#if 0 /* Just some notes of what needs to be done in interrupt handler */
-  framer_hdrlen = sixlowpan_createframe(ieee, ieee->i_panid);
-  memcpy(g_rimeptr + g_rime_hdrlen, (uint8_t *)ipv6 + g_uncomp_hdrlen, len - g_uncomp_hdrlen);
-  iob->io_len = len - g_uncomp_hdrlen + g_rime_hdrlen;
-#endif
-#warning Missing logic
   /* Notify the IEEE802.14.5 MAC driver that we have data to be sent */
 #warning Missing logic
   /* Wait for the transfer to complete */
@@ -225,29 +242,22 @@ static int sixlowpan_send_frame(FAR struct ieee802154_driver_s *ieee,
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: sixlowpan_send
+ * Name: sixlowpan_queue_frames
  *
  * Description:
- *   Process an outgoing UDP or TCP packet.  Takes an IP packet and formats
- *   it to be sent on an 802.15.4 network using 6lowpan.  Called from common
- *   UDP/TCP send logic.
+ *   Process an outgoing UDP or TCP packet.  This function is called from
+ *   send interrupt logic when a TX poll is received.  It formates the
+ *   list of frames to be sent by the IEEE802.15.4 MAC driver.
  *
- *   The payload data is in the caller 'buf' and is of length 'len'.
+ *   The payload data is in the caller 's_buf' and is of length 's_len'.
  *   Compressed headers will be added and if necessary the packet is
  *   fragmented. The resulting packet/fragments are put in ieee->i_framelist
  *   and the entire list of frames will be delivered to the 802.15.4 MAC via
  *   ieee->i_framelist.
  *
  * Input Parameters:
- *   dev   - The IEEE802.15.4 MAC network driver interface.
- *   ipv6  - IPv6 plus TCP or UDP headers.
- *   buf   - Data to send
- *   len   - Length of data to send
- *   raddr - The IEEE802.15.4 MAC address of the destination
+ *   dev   - The structure of the network driver that caused the interrupt
+ *   sinfo - Send state information
  *
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.
@@ -260,9 +270,8 @@ static int sixlowpan_send_frame(FAR struct ieee802154_driver_s *ieee,
  *
  ****************************************************************************/
 
-int sixlowpan_send(FAR struct net_driver_s *dev,
-                   FAR const struct ipv6_hdr_s *ipv6, FAR const void *buf,
-                   size_t len, FAR const struct rimeaddr_s *raddr)
+int sixlowpan_queue_frames(FAR struct net_driver_s *dev,
+                           FAR struct sixlowpan_send_s *sinfo)
 {
   FAR struct ieee802154_driver_s *ieee = (FAR struct ieee802154_driver_s *)dev;
   FAR struct iob_s *iob;
@@ -301,7 +310,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
 
       /* Call the attribution when the callback comes, but set attributes here */
 
-      sixlowpan_set_pktattrs(ieee, ipv6);
+      sixlowpan_set_pktattrs(ieee, sinfo->s_destip);
     }
 #endif
 
@@ -315,9 +324,9 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
 
   /* Set stream mode for all TCP packets, except FIN packets. */
 
-  if (ipv6->proto == IP_PROTO_TCP)
+  if (sinfo->s_destip->proto == IP_PROTO_TCP)
     {
-      FAR const struct tcp_hdr_s *tcp = &((FAR const struct ipv6tcp_hdr_s *)ipv6)->tcp;
+      FAR const struct tcp_hdr_s *tcp = &((FAR const struct ipv6tcp_hdr_s *)sinfo->s_destip)->tcp;
 
       if ((tcp->flags & TCP_FIN) == 0 &&
           (tcp->flags & TCP_CTL) != TCP_ACK)
@@ -331,22 +340,22 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
     }
 
   /* The destination address will be tagged to each outbound packet. If the
-   * argument raddr is NULL, we are sending a broadcast packet.
+   * argument destmac is NULL, we are sending a broadcast packet.
    */
 
-  if (raddr == NULL)
+  if (sinfo->s_destmac == NULL)
     {
       memset(&dest, 0, sizeof(struct rimeaddr_s));
     }
   else
     {
-      rimeaddr_copy(&dest, (FAR const struct rimeaddr_s *)raddr);
+      rimeaddr_copy(&dest, (FAR const struct rimeaddr_s *)sinfo->s_destmac);
     }
 
-  ninfo("Sending packet len %d\n", len);
+  ninfo("Sending packet len %d\n", sinfo->s_len);
 
 #ifndef CONFIG_NET_6LOWPAN_COMPRESSION_IPv6
-  if (len >= CONFIG_NET_6LOWPAN_COMPRESSION_THRESHOLD)
+  if (sinfo->s_len >= CONFIG_NET_6LOWPAN_COMPRESSION_THRESHOLD)
     {
       /* Try to compress the headers */
 
@@ -363,7 +372,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
     {
       /* Small.. use IPv6 dispatch (no compression) */
 
-      sixlowpan_compress_ipv6hdr(ieee, ipv6);
+      sixlowpan_compress_ipv6hdr(ieee, sinfo->s_destip);
     }
 
   ninfo("Header of len %d\n", g_rime_hdrlen);
@@ -383,7 +392,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
 
   /* Check if we need to fragment the packet into several frames */
 
-  if ((int)len - (int)g_uncomp_hdrlen >
+  if ((int)sinfo->s_len - (int)g_uncomp_hdrlen >
       (int)CONFIG_NET_6LOWPAN_MAXPAYLOAD - framer_hdrlen -
       (int)g_rime_hdrlen)
     {
@@ -402,7 +411,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
        * The following fragments contain only the fragn dispatch.
        */
 
-      ninfo("Fragmentation sending packet len %d\n", len);
+      ninfo("Fragmentation sending packet len %d\n", sinfo->s_len);
 
       /* Allocate an IOB to hold the first fragment, waiting if necessary. */
 
@@ -417,28 +426,52 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
       iob->io_pktlen = 0;
 
       /* Create 1st Fragment */
-      /* Add the frame header. */
+      /* Add the frame header */
 
-      verify = sixlowpan_hdrlen(ieee, ieee->i_panid);
+      verify = sixlowpan_framecreate(ieee, iob, ieee->i_panid);
       DEBUGASSERT(vreify == framer_hdrlen);
       UNUSED(verify);
 
       /* Move HC1/HC06/IPv6 header */
-#  warning Missing logic
 
-      /* FRAG1 dispatch + header
-       * Note that the length is in units of 8 bytes
+      memmove(g_rimeptr + SIXLOWPAN_FRAG1_HDR_LEN, g_rimeptr, g_rime_hdrlen);
+
+      /* Setup up the fragment header.
+       *
+       * The fragment header contains three fields:  Datagram size, datagram
+       * tag and datagram offset:
+       *
+       * 1. Datagram size describes the total (un-fragmented) payload.
+       * 2. Datagram tag identifies the set of fragments and is used to
+       *    match fragments of the same payload.
+       * 3. Datagram offset identifies the fragment’s offset within the un-
+       *    fragmented payload.
+       *
+       * The fragment header length is 4 bytes for the first header and 5
+       * bytes for all subsequent headers.
        */
-#  warning Missing logic
 
-      /* Copy payload and send */
-#  warning Missing logic
+      PUTINT16(RIME_FRAG_PTR, RIME_FRAG_DISPATCH_SIZE,
+              ((SIXLOWPAN_DISPATCH_FRAG1 << 8) | sinfo->s_len));
+      PUTINT16(RIME_FRAG_PTR, RIME_FRAG_TAG, ieee->i_dgramtag);
+      ieee->i_dgramtag++;
 
-      /* Check TX result. */
-#  warning Missing logic
+      /* Copy payload and enqueue */
+
+      g_rime_hdrlen += SIXLOWPAN_FRAG1_HDR_LEN;
+      g_rime_payloadlen =
+        (CONFIG_NET_6LOWPAN_MAXPAYLOAD - framer_hdrlen - g_rime_hdrlen) & 0xf8;
+
+      memcpy(g_rimeptr + g_rime_hdrlen,
+             (uint8_t *) sinfo->s_destip + g_uncomp_hdrlen, g_rime_payloadlen);
+      iob->io_len += g_rime_payloadlen + g_rime_hdrlen;
 
       /* Set outlen to what we already sent from the IP payload */
-#  warning Missing logic
+
+      outlen = g_rime_payloadlen + g_uncomp_hdrlen;
+
+      ninfo("First fragment: len %d, tag %d\n",
+            g_rime_payloadlen, ieee->i_dgramtag);
 
       /* Add the first frame to the IOB queue */
 
@@ -449,13 +482,11 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
 
       iob->io_pktlen    = iob->io_len;
 
-      /* Create following fragments
-       * Datagram tag is already in the buffer, we need to set the
-       * FRAGN dispatch and for each fragment, the offset
-       */
-#  warning Missing logic
+      /* Create following fragments */
 
-      while (outlen < len)
+      g_rime_hdrlen = SIXLOWPAN_FRAGN_HDR_LEN;
+
+      while (outlen < sinfo->s_len)
         {
           /* Allocate an IOB to hold the next fragment, waiting if
            * necessary.
@@ -471,11 +502,47 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
           iob->io_offset = 0;
           iob->io_pktlen = 0;
 
-          /* Copy payload */
-#  warning Missing logic
+          /* Add the frame header */
+
+          verify = sixlowpan_framecreate(ieee, iob, ieee->i_panid);
+          DEBUGASSERT(vreify == framer_hdrlen);
+          UNUSED(verify);
+
+          /* Move HC1/HC06/IPv6 header */
+
+          memmove(g_rimeptr + SIXLOWPAN_FRAGN_HDR_LEN, g_rimeptr, g_rime_hdrlen);
+
+          /* Setup up the fragment header */
+
+          PUTINT16(RIME_FRAG_PTR, RIME_FRAG_DISPATCH_SIZE,
+                  ((SIXLOWPAN_DISPATCH_FRAGN << 8) | sinfo->s_len));
+          PUTINT16(RIME_FRAG_PTR, RIME_FRAG_TAG, ieee->i_dgramtag);
+          RIME_FRAG_PTR[RIME_FRAG_OFFSET] = outlen >> 3;
+
+          /* Copy payload and enqueue */
+
+          if (sinfo->s_len - outlen < g_rime_payloadlen)
+            {
+              /* Last fragment */
+
+              g_rime_payloadlen = sinfo->s_len - outlen;
+            }
+          else
+            {
+              g_rime_payloadlen =
+                (CONFIG_NET_6LOWPAN_MAXPAYLOAD - framer_hdrlen - g_rime_hdrlen) & 0xf8;
+            }
+
+          memcpy(g_rimeptr + g_rime_hdrlen, (FAR uint8_t *) sinfo->s_destip + outlen,
+                 g_rime_payloadlen);
+          iob->io_len = g_rime_payloadlen + g_rime_hdrlen;
+
+          /* Set outlen to what we already sent from the IP payload */
+
+          outlen += (g_rime_payloadlen + g_uncomp_hdrlen);
 
           ninfo("sixlowpan output: fragment offset %d, len %d, tag %d\n",
-                outlen >> 3, g_rime_payloadlen, g_mytag);
+                outlen >> 3, g_rime_payloadlen, ieee->i_dgramtag);
 
           /* Add the next frame to the tail of the IOB queue */
 
@@ -484,16 +551,13 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
           /* Keep track of the total amount of data queue */
 
           ieee->i_framelist->io_pktlen += iob->io_len;
-
-          /* Check tx result. */
-#  warning Missing logic
         }
 
       /* Send the list of frames */
 
       return sixlowpan_send_frame(ieee, ieee->i_framelist);
 #else
-      nerr("ERROR: Packet too large: %d\n", len);
+      nerr("ERROR: Packet too large: %d\n", sinfo->s_len);
       nerr("       Cannot to be sent without fragmentation support\n");
       nerr("       dropping packet\n");
 
@@ -502,6 +566,8 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
     }
   else
     {
+      int verify;
+
       /* The packet does not need to be fragmented just copy the "payload"
        * and send in one frame.
        */
@@ -518,11 +584,17 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
       iob->io_offset = 0;
       iob->io_pktlen = 0;
 
-      /* Format the single frame */
-#  warning Missing logic
+      /* Add the frame header */
 
-      /* Send the single frame */
-#  warning Missing logic
+      verify = sixlowpan_framecreate(ieee, iob, ieee->i_panid);
+      DEBUGASSERT(vreify == framer_hdrlen);
+      UNUSED(verify);
+
+      /* Copy the payload and queue */
+
+      memcpy(g_rimeptr + g_rime_hdrlen, (uint8_t *)sinfo->s_destip + g_uncomp_hdrlen,
+             sinfo->s_len - g_uncomp_hdrlen);
+      iob->io_len = sinfo->s_len - g_uncomp_hdrlen + g_rime_hdrlen;
 
       /* Add the first frame to the IOB queue */
 
@@ -534,6 +606,253 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
 
       return sixlowpan_send_frame(ieee, iob);
     }
+}
+/****************************************************************************
+ * Function: send_timeout
+ *
+ * Description:
+ *   Check for send timeout.
+ *
+ * Input Parameters:
+ *   sinfo - Send state structure reference
+ *
+ * Returned Value:
+ *   TRUE:timeout FALSE:no timeout
+ *
+ * Assumptions:
+ *   The network is locked
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_SOCKOPTS
+static inline int send_timeout(FAR struct sixlowpan_send_s *sinfo)
+{
+  /* Check for a timeout.  Zero means none and, in that case, we will let
+   * the send wait forever.
+   */
+
+  if (sinfo->s_timeout != 0)
+    {
+      /* Check if the configured timeout has elapsed */
+      /* REVISIT:  I would need a psock to do this */
+
+      //return net_timeo(sinfo->s_time, psock->s_sndtimeo);
+#warning Missing logic
+    }
+
+  /* No timeout */
+
+  return FALSE;
+}
+#endif /* CONFIG_NET_SOCKOPTS */
+
+/****************************************************************************
+ * Function: tcpsend_interrupt
+ *
+ * Description:
+ *   This function is called from the interrupt level to perform the actual
+ *   send operation when polled by the lower, device interfacing layer.
+ *
+ * Parameters:
+ *   dev   - The structure of the network driver that caused the interrupt
+ *   conn  - The connection structure associated with the socket
+ *   flags - Set of events describing why the callback was invoked
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static uint16_t send_interrupt(FAR struct net_driver_s *dev,
+                               FAR void *pvconn,
+                               FAR void *pvpriv, uint16_t flags)
+{
+  FAR struct sixlowpan_send_s *sinfo = (FAR struct sixlowpan_send_s *)pvpriv;
+
+  ninfo("flags: %04x: %d\n", flags);
+
+  /* Check if the IEEE802.15.4 went down */
+
+  if ((flags & NETDEV_DOWN) != 0)
+    {
+      ninfo("Device is down\n");
+      sinfo->s_result = -ENOTCONN;
+      goto end_wait;
+    }
+
+  /* Check for a poll for TX data. */
+
+  if ((flags & WPAN_NEWDATA) == 0)
+    {
+      DEBUGASSERT((flags & WPAN_POLL) != 0);
+
+      /* Transfer the frame listto the IEEE802.15.4 MAC device */
+
+      sinfo->s_result = sixlowpan_queue_frames(dev, sinfo);
+      flags &= ~WPAN_POLL;
+      goto end_wait;
+    }
+
+#ifdef CONFIG_NET_SOCKOPTS
+  /* All data has been sent and we are just waiting for ACK or re-transmit
+   * indications to complete the send.  Check for a timeout.
+   */
+
+  if (send_timeout(sinfo))
+    {
+      /* Yes.. report the timeout */
+
+      nwarn("WARNING: SEND timeout\n");
+      sinfo->s_result = -ETIMEDOUT;
+      goto end_wait;
+    }
+#endif /* CONFIG_NET_SOCKOPTS */
+
+  /* Continue waiting */
+
+  return flags;
+
+end_wait:
+  /* Do not allow any further callbacks */
+
+  sinfo->s_cb->flags   = 0;
+  sinfo->s_cb->priv    = NULL;
+  sinfo->s_cb->event   = NULL;
+
+  /* Wake up the waiting thread */
+
+  sem_post(&sinfo->s_waitsem);
+  return flags;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sixlowpan_send
+ *
+ * Description:
+ *   Process an outgoing UDP or TCP packet.  Takes an IP packet and formats
+ *   it to be sent on an 802.15.4 network using 6lowpan.  Called from common
+ *   UDP/TCP send logic.
+ *
+ *   The payload data is in the caller 'buf' and is of length 'len'.
+ *   Compressed headers will be added and if necessary the packet is
+ *   fragmented. The resulting packet/fragments are put in ieee->i_framelist
+ *   and the entire list of frames will be delivered to the 802.15.4 MAC via
+ *   ieee->i_framelist.
+ *
+ * Input Parameters:
+ *   dev     - The IEEE802.15.4 MAC network driver interface.
+ *   ipv6    - IPv6 plus TCP or UDP headers.
+ *   buf     - Data to send
+ *   len     - Length of data to send
+ *   raddr   - The IEEE802.15.4 MAC address of the destination
+ *   timeout - Send timeout in deciseconds
+ *
+ * Returned Value:
+ *   Ok is returned on success; Othewise a negated errno value is returned.
+ *   This function is expected to fail if the driver is not an IEEE802.15.4
+ *   MAC network driver.  In that case, the UDP/TCP will fall back to normal
+ *   IPv4/IPv6 formatting.
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+int sixlowpan_send(FAR struct net_driver_s *dev,
+                   FAR const struct ipv6_hdr_s *ipv6, FAR const void *buf,
+                   size_t len, FAR const struct rimeaddr_s *raddr,
+                   uint16_t timeout)
+{
+  struct sixlowpan_send_s sinfo;
+
+  /* Initialize the send state structure */
+
+  sem_init(&sinfo.s_waitsem, 0, 0);
+  (void)sem_setprotocol(&sinfo.s_waitsem, SEM_PRIO_NONE);
+
+  sinfo.s_result  = -EBUSY;
+  sinfo.s_destip  = ipv6;
+  sinfo.s_destmac = raddr;
+  sinfo.s_buf     = buf;
+  sinfo.s_len     = len;
+
+#ifdef CONFIG_NET_SOCKOPTS
+  sinfo.s_timeout = timeout;
+  sinfo.s_time    = clock_systimer();
+#endif
+
+  /* Set the socket state to sending */
+  /* REVISIT: We would need a psock to do this.  Already done by caller. */
+
+  //psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
+#warning Missing logic
+
+  net_lock();
+  if (len > 0)
+    {
+      /* Allocate resources to receive a callback */
+      /* REVISIT:  Need a psock instance to get the second argument
+       * to devif_conn_callback_alloc().
+       */
+
+      sinfo.s_cb =  devif_callback_alloc(dev, NULL);
+      if (sinfo.s_cb != NULL)
+        {
+          int ret;
+
+          /* Set up the callback in the connection */
+
+          sinfo.s_cb->flags   = (NETDEV_DOWN | WPAN_POLL);
+          sinfo.s_cb->priv    = (FAR void *)&sinfo;
+          sinfo.s_cb->event   = send_interrupt;
+
+          /* Notify the the IEEE802.15.4 MAC that we have data to send. */
+          /* REVISIT:  Need a psock instance for the arguments to
+           * send_txnotify().
+           */
+
+          // send_txnotify(psock, conn);
+#warning Missing logic
+
+          /* Wait for the send to complete or an error to occur:  NOTES: (1)
+           * net_lockedwait will also terminate if a signal is received, (2) interrupts
+           * may be disabled!  They will be re-enabled while the task sleeps and
+           * automatically re-enabled when the task restarts.
+           */
+
+          ret = net_lockedwait(&sinfo.s_waitsem);
+          if (ret < 0)
+            {
+              sinfo.s_result = -get_errno();
+            }
+
+          /* Make sure that no further interrupts are processed */
+          /* REVISIT:  Need a psock instance to get the arguments
+           * to devif_conn_callback_free().
+           */
+
+          //devif_conn_callback_free(conn, sinfo.s_cb, NULL);
+#warning Missing logic
+        }
+    }
+
+  sem_destroy(&sinfo.s_waitsem);
+  net_unlock();
+
+  /* Set the socket state to idle */
+  /* REVISIT: Again, need a psock instance */
+
+  // psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
+#warning Missing logic
+
+   return (sinfo.s_result < 0 ? sinfo.s_result : len);
 }
 
 #endif /* CONFIG_NET_6LOWPAN */

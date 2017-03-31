@@ -99,7 +99,6 @@
 #define SIXLOWPAN_IPHC_TTL_255           0x03
 #define SIXLOWPAN_IPHC_TTL_I             0x00
 
-
 /* Values of fields within the IPHC encoding second byte */
 
 #define SIXLOWPAN_IPHC_CID               0x80
@@ -422,6 +421,13 @@ struct ieee802154_driver_s
    */
 
   uint8_t i_dsn;
+
+  /* i_dgramtag.  Datagram tag to be put in the header of the set of
+   * fragments.  It is used by the recipient to match fragments of the
+   * same payload.
+   */
+
+  uint16_t i_dgramtag;
 };
 
 /* The structure of a next header compressor.  This compressor is provided

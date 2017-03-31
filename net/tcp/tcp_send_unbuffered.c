@@ -129,7 +129,7 @@ struct send_s
  *   TRUE:timeout FALSE:no timeout
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -139,7 +139,7 @@ static inline int send_timeout(FAR struct send_s *pstate)
   FAR struct socket *psock;
 
   /* Check for a timeout configured via setsockopts(SO_SNDTIMEO).
-   * If none... we well let the send wait forever.
+   * If none... we will let the send wait forever.
    */
 
   psock = pstate->snd_sock;
@@ -173,7 +173,7 @@ static inline int send_timeout(FAR struct send_s *pstate)
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -224,7 +224,7 @@ static inline void tcpsend_ipselect(FAR struct net_driver_s *dev,
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -278,7 +278,7 @@ static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -707,8 +707,6 @@ static inline void send_txnotify(FAR struct socket *psock,
  *     The local end has been shut down on a connection oriented socket.
  *     In this case the process will also receive a SIGPIPE unless
  *     MSG_NOSIGNAL is set.
- *
- * Assumptions:
  *
  ****************************************************************************/
 
