@@ -59,10 +59,6 @@ ifeq ($(CONFIG_NET_6LOWPAN_COMPRESSION_HC06),y)
 NET_CSRCS += sixlowpan_hc06.c
 endif
 
-ifeq ($(CONFIG_NET_6LOWPAN_SNIFFER),y)
-NET_CSRCS += sixlowpan_sniffer.c
-endif
-
 # Include the sixlowpan directory in the build
 
 DEPPATH += --dep-path sixlowpan

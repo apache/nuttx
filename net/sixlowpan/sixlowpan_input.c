@@ -80,6 +80,62 @@ static bool sixlowpan_isbroadcast(uint8_t mode, FAR uint8_t *addr)
 }
 
 /****************************************************************************
+ * Name: sixlowpan_set_pktattrs
+ *
+ * Description:
+ *   Setup some packet buffer attributes
+ *
+ * Input Parameters:
+ *   ieee - Pointer to IEEE802.15.4 MAC driver structure.
+ *   ipv6 - Pointer to the IPv6 header to "compress"
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void sixlowpan_set_pktattrs(FAR struct ieee802154_driver_s *ieee,
+                                   FAR const struct ipv6_hdr_s *ipv6)
+{
+  int attr = 0;
+
+  /* Set protocol in NETWORK_ID */
+
+  g_pktattrs[PACKETBUF_ATTR_NETWORK_ID] = ipv6->proto;
+
+  /* Assign values to the channel attribute (port or type + code) */
+
+  if (ipv6->proto == IP_PROTO_UDP)
+    {
+      FAR struct udp_hdr_s *udp = &((FAR struct ipv6udp_hdr_s *)ipv6)->udp;
+
+      attr = udp->srcport;
+      if (udp->destport < attr)
+        {
+          attr = udp->destport;
+        }
+    }
+  else if (ipv6->proto == IP_PROTO_TCP)
+    {
+      FAR struct tcp_hdr_s *tcp = &((FAR struct ipv6tcp_hdr_s *)ipv6)->tcp;
+
+      attr = tcp->srcport;
+      if (tcp->destport < attr)
+        {
+          attr = tcp->destport;
+        }
+    }
+  else if (ipv6->proto == IP_PROTO_ICMP6)
+    {
+      FAR struct icmpv6_iphdr_s *icmp = &((FAR struct ipv6icmp_hdr_s *)ipv6)->icmp;
+
+      attr = icmp->type << 8 | icmp->code;
+    }
+
+  g_pktattrs[PACKETBUF_ATTR_CHANNEL] = attr;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 

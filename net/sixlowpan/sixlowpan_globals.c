@@ -51,12 +51,6 @@
 
 FAR struct sixlowpan_nhcompressor_s *g_sixlowpan_compressor;
 
-#ifdef CONFIG_NET_6LOWPAN_SNIFFER
-/* A pointer to the optional, architecture-specific sniffer */
-
-FAR struct sixlowpan_rime_sniffer_s *g_sixlowpan_sniffer;
-#endif
-
 /* The following data values are used to hold intermediate settings while
  * processing IEEE802.15.4 frames.  These globals are shared with incoming
  * and outgoing frame processing and possibly with mutliple IEEE802.15.4 MAC

@@ -340,13 +340,6 @@ struct frame802154_s
 struct sixlowpan_nhcompressor_s; /* Foward reference */
 extern FAR struct sixlowpan_nhcompressor_s *g_sixlowpan_compressor;
 
-#ifdef CONFIG_NET_6LOWPAN_SNIFFER
-/* Rime Sniffer support for one single listener to enable trace of IP */
-
-struct sixlowpan_rime_sniffer_s; /* Foward reference */
-extern FAR struct sixlowpan_rime_sniffer_s *g_sixlowpan_sniffer;
-#endif
-
 /* The following data values are used to hold intermediate settings while
  * processing IEEE802.15.4 frames.  These globals are shared with incoming
  * and outgoing frame processing and possibly with mutliple IEEE802.15.4 MAC

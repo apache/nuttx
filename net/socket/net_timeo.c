@@ -78,6 +78,7 @@ int net_timeo(systime_t start_time, socktimeo_t timeo)
     {
       return TRUE;
     }
+
   return FALSE;
 }
 

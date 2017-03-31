@@ -187,6 +187,9 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
       nerr("ERROR: sixlowpan_send() failed: %d\n", ret);
     }
 
+  /* Set the socket state to idle */
+
+  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
   return ret;
 }
 

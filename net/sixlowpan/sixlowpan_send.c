@@ -103,10 +103,8 @@ struct sixlowpan_send_s
   FAR struct devif_callback_s *s_cb;      /* Reference to callback instance */
   sem_t                        s_waitsem; /* Supports waiting for driver events */
   int                          s_result;  /* The result of the transfer */
-#ifdef CONFIG_NET_SOCKOPTS
   uint16_t                     s_timeout; /* Send timeout in deciseconds */
   systime_t                    s_time;    /* Last send time for determining timeout */
-#endif
   FAR const struct ipv6_hdr_s *s_destip;  /* Destination IP address */
   FAR const struct rimeaddr_s *s_destmac; /* Destination MAC address */
   FAR const void              *s_buf;     /* Data to send */
@@ -116,63 +114,6 @@ struct sixlowpan_send_s
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: sixlowpan_set_pktattrs
- *
- * Description:
- *   Setup some packet buffer attributes
- *
- * Input Parameters:
- *   ieee - Pointer to IEEE802.15.4 MAC driver structure.
- *   ipv6 - Pointer to the IPv6 header to "compress"
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-/* REVISIT:  This is use in input function, but only for sniffer on output */
-static void sixlowpan_set_pktattrs(FAR struct ieee802154_driver_s *ieee,
-                                   FAR const struct ipv6_hdr_s *ipv6)
-{
-  int attr = 0;
-
-  /* Set protocol in NETWORK_ID */
-
-  g_pktattrs[PACKETBUF_ATTR_NETWORK_ID] = ipv6->proto;
-
-  /* Assign values to the channel attribute (port or type + code) */
-
-  if (ipv6->proto == IP_PROTO_UDP)
-    {
-      FAR struct udp_hdr_s *udp = &((FAR struct ipv6udp_hdr_s *)ipv6)->udp;
-
-      attr = udp->srcport;
-      if (udp->destport < attr)
-        {
-          attr = udp->destport;
-        }
-    }
-  else if (ipv6->proto == IP_PROTO_TCP)
-    {
-      FAR struct tcp_hdr_s *tcp = &((FAR struct ipv6tcp_hdr_s *)ipv6)->tcp;
-
-      attr = tcp->srcport;
-      if (tcp->destport < attr)
-        {
-          attr = tcp->destport;
-        }
-    }
-  else if (ipv6->proto == IP_PROTO_ICMP6)
-    {
-      FAR struct icmpv6_iphdr_s *icmp = &((FAR struct ipv6icmp_hdr_s *)ipv6)->icmp;
-
-      attr = icmp->type << 8 | icmp->code;
-    }
-
-  g_pktattrs[PACKETBUF_ATTR_CHANNEL] = attr;
-}
 
 /****************************************************************************
  * Name: sixlowpan_compress_ipv6hdr
@@ -212,33 +153,6 @@ static void sixlowpan_compress_ipv6hdr(FAR struct ieee802154_driver_s *ieee,
   memcpy(g_rimeptr + g_rime_hdrlen, ipv6, IPv6_HDRLEN);
   g_rime_hdrlen   += IPv6_HDRLEN;
   g_uncomp_hdrlen += IPv6_HDRLEN;
-}
-
-/****************************************************************************
- * Name: sixlowpan_send_frame
- *
- * Description:
- *   Send one frame when the IEEE802.15.4 MAC device next polls.
- *
- * Input Parameters:
- *   ieee - Pointer to IEEE802.15.4 MAC driver structure.
- *   iobq - The list of frames to send.
- *
- * Returned Value:
- *   Zero (OK) on success; otherwise a negated errno value is returned.
- *
- ****************************************************************************/
-
-static int sixlowpan_send_frame(FAR struct ieee802154_driver_s *ieee,
-                                FAR struct iob_s *iobq)
-{
-  /* Prepare the frame */
-#warning Missing logic
-  /* Notify the IEEE802.14.5 MAC driver that we have data to be sent */
-#warning Missing logic
-  /* Wait for the transfer to complete */
-#warning Missing logic
-  return -ENOSYS;
 }
 
 /****************************************************************************
@@ -288,31 +202,6 @@ int sixlowpan_queue_frames(FAR struct net_driver_s *dev,
   g_rime_hdrlen   = 0;
   /* REVISIT: Do I need this rimeptr? */
   g_rimeptr       = &dev->d_buf[PACKETBUF_HDR_SIZE];
-
-  /* Reset rime buffer, packet buffer metatadata */
-
-  memset(g_pktattrs, 0, PACKETBUF_NUM_ATTRS * sizeof(uint16_t));
-  memset(g_pktaddrs, 0, PACKETBUF_NUM_ADDRS * sizeof(struct rimeaddr_s));
-
-  g_pktattrs[PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS] =
-    CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS;
-
-#ifdef CONFIG_NET_6LOWPAN_SNIFFER
-  if (g_sixlowpan_sniffer != NULL)
-    {
-      /* Reset rime buffer, packet buffer metatadata */
-
-      memset(g_pktattrs, 0, PACKETBUF_NUM_ATTRS * sizeof(uint16_t));
-      memset(g_pktaddrs, 0, PACKETBUF_NUM_ADDRS * sizeof(struct rimeaddr_s));
-
-      g_pktattrs[PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS] =
-        CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS;
-
-      /* Call the attribution when the callback comes, but set attributes here */
-
-      sixlowpan_set_pktattrs(ieee, sinfo->s_destip);
-    }
-#endif
 
   /* Reset rime buffer, packet buffer metatadata */
 
@@ -552,10 +441,6 @@ int sixlowpan_queue_frames(FAR struct net_driver_s *dev,
 
           ieee->i_framelist->io_pktlen += iob->io_len;
         }
-
-      /* Send the list of frames */
-
-      return sixlowpan_send_frame(ieee, ieee->i_framelist);
 #else
       nerr("ERROR: Packet too large: %d\n", sinfo->s_len);
       nerr("       Cannot to be sent without fragmentation support\n");
@@ -603,10 +488,11 @@ int sixlowpan_queue_frames(FAR struct net_driver_s *dev,
       /* Keep track of the total amount of data queue */
 
       iob->io_pktlen    = iob->io_len;
-
-      return sixlowpan_send_frame(ieee, iob);
     }
+
+  return OK;
 }
+
 /****************************************************************************
  * Function: send_timeout
  *
@@ -624,8 +510,7 @@ int sixlowpan_queue_frames(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_SOCKOPTS
-static inline int send_timeout(FAR struct sixlowpan_send_s *sinfo)
+static inline bool send_timeout(FAR struct sixlowpan_send_s *sinfo)
 {
   /* Check for a timeout.  Zero means none and, in that case, we will let
    * the send wait forever.
@@ -634,17 +519,20 @@ static inline int send_timeout(FAR struct sixlowpan_send_s *sinfo)
   if (sinfo->s_timeout != 0)
     {
       /* Check if the configured timeout has elapsed */
-      /* REVISIT:  I would need a psock to do this */
 
-      //return net_timeo(sinfo->s_time, psock->s_sndtimeo);
-#warning Missing logic
+      systime_t timeo_ticks =  DSEC2TICK(sinfo->s_timeout);
+      systime_t elapsed     =  clock_systimer() - sinfo->s_time;
+
+      if (elapsed >= timeo_ticks)
+        {
+          return true;
+        }
     }
 
   /* No timeout */
 
-  return FALSE;
+  return false;
 }
-#endif /* CONFIG_NET_SOCKOPTS */
 
 /****************************************************************************
  * Function: tcpsend_interrupt
@@ -696,10 +584,7 @@ static uint16_t send_interrupt(FAR struct net_driver_s *dev,
       goto end_wait;
     }
 
-#ifdef CONFIG_NET_SOCKOPTS
-  /* All data has been sent and we are just waiting for ACK or re-transmit
-   * indications to complete the send.  Check for a timeout.
-   */
+  /* Check for a timeout. */
 
   if (send_timeout(sinfo))
     {
@@ -709,7 +594,6 @@ static uint16_t send_interrupt(FAR struct net_driver_s *dev,
       sinfo->s_result = -ETIMEDOUT;
       goto end_wait;
     }
-#endif /* CONFIG_NET_SOCKOPTS */
 
   /* Continue waiting */
 
@@ -778,28 +662,20 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
   (void)sem_setprotocol(&sinfo.s_waitsem, SEM_PRIO_NONE);
 
   sinfo.s_result  = -EBUSY;
+  sinfo.s_timeout = timeout;
+  sinfo.s_time    = clock_systimer();
   sinfo.s_destip  = ipv6;
   sinfo.s_destmac = raddr;
   sinfo.s_buf     = buf;
   sinfo.s_len     = len;
 
-#ifdef CONFIG_NET_SOCKOPTS
-  sinfo.s_timeout = timeout;
-  sinfo.s_time    = clock_systimer();
-#endif
-
-  /* Set the socket state to sending */
-  /* REVISIT: We would need a psock to do this.  Already done by caller. */
-
-  //psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
-#warning Missing logic
-
   net_lock();
   if (len > 0)
     {
-      /* Allocate resources to receive a callback */
-      /* REVISIT:  Need a psock instance to get the second argument
-       * to devif_conn_callback_alloc().
+      /* Allocate resources to receive a callback.
+       *
+       * The second parameter is NULL meaning that we can get only
+       * device related events, no connect-related events.
        */
 
       sinfo.s_cb =  devif_callback_alloc(dev, NULL);
@@ -814,12 +690,8 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
           sinfo.s_cb->event   = send_interrupt;
 
           /* Notify the the IEEE802.15.4 MAC that we have data to send. */
-          /* REVISIT:  Need a psock instance for the arguments to
-           * send_txnotify().
-           */
 
-          // send_txnotify(psock, conn);
-#warning Missing logic
+          netdev_txnotify_dev(dev);
 
           /* Wait for the send to complete or an error to occur:  NOTES: (1)
            * net_lockedwait will also terminate if a signal is received, (2) interrupts
@@ -834,25 +706,15 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
             }
 
           /* Make sure that no further interrupts are processed */
-          /* REVISIT:  Need a psock instance to get the arguments
-           * to devif_conn_callback_free().
-           */
 
-          //devif_conn_callback_free(conn, sinfo.s_cb, NULL);
-#warning Missing logic
+           devif_dev_callback_free(dev, sinfo.s_cb);
         }
     }
 
   sem_destroy(&sinfo.s_waitsem);
   net_unlock();
 
-  /* Set the socket state to idle */
-  /* REVISIT: Again, need a psock instance */
-
-  // psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
-#warning Missing logic
-
-   return (sinfo.s_result < 0 ? sinfo.s_result : len);
+  return (sinfo.s_result < 0 ? sinfo.s_result : len);
 }
 
 #endif /* CONFIG_NET_6LOWPAN */

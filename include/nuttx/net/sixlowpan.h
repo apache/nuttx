@@ -454,14 +454,6 @@ struct sixlowpan_nhcompressor_s
                          FAR uint8_t *uncompressed_len);
 };
 
-/* RIME sniffer callbacks */
-
-struct sixlowpan_rime_sniffer_s
-{
-  CODE void (*input)(void);
-  CODE void (*output)(int mac_status);
-};
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -482,25 +474,5 @@ struct sixlowpan_rime_sniffer_s
  ****************************************************************************/
 
 void sixlowpan_set_compressor(FAR struct sixlowpan_nhcompressor_s *compressor);
-
-/****************************************************************************
- * Function: sixlowpan_set_sniffer
- *
- * Description:
- *   Configure to use an architecture-specific sniffer to enable tracing of
- *   IP.
- *
- * Input parameters:
- *   sniffer - A reference to the new sniffer to be used.  This may
- *             be a NULL value to disable the sniffer.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_6LOWPAN_SNIFFER
-void sixlowpan_set_sniffer(FAR struct sixlowpan_rime_sniffer_s *sniffer);
-#endif
 
 #endif /* __INCLUDE_NUTTX_NET_SIXLOWOAN_H */
