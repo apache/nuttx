@@ -56,6 +56,18 @@ ifeq ($(CONFIG_CRYPTO_SW_AES),y)
   CRYPTO_CSRCS += aes.c
 endif
 
+# BLAKE2s hash algorithm
+
+ifeq ($(CONFIG_CRYPTO_BLAKE2S),y)
+  CRYPTO_CSRCS += blake2s.c
+endif
+
+# Entropy pool random number generator
+
+ifeq ($(CONFIG_CRYPTO_RANDOM_POOL),y)
+  CRYPTO_CSRCS += random_pool.c
+endif
+
 endif # CONFIG_CRYPTO
 
 ASRCS = $(CRYPTO_ASRCS)

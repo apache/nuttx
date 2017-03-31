@@ -91,6 +91,7 @@ namespace std
   using ::vfwprintf;
   using ::vwprintf;
   using ::vswprintf;
+  using ::wcstold;
   using ::wcrtomb;
   using ::wcscat;
   using ::wcschr;

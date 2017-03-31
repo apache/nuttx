@@ -45,9 +45,10 @@
 
 #include <nuttx/cancelpt.h>
 
+#include "pkt/pkt.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
-#include "pkt/pkt.h"
+#include "sixlowpan/sixlowpan.h"
 #include "local/local.h"
 #include "socket/socket.h"
 
@@ -133,6 +134,8 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 #if defined(CONFIG_NET_PKT)
       case SOCK_RAW:
         {
+          /* Raw packet send */
+
           ret = psock_pkt_send(psock, buf, len);
         }
         break;
@@ -146,6 +149,8 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
           if (psock->s_domain == PF_LOCAL)
 #endif
             {
+              /* Local TCP packet send */
+
               ret = psock_local_send(psock, buf, len, flags);
             }
 #endif /* CONFIG_NET_LOCAL_STREAM */
@@ -155,7 +160,26 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
           else
 #endif
             {
+#ifdef CONFIG_NET_6LOWPAN
+              /* Try 6loWPAN TCP packet send */
+
+              ret = psock_6lowpan_tcp_send(psock, buf, len);
+
+#ifdef CONFIG_NETDEV_MULTINIC
+              if (ret < 0)
+                {
+                  /* UDP/IP packet send */
+
+                  ret = psock_tcp_send(psock, buf, len);
+                }
+
+#endif /* CONFIG_NETDEV_MULTINIC */
+#else  /* CONFIG_NET_6LOWPAN */
+
+              /* Only TCP/IP packet send */
+
               ret = psock_tcp_send(psock, buf, len);
+#endif /* CONFIG_NET_6LOWPAN */
             }
 #endif /* CONFIG_NET_TCP */
         }
@@ -170,6 +194,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
           if (psock->s_domain == PF_LOCAL)
 #endif
             {
+              /* Local UDP packet send */
 #warning Missing logic
               ret = -ENOSYS;
             }
@@ -180,7 +205,26 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
           else
 #endif
             {
+#ifdef CONFIG_NET_6LOWPAN
+              /* Try 6loWPAN UDP packet send */
+
+              ret = psock_6lowpan_udp_send(psock, buf, len);
+
+#ifdef CONFIG_NETDEV_MULTINIC
+              if (ret < 0)
+                {
+                  /* UDP/IP packet send */
+
+                  ret = psock_udp_send(psock, buf, len);
+                }
+
+#endif /* CONFIG_NETDEV_MULTINIC */
+#else  /* CONFIG_NET_6LOWPAN */
+
+              /* Only UDP/IP packet send */
+
               ret = psock_udp_send(psock, buf, len);
+#endif /* CONFIG_NET_6LOWPAN */
             }
 #endif /* CONFIG_NET_UDP */
         }

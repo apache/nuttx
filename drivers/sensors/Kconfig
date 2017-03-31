@@ -32,6 +32,29 @@ config BMP180
 	---help---
 		Enable driver support for the Bosch BMP180 barometer sensor.
 
+config HTS221
+	bool "ST HTS221 humidity sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the ST HTS221 humidity sensor.
+
+if HTS221
+
+config DEBUG_HTS221
+	bool "Debug support for the HTS221"
+	default n
+	---help---
+		Enables debug features for the HTS221
+
+config HTS221_NPOLLWAITERS
+	int "Number of waiters to poll"
+	default 1
+	---help---
+		Number of waiters to poll
+
+endif # HTS221
+
 config SENSORS_L3GD20
 	bool "ST L3GD20 Gyroscope Sensor support"
 	default n

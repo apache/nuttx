@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/net_sockets.c
+ * net/net_initialize.c
  *
- *   Copyright (C) 2007-2009, 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@
 #include "devif/devif.h"
 #include "netdev/netdev.h"
 #include "arp/arp.h"
+#include "sixlowpan/sixlowpan.h"
 #include "neighbor/neighbor.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
@@ -57,26 +58,6 @@
 #include "igmp/igmp.h"
 #include "route/route.h"
 #include "utils/utils.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -119,7 +100,13 @@ void net_setup(void)
   /* Initialize the Neighbor Table data structures */
 
   neighbor_initialize();
+
+#ifdef CONFIG_NET_6LOWPAN
+  /* Initialize 6loWPAN data structures */
+
+  sixlowpan_initialize();
 #endif
+#endif /* CONFIG_NET_IPv6 */
 
 #ifdef CONFIG_NET_IOB
   /* Initialize I/O buffering */

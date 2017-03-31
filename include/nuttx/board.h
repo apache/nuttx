@@ -646,4 +646,20 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
                      int lineno);
 #endif
 
+/****************************************************************************
+ * Name: board_initrngseed
+ *
+ * Description:
+ *   If CONFIG_BOARD_INITRNGSEED is selected then board_init_rngseed is
+ *   called at up_randompool_initialize() to feed initial random seed
+ *   to RNG. Implemenation of this functions should feed at least
+ *   MIN_SEED_NEW_ENTROPY_WORDS 32-bit random words to entropy-pool using
+ *   up_rngaddentropy() or up_rngaddint().
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_INITRNGSEED
+void board_init_rngseed(void);
+#endif
+
 #endif /* __INCLUDE_NUTTX_BOARD_H */

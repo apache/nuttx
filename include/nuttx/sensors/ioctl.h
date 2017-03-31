@@ -115,4 +115,14 @@
 #define SNIOC_RESET         _SNIOC(0x0028) /* Arg: None */
 #define SNIOC_OVERSAMPLING  _SNIOC(0x0029) /* Arg: uint16_t value */
 
+/* IOCTL commands unique to the HTS221 */
+
+#define SNIOC_GET_DEV_ID        _SNIOC(0x002a)
+#define SNIOC_CFGR              _SNIOC(0x002b)
+#define SNIOC_START_CONVERSION  _SNIOC(0x002c)
+#define SNIOC_CHECK_STATUS_REG  _SNIOC(0x002d)
+#define SNIOC_READ_RAW_DATA     _SNIOC(0x002e)
+#define SNIOC_READ_CONVERT_DATA _SNIOC(0x002f)
+#define SNIOC_DUMP_REGS         _SNIOC(0x0030)
+
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */

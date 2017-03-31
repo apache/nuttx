@@ -56,6 +56,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/input/buttons.h>
+#include <nuttx/random.h>
 
 #include <nuttx/irq.h>
 
@@ -316,6 +317,8 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
 
   DEBUGASSERT(lower->bl_buttons);
   sample = lower->bl_buttons(lower);
+
+  add_ui_randomness(sample);
 
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
   /* Determine which buttons have been newly pressed and which have been

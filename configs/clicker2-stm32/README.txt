@@ -249,3 +249,55 @@ Configurations
       CONFIG_HAVE_CXX=y
       CONFIG_HAVE_CXXINITIALIZE=y
       CONFIG_EXAMPLES_NSH_CXXINITIALIZE=y
+
+  usbnsh:
+  -------
+
+    This is another NSH example.  If differs from other 'nsh' configurations
+    in that this configurations uses a USB serial device for console I/O.
+    Such a configuration is useful on the Clicker2 STM32 which has no
+    builtin RS-232 drivers.
+
+    NOTES:
+
+    1. This configuration does have USART3 output enabled and set up as
+       the system logging device:
+
+       CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
+       CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : USART3 will be /dev/ttyS0
+
+       However, there is nothing to generate SYLOG output in the default
+       configuration so nothing should appear on USART3 unless you enable
+       some debug output or enable the USB monitor.
+
+    2. Enabling USB monitor SYSLOG output.  If tracing is enabled, the USB
+       device will save encoded trace output in in-memory buffer; if the
+       USB monitor is enabled, that trace buffer will be periodically
+       emptied and dumped to the system logging device (USART3 in this
+       configuration):
+
+       CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
+       CONFIG_USBDEV_TRACE_NRECORDS=128        : Buffer 128 records in memory
+       CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
+       CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
+       CONFIG_USBMONITOR=y              : Enable the USB monitor daemon
+       CONFIG_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
+       CONFIG_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
+       CONFIG_USBMONITOR_INTERVAL=2     : Dump trace data every 2 seconds
+
+       CONFIG_USBMONITOR_TRACEINIT=y    : Enable TRACE output
+       CONFIG_USBMONITOR_TRACECLASS=y
+       CONFIG_USBMONITOR_TRACETRANSFERS=y
+       CONFIG_USBMONITOR_TRACECONTROLLER=y
+       CONFIG_USBMONITOR_TRACEINTERRUPTS=y
+
+    Using the Prolifics PL2303 Emulation
+    ------------------------------------
+    You could also use the non-standard PL2303 serial device instead of
+    the standard CDC/ACM serial device by changing:
+
+      CONFIG_CDCACM=n               : Disable the CDC/ACM serial device class
+      CONFIG_CDCACM_CONSOLE=n       : The CDC/ACM serial device is NOT the console
+      CONFIG_PL2303=y               : The Prolifics PL2303 emulation is enabled
+      CONFIG_PL2303_CONSOLE=y       : The PL2303 serial device is the console
+

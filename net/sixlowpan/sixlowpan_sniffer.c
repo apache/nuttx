@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/6lowpan/6lowpan.h
+ * net/sixlowpan/sixlowpan_sniffer.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,24 +33,49 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_6LOWPAN_6LOWPAN_H
-#define __NET_6LOWPAN_6LOWPAN_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_NET_6LOWPAN
+#include "nuttx/net/net.h"
+#include "nuttx/net/sixlowpan.h"
+
+#include "sixlowpan/sixlowpan_internal.h"
+
+#ifdef CONFIG_NET_6LOWPAN_SNIFFER
 
 /****************************************************************************
- * Public Types
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Function Prototypes
+ * Function: sixlowpan_set_sniffer
+ *
+ * Description:
+ *   Configure to use an architecture-specific sniffer to enable tracing of
+ *   IP.
+ *
+ * Input parameters:
+ *   sniffer - A reference to the new sniffer to be used.  This may
+ *             be a NULL value to disable the sniffer.
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
-#endif /* CONFIG_NET_6LOWPAN */
-#endif /* __NET_6LOWPAN_6LOWPAN_H */
+void sixlowpan_set_sniffer(FAR struct sixlowpan_rime_sniffer_s *sniffer)
+{
+  /* Make sure that the sniffer is not in use */
+
+  net_lock();
+
+  /* Then instantiate the new sniffer */
+
+  g_sixlowpan_sniffer = sniffer;
+  net_unlock();
+}
+
+#endif /* CONFIG_NET_6LOWPAN_SNIFFER */

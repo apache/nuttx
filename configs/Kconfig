@@ -2015,6 +2015,27 @@ config BOARD_RESET_ON_CRASH
 		If selected the board_crashdump should reset the machine after
 		saveing the state of the machine
 
+config BOARD_ENTROPY_POOL
+	bool "Enable Board level storing of entropy pool structure"
+	default n
+	depends on CRYPTO_RANDOM_POOL
+	---help---
+		Entropy pool structure can be provided by board source.
+		Use for this is, for example, to allocate entropy pool
+		from special area of RAM which content is kept over
+		system reset.
+
+config BOARD_INITRNGSEED
+	bool "Enable Board level initial seeding of entropy pool RNG"
+	default n
+	depends on CRYPTO_RANDOM_POOL
+	---help---
+		If enabled, entropy pool random number generator will call
+		board_init_rndseed() upon initialization. This function
+		can then provide early entropy seed to the pool through
+		entropy injection APIs provided at 'nuttx/random.h'.
+#endif
+
 config LIB_BOARDCTL
 	bool "Enable boardctl() interface"
 	default n

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_mutexlock.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,11 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <sched.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
+
+#include <nuttx/sched.h>
 
 #include "pthread/pthread.h"
 
@@ -104,15 +107,12 @@
 int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
 {
   int mypid = (int)getpid();
-  int ret = OK;
+  int ret = EINVAL;
 
   sinfo("mutex=0x%p\n", mutex);
+  DEBUGASSERT(mutex != NULL);
 
-  if (!mutex)
-    {
-      ret = EINVAL;
-    }
-  else
+  if (mutex != NULL)
     {
       /* Make sure the semaphore is stable while we make the following
        * checks.  This all needs to be one atomic action.
@@ -120,29 +120,41 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
 
       sched_lock();
 
-      /* Does this task already hold the semaphore? */
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
+      /* All mutex types except for NORMAL (and DEFAULT) will return
+       * and an error  error if the caller does not hold the mutex.
+       */
 
-      if (mutex->pid == mypid)
+      if (mutex->type != PTHREAD_MUTEX_NORMAL && mutex->pid == mypid)
         {
           /* Yes.. Is this a recursive mutex? */
 
-#ifdef CONFIG_MUTEX_TYPES
           if (mutex->type == PTHREAD_MUTEX_RECURSIVE)
             {
-              /* Yes... just increment the number of locks held and return success */
+              /* Yes... just increment the number of locks held and return
+               * success.
+               */
 
-              mutex->nlocks++;
+              if (mutex->nlocks < INT16_MAX)
+                {
+                  mutex->nlocks++;
+                  ret = OK;
+                }
+              else
+                {
+                  ret = EOVERFLOW;
+                }
             }
           else
-#endif
             {
               /* No, then we would deadlock... return an error (default
                * behavior is like PTHREAD_MUTEX_ERRORCHECK)
                *
-               * NOTE:  This is non-compliant behavior for the case of a
-               * NORMAL mutex.  In that case, it the deadlock condition should
-               * not be detected and the thread should be permitted to
-               * deadlock.
+               * NOTE: This is the correct behavior for a 'robust', NORMAL
+               * mutex.  Compiant behavior for non-robust mutex should not
+               * include these checks.  In that case, it the deadlock
+               * condition should not be detected and the thread should be
+               * permitted to deadlock.
                */
 
               serr("ERROR: Returning EDEADLK\n");
@@ -150,19 +162,69 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
             }
         }
       else
-        {
-          /* Take the semaphore */
+#endif /* CONFIG_PTHREAD_MUTEX_TYPES */
 
-          ret = pthread_takesemaphore((FAR sem_t *)&mutex->sem);
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+      /* The calling thread does not hold the semaphore.  The correct
+       * behavior for the 'robust' mutex is to verify that the holder of the
+       * mutex is still valid.  This is protection from the case
+       * where the holder of the mutex has exitted without unlocking it.
+       */
+
+#ifdef CONFIG_PTHREAD_MUTEX_BOTH
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
+      /* Include check if this is a NORMAL mutex and that it is robust */
+
+      if (mutex->pid > 0 &&
+          ((mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 ||
+            mutex->type != PTHREAD_MUTEX_NORMAL) &&
+          sched_gettcb(mutex->pid) == NULL)
+
+#else /* CONFIG_PTHREAD_MUTEX_TYPES */
+      /* This can only be a NORMAL mutex.  Include check if it is robust */
+
+      if (mutex->pid > 0 &&
+          (mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 &&
+          sched_gettcb(mutex->pid) == NULL)
+
+#endif /* CONFIG_PTHREAD_MUTEX_TYPES */
+#else /* CONFIG_PTHREAD_MUTEX_ROBUST */
+      /* This mutex is always robust, whatever type it is. */
+
+      if (mutex->pid > 0 && sched_gettcb(mutex->pid) == NULL)
+#endif
+        {
+          DEBUGASSERT(mutex->pid != 0); /* < 0: available, >0 owned, ==0 error */
+          DEBUGASSERT((mutex->flags & _PTHREAD_MFLAGS_INCONSISTENT) != 0);
+
+          /* A thread holds the mutex, but there is no such thread.  POSIX
+           * requires that the 'robust' mutex return EOWNERDEAD in this case.
+           * It is then the caller's responsibility to call pthread_mutx_consistent()
+           * fo fix the mutex.
+           */
+
+          mutex->flags |= _PTHREAD_MFLAGS_INCONSISTENT;
+          ret           = EOWNERDEAD;
+        }
+      else
+#endif /* !CONFIG_PTHREAD_MUTEX_UNSAFE */
+
+        {
+          /* Take the underlying semaphore, waiting if necessary.  NOTE that
+           * is required to deadlock for the case of the non-robust NORMAL or
+           * default mutex.
+           */
+
+          ret = pthread_mutex_take(mutex, true);
 
           /* If we successfully obtained the semaphore, then indicate
            * that we own it.
            */
 
-          if (!ret)
+          if (ret == OK)
             {
               mutex->pid    = mypid;
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
               mutex->nlocks = 1;
 #endif
             }

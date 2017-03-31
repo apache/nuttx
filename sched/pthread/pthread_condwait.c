@@ -71,6 +71,7 @@
 
 int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 {
+  int status;
   int ret;
 
   sinfo("cond=0x%p mutex=0x%p\n", cond, mutex);
@@ -100,11 +101,18 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 
       sched_lock();
       mutex->pid = -1;
-      ret = pthread_givesemaphore((FAR sem_t *)&mutex->sem);
+      ret = pthread_mutex_give(mutex);
 
       /* Take the semaphore */
 
-      ret |= pthread_takesemaphore((FAR sem_t *)&cond->sem);
+      status = pthread_takesemaphore((FAR sem_t *)&cond->sem, false);
+      if (ret == OK)
+        {
+          /* Report the first failure that occurs */
+
+          ret = status;
+        }
+
       sched_unlock();
 
       /* Reacquire the mutex.
@@ -114,7 +122,16 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
        */
 
       sinfo("Reacquire mutex...\n");
-      ret |= pthread_takesemaphore((FAR sem_t *)&mutex->sem);
+      status = pthread_mutex_take(mutex, false);
+      if (ret == OK)
+        {
+          /* Report the first failure that occurs */
+
+          ret = status;
+        }
+
+      /* Was all of the above successful? */
+
       if (ret == OK)
         {
           mutex->pid = getpid();

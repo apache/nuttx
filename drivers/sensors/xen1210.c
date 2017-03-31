@@ -49,6 +49,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/sensors/xen1210.h>
+#include <nuttx/random.h>
 
 #include "xen1210.h"
 
@@ -442,6 +443,12 @@ void xen1210_getdata(FAR struct xen1210_dev_s *priv)
 #ifdef CONFIG_XEN1210_REGDEBUG
   _err("%02x->%02x\n", regaddr, regval);
 #endif
+
+  /* Feed sensor data to entropy pool */
+
+  add_sensor_randomness((priv->sample.data_x << 8) ^
+                        (priv->sample.data_y << 4) ^
+                        (priv->sample.data_z << 4));
 }
 
 /****************************************************************************

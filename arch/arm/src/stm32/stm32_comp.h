@@ -60,7 +60,7 @@
 #define COMP_POL_DEFAULT      COMP_POL_NONINVERT  /* Output is not inverted */
 #define COMP_INM_DEFAULT      COMP_INMSEL_1P4VREF /* 1/4 of Vrefint as INM */
 #define COMP_OUTSEL_DEFAULT   COMP_OUTSEL_NOSEL   /* Output not selected */
-#define COMP_LOCK_DEFAULT     COMP_LOCK_RO        /* Do not lock CSR register */
+#define COMP_LOCK_DEFAULT     COMP_LOCK_RW        /* Do not lock CSR register */
 
 #ifndef CONFIG_STM32_STM32F33XX
 #define COMP_MODE_DEFAULT
@@ -172,23 +172,6 @@ enum stm32_comp_winmode_e
 
 #endif
 
-/* Comparator configuration ***********************************************************/
-
-struct stm32_comp_s
-{
-  uint8_t blanking;             /* Blanking source */
-  uint8_t pol;                  /* Output polarity */
-  uint8_t inm;                  /* Inverting input selection */
-  uint8_t out;                  /* Comparator output */
-  uint8_t lock;                 /* Comparator Lock */
-  uint32_t csr;                 /* Control and status register */
-#ifndef CONFIG_STM32_STM32F33XX
-  uint8_t mode;                 /* Comparator mode */
-  uint8_t hyst;                 /* Comparator hysteresis */
-                                /* @TODO: Window mode + INP selection */
-#endif
-};
-
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
@@ -201,22 +184,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
-/****************************************************************************
-* Name: stm32_compconfig
-*
-* Description:
-*   Configure comparator and used I/Os
-*
-* Input Parameters:
-*   priv   - A reference to the COMP structure
-*
-* Returned Value:
-*  0 on success, a negated errno value on failure
-*
-****************************************************************************/
-
-int stm32_compconfig(FAR struct stm32_comp_s *priv);
 
 /****************************************************************************
 * Name: stm32_compinitialize
@@ -236,41 +203,7 @@ int stm32_compconfig(FAR struct stm32_comp_s *priv);
 *
 ****************************************************************************/
 
-FAR struct stm32_comp_s* stm32_compinitialize(int intf);
-
-/****************************************************************************
-* Name: stm32_compenable
-*
-* Description:
-*   Enable/disable comparator
-*
-* Input Parameters:
-*   priv   - A reference to the COMP structure
-*   enable - enable/disable flag
-*
-* Returned Value:
-*  0 on success, a negated errno value on failure
-*
-****************************************************************************/
-
-int stm32_compenable(FAR struct stm32_comp_s *priv, bool enable);
-
-/****************************************************************************
-* Name: stm32_complock
-*
-* Description:
-*   Lock comparator CSR register
-*
-* Input Parameters:
-*   priv   - A reference to the COMP structure
-*   enable - lock flag
-*
-* Returned Value:
-*  0 on success, a negated errno value on failure
-*
-****************************************************************************/
-
-int stm32_complock(FAR struct stm32_comp_s *priv, bool lock);
+FAR struct comp_dev_s* stm32_compinitialize(int intf);
 
 #undef EXTERN
 #ifdef __cplusplus

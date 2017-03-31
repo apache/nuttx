@@ -255,7 +255,7 @@ menuconfig NET_IPv6
 		Build in support for IPv6.
 
 source "net/neighbor/Kconfig"
-source "net/6lowpan/Kconfig"
+source "net/sixlowpan/Kconfig"
 
 endmenu # Internet Protocol Selection
 

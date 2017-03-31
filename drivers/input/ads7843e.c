@@ -70,6 +70,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/random.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/input/touchscreen.h>
@@ -623,6 +624,8 @@ static void ads7843e_worker(FAR void *arg)
       x = ads7843e_sendcmd(priv, ADS7843_CMD_XPOSITION);
       y = ads7843e_sendcmd(priv, ADS7843_CMD_YPOSITION);
 #endif
+
+      add_ui_randomness((x << 16) | y);
 
       /* Perform a thresholding operation so that the results will be more stable.
        * If the difference from the last sample is small, then ignore the event.

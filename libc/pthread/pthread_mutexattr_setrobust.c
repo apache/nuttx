@@ -1,11 +1,8 @@
 /****************************************************************************
- * include/nuttx/net/6lowpan.h
+ * libc/pthread/pthread_mutexattr_setrobust.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 201t Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Includes some definitions that a compatible with the LGPL GNU C Library
- * header file of the same name.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,27 +33,64 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NET_6LOWPAN_H
-#define __INCLUDE_NUTTX_NET_6LOWPAN_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <nuttx/net/netconfig.h>
+#include <pthread.h>
+#include <errno.h>
 
 /****************************************************************************
- * Public Type Definitions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Function: pthread_mutexattr_setrobust
+ *
+ * Description:
+ *   Set the mutex robustness in the mutex attributes.
+ *
+ * Parameters:
+ *   attr   - The mutex attributes in which to set the mutex type.
+ *   robust - The mutex type value to set.
+ *
+ * Return Value:
+ *   0, if the mutex robustness was successfully set in 'attr', or
+ *   EINVAL, if 'attr' is NULL or 'robust' unrecognized.
+ *
+ * Assumptions:
+ *
  ****************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+int pthread_mutexattr_setrobust(pthread_mutexattr_t *attr, int robust)
+{
+#if defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
 
-#endif /* __INCLUDE_NUTTX_NET_6LOWPAN_H */
+  if (attr != NULL && robust == PTHREAD_MUTEX_STALLED)
+    {
+      return OK;
+    }
+
+  return EINVAL;
+
+#elif defined(CONFIG_PTHREAD_MUTEX_BOTH)
+
+  if (attr != NULL && (robust == PTHREAD_MUTEX_STALLED || robust == _PTHREAD_MFLAGS_ROBUST))
+    {
+      attr->robust = robust;
+      return OK;
+    }
+
+  return EINVAL;
+
+#else /* Default: CONFIG_PTHREAD_MUTEX_ROBUST */
+
+  if (attr != NULL && robust == _PTHREAD_MFLAGS_ROBUST)
+    {
+      return OK;
+    }
+
+  return EINVAL;
+#endif
+}

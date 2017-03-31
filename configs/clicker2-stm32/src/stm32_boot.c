@@ -63,6 +63,17 @@
 
 void stm32_boardinitialize(void)
 {
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
+   * stm32_spidev_initialize() has been brought into the link.
+   */
+
+  if (stm32_spidev_initialize)
+    {
+      stm32_spidev_initialize();
+    }
+#endif
+
 #ifdef CONFIG_STM32_OTGFS
   /* Initialize USB if the 1) OTG FS controller is in the configuration and 2)
    * disabled, and 3) the weak function stm32_usb_configure() has been brought

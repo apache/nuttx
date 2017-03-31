@@ -44,13 +44,27 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-/* #include <nuttx/analog/comp.h> */
+#include <nuttx/analog/comp.h>
 
 #include "stm32.h"
 
 #if defined(CONFIG_COMP) && (defined(CONFIG_STM32_COMP2) || \
                              defined(CONFIG_STM32_COMP4) || \
                              defined(CONFIG_STM32_COMP6))
+
+#ifdef CONFIG_STM32_COMP2
+#  if defined(CONFIG_STM32_COMP4) || defined(CONFIG_STM32_COMP6)
+#    error "Currently only one COMP device supported"
+#  endif
+#elif CONFIG_STM32_COMP4
+#  if defined(CONFIG_STM32_COMP2) || defined(CONFIG_STM32_COMP6)
+#    error "Currently only one COMP device supported"
+#  endif
+#elif CONFIG_STM32_COMP6
+#  if defined(CONFIG_STM32_COMP2) || defined(CONFIG_STM32_COMP4)
+#    error "Currently only one COMP device supported"
+#  endif
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -67,12 +81,13 @@
 int stm32_comp_setup(void)
 {
   static bool initialized = false;
-  struct stm32_comp_s* comp = NULL;
+  struct comp_dev_s* comp = NULL;
   int ret;
-  UNUSED(ret);
 
   if (!initialized)
     {
+      /* Get the comparator interface */
+
 #ifdef CONFIG_STM32_COMP2
       comp = stm32_compinitialize(2);
       if (comp == NULL)
@@ -100,8 +115,7 @@ int stm32_comp_setup(void)
         }
 #endif
 
-#if 0
-      /* COMP driver not implemented yet */
+      /* Register the comparator character driver at /dev/comp0 */
 
       ret = comp_register("/dev/comp0", comp);
       if (ret < 0)
@@ -109,7 +123,6 @@ int stm32_comp_setup(void)
           aerr("ERROR: comp_register failed: %d\n", ret);
           return ret;
         }
-#endif
 
       initialized = true;
     }

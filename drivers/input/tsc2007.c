@@ -68,6 +68,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/random.h>
 
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/tsc2007.h>
@@ -619,7 +620,7 @@ static void tsc2007_worker(FAR void *arg)
        *  vertical or horizontal resistive network.  The A/D converter converts
        *  the voltage measured at the point where the panel is touched. A measurement
        *  of the Y position of the pointing device is made by connecting the X+
-       *  input to a data converter chip, turning on the Y+ and Y– drivers, and
+       *  input to a data converter chip, turning on the Y+ and Y- drivers, and
        *  digitizing the voltage seen at the X+ input ..."
        *
        * "... it is recommended that whenever the host writes to the TSC2007, the
@@ -698,6 +699,8 @@ static void tsc2007_worker(FAR void *arg)
       priv->sample.y        = y;
       priv->sample.pressure = pressure;
       priv->sample.valid    = true;
+
+      add_ui_randomness((x << 16) ^ y ^ (pressure << 9));
     }
 
   /* Note the availability of new measurements */

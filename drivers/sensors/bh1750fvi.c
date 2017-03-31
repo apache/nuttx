@@ -51,6 +51,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/bh1750fvi.h>
+#include <nuttx/random.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_BH1750FVI)
 
@@ -249,6 +250,8 @@ static ssize_t bh1750fvi_read(FAR struct file *filep, FAR char *buffer,
 
   buffer[0] = lux & 0xFF;
   buffer[1] = (lux & 0xFF00) >> 8;
+
+  add_sensor_randomness(lux);
 
   return buflen;
 }

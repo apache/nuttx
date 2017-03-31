@@ -60,6 +60,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/analog/adc.h>
+#include <nuttx/random.h>
 
 #include <nuttx/irq.h>
 
@@ -295,6 +296,10 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 
               break;
             }
+
+          /* Feed ADC data to entropy pool */
+
+          add_sensor_randomness(msg->am_data);
 
           /* Copy the message to the user buffer */
 

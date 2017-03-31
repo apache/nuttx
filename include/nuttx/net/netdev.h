@@ -418,6 +418,10 @@ int ipv4_input(FAR struct net_driver_s *dev);
 int ipv6_input(FAR struct net_driver_s *dev);
 #endif
 
+#ifdef CONFIG_NET_6LOWPAN
+int sixlowpan_input(FAR struct net_driver_s *dev);
+#endif
+
 /****************************************************************************
  * Polling of connections
  *

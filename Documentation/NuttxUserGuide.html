@@ -7037,7 +7037,7 @@ interface of the same name.
 <p>
 <pre>
     #include &lt;pthread.h&gt;
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
     int pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int *type);
 #endif
 </pre>
@@ -7072,7 +7072,7 @@ returned to indicate the error:
 <p>
 <pre>
     #include &lt;pthread.h&gt;
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
     int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type);
 #endif
 </pre>
