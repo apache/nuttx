@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include "nuttx/net/net.h"
-#include "nuttx/net/sixlowpan.h"
 
 #include "sixlowpan/sixlowpan_internal.h"
 

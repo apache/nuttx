@@ -63,6 +63,7 @@
 #include <nuttx/net/tcp.h>
 #include <nuttx/net/udp.h>
 #include <nuttx/net/icmpv6.h>
+#include <nuttx/net/sixlowpan.h>
 
 #ifdef CONFIG_NET_6LOWPAN
 
@@ -83,25 +84,20 @@
 
 /* Frame buffer helpers */
 
-#define FRAME_RESET(ieee) \
+#define FRAME_RESET() \
   do \
     { \
-      (ieee)->i_dataoffset = 0; \
+      g_dataoffset = 0; \
     } \
   while (0)
 
-#define FRAME_HDR_START(ieee,iob) \
-  ((iob)->io_data)
-#define FRAME_HDR_SIZE(ieee,iob) \
-  ((ieee)->i_dataoffset)
+#define FRAME_HDR_START(iob)  ((iob)->io_data)
+#define FRAME_HDR_SIZE(iob)   g_dataoffset
 
-#define FRAME_DATA_START(ieee,iob) \
-  ((FAR uint8_t *)((iob)->io_data) + (ieee)->i_dataoffset)
-#define FRAME_DATA_SIZE(ieee,iob) \
-  ((iob)->io_len - (ieee)->i_dataoffset)
+#define FRAME_DATA_START(iob) ((FAR uint8_t *)((iob)->io_data) + g_dataoffset)
+#define FRAME_DATA_SIZE(iob)  ((iob)->io_len - g_dataoffset)
 
-#define FRAME_REMAINING(ieee,iob) \
-  (CONFIG_NET_6LOWPAN_FRAMELEN - (iob)->io_len)
+#define FRAME_REMAINING(iob)  (CONFIG_NET_6LOWPAN_FRAMELEN - (iob)->io_len)
 #define FRAME_SIZE(ieee,iob) \
   ((iob)->io_len)
 
@@ -131,6 +127,63 @@
 
 #define FRAME802154_SECURITY_LEVEL_NONE 0
 #define FRAME802154_SECURITY_LEVEL_128  3
+
+/* Packet buffer Definitions */
+
+#define PACKETBUF_HDR_SIZE                    48
+
+#define PACKETBUF_ATTR_PACKET_TYPE_DATA       0
+#define PACKETBUF_ATTR_PACKET_TYPE_ACK        1
+#define PACKETBUF_ATTR_PACKET_TYPE_STREAM     2
+#define PACKETBUF_ATTR_PACKET_TYPE_STREAM_END 3
+#define PACKETBUF_ATTR_PACKET_TYPE_TIMESTAMP  4
+
+/* Packet buffer attributes (indices into i_pktattr) */
+
+#define PACKETBUF_ATTR_NONE                   0
+
+/* Scope 0 attributes: used only on the local node. */
+
+#define PACKETBUF_ATTR_CHANNEL                1
+#define PACKETBUF_ATTR_NETWORK_ID             2
+#define PACKETBUF_ATTR_LINK_QUALITY           3
+#define PACKETBUF_ATTR_RSSI                   4
+#define PACKETBUF_ATTR_TIMESTAMP              5
+#define PACKETBUF_ATTR_RADIO_TXPOWER          6
+#define PACKETBUF_ATTR_LISTEN_TIME            7
+#define PACKETBUF_ATTR_TRANSMIT_TIME          8
+#define PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS  9
+#define PACKETBUF_ATTR_MAC_SEQNO              10
+#define PACKETBUF_ATTR_MAC_ACK                11
+
+/* Scope 1 attributes: used between two neighbors only. */
+
+#define PACKETBUF_ATTR_RELIABLE               12
+#define PACKETBUF_ATTR_PACKET_ID              13
+#define PACKETBUF_ATTR_PACKET_TYPE            14
+#define PACKETBUF_ATTR_REXMIT                 15
+#define PACKETBUF_ATTR_MAX_REXMIT             16
+#define PACKETBUF_ATTR_NUM_REXMIT             17
+#define PACKETBUF_ATTR_PENDING                18
+
+/* Scope 2 attributes: used between end-to-end nodes. */
+
+#define PACKETBUF_ATTR_HOPS                   11
+#define PACKETBUF_ATTR_TTL                    20
+#define PACKETBUF_ATTR_EPACKET_ID             21
+#define PACKETBUF_ATTR_EPACKET_TYPE           22
+#define PACKETBUF_ATTR_ERELIABLE              23
+
+#define PACKETBUF_NUM_ATTRS                   24
+
+/* Addresses (indices into i_pktaddr) */
+
+#define PACKETBUF_ADDR_SENDER                 0
+#define PACKETBUF_ADDR_RECEIVER               1
+#define PACKETBUF_ADDR_ESENDER                2
+#define PACKETBUF_ADDR_ERECEIVER              3
+
+#define PACKETBUF_NUM_ADDRS                   4
 
 /****************************************************************************
  * Public Types
@@ -241,6 +294,43 @@ extern FAR struct sixlowpan_nhcompressor_s *g_sixlowpan_compressor;
 struct sixlowpan_rime_sniffer_s; /* Foward reference */
 extern FAR struct sixlowpan_rime_sniffer_s *g_sixlowpan_sniffer;
 #endif
+
+/* The following data values are used to hold intermediate settings while
+ * processing IEEE802.15.4 frames.  These globals are shared with incoming
+ * and outgoing frame processing and possibly with mutliple IEEE802.15.4 MAC
+ * devices.  The network lock provides exclusive use of these globals
+ * during that processing
+ */
+
+/* A pointer to the rime buffer.
+ *
+ * We initialize it to the beginning of the rime buffer, then access
+ * different fields by updating the offset ieee->g_rime_hdrlen.
+ */
+
+extern FAR uint8_t *g_rimeptr;
+
+/* g_uncomp_hdrlen is the length of the headers before compression (if HC2
+ * is used this includes the UDP header in addition to the IP header).
+ */
+
+extern uint8_t g_uncomp_hdrlen;
+
+/* g_rime_hdrlen is the total length of (the processed) 6lowpan headers
+ * (fragment headers, IPV6 or HC1, HC2, and HC1 and HC2 non compressed
+ * fields).
+ */
+
+extern uint8_t g_rime_hdrlen;
+
+/* Offset first available byte for the payload after header region. */
+
+uint8_t g_dataoffset;
+
+/* Packet buffer metadata: Attributes and addresses */
+
+extern uint16_t g_pktattrs[PACKETBUF_NUM_ATTRS];
+extern struct rimeaddr_s g_pktaddrs[PACKETBUF_NUM_ADDRS];
 
 /****************************************************************************
  * Public Types
@@ -478,8 +568,7 @@ void sixlowpan_uncompresshdr_hc1(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int sixlowpan_frame_hdralloc(FAR struct ieee802154_driver_s *ieee,
-                             FAR struct iob_s *iob, int size);
+int sixlowpan_frame_hdralloc(FAR struct iob_s *iob, int size);
 
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* _NET_SIXLOWPAN_SIXLOWPAN_INTERNAL_H */

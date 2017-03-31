@@ -57,10 +57,6 @@
 #include "nuttx/net/iob.h"
 #include "nuttx/net/netdev.h"
 #include "nuttx/net/ip.h"
-#include "nuttx/net/tcp.h"
-#include "nuttx/net/udp.h"
-#include "nuttx/net/icmpv6.h"
-#include "nuttx/net/sixlowpan.h"
 
 #include "iob/iob.h"
 #include "netdev/netdev.h"
@@ -117,7 +113,7 @@ static void sixlowpan_set_pktattrs(FAR struct ieee802154_driver_s *ieee,
 
   /* Set protocol in NETWORK_ID */
 
-  ieee->i_pktattrs[PACKETBUF_ATTR_NETWORK_ID] = ipv6->proto;
+  g_pktattrs[PACKETBUF_ATTR_NETWORK_ID] = ipv6->proto;
 
   /* Assign values to the channel attribute (port or type + code) */
 
@@ -148,7 +144,7 @@ static void sixlowpan_set_pktattrs(FAR struct ieee802154_driver_s *ieee,
       attr = icmp->type << 8 | icmp->code;
     }
 
-  ieee->i_pktattrs[PACKETBUF_ATTR_CHANNEL] = attr;
+  g_pktattrs[PACKETBUF_ATTR_CHANNEL] = attr;
 }
 
 /****************************************************************************
@@ -181,14 +177,14 @@ static void sixlowpan_compress_ipv6hdr(FAR struct ieee802154_driver_s *ieee,
 {
   /* Indicate the IPv6 dispatch and length */
 
-  *ieee->i_rimeptr       = SIXLOWPAN_DISPATCH_IPV6;
-  ieee->i_rime_hdrlen   += SIXLOWPAN_IPV6_HDR_LEN;
+  *g_rimeptr       = SIXLOWPAN_DISPATCH_IPV6;
+  g_rime_hdrlen   += SIXLOWPAN_IPV6_HDR_LEN;
 
   /* Copy the IPv6 header and adjust pointers */
 
-  memcpy(ieee->i_rimeptr + ieee->i_rime_hdrlen, ipv6, IPv6_HDRLEN);
-  ieee->i_rime_hdrlen   += IPv6_HDRLEN;
-  ieee->i_uncomp_hdrlen += IPv6_HDRLEN;
+  memcpy(g_rimeptr + g_rime_hdrlen, ipv6, IPv6_HDRLEN);
+  g_rime_hdrlen   += IPv6_HDRLEN;
+  g_uncomp_hdrlen += IPv6_HDRLEN;
 }
 
 /****************************************************************************
@@ -217,8 +213,8 @@ static int sixlowpan_send_frame(FAR struct ieee802154_driver_s *ieee,
    */
 #if 0 /* Just some notes of what needs to be done in interrupt handler */
   framer_hdrlen = sixlowpan_createframe(ieee, ieee->i_panid);
-  memcpy(ieee->i_rimeptr + ieee->i_rime_hdrlen, (uint8_t *)ipv6 + ieee->i_uncomp_hdrlen, len - ieee->i_uncomp_hdrlen);
-  iob->io_len = len - ieee->i_uncomp_hdrlen + ieee->i_rime_hdrlen;
+  memcpy(g_rimeptr + g_rime_hdrlen, (uint8_t *)ipv6 + g_uncomp_hdrlen, len - g_uncomp_hdrlen);
+  iob->io_len = len - g_uncomp_hdrlen + g_rime_hdrlen;
 #endif
 #warning Missing logic
   /* Notify the IEEE802.14.5 MAC driver that we have data to be sent */
@@ -274,20 +270,22 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
   struct rimeaddr_s dest;
   uint16_t outlen = 0;
 
-  /* Initialize device-specific data */
+  /* Initialize global data.  Locking the network guarantees that we have
+   * exclusive use of the global values for intermediate calculations.
+   */
 
-  FRAME_RESET(ieee);
-  ieee->i_uncomp_hdrlen = 0;
-  ieee->i_rime_hdrlen   = 0;
+  FRAME_RESET();
+  g_uncomp_hdrlen = 0;
+  g_rime_hdrlen   = 0;
   /* REVISIT: Do I need this rimeptr? */
-  ieee->i_rimeptr = &dev->d_buf[PACKETBUF_HDR_SIZE];
+  g_rimeptr       = &dev->d_buf[PACKETBUF_HDR_SIZE];
 
   /* Reset rime buffer, packet buffer metatadata */
 
-  memset(ieee->i_pktattrs, 0, PACKETBUF_NUM_ATTRS * sizeof(uint16_t));
-  memset(ieee->i_pktaddrs, 0, PACKETBUF_NUM_ADDRS * sizeof(struct rimeaddr_s));
+  memset(g_pktattrs, 0, PACKETBUF_NUM_ATTRS * sizeof(uint16_t));
+  memset(g_pktaddrs, 0, PACKETBUF_NUM_ADDRS * sizeof(struct rimeaddr_s));
 
-  ieee->i_pktattrs[PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS] =
+  g_pktattrs[PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS] =
     CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS;
 
 #ifdef CONFIG_NET_6LOWPAN_SNIFFER
@@ -295,10 +293,10 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
     {
       /* Reset rime buffer, packet buffer metatadata */
 
-      memset(ieee->i_pktattrs, 0, PACKETBUF_NUM_ATTRS * sizeof(uint16_t));
-      memset(ieee->i_pktaddrs, 0, PACKETBUF_NUM_ADDRS * sizeof(struct rimeaddr_s));
+      memset(g_pktattrs, 0, PACKETBUF_NUM_ATTRS * sizeof(uint16_t));
+      memset(g_pktaddrs, 0, PACKETBUF_NUM_ADDRS * sizeof(struct rimeaddr_s));
 
-      ieee->i_pktattrs[PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS] =
+      g_pktattrs[PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS] =
         CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS;
 
       /* Call the attribution when the callback comes, but set attributes here */
@@ -309,10 +307,10 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
 
   /* Reset rime buffer, packet buffer metatadata */
 
-  memset(ieee->i_pktattrs, 0, PACKETBUF_NUM_ATTRS * sizeof(uint16_t));
-  memset(ieee->i_pktaddrs, 0, PACKETBUF_NUM_ADDRS * sizeof(struct rimeaddr_s));
+  memset(g_pktattrs, 0, PACKETBUF_NUM_ATTRS * sizeof(uint16_t));
+  memset(g_pktaddrs, 0, PACKETBUF_NUM_ADDRS * sizeof(struct rimeaddr_s));
 
-  ieee->i_pktattrs[PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS] =
+  g_pktattrs[PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS] =
     CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS;
 
   /* Set stream mode for all TCP packets, except FIN packets. */
@@ -324,11 +322,11 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
       if ((tcp->flags & TCP_FIN) == 0 &&
           (tcp->flags & TCP_CTL) != TCP_ACK)
         {
-          ieee->i_pktattrs[PACKETBUF_ATTR_PACKET_TYPE] = PACKETBUF_ATTR_PACKET_TYPE_STREAM;
+          g_pktattrs[PACKETBUF_ATTR_PACKET_TYPE] = PACKETBUF_ATTR_PACKET_TYPE_STREAM;
         }
       else if ((tcp->flags & TCP_FIN) == TCP_FIN)
         {
-          ieee->i_pktattrs[PACKETBUF_ATTR_PACKET_TYPE] = PACKETBUF_ATTR_PACKET_TYPE_STREAM_END;
+          g_pktattrs[PACKETBUF_ATTR_PACKET_TYPE] = PACKETBUF_ATTR_PACKET_TYPE_STREAM_END;
         }
     }
 
@@ -368,9 +366,9 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
       sixlowpan_compress_ipv6hdr(ieee, ipv6);
     }
 
-  ninfo("Header of len %d\n", ieee->i_rime_hdrlen);
+  ninfo("Header of len %d\n", g_rime_hdrlen);
 
-  rimeaddr_copy(&ieee->i_pktaddrs[PACKETBUF_ADDR_RECEIVER], &dest);
+  rimeaddr_copy(&g_pktaddrs[PACKETBUF_ADDR_RECEIVER], &dest);
 
   /* Pre-calculate frame header length. */
 
@@ -385,9 +383,9 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
 
   /* Check if we need to fragment the packet into several frames */
 
-  if ((int)len - (int)ieee->i_uncomp_hdrlen >
+  if ((int)len - (int)g_uncomp_hdrlen >
       (int)CONFIG_NET_6LOWPAN_MAXPAYLOAD - framer_hdrlen -
-      (int)ieee->i_rime_hdrlen)
+      (int)g_rime_hdrlen)
     {
 #if CONFIG_NET_6LOWPAN_FRAG
       /* ieee->i_framelist will hold the generated frames; frames will be

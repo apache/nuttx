@@ -44,8 +44,6 @@
 #include <debug.h>
 
 #include "nuttx/net/netdev.h"
-#include "nuttx/net/udp.h"
-#include "nuttx/net/sixlowpan.h"
 
 #include "netdev/netdev.h"
 #include "socket/socket.h"

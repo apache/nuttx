@@ -39,8 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include "nuttx/net/sixlowpan.h"
-
 #include "sixlowpan/sixlowpan_internal.h"
 
 #ifdef CONFIG_NET_6LOWPAN
@@ -58,5 +56,42 @@ FAR struct sixlowpan_nhcompressor_s *g_sixlowpan_compressor;
 
 FAR struct sixlowpan_rime_sniffer_s *g_sixlowpan_sniffer;
 #endif
+
+/* The following data values are used to hold intermediate settings while
+ * processing IEEE802.15.4 frames.  These globals are shared with incoming
+ * and outgoing frame processing and possibly with mutliple IEEE802.15.4 MAC
+ * devices.  The network lock provides exclusive use of these globals
+ * during that processing
+ */
+
+/* A pointer to the rime buffer.
+ *
+ * We initialize it to the beginning of the rime buffer, then access
+ * different fields by updating the offset ieee->g_rime_hdrlen.
+ */
+
+FAR uint8_t *g_rimeptr;
+
+/* g_uncomp_hdrlen is the length of the headers before compression (if HC2
+ * is used this includes the UDP header in addition to the IP header).
+ */
+
+uint8_t g_uncomp_hdrlen;
+
+/* g_rime_hdrlen is the total length of (the processed) 6lowpan headers
+ * (fragment headers, IPV6 or HC1, HC2, and HC1 and HC2 non compressed
+ * fields).
+ */
+
+uint8_t g_rime_hdrlen;
+
+/* Offset first available byte for the payload after header region. */
+
+uint8_t g_dataoffset;
+
+/* Packet buffer metadata: Attributes and addresses */
+
+uint16_t g_pktattrs[PACKETBUF_NUM_ATTRS];
+struct rimeaddr_s g_pktaddrs[PACKETBUF_NUM_ADDRS];
 
 #endif /* CONFIG_NET_6LOWPAN */
