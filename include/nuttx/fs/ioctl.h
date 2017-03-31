@@ -86,6 +86,7 @@
 #define _SPIBASE        (0x2100) /* SPI driver commands */
 #define _GPIOBASE       (0x2200) /* GPIO driver commands */
 #define _CLIOCBASE      (0x2300) /* Contactless modules ioctl commands */
+#define _USBCBASE       (0x2400) /* USB-C controller ioctl commands */
 
 /* boardctl() commands share the same number space */
 
@@ -400,6 +401,12 @@
 
 #define _CLIOCVALID(c)    (_IOC_TYPE(c)==_CLIOCBASE)
 #define _CLIOC(nr)        _IOC(_CLIOCBASE,nr)
+
+/* USB-C controller driver ioctl definitions ********************************/
+/* (see nuttx/include/usb/xxx.h */
+
+#define _USBCIOCVALID(c)  (_IOC_TYPE(c)==_USBCBASE)
+#define _USBCIOC(nr)      _IOC(_USBCBASE,nr)
 
 /* boardctl() command definitions *******************************************/
 

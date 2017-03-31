@@ -220,7 +220,7 @@ static const struct file_operations g_lps25hops =
   lps25h_close,  /* close */
   lps25h_read,   /* read */
   lps25h_write,  /* write */
-  0,             /* seek */
+  NULL,          /* seek */
   lps25h_ioctl   /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   , NULL         /* poll */
