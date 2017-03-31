@@ -174,8 +174,6 @@ static const struct file_operations g_humidityops =
 #endif
 };
 
-static struct hts221_dev_s *g_humid_data;
-
 /****************************************************************************
 * Private Functions
 ****************************************************************************/
@@ -1069,13 +1067,14 @@ out:
 
 static int hts221_int_handler(int irq, FAR void *context, FAR void *arg)
 {
-  if (!g_humid_data)
-    return OK;
+  FAR struct hts221_dev_s *priv = (FAR struct hts221_dev_s *)arg;
 
-  g_humid_data->int_pending = true;
+  DEBUGASSERT(priv != NULL);
+
+  priv->int_pending = true;
   hts221_dbg("Hts221 interrupt\n");
 #ifndef CONFIG_DISABLE_POLL
-  hts221_notify(g_humid_data);
+  hts221_notify(priv);
 #endif
 
   return OK;
@@ -1095,7 +1094,6 @@ int hts221_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
       return -ENOMEM;
     }
 
-  g_humid_data = priv;
   priv->addr   = addr;
   priv->i2c    = i2c;
   priv->config = config;
@@ -1125,7 +1123,7 @@ int hts221_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
       priv->config->irq_clear(priv->config);
     }
 
-  priv->config->irq_attach(priv->config, hts221_int_handler);
+  priv->config->irq_attach(priv->config, hts221_int_handler, priv);
   priv->config->irq_enable(priv->config, false);
   return OK;
 }
