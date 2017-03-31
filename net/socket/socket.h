@@ -49,6 +49,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/net/net.h>
+#include "tcp/tcp.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -152,7 +153,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 struct tcp_conn_s; /* Forward reference */
 #endif
 
@@ -243,7 +244,7 @@ FAR struct socket *sockfd_socket(int sockfd);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 int net_startmonitor(FAR struct socket *psock);
 #endif
 
@@ -265,7 +266,7 @@ int net_startmonitor(FAR struct socket *psock);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 void net_stopmonitor(FAR struct tcp_conn_s *conn);
 #endif
 
@@ -287,7 +288,7 @@ void net_stopmonitor(FAR struct tcp_conn_s *conn);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 void net_lostconnection(FAR struct socket *psock, uint16_t flags);
 #endif
 

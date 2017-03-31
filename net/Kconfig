@@ -236,6 +236,23 @@ config TUN_LPWORK
 endchoice # Work queue
 endif # NET_TUN
 
+config NET_USRSOCK
+	bool "User-space networking stack API"
+	default n
+	---help---
+		Enable or disable user-space networking stack support.
+
+		User-space networking stack API allows user-space daemon to
+		provide TCP/IP stack implementation for NuttX network.
+
+		Main use for this is to allow use and integration of
+		HW-provided TCP/IP stacks for NuttX.
+
+		For example, user-space daemon can translate /dev/usrsock API
+		requests to HW TCP/IP API requests while rest of the user-space
+		can access standard socket API, with socket descriptors that
+		can be used with NuttX system calls.
+
 endmenu # Data link support
 
 source "net/netdev/Kconfig"
@@ -271,6 +288,7 @@ source "net/arp/Kconfig"
 source "net/loopback/Kconfig"
 source "net/iob/Kconfig"
 source "net/procfs/Kconfig"
+source "net/usrsock/Kconfig"
 source "net/utils/Kconfig"
 
 config NET_STATISTICS

@@ -234,12 +234,17 @@
  */
 
 struct net_driver_s;       /* Forward reference */
+
+typedef CODE uint16_t (*devif_callback_event_t)(FAR struct net_driver_s *dev,
+                                                FAR void *pvconn,
+                                                FAR void *pvpriv,
+                                                uint16_t flags);
+
 struct devif_callback_s
 {
   FAR struct devif_callback_s *nxtconn;
   FAR struct devif_callback_s *nxtdev;
-  uint16_t (*event)(FAR struct net_driver_s *dev, FAR void *pvconn,
-                    FAR void *pvpriv, uint16_t flags);
+  FAR devif_callback_event_t event;
   FAR void *priv;
   uint16_t flags;
 };

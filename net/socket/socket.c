@@ -52,6 +52,7 @@
 #include "udp/udp.h"
 #include "pkt/pkt.h"
 #include "local/local.h"
+#include "usrsock/usrsock.h"
 
 /****************************************************************************
  * Private Functions
@@ -65,7 +66,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 static int psock_tcp_alloc(FAR struct socket *psock)
 {
   /* Allocate the TCP connection structure */
@@ -90,7 +91,7 @@ static int psock_tcp_alloc(FAR struct socket *psock)
   psock->s_conn = conn;
   return OK;
 }
-#endif /* CONFIG_NET_TCP */
+#endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Name: psock_udp_alloc
@@ -100,7 +101,7 @@ static int psock_tcp_alloc(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_UDP
+#ifdef NET_UDP_HAVE_STACK
 static int psock_udp_alloc(FAR struct socket *psock)
 {
   /* Allocate the UDP connection structure */
@@ -125,7 +126,7 @@ static int psock_udp_alloc(FAR struct socket *psock)
   psock->s_conn = conn;
   return OK;
 }
-#endif /* CONFIG_NET_UDP */
+#endif /* NET_UDP_HAVE_STACK */
 
 /****************************************************************************
  * Name: psock_pkt_alloc
@@ -249,6 +250,47 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
   bool dgramok  = false;
   int ret;
   int errcode;
+
+#ifdef CONFIG_NET_USRSOCK
+  switch (domain)
+    {
+      default:
+        break;
+
+      case PF_INET:
+      case PF_INET6:
+        {
+#ifndef CONFIG_NET_USRSOCK_UDP
+          if (type == SOCK_DGRAM)
+            break;
+#endif
+#ifndef CONFIG_NET_USRSOCK_TCP
+          if (type == SOCK_STREAM)
+            break;
+#endif
+          psock->s_type = 0;
+          psock->s_conn = NULL;
+
+          ret = usrsock_socket(domain, type, protocol, psock);
+          if (ret >= 0)
+            {
+              /* Successfully handled and opened by usrsock daemon. */
+
+              return OK;
+            }
+          else if (ret == -ENETDOWN)
+            {
+              /* Net down means that usrsock daemon is not running.
+               * Attempt to open socket with kernel networking stack. */
+            }
+          else
+            {
+              errcode = -ret;
+              goto errout;
+            }
+        }
+    }
+#endif /* CONFIG_NET_USRSOCK */
 
   /* Only PF_INET, PF_INET6 or PF_PACKET domains supported */
 
@@ -400,9 +442,13 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
           if (ipdomain)
 #endif
             {
+#ifdef NET_TCP_HAVE_STACK
               /* Allocate and attach the TCP connection structure */
 
               ret = psock_tcp_alloc(psock);
+#else
+              ret = -ENETDOWN;
+#endif
             }
 #endif /* CONFIG_NET_TCP */
 
@@ -438,9 +484,13 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
           if (ipdomain)
 #endif
             {
+#ifdef NET_UDP_HAVE_STACK
               /* Allocate and attach the UDP connection structure */
 
               ret = psock_udp_alloc(psock);
+#else
+              ret = -ENETDOWN;
+#endif
             }
 #endif /* CONFIG_NET_UDP */
 

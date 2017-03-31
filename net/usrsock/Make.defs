@@ -1,8 +1,8 @@
 ############################################################################
-# net/tcp/Make.defs
+# net/usrsock/Make.defs
 #
-#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <gnutt@nuttx.org>
+#   Copyright (C) 2015, 2017 Haltian Ltd. All rights reserved.
+#   Author: Jussi Kivilinna <jussi.kivilinna@haltian.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,46 +33,19 @@
 #
 ############################################################################
 
-# TCP/IP source files
+# User Socket source files
 
-ifeq ($(CONFIG_NET_TCP),y)
-ifneq ($(CONFIG_NET_TCP_NO_STACK),y)
+ifeq ($(CONFIG_NET_USRSOCK),y)
 
-# Socket layer
+NET_CSRCS += usrsock_close.c usrsock_conn.c usrsock_bind.c usrsock_connect.c
+NET_CSRCS += usrsock_dev.c
+NET_CSRCS += usrsock_event.c usrsock_getsockname.c usrsock_getsockopt.c
+NET_CSRCS += usrsock_poll.c usrsock_recvfrom.c usrsock_sendto.c 
+NET_CSRCS += usrsock_setsockopt.c usrsock_socket.c
 
-SOCK_CSRCS += tcp_accept.c
+# Include User Socket build support
 
-ifeq ($(CONFIG_NET_TCP_WRITE_BUFFERS),y)
-SOCK_CSRCS += tcp_send_buffered.c
-else
-SOCK_CSRCS += tcp_send_unbuffered.c
-endif
+DEPPATH += --dep-path usrsock
+VPATH += :usrsock
 
-ifneq ($(CONFIG_DISABLE_POLL),y)
-ifeq ($(CONFIG_NET_TCP_READAHEAD),y)
-NET_CSRCS += tcp_netpoll.c
-endif
-endif
-
-# Transport layer
-
-NET_CSRCS += tcp_conn.c tcp_seqno.c tcp_devpoll.c tcp_finddev.c tcp_timer.c
-NET_CSRCS += tcp_send.c tcp_input.c tcp_appsend.c tcp_listen.c
-NET_CSRCS += tcp_callback.c tcp_backlog.c tcp_ipselect.c
-
-# TCP write buffering
-
-ifeq ($(CONFIG_NET_TCP_WRITE_BUFFERS),y)
-NET_CSRCS += tcp_wrbuffer.c
-ifeq ($(CONFIG_DEBUG_FEATURES),y)
-NET_CSRCS += tcp_wrbuffer_dump.c
-endif
-endif
-
-# Include TCP build support
-
-DEPPATH += --dep-path tcp
-VPATH += :tcp
-
-endif # !CONFIG_NET_TCP_NO_STACK
-endif # CONFIG_NET_TCP
+endif # CONFIG_NET_USRSOCK

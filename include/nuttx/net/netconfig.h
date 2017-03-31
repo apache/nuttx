@@ -97,7 +97,7 @@
  *
  *   - Maximum Transfer Unit (MTU)
  *   - TCP Receive Window size (See TCP configuration options below)
- * 
+ *
  * A better solution would be to support device-by-device MTU and receive
  * window sizes.  This minimum support is require to support the optimal
  * SLIP MTU of 296 bytes and the standard Ethernet MTU of 1500
@@ -545,6 +545,18 @@
  */
 
 #  define CONFIG_NET_ARP_MAXAGE 120
+#endif
+
+/* Usrsock configuration options */
+
+/* The maximum amount of concurrent usrsock connections, Default: 6 */
+
+#ifndef CONFIG_NET_USRSOCK_CONNS
+#  ifdef CONFIG_NET_USRSOCK
+#    define CONFIG_NET_USRSOCK_CONNS 6
+#  else
+#    define CONFIG_NET_USRSOCK_CONNS 0
+#  endif
 #endif
 
 /* General configuration options */
