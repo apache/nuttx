@@ -86,8 +86,9 @@
 #define _SPIBASE        (0x2100) /* SPI driver commands */
 #define _GPIOBASE       (0x2200) /* GPIO driver commands */
 #define _CLIOCBASE      (0x2300) /* Contactless modules ioctl commands */
-#define _MAC802154BASE  (0x2400) /* 802.15.4 MAC ioctl commands */
-#define _PHY802154BASE  (0x2500) /* 802.15.4 Radio ioctl commands */
+#define _USBCBASE       (0x2400) /* USB-C controller ioctl commands */
+#define _MAC802154BASE  (0x2500) /* 802.15.4 MAC ioctl commands */
+#define _PHY802154BASE  (0x2600) /* 802.15.4 Radio ioctl commands */
 
 /* boardctl() commands share the same number space */
 
@@ -397,19 +398,25 @@
 #define _GPIOCVALID(c)    (_IOC_TYPE(c)==_GPIOBASE)
 #define _GPIOC(nr)        _IOC(_GPIOBASE,nr)
 
-/* Contactless driver ioctl definitions ****************************************/
+/* Contactless driver ioctl definitions *************************************/
 /* (see nuttx/include/contactless/ioctl.h */
 
 #define _CLIOCVALID(c)    (_IOC_TYPE(c)==_CLIOCBASE)
 #define _CLIOC(nr)        _IOC(_CLIOCBASE,nr)
 
-/* 802.15.4 MAC driver ioctl definitions *******************************************/
+/* USB-C controller driver ioctl definitions ********************************/
+/* (see nuttx/include/usb/xxx.h */
+
+#define _USBCIOCVALID(c)  (_IOC_TYPE(c)==_USBCBASE)
+#define _USBCIOC(nr)      _IOC(_USBCBASE,nr)
+
+/* 802.15.4 MAC driver ioctl definitions ************************************/
 /* (see nuttx/include/wireless/ieee802154/ieee802154_mac.h */
 
 #define _MAC802154IOCVALID(c)   (_IOC_TYPE(c)==_MAC802154BASE)
 #define _MAC802154IOC(nr)       _IOC(_MAC802154BASE,nr)
 
-/* 802.15.4 Radio driver ioctl definitions *******************************************/
+/* 802.15.4 Radio driver ioctl definitions **********************************/
 /* (see nuttx/ieee802154/wireless/ieee802154_radio.h */
 
 #define _PHY802154IOCVALID(c)    (_IOC_TYPE(c)==_PHY802154BASE)

@@ -117,10 +117,11 @@ typedef struct hts221_settings_s
 typedef struct hts221_config_s
 {
   int irq;
-  CODE int  (*irq_attach)(FAR struct hts221_config_s * state, xcpt_t isr);
-  CODE void (*irq_enable)(FAR const struct hts221_config_s * state,
+  CODE int  (*irq_attach)(FAR struct hts221_config_s * state, xcpt_t isr,
+                          FAR void *arg);
+  CODE void (*irq_enable)(FAR const struct hts221_config_s *state,
                           bool enable);
-  CODE void (*irq_clear)(FAR const struct hts221_config_s * state);
+  CODE void (*irq_clear)(FAR const struct hts221_config_s *state);
   CODE int  (*set_power)(FAR const struct hts221_config_s *state, bool on);
 } hts221_config_t;
 

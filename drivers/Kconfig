@@ -552,6 +552,16 @@ if USBHOST
 source drivers/usbhost/Kconfig
 endif # USBHOST
 
+menuconfig USBMISC
+	bool "USB Miscellaneous drivers"
+	default n
+	---help---
+		USB Miscellaneous drivers.
+
+if USBMISC
+source drivers/usbmisc/Kconfig
+endif # USBMISC
+
 config HAVE_USBTRACE
 	bool
 	default n

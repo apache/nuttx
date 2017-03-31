@@ -54,6 +54,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include "nuttx/net/iob.h"
 #include "nuttx/net/netdev.h"
 #include "nuttx/net/ip.h"
 #include "nuttx/net/tcp.h"
@@ -61,6 +62,7 @@
 #include "nuttx/net/icmpv6.h"
 #include "nuttx/net/sixlowpan.h"
 
+#include "iob/iob.h"
 #include "netdev/netdev.h"
 #include "socket/socket.h"
 #include "tcp/tcp.h"
@@ -68,6 +70,26 @@
 #include "sixlowpan/sixlowpan_internal.h"
 
 #ifdef CONFIG_NET_6LOWPAN
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+/* A single IOB must be big enough to hold a full frame */
+
+#if CONFIG_IOB_BUFSIZE < CONFIG_NET_6LOWPAN_FRAMELEN
+#  error IOBs must be large enough to hold full IEEE802.14.5 frame
+#endif
+
+/* There must be at least enough IOBs to hold the full MTU.  Probably still
+ * won't work unless there are a few more.
+ */
+
+#if CONFIG_NET_6LOWPAN_MTU > (CONFIG_IOB_BUFSIZE * CONFIG_IOB_NBUFFERS)
+#  error Not enough IOBs to hold one full IEEE802.14.5 packet
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -177,14 +199,15 @@ static void sixlowpan_compress_ipv6hdr(FAR struct ieee802154_driver_s *ieee,
  *
  * Input Parameters:
  *   ieee - Pointer to IEEE802.15.4 MAC driver structure.
- *   ipv6 - Pointer to the IPv6 header to "compress"
+ *   iobq - The list of frames to send.
  *
  * Returned Value:
- *   None
+ *   Zero (OK) on success; otherwise a negated errno value is returned.
  *
  ****************************************************************************/
 
-static int sixlowpan_send_frame(FAR struct ieee802154_driver_s *ieee)
+static int sixlowpan_send_frame(FAR struct ieee802154_driver_s *ieee,
+                                FAR struct iob_s *iobq)
 {
   /* Prepare the frame */
 #warning Missing logic
@@ -247,10 +270,10 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
                    size_t len, FAR const struct rimeaddr_s *raddr)
 {
   FAR struct ieee802154_driver_s *ieee = (FAR struct ieee802154_driver_s *)dev;
-
-  int framer_hdrlen;       /* Framer header length */
-  struct rimeaddr_s dest;  /* The MAC address of the destination of the packet */
-  uint16_t outlen = 0;     /* Number of bytes processed. */
+  FAR struct iob_s *iob;
+  int framer_hdrlen;
+  struct rimeaddr_s dest;
+  uint16_t outlen = 0;
 
   /* Initialize device-specific data */
 
@@ -356,7 +379,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
   if (framer_hdrlen < 0)
     {
       /* Failed to determine the size of the header failed. */
- 
+
       nerr("ERROR: sixlowpan_framecreate() failed: %d\n", framer_hdrlen);
       return framer_hdrlen;
     }
@@ -368,6 +391,13 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
       (int)ieee->i_rime_hdrlen)
     {
 #if CONFIG_NET_6LOWPAN_FRAG
+      /* qhead will hold the generated frames; Subsequent frames will be
+       * added at qtail.
+       */
+
+      FAR struct iob_s *qhead;
+      FAR struct iob_s *qtail;
+
       /* The outbound IPv6 packet is too large to fit into a single 15.4
        * packet, so we fragment it into multiple packets and send them.
        * The first fragment contains frag1 dispatch, then
@@ -376,6 +406,11 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
        */
 
       ninfo("Fragmentation sending packet len %d\n", len);
+
+      /* Allocate an IOB to hold the first fragment, waiting if necessary. */
+
+      iob = iob_alloc(false);
+      DEBUGASSERT(iob != NULL);
 
       /* Create 1st Fragment */
 #  warning Missing logic
@@ -390,12 +425,18 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
 
       /* Copy payload and send */
 #  warning Missing logic
- 
+
       /* Check TX result. */
 #  warning Missing logic
 
       /* Set outlen to what we already sent from the IP payload */
 #  warning Missing logic
+
+      /* Add the first frame to the IOB queue */
+
+      qhead         = iob;
+      qtail         = iob;
+      iob->io_flink = NULL;
 
       /* Create following fragments
        * Datagram tag is already in the buffer, we need to set the
@@ -405,20 +446,31 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
 
       while (outlen < len)
         {
-          /* Copy payload and send */
+          /* Allocate an IOB to hold the next fragment, waiting if
+           * necessary.
+           */
+
+          iob = iob_alloc(false);
+          DEBUGASSERT(iob != NULL);
+
+          /* Copy payload */
 #  warning Missing logic
 
           ninfo("sixlowpan output: fragment offset %d, len %d, tag %d\n",
                 outlen >> 3, g_rime_payloadlen, g_mytag);
 
-#  warning Missing logic
-          sixlowpan_send_frame(ieee);
+          /* Add the next frame to the tail of the IOB queue */
+
+          qtail->io_flink = iob;
+          iob->io_flink   = NULL;
 
           /* Check tx result. */
 #  warning Missing logic
         }
 
-      return -ENOSYS;
+      /* Send the list of frames */
+
+      return sixlowpan_send_frame(ieee, qhead);
 #else
       nerr("ERROR: Packet too large: %d\n", len);
       nerr("       Cannot to be sent without fragmentation support\n");
@@ -433,10 +485,19 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
        * and send in one frame.
        */
 
-      return sixlowpan_send_frame(ieee);
-    }
+      /* Allocate an IOB to hold the frame, waiting if necessary. */
 
-  return -ENOSYS;
+      iob = iob_alloc(false);
+      DEBUGASSERT(iob != NULL);
+
+      /* Format the single frame */
+#  warning Missing logic
+
+      /* Send the single frame */
+
+      iob->io_flink = NULL;
+      return sixlowpan_send_frame(ieee, iob);
+    }
 }
 
 #endif /* CONFIG_NET_6LOWPAN */
