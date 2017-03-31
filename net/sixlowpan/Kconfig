@@ -3,14 +3,6 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-menuconfig NET_6LOWPAN
-	bool "IEEE 802.15.4 6LoWPAN support"
-	default n
-	depends on EXPERIMENTAL && NET_IPv6
-	---help---
-		Enable support for IEEE 802.15.4 Low power Wireless Personal Area
-		Networking (6LoWPAN).
-
 if NET_6LOWPAN
 
 config NET_6LOWPAN_FRAG

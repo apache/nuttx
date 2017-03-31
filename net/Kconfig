@@ -123,14 +123,23 @@ config NET_USER_DEVFMT
 
 config NET_ETHERNET
 	bool "Ethernet support"
-	default y if !NET_SLIP
-	default n if NET_SLIP
+	default y
 	select NETDEV_MULTINIC if NET_6LOWPAN || NET_LOOPBACK || NET_SLIP || NET_TUN
 	select NET_MULTILINK if NET_6LOWPAN || NET_LOOPBACK || NET_SLIP || NET_TUN
 	---help---
 		If NET_SLIP is not selected, then Ethernet will be used (there is
 		no need to define anything special in the configuration file to use
 		Ethernet -- it is the default).
+
+menuconfig NET_6LOWPAN
+	bool "IEEE 802.15.4 6LoWPAN support"
+	default n
+	select NETDEV_MULTINIC if NET_ETHERNET || NET_LOOPBACK || NET_SLIP || NET_TUN
+	select NET_MULTILINK if NET_ETHERNET || NET_LOOPBACK || NET_SLIP || NET_TUN
+	depends on EXPERIMENTAL && NET_IPv6
+	---help---
+		Enable support for IEEE 802.15.4 Low power Wireless Personal Area
+		Networking (6LoWPAN).
 
 config NET_LOOPBACK
 	bool "Local loopback"

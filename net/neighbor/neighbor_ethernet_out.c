@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/neighbor/neighbor_out.c
+ * net/neighbor/neighbor_ethernet_out.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
