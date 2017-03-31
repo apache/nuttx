@@ -300,7 +300,7 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
       else
 #endif
         {
-          pstate->tc_conn->mss = TCP_IPv4_INITIAL_MSS(dev);
+          pstate->tc_conn->mss = TCP_IPv6_INITIAL_MSS(dev);
         }
 #endif /* CONFIG_NET_IPv6 */
 
