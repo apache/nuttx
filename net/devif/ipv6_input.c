@@ -197,7 +197,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
    * negotiating over DHCP for an address).
    */
 
-#if defined(CONFIG_NET_BROADCAST) && defined(CONFIG_NET_UDP)
+#if defined(CONFIG_NET_BROADCAST) && defined(NET_UDP_HAVE_STACK)
   if (ipv6->proto == IP_PROTO_UDP &&
       net_ipv6addr_cmp(ipv6->destipaddr, g_ipv6_alloneaddr))
     {
@@ -253,13 +253,13 @@ int ipv6_input(FAR struct net_driver_s *dev)
 
   switch (ipv6->proto)
     {
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
       case IP_PROTO_TCP:   /* TCP input */
         tcp_ipv6_input(dev);
         break;
 #endif
 
-#ifdef CONFIG_NET_UDP
+#ifdef NET_UDP_HAVE_STACK
       case IP_PROTO_UDP:   /* UDP input */
         udp_ipv6_input(dev);
         break;

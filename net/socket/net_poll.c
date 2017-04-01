@@ -45,6 +45,7 @@
 #include "udp/udp.h"
 #include "local/local.h"
 #include "socket/socket.h"
+#include "usrsock/usrsock.h"
 
 #if defined(CONFIG_NET) && !defined(CONFIG_DISABLE_POLL)
 
@@ -57,7 +58,8 @@
  */
 
 #undef HAVE_NET_POLL
-#if defined(HAVE_TCP_POLL) || defined(HAVE_UDP_POLL) || defined(HAVE_LOCAL_POLL)
+#if defined(HAVE_TCP_POLL) || defined(HAVE_UDP_POLL) || \
+    defined(HAVE_LOCAL_POLL) || defined(CONFIG_NET_USRSOCK)
 #  define HAVE_NET_POLL 1
 #endif
 
@@ -232,6 +234,15 @@ int psock_poll(FAR struct socket *psock, FAR struct pollfd *fds, bool setup)
   return -ENOSYS;
 #else
   int ret;
+
+#ifdef CONFIG_NET_USRSOCK
+  if (psock->s_type == SOCK_USRSOCK_TYPE)
+    {
+      /* Perform usrsock setup/teardown. */
+
+      return usrsock_poll(psock, fds, setup);
+    }
+#endif
 
   /* Check if we are setting up or tearing down the poll */
 

@@ -48,6 +48,7 @@
 #include "tcp/tcp.h"
 #include "local/local.h"
 #include "socket/socket.h"
+#include "usrsock/usrsock.h"
 
 /****************************************************************************
  * Public Functions
@@ -92,6 +93,13 @@ int psock_listen(FAR struct socket *psock, int backlog)
 
   if (psock->s_type != SOCK_STREAM || !psock->s_conn)
     {
+#ifdef CONFIG_NET_USRSOCK
+      if (psock->s_type == SOCK_USRSOCK_TYPE)
+        {
+#warning "Missing logic"
+        }
+#endif
+
       errcode = EOPNOTSUPP;
       goto errout;
     }
@@ -118,6 +126,7 @@ int psock_listen(FAR struct socket *psock, int backlog)
   else
 #endif
     {
+#ifdef NET_TCP_HAVE_STACK
       FAR struct tcp_conn_s *conn =
         (FAR struct tcp_conn_s *)psock->s_conn;
 
@@ -143,6 +152,10 @@ int psock_listen(FAR struct socket *psock, int backlog)
        */
 
       tcp_listen(conn);
+#else
+      errcode = EOPNOTSUPP;
+      goto errout;
+#endif /* NET_TCP_HAVE_STACK */
     }
 #endif /* CONFIG_NET_TCP */
 

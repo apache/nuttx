@@ -36,6 +36,7 @@
 # UDP source files
 
 ifeq ($(CONFIG_NET_UDP),y)
+ifneq ($(CONFIG_NET_UDP_NO_STACK),y)
 
 # Socket layer
 
@@ -57,4 +58,5 @@ NET_CSRCS += udp_callback.c udp_ipselect.c
 DEPPATH += --dep-path udp
 VPATH += :udp
 
+endif # !CONFIG_NET_UDP_NO_STACK
 endif # CONFIG_NET_UDP

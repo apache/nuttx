@@ -44,15 +44,17 @@
  * SUCH DAMAGE.
  *
  ****************************************************************************/
-/* Frame Organization:
+
+/* Frame Organization.  The IOB data is retained in the io_data[] field of the
+ * IOB structure like:
  *
  *     Content            Offset
  *   +------------------+ 0
  *   | Frame Header     |
- *   +------------------+ i_dataoffset
+ *   +------------------+ g_dataoffset
  *   | Procotol Headers |
  *   | Data Payload     |
- *   +------------------+ i_framelen
+ *   +------------------+ iob->io_len
  *   | Unused           |
  *   +------------------+ CONFIG_NET_6LOWPAN_FRAMELEN
  */
@@ -65,8 +67,6 @@
 
 #include <string.h>
 #include <errno.h>
-
-#include "nuttx/net/sixlowpan.h"
 
 #include "sixlowpan/sixlowpan_internal.h"
 
@@ -84,13 +84,12 @@
  *
  ****************************************************************************/
 
-int sixlowpan_frame_hdralloc(FAR struct ieee802154_driver_s *ieee,
-                             int size)
+int sixlowpan_frame_hdralloc(FAR struct iob_s *iob, int size)
 {
-  if (size <= FRAME_REMAINING(ieee))
+  if (size <= FRAME_REMAINING(iob))
     {
-      ieee->i_dataoffset += size;
-      ieee->i_framelen   += size;
+      g_dataoffset += size;
+      iob->io_len  += size;
       return OK;
     }
 

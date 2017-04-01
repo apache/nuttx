@@ -186,7 +186,7 @@ static inline int devif_poll_igmp(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_UDP
+#ifdef NET_UDP_HAVE_STACK
 static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
                                       devif_poll_callback_t callback)
 {
@@ -208,7 +208,7 @@ static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
 
   return bstop;
 }
-#endif /* CONFIG_NET_UDP */
+#endif /* NET_UDP_HAVE_STACK */
 
 /****************************************************************************
  * Function: devif_poll_tcp_connections
@@ -222,7 +222,7 @@ static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
                                              devif_poll_callback_t callback)
 {
@@ -261,7 +261,7 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
                                        devif_poll_callback_t callback,
                                        int hsec)
@@ -349,7 +349,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 
   if (!bstop)
 #endif
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
     {
       /* Traverse all of the active TCP connections and perform the poll
        * action.
@@ -360,7 +360,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 
   if (!bstop)
 #endif
-#ifdef CONFIG_NET_UDP
+#ifdef NET_UDP_HAVE_STACK
     {
       /* Traverse all of the allocated UDP connections and perform
        * the poll action
@@ -467,7 +467,7 @@ int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
        neighbor_periodic(hsec);
 #endif
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
       /* Traverse all of the active TCP connections and perform the
        * timer action.
        */

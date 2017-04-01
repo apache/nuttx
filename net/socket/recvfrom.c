@@ -72,6 +72,7 @@
 #include "pkt/pkt.h"
 #include "local/local.h"
 #include "socket/socket.h"
+#include "usrsock/usrsock.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -90,7 +91,8 @@
  * Private Types
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP) || defined(CONFIG_NET_PKT)
+#if defined(NET_UDP_HAVE_STACK) || defined(NET_TCP_HAVE_STACK) \
+    || defined(CONFIG_NET_PKT)
 struct recvfrom_s
 {
   FAR struct socket       *rf_sock;      /* The parent socket structure */
@@ -106,7 +108,7 @@ struct recvfrom_s
   ssize_t                  rf_recvlen;   /* The received length */
   int                      rf_result;    /* Success:OK, failure:negated errno */
 };
-#endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
+#endif /* NET_UDP_HAVE_STACK || NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Private Functions
@@ -129,7 +131,8 @@ struct recvfrom_s
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP) || defined(CONFIG_NET_PKT)
+#if defined(NET_UDP_HAVE_STACK) || defined(NET_TCP_HAVE_STACK) \
+    || defined(CONFIG_NET_PKT)
 
 static inline void recvfrom_add_recvlen(FAR struct recvfrom_s *pstate,
                                         size_t recvlen)
@@ -143,7 +146,7 @@ static inline void recvfrom_add_recvlen(FAR struct recvfrom_s *pstate,
   pstate->rf_buffer  += recvlen;
   pstate->rf_buflen  -= recvlen;
 }
-#endif /* CONFIG_NET_UDP || CONFIG_NET_TCP || CONFIG_NET_PKT */
+#endif /* NET_UDP_HAVE_STACK || NET_TCP_HAVE_STACK || CONFIG_NET_PKT */
 
 /****************************************************************************
  * Function: recvfrom_newdata
@@ -163,7 +166,7 @@ static inline void recvfrom_add_recvlen(FAR struct recvfrom_s *pstate,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
+#if defined(NET_UDP_HAVE_STACK) || defined(NET_TCP_HAVE_STACK)
 static size_t recvfrom_newdata(FAR struct net_driver_s *dev,
                                FAR struct recvfrom_s *pstate)
 {
@@ -191,7 +194,7 @@ static size_t recvfrom_newdata(FAR struct net_driver_s *dev,
 
   return recvlen;
 }
-#endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
+#endif /* NET_UDP_HAVE_STACK || NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Function: recvfrom_newpktdata
@@ -255,7 +258,7 @@ static void recvfrom_newpktdata(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 static inline void recvfrom_newtcpdata(FAR struct net_driver_s *dev,
                                        FAR struct recvfrom_s *pstate)
 {
@@ -307,7 +310,7 @@ static inline void recvfrom_newtcpdata(FAR struct net_driver_s *dev,
 
   dev->d_len = 0;
 }
-#endif /* CONFIG_NET_TCP */
+#endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Function: recvfrom_newudpdata
@@ -327,7 +330,7 @@ static inline void recvfrom_newtcpdata(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_UDP
+#ifdef NET_UDP_HAVE_STACK
 static inline void recvfrom_newudpdata(FAR struct net_driver_s *dev,
                                        FAR struct recvfrom_s *pstate)
 {
@@ -339,7 +342,7 @@ static inline void recvfrom_newudpdata(FAR struct net_driver_s *dev,
 
   dev->d_len = 0;
 }
-#endif /* CONFIG_NET_TCP */
+#endif /* NET_UDP_HAVE_STACK */
 
 /****************************************************************************
  * Function: recvfrom_tcpreadahead
@@ -359,7 +362,7 @@ static inline void recvfrom_newudpdata(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_TCP) && defined(CONFIG_NET_TCP_READAHEAD)
+#if defined(NET_TCP_HAVE_STACK) && defined(CONFIG_NET_TCP_READAHEAD)
 static inline void recvfrom_tcpreadahead(struct recvfrom_s *pstate)
 {
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pstate->rf_sock->s_conn;
@@ -419,9 +422,9 @@ static inline void recvfrom_tcpreadahead(struct recvfrom_s *pstate)
         }
     }
 }
-#endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
+#endif /* NET_TCP_HAVE_STACK && CONFIG_NET_TCP_READAHEAD */
 
-#if defined(CONFIG_NET_UDP) && defined(CONFIG_NET_UDP_READAHEAD)
+#if defined(NET_UDP_HAVE_STACK) && defined(CONFIG_NET_UDP_READAHEAD)
 
 static inline void recvfrom_udpreadahead(struct recvfrom_s *pstate)
 {
@@ -526,7 +529,7 @@ out:
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
+#if defined(NET_UDP_HAVE_STACK) || defined(NET_TCP_HAVE_STACK)
 #ifdef CONFIG_NET_SOCKOPTS
 static int recvfrom_timeout(struct recvfrom_s *pstate)
 {
@@ -581,7 +584,7 @@ static int recvfrom_timeout(struct recvfrom_s *pstate)
   return FALSE;
 }
 #endif /* CONFIG_NET_SOCKOPTS */
-#endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
+#endif /* NET_UDP_HAVE_STACK || NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Function: recvfrom_pktsender
@@ -684,7 +687,7 @@ static uint16_t recvfrom_pktinterrupt(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 static inline void recvfrom_tcpsender(FAR struct net_driver_s *dev,
                                       FAR struct recvfrom_s *pstate)
 {
@@ -735,7 +738,7 @@ static inline void recvfrom_tcpsender(FAR struct net_driver_s *dev,
     }
 #endif /* CONFIG_NET_IPv4 */
 }
-#endif /* CONFIG_NET_TCP */
+#endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Function: recvfrom_tcpinterrupt
@@ -757,7 +760,7 @@ static inline void recvfrom_tcpsender(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
                                       FAR void *pvconn, FAR void *pvpriv,
                                       uint16_t flags)
@@ -958,7 +961,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
 
   return flags;
 }
-#endif /* CONFIG_NET_TCP */
+#endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Function: recvfrom_udpsender
@@ -978,7 +981,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_UDP
+#ifdef NET_UDP_HAVE_STACK
 static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_s *pstate)
 {
   /* Get the family from the packet type, IP address from the IP header, and
@@ -1059,7 +1062,7 @@ static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_
     }
 #endif /* CONFIG_NET_IPv4 */
 }
-#endif /* CONFIG_NET_UDP */
+#endif /* NET_UDP_HAVE_STACK */
 
 /****************************************************************************
  * Function: recvfrom_udp_terminate
@@ -1076,7 +1079,7 @@ static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_UDP
+#ifdef NET_UDP_HAVE_STACK
 static void recvfrom_udp_terminate(FAR struct recvfrom_s *pstate, int result)
 {
   /* Don't allow any further UDP call backs. */
@@ -1095,7 +1098,7 @@ static void recvfrom_udp_terminate(FAR struct recvfrom_s *pstate, int result)
 
   sem_post(&pstate->rf_sem);
 }
-#endif /* CONFIG_NET_UDP */
+#endif /* NET_UDP_HAVE_STACK */
 
 /****************************************************************************
  * Function: recvfrom_udp_interrupt
@@ -1117,7 +1120,7 @@ static void recvfrom_udp_terminate(FAR struct recvfrom_s *pstate, int result)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_UDP
+#ifdef NET_UDP_HAVE_STACK
 static uint16_t recvfrom_udp_interrupt(FAR struct net_driver_s *dev,
                                        FAR void *pvconn, FAR void *pvpriv,
                                        uint16_t flags)
@@ -1189,7 +1192,7 @@ static uint16_t recvfrom_udp_interrupt(FAR struct net_driver_s *dev,
 
   return flags;
 }
-#endif /* CONFIG_NET_UDP */
+#endif /* NET_UDP_HAVE_STACK */
 
 /****************************************************************************
  * Function: recvfrom_init
@@ -1210,7 +1213,8 @@ static uint16_t recvfrom_udp_interrupt(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP) || defined(CONFIG_NET_PKT)
+#if defined(NET_UDP_HAVE_STACK) || defined(NET_TCP_HAVE_STACK) \
+    || defined(CONFIG_NET_PKT)
 static void recvfrom_init(FAR struct socket *psock, FAR void *buf,
                           size_t len, FAR struct sockaddr *infrom,
                           FAR socklen_t *fromlen,
@@ -1246,7 +1250,7 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf,
 
 #define recvfrom_uninit(s) sem_destroy(&(s)->rf_sem)
 
-#endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
+#endif /* NET_UDP_HAVE_STACK || NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Function: recvfrom_result
@@ -1265,7 +1269,8 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP) || defined(CONFIG_NET_PKT)
+#if defined(NET_UDP_HAVE_STACK) || defined(NET_TCP_HAVE_STACK) \
+    || defined(CONFIG_NET_PKT)
 static ssize_t recvfrom_result(int result, struct recvfrom_s *pstate)
 {
   int save_errno = get_errno(); /* In case something we do changes it */
@@ -1294,7 +1299,7 @@ static ssize_t recvfrom_result(int result, struct recvfrom_s *pstate)
 
   return pstate->rf_recvlen;
 }
-#endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
+#endif /* NET_UDP_HAVE_STACK || NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Function: recvfromo_pkt_rxnotify
@@ -1334,7 +1339,7 @@ static void recvfromo_pkt_rxnotify(FAR struct pkt_conn_s *conn)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_UDP
+#ifdef NET_UDP_HAVE_STACK
 static inline void recvfrom_udp_rxnotify(FAR struct socket *psock,
                                          FAR struct udp_conn_s *conn)
 {
@@ -1373,7 +1378,7 @@ static inline void recvfrom_udp_rxnotify(FAR struct socket *psock,
     }
 #endif /* CONFIG_NET_IPv6 */
 }
-#endif /* CONFIG_NET_UDP */
+#endif /* NET_UDP_HAVE_STACK */
 
 /****************************************************************************
  * Function: pkt_recvfrom
@@ -1489,7 +1494,7 @@ errout_with_state:
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_UDP
+#ifdef NET_UDP_HAVE_STACK
 static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                             FAR struct sockaddr *from, FAR socklen_t *fromlen)
 {
@@ -1607,7 +1612,7 @@ errout_with_state:
   recvfrom_uninit(&state);
   return ret;
 }
-#endif /* CONFIG_NET_UDP */
+#endif /* NET_UDP_HAVE_STACK */
 
 /****************************************************************************
  * Function: tcp_recvfrom
@@ -1629,7 +1634,7 @@ errout_with_state:
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                             FAR struct sockaddr *from, FAR socklen_t *fromlen)
 {
@@ -1785,7 +1790,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   recvfrom_uninit(&state);
   return (ssize_t)ret;
 }
-#endif /* CONFIG_NET_TCP */
+#endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Public Functions
@@ -1880,6 +1885,22 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       goto errout;
     }
 
+#ifdef CONFIG_NET_USRSOCK
+  if (psock->s_type == SOCK_USRSOCK_TYPE)
+    {
+      /* Perform the usrsock recvfrom operation */
+
+      ret = usrsock_recvfrom(psock, buf, len, from, fromlen);
+      if (ret < 0)
+        {
+          errcode = -ret;
+          goto errout;
+        }
+
+      return ret;
+    }
+#endif
+
   /* If a 'from' address has been provided, verify that it is large
    * enough to hold this address family.
    */
@@ -1964,7 +1985,11 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
         else
 #endif
           {
+#ifdef NET_TCP_HAVE_STACK
             ret = tcp_recvfrom(psock, buf, len, from, fromlen);
+#else
+            ret = -ENOSYS;
+#endif
           }
 #endif /* CONFIG_NET_TCP */
       }
@@ -1989,7 +2014,11 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
         else
 #endif
           {
+#ifdef NET_UDP_HAVE_STACK
             ret = udp_recvfrom(psock, buf, len, from, fromlen);
+#else
+            ret = -ENOSYS;
+#endif
           }
 #endif /* CONFIG_NET_UDP */
       }

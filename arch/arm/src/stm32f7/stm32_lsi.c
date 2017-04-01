@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32f/stm32_lsi.c
+ * arch/arm/src/stm32f7/stm32_lsi.c
  *
  *   Copyright (C) 2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

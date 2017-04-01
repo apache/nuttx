@@ -59,7 +59,6 @@
 #include <nuttx/config.h>
 
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/sixlowpan.h>
 
 #include "sixlowpan/sixlowpan_internal.h"
 
@@ -169,7 +168,7 @@ void sixlowpan_hc06_initialize(void)
 }
 
 /****************************************************************************
- * Name: sixlowpan_hc06_initialize
+ * Name: sixlowpan_compresshdr_hc06
  *
  * Description:
  *   Compress IP/UDP header
@@ -203,7 +202,7 @@ void sixlowpan_hc06_initialize(void)
  *   compress the IID.
  *
  * Input Parameters:
- *   dev      - A reference to the IEE802.15.4 network device state
+ *   ieee     - A reference to the IEE802.15.4 network device state
  *   destaddr - L2 destination address, needed to compress IP dest
  *
  * Returned Value:
@@ -211,7 +210,7 @@ void sixlowpan_hc06_initialize(void)
  *
  ****************************************************************************/
 
-void sixlowpan_compresshdr_hc06(FAR struct net_driver_s *dev,
+void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                                 FAR struct rimeaddr_s *destaddr)
 {
   /* REVISIT: To be provided */
@@ -231,7 +230,7 @@ void sixlowpan_compresshdr_hc06(FAR struct net_driver_s *dev,
  *   appropriate values
  *
  * Input Parmeters:
- *   dev   - A reference to the IEE802.15.4 network device state
+ *   ieee  - A reference to the IEE802.15.4 network device state
  *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
  *           inferred from the L2 length), non 0 if the packet is a 1st
  *           fragment.
@@ -241,7 +240,7 @@ void sixlowpan_compresshdr_hc06(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-void sixlowpan_uncompresshdr_hc06(FAR struct net_driver_s *dev,
+void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                                   uint16_t iplen)
 {
   /* REVISIT: To be provided */

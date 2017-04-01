@@ -51,6 +51,7 @@
 #include "sixlowpan/sixlowpan.h"
 #include "local/local.h"
 #include "socket/socket.h"
+#include "usrsock/usrsock.h"
 
 /****************************************************************************
  * Public Functions
@@ -168,9 +169,14 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 #ifdef CONFIG_NETDEV_MULTINIC
               if (ret < 0)
                 {
-                  /* UDP/IP packet send */
+                  /* TCP/IP packet send */
 
                   ret = psock_tcp_send(psock, buf, len);
+#ifdef NET_TCP_HAVE_STACK
+                  ret = psock_tcp_send(psock, buf, len);
+#else
+                  ret = -ENOSYS;
+#endif
                 }
 
 #endif /* CONFIG_NETDEV_MULTINIC */
@@ -178,7 +184,11 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 
               /* Only TCP/IP packet send */
 
+#ifdef NET_TCP_HAVE_STACK
               ret = psock_tcp_send(psock, buf, len);
+#else
+              ret = -ENOSYS;
+#endif
 #endif /* CONFIG_NET_6LOWPAN */
             }
 #endif /* CONFIG_NET_TCP */
@@ -216,6 +226,11 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
                   /* UDP/IP packet send */
 
                   ret = psock_udp_send(psock, buf, len);
+#ifdef NET_UDP_HAVE_STACK
+                  ret = psock_udp_send(psock, buf, len);
+#else
+                  ret = -ENOSYS;
+#endif
                 }
 
 #endif /* CONFIG_NETDEV_MULTINIC */
@@ -223,13 +238,25 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 
               /* Only UDP/IP packet send */
 
+#ifdef NET_UDP_HAVE_STACK
               ret = psock_udp_send(psock, buf, len);
+#else
+              ret = -ENOSYS;
+#endif
 #endif /* CONFIG_NET_6LOWPAN */
             }
 #endif /* CONFIG_NET_UDP */
         }
         break;
 #endif /* CONFIG_NET_UDP */
+
+#ifdef CONFIG_NET_USRSOCK
+      case SOCK_USRSOCK_TYPE:
+        {
+          ret = usrsock_sendto(psock, buf, len, NULL, 0);
+        }
+        break;
+#endif /*CONFIG_NET_USRSOCK*/
 
       default:
         {
@@ -243,6 +270,11 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
     }
 
   leave_cancellation_point();
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
   return ret;
 }
 

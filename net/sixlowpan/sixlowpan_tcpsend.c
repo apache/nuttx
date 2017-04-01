@@ -44,8 +44,6 @@
 #include <debug.h>
 
 #include "nuttx/net/netdev.h"
-#include "nuttx/net/tcp.h"
-#include "nuttx/net/sixlowpan.h"
 
 #include "netdev/netdev.h"
 #include "socket/socket.h"
@@ -87,7 +85,8 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
   FAR struct tcp_conn_s *conn;
   FAR struct net_driver_s *dev;
   struct ipv6tcp_hdr_s ipv6tcp;
-  struct rimeaddr_s dest;
+  struct rimeaddr_s destmac;
+  uint16_t timeout;
   int ret;
 
   DEBUGASSERT(psock != NULL && psock->s_crefs > 0);
@@ -128,14 +127,22 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
 #ifdef CONFIG_NETDEV_MULTINIC
   dev = netdev_findby_ipv6addr(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
-  if (dev == NULL || dev->d_lltype != NET_LL_IEEE805154)
+#ifdef CONFIG_NETDEV_MULTILINK
+  if (dev == NULL || dev->d_lltype != NET_LL_IEEE802154)
+#else
+  if (dev == NULL)
+#endif
     {
       nwarn("WARNING: Not routable or not IEEE802.15.4 MAC\n");
       return (ssize_t)-ENETUNREACH;
     }
 #else
   dev = netdev_findby_ipv6addr(conn->u.ipv6.raddr);
+#ifdef CONFIG_NETDEV_MULTILINK
+  if (dev == NULL || dev->d_lltype != NET_LL_IEEE802154)
+#else
   if (dev == NULL)
+#endif
     {
       nwarn("WARNING: Not routable\n");
       return (ssize_t)-ENETUNREACH;
@@ -167,13 +174,22 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
    * packet.
    */
 
+#ifdef CONFIG_NET_SOCKOPTS
+  timeout = psock->s_sndtimeo;
+#else
+  timeout = 0;
+#endif
+
   ret = sixlowpan_send(dev, (FAR const struct ipv6_hdr_s *)&ipv6tcp,
-                       buf, len, &dest);
+                       buf, len, &destmac, timeout);
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_send() failed: %d\n", ret);
     }
 
+  /* Set the socket state to idle */
+
+  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
   return ret;
 }
 

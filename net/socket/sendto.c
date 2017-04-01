@@ -51,6 +51,7 @@
 #include "udp/udp.h"
 #include "local/local.h"
 #include "socket/socket.h"
+#include "usrsock/usrsock.h"
 
 /****************************************************************************
  * Public Functions
@@ -126,7 +127,8 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
                      socklen_t tolen)
 {
   socklen_t minlen;
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL_DGRAM)
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL_DGRAM) || \
+    defined(CONFIG_NET_USRSOCK)
   ssize_t nsent;
 #endif
   int errcode;
@@ -137,7 +139,8 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 
   if (!to || !tolen)
     {
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_STREAM)
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_STREAM) || \
+    defined(CONFIG_NET_USRSOCK)
       return psock_send(psock, buf, len, flags);
 #else
       nerr("ERROR: No 'to' address\n");
@@ -145,6 +148,22 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
       goto errout;
 #endif
     }
+
+#ifdef CONFIG_NET_USRSOCK
+  if (psock->s_type == SOCK_USRSOCK_TYPE)
+    {
+      /* Perform the usrsock sendto operation */
+
+      nsent = usrsock_sendto(psock, buf, len, to, tolen);
+      if (nsent < 0)
+        {
+          errcode = -nsent;
+          goto errout;
+        }
+
+      return nsent;
+    }
+#endif
 
   /* Verify that a valid address has been provided */
 
@@ -218,7 +237,11 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
   else
 #endif
     {
+#ifdef NET_UDP_HAVE_STACK
       nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
+#else
+      nsent = -ENOSYS;
+#endif
     }
 #endif /* CONFIG_NET_UDP */
 

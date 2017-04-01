@@ -9,9 +9,16 @@ config NET_TCP
 	bool "TCP/IP Networking"
 	default n
 	---help---
-		TCP support on or off
+		Enable or disable TCP networking support.
 
-if NET_TCP
+config NET_TCP_NO_STACK
+	bool "Disable TCP/IP Stack"
+	default n
+	select NET_TCP
+	---help---
+		Build without TCP/IP stack even if TCP networking support enabled.
+
+if NET_TCP && !NET_TCP_NO_STACK
 
 config NET_TCPURGDATA
 	bool "Urgent data"
@@ -184,5 +191,5 @@ config NET_SENDFILE
 		Support larger, higher performance sendfile() for transferring
 		files out a TCP connection.
 
-endif # NET_TCP
+endif # NET_TCP && !NET_TCP_NO_STACK
 endmenu # TCP/IP Networking

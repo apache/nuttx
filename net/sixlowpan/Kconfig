@@ -3,14 +3,6 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-menuconfig NET_6LOWPAN
-	bool "IEEE 802.15.4 6LoWPAN support"
-	default n
-	depends on EXPERIMENTAL && NET_IPv6
-	---help---
-		Enable support for IEEE 802.15.4 Low power Wireless Personal Area
-		Networking (6LoWPAN).
-
 if NET_6LOWPAN
 
 config NET_6LOWPAN_FRAG
@@ -185,11 +177,5 @@ config NET_6LOWPAN_TCP_RECVWNDO
 		(i.e., to the size of the IEEE802.15.4 MTU or frame payload) if
 		the application is slow to process incoming data, or high (32768
 		bytes) if the application processes data quickly.
-
-config NET_6LOWPAN_SNIFFER
-	default n
-	---help---
-		Enable use use an architecture-specific sniffer to support tracing
-		of IP.
 
 endif # NET_6LOWPAN

@@ -42,7 +42,10 @@ SOCK_CSRCS += net_dupsd2.c net_clone.c net_poll.c net_vfcntl.c
 # TCP/IP support
 
 ifeq ($(CONFIG_NET_TCP),y)
-SOCK_CSRCS += listen.c accept.c net_monitor.c
+SOCK_CSRCS += listen.c accept.c
+ifneq ($(CONFIG_NET_TCP_NO_STACK),y)
+SOCK_CSRCS += net_monitor.c
+endif
 
 # Local Unix domain support
 
