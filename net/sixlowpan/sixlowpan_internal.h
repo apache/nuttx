@@ -228,7 +228,7 @@
 /* General helper macros ****************************************************/
 
 #define GETINT16(ptr,index) \
-  ((((uint16_t)((ptr)[index]) << 8)) | ((uint16_t)(((ptr)[(index) + 1]))))
+  ((((uint16_t)((ptr)[index])) << 8) | ((uint16_t)(((ptr)[(index) + 1]))))
 #define PUTINT16(ptr,index,value) \
   do \
     { \
@@ -396,6 +396,7 @@ extern struct rimeaddr_s g_pktaddrs[PACKETBUF_NUM_ADDRS];
 
 struct net_driver_s;         /* Forward reference */
 struct ieee802154_driver_s;  /* Forward reference */
+struct ipv6_hdr_s;           /* Forward reference */
 struct rimeaddr_s;           /* Forward reference */
 struct iob_s;                /* Forward reference */
 
@@ -559,7 +560,10 @@ void sixlowpan_hc06_initialize(void);
  *
  * Input Parameters:
  *   ieee     - A reference to the IEE802.15.4 network device state
- *   destaddr - L2 destination address, needed to compress IP dest
+ *   ipv6     - The IPv6 header to be compressed
+ *   destaddr - L2 destination address, needed to compress the IP
+ *              destination field
+ *   iob      - The IOB into which the compressed header should be saved.
  *
  * Returned Value:
  *   None
@@ -567,8 +571,10 @@ void sixlowpan_hc06_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
-void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *dev,
-                                FAR struct rimeaddr_s *destaddr);
+void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
+                                FAR const struct ipv6_hdr_s *ipv6,
+                                FAR const struct rimeaddr_s *destaddr,
+                                FAR struct iob_s *iob);
 #endif
 
 /****************************************************************************
@@ -612,8 +618,10 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  *
  * Input Parmeters:
  *   ieee     - A reference to the IEE802.15.4 network device state
+ *   ipv6     - The IPv6 header to be compressed
  *   destaddr - L2 destination address, needed to compress the IP
  *              destination field
+ *   iob      - The IOB into which the compressed header should be saved.
  *
  * Returned Value:
  *   None
@@ -622,7 +630,9 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
 void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
-                               FAR struct rimeaddr_s *destaddr);
+                               FAR const struct ipv6_hdr_s *ipv6,
+                               FAR const struct rimeaddr_s *destaddr,
+                               FAR struct iob_s *iob);
 #endif
 
 /****************************************************************************
@@ -664,26 +674,34 @@ void sixlowpan_uncompresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
 int sixlowpan_frame_hdralloc(FAR struct iob_s *iob, int size);
 
 /****************************************************************************
- * Name: sixlowpan_ipfromrime and sixlowpan_rimefromip
+ * Name: sixlowpan_islinklocal, sixlowpan_ipfromrime, sixlowpan_rimefromip,
+ *       and sixlowpan_ismacbased
  *
  * Description:
- *   sixlowpan_ipfromrime: Use stateless auto-configuration to create an IP
- *   address from a rime address.
+ *   sixlowpan_ipfromrime: Create a link local IPv6 address from a rime 
+ *   address.
  *
- *   sixlowpan_rimefromip: Assume stateless auto-configuration to extrate
- *   the rime address from an IP address
+ *   sixlowpan_rimefromip: Extract the rime address from a link local IPv6
+ *   address.
+ *
+ *   sixlowpan_islinklocal and sixlowpan_ismacbased will return true for
+ *   address created in this fashion.
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  xxxx xxxx 0000 0000 2-byte Rime address (VALID?)
+ *    fe80 0000 0000 0000  xxxx 0000 0000 0000 2-byte Rime address (VALID?)
  *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte Rime address
  *
  ****************************************************************************/
+
+#define sixlowpan_islinklocal(ipaddr) ((ipaddr)[0] = NTOHS(0xfe80))
 
 void sixlowpan_ipfromrime(FAR const struct rimeaddr_s *rime,
                           net_ipv6addr_t ipaddr);
 void sixlowpan_rimefromip(const net_ipv6addr_t ipaddr,
                           FAR struct rimeaddr_s *rime);
+bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
+                          FAR const struct rimeaddr_s *rime);
 
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* _NET_SIXLOWPAN_SIXLOWPAN_INTERNAL_H */

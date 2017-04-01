@@ -203,7 +203,10 @@ void sixlowpan_hc06_initialize(void)
  *
  * Input Parameters:
  *   ieee     - A reference to the IEE802.15.4 network device state
- *   destaddr - L2 destination address, needed to compress IP dest
+ *   ipv6     - The IPv6 header to be compressed
+ *   destaddr - L2 destination address, needed to compress the IP
+ *              destination field
+ *   iob      - The IOB into which the compressed header should be saved.
  *
  * Returned Value:
  *   None
