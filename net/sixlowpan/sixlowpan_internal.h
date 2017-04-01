@@ -663,5 +663,27 @@ void sixlowpan_uncompresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
 
 int sixlowpan_frame_hdralloc(FAR struct iob_s *iob, int size);
 
+/****************************************************************************
+ * Name: sixlowpan_ipfromrime and sixlowpan_rimefromip
+ *
+ * Description:
+ *   sixlowpan_ipfromrime: Use stateless auto-configuration to create an IP
+ *   address from a rime address.
+ *
+ *   sixlowpan_rimefromip: Assume stateless auto-configuration to extrate
+ *   the rime address from an IP address
+ *
+ *    128  112  96   80    64   48   32   16
+ *    ---- ---- ---- ----  ---- ---- ---- ----
+ *    fe80 0000 0000 0000  xxxx xxxx 0000 0000 2-byte Rime address (VALID?)
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte Rime address
+ *
+ ****************************************************************************/
+
+void sixlowpan_ipfromrime(FAR const struct rimeaddr_s *rime,
+                          net_ipv6addr_t ipaddr);
+void sixlowpan_rimefromip(const net_ipv6addr_t ipaddr,
+                          FAR struct rimeaddr_s *rime);
+
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* _NET_SIXLOWPAN_SIXLOWPAN_INTERNAL_H */

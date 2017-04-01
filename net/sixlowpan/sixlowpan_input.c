@@ -700,8 +700,12 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee)
 
                   ipv6hdr = (FAR struct ipv6_hdr_s *)(ieee->i_dev.d_buf);
 
-                  /* Get the Rime MAC address of the destination */
-#warning Missing logic
+                  /* Get the Rime MAC address of the destination.  This
+                   * assumes an encoding of the MAC address in the IPv6
+                   * address.
+                   */
+
+                  sixlowpan_rimefromip(ipv6hdr->destipaddr, &destmac);
 
                   /* Convert the outgoing packet into a frame list. */
 

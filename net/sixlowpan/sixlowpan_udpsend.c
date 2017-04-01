@@ -168,8 +168,11 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
 
-  /* Get the Rime MAC address of the destination */
-#warning Missing logic
+  /* Get the Rime MAC address of the destination  This assumes an encoding
+   * of the MAC address in the IPv6 address.
+   */
+
+  sixlowpan_rimefromip(conn->u.ipv6.raddr, &destmac);
 
   /* If routable, then call sixlowpan_send() to format and send the 6loWPAN
    * packet.
