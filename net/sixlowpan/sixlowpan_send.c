@@ -55,6 +55,17 @@
 #ifdef CONFIG_NET_6LOWPAN
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* These are temporary stubs.  Something like this would be needed to
+ * monitor the health of a IPv6 neighbor.
+ */
+
+#define neighbor_reachable(dev)
+#define neighbor_notreachable(dev)
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -172,6 +183,7 @@ static uint16_t send_interrupt(FAR struct net_driver_s *dev,
                                sinfo->s_destmac);
 
       flags &= ~WPAN_POLL;
+      neighbor_reachable(dev);
       goto end_wait;
     }
 
@@ -183,6 +195,7 @@ static uint16_t send_interrupt(FAR struct net_driver_s *dev,
 
       nwarn("WARNING: SEND timeout\n");
       sinfo->s_result = -ETIMEDOUT;
+      neighbor_notreachable(dev);
       goto end_wait;
     }
 

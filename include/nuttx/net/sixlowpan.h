@@ -53,6 +53,7 @@
 
 #include <stdint.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/net/iob.h>
 #include <nuttx/net/netdev.h>
 
@@ -71,9 +72,13 @@
 
 #define SIXLOWPAN_DISPATCH_IPV6          0x41 /* 01000001 = 65 */
 #define SIXLOWPAN_DISPATCH_HC1           0x42 /* 01000010 = 66 */
-#define SIXLOWPAN_DISPATCH_IPHC          0x60 /* 011xxxxx = ... */
+
+#define SIXLOWPAN_DISPATCH_IPHC          0x60 /* 011xxxxx */
+#define SIXLOWPAN_DISPATCH_IPHC_MASK     0xe0 /* 11100000 */
+
 #define SIXLOWPAN_DISPATCH_FRAG1         0xc0 /* 11000xxx */
 #define SIXLOWPAN_DISPATCH_FRAGN         0xe0 /* 11100xxx */
+#define SIXLOWPAN_DISPATCH_FRAG_MASK     0xf1 /* 11111000 */
 
 /* HC1 encoding */
 
@@ -402,6 +407,7 @@ struct ieee802154_driver_s
 
   FAR struct iob_s *i_framelist;
 
+  /* Driver Configuration ***************************************************/
   /* i_panid.  The PAN ID is 16-bit number that identifies the network. It
    * must be unique to differentiate a network. All the nodes in the same
    * network should have the same PAN ID.  This value must be provided to
@@ -433,6 +439,42 @@ struct ieee802154_driver_s
    */
 
   uint16_t i_dgramtag;
+
+#if CONFIG_NET_6LOWPAN_FRAG
+  /* Fragmentation Support *************************************************/
+  /* Fragementation is handled frame by frame and requires that certain
+   * state information be retained from frame to frame.
+   */
+
+  /* i_pktlen. The total length of the IPv6 packet to be re-assembled in
+   * d_buf.
+   */
+
+  uint16_t i_pktlen;
+
+  /* The current accumulated length of the packet being received in d_buf.
+   * Included IPv6 and protocol headers.
+   */
+
+  uint16_t i_accumlen;
+
+  /* i_reasstag.  Each frame in the reassembly has a tag.  That tag must
+   * match the reassembly tag in the fragments being merged.
+   */
+
+  uint16_t i_reasstag;
+
+  /* The source MAC address of the fragments being merged */
+
+  struct rimeaddr_s i_fragsrc;
+
+  /* That time at which reassembly was started.  If the elapsed time
+   * exceeds CONFIG_NET_6LOWPAN_MAXAGE, then the reassembly will
+   * be cancelled.
+   */
+
+  systime_t i_time;
+#endif /* CONFIG_NET_6LOWPAN_FRAG */
 };
 
 /* The structure of a next header compressor.  This compressor is provided
