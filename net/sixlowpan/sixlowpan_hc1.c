@@ -102,7 +102,7 @@
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *
  * Input Parmeters:
- *   dev      - A reference to the IEE802.15.4 network device state
+ *   ieee     - A reference to the IEE802.15.4 network device state
  *   destaddr - L2 destination address, needed to compress the IP
  *              destination field
  *
@@ -111,7 +111,7 @@
  *
  ****************************************************************************/
 
-void sixlowpan_compresshdr_hc1(FAR struct net_driver_s *dev,
+void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
                                FAR struct rimeaddr_s *destaddr)
 {
 /* REVISIT: To be provided */
@@ -130,7 +130,7 @@ void sixlowpan_compresshdr_hc1(FAR struct net_driver_s *dev,
  *   are set to the appropriate values
  *
  * Input Parameters:
- *   dev   - A reference to the IEE802.15.4 network device state
+ *   ieee  - A reference to the IEE802.15.4 network device state
  *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
  *           inferred from the L2 length), non 0 if the packet is a 1st
  *           fragment.
@@ -140,7 +140,7 @@ void sixlowpan_compresshdr_hc1(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-void sixlowpan_uncompresshdr_hc1(FAR struct net_driver_s *dev,
+void sixlowpan_uncompresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
                                  uint16_t iplen)
 {
 /* REVISIT: To be provided */

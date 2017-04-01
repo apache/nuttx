@@ -260,7 +260,7 @@
  */
 
 
-#define FRAME_IOB_EMPTY(ieee)  ((ieee)->framelist == NULL)
+#define FRAME_IOB_EMPTY(ieee)  ((ieee)->i_framelist == NULL)
 #define FRAME_IOB_REMOVE(ieee, iob) \
   do \
     { \
@@ -369,6 +369,11 @@ struct rimeaddr_s
  *
  *    The MAC driver should then inform the network of the by calling
  *    sixlowpan_input().
+ *
+ *    Normally, the network will free the IOB and will nullify the frame
+ *    list.  But ss a complexity, the result of receiving a frame may be
+ *    that the network may respond provide an outgoing frames in the
+ *    frame list.
  */
 
 struct ieee802154_driver_s
@@ -457,6 +462,61 @@ struct sixlowpan_nhcompressor_s
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: sixlowpan_input
+ *
+ * Description:
+ *   Process an incoming 6loWPAN frame.
+ *
+ *   This function is called when the device driver has received a 6loWPAN
+ *   frame from the network. The frame from the device driver must be
+ *   provided in a IOB present in the i_framelist:  The frame data is in the
+ *   IOB io_data[] buffer and the length of the frame is in the IOB io_len
+ *   field.  Only a single IOB is expected in the i_framelist.  This incoming
+ *   data will be processed one frame at a time.
+ *
+ *   An non-NULL d_buf of size CONFIG_NET_6LOWPAN_MTU must also be provided.
+ *   The frame will be decompressed and placed in the d_buf. Fragmented
+ *   packets will also be reassembled in the d_buf as they are received
+ *   (meaning for the driver, that two packet buffers are required:  One for
+ *   reassembly of RX packets and one used for TX polling).
+ *
+ *   After each frame is processed into d_buf, the IOB is removed and
+ *   deallocated.  i_framelist will be nullified.  If reassembly is
+ *   incomplete, this function will return to called with i_framelist
+ *   equal to NULL.  The partially reassembled packet must be preserved by
+ *   the IEEE802.15.4 MAC and provided again when the next frame is
+ *   received.
+ *
+ *   When the packet in the d_buf is fully reassembled, it will be provided
+ *   to the network as with any other received packet.  d_len will be set
+ *   the the length of the uncompressed, reassembled packet.
+ *
+ *   After the network processes the packet, d_len will be set to zero.
+ *   Network logic may also decide to send a response to the packet.  In
+ *   that case, the outgoing network packet will be placed in d_buf the
+ *   d_buf and d_len will be set to a non-zero value.  That case is handled
+ *   by this function.
+ *
+ *   If that case occurs, the packet will be converted to a list of
+ *   compressed and possibly fragmented frames in i_framelist as with other
+ *   TX operations.
+ *
+ *   So from the standpoint of the IEEE802.15.4 MAC driver, there are two
+ *   possible results:  (1) i_framelist is NULL meaning that the frame
+ *   was fully processed and freed, or (2) i_framelist is non-NULL meaning
+ *   that there are outgoing frame(s) to be sent.
+ *
+ * Input Parameters:
+ *   ieee - The IEEE802.15.4 MAC network driver interface.
+ *
+ * Returned Value:
+ *   Ok is returned on success; Othewise a negated errno value is returned.
+ *
+ ****************************************************************************/
+
+int sixlowpan_input(FAR struct ieee802154_driver_s *ieee);
 
 /****************************************************************************
  * Function: sixlowpan_set_compressor

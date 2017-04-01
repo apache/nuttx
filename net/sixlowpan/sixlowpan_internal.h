@@ -482,6 +482,43 @@ int sixlowpan_framecreate(FAR struct ieee802154_driver_s *ieee,
                           FAR struct iob_s *iob, uint16_t dest_panid);
 
 /****************************************************************************
+ * Name: sixlowpan_queue_frames
+ *
+ * Description:
+ *   Process an outgoing UDP or TCP packet.  This function is called from
+ *   send interrupt logic when a TX poll is received.  It formates the
+ *   list of frames to be sent by the IEEE802.15.4 MAC driver.
+ *
+ *   The payload data is in the caller 's_buf' and is of length 's_len'.
+ *   Compressed headers will be added and if necessary the packet is
+ *   fragmented. The resulting packet/fragments are put in ieee->i_framelist
+ *   and the entire list of frames will be delivered to the 802.15.4 MAC via
+ *   ieee->i_framelist.
+ *
+ * Input Parameters:
+ *   ieee    - The IEEE802.15.4 MAC driver instance
+ *   ipv6hdr - IPv6 header followed by TCP or UDP header.
+ *   buf     - Data to send
+ *   len     - Length of data to send
+ *   destmac - The IEEE802.15.4 MAC address of the destination
+ *
+ * Returned Value:
+ *   Ok is returned on success; Othewise a negated errno value is returned.
+ *   This function is expected to fail if the driver is not an IEEE802.15.4
+ *   MAC network driver.  In that case, the UDP/TCP will fall back to normal
+ *   IPv4/IPv6 formatting.
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
+                           FAR const struct ipv6_hdr_s *ipv6hdr,
+                           FAR const void *buf,  size_t len,
+                           FAR const struct rimeaddr_s *destmac);
+
+/****************************************************************************
  * Name: sixlowpan_hc06_initialize
  *
  * Description:
@@ -521,7 +558,7 @@ void sixlowpan_hc06_initialize(void);
  *   compression
  *
  * Input Parameters:
- *   dev      - A reference to the IEE802.15.4 network device state
+ *   ieee     - A reference to the IEE802.15.4 network device state
  *   destaddr - L2 destination address, needed to compress IP dest
  *
  * Returned Value:
@@ -530,7 +567,7 @@ void sixlowpan_hc06_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
-void sixlowpan_compresshdr_hc06(FAR struct net_driver_s *dev,
+void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *dev,
                                 FAR struct rimeaddr_s *destaddr);
 #endif
 
@@ -548,7 +585,7 @@ void sixlowpan_compresshdr_hc06(FAR struct net_driver_s *dev,
  *   appropriate values
  *
  * Input Parmeters:
- *   dev   - A reference to the IEE802.15.4 network device state
+ *   ieee  - A reference to the IEE802.15.4 network device state
  *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
  *           inferred from the L2 length), non 0 if the packet is a 1st
  *           fragment.
@@ -559,7 +596,7 @@ void sixlowpan_compresshdr_hc06(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
-void sixlowpan_uncompresshdr_hc06(FAR struct net_driver_s *dev,
+void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                                   uint16_t iplen);
 #endif
 
@@ -574,7 +611,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct net_driver_s *dev,
  *   uip_buf buffer.
  *
  * Input Parmeters:
- *   dev      - A reference to the IEE802.15.4 network device state
+ *   ieee     - A reference to the IEE802.15.4 network device state
  *   destaddr - L2 destination address, needed to compress the IP
  *              destination field
  *
@@ -584,7 +621,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
-void sixlowpan_compresshdr_hc1(FAR struct net_driver_s *dev,
+void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
                                FAR struct rimeaddr_s *destaddr);
 #endif
 
@@ -601,7 +638,7 @@ void sixlowpan_compresshdr_hc1(FAR struct net_driver_s *dev,
  *   are set to the appropriate values
  *
  * Input Parameters:
- *   dev   - A reference to the IEE802.15.4 network device state
+ *   ieee  - A reference to the IEE802.15.4 network device state
  *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
  *           inferred from the L2 length), non 0 if the packet is a 1st
  *           fragment.
@@ -612,7 +649,7 @@ void sixlowpan_compresshdr_hc1(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
-void sixlowpan_uncompresshdr_hc1(FAR struct net_driver_s *dev,
+void sixlowpan_uncompresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
                                  uint16_t ip_len);
 #endif
 

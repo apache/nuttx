@@ -85,7 +85,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
   FAR struct tcp_conn_s *conn;
   FAR struct net_driver_s *dev;
   struct ipv6tcp_hdr_s ipv6tcp;
-  struct rimeaddr_s dest;
+  struct rimeaddr_s destmac;
   uint16_t timeout;
   int ret;
 
@@ -181,7 +181,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 #endif
 
   ret = sixlowpan_send(dev, (FAR const struct ipv6_hdr_s *)&ipv6tcp,
-                       buf, len, &dest, timeout);
+                       buf, len, &destmac, timeout);
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_send() failed: %d\n", ret);

@@ -518,8 +518,10 @@ int sixlowpan_802154_framecreate(FAR struct frame802154_s *finfo,
  * Function: sixlowpan_framecreate
  *
  * Description:
- *   This function is called after the IEEE802.15.4 MAC driver polls for
- *   TX data.  It creates the IEEE802.15.4 header in the frame buffer.
+ *   This function is called after eiether (1) the IEEE802.15.4 MAC driver
+ *   polls for TX data or (2) after the IEEE802.15.4 MAC driver provides an
+ *   in frame and the network responds with an outgoing packet.  It creates
+ *   the IEEE802.15.4 header in the frame buffer.
  *
  * Input parameters:
  *   ieee       - A reference IEEE802.15.4 MAC network device structure.
