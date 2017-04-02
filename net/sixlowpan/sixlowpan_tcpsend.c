@@ -50,9 +50,72 @@
 #include "netdev/netdev.h"
 #include "socket/socket.h"
 #include "tcp/tcp.h"
+#include "utils/utils.h"
 #include "sixlowpan/sixlowpan_internal.h"
 
 #if defined(CONFIG_NET_6LOWPAN) && defined(CONFIG_NET_TCP)
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sixlowpan_tcp_chksum
+ *
+ * Description:
+ *   Perform the checksum calcaultion over the IPv6, protocol headers, and
+ *   data payload as necessary.
+ *
+ * Input Parameters:
+ *   ipv6tcp - A reference to a structure containing the IPv6 and TCP headers.
+ *   buf     - The beginning of the payload data
+ *   buflen  - The length of the payload data.
+ *
+ * Returned Value:
+ *   The calculated checksum
+ *
+ ****************************************************************************/
+
+static uint16_t sixlowpan_tcp_chksum(FAR struct ipv6tcp_hdr_s *ipv6tcp,
+                                     FAR const uint8_t *buf, uint16_t buflen)
+{
+  uint16_t upperlen;
+  uint16_t sum;
+
+  /* The length reported in the IPv6 header is the length of the payload
+   * that follows the header.
+   */
+
+  upperlen = ((uint16_t)ipv6tcp->ipv6.len[0] << 8) + ipv6tcp->ipv6.len[1];
+
+  /* Verify some minimal assumptions */
+
+  if (upperlen > CONFIG_NET_6LOWPAN_MTU)
+    {
+      return 0;
+    }
+
+  /* The checksum is calculated starting with a pseudo-header of IPv6 header
+   * fields according to the IPv6 standard, which consists of the source
+   * and destination addresses, the packet length and the next header field.
+   */
+
+  sum = upperlen + ipv6tcp->ipv6.proto;
+
+  /* Sum IP source and destination addresses. */
+
+  sum = chksum(sum, (FAR uint8_t *)ipv6tcp->ipv6.srcipaddr,
+               2 * sizeof(net_ipv6addr_t));
+
+  /* Sum the TCP header */
+
+  sum = chksum(sum, (FAR uint8_t *)&ipv6tcp->tcp, TCP_HDRLEN);
+
+  /* Sum payload data. */
+
+  sum = chksum(sum, buf, buflen);
+  return (sum == 0) ? 0xffff : htons(sum);
+}
 
 /****************************************************************************
  * Public Functions
@@ -224,19 +287,14 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
   /* Calculate TCP checksum. */
 
   ipv6tcp.tcp.tcpchksum   = 0;
-#if 0
-  /* REVISIT: Current checksum logic expects the IPv6 header, the UDP header, and
-   * the payload data to be in contiguous memory.
-   */
-
-  ipv6tcp.tcp.tcpchksum   = ~tcp_ipv6_chksum(dev);
-#endif
+  ipv6tcp.tcp.tcpchksum   = ~sixlowpan_tcp_chksum(&ipv6tcp, buf, buflen);
 
   ninfo("Outgoing TCP packet length: %d bytes\n", iplen + IOPv6_HDRLEN);
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.tcp.sent++;
 #endif
+
   /* Set the socket state to sending */
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);

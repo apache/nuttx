@@ -51,9 +51,74 @@
 #include "netdev/netdev.h"
 #include "socket/socket.h"
 #include "udp/udp.h"
+#include "utils/utils.h"
 #include "sixlowpan/sixlowpan_internal.h"
 
 #if defined(CONFIG_NET_6LOWPAN) && defined(CONFIG_NET_UDP)
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sixlowpan_udp_chksum
+ *
+ * Description:
+ *   Perform the checksum calcaultion over the IPv6, protocol headers, and
+ *   data payload as necessary.
+ *
+ * Input Parameters:
+ *   ipv6udp - A reference to a structure containing the IPv6 and UDP headers.
+ *   buf     - The beginning of the payload data
+ *   buflen  - The length of the payload data.
+ *
+ * Returned Value:
+ *   The calculated checksum
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_UDP_CHECKSUMS
+static uint16_t sixlowpan_udp_chksum(FAR struct ipv6udp_hdr_s *ipv6udp,
+                                     FAR const uint8_t *buf, uint16_t buflen)
+{
+  uint16_t upperlen;
+  uint16_t sum;
+
+  /* The length reported in the IPv6 header is the length of the payload
+   * that follows the header.
+   */
+
+  upperlen = ((uint16_t)ipv6udp->ipv6.len[0] << 8) + ipv6udp->ipv6.len[1];
+
+  /* Verify some minimal assumptions */
+
+  if (upperlen > CONFIG_NET_6LOWPAN_MTU)
+    {
+      return 0;
+    }
+
+  /* The checksum is calculated starting with a pseudo-header of IPv6 header
+   * fields according to the IPv6 standard, which consists of the source
+   * and destination addresses, the packet length and the next header field.
+   */
+
+  sum = upperlen + ipv6udp->ipv6.proto;
+
+  /* Sum IP source and destination addresses. */
+
+  sum = chksum(sum, (FAR uint8_t *)ipv6udp->ipv6.srcipaddr,
+               2 * sizeof(net_ipv6addr_t));
+
+  /* Sum the UDP header */
+
+  sum = chksum(sum, (FAR uint8_t *)&ipv6udp->udp, UDP_HDRLEN);
+
+  /* Sum payload data. */
+
+  sum = chksum(sum, buf, buflen);
+  return (sum == 0) ? 0xffff : htons(sum);
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -211,23 +276,13 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
   ipv6udp.udp.udplen      = htons(iplen);
   ipv6udp.udp.udpchksum   = 0;
 
-  ipv6udp.udp.udpchksum   = 0;
-
-#warning Missing logic
-#if 0 /* REVISIT */
 #ifdef CONFIG_NET_UDP_CHECKSUMS
-  /* Calculate UDP checksum. */
-  /* REVISIT: Current checksum logic expects the IPv6 header, the UDP header, and
-   * the payload data to be in contiguous memory.
-   */
-
-  ipv6udp.udp.udpchksum   = ~udp_ipv6_chksum(dev);
+  ipv6udp.udp.udpchksum   = ~sixlowpan_udp_chksum(ipv6udp, buf, buflen);
   if (ipv6udp.udp.udpchksum == 0)
     {
       ipv6udp.udp.udpchksum = 0xffff;
     }
 #endif /* CONFIG_NET_UDP_CHECKSUMS */
-#endif /* REVISIT */
 
   ninfo("Outgoing UDP packet length: %d\n", iplen + IPv6_HDRLEN);
 
