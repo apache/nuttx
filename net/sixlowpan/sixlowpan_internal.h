@@ -416,7 +416,7 @@ struct iob_s;                /* Forward reference */
  *
  * Input Parameters:
  *   dev     - The IEEE802.15.4 MAC network driver interface.
- *   ipv6    - IPv6 plus TCP or UDP headers.
+ *   destip    - IPv6 plus TCP or UDP headers.
  *   buf     - Data to send
  *   len     - Length of data to send
  *   raddr   - The MAC address of the destination
@@ -434,7 +434,7 @@ struct iob_s;                /* Forward reference */
  ****************************************************************************/
 
 int sixlowpan_send(FAR struct net_driver_s *dev,
-                   FAR const struct ipv6_hdr_s *ipv6, FAR const void *buf,
+                   FAR const struct ipv6_hdr_s *destip, FAR const void *buf,
                    size_t len, FAR const struct rimeaddr_s *raddr,
                    uint16_t timeout);
 
@@ -560,8 +560,8 @@ void sixlowpan_hc06_initialize(void);
  *
  * Input Parameters:
  *   ieee     - A reference to the IEE802.15.4 network device state
- *   ipv6     - The IPv6 header to be compressed
- *   destaddr - L2 destination address, needed to compress the IP
+ *   destip   - The IPv6 header to be compressed
+ *   destmac  - L2 destination address, needed to compress the IP
  *              destination field
  *   iob      - The IOB into which the compressed header should be saved.
  *
@@ -572,8 +572,8 @@ void sixlowpan_hc06_initialize(void);
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
 void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
-                                FAR const struct ipv6_hdr_s *ipv6,
-                                FAR const struct rimeaddr_s *destaddr,
+                                FAR const struct ipv6_hdr_s *destip,
+                                FAR const struct rimeaddr_s *destmac,
                                 FAR struct iob_s *iob);
 #endif
 
@@ -618,8 +618,8 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  *
  * Input Parmeters:
  *   ieee     - A reference to the IEE802.15.4 network device state
- *   ipv6     - The IPv6 header to be compressed
- *   destaddr - L2 destination address, needed to compress the IP
+ *   destip   - The IPv6 header to be compressed
+ *   destmac - L2 destination address, needed to compress the IP
  *              destination field
  *   iob      - The IOB into which the compressed header should be saved.
  *
@@ -630,8 +630,8 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
 void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
-                               FAR const struct ipv6_hdr_s *ipv6,
-                               FAR const struct rimeaddr_s *destaddr,
+                               FAR const struct ipv6_hdr_s *destip,
+                               FAR const struct rimeaddr_s *destmac,
                                FAR struct iob_s *iob);
 #endif
 

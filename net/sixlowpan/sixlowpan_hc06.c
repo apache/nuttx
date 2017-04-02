@@ -203,8 +203,8 @@ void sixlowpan_hc06_initialize(void)
  *
  * Input Parameters:
  *   ieee     - A reference to the IEE802.15.4 network device state
- *   ipv6     - The IPv6 header to be compressed
- *   destaddr - L2 destination address, needed to compress the IP
+ *   destip   - The IPv6 header to be compressed
+ *   destmac  - L2 destination address, needed to compress the IP
  *              destination field
  *   iob      - The IOB into which the compressed header should be saved.
  *
@@ -214,7 +214,9 @@ void sixlowpan_hc06_initialize(void)
  ****************************************************************************/
 
 void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
-                                FAR struct rimeaddr_s *destaddr)
+                                FAR const struct ipv6_hdr_s *destip,
+                                FAR const struct rimeaddr_s *destmac,
+                                FAR struct iob_s *iob)
 {
   /* REVISIT: To be provided */
 }
