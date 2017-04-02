@@ -53,6 +53,10 @@ ifeq ($(CONFIG_IEEE802154_DEV),y)
 CSRCS += radio802154_device.c
 endif
 
+ifeq ($(CONFIG_IEEE802154_LOOPBACK),y)
+CSRCS += mac802154_loopback.c
+endif
+
 DEPPATH += --dep-path ieee802154
 VPATH += :ieee802154
 CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)wireless$(DELIM)ieee802154}
