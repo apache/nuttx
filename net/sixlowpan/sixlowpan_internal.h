@@ -465,7 +465,7 @@ struct iob_s;                /* Forward reference */
  *   it to be sent on an 802.15.4 network using 6lowpan.  Called from common
  *   UDP/TCP send logic.
  *
- *   The payload data is in the caller 'buf' and is of length 'len'.
+ *   The payload data is in the caller 'buf' and is of length 'buflen'.
  *   Compressed headers will be added and if necessary the packet is
  *   fragmented. The resulting packet/fragments are put in ieee->i_framelist
  *   and the entire list of frames will be delivered to the 802.15.4 MAC via
@@ -473,9 +473,9 @@ struct iob_s;                /* Forward reference */
  *
  * Input Parameters:
  *   dev     - The IEEE802.15.4 MAC network driver interface.
- *   destip    - IPv6 plus TCP or UDP headers.
+ *   destip  - IPv6 plus TCP or UDP headers.
  *   buf     - Data to send
- *   len     - Length of data to send
+ *   buflen  - Length of data to send
  *   raddr   - The MAC address of the destination
  *   timeout - Send timeout in deciseconds
  *
@@ -492,7 +492,7 @@ struct iob_s;                /* Forward reference */
 
 int sixlowpan_send(FAR struct net_driver_s *dev,
                    FAR const struct ipv6_hdr_s *destip, FAR const void *buf,
-                   size_t len, FAR const struct rimeaddr_s *raddr,
+                   size_t buflen, FAR const struct rimeaddr_s *raddr,
                    uint16_t timeout);
 
 /****************************************************************************
@@ -557,7 +557,7 @@ int sixlowpan_framecreate(FAR struct ieee802154_driver_s *ieee,
  *   ieee    - The IEEE802.15.4 MAC driver instance
  *   ipv6hdr - IPv6 header followed by TCP or UDP header.
  *   buf     - Data to send
- *   len     - Length of data to send
+ *   buflen  - Length of data to send
  *   destmac - The IEEE802.15.4 MAC address of the destination
  *
  * Returned Value:
@@ -573,7 +573,7 @@ int sixlowpan_framecreate(FAR struct ieee802154_driver_s *ieee,
 
 int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
                            FAR const struct ipv6_hdr_s *ipv6hdr,
-                           FAR const void *buf,  size_t len,
+                           FAR const void *buf,  size_t buflen,
                            FAR const struct rimeaddr_s *destmac);
 
 /****************************************************************************

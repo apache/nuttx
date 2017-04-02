@@ -46,6 +46,7 @@
 #include <debug.h>
 
 #include "nuttx/net/netdev.h"
+#include "nuttx/net/netstats.h"
 
 #include "netdev/netdev.h"
 #include "socket/socket.h"
@@ -70,7 +71,7 @@
  * Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Data to send
- *   len      Length of data to send
+ *   buflen   Length of data to send
  *   flags    Send flags
  *   to       Address of recipient
  *   tolen    The length of the address structure
@@ -88,7 +89,7 @@
 
 ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
                                  FAR const void *buf,
-                                 size_t len, int flags,
+                                 size_t buflen, int flags,
                                  FAR const struct sockaddr *to,
                                  socklen_t tolen)
 {
@@ -97,6 +98,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
   FAR struct net_driver_s *dev;
   struct ipv6udp_hdr_s ipv6udp;
   struct rimeaddr_s destmac;
+  uint16_t iplen;
   uint16_t timeout;
   int ret;
 
@@ -176,7 +178,62 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
 #endif
 
   /* Initialize the IPv6/UDP headers */
+
+  ipv6udp.ipv6.vtc    = 0x60;
+  ipv6udp.ipv6.tcf    = 0x00;
+  ipv6udp.ipv6.flow   = 0x00;
+  ipv6udp.ipv6.proto  = IP_PROTO_UDP;
+  ipv6udp.ipv6.ttl    = conn->ttl;
+
+  /* The IPv6 header length field does not include the size of IPv6 IP
+   * header.
+   */
+
+  iplen               = buflen + UDP_HDRLEN;
+  ipv6udp.ipv6.len[0] = (iplen >> 8);
+  ipv6udp.ipv6.len[1] = (iplen & 0xff);
+
+  /* Copy the source and destination addresses */
+
+  net_ipv6addr_hdrcopy(ipv6udp.ipv6.srcipaddr,  to6->sin6_addr.in6_u.u6_addr16);
+  net_ipv6addr_hdrcopy(ipv6udp.ipv6.destipaddr, conn->u.ipv6.raddr);
+
+  ninfo("IPv6 length: %d\n", ((int)ipv6->len[0] << 8) + ipv6->len[1]);
+
+#ifdef CONFIG_NET_STATISTICS
+  g_netstats.ipv6.sent++;
+#endif
+
+  /* Initialize the UDP header */
+
+  ipv6udp.udp.srcport     = conn->lport;
+  ipv6udp.udp.destport    = to6->sin6_port;
+  ipv6udp.udp.udplen      = htons(iplen);
+  ipv6udp.udp.udpchksum   = 0;
+
+  ipv6udp.udp.udpchksum   = 0;
+
 #warning Missing logic
+#if 0 /* REVISIT */
+#ifdef CONFIG_NET_UDP_CHECKSUMS
+  /* Calculate UDP checksum. */
+  /* REVISIT: Current checksum logic expects the IPv6 header, the UDP header, and
+   * the payload data to be in contiguous memory.
+   */
+
+  ipv6udp.udp.udpchksum   = ~udp_ipv6_chksum(dev);
+  if (ipv6udp.udp.udpchksum == 0)
+    {
+      ipv6udp.udp.udpchksum = 0xffff;
+    }
+#endif /* CONFIG_NET_UDP_CHECKSUMS */
+#endif /* REVISIT */
+
+  ninfo("Outgoing UDP packet length: %d\n", iplen + IPv6_HDRLEN);
+
+#ifdef CONFIG_NET_STATISTICS
+  g_netstats.udp.sent++;
+#endif
 
   /* Set the socket state to sending */
 
@@ -199,7 +256,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
 #endif
 
   ret = sixlowpan_send(dev, (FAR const struct ipv6_hdr_s *)&ipv6udp,
-                       buf, len, &destmac, timeout);
+                       buf, buflen, &destmac, timeout);
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_send() failed: %d\n", ret);
@@ -219,9 +276,9 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
  *   sockets.
  *
  * Parameters:
- *   psock - An instance of the internal socket structure.
- *   buf   - Data to send
- *   len   - Length of data to send
+ *   psock  - An instance of the internal socket structure.
+ *   buf    - Data to send
+ *   buflen - Length of data to send
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
@@ -234,7 +291,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
  ****************************************************************************/
 
 ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
-                               size_t len)
+                               size_t buflen)
 {
   FAR struct udp_conn_s *conn;
   struct sockaddr_in6 to;
@@ -278,7 +335,7 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
   to.sin6_port   = conn->rport;  /* Already network order */
   memcpy(to.sin6_addr.in6_u.u6_addr16, conn->u.ipv6.raddr, 16);
 
-  return psock_6lowpan_udp_sendto(psock, buf, len, 0,
+  return psock_6lowpan_udp_sendto(psock, buf, buflen, 0,
                                   (FAR const struct sockaddr *)&to,
                                   sizeof(struct sockaddr_in6));
 }
