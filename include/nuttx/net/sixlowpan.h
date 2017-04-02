@@ -477,30 +477,6 @@ struct ieee802154_driver_s
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 };
 
-/* The structure of a next header compressor.  This compressor is provided
- * by architecture-specific logic outside of the network stack.
- *
- * TODO: needs more parameters when compressing extension headers, etc.
- */
-
-struct sixlowpan_nhcompressor_s
-{
-  CODE int (*is_compressable)(uint8_t next_header);
-
-  /* Compress next header (TCP/UDP, etc) - ptr points to next header to
-   * compress.
-   */
-
-  CODE int (*compress)(FAR uint8_t *compressed, FAR uint8_t *uncompressed_len);
-
-  /* Uncompress next header (TCP/UDP, etc) - ptr points to next header to
-   * uncompress.
-   */
-
-  CODE int (*uncompress)(FAR uint8_t *compressed, FAR uint8_t *lowpanbuf,
-                         FAR uint8_t *uncompressed_len);
-};
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -559,22 +535,5 @@ struct sixlowpan_nhcompressor_s
  ****************************************************************************/
 
 int sixlowpan_input(FAR struct ieee802154_driver_s *ieee);
-
-/****************************************************************************
- * Function: sixlowpan_set_compressor
- *
- * Description:
- *   Configure to use the architecture-specific compressor.
- *
- * Input parameters:
- *   compressor - A reference to the new compressor to be used.  This may
- *                be a NULL value to disable the compressor.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void sixlowpan_set_compressor(FAR struct sixlowpan_nhcompressor_s *compressor);
 
 #endif /* __INCLUDE_NUTTX_NET_SIXLOWOAN_H */

@@ -527,6 +527,17 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
 #endif
 
 /****************************************************************************
+ * Function: net_ipv6addr_prefixcmp
+ *
+ * Description:
+ *   Compare two IPv6 address prefixes.
+ *
+ ****************************************************************************/
+
+#define net_ipv6addr_prefixcmp(addr1, addr2, length) \
+  (memcmp(addr1, addr2, length >> 3) == 0)
+
+/****************************************************************************
  * Function: net_ipaddr_mask
  *
  * Description:

@@ -335,11 +335,6 @@ struct frame802154_s
  * Public Data
  ****************************************************************************/
 
-/* A pointer to the optional, architecture-specific compressor */
-
-struct sixlowpan_nhcompressor_s; /* Foward reference */
-extern FAR struct sixlowpan_nhcompressor_s *g_sixlowpan_compressor;
-
 /* The following data values are used to hold intermediate settings while
  * processing IEEE802.15.4 frames.  These globals are shared with incoming
  * and outgoing frame processing and possibly with mutliple IEEE802.15.4 MAC
@@ -593,7 +588,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  * Input Parmeters:
  *   ieee  - A reference to the IEE802.15.4 network device state
  *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
- *           inferred from the L2 length), non 0 if the packet is a 1st
+ *           inferred from the L2 length), non 0 if the packet is a first
  *           fragment.
  *
  * Returned Value:
@@ -650,7 +645,7 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
  * Input Parameters:
  *   ieee  - A reference to the IEE802.15.4 network device state
  *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
- *           inferred from the L2 length), non 0 if the packet is a 1st
+ *           inferred from the L2 length), non 0 if the packet is a first
  *           fragment.
  *
  * Returned Value:
