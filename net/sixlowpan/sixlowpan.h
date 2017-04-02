@@ -53,8 +53,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-struct socket;   /* Forward reference */
-struct sockaddr; /* Forward reference */
+struct net_driver_s; /* Forward reference */
+struct socket;       /* Forward reference */
+struct sockaddr;     /* Forward reference */
 
 /****************************************************************************
  * Name: sixlowpan_initialize
@@ -104,6 +105,33 @@ void sixlowpan_initialize(void);
 ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
                                size_t len);
 #endif
+
+/****************************************************************************
+ * Function: sixlowpan_tcp_send
+ *
+ * Description:
+ *   TCP output comes through two different mechansims.  Either from:
+ *
+ *   1. TCP socket output.  For the case of TCP output to an
+ *      IEEE802.15.4, the TCP output is caught in the socket
+ *      send()/sendto() logic and and redirected to psock_6lowpan_tcp_send().
+ *   2. TCP output from the TCP state machine.  That will occur
+ *      during TCP packet processing by the TCP state meachine.  It
+ *      is detected there when ipv6_tcp_input() returns with d_len > 0. This
+ *      will be redirected here.
+ *
+ * Parameters:
+ *   dev - An instance of nework device state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+void sixlowpan_tcp_send(FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Function: psock_6lowpan_udp_send

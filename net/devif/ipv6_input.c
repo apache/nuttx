@@ -95,6 +95,7 @@
 #include "neighbor/neighbor.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
+#include "sixlowpan/sixlowpan.h"
 #include "pkt/pkt.h"
 #include "icmpv6/icmpv6.h"
 

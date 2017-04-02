@@ -113,7 +113,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
   conn = (FAR struct tcp_conn_s *)psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+#ifdef CONFIG_NET_IPv4
   /* Ignore if not IPv6 domain */
 
   if (conn->domain != PF_INET6)
@@ -194,6 +194,88 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
   return ret;
+}
+
+/****************************************************************************
+ * Function: sixlowpan_tcp_send
+ *
+ * Description:
+ *   TCP output comes through two different mechansims.  Either from:
+ *
+ *   1. TCP socket output.  For the case of TCP output to an
+ *      IEEE802.15.4, the TCP output is caught in the socket
+ *      send()/sendto() logic and and redirected to psock_6lowpan_tcp_send().
+ *   2. TCP output from the TCP state machine.  That will occur
+ *      during TCP packet processing by the TCP state meachine.  It
+ *      is detected there when ipv6_tcp_input() returns with d_len > 0. This
+ *      will be redirected here.
+ *
+ * Parameters:
+ *   dev - An instance of nework device state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+void sixlowpan_tcp_send(FAR struct net_driver_s *dev)
+{
+  DEBUGASSERT(dev != NULL && dev->d_len > 0);
+
+  /* Double check */
+
+  if (dev != NULL && dev->d_len > 0)
+    {
+      FAR struct ipv6_hdr_s *ipv6hdr;
+
+      /* The IPv6 header followed by a TCP headers should lie at the
+       * beginning of d_buf since there is no link layer protocol header
+       * and the TCP state machine should only response with TCP packets.
+       */
+
+      ipv6hdr = (FAR struct ipv6_hdr_s *)(dev->d_buf);
+
+      /* The TCP data payload should follow the IPv6 header plus the
+       * protocol header.
+       */
+
+      if (ipv6hdr->proto != IP_PROTO_TCP)
+        {
+          nwarn("WARNING: Expected TCP protoype: %u\n", ipv6hdr->proto);
+        }
+      else
+        {
+          size_t hdrlen;
+
+          hdrlen = IPv6_HDRLEN + TCP_HDRLEN;
+          if (hdrlen < dev->d_len)
+            {
+              nwarn("WARNING: Packet to small:  Have %u need >%u\n",
+                  dev->d_len, hdrlen);
+            }
+          else
+            {
+              struct rimeaddr_s destmac;
+
+              /* Get the Rime MAC address of the destination.  This assumes
+               * an encoding of the MAC address in the IPv6 address.
+               */
+
+              sixlowpan_rimefromip(ipv6hdr->destipaddr, &destmac);
+
+              /* Convert the outgoing packet into a frame list. */
+
+              (void)sixlowpan_queue_frames(
+                      (FAR struct ieee802154_driver_s *)dev, ipv6hdr,
+                      dev->d_buf + hdrlen, dev->d_len - hdrlen, &destmac);
+            }
+        }
+    }
+
+  dev->d_len = 0;
 }
 
 #endif /* CONFIG_NET_6LOWPAN && CONFIG_NET_TCP */

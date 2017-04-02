@@ -92,91 +92,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sixlowpan_isbroadcast
- *
- * Description:
- *   Return the address length associated with a 2-bit address mode
- *
- * Input parameters:
- *   addrmode - The address mode
- *
- * Returned Value:
- *   The address length associated with the address mode.
- *
- ****************************************************************************/
-
-static bool sixlowpan_isbroadcast(uint8_t mode, FAR uint8_t *addr)
-{
-  int i = ((mode == FRAME802154_SHORTADDRMODE) ? 2 : 8);
-
-  while (i-- > 0)
-    {
-      if (addr[i] != 0xff)
-        {
-          return false;
-        }
-    }
-
-  return true;
-}
-
-/****************************************************************************
- * Name: sixlowpan_set_pktattrs
- *
- * Description:
- *   Setup some packet buffer attributes
- *
- * Input Parameters:
- *   ieee - Pointer to IEEE802.15.4 MAC driver structure.
- *   ipv6 - Pointer to the IPv6 header to "compress"
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void sixlowpan_set_pktattrs(FAR struct ieee802154_driver_s *ieee,
-                                   FAR const struct ipv6_hdr_s *ipv6)
-{
-  int attr = 0;
-
-  /* Set protocol in NETWORK_ID */
-
-  g_pktattrs[PACKETBUF_ATTR_NETWORK_ID] = ipv6->proto;
-
-  /* Assign values to the channel attribute (port or type + code) */
-
-  if (ipv6->proto == IP_PROTO_UDP)
-    {
-      FAR struct udp_hdr_s *udp = &((FAR struct ipv6udp_hdr_s *)ipv6)->udp;
-
-      attr = udp->srcport;
-      if (udp->destport < attr)
-        {
-          attr = udp->destport;
-        }
-    }
-  else if (ipv6->proto == IP_PROTO_TCP)
-    {
-      FAR struct tcp_hdr_s *tcp = &((FAR struct ipv6tcp_hdr_s *)ipv6)->tcp;
-
-      attr = tcp->srcport;
-      if (tcp->destport < attr)
-        {
-          attr = tcp->destport;
-        }
-    }
-  else if (ipv6->proto == IP_PROTO_ICMP6)
-    {
-      FAR struct icmpv6_iphdr_s *icmp = &((FAR struct ipv6icmp_hdr_s *)ipv6)->icmp;
-
-      attr = icmp->type << 8 | icmp->code;
-    }
-
-  g_pktattrs[PACKETBUF_ATTR_CHANNEL] = attr;
-}
-
-/****************************************************************************
  * Name: sixlowpan_frame_process
  *
  * Description:
@@ -691,7 +606,10 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee)
               if (ieee->i_dev.d_len > 0)
                 {
                   FAR struct ipv6_hdr_s *ipv6hdr;
+                  FAR uint8_t *buffer;
                   struct rimeaddr_s destmac;
+                  size_t hdrlen;
+                  size_t buflen;
 
                   /* The IPv6 header followed by TCP or UDP headers should
                    * lie at the beginning of d_buf since there is no link
@@ -707,10 +625,46 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee)
 
                   sixlowpan_rimefromip(ipv6hdr->destipaddr, &destmac);
 
+                  /* The data payload should follow the IPv6 header plus
+                   * the protocol header.
+                   */
+
+                  if (ipv6hdr->proto != IP_PROTO_TCP)
+                    {
+                      hdrlen = IPv6_HDRLEN + TCP_HDRLEN;
+                    }
+                  else if (ipv6hdr->proto != IP_PROTO_UDP)
+                    {
+                      hdrlen = IPv6_HDRLEN + UDP_HDRLEN;
+                    }
+                  else if (ipv6hdr->proto != IP_PROTO_ICMP6)
+                    {
+                      hdrlen = IPv6_HDRLEN + ICMPv6_HDRLEN;
+                    }
+                  else
+                    {
+                      nwarn("WARNING: Unsupported protoype: %u\n",
+                            ipv6hdr->proto);
+                      ret = -EPROTO;
+                      goto drop;
+                    }
+
+                  if (hdrlen < ieee->i_dev.d_len)
+                    {
+                      nwarn("WARNING: Packet to small: Have %u need >%u\n",
+                            ieee->i_dev.d_len, hdrlen);
+                      ret = -ENOBUFS;
+                      goto drop;
+                    }
+
                   /* Convert the outgoing packet into a frame list. */
 
-                  ret = sixlowpan_queue_frames(ieee, ipv6hdr, ieee->i_dev.d_buf,
-                                               ieee->i_dev.d_len, &destmac);
+                  buffer = ieee->i_dev.d_buf + hdrlen;
+                  buflen = ieee->i_dev.d_len - hdrlen;
+
+                  ret = sixlowpan_queue_frames(ieee, ipv6hdr, buffer, buflen,
+                                               &destmac);
+drop:
                   ieee->i_dev.d_len = 0;
                 }
             }
