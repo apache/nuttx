@@ -100,8 +100,8 @@
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *
  * Input Parameters:
- *   ieee - Pointer to IEEE802.15.4 MAC driver structure.
- *   ipv6 - Pointer to the IPv6 header to "compress"
+ *   ieee   - Pointer to IEEE802.15.4 MAC driver structure.
+ *   destip - Pointer to the IPv6 header to "compress"
  *
  * Returned Value:
  *   None
@@ -109,7 +109,7 @@
  ****************************************************************************/
 
 static void sixlowpan_compress_ipv6hdr(FAR struct ieee802154_driver_s *ieee,
-                                       FAR const struct ipv6_hdr_s *ipv6)
+                                       FAR const struct ipv6_hdr_s *destip)
 {
   /* Indicate the IPv6 dispatch and length */
 
@@ -118,7 +118,7 @@ static void sixlowpan_compress_ipv6hdr(FAR struct ieee802154_driver_s *ieee,
 
   /* Copy the IPv6 header and adjust pointers */
 
-  memcpy(g_rimeptr + g_rime_hdrlen, ipv6, IPv6_HDRLEN);
+  memcpy(g_rimeptr + g_rime_hdrlen, destip, IPv6_HDRLEN);
   g_rime_hdrlen   += IPv6_HDRLEN;
   g_uncomp_hdrlen += IPv6_HDRLEN;
 }
@@ -161,12 +161,12 @@ static void sixlowpan_compress_ipv6hdr(FAR struct ieee802154_driver_s *ieee,
 
 int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
                            FAR const struct ipv6_hdr_s *destip,
-                           FAR const void *buf,  size_t len,
+                           FAR const void *buf, size_t len,
                            FAR const struct rimeaddr_s *destmac)
 {
   FAR struct iob_s *iob;
   int framer_hdrlen;
-  struct rimeaddr_s dest;
+  struct rimeaddr_s bcastmac;
   uint16_t outlen = 0;
 
   /* Initialize global data.  Locking the network guarantees that we have
@@ -211,12 +211,23 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
   if (destmac == NULL)
     {
-      memset(&dest, 0, sizeof(struct rimeaddr_s));
+      memset(&bcastmac, 0, sizeof(struct rimeaddr_s));
+      destmac = &bcastmac;
     }
-  else
-    {
-      rimeaddr_copy(&dest, (FAR const struct rimeaddr_s *)destmac);
-    }
+
+  /* Pre-allocate the IOB to hold frame or the first fragment, waiting if
+   * necessary.
+   */
+
+  iob = iob_alloc(false);
+  DEBUGASSERT(iob != NULL);
+
+  /* Initialize the IOB */
+
+  iob->io_flink  = NULL;
+  iob->io_len    = 0;
+  iob->io_offset = 0;
+  iob->io_pktlen = 0;
 
   ninfo("Sending packet len %d\n", len);
 
@@ -226,9 +237,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
       /* Try to compress the headers */
 
 #if defined(CONFIG_NET_6LOWPAN_COMPRESSION_HC1)
-      sixlowpan_compresshdr_hc1(ieee, &dest);
+      sixlowpan_compresshdr_hc1(ieee, destip, destmac, iob);
 #elif defined(CONFIG_NET_6LOWPAN_COMPRESSION_HC06)
-      sixlowpan_compresshdr_hc06(ieee, &dest);
+      sixlowpan_compresshdr_hc06(ieee, destip, destmac, iob);
 #else
 #  error No compression specified
 #endif
@@ -243,7 +254,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
   ninfo("Header of len %d\n", g_rime_hdrlen);
 
-  rimeaddr_copy(&g_pktaddrs[PACKETBUF_ADDR_RECEIVER], &dest);
+  rimeaddr_copy(&g_pktaddrs[PACKETBUF_ADDR_RECEIVER], destmac);
 
   /* Pre-calculate frame header length. */
 
@@ -279,20 +290,8 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
       ninfo("Fragmentation sending packet len %d\n", len);
 
-      /* Allocate an IOB to hold the first fragment, waiting if necessary. */
-
-      iob = iob_alloc(false);
-      DEBUGASSERT(iob != NULL);
-
-      /* Initialize the IOB */
-
-      iob->io_flink  = NULL;
-      iob->io_len    = 0;
-      iob->io_offset = 0;
-      iob->io_pktlen = 0;
-
       /* Create 1st Fragment */
-      /* Add the frame header */
+      /* Add the frame header using the pre-allocated IOB. */
 
       verify = sixlowpan_framecreate(ieee, iob, ieee->i_panid);
       DEBUGASSERT(verify == framer_hdrlen);
@@ -434,19 +433,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
        * and send in one frame.
        */
 
-      /* Allocate an IOB to hold the frame, waiting if necessary. */
-
-      iob = iob_alloc(false);
-      DEBUGASSERT(iob != NULL);
-
-      /* Initialize the IOB */
-
-      iob->io_flink  = NULL;
-      iob->io_len    = 0;
-      iob->io_offset = 0;
-      iob->io_pktlen = 0;
-
-      /* Add the frame header */
+      /* Add the frame header to the prealloated IOB. */
 
       verify = sixlowpan_framecreate(ieee, iob, ieee->i_panid);
       DEBUGASSERT(vreify == framer_hdrlen);

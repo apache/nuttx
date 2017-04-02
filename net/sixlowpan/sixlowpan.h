@@ -53,7 +53,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-struct socket; /* Forward reference */
+struct net_driver_s; /* Forward reference */
+struct socket;       /* Forward reference */
+struct sockaddr;     /* Forward reference */
 
 /****************************************************************************
  * Name: sixlowpan_initialize
@@ -105,6 +107,33 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 #endif
 
 /****************************************************************************
+ * Function: sixlowpan_tcp_send
+ *
+ * Description:
+ *   TCP output comes through two different mechansims.  Either from:
+ *
+ *   1. TCP socket output.  For the case of TCP output to an
+ *      IEEE802.15.4, the TCP output is caught in the socket
+ *      send()/sendto() logic and and redirected to psock_6lowpan_tcp_send().
+ *   2. TCP output from the TCP state machine.  That will occur
+ *      during TCP packet processing by the TCP state meachine.  It
+ *      is detected there when ipv6_tcp_input() returns with d_len > 0. This
+ *      will be redirected here.
+ *
+ * Parameters:
+ *   dev - An instance of nework device state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+void sixlowpan_tcp_send(FAR struct net_driver_s *dev);
+
+/****************************************************************************
  * Function: psock_6lowpan_udp_send
  *
  * Description:
@@ -131,6 +160,40 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
                                size_t len);
 #endif
+
+/****************************************************************************
+ * Function: psock_6lowpan_udp_sendto
+ *
+ * Description:
+ *   If sendto() is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)
+ *   socket, the parameters to and 'tolen' are ignored (and the error EISCONN
+ *   may be returned when they are not NULL and 0), and the error ENOTCONN is
+ *   returned when the socket was not actually connected.
+ *
+ * Parameters:
+ *   psock    A pointer to a NuttX-specific, internal socket structure
+ *   buf      Data to send
+ *   len      Length of data to send
+ *   flags    Send flags
+ *   to       Address of recipient
+ *   tolen    The length of the address structure
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error,
+ *   -1 is returned, and errno is set appropriately.    Returned error
+ *   number must be consistent with definition of errors reported by
+ *   sendto().
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
+                                 FAR const void *buf,
+                                 size_t len, int flags,
+                                 FAR const struct sockaddr *to,
+                                 socklen_t tolen);
 
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* _NET_SIXLOWPAN_SIXLOWPAN_H */

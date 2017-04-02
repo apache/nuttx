@@ -39,11 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <sys/socket.h>
+#include <string.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
 #include "nuttx/net/netdev.h"
+#include "nuttx/net/netstats.h"
 
 #include "netdev/netdev.h"
 #include "socket/socket.h"
@@ -57,21 +60,26 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_6lowpan_udp_send
+ * Function: psock_6lowpan_udp_sendto
  *
  * Description:
- *   psock_6lowpan_udp_send() call may be used with connectionlesss UDP
- *   sockets.
+ *   If sendto() is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)
+ *   socket, the parameters to and 'tolen' are ignored (and the error EISCONN
+ *   may be returned when they are not NULL and 0), and the error ENOTCONN is
+ *   returned when the socket was not actually connected.
  *
  * Parameters:
- *   psock - An instance of the internal socket structure.
- *   buf   - Data to send
- *   len   - Length of data to send
+ *   psock    A pointer to a NuttX-specific, internal socket structure
+ *   buf      Data to send
+ *   buflen   Length of data to send
+ *   flags    Send flags
+ *   to       Address of recipient
+ *   tolen    The length of the address structure
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
- *   -1 is returned, and errno is set appropriately.  Returned error numbers
- *   must be consistent with definition of errors reported by send() or
+ *   -1 is returned, and errno is set appropriately.    Returned error
+ *   number must be consistent with definition of errors reported by
  *   sendto().
  *
  * Assumptions:
@@ -79,15 +87,214 @@
  *
  ****************************************************************************/
 
-ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
-                               size_t len)
+ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
+                                 FAR const void *buf,
+                                 size_t buflen, int flags,
+                                 FAR const struct sockaddr *to,
+                                 socklen_t tolen)
 {
+  FAR struct sockaddr_in6 *to6 = (FAR struct sockaddr_in6 *)to;
   FAR struct udp_conn_s *conn;
   FAR struct net_driver_s *dev;
   struct ipv6udp_hdr_s ipv6udp;
   struct rimeaddr_s destmac;
+  uint16_t iplen;
   uint16_t timeout;
   int ret;
+
+  DEBUGASSERT(psock != NULL && psock->s_crefs > 0 && to != NULL);
+  DEBUGASSERT(psock->s_type == SOCK_DGRAM);
+
+  if (psock == NULL || to == NULL)
+    {
+      return (ssize_t)-EINVAL;
+    }
+
+  /* Make sure that this is a datagram valid socket */
+
+  if (psock->s_crefs <= 0 || psock->s_type != SOCK_DGRAM)
+    {
+      nerr("ERROR: Invalid socket\n");
+      return (ssize_t)-EBADF;
+    }
+
+  /* Make sure that the destination address is valid */
+
+  if (to6->sin6_family != AF_INET6 || tolen < sizeof(struct sockaddr_in6))
+    {
+      nerr("ERROR: Invalid destination address\n");
+      return (ssize_t)-EAFNOSUPPORT;
+    }
+
+  /* Get the underlying UDP "connection" structure */
+
+  conn = (FAR struct udp_conn_s *)psock->s_conn;
+  DEBUGASSERT(conn != NULL);
+
+  /* Ignore if not IPv6 domain */
+
+  if (conn->domain != PF_INET6)
+    {
+      nwarn("WARNING: Not IPv6\n");
+      return (ssize_t)-EPROTOTYPE;
+    }
+
+  /* Route outgoing message to the correct device */
+
+#ifdef CONFIG_NETDEV_MULTINIC
+  dev = netdev_findby_ipv6addr(conn->u.ipv6.laddr,
+                               to6->sin6_addr.in6_u.u6_addr16);
+#ifdef CONFIG_NETDEV_MULTILINK
+  if (dev == NULL || dev->d_lltype != NET_LL_IEEE802154)
+#else
+  if (dev == NULL)
+#endif
+    {
+      nwarn("WARNING: Not routable or not IEEE802.15.4 MAC\n");
+      return (ssize_t)-ENETUNREACH;
+    }
+#else
+  dev = netdev_findby_ipv6addr(to6->sin6_addr.in6_u.u6_addr16);
+#ifdef CONFIG_NETDEV_MULTILINK
+  if (dev == NULL || dev->d_lltype != NET_LL_IEEE802154)
+#else
+  if (dev == NULL)
+#endif
+    {
+      nwarn("WARNING: Not routable\n");
+      return (ssize_t)-ENETUNREACH;
+    }
+#endif
+
+#ifdef CONFIG_NET_ICMPv6_NEIGHBOR
+  /* Make sure that the IP address mapping is in the Neighbor Table */
+
+  ret = icmpv6_neighbor(to6->sin6_addr.in6_u.u6_addr16);
+  if (ret < 0)
+    {
+      nerr("ERROR: Not reachable\n");
+      return (ssize_t)-ENETUNREACH;
+    }
+#endif
+
+  /* Initialize the IPv6/UDP headers */
+
+  ipv6udp.ipv6.vtc    = 0x60;
+  ipv6udp.ipv6.tcf    = 0x00;
+  ipv6udp.ipv6.flow   = 0x00;
+  ipv6udp.ipv6.proto  = IP_PROTO_UDP;
+  ipv6udp.ipv6.ttl    = conn->ttl;
+
+  /* The IPv6 header length field does not include the size of IPv6 IP
+   * header.
+   */
+
+  iplen               = buflen + UDP_HDRLEN;
+  ipv6udp.ipv6.len[0] = (iplen >> 8);
+  ipv6udp.ipv6.len[1] = (iplen & 0xff);
+
+  /* Copy the source and destination addresses */
+
+  net_ipv6addr_hdrcopy(ipv6udp.ipv6.srcipaddr,  to6->sin6_addr.in6_u.u6_addr16);
+  net_ipv6addr_hdrcopy(ipv6udp.ipv6.destipaddr, conn->u.ipv6.raddr);
+
+  ninfo("IPv6 length: %d\n", ((int)ipv6->len[0] << 8) + ipv6->len[1]);
+
+#ifdef CONFIG_NET_STATISTICS
+  g_netstats.ipv6.sent++;
+#endif
+
+  /* Initialize the UDP header */
+
+  ipv6udp.udp.srcport     = conn->lport;
+  ipv6udp.udp.destport    = to6->sin6_port;
+  ipv6udp.udp.udplen      = htons(iplen);
+  ipv6udp.udp.udpchksum   = 0;
+
+  ipv6udp.udp.udpchksum   = 0;
+
+#warning Missing logic
+#if 0 /* REVISIT */
+#ifdef CONFIG_NET_UDP_CHECKSUMS
+  /* Calculate UDP checksum. */
+  /* REVISIT: Current checksum logic expects the IPv6 header, the UDP header, and
+   * the payload data to be in contiguous memory.
+   */
+
+  ipv6udp.udp.udpchksum   = ~udp_ipv6_chksum(dev);
+  if (ipv6udp.udp.udpchksum == 0)
+    {
+      ipv6udp.udp.udpchksum = 0xffff;
+    }
+#endif /* CONFIG_NET_UDP_CHECKSUMS */
+#endif /* REVISIT */
+
+  ninfo("Outgoing UDP packet length: %d\n", iplen + IPv6_HDRLEN);
+
+#ifdef CONFIG_NET_STATISTICS
+  g_netstats.udp.sent++;
+#endif
+
+  /* Set the socket state to sending */
+
+  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
+
+  /* Get the Rime MAC address of the destination  This assumes an encoding
+   * of the MAC address in the IPv6 address.
+   */
+
+  sixlowpan_rimefromip(to6->sin6_addr.in6_u.u6_addr16, &destmac);
+
+  /* If routable, then call sixlowpan_send() to format and send the 6loWPAN
+   * packet.
+   */
+
+#ifdef CONFIG_NET_SOCKOPTS
+  timeout = psock->s_sndtimeo;
+#else
+  timeout = 0;
+#endif
+
+  ret = sixlowpan_send(dev, (FAR const struct ipv6_hdr_s *)&ipv6udp,
+                       buf, buflen, &destmac, timeout);
+  if (ret < 0)
+    {
+      nerr("ERROR: sixlowpan_send() failed: %d\n", ret);
+    }
+
+  /* Set the socket state to idle */
+
+  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
+  return ret;
+}
+
+/****************************************************************************
+ * Function: psock_6lowpan_udp_send
+ *
+ * Description:
+ *   psock_6lowpan_udp_send() call may be used with connectionlesss UDP
+ *   sockets.
+ *
+ * Parameters:
+ *   psock  - An instance of the internal socket structure.
+ *   buf    - Data to send
+ *   buflen - Length of data to send
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error,
+ *   -1 is returned, and errno is set appropriately.  Returned error numbers
+ *   must be consistent with definition of errors reported by send().
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
+                               size_t buflen)
+{
+  FAR struct udp_conn_s *conn;
+  struct sockaddr_in6 to;
 
   DEBUGASSERT(psock != NULL && psock->s_crefs > 0);
   DEBUGASSERT(psock->s_type == SOCK_DGRAM);
@@ -114,7 +321,6 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
   conn = (FAR struct udp_conn_s *)psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
   /* Ignore if not IPv6 domain */
 
   if (conn->domain != PF_INET6)
@@ -122,76 +328,16 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
       nwarn("WARNING: Not IPv6\n");
       return (ssize_t)-EPROTOTYPE;
     }
-#endif
 
-  /* Route outgoing message to the correct device */
+  /* Create the 'to' address */
 
-#ifdef CONFIG_NETDEV_MULTINIC
-  dev = netdev_findby_ipv6addr(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
-#ifdef CONFIG_NETDEV_MULTILINK
-  if (dev == NULL || dev->d_lltype != NET_LL_IEEE802154)
-#else
-  if (dev == NULL)
-#endif
-    {
-      nwarn("WARNING: Not routable or not IEEE802.15.4 MAC\n");
-      return (ssize_t)-ENETUNREACH;
-    }
-#else
-  dev = netdev_findby_ipv6addr(conn->u.ipv6.raddr);
-#ifdef CONFIG_NETDEV_MULTILINK
-  if (dev == NULL || dev->d_lltype != NET_LL_IEEE802154)
-#else
-  if (dev == NULL)
-#endif
-    {
-      nwarn("WARNING: Not routable\n");
-      return (ssize_t)-ENETUNREACH;
-    }
-#endif
+  to.sin6_family = AF_INET6;
+  to.sin6_port   = conn->rport;  /* Already network order */
+  memcpy(to.sin6_addr.in6_u.u6_addr16, conn->u.ipv6.raddr, 16);
 
-#ifdef CONFIG_NET_ICMPv6_NEIGHBOR
-  /* Make sure that the IP address mapping is in the Neighbor Table */
-
-  ret = icmpv6_neighbor(conn->u.ipv6.raddr);
-  if (ret < 0)
-    {
-      nerr("ERROR: Not reachable\n");
-      return (ssize_t)-ENETUNREACH;
-    }
-#endif
-
-  /* Initialize the IPv6/UDP headers */
-#warning Missing logic
-
-  /* Set the socket state to sending */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
-
-  /* Get the Rime MAC address of the destination */
-#warning Missing logic
-
-  /* If routable, then call sixlowpan_send() to format and send the 6loWPAN
-   * packet.
-   */
-
-#ifdef CONFIG_NET_SOCKOPTS
-  timeout = psock->s_sndtimeo;
-#else
-  timeout = 0;
-#endif
-
-  ret = sixlowpan_send(dev, (FAR const struct ipv6_hdr_s *)&ipv6udp,
-                       buf, len, &destmac, timeout);
-  if (ret < 0)
-    {
-      nerr("ERROR: sixlowpan_send() failed: %d\n", ret);
-    }
-
-  /* Set the socket state to idle */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
-  return ret;
+  return psock_6lowpan_udp_sendto(psock, buf, buflen, 0,
+                                  (FAR const struct sockaddr *)&to,
+                                  sizeof(struct sockaddr_in6));
 }
 
 #endif /* CONFIG_NET_6LOWPAN && CONFIG_NET_UDP */

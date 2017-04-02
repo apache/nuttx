@@ -90,9 +90,7 @@
 #  error "Logic to support multiple Ethernet interfaces is incomplete"
 #endif
 
-/* If processing is not done at the interrupt level, then work queue support
- * is required.
- */
+/* Work queue support is required. */
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required

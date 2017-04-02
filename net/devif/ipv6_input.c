@@ -95,6 +95,7 @@
 #include "neighbor/neighbor.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
+#include "sixlowpan/sixlowpan.h"
 #include "pkt/pkt.h"
 #include "icmpv6/icmpv6.h"
 
@@ -255,12 +256,45 @@ int ipv6_input(FAR struct net_driver_s *dev)
     {
 #ifdef NET_TCP_HAVE_STACK
       case IP_PROTO_TCP:   /* TCP input */
+        /* Forward the IPv6 TCP packet */
+
         tcp_ipv6_input(dev);
-        break;
+
+#ifdef CONFIG_NET_6LOWPAN
+        /* TCP output comes through two different mechansims.  Either from:
+         *
+         *   1. TCP socket output.  For the case of TCP output to an
+         *      IEEE802.15.4, the TCP output is caught in the socket
+         *      send()/sendto() logic and and redirected to 6loWPAN logic.
+         *   2. TCP output from the TCP state machine.  That will pass
+         *      here and can be detected if d_len > 0.  It will be redirected
+         *      to 6loWPAN logic here.
+         */
+
+#ifdef CONFIG_NET_MULTILINK
+       /* Handle the case where multiple link layer protocols are supported */
+
+       if (dev->d_len > 0 && dev->d_lltype == CONFIG_NET_6LOWPAN)
+#else
+       if (dev->d_len > 0)
 #endif
+         {
+            /* Let 6loWPAN handle the TCP output */
+
+            sixlowpan_tcp_send(dev);
+
+            /* Drop the packet in the d_buf */
+
+            goto drop;
+         }
+#endif /* CONFIG_NET_6LOWPAN */
+        break;
+#endif /* NET_TCP_HAVE_STACK */
 
 #ifdef NET_UDP_HAVE_STACK
       case IP_PROTO_UDP:   /* UDP input */
+        /* Forward the IPv6 UDP packet */
+
         udp_ipv6_input(dev);
         break;
 #endif
@@ -269,6 +303,8 @@ int ipv6_input(FAR struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_ICMPv6
       case IP_PROTO_ICMP6: /* ICMP6 input */
+        /* Forward the ICMPv6 packet */
+
         icmpv6_input(dev);
         break;
 #endif

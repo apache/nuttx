@@ -336,67 +336,51 @@
 #endif
 
 #ifdef CONFIG_NET_MULTILINK
-#  undef __LAST_MIN_UDP_MSS
-#  undef __LAST_MAX_UDP_MSS
-
 #  ifdef CONFIG_NET_ETHERNET
-#    ifdef __LAST_MIN_UDP_MSS
-#      define __MIN_UDP_MSS(h)  MIN(ETH_UDP_MSS(h),__LAST_MIN_UDP_MSS(h))
-#      define __MAX_UDP_MSS(h)  MAX(ETH_UDP_MSS(h),__LAST_MAX_UDP_MSS(h))
-#    else
-#      define __MIN_UDP_MSS(h)  ETH_UDP_MSS(h)
-#      define __MAX_UDP_MSS(h)  ETH_UDP_MSS(h)
-#    endif
-#    undef __LAST_MIN_UDP_MSS
-#    undef __LAST_MAX_UDP_MSS
-#    define __LAST_MIN_UDP_MSS(h) __MIN_UDP_MSS(h)
-#    define __LAST_MAX_UDP_MSS(h) __MAX_UDP_MSS(h)
+#    define __MIN_UDP_MSS(h)         ETH_UDP_MSS(h)
+#    define __MAX_UDP_MSS(h)         ETH_UDP_MSS(h)
+#    define __ETH_MIN_UDP_MSS(h)     ETH_UDP_MSS(h)
+#    define __ETH_MAX_UDP_MSS(h)     ETH_UDP_MSS(h)
+#  else
+#    define __ETH_MIN_UDP_MSS(h)     INT_MAX
+#    define __ETH_MAX_UDP_MSS(h)     0
 #  endif
 
 #  ifdef CONFIG_NET_6LOWPAN
-#    ifdef __LAST_MIN_UDP_MSS
-#      define __MIN_UDP_MSS(h)  MIN(IEEE802154_UDP_MSS(h),__LAST_MIN_UDP_MSS(h))
-#      define __MAX_UDP_MSS(h)  MAX(IEEE802154_UDP_MSS(h),__LAST_MAX_UDP_MSS(h))
-#    else
-#      define __MIN_UDP_MSS(h)  IEEE802154_UDP_MSS(h)
-#      define __MAX_UDP_MSS(h)  IEEE802154_UDP_MSS(h)
-#    endif
-#    undef __LAST_MIN_UDP_MSS
-#    undef __LAST_MAX_UDP_MSS
-#    define __LAST_MIN_UDP_MSS(h) __MIN_UDP_MSS(h)
-#    define __LAST_MAX_UDP_MSS(h) __MAX_UDP_MSS(h)
+#    undef  __MIN_UDP_MSS
+#    undef  __MIN_UDP_MSS
+#    define __MIN_UDP_MSS(h)         MIN(IEEE802154_UDP_MSS(h),__ETH_MIN_UDP_MSS(h))
+#    define __MAX_UDP_MSS(h)         MAX(IEEE802154_UDP_MSS(h),__ETH_MAX_UDP_MSS(h))
+#    define __6LOWPAN_MIN_UDP_MSS(h) MIN(IEEE802154_UDP_MSS(h),__ETH_MIN_UDP_MSS(h))
+#    define __6LOWPAN_MAX_UDP_MSS(h) MAX(IEEE802154_UDP_MSS(h),__ETH_MAX_UDP_MSS(h))
+#  else
+#    define __6LOWPAN_MIN_UDP_MSS(h) __ETH_MIN_UDP_MSS(h)
+#    define __6LOWPAN_MAX_UDP_MSS(h) __ETH_MAX_UDP_MSS(h)
 #  endif
 
 #  ifdef CONFIG_NET_LOOPBACK
-#    ifdef __LAST_MIN_UDP_MSS
-#      define __MIN_UDP_MSS(h)  MIN(LO_UDP_MSS(h),__LAST_MIN_UDP_MSS(h))
-#      define __MAX_UDP_MSS(h)  MAX(LO_UDP_MSS(h),__LAST_MAX_UDP_MSS(h))
-#    else
-#      define __MIN_UDP_MSS(h)  LO_UDP_MSS(h)
-#      define __MAX_UDP_MSS(h)  LO_UDP_MSS(h)
-#    endif
-#    undef __LAST_MIN_UDP_MSS
-#    undef __LAST_MAX_UDP_MSS
-#    define __LAST_MIN_UDP_MSS(h) __MIN_UDP_MSS(h)
-#    define __LAST_MAX_UDP_MSS(h) __MAX_UDP_MSS(h)
+#    undef  __MIN_UDP_MSS
+#    undef  __MIN_UDP_MSS
+#    define __MIN_UDP_MSS(h)        MIN(LO_UDP_MSS(h),__6LOWPAN_MIN_UDP_MSS(h))
+#    define __MAX_UDP_MSS(h)        MAX(LO_UDP_MSS(h),__6LOWPAN_MAX_UDP_MSS(h))
+#    define __LOOP_MIN_UDP_MSS(h)   MIN(LO_UDP_MSS(h),__6LOWPAN_MIN_UDP_MSS(h))
+#    define __LOOP_MAX_UDP_MSS(h)   MAX(LO_UDP_MSS(h),__6LOWPAN_MAX_UDP_MSS(h))
+#  else
+#    define __LOOP_MIN_UDP_MSS(h) __6LOWPAN_MIN_UDP_MSS(h)
+#    define __LOOP_MAX_UDP_MSS(h) __6LOWPAN_MAX_UDP_MSS(h)
 #  endif
 
 #  ifdef CONFIG_NET_SLIP
-#    ifdef __LAST_MIN_UDP_MSS
-#      define __MIN_UDP_MSS(h)  MIN(SLIP_UDP_MSS(h),__LAST_MIN_UDP_MSS(h))
-#      define __MAX_UDP_MSS(h)  MAX(SLIP_UDP_MSS(h),__LAST_MAX_UDP_MSS(h))
-#    else
-#      define __MIN_UDP_MSS(h)  SLIP_UDP_MSS(h)
-#      define __MAX_UDP_MSS(h)  SLIP_UDP_MSS(h)
-#    endif
-#    undef __LAST_MIN_UDP_MSS
-#    undef __LAST_MAX_UDP_MSS
-#    define __LAST_MIN_UDP_MSS(h) __MIN_UDP_MSS(h)
-#    define __LAST_MAX_UDP_MSS(h) __MAX_UDP_MSS(h)
+#    undef  __MIN_UDP_MSS
+#    undef  __MIN_UDP_MSS
+#    define __MIN_UDP_MSS(h)      MIN(SLIP_UDP_MSS(h),__LOOP_MIN_UDP_MSS(h))
+#    define __MAX_UDP_MSS(h)      MAX(SLIP_UDP_MSS(h),__LOOP_MAX_UDP_MSS(h))
+#    define __SLIP_MIN_UDP_MSS(h) MIN(SLIP_UDP_MSS(h),__LOOP_MIN_UDP_MSS(h))
+#    define __SLIP_MAX_UDP_MSS(h) MAX(SLIP_UDP_MSS(h),__LOOP_MAX_UDP_MSS(h))
+#  else
+#    define __SLIP_MIN_UDP_MSS(h) __LOOP_MIN_UDP_MSS(h)
+#    define __SLIP_MAX_UDP_MSS(h) __LOOP_MAX_UDP_MSS(h)
 #  endif
-
-#  undef __LAST_MIN_UDP_MSS
-#  undef __LAST_MAX_UDP_MSS
 #endif
 
 /* NOTE: MSS calcuation excludes the UDP_HDRLEN. */
@@ -531,67 +515,52 @@
 #endif
 
 #ifdef CONFIG_NET_MULTILINK
-#  undef __LAST_MIN_TCP_MSS
-#  undef __LAST_MAX_TCP_MSS
 
 #  ifdef CONFIG_NET_ETHERNET
-#    ifdef __LAST_MIN_TCP_MSS
-#      define __MIN_TCP_MSS(h)  MIN(ETH_TCP_MSS(h),__LAST_MIN_TCP_MSS(h))
-#      define __MAX_TCP_MSS(h)  MAX(ETH_TCP_MSS(h),__LAST_MAX_TCP_MSS(h))
-#    else
-#      define __MIN_TCP_MSS(h)  ETH_TCP_MSS(h)
-#      define __MAX_TCP_MSS(h)  ETH_TCP_MSS(h)
-#    endif
-#    undef __LAST_MIN_TCP_MSS
-#    undef __LAST_MAX_TCP_MSS
-#    define __LAST_MIN_TCP_MSS(h) __MIN_TCP_MSS(h)
-#    define __LAST_MAX_TCP_MSS(h) __MAX_TCP_MSS(h)
+#    define __MIN_TCP_MSS(h)         ETH_TCP_MSS(h)
+#    define __MAX_TCP_MSS(h)         ETH_TCP_MSS(h)
+#    define __ETH_MIN_TCP_MSS(h)     ETH_TCP_MSS(h)
+#    define __ETH_MAX_TCP_MSS(h)     ETH_TCP_MSS(h)
+#  else
+#    define __ETH_MIN_TCP_MSS(h)     INT_MAX
+#    define __ETH_MAX_TCP_MSS(h)     0
 #  endif
 
 #  ifdef CONFIG_NET_6LOWPAN
-#    ifdef __LAST_MIN_TCP_MSS
-#      define __MIN_TCP_MSS(h)  MIN(IEEE802154_TCP_MSS(h),__LAST_MIN_TCP_MSS(h))
-#      define __MAX_TCP_MSS(h)  MAX(IEEE802154_TCP_MSS(h),__LAST_MAX_TCP_MSS(h))
-#    else
-#      define __MIN_TCP_MSS(h)  IEEE802154_TCP_MSS(h)
-#      define __MAX_TCP_MSS(h)  IEEE802154_TCP_MSS(h)
-#    endif
-#    undef __LAST_MIN_TCP_MSS
-#    undef __LAST_MAX_TCP_MSS
-#    define __LAST_MIN_TCP_MSS(h) __MIN_TCP_MSS(h)
-#    define __LAST_MAX_TCP_MSS(h) __MAX_TCP_MSS(h)
+#    undef  __MIN_TCP_MSS
+#    undef  __MAX_TCP_MSS
+#    define __MIN_TCP_MSS(h)         MIN(IEEE802154_TCP_MSS(h),__ETH_MIN_TCP_MSS(h))
+#    define __MAX_TCP_MSS(h)         MAX(IEEE802154_TCP_MSS(h),__ETH_MAX_TCP_MSS(h))
+#    define __6LOWPAN_MIN_TCP_MSS(h) MIN(IEEE802154_TCP_MSS(h),__ETH_MIN_TCP_MSS(h))
+#    define __6LOWPAN_MAX_TCP_MSS(h) MAX(IEEE802154_TCP_MSS(h),__ETH_MAX_TCP_MSS(h))
+#  else
+#    define __6LOWPAN_MIN_TCP_MSS(h) __ETH_MIN_TCP_MSS(h)
+#    define __6LOWPAN_MAX_TCP_MSS(h) __ETH_MAX_TCP_MSS(h)
 #  endif
 
 #  ifdef CONFIG_NET_LOOPBACK
-#    ifdef __LAST_MIN_TCP_MSS
-#      define __MIN_TCP_MSS(h)  MIN(LO_TCP_MSS(h),__LAST_MIN_TCP_MSS(h))
-#      define __MAX_TCP_MSS(h)  MAX(LO_TCP_MSS(h),__LAST_MAX_TCP_MSS(h))
-#    else
-#      define __MIN_TCP_MSS(h)  LO_TCP_MSS(h)
-#      define __MAX_TCP_MSS(h)  LO_TCP_MSS(h)
-#    endif
-#    undef __LAST_MIN_TCP_MSS
-#    undef __LAST_MAX_TCP_MSS
-#    define __LAST_MIN_TCP_MSS(h) __MIN_TCP_MSS(h)
-#    define __LAST_MAX_TCP_MSS(h) __MAX_TCP_MSS(h)
+#    undef  __MIN_TCP_MSS
+#    undef  __MAX_TCP_MSS
+#    define __MIN_TCP_MSS(h)         MIN(LO_TCP_MSS(h),__6LOWPAN_MIN_TCP_MSS(h))
+#    define __MAX_TCP_MSS(h)         MAX(LO_TCP_MSS(h),__6LOWPAN_MAX_TCP_MSS(h))
+#    define __LOOP_MIN_TCP_MSS(h)    MIN(LO_TCP_MSS(h),__6LOWPAN_MIN_TCP_MSS(h))
+#    define __LOOP_MAX_TCP_MSS(h)    MAX(LO_TCP_MSS(h),__6LOWPAN_MAX_TCP_MSS(h))
+#  else
+#    define __LOOP_MIN_TCP_MSS(h)    _6LOWPAN_MIN_TCP_MSS(h)
+#    define __LOOP_MAX_TCP_MSS(h)   __6LOWPAN_MAX_TCP_MSS(h)
 #  endif
 
 #  ifdef CONFIG_NET_SLIP
-#    ifdef __LAST_MIN_TCP_MSS
-#      define __MIN_TCP_MSS(h)  MIN(SLIP_TCP_MSS(h),__LAST_MIN_TCP_MSS(h))
-#      define __MAX_TCP_MSS(h)  MAX(SLIP_TCP_MSS(h),__LAST_MAX_TCP_MSS(h))
-#    else
-#      define __MIN_TCP_MSS(h)  SLIP_TCP_MSS(h)
-#      define __MAX_TCP_MSS(h)  SLIP_TCP_MSS(h)
-#    endif
-#    undef __LAST_MIN_TCP_MSS
-#    undef __LAST_MAX_TCP_MSS
-#    define __LAST_MIN_TCP_MSS(h) __MIN_TCP_MSS(h)
-#    define __LAST_MAX_TCP_MSS(h) __MAX_TCP_MSS(h)
+#    undef  __MIN_TCP_MSS
+#    undef  __MAX_TCP_MSS
+#    define __MIN_TCP_MSS(h)        MIN(SLIP_TCP_MSS(h),__LOOP_MIN_TCP_MSS(h))
+#    define __MAX_TCP_MSS(h)        MAX(SLIP_TCP_MSS(h),__LOOP_MAX_TCP_MSS(h))
+#    define __SLIP_MIN_TCP_MSS(h)   MIN(SLIP_TCP_MSS(h),__LOOP_MIN_TCP_MSS(h))
+#    define __SLIP_MAX_TCP_MSS(h)   MAX(SLIP_TCP_MSS(h),__LOOP_MAX_TCP_MSS(h))
+#  else
+#    define __SLIP_MIN_TCP_MSS(h)   __LOOP_MIN_TCP_MSS(h)
+#    define __SLIP_MAX_TCP_MSS(h)   __LOOP_MAX_TCP_MSS(h)
 #  endif
-
-#  undef __LAST_MIN_TCP_MSS
-#  undef __LAST_MAX_TCP_MSS
 #endif
 
 /* If IPv4 is supported, it will have the larger MSS.

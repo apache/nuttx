@@ -53,6 +53,7 @@
 
 #include <stdint.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/net/iob.h>
 #include <nuttx/net/netdev.h>
 
@@ -71,9 +72,13 @@
 
 #define SIXLOWPAN_DISPATCH_IPV6          0x41 /* 01000001 = 65 */
 #define SIXLOWPAN_DISPATCH_HC1           0x42 /* 01000010 = 66 */
-#define SIXLOWPAN_DISPATCH_IPHC          0x60 /* 011xxxxx = ... */
+
+#define SIXLOWPAN_DISPATCH_IPHC          0x60 /* 011xxxxx */
+#define SIXLOWPAN_DISPATCH_IPHC_MASK     0xe0 /* 11100000 */
+
 #define SIXLOWPAN_DISPATCH_FRAG1         0xc0 /* 11000xxx */
 #define SIXLOWPAN_DISPATCH_FRAGN         0xe0 /* 11100xxx */
+#define SIXLOWPAN_DISPATCH_FRAG_MASK     0xf1 /* 11111000 */
 
 /* HC1 encoding */
 
@@ -154,77 +159,6 @@
 #define SIXLOWPAN_HC1_HC_UDP_HDR_LEN     7
 #define SIXLOWPAN_FRAG1_HDR_LEN          4
 #define SIXLOWPAN_FRAGN_HDR_LEN          5
-
-/* Address compressibility test macros */
-
-/* Check whether we can compress the IID in address 'a' to 16 bits.  This is
- * used for unicast addresses only, and is true if the address is on the
- * format <PREFIX>::0000:00ff:fe00:XXXX
- *
- * NOTE: we currently assume 64-bits prefixes
- */
-
-#define SIXLOWPAN_IS_IID_16BIT_COMPRESSABLE(a) \
-  ((((a)->u16[4]) == 0) && \
-   // (((a)->u8[10]) == 0)&& \
-   (((a)->u8[11]) == 0xff)&& \
-   (((a)->u8[12]) == 0xfe)&& \
-   (((a)->u8[13]) == 0))
-
-/* Check whether the 9-bit group-id of the compressed multicast address is
- * known. It is true if the 9-bit group is the all nodes or all routers
- * group.  Parameter 'a' is typed uint8_t *
- */
-
-#define SIXLOWPAN_IS_MCASTADDR_DECOMPRESSABLE(a) \
-   (((*a & 0x01) == 0) && \
-    ((*(a + 1) == 0x01) || (*(a + 1) == 0x02)))
-
-/* Check whether the 112-bit group-id of the multicast address is mappable
- * to a 9-bit group-id. It is true if the group is the all nodes or all
- * routers group.
- */
-
-#define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE(a) \
-  ((((a)->u16[1]) == 0) && \
-   (((a)->u16[2]) == 0) && \
-   (((a)->u16[3]) == 0) && \
-   (((a)->u16[4]) == 0) && \
-   (((a)->u16[5]) == 0) && \
-   (((a)->u16[6]) == 0) && \
-   (((a)->u8[14]) == 0) && \
-   ((((a)->u8[15]) == 1) || (((a)->u8[15]) == 2)))
-
-/* FFXX::00XX:XXXX:XXXX */
-
-#define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE48(a) \
-  ((((a)->u16[1]) == 0) && \
-   (((a)->u16[2]) == 0) && \
-   (((a)->u16[3]) == 0) && \
-   (((a)->u16[4]) == 0) && \
-   (((a)->u8[10]) == 0))
-
-/* FFXX::00XX:XXXX */
-
-#define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE32(a) \
-  ((((a)->u16[1]) == 0) && \
-   (((a)->u16[2]) == 0) && \
-   (((a)->u16[3]) == 0) && \
-   (((a)->u16[4]) == 0) && \
-   (((a)->u16[5]) == 0) && \
-   (((a)->u8[12]) == 0))
-
-/* FF02::00XX */
-
-#define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE8(a) \
-  ((((a)->u8[1]) == 2) && \
-   (((a)->u16[1]) == 0) && \
-   (((a)->u16[2]) == 0) && \
-   (((a)->u16[3]) == 0) && \
-   (((a)->u16[4]) == 0) && \
-   (((a)->u16[5]) == 0) && \
-   (((a)->u16[6]) == 0) && \
-   (((a)->u8[14]) == 0))
 
 /* This maximum size of an IEEE802.15.4 frame.  Certain, non-standard
  * devices may exceed this value, however.
@@ -402,6 +336,7 @@ struct ieee802154_driver_s
 
   FAR struct iob_s *i_framelist;
 
+  /* Driver Configuration ***************************************************/
   /* i_panid.  The PAN ID is 16-bit number that identifies the network. It
    * must be unique to differentiate a network. All the nodes in the same
    * network should have the same PAN ID.  This value must be provided to
@@ -433,30 +368,42 @@ struct ieee802154_driver_s
    */
 
   uint16_t i_dgramtag;
-};
 
-/* The structure of a next header compressor.  This compressor is provided
- * by architecture-specific logic outside of the network stack.
- *
- * TODO: needs more parameters when compressing extension headers, etc.
- */
-
-struct sixlowpan_nhcompressor_s
-{
-  CODE int (*is_compressable)(uint8_t next_header);
-
-  /* Compress next header (TCP/UDP, etc) - ptr points to next header to
-   * compress.
+#if CONFIG_NET_6LOWPAN_FRAG
+  /* Fragmentation Support *************************************************/
+  /* Fragementation is handled frame by frame and requires that certain
+   * state information be retained from frame to frame.
    */
 
-  CODE int (*compress)(FAR uint8_t *compressed, FAR uint8_t *uncompressed_len);
-
-  /* Uncompress next header (TCP/UDP, etc) - ptr points to next header to
-   * uncompress.
+  /* i_pktlen. The total length of the IPv6 packet to be re-assembled in
+   * d_buf.
    */
 
-  CODE int (*uncompress)(FAR uint8_t *compressed, FAR uint8_t *lowpanbuf,
-                         FAR uint8_t *uncompressed_len);
+  uint16_t i_pktlen;
+
+  /* The current accumulated length of the packet being received in d_buf.
+   * Included IPv6 and protocol headers.
+   */
+
+  uint16_t i_accumlen;
+
+  /* i_reasstag.  Each frame in the reassembly has a tag.  That tag must
+   * match the reassembly tag in the fragments being merged.
+   */
+
+  uint16_t i_reasstag;
+
+  /* The source MAC address of the fragments being merged */
+
+  struct rimeaddr_s i_fragsrc;
+
+  /* That time at which reassembly was started.  If the elapsed time
+   * exceeds CONFIG_NET_6LOWPAN_MAXAGE, then the reassembly will
+   * be cancelled.
+   */
+
+  systime_t i_time;
+#endif /* CONFIG_NET_6LOWPAN_FRAG */
 };
 
 /****************************************************************************
@@ -517,22 +464,5 @@ struct sixlowpan_nhcompressor_s
  ****************************************************************************/
 
 int sixlowpan_input(FAR struct ieee802154_driver_s *ieee);
-
-/****************************************************************************
- * Function: sixlowpan_set_compressor
- *
- * Description:
- *   Configure to use the architecture-specific compressor.
- *
- * Input parameters:
- *   compressor - A reference to the new compressor to be used.  This may
- *                be a NULL value to disable the compressor.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void sixlowpan_set_compressor(FAR struct sixlowpan_nhcompressor_s *compressor);
 
 #endif /* __INCLUDE_NUTTX_NET_SIXLOWOAN_H */

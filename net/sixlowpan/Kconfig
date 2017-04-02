@@ -132,7 +132,8 @@ config NET_6LOWPAN_MAXAGE
 	int "Packet reassembly timeout"
 	default 20
 	---help---
-		Timeout for packet reassembly at the 6lowpan layer (should be < 60s)
+		Timeout for packet reassembly at the 6lowpan layer in units of
+		seconds (should be < 60s)
 
 config NET_6LOWPAN_MAX_MACTRANSMITS
 	int "Max MAC transmissions"

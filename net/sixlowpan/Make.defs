@@ -41,7 +41,7 @@ ifeq ($(CONFIG_NET_6LOWPAN),y)
 
 NET_CSRCS += sixlowpan_initialize.c sixlowpan_globals.c sixlowpan_utils.c
 NET_CSRCS += sixlowpan_input.c sixlowpan_send.c sixlowpan_framer.c
-NET_CSRCS += sixlowpan_framelist.c sixlowpan_compressor.c
+NET_CSRCS += sixlowpan_framelist.c
 
 ifeq ($(CONFIG_NET_TCP),y)
 NET_CSRCS += sixlowpan_tcpsend.c

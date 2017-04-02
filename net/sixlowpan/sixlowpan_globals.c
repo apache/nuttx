@@ -47,10 +47,6 @@
  * Public Data
  ****************************************************************************/
 
-/* A pointer to the optional, architecture-specific compressor */
-
-FAR struct sixlowpan_nhcompressor_s *g_sixlowpan_compressor;
-
 /* The following data values are used to hold intermediate settings while
  * processing IEEE802.15.4 frames.  These globals are shared with incoming
  * and outgoing frame processing and possibly with mutliple IEEE802.15.4 MAC

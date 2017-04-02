@@ -54,6 +54,17 @@
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Buffer access helpers */
+
+#define IPv6BUF(dev)  \
+  ((FAR struct ipv6_hdr_s *)((dev)->d_buf))
+#define UDPIPv6BUF(dev) \
+  ((FAR struct udp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -102,9 +113,11 @@
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *
  * Input Parmeters:
- *   ieee     - A reference to the IEE802.15.4 network device state
- *   destaddr - L2 destination address, needed to compress the IP
- *              destination field
+ *   ieee    - A reference to the IEE802.15.4 network device state
+ *   ipv6    - The IPv6 header to be compressed
+ *   destmac - L2 destination address, needed to compress the IP
+ *             destination field
+ *   iob     - The IOB into which the compressed header should be saved.
  *
  * Returned Value:
  *   None
@@ -112,9 +125,109 @@
  ****************************************************************************/
 
 void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
-                               FAR struct rimeaddr_s *destaddr)
+                               FAR const struct ipv6_hdr_s *ipv6,
+                               FAR const struct rimeaddr_s *destmac,
+                               FAR struct iob_s *iob)
 {
-/* REVISIT: To be provided */
+  FAR uint8_t *hc1 = RIME_HC1_PTR;
+
+  /* Check if all the assumptions for full compression are valid */
+
+  if (ipv6->vtc != 0x60 || ipv6->tcflow != 0 || ipv6->flow != 0 ||
+      !sixlowpan_islinklocal(&ipv6->srcipaddr) ||
+      !sixlowpan_ismacbased(&ipv6->srcipaddr, &ieee->i_rimeaddr) ||
+      !sixlowpan_islinklocal(&ipv6->destipaddr) ||
+      !sixlowpan_ismacbased(&ipv6->destipaddr, destmac) ||
+      (ipv6->proto != IP_PROTO_ICMP6 && ipv6->proto != IP_PROTO_UDP &&
+       ipv6->proto != IP_PROTO_TCP))
+    {
+      /* IPV6 DISPATCH
+       * Something cannot be compressed, use IPV6 DISPATCH,
+       * compress nothing, copy IPv6 header in rime buffer
+       */
+
+      *g_rimeptr      = SIXLOWPAN_DISPATCH_IPV6;
+       g_rime_hdrlen += SIXLOWPAN_IPV6_HDR_LEN;
+       memcpy(g_rimeptr + g_rime_hdrlen, ipv6, IPv6_HDRLEN);
+       g_rime_hdrlen += IPv6_HDRLEN;
+       g_uncomp_hdrlen += IPv6_HDRLEN;
+    }
+  else
+    {
+      /* HC1 DISPATCH  maximum compresssion:
+       * All fields in the IP header but Hop Limit are elided.  If next
+       * header is UDP, we compress UDP header using HC2
+       */
+
+      hc1[RIME_HC1_DISPATCH] = SIXLOWPAN_DISPATCH_HC1;
+      g_uncomp_hdrlen += IPv6_HDRLEN;
+      switch (ipv6->proto)
+        {
+        case IP_PROTO_ICMP6:
+          /* HC1 encoding and ttl */
+
+          hc1[RIME_HC1_ENCODING] = 0xfc;
+          hc1[RIME_HC1_TTL] = ipv6->ttl;
+          g_rime_hdrlen += SIXLOWPAN_HC1_HDR_LEN;
+          break;
+
+#if CONFIG_NET_TCP
+        case IP_PROTO_TCP:
+          /* HC1 encoding and ttl */
+
+          hc1[RIME_HC1_ENCODING] = 0xfe;
+          hc1[RIME_HC1_TTL] = ipv6->ttl;
+          g_rime_hdrlen += SIXLOWPAN_HC1_HDR_LEN;
+          break;
+#endif /* CONFIG_NET_TCP */
+
+#if CONFIG_NET_UDP
+        case IP_PROTO_UDP:
+          FAR struct udp_hdr_s *udp = UDPIPv6BUF(dev);
+
+          /* Try to compress UDP header (we do only full compression).  This
+           * is feasible if both src and dest ports are between
+           * SIXLOWPAN_UDP_PORT_MIN and SIXLOWPAN_UDP_PORT_MIN + 15
+           */
+
+          ninfo("local/remote port %u/%u\n", udp->srcport, udp->destport);
+
+          if (htons(udp->srcport)  >= SIXLOWPAN_UDP_PORT_MIN &&
+              htons(udp->srcport)  <  SIXLOWPAN_UDP_PORT_MAX &&
+              htons(udp->destport) >= SIXLOWPAN_UDP_PORT_MIN &&
+              htons(udp->destport) <  SIXLOWPAN_UDP_PORT_MAX)
+            {
+              FAR uint8_t *hcudp = RIME_HC1_HC_UDP_PTR;
+
+              /* HC1 encoding */
+
+              hcudp[RIME_HC1_HC_UDP_HC1_ENCODING] = 0xfb;
+
+              /* HC_UDP encoding, ttl, src and dest ports, checksum */
+
+              hcudp[RIME_HC1_HC_UDP_UDP_ENCODING] = 0xe0;
+              hcudp[RIME_HC1_HC_UDP_TTL]          = ipv6->ttl;
+              hcudp[RIME_HC1_HC_UDP_PORTS]        =
+                (uint8_t)((htons(udp->srcport) - SIXLOWPAN_UDP_PORT_MIN) << 4) +
+                (uint8_t)((htons(udp->destport) - SIXLOWPAN_UDP_PORT_MIN));
+
+              memcpy(&hcudp[RIME_HC1_HC_UDP_CHKSUM], &udp->udpchksum, 2);
+
+              g_rime_hdrlen   += SIXLOWPAN_HC1_HC_UDP_HDR_LEN;
+              g_uncomp_hdrlen += UIP_UDPH_LEN;
+            }
+          else
+            {
+              /* HC1 encoding and ttl */
+
+              hc1[RIME_HC1_ENCODING] = 0xfa;
+              hc1[RIME_HC1_TTL]      = ipv6->ttl;
+              g_rime_hdrlen         += SIXLOWPAN_HC1_HDR_LEN;
+            }
+          break;
+#endif /* CONFIG_NET_UDP */
+        }
+    }
 }
 
 /****************************************************************************
@@ -136,14 +249,127 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
  *           fragment.
  *
  * Returned Value:
- *   None
+ *   Zero (OK) is returned on success, on failure a negater errno value is
+ *   returned.
  *
  ****************************************************************************/
 
-void sixlowpan_uncompresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
-                                 uint16_t iplen)
+int sixlowpan_uncompresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
+                                uint16_t iplen)
 {
-/* REVISIT: To be provided */
+  FAR struct ipv6_hdr_s *ipv6 = IPv6BUF(&ieee->i_dev);
+  FAR uint8_t *hc1 = RIME_HC1_PTR;
+
+  /* Format the IPv6 header in the device d_buf */
+  /* Set version, traffic clase, and flow label */
+
+  ipv6->vtc    = 0x60;  /* Bits 0-3: version, bits 4-7: traffic class (MS) */
+  ipv6->tcf    = 0;     /* Bits 0-3: traffic class (LS), 4-bits: flow label (MS) */
+  ipv6->flow   = 0;     /* 16-bit flow label (LS) */
+
+  /* Use stateless auto-configuration to set source and destination IP
+   * addresses.
+   */
+
+  sixlowpan_ipfromrime(&g_pktaddrs[PACKETBUF_ADDR_SENDER],
+                       &ipv6->srcipaddr);
+  sixlowpan_ipfromrime(&g_pktaddrs[PACKETBUF_ADDR_RECEIVER],
+                       &ipv6->destipaddr);
+  g_uncomp_hdrlen += IPv6_HDRLEN;
+
+  /* len[], proto, and ttl depend on the encoding */
+
+  switch (hc1[RIME_HC1_ENCODING] & 0x06)
+    {
+    case SIXLOWPAN_HC1_NH_ICMP6:
+      ipv6->proto    = IP_PROTO_ICMP6;
+      ipv6->ttl      = hc1[RIME_HC1_TTL];
+      g_rime_hdrlen += SIXLOWPAN_HC1_HDR_LEN;
+      break;
+
+#if CONFIG_NET_TCP
+    case SIXLOWPAN_HC1_NH_TCP:
+      ipv6->proto    = IP_PROTO_TCP;
+      ipv6->ttl      = hc1[RIME_HC1_TTL];
+      g_rime_hdrlen += SIXLOWPAN_HC1_HDR_LEN;
+      break;
+#endif /* CONFIG_NET_TCP */
+
+#if CONFIG_NET_UDP
+    case SIXLOWPAN_HC1_NH_UDP:
+      {
+        FAR struct udp_hdr_s *udp = UDPIPv6BUF(&ieee->i_dev);
+        FAR uint8_t *hcudp = RIME_HC1_HC_UDP_PTR;
+
+        ipv6->proto = IP_PROTO_UDP;
+        if ((hcudp[RIME_HC1_HC_UDP_HC1_ENCODING] & 0x01) != 0)
+          {
+            /* UDP header is compressed with HC_UDP */
+
+            if (hcudp[RIME_HC1_HC_UDP_UDP_ENCODING] !=
+                SIXLOWPAN_HC_UDP_ALL_C)
+              {
+                nwarn("WARNING: sixlowpan (uncompress_hdr), packet not supported");
+                return -EOPNOTSUPP;
+              }
+
+            /* IP TTL */
+
+            ipv6->ttl = hcudp[RIME_HC1_HC_UDP_TTL];
+
+            /* UDP ports, len, checksum */
+
+            udp->srcport =
+              htons(SIXLOWPAN_UDP_PORT_MIN + (hcudp[RIME_HC1_HC_UDP_PORTS] >> 4));
+            udp->destport =
+              htons(SIXLOWPAN_UDP_PORT_MIN + (hcudp[RIME_HC1_HC_UDP_PORTS] & 0x0F));
+
+            memcpy(&udp->udpchksum, &hcudp[RIME_HC1_HC_UDP_CHKSUM], 2);
+
+            g_uncomp_hdrlen += UIP_UDPH_LEN;
+            g_rime_hdrlen   += SIXLOWPAN_HC1_HC_UDP_HDR_LEN;
+          }
+        else
+          {
+            g_rime_hdrlen += SIXLOWPAN_HC1_HDR_LEN;
+          }
+      }
+      break;
+#endif /* CONFIG_NET_UDP */
+
+    default:
+      return -EPROTONOSUPPORT;
+    }
+
+  /* IP length field. */
+
+  if (iplen == 0)
+    {
+      /* This is not a fragmented packet */
+
+      ipv6->len[0] = 0;
+      ipv6->len[1] = ieee->i_dev.d_len - g_rime_hdrlen +  /* REVISIT */
+                     g_uncomp_hdrlen - IPv6_HDRLEN;
+    }
+  else
+    {
+      /* This is a 1st fragment */
+
+      ipv6->len[0] = (iplen - IPv6_HDRLEN) >> 8;
+      ipv6->len[1] = (iplen - IPv6_HDRLEN) & 0x00FF;
+    }
+
+  /* length field in UDP header */
+
+#if CONFIG_NET_UDP
+  if (ipv6->proto == IP_PROTO_UDP)
+    {
+      FAR struct udp_hdr_s *udp = UDPIPv6BUF(&ieee->i_dev);
+      memcpy(&udp->udplen, &ipv6->len[0], 2);
+    }
+#endif
+
+  return;
 }
 
 #endif /* CONFIG_NET_6LOWPAN_COMPRESSION_HC1 */
