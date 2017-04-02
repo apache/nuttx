@@ -53,7 +53,8 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-struct socket; /* Forward reference */
+struct socket;   /* Forward reference */
+struct sockaddr; /* Forward reference */
 
 /****************************************************************************
  * Name: sixlowpan_initialize
@@ -131,6 +132,40 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
                                size_t len);
 #endif
+
+/****************************************************************************
+ * Function: psock_6lowpan_udp_sendto
+ *
+ * Description:
+ *   If sendto() is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)
+ *   socket, the parameters to and 'tolen' are ignored (and the error EISCONN
+ *   may be returned when they are not NULL and 0), and the error ENOTCONN is
+ *   returned when the socket was not actually connected.
+ *
+ * Parameters:
+ *   psock    A pointer to a NuttX-specific, internal socket structure
+ *   buf      Data to send
+ *   len      Length of data to send
+ *   flags    Send flags
+ *   to       Address of recipient
+ *   tolen    The length of the address structure
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error,
+ *   -1 is returned, and errno is set appropriately.    Returned error
+ *   number must be consistent with definition of errors reported by
+ *   sendto().
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
+                                 FAR const void *buf,
+                                 size_t len, int flags,
+                                 FAR const struct sockaddr *to,
+                                 socklen_t tolen);
 
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* _NET_SIXLOWPAN_SIXLOWPAN_H */

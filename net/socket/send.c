@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/send.c
  *
- *   Copyright (C) 2007-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -166,29 +166,18 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 
               ret = psock_6lowpan_tcp_send(psock, buf, len);
 
-#ifdef CONFIG_NETDEV_MULTINIC
+#if defined(CONFIG_NETDEV_MULTINIC) && defined(NET_TCP_HAVE_STACK)
               if (ret < 0)
                 {
                   /* TCP/IP packet send */
 
                   ret = psock_tcp_send(psock, buf, len);
-#ifdef NET_TCP_HAVE_STACK
-                  ret = psock_tcp_send(psock, buf, len);
-#else
-                  ret = -ENOSYS;
-#endif
                 }
-
-#endif /* CONFIG_NETDEV_MULTINIC */
-#else  /* CONFIG_NET_6LOWPAN */
-
-              /* Only TCP/IP packet send */
-
-#ifdef NET_TCP_HAVE_STACK
-              ret = psock_tcp_send(psock, buf, len);
+#endif /* CONFIG_NETDEV_MULTINIC && NET_TCP_HAVE_STACK */
+#elif defined(NET_TCP_HAVE_STACK)
+              nsent = psock_tcp_send(psock, buf, len, flags, to, tolen);
 #else
-              ret = -ENOSYS;
-#endif
+              nsent = -ENOSYS;
 #endif /* CONFIG_NET_6LOWPAN */
             }
 #endif /* CONFIG_NET_TCP */
@@ -215,34 +204,25 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
           else
 #endif
             {
-#ifdef CONFIG_NET_6LOWPAN
+#if defined(CONFIG_NET_6LOWPAN)
               /* Try 6loWPAN UDP packet send */
 
               ret = psock_6lowpan_udp_send(psock, buf, len);
 
-#ifdef CONFIG_NETDEV_MULTINIC
+#if defined(CONFIG_NETDEV_MULTINIC) && defined(NET_UDP_HAVE_STACK)
               if (ret < 0)
                 {
                   /* UDP/IP packet send */
 
                   ret = psock_udp_send(psock, buf, len);
-#ifdef NET_UDP_HAVE_STACK
-                  ret = psock_udp_send(psock, buf, len);
-#else
-                  ret = -ENOSYS;
-#endif
                 }
-
-#endif /* CONFIG_NETDEV_MULTINIC */
-#else  /* CONFIG_NET_6LOWPAN */
-
+#endif /* CONFIG_NETDEV_MULTINIC && NET_UDP_HAVE_STACK */
+#elif defined(NET_UDP_HAVE_STACK)
               /* Only UDP/IP packet send */
-
-#ifdef NET_UDP_HAVE_STACK
+ 
               ret = psock_udp_send(psock, buf, len);
 #else
               ret = -ENOSYS;
-#endif
 #endif /* CONFIG_NET_6LOWPAN */
             }
 #endif /* CONFIG_NET_UDP */

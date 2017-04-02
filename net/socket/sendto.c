@@ -49,6 +49,7 @@
 #include <nuttx/net/net.h>
 
 #include "udp/udp.h"
+#include "sixlowpan/sixlowpan.h"
 #include "local/local.h"
 #include "socket/socket.h"
 #include "usrsock/usrsock.h"
@@ -237,11 +238,24 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
   else
 #endif
     {
-#ifdef NET_UDP_HAVE_STACK
+#if defined(CONFIG_NET_6LOWPAN)
+      /* Try 6loWPAN UDP packet sendto() */
+
+      nsent = psock_6lowpan_udp_sendto(psock, buf, len, flags, to, tolen);
+
+#if defined(CONFIG_NETDEV_MULTINIC) && defined(NET_UDP_HAVE_STACK)
+      if (nsent < 0)
+        {
+          /* UDP/IP packet sendto */
+
+          nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
+        }
+#endif /* CONFIG_NETDEV_MULTINIC && NET_UDP_HAVE_STACK */
+#elif defined(NET_UDP_HAVE_STACK)
       nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
 #else
       nsent = -ENOSYS;
-#endif
+#endif /* CONFIG_NET_6LOWPAN */
     }
 #endif /* CONFIG_NET_UDP */
 
