@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/utils/net_chksum.c
+ * net/utils/net_icmpchksum.c
  *
  *   Copyright (C) 2007-2010, 2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,7 +45,6 @@
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/ip.h>
 #include <nuttx/net/icmp.h>
 
 #include "utils/utils.h"
@@ -54,101 +53,42 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IPv4BUF   ((struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define IPv6BUF   ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define ICMPBUF   ((struct icmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define ICMPv6BUF ((struct icmp_ipv6hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: chksum
+ * Name: icmp_chksum
  *
  * Description:
- *   Calculate the raw change some over the memory region described by
- *   data and len.
- *
- * Input Parameters:
- *   sum  - Partial calculations carried over from a previous call to chksum().
- *          This should be zero on the first time that check sum is called.
- *   data - Beginning of the data to include in the checksum.
- *   len  - Length of the data to include in the checksum.
- *
- * Returned Value:
- *   The updated checksum value.
+ *   Calculate the checksum of the ICMP message
  *
  ****************************************************************************/
 
-#ifndef CONFIG_NET_ARCH_CHKSUM
-uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len)
+#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
+uint16_t icmp_chksum(FAR struct net_driver_s *dev, int len)
 {
-  FAR const uint8_t *dataptr;
-  FAR const uint8_t *last_byte;
-  uint16_t t;
-
-  dataptr = data;
-  last_byte = data + len - 1;
-
-  while (dataptr < last_byte)
-    {
-      /* At least two more bytes */
-
-      t = ((uint16_t)dataptr[0] << 8) + dataptr[1];
-      sum += t;
-      if (sum < t)
-        {
-          sum++; /* carry */
-        }
-
-      dataptr += 2;
-    }
-
-  if (dataptr == last_byte)
-    {
-      t = (dataptr[0] << 8) + 0;
-      sum += t;
-      if (sum < t)
-        {
-          sum++; /* carry */
-        }
-    }
-
-  /* Return sum in host byte order. */
-
-  return sum;
+  FAR struct icmp_iphdr_s *icmp = ICMPBUF;
+  return net_chksum((FAR uint16_t *)&icmp->type, len);
 }
-#endif /* CONFIG_NET_ARCH_CHKSUM */
+#endif /* CONFIG_NET_ICMP && CONFIG_NET_ICMP_PING */
 
 /****************************************************************************
- * Name: net_chksum
+ * Name: icmpv6_chksum
  *
  * Description:
- *   Calculate the Internet checksum over a buffer.
- *
- *   The Internet checksum is the one's complement of the one's complement
- *   sum of all 16-bit words in the buffer.
- *
- *   See RFC1071.
- *
- *   If CONFIG_NET_ARCH_CHKSUM is defined, then this function must be
- *   provided by architecture-specific logic.
- *
- * Input Parameters:
- *
- *   buf - A pointer to the buffer over which the checksum is to be computed.
- *
- *   len - The length of the buffer over which the checksum is to be computed.
- *
- * Returned Value:
- *   The Internet checksum of the buffer.
+ *   Calculate the checksum of the ICMPv6 message
  *
  ****************************************************************************/
 
-#ifndef CONFIG_NET_ARCH_CHKSUM
-uint16_t net_chksum(FAR uint16_t *data, uint16_t len)
+#ifdef CONFIG_NET_ICMPv6
+uint16_t icmpv6_chksum(FAR struct net_driver_s *dev)
 {
-  return htons(chksum(0, (uint8_t *)data, len));
+  return ipv6_upperlayer_chksum(dev, IP_PROTO_ICMP6);
 }
-#endif /* CONFIG_NET_ARCH_CHKSUM */
+#endif
 
 #endif /* CONFIG_NET */

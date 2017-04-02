@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/utils/net_chksum.c
+ * net/utils/net_incr32.c
  *
- *   Copyright (C) 2007-2010, 2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2012, 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
 
 #include <stdint.h>
 #include <debug.h>
@@ -50,105 +49,73 @@
 
 #include "utils/utils.h"
 
+#ifndef CONFIG_NET_ARCH_INCR32
+
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Functions
  ****************************************************************************/
 
-#define IPv4BUF   ((struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define IPv6BUF   ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+/****************************************************************************
+ * Name: net_carry32
+ *
+ * Description:
+ *   Calculate the Internet checksum over a buffer.
+ *
+ ****************************************************************************/
+
+static inline void net_carry32(FAR uint8_t *sum, uint16_t op16)
+{
+  if (sum[2] < (op16 >> 8))
+    {
+      ++sum[1];
+      if (sum[1] == 0)
+        {
+          ++sum[0];
+        }
+    }
+
+  if (sum[3] < (op16 & 0xff))
+    {
+      ++sum[2];
+      if (sum[2] == 0)
+        {
+          ++sum[1];
+          if (sum[1] == 0)
+            {
+              ++sum[0];
+            }
+        }
+    }
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: chksum
+ * Name: net_incr32
  *
  * Description:
- *   Calculate the raw change some over the memory region described by
- *   data and len.
+ *
+ *   Carry out a 32-bit addition.
+ *
+ *   By defining CONFIG_NET_ARCH_INCR32, the architecture can replace
+ *   net_incr32 with hardware assisted solutions.
  *
  * Input Parameters:
- *   sum  - Partial calculations carried over from a previous call to chksum().
- *          This should be zero on the first time that check sum is called.
- *   data - Beginning of the data to include in the checksum.
- *   len  - Length of the data to include in the checksum.
+ *   op32 - A pointer to a 4-byte array representing a 32-bit integer in
+ *          network byte order (big endian).  This value may not be word
+ *          aligned. The value pointed to by op32 is modified in place
  *
- * Returned Value:
- *   The updated checksum value.
+ *   op16 - A 16-bit integer in host byte order.
  *
  ****************************************************************************/
 
-#ifndef CONFIG_NET_ARCH_CHKSUM
-uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len)
+void net_incr32(FAR uint8_t *op32, uint16_t op16)
 {
-  FAR const uint8_t *dataptr;
-  FAR const uint8_t *last_byte;
-  uint16_t t;
-
-  dataptr = data;
-  last_byte = data + len - 1;
-
-  while (dataptr < last_byte)
-    {
-      /* At least two more bytes */
-
-      t = ((uint16_t)dataptr[0] << 8) + dataptr[1];
-      sum += t;
-      if (sum < t)
-        {
-          sum++; /* carry */
-        }
-
-      dataptr += 2;
-    }
-
-  if (dataptr == last_byte)
-    {
-      t = (dataptr[0] << 8) + 0;
-      sum += t;
-      if (sum < t)
-        {
-          sum++; /* carry */
-        }
-    }
-
-  /* Return sum in host byte order. */
-
-  return sum;
+  op32[3] += (op16 & 0xff);
+  op32[2] += (op16 >> 8);
+  net_carry32(op32, op16);
 }
-#endif /* CONFIG_NET_ARCH_CHKSUM */
 
-/****************************************************************************
- * Name: net_chksum
- *
- * Description:
- *   Calculate the Internet checksum over a buffer.
- *
- *   The Internet checksum is the one's complement of the one's complement
- *   sum of all 16-bit words in the buffer.
- *
- *   See RFC1071.
- *
- *   If CONFIG_NET_ARCH_CHKSUM is defined, then this function must be
- *   provided by architecture-specific logic.
- *
- * Input Parameters:
- *
- *   buf - A pointer to the buffer over which the checksum is to be computed.
- *
- *   len - The length of the buffer over which the checksum is to be computed.
- *
- * Returned Value:
- *   The Internet checksum of the buffer.
- *
- ****************************************************************************/
-
-#ifndef CONFIG_NET_ARCH_CHKSUM
-uint16_t net_chksum(FAR uint16_t *data, uint16_t len)
-{
-  return htons(chksum(0, (uint8_t *)data, len));
-}
-#endif /* CONFIG_NET_ARCH_CHKSUM */
-
-#endif /* CONFIG_NET */
+#endif /* CONFIG_NET_ARCH_INCR32 */
