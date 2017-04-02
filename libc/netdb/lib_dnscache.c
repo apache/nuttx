@@ -268,8 +268,8 @@ int dns_find_answer(FAR const char *hostname, FAR struct sockaddr *addr,
               /* We have a match.  Return the resolved host address */
 
 #ifdef CONFIG_NET_IPv4
-              if (entry->addr.addr.sa_family == AF_INET)
 #ifdef CONFIG_NET_IPv6
+              if (entry->addr.addr.sa_family == AF_INET)
 #endif
                 {
                    inlen = sizeof(struct sockaddr_in);
@@ -277,8 +277,8 @@ int dns_find_answer(FAR const char *hostname, FAR struct sockaddr *addr,
 #endif
 
 #ifdef CONFIG_NET_IPv6
-              else
 #ifdef CONFIG_NET_IPv4
+              else
 #endif
                 {
                    inlen = sizeof(struct sockaddr_in6);

@@ -119,6 +119,7 @@ ifeq ($(CONFIG_ARCH_ROMGETC),y)
   CSRCS += up_romgetc.c
 endif
 
+ifeq ($(CONFIG_SIM_NETDEV),y)
 ifeq ($(CONFIG_NET_ETHERNET),y)
   CSRCS += up_netdriver.c
   HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_ETH_MTU)
@@ -131,11 +132,12 @@ endif
 ifeq ($(CONFIG_SIM_NET_HOST_ROUTE),y)
   HOSTCFLAGS += -DCONFIG_SIM_NET_HOST_ROUTE
 endif
-else
+else # HOSTOS != Cygwin
   HOSTSRCS += up_wpcap.c up_netdev.c
   DRVLIB = /lib/w32api/libws2_32.a /lib/w32api/libiphlpapi.a
-endif
-endif
+endif # HOSTOS != Cygwin
+endif # CONFIG_NET_ETHERNET
+endif # CONFIG_SIM_NETDEV
 
 ifeq ($(CONFIG_SMP),y)
   HOSTCFLAGS += -DCONFIG_SMP=1 -DCONFIG_SMP_NCPUS=$(CONFIG_SMP_NCPUS)

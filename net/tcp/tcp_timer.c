@@ -46,6 +46,7 @@
 #if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
 
 #include <stdint.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/net/netconfig.h>

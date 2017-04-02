@@ -370,7 +370,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
           /* Add the frame header */
 
           verify = sixlowpan_framecreate(ieee, iob, ieee->i_panid);
-          DEBUGASSERT(vreify == framer_hdrlen);
+          DEBUGASSERT(verify == framer_hdrlen);
           UNUSED(verify);
 
           /* Move HC1/HC06/IPv6 header */
@@ -436,7 +436,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
       /* Add the frame header to the prealloated IOB. */
 
       verify = sixlowpan_framecreate(ieee, iob, ieee->i_panid);
-      DEBUGASSERT(vreify == framer_hdrlen);
+      DEBUGASSERT(verify == framer_hdrlen);
       UNUSED(verify);
 
       /* Copy the payload and queue */
