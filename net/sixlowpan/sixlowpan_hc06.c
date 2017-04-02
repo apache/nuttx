@@ -121,7 +121,7 @@ static FAR uint8_t *g_hc06ptr;
  *   0 -> 16 bytes from packet
  *   1 -> 2 bytes from prefix - bunch of zeroes and 8 from packet
  *   2 -> 2 bytes from prefix - 0000::00ff:fe00:XXXX from packet
- *   3 -> 2 bytes from prefix - infer 8 bytes from lladdr
+ *   3 -> 2 bytes from prefix - infer 8 bytes from MAC address
  *
  *   NOTE: => the uncompress function does change 0xf to 0x10
  *   NOTE: 0x00 => no-autoconfig => unspecified
@@ -134,7 +134,7 @@ static const uint8_t g_unc_llconf[] = { 0x0f, 0x28, 0x22, 0x20 };
  *   0 -> 0 bits from packet [unspecified / reserved]
  *   1 -> 8 bytes from prefix - bunch of zeroes and 8 from packet
  *   2 -> 8 bytes from prefix - 0000::00ff:fe00:XXXX + 2 from packet
- *   3 -> 8 bytes from prefix - infer 8 bytes from lladdr
+ *   3 -> 8 bytes from prefix - infer 8 bytes from MAC address
  */
 
 static const uint8_t g_unc_ctxconf[] = { 0x00, 0x88, 0x82, 0x80 };
@@ -144,7 +144,7 @@ static const uint8_t g_unc_ctxconf[] = { 0x00, 0x88, 0x82, 0x80 };
  *   0 -> 0 bits from packet
  *   1 -> 2 bytes from prefix - bunch of zeroes 5 from packet
  *   2 -> 2 bytes from prefix - zeroes + 3 from packet
- *   3 -> 2 bytes from prefix - infer 1 bytes from lladdr
+ *   3 -> 2 bytes from prefix - infer 1 bytes from MAC address
  */
 
 static const uint8_t g_unc_mxconf[] = { 0x0f, 0x25, 0x23, 0x21 };
@@ -202,7 +202,7 @@ static FAR struct sixlowpan_addrcontext_s *
  ****************************************************************************/
 
 static FAR struct sixlowpan_addrcontext_s *
-  find_addrcontext_byprefix(FAR net_ipv6addr_t *ipaddr)
+  find_addrcontext_byprefix(FAR const net_ipv6addr_t ipaddr)
 {
 #if CONFIG_NET_6LOWPAN_MAXADDRCONTEXT > 0
   int i;
@@ -220,6 +220,45 @@ static FAR struct sixlowpan_addrcontext_s *
 #endif /* CONFIG_NET_6LOWPAN_MAXADDRCONTEXT > 0 */
 
   return NULL;
+}
+
+/****************************************************************************
+ * Name: uncompress_addr
+ *
+ * Description:
+ *   Uncompress addresses based on a prefix and a postfix with zeroes in
+ *   between. If the postfix is zero in length it will use the link address
+ *   to configure the IP address (autoconf style).
+ *
+ *   prefpost takes a byte where the first nibble specify prefix count
+ *   and the second postfix count (NOTE: 15/0xf => 16 bytes copy).
+ *
+ ****************************************************************************/
+
+static uint8_t compress_addr_64(FAR const net_ipv6addr_t ipaddr,
+                                FAR const struct rimeaddr_s *macaddr,
+                                uint8_t bitpos)
+{
+  if (sixlowpan_ismacbased(ipaddr, macaddr))
+    {
+      return 3 << bitpos;       /* 0-bits */
+    }
+  else if (SIXLOWPAN_IS_IID_16BIT_COMPRESSABLE(ipaddr))
+    {
+      /* Compress IID to 16 bits xxxx::0000:00ff:fe00:XXXX */
+
+      memcpy(g_hc06ptr, &ipaddr[7], 2);
+      g_hc06ptr += 2;
+      return 2 << bitpos;       /* 16-bits */
+    }
+  else
+    {
+      /* Do not compress IID => xxxx::IID */
+
+      memcpy(g_hc06ptr, &ipaddr[4], 8);
+      g_hc06ptr += 8;
+      return 1 << bitpos;       /* 64-bits */
+    }
 }
 
 /****************************************************************************
@@ -367,8 +406,7 @@ void sixlowpan_hc06_initialize(void)
  *   Compress IP/UDP header
  *
  *   This function is called by the 6lowpan code to create a compressed
- *   6lowpan packet in the packetbuf buffer from a full IPv6 packet in the
- *   uip_buf buffer.
+ *   6lowpan packet in the frame buffer from a full IPv6 packet.
  *
  *     HC-06 (draft-ietf-6lowpan-hc, version 6)
  *     http://tools.ietf.org/html/draft-ietf-6lowpan-hc-06
@@ -395,11 +433,11 @@ void sixlowpan_hc06_initialize(void)
  *   neither compress the IID.
  *
  * Input Parameters:
- *   ieee     - A reference to the IEE802.15.4 network device state
- *   destip   - The IPv6 header to be compressed
- *   destmac  - L2 destination address, needed to compress the IP
- *              destination field
- *   iob      - The IOB into which the compressed header should be saved.
+ *   ieee    - A reference to the IEE802.15.4 network device state
+ *   ipv6    - The IPv6 header to be compressed
+ *   destmac - L2 destination address, needed to compress the IP
+ *             destination field
+ *   iob     - The IOB into which the compressed header should be saved.
  *
  * Returned Value:
  *   None
@@ -407,11 +445,370 @@ void sixlowpan_hc06_initialize(void)
  ****************************************************************************/
 
 void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
-                                FAR const struct ipv6_hdr_s *destip,
+                                FAR const struct ipv6_hdr_s *ipv6,
                                 FAR const struct rimeaddr_s *destmac,
                                 FAR struct iob_s *iob)
 {
-  /* REVISIT: To be provided */
+  FAR uint8_t *iphc = RIME_IPHC_BUF;
+  FAR struct sixlowpan_addrcontext_s *addrcontext;
+  uint8_t iphc0;
+  uint8_t iphc1;
+  uint8_t tmp;
+
+  ninfodumpbuffer("IPv6 before compression", ipv6, sizeof(ipv6_hdr_s));
+
+  g_hc06ptr = g_rimeptr + 2;
+
+  /* As we copy some bit-length fields, in the IPHC encoding bytes,
+   * we sometimes use |=
+   * If the field is 0, and the current bit value in memory is 1,
+   * this does not work. We therefore reset the IPHC encoding here
+   */
+
+  iphc0   = SIXLOWPAN_DISPATCH_IPHC;
+  iphc1   = 0;
+  iphc[2] = 0;         /* Might not be used - but needs to be cleared */
+
+  /* Address handling needs to be made first since it might cause an extra
+   * byte with [ SCI | DCI ]
+   */
+
+  /* Check if dest address context exists (for allocating third byte)
+   *
+   * TODO: fix this so that it remembers the looked up values for avoiding two
+   * lookups - or set the lookup values immediately
+   */
+
+  if (find_addrcontext_byprefix(ipv6->destipaddr) != NULL ||
+      find_addrcontext_byprefix(ipv6->srcipaddr) != NULL)
+    {
+      /* set address context flag and increase g_hc06ptr */
+
+      ninfo("Decompressing dest or src ipaddr. Setting CID\n");
+      iphc1 |= SIXLOWPAN_IPHC_CID;
+      g_hc06ptr++;
+    }
+
+  /* Traffic class, flow label
+   *
+   * If flow label is 0, compress it. If traffic class is 0, compress it
+   * We have to process both in the same time as the offset of traffic class
+   * depends on the presence of version and flow label
+   */
+
+  /* hc06 format of tc is ECN | DSCP , original is DSCP | ECN */
+
+  tmp = (ipv6->vtc << 4) | (ipv6->tcf >> 4);
+  tmp = ((tmp & 0x03) << 6) | (tmp >> 2);
+
+  if (((ipv6->tcf & 0x0f) == 0) && (ipv6->flow == 0))
+    {
+      /* Flow label can be compressed */
+
+      iphc0 |= SIXLOWPAN_IPHC_FL_C;
+      if (((ipv6->vtc & 0x0f) == 0) && ((ipv6->tcf & 0xf0) == 0))
+        {
+          /* Compress (elide) all */
+
+          iphc0 |= SIXLOWPAN_IPHC_TC_C;
+        }
+      else
+        {
+          /* Sompress only the flow label */
+
+          *g_hc06ptr = tmp;
+          g_hc06ptr += 1;
+        }
+    }
+  else
+    {
+      /* Flow label cannot be compressed */
+
+      if (((ipv6->vtc & 0x0f) == 0) && ((ipv6->tcf & 0xF0) == 0))
+        {
+          /* Compress only traffic class */
+
+          iphc0 |= SIXLOWPAN_IPHC_TC_C;
+          *g_hc06ptr = (tmp & 0xc0) | (ipv6->tcf & 0x0f);
+          memcpy(g_hc06ptr + 1, &ipv6->flow, 2);
+          g_hc06ptr += 3;
+        }
+      else
+        {
+          /* Compress nothing */
+
+          memcpy(g_hc06ptr, &ipv6->vtc, 4);
+
+          /* But replace the top byte with the new ECN | DSCP format */
+
+          *g_hc06ptr = tmp;
+          g_hc06ptr += 4;
+        }
+    }
+
+  /* Note that the payload length is always compressed */
+
+  /* Next header. We compress it if UDP */
+
+#if CONFIG_NET_UDP || UIP_CONF_ROUTER
+  if (ipv6->proto == IP_PROTO_UDP)
+    {
+      iphc0 |= SIXLOWPAN_IPHC_NH_C;
+    }
+#endif /* CONFIG_NET_UDP */
+
+  if ((iphc0 & SIXLOWPAN_IPHC_NH_C) == 0)
+    {
+      *g_hc06ptr = ipv6->proto;
+      g_hc06ptr += 1;
+    }
+
+  /* Hop limit
+   *
+   *   if 1: compress, encoding is 01
+   *   if 64: compress, encoding is 10
+   *   if 255: compress, encoding is 11
+   *   else do not compress
+   */
+
+  switch (ipv6->ttl)
+    {
+    case 1:
+      iphc0 |= SIXLOWPAN_IPHC_TTL_1;
+      break;
+
+    case 64:
+      iphc0 |= SIXLOWPAN_IPHC_TTL_64;
+      break;
+
+    case 255:
+      iphc0 |= SIXLOWPAN_IPHC_TTL_255;
+      break;
+
+    default:
+      *g_hc06ptr = ipv6->ttl;
+      g_hc06ptr += 1;
+      break;
+    }
+
+  /* Source address - cannot be multicast */
+
+  if (net_is_addr_unspecified(ipv6->srcipaddr))
+    {
+      ninfo("Compressing unspecified.  Setting SAC\n");
+
+      iphc1 |= SIXLOWPAN_IPHC_SAC;
+      iphc1 |= SIXLOWPAN_IPHC_SAM_00;
+    }
+  else if ((addrcontext = find_addrcontext_byprefix(ipv6->srcipaddr)) != NULL)
+    {
+      /* Elide the prefix - indicate by CID and set address context + SAC */
+
+      ninfo("Compressing src with address context. Setting CID and SAC context: %d\n",
+            addrcontext->number);
+
+      iphc1   |= SIXLOWPAN_IPHC_CID | SIXLOWPAN_IPHC_SAC;
+      iphc[2] |= addrcontext->number << 4;
+
+      /* Compession compare with this nodes address (source) */
+
+      iphc1   |= compress_addr_64(ipv6->srcipaddr, &ieee->i_nodeaddr,
+                                  SIXLOWPAN_IPHC_SAM_BIT);
+
+      /* No address context found for this address */
+    }
+  else if (net_is_addr_linklocal(ipv6->srcipaddr) &&
+           ipv6->destipaddr[1] == 0 &&  ipv6->destipaddr[2] == 0 &&
+           ipv6->destipaddr[3] == 0)
+    {
+      iphc1 |= compress_addr_64(ipv6->srcipaddr, &ieee->i_nodeaddr,
+                                SIXLOWPAN_IPHC_SAM_BIT);
+    }
+  else
+    {
+      /* Send the full address => SAC = 0, SAM = 00 */
+
+      iphc1 |= SIXLOWPAN_IPHC_SAM_00;   /* 128-bits */
+      memcpy(g_hc06ptr, ipv6->srcipaddr, 16);
+      g_hc06ptr += 16;
+    }
+
+  /* Destination address */
+
+  if (net_is_addr_mcast(ipv6->destipaddr))
+    {
+      /* Address is multicast, try to compress */
+
+      iphc1 |= SIXLOWPAN_IPHC_M;
+      if (SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE8(ipv6->destipaddr))
+        {
+          iphc1 |= SIXLOWPAN_IPHC_DAM_11;
+
+          /* Use last byte */
+
+          *g_hc06ptr = ipv6->destipaddr[7] & 0x00ff;
+          g_hc06ptr += 1;
+        }
+      else if (SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE32(ipv6->destipaddr))
+        {
+          FAR uint8_t *iptr = (FAR uint8_t *)ipv6->destipaddr;
+
+          iphc1 |= SIXLOWPAN_IPHC_DAM_10;
+
+          /* Second byte + the last three */
+
+          *g_hc06ptr = iptr[1];
+          memcpy(g_hc06ptr + 1, &iptr[13], 3);
+          g_hc06ptr += 4;
+        }
+      else if (SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE48(ipv6->destipaddr))
+        {
+          FAR uint8_t *iptr = (FAR uint8_t *)ipv6->destipaddr;
+
+          iphc1 |= SIXLOWPAN_IPHC_DAM_01;
+
+          /* Second byte + the last five */
+
+          *g_hc06ptr = iptr[1];
+          memcpy(g_hc06ptr + 1, &iptr[11], 5);
+          g_hc06ptr += 6;
+        }
+      else
+        {
+          iphc1 |= SIXLOWPAN_IPHC_DAM_00;
+
+          /* Full address */
+
+          memcpy(g_hc06ptr, ipv6->destipaddr, 16);
+          g_hc06ptr += 16;
+        }
+    }
+  else
+    {
+      /* Address is unicast, try to compress */
+
+      if ((addrcontext =  find_addrcontext_byprefix(ipv6->destipaddr)) != NULL)
+        {
+          /* Elide the prefix */
+
+          iphc1 |= SIXLOWPAN_IPHC_DAC;
+          iphc[2] |= addrcontext->number;
+
+          /* Compession compare with link adress (destination) */
+
+          iphc1 |= compress_addr_64(ipv6->destipaddr, destmac,
+                                    SIXLOWPAN_IPHC_DAM_BIT);
+
+          /* No address context found for this address */
+        }
+      else if (net_is_addr_linklocal(ipv6->destipaddr) &&
+               ipv6->destipaddr[1] == 0 && ipv6->destipaddr[2] == 0 &&
+               ipv6->destipaddr[3] == 0)
+        {
+          iphc1 |= compress_addr_64(ipv6->destipaddr, destmac,
+                                    SIXLOWPAN_IPHC_DAM_BIT);
+        }
+      else
+        {
+          /* Send the full address */
+
+          iphc1 |= SIXLOWPAN_IPHC_DAM_00;       /* 128-bits */
+          memcpy(g_hc06ptr, ipv6->destipaddr, 16);
+          g_hc06ptr += 16;
+        }
+    }
+
+  g_uncomp_hdrlen = IPv6_HDRLEN;
+
+#if CONFIG_NET_UDP
+  /* UDP header compression */
+
+  if (ipv6->proto == IP_PROTO_UDP)
+    {
+      FAR struct udp_hdr_s *udp = UDPIPv6BUF(ieee);
+
+      ninfo("Uncompressed UDP ports on send side: %x, %x\n",
+            ntohs(udp->srcport), ntohs(udp->destport));
+
+      /* Mask out the last 4 bits can be used as a mask */
+
+      if (((ntohs(udp->srcport) & 0xfff0) == SIXLOWPAN_UDP_4_BIT_PORT_MIN) &&
+          ((ntohs(udp->destport) & 0xfff0) == SIXLOWPAN_UDP_4_BIT_PORT_MIN))
+        {
+          /* We can compress 12 bits of both source and dest */
+
+          *g_hc06ptr = SIXLOWPAN_NHC_UDP_CS_P_11;
+
+          ninfo("Remove 12b of both source & dest with prefix 0xfob\n");
+
+          *(g_hc06ptr + 1) =
+            (uint8_t)((ntohs(udp->srcport) - SIXLOWPAN_UDP_4_BIT_PORT_MIN) << 4) +
+            (uint8_t)((ntohs(udp->destport) - SIXLOWPAN_UDP_4_BIT_PORT_MIN));
+
+          g_hc06ptr += 2;
+        }
+      else if ((ntohs(udp->destport) & 0xff00) ==
+               SIXLOWPAN_UDP_8_BIT_PORT_MIN)
+        {
+          /* We can compress 8 bits of dest, leave source. */
+
+          *g_hc06ptr = SIXLOWPAN_NHC_UDP_CS_P_01;
+
+          ninfo("Leave source, remove 8 bits of dest with prefix 0xF0\n");
+
+          memcpy(g_hc06ptr + 1, &udp->srcport, 2);
+          *(g_hc06ptr + 3) =
+            (uint8_t) ((ntohs(udp->destport) -
+                        SIXLOWPAN_UDP_8_BIT_PORT_MIN));
+          g_hc06ptr += 4;
+        }
+      else if ((ntohs(udp->srcport) & 0xff00) ==
+               SIXLOWPAN_UDP_8_BIT_PORT_MIN)
+        {
+          /* We can compress 8 bits of src, leave dest. Copy compressed port */
+
+          *g_hc06ptr = SIXLOWPAN_NHC_UDP_CS_P_10;
+
+          ninfo("Remove 8 bits of source with prefix 0xF0, leave dest. hch: %u\n",
+                *g_hc06ptr);
+
+          *(g_hc06ptr + 1) =
+            (uint8_t)((ntohs(udp->srcport) - SIXLOWPAN_UDP_8_BIT_PORT_MIN));
+
+          memcpy(g_hc06ptr + 2, &udp->destport, 2);
+          g_hc06ptr += 4;
+        }
+      else
+        {
+          /* we cannot compress. Copy uncompressed ports, full checksum */
+
+          *g_hc06ptr = SIXLOWPAN_NHC_UDP_CS_P_00;
+
+          nwarn("WARNING: Cannot compress headers\n");
+
+          memcpy(g_hc06ptr + 1, &udp->srcport, 4);
+          g_hc06ptr += 5;
+        }
+
+      /* Always inline the checksum */
+
+      if (1)
+        {
+          memcpy(g_hc06ptr, &udp->udpchksum, 2);
+          g_hc06ptr += 2;
+        }
+
+      g_uncomp_hdrlen += UDP_HDRLEN;
+    }
+#endif /* CONFIG_NET_UDP */
+
+  /* Before the g_rime_hdrlen operation */
+
+  iphc[0] = iphc0;
+  iphc[1] = iphc1;
+
+  g_rime_hdrlen = g_hc06ptr - g_rimeptr;
+  return;
 }
 
 /****************************************************************************
@@ -529,7 +926,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
       /* Next header is carried inline */
 
       ipv6->proto = *g_hc06ptr;
-      ninfo("IPHC: next header inline: %d\n", ipv6->proto);
+      ninfo("Next header inline: %d\n", ipv6->proto);
       g_hc06ptr += 1;
     }
 
@@ -563,7 +960,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
           addrcontext = find_addrcontext_bynumber(sci);
           if (addrcontext == NULL)
             {
-              ninfo("sixlowpan uncompress_hdr: error address context not found\n");
+              nerr("ERROR: Address context not found\n");
               return;
             }
         }
@@ -633,7 +1030,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
           if (addrcontext == NULL)
             {
-              ninfo("sixlowpan uncompress_hdr: error address context not found\n");
+              ninfo("ERROR: Address context not found\n");
               return;
             }
 
@@ -666,7 +1063,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
           ipv6->proto         = IP_PROTO_UDP;
           checksum_compressed = *g_hc06ptr & SIXLOWPAN_NHC_UDP_CHECKSUMC;
 
-          ninfo("IPHC: Incoming header value: %i\n", *g_hc06ptr);
+          ninfo("Incoming header value: %i\n", *g_hc06ptr);
 
           switch (*g_hc06ptr & SIXLOWPAN_NHC_UDP_CS_P_11)
             {
@@ -676,9 +1073,8 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
               memcpy(&udp->srcport, g_hc06ptr + 1, 2);
               memcpy(&udp->destport, g_hc06ptr + 3, 2);
 
-              ninfo("IPHC: Uncompressed UDP ports (ptr+5): %x, %x\n",
-                     htons(udp->srcport),
-                     htons(udp->destport));
+              ninfo("Uncompressed UDP ports (ptr+5): %x, %x\n",
+                     htons(udp->srcport), htons(udp->destport));
 
               g_hc06ptr += 5;
               break;
@@ -688,15 +1084,14 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                * inline
                */
 
-              ninfo("IPHC: Decompressing destination\n");
+              ninfo("Decompressing destination\n");
 
               memcpy(&udp->srcport, g_hc06ptr + 1, 2);
               udp->destport =
                 htons(SIXLOWPAN_UDP_8_BIT_PORT_MIN + (*(g_hc06ptr + 3)));
 
-              ninfo("IPHC: Uncompressed UDP ports (ptr+4): %x, %x\n",
-                     htons(udp->srcport),
-                     htons(udp->destport));
+              ninfo("Uncompressed UDP ports (ptr+4): %x, %x\n",
+                     htons(udp->srcport), htons(udp->destport));
 
               g_hc06ptr += 4;
               break;
@@ -706,15 +1101,14 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                * inline
                */
 
-              ninfo("IPHC: Decompressing source\n");
+              ninfo("Decompressing source\n");
 
               udp->srcport =
                 htons(SIXLOWPAN_UDP_8_BIT_PORT_MIN + (*(g_hc06ptr + 1)));
               memcpy(&udp->destport, g_hc06ptr + 2, 2);
 
-              ninfo("IPHC: Uncompressed UDP ports (ptr+4): %x, %x\n",
-                     htons(udp->srcport),
-                     htons(udp->destport));
+              ninfo("Uncompressed UDP ports (ptr+4): %x, %x\n",
+                     htons(udp->srcport), htons(udp->destport));
 
               g_hc06ptr += 4;
               break;
@@ -727,10 +1121,10 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                           (*(g_hc06ptr + 1) >> 4));
               udp->destport =
                 htons(SIXLOWPAN_UDP_4_BIT_PORT_MIN +
-                          ((*(g_hc06ptr + 1)) & 0x0F));
-              ninfo("IPHC: Uncompressed UDP ports (ptr+2): %x, %x\n",
-                     htons(udp->srcport),
-                     htons(udp->destport));
+                          ((*(g_hc06ptr + 1)) & 0x0f));
+
+              ninfo("Uncompressed UDP ports (ptr+2): %x, %x\n",
+                     htons(udp->srcport), htons(udp->destport));
 
               g_hc06ptr += 2;
               break;
@@ -746,7 +1140,8 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
               memcpy(&udp->udpchksum, g_hc06ptr, 2);
               g_hc06ptr += 2;
-              ninfo("IPHC: sixlowpan uncompress_hdr: checksum included\n");
+
+              ninfo("Checksum included\n");
             }
           else
             {

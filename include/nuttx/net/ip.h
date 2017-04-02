@@ -483,7 +483,7 @@ EXTERN const net_ipv6addr_t g_ipv6_llnetmask;   /* Netmask for local link addres
 #endif
 
 /****************************************************************************
- * Function: net_ipv4addr_maskcmp and net_ipv6addr_maskcmp
+ * Name: net_ipv4addr_maskcmp and net_ipv6addr_maskcmp
  *
  * Description:
  *   Compare two IP addresses under a netmask.  The mask is used to mask
@@ -527,7 +527,7 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
 #endif
 
 /****************************************************************************
- * Function: net_ipv6addr_prefixcmp
+ * Name: net_ipv6addr_prefixcmp
  *
  * Description:
  *   Compare two IPv6 address prefixes.
@@ -538,7 +538,75 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
   (memcmp(addr1, addr2, length >> 3) == 0)
 
 /****************************************************************************
- * Function: net_ipaddr_mask
+ * Name: net_is_addr_loopback
+ *
+ * Description:
+ *   Is Ithe Pv6 address a the loopback address?
+ *
+ ****************************************************************************/
+
+#define net_is_addr_loopback(a) \
+  ((a)[0] == 0 && (a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
+   (a)[4] == 0 && (a)[5] == 0 && (a)[6] == 0 && (a)[7] == 0x0001)
+
+/****************************************************************************
+ * Name: net_is_addr_unspecified
+ *
+ * Description:
+ *   Is Ithe Pv6 address the unspecified address?
+ *
+ ****************************************************************************/
+
+#define net_is_addr_unspecified(a) \
+  ((a)[0] == 0 && (a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
+   (a)[4] == 0 && (a)[5] == 0 && (a)[6] == 0 && (a)[7] == 0)
+
+/****************************************************************************
+ * Name: net_is_addr_mcast
+ *
+ * Description:
+ *   s address a multicast address? see RFC 3513.
+ *
+ ****************************************************************************/
+
+#define net_is_addr_mcast(a) (((a)[0] & 0xff00) == 0xff00)
+
+/****************************************************************************
+ * Name: net_is_addr_linklocal_allnodes_mcast
+ *
+ * Description:
+ *   Is IPv6 address a the link local all-nodes multicast address?
+ *
+ ****************************************************************************/
+
+#define net_is_addr_linklocal_allnodes_mcast(a) \
+  ((a)[0] == 0xff02 && (a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
+   (a)[4] == 0      && (a)[5] == 0 && (a)[6] == 0 && (a)[7] == 0x0001)
+
+/****************************************************************************
+ * Name: net_is_addr_linklocal_allrouters_mcast
+ *
+ * Description:
+ *   Is IPv6 address a the link local all-routers multicast address?
+ *
+ ****************************************************************************/
+
+#define net_is_addr_linklocal_allrouters_mcast(a) \
+  ((a)[0] == 0xff02 && (a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
+   (a)[4] == 0      && (a)[5] == 0 && (a)[6] == 0 && (a)[7] == 0x0002)
+
+/****************************************************************************
+ * Name: net_is_addr_linklocal
+ *
+ * Description:
+ *   Checks whether the address a is link local.
+ *
+ ****************************************************************************/
+
+#define net_is_addr_linklocal(a) ((a)[0] == 0xfe80)
+
+/****************************************************************************
+ * Name: net_ipaddr_mask
  *
  * Description:
  *    Mask out the network part of an IP address, given the address and

@@ -89,7 +89,7 @@
  * The fragment header is used when the payload is too large to fit in a
  * single IEEE 802.15.4 frame. The fragment header contains three fields:
  * Datagram size, datagram tag and datagram offset.
- * 
+ *
  * 1. Datagram size describes the total (un-fragmented) payload.
  * 2. Datagram tag identifies the set of fragments and is used to match
  *    fragments of the same payload.
@@ -224,6 +224,68 @@
 #define FRAME_REMAINING(iob)  (CONFIG_NET_6LOWPAN_FRAMELEN - (iob)->io_len)
 #define FRAME_SIZE(ieee,iob) \
   ((iob)->io_len)
+
+/* Address compressibility test macros **************************************/
+
+/* Check whether we can compress the IID in address 'a' to 16 bits.  This is
+ * used for unicast addresses only, and is true if the address is on the
+ * format <PREFIX>::0000:00ff:fe00:XXXX
+ *
+ * NOTE: we currently assume 64-bits prefixes
+ */
+
+/* Check whether we can compress the IID in address 'a' to 16 bits.  This is
+ * used for unicast addresses only, and is true if the address is on the
+ * format <PREFIX>::0000:00ff:fe00:XXXX.
+ *
+ * NOTE: we currently assume 64-bits prefixes.  Big-endian, network order is
+ * assumed.
+ */
+
+#define SIXLOWPAN_IS_IID_16BIT_COMPRESSABLE(a) \
+  ((((a)[4]) == 0x0000) && (((a)[5]) == 0x00ff) && (((a)[6]) == 0xfe00))
+
+/* Check whether the 9-bit group-id of the compressed multicast address is
+ * known. It is true if the 9-bit group is the all nodes or all routers
+ * group.  Parameter 'a' is typed uint8_t *
+ */
+
+#define SIXLOWPAN_IS_MCASTADDR_DECOMPRESSABLE(a) \
+   (((*a & 0x01) == 0) && \
+    ((*(a + 1) == 0x01) || (*(a + 1) == 0x02)))
+
+/* Check whether the 112-bit group-id of the multicast address is mappable
+ * to a 9-bit group-id. It is true if the group is the all nodes or all
+ * routers group:
+ *
+ *    XXXX:0000:0000:0000:0000:0000:0000:0001  All nodes address
+ *    XXXX:0000:0000:0000:0000:0000:0000:0002  All routers address
+ */
+
+#define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE(a) \
+  ((a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
+   (a)[4] == 0 && (a)[5] == 0 && (a)[6] == 0 && \
+   ((a)[7] == 0x0001 || (a)[7] == 0x0002))
+
+/* FFXX:0000:0000:0000:0000:00XX:XXXX:XXXX */
+
+#define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE48(a) \
+  ((a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
+   (a)[4] == 0 && (((a)[5] & 0xff00) == 0))
+
+/* FFXX:0000:0000:0000:0000:0000:00XX:XXXX */
+
+#define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE32(a) \
+  ((a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
+   (a)[4] == 0 && (a)[5] == 0 && ((a)[6] & 0xff00) == 0)
+
+/* FF02:0000:0000:0000:0000:0000:0000:00XX */
+
+#define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE8(a) \
+  ((((a)[0] & 0x00ff) == 0x0002) && \
+   (a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
+   (a)[4] == 0 && (a)[5] == 0 && (a)[6] == 0 && \
+   (((a)[7] & 0xff00) == 0x0000))
 
 /* General helper macros ****************************************************/
 
@@ -538,7 +600,7 @@ void sixlowpan_hc06_initialize(void);
 #endif
 
 /****************************************************************************
- * Name: sixlowpan_hc06_initialize
+ * Name: sixlowpan_compresshdr_hc06
  *
  * Description:
  *   Compress IP/UDP header
@@ -555,7 +617,7 @@ void sixlowpan_hc06_initialize(void);
  *
  * Input Parameters:
  *   ieee     - A reference to the IEE802.15.4 network device state
- *   destip   - The IPv6 header to be compressed
+ *   ipv6     - The IPv6 header to be compressed
  *   destmac  - L2 destination address, needed to compress the IP
  *              destination field
  *   iob      - The IOB into which the compressed header should be saved.
@@ -567,13 +629,13 @@ void sixlowpan_hc06_initialize(void);
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
 void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
-                                FAR const struct ipv6_hdr_s *destip,
+                                FAR const struct ipv6_hdr_s *ipv6,
                                 FAR const struct rimeaddr_s *destmac,
                                 FAR struct iob_s *iob);
 #endif
 
 /****************************************************************************
- * Name: sixlowpan_hc06_initialize
+ * Name: sixlowpan_uncompresshdr_hc06
  *
  * Description:
  *   Uncompress HC06 (i.e., IPHC and LOWPAN_UDP) headers and put them in
@@ -612,11 +674,11 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  *   uip_buf buffer.
  *
  * Input Parmeters:
- *   ieee     - A reference to the IEE802.15.4 network device state
- *   destip   - The IPv6 header to be compressed
+ *   ieee    - A reference to the IEE802.15.4 network device state
+ *   ipv6    - The IPv6 header to be compressed
  *   destmac - L2 destination address, needed to compress the IP
- *              destination field
- *   iob      - The IOB into which the compressed header should be saved.
+ *             destination field
+ *   iob     - The IOB into which the compressed header should be saved.
  *
  * Returned Value:
  *   None
@@ -625,7 +687,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
 void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
-                               FAR const struct ipv6_hdr_s *destip,
+                               FAR const struct ipv6_hdr_s *ipv6,
                                FAR const struct rimeaddr_s *destmac,
                                FAR struct iob_s *iob);
 #endif
@@ -673,7 +735,7 @@ int sixlowpan_frame_hdralloc(FAR struct iob_s *iob, int size);
  *       and sixlowpan_ismacbased
  *
  * Description:
- *   sixlowpan_ipfromrime: Create a link local IPv6 address from a rime 
+ *   sixlowpan_ipfromrime: Create a link local IPv6 address from a rime
  *   address.
  *
  *   sixlowpan_rimefromip: Extract the rime address from a link local IPv6
