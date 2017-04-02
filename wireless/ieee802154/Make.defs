@@ -39,8 +39,12 @@ ifeq ($(CONFIG_WIRELESS_IEEE802154),y)
 
 # Include wireless devices build support
 
-DEPPATH += --dep-path wireless/ieee802154
-VPATH += :wireless/ieee802154
+ifeq ($(CONFIG_IEEE802154_LOOPBACK),y)
+CSRCS += mac802154_loopback.c
+endif
+
+DEPPATH += --dep-path ieee802154
+VPATH += :ieee802154
 CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)wireless$(DELIM)ieee802154}
 
 endif # CONFIG_WIRELESS_IEEE802154
