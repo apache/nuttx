@@ -100,10 +100,19 @@ config SIM_WALLTIME
 		correct for the system timer tick rate.  With this definition in the configuration,
 		sleep() behavior is more or less normal.
 
+config SIM_NETDEV
+	bool "Simulated Network Device"
+	default y
+	depends on NET
+	---help---
+		Build in support for a simulated network device using a TAP device on Linux or
+		WPCAP on Windows.
+
 if HOST_LINUX
 choice
 	prompt "Simulation Network Type"
 	default SIM_NET_HOST_ROUTE
+	depends on SIM_NETDEV
 
 config SIM_NET_HOST_ROUTE
 	bool "Use local host route"
