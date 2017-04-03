@@ -45,6 +45,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/net.h>
 
 #include "devif/devif.h"
 #include "arp/arp.h"
@@ -55,6 +56,21 @@
 #include "icmp/icmp.h"
 #include "icmpv6/icmpv6.h"
 #include "igmp/igmp.h"
+#include "sixlowpan/sixlowpan.h"
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+enum devif_packet_type
+{
+  DEVIF_PKT = 0,
+  DEVIF_ICMP,
+  DEVIF_IGMP,
+  DEVIF_TCP,
+  DEVIF_UDP,
+  DEVIF_ICMP6
+};
 
 /****************************************************************************
  * Public Data
@@ -67,6 +83,78 @@ systime_t g_polltime;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Function: devif_packet_conversion
+ *
+ * Description:
+ *   Generic output conversion hook.  Only needed for IEEE802.15.4 for now
+ *   is a point where support for other conversions may be provided.
+ *
+ *   TCP output comes through three different mechansims.  Either from:
+ *
+ *   1. TCP socket output.  For the case of TCP output to an
+ *      IEEE802.15.4, the TCP output is caught in the socket
+ *      send()/sendto() logic and and redirected to 6loWPAN logic.
+ *   2. TCP output from the TCP state machine.  That will occur
+ *      during TCP packet processing by the TCP state meachine.
+ *   3. TCP output resulting from TX or timer polling
+ *
+ *   Cases 2 is handled here.  Logic here detected if (1) an attempt
+ *   to return with d_len > 0 and (2) that the device is an
+ *   IEEE802.15.4 MAC network driver. Under those conditions, 6loWPAN
+ *   logic will be called to create the IEEE80215.4 frames.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_6LOWPAN
+static void devif_packet_conversion(FAR struct net_driver_s *dev,
+                                    enum devif_packet_type pkttype)
+{
+#ifdef CONFIG_NET_MULTILINK
+  /* Handle the case where multiple link layer protocols are supported */
+
+  if (dev->d_len > 0 && dev->d_lltype == NET_LL_IEEE802154)
+#else
+  if (dev->d_len > 0)
+#endif
+    {
+      if (pkttype == DEVIF_TCP)
+        {
+          FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)dev->d_buf;
+
+          /* This packet came from a response to TCP polling and is directed
+           * to an IEEE802.15.4 device using 6loWPAN.  Verify that the outgoing
+           * packet is IPv6 with TCP protocol.
+           */
+
+          if (ipv6->vtc ==  IPv6_VERSION && ipv6->proto == IP_PROTO_TCP)
+            {
+              /* Let 6loWPAN convert IPv6 TCP output into IEEE802.15.4 frames. */
+
+              sixlowpan_tcp_send(dev);
+            }
+          else
+            {
+              nerr("ERROR: IPv6 version or protocol error.  Packet dropped\n");
+              nerr("       IP version: %02x proocol: %u\n",
+                   ipv6->vtc, ipv6->proto);
+            }
+        }
+      else
+        {
+          nerr("ERROR: Non-TCP packet dropped.  Packet type: %u\n", pkttype);
+        }
+
+      dev->d_len = 0;
+    }
+}
+#else
+# define devif_packet_conversion(dev,pkttype)
+#endif /* CONFIG_NET_6LOWPAN */
 
 /****************************************************************************
  * Function: devif_poll_pkt_connections
@@ -95,6 +183,10 @@ static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
 
       pkt_poll(dev, pkt_conn);
 
+      /* Perform any necessary conversions on outgoing packets */
+
+      devif_packet_conversion(dev, DEVIF_PKT);
+
       /* Call back into the driver */
 
       bstop = callback(dev);
@@ -120,6 +212,10 @@ static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
 
   icmp_poll(dev);
 
+  /* Perform any necessary conversions on outgoing packets */
+
+  devif_packet_conversion(dev, DEVIF_ICMP);
+
   /* Call back into the driver */
 
   return callback(dev);
@@ -141,6 +237,10 @@ static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
   /* Perform the ICMPv6 poll */
 
   icmpv6_poll(dev);
+
+  /* Perform any necessary conversions on outgoing packets */
+
+  devif_packet_conversion(dev, DEVIF_ICMP6);
 
   /* Call back into the driver */
 
@@ -167,6 +267,10 @@ static inline int devif_poll_igmp(FAR struct net_driver_s *dev,
   /* Perform the IGMP TX poll */
 
   igmp_poll(dev);
+
+  /* Perform any necessary conversions on outgoing packets */
+
+  devif_packet_conversion(dev, DEVIF_IGMP);
 
   /* Call back into the driver */
 
@@ -200,6 +304,10 @@ static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
       /* Perform the UDP TX poll */
 
       udp_poll(dev, conn);
+
+      /* Perform any necessary conversions on outgoing packets */
+
+      devif_packet_conversion(dev, DEVIF_UDP);
 
       /* Call back into the driver */
 
@@ -236,6 +344,10 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
       /* Perform the TCP TX poll */
 
       tcp_poll(dev, conn);
+
+      /* Perform any necessary conversions on outgoing packets */
+
+      devif_packet_conversion(dev, DEVIF_TCP);
 
       /* Call back into the driver */
 
@@ -276,6 +388,10 @@ static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
       /* Perform the TCP timer poll */
 
       tcp_timer(dev, conn, hsec);
+
+      /* Perform any necessary conversions on outgoing packets */
+
+      devif_packet_conversion(dev, DEVIF_TCP);
 
       /* Call back into the driver */
 

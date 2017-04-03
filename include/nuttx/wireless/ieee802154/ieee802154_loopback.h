@@ -1,8 +1,11 @@
 /****************************************************************************
- * config/sim/src/sim_boot.c
+ * include/nuttx/net/ieee802154.h
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ * Includes some definitions that a compatible with the LGPL GNU C Library
+ * header file of the same name.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,35 +36,38 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_LOOPBACK_H
+#define __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_LOOPBACK_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/board.h>
 
-#include "sim.h"
+#ifdef CONFIG_IEEE802154_LOOPBACK
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_initialize
+ * Function: ieee8021514_loopback
  *
  * Description:
- *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_initialize().  board_initialize() will be
- *   called immediately after up_intiialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
+ *   Initialize and register the Ieee802.15.4 MAC loopback network driver.
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BOARD_INITIALIZE
-void board_initialize(void)
-{
-  sim_bringup();
-}
-#endif /* CONFIG_BOARD_INITIALIZE */
+int ieee8021514_loopback(void);
+
+#endif /* CONFIG_IEEE802154_LOOPBACK */
+#endif /* __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_LOOPBACK_H */

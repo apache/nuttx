@@ -155,6 +155,8 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
   uint16_t iplen;
   int ret;
 
+  ninfo("buflen %lu\n", (unsigned long)buflen);
+
   DEBUGASSERT(psock != NULL && psock->s_crefs > 0);
   DEBUGASSERT(psock->s_type == SOCK_STREAM);
 
@@ -249,7 +251,8 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
   net_ipv6addr_hdrcopy(ipv6tcp.ipv6.srcipaddr,  conn->u.ipv6.laddr);
   net_ipv6addr_hdrcopy(ipv6tcp.ipv6.destipaddr, conn->u.ipv6.raddr);
 
-  ninfo("IPv6 length: %d\n", ((int)ipv6->len[0] << 8) + ipv6->len[1]);
+  ninfo("IPv6 length: %d\n",
+        ((int)ipv6tcp.ipv6.len[0] << 8) + ipv6tcp.ipv6.len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.ipv6.sent++;
@@ -289,7 +292,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
   ipv6tcp.tcp.tcpchksum   = 0;
   ipv6tcp.tcp.tcpchksum   = ~sixlowpan_tcp_chksum(&ipv6tcp, buf, buflen);
 
-  ninfo("Outgoing TCP packet length: %d bytes\n", iplen + IOPv6_HDRLEN);
+  ninfo("Outgoing TCP packet length: %d bytes\n", iplen + IPv6_HDRLEN);
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.tcp.sent++;
@@ -332,15 +335,20 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
  * Function: sixlowpan_tcp_send
  *
  * Description:
- *   TCP output comes through two different mechansims.  Either from:
+ *   TCP output comes through three different mechansims.  Either from:
  *
  *   1. TCP socket output.  For the case of TCP output to an
  *      IEEE802.15.4, the TCP output is caught in the socket
  *      send()/sendto() logic and and redirected to psock_6lowpan_tcp_send().
  *   2. TCP output from the TCP state machine.  That will occur
- *      during TCP packet processing by the TCP state meachine.  It
- *      is detected there when ipv6_tcp_input() returns with d_len > 0. This
- *      will be redirected here.
+ *      during TCP packet processing by the TCP state meachine.
+ *   3. TCP output resulting from TX or timer polling
+ *
+ *   Cases 2 and 3 will be handled here.  Logic in ipv6_tcp_input(),
+ *   devif_poll(), and devif_timer() detect if (1) an attempt to return with
+ *   d_len > 0 and (2) that the device is an IEEE802.15.4 MAC network
+ *   driver. Under those conditions, this function will be called to create
+ *   the IEEE80215.4 frames.
  *
  * Parameters:
  *   dev - An instance of nework device state structure
@@ -358,6 +366,8 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev)
   DEBUGASSERT(dev != NULL && dev->d_len > 0);
 
   /* Double check */
+
+  ninfo("d_len %u\n", dev->d_len);
 
   if (dev != NULL && dev->d_len > 0)
     {
@@ -383,10 +393,10 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev)
           size_t hdrlen;
 
           hdrlen = IPv6_HDRLEN + TCP_HDRLEN;
-          if (hdrlen < dev->d_len)
+          if (hdrlen > dev->d_len)
             {
               nwarn("WARNING: Packet to small:  Have %u need >%u\n",
-                  dev->d_len, hdrlen);
+                    dev->d_len, hdrlen);
             }
           else
             {

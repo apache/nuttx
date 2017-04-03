@@ -263,7 +263,8 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
   net_ipv6addr_hdrcopy(ipv6udp.ipv6.srcipaddr,  to6->sin6_addr.in6_u.u6_addr16);
   net_ipv6addr_hdrcopy(ipv6udp.ipv6.destipaddr, conn->u.ipv6.raddr);
 
-  ninfo("IPv6 length: %d\n", ((int)ipv6->len[0] << 8) + ipv6->len[1]);
+  ninfo("IPv6 length: %d\n",
+        ((int)ipv6udp.ipv6.len[0] << 8) + ipv6udp.ipv6.len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.ipv6.sent++;

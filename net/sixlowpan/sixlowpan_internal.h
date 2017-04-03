@@ -243,7 +243,8 @@
  */
 
 #define SIXLOWPAN_IS_IID_16BIT_COMPRESSABLE(a) \
-  ((((a)[4]) == 0x0000) && (((a)[5]) == 0x00ff) && (((a)[6]) == 0xfe00))
+  ((((a)[4]) == 0x0000) && (((a)[5]) == HTONS(0x00ff)) && \
+   (((a)[6]) == 0xfe00))
 
 /* Check whether the 9-bit group-id of the compressed multicast address is
  * known. It is true if the 9-bit group is the all nodes or all routers
@@ -265,27 +266,27 @@
 #define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE(a) \
   ((a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
    (a)[4] == 0 && (a)[5] == 0 && (a)[6] == 0 && \
-   ((a)[7] == 0x0001 || (a)[7] == 0x0002))
+   ((a)[7] == HTONS(0x0001) || (a)[7] == HTONS(0x0002)))
 
 /* FFXX:0000:0000:0000:0000:00XX:XXXX:XXXX */
 
 #define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE48(a) \
   ((a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
-   (a)[4] == 0 && (((a)[5] & 0xff00) == 0))
+   (a)[4] == 0 && (((a)[5] & HTONS(0xff00)) == 0))
 
 /* FFXX:0000:0000:0000:0000:0000:00XX:XXXX */
 
 #define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE32(a) \
   ((a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
-   (a)[4] == 0 && (a)[5] == 0 && ((a)[6] & 0xff00) == 0)
+   (a)[4] == 0 && (a)[5] == 0 && ((a)[6] & HTONS(0xff00)) == 0)
 
 /* FF02:0000:0000:0000:0000:0000:0000:00XX */
 
 #define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE8(a) \
-  ((((a)[0] & 0x00ff) == 0x0002) && \
+  ((((a)[0] & HTONS(0x00ff)) == HTONS(0x0002)) && \
    (a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
    (a)[4] == 0 && (a)[5] == 0 && (a)[6] == 0 && \
-   (((a)[7] & 0xff00) == 0x0000))
+   (((a)[7] & HTONS(0xff00)) == 0x0000))
 
 /* General helper macros ****************************************************/
 

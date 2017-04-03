@@ -110,15 +110,20 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
  * Function: sixlowpan_tcp_send
  *
  * Description:
- *   TCP output comes through two different mechansims.  Either from:
+ *   TCP output comes through three different mechansims.  Either from:
  *
  *   1. TCP socket output.  For the case of TCP output to an
  *      IEEE802.15.4, the TCP output is caught in the socket
  *      send()/sendto() logic and and redirected to psock_6lowpan_tcp_send().
  *   2. TCP output from the TCP state machine.  That will occur
- *      during TCP packet processing by the TCP state meachine.  It
- *      is detected there when ipv6_tcp_input() returns with d_len > 0. This
- *      will be redirected here.
+ *      during TCP packet processing by the TCP state meachine.
+ *   3. TCP output resulting from TX or timer polling
+ *
+ *   Cases 2 and 3 will be handled here.  Logic in ipv6_tcp_input(),
+ *   devif_poll(), and devif_timer() detect if (1) an attempt to return with
+ *   d_len > 0 and (2) that the device is an IEEE802.15.4 MAC network
+ *   driver. Under those conditions, this function will be called to create
+ *   the IEEE80215.4 frames.
  *
  * Parameters:
  *   dev - An instance of nework device state structure
