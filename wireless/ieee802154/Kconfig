@@ -45,14 +45,6 @@ config IEEE802154_LOOPBACK
 	---help---
 		Add support for the IEEE802154 6loWPAN Loopback test device.
 
-config IEEE802154_LOOPBACK
-	bool "IEEE802154 6loWPAN Loopback"
-	default n
-	depends on NET_6LOWPAN && NET_IPv6
-	select ARCH_HAVE_NETDEV_STATISTICS
-	---help---
-		Add support for the IEEE802154 6loWPAN Loopback test device.
-
 if IEEE802154_LOOPBACK
 
 choice
