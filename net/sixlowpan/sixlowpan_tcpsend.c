@@ -249,7 +249,8 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
   net_ipv6addr_hdrcopy(ipv6tcp.ipv6.srcipaddr,  conn->u.ipv6.laddr);
   net_ipv6addr_hdrcopy(ipv6tcp.ipv6.destipaddr, conn->u.ipv6.raddr);
 
-  ninfo("IPv6 length: %d\n", ((int)ipv6->len[0] << 8) + ipv6->len[1]);
+  ninfo("IPv6 length: %d\n",
+        ((int)ipv6tcp.ipv6.len[0] << 8) + ipv6tcp.ipv6.len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.ipv6.sent++;
@@ -289,7 +290,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
   ipv6tcp.tcp.tcpchksum   = 0;
   ipv6tcp.tcp.tcpchksum   = ~sixlowpan_tcp_chksum(&ipv6tcp, buf, buflen);
 
-  ninfo("Outgoing TCP packet length: %d bytes\n", iplen + IOPv6_HDRLEN);
+  ninfo("Outgoing TCP packet length: %d bytes\n", iplen + IPv6_HDRLEN);
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.tcp.sent++;

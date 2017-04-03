@@ -53,11 +53,8 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
-#include <nuttx/net/loopback.h>
-
-#ifndef CONFIG_NET_LOOPBACK
-#  include <nuttx/net/sixlowpan.h>
-#endif
+#include <nuttx/net/sixlowpan.h>
+#include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
 
 #ifdef CONFIG_IEEE802154_LOOPBACK
 
@@ -109,14 +106,6 @@ struct lo_driver_s
 
 static struct lo_driver_s g_loopback;
 static uint8_t g_iobuffer[CONFIG_NET_6LOWPAN_MTU + CONFIG_NET_GUARDSIZE];
-
-#ifndef CONFIG_NET_LOOPBACK
-static const net_ipv6addr_t g_lo_ipv6addr   =
-{
-  HTONS(0), HTONS(0), HTONS(0), HTONS(0),
-  HTONS(0), HTONS(0), HTONS(0), HTONS(1)
-};
-#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -520,14 +509,13 @@ static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: localhost_initialize
+ * Function: ieee8021514_loopback
  *
  * Description:
- *   Initialize the Ethernet controller and driver
+ *   Initialize and register the Ieee802.15.4 MAC loopback network driver.
  *
  * Parameters:
- *   intf - In the case where there are multiple EMACs, this value
- *          identifies which EMAC is to be initialized.
+ *   None
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -536,7 +524,7 @@ static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-int localhost_initialize(void)
+int ieee8021514_loopback(void)
 {
   FAR struct lo_driver_s  *priv;
   FAR struct net_driver_s *dev;
@@ -569,12 +557,6 @@ int localhost_initialize(void)
    */
 
   (void)netdev_register(&priv->lo_ieee.i_dev, NET_LL_IEEE802154);
-
-  /* Set the local loopback IP address */
-
-  net_ipv6addr_copy(dev->d_ipv6addr, g_lo_ipv6addr);
-  net_ipv6addr_copy(dev->d_ipv6draddr, g_lo_ipv6addr);
-  net_ipv6addr_copy(dev->d_ipv6netmask, g_ipv6_alloneaddr);
 
   /* Put the network in the UP state */
 

@@ -470,7 +470,8 @@ copypayload:
     }
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
-  ninfodumpbuffer("IPv6 header", IPv6BUF(ieee->i_dev), IPv6_HDRLEN)
+  ninfodumpbuffer("IPv6 header", (FAR const uint8_t *)IPv6BUF(&ieee->i_dev),
+                  IPv6_HDRLEN);
   return OK;
 }
 
