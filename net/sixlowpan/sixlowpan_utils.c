@@ -149,7 +149,7 @@ void sixlowpan_rimefromip(const net_ipv6addr_t ipaddr,
 {
   /* REVISIT: See notes about 2 byte addresses in sixlowpan_ipfromrime() */
 
-  DEBUGASSERT(ipaddr[0] == 0xfe80);
+  DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
 
   memcpy(rime, &ipaddr[4], CONFIG_NET_6LOWPAN_RIMEADDR_SIZE);
   rime->u8[0] ^= 0x02;

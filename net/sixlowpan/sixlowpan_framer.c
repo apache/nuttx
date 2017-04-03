@@ -294,7 +294,7 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
 
   /* Initialize all prameters to all zero */
 
-  memset(&params, 0, sizeof(params));
+  memset(params, 0, sizeof(params));
 
   /* Reset to an empty frame */
 
