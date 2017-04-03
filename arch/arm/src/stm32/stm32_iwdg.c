@@ -634,8 +634,8 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  * Name: stm32_iwdginitialize
  *
  * Description:
- *   Initialize the IWDG watchdog time.  The watchdog timer is initialized and
- *   registers as 'devpath.  The initial state of the watchdog time is
+ *   Initialize the IWDG watchdog timer.  The watchdog timer is initialized and
+ *   registers as 'devpath'.  The initial state of the watchdog timer is
  *   disabled.
  *
  * Input Parameters:
@@ -665,7 +665,7 @@ void stm32_iwdginitialize(FAR const char *devpath, uint32_t lsifreq)
   priv->started = false;
 
   /* Make sure that the LSI oscillator is enabled.  NOTE:  The LSI oscillator
-   * is enabled here but is not disabled by this file (because this file does
+   * is enabled here but is not disabled by this file, because this file does
    * not know the global usage of the oscillator.  Any clock management
    * logic (say, as part of a power management scheme) needs handle other
    * LSI controls outside of this file.
@@ -685,9 +685,9 @@ void stm32_iwdginitialize(FAR const char *devpath, uint32_t lsifreq)
 
   (void)watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
 
-  /* When the microcontroller enters debug mode (Cortex™-M4F core halted),
+  /* When the microcontroller enters debug mode (Cortex-M4F core halted),
    * the IWDG counter either continues to work normally or stops, depending
-   * on DBG_WIDG_STOP configuration bit in DBG module.
+   * on DBG_IWDG_STOP configuration bit in DBG module.
    */
 
 #if defined(CONFIG_STM32_JTAG_FULL_ENABLE) || \
@@ -695,7 +695,7 @@ void stm32_iwdginitialize(FAR const char *devpath, uint32_t lsifreq)
     defined(CONFIG_STM32_JTAG_SW_ENABLE)
     {
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F40XX) || defined(CONFIG_STM32_STM32L15XX)
       uint32_t cr = getreg32(STM32_DBGMCU_APB1_FZ);
       cr |= DBGMCU_APB1_IWDGSTOP;
       putreg32(cr, STM32_DBGMCU_APB1_FZ);
