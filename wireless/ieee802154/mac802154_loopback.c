@@ -162,6 +162,22 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
   FAR struct iob_s *iob;
   int ret;
 
+  if (dev->d_len > 0 || priv->lo_ieee.i_framelist != NULL)
+    {
+      ninfo("d_len: %u i_framelist: %p\n",
+            dev->d_len, priv->lo_ieee.i_framelist);
+
+      /* The only two valid settings are:
+       *
+       * 1. Nothing to send:
+       *    dev->d_len == 0 && priv->lo_ieee.i_framelist == NULL
+       * 2. Outgoing packet has been converted to IEEE802.15.4 frames:
+       *    dev->d_len == 0 && priv->lo_ieee.i_framelist != NULL
+       */
+
+      DEBUGASSERT(dev->d_len == 0 && priv->lo_ieee.i_framelist != NULL);
+    }
+
   /* Remove the queued IOBs from driver structure */
 
   head = priv->lo_ieee.i_framelist;
@@ -298,6 +314,11 @@ static void lo_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)arg;
 
+  if (!work_available(&priv->lo_work))
+    {
+      nwarn("WARNING: lo_work NOT available\n");
+    }
+
   /* Schedule to perform the interrupt processing on the worker thread. */
 
   work_queue(LPBKWORK, &priv->lo_work, lo_poll_work, priv, 0);
@@ -324,14 +345,22 @@ static int lo_ifup(FAR struct net_driver_s *dev)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
 
-#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
-  ninfo("Bringing up: Rime %02x:%02x PANID=%04x\n",
-        dev->d_ipv6addr[0], dev->d_ipv6addr[1], priv->lo_ieee.i_panid);
-#elif CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 8
-  ninfo("Bringing up: Rime %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x PANID=%04x\n",
+  ninfo("Bringing up: IPv6 %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
         dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-        dev->d_ipv6addr[6], dev->d_ipv6addr[7], priv->lo_ieee.i_panid);
+        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+
+#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
+  ninfo("             Node: %02x:%02x PANID=%04x\n",
+         priv->lo_ieee.i_nodeaddr.u8[0], priv->lo_ieee.i_nodeaddr.u8[1],
+         priv->lo_ieee.i_panid);
+#else /* CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 8 */
+  ninfo("             Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x PANID=%04x\n",
+         priv->lo_ieee.i_nodeaddr.u8[0], priv->lo_ieee.i_nodeaddr.u8[1],
+         priv->lo_ieee.i_nodeaddr.u8[2], priv->lo_ieee.i_nodeaddr.u8[3],
+         priv->lo_ieee.i_nodeaddr.u8[4], priv->lo_ieee.i_nodeaddr.u8[5],
+         priv->lo_ieee.i_nodeaddr.u8[6], priv->lo_ieee.i_nodeaddr.u8[7],
+         priv->lo_ieee.i_panid);
 #endif
 
   /* Set and activate a timer process */
@@ -363,6 +392,8 @@ static int lo_ifdown(FAR struct net_driver_s *dev)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
 
+  ninfo("IP up: %u\n", priv->lo_bifup);
+
   /* Cancel the TX poll timer and TX timeout timers */
 
   wd_cancel(priv->lo_polldog);
@@ -393,6 +424,8 @@ static int lo_ifdown(FAR struct net_driver_s *dev)
 static void lo_txavail_work(FAR void *arg)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)arg;
+
+  ninfo("IP up: %u\n", priv->lo_bifup);
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -435,6 +468,8 @@ static int lo_txavail(FAR struct net_driver_s *dev)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
 
+  ninfo("Available: %u\n", work_available(&priv->lo_work));
+
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
    * availability action.
@@ -471,6 +506,14 @@ static int lo_txavail(FAR struct net_driver_s *dev)
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
 static int lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
+#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
+  ninfo("MAC: %02x:%02x\n",
+         mac[0], mac[1]);
+#else /* CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 8 */
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
+         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], mac[6], mac[7]);
+#endif
+
   /* There is no multicast support in the loopback driver */
 
   return OK;
@@ -498,6 +541,14 @@ static int lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 #ifdef CONFIG_NET_IGMP
 static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
+#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
+  ninfo("MAC: %02x:%02x\n",
+         mac[0], mac[1]);
+#else /* CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 8 */
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
+         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], mac[6], mac[7]);
+#endif
+
   /* There is no multicast support in the loopback driver */
 
   return OK;
@@ -528,6 +579,8 @@ int ieee8021514_loopback(void)
 {
   FAR struct lo_driver_s  *priv;
   FAR struct net_driver_s *dev;
+
+  ninfo("Initializing\n");
 
   /* Get the interface structure associated with this interface number. */
 
