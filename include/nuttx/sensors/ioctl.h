@@ -133,4 +133,14 @@
 #define SNIOC_PRESSURE_OUT      _SNIOC(0x0034)
 #define SNIOC_SENSOR_OFF        _SNIOC(0x0035)
 
+/* IOCTL commands unique to the LIS2DH */
+
+#define SNIOC_WRITESETUP            _SNIOC(0x0036) /* Arg: uint8_t value */
+#define SNIOC_WRITE_INT1THRESHOLD   _SNIOC(0x0037) /* Arg: uint8_t value */
+#define SNIOC_WRITE_INT2THRESHOLD   _SNIOC(0x0038) /* Arg: uint8_t value */
+#define SNIOC_RESET_HPFILTER        _SNIOC(0x0039) /* Arg: uint8_t value */
+#define SNIOC_START_SELFTEST        _SNIOC(0x003a) /* Arg: uint8_t value */
+#define SNIOC_WHO_AM_I              _SNIOC(0x003b)
+#define SNIOC_READ_TEMP             _SNIOC(0x003c) /* Arg: int16_t value */
+
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */
