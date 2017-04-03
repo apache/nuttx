@@ -130,7 +130,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                  FAR socklen_t *addrlen, FAR struct socket *newsock)
 {
   int errcode;
-#ifdef NET_TCP_HAVE_STACK
+#if defined(NET_TCP_HAVE_STACK) || defined(CONFIG_NET_LOCAL_STREAM)
   int ret;
 #endif
 

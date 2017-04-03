@@ -75,12 +75,41 @@ config SENSOR_KXTJ9_I2C_BUS_SPEED
 
 endif # SENSOR_KXTJ9
 
+config LIS2DH
+	bool "STMicro LIS2DH device support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the STMicro LIS2DH accelerometer
+
+if LIS2DH
+
+config DEBUG_LIS2DH
+	bool "Debug support for the LIS2DH"
+	default n
+	---help---
+		Enables debug features for the LIS2DH
+
+config LIS2DH_NPOLLWAITERS
+	int "Number of waiters to poll"
+	default 2
+	---help---
+		Maximum number of threads that can be waiting on poll()
+
+config LIS2DH_DRIVER_SELFTEST
+	bool "Enable selftest in LIS2DH driver"
+	default n
+	---help---
+		Enable selftest in LIS2DH driver
+
+endif # LIS2DH
+
 config LIS3DSH
-	bool "STMicro LIS3DSH 3-Axis acclerometer support"
+	bool "STMicro LIS3DSH 3-Axis accelerometer support"
 	default n
 	select SPI
 	---help---
-		Enable driver support for the STMicro LIS3DSH 3-Axis acclerometer.
+		Enable driver support for the STMicro LIS3DSH 3-Axis accelerometer.
 
 config LIS331DL
 	bool "STMicro LIS331DL device support"

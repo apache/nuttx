@@ -68,4 +68,35 @@ config IEEE802154_LOOPBACK_LPWORK
 endchoice # Work queue
 endif # IEEE802154_LOOPBACK
 
+config IEEE802154_LOOPBACK
+	bool "IEEE802154 6loWPAN Loopback"
+	default n
+	depends on NET_6LOWPAN && NET_IPv6
+	select ARCH_HAVE_NETDEV_STATISTICS
+	---help---
+		Add support for the IEEE802154 6loWPAN Loopback test device.
+
+if IEEE802154_LOOPBACK
+
+choice
+	prompt "Work queue"
+	default IEEE802154_LOOPBACK_LPWORK if SCHED_LPWORK
+	default IEEE802154_LOOPBACK_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the loopback driver.  If the
+		low priority work queue is available, then it should be used by the
+		loopback driver.
+
+config IEEE802154_LOOPBACK_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config IEEE802154_LOOPBACK_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
+endif # IEEE802154_LOOPBACK
+
 endif # IEEE802154
