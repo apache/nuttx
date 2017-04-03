@@ -807,6 +807,12 @@ pashello
 
   Configures to use apps/examples/pashello.
 
+sixlowpan
+
+  This configuration was intended only for unit-level testing of the
+  6loWPAN stack.  It enables networking with 6loWPAN support and uses
+  only a IEEE802.15.4 MAC loopback network device to supported testing.
+
 touchscreen
 
   This configuration uses the simple touchscreen test at

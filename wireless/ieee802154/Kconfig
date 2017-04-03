@@ -10,7 +10,7 @@ config WIRELESS_IEEE802154
 	---help---
 		Enables support for the IEEE 802.14.5 Wireless library.
 
-if IEEE802154
+if WIRELESS_IEEE802154
 
 config IEEE802154_LOOPBACK
 	bool "IEEE802154 6loWPAN Loopback"
@@ -43,4 +43,4 @@ config IEEE802154_LOOPBACK_LPWORK
 endchoice # Work queue
 endif # IEEE802154_LOOPBACK
 
-endif # IEEE802154
+endif # WIRELESS_IEEE802154
