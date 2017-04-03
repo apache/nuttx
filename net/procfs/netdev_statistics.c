@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/procfs/netdev_statistics.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <netinet/ether.h>
 
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/sixlowpan.h>
 
 #include "netdev/netdev.h"
 #include "utils/utils.h"
@@ -106,6 +107,9 @@ static const linegen_t g_linegen[] =
 static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
 {
   FAR struct net_driver_s *dev;
+#ifdef CONFIG_NET_6LOWPAN
+  FAR struct ieee802154_driver_s *ieee;
+#endif
   FAR const char *status;
   int len = 0;
 
@@ -139,6 +143,30 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
         len += snprintf(&netfile->line[len], NET_LINELEN - len,
                         "%s\tLink encap:Ethernet HWaddr %s",
                         dev->d_ifname, ether_ntoa(&dev->d_mac));
+        break;
+#endif
+
+#ifdef CONFIG_NET_6LOWPAN
+      case NET_LL_IEEE802154:
+        {
+          ieee = (FAR struct ieee802154_driver_s *)dev;
+
+#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
+          len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                          "%s\tLink encap:6loWPAN HWaddr %02x:%02x",
+                          dev->d_ifname,
+                          ieee->i_nodeaddr.u8[0], ieee->i_nodeaddr.u8[1]);
+#else /* CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 8 */
+          len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                          "%s\tLink encap:6loWPAN HWaddr "
+                          "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
+                          dev->d_ifname,
+                          ieee->i_nodeaddr.u8[0], ieee->i_nodeaddr.u8[1],
+                          ieee->i_nodeaddr.u8[2], ieee->i_nodeaddr.u8[3],
+                          ieee->i_nodeaddr.u8[4], ieee->i_nodeaddr.u8[5],
+                          ieee->i_nodeaddr.u8[6], ieee->i_nodeaddr.u8[7]);
+#endif
+        }
         break;
 #endif
 
@@ -184,6 +212,26 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
                   "%s\tLink encap:Ethernet HWaddr %s at %s\n",
                   dev->d_ifname, ether_ntoa(&dev->d_mac), status);
 
+#elif defined(CONFIG_NET_6LOWPAN)
+  ieee = (FAR struct ieee802154_driver_s *)dev;
+
+#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
+  len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                  "%s\tLink encap:6loWPAN HWaddr %02x:%02x at %s",
+                  dev->d_ifname,
+                  ieee->i_nodeaddr.u8[0], ieee->i_nodeaddr.u8[1],
+                  status);
+#else /* CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 8 */
+  len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                  "%s\tLink encap:6loWPAN HWaddr "
+                  "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x at %s",
+                  dev->d_ifname,
+                  ieee->i_nodeaddr.u8[0], ieee->i_nodeaddr.u8[1],
+                  ieee->i_nodeaddr.u8[2], ieee->i_nodeaddr.u8[3],
+                  ieee->i_nodeaddr.u8[4], ieee->i_nodeaddr.u8[5],
+                  ieee->i_nodeaddr.u8[6], ieee->i_nodeaddr.u8[7],
+                  status);
+#endif
 #elif defined(CONFIG_NET_LOOPBACK)
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   "%s\tLink encap:Local Loopback at %s\n",

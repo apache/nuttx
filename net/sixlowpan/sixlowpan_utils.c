@@ -116,7 +116,7 @@ void sixlowpan_ipfromrime(FAR const struct rimeaddr_s *rime,
                           net_ipv6addr_t ipaddr)
 {
   memset(ipaddr, 0, sizeof(net_ipv6addr_t));
-  ipaddr[0] = 0xfe80;
+  ipaddr[0] = HTONS(0xfe80);
 
   /* We consider only links with IEEE EUI-64 identifier or IEEE 48-bit MAC
    * addresses.  NOTE: that CONFIG_NET_6LOWPAN_RIMEADDR_SIZE may be 2 or
@@ -128,7 +128,7 @@ void sixlowpan_ipfromrime(FAR const struct rimeaddr_s *rime,
    */
 
   memcpy(&ipaddr[4], rime, CONFIG_NET_6LOWPAN_RIMEADDR_SIZE);
-  ipaddr[4] ^= 0x0200;
+  ipaddr[4] ^= HTONS(0x0200);
 }
 
 /****************************************************************************
@@ -174,10 +174,10 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
   FAR const uint8_t *rimeptr = rime->u8;
 
 #if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
-  return ((ipaddr[4] == (GETINT16(rimeptr, 0) ^ 0x0200)) &&
+  return ((ipaddr[4] == htons((GETINT16(rimeptr, 0) ^ 0x0200))) &&
            ipaddr[5] == 0 && ipaddr[6] == 0 && ipaddr[7] == 0);
 #else /* CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 8 */
-  return ((ipaddr[4] == (GETINT16(rimeptr, 0) ^ 0x0200)) &&
+  return ((ipaddr[4] == htons((GETINT16(rimeptr, 0) ^ 0x0200))) &&
            ipaddr[5] == GETINT16(rimeptr, 2) &&
            ipaddr[6] == GETINT16(rimeptr, 4) &&
            ipaddr[7] == GETINT16(rimeptr, 6));

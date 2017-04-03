@@ -455,7 +455,8 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
   uint8_t iphc1;
   uint8_t tmp;
 
-  ninfodumpbuffer("IPv6 before compression", ipv6, sizeof(struct ipv6_hdr_s));
+  ninfodumpbuffer("IPv6 before compression", (FAR const uint8_t *)ipv6,
+                  sizeof(struct ipv6_hdr_s));
 
   g_hc06ptr = g_rimeptr + 2;
 

@@ -250,7 +250,6 @@ int tcp_local_ipv6_device(FAR struct tcp_conn_s *conn)
 #else
   return tcp_find_ipv6_device(conn, NULL);
 #endif
-
 }
 #endif /* CONFIG_NET_IPv6 */
 

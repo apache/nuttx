@@ -547,7 +547,7 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
 
 #define net_is_addr_loopback(a) \
   ((a)[0] == 0 && (a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
-   (a)[4] == 0 && (a)[5] == 0 && (a)[6] == 0 && (a)[7] == 0x0001)
+   (a)[4] == 0 && (a)[5] == 0 && (a)[6] == 0 && (a)[7] == HTONS(0x0001))
 
 /****************************************************************************
  * Name: net_is_addr_unspecified
@@ -569,7 +569,7 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
  *
  ****************************************************************************/
 
-#define net_is_addr_mcast(a) (((a)[0] & 0xff00) == 0xff00)
+#define net_is_addr_mcast(a) (((a)[0] & HTONS(0xff00)) == HTONS(0xff00))
 
 /****************************************************************************
  * Name: net_is_addr_linklocal_allnodes_mcast
@@ -580,8 +580,8 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
  ****************************************************************************/
 
 #define net_is_addr_linklocal_allnodes_mcast(a) \
-  ((a)[0] == 0xff02 && (a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
-   (a)[4] == 0      && (a)[5] == 0 && (a)[6] == 0 && (a)[7] == 0x0001)
+  ((a)[0] == HTONS(0xff02) && (a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
+   (a)[4] == 0 && (a)[5] == 0 && (a)[6] == 0 && (a)[7] == HTONS(0x0001))
 
 /****************************************************************************
  * Name: net_is_addr_linklocal_allrouters_mcast
@@ -592,8 +592,8 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
  ****************************************************************************/
 
 #define net_is_addr_linklocal_allrouters_mcast(a) \
-  ((a)[0] == 0xff02 && (a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
-   (a)[4] == 0      && (a)[5] == 0 && (a)[6] == 0 && (a)[7] == 0x0002)
+  ((a)[0] == HTONS(0xff02) && (a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
+   (a)[4] == 0 && (a)[5] == 0 && (a)[6] == 0 && (a)[7] == HTOS(0x0002))
 
 /****************************************************************************
  * Name: net_is_addr_linklocal
@@ -603,7 +603,7 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
  *
  ****************************************************************************/
 
-#define net_is_addr_linklocal(a) ((a)[0] == 0xfe80)
+#define net_is_addr_linklocal(a) ((a)[0] == HTONS(0xfe80))
 
 /****************************************************************************
  * Name: net_ipaddr_mask

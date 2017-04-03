@@ -393,10 +393,10 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev)
           size_t hdrlen;
 
           hdrlen = IPv6_HDRLEN + TCP_HDRLEN;
-          if (hdrlen < dev->d_len)
+          if (hdrlen > dev->d_len)
             {
               nwarn("WARNING: Packet to small:  Have %u need >%u\n",
-                  dev->d_len, hdrlen);
+                    dev->d_len, hdrlen);
             }
           else
             {
