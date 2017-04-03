@@ -124,7 +124,7 @@
 ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
                    int flags)
 {
-  int ret;
+  ssize_t ret;
 
   /* Treat as a cancellation point */
 
@@ -175,9 +175,9 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
                 }
 #endif /* CONFIG_NETDEV_MULTINIC && NET_TCP_HAVE_STACK */
 #elif defined(NET_TCP_HAVE_STACK)
-              nsent = psock_tcp_send(psock, buf, len, flags, to, tolen);
+              ret = psock_tcp_send(psock, buf, len);
 #else
-              nsent = -ENOSYS;
+              ret = -ENOSYS;
 #endif /* CONFIG_NET_6LOWPAN */
             }
 #endif /* CONFIG_NET_TCP */
@@ -219,7 +219,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 #endif /* CONFIG_NETDEV_MULTINIC && NET_UDP_HAVE_STACK */
 #elif defined(NET_UDP_HAVE_STACK)
               /* Only UDP/IP packet send */
- 
+
               ret = psock_udp_send(psock, buf, len);
 #else
               ret = -ENOSYS;
