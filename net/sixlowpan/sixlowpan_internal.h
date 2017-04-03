@@ -717,8 +717,8 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
-void sixlowpan_uncompresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
-                                 uint16_t ip_len);
+int sixlowpan_uncompresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
+                                uint16_t ip_len);
 #endif
 
 /****************************************************************************
@@ -752,7 +752,7 @@ int sixlowpan_frame_hdralloc(FAR struct iob_s *iob, int size);
  *
  ****************************************************************************/
 
-#define sixlowpan_islinklocal(ipaddr) ((ipaddr)[0] = NTOHS(0xfe80))
+#define sixlowpan_islinklocal(ipaddr) ((ipaddr)[0] == NTOHS(0xfe80))
 
 void sixlowpan_ipfromrime(FAR const struct rimeaddr_s *rime,
                           net_ipv6addr_t ipaddr);

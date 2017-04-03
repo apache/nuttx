@@ -51,6 +51,17 @@ config NET_6LOWPAN_COMPRESSION_THRESHOLD
 		CONFIG_NET_6LOWPAN_COMPRESSION_THRESHOLD sets a lower threshold for
 		when packets should not be compressed.
 
+config NET_6LOWPAN_MINPORT
+	hex "Minimum port nubmer"
+	default 0x5471
+	depends on NET_6LOWPAN_COMPRESSION_HC1
+	---help---
+		HC1 compression of UDP headersis feasible only if both src and dest
+		ports are between CONFIG_NET_6LOWPAN_MINPORT and
+		CONFIG_NET_6LOWPAN_MINPORT + 15, inclusive.
+
+		All nodes must agree on the value of CONFIG_NET_6LOWPAN_MINPORT
+
 if NET_6LOWPAN_COMPRESSION_HC06
 
 config NET_6LOWPAN_MAXADDRCONTEXT
