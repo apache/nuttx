@@ -543,7 +543,7 @@ int sixlowpan_framecreate(FAR struct ieee802154_driver_s *ieee,
  *   send interrupt logic when a TX poll is received.  It formates the
  *   list of frames to be sent by the IEEE802.15.4 MAC driver.
  *
- *   The payload data is in the caller 's_buf' and is of length 's_len'.
+ *   The payload data is in the caller 'buf' and is of length 'buflen'.
  *   Compressed headers will be added and if necessary the packet is
  *   fragmented. The resulting packet/fragments are put in ieee->i_framelist
  *   and the entire list of frames will be delivered to the 802.15.4 MAC via
@@ -552,8 +552,9 @@ int sixlowpan_framecreate(FAR struct ieee802154_driver_s *ieee,
  * Input Parameters:
  *   ieee    - The IEEE802.15.4 MAC driver instance
  *   ipv6hdr - IPv6 header followed by TCP or UDP header.
- *   buf     - Data to send
- *   buflen  - Length of data to send
+ *   buf     - Beginning of the packet packet to send (with IPv6 + protocol
+ *             headers)
+ *   buflen  - Length of data to send (include IPv6 and protocol headers)
  *   destmac - The IEEE802.15.4 MAC address of the destination
  *
  * Returned Value:

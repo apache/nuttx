@@ -390,30 +390,19 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev)
         }
       else
         {
-          size_t hdrlen;
+          struct rimeaddr_s destmac;
 
-          hdrlen = IPv6_HDRLEN + TCP_HDRLEN;
-          if (hdrlen > dev->d_len)
-            {
-              nwarn("WARNING: Packet to small:  Have %u need >%u\n",
-                    dev->d_len, hdrlen);
-            }
-          else
-            {
-              struct rimeaddr_s destmac;
+          /* Get the Rime MAC address of the destination.  This assumes an
+           * encoding of the MAC address in the IPv6 address.
+           */
 
-              /* Get the Rime MAC address of the destination.  This assumes
-               * an encoding of the MAC address in the IPv6 address.
-               */
+          sixlowpan_rimefromip(ipv6hdr->destipaddr, &destmac);
 
-              sixlowpan_rimefromip(ipv6hdr->destipaddr, &destmac);
+          /* Convert the outgoing packet into a frame list. */
 
-              /* Convert the outgoing packet into a frame list. */
-
-              (void)sixlowpan_queue_frames(
-                      (FAR struct ieee802154_driver_s *)dev, ipv6hdr,
-                      dev->d_buf + hdrlen, dev->d_len - hdrlen, &destmac);
-            }
+          (void)sixlowpan_queue_frames(
+                  (FAR struct ieee802154_driver_s *)dev, ipv6hdr,
+                  dev->d_buf, dev->d_len, &destmac);
         }
     }
 

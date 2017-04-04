@@ -148,16 +148,6 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
   payptr = &iob->io_data[PACKETBUF_HDR_SIZE];
 
 #if CONFIG_NET_6LOWPAN_FRAG
-  /* If reassembly timed out, cancel it */
-
-  elapsed = clock_systimer() - ieee->i_time;
-  if (elapsed > NET_6LOWPAN_TIMEOUT)
-    {
-      nwarn("WARNING: Reassembly timed out\n");
-      ieee->i_pktlen   = 0;
-      ieee->i_accumlen = 0;
-    }
-
   /* Since we don't support the mesh and broadcast header, the first header
    * we look for is the fragmentation header
    */
@@ -229,6 +219,16 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
   if (ieee->i_accumlen > 0)
     {
+      /* If reassembly timed out, cancel it */
+
+      elapsed = clock_systimer() - ieee->i_time;
+      if (elapsed > NET_6LOWPAN_TIMEOUT)
+        {
+          nwarn("WARNING: Reassembly timed out\n");
+          ieee->i_pktlen   = 0;
+          ieee->i_accumlen = 0;
+        }
+
       /* In this case what we expect is that the next frame will hold the
        * next FRAGN of the sequence.  We have to handle a few exeptional
        * cases that we need to handle:
@@ -246,7 +246,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
        *
        */
 
-      if (!isfrag)
+      else if (!isfrag)
         {
           /* Discard the partially assembled packet */
 
@@ -287,13 +287,15 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
                 "the packet currently being reassembled\n");
           return OK;
         }
+      else
+        {
+          /* Looks good.  We are currently processing a reassembling sequence
+           * and we recieved a valid FRAGN fragment.  Skip the header
+           * compression dispatch logic.
+           */
 
-      /* Looks good.  We are currently processing a reassembling sequence and
-       * we recieved a valid FRAGN fragment.  Skip the header compression
-       * dispatch logic.
-       */
-
-      goto copypayload;
+          goto copypayload;
+        }
     }
 
   /* There is no reassembly in progress. Check if we received a fragment */
@@ -359,6 +361,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
     }
   else
 #endif /* CONFIG_NET_6LOWPAN_COMPRESSION_HC1 */
+
   if (hc1[RIME_HC1_DISPATCH] == SIXLOWPAN_DISPATCH_IPV6)
     {
       ninfo("IPV6 Dispatch\n");
