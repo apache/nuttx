@@ -234,6 +234,19 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
   ninfo("Sending packet length %d\n", buflen);
 
+  /* Pre-calculate frame header length. */
+
+  framer_hdrlen = sixlowpan_send_hdrlen(ieee, ieee->i_panid);
+  if (framer_hdrlen < 0)
+    {
+      /* Failed to determine the size of the header failed. */
+
+      nerr("ERROR: sixlowpan_send_hdrlen() failed: %d\n", framer_hdrlen);
+      return framer_hdrlen;
+    }
+
+  g_frame_hdrlen  = framer_hdrlen;
+
 #ifndef CONFIG_NET_6LOWPAN_COMPRESSION_IPv6
   if (buflen >= CONFIG_NET_6LOWPAN_COMPRESSION_THRESHOLD)
     {
@@ -258,17 +271,6 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
   ninfo("Header of length %d\n", g_frame_hdrlen);
 
   rimeaddr_copy(&g_pktaddrs[PACKETBUF_ADDR_RECEIVER], destmac);
-
-  /* Pre-calculate frame header length. */
-
-  framer_hdrlen = sixlowpan_send_hdrlen(ieee, ieee->i_panid);
-  if (framer_hdrlen < 0)
-    {
-      /* Failed to determine the size of the header failed. */
-
-      nerr("ERROR: sixlowpan_send_hdrlen() failed: %d\n", framer_hdrlen);
-      return framer_hdrlen;
-    }
 
   /* Check if we need to fragment the packet into several frames */
 

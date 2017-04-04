@@ -461,7 +461,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
   if (hc1[RIME_HC1_DISPATCH] == SIXLOWPAN_DISPATCH_IPV6)
     {
       ninfo("IPV6 Dispatch\n");
-      g_frame_hdrlen += SIXLOWPAN_IPV6_HDR_LEN;
+      g_frame_hdrlen  += SIXLOWPAN_IPV6_HDR_LEN;
 
       /* Put uncompressed IP header in d_buf. */
 
@@ -469,7 +469,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
       /* Update g_uncomp_hdrlen and g_frame_hdrlen. */
 
-      g_frame_hdrlen += IPv6_HDRLEN;
+      g_frame_hdrlen  += IPv6_HDRLEN;
       g_uncomp_hdrlen += IPv6_HDRLEN;
     }
   else
@@ -484,19 +484,20 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 copypayload:
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
-  /* Copy "payload" from the rime buffer to the d_buf.  If this frame is a
-   * first fragment or not part of a fragmented packet, we have already
-   * copied the compressed headers, g_uncomp_hdrlen and g_frame_hdrlen are
-   * non-zerio, fragoffset is.
+  /* Copy "payload" from the rime buffer to the IEEE802.15.4 MAC drivers
+   * d_buf.  If this frame is a first fragment or not part of a fragmented
+   * packet, we have already copied the compressed headers, g_uncomp_hdrlen
+   * and g_frame_hdrlen are non-zerio, fragoffset is.
    */
 
-  if (ieee->i_dev.d_len < g_frame_hdrlen)
+  if (g_frame_hdrlen > CONFIG_NET_6LOWPAN_MTU)
     {
-      ninfo("SIXLOWPAN: packet dropped due to header > total packet\n");
+      nwarn("WARNING: Packet dropped due to header (%u) > packet buffer (%u)\n",
+            g_frame_hdrlen, CONFIG_NET_6LOWPAN_MTU);
       return OK;
     }
 
-  g_rime_payloadlen = ieee->i_dev.d_len - g_frame_hdrlen;
+  g_rime_payloadlen = iob->io_len - g_frame_hdrlen;
 
   /* Sanity-check size of incoming packet to avoid buffer overflow */
 
