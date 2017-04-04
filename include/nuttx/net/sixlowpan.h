@@ -364,18 +364,18 @@ struct ieee802154_driver_s
 
   uint8_t i_dsn;
 
+#if CONFIG_NET_6LOWPAN_FRAG
+  /* Fragmentation Support *************************************************/
+  /* Fragmentation is handled frame by frame and requires that certain
+   * state information be retained from frame to frame.
+   */
+
   /* i_dgramtag.  Datagram tag to be put in the header of the set of
    * fragments.  It is used by the recipient to match fragments of the
    * same payload.
    */
 
   uint16_t i_dgramtag;
-
-#if CONFIG_NET_6LOWPAN_FRAG
-  /* Fragmentation Support *************************************************/
-  /* Fragementation is handled frame by frame and requires that certain
-   * state information be retained from frame to frame.
-   */
 
   /* i_pktlen. The total length of the IPv6 packet to be re-assembled in
    * d_buf.

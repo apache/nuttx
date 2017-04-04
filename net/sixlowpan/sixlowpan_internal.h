@@ -454,7 +454,7 @@ extern uint8_t g_frame_hdrlen;
 
 /* Offset first available byte for the payload after header region. */
 
-uint8_t g_dataoffset;
+extern uint8_t g_dataoffset;
 
 /* Packet buffer metadata: Attributes and addresses */
 

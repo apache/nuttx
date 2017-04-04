@@ -18,7 +18,7 @@
  *            Joel Hoglund <joel@sics.se>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
+ * modification, are permitted provided that the following c/onditions
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
@@ -74,9 +74,9 @@
  ****************************************************************************/
 
 #define IPv6BUF(ieee) \
-  ((FAR struct ipv6_hdr_s *)&(ieee)->i_dev.d_buf)
+  ((FAR struct ipv6_hdr_s *)((ieee)->i_dev.d_buf))
 #define UDPIPv6BUF(ieee) \
-  ((FAR struct udp_hdr_s *)&(ieee)->i_dev.d_buf[IPv6_HDRLEN])
+  ((FAR struct udp_hdr_s *)&((ieee)->i_dev.d_buf[IPv6_HDRLEN]))
 
 /****************************************************************************
  * Private Types
@@ -841,7 +841,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
 void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                                   uint16_t iplen, FAR struct iob_s *iob,
-                                  FAR char *payptr)
+                                  FAR uint8_t *payptr)
 {
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF(ieee);
   FAR uint8_t *iphc = payptr + g_frame_hdrlen;

@@ -54,7 +54,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#if CONFIG_NET_6LOWPAN_FRAG
+#ifdef CONFIG_NET_6LOWPAN_FRAG
 #  include "nuttx/clock.h"
 #endif
 
@@ -214,11 +214,11 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
   uint16_t fragsize  = 0;     /* Size of the IP packet (read from fragment) */
   uint8_t fragoffset = 0;     /* Offset of the fragment in the IP packet */
-  bool isfrag        = false;
   int reqsize;                /* Required buffer size */
   int hdrsize;                /* Size of the IEEE802.15.4 header */
 
-#if CONFIG_NET_6LOWPAN_FRAG
+#ifdef CONFIG_NET_6LOWPAN_FRAG
+  bool isfrag        = false;
   bool isfirstfrag   = false;
   bool islastfrag    = false;
   uint16_t fragtag   = 0;     /* Tag of the fragment */
@@ -243,7 +243,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
   payptr = &iob->io_data[hdrsize];
 
-#if CONFIG_NET_6LOWPAN_FRAG
+#ifdef CONFIG_NET_6LOWPAN_FRAG
   /* Since we don't support the mesh and broadcast header, the first header
    * we look for is the fragmentation header
    */
@@ -285,7 +285,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
         g_frame_hdrlen += SIXLOWPAN_FRAGN_HDR_LEN;
 
-        ninfo("islastfrag?: i_accumlen %d g_rime_payloadlen %d fragsize %d\n",
+        ninfo("FRAGN: i_accumlen %d g_rime_payloadlen %d fragsize %d\n",
               ieee->i_accumlen, iob->io_len - g_frame_hdrlen, fragsize);
 
         /* Indicate that this frame is a another fragment for reassembly */
@@ -480,7 +480,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       return OK;
     }
 
-#if CONFIG_NET_6LOWPAN_FRAG
+#ifdef CONFIG_NET_6LOWPAN_FRAG
 copypayload:
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
@@ -514,7 +514,7 @@ copypayload:
          (int)(fragoffset << 3), payptr + g_frame_hdrlen,
          g_rime_payloadlen);
 
-#if CONFIG_NET_6LOWPAN_FRAG
+#ifdef CONFIG_NET_6LOWPAN_FRAG
   /* Update ieee->i_accumlen if the frame is a fragment, ieee->i_pktlen
    * otherwise.
    */
