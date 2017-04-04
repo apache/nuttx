@@ -54,7 +54,7 @@ config NET_6LOWPAN_COMPRESSION_THRESHOLD
 
 config NET_6LOWPAN_MINPORT
 	hex "Minimum port nubmer"
-	default 0x5471
+	default 0xf0b0
 	depends on NET_6LOWPAN_COMPRESSION_HC1
 	---help---
 		HC1 compression of UDP headersis feasible only if both src and dest

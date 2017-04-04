@@ -66,9 +66,9 @@
 /* Min and Max compressible UDP ports - HC06 */
 
 #define SIXLOWPAN_UDP_4_BIT_PORT_MIN     0xf0b0
-#define SIXLOWPAN_UDP_4_BIT_PORT_MAX     0xf0bf   /* F0B0 + 15 */
-#define SIXLOWPAN_UDP_8_BIT_PORT_MIN     0xF000
-#define SIXLOWPAN_UDP_8_BIT_PORT_MAX     0xf0ff   /* F000 + 255 */
+#define SIXLOWPAN_UDP_4_BIT_PORT_MAX     0xf0bf   /* f0b0 + 15 */
+#define SIXLOWPAN_UDP_8_BIT_PORT_MIN     0xf000
+#define SIXLOWPAN_UDP_8_BIT_PORT_MAX     0xf0ff   /* f000 + 255 */
 
 /* 6lowpan dispatches */
 

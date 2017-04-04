@@ -356,7 +356,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       else if (fragsize == 0)
         {
           nwarn("WARNING: Dropping zero-length 6loWPAN fragment\n");
-          return OK;
+          return INPUT_PARTIAL;
         }
 
       /* A non-zero, first fragement received while we are in the middle of
@@ -381,7 +381,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
           nwarn("WARNING: Dropping 6loWPAN packet that is not a fragment of "
                 "the packet currently being reassembled\n");
-          return OK;
+          return INPUT_PARTIAL;
         }
       else
         {
@@ -507,7 +507,7 @@ copypayload:
       ninfo("Required buffer size: %d+%d+%d=%d Available: %d\n",
             g_uncomp_hdrlen, (int)(fragoffset << 3), g_rime_payloadlen,
             reqsize, CONFIG_NET_6LOWPAN_MTU);
-      return OK;
+      return -ENOMEM;
     }
 
   memcpy((FAR uint8_t *)ieee->i_dev.d_buf + g_uncomp_hdrlen +
@@ -545,12 +545,10 @@ copypayload:
              ieee->i_accumlen, g_rime_payloadlen);
     }
   else
-#endif /* CONFIG_NET_6LOWPAN_FRAG */
     {
       ieee->i_pktlen = g_rime_payloadlen + g_uncomp_hdrlen;
     }
 
-#if CONFIG_NET_6LOWPAN_FRAG
   /* If we have a full IP packet in sixlowpan_buf, deliver it to
    * the IP stack
    */
@@ -560,23 +558,21 @@ copypayload:
 
   if (ieee->i_accumlen == 0 || ieee->i_accumlen == ieee->i_pktlen)
     {
-      FAR struct ipv6_hdr_s *ipv6 = IPv6BUF(&ieee->i_dev);
-
       ninfo("IP packet ready (length %d)\n", ieee->i_pktlen);
 
-      /* REVISIT -- clearly wrong. */
-      memcpy((FAR uint8_t *)ipv6, (FAR uint8_t *)ipv6, ieee->i_pktlen);
-
-      ieee->i_pktlen   = 0;
-      ieee->i_accumlen = 0;
-
+      ieee->i_dev.d_len = ieee->i_pktlen;
+      ieee->i_pktlen    = 0;
+      ieee->i_accumlen  = 0;
+      return INPUT_COMPLETE;
     }
-#endif /* CONFIG_NET_6LOWPAN_FRAG */
 
-  sixlowpan_dumpbuffer("IPv6 header",
-                       (FAR const uint8_t *)IPv6BUF(&ieee->i_dev),
-                       IPv6_HDRLEN);
-  return OK;
+  return INPUT_PARTIAL;
+#else
+  /* Deliver the packet to the IP stack */
+
+  ieee->i_dev.d_len = g_rime_payloadlen + g_uncomp_hdrlen;
+  return INPUT_COMPLETE;
+#endif /* CONFIG_NET_6LOWPAN_FRAG */
 }
 
 /****************************************************************************
