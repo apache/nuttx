@@ -440,7 +440,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
   hc1 = payptr + g_frame_hdrlen;
 
-  #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
+#ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
   if ((hc1[RIME_HC1_DISPATCH] & SIXLOWPAN_DISPATCH_IPHC_MASK) == SIXLOWPAN_DISPATCH_IPHC)
     {
       ninfo("IPHC Dispatch\n");

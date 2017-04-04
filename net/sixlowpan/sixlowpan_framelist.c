@@ -115,14 +115,14 @@ static void sixlowpan_compress_ipv6hdr(FAR struct ieee802154_driver_s *ieee,
 {
   /* Indicate the IPv6 dispatch and length */
 
-  *fptr            = SIXLOWPAN_DISPATCH_IPV6;
-  g_frame_hdrlen  += SIXLOWPAN_IPV6_HDR_LEN;
+  fptr[g_frame_hdrlen] = SIXLOWPAN_DISPATCH_IPV6;
+  g_frame_hdrlen      += SIXLOWPAN_IPV6_HDR_LEN;
 
   /* Copy the IPv6 header and adjust pointers */
 
-  memcpy(fptr + g_frame_hdrlen, destip, IPv6_HDRLEN);
-  g_frame_hdrlen  += IPv6_HDRLEN;
-  g_uncomp_hdrlen += IPv6_HDRLEN;
+  memcpy(&fptr[g_frame_hdrlen] , destip, IPv6_HDRLEN);
+  g_frame_hdrlen      += IPv6_HDRLEN;
+  g_uncomp_hdrlen     += IPv6_HDRLEN;
 }
 
 /****************************************************************************
