@@ -42,8 +42,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NET_SIXLOWOAN_H
-#define __INCLUDE_NUTTX_NET_SIXLOWOAN_H
+#ifndef __INCLUDE_NUTTX_NET_SIXLOWPAN_H
+#define __INCLUDE_NUTTX_NET_SIXLOWPAN_H
 
 /****************************************************************************
  * Included Files
@@ -56,6 +56,8 @@
 #include <nuttx/clock.h>
 #include <nuttx/net/iob.h>
 #include <nuttx/net/netdev.h>
+
+#ifdef CONFIG_NET_6LOWPAN
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -465,4 +467,5 @@ struct ieee802154_driver_s
 
 int sixlowpan_input(FAR struct ieee802154_driver_s *ieee);
 
-#endif /* __INCLUDE_NUTTX_NET_SIXLOWOAN_H */
+#endif /* CONFIG_NET_6LOWPAN */
+#endif /* __INCLUDE_NUTTX_NET_SIXLOWPAN_H */

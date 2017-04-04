@@ -167,8 +167,12 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
   uint16_t timeout;
   int ret;
 
+  ninfo("buflen %lu\n", (unsigned long)buflen);
+
   DEBUGASSERT(psock != NULL && psock->s_crefs > 0 && to != NULL);
   DEBUGASSERT(psock->s_type == SOCK_DGRAM);
+
+  sixlowpan_dumpbuffer("Outgoing UDP payload", buf, buflen);
 
   if (psock == NULL || to == NULL)
     {
@@ -352,8 +356,12 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
   FAR struct udp_conn_s *conn;
   struct sockaddr_in6 to;
 
+  ninfo("buflen %lu\n", (unsigned long)buflen);
+
   DEBUGASSERT(psock != NULL && psock->s_crefs > 0);
   DEBUGASSERT(psock->s_type == SOCK_DGRAM);
+
+  sixlowpan_dumpbuffer("Outgoing UDP payload", buf, buflen);
 
   /* Make sure that this is a valid socket */
 

@@ -294,7 +294,7 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
 
   /* Initialize all prameters to all zero */
 
-  memset(&params, 0, sizeof(params));
+  memset(params, 0, sizeof(params));
 
   /* Reset to an empty frame */
 
@@ -383,7 +383,7 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sixlowpan_hdrlen
+ * Function: sixlowpan_send_hdrlen
  *
  * Description:
  *   This function is before the first frame has been sent in order to
@@ -401,7 +401,7 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
  *
  ****************************************************************************/
 
-int sixlowpan_hdrlen(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_send_hdrlen(FAR struct ieee802154_driver_s *ieee,
                      uint16_t dest_panid)
 {
   struct frame802154_s params;
@@ -453,18 +453,18 @@ int sixlowpan_802154_framecreate(FAR struct frame802154_s *finfo,
       return 0;
     }
 
-  /* OK, now we have field lengths.  Time to actually construct
-   * the outgoing frame, and store it in the provided buffer
+  /* OK, now we have field lengths.  Time to actually construct the outgoing
+   * frame, and store it in the provided buffer
    */
 
-  buf[0] = (finfo->fcf.frame_type         & 7) |
-           ((finfo->fcf.security_enabled  & 1) << 3) |
-           ((finfo->fcf.frame_pending     & 1) << 4) |
-           ((finfo->fcf.ack_required      & 1) << 5) |
-           ((finfo->fcf.panid_compression & 1) << 6);
-  buf[1] = ((finfo->fcf.dest_addr_mode    & 3) << 2) |
-           ((finfo->fcf.frame_version     & 3) << 4) |
-           ((finfo->fcf.src_addr_mode     & 3) << 6);
+  buf[0] = ((finfo->fcf.frame_type        & 7) << FRAME802154_FRAMETYPE_SHIFT)    |
+           ((finfo->fcf.security_enabled  & 1) << FRAME802154_SECENABLED_SHIFT)   |
+           ((finfo->fcf.frame_pending     & 1) << FRAME802154_FRAMEPENDING_SHIFT) |
+           ((finfo->fcf.ack_required      & 1) << FRAME802154_ACKREQUEST_SHIFT)   |
+           ((finfo->fcf.panid_compression & 1) << FRAME802154_PANIDCOMP_SHIFT);
+  buf[1] = ((finfo->fcf.dest_addr_mode    & 3) << FRAME802154_DSTADDR_SHIFT)      |
+           ((finfo->fcf.frame_version     & 3) << FRAME802154_VERSION_SHIFT)      |
+           ((finfo->fcf.src_addr_mode     & 3) << FRAME802154_SRCADDR_SHIFT);
 
   /* Sequence number */
 
@@ -483,7 +483,7 @@ int sixlowpan_802154_framecreate(FAR struct frame802154_s *finfo,
 
   for (i = flen.dest_addr_len; i > 0; i--)
     {
-     buf[pos++] = finfo->dest_addr[i - 1];
+      buf[pos++] = finfo->dest_addr[i - 1];
     }
 
   /* Source PAN ID */

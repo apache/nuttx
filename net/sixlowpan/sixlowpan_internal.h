@@ -100,21 +100,16 @@
  * bytes for all subsequent headers.
  */
 
-#define RIME_FRAG_PTR                   g_rimeptr
 #define RIME_FRAG_DISPATCH_SIZE         0  /* 16 bit */
 #define RIME_FRAG_TAG                   2  /* 16 bit */
 #define RIME_FRAG_OFFSET                4  /* 8 bit */
 
 /* Define the Rime buffer as a byte array */
 
-#define RIME_IPHC_BUF                   (g_rimeptr + g_rime_hdrlen)
-
-#define RIME_HC1_PTR                    (g_rimeptr + g_rime_hdrlen)
 #define RIME_HC1_DISPATCH               0  /* 8 bit */
 #define RIME_HC1_ENCODING               1  /* 8 bit */
 #define RIME_HC1_TTL                    2  /* 8 bit */
 
-#define RIME_HC1_HC_UDP_PTR             (g_rimeptr + g_rime_hdrlen)
 #define RIME_HC1_HC_UDP_DISPATCH        0  /* 8 bit */
 #define RIME_HC1_HC_UDP_HC1_ENCODING    1  /* 8 bit */
 #define RIME_HC1_HC_UDP_UDP_ENCODING    2  /* 8 bit */
@@ -126,32 +121,46 @@
  * IEEE802.15.4 spec for details.
  */
 
-#define FRAME802154_BEACONFRAME         0x00
-#define FRAME802154_DATAFRAME           0x01
-#define FRAME802154_ACKFRAME            0x02
-#define FRAME802154_CMDFRAME            0x03
+#define FRAME802154_FRAMETYPE_SHIFT     (0)  /* Bits 0-2: Frame type */
+#define FRAME802154_FRAMETYPE_MASK      (7 << FRAME802154_FRAMETYPE_SHIFT)
+#define FRAME802154_SECENABLED_SHIFT    (3)  /* Bit 3: Security enabled */
+#define FRAME802154_FRAMEPENDING_SHIFT  (4)  /* Bit 4: Frame pending */
+#define FRAME802154_ACKREQUEST_SHIFT    (5)  /* Bit 5: ACK request */
+#define FRAME802154_PANIDCOMP_SHIFT     (6)  /* Bit 6: PANID compression */
+                                             /* Bits 7-9: Reserved */
+#define FRAME802154_DSTADDR_SHIFT       (2)  /* Bits 10-11: Dest address mode */
+#define FRAME802154_DSTADDR_MASK        (3 << FRAME802154_DSTADDR_SHIFT)
+#define FRAME802154_VERSION_SHIFT       (4)  /* Bit 12-13: Frame version */
+#define FRAME802154_VERSION_MASK        (3 << FRAME802154_VERSION_SHIFT)
+#define FRAME802154_SRCADDR_SHIFT       (6)  /* Bits 14-15: Source address mode */
+#define FRAME802154_SRCADDR_MASK        (3 << FRAME802154_SRCADDR_SHIFT)
 
-#define FRAME802154_BEACONREQ           0x07
+/* Unshifted values for use in struct frame802154_fcf_s */
 
-#define FRAME802154_IEEERESERVED        0x00
-#define FRAME802154_NOADDR              0x00  /* Only valid for ACK or Beacon frames */
-#define FRAME802154_SHORTADDRMODE       0x02
-#define FRAME802154_LONGADDRMODE        0x03
+#define FRAME802154_BEACONFRAME         (0)
+#define FRAME802154_DATAFRAME           (1)
+#define FRAME802154_ACKFRAME            (2)
+#define FRAME802154_CMDFRAME            (3)
+
+#define FRAME802154_BEACONREQ           (7)
+
+#define FRAME802154_IEEERESERVED        (0)
+#define FRAME802154_NOADDR              (0)  /* Only valid for ACK or Beacon frames */
+#define FRAME802154_SHORTADDRMODE       (2)
+#define FRAME802154_LONGADDRMODE        (3)
 
 #define FRAME802154_NOBEACONS           0x0f
 
 #define FRAME802154_BROADCASTADDR       0xffff
 #define FRAME802154_BROADCASTPANDID     0xffff
 
-#define FRAME802154_IEEE802154_2003     0x00
-#define FRAME802154_IEEE802154_2006     0x01
+#define FRAME802154_IEEE802154_2003     (0)
+#define FRAME802154_IEEE802154_2006     (1)
 
-#define FRAME802154_SECURITY_LEVEL_NONE 0
-#define FRAME802154_SECURITY_LEVEL_128  3
+#define FRAME802154_SECURITY_LEVEL_NONE (0)
+#define FRAME802154_SECURITY_LEVEL_128  (3)
 
 /* Packet buffer Definitions */
-
-#define PACKETBUF_HDR_SIZE                    48
 
 #define PACKETBUF_ATTR_PACKET_TYPE_DATA       0
 #define PACKETBUF_ATTR_PACKET_TYPE_ACK        1
@@ -300,6 +309,14 @@
     } \
   while(0)
 
+/* Debug ********************************************************************/
+
+#ifdef CONFIG_NET_6LOWPAN_DUMPBUFFER
+#  define sixlowpan_dumpbuffer(m,b,s) ninfodumpbuffer(m,b,s)
+#else
+#  define sixlowpan_dumpbuffer(m,b,s)
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -408,7 +425,7 @@ struct frame802154_s
 /* A pointer to the rime buffer.
  *
  * We initialize it to the beginning of the rime buffer, then access
- * different fields by updating the offset ieee->g_rime_hdrlen.
+ * different fields by updating the offset ieee->g_frame_hdrlen.
  */
 
 extern FAR uint8_t *g_rimeptr;
@@ -428,12 +445,12 @@ extern uint8_t g_rime_payloadlen;
 
 extern uint8_t g_uncomp_hdrlen;
 
-/* g_rime_hdrlen is the total length of (the processed) 6lowpan headers
+/* g_frame_hdrlen is the total length of (the processed) 6lowpan headers
  * (fragment headers, IPV6 or HC1, HC2, and HC1 and HC2 non compressed
  * fields).
  */
 
-extern uint8_t g_rime_hdrlen;
+extern uint8_t g_frame_hdrlen;
 
 /* Offset first available byte for the payload after header region. */
 
@@ -497,7 +514,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
                    uint16_t timeout);
 
 /****************************************************************************
- * Function: sixlowpan_hdrlen
+ * Function: sixlowpan_send_hdrlen
  *
  * Description:
  *   This function is before the first frame has been sent in order to
@@ -515,7 +532,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int sixlowpan_hdrlen(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_send_hdrlen(FAR struct ieee802154_driver_s *ieee,
                      uint16_t dest_panid);
 
 /****************************************************************************
@@ -548,7 +565,7 @@ int sixlowpan_framecreate(FAR struct ieee802154_driver_s *ieee,
  *   send interrupt logic when a TX poll is received.  It formates the
  *   list of frames to be sent by the IEEE802.15.4 MAC driver.
  *
- *   The payload data is in the caller 's_buf' and is of length 's_len'.
+ *   The payload data is in the caller 'buf' and is of length 'buflen'.
  *   Compressed headers will be added and if necessary the packet is
  *   fragmented. The resulting packet/fragments are put in ieee->i_framelist
  *   and the entire list of frames will be delivered to the 802.15.4 MAC via
@@ -557,8 +574,9 @@ int sixlowpan_framecreate(FAR struct ieee802154_driver_s *ieee,
  * Input Parameters:
  *   ieee    - The IEEE802.15.4 MAC driver instance
  *   ipv6hdr - IPv6 header followed by TCP or UDP header.
- *   buf     - Data to send
- *   buflen  - Length of data to send
+ *   buf     - Beginning of the packet packet to send (with IPv6 + protocol
+ *             headers)
+ *   buflen  - Length of data to send (include IPv6 and protocol headers)
  *   destmac - The IEEE802.15.4 MAC address of the destination
  *
  * Returned Value:
@@ -621,7 +639,7 @@ void sixlowpan_hc06_initialize(void);
  *   ipv6     - The IPv6 header to be compressed
  *   destmac  - L2 destination address, needed to compress the IP
  *              destination field
- *   iob      - The IOB into which the compressed header should be saved.
+ *   fptr     - Pointer to frame to be compressed.
  *
  * Returned Value:
  *   None
@@ -632,7 +650,7 @@ void sixlowpan_hc06_initialize(void);
 void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                                 FAR const struct ipv6_hdr_s *ipv6,
                                 FAR const struct rimeaddr_s *destmac,
-                                FAR struct iob_s *iob);
+                                FAR uint8_t *fptr);
 #endif
 
 /****************************************************************************
@@ -645,14 +663,16 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  *   This function is called by the input function when the dispatch is HC06.
  *   We process the packet in the rime buffer, uncompress the header fields,
  *   and copy the result in the sixlowpan buffer.  At the end of the
- *   decompression, g_rime_hdrlen and g_uncompressed_hdrlen are set to the
+ *   decompression, g_frame_hdrlen and g_uncompressed_hdrlen are set to the
  *   appropriate values
  *
  * Input Parmeters:
- *   ieee  - A reference to the IEE802.15.4 network device state
- *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
- *           inferred from the L2 length), non 0 if the packet is a first
- *           fragment.
+ *   ieee   - A reference to the IEE802.15.4 network device state
+ *   iplen  - Equal to 0 if the packet is not a fragment (IP length is then
+ *            inferred from the L2 length), non 0 if the packet is a first
+ *            fragment.
+ *   iob    - Pointer to the IOB containing the received frame.
+ *   payptr - Pointer to the frame data payload.
  *
  * Returned Value:
  *   None
@@ -661,7 +681,8 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
 void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
-                                  uint16_t iplen);
+                                  uint16_t iplen, FAR struct iob_s *iob,
+                                  FAR uint8_t *payptr);
 #endif
 
 /****************************************************************************
@@ -679,7 +700,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  *   ipv6    - The IPv6 header to be compressed
  *   destmac - L2 destination address, needed to compress the IP
  *             destination field
- *   iob     - The IOB into which the compressed header should be saved.
+ *   fptr     - Pointer to frame to be compressed.
  *
  * Returned Value:
  *   None
@@ -690,7 +711,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
                                FAR const struct ipv6_hdr_s *ipv6,
                                FAR const struct rimeaddr_s *destmac,
-                               FAR struct iob_s *iob);
+                               FAR uint8_t *fptr);
 #endif
 
 /****************************************************************************
@@ -702,7 +723,7 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
  *   This function is called by the input function when the dispatch is
  *   HC1.  It processes the packet in the rime buffer, uncompresses the
  *   header fields, and copies the result in the sixlowpan buffer.  At the
- *   end of the decompression, g_rime_hdrlen and uncompressed_hdr_len
+ *   end of the decompression, g_frame_hdrlen and uncompressed_hdr_len
  *   are set to the appropriate values
  *
  * Input Parameters:
@@ -710,6 +731,8 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
  *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
  *           inferred from the L2 length), non 0 if the packet is a first
  *           fragment.
+ *   iob    - Pointer to the IOB containing the received frame.
+ *   payptr - Pointer to the frame data payload.
  *
  * Returned Value:
  *   None
@@ -717,8 +740,9 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
-void sixlowpan_uncompresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
-                                 uint16_t ip_len);
+int sixlowpan_uncompresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
+                                uint16_t ip_len, FAR struct iob_s *iob,
+                                FAR uint8_t *payptr);
 #endif
 
 /****************************************************************************
@@ -752,7 +776,7 @@ int sixlowpan_frame_hdralloc(FAR struct iob_s *iob, int size);
  *
  ****************************************************************************/
 
-#define sixlowpan_islinklocal(ipaddr) ((ipaddr)[0] = NTOHS(0xfe80))
+#define sixlowpan_islinklocal(ipaddr) ((ipaddr)[0] == NTOHS(0xfe80))
 
 void sixlowpan_ipfromrime(FAR const struct rimeaddr_s *rime,
                           net_ipv6addr_t ipaddr);
