@@ -100,21 +100,16 @@
  * bytes for all subsequent headers.
  */
 
-#define RIME_FRAG_PTR                   g_rimeptr
 #define RIME_FRAG_DISPATCH_SIZE         0  /* 16 bit */
 #define RIME_FRAG_TAG                   2  /* 16 bit */
 #define RIME_FRAG_OFFSET                4  /* 8 bit */
 
 /* Define the Rime buffer as a byte array */
 
-#define RIME_IPHC_BUF                   (g_rimeptr + g_rime_hdrlen)
-
-#define RIME_HC1_PTR                    (g_rimeptr + g_rime_hdrlen)
 #define RIME_HC1_DISPATCH               0  /* 8 bit */
 #define RIME_HC1_ENCODING               1  /* 8 bit */
 #define RIME_HC1_TTL                    2  /* 8 bit */
 
-#define RIME_HC1_HC_UDP_PTR             (g_rimeptr + g_rime_hdrlen)
 #define RIME_HC1_HC_UDP_DISPATCH        0  /* 8 bit */
 #define RIME_HC1_HC_UDP_HC1_ENCODING    1  /* 8 bit */
 #define RIME_HC1_HC_UDP_UDP_ENCODING    2  /* 8 bit */
@@ -408,7 +403,7 @@ struct frame802154_s
 /* A pointer to the rime buffer.
  *
  * We initialize it to the beginning of the rime buffer, then access
- * different fields by updating the offset ieee->g_rime_hdrlen.
+ * different fields by updating the offset ieee->g_frame_hdrlen.
  */
 
 extern FAR uint8_t *g_rimeptr;
@@ -428,12 +423,12 @@ extern uint8_t g_rime_payloadlen;
 
 extern uint8_t g_uncomp_hdrlen;
 
-/* g_rime_hdrlen is the total length of (the processed) 6lowpan headers
+/* g_frame_hdrlen is the total length of (the processed) 6lowpan headers
  * (fragment headers, IPV6 or HC1, HC2, and HC1 and HC2 non compressed
  * fields).
  */
 
-extern uint8_t g_rime_hdrlen;
+extern uint8_t g_frame_hdrlen;
 
 /* Offset first available byte for the payload after header region. */
 
@@ -621,7 +616,7 @@ void sixlowpan_hc06_initialize(void);
  *   ipv6     - The IPv6 header to be compressed
  *   destmac  - L2 destination address, needed to compress the IP
  *              destination field
- *   iob      - The IOB into which the compressed header should be saved.
+ *   fptr     - Pointer to frame data payload.
  *
  * Returned Value:
  *   None
@@ -632,7 +627,7 @@ void sixlowpan_hc06_initialize(void);
 void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                                 FAR const struct ipv6_hdr_s *ipv6,
                                 FAR const struct rimeaddr_s *destmac,
-                                FAR struct iob_s *iob);
+                                FAR uint8_t *fptr);
 #endif
 
 /****************************************************************************
@@ -645,14 +640,16 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  *   This function is called by the input function when the dispatch is HC06.
  *   We process the packet in the rime buffer, uncompress the header fields,
  *   and copy the result in the sixlowpan buffer.  At the end of the
- *   decompression, g_rime_hdrlen and g_uncompressed_hdrlen are set to the
+ *   decompression, g_frame_hdrlen and g_uncompressed_hdrlen are set to the
  *   appropriate values
  *
  * Input Parmeters:
- *   ieee  - A reference to the IEE802.15.4 network device state
- *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
- *           inferred from the L2 length), non 0 if the packet is a first
- *           fragment.
+ *   ieee   - A reference to the IEE802.15.4 network device state
+ *   iplen  - Equal to 0 if the packet is not a fragment (IP length is then
+ *            inferred from the L2 length), non 0 if the packet is a first
+ *            fragment.
+ *   iob    - Pointer to the IOB containing the received frame.
+ *   payptr - Pointer to the frame data payload.
  *
  * Returned Value:
  *   None
@@ -661,7 +658,8 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
 void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
-                                  uint16_t iplen);
+                                  uint16_t iplen, FAR struct iob_s *iob,
+                                  FAR uint8_t *payptr);
 #endif
 
 /****************************************************************************
@@ -679,7 +677,6 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  *   ipv6    - The IPv6 header to be compressed
  *   destmac - L2 destination address, needed to compress the IP
  *             destination field
- *   iob     - The IOB into which the compressed header should be saved.
  *
  * Returned Value:
  *   None
@@ -690,7 +687,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
                                FAR const struct ipv6_hdr_s *ipv6,
                                FAR const struct rimeaddr_s *destmac,
-                               FAR struct iob_s *iob);
+                               FAR uint8_t *fptr);
 #endif
 
 /****************************************************************************
@@ -702,7 +699,7 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
  *   This function is called by the input function when the dispatch is
  *   HC1.  It processes the packet in the rime buffer, uncompresses the
  *   header fields, and copies the result in the sixlowpan buffer.  At the
- *   end of the decompression, g_rime_hdrlen and uncompressed_hdr_len
+ *   end of the decompression, g_frame_hdrlen and uncompressed_hdr_len
  *   are set to the appropriate values
  *
  * Input Parameters:
@@ -710,6 +707,8 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
  *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
  *           inferred from the L2 length), non 0 if the packet is a first
  *           fragment.
+ *   iob    - Pointer to the IOB containing the received frame.
+ *   payptr - Pointer to the frame data payload.
  *
  * Returned Value:
  *   None
@@ -718,7 +717,8 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
 int sixlowpan_uncompresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
-                                uint16_t ip_len);
+                                uint16_t ip_len, FAR struct iob_s *iob,
+                                FAR uint8_t *payptr);
 #endif
 
 /****************************************************************************

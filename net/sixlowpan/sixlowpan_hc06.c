@@ -437,7 +437,7 @@ void sixlowpan_hc06_initialize(void)
  *   ipv6    - The IPv6 header to be compressed
  *   destmac - L2 destination address, needed to compress the IP
  *             destination field
- *   iob     - The IOB into which the compressed header should be saved.
+ *   fptr    - Pointer to frame data payload.
  *
  * Returned Value:
  *   None
@@ -447,9 +447,9 @@ void sixlowpan_hc06_initialize(void)
 void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                                 FAR const struct ipv6_hdr_s *ipv6,
                                 FAR const struct rimeaddr_s *destmac,
-                                FAR struct iob_s *iob)
+                                FAR uint8_t *fptr)
 {
-  FAR uint8_t *iphc = RIME_IPHC_BUF;
+  FAR uint8_t *iphc = fptr + g_frame_hdrlen;
   FAR struct sixlowpan_addrcontext_s *addrcontext;
   uint8_t iphc0;
   uint8_t iphc1;
@@ -458,7 +458,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
   ninfodumpbuffer("IPv6 before compression", (FAR const uint8_t *)ipv6,
                   sizeof(struct ipv6_hdr_s));
 
-  g_hc06ptr = g_rimeptr + 2;
+  g_hc06ptr = fptr + 2;
 
   /* As we copy some bit-length fields, in the IPHC encoding bytes,
    * we sometimes use |=
@@ -803,12 +803,12 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
     }
 #endif /* CONFIG_NET_UDP */
 
-  /* Before the g_rime_hdrlen operation */
+  /* Before the g_frame_hdrlen operation */
 
   iphc[0] = iphc0;
   iphc[1] = iphc1;
 
-  g_rime_hdrlen = g_hc06ptr - g_rimeptr;
+  g_frame_hdrlen = g_hc06ptr - fptr;
   return;
 }
 
@@ -822,14 +822,16 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  *   This function is called by the input function when the dispatch is HC06.
  *   We process the packet in the rime buffer, uncompress the header fields,
  *   and copy the result in the sixlowpan buffer.  At the end of the
- *   decompression, g_rime_hdrlen and g_uncompressed_hdrlen are set to the
+ *   decompression, g_frame_hdrlen and g_uncompressed_hdrlen are set to the
  *   appropriate values
  *
  * Input Parmeters:
- *   ieee  - A reference to the IEE802.15.4 network device state
- *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
- *           inferred from the L2 length), non 0 if the packet is a first
- *           fragment.
+ *   ieee   - A reference to the IEE802.15.4 network device state
+ *   iplen  - Equal to 0 if the packet is not a fragment (IP length is then
+ *            inferred from the L2 length), non 0 if the packet is a first
+ *            fragment.
+ *   iob    - Pointer to the IOB containing the received frame.
+ *   payptr - Pointer to the frame data payload.
  *
  * Returned Value:
  *   None
@@ -837,17 +839,18 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  ****************************************************************************/
 
 void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
-                                  uint16_t iplen)
+                                  uint16_t iplen, FAR struct iob_s *iob,
+                                  FAR char *payptr)
 {
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF(ieee);
-  FAR uint8_t *iphc = RIME_IPHC_BUF;
+  FAR uint8_t *iphc = payptr + g_frame_hdrlen;
   uint8_t iphc0;
   uint8_t iphc1;
   uint8_t tmp;
 
   /* At least two byte will be used for the encoding */
 
-  g_hc06ptr = g_rimeptr + g_rime_hdrlen + 2;
+  g_hc06ptr = payptr + g_frame_hdrlen + 2;
 
   iphc0 = iphc[0];
   iphc1 = iphc[1];
@@ -1153,7 +1156,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
         }
     }
 
-  g_rime_hdrlen = g_hc06ptr - g_rimeptr;
+  g_frame_hdrlen = g_hc06ptr - payptr;
 
   /* IP length field. */
 
@@ -1162,7 +1165,8 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
       /* This is not a fragmented packet */
 
       ipv6->len[0] = 0;
-      ipv6->len[1] = ieee->i_dev.d_len - g_rime_hdrlen + g_uncomp_hdrlen - IPv6_HDRLEN;
+      ipv6->len[1] = iob->io_len - g_frame_hdrlen + g_uncomp_hdrlen -
+                     IPv6_HDRLEN;
     }
   else
     {

@@ -54,14 +54,6 @@
  * during that processing
  */
 
-/* A pointer to the rime buffer.
- *
- * We initialize it to the beginning of the rime buffer, then access
- * different fields by updating the offset ieee->g_rime_hdrlen.
- */
-
-FAR uint8_t *g_rimeptr;
-
 /* The length of the payload in the Rime buffer.
  *
  * The payload is what comes after the compressed or uncompressed headers
@@ -77,12 +69,12 @@ uint8_t g_rime_payloadlen;
 
 uint8_t g_uncomp_hdrlen;
 
-/* g_rime_hdrlen is the total length of (the processed) 6lowpan headers
+/* g_frame_hdrlen is the total length of (the processed) 6lowpan headers
  * (fragment headers, IPV6 or HC1, HC2, and HC1 and HC2 non compressed
  * fields).
  */
 
-uint8_t g_rime_hdrlen;
+uint8_t g_frame_hdrlen;
 
 /* Offset first available byte for the payload after header region. */
 
