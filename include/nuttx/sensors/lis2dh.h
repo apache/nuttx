@@ -109,8 +109,12 @@ extern "C"
 
 /* I1_AOI1 ENABLE for INT2 (-X------) */
 
-#define ST_LIS2DH_CR3_I1_AOI1_ENABLED   0x40   /* AOI1 interrupt on INT1 pin.*/
-#define ST_LIS2DH_CR3_I1_AOI2_ENABLED   0x20   /* AOI2 interrupt on INT1 pin.*/
+#define ST_LIS2DH_CR3_I1_AOI1_ENABLED   0x40   /* AOI1 interrupt on INT1 pin. */
+#define ST_LIS2DH_CR3_I1_AOI2_ENABLED   0x20   /* AOI2 interrupt on INT1 pin. */
+#define ST_LIS2DH_CR3_I1_DRDY1          0x10   /* DRDY1 interrupt on INT1 pin. */
+#define ST_LIS2DH_CR3_I1_DRDY2          0x08   /* DRDY2 interrupt on INT1 pin. */
+#define ST_LIS2DH_CR3_I1_WTM            0x04   /* FIFO Watermark interrupt on INT1 pin. */
+#define ST_LIS2DH_CR3_I1_OVERRUN        0x02   /* FIFO Overrun interrupt on INT1 pin. */
 
 #define ST_LIS2DH_CTRL_REG4             0x23
 

@@ -129,7 +129,7 @@ static int            lis2dh_access(FAR struct lis2dh_dev_s *dev,
                         uint8_t subaddr, FAR uint8_t *buf, int length);
 static int            lis2dh_get_reading(FAR struct lis2dh_dev_s *dev,
                         FAR struct lis2dh_vector_s *res, bool force_read);
-static int            lis2dh_powerdown(FAR struct lis2dh_dev_s  dev);
+static int            lis2dh_powerdown(FAR struct lis2dh_dev_s *dev);
 static int            lis2dh_reboot(FAR struct lis2dh_dev_s *dev);
 static int            lis2dh_poll(FAR struct file *filep,
                         FAR struct pollfd *fds, bool setup);
@@ -326,6 +326,20 @@ static ssize_t lis2dh_read(FAR struct file *filep, FAR char *buffer,
       return -EINVAL;
     }
 
+  err = sem_wait(&priv->devsem);
+  if (err < 0)
+    {
+      return -EINTR;
+    }
+
+  /* Do not allow read() if no SNIOC_WRITESETUP first. */
+
+  if (!priv->setup)
+    {
+      lis2dh_dbg("lis2dh: Read from unconfigured device\n");
+      return -EINVAL;
+    }
+
   flags = enter_critical_section();
 #ifdef LIS2DH_COUNT_INTS
   if (priv->int_pending > 0)
@@ -342,13 +356,6 @@ static ssize_t lis2dh_read(FAR struct file *filep, FAR char *buffer,
   /* Set pointer to first measurement data */
 
   ptr = (FAR struct lis2dh_result *)buffer;
-
-  err = sem_wait(&priv->devsem);
-  if (err < 0)
-    {
-      return -EINTR;
-    }
-
   ptr->header.meas_count = 0;
 
   if (!priv->fifo_used)
@@ -421,9 +428,9 @@ static ssize_t lis2dh_read(FAR struct file *filep, FAR char *buffer,
 
           fifo_num_samples = (buf & ST_LIS2DH_FIFOSR_NUM_SAMP_MASK) + 1;
 
-          if (fifo_num_samples > readcount)
+          if (fifo_num_samples > (readcount - ptr->header.meas_count))
             {
-              fifo_num_samples = readcount;
+              fifo_num_samples = (readcount - ptr->header.meas_count);
             }
 
           ptr->header.meas_count +=
