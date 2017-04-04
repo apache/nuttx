@@ -131,7 +131,7 @@ config NET_ETHERNET
 		no need to define anything special in the configuration file to use
 		Ethernet -- it is the default).
 
-menuconfig NET_6LOWPAN
+config NET_6LOWPAN
 	bool "IEEE 802.15.4 6LoWPAN support"
 	default n
 	select NETDEV_MULTINIC if NET_ETHERNET || NET_LOOPBACK || NET_SLIP || NET_TUN

@@ -261,12 +261,12 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
   /* Pre-calculate frame header length. */
 
-  framer_hdrlen = sixlowpan_hdrlen(ieee, ieee->i_panid);
+  framer_hdrlen = sixlowpan_send_hdrlen(ieee, ieee->i_panid);
   if (framer_hdrlen < 0)
     {
       /* Failed to determine the size of the header failed. */
 
-      nerr("ERROR: sixlowpan_hdrlen() failed: %d\n", framer_hdrlen);
+      nerr("ERROR: sixlowpan_send_hdrlen() failed: %d\n", framer_hdrlen);
       return framer_hdrlen;
     }
 
@@ -340,6 +340,8 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
       ninfo("First fragment: length %d, tag %d\n",
             g_rime_payloadlen, ieee->i_dgramtag);
+      sixlowpan_dumpbuffer("Outgoing frame",
+                           (FAR const uint8_t *)iob->io_data, iob->io_len);
 
       /* Add the first frame to the IOB queue */
 
@@ -412,6 +414,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
           ninfo("sixlowpan output: fragment offset %d, length %d, tag %d\n",
                 outlen >> 3, g_rime_payloadlen, ieee->i_dgramtag);
+          sixlowpan_dumpbuffer("Outgoing frame",
+                               (FAR const uint8_t *)iob->io_data,
+                               iob->io_len);
 
           /* Add the next frame to the tail of the IOB queue */
 
@@ -448,6 +453,10 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
       memcpy(fptr + g_frame_hdrlen, (FAR uint8_t *)destip + g_uncomp_hdrlen,
              buflen - g_uncomp_hdrlen);
       iob->io_len = buflen - g_uncomp_hdrlen + g_frame_hdrlen;
+
+      ninfo("Non-fragmented: length %d\n", iob->io_len);
+      sixlowpan_dumpbuffer("Outgoing frame",
+                       (FAR const uint8_t *)iob->io_data, iob->io_len);
 
       /* Add the first frame to the IOB queue */
 

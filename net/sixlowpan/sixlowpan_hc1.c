@@ -119,7 +119,7 @@
  *   ipv6    - The IPv6 header to be compressed
  *   destmac - L2 destination address, needed to compress the IP
  *             destination field
- *   fptr     - Pointer to frame data payload.
+ *   fptr    - Pointer to frame to be compressed.
  *
  * Returned Value:
  *   None
@@ -144,15 +144,18 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
        ipv6->proto != IP_PROTO_TCP))
     {
       /* IPV6 DISPATCH
-       * Something cannot be compressed, use IPV6 DISPATCH,
-       * compress nothing, copy IPv6 header in rime buffer
+       * Something cannot be compressed, use IPV6 DISPATCH, compress
+       * nothing, copy IPv6 header in rime buffer
        */
 
-      *fptr             = SIXLOWPAN_DISPATCH_IPV6;
-       g_frame_hdrlen  += SIXLOWPAN_IPV6_HDR_LEN;
-       memcpy(fptr + g_frame_hdrlen, ipv6, IPv6_HDRLEN);
-       g_frame_hdrlen  += IPv6_HDRLEN;
-       g_uncomp_hdrlen += IPv6_HDRLEN;
+      /* IPv6 dispatch header (1 byte) */
+
+      hc1[RIME_HC1_DISPATCH] = SIXLOWPAN_DISPATCH_IPV6;
+      g_frame_hdrlen        += SIXLOWPAN_IPV6_HDR_LEN;
+
+      memcpy(fptr + g_frame_hdrlen, ipv6, IPv6_HDRLEN);
+      g_frame_hdrlen        += IPv6_HDRLEN;
+      g_uncomp_hdrlen       += IPv6_HDRLEN;
     }
   else
     {
@@ -169,8 +172,8 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
           /* HC1 encoding and ttl */
 
           hc1[RIME_HC1_ENCODING] = 0xfc;
-          hc1[RIME_HC1_TTL] = ipv6->ttl;
-          g_frame_hdrlen += SIXLOWPAN_HC1_HDR_LEN;
+          hc1[RIME_HC1_TTL]  = ipv6->ttl;
+          g_frame_hdrlen    += SIXLOWPAN_HC1_HDR_LEN;
           break;
 
 #if CONFIG_NET_TCP
@@ -178,8 +181,8 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
           /* HC1 encoding and ttl */
 
           hc1[RIME_HC1_ENCODING] = 0xfe;
-          hc1[RIME_HC1_TTL] = ipv6->ttl;
-          g_frame_hdrlen += SIXLOWPAN_HC1_HDR_LEN;
+          hc1[RIME_HC1_TTL]  = ipv6->ttl;
+          g_frame_hdrlen    += SIXLOWPAN_HC1_HDR_LEN;
           break;
 #endif /* CONFIG_NET_TCP */
 
@@ -217,8 +220,8 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
 
                 memcpy(&hcudp[RIME_HC1_HC_UDP_CHKSUM], &udp->udpchksum, 2);
 
-                g_frame_hdrlen  += SIXLOWPAN_HC1_HC_UDP_HDR_LEN;
-                g_uncomp_hdrlen += UDP_HDRLEN;
+                g_frame_hdrlen        += SIXLOWPAN_HC1_HC_UDP_HDR_LEN;
+                g_uncomp_hdrlen       += UDP_HDRLEN;
               }
             else
               {

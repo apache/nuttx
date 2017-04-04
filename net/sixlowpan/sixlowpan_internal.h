@@ -121,32 +121,46 @@
  * IEEE802.15.4 spec for details.
  */
 
-#define FRAME802154_BEACONFRAME         0x00
-#define FRAME802154_DATAFRAME           0x01
-#define FRAME802154_ACKFRAME            0x02
-#define FRAME802154_CMDFRAME            0x03
+#define FRAME802154_FRAMETYPE_SHIFT     (0)  /* Bits 0-2: Frame type */
+#define FRAME802154_FRAMETYPE_MASK      (7 << FRAME802154_FRAMETYPE_SHIFT)
+#define FRAME802154_SECENABLED_SHIFT    (3)  /* Bit 3: Security enabled */
+#define FRAME802154_FRAMEPENDING_SHIFT  (4)  /* Bit 4: Frame pending */
+#define FRAME802154_ACKREQUEST_SHIFT    (5)  /* Bit 5: ACK request */
+#define FRAME802154_PANIDCOMP_SHIFT     (6)  /* Bit 6: PANID compression */
+                                             /* Bits 7-9: Reserved */
+#define FRAME802154_DSTADDR_SHIFT       (2)  /* Bits 10-11: Dest address mode */
+#define FRAME802154_DSTADDR_MASK        (3 << FRAME802154_DSTADDR_SHIFT)
+#define FRAME802154_VERSION_SHIFT       (4)  /* Bit 12-13: Frame version */
+#define FRAME802154_VERSION_MASK        (3 << FRAME802154_VERSION_SHIFT)
+#define FRAME802154_SRCADDR_SHIFT       (6)  /* Bits 14-15: Source address mode */
+#define FRAME802154_SRCADDR_MASK        (3 << FRAME802154_SRCADDR_SHIFT)
 
-#define FRAME802154_BEACONREQ           0x07
+/* Unshifted values for use in struct frame802154_fcf_s */
 
-#define FRAME802154_IEEERESERVED        0x00
-#define FRAME802154_NOADDR              0x00  /* Only valid for ACK or Beacon frames */
-#define FRAME802154_SHORTADDRMODE       0x02
-#define FRAME802154_LONGADDRMODE        0x03
+#define FRAME802154_BEACONFRAME         (0)
+#define FRAME802154_DATAFRAME           (1)
+#define FRAME802154_ACKFRAME            (2)
+#define FRAME802154_CMDFRAME            (3)
+
+#define FRAME802154_BEACONREQ           (7)
+
+#define FRAME802154_IEEERESERVED        (0)
+#define FRAME802154_NOADDR              (0)  /* Only valid for ACK or Beacon frames */
+#define FRAME802154_SHORTADDRMODE       (2)
+#define FRAME802154_LONGADDRMODE        (3)
 
 #define FRAME802154_NOBEACONS           0x0f
 
 #define FRAME802154_BROADCASTADDR       0xffff
 #define FRAME802154_BROADCASTPANDID     0xffff
 
-#define FRAME802154_IEEE802154_2003     0x00
-#define FRAME802154_IEEE802154_2006     0x01
+#define FRAME802154_IEEE802154_2003     (0)
+#define FRAME802154_IEEE802154_2006     (1)
 
-#define FRAME802154_SECURITY_LEVEL_NONE 0
-#define FRAME802154_SECURITY_LEVEL_128  3
+#define FRAME802154_SECURITY_LEVEL_NONE (0)
+#define FRAME802154_SECURITY_LEVEL_128  (3)
 
 /* Packet buffer Definitions */
-
-#define PACKETBUF_HDR_SIZE                    48
 
 #define PACKETBUF_ATTR_PACKET_TYPE_DATA       0
 #define PACKETBUF_ATTR_PACKET_TYPE_ACK        1
@@ -294,6 +308,14 @@
       (ptr)[index + 1] = (uint16_t)(value) & 0xff; \
     } \
   while(0)
+
+/* Debug ********************************************************************/
+
+#ifdef CONFIG_NET_6LOWPAN_DUMPBUFFER
+#  define sixlowpan_dumpbuffer(m,b,s) ninfodumpbuffer(m,b,s)
+#else
+#  define sixlowpan_dumpbuffer(m,b,s)
+#endif
 
 /****************************************************************************
  * Public Types
@@ -492,7 +514,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
                    uint16_t timeout);
 
 /****************************************************************************
- * Function: sixlowpan_hdrlen
+ * Function: sixlowpan_send_hdrlen
  *
  * Description:
  *   This function is before the first frame has been sent in order to
@@ -510,7 +532,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int sixlowpan_hdrlen(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_send_hdrlen(FAR struct ieee802154_driver_s *ieee,
                      uint16_t dest_panid);
 
 /****************************************************************************
@@ -617,7 +639,7 @@ void sixlowpan_hc06_initialize(void);
  *   ipv6     - The IPv6 header to be compressed
  *   destmac  - L2 destination address, needed to compress the IP
  *              destination field
- *   fptr     - Pointer to frame data payload.
+ *   fptr     - Pointer to frame to be compressed.
  *
  * Returned Value:
  *   None
@@ -678,6 +700,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  *   ipv6    - The IPv6 header to be compressed
  *   destmac - L2 destination address, needed to compress the IP
  *             destination field
+ *   fptr     - Pointer to frame to be compressed.
  *
  * Returned Value:
  *   None

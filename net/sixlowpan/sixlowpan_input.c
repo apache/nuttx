@@ -88,6 +88,94 @@
 #define IPv6BUF(dev)  ((FAR struct ipv6_hdr_s *)((dev)->d_buf))
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sixlowpan_recv_hdrlen
+ *
+ * Description:
+ *   Get the length of the IEEE802.15.4 header on the received frame.
+ *
+ * Input Parameters:
+ *   ieee - The IEEE802.15.4 MAC network driver interface.
+ *   iob  - The IOB containing the frame.
+ *
+ * Returned Value:
+ *   Ok is returned on success; Othewise a negated errno value is returned.
+ *
+ * Assumptions:
+ *   Network is locked
+ *
+ ****************************************************************************/
+
+int sixlowpan_recv_hdrlen(FAR const uint8_t *fptr)
+{
+  uint16_t hdrlen;
+  uint8_t addrmode;
+
+  /* Minimum header:  2 byte FCF + 1 byte sequence number */
+
+  hdrlen = 3;
+
+  /* Account for destination address size */
+
+  addrmode = (fptr[1] & FRAME802154_DSTADDR_MASK) >> FRAME802154_DSTADDR_SHIFT;
+  if (addrmode == FRAME802154_SHORTADDRMODE)
+    {
+      /* 2 byte dest PAN + 2 byte dest short address */
+
+      hdrlen += 4;
+    }
+  else if (addrmode == FRAME802154_LONGADDRMODE)
+    {
+      /* 2 byte dest PAN + 6 byte dest long address */
+
+      hdrlen += 10;
+    }
+  else if (addrmode != FRAME802154_NOADDR)
+    {
+      nwarn("WARNING: Unrecognized address mode\n");
+
+      return -ENOSYS;
+    }
+  else if ((fptr[0] & (1 << FRAME802154_PANIDCOMP_SHIFT)) != 0)
+    {
+      nwarn("WARNING: PAN compression, but no destination address\n");
+
+      return -EINVAL;
+    }
+
+  /* Account for source address size */
+
+  addrmode = (fptr[1] & FRAME802154_SRCADDR_MASK) >> FRAME802154_SRCADDR_SHIFT;
+  if (addrmode == FRAME802154_NOADDR)
+    {
+      return hdrlen;
+    }
+  else
+    {
+      if ((fptr[0] & (1 << FRAME802154_PANIDCOMP_SHIFT)) == 0)
+        {
+          hdrlen += 2;
+        }
+
+      /* Add the length of the source address */
+
+      if (addrmode == FRAME802154_SHORTADDRMODE)
+        {
+          return hdrlen + 2;
+        }
+      else if (addrmode == FRAME802154_LONGADDRMODE)
+        {
+          return hdrlen + 8;
+        }
+    }
+
+  return 0;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -128,6 +216,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
   uint8_t fragoffset = 0;     /* Offset of the fragment in the IP packet */
   bool isfrag        = false;
   int reqsize;                /* Required buffer size */
+  int hdrsize;                /* Size of the IEEE802.15.4 header */
 
 #if CONFIG_NET_6LOWPAN_FRAG
   bool isfirstfrag   = false;
@@ -141,11 +230,18 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
    */
 
   g_uncomp_hdrlen = 0;
-  g_frame_hdrlen = 0;
+  g_frame_hdrlen  = 0;
 
-  /* The MAC puts the 15.4 payload inside the RIME data buffer */
+  /* Get a pointer to the payload following the IEEE802.15.4 frame header. */
 
-  payptr = &iob->io_data[PACKETBUF_HDR_SIZE];
+  hdrsize = sixlowpan_recv_hdrlen(iob->io_data);
+  if (hdrsize < 0)
+    {
+      nwarn("Invalid IEEE802.15.2 header: %d\n", hdrsize);
+      return hdrsize;
+    }
+
+  payptr = &iob->io_data[hdrsize];
 
 #if CONFIG_NET_6LOWPAN_FRAG
   /* Since we don't support the mesh and broadcast header, the first header
@@ -476,8 +572,9 @@ copypayload:
     }
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
-  ninfodumpbuffer("IPv6 header", (FAR const uint8_t *)IPv6BUF(&ieee->i_dev),
-                  IPv6_HDRLEN);
+  sixlowpan_dumpbuffer("IPv6 header",
+                       (FAR const uint8_t *)IPv6BUF(&ieee->i_dev),
+                       IPv6_HDRLEN);
   return OK;
 }
 
@@ -497,6 +594,10 @@ copypayload:
 
 static int sixlowpan_dispatch(FAR struct ieee802154_driver_s *ieee)
 {
+  sixlowpan_dumpbuffer("Incoming packet",
+                       (FAR const uint8_t *)IPv6BUF(&ieee->i_dev),
+                       ieee->i_dev.d_len);
+
 #ifdef CONFIG_NET_PKT
   /* When packet sockets are enabled, feed the frame into the packet tap */
 
@@ -590,6 +691,9 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee)
 
       FRAME_IOB_REMOVE(ieee, iob);
       DEBUGASSERT(iob != NULL);
+
+      sixlowpan_dumpbuffer("Incoming frame",
+                           (FAR const uint8_t *)iob->io_data, iob->io_len);
 
       /* Process the frame, decompressing it into the packet buffer */
 
