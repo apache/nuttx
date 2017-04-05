@@ -819,7 +819,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 }
 
 /****************************************************************************
- * Name: sixlowpan_hc06_initialize
+ * Name: sixlowpan_uncompresshdr_hc06
  *
  * Description:
  *   Uncompress HC06 (i.e., IPHC and LOWPAN_UDP) headers and put them in
@@ -849,26 +849,29 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                                   FAR uint8_t *payptr)
 {
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF(ieee);
-  FAR uint8_t *iphc = payptr + g_frame_hdrlen;
+  FAR uint8_t *iphc;
   uint8_t iphc0;
   uint8_t iphc1;
   uint8_t tmp;
 
-  /* At least two byte will be used for the encoding */
+  /* payptr points to IPHC.  At least two byte will be used for the encoding. */
 
-  g_hc06ptr = payptr + g_frame_hdrlen + 2;
-
+  iphc  = payptr;
   iphc0 = iphc[0];
   iphc1 = iphc[1];
 
-  ninfo("payptr=%p g_frame_hdrlen=%u iphc[%p]=%02x:%02x:%02x g_hc06ptr=%p\n",
+  /* g_hc96ptr points to just after the 2-byte minimum IPHC */
+
+  g_hc06ptr = payptr + 2;
+
+  ninfo("payptr=%p g_frame_hdrlen=%u iphc=%02x:%02x:%02x g_hc06ptr=%p\n",
          payptr, g_frame_hdrlen, iphc, iphc[0], iphc[1], iphc[2], g_hc06ptr);
 
   /* Another if the CID flag is set */
 
   if (iphc1 & SIXLOWPAN_IPHC_CID)
     {
-      ninfo("IPHC: CID flag set. Increase header by one\n");
+      ninfo("CID flag set. Increase header by one\n");
       g_hc06ptr++;
     }
 
