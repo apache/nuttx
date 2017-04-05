@@ -45,20 +45,6 @@
  *
  ****************************************************************************/
 
-/* Frame Organization.  The IOB data is retained in the io_data[] field of the
- * IOB structure like:
- *
- *     Content            Offset
- *   +------------------+ 0
- *   | Frame Header     |
- *   +------------------+ g_dataoffset
- *   | Procotol Headers |
- *   | Data Payload     |
- *   +------------------+ iob->io_len
- *   | Unused           |
- *   +------------------+ CONFIG_NET_6LOWPAN_FRAMELEN
- */
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -78,26 +64,6 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: sixlowpan_frame_hdralloc
- *
- * Description:
- *   Allocate space for a header within the packet buffer (dev->d_buf).
- *
- ****************************************************************************/
-
-int sixlowpan_frame_hdralloc(FAR struct iob_s *iob, int size)
-{
-  if (size <= FRAME_REMAINING(iob))
-    {
-      g_dataoffset += size;
-      iob->io_len  += size;
-      return OK;
-    }
-
-  return -ENOMEM;
-}
 
 /****************************************************************************
  * Name: sixlowpan_ipfromrime

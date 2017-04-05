@@ -215,25 +215,6 @@
 
 #define PACKETBUF_NUM_ADDRS                   4
 
-/* Frame buffer helpers *****************************************************/
-
-#define FRAME_RESET() \
-  do \
-    { \
-      g_dataoffset = 0; \
-    } \
-  while (0)
-
-#define FRAME_HDR_START(iob)  ((iob)->io_data)
-#define FRAME_HDR_SIZE(iob)   g_dataoffset
-
-#define FRAME_DATA_START(iob) ((FAR uint8_t *)((iob)->io_data) + g_dataoffset)
-#define FRAME_DATA_SIZE(iob)  ((iob)->io_len - g_dataoffset)
-
-#define FRAME_REMAINING(iob)  (CONFIG_NET_6LOWPAN_FRAMELEN - (iob)->io_len)
-#define FRAME_SIZE(ieee,iob) \
-  ((iob)->io_len)
-
 /* Address compressibility test macros **************************************/
 
 /* Check whether we can compress the IID in address 'a' to 16 bits.  This is
@@ -407,8 +388,6 @@ struct frame802154_s
   uint16_t src_pid;          /* Source PAN ID */
   uint8_t src_addr[8];       /* Source address */
   struct frame802154_aux_hdr_s aux_hdr;  /* Aux security header */
-  uint8_t *payload;          /* Pointer to 802.15.4 frame payload */
-  uint8_t payload_len;       /* Length of payload field */
 };
 
 /****************************************************************************
@@ -451,10 +430,6 @@ extern uint8_t g_uncomp_hdrlen;
  */
 
 extern uint8_t g_frame_hdrlen;
-
-/* Offset first available byte for the payload after header region. */
-
-extern uint8_t g_dataoffset;
 
 /* Packet buffer metadata: Attributes and addresses */
 
@@ -744,16 +719,6 @@ int sixlowpan_uncompresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
                                 uint16_t ip_len, FAR struct iob_s *iob,
                                 FAR uint8_t *payptr);
 #endif
-
-/****************************************************************************
- * Name: sixlowpan_frame_hdralloc
- *
- * Description:
- *   Allocate space for a header within the frame buffer (IOB).
- *
- ****************************************************************************/
-
-int sixlowpan_frame_hdralloc(FAR struct iob_s *iob, int size);
 
 /****************************************************************************
  * Name: sixlowpan_islinklocal, sixlowpan_ipfromrime, sixlowpan_rimefromip,

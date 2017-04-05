@@ -287,7 +287,7 @@ static int sixlowpan_802154_hdrlen(FAR struct frame802154_s *finfo)
  ****************************************************************************/
 
 static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
-                                   FAR struct iob_s *iob, uint16_t dest_panid,
+                                   uint16_t dest_panid,
                                    FAR struct frame802154_s *params)
 {
   bool rcvrnull;
@@ -295,10 +295,6 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
   /* Initialize all prameters to all zero */
 
   memset(params, 0, sizeof(params));
-
-  /* Reset to an empty frame */
-
-  FRAME_RESET();
 
   /* Build the FCF (Only non-zero elements need to be initialized). */
 
@@ -368,14 +364,6 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
   /* Set the source address to the node address assigned to the device */
 
   rimeaddr_copy((struct rimeaddr_s *)&params->src_addr, &ieee->i_nodeaddr.u8);
-
-  /* Configure the (optional) payload address and length */
-
-  if (iob != NULL)
-    {
-      params->payload     = FRAME_DATA_START(iob);
-      params->payload_len = FRAME_DATA_SIZE(iob);
-    }
 }
 
 /****************************************************************************
@@ -402,13 +390,13 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
  ****************************************************************************/
 
 int sixlowpan_send_hdrlen(FAR struct ieee802154_driver_s *ieee,
-                     uint16_t dest_panid)
+                          uint16_t dest_panid)
 {
   struct frame802154_s params;
 
   /* Set up the frame parameters */
 
-  sixlowpan_setup_params(ieee, NULL, dest_panid, &params);
+  sixlowpan_setup_params(ieee, dest_panid, &params);
 
   /* Return the length of the header */
 
@@ -427,7 +415,7 @@ int sixlowpan_send_hdrlen(FAR struct ieee802154_driver_s *ieee,
  *            the frame to send.
  *   buf    - Pointer to the buffer to use for the frame.
  *   buflen - The length of the buffer to use for the frame.
- *   finfo - I that specifies the frame to send.
+ *   finfo  - Specifies the frame to send.
  *
  * Returned Value:
  *   The length of the frame header or 0 if there was insufficient space in
@@ -539,33 +527,22 @@ int sixlowpan_framecreate(FAR struct ieee802154_driver_s *ieee,
                           FAR struct iob_s *iob, uint16_t dest_panid)
 {
   struct frame802154_s params;
-  int len;
-  int ret;
+  int hdrlen;
 
   /* Set up the frame parameters */
 
-  sixlowpan_setup_params(ieee, iob, dest_panid, &params);
+  sixlowpan_setup_params(ieee, dest_panid, &params);
 
   /* Get the length of the header */
 
-  len = sixlowpan_802154_hdrlen(&params);
-
-  /* Allocate space for the header in the frame buffer */
-
-  ret = sixlowpan_frame_hdralloc(iob, len);
-  if (ret < 0)
-    {
-      wlerr("ERROR: Header too large: %u\n", len);
-      return ret;
-    }
+  hdrlen = sixlowpan_802154_hdrlen(&params);
 
   /* Then create the frame */
 
-  sixlowpan_802154_framecreate(&params, FRAME_HDR_START(iob), len);
+  sixlowpan_802154_framecreate(&params, iob->io_data, hdrlen);
 
-  wlinfo("Frame type: %02x Data len: %d %u (%u)\n",
-         params.fcf.frame_type, len, FRAME_DATA_SIZE(iob),
-         FRAME_SIZE(ieee, iob));
+  wlinfo("Frame type: %02x hdrlen: %d\n",
+         params.fcf.frame_type, hdrlen);
 #if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
   wlinfo("Dest address: %02x:%02x\n",
          params.dest_addr[0], params.dest_addr[1]);
@@ -576,7 +553,7 @@ int sixlowpan_framecreate(FAR struct ieee802154_driver_s *ieee,
          params.dest_addr[6], params.dest_addr[7]);
 #endif
 
-  return len;
+  return hdrlen;
 }
 
 #endif /* CONFIG_NET_6LOWPAN */

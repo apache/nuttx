@@ -180,7 +180,6 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
    * exclusive use of the global values for intermediate calculations.
    */
 
-  FRAME_RESET();
   g_uncomp_hdrlen = 0;
   g_frame_hdrlen  = 0;
 
