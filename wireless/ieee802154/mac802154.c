@@ -81,7 +81,7 @@ struct ieee802154_privmac_s
              uint32_t macPad             : 3;
   /* 0x48 */ uint32_t macBeaconTxTime    : 24;
 
-  /* 0x45 */ uint8_t  macBeaconPayload[IEEE802154_aMaxBeaconPayloadLength];
+  /* 0x45 */ uint8_t  macBeaconPayload[IEEE802154_MAX_BEACON_PAYLOAD_LENGTH];
   /* 0x46 */ uint8_t  macBeaconPayloadLength;
   /* 0x49 */ uint8_t  macBSN;
   /* 0x4A */ uint8_t  macCoordExtendedAddress[8];
@@ -106,36 +106,41 @@ struct ieee802154_privmac_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int mac802154_reqdata(FAR struct ieee802154_mac_s *mac,
-             uint8_t handle, FAR uint8_t *buf, int len);
-static int mac802154_reqpurge(FAR struct ieee802154_mac_s *mac,
-             uint8_t handle);
-static int mac802154_reqassociate(FAR struct ieee802154_mac_s *mac,
-             uint16_t panid, FAR uint8_t *coordeadr);
-static int mac802154_reqdisassociate(FAR struct ieee802154_mac_s *mac,
-             FAR uint8_t *eadr, uint8_t reason);
-static int mac802154_reqget(FAR struct ieee802154_mac_s *mac,
-             int attribute);
-static int mac802154_reqgts(FAR struct ieee802154_mac_s *mac,
+/* MAC Data Service (MCPS) functions */
+
+static int mac802154_req_data(FAR struct ieee802154_mac_s *mac,
+            FAR struct ieee802154_data_req_s *req);
+static int mac802154_req_purge(FAR struct ieee802154_mac_s *mac,
+            uint8_t handle);
+
+/* MAC Sublayer Management Entity (MLME) functions */
+
+static int mac802154_req_associate(FAR struct ieee802154_mac_s *mac,
+             FAR struct ieee802154_assoc_req_s *req);
+static int mac802154_req_disassociate(FAR struct ieee802154_mac_s *mac,
+             FAR struct ieee802154_disassoc_req_s *req); 
+static int mac802154_req_get(FAR struct ieee802154_mac_s *mac,
+             enum ieee802154_pib_attr_e attr);
+static int mac802154_req_gts(FAR struct ieee802154_mac_s *mac,
              FAR uint8_t *characteristics);
-static int mac802154_reqreset(FAR struct ieee802154_mac_s *mac,
+static int mac802154_req_reset(FAR struct ieee802154_mac_s *mac,
              bool setdefaults);
-static int mac802154_reqrxenable(FAR struct ieee802154_mac_s *mac,
+static int mac802154_req_rxenable(FAR struct ieee802154_mac_s *mac,
              bool deferrable, int ontime, int duration);
-static int mac802154_reqscan(FAR struct ieee802154_mac_s *mac,
+static int mac802154_req_scan(FAR struct ieee802154_mac_s *mac,
              uint8_t type, uint32_t channels, int duration);
-static int mac802154_reqset(FAR struct ieee802154_mac_s *mac,
+static int mac802154_req_set(FAR struct ieee802154_mac_s *mac,
              int attribute, FAR uint8_t *value, int valuelen);
-static int mac802154_reqstart(FAR struct ieee802154_mac_s *mac,
+static int mac802154_req_start(FAR struct ieee802154_mac_s *mac,
              uint16_t panid, int channel, uint8_t bo, uint8_t fo,
              bool coord, bool batext, bool realign);
-static int mac802154_reqsync(FAR struct ieee802154_mac_s *mac,
+static int mac802154_req_sync(FAR struct ieee802154_mac_s *mac,
              int channel, bool track);
-static int mac802154_reqpoll(FAR struct ieee802154_mac_s *mac,
+static int mac802154_req_poll(FAR struct ieee802154_mac_s *mac,
              FAR uint8_t *coordaddr);
-static int mac802154_rspassociate(FAR struct ieee802154_mac_s *mac,
+static int mac802154_rsp_associate(FAR struct ieee802154_mac_s *mac,
              uint8_t eadr, uint16_t saddr, int status);
-static int mac802154_rsporphan(FAR struct ieee802154_mac_s *mac,
+static int mac802154_rsp_orphan(FAR struct ieee802154_mac_s *mac,
              FAR uint8_t *orphanaddr, uint16_t saddr, bool associated);
 
 
@@ -145,21 +150,21 @@ static int mac802154_rsporphan(FAR struct ieee802154_mac_s *mac,
 
 static const struct ieee802154_macops_s mac802154ops =
 {
-  .req_data         = mac802154_reqdata,
-  .req_purge        = mac802154_reqpurge,
-  .req_associate    = mac802154_reqassociate,
-  .req_disassociate = mac802154_reqdisassociate,
-  .req_get          = mac802154_reqget,
-  .req_gts          = mac802154_reqgts,
-  .req_reset        = mac802154_reqreset,
-  .req_rxenable     = mac802154_reqrxenable,
-  .req_scan         = mac802154_reqscan,
-  .req_set          = mac802154_reqset,
-  .req_start        = mac802154_reqstart,
-  .req_sync         = mac802154_reqsync,
-  .req_poll         = mac802154_reqpoll,
-  .rsp_associate    = mac802154_rspassociate,
-  .rsp_orphan       = mac802154_rsporphan,
+  .req_data           = mac802154_req_data,
+  .req_purge          = mac802154_req_purge,
+  .req_associate      = mac802154_req_associate,
+  .req_disassociate   = mac802154_req_disassociate,
+  .req_get            = mac802154_req_get,
+  .req_gts            = mac802154_req_gts,
+  .req_reset          = mac802154_req_reset,
+  .req_rxenable       = mac802154_req_rxenable,
+  .req_scan           = mac802154_req_scan,
+  .req_set            = mac802154_req_set,
+  .req_start          = mac802154_req_start,
+  .req_sync           = mac802154_req_sync,
+  .req_poll           = mac802154_req_poll,
+  .rsp_associate      = mac802154_rsp_associate,
+  .rsp_orphan         = mac802154_rsp_orphan,
 };
 
 /****************************************************************************
@@ -244,8 +249,8 @@ static int mac802154_applymib(FAR struct ieee802154_privmac_s *priv)
  *
  ****************************************************************************/
 
-static int mac802154_reqdata(FAR struct ieee802154_mac_s *mac,
-                             uint8_t handle, FAR uint8_t *buf, int len)
+static int mac802154_req_data(FAR struct ieee802154_mac_s *mac,
+                              FAR struct ieee802154_data_req_s *req)
 {
   FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
@@ -261,7 +266,7 @@ static int mac802154_reqdata(FAR struct ieee802154_mac_s *mac,
  *
  ****************************************************************************/
 
-static int mac802154_reqpurge(FAR struct ieee802154_mac_s *mac,
+static int mac802154_req_purge(FAR struct ieee802154_mac_s *mac,
                               uint8_t handle)
 {
   FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
@@ -269,7 +274,7 @@ static int mac802154_reqpurge(FAR struct ieee802154_mac_s *mac,
 }
 
 /****************************************************************************
- * Name: mac802154_reqassociate
+ * Name: mac802154_req_associate
  *
  * Description:
  *   The MLME-ASSOCIATE.request primitive allows a device to request an 
@@ -278,15 +283,15 @@ static int mac802154_reqpurge(FAR struct ieee802154_mac_s *mac,
  *
  ****************************************************************************/
 
-static int mac802154_reqassociate(FAR struct ieee802154_mac_s *mac,
-                                  uint16_t panid, FAR uint8_t *coordeadr)
+static int mac802154_req_associate(FAR struct ieee802154_mac_s *mac,
+                                   FAR struct ieee802154_assoc_req_s *req)
 {
   FAR struct ieee802154_privmac_s * priv = (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
 /****************************************************************************
- * Name: mac802154_reqdisassociate
+ * Name: mac802154_req_disassociate
  *
  * Description:
  *   The MLME-DISASSOCIATE.request primitive is used by an associated device to
@@ -297,15 +302,15 @@ static int mac802154_reqassociate(FAR struct ieee802154_mac_s *mac,
  *
  ****************************************************************************/
 
-static int mac802154_reqdisassociate(FAR struct ieee802154_mac_s *mac,
-                                     FAR uint8_t *eadr, uint8_t reason)
+static int mac802154_req_disassociate(FAR struct ieee802154_mac_s *mac,
+                                      FAR struct ieee802154_disassoc_req_s *req)
 {
   FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
 /****************************************************************************
- * Name: mac802154_reqget
+ * Name: mac802154_req_get
  *
  * Description:
  *   The MLME-GET.request primitive requests information about a given PIB
@@ -314,15 +319,15 @@ static int mac802154_reqdisassociate(FAR struct ieee802154_mac_s *mac,
  *
  ****************************************************************************/
 
-static int mac802154_reqget(FAR struct ieee802154_mac_s *mac,
-                            int attribute)
+static int mac802154_req_get(FAR struct ieee802154_mac_s *mac,
+                             enum ieee802154_pib_attr_e attr)
 {
   FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
 /****************************************************************************
- * Name: mac802154_reqgts
+ * Name: mac802154_req_gts
  *
  * Description:
  *   The MLME-GTS.request primitive allows a device to send a request to the PAN
@@ -332,15 +337,15 @@ static int mac802154_reqget(FAR struct ieee802154_mac_s *mac,
  *
  ****************************************************************************/
 
-static int mac802154_reqgts(FAR struct ieee802154_mac_s *mac,
-                            FAR uint8_t *characteristics)
+static int mac802154_req_gts(FAR struct ieee802154_mac_s *mac,
+                             FAR uint8_t *characteristics)
 {
   FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
 /****************************************************************************
- * Name: mac802154_reqreset
+ * Name: mac802154_req_reset
  *
  * Description:
  *   The MLME-RESET.request primitive allows the next higher layer to request
@@ -349,15 +354,15 @@ static int mac802154_reqgts(FAR struct ieee802154_mac_s *mac,
  *
  ****************************************************************************/
 
-static int mac802154_reqreset(FAR struct ieee802154_mac_s *mac,
-                              bool setdefaults)
+static int mac802154_req_reset(FAR struct ieee802154_mac_s *mac,
+                               bool setdefaults)
 {
   FAR struct ieee802154_privmac_s * priv = (FAR struct ieee802154_privmac_s *) mac;
   return -ENOTTY;
 }
 
 /****************************************************************************
- * Name: mac802154_reqrxenable
+ * Name: mac802154_req_rxenable
  *
  * Description:
  *   The MLME-RX-ENABLE.request primitive allows the next higher layer to
@@ -367,15 +372,15 @@ static int mac802154_reqreset(FAR struct ieee802154_mac_s *mac,
  *
  ****************************************************************************/
 
-static int mac802154_reqrxenable(FAR struct ieee802154_mac_s *mac,
-                                 bool deferrable, int ontime, int duration)
+static int mac802154_req_rxenable(FAR struct ieee802154_mac_s *mac,
+                                  bool deferrable, int ontime, int duration)
 {
   FAR struct ieee802154_privmac_s * priv = (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
 /****************************************************************************
- * Name: mac802154_reqscan
+ * Name: mac802154_req_scan
  *
  * Description:
  *   The MLME-SCAN.request primitive is used to initiate a channel scan over a
@@ -389,15 +394,15 @@ static int mac802154_reqrxenable(FAR struct ieee802154_mac_s *mac,
  *
  ****************************************************************************/
 
-static int mac802154_reqscan(FAR struct ieee802154_mac_s *mac,
-                             uint8_t type, uint32_t channels, int duration)
+static int mac802154_req_scan(FAR struct ieee802154_mac_s *mac,
+                              uint8_t type, uint32_t channels, int duration)
 {
   FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
 /****************************************************************************
- * Name: mac802154_reqset
+ * Name: mac802154_req_set
  *
  * Description:
  *   The MLME-SET.request primitive attempts to write the given value to the
@@ -406,15 +411,15 @@ static int mac802154_reqscan(FAR struct ieee802154_mac_s *mac,
  *
  ****************************************************************************/
 
-static int mac802154_reqset(FAR struct ieee802154_mac_s *mac,
-                            int attribute, FAR uint8_t *value, int valuelen)
+static int mac802154_req_set(FAR struct ieee802154_mac_s *mac,
+                             int attribute, FAR uint8_t *value, int valuelen)
 {
   FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
 /****************************************************************************
- * Name: mac802154_reqstart
+ * Name: mac802154_req_start
  *
  * Description:
  *   The MLME-START.request primitive makes a request for the device to start
@@ -423,17 +428,17 @@ static int mac802154_reqset(FAR struct ieee802154_mac_s *mac,
  *
  ****************************************************************************/
 
-static int mac802154_reqstart(FAR struct ieee802154_mac_s *mac,
-                              uint16_t panid, int channel, uint8_t bo,
-                              uint8_t fo, bool coord, bool batext,
-                              bool realign)
+static int mac802154_req_start(FAR struct ieee802154_mac_s *mac,
+                               uint16_t panid, int channel, uint8_t bo,
+                               uint8_t fo, bool coord, bool batext,
+                               bool realign)
 {
   FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
 /****************************************************************************
- * Name: mac802154_reqsync
+ * Name: mac802154_req_sync
  *
  * Description:
  *   The MLME-SYNC.request primitive requests to synchronize with the
@@ -443,15 +448,15 @@ static int mac802154_reqstart(FAR struct ieee802154_mac_s *mac,
  *
  ****************************************************************************/
 
-static int mac802154_reqsync(FAR struct ieee802154_mac_s *mac,
-                             int channel, bool track)
+static int mac802154_req_sync(FAR struct ieee802154_mac_s *mac,
+                              int channel, bool track)
 {
   FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
 /****************************************************************************
- * Name: mac802154_reqpoll
+ * Name: mac802154_req_poll
  *
  * Description:
  *   The MLME-POLL.request primitive prompts the device to request data from the
@@ -461,15 +466,15 @@ static int mac802154_reqsync(FAR struct ieee802154_mac_s *mac,
  *
  ****************************************************************************/
 
-static int mac802154_reqpoll(FAR struct ieee802154_mac_s *mac,
-                             FAR uint8_t *coordaddr)
+static int mac802154_req_poll(FAR struct ieee802154_mac_s *mac,
+                              FAR uint8_t *coordaddr)
 {
   FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
 /****************************************************************************
- * Name: mac802154_rspassociate
+ * Name: mac802154_rsp_associate
  *
  * Description:
  *   The MLME-ASSOCIATE.response primitive is used to initiate a response to an 
@@ -477,15 +482,15 @@ static int mac802154_reqpoll(FAR struct ieee802154_mac_s *mac,
  *
  ****************************************************************************/
 
-static int mac802154_rspassociate(FAR struct ieee802154_mac_s *mac,
-                                  uint8_t eadr, uint16_t saddr, int status)
+static int mac802154_rsp_associate(FAR struct ieee802154_mac_s *mac,
+                                   uint8_t eadr, uint16_t saddr, int status)
 {
   FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
 /****************************************************************************
- * Name: mac802154_rsporphan
+ * Name: mac802154_rsp_orphan
  *
  * Description:
  *   The MLME-ORPHAN.response primitive allows the next higher layer of a
@@ -493,9 +498,9 @@ static int mac802154_rspassociate(FAR struct ieee802154_mac_s *mac,
  *
  ****************************************************************************/
 
-static int mac802154_rsporphan(FAR struct ieee802154_mac_s *mac,
-                               FAR uint8_t *orphanaddr, uint16_t saddr,
-                               bool associated)
+static int mac802154_rsp_orphan(FAR struct ieee802154_mac_s *mac,
+                                FAR uint8_t *orphanaddr, uint16_t saddr,
+                                bool associated)
 {
   FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;

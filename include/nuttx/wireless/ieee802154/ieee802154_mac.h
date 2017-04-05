@@ -2,7 +2,13 @@
  * include/nuttx/wireless/ieee802154/ieee802154_mac.h
  *
  *   Copyright (C) 2016 Sebastien Lorquet. All rights reserved.
+ *   Copyright (C) 2017 Verge Inc. All rights reserved.
+ *
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
+ *   Author: Anthony Merlino <anthony@vergeaero.com>
+ *
+ *   The naming and comments for various fields are taken directly
+ *   from the IEEE 802.15.4 2011 standard.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -142,29 +148,40 @@
 
 /* IEEE 802.15.4 PHY constants */
 
-#define IEEE802154_aMaxPHYPacketSize       127
-#define IEEE802154_aTurnaroundTime         12 /*symbol periods*/
+#define IEEE802154_MAX_PHY_PACKET_SIZE        127
+#define IEEE802154_TURN_AROUND_TIME             12 /*symbol periods*/
 
 /* IEEE 802.15.4 MAC constants */
 
-#define IEEE802154_aBaseSlotDuration       60
-#define IEEE802154_aNumSuperframeSlots     16
-#define IEEE802154_aBaseSuperframeDuration (IEEE802154_aBaseSlotDuration * IEEE802154_aNumSuperframeSlots)
-#define IEEE802154_aMaxBE                  5
-#define IEEE802154_aMaxBeaconOverhead      75
-#define IEEE802154_aMaxBeaconPayloadLength (IEEE802154_aMaxPHYPacketSize - IEEE802154_aMaxBeaconOverhead)
-#define IEEE802154_aGTSDescPersistenceTime 4
-#define IEEE802154_aMaxFrameOverhead       25
-#define IEEE802154_aMaxFrameResponseTime   1220
-#define IEEE802154_aMaxFrameRetries        3
-#define IEEE802154_aMaxLostBeacons         4
-#define IEEE802154_aMaxMACFrameSize        (IEEE802154_aMaxPHYPacketSize - IEEE802154_aMaxFrameOverhead)
-#define IEEE802154_aMaxSIFSFrameSize       18
-#define IEEE802154_aMinCAPLength           440
-#define IEEE802154_aMinLIFSPeriod          40
-#define IEEE802154_aMinSIFSPeriod          12
-#define IEEE802154_aResponseWaitTime       (32 * IEEE802154_aBaseSuperframeDuration)
-#define IEEE802154_aUnitBackoffPeriod      20
+#define IEEE802154_BASE_SLOT_DURATION         60
+#define IEEE802154_NUM_SUPERFRAME_SLOTS       16
+
+#define IEEE802154_BASE_SUPERFRAME_DURATION \
+        (IEEE802154_BASE_SLOT_DURATION * IEEE802154_NUM_SUPERFRAME_SLOTS)
+
+#define IEEE802154_GTS_DESC_PERSISTENCE_TIME  4
+#define IEEE802154_MAX_BEACON_OVERHEAD        75
+
+#define IEEE802154_MAX_BEACON_PAYLOAD_LENGTH \
+        (IEEE802154_MAX_PHY_PACKET_SIZE - IEEE802154_MAX_BEACON_OVERHEAD)
+
+#define IEEE802154_MAX_LOST_BEACONS           4
+#define IEEE802514_MIN_MPDU_OVERHEAD          9
+#define IEEE802154_MAX_MPDU_UNSEC_OVERHEAD    25
+
+#define IEEE802154_MAX_SAFE_MAC_PAYLOAD_SIZE \
+        (IEEE802154_MAX_PHY_PACKET_SIZE - IEEE802154_MAX_MPDU_UNSEC_OVERHEAD)
+  
+#define IEEE802154_MAX_MAC_PAYLOAD_SIZE \
+        (IEEE802154_MAX_PHY_PACKET_SIZE - IEEE802154_MIN_MPDU_OVERHEAD)
+
+#define IEEE802154_MAX_SIFS_FRAME_SIZE        18
+#define IEEE802154_MIN_CAP_LENGTH             440
+#define IEEE802154_UNIT_BACKOFF_PERIOD        20
+
+/* IEEE 802.15.4 MAC PIB Attribut Defaults */
+
+// TODO: Add macros
 
 /****************************************************************************
  * Public Types
@@ -200,41 +217,100 @@ enum ieee802154_status_e
 
 /* IEEE 802.15.4 PHY/MAC PIB attributes IDs */
 
-enum
+enum ieee802154_pib_attr_e
 {
-  IEEE802154_phyCurrentChannel = 0x00,
-  IEEE802154_phyChannelsSupported,
-  IEEE802154_phyTransmitPower,
-  IEEE802154_phyCCAMode,
-  IEEE802154_macAckWaitDuration = 0x40,
-  IEEE802154_macAssociationPermit,
-  IEEE802154_macAutoRequest,
-  IEEE802154_macBattLifeExt,
-  IEEE802154_macBattLifeExtPeriods,
-  IEEE802154_macBeaconPayload,
-  IEEE802154_macBeaconPayloadLength,
-  IEEE802154_macBeaconOrder,
-  IEEE802154_macBeaconTxTime,
-  IEEE802154_macBSN,
-  IEEE802154_macCoordExtendedAddress,
-  IEEE802154_macCoordShortAddress,
-  IEEE802154_macDSN,
-  IEEE802154_macGTSPermit,
-  IEEE802154_macMaxCSMABackoffs,
-  IEEE802154_macMinBE,
-  IEEE802154_macPANId,
-  IEEE802154_macPromiscuousMode,
-  IEEE802154_macRxOnWhenIdle,
-  IEEE802154_macShortAddress,
-  IEEE802154_macSuperframeOrder,
-  IEEE802154_macTransactionPersistenceTime,
-  IEEE802154_macACLEntryDescriptorSet = 0x70,
-  IEEE802154_macACLEntryDescriptorSetSize,
-  IEEE802154_macDefaultSecurity,
-  IEEE802154_macDefaultSecurityMaterialLength,
-  IEEE802154_macDefaultSecurityMaterial,
-  IEEE802154_macDefaultSecuritySuite,
-  IEEE802154_macSecurityMode
+  /* PHY PIB Attributes */
+
+  IEEE802154_PIB_PHY_CURRENT_CHANNEL = 0x00,
+  IEEE802154_PIB_PHY_CHANNELS_SUPPORTED,
+  IEEE802154_PIB_PHY_TX_POWER_TOLERANCE,
+  IEEE802154_PIB_PHY_TX_POWER,
+  IEEE802154_PIB_PHY_CCA_MODE,
+  IEEE802154_PIB_PHY_CURRENT_PAGE,
+  IEEE802154_PIB_PHY_MAX_FRAME_DURATION,
+  IEEE802154_PIB_PHY_SHR_DURATION,
+  IEEE802154_PIB_PHY_SYM_PER_OCTET,
+  IEEE802154_PIB_PHY_PREAMBLE_SYM_LEN,
+  IEEE802154_PIB_PHY_UWB_DATARATES_SUP,
+  IEEE802154_PIB_PHY_CSS_LOW_DATARATE_SUP,
+  IEEE802154_PIB_PHY_UWB_COU_PULSES_SUP,
+  IEEE802154_PIB_PHY_UWB_CS_PULSES_SUP,
+  IEEE802154_PIB_PHY_UWB_LCP_PULSES_SUP,
+  IEEE802154_PIB_PHY_UWB_CURR_PULSE_SHAPE,
+  IEEE802154_PIB_PHY_UWB_COU_PULSE,
+  IEEE802154_PIB_PHY_UWB_CS_PULSE,
+  IEEE802154_PIB_PHY_UWB_LCP_WEIGHT1,
+  IEEE802154_PIB_PHY_UWB_LCP_WEIGHT2,
+  IEEE802154_PIB_PHY_UWB_LCP_WEIGHT3,
+  IEEE802154_PIB_PHY_UWB_LCP_WEIGHT4,
+  IEEE802154_PIB_PHY_UWB_LCP_DELAY2,
+  IEEE802154_PIB_PHY_UWB_LCP_DELAY3,
+  IEEE802154_PIB_PHY_UWB_LCP_DELAY4,
+  IEEE802154_PIB_PHY_RANGING,
+  IEEE802154_PIB_PHY_RANGING_CRYSTAL_OFFSET,
+  IEEE802154_PIB_PHY_RANGING_DPS,
+  IEEE802154_PIB_PHY_CURRENT_CODE,
+  IEEE802154_PIB_PHY_NATIVE_PRF,
+  IEEE802154_PIB_PHY_UWB_SCAN_BINS_PER_CHAN,
+  IEEE802154_PIB_PHY_UWB_INS_PREAMBLE_INTERVAL,
+  IEEE802154_PIB_PHY_UWB_TX_RMARKER,
+  IEEE802154_PIB_PHY_UWB_RX_RMARKER,
+  IEEE802154_PIB_PHY_RFRAME_PROC_TIME,
+  IEEE802154_PIB_PHY_CCA_DURATION,
+
+  /* MAC PIB Attributes */
+
+  IEEE802154_PIB_MAC_EXTENDED_ADDR = 0x40,
+  IEEE802154_PIB_MAC_ACK_WAIT_DUR,
+  IEEE802154_PIB_MAC_ASSOCIATED_PANCOORD,
+  IEEE802154_PIB_MAC_ASSOCIATION_PERMIT,
+  IEEE802154_PIB_MAC_AUTO_REQUEST,
+  IEEE802154_PIB_MAC_BATT_LIFE_EXT,
+  IEEE802154_PIB_MAC_BATT_LIFE_EXT_PERIODS,
+  IEEE802154_PIB_MAC_BEACON_PAYLOAD,
+  IEEE802154_PIB_MAC_BEACON_PAYLOAD_LEN,
+  IEEE802154_PIB_MAC_BEACON_ORDER,
+  IEEE802154_PIB_MAC_BEACON_TX_TIME,
+  IEEE802154_PIB_MAC_BSN,
+  IEEE802154_PIB_MAC_COORD_EXT_ADDR,
+  IEEE802154_PIB_MAC_COORD_SHORT_ADDR,
+  IEEE802154_PIB_MAC_DSN,
+  IEEE802154_PIB_MAC_GTS_PERMIT,
+  IEEE802154_PIB_MAC_MAX_BE,
+  IEEE802154_PIB_MAC_MAX_CSMA_BACKOFFS,
+  IEEE802154_PIB_MAC_FRAME_TOTAL_WAIT_TIME,
+  IEEE802154_PIB_MAC_MAX_FRAME_RETRIES,
+  IEEE802154_PIB_MAC_MIN_BE,
+  IEEE802154_PIB_MAC_LIFS_PERIOD,
+  IEEE802154_PIB_MAC_SIFS_PERIOD,
+  IEEE802154_PIB_MAC_PAN_ID,
+  IEEE802154_PIB_MAC_PROMISCUOUS_MODE,
+  IEEE802154_PIB_MAC_RANGING_SUPPORT,
+  IEEE802154_PIB_MAC_RESPONSE_WAIT_TIME,
+  IEEE802154_PIB_MAC_RX_ON_WHEN_IDLE,
+  IEEE802154_PIB_MAC_SECURITY_ENABLED,
+  IEEE802154_PIB_MAC_SHORT_ADDRESS,
+  IEEE802154_PIB_MAC_SUPERFRAME_ORDER,
+  IEEE802154_PIB_MAC_SYNC_SYMBOL_OFFSET,
+  IEEE802154_PIB_MAC_TIMESTAMP_SUPPORT,
+  IEEE802154_PIB_MAC_TRANSACTION_PERSIST_TIME,
+  IEEE802154_PIB_MAC_TX_CTRL_ACTIVE_DUR,
+  IEEE802154_PIB_MAC_TX_CTRL_PAUSE_DUR,
+  IEEE802154_PIB_MAC_TX_TOTAL_DUR,
+
+  /* MAC Security Attributes */
+
+  IEEE802154_PIB_MAC_KEY_TABLE = 0x70,
+  IEEE802154_PIB_MAC_DEV_TABLE,
+  IEEE802154_PIB_MAC_SEC_LVL_TABLE,
+  IEEE802154_PIB_MAC_FRAME_COUNTER,
+  IEEE802154_PIB_MAC_AUTOREQ_SEC_LVL,
+  IEEE802154_PIB_MAC_AUTOREQ_KEY_ID_MODE,
+  IEEE802154_PIB_MAC_AUTOREQ_KEY_SOURCE,
+  IEEE802154_PIB_MAC_AUTOREQ_KEY_INDEX,
+  IEEE802154_PIB_MAC_DEFAULT_KEY_SRC,
+  IEEE802154_PIB_MAC_PANCOORD_EXT_ADDR,
+  IEEE802154_PIB_MAC_PANCOORD_SHORT_ADDR,
 };
 
 /* IEEE 802.15.4 Device address
@@ -253,12 +329,15 @@ enum ieee802154_addr_mode_e
 
 struct ieee802154_addr_s
 {
-  enum ieee802154_addr_mode_e ia_mode;  /* Address mode. Short or Extended */
-  uint16_t ia_panid;                    /* PAN identifier, can be IEEE802154_PAN_UNSPEC */
+  /* Address mode. Short or Extended */
+
+  enum ieee802154_addr_mode_e ia_mode;  
+
+  uint16_t ia_panid;        /* PAN identifier, can be IEEE802154_PAN_UNSPEC */
   union
   {
-    uint16_t _ia_saddr;                 /* short address */
-    uint8_t  _ia_eaddr[8];              /* extended address */
+    uint16_t _ia_saddr;     /* short address */
+    uint8_t  _ia_eaddr[8];  /* extended address */
   } ia_addr;
 
 #define ia_saddr ia_addr._ia_saddr
@@ -305,6 +384,42 @@ struct ieee802154_framecontrol_s
   uint16_t src_addr_mode  : 2;
 };
 
+#ifdef CONFIG_IEEE802154_SECURITY
+struct ieee802154_security_s
+{
+  uint8_t level;            /* Security level to be used */
+  uint8_t key_id_mode;      /* Mode used to identify the key to be used */
+  uint8_t key_source[8];    /* Originator of the key to be used */
+  uint8_t key_index;        /* Index of the key to be used */
+};
+#endif
+
+#ifdef CONFIG_IEEE802154_UWB
+enum ieee802154_uwbprf_e
+{
+  IEEE802154_UWBPRF_OFF = 0,
+  IEEE802154_UWBPRF_4M,
+  IEEE802154_UWBPRF_16M,
+  IEEE802154_UWBPRF_64M
+};
+
+enum ieee802154_uwb_datarate_e
+{
+  IEEE802154_UWB_DATARATE_0 = 0,
+  IEEE802154_UWB_DATARATE_16,
+  IEEE802154_UWB_DATARATE_64,
+  IEEE802154_UWB_DATARATE_1024,
+  IEEE802154_UWB_DATARATE_4096
+};
+#endif
+
+enum ieee802154_ranging_e
+{
+  IEEE802154_NON_RANGING = 0,
+  IEEE802154_ALL_RANGING,
+  IEEE802154_PHY_HEADER_ONLY
+};
+
 struct ieee802154_frame_s
 {
   struct ieee802154_framecontrol_s frame_control;
@@ -316,6 +431,99 @@ struct ieee802154_frame_s
 #endif
   void *payload;
   uint16_t fcs;
+};
+
+struct ieee802154_data_req_s
+{
+  enum ieee802154_addr_mode_e src_addr_mode;  /* Source Address Mode */
+  struct ieee802154_addr_s dest__addr;        /* Destination Address */
+  
+  /* Number of bytes contained in the MAC Service Data Unit (MSDU) 
+   * to be transmitted by the MAC sublayer enitity 
+   * Note: This could be a uint8_t but if anyone ever wants to use
+   * non-standard frame lengths, they may want a length larger than
+   * a uint8_t */
+
+  uint16_t msdu_length;
+
+
+  uint8_t msdu_handle;    /* Handle assoc. with MSDU */
+  struct {
+    uint8_t ack_tx      : 1;  /* Acknowledge TX? */               
+    uint8_t gts_tx      : 1;  /* 1=GTS used for TX, 0=CAP used for TX */
+    uint8_t indirect_tx : 1;  /* Should indirect transmission be used? */
+  };
+
+#ifdef CONFIG_IEEE802154_SECURITY
+  /* Security information if enabled */
+
+  struct ieee802154_security_s security;
+#endif
+
+#ifdef CONFIG_IEEE802154_UWB
+  /* The UWB Pulse Repetion Frequency to be used for the transmission */
+
+  enum ieee802154_uwbprf_e uwb_prf;
+
+  /* The UWB preamble symbol repititions
+   *  Should be one of:
+   *    0, 16, 64, 1024, 4096 */
+
+  uint16_t uwb_presym_rep;  
+
+  /* The UWB Data Rate to be used for the transmission */
+
+  enum ieee802154_uwb_datarate_e data_rate;
+#endif
+
+  enum ieee802154_ranging_e ranging;
+
+  /* The MAC service data unit array that is to be transmitted
+   * This must be at the end of the struct to allow the array
+   * to continue and make the struct "variable length" */ 
+
+  uint8_t msdu[1];
+};
+#define SIZEOF_IEEE802154_DATA_REQ_S(n) \
+        (sizeof(struct ieee802154_data_req_s) + (n))
+
+struct ieee802154_data_conf_s
+{
+  uint8_t msdu_handle;              /* Handle assoc. with MSDU */
+
+  /* The time, in symbols, at which the data were transmitted */
+
+  uint32_t timestamp;
+
+  enum ieee802154_status_e status;  /* The status of the MSDU transmission */
+
+#ifdef CONFIG_IEEE802154_RANGING
+  bool rng_rcvd;                    /* Ranging indicated by MSDU */
+
+  /* A count of the time units corresponding to an RMARKER at the antenna at
+   * the beginning of the ranging exchange */
+
+  uint32_t rng_counter_start; 
+
+  /* A count of the time units corresponding to an RMARKER at the antenna at
+   * end of the ranging exchange */
+
+  uint32_t rng_counter_stop; 
+
+  /* A count of the time units in a message exchange over which the tracking
+   * offset was measured */
+
+  uint34_t rng_tracking_interval;
+
+  /* A count of the time units slipped or advanced by the radio tracking
+   * system over the course of the entire tracking interval */
+
+  uint32_t rng_offset;
+
+  /* The Figure of Merit (FoM) characterizing the ranging measurement */ 
+
+  uint8_t rng_fom; 
+#endif
 };
 
 struct ieee802154_capability_info_s
@@ -330,16 +538,6 @@ struct ieee802154_capability_info_s
   uint8_t allocate_addr : 1;  /* 1=Coordinator allocates short address
                                * 0=otherwise */
 };
-
-#ifdef CONFIG_IEEE802154_SECURITY
-struct ieee802154_security_s
-{
-  uint8_t level;            /* Security level to be used */
-  uint8_t key_id_mode;      /* Mode used to identify the key to be used */
-  uint8_t key_source[8];    /* Originator of the key to be used */
-  uint8_t key_index;        /* Index of the key to be used */
-};
-#endif
 
 struct ieee802154_superframe_spec_s
 {
@@ -367,7 +565,7 @@ struct ieee802154_pan_desc_s
 
   uint8_t gts_permit;       /* 0=No GTS requests allowed
                              * 1=GTS request allowed */
-  uint8_t link_quality;     /* LQI at which beacon was received */
+  uint8_t lqi;              /* Link Quality Indication of the beacon */
   uint32_t timestamp;       /* Time at which the beacon frame was received
                              * in symbols */
 };
@@ -390,7 +588,7 @@ struct ieee802154_pend_addr_s
 
 /* Primitive Semantics */
 
-struct ieee802154_assoc_request_s
+struct ieee802154_assoc_req_s
 {
   uint8_t channel;          /* Channel number to attempt association */
   uint8_t channel_page;     /* Channel page to attempt association */
@@ -410,7 +608,7 @@ struct ieee802154_assoc_request_s
 #endif
 };
 
-struct ieee802154_assoc_indication_s
+struct ieee802154_assoc_ind_s
 {
   /* Address of device requesting association. Always in extended mode */
 
@@ -427,7 +625,7 @@ struct ieee802154_assoc_indication_s
 #endif
 };
 
-struct ieee802154_assoc_response_s
+struct ieee802154_assoc_rsp_s
 {
   /* Address of device requesting association. Always in extended mode */
 
@@ -444,7 +642,7 @@ struct ieee802154_assoc_response_s
 #endif
 };
 
-struct ieee802154_assoc_confirm_s
+struct ieee802154_assoc_conf_s
 {
   /* Associated device address ALWAYS passed in short address mode. The
    * address will be IEEE802154_SADDR_UNSPEC if association was unsuccessful */
@@ -462,7 +660,7 @@ struct ieee802154_assoc_confirm_s
 #endif
 };
 
-struct ieee802154_disassoc_request_s
+struct ieee802154_disassoc_req_s
 {
   /* Address of device to send disassociation notification */
 
@@ -481,7 +679,7 @@ struct ieee802154_disassoc_request_s
 #endif
 };
 
-struct ieee802154_disassoc_indication_s
+struct ieee802154_disassoc_ind_s
 {
   /* Address of device requesting disassociation. Always extended mode */
 
@@ -498,7 +696,7 @@ struct ieee802154_disassoc_indication_s
 #endif
 };
 
-struct ieee802154_disassoc_confirm_s
+struct ieee802154_disassoc_conf_s
 {
   /* Status of the disassociation attempt */
 
@@ -509,7 +707,7 @@ struct ieee802154_disassoc_confirm_s
   struct ieee802154_addr_s dev_addr;
 };
 
-struct ieee802154_beaconnotify_indication_s
+struct ieee802154_beaconnotify_ind_s
 {
   uint8_t bsn;        /* Beacon sequence number */
 
@@ -526,8 +724,11 @@ struct ieee802154_beaconnotify_indication_s
       
   /* Beacon payload */
 
-  uint8_t sdu[IEEE802154_aMaxBeaconPayloadLength];
+  uint8_t sdu[IEEE802154_MAX_BEACON_PAYLOAD_LENGTH];
 };
+#define SIZEOF_IEEE802154_BEACONNOTIFY_IND_S(n) \
+  (sizeof(struct ieee802154_beaconnotify_ind_s) \
+  - IEEE802154_MAX_BEACON_PAYLOAD_LENGTH + (n))
 
 /* Operations */
 
@@ -539,8 +740,8 @@ struct ieee802154_macops_s
 
   /* Transmit a data frame */
 
-  CODE int (*req_data)(FAR struct ieee802154_mac_s *mac, uint8_t handle,
-                       FAR uint8_t *buf, int len);
+  CODE int (*req_data)(FAR struct ieee802154_mac_s *mac,
+                       FAR struct ieee802154_data_req_s *req);
 
   /* Cancel transmission of a data frame */
 
@@ -549,16 +750,17 @@ struct ieee802154_macops_s
   /* Start association with coordinator */
 
   CODE int (*req_associate)(FAR struct ieee802154_mac_s *mac,
-                            uint16_t panid, FAR uint8_t *coordeadr);
+                            FAR struct ieee802154_assoc_req_s *req);
 
   /* Start disassociation with coordinator */
 
   CODE int (*req_disassociate)(FAR struct ieee802154_mac_s *mac,
-                               FAR uint8_t *eadr, uint8_t reason);
+                               FAR struct ieee802154_disassoc_req_s *req);
 
   /* Read the PIB */
 
-  CODE int (*req_get)(FAR struct ieee802154_mac_s *mac, int attribute);
+  CODE int (*req_get)(FAR struct ieee802154_mac_s *mac,
+                      enum ieee802154_pib_attr_e attr);
 
   /* Allocate or deallocate a GTS */
 
@@ -612,94 +814,98 @@ struct ieee802154_macops_s
 
 struct ieee802154_maccb_s
 {
+  /* Context arg for handling callback */
+
+  FAR void *cb_context;
+
   /* Asynchronous confirmations to requests */
 
   /* Data frame was received by remote device */
 
-  CODE int (*conf_data)(FAR struct ieee802154_mac_s *mac,
-                        FAR uint8_t *buf, int len);
+  CODE void (*conf_data)(FAR struct ieee802154_mac_s *mac,
+                         FAR struct ieee802154_data_conf_s *conf);
 
   /* Data frame was purged */
 
-  CODE int (*conf_purge)(FAR struct ieee802154_mac_s *mac, uint8_t handle,
-                         int status);
+  CODE void (*conf_purge)(FAR struct ieee802154_mac_s *mac, uint8_t handle,
+                          int status);
 
   /* Association request completed */
 
-  CODE int (*conf_associate)(FAR struct ieee802154_mac_s *mac,
-                             uint16_t saddr, int status);
+  CODE void (*conf_associate)(FAR struct ieee802154_mac_s *mac,
+                              uint16_t saddr, int status);
 
   /* Disassociation request completed */
 
-  CODE int (*conf_disassociate)(FAR struct ieee802154_mac_s *mac,
-                                int status);
+  CODE void (*conf_disassociate)(FAR struct ieee802154_mac_s *mac,
+                                 int status);
 
-  /* PIB data returned */
+  /* PIvoata returned */
 
-  CODE int (*conf_get)(FAR struct ieee802154_mac_s *mac, int status,
-                       int attribute, FAR uint8_t *value,
-                       int valuelen);
+  CODE void (*conf_get)(FAR struct ieee802154_mac_s *mac, int status,
+                        int attribute, FAR uint8_t *value,
+                        int valuelen);
 
-  /* GTS management completed */
+  /* GTvoanagement completed */
 
-  CODE int (*conf_gts)(FAR struct ieee802154_mac_s *mac,
-                       FAR uint8_t *characteristics, int status);
+  CODE void (*conf_gts)(FAR struct ieee802154_mac_s *mac,
+                        FAR uint8_t *characteristics, int status);
 
-  /* MAC reset completed */
+  /* MAveset completed */
 
-  CODE int (*conf_reset)(FAR struct ieee802154_mac_s *mac, int status);
+  CODE void (*conf_reset)(FAR struct ieee802154_mac_s *mac, int status);
 
-  CODE int (*conf_rxenable)(FAR struct ieee802154_mac_s *mac, int status);
+  CODE void (*conf_rxenable)(FAR struct ieee802154_mac_s *mac, int status);
 
-  CODE int (*conf_scan)(FAR struct ieee802154_mac_s *mac, int status,
-                        uint8_t type, uint32_t unscanned, int rsltsize,
-                        FAR uint8_t *edlist, FAR uint8_t *pandescs);
+  CODE void (*conf_scan)(FAR struct ieee802154_mac_s *mac, int status,
+                         uint8_t type, uint32_t unscanned, int rsltsize,
+                         FAR uint8_t *edlist, FAR uint8_t *pandescs);
 
-  CODE int (*conf_set)(FAR struct ieee802154_mac_s *mac, int status,
-                       int attribute);
+  CODE void (*conf_set)(FAR struct ieee802154_mac_s *mac, int status,
+                        int attribute);
 
-  CODE int (*conf_start)(FAR struct ieee802154_mac_s *mac, int status);
+  CODE void (*conf_start)(FAR struct ieee802154_mac_s *mac, int status);
 
-  CODE int (*conf_poll)(FAR struct ieee802154_mac_s *mac, int status);
+  CODE void (*conf_poll)(FAR struct ieee802154_mac_s *mac, int status);
 
   /* Asynchronous event indications, replied to synchronously with responses */
 
   /* Data frame received */
 
-  CODE int (*ind_data)(FAR struct ieee802154_mac_s *mac, FAR uint8_t *buf,
-                       int len);
+  CODE void (*ind_data)(FAR struct ieee802154_mac_s *mac, FAR uint8_t *buf,
+                        int len);
 
   /* Association request received */
 
-  CODE int (*ind_associate)(FAR struct ieee802154_mac_s *mac,
-                            uint16_t clipanid, FAR uint8_t *clieaddr);
+  CODE void (*ind_associate)(FAR struct ieee802154_mac_s *mac,
+                             uint16_t clipanid, FAR uint8_t *clieaddr);
 
    /* Disassociation request received */
 
-  CODE int (*ind_disassociate)(FAR struct ieee802154_mac_s *mac,
-                               FAR uint8_t *eadr, uint8_t reason);
+  CODE void (*ind_disassociate)(FAR struct ieee802154_mac_s *mac,
+                                FAR uint8_t *eadr, uint8_t reason);
 
   /* Beacon notification */
 
-  CODE int (*ind_beaconnotify)(FAR struct ieee802154_mac_s *mac,
-                               FAR uint8_t *bsn, FAR struct ieee802154_pan_desc_s *pandesc,
-                               FAR uint8_t *sdu, int sdulen);
+  CODE void (*ind_beaconnotify)(FAR struct ieee802154_mac_s *mac,
+                                FAR uint8_t *bsn, FAR struct ieee802154_pan_desc_s *pandesc,
+                                FAR uint8_t *sdu, int sdulen);
 
   /* GTS management request received */
 
-  CODE int (*ind_gts)(FAR struct ieee802154_mac_s *mac,
-                      FAR uint8_t *devaddr, FAR uint8_t *characteristics);
+  CODE void (*ind_gts)(FAR struct ieee802154_mac_s *mac,
+                       FAR uint8_t *devaddr, FAR uint8_t *characteristics);
 
   /* Orphan device detected */
 
-  CODE int (*ind_orphan)(FAR struct ieee802154_mac_s *mac,
-                         FAR uint8_t *orphanaddr);
+  CODE void (*ind_orphan)(FAR struct ieee802154_mac_s *mac,
+                          FAR uint8_t *orphanaddr);
 
-  CODE int (*ind_commstatus)(FAR struct ieee802154_mac_s *mac,
-                             uint16_t panid, FAR uint8_t *src,
-                             FAR uint8_t *dst, int status);
+  CODE void (*ind_commstatus)(FAR struct ieee802154_mac_s *mac,
+                              uint16_t panid, FAR uint8_t *src,
+                              FAR uint8_t *dst, int status);
 
-  CODE int (*ind_syncloss)(FAR struct ieee802154_mac_s *mac, int reason);
+  CODE void (*ind_syncloss)(FAR struct ieee802154_mac_s *mac, int reason);
 };
 
 struct ieee802154_radio_s; /* Forware reference */
