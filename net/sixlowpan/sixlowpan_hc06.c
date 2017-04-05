@@ -508,12 +508,12 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
     {
       /* Flow label can be compressed */
 
-      iphc0 |= SIXLOWPAN_IPHC_FL_C;
+      iphc0 |= SIXLOWPAN_IPHC_TC_10;
       if (((ipv6->vtc & 0x0f) == 0) && ((ipv6->tcf & 0xf0) == 0))
         {
           /* Compress (elide) all */
 
-          iphc0 |= SIXLOWPAN_IPHC_TC_C;
+          iphc0 |= SIXLOWPAN_IPHC_TC_01;
         }
       else
         {
@@ -531,7 +531,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
         {
           /* Compress only traffic class */
 
-          iphc0 |= SIXLOWPAN_IPHC_TC_C;
+          iphc0 |= SIXLOWPAN_IPHC_TC_01;
           *g_hc06ptr = (tmp & 0xc0) | (ipv6->tcf & 0x0f);
           memcpy(g_hc06ptr + 1, &ipv6->flow, 2);
           g_hc06ptr += 3;
@@ -556,11 +556,11 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 #if CONFIG_NET_UDP || UIP_CONF_ROUTER
   if (ipv6->proto == IP_PROTO_UDP)
     {
-      iphc0 |= SIXLOWPAN_IPHC_NH_C;
+      iphc0 |= SIXLOWPAN_IPHC_NH;
     }
 #endif /* CONFIG_NET_UDP */
 
-  if ((iphc0 & SIXLOWPAN_IPHC_NH_C) == 0)
+  if ((iphc0 & SIXLOWPAN_IPHC_NH) == 0)
     {
       *g_hc06ptr = ipv6->proto;
       g_hc06ptr += 1;
@@ -577,15 +577,15 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
   switch (ipv6->ttl)
     {
     case 1:
-      iphc0 |= SIXLOWPAN_IPHC_TTL_1;
+      iphc0 |= SIXLOWPAN_IPHC_HLIM_1;
       break;
 
     case 64:
-      iphc0 |= SIXLOWPAN_IPHC_TTL_64;
+      iphc0 |= SIXLOWPAN_IPHC_HLIM_64;
       break;
 
     case 255:
-      iphc0 |= SIXLOWPAN_IPHC_TTL_255;
+      iphc0 |= SIXLOWPAN_IPHC_HLIM_255;
       break;
 
     default:
@@ -601,7 +601,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
       ninfo("Compressing unspecified.  Setting SAC\n");
 
       iphc1 |= SIXLOWPAN_IPHC_SAC;
-      iphc1 |= SIXLOWPAN_IPHC_SAM_00;
+      iphc1 |= SIXLOWPAN_IPHC_SAM_128;
     }
   else if ((addrcontext = find_addrcontext_byprefix(ipv6->srcipaddr)) != NULL)
     {
@@ -613,7 +613,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
       iphc1   |= SIXLOWPAN_IPHC_CID | SIXLOWPAN_IPHC_SAC;
       iphc[2] |= addrcontext->number << 4;
 
-      /* Compession compare with this nodes address (source) */
+      /* Compression compare with this nodes address (source) */
 
       iphc1   |= compress_addr_64(ipv6->srcipaddr, &ieee->i_nodeaddr,
                                   SIXLOWPAN_IPHC_SAM_BIT);
@@ -631,7 +631,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
     {
       /* Send the full address => SAC = 0, SAM = 00 */
 
-      iphc1 |= SIXLOWPAN_IPHC_SAM_00;   /* 128-bits */
+      iphc1 |= SIXLOWPAN_IPHC_SAM_128;   /* 128-bits */
       memcpy(g_hc06ptr, ipv6->srcipaddr, 16);
       g_hc06ptr += 16;
     }
@@ -645,7 +645,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
       iphc1 |= SIXLOWPAN_IPHC_M;
       if (SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE8(ipv6->destipaddr))
         {
-          iphc1 |= SIXLOWPAN_IPHC_DAM_11;
+          iphc1 |= SIXLOWPAN_IPHC_DAM_0;
 
           /* Use last byte */
 
@@ -656,7 +656,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
         {
           FAR uint8_t *iptr = (FAR uint8_t *)ipv6->destipaddr;
 
-          iphc1 |= SIXLOWPAN_IPHC_DAM_10;
+          iphc1 |= SIXLOWPAN_IPHC_DAM_16;
 
           /* Second byte + the last three */
 
@@ -668,7 +668,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
         {
           FAR uint8_t *iptr = (FAR uint8_t *)ipv6->destipaddr;
 
-          iphc1 |= SIXLOWPAN_IPHC_DAM_01;
+          iphc1 |= SIXLOWPAN_IPHC_DAM_64;
 
           /* Second byte + the last five */
 
@@ -678,7 +678,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
         }
       else
         {
-          iphc1 |= SIXLOWPAN_IPHC_DAM_00;
+          iphc1 |= SIXLOWPAN_IPHC_DAM_128;
 
           /* Full address */
 
@@ -715,7 +715,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
         {
           /* Send the full address */
 
-          iphc1 |= SIXLOWPAN_IPHC_DAM_00;       /* 128-bits */
+          iphc1 |= SIXLOWPAN_IPHC_DAM_128;       /* 128-bits */
           memcpy(g_hc06ptr, ipv6->destipaddr, 16);
           g_hc06ptr += 16;
         }
@@ -865,7 +865,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
   g_hc06ptr = payptr + 2;
 
   ninfo("payptr=%p g_frame_hdrlen=%u iphc=%02x:%02x:%02x g_hc06ptr=%p\n",
-         payptr, g_frame_hdrlen, iphc, iphc[0], iphc[1], iphc[2], g_hc06ptr);
+         payptr, g_frame_hdrlen, iphc[0], iphc[1], iphc[2], g_hc06ptr);
 
   /* Another if the CID flag is set */
 
@@ -877,11 +877,11 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
   /* Traffic class and flow label */
 
-  if ((iphc0 & SIXLOWPAN_IPHC_FL_C) == 0)
+  if ((iphc0 & SIXLOWPAN_IPHC_TC_10) == 0)
     {
       /* Flow label are carried inline */
 
-      if ((iphc0 & SIXLOWPAN_IPHC_TC_C) == 0)
+      if ((iphc0 & SIXLOWPAN_IPHC_TC_01) == 0)
         {
           /* Traffic class is carried inline */
 
@@ -916,7 +916,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
       /* Version is always 6! */
       /* Version and flow label are compressed */
 
-      if ((iphc0 & SIXLOWPAN_IPHC_TC_C) == 0)
+      if ((iphc0 & SIXLOWPAN_IPHC_TC_01) == 0)
         {
           /* Traffic class is inline */
 
@@ -937,7 +937,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
   /* Next Header */
 
-  if ((iphc0 & SIXLOWPAN_IPHC_NH_C) == 0)
+  if ((iphc0 & SIXLOWPAN_IPHC_NH) == 0)
     {
       /* Next header is carried inline */
 
@@ -948,19 +948,19 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
   /* Hop limit */
 
-  if ((iphc0 & 0x03) != SIXLOWPAN_IPHC_TTL_I)
+  if ((iphc0 & SIXLOWPAN_IPHC_HLIM_MASK) != SIXLOWPAN_IPHC_HLIM_INLINE)
     {
-      ipv6->ttl   = g_ttl_values[iphc0 & 0x03];
+      ipv6->ttl  = g_ttl_values[iphc0 & SIXLOWPAN_IPHC_HLIM_MASK];
     }
   else
     {
-      ipv6->ttl   = *g_hc06ptr;
+      ipv6->ttl  = *g_hc06ptr;
       g_hc06ptr += 1;
     }
 
   /* Put the source address compression mode SAM in the tmp var */
 
-  tmp = ((iphc1 & SIXLOWPAN_IPHC_SAM_11) >> SIXLOWPAN_IPHC_SAM_BIT) & 0x03;
+  tmp = ((iphc1 & SIXLOWPAN_IPHC_SAM_MASK) >> SIXLOWPAN_IPHC_SAM_BIT) & 0x03;
 
   /* Address context based compression */
 
@@ -996,9 +996,9 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
     }
 
   /* Destination address */
-  /* put the destination address compression mode into tmp */
+  /* Put the destination address compression mode into tmp */
 
-  tmp = ((iphc1 & SIXLOWPAN_IPHC_DAM_11) >> SIXLOWPAN_IPHC_DAM_BIT) & 0x03;
+  tmp = ((iphc1 & SIXLOWPAN_IPHC_DAM_MASK) >> SIXLOWPAN_IPHC_DAM_BIT) & 0x03;
 
   /* Multicast compression */
 
@@ -1012,12 +1012,12 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
         }
       else
         {
-          /* non-address context based multicast compression
+          /* Non-address context based multicast compression
            *
-           *   DAM_00: 128 bits
-           *   DAM_01: 48 bits FFXX::00XX:XXXX:XXXX
-           *   DAM_10: 32 bits FFXX::00XX:XXXX
-           *   DAM_11: 8 bits FF02::00XX
+           *   DAM 00: 128 bits
+           *   DAM 01: 48 bits FFXX::00XX:XXXX:XXXX
+           *   DAM 0: 32 bits FFXX::00XX:XXXX
+           *   DAM 11: 8 bits FF02::00XX
            */
 
           uint8_t prefix[] = { 0xff, 0x02 };
@@ -1066,7 +1066,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
   /* Next header processing - continued */
 
-  if ((iphc0 & SIXLOWPAN_IPHC_NH_C))
+  if ((iphc0 & SIXLOWPAN_IPHC_NH))
     {
       FAR struct udp_hdr_s *udp = UDPIPv6BUF(ieee);
 
