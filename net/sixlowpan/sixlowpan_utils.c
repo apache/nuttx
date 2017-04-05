@@ -73,8 +73,8 @@
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte Rime address
- *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte Rime address
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte Rime address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte Rime address IEEE EUI-64
  *
  ****************************************************************************/
 
@@ -107,8 +107,8 @@ void sixlowpan_ipfromrime(FAR const struct rimeaddr_s *rime,
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte Rime address
- *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte Rime address
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte Rime address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte Rime address IEEE EUI-64
  *
  ****************************************************************************/
 
@@ -135,8 +135,8 @@ void sixlowpan_rimefromip(const net_ipv6addr_t ipaddr,
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte Rime address
- *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte Rime address
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte Rime address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte Rime address IEEE EUI-64
  *
  ****************************************************************************/
 
@@ -146,13 +146,13 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
   FAR const uint8_t *rimeptr = rime->u8;
 
 #if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
-  return ((ipaddr[4] == htons((GETINT16(rimeptr, 0) ^ 0x0200))) &&
-           ipaddr[5] == 0 && ipaddr[6] == 0 && ipaddr[7] == 0);
+  return (ipaddr[5] == HTONS(0x00ff) && ipaddr[6] == HTONS(0xfe00) &&
+          ipaddr[7] == htons((GETINT16(rimeptr, 0) ^ 0x0200)));
 #else /* CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 8 */
-  return ((ipaddr[4] == htons((GETINT16(rimeptr, 0) ^ 0x0200))) &&
-           ipaddr[5] == GETINT16(rimeptr, 2) &&
-           ipaddr[6] == GETINT16(rimeptr, 4) &&
-           ipaddr[7] == GETINT16(rimeptr, 6));
+  return (ipaddr[4] == htons((GETINT16(rimeptr, 0) ^ 0x0200)) &&
+          ipaddr[5] == GETINT16(rimeptr, 2) &&
+          ipaddr[6] == GETINT16(rimeptr, 4) &&
+          ipaddr[7] == GETINT16(rimeptr, 6));
 #endif
 }
 
