@@ -74,6 +74,8 @@ struct mac802154_devwrapper_s
    */
 
   FAR struct mac802154_open_s *md_open;
+
+  FAR struct mac802154dev_dwait_s *md_dwait;
 };
 
 /* This structure describes the state of one open mac driver instance */
@@ -87,6 +89,17 @@ struct mac802154_open_s
   /* The following will be true if we are closing */
 
   volatile bool md_closing;
+};
+
+struct mac802154dev_dwait_s
+{
+  uint8_t mw_handle;  /* The msdu handle identifying the frame */
+  sem_t mw_sem;       /* The semaphore used to signal the completion */
+  int status;         /* The success/error of the transaction */
+
+  /* Supports a singly linked list */
+
+  FAR struct mac802154dev_dwait_s *mw_flink;
 };
 
 /****************************************************************************
@@ -362,7 +375,8 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
 {
   FAR struct inode *inode;
   FAR struct mac802154_devwrapper_s *dev;
-  struct ieee802154_frame_s frame;
+  FAR struct ieee802154_data_req_s *req;
+  struct mac802154dev_dwait_s dwait;
   int ret;
 
   DEBUGASSERT(filep && filep->f_inode);
@@ -391,12 +405,37 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
       wlerr("ERROR: mac802154dev_takesem failed: %d\n", ret);
       return ret;
     }
-  
-  /* TODO: Send the frame out */
-  ret = -ENOTSUP;
+
+  /* Setup the wait struct */
+
+  dwait.mw_handle = req->msdu_handle;
+
+  /* Link the wait struct */
+
+  dwait.mw_flink = dev->md_dwait;
+  dev->md_wait = &dwait;
+
+  /* Pass the request to the MAC layer */
+
+  ret = dev->md_mac->ops.req_data(dev->md_mac, req);
 
   mac802154dev_givesem(&dev->md_exclsem);
-  return ret;
+
+  if (ret < 0) 
+    {
+      wlerr("ERROR: req_data failed %d\n", ret);
+      return ret;
+    }
+
+  /* Wait for the DATA.confirm callback to be called for our handle */
+
+  sem_wait(dwait.mw_sem);
+
+  /* The unlinking of the wait struct happens inside the callback. This
+   * is more efficient since it will already have to find the struct in
+   * the list in order to perform the sem_post. */
+
+  return dwait.status;
 }
 
 /****************************************************************************
@@ -443,6 +482,39 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
   mac802154dev_givesem(&dev->md_exclsem);
   return ret;
 }
+
+void mac802154dev_conf_data(FAR struct ieee802154_mac_s *mac,
+                           FAR struct ieee802154_data_conf_s *conf)
+{
+  FAR struct mac802154_devwrapper_s *dev;
+  FAR struct mac802154dev_dwait_s *curr;
+  FAR struct mac802154dev_dwait_s *prev;
+  int ret;
+
+  /* Get the dev from the callback context.  This should have been set when the
+   * char driver was registered */
+
+  dev = mac->cbs.cb_context;
+
+  /* Get exclusive access to the driver structure */
+
+  ret = mac802154dev_takesem(&dev->md_exclsem);
+  if (ret < 0)
+    {
+      wlerr("ERROR: mac802154dev_takesem failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Search to see if there is a dwait pending for this transaction */
+
+  for (prev = NULL, curr = dev->md_dwait;
+       curr && curr->mw_handle != conf->msdu_handle;
+       prev = curr, curr = curr->mw_flink);
+
+
+
+}
+
 
 /****************************************************************************
  * Public Functions
