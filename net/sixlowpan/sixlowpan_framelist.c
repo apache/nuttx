@@ -51,6 +51,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/net/netdev.h>
@@ -171,13 +172,14 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
   FAR uint8_t *fptr;
   int framer_hdrlen;
   struct rimeaddr_s bcastmac;
+#ifdef CONFIG_NET_6LOWPAN_FRAG
   uint16_t outlen = 0;
+#endif
 
   /* Initialize global data.  Locking the network guarantees that we have
    * exclusive use of the global values for intermediate calculations.
    */
 
-  FRAME_RESET();
   g_uncomp_hdrlen = 0;
   g_frame_hdrlen  = 0;
 
@@ -278,7 +280,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
       (int)CONFIG_NET_6LOWPAN_MAXPAYLOAD - framer_hdrlen -
       (int)g_frame_hdrlen)
     {
-#if CONFIG_NET_6LOWPAN_FRAG
+#ifdef CONFIG_NET_6LOWPAN_FRAG
       /* ieee->i_framelist will hold the generated frames; frames will be
        * added at qtail.
        */

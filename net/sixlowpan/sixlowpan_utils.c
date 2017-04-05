@@ -45,20 +45,6 @@
  *
  ****************************************************************************/
 
-/* Frame Organization.  The IOB data is retained in the io_data[] field of the
- * IOB structure like:
- *
- *     Content            Offset
- *   +------------------+ 0
- *   | Frame Header     |
- *   +------------------+ g_dataoffset
- *   | Procotol Headers |
- *   | Data Payload     |
- *   +------------------+ iob->io_len
- *   | Unused           |
- *   +------------------+ CONFIG_NET_6LOWPAN_FRAMELEN
- */
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -80,26 +66,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sixlowpan_frame_hdralloc
- *
- * Description:
- *   Allocate space for a header within the packet buffer (dev->d_buf).
- *
- ****************************************************************************/
-
-int sixlowpan_frame_hdralloc(FAR struct iob_s *iob, int size)
-{
-  if (size <= FRAME_REMAINING(iob))
-    {
-      g_dataoffset += size;
-      iob->io_len  += size;
-      return OK;
-    }
-
-  return -ENOMEM;
-}
-
-/****************************************************************************
  * Name: sixlowpan_ipfromrime
  *
  * Description:
@@ -107,28 +73,30 @@ int sixlowpan_frame_hdralloc(FAR struct iob_s *iob, int size)
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  xxxx xxxx 0000 0000 2-byte Rime address (VALID?)
- *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte Rime address
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte Rime address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte Rime address IEEE EUI-64
  *
  ****************************************************************************/
 
 void sixlowpan_ipfromrime(FAR const struct rimeaddr_s *rime,
                           net_ipv6addr_t ipaddr)
 {
+  /* We consider only links with IEEE EUI-64 identifier or IEEE 48-bit MAC
+   * addresses.
+   */
+
   memset(ipaddr, 0, sizeof(net_ipv6addr_t));
   ipaddr[0] = HTONS(0xfe80);
 
-  /* We consider only links with IEEE EUI-64 identifier or IEEE 48-bit MAC
-   * addresses.  NOTE: that CONFIG_NET_6LOWPAN_RIMEADDR_SIZE may be 2 or
-   * 8.  In the case of 2, we treat the address like an 8 byte address with
-   * the lower bytes set to zero.
-   *
-   * REVISIT:  This is just a guess so that I can continue making forward
-   * progress.  What is the correct policy?
-   */
-
+#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
+  ipaddr[5]  = HTONS(0x00ff);
+  ipaddr[6]  = HTONS(0xfe00);
+  memcpy(&ipaddr[7], rime, CONFIG_NET_6LOWPAN_RIMEADDR_SIZE);
+  ipaddr[7] ^= HTONS(0x0200);
+#else
   memcpy(&ipaddr[4], rime, CONFIG_NET_6LOWPAN_RIMEADDR_SIZE);
   ipaddr[4] ^= HTONS(0x0200);
+#endif
 }
 
 /****************************************************************************
@@ -139,8 +107,8 @@ void sixlowpan_ipfromrime(FAR const struct rimeaddr_s *rime,
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  xxxx 0000 0000 0000 2-byte Rime address (VALID?)
- *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte Rime address
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte Rime address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte Rime address IEEE EUI-64
  *
  ****************************************************************************/
 
@@ -151,7 +119,11 @@ void sixlowpan_rimefromip(const net_ipv6addr_t ipaddr,
 
   DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
 
+#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
+  memcpy(rime, &ipaddr[7], CONFIG_NET_6LOWPAN_RIMEADDR_SIZE);
+#else
   memcpy(rime, &ipaddr[4], CONFIG_NET_6LOWPAN_RIMEADDR_SIZE);
+#endif
   rime->u8[0] ^= 0x02;
 }
 
@@ -159,12 +131,12 @@ void sixlowpan_rimefromip(const net_ipv6addr_t ipaddr,
  * Name: sixlowpan_ismacbased
  *
  * Description:
- *   Extract the rime address from a link local IPv6 address:
+ *   Check if the MAC address is encoded in the IP address:
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  xxxx 0000 0000 0000 2-byte Rime address (VALID?)
- *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte Rime address
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte Rime address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte Rime address IEEE EUI-64
  *
  ****************************************************************************/
 
@@ -174,13 +146,13 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
   FAR const uint8_t *rimeptr = rime->u8;
 
 #if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
-  return ((ipaddr[4] == htons((GETINT16(rimeptr, 0) ^ 0x0200))) &&
-           ipaddr[5] == 0 && ipaddr[6] == 0 && ipaddr[7] == 0);
+  return (ipaddr[5] == HTONS(0x00ff) && ipaddr[6] == HTONS(0xfe00) &&
+          ipaddr[7] == htons((GETINT16(rimeptr, 0) ^ 0x0200)));
 #else /* CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 8 */
-  return ((ipaddr[4] == htons((GETINT16(rimeptr, 0) ^ 0x0200))) &&
-           ipaddr[5] == GETINT16(rimeptr, 2) &&
-           ipaddr[6] == GETINT16(rimeptr, 4) &&
-           ipaddr[7] == GETINT16(rimeptr, 6));
+  return (ipaddr[4] == htons((GETINT16(rimeptr, 0) ^ 0x0200)) &&
+          ipaddr[5] == GETINT16(rimeptr, 2) &&
+          ipaddr[6] == GETINT16(rimeptr, 4) &&
+          ipaddr[7] == GETINT16(rimeptr, 6));
 #endif
 }
 

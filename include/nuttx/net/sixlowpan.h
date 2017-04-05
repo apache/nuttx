@@ -66,9 +66,9 @@
 /* Min and Max compressible UDP ports - HC06 */
 
 #define SIXLOWPAN_UDP_4_BIT_PORT_MIN     0xf0b0
-#define SIXLOWPAN_UDP_4_BIT_PORT_MAX     0xf0bf   /* F0B0 + 15 */
-#define SIXLOWPAN_UDP_8_BIT_PORT_MIN     0xF000
-#define SIXLOWPAN_UDP_8_BIT_PORT_MAX     0xf0ff   /* F000 + 255 */
+#define SIXLOWPAN_UDP_4_BIT_PORT_MAX     0xf0bf   /* f0b0 + 15 */
+#define SIXLOWPAN_UDP_8_BIT_PORT_MIN     0xf000
+#define SIXLOWPAN_UDP_8_BIT_PORT_MAX     0xf0ff   /* f000 + 255 */
 
 /* 6lowpan dispatches */
 
@@ -364,18 +364,18 @@ struct ieee802154_driver_s
 
   uint8_t i_dsn;
 
+#if CONFIG_NET_6LOWPAN_FRAG
+  /* Fragmentation Support *************************************************/
+  /* Fragmentation is handled frame by frame and requires that certain
+   * state information be retained from frame to frame.
+   */
+
   /* i_dgramtag.  Datagram tag to be put in the header of the set of
    * fragments.  It is used by the recipient to match fragments of the
    * same payload.
    */
 
   uint16_t i_dgramtag;
-
-#if CONFIG_NET_6LOWPAN_FRAG
-  /* Fragmentation Support *************************************************/
-  /* Fragementation is handled frame by frame and requires that certain
-   * state information be retained from frame to frame.
-   */
 
   /* i_pktlen. The total length of the IPv6 packet to be re-assembled in
    * d_buf.

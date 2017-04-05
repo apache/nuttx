@@ -18,7 +18,7 @@
  *            Joel Hoglund <joel@sics.se>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
+ * modification, are permitted provided that the following c/onditions
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
@@ -74,9 +74,9 @@
  ****************************************************************************/
 
 #define IPv6BUF(ieee) \
-  ((FAR struct ipv6_hdr_s *)&(ieee)->i_dev.d_buf)
+  ((FAR struct ipv6_hdr_s *)((ieee)->i_dev.d_buf))
 #define UDPIPv6BUF(ieee) \
-  ((FAR struct udp_hdr_s *)&(ieee)->i_dev.d_buf[IPv6_HDRLEN])
+  ((FAR struct udp_hdr_s *)&((ieee)->i_dev.d_buf[IPv6_HDRLEN]))
 
 /****************************************************************************
  * Private Types
@@ -239,13 +239,16 @@ static uint8_t compress_addr_64(FAR const net_ipv6addr_t ipaddr,
                                 FAR const struct rimeaddr_s *macaddr,
                                 uint8_t bitpos)
 {
+  ninfo("ipaddr=%p macaddr=%p bitpos=%u g_hc06ptr=%p\n",
+         ipaddr, macaddr, bitpos, g_hc06ptr);
+
   if (sixlowpan_ismacbased(ipaddr, macaddr))
     {
       return 3 << bitpos;       /* 0-bits */
     }
   else if (SIXLOWPAN_IS_IID_16BIT_COMPRESSABLE(ipaddr))
     {
-      /* Compress IID to 16 bits xxxx::0000:00ff:fe00:XXXX */
+      /* Compress IID to 16 bits: xxxx:xxxx:xxxx:xxxx:0000:00ff:fe00:XXXX */
 
       memcpy(g_hc06ptr, &ipaddr[7], 2);
       g_hc06ptr += 2;
@@ -253,7 +256,7 @@ static uint8_t compress_addr_64(FAR const net_ipv6addr_t ipaddr,
     }
   else
     {
-      /* Do not compress IID => xxxx::IID */
+      /* Do not compress IID: xxxx:xxxx:xxxx:xxxx:IID:IID:IID:IID */
 
       memcpy(g_hc06ptr, &ipaddr[4], 8);
       g_hc06ptr += 8;
@@ -455,11 +458,9 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
   uint8_t iphc1;
   uint8_t tmp;
 
-  sixlowpan_dumpbuffer("IPv6 before compression",
-                       (FAR const uint8_t *)ipv6,
-                       sizeof(struct ipv6_hdr_s));
-
   g_hc06ptr = fptr + 2;
+  ninfo("fptr=%p g_frame_hdrlen=%u iphc=%p g_hc06ptr=%p\n",
+         fptr, g_frame_hdrlen, iphc, g_hc06ptr);
 
   /* As we copy some bit-length fields, in the IPHC encoding bytes,
    * we sometimes use |=
@@ -516,7 +517,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
         }
       else
         {
-          /* Sompress only the flow label */
+          /* Compress only the flow label */
 
           *g_hc06ptr = tmp;
           g_hc06ptr += 1;
@@ -810,6 +811,10 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
   iphc[1] = iphc1;
 
   g_frame_hdrlen = g_hc06ptr - fptr;
+
+  ninfo("fptr=%p g_frame_hdrlen=%u iphc=%02x:%02x:%02x g_hc06ptr=%p\n",
+         fptr, g_frame_hdrlen, iphc[0], iphc[1], iphc[2], g_hc06ptr);
+
   return;
 }
 
@@ -841,7 +846,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
 void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                                   uint16_t iplen, FAR struct iob_s *iob,
-                                  FAR char *payptr)
+                                  FAR uint8_t *payptr)
 {
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF(ieee);
   FAR uint8_t *iphc = payptr + g_frame_hdrlen;
@@ -856,11 +861,14 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
   iphc0 = iphc[0];
   iphc1 = iphc[1];
 
+  ninfo("payptr=%p g_frame_hdrlen=%u iphc[%p]=%02x:%02x:%02x g_hc06ptr=%p\n",
+         payptr, g_frame_hdrlen, iphc, iphc[0], iphc[1], iphc[2], g_hc06ptr);
+
   /* Another if the CID flag is set */
 
   if (iphc1 & SIXLOWPAN_IPHC_CID)
     {
-      ninfo("IPHC: CID flag set - increase header with one\n");
+      ninfo("IPHC: CID flag set. Increase header by one\n");
       g_hc06ptr++;
     }
 
