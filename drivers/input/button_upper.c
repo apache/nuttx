@@ -158,8 +158,8 @@ static const struct file_operations btn_fops =
   btn_open,  /* open */
   btn_close, /* close */
   btn_read,  /* read */
-  0,          /* write */
-  0,          /* seek */
+  NULL,      /* write */
+  NULL,      /* seek */
   btn_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   , btn_poll /* poll */
