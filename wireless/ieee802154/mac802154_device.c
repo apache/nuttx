@@ -433,7 +433,8 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
 
   /* The unlinking of the wait struct happens inside the callback. This
    * is more efficient since it will already have to find the struct in
-   * the list in order to perform the sem_post. */
+   * the list in order to perform the sem_post.
+   */
 
   return dwait.status;
 }
@@ -491,8 +492,9 @@ void mac802154dev_conf_data(FAR struct ieee802154_mac_s *mac,
   FAR struct mac802154dev_dwait_s *prev;
   int ret;
 
-  /* Get the dev from the callback context.  This should have been set when the
-   * char driver was registered */
+  /* Get the dev from the callback context.  This should have been set when
+   * the char driver was registered.
+   */
 
   dev = mac->cbs.cb_context;
 
@@ -510,11 +512,7 @@ void mac802154dev_conf_data(FAR struct ieee802154_mac_s *mac,
   for (prev = NULL, curr = dev->md_dwait;
        curr && curr->mw_handle != conf->msdu_handle;
        prev = curr, curr = curr->mw_flink);
-
-
-
 }
-
 
 /****************************************************************************
  * Public Functions

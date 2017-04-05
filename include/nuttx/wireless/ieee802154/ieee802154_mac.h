@@ -448,7 +448,8 @@ struct ieee802154_data_req_s
 
 
   uint8_t msdu_handle;    /* Handle assoc. with MSDU */
-  struct {
+  struct
+  {
     uint8_t ack_tx      : 1;  /* Acknowledge TX? */               
     uint8_t gts_tx      : 1;  /* 1=GTS used for TX, 0=CAP used for TX */
     uint8_t indirect_tx : 1;  /* Should indirect transmission be used? */
@@ -467,7 +468,8 @@ struct ieee802154_data_req_s
 
   /* The UWB preamble symbol repititions
    *  Should be one of:
-   *    0, 16, 64, 1024, 4096 */
+   *    0, 16, 64, 1024, 4096
+   */
 
   uint16_t uwb_presym_rep;  
 
@@ -480,10 +482,12 @@ struct ieee802154_data_req_s
 
   /* The MAC service data unit array that is to be transmitted
    * This must be at the end of the struct to allow the array
-   * to continue and make the struct "variable length" */ 
+   * to continue and make the struct "variable length"
+   */ 
 
   uint8_t msdu[1];
 };
+
 #define SIZEOF_IEEE802154_DATA_REQ_S(n) \
         (sizeof(struct ieee802154_data_req_s) + (n))
 
@@ -501,22 +505,26 @@ struct ieee802154_data_conf_s
   bool rng_rcvd;                    /* Ranging indicated by MSDU */
 
   /* A count of the time units corresponding to an RMARKER at the antenna at
-   * the beginning of the ranging exchange */
+   * the beginning of the ranging exchange
+   */
 
   uint32_t rng_counter_start; 
 
   /* A count of the time units corresponding to an RMARKER at the antenna at
-   * end of the ranging exchange */
+   * end of the ranging exchange
+   */
 
   uint32_t rng_counter_stop; 
 
   /* A count of the time units in a message exchange over which the tracking
-   * offset was measured */
+   * offset was measured
+   */
 
   uint34_t rng_tracking_interval;
 
   /* A count of the time units slipped or advanced by the radio tracking
-   * system over the course of the entire tracking interval */
+   * system over the course of the entire tracking interval
+   */
 
   uint32_t rng_offset;
 
@@ -645,7 +653,8 @@ struct ieee802154_assoc_rsp_s
 struct ieee802154_assoc_conf_s
 {
   /* Associated device address ALWAYS passed in short address mode. The
-   * address will be IEEE802154_SADDR_UNSPEC if association was unsuccessful */
+   * address will be IEEE802154_SADDR_UNSPEC if association was unsuccessful.
+   */
 
   struct ieee802154_addr_s dev_addr;
 
@@ -726,6 +735,7 @@ struct ieee802154_beaconnotify_ind_s
 
   uint8_t sdu[IEEE802154_MAX_BEACON_PAYLOAD_LENGTH];
 };
+
 #define SIZEOF_IEEE802154_BEACONNOTIFY_IND_S(n) \
   (sizeof(struct ieee802154_beaconnotify_ind_s) \
   - IEEE802154_MAX_BEACON_PAYLOAD_LENGTH + (n))
