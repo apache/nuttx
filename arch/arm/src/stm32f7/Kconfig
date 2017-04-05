@@ -1823,7 +1823,7 @@ config STM32F7_HAVE_RTC_COUNTER
 
 config STM32F7_HAVE_RTC_SUBSECONDS
 	bool
-	default n
+	default y
 
 config RTC_MAGIC_REG
 	int "The BKP register used to store/check the Magic value to determine if RTC is set already"

@@ -49,6 +49,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/lm75.h>
+#include <nuttx/random.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75)
 
@@ -268,6 +269,8 @@ static int lm75_readtemp(FAR struct lm75_dev_s *priv, FAR b16_t *temp)
       snerr("ERROR: lm75_readb16 failed: %d\n", ret);
       return ret;
     }
+
+  add_sensor_randomness(temp16);
 
   sninfo("Centigrade: %08x\n", temp16);
 

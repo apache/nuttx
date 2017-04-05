@@ -85,7 +85,8 @@
 #define _I2CBASE        (0x2000) /* I2C driver commands */
 #define _SPIBASE        (0x2100) /* SPI driver commands */
 #define _GPIOBASE       (0x2200) /* GPIO driver commands */
-#define _CLIOCBASE      (0x1200) /* Contactless modules ioctl commands */
+#define _CLIOCBASE      (0x2300) /* Contactless modules ioctl commands */
+#define _USBCBASE       (0x2400) /* USB-C controller ioctl commands */
 
 /* boardctl() commands share the same number space */
 
@@ -371,19 +372,19 @@
 #define _LOOPIOCVALID(c)  (_IOC_TYPE(c)==_LOOPBASE)
 #define _LOOPIOC(nr)      _IOC(_LOOPBASE,nr)
 
-/* Modem driver ioctl definitions ********************************************/
+/* Modem driver ioctl definitions *******************************************/
 /* see nuttx/include/modem/ioctl.h */
 
 #define _MODEMIOCVALID(c) (_IOC_TYPE(c)==_MODEMBASE)
 #define _MODEMIOC(nr)     _IOC(_MODEMBASE,nr)
 
-/* I2C driver ioctl definitions **********************************************/
+/* I2C driver ioctl definitions *********************************************/
 /* see nuttx/include/i2c/i2c_master.h */
 
 #define _I2CIOCVALID(c)   (_IOC_TYPE(c)==_I2CBASE)
 #define _I2CIOC(nr)       _IOC(_I2CBASE,nr)
 
-/* SPI driver ioctl definitions **********************************************/
+/* SPI driver ioctl definitions *********************************************/
 /* see nuttx/include/spi/spi_transfer.h */
 
 #define _SPIIOCVALID(c)   (_IOC_TYPE(c)==_SPIBASE)
@@ -395,11 +396,17 @@
 #define _GPIOCVALID(c)    (_IOC_TYPE(c)==_GPIOBASE)
 #define _GPIOC(nr)        _IOC(_GPIOBASE,nr)
 
-/* Contactless driver ioctl definitions ****************************************/
+/* Contactless driver ioctl definitions *************************************/
 /* (see nuttx/include/contactless/ioctl.h */
 
 #define _CLIOCVALID(c)    (_IOC_TYPE(c)==_CLIOCBASE)
 #define _CLIOC(nr)        _IOC(_CLIOCBASE,nr)
+
+/* USB-C controller driver ioctl definitions ********************************/
+/* (see nuttx/include/usb/xxx.h */
+
+#define _USBCIOCVALID(c)  (_IOC_TYPE(c)==_USBCBASE)
+#define _USBCIOC(nr)      _IOC(_USBCBASE,nr)
 
 /* boardctl() command definitions *******************************************/
 

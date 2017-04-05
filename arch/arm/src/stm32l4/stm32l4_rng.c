@@ -145,7 +145,7 @@ static void stm32l4_rngenable(void)
   up_enable_irq(STM32L4_IRQ_RNG);
 }
 
-static void stm32l4_rngdisable()
+static void stm32l4_rngdisable(void)
 {
   uint32_t regval;
 
@@ -261,7 +261,7 @@ static ssize_t stm32l4_rngread(struct file *filep, char *buffer, size_t buflen)
       /* We've got the device semaphore, proceed with reading */
 
       /* Initialize the operation semaphore with 0 for blocking until the
-       * buffer is filled from interrupts.  The waitsem semaphore is used
+       * buffer is filled from interrupts.  The readsem semaphore is used
        * for signaling and, hence, should not have priority inheritance
        * enabled.
        */

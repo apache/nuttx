@@ -42,6 +42,7 @@
 #include <debug.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/random.h>
 
 #include "irq/irq.h"
 
@@ -53,7 +54,7 @@
  * Name: irq_dispatch
  *
  * Description:
- *   This function must be called from the achitecture-specific logic in
+ *   This function must be called from the architecture-specific logic in
  *   order to dispatch an interrupt to the appropriate, registered handling
  *   logic.
  *
@@ -95,6 +96,12 @@ void irq_dispatch(int irq, FAR void *context)
 #else
   vector = irq_unexpected_isr;
   arg    = NULL;
+#endif
+
+#ifdef CONFIG_CRYPTO_RANDOM_POOL_COLLECT_IRQ_RANDOMNESS
+  /* Add interrupt timing randomness to entropy pool */
+
+  add_irq_randomness(irq);
 #endif
 
   /* Then dispatch to the interrupt handler */

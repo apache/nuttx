@@ -381,16 +381,6 @@ void up_irqinitialize(void)
       putreg32(0, regaddr);
     }
 
-  /* Colorize the interrupt stack for debug purposes */
-
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
-  {
-    size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
-    up_stack_color((FAR void *)((uintptr_t)&g_intstackbase - intstack_size),
-                   intstack_size);
-  }
-#endif
-
   /* Make sure that we are using the correct vector table.  The default
    * vector address is 0x0000:0000 but if we are executing code that is
    * positioned in SRAM or in external FLASH, then we may need to reset

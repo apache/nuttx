@@ -1,0 +1,20 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if DRIVERS_IEEE80211
+
+config IEEE80211_BROADCOM_FULLMAC
+	bool
+
+config IEEE80211_BROADCOM_FULLMAC_SDIO
+	bool "Broadcom FullMAC driver on SDIO bus"
+	depends on ARCH_HAVE_SDIO
+	select IEEE80211_BROADCOM_FULLMAC
+	default n
+	---help---
+		This selection enables support for broadcom
+		FullMAC-compliant devices using SDIO bus.
+
+endif # DRIVERS_IEEE80211

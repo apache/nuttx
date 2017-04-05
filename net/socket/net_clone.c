@@ -51,6 +51,7 @@
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "socket/socket.h"
+#include "usrsock/usrsock.h"
 
 /****************************************************************************
  * Public Functions
@@ -96,7 +97,7 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
   DEBUGASSERT(psock2->s_conn);
   psock2->s_crefs    = 1;                   /* One reference on the new socket itself */
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
   if (psock2->s_type == SOCK_STREAM)
     {
       FAR struct tcp_conn_s *conn = psock2->s_conn;
@@ -105,10 +106,19 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
     }
   else
 #endif
-#ifdef CONFIG_NET_UDP
+#ifdef NET_UDP_HAVE_STACK
   if (psock2->s_type == SOCK_DGRAM)
     {
       FAR struct udp_conn_s *conn = psock2->s_conn;
+      DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
+      conn->crefs++;
+    }
+  else
+#endif
+#ifdef CONFIG_NET_USRSOCK
+  if (psock2->s_type == SOCK_USRSOCK_TYPE)
+    {
+      FAR struct usrsock_conn_s *conn = psock2->s_conn;
       DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
       conn->crefs++;
     }

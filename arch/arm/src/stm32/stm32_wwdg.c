@@ -734,8 +734,8 @@ static int stm32_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
  * Name: stm32_wwdginitialize
  *
  * Description:
- *   Initialize the WWDG watchdog time.  The watchdog timer is initialized and
- *   registers as 'devpath.  The initial state of the watchdog time is
+ *   Initialize the WWDG watchdog timer.  The watchdog timer is initialized and
+ *   registers as 'devpath'.  The initial state of the watchdog timer is
  *   disabled.
  *
  * Input Parameters:
@@ -753,7 +753,7 @@ void stm32_wwdginitialize(FAR const char *devpath)
 
   wdinfo("Entry: devpath=%s\n", devpath);
 
-  /* NOTE we assume that clocking to the IWDG has already been provided by
+  /* NOTE we assume that clocking to the WWDG has already been provided by
    * the RCC initialization logic.
    */
 
@@ -780,7 +780,7 @@ void stm32_wwdginitialize(FAR const char *devpath)
 
   (void)watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
 
-  /* When the microcontroller enters debug mode (Cortex�-M4F core halted),
+  /* When the microcontroller enters debug mode (Cortex-M core halted),
    * the WWDG counter either continues to work normally or stops, depending
    * on DBG_WWDG_STOP configuration bit in DBG module.
    */
@@ -790,7 +790,7 @@ void stm32_wwdginitialize(FAR const char *devpath)
     defined(CONFIG_STM32_JTAG_SW_ENABLE)
     {
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F40XX) || defined(CONFIG_STM32_STM32L15XX)
       uint32_t cr = getreg32(STM32_DBGMCU_APB1_FZ);
       cr |= DBGMCU_APB1_WWDGSTOP;
       putreg32(cr, STM32_DBGMCU_APB1_FZ);

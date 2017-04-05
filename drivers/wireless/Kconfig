@@ -26,6 +26,15 @@ menuconfig DRIVERS_IEEE802154
 
 source drivers/wireless/ieee802154/Kconfig
 
+menuconfig DRIVERS_IEEE80211
+	bool "IEEE 802.11 Device Support"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		This directory holds implementations of IEEE802.11 device drivers.
+
+source drivers/wireless/ieee80211/Kconfig
+
 config WL_NRF24L01
 	bool "nRF24l01+ transceiver support"
 	default n

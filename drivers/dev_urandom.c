@@ -49,11 +49,13 @@
 #include <string.h>
 #include <poll.h>
 #include <errno.h>
+#include <assert.h>
 
 #include <nuttx/lib/lib.h>
 #include <nuttx/lib/xorshift128.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/drivers.h>
+#include <nuttx/random.h>
 
 #if defined(CONFIG_DEV_URANDOM) && !defined(CONFIG_DEV_URANDOM_ARCH)
 
@@ -62,13 +64,18 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_DEV_URANDOM_CONGRUENTIAL) && \
-    !defined(CONFIG_DEV_URANDOM_XORSHIFT128)
-#  define CONFIG_DEV_URANDOM_XORSHIFT128 1
+    !defined(CONFIG_DEV_URANDOM_XORSHIFT128) && \
+    !defined(CONFIG_DEV_URANDOM_RANDOM_POOL)
+#  ifdef CONFIG_CRYPTO_RANDOM_POOL
+#    define CONFIG_DEV_URANDOM_RANDOM_POOL 1
+#  else
+#    define CONFIG_DEV_URANDOM_XORSHIFT128 1
+#  endif
 #endif
 
 #ifdef CONFIG_DEV_URANDOM_XORSHIFT128
 #  define PRNG() do_xorshift128()
-#else /* CONFIG_DEV_URANDOM_CONGRUENTIAL */
+#elif defined(CONFIG_DEV_URANDOM_CONGRUENTIAL)
 #  define PRNG() do_congruential()
 #endif
 
@@ -158,6 +165,12 @@ static inline uint32_t do_congruential(void)
 static ssize_t devurand_read(FAR struct file *filep, FAR char *buffer,
                              size_t len)
 {
+#ifdef CONFIG_DEV_URANDOM_RANDOM_POOL
+  if (len)
+    {
+      getrandom(buffer, len);
+    }
+#else
   size_t n;
   uint32_t rnd;
 
@@ -208,6 +221,7 @@ static ssize_t devurand_read(FAR struct file *filep, FAR char *buffer,
         }
       while (--n > 0);
     }
+#endif /* CONFIG_DEV_URANDOM_RANDOM_POOL */
 
   return len;
 }
@@ -228,6 +242,56 @@ static ssize_t devurand_write(FAR struct file *filep, FAR const char *buffer,
   memcpy(&seed, buffer, len);
   srand(seed);
   return len;
+#elif defined(CONFIG_DEV_URANDOM_RANDOM_POOL)
+  const unsigned int alignmask = sizeof(uint32_t) - 1;
+  const size_t initlen = len;
+  uint32_t tmp = 0;
+  size_t currlen;
+
+  if (!len)
+    {
+      return 0;
+    }
+
+  /* Seed entropy pool with data from user. */
+
+  if ((uintptr_t)buffer & alignmask)
+    {
+      /* Make unaligned input aligned. */
+
+      currlen = min(sizeof(uint32_t) - ((uintptr_t)buffer & alignmask), len);
+      memcpy(&tmp, buffer, currlen);
+      up_rngaddint(RND_SRC_SW, tmp);
+
+      len -= currlen;
+      buffer += currlen;
+    }
+
+  if (len >= sizeof(uint32_t))
+    {
+      /* Handle bulk aligned, word-sized data. */
+
+      DEBUGASSERT(((uintptr_t)buffer & alignmask) == 0);
+      currlen = len / sizeof(uint32_t);
+      up_rngaddentropy(RND_SRC_SW, (FAR uint32_t *)buffer, currlen);
+      buffer += currlen * sizeof(uint32_t);
+      len %= sizeof(uint32_t);
+    }
+
+  if (len > 0)
+    {
+      /* Handle trailing bytes. */
+
+      DEBUGASSERT(len < sizeof(uint32_t));
+      memcpy(&tmp, buffer, len);
+      up_rngaddint(RND_SRC_SW, tmp);
+    }
+
+  /* Reseeding of random number generator from entropy pool. */
+
+  up_rngreseed();
+
+  return initlen;
 #else
   len = min(len, sizeof(g_prng.u));
   memcpy(&g_prng.u, buffer, len);
@@ -274,6 +338,8 @@ void devurandom_register(void)
 
 #ifdef CONFIG_DEV_URANDOM_CONGRUENTIAL
   srand(10197);
+#elif defined(CONFIG_DEV_URANDOM_RANDOM_POOL)
+  up_randompool_initialize();
 #else
   g_prng.state.w = 97;
   g_prng.state.x = 101;

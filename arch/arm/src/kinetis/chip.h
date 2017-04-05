@@ -52,7 +52,7 @@
 
 /* If the common ARMv7-M vector handling logic is used, then it expects the
  * following definition in this file that provides the number of supported external
- * interrupts which, for this architecture, is provided in the arch/stm32f7/chip.h
+ * interrupts which, for this architecture, is provided in the arch/kinetis/chip.h
  * header file.
  */
 

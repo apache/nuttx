@@ -49,6 +49,7 @@
 #include <arch/irq.h>
 #include <nuttx/net/net.h>
 #include "socket/socket.h"
+#include "usrsock/usrsock.h"
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
@@ -164,6 +165,13 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
               ret |= O_NONBLOCK;
             }
 #endif /* CONFIG_NET_LOCAL || CONFIG_NET_TCP_READAHEAD || CONFIG_NET_UDP_READAHEAD */
+
+#ifdef CONFIG_NET_USRSOCK
+          if (psock->s_type == SOCK_USRSOCK_TYPE && _SS_ISNONBLOCK(psock->s_flags))
+            {
+              ret |= O_NONBLOCK;
+            }
+#endif
         }
         break;
 
@@ -178,7 +186,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
 
         {
 #if defined(CONFIG_NET_LOCAL) || defined(CONFIG_NET_TCP_READAHEAD) || \
-    defined(CONFIG_NET_UDP_READAHEAD)
+    defined(CONFIG_NET_UDP_READAHEAD) || defined(CONFIG_NET_USRSOCK)
            /* Non-blocking is the only configurable option.  And it applies
             * only Unix domain sockets and to read operations on TCP/IP
             * and UDP/IP sockets when read-ahead is enabled.
@@ -213,7 +221,22 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
             }
           else
 #endif
-#endif /* CONFIG_NET_LOCAL || CONFIG_NET_TCP_READAHEAD || CONFIG_NET_UDP_READAHEAD */
+#if defined(CONFIG_NET_USRSOCK)
+          if (psock->s_type == SOCK_USRSOCK_TYPE)  /* usrsock socket */
+            {
+               if ((mode & O_NONBLOCK) != 0)
+                 {
+                   psock->s_flags |= _SF_NONBLOCK;
+                 }
+               else
+                 {
+                   psock->s_flags &= ~_SF_NONBLOCK;
+                 }
+            }
+          else
+#endif
+#endif /* CONFIG_NET_LOCAL || CONFIG_NET_TCP_READAHEAD ||
+          CONFIG_NET_UDP_READAHEAD || CONFIG_NET_USRSOCK */
             {
               nerr("ERROR: Non-blocking not supported for this socket\n");
             }

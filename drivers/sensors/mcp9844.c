@@ -50,6 +50,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/mcp9844.h>
+#include <nuttx/random.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_MCP9844)
 
@@ -274,6 +275,10 @@ static int mcp9844_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           if (ret == OK)
             {
+              /* Feed sensor data to entropy pool */
+
+              add_sensor_randomness(raw_temperature);
+
               /* BIT15 - 13 contain information if preset temperature values
                * have been exceeded or undercut. BIT12 is now not any longer
                * needed since we do have the sign information retrieved.

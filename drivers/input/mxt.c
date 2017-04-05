@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/input/mxt.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,6 +64,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/random.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/input/touchscreen.h>
@@ -87,6 +88,10 @@
  */
 
 #define INVALID_POSITION 0x1000
+
+/* Maximum number of retries */
+
+#define MAX_RETRIES  3
 
 /* Get a 16-bit value in little endian order (not necessarily aligned).  The
  * source data is in little endian order.  The host byte order does not
@@ -311,7 +316,7 @@ static int mxt_getreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
 
   /* Try up to three times to read the register */
 
-  for (retries = 1; retries <= 3; retries++)
+  for (retries = 1; retries <= MAX_RETRIES; retries++)
     {
       iinfo("retries=%d regaddr=%04x buflen=%d\n", retries, regaddr, buflen);
 
@@ -342,15 +347,20 @@ static int mxt_getreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
       if (ret < 0)
         {
 #ifdef CONFIG_I2C_RESET
-          /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
+          /* Perhaps the I2C bus is locked up?  Try to shake the bus free.
+           * Don't bother with the reset if this was the last attempt.
+           */
 
-          iwarn("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
-
-          ret = I2C_RESET(priv->i2c);
-          if (ret < 0)
+          if (retries < MAX_RETRIES)
             {
-              ierr("ERROR: I2C_RESET failed: %d\n", ret);
-              break;
+              iwarn("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+
+              ret = I2C_RESET(priv->i2c);
+              if (ret < 0)
+                {
+                  ierr("ERROR: I2C_RESET failed: %d\n", ret);
+                  break;
+                }
             }
 #else
           ierr("ERROR: I2C_TRANSFER failed: %d\n", ret);
@@ -385,7 +395,7 @@ static int mxt_putreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
 
   /* Try up to three times to read the register */
 
-  for (retries = 1; retries <= 3; retries++)
+  for (retries = 1; retries <= MAX_RETRIES; retries++)
     {
       iinfo("retries=%d regaddr=%04x buflen=%d\n", retries, regaddr, buflen);
 
@@ -416,14 +426,19 @@ static int mxt_putreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
       if (ret < 0)
         {
 #ifdef CONFIG_I2C_RESET
-          /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
+          /* Perhaps the I2C bus is locked up?  Try to shake the bus free.
+           * Don't bother with the reset if this was the last attempt.
+           */
 
-          iwarn("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
-
-          ret = I2C_RESET(priv->i2c);
-          if (ret < 0)
+          if (retries < MAX_RETRIES)
             {
-              ierr("ERROR: I2C_RESET failed: %d\n", ret);
+              iwarn("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+
+              ret = I2C_RESET(priv->i2c);
+              if (ret < 0)
+                {
+                  ierr("ERROR: I2C_RESET failed: %d\n", ret);
+                }
             }
 #else
           ierr("ERROR: I2C_TRANSFER failed: %d\n", ret);
@@ -874,6 +889,8 @@ static void mxt_touch_event(FAR struct mxt_dev_s *priv,
       sample->area     = area;
       sample->pressure = pressure;
       sample->valid    = true;
+
+      add_ui_randomness((x << 16) ^ y ^ (area << 9) ^ (pressure << 1));
 
       /* If this is not the first touch report, then report it as a move:
        * Same contact, same ID, but with a new, updated position.

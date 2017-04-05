@@ -114,6 +114,17 @@ static inline FAR char *rindex(FAR const char *s, int c)
  ****************************************************************************/
 
 int ffs(int j);
+int ffsl(long j);
+#ifdef CONFIG_HAVE_LONG_LONG
+int ffsll(long long j);
+#endif
+
+int fls(int j);
+int flsl(long j);
+#ifdef CONFIG_HAVE_LONG_LONG
+int flsll(long long j);
+#endif
+
 int strcasecmp(FAR const char *, FAR const char *);
 int strncasecmp(FAR const char *, FAR const char *, size_t);
 

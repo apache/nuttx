@@ -50,6 +50,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/lsm9ds1.h>
+#include <nuttx/random.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SN_LSM9DS1)
 
@@ -1244,6 +1245,7 @@ static ssize_t lsm9ds1_read(FAR struct file *filep, FAR char *buffer,
   uint8_t                   regaddr;
   uint8_t                   lo;
   uint8_t                   hi;
+  uint32_t                  merge = 0;
 
   /* Sanity check */
 
@@ -1301,6 +1303,10 @@ static ssize_t lsm9ds1_read(FAR struct file *filep, FAR char *buffer,
 
           data = ((uint16_t)hi << 8) | (uint16_t)lo;
 
+          /* Collect entropy */
+
+          merge += data ^ (merge >> 16);
+
           /* The value is positive */
 
           if (data < 0x8000)
@@ -1328,6 +1334,10 @@ static ssize_t lsm9ds1_read(FAR struct file *filep, FAR char *buffer,
             }
         }
     }
+
+  /* Feed sensor data to entropy pool */
+
+  add_sensor_randomness(merge);
 
   return nsamples * samplesize;
 }

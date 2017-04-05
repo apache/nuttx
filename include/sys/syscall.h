@@ -418,12 +418,20 @@
 #  define SYS_pthread_mutex_lock       (__SYS_pthread+19)
 #  define SYS_pthread_mutex_trylock    (__SYS_pthread+20)
 #  define SYS_pthread_mutex_unlock     (__SYS_pthread+21)
-#  define SYS_pthread_once             (__SYS_pthread+22)
-#  define SYS_pthread_setschedparam    (__SYS_pthread+23)
-#  define SYS_pthread_setschedprio     (__SYS_pthread+24)
-#  define SYS_pthread_setspecific      (__SYS_pthread+25)
-#  define SYS_pthread_yield            (__SYS_pthread+26)
-#  define __SYS_pthread_smp            (__SYS_pthread+27)
+
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+#  define SYS_pthread_mutex_consistent (__SYS_pthread+22)
+#  define __SYS_pthread_once           (__SYS_pthread+23)
+#else
+#  define __SYS_pthread_once           (__SYS_pthread+22)
+#endif
+
+#  define SYS_pthread_once             (__SYS_pthread_once+0)
+#  define SYS_pthread_setschedparam    (__SYS_pthread_once+1)
+#  define SYS_pthread_setschedprio     (__SYS_pthread_once+2)
+#  define SYS_pthread_setspecific      (__SYS_pthread_once+3)
+#  define SYS_pthread_yield            (__SYS_pthread_once+4)
+#  define __SYS_pthread_smp            (__SYS_pthread_once+5)
 
 #  ifdef CONFIG_SMP
 #    define SYS_pthread_setaffinity_np (__SYS_pthread_smp+0)
@@ -516,10 +524,19 @@
 /* The following is defined only if CONFIG_TASK_NAME_SIZE > 0 */
 
 #if CONFIG_TASK_NAME_SIZE > 0
-#  define SYS_prctl                    (SYS_nnetsocket+0)
-#  define SYS_maxsyscall               (SYS_nnetsocket+1)
+#  define SYS_prctl                    (SYS_nnetsocket+1)
 #else
-#  define SYS_maxsyscall               SYS_nnetsocket
+#  define SYS_prctl                    SYS_nnetsocket
+#endif
+
+/* The following is defined only if entropy pool random number generator
+ * is enabled. */
+
+#ifdef CONFIG_CRYPTO_RANDOM_POOL
+#  define SYS_getrandom                (SYS_prctl+1)
+#  define SYS_maxsyscall               (SYS_prctl+2)
+#else
+#  define SYS_maxsyscall               SYS_prctl
 #endif
 
 /* Note that the reported number of system calls does *NOT* include the

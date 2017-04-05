@@ -81,5 +81,3 @@ int pthread_condattr_init(FAR pthread_condattr_t *attr)
   linfo("Returning %d\n", ret);
   return ret;
 }
-
-

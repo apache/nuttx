@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/olimex-stm32-p107/src/olimex-stm32-p407.h
+ * configs/olimex-stm32-p407/src/olimex-stm32-p407.h
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -159,11 +159,11 @@
  */
 
 #define GPIO_OTGFS_VBUS   (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTA|GPIO_PIN9)
-#define GPIO_OTGFS_PWRON  (GPIO_OUTPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTC|GPIO_PIN2)
+#define GPIO_OTGFS_PWRON  (GPIO_OUTPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
+                           GPIO_PUSHPULL|GPIO_PORTC|GPIO_PIN2)
 
 #ifdef CONFIG_USBHOST
 #  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTB|GPIO_PIN10)
-
 #else
 #  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTB|GPIO_PIN10)
 #endif
@@ -225,7 +225,7 @@ void stm32_stram_configure(void);
  *
  * Description:
  *   Called from stm32_boardinitialize very early in inialization to setup USB-related
- *   GPIO pins for the STM32F4Discovery board.
+ *   GPIO pins for the Olimex STM32 P407 board.
  *
  ************************************************************************************/
 

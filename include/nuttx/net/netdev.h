@@ -330,7 +330,7 @@ struct net_driver_s
   int (*d_addmac)(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
   int (*d_rmmac)(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
   int (*d_ioctl)(FAR struct net_driver_s *dev, int cmd, long arg);
 #endif
 
@@ -416,6 +416,11 @@ int ipv4_input(FAR struct net_driver_s *dev);
 
 #ifdef CONFIG_NET_IPv6
 int ipv6_input(FAR struct net_driver_s *dev);
+#endif
+
+#ifdef CONFIG_NET_6LOWPAN
+struct ieee802154_driver_s;  /* See sixlowpan.h */
+int sixlowpan_input(FAR struct ieee802154_driver_s *ieee);
 #endif
 
 /****************************************************************************

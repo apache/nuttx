@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated March 4, 2017)
+NuttX TODO List (Last updated March 26, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -14,12 +14,12 @@ nuttx/:
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
-  (2)  pthreads (sched/pthread)
+  (4)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
   (8)  Kernel/Protected Build
   (3)  C++ Support
   (6)  Binary loaders (binfmt/)
- (13)  Network (net/, drivers/net)
+ (14)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
  (12)  Libraries (libc/, libm/)
@@ -346,7 +346,7 @@ o Signals (sched/signal, arch/)
   Priority:    Low. Even if there are only 31 usable signals, that is still a lot.
 
 o pthreads (sched/pthreads)
-  ^^^^^^^^^^^^^^^^^
+  ^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       PTHREAD_PRIO_PROTECT
   Description: Extend pthread_mutexattr_setprotocol().  It should support
@@ -448,6 +448,30 @@ o pthreads (sched/pthreads)
   Status:      Not really open.  This is just the way it is.
   Priority:    Nothing additional is planned.
 
+  Title:       PTHREAD FILES IN WRONG LOCATTION
+  Description: There are many pthread interface functions in files located in
+               sched/pthread.  These should be moved from that location to
+               libc/pthread.  In the flat build, this really does not matter,
+               but in the protected build that location means that system calls
+               are required to access the pthread interface functions.
+  Status:      Open
+  Priority:    Medium-low. Priority may be higher if system call overheade becomes
+               an issue.
+
+  Title:       ROBUST MUTEX ATTRIBUTE NOT SUPPORTED
+  Description: In NuttX, all mutexes are 'robust' in the sense that an attmpt
+               to lock a mutex will return EOWNDERDEAD if the holder of the
+               mutex has died.  Unlocking of a mutex will fail if the caller
+               is not the holder of the mutex.
+
+               POSIX, however, requires that there be a mutex attribute called
+               robust that determines which behavior is supported.  non-robust
+               should be the default.  NuttX does not support this attribute
+               and robust behavior is the default and only supported behavior.
+  Status:      Open
+  Priority:    Low.  The non-robust behavior is dangerous and really should never
+               be used.
+
 o Message Queues (sched/mqueue)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -507,7 +531,7 @@ o Kernel/Protected Build
                in the nuttx/ directory.  However, the user interfaces must be
                moved into a NuttX library or into apps/.  Currently
                applications calls to the NxTerm user interfaces are
-               undefined.
+               undefined in the Kernel/Protected builds.
   Status:      Open
   Priority:    Medium
 
@@ -1065,6 +1089,20 @@ o Network (net/, drivers/net)
   Status:      Open
   Priority:    High if you happen to be using Ethernet in this configuration.
 
+  Title:       REPARTITION DRIVER FUNCTIONALITY
+  Description: Every network driver performs the first level of packet decoding.
+               It examines the packet header and calls ipv4_input(), ipv6_input().
+               icmp_input(), etc. as appropriate.  This is a maintenance problem
+               because it means that any changes to the network input interfaces
+               affects all drivers.
+
+               A better, more maintainable solution would use a single net_input()
+               function that would receive all incoming packets.  This function
+               would then perform that common packet decoding logic that is
+               currently implemented in every network driver.
+  Status:      Open
+  Priority:    Low.  Really just as aesthetic maintainability issue.
+
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1196,7 +1234,7 @@ o USB (drivers/usbdev, drivers/usbhost)
                from being usable:
 
               - The driver works fine when configured for reduced or bulk-
-                only protocol.
+                only protocol on the Olimex LPC1766STK.
 
               - Testing has not been performed with the interrupt IN channel
                 enabled (ie., I have not enabled FLOW control nor do I have
@@ -1221,6 +1259,32 @@ o USB (drivers/usbdev, drivers/usbhost)
                 Apparently the host driver is trashing memory on receipt
                 of data.
 
+                UPDATE:  This behavior needs to be retested with:
+                  commit ce2845c5c3c257d081f624857949a6afd4a4668a
+                  Author: Janne Rosberg <janne.rosberg@offcode.fi>
+                  Date:   Tue Mar 7 06:58:32 2017 -0600
+
+                    usbhost_cdcacm: fix tx outbuffer overflow and remove now
+                    invalid assert
+
+                  commit 3331e9c49aaaa6dcc3aefa6a9e2c80422ffedcd3
+                  Author: Janne Rosberg <janne.rosberg@offcode.fi>
+                  Date:   Tue Mar 7 06:57:06 2017 -0600
+
+                    STM32 OTGHS host:  stm32_in_transfer() fails and returns NAK
+                    if a short transfer is received.  This causes problems from
+                    class drivers like CDC/ACM where short packets are expected.
+                    In those protocols, any transfer may be terminated by sending
+                    short or NUL packet.
+
+                  commit 0631c1aafa76dbaa41b4c37e18db98be47b60481
+                  Author: Gregory Nutt <gnutt@nuttx.org>
+                  Date:   Tue Mar 7 07:17:24 2017 -0600
+
+                    STM32 OTGFS, STM32 L4 and F7: Adapt Janne Rosberg's patch to
+                    STM32 OTGHS host to OTGFS host, and to similar implements for
+                    L4 and F7.
+
               - The SAMA5D EHCI and the LPC31 EHCI drivers both take semaphores
                 in the cancel method.  The current CDC/ACM class driver calls
                 the cancel() method from an interrupt handler.  This will
@@ -1234,9 +1298,12 @@ o USB (drivers/usbdev, drivers/usbhost)
                configurations if you use it.
 
                That all being said, I know of know no issues with the current
-               CDC/ACM driver if the interrupt IN endpoint is not used, i.e.,
-               in "reduced" mode.  The only loss of functionality is output
-               flow control.
+               CDC/ACM driver on the Olimex LPC1766STK platform if the interrupt
+               IN endpoint is not used, i.e., in "reduced" mode.  The only loss
+               of functionality is output flow control.
+
+               UPDATE: The CDC/ACM class driver may also now be functional on
+               the STM32.  That needs to be verified.
 
   Status:      Open
   Priority:    Medium-Low unless you really need host CDC/ACM support.

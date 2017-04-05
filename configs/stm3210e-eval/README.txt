@@ -1092,9 +1092,6 @@ Where <subdir> is one of the following:
       -CONFIG_EXAMPLES_USBSERIAL=y
       +CONFIG_EXAMPLES_USBSERIAL=n
 
-      -CONFIG_EXAMPLES_USBTERM=n
-      +CONFIG_EXAMPLES_USBTERM=y
-
   usbmsc:
   -------
     This configuration directory exercises the USB mass storage

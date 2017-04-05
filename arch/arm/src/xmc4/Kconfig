@@ -1,0 +1,346 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "XMC4xxx Configuration Options"
+
+choice
+	prompt "XMC4xxx Chip Selection"
+	default ARCH_CHIP_XMC4500
+	depends on ARCH_CHIP_XMC4
+
+config ARCH_CHIP_XMC4500
+	bool "XMC4500"
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_XMC4700
+	bool "XMC4700"
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_XMC4800
+	bool "XMC4800"
+	select ARCH_HAVE_FPU
+
+endchoice
+
+# These "hidden" settings determine is a peripheral option is available for
+# the selection MCU
+
+
+# When there are multiple instances of a device, these "hidden" settings
+# will automatically be selected and will represent the 'OR' of the
+# instances selected.
+
+config XMC4_USIC
+	bool
+	default n
+
+config XMC4_USCI_UART
+	bool
+	default n
+	select MCU_SERIAL
+
+config XMC4_USCI_LIN
+	bool
+	default n
+
+config XMC4_USCI_SPI
+	bool
+	default n
+
+config XMC4_USCI_I2C
+	bool
+	default n
+
+config XMC4_USCI_I2S
+	bool
+	default n
+
+# Chip families
+
+menu "XMC4xxx Peripheral Support"
+
+config XMC4_USIC0
+	bool "USIC0"
+	default n
+	select XMC4_USIC
+	---help---
+		Support USIC0
+
+config XMC4_USIC1
+	bool "USIC1"
+	default n
+	---help---
+		Support USIC1
+
+config XMC4_USIC2
+	bool "USIC2"
+	default n
+	select XMC4_USIC
+	---help---
+		Support USIC2
+
+endmenu
+
+menu "XMC4xxx USIC Configuration"
+	depends on XMC4_USIC
+
+choice
+	prompt "USIC0 Channel 0 Configuration"
+	default XMC4_USIC0_CHAN0_ISUART
+	depends on XMC4_USIC0
+
+config XMC4_USIC0_CHAN0_NONE
+	bool "Not used"
+	---help---
+		USIC0 Channel 0 will not be enabled
+
+config XMC4_USIC0_CHAN0_ISUART
+	bool "UART0"
+	select UART0_SERIALDRIVER
+	select XMC4_USCI_UART
+	---help---
+		Configure USIC0 Channel 0 as a UART
+
+config XMC4_USIC0_CHAN0_ISLIN
+	bool "LIN"
+	select XMC4_USCI_LIN
+	---help---
+		Configure USIC0 Channel 0 as a LIN UART
+
+config XMC4_USIC0_CHAN0_ISSPI
+	bool "SPI"
+	select XMC4_USCI_SPI
+	---help---
+		Configure USIC0 Channel 0 for SPI communications
+
+config XMC4_USIC0_CHAN0_ISI2C
+	bool "I2C"
+	select XMC4_USCI_I2C
+	---help---
+		Configure USIC0 Channel 0 for I2C communications
+
+config XMC4_USIC0_CHAN0_ISI2S
+	bool "I2S"
+	select XMC4_USCI_I2S
+	---help---
+		Configure USIC0 Channel 0 for I2S audio
+
+endchoice # USIC0 Channel 0 Configuration
+
+choice
+	prompt "USIC0 Channel 1 Configuration"
+	default XMC4_USIC0_CHAN1_ISUART
+	depends on XMC4_USIC0
+
+config XMC4_USIC0_CHAN1_NONE
+	bool "Not used"
+	---help---
+		USIC0 Channel 1 will not be enabled
+
+config XMC4_USIC0_CHAN1_ISUART
+	bool "UART1"
+	select UART1_SERIALDRIVER
+	select XMC4_USCI_UART
+	---help---
+		Configure USIC0 Channel 1 as a UART
+
+config XMC4_USIC0_CHAN1_ISLIN
+	bool "LIN"
+	select XMC4_USCI_LIN
+	---help---
+		Configure USIC0 Channel 1 as a LIN UART
+
+config XMC4_USIC0_CHAN1_ISSPI
+	bool "SPI"
+	select XMC4_USCI_SPI
+	---help---
+		Configure USIC0 Channel 1 for SPI communications
+
+config XMC4_USIC0_CHAN1_ISI2C
+	bool "I2C"
+	select XMC4_USCI_I2C
+	---help---
+		Configure USIC0 Channel 1 for I2C communications
+
+config XMC4_USIC0_CHAN1_ISI2S
+	bool "I2S"
+	select XMC4_USCI_I2S
+	---help---
+		Configure USIC0 Channel 1 for I2S audio
+
+endchoice # USIC0 Channel 1 Configuration
+
+choice
+	prompt "USIC1 Channel 0 Configuration"
+	default XMC4_USIC1_CHAN0_ISUART
+	depends on XMC4_USIC1
+
+config XMC4_USIC1_CHAN0_NONE
+	bool "Not used"
+	---help---
+		USIC0 Channel 0 will not be enabled
+
+config XMC4_USIC1_CHAN0_ISUART
+	bool "UART2"
+	select UART2_SERIALDRIVER
+	select XMC4_USCI_UART
+	---help---
+		Configure USIC1 Channel 0 as a UART
+
+config XMC4_USIC1_CHAN0_ISLIN
+	bool "LIN"
+	select XMC4_USCI_LIN
+	---help---
+		Configure USIC1 Channel 0 as a LIN UART
+
+config XMC4_USIC1_CHAN0_ISSPI
+	bool "SPI"
+	select XMC4_USCI_SPI
+	---help---
+		Configure USIC1 Channel 0 for SPI communications
+
+config XMC4_USIC1_CHAN0_ISI2C
+	bool "I2C"
+	select XMC4_USCI_I2C
+	---help---
+		Configure USIC1 Channel 0 for I2C communications
+
+config XMC4_USIC1_CHAN0_ISI2S
+	bool "I2S"
+	select XMC4_USCI_I2S
+	---help---
+		Configure USIC1 Channel 0 for I2S audio
+
+endchoice # USIC1 Channel 0 Configuration
+
+choice
+	prompt "USIC1 Channel 1 Configuration"
+	default XMC4_USIC1_CHAN1_ISUART
+	depends on XMC4_USIC1
+
+config XMC4_USIC1_CHAN1_NONE
+	bool "Not used"
+	---help---
+		USIC0 Channel 1 will not be enabled
+
+config XMC4_USIC1_CHAN1_ISUART
+	bool "UART3"
+	select UART3_SERIALDRIVER
+	select XMC4_USCI_UART
+	---help---
+		Configure USIC1 Channel 1 as a UART
+
+config XMC4_USIC1_CHAN1_ISLIN
+	bool "LIN"
+	select XMC4_USCI_LIN
+	---help---
+		Configure USIC1 Channel 1 as a LIN UART
+
+config XMC4_USIC1_CHAN1_ISSPI
+	bool "SPI"
+	select XMC4_USCI_SPI
+	---help---
+		Configure USIC1 Channel 1 for SPI communications
+
+config XMC4_USIC1_CHAN1_ISI2C
+	bool "I2C"
+	select XMC4_USCI_I2C
+	---help---
+		Configure USIC1 Channel 1 for I2C communications
+
+config XMC4_USIC1_CHAN1_ISI2S
+	bool "I2S"
+	select XMC4_USCI_I2S
+	---help---
+		Configure USIC1 Channel 1 for I2S audio
+
+endchoice # USIC1 Channel 1 Configuration
+
+choice
+	prompt "USIC2 Channel 0 Configuration"
+	default XMC4_USIC2_CHAN0_ISUART
+	depends on XMC4_USIC2
+
+config XMC4_USIC2_CHAN0_NONE
+	bool "Not used"
+	---help---
+		USIC0 Channel 0 will not be enabled
+
+config XMC4_USIC2_CHAN0_ISUART
+	bool "UART4"
+	select UART4_SERIALDRIVER
+	select XMC4_USCI_UART
+	---help---
+		Configure USIC2 Channel 0 as a UART
+
+config XMC4_USIC2_CHAN0_ISLIN
+	bool "LIN"
+	select XMC4_USCI_LIN
+	---help---
+		Configure USIC2 Channel 0 as a LIN UART
+
+config XMC4_USIC2_CHAN0_ISSPI
+	bool "SPI"
+	select XMC4_USCI_SPI
+	---help---
+		Configure USIC2 Channel 0 for SPI communications
+
+config XMC4_USIC2_CHAN0_ISI2C
+	bool "I2C"
+	select XMC4_USCI_I2C
+	---help---
+		Configure USIC2 Channel 0 for I2C communications
+
+config XMC4_USIC2_CHAN0_ISI2S
+	bool "I2S"
+	select XMC4_USCI_I2S
+	---help---
+		Configure USIC2 Channel 0 for I2S audio
+
+endchoice # USIC2 Channel 0 Configuration
+
+choice
+	prompt "USIC2 Channel 1 Configuration"
+	default XMC4_USIC2_CHAN1_ISUART
+	depends on XMC4_USIC2
+
+config XMC4_USIC2_CHAN1_NONE
+	bool "Not used"
+	---help---
+		USIC0 Channel 1 will not be enabled
+
+config XMC4_USIC2_CHAN1_ISUART
+	bool "UART5"
+	select UART5_SERIALDRIVER
+	select XMC4_USCI_UART
+	---help---
+		Configure USIC2 Channel 1 as a UART
+
+config XMC4_USIC2_CHAN1_ISLIN
+	bool "LIN"
+	select XMC4_USCI_LIN
+	---help---
+		Configure USIC2 Channel 1 as a LIN UART
+
+config XMC4_USIC2_CHAN1_ISSPI
+	bool "SPI"
+	select XMC4_USCI_SPI
+	---help---
+		Configure USIC2 Channel 1 for SPI communications
+
+config XMC4_USIC2_CHAN1_ISI2C
+	bool "I2C"
+	select XMC4_USCI_I2C
+	---help---
+		Configure USIC2 Channel 1 for I2C communications
+
+config XMC4_USIC2_CHAN1_ISI2S
+	bool "I2S"
+	select XMC4_USCI_I2S
+	---help---
+		Configure USIC2 Channel 1 for I2S audio
+
+endchoice # USIC2 Channel 1 Configuration
+endmenu # XMC4xxx USIC Configuration

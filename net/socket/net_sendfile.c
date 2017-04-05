@@ -72,6 +72,8 @@
 #include "tcp/tcp.h"
 #include "socket/socket.h"
 
+#ifdef NET_TCP_HAVE_STACK
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -615,6 +617,21 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
       goto errout;
     }
 
+#ifdef CONFIG_NET_USRSOCK
+  /* If this is a usrsock socket, use generic sendfile implementation. */
+
+  if (psock->s_type == SOCK_USRSOCK_TYPE)
+    {
+      int infd;
+
+      list = sched_getfiles();
+      DEBUGASSERT(list != NULL);
+
+      infd = infile - list->fl_files;
+      return lib_sendfile(outfd, infd, offset, count);
+    }
+#endif /* CONFIG_NET_USRSOCK */
+
   /* If this is an un-connected socket, then return ENOTCONN */
 
   if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
@@ -775,5 +792,7 @@ errout:
       return state.snd_sent;
     }
 }
+
+#endif /* NET_TCP_HAVE_STACK */
 
 #endif /* CONFIG_NET && CONFIG_NET_TCP */

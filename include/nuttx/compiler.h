@@ -64,6 +64,18 @@
 
 # define UNUSED(a) ((void)(a))
 
+/* Built-in functions */
+
+/* GCC 4.x have __builtin_ctz(|l|ll) and __builtin_clz(|l|ll). These count
+ * trailing/leading zeros of input number and typically will generate few
+ * fast bit-counting instructions. Inputting zero to these functions is
+ * undefined and needs to be taken care of by the caller. */
+
+#if __GNUC__ >= 4
+#  define CONFIG_HAVE_BUILTIN_CTZ 1
+#  define CONFIG_HAVE_BUILTIN_CLZ 1
+#endif
+
 /* Attributes
  *
  * GCC supports weak symbols which can be used to reduce code size because

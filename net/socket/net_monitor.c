@@ -50,6 +50,8 @@
 #include "tcp/tcp.h"
 #include "socket/socket.h"
 
+#ifdef NET_TCP_HAVE_STACK
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -344,5 +346,7 @@ void net_lostconnection(FAR struct socket *psock, uint16_t flags)
   net_stopmonitor((FAR struct tcp_conn_s *)psock->s_conn);
   net_unlock();
 }
+
+#endif /* NET_TCP_HAVE_STACK */
 
 #endif /* CONFIG_NET && CONFIG_NET_TCP */

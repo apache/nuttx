@@ -121,9 +121,9 @@ static inline void _local_semtake(sem_t *sem)
  *
  ****************************************************************************/
 
-int inline local_stream_connect(FAR struct local_conn_s *client,
-                                FAR struct local_conn_s *server,
-                                bool nonblock)
+static int inline local_stream_connect(FAR struct local_conn_s *client,
+                                       FAR struct local_conn_s *server,
+                                       bool nonblock)
 {
   int ret;
 

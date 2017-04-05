@@ -46,4 +46,60 @@
 #include "chip.h"
 #include "chip/stm32_flash.h"
 
+/************************************************************************************
+ * Public Function Prototypes
+ ************************************************************************************/
+
+/************************************************************************************
+ * Name: stm32_eeprom_size
+ *
+ * Description:
+ *   Get EEPROM data memory size
+ *
+ * Returns:
+ *  Length of EEPROM memory region
+ *
+ ************************************************************************************/
+
+size_t stm32_eeprom_size(void);
+
+/************************************************************************************
+ * Name: stm32_eeprom_getaddress
+ *
+ * Description:
+ *   Get EEPROM data memory address
+ *
+ * Returns:
+ *  Address of EEPROM memory region
+ *
+ ************************************************************************************/
+
+size_t stm32_eeprom_getaddress(void);
+
+/************************************************************************************
+ * Name: stm32_eeprom_write
+ *
+ * Description:
+ *    Write buffer to EEPROM data memory address
+ *
+ * Returns:
+ *  Number of written bytes or error code.
+ *
+ ************************************************************************************/
+
+ssize_t stm32_eeprom_write(size_t addr, const void *buf, size_t buflen);
+
+/************************************************************************************
+ * Name: stm32_eeprom_erase
+ *
+ * Description:
+ *    Erase memory on EEPROM data memory address
+ *
+ * Returns:
+ *  Number of erased bytes or error code.
+ *
+ ************************************************************************************/
+
+ssize_t stm32_eeprom_erase(size_t addr, size_t eraselen);
+
 #endif /* __ARCH_ARM_SRC_STM32_STM32_FLASH_H */

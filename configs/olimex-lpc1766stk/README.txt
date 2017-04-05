@@ -933,61 +933,6 @@ Configuration Sub-Directories
        CONFIG_DEBUG_INFO=y
        CONFIG_DEBUG_FTPC=y
 
-  hidkbd:
-    This configuration directory, performs a simple test of the USB host
-    HID keyboard class driver using the test logic in apps/examples/hidkbd.
-
-    NOTES:
-
-    1. Default platform/toolchain: This is how the build is configured by
-       be default.  These options can easily be re-confured, however.
-
-       CONFIG_HOST_WINDOWS=y                   : Windows
-       CONFIG_WINDOWS_CYGWIN=y                 : Cygwin environment on Windows
-       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
-
-    2. I used this configuration to test the USB hub class.  I did this
-       testing with the following changes to the configuration:
-
-       Drivers -> USB Host Driver Support
-         CONFIG_USBHOST_HUB=y                  : Enable the hub class
-         CONFIG_USBHOST_ASYNCH=y               : Asynchonous I/O supported needed for hubs
-
-       System Type -> USB host configuration
-         CONFIG_LPC17_USBHOST_NASYNCH=8        : Allow up to 8 asynchronous requests
-         CONFIG_USBHOST_NEDS=3                 : Increase number of endpoint descriptors from 2
-         CONFIG_USBHOST_NTDS=4                 : Increase number of transfer descriptors from 3
-         CONFIG_USBHOST_TDBUFFERS=4            : Increase number of transfer buffers from 3
-         CONFIG_USBHOST_IOBUFSIZE=256          : Decrease the size of I/O buffers from 512
-
-       RTOS Features -> Work Queue Support
-         CONFIG_SCHED_LPWORK=y         : Low priority queue support is needed
-         CONFIG_SCHED_LPNTHREADS=1
-         CONFIG_SCHED_LPWORKSTACKSIZE=1024
-
-       NOTES:
-
-       1. It is necessary to perform work on the low-priority work queue
-          (vs. the high priority work queue) because deferred hub-related
-          work requires some delays and waiting that is not appropriate on
-          the high priority work queue.
-
-       2. I also increased some stack sizes.  These values are not tuned.
-          When I ran into stack size issues, I just increased the size of
-          all threads that had smaller stacks.
-
-          CONFIG_EXAMPLES_HIDKBD_STACKSIZE=2048    : Was 1024
-          CONFIG_HIDKBD_STACKSIZE=2048             : Was 1024
-          CONFIG_SCHED_HPWORKSTACKSIZE=2048        : Was 1024 (1024 is probably ok)
-          CONFIG_LPC1766STK_USBHOST_STACKSIZE=1536 | Was 1024
-
-       STATUS:
-         2015-05-03: The hub basically works.  The only problem that I see is
-                     that the code does not enumerate the hub if it is
-                     connected at the time of reset up.  It does not a power-up
-                     reset, but not with the reset button.  This sounds like
-                     a hardwares reset issue on the board to me.
-
   hidmouse:
     This configuration directory supports a variant of an NSH configution.
     It is set up to perform the touchscreen test at apps/examples/touchscreen

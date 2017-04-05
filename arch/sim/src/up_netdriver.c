@@ -209,7 +209,7 @@ void netdriver_loop(void)
             {
               pkt_input(&g_sim_dev);
             }
-#endif
+#endif /* CONFIG_NET_PKT */
 
           /* We only accept IP packets of the configured type and ARP packets */
 
@@ -253,7 +253,7 @@ void netdriver_loop(void)
                 }
             }
           else
-#endif
+#endif /* CONFIG_NET_IPv4 */
 #ifdef CONFIG_NET_IPv6
           if (eth->type == HTONS(ETHTYPE_IP6) && is_ours)
             {
@@ -283,7 +283,7 @@ void netdriver_loop(void)
                     {
                       neighbor_out(&g_sim_dev);
                     }
-#endif
+#endif /* CONFIG_NET_IPv6 */
 
                   /* And send the packet */
 
@@ -291,7 +291,7 @@ void netdriver_loop(void)
                 }
             }
           else
-#endif
+#endif/* CONFIG_NET_IPv6 */
 #ifdef CONFIG_NET_ARP
           if (eth->type == htons(ETHTYPE_ARP))
             {
@@ -307,7 +307,11 @@ void netdriver_loop(void)
                   netdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
                 }
             }
+          else
 #endif
+           {
+             nwarn("WARNING: Unsupported Ethernet type %u\n", eth->type)
+           }
         }
     }
 

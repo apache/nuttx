@@ -47,6 +47,7 @@
 #include <nuttx/board.h>
 #include <nuttx/clock.h>
 #include <nuttx/timers/oneshot.h>
+#include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
 
 #include "up_internal.h"
 #include "sim.h"
@@ -136,6 +137,16 @@ int sim_bringup(void)
     {
       _err("ERROR: Failed to mount procfs at %s: %d\n",
            SIM_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
+#ifdef CONFIG_IEEE802154_LOOPBACK
+  /* Initialize and register the IEEE802.15.4 MAC network loop device */
+
+  ret = ieee8021514_loopback();
+  if (ret < 0)
+    {
+      _err("ERROR: ieee8021514_loopback() failed: %d\n", ret);
     }
 #endif
 

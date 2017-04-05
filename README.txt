@@ -197,6 +197,9 @@ Ubuntu Bash under Windows 10
 
     C:\Users\Username\AppData\Local\lxss\rootfs
 
+  However, I am unable to see my files under the rootfs/home directory
+  so this is not very useful.
+
   Install Linux Software.
   -----------------------
   Use "sudo apt-get install <package name>".  As examples, this is how
@@ -461,9 +464,9 @@ Notes about Header Files
 
     Certain header files, such as setjmp.h, stdarg.h, and math.h, may still
     be needed from your toolchain and your compiler may not, however, be able
-    to find these if you compile NuttX without using standard header file.
-    If that is the case, one solution is to copy those header file from
-    your toolchain into the NuttX include directory.
+    to find these if you compile NuttX without using standard header files
+    (ie., with -nostdinc).  If that is the case, one solution is to copy
+    those header file from your toolchain into the NuttX include directory.
 
   Duplicated Header Files.
 
@@ -1453,6 +1456,8 @@ nuttx/
  |   |   `- README.txt
  |   |- cc3200-launchpad/
  |   |   `- README.txt
+ |   |- clicker2-stm32
+ |   |   `- README.txt
  |   |- cloudctrl
  |   |   `- README.txt
  |   |- demo0s12ne64/
@@ -1680,6 +1685,8 @@ nuttx/
  |   |- us7032evb1/
  |   |   `- README.txt
  |   |- viewtool-stm32f107/
+ |   |   `- README.txt
+ |   |- xmc5400-relax/
  |   |   `- README.txt
  |   |- xtrs/
  |   |   `- README.txt

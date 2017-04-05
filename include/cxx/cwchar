@@ -41,6 +41,7 @@
 //***************************************************************************
 
 #include <wchar.h>
+#include <stdlib.h>
 
 //***************************************************************************
 // Namespace
@@ -79,6 +80,7 @@ namespace std
   using ::mbrlen;
   using ::mbrtowc;
   using ::mbsrtowcs;
+  using ::mbtowc;
   using ::putwc;
   using ::putwchar;
   using ::swprintf;
@@ -89,6 +91,7 @@ namespace std
   using ::vfwprintf;
   using ::vwprintf;
   using ::vswprintf;
+  using ::wcstold;
   using ::wcrtomb;
   using ::wcscat;
   using ::wcschr;
@@ -109,13 +112,17 @@ namespace std
   using ::wcsspn;
   using ::wcsstr;
   using ::wcstod;
+  using ::wcstof;
   using ::wcstok;
   using ::wcstol;
+  using ::wcstoll;
   using ::wcstoul;
+  using ::wcstoull;
   using ::wcswcs;
   using ::wcswidth;
   using ::wcsxfrm;
   using ::wctob;
+  using ::wctomb;
   using ::wctype;
   using ::wcwidth;
   using ::wmemchr;

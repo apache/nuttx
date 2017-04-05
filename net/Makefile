@@ -67,11 +67,12 @@ include pkt/Make.defs
 include local/Make.defs
 include tcp/Make.defs
 include udp/Make.defs
-include 6lowpan/Make.defs
+include sixlowpan/Make.defs
 include devif/Make.defs
 include loopback/Make.defs
 include route/Make.defs
 include procfs/Make.defs
+include usrsock/Make.defs
 include utils/Make.defs
 endif
 

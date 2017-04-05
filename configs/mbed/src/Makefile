@@ -54,8 +54,4 @@ ifeq ($(CONFIG_ADC),y)
 CSRCS += lpc17_adc.c
 endif
 
-ifeq ($(CONFIG_EXAMPLES_HIDKBD),y)
-CSRCS += lpc17_hidkbd.c
-endif
-
 include $(TOPDIR)/configs/Board.mk

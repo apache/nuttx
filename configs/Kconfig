@@ -60,6 +60,15 @@ config ARCH_BOARD_C5471EVM
 		NuttX runs on the ARM core and is built with a GNU arm-nuttx-elf toolchain*.
 		This port is complete and verified.
 
+config ARCH_BOARD_CLICKER2_STM32
+	bool "Mikrow Clicker2 STM32"
+	depends on ARCH_CHIP_STM32F407VG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Mikroe Clicker2 STM32 board based on the STMicro STM32F407VGT6 MCU.
+
 config ARCH_BOARD_CLOUDCTRL
 	bool "Darcy's CloudController stm32f10x board"
 	depends on ARCH_CHIP_STM32F107VC
@@ -154,6 +163,16 @@ config ARCH_BOARD_ESP32CORE
 		bus of these CPUs. With some minor exceptions, the address mapping
 		of two CPUs is symmetric, meaning they use the same addresses to
 		access the same memory.
+
+config ARCH_BOARD_EZ80F910200KITG
+	bool "ZiLOG ez80f910200kitg development kit"
+	depends on ARCH_CHIP_EZ80F91
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		ez80Acclaim! Microcontroller.  This port use the Zilog ez80f910200kitg
+		development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
+		tools.  The development environment is Cygwin under WinXP.
 
 config ARCH_BOARD_EZ80F910200ZCO
 	bool "ZiLOG ez80f910200zco development kit"
@@ -946,6 +965,17 @@ config ARCH_BOARD_SPARK
 		(http://www.spark.io).  This board features the STM32103CBT6
 		MCU from STMicro.
 
+config ARCH_BOARD_PHOTON
+	bool "Photon wifi board"
+	depends on ARCH_CHIP_STM32F205RG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		A configuration for the Photon from Particle Devices
+		(https://www.particle.io). This board features the STM32F205RGY6
+		MCU from STMicro.
+
 config ARCH_BOARD_STM32_BUTTERFLY2
 	bool "Kamami STM32Butterfly2 development board"
 	depends on ARCH_CHIP_STM32F107VC
@@ -1249,6 +1279,15 @@ config ARCH_BOARD_VIEWTOOL_STM32F107
 		board may be fitted with either: (1) STM32F107VCT6 or (2) STM32F103VCT6.
 		See http://www.viewtool.com/ for further information.
 
+config ARCH_BOARD_XMC4500RELAX
+	bool "Infineon XMC4500 Relax"
+	depends on ARCH_CHIP_XMC4500
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Infineon XMC4000 Relax Lite v1
+
 config ARCH_BOARD_XTRS
 	bool "XTRS TRS80 Model 3 emulation"
 	depends on ARCH_CHIP_Z80
@@ -1393,6 +1432,7 @@ config ARCH_BOARD
 	default "avr32dev1"                if ARCH_BOARD_AVR32DEV1
 	default "bambino-200e"             if ARCH_BOARD_BAMBINO_200E
 	default "c5471evm"                 if ARCH_BOARD_C5471EVM
+	default "clicker2-stm32"           if ARCH_BOARD_CLICKER2_STM32
 	default "cloudctrl"                if ARCH_BOARD_CLOUDCTRL
 	default "demo9s12ne64"             if ARCH_BOARD_DEMOS92S12NEC64
 	default "dk-tm4c129x"              if ARCH_BOARD_DK_TM4C129X
@@ -1479,6 +1519,7 @@ config ARCH_BOARD
 	default "shenzhou"                 if ARCH_BOARD_SHENZHOU
 	default "skp16c26"                 if ARCH_BOARD_SKP16C26
 	default "spark"                    if ARCH_BOARD_SPARK
+	default "photon"                   if ARCH_BOARD_PHOTON
 	default "stm32butterfly2"          if ARCH_BOARD_STM32_BUTTERFLY2
 	default "stm32_tiny"               if ARCH_BOARD_STM32_TINY
 	default "stm32f103-minimum"        if ARCH_BOARD_STM32F103_MINIMUM
@@ -1509,6 +1550,7 @@ config ARCH_BOARD
 	default "ubw32"                    if ARCH_BOARD_UBW32
 	default "us7032evb1"               if ARCH_BOARD_US7032EVB1
 	default "viewtool-stm32f107"       if ARCH_BOARD_VIEWTOOL_STM32F107
+	default "xmc4500-relax"            if ARCH_BOARD_XMC4500RELAX
 	default "xtrs"                     if ARCH_BOARD_XTRS
 	default "z16f2800100zcog"          if ARCH_BOARD_Z16F2800100ZCOG
 	default "z80sim"                   if ARCH_BOARD_Z80SIM
@@ -1571,6 +1613,9 @@ source "configs/bambino-200e/Kconfig"
 endif
 if ARCH_BOARD_C5471EVM
 source "configs/c5471evm/Kconfig"
+endif
+if ARCH_BOARD_CLICKER2_STM32
+source "configs/clicker2-stm32/Kconfig"
 endif
 if ARCH_BOARD_CLOUDCTRL
 source "configs/cloudctrl/Kconfig"
@@ -1827,6 +1872,9 @@ endif
 if ARCH_BOARD_SPARK
 source "configs/spark/Kconfig"
 endif
+if ARCH_BOARD_PHOTON
+source "configs/photon/Kconfig"
+endif
 if ARCH_BOARD_STM32_BUTTERFLY2
 source "configs/stm32butterfly2/Kconfig"
 endif
@@ -1911,6 +1959,9 @@ endif
 if ARCH_BOARD_VIEWTOOL_STM32F107
 source "configs/viewtool-stm32f107/Kconfig"
 endif
+if ARCH_BOARD_XMC4500RELAX
+source "configs/xmc4500-relax/Kconfig"
+endif
 if ARCH_BOARD_XTRS
 source "configs/xtrs/Kconfig"
 endif
@@ -1963,6 +2014,27 @@ config BOARD_RESET_ON_CRASH
 	---help---
 		If selected the board_crashdump should reset the machine after
 		saveing the state of the machine
+
+config BOARD_ENTROPY_POOL
+	bool "Enable Board level storing of entropy pool structure"
+	default n
+	depends on CRYPTO_RANDOM_POOL
+	---help---
+		Entropy pool structure can be provided by board source.
+		Use for this is, for example, to allocate entropy pool
+		from special area of RAM which content is kept over
+		system reset.
+
+config BOARD_INITRNGSEED
+	bool "Enable Board level initial seeding of entropy pool RNG"
+	default n
+	depends on CRYPTO_RANDOM_POOL
+	---help---
+		If enabled, entropy pool random number generator will call
+		board_init_rndseed() upon initialization. This function
+		can then provide early entropy seed to the pool through
+		entropy injection APIs provided at 'nuttx/random.h'.
+#endif
 
 config LIB_BOARDCTL
 	bool "Enable boardctl() interface"

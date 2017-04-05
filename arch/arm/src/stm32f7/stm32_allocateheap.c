@@ -126,7 +126,7 @@
 #  endif
 #endif
 
-/* There are 4 possible heap configurations:
+/* There are 5 possible heap configurations:
  *
  * Configuration 1. System SRAM1 (only)
  *                  CONFIG_MM_REGIONS == 1

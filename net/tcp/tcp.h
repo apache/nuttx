@@ -48,11 +48,14 @@
 #include <nuttx/net/iob.h>
 #include <nuttx/net/ip.h>
 
-#ifdef CONFIG_NET_TCP
+#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define NET_TCP_HAVE_STACK 1
+
 /* Conditions for support TCP poll/select operations */
 
 #if !defined(CONFIG_DISABLE_POLL) && CONFIG_NSOCKET_DESCRIPTORS > 0 && \
@@ -1306,5 +1309,5 @@ int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
 }
 #endif
 
-#endif /* CONFIG_NET_TCP */
+#endif /* CONFIG_NET_TCP && !CONFIG_NET_TCP_NO_STACK */
 #endif /* _NET_TCP_TCP_H */
