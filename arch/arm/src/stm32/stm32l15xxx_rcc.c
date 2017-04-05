@@ -579,12 +579,11 @@ static void stm32_stdclockconfig(void)
 
 #endif
 
-  /* Enable the source clock for the PLL (via HSE or HSI), HSE, and HSI.
-   * NOTE that only PLL, HSE, or HSI are supported for the system clock
-   * in this implementation
-   */
+  /* Enable the source clock for the PLL (via HSE or HSI), HSE, and HSI. */
 
-#if (STM32_CFGR_PLLSRC == RCC_CFGR_PLLSRC) || (STM32_SYSCLK_SW == RCC_CFGR_SW_HSE)
+#if (STM32_SYSCLK_SW == RCC_CFGR_SW_HSE) || \
+    ((STM32_SYSCLK_SW == RCC_CFGR_SW_PLL) && (STM32_CFGR_PLLSRC == RCC_CFGR_PLLSRC))
+
   /* The PLL is using the HSE, or the HSE is the system clock.  In either
    * case, we need to enable HSE clocking.
    */
@@ -599,7 +598,9 @@ static void stm32_stdclockconfig(void)
       return;
     }
 
-#elif (STM32_CFGR_PLLSRC == 0) || (STM32_SYSCLK_SW == RCC_CFGR_SW_HSI)
+#elif (STM32_SYSCLK_SW == RCC_CFGR_SW_HSI) || \
+      ((STM32_SYSCLK_SW == RCC_CFGR_SW_PLL) && STM32_CFGR_PLLSRC == 0)
+
   /* The PLL is using the HSI, or the HSI is the system clock.  In either
    * case, we need to enable HSI clocking.
    */
@@ -615,6 +616,8 @@ static void stm32_stdclockconfig(void)
   while ((getreg32(STM32_RCC_CR) & RCC_CR_HSIRDY) == 0);
 
 #endif
+
+#if (STM32_SYSCLK_SW != RCC_CFGR_SW_MSI)
 
   /* Increasing the CPU frequency (in the same voltage range):
    *
@@ -650,6 +653,8 @@ static void stm32_stdclockconfig(void)
 
   regval |= FLASH_ACR_PRFTEN;
   putreg32(regval, STM32_FLASH_ACR);
+
+#endif /* STM32_SYSCLK_SW != RCC_CFGR_SW_MSI */
 
   /* Set the HCLK source/divider */
 
