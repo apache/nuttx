@@ -225,13 +225,6 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
   systime_t elapsed;          /* Elapsed time */
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
-  /* Initialize global data.  Locking the network guarantees that we have
-   * exclusive use of the global values for intermediate calculations.
-   */
-
-  g_uncomp_hdrlen = 0;
-  g_frame_hdrlen  = 0;
-
   /* Get a pointer to the payload following the IEEE802.15.4 frame header. */
 
   hdrsize = sixlowpan_recv_hdrlen(iob->io_data);
@@ -240,6 +233,15 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       nwarn("Invalid IEEE802.15.2 header: %d\n", hdrsize);
       return hdrsize;
     }
+
+  /* Initialize global data.  Locking the network guarantees that we have
+   * exclusive use of the global values for intermediate calculations.
+   */
+
+  g_uncomp_hdrlen = 0;
+  g_frame_hdrlen  = hdrsize;
+
+  /* Payload starts after the IEEE802.15.4 header */
 
   payptr = &iob->io_data[hdrsize];
 
@@ -438,7 +440,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
   /* Process next dispatch and headers */
 
-  hc1 = payptr + g_frame_hdrlen;
+  hc1 = &iob->io_data[g_frame_hdrlen];
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
   if ((hc1[RIME_HC1_DISPATCH] & SIXLOWPAN_DISPATCH_IPHC_MASK) == SIXLOWPAN_DISPATCH_IPHC)
@@ -484,20 +486,19 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 copypayload:
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
-  /* Copy "payload" from the rime buffer to the IEEE802.15.4 MAC drivers
+  /* Copy "payload" from the rime buffer to the IEEE802.15.4 MAC driver's
    * d_buf.  If this frame is a first fragment or not part of a fragmented
    * packet, we have already copied the compressed headers, g_uncomp_hdrlen
    * and g_frame_hdrlen are non-zerio, fragoffset is.
    */
 
-  if (g_frame_hdrlen > CONFIG_NET_6LOWPAN_MTU)
+  g_rime_payloadlen = iob->io_len - g_frame_hdrlen;
+  if (g_rime_payloadlen > CONFIG_NET_6LOWPAN_MTU)
     {
-      nwarn("WARNING: Packet dropped due to header (%u) > packet buffer (%u)\n",
-            g_frame_hdrlen, CONFIG_NET_6LOWPAN_MTU);
+      nwarn("WARNING: Packet dropped due to payload (%u) > packet buffer (%u)\n",
+            g_rime_payloadlen, CONFIG_NET_6LOWPAN_MTU);
       return OK;
     }
-
-  g_rime_payloadlen = iob->io_len - g_frame_hdrlen;
 
   /* Sanity-check size of incoming packet to avoid buffer overflow */
 
