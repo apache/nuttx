@@ -498,7 +498,7 @@ do_qconfig: dirlinks apps_preconfig
 
 qconfig: do_qconfig clean_context
 
-gconfig: dirlinks apps_preconfig
+do_gconfig: dirlinks apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-gconf Kconfig
 
 gconfig: do_gconfig clean_context
