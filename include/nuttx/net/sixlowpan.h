@@ -94,37 +94,40 @@
 
 /* IPHC encoding
  *
- * Values of fields within the IPHC encoding first byte (C stands for
- * compressed and I for inline)
+ * Values of fields within the IPHC encoding first byte
+ * (Using MS-to-LS bit numbering of the draft RFC)
  */
-
-#define SIXLOWPAN_IPHC_FL_C              0x10
-#define SIXLOWPAN_IPHC_TC_C              0x08
-#define SIXLOWPAN_IPHC_NH_C              0x04
-#define SIXLOWPAN_IPHC_TTL_1             0x01
-#define SIXLOWPAN_IPHC_TTL_64            0x02
-#define SIXLOWPAN_IPHC_TTL_255           0x03
-#define SIXLOWPAN_IPHC_TTL_I             0x00
+                                               /* Bits 0-2: 011 */
+#define SIXLOWPAN_IPHC_TC_MASK           0x18  /* Bits 3-4: Traffic Class, Flow Label */
+#  define SIXLOWPAN_IPHC_TC_00           0x00  /*   ECN+DSCP+4-bit Pad+Flow Label (4 bytes) */
+#  define SIXLOWPAN_IPHC_TC_01           0x08  /*   ECN+2-bit Pad+ Flow Label (3 bytes), DSCP is elided. */
+#  define SIXLOWPAN_IPHC_TC_10           0x10  /*   ECN+DSCP (1 byte), Flow Label is elided */
+#  define SIXLOWPAN_IPHC_TC_11           0x11  /*   Traffic Class and Flow Label are elided */
+#define SIXLOWPAN_IPHC_NH                0x04  /* Bit 5: Next Header Compressed */
+#define SIXLOWPAN_IPHC_HLIM_MASK         0x03  /* Bits 6-7: Hop Limit */
+#  define SIXLOWPAN_IPHC_HLIM_INLINE     0x00  /*   Carried in-line */
+#  define SIXLOWPAN_IPHC_HLIM_1          0x01  /*   Compressed hop limit of 1 */
+#  define SIXLOWPAN_IPHC_HLIM_64         0x02  /*   Compressed hop limit of 64 */
+#  define SIXLOWPAN_IPHC_HLIM_255        0x03  /*   Compressed hop limit of 255 */
 
 /* Values of fields within the IPHC encoding second byte */
 
-#define SIXLOWPAN_IPHC_CID               0x80
-
-#define SIXLOWPAN_IPHC_SAC               0x40
-#define SIXLOWPAN_IPHC_SAM_00            0x00
-#define SIXLOWPAN_IPHC_SAM_01            0x10
-#define SIXLOWPAN_IPHC_SAM_10            0x20
-#define SIXLOWPAN_IPHC_SAM_11            0x30
+#define SIXLOWPAN_IPHC_CID               0x80  /* Bit 8: Context identifier extension */
+#define SIXLOWPAN_IPHC_SAC               0x40  /* Bit 9: Source address compression */
+#define SIXLOWPAN_IPHC_SAM_MASK          0x30  /* Bits 10-11: Source address mode */
+#  define SIXLOWPAN_IPHC_SAM_128         0x00  /*   128-bits */
+#  define SIXLOWPAN_IPHC_SAM_64          0x10  /*   64-bits */
+#  define SIXLOWPAN_IPHC_SAM_16          0x20  /*   16-bits */
+#  define SIXLOWPAN_IPHC_SAM_0           0x30  /*   0-bits */
+#define SIXLOWPAN_IPHC_M                 0x08  /* Bit 12: Multicast compression */
+#define SIXLOWPAN_IPHC_DAC               0x04  /* Bit 13: Destination address compression */
+#define SIXLOWPAN_IPHC_DAM_MASK          0x03  /* Bits 14-15: Destination address mode */
+#  define SIXLOWPAN_IPHC_DAM_128         0x00  /*   128-bits */
+#  define SIXLOWPAN_IPHC_DAM_64          0x01  /*   64-bits */
+#  define SIXLOWPAN_IPHC_DAM_16          0x02  /*   16-bits */
+#  define SIXLOWPAN_IPHC_DAM_0           0x03  /*   0-bits */
 
 #define SIXLOWPAN_IPHC_SAM_BIT           4
-
-#define SIXLOWPAN_IPHC_M                 0x08
-#define SIXLOWPAN_IPHC_DAC               0x04
-#define SIXLOWPAN_IPHC_DAM_00            0x00
-#define SIXLOWPAN_IPHC_DAM_01            0x01
-#define SIXLOWPAN_IPHC_DAM_10            0x02
-#define SIXLOWPAN_IPHC_DAM_11            0x03
-
 #define SIXLOWPAN_IPHC_DAM_BIT           0
 
 /* Link local context number */

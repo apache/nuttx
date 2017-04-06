@@ -462,12 +462,21 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
   if (hc1[RIME_HC1_DISPATCH] == SIXLOWPAN_DISPATCH_IPV6)
     {
-      ninfo("IPV6 Dispatch\n");
+      FAR struct ipv6_hdr_s *ipv6 = IPv6BUF(&ieee->i_dev);
+
+      ninfo("IPv6 Dispatch\n");
       g_frame_hdrlen  += SIXLOWPAN_IPV6_HDR_LEN;
+
+      /* payptr was set up to begin just after the IPHC bytes.  However,
+       * those bytes are not present for the case of IPv6 dispatch.  Just
+       * reset back to the begnning of the buffer.
+       */
+
+      payptr = iob->io_data;
 
       /* Put uncompressed IP header in d_buf. */
 
-      memcpy(ieee->i_dev.d_buf, payptr + g_frame_hdrlen, IPv6_HDRLEN);
+      memcpy(ipv6, payptr + g_frame_hdrlen, IPv6_HDRLEN);
 
       /* Update g_uncomp_hdrlen and g_frame_hdrlen. */
 

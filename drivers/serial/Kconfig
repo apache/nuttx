@@ -1577,7 +1577,7 @@ config USART6_2STOP
 		1=Two stop bits
 
 config USART6_IFLOWCONTROL
-	bool "UART6 RTS flow control"
+	bool "USART6 RTS flow control"
 	default n
 	select SERIAL_IFLOWCONTROL
 	---help---

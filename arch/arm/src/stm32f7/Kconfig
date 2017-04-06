@@ -1832,8 +1832,13 @@ config RTC_MAGIC_REG
 	depends on RTC && !STM32F7_HAVE_RTC_COUNTER
 
 config RTC_MAGIC
-	hex "Value used as Magic to determine if RTC is set already"
+	hex "Value used as Magic to determine if RTC is already setup"
 	default 0xfacefeee
+	depends on RTC && !STM32F7_HAVE_RTC_COUNTER
+
+config RTC_MAGIC_TIME_SET
+	hex "Value used as Magic to determine if RTC is setup and have time set"
+	default 0xfacefeef
 	depends on RTC && !STM32F7_HAVE_RTC_COUNTER
 
 choice
@@ -1884,8 +1889,7 @@ config STM32F7_DTCM_PROCFS
 config STM32F7_DMACAPABLE
 	bool "Workaround non-DMA capable memory"
 	depends on ARCH_DMA
-	default y if !STM32F7_CCMEXCLUDE
-	default n if STM32F7_CCMEXCLUDE
+	default n
 	---help---
 		This option enables the DMA interface stm32_dmacapable that can be
 		used to check if it is possible to do DMA from the selected address.

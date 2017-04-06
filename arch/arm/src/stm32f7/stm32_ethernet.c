@@ -635,8 +635,8 @@ struct stm32_ethmac_s
  * 1. Be a multiple of the D-Cache line size.  This requirement is assured
  *    by the definition of RXDMA buffer size above.
  * 2. Be aligned a D-Cache line boundaries, and
- * 3. Be positioned in DMA-able memory (*NOT* DTCM memory).  This must
- *    be managed by logic in the linker script file.
+ * 3. Be positioned in DMA-able memory.  This must be managed by logic
+ *    in the linker script file.
  *
  * These DMA buffers are defined sequentially here to best assure optimal
  * packing of the buffers.

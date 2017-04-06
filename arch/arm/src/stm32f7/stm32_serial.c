@@ -218,6 +218,46 @@
 #ifdef USE_SERIALDRIVER
 #ifdef HAVE_UART
 
+/* Warnings for potentially unsafe configuration combinations. */
+
+/* Combination of RXDMA + IFLOWCONTROL does not work as one might expect.
+ * Since RXDMA uses circular DMA-buffer, DMA will always keep reading new
+ * data from USART peripheral even if DMA buffer underruns. Thus this
+ * combination only does following: RTS is asserted on USART setup and
+ * deasserted on shutdown and does not perform actual RTS flow-control.
+ */
+
+#if defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_IFLOWCONTROL)
+#  warning "RXDMA and IFLOWCONTROL both enabled for USART1. \
+            This combination can lead to data loss."
+#endif
+
+#if defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_IFLOWCONTROL)
+#  warning "RXDMA and IFLOWCONTROL both enabled for USART2. \
+            This combination can lead to data loss."
+#endif
+
+#if defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_IFLOWCONTROL)
+#  warning "RXDMA and IFLOWCONTROL both enabled for USART3. \
+            This combination can lead to data loss."
+#endif
+
+#if defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_IFLOWCONTROL)
+#  warning "RXDMA and IFLOWCONTROL both enabled for USART6. \
+            This combination can lead to data loss."
+#endif
+
+#if defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_IFLOWCONTROL)
+#  warning "RXDMA and IFLOWCONTROL both enabled for UART7. \
+            This combination can lead to data loss."
+#endif
+
+#if defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_IFLOWCONTROL)
+#  warning "RXDMA and IFLOWCONTROL both enabled for UART8. \
+            This combination can lead to data loss."
+#endif
+
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -227,6 +267,10 @@ struct up_dev_s
   struct uart_dev_s dev;       /* Generic UART device */
   uint16_t          ie;        /* Saved interrupt mask bits value */
   uint16_t          sr;        /* Saved status bits */
+
+  /* Has been initialized and HW is setup. */
+
+  bool              initialized;
 
   /* If termios are supported, then the following fields may vary at
    * runtime.
@@ -379,8 +423,7 @@ static const struct uart_ops_s g_uart_dma_ops =
  * 1. Be a multiple of the D-Cache line size.  This requirement is assured
  *    by the definition of RXDMA buffer size above.
  * 2. Be aligned a D-Cache line boundaries, and
- * 3. Be positioned in DMA-able memory (*NOT* DTCM memory).  This must
- *    be managed by logic in the linker script file.
+ * 3. Be positioned in DMA-able memory.
  *
  * These DMA buffers are defined sequentially here to best assure optimal
  * packing of the buffers.
@@ -879,11 +922,11 @@ static struct up_dev_s g_uart7priv =
   .usartbase      = STM32_UART7_BASE,
   .tx_gpio        = GPIO_UART7_TX,
   .rx_gpio        = GPIO_UART7_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART7_OFLOWCONTROL)
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART7_OFLOWCONTROL)
   .oflow          = true,
   .cts_gpio       = GPIO_UART7_CTS,
 #endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART7_IFLOWCONTROL)
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART7_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = GPIO_UART7_RTS,
 #endif
@@ -940,11 +983,11 @@ static struct up_dev_s g_uart8priv =
   .usartbase      = STM32_UART8_BASE,
   .tx_gpio        = GPIO_UART8_TX,
   .rx_gpio        = GPIO_UART8_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART8_OFLOWCONTROL)
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART8_OFLOWCONTROL)
   .oflow          = true,
   .cts_gpio       = GPIO_UART8_CTS,
 #endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART8_IFLOWCONTROL)
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART8_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = GPIO_UART8_RTS,
 #endif
@@ -1460,6 +1503,11 @@ static int up_setup(struct uart_dev_s *dev)
   /* Set up the cached interrupt enables value */
 
   priv->ie    = 0;
+
+  /* Mark device as initialized. */
+
+  priv->initialized = true;
+
   return OK;
 }
 
@@ -1538,6 +1586,10 @@ static void up_shutdown(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint32_t regval;
+
+  /* Mark device as uninitialized. */
+
+  priv->initialized = false;
 
   /* Disable all interrupts */
 
@@ -2528,6 +2580,31 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
  ****************************************************************************/
 
 #ifdef USE_SERIALDRIVER
+
+/****************************************************************************
+ * Name: stm32_serial_get_uart
+ *
+ * Description:
+ *   Get serial driver structure for STM32 USART
+ *
+ ****************************************************************************/
+
+FAR uart_dev_t *stm32_serial_get_uart(int uart_num)
+{
+  int uart_idx = uart_num - 1;
+
+  if (uart_idx < 0 || uart_idx >= STM32_NSERIAL || !uart_devs[uart_idx])
+    {
+      return NULL;
+    }
+
+  if (!uart_devs[uart_idx]->initialized)
+    {
+      return NULL;
+    }
+
+  return &uart_devs[uart_idx]->dev;
+}
 
 /****************************************************************************
  * Name: up_earlyserialinit

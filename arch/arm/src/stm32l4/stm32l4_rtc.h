@@ -171,6 +171,19 @@ struct tm;
 int stm32l4_rtc_setdatetime(FAR const struct tm *tp);
 #endif
 
+/****************************************************************************
+ * Name: stm32l4_rtc_setdatetime
+ *
+ * Description:
+ *   Check if RTC time has been set.
+ *
+ * Returned Value:
+ *   Returns true if RTC date-time have been previously set.
+ *
+ ****************************************************************************/
+
+bool stm32l4_rtc_havesettime(void);
+
 #ifdef CONFIG_RTC_ALARM
 /****************************************************************************
  * Name: stm32l4_rtc_setalarm
