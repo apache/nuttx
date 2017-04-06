@@ -83,11 +83,16 @@
 # define CONFIG_RTC_MAGIC           (0xfacefeee)
 #endif
 
+#if !defined(CONFIG_RTC_MAGIC_TIME_SET)
+#  define CONFIG_RTC_MAGIC_TIME_SET  (CONFIG_RTC_MAGIC + 1)
+#endif
+
 #if !defined(CONFIG_RTC_MAGIC_REG)
 # define CONFIG_RTC_MAGIC_REG       (0)
 #endif
 
 #define RTC_MAGIC                   CONFIG_RTC_MAGIC
+#define RTC_MAGIC_TIME_SET          CONFIG_RTC_MAGIC_TIME_SET
 #define RTC_MAGIC_REG               STM32_RTC_BKR(CONFIG_RTC_MAGIC_REG)
 
 /****************************************************************************

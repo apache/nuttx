@@ -1832,8 +1832,13 @@ config RTC_MAGIC_REG
 	depends on RTC && !STM32F7_HAVE_RTC_COUNTER
 
 config RTC_MAGIC
-	hex "Value used as Magic to determine if RTC is set already"
+	hex "Value used as Magic to determine if RTC is already setup"
 	default 0xfacefeee
+	depends on RTC && !STM32F7_HAVE_RTC_COUNTER
+
+config RTC_MAGIC_TIME_SET
+	hex "Value used as Magic to determine if RTC is setup and have time set"
+	default 0xfacefeef
 	depends on RTC && !STM32F7_HAVE_RTC_COUNTER
 
 choice

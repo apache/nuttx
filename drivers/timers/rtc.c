@@ -332,7 +332,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     /* RTC_SET_TIME sets the RTC's time
      *
-     * Argument: A read-only reference to a struct rtc_time containing the
+     * Argument: A read-only reference to a struct rtc_time containing
      *           the new time to be set.
      */
 
@@ -344,6 +344,24 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         if (ops->settime)
           {
             ret = ops->settime(upper->lower, rtctime);
+          }
+      }
+      break;
+
+    /* RTC_HAVE_SET_TIME checks if RTC's time had been set
+     *
+     * Argument: A writable reference to a bool to receive true/false return
+     *           value of the check.
+     */
+
+    case RTC_HAVE_SET_TIME:
+      {
+        FAR bool *have_set_time = (FAR bool *)((uintptr_t)arg);
+
+        if (ops->havesettime)
+          {
+            *have_set_time = ops->havesettime(upper->lower);
+            ret = OK;
           }
       }
       break;
