@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
 #include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
@@ -82,10 +83,10 @@ struct sixlowpan_send_s
   int                          s_result;  /* The result of the transfer */
   uint16_t                     s_timeout; /* Send timeout in deciseconds */
   systime_t                    s_time;    /* Last send time for determining timeout */
-  FAR const struct ipv6_hdr_s *s_ipv6hdr; /* IPv6 header, followed by UDP or TCP header. */
   FAR const struct rimeaddr_s *s_destmac; /* Destination MAC address */
   FAR const void              *s_buf;     /* Data to send */
   size_t                       s_len;     /* Length of data in buf */
+  FAR const union ipv6_hdr_u   s_ipv6hdr; /* IPv6 header, followed by UDP, TCP, or ICMPv6 header. */
 };
 
 /****************************************************************************
@@ -176,12 +177,12 @@ static uint16_t send_interrupt(FAR struct net_driver_s *dev,
     {
       DEBUGASSERT((flags & WPAN_POLL) != 0);
 
-      /* Transfer the frame listto the IEEE802.15.4 MAC device */
+      /* Transfer the frame list to the IEEE802.15.4 MAC device */
 
       sinfo->s_result =
         sixlowpan_queue_frames((FAR struct ieee802154_driver_s *)dev,
-                               sinfo->s_ipv6hdr, sinfo->s_buf, sinfo->s_len,
-                               sinfo->s_destmac);
+                               &sinfo->s_ipv6hdr.ipv6, sinfo->s_buf,
+                               sinfo->s_len, sinfo->s_destmac);
 
       flags &= ~WPAN_POLL;
       neighbor_reachable(dev);
@@ -215,6 +216,56 @@ end_wait:
 
   sem_post(&sinfo->s_waitsem);
   return flags;
+}
+
+/****************************************************************************
+ * Name: sixlowpan_ipv6_copy
+ *
+ * Description:
+ *   Make a copy of the IPv6 + {TCP, UDP, ICMPv6} header structure.
+ *
+ * Input Parameters:
+ *   ipv6hdr - IPv6 header followed by TCP or UDP header.
+ *   sinfo - Send state structure reference
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void sixlowpan_ipv6_copy(FAR const struct ipv6_hdr_s *ipv6hdr,
+                                FAR struct sixlowpan_send_s *sinfo)
+{
+  size_t structsize;
+
+   switch (ipv6hdr->proto)
+     {
+#ifdef CONFIG_NET_TCP
+     case IP_PROTO_TCP:
+       structsize = sizeof(struct ipv6tcp_hdr_s);
+       break;
+#endif
+
+#ifdef CONFIG_NET_UDP
+     case IP_PROTO_UDP:
+       structsize = sizeof(struct ipv6udp_hdr_s);
+       break;
+#endif
+
+#ifdef CONFIG_NET_ICMPv6
+     case IP_PROTO_ICMP6:
+       structsize = sizeof(struct ipv6icmp_hdr_s);
+       break;
+#endif
+
+     default:
+       nwarn("WARNING: Unrecognized proto: %u\n", ipv6hdr->proto);
+       structsize = sizeof(struct ipv6_hdr_s);
+       break;
+     }
+
+   memcpy((FAR void *)&sinfo->s_ipv6hdr, (FAR const void *)ipv6hdr,
+          structsize);
 }
 
 /****************************************************************************
@@ -271,10 +322,11 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
   sinfo.s_result  = -EBUSY;
   sinfo.s_timeout = timeout;
   sinfo.s_time    = clock_systimer();
-  sinfo.s_ipv6hdr = ipv6hdr;
   sinfo.s_destmac = destmac;
   sinfo.s_buf     = buf;
   sinfo.s_len     = len;
+
+  sixlowpan_ipv6_copy(ipv6hdr, &sinfo);
 
   net_lock();
   if (len > 0)

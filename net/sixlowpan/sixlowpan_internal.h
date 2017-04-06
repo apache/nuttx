@@ -327,6 +327,22 @@ struct ipv6icmp_hdr_s
   struct icmpv6_iphdr_s icmp;
 };
 
+/* IPv6 + TCP or UDP or ICMPv6 header */
+
+union ipv6_hdr_u
+{
+  struct ipv6_hdr_s     ipv6;
+#ifdef CONFIG_NET_TCP
+  struct ipv6tcp_hdr_s  ipv6tcp;
+#endif
+#ifdef CONFIG_NET_UDP
+  struct ipv6udp_hdr_s  ipv6udp;
+#endif
+#ifdef CONFIG_NET_ICMPv6
+  struct ipv6icmp_hdr_s  ipv6icmp
+#endif
+};
+
 /* IEEE802.15.4 Frame Definitions *******************************************/
 /* The IEEE 802.15.4 frame has a number of constant/fixed fields that can be
  * counted to make frame construction and max payload calculations easier.
