@@ -507,10 +507,10 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
    *
    * On fast systems this can lead to a direct hit of the WDD boundary and
    * thus to a reset of the system.  This is why we program the WDD Value toi
-   * 0xfff to truly disable this Forbidden Window Feature.
+   * WDT_MR_WDD_MAX to truly disable this Forbidden Window Feature.
    */
 
-  regval = WDT_MR_WDV(reload) | WDT_MR_WDD(0xfff);
+  regval = WDT_MR_WDV(reload) | WDT_MR_WDD(WDT_MR_WDD_MAX);
 
 #ifdef CONFIG_SAMV7_WDT_INTERRUPT
   /* Generate an interrupt whent he watchdog timer expires */
