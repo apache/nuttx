@@ -495,9 +495,22 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
    * NOTE: The Watchdog Mode Register (WDT_MR) can be written only once.  Only
    * a processor reset resets it.  Writing the WDT_MR register reloads the
    * timer with the newly programmed mode parameters.
+   *
+   * NOTE: The WDD Value is the lower bound of a so called Forbidden Window
+   * (see Datasheet for further Informations).  To disable this Forbidden
+   * Window we have to set the WDD Value greater than or equal to WDV
+   * (according the Datasheet).
+   *
+   * When setting the WDD Value equal to WDV we have to wait at least one clock
+   * pulse of the (very slow) watchdog clock source between two resets (or the
+   * configuration and the first reset) of the watchdog.
+   *
+   * On fast systems this can lead to a direct hit of the WDD boundary and
+   * thus to a reset of the system.  This is why we program the WDD Value toi
+   * 0xfff to truly disable this Forbidden Window Feature.
    */
 
-  regval = WDT_MR_WDV(reload) | WDT_MR_WDD(reload);
+  regval = WDT_MR_WDV(reload) | WDT_MR_WDD(0xfff);
 
 #ifdef CONFIG_SAMV7_WDT_INTERRUPT
   /* Generate an interrupt whent he watchdog timer expires */
