@@ -1884,8 +1884,7 @@ config STM32F7_DTCM_PROCFS
 config STM32F7_DMACAPABLE
 	bool "Workaround non-DMA capable memory"
 	depends on ARCH_DMA
-	default y if !STM32F7_CCMEXCLUDE
-	default n if STM32F7_CCMEXCLUDE
+	default n
 	---help---
 		This option enables the DMA interface stm32_dmacapable that can be
 		used to check if it is possible to do DMA from the selected address.

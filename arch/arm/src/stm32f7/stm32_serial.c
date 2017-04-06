@@ -383,8 +383,7 @@ static const struct uart_ops_s g_uart_dma_ops =
  * 1. Be a multiple of the D-Cache line size.  This requirement is assured
  *    by the definition of RXDMA buffer size above.
  * 2. Be aligned a D-Cache line boundaries, and
- * 3. Be positioned in DMA-able memory (*NOT* DTCM memory).  This must
- *    be managed by logic in the linker script file.
+ * 3. Be positioned in DMA-able memory.
  *
  * These DMA buffers are defined sequentially here to best assure optimal
  * packing of the buffers.
