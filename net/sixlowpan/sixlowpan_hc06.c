@@ -458,9 +458,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
   uint8_t iphc1;
   uint8_t tmp;
 
-  g_hc06ptr = fptr + 2;
-  ninfo("fptr=%p g_frame_hdrlen=%u iphc=%p g_hc06ptr=%p\n",
-         fptr, g_frame_hdrlen, iphc, g_hc06ptr);
+  ninfo("fptr=%p g_frame_hdrlen=%u iphc=%p\n", fptr, g_frame_hdrlen, iphc);
 
   /* As we copy some bit-length fields, in the IPHC encoding bytes,
    * we sometimes use |=
@@ -471,6 +469,10 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
   iphc0   = SIXLOWPAN_DISPATCH_IPHC;
   iphc1   = 0;
   iphc[2] = 0;         /* Might not be used - but needs to be cleared */
+
+  /* Point to just after the two IPHC bytes we have committed to */
+
+  g_hc06ptr = iphc + 2;
 
   /* Address handling needs to be made first since it might cause an extra
    * byte with [ SCI | DCI ]
@@ -527,7 +529,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
     {
       /* Flow label cannot be compressed */
 
-      if (((ipv6->vtc & 0x0f) == 0) && ((ipv6->tcf & 0xF0) == 0))
+      if (((ipv6->vtc & 0x0f) == 0) && ((ipv6->tcf & 0xf0) == 0))
         {
           /* Compress only traffic class */
 
@@ -617,9 +619,10 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
       iphc1   |= compress_addr_64(ipv6->srcipaddr, &ieee->i_nodeaddr,
                                   SIXLOWPAN_IPHC_SAM_BIT);
-
-      /* No address context found for this address */
     }
+
+  /* No address context found for this address */
+
   else if (net_is_addr_linklocal(ipv6->srcipaddr) &&
            ipv6->destipaddr[1] == 0 &&  ipv6->destipaddr[2] == 0 &&
            ipv6->destipaddr[3] == 0)
@@ -869,7 +872,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
   /* Another if the CID flag is set */
 
-  if (iphc1 & SIXLOWPAN_IPHC_CID)
+  if ((iphc1 & SIXLOWPAN_IPHC_CID) != 0)
     {
       ninfo("CID flag set. Increase header by one\n");
       g_hc06ptr++;
@@ -964,7 +967,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
   /* Address context based compression */
 
-  if (iphc1 & SIXLOWPAN_IPHC_SAC)
+  if ((iphc1 & SIXLOWPAN_IPHC_SAC) != 0)
     {
       FAR struct sixlowpan_addrcontext_s *addrcontext;
       uint8_t sci = (iphc1 & SIXLOWPAN_IPHC_CID) ? iphc[2] >> 4 : 0;
@@ -1002,11 +1005,11 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
   /* Multicast compression */
 
-  if (iphc1 & SIXLOWPAN_IPHC_M)
+  if ((iphc1 & SIXLOWPAN_IPHC_M) != 0)
     {
       /* Address context based multicast compression */
 
-      if (iphc1 & SIXLOWPAN_IPHC_DAC)
+      if ((iphc1 & SIXLOWPAN_IPHC_DAC) != 0)
         {
           /* TODO: implement this */
         }
@@ -1035,10 +1038,10 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
       /* no multicast */
       /* Context based */
 
-      if (iphc1 & SIXLOWPAN_IPHC_DAC)
+      if ((iphc1 & SIXLOWPAN_IPHC_DAC) != 0)
         {
           FAR struct sixlowpan_addrcontext_s *addrcontext;
-          uint8_t dci    = (iphc1 & SIXLOWPAN_IPHC_CID) ? iphc[2] & 0x0f : 0;
+          uint8_t dci = ((iphc1 & SIXLOWPAN_IPHC_CID) != 0) ? iphc[2] & 0x0f : 0;
 
           addrcontext = find_addrcontext_bynumber(dci);
 
@@ -1066,7 +1069,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
   /* Next header processing - continued */
 
-  if ((iphc0 & SIXLOWPAN_IPHC_NH))
+  if ((iphc0 & SIXLOWPAN_IPHC_NH) != 0)
     {
       FAR struct udp_hdr_s *udp = UDPIPv6BUF(ieee);
 
