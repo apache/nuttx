@@ -174,13 +174,11 @@ static const struct file_operations g_humidityops =
 #endif
 };
 
-static struct hts221_dev_s *g_humid_data;
-
 /****************************************************************************
 * Private Functions
 ****************************************************************************/
 
-static int hts221_do_transfer(FAR struct hts221_dev_s *dev,
+static int hts221_do_transfer(FAR struct hts221_dev_s *priv,
                               FAR struct i2c_msg_s *msgv,
                               size_t nmsg)
 {
@@ -189,7 +187,7 @@ static int hts221_do_transfer(FAR struct hts221_dev_s *dev,
 
   for (retries = 0; retries < HTS221_I2C_RETRIES; retries++)
     {
-      ret = I2C_TRANSFER(dev->i2c, msgv, nmsg);
+      ret = I2C_TRANSFER(priv->i2c, msgv, nmsg);
       if (ret >= 0)
         {
           return 0;
@@ -203,7 +201,7 @@ static int hts221_do_transfer(FAR struct hts221_dev_s *dev,
               break;
             }
 
-          ret = up_i2creset(dev->i2c);
+          ret = up_i2creset(priv->i2c);
           if (ret < 0)
             {
               hts221_dbg("up_i2creset failed: %d\n", ret);
@@ -217,51 +215,51 @@ static int hts221_do_transfer(FAR struct hts221_dev_s *dev,
   return ret;
 }
 
-static int32_t hts221_write_reg8(FAR struct hts221_dev_s *dev,
+static int32_t hts221_write_reg8(FAR struct hts221_dev_s *priv,
                                  const uint8_t *command)
 {
   struct i2c_msg_s msgv[2] =
   {
     {
-      .addr   = dev->addr,
+      .addr   = priv->addr,
       .flags  = 0,
       .buffer = (FAR void *)&command[0],
       .length = 1
     },
     {
-      .addr   = dev->addr,
+      .addr   = priv->addr,
       .flags  = I2C_M_NORESTART,
       .buffer = (FAR void *)&command[1],
       .length = 1
     }
   };
 
-  return hts221_do_transfer(dev, msgv, 2);
+  return hts221_do_transfer(priv, msgv, 2);
 }
 
-static int hts221_read_reg(FAR struct hts221_dev_s *dev,
+static int hts221_read_reg(FAR struct hts221_dev_s *priv,
                            FAR const uint8_t *command, FAR uint8_t *value)
 {
   struct i2c_msg_s msgv[2] =
   {
     {
-      .addr   = dev->addr,
+      .addr   = priv->addr,
       .flags  = 0,
       .buffer = (FAR void *)command,
       .length = 1
     },
     {
-      .addr   = dev->addr,
+      .addr   = priv->addr,
       .flags  = I2C_M_READ,
       .buffer = value,
       .length = 1
     }
   };
 
-  return hts221_do_transfer(dev, msgv, 2);
+  return hts221_do_transfer(priv, msgv, 2);
 }
 
-static int hts221_get_id(FAR struct hts221_dev_s *priv, uint8_t * value)
+static int hts221_get_id(FAR struct hts221_dev_s *priv, uint8_t *value)
 {
   int ret = OK;
   uint8_t cmd = HTS221_WHO_AM_I;
@@ -362,7 +360,7 @@ static int hts221_config_ctrl_reg2(FAR struct hts221_dev_s *priv,
 }
 
 static int hts221_config_ctrl_reg1(FAR struct hts221_dev_s *priv,
-                                   FAR hts221_settings_t * settings)
+                                   FAR hts221_settings_t *settings)
 {
   int ret = OK;
   uint8_t regval = 0;
@@ -420,7 +418,7 @@ static int hts221_power_on_off(FAR struct hts221_dev_s *priv, bool on)
 }
 
 static int hts221_config(FAR struct hts221_dev_s *priv,
-                         FAR hts221_settings_t * cfgr)
+                         FAR hts221_settings_t *cfgr)
 {
   int ret = OK;
 
@@ -477,7 +475,7 @@ static int hts221_start_conversion(FAR struct hts221_dev_s *priv)
 }
 
 static int hts221_check_status(FAR struct hts221_dev_s *priv,
-                               FAR hts221_status_t * status)
+                               FAR hts221_status_t *status)
 {
   int ret = OK;
   uint8_t addr = HTS221_STATUS_REG;
@@ -498,7 +496,7 @@ static int hts221_check_status(FAR struct hts221_dev_s *priv,
 }
 
 static int hts221_read_raw_data(FAR struct hts221_dev_s *priv,
-                                FAR hts221_raw_data_t * data)
+                                FAR hts221_raw_data_t *data)
 {
   int ret = OK;
   uint8_t addr_humid_low = HTS221_HUM_OUT_L;
@@ -1069,13 +1067,14 @@ out:
 
 static int hts221_int_handler(int irq, FAR void *context, FAR void *arg)
 {
-  if (!g_humid_data)
-    return OK;
+  FAR struct hts221_dev_s *priv = (FAR struct hts221_dev_s *)arg;
 
-  g_humid_data->int_pending = true;
+  DEBUGASSERT(priv != NULL);
+
+  priv->int_pending = true;
   hts221_dbg("Hts221 interrupt\n");
 #ifndef CONFIG_DISABLE_POLL
-  hts221_notify(g_humid_data);
+  hts221_notify(priv);
 #endif
 
   return OK;
@@ -1095,7 +1094,6 @@ int hts221_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
       return -ENOMEM;
     }
 
-  g_humid_data = priv;
   priv->addr   = addr;
   priv->i2c    = i2c;
   priv->config = config;
@@ -1125,7 +1123,7 @@ int hts221_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
       priv->config->irq_clear(priv->config);
     }
 
-  priv->config->irq_attach(priv->config, hts221_int_handler);
+  priv->config->irq_attach(priv->config, hts221_int_handler, priv);
   priv->config->irq_enable(priv->config, false);
   return OK;
 }

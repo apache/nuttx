@@ -437,8 +437,8 @@ static void skel_receive(FAR struct skel_driver_s *priv)
               skel_transmit(priv);
             }
         }
-#endif
       else
+#endif
         {
           NETDEV_RXDROPPED(&priv->sk_dev);
         }

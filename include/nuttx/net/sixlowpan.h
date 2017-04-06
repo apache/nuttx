@@ -42,8 +42,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NET_SIXLOWOAN_H
-#define __INCLUDE_NUTTX_NET_SIXLOWOAN_H
+#ifndef __INCLUDE_NUTTX_NET_SIXLOWPAN_H
+#define __INCLUDE_NUTTX_NET_SIXLOWPAN_H
 
 /****************************************************************************
  * Included Files
@@ -53,7 +53,11 @@
 
 #include <stdint.h>
 
+#include <nuttx/clock.h>
+#include <nuttx/net/iob.h>
 #include <nuttx/net/netdev.h>
+
+#ifdef CONFIG_NET_6LOWPAN
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -62,17 +66,21 @@
 /* Min and Max compressible UDP ports - HC06 */
 
 #define SIXLOWPAN_UDP_4_BIT_PORT_MIN     0xf0b0
-#define SIXLOWPAN_UDP_4_BIT_PORT_MAX     0xf0bf   /* F0B0 + 15 */
-#define SIXLOWPAN_UDP_8_BIT_PORT_MIN     0xF000
-#define SIXLOWPAN_UDP_8_BIT_PORT_MAX     0xf0ff   /* F000 + 255 */
+#define SIXLOWPAN_UDP_4_BIT_PORT_MAX     0xf0bf   /* f0b0 + 15 */
+#define SIXLOWPAN_UDP_8_BIT_PORT_MIN     0xf000
+#define SIXLOWPAN_UDP_8_BIT_PORT_MAX     0xf0ff   /* f000 + 255 */
 
 /* 6lowpan dispatches */
 
 #define SIXLOWPAN_DISPATCH_IPV6          0x41 /* 01000001 = 65 */
 #define SIXLOWPAN_DISPATCH_HC1           0x42 /* 01000010 = 66 */
-#define SIXLOWPAN_DISPATCH_IPHC          0x60 /* 011xxxxx = ... */
+
+#define SIXLOWPAN_DISPATCH_IPHC          0x60 /* 011xxxxx */
+#define SIXLOWPAN_DISPATCH_IPHC_MASK     0xe0 /* 11100000 */
+
 #define SIXLOWPAN_DISPATCH_FRAG1         0xc0 /* 11000xxx */
 #define SIXLOWPAN_DISPATCH_FRAGN         0xe0 /* 11100xxx */
+#define SIXLOWPAN_DISPATCH_FRAG_MASK     0xf1 /* 11111000 */
 
 /* HC1 encoding */
 
@@ -86,38 +94,40 @@
 
 /* IPHC encoding
  *
- * Values of fields within the IPHC encoding first byte (C stands for
- * compressed and I for inline)
+ * Values of fields within the IPHC encoding first byte
+ * (Using MS-to-LS bit numbering of the draft RFC)
  */
-
-#define SIXLOWPAN_IPHC_FL_C              0x10
-#define SIXLOWPAN_IPHC_TC_C              0x08
-#define SIXLOWPAN_IPHC_NH_C              0x04
-#define SIXLOWPAN_IPHC_TTL_1             0x01
-#define SIXLOWPAN_IPHC_TTL_64            0x02
-#define SIXLOWPAN_IPHC_TTL_255           0x03
-#define SIXLOWPAN_IPHC_TTL_I             0x00
-
+                                               /* Bits 0-2: 011 */
+#define SIXLOWPAN_IPHC_TC_MASK           0x18  /* Bits 3-4: Traffic Class, Flow Label */
+#  define SIXLOWPAN_IPHC_TC_00           0x00  /*   ECN+DSCP+4-bit Pad+Flow Label (4 bytes) */
+#  define SIXLOWPAN_IPHC_TC_01           0x08  /*   ECN+2-bit Pad+ Flow Label (3 bytes), DSCP is elided. */
+#  define SIXLOWPAN_IPHC_TC_10           0x10  /*   ECN+DSCP (1 byte), Flow Label is elided */
+#  define SIXLOWPAN_IPHC_TC_11           0x11  /*   Traffic Class and Flow Label are elided */
+#define SIXLOWPAN_IPHC_NH                0x04  /* Bit 5: Next Header Compressed */
+#define SIXLOWPAN_IPHC_HLIM_MASK         0x03  /* Bits 6-7: Hop Limit */
+#  define SIXLOWPAN_IPHC_HLIM_INLINE     0x00  /*   Carried in-line */
+#  define SIXLOWPAN_IPHC_HLIM_1          0x01  /*   Compressed hop limit of 1 */
+#  define SIXLOWPAN_IPHC_HLIM_64         0x02  /*   Compressed hop limit of 64 */
+#  define SIXLOWPAN_IPHC_HLIM_255        0x03  /*   Compressed hop limit of 255 */
 
 /* Values of fields within the IPHC encoding second byte */
 
-#define SIXLOWPAN_IPHC_CID               0x80
-
-#define SIXLOWPAN_IPHC_SAC               0x40
-#define SIXLOWPAN_IPHC_SAM_00            0x00
-#define SIXLOWPAN_IPHC_SAM_01            0x10
-#define SIXLOWPAN_IPHC_SAM_10            0x20
-#define SIXLOWPAN_IPHC_SAM_11            0x30
+#define SIXLOWPAN_IPHC_CID               0x80  /* Bit 8: Context identifier extension */
+#define SIXLOWPAN_IPHC_SAC               0x40  /* Bit 9: Source address compression */
+#define SIXLOWPAN_IPHC_SAM_MASK          0x30  /* Bits 10-11: Source address mode */
+#  define SIXLOWPAN_IPHC_SAM_128         0x00  /*   128-bits */
+#  define SIXLOWPAN_IPHC_SAM_64          0x10  /*   64-bits */
+#  define SIXLOWPAN_IPHC_SAM_16          0x20  /*   16-bits */
+#  define SIXLOWPAN_IPHC_SAM_0           0x30  /*   0-bits */
+#define SIXLOWPAN_IPHC_M                 0x08  /* Bit 12: Multicast compression */
+#define SIXLOWPAN_IPHC_DAC               0x04  /* Bit 13: Destination address compression */
+#define SIXLOWPAN_IPHC_DAM_MASK          0x03  /* Bits 14-15: Destination address mode */
+#  define SIXLOWPAN_IPHC_DAM_128         0x00  /*   128-bits */
+#  define SIXLOWPAN_IPHC_DAM_64          0x01  /*   64-bits */
+#  define SIXLOWPAN_IPHC_DAM_16          0x02  /*   16-bits */
+#  define SIXLOWPAN_IPHC_DAM_0           0x03  /*   0-bits */
 
 #define SIXLOWPAN_IPHC_SAM_BIT           4
-
-#define SIXLOWPAN_IPHC_M                 0x08
-#define SIXLOWPAN_IPHC_DAC               0x04
-#define SIXLOWPAN_IPHC_DAM_00            0x00
-#define SIXLOWPAN_IPHC_DAM_01            0x01
-#define SIXLOWPAN_IPHC_DAM_10            0x02
-#define SIXLOWPAN_IPHC_DAM_11            0x03
-
 #define SIXLOWPAN_IPHC_DAM_BIT           0
 
 /* Link local context number */
@@ -155,139 +165,67 @@
 #define SIXLOWPAN_FRAG1_HDR_LEN          4
 #define SIXLOWPAN_FRAGN_HDR_LEN          5
 
-/* Address compressibility test macros */
-
-/* Check whether we can compress the IID in address 'a' to 16 bits.  This is
- * used for unicast addresses only, and is true if the address is on the
- * format <PREFIX>::0000:00ff:fe00:XXXX
- *
- * NOTE: we currently assume 64-bits prefixes
- */
-
-#define SIXLOWPAN_IS_IID_16BIT_COMPRESSABLE(a) \
-  ((((a)->u16[4]) == 0) && \
-   // (((a)->u8[10]) == 0)&& \
-   (((a)->u8[11]) == 0xff)&& \
-   (((a)->u8[12]) == 0xfe)&& \
-   (((a)->u8[13]) == 0))
-
-/* Check whether the 9-bit group-id of the compressed multicast address is
- * known. It is true if the 9-bit group is the all nodes or all routers
- * group.  Parameter 'a' is typed uint8_t *
- */
-
-#define SIXLOWPAN_IS_MCASTADDR_DECOMPRESSABLE(a) \
-   (((*a & 0x01) == 0) && \
-    ((*(a + 1) == 0x01) || (*(a + 1) == 0x02)))
-
-/* Check whether the 112-bit group-id of the multicast address is mappable
- * to a 9-bit group-id. It is true if the group is the all nodes or all
- * routers group.
- */
-
-#define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE(a) \
-  ((((a)->u16[1]) == 0) && \
-   (((a)->u16[2]) == 0) && \
-   (((a)->u16[3]) == 0) && \
-   (((a)->u16[4]) == 0) && \
-   (((a)->u16[5]) == 0) && \
-   (((a)->u16[6]) == 0) && \
-   (((a)->u8[14]) == 0) && \
-   ((((a)->u8[15]) == 1) || (((a)->u8[15]) == 2)))
-
-/* FFXX::00XX:XXXX:XXXX */
-
-#define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE48(a) \
-  ((((a)->u16[1]) == 0) && \
-   (((a)->u16[2]) == 0) && \
-   (((a)->u16[3]) == 0) && \
-   (((a)->u16[4]) == 0) && \
-   (((a)->u8[10]) == 0))
-
-/* FFXX::00XX:XXXX */
-
-#define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE32(a) \
-  ((((a)->u16[1]) == 0) && \
-   (((a)->u16[2]) == 0) && \
-   (((a)->u16[3]) == 0) && \
-   (((a)->u16[4]) == 0) && \
-   (((a)->u16[5]) == 0) && \
-   (((a)->u8[12]) == 0))
-
-/* FF02::00XX */
-
-#define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE8(a) \
-  ((((a)->u8[1]) == 2) && \
-   (((a)->u16[1]) == 0) && \
-   (((a)->u16[2]) == 0) && \
-   (((a)->u16[3]) == 0) && \
-   (((a)->u16[4]) == 0) && \
-   (((a)->u16[5]) == 0) && \
-   (((a)->u16[6]) == 0) && \
-   (((a)->u8[14]) == 0))
-
 /* This maximum size of an IEEE802.15.4 frame.  Certain, non-standard
  * devices may exceed this value, however.
  */
 
 #define SIXLOWPAN_MAC_STDFRAME 127
 
-/* Packet buffer Definitions */
+/* Frame buffer helper macros.
+ *
+ * The IEEE802.15.4 MAC driver structures includes a list of IOB
+ * structures, i_framelist, containing frames to be sent by the driver or
+ * that were received by the driver.  The IOB structure is defined in
+ * include/nuttx/net/iob.h.  The length of data in the IOB is provided by
+ * the io_len field of the IOB structure.
+ *
+ * NOTE that IOBs must be configured such that CONFIG_IOB_BUFSIZE >=
+ * CONFIG_NET_6LOWPAN_FRAMELEN
+ *
+ * 1. On a TX poll, the IEEE802.15.4 MAC driver should provide its driver
+ *    structure with i_framelist set to NULL.  At the conclusion of the
+ *    poll, if there are frames to be sent, they will have been added to
+ *    the i_framelist.  The non-empty frame list is the indication that
+ *    there is data to be sent.
+ *
+ *    The IEEE802.15.4 may use the FRAME_IOB_EMPTY() macro to determine
+ *    if there there frames to be sent.  If so, it should remove each
+ *    frame from the frame list using the FRAME_IOB_REMOVE() macro and send
+ *    it.  That macro will return NULL when all of the frames have been
+ *    sent.
+ *
+ *    After sending each frame, the driver must return the IOB to the pool
+ *    of free IOBs using the FROM_IOB_FREE() macro.
+ */
 
-#define PACKETBUF_HDR_SIZE                    48
 
-#define PACKETBUF_ATTR_PACKET_TYPE_DATA       0
-#define PACKETBUF_ATTR_PACKET_TYPE_ACK        1
-#define PACKETBUF_ATTR_PACKET_TYPE_STREAM     2
-#define PACKETBUF_ATTR_PACKET_TYPE_STREAM_END 3
-#define PACKETBUF_ATTR_PACKET_TYPE_TIMESTAMP  4
+#define FRAME_IOB_EMPTY(ieee)  ((ieee)->i_framelist == NULL)
+#define FRAME_IOB_REMOVE(ieee, iob) \
+  do \
+    { \
+      (iob)               = (ieee)->i_framelist; \
+      (ieee)->i_framelist = (iob)->io_flink; \
+      (iob)->io_flink     = NULL; \
+    } \
+  while (0)
+#define FRAME_IOB_FREE(iob)    iob_free(iob)
 
-/* Packet buffer attributes (indices into i_pktattr) */
+/* 2. When receiving data, the IEEE802.15.4 MAC driver should receive the
+ *    frame data directly into the payload area of an IOB structure.  That
+ *    IOB structure may be obtained using the FRAME_IOB_ALLOC() macro.  The
+ *    single frame should be added to the frame list using FRAME_IOB_ADD()
+ *    (it will be a list of length one) .  The MAC driver should then inform
+ *    the network of the by calling sixlowpan_input().
+ */
 
-#define PACKETBUF_ATTR_NONE                   0
-
-/* Scope 0 attributes: used only on the local node. */
-
-#define PACKETBUF_ATTR_CHANNEL                1
-#define PACKETBUF_ATTR_NETWORK_ID             2
-#define PACKETBUF_ATTR_LINK_QUALITY           3
-#define PACKETBUF_ATTR_RSSI                   4
-#define PACKETBUF_ATTR_TIMESTAMP              5
-#define PACKETBUF_ATTR_RADIO_TXPOWER          6
-#define PACKETBUF_ATTR_LISTEN_TIME            7
-#define PACKETBUF_ATTR_TRANSMIT_TIME          8
-#define PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS  9
-#define PACKETBUF_ATTR_MAC_SEQNO              10
-#define PACKETBUF_ATTR_MAC_ACK                11
-
-/* Scope 1 attributes: used between two neighbors only. */
-
-#define PACKETBUF_ATTR_RELIABLE               12
-#define PACKETBUF_ATTR_PACKET_ID              13
-#define PACKETBUF_ATTR_PACKET_TYPE            14
-#define PACKETBUF_ATTR_REXMIT                 15
-#define PACKETBUF_ATTR_MAX_REXMIT             16
-#define PACKETBUF_ATTR_NUM_REXMIT             17
-#define PACKETBUF_ATTR_PENDING                18
-
-/* Scope 2 attributes: used between end-to-end nodes. */
-
-#define PACKETBUF_ATTR_HOPS                   11
-#define PACKETBUF_ATTR_TTL                    20
-#define PACKETBUF_ATTR_EPACKET_ID             21
-#define PACKETBUF_ATTR_EPACKET_TYPE           22
-#define PACKETBUF_ATTR_ERELIABLE              23
-
-#define PACKETBUF_NUM_ATTRS                   24
-
-  /* Addresses (indices into i_pktaddr) */
-
-#define PACKETBUF_ADDR_SENDER                 0
-#define PACKETBUF_ADDR_RECEIVER               1
-#define PACKETBUF_ADDR_ESENDER                2
-#define PACKETBUF_ADDR_ERECEIVER              3
-
-#define PACKETBUF_NUM_ADDRS                   4
+#define FRAME_IOB_ALLOC()      iob_alloc(false)
+#define FRAME_IOB_ADD(ieee, iob) \
+  do \
+    { \
+      (iob)->io_flink     = (ieee)->i_framelist; \
+      (ieee)->i_framelist = (iob); \
+    } \
+  while (0)
 
 /****************************************************************************
  * Public Types
@@ -305,18 +243,20 @@ struct rimeaddr_s
  * difference is that fragmentation must be supported.
  *
  * The IEEE802.15.4 MAC does not use the d_buf packet buffer directly.
- * Rather, it uses a smaller frame buffer, i_frame.
+ * Rather, it uses a list smaller frame buffers, i_framelist.
  *
- *   - The packet fragment data is provided to the i_frame buffer each time
- *     that the IEEE802.15.4 MAC needs to send more data.  The length of
- *     the frame is provided in i_frame.
+ *   - The packet fragment data is provided to an IOB in the i_framelist
+ *     buffer each time that the IEEE802.15.4 MAC needs to send more data.
+ *     The length of the frame is provided in the io_len field of the IOB.
  *
- *     In this case, the d_buf holds the packet data yet to be sent; d_len
- *     holds the size of entire packet.
+ *     In this case, the d_buf is not used at all and, if fact, may be
+ *     NULL.
  *
  *   - Received frames are provided by IEEE802.15.4 MAC to the network
- *     via i_frame with length i_framelen for reassembly in d_buf;  d_len
- *     will hold the size of the reassembled packet.
+ *     via and IOB in i_framelist with length io_len for reassembly in
+ *     d_buf;  d_len will hold the size of the reassembled packet.
+ *
+ *     In this case, a d_buf of size CONFIG_NET_6LOWPAN_MTU must be provided.
  *
  * This is accomplished by "inheriting" the standard 'struct net_driver_s'
  * and appending the frame buffer as well as other metadata needed to
@@ -328,36 +268,51 @@ struct rimeaddr_s
  * this structure.  In general, all fields must be set to NULL.  In
  * addtion:
  *
- * 1) i_panid must be set to identify the network.  It may be set to 0xfff
+ * 1. i_panid must be set to identify the network.  It may be set to 0xfff
  *    if the device is not associated.
- * 2) i_dsn must be set to a random value.  After that, it will be managed
+ *
+ * 2. i_dsn must be set to a random value.  After that, it will be managed
  *    by the network.
- * 3) i_nodeaddr must be set after the MAC is assigned an address.
- * 4) On network TX poll operations, the IEEE802.15.4 MAC needs to provide
- *    the i_frame buffer with size greater than or equal to
- *    CONFIG_NET_6LOWPAN_FRAMELEN.  No dev.d_buf need be provided in this
- *    case.  The entire is TX is performed using only the i_frame buffer.
- * 5) On network input RX oprations, both buffers must be provided.  The size
- *    of the i_frame buffer is, again, greater than or equal to
- *    CONFIG_NET_6LOWPAN_FRAMELEN.  The larger dev.d_buf must have a size
- *    of at least the advertised MTU of the protocol, CONFIG_NET_6LOWPAN_MTU.
- *    If fragmentation is enabled, then the logical packet size may be
- *    significantly larger than the size of the frame buffer.  The dev.d_buf
- *    is used for de-compressing each frame and reassembling any fragmented
- *    packets to create the full input packet that is provided to the
- *    application.
  *
- * Frame Organization:
+ * 3. i_nodeaddr must be set after the MAC is assigned an address.
  *
- *     Content            Offset
- *   +------------------+ 0
- *   | Frame Header     |
- *   +------------------+ i_dataoffset
- *   | Procotol Headers |
- *   | Data Payload     |
- *   +------------------+ i_framelen
- *   | Unused           |
- *   +------------------+ CONFIG_NET_6LOWPAN_FRAMELEN
+ * 4. On a TX poll, the IEEE802.15.4 MAC driver should provide its driver
+ *    structure with i_framelist set to NULL.  At the conclusion of the
+ *    poll, if there are frames to be sent, they will have been added to
+ *    the i_framelist.  The non-empty frame list at the conclusion of the
+ *    TX poll is the indication that is data to be sent.
+ *
+ *    The IEEE802.15.4 may use the FRAME_IOB_EMPTY() macro to determine
+ *    if there there frames to be sent.  If so, it should remove each
+ *    frame from the frame list using the FRAME_IOB_REMOVE() macro and send
+ *    it.  That macro will return NULL when all of the frames have been
+ *    sent.
+ *
+ *    After sending each frame, the driver must return the IOB to the pool
+ *    of free IOBs using the FROM_IOB_FREE() macro.
+ *
+ * 5. When receiving data both buffers must be provided:
+ *
+ *    The IEEE802.15.4 MAC driver should receive the frame data directly
+ *    into the payload area of an IOB structure.  That IOB structure may be
+ *    obtained using the FRAME_IOB_ALLOC() macro.  The single frame should
+ *    be added to the frame list using FRAME_IOB_ADD() (it will be a list of
+ *    length one).
+ *
+ *    The larger dev.d_buf must have a size of at least the advertised MTU
+ *    of the protocol, CONFIG_NET_6LOWPAN_MTU.  If fragmentation is enabled,
+ *    then the logical packet size may be significantly larger than the
+ *    size of the frame buffer.  The dev.d_buf is used for de-compressing
+ *    each frame and reassembling any fragmented packets to create the full
+ *    input packet that is provided to the application.
+ *
+ *    The MAC driver should then inform the network of the by calling
+ *    sixlowpan_input().
+ *
+ *    Normally, the network will free the IOB and will nullify the frame
+ *    list.  But ss a complexity, the result of receiving a frame may be
+ *    that the network may respond provide an outgoing frames in the
+ *    frame list.
  */
 
 struct ieee802154_driver_s
@@ -370,32 +325,23 @@ struct ieee802154_driver_s
 
   /* IEEE802.15.4 MAC-specific definitions follow. */
 
-  /* The i_frame array is used to hold outgoing frame.   When the
-   * IEEE802.15.4 device polls for new data, the outgoing frame containing
-   * the next fragment is placed in i_frame.
+  /* The i_framelist is used to hold a outgoing frames contained in IOB
+   * structures.   When the IEEE802.15.4 device polls for new TX data, the
+   * outgoing frame(s) containing the packet fragments are placed in IOBs
+   * and queued in i_framelist.
    *
-   * The network will handle only a single outgong frame at a time.  The
-   * IEEE802.15.4 MAC driver design may be concurrently sending and
-   * requesting new framesusing break-off fram buffers.  That frame buffer
-   * management must be controlled by the IEEE802.15.4 MAC driver.
+   * The i_framelist is similary used to hold incoming frames in IOB
+   * structures.  The IEEE802.15.4 MAC driver must receive frames in an IOB,
+   * place the IOB in the i_framelist, and call sixlowpan_input().
    *
-   * Driver provided frame buffers should of size CONFIG_NET_6LOWPAN_FRAMELEN
-   * and should be 16-bit aligned.
+   * The IEEE802.15.4 MAC driver design may be concurrently sending and
+   * requesting new frames using lists of IOBs.  That IOB frame buffer
+   * management must be managed by the IEEE802.15.4 MAC driver.
    */
 
-  FAR uint8_t *i_frame;
+  FAR struct iob_s *i_framelist;
 
-  /* The length of valid data in the i_frame buffer.
-   *
-   * When the network device driver calls the network input function,
-   * i_framelen should be set to zero.  If there is frame to be sent
-   * by the network, i_framelen will be set to indicate the size of
-   * frame to be sent.  The value zero means that there is no frame
-   * to be sent.
-   */
-
-  uint16_t i_framelen;
-
+  /* Driver Configuration ***************************************************/
   /* i_panid.  The PAN ID is 16-bit number that identifies the network. It
    * must be unique to differentiate a network. All the nodes in the same
    * network should have the same PAN ID.  This value must be provided to
@@ -421,71 +367,48 @@ struct ieee802154_driver_s
 
   uint8_t i_dsn;
 
-  /* The following fields are device-specific metadata used by the 6loWPAN
-   * stack and should not be modified by the IEEE802.15.4 MAC network drvier.
+#if CONFIG_NET_6LOWPAN_FRAG
+  /* Fragmentation Support *************************************************/
+  /* Fragmentation is handled frame by frame and requires that certain
+   * state information be retained from frame to frame.
    */
 
-  /* A pointer to the rime buffer.
-   *
-   * We initialize it to the beginning of the rime buffer, then access
-   * different fields by updating the offset ieee->i_rime_hdrlen.
+  /* i_dgramtag.  Datagram tag to be put in the header of the set of
+   * fragments.  It is used by the recipient to match fragments of the
+   * same payload.
    */
 
-  FAR uint8_t *i_rimeptr;
+  uint16_t i_dgramtag;
 
-  /* i_uncomp_hdrlen is the length of the headers before compression (if HC2
-   * is used this includes the UDP header in addition to the IP header).
+  /* i_pktlen. The total length of the IPv6 packet to be re-assembled in
+   * d_buf.
    */
 
-  uint8_t i_uncomp_hdrlen;
+  uint16_t i_pktlen;
 
-  /* i_rime_hdrlen is the total length of (the processed) 6lowpan headers
-   * (fragment headers, IPV6 or HC1, HC2, and HC1 and HC2 non compressed
-   * fields).
+  /* The current accumulated length of the packet being received in d_buf.
+   * Included IPv6 and protocol headers.
    */
 
-  uint8_t i_rime_hdrlen;
+  uint16_t i_accumlen;
 
-  /* Offset first available byte for the payload after header region. */
-
-  uint8_t i_dataoffset;
-
-  /* Packet buffer metadata: Attributes and addresses */
-
-  uint16_t i_pktattrs[PACKETBUF_NUM_ATTRS];
-  struct rimeaddr_s i_pktaddrs[PACKETBUF_NUM_ADDRS];
-};
-
-/* The structure of a next header compressor.  This compressor is provided
- * by architecture-specific logic outside of the network stack.
- *
- * TODO: needs more parameters when compressing extension headers, etc.
- */
-
-struct sixlowpan_nhcompressor_s
-{
-  CODE int (*is_compressable)(uint8_t next_header);
-
-  /* Compress next header (TCP/UDP, etc) - ptr points to next header to
-   * compress.
+  /* i_reasstag.  Each frame in the reassembly has a tag.  That tag must
+   * match the reassembly tag in the fragments being merged.
    */
 
-  CODE int (*compress)(FAR uint8_t *compressed, FAR uint8_t *uncompressed_len);
+  uint16_t i_reasstag;
 
-  /* Uncompress next header (TCP/UDP, etc) - ptr points to next header to
-   * uncompress.
+  /* The source MAC address of the fragments being merged */
+
+  struct rimeaddr_s i_fragsrc;
+
+  /* That time at which reassembly was started.  If the elapsed time
+   * exceeds CONFIG_NET_6LOWPAN_MAXAGE, then the reassembly will
+   * be cancelled.
    */
 
-  CODE int (*uncompress)(FAR uint8_t *compressed, FAR uint8_t *lowpanbuf,
-                         FAR uint8_t *uncompressed_len);
-};
-
-/* RIME sniffer callbacks */
-
-struct sixlowpan_rime_sniffer_s
-{
-  CODE void (*input)(void);
-  CODE void (*output)(int mac_status);
+  systime_t i_time;
+#endif /* CONFIG_NET_6LOWPAN_FRAG */
 };
 
 /****************************************************************************
@@ -493,40 +416,59 @@ struct sixlowpan_rime_sniffer_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sixlowpan_set_compressor
+ * Name: sixlowpan_input
  *
  * Description:
- *   Configure to use the architecture-specific compressor.
+ *   Process an incoming 6loWPAN frame.
  *
- * Input parameters:
- *   compressor - A reference to the new compressor to be used.  This may
- *                be a NULL value to disable the compressor.
+ *   This function is called when the device driver has received a 6loWPAN
+ *   frame from the network. The frame from the device driver must be
+ *   provided in a IOB present in the i_framelist:  The frame data is in the
+ *   IOB io_data[] buffer and the length of the frame is in the IOB io_len
+ *   field.  Only a single IOB is expected in the i_framelist.  This incoming
+ *   data will be processed one frame at a time.
+ *
+ *   An non-NULL d_buf of size CONFIG_NET_6LOWPAN_MTU must also be provided.
+ *   The frame will be decompressed and placed in the d_buf. Fragmented
+ *   packets will also be reassembled in the d_buf as they are received
+ *   (meaning for the driver, that two packet buffers are required:  One for
+ *   reassembly of RX packets and one used for TX polling).
+ *
+ *   After each frame is processed into d_buf, the IOB is removed and
+ *   deallocated.  i_framelist will be nullified.  If reassembly is
+ *   incomplete, this function will return to called with i_framelist
+ *   equal to NULL.  The partially reassembled packet must be preserved by
+ *   the IEEE802.15.4 MAC and provided again when the next frame is
+ *   received.
+ *
+ *   When the packet in the d_buf is fully reassembled, it will be provided
+ *   to the network as with any other received packet.  d_len will be set
+ *   the the length of the uncompressed, reassembled packet.
+ *
+ *   After the network processes the packet, d_len will be set to zero.
+ *   Network logic may also decide to send a response to the packet.  In
+ *   that case, the outgoing network packet will be placed in d_buf the
+ *   d_buf and d_len will be set to a non-zero value.  That case is handled
+ *   by this function.
+ *
+ *   If that case occurs, the packet will be converted to a list of
+ *   compressed and possibly fragmented frames in i_framelist as with other
+ *   TX operations.
+ *
+ *   So from the standpoint of the IEEE802.15.4 MAC driver, there are two
+ *   possible results:  (1) i_framelist is NULL meaning that the frame
+ *   was fully processed and freed, or (2) i_framelist is non-NULL meaning
+ *   that there are outgoing frame(s) to be sent.
+ *
+ * Input Parameters:
+ *   ieee - The IEEE802.15.4 MAC network driver interface.
  *
  * Returned Value:
- *   None
+ *   Ok is returned on success; Othewise a negated errno value is returned.
  *
  ****************************************************************************/
 
-void sixlowpan_set_compressor(FAR struct sixlowpan_nhcompressor_s *compressor);
+int sixlowpan_input(FAR struct ieee802154_driver_s *ieee);
 
-/****************************************************************************
- * Function: sixlowpan_set_sniffer
- *
- * Description:
- *   Configure to use an architecture-specific sniffer to enable tracing of
- *   IP.
- *
- * Input parameters:
- *   sniffer - A reference to the new sniffer to be used.  This may
- *             be a NULL value to disable the sniffer.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_6LOWPAN_SNIFFER
-void sixlowpan_set_sniffer(FAR struct sixlowpan_rime_sniffer_s *sniffer);
-#endif
-
-#endif /* __INCLUDE_NUTTX_NET_SIXLOWOAN_H */
+#endif /* CONFIG_NET_6LOWPAN */
+#endif /* __INCLUDE_NUTTX_NET_SIXLOWPAN_H */

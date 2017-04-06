@@ -464,9 +464,9 @@ Notes about Header Files
 
     Certain header files, such as setjmp.h, stdarg.h, and math.h, may still
     be needed from your toolchain and your compiler may not, however, be able
-    to find these if you compile NuttX without using standard header file.
-    If that is the case, one solution is to copy those header file from
-    your toolchain into the NuttX include directory.
+    to find these if you compile NuttX without using standard header files
+    (ie., with -nostdinc).  If that is the case, one solution is to copy
+    those header file from your toolchain into the NuttX include directory.
 
   Duplicated Header Files.
 

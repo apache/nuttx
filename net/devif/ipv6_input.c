@@ -95,6 +95,7 @@
 #include "neighbor/neighbor.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
+#include "sixlowpan/sixlowpan.h"
 #include "pkt/pkt.h"
 #include "icmpv6/icmpv6.h"
 
@@ -197,7 +198,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
    * negotiating over DHCP for an address).
    */
 
-#if defined(CONFIG_NET_BROADCAST) && defined(CONFIG_NET_UDP)
+#if defined(CONFIG_NET_BROADCAST) && defined(NET_UDP_HAVE_STACK)
   if (ipv6->proto == IP_PROTO_UDP &&
       net_ipv6addr_cmp(ipv6->destipaddr, g_ipv6_alloneaddr))
     {
@@ -253,14 +254,52 @@ int ipv6_input(FAR struct net_driver_s *dev)
 
   switch (ipv6->proto)
     {
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
       case IP_PROTO_TCP:   /* TCP input */
-        tcp_ipv6_input(dev);
-        break;
-#endif
+        /* Forward the IPv6 TCP packet */
 
-#ifdef CONFIG_NET_UDP
+        tcp_ipv6_input(dev);
+
+#ifdef CONFIG_NET_6LOWPAN
+        /* TCP output comes through three different mechansims.  Either from:
+         *
+         *   1. TCP socket output.  For the case of TCP output to an
+         *      IEEE802.15.4, the TCP output is caught in the socket
+         *      send()/sendto() logic and and redirected to 6loWPAN logic.
+         *   2. TCP output from the TCP state machine.  That will occur
+         *      during TCP packet processing by the TCP state meachine.
+         *   3. TCP output resulting from TX or timer polling
+         *
+         * Cases 2 is handled here.  Logic here detected if (1) an attempt
+         * to return with d_len > 0 and (2) that the device is an
+         * IEEE802.15.4 MAC network driver. Under those conditions, 6loWPAN
+         * logic will be called to create the IEEE80215.4 frames.
+         */
+
+#ifdef CONFIG_NET_MULTILINK
+        /* Handle the case where multiple link layer protocols are supported */
+
+        if (dev->d_len > 0 && dev->d_lltype == CONFIG_NET_6LOWPAN)
+#else
+        if (dev->d_len > 0)
+#endif
+          {
+            /* Let 6loWPAN handle the TCP output */
+
+            sixlowpan_tcp_send(dev);
+
+            /* Drop the packet in the d_buf */
+
+            goto drop;
+          }
+#endif /* CONFIG_NET_6LOWPAN */
+        break;
+#endif /* NET_TCP_HAVE_STACK */
+
+#ifdef NET_UDP_HAVE_STACK
       case IP_PROTO_UDP:   /* UDP input */
+        /* Forward the IPv6 UDP packet */
+
         udp_ipv6_input(dev);
         break;
 #endif
@@ -269,6 +308,8 @@ int ipv6_input(FAR struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_ICMPv6
       case IP_PROTO_ICMP6: /* ICMP6 input */
+        /* Forward the ICMPv6 packet */
+
         icmpv6_input(dev);
         break;
 #endif

@@ -4,18 +4,6 @@
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Parts of this file derive from Contiki:
- *
- *   Copyright (c) 2008, Swedish Institute of Computer Science.
- *   All rights reserved.
- *   Authors: Adam Dunkels <adam@sics.se>
- *            Nicolas Tsiftes <nvt@sics.se>
- *            Niclas Finne <nfi@sics.se>
- *            Mathilde Durvy <mdurvy@cisco.com>
- *            Julien Abeille <jabeille@cisco.com>
- *            Joakim Eriksson <joakime@sics.se>
- *            Joel Hoglund <joel@sics.se>
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -23,23 +11,25 @@
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Institute nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
 
@@ -49,160 +39,182 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
+#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
-#include "nuttx/net/netdev.h"
-#include "nuttx/net/ip.h"
-#include "nuttx/net/tcp.h"
-#include "nuttx/net/udp.h"
-#include "nuttx/net/icmpv6.h"
-#include "nuttx/net/sixlowpan.h"
+#include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/net/net.h>
 
 #include "netdev/netdev.h"
-#include "socket/socket.h"
-#include "tcp/tcp.h"
-#include "udp/udp.h"
+#include "devif/devif.h"
+
 #include "sixlowpan/sixlowpan_internal.h"
 
 #ifdef CONFIG_NET_6LOWPAN
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* These are temporary stubs.  Something like this would be needed to
+ * monitor the health of a IPv6 neighbor.
+ */
+
+#define neighbor_reachable(dev)
+#define neighbor_notreachable(dev)
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* This is the state data provided to the send interrupt logic.  No actions
+ * can be taken until the until we receive the TX poll, then we can call
+ * sixlowpan_queue_frames() with this data strurcture.
+ */
+
+struct sixlowpan_send_s
+{
+  FAR struct devif_callback_s *s_cb;      /* Reference to callback instance */
+  sem_t                        s_waitsem; /* Supports waiting for driver events */
+  int                          s_result;  /* The result of the transfer */
+  uint16_t                     s_timeout; /* Send timeout in deciseconds */
+  systime_t                    s_time;    /* Last send time for determining timeout */
+  FAR const struct ipv6_hdr_s *s_ipv6hdr; /* IPv6 header, followed by UDP or TCP header. */
+  FAR const struct rimeaddr_s *s_destmac; /* Destination MAC address */
+  FAR const void              *s_buf;     /* Data to send */
+  size_t                       s_len;     /* Length of data in buf */
+};
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sixlowpan_set_pktattrs
+ * Function: send_timeout
  *
  * Description:
- *   Setup some packet buffer attributes
+ *   Check for send timeout.
  *
  * Input Parameters:
- *   ieee - Pointer to IEEE802.15.4 MAC driver structure.
- *   ipv6 - Pointer to the IPv6 header to "compress"
+ *   sinfo - Send state structure reference
  *
  * Returned Value:
- *   None
+ *   TRUE:timeout FALSE:no timeout
+ *
+ * Assumptions:
+ *   The network is locked
  *
  ****************************************************************************/
 
-static void sixlowpan_set_pktattrs(FAR struct ieee802154_driver_s *ieee,
-                                   FAR const struct ipv6_hdr_s *ipv6)
+static inline bool send_timeout(FAR struct sixlowpan_send_s *sinfo)
 {
-  int attr = 0;
-
-  /* Set protocol in NETWORK_ID */
-
-  ieee->i_pktattrs[PACKETBUF_ATTR_NETWORK_ID] = ipv6->proto;
-
-  /* Assign values to the channel attribute (port or type + code) */
-
-  if (ipv6->proto == IP_PROTO_UDP)
-    {
-      FAR struct udp_hdr_s *udp = &((FAR struct ipv6udp_hdr_s *)ipv6)->udp;
-
-      attr = udp->srcport;
-      if (udp->destport < attr)
-        {
-          attr = udp->destport;
-        }
-    }
-  else if (ipv6->proto == IP_PROTO_TCP)
-    {
-      FAR struct tcp_hdr_s *tcp = &((FAR struct ipv6tcp_hdr_s *)ipv6)->tcp;
-
-      attr = tcp->srcport;
-      if (tcp->destport < attr)
-        {
-          attr = tcp->destport;
-        }
-    }
-  else if (ipv6->proto == IP_PROTO_ICMP6)
-    {
-      FAR struct icmpv6_iphdr_s *icmp = &((FAR struct ipv6icmp_hdr_s *)ipv6)->icmp;
-
-      attr = icmp->type << 8 | icmp->code;
-    }
-
-  ieee->i_pktattrs[PACKETBUF_ATTR_CHANNEL] = attr;
-}
-
-/****************************************************************************
- * Name: sixlowpan_compress_ipv6hdr
- *
- * Description:
- *   IPv6 dispatch "compression" function.  Packets "Compression" when only
- *   IPv6 dispatch is used
- *
- *   There is no compression in this case, all fields are sent
- *   inline. We just add the IPv6 dispatch byte before the packet.
- *
- *   0               1                   2                   3
- *   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
- *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- *   | IPv6 Dsp      | IPv6 header and payload ...
- *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- *
- * Input Parameters:
- *   ieee - Pointer to IEEE802.15.4 MAC driver structure.
- *   ipv6 - Pointer to the IPv6 header to "compress"
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void sixlowpan_compress_ipv6hdr(FAR struct ieee802154_driver_s *ieee,
-                                       FAR const struct ipv6_hdr_s *ipv6)
-{
-  /* Indicate the IPv6 dispatch and length */
-
-  *ieee->i_rimeptr       = SIXLOWPAN_DISPATCH_IPV6;
-  ieee->i_rime_hdrlen   += SIXLOWPAN_IPV6_HDR_LEN;
-
-  /* Copy the IPv6 header and adjust pointers */
-
-  memcpy(ieee->i_rimeptr + ieee->i_rime_hdrlen, ipv6, IPv6_HDRLEN);
-  ieee->i_rime_hdrlen   += IPv6_HDRLEN;
-  ieee->i_uncomp_hdrlen += IPv6_HDRLEN;
-}
-
-/****************************************************************************
- * Name: sixlowpan_send_frame
- *
- * Description:
- *   Send one frame when the IEEE802.15.4 MAC device next polls.
- *
- * Input Parameters:
- *   ieee - Pointer to IEEE802.15.4 MAC driver structure.
- *   ipv6 - Pointer to the IPv6 header to "compress"
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static int sixlowpan_send_frame(FAR struct ieee802154_driver_s *ieee)
-{
-  /* Prepare the frame */
-#warning Missing logic
-  /* Set up for the TX poll */
-  /* When polled, then we need to call sixlowpan_framecreate() to create the
-   * frame and copy the payload data into the frame.
+  /* Check for a timeout.  Zero means none and, in that case, we will let
+   * the send wait forever.
    */
-#if 0 /* Just some notes of what needs to be done in interrupt handler */
-  framer_hdrlen = sixlowpan_createframe(ieee, ieee->i_panid);
-  memcpy(ieee->i_rimeptr + ieee->i_rime_hdrlen, (uint8_t *)ipv6 + ieee->i_uncomp_hdrlen, len - ieee->i_uncomp_hdrlen);
-  dev->i_framelen = len - ieee->i_uncomp_hdrlen + ieee->i_rime_hdrlen;
-#endif
-#warning Missing logic
-  /* Notify the IEEE802.14.5 MAC driver that we have data to be sent */
-#warning Missing logic
-  /* Wait for the transfer to complete */
-#warning Missing logic
-  return -ENOSYS;
+
+  if (sinfo->s_timeout != 0)
+    {
+      /* Check if the configured timeout has elapsed */
+
+      systime_t timeo_ticks =  DSEC2TICK(sinfo->s_timeout);
+      systime_t elapsed     =  clock_systimer() - sinfo->s_time;
+
+      if (elapsed >= timeo_ticks)
+        {
+          return true;
+        }
+    }
+
+  /* No timeout */
+
+  return false;
+}
+
+/****************************************************************************
+ * Function: send_interrupt
+ *
+ * Description:
+ *   This function is called from the interrupt level to perform the actual
+ *   send operation when polled by the lower, device interfacing layer.
+ *
+ * Parameters:
+ *   dev   - The structure of the network driver that caused the interrupt
+ *   conn  - The connection structure associated with the socket
+ *   flags - Set of events describing why the callback was invoked
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static uint16_t send_interrupt(FAR struct net_driver_s *dev,
+                               FAR void *pvconn,
+                               FAR void *pvpriv, uint16_t flags)
+{
+  FAR struct sixlowpan_send_s *sinfo = (FAR struct sixlowpan_send_s *)pvpriv;
+
+  ninfo("flags: %04x: %d\n", flags);
+
+  /* Check if the IEEE802.15.4 went down */
+
+  if ((flags & NETDEV_DOWN) != 0)
+    {
+      ninfo("Device is down\n");
+      sinfo->s_result = -ENOTCONN;
+      goto end_wait;
+    }
+
+  /* Check for a poll for TX data. */
+
+  if ((flags & WPAN_NEWDATA) == 0)
+    {
+      DEBUGASSERT((flags & WPAN_POLL) != 0);
+
+      /* Transfer the frame listto the IEEE802.15.4 MAC device */
+
+      sinfo->s_result =
+        sixlowpan_queue_frames((FAR struct ieee802154_driver_s *)dev,
+                               sinfo->s_ipv6hdr, sinfo->s_buf, sinfo->s_len,
+                               sinfo->s_destmac);
+
+      flags &= ~WPAN_POLL;
+      neighbor_reachable(dev);
+      goto end_wait;
+    }
+
+  /* Check for a timeout. */
+
+  if (send_timeout(sinfo))
+    {
+      /* Yes.. report the timeout */
+
+      nwarn("WARNING: SEND timeout\n");
+      sinfo->s_result = -ETIMEDOUT;
+      neighbor_notreachable(dev);
+      goto end_wait;
+    }
+
+  /* Continue waiting */
+
+  return flags;
+
+end_wait:
+  /* Do not allow any further callbacks */
+
+  sinfo->s_cb->flags   = 0;
+  sinfo->s_cb->priv    = NULL;
+  sinfo->s_cb->event   = NULL;
+
+  /* Wake up the waiting thread */
+
+  sem_post(&sinfo->s_waitsem);
+  return flags;
 }
 
 /****************************************************************************
@@ -217,19 +229,19 @@ static int sixlowpan_send_frame(FAR struct ieee802154_driver_s *ieee)
  *   it to be sent on an 802.15.4 network using 6lowpan.  Called from common
  *   UDP/TCP send logic.
  *
- *  The payload data is in the caller 'buf' and is of length 'len'.
- *  Compressed headers will be added and if necessary the packet is
- *  fragmented. The resulting packet/fragments are put in dev->d_buf and
- *  the first frame will be delivered to the 802.15.4 MAC. via ieee->i_frame.
- *
- * Input Parmeters:
+ *   The payload data is in the caller 'buf' and is of length 'len'.
+ *   Compressed headers will be added and if necessary the packet is
+ *   fragmented. The resulting packet/fragments are put in ieee->i_framelist
+ *   and the entire list of frames will be delivered to the 802.15.4 MAC via
+ *   ieee->i_framelist.
  *
  * Input Parameters:
- *   dev   - The IEEE802.15.4 MAC network driver interface.
- *   ipv6  - IPv6 plus TCP or UDP headers.
- *   buf   - Data to send
- *   len   - Length of data to send
- *   raddr - The IEEE802.15.4 MAC address of the destination
+ *   dev     - The IEEE802.15.4 MAC network driver interface.
+ *   ipv6hdr - IPv6 header followed by TCP or UDP header.
+ *   buf     - Data to send
+ *   len     - Length of data to send
+ *   destmac - The IEEE802.15.4 MAC address of the destination
+ *   timeout - Send timeout in deciseconds
  *
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.
@@ -243,200 +255,71 @@ static int sixlowpan_send_frame(FAR struct ieee802154_driver_s *ieee)
  ****************************************************************************/
 
 int sixlowpan_send(FAR struct net_driver_s *dev,
-                   FAR const struct ipv6_hdr_s *ipv6, FAR const void *buf,
-                   size_t len, FAR const struct rimeaddr_s *raddr)
+                   FAR const struct ipv6_hdr_s *ipv6hdr, FAR const void *buf,
+                   size_t len, FAR const struct rimeaddr_s *destmac,
+                   uint16_t timeout)
 {
-  FAR struct ieee802154_driver_s *ieee = (FAR struct ieee802154_driver_s *)dev;
+  struct sixlowpan_send_s sinfo;
 
-  int framer_hdrlen;       /* Framer header length */
-  struct rimeaddr_s dest;  /* The MAC address of the destination of the packet */
-  uint16_t outlen = 0;     /* Number of bytes processed. */
+  /* Initialize the send state structure */
 
-  /* Initialize device-specific data */
+  sem_init(&sinfo.s_waitsem, 0, 0);
+  (void)sem_setprotocol(&sinfo.s_waitsem, SEM_PRIO_NONE);
 
-  FRAME_RESET(ieee);
-  ieee->i_uncomp_hdrlen = 0;
-  ieee->i_rime_hdrlen   = 0;
-  /* REVISIT: Do I need this rimeptr? */
-  ieee->i_rimeptr = &dev->d_buf[PACKETBUF_HDR_SIZE];
+  sinfo.s_result  = -EBUSY;
+  sinfo.s_timeout = timeout;
+  sinfo.s_time    = clock_systimer();
+  sinfo.s_ipv6hdr = ipv6hdr;
+  sinfo.s_destmac = destmac;
+  sinfo.s_buf     = buf;
+  sinfo.s_len     = len;
 
-  /* Reset rime buffer, packet buffer metatadata */
-
-  memset(ieee->i_pktattrs, 0, PACKETBUF_NUM_ATTRS * sizeof(uint16_t));
-  memset(ieee->i_pktaddrs, 0, PACKETBUF_NUM_ADDRS * sizeof(struct rimeaddr_s));
-
-  ieee->i_pktattrs[PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS] =
-    CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS;
-
-#ifdef CONFIG_NET_6LOWPAN_SNIFFER
-  if (g_sixlowpan_sniffer != NULL)
+  net_lock();
+  if (len > 0)
     {
-      /* Reset rime buffer, packet buffer metatadata */
+      /* Allocate resources to receive a callback.
+       *
+       * The second parameter is NULL meaning that we can get only
+       * device related events, no connect-related events.
+       */
 
-      memset(ieee->i_pktattrs, 0, PACKETBUF_NUM_ATTRS * sizeof(uint16_t));
-      memset(ieee->i_pktaddrs, 0, PACKETBUF_NUM_ADDRS * sizeof(struct rimeaddr_s));
-
-      ieee->i_pktattrs[PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS] =
-        CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS;
-
-      /* Call the attribution when the callback comes, but set attributes here */
-
-      sixlowpan_set_pktattrs(ieee, ipv6);
-    }
-#endif
-
-  /* Reset rime buffer, packet buffer metatadata */
-
-  memset(ieee->i_pktattrs, 0, PACKETBUF_NUM_ATTRS * sizeof(uint16_t));
-  memset(ieee->i_pktaddrs, 0, PACKETBUF_NUM_ADDRS * sizeof(struct rimeaddr_s));
-
-  ieee->i_pktattrs[PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS] =
-    CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS;
-
-  /* Set stream mode for all TCP packets, except FIN packets. */
-
-  if (ipv6->proto == IP_PROTO_TCP)
-    {
-      FAR const struct tcp_hdr_s *tcp = &((FAR const struct ipv6tcp_hdr_s *)ipv6)->tcp;
-
-      if ((tcp->flags & TCP_FIN) == 0 &&
-          (tcp->flags & TCP_CTL) != TCP_ACK)
+      sinfo.s_cb =  devif_callback_alloc(dev, NULL);
+      if (sinfo.s_cb != NULL)
         {
-          ieee->i_pktattrs[PACKETBUF_ATTR_PACKET_TYPE] = PACKETBUF_ATTR_PACKET_TYPE_STREAM;
-        }
-      else if ((tcp->flags & TCP_FIN) == TCP_FIN)
-        {
-          ieee->i_pktattrs[PACKETBUF_ATTR_PACKET_TYPE] = PACKETBUF_ATTR_PACKET_TYPE_STREAM_END;
+          int ret;
+
+          /* Set up the callback in the connection */
+
+          sinfo.s_cb->flags   = (NETDEV_DOWN | WPAN_POLL);
+          sinfo.s_cb->priv    = (FAR void *)&sinfo;
+          sinfo.s_cb->event   = send_interrupt;
+
+          /* Notify the the IEEE802.15.4 MAC that we have data to send. */
+
+          netdev_txnotify_dev(dev);
+
+          /* Wait for the send to complete or an error to occur:  NOTES: (1)
+           * net_lockedwait will also terminate if a signal is received, (2) interrupts
+           * may be disabled!  They will be re-enabled while the task sleeps and
+           * automatically re-enabled when the task restarts.
+           */
+
+          ret = net_lockedwait(&sinfo.s_waitsem);
+          if (ret < 0)
+            {
+              sinfo.s_result = -get_errno();
+            }
+
+          /* Make sure that no further interrupts are processed */
+
+           devif_dev_callback_free(dev, sinfo.s_cb);
         }
     }
 
-  /* The destination address will be tagged to each outbound packet. If the
-   * argument raddr is NULL, we are sending a broadcast packet.
-   */
+  sem_destroy(&sinfo.s_waitsem);
+  net_unlock();
 
-  if (raddr == NULL)
-    {
-      memset(&dest, 0, sizeof(struct rimeaddr_s));
-    }
-  else
-    {
-      rimeaddr_copy(&dest, (FAR const struct rimeaddr_s *)raddr);
-    }
-
-  ninfo("Sending packet len %d\n", len);
-
-#ifndef CONFIG_NET_6LOWPAN_COMPRESSION_IPv6
-  if (len >= CONFIG_NET_6LOWPAN_COMPRESSION_THRESHOLD)
-    {
-      /* Try to compress the headers */
-
-#if defined(CONFIG_NET_6LOWPAN_COMPRESSION_HC1)
-      sixlowpan_compresshdr_hc1(dev, &dest);
-#elif defined(CONFIG_NET_6LOWPAN_COMPRESSION_HC06)
-      sixlowpan_compresshdr_hc06(dev, &dest);
-#else
-#  error No compression specified
-#endif
-    }
-  else
-#endif /* !CONFIG_NET_6LOWPAN_COMPRESSION_IPv6 */
-    {
-      /* Small.. use IPv6 dispatch (no compression) */
-
-      sixlowpan_compress_ipv6hdr(ieee, ipv6);
-    }
-
-  ninfo("Header of len %d\n", ieee->i_rime_hdrlen);
-
-  rimeaddr_copy(&ieee->i_pktaddrs[PACKETBUF_ADDR_RECEIVER], &dest);
-
-  /* Pre-calculate frame header length. */
-
-  framer_hdrlen = sixlowpan_hdrlen(ieee, ieee->i_panid);
-  if (framer_hdrlen < 0)
-    {
-      /* Failed to determine the size of the header failed. */
- 
-      nerr("ERROR: sixlowpan_framecreate() failed: %d\n", framer_hdrlen);
-      return framer_hdrlen;
-    }
-
-  /* Check if we need to fragment the packet into several frames */
-
-  if ((int)len - (int)ieee->i_uncomp_hdrlen >
-      (int)CONFIG_NET_6LOWPAN_MAXPAYLOAD - framer_hdrlen -
-      (int)ieee->i_rime_hdrlen)
-    {
-#if CONFIG_NET_6LOWPAN_FRAG
-      /* The outbound IPv6 packet is too large to fit into a single 15.4
-       * packet, so we fragment it into multiple packets and send them.
-       * The first fragment contains frag1 dispatch, then
-       * IPv6/HC1/HC06/HC_UDP dispatchs/headers.
-       * The following fragments contain only the fragn dispatch.
-       */
-
-      ninfo("Fragmentation sending packet len %d\n", len);
-
-      /* Create 1st Fragment */
-#  warning Missing logic
-
-      /* Move HC1/HC06/IPv6 header */
-#  warning Missing logic
-
-      /* FRAG1 dispatch + header
-       * Note that the length is in units of 8 bytes
-       */
-#  warning Missing logic
-
-      /* Copy payload and send */
-#  warning Missing logic
- 
-      /* Check TX result. */
-#  warning Missing logic
-
-      /* Set outlen to what we already sent from the IP payload */
-#  warning Missing logic
-
-      /* Create following fragments
-       * Datagram tag is already in the buffer, we need to set the
-       * FRAGN dispatch and for each fragment, the offset
-       */
-#  warning Missing logic
-
-      while (outlen < len)
-        {
-          /* Copy payload and send */
-#  warning Missing logic
-
-          ninfo("sixlowpan output: fragment offset %d, len %d, tag %d\n",
-                outlen >> 3, g_rime_payloadlen, g_mytag);
-
-#  warning Missing logic
-          sixlowpan_send_frame(ieee);
-
-          /* Check tx result. */
-#  warning Missing logic
-        }
-
-      return -ENOSYS;
-#else
-      nerr("ERROR: Packet too large: %d\n", len);
-      nerr("       Cannot to be sent without fragmentation support\n");
-      nerr("       dropping packet\n");
-
-      return -E2BIG;
-#endif
-    }
-  else
-    {
-      /* The packet does not need to be fragmented just copy the "payload"
-       * and send in one frame.
-       */
-
-      return sixlowpan_send_frame(ieee);
-    }
-
-  return -ENOSYS;
+  return (sinfo.s_result < 0 ? sinfo.s_result : len);
 }
 
 #endif /* CONFIG_NET_6LOWPAN */

@@ -33,11 +33,11 @@ config BMP180
 		Enable driver support for the Bosch BMP180 barometer sensor.
 
 config HTS221
-	bool "ST HTS221 humidity sensor"
+	bool "STMicro HTS221 humidity sensor"
 	default n
 	select I2C
 	---help---
-		Enable driver support for the ST HTS221 humidity sensor.
+		Enable driver support for the STMicro HTS221 humidity sensor.
 
 if HTS221
 
@@ -56,11 +56,11 @@ config HTS221_NPOLLWAITERS
 endif # HTS221
 
 config SENSORS_L3GD20
-	bool "ST L3GD20 Gyroscope Sensor support"
+	bool "STMicro L3GD20 Gyroscope Sensor support"
 	default n
 	select SPI
 	---help---
-		Enable driver support for the ST L3GD20 gyroscope sensor.
+		Enable driver support for the STMicro L3GD20 gyroscope sensor.
 
 config SENSOR_KXTJ9
 	bool "Kionix KXTJ9 Accelerometer support"
@@ -75,15 +75,44 @@ config SENSOR_KXTJ9_I2C_BUS_SPEED
 
 endif # SENSOR_KXTJ9
 
+config LIS2DH
+	bool "STMicro LIS2DH device support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the STMicro LIS2DH accelerometer
+
+if LIS2DH
+
+config DEBUG_LIS2DH
+	bool "Debug support for the LIS2DH"
+	default n
+	---help---
+		Enables debug features for the LIS2DH
+
+config LIS2DH_NPOLLWAITERS
+	int "Number of waiters to poll"
+	default 2
+	---help---
+		Maximum number of threads that can be waiting on poll()
+
+config LIS2DH_DRIVER_SELFTEST
+	bool "Enable selftest in LIS2DH driver"
+	default n
+	---help---
+		Enable selftest in LIS2DH driver
+
+endif # LIS2DH
+
 config LIS3DSH
-	bool "STMicro LIS3DSH 3-Axis acclerometer support"
+	bool "STMicro LIS3DSH 3-Axis accelerometer support"
 	default n
 	select SPI
 	---help---
-		Enable driver support for the STMicro LIS3DSH 3-Axis acclerometer.
+		Enable driver support for the STMicro LIS3DSH 3-Axis accelerometer.
 
 config LIS331DL
-	bool "ST LIS331DL device support"
+	bool "STMicro LIS331DL device support"
 	default n
 	select I2C
 
@@ -105,6 +134,23 @@ config LSM9DS1_I2C_FREQUENCY
 	default 400000
 	range 1 400000
 	depends on SN_LSM9DS1
+
+config LPS25H
+	bool "STMicro LPS25H pressure sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the STMicro LPS25H barometer sensor.
+
+if LPS25H
+
+config DEBUG_LPS25H
+	bool "Debug support for the LPS25H"
+	default n
+	---help---
+		Enables debug features for the LPS25H
+
+endif # LPS25H
 
 config MB7040
 	bool "MaxBotix MB7040 Sonar support"
@@ -209,7 +255,7 @@ endif # SENSORS_ADXL345
 config MAX31855
 	bool "Maxim MAX31855 Driver"
 	default n
-        select SPI
+	select SPI
 	---help---
 		Enables support for the MAX31855 driver
 
@@ -229,7 +275,7 @@ config LIS3MDL
 	default n
 	select SPI
 	---help---
-		Enable driver support for the ST LIS3MDL 3-axis magnetometer.
+		Enable driver support for the STMicro LIS3MDL 3-axis magnetometer.
 
 config LM75
 	bool "STMicro LM-75 Temperature Sensor support"

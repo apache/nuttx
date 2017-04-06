@@ -57,6 +57,7 @@
 #include "local/local.h"
 #include "igmp/igmp.h"
 #include "route/route.h"
+#include "usrsock/usrsock.h"
 #include "utils/utils.h"
 
 /****************************************************************************
@@ -130,7 +131,7 @@ void net_setup(void)
   local_initialize();
 #endif
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
   /* Initialize the listening port structures */
 
   tcp_listen_initialize();
@@ -146,7 +147,7 @@ void net_setup(void)
 #endif
 #endif /* CONFIG_NET_TCP */
 
-#ifdef CONFIG_NET_UDP
+#ifdef NET_UDP_HAVE_STACK
   /* Initialize the UDP connection structures */
 
   udp_initialize();
@@ -162,6 +163,12 @@ void net_setup(void)
   /* Initialize the routing table */
 
   net_initroute();
+#endif
+
+#ifdef CONFIG_NET_USRSOCK
+  /* Initialize the user-space socket API */
+
+  usrsock_initialize();
 #endif
 }
 

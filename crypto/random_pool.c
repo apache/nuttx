@@ -367,7 +367,7 @@ static void rng_buf_internal(FAR void *bytes, size_t nbytes)
 
 static void rng_init(void)
 {
-  crypinfo("Initializing RNG\n");
+  cryptinfo("Initializing RNG\n");
 
   memset(&g_rng, 0, sizeof(struct rng_s));
   sem_init(&g_rng.rd_sem, 0, 1);

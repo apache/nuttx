@@ -125,4 +125,22 @@
 #define SNIOC_READ_CONVERT_DATA _SNIOC(0x002f)
 #define SNIOC_DUMP_REGS         _SNIOC(0x0030)
 
+/* IOCTL commands unique to the LPS25H */
+
+#define SNIOC_GET_DEV_ID        _SNIOC(0x0031)
+#define SNIOC_CFGR              _SNIOC(0x0032)
+#define SNIOC_TEMPERATURE_OUT   _SNIOC(0x0033)
+#define SNIOC_PRESSURE_OUT      _SNIOC(0x0034)
+#define SNIOC_SENSOR_OFF        _SNIOC(0x0035)
+
+/* IOCTL commands unique to the LIS2DH */
+
+#define SNIOC_WRITESETUP            _SNIOC(0x0036) /* Arg: uint8_t value */
+#define SNIOC_WRITE_INT1THRESHOLD   _SNIOC(0x0037) /* Arg: uint8_t value */
+#define SNIOC_WRITE_INT2THRESHOLD   _SNIOC(0x0038) /* Arg: uint8_t value */
+#define SNIOC_RESET_HPFILTER        _SNIOC(0x0039) /* Arg: uint8_t value */
+#define SNIOC_START_SELFTEST        _SNIOC(0x003a) /* Arg: uint8_t value */
+#define SNIOC_WHO_AM_I              _SNIOC(0x003b)
+#define SNIOC_READ_TEMP             _SNIOC(0x003c) /* Arg: int16_t value */
+
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */

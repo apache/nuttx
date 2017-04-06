@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/sixlowpan/sixlowpan_compressor.c
+ * net/utils/net_udpchksum.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2012, 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,42 +39,47 @@
 
 #include <nuttx/config.h>
 
-#include "nuttx/net/net.h"
-#include "nuttx/net/sixlowpan.h"
+#include <stdint.h>
 
-#include "sixlowpan/sixlowpan_internal.h"
+#include <nuttx/net/netconfig.h>
+#include <nuttx/net/netdev.h>
 
-#ifdef CONFIG_NET_6LOWPAN
+#include "utils/utils.h"
+
+#ifdef CONFIG_NET_UDP
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sixlowpan_set_compressor
+ * Name: udp_ipv4_chksum
  *
  * Description:
- *   Configure to use the architecture-specific compressor.
- *
- * Input parameters:
- *   compressor - A reference to the new compressor to be used.  This may
- *                be a NULL value to disable the compressor.
- *
- * Returned Value:
- *   None
+ *   Calculate the UDP/IPv4 checksum of the packet in d_buf and d_appdata.
  *
  ****************************************************************************/
 
-void sixlowpan_set_compressor(FAR struct sixlowpan_nhcompressor_s *compressor)
+#if defined(CONFIG_NET_UDP_CHECKSUMS) && defined(CONFIG_NET_IPv4)
+uint16_t udp_ipv4_chksum(FAR struct net_driver_s *dev)
 {
-  /* Make sure that the compressor is not in use */
-
-  net_lock();
-
-  /* Then instantiate the new compressor */
-
-  g_sixlowpan_compressor = compressor;
-  net_unlock();
+  return ipv4_upperlayer_chksum(dev, IP_PROTO_UDP);
 }
+#endif
 
-#endif /* CONFIG_NET_6LOWPAN */
+/****************************************************************************
+ * Name: udp_ipv6_chksum
+ *
+ * Description:
+ *   Calculate the UDP/IPv6 checksum of the packet in d_buf and d_appdata.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_UDP_CHECKSUMS) && defined(CONFIG_NET_IPv6)
+uint16_t udp_ipv6_chksum(FAR struct net_driver_s *dev)
+{
+  return ipv6_upperlayer_chksum(dev, IP_PROTO_UDP);
+}
+#endif
+
+#endif /* CONFIG_NET_UDP */

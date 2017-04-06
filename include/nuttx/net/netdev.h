@@ -419,7 +419,8 @@ int ipv6_input(FAR struct net_driver_s *dev);
 #endif
 
 #ifdef CONFIG_NET_6LOWPAN
-int sixlowpan_input(FAR struct net_driver_s *dev);
+struct ieee802154_driver_s;  /* See sixlowpan.h */
+int sixlowpan_input(FAR struct ieee802154_driver_s *ieee);
 #endif
 
 /****************************************************************************

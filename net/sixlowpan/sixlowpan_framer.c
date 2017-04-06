@@ -55,7 +55,6 @@
 #include <debug.h>
 
 #include "nuttx/net/net.h"
-#include "nuttx/net/sixlowpan.h"
 
 #include "sixlowpan/sixlowpan_internal.h"
 
@@ -277,9 +276,10 @@ static int sixlowpan_802154_hdrlen(FAR struct frame802154_s *finfo)
  *
  * Input parameters:
  *   ieee       - A reference IEEE802.15.4 MAC network device structure.
- *   params     - Where to put the parmeters
+ *   iob        - The IOB in which to create the frame.
  *   dest_panid - PAN ID of the destination.  May be 0xffff if the destination
  *                is not associated.
+ *   params     - Where to put the parmeters
  *
  * Returned Value:
  *   None.
@@ -287,33 +287,28 @@ static int sixlowpan_802154_hdrlen(FAR struct frame802154_s *finfo)
  ****************************************************************************/
 
 static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
-                                   FAR struct frame802154_s *params,
-                                   uint16_t dest_panid)
+                                   uint16_t dest_panid,
+                                   FAR struct frame802154_s *params)
 {
   bool rcvrnull;
 
   /* Initialize all prameters to all zero */
 
-  memset(&params, 0, sizeof(params));
-
-  /* Reset to an empty frame */
-
-  ieee->i_framelen   = 0;
-  ieee->i_dataoffset = 0;
+  memset(params, 0, sizeof(params));
 
   /* Build the FCF (Only non-zero elements need to be initialized). */
 
   params->fcf.frame_type    = FRAME802154_DATAFRAME;
-  params->fcf.frame_pending = ieee->i_pktattrs[PACKETBUF_ATTR_PENDING];
+  params->fcf.frame_pending = g_pktattrs[PACKETBUF_ATTR_PENDING];
 
   /* If the output address is NULL in the Rime buf, then it is broadcast
    * on the 802.15.4 network.
    */
 
-  rcvrnull = sixlowpan_addrnull(ieee->i_pktaddrs[PACKETBUF_ADDR_RECEIVER].u8);
+  rcvrnull = sixlowpan_addrnull(g_pktaddrs[PACKETBUF_ADDR_RECEIVER].u8);
   if (rcvrnull)
     {
-      params->fcf.ack_required = ieee->i_pktattrs[PACKETBUF_ATTR_MAC_ACK];
+      params->fcf.ack_required = g_pktattrs[PACKETBUF_ATTR_MAC_ACK];
     }
 
   /* Insert IEEE 802.15.4 (2003) version bit. */
@@ -322,14 +317,14 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
 
   /* Increment and set the data sequence number. */
 
-  if (ieee->i_pktattrs[PACKETBUF_ATTR_MAC_SEQNO] != 0)
+  if (g_pktattrs[PACKETBUF_ATTR_MAC_SEQNO] != 0)
     {
-      params->seq = ieee->i_pktattrs[PACKETBUF_ATTR_MAC_SEQNO];
+      params->seq = g_pktattrs[PACKETBUF_ATTR_MAC_SEQNO];
     }
   else
     {
       params->seq = ieee->i_dsn++;
-      ieee->i_pktattrs[PACKETBUF_ATTR_MAC_SEQNO] = params->seq;
+      g_pktattrs[PACKETBUF_ATTR_MAC_SEQNO] = params->seq;
     }
 
   /* Complete the addressing fields. */
@@ -355,7 +350,7 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
       /* Copy the destination address */
 
       rimeaddr_copy((struct rimeaddr_s *)&params->dest_addr,
-                    ieee->i_pktaddrs[PACKETBUF_ADDR_RECEIVER].u8);
+                    g_pktaddrs[PACKETBUF_ADDR_RECEIVER].u8);
 
       /* Use short address mode if so configured */
 
@@ -369,11 +364,6 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
   /* Set the source address to the node address assigned to the device */
 
   rimeaddr_copy((struct rimeaddr_s *)&params->src_addr, &ieee->i_nodeaddr.u8);
-
-  /* Configure the payload address and length */
-
-  params->payload     = FRAME_DATA_START(ieee);
-  params->payload_len = FRAME_DATA_SIZE(ieee);
 }
 
 /****************************************************************************
@@ -381,7 +371,7 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sixlowpan_hdrlen
+ * Function: sixlowpan_send_hdrlen
  *
  * Description:
  *   This function is before the first frame has been sent in order to
@@ -399,14 +389,14 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
  *
  ****************************************************************************/
 
-int sixlowpan_hdrlen(FAR struct ieee802154_driver_s *ieee,
-                     uint16_t dest_panid)
+int sixlowpan_send_hdrlen(FAR struct ieee802154_driver_s *ieee,
+                          uint16_t dest_panid)
 {
   struct frame802154_s params;
 
   /* Set up the frame parameters */
 
-  sixlowpan_setup_params(ieee, &params, dest_panid);
+  sixlowpan_setup_params(ieee, dest_panid, &params);
 
   /* Return the length of the header */
 
@@ -425,7 +415,7 @@ int sixlowpan_hdrlen(FAR struct ieee802154_driver_s *ieee,
  *            the frame to send.
  *   buf    - Pointer to the buffer to use for the frame.
  *   buflen - The length of the buffer to use for the frame.
- *   finfo - I that specifies the frame to send.
+ *   finfo  - Specifies the frame to send.
  *
  * Returned Value:
  *   The length of the frame header or 0 if there was insufficient space in
@@ -451,18 +441,18 @@ int sixlowpan_802154_framecreate(FAR struct frame802154_s *finfo,
       return 0;
     }
 
-  /* OK, now we have field lengths.  Time to actually construct
-   * the outgoing frame, and store it in the provided buffer
+  /* OK, now we have field lengths.  Time to actually construct the outgoing
+   * frame, and store it in the provided buffer
    */
 
-  buf[0] = (finfo->fcf.frame_type         & 7) |
-           ((finfo->fcf.security_enabled  & 1) << 3) |
-           ((finfo->fcf.frame_pending     & 1) << 4) |
-           ((finfo->fcf.ack_required      & 1) << 5) |
-           ((finfo->fcf.panid_compression & 1) << 6);
-  buf[1] = ((finfo->fcf.dest_addr_mode    & 3) << 2) |
-           ((finfo->fcf.frame_version     & 3) << 4) |
-           ((finfo->fcf.src_addr_mode     & 3) << 6);
+  buf[0] = ((finfo->fcf.frame_type        & 7) << FRAME802154_FRAMETYPE_SHIFT)    |
+           ((finfo->fcf.security_enabled  & 1) << FRAME802154_SECENABLED_SHIFT)   |
+           ((finfo->fcf.frame_pending     & 1) << FRAME802154_FRAMEPENDING_SHIFT) |
+           ((finfo->fcf.ack_required      & 1) << FRAME802154_ACKREQUEST_SHIFT)   |
+           ((finfo->fcf.panid_compression & 1) << FRAME802154_PANIDCOMP_SHIFT);
+  buf[1] = ((finfo->fcf.dest_addr_mode    & 3) << FRAME802154_DSTADDR_SHIFT)      |
+           ((finfo->fcf.frame_version     & 3) << FRAME802154_VERSION_SHIFT)      |
+           ((finfo->fcf.src_addr_mode     & 3) << FRAME802154_SRCADDR_SHIFT);
 
   /* Sequence number */
 
@@ -481,7 +471,7 @@ int sixlowpan_802154_framecreate(FAR struct frame802154_s *finfo,
 
   for (i = flen.dest_addr_len; i > 0; i--)
     {
-     buf[pos++] = finfo->dest_addr[i - 1];
+      buf[pos++] = finfo->dest_addr[i - 1];
     }
 
   /* Source PAN ID */
@@ -516,11 +506,14 @@ int sixlowpan_802154_framecreate(FAR struct frame802154_s *finfo,
  * Function: sixlowpan_framecreate
  *
  * Description:
- *   This function is called after the IEEE802.15.4 MAC driver polls for
- *   TX data.  It creates the IEEE802.15.4 header in the frame buffer.
+ *   This function is called after eiether (1) the IEEE802.15.4 MAC driver
+ *   polls for TX data or (2) after the IEEE802.15.4 MAC driver provides an
+ *   in frame and the network responds with an outgoing packet.  It creates
+ *   the IEEE802.15.4 header in the frame buffer.
  *
  * Input parameters:
  *   ieee       - A reference IEEE802.15.4 MAC network device structure.
+ *   iob        - The IOB in which to create the frame.
  *   dest_panid - PAN ID of the destination.  May be 0xffff if the destination
  *                is not associated.
  *
@@ -531,36 +524,25 @@ int sixlowpan_802154_framecreate(FAR struct frame802154_s *finfo,
  ****************************************************************************/
 
 int sixlowpan_framecreate(FAR struct ieee802154_driver_s *ieee,
-                          uint16_t dest_panid)
+                          FAR struct iob_s *iob, uint16_t dest_panid)
 {
   struct frame802154_s params;
-  int len;
-  int ret;
+  int hdrlen;
 
   /* Set up the frame parameters */
 
-  sixlowpan_setup_params(ieee, &params, dest_panid);
+  sixlowpan_setup_params(ieee, dest_panid, &params);
 
   /* Get the length of the header */
 
-  len = sixlowpan_802154_hdrlen(&params);
-
-  /* Allocate space for the header in the frame buffer */
-
-  ret = sixlowpan_frame_hdralloc(ieee, len);
-  if (ret < 0)
-    {
-      wlerr("ERROR: Header too large: %u\n", len);
-      return ret;
-    }
+  hdrlen = sixlowpan_802154_hdrlen(&params);
 
   /* Then create the frame */
 
-  sixlowpan_802154_framecreate(&params, FRAME_HDR_START(ieee), len);
+  sixlowpan_802154_framecreate(&params, iob->io_data, hdrlen);
 
-  wlinfo("Frame type: %02x Data len: %d %u (%u)\n",
-         params.fcf.frame_type, len, FRAME_DATA_SIZE(ieee),
-         FRAME_SIZE(ieee));
+  wlinfo("Frame type: %02x hdrlen: %d\n",
+         params.fcf.frame_type, hdrlen);
 #if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
   wlinfo("Dest address: %02x:%02x\n",
          params.dest_addr[0], params.dest_addr[1]);
@@ -571,7 +553,7 @@ int sixlowpan_framecreate(FAR struct ieee802154_driver_s *ieee,
          params.dest_addr[6], params.dest_addr[7]);
 #endif
 
-  return len;
+  return hdrlen;
 }
 
 #endif /* CONFIG_NET_6LOWPAN */

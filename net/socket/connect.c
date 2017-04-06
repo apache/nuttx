@@ -62,12 +62,13 @@
 #include "udp/udp.h"
 #include "local/local.h"
 #include "socket/socket.h"
+#include "usrsock/usrsock.h"
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 struct tcp_connect_s
 {
   FAR struct tcp_conn_s  *tc_conn;    /* Reference to TCP connection structure */
@@ -82,7 +83,7 @@ struct tcp_connect_s
  * Private Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 static inline int psock_setup_callbacks(FAR struct socket *psock,
                                         FAR struct tcp_connect_s *pstate);
 static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
@@ -92,7 +93,7 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
                                         uint16_t flags);
 static inline int psock_tcp_connect(FAR struct socket *psock,
                                     FAR const struct sockaddr *addr);
-#endif /* CONFIG_NET_TCP */
+#endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Private Functions
@@ -101,7 +102,7 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
  * Name: psock_setup_callbacks
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 static inline int psock_setup_callbacks(FAR struct socket *psock,
                                         FAR struct tcp_connect_s *pstate)
 {
@@ -137,13 +138,13 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
 
   return ret;
 }
-#endif /* CONFIG_NET_TCP */
+#endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Name: psock_teardown_callbacks
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
                                      int status)
 {
@@ -165,7 +166,7 @@ static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
       net_stopmonitor(conn);
     }
 }
-#endif /* CONFIG_NET_TCP */
+#endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Name: psock_connect_interrupt
@@ -187,7 +188,7 @@ static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
                                         FAR void *pvconn, FAR void *pvpriv,
                                         uint16_t flags)
@@ -299,7 +300,7 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
       else
 #endif
         {
-          pstate->tc_conn->mss = TCP_IPv4_INITIAL_MSS(dev);
+          pstate->tc_conn->mss = TCP_IPv6_INITIAL_MSS(dev);
         }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -322,7 +323,7 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
 
   return flags;
 }
-#endif /* CONFIG_NET_TCP */
+#endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Name: psock_tcp_connect
@@ -342,7 +343,7 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 static inline int psock_tcp_connect(FAR struct socket *psock,
                                     FAR const struct sockaddr *addr)
 {
@@ -434,7 +435,7 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
   net_unlock();
   return ret;
 }
-#endif /* CONFIG_NET_TCP */
+#endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Public Functions
@@ -512,7 +513,8 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
                   socklen_t addrlen)
 {
   FAR const struct sockaddr_in *inaddr = (FAR const struct sockaddr_in *)addr;
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL)
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP) || \
+    defined(CONFIG_NET_LOCAL) || defined(CONFIG_NET_USRSOCK)
   int ret;
 #endif
   int errcode;
@@ -570,6 +572,13 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 #endif
 
     default:
+#ifdef CONFIG_NET_USRSOCK
+      if (psock->s_type == SOCK_USRSOCK_TYPE)
+        {
+          break;
+        }
+#endif
+
       DEBUGPANIC();
       errcode = EAFNOSUPPORT;
       goto errout;
@@ -608,9 +617,13 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
           else
 #endif
             {
+#ifdef NET_TCP_HAVE_STACK
               /* Connect the TCP/IP socket */
 
               ret = psock_tcp_connect(psock, addr);
+#else
+              ret = -ENOSYS;
+#endif
             }
 #endif /* CONFIG_NET_TCP */
 
@@ -642,6 +655,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
           else
 #endif
             {
+#ifdef NET_UDP_HAVE_STACK
               ret = udp_connect(psock->s_conn, addr);
               if (ret < 0 || addr == NULL)
                 {
@@ -651,6 +665,9 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
                 {
                   psock->s_flags |= _SF_CONNECTED;
                 }
+#else
+              ret = -ENOSYS;
+#endif
             }
 #endif /* CONFIG_NET_UDP */
 
@@ -662,6 +679,19 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
         }
         break;
 #endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL_DGRAM */
+
+#ifdef CONFIG_NET_USRSOCK
+      case SOCK_USRSOCK_TYPE:
+        {
+          ret = usrsock_connect(psock, addr, addrlen);
+          if (ret < 0)
+            {
+              errcode = -ret;
+              goto errout;
+            }
+        }
+        break;
+#endif /* CONFIG_NET_USRSOCK */
 
       default:
         errcode = EBADF;

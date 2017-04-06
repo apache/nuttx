@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/send.c
  *
- *   Copyright (C) 2007-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@
 #include "sixlowpan/sixlowpan.h"
 #include "local/local.h"
 #include "socket/socket.h"
+#include "usrsock/usrsock.h"
 
 /****************************************************************************
  * Public Functions
@@ -123,7 +124,7 @@
 ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
                    int flags)
 {
-  int ret;
+  ssize_t ret;
 
   /* Treat as a cancellation point */
 
@@ -165,20 +166,18 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 
               ret = psock_6lowpan_tcp_send(psock, buf, len);
 
-#ifdef CONFIG_NETDEV_MULTINIC
+#if defined(CONFIG_NETDEV_MULTINIC) && defined(NET_TCP_HAVE_STACK)
               if (ret < 0)
                 {
-                  /* UDP/IP packet send */
+                  /* TCP/IP packet send */
 
                   ret = psock_tcp_send(psock, buf, len);
                 }
-
-#endif /* CONFIG_NETDEV_MULTINIC */
-#else  /* CONFIG_NET_6LOWPAN */
-
-              /* Only TCP/IP packet send */
-
+#endif /* CONFIG_NETDEV_MULTINIC && NET_TCP_HAVE_STACK */
+#elif defined(NET_TCP_HAVE_STACK)
               ret = psock_tcp_send(psock, buf, len);
+#else
+              ret = -ENOSYS;
 #endif /* CONFIG_NET_6LOWPAN */
             }
 #endif /* CONFIG_NET_TCP */
@@ -205,31 +204,39 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
           else
 #endif
             {
-#ifdef CONFIG_NET_6LOWPAN
+#if defined(CONFIG_NET_6LOWPAN)
               /* Try 6loWPAN UDP packet send */
 
               ret = psock_6lowpan_udp_send(psock, buf, len);
 
-#ifdef CONFIG_NETDEV_MULTINIC
+#if defined(CONFIG_NETDEV_MULTINIC) && defined(NET_UDP_HAVE_STACK)
               if (ret < 0)
                 {
                   /* UDP/IP packet send */
 
                   ret = psock_udp_send(psock, buf, len);
                 }
-
-#endif /* CONFIG_NETDEV_MULTINIC */
-#else  /* CONFIG_NET_6LOWPAN */
-
+#endif /* CONFIG_NETDEV_MULTINIC && NET_UDP_HAVE_STACK */
+#elif defined(NET_UDP_HAVE_STACK)
               /* Only UDP/IP packet send */
 
               ret = psock_udp_send(psock, buf, len);
+#else
+              ret = -ENOSYS;
 #endif /* CONFIG_NET_6LOWPAN */
             }
 #endif /* CONFIG_NET_UDP */
         }
         break;
 #endif /* CONFIG_NET_UDP */
+
+#ifdef CONFIG_NET_USRSOCK
+      case SOCK_USRSOCK_TYPE:
+        {
+          ret = usrsock_sendto(psock, buf, len, NULL, 0);
+        }
+        break;
+#endif /*CONFIG_NET_USRSOCK*/
 
       default:
         {
@@ -243,6 +250,11 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
     }
 
   leave_cancellation_point();
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
   return ret;
 }
 
