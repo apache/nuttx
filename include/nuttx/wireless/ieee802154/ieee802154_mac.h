@@ -916,17 +916,17 @@ struct ieee802154_maccb_s
 
   CODE void (*conf_disassociate)(MACHANDLE mac, int status);
 
-  /* PIvoata returned */
+  /* PIB data returned */
 
   CODE void (*conf_get)(MACHANDLE mac, int status, int attribute,
                         FAR uint8_t *value, int valuelen);
 
-  /* GTvoanagement completed */
+  /* GTS management completed */
 
   CODE void (*conf_gts)(MACHANDLE mac, FAR uint8_t *characteristics,
                         int status);
 
-  /* MAveset completed */
+  /* MAC reset completed */
 
   CODE void (*conf_reset)(MACHANDLE mac, int status);
 
