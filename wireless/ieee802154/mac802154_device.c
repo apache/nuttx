@@ -77,15 +77,33 @@ struct mac802154_devwrapper_s
 
   FAR struct mac802154_open_s *md_open;
   FAR struct mac802154dev_dwait_s *md_dwait;
+
+#ifndef CONFIG_DISABLE_SIGNALS
+  /* MCPS Service notification information */
+
+  struct mac802154dev_notify_s md_mcps_notify;
+  pid_t md_mcps_pid;
+  
+  /* MLME Service notification information */
+
+  struct mac802154dev_notify_s md_mlme_notify;
+  pid_t md_mlme_pid;
+
+#endif
+};
+
+struct mac802154dev_notify_s
+{
+  uint8_t mn_signo;       /* Signal number to use in the notification */
 };
 
 /* This structure describes the state of one open mac driver instance */
 
-struct mac802154_open_s
+struct mac802154dev_open_s
 {
   /* Supports a singly linked list */
 
-  FAR struct mac802154_open_s *md_flink;
+  FAR struct mac802154dev_open_s *md_flink;
 
   /* The following will be true if we are closing */
 
@@ -96,7 +114,7 @@ struct mac802154dev_dwait_s
 {
   uint8_t mw_handle;  /* The msdu handle identifying the frame */
   sem_t mw_sem;       /* The semaphore used to signal the completion */
-  int status;         /* The success/error of the transaction */
+  int mw_status;      /* The success/error of the transaction */
 
   /* Supports a singly linked list */
 
@@ -181,7 +199,7 @@ static int mac802154dev_open(FAR struct file *filep)
 {
   FAR struct inode *inode;
   FAR struct mac802154_devwrapper_s *dev;
-  FAR struct mac802154_open_s *opriv;
+  FAR struct mac802154dev_open_s *opriv;
   int ret;
 
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
@@ -201,8 +219,8 @@ static int mac802154dev_open(FAR struct file *filep)
 
   /* Allocate a new open struct */
 
-  opriv = (FAR struct mac802154_open_s *)
-    kmm_zalloc(sizeof(struct mac802154_open_s));
+  opriv = (FAR struct mac802154dev_open_s *)
+    kmm_zalloc(sizeof(struct mac802154dev_open_s));
 
   if (!opriv)
     {
@@ -238,9 +256,9 @@ static int mac802154dev_close(FAR struct file *filep)
 {
   FAR struct inode *inode;
   FAR struct mac802154_devwrapper_s *dev;
-  FAR struct mac802154_open_s *opriv;
-  FAR struct mac802154_open_s *curr;
-  FAR struct mac802154_open_s *prev;
+  FAR struct mac802154dev_open_s *opriv;
+  FAR struct mac802154dev_open_s *curr;
+  FAR struct mac802154dev_open_s *prev;
   irqstate_t flags;
   bool closing;
   int ret;
@@ -431,7 +449,13 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
 
   /* Wait for the DATA.confirm callback to be called for our handle */
 
-  sem_wait(&dwait.mw_sem);
+  if(sem_wait(dwait.mw_sem) < 0)
+    {
+      /* This should only happen if the wait was canceled by an signal */
+
+      DEBUGASSERT(errno == EINTR);
+      return -EINTR;
+    }
 
   /* The unlinking of the wait struct happens inside the callback. This
    * is more efficient since it will already have to find the struct in
@@ -476,6 +500,57 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
 
   switch (cmd)
     {
+#ifndef CONFIG_DISABLE_SIGNALS
+      /* Command:     MAC802154IOC_MLME_REGISTER, MAC802154IOC_MCPS_REGISTER
+       * Description: Register to receive a signal whenever there is a
+       *              event primitive sent from the MAC layer.
+       * Argument:    A read-only pointer to an instance of struct
+       *              mac802154dev_notify_s
+       * Return:      Zero (OK) on success.  Minus one will be returned on
+       *              failure with the errno value set appropriately.
+       */
+
+      case MAC802154IOC_MLME_REGISTER:
+        {
+          FAR struct mac802154dev_notify_s *notify =
+            (FAR struct mac802154dev_notify_s *)((uintptr_t)arg);
+
+          if (notify)
+            {
+              /* Save the notification events */
+
+              dev->md_mlme_notify.mn_signo      = notify->mn_signo;
+              dev->md_mlme_pid                  = getpid();
+
+              return OK; 
+            }
+        }
+        break;
+      case MAC802154IOC_MCPS_REGISTER:
+        {
+          FAR struct mac802154dev_notify_s *notify =
+            (FAR struct mac802154dev_notify_s *)((uintptr_t)arg);
+
+          if (notify)
+            {
+              /* Save the notification events */
+
+              dev->md_mcps_notify.mn_signo      = notify->mn_signo;
+              dev->md_mcps_pid                  = getpid();
+
+              return OK; 
+            }
+        }
+        break;
+#endif
+      case MAC802154IOC_MLME_ASSOC_REQUEST:
+        {
+          FAR struct ieee802154_assoc_req_s *req =
+            (FAR struct ieee802154_assoc_req_s *)((uintptr_t)arg);
+
+          
+        }
+        break;
       default:
         wlerr("ERROR: Unrecognized command %ld\n", cmd);
         ret = -EINVAL;
@@ -501,20 +576,63 @@ void mac802154dev_conf_data(MACHANDLE mac,
    */
 #warning Missing logic
 
-  /* Get exclusive access to the driver structure */
-
-  ret = mac802154dev_takesem(&dev->md_exclsem);
-  if (ret < 0)
-    {
-      wlerr("ERROR: mac802154dev_takesem failed: %d\n", ret);
-      return;
-    }
+  /* Get exclusive access to the driver structure.  We don't care about any
+   * signals so if we see one, just go back to trying to get access again */
+  
+  while(mac802154dev_takesem(&dev->md_exclsem) != OK);
 
   /* Search to see if there is a dwait pending for this transaction */
 
   for (prev = NULL, curr = dev->md_dwait;
        curr && curr->mw_handle != conf->msdu_handle;
        prev = curr, curr = curr->mw_flink);
+  
+  /* If a dwait is found */
+
+  if (curr)
+  {
+    /* Unlink the structure from the list.  The struct should be allocated on
+     * the calling write's stack, so we don't need to worry about deallocating
+     * here */
+
+    if (prev)
+      {
+        prev->mw_flink = curr->mw_flink;
+      }
+    else
+      {
+        dev->md_dwait = curr->mw_flink;
+      }
+   
+    /* Copy the transmission status into the dwait struct */
+
+    curr->mw_status = conf->msdu_handle;
+
+    /* Wake the thread waiting for the data transmission */
+
+    sem_post(&curr->mw_sem);
+
+    /* Release the driver */
+
+    mac802154dev_givesem(&dev->md_exclsem);
+  }
+
+
+#ifndef CONFIG_DISABLE_SIGNALS
+  /* Send a signal to the registered application */
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  /* Copy the status as the signal data to be optionally used by app */
+
+  union sigval value;
+  value.sival_int = (int)conf->status;
+  (void)sigqueue(dev->md_mcps_pid, dev->md_mcps_notify.mn_signo, value);
+#else
+  (void)sigqueue(dev->md_mcps_pid, dev->md_mcps_notify.mn_signo,
+                 value.sival_ptr);
+#endif
+
+#endif
 }
 
 /****************************************************************************
