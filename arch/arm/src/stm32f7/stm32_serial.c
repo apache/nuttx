@@ -218,6 +218,46 @@
 #ifdef USE_SERIALDRIVER
 #ifdef HAVE_UART
 
+/* Warnings for potentially unsafe configuration combinations. */
+
+/* Combination of RXDMA + IFLOWCONTROL does not work as one might expect.
+ * Since RXDMA uses circular DMA-buffer, DMA will always keep reading new
+ * data from USART peripheral even if DMA buffer underruns. Thus this
+ * combination only does following: RTS is asserted on USART setup and
+ * deasserted on shutdown and does not perform actual RTS flow-control.
+ */
+
+#if defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_IFLOWCONTROL)
+#  warning "RXDMA and IFLOWCONTROL both enabled for USART1. \
+            This combination can lead to data loss."
+#endif
+
+#if defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_IFLOWCONTROL)
+#  warning "RXDMA and IFLOWCONTROL both enabled for USART2. \
+            This combination can lead to data loss."
+#endif
+
+#if defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_IFLOWCONTROL)
+#  warning "RXDMA and IFLOWCONTROL both enabled for USART3. \
+            This combination can lead to data loss."
+#endif
+
+#if defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_IFLOWCONTROL)
+#  warning "RXDMA and IFLOWCONTROL both enabled for USART6. \
+            This combination can lead to data loss."
+#endif
+
+#if defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_IFLOWCONTROL)
+#  warning "RXDMA and IFLOWCONTROL both enabled for UART7. \
+            This combination can lead to data loss."
+#endif
+
+#if defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_IFLOWCONTROL)
+#  warning "RXDMA and IFLOWCONTROL both enabled for UART8. \
+            This combination can lead to data loss."
+#endif
+
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
