@@ -146,7 +146,7 @@ static void sixlowpan_compress_ipv6hdr(FAR struct ieee802154_driver_s *ieee,
  *
  * Input Parameters:
  *   ieee    - The IEEE802.15.4 MAC driver instance
- *   ipv6hdr - IPv6 header followed by TCP or UDP header.
+ *   ipv6hdr - IPv6 header followed by TCP, UDP, or ICMPv6 header.
  *   buf     - Beginning of the packet packet to send (with IPv6 + protocol
  *             headers)
  *   buflen  - Length of data to send (include IPv6 and protocol headers)

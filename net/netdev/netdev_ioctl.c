@@ -59,6 +59,10 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
 
+#ifdef CONFIG_NET_6LOWPAN
+#  include <nuttx/net/sixlowpan.h>
+#endif
+
 #ifdef CONFIG_NET_IGMP
 #  include <sys/sockio.h>
 #  include <nuttx/net/igmp.h>
@@ -702,16 +706,47 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
 
       /* MAC address operations only make sense if Ethernet is supported */
 
-#ifdef CONFIG_NET_ETHERNET
+#if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_NET_6LOWPAN)
       case SIOCGIFHWADDR:  /* Get hardware address */
         {
           dev = netdev_ifrdev(req);
           if (dev)
             {
-              req->ifr_hwaddr.sa_family = AF_INETX;
-              memcpy(req->ifr_hwaddr.sa_data,
-                     dev->d_mac.ether_addr_octet, IFHWADDRLEN);
-              ret = OK;
+#ifdef CONFIG_NET_ETHERNET
+#ifdef CONFIG_NET_MULTILINK
+              if (dev->d_lltype == NET_LL_ETHERNET)
+#else
+              if (true)
+#endif
+                {
+                  req->ifr_hwaddr.sa_family = AF_INETX;
+                  memcpy(req->ifr_hwaddr.sa_data,
+                         dev->d_mac.ether_addr_octet, IFHWADDRLEN);
+                  ret = OK;
+                }
+              else
+#endif
+
+#ifdef CONFIG_NET_6LOWPAN
+#ifdef CONFIG_NET_MULTILINK
+              if (dev->d_lltype == NET_LL_IEEE802154)
+#else
+              if (true)
+#endif
+                {
+                  FAR struct ieee802154_driver_s *ieee =
+                    (FAR struct ieee802154_driver_s *)dev;
+
+                   req->ifr_hwaddr.sa_family = AF_INETX;
+                   memcpy(req->ifr_hwaddr.sa_data, ieee->i_nodeaddr.u8,
+                          CONFIG_NET_6LOWPAN_RIMEADDR_SIZE);
+                   ret = OK;
+                }
+               else
+#endif
+                {
+                  nerr("Unsupported link layer\n");
+                }
             }
         }
         break;
@@ -721,9 +756,40 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
           dev = netdev_ifrdev(req);
           if (dev)
             {
-              memcpy(dev->d_mac.ether_addr_octet,
-                     req->ifr_hwaddr.sa_data, IFHWADDRLEN);
-              ret = OK;
+#ifdef CONFIG_NET_ETHERNET
+#ifdef CONFIG_NET_MULTILINK
+              if (dev->d_lltype == NET_LL_ETHERNET)
+#else
+              if (true)
+#endif
+                {
+                  memcpy(dev->d_mac.ether_addr_octet,
+                         req->ifr_hwaddr.sa_data, IFHWADDRLEN);
+                  ret = OK;
+                }
+              else
+#endif
+
+#ifdef CONFIG_NET_6LOWPAN
+#ifdef CONFIG_NET_MULTILINK
+              if (dev->d_lltype == NET_LL_IEEE802154)
+#else
+              if (true)
+#endif
+                {
+                  FAR struct ieee802154_driver_s *ieee =
+                    (FAR struct ieee802154_driver_s *)dev;
+
+                   req->ifr_hwaddr.sa_family = AF_INETX;
+                   memcpy(ieee->i_nodeaddr.u8, req->ifr_hwaddr.sa_data,
+                          CONFIG_NET_6LOWPAN_RIMEADDR_SIZE);
+                   ret = OK;
+                }
+              else
+#endif
+                {
+                  nerr("Unsupported link layer\n");
+                }
             }
         }
         break;

@@ -191,22 +191,15 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
 
   if (to6->sin6_family != AF_INET6 || tolen < sizeof(struct sockaddr_in6))
     {
-      nerr("ERROR: Invalid destination address\n");
-      return (ssize_t)-EAFNOSUPPORT;
+      nerr("ERROR: Invalid destination address: sin6_family=%u tolen = %u\n",
+           to6->sin6_family, tolen);
+      return (ssize_t)-EPROTOTYPE;
     }
 
   /* Get the underlying UDP "connection" structure */
 
   conn = (FAR struct udp_conn_s *)psock->s_conn;
   DEBUGASSERT(conn != NULL);
-
-  /* Ignore if not IPv6 domain */
-
-  if (conn->domain != PF_INET6)
-    {
-      nwarn("WARNING: Not IPv6\n");
-      return (ssize_t)-EPROTOTYPE;
-    }
 
   /* Route outgoing message to the correct device */
 
@@ -264,8 +257,8 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
 
   /* Copy the source and destination addresses */
 
-  net_ipv6addr_hdrcopy(ipv6udp.ipv6.srcipaddr,  to6->sin6_addr.in6_u.u6_addr16);
-  net_ipv6addr_hdrcopy(ipv6udp.ipv6.destipaddr, conn->u.ipv6.raddr);
+  net_ipv6addr_hdrcopy(ipv6udp.ipv6.destipaddr, to6->sin6_addr.in6_u.u6_addr16);
+  net_ipv6addr_hdrcopy(ipv6udp.ipv6.srcipaddr,  conn->u.ipv6.laddr);
 
   ninfo("IPv6 length: %d\n",
         ((int)ipv6udp.ipv6.len[0] << 8) + ipv6udp.ipv6.len[1]);
@@ -315,7 +308,8 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
   timeout = 0;
 #endif
 
-  ret = sixlowpan_send(dev, (FAR const struct ipv6_hdr_s *)&ipv6udp,
+  ret = sixlowpan_send(dev, &conn->list,
+                       (FAR const struct ipv6_hdr_s *)&ipv6udp,
                        buf, buflen, &destmac, timeout);
   if (ret < 0)
     {

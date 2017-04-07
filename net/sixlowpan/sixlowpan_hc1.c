@@ -116,7 +116,8 @@
  *
  * Input Parmeters:
  *   ieee    - A reference to the IEE802.15.4 network device state
- *   ipv6    - The IPv6 header to be compressed
+ *   ipv6    - The IPv6 header followd by TCP, UDP, or ICMPv6 header to be
+ *             compressed
  *   destmac - L2 destination address, needed to compress the IP
  *             destination field
  *   fptr    - Pointer to frame to be compressed.
@@ -189,7 +190,8 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
 #if CONFIG_NET_UDP
         case IP_PROTO_UDP:
           {
-            FAR struct udp_hdr_s *udp = UDPIPv6BUF(&ieee->i_dev);
+            FAR struct udp_hdr_s *udp =
+              &(((FAR struct ipv6udp_hdr_s *)ipv6)->udp);
 
             /* Try to compress UDP header (we do only full compression).
              * This is feasible if both src and dest ports are between
@@ -199,10 +201,10 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
 
             ninfo("local/remote port %u/%u\n", udp->srcport, udp->destport);
 
-            if (htons(udp->srcport)  >=  CONFIG_NET_6LOWPAN_MINPORT &&
-                htons(udp->srcport)  <  (CONFIG_NET_6LOWPAN_MINPORT + 16) &&
-                htons(udp->destport) >=  CONFIG_NET_6LOWPAN_MINPORT &&
-                htons(udp->destport) <  (CONFIG_NET_6LOWPAN_MINPORT + 16))
+            if (ntohs(udp->srcport)  >=  CONFIG_NET_6LOWPAN_MINPORT &&
+                ntohs(udp->srcport)  <  (CONFIG_NET_6LOWPAN_MINPORT + 16) &&
+                ntohs(udp->destport) >=  CONFIG_NET_6LOWPAN_MINPORT &&
+                ntohs(udp->destport) <  (CONFIG_NET_6LOWPAN_MINPORT + 16))
               {
                 FAR uint8_t *hcudp = fptr + g_frame_hdrlen;
 
@@ -215,8 +217,8 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
                 hcudp[RIME_HC1_HC_UDP_UDP_ENCODING] = 0xe0;
                 hcudp[RIME_HC1_HC_UDP_TTL]          = ipv6->ttl;
                 hcudp[RIME_HC1_HC_UDP_PORTS]        =
-                  (uint8_t)((htons(udp->srcport) - CONFIG_NET_6LOWPAN_MINPORT) << 4) +
-                  (uint8_t)((htons(udp->destport) - CONFIG_NET_6LOWPAN_MINPORT));
+                  (uint8_t)((ntohs(udp->srcport) - CONFIG_NET_6LOWPAN_MINPORT) << 4) +
+                  (uint8_t)((ntohs(udp->destport) - CONFIG_NET_6LOWPAN_MINPORT));
 
                 memcpy(&hcudp[RIME_HC1_HC_UDP_CHKSUM], &udp->udpchksum, 2);
 

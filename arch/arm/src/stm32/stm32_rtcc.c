@@ -600,7 +600,7 @@ int up_rtc_initialize(void)
 
   stm32_pwr_enablebkp(true);
 
-  if (regval != RTC_MAGIC)
+  if (regval != RTC_MAGIC && regval != RTC_MAGIC_TIME_SET)
     {
       /* Some boards do not have the external 32khz oscillator installed, for those
        * boards we must fallback to the crummy internal RC clock or the external high
@@ -712,7 +712,7 @@ int up_rtc_initialize(void)
    * has been writing to to back-up date register DR0.
    */
 
-  if (regval != RTC_MAGIC)
+  if (regval != RTC_MAGIC && regval != RTC_MAGIC_TIME_SET)
     {
       rtcinfo("Do setup\n");
 
@@ -1002,6 +1002,15 @@ int stm32_rtc_setdatetime(FAR const struct tm *tp)
 
       rtc_exitinit();
       ret = rtc_synchwait();
+    }
+
+  /* Remember that the RTC is initialized and had its time set. */
+
+  if (getreg32(RTC_MAGIC_REG) != RTC_MAGIC_TIME_SET)
+    {
+      stm32_pwr_enablebkp(true);
+      putreg32(RTC_MAGIC_TIME_SET, RTC_MAGIC_REG);
+      stm32_pwr_enablebkp(false);
     }
 
   /* Re-enable the write protection for RTC registers */

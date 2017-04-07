@@ -856,9 +856,13 @@ int up_rtc_initialize(void)
 
   regval = getreg32(RTC_MAGIC_REG);
 
+  /* Enable write access to the backup domain (RTC registers, RTC
+   * backup data registers and backup SRAM).
+   */
+
   stm32_pwr_enablebkp(true);
 
-  if (regval != RTC_MAGIC)
+  if (regval != RTC_MAGIC && regval != RTC_MAGIC_TIME_SET)
     {
       /* Issue the Backup domain Reset Per Section 5.3.20 DocID028270 Rev 2
        * The LSEON, LSEBYP, RTCSEL and RTCEN bits in the RCC backup domain
@@ -949,8 +953,6 @@ int up_rtc_initialize(void)
         }
     }
 
-  stm32_pwr_enablebkp(false);
-
   /* Loop, attempting to initialize/resume the RTC.  This loop is necessary
    * because it seems that occasionally it takes longer to initialize the
    * RTC (the actual failure is in rtc_synchwait()).
@@ -988,19 +990,13 @@ int up_rtc_initialize(void)
    * has been writing to to back-up date register DR0.
    */
 
-  if (regval != RTC_MAGIC)
+  if (regval != RTC_MAGIC && regval != RTC_MAGIC_TIME_SET)
     {
       rtcinfo("Do setup\n");
 
       /* Perform the one-time setup of the LSE clocking to the RTC */
 
       ret = rtc_setup();
-
-      /* Enable write access to the backup domain (RTC registers, RTC
-       * backup data registers and backup SRAM).
-       */
-
-      stm32_pwr_enablebkp(true);
 
       /* Remember that the RTC is initialized */
 
@@ -1295,6 +1291,15 @@ int stm32_rtc_setdatetime(FAR const struct tm *tp)
 
       rtc_exitinit();
       ret = rtc_synchwait();
+    }
+
+  /* Remember that the RTC is initialized and had its time set. */
+
+  if (getreg32(RTC_MAGIC_REG) != RTC_MAGIC_TIME_SET)
+    {
+      stm32_pwr_enablebkp(true);
+      putreg32(RTC_MAGIC_TIME_SET, RTC_MAGIC_REG);
+      stm32_pwr_enablebkp(false);
     }
 
   /* Re-enable the write protection for RTC registers */

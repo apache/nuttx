@@ -50,6 +50,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/timers/rtc.h>
 
+#include "up_arch.h"
+
 #include "chip.h"
 #include "stm32_rtc.h"
 
@@ -106,6 +108,7 @@ static int stm32_rdtime(FAR struct rtc_lowerhalf_s *lower,
                         FAR struct rtc_time *rtctime);
 static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
                          FAR const struct rtc_time *rtctime);
+static bool stm32_havesettime(FAR struct rtc_lowerhalf_s *lower);
 
 #ifdef CONFIG_RTC_ALARM
 static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
@@ -125,6 +128,7 @@ static const struct rtc_ops_s g_rtc_ops =
 {
   .rdtime      = stm32_rdtime,
   .settime     = stm32_settime,
+  .havesettime = stm32_havesettime,
 #ifdef CONFIG_RTC_ALARM
   .setalarm    = stm32_setalarm,
   .setrelative = stm32_setrelative,
@@ -312,6 +316,25 @@ static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
 
   return up_rtc_settime(&ts);
 #endif
+}
+
+/****************************************************************************
+ * Name: stm32_havesettime
+ *
+ * Description:
+ *   Implements the havesettime() method of the RTC driver interface
+ *
+ * Input Parameters:
+ *   lower   - A reference to RTC lower half driver state structure
+ *
+ * Returned Value:
+ *   Returns true if RTC date-time have been previously set.
+ *
+ ****************************************************************************/
+
+static bool stm32_havesettime(FAR struct rtc_lowerhalf_s *lower)
+{
+  return getreg32(RTC_MAGIC_REG) == RTC_MAGIC_TIME_SET;
 }
 
 /****************************************************************************

@@ -327,7 +327,8 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
   timeout = 0;
 #endif
 
-  ret = sixlowpan_send(dev, (FAR const struct ipv6_hdr_s *)&ipv6tcp,
+  ret = sixlowpan_send(dev, &conn->list,
+                       (FAR const struct ipv6_hdr_s *)&ipv6tcp,
                        buf, buflen, &destmac, timeout);
   if (ret < 0)
     {
