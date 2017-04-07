@@ -425,6 +425,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
           /* Add the next frame to the tail of the IOB queue */
 
           qtail->io_flink = iob;
+          qtail           = iob;
 
           /* Keep track of the total amount of data queue */
 
