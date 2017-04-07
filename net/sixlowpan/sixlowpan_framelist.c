@@ -202,8 +202,8 @@ static void sixlowpan_copy_protohdr(FAR const struct ipv6_hdr_s *ipv6hdr,
   memcpy(fptr + g_frame_hdrlen, (FAR uint8_t *)ipv6hdr + g_uncomp_hdrlen,
          copysize);
 
-  g_frame_hdrlen   += copysize;
-  g_uncomp_hdrlen  += copysize;
+  g_frame_hdrlen  += copysize;
+  g_uncomp_hdrlen += copysize;
 }
 
 /****************************************************************************
@@ -252,6 +252,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
   FAR uint8_t *fptr;
   int framer_hdrlen;
   struct rimeaddr_s bcastmac;
+  uint16_t pktlen;
   uint16_t paysize;
 #ifdef CONFIG_NET_6LOWPAN_FRAG
   uint16_t outlen = 0;
@@ -365,6 +366,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
        */
 
       FAR struct iob_s *qtail;
+      FAR uint8_t *frame1;
       int verify;
 
       /* The outbound IPv6 packet is too large to fit into a single 15.4
@@ -383,7 +385,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
       DEBUGASSERT(verify == framer_hdrlen);
       UNUSED(verify);
 
-      /* Move HC1/HC06/IPv6 header */
+      /* Move HC1/HC06/IPv6 header to make space for the FRAG1 header at the
+       * beginning of the frame.
+       */
 
       memmove(fptr + SIXLOWPAN_FRAG1_HDR_LEN, fptr, g_frame_hdrlen);
 
@@ -402,11 +406,10 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
        * bytes for all subsequent headers.
        */
 
+      pktlen = buflen + g_uncomp_hdrlen;
       PUTINT16(fptr, RIME_FRAG_DISPATCH_SIZE,
-              ((SIXLOWPAN_DISPATCH_FRAG1 << 8) | buflen));
-
+               ((SIXLOWPAN_DISPATCH_FRAG1 << 8) | pktlen));
       PUTINT16(fptr, RIME_FRAG_TAG, ieee->i_dgramtag);
-      ieee->i_dgramtag++;
 
       g_frame_hdrlen += SIXLOWPAN_FRAG1_HDR_LEN;
 
@@ -414,9 +417,11 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
       sixlowpan_copy_protohdr(destip, fptr);
 
-      /* Copy payload and enqueue */
+      /* Copy payload and enqueue.  NOTE that the size is a multiple of eight
+       * bytes.
+       */
 
-      paysize = (CONFIG_NET_6LOWPAN_MAXPAYLOAD - g_frame_hdrlen) & 0xf8;
+      paysize = (CONFIG_NET_6LOWPAN_MAXPAYLOAD - g_frame_hdrlen) & ~7;
       memcpy(fptr + g_frame_hdrlen, buf,  paysize);
 
       /* Set outlen to what we already sent from the IP payload */
@@ -440,10 +445,11 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
       /* Create following fragments */
 
-      g_frame_hdrlen = SIXLOWPAN_FRAGN_HDR_LEN;
-
+      frame1 = iob->io_data;
       while (outlen < buflen)
         {
+          uint16_t fragn_hdrlen;
+
           /* Allocate an IOB to hold the next fragment, waiting if
            * necessary.
            */
@@ -459,49 +465,44 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
           iob->io_pktlen = 0;
           fptr           = iob->io_data;
 
-          /* Add the frame header */
+          /* Copy the frame header from first frame, into the correct
+           * location after the FRAGN header.
+           */
 
-          verify = sixlowpan_framecreate(ieee, iob, ieee->i_panid);
-          DEBUGASSERT(verify == framer_hdrlen);
-          UNUSED(verify);
+          memmove(fptr + SIXLOWPAN_FRAGN_HDR_LEN,
+                  frame1 + SIXLOWPAN_FRAG1_HDR_LEN,
+                  framer_hdrlen);
+          fragn_hdrlen = framer_hdrlen;
 
-          /* Move HC1/HC06/IPv6 header */
-
-          memmove(fptr + SIXLOWPAN_FRAGN_HDR_LEN, fptr, g_frame_hdrlen);
-
-          /* Setup up the fragment header */
+          /* Setup up the FRAGN header at the beginning of the frame */
 
           PUTINT16(fptr, RIME_FRAG_DISPATCH_SIZE,
-                  ((SIXLOWPAN_DISPATCH_FRAGN << 8) | buflen));
+                   ((SIXLOWPAN_DISPATCH_FRAGN << 8) | pktlen));
           PUTINT16(fptr, RIME_FRAG_TAG, ieee->i_dgramtag);
           fptr[RIME_FRAG_OFFSET] = outlen >> 3;
 
-          /* Copy protocol header that follows the IPv6 header */
-
-          sixlowpan_copy_protohdr(destip, fptr);
+          fragn_hdrlen += SIXLOWPAN_FRAGN_HDR_LEN;
 
           /* Copy payload and enqueue */
           /* Check for the last fragment */
 
+          paysize = (CONFIG_NET_6LOWPAN_MAXPAYLOAD - fragn_hdrlen) &
+                    SIXLOWPAN_DISPATCH_FRAG_MASK;
           if (buflen - outlen < paysize)
             {
               /* Last fragment, truncate to the correct length */
 
               paysize = buflen - outlen;
             }
-          else
-            {
-              paysize = (CONFIG_NET_6LOWPAN_MAXPAYLOAD - g_frame_hdrlen) & 0xf8;
-            }
 
-          memcpy(fptr + g_frame_hdrlen, buf + outlen, paysize);
+          memcpy(fptr + fragn_hdrlen, buf + outlen, paysize);
 
           /* Set outlen to what we already sent from the IP payload */
 
-          iob->io_len = paysize + g_frame_hdrlen;
+          iob->io_len = paysize + fragn_hdrlen;
           outlen     += paysize;
 
-          ninfo("Fragment offset %d, length %d, tag %d\n",
+          ninfo("Fragment offset=%d, paysize=%d, i_dgramtag=%d\n",
                 outlen >> 3, paysize, ieee->i_dgramtag);
           sixlowpan_dumpbuffer("Outgoing frame",
                                (FAR const uint8_t *)iob->io_data,
@@ -516,6 +517,10 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
           ieee->i_framelist->io_pktlen += iob->io_len;
         }
+
+      /* Update the datagram TAG value */
+
+      ieee->i_dgramtag++;
 #else
       nerr("ERROR: Packet too large: %d\n", buflen);
       nerr("       Cannot to be sent without fragmentation support\n");
