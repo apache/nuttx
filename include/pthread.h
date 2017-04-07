@@ -337,6 +337,28 @@ typedef struct pthread_barrier_s pthread_barrier_t;
 typedef bool pthread_once_t;
 #define __PTHREAD_ONCE_T_DEFINED 1
 
+#ifdef CONFIG_PTHREAD_RWLOCK
+struct pthread_rwlock_s
+{
+    pthread_mutex_t lock;
+    pthread_cond_t  cv;
+    unsigned int num_readers;
+    unsigned int num_writers;
+};
+
+typedef struct pthread_rwlock_s pthread_rwlock_t;
+
+typedef int pthread_rwlockattr_t;
+
+#define PTHREAD_RWLOCK_INITIALIZER  {PTHREAD_MUTEX_INITIALIZER, \
+                                     PTHREAD_COND_INITIALIZER, \
+                                     0, 0}
+
+#define PTHREAD_MUTEX_INITIALIZER   {NULL, SEM_INITIALIZER(1), -1, \
+                                     __PTHREAD_MUTEX_DEFAULT_FLAGS, \
+                                     PTHREAD_MUTEX_DEFAULT, 0}
+#endif
+
 #ifdef CONFIG_PTHREAD_CLEANUP
 /* This type describes the pthread cleanup callback (non-standard) */
 
@@ -539,14 +561,31 @@ int pthread_barrierattr_setpshared(FAR pthread_barrierattr_t *attr,
 
 int pthread_barrier_destroy(FAR pthread_barrier_t *barrier);
 int pthread_barrier_init(FAR pthread_barrier_t *barrier,
-                                FAR const pthread_barrierattr_t *attr,
-                                unsigned int count);
+                         FAR const pthread_barrierattr_t *attr,
+                         unsigned int count);
 int pthread_barrier_wait(FAR pthread_barrier_t *barrier);
 
 /* Pthread initialization */
 
 int pthread_once(FAR pthread_once_t *once_control,
                         CODE void (*init_routine)(void));
+
+/* Pthread rwlock */
+
+#ifdef CONFIG_PTHREAD_RWLOCK
+int pthread_rwlock_destroy(FAR pthread_rwlock_t *rw_lock);
+int pthread_rwlock_init(FAR pthread_rwlock_t *rw_lock,
+                        FAR const pthread_rwlockattr_t *attr);
+int pthread_rwlock_rdlock(pthread_rwlock_t *lock);
+int pthread_rwlock_timedrdlock(FAR pthread_rwlock_t *lock,
+                               FAR const struct timespec *abstime);
+int pthread_rwlock_tryrdlock(FAR pthread_rwlock_t *lock);
+int pthread_rwlock_wrlock(FAR pthread_rwlock_t *lock);
+int pthread_rwlock_timedwrlock(FAR pthread_rwlock_t *lock,
+                               FAR const struct timespec *abstime);
+int pthread_rwlock_trywrlock(FAR pthread_rwlock_t *lock);
+int pthread_rwlock_unlock(FAR pthread_rwlock_t *lock);
+#endif /* CONFIG_PTHREAD_RWLOCK */
 
 /* Pthread signal management APIs */
 
