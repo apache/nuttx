@@ -176,7 +176,7 @@ static uint16_t send_interrupt(FAR struct net_driver_s *dev,
     {
       DEBUGASSERT((flags & WPAN_POLL) != 0);
 
-      /* Transfer the frame listto the IEEE802.15.4 MAC device */
+      /* Transfer the frame list to the IEEE802.15.4 MAC device */
 
       sinfo->s_result =
         sixlowpan_queue_frames((FAR struct ieee802154_driver_s *)dev,
@@ -237,6 +237,7 @@ end_wait:
  *
  * Input Parameters:
  *   dev     - The IEEE802.15.4 MAC network driver interface.
+ *   list    - Head of callback list for send interrupt
  *   ipv6hdr - IPv6 header followed by TCP or UDP header.
  *   buf     - Data to send
  *   len     - Length of data to send
@@ -255,6 +256,7 @@ end_wait:
  ****************************************************************************/
 
 int sixlowpan_send(FAR struct net_driver_s *dev,
+                   FAR struct devif_callback_s **list,
                    FAR const struct ipv6_hdr_s *ipv6hdr, FAR const void *buf,
                    size_t len, FAR const struct rimeaddr_s *destmac,
                    uint16_t timeout)
@@ -283,7 +285,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
        * device related events, no connect-related events.
        */
 
-      sinfo.s_cb =  devif_callback_alloc(dev, NULL);
+      sinfo.s_cb =  devif_callback_alloc(dev, list);
       if (sinfo.s_cb != NULL)
         {
           int ret;
@@ -312,7 +314,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
 
           /* Make sure that no further interrupts are processed */
 
-           devif_dev_callback_free(dev, sinfo.s_cb);
+           devif_conn_callback_free(dev, sinfo.s_cb, list);
         }
     }
 

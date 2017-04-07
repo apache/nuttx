@@ -409,15 +409,6 @@ struct frame802154_s
 
 extern FAR uint8_t *g_rimeptr;
 
-/* The length of the payload in the Rime buffer.
- *
- * The payload is what comes after the compressed or uncompressed headers
- * (can be the IP payload if the IP header only is compressed or the UDP
- * payload if the UDP header is also compressed)
- */
-
-extern uint8_t g_rime_payloadlen;
-
 /* g_uncomp_hdrlen is the length of the headers before compression (if HC2
  * is used this includes the UDP header in addition to the IP header).
  */
@@ -446,6 +437,7 @@ extern struct rimeaddr_s g_pktaddrs[PACKETBUF_NUM_ADDRS];
 
 struct net_driver_s;         /* Forward reference */
 struct ieee802154_driver_s;  /* Forward reference */
+struct devif_callback_s;     /* Forward reference */
 struct ipv6_hdr_s;           /* Forward reference */
 struct rimeaddr_s;           /* Forward reference */
 struct iob_s;                /* Forward reference */
@@ -466,7 +458,8 @@ struct iob_s;                /* Forward reference */
  *
  * Input Parameters:
  *   dev     - The IEEE802.15.4 MAC network driver interface.
- *   destip  - IPv6 plus TCP or UDP headers.
+ *   list    - Head of callback list for send interrupt
+ *   ipv6hdr - IPv6 plus TCP or UDP headers.
  *   buf     - Data to send
  *   buflen  - Length of data to send
  *   raddr   - The MAC address of the destination
@@ -484,7 +477,8 @@ struct iob_s;                /* Forward reference */
  ****************************************************************************/
 
 int sixlowpan_send(FAR struct net_driver_s *dev,
-                   FAR const struct ipv6_hdr_s *destip, FAR const void *buf,
+                   FAR struct devif_callback_s **list,
+                   FAR const struct ipv6_hdr_s *ipv6hdr, FAR const void *buf,
                    size_t buflen, FAR const struct rimeaddr_s *raddr,
                    uint16_t timeout);
 

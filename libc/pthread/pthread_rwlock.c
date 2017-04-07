@@ -1,8 +1,8 @@
 /****************************************************************************
- * net/sixlowpan/sixlowpan_globals.c
+ * libc/pthread/pthread_rwlock.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Mark Schulte. All rights reserved.
+ *   Author: Mark Schulte <mark@mjs.pw>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,37 +39,90 @@
 
 #include <nuttx/config.h>
 
-#include "sixlowpan/sixlowpan_internal.h"
+#include <stdint.h>
+#include <pthread.h>
+#include <errno.h>
+#include <debug.h>
 
-#ifdef CONFIG_NET_6LOWPAN
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
- * Public Data
+ * Public Functions
  ****************************************************************************/
 
-/* The following data values are used to hold intermediate settings while
- * processing IEEE802.15.4 frames.  These globals are shared with incoming
- * and outgoing frame processing and possibly with mutliple IEEE802.15.4 MAC
- * devices.  The network lock provides exclusive use of these globals
- * during that processing
- */
+int pthread_rwlock_init(FAR pthread_rwlock_t *lock,
+                        FAR const pthread_rwlockattr_t *attr)
+{
+  int err;
 
-/* g_uncomp_hdrlen is the length of the headers before compression (if HC2
- * is used this includes the UDP header in addition to the IP header).
- */
+  if (attr != NULL)
+    {
+      return -ENOSYS;
+    }
 
-uint8_t g_uncomp_hdrlen;
+  lock->num_readers       = 0;
+  lock->num_writers       = 0;
+  lock->write_in_progress = false;
 
-/* g_frame_hdrlen is the total length of (the processed) 6lowpan headers
- * (fragment headers, IPV6 or HC1, HC2, and HC1 and HC2 non compressed
- * fields).
- */
+  err = pthread_cond_init(&lock->cv, NULL);
+  if (err != 0)
+    {
+      return err;
+    }
 
-uint8_t g_frame_hdrlen;
+  err = pthread_mutex_init(&lock->lock, NULL);
+  if (err != 0)
+    {
+      pthread_cond_destroy(&lock->cv);
+      return err;
+    }
 
-/* Packet buffer metadata: Attributes and addresses */
+  return err;
+}
 
-uint16_t g_pktattrs[PACKETBUF_NUM_ATTRS];
-struct rimeaddr_s g_pktaddrs[PACKETBUF_NUM_ADDRS];
+int pthread_rwlock_destroy(FAR pthread_rwlock_t *lock)
+{
+  int cond_err  = pthread_cond_destroy(&lock->cv);
+  int mutex_err = pthread_mutex_destroy(&lock->lock);
 
-#endif /* CONFIG_NET_6LOWPAN */
+  if (mutex_err)
+    {
+      return mutex_err;
+    }
+
+  return cond_err;
+}
+
+int pthread_rwlock_unlock(FAR pthread_rwlock_t *rw_lock)
+{
+  int err;
+
+  err = pthread_mutex_lock(&rw_lock->lock);
+  if (err != 0)
+    {
+      return err;
+    }
+
+  if (rw_lock->num_readers > 0)
+    {
+      rw_lock->num_readers--;
+
+      if (rw_lock->num_readers == 0)
+        {
+          err = pthread_cond_broadcast(&rw_lock->cv);
+        }
+    }
+  else if (rw_lock->write_in_progress)
+    {
+      rw_lock->write_in_progress = false;
+
+      err = pthread_cond_broadcast(&rw_lock->cv);
+    }
+  else
+    {
+      err = EINVAL;
+    }
+
+  pthread_mutex_unlock(&rw_lock->lock);
+  return err;
+}

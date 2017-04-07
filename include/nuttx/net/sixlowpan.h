@@ -80,7 +80,7 @@
 
 #define SIXLOWPAN_DISPATCH_FRAG1         0xc0 /* 11000xxx */
 #define SIXLOWPAN_DISPATCH_FRAGN         0xe0 /* 11100xxx */
-#define SIXLOWPAN_DISPATCH_FRAG_MASK     0xf1 /* 11111000 */
+#define SIXLOWPAN_DISPATCH_FRAG_MASK     0xf8 /* 11111000 */
 
 /* HC1 encoding */
 
@@ -397,6 +397,12 @@ struct ieee802154_driver_s
    */
 
   uint16_t i_reasstag;
+
+  /* i_boffset.  Offset to the beginning of data in d_buf.  As each fragment
+   * is received, data is placed at an appriate offset added to this.
+   */
+
+  uint16_t i_boffset;
 
   /* The source MAC address of the fragments being merged */
 
