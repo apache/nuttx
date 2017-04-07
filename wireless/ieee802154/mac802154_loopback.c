@@ -185,23 +185,25 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
   /* Find the tail of the IOB queue */
 
   for (tail = NULL, iob = head;
-         iob != NULL;
-         tail = iob, iob = iob->io_flink);
+       iob != NULL;
+       tail = iob, iob = iob->io_flink);
 
   /* Loop while there frames to be sent, i.e., while the IOB list is not
    * emtpy. Sending, of course, just means relaying back through the network
    * for this driver.
    */
 
-  while (!FRAME_IOB_EMPTY(&priv->lo_ieee))
+  while (head != NULL)
     {
        /* Remove the IOB from the queue */
 
-       FRAME_IOB_REMOVE(&priv->lo_ieee, iob);
+       iob           = head;
+       head          = iob->io_flink;
+       iob->io_flink = NULL;
 
        /* Is the queue now empty? */
 
-       if (FRAME_IOB_EMPTY(&priv->lo_ieee))
+       if (head == NULL)
          {
            tail = NULL;
          }
@@ -239,8 +241,8 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
            /* Find the new tail of the IOB queue */
 
            for (tail = iob, iob = iob->io_flink;
-                  iob != NULL;
-                  tail = iob, iob = iob->io_flink);
+                iob != NULL;
+                tail = iob, iob = iob->io_flink);
          }
 
        priv->lo_txdone = true;

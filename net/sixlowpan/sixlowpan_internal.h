@@ -409,15 +409,6 @@ struct frame802154_s
 
 extern FAR uint8_t *g_rimeptr;
 
-/* The length of the payload in the Rime buffer.
- *
- * The payload is what comes after the compressed or uncompressed headers
- * (can be the IP payload if the IP header only is compressed or the UDP
- * payload if the UDP header is also compressed)
- */
-
-extern uint8_t g_rime_payloadlen;
-
 /* g_uncomp_hdrlen is the length of the headers before compression (if HC2
  * is used this includes the UDP header in addition to the IP header).
  */

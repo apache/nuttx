@@ -403,6 +403,8 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev)
       else
         {
           struct rimeaddr_s destmac;
+          FAR uint8_t *buf;
+          size_t buflen;
 
           /* Get the Rime MAC address of the destination.  This assumes an
            * encoding of the MAC address in the IPv6 address.
@@ -412,9 +414,12 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev)
 
           /* Convert the outgoing packet into a frame list. */
 
+          buf    = dev->d_buf + sizeof(struct ipv6_hdr_s);
+          buflen = dev->d_len - sizeof(struct ipv6_hdr_s);
+
           (void)sixlowpan_queue_frames(
                   (FAR struct ieee802154_driver_s *)dev, ipv6hdr,
-                  dev->d_buf, dev->d_len, &destmac);
+                  buf, buflen, &destmac);
         }
     }
 
