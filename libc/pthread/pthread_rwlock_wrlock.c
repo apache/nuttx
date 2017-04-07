@@ -75,13 +75,13 @@ int pthread_rwlock_trywrlock(FAR pthread_rwlock_t *rw_lock)
       return err;
     }
 
-  if (rw_lock->num_readers > 0 || rw_lock->num_writers > 0)
+  if (rw_lock->num_readers > 0 || rw_lock->write_in_progress)
     {
       err = EBUSY;
     }
   else
     {
-      rw_lock->num_writers++;
+      rw_lock->write_in_progress = true;
     }
 
   pthread_mutex_unlock(&rw_lock->lock);
@@ -92,20 +92,21 @@ int pthread_rwlock_timedwrlock(FAR pthread_rwlock_t *rw_lock,
                                FAR const struct timespec *ts)
 {
   int err = pthread_mutex_lock(&rw_lock->lock);
-  int num_writers_current;
 
   if (err != 0)
     {
       return err;
     }
 
-  num_writers_current = rw_lock->num_writers++;
-  if (num_writers_current == 0)
+  if (rw_lock->num_writers == UINT_MAX)
     {
+      err = EAGAIN;
       goto exit_with_mutex;
     }
 
-  while (rw_lock->num_writers != num_writers_current)
+  rw_lock->num_writers++;
+
+  while (rw_lock->write_in_progress || rw_lock->num_readers > 0)
     {
       if (ts != NULL)
         {
@@ -121,6 +122,20 @@ int pthread_rwlock_timedwrlock(FAR pthread_rwlock_t *rw_lock,
           break;
         }
     }
+
+  if (err == 0)
+    {
+      rw_lock->write_in_progress = true;
+    }
+
+  else
+    {
+      /* In case of error, notify any blocked readers. */
+
+      (void) pthread_cond_broadcast(&rw_lock->cv);
+    }
+
+  rw_lock->num_writers--;
 
 exit_with_mutex:
   pthread_mutex_unlock(&rw_lock->lock);

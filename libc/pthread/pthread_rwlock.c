@@ -60,8 +60,9 @@ int pthread_rwlock_init(FAR pthread_rwlock_t *lock,
       return -ENOSYS;
     }
 
-  lock->num_readers = 0;
-  lock->num_writers = 0;
+  lock->num_readers       = 0;
+  lock->num_writers       = 0;
+  lock->write_in_progress = false;
 
   err = pthread_cond_init(&lock->cv, NULL);
   if (err != 0)
@@ -111,9 +112,9 @@ int pthread_rwlock_unlock(FAR pthread_rwlock_t *rw_lock)
           err = pthread_cond_broadcast(&rw_lock->cv);
         }
     }
-  else if (rw_lock->num_writers > 0)
+  else if (rw_lock->write_in_progress)
     {
-      rw_lock->num_writers--;
+      rw_lock->write_in_progress = false;
 
       err = pthread_cond_broadcast(&rw_lock->cv);
     }

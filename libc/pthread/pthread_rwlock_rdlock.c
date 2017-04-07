@@ -54,7 +54,7 @@ static int tryrdlock(FAR pthread_rwlock_t *rw_lock)
 {
   int err;
 
-  if (rw_lock->num_writers > 0)
+  if (rw_lock->num_writers > 0 || rw_lock->write_in_progress)
     {
       err = EBUSY;
     }

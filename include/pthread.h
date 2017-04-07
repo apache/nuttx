@@ -343,6 +343,7 @@ struct pthread_rwlock_s
     pthread_cond_t  cv;
     unsigned int num_readers;
     unsigned int num_writers;
+    bool write_in_progress;
 };
 
 typedef struct pthread_rwlock_s pthread_rwlock_t;
