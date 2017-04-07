@@ -573,12 +573,6 @@ config PTHREAD_MUTEX_DEFAULT_UNSAFE
 
 endchoice # Default NORMAL mutex robustness
 
-config PTHREAD_RWLOCK
-	bool "Enable pthread rwlock API"
-	default n
-	---help---
-		Add supports for the rwlock interfaces
-
 config NPTHREAD_KEYS
 	int "Maximum number of pthread keys"
 	default 4

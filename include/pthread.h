@@ -337,7 +337,6 @@ typedef struct pthread_barrier_s pthread_barrier_t;
 typedef bool pthread_once_t;
 #define __PTHREAD_ONCE_T_DEFINED 1
 
-#ifdef CONFIG_PTHREAD_RWLOCK
 struct pthread_rwlock_s
 {
     pthread_mutex_t lock;
@@ -357,7 +356,6 @@ typedef int pthread_rwlockattr_t;
 #define PTHREAD_MUTEX_INITIALIZER   {NULL, SEM_INITIALIZER(1), -1, \
                                      __PTHREAD_MUTEX_DEFAULT_FLAGS, \
                                      PTHREAD_MUTEX_DEFAULT, 0}
-#endif
 
 #ifdef CONFIG_PTHREAD_CLEANUP
 /* This type describes the pthread cleanup callback (non-standard) */
@@ -572,7 +570,6 @@ int pthread_once(FAR pthread_once_t *once_control,
 
 /* Pthread rwlock */
 
-#ifdef CONFIG_PTHREAD_RWLOCK
 int pthread_rwlock_destroy(FAR pthread_rwlock_t *rw_lock);
 int pthread_rwlock_init(FAR pthread_rwlock_t *rw_lock,
                         FAR const pthread_rwlockattr_t *attr);
@@ -585,7 +582,6 @@ int pthread_rwlock_timedwrlock(FAR pthread_rwlock_t *lock,
                                FAR const struct timespec *abstime);
 int pthread_rwlock_trywrlock(FAR pthread_rwlock_t *lock);
 int pthread_rwlock_unlock(FAR pthread_rwlock_t *lock);
-#endif /* CONFIG_PTHREAD_RWLOCK */
 
 /* Pthread signal management APIs */
 
