@@ -154,29 +154,37 @@ static void sixlowpan_copy_protohdr(FAR const struct ipv6_hdr_s *ipv6hdr,
      {
 #ifdef CONFIG_NET_TCP
      case IP_PROTO_TCP:
-       combined  = sizeof(struct ipv6tcp_hdr_s);
-       protosize = sizeof(struct tcp_hdr_s);
+       {
+         FAR struct tcp_hdr_s *tcp = &((FAR struct ipv6tcp_hdr_s *)ipv6hdr)->tcp;
+
+         /* The TCP header length is encoded in the top 4 bits of the
+          * tcpoffset field (in units of 32-bit words).
+          */
+
+         protosize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
+         combined  = sizeof(struct ipv6_hdr_s) + protosize;
+       }
        break;
 #endif
 
 #ifdef CONFIG_NET_UDP
      case IP_PROTO_UDP:
-       combined  = sizeof(struct ipv6udp_hdr_s);
        protosize = sizeof(struct udp_hdr_s);
+       combined  = sizeof(struct ipv6udp_hdr_s);
        break;
 #endif
 
 #ifdef CONFIG_NET_ICMPv6
      case IP_PROTO_ICMP6:
-       combined  = sizeof(struct ipv6icmp_hdr_s);
        protosize = sizeof(struct icmpv6_hdr_s);
+       combined  = sizeof(struct ipv6icmp_hdr_s);
        break;
 #endif
 
      default:
        nwarn("WARNING: Unrecognized proto: %u\n", ipv6hdr->proto);
-       combined  = sizeof(struct ipv6_hdr_s);
        protosize = 0;
+       combined  = sizeof(struct ipv6_hdr_s);
        break;
      }
 

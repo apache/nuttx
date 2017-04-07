@@ -86,6 +86,7 @@
 /* Buffer access helpers */
 
 #define IPv6BUF(dev)  ((FAR struct ipv6_hdr_s *)((dev)->d_buf))
+#define TCPBUF(dev)   ((FAR struct tcp_hdr_s *)&(dev)->d_buf[IPv6_HDRLEN])
 
 /****************************************************************************
  * Private Functions
@@ -728,7 +729,7 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee)
                    * layer protocol header.
                    */
 
-                  ipv6hdr = (FAR struct ipv6_hdr_s *)(ieee->i_dev.d_buf);
+                  ipv6hdr = IPv6BUF(&ieee->i_dev);
 
                   /* Get the Rime MAC address of the destination.  This
                    * assumes an encoding of the MAC address in the IPv6
@@ -743,7 +744,15 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee)
 
                   if (ipv6hdr->proto != IP_PROTO_TCP)
                     {
-                      hdrlen = IPv6_HDRLEN + TCP_HDRLEN;
+                      FAR struct tcp_hdr_s *tcp = TCPBUF(&ieee->i_dev);
+                      uint16_t tcplen;
+
+                      /* The TCP header length is encoded in the top 4 bits
+                       * of the tcpoffset field (in units of 32-bit words).
+                       */
+
+                      tcplen = ((uint16_t)tcp->tcpoffset >> 4) << 2;
+                      hdrlen = IPv6_HDRLEN + tcplen;
                     }
                   else if (ipv6hdr->proto != IP_PROTO_UDP)
                     {
