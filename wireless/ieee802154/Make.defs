@@ -53,6 +53,10 @@ ifeq ($(CONFIG_IEEE802154_DEV),y)
 CSRCS += radio802154_device.c
 endif
 
+ifeq ($(CONFIG_IEEE802154_NETDEV),y)
+CSRCS += mac802154_netdev.c
+endif
+
 ifeq ($(CONFIG_IEEE802154_LOOPBACK),y)
 CSRCS += mac802154_loopback.c
 endif
