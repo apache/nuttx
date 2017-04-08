@@ -354,10 +354,6 @@ typedef int pthread_rwlockattr_t;
                                      PTHREAD_COND_INITIALIZER, \
                                      0, 0}
 
-#define PTHREAD_MUTEX_INITIALIZER   {NULL, SEM_INITIALIZER(1), -1, \
-                                     __PTHREAD_MUTEX_DEFAULT_FLAGS, \
-                                     PTHREAD_MUTEX_DEFAULT, 0}
-
 #ifdef CONFIG_PTHREAD_CLEANUP
 /* This type describes the pthread cleanup callback (non-standard) */
 
