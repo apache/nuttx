@@ -74,13 +74,13 @@
 /* Rime addres macros */
 /* Copy a Rime address */
 
-#define rimeaddr_copy(dest,src) \
-  memcpy(dest, src, CONFIG_NET_6LOWPAN_RIMEADDR_SIZE)
+#define rimeaddr_copy(dest,src)  \
+  memcpy(dest, src, NET_6LOWPAN_RIMEADDR_SIZE)
 
 /* Compare two Rime addresses */
 
 #define rimeaddr_cmp(addr1,addr2) \
-  (memcmp(addr1, addr2, CONFIG_NET_6LOWPAN_RIMEADDR_SIZE) == 0)
+  (memcmp(addr1, addr2, NET_6LOWPAN_RIMEADDR_SIZE) == 0)
 
 /* Pointers in the Rime buffer */
 

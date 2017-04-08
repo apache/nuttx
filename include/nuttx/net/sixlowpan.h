@@ -63,6 +63,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* By default, a 2-byte Rime address is used for the IEEE802.15.4 MAC
+ * device's link  layer address.  If CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
+ * is selected, then an 8-byte Rime address will be used.
+ */
+
+#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
+#  define NET_6LOWPAN_RIMEADDR_SIZE 8
+#else
+#  define NET_6LOWPAN_RIMEADDR_SIZE 2
+#endif
+
 /* Frame format definitions *************************************************/
 /* Fragment header.
  *
@@ -374,7 +385,7 @@
 
 struct rimeaddr_s
 {
-  uint8_t u8[CONFIG_NET_6LOWPAN_RIMEADDR_SIZE];
+  uint8_t u8[NET_6LOWPAN_RIMEADDR_SIZE];
 };
 
 /* The device structure for IEEE802.15.4 MAC network device differs from the

@@ -151,12 +151,7 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
         {
           ieee = (FAR struct ieee802154_driver_s *)dev;
 
-#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
-          len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                          "%s\tLink encap:6loWPAN HWaddr %02x:%02x",
-                          dev->d_ifname,
-                          ieee->i_nodeaddr.u8[0], ieee->i_nodeaddr.u8[1]);
-#else /* CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 8 */
+#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
           len += snprintf(&netfile->line[len], NET_LINELEN - len,
                           "%s\tLink encap:6loWPAN HWaddr "
                           "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
@@ -165,6 +160,11 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
                           ieee->i_nodeaddr.u8[2], ieee->i_nodeaddr.u8[3],
                           ieee->i_nodeaddr.u8[4], ieee->i_nodeaddr.u8[5],
                           ieee->i_nodeaddr.u8[6], ieee->i_nodeaddr.u8[7]);
+#else
+          len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                          "%s\tLink encap:6loWPAN HWaddr %02x:%02x",
+                          dev->d_ifname,
+                          ieee->i_nodeaddr.u8[0], ieee->i_nodeaddr.u8[1]);
 #endif
         }
         break;
@@ -215,21 +215,21 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
 #elif defined(CONFIG_NET_6LOWPAN)
   ieee = (FAR struct ieee802154_driver_s *)dev;
 
-#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
-  len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                  "%s\tLink encap:6loWPAN HWaddr %02x:%02x at %s",
-                  dev->d_ifname,
-                  ieee->i_nodeaddr.u8[0], ieee->i_nodeaddr.u8[1],
-                  status);
-#else /* CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 8 */
+#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   "%s\tLink encap:6loWPAN HWaddr "
-                  "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x at %s",
+                  "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x at %s\n",
                   dev->d_ifname,
                   ieee->i_nodeaddr.u8[0], ieee->i_nodeaddr.u8[1],
                   ieee->i_nodeaddr.u8[2], ieee->i_nodeaddr.u8[3],
                   ieee->i_nodeaddr.u8[4], ieee->i_nodeaddr.u8[5],
                   ieee->i_nodeaddr.u8[6], ieee->i_nodeaddr.u8[7],
+                  status);
+#else
+  len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                  "%s\tLink encap:6loWPAN HWaddr %02x:%02x at %s\n",
+                  dev->d_ifname,
+                  ieee->i_nodeaddr.u8[0], ieee->i_nodeaddr.u8[1],
                   status);
 #endif
 #elif defined(CONFIG_NET_LOOPBACK)
@@ -443,7 +443,7 @@ static int netprocfs_txstatistics_header(FAR struct netprocfs_file_s *netfile)
   DEBUGASSERT(netfile != NULL);
 
   return snprintf(netfile->line, NET_LINELEN, "\tTX: %-8s %-8s %-8s %-8s\n",
-                 "Queued", "Sent", "Erorts", "Timeouts");
+                 "Queued", "Sent", "Errors", "Timeouts");
 }
 #endif /* CONFIG_NETDEV_STATISTICS */
 
