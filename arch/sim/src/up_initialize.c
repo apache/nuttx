@@ -187,7 +187,7 @@ void up_initialize(void)
    * separately.
    */
 
-  syslog(LOG_INFO, "SIM: Initializing");
+  syslog(LOG_INFO, "SIM: Initializing\n");
 #endif
 
 #ifdef CONFIG_PM

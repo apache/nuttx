@@ -258,7 +258,7 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
  *            inferred from the L2 length), non 0 if the packet is a 1st
  *            fragment.
  *   iob    - Pointer to the IOB containing the received frame.
- *   payptr - Pointer to the frame data payload.
+ *   fptr   - Pointer to frame to be uncompressed.
  *
  * Returned Value:
  *   Zero (OK) is returned on success, on failure a negater errno value is
@@ -268,10 +268,10 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
 
 int sixlowpan_uncompresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
                                 uint16_t iplen, FAR struct iob_s *iob,
-                                FAR uint8_t *payptr)
+                                FAR uint8_t *fptr)
 {
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF(&ieee->i_dev);
-  FAR uint8_t *hc1 = payptr + g_frame_hdrlen;
+  FAR uint8_t *hc1 = fptr + g_frame_hdrlen;
 
   /* Format the IPv6 header in the device d_buf */
   /* Set version, traffic clase, and flow label */
@@ -312,7 +312,7 @@ int sixlowpan_uncompresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
     case SIXLOWPAN_HC1_NH_UDP:
       {
         FAR struct udp_hdr_s *udp = UDPIPv6BUF(&ieee->i_dev);
-        FAR uint8_t *hcudp = payptr + g_frame_hdrlen;
+        FAR uint8_t *hcudp = fptr + g_frame_hdrlen;
 
         ipv6->proto = IP_PROTO_UDP;
         if ((hcudp[RIME_HC1_HC_UDP_HC1_ENCODING] & 0x01) != 0)

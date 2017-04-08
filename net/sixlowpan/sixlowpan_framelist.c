@@ -112,6 +112,8 @@
 static void sixlowpan_compress_ipv6hdr(FAR const struct ipv6_hdr_s *ipv6hdr,
                                        FAR uint8_t *fptr)
 {
+  uint16_t protosize;
+
   /* Indicate the IPv6 dispatch and length */
 
   fptr[g_frame_hdrlen] = SIXLOWPAN_DISPATCH_IPV6;
@@ -122,33 +124,8 @@ static void sixlowpan_compress_ipv6hdr(FAR const struct ipv6_hdr_s *ipv6hdr,
   memcpy(&fptr[g_frame_hdrlen] , ipv6hdr, IPv6_HDRLEN);
   g_frame_hdrlen      += IPv6_HDRLEN;
   g_uncomp_hdrlen     += IPv6_HDRLEN;
-}
 
-/****************************************************************************
- * Name: sixlowpan_copy_protohdr
- *
- * Description:
- *   The IPv6 header should have already been processed (as reflected in the
- *   g_uncomphdrlen).  But we probably still need to copy the following
- *   protocol header.
- *
- * Input Parameters:
- *   ipv6hdr - Pointer to the IPv6 header to "compress"
- *   fptr    - Pointer to the beginning of the frame under construction
- *
- * Returned Value:
- *   None.  But g_frame_hdrlen and g_uncomp_hdrlen updated.
- *
- ****************************************************************************/
-
-static void sixlowpan_copy_protohdr(FAR const struct ipv6_hdr_s *ipv6hdr,
-                                    FAR uint8_t *fptr)
-{
-  uint16_t combined;
-  uint16_t protosize;
-  uint16_t copysize;
-
-  /* What is the total size of the IPv6 + protocol header? */
+  /* Copy the following protocol header, */
 
    switch (ipv6hdr->proto)
      {
@@ -162,7 +139,6 @@ static void sixlowpan_copy_protohdr(FAR const struct ipv6_hdr_s *ipv6hdr,
           */
 
          protosize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
-         combined  = sizeof(struct ipv6_hdr_s) + protosize;
        }
        break;
 #endif
@@ -170,48 +146,27 @@ static void sixlowpan_copy_protohdr(FAR const struct ipv6_hdr_s *ipv6hdr,
 #ifdef CONFIG_NET_UDP
      case IP_PROTO_UDP:
        protosize = sizeof(struct udp_hdr_s);
-       combined  = sizeof(struct ipv6udp_hdr_s);
        break;
 #endif
 
 #ifdef CONFIG_NET_ICMPv6
      case IP_PROTO_ICMP6:
        protosize = sizeof(struct icmpv6_hdr_s);
-       combined  = sizeof(struct ipv6icmp_hdr_s);
        break;
 #endif
 
      default:
        nwarn("WARNING: Unrecognized proto: %u\n", ipv6hdr->proto);
-       protosize = 0;
-       combined  = sizeof(struct ipv6_hdr_s);
-       break;
+       return;
      }
 
-  /* Copy the remaining protocol header. */
-
-  if (g_uncomp_hdrlen > IPv6_HDRLEN)
-    {
-      nwarn("WARNING: Protocol header not copied: "
-            "g_uncomp_hdren=%u IPv6_HDRLEN=%u\n",
-            g_uncomp_hdrlen, IPv6_HDRLEN);
-      return;
-    }
-
-  copysize = combined - g_uncomp_hdrlen;
-  if (copysize != protosize)
-    {
-      nwarn("WARNING: Protocol header size mismatch: "
-            "g_uncomp_hdren=%u copysize=%u protosize=%u\n",
-            g_uncomp_hdrlen, copysize, protosize);
-      return;
-    }
+  /* Copy the protocol header. */
 
   memcpy(fptr + g_frame_hdrlen, (FAR uint8_t *)ipv6hdr + g_uncomp_hdrlen,
-         copysize);
+         protosize);
 
-  g_frame_hdrlen  += copysize;
-  g_uncomp_hdrlen += copysize;
+  g_frame_hdrlen  += protosize;
+  g_uncomp_hdrlen += protosize;
 }
 
 /****************************************************************************
@@ -421,10 +376,6 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
       g_frame_hdrlen += SIXLOWPAN_FRAG1_HDR_LEN;
 
-      /* Copy protocol header that follows the IPv6 header */
-
-      sixlowpan_copy_protohdr(destip, fptr);
-
       /* Copy payload and enqueue.  NOTE that the size is a multiple of eight
        * bytes.
        */
@@ -550,10 +501,6 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
       verify = sixlowpan_framecreate(ieee, iob, ieee->i_panid);
       DEBUGASSERT(verify == framer_hdrlen);
       UNUSED(verify);
-
-      /* Copy protocol header that follows the IPv6 header */
-
-      sixlowpan_copy_protohdr(destip, fptr);
 
       /* Copy the payload and queue */
 
