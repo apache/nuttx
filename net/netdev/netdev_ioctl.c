@@ -739,7 +739,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
 
                    req->ifr_hwaddr.sa_family = AF_INETX;
                    memcpy(req->ifr_hwaddr.sa_data, ieee->i_nodeaddr.u8,
-                          CONFIG_NET_6LOWPAN_RIMEADDR_SIZE);
+                          NET_6LOWPAN_RIMEADDR_SIZE);
                    ret = OK;
                 }
                else
@@ -782,7 +782,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
 
                    req->ifr_hwaddr.sa_family = AF_INETX;
                    memcpy(ieee->i_nodeaddr.u8, req->ifr_hwaddr.sa_data,
-                          CONFIG_NET_6LOWPAN_RIMEADDR_SIZE);
+                          NET_6LOWPAN_RIMEADDR_SIZE);
                    ret = OK;
                 }
               else

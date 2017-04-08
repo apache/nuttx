@@ -195,57 +195,68 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
 
   while (head != NULL)
     {
-       /* Remove the IOB from the queue */
+      /* Increment statistics */
 
-       iob           = head;
-       head          = iob->io_flink;
-       iob->io_flink = NULL;
+      NETDEV_RXPACKETS(&priv->lo_ieee.i_dev);
 
-       /* Is the queue now empty? */
+      /* Remove the IOB from the queue */
 
-       if (head == NULL)
-         {
-           tail = NULL;
-         }
+      iob           = head;
+      head          = iob->io_flink;
+      iob->io_flink = NULL;
 
-       /* Return the next frame to the network */
+      /* Is the queue now empty? */
 
-       iob->io_flink      = NULL;
-       priv->lo_ieee.i_framelist = iob;
+      if (head == NULL)
+        {
+          tail = NULL;
+        }
 
-       ninfo("Send frame %p to the network. Length=%u\n", iob, iob->io_len);
-       ret = sixlowpan_input(&priv->lo_ieee);
-       if (ret < 0)
-         {
-           nerr("ERROR: sixlowpan_input returned %d\n", ret);
-         }
+      /* Return the next frame to the network */
 
-       /* What if the network responds with more frames to send? */
+      iob->io_flink      = NULL;
+      priv->lo_ieee.i_framelist = iob;
 
-       if (priv->lo_ieee.i_framelist != NULL)
-         {
-           /* Append the new list to the tail of the queue */
+      ninfo("Send frame %p to the network. Length=%u\n", iob, iob->io_len);
+      ret = sixlowpan_input(&priv->lo_ieee);
 
-           iob                       = priv->lo_ieee.i_framelist;
-           priv->lo_ieee.i_framelist = NULL;
+      /* Increment statistics */
 
-           if (tail == NULL)
-             {
-               head = iob;
-             }
-           else
-             {
-               tail->io_flink = iob;
-             }
+      NETDEV_TXPACKETS(&priv->lo_ieee.i_dev);
 
-           /* Find the new tail of the IOB queue */
+      if (ret < 0)
+        {
+          nerr("ERROR: sixlowpan_input returned %d\n", ret);
+          NETDEV_TXERRORS(&priv->lo_ieee.i_dev);
+          NETDEV_ERRORS(&priv->lo_ieee.i_dev);
+        }
 
-           for (tail = iob, iob = iob->io_flink;
-                iob != NULL;
-                tail = iob, iob = iob->io_flink);
-         }
+      /* What if the network responds with more frames to send? */
 
-       priv->lo_txdone = true;
+      if (priv->lo_ieee.i_framelist != NULL)
+        {
+          /* Append the new list to the tail of the queue */
+
+          iob                       = priv->lo_ieee.i_framelist;
+          priv->lo_ieee.i_framelist = NULL;
+
+          if (tail == NULL)
+            {
+              head = iob;
+            }
+          else
+            {
+              tail->io_flink = iob;
+            }
+
+          /* Find the new tail of the IOB queue */
+
+          for (tail = iob, iob = iob->io_flink;
+               iob != NULL;
+               tail = iob, iob = iob->io_flink);
+        }
+
+      priv->lo_txdone = true;
     }
 
   return 0;
@@ -352,16 +363,16 @@ static int lo_ifup(FAR struct net_driver_s *dev)
         dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
         dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 
-#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
-  ninfo("             Node: %02x:%02x PANID=%04x\n",
-         priv->lo_ieee.i_nodeaddr.u8[0], priv->lo_ieee.i_nodeaddr.u8[1],
-         priv->lo_ieee.i_panid);
-#else /* CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 8 */
+#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
   ninfo("             Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x PANID=%04x\n",
          priv->lo_ieee.i_nodeaddr.u8[0], priv->lo_ieee.i_nodeaddr.u8[1],
          priv->lo_ieee.i_nodeaddr.u8[2], priv->lo_ieee.i_nodeaddr.u8[3],
          priv->lo_ieee.i_nodeaddr.u8[4], priv->lo_ieee.i_nodeaddr.u8[5],
          priv->lo_ieee.i_nodeaddr.u8[6], priv->lo_ieee.i_nodeaddr.u8[7],
+         priv->lo_ieee.i_panid);
+#else
+  ninfo("             Node: %02x:%02x PANID=%04x\n",
+         priv->lo_ieee.i_nodeaddr.u8[0], priv->lo_ieee.i_nodeaddr.u8[1],
          priv->lo_ieee.i_panid);
 #endif
 
@@ -508,12 +519,12 @@ static int lo_txavail(FAR struct net_driver_s *dev)
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
 static int lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
-  ninfo("MAC: %02x:%02x\n",
-         mac[0], mac[1]);
-#else /* CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 8 */
+#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
   ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], mac[6], mac[7]);
+#else
+  ninfo("MAC: %02x:%02x\n",
+         mac[0], mac[1]);
 #endif
 
   /* There is no multicast support in the loopback driver */
@@ -543,12 +554,12 @@ static int lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 #ifdef CONFIG_NET_IGMP
 static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
-  ninfo("MAC: %02x:%02x\n",
-         mac[0], mac[1]);
-#else /* CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 8 */
+#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
   ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], mac[6], mac[7]);
+#else
+  ninfo("MAC: %02x:%02x\n",
+         mac[0], mac[1]);
 #endif
 
   /* There is no multicast support in the loopback driver */

@@ -88,14 +88,14 @@ void sixlowpan_ipfromrime(FAR const struct rimeaddr_s *rime,
   memset(ipaddr, 0, sizeof(net_ipv6addr_t));
   ipaddr[0] = HTONS(0xfe80);
 
-#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
+#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
+  memcpy(&ipaddr[4], rime, NET_6LOWPAN_RIMEADDR_SIZE);
+  ipaddr[4] ^= HTONS(0x0200);
+#else
   ipaddr[5]  = HTONS(0x00ff);
   ipaddr[6]  = HTONS(0xfe00);
-  memcpy(&ipaddr[7], rime, CONFIG_NET_6LOWPAN_RIMEADDR_SIZE);
+  memcpy(&ipaddr[7], rime, NET_6LOWPAN_RIMEADDR_SIZE);
   ipaddr[7] ^= HTONS(0x0200);
-#else
-  memcpy(&ipaddr[4], rime, CONFIG_NET_6LOWPAN_RIMEADDR_SIZE);
-  ipaddr[4] ^= HTONS(0x0200);
 #endif
 }
 
@@ -119,10 +119,10 @@ void sixlowpan_rimefromip(const net_ipv6addr_t ipaddr,
 
   DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
 
-#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
-  memcpy(rime, &ipaddr[7], CONFIG_NET_6LOWPAN_RIMEADDR_SIZE);
+#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
+  memcpy(rime, &ipaddr[4], NET_6LOWPAN_RIMEADDR_SIZE);
 #else
-  memcpy(rime, &ipaddr[4], CONFIG_NET_6LOWPAN_RIMEADDR_SIZE);
+  memcpy(rime, &ipaddr[7], NET_6LOWPAN_RIMEADDR_SIZE);
 #endif
   rime->u8[0] ^= 0x02;
 }
@@ -145,14 +145,14 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
 {
   FAR const uint8_t *rimeptr = rime->u8;
 
-#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
-  return (ipaddr[5] == HTONS(0x00ff) && ipaddr[6] == HTONS(0xfe00) &&
-          ipaddr[7] == htons((GETINT16(rimeptr, 0) ^ 0x0200)));
-#else /* CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 8 */
+#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
   return (ipaddr[4] == htons((GETINT16(rimeptr, 0) ^ 0x0200)) &&
           ipaddr[5] == GETINT16(rimeptr, 2) &&
           ipaddr[6] == GETINT16(rimeptr, 4) &&
           ipaddr[7] == GETINT16(rimeptr, 6));
+#else
+  return (ipaddr[5] == HTONS(0x00ff) && ipaddr[6] == HTONS(0xfe00) &&
+          ipaddr[7] == htons((GETINT16(rimeptr, 0) ^ 0x0200)));
 #endif
 }
 

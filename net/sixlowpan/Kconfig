@@ -133,12 +133,13 @@ config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_1
 endif # NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_0
 endif # NET_6LOWPAN_COMPRESSION_HC06
 
-config NET_6LOWPAN_RIMEADDR_SIZE
-	int "Rime address size"
-	default 2
-	range 2 8
+config NET_6LOWPAN_RIMEADDR_EXTENDED
+	int "Extended Rime address"
+	default n
 	---help---
-		Only the values 2 and 8 are supported
+		By default, a 2-byte Rime address is used for the IEEE802.15.4 MAC
+		device's link layer address.  If this option is selected, then an
+		8-byte Rime address will be used.
 
 config NET_6LOWPAN_MAXAGE
 	int "Packet reassembly timeout"
