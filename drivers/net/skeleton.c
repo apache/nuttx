@@ -136,6 +136,10 @@ struct skel_driver_s
 
 /* A single packet buffer per device is used here.  There might be multiple
  * packet buffers in a more complex, pipelined design.
+ *
+ * NOTE that if CONFIG_skeleton_NINTERFACES were greater than 1, you would
+ * need a minimum on one packetbuffer per instance.  Much better to be
+ * allocated dynamically.
  */
 
 static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
@@ -557,7 +561,9 @@ static void skel_interrupt_work(FAR void *arg)
 
 static int skel_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  FAR struct skel_driver_s *priv = &g_skel[0];
+  FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)arg;
+
+  DEBUGASSERT(priv != NULL);
 
   /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
    * also disabled if the TX timeout event occurs, there can be no race
@@ -1101,7 +1107,7 @@ int skel_initialize(int intf)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(CONFIG_skeleton_IRQ, skel_interrupt, NULL))
+  if (irq_attach(CONFIG_skeleton_IRQ, skel_interrupt, priv))
     {
       /* We could not attach the ISR to the interrupt */
 
