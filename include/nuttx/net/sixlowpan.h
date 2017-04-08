@@ -376,27 +376,37 @@ struct ieee802154_driver_s
   /* i_dgramtag.  Datagram tag to be put in the header of the set of
    * fragments.  It is used by the recipient to match fragments of the
    * same payload.
+   *
+   * This is the sender's copy of the tag.  It is incremented after each
+   * fragmented packet is sent so that it will be unique to that
+   * sequence fragmentation.  Its value is then persistent, the values of
+   * other fragmentatin variables are valid on during a single
+   * fragmentation sequence (while i_accumlen > 0)
    */
 
   uint16_t i_dgramtag;
 
+  /* i_reasstag.  Each frame in the reassembly has a tag.  That tag must
+   * match the reassembly tag in the fragments being merged.
+   *
+   * This is the same tag as i_dgramtag but is saved on the receiving
+   * side to match all of the fragments of the packet.
+   */
+
+  uint16_t i_reasstag;
+
   /* i_pktlen. The total length of the IPv6 packet to be re-assembled in
-   * d_buf.
+   * d_buf.  Used to determine when the re-assembly is complete.
    */
 
   uint16_t i_pktlen;
 
   /* The current accumulated length of the packet being received in d_buf.
-   * Included IPv6 and protocol headers.
+   * Included IPv6 and protocol headers.  Currently used only to determine
+   * there is a fragmentation sequence in progress.
    */
 
   uint16_t i_accumlen;
-
-  /* i_reasstag.  Each frame in the reassembly has a tag.  That tag must
-   * match the reassembly tag in the fragments being merged.
-   */
-
-  uint16_t i_reasstag;
 
   /* i_boffset.  Offset to the beginning of data in d_buf.  As each fragment
    * is received, data is placed at an appriate offset added to this.
