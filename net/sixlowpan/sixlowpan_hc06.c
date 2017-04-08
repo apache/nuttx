@@ -440,7 +440,7 @@ void sixlowpan_hc06_initialize(void)
  *   ipv6    - The IPv6 header to be compressed
  *   destmac - L2 destination address, needed to compress the IP
  *             destination field
- *   fptr    - Pointer to frame data payload.
+ *   fptr    - Pointer to frame to be compressed.
  *
  * Returned Value:
  *   None
@@ -840,7 +840,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  *            inferred from the L2 length), non 0 if the packet is a first
  *            fragment.
  *   iob    - Pointer to the IOB containing the received frame.
- *   payptr - Pointer to the frame data payload.
+ *   fptr   - Pointer to frame to be compressed.
  *
  * Returned Value:
  *   None
@@ -849,7 +849,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
 void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                                   uint16_t iplen, FAR struct iob_s *iob,
-                                  FAR uint8_t *payptr)
+                                  FAR uint8_t *fptr)
 {
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF(ieee);
   FAR uint8_t *iphc;
@@ -857,18 +857,18 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
   uint8_t iphc1;
   uint8_t tmp;
 
-  /* payptr points to IPHC.  At least two byte will be used for the encoding. */
+  /* iphc points to IPHC.  At least two byte will be used for the encoding. */
 
-  iphc  = payptr;
+  iphc  = fptr + g_frame_hdrlen;
   iphc0 = iphc[0];
   iphc1 = iphc[1];
 
   /* g_hc96ptr points to just after the 2-byte minimum IPHC */
 
-  g_hc06ptr = payptr + 2;
+  g_hc06ptr = iphc + 2;
 
-  ninfo("payptr=%p g_frame_hdrlen=%u iphc=%02x:%02x:%02x g_hc06ptr=%p\n",
-         payptr, g_frame_hdrlen, iphc[0], iphc[1], iphc[2], g_hc06ptr);
+  ninfo("fptr=%p g_frame_hdrlen=%u iphc=%02x:%02x:%02x g_hc06ptr=%p\n",
+         fptr, g_frame_hdrlen, iphc[0], iphc[1], iphc[2], g_hc06ptr);
 
   /* Another if the CID flag is set */
 
@@ -1171,7 +1171,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
         }
     }
 
-  g_frame_hdrlen = g_hc06ptr - payptr;
+  g_frame_hdrlen = g_hc06ptr - fptr;
 
   /* IP length field. */
 

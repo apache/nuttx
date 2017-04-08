@@ -641,7 +641,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  *            inferred from the L2 length), non 0 if the packet is a first
  *            fragment.
  *   iob    - Pointer to the IOB containing the received frame.
- *   payptr - Pointer to the frame data payload.
+ *   fptr   - Pointer to frame to be uncompressed.
  *
  * Returned Value:
  *   None
@@ -651,7 +651,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
 void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                                   uint16_t iplen, FAR struct iob_s *iob,
-                                  FAR uint8_t *payptr);
+                                  FAR uint8_t *fptr);
 #endif
 
 /****************************************************************************
@@ -701,7 +701,7 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
  *           inferred from the L2 length), non 0 if the packet is a first
  *           fragment.
  *   iob    - Pointer to the IOB containing the received frame.
- *   payptr - Pointer to the frame data payload.
+ *   fptr   - Pointer to frame to be uncompressed.
  *
  * Returned Value:
  *   None
@@ -711,7 +711,7 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
 int sixlowpan_uncompresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
                                 uint16_t ip_len, FAR struct iob_s *iob,
-                                FAR uint8_t *payptr);
+                                FAR uint8_t *fptr);
 #endif
 
 /****************************************************************************
