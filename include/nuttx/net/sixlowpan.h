@@ -63,6 +63,83 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Frame format definitions *************************************************/
+/* Fragment header.
+ *
+ * The fragment header is used when the payload is too large to fit in a
+ * single IEEE 802.15.4 frame. The fragment header contains three fields:
+ * Datagram size, datagram tag and datagram offset.
+ *
+ * 1. Datagram size describes the total (un-fragmented) payload.
+ * 2. Datagram tag identifies the set of fragments and is used to match
+ *    fragments of the same payload.
+ * 3. Datagram offset identifies the fragment’s offset within the un-
+ *    fragmented payload.
+ *
+ * The fragment header length is 4 bytes for the first header and 5
+ * bytes for all subsequent headers.
+ */
+
+#define RIME_FRAG_DISPATCH_SIZE          0  /* 16 bit */
+#define RIME_FRAG_TAG                    2  /* 16 bit */
+#define RIME_FRAG_OFFSET                 4  /* 8 bit */
+
+/* Define the Rime buffer as a byte array */
+
+#define RIME_HC1_DISPATCH                0  /* 8 bit */
+#define RIME_HC1_ENCODING                1  /* 8 bit */
+#define RIME_HC1_TTL                     2  /* 8 bit */
+
+#define RIME_HC1_HC_UDP_DISPATCH         0  /* 8 bit */
+#define RIME_HC1_HC_UDP_HC1_ENCODING     1  /* 8 bit */
+#define RIME_HC1_HC_UDP_UDP_ENCODING     2  /* 8 bit */
+#define RIME_HC1_HC_UDP_TTL              3  /* 8 bit */
+#define RIME_HC1_HC_UDP_PORTS            4  /* 8 bit */
+#define RIME_HC1_HC_UDP_CHKSUM           5  /* 16 bit */
+
+/* These are some definitions of element values used in the FCF.  See the
+ * IEEE802.15.4 spec for details.
+ */
+
+#define FRAME802154_FRAMETYPE_SHIFT      (0)  /* Bits 0-2: Frame type */
+#define FRAME802154_FRAMETYPE_MASK       (7 << FRAME802154_FRAMETYPE_SHIFT)
+#define FRAME802154_SECENABLED_SHIFT     (3)  /* Bit 3: Security enabled */
+#define FRAME802154_FRAMEPENDING_SHIFT   (4)  /* Bit 4: Frame pending */
+#define FRAME802154_ACKREQUEST_SHIFT     (5)  /* Bit 5: ACK request */
+#define FRAME802154_PANIDCOMP_SHIFT      (6)  /* Bit 6: PANID compression */
+                                              /* Bits 7-9: Reserved */
+#define FRAME802154_DSTADDR_SHIFT        (2)  /* Bits 10-11: Dest address mode */
+#define FRAME802154_DSTADDR_MASK         (3 << FRAME802154_DSTADDR_SHIFT)
+#define FRAME802154_VERSION_SHIFT        (4)  /* Bit 12-13: Frame version */
+#define FRAME802154_VERSION_MASK         (3 << FRAME802154_VERSION_SHIFT)
+#define FRAME802154_SRCADDR_SHIFT        (6)  /* Bits 14-15: Source address mode */
+#define FRAME802154_SRCADDR_MASK         (3 << FRAME802154_SRCADDR_SHIFT)
+
+/* Unshifted values for use in struct frame802154_fcf_s */
+
+#define FRAME802154_BEACONFRAME          (0)
+#define FRAME802154_DATAFRAME            (1)
+#define FRAME802154_ACKFRAME             (2)
+#define FRAME802154_CMDFRAME             (3)
+
+#define FRAME802154_BEACONREQ            (7)
+
+#define FRAME802154_IEEERESERVED         (0)
+#define FRAME802154_NOADDR               (0)  /* Only valid for ACK or Beacon frames */
+#define FRAME802154_SHORTADDRMODE        (2)
+#define FRAME802154_LONGADDRMODE         (3)
+
+#define FRAME802154_NOBEACONS            0x0f
+
+#define FRAME802154_BROADCASTADDR        0xffff
+#define FRAME802154_BROADCASTPANDID      0xffff
+
+#define FRAME802154_IEEE802154_2003      (0)
+#define FRAME802154_IEEE802154_2006      (1)
+
+#define FRAME802154_SECURITY_LEVEL_NONE  (0)
+#define FRAME802154_SECURITY_LEVEL_128   (3)
+
 /* Min and Max compressible UDP ports - HC06 */
 
 #define SIXLOWPAN_UDP_4_BIT_PORT_MIN     0xf0b0
@@ -171,9 +248,71 @@
 
 #define SIXLOWPAN_MAC_STDFRAME 127
 
-/* Frame buffer helper macros.
+/* Address compressibility test macros **************************************/
+
+/* Check whether we can compress the IID in address 'a' to 16 bits.  This is
+ * used for unicast addresses only, and is true if the address is on the
+ * format <PREFIX>::0000:00ff:fe00:XXXX
  *
- * The IEEE802.15.4 MAC driver structures includes a list of IOB
+ * NOTE: we currently assume 64-bits prefixes
+ */
+
+/* Check whether we can compress the IID in address 'a' to 16 bits.  This is
+ * used for unicast addresses only, and is true if the address is on the
+ * format <PREFIX>::0000:00ff:fe00:XXXX.
+ *
+ * NOTE: we currently assume 64-bits prefixes.  Big-endian, network order is
+ * assumed.
+ */
+
+#define SIXLOWPAN_IS_IID_16BIT_COMPRESSABLE(a) \
+  ((((a)[4]) == 0x0000) && (((a)[5]) == HTONS(0x00ff)) && \
+   (((a)[6]) == 0xfe00))
+
+/* Check whether the 9-bit group-id of the compressed multicast address is
+ * known. It is true if the 9-bit group is the all nodes or all routers
+ * group.  Parameter 'a' is typed uint8_t *
+ */
+
+#define SIXLOWPAN_IS_MCASTADDR_DECOMPRESSABLE(a) \
+   (((*a & 0x01) == 0) && \
+    ((*(a + 1) == 0x01) || (*(a + 1) == 0x02)))
+
+/* Check whether the 112-bit group-id of the multicast address is mappable
+ * to a 9-bit group-id. It is true if the group is the all nodes or all
+ * routers group:
+ *
+ *    XXXX:0000:0000:0000:0000:0000:0000:0001  All nodes address
+ *    XXXX:0000:0000:0000:0000:0000:0000:0002  All routers address
+ */
+
+#define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE(a) \
+  ((a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
+   (a)[4] == 0 && (a)[5] == 0 && (a)[6] == 0 && \
+   ((a)[7] == HTONS(0x0001) || (a)[7] == HTONS(0x0002)))
+
+/* FFXX:0000:0000:0000:0000:00XX:XXXX:XXXX */
+
+#define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE48(a) \
+  ((a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
+   (a)[4] == 0 && (((a)[5] & HTONS(0xff00)) == 0))
+
+/* FFXX:0000:0000:0000:0000:0000:00XX:XXXX */
+
+#define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE32(a) \
+  ((a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
+   (a)[4] == 0 && (a)[5] == 0 && ((a)[6] & HTONS(0xff00)) == 0)
+
+/* FF02:0000:0000:0000:0000:0000:0000:00XX */
+
+#define SIXLOWPAN_IS_MCASTADDR_COMPRESSABLE8(a) \
+  ((((a)[0] & HTONS(0x00ff)) == HTONS(0x0002)) && \
+   (a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
+   (a)[4] == 0 && (a)[5] == 0 && (a)[6] == 0 && \
+   (((a)[7] & HTONS(0xff00)) == 0x0000))
+
+/* Frame buffer helper macros ***********************************************/
+/* The IEEE802.15.4 MAC driver structures includes a list of IOB
  * structures, i_framelist, containing frames to be sent by the driver or
  * that were received by the driver.  The IOB structure is defined in
  * include/nuttx/net/iob.h.  The length of data in the IOB is provided by

@@ -191,6 +191,91 @@ int sixlowpan_recv_hdrlen(FAR const uint8_t *fptr)
 }
 
 /****************************************************************************
+ * Name: sixlowpan_compress_ipv6hdr
+ *
+ * Description:
+ *   IPv6 dispatch "compression" function.  Packets "Compression" when only
+ *   IPv6 dispatch is used
+ *
+ *   There is no compression in this case, all fields are sent
+ *   inline. We just add the IPv6 dispatch byte before the packet.
+ *
+ *   0               1                   2                   3
+ *   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *   | IPv6 Dsp      | IPv6 header and payload ...
+ *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *
+ * Input Parameters:
+ *   ieee - The IEEE802.15.4 MAC network driver interface.
+ *   fptr - Pointer to the beginning of the frame under construction
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void sixlowpan_uncompress_ipv6hdr(FAR struct ieee802154_driver_s *ieee,
+                                         FAR uint8_t *fptr)
+{
+  FAR struct ipv6_hdr_s *ipv6 = IPv6BUF(&ieee->i_dev);
+  uint16_t protosize;
+ 
+  /* Put uncompressed IPv6 header in d_buf. */
+
+  g_frame_hdrlen  += SIXLOWPAN_IPV6_HDR_LEN;
+  memcpy(ipv6, fptr + g_frame_hdrlen, IPv6_HDRLEN);
+
+  /* Update g_uncomp_hdrlen and g_frame_hdrlen. */
+
+  g_frame_hdrlen  += IPv6_HDRLEN;
+  g_uncomp_hdrlen += IPv6_HDRLEN;
+
+  /* Copy the following protocol header, */
+
+   switch (ipv6->proto)
+     {
+#ifdef CONFIG_NET_TCP
+     case IP_PROTO_TCP:
+       {
+         FAR struct tcp_hdr_s *tcp = &((FAR struct ipv6tcp_hdr_s *)ipv6)->tcp;
+
+         /* The TCP header length is encoded in the top 4 bits of the
+          * tcpoffset field (in units of 32-bit words).
+          */
+
+         protosize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
+       }
+       break;
+#endif
+
+#ifdef CONFIG_NET_UDP
+     case IP_PROTO_UDP:
+       protosize = sizeof(struct udp_hdr_s);
+       break;
+#endif
+
+#ifdef CONFIG_NET_ICMPv6
+     case IP_PROTO_ICMP6:
+       protosize = sizeof(struct icmpv6_hdr_s);
+       break;
+#endif
+
+     default:
+       nwarn("WARNING: Unrecognized proto: %u\n", ipv6->proto);
+       return;
+     }
+
+  /* Copy the protocol header. */
+
+  memcpy((FAR uint8_t *)ipv6 + g_uncomp_hdrlen, fptr + g_frame_hdrlen,
+         protosize);
+
+  g_frame_hdrlen  += protosize;
+  g_uncomp_hdrlen += protosize;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -437,9 +522,6 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
   if ((hc1[RIME_HC1_DISPATCH] & SIXLOWPAN_DISPATCH_IPHC_MASK) == SIXLOWPAN_DISPATCH_IPHC)
     {
       ninfo("IPHC Dispatch\n");
-
-      /* Payload starts after the IEEE802.15.4 header(s) */
-
       sixlowpan_uncompresshdr_hc06(ieee, fragsize, iob, fptr);
     }
   else
@@ -449,29 +531,15 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
   if (hc1[RIME_HC1_DISPATCH] == SIXLOWPAN_DISPATCH_HC1)
     {
       ninfo("HC1 Dispatch\n");
-
-      /* Payload starts after the IEEE802.15.4 header(s) */
-
-      sixlowpan_uncompresshdr_hc1(ieee, fragsize, iob, fptr);
+     sixlowpan_uncompresshdr_hc1(ieee, fragsize, iob, fptr);
     }
   else
 #endif /* CONFIG_NET_6LOWPAN_COMPRESSION_HC1 */
 
   if (hc1[RIME_HC1_DISPATCH] == SIXLOWPAN_DISPATCH_IPV6)
     {
-      FAR struct ipv6_hdr_s *ipv6 = IPv6BUF(&ieee->i_dev);
-
       ninfo("IPv6 Dispatch\n");
-      g_frame_hdrlen  += SIXLOWPAN_IPV6_HDR_LEN;
-
-      /* Put uncompressed IP header in d_buf. */
-
-      memcpy(ipv6, fptr + g_frame_hdrlen, IPv6_HDRLEN);
-
-      /* Update g_uncomp_hdrlen and g_frame_hdrlen. */
-
-      g_frame_hdrlen  += IPv6_HDRLEN;
-      g_uncomp_hdrlen += IPv6_HDRLEN;
+      sixlowpan_uncompress_ipv6hdr(ieee, fptr);
     }
   else
     {
