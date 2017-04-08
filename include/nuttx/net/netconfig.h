@@ -295,16 +295,13 @@
 #endif
 
 /* The UDP maximum packet size. This is should not be to set to more
- * than NET_DEV_MTU(d) - NET_LL_HDRLEN(dev) - IPv*_HDRLEN.
- *
- * REVISIT: It is unclear to me if the UDP_HDRLEN should subtracted
- * or not.
+ * than NET_DEV_MTU(d) - NET_LL_HDRLEN(dev) - UDP_HDRLEN - IPv*_HDRLEN.
  */
 
-#define UDP_MSS(d,h)            (NET_DEV_MTU(d) - NET_LL_HDRLEN(d) (h))
+#define UDP_MSS(d,h)            (NET_DEV_MTU(d) - NET_LL_HDRLEN(d) - UDP_HDRLEN (h))
 
 #ifdef CONFIG_NET_ETHERNET
-#  define ETH_UDP_MSS(h)        (CONFIG_NET_ETH_MTU - ETH_HDRLEN - (h))
+#  define ETH_UDP_MSS(h)        (CONFIG_NET_ETH_MTU - ETH_HDRLEN - UDP_HDRLEN - (h))
 #  ifndef CONFIG_NET_MULTILINK
 #    define __MIN_UDP_MSS(h)    ETH_UDP_MSS(h)
 #    define __MAX_UDP_MSS(h)    ETH_UDP_MSS(h)
@@ -312,7 +309,7 @@
 #endif
 
 #ifdef CONFIG_NET_6LOWPAN
-#  define IEEE802154_UDP_MSS(h) (CONFIG_NET_6LOWPAN_MAXPAYLOAD - (h))
+#  define IEEE802154_UDP_MSS(h) (CONFIG_NET_6LOWPAN_MAXPAYLOAD - UDP_HDRLEN - (h))
 #  ifndef CONFIG_NET_MULTILINK
 #    define __MIN_UDP_MSS(h)    IEEE802154_UDP_MSS(h)
 #    define __MAX_UDP_MSS(h)    IEEE802154_UDP_MSS(h)
@@ -320,7 +317,7 @@
 #endif
 
 #ifdef CONFIG_NET_LOOPBACK
-#  define LO_UDP_MSS(h)         (NET_LO_MTU - (h))
+#  define LO_UDP_MSS(h)         (NET_LO_MTU - UDP_HDRLEN - (h))
 #  ifndef CONFIG_NET_MULTILINK
 #    define __MIN_UDP_MSS(h)    LO_UDP_MSS(h)
 #    define __MAX_UDP_MSS(h)    LO_UDP_MSS(h)
@@ -328,7 +325,7 @@
 #endif
 
 #ifdef CONFIG_NET_SLIP
-#  define SLIP_UDP_MSS(h)       (CONFIG_NET_SLIP_MTU - (h))
+#  define SLIP_UDP_MSS(h)       (CONFIG_NET_SLIP_MTU - UDP_HDRLEN - (h))
 #  ifndef CONFIG_NET_MULTILINK
 #    define __MIN_UDP_MSS(h)    SLIP_UDP_MSS(h)
 #    define __MAX_UDP_MSS(h)    SLIP_UDP_MSS(h)
@@ -383,27 +380,25 @@
 #  endif
 #endif
 
-/* NOTE: MSS calcuation excludes the UDP_HDRLEN. */
-
  #ifdef CONFIG_NET_IPv4
-#  define UDP_IPv4_MSS(d)    UDP_MSS(d,IPv4_HDRLEN)
-#  define ETH_IPv4_UDP_MSS   ETH_UDP_MSS(IPv4_HDRLEN)
-#  define SLIP_IPv4_UDP_MSS  SLIP_UDP_MSS(IPv4_HDRLEN)
+#  define UDP_IPv4_MSS(d)       UDP_MSS(d,IPv4_HDRLEN)
+#  define ETH_IPv4_UDP_MSS      ETH_UDP_MSS(IPv4_HDRLEN)
+#  define SLIP_IPv4_UDP_MSS     SLIP_UDP_MSS(IPv4_HDRLEN)
 
-#  define MIN_IPv4_UDP_MSS   __MIN_UDP_MSS(IPv4_HDRLEN)
-#  define MIN_UDP_MSS        __MIN_UDP_MSS(IPv4_HDRLEN)
+#  define MIN_IPv4_UDP_MSS      __MIN_UDP_MSS(IPv4_HDRLEN)
+#  define MIN_UDP_MSS           __MIN_UDP_MSS(IPv4_HDRLEN)
 
 #  undef  MAX_UDP_MSS
-#  define MAX_IPv4_UDP_MSS   __MAX_UDP_MSS(IPv4_HDRLEN)
-#  define MAX_UDP_MSS        __MAX_UDP_MSS(IPv4_HDRLEN)
+#  define MAX_IPv4_UDP_MSS      __MAX_UDP_MSS(IPv4_HDRLEN)
+#  define MAX_UDP_MSS           __MAX_UDP_MSS(IPv4_HDRLEN)
 #endif
 
 /* If IPv6 is support, it will have the smaller MSS */
 
 #ifdef CONFIG_NET_IPv6
 #  undef  MIN_UDP_MSS
-#  define MIN_IPv6_UDP_MSS   __MIN_UDP_MSS(IPv6_HDRLEN)
-#  define MIN_UDP_MSS        __MIN_UDP_MSS(IPv6_HDRLEN)
+#  define MIN_IPv6_UDP_MSS      __MIN_UDP_MSS(IPv6_HDRLEN)
+#  define MIN_UDP_MSS           __MIN_UDP_MSS(IPv6_HDRLEN)
 #endif
 
 /* TCP configuration options */
@@ -473,17 +468,15 @@
  * may support a different UDP MSS value.  Here we arbitrarily select
  * the minimum MSS for that case.
  *
- * REVISIT: It is unclear to me if the TCP_HDRLEN should subtracted
- * or not.
+ * REVISIT: TCP_HDRLEN is not really a constant!
  */
 
-#define TCP_MSS(d,h)            (NET_DEV_MTU(d) - NET_LL_HDRLEN(d) - (h))
-#define LO_TCP_MSS(h)           (NET_LO_MTU - (h))
+#define TCP_MSS(d,h)            (NET_DEV_MTU(d) - NET_LL_HDRLEN(d) - TCP_HDRLEN - (h))
 
 /* Get the smallest and largest MSS */
 
 #ifdef CONFIG_NET_ETHERNET
-#  define ETH_TCP_MSS(h)        (CONFIG_NET_ETH_MTU - ETH_HDRLEN - (h))
+#  define ETH_TCP_MSS(h)        (CONFIG_NET_ETH_MTU - ETH_HDRLEN - TCP_HDRLEN - (h))
 #  ifndef CONFIG_NET_MULTILINK
 #    define __MIN_TCP_MSS(h)    ETH_TCP_MSS(h)
 #    define __MAX_TCP_MSS(h)    ETH_TCP_MSS(h)
@@ -491,7 +484,7 @@
 #endif
 
 #ifdef CONFIG_NET_6LOWPAN
-#  define IEEE802154_TCP_MSS(h) CONFIG_NET_6LOWPAN_MAXPAYLOAD
+#  define IEEE802154_TCP_MSS(h) (CONFIG_NET_6LOWPAN_MAXPAYLOAD - TCP_HDRLEN - (h))
 #  ifndef CONFIG_NET_MULTILINK
 #    define __MIN_TCP_MSS(h)    IEEE802154_TCP_MSS(h)
 #    define __MAX_TCP_MSS(h)    IEEE802154_TCP_MSS(h)
@@ -499,7 +492,7 @@
 #endif
 
 #ifdef CONFIG_NET_LOOPBACK
-#  define LO_TCP_MSS(h)         (NET_LO_MTU - (h))
+#  define LO_TCP_MSS(h)         (NET_LO_MTU - TCP_HDRLEN - (h))
 #  ifndef CONFIG_NET_MULTILINK
 #    define __MIN_TCP_MSS(h)    LO_TCP_MSS(h)
 #    define __MAX_TCP_MSS(h)    LO_TCP_MSS(h)
@@ -507,7 +500,7 @@
 #endif
 
 #ifdef CONFIG_NET_SLIP
-#  define SLIP_TCP_MSS(h)       (CONFIG_NET_SLIP_MTU - (h))
+#  define SLIP_TCP_MSS(h)       (CONFIG_NET_SLIP_MTU - TCP_HDRLEN - (h))
 #  ifndef CONFIG_NET_MULTILINK
 #    define __MIN_TCP_MSS(h)    SLIP_TCP_MSS(h)
 #    define __MAX_TCP_MSS(h)    SLIP_TCP_MSS(h)
@@ -568,26 +561,26 @@
  */
 
 #ifdef CONFIG_NET_IPv6
-#  define TCP_IPv6_MSS(d)   TCP_MSS(d,IPv6_HDRLEN)
-#  define ETH_IPv6_TCP_MSS  ETH_TCP_MSS(IPv6_HDRLEN)
-#  define SLIP_IPv6_TCP_MSS SLIP_TCP_MSS(IPv6_HDRLEN)
-#  define MAX_TCP_MSS       __MAX_TCP_MSS(IPv6_HDRLEN)
+#  define TCP_IPv6_MSS(d)       TCP_MSS(d,IPv6_HDRLEN)
+#  define ETH_IPv6_TCP_MSS      ETH_TCP_MSS(IPv6_HDRLEN)
+#  define SLIP_IPv6_TCP_MSS     SLIP_TCP_MSS(IPv6_HDRLEN)
+#  define MAX_TCP_MSS           __MAX_TCP_MSS(IPv6_HDRLEN)
 #endif
 
 #ifdef CONFIG_NET_IPv4
-#  define TCP_IPv4_MSS(d)   TCP_MSS(d,IPv4_HDRLEN)
-#  define ETH_IPv4_TCP_MSS  ETH_TCP_MSS(IPv4_HDRLEN)
-#  define SLIP_IPv4_TCP_MSS SLIP_TCP_MSS(IPv4_HDRLEN)
-#  define MIN_TCP_MSS       __MIN_TCP_MSS(IPv4_HDRLEN)
+#  define TCP_IPv4_MSS(d)       TCP_MSS(d,IPv4_HDRLEN)
+#  define ETH_IPv4_TCP_MSS      ETH_TCP_MSS(IPv4_HDRLEN)
+#  define SLIP_IPv4_TCP_MSS     SLIP_TCP_MSS(IPv4_HDRLEN)
+#  define MIN_TCP_MSS           __MIN_TCP_MSS(IPv4_HDRLEN)
 #  undef MAX_TCP_MSS
-#  define MAX_TCP_MSS       __MAX_TCP_MSS(IPv4_HDRLEN)
+#  define MAX_TCP_MSS           __MAX_TCP_MSS(IPv4_HDRLEN)
 #endif
 
 /* If IPv6 is supported, it will have the smaller MSS */
 
 #ifdef CONFIG_NET_IPv6
 #  undef MIN_TCP_MSS
-#  define MIN_TCP_MSS       __MIN_TCP_MSS(IPv6_HDRLEN)
+#  define MIN_TCP_MSS           __MIN_TCP_MSS(IPv6_HDRLEN)
 #endif
 
 /* The size of the advertised receiver's window.
@@ -614,21 +607,27 @@
 #endif
 
 #if defined(CONFIG_NET_MULTILINK)
-   /* We are supporting multiple network devices using different link layer
-    * protocols.  Get the size of the receive window from the device structure.
-    */
+  /* We are supporting multiple network devices using different link layer
+   * protocols.  Get the size of the receive window from the device
+   * structure.
+   */
 
 #  define NET_DEV_RCVWNDO(d)  ((d)->d_recvwndo)
-
-#elif defined(CONFIG_NET_SLIP)
-   /* Only SLIP.. use the configured SLIP receive window size */
-
-#  define NET_DEV_RCVWNDO(d)  CONFIG_NET_SLIP_TCP_RECVWNDO
 
 #elif defined(CONFIG_NET_ETHERNET)
    /* Only Ethernet.. use the configured SLIP receive window size */
 
 #  define NET_DEV_RCVWNDO(d)  CONFIG_NET_ETH_TCP_RECVWNDO
+
+#elif defined(CONFIG_NET_6LOWPAN)
+   /* Only 6loWPAN.. use the configured 6loWPAN receive window size */
+
+#  define NET_DEV_RCVWNDO(d)  CONFIG_NET_6LOWPAN_TCP_RECVWNDO
+
+#elif defined(CONFIG_NET_SLIP)
+   /* Only SLIP.. use the configured SLIP receive window size */
+
+#  define NET_DEV_RCVWNDO(d)  CONFIG_NET_SLIP_TCP_RECVWNDO
 
 #else /* if defined(CONFIG_NET_LOOPBACK) */
    /* Only loal loopback.. use the fixed loopback receive window size */
