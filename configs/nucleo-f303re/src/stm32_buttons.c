@@ -83,7 +83,7 @@ void board_button_initialize(void)
  * Description:
  *   After board_button_initialize() has been called, board_buttons() may be
  *   called to collect the state of all buttons.  board_buttons() returns an
- *   8-bit unsigned integer with each bit associated with a button.  See the
+ *   32-bit unsigned integer with each bit associated with a button.  See the
  *   BUTTON_*_BIT definitions in board.h for the meaning of each bit.
  *
  ****************************************************************************/

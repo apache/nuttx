@@ -581,7 +581,7 @@ void board_button_initialize(void);
  * Description:
  *   After board_button_initialize() has been called, board_buttons() may be
  *   called to collect the state of all buttons.  board_buttons() returns an
- *   8-bit bit set with each bit associated with a button.  A bit set to
+ *   32-bit bit set with each bit associated with a button.  A bit set to
  *   "1" means that the button is depressed; a bit set to "0" means that
  *   the button is released.  The correspondence of the each button bit
  *   and physical buttons is board-specific.
