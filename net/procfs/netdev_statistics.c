@@ -62,7 +62,9 @@
 
 static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile);
 static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile);
-
+#ifdef CONFIG_NET_IPv6
+static int netprocfs_dripaddress(FAR struct netprocfs_file_s *netfile);
+#endif
 #ifdef CONFIG_NETDEV_STATISTICS
 static int netprocfs_rxstatistics_header(FAR struct netprocfs_file_s *netfile);
 static int netprocfs_rxstatistics(FAR struct netprocfs_file_s *netfile);
@@ -83,6 +85,9 @@ static const linegen_t g_linegen[] =
 {
   netprocfs_linklayer,
   netprocfs_ipaddresses
+#ifdef CONFIG_NET_IPv6
+  , netprocfs_dripaddress
+#endif
 #ifdef CONFIG_NETDEV_STATISTICS
   , netprocfs_rxstatistics_header,
   netprocfs_rxstatistics,
@@ -292,7 +297,7 @@ static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile)
 
   addr.s_addr = dev->d_netmask;
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                  "Mask:%s\n", inet_ntoa(addr));
+                  "Mask:%s\n\n", inet_ntoa(addr));
 #endif
 
 #ifdef CONFIG_NET_IPv6
@@ -307,19 +312,42 @@ static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile)
       len += snprintf(&netfile->line[len], NET_LINELEN - len,
                       "\tinet6 addr:%s/%d\n", addrstr, preflen);
     }
+#endif
 
-  /* REVISIT: Show the IPv6 default router address */
+  return len;
+}
+
+/****************************************************************************
+ * Name: netprocfs_dripaddress
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+static int netprocfs_dripaddress(FAR struct netprocfs_file_s *netfile)
+{
+  FAR struct net_driver_s *dev;
+  char addrstr[INET6_ADDRSTRLEN];
+  uint8_t preflen;
+  int len = 0;
+
+  DEBUGASSERT(netfile != NULL && netfile->dev != NULL);
+  dev = netfile->dev;
+
+  /* Convert the 128 network mask to a human friendly prefix length */
+
+  preflen = net_ipv6_mask2pref(dev->d_ipv6netmask);
+
+
+  /* Show the IPv6 default router address */
 
   if (inet_ntop(AF_INET6, dev->d_ipv6draddr, addrstr, INET6_ADDRSTRLEN))
     {
       len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                      "\tinet6 DRaddr:%s/%d\n", addrstr, preflen);
+                      "\tinet6 DRaddr:%s/%d\n\n", addrstr, preflen);
     }
-#endif
 
-  len += snprintf(&netfile->line[len], NET_LINELEN - len, "\n");
   return len;
 }
+#endif
 
 /****************************************************************************
  * Name: netprocfs_rxstatistics_header
