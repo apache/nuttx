@@ -603,7 +603,7 @@ int ieee8021514_loopback(void)
 
   memset(priv, 0, sizeof(struct lo_driver_s));
 
-  dev = &priv->lo_ieee.i_dev;
+  dev            = &priv->lo_ieee.i_dev;
   dev->d_ifup    = lo_ifup;       /* I/F up (new IP address) callback */
   dev->d_ifdown  = lo_ifdown;     /* I/F down callback */
   dev->d_txavail = lo_txavail;    /* New TX data callback */
