@@ -918,11 +918,11 @@ struct ieee802154_maccb_s
   CODE void (*ind_syncloss)(FAR struct ieee802154_mac_s *mac, int reason);
 };
 
-struct ieee802154_radio_s; /* Forware reference */
+struct ieee802154_radio_s; /* Forward reference */
 
 struct ieee802154_mac_s
 {
-  struct ieee802154_radio_s *radio;
+  FAR struct ieee802154_radio_s *radio;
   struct ieee802154_macops_s ops;
   struct ieee802154_maccb_s  cbs;
 };
@@ -947,9 +947,9 @@ extern "C"
  *
  *   The returned MAC structure should be passed to either the next highest
  *   layer in the network stack, or registered with a mac802154dev character
- *   driver.  In either of these scenarios, the next highest layer should 
- *   register a set of callbacks with the MAC layer by setting the mac->cbs
- *   member.
+ *   or network drivers.  In any of these scenarios, the next highest layer
+ *   should  register a set of callbacks with the MAC layer by setting the
+ *   mac->cbs member.
  *
  *   NOTE: This API does not create any device accessible to userspace. If you
  *   want to call these APIs from userspace, you have to wrap your mac in a
@@ -975,7 +975,7 @@ FAR struct ieee802154_mac_s *
  *   user-space
  *
  * Input Parameters:
- *   mac - Pointer to the mac layer struct to be registerd.
+ *   mac - Pointer to the mac layer struct to be registered.
  *   minor - The device minor number.  The IEEE802.15.4 MAC character device
  *     will be registered as /dev/ieeeN where N is the minor number
  *
@@ -986,6 +986,24 @@ FAR struct ieee802154_mac_s *
  ****************************************************************************/
 
 int mac802154dev_register(FAR struct ieee802154_mac_s *mac, int minor);
+
+/****************************************************************************
+ * Name: mac802154netdev_register
+ *
+ * Description:
+ *   Register a network driver to access the IEEE 802.15.4 MAC layer from
+ *   a socket using 6loWPAN
+ *
+ * Input Parameters:
+ *   mac - Pointer to the mac layer struct to be registered.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned on success.  Otherwise a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int mac802154netdev_register(FAR struct ieee802154_mac_s *mac);
 
 #undef EXTERN
 #ifdef __cplusplus

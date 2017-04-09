@@ -518,9 +518,9 @@ static int mac802154_rsp_orphan(FAR struct ieee802154_mac_s *mac,
  *
  *   The returned MAC structure should be passed to either the next highest
  *   layer in the network stack, or registered with a mac802154dev character
- *   driver.  In either of these scenarios, the next highest layer should 
- *   register a set of callbacks with the MAC layer by setting the mac->cbs
- *   member.
+ *   or network drivers.  In any of these scenarios, the next highest layer
+ *   should  register a set of callbacks with the MAC layer by setting the
+ *   mac->cbs member.
  *
  *   NOTE: This API does not create any device accessible to userspace. If you
  *   want to call these APIs from userspace, you have to wrap your mac in a

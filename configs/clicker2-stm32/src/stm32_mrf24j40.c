@@ -264,20 +264,33 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
       wlerr("ERROR: Failed to initialize IEEE802.15.4 MAC\n");
       return -ENODEV;
     }
-#endif
 
-#if defined(CONFIG_IEEE802154_MAC_DEV)
-  /* If want to call these APIs from userspace, you have to wrap your mac
-   * in a character device via mac802154_device.c.
+#if defined(CONFIG_IEEE802154_NETDEV)
+  /* Use the IEEE802.15.4 MAC interface instance to create a 6loWPAN
+   * network interface by wrapping the MAC intrface instance in a
+   * network device driver via mac802154dev_register().
+   */
+
+  ret = mac802154netdev_register(mac);
+  if (ret < 0)
+    {
+      wlerr("ERROR: Failed to register the MAC network driver wpan%d: %d\n",
+            0, ret);
+      return ret;
+    }
+#elif defined(CONFIG_IEEE802154_MAC_DEV)
+  /* If want to call these APIs from userspace, you have to wrap the MAC
+   * interface in a character device viamac802154dev_register().
    */
 
   ret = mac802154dev_register(mac, 0);
   if (ret < 0)
     {
-      wlerr("ERROR: Failed to register the MAC character driver ieee%d: %d\n",
+      wlerr("ERROR: Failed to register the MAC character driver /dev/ieee%d: %d\n",
             0, ret);
       return ret;
     }
+#endif
 #elif defined(CONFIG_IEEE802154_DEV)
   /* Register a character driver to access the IEEE 802.15.4 radio from
    * user-space
@@ -290,7 +303,7 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
             RADIO_DEVNAME, ret);
       return ret;
     }
-#endif
+#endif /* CONFIG_IEEE802154_MAC */
 
   return OK;
 }

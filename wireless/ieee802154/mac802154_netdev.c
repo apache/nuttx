@@ -117,8 +117,8 @@ struct mac802154_driver_s
 {
   /* This holds the information visible to the NuttX network */
 
-  struct ieee802154_driver_s m8_dev;  /* Interface understood by the network */
-  struct ieee802154_mac_s m8_mac;     /* Interface understood by the MAC */
+  struct ieee802154_driver_s m8_dev;   /* Interface understood by the network */
+  FAR struct ieee802154_mac_s *m8_mac; /* Contained MAC interface */
 
   /* For internal use by this driver */
 
@@ -127,19 +127,6 @@ struct mac802154_driver_s
   WDOG_ID m8_txtimeout;        /* TX timeout timer */
   struct work_s m8_irqwork;    /* For deferring interupt work to the work queue */
   struct work_s m8_pollwork;   /* For deferring poll work to the work queue */
-};
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-struct ieee802154_radio_s; /* Forware reference */
-
-
-{
-  
-  struct ieee802154_macops_s ops;
-  struct ieee802154_maccb_s  cbs;
 };
 
 /****************************************************************************
@@ -1282,26 +1269,25 @@ static void mac802154_ipv6multicast(FAR struct mac802154_driver_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mac802154_initialize
+ * Name: mac802154netdev_register
  *
  * Description:
- *   Initialize the Ethernet controller and driver
+ *   Register a network driver to access the IEEE 802.15.4 MAC layer from
+ *   a socket using 6loWPAN
  *
- * Parameters:
- *   intf - In the case where there are multiple EMACs, this value
- *          identifies which EMAC is to be initialized.
+ * Input Parameters:
+ *   mac - Pointer to the mac layer struct to be registered.
  *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
+ * Returned Values:
+ *   Zero (OK) is returned on success.  Otherwise a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-int mac802154_initialize(FAR struct ieee802154_radio_s *radio)
+int mac802154netdev_register(FAR struct ieee802154_mac_s *mac);
 {
   FAR struct mac802154_driver_s *priv;
-  FAR struct ieee802154_driver_s *ieee;
+  FAR truct ieee802154_maccb_s *macb;
   FAR struct net_driver_s *dev;
   FAR uint8_t *pktbuf;
 
@@ -1332,9 +1318,7 @@ int mac802154_initialize(FAR struct ieee802154_radio_s *radio)
 
   /* Initialize the driver structure */
 
-  ieee               = &priv->m8_dev;
-  dev                = &ieee->i_dev;
-
+  dev                = &ieee->m8_dev.i_dev;
   dev->d_buf         = pktbuf;             /* Single packet buffer */
   dev->d_ifup        = mac802154_ifup;     /* I/F up (new IP address) callback */
   dev->d_ifdown      = mac802154_ifdown;   /* I/F down callback */
@@ -1347,10 +1331,36 @@ int mac802154_initialize(FAR struct ieee802154_radio_s *radio)
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  priv->m8_txpoll    = wd_create();       /* Create periodic poll timer */
+  priv->m8_mac       = mac;                /* Save the MAC interface instance */
+  priv->m8_txpoll    = wd_create();        /* Create periodic poll timer */
   priv->m8_txtimeout = wd_create();        /* Create TX timeout timer */
 
   DEBUGASSERT(priv->m8_txpoll != NULL && priv->m8_txtimeout != NULL);
+
+  /* Initialize the MAC callbacks */
+
+  maccb                    = &mac->cbs;
+  maccb->cb_context        = priv;
+  maccb->conf_data         = mac802154_conf_data;
+  maccb->conf_purge        = mac802154_conf_purge;
+  maccb->conf_associate    = mac802154_conf_associate;
+  maccb->conf_disassociate = mac802154_conf_disassociate;
+  maccb->conf_get          = mac802154_conf_get;
+  maccb->conf_gts          = mac802154_conf_gts;
+  maccb->conf_reset        = mac802154_conf_reset;
+  maccb->conf_rxenable     = mac802154_conf_rxenable;
+  maccb->conf_scan         = mac802154_conf_scan;
+  maccb->conf_set          = mac802154_conf_set;
+  maccb->conf_start        = mac802154_conf_start;
+  maccb->conf_poll         = mac802154_conf_poll;
+  maccb->ind_data          = mac802154_ind_data;
+  maccb->ind_associate     = mac802154_ind_associate;
+  maccb->ind_disassociate  = mac802154_ind_disassociate;
+  maccb->ind_beaconnotify  = mac802154_ind_beaconnotify;
+  maccb->ind_gts           = mac802154_ind_gts;
+  maccb->ind_orphan        = mac802154_ind_orphan;
+  maccb->ind_commstatus    = mac802154_ind_commstatus;
+  maccb->ind_syncloss      = mac802154_ind_syncloss;
 
   /* Put the interface in the down state. */
 
