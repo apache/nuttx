@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/photon/src/stm32_wlan.c
+ * config/photon/src/stm32_bringup.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -39,98 +39,94 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <sys/types.h>
+#include <syslog.h>
 
-#include <nuttx/wireless/ieee80211/bcmf_sdio.h>
-#include <nuttx/wireless/ieee80211/bcmf_board.h>
+#include <nuttx/input/buttons.h>
+#include <nuttx/leds/userled.h>
+#include <nuttx/board.h>
 
 #include <arch/board/board.h>
 
-#include "stm32_gpio.h"
-#include "stm32_sdio.h"
-
 #include "photon.h"
+#include "stm32_wdg.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bcmf_board_reset
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Called either by board_intialize() if CONFIG_BOARD_INITIALIZE or by
+ *   board_app_initialize if CONFIG_LIB_BOARDCTL is selected.  This function
+ *   initializes and configures all on-board features appropriate for the
+ *   selected configuration.
+ *
  ****************************************************************************/
 
-void bcmf_board_reset(int minor, bool reset)
+int stm32_bringup(void)
 {
-  if (minor != SDIO_WLAN0_MINOR)
-    {
-      return;
-    }
+  int ret = OK;
 
-  stm32_gpiowrite(GPIO_WLAN0_RESET, !reset);
-}
+#ifdef CONFIG_USERLED
+#ifdef CONFIG_USERLED_LOWER
+  /* Register the LED driver */
 
-/****************************************************************************
- * Name: bcmf_board_power
- ****************************************************************************/
-
-void bcmf_board_power(int minor, bool power)
-{
-  /* Power signal is not used on Photon board */
-}
-
-/****************************************************************************
- * Name: bcmf_board_initialize
- ****************************************************************************/
-
-void bcmf_board_initialize(int minor)
-{
-  if (minor != SDIO_WLAN0_MINOR)
-    {
-      return;
-    }
-
-  /* Configure reset pin */
-
-  stm32_configgpio(GPIO_WLAN0_RESET);
-
-  /* Put wlan chip in reset state */
-
-  bcmf_board_reset(minor, true);
-}
-
-/****************************************************************************
- * Name: photon_wlan_initialize
- ****************************************************************************/
-
-int photon_wlan_initialize()
-{
-  int ret;
-  struct sdio_dev_s *sdio_dev;
-
-  /* Initialize sdio interface */
-
-  wlinfo("Initializing SDIO slot %d\n", SDIO_WLAN0_SLOTNO);
-
-  sdio_dev = sdio_initialize(SDIO_WLAN0_SLOTNO);
-
-  if (!sdio_dev)
-    {
-      wlerr("ERROR: Failed to initialize SDIO with slot %d\n",
-             SDIO_WLAN0_SLOTNO);
-      return ERROR;
-    }
-
-  /* Bind the SDIO interface to the bcmf driver */
-
-  ret = bcmf_sdio_initialize(SDIO_WLAN0_MINOR, sdio_dev);
-
+  ret = userled_lower_initialize("/dev/userleds");
   if (ret != OK)
     {
-      wlerr("ERROR: Failed to bind SDIO to bcmf driver\n");
-
-      /* FIXME deinitialize sdio device */
-      return ERROR;
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+      return ret;
     }
+#else
+  board_userled_initialize();
+#endif /* CONFIG_USERLED_LOWER */
+#endif /* CONFIG_USERLED */
 
-  return OK;
+#ifdef CONFIG_BUTTONS
+#ifdef CONFIG_BUTTONS_LOWER
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+      return ret;
+    }
+#else
+  board_button_initialize();
+#endif /* CONFIG_BUTTONS_LOWER */
+#endif /* CONFIG_BUTTONS */
+
+#ifdef CONFIG_STM32_IWDG
+  stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
+#endif
+
+#ifdef CONFIG_PHOTON_WDG
+
+  /* Start WDG kicker thread */
+
+  ret = photon_watchdog_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "Failed to start watchdog thread: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_PHOTON_WLAN
+
+  /* Initialize wlan driver and hardware */
+
+  ret = photon_wlan_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "Failed to initialize wlan: %d\n", ret);
+      return ret;
+    }
+#endif
+
+  return ret;
 }
