@@ -59,7 +59,7 @@ void board_button_initialize(void)
  * Name: board_buttons
  ****************************************************************************/
 
-uint8_t board_buttons(void)
+uint32_t board_buttons(void)
 {
 #warning Missing logic
   return 0;

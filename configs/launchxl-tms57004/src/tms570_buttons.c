@@ -159,7 +159,7 @@ void board_button_initialize(void)
  *
  ****************************************************************************/
 
-uint8_t board_buttons(void)
+uint32_t board_buttons(void)
 {
   return tms570_gioread(GIO_BUTTON) ? BUTTON_GIOA7_BIT : 0;
 }

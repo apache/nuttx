@@ -88,7 +88,7 @@ void board_button_initialize(void)
  *
  ****************************************************************************/
 
-uint8_t board_buttons(void)
+uint32_t board_buttons(void)
 {
   /* Check the state of the USER button.  A LOW value means that the key is
    * pressed.

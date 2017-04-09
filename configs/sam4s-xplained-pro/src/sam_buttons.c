@@ -86,7 +86,7 @@ void board_button_initialize(void)
  *
  ****************************************************************************/
 
-uint8_t board_buttons(void)
+uint32_t board_buttons(void)
 {
   return sam_gpioread(GPIO_SW0) ? 0 : BUTTON_SW0_BIT;
 }

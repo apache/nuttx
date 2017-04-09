@@ -112,9 +112,9 @@ void board_button_initialize(void)
  * Name: board_buttons
  ****************************************************************************/
 
-uint8_t board_buttons(void)
+uint32_t board_buttons(void)
 {
-  uint8_t ret    = 0;
+  uint32_t ret = 0;
 
   if ((getreg16(STR71X_GPIO0_PD) & STR71X_WAKEUPBUTTON_GPIO0) != 0)
     {

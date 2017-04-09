@@ -77,7 +77,7 @@ void board_button_initialize(void)
  * Name: board_buttons
  ****************************************************************************/
 
-uint8_t board_buttons(void)
+uint32_t board_buttons(void)
 {
   return stm32_gpioread(GPIO_BTN_USER) ? 1 : 0;
 }

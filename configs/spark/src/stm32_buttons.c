@@ -80,7 +80,7 @@ void board_button_initialize(void)
  * N.B The return state in true logic, the button polarity is dealt here in
  ****************************************************************************/
 
-uint8_t board_buttons(void)
+uint32_t board_buttons(void)
 {
   return stm32_gpioread(GPIO_BTN)==0 ? BUTTON_USER_BIT : 0;
 }
