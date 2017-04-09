@@ -1,8 +1,8 @@
 /****************************************************************************
- * configs/photon/src/stm32_wlan.c
+ * configs/photon/src/stm32_autoleds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Simon Piriou <spiriou31@gmail.com>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,104 +33,84 @@
  *
  ****************************************************************************/
 
+/* LEDs
+ *
+ * A single LED is available driven by PA13.
+ *
+ * These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+ * defined.  In that case, the usage by the board port is defined in
+ * include/board.h and src/sam_autoleds.c. The LEDs are used to encode
+ * OS-related events as follows:
+ *
+ *   ------------------- ----------------------- ------
+ *   SYMBOL              Meaning                 LED
+ *   ------------------- ----------------------- ------
+ *   LED_STARTED         NuttX has been started  OFF
+ *   LED_HEAPALLOCATE    Heap has been allocated OFF
+ *   LED_IRQSENABLED     Interrupts enabled      OFF
+ *   LED_STACKCREATED    Idle stack created      ON
+ *   LED_INIRQ           In an interrupt         N/C
+ *   LED_SIGNAL          In a signal handler     N/C
+ *   LED_ASSERTION       An assertion failed     N/C
+ *   LED_PANIC           The system has crashed  FLASH
+ *
+ * Thus is LED is statically on, NuttX has successfully  booted and is,
+ * apparently, running normally.  If LED is flashing at approximately
+ * 2Hz, then a fatal error has been detected and the system has halted.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <debug.h>
 
-#include <nuttx/wireless/ieee80211/bcmf_sdio.h>
-#include <nuttx/wireless/ieee80211/bcmf_board.h>
-
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "stm32_gpio.h"
-#include "stm32_sdio.h"
-
 #include "photon.h"
+
+#ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bcmf_board_reset
+ * Name: board_autoled_initialize
  ****************************************************************************/
 
-void bcmf_board_reset(int minor, bool reset)
+void board_autoled_initialize(void)
 {
-  if (minor != SDIO_WLAN0_MINOR)
-    {
-      return;
-    }
+  /* Configure Photon LED gpio as output */
 
-  stm32_gpiowrite(GPIO_WLAN0_RESET, !reset);
+  stm32_configgpio(GPIO_LED1);
 }
 
 /****************************************************************************
- * Name: bcmf_board_power
+ * Name: board_autoled_on
  ****************************************************************************/
 
-void bcmf_board_power(int minor, bool power)
+void board_autoled_on(int led)
 {
-  /* Power signal is not used on Photon board */
+  if (led == 1 || led == 3)
+    {
+      stm32_gpiowrite(GPIO_LED1, true);
+    }
 }
 
 /****************************************************************************
- * Name: bcmf_board_initialize
+ * Name: board_autoled_off
  ****************************************************************************/
 
-void bcmf_board_initialize(int minor)
+void board_autoled_off(int led)
 {
-  if (minor != SDIO_WLAN0_MINOR)
+  if (led == 3)
     {
-      return;
+      stm32_gpiowrite(GPIO_LED1, false);
     }
-
-  /* Configure reset pin */
-
-  stm32_configgpio(GPIO_WLAN0_RESET);
-
-  /* Put wlan chip in reset state */
-
-  bcmf_board_reset(minor, true);
 }
 
-/****************************************************************************
- * Name: photon_wlan_initialize
- ****************************************************************************/
-
-int photon_wlan_initialize()
-{
-  int ret;
-  struct sdio_dev_s *sdio_dev;
-
-  /* Initialize sdio interface */
-
-  wlinfo("Initializing SDIO slot %d\n", SDIO_WLAN0_SLOTNO);
-
-  sdio_dev = sdio_initialize(SDIO_WLAN0_SLOTNO);
-
-  if (!sdio_dev)
-    {
-      wlerr("ERROR: Failed to initialize SDIO with slot %d\n",
-             SDIO_WLAN0_SLOTNO);
-      return ERROR;
-    }
-
-  /* Bind the SDIO interface to the bcmf driver */
-
-  ret = bcmf_sdio_initialize(SDIO_WLAN0_MINOR, sdio_dev);
-
-  if (ret != OK)
-    {
-      wlerr("ERROR: Failed to bind SDIO to bcmf driver\n");
-
-      /* FIXME deinitialize sdio device */
-      return ERROR;
-    }
-
-  return OK;
-}
+#endif /* CONFIG_ARCH_LEDS */

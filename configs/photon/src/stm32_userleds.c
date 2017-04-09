@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/photon/src/stm32_leds.c
+ * configs/photon/src/stm32_userleds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -45,6 +45,8 @@
 
 #include "stm32_gpio.h"
 
+#ifndef CONFIG_ARCH_LEDS
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -80,3 +82,5 @@ void board_userled_all(uint8_t ledset)
 {
   stm32_gpiowrite(GPIO_LED1, !!(ledset & BOARD_LED1_BIT));
 }
+
+#endif /* !CONFIG_ARCH_LEDS */
