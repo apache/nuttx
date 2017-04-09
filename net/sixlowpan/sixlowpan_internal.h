@@ -92,7 +92,7 @@
 #define PACKETBUF_ATTR_PACKET_TYPE_STREAM_END 3
 #define PACKETBUF_ATTR_PACKET_TYPE_TIMESTAMP  4
 
-/* Packet buffer attributes (indices into i_pktattr) */
+/* Packet buffer attributes (indices into g_pktattrs) */
 
 #define PACKETBUF_ATTR_NONE                   0
 
@@ -130,7 +130,7 @@
 
 #define PACKETBUF_NUM_ATTRS                   24
 
-/* Addresses (indices into i_pktaddr) */
+/* Addresses (indices into g_pktaddrs) */
 
 #define PACKETBUF_ADDR_SENDER                 0
 #define PACKETBUF_ADDR_RECEIVER               1

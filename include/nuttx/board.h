@@ -593,7 +593,7 @@ void board_button_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_BUTTONS
-uint8_t board_buttons(void);
+uint32_t board_buttons(void);
 #endif
 
 /****************************************************************************

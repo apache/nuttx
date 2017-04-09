@@ -135,9 +135,9 @@ void board_button_initialize(void)
  *
  ****************************************************************************/
 
-uint8_t board_buttons(void)
+uint32_t board_buttons(void)
 {
-  uint8_t retval;
+  uint32_t retval;
 
   retval  = sam_gpioread(GPIO_SCROLLUP)  ? 0 : BUTTON_SCROLLUP;
   retval |= sam_gpioread(GPIO_SCROLLDWN) ? 0 : BUTTON_SCROLLDOWN;

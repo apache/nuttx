@@ -100,7 +100,7 @@ void board_button_initialize(void)
  *
  ****************************************************************************/
 
-uint8_t board_buttons(void)
+uint32_t board_buttons(void)
 {
   return sam_pioread(PIO_USER1) ? 0 : BUTTON_USER1_BIT;
 }

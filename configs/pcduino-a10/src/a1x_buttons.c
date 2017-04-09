@@ -84,7 +84,7 @@ void board_button_initialize(void)
  *
  ****************************************************************************/
 
-uint8_t board_buttons(void)
+uint32_t board_buttons(void)
 {
 # warning Missing logic
 }
