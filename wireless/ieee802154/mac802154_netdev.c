@@ -109,8 +109,8 @@
  * Private Types
  ****************************************************************************/
 
-/* The mac802154_driver_s encapsulates all state information for a single hardware
- * interface
+/* The mac802154_driver_s encapsulates all state information for a single
+ * IEEE802.15.4 MAC interface.
  */
 
 struct mac802154_driver_s
@@ -251,6 +251,10 @@ static void mac802154_ipv6multicast(FAR struct mac802154_driver_s *priv);
 static void mac802154_conf_data(FAR struct ieee802154_mac_s *mac,
                                 FAR struct ieee802154_data_conf_s *conf)
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
@@ -264,6 +268,10 @@ static void mac802154_conf_data(FAR struct ieee802154_mac_s *mac,
 static void mac802154_conf_purge(FAR struct ieee802154_mac_s *mac,
                                  uint8_t handle, int status)
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
@@ -277,6 +285,10 @@ static void mac802154_conf_purge(FAR struct ieee802154_mac_s *mac,
 static void mac802154_conf_associate(FAR struct ieee802154_mac_s *mac,
                                      uint16_t saddr, int status)
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
@@ -289,6 +301,10 @@ static void mac802154_conf_associate(FAR struct ieee802154_mac_s *mac,
 
 static void mac802154_conf_disassociate(FAR struct ieee802154_mac_s *mac,
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
@@ -303,6 +319,10 @@ static void mac802154_conf_get(FAR struct ieee802154_mac_s *mac, int status,
                                int attribute, FAR uint8_t *value,
                                int valuelen)
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
@@ -316,6 +336,10 @@ static void mac802154_conf_get(FAR struct ieee802154_mac_s *mac, int status,
 static void mac802154_conf_gts(FAR struct ieee802154_mac_s *mac,
                                FAR uint8_t *characteristics, int status)
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
@@ -329,6 +353,10 @@ static void mac802154_conf_gts(FAR struct ieee802154_mac_s *mac,
 static void mac802154_conf_reset(FAR struct ieee802154_mac_s *mac,
                                  int status)
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
@@ -341,6 +369,10 @@ static void mac802154_conf_reset(FAR struct ieee802154_mac_s *mac,
 static void mac802154_conf_rxenable(FAR struct ieee802154_mac_s *mac,
                                     int status)
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
@@ -355,6 +387,10 @@ static void mac802154_conf_scan(FAR struct ieee802154_mac_s *mac,
                                 uint32_t unscanned, int rsltsize,
                                 FAR uint8_t *edlist, FAR uint8_t *pandescs)
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
@@ -367,6 +403,10 @@ static void mac802154_conf_scan(FAR struct ieee802154_mac_s *mac,
 static void mac802154_conf_set(FAR struct ieee802154_mac_s *mac, int status,
                                int attribute)
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
@@ -379,6 +419,10 @@ static void mac802154_conf_set(FAR struct ieee802154_mac_s *mac, int status,
 static void mac802154_conf_start(FAR struct ieee802154_mac_s *mac,
                                 int status)
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
@@ -391,6 +435,10 @@ static void mac802154_conf_start(FAR struct ieee802154_mac_s *mac,
 static void mac802154_conf_poll(FAR struct ieee802154_mac_s *mac,
                                 int status)
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
@@ -404,6 +452,10 @@ static void mac802154_conf_poll(FAR struct ieee802154_mac_s *mac,
 static void mac802154_ind_data(FAR struct ieee802154_mac_s *mac,
                                FAR uint8_t *buf, int len)
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
@@ -418,6 +470,10 @@ static void mac802154_ind_associate(FAR struct ieee802154_mac_s *mac,
                                     uint16_t clipanid,
                                     FAR uint8_t *clieaddr)
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
@@ -431,6 +487,10 @@ static void mac802154_ind_associate(FAR struct ieee802154_mac_s *mac,
 static void mac802154_ind_disassociate(FAR struct ieee802154_mac_s *mac,
                                        FAR uint8_t *eadr, uint8_t reason)
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
@@ -446,6 +506,10 @@ static void mac802154_ind_beaconnotify(FAR struct ieee802154_mac_s *mac,
                                        FAR struct ieee802154_pan_desc_s *pandesc,
                                        FAR uint8_t *sdu, int sdulen)
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
@@ -460,6 +524,10 @@ static void mac802154_ind_gts(FAR struct ieee802154_mac_s *mac,
                               FAR uint8_t *devaddr,
                               FAR uint8_t *characteristics)
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
@@ -473,6 +541,10 @@ static void mac802154_ind_gts(FAR struct ieee802154_mac_s *mac,
 static void mac802154_ind_orphan(FAR struct ieee802154_mac_s *mac,
                                  FAR uint8_t *orphanaddr)
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
@@ -486,6 +558,10 @@ static void mac802154_ind_commstatus(FAR struct ieee802154_mac_s *mac,
                                      uint16_t panid, FAR uint8_t *src,
                                      FAR uint8_t *dst, int status)
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
@@ -498,6 +574,10 @@ static void mac802154_ind_commstatus(FAR struct ieee802154_mac_s *mac,
 static void mac802154_ind_syncloss(FAR struct ieee802154_mac_s *mac,
                                    int reason)
 {
+  FAR struct mac802154_driver_s *priv;
+
+  DEBUGASSERT(mac != NULL && mac->cb_context);
+  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
 }
 
 /****************************************************************************
