@@ -145,12 +145,6 @@ int pthread_cancel(pthread_t thread)
       pthread_exit(PTHREAD_CANCELED);
     }
 
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-  /* Recover any mutexes still held by the canceled thread */
-
-  pthread_mutex_inconsistent(tcb);
-#endif
-
 #ifdef CONFIG_PTHREAD_CLEANUP
   /* Perform any stack pthread clean-up callbacks.
    *
@@ -167,6 +161,12 @@ int pthread_cancel(pthread_t thread)
   /* Complete pending join operations */
 
   (void)pthread_completejoin((pid_t)thread, PTHREAD_CANCELED);
+
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+  /* Recover any mutexes still held by the canceled thread */
+
+  pthread_mutex_inconsistent(tcb);
+#endif
 
   /* Then let task_terminate do the real work */
 

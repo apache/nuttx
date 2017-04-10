@@ -125,10 +125,12 @@ int pthread_mutex_take(FAR struct pthread_mutex_s *mutex, bool intr)
         }
       else
         {
-          /* Take semaphore underlying the mutex */
+          /* Take semaphore underlying the mutex.  pthread_takesemaphore
+           * returns zero on success and a positive errno value on failue.
+           */
 
           ret = pthread_takesemaphore(&mutex->sem, intr);
-          if (ret < OK)
+          if (ret != OK)
             {
               ret = get_errno();
             }
