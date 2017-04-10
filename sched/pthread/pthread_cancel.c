@@ -150,9 +150,9 @@ int pthread_cancel(pthread_t thread)
    *
    * REVISIT: In this case, the clean-up callback will execute on the
    * thread of the caller of pthread cancel, not on the thread of
-   * the thread-to-be-canceled.  Is that an issue?  Presumably they
-   * are both within the same group and within the same process address
-   * space.
+   * the thread-to-be-canceled.  This is a problem when deferred
+   * cancellation is not supported because, for example, the clean-up
+   * function will be unable to unlock its own mutexes.
    */
 
   pthread_cleanup_popall(tcb);

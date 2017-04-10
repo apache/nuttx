@@ -203,6 +203,22 @@
 
 #define IW_ESSID_MAX_SIZE   32
 
+/* Modes of operation */
+
+#define IW_MODE_AUTO        0    /* Let the driver decides */
+#define IW_MODE_ADHOC       1    /* Single cell network */
+#define IW_MODE_INFRA       2    /* Multi cell network, roaming, ... */
+#define IW_MODE_MASTER      3    /* Synchronisation master or Access Point */
+#define IW_MODE_REPEAT      4    /* Wireless Repeater (forwarder) */
+#define IW_MODE_SECOND      5    /* Secondary master/repeater (backup) */
+#define IW_MODE_MONITOR     6    /* Passive monitor (listen only) */
+#define IW_MODE_MESH        7    /* Mesh (IEEE 802.11s) network */
+
+/* Frequency flags */
+
+#define IW_FREQ_AUTO        0x00 /* Let the driver decides */
+#define IW_FREQ_FIXED       0x01 /* Force a specific value */
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -303,8 +319,8 @@ union iwreq_data
 
 struct iwreq
 {
-  char ifrn_name[IFNAMSIZ];    /* Interface name, e.g. "eth0" */
-  union iwreq_data u;          /* Data payload */
+  char ifrn_name[IFNAMSIZ]; /* Interface name, e.g. "eth0" */
+  union iwreq_data u;       /* Data payload */
 };
 
 #endif /* CONFIG_DRIVERS_WIRELESS */
