@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated March 26, 2017)
+NuttX TODO List (Last updated April 10, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -108,9 +108,10 @@ o Task/Scheduler (sched/)
                2. They run in supervisor mode (if applicable), and
                3. They do not obey any setup of PIC or address
                   environments. Do they need to?
-               4. In the case of task_delete() and pthread_cancel(), these
-                  callbacks will run on the thread of execution and address
-                  context of the caller of task.  That is very bad!
+               4. In the case of task_delete() and pthread_cancel() without
+                  defferred cancellation, these callbacks will run on the
+                  thread of execution and address context of the caller of
+                  task_delete() or pthread_cancel().  That is very bad!
 
                The fix for all of these issues it to have the callbacks
                run on the caller's thread as is currently done with

@@ -44,6 +44,8 @@
 
 #include "chip.h"
 
+#ifdef CONFIG_STM32_COMP
+
 #if defined(CONFIG_STM32_STM32F30XX)
 #  error "COMP support for STM32F30XX not implemented yet"
 #elif defined(CONFIG_STM32_STM32F33XX)
@@ -211,4 +213,5 @@ FAR struct comp_dev_s* stm32_compinitialize(int intf);
 #endif
 #endif /* __ASSEMBLY__ */
 
+#endif /* CONFIG_STM23_COMP */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_COMP_H */

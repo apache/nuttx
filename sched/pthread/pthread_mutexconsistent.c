@@ -104,13 +104,14 @@ int pthread_mutex_consistent(FAR pthread_mutex_t *mutex)
       DEBUGASSERT(mutex->pid != 0); /* < 0: available, >0 owned, ==0 error */
       if (mutex->pid >= 0)
         {
-          /* No.. Verify that the PID still exists.  We may be destroying
-           * the mutex after cancelling a pthread and the mutex may have
-           * been in a bad state owned by the dead pthread.  NOTE: The
-           * folling is unspecified behavior (see pthread_mutex_consistent()).
+          /* No.. Verify that the thread associated with the PID still
+           * exists.  We may be destroying the mutex after cancelling a
+           * pthread and the mutex may have been in a bad state owned by
+           * the dead pthread.  NOTE: The following is unspecified behavior
+           * (see pthread_mutex_consistent()).
            *
            * If the holding thread is still valid, then we should be able to
-           * map its PID to the underlying TCB. That is what sched_gettcb()
+           * map its PID to the underlying TCB.  That is what sched_gettcb()
            * does.
            */
 
@@ -130,6 +131,21 @@ int pthread_mutex_consistent(FAR pthread_mutex_t *mutex)
               status = sem_reset((FAR sem_t *)&mutex->sem, 1);
               ret = (status != OK) ? get_errno() : OK;
             }
+
+          /* Otherwise the mutex is held by some active thread.  Let's not
+           * touch anything!
+           */
+        }
+      else
+        {
+          /* There is no holder of the mutex.  Just make sure the
+           * inconsistent flag is cleared and the number of locks is zero.
+           */
+
+          mutex->flags &= _PTHREAD_MFLAGS_ROBUST;
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
+          mutex->nlocks = 0;
+#endif
         }
 
       sched_unlock();

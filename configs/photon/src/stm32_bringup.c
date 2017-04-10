@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/mount.h>
 #include <syslog.h>
 
 #include <nuttx/input/buttons.h>
@@ -70,7 +71,17 @@ int stm32_bringup(void)
 {
   int ret = OK;
 
-#ifdef CONFIG_USERLED
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_USERLED) && !defined(CONFIG_ARCH_LEDS)
 #ifdef CONFIG_USERLED_LOWER
   /* Register the LED driver */
 
@@ -81,9 +92,11 @@ int stm32_bringup(void)
       return ret;
     }
 #else
+  /* Enable USER LED support for some other purpose */
+
   board_userled_initialize();
 #endif /* CONFIG_USERLED_LOWER */
-#endif /* CONFIG_USERLED */
+#endif /* CONFIG_USERLED && !CONFIG_ARCH_LEDS */
 
 #ifdef CONFIG_BUTTONS
 #ifdef CONFIG_BUTTONS_LOWER
@@ -96,16 +109,19 @@ int stm32_bringup(void)
       return ret;
     }
 #else
+  /* Enable BUTTON support for some other purpose */
+
   board_button_initialize();
 #endif /* CONFIG_BUTTONS_LOWER */
 #endif /* CONFIG_BUTTONS */
 
 #ifdef CONFIG_STM32_IWDG
+  /* Initialize the watchdog timer */
+
   stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
 #endif
 
 #ifdef CONFIG_PHOTON_WDG
-
   /* Start WDG kicker thread */
 
   ret = photon_watchdog_initialize();
@@ -117,7 +133,6 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_PHOTON_WLAN
-
   /* Initialize wlan driver and hardware */
 
   ret = photon_wlan_initialize();
