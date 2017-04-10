@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/pthread/pthread_rwlockwrite.c
+ * libc/pthread/pthread_rwlock_wrlock.c
  *
  *   Copyright (C) 2017 Mark Schulte. All rights reserved.
  *   Author: Mark Schulte <mark@mjs.pw>
@@ -47,14 +47,28 @@
 #include <nuttx/semaphore.h>
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_PTHREAD_CLEANUP
+static void wrlock_cleanup(FAR void *arg)
+{
+  FAR pthread_rwlock_t *rw_lock = (FAR pthread_rwlock_t *)arg;
+
+  rw_lock->num_writers--;
+  pthread_mutex_unlock(&rw_lock->lock);
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_rwlock_rdlock
+ * Name: pthread_rwlock_wrlock
  *
  * Description:
- *   Locks a read/write lock for reading
+ *   Locks a read/write lock for writing
  *
  * Parameters:
  *   None
@@ -106,6 +120,9 @@ int pthread_rwlock_timedwrlock(FAR pthread_rwlock_t *rw_lock,
 
   rw_lock->num_writers++;
 
+#ifdef CONFIG_PTHREAD_CLEANUP
+  pthread_cleanup_push(&wrlock_cleanup, rw_lock);
+#endif
   while (rw_lock->write_in_progress || rw_lock->num_readers > 0)
     {
       if (ts != NULL)
@@ -122,12 +139,14 @@ int pthread_rwlock_timedwrlock(FAR pthread_rwlock_t *rw_lock,
           break;
         }
     }
+#ifdef CONFIG_PTHREAD_CLEANUP
+  pthread_cleanup_pop(0);
+#endif
 
   if (err == 0)
     {
       rw_lock->write_in_progress = true;
     }
-
   else
     {
       /* In case of error, notify any blocked readers. */
