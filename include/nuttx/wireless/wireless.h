@@ -313,13 +313,22 @@ union iwreq_data
   struct iw_point data;     /* Other large parameters */
 };
  
+/* A Wireless Event. */
+
+struct iw_event
+{
+  uint16_t           len;   /* Real length of ata */
+  uint16_t           cmd;   /* Wireless IOCTL command*/
+  union iwreq_data   u;     /* Fixed IOCTL payload */
+};
+
 /* This is the structure used to exchange data in wireless IOCTLs.  This structure
  * is the same as 'struct ifreq', but defined for use with wireless IOCTLs.
  */
 
 struct iwreq
 {
-  char ifrn_name[IFNAMSIZ]; /* Interface name, e.g. "eth0" */
+  char ifr_name[IFNAMSIZ];  /* Interface name, e.g. "eth0" */
   union iwreq_data u;       /* Data payload */
 };
 
