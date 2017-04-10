@@ -55,7 +55,18 @@ static void rdlock_cleanup(FAR void *arg)
 {
   FAR pthread_rwlock_t *rw_lock = (FAR pthread_rwlock_t *)arg;
 
-  pthread_mutex_unlock(&rw_lock->lock);
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+  /* Check if this is a robust mutex in an inconsistent state */
+
+  if ((rw_lock->lock.flags & _PTHREAD_MFLAGS_INCONSISTENT) != 0)
+    {
+      (void)pthread_mutex_consistent(&rw_lock->lock);
+    }
+  else
+#endif
+    {
+      (void)pthread_mutex_unlock(&rw_lock->lock);
+    }
 }
 #endif
 
