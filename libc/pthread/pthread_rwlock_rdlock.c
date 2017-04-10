@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/pthread/pthread_rwlockread.c
+ * libc/pthread/pthread_rwlock_rdlock.c
  *
  *   Copyright (C) 2017 Mark Schulte. All rights reserved.
  *   Author: Mark Schulte <mark@mjs.pw>
@@ -49,6 +49,26 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_PTHREAD_CLEANUP
+static void rdlock_cleanup(FAR void *arg)
+{
+  FAR pthread_rwlock_t *rw_lock = (FAR pthread_rwlock_t *)arg;
+
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+  /* Check if this is a robust mutex in an inconsistent state */
+
+  if ((rw_lock->lock.flags & _PTHREAD_MFLAGS_INCONSISTENT) != 0)
+    {
+      (void)pthread_mutex_consistent(&rw_lock->lock);
+    }
+  else
+#endif
+    {
+      (void)pthread_mutex_unlock(&rw_lock->lock);
+    }
+}
+#endif
 
 static int tryrdlock(FAR pthread_rwlock_t *rw_lock)
 {
@@ -116,6 +136,9 @@ int pthread_rwlock_timedrdlock(FAR pthread_rwlock_t *rw_lock,
       return err;
     }
 
+#ifdef CONFIG_PTHREAD_CLEANUP
+  pthread_cleanup_push(&rdlock_cleanup, rw_lock);
+#endif
   while ((err = tryrdlock(rw_lock)) == EBUSY)
     {
       if (ts != NULL)
@@ -132,6 +155,9 @@ int pthread_rwlock_timedrdlock(FAR pthread_rwlock_t *rw_lock,
           break;
         }
     }
+#ifdef CONFIG_PTHREAD_CLEANUP
+  pthread_cleanup_pop(0);
+#endif
 
   pthread_mutex_unlock(&rw_lock->lock);
   return err;
