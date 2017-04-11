@@ -95,8 +95,8 @@ static void pthread_mutex_add(FAR struct pthread_mutex_s *mutex)
  *   mutex to the list of mutexes held by this thread.
  *
  * Parameters:
- *  mutex - The mux to be locked
- *  intr  - false: ignore EINTR errors when locking; true tread EINTR as
+ *  mutex - The mutex to be locked
+ *  intr  - false: ignore EINTR errors when locking; true treat EINTR as
  *          other errors by returning the errno value
  *
  * Return Value:
@@ -126,15 +126,11 @@ int pthread_mutex_take(FAR struct pthread_mutex_s *mutex, bool intr)
       else
         {
           /* Take semaphore underlying the mutex.  pthread_takesemaphore
-           * returns zero on success and a positive errno value on failue.
+           * returns zero on success and a positive errno value on failure.
            */
 
           ret = pthread_takesemaphore(&mutex->sem, intr);
-          if (ret != OK)
-            {
-              ret = get_errno();
-            }
-          else
+          if (ret == OK)
             {
               /* Check if the holder of the mutex has terminated without
                * releasing.  In that case, the state of the mutex is
@@ -169,8 +165,8 @@ int pthread_mutex_take(FAR struct pthread_mutex_s *mutex, bool intr)
  *   mutex to the list of mutexes held by this thread.
  *
  * Parameters:
- *  mutex - The mux to be locked
- *  intr  - false: ignore EINTR errors when locking; true tread EINTR as
+ *  mutex - The mutex to be locked
+ *  intr  - false: ignore EINTR errors when locking; true treat EINTR as
  *          other errors by returning the errno value
  *
  * Return Value:
@@ -283,3 +279,70 @@ int pthread_mutex_give(FAR struct pthread_mutex_s *mutex)
   return ret;
 }
 
+/****************************************************************************
+ * Name: pthread_disable_cancel() and pthread_enable_cancel()
+ *
+ * Description:
+ *   Temporarily disable cancellation and return old cancel state, which
+ *   can later be restored.  This is useful when a cancellation point
+ *   function is called from within the OS by a non-cancellation point:
+ *   In certain such cases, we need to defer the cancellation to prevent
+ *   bad things from happening.
+ *
+ * Parameters:
+ *   saved cancel flags for pthread_enable_cancel()
+ *
+ * Return Value:
+ *   old cancel flags for pthread_disable_cancel()
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CANCELLATION_POINTS
+uint16_t pthread_disable_cancel(void)
+{
+   FAR struct pthread_tcb_s *tcb = (FAR struct pthread_tcb_s *)this_task();
+   irqstate_t flags;
+   uint16_t old;
+
+   /* We need perform the following operations from within a critical section
+    * because it can compete with interrupt level activity.
+    */
+
+   flags = enter_critical_section();
+   old = tcb->cmn.flags & (TCB_FLAG_CANCEL_PENDING | TCB_FLAG_NONCANCELABLE);
+   tcb->cmn.flags &= ~(TCB_FLAG_CANCEL_PENDING | TCB_FLAG_NONCANCELABLE);
+   leave_critical_section(flags);
+   return old;
+}
+
+void pthread_enable_cancel(uint16_t cancelflags)
+{
+   FAR struct pthread_tcb_s *tcb = (FAR struct pthread_tcb_s *)this_task();
+   irqstate_t flags;
+
+   /* We need perform the following operations from within a critical section
+    * because it can compete with interrupt level activity.
+    */
+
+   flags = enter_critical_section();
+   tcb->cmn.flags |= cancelflags;
+
+   /* What should we do if there is a pending cancellation?
+    *
+    * If the thread is executing with deferred cancellation, we need do
+    * nothing more; the cancellation cannot occur until the next
+    * cancellation point.
+    *
+    * However, if the thread is executing in asynchronous cancellation mode,
+    * then we need to terminate now by simply calling pthread_exit().
+    */
+
+   if ((tcb->cmn.flags & TCB_FLAG_CANCEL_DEFERRED) == 0 &&
+       (tcb->cmn.flags & TCB_FLAG_CANCEL_PENDING) != 0)
+     {
+       pthread_exit(NULL);
+     }
+
+   leave_critical_section(flags);
+}
+#endif /* CONFIG_CANCELLATION_POINTS */
