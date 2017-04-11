@@ -213,11 +213,17 @@
 #define IW_MODE_SECOND      5    /* Secondary master/repeater (backup) */
 #define IW_MODE_MONITOR     6    /* Passive monitor (listen only) */
 #define IW_MODE_MESH        7    /* Mesh (IEEE 802.11s) network */
+#define IW_MODE_NFLAGS      8
 
 /* Frequency flags */
 
 #define IW_FREQ_AUTO        0x00 /* Let the driver decides */
 #define IW_FREQ_FIXED       0x01 /* Force a specific value */
+#define IW_FREQ_NFLAGS      2
+
+/* Scan-related */
+
+#define IW_SCAN_MAX_DATA    4096 /* Maximum size of returned data */
 
 /************************************************************************************
  * Public Types
