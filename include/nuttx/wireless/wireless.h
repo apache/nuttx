@@ -217,9 +217,18 @@
 
 /* Frequency flags */
 
-#define IW_FREQ_AUTO        0x00 /* Let the driver decides */
-#define IW_FREQ_FIXED       0x01 /* Force a specific value */
+#define IW_FREQ_AUTO        0    /* Let the driver decides */
+#define IW_FREQ_FIXED       1    /* Force a specific value */
 #define IW_FREQ_NFLAGS      2
+
+#define IW_MAX_FREQUENCIES  32   /* Max. frequencies in struct iw_range */
+
+/* Transmit Power flags available */
+
+#define IW_TXPOW_DBM        0  /* Value is in dBm */
+#define IW_TXPOW_MWATT      1  /* Value is in mW */
+#define IW_TXPOW_RELATIVE   2  /* Value is in arbitrary units */
+#define IW_TXPOW_NFLAGS     3
 
 /* Scan-related */
 
@@ -318,15 +327,6 @@ union iwreq_data
   struct iw_param param;    /* Other small parameters */
   struct iw_point data;     /* Other large parameters */
 };
- 
-/* A Wireless Event. */
-
-struct iw_event
-{
-  uint16_t           len;   /* Real length of ata */
-  uint16_t           cmd;   /* Wireless IOCTL command*/
-  union iwreq_data   u;     /* Fixed IOCTL payload */
-};
 
 /* This is the structure used to exchange data in wireless IOCTLs.  This structure
  * is the same as 'struct ifreq', but defined for use with wireless IOCTLs.
@@ -336,6 +336,23 @@ struct iwreq
 {
   char ifr_name[IFNAMSIZ];  /* Interface name, e.g. "eth0" */
   union iwreq_data u;       /* Data payload */
+};
+
+/* Range of parameters (currently only frequencies) */
+
+struct iw_range
+{
+  uint8_t num_frequency;  /* Number of frequencies in the freq[] list */
+  struct iw_freq freq[IW_MAX_FREQUENCIES];
+};
+
+/* A Wireless Event. */
+
+struct iw_event
+{
+  uint16_t           len;   /* Real length of ata */
+  uint16_t           cmd;   /* Wireless IOCTL command*/
+  union iwreq_data   u;     /* Fixed IOCTL payload */
 };
 
 #endif /* CONFIG_DRIVERS_WIRELESS */
