@@ -50,11 +50,17 @@ endif
 
 ifeq (,$(findstring y,$(CONFIG_UCLIBCXX) $(CONFIG_LIBCXX)))
 CXXSRCS += libxx_delete.cxx libxx_deletea.cxx libxx_new.cxx libxx_newa.cxx
-CXXSRCS += libxx_stdthrow.cxx libxx_cxa_guard.cxx
+CXXSRCS += libxx_stdthrow.cxx
 else
 ifeq (,$(findstring y,$(CONFIG_UCLIBCXX_EXCEPTION) $(CONFIG_LIBCXX_EXCEPTION)))
 CXXSRCS += libxx_stdthrow.cxx
 endif
+endif
+
+# uClibc++ doesn't need this file
+
+ifneq ($(CONFIG_UCLIBCXX),y)
+CXXSRCS += libxx_cxa_guard.cxx
 endif
 
 # Paths
