@@ -167,13 +167,13 @@
 
 /* Pending register */
 
-#define EXTI_IMR1_BIT(n)          STM32L4_EXTI1_BIT(n)  /* 1=Selected trigger request occurred */
-#define EXTI_IMR1_SHIFT           (0)                /* Bits 0-X: Pending bit for all lines */
-#define EXTI_IMR1_MASK            STM32L4_EXTI1_MASK
+#define EXTI_PR1_BIT(n)           STM32L4_EXTI1_BIT(n)  /* 1=Selected trigger request occurred */
+#define EXTI_PR1_SHIFT            (0)                /* Bits 0-X: Pending bit for all lines */
+#define EXTI_PR1_MASK             STM32L4_EXTI1_MASK
 
-#define EXTI_IMR2_BIT(n)          STM32L4_EXTI2_BIT(n)  /* 1=Selected trigger request occurred */
-#define EXTI_IMR2_SHIFT           (0)                /* Bits 0-X: Pending bit for all lines */
-#define EXTI_IMR2_MASK            STM32L4_EXTI2_MASK
+#define EXTI_PR2_BIT(n)           STM32L4_EXTI2_BIT(n)  /* 1=Selected trigger request occurred */
+#define EXTI_PR2_SHIFT            (0)                /* Bits 0-X: Pending bit for all lines */
+#define EXTI_PR2_MASK             STM32L4_EXTI2_MASK
 
 #endif /* __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_EXTI_H */
 
