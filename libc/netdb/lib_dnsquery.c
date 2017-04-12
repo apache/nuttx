@@ -494,7 +494,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
 
           nerr("ERROR: IPv4 dns_recv_response failed: %d\n", ret);
 
-          if (ret != -EADDRNOTAVAIL)
+          if (ret == -EADDRNOTAVAIL)
             {
               /* The IPv4 address is not available.  Return zero to
                * continue the tranversal with the next nameserver
@@ -575,7 +575,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
 
           nerr("ERROR: IPv6 dns_recv_response failed: %d\n", ret);
 
-          if (ret != -EADDRNOTAVAIL)
+          if (ret == -EADDRNOTAVAIL)
             {
               /* The IPv6 address is not available.  Return zero to
                * continue the tranversal with the next nameserver
