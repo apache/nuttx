@@ -59,6 +59,7 @@
 #define  SSB_TMSLOW_BE		0x80000000 /* BIST Enable */
 
 #define I_HMB_SW_MASK                 ( (uint32_t) 0x000000F0 )
+#define I_HMB_FRAME_IND               ( 1<<6 )
 
 enum {
     CHIPCOMMON_CORE_ID,

@@ -8,6 +8,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/* FIXME: Low level bus data transfer function
+ * To avoid bus error, len will be aligned to:
+ * - upper power of 2 iflen is lesser than 64
+ * - upper 64 bytes block if len is greater than 64
+ */
+
 int bcmf_transfer_bytes(FAR struct bcmf_dev_s *priv, bool write,
                          uint8_t function, uint32_t address,
                          uint8_t *buf, unsigned int len);

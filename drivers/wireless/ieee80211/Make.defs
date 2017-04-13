@@ -43,6 +43,7 @@ ifeq ($(CONFIG_DRIVERS_IEEE80211),y)
 ifeq ($(CONFIG_IEEE80211_BROADCOM_FULLMAC_SDIO),y)
   CSRCS += bcmf_sdio.c
   CSRCS += bcmf_core.c
+  CSRCS += bcmf_sdpcm.c
   CSRCS += mmc_sdio.c
 endif
 

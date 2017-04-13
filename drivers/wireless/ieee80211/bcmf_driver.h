@@ -36,6 +36,7 @@
 #ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H
 #define __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H
 
+#include <stdbool.h>
 #include <nuttx/sdio.h>
 
 /* This structure contains the unique state of the Broadcom FullMAC driver */
@@ -49,6 +50,17 @@ struct bcmf_dev_s
 
   uint32_t (*get_core_base_address)(unsigned int core); /* Get chip specific
                                       base address for evey cores */
+
+  sem_t sem;                       /* Semaphore for processing thread event */
+  struct wdog_s *waitdog;          /* Processing thread waitdog */
+  bool ready;                      /* Current device status */
+  bool sleeping;                   /* Current sleep status */
+  volatile bool irq_pending;       /* True if interrupt is pending */
+  uint32_t intstatus;              /* Copy of device current interrupt status */
+
+  uint8_t max_seq;                 /* Maximum transmit sequence allowed */
+  uint8_t tx_seq;                  /* Transmit sequence number (next) */
+  uint8_t rx_seq;                  /* Receive sequence number (expected) */
 };
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H */

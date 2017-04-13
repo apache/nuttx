@@ -186,8 +186,7 @@
 
 /* Big DTIMER setting */
 
-// #define SDIO_DTIMER_DATATIMEOUT  (0x000fffff)
-#define SDIO_DTIMER_DATATIMEOUT  (0xffffffff)
+#define SDIO_DTIMER_DATATIMEOUT  (0x000fffff)
 
 /* DMA channel/stream configuration register settings.  The following
  * must be selected.  The DMA driver will select the remaining fields.
