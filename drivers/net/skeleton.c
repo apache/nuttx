@@ -190,6 +190,9 @@ static int skel_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 static void skel_ipv6multicast(FAR struct skel_driver_s *priv);
 #endif
 #endif
+#ifdef CONFIG_NETDEV_IOCTL
+static int skel_ioctl(FAR struct net_driver_s *dev, int cmd, long arg);
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -1074,6 +1077,45 @@ static void skel_ipv6multicast(FAR struct skel_driver_s *priv)
 #endif /* CONFIG_NET_ICMPv6 */
 
 /****************************************************************************
+ * Name: skel_ioctl
+ *
+ * Description:
+ *   Handle network IOCTL commands directed to this device.
+ *
+ * Parameters:
+ *   dev - Reference to the NuttX driver state structure
+ *   cmd - The IOCTL command
+ *   arg - The argument for the IOCTL command
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_IOCTL
+static int skel_ioctl(FAR struct net_driver_s *dev, int cmd, long arg)
+{
+  FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)dev->d_private;
+  int ret;
+
+  /* Decode and dispatch the driver-specific IOCTL command */
+
+  switch (cmd)
+    {
+      /* Add cases here to support the IOCTL commands */
+
+      default:
+        nerr("ERROR: Unrecognized IOCTL command: %d\n", command);
+        return -ENOTTY;  /* Special return value for this case */
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1124,6 +1166,9 @@ int skel_initialize(int intf)
 #ifdef CONFIG_NET_IGMP
   priv->sk_dev.d_addmac  = skel_addmac;   /* Add multicast MAC address */
   priv->sk_dev.d_rmmac   = skel_rmmac;    /* Remove multicast MAC address */
+#endif
+#ifdef CONFIG_NETDEV_IOCTL
+  priv->sk_dev.d_ioctl   = skel_ioctl;    /* Handle network IOCTL commands */
 #endif
   priv->sk_dev.d_private = (FAR void *)g_skel; /* Used to recover private state from dev */
 
