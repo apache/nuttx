@@ -72,17 +72,18 @@ void stm32_boardinitialize(void)
   board_autoled_initialize();
 #endif
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
-  /* Configure SPI chip selects if 1) SP2 is not disabled, and 2) the weak function
-   * stm32_spidev_initialize() has been brought into the link.
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || \
+    defined(CONFIG_STM32_SPI3)
+  /* Configure SPI chip selects if 1) SP2 is not disabled, and 2) the
+   * weak function stm32_spidev_initialize() has been brought into the link.
    */
 
   stm32_spidev_initialize();
 #endif
 
 #ifdef CONFIG_STM32_OTGFS
-  /* Initialize USB if the 1) OTG FS controller is in the configuration and 2)
-   * disabled. Presumably either CONFIG_USBDEV or CONFIG_USBHOST is also selected.
+  /* Initialize USB if the OTG FS controller is in the configuration.
+   * Presumably either CONFIG_USBDEV or CONFIG_USBHOST is also selected.
    */
 
   stm32_usbinitialize();

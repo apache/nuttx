@@ -1,7 +1,7 @@
 /****************************************************************************
- * config/stm32f4discovery/src/stm32_bringup.c
+ * config/stm32f411e-disco/src/stm32_bringup.c
  *
- *   Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,16 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/mount.h>
-#include <stdbool.h>
-#include <stdio.h>
 #include <debug.h>
-#include <errno.h>
-
-#ifdef CONFIG_USBMONITOR
-#  include <nuttx/usb/usbmonitor.h>
-#endif
-
-#include <nuttx/binfmt/elf.h>
 
 #include "stm32.h"
 
@@ -58,20 +49,6 @@
 #endif
 
 #include "stm32f411e-disco.h"
-
-/* Conditional logic in stm32f4discover.h will determine if certain features
- * are supported.  Tests for these features need to be made after including
- * stm32f4discovery.h.
- */
-
-#ifdef HAVE_RTC_DRIVER
-#  include <nuttx/timers/rtc.h>
-#  include "stm32_rtc.h"
-#endif
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -95,7 +72,7 @@ int stm32_bringup(void)
 {
   int ret = OK;
 
-#ifdef HAVE_USBHOST
+#if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
   /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
    * will monitor for USB connection and disconnection events.
    */
@@ -114,7 +91,7 @@ int stm32_bringup(void)
   ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
-      serr("ERROR: Failed to mount procfs at %s: %d\n",
+      ferr("ERROR: Failed to mount procfs at %s: %d\n",
            STM32_PROCFS_MOUNTPOINT, ret);
     }
 #endif

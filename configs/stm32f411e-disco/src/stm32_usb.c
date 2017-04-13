@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32f411e-disco/src/stm32_usb.c
  *
- *   Copyright (C) 2012-2013, 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  *   Copyright (C) 2017 Brian Webb. All rights reserved.
@@ -65,11 +65,8 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#if defined(CONFIG_USBDEV) || defined(CONFIG_USBHOST)
-#  define HAVE_USB 1
-#else
+#if !defined(CONFIG_USBDEV) && !defined(CONFIG_USBHOST)
 #  warning "CONFIG_STM32_OTGFS is enabled but neither CONFIG_USBDEV nor CONFIG_USBHOST"
-#  undef HAVE_USB
 #endif
 
 #ifndef CONFIG_STM32F411DISCO_USBHOST_PRIO

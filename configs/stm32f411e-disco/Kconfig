@@ -15,5 +15,4 @@ config STM32F411DISCO_USBHOST_PRIO
 	default 100
 	depends on USBHOST
 
-
 endif

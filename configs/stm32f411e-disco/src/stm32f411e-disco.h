@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * configs/stm32f411e-disco/src/stm32f411e-disco.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
@@ -32,28 +32,28 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __CONFIGS_STM32F411E_DISCO_SRC_STM32F411E_DISCO_H
 #define __CONFIGS_STM32F411E_DISCO_SRC_STM32F411E_DISCO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
 #include <stdint.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ ****************************************************************************/
+/* Configuration ************************************************************/
 
-/* LED.  User LD2: the green LED is a user LED connected to Arduino signal D13
- * corresponding to MCU I/O PA5 (pin 21) or PB13 (pin 34) depending on the STM32
- * target.
+/* LED.  User LD2: the green LED is a user LED connected to Arduino signal
+ * D13 corresponding to MCU I/O PA5 (pin 21) or PB13 (pin 34) depending on
+ * the STM32 target.
  *
  * - When the I/O is HIGH value, the LED is on.
  * - When the I/O is LOW, the LED is off.
@@ -84,16 +84,6 @@
                             GPIO_PORTA | GPIO_PIN6)
 #define GPIO_SPI1_SCK_OFF  (GPIO_INPUT | GPIO_PULLDOWN | \
                             GPIO_PORTA | GPIO_PIN5)
-
-/* Assume that we have everything */
-
-#define HAVE_USBDEV     1
-#define HAVE_USBHOST    1
-#define HAVE_USBMONITOR 1
-#define HAVE_SDIO       1
-#define HAVE_RTC_DRIVER 1
-#define HAVE_ELF        1
-#define HAVE_NETMONITOR 1
 
 /* USB OTG FS
  *
@@ -127,9 +117,9 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Global driver instances */
 
@@ -140,17 +130,17 @@ extern struct spi_dev_s *g_spi1;
 extern struct spi_dev_s *g_spi2;
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_spidev_initialize(void);
 
@@ -158,7 +148,7 @@ void stm32_spidev_initialize(void);
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in initialization to setup
+ *   Called from stm32_boardinitialize very early in initialization to setup
  *   USB-related GPIO pins for the STM32F4Discovery board.
  *
  ****************************************************************************/
@@ -172,7 +162,7 @@ void stm32_usbinitialize(void);
  *
  * Description:
  *   Called at application startup time to initialize the USB host
- *   functionality. This function will start a thread that will monitor for
+ *   functionality.  This function will start a thread that will monitor for
  *   device connection/disconnection events.
  *
  ****************************************************************************/
