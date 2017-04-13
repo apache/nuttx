@@ -494,9 +494,10 @@ void mac802154dev_conf_data(FAR struct ieee802154_mac_s *mac,
 
   /* Get the dev from the callback context.  This should have been set when
    * the char driver was registered.
+   *
+   * REVISIT: See mac802154_netdev.c
    */
-
-  dev = mac->cbs.cb_context;
+#warning Missing logic
 
   /* Get exclusive access to the driver structure */
 
@@ -554,7 +555,13 @@ int mac802154dev_register(FAR struct ieee802154_mac_s *mac, int minor)
   dev->md_mac = mac;
   sem_init(&dev->md_exclsem, 0, 1); /* Allow the device to be opened once
                                      * before blocking */
-  
+
+  /* Initialize the callbacks and bind them to the radio
+   *
+   * REVISIT: See mac802154_netdev.c
+   */
+#warning Missing logic
+
   /* Create the character device name */
 
   snprintf(devname, DEVNAME_FMTLEN, DEVNAME_FMT, minor);

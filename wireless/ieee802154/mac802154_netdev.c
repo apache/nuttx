@@ -103,11 +103,21 @@
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
-#define BUF ((struct eth_hdr_s *)priv->m8_dev.d_buf)
+#define BUF ((struct eth_hdr_s *)priv->md_dev.d_buf)
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+/* This is our private version of the MAC callback stucture */
+
+struct mac802154_callback_s
+{
+  /* This holds the information visible to the MAC layer */
+
+  struct ieee802154_maccb_s mc_cb;        /* Interface understood by the MAC layer */
+  FAR struct mac802154_driver_s *mc_priv; /* Our priv data */
+};
 
 /* The mac802154_driver_s encapsulates all state information for a single
  * IEEE802.15.4 MAC interface.
@@ -117,16 +127,17 @@ struct mac802154_driver_s
 {
   /* This holds the information visible to the NuttX network */
 
-  struct ieee802154_driver_s m8_dev;   /* Interface understood by the network */
-  FAR struct ieee802154_mac_s *m8_mac; /* Contained MAC interface */
+  struct ieee802154_driver_s md_dev;   /* Interface understood by the network */
+  FAR struct ieee802154_mac_s *md_mac; /* Contained MAC interface */
+  struct mac802154_callback_s md_cb;   /* Callback information */
 
   /* For internal use by this driver */
 
-  bool m8_bifup;               /* true:ifup false:ifdown */
-  WDOG_ID m8_txpoll;           /* TX poll timer */
-  WDOG_ID m8_txtimeout;        /* TX timeout timer */
-  struct work_s m8_irqwork;    /* For deferring interupt work to the work queue */
-  struct work_s m8_pollwork;   /* For deferring poll work to the work queue */
+  bool md_bifup;               /* true:ifup false:ifdown */
+  WDOG_ID md_txpoll;           /* TX poll timer */
+  WDOG_ID md_txtimeout;        /* TX timeout timer */
+  struct work_s md_irqwork;    /* For deferring interupt work to the work queue */
+  struct work_s md_pollwork;   /* For deferring poll work to the work queue */
 };
 
 /****************************************************************************
@@ -254,10 +265,11 @@ static int mac802154_ioctl(FAR struct net_driver_s *dev, int cmd, long arg);
 static void mac802154_conf_data(FAR struct ieee802154_mac_s *mac,
                                 FAR struct ieee802154_data_conf_s *conf)
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -271,10 +283,11 @@ static void mac802154_conf_data(FAR struct ieee802154_mac_s *mac,
 static void mac802154_conf_purge(FAR struct ieee802154_mac_s *mac,
                                  uint8_t handle, int status)
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -288,10 +301,11 @@ static void mac802154_conf_purge(FAR struct ieee802154_mac_s *mac,
 static void mac802154_conf_associate(FAR struct ieee802154_mac_s *mac,
                                      uint16_t saddr, int status)
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -304,10 +318,11 @@ static void mac802154_conf_associate(FAR struct ieee802154_mac_s *mac,
 
 static void mac802154_conf_disassociate(FAR struct ieee802154_mac_s *mac,
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -322,10 +337,11 @@ static void mac802154_conf_get(FAR struct ieee802154_mac_s *mac, int status,
                                int attribute, FAR uint8_t *value,
                                int valuelen)
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -339,10 +355,11 @@ static void mac802154_conf_get(FAR struct ieee802154_mac_s *mac, int status,
 static void mac802154_conf_gts(FAR struct ieee802154_mac_s *mac,
                                FAR uint8_t *characteristics, int status)
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -356,10 +373,11 @@ static void mac802154_conf_gts(FAR struct ieee802154_mac_s *mac,
 static void mac802154_conf_reset(FAR struct ieee802154_mac_s *mac,
                                  int status)
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -372,10 +390,11 @@ static void mac802154_conf_reset(FAR struct ieee802154_mac_s *mac,
 static void mac802154_conf_rxenable(FAR struct ieee802154_mac_s *mac,
                                     int status)
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -390,10 +409,11 @@ static void mac802154_conf_scan(FAR struct ieee802154_mac_s *mac,
                                 uint32_t unscanned, int rsltsize,
                                 FAR uint8_t *edlist, FAR uint8_t *pandescs)
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -406,10 +426,11 @@ static void mac802154_conf_scan(FAR struct ieee802154_mac_s *mac,
 static void mac802154_conf_set(FAR struct ieee802154_mac_s *mac, int status,
                                int attribute)
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -422,10 +443,11 @@ static void mac802154_conf_set(FAR struct ieee802154_mac_s *mac, int status,
 static void mac802154_conf_start(FAR struct ieee802154_mac_s *mac,
                                 int status)
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -438,10 +460,11 @@ static void mac802154_conf_start(FAR struct ieee802154_mac_s *mac,
 static void mac802154_conf_poll(FAR struct ieee802154_mac_s *mac,
                                 int status)
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -455,10 +478,11 @@ static void mac802154_conf_poll(FAR struct ieee802154_mac_s *mac,
 static void mac802154_ind_data(FAR struct ieee802154_mac_s *mac,
                                FAR uint8_t *buf, int len)
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -473,10 +497,11 @@ static void mac802154_ind_associate(FAR struct ieee802154_mac_s *mac,
                                     uint16_t clipanid,
                                     FAR uint8_t *clieaddr)
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -490,10 +515,11 @@ static void mac802154_ind_associate(FAR struct ieee802154_mac_s *mac,
 static void mac802154_ind_disassociate(FAR struct ieee802154_mac_s *mac,
                                        FAR uint8_t *eadr, uint8_t reason)
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -509,10 +535,11 @@ static void mac802154_ind_beaconnotify(FAR struct ieee802154_mac_s *mac,
                                        FAR struct ieee802154_pan_desc_s *pandesc,
                                        FAR uint8_t *sdu, int sdulen)
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -527,10 +554,11 @@ static void mac802154_ind_gts(FAR struct ieee802154_mac_s *mac,
                               FAR uint8_t *devaddr,
                               FAR uint8_t *characteristics)
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -544,10 +572,11 @@ static void mac802154_ind_gts(FAR struct ieee802154_mac_s *mac,
 static void mac802154_ind_orphan(FAR struct ieee802154_mac_s *mac,
                                  FAR uint8_t *orphanaddr)
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -561,10 +590,11 @@ static void mac802154_ind_commstatus(FAR struct ieee802154_mac_s *mac,
                                      uint16_t panid, FAR uint8_t *src,
                                      FAR uint8_t *dst, int status)
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -577,10 +607,11 @@ static void mac802154_ind_commstatus(FAR struct ieee802154_mac_s *mac,
 static void mac802154_ind_syncloss(FAR struct ieee802154_mac_s *mac,
                                    int reason)
 {
+  FAR struct mac802154_callback_s *cb = (FAR struct mac802154_callback_s *)mac;
   FAR struct mac802154_driver_s *priv;
 
-  DEBUGASSERT(mac != NULL && mac->cb_context);
-  priv = (FAR struct mac802154_driver_s *)mac->cb_context;
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -611,15 +642,15 @@ static int mac802154_transmit(FAR struct mac802154_driver_s *priv)
 
   /* Increment statistics */
 
-  NETDEV_TXPACKETS(priv->m8_dev);
+  NETDEV_TXPACKETS(priv->md_dev);
 
-  /* Send the packet: address=priv->m8_dev.d_buf, length=priv->m8_dev.d_len */
+  /* Send the packet: address=priv->md_dev.d_buf, length=priv->md_dev.d_len */
 
   /* Enable Tx interrupts */
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->m8_txtimeout, skeleton_TXTIMEOUT,
+  (void)wd_start(priv->md_txtimeout, skeleton_TXTIMEOUT,
                  mac802154_txtimeout_expiry, 1, (wdparm_t)priv);
   return OK;
 }
@@ -656,7 +687,7 @@ static int mac802154_txpoll(FAR struct net_driver_s *dev)
    * i_framelist will set to a new, outgoing list of frames.
    */
 
-  if (priv->m8_dev.i_framelist != NULL)
+  if (priv->md_dev.i_framelist != NULL)
     {
        /* And send the packet */
 
@@ -711,14 +742,14 @@ static void mac802154_receive(FAR struct mac802154_driver_s *priv)
 
   /* Transfer the frame to the network logic */
 
-  priv->m8_dev.framelist = iob;
-  sixlowpan_input(&priv->m8_dev);
+  priv->md_dev.framelist = iob;
+  sixlowpan_input(&priv->md_dev);
 
   /* If the above function invocation resulted in data that should be sent
    * out, the field i_framelist will set to a new, outgoing list of frames.
    */
 
-  if (priv->m8_dev.i_framelist != NULL)
+  if (priv->md_dev.i_framelist != NULL)
     {
        /* And send the packet */
 
@@ -749,7 +780,7 @@ static void mac802154_txdone(FAR struct mac802154_driver_s *priv)
 
   /* Check for errors and update statistics */
 
-  NETDEV_TXDONE(priv->m8_dev);
+  NETDEV_TXDONE(priv->md_dev);
 
   /* Check if there are pending transmissions */
 
@@ -757,13 +788,13 @@ static void mac802154_txdone(FAR struct mac802154_driver_s *priv)
    * disable further Tx interrupts.
    */
 
-  wd_cancel(priv->m8_txtimeout);
+  wd_cancel(priv->md_txtimeout);
 
   /* And disable further TX interrupts. */
 
   /* In any event, poll the network for new TX data */
 
-  (void)devif_poll(&priv->m8_dev, mac802154_txpoll);
+  (void)devif_poll(&priv->md_dev, mac802154_txpoll);
 }
 
 /****************************************************************************
@@ -854,12 +885,12 @@ static int mac802154_transfer(int irq, FAR void *context, FAR void *arg)
        * expiration and the deferred interrupt processing.
        */
 
-       wd_cancel(priv->m8_txtimeout);
+       wd_cancel(priv->md_txtimeout);
     }
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->m8_irqwork, mac802154_transfer_work, priv, 0);
+  work_queue(ETHWORK, &priv->md_irqwork, mac802154_transfer_work, priv, 0);
   return OK;
 }
 
@@ -894,13 +925,13 @@ static void mac802154_txtimeout_work(FAR void *arg)
 
   /* Increment statistics and dump debug info */
 
-  NETDEV_TXTIMEOUTS(priv->m8_dev);
+  NETDEV_TXTIMEOUTS(priv->md_dev);
 
   /* Then reset the hardware */
 
   /* Then poll the network for new XMIT data */
 
-  (void)devif_poll(&priv->m8_dev, mac802154_txpoll);
+  (void)devif_poll(&priv->md_dev, mac802154_txpoll);
   net_unlock();
 }
 
@@ -936,7 +967,7 @@ static void mac802154_txtimeout_expiry(int argc, wdparm_t arg, ...)
 
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->m8_irqwork, mac802154_txtimeout_work, priv, 0);
+  work_queue(ETHWORK, &priv->md_irqwork, mac802154_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
@@ -1000,11 +1031,11 @@ static void mac802154_poll_work(FAR void *arg)
    * progress, we will missing TCP time state updates?
    */
 
-  (void)devif_timer(&priv->m8_dev, mac802154_txpoll);
+  (void)devif_timer(&priv->md_dev, mac802154_txpoll);
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->m8_txpoll, skeleton_WDDELAY, mac802154_poll_expiry, 1,
+  (void)wd_start(priv->md_txpoll, skeleton_WDDELAY, mac802154_poll_expiry, 1,
                  (wdparm_t)priv);
   net_unlock();
 }
@@ -1033,7 +1064,7 @@ static void mac802154_poll_expiry(int argc, wdparm_t arg, ...)
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->m8_pollwork, mac802154_poll_work, priv, 0);
+  work_queue(ETHWORK, &priv->md_pollwork, mac802154_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -1071,7 +1102,7 @@ static int mac802154_ifup(FAR struct net_driver_s *dev)
 
   /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
 
-  /* Instantiate the MAC address from priv->m8_dev.d_mac.ether_addr_octet */
+  /* Instantiate the MAC address from priv->md_dev.d_mac.ether_addr_octet */
 
 #ifdef CONFIG_NET_ICMPv6
   /* Set up IPv6 multicast address filtering */
@@ -1081,12 +1112,12 @@ static int mac802154_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->m8_txpoll, skeleton_WDDELAY, mac802154_poll_expiry, 1,
+  (void)wd_start(priv->md_txpoll, skeleton_WDDELAY, mac802154_poll_expiry, 1,
                  (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 
-  priv->m8_bifup = true;
+  priv->md_bifup = true;
   up_enable_irq(CONFIG_IEEE802154_NETDEV_IRQ);
   return OK;
 }
@@ -1119,8 +1150,8 @@ static int mac802154_ifdown(FAR struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->m8_txpoll);
-  wd_cancel(priv->m8_txtimeout);
+  wd_cancel(priv->md_txpoll);
+  wd_cancel(priv->md_txtimeout);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the mac802154_ifup() always
@@ -1129,7 +1160,7 @@ static int mac802154_ifdown(FAR struct net_driver_s *dev)
 
   /* Mark the device "down" */
 
-  priv->m8_bifup = false;
+  priv->md_bifup = false;
   leave_critical_section(flags);
   return OK;
 }
@@ -1165,13 +1196,13 @@ static void mac802154_txavail_work(FAR void *arg)
 
   /* Ignore the notification if the interface is not yet up */
 
-  if (priv->m8_bifup)
+  if (priv->md_bifup)
     {
       /* Check if there is room in the hardware to hold another outgoing packet. */
 
       /* If so, then poll the network for new XMIT data */
 
-      (void)devif_poll(&priv->m8_dev, mac802154_txpoll);
+      (void)devif_poll(&priv->md_dev, mac802154_txpoll);
     }
 
   net_unlock();
@@ -1205,11 +1236,11 @@ static int mac802154_txavail(FAR struct net_driver_s *dev)
    * availability action.
    */
 
-  if (work_available(&priv->m8_pollwork))
+  if (work_available(&priv->md_pollwork))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(ETHWORK, &priv->m8_pollwork, mac802154_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->md_pollwork, mac802154_txavail_work, priv, 0);
     }
 
   return OK;
@@ -1381,7 +1412,7 @@ static int mac802154_ioctl(FAR struct net_driver_s *dev, int cmd, long arg)
       if (netmac != NULL)
         {
           unsigned long macarg = (unsigned int)((uintptr_t)&netmac->u);
-          ret = priv->m8_mac.macops.ioctl(priv->m8_mac, cmd, macarg);
+          ret = priv->md_mac.macops.ioctl(priv->md_mac, cmd, macarg);
         }
     }
 
@@ -1395,7 +1426,7 @@ static int mac802154_ioctl(FAR struct net_driver_s *dev, int cmd, long arg)
       if (netradio != NULL)
         {
           unsigned long radioarg = (unsigned int)((uintptr_t)&netradio->u);
-          ret = priv->m8_mac.macops.ioctl(priv->m8_mac, cmd, radioarg);
+          ret = priv->md_mac.macops.ioctl(priv->md_mac, cmd, radioarg);
         }
     }
 
@@ -1405,7 +1436,7 @@ static int mac802154_ioctl(FAR struct net_driver_s *dev, int cmd, long arg)
 
   else
    {
-     ret = priv->m8_mac.macops.ioctl(priv->m8_mac, cmd, arg);
+     ret = priv->md_mac.macops.ioctl(priv->md_mac, cmd, arg);
    }
 }
 #endif
@@ -1433,9 +1464,9 @@ static int mac802154_ioctl(FAR struct net_driver_s *dev, int cmd, long arg)
 int mac802154netdev_register(FAR struct ieee802154_mac_s *mac);
 {
   FAR struct mac802154_driver_s *priv;
-  FAR truct ieee802154_maccb_s *macb;
   FAR struct net_driver_s *dev;
   FAR uint8_t *pktbuf;
+  int ret;
 
   DEBUGASSERT(radio != NULL);
 
@@ -1464,7 +1495,7 @@ int mac802154netdev_register(FAR struct ieee802154_mac_s *mac);
 
   /* Initialize the driver structure */
 
-  dev                = &ieee->m8_dev.i_dev;
+  dev                = &ieee->md_dev.i_dev;
   dev->d_buf         = pktbuf;             /* Single packet buffer */
   dev->d_ifup        = mac802154_ifup;     /* I/F up (new IP address) callback */
   dev->d_ifdown      = mac802154_ifdown;   /* I/F down callback */
@@ -1480,16 +1511,17 @@ int mac802154netdev_register(FAR struct ieee802154_mac_s *mac);
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  priv->m8_mac       = mac;                /* Save the MAC interface instance */
-  priv->m8_txpoll    = wd_create();        /* Create periodic poll timer */
-  priv->m8_txtimeout = wd_create();        /* Create TX timeout timer */
+  priv->md_mac       = mac;                /* Save the MAC interface instance */
+  priv->md_txpoll    = wd_create();        /* Create periodic poll timer */
+  priv->md_txtimeout = wd_create();        /* Create TX timeout timer */
 
-  DEBUGASSERT(priv->m8_txpoll != NULL && priv->m8_txtimeout != NULL);
+  DEBUGASSERT(priv->md_txpoll != NULL && priv->md_txtimeout != NULL);
 
   /* Initialize the MAC callbacks */
 
-  maccb                    = &mac->cbs;
-  maccb->cb_context        = priv;
+  priv->md_cb.mc_priv      = priv;
+
+  maccb                    = &priv->md_cb.mc_cb;
   maccb->conf_data         = mac802154_conf_data;
   maccb->conf_purge        = mac802154_conf_purge;
   maccb->conf_associate    = mac802154_conf_associate;
@@ -1511,13 +1543,31 @@ int mac802154netdev_register(FAR struct ieee802154_mac_s *mac);
   maccb->ind_commstatus    = mac802154_ind_commstatus;
   maccb->ind_syncloss      = mac802154_ind_syncloss;
 
+  /* Bind the callback structure */
+
+  ret = mac->ops->bind(mac, *priv->md_cb.mc_cb);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to bind the MAC callbacks: %d\n", ret);
+
+      /* Release wdog timers */
+
+      wd_delete(priv->md_txpoll);
+      wd_delete(priv->md_txtimeout);
+
+      /* Free memory and return the error */
+      kmm_free(pktbuf);
+      kmm_free(priv);
+      return ret
+    }
+
   /* Put the interface in the down state. */
 
   mac802154_ifdown(dev);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->m8_dev, NET_LL_IEEE802154);
+  (void)netdev_register(&priv->md_dev, NET_LL_IEEE802154);
   return OK;
 }
 

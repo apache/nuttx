@@ -883,7 +883,8 @@ struct ieee802154_netmac_s
 
 /* MAC Interface Operations *************************************************/
 
-struct ieee802154_mac_s; /* Forward reference */
+struct ieee802154_mac_s;   /* Forward reference */
+struct ieee802154_maccb_s; /* Forward reference */
 
 struct ieee802154_macops_s
 {
@@ -960,6 +961,11 @@ struct ieee802154_macops_s
                          FAR uint8_t *orphanaddr, uint16_t saddr,
                          bool associated);
 
+  /* Bind callbacks to the IEEE802.15.4 MAC */
+
+  CODE int (*bind)(FAR struct ieee802154_mac_s *mac,
+                   FAR const struct ieee802154_maccb_s *cb);
+
   /* IOCTL support */
 
   CODE int (*ioctl)(FAR struct ieee802154_mac_s *mac, int cmd,
@@ -970,10 +976,6 @@ struct ieee802154_macops_s
 
 struct ieee802154_maccb_s
 {
-  /* Context arg for handling callback */
-
-  FAR void *cb_context;
-
   /* Asynchronous confirmations to requests */
 
   /* Data frame was received by remote device */
@@ -1064,13 +1066,13 @@ struct ieee802154_maccb_s
   CODE void (*ind_syncloss)(FAR struct ieee802154_mac_s *mac, int reason);
 };
 
-struct ieee802154_radio_s; /* Forward reference */
-
 struct ieee802154_mac_s
 {
-  FAR struct ieee802154_radio_s *radio;
+  /* Publicly visiable part of the MAC interface */
+
   struct ieee802154_macops_s ops;
-  struct ieee802154_maccb_s  cbs;
+
+  /* MAC private data may follow */
 };
 
 #ifdef __cplusplus
@@ -1084,6 +1086,8 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+struct ieee802154_radio_s; /* Forward reference */
 
 /****************************************************************************
  * Name: mac802154_create

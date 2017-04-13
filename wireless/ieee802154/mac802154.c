@@ -61,7 +61,9 @@
 
 struct ieee802154_privmac_s
 {
-  struct ieee802154_mac_s pubmac; /* This MUST be the first member */
+  struct ieee802154_mac_s pubmac;           /* This MUST be the first member */
+  FAR struct ieee802154_radio_s *radio;     /* Contained IEEE802.15.4 radio dev */
+  FAR const struct ieee802154_maccb_s *cb;  /* Contained MAC callbacks */
 
   /* MIB attributes, grouped to save memory */
   /* 0x40 */ uint8_t  macAckWaitDuration    : 1; /* 55 or 120(true) */
@@ -143,6 +145,10 @@ static int mac802154_rsp_associate(FAR struct ieee802154_mac_s *mac,
 static int mac802154_rsp_orphan(FAR struct ieee802154_mac_s *mac,
              FAR uint8_t *orphanaddr, uint16_t saddr, bool associated);
 
+static int mac802154_bind(FAR struct ieee802154_mac_s *mac,
+             FAR struct ieee802154_maccb_s *cb);
+static int mac802154_ioctl(FAR struct ieee802154_mac_s *mac, int cmd,
+             unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -502,9 +508,75 @@ static int mac802154_rsp_orphan(FAR struct ieee802154_mac_s *mac,
                                 FAR uint8_t *orphanaddr, uint16_t saddr,
                                 bool associated)
 {
-  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
+
+/****************************************************************************
+ * Name: mac802154_bind
+ *
+ * Description:
+ *   Bind the MAC callback table to the MAC state.
+ *
+ * Parameters:
+ *   mac - Reference to the MAC driver state structure
+ *   cb  - MAC callback operations
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int mac802154_bind(FAR struct ieee802154_mac_s *mac,
+                          FAR const struct ieee802154_maccb_s *cb)
+{
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
+
+  priv->cb = cb;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: mac802154_ioctl
+ *
+ * Description:
+ *   Handle MAC and radio IOCTL commands directed to the MAC.
+ *
+ * Parameters:
+ *   mac - Reference to the MAC driver state structure
+ *   cmd - The IOCTL command
+ *   arg - The argument for the IOCTL command
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int mac802154_ioctl(FAR struct ieee802154_mac_s *mac, int cmd,
+                           unsigned long arg)
+{
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
+  int ret = -EINVAL;
+
+  /* Check for IOCTLs aimed at the IEEE802.15.4 MAC layer */
+
+  if (_MAC802154IOCVALID(cmd))
+    {
+      /* Handle the MAC IOCTL command */
+#warning Missing logic
+    }
+
+  /* No, other IOCTLs must be aimed at the IEEE802.15.4 radio layer */
+
+  else
+   {
+     ret = priv->radio->ioctl(priv->radio, cmd, arg);
+   }
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -552,7 +624,7 @@ FAR struct ieee802154_mac_s *
 
   /* Initialize fields */
 
-  mac->pubmac.radio = radiodev;
+  mac->radio = radiodev;
   mac->pubmac.ops   = mac802154ops;
 
   mac802154_defaultmib(mac);
