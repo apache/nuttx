@@ -149,8 +149,8 @@ union ieee802154_radioarg_u
 
 struct ieee802154_netradio_s
 {
-  char ifr_name[IFNAMSIZ];      /* Interface name, e.g. "wpan0" */
-  union ieee802154_radioarg_u   /* Data payload */
+  char ifr_name[IFNAMSIZ];       /* Interface name, e.g. "wpan0" */
+  union ieee802154_radioarg_u u; /* Data payload */
 };
 #endif
 
