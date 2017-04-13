@@ -959,6 +959,11 @@ struct ieee802154_macops_s
   CODE int (*rsp_orphan)(FAR struct ieee802154_mac_s *mac,
                          FAR uint8_t *orphanaddr, uint16_t saddr,
                          bool associated);
+
+  /* IOCTL support */
+
+  CODE int (*ioctl)(FAR struct ieee802154_mac_s *mac, int cmd,
+                    unsigned long arg);
 };
 
 /* Notifications */

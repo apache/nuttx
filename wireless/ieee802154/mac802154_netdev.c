@@ -235,6 +235,9 @@ static int  mac802154_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac
 static void mac802154_ipv6multicast(FAR struct mac802154_driver_s *priv);
 #endif
 #endif
+#ifdef CONFIG_NETDEV_IOCTL
+static int mac802154_ioctl(FAR struct net_driver_s *dev, int cmd, long arg);
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -1345,6 +1348,69 @@ static void mac802154_ipv6multicast(FAR struct mac802154_driver_s *priv)
 #endif /* CONFIG_NET_ICMPv6 */
 
 /****************************************************************************
+ * Name: mac802154_ioctl
+ *
+ * Description:
+ *   Handle network IOCTL commands directed to this device.
+ *
+ * Parameters:
+ *   dev - Reference to the NuttX driver state structure
+ *   cmd - The IOCTL command
+ *   arg - The argument for the IOCTL command
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_IOCTL
+static int mac802154_ioctl(FAR struct net_driver_s *dev, int cmd, long arg)
+{
+  FAR struct mac802154_driver_s *priv = (FAR struct mac802154_driver_s *)dev->d_private;
+  int ret = -EINVAL;
+
+  /* Check for IOCTLs aimed at the IEEE802.15.4 MAC layer */
+
+  if (_MAC802154IOCVALID(cmd))
+    {
+      FAR struct ieee802154_netmac_s *netmac =
+        (FAR struct ieee802154_netmac_s *)arg;
+
+      if (netmac != NULL)
+        {
+          unsigned long macarg = (unsigned int)((uintptr_t)&netmac->u);
+          ret = priv->m8_mac.macops.ioctl(priv->m8_mac, cmd, macarg);
+        }
+    }
+
+  /* No, check for IOCTLs aimed at the IEEE802.15.4 radio layer */
+
+  else if (_PHY802154IOCVALID(cmd))
+    {
+      FAR struct ieee802154_netradio_s *netradio =
+        (FAR struct ieee802154_netradio_s *)arg;
+
+      if (netradio != NULL)
+        {
+          unsigned long radioarg = (unsigned int)((uintptr_t)&netradio->u);
+          ret = priv->m8_mac.macops.ioctl(priv->m8_mac, cmd, radioarg);
+        }
+    }
+
+  /* Okay, we have no idea what this command is.. just give to the
+   * IEEE802.15.4 MAC layer without modification.
+   */
+
+  else
+   {
+     ret = priv->m8_mac.macops.ioctl(priv->m8_mac, cmd, arg);
+   }
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1406,6 +1472,9 @@ int mac802154netdev_register(FAR struct ieee802154_mac_s *mac);
 #ifdef CONFIG_NET_IGMP
   dev->d_addmac      = mac802154_addmac;   /* Add multicast MAC address */
   dev->d_rmmac       = mac802154_rmmac;    /* Remove multicast MAC address */
+#endif
+ #ifdef CONFIG_NETDEV_IOCTL
+  dev->d_ioctl       = mac802154_ioctl;    /* Handle network IOCTL commands */
 #endif
   dev->d_private     = (FAR void *)priv;   /* Used to recover private state from dev */
 
