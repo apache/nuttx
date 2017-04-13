@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/stm32f411e-disco/src/stm32_appinit.c
+ * config/stm32f411e-disco/src/stm32_bringup.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,17 +39,14 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <syslog.h>
-#include <errno.h>
+#include <sys/mount.h>
+#include <debug.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
+#include "stm32.h"
 
-#include <stm32.h>
-#include <stm32_uart.h>
-
-#include <arch/board/board.h>
+#ifdef CONFIG_STM32_OTGFS
+#  include "stm32_usbhost.h"
+#endif
 
 #include "stm32f411e-disco.h"
 
@@ -58,37 +55,46 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_app_initialize
+ * Name: stm32_bringup
  *
  * Description:
- *   Perform application specific initialization.  This function is never
- *   called directly from application code, but only indirectly via the
- *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
+ *   Perform architecture-specific initialization
  *
- * Input Parameters:
- *   arg - The boardctl() argument is passed to the board_app_initialize()
- *         implementation without modification.  The argument has no
- *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the the
- *         matching application logic.  The value cold be such things as a
- *         mode enumeration value, a set of DIP switch switch settings, a
- *         pointer to configuration data read from a file or serial FLASH,
- *         or whatever you would like to do with it.  Every implementation
- *         should accept zero/NULL as a default configuration.
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
  *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
+ *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
  *
  ****************************************************************************/
 
-int board_app_initialize(uintptr_t arg)
+int stm32_bringup(void)
 {
-#ifndef CONFIG_BOARD_INITIALIZE
-  /* Perform board-specific initialization */
+  int ret = OK;
 
-  return stm32_bringup();
-#else
-  return OK;
+#if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
+  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
+   * will monitor for USB connection and disconnection events.
+   */
+
+  ret = stm32_usbhost_initialize();
+  if (ret != OK)
+    {
+      uerr("ERROR: Failed to initialize USB host: %d\n", ret);
+      return ret;
+    }
 #endif
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to mount procfs at %s: %d\n",
+           STM32_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
+  return ret;
 }

@@ -120,12 +120,6 @@ int board_app_initialize(uintptr_t arg)
 
   (void)ret;
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION
-  /* Configure CPU load estimation */
-
-  cpuload_initialize_once();
-#endif
-
 #ifdef HAVE_PROC
   /* Mount the proc filesystem */
 

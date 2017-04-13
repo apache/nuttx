@@ -1159,7 +1159,12 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       int intf;
       FAR struct ifreq *ifr = (FAR struct ifreq *)arg;
 
+#ifdef CONFIG_NET_MULTILINK
+      if (!ifr || ((ifr->ifr_flags & IFF_MASK) != IFF_TUN &&
+                   (ifr->ifr_flags & IFF_MASK) != IFF_TAP))
+#else
       if (!ifr || (ifr->ifr_flags & IFF_MASK) != IFF_TUN)
+#endif
         {
           return -EINVAL;
         }
@@ -1190,6 +1195,25 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       priv = filep->f_priv;
       strncpy(ifr->ifr_name, priv->dev.d_ifname, IFNAMSIZ);
+
+#ifdef CONFIG_NET_MULTILINK
+      if ((ifr->ifr_flags & IFF_MASK) == IFF_TAP)
+        {
+          /* TAP device -> handling raw Ethernet packets
+           * -> set appropriate Ethernet header length
+           */
+
+          priv->dev.d_llhdrlen = ETH_HDRLEN;
+        }
+      else if ((ifr->ifr_flags & IFF_MASK) == IFF_TUN)
+        {
+          /* TUN device -> handling an application data stream
+           * -> no header
+           */
+
+          priv->dev.d_llhdrlen = 0;
+        }
+#endif
 
       tundev_unlock(tun);
 

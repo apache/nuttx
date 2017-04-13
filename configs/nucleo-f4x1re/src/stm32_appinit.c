@@ -102,12 +102,6 @@ int board_app_initialize(uintptr_t arg)
 {
   int ret = OK;
 
-  /* Configure CPU load estimation */
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION
-  cpuload_initialize_once();
-#endif
-
 #ifdef HAVE_MMCSD
   /* First, get an instance of the SDIO interface */
 

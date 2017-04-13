@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated April 10, 2017)
+NuttX TODO List (Last updated April 12, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -9,7 +9,7 @@ issues related to each board port.
 
 nuttx/:
 
- (10)  Task/Scheduler (sched/)
+ (11)  Task/Scheduler (sched/)
   (1)  SMP
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
@@ -185,6 +185,47 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Low.  Things are just the way that we want them for the way
                that NuttX is used today.
+
+  Title:       INTERNAL VERSIONS OF USER FUNCTIONS
+  Description: The internal NuttX logic uses the same interfaces as does
+               the application.  That sometime produces a problem because
+               there is "overloaded" functionality in those user interfaces
+               that are not desireable.
+
+               For example, having cancellation points hidden inside of the
+               OS can cause non-cancellation point interfaces to behave
+               strangely.  There was a change recently in pthread_cond_wait()
+               and pthread_cond_timedwait() recently to effectively disable
+               the cancellation point behavior of sem_init().  This was
+               accomplished with two functions:  pthread_disable_cancel()
+               and pthread_enable_cancel()
+
+               Here is another issue:  Internal OS functions should not set
+               errno and should never have to look at the errno value to
+               determine the cause of the failure.  The errno is provided
+               for compatibility with POSIX application interface
+               requirements and really doesn't need to be used within the
+               OS.
+
+               Both of these could be fixed if there were special internal
+               versions these functions.  For example, there could be a an
+               nx_sem_wait() that does all of the same things as sem_wait()
+               was does not create a cancellation point and does not set
+               the errno value on failures.
+
+               Everything inside the OS would use nx_sem_wait().
+               Applications would call sem_wait() which would just be a
+               wrapper around nx_sem_wait() that adds the cancellation point
+               and that sets the errno value on failures.
+
+               Changes like that could clean up some of this internal
+               craziness.  The condition variable change described above is
+               really a "bandaid" to handle the case that sem_wait() is a
+               cancellation point.
+  Status:      Open
+  Priority:    Low.  Things are working OK the way they are.  But the design
+               could be improved and made a little more efficient with this
+               change.
 
 o SMP
   ^^^
