@@ -51,6 +51,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#ifdef CONFIG_NET_6LOWPAN
+#  include <net/if.h>
+#endif
+
 #include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
@@ -180,6 +184,10 @@
 #define IEEE802154_UNIT_BACKOFF_PERIOD        20
 
 /* IEEE 802.15.4 MAC PIB Attribut Defaults */
+
+/* Definitions used by IOCTL calls */
+
+#define MAX_ORPHAN_ADDR   32  /* REVISIT */
 
 // TODO: Add macros
 
@@ -740,7 +748,140 @@ struct ieee802154_beaconnotify_ind_s
   (sizeof(struct ieee802154_beaconnotify_ind_s) \
   - IEEE802154_MAX_BEACON_PAYLOAD_LENGTH + (n))
 
-/* Operations */
+/* IOCTL data arguments *****************************************************/
+
+/* Data returned with MAC802154IOC_MLME_ASSOC_RESPONSE */
+
+struct ieee802154_assocresp_s
+{
+  uint8_t eadr;
+  uint16_t saddr;
+  int status;
+};
+
+/* Data provided to MAC802154IOC_MLME_GET_REQUEST */
+
+struct ieee802154_getreq_s
+{
+  enum ieee802154_pib_attr_e attr;
+};
+
+/* Data provided to MAC802154IOC_MLME_GTS_REQUEST */
+
+struct ieee802154_gtsreq_s
+{
+  uint8_t characteristics;
+};
+
+/* Data returned with MAC802154IOC_MLME_ORPHAN_RESPONSE */
+
+struct ieee802154_orphanresp_s
+{
+  uint8_t orphanaddr[MAX_ORPHAN_ADDR];
+  uint16_t saddr;
+  bool associated;
+};
+
+/* Data provided with MAC802154IOC_MLME_RESET_REQUEST */
+
+struct ieee802154_resetreq_s
+{
+  bool setdefaults;
+};
+
+/* Data provided with MAC802154IOC_MLME_RXENABLE_REQUEST */
+
+struct ieee802154_rxenabreq_s
+{
+  bool deferrable;
+  int ontime;
+  int duration;
+};
+
+/* Data provided with MAC802154IOC_MLME_SCAN_REQUEST */
+
+struct ieee802154_scanreq_s
+{
+  uint8_t type;
+  uint32_t channels;
+  int duration;
+};
+
+/* Data provided with MAC802154IOC_MLME_SET_REQUEST */
+
+struct ieee802154_setreq_s
+{
+  FAR uint8_t *value;
+  int valuelen;
+  int attribute;
+};
+
+/* Data provided with MAC802154IOC_MLME_START_REQUEST */
+
+struct ieee802154_startreq_s
+{
+  int channel;
+  uint16_t panid;
+  uint8_t bo;
+  uint8_t fo;
+  bool coord;
+  bool batext;
+  bool realign;
+};
+
+/* Data provided with MAC802154IOC_MLME_SYNC_REQUEST */
+
+struct ieee802154_syncreq_s
+{
+  int channel;
+  bool track;
+};
+
+/* Data provided with MAC802154IOC_MLME_POLL_REQUEST */
+
+struct ieee802154_pollreq_s
+{
+  FAR uint8_t *coordaddr;
+};
+
+/* A pointer to this structure is passed as the argument of each IOCTL
+ * command.
+ */
+
+union ieee802154_macarg_u
+{
+  struct ieee802154_assoc_req_s    assocreq;    /* MAC802154IOC_MLME_ASSOC_REQUEST */
+  struct ieee802154_assocresp_s    assocresp:   /* MAC802154IOC_MLME_ASSOC_RESPONSE */
+  struct ieee802154_disassoc_req_s disassocreq; /* MAC802154IOC_MLME_DISASSOC_REQUEST */
+  struct ieee802154_mlmereq_s      getreq;      /* MAC802154IOC_MLME_GET_REQUEST */
+  struct ieee802154_gtsreq_s       gtsreq;      /* MAC802154IOC_MLME_GTS_REQUEST */
+  struct ieee802154_orphanresp_s   orphanresp;  /* MAC802154IOC_MLME_ORPHAN_RESPONSE */
+  struct ieee802154_resetreq_s     resetreq;    /* MAC802154IOC_MLME_RESET_REQUEST */
+  struct ieee802154_rxenabreq_s    rxenabreq;   /* MAC802154IOC_MLME_RXENABLE_REQUEST */
+  struct ieee802154_scanreq_s      scanreq;     /* MAC802154IOC_MLME_SCAN_REQUEST */
+  struct ieee802154_setreq_s       setreq;      /* MAC802154IOC_MLME_SET_REQUEST */
+  struct ieee802154_startreq_s     startreq;    /* MAC802154IOC_MLME_START_REQUEST */
+  struct ieee802154_syncreq_s      syncreq;     /* MAC802154IOC_MLME_SYNC_REQUEST */
+  struct ieee802154_pollreq_s      pollreq;     /* MAC802154IOC_MLME_POLL_REQUEST */
+  /* To be determined */                        /* MAC802154IOC_MLME_DPS_REQUEST */
+  /* To be determined */                        /* MAC802154IOC_MLME_SOUNDING_REQUEST */
+  /* To be determined */                        /* MAC802154IOC_MLME_CALIBRATE_REQUEST */
+};
+
+#ifdef CONFIG_NET_6LOWPAN
+/* For the case of network IOCTLs, the network IOCTL to the MAC network
+ * driver will include a device name like "wpan0" as the destination of
+ * the IOCTL command.
+ */
+
+struct ieee802154_netmac_s
+{
+  char ifr_name[IFNAMSIZ];     /* Interface name, e.g. "wpan0" */
+  union ieee802154_macarg_u u; /* Data payload */
+};
+#endif
+
+/* MAC Interface Operations *************************************************/
 
 struct ieee802154_mac_s; /* Forward reference */
 
