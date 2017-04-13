@@ -140,7 +140,7 @@ static void mrf24j40_irqwork_tx(FAR struct mrf24j40_radio_s *dev);
 static void mrf24j40_irqworker(FAR void *arg);
 static int  mrf24j40_interrupt(int irq, FAR void *context, FAR void *arg);
 
-/* Driver operations */
+/* IOCTL helpers */
 
 static int  mrf24j40_setchannel(FAR struct ieee802154_radio_s *ieee,
               uint8_t chan);
@@ -174,10 +174,13 @@ static int  mrf24j40_setcca(FAR struct ieee802154_radio_s *ieee,
               FAR struct ieee802154_cca_s *cca);
 static int  mrf24j40_getcca(FAR struct ieee802154_radio_s *ieee,
               FAR struct ieee802154_cca_s *cca);
-static int  mrf24j40_ioctl(FAR struct ieee802154_radio_s *ieee, int cmd,
-              unsigned long arg);
 static int  mrf24j40_energydetect(FAR struct ieee802154_radio_s *ieee,
               FAR uint8_t *energy);
+
+/* Driver operations */
+
+static int  mrf24j40_ioctl(FAR struct ieee802154_radio_s *ieee, int cmd,
+              unsigned long arg);
 static int  mrf24j40_rxenable(FAR struct ieee802154_radio_s *ieee,
               bool state, FAR struct ieee802154_packet_s *packet);
 static int  mrf24j40_transmit(FAR struct ieee802154_radio_s *ieee,
@@ -198,16 +201,7 @@ static struct mrf24j40_radio_s g_mrf24j40_devices[1];
 
 static const struct ieee802154_radioops_s mrf24j40_devops =
 {
-  mrf24j40_setchannel, mrf24j40_getchannel,
-  mrf24j40_setpanid  , mrf24j40_getpanid,
-  mrf24j40_setsaddr  , mrf24j40_getsaddr,
-  mrf24j40_seteaddr  , mrf24j40_geteaddr,
-  mrf24j40_setpromisc, mrf24j40_getpromisc,
-  mrf24j40_setdevmode, mrf24j40_getdevmode,
-  mrf24j40_settxpower, mrf24j40_gettxpower,
-  mrf24j40_setcca    , mrf24j40_getcca,
   mrf24j40_ioctl,
-  mrf24j40_energydetect,
   mrf24j40_rxenable,
   mrf24j40_transmit
 };

@@ -148,7 +148,7 @@ static void at86rf23x_irqwork_tx(FAR struct at86rf23x_dev_s *dev);
 static void at86rf23x_irqworker(FAR void *arg);
 static int  at86rf23x_interrupt(int irq, FAR void *context, FAR void *arg);
 
-/* Driver operations */
+/* IOCTL helpers */
 
 static int  at86rf23x_setchannel(FAR struct ieee802154_radio_s *ieee,
               uint8_t chan);
@@ -182,10 +182,13 @@ static int  at86rf23x_setcca(FAR struct ieee802154_radio_s *ieee,
               FAR struct ieee802154_cca_s *cca);
 static int  at86rf23x_getcca(FAR struct ieee802154_radio_s *ieee,
               FAR struct ieee802154_cca_s *cca);
-static int  at86rf23x_ioctl(FAR struct ieee802154_radio_s *ieee, int cmd,
-              unsigned long arg);
 static int  at86rf23x_energydetect(FAR struct ieee802154_radio_s *ieee,
               FAR uint8_t *energy);
+
+/* Driver operations */
+
+static int  at86rf23x_ioctl(FAR struct ieee802154_radio_s *ieee, int cmd,
+              unsigned long arg);
 static int  at86rf23x_rxenable(FAR struct ieee802154_radio_s *ieee,
               bool state, FAR struct ieee802154_packet_s *packet);
 static int  at86rf23x_transmit(FAR struct ieee802154_radio_s *ieee,
@@ -206,24 +209,7 @@ static struct at86rf23x_dev_s g_at86rf23x_devices[1];
 
 static const struct ieee802154_radioops_s at86rf23x_devops =
 {
-  .setchannel   = at86rf23x_setchannel,
-  .getchannel   = at86rf23x_getchannel,
-  .setpanid     = at86rf23x_setpanid,
-  .getpanid     = at86rf23x_getpanid,
-  .setsaddr     = at86rf23x_setsaddr,
-  .getsaddr     = at86rf23x_getsaddr,
-  .seteaddr     = at86rf23x_seteaddr,
-  .geteaddr     = at86rf23x_geteaddr,
-  .setpromisc   = at86rf23x_setpromisc,
-  .getpromisc   = at86rf23x_getpromisc,
-  .setdevmode   = at86rf23x_setdevmode,
-  .getdevmode   = at86rf23x_getdevmode,
-  .settxpower   = at86rf23x_settxpower,
-  .gettxpower   = at86rf23x_gettxpower,
-  .setcca       = at86rf23x_setcca,
-  .getcca       = at86rf23x_getcca,
   .ioctl        = at86rf23x_ioctl,
-  .energydetect = at86rf23x_energydetect,
   .rxenable     = at86rf23x_rxenable,
   .transmit     = at86rf23x_transmit
 };
@@ -1144,6 +1130,24 @@ static int at86rf23x_getcca(FAR struct ieee802154_radio_s *ieee,
 }
 
 /****************************************************************************
+ * Name: at86rf23x_energydetect
+ *
+ * Description:
+ *   Perform energy detection scan. TODO: Need to implement.
+ *
+ ****************************************************************************/
+
+static int at86rf23x_energydetect(FAR struct ieee802154_radio_s *ieee,
+                                  FAR uint8_t *energy)
+{
+#warning at86rf23x_energydetect not implemented.
+
+  /* Not yet implemented */
+
+  return ERROR;
+}
+
+/****************************************************************************
  * Name: at86rf23x_ioctl
  *
  * Description:
@@ -1235,23 +1239,6 @@ static int at86rf23x_ioctl(FAR struct ieee802154_radio_s *ieee, int cmd,
       default:
         return -ENOTTY;
     }
-}
-
-/****************************************************************************
- * Name: at86rf23x_energydetect
- *
- * Description:
- *   Perform energy detection scan. TODO: Need to implement.
- *
- ****************************************************************************/
-static int at86rf23x_energydetect(FAR struct ieee802154_radio_s *ieee,
-                                  FAR uint8_t *energy)
-{
-#warning at86rf23x_energydetect not implemented.
-
-  /* Not yet implemented */
-
-  return ERROR;
 }
 
 /****************************************************************************

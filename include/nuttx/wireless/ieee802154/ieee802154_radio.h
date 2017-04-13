@@ -178,47 +178,8 @@ struct ieee802154_radio_s;
 
 struct ieee802154_radioops_s
 {
-  CODE int (*setchannel)(FAR struct ieee802154_radio_s *dev,
-             uint8_t channel);
-  CODE int (*getchannel)(FAR struct ieee802154_radio_s *dev,
-             FAR uint8_t *channel);
-
-  CODE int (*setpanid)(FAR struct ieee802154_radio_s *dev, uint16_t panid);
-  CODE int (*getpanid)(FAR struct ieee802154_radio_s *dev,
-             FAR uint16_t *panid);
-
-  CODE int (*setsaddr)(FAR struct ieee802154_radio_s *dev, uint16_t saddr);
-  CODE int (*getsaddr)(FAR struct ieee802154_radio_s *dev,
-             FAR uint16_t *saddr);
-
-  CODE int (*seteaddr)(FAR struct ieee802154_radio_s *dev,
-             FAR uint8_t *laddr);
-  CODE int (*geteaddr)(FAR struct ieee802154_radio_s *dev,
-             FAR uint8_t *laddr);
-
-  CODE int (*setpromisc)(FAR struct ieee802154_radio_s *dev, bool promisc);
-  CODE int (*getpromisc)(FAR struct ieee802154_radio_s *dev,
-             FAR bool *promisc);
-
-  CODE int (*setdevmode)(FAR struct ieee802154_radio_s *dev,
-             uint8_t devmode);
-  CODE int (*getdevmode)(FAR struct ieee802154_radio_s *dev,
-             FAR uint8_t *devmode);
-
-  CODE int (*settxpower)(FAR struct ieee802154_radio_s *dev,
-             int32_t txpwr);  /* unit = 1 mBm = 1/100 dBm */
-  CODE int (*gettxpower)(FAR struct ieee802154_radio_s *dev,
-             FAR int32_t *txpwr);
-
-  CODE int (*setcca)(FAR struct ieee802154_radio_s *dev,
-             FAR struct ieee802154_cca_s *cca);
-  CODE int (*getcca)(FAR struct ieee802154_radio_s *dev,
-             FAR struct ieee802154_cca_s *cca);
-
   CODE int (*ioctl)(FAR struct ieee802154_radio_s *ieee, int cmd,
              unsigned long arg);
-  CODE int (*energydetect)(FAR struct ieee802154_radio_s *dev,
-             FAR uint8_t *energy);
   CODE int (*rxenable)(FAR struct ieee802154_radio_s *dev, bool state,
              FAR struct ieee802154_packet_s *packet);
   CODE int (*transmit)(FAR struct ieee802154_radio_s *dev,
