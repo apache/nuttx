@@ -991,10 +991,81 @@ static int mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev)
 static int mrf24j40_ioctl(FAR struct ieee802154_radio_s *ieee, int cmd,
                           unsigned long arg)
 {
-  FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)ieee;
+  FAR struct mrf24j40_radio_s *dev =
+    (FAR struct mrf24j40_radio_s *)ieee;
+  FAR union ieee802154_radioarg_u *u; =
+    (FAR union ieee802154_radioarg_u *)((uintptr_t)arg)
 
   switch(cmd)
     {
+      case PHY802154IOC_SET_CHAN:
+        ret = mrf24j40_setchannel(ieee, u.channel);
+        break;
+
+      case PHY802154IOC_GET_CHAN:
+        ret =  mrf24j40_getchannel(ieee, &u.channel);
+        break;
+
+      case PHY802154IOC_SET_PANID:
+        ret = mrf24j40_setpanid(ieee, u.panid);
+        break;
+
+      case PHY802154IOC_GET_PANID:
+        ret = mrf24j40_getpanid(ieee, &u.panid);
+        break;
+
+      case PHY802154IOC_SET_SADDR:
+        ret = mrf24j40_setsaddr(ieee, u.saddr);
+        break;
+
+      case PHY802154IOC_GET_SADDR:
+        ret = mrf24j40_getsaddr(ieee, &u.saddr);
+        break;
+
+      case PHY802154IOC_SET_EADDR:
+        ret = mrf24j40_seteaddr(ieee, u.eaddr);
+        break;
+
+      case PHY802154IOC_GET_EADDR:
+        ret = mrf24j40_geteaddr(ieee, u.eaddr);
+        break;
+
+      case PHY802154IOC_SET_PROMISC:
+        ret = mrf24j40_setpromisc(ieee, u.promisc);
+        break;
+
+      case PHY802154IOC_GET_PROMISC:
+        ret = mrf24j40_getpromisc(ieee, &u.promisc);
+        break;
+
+      case PHY802154IOC_SET_DEVMODE:
+        ret = mrf24j40_setdevmode(ieee, u.devmode);
+        break;
+
+      case PHY802154IOC_GET_DEVMODE:
+        ret = mrf24j40_getdevmode(ieee, &u.devmode);
+        break;
+
+      case PHY802154IOC_SET_TXPWR:
+        ret = mrf24j40_settxpower(ieee, u.txpwr);
+        break;
+
+      case PHY802154IOC_GET_TXPWR:
+        ret = mrf24j40_gettxpower(ieee, &u.txpwr);
+        break;
+
+      case PHY802154IOC_SET_CCA:
+        ret = mrf24j40_setcca(ieee, &u.cca);
+        break;
+
+      case PHY802154IOC_GET_CCA:
+        ret = mrf24j40_getcca(ieee, &u.cca);
+        break;
+
+      case PHY802154IOC_ENERGYDETECT:
+        ret = mrf24j40_energydetect(ieee, &u.energy);
+        break;
+
       case 1000:
         return mrf24j40_regdump(dev);
 

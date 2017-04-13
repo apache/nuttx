@@ -1154,10 +1154,81 @@ static int at86rf23x_getcca(FAR struct ieee802154_radio_s *ieee,
 static int at86rf23x_ioctl(FAR struct ieee802154_radio_s *ieee, int cmd,
                            unsigned long arg)
 {
-  FAR struct at86rf23x_dev_s *dev = (FAR struct at86rf23x_dev_s *)ieee;
+  FAR struct at86rf23x_dev_s *dev =
+    (FAR struct at86rf23x_dev_s *)ieee;
+  FAR union ieee802154_radioarg_u *u; =
+    (FAR union ieee802154_radioarg_u *)((uintptr_t)arg)
 
   switch (cmd)
     {
+      case PHY802154IOC_SET_CHAN:
+        ret = at86rf23x_setchannel(ieee, u.channel);
+        break;
+
+      case PHY802154IOC_GET_CHAN:
+        ret =  at86rf23x_getchannel(ieee, &u.channel);
+        break;
+
+      case PHY802154IOC_SET_PANID:
+        ret = at86rf23x_setpanid(ieee, u.panid);
+        break;
+
+      case PHY802154IOC_GET_PANID:
+        ret = at86rf23x_getpanid(ieee, &u.panid);
+        break;
+
+      case PHY802154IOC_SET_SADDR:
+        ret = at86rf23x_setsaddr(ieee, u.saddr);
+        break;
+
+      case PHY802154IOC_GET_SADDR:
+        ret = at86rf23x_getsaddr(ieee, &u.saddr);
+        break;
+
+      case PHY802154IOC_SET_EADDR:
+        ret = at86rf23x_seteaddr(ieee, u.eaddr);
+        break;
+
+      case PHY802154IOC_GET_EADDR:
+        ret = at86rf23x_geteaddr(ieee, u.eaddr);
+        break;
+
+      case PHY802154IOC_SET_PROMISC:
+        ret = at86rf23x_setpromisc(ieee, u.promisc);
+        break;
+
+      case PHY802154IOC_GET_PROMISC:
+        ret = at86rf23x_getpromisc(ieee, &u.promisc);
+        break;
+
+      case PHY802154IOC_SET_DEVMODE:
+        ret = at86rf23x_setdevmode(ieee, u.devmode);
+        break;
+
+      case PHY802154IOC_GET_DEVMODE:
+        ret = at86rf23x_getdevmode(ieee, &u.devmode);
+        break;
+
+      case PHY802154IOC_SET_TXPWR:
+        ret = at86rf23x_settxpower(ieee, u.txpwr);
+        break;
+
+      case PHY802154IOC_GET_TXPWR:
+        ret = at86rf23x_gettxpower(ieee, &u.txpwr);
+        break;
+
+      case PHY802154IOC_SET_CCA:
+        ret = at86rf23x_setcca(ieee, &u.cca);
+        break;
+
+      case PHY802154IOC_GET_CCA:
+        ret = at86rf23x_getcca(ieee, &u.cca);
+        break;
+
+      case PHY802154IOC_ENERGYDETECT:
+        ret = at86rf23x_energydetect(ieee, &u.energy);
+        break;
+
       case 1000:
         return at86rf23x_regdump(dev);
 

@@ -99,6 +99,8 @@
 
 #define PHY802154IOC_ENERGYDETECT     _PHY802154IOC(0x0011)
 
+#define EADDR_SIZE                    8  /* REVISIT */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -129,15 +131,15 @@ struct ieee802154_packet_s
 
 union ieee802154_radioarg_u
 {
-  uint8_t  channel;             /* PHY802154IOC_GET/SET_CHAN */
-  uint16_t panid;               /* PHY802154IOC_GET/SET_PANID */
-  uint16_t saddr;               /* PHY802154IOC_GET/SET_SADDR */
-  uint16_t laddr;               /* PHY802154IOC_GET/SET_EADDR */
-  bool     promisc;             /* PHY802154IOC_GET/SET_EADDR */
-  bool     devmode;             /* PHY802154IOC_GET/SET_DEVMODE */
-  int32_t  txpwr;               /* PHY802154IOC_GET/SET_TXPWR */
-  bool     energy               /* PHY802154IOC_ENERGYDETECT */
-  struct ieee802154_cca_s cca;  /* PHY802154IOC_GET/SET_CCA */
+  uint8_t  channel;            /* PHY802154IOC_GET/SET_CHAN */
+  uint16_t panid;              /* PHY802154IOC_GET/SET_PANID */
+  uint16_t saddr;              /* PHY802154IOC_GET/SET_SADDR */
+  uint8_t  eaddr[EADDR_SIZE];  /* PHY802154IOC_GET/SET_EADDR */
+  bool     promisc;            /* PHY802154IOC_GET/SET_EADDR */
+  uint8_t  devmode;            /* PHY802154IOC_GET/SET_DEVMODE */
+  int32_t  txpwr;              /* PHY802154IOC_GET/SET_TXPWR */
+  bool     energy              /* PHY802154IOC_ENERGYDETECT */
+  struct ieee802154_cca_s cca; /* PHY802154IOC_GET/SET_CCA */
 };
 
 #ifdef CONFIG_NET_6LOWPAN
