@@ -43,9 +43,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <semaphore.h>
+
+#ifdef CONFIG_NET_6LOWPAN
+#  include <net/if.h>
+#endif
+
 #include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
@@ -97,6 +103,8 @@
  * Public Types
  ****************************************************************************/
 
+/* Structures used with IEEE802.15.4 radio interface operations *************/
+
 struct ieee802154_cca_s
 {
   uint8_t use_ed  : 1; /* CCA using ED */
@@ -105,12 +113,63 @@ struct ieee802154_cca_s
   uint8_t csth;        /* Carrier sense threshold for CCA */
 };
 
-struct ieee802154_packet_s 
-{ 
-  uint8_t len; 
-  uint8_t data[127]; 
-  uint8_t lqi; 
-  uint8_t rssi; 
+struct ieee802154_packet_s
+{
+  uint8_t len;
+  uint8_t data[127];
+  uint8_t lqi;
+  uint8_t rssi;
+};
+
+/* IOCTL command data argument **********************************************/
+
+/* A pointer to this structure is passed as the argument of each IOCTL
+ * command.
+ */
+
+union ieee802154_radioarg_u
+{
+  uint8_t  channel;             /* PHY802154IOC_GET/SET_CHAN */
+  uint16_t panid;               /* PHY802154IOC_GET/SET_PANID */
+  uint16_t saddr;               /* PHY802154IOC_GET/SET_SADDR */
+  uint16_t laddr;               /* PHY802154IOC_GET/SET_EADDR */
+  bool     promisc;             /* PHY802154IOC_GET/SET_EADDR */
+  bool     devmode;             /* PHY802154IOC_GET/SET_DEVMODE */
+  int32_t  txpwr;               /* PHY802154IOC_GET/SET_TXPWR */
+  bool     energy               /* PHY802154IOC_ENERGYDETECT */
+  struct ieee802154_cca_s cca;  /* PHY802154IOC_GET/SET_CCA */
+};
+
+#ifdef CONFIG_NET_6LOWPAN
+/* For the case of network IOCTLs, the network IOCTL to the MAC network
+ * driver will include a device name like "wpan0" as the destination of
+ * the IOCTL command.  The MAC layer will forward only the payload union
+ * to the radio IOCTL method.
+ */
+
+struct ieee802154_netradio_s
+{
+  char ifr_name[IFNAMSIZ];      /* Interface name, e.g. "wpan0" */
+  union ieee802154_radioarg_u   /* Data payload */
+};
+#endif
+
+/* IEEE802.15.4 Radio Interface Operations **********************************/
+
+struct ieee802154_cca_s
+{
+  uint8_t use_ed  : 1; /* CCA using ED */
+  uint8_t use_cs  : 1; /* CCA using carrier sense */
+  uint8_t edth;        /* Energy detection threshold for CCA */
+  uint8_t csth;        /* Carrier sense threshold for CCA */
+};
+
+struct ieee802154_packet_s
+{
+  uint8_t len;
+  uint8_t data[127];
+  uint8_t lqi;
+  uint8_t rssi;
 };
 
 struct ieee802154_radio_s;
@@ -163,7 +222,7 @@ struct ieee802154_radioops_s
   CODE int (*transmit)(FAR struct ieee802154_radio_s *dev,
              FAR struct ieee802154_packet_s *packet);
 
-  /*TODO beacon/sf order*/
+  /* TODO beacon/sf order */
 };
 
 struct ieee802154_radio_s
