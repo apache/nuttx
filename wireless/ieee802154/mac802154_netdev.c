@@ -214,17 +214,18 @@ static int  macnet_txavail(FAR struct net_driver_s *dev);
 
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
 static int  macnet_addmac(FAR struct net_driver_s *dev,
-                          FAR const uint8_t *mac);
+              FAR const uint8_t *mac);
 #ifdef CONFIG_NET_IGMP
 static int  macnet_rmmac(FAR struct net_driver_s *dev,
-                         FAR const uint8_t *mac);
+              FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NET_ICMPv6
 static void macnet_ipv6multicast(FAR struct macnet_driver_s *priv);
 #endif
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
-static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd, long arg);
+static int  macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
+              unsigned long arg);
 #endif
 
 /****************************************************************************
@@ -1359,7 +1360,8 @@ static void macnet_ipv6multicast(FAR struct macnet_driver_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_IOCTL
-static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd, long arg)
+static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
+                        unsigned long arg)
 {
   FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)dev->d_private;
   int ret = -EINVAL;
