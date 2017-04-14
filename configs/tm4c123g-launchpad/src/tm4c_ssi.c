@@ -59,7 +59,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG_SPI_INFO)
+#ifdef CONFIG_DEBUG_SPI_INFO
 #  define ssi_dumpgpio(m) tiva_dumpgpio(SDCCS_GPIO, m)
 #else
 #  define ssi_dumpgpio(m)

@@ -136,6 +136,10 @@ struct skel_driver_s
 
 /* A single packet buffer per device is used here.  There might be multiple
  * packet buffers in a more complex, pipelined design.
+ *
+ * NOTE that if CONFIG_skeleton_NINTERFACES were greater than 1, you would
+ * need a minimum on one packetbuffer per instance.  Much better to be
+ * allocated dynamically.
  */
 
 static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
@@ -186,13 +190,16 @@ static int skel_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 static void skel_ipv6multicast(FAR struct skel_driver_s *priv);
 #endif
 #endif
+#ifdef CONFIG_NETDEV_IOCTL
+static int skel_ioctl(FAR struct net_driver_s *dev, int cmd, long arg);
+#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: skel_transmit
+ * Name: skel_transmit
  *
  * Description:
  *   Start hardware transmission.  Called either from the txdone interrupt
@@ -233,7 +240,7 @@ static int skel_transmit(FAR struct skel_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: skel_txpoll
+ * Name: skel_txpoll
  *
  * Description:
  *   The transmitter is available, check if the network has any outgoing
@@ -305,7 +312,7 @@ static int skel_txpoll(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: skel_receive
+ * Name: skel_receive
  *
  * Description:
  *   An interrupt was received indicating the availability of a new RX packet
@@ -447,7 +454,7 @@ static void skel_receive(FAR struct skel_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: skel_txdone
+ * Name: skel_txdone
  *
  * Description:
  *   An interrupt was received indicating that the last TX packet(s) is done
@@ -487,7 +494,7 @@ static void skel_txdone(FAR struct skel_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: skel_interrupt_work
+ * Name: skel_interrupt_work
  *
  * Description:
  *   Perform interrupt related work from the worker thread
@@ -539,7 +546,7 @@ static void skel_interrupt_work(FAR void *arg)
 }
 
 /****************************************************************************
- * Function: skel_interrupt
+ * Name: skel_interrupt
  *
  * Description:
  *   Hardware interrupt handler
@@ -557,7 +564,9 @@ static void skel_interrupt_work(FAR void *arg)
 
 static int skel_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  FAR struct skel_driver_s *priv = &g_skel[0];
+  FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)arg;
+
+  DEBUGASSERT(priv != NULL);
 
   /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
    * also disabled if the TX timeout event occurs, there can be no race
@@ -584,7 +593,7 @@ static int skel_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 
 /****************************************************************************
- * Function: skel_txtimeout_work
+ * Name: skel_txtimeout_work
  *
  * Description:
  *   Perform TX timeout related work from the worker thread
@@ -625,7 +634,7 @@ static void skel_txtimeout_work(FAR void *arg)
 }
 
 /****************************************************************************
- * Function: skel_txtimeout_expiry
+ * Name: skel_txtimeout_expiry
  *
  * Description:
  *   Our TX watchdog timed out.  Called from the timer interrupt handler.
@@ -660,7 +669,7 @@ static void skel_txtimeout_expiry(int argc, wdparm_t arg, ...)
 }
 
 /****************************************************************************
- * Function: skel_poll_process
+ * Name: skel_poll_process
  *
  * Description:
  *   Perform the periodic poll.  This may be called either from watchdog
@@ -681,7 +690,7 @@ static inline void skel_poll_process(FAR struct skel_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: skel_poll_work
+ * Name: skel_poll_work
  *
  * Description:
  *   Perform periodic polling from the worker thread
@@ -730,7 +739,7 @@ static void skel_poll_work(FAR void *arg)
 }
 
 /****************************************************************************
- * Function: skel_poll_expiry
+ * Name: skel_poll_expiry
  *
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
@@ -757,7 +766,7 @@ static void skel_poll_expiry(int argc, wdparm_t arg, ...)
 }
 
 /****************************************************************************
- * Function: skel_ifup
+ * Name: skel_ifup
  *
  * Description:
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
@@ -812,7 +821,7 @@ static int skel_ifup(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: skel_ifdown
+ * Name: skel_ifdown
  *
  * Description:
  *   NuttX Callback: Stop the interface.
@@ -855,7 +864,7 @@ static int skel_ifdown(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: skel_txavail_work
+ * Name: skel_txavail_work
  *
  * Description:
  *   Perform an out-of-cycle poll on the worker thread.
@@ -898,7 +907,7 @@ static void skel_txavail_work(FAR void *arg)
 }
 
 /****************************************************************************
- * Function: skel_txavail
+ * Name: skel_txavail
  *
  * Description:
  *   Driver callback invoked when new TX data is available.  This is a
@@ -936,7 +945,7 @@ static int skel_txavail(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: skel_addmac
+ * Name: skel_addmac
  *
  * Description:
  *   NuttX Callback: Add the specified MAC address to the hardware multicast
@@ -965,7 +974,7 @@ static int skel_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
- * Function: skel_rmmac
+ * Name: skel_rmmac
  *
  * Description:
  *   NuttX Callback: Remove the specified MAC address from the hardware multicast
@@ -994,7 +1003,7 @@ static int skel_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
- * Function: skel_ipv6multicast
+ * Name: skel_ipv6multicast
  *
  * Description:
  *   Configure the IPv6 multicast MAC address.
@@ -1068,11 +1077,50 @@ static void skel_ipv6multicast(FAR struct skel_driver_s *priv)
 #endif /* CONFIG_NET_ICMPv6 */
 
 /****************************************************************************
+ * Name: skel_ioctl
+ *
+ * Description:
+ *   Handle network IOCTL commands directed to this device.
+ *
+ * Parameters:
+ *   dev - Reference to the NuttX driver state structure
+ *   cmd - The IOCTL command
+ *   arg - The argument for the IOCTL command
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_IOCTL
+static int skel_ioctl(FAR struct net_driver_s *dev, int cmd, long arg)
+{
+  FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)dev->d_private;
+  int ret;
+
+  /* Decode and dispatch the driver-specific IOCTL command */
+
+  switch (cmd)
+    {
+      /* Add cases here to support the IOCTL commands */
+
+      default:
+        nerr("ERROR: Unrecognized IOCTL command: %d\n", command);
+        return -ENOTTY;  /* Special return value for this case */
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: skel_initialize
+ * Name: skel_initialize
  *
  * Description:
  *   Initialize the Ethernet controller and driver
@@ -1101,7 +1149,7 @@ int skel_initialize(int intf)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(CONFIG_skeleton_IRQ, skel_interrupt, NULL))
+  if (irq_attach(CONFIG_skeleton_IRQ, skel_interrupt, priv))
     {
       /* We could not attach the ISR to the interrupt */
 
@@ -1118,6 +1166,9 @@ int skel_initialize(int intf)
 #ifdef CONFIG_NET_IGMP
   priv->sk_dev.d_addmac  = skel_addmac;   /* Add multicast MAC address */
   priv->sk_dev.d_rmmac   = skel_rmmac;    /* Remove multicast MAC address */
+#endif
+#ifdef CONFIG_NETDEV_IOCTL
+  priv->sk_dev.d_ioctl   = skel_ioctl;    /* Handle network IOCTL commands */
 #endif
   priv->sk_dev.d_private = (FAR void *)g_skel; /* Used to recover private state from dev */
 

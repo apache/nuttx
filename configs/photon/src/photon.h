@@ -90,6 +90,21 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Called either by board_intialize() if CONFIG_BOARD_INITIALIZE or by
+ *   board_app_initialize if CONFIG_LIB_BOARDCTL is selected.  This function
+ *   initializes and configures all on-board features appropriate for the
+ *   selected configuration.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_INITIALIZE)
+int stm32_bringup(void);
+#endif
+
+/****************************************************************************
  * Name: photon_watchdog_initialize()
  *
  * Description:

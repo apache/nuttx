@@ -140,12 +140,6 @@ FAR struct mtd_dev_s *mtd_temp;
   int ret;
 
   (void)ret;
-  
-#ifdef CONFIG_SCHED_INSTRUMENTATION
-  /* Configure CPU load estimation */
-
-  cpuload_initialize_once();
-#endif
 
 #ifdef HAVE_PROC
   /* mount the proc filesystem */
@@ -208,7 +202,7 @@ FAR struct mtd_dev_s *mtd_temp;
           return ret;
         }
       g_mtd_fs = mtd_temp;
-        
+
 #ifdef CONFIG_MTD_PARTITION
       {
         FAR struct mtd_geometry_s geo;
@@ -342,7 +336,7 @@ int board_ioctl(unsigned int cmd, uintptr_t arg)
            * 6 = CONFIG_N25QXXX_DUMMIES;
            * 0xeb = N25QXXX_FAST_READ_QUADIO;
            */
-          
+
           meminfo.flags   = QSPIMEM_READ | QSPIMEM_QUADIO;
           meminfo.addrlen = 3;
           meminfo.dummies = 6;    //CONFIG_N25QXXX_DUMMIES;
@@ -350,17 +344,17 @@ int board_ioctl(unsigned int cmd, uintptr_t arg)
           meminfo.addr    = 0;
           meminfo.buflen  = 0;
           meminfo.buffer  = NULL;
-          
+
           stm32l4_qspi_enter_memorymapped(g_qspi, &meminfo, 80000000);
         }
         break;
-      
+
       case BIOC_EXIT_MEMMAP:
         stm32l4_qspi_exit_memorymapped(g_qspi);
         break;
-      
+
 #endif
-      
+
       default:
           return -EINVAL;
         break;

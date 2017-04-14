@@ -306,7 +306,12 @@
 #define STM32L4_DMA2_CHAN6          (12)
 #define STM32L4_DMA2_CHAN7          (13)
 
-#define DMACHAN_SETTING(chan, sel)     ( ( ( (sel) & 0xff) << 8) | ( (chan) & 0xff) )
+/* DMA Channel settings include a channel and an alternative function.
+ * Channel is in bits 0..7
+ * Request number is in bits 8..15
+ */
+
+#define DMACHAN_SETTING(chan, req)     ((((req) & 0xff) << 8) | ((chan) & 0xff))
 #define DMACHAN_SETTING_CHANNEL_MASK   0x00FF
 #define DMACHAN_SETTING_CHANNEL_SHIFT  (0)
 #define DMACHAN_SETTING_FUNCTION_MASK  0xFF00
@@ -384,7 +389,7 @@
 
 #define DMACHAN_SPI1_RX_1       DMACHAN_SETTING(STM32L4_DMA1_CHAN2, 1)
 #define DMACHAN_SPI1_RX_2       DMACHAN_SETTING(STM32L4_DMA2_CHAN3, 4)
-#define DMACHAN_SPI1_TX_1       DMACHAN_SETTING(STM32L4_DMA1_CHAN3, 0)
+#define DMACHAN_SPI1_TX_1       DMACHAN_SETTING(STM32L4_DMA1_CHAN3, 1)
 #define DMACHAN_SPI1_TX_2       DMACHAN_SETTING(STM32L4_DMA2_CHAN4, 4)
 
 #define DMACHAN_SPI2_RX         DMACHAN_SETTING(STM32L4_DMA1_CHAN4, 1)

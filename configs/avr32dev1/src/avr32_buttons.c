@@ -120,15 +120,15 @@ void board_button_initialize(void)
  * Description:
  *   After board_button_initialize() has been called, board_buttons() may be
  *   called to collect the state of all buttons.  board_buttons() returns an
- *   8-bit bit set with each bit associated with a button.  See the BUTTON*
+ *   32-bit bit set with each bit associated with a button.  See the BUTTON*
  *   definitions in the board.h header file for the meaning of each bit in
  *   the returned value.
  *
  ****************************************************************************/
 
-uint8_t board_buttons(void)
+uint32_t board_buttons(void)
 {
-  uint8_t retval;
+  uint32_t retval;
 
   retval  = at32uc3_gpioread(PINMUX_GPIO_BUTTON1) ? 0 : BUTTON1;
   retval |= at32uc3_gpioread(PINMUX_GPIO_BUTTON2) ? 0 : BUTTON2;

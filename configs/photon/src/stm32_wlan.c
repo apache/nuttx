@@ -38,15 +38,18 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <debug.h>
 
-#include <arch/board/board.h>
 #include <nuttx/wireless/ieee80211/bcmf_sdio.h>
 #include <nuttx/wireless/ieee80211/bcmf_board.h>
-#include "photon.h"
+
+#include <arch/board/board.h>
 
 #include "stm32_gpio.h"
 #include "stm32_sdio.h"
+
+#include "photon.h"
 
 /****************************************************************************
  * Public Functions
@@ -105,25 +108,29 @@ int photon_wlan_initialize()
   struct sdio_dev_s *sdio_dev;
 
   /* Initialize sdio interface */
-  _info("Initializing SDIO slot %d\n", SDIO_WLAN0_SLOTNO);
+
+  wlinfo("Initializing SDIO slot %d\n", SDIO_WLAN0_SLOTNO);
 
   sdio_dev = sdio_initialize(SDIO_WLAN0_SLOTNO);
 
   if (!sdio_dev)
     {
-      _err("ERROR: Failed to initialize SDIO with slot %d\n",
+      wlerr("ERROR: Failed to initialize SDIO with slot %d\n",
              SDIO_WLAN0_SLOTNO);
       return ERROR;
     }
 
   /* Bind the SDIO interface to the bcmf driver */
+
   ret = bcmf_sdio_initialize(SDIO_WLAN0_MINOR, sdio_dev);
 
   if (ret != OK)
     {
-      _err("ERROR: Failed to bind SDIO to bcmf driver\n");
+      wlerr("ERROR: Failed to bind SDIO to bcmf driver\n");
+
       /* FIXME deinitialize sdio device */
       return ERROR;
     }
+
   return OK;
 }

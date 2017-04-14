@@ -601,8 +601,6 @@ config PTHREAD_CLEANUP_STACKSIZE
 		8 for a CPU with 32-bit addressing and 4 for a CPU with 16-bit
 		addressing.
 
-endmenu # Pthread Options
-
 config CANCELLATION_POINTS
 	bool "Cancellation points"
 	default n
@@ -610,6 +608,8 @@ config CANCELLATION_POINTS
 		Enable POSIX cancellation points for pthread_cancel().  If selected,
 		cancellation points will also used with the () task_delete() API even if
 		pthreads are not enabled.
+
+endmenu # Pthread Options
 
 menu "Performance Monitoring"
 

@@ -84,11 +84,11 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-#ifdef CONFIG_SCHED_INSTRUMENTATION
-  /* Configure CPU load estimation */
+#ifndef CONFIG_BOARD_INITIALIZE
+  /* Perform board-specific initialization */
 
-  cpuload_initialize_once();
-#endif
-
+  return stm32_bringup();
+#else
   return OK;
+#endif
 }

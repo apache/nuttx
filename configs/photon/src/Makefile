@@ -35,18 +35,24 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = stm32_boot.c
+CSRCS = stm32_boot.c stm32_bringup.c
 
 ifeq ($(CONFIG_PHOTON_DFU_BOOTLOADER),y)
 CSRCS += dfu_signature.c
+endif
+
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += stm32_appinit.c
 endif
 
 ifeq ($(CONFIG_BUTTONS),y)
 CSRCS += stm32_buttons.c
 endif
 
-ifeq ($(CONFIG_USERLED),y)
-CSRCS += stm32_leds.c
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += stm32_autoleds.c
+else
+CSRCS += stm32_userleds.c
 endif
 
 ifeq ($(CONFIG_PHOTON_WDG),y)
@@ -59,10 +65,6 @@ endif
 
 ifeq ($(CONFIG_STM32_OTGHS),y)
 CSRCS += stm32_usb.c
-endif
-
-ifeq ($(CONFIG_NSH_LIBRARY),y)
-CSRCS += stm32_appinit.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

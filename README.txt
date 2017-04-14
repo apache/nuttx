@@ -1750,6 +1750,8 @@ nuttx/
  |   |   `- README.txt
  |   `- README.txt
  |- net/
+ |   |- sixlowpan
+ |   |   `- README.txt
  |   `- README.txt
  |- syscall/
  |   `- README.txt

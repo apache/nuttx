@@ -88,6 +88,7 @@ static uint16_t sixlowpan_tcp_chksum(FAR struct ipv6tcp_hdr_s *ipv6tcp,
                                      FAR const uint8_t *buf, uint16_t buflen)
 {
   uint16_t upperlen;
+  uint16_t tcplen;
   uint16_t sum;
 
   /* The length reported in the IPv6 header is the length of the payload
@@ -115,9 +116,14 @@ static uint16_t sixlowpan_tcp_chksum(FAR struct ipv6tcp_hdr_s *ipv6tcp,
   sum = chksum(sum, (FAR uint8_t *)ipv6tcp->ipv6.srcipaddr,
                2 * sizeof(net_ipv6addr_t));
 
-  /* Sum the TCP header */
+  /* Sum the TCP header
+   *
+   * The TCP header length is encoded in the top 4 bits of the tcpoffset
+   * field (in units of 32-bit words).
+   */
 
-  sum = chksum(sum, (FAR uint8_t *)&ipv6tcp->tcp, TCP_HDRLEN);
+  tcplen = ((uint16_t)ipv6tcp->tcp.tcpoffset >> 4) << 2;
+  sum = chksum(sum, (FAR uint8_t *)&ipv6tcp->tcp, tcplen);
 
   /* Sum payload data. */
 
@@ -383,38 +389,62 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev)
 
   if (dev != NULL && dev->d_len > 0)
     {
-      FAR struct ipv6_hdr_s *ipv6hdr;
+      FAR struct ipv6tcp_hdr_s *ipv6hdr;
 
       /* The IPv6 header followed by a TCP headers should lie at the
        * beginning of d_buf since there is no link layer protocol header
        * and the TCP state machine should only response with TCP packets.
        */
 
-      ipv6hdr = (FAR struct ipv6_hdr_s *)(dev->d_buf);
+      ipv6hdr = (FAR struct ipv6tcp_hdr_s *)(dev->d_buf);
 
       /* The TCP data payload should follow the IPv6 header plus the
        * protocol header.
        */
 
-      if (ipv6hdr->proto != IP_PROTO_TCP)
+      if (ipv6hdr->ipv6.proto != IP_PROTO_TCP)
         {
-          nwarn("WARNING: Expected TCP protoype: %u\n", ipv6hdr->proto);
+          nwarn("WARNING: Expected TCP protoype: %u vs %s\n",
+                ipv6hdr->ipv6.proto, IP_PROTO_TCP);
         }
       else
         {
           struct rimeaddr_s destmac;
+          FAR uint8_t *buf;
+          uint16_t hdrlen;
+          uint16_t buflen;
 
           /* Get the Rime MAC address of the destination.  This assumes an
            * encoding of the MAC address in the IPv6 address.
            */
 
-          sixlowpan_rimefromip(ipv6hdr->destipaddr, &destmac);
+          sixlowpan_rimefromip(ipv6hdr->ipv6.destipaddr, &destmac);
 
-          /* Convert the outgoing packet into a frame list. */
+          /* Get the IPv6 + TCP combined header length.  The size of the TCP
+           * header is encoded in the top 4 bits of the tcpoffset field (in
+           * units of 32-bit words).
+           */
 
-          (void)sixlowpan_queue_frames(
-                  (FAR struct ieee802154_driver_s *)dev, ipv6hdr,
-                  dev->d_buf, dev->d_len, &destmac);
+          hdrlen = IPv6_HDRLEN + (((uint16_t)ipv6hdr->tcp.tcpoffset >> 4) << 2);
+
+          /* Drop the packet if the buffer length is less than this. */
+
+          if (hdrlen > dev->d_len)
+            {
+              nwarn("WARNING:  Dropping small TCP packet: %u < %u\n",
+                    buflen, hdrlen);
+            }
+          else
+            {
+              /* Convert the outgoing packet into a frame list. */
+
+              buf    = dev->d_buf + hdrlen;
+              buflen = dev->d_len - hdrlen;
+
+              (void)sixlowpan_queue_frames(
+                      (FAR struct ieee802154_driver_s *)dev, &ipv6hdr->ipv6,
+                      buf, buflen, &destmac);
+            }
         }
     }
 

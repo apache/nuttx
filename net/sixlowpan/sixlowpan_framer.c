@@ -125,11 +125,7 @@ static inline uint8_t sixlowpan_addrlen(uint8_t addrmode)
 
 static bool sixlowpan_addrnull(FAR uint8_t *addr)
 {
-#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
-  int i = 2;
-#else
-  int i = 8;
-#endif
+  int i = NET_6LOWPAN_RIMEADDR_SIZE;
 
   while (i-- > 0)
     {
@@ -354,10 +350,10 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
 
       /* Use short address mode if so configured */
 
-#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
-      params->fcf.dest_addr_mode = FRAME802154_SHORTADDRMODE;
-#else
+#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
       params->fcf.dest_addr_mode = FRAME802154_LONGADDRMODE;
+#else
+      params->fcf.dest_addr_mode = FRAME802154_SHORTADDRMODE;
 #endif
     }
 
@@ -543,14 +539,14 @@ int sixlowpan_framecreate(FAR struct ieee802154_driver_s *ieee,
 
   wlinfo("Frame type: %02x hdrlen: %d\n",
          params.fcf.frame_type, hdrlen);
-#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
-  wlinfo("Dest address: %02x:%02x\n",
-         params.dest_addr[0], params.dest_addr[1]);
-#else
+#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
   wlinfo("Dest address: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
          params.dest_addr[0], params.dest_addr[1], params.dest_addr[2],
          params.dest_addr[3], params.dest_addr[4], params.dest_addr[5],
          params.dest_addr[6], params.dest_addr[7]);
+#else
+  wlinfo("Dest address: %02x:%02x\n",
+         params.dest_addr[0], params.dest_addr[1]);
 #endif
 
   return hdrlen;

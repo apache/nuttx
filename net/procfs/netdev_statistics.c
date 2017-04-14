@@ -62,7 +62,9 @@
 
 static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile);
 static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile);
-
+#ifdef CONFIG_NET_IPv6
+static int netprocfs_dripaddress(FAR struct netprocfs_file_s *netfile);
+#endif
 #ifdef CONFIG_NETDEV_STATISTICS
 static int netprocfs_rxstatistics_header(FAR struct netprocfs_file_s *netfile);
 static int netprocfs_rxstatistics(FAR struct netprocfs_file_s *netfile);
@@ -83,6 +85,9 @@ static const linegen_t g_linegen[] =
 {
   netprocfs_linklayer,
   netprocfs_ipaddresses
+#ifdef CONFIG_NET_IPv6
+  , netprocfs_dripaddress
+#endif
 #ifdef CONFIG_NETDEV_STATISTICS
   , netprocfs_rxstatistics_header,
   netprocfs_rxstatistics,
@@ -151,12 +156,7 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
         {
           ieee = (FAR struct ieee802154_driver_s *)dev;
 
-#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
-          len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                          "%s\tLink encap:6loWPAN HWaddr %02x:%02x",
-                          dev->d_ifname,
-                          ieee->i_nodeaddr.u8[0], ieee->i_nodeaddr.u8[1]);
-#else /* CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 8 */
+#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
           len += snprintf(&netfile->line[len], NET_LINELEN - len,
                           "%s\tLink encap:6loWPAN HWaddr "
                           "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
@@ -165,6 +165,11 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
                           ieee->i_nodeaddr.u8[2], ieee->i_nodeaddr.u8[3],
                           ieee->i_nodeaddr.u8[4], ieee->i_nodeaddr.u8[5],
                           ieee->i_nodeaddr.u8[6], ieee->i_nodeaddr.u8[7]);
+#else
+          len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                          "%s\tLink encap:6loWPAN HWaddr %02x:%02x",
+                          dev->d_ifname,
+                          ieee->i_nodeaddr.u8[0], ieee->i_nodeaddr.u8[1]);
 #endif
         }
         break;
@@ -215,21 +220,21 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
 #elif defined(CONFIG_NET_6LOWPAN)
   ieee = (FAR struct ieee802154_driver_s *)dev;
 
-#if CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 2
-  len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                  "%s\tLink encap:6loWPAN HWaddr %02x:%02x at %s",
-                  dev->d_ifname,
-                  ieee->i_nodeaddr.u8[0], ieee->i_nodeaddr.u8[1],
-                  status);
-#else /* CONFIG_NET_6LOWPAN_RIMEADDR_SIZE == 8 */
+#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   "%s\tLink encap:6loWPAN HWaddr "
-                  "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x at %s",
+                  "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x at %s\n",
                   dev->d_ifname,
                   ieee->i_nodeaddr.u8[0], ieee->i_nodeaddr.u8[1],
                   ieee->i_nodeaddr.u8[2], ieee->i_nodeaddr.u8[3],
                   ieee->i_nodeaddr.u8[4], ieee->i_nodeaddr.u8[5],
                   ieee->i_nodeaddr.u8[6], ieee->i_nodeaddr.u8[7],
+                  status);
+#else
+  len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                  "%s\tLink encap:6loWPAN HWaddr %02x:%02x at %s\n",
+                  dev->d_ifname,
+                  ieee->i_nodeaddr.u8[0], ieee->i_nodeaddr.u8[1],
                   status);
 #endif
 #elif defined(CONFIG_NET_LOOPBACK)
@@ -292,7 +297,7 @@ static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile)
 
   addr.s_addr = dev->d_netmask;
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                  "Mask:%s\n", inet_ntoa(addr));
+                  "Mask:%s\n\n", inet_ntoa(addr));
 #endif
 
 #ifdef CONFIG_NET_IPv6
@@ -307,19 +312,42 @@ static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile)
       len += snprintf(&netfile->line[len], NET_LINELEN - len,
                       "\tinet6 addr:%s/%d\n", addrstr, preflen);
     }
+#endif
 
-  /* REVISIT: Show the IPv6 default router address */
+  return len;
+}
+
+/****************************************************************************
+ * Name: netprocfs_dripaddress
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+static int netprocfs_dripaddress(FAR struct netprocfs_file_s *netfile)
+{
+  FAR struct net_driver_s *dev;
+  char addrstr[INET6_ADDRSTRLEN];
+  uint8_t preflen;
+  int len = 0;
+
+  DEBUGASSERT(netfile != NULL && netfile->dev != NULL);
+  dev = netfile->dev;
+
+  /* Convert the 128 network mask to a human friendly prefix length */
+
+  preflen = net_ipv6_mask2pref(dev->d_ipv6netmask);
+
+
+  /* Show the IPv6 default router address */
 
   if (inet_ntop(AF_INET6, dev->d_ipv6draddr, addrstr, INET6_ADDRSTRLEN))
     {
       len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                      "\tinet6 DRaddr:%s/%d\n", addrstr, preflen);
+                      "\tinet6 DRaddr:%s/%d\n\n", addrstr, preflen);
     }
-#endif
 
-  len += snprintf(&netfile->line[len], NET_LINELEN - len, "\n");
   return len;
 }
+#endif
 
 /****************************************************************************
  * Name: netprocfs_rxstatistics_header
@@ -443,7 +471,7 @@ static int netprocfs_txstatistics_header(FAR struct netprocfs_file_s *netfile)
   DEBUGASSERT(netfile != NULL);
 
   return snprintf(netfile->line, NET_LINELEN, "\tTX: %-8s %-8s %-8s %-8s\n",
-                 "Queued", "Sent", "Erorts", "Timeouts");
+                 "Queued", "Sent", "Errors", "Timeouts");
 }
 #endif /* CONFIG_NETDEV_STATISTICS */
 

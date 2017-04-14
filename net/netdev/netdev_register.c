@@ -251,7 +251,8 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 
 #ifdef CONFIG_NET_TUN
           case NET_LL_TUN:        /* Virtual Network Device (TUN) */
-            dev->d_llhdrlen = 0;
+            dev->d_llhdrlen = 0;  /* This will be overwritten by tun_ioctl
+                                   * if used as a TAP (layer 2) device */
             dev->d_mtu      = CONFIG_NET_TUN_MTU;
 #ifdef CONFIG_NET_TCP
             dev->d_recvwndo = CONFIG_NET_TUN_TCP_RECVWNDO;

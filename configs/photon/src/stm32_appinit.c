@@ -2,7 +2,7 @@
  * config/photon/src/stm32_appinit.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Simon Piriou <spiriou31@gmail.com>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,23 +38,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
 
-#include <syslog.h>
+#include <sys/types.h>
+
+#include <nuttx/board.h>
 
 #include "photon.h"
-#include "stm32_wdg.h"
-#include <nuttx/input/buttons.h>
-#include <nuttx/leds/userled.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef OK
-#  define OK 0
-#endif
+#ifdef CONFIG_LIB_BOARDCTL
 
 /****************************************************************************
  * Public Functions
@@ -87,65 +78,13 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-  int ret = OK;
+#ifndef CONFIG_BOARD_INITIALIZE
+  /* Perform board initialization */
 
-#ifdef CONFIG_USERLED
-#ifdef CONFIG_USERLED_LOWER
-  /* Register the LED driver */
-
-  ret = userled_lower_initialize("/dev/userleds");
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
-      return ret;
-    }
+  return stm32_bringup();
 #else
-  board_userled_initialize();
-#endif /* CONFIG_USERLED_LOWER */
-#endif /* CONFIG_USERLED */
-
-#ifdef CONFIG_BUTTONS
-#ifdef CONFIG_BUTTONS_LOWER
-  /* Register the BUTTON driver */
-
-  ret = btn_lower_initialize("/dev/buttons");
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
-      return ret;
-    }
-#else
-  board_button_initialize();
-#endif /* CONFIG_BUTTONS_LOWER */
-#endif /* CONFIG_BUTTONS */
-
-#ifdef CONFIG_STM32_IWDG
-  stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
+  return OK;
 #endif
-
-#ifdef CONFIG_PHOTON_WDG
-
-  /* Start WDG kicker thread */
-
-  ret = photon_watchdog_initialize();
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "Failed to start watchdog thread: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_PHOTON_WLAN
-
-  /* Initialize wlan driver and hardware */
-
-  ret = photon_wlan_initialize();
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "Failed to initialize wlan: %d\n", ret);
-      return ret;
-    }
-#endif
-
-  return ret;
 }
+
+#endif /* CONFIG_LIB_BOARDCTL */

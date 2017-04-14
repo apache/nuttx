@@ -127,9 +127,9 @@ void board_button_initialize(void)
  *
  ****************************************************************************/
 
-uint8_t board_buttons(void)
+uint32_t board_buttons(void)
 {
-  uint8_t ret = 0;
+  uint32_t ret = 0;
   int i;
 
   /* Check that state of each key */

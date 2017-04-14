@@ -1,8 +1,8 @@
 /****************************************************************************
- * configs/photon/src/stm32_leds.c
+ * config/stm32f411e-disco/src/stm32_bringup.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Simon Piriou <spiriou31@gmail.com>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,45 +38,63 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/mount.h>
 #include <debug.h>
 
-#include <arch/board/board.h>
-#include "photon.h"
+#include "stm32.h"
 
-#include "stm32_gpio.h"
+#ifdef CONFIG_STM32_OTGFS
+#  include "stm32_usbhost.h"
+#endif
+
+#include "stm32f411e-disco.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_userled_initialize
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
+ *
+ *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
+ *
  ****************************************************************************/
 
-void board_userled_initialize(void)
+int stm32_bringup(void)
 {
-  /* Configure Photon LED gpio as output */
+  int ret = OK;
 
-  stm32_configgpio(GPIO_LED1);
-}
+#if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
+  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
+   * will monitor for USB connection and disconnection events.
+   */
 
-/****************************************************************************
- * Name: board_userled
- ****************************************************************************/
-
-void board_userled(int led, bool ledon)
-{
-  if (led == BOARD_LED1)
+  ret = stm32_usbhost_initialize();
+  if (ret != OK)
     {
-      stm32_gpiowrite(GPIO_LED1, ledon);
+      uerr("ERROR: Failed to initialize USB host: %d\n", ret);
+      return ret;
     }
-}
+#endif
 
-/****************************************************************************
- * Name: board_userled_all
- ****************************************************************************/
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
 
-void board_userled_all(uint8_t ledset)
-{
-  stm32_gpiowrite(GPIO_LED1, !!(ledset & BOARD_LED1_BIT));
+  ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to mount procfs at %s: %d\n",
+           STM32_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
+  return ret;
 }

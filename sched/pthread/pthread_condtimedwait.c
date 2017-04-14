@@ -167,9 +167,10 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                            FAR const struct timespec *abstime)
 {
   FAR struct tcb_s *rtcb = this_task();
+  irqstate_t flags;
+  uint16_t oldstate;
   int ticks;
   int mypid = (int)getpid();
-  irqstate_t flags;
   int ret = OK;
   int status;
 
@@ -316,7 +317,11 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                   /* Reacquire the mutex (retaining the ret). */
 
                   sinfo("Re-locking...\n");
+
+                  oldstate = pthread_disable_cancel();
                   status = pthread_mutex_take(mutex, false);
+                  pthread_enable_cancel(oldstate);
+
                   if (status == OK)
                     {
                       mutex->pid = mypid;

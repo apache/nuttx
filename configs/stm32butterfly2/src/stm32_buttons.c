@@ -92,9 +92,9 @@ void board_button_initialize(void)
  *      Reads keys
  ****************************************************************************/
 
-uint8_t board_buttons(void)
+uint32_t board_buttons(void)
 {
-  uint8_t rv = 0;
+  uint32_t rv = 0;
   int i;
 
   for (i = 0; i != NUM_BUTTONS; ++i)

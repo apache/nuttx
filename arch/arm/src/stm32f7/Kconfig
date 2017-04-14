@@ -1634,7 +1634,7 @@ config SERIAL_DISABLE_REORDERING
 
 config STM32F7_FLOWCONTROL_BROKEN
 	bool "Use Software UART RTS flow control"
-	depends on STM32F7_USART
+	depends on STM32F7_USART && SERIAL_IFLOWCONTROL_WATERMARKS
 	default n
 	---help---
 		Enable UART RTS flow control using Software. Because STM

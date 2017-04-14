@@ -220,43 +220,56 @@
 
 /* Warnings for potentially unsafe configuration combinations. */
 
+#if defined(CONFIG_STM32F7_FLOWCONTROL_BROKEN) && \
+    !defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS)
+#  error "CONFIG_STM32F7_FLOWCONTROL_BROKEN requires \
+          CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS to be enabled."
+#endif
+
+#ifndef CONFIG_STM32F7_FLOWCONTROL_BROKEN
 /* Combination of RXDMA + IFLOWCONTROL does not work as one might expect.
  * Since RXDMA uses circular DMA-buffer, DMA will always keep reading new
  * data from USART peripheral even if DMA buffer underruns. Thus this
  * combination only does following: RTS is asserted on USART setup and
  * deasserted on shutdown and does not perform actual RTS flow-control.
+ *
+ * With SW flow-control, RTS is asserted before UART receive buffer fully
+ * fills, thus preventing data loss if application is slow to process data
+ * from serial device node. However, if RxDMA interrupt is blocked for too
+ * long, data loss is still possible as SW flow-control would also be
+ * blocked.
  */
 
-#if defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_IFLOWCONTROL)
-#  warning "RXDMA and IFLOWCONTROL both enabled for USART1. \
-            This combination can lead to data loss."
-#endif
+# if defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_IFLOWCONTROL)
+#    warning "RXDMA and IFLOWCONTROL both enabled for USART1. \
+              This combination can lead to data loss."
+#  endif
 
-#if defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_IFLOWCONTROL)
-#  warning "RXDMA and IFLOWCONTROL both enabled for USART2. \
-            This combination can lead to data loss."
-#endif
+#  if defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_IFLOWCONTROL)
+#    warning "RXDMA and IFLOWCONTROL both enabled for USART2. \
+              This combination can lead to data loss."
+#  endif
 
-#if defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_IFLOWCONTROL)
-#  warning "RXDMA and IFLOWCONTROL both enabled for USART3. \
-            This combination can lead to data loss."
-#endif
+#  if defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_IFLOWCONTROL)
+#    warning "RXDMA and IFLOWCONTROL both enabled for USART3. \
+              This combination can lead to data loss."
+#  endif
 
-#if defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_IFLOWCONTROL)
-#  warning "RXDMA and IFLOWCONTROL both enabled for USART6. \
-            This combination can lead to data loss."
-#endif
+#  if defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_IFLOWCONTROL)
+#    warning "RXDMA and IFLOWCONTROL both enabled for USART6. \
+              This combination can lead to data loss."
+#  endif
 
-#if defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_IFLOWCONTROL)
-#  warning "RXDMA and IFLOWCONTROL both enabled for UART7. \
-            This combination can lead to data loss."
-#endif
+#  if defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_IFLOWCONTROL)
+#    warning "RXDMA and IFLOWCONTROL both enabled for UART7. \
+              This combination can lead to data loss."
+#  endif
 
-#if defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_IFLOWCONTROL)
-#  warning "RXDMA and IFLOWCONTROL both enabled for UART8. \
-            This combination can lead to data loss."
-#endif
-
+#  if defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_IFLOWCONTROL)
+#    warning "RXDMA and IFLOWCONTROL both enabled for UART8. \
+              This combination can lead to data loss."
+#  endif
+#endif /* CONFIG_STM32F7_FLOWCONTROL_BROKEN */
 
 /****************************************************************************
  * Private Types
@@ -2211,6 +2224,22 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
       /* Assert/de-assert nRTS set it high resume/stop sending */
 
       stm32_gpiowrite(priv->rts_gpio, upper);
+
+      if (upper)
+        {
+          /* With heavy Rx traffic, RXNE might be set and data pending.
+           * Returning 'true' in such case would cause RXNE left unhandled
+           * and causing interrupt storm. Sending end might be also be slow
+           * to react on nRTS, and returning 'true' here would prevent
+           * processing that data.
+           *
+           * Therefore, return 'false' so input data is still being processed
+           * until sending end reacts on nRTS signal and stops sending more.
+           */
+
+          return false;
+        }
+
       return upper;
     }
 

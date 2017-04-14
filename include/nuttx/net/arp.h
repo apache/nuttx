@@ -69,6 +69,7 @@
  */
 
 #define ARPHRD_ETHER        1    /* Ethernet */
+#define ARPHRD_IEEE80211    801  /* IEEE 802.11 */
 #define ARPHRD_IEEE802154   804  /* IEEE 802.15.4 */
 
 /****************************************************************************

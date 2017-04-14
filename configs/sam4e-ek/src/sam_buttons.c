@@ -130,14 +130,14 @@ void board_button_initialize(void)
  * Description:
  *   After board_button_initialize() has been called, board_buttons() may be
  *   called to collect the state of all buttons.  board_buttons() returns an
- *   8-bit bit set with each bit associated with a button.  See the BUTTON*
+ *   32-bit bit set with each bit associated with a button.  See the BUTTON*
  *   definitions above for the meaning of each bit in the returned value.
  *
  ****************************************************************************/
 
-uint8_t board_buttons(void)
+uint32_t board_buttons(void)
 {
-  uint8_t retval;
+  uint32_t retval;
 
   retval  = sam_gpioread(GPIO_SCROLLUP)  ? 0 : BUTTON_SCROLLUP;
   retval |= sam_gpioread(GPIO_SCROLLDWN) ? 0 : BUTTON_SCROLLDOWN;

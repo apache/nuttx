@@ -96,7 +96,7 @@
  * from the button driver.
  */
 
-typedef uint8_t btn_buttonset_t;
+typedef uint32_t btn_buttonset_t;
 
 /* A reference to this structure is provided with the BTNIOC_POLLEVENTS IOCTL
  * command and describes the conditions under which the client would like

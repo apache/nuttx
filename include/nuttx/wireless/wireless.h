@@ -203,6 +203,37 @@
 
 #define IW_ESSID_MAX_SIZE   32
 
+/* Modes of operation */
+
+#define IW_MODE_AUTO        0    /* Let the driver decides */
+#define IW_MODE_ADHOC       1    /* Single cell network */
+#define IW_MODE_INFRA       2    /* Multi cell network, roaming, ... */
+#define IW_MODE_MASTER      3    /* Synchronisation master or Access Point */
+#define IW_MODE_REPEAT      4    /* Wireless Repeater (forwarder) */
+#define IW_MODE_SECOND      5    /* Secondary master/repeater (backup) */
+#define IW_MODE_MONITOR     6    /* Passive monitor (listen only) */
+#define IW_MODE_MESH        7    /* Mesh (IEEE 802.11s) network */
+#define IW_MODE_NFLAGS      8
+
+/* Frequency flags */
+
+#define IW_FREQ_AUTO        0    /* Let the driver decides */
+#define IW_FREQ_FIXED       1    /* Force a specific value */
+#define IW_FREQ_NFLAGS      2
+
+#define IW_MAX_FREQUENCIES  32   /* Max. frequencies in struct iw_range */
+
+/* Transmit Power flags available */
+
+#define IW_TXPOW_DBM        0  /* Value is in dBm */
+#define IW_TXPOW_MWATT      1  /* Value is in mW */
+#define IW_TXPOW_RELATIVE   2  /* Value is in arbitrary units */
+#define IW_TXPOW_NFLAGS     3
+
+/* Scan-related */
+
+#define IW_SCAN_MAX_DATA    4096 /* Maximum size of returned data */
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -296,15 +327,32 @@ union iwreq_data
   struct iw_param param;    /* Other small parameters */
   struct iw_point data;     /* Other large parameters */
 };
- 
+
 /* This is the structure used to exchange data in wireless IOCTLs.  This structure
  * is the same as 'struct ifreq', but defined for use with wireless IOCTLs.
  */
 
 struct iwreq
 {
-  char ifrn_name[IFNAMSIZ];    /* Interface name, e.g. "eth0" */
-  union iwreq_data u;          /* Data payload */
+  char ifr_name[IFNAMSIZ];  /* Interface name, e.g. "eth0" */
+  union iwreq_data u;       /* Data payload */
+};
+
+/* Range of parameters (currently only frequencies) */
+
+struct iw_range
+{
+  uint8_t num_frequency;  /* Number of frequencies in the freq[] list */
+  struct iw_freq freq[IW_MAX_FREQUENCIES];
+};
+
+/* A Wireless Event. */
+
+struct iw_event
+{
+  uint16_t           len;   /* Real length of ata */
+  uint16_t           cmd;   /* Wireless IOCTL command*/
+  union iwreq_data   u;     /* Fixed IOCTL payload */
 };
 
 #endif /* CONFIG_DRIVERS_WIRELESS */

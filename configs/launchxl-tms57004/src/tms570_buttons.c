@@ -154,12 +154,12 @@ void board_button_initialize(void)
  * Description:
  *   After board_button_initialize() has been called, board_buttons() may be
  *   called to collect the state of all buttons.  board_buttons() returns an
- *   8-bit bit set with each bit associated with a button.  See the BUTTON*
+ *   32-bit bit set with each bit associated with a button.  See the BUTTON*
  *   definitions above for the meaning of each bit in the returned value.
  *
  ****************************************************************************/
 
-uint8_t board_buttons(void)
+uint32_t board_buttons(void)
 {
   return tms570_gioread(GIO_BUTTON) ? BUTTON_GIOA7_BIT : 0;
 }
