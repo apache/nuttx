@@ -196,7 +196,7 @@
 #endif
 
 #ifdef USE_SERIALDRIVER
-#ifdef HAVE_USART
+#ifdef HAVE_UART
 
 /****************************************************************************
  * Private Types
@@ -2327,7 +2327,7 @@ static int stm32f0serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
   return OK;
 }
 #endif
-#endif /* HAVE_USART */
+#endif /* HAVE_UART */
 #endif /* USE_SERIALDRIVER */
 
 /****************************************************************************
@@ -2349,7 +2349,7 @@ static int stm32f0serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
 #ifdef USE_EARLYSERIALINIT
 void up_earlyserialinit(void)
 {
-#ifdef HAVE_USART
+#ifdef HAVE_UART
   unsigned i;
 
   /* Disable all USART interrupts */
@@ -2382,7 +2382,7 @@ void up_earlyserialinit(void)
 
 void up_serialinit(void)
 {
-#ifdef HAVE_USART
+#ifdef HAVE_UART
   char devname[16];
   unsigned i;
   unsigned minor = 0;
