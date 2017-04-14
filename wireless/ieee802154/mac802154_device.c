@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/ieee802154/mac802154_device.c
+ * wireless/ieee802154/mac802154_device.c
  *
  *   Copyright (C) 2017 Verge Inc. All rights reserved.
  *   Author: Anthony Merlino <anthony@vergeaero.com>

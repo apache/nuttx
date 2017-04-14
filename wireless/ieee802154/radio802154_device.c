@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/ieee802154/radio802154_device.c
+ * wireless/ieee802154/radio802154_device.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2014-2015 Sebastien Lorquet. All rights reserved.
