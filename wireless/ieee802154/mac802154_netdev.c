@@ -60,6 +60,8 @@
 #include <nuttx/wireless/ieee80154_device.h>
 #include <nuttx/wireless/ieee80154_mac.h>
 
+#include "mac802154.h"
+
 #ifdef CONFIG_NET_6LOWPAN
 
 /****************************************************************************

@@ -56,6 +56,8 @@
 #include <nuttx/net/sixlowpan.h>
 #include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
 
+#include "mac802154.h"
+
 #ifdef CONFIG_IEEE802154_LOOPBACK
 
 /****************************************************************************
