@@ -1,5 +1,5 @@
 ############################################################################
-# arch/arm/src/stm32f0/Make.defs
+# configs/stm32f0discovery/src/Makefile
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,67 +34,35 @@
 #
 ############################################################################
 
-HEAD_ASRC =
+-include $(TOPDIR)/Make.defs
 
-CMN_ASRCS  = up_exception.S up_saveusercontext.S up_fullcontextrestore.S
-CMN_ASRCS += up_switchcontext.S vfork.S
+ASRCS =
+CSRCS = stm32_boot.c stm32_bringup.c
 
-CMN_CSRCS  = up_allocateheap.c up_assert.c up_blocktask.c up_copyfullstate.c
-CMN_CSRCS += up_createstack.c up_mdelay.c up_udelay.c up_exit.c
-CMN_CSRCS += up_initialize.c up_initialstate.c up_interruptcontext.c
-CMN_CSRCS += up_puts.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
-CMN_CSRCS += up_releasepending.c up_releasestack.c up_reprioritizertr.c
-CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c up_stackframe.c
-CMN_CSRCS += up_systemreset.c up_unblocktask.c up_usestack.c up_doirq.c
-CMN_CSRCS += up_hardfault.c up_svcall.c up_vectors.c up_vfork.c
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += up_task_start.c up_pthread_start.c
-ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-CMN_CSRCS += up_signal_dispatch.c
-CMN_UASRCS += up_signal_handler.S
-endif
-endif
-
-ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += up_checkstack.c
-endif
-
-ifeq ($(CONFIG_DEBUG_FEATURES),y)
-CMN_CSRCS += up_dumpnvic.c
-endif
-
-CHIP_ASRCS  =
-CHIP_CSRCS  = stm32f0_clockconfig.c stm32f0_gpio.c stm32f0_idle.c
-CHIP_CSRCS += stm32f0_irq.c stm32f0_lowputc.c stm32f0_serial.c
-CHIP_CSRCS += stm32f0_start.c
-
-# Configuration-dependent STM32F0xx files
-
-ifneq ($(CONFIG_SCHED_TICKLESS),y)
-CHIP_CSRCS += stm32f0_timerisr.c
-endif
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CHIP_CSRCS += stm32f0_userspace.c
-endif
-
-ifeq ($(CONFIG_STM32F0_GPIOIRQ),y)
-CHIP_CSRCS += stm32f0_gpioint.c
-endif
-
-ifeq ($(CONFIG_ARCH_IRQPRIO),y)
-CHIP_CSRCS += stm32f0_irqprio.c
-endif
-
-ifeq ($(CONFIG_STM32F0_SPI0),y)
-CHIP_CSRCS += stm32f0_spi.c
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += stm32_autoleds.c
 else
-ifeq ($(CONFIG_STM32F0_SPI1),y)
-CHIP_CSRCS += stm32f0_spi.c
+CSRCS += stm32_userleds.c
 endif
+
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS += stm32_buttons.c
+endif
+
+ifeq ($(CONFIG_STM32F0_SPI),y)
+CSRCS += stm32_spi.c
 endif
 
 ifeq ($(CONFIG_PWM),y)
-CHIP_CSRCS += stm32f0_pwm.c
+CSRCS += stm32_pwm.c
 endif
+
+ifeq ($(CONFIG_QENCODER),y)
+CSRCS += stm32_qencoder.c
+endif
+
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += stm32_appinit.c
+endif
+
+include $(TOPDIR)/configs/Board.mk

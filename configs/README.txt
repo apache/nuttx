@@ -660,6 +660,10 @@ configs/stm32butterfly2
   Kamami stm32butterfly2 development board with optional ETH phy.  See
   https://kamami.pl/zestawy-uruchomieniowe-stm32/178507-stm32butterfly2.html
 
+configs/stm32f0discovery
+  STMicro STM32F-Discovery board based on the STMicro ARCH_CHIP_STM32F051R8
+  MCU.
+
 configs/stm32f103-minimum
   Generic STM32F103C8T6 Minimum ARM Development Board.
 
