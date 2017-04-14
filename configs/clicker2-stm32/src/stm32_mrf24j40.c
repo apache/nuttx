@@ -228,7 +228,7 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
 {
   FAR struct ieee802154_radio_s *radio;
 #ifdef CONFIG_IEEE802154_MAC
-  FAR struct ieee802154_mac_s *mac;
+  MACHANDLE mac;
 #endif
   FAR struct spi_dev_s *spi;
   int ret;

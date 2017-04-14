@@ -881,96 +881,12 @@ struct ieee802154_netmac_s
 };
 #endif
 
-/* MAC Interface Operations *************************************************/
+/* This is an opaque reference to the MAC's internal private state.  It is
+ * returned by mac802154_create() when it is created.  It may then be used
+ * at other interfaces in order to interact with the MAC.
+ */
 
-struct ieee802154_mac_s;   /* Forward reference */
-struct ieee802154_maccb_s; /* Forward reference */
-
-struct ieee802154_macops_s
-{
-  /* Requests, confirmed asynchronously via callbacks */
-
-  /* Transmit a data frame */
-
-  CODE int (*req_data)(FAR struct ieee802154_mac_s *mac,
-                       FAR struct ieee802154_data_req_s *req);
-
-  /* Cancel transmission of a data frame */
-
-  CODE int (*req_purge)(FAR struct ieee802154_mac_s *mac, uint8_t handle);
-
-  /* Start association with coordinator */
-
-  CODE int (*req_associate)(FAR struct ieee802154_mac_s *mac,
-                            FAR struct ieee802154_assoc_req_s *req);
-
-  /* Start disassociation with coordinator */
-
-  CODE int (*req_disassociate)(FAR struct ieee802154_mac_s *mac,
-                               FAR struct ieee802154_disassoc_req_s *req);
-
-  /* Read the PIB */
-
-  CODE int (*req_get)(FAR struct ieee802154_mac_s *mac,
-                      enum ieee802154_pib_attr_e attr);
-
-  /* Allocate or deallocate a GTS */
-
-  CODE int (*req_gts)(FAR struct ieee802154_mac_s *mac,
-                      FAR uint8_t *characteristics);
-
-  /* MAC layer reset */
-
-  CODE int (*req_reset)(FAR struct ieee802154_mac_s *mac, bool setdefaults);
-
-  /* PHY receiver control */
-
-  CODE int (*req_rxenable)(FAR struct ieee802154_mac_s *mac, bool deferrable,
-                           int ontime, int duration);
-
-  /* Start a network scan */
-
-  CODE int (*req_scan)(FAR struct ieee802154_mac_s *mac, uint8_t type,
-                       uint32_t channels, int duration);
-
-  /* Change the PIB */
-
-  CODE int (*req_set)(FAR struct ieee802154_mac_s *mac, int attribute,
-                      FAR uint8_t *value, int valuelen);
-
-  CODE int (*req_start)(FAR struct ieee802154_mac_s *mac, uint16_t panid,
-                        int channel, uint8_t bo, uint8_t fo, bool coord,
-                        bool batext, bool realign);
-
-  CODE int (*req_sync)(FAR struct ieee802154_mac_s *mac, int channel,
-                       bool track);
-
-  CODE int (*req_poll)(FAR struct ieee802154_mac_s *mac,
-                       FAR uint8_t *coordaddr);
-
-  /* Synchronous Responses to Indications received via callbacks */
-
-  /* Reply to an association request */
-
-  CODE int (*rsp_associate)(FAR struct ieee802154_mac_s *mac, uint8_t eadr,
-                            uint16_t saddr, int status);
-
-  /* Orphan device management */
-
-  CODE int (*rsp_orphan)(FAR struct ieee802154_mac_s *mac,
-                         FAR uint8_t *orphanaddr, uint16_t saddr,
-                         bool associated);
-
-  /* Bind callbacks to the IEEE802.15.4 MAC */
-
-  CODE int (*bind)(FAR struct ieee802154_mac_s *mac,
-                   FAR const struct ieee802154_maccb_s *cb);
-
-  /* IOCTL support */
-
-  CODE int (*ioctl)(FAR struct ieee802154_mac_s *mac, int cmd,
-                    unsigned long arg);
-};
+typedef FAR void *MACHANDLE;
 
 /* Notifications */
 
@@ -980,99 +896,83 @@ struct ieee802154_maccb_s
 
   /* Data frame was received by remote device */
 
-  CODE void (*conf_data)(FAR struct ieee802154_mac_s *mac,
+  CODE void (*conf_data)(MACHANDLE mac,
                          FAR struct ieee802154_data_conf_s *conf);
 
   /* Data frame was purged */
 
-  CODE void (*conf_purge)(FAR struct ieee802154_mac_s *mac, uint8_t handle,
-                          int status);
+  CODE void (*conf_purge)(MACHANDLE mac, uint8_t handle, int status);
 
   /* Association request completed */
 
-  CODE void (*conf_associate)(FAR struct ieee802154_mac_s *mac,
-                              uint16_t saddr, int status);
+  CODE void (*conf_associate)(MACHANDLE mac, uint16_t saddr, int status);
 
   /* Disassociation request completed */
 
-  CODE void (*conf_disassociate)(FAR struct ieee802154_mac_s *mac,
-                                 int status);
+  CODE void (*conf_disassociate)(MACHANDLE mac, int status);
 
   /* PIvoata returned */
 
-  CODE void (*conf_get)(FAR struct ieee802154_mac_s *mac, int status,
-                        int attribute, FAR uint8_t *value,
-                        int valuelen);
+  CODE void (*conf_get)(MACHANDLE mac, int status, int attribute,
+                        FAR uint8_t *value, int valuelen);
 
   /* GTvoanagement completed */
 
-  CODE void (*conf_gts)(FAR struct ieee802154_mac_s *mac,
-                        FAR uint8_t *characteristics, int status);
+  CODE void (*conf_gts)(MACHANDLE mac, FAR uint8_t *characteristics,
+                        int status);
 
   /* MAveset completed */
 
-  CODE void (*conf_reset)(FAR struct ieee802154_mac_s *mac, int status);
+  CODE void (*conf_reset)(MACHANDLE mac, int status);
 
-  CODE void (*conf_rxenable)(FAR struct ieee802154_mac_s *mac, int status);
+  CODE void (*conf_rxenable)(MACHANDLE mac, int status);
 
-  CODE void (*conf_scan)(FAR struct ieee802154_mac_s *mac, int status,
-                         uint8_t type, uint32_t unscanned, int rsltsize,
+  CODE void (*conf_scan)(MACHANDLE mac, int status, uint8_t type,
+                         uint32_t unscanned, int rsltsize,
                          FAR uint8_t *edlist, FAR uint8_t *pandescs);
 
-  CODE void (*conf_set)(FAR struct ieee802154_mac_s *mac, int status,
-                        int attribute);
+  CODE void (*conf_set)(MACHANDLE mac, int status, int attribute);
 
-  CODE void (*conf_start)(FAR struct ieee802154_mac_s *mac, int status);
+  CODE void (*conf_start)(MACHANDLE mac, int status);
 
-  CODE void (*conf_poll)(FAR struct ieee802154_mac_s *mac, int status);
+  CODE void (*conf_poll)(MACHANDLE mac, int status);
 
   /* Asynchronous event indications, replied to synchronously with responses */
 
   /* Data frame received */
 
-  CODE void (*ind_data)(FAR struct ieee802154_mac_s *mac, FAR uint8_t *buf,
-                        int len);
+  CODE void (*ind_data)(MACHANDLE mac, FAR uint8_t *buf, int len);
 
   /* Association request received */
 
-  CODE void (*ind_associate)(FAR struct ieee802154_mac_s *mac,
-                             uint16_t clipanid, FAR uint8_t *clieaddr);
+  CODE void (*ind_associate)(MACHANDLE mac, uint16_t clipanid,
+                             FAR uint8_t *clieaddr);
 
    /* Disassociation request received */
 
-  CODE void (*ind_disassociate)(FAR struct ieee802154_mac_s *mac,
-                                FAR uint8_t *eadr, uint8_t reason);
+  CODE void (*ind_disassociate)(MACHANDLE mac, FAR uint8_t *eadr,
+                                uint8_t reason);
 
   /* Beacon notification */
 
-  CODE void (*ind_beaconnotify)(FAR struct ieee802154_mac_s *mac,
-                                FAR uint8_t *bsn, FAR struct ieee802154_pan_desc_s *pandesc,
+  CODE void (*ind_beaconnotify)(MACHANDLE mac, FAR uint8_t *bsn,
+                                FAR struct ieee802154_pan_desc_s *pandesc,
                                 FAR uint8_t *sdu, int sdulen);
 
   /* GTS management request received */
 
-  CODE void (*ind_gts)(FAR struct ieee802154_mac_s *mac,
-                       FAR uint8_t *devaddr, FAR uint8_t *characteristics);
+  CODE void (*ind_gts)(MACHANDLE mac, FAR uint8_t *devaddr,
+                       FAR uint8_t *characteristics);
 
   /* Orphan device detected */
 
-  CODE void (*ind_orphan)(FAR struct ieee802154_mac_s *mac,
-                          FAR uint8_t *orphanaddr);
+  CODE void (*ind_orphan)(MACHANDLE mac, FAR uint8_t *orphanaddr);
 
-  CODE void (*ind_commstatus)(FAR struct ieee802154_mac_s *mac,
-                              uint16_t panid, FAR uint8_t *src,
-                              FAR uint8_t *dst, int status);
+  CODE void (*ind_commstatus)(MACHANDLE mac, uint16_t panid,
+                              FAR uint8_t *src, FAR uint8_t *dst,
+                              int status);
 
-  CODE void (*ind_syncloss)(FAR struct ieee802154_mac_s *mac, int reason);
-};
-
-struct ieee802154_mac_s
-{
-  /* Publicly visiable part of the MAC interface */
-
-  struct ieee802154_macops_s ops;
-
-  /* MAC private data may follow */
+  CODE void (*ind_syncloss)(MACHANDLE mac, int reason);
 };
 
 #ifdef __cplusplus
@@ -1109,13 +1009,11 @@ struct ieee802154_radio_s; /* Forward reference */
  *   radiodev - an instance of an IEEE 802.15.4 radio
  *
  * Returned Value:
- *   A MAC structure that has pointers to MAC operations
- *   and responses.
+ *   An opaque reference to the MAC state data.
  *
  ****************************************************************************/
 
-FAR struct ieee802154_mac_s *
-  mac802154_create(FAR struct ieee802154_radio_s *radiodev);
+MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev);
 
 /****************************************************************************
  * Name: mac802154dev_register
@@ -1135,7 +1033,7 @@ FAR struct ieee802154_mac_s *
  *
  ****************************************************************************/
 
-int mac802154dev_register(FAR struct ieee802154_mac_s *mac, int minor);
+int mac802154dev_register(MACHANDLE mac, int minor);
 
 /****************************************************************************
  * Name: mac802154netdev_register
@@ -1153,7 +1051,245 @@ int mac802154dev_register(FAR struct ieee802154_mac_s *mac, int minor);
  *
  ****************************************************************************/
 
-int mac802154netdev_register(FAR struct ieee802154_mac_s *mac);
+int mac802154netdev_register(MACHANDLE mac);
+
+/****************************************************************************
+ * Name: mac802154_bind
+ *
+ * Description:
+ *   Bind the MAC callback table to the MAC state.
+ *
+ * Parameters:
+ *   mac - Reference to the MAC driver state structure
+ *   cb  - MAC callback operations
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+int mac802154_bind(MACHANDLE mac, FAR const struct ieee802154_maccb_s *cb);
+
+/****************************************************************************
+ * Name: mac802154_ioctl
+ *
+ * Description:
+ *   Handle MAC and radio IOCTL commands directed to the MAC.
+ *
+ * Parameters:
+ *   mac - Reference to the MAC driver state structure
+ *   cmd - The IOCTL command
+ *   arg - The argument for the IOCTL command
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg);
+
+/****************************************************************************
+ * MAC Interface Operations
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: mac802154_req_data
+ *
+ * Description:
+ *   The MCPS-DATA.request primitive requests the transfer of a data SPDU
+ *   (i.e., MSDU) from a local SSCS entity to a single peer SSCS entity. 
+ *   Confirmation is returned via the
+ *   struct ieee802154_maccb_s->conf_data callback.
+ *
+ ****************************************************************************/
+
+int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req);
+
+/****************************************************************************
+ * Name: mac802154_req_purge
+ *
+ * Description:
+ *   The MCPS-PURGE.request primitive allows the next higher layer to purge an
+ *   MSDU from the transaction queue. Confirmation is returned via
+ *   the struct ieee802154_maccb_s->conf_purge callback.
+ *
+ ****************************************************************************/
+
+int mac802154_req_purge(MACHANDLE mac, uint8_t handle);
+
+/****************************************************************************
+ * Name: mac802154_req_associate
+ *
+ * Description:
+ *   The MLME-ASSOCIATE.request primitive allows a device to request an 
+ *   association with a coordinator. Confirmation is returned via the
+ *   struct ieee802154_maccb_s->conf_associate callback.
+ *
+ ****************************************************************************/
+
+int mac802154_req_associate(MACHANDLE mac
+                            FAR struct ieee802154_assoc_req_s *req);
+
+/****************************************************************************
+ * Name: mac802154_req_disassociate
+ *
+ * Description:
+ *   The MLME-DISASSOCIATE.request primitive is used by an associated device to
+ *   notify the coordinator of its intent to leave the PAN. It is also used by
+ *   the coordinator to instruct an associated device to leave the PAN.
+ *   Confirmation is returned via the
+ *   struct ieee802154_maccb_s->conf_disassociate callback.
+ *
+ ****************************************************************************/
+
+int mac802154_req_disassociate(MACHANDLE mac,
+                               FAR struct ieee802154_disassoc_req_s *req);
+
+/****************************************************************************
+ * Name: mac802154_req_get
+ *
+ * Description:
+ *   The MLME-GET.request primitive requests information about a given PIB
+ *   attribute. Actual data is returned via the
+ *   struct ieee802154_maccb_s->conf_get callback.
+ *
+ ****************************************************************************/
+
+int mac802154_req_get(MACHANDLE mac, enum ieee802154_pib_attr_e attr);
+
+/****************************************************************************
+ * Name: mac802154_req_gts
+ *
+ * Description:
+ *   The MLME-GTS.request primitive allows a device to send a request to the PAN
+ *   coordinator to allocate a new GTS or to deallocate an existing GTS.
+ *   Confirmation is returned via the
+ *   struct ieee802154_maccb_s->conf_gts callback.
+ *
+ ****************************************************************************/
+
+int mac802154_req_gts(MACHANDLE mac, FAR uint8_t *characteristics);
+
+/****************************************************************************
+ * Name: mac802154_req_reset
+ *
+ * Description:
+ *   The MLME-RESET.request primitive allows the next higher layer to request
+ *   that the MLME performs a reset operation. Confirmation is returned via
+ *   the struct ieee802154_maccb_s->conf_reset callback.
+ *
+ ****************************************************************************/
+
+int mac802154_req_reset(MACHANDLE mac, bool setdefaults);
+
+/****************************************************************************
+ * Name: mac802154_req_rxenable
+ *
+ * Description:
+ *   The MLME-RX-ENABLE.request primitive allows the next higher layer to
+ *   request that the receiver is enable for a finite period of time.
+ *   Confirmation is returned via the
+ *   struct ieee802154_maccb_s->conf_rxenable callback.
+ *
+ ****************************************************************************/
+
+int mac802154_req_rxenable(MACHANDLE mac, bool deferrable, int ontime,
+                           int duration);
+
+/****************************************************************************
+ * Name: mac802154_req_scan
+ *
+ * Description:
+ *   The MLME-SCAN.request primitive is used to initiate a channel scan over a
+ *   given list of channels. A device can use a channel scan to measure the
+ *   energy on the channel, search for the coordinator with which it associated,
+ *   or search for all coordinators transmitting beacon frames within the POS of
+ *   the scanning device. Scan results are returned
+ *   via MULTIPLE calls to the struct ieee802154_maccb_s->conf_scan callback.
+ *   This is a difference with the official 802.15.4 specification, implemented
+ *   here to save memory.
+ *
+ ****************************************************************************/
+
+int mac802154_req_scan(MACHANDLE mac, uint8_t type, uint32_t channels,
+                       int duration);
+
+/****************************************************************************
+ * Name: mac802154_req_set
+ *
+ * Description:
+ *   The MLME-SET.request primitive attempts to write the given value to the
+ *   indicated MAC PIB attribute. Confirmation is returned via the
+ *   struct ieee802154_maccb_s->conf_set callback.
+ *
+ ****************************************************************************/
+
+int mac802154_req_set(MACHANDLE mac, int attribute, FAR uint8_t *value,
+                      int valuelen);
+
+/****************************************************************************
+ * Name: mac802154_req_start
+ *
+ * Description:
+ *   The MLME-START.request primitive makes a request for the device to start
+ *   using a new superframe configuration. Confirmation is returned
+ *   via the struct ieee802154_maccb_s->conf_start callback.
+ *
+ ****************************************************************************/
+
+int mac802154_req_start(MACHANDLE mac, uint16_t panid, int channel,
+                        uint8_t bo, uint8_t fo, bool coord, bool batext,
+                        bool realign);
+
+/****************************************************************************
+ * Name: mac802154_req_sync
+ *
+ * Description:
+ *   The MLME-SYNC.request primitive requests to synchronize with the
+ *   coordinator by acquiring and, if specified, tracking its beacons.
+ *   Confirmation is returned via the
+ *   struct ieee802154_maccb_s->int_commstatus callback. TOCHECK.
+ *
+ ****************************************************************************/
+
+int mac802154_req_sync(MACHANDLE mac, int channel, bool track);
+
+/****************************************************************************
+ * Name: mac802154_req_poll
+ *
+ * Description:
+ *   The MLME-POLL.request primitive prompts the device to request data from the
+ *   coordinator. Confirmation is returned via the 
+ *   struct ieee802154_maccb_s->conf_poll callback, followed by a
+ *   struct ieee802154_maccb_s->ind_data callback.
+ *
+ ****************************************************************************/
+
+int mac802154_req_poll(MACHANDLE mac, FAR uint8_t *coordaddr);
+
+/****************************************************************************
+ * Name: mac802154_rsp_associate
+ *
+ * Description:
+ *   The MLME-ASSOCIATE.response primitive is used to initiate a response to an 
+ *   MLME-ASSOCIATE.indication primitive.
+ *
+ ****************************************************************************/
+
+int mac802154_rsp_associate(MACHANDLE mac, uint8_t eadr, uint16_t saddr,
+                            int status);
+
+/****************************************************************************
+ * Name: mac802154_rsp_orphan
+ *
+ * Description:
+ *   The MLME-ORPHAN.response primitive allows the next higher layer of a
+ *   coordinator to respond to the MLME-ORPHAN.indication primitive.
+ *
+ ****************************************************************************/
+
+int mac802154_rsp_orphan(MACHANDLE mac, FAR uint8_t *orphanaddr,
+                         uint16_t saddr, bool associated);
 
 #undef EXTERN
 #ifdef __cplusplus

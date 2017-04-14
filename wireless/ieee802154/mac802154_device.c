@@ -66,15 +66,14 @@
 
 struct mac802154_devwrapper_s
 {
-  FAR struct ieee802154_mac_s *md_mac;  /* Saved binding to the mac layer */
-  sem_t md_exclsem;                     /* Exclusive device access */
+  MACHANDLE md_mac;    /* Saved binding to the mac layer */
+  sem_t md_exclsem;    /* Exclusive device access */
 
   /* The following is a singly linked list of open references to the
    * MAC device.
    */
 
   FAR struct mac802154_open_s *md_open;
-
   FAR struct mac802154dev_dwait_s *md_dwait;
 };
 
@@ -452,7 +451,7 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
 {
   FAR struct inode *inode;
   FAR struct mac802154_devwrapper_s *dev;
-  FAR struct ieee802154_mac_s *mac;
+  MACHANDLE mac;
   int ret;
 
   DEBUGASSERT(filep != NULL && filep->f_priv != NULL &&
@@ -484,8 +483,8 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
   return ret;
 }
 
-void mac802154dev_conf_data(FAR struct ieee802154_mac_s *mac,
-                           FAR struct ieee802154_data_conf_s *conf)
+void mac802154dev_conf_data(MACHANDLE mac,
+                            FAR struct ieee802154_data_conf_s *conf)
 {
   FAR struct mac802154_devwrapper_s *dev;
   FAR struct mac802154dev_dwait_s *curr;
@@ -537,7 +536,7 @@ void mac802154dev_conf_data(FAR struct ieee802154_mac_s *mac,
  *
  ****************************************************************************/
 
-int mac802154dev_register(FAR struct ieee802154_mac_s *mac, int minor)
+int mac802154dev_register(MACHANDLE mac, int minor)
 {
   FAR struct mac802154_devwrapper_s *dev;
   char devname[DEVNAME_FMTLEN];
