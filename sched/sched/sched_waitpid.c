@@ -346,7 +346,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 #ifdef CONFIG_SCHED_CHILD_STATUS
   /* Does this task retain child status? */
 
-  retains = ((rtcb->group->tg_flags && GROUP_FLAG_NOCLDWAIT) == 0);
+  retains = ((rtcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0);
 
   if (rtcb->group->tg_children == NULL && retains)
     {
