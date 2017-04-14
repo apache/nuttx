@@ -377,6 +377,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
   FAR struct inode *inode;
   FAR struct mac802154_devwrapper_s *dev;
   FAR struct ieee802154_data_req_s *req;
+  FAR struct ieee802154_frame_s *frame;
   struct mac802154dev_dwait_s dwait;
   int ret;
 
@@ -396,7 +397,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
     }
   
   DEBUGASSERT(buffer != NULL);
-  frame = *(FAR struct ieee802154_frame_s *)buffer;
+  frame = (FAR struct ieee802154_frame_s *)buffer;
 
   /* Get exclusive access to the driver structure */
 
@@ -414,11 +415,11 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
   /* Link the wait struct */
 
   dwait.mw_flink = dev->md_dwait;
-  dev->md_wait = &dwait;
+  dev->md_dwait = &dwait;
 
   /* Pass the request to the MAC layer */
 
-  ret = dev->md_mac->ops.req_data(dev->md_mac, req);
+  ret = mac802154_req_data(dev->md_mac, req);
 
   mac802154dev_givesem(&dev->md_exclsem);
 
@@ -430,7 +431,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
 
   /* Wait for the DATA.confirm callback to be called for our handle */
 
-  sem_wait(dwait.mw_sem);
+  sem_wait(&dwait.mw_sem);
 
   /* The unlinking of the wait struct happens inside the callback. This
    * is more efficient since it will already have to find the struct in
@@ -506,7 +507,7 @@ void mac802154dev_conf_data(MACHANDLE mac,
   if (ret < 0)
     {
       wlerr("ERROR: mac802154dev_takesem failed: %d\n", ret);
-      return ret;
+      return;
     }
 
   /* Search to see if there is a dwait pending for this transaction */
