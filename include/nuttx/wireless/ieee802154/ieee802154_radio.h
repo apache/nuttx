@@ -138,7 +138,7 @@ union ieee802154_radioarg_u
   bool     promisc;            /* PHY802154IOC_GET/SET_EADDR */
   uint8_t  devmode;            /* PHY802154IOC_GET/SET_DEVMODE */
   int32_t  txpwr;              /* PHY802154IOC_GET/SET_TXPWR */
-  bool     energy              /* PHY802154IOC_ENERGYDETECT */
+  bool     energy;             /* PHY802154IOC_ENERGYDETECT */
   struct ieee802154_cca_s cca; /* PHY802154IOC_GET/SET_CCA */
 };
 
@@ -158,23 +158,7 @@ struct ieee802154_netradio_s
 
 /* IEEE802.15.4 Radio Interface Operations **********************************/
 
-struct ieee802154_cca_s
-{
-  uint8_t use_ed  : 1; /* CCA using ED */
-  uint8_t use_cs  : 1; /* CCA using carrier sense */
-  uint8_t edth;        /* Energy detection threshold for CCA */
-  uint8_t csth;        /* Carrier sense threshold for CCA */
-};
-
-struct ieee802154_packet_s
-{
-  uint8_t len;
-  uint8_t data[127];
-  uint8_t lqi;
-  uint8_t rssi;
-};
-
-struct ieee802154_radio_s;
+struct ieee802154_radio_s; /* Forward reference */
 
 struct ieee802154_radioops_s
 {

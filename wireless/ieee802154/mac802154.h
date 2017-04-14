@@ -52,7 +52,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <nuttx/wireless/ieee802155_mac.h>
+#include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 /****************************************************************************
  * Public Function Prototypes
@@ -132,7 +132,7 @@ int mac802154_req_purge(MACHANDLE mac, uint8_t handle);
  *
  ****************************************************************************/
 
-int mac802154_req_associate(MACHANDLE mac
+int mac802154_req_associate(MACHANDLE mac,
                             FAR struct ieee802154_assoc_req_s *req);
 
 /****************************************************************************

@@ -851,9 +851,9 @@ struct ieee802154_pollreq_s
 union ieee802154_macarg_u
 {
   struct ieee802154_assoc_req_s    assocreq;    /* MAC802154IOC_MLME_ASSOC_REQUEST */
-  struct ieee802154_assocresp_s    assocresp:   /* MAC802154IOC_MLME_ASSOC_RESPONSE */
+  struct ieee802154_assocresp_s    assocresp;   /* MAC802154IOC_MLME_ASSOC_RESPONSE */
   struct ieee802154_disassoc_req_s disassocreq; /* MAC802154IOC_MLME_DISASSOC_REQUEST */
-  struct ieee802154_mlmereq_s      getreq;      /* MAC802154IOC_MLME_GET_REQUEST */
+  struct ieee802154_getreq_s       getreq;      /* MAC802154IOC_MLME_GET_REQUEST */
   struct ieee802154_gtsreq_s       gtsreq;      /* MAC802154IOC_MLME_GTS_REQUEST */
   struct ieee802154_orphanresp_s   orphanresp;  /* MAC802154IOC_MLME_ORPHAN_RESPONSE */
   struct ieee802154_resetreq_s     resetreq;    /* MAC802154IOC_MLME_RESET_REQUEST */

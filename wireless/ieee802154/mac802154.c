@@ -45,6 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/wireless/ieee802154/ieee802154_radio.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 #include "mac802154.h"
@@ -271,6 +272,8 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg)
     (FAR struct ieee802154_privmac_s *)mac;
   int ret = -EINVAL;
 
+  DEBUGASSERT(priv != NULL);
+
   /* Check for IOCTLs aimed at the IEEE802.15.4 MAC layer */
 
   if (_MAC802154IOCVALID(cmd))
@@ -283,8 +286,14 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg)
 
   else
    {
-     ret = priv->radio->ioctl(priv->radio, cmd, arg);
+     DEBUGASSERT(priv->radio != NULL &&
+                 priv->radio->ops != NULL &&
+                 priv->radio->ops->ioctl != NULL);
+
+     ret = priv->radio->ops->ioctl(priv->radio, cmd, arg);
    }
+
+ return ret;
 }
 
 /****************************************************************************
@@ -334,7 +343,7 @@ int mac802154_req_purge(MACHANDLE mac, uint8_t handle)
  *
  ****************************************************************************/
 
-int mac802154_req_associate(MACHANDLE mac
+int mac802154_req_associate(MACHANDLE mac,
                             FAR struct ieee802154_assoc_req_s *req)
 {
   FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
