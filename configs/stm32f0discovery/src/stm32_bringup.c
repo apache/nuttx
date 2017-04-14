@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/mount.h>
+#include <sys/types.h>
 
 #include "stm32f0discovery.h"
 

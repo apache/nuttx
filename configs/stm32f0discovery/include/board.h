@@ -48,7 +48,6 @@
 #endif
 
 #include "stm32f0_rcc.h"
-#include "stm32f0.h"
 
 /************************************************************************************
  * Pre-processor Definitions

@@ -48,7 +48,6 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "stm32f0.h"
 #include "stm32f0discovery.h"
 
 #ifdef CONFIG_ARCH_LEDS
