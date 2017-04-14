@@ -1548,8 +1548,6 @@ nuttx/
  |   |   `- README.txt
  |   |- nucleo-144/
  |   |   `- README.txt
- |   |- nucleo-64/
- |   |   `- README.txt
  |   |- nucleo-f4x1re/
  |   |   `- README.txt
  |   |- nutiny-nuc120/
