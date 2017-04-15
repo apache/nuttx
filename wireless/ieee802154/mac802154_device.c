@@ -83,12 +83,11 @@ struct mac802154_devwrapper_s
 
   struct mac802154dev_notify_s md_mcps_notify;
   pid_t md_mcps_pid;
-  
+
   /* MLME Service notification information */
 
   struct mac802154dev_notify_s md_mlme_notify;
   pid_t md_mlme_pid;
-
 #endif
 };
 
@@ -228,7 +227,7 @@ static int mac802154dev_open(FAR struct file *filep)
       ret = -ENOMEM;
       goto errout_with_sem;
     }
-  
+
   /* Attach the open struct to the device */
 
   opriv->md_flink = dev->md_open;
@@ -413,7 +412,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
       wlerr("ERROR: buffer too small: %lu\n", (unsigned long)len);
       return -EINVAL;
     }
-  
+
   DEBUGASSERT(buffer != NULL);
   frame = (FAR struct ieee802154_frame_s *)buffer;
 
@@ -441,7 +440,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
 
   mac802154dev_givesem(&dev->md_exclsem);
 
-  if (ret < 0) 
+  if (ret < 0)
     {
       wlerr("ERROR: req_data failed %d\n", ret);
       return ret;
@@ -449,7 +448,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
 
   /* Wait for the DATA.confirm callback to be called for our handle */
 
-  if(sem_wait(dwait.mw_sem) < 0)
+  if (sem_wait(dwait.mw_sem) < 0)
     {
       /* This should only happen if the wait was canceled by an signal */
 
@@ -522,10 +521,11 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
               dev->md_mlme_notify.mn_signo      = notify->mn_signo;
               dev->md_mlme_pid                  = getpid();
 
-              return OK; 
+              return OK;
             }
         }
         break;
+
       case MAC802154IOC_MCPS_REGISTER:
         {
           FAR struct mac802154dev_notify_s *notify =
@@ -538,19 +538,19 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
               dev->md_mcps_notify.mn_signo      = notify->mn_signo;
               dev->md_mcps_pid                  = getpid();
 
-              return OK; 
+              return OK;
             }
         }
         break;
 #endif
+
       case MAC802154IOC_MLME_ASSOC_REQUEST:
         {
           FAR struct ieee802154_assoc_req_s *req =
             (FAR struct ieee802154_assoc_req_s *)((uintptr_t)arg);
-
-          
         }
         break;
+
       default:
         wlerr("ERROR: Unrecognized command %ld\n", cmd);
         ret = -EINVAL;
@@ -578,7 +578,7 @@ void mac802154dev_conf_data(MACHANDLE mac,
 
   /* Get exclusive access to the driver structure.  We don't care about any
    * signals so if we see one, just go back to trying to get access again */
-  
+
   while(mac802154dev_takesem(&dev->md_exclsem) != OK);
 
   /* Search to see if there is a dwait pending for this transaction */
@@ -586,37 +586,36 @@ void mac802154dev_conf_data(MACHANDLE mac,
   for (prev = NULL, curr = dev->md_dwait;
        curr && curr->mw_handle != conf->msdu_handle;
        prev = curr, curr = curr->mw_flink);
-  
+
   /* If a dwait is found */
 
   if (curr)
-  {
-    /* Unlink the structure from the list.  The struct should be allocated on
-     * the calling write's stack, so we don't need to worry about deallocating
-     * here */
+   {
+      /* Unlink the structure from the list.  The struct should be allocated on
+       * the calling write's stack, so we don't need to worry about deallocating
+       * here */
 
-    if (prev)
-      {
-        prev->mw_flink = curr->mw_flink;
-      }
-    else
-      {
-        dev->md_dwait = curr->mw_flink;
-      }
-   
-    /* Copy the transmission status into the dwait struct */
+      if (prev)
+        {
+          prev->mw_flink = curr->mw_flink;
+        }
+      else
+        {
+          dev->md_dwait = curr->mw_flink;
+        }
 
-    curr->mw_status = conf->msdu_handle;
+      /* Copy the transmission status into the dwait struct */
 
-    /* Wake the thread waiting for the data transmission */
+      curr->mw_status = conf->msdu_handle;
 
-    sem_post(&curr->mw_sem);
+      /* Wake the thread waiting for the data transmission */
 
-    /* Release the driver */
+      sem_post(&curr->mw_sem);
 
-    mac802154dev_givesem(&dev->md_exclsem);
-  }
+      /* Release the driver */
 
+      mac802154dev_givesem(&dev->md_exclsem);
+    }
 
 #ifndef CONFIG_DISABLE_SIGNALS
   /* Send a signal to the registered application */
@@ -631,7 +630,6 @@ void mac802154dev_conf_data(MACHANDLE mac,
   (void)sigqueue(dev->md_mcps_pid, dev->md_mcps_notify.mn_signo,
                  value.sival_ptr);
 #endif
-
 #endif
 }
 

@@ -261,7 +261,7 @@ static ssize_t radio802154dev_read(FAR struct file *filep, FAR char *buffer, siz
       goto done;
     }
 #endif
-  
+
   /* if no packet is received, this will produce -EAGAIN
    * The user is responsible for sleeping until sth arrives
    */

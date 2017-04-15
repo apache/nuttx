@@ -74,11 +74,11 @@ struct ieee802154_privmac_s
   /* Support a singly linked list of transactions that will be sent using the
    * CSMA algorithm.  On a non-beacon enabled PAN, these transactions will be
    * sent whenever. On a beacon-enabled PAN, these transactions will be sent
-   * during the CAP of the Coordinator's superframe. */
+   * during the CAP of the Coordinator's superframe.
+   */
 
   FAR struct mac802154_trans_s *csma_head;
   FAR struct mac802154_trans_s *csma_tail;
-
   struct mac802154_trans_s csma_buf[5];
 
   /* Support a singly linked list of transactions that will be sent indirectly.
@@ -86,16 +86,16 @@ struct ieee802154_privmac_s
    * transactions will stay here until the data is extracted by the destination
    * device sending a Data Request MAC command or if too much time passes. This
    * list should also be used to populate the address list of the outgoing
-   * beacon frame */
-   
+   * beacon frame.
+   */
+
   FAR struct mac802154_trans_s *indirect_head;
   FAR struct mac802154_trans_s *indirect_tail;
-
   FAR struct mac802154_trans_s *active_trans;
 
   /* MAC PIB attributes, grouped to save memory */
 
-  /* Holds all address information (Extended, Short, and PAN ID) for the MAC */
+  /* Holds all address information (Extended, Short, and PAN ID) for the MAC. */
 
   struct ieee802154_addr_s addr;
 
@@ -107,8 +107,9 @@ struct ieee802154_privmac_s
    * arrive following a transmitted data frame. [1] pg. 126
    *
    * NOTE: This may be able to be a 16-bit or even an 8-bit number.  I wasn't
-   * sure at the time what the range of reasonable values was */
-   
+   * sure at the time what the range of reasonable values was.
+   */
+
   uint32_t ack_wait_dur;
 
   /* The maximum time to wait either for a frame intended as a response to a
@@ -116,19 +117,21 @@ struct ieee802154_privmac_s
    * Frame Pending field set to one. [1] pg. 127
    *
    * NOTE: This may be able to be a 16-bit or even an 8-bit number.  I wasn't
-   * sure at the time what the range of reasonable values was */
+   * sure at the time what the range of reasonable values was.
+   */
 
   uint32_t max_frame_wait_time;
 
   /* The maximum time (in unit periods) that a transaction is stored by a
-   * coordinator and indicated in its beacon. */
+   * coordinator and indicated in its beacon.
+   */
 
   uint16_t trans_persist_time;
 
-  /* Contents of beacon payload */ 
+  /* Contents of beacon payload */
 
-  uint8_t  beacon_payload[IEEE802154_MAX_BEACON_PAYLOAD_LENGTH];
-  uint8_t  beacon_payload_len;    /* Length of beacon payload */ 
+  uint8_t beacon_payload[IEEE802154_MAX_BEACON_PAYLOAD_LENGTH];
+  uint8_t beacon_payload_len;     /* Length of beacon payload */
 
   uint8_t batt_life_ext_periods;  /* # of backoff periods during which rx is
                                    * enabled after the IFS following beacon */
@@ -138,21 +141,23 @@ struct ieee802154_privmac_s
   uint8_t max_retries;  /* Max # of retries alloed after tx failure */
 
   /* The maximum time, in multiples of aBaseSuperframeDuration, a device shall
-   * wait for a response command frame to be available following a request 
-   * command frame. [1] 128 */
+   * wait for a response command frame to be available following a request
+   * command frame. [1] 128.
+   */
 
   uint8_t resp_wait_time;
 
   /* The total transmit duration (including PHY header and FCS) specified in
-   * symbols. [1] pg. 129 */
+   * symbols. [1] pg. 129.
+   */
 
   uint32_t tx_total_dur;
 
   struct
-  { 
+  {
     uint32_t is_assoc           : 1;  /* Are we associated to the PAN */
     uint32_t assoc_permit       : 1;  /* Are we allowing assoc. as a coord. */
-    uint32_t auto_req           : 1;  /* Automatically send data req. if addr 
+    uint32_t auto_req           : 1;  /* Automatically send data req. if addr
                                        * addr is in the beacon frame */
 
     uint32_t batt_life_ext      : 1;  /* Is BLE enabled */
@@ -170,11 +175,12 @@ struct ieee802154_privmac_s
     uint32_t superframe_order   : 4;  /* Length of active portion of outgoing
                                        * superframe, including the beacon */
 
-    /* The offset, measured is symbols, between the symbol boundary at which the 
+    /* The offset, measured is symbols, between the symbol boundary at which the
      * MLME captures the timestamp of each transmitted and received frame, and
      * the onset of the first symbol past the SFD, namely the first symbol of
-     * the frames [1] pg. 129 */
-     
+     * the frames [1] pg. 129.
+     */
+
     uint32_t sync_symb_offset   : 12;
   }
 
@@ -187,17 +193,14 @@ struct ieee802154_privmac_s
 
   struct
   {
-    uint32_t tx_ctrl_active_dur : 17; /* Duration for which tx is permitted to 
+    uint32_t tx_ctrl_active_dur : 17; /* Duration for which tx is permitted to
                                        * be active */
-                                      
     uint32_t tx_ctrl_pause_dur  : 1;  /* Duration after tx before another tx is
                                        * permitted. 0=2000, 1= 10000 */
-
     uint32_t timestamp_support  : 1;  /* Does MAC layer supports timestamping */
   }
 
   /* TODO: Add Security-related MAC PIB attributes */
-
 };
 
 struct mac802154_trans_s
@@ -220,7 +223,8 @@ struct mac802154_trans_s
 struct mac802154_unsec_mhr_s
 {
   uint8_t length;
-  union {
+  union
+  {
     uint16_t frame_control;
     uint8_t data[IEEE802154_MAX_UNSEC_MHR_OVERHEAD];
   };
@@ -309,9 +313,9 @@ static int mac802154_applymib(FAR struct ieee802154_privmac_s *priv)
  *   should  register a set of callbacks with the MAC layer by setting the
  *   mac->cbs member.
  *
- *   NOTE: This API does not create any device accessible to userspace. If you
- *   want to call these APIs from userspace, you have to wrap your mac in a
- *   character device via mac802154_device.c.
+ *   NOTE: This API does not create any device accessible to userspace. If
+ *   you want to call these APIs from userspace, you have to wrap your mac
+ *   in a character device via mac802154_device.c.
  *
  * Input Parameters:
  *   radiodev - an instance of an IEEE 802.15.4 radio
@@ -341,7 +345,7 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
 
   mac802154_defaultmib(mac);
   mac802154_applymib(mac);
- 
+
   mac->phyif.ops = &mac802154_phyifops;
   mac->phyif.priv = mac;
 
@@ -431,7 +435,7 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg)
  *
  * Description:
  *   The MCPS-DATA.request primitive requests the transfer of a data SPDU
- *   (i.e., MSDU) from a local SSCS entity to a single peer SSCS entity. 
+ *   (i.e., MSDU) from a local SSCS entity to a single peer SSCS entity.
  *   Confirmation is returned via the
  *   struct ieee802154_maccb_s->conf_data callback.
  *
@@ -439,7 +443,8 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg)
 
 int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
 {
-  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
   FAR struct mac802154_trans_s *trans;
   struct mac802154_unsec_mhr_s mhr;
   int ret;
@@ -450,7 +455,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
 
   /* Do a preliminary check to make sure the MSDU isn't too long for even the
    * best case */
-  
+
   if (req->msdu_length > IEEE802154_MAX_MAC_PAYLOAD_SIZE)
     {
       return -EINVAL;
@@ -465,7 +470,8 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
   mhr.frame_control |= IEEE802154_FRAME_DATA << IEEE802154_FRAMECTRL_SHIFT_FTYPE;
 
   /* If the msduLength is greater than aMaxMACSafePayloadSize, the MAC sublayer
-   * will set the Frame Version to one. [1] pg. 118 */
+   * will set the Frame Version to one. [1] pg. 118.
+   */
 
   if (req->msdu_length > IEEE802154_MAX_SAFE_MAC_PAYLOAD_SIZE)
     {
@@ -474,13 +480,15 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
 
   /* If the TXOptions parameter specifies that an acknowledged transmission is
    * required, the AR field will be set appropriately, as described in
-   * 5.1.6.4 [1] pg. 118 */
+   * 5.1.6.4 [1] pg. 118.
+   */
 
   mhr.frame_ctrl |= (req->ack_tx << IEEE802154_FRAMECTRL_SHIFT_ACKREQ);
 
-  /* If the destination address is present, copy the PAN ID and one of the 
-   * addresses, depending on mode, into the MHR */ 
-  
+  /* If the destination address is present, copy the PAN ID and one of the
+   * addresses, depending on mode, into the MHR .
+   */
+
   if (req->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
     {
       memcpy(&mhr.data[mhr.length], req->dest_addr.panid, 2);
@@ -497,7 +505,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
           mhr.length += 8;
         }
     }
-  
+
   /* Set the destination addr mode inside the frame contorl field */
 
   mhr.frame_ctrl |= (req->dest_addr.mode << IEEE802154_FRAMECTRL_SHIFT_DADDR);
@@ -512,15 +520,17 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
     }
 
   /* If both destination and source addressing information is present, the MAC
-   * sublayer shall compare the destination and source PAN identifiers. 
-   * [1] pg. 41 */
+   * sublayer shall compare the destination and source PAN identifiers.
+   * [1] pg. 41.
+   */
 
   if (req->src_addr_mode  != IEEE802154_ADDRMODE_NONE &&
       req->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
     {
       /* If the PAN identifiers are identical, the PAN ID Compression field
        * shall be set to one, and the source PAN identifier shall be omitted
-       * from the transmitted frame. [1] pg. 41 */
+       * from the transmitted frame. [1] pg. 41.
+       */
 
       if(req->dest_addr.panid == priv->addr.panid)
         {
@@ -531,7 +541,8 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
   if (req->src_addr_mode != IEEE802154_ADDRMODE_NONE)
     {
       /* If the destination address is not included, or if PAN ID Compression
-       * is off, we need to include the Source PAN ID */
+       * is off, we need to include the Source PAN ID.
+       */
 
       if (req->dest_addr.mode == IEEE802154_ADDRMODE_NONE ||
           (mhr.frame_control & IEEE802154_FRAMECTRL_PANIDCOMP)
@@ -558,13 +569,15 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
 
   /* Each time a data or a MAC command frame is generated, the MAC sublayer
    * shall copy the value of macDSN into the Sequence Number field of the MHR
-   * of the outgoing frame and then increment it by one. [1] pg. 40 */
+   * of the outgoing frame and then increment it by one. [1] pg. 40.
+   */
 
   mhr.data[mhr.length++] = priv.dsn++;
 
   /* Now that we know which fields are included in the header, we can make
-   * sure we actually have enough room in the PSDU */
-   
+   * sure we actually have enough room in the PSDU.
+   */
+
   if (mhr.length + req->msdu_length + IEEE802154_MFR_LENGTH >
       IEEE802154_MAX_PHY_PACKET_SIZE)
   {
@@ -579,16 +592,17 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
 
   trans->msdu_handle = req->msdu_handle;
 
-  /* If the TxOptions parameter specifies that a GTS transmission is required, 
-   * the MAC sublayer will determine whether it has a valid GTS as described 
+  /* If the TxOptions parameter specifies that a GTS transmission is required,
+   * the MAC sublayer will determine whether it has a valid GTS as described
    * 5.1.7.3. If a valid GTS could not be found, the MAC sublayer will discard
-   * the MSDU. If a valid GTS was found, the MAC sublayer will defer, if 
+   * the MSDU. If a valid GTS was found, the MAC sublayer will defer, if
    * necessary, until the GTS. If the TxOptions parameter specifies that a GTS
    * transmission is not required, the MAC sublayer will transmit the MSDU using
    * either slotted CSMA-CA in the CAP for a beacon-enabled PAN or unslotted
    * CSMA-CA for a nonbeacon-enabled PAN. Specifying a GTS transmission in the
    * TxOptions parameter overrides an indirect transmission request.
-   * [1] pg. 118 */
+   * [1] pg. 118.
+   */
 
   if (req->gts_tx)
     {
@@ -596,7 +610,8 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
        * the transaction.  Instead of going in the CSMA transaction list, it
        * should be linked to the GTS' transaction list. We'll need to check if
        * the GTS is valid, and then find the GTS, before linking. Note, we also
-       * don't have to try and kick-off any transmission here. */
+       * don't have to try and kick-off any transmission here.
+       */
 
       return -ENOTSUP;
     }
@@ -605,17 +620,19 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
       /* If the TxOptions parameter specifies that an indirect transmission is
        * required and this primitive is received by the MAC sublayer of a
        * coordinator, the data frame is sent using indirect transmission, as
-       * described in 5.1.5 and 5.1.6.3. [1] */
+       * described in 5.1.5 and 5.1.6.3. [1]
+       */
 
       if (req->indirect_tx)
         {
           /* If the TxOptions parameter specifies that an indirect transmission
            * is required and if the device receiving this primitive is not a
-           * coordinator, the destination address is not present, or the 
+           * coordinator, the destination address is not present, or the
            * TxOptions parameter also specifies a GTS transmission, the indirect
-           * transmission option will be ignored. [1] */
+           * transmission option will be ignored. [1]
+           */
 
-          if (priv->is_coord && req->dest_addr.mode != IEEE802154_ADDRMODE_NONE) 
+          if (priv->is_coord && req->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
             {
               /* Link the transaction into the indirect_trans list */
 
@@ -653,11 +670,11 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
 
 /* Called from interrupt level or worker thread with interrupts disabled */
 
-static uint16_t mac802154_poll_csma(FAR struct ieee802154_phyif_s *phyif, 
+static uint16_t mac802154_poll_csma(FAR struct ieee802154_phyif_s *phyif,
                                     FAR struct ieee802154_txdesc_s *tx_desc,
                                     uint8_t *buf)
 {
-  FAR struct ieee802154_privmac_s *priv = 
+  FAR struct ieee802154_privmac_s *priv =
       (FAR struct ieee802154_privmac_s *)&phyif->priv;
 
   FAR struct mac802154_trans_s *trans;
@@ -684,7 +701,8 @@ static uint16_t mac802154_poll_csma(FAR struct ieee802154_phyif_s *phyif,
       /* Now that we've passed off the data, notify the waiting thread.
        * NOTE: The transaction was allocated on the waiting thread's stack so
        * it will be automatically deallocated when that thread awakens and
-       * returns */
+       * returns.
+       */
 
       sem_post(trans->sem);
 
@@ -698,15 +716,16 @@ static uint16_t mac802154_poll_csma(FAR struct ieee802154_phyif_s *phyif,
  * Name: mac802154_req_purge
  *
  * Description:
- *   The MCPS-PURGE.request primitive allows the next higher layer to purge an
- *   MSDU from the transaction queue. Confirmation is returned via
+ *   The MCPS-PURGE.request primitive allows the next higher layer to purge
+ *   an MSDU from the transaction queue. Confirmation is returned via
  *   the struct ieee802154_maccb_s->conf_purge callback.
  *
  ****************************************************************************/
 
 int mac802154_req_purge(MACHANDLE mac, uint8_t handle)
 {
-  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
@@ -714,7 +733,7 @@ int mac802154_req_purge(MACHANDLE mac, uint8_t handle)
  * Name: mac802154_req_associate
  *
  * Description:
- *   The MLME-ASSOCIATE.request primitive allows a device to request an 
+ *   The MLME-ASSOCIATE.request primitive allows a device to request an
  *   association with a coordinator. Confirmation is returned via the
  *   struct ieee802154_maccb_s->conf_associate callback.
  *
@@ -723,7 +742,8 @@ int mac802154_req_purge(MACHANDLE mac, uint8_t handle)
 int mac802154_req_associate(MACHANDLE mac,
                             FAR struct ieee802154_assoc_req_s *req)
 {
-  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
 
   /* Set the channel of the PHY layer */
 
@@ -737,12 +757,12 @@ int mac802154_req_associate(MACHANDLE mac,
   if (req->coord_addr.mode == IEEE802154_ADDRMODE_EXTENDED)
     {
 
-    } 
+    }
   else if (req->coord_addr.mode == IEEE802154_ADDRMODE_EXTENDED)
     {
 
     }
-  else 
+  else
     {
       return -EINVAL;
     }
@@ -765,7 +785,8 @@ int mac802154_req_associate(MACHANDLE mac,
 int mac802154_req_disassociate(MACHANDLE mac,
                                FAR struct ieee802154_disassoc_req_s *req)
 {
-  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
@@ -781,7 +802,8 @@ int mac802154_req_disassociate(MACHANDLE mac,
 
 int mac802154_req_get(MACHANDLE mac, enum ieee802154_pib_attr_e attr)
 {
-  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
@@ -798,7 +820,8 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_pib_attr_e attr)
 
 int mac802154_req_gts(MACHANDLE mac, FAR uint8_t *characteristics)
 {
-  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
@@ -814,7 +837,8 @@ int mac802154_req_gts(MACHANDLE mac, FAR uint8_t *characteristics)
 
 int mac802154_req_reset(MACHANDLE mac, bool setdefaults)
 {
-  FAR struct ieee802154_privmac_s * priv = (FAR struct ieee802154_privmac_s *) mac;
+  FAR struct ieee802154_privmac_s * priv =
+    (FAR struct ieee802154_privmac_s *) mac;
   return -ENOTTY;
 }
 
@@ -832,7 +856,8 @@ int mac802154_req_reset(MACHANDLE mac, bool setdefaults)
 int mac802154_req_rxenable(MACHANDLE mac, bool deferrable, int ontime,
                            int duration)
 {
-  FAR struct ieee802154_privmac_s * priv = (FAR struct ieee802154_privmac_s *)mac;
+  FAR struct ieee802154_privmac_s * priv =
+    (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
@@ -854,7 +879,8 @@ int mac802154_req_rxenable(MACHANDLE mac, bool deferrable, int ontime,
 int mac802154_req_scan(MACHANDLE mac, uint8_t type, uint32_t channels,
                        int duration)
 {
-  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
@@ -871,7 +897,8 @@ int mac802154_req_scan(MACHANDLE mac, uint8_t type, uint32_t channels,
 int mac802154_req_set(MACHANDLE mac, int attribute, FAR uint8_t *value,
                       int valuelen)
 {
-  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
@@ -889,7 +916,8 @@ int mac802154_req_start(MACHANDLE mac, uint16_t panid, int channel,
                         uint8_t bo, uint8_t fo, bool coord, bool batext,
                         bool realign)
 {
-  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
@@ -906,7 +934,8 @@ int mac802154_req_start(MACHANDLE mac, uint16_t panid, int channel,
 
 int mac802154_req_sync(MACHANDLE mac, int channel, bool track)
 {
-  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
@@ -914,8 +943,8 @@ int mac802154_req_sync(MACHANDLE mac, int channel, bool track)
  * Name: mac802154_req_poll
  *
  * Description:
- *   The MLME-POLL.request primitive prompts the device to request data from the
- *   coordinator. Confirmation is returned via the 
+ *   The MLME-POLL.request primitive prompts the device to request data from
+ *   the coordinator. Confirmation is returned via the
  *   struct ieee802154_maccb_s->conf_poll callback, followed by a
  *   struct ieee802154_maccb_s->ind_data callback.
  *
@@ -923,7 +952,8 @@ int mac802154_req_sync(MACHANDLE mac, int channel, bool track)
 
 int mac802154_req_poll(MACHANDLE mac, FAR uint8_t *coordaddr)
 {
-  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 
@@ -931,15 +961,16 @@ int mac802154_req_poll(MACHANDLE mac, FAR uint8_t *coordaddr)
  * Name: mac802154_rsp_associate
  *
  * Description:
- *   The MLME-ASSOCIATE.response primitive is used to initiate a response to an 
- *   MLME-ASSOCIATE.indication primitive.
+ *   The MLME-ASSOCIATE.response primitive is used to initiate a response to
+ *   an MLME-ASSOCIATE.indication primitive.
  *
  ****************************************************************************/
 
 int mac802154_rsp_associate(MACHANDLE mac, uint8_t eadr, uint16_t saddr,
                             int status)
 {
-  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
   return -ENOTTY;
 }
 

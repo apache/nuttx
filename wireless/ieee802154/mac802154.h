@@ -102,7 +102,7 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg);
  *
  * Description:
  *   The MCPS-DATA.request primitive requests the transfer of a data SPDU
- *   (i.e., MSDU) from a local SSCS entity to a single peer SSCS entity. 
+ *   (i.e., MSDU) from a local SSCS entity to a single peer SSCS entity.
  *   Confirmation is returned via the
  *   struct ieee802154_maccb_s->conf_data callback.
  *
@@ -114,8 +114,8 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req);
  * Name: mac802154_req_purge
  *
  * Description:
- *   The MCPS-PURGE.request primitive allows the next higher layer to purge an
- *   MSDU from the transaction queue. Confirmation is returned via
+ *   The MCPS-PURGE.request primitive allows the next higher layer to purge
+ *   an MSDU from the transaction queue. Confirmation is returned via
  *   the struct ieee802154_maccb_s->conf_purge callback.
  *
  ****************************************************************************/
@@ -126,7 +126,7 @@ int mac802154_req_purge(MACHANDLE mac, uint8_t handle);
  * Name: mac802154_req_associate
  *
  * Description:
- *   The MLME-ASSOCIATE.request primitive allows a device to request an 
+ *   The MLME-ASSOCIATE.request primitive allows a device to request an
  *   association with a coordinator. Confirmation is returned via the
  *   struct ieee802154_maccb_s->conf_associate callback.
  *
@@ -139,9 +139,11 @@ int mac802154_req_associate(MACHANDLE mac,
  * Name: mac802154_req_disassociate
  *
  * Description:
- *   The MLME-DISASSOCIATE.request primitive is used by an associated device to
- *   notify the coordinator of its intent to leave the PAN. It is also used by
- *   the coordinator to instruct an associated device to leave the PAN.
+ *   The MLME-DISASSOCIATE.request primitive is used by an associated device
+ *   to notify the coordinator of its intent to leave the PAN. It is also
+ *   used by the coordinator to instruct an associated device to leave the
+ *   PAN.
+ *
  *   Confirmation is returned via the
  *   struct ieee802154_maccb_s->conf_disassociate callback.
  *
@@ -166,8 +168,8 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_pib_attr_e attr);
  * Name: mac802154_req_gts
  *
  * Description:
- *   The MLME-GTS.request primitive allows a device to send a request to the PAN
- *   coordinator to allocate a new GTS or to deallocate an existing GTS.
+ *   The MLME-GTS.request primitive allows a device to send a request to the
+ *   PAN coordinator to allocate a new GTS or to deallocate an existing GTS.
  *   Confirmation is returned via the
  *   struct ieee802154_maccb_s->conf_gts callback.
  *
@@ -205,14 +207,14 @@ int mac802154_req_rxenable(MACHANDLE mac, bool deferrable, int ontime,
  * Name: mac802154_req_scan
  *
  * Description:
- *   The MLME-SCAN.request primitive is used to initiate a channel scan over a
- *   given list of channels. A device can use a channel scan to measure the
- *   energy on the channel, search for the coordinator with which it associated,
- *   or search for all coordinators transmitting beacon frames within the POS of
- *   the scanning device. Scan results are returned
- *   via MULTIPLE calls to the struct ieee802154_maccb_s->conf_scan callback.
- *   This is a difference with the official 802.15.4 specification, implemented
- *   here to save memory.
+ *   The MLME-SCAN.request primitive is used to initiate a channel scan over
+ *   a given list of channels. A device can use a channel scan to measure
+ *   the energy on the channel, search for the coordinator with which it
+ *   associated, or search for all coordinators transmitting beacon frames
+ *   within the POS of the scanning device. Scan results are returned
+ *   via MULTIPLE calls to the struct ieee802154_maccb_s->conf_scan
+ *   callback.  This is a difference with the official 802.15.4
+ *   specification, implemented here to save memory.
  *
  ****************************************************************************/
 
@@ -236,8 +238,8 @@ int mac802154_req_set(MACHANDLE mac, int attribute, FAR uint8_t *value,
  * Name: mac802154_req_start
  *
  * Description:
- *   The MLME-START.request primitive makes a request for the device to start
- *   using a new superframe configuration. Confirmation is returned
+ *   The MLME-START.request primitive makes a request for the device to
+ *   start using a new superframe configuration. Confirmation is returned
  *   via the struct ieee802154_maccb_s->conf_start callback.
  *
  ****************************************************************************/
@@ -263,8 +265,8 @@ int mac802154_req_sync(MACHANDLE mac, int channel, bool track);
  * Name: mac802154_req_poll
  *
  * Description:
- *   The MLME-POLL.request primitive prompts the device to request data from the
- *   coordinator. Confirmation is returned via the 
+ *   The MLME-POLL.request primitive prompts the device to request data from
+ *   the coordinator. Confirmation is returned via the
  *   struct ieee802154_maccb_s->conf_poll callback, followed by a
  *   struct ieee802154_maccb_s->ind_data callback.
  *
@@ -276,8 +278,8 @@ int mac802154_req_poll(MACHANDLE mac, FAR uint8_t *coordaddr);
  * Name: mac802154_rsp_associate
  *
  * Description:
- *   The MLME-ASSOCIATE.response primitive is used to initiate a response to an 
- *   MLME-ASSOCIATE.indication primitive.
+ *   The MLME-ASSOCIATE.response primitive is used to initiate a response to
+ *   an MLME-ASSOCIATE.indication primitive.
  *
  ****************************************************************************/
 
