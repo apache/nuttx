@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev_findbyaddr.c
  *
- *   Copyright (C) 2007-2009, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -217,8 +217,10 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr)
            * broadcast packet out ALL local networks.  I am not sure
            * of that and, in any event, there is nothing we can do
            * about that here.
-           * For now, simply return the first network interface in order
-           * to have working DHCP with CONFIG_NETDEV_MULTINIC.
+           *
+           * REVISIT:  For now, arbitrarily return the first network
+           * interface in the list of network devices.  The broadcast
+           * will be sent on that device only.
            */
 
           return g_netdevices;
@@ -337,9 +339,13 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t ripaddr)
            * broadcast packet out ALL local networks.  I am not sure
            * of that and, in any event, there is nothing we can do
            * about that here.
+           *
+           * REVISIT:  For now, arbitrarily return the first network
+           * interface in the list of network devices.  The broadcast
+           * will be sent on that device only.
            */
 
-          return NULL;
+          return g_netdevices;
         }
       else
         {
