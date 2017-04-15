@@ -70,6 +70,10 @@
 
 #ifdef CONFIG_NETDEV_WIRELESS_IOCTL
 #  include <nuttx/wireless/wireless.h>
+#ifdef CONFIG_NET_6LOWPAN
+#  include <nuttx/wireless/ieee802154/ieee802154_mac.h>
+#  include <nuttx/wireless/ieee802154/ieee802154_radio.h>
+#endif
 #endif
 
 #include "arp/arp.h"
@@ -346,6 +350,76 @@ static FAR struct net_driver_s *netdev_wifrdev(FAR struct iwreq *req)
     }
 
   return NULL;
+}
+#endif
+
+/****************************************************************************
+ * Name: netdev_iee802154_ioctl
+ *
+ * Description:
+ *   Perform IEEE802.15.4 network device specific operations.
+ *
+ * Parameters:
+ *   psock    Socket structure
+ *   dev      Ethernet driver device structure
+ *   cmd      The ioctl command
+ *   req      The argument of the ioctl cmd
+ *
+ * Return:
+ *   >=0 on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN)
+static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
+                                  unsigned long arg)
+{
+  FAR struct net_driver_s *dev;
+  FAR char *ifname;
+  int ret = -ENOTTY;
+
+  if (req != NULL)
+    {
+      /* Verify that this is either a valid IEEE802.15.4 radio IOCTL command
+       * or a valid IEEE802.15.4 MAC IOCTL command.
+       */
+
+      if (_PHY802154IOCVALID(cmd))
+        {
+          /* Get the IEEE802.15.4 network device to receive the radio IOCTL
+           * commdand
+           */
+
+          FAR struct ieee802154_netradio_s *radio =
+            (FAR struct ieee802154_netradio_s *)((uintptr_t)arg);
+
+          ifname = radio->ifr_name;
+        }
+      else if (_MAC802154IOCVALID(cmd))
+        {
+          /* Get the IEEE802.15.4 MAC device to receive the radio IOCTL
+           * commdand
+           */
+
+          FAR struct ieee802154_netmac_s *netmac =
+            (FAR struct ieee802154_netmac_s *)((uintptr_t)arg);
+
+          ifname = netmac->ifr_name;
+        }
+      else
+        {
+          /* The IOCTL command is neither */
+
+          return -ENOTTY;
+        }
+
+      /* Perform the device IOCTL */
+
+      ret = dev->d_ioctl(dev, cmd, arg);
+    }
+
+  return ret;
 }
 #endif
 
