@@ -146,19 +146,19 @@
 #define IEEE802154_FRAMECTRL_VERSION    0x3000  /* Source addressing mode, bits 12-13 */
 #define IEEE802154_FRAMECTRL_SADDR      0xC000  /* Source addressing mode, bits 14-15 */
 
-#define IEEE802154_FRAMECTRL_SHIFT_FTYPE     0  /* Frame type, bits 0-2 */
-#define IEEE802154_FRAMECTRL_SHIFT_SEC       3  /* Security Enabled, bit 3 */
-#define IEEE802154_FRAMECTRL_SHIFT_PEND      4  /* Frame pending, bit 4 */
-#define IEEE802154_FRAMECTRL_SHIFT_ACKREQ    5  /* Acknowledge request, bit 5 */
-#define IEEE802154_FRAMECTRL_SHIFT_PANIDCOMP 6  /* PAN ID Compression, bit 6 */
-#define IEEE802154_FRAMECTRL_SHIFT_DADDR     10 /* Dest addressing mode, bits 10-11 */
-#define IEEE802154_FRAMECTRL_SHIFT_VERSION   12 /* Source addressing mode, bits 12-13 */
-#define IEEE802154_FRAMECTRL_SHIFT_SADDR     14 /* Source addressing mode, bits 14-15 */
+#define IEEE802154_FRAMECTRL_SHIFT_FTYPE      0  /* Frame type, bits 0-2 */
+#define IEEE802154_FRAMECTRL_SHIFT_SEC        3  /* Security Enabled, bit 3 */
+#define IEEE802154_FRAMECTRL_SHIFT_PEND       4  /* Frame pending, bit 4 */
+#define IEEE802154_FRAMECTRL_SHIFT_ACKREQ     5  /* Acknowledge request, bit 5 */
+#define IEEE802154_FRAMECTRL_SHIFT_PANIDCOMP  6  /* PAN ID Compression, bit 6 */
+#define IEEE802154_FRAMECTRL_SHIFT_DADDR      10 /* Dest addressing mode, bits 10-11 */
+#define IEEE802154_FRAMECTRL_SHIFT_VERSION    12 /* Source addressing mode, bits 12-13 */
+#define IEEE802154_FRAMECTRL_SHIFT_SADDR      14 /* Source addressing mode, bits 14-15 */
 
 /* IEEE 802.15.4 PHY constants */
 
 #define IEEE802154_MAX_PHY_PACKET_SIZE        127
-#define IEEE802154_TURN_AROUND_TIME             12 /*symbol periods*/
+#define IEEE802154_TURN_AROUND_TIME           12 /*symbol periods*/
 
 /* IEEE 802.15.4 MAC constants */
 
@@ -175,8 +175,13 @@
         (IEEE802154_MAX_PHY_PACKET_SIZE - IEEE802154_MAX_BEACON_OVERHEAD)
 
 #define IEEE802154_MAX_LOST_BEACONS           4
-#define IEEE802514_MIN_MPDU_OVERHEAD          9
-#define IEEE802154_MAX_MPDU_UNSEC_OVERHEAD    25
+#define IEEE802154_MIN_MPDU_OVERHEAD          9
+#define IEEE802154_MAX_UNSEC_MHR_OVERHEAD     23
+#define IEEE802154_MFR_LENGTH                 2
+
+#define IEEE802154_MAX_MPDU_UNSEC_OVERHEAD  \
+        (IEEE802154_MAX_UNSEC_MHR_OVERHEAD + IEEE802154_MFR_LENGTH)
+ 
 
 #define IEEE802154_MAX_SAFE_MAC_PAYLOAD_SIZE \
         (IEEE802154_MAX_PHY_PACKET_SIZE - IEEE802154_MAX_MPDU_UNSEC_OVERHEAD)
@@ -344,58 +349,17 @@ struct ieee802154_addr_s
 {
   /* Address mode. Short or Extended */
 
-  enum ieee802154_addr_mode_e ia_mode;  
+  enum ieee802154_addr_mode_e mode;  
 
-  uint16_t ia_panid;        /* PAN identifier, can be IEEE802154_PAN_UNSPEC */
+  uint16_t panid;           /* PAN identifier, can be IEEE802154_PAN_UNSPEC */
   union
   {
-    uint16_t _ia_saddr;     /* short address */
-    uint8_t  _ia_eaddr[8];  /* extended address */
-  } ia_addr;
-
-#define ia_saddr ia_addr._ia_saddr
-#define ia_eaddr ia_addr._ia_eaddr
+    uint16_t saddr;     /* short address */
+    uint8_t  eaddr[8];  /* extended address */
+  };
 };
 
 #define IEEE802154_ADDRSTRLEN 22 /* (2*2+1+8*2, PPPP/EEEEEEEEEEEEEEEE) */
-
-struct ieee802154_framecontrol_s
-{
-  /* Frame type
-   *
-   * Should be a value from: ieee802154_frametype_e
-   *
-   * Bits 0-1
-   */
-
-  uint16_t frame_type     : 3;  
-
-  uint16_t security_en    : 1;  /* Security Enabled flag, bit 3 */
-  uint16_t frame_pending  : 1;  /* Frame Pending flag, bit 4 */
-  uint16_t ack_req        : 1;  /* Acknowledge Request flag, bit 5 */
-  uint16_t panid_comp     : 1;  /* PAN ID Compression flag, bit 6 */
-  uint16_t reserved       : 3;  /* Reserved, bits 7-9 */
-
-  /* Destination Addressing Mode
-   *
-   * Should be a value from: ieee802154_addr_mode_e
-   *
-   * Bits 10-11
-   */
-
-  uint16_t dest_addr_mode : 2;
-
-  uint16_t frame_version  : 2;  /* Frame Version, bits 12-13 */
-
-  /* Source Addressing Mode
-   *
-   * Should be a value from: ieee802154_addr_mode_e
-   *
-   * Bits 14-15
-   */
-
-  uint16_t src_addr_mode  : 2;
-};
 
 #ifdef CONFIG_IEEE802154_SECURITY
 struct ieee802154_security_s
@@ -449,7 +413,7 @@ struct ieee802154_frame_s
 struct ieee802154_data_req_s
 {
   enum ieee802154_addr_mode_e src_addr_mode;  /* Source Address Mode */
-  struct ieee802154_addr_s dest__addr;        /* Destination Address */
+  struct ieee802154_addr_s dest_addr;         /* Destination Address */
   
   /* Number of bytes contained in the MAC Service Data Unit (MSDU) 
    * to be transmitted by the MAC sublayer enitity 
@@ -502,7 +466,7 @@ struct ieee802154_data_req_s
 };
 
 #define SIZEOF_IEEE802154_DATA_REQ_S(n) \
-        (sizeof(struct ieee802154_data_req_s) + (n))
+        (sizeof(struct ieee802154_data_req_s) + (n) - 1)
 
 struct ieee802154_data_conf_s
 {
