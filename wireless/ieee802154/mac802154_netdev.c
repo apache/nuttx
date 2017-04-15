@@ -1462,24 +1462,24 @@ int mac802154netdev_register(MACHANDLE mac)
   /* Initialize the driver structure */
 
   dev                = &ieee->md_dev.i_dev;
-  dev->d_buf         = pktbuf;             /* Single packet buffer */
-  dev->d_ifup        = macnet_ifup;     /* I/F up (new IP address) callback */
-  dev->d_ifdown      = macnet_ifdown;   /* I/F down callback */
-  dev->d_txavail     = macnet_txavail;  /* New TX data callback */
+  dev->d_buf         = pktbuf;            /* Single packet buffer */
+  dev->d_ifup        = macnet_ifup;       /* I/F up (new IP address) callback */
+  dev->d_ifdown      = macnet_ifdown;     /* I/F down callback */
+  dev->d_txavail     = macnet_txavail;    /* New TX data callback */
 #ifdef CONFIG_NET_IGMP
-  dev->d_addmac      = macnet_addmac;   /* Add multicast MAC address */
-  dev->d_rmmac       = macnet_rmmac;    /* Remove multicast MAC address */
+  dev->d_addmac      = macnet_addmac;     /* Add multicast MAC address */
+  dev->d_rmmac       = macnet_rmmac;      /* Remove multicast MAC address */
 #endif
  #ifdef CONFIG_NETDEV_IOCTL
-  dev->d_ioctl       = macnet_ioctl;    /* Handle network IOCTL commands */
+  dev->d_ioctl       = macnet_ioctl;      /* Handle network IOCTL commands */
 #endif
-  dev->d_private     = (FAR void *)priv;   /* Used to recover private state from dev */
+  dev->d_private     = (FAR void *)priv;  /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  priv->md_mac       = mac;                /* Save the MAC interface instance */
-  priv->md_txpoll    = wd_create();        /* Create periodic poll timer */
-  priv->md_txtimeout = wd_create();        /* Create TX timeout timer */
+  priv->md_mac       = mac;               /* Save the MAC interface instance */
+  priv->md_txpoll    = wd_create();       /* Create periodic poll timer */
+  priv->md_txtimeout = wd_create();       /* Create TX timeout timer */
 
   DEBUGASSERT(priv->md_txpoll != NULL && priv->md_txtimeout != NULL);
 
