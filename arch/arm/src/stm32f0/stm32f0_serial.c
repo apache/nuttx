@@ -59,14 +59,21 @@
 #endif
 
 #include <arch/serial.h>
-#include <arch/board/board.h>
 
-#include "chip.h"
-#include "stm32f0_uart.h"
-//#include "stm32f0_dma.h"
-#include "stm32f0_rcc.h"
 #include "up_arch.h"
 #include "up_internal.h"
+#include "chip.h"
+#include "stm32f0_gpio.h"
+#include "stm32f0_uart.h"
+#include "stm32f0_rcc.h"
+#include "chip/stm32f0_pinmap.h"
+
+/* board.h should be included last.  It may depend on defintions from
+ * previous header files and it may, in certain cases, override definitions
+ * provided in previous header files.
+ */
+
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -189,7 +196,7 @@
 #endif
 
 #ifdef USE_SERIALDRIVER
-#ifdef HAVE_USART
+#ifdef HAVE_UART
 
 /****************************************************************************
  * Private Types
@@ -2320,7 +2327,7 @@ static int stm32f0serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
   return OK;
 }
 #endif
-#endif /* HAVE_USART */
+#endif /* HAVE_UART */
 #endif /* USE_SERIALDRIVER */
 
 /****************************************************************************
@@ -2342,7 +2349,7 @@ static int stm32f0serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
 #ifdef USE_EARLYSERIALINIT
 void up_earlyserialinit(void)
 {
-#ifdef HAVE_USART
+#ifdef HAVE_UART
   unsigned i;
 
   /* Disable all USART interrupts */
@@ -2375,7 +2382,7 @@ void up_earlyserialinit(void)
 
 void up_serialinit(void)
 {
-#ifdef HAVE_USART
+#ifdef HAVE_UART
   char devname[16];
   unsigned i;
   unsigned minor = 0;

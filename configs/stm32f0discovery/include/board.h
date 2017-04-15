@@ -237,38 +237,5 @@
 #define BUTTON_USER_BIT          (1 << BUTTON_USER)
 
 /* Alternate Pin Functions **********************************************************/
-/* The STM32L-Discovery has no on-board RS-232 driver.  Further, there are no USART
- * pins that do not conflict with the on board resources, in particular, the LCD:
- * Most USART pins are available if the LCD is enabled; USART2 may be used if either
- * the LCD or the on-board LEDs are disabled.
- *
- *   PA9   USART1_TX  LCD glass COM1  P2, pin 22
- *   PA10  USART1_RX  LCD glass COM2  P2, pin 21
- *   PB6   USART1_TX  LED Blue        P2, pin 8
- *   PB7   USART1_RX  LED Green       P2, pin 7
- *
- *   PA2   USART2_TX  LCD SEG1        P1, pin 17
- *   PA3   USART2_RX  LCD SEG2        P1, pin 18
- *
- *   PB10  USART3_TX LCD SEG6         P1, pin 22
- *   PB11  USART3_RX LCD SEG7         P1, pin 23
- *   PC10  USART3_TX LCD SEG22        P2, pin 15
- *   PC11  USART3_RX LCD SEG23        P2, pin 14
- */
-
-/* Select PA9 and PA10 if the LCD is not enabled */
-
-//#define GPIO_USART1_RX         GPIO_USART1_RX_1 /* PA10 */
-//#define GPIO_USART1_TX         GPIO_USART1_TX_1 /* PA9 */
-
-/* This there are no other options for USART1 on this part */
-
-#define GPIO_USART2_RX         GPIO_USART2_RX_1 /* PA3 */
-#define GPIO_USART2_TX         GPIO_USART2_TX_1 /* PA2 */
-
-/* Arbirtrarily select PB10 and PB11 */
-
-#define GPIO_USART3_RX         GPIO_USART3_RX_1 /* PB11 */
-#define GPIO_USART3_TX         GPIO_USART3_TX_1 /* PB10 */
 
 #endif  /* __CONFIG_STM32F0DISCOVERY_INCLUDE_BOARD_H */
