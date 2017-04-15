@@ -414,7 +414,7 @@ static int  sam_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int  sam_ioctl(struct net_driver_s *dev, int cmd, long arg);
+static int  sam_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg);
 #endif
 
 /* PHY Initialization */
@@ -2346,7 +2346,7 @@ static int sam_rmmac(struct net_driver_s *dev, const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int sam_ioctl(struct net_driver_s *dev, int cmd, long arg)
+static int sam_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
   struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
   int ret;
