@@ -70,10 +70,11 @@
 
 #ifdef CONFIG_NETDEV_WIRELESS_IOCTL
 #  include <nuttx/wireless/wireless.h>
-#ifdef CONFIG_NET_6LOWPAN
+#endif
+
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN)
 #  include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 #  include <nuttx/wireless/ieee802154/ieee802154_radio.h>
-#endif
 #endif
 
 #include "arp/arp.h"
@@ -379,7 +380,7 @@ static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
   FAR char *ifname;
   int ret = -ENOTTY;
 
-  if (req != NULL)
+  if (arg != 0ul)
     {
       /* Verify that this is either a valid IEEE802.15.4 radio IOCTL command
        * or a valid IEEE802.15.4 MAC IOCTL command.
@@ -414,9 +415,15 @@ static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
           return -ENOTTY;
         }
 
-      /* Perform the device IOCTL */
+      /* Find the device with this name */
 
-      ret = dev->d_ioctl(dev, cmd, arg);
+      dev = netdev_findbyname(ifname);
+      if (dev != NULL)
+        {
+          /* Perform the device IOCTL */
+
+          ret = dev->d_ioctl(dev, cmd, arg);
+        }
     }
 
   return ret;
@@ -1301,11 +1308,20 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
   ret = netdev_ifrioctl(psock, cmd, (FAR struct ifreq *)((uintptr_t)arg));
 
 #if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_WIRELESS_IOCTL)
-  /* Check a wireless network command */
+  /* Check for a wireless network command */
 
   if (ret == -ENOTTY)
     {
       ret = netdev_wifrioctl(psock, cmd, (FAR struct iwreq *)((uintptr_t)arg));
+    }
+#endif
+
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN)
+  /* Check for a IEEE802.15.4 network device command */
+
+  if (ret == -ENOTTY)
+    {
+      ret = netdev_iee802154_ioctl(psock, cmd, arg);
     }
 #endif
 
