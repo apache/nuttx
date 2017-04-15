@@ -459,7 +459,7 @@ static int netdev_wifrioctl(FAR struct socket *psock, int cmd,
         {
           /* Just forward the IOCTL to the wireless driver */
 
-          ret = dev->d_ioctl(dev, cmd, ((long)(uintptr_t)req));
+          ret = dev->d_ioctl(dev, cmd, ((unsigned long)(uintptr_t)req));
         }
     }
 
@@ -901,7 +901,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
           if (dev && dev->d_ioctl)
             {
               struct mii_iotcl_notify_s *notify = &req->ifr_ifru.ifru_mii_notify;
-              ret = dev->d_ioctl(dev, cmd, ((long)(uintptr_t)notify));
+              ret = dev->d_ioctl(dev, cmd, ((unsigned long)(uintptr_t)notify));
             }
         }
         break;
@@ -915,7 +915,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
           if (dev && dev->d_ioctl)
             {
               struct mii_ioctl_data_s *mii_data = &req->ifr_ifru.ifru_mii_data;
-              ret = dev->d_ioctl(dev, cmd, ((long)(uintptr_t)mii_data));
+              ret = dev->d_ioctl(dev, cmd, ((unsigned long)(uintptr_t)mii_data));
             }
         }
         break;

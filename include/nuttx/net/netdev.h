@@ -331,7 +331,8 @@ struct net_driver_s
   int (*d_rmmac)(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
-  int (*d_ioctl)(FAR struct net_driver_s *dev, int cmd, long arg);
+  int (*d_ioctl)(FAR struct net_driver_s *dev, int cmd,
+                 unsigned long arg);
 #endif
 
   /* Drivers may attached device-specific, private information */

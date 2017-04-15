@@ -678,9 +678,10 @@ static void stm32_checksetup(void);
 /* Free buffer management */
 
 static void stm32_initbuffer(struct stm32_ethmac_s *priv,
-                             uint8_t *txbuffer);
+              uint8_t *txbuffer);
 static inline uint8_t *stm32_allocbuffer(struct stm32_ethmac_s *priv);
-static inline void stm32_freebuffer(struct stm32_ethmac_s *priv, uint8_t *buffer);
+static inline void stm32_freebuffer(struct stm32_ethmac_s *priv,
+              uint8_t *buffer);
 static inline bool stm32_isfreebuffer(struct stm32_ethmac_s *priv);
 
 /* Common TX logic */
@@ -695,7 +696,7 @@ static void stm32_enableint(struct stm32_ethmac_s *priv, uint32_t ierbit);
 static void stm32_disableint(struct stm32_ethmac_s *priv, uint32_t ierbit);
 
 static void stm32_freesegment(struct stm32_ethmac_s *priv,
-                              struct eth_rxdesc_s *rxfirst, int segments);
+              struct eth_rxdesc_s *rxfirst, int segments);
 static int  stm32_recvframe(struct stm32_ethmac_s *priv);
 static void stm32_receive(struct stm32_ethmac_s *priv);
 static void stm32_freeframe(struct stm32_ethmac_s *priv);
@@ -727,24 +728,26 @@ static int  stm32_addmac(struct net_driver_s *dev, const uint8_t *mac);
 static int  stm32_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int  stm32_ioctl(struct net_driver_s *dev, int cmd, long arg);
+static int  stm32_ioctl(struct net_driver_s *dev, int cmd,
+              unsigned long arg);
 #endif
 
 /* Descriptor Initialization */
 
 static void stm32_txdescinit(struct stm32_ethmac_s *priv,
-                             union stm32_txdesc_u *txtable);
+              union stm32_txdesc_u *txtable);
 static void stm32_rxdescinit(struct stm32_ethmac_s *priv,
-                             union stm32_rxdesc_u *rxtable,
-                             uint8_t *rxbuffer);
+              union stm32_rxdesc_u *rxtable, uint8_t *rxbuffer);
 
 /* PHY Initialization */
 
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
 static int  stm32_phyintenable(struct stm32_ethmac_s *priv);
 #endif
-static int  stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
-static int  stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value);
+static int  stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr,
+              uint16_t *value);
+static int  stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr,
+              uint16_t value);
 #ifdef CONFIG_ETH0_PHY_DM9161
 static inline int stm32_dm9161(struct stm32_ethmac_s *priv);
 #endif
@@ -2938,7 +2941,7 @@ static void stm32_rxdescinit(struct stm32_ethmac_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int stm32_ioctl(struct net_driver_s *dev, int cmd, long arg)
+static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
   struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)dev->d_private;

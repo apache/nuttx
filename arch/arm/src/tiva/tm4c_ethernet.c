@@ -685,7 +685,8 @@ static void tiva_checksetup(void);
 
 static void tiva_initbuffer(FAR struct tiva_ethmac_s *priv);
 static inline uint8_t *tiva_allocbuffer(FAR struct tiva_ethmac_s *priv);
-static inline void tiva_freebuffer(FAR struct tiva_ethmac_s *priv, uint8_t *buffer);
+static inline void tiva_freebuffer(FAR struct tiva_ethmac_s *priv,
+              uint8_t *buffer);
 static inline bool tiva_isfreebuffer(FAR struct tiva_ethmac_s *priv);
 
 /* Common TX logic */
@@ -697,10 +698,11 @@ static void tiva_dopoll(FAR struct tiva_ethmac_s *priv);
 /* Interrupt handling */
 
 static void tiva_enableint(FAR struct tiva_ethmac_s *priv, uint32_t ierbit);
-static void tiva_disableint(FAR struct tiva_ethmac_s *priv, uint32_t ierbit);
+static void tiva_disableint(FAR struct tiva_ethmac_s *priv,
+              uint32_t ierbit);
 
 static void tiva_freesegment(FAR struct tiva_ethmac_s *priv,
-                             FAR struct emac_rxdesc_s *rxfirst, int segments);
+              FAR struct emac_rxdesc_s *rxfirst, int segments);
 static int  tiva_recvframe(FAR struct tiva_ethmac_s *priv);
 static void tiva_receive(FAR struct tiva_ethmac_s *priv);
 static void tiva_freeframe(FAR struct tiva_ethmac_s *priv);
@@ -732,7 +734,8 @@ static int  tiva_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 static int  tiva_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int  tiva_ioctl(struct net_driver_s *dev, int cmd, long arg);
+static int  tiva_ioctl(struct net_driver_s *dev, int cmd,
+              unsigned long arg);
 #endif
 
 /* Descriptor Initialization */
@@ -745,8 +748,10 @@ static void tiva_rxdescinit(FAR struct tiva_ethmac_s *priv);
 #ifdef CONFIG_TIVA_PHY_INTERRUPTS
 static void tiva_phy_intenable(bool enable);
 #endif
-static int  tiva_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
-static int  tiva_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value);
+static int  tiva_phyread(uint16_t phydevaddr, uint16_t phyregaddr,
+              uint16_t *value);
+static int  tiva_phywrite(uint16_t phydevaddr, uint16_t phyregaddr,
+              uint16_t value);
 static int  tiva_phyinit(FAR struct tiva_ethmac_s *priv);
 
 /* MAC/DMA Initialization */
@@ -766,6 +771,7 @@ static int  tive_emac_configure(FAR struct tiva_ethmac_s *priv);
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: tiva_getreg
  *
@@ -2855,7 +2861,7 @@ static void tiva_rxdescinit(FAR struct tiva_ethmac_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int tiva_ioctl(struct net_driver_s *dev, int cmd, long arg)
+static int tiva_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
   int ret;
 

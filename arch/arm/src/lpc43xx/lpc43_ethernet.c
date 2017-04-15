@@ -572,7 +572,8 @@ static void lpc43_checksetup(void);
 
 static void lpc43_initbuffer(FAR struct lpc43_ethmac_s *priv);
 static inline uint8_t *lpc43_allocbuffer(FAR struct lpc43_ethmac_s *priv);
-static inline void lpc43_freebuffer(FAR struct lpc43_ethmac_s *priv, uint8_t *buffer);
+static inline void lpc43_freebuffer(FAR struct lpc43_ethmac_s *priv,
+              uint8_t *buffer);
 static inline bool lpc43_isfreebuffer(FAR struct lpc43_ethmac_s *priv);
 
 /* Common TX logic */
@@ -583,11 +584,13 @@ static void lpc43_dopoll(FAR struct lpc43_ethmac_s *priv);
 
 /* Interrupt handling */
 
-static void lpc43_enableint(FAR struct lpc43_ethmac_s *priv, uint32_t ierbit);
-static void lpc43_disableint(FAR struct lpc43_ethmac_s *priv, uint32_t ierbit);
+static void lpc43_enableint(FAR struct lpc43_ethmac_s *priv,
+              uint32_t ierbit);
+static void lpc43_disableint(FAR struct lpc43_ethmac_s *priv,
+              uint32_t ierbit);
 
 static void lpc43_freesegment(FAR struct lpc43_ethmac_s *priv,
-                              FAR struct eth_rxdesc_s *rxfirst, int segments);
+              FAR struct eth_rxdesc_s *rxfirst, int segments);
 static int  lpc43_recvframe(FAR struct lpc43_ethmac_s *priv);
 static void lpc43_receive(FAR struct lpc43_ethmac_s *priv);
 static void lpc43_freeframe(FAR struct lpc43_ethmac_s *priv);
@@ -619,7 +622,8 @@ static int  lpc43_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 static int  lpc43_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int lpc43_ioctl(struct net_driver_s *dev, int cmd, long arg);
+static int  lpc43_ioctl(struct net_driver_s *dev, int cmd,
+              unsigned long arg);
 #endif
 /* Descriptor Initialization */
 
@@ -630,8 +634,10 @@ static void lpc43_rxdescinit(FAR struct lpc43_ethmac_s *priv);
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
 static int  lpc43_phyintenable(FAR struct lpc43_ethmac_s *priv);
 #endif
-static int  lpc43_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
-static int  lpc43_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value);
+static int  lpc43_phyread(uint16_t phydevaddr, uint16_t phyregaddr,
+              uint16_t *value);
+static int  lpc43_phywrite(uint16_t phydevaddr, uint16_t phyregaddr,
+              uint16_t value);
 #ifdef CONFIG_ETH0_PHY_DM9161
 static inline int lpc43_dm9161(FAR struct lpc43_ethmac_s *priv);
 #endif
@@ -2739,7 +2745,7 @@ static void lpc43_rxdescinit(FAR struct lpc43_ethmac_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int lpc43_ioctl(struct net_driver_s *dev, int cmd, long arg)
+static int lpc43_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
   FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)dev->d_private;
