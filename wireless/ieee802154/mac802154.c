@@ -67,6 +67,7 @@ struct ieee802154_privmac_s
 {
   FAR struct ieee802154_radio_s *radio;     /* Contained IEEE802.15.4 radio dev */
   FAR const struct ieee802154_maccb_s *cb;  /* Contained MAC callbacks */
+  FAR struct ieee802154_phyif_s phyif;      /* Interface to bind to radio */
 
   sem_t excl_sem; /* Support exclusive access */
 
@@ -226,6 +227,16 @@ struct mac802154_unsec_mhr_s
 };
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static const struct ieee802154_phyifops_s mac802154_phyifops =
+{
+  mac802154_poll_csma,
+  mac802154_poll_gts
+};
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -330,6 +341,13 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
 
   mac802154_defaultmib(mac);
   mac802154_applymib(mac);
+ 
+  mac->phyif.ops = &mac802154_phyifops;
+  mac->phyif.priv = mac;
+
+  /* Bind our PHY interface to the radio */
+
+  radiodev->ops->bind(radiodev, mac->phyif);
 
   return (MACHANDLE)mac;
 }
