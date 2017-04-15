@@ -217,9 +217,11 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr)
            * broadcast packet out ALL local networks.  I am not sure
            * of that and, in any event, there is nothing we can do
            * about that here.
+           * For now, simply return the first network interface in order
+           * to have working DHCP with CONFIG_NETDEV_MULTINIC.
            */
 
-          return NULL;
+          return g_netdevices;
         }
       else
         {
