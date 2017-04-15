@@ -706,6 +706,29 @@ int mac802154_req_associate(MACHANDLE mac,
                             FAR struct ieee802154_assoc_req_s *req)
 {
   FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)mac;
+
+  /* Set the channel of the PHY layer */
+
+  /* Set the channel page of the PHY layer */
+
+  /* Set the macPANId */
+
+  /* Set either the macCoordExtendedAddress and macCoordShortAddress
+   * depending on the CoordAddrMode in the primitive */
+
+  if (req->coord_addr.mode == IEEE802154_ADDRMODE_EXTENDED)
+    {
+
+    } 
+  else if (req->coord_addr.mode == IEEE802154_ADDRMODE_EXTENDED)
+    {
+
+    }
+  else 
+    {
+      return -EINVAL;
+    }
+
   return -ENOTTY;
 }
 
