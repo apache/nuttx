@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated April 12, 2017)
+NuttX TODO List (Last updated April 15, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -19,7 +19,7 @@ nuttx/:
   (8)  Kernel/Protected Build
   (3)  C++ Support
   (6)  Binary loaders (binfmt/)
- (14)  Network (net/, drivers/net)
+ (15)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
  (12)  Libraries (libc/, libm/)
@@ -1144,6 +1144,20 @@ o Network (net/, drivers/net)
                currently implemented in every network driver.
   Status:      Open
   Priority:    Low.  Really just as aesthetic maintainability issue.
+
+  Title:       BROADCAST WITH MULTIPLE NETWORK INTERFACES
+  Description: There is currently no mechanism to send a broadcast packet
+               out through several network interfaces.   Currently packets
+               can be sent to only one device.  Logic in netdev_findby_ipvXaddr()
+               currently just selects the first device in the list of
+               devices; only that device will receive broadcast packets.
+  Status:      Open
+  Priority:    High if you require broadcast on multiple networks.  There is
+               no simple solution known at this time, however.  Perhaps
+               netdev_findby_ipvXaddr() should return a list of devices rather
+               than a single device?  All upstream logic would then have to
+               deal with a list of devices.  That would be a huge effect and
+               certainly doesn't dount as a "simple solution".
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
