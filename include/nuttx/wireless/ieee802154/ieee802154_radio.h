@@ -157,19 +157,51 @@ struct ieee802154_netradio_s
 #endif
 
 /* IEEE802.15.4 Radio Interface Operations **********************************/
+struct ieee802154_trans_s
+{
+  uint8_t retry_count;  /* The number of retries remaining */ 
+  uint8_t msdu_handle;  /* The msdu handle identifying the transaction */
+
+  uint16_t psdu_length; /* The length of the PSDU */
+
+  /* The PHY Service Data Unit (PSDU) buffer representing the frame to be 
+   * transmitted. This must be at the end of the struct to allow the array
+   * to continue and make the struct "variable length". Users should allocate
+   * memory using the SIZEOF_MAC802154_TRANSACTION_S macro below */
+
+  uint8_t psdu[CONFIG_IEEE802154_MTU];
+};
 
 struct ieee802154_radio_s; /* Forward reference */
 
+struct ieee802154_phyif_s
+{
+  CODE int (*poll_csma) (FAR struct ieee802154_phyif_s *phyif,
+                         FAR struct ieee802154_txdesc_s *tx_desc,
+                         uint8_t *buf);
+
+  CODE int (*poll_gts) (FAR struct ieee802154_phyif_s *phyif,
+                        FAR struct ieee802154_txdesc_s *tx_desc,
+                        uint8_t *buf);
+
+  /* Driver-specific information */
+
+  void * priv;
+};
+
 struct ieee802154_radioops_s
 {
+  CODE int (*bind) (FAR struct ieee802154_radio_s *dev,
+                    FAR const struct ieee802154_phyif_s *phyif);
+
   CODE int (*ioctl)(FAR struct ieee802154_radio_s *ieee, int cmd,
              unsigned long arg);
+
   CODE int (*rxenable)(FAR struct ieee802154_radio_s *dev, bool state,
              FAR struct ieee802154_packet_s *packet);
+
   CODE int (*transmit)(FAR struct ieee802154_radio_s *dev,
              FAR struct ieee802154_packet_s *packet);
-
-  /* TODO beacon/sf order */
 };
 
 struct ieee802154_radio_s
