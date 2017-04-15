@@ -172,9 +172,10 @@ struct ieee802154_trans_s
   uint8_t psdu[CONFIG_IEEE802154_MTU];
 };
 
-struct ieee802154_radio_s; /* Forward reference */
 
-struct ieee802154_phyif_s
+struct ieee802154_phyif_s; /* Forward Reference */
+
+struct ieee802154_phyifops_s
 {
   CODE int (*poll_csma) (FAR struct ieee802154_phyif_s *phyif,
                          FAR struct ieee802154_txdesc_s *tx_desc,
@@ -183,11 +184,18 @@ struct ieee802154_phyif_s
   CODE int (*poll_gts) (FAR struct ieee802154_phyif_s *phyif,
                         FAR struct ieee802154_txdesc_s *tx_desc,
                         uint8_t *buf);
+};
+
+struct ieee802154_phyif_s
+{
+  FAR const struct ieee802154_phyifops_s *ops;
 
   /* Driver-specific information */
 
   void * priv;
 };
+
+struct ieee802154_radio_s; /* Forward reference */
 
 struct ieee802154_radioops_s
 {
