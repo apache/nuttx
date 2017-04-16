@@ -160,14 +160,22 @@
 
 /* 6lowpan dispatches */
 
-#define SIXLOWPAN_DISPATCH_IPV6          0x41 /* 01000001 = 65 */
-#define SIXLOWPAN_DISPATCH_HC1           0x42 /* 01000010 = 66 */
+#define SIXLOWPAN_DISPATCH_NALP          0x00 /* 00xxxxxx Not a LoWPAN packet */
+#define SIXLOWPAN_DISPATCH_NALP_MASK     0xc0 /* 11000000 */
 
-#define SIXLOWPAN_DISPATCH_IPHC          0x60 /* 011xxxxx */
+#define SIXLOWPAN_DISPATCH_IPV6          0x41 /* 01000001 Uncompressed IPv6 addresses */
+#define SIXLOWPAN_DISPATCH_HC1           0x42 /* 01000010 HC1 Compressed IPv6 header */
+#define SIXLOWPAN_DISPATCH_BC0           0x50 /* 01010000 BC0 Broadcast header */
+#define SIXLOWPAN_DISPATCH_ESC           0x7f /* 01111111 Additional Dispatch octet follows  */
+
+#define SIXLOWPAN_DISPATCH_IPHC          0x60 /* 011xxxxx IP Header Compression (IPHC)*/
 #define SIXLOWPAN_DISPATCH_IPHC_MASK     0xe0 /* 11100000 */
 
-#define SIXLOWPAN_DISPATCH_FRAG1         0xc0 /* 11000xxx */
-#define SIXLOWPAN_DISPATCH_FRAGN         0xe0 /* 11100xxx */
+#define SIXLOWPAN_DISPATCH_MESH          0x80 /* 10xxxxxx Mesh routing header */
+#define SIXLOWPAN_DISPATCH_MESH_MASK     0xc0 /* 11000000 */
+
+#define SIXLOWPAN_DISPATCH_FRAG1         0xc0 /* 11000xxx Fragmentation header (ﬁrst) */
+#define SIXLOWPAN_DISPATCH_FRAGN         0xe0 /* 11100xxx Fragmentation header (subsequent) */
 #define SIXLOWPAN_DISPATCH_FRAG_MASK     0xf8 /* 11111000 */
 
 /* HC1 encoding */

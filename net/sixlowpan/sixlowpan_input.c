@@ -83,10 +83,47 @@
 
 #define NET_6LOWPAN_TIMEOUT SEC2TICK(CONFIG_NET_6LOWPAN_MAXAGE)
 
+/* This is the size of a buffer large enough to hold the largest uncompressed
+ * HC06 or HC1 headers.
+ */
+
+#ifdef CONFIG_NET_TCP
+/* The basic TCP header length is TCP_HDRLEN but could include up to 16
+ * additional 32-bit words of optional data.
+ */
+
+#  define UNCOMP_MAXHDR  (IPv6_HDRLEN + TCP_HDRLEN + 16*sizeof(uint32_t))
+
+#elif defined(CONFIG_NET_UDP)
+/* The UDP header length is always 8 bytes */
+
+#  define UNCOMP_MAXHDR  (IPv6_HDRLEN + TCP_HDRLEN)
+
+#elif defined(CONFIG_NET_ICMPv6)
+/* The ICMPv6 header length is a mere 4 bytes */
+
+#  define UNCOMP_MAXHDR  (IPv6_HDRLEN + ICMPv6_HDRLEN)
+
+#else
+/* No other header type is handled. */
+
+#  define UNCOMP_MAXHDR  IPv6_HDRLEN
+#endif
+
 /* Buffer access helpers */
 
 #define IPv6BUF(dev)  ((FAR struct ipv6_hdr_s *)((dev)->d_buf))
 #define TCPBUF(dev)   ((FAR struct tcp_hdr_s *)&(dev)->d_buf[IPv6_HDRLEN])
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_6LOWPAN_FRAG
+/* This big buffer could be avoided with a little more effort */
+
+static uint8_t g_bitbucket[UNCOMP_MAXHDR];
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -96,7 +133,7 @@
  * Name: sixlowpan_recv_hdrlen
  *
  * Description:
- *   Get the length of the IEEE802.15.4 header on the received frame.
+ *   Get the length of the IEEE802.15.4 FCF header on the received frame.
  *
  * Input Parameters:
  *   ieee - The IEEE802.15.4 MAC network driver interface.
@@ -112,26 +149,12 @@
 
 int sixlowpan_recv_hdrlen(FAR const uint8_t *fptr)
 {
-  uint16_t hdrlen = 0;
+  uint16_t hdrlen;
   uint8_t addrmode;
-  uint8_t tmp;
-
-  /* Check for a fragment header preceding the IEEE802.15.4 FCF */
-
-  tmp = *fptr & SIXLOWPAN_DISPATCH_FRAG_MASK;
-  if (tmp == SIXLOWPAN_DISPATCH_FRAG1)
-    {
-      hdrlen += SIXLOWPAN_FRAG1_HDR_LEN;
-    }
-  else if (tmp == SIXLOWPAN_DISPATCH_FRAGN)
-    {
-      hdrlen += SIXLOWPAN_FRAGN_HDR_LEN;
-    }
 
   /* Minimum header:  2 byte FCF + 1 byte sequence number */
 
-  fptr   += hdrlen;
-  hdrlen += 3;
+  hdrlen = 3;
 
   /* Account for destination address size */
 
@@ -207,18 +230,18 @@ int sixlowpan_recv_hdrlen(FAR const uint8_t *fptr)
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *
  * Input Parameters:
- *   ieee - The IEEE802.15.4 MAC network driver interface.
  *   fptr - Pointer to the beginning of the frame under construction
+ *   bptr - Output goes here.  Normally this is a known offset into d_buf,
+ *          may be redirected to g_bitbucket on the case of FRAGN frames.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void sixlowpan_uncompress_ipv6hdr(FAR struct ieee802154_driver_s *ieee,
-                                         FAR uint8_t *fptr)
+static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr, FAR uint8_t *bptr)
 {
-  FAR struct ipv6_hdr_s *ipv6 = IPv6BUF(&ieee->i_dev);
+  FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)bptr;
   uint16_t protosize;
  
   /* Put uncompressed IPv6 header in d_buf. */
@@ -310,6 +333,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
                                    FAR struct iob_s *iob)
 {
   FAR uint8_t *fptr;          /* Convenience pointer to beginning of the frame */
+  FAR uint8_t *bptr;          /* Used to redirect uncompressed header to the bitbucket */
   FAR uint8_t *hc1;           /* Convenience pointer to HC1 data */
   uint16_t fragsize  = 0;     /* Size of the IP packet (read from fragment) */
   uint16_t paysize;           /* Size of the data payload */
@@ -318,6 +342,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
   int hdrsize;                /* Size of the IEEE802.15.4 header */
 
 #ifdef CONFIG_NET_6LOWPAN_FRAG
+  FAR uint8_t *fragptr;       /* Pointer to the fragmentation header */
   bool isfrag        = false;
   bool isfirstfrag   = false;
   uint16_t fragtag   = 0;     /* Tag of the fragment */
@@ -349,7 +374,8 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
    * already includes the fragementation header, if presetn.
    */
 
-  switch ((GETINT16(fptr, RIME_FRAG_DISPATCH_SIZE) & 0xf800) >> 8)
+  fragptr = fptr + hdrsize;
+  switch ((GETINT16(fragptr, RIME_FRAG_DISPATCH_SIZE) & 0xf800) >> 8)
     {
     /* First fragment of new reassembly */
 
@@ -357,16 +383,17 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       {
         /* Set up for the reassembly */
 
-        fragsize    = GETINT16(fptr, RIME_FRAG_DISPATCH_SIZE) & 0x07ff;
-        fragtag     = GETINT16(fptr, RIME_FRAG_TAG);
+        fragsize        = GETINT16(fragptr, RIME_FRAG_DISPATCH_SIZE) & 0x07ff;
+        fragtag         = GETINT16(fragptr, RIME_FRAG_TAG);
+        g_frame_hdrlen += SIXLOWPAN_FRAG1_HDR_LEN;
 
         ninfo("FRAG1: fragsize=%d fragtag=%d fragoffset=%d\n",
               fragsize, fragtag, fragoffset);
 
         /* Indicate the first fragment of the reassembly */
 
-        isfirstfrag = true;
-        isfrag      = true;
+        isfirstfrag     = true;
+        isfrag          = true;
       }
       break;
 
@@ -374,9 +401,10 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       {
         /* Set offset, tag, size.  Offset is in units of 8 bytes. */
 
-        fragoffset  = fptr[RIME_FRAG_OFFSET];
-        fragtag     = GETINT16(fptr, RIME_FRAG_TAG);
-        fragsize    = GETINT16(fptr, RIME_FRAG_DISPATCH_SIZE) & 0x07ff;
+        fragoffset      = fragptr[RIME_FRAG_OFFSET];
+        fragtag         = GETINT16(fragptr, RIME_FRAG_TAG);
+        fragsize        = GETINT16(fragptr, RIME_FRAG_DISPATCH_SIZE) & 0x07ff;
+        g_frame_hdrlen += SIXLOWPAN_FRAGN_HDR_LEN;
 
         ninfo("FRAGN: fragsize=%d fragtag=%d fragoffset=%d\n",
               fragsize, fragtag, fragoffset);
@@ -385,7 +413,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
         /* Indicate that this frame is a another fragment for reassembly */
 
-        isfrag = true;
+        isfrag          = true;
       }
       break;
 
@@ -397,6 +425,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
   /* Check if we are currently reassembling a packet */
 
+  bptr = ieee->i_dev.d_buf;
   if (ieee->i_accumlen > 0)
     {
       /* If reassembly timed out, cancel it */
@@ -470,12 +499,11 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       else
         {
           /* Looks good.  We are currently processing a reassembling sequence
-           * and we recieved a valid FRAGN fragment.  Skip the header
-           * compression dispatch logic.
+           * and we recieved a valid FRAGN fragment.  Redirect the header
+           * uncompression to our bitbucket.
            */
 
-          g_uncomp_hdrlen = ieee->i_boffset;
-          goto copypayload;
+          bptr = g_bitbucket;
         }
     }
 
@@ -522,7 +550,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
   if ((hc1[RIME_HC1_DISPATCH] & SIXLOWPAN_DISPATCH_IPHC_MASK) == SIXLOWPAN_DISPATCH_IPHC)
     {
       ninfo("IPHC Dispatch\n");
-      sixlowpan_uncompresshdr_hc06(ieee, fragsize, iob, fptr);
+      sixlowpan_uncompresshdr_hc06(fragsize, iob, fptr, bptr);
     }
   else
 #endif /* CONFIG_NET_6LOWPAN_COMPRESSION_HC06 */
@@ -531,7 +559,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
   if (hc1[RIME_HC1_DISPATCH] == SIXLOWPAN_DISPATCH_HC1)
     {
       ninfo("HC1 Dispatch\n");
-     sixlowpan_uncompresshdr_hc1(ieee, fragsize, iob, fptr);
+      sixlowpan_uncompresshdr_hc1(fragsize, iob, fptr, bptr);
     }
   else
 #endif /* CONFIG_NET_6LOWPAN_COMPRESSION_HC1 */
@@ -539,30 +567,40 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
   if (hc1[RIME_HC1_DISPATCH] == SIXLOWPAN_DISPATCH_IPV6)
     {
       ninfo("IPv6 Dispatch\n");
-      sixlowpan_uncompress_ipv6hdr(ieee, fptr);
+      sixlowpan_uncompress_ipv6hdr(fptr, bptr);
     }
   else
     {
       /* Unknown or unsupported header */
 
-      nwarn("WARNING unknown dispatch: %u\n",  hc1[RIME_HC1_DISPATCH]);
+      nwarn("WARNING: Unknown dispatch: %u\n",  hc1[RIME_HC1_DISPATCH]);
       return OK;
     }
 
 #ifdef CONFIG_NET_6LOWPAN_FRAG
-  /* Non-fragmented and FRAG1 frames pass through here.  Remember the
-   * offset from the beginning of d_buf where be begin placing the data
-   * payload.
-   */
+  /* Is this the first fragment is a sequence? */
+
 
   if (isfirstfrag)
     {
+      /* Yes.. Remember the offset from the beginning of d_buf where we
+       * begin placing the data payload.
+       */
+
       ieee->i_boffset = g_uncomp_hdrlen;
     }
 
-  /* We branch to here on all good FRAGN frames */
+  /* No.. is this a subsequent fragment in the same sequence? */
 
-copypayload:
+  else if (isfrag)
+    {
+      /* Yes, recover the offset from the beginning of the d_buf where
+       * we began placing payload data.
+       */
+
+      g_uncomp_hdrlen = ieee->i_boffset;
+    }
+
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
   /* Copy "payload" from the rime buffer to the IEEE802.15.4 MAC driver's
@@ -584,7 +622,7 @@ copypayload:
   reqsize = g_uncomp_hdrlen + (fragoffset << 3) + paysize;
   if (reqsize > CONFIG_NET_6LOWPAN_MTU)
     {
-      ninfo("Required buffer size: %u+%u+%u=%u Available=%u\n",
+      nwarn("WARNING: Required buffer size: %u+%u+%u=%u Available=%u\n",
             g_uncomp_hdrlen, (fragoffset << 3), paysize,
             reqsize, CONFIG_NET_6LOWPAN_MTU);
       return -ENOMEM;
