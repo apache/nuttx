@@ -19,7 +19,7 @@ nuttx/:
   (8)  Kernel/Protected Build
   (3)  C++ Support
   (6)  Binary loaders (binfmt/)
- (15)  Network (net/, drivers/net)
+ (14)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
  (12)  Libraries (libc/, libm/)
@@ -1006,8 +1006,8 @@ o Network (net/, drivers/net)
                however.  Others support the address filtering interfaces but
                have never been verifed:
 
-               C5471, LM3X, ez80, DM0x90 NIC, PIC: Do not support address
-                 filteringing.
+               C5471, LM3S, ez80, DM0x90 NIC, PIC: Do not support address
+                 filtering.
                Kinetis, LPC17xx, LPC43xx:  Untested address filter support
 
   Status:      Open
@@ -1086,15 +1086,6 @@ o Network (net/, drivers/net)
   Title:       MISSING netdb INTERFACES
   Description: There is no implementation for many netdb interfaces such as
                getaddrinfo(), freeaddrinfo(), getnameinfo(), etc.
-  Status:      Open
-  Priority:    Low
-
-  Title:       REMOVE CONFIG_NET_MULTIBUFFER
-  Description: The CONFIG_NET_MULTIBUFFER controls some details in the layout
-               of the network device structure. This is really a unnecessary
-               complexity and should be removed.  The cost for those network
-               drivers that currently do not support CONFIG_NET_MULTIBUFFER
-               is the size of one pointer.
   Status:      Open
   Priority:    Low
 
