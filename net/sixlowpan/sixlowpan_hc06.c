@@ -223,7 +223,7 @@ static FAR struct sixlowpan_addrcontext_s *
 }
 
 /****************************************************************************
- * Name: uncompress_addr
+ * Name: compress_addr_64
  *
  * Description:
  *   Uncompress addresses based on a prefix and a postfix with zeroes in
@@ -1019,7 +1019,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
            *
            *   DAM 00: 128 bits
            *   DAM 01: 48 bits FFXX::00XX:XXXX:XXXX
-           *   DAM 0: 32 bits FFXX::00XX:XXXX
+           *   DAM 10: 32 bits FFXX::00XX:XXXX
            *   DAM 11: 8 bits FF02::00XX
            */
 
@@ -1049,7 +1049,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
           if (addrcontext == NULL)
             {
-              ninfo("ERROR: Address context not found\n");
+              nerr("ERROR: Address context not found\n");
               return;
             }
 
