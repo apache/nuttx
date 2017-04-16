@@ -130,16 +130,26 @@ struct macnet_driver_s
   /* This holds the information visible to the NuttX network */
 
   struct ieee802154_driver_s md_dev;  /* Interface understood by the network */
-  struct macnet_callback_s md_cb;     /* Callback information */
-  MACHANDLE md_mac;                   /* Contained MAC interface */
 
   /* For internal use by this driver */
 
-  bool md_bifup;               /* true:ifup false:ifdown */
-  WDOG_ID md_txpoll;           /* TX poll timer */
-  WDOG_ID md_txtimeout;        /* TX timeout timer */
-  struct work_s md_irqwork;    /* For deferring interupt work to the work queue */
-  struct work_s md_pollwork;   /* For deferring poll work to the work queue */
+  struct macnet_callback_s md_cb; /* Callback information */
+  MACHANDLE md_mac;               /* Contained MAC interface */
+  bool md_bifup;                  /* true:ifup false:ifdown */
+  WDOG_ID md_txpoll;              /* TX poll timer */
+  WDOG_ID md_txtimeout;           /* TX timeout timer */
+  struct work_s md_irqwork;       /* Defer interupt work to the work queue */
+  struct work_s md_pollwork;      /* Defer poll work to the work queue */
+
+  /* This is queue of outgoing, ready-to-send frames that will be sent
+   * indirectly.  This list should only be used by a MAC acting as a
+   * coordinator.  These transactions will stay here until the data is
+   * extracted by the destination device sending a Data Request MAC
+   * command or if too much time passes.
+   */
+
+  FAR volatile struct iob_s *md_head;
+  FAR volatile struct iob_s *md_tail;
 };
 
 /****************************************************************************
@@ -583,11 +593,55 @@ static void macnet_ind_syncloss(MACHANDLE mac, int reason)
  * Name: macnet_transmit
  *
  * Description:
- *   Start hardware transmission.  Called either from the txdone interrupt
- *   handling or from watchdog based polling.
+ *   This function is called from the lower MAC layer when thre radio device
+ *   is ready to accept another outgoing frame.  It removes one of the
+ *   previously queued fram IOBs and provides that to the MAC layer.
  *
  * Parameters:
  *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ * Assumptions:
+ *   May or may not be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+static int macnet_transmit(FAR struct macnet_driver_s *priv)
+{
+  /* Cancel the TX timeout watchdog
+   *
+   * REVISIT:  Is there not a race condition here?  Might the TX timeout
+   * already be queued?.
+   */
+
+  wd_cancel(priv->md_txtimeout);
+
+  /* Increment statistics */
+
+  NETDEV_TXPACKETS(priv->md_dev);
+
+  /* Provide the pre-formatted packet to the radio device (via the lower MAC
+   * layer).
+   */
+#warning Missing logic
+
+  /* Setup the TX timeout watchdog (perhaps restarting the timer) */
+
+  (void)wd_start(priv->md_txtimeout, skeleton_TXTIMEOUT,
+                 macnet_txtimeout_expiry, 1, (wdparm_t)priv);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: macnet_txqueue
+ *
+ * Description:
+ *   Add new frames from the network to the list of outgoing frames.
+ *
+ * Parameters:
+ *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
  *   OK on success; a negated errno on failure
@@ -598,26 +652,37 @@ static void macnet_ind_syncloss(MACHANDLE mac, int reason)
  *
  ****************************************************************************/
 
-static int macnet_transmit(FAR struct macnet_driver_s *priv)
+static void macnet_txqueue(FAR struct net_driver_s *dev)
 {
-  /* Verify that the hardware is ready to send another packet.  If we get
-   * here, then we are committed to sending a packet; Higher level logic
-   * must have assured that there is no transmission in progress.
-   */
+  /* Check if there is a new list of outgoing frames from the network. */
 
-  /* Increment statistics */
+  if (priv->lo_ieee.i_framelist != NULL)
+    {
+      /* Yes.. Remove the frame list from the driver structure */
 
-  NETDEV_TXPACKETS(priv->md_dev);
+      iob                       = priv->lo_ieee.i_framelist;
+      priv->lo_ieee.i_framelist = NULL;
 
-  /* Send the packet: address=priv->md_dev.d_buf, length=priv->md_dev.d_len */
+      /* Append the new list to the tail of the queue of outgoing frames. */
 
-  /* Enable Tx interrupts */
+      if (priv->md_tail == NULL)
+        {
+          priv->md_head = iob;
+        }
+      else
+        {
+          priv->md_tail->io_flink = iob;
+        }
 
-  /* Setup the TX timeout watchdog (perhaps restarting the timer) */
+      /* Find the new tail of the outgoing frame queue */
 
-  (void)wd_start(priv->md_txtimeout, skeleton_TXTIMEOUT,
-                 macnet_txtimeout_expiry, 1, (wdparm_t)priv);
-  return OK;
+      for (priv->md_tail = iob, iob = iob->io_flink;
+           iob != NULL;
+           priv->md_tail = iob, iob = iob->io_flink);
+
+       /* Notify the radio driver that there is data available */
+#warning Missing logic
+    }
 }
 
 /****************************************************************************
@@ -646,17 +711,21 @@ static int macnet_transmit(FAR struct macnet_driver_s *priv)
 
 static int macnet_txpoll(FAR struct net_driver_s *dev)
 {
-  FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)dev->d_private;
+  FAR struct macnet_driver_s *priv =
+    (FAR struct macnet_driver_s *)dev->d_private;
+  FAR struct iob_s *iob;
 
   /* If the polling resulted in data that should be sent out, the field
    * i_framelist will set to a new, outgoing list of frames.
    */
 
-  if (priv->md_dev.i_framelist != NULL)
+  if (priv->lo_ieee.i_framelist != NULL)
     {
-       /* And send the packet */
+      /* Remove the frame list from the driver structure and append it to
+       * the tail of the ist of outgoing frames.
+       */
 
-       macnet_transmit(priv);
+      macnet_txqueue(priv);
     }
 
   /* If zero is returned, the polling will continue until all connections have
@@ -711,14 +780,17 @@ static void macnet_receive(FAR struct macnet_driver_s *priv)
   sixlowpan_input(&priv->md_dev);
 
   /* If the above function invocation resulted in data that should be sent
-   * out, the field i_framelist will set to a new, outgoing list of frames.
+   * out, the field i_framelist will have been set to a new, outgoing list
+   * of frames.
    */
 
   if (priv->md_dev.i_framelist != NULL)
     {
-       /* And send the packet */
+      /* Remove the frame list from the driver structure and append it to
+       * the tail of the ist of outgoing frames.
+       */
 
-       macnet_transmit(priv);
+      macnet_txqueue(priv);
     }
 }
 
