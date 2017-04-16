@@ -129,10 +129,6 @@ int bcmf_sdio_bus_sleep(FAR struct bcmf_dev_s *priv, bool sleep)
   int loops;
   uint8_t value;
 
-  _info("request %s currently %s\n",
-        (sleep ? "SLEEP" : "WAKE"),
-        (priv->sleeping ? "SLEEP" : "WAKE"));
-
   if (priv->sleeping == sleep)
     {
       return OK;
@@ -681,13 +677,28 @@ int bcmf_sdio_initialize(int minor, FAR struct sdio_dev_s *dev)
      TODO Create a wlan device name and register network driver here */
 
   // TODO remove: basic iovar test
-  up_mdelay(2000);
+  up_mdelay(1000);
   char fw_version[64];
+  uint32_t out_len = sizeof(fw_version);
   ret = bcmf_sdpcm_iovar_request(priv, CHIP_STA_INTERFACE, false,
                                  IOVAR_STR_VERSION, fw_version,
-                                 sizeof(fw_version));
-  _info("fw version %d\n", ret);
+                                 &out_len);
+  if (ret == OK)
+    {
+      _info("fw version %d <%s>\n", out_len, fw_version);
+    }
 
+  up_mdelay(100);
+  out_len = 6;
+  ret = bcmf_sdpcm_iovar_request(priv, CHIP_STA_INTERFACE, false,
+                                 IOVAR_STR_CUR_ETHERADDR, fw_version,
+                                 &out_len);
+  if (ret == OK)
+    {
+      _info("MAC address %d %02X:%02X:%02X:%02X:%02X:%02X\n", out_len,
+                            fw_version[0], fw_version[1], fw_version[2],
+                            fw_version[3], fw_version[4], fw_version[5]);
+    }
 
   return OK;
 
@@ -799,7 +810,7 @@ int bcmf_sdio_thread(int argc, char **argv)
           if (ret == -ENODATA)
             {
               /*  All frames processed */
-              _info("All frames processed\n");
+
               priv->intstatus &= ~I_HMB_FRAME_IND;
             }
         }

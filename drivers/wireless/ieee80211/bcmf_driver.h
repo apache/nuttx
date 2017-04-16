@@ -39,6 +39,12 @@
 #include <stdbool.h>
 #include <nuttx/sdio.h>
 
+#define BCMF_STATUS_BUS_UP (1<<0) /* Chip is flashed and running */
+#define BCMF_STATUS_READY  (1<<1) /* Chip is ready to receive requests */
+
+#define BCMF_STATUS_SLEEP  (1<<2) /* Chip is in low power mode */
+#define BCMF_STATUS_WAIT_CONTROL (1<<3) /* Waiting for control response */
+
 /* This structure contains the unique state of the Broadcom FullMAC driver */
 
 struct bcmf_dev_s
@@ -66,6 +72,7 @@ struct bcmf_dev_s
   sem_t control_mutex;             /* Cannot handle multiple control requests */
   sem_t control_timeout;           /* Semaphore to wait for control frame rsp */
   uint16_t control_reqid;          /* Current control request id */
+  uint8_t *control_rxframe;        /* Received control frame response */
 
   // FIXME use mutex instead of semaphore
   sem_t tx_queue_mutex;            /* Lock for transmit queue */
