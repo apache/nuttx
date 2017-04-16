@@ -44,6 +44,7 @@ ifeq ($(CONFIG_IEEE80211_BROADCOM_FULLMAC_SDIO),y)
   CSRCS += bcmf_sdio.c
   CSRCS += bcmf_core.c
   CSRCS += bcmf_sdpcm.c
+  CSRCS += bcmf_hexdump.c
   CSRCS += mmc_sdio.c
 endif
 

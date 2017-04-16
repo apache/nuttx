@@ -61,6 +61,10 @@
 #define I_HMB_SW_MASK                 ( (uint32_t) 0x000000F0 )
 #define I_HMB_FRAME_IND               ( 1<<6 )
 
+#define CHIP_STA_INTERFACE   0
+#define CHIP_AP_INTERFACE    1
+#define CHIP_P2P_INTERFACE   2
+
 enum {
     CHIPCOMMON_CORE_ID,
     DOT11MAC_CORE_ID,

@@ -51,10 +51,6 @@
 #define SOCSRAM_BASE_ADDRESS     0x18004000    /* SOCSRAM core register region      */
 #define BACKPLANE_ADDRESS_MASK   0x7FFF
 
-#define CHIP_STA_INTERFACE   0
-#define CHIP_AP_INTERFACE    1
-#define CHIP_P2P_INTERFACE   2
-
 /* Maximum value of bus data credit difference */
 #define CHIP_MAX_BUS_DATA_CREDIT_DIFF    7
 

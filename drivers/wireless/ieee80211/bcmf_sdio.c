@@ -45,6 +45,7 @@
 #include <string.h>
 #include <debug.h>
 #include <errno.h>
+#include <queue.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/sdio.h>
@@ -58,6 +59,9 @@
 #include "bcmf_sdio.h"
 #include "bcmf_core.h"
 #include "bcmf_sdpcm.h"
+
+// TODO remove
+#include "bcmf_ioctl.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -114,7 +118,7 @@ int bcmf_oob_irq(int irq, FAR void *context, FAR void *arg)
       /*  Signal bmcf thread */
       priv->irq_pending = true;
 
-      sem_post(&priv->sem);
+      sem_post(&priv->thread_signal);
     }
   return OK;
 }
@@ -362,8 +366,8 @@ int bcmf_bus_setup_interrupts(FAR struct bcmf_dev_s *priv)
 
   /* Redirect, configure and enable io for out-of-band interrupt signal */
 
-  ret = sdio_io_rw_direct(priv->sdio_dev, true, 0, SDIO_CCCR_BRCM_SEPINT,
-                  SDIO_SEPINT_MASK | SDIO_SEPINT_OE | SDIO_SEPINT_ACT_HI, NULL);
+  ret = bcmf_write_reg(priv, 0, SDIO_CCCR_BRCM_SEPINT,
+                       SDIO_SEPINT_MASK | SDIO_SEPINT_OE | SDIO_SEPINT_ACT_HI);
   if (ret != OK)
     {
       return ret;
@@ -528,6 +532,29 @@ int bcmf_write_reg(FAR struct bcmf_dev_s *priv, uint8_t function,
 }
 
 /****************************************************************************
+ * Name: bcmf_sem_wait
+ ****************************************************************************/
+
+int bcmf_sem_wait(sem_t *sem, unsigned int timeout_ms)
+{
+  struct timespec abstime;
+
+  /* Get the current time */
+
+  (void)clock_gettime(CLOCK_REALTIME, &abstime);
+
+  abstime.tv_nsec += 1000 * 1000* timeout_ms;
+
+  if (abstime.tv_nsec >= 1000 * 1000 * 1000)
+    {
+      abstime.tv_sec++;
+      abstime.tv_nsec -= 1000 * 1000 * 1000;
+    }
+
+  return sem_timedwait(sem, &abstime);
+}
+
+/****************************************************************************
  * Name: bcmf_sdio_initialize
  ****************************************************************************/
 
@@ -555,11 +582,11 @@ int bcmf_sdio_initialize(int minor, FAR struct sdio_dev_s *dev)
   priv->ready = false;
   priv->sleeping = true;
   
-  if ((ret = sem_init(&priv->sem, 0, 0)) != OK)
+  if ((ret = sem_init(&priv->thread_signal, 0, 0)) != OK)
     {
       goto exit_free_priv;
     }
-  if ((ret = sem_setprotocol(&priv->sem, SEM_PRIO_NONE)) != OK)
+  if ((ret = sem_setprotocol(&priv->thread_signal, SEM_PRIO_NONE)) != OK)
     {
       goto exit_free_priv;
     }
@@ -570,6 +597,27 @@ int bcmf_sdio_initialize(int minor, FAR struct sdio_dev_s *dev)
       ret = -ENOMEM;
       goto exit_free_priv;
     }
+
+  if ((ret = sem_init(&priv->control_mutex, 0, 1)) != OK)
+    {
+      goto exit_free_waitdog;
+    }
+
+  if ((ret = sem_init(&priv->control_timeout, 0, 0)) != OK)
+    {
+      goto exit_free_waitdog;
+    }
+  if ((ret = sem_setprotocol(&priv->control_timeout, SEM_PRIO_NONE)) != OK)
+    {
+      goto exit_free_waitdog;
+    }
+  /* Init transmit frames queue */
+
+  if ((ret = sem_init(&priv->tx_queue_mutex, 0, 1)) != OK)
+    {
+      goto exit_free_waitdog;
+    }
+  sq_init(&priv->tx_queue);
 
   /* Initialize device hardware */
 
@@ -632,6 +680,15 @@ int bcmf_sdio_initialize(int minor, FAR struct sdio_dev_s *dev)
   /* Device is up and running
      TODO Create a wlan device name and register network driver here */
 
+  // TODO remove: basic iovar test
+  up_mdelay(2000);
+  char fw_version[64];
+  ret = bcmf_sdpcm_iovar_request(priv, CHIP_STA_INTERFACE, false,
+                                 IOVAR_STR_VERSION, fw_version,
+                                 sizeof(fw_version));
+  _info("fw version %d\n", ret);
+
+
   return OK;
 
 exit_uninit_hw:
@@ -675,7 +732,8 @@ void bcmf_sdio_waitdog_timeout(int argc, wdparm_t arg1, ...)
   FAR struct bcmf_dev_s *priv = g_sdio_priv;
 
   /* Notify bcmf thread */
-  sem_post(&priv->sem);
+
+  sem_post(&priv->thread_signal);
 }
 
 int bcmf_sdio_thread(int argc, char **argv)
@@ -693,7 +751,7 @@ int bcmf_sdio_thread(int argc, char **argv)
     {
       /* Wait for event (device interrupt, user request or waitdog timer) */
 
-      ret = sem_wait(&priv->sem);
+      ret = sem_wait(&priv->thread_signal);
       if (ret != OK)
         {
           _err("Error while waiting for semaphore\n");
@@ -714,8 +772,6 @@ int bcmf_sdio_thread(int argc, char **argv)
           /* Woken up by interrupt, read device status */
 
           priv->irq_pending = false;
-
-          _info("process irq\n");
 
           bcmf_read_sbregw(priv,
                        CORE_BUS_REG(priv->get_core_base_address(SDIOD_CORE_ID),
@@ -748,10 +804,16 @@ int bcmf_sdio_thread(int argc, char **argv)
             }
         }
 
-      // TODO send all queued frames
+      /* Send all queued frames */
+
+      do
+        {
+          ret = bcmf_sdpcm_sendframe(priv);
+        } while (ret == OK);
 
       /* If we're done for now, turn off clock request. */
 
+      // TODO add wakelock
       bcmf_sdio_bus_sleep(priv, true);
     }
     return 0;

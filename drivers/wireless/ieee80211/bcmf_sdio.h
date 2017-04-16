@@ -24,4 +24,6 @@ int bcmf_read_reg(FAR struct bcmf_dev_s *priv, uint8_t function,
 int bcmf_write_reg(FAR struct bcmf_dev_s *priv, uint8_t function,
                    uint32_t address, uint8_t reg);
 
+int bcmf_sem_wait(sem_t *sem, unsigned int timeout_ms);
+
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_H */

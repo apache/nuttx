@@ -51,7 +51,7 @@ struct bcmf_dev_s
   uint32_t (*get_core_base_address)(unsigned int core); /* Get chip specific
                                       base address for evey cores */
 
-  sem_t sem;                       /* Semaphore for processing thread event */
+  sem_t thread_signal;             /* Semaphore for processing thread event */
   struct wdog_s *waitdog;          /* Processing thread waitdog */
   bool ready;                      /* Current device status */
   bool sleeping;                   /* Current sleep status */
@@ -61,6 +61,15 @@ struct bcmf_dev_s
   uint8_t max_seq;                 /* Maximum transmit sequence allowed */
   uint8_t tx_seq;                  /* Transmit sequence number (next) */
   uint8_t rx_seq;                  /* Receive sequence number (expected) */
+
+  // FIXME use mutex instead of semaphore
+  sem_t control_mutex;             /* Cannot handle multiple control requests */
+  sem_t control_timeout;           /* Semaphore to wait for control frame rsp */
+  uint16_t control_reqid;          /* Current control request id */
+
+  // FIXME use mutex instead of semaphore
+  sem_t tx_queue_mutex;            /* Lock for transmit queue */
+  dq_queue_t tx_queue;             /* Queue of frames to tramsmit */
 };
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H */
