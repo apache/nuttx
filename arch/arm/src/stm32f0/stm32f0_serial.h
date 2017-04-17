@@ -57,9 +57,9 @@
 
 /* Are any UARTs enabled? */
 
-#undef HAVE_UART
+#undef HAVE_USART
 #if defined(CONFIG_STM32F0_UART0)
-#  define HAVE_UART 1
+#  define HAVE_USART 1
 #endif
 
 /* Is there a serial console? There should be at most one defined.  It could be on

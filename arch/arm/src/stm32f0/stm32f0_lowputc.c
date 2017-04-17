@@ -273,7 +273,7 @@ void up_lowputc(char ch)
 
 void stm32f0_lowsetup(void)
 {
-#if defined(HAVE_UART)
+#if defined(HAVE_USART)
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   uint32_t cr;
 #endif
@@ -402,5 +402,5 @@ void stm32f0_lowsetup(void)
   putreg32(cr, STM32F0_CONSOLE_BASE + STM32F0_USART_CR1_OFFSET);
 
 #endif /* HAVE_CONSOLE && !CONFIG_SUPPRESS_UART_CONFIG */
-#endif /* HAVE_UART */
+#endif /* HAVE_USART */
 }

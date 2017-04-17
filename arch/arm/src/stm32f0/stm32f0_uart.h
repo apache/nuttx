@@ -84,7 +84,7 @@
 #if defined(CONFIG_STM32F0_USART1) || defined(CONFIG_STM32F0_USART2) || \
     defined(CONFIG_STM32F0_USART3) || defined(CONFIG_STM32F0_USART4) || \
     defined(CONFIG_STM32F0_USART5)
-#  define HAVE_UART 1
+#  define HAVE_USART 1
 #endif
 
 /* Sanity checks */
