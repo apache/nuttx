@@ -100,13 +100,15 @@
  *   this oscillator can be taken from the USB data stream itself (SOF
  *   signalization) which allows crystal-less operation.
  * SYSCLK
- *   The system clock is derived from the PLL VCO divided by the output division factor.
+ *   The system clock is derived from the PLL VCO divided by the output
+ *   division factor.
  * Limitations:
- *   96 MHz as PLLVCO when the product is in range 1 (1.8V),
- *   48 MHz as PLLVCO when the product is in range 2 (1.5V),
- *   24 MHz when the product is in range 3 (1.2V).
- *   Output division to avoid exceeding 32 MHz as SYSCLK.
- *   The minimum input clock frequency for PLL is 2 MHz (when using HSE as PLL source).
+ *   - 96 MHz as PLLVCO when the product is in range 1 (1.8V),
+ *   - 48 MHz as PLLVCO when the product is in range 2 (1.5V),
+ *   - 24 MHz when the product is in range 3 (1.2V).
+ *   - Output division to avoid exceeding 32 MHz as SYSCLK.
+ *   - The minimum input clock frequency for PLL is 2 MHz (when using HSE as
+ *     PLL source).
  */
 
 #define STM32F0_CFGR_PLLSRC        RCC_CFGR_PLLSRC_HSId2         /* Source is HSI/2 */
