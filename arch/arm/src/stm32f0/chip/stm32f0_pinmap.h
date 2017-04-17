@@ -43,8 +43,10 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32F0_STM32F05X) || defined(CONFIG_STM32F0_STM32F07X)
-#  include "chip/stm32f05xr_pinmap.h"
+#if defined(CONFIG_STM32F0_STM32F05X)
+#  include "chip/stm32f05x_pinmap.h"
+#elif defined(CONFIG_STM32F0_STM32F07X)
+#  include "chip/stm32f07x_pinmap.h"
 #else
 #  error "Unsupported STM32F0 pin map"
 #endif

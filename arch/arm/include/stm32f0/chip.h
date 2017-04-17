@@ -68,7 +68,7 @@
 #  define STM32F0_NCAP            13 /* Capacitive sensing channels (14 on UFQFPN32)) */
 #  define STM32F0_NPORTS          6  /* Six GPIO ports, GPIOA-F */
 
-#if defined(CONFIG_ARCH_CHIP_SSTM32F072C8) || defined(CONFIG_ARCH_CHIP_SSTM32F072CB)
+#elif defined(CONFIG_ARCH_CHIP_SSTM32F072C8) || defined(CONFIG_ARCH_CHIP_SSTM32F072CB)
 #  undef  STM32F051x                 /* Not STM32F051x family */
 #  define STM32F072x              1  /* STM32F072x family */
 
@@ -99,7 +99,7 @@
 #  define STM32F0_NCAP            17 /* Capacitive sensing channels */
 #  define STM32F0_NPORTS          6  /* Six GPIO ports, GPIOA-F */
 
-#if defined(CONFIG_ARCH_CHIP_SSTM32F072R8) || defined(CONFIG_ARCH_CHIP_SSTM32F072RB)
+#elif defined(CONFIG_ARCH_CHIP_SSTM32F072R8) || defined(CONFIG_ARCH_CHIP_SSTM32F072RB)
 #  undef  STM32F051x                 /* Not STM32F051x family */
 #  define STM32F072x              1  /* STM32F072x family */
 
@@ -130,7 +130,7 @@
 #  define STM32F0_NCAP            18 /* Capacitive sensing channels */
 #  define STM32F0_NPORTS          6  /* Six GPIO ports, GPIOA-F */
 
-#if defined(CONFIG_ARCH_CHIP_SSTM32F072V8) || defined(CONFIG_ARCH_CHIP_SSTM32F072VB)
+#elif defined(CONFIG_ARCH_CHIP_SSTM32F072V8) || defined(CONFIG_ARCH_CHIP_SSTM32F072VB)
 #  undef  STM32F051x                 /* Not STM32F051x family */
 #  define STM32F072x              1  /* STM32F072x family */
 

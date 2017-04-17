@@ -296,8 +296,8 @@ void stm32f0_lowsetup(void)
 #if defined(HAVE_UART)
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   uint32_t cr;
-  uint32_t clken;
 #endif
+  uint32_t clken;
 
 #if defined(HAVE_CONSOLE)
   /* Enable USART APB1/2 clock */
@@ -305,7 +305,7 @@ void stm32f0_lowsetup(void)
   modifyreg32(STM32F0_CONSOLE_APBREG, 0, STM32F0_CONSOLE_APBEN);
 #endif
 
-  /* Enable the console USART and configure GPIO pins needed for rx/tx. */
+  /* Enable all GPIO modules */
 
   clken  = getreg32(STM32F0_RCC_AHBENR);
   clken |= RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN |\
