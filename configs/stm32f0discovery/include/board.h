@@ -55,10 +55,10 @@
 /* Four different clock sources can be used to drive the system clock (SYSCLK):
  *
  * - HSI high-speed internal oscillator clock
- *   Generated from an internal 16 MHz RC oscillator
+ *   Generated from an internal 8 MHz RC oscillator
  * - HSE high-speed external oscillator clock
- *   Normally driven by an external crystal (X3).  However, this crystal is not fitted
- *   on the STM32L-Discovery board.
+ *   Normally driven by an external crystal (X3).  However, this crystal is not
+ *   fitted on the STM32F0-Discovery board.
  * - PLL clock
  * - MSI multispeed internal oscillator clock
  *   The MSI clock signal is generated from an internal RC oscillator. Seven frequency
@@ -74,7 +74,7 @@
 
 #define STM32F0_BOARD_XTAL         8000000ul        /* X3 on board (not fitted)*/
 
-#define STM32F0_HSI_FREQUENCY      16000000ul       /* Approximately 16MHz */
+#define STM32F0_HSI_FREQUENCY      8000000ul        /* Approximately 8MHz */
 #define STM32F0_HSE_FREQUENCY      STM32F0_BOARD_XTAL
 #define STM32F0_MSI_FREQUENCY      2097000          /* Default is approximately 2.097Mhz */
 #define STM32F0_LSI_FREQUENCY      37000            /* Approximately 37KHz */
@@ -82,20 +82,20 @@
 
 /* This is the clock setup we configure for:
  *
- *   SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for source
+ *   SYSCLK  = BOARD_OSCCLK_FREQUENCY = 12MHz -> Select Main oscillator for source
  *   PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> PLL0 multipler=20, pre-divider=1
- *   MCLK = 480MHz / 6 = 80MHz               -> MCLK divider = 6
+ *   MCLK    = 480MHz / 6 = 80MHz             -> MCLK divider = 6
  */
 
-#define STM32F0_MCLK                 48000000 /* 48Mhz */
+#define STM32F0_MCLK               48000000         /* 48Mhz */
 
 /* PLL Configuration
  *
- *   - PLL source is HSI      -> 16MHz input (nominal)
- *   - PLL multipler is 6     -> 96MHz PLL VCO clock output (for USB)
- *   - PLL output divider 3   -> 32MHz divided down PLL VCO clock output
+ *   - PLL source is HSI    -> 8MHz input (nominal)
+ *   - PLL multipler is 6   -> 48MHz PLL VCO clock output (for USB)
+ *   - PLL output divider 1 -> 48MHz divided down PLL VCO clock output
  *
- * Resulting SYSCLK frequency is 16MHz x 6 / 3 = 32MHz
+ * Resulting SYSCLK frequency is 16MHz x 6 / 1 = 48MHz
  *
  * USB/SDIO:
  *   If the USB or SDIO interface is used in the application, the PLL VCO
@@ -112,15 +112,15 @@
  *   The minimum input clock frequency for PLL is 2 MHz (when using HSE as PLL source).
  */
 
-#define STM32F0_CFGR_PLLSRC        0                       /* Source is 16MHz HSI */
+#define STM32F0_CFGR_PLLSRC        0                         /* Source is 16MHz HSI */
 #ifdef CONFIG_STM32F0_USB
-#  define STM32F0_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx6   /* PLLMUL = 6 */
-#  define STM32F0_CFGR_PLLDIV      RCC_CFGR_PLLDIV_3       /* PLLDIV = 3 */
+#  define STM32F0_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx6     /* PLLMUL = 6 */
+#  define STM32F0_CFGR_PLLDIV      RCC_CFGR_PLLDIV_3         /* PLLDIV = 3 */
 #  define STM32F0_PLL_FREQUENCY    (6*STM32F0_HSI_FREQUENCY) /* PLL VCO Frequency is 96MHz */
 #else
-#  define STM32F0_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx4   /* PLLMUL = 4 */
-#  define STM32F0_CFGR_PLLDIV      RCC_CFGR_PLLDIV_2       /* PLLDIV = 2 */
-#  define STM32F0_PLL_FREQUENCY    (4*STM32F0_HSI_FREQUENCY) /* PLL VCO Frequency is 64MHz */
+#  define STM32F0_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx6     /* PLLMUL = 6 */
+#  define STM32F0_CFGR_PLLDIV      RCC_CFGR_PLLDIV_1         /* PLLDIV = 1 */
+#  define STM32F0_PLL_FREQUENCY    (6*STM32F0_HSI_FREQUENCY) /* PLL VCO Frequency is 48MHz */
 #endif
 
 /* Use the PLL and set the SYSCLK source to be the divided down PLL VCO output
@@ -130,45 +130,44 @@
 #define STM32F0_SYSCLK_SW          RCC_CFGR_SW_PLL         /* Use the PLL as the SYSCLK */
 #define STM32F0_SYSCLK_SWS         RCC_CFGR_SWS_PLL
 #ifdef CONFIG_STM32F0_USB
-#  define STM32F0_SYSCLK_FREQUENCY (STM32F0_PLL_FREQUENCY/3) /* SYSCLK frequence is 96MHz/PLLDIV = 32MHz */
+#  define STM32F0_SYSCLK_FREQUENCY (STM32F0_PLL_FREQUENCY/3) /* SYSCLK frequency is 96MHz/PLLDIV = 32MHz */
 #else
-#  define STM32F0_SYSCLK_FREQUENCY (STM32F0_PLL_FREQUENCY/2) /* SYSCLK frequence is 64MHz/PLLDIV = 32MHz */
+#  define STM32F0_SYSCLK_FREQUENCY (STM32F0_PLL_FREQUENCY/2) /* SYSCLK frequency is 48MHz/PLLDIV = 24MHz */
 #endif
 
-/* AHB clock (HCLK) is SYSCLK (32MHz) */
+/* AHB clock (HCLK) is SYSCLK (24MHz) */
 
 #define STM32F0_RCC_CFGR_HPRE      RCC_CFGR_HPRE_SYSCLK
 #define STM32F0_HCLK_FREQUENCY     STM32F0_SYSCLK_FREQUENCY
 #define STM32F0_BOARD_HCLK         STM32F0_HCLK_FREQUENCY    /* Same as above, to satisfy compiler */
 
-/* APB2 clock (PCLK2) is HCLK (32MHz) */
+/* APB1 clock (PCLK1) is HCLK (24MHz) */
+
+#define STM32F0_RCC_CFGR_PPRE1     RCC_CFGR_PPRE1_HCLK
+#define STM32F0_PCLK1_FREQUENCY    (STM32F0_HCLK_FREQUENCY)
+
+/* APB2 clock (PCLK2) is HCLK (24MHz) */
 
 #define STM32F0_RCC_CFGR_PPRE2     RCC_CFGR_PPRE2_HCLK
 #define STM32F0_PCLK2_FREQUENCY    STM32F0_HCLK_FREQUENCY
 #define STM32F0_APB2_CLKIN         (STM32F0_PCLK2_FREQUENCY)
 
-/* APB2 timers 9, 10, and 11 will receive PCLK2. */
+/* APB1 timers 1-3, 6-7, and 14-17 will receive PCLK1 */
 
-#define STM32F0_APB2_TIM9_CLKIN    (STM32F0_PCLK2_FREQUENCY)
-#define STM32F0_APB2_TIM10_CLKIN   (STM32F0_PCLK2_FREQUENCY)
-#define STM32F0_APB2_TIM11_CLKIN   (STM32F0_PCLK2_FREQUENCY)
-
-/* APB1 clock (PCLK1) is HCLK (32MHz) */
-
-#define STM32F0_RCC_CFGR_PPRE1     RCC_CFGR_PPRE1_HCLK
-#define STM32F0_PCLK1_FREQUENCY    (STM32F0_HCLK_FREQUENCY)
-
-/* APB1 timers 2-7 will receive PCLK1 */
-
+#define STM32F0_APB1_TIM1_CLKIN    (STM32F0_PCLK1_FREQUENCY)
 #define STM32F0_APB1_TIM2_CLKIN    (STM32F0_PCLK1_FREQUENCY)
 #define STM32F0_APB1_TIM3_CLKIN    (STM32F0_PCLK1_FREQUENCY)
-#define STM32F0_APB1_TIM4_CLKIN    (STM32F0_PCLK1_FREQUENCY)
-#define STM32F0_APB1_TIM5_CLKIN    (STM32F0_PCLK1_FREQUENCY)
+
 #define STM32F0_APB1_TIM6_CLKIN    (STM32F0_PCLK1_FREQUENCY)
 #define STM32F0_APB1_TIM7_CLKIN    (STM32F0_PCLK1_FREQUENCY)
 
+#define STM32F0_APB1_TIM14_CLKIN   (STM32F0_PCLK1_FREQUENCY)
+#define STM32F0_APB1_TIM15_CLKIN   (STM32F0_PCLK1_FREQUENCY)
+#define STM32F0_APB1_TIM16_CLKIN   (STM32F0_PCLK1_FREQUENCY)
+#define STM32F0_APB1_TIM17_CLKIN   (STM32F0_PCLK1_FREQUENCY)
+
 /* LED definitions ******************************************************************/
-/* The STM32L-Discovery board has four LEDs.  Two of these are controlled by
+/* The STM32F0-Discovery board has four LEDs.  Two of these are controlled by
  * logic on the board and are not available for software control:
  *
  * LD1 COM:   LD2 default status is red. LD2 turns to green to indicate that
@@ -177,9 +176,9 @@
  *
  * And two LEDs can be controlled by software:
  *
- * User LD3:  Green LED is a user LED connected to the I/O PB7 of the STM32L152
+ * User LD3:  Green LED is a user LED connected to the I/O PB7 of the STM32F0152
  *            MCU.
- * User LD4:  Blue LED is a user LED connected to the I/O PB6 of the STM32L152
+ * User LD4:  Blue LED is a user LED connected to the I/O PB6 of the STM32F0152
  *            MCU.
  *
  * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
@@ -198,7 +197,7 @@
 #define BOARD_LED2_BIT           (1 << BOARD_LED2)
 
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 8 LEDs on board the
- * STM32L-Discovery.  The following definitions describe how NuttX controls the LEDs:
+ * STM32F0-Discovery.  The following definitions describe how NuttX controls the LEDs:
  *
  *   SYMBOL                Meaning                 LED state
  *                                                   LED1     LED2
@@ -224,11 +223,11 @@
 #define LED_PANIC                3
 
 /* Button definitions ***************************************************************/
-/* The STM32L-Discovery supports two buttons; only one button is controllable by
+/* The STM32F0-Discovery supports two buttons; only one button is controllable by
  * software:
  *
- *   B1 USER: user and wake-up button connected to the I/O PA0 of the STM32L152RBT6.
- *   B2 RESET: pushbutton connected to NRST is used to RESET the STM32L152RBT6.
+ *   B1 USER: user and wake-up button connected to the I/O PA0 of the STM32F0152RBT6.
+ *   B2 RESET: pushbutton connected to NRST is used to RESET the STM32F0152RBT6.
  */
 
 #define BUTTON_USER              0
