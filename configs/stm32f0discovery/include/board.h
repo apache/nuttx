@@ -91,11 +91,11 @@
 
 /* PLL Configuration
  *
- *   - PLL source is HSI    -> 8MHz input (nominal)
- *   - PLL multipler is 6   -> 48MHz PLL VCO clock output (for USB)
- *   - PLL output divider 1 -> 48MHz divided down PLL VCO clock output
+ *   - PLL source is HSI        -> 8MHz input (nominal)
+ *   - PLL source pre-divider 2 -> 4MHz divided down PLL VCO clock output
+ *   - PLL multipler is 6       -> 24MHz PLL VCO clock output (for USB)
  *
- * Resulting SYSCLK frequency is 16MHz x 6 / 1 = 48MHz
+ * Resulting SYSCLK frequency is 8MHz x 6 / 2 = 24MHz
  *
  * USB/SDIO:
  *   If the USB or SDIO interface is used in the application, the PLL VCO
@@ -112,15 +112,16 @@
  *   The minimum input clock frequency for PLL is 2 MHz (when using HSE as PLL source).
  */
 
-#define STM32F0_CFGR_PLLSRC        0                         /* Source is 16MHz HSI */
+#define STM32F0_CFGR_PLLSRC        RCC_CFGR_PLLSRC_HSId2        /* Source is HSI/2 */
+#define STM32F0_PLLSRC_FREQUENCY   (STM32F0_HSI_FREQUENCY/2)
 #ifdef CONFIG_STM32F0_USB
-#  define STM32F0_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx6     /* PLLMUL = 6 */
-#  define STM32F0_CFGR_PLLDIV      RCC_CFGR_PLLDIV_3         /* PLLDIV = 3 */
-#  define STM32F0_PLL_FREQUENCY    (6*STM32F0_HSI_FREQUENCY) /* PLL VCO Frequency is 96MHz */
+#  undef  STM32F0_CFGR2_PREDIV                                  /* Not used with source HSI/2 */
+#  define STM32F0_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx6        /* PLLMUL = 6 */
+#  define STM32F0_PLL_FREQUENCY    (6*STM32F0_PLLSRC_FREQUENCY) /* PLL VCO Frequency is 24MHz */
 #else
-#  define STM32F0_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx6     /* PLLMUL = 6 */
-#  define STM32F0_CFGR_PLLDIV      RCC_CFGR_PLLDIV_1         /* PLLDIV = 1 */
-#  define STM32F0_PLL_FREQUENCY    (6*STM32F0_HSI_FREQUENCY) /* PLL VCO Frequency is 48MHz */
+#  undef  STM32F0_CFGR2_PREDIV                                  /* Not used with source HSI/2 */
+#  define STM32F0_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx6        /* PLLMUL = 6 */
+#  define STM32F0_PLL_FREQUENCY    (6*STM32F0_PLLSRC_FREQUENCY) /* PLL VCO Frequency is 24MHz */
 #endif
 
 /* Use the PLL and set the SYSCLK source to be the divided down PLL VCO output
@@ -130,9 +131,9 @@
 #define STM32F0_SYSCLK_SW          RCC_CFGR_SW_PLL         /* Use the PLL as the SYSCLK */
 #define STM32F0_SYSCLK_SWS         RCC_CFGR_SWS_PLL
 #ifdef CONFIG_STM32F0_USB
-#  define STM32F0_SYSCLK_FREQUENCY (STM32F0_PLL_FREQUENCY/3) /* SYSCLK frequency is 96MHz/PLLDIV = 32MHz */
+#  define STM32F0_SYSCLK_FREQUENCY STM32F0_PLL_FREQUENCY /* SYSCLK frequency is PLL VCO = 24MHz */
 #else
-#  define STM32F0_SYSCLK_FREQUENCY (STM32F0_PLL_FREQUENCY/2) /* SYSCLK frequency is 48MHz/PLLDIV = 24MHz */
+#  define STM32F0_SYSCLK_FREQUENCY STM32F0_PLL_FREQUENCY /* SYSCLK frequency is PLL VCO = 24MHz */
 #endif
 
 /* AHB clock (HCLK) is SYSCLK (24MHz) */
