@@ -157,6 +157,7 @@ struct ieee802154_netradio_s
 #endif
 
 /* IEEE802.15.4 Radio Interface Operations **********************************/
+
 struct ieee802154_txdesc_s
 {
   uint8_t psdu_handle;  /* The psdu handle identifying the transaction */
@@ -171,12 +172,9 @@ struct ieee802154_phyif_s; /* Forward Reference */
 struct ieee802154_phyifops_s
 {
   CODE int (*poll_csma) (FAR struct ieee802154_phyif_s *phyif,
-                         FAR struct ieee802154_txdesc_s *tx_desc,
-                         uint8_t *buf);
-
+             FAR struct ieee802154_txdesc_s *tx_desc, FAR uint8_t *buf);
   CODE int (*poll_gts) (FAR struct ieee802154_phyif_s *phyif,
-                        FAR struct ieee802154_txdesc_s *tx_desc,
-                        uint8_t *buf);
+             FAR struct ieee802154_txdesc_s *tx_desc, FAR uint8_t *buf);
 };
 
 struct ieee802154_phyif_s
@@ -185,7 +183,7 @@ struct ieee802154_phyif_s
 
   /* Driver-specific information */
 
-  void * priv;
+  FAR void * priv;
 };
 
 struct ieee802154_radio_s; /* Forward reference */
@@ -193,14 +191,11 @@ struct ieee802154_radio_s; /* Forward reference */
 struct ieee802154_radioops_s
 {
   CODE int (*bind) (FAR struct ieee802154_radio_s *dev,
-                    FAR const struct ieee802154_phyif_s *phyif);
-
+             FAR const struct ieee802154_phyif_s *phyif);
   CODE int (*ioctl)(FAR struct ieee802154_radio_s *ieee, int cmd,
              unsigned long arg);
-
   CODE int (*rxenable)(FAR struct ieee802154_radio_s *dev, bool state,
              FAR struct ieee802154_packet_s *packet);
-
   CODE int (*txnotify_csma)(FAR struct ieee802154_radio_s *dev);
   CODE int (*txnotify_gts)(FAR struct ieee802154_radio_s *dev);
 };

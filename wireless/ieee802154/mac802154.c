@@ -66,10 +66,10 @@ struct mac802154_trans_s
 
   uint8_t msdu_handle;
 
-  uint8_t *mhr_buf;
+  FAR uint8_t *mhr_buf;
   uint8_t mhr_len;
 
-  uint8_t *d_buf;
+  FAR uint8_t *d_buf;
   uint8_t d_len;
 
   sem_t sem;
@@ -78,10 +78,11 @@ struct mac802154_trans_s
 struct mac802154_unsec_mhr_s
 {
   uint8_t length;
-  union {
+  union
+  {
     uint16_t frame_control;
     uint8_t data[IEEE802154_MAX_UNSEC_MHR_OVERHEAD];
-  };
+  } u;
 };
 
 /* The privmac structure holds the internal state of the MAC and is the
@@ -530,7 +531,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
        * from the transmitted frame. [1] pg. 41.
        */
 
-      if(req->dest_addr.panid == priv->addr.panid)
+      if (req->dest_addr.panid == priv->addr.panid)
         {
           mhr.frame_control |= IEEE802154_FRAMECTRL_PANIDCOMP;
         }

@@ -268,7 +268,8 @@ static void mrf24j40_dopoll_csma(FAR struct ieee802154_radio_s *radio)
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
 
   /* Need to get exlusive access to the device so that we can use the copy
-   * buffer */
+   * buffer.
+   */
 
   while (sem_wait(&dev->exclsem) < 0) { }
   
@@ -318,30 +319,31 @@ static void mrf24j40_txnotify_gts(FAR struct ieee802154_radio_s *radio)
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
 
   /* Need to get exclusive access to the device so that we can use the copy
-   * buffer */
+   * buffer.
+   */
 
   while (sem_wait(dev->exclsem) < 0) { }
 
-  for(gts = 0; gts < MRF24J40_GTS_SLOTS, gts++)
-  {
-    if(!dev->gts_txdesc[i].busy)
-      {
-        ret = dev->phyif->poll_gts(dev->phyif, &radio->gts_txdesc[i],
-                                   &dev->tx_buf[0]);
+  for (gts = 0; gts < MRF24J40_GTS_SLOTS, gts++)
+    {
+      if (!dev->gts_txdesc[i].busy)
+        {
+          ret = dev->phyif->poll_gts(dev->phyif, &radio->gts_txdesc[i],
+                                     &dev->tx_buf[0]);
 
-        if (ret > 0)
-          {
-            /* Now the txdesc is in use */
+          if (ret > 0)
+            {
+              /* Now the txdesc is in use */
 
-            dev->gts_txdesc[i].busy = 1;
+              dev->gts_txdesc[i].busy = 1;
 
-            /* Setup the transaction on the device in the open GTS FIFO */
+              /* Setup the transaction on the device in the open GTS FIFO */
 
-            mrf24j40_gts_setup(radio, i, &dev->tx_buf[0],
-                               dev->gts_desc[i].psdu_length);
-          }
-      }
-  }
+              mrf24j40_gts_setup(radio, i, &dev->tx_buf[0],
+                                 dev->gts_desc[i].psdu_length);
+            }
+        }
+    }
 }
 
 /****************************************************************************
