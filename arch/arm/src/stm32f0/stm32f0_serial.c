@@ -105,7 +105,7 @@
 
 #  if defined(CONFIG_USART4_RXDMA) || defined(CONFIG_USART5_RXDMA)
 #    ifndef CONFIG_STM32F0_DMA2
-#      error STM32F0 UART4/5 receive DMA requires CONFIG_STM32F0_DMA2
+#      error STM32F0 USART4/5 receive DMA requires CONFIG_STM32F0_DMA2
 #    endif
 #  endif
 
@@ -387,18 +387,18 @@ static char g_usart3rxfifo[RXDMA_BUFFER_SIZE];
 #endif
 
 #ifdef CONFIG_STM32F0_USART4
-static char g_uart4rxbuffer[CONFIG_USART4_RXBUFSIZE];
-static char g_uart4txbuffer[CONFIG_USART4_TXBUFSIZE];
+static char g_usart4rxbuffer[CONFIG_USART4_RXBUFSIZE];
+static char g_usart4txbuffer[CONFIG_USART4_TXBUFSIZE];
 # ifdef CONFIG_USART4_RXDMA
-static char g_uart4rxfifo[RXDMA_BUFFER_SIZE];
+static char g_usart4rxfifo[RXDMA_BUFFER_SIZE];
 # endif
 #endif
 
 #ifdef CONFIG_STM32F0_USART5
-static char g_uart5rxbuffer[CONFIG_USART5_RXBUFSIZE];
-static char g_uart5txbuffer[CONFIG_USART5_TXBUFSIZE];
+static char g_usart5rxbuffer[CONFIG_USART5_RXBUFSIZE];
+static char g_usart5txbuffer[CONFIG_USART5_TXBUFSIZE];
 # ifdef CONFIG_USART5_RXDMA
-static char g_uart5rxfifo[RXDMA_BUFFER_SIZE];
+static char g_usart5rxfifo[RXDMA_BUFFER_SIZE];
 # endif
 #endif
 
@@ -585,10 +585,10 @@ static struct stm32f0_serial_s g_usart3priv =
 };
 #endif
 
-/* This describes the state of the STM32 UART4 port. */
+/* This describes the state of the STM32 USART4 port. */
 
 #ifdef CONFIG_STM32F0_USART4
-static struct stm32f0_serial_s g_uart4priv =
+static struct stm32f0_serial_s g_usart4priv =
 {
   .dev =
     {
@@ -598,19 +598,19 @@ static struct stm32f0_serial_s g_uart4priv =
       .recv      =
       {
         .size    = CONFIG_USART4_RXBUFSIZE,
-        .buffer  = g_uart4rxbuffer,
+        .buffer  = g_usart4rxbuffer,
       },
       .xmit      =
       {
         .size    = CONFIG_USART4_TXBUFSIZE,
-        .buffer  = g_uart4txbuffer,
+        .buffer  = g_usart4txbuffer,
       },
 #ifdef CONFIG_USART4_RXDMA
       .ops       = &g_uart_dma_ops,
 #else
       .ops       = &g_uart_ops,
 #endif
-      .priv      = &g_uart4priv,
+      .priv      = &g_usart4priv,
     },
 
   .irq           = STM32F0_IRQ_USART4,
@@ -636,7 +636,7 @@ static struct stm32f0_serial_s g_uart4priv =
 #endif
 #ifdef CONFIG_USART4_RXDMA
   .rxdma_channel = DMAMAP_USART4_RX,
-  .rxfifo        = g_uart4rxfifo,
+  .rxfifo        = g_usart4rxfifo,
 #endif
 
 #ifdef CONFIG_USART4_RS485
@@ -650,10 +650,10 @@ static struct stm32f0_serial_s g_uart4priv =
 };
 #endif
 
-/* This describes the state of the STM32 UART5 port. */
+/* This describes the state of the STM32 USART5 port. */
 
 #ifdef CONFIG_STM32F0_USART5
-static struct stm32f0_serial_s g_uart5priv =
+static struct stm32f0_serial_s g_usart5priv =
 {
   .dev =
     {
@@ -663,19 +663,19 @@ static struct stm32f0_serial_s g_uart5priv =
       .recv     =
       {
         .size   = CONFIG_USART5_RXBUFSIZE,
-        .buffer = g_uart5rxbuffer,
+        .buffer = g_usart5rxbuffer,
       },
       .xmit     =
       {
         .size   = CONFIG_USART5_TXBUFSIZE,
-        .buffer = g_uart5txbuffer,
+        .buffer = g_usart5txbuffer,
       },
 #ifdef CONFIG_USART5_RXDMA
       .ops      = &g_uart_dma_ops,
 #else
       .ops      = &g_uart_ops,
 #endif
-      .priv     = &g_uart5priv,
+      .priv     = &g_usart5priv,
     },
 
   .irq            = STM32F0_IRQ_USART5,
@@ -701,7 +701,7 @@ static struct stm32f0_serial_s g_uart5priv =
 #endif
 #ifdef CONFIG_USART5_RXDMA
   .rxdma_channel = DMAMAP_USART5_RX,
-  .rxfifo        = g_uart5rxfifo,
+  .rxfifo        = g_usart5rxfifo,
 #endif
 
 #ifdef CONFIG_USART5_RS485
@@ -729,10 +729,10 @@ FAR static struct stm32f0_serial_s * const uart_devs[STM32F0_NUSART] =
   [2] = &g_usart3priv,
 #endif
 #ifdef CONFIG_STM32F0_USART4
-  [3] = &g_uart4priv,
+  [3] = &g_usart4priv,
 #endif
 #ifdef CONFIG_STM32F0_USART5
-  [4] = &g_uart5priv,
+  [4] = &g_usart5priv,
 #endif
 };
 
@@ -2489,16 +2489,16 @@ void stm32f0serial_dmapoll(void)
 #endif
 
 #ifdef CONFIG_USART4_RXDMA
-  if (g_uart4priv.rxdma != NULL)
+  if (g_usart4priv.rxdma != NULL)
     {
-      stm32f0serial_dmarxcallback(g_uart4priv.rxdma, 0, &g_uart4priv);
+      stm32f0serial_dmarxcallback(g_usart4priv.rxdma, 0, &g_usart4priv);
     }
 #endif
 
 #ifdef CONFIG_USART5_RXDMA
-  if (g_uart5priv.rxdma != NULL)
+  if (g_usart5priv.rxdma != NULL)
     {
-      stm32f0serial_dmarxcallback(g_uart5priv.rxdma, 0, &g_uart5priv);
+      stm32f0serial_dmarxcallback(g_usart5priv.rxdma, 0, &g_usart5priv);
     }
 #endif
 
