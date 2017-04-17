@@ -297,20 +297,12 @@ void stm32f0_lowsetup(void)
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   uint32_t cr;
 #endif
-  uint32_t clken;
 
 #if defined(HAVE_CONSOLE)
   /* Enable USART APB1/2 clock */
 
   modifyreg32(STM32F0_CONSOLE_APBREG, 0, STM32F0_CONSOLE_APBEN);
 #endif
-
-  /* Enable all GPIO modules */
-
-  clken  = getreg32(STM32F0_RCC_AHBENR);
-  clken |= RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN |\
-           RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN;
-  putreg32(clken, STM32F0_RCC_AHBENR);
 
 #ifdef STM32F0_CONSOLE_TX
   stm32f0_configgpio(STM32F0_CONSOLE_TX);

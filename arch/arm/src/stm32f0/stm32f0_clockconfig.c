@@ -111,4 +111,12 @@ void stm32f0_clockconfig(void)
   regval |= RCC_CFGR_SW_PLL;
   putreg32(regval, STM32F0_RCC_CFGR);
   while ((getreg32(STM32F0_RCC_CFGR) & RCC_CFGR_SW_MASK) != RCC_CFGR_SW_PLL);
+
+  /* Enable basic peripheral support */
+  /* Enable all GPIO modules */
+
+  regval  = getreg32(STM32F0_RCC_AHBENR);
+  regval |= RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN |\
+            RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN;
+  putreg32(regval, STM32F0_RCC_AHBENR);
 }
