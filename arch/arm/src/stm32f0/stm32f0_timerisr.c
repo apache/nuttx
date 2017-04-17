@@ -63,9 +63,9 @@
  */
 
 #if defined(CONFIG_STM32F0_SYSTICK_CORECLK)
-#  define SYSTICK_CLOCK STM32F0_MCLK        /* Core clock */
+#  define SYSTICK_CLOCK STM32F0_SYSCLK_FREQUENCY        /* Core clock */
 #elif defined(CONFIG_STM32F0_SYSTICK_CORECLK_DIV16)
-#  define SYSTICK_CLOCK (STM32F0_MCLK / 16) /* Core clock divided by 16 */
+#  define SYSTICK_CLOCK (STM32F0_SYSCLK_FREQUENCY / 16) /* Core clock divided by 16 */
 #endif
 
 /* The desired timer interrupt frequency is provided by the definition

@@ -75,27 +75,19 @@
 #define STM32F0_BOARD_XTAL         8000000ul        /* X3 on board (not fitted)*/
 
 #define STM32F0_HSI_FREQUENCY      8000000ul        /* Approximately 8MHz */
+#define STM32F0_HSI14_FREQUENCY    14000000ul       /* HSI14 for ADC */
+#define STM32F0_HSI48_FREQUENCY    48000000ul       /* HSI48 for USB, only some STM32F0xx */
 #define STM32F0_HSE_FREQUENCY      STM32F0_BOARD_XTAL
-#define STM32F0_MSI_FREQUENCY      2097000          /* Default is approximately 2.097Mhz */
-#define STM32F0_LSI_FREQUENCY      37000            /* Approximately 37KHz */
+#define STM32F0_LSI_FREQUENCY      40000            /* Approximately 40KHz */
 #define STM32F0_LSE_FREQUENCY      32768            /* X2 on board */
-
-/* This is the clock setup we configure for:
- *
- *   SYSCLK  = BOARD_OSCCLK_FREQUENCY = 12MHz -> Select Main oscillator for source
- *   PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> PLL0 multipler=20, pre-divider=1
- *   MCLK    = 480MHz / 6 = 80MHz             -> MCLK divider = 6
- */
-
-#define STM32F0_MCLK               48000000         /* 48Mhz */
 
 /* PLL Configuration
  *
- *   - PLL source is HSI        -> 8MHz input (nominal)
- *   - PLL source pre-divider 2 -> 4MHz divided down PLL VCO clock output
- *   - PLL multipler is 6       -> 24MHz PLL VCO clock output (for USB)
+ *   - PLL source is HSI       -> 8MHz input (nominal)
+ *   - PLL source predivider 2 -> 4MHz divided down PLL VCO clock output
+ *   - PLL multipler is 12     -> 48MHz PLL VCO clock output (for USB)
  *
- * Resulting SYSCLK frequency is 8MHz x 6 / 2 = 24MHz
+ * Resulting SYSCLK frequency is 8MHz x 12 / 2 = 48MHz
  *
  * USB/SDIO:
  *   If the USB or SDIO interface is used in the application, the PLL VCO
@@ -112,16 +104,16 @@
  *   The minimum input clock frequency for PLL is 2 MHz (when using HSE as PLL source).
  */
 
-#define STM32F0_CFGR_PLLSRC        RCC_CFGR_PLLSRC_HSId2        /* Source is HSI/2 */
-#define STM32F0_PLLSRC_FREQUENCY   (STM32F0_HSI_FREQUENCY/2)
+#define STM32F0_CFGR_PLLSRC        RCC_CFGR_PLLSRC_HSId2         /* Source is HSI/2 */
+#define STM32F0_PLLSRC_FREQUENCY   (STM32F0_HSI_FREQUENCY/2)     /* 8MHz / 2 = 4MHz */
 #ifdef CONFIG_STM32F0_USB
-#  undef  STM32F0_CFGR2_PREDIV                                  /* Not used with source HSI/2 */
-#  define STM32F0_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx6        /* PLLMUL = 6 */
-#  define STM32F0_PLL_FREQUENCY    (6*STM32F0_PLLSRC_FREQUENCY) /* PLL VCO Frequency is 24MHz */
+#  undef  STM32F0_CFGR2_PREDIV                                   /* Not used with source HSI/2 */
+#  define STM32F0_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx12        /* PLLMUL = 12 */
+#  define STM32F0_PLL_FREQUENCY    (12*STM32F0_PLLSRC_FREQUENCY) /* PLL VCO Frequency is 48MHz */
 #else
-#  undef  STM32F0_CFGR2_PREDIV                                  /* Not used with source HSI/2 */
-#  define STM32F0_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx6        /* PLLMUL = 6 */
-#  define STM32F0_PLL_FREQUENCY    (6*STM32F0_PLLSRC_FREQUENCY) /* PLL VCO Frequency is 24MHz */
+#  undef  STM32F0_CFGR2_PREDIV                                   /* Not used with source HSI/2 */
+#  define STM32F0_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx12        /* PLLMUL = 12 */
+#  define STM32F0_PLL_FREQUENCY    (12*STM32F0_PLLSRC_FREQUENCY) /* PLL VCO Frequency is 48MHz */
 #endif
 
 /* Use the PLL and set the SYSCLK source to be the divided down PLL VCO output
@@ -131,23 +123,21 @@
 #define STM32F0_SYSCLK_SW          RCC_CFGR_SW_PLL         /* Use the PLL as the SYSCLK */
 #define STM32F0_SYSCLK_SWS         RCC_CFGR_SWS_PLL
 #ifdef CONFIG_STM32F0_USB
-#  define STM32F0_SYSCLK_FREQUENCY STM32F0_PLL_FREQUENCY /* SYSCLK frequency is PLL VCO = 24MHz */
+#  define STM32F0_SYSCLK_FREQUENCY STM32F0_PLL_FREQUENCY /* SYSCLK frequency is PLL VCO = 48MHz */
 #else
-#  define STM32F0_SYSCLK_FREQUENCY STM32F0_PLL_FREQUENCY /* SYSCLK frequency is PLL VCO = 24MHz */
+#  define STM32F0_SYSCLK_FREQUENCY STM32F0_PLL_FREQUENCY /* SYSCLK frequency is PLL VCO = 48MHz */
 #endif
-
-/* AHB clock (HCLK) is SYSCLK (24MHz) */
 
 #define STM32F0_RCC_CFGR_HPRE      RCC_CFGR_HPRE_SYSCLK
 #define STM32F0_HCLK_FREQUENCY     STM32F0_SYSCLK_FREQUENCY
 #define STM32F0_BOARD_HCLK         STM32F0_HCLK_FREQUENCY    /* Same as above, to satisfy compiler */
 
-/* APB1 clock (PCLK1) is HCLK (24MHz) */
+/* APB1 clock (PCLK1) is HCLK (48MHz) */
 
 #define STM32F0_RCC_CFGR_PPRE1     RCC_CFGR_PPRE1_HCLK
 #define STM32F0_PCLK1_FREQUENCY    (STM32F0_HCLK_FREQUENCY)
 
-/* APB2 clock (PCLK2) is HCLK (24MHz) */
+/* APB2 clock (PCLK2) is HCLK (48MHz) */
 
 #define STM32F0_RCC_CFGR_PPRE2     RCC_CFGR_PPRE2_HCLK
 #define STM32F0_PCLK2_FREQUENCY    STM32F0_HCLK_FREQUENCY

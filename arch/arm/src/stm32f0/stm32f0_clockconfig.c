@@ -91,11 +91,11 @@ void stm32f0_clockconfig(void)
   putreg32(regval, STM32F0_RCC_CR);
   while ((getreg32(STM32F0_RCC_CR) & RCC_CR_PLLRDY) != 0);
 
-  /* Configure the PLL. Multiple x6 to get 48MHz */
+  /* Configure the PLL. Multiply the HSI to get System Clock */
 
   regval  = getreg32(STM32F0_RCC_CFGR);
   regval &= ~RCC_CFGR_PLLMUL_MASK;
-  regval |= RCC_CFGR_PLLMUL_CLKx6;
+  regval |= STM32F0_CFGR_PLLMUL;
   putreg32(regval, STM32F0_RCC_CFGR);
 
   /* Enable the PLL */
