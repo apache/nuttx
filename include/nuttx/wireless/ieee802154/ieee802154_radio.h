@@ -157,21 +157,14 @@ struct ieee802154_netradio_s
 #endif
 
 /* IEEE802.15.4 Radio Interface Operations **********************************/
-struct ieee802154_trans_s
+struct ieee802154_txdesc_s
 {
-  uint8_t retry_count;  /* The number of retries remaining */ 
-  uint8_t msdu_handle;  /* The msdu handle identifying the transaction */
+  uint8_t psdu_handle;  /* The psdu handle identifying the transaction */
 
   uint16_t psdu_length; /* The length of the PSDU */
 
-  /* The PHY Service Data Unit (PSDU) buffer representing the frame to be 
-   * transmitted. This must be at the end of the struct to allow the array
-   * to continue and make the struct "variable length". Users should allocate
-   * memory using the SIZEOF_MAC802154_TRANSACTION_S macro below */
-
-  uint8_t psdu[CONFIG_IEEE802154_MTU];
+  /* TODO: Add slotting information for GTS transactions */
 };
-
 
 struct ieee802154_phyif_s; /* Forward Reference */
 
@@ -208,8 +201,8 @@ struct ieee802154_radioops_s
   CODE int (*rxenable)(FAR struct ieee802154_radio_s *dev, bool state,
              FAR struct ieee802154_packet_s *packet);
 
-  CODE int (*transmit)(FAR struct ieee802154_radio_s *dev,
-             FAR struct ieee802154_packet_s *packet);
+  CODE int (*txnotify_csma)(FAR struct ieee802154_radio_s *dev);
+  CODE int (*txnotify_gts)(FAR struct ieee802154_radio_s *dev);
 };
 
 struct ieee802154_radio_s
@@ -222,17 +215,6 @@ struct ieee802154_radio_s
                                       * rx interrupt, NULL if rx not enabled */
   sem_t rxsem;                       /* Semaphore posted after reception of
                                       * a packet */
-
-  /* Packet transmission management */
-
-  bool txok;                         /* Last transmission status, filled by
-                                      * tx interrupt */
-  bool txbusy;                       /* Last transmission failed because
-                                      * channel busy */
-  uint8_t txretries;                 /* Last transmission required this much
-                                      * retries */
-  sem_t txsem;                       /* Semaphore posted after transmission
-                                      * of a packet */
 };
 
 #ifdef __cplusplus

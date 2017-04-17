@@ -57,6 +57,32 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+ 
+struct mac802154_trans_s
+{
+  /* Supports a singly linked list */
+
+  FAR struct mac802154_trans_s *flink;
+
+  uint8_t msdu_handle;
+
+  uint8_t *mhr_buf;
+  uint8_t mhr_len;
+
+  uint8_t *d_buf;
+  uint8_t d_len;
+
+  sem_t sem;
+};
+
+struct mac802154_unsec_mhr_s
+{
+  uint8_t length;
+  union {
+    uint16_t frame_control;
+    uint8_t data[IEEE802154_MAX_UNSEC_MHR_OVERHEAD];
+  };
+};
 
 /* The privmac structure holds the internal state of the MAC and is the
  * underlying represention of the opaque MACHANDLE.  It contains storage for
@@ -79,7 +105,6 @@ struct ieee802154_privmac_s
 
   FAR struct mac802154_trans_s *csma_head;
   FAR struct mac802154_trans_s *csma_tail;
-  struct mac802154_trans_s csma_buf[5];
 
   /* Support a singly linked list of transactions that will be sent indirectly.
    * This list should only be used by a MAC acting as a coordinator.  These
@@ -91,7 +116,6 @@ struct ieee802154_privmac_s
 
   FAR struct mac802154_trans_s *indirect_head;
   FAR struct mac802154_trans_s *indirect_tail;
-  FAR struct mac802154_trans_s *active_trans;
 
   /* MAC PIB attributes, grouped to save memory */
 
@@ -203,32 +227,6 @@ struct ieee802154_privmac_s
   /* TODO: Add Security-related MAC PIB attributes */
 };
 
-struct mac802154_trans_s
-{
-  /* Supports a singly linked list */
-
-  FAR struct mac802154_trans_s *flink;
-
-  uint8_t msdu_handle;
-
-  uint8_t *mhr_buf;
-  uint8_t mhr_len;
-
-  uint8_t *d_buf;
-  uint8_t d_len;
-
-  sem_t sem;
-};
-
-struct mac802154_unsec_mhr_s
-{
-  uint8_t length;
-  union
-  {
-    uint16_t frame_control;
-    uint8_t data[IEEE802154_MAX_UNSEC_MHR_OVERHEAD];
-  };
-};
 
 /****************************************************************************
  * Private Data
@@ -563,7 +561,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
         }
     }
 
-  /* Set the source addr mode inside the frame contorl field */
+  /* Set the source addr mode inside the frame control field */
 
   mhr.frame_ctrl |= (req->src_addr_mode << IEEE802154_FRAMECTRL_SHIFT_SADDR);
 
@@ -658,7 +656,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
 
           /* Notify the radio driver that there is data available */
 
-          priv->radio->tx_notify(priv->radio);
+          priv->radio->ops->tx_notify(priv->radio);
 
           sem_wait(&trans->sem);
         }
@@ -709,6 +707,13 @@ static uint16_t mac802154_poll_csma(FAR struct ieee802154_phyif_s *phyif,
       return txdesc->psdu_length;
     }
 
+  return 0;
+}
+
+static uint16_t mac802154_poll_gts(FAR struct ieee802154_phyif_s *phyif, 
+                                   FAR struct ieee802154_txdesc_s *tx_desc,
+                                   uint8_t *buf)
+{
   return 0;
 }
 
