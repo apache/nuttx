@@ -81,7 +81,7 @@ void stm32f0_clockconfig(void)
       regval &= (uint32_t) (~RCC_CFGR_SW_MASK);
       putreg32(regval, STM32F0_RCC_CFGR);
 
-      while ((getreg32(STM32F0_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_HSI) ;
+      while ((getreg32(STM32F0_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_HSI);
     }
 
   /* Disable the PLL */
@@ -89,12 +89,13 @@ void stm32f0_clockconfig(void)
   regval  = getreg32(STM32F0_RCC_CR);
   regval &= (uint32_t)(~RCC_CR_PLLON);
   putreg32(regval, STM32F0_RCC_CR);
-  while ((getreg32(STM32F0_RCC_CR) & RCC_CR_PLLRDY) != 0) ;
+  while ((getreg32(STM32F0_RCC_CR) & RCC_CR_PLLRDY) != 0);
 
   /* Configure the PLL. Multiple x6 to get 48MHz */
 
   regval  = getreg32(STM32F0_RCC_CFGR);
-  regval &= (RCC_CFGR_PLLMUL_CLKx6 | ~RCC_CFGR_PLLMUL_MASK);
+  regval &= ~RCC_CFGR_PLLMUL_MASK;
+  regval |= RCC_CFGR_PLLMUL_CLKx6
   putreg32(regval, STM32F0_RCC_CFGR);
 
   /* Enable the PLL */
@@ -102,12 +103,12 @@ void stm32f0_clockconfig(void)
   regval  = getreg32(STM32F0_RCC_CR);
   regval |= RCC_CR_PLLON;
   putreg32(regval, STM32F0_RCC_CR);
-  while ((getreg32(STM32F0_RCC_CR) & RCC_CR_PLLRDY) == 0) ;
+  while ((getreg32(STM32F0_RCC_CR) & RCC_CR_PLLRDY) == 0);
 
   /* Configure to use the PLL */
 
   regval  = getreg32(STM32F0_RCC_CFGR);
-  regval |= (uint32_t) (RCC_CFGR_SW_PLL);
+  regval |= (uint32_t)(RCC_CFGR_SW_PLL);
   putreg32(regval, STM32F0_RCC_CFGR);
-  while ((getreg32(STM32F0_RCC_CFGR) & RCC_CFGR_SW_MASK) != RCC_CFGR_SW_PLL) ;
+  while ((getreg32(STM32F0_RCC_CFGR) & RCC_CFGR_SW_MASK) != RCC_CFGR_SW_PLL);
 }
