@@ -125,10 +125,17 @@ struct mrf24j40_radio_s
 
   /* Buffer Allocations */
 
-  struct ieee802154_txdesc_s csma_desc;
-  struct ieee802154_txdesc_s gts_desc[2];
+  struct mrf24j40_txdesc_s csma_desc;
+  struct mrf24j40_txdesc_s gts_desc[2];
 
   uint8_t tx_buf[CONFIG_IEEE802154_MTU];
+};
+
+struct mrf24j40_txdesc_s
+{
+  struct ieee802154_txdesc_s ieee_desc;
+
+  uint8_t busy : 1; /* Is this txdesc being used */
 };
 
 /****************************************************************************
@@ -218,7 +225,8 @@ static const struct ieee802154_radioops_s mrf24j40_devops =
   mrf24j40_bind,
   mrf24j40_ioctl,
   mrf24j40_rxenable,
-  mrf24j40_transmit
+  mrf24j40_txnotify_csma,
+  mrf24j40_txnotify_gts,
 };
 
 /****************************************************************************
@@ -236,51 +244,104 @@ static void mrf24j40_bind(FAR struct ieee802154_radio_s *radio,
 }
 
 /****************************************************************************
- * Function: mrf24j40_txavail
+ * Function: mrf24j40_dopoll_csma
  *
  * Description:
- *    Called from the upper layer, this function is to notify the device that
- *    the upper layer has a pending transaction.  This function checks to see
- *    if there is availability for the corresponding transaction type.  If
- *    there is, the function will call to the MAC layer to get the transaction
- *    and then start the transmission  
+ *   This function is called in order to preform an out-of-sequence TX poll.
+ *   This is done:
+ *
+ *   1. After completion of a CSMA transmission
+ *   2. When the upper layer calls txnotify_csma
+ *  
+ * Parameters:
+ *   radio  - Reference to the radio driver state structure
+ *
+ * Returned Value:
+ *  None
+ *
+ * Assumptions:
  *
  ****************************************************************************/
 
-static void mrf24j40_txavail(FAR struct ieee802154_radio_s *radio, bool gts)
+static void mrf24j40_dopoll_csma(FAR struct ieee802154_radio_s *radio)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
-  uint8_t gts;
 
-  while (sem_wait(dev->exclsem) < 0) { }
+  /* Need to get exlusive access to the device so that we can use the copy
+   * buffer */
+
+  while (sem_wait(&dev->exclsem) < 0) { }
   
   /* If this a CSMA transaction and we have room in the CSMA fifo */
 
-  if (!gts && !dev->csma_busy)
+  if (!dev->csma_txdesc.busy)
     {
       /* need to somehow allow for a handle to be passed */
 
       ret = dev->phyif->poll_csma(dev->phyif, &radio->csma_txdesc,
                                   &dev->tx_buf[0]);
 
+      if (ret > 0)
+        {
+          /* Now the txdesc is in use */
+
+          dev->cmsa_desc.busy = 1;
+
+          /* Setup the transaction on the device in the CSMA FIFO */
+
+          mrf24j40_csma_setup(radio, &dev->tx_buf[0],
+                              dev->gts_desc[i].psdu_length);
+        }
+
       /* Setup the transmit on the device */
 
+      break;
     }
-  else
-    {
-      for(gts = 0; gts < MRF24J40_GTS_SLOTS, gts++)
+
+  sem_post(&dev->exclsem);
+}
+
+/****************************************************************************
+ * Function: mrf24j40_txnotify_gts
+ *
+ * Description:
+ *    Called from the upper layer, this function is to notify the device that
+ *    the upper layer has a pending transaction for one of it's GTS'.  This
+ *    function checks to see if there is availability for the corresponding
+ *    transaction type.  If there is, the function will call to the MAC layer
+ *    to get the transaction and then start the transmission  
+ *
+ ****************************************************************************/
+
+static void mrf24j40_txnotify_gts(FAR struct ieee802154_radio_s *radio)
+{
+  FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
+
+  /* Need to get exclusive access to the device so that we can use the copy
+   * buffer */
+
+  while (sem_wait(dev->exclsem) < 0) { }
+
+  for(gts = 0; gts < MRF24J40_GTS_SLOTS, gts++)
+  {
+    if(!dev->gts_txdesc[i].busy)
       {
-        if(!dev->gts_txdesc[i].busy)
+        ret = dev->phyif->poll_gts(dev->phyif, &radio->gts_txdesc[i],
+                                   &dev->tx_buf[0]);
+
+        if (ret > 0)
           {
-            ret = dev->phyif->poll_gts(dev->phyif, &radio->gts_txdesc[i],
-                                       &dev->tx_buf[0]);
+            /* Now the txdesc is in use */
 
-            /* Setup the transmit on the device */
+            dev->gts_txdesc[i].busy = 1;
 
-            break;
+            /* Setup the transaction on the device in the open GTS FIFO */
+
+            mrf24j40_gts_setup(radio, i, &dev->tx_buf[0],
+                               dev->gts_desc[i].psdu_length);
           }
       }
-    }
+  }
 }
 
 /****************************************************************************
@@ -1506,38 +1567,36 @@ FAR struct ieee802154_radio_s *mrf24j40_init(FAR struct spi_dev_s *spi,
   /* Initialize semaphores */
 
   sem_init(&dev->radio.rxsem, 0, 0);
-  sem_init(&dev->radio.txsem, 0, 0);
 
   /* These semaphores are all used for signaling and, hence, should
    * not have priority inheritance enabled.
    */
 
   sem_setprotocol(&dev->radio.rxsem, SEM_PRIO_NONE);
-  sem_setprotocol(&dev->radio.txsem, SEM_PRIO_NONE);
 
   dev->lower    = lower;
   dev->spi      = spi;
 
   mrf24j40_initialize(dev);
 
-  mrf24j40_setchannel(&dev->radio, 11);
-  mrf24j40_setpanid  (&dev->radio, 0xFFFF);
-  mrf24j40_setsaddr  (&dev->radio, 0xFFFF);
-  mrf24j40_seteaddr  (&dev->radio, (uint8_t*)"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF");
+  mrf24j40_setchannel(dev, 11);
+  mrf24j40_setpanid  (dev, 0xFFFF);
+  mrf24j40_setsaddr  (dev, 0xFFFF);
+  mrf24j40_seteaddr  (dev, (uint8_t*)"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF");
 
   /* Default device params */
 
   cca.use_ed = 1;
   cca.use_cs = 0;
   cca.edth = 0x60; /* CCA mode ED, no carrier sense, recommenced ED threshold -69 dBm */
-  mrf24j40_setcca(&dev->radio, &cca);
+  mrf24j40_setcca(dev, &cca);
 
   mrf24j40_setrxmode(dev, MRF24J40_RXMODE_NORMAL);
 
-  mrf24j40_settxpower(&dev->radio, 0); /*16. Set transmitter power .*/
+  mrf24j40_settxpower(dev, 0); /*16. Set transmitter power .*/
 
   mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
 
-  dev->lower->enable(dev->radio, true);
+  dev->lower->enable(dev->lower, true);
   return &dev->radio;
 }
