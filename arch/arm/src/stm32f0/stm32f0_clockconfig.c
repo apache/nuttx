@@ -95,7 +95,7 @@ void stm32f0_clockconfig(void)
 
   regval  = getreg32(STM32F0_RCC_CFGR);
   regval &= ~RCC_CFGR_PLLMUL_MASK;
-  regval |= RCC_CFGR_PLLMUL_CLKx6
+  regval |= RCC_CFGR_PLLMUL_CLKx6;
   putreg32(regval, STM32F0_RCC_CFGR);
 
   /* Enable the PLL */
