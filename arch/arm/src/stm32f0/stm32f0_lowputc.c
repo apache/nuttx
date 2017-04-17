@@ -296,6 +296,7 @@ void stm32f0_lowsetup(void)
 #if defined(HAVE_UART)
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   uint32_t cr;
+  uint32_t clken;
 #endif
 
 #if defined(HAVE_CONSOLE)
@@ -304,10 +305,12 @@ void stm32f0_lowsetup(void)
   modifyreg32(STM32F0_CONSOLE_APBREG, 0, STM32F0_CONSOLE_APBEN);
 #endif
 
-  /* Enable the console USART and configure GPIO pins needed for rx/tx.
-   *
-   * NOTE: Clocking for selected U[S]ARTs was already provided in stm32f0_rcc.c
-   */
+  /* Enable the console USART and configure GPIO pins needed for rx/tx. */
+
+  clken  = getreg32(STM32F0_RCC_AHBENR);
+  clken |= RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN |\
+           RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN;
+  putreg32(clken, STM32F0_RCC_AHBENR);
 
 #ifdef STM32F0_CONSOLE_TX
   stm32f0_configgpio(STM32F0_CONSOLE_TX);
