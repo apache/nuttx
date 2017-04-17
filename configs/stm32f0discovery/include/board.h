@@ -176,9 +176,9 @@
  *
  * And two LEDs can be controlled by software:
  *
- * User LD3:  Green LED is a user LED connected to the I/O PB7 of the STM32F0152
+ * User LD3:  Green LED is a user LED connected to the I/O PB7 of the STM32F051R8
  *            MCU.
- * User LD4:  Blue LED is a user LED connected to the I/O PB6 of the STM32F0152
+ * User LD4:  Blue LED is a user LED connected to the I/O PB6 of the STM32F051R8
  *            MCU.
  *
  * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
@@ -226,8 +226,8 @@
 /* The STM32F0-Discovery supports two buttons; only one button is controllable by
  * software:
  *
- *   B1 USER: user and wake-up button connected to the I/O PA0 of the STM32F0152RBT6.
- *   B2 RESET: pushbutton connected to NRST is used to RESET the STM32F0152RBT6.
+ *   B1 USER: user and wake-up button connected to the I/O PA0 of the STM32F051R8.
+ *   B2 RESET: pushbutton connected to NRST is used to RESET the STM32F051R8.
  */
 
 #define BUTTON_USER              0
