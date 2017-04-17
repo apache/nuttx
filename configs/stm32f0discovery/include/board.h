@@ -89,11 +89,16 @@
  *
  * Resulting SYSCLK frequency is 8MHz x 12 / 2 = 48MHz
  *
- * USB/SDIO:
- *   If the USB or SDIO interface is used in the application, the PLL VCO
- *   clock (defined by STM32F0_CFGR_PLLMUL) must be programmed to output a 96
- *   MHz frequency. This is required to provide a 48 MHz clock to the USB or
- *   SDIO (SDIOCLK or USBCLK = PLLVCO/2).
+ * USB:
+ *   If the USB interface is used in the application, it requires a precise
+ *   48MHz clock which can be generated from either the (1) the internal
+ *   main PLL with the HSE clock source using an HSE crystal oscillator.  In
+ *   this case,  the PLL VCO clock (defined by STM32F0_CFGR_PLLMUL) must be
+ *   programmed to output a 96 MHz frequency. This is required to provide a
+ *   48MHz clock to the (USBCLK = PLLVCO/2).  Or (2) by using the internal
+ *   48MHz oscillator in automatic trimming mode. The synchronization for
+ *   this oscillator can be taken from the USB data stream itself (SOF
+ *   signalization) which allows crystal-less operation.
  * SYSCLK
  *   The system clock is derived from the PLL VCO divided by the output division factor.
  * Limitations:
@@ -120,7 +125,7 @@
  * frequency (STM32F0_PLL_FREQUENCY divided by the PLLDIV value).
  */
 
-#define STM32F0_SYSCLK_SW          RCC_CFGR_SW_PLL         /* Use the PLL as the SYSCLK */
+#define STM32F0_SYSCLK_SW          RCC_CFGR_SW_PLL       /* Use the PLL as the SYSCLK */
 #define STM32F0_SYSCLK_SWS         RCC_CFGR_SWS_PLL
 #ifdef CONFIG_STM32F0_USB
 #  define STM32F0_SYSCLK_FREQUENCY STM32F0_PLL_FREQUENCY /* SYSCLK frequency is PLL VCO = 48MHz */
