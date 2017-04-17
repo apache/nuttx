@@ -482,7 +482,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
    * 5.1.6.4 [1] pg. 118.
    */
 
-  mhr.frame_ctrl |= (req->ack_tx << IEEE802154_FRAMECTRL_SHIFT_ACKREQ);
+  mhr.frame_ctrl |= (req->msdu_flags.ack_tx << IEEE802154_FRAMECTRL_SHIFT_ACKREQ);
 
   /* If the destination address is present, copy the PAN ID and one of the
    * addresses, depending on mode, into the MHR .
@@ -603,7 +603,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
    * [1] pg. 118.
    */
 
-  if (req->gts_tx)
+  if (req->msdu_flags.gts_tx)
     {
       /* TODO: Support GTS transmission. This should just change where we link
        * the transaction.  Instead of going in the CSMA transaction list, it
@@ -622,7 +622,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
        * described in 5.1.5 and 5.1.6.3. [1]
        */
 
-      if (req->indirect_tx)
+      if (req->msdu_flags.indirect_tx)
         {
           /* If the TxOptions parameter specifies that an indirect transmission
            * is required and if the device receiving this primitive is not a
@@ -642,13 +642,13 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
             {
               /* Override the setting since it wasn't valid */
 
-              req->indirect_tx = 0;
+              req->msgu_flags.indirect_tx = 0;
             }
         }
 
       /* If this is a direct transmission not during a GTS */
 
-      if (!req->indirect_tx)
+      if (!req->msdu_flags.indirect_tx)
         {
           /* Link the transaction into the CSMA transaction list */
 

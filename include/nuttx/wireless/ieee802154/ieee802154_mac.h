@@ -356,7 +356,7 @@ struct ieee802154_addr_s
   {
     uint16_t saddr;     /* short address */
     uint8_t  eaddr[8];  /* extended address */
-  };
+  } u;
 };
 
 #define IEEE802154_ADDRSTRLEN 22 /* (2*2+1+8*2, PPPP/EEEEEEEEEEEEEEEE) */
@@ -430,7 +430,7 @@ struct ieee802154_data_req_s
     uint8_t ack_tx      : 1;  /* Acknowledge TX? */               
     uint8_t gts_tx      : 1;  /* 1=GTS used for TX, 0=CAP used for TX */
     uint8_t indirect_tx : 1;  /* Should indirect transmission be used? */
-  };
+  } msdu_flags;
 
 #ifdef CONFIG_IEEE802154_SECURITY
   /* Security information if enabled */
@@ -566,8 +566,8 @@ struct ieee802154_pend_addr_s
       uint8_t reserved_3      : 1;  /* Reserved bit */
       uint8_t num_ext_addr    : 3;  /* Number of extended addresses pending */       
       uint8_t reserved_7      : 1;  /* Reserved bit */
-    };
-  };
+    } pa_addr;
+  } u;
   struct ieee802154_addr_s addr[7]; /* Array of at most 7 addresses */
 };
 
