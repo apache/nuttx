@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX C Coding Standard</i>
       </font></big></h1>
-      <p>Last Updated: February 9, 2017</p>
+      <p>Last Updated: April 17, 2017</p>
     </td>
   </tr>
 </table>
@@ -1291,14 +1291,23 @@ typedef int myinteger_t;
   <li>
     <b>No un-named structures</b>.
     All structures must be named, even if they are part of a type definition.
+    That is, a structure name must follow the reserved word <code>struct</code> in all structure definitions.
     The exception to this rule is for structures that are defined within another union or structure.  In those cases, the structure name should always be omitted.
   </li>
+  <li>
+    <b>No un-named structure fields</b>.
+    Structure may contain other structures as fields.
+    This this case, the structure field must be named.
+    C11 permits such un-named structure fields within structure.
+    NuttX generally follows C89 and all code outside of architecture specific directories must be compatible with C89.
   <li>
     <b>No structure definitions within Type Definition</b>.
     The practice of defining a structure within a type definition is discouraged.
     It is preferred that the structure definition and the type definition be separate definitions.
     In general, the NuttX coding style discourages any <code>typdef</code>-ing of structures;
     normally the full structure name is used as types throughout the code.
+    The reason for this is that is structure pointers may be forward referenced in header files without having to include the file the provides the type definition.
+    This greatly reduces header file coupling.
   </li>
   <li>
     <b>Short structure names</b>.
@@ -1373,7 +1382,7 @@ typedef int myinteger_t;
 <tr><td bgcolor="white">
 <p><font color="red"><b>Incorrect</b></p>
 <ul><pre>
-typedef struct
+typedef struct       /* Un-named structure */
 {
   ...
   int val1, val2, val3; /* Values 1-3 */
@@ -1388,6 +1397,18 @@ struct xyz_information
           bitc : 1;  /* Bit C */
   ...
 };
+
+struct abc_s
+{
+  ...
+  struct
+  {
+    int a;           /* Value A */
+    int b;           /* Value B */
+    int c;           /* Value C */
+  };                 /* Un-named structure field */
+  ...
+};
 </ul></pre></font>
 </td></tr>
 <tr><td bgcolor="white">
@@ -1396,23 +1417,35 @@ struct xyz_information
 struct xyz_info_s
 {
   ...
-  int val1; /* Value 1. */
-  int val2; /* Value 2. */
-  int val3; /* Value 3. */
+  int val1;          /* Value 1 */
+  int val2;          /* Value 2 */
+  int val3;          /* Value 3 */
   ...
 };
 </pre>
 <font color="blue"><pre>
-typdef struct xyz_info_s xzy_info_t;
+typedef struct xyz_info_s xzy_info_t;
 </pre>
 <p>(The use of typedef'ed structures is acceptable but discouraged)</p></font>
 <pre>
 struct xyz_info_s
 {
   ...
-  uint8_t bita : 1,  /* Bit A. */
-  uint8_t bitb : 1,  /* Bit B. */
-  uint8_t bitc : 1,  /* Bit C. */
+  uint8_t bita : 1,  /* Bit A */
+  uint8_t bitb : 1,  /* Bit B */
+  uint8_t bitc : 1,  /* Bit C */
+  ...
+};
+
+struct abc_s
+{
+  ...
+  struct
+  {
+    int a;           /* Value A */
+    int b;           /* Value B */
+    int c;           /* Value C */
+  } abc;
   ...
 };
 </ul></pre></font>
@@ -1433,13 +1466,18 @@ struct xyz_info_s
 <tr><td bgcolor="white">
 <p><font color="green"><b>Example</b></p>
 <ul><pre>
-union xyz_union_u
+union xyz_union_u  /* All unions must be named */
 {
-  uint8_t  b[4]; /* Byte values. */
-  uint16_t h[2]; /* Half word values. */
-  uint32_t w;    /* Word Value. */
+  uint8_t  b[4];   /* Byte values. */
+  uint16_t h[2];   /* Half word values. */
+  uint32_t w;      /* Word Value. */
 };
-
+</pre>
+<font color="blue"><pre>
+typedef union xyz_union_u xzy_union_t;
+</pre>
+<p>(The use of typedef'ed unions is acceptable but discouraged)</p></font>
+<pre>
 struct xyz_info_s
 {
   ...
@@ -1448,7 +1486,7 @@ struct xyz_info_s
     uint8_t  b[4]; /* Byte values. */
     uint16_t h[2]; /* Half word values. */
     uint32_t w;    /* Word Value. */
-  } u;
+  } u;             /* All union fields must be named */
   ...
 };
 </ul></pre></font>
@@ -1456,9 +1494,9 @@ struct xyz_info_s
 </table></center>
 <p>
   <b>NOTE:</b>
-  Note that the union name <code>u</code> is used often.
+  Note that the union fields within structures are often named <code>u</code>.
   This is another exception to the prohibition against using single character variable and field names.
-  The short field name <code>u</code> clearly identifies a union field and prevents the full name to the union value from being excessively long.
+  The short field name <code>u</code> clearly identifies a union field and prevents the full name of the union value from being excessively long.
 </p>
 
 <h2>2.7 <a name="enumerations">Enumerations</a></h2>
