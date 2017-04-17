@@ -52,10 +52,7 @@
 
 #include "stm32f0_clockconfig.h"
 #include "stm32f0_lowputc.h"
-
-#ifdef CONFIG_ARCH_FPU
-#  include "nvic.h"
-#endif
+#include "stm32f0_start.h"
 
 /****************************************************************************
  * Pre-processor Definitions

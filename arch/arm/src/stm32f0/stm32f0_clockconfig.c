@@ -69,16 +69,16 @@
 
 void stm32f0_clockconfig(void)
 {
-  int regval;
+  uint32_t regval;
 
-  /*  Verify if PLL is already setup, if so define to use HSI mode */
+  /*  Verify if PLL is already setup.  If so configure to use HSI mode */
 
   if ((getreg32(STM32F0_RCC_CFGR) & RCC_CFGR_SWS_MASK) == RCC_CFGR_SWS_PLL)
     {
       /* Select HSI mode */
 
       regval  = getreg32(STM32F0_RCC_CFGR);
-      regval &= (uint32_t) (~RCC_CFGR_SW_MASK);
+      regval &= ~RCC_CFGR_SW_MASK;
       putreg32(regval, STM32F0_RCC_CFGR);
 
       while ((getreg32(STM32F0_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_HSI);
@@ -87,7 +87,7 @@ void stm32f0_clockconfig(void)
   /* Disable the PLL */
 
   regval  = getreg32(STM32F0_RCC_CR);
-  regval &= (uint32_t)(~RCC_CR_PLLON);
+  regval &= ~RCC_CR_PLLON;
   putreg32(regval, STM32F0_RCC_CR);
   while ((getreg32(STM32F0_RCC_CR) & RCC_CR_PLLRDY) != 0);
 
@@ -108,7 +108,7 @@ void stm32f0_clockconfig(void)
   /* Configure to use the PLL */
 
   regval  = getreg32(STM32F0_RCC_CFGR);
-  regval |= (uint32_t)(RCC_CFGR_SW_PLL);
+  regval |= RCC_CFGR_SW_PLL;
   putreg32(regval, STM32F0_RCC_CFGR);
   while ((getreg32(STM32F0_RCC_CFGR) & RCC_CFGR_SW_MASK) != RCC_CFGR_SW_PLL);
 }
