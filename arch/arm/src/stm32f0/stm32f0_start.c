@@ -75,7 +75,7 @@ const uint32_t g_idle_topstack = IDLE_STACK;
  * Name: showprogress
  *
  * Description:
- *   Print a character on the UART to show boot status.
+ *   Print a character on the CONSOLE USART to show boot status.
  *
  ****************************************************************************/
 

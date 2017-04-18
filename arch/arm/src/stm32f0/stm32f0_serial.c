@@ -84,7 +84,7 @@
 
 /* If DMA is enabled on any USART, then very that other pre-requisites
  * have also been selected.
- * UART DMA1 DMA2
+ * USART DMA1 DMA2
  *    1  X    X
  *    2  X
  *    3  X
@@ -130,7 +130,7 @@
 #    error "USART1 DMA channel not defined (DMAMAP_USART1_RX)"
 #  endif
 
-/* UART2-5 have no alternate channels */
+/* USART2-5 have no alternate channels */
 
 #  define DMAMAP_USART2_RX  DMACHAN_USART2_RX
 #  define DMAMAP_USART3_RX  DMACHAN_USART3_RX
@@ -204,7 +204,7 @@
 
 struct stm32f0_serial_s
 {
-  struct uart_dev_s dev;       /* Generic UART device */
+  struct uart_dev_s dev;       /* Generic USART device */
   uint16_t          ie;        /* Saved interrupt mask bits value */
   uint16_t          sr;        /* Saved status bits */
 
@@ -1010,7 +1010,7 @@ static void stm32f0serial_setformat(FAR struct uart_dev_s *dev)
  *   Enable or disable APB clock for the USART peripheral
  *
  * Input parameters:
- *   dev - A reference to the UART driver state structure
+ *   dev - A reference to the USART driver state structure
  *   on  - Enable clock if 'on' is 'true' and disable if 'false'
  *
  ****************************************************************************/
@@ -1196,7 +1196,7 @@ static int stm32f0serial_dmasetup(FAR struct uart_dev_s *dev)
   int result;
   uint32_t regval;
 
-  /* Do the basic UART setup first, unless we are the console */
+  /* Do the basic USART setup first, unless we are the console */
 
   if (!dev->isconsole)
     {
@@ -1240,7 +1240,7 @@ static int stm32f0serial_dmasetup(FAR struct uart_dev_s *dev)
 
   priv->rxdmanext = 0;
 
-  /* Enable receive DMA for the UART */
+  /* Enable receive DMA for the USART */
 
   regval  = stm32f0serial_getreg(priv, STM32F0_USART_CR3_OFFSET);
   regval |= USART_CR3_DMAR;
@@ -1295,7 +1295,7 @@ static void stm32f0serial_shutdown(FAR struct uart_dev_s *dev)
 
   stm32f0serial_setapbclock(dev, false);
 
-  /* Disable Rx, Tx, and the UART */
+  /* Disable Rx, Tx, and the USART */
 
   regval  = stm32f0serial_getreg(priv, STM32F0_USART_CR1_OFFSET);
   regval &= ~(USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
@@ -1348,7 +1348,7 @@ static void stm32f0serial_dmashutdown(FAR struct uart_dev_s *dev)
 {
   FAR struct stm32f0_serial_s *priv = (FAR struct stm32f0_serial_s *)dev->priv;
 
-  /* Perform the normal UART shutdown */
+  /* Perform the normal USART shutdown */
 
   stm32f0serial_shutdown(dev);
 
@@ -1880,11 +1880,11 @@ static bool stm32f0serial_rxavailable(FAR struct uart_dev_s *dev)
  * Description:
  *   Called when Rx buffer is full (or exceeds configured watermark levels
  *   if CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS is defined).
- *   Return true if UART activated RX flow control to block more incoming
+ *   Return true if USART activated RX flow control to block more incoming
  *   data
  *
  * Input parameters:
- *   dev       - UART device instance
+ *   dev       - USART device instance
  *   nbuffered - the number of characters currently buffered
  *               (if CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS is
  *               not defined the value will be 0 for an empty buffer or the
@@ -1924,7 +1924,7 @@ static bool stm32f0serial_rxflowcontrol(FAR struct uart_dev_s *dev,
            * peripheral.  When hardware RTS is enabled, this will
            * prevent more data from coming in.
            *
-           * This function is only called when UART recv buffer is full,
+           * This function is only called when USART recv buffer is full,
            * that is: "dev->recv.head + 1 == dev->recv.tail".
            *
            * Logic in "uart_read" will automatically toggle Rx interrupts
@@ -2367,7 +2367,7 @@ void up_earlyserialinit(void)
 #if CONSOLE_USART > 0
   stm32f0serial_setup(&uart_devs[CONSOLE_USART - 1]->dev);
 #endif
-#endif /* HAVE UART */
+#endif /* HAVE USART */
 }
 #endif
 
@@ -2404,7 +2404,7 @@ void up_serialinit(void)
   (void)uart_register("/dev/console", &uart_devs[CONSOLE_USART - 1]->dev);
 
 #ifndef CONFIG_SERIAL_DISABLE_REORDERING
-  /* If not disabled, register the console UART to ttyS0 and exclude
+  /* If not disabled, register the console USART to ttyS0 and exclude
    * it from initializing it further down
    */
 
@@ -2446,7 +2446,7 @@ void up_serialinit(void)
       devname[9] = '0' + minor++;
       (void)uart_register(devname, &uart_devs[i]->dev);
     }
-#endif /* HAVE UART */
+#endif /* HAVE USART */
 }
 
 /****************************************************************************
