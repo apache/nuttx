@@ -43,6 +43,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <string.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wireless/ieee802154/ieee802154_radio.h>
@@ -96,7 +97,7 @@ struct ieee802154_privmac_s
   FAR const struct ieee802154_maccb_s *cb;  /* Contained MAC callbacks */
   FAR struct ieee802154_phyif_s phyif;      /* Interface to bind to radio */
 
-  sem_t excl_sem; /* Support exclusive access */
+  sem_t exclsem; /* Support exclusive access */
 
   /* Support a singly linked list of transactions that will be sent using the
    * CSMA algorithm.  On a non-beacon enabled PAN, these transactions will be
@@ -207,14 +208,14 @@ struct ieee802154_privmac_s
      */
 
     uint32_t sync_symb_offset   : 12;
-  }
+  };
 
   struct
   {
     uint32_t beacon_tx_time     : 24; /* Time of last beacon transmit */
     uint32_t min_be             : 4;  /* Min value of backoff exponent (BE) */
     uint32_t max_be             : 4;  /* Max value of backoff exponent (BE) */
-  }
+  };
 
   struct
   {
@@ -223,11 +224,33 @@ struct ieee802154_privmac_s
     uint32_t tx_ctrl_pause_dur  : 1;  /* Duration after tx before another tx is
                                        * permitted. 0=2000, 1= 10000 */
     uint32_t timestamp_support  : 1;  /* Does MAC layer supports timestamping */
-  }
+    uint32_t is_coord           : 1;  /* Is this device acting as coordinator */
+  };
 
   /* TODO: Add Security-related MAC PIB attributes */
 };
 
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static inline int mac802154_takesem(sem_t *sem);
+#define mac802154_givesem(s) sem_post(s);
+
+/* Internal Functions */
+
+static int mac802154_defaultmib(FAR struct ieee802154_privmac_s *priv);
+static int mac802154_applymib(FAR struct ieee802154_privmac_s *priv);
+
+/* IEEE 802.15.4 PHY Interface OPs */
+
+static int mac802154_poll_csma(FAR struct ieee802154_phyif_s *phyif,
+                                    FAR struct ieee802154_txdesc_s *tx_desc,
+                                    uint8_t *buf);
+
+static int mac802154_poll_gts(FAR struct ieee802154_phyif_s *phyif, 
+                                   FAR struct ieee802154_txdesc_s *tx_desc,
+                                   uint8_t *buf);
 
 /****************************************************************************
  * Private Data
@@ -350,7 +373,7 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
 
   /* Bind our PHY interface to the radio */
 
-  radiodev->ops->bind(radiodev, mac->phyif);
+  radiodev->ops->bind(radiodev, &mac->phyif);
 
   return (MACHANDLE)mac;
 }
@@ -444,7 +467,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
-  FAR struct mac802154_trans_s *trans;
+  FAR struct mac802154_trans_s trans;
   struct mac802154_unsec_mhr_s mhr;
   int ret;
 
@@ -462,11 +485,12 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
 
   /* Ensure we start with a clear frame control field */
 
-  mhr.frame_control = 0;
+  mhr.u.frame_control = 0;
 
   /* Set the frame type to Data */
 
-  mhr.frame_control |= IEEE802154_FRAME_DATA << IEEE802154_FRAMECTRL_SHIFT_FTYPE;
+  mhr.u.frame_control |= IEEE802154_FRAME_DATA <<
+                         IEEE802154_FRAMECTRL_SHIFT_FTYPE;
 
   /* If the msduLength is greater than aMaxMACSafePayloadSize, the MAC sublayer
    * will set the Frame Version to one. [1] pg. 118.
@@ -474,7 +498,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
 
   if (req->msdu_length > IEEE802154_MAX_SAFE_MAC_PAYLOAD_SIZE)
     {
-      mhr.frame_ctrl |= IEEE802154_FRAMECTRL_VERSION;
+      mhr.u.frame_control |= IEEE802154_FRAMECTRL_VERSION;
     }
 
   /* If the TXOptions parameter specifies that an acknowledged transmission is
@@ -482,7 +506,8 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
    * 5.1.6.4 [1] pg. 118.
    */
 
-  mhr.frame_ctrl |= (req->msdu_flags.ack_tx << IEEE802154_FRAMECTRL_SHIFT_ACKREQ);
+  mhr.u.frame_control |= (req->msdu_flags.ack_tx <<
+                          IEEE802154_FRAMECTRL_SHIFT_ACKREQ);
 
   /* If the destination address is present, copy the PAN ID and one of the
    * addresses, depending on mode, into the MHR .
@@ -490,28 +515,29 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
 
   if (req->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
     {
-      memcpy(&mhr.data[mhr.length], req->dest_addr.panid, 2);
+      memcpy(&mhr.u.data[mhr.length], &req->dest_addr.panid, 2);
       mhr.length += 2;
 
       if (req->dest_addr.mode == IEEE802154_ADDRMODE_SHORT)
         {
-          memcpy(&mhr.data[mhr.length], req->dest_addr.saddr, 2);
+          memcpy(&mhr.u.data[mhr.length], &req->dest_addr.saddr, 2);
           mhr.length += 2;
         }
       else if (req->dest_addr.mode == IEEE802154_ADDRMODE_EXTENDED)
         {
-          memcpy(&mhr.data[mhr.length], req->dest_addr.eaddr, 8);
+          memcpy(&mhr.u.data[mhr.length], &req->dest_addr.eaddr, 8);
           mhr.length += 8;
         }
     }
 
   /* Set the destination addr mode inside the frame contorl field */
 
-  mhr.frame_ctrl |= (req->dest_addr.mode << IEEE802154_FRAMECTRL_SHIFT_DADDR);
+  mhr.u.frame_control |= (req->dest_addr.mode <<
+                          IEEE802154_FRAMECTRL_SHIFT_DADDR);
 
   /* From this point on, we need exclusive access to the privmac struct */
 
-  ret = mac802154dev_takesem(&dev->md_exclsem);
+  ret = mac802154_takesem(&priv->exclsem);
   if (ret < 0)
     {
       wlerr("ERROR: mac802154_takesem failed: %d\n", ret);
@@ -533,7 +559,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
 
       if (req->dest_addr.panid == priv->addr.panid)
         {
-          mhr.frame_control |= IEEE802154_FRAMECTRL_PANIDCOMP;
+          mhr.u.frame_control |= IEEE802154_FRAMECTRL_PANIDCOMP;
         }
     }
 
@@ -543,35 +569,36 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
        * is off, we need to include the Source PAN ID.
        */
 
-      if (req->dest_addr.mode == IEEE802154_ADDRMODE_NONE ||
-          (mhr.frame_control & IEEE802154_FRAMECTRL_PANIDCOMP)
+      if ((req->dest_addr.mode == IEEE802154_ADDRMODE_NONE) ||
+          (mhr.u.frame_control & IEEE802154_FRAMECTRL_PANIDCOMP))
         {
-          memcpy(&mhr.data[mhr.length], priv->addr.panid, 2);
+          memcpy(&mhr.u.data[mhr.length], &priv->addr.panid, 2);
           mhr.length += 2;
         }
 
       if (req->src_addr_mode == IEEE802154_ADDRMODE_SHORT)
         {
-          memcpy(&mhr.data[mhr.length], priv->addr.saddr, 2);
+          memcpy(&mhr.u.data[mhr.length], &priv->addr.saddr, 2);
           mhr.length += 2;
         }
       else if (req->src_addr_mode == IEEE802154_ADDRMODE_EXTENDED)
         {
-          memcpy(&mhr.data[mhr.length], priv->addr.eaddr, 8);
+          memcpy(&mhr.u.data[mhr.length], &priv->addr.eaddr, 8);
           mhr.length += 8;
         }
     }
 
   /* Set the source addr mode inside the frame control field */
 
-  mhr.frame_ctrl |= (req->src_addr_mode << IEEE802154_FRAMECTRL_SHIFT_SADDR);
+  mhr.u.frame_control |= (req->src_addr_mode <<
+                          IEEE802154_FRAMECTRL_SHIFT_SADDR);
 
   /* Each time a data or a MAC command frame is generated, the MAC sublayer
    * shall copy the value of macDSN into the Sequence Number field of the MHR
    * of the outgoing frame and then increment it by one. [1] pg. 40.
    */
 
-  mhr.data[mhr.length++] = priv.dsn++;
+  mhr.u.data[mhr.length++] = priv->dsn++;
 
   /* Now that we know which fields are included in the header, we can make
    * sure we actually have enough room in the PSDU.
@@ -583,13 +610,13 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
     return -E2BIG;
   }
 
-  trans->mhr_buf = &mhr.data[0];
-  trans->mhr_len = mhr.length;
+  trans.mhr_buf = &mhr.u.data[0];
+  trans.mhr_len = mhr.length;
 
-  trans->d_buf = &req->msdu[0];
-  trans->d_len = req->msdu_length;
+  trans.d_buf = &req->msdu[0];
+  trans.d_len = req->msdu_length;
 
-  trans->msdu_handle = req->msdu_handle;
+  trans.msdu_handle = req->msdu_handle;
 
   /* If the TxOptions parameter specifies that a GTS transmission is required,
    * the MAC sublayer will determine whether it has a valid GTS as described
@@ -635,14 +662,14 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
             {
               /* Link the transaction into the indirect_trans list */
 
-              priv->indirect_tail->flink = trans;
-              priv->indirect_tail = trans;
+              priv->indirect_tail->flink = &trans;
+              priv->indirect_tail = &trans;
             }
           else
             {
               /* Override the setting since it wasn't valid */
 
-              req->msgu_flags.indirect_tx = 0;
+              req->msdu_flags.indirect_tx = 0;
             }
         }
 
@@ -652,40 +679,50 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
         {
           /* Link the transaction into the CSMA transaction list */
 
-          priv->csma_tail->flink = trans;
-          priv->csma_tail = trans;
+          priv->csma_tail->flink = &trans;
+          priv->csma_tail = &trans;
+
+          /* We no longer need to have the MAC layer locked. */
+
+          mac802154_givesem(&priv->exclsem);
 
           /* Notify the radio driver that there is data available */
 
-          priv->radio->ops->tx_notify(priv->radio);
+          priv->radio->ops->txnotify_csma(priv->radio);
 
-          sem_wait(&trans->sem);
+          sem_wait(&trans.sem);
         }
     }
 
   return OK;
 }
 
-
 /* Called from interrupt level or worker thread with interrupts disabled */
 
-static uint16_t mac802154_poll_csma(FAR struct ieee802154_phyif_s *phyif,
+static int mac802154_poll_csma(FAR struct ieee802154_phyif_s *phyif,
                                     FAR struct ieee802154_txdesc_s *tx_desc,
                                     uint8_t *buf)
 {
   FAR struct ieee802154_privmac_s *priv =
       (FAR struct ieee802154_privmac_s *)&phyif->priv;
-
   FAR struct mac802154_trans_s *trans;
+  int ret = 0;
+
+  DEBUGASSERT(priv != 0);
+
+  /* Get exclusive access to the driver structure.  We don't care about any
+   * signals so if we see one, just go back to trying to get access again */
+
+  while (mac802154_takesem(&priv->exclsem) != 0);
 
   /* Check to see if there are any CSMA transactions waiting */
 
-  if (mac->csma_head)
+  if (priv->csma_head)
     {
       /* Pop a CSMA transaction off the list */
 
-      trans = mac->csma_head;
-      mac->csma_head = mac->csma_head.flink;
+      trans = priv->csma_head;
+      priv->csma_head = priv->csma_head->flink;
 
       /* Setup the transmit descriptor */
 
@@ -703,15 +740,17 @@ static uint16_t mac802154_poll_csma(FAR struct ieee802154_phyif_s *phyif,
        * returns.
        */
 
-      sem_post(trans->sem);
+      sem_post(&trans->sem);
 
-      return txdesc->psdu_length;
+      ret = tx_desc->psdu_length;
     }
 
-  return 0;
+  mac802154_givesem(&priv->exclsem);
+
+  return ret;
 }
 
-static uint16_t mac802154_poll_gts(FAR struct ieee802154_phyif_s *phyif, 
+static int mac802154_poll_gts(FAR struct ieee802154_phyif_s *phyif, 
                                    FAR struct ieee802154_txdesc_s *tx_desc,
                                    uint8_t *buf)
 {

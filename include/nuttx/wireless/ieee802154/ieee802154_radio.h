@@ -190,14 +190,14 @@ struct ieee802154_radio_s; /* Forward reference */
 
 struct ieee802154_radioops_s
 {
-  CODE int (*bind) (FAR struct ieee802154_radio_s *dev,
-             FAR const struct ieee802154_phyif_s *phyif);
-  CODE int (*ioctl)(FAR struct ieee802154_radio_s *ieee, int cmd,
+  CODE int (*bind) (FAR struct ieee802154_radio_s *radio,
+             FAR struct ieee802154_phyif_s *phyif);
+  CODE int (*ioctl)(FAR struct ieee802154_radio_s *radio, int cmd,
              unsigned long arg);
-  CODE int (*rxenable)(FAR struct ieee802154_radio_s *dev, bool state,
+  CODE int (*rxenable)(FAR struct ieee802154_radio_s *radio, bool state,
              FAR struct ieee802154_packet_s *packet);
-  CODE int (*txnotify_csma)(FAR struct ieee802154_radio_s *dev);
-  CODE int (*txnotify_gts)(FAR struct ieee802154_radio_s *dev);
+  CODE int (*txnotify_csma)(FAR struct ieee802154_radio_s *radio);
+  CODE int (*txnotify_gts)(FAR struct ieee802154_radio_s *radio);
 };
 
 struct ieee802154_radio_s

@@ -85,7 +85,7 @@
 
 #define MAC802154IOC_MCPS_REGISTER             _MAC802154IOC(0x0001)
 
-#define MAC802154IOC_MLME_REGISER              _MAC802154IOC(0x0002);
+#define MAC802154IOC_MLME_REGISTER             _MAC802154IOC(0x0002)
 #define MAC802154IOC_MLME_ASSOC_REQUEST        _MAC802154IOC(0x0003)
 #define MAC802154IOC_MLME_ASSOC_RESPONSE       _MAC802154IOC(0x0004)
 #define MAC802154IOC_MLME_DISASSOC_REQUEST     _MAC802154IOC(0x0005)
@@ -102,8 +102,6 @@
 #define MAC802154IOC_MLME_DPS_REQUEST          _MAC802154IOC(0x0010)
 #define MAC802154IOC_MLME_SOUNDING_REQUEST     _MAC802154IOC(0x0011)
 #define MAC802154IOC_MLME_CALIBRATE_REQUEST    _MAC802154IOC(0x0012)
-
-
 
 /* IEEE 802.15.4 MAC Interface **********************************************/
 
@@ -351,12 +349,9 @@ struct ieee802154_addr_s
 
   enum ieee802154_addr_mode_e mode;  
 
-  uint16_t panid;           /* PAN identifier, can be IEEE802154_PAN_UNSPEC */
-  union
-  {
-    uint16_t saddr;     /* short address */
-    uint8_t  eaddr[8];  /* extended address */
-  } u;
+  uint16_t panid;     /* PAN identifier, can be IEEE802154_PAN_UNSPEC */
+  uint16_t saddr;     /* short address */
+  uint8_t  eaddr[8];  /* extended address */
 };
 
 #define IEEE802154_ADDRSTRLEN 22 /* (2*2+1+8*2, PPPP/EEEEEEEEEEEEEEEE) */
@@ -395,19 +390,6 @@ enum ieee802154_ranging_e
   IEEE802154_NON_RANGING = 0,
   IEEE802154_ALL_RANGING,
   IEEE802154_PHY_HEADER_ONLY
-};
-
-struct ieee802154_frame_s
-{
-  struct ieee802154_framecontrol_s frame_control;
-  uint8_t seq_num;
-  struct ieee802154_addr_s dest_addr;
-  struct ieee802154_addr_s src_addr;
-#ifdef CONFIG_IEEE802154_SECURITY
-  struct ieee802154_auxsec_s aux_sec_hdr;
-#endif
-  void *payload;
-  uint16_t fcs;
 };
 
 struct ieee802154_data_req_s
@@ -464,7 +446,6 @@ struct ieee802154_data_req_s
 
   uint8_t msdu[1];
 };
-
 #define SIZEOF_IEEE802154_DATA_REQ_S(n) \
         (sizeof(struct ieee802154_data_req_s) + (n) - 1)
 
