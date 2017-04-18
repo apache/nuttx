@@ -45,6 +45,7 @@
 #include <string.h>
 #include <errno.h>
 #include <time.h>
+#include <fcntl.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -65,31 +66,6 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-struct mac802154_devwrapper_s
-{
-  MACHANDLE md_mac;    /* Saved binding to the mac layer */
-  sem_t md_exclsem;    /* Exclusive device access */
-
-  /* The following is a singly linked list of open references to the
-   * MAC device.
-   */
-
-  FAR struct mac802154_open_s *md_open;
-  FAR struct mac802154dev_dwait_s *md_dwait;
-
-#ifndef CONFIG_DISABLE_SIGNALS
-  /* MCPS Service notification information */
-
-  struct mac802154dev_notify_s md_mcps_notify;
-  pid_t md_mcps_pid;
-
-  /* MLME Service notification information */
-
-  struct mac802154dev_notify_s md_mlme_notify;
-  pid_t md_mlme_pid;
-#endif
-};
 
 struct mac802154dev_notify_s
 {
@@ -118,6 +94,31 @@ struct mac802154dev_dwait_s
   /* Supports a singly linked list */
 
   FAR struct mac802154dev_dwait_s *mw_flink;
+};
+
+struct mac802154_devwrapper_s
+{
+  MACHANDLE md_mac;    /* Saved binding to the mac layer */
+  sem_t md_exclsem;    /* Exclusive device access */
+
+  /* The following is a singly linked list of open references to the
+   * MAC device.
+   */
+
+  FAR struct mac802154dev_open_s *md_open;
+  FAR struct mac802154dev_dwait_s *md_dwait;
+
+#ifndef CONFIG_DISABLE_SIGNALS
+  /* MCPS Service notification information */
+
+  struct mac802154dev_notify_s md_mcps_notify;
+  pid_t md_mcps_pid;
+
+  /* MLME Service notification information */
+
+  struct mac802154dev_notify_s md_mlme_notify;
+  pid_t md_mlme_pid;
+#endif
 };
 
 /****************************************************************************
@@ -358,7 +359,8 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
    * packet.
    */
 
-  if (len < sizeof(struct ieee802154_frame_s))
+  if ((len >= SIZEOF_IEEE802154_DATA_REQ_S(1)) &&
+      (len <= SIZEOF_IEEE802154_DATA_REQ_S(IEEE802154_MAX_MAC_PAYLOAD_SIZE)))
     {
       wlerr("ERROR: buffer too small: %lu\n", (unsigned long)len);
       return -EINVAL;
@@ -394,7 +396,6 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
   FAR struct inode *inode;
   FAR struct mac802154_devwrapper_s *dev;
   FAR struct ieee802154_data_req_s *req;
-  FAR struct ieee802154_frame_s *frame;
   struct mac802154dev_dwait_s dwait;
   int ret;
 
@@ -404,41 +405,53 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
   dev  = (FAR struct mac802154_devwrapper_s *)inode->i_private;
 
   /* Check to make sure that the buffer is big enough to hold at least one
-   * packet.
-   */
+   * packet. */
 
-  if (len < sizeof(struct ieee802154_frame_s))
+  if ((len >= SIZEOF_IEEE802154_DATA_REQ_S(1)) &&
+      (len <= SIZEOF_IEEE802154_DATA_REQ_S(IEEE802154_MAX_MAC_PAYLOAD_SIZE)))
     {
-      wlerr("ERROR: buffer too small: %lu\n", (unsigned long)len);
+      wlerr("ERROR: buffer isn't an ieee802154_data_req_s: %lu\n",
+            (unsigned long)len);
+
       return -EINVAL;
     }
 
   DEBUGASSERT(buffer != NULL);
-  frame = (FAR struct ieee802154_frame_s *)buffer;
+  req = (FAR struct ieee802154_data_req_s *)buffer;
 
-  /* Get exclusive access to the driver structure */
+  /* If this is a blocking operation, we need to setup a wait struct so we
+   * can unblock when the packet transmission has finished. If this is a
+   * non-blocking write, we pass off the data and then move along. Technically
+   * we stil have to wait for the transaction to get put into the buffer, but we
+   * won't wait for the transaction to actually finish. */
 
-  ret = mac802154dev_takesem(&dev->md_exclsem);
-  if (ret < 0)
+  if (!(filep->f_oflags & O_NONBLOCK))
     {
-      wlerr("ERROR: mac802154dev_takesem failed: %d\n", ret);
-      return ret;
-    }
+      /* Get exclusive access to the driver structure */
 
-  /* Setup the wait struct */
+      ret = mac802154dev_takesem(&dev->md_exclsem);
+      if (ret < 0)
+        {
+          wlerr("ERROR: mac802154dev_takesem failed: %d\n", ret);
+          return ret;
+        }
 
-  dwait.mw_handle = req->msdu_handle;
+      /* Setup the wait struct */
 
-  /* Link the wait struct */
+      dwait.mw_handle = req->msdu_handle;
 
-  dwait.mw_flink = dev->md_dwait;
-  dev->md_dwait = &dwait;
+      /* Link the wait struct */
 
+      dwait.mw_flink = dev->md_dwait;
+      dev->md_dwait = &dwait;
+
+      mac802154dev_givesem(&dev->md_exclsem);
+
+  }
+ 
   /* Pass the request to the MAC layer */
 
   ret = mac802154_req_data(dev->md_mac, req);
-
-  mac802154dev_givesem(&dev->md_exclsem);
 
   if (ret < 0)
     {
@@ -446,22 +459,28 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
       return ret;
     }
 
-  /* Wait for the DATA.confirm callback to be called for our handle */
 
-  if (sem_wait(dwait.mw_sem) < 0)
+  if (!(filep->f_oflags & O_NONBLOCK))
     {
-      /* This should only happen if the wait was canceled by an signal */
+      /* Wait for the DATA.confirm callback to be called for our handle */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      if (sem_wait(&dwait.mw_sem) < 0)
+        {
+          /* This should only happen if the wait was canceled by an signal */
+
+          DEBUGASSERT(errno == EINTR);
+          return -EINTR;
+        }
+
+      /* The unlinking of the wait struct happens inside the callback. This
+       * is more efficient since it will already have to find the struct in
+       * the list in order to perform the sem_post.
+       */
+
+      return dwait.mw_status;
     }
 
-  /* The unlinking of the wait struct happens inside the callback. This
-   * is more efficient since it will already have to find the struct in
-   * the list in order to perform the sem_post.
-   */
-
-  return dwait.status;
+  return OK;
 }
 
 /****************************************************************************
@@ -477,7 +496,6 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
 {
   FAR struct inode *inode;
   FAR struct mac802154_devwrapper_s *dev;
-  MACHANDLE mac;
   int ret;
 
   DEBUGASSERT(filep != NULL && filep->f_priv != NULL &&
@@ -564,10 +582,10 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
 void mac802154dev_conf_data(MACHANDLE mac,
                             FAR struct ieee802154_data_conf_s *conf)
 {
-  FAR struct mac802154_devwrapper_s *dev;
+  FAR struct mac802154_devwrapper_s *dev = 
+    (FAR struct mac802154_devwrapper_s *)mac;
   FAR struct mac802154dev_dwait_s *curr;
   FAR struct mac802154dev_dwait_s *prev;
-  int ret;
 
   /* Get the dev from the callback context.  This should have been set when
    * the char driver was registered.
@@ -579,7 +597,7 @@ void mac802154dev_conf_data(MACHANDLE mac,
   /* Get exclusive access to the driver structure.  We don't care about any
    * signals so if we see one, just go back to trying to get access again */
 
-  while(mac802154dev_takesem(&dev->md_exclsem) != OK);
+  while (mac802154dev_takesem(&dev->md_exclsem) != 0);
 
   /* Search to see if there is a dwait pending for this transaction */
 
