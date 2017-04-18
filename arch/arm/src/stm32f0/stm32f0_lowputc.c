@@ -299,7 +299,7 @@ void stm32f0_lowsetup(void)
 #ifdef CONFIG_STM32F0_USART2
   /* Enable USART APB1 clock */
 
-  modifyreg32(STM32F0_RCC_APB1ENR1, 0, RCC_APB1ENR1_USART2EN);
+  modifyreg32(STM32F0_RCC_APB1ENR, 0, RCC_APB1ENR_USART2EN);
 
   /* Configure RX/TX pins */
 
@@ -315,7 +315,7 @@ void stm32f0_lowsetup(void)
 #ifdef CONFIG_STM32F0_USART3
   /* Enable USART APB1 clock */
 
-  modifyreg32(STM32F0_RCC_APB1ENR1, 0, RCC_APB1ENR1_USART3EN);
+  modifyreg32(STM32F0_RCC_APB1ENR, 0, RCC_APB1ENR_USART3EN);
 
   /* Configure RX/TX pins */
 
@@ -331,7 +331,7 @@ void stm32f0_lowsetup(void)
 #ifdef CONFIG_STM32F0_USART4
   /* Enable USART APB1 clock */
 
-  modifyreg32(STM32F0_RCC_APB1ENR1, 0, RCC_APB1ENR1_USART4EN);
+  modifyreg32(STM32F0_RCC_APB1ENR, 0, RCC_APB1ENR_USART4EN);
 
   /* Configure RX/TX pins */
 
@@ -347,7 +347,7 @@ void stm32f0_lowsetup(void)
 #ifdef CONFIG_STM32F0_USART5
   /* Enable USART APB1 clock */
 
-  modifyreg32(STM32F0_RCC_APB1ENR1, 0, RCC_APB1ENR1_USART5EN);
+  modifyreg32(STM32F0_RCC_APB1ENR, 0, RCC_APB1ENR_USART5EN);
 
   /* Configure RX/TX pins */
 

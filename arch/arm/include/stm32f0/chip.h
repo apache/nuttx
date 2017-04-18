@@ -68,11 +68,11 @@
 #  define STM32F0_NCAP            13 /* Capacitive sensing channels (14 on UFQFPN32)) */
 #  define STM32F0_NPORTS          6  /* Six GPIO ports, GPIOA-F */
 
-#elif defined(CONFIG_ARCH_CHIP_SSTM32F072C8) || defined(CONFIG_ARCH_CHIP_SSTM32F072CB)
+#elif defined(CONFIG_ARCH_CHIP_STM32F072C8) || defined(CONFIG_ARCH_CHIP_STM32F072CB)
 #  undef  STM32F051x                 /* Not STM32F051x family */
 #  define STM32F072x              1  /* STM32F072x family */
 
-#  ifdef CONFIG_ARCH_CHIP_SSTM32F072C8
+#  ifdef CONFIG_ARCH_CHIP_STM32F072C8
 #    define STM32F0_FLASH_SIZE    (64*1024)  /*  64Kb */
 #  else
 #    define STM32F0_FLASH_SIZE    (128*1024) /* 128Kb */
@@ -89,7 +89,7 @@
 #  define STM32F0_NUSART          4  /* Four USARTs module */
 #  define STM32F0_NCAN            1  /* One CAN controller */
 #  define STM32F0_NUSBDEV         1  /* One USB device controller */
-#  deifne STM32F0_NCEC            1  /* One HDMI-CEC controller */
+#  define STM32F0_NCEC            1  /* One HDMI-CEC controller */
 #  define STM32F0_NADC16          1  /* One 16-bit module */
 #  define STM32F0_NADCCHAN        10 /* Ten external channels */
 #  define STM32F0_NADCEXT         3  /* Three external channels */
@@ -99,11 +99,11 @@
 #  define STM32F0_NCAP            17 /* Capacitive sensing channels */
 #  define STM32F0_NPORTS          6  /* Six GPIO ports, GPIOA-F */
 
-#elif defined(CONFIG_ARCH_CHIP_SSTM32F072R8) || defined(CONFIG_ARCH_CHIP_SSTM32F072RB)
+#elif defined(CONFIG_ARCH_CHIP_STM32F072R8) || defined(CONFIG_ARCH_CHIP_STM32F072RB)
 #  undef  STM32F051x                 /* Not STM32F051x family */
 #  define STM32F072x              1  /* STM32F072x family */
 
-#  ifdef CONFIG_ARCH_CHIP_SSTM32F072C8
+#  ifdef CONFIG_ARCH_CHIP_STM32F072R8
 #    define STM32F0_FLASH_SIZE    (64*1024)  /*  64Kb */
 #  else
 #    define STM32F0_FLASH_SIZE    (128*1024) /* 128Kb */
@@ -120,7 +120,7 @@
 #  define STM32F0_NUSART          4  /* Four USARTs module */
 #  define STM32F0_NCAN            1  /* One CAN controller */
 #  define STM32F0_NUSBDEV         1  /* One USB device controller */
-#  deifne STM32F0_NCEC            1  /* One HDMI-CEC controller */
+#  define STM32F0_NCEC            1  /* One HDMI-CEC controller */
 #  define STM32F0_NADC16          1  /* One 16-bit module */
 #  define STM32F0_NADCCHAN        16 /* 16 external channels */
 #  define STM32F0_NADCEXT         3  /* Three external channels */
@@ -130,11 +130,11 @@
 #  define STM32F0_NCAP            18 /* Capacitive sensing channels */
 #  define STM32F0_NPORTS          6  /* Six GPIO ports, GPIOA-F */
 
-#elif defined(CONFIG_ARCH_CHIP_SSTM32F072V8) || defined(CONFIG_ARCH_CHIP_SSTM32F072VB)
+#elif defined(CONFIG_ARCH_CHIP_STM32F072V8) || defined(CONFIG_ARCH_CHIP_STM32F072VB)
 #  undef  STM32F051x                 /* Not STM32F051x family */
 #  define STM32F072x              1  /* STM32F072x family */
 
-#  ifdef CONFIG_ARCH_CHIP_SSTM32F072C8
+#  ifdef CONFIG_ARCH_CHIP_STM32F072V8
 #    define STM32F0_FLASH_SIZE    (64*1024)  /*  64Kb */
 #  else
 #    define STM32F0_FLASH_SIZE    (128*1024) /* 128Kb */
@@ -151,7 +151,7 @@
 #  define STM32F0_NUSART          4  /* Four USARTs module */
 #  define STM32F0_NCAN            1  /* One CAN controller */
 #  define STM32F0_NUSBDEV         1  /* One USB device controller */
-#  deifne STM32F0_NCEC            1  /* One HDMI-CEC controller */
+#  define STM32F0_NCEC            1  /* One HDMI-CEC controller */
 #  define STM32F0_NADC16          1  /* One 16-bit module */
 #  define STM32F0_NADCCHAN        16 /* 16 external channels */
 #  define STM32F0_NADCEXT         3  /* Three external channels */
