@@ -49,6 +49,25 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+/* Alternate Pin Functions.
+ *
+ * Alternative pin selections are provided with a numeric suffix like _1,
+ * _2, etc.  Drivers, however, will use the pin selection without the numeric
+ * suffix.  Additional definitions are required in the board.h file.  For
+ * example, if USART1_TX connects vis PA9 on some board, then the following
+ * definition should appear inthe board.h header file for that board:
+ *
+ * #define GPIO_USART1_TX GPIO_USART1_TX_1
+ *
+ * The driver will then automatically configre PD0 as the CAN1 RX pin.
+ */
+
+/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
+ * Additional effort is required to select specific GPIO options such as frequency,
+ * open-drain/push-pull, and pull-up/down!  Just the basics are defined for most
+ * pins in this file.
+ */
+
 /* ADC */
 
 #define GPIO_ADC_IN0        (GPIO_ANALOG|GPIO_PORTA|GPIO_PIN0)
@@ -74,13 +93,10 @@
 
 /* USART */
 
-#if defined(CONFIG_STM32F0_USART1_REMAP)
-#  define GPIO_USART1_TX    (GPIO_ALT|GPIO_AF0|GPIO_PORTB|GPIO_PIN6)
-#  define GPIO_USART1_RX    (GPIO_ALT|GPIO_AF0|GPIO_PORTB|GPIO_PIN7)
-#else
-#  define GPIO_USART1_TX    (GPIO_ALT|GPIO_AF1|GPIO_PORTA|GPIO_PIN9)
-#  define GPIO_USART1_RX    (GPIO_ALT|GPIO_AF1|GPIO_PORTA|GPIO_PIN10)
-#endif
+#define GPIO_USART1_TX_1    (GPIO_ALT|GPIO_AF1|GPIO_PORTA|GPIO_PIN9)
+#define GPIO_USART1_TX_2    (GPIO_ALT|GPIO_AF0|GPIO_PORTB|GPIO_PIN6)
+#define GPIO_USART1_RX_1    (GPIO_ALT|GPIO_AF1|GPIO_PORTA|GPIO_PIN10)
+#define GPIO_USART1_RX_2    (GPIO_ALT|GPIO_AF0|GPIO_PORTB|GPIO_PIN7)
 #define GPIO_USART1_CTS     (GPIO_ALT|GPIO_AF1|GPIO_PORTA|GPIO_PIN11)
 #define GPIO_USART1_RTS     (GPIO_ALT|GPIO_AF1|GPIO_PORTA|GPIO_PIN12)
 #define GPIO_USART1_CK      (GPIO_ALT|GPIO_AF1|GPIO_PORTA|GPIO_PIN8)
@@ -93,18 +109,14 @@
 
 /* SPI */
 
-#if defined(CONFIG_STM32F0_SPI1_REMAP)
-#  define GPIO_SPI1_NSS     (GPIO_ALT|GPIO_AF0|GPIO_PORTA|GPIO_PIN15)
-#  define GPIO_SPI1_SCK     (GPIO_ALT|GPIO_AF0|GPIO_PORTB|GPIO_PIN3)
-#  define GPIO_SPI1_MISO    (GPIO_ALT|GPIO_AF0|GPIO_PORTB|GPIO_PIN4)
-#  define GPIO_SPI1_MOSI    (GPIO_ALT|GPIO_AF0|GPIO_PORTB|GPIO_PIN5)
-#else
-#  define GPIO_SPI1_NSS     (GPIO_ALT|GPIO_AF0|GPIO_PORTA|GPIO_PIN4)
-#  define GPIO_SPI1_SCK     (GPIO_ALT|GPIO_AF0|GPIO_PORTA|GPIO_PIN5)
-#  define GPIO_SPI1_MISO    (GPIO_ALT|GPIO_AF0|GPIO_PORTA|GPIO_PIN6)
-#  define GPIO_SPI1_MOSI    (GPIO_ALT|GPIO_AF0|GPIO_PORTA|GPIO_PIN7)
-#endif
-
+#define GPIO_SPI1_NSS_1     (GPIO_ALT|GPIO_AF0|GPIO_PORTA|GPIO_PIN4)
+#define GPIO_SPI1_NSS_2     (GPIO_ALT|GPIO_AF0|GPIO_PORTA|GPIO_PIN15)
+#define GPIO_SPI1_SCK_1     (GPIO_ALT|GPIO_AF0|GPIO_PORTA|GPIO_PIN5)
+#define GPIO_SPI1_SCK_2     (GPIO_ALT|GPIO_AF0|GPIO_PORTB|GPIO_PIN3)
+#define GPIO_SPI1_MISO_1    (GPIO_ALT|GPIO_AF0|GPIO_PORTA|GPIO_PIN6)
+#define GPIO_SPI1_MISO_2    (GPIO_ALT|GPIO_AF0|GPIO_PORTB|GPIO_PIN4)
+#define GPIO_SPI1_MOSI_1    (GPIO_ALT|GPIO_AF0|GPIO_PORTA|GPIO_PIN7)
+#define GPIO_SPI1_MOSI_2    (GPIO_ALT|GPIO_AF0|GPIO_PORTB|GPIO_PIN5)
 #define GPIO_SPI2_NSS       (GPIO_ALT|GPIO_AF0|GPIO_PORTB|GPIO_PIN12)
 #define GPIO_SPI2_SCK       (GPIO_ALT|GPIO_AF0|GPIO_PORTB|GPIO_PIN13)
 #define GPIO_SPI2_MISO      (GPIO_ALT|GPIO_AF0|GPIO_PORTB|GPIO_PIN14)
@@ -112,13 +124,10 @@
 
 /* I2C */
 
-#if defined(CONFIG_STM32F0_I2C1_REMAP)
-#  define GPIO_I2C1_SCL     (GPIO_ALT|GPIO_AF1|GPIO_PORTB|GPIO_PIN8)
-#  define GPIO_I2C1_SDA     (GPIO_ALT|GPIO_AF1|GPIO_PORTB|GPIO_PIN9)
-#else
-#  define GPIO_I2C1_SCL     (GPIO_ALT|GPIO_AF1|GPIO_PORTB|GPIO_PIN6)
-#  define GPIO_I2C1_SDA     (GPIO_ALT|GPIO_AF1|GPIO_PORTB|GPIO_PIN7)
-#endif
+#define GPIO_I2C1_SCL_1     (GPIO_ALT|GPIO_AF1|GPIO_PORTB|GPIO_PIN6)
+#define GPIO_I2C1_SCL_2     (GPIO_ALT|GPIO_AF1|GPIO_PORTB|GPIO_PIN8)
+#define GPIO_I2C1_SDA_1     (GPIO_ALT|GPIO_AF1|GPIO_PORTB|GPIO_PIN7)
+#define GPIO_I2C1_SDA_2     (GPIO_ALT|GPIO_AF1|GPIO_PORTB|GPIO_PIN9)
 #define GPIO_I2C1_SMBA      (GPIO_ALT|GPIO_AF3|GPIO_PORTB|GPIO_PIN5)
 
 #define GPIO_I2C2_SCL       (GPIO_ALT|GPIO_AF1|GPIO_PORTB|GPIO_PIN10)

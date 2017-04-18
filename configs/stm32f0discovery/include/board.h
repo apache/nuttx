@@ -234,5 +234,9 @@
 #define BUTTON_USER_BIT          (1 << BUTTON_USER)
 
 /* Alternate Pin Functions **********************************************************/
+/* USART 1 */
+
+#define GPIO_USART1_TX           GPIO_USART1_TX_1
+#define GPIO_USART1_RX           GPIO_USART1_RX_1
 
 #endif  /* __CONFIG_STM32F0DISCOVERY_INCLUDE_BOARD_H */
