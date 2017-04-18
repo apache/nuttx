@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32f0/chip/stm32f0_memorymap.h
+ * configs/nucleo-f072rb/src/stm32f0_boot.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,20 +34,61 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0_CHIP_STM32F0_MEMORYMAP_H
-#define __ARCH_ARM_SRC_STM32F0_CHIP_STM32F0_MEMORYMAP_H
-
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip.h"
 
-#if defined(CONFIG_STM32F0_STM32F05X) || defined(CONFIG_STM32F0_STM32F07X)
-#  include "chip/stm32f05xf07x_memorymap.h"
-#else
-#  error "Unsupported STM32 memory map"
+#include <debug.h>
+
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
+#include "up_arch.h"
+#include "nucleo-f072rb.h"
+
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
+
+/************************************************************************************
+ * Name: stm32f0_boardinitialize
+ *
+ * Description:
+ *   All STM32 architectures must provide the following entry point.  This entry point
+ *   is called early in the intitialization -- after all memory has been configured
+ *   and mapped but before any devices have been initialized.
+ *
+ ************************************************************************************/
+
+void stm32f0_boardinitialize(void)
+{
+#ifdef CONFIG_ARCH_LEDS
+  /* Configure on-board LEDs if LED support has been selected. */
+
+  board_autoled_initialize();
 #endif
+}
 
-#endif /* __ARCH_ARM_SRC_STM32F0_CHIP_STM32F0_MEMORYMAP_H */
+/****************************************************************************
+ * Name: board_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_initialize().  board_initialize() will be
+ *   called immediately after up_initialize() is called and just before the
+ *   initial application is started.  This additional initialization phase
+ *   may be used, for example, to initialize board-specific device drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_INITIALIZE
+void board_initialize(void)
+{
+  /* Perform board-specific initialization here if so configured */
+
+  (void)stm32_bringup();
+}
+#endif

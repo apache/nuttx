@@ -1,8 +1,8 @@
 /************************************************************************************
- * arch/arm/src/stm32f0/chip/stm32f0_pinmap.h
+ * arch/arm/src/stm32f0/stm32f0_start.h
  *
- *   Copyright (C) 2015 Sebastien Lorquet. All rights reserved.
- *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,23 +33,44 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0_CHIP_STM32F0_PINMAP_H
-#define __ARCH_ARM_SRC_STM32F0_CHIP_STM32F0_PINMAP_H
+#ifndef __ARCH_ARM_SRC_STM32F0_STM32F0_START_H
+#define __ARCH_ARM_SRC_STM32F0_STM32F0_START_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip.h"
 
-#if defined(CONFIG_STM32F0_STM32F05X)
-#  include "chip/stm32f05x_pinmap.h"
-#elif defined(CONFIG_STM32F0_STM32F07X)
-#  include "chip/stm32f07x_pinmap.h"
-#else
-#  error "Unsupported STM32F0 pin map"
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+#ifdef __cplusplus
+extern "C"
+{
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32F0_CHIP_STM32F0_PINMAP_H */
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
 
+/************************************************************************************
+ * Name: stm32f0_boardinitialize
+ *
+ * Description:
+ *   All STM32 architectures must provide the following entry point.  This entry
+ *   point is called early in the intitialization -- after all memory has been
+ *   configured and mapped but before any devices have been initialized.
+ *
+ ************************************************************************************/
+
+void stm32f0_boardinitialize(void);
+
+#ifdef __cplusplus
+}
+#endif
+#endif /* __ASSEMBLY__ */
+
+#endif /* __ARCH_ARM_SRC_STM32F0_STM32F0_START_H */

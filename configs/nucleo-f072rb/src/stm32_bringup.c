@@ -1,8 +1,8 @@
-/************************************************************************************
- * arch/arm/src/stm32f0/chip/stm32f0_pinmap.h
+/****************************************************************************
+ * config/nucleo-f072rb/src/stm32_bringup.c
  *
- *   Copyright (C) 2015 Sebastien Lorquet. All rights reserved.
- *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,25 +31,51 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0_CHIP_STM32F0_PINMAP_H
-#define __ARCH_ARM_SRC_STM32F0_CHIP_STM32F0_PINMAP_H
-
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip.h"
 
-#if defined(CONFIG_STM32F0_STM32F05X)
-#  include "chip/stm32f05x_pinmap.h"
-#elif defined(CONFIG_STM32F0_STM32F07X)
-#  include "chip/stm32f07x_pinmap.h"
-#else
-#  error "Unsupported STM32F0 pin map"
+#include <sys/mount.h>
+#include <sys/types.h>
+
+#include "nucleo-f072rb.h"
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
+ *
+ *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
+ *
+ ****************************************************************************/
+
+int stm32_bringup(void)
+{
+  int ret;
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32F0_CHIP_STM32F0_PINMAP_H */
-
+  UNUSED(ret);
+  return OK;
+}

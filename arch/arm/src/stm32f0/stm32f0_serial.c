@@ -84,7 +84,7 @@
 
 /* If DMA is enabled on any USART, then very that other pre-requisites
  * have also been selected.
- * UART DMA1 DMA2
+ * USART DMA1 DMA2
  *    1  X    X
  *    2  X
  *    3  X
@@ -105,7 +105,7 @@
 
 #  if defined(CONFIG_USART4_RXDMA) || defined(CONFIG_USART5_RXDMA)
 #    ifndef CONFIG_STM32F0_DMA2
-#      error STM32F0 UART4/5 receive DMA requires CONFIG_STM32F0_DMA2
+#      error STM32F0 USART4/5 receive DMA requires CONFIG_STM32F0_DMA2
 #    endif
 #  endif
 
@@ -130,7 +130,7 @@
 #    error "USART1 DMA channel not defined (DMAMAP_USART1_RX)"
 #  endif
 
-/* UART2-5 have no alternate channels */
+/* USART2-5 have no alternate channels */
 
 #  define DMAMAP_USART2_RX  DMACHAN_USART2_RX
 #  define DMAMAP_USART3_RX  DMACHAN_USART3_RX
@@ -196,7 +196,7 @@
 #endif
 
 #ifdef USE_SERIALDRIVER
-#ifdef HAVE_UART
+#ifdef HAVE_USART
 
 /****************************************************************************
  * Private Types
@@ -204,7 +204,7 @@
 
 struct stm32f0_serial_s
 {
-  struct uart_dev_s dev;       /* Generic UART device */
+  struct uart_dev_s dev;       /* Generic USART device */
   uint16_t          ie;        /* Saved interrupt mask bits value */
   uint16_t          sr;        /* Saved status bits */
 
@@ -387,18 +387,18 @@ static char g_usart3rxfifo[RXDMA_BUFFER_SIZE];
 #endif
 
 #ifdef CONFIG_STM32F0_USART4
-static char g_uart4rxbuffer[CONFIG_USART4_RXBUFSIZE];
-static char g_uart4txbuffer[CONFIG_USART4_TXBUFSIZE];
+static char g_usart4rxbuffer[CONFIG_USART4_RXBUFSIZE];
+static char g_usart4txbuffer[CONFIG_USART4_TXBUFSIZE];
 # ifdef CONFIG_USART4_RXDMA
-static char g_uart4rxfifo[RXDMA_BUFFER_SIZE];
+static char g_usart4rxfifo[RXDMA_BUFFER_SIZE];
 # endif
 #endif
 
 #ifdef CONFIG_STM32F0_USART5
-static char g_uart5rxbuffer[CONFIG_USART5_RXBUFSIZE];
-static char g_uart5txbuffer[CONFIG_USART5_TXBUFSIZE];
+static char g_usart5rxbuffer[CONFIG_USART5_RXBUFSIZE];
+static char g_usart5txbuffer[CONFIG_USART5_TXBUFSIZE];
 # ifdef CONFIG_USART5_RXDMA
-static char g_uart5rxfifo[RXDMA_BUFFER_SIZE];
+static char g_usart5rxfifo[RXDMA_BUFFER_SIZE];
 # endif
 #endif
 
@@ -585,10 +585,10 @@ static struct stm32f0_serial_s g_usart3priv =
 };
 #endif
 
-/* This describes the state of the STM32 UART4 port. */
+/* This describes the state of the STM32 USART4 port. */
 
 #ifdef CONFIG_STM32F0_USART4
-static struct stm32f0_serial_s g_uart4priv =
+static struct stm32f0_serial_s g_usart4priv =
 {
   .dev =
     {
@@ -598,19 +598,19 @@ static struct stm32f0_serial_s g_uart4priv =
       .recv      =
       {
         .size    = CONFIG_USART4_RXBUFSIZE,
-        .buffer  = g_uart4rxbuffer,
+        .buffer  = g_usart4rxbuffer,
       },
       .xmit      =
       {
         .size    = CONFIG_USART4_TXBUFSIZE,
-        .buffer  = g_uart4txbuffer,
+        .buffer  = g_usart4txbuffer,
       },
 #ifdef CONFIG_USART4_RXDMA
       .ops       = &g_uart_dma_ops,
 #else
       .ops       = &g_uart_ops,
 #endif
-      .priv      = &g_uart4priv,
+      .priv      = &g_usart4priv,
     },
 
   .irq           = STM32F0_IRQ_USART4,
@@ -636,7 +636,7 @@ static struct stm32f0_serial_s g_uart4priv =
 #endif
 #ifdef CONFIG_USART4_RXDMA
   .rxdma_channel = DMAMAP_USART4_RX,
-  .rxfifo        = g_uart4rxfifo,
+  .rxfifo        = g_usart4rxfifo,
 #endif
 
 #ifdef CONFIG_USART4_RS485
@@ -650,10 +650,10 @@ static struct stm32f0_serial_s g_uart4priv =
 };
 #endif
 
-/* This describes the state of the STM32 UART5 port. */
+/* This describes the state of the STM32 USART5 port. */
 
 #ifdef CONFIG_STM32F0_USART5
-static struct stm32f0_serial_s g_uart5priv =
+static struct stm32f0_serial_s g_usart5priv =
 {
   .dev =
     {
@@ -663,19 +663,19 @@ static struct stm32f0_serial_s g_uart5priv =
       .recv     =
       {
         .size   = CONFIG_USART5_RXBUFSIZE,
-        .buffer = g_uart5rxbuffer,
+        .buffer = g_usart5rxbuffer,
       },
       .xmit     =
       {
         .size   = CONFIG_USART5_TXBUFSIZE,
-        .buffer = g_uart5txbuffer,
+        .buffer = g_usart5txbuffer,
       },
 #ifdef CONFIG_USART5_RXDMA
       .ops      = &g_uart_dma_ops,
 #else
       .ops      = &g_uart_ops,
 #endif
-      .priv     = &g_uart5priv,
+      .priv     = &g_usart5priv,
     },
 
   .irq            = STM32F0_IRQ_USART5,
@@ -701,7 +701,7 @@ static struct stm32f0_serial_s g_uart5priv =
 #endif
 #ifdef CONFIG_USART5_RXDMA
   .rxdma_channel = DMAMAP_USART5_RX,
-  .rxfifo        = g_uart5rxfifo,
+  .rxfifo        = g_usart5rxfifo,
 #endif
 
 #ifdef CONFIG_USART5_RS485
@@ -729,10 +729,10 @@ FAR static struct stm32f0_serial_s * const uart_devs[STM32F0_NUSART] =
   [2] = &g_usart3priv,
 #endif
 #ifdef CONFIG_STM32F0_USART4
-  [3] = &g_uart4priv,
+  [3] = &g_usart4priv,
 #endif
 #ifdef CONFIG_STM32F0_USART5
-  [4] = &g_uart5priv,
+  [4] = &g_usart5priv,
 #endif
 };
 
@@ -1010,7 +1010,7 @@ static void stm32f0serial_setformat(FAR struct uart_dev_s *dev)
  *   Enable or disable APB clock for the USART peripheral
  *
  * Input parameters:
- *   dev - A reference to the UART driver state structure
+ *   dev - A reference to the USART driver state structure
  *   on  - Enable clock if 'on' is 'true' and disable if 'false'
  *
  ****************************************************************************/
@@ -1035,26 +1035,26 @@ static void stm32f0serial_setapbclock(FAR struct uart_dev_s *dev, bool on)
 #endif
 #ifdef CONFIG_STM32F0_USART2
     case STM32F0_USART2_BASE:
-      rcc_en = RCC_APB1ENR1_USART2EN;
-      regaddr = STM32F0_RCC_APB1ENR1;
+      rcc_en = RCC_APB1ENR_USART2EN;
+      regaddr =STM32F0_RCC_APB1ENR;
       break;
 #endif
 #ifdef CONFIG_STM32F0_USART3
     case STM32F0_USART3_BASE:
-      rcc_en = RCC_APB1ENR1_USART3EN;
-      regaddr = STM32F0_RCC_APB1ENR1;
+      rcc_en = RCC_APB1ENR_USART3EN;
+      regaddr =STM32F0_RCC_APB1ENR;
       break;
 #endif
 #ifdef CONFIG_STM32F0_USART4
     case STM32F0_USART4_BASE:
-      rcc_en = RCC_APB1ENR1_USART4EN;
-      regaddr = STM32F0_RCC_APB1ENR1;
+      rcc_en = RCC_APB1ENR_USART4EN;
+      regaddr =STM32F0_RCC_APB1ENR;
       break;
 #endif
 #ifdef CONFIG_STM32F0_USART5
     case STM32F0_USART5_BASE:
-      rcc_en = RCC_APB1ENR1_USART5EN;
-      regaddr = STM32F0_RCC_APB1ENR1;
+      rcc_en = RCC_APB1ENR_USART5EN;
+      regaddr =STM32F0_RCC_APB1ENR;
       break;
 #endif
     }
@@ -1196,7 +1196,7 @@ static int stm32f0serial_dmasetup(FAR struct uart_dev_s *dev)
   int result;
   uint32_t regval;
 
-  /* Do the basic UART setup first, unless we are the console */
+  /* Do the basic USART setup first, unless we are the console */
 
   if (!dev->isconsole)
     {
@@ -1240,7 +1240,7 @@ static int stm32f0serial_dmasetup(FAR struct uart_dev_s *dev)
 
   priv->rxdmanext = 0;
 
-  /* Enable receive DMA for the UART */
+  /* Enable receive DMA for the USART */
 
   regval  = stm32f0serial_getreg(priv, STM32F0_USART_CR3_OFFSET);
   regval |= USART_CR3_DMAR;
@@ -1295,7 +1295,7 @@ static void stm32f0serial_shutdown(FAR struct uart_dev_s *dev)
 
   stm32f0serial_setapbclock(dev, false);
 
-  /* Disable Rx, Tx, and the UART */
+  /* Disable Rx, Tx, and the USART */
 
   regval  = stm32f0serial_getreg(priv, STM32F0_USART_CR1_OFFSET);
   regval &= ~(USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
@@ -1348,7 +1348,7 @@ static void stm32f0serial_dmashutdown(FAR struct uart_dev_s *dev)
 {
   FAR struct stm32f0_serial_s *priv = (FAR struct stm32f0_serial_s *)dev->priv;
 
-  /* Perform the normal UART shutdown */
+  /* Perform the normal USART shutdown */
 
   stm32f0serial_shutdown(dev);
 
@@ -1880,11 +1880,11 @@ static bool stm32f0serial_rxavailable(FAR struct uart_dev_s *dev)
  * Description:
  *   Called when Rx buffer is full (or exceeds configured watermark levels
  *   if CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS is defined).
- *   Return true if UART activated RX flow control to block more incoming
+ *   Return true if USART activated RX flow control to block more incoming
  *   data
  *
  * Input parameters:
- *   dev       - UART device instance
+ *   dev       - USART device instance
  *   nbuffered - the number of characters currently buffered
  *               (if CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS is
  *               not defined the value will be 0 for an empty buffer or the
@@ -1924,7 +1924,7 @@ static bool stm32f0serial_rxflowcontrol(FAR struct uart_dev_s *dev,
            * peripheral.  When hardware RTS is enabled, this will
            * prevent more data from coming in.
            *
-           * This function is only called when UART recv buffer is full,
+           * This function is only called when USART recv buffer is full,
            * that is: "dev->recv.head + 1 == dev->recv.tail".
            *
            * Logic in "uart_read" will automatically toggle Rx interrupts
@@ -2327,7 +2327,7 @@ static int stm32f0serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
   return OK;
 }
 #endif
-#endif /* HAVE_UART */
+#endif /* HAVE_USART */
 #endif /* USE_SERIALDRIVER */
 
 /****************************************************************************
@@ -2349,7 +2349,7 @@ static int stm32f0serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
 #ifdef USE_EARLYSERIALINIT
 void up_earlyserialinit(void)
 {
-#ifdef HAVE_UART
+#ifdef HAVE_USART
   unsigned i;
 
   /* Disable all USART interrupts */
@@ -2367,7 +2367,7 @@ void up_earlyserialinit(void)
 #if CONSOLE_USART > 0
   stm32f0serial_setup(&uart_devs[CONSOLE_USART - 1]->dev);
 #endif
-#endif /* HAVE UART */
+#endif /* HAVE USART */
 }
 #endif
 
@@ -2382,7 +2382,7 @@ void up_earlyserialinit(void)
 
 void up_serialinit(void)
 {
-#ifdef HAVE_UART
+#ifdef HAVE_USART
   char devname[16];
   unsigned i;
   unsigned minor = 0;
@@ -2404,7 +2404,7 @@ void up_serialinit(void)
   (void)uart_register("/dev/console", &uart_devs[CONSOLE_USART - 1]->dev);
 
 #ifndef CONFIG_SERIAL_DISABLE_REORDERING
-  /* If not disabled, register the console UART to ttyS0 and exclude
+  /* If not disabled, register the console USART to ttyS0 and exclude
    * it from initializing it further down
    */
 
@@ -2446,7 +2446,7 @@ void up_serialinit(void)
       devname[9] = '0' + minor++;
       (void)uart_register(devname, &uart_devs[i]->dev);
     }
-#endif /* HAVE UART */
+#endif /* HAVE USART */
 }
 
 /****************************************************************************
@@ -2489,16 +2489,16 @@ void stm32f0serial_dmapoll(void)
 #endif
 
 #ifdef CONFIG_USART4_RXDMA
-  if (g_uart4priv.rxdma != NULL)
+  if (g_usart4priv.rxdma != NULL)
     {
-      stm32f0serial_dmarxcallback(g_uart4priv.rxdma, 0, &g_uart4priv);
+      stm32f0serial_dmarxcallback(g_usart4priv.rxdma, 0, &g_usart4priv);
     }
 #endif
 
 #ifdef CONFIG_USART5_RXDMA
-  if (g_uart5priv.rxdma != NULL)
+  if (g_usart5priv.rxdma != NULL)
     {
-      stm32f0serial_dmarxcallback(g_uart5priv.rxdma, 0, &g_uart5priv);
+      stm32f0serial_dmarxcallback(g_usart5priv.rxdma, 0, &g_usart5priv);
     }
 #endif
 

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32f0/chip/stm32f05xxx_memorymap.h
+ * arch/arm/src/stm32f0/chip/stm32f05xf07x_memorymap.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,14 +34,14 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0_CHIP_STM32F05XXX_MEMORYMAP_H
-#define __ARCH_ARM_SRC_STM32F0_CHIP_STM32F05XXX_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_STM32F0_CHIP_ST32F05XF07X_MEMORYMAP_H
+#define __ARCH_ARM_SRC_STM32F0_CHIP_ST32F05XF07X_MEMORYMAP_H
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* STM32F050XXX Address Blocks *******************************************************/
+/* ST32F05XF07X Address Blocks ******************************************************/
 
 #define STM32F0_CODE_BASE      0x00000000     /* 0x00000000-0x1fffffff: 512Mb code block */
 #define STM32F0_SRAM_BASE      0x20000000     /* 0x20000000-0x3fffffff: 512Mb sram block */
@@ -154,4 +154,4 @@
 #define STM32F0_SCS_BASE      0xe000e000
 #define STM32F0_DEBUGMCU_BASE 0xe0042000
 
-#endif /* __ARCH_ARM_SRC_STM32F0_CHIP_STM32F30XXX_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_STM32F0_CHIP_ST32F05XF07X_MEMORYMAP_H */

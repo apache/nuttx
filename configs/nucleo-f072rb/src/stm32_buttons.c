@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/arm/src/stm32f0/stm32f0_clockconfig.c
+ * configs/nucleo-f072rb/src/stm32_buttons.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,82 +40,87 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <debug.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
-#include "stm32f0_rcc.h"
-#include "stm32f0_clockconfig.h"
-#include "chip/stm32f0_syscfg.h"
-#include "chip/stm32f0_gpio.h"
+#include "nucleo-f072rb.h"
+
+#ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32f0_clockconfig
+ * Name: board_button_initialize
  *
  * Description:
- *   Called to initialize the STM32F0xx.  This does whatever setup is needed
- *   to put the SoC in a usable state.  This includes the initialization of
- *   clocking using the settings in board.h.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  ****************************************************************************/
 
-void stm32f0_clockconfig(void)
+void board_button_initialize(void)
 {
-  uint32_t regval;
+  /* Configure the single button as an input.  NOTE that EXTI interrupts are
+   * also configured for the pin.
+   */
 
-  /*  Verify if PLL is already setup.  If so configure to use HSI mode */
+  stm32_configgpio(GPIO_BTN_USER);
+}
 
-  if ((getreg32(STM32F0_RCC_CFGR) & RCC_CFGR_SWS_MASK) == RCC_CFGR_SWS_PLL)
+/****************************************************************************
+ * Name: board_buttons
+ ****************************************************************************/
+
+uint32_t board_buttons(void)
+{
+  /* Check that state of each USER button. A LOW value means that the key is
+   * pressed.
+   */
+
+  bool released = stm32_gpioread(GPIO_BTN_USER);
+  return !released;
+}
+
+/************************************************************************************
+ * Button support.
+ *
+ * Description:
+ *   board_button_initialize() must be called to initialize button resources.  After
+ *   that, board_buttons() may be called to collect the current state of all
+ *   buttons or board_button_irq() may be called to register button interrupt
+ *   handlers.
+ *
+ *   After board_button_initialize() has been called, board_buttons() may be called to
+ *   collect the state of all buttons.  board_buttons() returns an 32-bit bit set
+ *   with each bit associated with a button.  See the BUTTON_*_BIT
+ *   definitions in board.h for the meaning of each bit.
+ *
+ *   board_button_irq() may be called to register an interrupt handler that will
+ *   be called when a button is depressed or released.  The ID value is a
+ *   button enumeration value that uniquely identifies a button resource. See the
+ *   BUTTON_* definitions in board.h for the meaning of enumeration
+ *   value.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_IRQBUTTONS
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+{
+  int ret = -EINVAL;
+
+  if (id == BUTTON_USER)
     {
-      /* Select HSI mode */
-
-      regval  = getreg32(STM32F0_RCC_CFGR);
-      regval &= ~RCC_CFGR_SW_MASK;
-      putreg32(regval, STM32F0_RCC_CFGR);
-
-      while ((getreg32(STM32F0_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_HSI);
+      ret = stm32_gpiosetevent(GPIO_BTN_USER, true, true, true, irqhandler, arg);
     }
 
-  /* Disable the PLL */
-
-  regval  = getreg32(STM32F0_RCC_CR);
-  regval &= ~RCC_CR_PLLON;
-  putreg32(regval, STM32F0_RCC_CR);
-  while ((getreg32(STM32F0_RCC_CR) & RCC_CR_PLLRDY) != 0);
-
-  /* Configure the PLL. Multiply the HSI to get System Clock */
-
-  regval  = getreg32(STM32F0_RCC_CFGR);
-  regval &= ~RCC_CFGR_PLLMUL_MASK;
-  regval |= STM32F0_CFGR_PLLMUL;
-  putreg32(regval, STM32F0_RCC_CFGR);
-
-  /* Enable the PLL */
-
-  regval  = getreg32(STM32F0_RCC_CR);
-  regval |= RCC_CR_PLLON;
-  putreg32(regval, STM32F0_RCC_CR);
-  while ((getreg32(STM32F0_RCC_CR) & RCC_CR_PLLRDY) == 0);
-
-  /* Configure to use the PLL */
-
-  regval  = getreg32(STM32F0_RCC_CFGR);
-  regval |= RCC_CFGR_SW_PLL;
-  putreg32(regval, STM32F0_RCC_CFGR);
-  while ((getreg32(STM32F0_RCC_CFGR) & RCC_CFGR_SW_MASK) != RCC_CFGR_SW_PLL);
-
-  /* Enable basic peripheral support */
-  /* Enable all GPIO modules */
-
-  regval  = getreg32(STM32F0_RCC_AHBENR);
-  regval |= RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN |\
-            RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN;
-  putreg32(regval, STM32F0_RCC_AHBENR);
+  return ret;
 }
+#endif
+#endif /* CONFIG_ARCH_BUTTONS */

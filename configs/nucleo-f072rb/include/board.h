@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/stm32f0discovery/include/board.h
+ * configs/nucleo-f072rb/include/board.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIG_STM32F0DISCOVERY_INCLUDE_BOARD_H
-#define __CONFIG_STM32F0DISCOVERY_INCLUDE_BOARD_H
+#ifndef __CONFIG_NUCLEO_F072RB_INCLUDE_BOARD_H
+#define __CONFIG_NUCLEO_F072RB_INCLUDE_BOARD_H
 
 /************************************************************************************
  * Included Files
@@ -58,7 +58,7 @@
  *   Generated from an internal 8 MHz RC oscillator
  * - HSE high-speed external oscillator clock
  *   Normally driven by an external crystal (X3).  However, this crystal is not
- *   fitted on the STM32F0-Discovery board.
+ *   fitted on the Nucleo-F072RB board.
  * - PLL clock
  * - MSI multispeed internal oscillator clock
  *   The MSI clock signal is generated from an internal RC oscillator. Seven frequency
@@ -165,78 +165,77 @@
 #define STM32F0_APB1_TIM17_CLKIN   (STM32F0_PCLK1_FREQUENCY)
 
 /* LED definitions ******************************************************************/
-/* The STM32F0-Discovery board has four LEDs.  Two of these are controlled by
- * logic on the board and are not available for software control:
+/* LEDs
  *
- * LD1 COM:   LD2 default status is red. LD2 turns to green to indicate that
- *            communications are in progress between the PC and the ST-LINK/V2.
- * LD2 PWR:   Red LED indicates that the board is powered.
+ * The Nucleo-64 board has one user controlable LED, User LD2.  This green
+ * LED is a user LED connected to Arduino signal D13 corresponding to STM32
+ * I/O PA5 (PB13 on other some other Nucleo-64 boards).
  *
- * And two LEDs can be controlled by software:
- *
- * User LD3:  Green LED is a user LED connected to the I/O PB7 of the STM32F051R8
- *            MCU.
- * User LD4:  Blue LED is a user LED connected to the I/O PB6 of the STM32F051R8
- *            MCU.
- *
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
- * way.  The following definitions are used to access individual LEDs.
+ *   - When the I/O is HIGH value, the LED is on
+ *   - When the I/O is LOW, the LED is off
  */
 
 /* LED index values for use with board_userled() */
 
-#define BOARD_LED1               0 /* User LD3 */
-#define BOARD_LED2               1 /* User LD4 */
-#define BOARD_NLEDS              2
+#define BOARD_LD2         0
+#define BOARD_NLEDS       1
 
 /* LED bits for use with board_userled_all() */
 
-#define BOARD_LED1_BIT           (1 << BOARD_LED1)
-#define BOARD_LED2_BIT           (1 << BOARD_LED2)
+#define BOARD_LD2_BIT     (1 << BOARD_LD2)
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 8 LEDs on board the
- * STM32F0-Discovery.  The following definitions describe how NuttX controls the LEDs:
+/* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+ * defined.  In that case, the usage by the board port is defined in
+ * include/board.h and src/sam_leds.c. The LEDs are used to encode OS-related
+ * events as follows when the red LED (PE24) is available:
  *
- *   SYMBOL                Meaning                 LED state
- *                                                   LED1     LED2
- *   -------------------  -----------------------  -------- --------
- *   LED_STARTED          NuttX has been started     OFF      OFF
- *   LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF
- *   LED_IRQSENABLED      Interrupts enabled         OFF      OFF
- *   LED_STACKCREATED     Idle stack created         ON       OFF
- *   LED_INIRQ            In an interrupt              No change
- *   LED_SIGNAL           In a signal handler          No change
- *   LED_ASSERTION        An assertion failed          No change
- *   LED_PANIC            The system has crashed     OFF      Blinking
- *   LED_IDLE             STM32 is is sleep mode       Not used
+ *   SYMBOL                Meaning                   LD2
+ *   -------------------  -----------------------  -----------
+ *   LED_STARTED          NuttX has been started     OFF
+ *   LED_HEAPALLOCATE     Heap has been allocated    OFF
+ *   LED_IRQSENABLED      Interrupts enabled         OFF
+ *   LED_STACKCREATED     Idle stack created         ON
+ *   LED_INIRQ            In an interrupt            No change
+ *   LED_SIGNAL           In a signal handler        No change
+ *   LED_ASSERTION        An assertion failed        No change
+ *   LED_PANIC            The system has crashed     Blinking
+ *   LED_IDLE             MCU is is sleep mode       Not used
+ *
+ * Thus if LD2, NuttX has successfully booted and is, apparently, running
+ * normally.  If LD2 is flashing at approximately 2Hz, then a fatal error
+ * has been detected and the system has halted.
  */
 
-#define LED_STARTED              0
-#define LED_HEAPALLOCATE         0
-#define LED_IRQSENABLED          0
-#define LED_STACKCREATED         1
-#define LED_INIRQ                2
-#define LED_SIGNAL               2
-#define LED_ASSERTION            2
-#define LED_PANIC                3
+#define LED_STARTED      0
+#define LED_HEAPALLOCATE 0
+#define LED_IRQSENABLED  0
+#define LED_STACKCREATED 1
+#define LED_INIRQ        2
+#define LED_SIGNAL       2
+#define LED_ASSERTION    2
+#define LED_PANIC        1
 
 /* Button definitions ***************************************************************/
-/* The STM32F0-Discovery supports two buttons; only one button is controllable by
- * software:
+/* Buttons
  *
- *   B1 USER: user and wake-up button connected to the I/O PA0 of the STM32F051R8.
- *   B2 RESET: pushbutton connected to NRST is used to RESET the STM32F051R8.
+ *   B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
+ *   microcontroller.
  */
 
-#define BUTTON_USER              0
-#define NUM_BUTTONS              1
+#define BUTTON_USER        0
+#define NUM_BUTTONS        1
 
-#define BUTTON_USER_BIT          (1 << BUTTON_USER)
+#define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
 /* Alternate Pin Functions **********************************************************/
 /* USART 1 */
 
-#define GPIO_USART1_TX           GPIO_USART1_TX_1
-#define GPIO_USART1_RX           GPIO_USART1_RX_1
+#define GPIO_USART1_TX           GPIO_USART1_TX_2
+#define GPIO_USART1_RX           GPIO_USART1_RX_2
 
-#endif  /* __CONFIG_STM32F0DISCOVERY_INCLUDE_BOARD_H */
+/* USART 2 */
+
+#define GPIO_USART2_TX           GPIO_USART2_TX_3
+#define GPIO_USART2_RX           GPIO_USART2_RX_3
+
+#endif  /* __CONFIG_NUCLEO_F072RB_INCLUDE_BOARD_H */

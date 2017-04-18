@@ -132,6 +132,12 @@
 #define ADC_MAX_CHANNELS_NODMA 1
 
 #ifdef ADC_HAVE_DMA
+#  ifndef CONFIG_STM32F7_DMA2
+#    error "STM32F7 ADC DMA support requires CONFIG_STM32F7_DMA2"
+#  endif
+#endif
+
+#ifdef ADC_HAVE_DMA
 #  define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_DMA
 #else
 #  define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_NODMA
@@ -1133,7 +1139,7 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
 
       for (i = 0; i < priv->nchannels; i++)
         {
-          priv->cb->au_receive(dev, priv->current, priv->dmabuffer[priv->current]);
+          priv->cb->au_receive(dev, priv->chanlist[priv->current], priv->dmabuffer[priv->current]);
           priv->current++;
           if (priv->current >= priv->nchannels)
             {
@@ -1271,12 +1277,12 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   /* ADC CCR configuration */
 
-  clrbits  = ADC_CCR_ADCPRE_MASK | ADC_CCR_TSVREFE;
-  setbits  = ADC_CCR_ADCPRE_DIV;
+  clrbits = ADC_CCR_ADCPRE_MASK | ADC_CCR_TSVREFE;
+  setbits = ADC_CCR_ADCPRE_DIV;
 
   if (adc_internal(priv))
     {
-      setbits  = ADC_CCR_TSVREFE;
+      setbits |= ADC_CCR_TSVREFE;
     }
 
   clrbits |= ADC_CCR_MULTI_MASK | ADC_CCR_DELAY_MASK | ADC_CCR_DDS |
@@ -1325,11 +1331,11 @@ static void adc_reset(FAR struct adc_dev_s *dev)
           aerr("ERROR: adc_timinit failed: %d\n", ret);
         }
     }
-#ifndef CONFIG_ADC_NO_STARTUP_CONV
+#ifndef CONFIG_STM32F7_ADC_NO_STARTUP_CONV
   else
 #endif
 #endif
-#ifndef CONFIG_ADC_NO_STARTUP_CONV
+#ifndef CONFIG_STM32F7_ADC_NO_STARTUP_CONV
     {
       adc_startconv(priv, true);
     }
@@ -1721,7 +1727,7 @@ static int adc123_interrupt(int irq, FAR void *context, FAR void *arg)
  *   cchannels - Number of channels
  *
  * Returned Value:
- *   Valid ADC device structure reference on succcess; a NULL on failure
+ *   Valid ADC device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

@@ -474,11 +474,10 @@ config STM32F0_VALUELINE
 	select STM32F0_HAVE_USART4
 	select STM32F0_HAVE_USART5
 	select STM32F0_HAVE_TIM1
-	select STM32F0_HAVE_TIM5
+	select STM32F0_HAVE_TIM2
+	select STM32F0_HAVE_TIM3
 	select STM32F0_HAVE_TIM6
 	select STM32F0_HAVE_TIM7
-	select STM32F0_HAVE_TIM12
-	select STM32F0_HAVE_TIM13
 	select STM32F0_HAVE_TIM14
 	select STM32F0_HAVE_TIM15
 	select STM32F0_HAVE_TIM16
@@ -489,46 +488,62 @@ config STM32F0_VALUELINE
 config STM32F0_ACCESSLINE
 	bool
 	default n
-	select STM32F0_HAVE_OTGFS
 	select STM32F0_HAVE_USART3
 	select STM32F0_HAVE_USART4
 	select STM32F0_HAVE_USART5
 	select STM32F0_HAVE_TIM1
-	select STM32F0_HAVE_TIM5
+	select STM32F0_HAVE_TIM2
+	select STM32F0_HAVE_TIM3
 	select STM32F0_HAVE_TIM6
 	select STM32F0_HAVE_TIM7
+	select STM32F0_HAVE_TIM14
+	select STM32F0_HAVE_TIM15
+	select STM32F0_HAVE_TIM16
+	select STM32F0_HAVE_TIM17
 	select STM32F0_HAVE_ADC2
 	select STM32F0_HAVE_CAN1
-	select STM32F0_HAVE_CAN2
-	select STM32F0_HAVE_ETHMAC
 	select STM32F0_HAVE_SPI2
 	select STM32F0_HAVE_SPI3
 
 config STM32F0_LOWVOLTLINE
 	bool
 	default n
-	select STM32F0_HAVE_OTGFS
 	select STM32F0_HAVE_USART3
 	select STM32F0_HAVE_USART4
 	select STM32F0_HAVE_USART5
 	select STM32F0_HAVE_TIM1
-	select STM32F0_HAVE_TIM5
+	select STM32F0_HAVE_TIM2
+	select STM32F0_HAVE_TIM3
 	select STM32F0_HAVE_TIM6
 	select STM32F0_HAVE_TIM7
+	select STM32F0_HAVE_TIM14
+	select STM32F0_HAVE_TIM15
+	select STM32F0_HAVE_TIM16
+	select STM32F0_HAVE_TIM17
 	select STM32F0_HAVE_ADC2
 	select STM32F0_HAVE_CAN1
-	select STM32F0_HAVE_CAN2
-	select STM32F0_HAVE_ETHMAC
 	select STM32F0_HAVE_SPI2
 	select STM32F0_HAVE_SPI3
 
 config STM32F0_USBLINE
 	bool
 	default n
-	select STM32F0_HAVE_USBDEV
-	select STM32F0_HAVE_FSMC
 	select STM32F0_HAVE_USART3
+	select STM32F0_HAVE_USART4
+	select STM32F0_HAVE_TIM1
+	select STM32F0_HAVE_TIM2
+	select STM32F0_HAVE_TIM3
+	select STM32F0_HAVE_TIM6
+	select STM32F0_HAVE_TIM7
+	select STM32F0_HAVE_TIM14
+	select STM32F0_HAVE_TIM15
+	select STM32F0_HAVE_TIM16
+	select STM32F0_HAVE_TIM17
+	select STM32F0_HAVE_ADC2
+	select STM32F0_HAVE_CAN1
 	select STM32F0_HAVE_SPI2
+	select STM32F0_HAVE_SPI3
+	select STM32F0_HAVE_USBDEV
 
 config STM32F0_DFU
 	bool "DFU bootloader"
@@ -562,10 +577,6 @@ config STM32F0_HAVE_CCM
 	default n
 
 config STM32F0_HAVE_USBDEV
-	bool
-	default n
-
-config STM32F0_HAVE_OTGFS
 	bool
 	default n
 
@@ -617,43 +628,11 @@ config STM32F0_HAVE_TIM3
 	bool
 	default n
 
-config STM32F0_HAVE_TIM4
-	bool
-	default n
-
-config STM32F0_HAVE_TIM5
-	bool
-	default n
-
 config STM32F0_HAVE_TIM6
 	bool
 	default n
 
 config STM32F0_HAVE_TIM7
-	bool
-	default n
-
-config STM32F0_HAVE_TIM8
-	bool
-	default n
-
-config STM32F0_HAVE_TIM9
-	bool
-	default n
-
-config STM32F0_HAVE_TIM10
-	bool
-	default n
-
-config STM32F0_HAVE_TIM11
-	bool
-	default n
-
-config STM32F0_HAVE_TIM12
-	bool
-	default n
-
-config STM32F0_HAVE_TIM13
 	bool
 	default n
 
@@ -733,10 +712,6 @@ config STM32F0_HAVE_CAN1
 	bool
 	default n
 
-config STM32F0_HAVE_CAN2
-	bool
-	default n
-
 config STM32F0_HAVE_COMP1
        bool
        default n
@@ -774,10 +749,6 @@ config STM32F0_HAVE_DAC2
 	default n
 
 config STM32F0_HAVE_RNG
-	bool
-	default n
-
-config STM32F0_HAVE_ETHMAC
 	bool
 	default n
 
@@ -930,13 +901,6 @@ config STM32F0_CAN1
 	select STM32F0_CAN
 	depends on STM32F0_HAVE_CAN1
 
-config STM32F0_CAN2
-	bool "CAN2"
-	default n
-	select CAN
-	select STM32F0_CAN
-	depends on STM32F0_HAVE_CAN2
-
 config STM32F0_CEC
 	bool "CEC"
 	default n
@@ -1083,16 +1047,6 @@ config STM32F0_TIM3
 	default n
 	depends on STM32F0_HAVE_TIM3
 
-config STM32F0_TIM4
-	bool "TIM4"
-	default n
-	depends on STM32F0_HAVE_TIM4
-
-config STM32F0_TIM5
-	bool "TIM5"
-	default n
-	depends on STM32F0_HAVE_TIM5
-
 config STM32F0_TIM6
 	bool "TIM6"
 	default n
@@ -1102,36 +1056,6 @@ config STM32F0_TIM7
 	bool "TIM7"
 	default n
 	depends on STM32F0_HAVE_TIM7
-
-config STM32F0_TIM8
-	bool "TIM8"
-	default n
-	depends on STM32F0_HAVE_TIM8
-
-config STM32F0_TIM9
-	bool "TIM9"
-	default n
-	depends on STM32F0_HAVE_TIM9
-
-config STM32F0_TIM10
-	bool "TIM10"
-	default n
-	depends on STM32F0_HAVE_TIM10
-
-config STM32F0_TIM11
-	bool "TIM11"
-	default n
-	depends on STM32F0_HAVE_TIM11
-
-config STM32F0_TIM12
-	bool "TIM12"
-	default n
-	depends on STM32F0_HAVE_TIM12
-
-config STM32F0_TIM13
-	bool "TIM13"
-	default n
-	depends on STM32F0_HAVE_TIM13
 
 config STM32F0_TIM14
 	bool "TIM14"
@@ -1291,7 +1215,6 @@ config USART1_RS485_DIR_POLARITY
 
 endif # STM32F0_USART1_SERIALDRIVER
 
-
 choice
 	prompt "USART2 Driver Configuration"
 	default STM32F0_USART2_SERIALDRIVER
@@ -1328,7 +1251,6 @@ config USART2_RS485_DIR_POLARITY
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
 endif # STM32F0_USART2_SERIALDRIVER
-
 
 choice
 	prompt "USART3 Driver Configuration"
@@ -1481,7 +1403,6 @@ config USART6_RS485_DIR_POLARITY
 
 endif # STM32F0_USART6_SERIALDRIVER
 
-
 choice
 	prompt "USART7 Driver Configuration"
 	default STM32F0_USART7_SERIALDRIVER
@@ -1518,7 +1439,6 @@ config USART7_RS485_DIR_POLARITY
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
 endif # STM32F0_USART7_SERIALDRIVER
-
 
 choice
 	prompt "USART8 Driver Configuration"

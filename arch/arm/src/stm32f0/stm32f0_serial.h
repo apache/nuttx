@@ -42,42 +42,9 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/board/board.h>
-
-#include "chip/stm32f0_uart.h"
-#include "chip/stm32f0_syscfg.h"
-
-#include "stm32f0_gpio.h"
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-
-/* Configuration *********************************************************************/
-
-/* Are any UARTs enabled? */
-
-#undef HAVE_UART
-#if defined(CONFIG_STM32F0_UART0)
-#  define HAVE_UART 1
-#endif
-
-/* Is there a serial console? There should be at most one defined.  It could be on
- * any UARTn, n=0,1,2,3
- */
-
-#if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_STM32F0_UART0)
-#  define HAVE_SERIAL_CONSOLE 1
-#else
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef HAVE_SERIAL_CONSOLE
-#endif
-
-/* We cannot allow the DLM/DLL divisor to become to small or will will lose too
- * much accuracy.  This following is a "fudge factor" that represents the minimum
- * value of the divisor that we will permit.
- */
-
-#define UART_MINDL 32
 
 #endif /* __ARCH_ARM_SRC_STM32F0_STM32F0_SERIAL_H */

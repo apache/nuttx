@@ -1548,6 +1548,8 @@ nuttx/
  |   |   `- README.txt
  |   |- nucleo-144/
  |   |   `- README.txt
+ |   |- nucleo-f072rb/
+ |   |   `- README.txt
  |   |- nucleo-f303re/
  |   |   `- README.txt
  |   |- nucleo-f334r8/

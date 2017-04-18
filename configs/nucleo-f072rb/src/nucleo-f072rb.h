@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32f0/stm32f0_start.c
+ * configs/nucleo-f072rb/src/nucleo-f072rb.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,135 +34,90 @@
  *
  ****************************************************************************/
 
+#ifndef __CONFIGS_NUCLEO_F072RB_SRC_NUCLEO_F072RB_H
+#define __CONFIGS_NUCLEO_F072RB_SRC_NUCLEO_F072RB_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
+#include <nuttx/compiler.h>
 #include <stdint.h>
-#include <assert.h>
-#include <debug.h>
 
-#include <nuttx/init.h>
-#include <arch/board/board.h>
-
-#include "up_arch.h"
-#include "up_internal.h"
-
-#include "stm32f0_clockconfig.h"
-#include "stm32f0_lowputc.h"
-#include "stm32f0_start.h"
+#include "stm32f0_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IDLE_STACK ((uint32_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
-#define HEAP_BASE  ((uint32_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE)
+/* Configuration ************************************************************/
+/* How many SPI modules does this chip support? */
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-const uint32_t g_idle_topstack = IDLE_STACK;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: showprogress
- *
- * Description:
- *   Print a character on the CONSOLE USART to show boot status.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c) up_lowputc(c)
-#else
-#  define showprogress(c)
+#if STM32F0_NSPI < 1
+#  undef CONFIG_STM32F0_SPI1
+#  undef CONFIG_STM32F0_SPI2
+#  undef CONFIG_STM32F0_SPI3
+#elif STM32F0_NSPI < 2
+#  undef CONFIG_STM32F0_SPI2
+#  undef CONFIG_STM32F0_SPI3
+#elif STM32F0_NSPI < 3
+#  undef CONFIG_STM32F0_SPI3
 #endif
+
+/* Nucleo-F072RB GPIOs ******************************************************/
+/* LED.  User LD2: the green LED is a user LED connected to Arduino signal
+ * D13 corresponding to MCU I/O PA5 (pin 21) or PB13 (pin 34) depending on
+ * the STM32 target.
+ *
+ * - When the I/O is HIGH value, the LED is on.
+ * - When the I/O is LOW, the LED is off.
+ */
+
+#define GPIO_LD2        (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_10MHz | \
+                         GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN5)
+
+/* Button definitions *******************************************************/
+/*   B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
+ *   microcontroller.
+ */
+
+#define MIN_IRQBUTTON   BUTTON_USER
+#define MAX_IRQBUTTON   BUTTON_USER
+#define NUM_IRQBUTTONS  1
+
+#define GPIO_BTN_USER   (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | \
+                         GPIO_PORTC | GPIO_PIN13)
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Name: stm32_bringup
  *
  * Description:
- *   This is the reset entry point.
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
+ *
+ *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
  *
  ****************************************************************************/
 
-void __start(void)
-{
-  const uint32_t *src;
-  uint32_t *dest;
+int stm32_bringup(void);
 
-  /* Configure the uart so that we can get debug output as soon as possible */
-
-  stm32f0_clockconfig();
-  stm32f0_lowsetup();
-  showprogress('A');
-
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
-
-  for (dest = &_sbss; dest < &_ebss; )
-    {
-      *dest++ = 0;
-    }
-
-  showprogress('B');
-
-  /* Move the initialized data section from his temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
-   * end of all of the other read-only data (.text, .rodata) at _eronly.
-   */
-
-  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
-    {
-      *dest++ = *src++;
-    }
-
-  showprogress('C');
-
-  /* Perform early serial initialization */
-
-#ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
-#endif
-  showprogress('D');
-
-  /* For the case of the separate user-/kernel-space build, perform whatever
-   * platform specific initialization of the user memory is required.
-   * Normally this just means initializing the user space .data and .bss
-   * segments.
-   */
-
-#ifdef CONFIG_BUILD_PROTECTED
-  stm32f0_userspace();
-  showprogress('E');
-#endif
-
-  /* Initialize onboard resources */
-
-  stm32f0_boardinitialize();
-  showprogress('F');
-
-  /* Then start NuttX */
-
-  showprogress('\r');
-  showprogress('\n');
-
-  os_start();
-
-  /* Shouldn't get here */
-
-  for (; ; );
-}
+#endif /* __ASSEMBLY__ */
+#endif /* __CONFIGS_NUCLEO_F072RB_SRC_NUCLEO_F072RB_H */

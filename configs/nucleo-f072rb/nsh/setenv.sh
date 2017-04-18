@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/stm32f0discovery/nsh/setenv.sh
+# configs/nucleo-f072rb/nsh/setenv.sh
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

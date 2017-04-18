@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/arm/src/stm32f0/stm32f0_clockconfig.c
+ * configs/nucleo-f072rb/src/stm32_autoleds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,82 +40,57 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "stm32f0_rcc.h"
-#include "stm32f0_clockconfig.h"
-#include "chip/stm32f0_syscfg.h"
-#include "chip/stm32f0_gpio.h"
+#include "stm32f0_gpio.h"
+#include "nucleo-f072rb.h"
+
+#ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32f0_clockconfig
- *
- * Description:
- *   Called to initialize the STM32F0xx.  This does whatever setup is needed
- *   to put the SoC in a usable state.  This includes the initialization of
- *   clocking using the settings in board.h.
- *
+ * Name: board_autoled_initialize
  ****************************************************************************/
 
-void stm32f0_clockconfig(void)
+void board_autoled_initialize(void)
 {
-  uint32_t regval;
+  /* Configure LD2 GPIO for output */
 
-  /*  Verify if PLL is already setup.  If so configure to use HSI mode */
-
-  if ((getreg32(STM32F0_RCC_CFGR) & RCC_CFGR_SWS_MASK) == RCC_CFGR_SWS_PLL)
-    {
-      /* Select HSI mode */
-
-      regval  = getreg32(STM32F0_RCC_CFGR);
-      regval &= ~RCC_CFGR_SW_MASK;
-      putreg32(regval, STM32F0_RCC_CFGR);
-
-      while ((getreg32(STM32F0_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_HSI);
-    }
-
-  /* Disable the PLL */
-
-  regval  = getreg32(STM32F0_RCC_CR);
-  regval &= ~RCC_CR_PLLON;
-  putreg32(regval, STM32F0_RCC_CR);
-  while ((getreg32(STM32F0_RCC_CR) & RCC_CR_PLLRDY) != 0);
-
-  /* Configure the PLL. Multiply the HSI to get System Clock */
-
-  regval  = getreg32(STM32F0_RCC_CFGR);
-  regval &= ~RCC_CFGR_PLLMUL_MASK;
-  regval |= STM32F0_CFGR_PLLMUL;
-  putreg32(regval, STM32F0_RCC_CFGR);
-
-  /* Enable the PLL */
-
-  regval  = getreg32(STM32F0_RCC_CR);
-  regval |= RCC_CR_PLLON;
-  putreg32(regval, STM32F0_RCC_CR);
-  while ((getreg32(STM32F0_RCC_CR) & RCC_CR_PLLRDY) == 0);
-
-  /* Configure to use the PLL */
-
-  regval  = getreg32(STM32F0_RCC_CFGR);
-  regval |= RCC_CFGR_SW_PLL;
-  putreg32(regval, STM32F0_RCC_CFGR);
-  while ((getreg32(STM32F0_RCC_CFGR) & RCC_CFGR_SW_MASK) != RCC_CFGR_SW_PLL);
-
-  /* Enable basic peripheral support */
-  /* Enable all GPIO modules */
-
-  regval  = getreg32(STM32F0_RCC_AHBENR);
-  regval |= RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN |\
-            RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN;
-  putreg32(regval, STM32F0_RCC_AHBENR);
+  stm32f0_configgpio(GPIO_LD2);
 }
+
+/****************************************************************************
+ * Name: board_autoled_on
+ ****************************************************************************/
+
+void board_autoled_on(int led)
+{
+  if (led == 1)
+    {
+      stm32f0_gpiowrite(GPIO_LD2, true);
+    }
+}
+
+/****************************************************************************
+ * Name: board_autoled_off
+ ****************************************************************************/
+
+void board_autoled_off(int led)
+{
+  if (led == 1)
+    {
+      stm32f0_gpiowrite(GPIO_LD2, false);
+    }
+}
+
+#endif /* CONFIG_ARCH_LEDS */
