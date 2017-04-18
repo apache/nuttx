@@ -2054,11 +2054,11 @@ static void adc_reset(FAR struct adc_dev_s *dev)
           aerr("ERROR: adc_timinit failed: %d\n", ret);
         }
     }
-#ifndef CONFIG_ADC_NO_STARTUP_CONV
+#ifndef CONFIG_STM32_ADC_NO_STARTUP_CONV
   else
 #endif
 #endif
-#ifndef CONFIG_ADC_NO_STARTUP_CONV
+#ifndef CONFIG_STM32_ADC_NO_STARTUP_CONV
     {
       adc_startconv(priv, true);
     }

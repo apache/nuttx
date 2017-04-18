@@ -134,7 +134,7 @@ endif # NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_0
 endif # NET_6LOWPAN_COMPRESSION_HC06
 
 config NET_6LOWPAN_RIMEADDR_EXTENDED
-	int "Extended Rime address"
+	bool "Extended Rime address"
 	default n
 	---help---
 		By default, a 2-byte Rime address is used for the IEEE802.15.4 MAC

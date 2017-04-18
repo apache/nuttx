@@ -5627,6 +5627,12 @@ endmenu # Timer Configuration
 menu "ADC Configuration"
 	depends on STM32_ADC
 
+config STM32_ADC_NO_STARTUP_CONV
+	bool "Do not start conversion when opening ADC device"
+	default n
+	---help---
+		Do not start conversion when opening ADC device.
+
 config STM32_ADC1_DMA
 	bool "ADC1 DMA"
 	depends on STM32_ADC1 && STM32_HAVE_ADC1_DMA
