@@ -1414,6 +1414,7 @@ struct abc_s
   };                 /* Un-named structure field */
   ...
 };
+
 </ul></pre></font>
 </td></tr>
 <tr><td bgcolor="white">
@@ -1460,29 +1461,22 @@ struct xyz_info_s
 <p>
   <b>Discouraged</b>
 </p>
-</font>
 <pre>
 struct abc_s
 {
   ...
-</pre>
-<font color="blue">
-<pre>
   struct
   {
     int a;           /* Value A */
     int b;           /* Value B */
     int c;           /* Value C */
   } abc;
-</pre>
-</font>
-<pre>
   ...
 };
 </pre>
-<font color="blue">
 <p>
-  The use of structures defined within other structures is acceptable but discouraged.
+  The use of structures defined within other structures is acceptable provided that they define named fields.
+  The general practice of defining a structure within the scope of another structure, however, is still but discouraged in any case.
   The following is preferred:
 </p>
 </font>
@@ -1498,6 +1492,7 @@ struct abc_s
   int c;             /* Value C */
   ...
 };
+
 </ul></pre></font>
 </td></tr>
 </table></center>
@@ -1526,7 +1521,7 @@ union xyz_union_u  /* All unions must be named */
 <font color="blue"><pre>
 typedef union xyz_union_u xzy_union_t;
 </pre>
-<p>(The use of typedef'ed unions is acceptable but discouraged)</p></font>
+<p>The use of typedef'ed unions is acceptable but discouraged.</p></font>
 <pre>
 struct xyz_info_s
 {
@@ -1539,6 +1534,7 @@ struct xyz_info_s
   } u;             /* All union fields must be named */
   ...
 };
+
 </ul></pre></font>
 </td></tr>
 </table></center>
