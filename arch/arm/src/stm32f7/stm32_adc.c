@@ -1277,12 +1277,12 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   /* ADC CCR configuration */
 
-  clrbits  = ADC_CCR_ADCPRE_MASK | ADC_CCR_TSVREFE;
-  setbits  = ADC_CCR_ADCPRE_DIV;
+  clrbits = ADC_CCR_ADCPRE_MASK | ADC_CCR_TSVREFE;
+  setbits = ADC_CCR_ADCPRE_DIV;
 
   if (adc_internal(priv))
     {
-      setbits  = ADC_CCR_TSVREFE;
+      setbits |= ADC_CCR_TSVREFE;
     }
 
   clrbits |= ADC_CCR_MULTI_MASK | ADC_CCR_DELAY_MASK | ADC_CCR_DDS |
