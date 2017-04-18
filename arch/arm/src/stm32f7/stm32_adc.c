@@ -132,6 +132,12 @@
 #define ADC_MAX_CHANNELS_NODMA 1
 
 #ifdef ADC_HAVE_DMA
+#  ifndef CONFIG_STM32F7_DMA2
+#    error "STM32F7 ADC DMA support requires CONFIG_STM32F7_DMA2"
+#  endif
+#endif
+
+#ifdef ADC_HAVE_DMA
 #  define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_DMA
 #else
 #  define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_NODMA
@@ -1133,7 +1139,7 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
 
       for (i = 0; i < priv->nchannels; i++)
         {
-          priv->cb->au_receive(dev, priv->current, priv->dmabuffer[priv->current]);
+          priv->cb->au_receive(dev, priv->chanlist[priv->current], priv->dmabuffer[priv->current]);
           priv->current++;
           if (priv->current >= priv->nchannels)
             {
@@ -1721,7 +1727,7 @@ static int adc123_interrupt(int irq, FAR void *context, FAR void *arg)
  *   cchannels - Number of channels
  *
  * Returned Value:
- *   Valid ADC device structure reference on succcess; a NULL on failure
+ *   Valid ADC device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

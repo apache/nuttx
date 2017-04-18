@@ -80,7 +80,7 @@
 
 /* Convert the DMA stream base address to the DMA register block address */
 
-#define DMA_BASE(ch)     (ch & 0xfffffc00)
+#define DMA_BASE(ch)     ((ch) & 0xfffffc00)
 
 /****************************************************************************
  * Private Types

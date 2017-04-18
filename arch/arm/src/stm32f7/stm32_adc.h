@@ -750,14 +750,14 @@ extern "C"
  *   nchannels - Number of channels
  *
  * Returned Value:
- *   Valid can device structure reference on succcess; a NULL on failure
+ *   Valid ADC device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
 struct adc_dev_s;
 struct adc_dev_s *stm32_adc_initialize(int intf,
-                                        FAR const uint8_t *chanlist,
-                                        int nchannels);
+                                       FAR const uint8_t *chanlist,
+                                       int nchannels);
 #undef EXTERN
 #ifdef __cplusplus
 }
