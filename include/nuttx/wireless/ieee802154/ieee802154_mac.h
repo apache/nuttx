@@ -401,7 +401,8 @@ struct ieee802154_data_req_s
    * to be transmitted by the MAC sublayer enitity 
    * Note: This could be a uint8_t but if anyone ever wants to use
    * non-standard frame lengths, they may want a length larger than
-   * a uint8_t */
+   * a uint8_t.
+   */
 
   uint16_t msdu_length;
 
@@ -611,7 +612,8 @@ struct ieee802154_assoc_rsp_s
 struct ieee802154_assoc_conf_s
 {
   /* Associated device address ALWAYS passed in short address mode. The
-   * address will be IEEE802154_SADDR_UNSPEC if association was unsuccessful.
+   * address will be IEEE802154_SADDR_UNSPEC if association was
+   * unsuccessful.
    */
 
   struct ieee802154_addr_s dev_addr;

@@ -245,12 +245,12 @@ static int mac802154_applymib(FAR struct ieee802154_privmac_s *priv);
 /* IEEE 802.15.4 PHY Interface OPs */
 
 static int mac802154_poll_csma(FAR struct ieee802154_phyif_s *phyif,
-                                    FAR struct ieee802154_txdesc_s *tx_desc,
-                                    uint8_t *buf);
+                               FAR struct ieee802154_txdesc_s *tx_desc,
+                               FAR uint8_t *buf);
 
 static int mac802154_poll_gts(FAR struct ieee802154_phyif_s *phyif, 
-                                   FAR struct ieee802154_txdesc_s *tx_desc,
-                                   uint8_t *buf);
+                              FAR struct ieee802154_txdesc_s *tx_desc,
+                              FAR uint8_t *buf);
 
 /****************************************************************************
  * Private Data
@@ -301,6 +301,7 @@ static inline int mac802154_takesem(sem_t *sem)
 static int mac802154_defaultmib(FAR struct ieee802154_privmac_s *priv)
 {
   /* TODO: Set all MAC fields to default values */
+
   return OK;
 }
 
@@ -475,8 +476,9 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
 
   mhr.length = 2;
 
-  /* Do a preliminary check to make sure the MSDU isn't too long for even the
-   * best case */
+  /* Do a preliminary check to make sure the MSDU isn't too long for even
+   * the best case.
+   */
 
   if (req->msdu_length > IEEE802154_MAX_MAC_PAYLOAD_SIZE)
     {
@@ -492,8 +494,8 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
   mhr.u.frame_control |= IEEE802154_FRAME_DATA <<
                          IEEE802154_FRAMECTRL_SHIFT_FTYPE;
 
-  /* If the msduLength is greater than aMaxMACSafePayloadSize, the MAC sublayer
-   * will set the Frame Version to one. [1] pg. 118.
+  /* If the msduLength is greater than aMaxMACSafePayloadSize, the MAC
+   * sublayer will set the Frame Version to one. [1] pg. 118.
    */
 
   if (req->msdu_length > IEEE802154_MAX_SAFE_MAC_PAYLOAD_SIZE)
@@ -501,8 +503,8 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
       mhr.u.frame_control |= IEEE802154_FRAMECTRL_VERSION;
     }
 
-  /* If the TXOptions parameter specifies that an acknowledged transmission is
-   * required, the AR field will be set appropriately, as described in
+  /* If the TXOptions parameter specifies that an acknowledged transmission
+   * is required, the AR field will be set appropriately, as described in
    * 5.1.6.4 [1] pg. 118.
    */
 
@@ -700,8 +702,8 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
 /* Called from interrupt level or worker thread with interrupts disabled */
 
 static int mac802154_poll_csma(FAR struct ieee802154_phyif_s *phyif,
-                                    FAR struct ieee802154_txdesc_s *tx_desc,
-                                    uint8_t *buf)
+                               FAR struct ieee802154_txdesc_s *tx_desc,
+                               FAR uint8_t *buf)
 {
   FAR struct ieee802154_privmac_s *priv =
       (FAR struct ieee802154_privmac_s *)&phyif->priv;
@@ -711,7 +713,8 @@ static int mac802154_poll_csma(FAR struct ieee802154_phyif_s *phyif,
   DEBUGASSERT(priv != 0);
 
   /* Get exclusive access to the driver structure.  We don't care about any
-   * signals so if we see one, just go back to trying to get access again */
+   * signals so if we see one, just go back to trying to get access again.
+   */
 
   while (mac802154_takesem(&priv->exclsem) != 0);
 
@@ -751,8 +754,8 @@ static int mac802154_poll_csma(FAR struct ieee802154_phyif_s *phyif,
 }
 
 static int mac802154_poll_gts(FAR struct ieee802154_phyif_s *phyif, 
-                                   FAR struct ieee802154_txdesc_s *tx_desc,
-                                   uint8_t *buf)
+                              FAR struct ieee802154_txdesc_s *tx_desc,
+                              FAR uint8_t *buf)
 {
   return 0;
 }
@@ -797,7 +800,8 @@ int mac802154_req_associate(MACHANDLE mac,
   /* Set the macPANId */
 
   /* Set either the macCoordExtendedAddress and macCoordShortAddress
-   * depending on the CoordAddrMode in the primitive */
+   * depending on the CoordAddrMode in the primitive.
+   */
 
   if (req->coord_addr.mode == IEEE802154_ADDRMODE_EXTENDED)
     {
