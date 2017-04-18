@@ -218,8 +218,8 @@
 /* Button definitions ***************************************************************/
 /* Buttons
  *
- *   B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
- *   microcontroller.
+ * B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
+ * microcontroller.
  */
 
 #define BUTTON_USER        0
