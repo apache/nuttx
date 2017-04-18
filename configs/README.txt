@@ -411,6 +411,9 @@ configs/nucleo-144
   STM32F767ZIT6 is a 216MHz Cortex-M7 operation with 2048Kb Flash memory
   and 512Kb SRAM.
 
+configs/nucleo-f072rb
+  STMicro Nucleo F072RB board based on the STMicro STM32F072RBT6 MCU.
+
 configs/nucleo-f4x1re
   STMicro ST Nucleo F401RE and F411RE boards.  See
   http://mbed.org/platforms/ST-Nucleo-F401RE and
