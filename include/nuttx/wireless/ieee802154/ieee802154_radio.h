@@ -161,9 +161,7 @@ struct ieee802154_netradio_s
 struct ieee802154_txdesc_s
 {
   uint8_t psdu_handle;  /* The psdu handle identifying the transaction */
-
   uint16_t psdu_length; /* The length of the PSDU */
-
   uint8_t status;       /* The status of the transaction.  This is set by the
                          * radio layer prior to calling txdone_csma */
 

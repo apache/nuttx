@@ -163,7 +163,7 @@ static int  mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev);
 static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev);
 static void mrf24j40_irqwork_txnorm(FAR struct mrf24j40_radio_s *dev);
 static void mrf24j40_irqwork_txgts(FAR struct mrf24j40_radio_s *dev,
-                                   uint8_t gts_num);
+              uint8_t gts_num);
 
 static void mrf24j40_irqworker(FAR void *arg);
 static int  mrf24j40_interrupt(int irq, FAR void *context, FAR void *arg);
@@ -171,13 +171,12 @@ static int  mrf24j40_interrupt(int irq, FAR void *context, FAR void *arg);
 static void mrf24j40_dopoll_csma(FAR void *arg);
 static void mrf24j40_dopoll_gts(FAR void *arg);
 
-static int mrf24j40_csma_setup(FAR struct mrf24j40_radio_s *dev,
-             uint8_t *buf, uint16_t buf_len);
-static int mrf24j40_gts_setup(FAR struct mrf24j40_radio_s *dev, uint8_t gts,
-             uint8_t *buf, uint16_t buf_len);
-static int mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
-                               uint8_t *buf, uint16_t buf_len,
-                               uint32_t fifo_addr);
+static int  mrf24j40_csma_setup(FAR struct mrf24j40_radio_s *dev,
+              FAR uint8_t *buf, uint16_t buf_len);
+static int  mrf24j40_gts_setup(FAR struct mrf24j40_radio_s *dev, uint8_t gts,
+              FAR uint8_t *buf, uint16_t buf_len);
+static int  mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
+              FAR uint8_t *buf, uint16_t buf_len, uint32_t fifo_addr);
 
 /* IOCTL helpers */
 
@@ -225,7 +224,7 @@ static int  mrf24j40_ioctl(FAR struct ieee802154_radio_s *radio, int cmd,
 static int  mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio,
               bool state, FAR struct ieee802154_packet_s *packet);
 static int  mrf24j40_transmit(FAR struct ieee802154_radio_s *radio,
-              uint8_t *buf, uint16_t buf_len);
+              FAR uint8_t *buf, uint16_t buf_len);
 static int mrf24j40_txnotify_csma(FAR struct ieee802154_radio_s *radio);
 static int mrf24j40_txnotify_gts(FAR struct ieee802154_radio_s *radio);
 
@@ -1340,7 +1339,7 @@ static int mrf24j40_energydetect(FAR struct mrf24j40_radio_s *dev,
  ****************************************************************************/
 
 static int mrf24j40_transmit(FAR struct ieee802154_radio_s *radio,
-                             uint8_t *buf, uint16_t buf_len)
+                             FAR uint8_t *buf, uint16_t buf_len)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
   uint8_t  reg;
@@ -1384,10 +1383,10 @@ static int mrf24j40_transmit(FAR struct ieee802154_radio_s *radio,
  ****************************************************************************/
 
 static int mrf24j40_csma_setup(FAR struct mrf24j40_radio_s *dev,
-                               uint8_t *buf, uint16_t buf_len)
+                               FAR uint8_t *buf, uint16_t buf_len)
 {
-  uint8_t  reg;
-  int      ret;
+  uint8_t reg;
+  int     ret;
 
   mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
 
@@ -1427,13 +1426,20 @@ static int mrf24j40_csma_setup(FAR struct mrf24j40_radio_s *dev,
  ****************************************************************************/
 
 static int mrf24j40_gts_setup(FAR struct mrf24j40_radio_s *dev, uint8_t fifo,
-                              uint8_t *buf, uint16_t buf_len)
+                              FAR uint8_t *buf, uint16_t buf_len)
 {
   return -ENOTTY;
 }
 
+/****************************************************************************
+ * Name: mrf24j40_setup_fifo
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
 static int mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
-                               uint8_t *buf, uint16_t buf_len,
+                               FAR uint8_t *buf, uint16_t buf_len,
                                uint32_t fifo_addr)
 {
   int      ret;
@@ -1506,7 +1512,8 @@ static void mrf24j40_irqwork_txnorm(FAR struct mrf24j40_radio_s *dev)
 
   /* Get the status from the device and copy the status into the tx desc.
    * The status for the normal FIFO is represented with bit TXNSTAT where
-   * 0=success, 1= failure */
+   * 0=success, 1= failure.
+   */
 
   txstat = mrf24j40_getreg(dev->spi, MRF24J40_TXSTAT);
   dev->csma_desc.pub.status = txstat & MRF24J40_TXSTAT_TXNSTAT;
@@ -1543,7 +1550,8 @@ static void mrf24j40_irqwork_txgts(FAR struct mrf24j40_radio_s *dev,
 
   /* Get the status from the device and copy the status into the tx desc.
    * The status for the normal FIFO is represented with bit TXNSTAT where
-   * 0=success, 1= failure */
+   * 0=success, 1= failure.
+   */
 
   txstat = mrf24j40_getreg(dev->spi, MRF24J40_TXSTAT);
 
