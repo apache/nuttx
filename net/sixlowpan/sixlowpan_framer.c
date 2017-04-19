@@ -70,11 +70,11 @@
 
 struct field_length_s
 {
-  uint8_t dest_pid_len;    /**<  Length (in bytes) of destination PAN ID field */
-  uint8_t dest_addr_len;   /**<  Length (in bytes) of destination address field */
-  uint8_t src_pid_len;     /**<  Length (in bytes) of source PAN ID field */
-  uint8_t src_addr_len;    /**<  Length (in bytes) of source address field */
-  uint8_t aux_sec_len;     /**<  Length (in bytes) of aux security header field */
+  uint8_t dest_pid_len;    /* Length (in bytes) of destination PAN ID field */
+  uint8_t dest_addr_len;   /* Length (in bytes) of destination address field */
+  uint8_t src_pid_len;     /* Length (in bytes) of source PAN ID field */
+  uint8_t src_addr_len;    /* Length (in bytes) of source address field */
+  uint8_t aux_sec_len;     /* Length (in bytes) of aux security header field */
 };
 
 /****************************************************************************
@@ -179,10 +179,17 @@ static void sixlowpan_fieldlengths(FAR struct frame802154_s *finfo,
       (finfo->fcf.src_addr_mode & 3) != 0 &&
       finfo->src_pid == finfo->dest_pid)
     {
+      /* Indicate source PANID compression */
+
       finfo->fcf.panid_compression = 1;
 
-      /* Compressed header, only do dest pid */
-      /* flen->src_pid_len = 0; */
+      /* Compressed header, only do dest pid.
+       *
+       * REVISIT:  This was commented out in corresponding Contiki logic, but
+       * is needed to match sixlowpan_recv_hdrlen().
+       */
+
+      flen->src_pid_len = 0;
     }
 
   /* Determine address lengths */
@@ -348,7 +355,7 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
       rimeaddr_copy((struct rimeaddr_s *)&params->dest_addr,
                     g_pktaddrs[PACKETBUF_ADDR_RECEIVER].u8);
 
-      /* Use short address mode if so configured */
+      /* Use short destination address mode if so configured */
 
 #ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
       params->fcf.dest_addr_mode = FRAME802154_LONGADDRMODE;
@@ -359,7 +366,15 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
 
   /* Set the source address to the node address assigned to the device */
 
-  rimeaddr_copy((struct rimeaddr_s *)&params->src_addr, &ieee->i_nodeaddr.u8);
+  rimeaddr_copy((struct rimeaddr_s *)&params->src_addr, &ieee->i_nodeaddr);
+
+  /* Use short soruce address mode if so configured */
+
+#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
+  params->fcf.src_addr_mode = FRAME802154_LONGADDRMODE;
+#else
+  params->fcf.src_addr_mode = FRAME802154_SHORTADDRMODE;
+#endif
 }
 
 /****************************************************************************

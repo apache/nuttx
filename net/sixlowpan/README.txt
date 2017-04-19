@@ -33,7 +33,7 @@ Optimal 6loWPAN Configuration
 Fragmentation Headers
 ---------------------
 A fragment header is placed at the beginning of the outgoing packet just
-after the FCF when the payload is too large to fit in a single IEEE 802.15.4
+after the MAC when the payload is too large to fit in a single IEEE 802.15.4
 frame. The fragment header contains three fields: Datagram size, datagram tag
 and datagram offset.
 
@@ -47,7 +47,7 @@ The length of the fragment header length is four bytes for the first header
 (FRAG1) and five bytes for all subsequent headers (FRAGN).  For example,
 this is a HC1 compressed first frame of a packet
 
-  01 08 01 0000 3412                            ### 7-byte FCF header
+  41 88 01 0000 3412 cdab                       ### 9-byte MAC header
   c50e 000b                                     ### 4-byte FRAG1 header
   42                                            ### SIXLOWPAN_DISPATCH_HC1
     fb                                          ### RIME_HC1_HC_UDP_HC1_ENCODING
@@ -56,14 +56,15 @@ this is a HC1 compressed first frame of a packet
     10                                          ### RIME_HC1_HC_UDP_PORTS
     0000                                        ### RIME_HC1_HC_UDP_CHKSUM
 
-  80 byte Payload follows:
+  104 byte Payload follows:
   4f4e452064617920 48656e6e792d7065 6e6e792077617320 7069636b696e6720
   757020636f726e20 696e207468652063 6f726e7961726420 7768656e2d2d7768
-  61636b212d2d736f 6d657468696e6720                                                              g
+  61636b212d2d736f 6d657468696e6720 6869742068657220 75706f6e20746865
+  20686561642e2027
 
 This is the second frame of the same transfer:
 
-  01 08 01 0000 3412                            ### 7-byte FCF header
+  41 88 01 0000 3412 cdab                       ### 9-byte MAC header
   e50e 000b 0a                                  ### 5 byte FRAGN header
   42                                            ### SIXLOWPAN_DISPATCH_HC1
     fb                                          ### RIME_HC1_HC_UDP_HC1_ENCODING
@@ -72,11 +73,11 @@ This is the second frame of the same transfer:
     10                                          ### RIME_HC1_HC_UDP_PORTS
     0000                                        ### RIME_HC1_HC_UDP_CHKSUM
 
-  80 byte Payload follows:
-  6869742068657220 75706f6e20746865 20686561642e2027 476f6f646e657373
-  2067726163696f75 73206d6521272073 6169642048656e6e 792d70656e6e793b
-  202774686520736b 79277320612d676f
-
+  104 byte Payload follows:
+  476f6f646e657373 2067726163696f75 73206d6521272073 6169642048656e6e
+  792d70656e6e793b 202774686520736b 79277320612d676f 696e6720746f2066
+  616c6c3b2049206d 75737420676f2061 6e642074656c6c20 746865206b696e67
+  2e270a0a536f2073
 
 The payload length is encoded in the LS 11-bits of the first 16-bit value:
 In this example the payload size is 0x050e or 1,294.  The tag is 0x000b.  In
