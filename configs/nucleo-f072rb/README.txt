@@ -267,18 +267,55 @@ Configurations
 
     NOTES:
 
-    1. Support for NSH built-in applications is provided:
+    1. This initial release of this configuration was very minimal, but
+       also very small:
 
-       Binary Formats:
-         CONFIG_BUILTIN=y           : Enable support for built-in programs
+       $ size nuttx
+          text    data     bss     dec     hex filename
+         32000      92    1172   33264    81f0 nuttx
 
-       Application Configuration:
-         CONFIG_NSH_BUILTIN_APPS=y  : Enable starting apps from NSH command line
+       The current version, additional features have been enabled:  board
+       bring-up initialization, button support, the procfs file system,
+       and NSH built-in application support.  The size increased as follows:
 
-       No built applications are enabled in the base configuration, however.
+       $ size nuttx
+          text    data     bss     dec     hex filename
+         40231      92    1208   41531    a23b nuttx
 
-    2. C++ support for applications is enabled:
+       Those additional features cost about 8KiB FLASH.  I believe that is a
+       good use of the STM32F072RB's FLASH, but if you interested in the
+       more minimal configuration, here is what was changed:
 
-      CONFIG_HAVE_CXX=y
-      CONFIG_HAVE_CXXINITIALIZE=y
-      CONFIG_EXAMPLES_NSH_CXXINITIALIZE=y
+       Removed
+
+         CONFIG_BINFMT_DISABLE=y
+         CONFIG_DISABLE_MOUNTPOINT=y
+         CONFIG_NSH_DISABLE_CD=y
+
+       Added:
+
+         CONFIG_ARCH_BUTTONS=y
+         CONFIG_ARCH_IRQBUTTONS=y
+
+         CONFIG_BUILTIN=y
+         CONFIG_BUILTIN_PROXY_STACKSIZE=1024
+
+         CONFIG_FS_PROCFS=y
+         CONFIG_NSH_PROC_MOUNTPOINT="/proc"
+
+         CONFIG_LIB_BOARDCTL=y
+         CONFIG_NSH_ARCHINIT=y
+         CONFIG_NSH_BUILTIN_APPS=y
+
+       Support for NSH built-in applications is enabled for future use. 
+       However, no built applications are enabled in this base configuration.
+
+    2. C++ support for applications is NOT enabled.  That could be enabled
+       with the following configuration changes:
+
+         CONFIG_HAVE_CXX=y
+         CONFIG_HAVE_CXXINITIALIZE=y
+         CONFIG_EXAMPLES_NSH_CXXINITIALIZE=y
+
+       And also support fo C++ constructors under
+       apps/platform/nucleo-stm32f072rb.
