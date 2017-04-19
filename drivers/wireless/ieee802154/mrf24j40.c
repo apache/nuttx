@@ -159,8 +159,12 @@ static int  mrf24j40_initialize(FAR struct mrf24j40_radio_s *dev);
 
 static int  mrf24j40_setrxmode(FAR struct mrf24j40_radio_s *dev, int mode);
 static int  mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev);
+
 static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev);
-static void mrf24j40_irqwork_tx(FAR struct mrf24j40_radio_s *dev);
+static void mrf24j40_irqwork_txnorm(FAR struct mrf24j40_radio_s *dev);
+static void mrf24j40_irqwork_txgts(FAR struct mrf24j40_radio_s *dev,
+                                   uint8_t gts_num);
+
 static void mrf24j40_irqworker(FAR void *arg);
 static int  mrf24j40_interrupt(int irq, FAR void *context, FAR void *arg);
 
@@ -171,6 +175,9 @@ static int mrf24j40_csma_setup(FAR struct mrf24j40_radio_s *dev,
              uint8_t *buf, uint16_t buf_len);
 static int mrf24j40_gts_setup(FAR struct mrf24j40_radio_s *dev, uint8_t gts,
              uint8_t *buf, uint16_t buf_len);
+static int mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
+                               uint8_t *buf, uint16_t buf_len,
+                               uint32_t fifo_addr);
 
 /* IOCTL helpers */
 
@@ -345,8 +352,6 @@ static void mrf24j40_dopoll_csma(FAR void *arg)
           mrf24j40_csma_setup(dev, &dev->tx_buf[0],
                               dev->csma_desc.pub.psdu_length);
         }
-
-      /* Setup the transmit on the device */
     }
 
   sem_post(&dev->exclsem);
@@ -1338,21 +1343,102 @@ static int mrf24j40_transmit(FAR struct ieee802154_radio_s *radio,
                              uint8_t *buf, uint16_t buf_len)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
-  uint32_t addr;
   uint8_t  reg;
   int      ret;
-  int      hlen = 3; /* Include frame control and seq number */
-  uint16_t frame_ctrl;
 
   mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
-
-  addr = MRF24J40_TXBUF_BASE;
 
   /* Enable tx int */
 
   reg  = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
   reg &= ~MRF24J40_INTCON_TXNIE;
   mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
+
+  /* Setup the FIFO */
+
+  ret = mrf24j40_setup_fifo(dev, buf, buf_len, MRF24J40_TXNORM_FIFO);
+
+  /* If the frame control field contains
+   * an acknowledgment request, set the TXNACKREQ bit.
+   * See IEEE 802.15.4/2003 7.2.1.1 page 112 for info.
+   */
+
+  reg = MRF24J40_TXNCON_TXNTRIG;
+  if (buf[0] & IEEE802154_FRAMECTRL_ACKREQ)
+    {
+      reg |= MRF24J40_TXNCON_TXNACKREQ;
+    }
+
+  /* Trigger packet emission */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_TXNCON, reg);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: mrf24j40_csma_setup
+ *
+ * Description:
+ *   Setup a CSMA transaction in the normal TX FIFO
+ *
+ ****************************************************************************/
+
+static int mrf24j40_csma_setup(FAR struct mrf24j40_radio_s *dev,
+                               uint8_t *buf, uint16_t buf_len)
+{
+  uint8_t  reg;
+  int      ret;
+
+  mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
+
+  /* Enable tx int */
+
+  reg  = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
+  reg &= ~MRF24J40_INTCON_TXNIE;
+  mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
+
+  /* Setup the FIFO */
+
+  ret = mrf24j40_setup_fifo(dev, buf, buf_len, MRF24J40_TXNORM_FIFO);
+
+  /* If the frame control field contains
+   * an acknowledgment request, set the TXNACKREQ bit.
+   * See IEEE 802.15.4/2003 7.2.1.1 page 112 for info.
+   */
+
+  reg = MRF24J40_TXNCON_TXNTRIG;
+  if (buf[0] & IEEE802154_FRAMECTRL_ACKREQ)
+    {
+      reg |= MRF24J40_TXNCON_TXNACKREQ;
+    }
+
+  /* Trigger packet emission */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_TXNCON, reg);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: mrf24j40_gts_setup
+ *
+ * Description:
+ *   Setup a GTS transaction in one of the GTS FIFOs 
+ *
+ ****************************************************************************/
+
+static int mrf24j40_gts_setup(FAR struct mrf24j40_radio_s *dev, uint8_t fifo,
+                              uint8_t *buf, uint16_t buf_len)
+{
+  return -ENOTTY;
+}
+
+static int mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
+                               uint8_t *buf, uint16_t buf_len,
+                               uint32_t fifo_addr)
+{
+  int      ret;
+  int      hlen = 3; /* Include frame control and seq number */
+  uint16_t frame_ctrl;
 
   /* Analyze frame control to compute header length */
 
@@ -1384,103 +1470,101 @@ static int mrf24j40_transmit(FAR struct ieee802154_radio_s *radio,
 
   /* Header len, 0, TODO for security modes */
 
-  mrf24j40_setreg(dev->spi, addr++, hlen);
+  mrf24j40_setreg(dev->spi, fifo_addr++, hlen);
 
   /* Frame length */
 
-  mrf24j40_setreg(dev->spi, addr++, buf_len);
+  mrf24j40_setreg(dev->spi, fifo_addr++, buf_len);
 
   /* Frame data */
 
   for (ret = 0; ret < buf_len; ret++) /* this sets the correct val for ret */
     {
-      mrf24j40_setreg(dev->spi, addr++, buf[ret]);
+      mrf24j40_setreg(dev->spi, fifo_addr++, buf[ret]);
     }
-
-  /* If the frame control field contains
-   * an acknowledgment request, set the TXNACKREQ bit.
-   * See IEEE 802.15.4/2003 7.2.1.1 page 112 for info.
-   */
-
-  reg = MRF24J40_TXNCON_TXNTRIG;
-  if (frame_ctrl & IEEE802154_FRAMECTRL_ACKREQ)
-    {
-      reg |= MRF24J40_TXNCON_TXNACKREQ;
-    }
-
-  /* Trigger packet emission */
-
-  mrf24j40_setreg(dev->spi, MRF24J40_TXNCON, reg);
+  
   return ret;
 }
 
 /****************************************************************************
- * Name: mrf24j40_csma_setup
- *
- * Description:
- *   Setup a CSMA transaction in the normal TX FIFO
- *
- ****************************************************************************/
-
-static int mrf24j40_csma_setup(FAR struct mrf24j40_radio_s *dev,
-                             uint8_t *buf, uint16_t buf_len)
-{
-  return -ENOTTY;
-}
-
-/****************************************************************************
- * Name: mrf24j40_gts_setup
- *
- * Description:
- *   Setup a GTS transaction in one of the GTS FIFOs 
- *
- ****************************************************************************/
-
-static int mrf24j40_gts_setup(FAR struct mrf24j40_radio_s *dev, uint8_t fifo,
-                              uint8_t *buf, uint16_t buf_len)
-{
-  return -ENOTTY;
-}
-
-/****************************************************************************
- * Name: mrf24j40_irqwork_tx
+ * Name: mrf24j40_irqwork_txnorm
  *
  * Description:
  *   Manage completion of packet transmission.
  *
  ****************************************************************************/
 
-static void mrf24j40_irqwork_tx(FAR struct mrf24j40_radio_s *dev)
+static void mrf24j40_irqwork_txnorm(FAR struct mrf24j40_radio_s *dev)
 {
   uint8_t txstat;
-  uint8_t reg;
-
-  txstat = mrf24j40_getreg(dev->spi, MRF24J40_TXSTAT);
-
-  reg = mrf24j40_getreg(dev->spi, MRF24J40_TXSTAT);
-
-  /* 1 means it failed, we want 1 to mean it worked. */
-
-#if 0
-  dev->radio.txok      = (reg & MRF24J40_TXSTAT_TXNSTAT) != MRF24J40_TXSTAT_TXNSTAT;
-  dev->radio.txretries = (reg & MRF24J40_TXSTAT_X_MASK) >> MRF24J40_TXSTAT_X_SHIFT;
-  dev->radio.txbusy    = (reg & MRF24J40_TXSTAT_CCAFAIL) == MRF24J40_TXSTAT_CCAFAIL;
-#endif
-
-  //wlinfo("TXSTAT%02X!\n", txstat);
-#warning TODO report errors
-  UNUSED(txstat);
 
   /* Disable tx int */
 
-  reg  = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
-  reg |= MRF24J40_INTCON_TXNIE;
-  mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
+  txstat  = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
+  txstat |= MRF24J40_INTCON_TXNIE;
+  mrf24j40_setreg(dev->spi, MRF24J40_INTCON, txstat);
 
-  /* Wake up the thread that triggered the transmission */
+  /* Get the status from the device and copy the status into the tx desc.
+   * The status for the normal FIFO is represented with bit TXNSTAT where
+   * 0=success, 1= failure */
 
-  /* sem_post(&dev->radio.txsem); */
+  txstat = mrf24j40_getreg(dev->spi, MRF24J40_TXSTAT);
+  dev->csma_desc.pub.status = txstat & MRF24J40_TXSTAT_TXNSTAT;
 
+  /* Inform the next layer of the transmission success/failure */
+
+  dev->radiocb->txdone_csma(dev->radiocb, dev->csma_desc.pub);
+
+  /* We are now done with the transaction */
+
+  dev->csma_desc.busy = 0;
+
+  mrf24j40_dopoll_csma(dev);
+}
+
+/****************************************************************************
+ * Name: mrf24j40_irqwork_gts
+ *
+ * Description:
+ *   Manage completion of packet transmission.
+ *
+ ****************************************************************************/
+
+static void mrf24j40_irqwork_txgts(FAR struct mrf24j40_radio_s *dev,
+                                   uint8_t gts)
+{
+  uint8_t txstat;
+
+  /* Disable tx int */
+
+  txstat  = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
+  txstat |= MRF24J40_INTCON_TXNIE;
+  mrf24j40_setreg(dev->spi, MRF24J40_INTCON, txstat);
+
+  /* Get the status from the device and copy the status into the tx desc.
+   * The status for the normal FIFO is represented with bit TXNSTAT where
+   * 0=success, 1= failure */
+
+  txstat = mrf24j40_getreg(dev->spi, MRF24J40_TXSTAT);
+
+  if (gts == 0)
+    {
+      dev->csma_desc.pub.status = txstat & MRF24J40_TXSTAT_TXG1STAT;
+    }
+  else if (gts == 1)
+    {
+      dev->csma_desc.pub.status = txstat & MRF24J40_TXSTAT_TXG2STAT;
+    }
+
+  /* Inform the next layer of the transmission success/failure */
+
+  dev->radiocb->txdone_gts(dev->radiocb, dev->gts_desc[gts].pub);
+
+  /* We are now done with the transaction */
+
+  dev->gts_desc[gts].busy = 0;
+
+  mrf24j40_dopoll_gts(dev);
 }
 
 /****************************************************************************
@@ -1618,7 +1702,21 @@ static void mrf24j40_irqworker(FAR void *arg)
     {
       /* A packet was transmitted or failed*/
 
-      mrf24j40_irqwork_tx(dev);
+      mrf24j40_irqwork_txnorm(dev);
+    }
+
+  if ((intstat & MRF24J40_INTSTAT_TXG1IF))
+    {
+      /* A packet was transmitted or failed*/
+
+      mrf24j40_irqwork_txgts(dev, 0);
+    }
+
+  if ((intstat & MRF24J40_INTSTAT_TXG1IF))
+    {
+      /* A packet was transmitted or failed*/
+
+      mrf24j40_irqwork_txgts(dev, 1);
     }
 
   /* Re-enable GPIO interrupts */

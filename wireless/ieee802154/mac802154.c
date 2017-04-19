@@ -235,7 +235,7 @@ struct ieee802154_privmac_s
   uint32_t is_coord           : 1;  /* Is this device acting as coordinator */
                                     /* 12-bits remaining */
 
-  /* End of 32-bit bitfield. 
+  /* End of 32-bit bitfield. */
 
   /* TODO: Add Security-related MAC PIB attributes */
 };
@@ -380,7 +380,7 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
   mac->radiocb.priv = mac;
 
   radiocb             = &mac->radiocb.cb;
-  radiocb->poll_cmsa  = mac802154_poll_csma;
+  radiocb->poll_csma  = mac802154_poll_csma;
   radiocb->poll_gts   = mac802154_poll_gts;
 
   /* Bind our callback structure */
