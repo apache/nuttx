@@ -175,9 +175,9 @@ struct ieee802154_radiocb_s
   CODE int (*poll_gts) (FAR struct ieee802154_radiocb_s *radiocb,
              FAR struct ieee802154_txdesc_s *tx_desc, FAR uint8_t *buf);
   CODE int (*txdone_csma) (FAR struct ieee802154_radiocb_s *radiocb,
-             FAR struct ieee802154_txdesc_s tx_desc);
+             FAR const struct ieee802154_txdesc_s *tx_desc);
   CODE int (*txdone_gts) (FAR struct ieee802154_radiocb_s *radiocb,
-             FAR struct ieee802154_txdesc_s tx_desc);
+             FAR const struct ieee802154_txdesc_s *tx_desc);
 };
 
 struct ieee802154_radio_s; /* Forward reference */
