@@ -592,6 +592,7 @@ static void up_restoreuartint(struct up_dev_s *priv, uint8_t ie)
  * Name: up_disableuartint
  ****************************************************************************/
 
+#ifdef HAVE_UART_CONSOLE
 static void up_disableuartint(struct up_dev_s *priv, uint8_t *ie)
 {
   irqstate_t flags;
@@ -605,6 +606,7 @@ static void up_disableuartint(struct up_dev_s *priv, uint8_t *ie)
   up_restoreuartint(priv, 0);
   leave_critical_section(flags);
 }
+#endif
 
 /****************************************************************************
  * Name: up_setup
