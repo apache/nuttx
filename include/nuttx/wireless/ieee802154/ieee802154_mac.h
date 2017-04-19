@@ -394,15 +394,15 @@ enum ieee802154_ranging_e
 
 struct ieee802154_capability_info_s
 {
-  uint8_t reserved_0 : 1;     /* Reserved */
-  uint8_t device_type : 1;    /* 0=RFD, 1=FFD */
-  uint8_t power_source : 1;   /* 1=AC, 0=Other */
-  uint8_t rx_on_idle : 1;     /* 0=Receiver off when idle
-                               * 1=Receiver on when idle */
-  uint8_t reserved_45 : 2;    /* Reserved */
-  uint8_t security : 1;       /* 0=disabled, 1=enabled */
-  uint8_t allocate_addr : 1;  /* 1=Coordinator allocates short address
-                               * 0=otherwise */
+  uint8_t reserved_0        : 1;  /* Reserved */
+  uint8_t device_type       : 1;  /* 0=RFD, 1=FFD */
+  uint8_t power_source      : 1;  /* 1=AC, 0=Other */
+  uint8_t rx_on_idle        : 1;  /* 0=Receiver off when idle
+                                   * 1=Receiver on when idle */
+  uint8_t reserved_45       : 2;  /* Reserved */
+  uint8_t security          : 1;  /* 0=disabled, 1=enabled */
+  uint8_t allocate_addr     : 1;  /* 1=Coordinator allocates short address
+                                   * 0=otherwise */
 };
 
 struct ieee802154_superframe_spec_s
@@ -902,6 +902,7 @@ struct ieee802154_commstatus_ind_s
   struct ieee802154_addr_s src_addr;
   struct ieee802154_addr_s dest_addr;
   enum ieee802154_status_e status;
+
 #ifdef CONFIG_IEEE802154_SECURITY
   /* Security information if enabled */
 
@@ -986,6 +987,7 @@ struct ieee802154_gts_ind_s
 {
   uint16_t dev_addr;
   struct ieee802154_gts_info_s gts_info;
+
 #ifdef CONFIG_IEEE802154_SECURITY
   /* Security information if enabled */
 
@@ -1005,6 +1007,7 @@ struct ieee802154_gts_ind_s
 struct ieee802154_orphan_ind_s
 {
   uint8_t orphan_addr[8];
+
 #ifdef CONFIG_IEEE802154_SECURITY
   /* Security information if enabled */
 
@@ -1024,6 +1027,7 @@ struct ieee802154_orphan_ind_s
 struct ieee802154_orphan_resp_s
 {
   uint8_t orphan_addr[8];
+
 #ifdef CONFIG_IEEE802154_SECURITY
   /* Security information if enabled */
 
@@ -1070,7 +1074,8 @@ struct ieee802154_reset_conf_s
 struct ieee802154_rxenable_req_s
 {
   /* Number of symbols measured from the start of the superframe before the
-   * receiver is to be enabled or disabled. */
+   * receiver is to be enabled or disabled.
+   */
 
   uint32_t rxon_time;        
 
@@ -1394,7 +1399,8 @@ enum ieee802154_macnotify_e
 
 /* Callback operations to notify the next highest layer of various asynchronous
  * events, usually triggered by some previous request or response invoked by the
- * upper layer */
+ * upper layer.
+ */
 
 struct ieee802154_maccb_s
 {

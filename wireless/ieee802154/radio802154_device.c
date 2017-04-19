@@ -298,7 +298,7 @@ done:
  ****************************************************************************/
 
 static ssize_t radio802154dev_write(FAR struct file *filep,
-                                   FAR const char *buffer, size_t len)
+                                    FAR const char *buffer, size_t len)
 {
   FAR struct inode *inode;
   FAR struct radio802154_devwrapper_s *dev;
@@ -347,7 +347,7 @@ static ssize_t radio802154dev_write(FAR struct file *filep,
    */
 
 #warning Fix this when transmit interface is complete
-  /*
+#if 0
   ret = dev->child->ops->transmit(dev->child, packet);
   if (ret != packet->len)
     {
@@ -359,7 +359,7 @@ static ssize_t radio802154dev_write(FAR struct file *filep,
     {
       wlerr("Radio Device timedout on Tx\n");
     }
-  */
+#endif
 
 done:
 

@@ -262,6 +262,13 @@ static int  macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: macnet_mlme_notify
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
 static void macnet_mlme_notify(FAR struct ieee802154_maccb_s *maccb,
                                enum ieee802154_macnotify_e notif,
                                FAR union ieee802154_mlme_notify_u *arg)
@@ -281,6 +288,13 @@ static void macnet_mlme_notify(FAR struct ieee802154_maccb_s *maccb,
     }
 }
 
+/****************************************************************************
+ * Name: macnet_mcps_notify
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
 static void macnet_mcps_notify(FAR struct ieee802154_maccb_s *maccb,
                                enum ieee802154_macnotify_e notif,
                                FAR union ieee802154_mcps_notify_u *arg)
@@ -299,16 +313,19 @@ static void macnet_mcps_notify(FAR struct ieee802154_maccb_s *maccb,
           macnet_conf_data(priv, &arg->dataconf);
         }
         break;
+
       case IEEE802154_NOTIFY_CONF_PURGE:
         {
           macnet_conf_purge(priv, &arg->purgeconf);
         }
         break;
+
       case IEEE802154_NOTIFY_IND_DATA:
         {
           macnet_ind_data(priv, &arg->dataind);
         }
         break;
+
       default:
         break;
     }
