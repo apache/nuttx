@@ -221,9 +221,9 @@ struct frame802154_fcf_s
 
 struct frame802154_scf_s
 {
-  uint8_t  security_level;   /* 3 bit. security level      */
-  uint8_t  key_id_mode;      /* 2 bit. Key identifier mode */
-  uint8_t  reserved;         /* 3 bit. Reserved bits       */
+  uint8_t security_level;    /* 3 bit. security level      */
+  uint8_t key_id_mode;       /* 2 bit. Key identifier mode */
+  uint8_t reserved;          /* 3 bit. Reserved bits       */
 };
 
 /* 802.15.4 Aux security header */
