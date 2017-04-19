@@ -185,27 +185,27 @@ struct ieee802154_privmac_s
 
   uint32_t tx_total_dur;
 
-  struct
-  {
-    uint32_t is_assoc           : 1;  /* Are we associated to the PAN */
-    uint32_t assoc_permit       : 1;  /* Are we allowing assoc. as a coord. */
-    uint32_t auto_req           : 1;  /* Automatically send data req. if addr
-                                       * addr is in the beacon frame */
+  /* Start of 32-bit bitfield */
 
-    uint32_t batt_life_ext      : 1;  /* Is BLE enabled */
-    uint32_t gts_permit         : 1;  /* Is PAN Coord. accepting GTS reqs. */
-    uint32_t promiscuous_mode   : 1;  /* Is promiscuous mode on? */
-    uint32_t ranging_supported  : 1;  /* Does MAC sublayer support ranging */
-    uint32_t rx_when_idle       : 1;  /* Recvr. on during idle periods */
-    uint32_t sec_enabled        : 1;  /* Does MAC sublayer have security en. */
+  uint32_t is_assoc           : 1;  /* Are we associated to the PAN */
+  uint32_t assoc_permit       : 1;  /* Are we allowing assoc. as a coord. */
+  uint32_t auto_req           : 1;  /* Automatically send data req. if addr
+                                     * addr is in the beacon frame */
 
-    uint32_t max_csma_backoffs  : 3;  /* Max num backoffs for CSMA algorithm
-                                       * before declaring ch access failure */
+  uint32_t batt_life_ext      : 1;  /* Is BLE enabled */
+  uint32_t gts_permit         : 1;  /* Is PAN Coord. accepting GTS reqs. */
+  uint32_t promiscuous_mode   : 1;  /* Is promiscuous mode on? */
+  uint32_t ranging_supported  : 1;  /* Does MAC sublayer support ranging */
+  uint32_t rx_when_idle       : 1;  /* Recvr. on during idle periods */
+  uint32_t sec_enabled        : 1;  /* Does MAC sublayer have security en. */
 
-    uint32_t beacon_order       : 4;  /* Freq. that beacon is transmitted */
+  uint32_t max_csma_backoffs  : 3;  /* Max num backoffs for CSMA algorithm
+                                     * before declaring ch access failure */
 
-    uint32_t superframe_order   : 4;  /* Length of active portion of outgoing
-                                       * superframe, including the beacon */
+  uint32_t beacon_order       : 4;  /* Freq. that beacon is transmitted */
+
+  uint32_t superframe_order   : 4;  /* Length of active portion of outgoing
+                                     * superframe, including the beacon */
 
     /* The offset, measured is symbols, between the symbol boundary at which the
      * MLME captures the timestamp of each transmitted and received frame, and
@@ -213,25 +213,29 @@ struct ieee802154_privmac_s
      * the frames [1] pg. 129.
      */
 
-    uint32_t sync_symb_offset   : 12;
-  };
+  uint32_t sync_symb_offset   : 12;
 
-  struct
-  {
-    uint32_t beacon_tx_time     : 24; /* Time of last beacon transmit */
-    uint32_t min_be             : 4;  /* Min value of backoff exponent (BE) */
-    uint32_t max_be             : 4;  /* Max value of backoff exponent (BE) */
-  };
+  /* End of 32-bit bitfield */
 
-  struct
-  {
-    uint32_t tx_ctrl_active_dur : 17; /* Duration for which tx is permitted to
-                                       * be active */
-    uint32_t tx_ctrl_pause_dur  : 1;  /* Duration after tx before another tx is
-                                       * permitted. 0=2000, 1= 10000 */
-    uint32_t timestamp_support  : 1;  /* Does MAC layer supports timestamping */
-    uint32_t is_coord           : 1;  /* Is this device acting as coordinator */
-  };
+  /* Start of 32-bit bitfield */
+
+  uint32_t beacon_tx_time     : 24; /* Time of last beacon transmit */
+  uint32_t min_be             : 4;  /* Min value of backoff exponent (BE) */
+  uint32_t max_be             : 4;  /* Max value of backoff exponent (BE) */
+
+  /* End of 32-bit bitfield */
+
+  /* Start of 32-bit bitfield */
+
+  uint32_t tx_ctrl_active_dur : 17; /* Duration for which tx is permitted to
+                                     * be active */
+  uint32_t tx_ctrl_pause_dur  : 1;  /* Duration after tx before another tx is
+                                     * permitted. 0=2000, 1= 10000 */
+  uint32_t timestamp_support  : 1;  /* Does MAC layer supports timestamping */
+  uint32_t is_coord           : 1;  /* Is this device acting as coordinator */
+  /* 12-bits remaining */
+
+  /* End of 32-bit bitfield. 
 
   /* TODO: Add Security-related MAC PIB attributes */
 };
