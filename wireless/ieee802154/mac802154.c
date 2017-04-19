@@ -163,14 +163,14 @@ struct ieee802154_privmac_s
   /* Contents of beacon payload */
 
   uint8_t beacon_payload[IEEE802154_MAX_BEACON_PAYLOAD_LENGTH];
-  uint8_t beacon_payload_len;     /* Length of beacon payload */
+  uint8_t beacon_payload_len;       /* Length of beacon payload */
 
-  uint8_t batt_life_ext_periods;  /* # of backoff periods during which rx is
-                                   * enabled after the IFS following beacon */
+  uint8_t batt_life_ext_periods;    /* # of backoff periods during which rx is
+                                     * enabled after the IFS following beacon */
 
-  uint8_t bsn;          /* Seq. num added to tx beacon frame */
-  uint8_t dsn;          /* Seq. num added to tx data or MAC frame */
-  uint8_t max_retries;  /* Max # of retries alloed after tx failure */
+  uint8_t bsn;                      /* Seq. num added to tx beacon frame */
+  uint8_t dsn;                      /* Seq. num added to tx data or MAC frame */
+  uint8_t max_retries;              /* Max # of retries alloed after tx failure */
 
   /* The maximum time, in multiples of aBaseSuperframeDuration, a device shall
    * wait for a response command frame to be available following a request
@@ -207,11 +207,11 @@ struct ieee802154_privmac_s
   uint32_t superframe_order   : 4;  /* Length of active portion of outgoing
                                      * superframe, including the beacon */
 
-    /* The offset, measured is symbols, between the symbol boundary at which the
-     * MLME captures the timestamp of each transmitted and received frame, and
-     * the onset of the first symbol past the SFD, namely the first symbol of
-     * the frames [1] pg. 129.
-     */
+  /* The offset, measured is symbols, between the symbol boundary at which the
+   * MLME captures the timestamp of each transmitted and received frame, and
+   * the onset of the first symbol past the SFD, namely the first symbol of
+   * the frames [1] pg. 129.
+   */
 
   uint32_t sync_symb_offset   : 12;
 
@@ -233,7 +233,7 @@ struct ieee802154_privmac_s
                                      * permitted. 0=2000, 1= 10000 */
   uint32_t timestamp_support  : 1;  /* Does MAC layer supports timestamping */
   uint32_t is_coord           : 1;  /* Is this device acting as coordinator */
-  /* 12-bits remaining */
+                                    /* 12-bits remaining */
 
   /* End of 32-bit bitfield. 
 
