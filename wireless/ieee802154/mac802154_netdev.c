@@ -157,42 +157,60 @@ struct macnet_driver_s
  ****************************************************************************/
 
 /* IEE802.15.4 MAC callback functions ***************************************/
+
+static void macnet_mlme_notify(FAR struct ieee802154_maccb_s *maccb,
+                               enum ieee802154_macnotify_e notif,
+                               FAR union ieee802154_mlme_notify_u *arg);
+
+static void macnet_mcps_notify(FAR struct ieee802154_maccb_s *maccb,
+                               enum ieee802154_macnotify_e notif,
+                               FAR union ieee802154_mcps_notify_u *arg);
+
 /* Asynchronous confirmations to requests */
 
-static void macnet_conf_data(MACHANDLE mac,
+static void macnet_conf_data(FAR struct macnet_driver_s *priv,
              FAR struct ieee802154_data_conf_s *conf);
-static void macnet_conf_purge(MACHANDLE mac, uint8_t handle, int status);
-static void macnet_conf_associate(MACHANDLE mac, uint16_t saddr, int status);
-static void macnet_conf_disassociate(MACHANDLE mac, int status);
-static void macnet_conf_get(MACHANDLE mac, int status, int attribute,
-             FAR uint8_t *value, int valuelen);
-static void macnet_conf_gts(MACHANDLE mac, FAR uint8_t *characteristics,
-             int status);
-static void macnet_conf_reset(MACHANDLE mac, int status);
-static void macnet_conf_rxenable(MACHANDLE mac, int status);
-static void macnet_conf_scan(MACHANDLE mac, int status, uint8_t type,
-             uint32_t unscanned, int rsltsize, FAR uint8_t *edlist,
-             FAR uint8_t *pandescs);
-static void macnet_conf_set(MACHANDLE mac, int status, int attribute);
-static void macnet_conf_start(MACHANDLE mac, int status);
-static void macnet_conf_poll(MACHANDLE mac, int status);
+static void macnet_conf_purge(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_purge_conf_s *conf);
+static void macnet_conf_associate(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_assoc_conf_s *conf);
+static void macnet_conf_disassociate(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_disassoc_conf_s *conf);
+static void macnet_conf_get(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_get_conf_s *conf);
+static void macnet_conf_gts(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_gts_conf_s *conf);
+static void macnet_conf_reset(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_reset_conf_s *conf); 
+static void macnet_conf_rxenable(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_rxenable_conf_s *conf); 
+static void macnet_conf_scan(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_scan_conf_s *conf); 
+static void macnet_conf_set(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_set_conf_s *conf); 
+static void macnet_conf_start(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_start_conf_s *conf); 
+static void macnet_conf_poll(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_poll_conf_s *conf); 
 
   /* Asynchronous event indications, replied to synchronously with responses */
 
-static void macnet_ind_data(MACHANDLE mac, FAR uint8_t *buf, int len);
-static void macnet_ind_associate(MACHANDLE mac, uint16_t clipanid,
-              FAR uint8_t *clieaddr);
-static void macnet_ind_disassociate(MACHANDLE mac, FAR uint8_t *eadr,
-              uint8_t reason);
-static void macnet_ind_beaconnotify(MACHANDLE mac, FAR uint8_t *bsn,
-              FAR struct ieee802154_pan_desc_s *pandesc, FAR uint8_t *sdu,
-              int sdulen);
-static void macnet_ind_gts(MACHANDLE mac, FAR uint8_t *devaddr,
-              FAR uint8_t *characteristics);
-static void macnet_ind_orphan(MACHANDLE mac, FAR uint8_t *orphanaddr);
-static void macnet_ind_commstatus(MACHANDLE mac, uint16_t panid,
-              FAR uint8_t *src, FAR uint8_t *dst, int status);
-static void macnet_ind_syncloss(MACHANDLE mac, int reason);
+static void macnet_ind_data(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_data_ind_s *conf); 
+static void macnet_ind_associate(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_assoc_ind_s *conf); 
+static void macnet_ind_disassociate(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_disassoc_ind_s *conf); 
+static void macnet_ind_beaconnotify(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_beaconnotify_ind_s *conf); 
+static void macnet_ind_gts(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_gts_ind_s *conf); 
+static void macnet_ind_orphan(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_orphan_ind_s *conf); 
+static void macnet_ind_commstatus(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_commstatus_ind_s *conf); 
+static void macnet_ind_syncloss(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_syncloss_ind_s *conf); 
 
 /* Network interface support ************************************************/
 /* Common TX logic */
@@ -244,6 +262,58 @@ static int  macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
  * Private Functions
  ****************************************************************************/
 
+static void macnet_mlme_notify(FAR struct ieee802154_maccb_s *maccb,
+                               enum ieee802154_macnotify_e notif,
+                               FAR union ieee802154_mlme_notify_u *arg)
+{
+  FAR struct macdev_callback_s *cb =
+    (FAR struct macdev_callback_s *)maccb;
+  FAR struct macnet_driver_s *priv;
+
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
+
+  switch (notif)
+    {
+
+      default:
+        break;
+    }
+}
+
+static void macnet_mcps_notify(FAR struct ieee802154_maccb_s *maccb,
+                               enum ieee802154_macnotify_e notif,
+                               FAR union ieee802154_mcps_notify_u *arg)
+{
+  FAR struct macdev_callback_s *cb =
+    (FAR struct macdev_callback_s *)maccb;
+  FAR struct macdev_driver_s *priv;
+
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  priv = cb->mc_priv;
+
+  switch (notif)
+    {
+      case IEEE802154_NOTIFY_CONF_DATA:
+        {
+          macnet_conf_data(priv, &arg->dataconf);
+        }
+        break;
+      case IEEE802154_NOTIFY_CONF_PURGE:
+        {
+          macnet_conf_purge(priv, &arg->purgeconf);
+        }
+        break;
+      case IEEE802154_NOTIFY_IND_DATA:
+        {
+          macnet_ind_data(priv, &arg->dataind);
+        }
+        break;
+      default:
+        break;
+    }
+}
+
 /****************************************************************************
  * Name: macnet_conf_data
  *
@@ -252,14 +322,10 @@ static int  macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
  *
  ****************************************************************************/
 
-static void macnet_conf_data(MACHANDLE mac,
+static void macnet_conf_data(FAR struct macnet_driver_s *priv,
                              FAR struct ieee802154_data_conf_s *conf)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -270,13 +336,10 @@ static void macnet_conf_data(MACHANDLE mac,
  *
  ****************************************************************************/
 
-static void macnet_conf_purge(MACHANDLE mac, uint8_t handle, int status)
+static void macnet_conf_purge(FAR struct macnet_driver_s *priv,
+                             FAR struct ieee802154_purge_conf_s *conf)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -287,13 +350,10 @@ static void macnet_conf_purge(MACHANDLE mac, uint8_t handle, int status)
  *
  ****************************************************************************/
 
-static void macnet_conf_associate(MACHANDLE mac, uint16_t saddr, int status)
+static void macnet_conf_associate(FAR struct macnet_driver_s *priv,
+                                  FAR struct ieee802154_assoc_conf_s *conf)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -304,66 +364,52 @@ static void macnet_conf_associate(MACHANDLE mac, uint16_t saddr, int status)
  *
  ****************************************************************************/
 
-static void macnet_conf_disassociate(MACHANDLE mac, int status)
+static void macnet_conf_disassociate(FAR struct macnet_driver_s *priv,
+                                     FAR struct ieee802154_disassoc_conf_s *conf)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
  * Name: macnet_conf_get
  *
  * Description:
- *   PIvoata returned
+ *   PIB data returned
  *
  ****************************************************************************/
 
-static void macnet_conf_get(MACHANDLE mac, int status, int attribute,
-                            FAR uint8_t *value, int valuelen)
+static void macnet_conf_get(FAR struct macnet_driver_s *priv,
+                            FAR struct ieee802154_get_conf_s *conf)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
  * Name: macnet_conf_gts
  *
  * Description:
- *   GTvoanagement completed
+ *   GTS management completed
  *
  ****************************************************************************/
 
-static void macnet_conf_gts(MACHANDLE mac, FAR uint8_t *characteristics,
-                            int status)
+static void macnet_conf_gts(FAR struct macnet_driver_s *priv,
+                            FAR struct ieee802154_gts_conf_s *conf)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
  * Name: macnet_conf_reset
  *
  * Description:
- *   MAveset completed
+ *   MAC reset completed
  *
  ****************************************************************************/
 
-static void macnet_conf_reset(MACHANDLE mac, int status)
+static void macnet_conf_reset(FAR struct macnet_driver_s *priv,
+                              FAR struct ieee802154_reset_conf_s *conf)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -373,13 +419,10 @@ static void macnet_conf_reset(MACHANDLE mac, int status)
  *
  ****************************************************************************/
 
-static void macnet_conf_rxenable(MACHANDLE mac, int status)
+static void macnet_conf_rxenable(FAR struct macnet_driver_s *priv,
+                                 FAR struct ieee802154_rxenable_conf_s *conf)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -389,15 +432,10 @@ static void macnet_conf_rxenable(MACHANDLE mac, int status)
  *
  ****************************************************************************/
 
-static void macnet_conf_scan(MACHANDLE mac, int status, uint8_t type,
-                             uint32_t unscanned, int rsltsize,
-                             FAR uint8_t *edlist, FAR uint8_t *pandescs)
+static void macnet_conf_scan(FAR struct macnet_driver_s *priv,
+                             FAR struct ieee802154_scan_conf_s *conf)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -407,13 +445,10 @@ static void macnet_conf_scan(MACHANDLE mac, int status, uint8_t type,
  *
  ****************************************************************************/
 
-static void macnet_conf_set(MACHANDLE mac, int status, int attribute)
+static void macnet_conf_set(FAR struct macnet_driver_s *priv,
+                            FAR struct ieee802154_set_conf_s *conf)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -423,13 +458,10 @@ static void macnet_conf_set(MACHANDLE mac, int status, int attribute)
  *
  ****************************************************************************/
 
-static void macnet_conf_start(MACHANDLE mac, int status)
+static void macnet_conf_start(FAR struct macnet_driver_s *priv,
+                              FAR struct ieee802154_start_conf_s *conf)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -439,13 +471,10 @@ static void macnet_conf_start(MACHANDLE mac, int status)
  *
  ****************************************************************************/
 
-static void macnet_conf_poll(MACHANDLE mac, int status)
+static void macnet_conf_poll(FAR struct macnet_driver_s *priv,
+                             FAR struct ieee802154_poll_conf_s *conf)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -456,13 +485,10 @@ static void macnet_conf_poll(MACHANDLE mac, int status)
  *
  ****************************************************************************/
 
-static void macnet_ind_data(MACHANDLE mac, FAR uint8_t *buf, int len)
+static void macnet_ind_data(FAR struct macnet_driver_s *priv,
+                            FAR struct ieee802154_data_ind_s *ind)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -473,14 +499,10 @@ static void macnet_ind_data(MACHANDLE mac, FAR uint8_t *buf, int len)
  *
  ****************************************************************************/
 
-static void macnet_ind_associate(MACHANDLE mac, uint16_t clipanid,
-                                 FAR uint8_t *clieaddr)
+static void macnet_ind_associate(FAR struct macnet_driver_s *priv,
+                                 FAR struct ieee802154_assoc_ind_s *ind)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -491,14 +513,10 @@ static void macnet_ind_associate(MACHANDLE mac, uint16_t clipanid,
  *
  ****************************************************************************/
 
-static void macnet_ind_disassociate(MACHANDLE mac, FAR uint8_t *eadr,
-                                    uint8_t reason)
+static void macnet_ind_disassociate(FAR struct macnet_driver_s *priv,
+                                    FAR struct ieee802154_disassoc_ind_s *ind)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -509,15 +527,10 @@ static void macnet_ind_disassociate(MACHANDLE mac, FAR uint8_t *eadr,
  *
  ****************************************************************************/
 
-static void macnet_ind_beaconnotify(MACHANDLE mac, FAR uint8_t *bsn,
-                                    FAR struct ieee802154_pan_desc_s *pandesc,
-                                    FAR uint8_t *sdu, int sdulen)
+static void macnet_ind_beaconnotify(FAR struct macnet_driver_s *priv,
+                                    FAR struct ieee802154_beaconnotify_ind_s *ind)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -528,14 +541,10 @@ static void macnet_ind_beaconnotify(MACHANDLE mac, FAR uint8_t *bsn,
  *
  ****************************************************************************/
 
-static void macnet_ind_gts(MACHANDLE mac, FAR uint8_t *devaddr,
-                           FAR uint8_t *characteristics)
+static void macnet_ind_gts(FAR struct macnet_driver_s *priv,
+                           FAR struct ieee802154_gts_ind_s *ind)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -546,13 +555,10 @@ static void macnet_ind_gts(MACHANDLE mac, FAR uint8_t *devaddr,
  *
  ****************************************************************************/
 
-static void macnet_ind_orphan(MACHANDLE mac, FAR uint8_t *orphanaddr)
+static void macnet_ind_orphan(FAR struct macnet_driver_s *priv,
+                              FAR struct ieee802154_orphan_ind_s *ind)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -562,15 +568,10 @@ static void macnet_ind_orphan(MACHANDLE mac, FAR uint8_t *orphanaddr)
  *
  ****************************************************************************/
 
-static void macnet_ind_commstatus(MACHANDLE mac, uint16_t panid,
-                                  FAR uint8_t *src, FAR uint8_t *dst,
-                                  int status)
+static void macnet_ind_commstatus(FAR struct macnet_driver_s *priv,
+                                  FAR struct ieee802154_commstatus_ind_s *ind)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -580,13 +581,10 @@ static void macnet_ind_commstatus(MACHANDLE mac, uint16_t panid,
  *
  ****************************************************************************/
 
-static void macnet_ind_syncloss(MACHANDLE mac, int reason)
+static void macnet_ind_syncloss(FAR struct macnet_driver_s *priv,
+                                FAR struct ieee802154_syncloss_ind_s *ind)
 {
-  FAR struct macnet_callback_s *cb = (FAR struct macnet_callback_s *)mac;
-  FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 }
 
 /****************************************************************************
@@ -1503,10 +1501,11 @@ int mac802154netdev_register(MACHANDLE mac)
 {
   FAR struct macnet_driver_s *priv;
   FAR struct net_driver_s *dev;
+  FAR struct ieee802154_maccb_s *maccb;
   FAR uint8_t *pktbuf;
   int ret;
 
-  DEBUGASSERT(radio != NULL);
+  DEBUGASSERT(mac != NULL);
 
   /* Get the interface structure associated with this interface number. */
 
@@ -1533,7 +1532,7 @@ int mac802154netdev_register(MACHANDLE mac)
 
   /* Initialize the driver structure */
 
-  dev                = &ieee->md_dev.i_dev;
+  dev                = &priv->md_dev.i_dev;
   dev->d_buf         = pktbuf;            /* Single packet buffer */
   dev->d_ifup        = macnet_ifup;       /* I/F up (new IP address) callback */
   dev->d_ifdown      = macnet_ifdown;     /* I/F down callback */
@@ -1557,34 +1556,16 @@ int mac802154netdev_register(MACHANDLE mac)
 
   /* Initialize the MAC callbacks */
 
-  priv->md_cb.mc_priv      = priv;
+  priv->md_cb.mc_priv = priv;
 
-  maccb                    = &priv->md_cb.mc_cb;
-  maccb->conf_data         = macnet_conf_data;
-  maccb->conf_purge        = macnet_conf_purge;
-  maccb->conf_associate    = macnet_conf_associate;
-  maccb->conf_disassociate = macnet_conf_disassociate;
-  maccb->conf_get          = macnet_conf_get;
-  maccb->conf_gts          = macnet_conf_gts;
-  maccb->conf_reset        = macnet_conf_reset;
-  maccb->conf_rxenable     = macnet_conf_rxenable;
-  maccb->conf_scan         = macnet_conf_scan;
-  maccb->conf_set          = macnet_conf_set;
-  maccb->conf_start        = macnet_conf_start;
-  maccb->conf_poll         = macnet_conf_poll;
-  maccb->ind_data          = macnet_ind_data;
-  maccb->ind_associate     = macnet_ind_associate;
-  maccb->ind_disassociate  = macnet_ind_disassociate;
-  maccb->ind_beaconnotify  = macnet_ind_beaconnotify;
-  maccb->ind_gts           = macnet_ind_gts;
-  maccb->ind_orphan        = macnet_ind_orphan;
-  maccb->ind_commstatus    = macnet_ind_commstatus;
-  maccb->ind_syncloss      = macnet_ind_syncloss;
+  maccb               = &priv->md_cb.mc_cb;
+  maccb->mlme_notify  = macdev_mlme_notify;       
+  maccb->mcps_notify  = macdev_mcps_notify;       
 
   /* Bind the callback structure */
 
-  ret = mac->ops->bind(mac, *priv->md_cb.mc_cb);
-  if (ret < 0)
+  ret = mac802154_bind(mac, maccb);
+  if (ret < 0
     {
       nerr("ERROR: Failed to bind the MAC callbacks: %d\n", ret);
 
@@ -1596,7 +1577,7 @@ int mac802154netdev_register(MACHANDLE mac)
       /* Free memory and return the error */
       kmm_free(pktbuf);
       kmm_free(priv);
-      return ret
+      return ret;
     }
 
   /* Put the interface in the down state. */

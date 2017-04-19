@@ -346,6 +346,8 @@ static ssize_t radio802154dev_write(FAR struct file *filep,
    * Beacons and GTS transmission will be handled via IOCTLs
    */
 
+#warning Fix this when transmit interface is complete
+  /*
   ret = dev->child->ops->transmit(dev->child, packet);
   if (ret != packet->len)
     {
@@ -357,6 +359,7 @@ static ssize_t radio802154dev_write(FAR struct file *filep,
     {
       wlerr("Radio Device timedout on Tx\n");
     }
+  */
 
 done:
 

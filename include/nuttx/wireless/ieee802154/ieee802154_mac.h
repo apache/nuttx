@@ -115,7 +115,7 @@
 /* MAC commands */
 
 #define IEEE802154_CMD_ASSOC_REQ      0x01
-#define IEEE802154_CMD_ASSOC_RSP      0x02
+#define IEEE802154_CMD_ASSOC_RESP     0x02
 #define IEEE802154_CMD_DISASSOC_NOT   0x03
 #define IEEE802154_CMD_DATA_REQ       0x04
 #define IEEE802154_CMD_PANID_CONF_NOT 0x05
@@ -392,107 +392,6 @@ enum ieee802154_ranging_e
   IEEE802154_PHY_HEADER_ONLY
 };
 
-struct ieee802154_data_req_s
-{
-  enum ieee802154_addr_mode_e src_addr_mode;  /* Source Address Mode */
-  struct ieee802154_addr_s dest_addr;         /* Destination Address */
-  
-  /* Number of bytes contained in the MAC Service Data Unit (MSDU) 
-   * to be transmitted by the MAC sublayer enitity 
-   * Note: This could be a uint8_t but if anyone ever wants to use
-   * non-standard frame lengths, they may want a length larger than
-   * a uint8_t.
-   */
-
-  uint16_t msdu_length;
-
-
-  uint8_t msdu_handle;    /* Handle assoc. with MSDU */
-  struct
-  {
-    uint8_t ack_tx      : 1;  /* Acknowledge TX? */               
-    uint8_t gts_tx      : 1;  /* 1=GTS used for TX, 0=CAP used for TX */
-    uint8_t indirect_tx : 1;  /* Should indirect transmission be used? */
-  } msdu_flags;
-
-#ifdef CONFIG_IEEE802154_SECURITY
-  /* Security information if enabled */
-
-  struct ieee802154_security_s security;
-#endif
-
-#ifdef CONFIG_IEEE802154_UWB
-  /* The UWB Pulse Repetion Frequency to be used for the transmission */
-
-  enum ieee802154_uwbprf_e uwb_prf;
-
-  /* The UWB preamble symbol repititions
-   *  Should be one of:
-   *    0, 16, 64, 1024, 4096
-   */
-
-  uint16_t uwb_presym_rep;  
-
-  /* The UWB Data Rate to be used for the transmission */
-
-  enum ieee802154_uwb_datarate_e data_rate;
-#endif
-
-  enum ieee802154_ranging_e ranging;
-
-  /* The MAC service data unit array that is to be transmitted
-   * This must be at the end of the struct to allow the array
-   * to continue and make the struct "variable length"
-   */ 
-
-  uint8_t msdu[1];
-};
-#define SIZEOF_IEEE802154_DATA_REQ_S(n) \
-        (sizeof(struct ieee802154_data_req_s) + (n) - 1)
-
-struct ieee802154_data_conf_s
-{
-  uint8_t msdu_handle;              /* Handle assoc. with MSDU */
-
-  /* The time, in symbols, at which the data were transmitted */
-
-  uint32_t timestamp;
-
-  enum ieee802154_status_e status;  /* The status of the MSDU transmission */
-
-#ifdef CONFIG_IEEE802154_RANGING
-  bool rng_rcvd;                    /* Ranging indicated by MSDU */
-
-  /* A count of the time units corresponding to an RMARKER at the antenna at
-   * the beginning of the ranging exchange
-   */
-
-  uint32_t rng_counter_start; 
-
-  /* A count of the time units corresponding to an RMARKER at the antenna at
-   * end of the ranging exchange
-   */
-
-  uint32_t rng_counter_stop; 
-
-  /* A count of the time units in a message exchange over which the tracking
-   * offset was measured
-   */
-
-  uint34_t rng_tracking_interval;
-
-  /* A count of the time units slipped or advanced by the radio tracking
-   * system over the course of the entire tracking interval
-   */
-
-  uint32_t rng_offset;
-
-  /* The Figure of Merit (FoM) characterizing the ranging measurement */ 
-
-  uint8_t rng_fom; 
-#endif
-};
-
 struct ieee802154_capability_info_s
 {
   uint8_t reserved_0 : 1;     /* Reserved */
@@ -553,7 +452,234 @@ struct ieee802154_pend_addr_s
   struct ieee802154_addr_s addr[7]; /* Array of at most 7 addresses */
 };
 
-/* Primitive Semantics */
+/* Primitive Support Types ***************************************************/
+
+union ieee802154_attr_val_u
+{
+  /* TODO: Finish this */
+};
+
+struct ieee802154_gts_info_s
+{
+  uint8_t length      : 4; /* Number of SF slots for GTS */
+  uint8_t direction   : 1; /* 0=transmit-only, 1=receive-only */
+  uint8_t type        : 1; /* 0=GTS deallocation, 1= GTS allocation */
+  uint8_t reserved    : 2;
+};
+
+enum ieee802154_scantype_e
+{
+  IEEE802154_SCANTYPE_ED,
+  IEEE802154_SCANTYPE_ACTIVE,
+  IEEE802154_SCANTYPE_PASSIVE,
+  IEEE802154_SCANTYPE_ORPHAN
+};
+
+/* Primitive Semantics *******************************************************/
+
+/*****************************************************************************
+ * Primitive: MCPS-DATA.request 
+ *
+ * Description:
+ *    Requests the transfer of data to another device.  
+ * 
+ *****************************************************************************/
+
+struct ieee802154_data_req_s
+{
+  enum ieee802154_addr_mode_e src_addr_mode;  /* Source Address Mode */
+  struct ieee802154_addr_s dest_addr;         /* Destination Address */
+  
+  /* Number of bytes contained in the MAC Service Data Unit (MSDU) 
+   * to be transmitted by the MAC sublayer enitity 
+   * Note: This could be a uint8_t but if anyone ever wants to use
+   * non-standard frame lengths, they may want a length larger than
+   * a uint8_t.
+   */
+
+  uint16_t msdu_length;
+
+  uint8_t msdu_handle;    /* Handle assoc. with MSDU */
+  struct
+  {
+    uint8_t ack_tx      : 1;  /* Acknowledge TX? */               
+    uint8_t gts_tx      : 1;  /* 1=GTS used for TX, 0=CAP used for TX */
+    uint8_t indirect_tx : 1;  /* Should indirect transmission be used? */
+  } msdu_flags;
+
+#ifdef CONFIG_IEEE802154_SECURITY
+  /* Security information if enabled */
+
+  struct ieee802154_security_s security;
+#endif
+
+#ifdef CONFIG_IEEE802154_UWB
+  /* The UWB Pulse Repetion Frequency to be used for the transmission */
+
+  enum ieee802154_uwbprf_e uwb_prf;
+
+  /* The UWB preamble symbol repititions
+   *  Should be one of:
+   *    0, 16, 64, 1024, 4096
+   */
+
+  uint16_t uwb_presym_rep;  
+
+  /* The UWB Data Rate to be used for the transmission */
+
+  enum ieee802154_uwb_datarate_e data_rate;
+#endif
+
+  enum ieee802154_ranging_e ranging;
+
+  /* The MAC service data unit array that is to be transmitted
+   * This must be at the end of the struct to allow the array
+   * to continue and make the struct "variable length"
+   */ 
+
+  uint8_t msdu[1];
+};
+
+#define SIZEOF_IEEE802154_DATA_REQ_S(n) \
+        (sizeof(struct ieee802154_data_req_s) + (n) - 1)
+
+/*****************************************************************************
+ * Primitive: MCPS-DATA.confirm 
+ *
+ * Description:
+ *    Reports the results of a request to transfer data to another device.
+ * 
+ *****************************************************************************/
+
+struct ieee802154_data_conf_s
+{
+  uint8_t msdu_handle;              /* Handle assoc. with MSDU */
+
+  /* The time, in symbols, at which the data were transmitted */
+
+  uint32_t timestamp;
+
+  enum ieee802154_status_e status;  /* The status of the MSDU transmission */
+
+#ifdef CONFIG_IEEE802154_RANGING
+  bool rng_rcvd;                    /* Ranging indicated by MSDU */
+
+  /* A count of the time units corresponding to an RMARKER at the antenna at
+   * the beginning of the ranging exchange
+   */
+
+  uint32_t rng_counter_start; 
+
+  /* A count of the time units corresponding to an RMARKER at the antenna at
+   * end of the ranging exchange
+   */
+
+  uint32_t rng_counter_stop; 
+
+  /* A count of the time units in a message exchange over which the tracking
+   * offset was measured
+   */
+
+  uint34_t rng_tracking_interval;
+
+  /* A count of the time units slipped or advanced by the radio tracking
+   * system over the course of the entire tracking interval
+   */
+
+  uint32_t rng_offset;
+
+  /* The Figure of Merit (FoM) characterizing the ranging measurement */ 
+
+  uint8_t rng_fom; 
+#endif
+};
+
+/*****************************************************************************
+ * Primitive: MCPS-DATA.indication 
+ *
+ * Description:
+ *    Indicates the reception of data from another device.
+ * 
+ *****************************************************************************/
+
+struct ieee802154_data_ind_s
+{
+  uint8_t msdu_handle;              /* Handle assoc. with MSDU */
+
+  /* The time, in symbols, at which the data were transmitted */
+
+  uint32_t timestamp;
+
+  enum ieee802154_status_e status;  /* The status of the MSDU transmission */
+
+#ifdef CONFIG_IEEE802154_RANGING
+  bool rng_rcvd;                    /* Ranging indicated by MSDU */
+
+  /* A count of the time units corresponding to an RMARKER at the antenna at
+   * the beginning of the ranging exchange
+   */
+
+  uint32_t rng_counter_start; 
+
+  /* A count of the time units corresponding to an RMARKER at the antenna at
+   * end of the ranging exchange
+   */
+
+  uint32_t rng_counter_stop; 
+
+  /* A count of the time units in a message exchange over which the tracking
+   * offset was measured
+   */
+
+  uint34_t rng_tracking_interval;
+
+  /* A count of the time units slipped or advanced by the radio tracking
+   * system over the course of the entire tracking interval
+   */
+
+  uint32_t rng_offset;
+
+  /* The Figure of Merit (FoM) characterizing the ranging measurement */ 
+
+  uint8_t rng_fom; 
+#endif
+};
+
+/*****************************************************************************
+ * Primitive: MCPS-PURGE.request 
+ *
+ * Description:
+ *    Allows the next higher layer to purge an MSDU from the transaction queue.
+ * 
+ *****************************************************************************/
+
+struct ieee802154_purge_req_s
+{
+  uint8_t msdu_handle;              /* Handle assoc. with MSDU */
+};
+
+/*****************************************************************************
+ * Primitive: MCPS-PURGE.confirm 
+ *
+ * Description:
+ *    Allows the MAC sublayer to notify the next higher layer of the success of
+ *    its request to purge an MSDU from the transaction queue.
+ * 
+ *****************************************************************************/
+
+struct ieee802154_purge_conf_s
+{
+  uint8_t msdu_handle;              /* Handle assoc. with MSDU */
+  enum ieee802154_status_e status;  /* The status of the MSDU transmission */
+};
+
+/*****************************************************************************
+ * Primitive: MLME-ASSOCIATE.request 
+ *
+ * Description:
+ *    Used by a device to request an association with a coordinator.
+ * 
+ *****************************************************************************/
 
 struct ieee802154_assoc_req_s
 {
@@ -575,6 +701,14 @@ struct ieee802154_assoc_req_s
 #endif
 };
 
+/*****************************************************************************
+ * Primitive: MLME-ASSOCIATE.indication 
+ *
+ * Description:
+ *    Used to indicate the reception of an association request command.
+ * 
+ *****************************************************************************/
+
 struct ieee802154_assoc_ind_s
 {
   /* Address of device requesting association. Always in extended mode */
@@ -592,7 +726,15 @@ struct ieee802154_assoc_ind_s
 #endif
 };
 
-struct ieee802154_assoc_rsp_s
+/*****************************************************************************
+ * Primitive: MLME-ASSOCIATE.response 
+ *
+ * Description:
+ *    Used to initiate a response to an MLME-ASSOCIATE.indication primitive.
+ * 
+ *****************************************************************************/
+
+struct ieee802154_assoc_resp_s
 {
   /* Address of device requesting association. Always in extended mode */
 
@@ -608,6 +750,15 @@ struct ieee802154_assoc_rsp_s
   struct ieee802154_security_s security;
 #endif
 };
+
+/*****************************************************************************
+ * Primitive: MLME-ASSOCIATE.confirm 
+ *
+ * Description:
+ *    Used to inform the next higher layer of the initiating device whether its
+ *    request to associate was successful or unsuccessful.
+ * 
+ *****************************************************************************/
 
 struct ieee802154_assoc_conf_s
 {
@@ -629,6 +780,16 @@ struct ieee802154_assoc_conf_s
 #endif
 };
 
+/*****************************************************************************
+ * Primitive: MLME-DISASSOCIATE.request 
+ *
+ * Description:
+ *    Used by an associated device to notify the coordinator of its intent to
+ *    leave the PAN. It is also used by the coordinator to instruct an
+ *    associated device to leave the PAN.
+ * 
+ *****************************************************************************/
+
 struct ieee802154_disassoc_req_s
 {
   /* Address of device to send disassociation notification */
@@ -648,6 +809,14 @@ struct ieee802154_disassoc_req_s
 #endif
 };
 
+/*****************************************************************************
+ * Primitive: MLME-DISASSOCIATE.indication 
+ *
+ * Description:
+ *    Used to indicate the reception of a disassociation notification command.
+ * 
+ *****************************************************************************/
+
 struct ieee802154_disassoc_ind_s
 {
   /* Address of device requesting disassociation. Always extended mode */
@@ -665,6 +834,14 @@ struct ieee802154_disassoc_ind_s
 #endif
 };
 
+/*****************************************************************************
+ * Primitive: MLME-DISASSOCIATE.confirm 
+ *
+ * Description:
+ *    Reports the results of an MLME-DISASSOCIATE.request primitive.
+ * 
+ *****************************************************************************/
+
 struct ieee802154_disassoc_conf_s
 {
   /* Status of the disassociation attempt */
@@ -675,6 +852,18 @@ struct ieee802154_disassoc_conf_s
 
   struct ieee802154_addr_s dev_addr;
 };
+
+/*****************************************************************************
+ * Primitive: MLME-BEACONNOTIFY.indication 
+ *
+ * Description:
+ *    Used to send parameters contained within a beacon frame received by the
+ *    MAC sublayer to the next higher layer when either macAutoRequest is set to
+ *    FALSE or when the beacon frame contains one or more octets of payload. The
+ *    primitive also sends a measure of the LQI and the time the beacon frame
+ *    was received.
+ * 
+ *****************************************************************************/
 
 struct ieee802154_beaconnotify_ind_s
 {
@@ -700,100 +889,402 @@ struct ieee802154_beaconnotify_ind_s
   (sizeof(struct ieee802154_beaconnotify_ind_s) \
   - IEEE802154_MAX_BEACON_PAYLOAD_LENGTH + (n))
 
-/* IOCTL data arguments *****************************************************/
+/*****************************************************************************
+ * Primitive: MLME-COMM-STATUS.indication 
+ *
+ * Description:
+ *    Allows the MLME to indicate a communications status.
+ * 
+ *****************************************************************************/
 
-/* Data returned with MAC802154IOC_MLME_ASSOC_RESPONSE */
-
-struct ieee802154_assocresp_s
+struct ieee802154_commstatus_ind_s
 {
-  uint8_t eadr;
-  uint16_t saddr;
-  int status;
+  struct ieee802154_addr_s src_addr;
+  struct ieee802154_addr_s dest_addr;
+  enum ieee802154_status_e status;
+#ifdef CONFIG_IEEE802154_SECURITY
+  /* Security information if enabled */
+
+  struct ieee802154_security_s security;
+#endif
 };
 
-/* Data provided to MAC802154IOC_MLME_GET_REQUEST */
+/*****************************************************************************
+ * Primitive: MLME-GET.request 
+ *
+ * Description:
+ *    Requests information about a given PIB attribute.
+ * 
+ *****************************************************************************/
 
-struct ieee802154_getreq_s
+struct ieee802154_get_req_s
 {
-  enum ieee802154_pib_attr_e attr;
+  enum ieee802154_pib_attr_e pib_attr;
 };
 
-/* Data provided to MAC802154IOC_MLME_GTS_REQUEST */
+/*****************************************************************************
+ * Primitive: MLME-GET.confirm 
+ *
+ * Description:
+ *    Reports the results of an information request from the PIB.
+ * 
+ *****************************************************************************/
 
-struct ieee802154_gtsreq_s
+struct ieee802154_get_conf_s
 {
-  uint8_t characteristics;
+  enum ieee802154_status_e status;
+  enum ieee802154_pib_attr_e pib_attr;
+  union ieee802154_attr_val_u attr_value;
 };
 
-/* Data returned with MAC802154IOC_MLME_ORPHAN_RESPONSE */
+/*****************************************************************************
+ * Primitive: MLME-GTS.request
+ *
+ * Description:
+ *    Allows a device to send a request to the PAN coordinator to allocate a new
+ *    GTS or to deallocate an existing GTS. This primitive is also used by the
+ *    PAN coordinator to initiate a GTS deallocation.
+ * 
+ *****************************************************************************/
 
-struct ieee802154_orphanresp_s
+struct ieee802154_gts_req_s
 {
-  uint8_t orphanaddr[MAX_ORPHAN_ADDR];
-  uint16_t saddr;
-  bool associated;
+  struct ieee802154_gts_info_s gts_info;
+
+#ifdef CONFIG_IEEE802154_SECURITY
+  /* Security information if enabled */
+
+  struct ieee802154_security_s security;
+#endif
 };
 
-/* Data provided with MAC802154IOC_MLME_RESET_REQUEST */
+/*****************************************************************************
+ * Primitive: MLME-GTS.confirm
+ *
+ * Description:
+ *    Reports the results of a request to allocate a new GTS or to deallocate an
+ *    existing GTS.
+ * 
+ *****************************************************************************/
 
-struct ieee802154_resetreq_s
+struct ieee802154_gts_conf_s
 {
-  bool setdefaults;
+  struct ieee802154_gts_info_s gts_info;
+  enum ieee802154_status_e status;
 };
 
-/* Data provided with MAC802154IOC_MLME_RXENABLE_REQUEST */
+/*****************************************************************************
+ * Primitive: MLME-GTS.indication
+ *
+ * Description:
+ *    Indicates that a GTS has been allocated or that a previously allocated
+ *    GTS has been deallocated.
+ * 
+ *****************************************************************************/
 
-struct ieee802154_rxenabreq_s
+struct ieee802154_gts_ind_s
 {
-  bool deferrable;
-  int ontime;
-  int duration;
+  uint16_t dev_addr;
+  struct ieee802154_gts_info_s gts_info;
+#ifdef CONFIG_IEEE802154_SECURITY
+  /* Security information if enabled */
+
+  struct ieee802154_security_s security;
+#endif
 };
 
-/* Data provided with MAC802154IOC_MLME_SCAN_REQUEST */
+/*****************************************************************************
+ * Primitive: MLME-ORPHAN.indication
+ *
+ * Description:
+ *    Generated by the MLME of a coordinator and issued to its next higher layer
+ *    on receipt of an orphan notification command.
+ * 
+ *****************************************************************************/
 
-struct ieee802154_scanreq_s
+struct ieee802154_orphan_ind_s
 {
-  uint8_t type;
-  uint32_t channels;
-  int duration;
+  uint8_t orphan_addr[8];
+#ifdef CONFIG_IEEE802154_SECURITY
+  /* Security information if enabled */
+
+  struct ieee802154_security_s security;
+#endif
 };
 
-/* Data provided with MAC802154IOC_MLME_SET_REQUEST */
+/*****************************************************************************
+ * Primitive: MLME-ORPHAN.response
+ *
+ * Description:
+ *    Allows the next higher layer of a coordinator to respond to the
+ *    MLME-ORPHAN.indication primitive.
+ * 
+ *****************************************************************************/
 
-struct ieee802154_setreq_s
+struct ieee802154_orphan_resp_s
 {
-  FAR uint8_t *value;
-  int valuelen;
-  int attribute;
+  uint8_t orphan_addr[8];
+#ifdef CONFIG_IEEE802154_SECURITY
+  /* Security information if enabled */
+
+  struct ieee802154_security_s security;
+#endif
 };
 
-/* Data provided with MAC802154IOC_MLME_START_REQUEST */
+/*****************************************************************************
+ * Primitive: MLME-RESET.request
+ *
+ * Description:
+ *    Used by the next higher layer to request that the MLME performs a reset
+ *    operation.
+ * 
+ *****************************************************************************/
 
-struct ieee802154_startreq_s
+struct ieee802154_reset_req_s
 {
-  int channel;
-  uint16_t panid;
-  uint8_t bo;
-  uint8_t fo;
-  bool coord;
-  bool batext;
-  bool realign;
+  bool rst_pibattr;
 };
 
-/* Data provided with MAC802154IOC_MLME_SYNC_REQUEST */
+/*****************************************************************************
+ * Primitive: MLME-RESET.confirm
+ *
+ * Description:
+ *    Reports the results of the reset operation.
+ * 
+ *****************************************************************************/
 
-struct ieee802154_syncreq_s
+struct ieee802154_reset_conf_s
 {
-  int channel;
-  bool track;
+  enum ieee802154_status_e status;
 };
 
-/* Data provided with MAC802154IOC_MLME_POLL_REQUEST */
+/*****************************************************************************
+ * Primitive: MLME-RXENABLE.request
+ *
+ * Description:
+ *    Allows the next higher layer to request that the receiver is either
+ *    enabled for a finite period of time or disabled.
+ * 
+ *****************************************************************************/
 
-struct ieee802154_pollreq_s
+struct ieee802154_rxenable_req_s
 {
-  FAR uint8_t *coordaddr;
+  /* Number of symbols measured from the start of the superframe before the
+   * receiver is to be enabled or disabled. */
+
+  uint32_t rxon_time;        
+
+  /* Number of symbols for which the receiver is to be enabled */
+
+  uint32_t rxon_dur;
+
+  uint8_t defer_permit  : 1; /* 0=Only attempt operation on current superframe
+                              * 1=Operation can be deferred to next superframe */
+  uint8_t rng_rxctrl    : 1; /* 0=RANGING_OFF, 1=RANGING_OFF */
+};
+
+/*****************************************************************************
+ * Primitive: MLME-RXENABLE.confirm
+ *
+ * Description:
+ *    Reports the results of the attempt to enable or disable the receiver.
+ * 
+ *****************************************************************************/
+
+struct ieee802154_rxenable_conf_s
+{
+  enum ieee802154_status_e status;
+};
+
+/*****************************************************************************
+ * Primitive: MLME-SCAN.request
+ *
+ * Description:
+ *    Used to initiate a channel scan over a given list of channels.
+ * 
+ *****************************************************************************/
+
+struct ieee802154_scan_req_s
+{
+
+  enum ieee802154_scantype_e type;
+  uint8_t duration;
+  uint8_t ch_page;
+
+#ifdef CONFIG_IEEE802154_SECURITY
+  /* Security information if enabled */
+
+  struct ieee802154_security_s security;
+#endif
+
+  uint8_t channels[1];
+};
+
+#define SIZEOF_IEEE802154_SCAN_REQ_S(n) \
+  (sizeof(struct ieee802154_scan_req_s) + (n) - 1)
+
+/*****************************************************************************
+ * Primitive: MLME-SCAN.confirm
+ *
+ * Description:
+ *    Reports the result of the channel scan request.
+ * 
+ *****************************************************************************/
+
+struct ieee802154_scan_conf_s
+{
+  enum ieee802154_status_e status;
+  enum ieee802154_scantype_e type;
+  uint8_t ch_page;
+  uint8_t num_channels;
+
+#warning Figure out how to handle missing primitive semantics. See standard.
+};
+
+/*****************************************************************************
+ * Primitive: MLME-SET.request
+ *
+ * Description:
+ *    Attempts to write the given value to the indicated PIB attribute.
+ * 
+ *****************************************************************************/
+
+struct ieee802154_set_req_s
+{
+  enum ieee802154_pib_attr_e pib_attr;
+  union ieee802154_attr_val_u attr_value;
+};
+
+/*****************************************************************************
+ * Primitive: MLME-SET.confirm
+ *
+ * Description:
+ *    Reports the results of an attempt to write a value to a PIB attribute.
+ * 
+ *****************************************************************************/
+
+struct ieee802154_set_conf_s
+{
+  enum ieee802154_status_e status;
+  enum ieee802154_pib_attr_e pib_attr;
+};
+
+/*****************************************************************************
+ * Primitive: MLME-START.request
+ *
+ * Description:
+ *    Used by the PAN coordinator to initiate a new PAN or to begin using a new
+ *    superframe configuration. This primitive is also used by a device already
+ *    associated with an existing PAN to begin using a new superframe
+ *    configuration.
+ * 
+ *****************************************************************************/
+
+struct ieee802154_start_req_s
+{
+  uint16_t pan_id;
+  uint8_t ch_num;
+  uint8_t ch_page;
+
+  uint32_t start_time   : 24; 
+  uint32_t beacon_order : 8;
+
+  uint8_t sf_order;
+
+  uint8_t pan_coord     : 1;
+  uint8_t batt_life_ext : 1;
+  uint8_t coord_realign : 1;
+
+#ifdef CONFIG_IEEE802154_SECURITY
+  /* Security information if enabled */
+
+  struct ieee802154_security_s coord_realign;
+  struct ieee802154_security_s beacon;
+#endif
+};
+
+/*****************************************************************************
+ * Primitive: MLME-START.confirm
+ *
+ * Description:
+ *    Reports the results of the attempt to start using a new superframe
+ *    configuration.
+ * 
+ *****************************************************************************/
+
+struct ieee802154_start_conf_s
+{
+  enum ieee802154_status_e status;
+};
+
+/*****************************************************************************
+ * Primitive: MLME-SYNC.request
+ *
+ * Description:
+ *    Requests to synchronize with the coordinator by acquiring and, if
+ *    specified, tracking its beacons.
+ * 
+ *****************************************************************************/
+
+struct ieee802154_sync_req_s
+{
+  uint8_t ch_num;
+  uint8_t ch_page;
+  bool track_beacon;
+};
+
+/*****************************************************************************
+ * Primitive: MLME-SYNC-LOSS.indication
+ *
+ * Description:
+ *    Indicates the loss of synchronization with a coordinator.
+ * 
+ *****************************************************************************/
+
+struct ieee802154_syncloss_ind_s
+{
+  enum ieee802154_status_e loss_reason;
+  uint16_t pan_id;
+  uint8_t ch_num;
+  uint8_t ch_page;
+
+#ifdef CONFIG_IEEE802154_SECURITY
+  /* Security information if enabled */
+
+  struct ieee802154_security_s security;
+#endif
+};
+
+/*****************************************************************************
+ * Primitive: MLME-POLL.request
+ *
+ * Description:
+ *    Prompts the device to request data from the coordinator. 
+ * 
+ *****************************************************************************/
+
+struct ieee802154_poll_req_s
+{
+  struct ieee802154_addr_s coord_addr;
+
+#ifdef CONFIG_IEEE802154_SECURITY
+  /* Security information if enabled */
+
+  struct ieee802154_security_s security;
+#endif
+};
+
+/*****************************************************************************
+ * Primitive: MLME-POLL.confirm
+ *
+ * Description:
+ *    Reports the results of a request to poll the coordinator for data.
+ * 
+ *****************************************************************************/
+
+struct ieee802154_poll_conf_s
+{
+  enum ieee802154_status_e status;
 };
 
 /* A pointer to this structure is passed as the argument of each IOCTL
@@ -803,21 +1294,50 @@ struct ieee802154_pollreq_s
 union ieee802154_macarg_u
 {
   struct ieee802154_assoc_req_s    assocreq;    /* MAC802154IOC_MLME_ASSOC_REQUEST */
-  struct ieee802154_assocresp_s    assocresp;   /* MAC802154IOC_MLME_ASSOC_RESPONSE */
+  struct ieee802154_assoc_resp_s   assocresp;   /* MAC802154IOC_MLME_ASSOC_RESPONSE */
   struct ieee802154_disassoc_req_s disassocreq; /* MAC802154IOC_MLME_DISASSOC_REQUEST */
-  struct ieee802154_getreq_s       getreq;      /* MAC802154IOC_MLME_GET_REQUEST */
-  struct ieee802154_gtsreq_s       gtsreq;      /* MAC802154IOC_MLME_GTS_REQUEST */
-  struct ieee802154_orphanresp_s   orphanresp;  /* MAC802154IOC_MLME_ORPHAN_RESPONSE */
-  struct ieee802154_resetreq_s     resetreq;    /* MAC802154IOC_MLME_RESET_REQUEST */
-  struct ieee802154_rxenabreq_s    rxenabreq;   /* MAC802154IOC_MLME_RXENABLE_REQUEST */
-  struct ieee802154_scanreq_s      scanreq;     /* MAC802154IOC_MLME_SCAN_REQUEST */
-  struct ieee802154_setreq_s       setreq;      /* MAC802154IOC_MLME_SET_REQUEST */
-  struct ieee802154_startreq_s     startreq;    /* MAC802154IOC_MLME_START_REQUEST */
-  struct ieee802154_syncreq_s      syncreq;     /* MAC802154IOC_MLME_SYNC_REQUEST */
-  struct ieee802154_pollreq_s      pollreq;     /* MAC802154IOC_MLME_POLL_REQUEST */
+  struct ieee802154_get_req_s      getreq;      /* MAC802154IOC_MLME_GET_REQUEST */
+  struct ieee802154_gts_req_s      gtsreq;      /* MAC802154IOC_MLME_GTS_REQUEST */
+  struct ieee802154_orphan_resp_s  orphanresp;  /* MAC802154IOC_MLME_ORPHAN_RESPONSE */
+  struct ieee802154_reset_req_s    resetreq;    /* MAC802154IOC_MLME_RESET_REQUEST */
+  struct ieee802154_rxenable_req_s rxenabreq;   /* MAC802154IOC_MLME_RXENABLE_REQUEST */
+  struct ieee802154_scan_req_s     scanreq;     /* MAC802154IOC_MLME_SCAN_REQUEST */
+  struct ieee802154_set_req_s      setreq;      /* MAC802154IOC_MLME_SET_REQUEST */
+  struct ieee802154_start_req_s    startreq;    /* MAC802154IOC_MLME_START_REQUEST */
+  struct ieee802154_sync_req_s     syncreq;     /* MAC802154IOC_MLME_SYNC_REQUEST */
+  struct ieee802154_poll_req_s     pollreq;     /* MAC802154IOC_MLME_POLL_REQUEST */
   /* To be determined */                        /* MAC802154IOC_MLME_DPS_REQUEST */
   /* To be determined */                        /* MAC802154IOC_MLME_SOUNDING_REQUEST */
   /* To be determined */                        /* MAC802154IOC_MLME_CALIBRATE_REQUEST */
+};
+
+union ieee802154_mlme_notify_u
+{
+  struct ieee802154_assoc_conf_s       assocconf;
+  struct ieee802154_disassoc_conf_s    disassocconf;
+  struct ieee802154_get_conf_s         getconf;
+  struct ieee802154_gts_conf_s         gtsconf;
+  struct ieee802154_reset_conf_s       resetconf;
+  struct ieee802154_rxenable_conf_s    rxenableconf;
+  struct ieee802154_scan_conf_s        scanconf;
+  struct ieee802154_set_conf_s         setconf;
+  struct ieee802154_start_conf_s       startconf;
+  struct ieee802154_poll_conf_s        pollconf;
+
+  struct ieee802154_assoc_ind_s        assocind;
+  struct ieee802154_disassoc_ind_s     disassocind;
+  struct ieee802154_beaconnotify_ind_s beaconnotifyind;
+  struct ieee802154_gts_ind_s          gtsind;
+  struct ieee802154_orphan_ind_s       orphanind;
+  struct ieee802154_commstatus_ind_s   commstatusind;
+  struct ieee802154_syncloss_ind_s     synclossind;
+};
+
+union ieee802154_mcps_notify_u
+{
+  struct ieee802154_data_conf_s        dataconf;
+  struct ieee802154_purge_conf_s       purgeconf;
+  struct ieee802154_data_ind_s         dataind;
 };
 
 #ifdef CONFIG_NET_6LOWPAN
@@ -840,91 +1360,51 @@ struct ieee802154_netmac_s
 
 typedef FAR void *MACHANDLE;
 
-/* Notifications */
+/* MAC Service Notifications */
+
+enum ieee802154_macnotify_e
+{
+  /* MCPS Notifications */
+
+  IEEE802154_NOTIFY_CONF_DATA = 0x00,
+  IEEE802154_NOTIFY_CONF_PURGE,
+  IEEE802154_NOTIFY_IND_DATA,
+
+  /* MLME Notifications */
+
+  IEEE802154_NOTIFY_CONF_ASSOC,
+  IEEE802154_NOTIFY_CONF_DISASSOC,
+  IEEE802154_NOTIFY_CONF_GET,
+  IEEE802154_NOTIFY_CONF_GTS,
+  IEEE802154_NOTIFY_CONF_RESET,
+  IEEE802154_NOTIFY_CONF_RXENABLE,
+  IEEE802154_NOTIFY_CONF_SCAN,
+  IEEE802154_NOTIFY_CONF_SET,
+  IEEE802154_NOTIFY_CONF_START,
+  IEEE802154_NOTIFY_CONF_POLL,
+
+  IEEE802154_NOTIFY_IND_ASSOC,
+  IEEE802154_NOTIFY_IND_DISASSOC,
+  IEEE802154_NOTIFY_IND_BEACONNOTIFY,
+  IEEE802154_NOTIFY_IND_GTS,
+  IEEE802154_NOTIFY_IND_ORPHAN,
+  IEEE802154_NOTIFY_IND_COMMSTATUS,
+  IEEE802154_NOTIFY_IND_SYNCLOSS
+};
+
+/* Callback operations to notify the next highest layer of various asynchronous
+ * events, usually triggered by some previous request or response invoked by the
+ * upper layer */
 
 struct ieee802154_maccb_s
 {
-  /* Asynchronous confirmations to requests */
+  CODE void (*mlme_notify) (FAR struct ieee802154_maccb_s *maccb,
+                            enum ieee802154_macnotify_e notif,
+                            FAR union ieee802154_mlme_notify_u *arg);
 
-  /* Data frame was received by remote device */
-
-  CODE void (*conf_data)(MACHANDLE mac,
-                         FAR struct ieee802154_data_conf_s *conf);
-
-  /* Data frame was purged */
-
-  CODE void (*conf_purge)(MACHANDLE mac, uint8_t handle, int status);
-
-  /* Association request completed */
-
-  CODE void (*conf_associate)(MACHANDLE mac, uint16_t saddr, int status);
-
-  /* Disassociation request completed */
-
-  CODE void (*conf_disassociate)(MACHANDLE mac, int status);
-
-  /* PIB data returned */
-
-  CODE void (*conf_get)(MACHANDLE mac, int status, int attribute,
-                        FAR uint8_t *value, int valuelen);
-
-  /* GTS management completed */
-
-  CODE void (*conf_gts)(MACHANDLE mac, FAR uint8_t *characteristics,
-                        int status);
-
-  /* MAC reset completed */
-
-  CODE void (*conf_reset)(MACHANDLE mac, int status);
-
-  CODE void (*conf_rxenable)(MACHANDLE mac, int status);
-
-  CODE void (*conf_scan)(MACHANDLE mac, int status, uint8_t type,
-                         uint32_t unscanned, int rsltsize,
-                         FAR uint8_t *edlist, FAR uint8_t *pandescs);
-
-  CODE void (*conf_set)(MACHANDLE mac, int status, int attribute);
-
-  CODE void (*conf_start)(MACHANDLE mac, int status);
-
-  CODE void (*conf_poll)(MACHANDLE mac, int status);
-
-  /* Asynchronous event indications, replied to synchronously with responses */
-
-  /* Data frame received */
-
-  CODE void (*ind_data)(MACHANDLE mac, FAR uint8_t *buf, int len);
-
-  /* Association request received */
-
-  CODE void (*ind_associate)(MACHANDLE mac, uint16_t clipanid,
-                             FAR uint8_t *clieaddr);
-
-   /* Disassociation request received */
-
-  CODE void (*ind_disassociate)(MACHANDLE mac, FAR uint8_t *eadr,
-                                uint8_t reason);
-
-  /* Beacon notification */
-
-  CODE void (*ind_beaconnotify)(MACHANDLE mac, FAR uint8_t *bsn,
-                                FAR struct ieee802154_pan_desc_s *pandesc,
-                                FAR uint8_t *sdu, int sdulen);
-
-  /* GTS management request received */
-
-  CODE void (*ind_gts)(MACHANDLE mac, FAR uint8_t *devaddr,
-                       FAR uint8_t *characteristics);
-
-  /* Orphan device detected */
-
-  CODE void (*ind_orphan)(MACHANDLE mac, FAR uint8_t *orphanaddr);
-
-  CODE void (*ind_commstatus)(MACHANDLE mac, uint16_t panid,
-                              FAR uint8_t *src, FAR uint8_t *dst,
-                              int status);
-
-  CODE void (*ind_syncloss)(MACHANDLE mac, int reason);
+  CODE void (*mcps_notify) (FAR struct ieee802154_maccb_s *maccb,
+                            enum ieee802154_macnotify_e notif,
+                            FAR union ieee802154_mcps_notify_u *arg);
 };
 
 #ifdef __cplusplus
