@@ -128,7 +128,7 @@
                                          * See include/nuttx/net/telnet.h */
 
 /****************************************************************************
- * Pulbic Type Definitions
+ * Public Type Definitions
  ****************************************************************************/
 
 /* See include/net/if.h, include/net/route.h, and include/net/arp.h */
