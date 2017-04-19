@@ -724,6 +724,15 @@ config ARCH_BOARD_NUCLEO_144
 			NUCLEO-F767ZI - STM32F767ZIT6 a 216MHz Cortex-M7, w/DPFPU -
 				2048KiB Flash memory and 512KiB SRAM.
 
+config ARCH_BOARD_NUCLEO_F072RB
+	bool "STM32F072 Nucleo F072RB"
+	depends on ARCH_CHIP_STM32F072RB
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo F072RB board based on the STMicro STM32F072RBT6 MCU.
+
 config ARCH_BOARD_NUCLEO_F303RE
 	bool "STM32F303 Nucleo F303RE"
 	depends on ARCH_CHIP_STM32F303RE
@@ -1036,6 +1045,15 @@ config ARCH_BOARD_STM3240G_EVAL
 		STMicro STM3240G-EVAL development board based on the STMicro STM32F103ZET6
 		microcontroller (ARM Cortex-M4 with FPU).  This port uses a GNU Cortex-M4
 		toolchain (such as CodeSourcery).
+
+config ARCH_BOARD_STM32F0_DISCOVERY
+	bool "STMicro STM32F0-Discovery board"
+	depends on ARCH_CHIP_STM32F051R8
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro STM32F-Discovery board based on the STMicro ARCH_CHIP_STM32F051R8 MCU.
 
 config ARCH_BOARD_STM32F3_DISCOVERY
 	bool "STMicro STM32F3-Discovery board"
@@ -1495,6 +1513,7 @@ config ARCH_BOARD
 	default "pic32mx7mmb"              if ARCH_BOARD_PIC32MX7MMB
 	default "pic32mz-starterkit"       if ARCH_BOARD_PIC32MZ_STARTERKIT
 	default "nucleo-144"               if ARCH_BOARD_NUCLEO_144
+	default "nucleo-f072rb"            if ARCH_BOARD_NUCLEO_F072RB
 	default "nucleo-f303re"            if ARCH_BOARD_NUCLEO_F303RE
 	default "nucleo-f334r8"            if ARCH_BOARD_NUCLEO_F334R8
 	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
@@ -1522,6 +1541,7 @@ config ARCH_BOARD
 	default "photon"                   if ARCH_BOARD_PHOTON
 	default "stm32butterfly2"          if ARCH_BOARD_STM32_BUTTERFLY2
 	default "stm32_tiny"               if ARCH_BOARD_STM32_TINY
+	default "stm32f0discovery"         if ARCH_BOARD_STM32F0_DISCOVERY
 	default "stm32f103-minimum"        if ARCH_BOARD_STM32F103_MINIMUM
 	default "stm3210e-eval"            if ARCH_BOARD_STM3210E_EVAL
 	default "stm3220g-eval"            if ARCH_BOARD_STM3220G_EVAL
@@ -1800,6 +1820,9 @@ endif
 if ARCH_BOARD_NUCLEO_144
 source "configs/nucleo-144/Kconfig"
 endif
+if ARCH_BOARD_NUCLEO_F072RB
+source "configs/nucleo-f072rb/Kconfig"
+endif
 if ARCH_BOARD_NUCLEO_F303RE
 source "configs/nucleo-f303re/Kconfig"
 endif
@@ -1880,6 +1903,9 @@ source "configs/stm32butterfly2/Kconfig"
 endif
 if ARCH_BOARD_STM32_TINY
 source "configs/stm32_tiny/Kconfig"
+endif
+if ARCH_BOARD_STM32F0_DISCOVERY
+source "configs/stm32f0discovery/Kconfig"
 endif
 if ARCH_BOARD_STM32F103_MINIMUM
 source "configs/stm32f103-minimum/Kconfig"

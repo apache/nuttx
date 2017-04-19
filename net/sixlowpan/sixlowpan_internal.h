@@ -497,12 +497,13 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  *   appropriate values
  *
  * Input Parmeters:
- *   ieee   - A reference to the IEE802.15.4 network device state
  *   iplen  - Equal to 0 if the packet is not a fragment (IP length is then
  *            inferred from the L2 length), non 0 if the packet is a first
  *            fragment.
  *   iob    - Pointer to the IOB containing the received frame.
- *   fptr   - Pointer to frame to be uncompressed.
+ *   fptr   - Pointer to frame to be compressed.
+ *   bptr   - Output goes here.  Normally this is a known offset into d_buf,
+ *            may be redirected to a "bitbucket" on the case of FRAGN frames.
  *
  * Returned Value:
  *   None
@@ -510,9 +511,8 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
-void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
-                                  uint16_t iplen, FAR struct iob_s *iob,
-                                  FAR uint8_t *fptr);
+void sixlowpan_uncompresshdr_hc06(uint16_t iplen, FAR struct iob_s *iob,
+                                  FAR uint8_t *fptr, FAR uint8_t *bptr);
 #endif
 
 /****************************************************************************
@@ -530,7 +530,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  *   ipv6    - The IPv6 header to be compressed
  *   destmac - L2 destination address, needed to compress the IP
  *             destination field
- *   fptr     - Pointer to frame to be compressed.
+ *   fptr    - Pointer to frame to be compressed.
  *
  * Returned Value:
  *   None
@@ -557,22 +557,23 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
  *   are set to the appropriate values
  *
  * Input Parameters:
- *   ieee  - A reference to the IEE802.15.4 network device state
  *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
- *           inferred from the L2 length), non 0 if the packet is a first
+ *           inferred from the L2 length), non 0 if the packet is a 1st
  *           fragment.
- *   iob    - Pointer to the IOB containing the received frame.
- *   fptr   - Pointer to frame to be uncompressed.
+ *   iob   - Pointer to the IOB containing the received frame.
+ *   fptr  - Pointer to frame to be uncompressed.
+ *   bptr  - Output goes here.  Normally this is a known offset into d_buf,
+ *           may be redirected to a "bitbucket" on the case of FRAGN frames.
  *
  * Returned Value:
- *   None
+ *   Zero (OK) is returned on success, on failure a negater errno value is
+ *   returned.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
-int sixlowpan_uncompresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
-                                uint16_t ip_len, FAR struct iob_s *iob,
-                                FAR uint8_t *fptr);
+int sixlowpan_uncompresshdr_hc1(uint16_t iplen, FAR struct iob_s *iob,
+                                FAR uint8_t *fptr, FAR uint8_t *bptr);
 #endif
 
 /****************************************************************************

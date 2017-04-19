@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated April 12, 2017)
+NuttX TODO List (Last updated April 15, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -1006,8 +1006,8 @@ o Network (net/, drivers/net)
                however.  Others support the address filtering interfaces but
                have never been verifed:
 
-               C5471, LM3X, ez80, DM0x90 NIC, PIC: Do not support address
-                 filteringing.
+               C5471, LM3S, ez80, DM0x90 NIC, PIC: Do not support address
+                 filtering.
                Kinetis, LPC17xx, LPC43xx:  Untested address filter support
 
   Status:      Open
@@ -1089,15 +1089,6 @@ o Network (net/, drivers/net)
   Status:      Open
   Priority:    Low
 
-  Title:       REMOVE CONFIG_NET_MULTIBUFFER
-  Description: The CONFIG_NET_MULTIBUFFER controls some details in the layout
-               of the network device structure. This is really a unnecessary
-               complexity and should be removed.  The cost for those network
-               drivers that currently do not support CONFIG_NET_MULTIBUFFER
-               is the size of one pointer.
-  Status:      Open
-  Priority:    Low
-
   Title:       ETHERNET WITH MULTIPLE LPWORK THREADS
   Description: Recently, Ethernet drivers were modified to support multiple
                work queue structures.  The question was raised: "My only
@@ -1144,6 +1135,20 @@ o Network (net/, drivers/net)
                currently implemented in every network driver.
   Status:      Open
   Priority:    Low.  Really just as aesthetic maintainability issue.
+
+  Title:       BROADCAST WITH MULTIPLE NETWORK INTERFACES
+  Description: There is currently no mechanism to send a broadcast packet
+               out through several network interfaces.   Currently packets
+               can be sent to only one device.  Logic in netdev_findby_ipvXaddr()
+               currently just selects the first device in the list of
+               devices; only that device will receive broadcast packets.
+  Status:      Open
+  Priority:    High if you require broadcast on multiple networks.  There is
+               no simple solution known at this time, however.  Perhaps
+               netdev_findby_ipvXaddr() should return a list of devices rather
+               than a single device?  All upstream logic would then have to
+               deal with a list of devices.  That would be a huge effect and
+               certainly doesn't dount as a "simple solution".
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -175,23 +175,26 @@ static void skel_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
-static int skel_ifup(FAR struct net_driver_s *dev);
-static int skel_ifdown(FAR struct net_driver_s *dev);
+static int  skel_ifup(FAR struct net_driver_s *dev);
+static int  skel_ifdown(FAR struct net_driver_s *dev);
 
 static void skel_txavail_work(FAR void *arg);
-static int skel_txavail(FAR struct net_driver_s *dev);
+static int  skel_txavail(FAR struct net_driver_s *dev);
 
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
-static int skel_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
+static int  skel_addmac(FAR struct net_driver_s *dev,
+              FAR const uint8_t *mac);
 #ifdef CONFIG_NET_IGMP
-static int skel_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
+static int  skel_rmmac(FAR struct net_driver_s *dev,
+              FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NET_ICMPv6
 static void skel_ipv6multicast(FAR struct skel_driver_s *priv);
 #endif
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
-static int skel_ioctl(FAR struct net_driver_s *dev, int cmd, long arg);
+static int  skel_ioctl(FAR struct net_driver_s *dev, int cmd,
+            unsigned long arg);
 #endif
 
 /****************************************************************************
@@ -1095,7 +1098,8 @@ static void skel_ipv6multicast(FAR struct skel_driver_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_IOCTL
-static int skel_ioctl(FAR struct net_driver_s *dev, int cmd, long arg)
+static int skel_ioctl(FAR struct net_driver_s *dev, int cmd,
+                      unsigned long arg)
 {
   FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)dev->d_private;
   int ret;

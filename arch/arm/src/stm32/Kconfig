@@ -1625,6 +1625,7 @@ config STM32_STM32F429
 	select STM32_HAVE_UART7
 	select STM32_HAVE_UART8
 	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM5
 	select STM32_HAVE_TIM6
 	select STM32_HAVE_TIM7
 	select STM32_HAVE_TIM8
@@ -5625,6 +5626,12 @@ endmenu # Timer Configuration
 
 menu "ADC Configuration"
 	depends on STM32_ADC
+
+config STM32_ADC_NO_STARTUP_CONV
+	bool "Do not start conversion when opening ADC device"
+	default n
+	---help---
+		Do not start conversion when opening ADC device.
 
 config STM32_ADC1_DMA
 	bool "ADC1 DMA"

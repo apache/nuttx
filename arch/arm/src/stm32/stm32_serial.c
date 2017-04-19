@@ -2250,7 +2250,9 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
                              unsigned int nbuffered, bool upper)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+#if !(defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS) && defined(CONFIG_STM32_FLOWCONTROL_BROKEN))
   uint16_t ie;
+#endif
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS) && defined(CONFIG_STM32_FLOWCONTROL_BROKEN)
   if (priv->iflow && (priv->rts_gpio != 0))

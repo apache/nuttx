@@ -232,6 +232,13 @@ config ARCH_CHIP_STM32
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M3/4).
 
+config ARCH_CHIP_STM32F0
+	bool "STMicro STM32 F0"
+	select ARCH_CORTEXM0
+	select ARCH_HAVE_CMNVECTOR
+	---help---
+		STMicro STM32 architectures (ARM Cortex-M0).
+
 config ARCH_CHIP_STM32F7
 	bool "STMicro STM32 F7"
 	select ARCH_HAVE_CMNVECTOR
@@ -441,6 +448,7 @@ config ARCH_CHIP
 	default "sam34"		if ARCH_CHIP_SAM34
 	default "samv7"		if ARCH_CHIP_SAMV7
 	default "stm32"		if ARCH_CHIP_STM32
+	default "stm32f0"	if ARCH_CHIP_STM32F0
 	default "stm32f7"	if ARCH_CHIP_STM32F7
 	default "stm32l4"	if ARCH_CHIP_STM32L4
 	default "str71x"	if ARCH_CHIP_STR71X
@@ -696,6 +704,9 @@ source arch/arm/src/samv7/Kconfig
 endif
 if ARCH_CHIP_STM32
 source arch/arm/src/stm32/Kconfig
+endif
+if ARCH_CHIP_STM32F0
+source arch/arm/src/stm32f0/Kconfig
 endif
 if ARCH_CHIP_STM32F7
 source arch/arm/src/stm32f7/Kconfig

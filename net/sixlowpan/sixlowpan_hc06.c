@@ -68,13 +68,10 @@
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
 
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IPv6BUF(ieee) \
-  ((FAR struct ipv6_hdr_s *)((ieee)->i_dev.d_buf))
 #define UDPIPv6BUF(ieee) \
   ((FAR struct udp_hdr_s *)&((ieee)->i_dev.d_buf[IPv6_HDRLEN]))
 
@@ -223,7 +220,7 @@ static FAR struct sixlowpan_addrcontext_s *
 }
 
 /****************************************************************************
- * Name: uncompress_addr
+ * Name: compress_addr_64
  *
  * Description:
  *   Uncompress addresses based on a prefix and a postfix with zeroes in
@@ -835,23 +832,23 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  *   appropriate values
  *
  * Input Parmeters:
- *   ieee   - A reference to the IEE802.15.4 network device state
  *   iplen  - Equal to 0 if the packet is not a fragment (IP length is then
  *            inferred from the L2 length), non 0 if the packet is a first
  *            fragment.
  *   iob    - Pointer to the IOB containing the received frame.
  *   fptr   - Pointer to frame to be compressed.
+ *   bptr   - Output goes here.  Normally this is a known offset into d_buf,
+ *            may be redirected to a "bitbucket" on the case of FRAGN frames.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
-                                  uint16_t iplen, FAR struct iob_s *iob,
-                                  FAR uint8_t *fptr)
+void sixlowpan_uncompresshdr_hc06(uint16_t iplen, FAR struct iob_s *iob,
+                                  FAR uint8_t *fptr, FAR uint8_t *bptr)
 {
-  FAR struct ipv6_hdr_s *ipv6 = IPv6BUF(ieee);
+  FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)bptr;
   FAR uint8_t *iphc;
   uint8_t iphc0;
   uint8_t iphc1;
@@ -1019,7 +1016,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
            *
            *   DAM 00: 128 bits
            *   DAM 01: 48 bits FFXX::00XX:XXXX:XXXX
-           *   DAM 0: 32 bits FFXX::00XX:XXXX
+           *   DAM 10: 32 bits FFXX::00XX:XXXX
            *   DAM 11: 8 bits FF02::00XX
            */
 
@@ -1049,7 +1046,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
           if (addrcontext == NULL)
             {
-              ninfo("ERROR: Address context not found\n");
+              nerr("ERROR: Address context not found\n");
               return;
             }
 
@@ -1071,7 +1068,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
   if ((iphc0 & SIXLOWPAN_IPHC_NH) != 0)
     {
-      FAR struct udp_hdr_s *udp = UDPIPv6BUF(ieee);
+      FAR struct udp_hdr_s *udp = (FAR struct udp_hdr_s *)(bptr + IPv6_HDRLEN);
 
       /* The next header is compressed, NHC is following */
 
@@ -1195,7 +1192,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
   if (ipv6->proto == IP_PROTO_UDP)
     {
-      FAR struct udp_hdr_s *udp = UDPIPv6BUF(ieee);
+      FAR struct udp_hdr_s *udp = (FAR struct udp_hdr_s *)(bptr + IPv6_HDRLEN);
       memcpy(&udp->udplen, &ipv6->len[0], 2);
     }
 }

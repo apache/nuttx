@@ -161,7 +161,24 @@ static uint16_t send_interrupt(FAR struct net_driver_s *dev,
 
   ninfo("flags: %04x: %d\n", flags);
 
-  /* Check if the IEEE802.15.4 went down */
+#ifdef CONFIG_NET_MULTILINK
+  /* Verify that this is an IEEE802.15.4 network driver. */
+
+  if (dev->d_lltype != NET_LL_IEEE802154)
+    {
+      return flags;
+    }
+#endif
+
+#ifdef CONFIG_NET_MULTINIC
+  /* REVISIT: Verify that this is the correct IEEE802.15.4 network driver to
+   * route the outgoing frame(s).  Chances are that there is only one
+   * IEEE802.15.4 network driver
+   */
+
+#endif
+
+  /* Check if the IEEE802.15.4 network driver went down */
 
   if ((flags & NETDEV_DOWN) != 0)
     {

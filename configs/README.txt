@@ -411,6 +411,9 @@ configs/nucleo-144
   STM32F767ZIT6 is a 216MHz Cortex-M7 operation with 2048Kb Flash memory
   and 512Kb SRAM.
 
+configs/nucleo-f072rb
+  STMicro Nucleo F072RB board based on the STMicro STM32F072RBT6 MCU.
+
 configs/nucleo-f4x1re
   STMicro ST Nucleo F401RE and F411RE boards.  See
   http://mbed.org/platforms/ST-Nucleo-F401RE and
@@ -659,6 +662,10 @@ configs/stm3240g-eval
 configs/stm32butterfly2
   Kamami stm32butterfly2 development board with optional ETH phy.  See
   https://kamami.pl/zestawy-uruchomieniowe-stm32/178507-stm32butterfly2.html
+
+configs/stm32f0discovery
+  STMicro STM32F-Discovery board based on the STMicro ARCH_CHIP_STM32F051R8
+  MCU.
 
 configs/stm32f103-minimum
   Generic STM32F103C8T6 Minimum ARM Development Board.
