@@ -101,10 +101,10 @@ struct mac802154dev_callback_s
   /* This holds the information visible to the MAC layer */
 
   struct ieee802154_maccb_s mc_cb;     /* Interface understood by the MAC layer */
-  FAR struct mac802154_devwrapper_s *mc_priv;    /* Our priv data */
+  FAR struct mac802154_chardevice_s *mc_priv;    /* Our priv data */
 };
 
-struct mac802154_devwrapper_s
+struct mac802154_chardevice_s
 {
   MACHANDLE md_mac;                     /* Saved binding to the mac layer */
   struct mac802154dev_callback_s md_cb; /* Callback information */
@@ -150,7 +150,7 @@ static int  mac802154dev_ioctl(FAR struct file *filep, int cmd,
 
 /* MAC callback helpers */
 
-static void mac802154dev_conf_data(FAR struct mac802154_devwrapper_s *dev,
+static void mac802154dev_conf_data(FAR struct mac802154_chardevice_s *dev,
                                    FAR struct ieee802154_data_conf_s *conf);
 
 /****************************************************************************
@@ -212,7 +212,7 @@ static inline int mac802154dev_takesem(sem_t *sem)
 static int mac802154dev_open(FAR struct file *filep)
 {
   FAR struct inode *inode;
-  FAR struct mac802154_devwrapper_s *dev;
+  FAR struct mac802154_chardevice_s *dev;
   FAR struct mac802154dev_open_s *opriv;
   int ret;
 
@@ -269,7 +269,7 @@ errout_with_sem:
 static int mac802154dev_close(FAR struct file *filep)
 {
   FAR struct inode *inode;
-  FAR struct mac802154_devwrapper_s *dev;
+  FAR struct mac802154_chardevice_s *dev;
   FAR struct mac802154dev_open_s *opriv;
   FAR struct mac802154dev_open_s *curr;
   FAR struct mac802154dev_open_s *prev;
@@ -281,7 +281,7 @@ static int mac802154dev_close(FAR struct file *filep)
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  dev = (FAR struct mac802154_devwrapper_s *)inode->i_private;
+  dev = (FAR struct mac802154_chardevice_s *)inode->i_private;
 
   /* Handle an improbable race conditions with the following atomic test
    * and set.
@@ -361,13 +361,13 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
                                  size_t len)
 {
   FAR struct inode *inode;
-  FAR struct mac802154_devwrapper_s *dev;
+  FAR struct mac802154_chardevice_s *dev;
   int ret;
 
   DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  dev = (FAR struct mac802154_devwrapper_s *)inode->i_private;
+  dev = (FAR struct mac802154_chardevice_s *)inode->i_private;
 
   /* Check to make sure that the buffer is big enough to hold at least one
    * packet.
@@ -408,7 +408,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
                                   FAR const char *buffer, size_t len)
 {
   FAR struct inode *inode;
-  FAR struct mac802154_devwrapper_s *dev;
+  FAR struct mac802154_chardevice_s *dev;
   FAR struct ieee802154_data_req_s *req;
   struct mac802154dev_dwait_s dwait;
   int ret;
@@ -416,7 +416,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
   DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  dev  = (FAR struct mac802154_devwrapper_s *)inode->i_private;
+  dev  = (FAR struct mac802154_chardevice_s *)inode->i_private;
 
   /* Check to make sure that the buffer is big enough to hold at least one
    * packet. */
@@ -460,7 +460,6 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
       dev->md_dwait = &dwait;
 
       mac802154dev_givesem(&dev->md_exclsem);
-
   }
  
   /* Pass the request to the MAC layer */
@@ -472,7 +471,6 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
       wlerr("ERROR: req_data failed %d\n", ret);
       return ret;
     }
-
 
   if (!(filep->f_oflags & O_NONBLOCK))
     {
@@ -509,14 +507,14 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
                                    unsigned long arg)
 {
   FAR struct inode *inode;
-  FAR struct mac802154_devwrapper_s *dev;
+  FAR struct mac802154_chardevice_s *dev;
   int ret;
 
   DEBUGASSERT(filep != NULL && filep->f_priv != NULL &&
               filep->f_inode != NULL);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  dev = (FAR struct mac802154_devwrapper_s *)inode->i_private;
+  dev = (FAR struct mac802154_chardevice_s *)inode->i_private;
 
   /* Get exclusive access to the driver structure */
 
@@ -599,7 +597,7 @@ static void mac802154dev_mlme_notify(FAR struct ieee802154_maccb_s *maccb,
 {
   FAR struct mac802154dev_callback_s *cb =
     (FAR struct mac802154dev_callback_s *)maccb;
-  FAR struct mac802154_devwrapper_s *dev;
+  FAR struct mac802154_chardevice_s *dev;
 
   DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
   dev = cb->mc_priv;
@@ -618,7 +616,7 @@ static void mac802154dev_mcps_notify(FAR struct ieee802154_maccb_s *maccb,
 {
   FAR struct mac802154dev_callback_s *cb =
     (FAR struct mac802154dev_callback_s *)maccb;
-  FAR struct mac802154_devwrapper_s *dev;
+  FAR struct mac802154_chardevice_s *dev;
 
   DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
   dev = cb->mc_priv;
@@ -635,7 +633,7 @@ static void mac802154dev_mcps_notify(FAR struct ieee802154_maccb_s *maccb,
     }
 }
 
-static void mac802154dev_conf_data(FAR struct mac802154_devwrapper_s *dev,
+static void mac802154dev_conf_data(FAR struct mac802154_chardevice_s *dev,
                                    FAR struct ieee802154_data_conf_s *conf)
 {
   FAR struct mac802154dev_dwait_s *curr;
@@ -722,12 +720,12 @@ static void mac802154dev_conf_data(FAR struct mac802154_devwrapper_s *dev,
 
 int mac802154dev_register(MACHANDLE mac, int minor)
 {
-  FAR struct mac802154_devwrapper_s *dev;
+  FAR struct mac802154_chardevice_s *dev;
   FAR struct ieee802154_maccb_s *maccb;
   char devname[DEVNAME_FMTLEN];
   int ret;
 
-  dev = kmm_zalloc(sizeof(struct mac802154_devwrapper_s));
+  dev = kmm_zalloc(sizeof(struct mac802154_chardevice_s));
   if (!dev)
     {
       wlerr("ERROR: Failed to allocate device structure\n");

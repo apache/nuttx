@@ -86,6 +86,12 @@ struct mac802154_unsec_mhr_s
   } u;
 };
 
+struct mac802154_radiocb_s
+{
+  struct ieee802154_radiocb_s cb;
+  FAR struct ieee802154_privmac_s *priv;
+};
+
 /* The privmac structure holds the internal state of the MAC and is the
  * underlying represention of the opaque MACHANDLE.  It contains storage for
  * the IEEE802.15.4 MIB attributes.
@@ -95,7 +101,7 @@ struct ieee802154_privmac_s
 {
   FAR struct ieee802154_radio_s *radio;     /* Contained IEEE802.15.4 radio dev */
   FAR const struct ieee802154_maccb_s *cb;  /* Contained MAC callbacks */
-  FAR struct ieee802154_phyif_s phyif;      /* Interface to bind to radio */
+  FAR struct mac802154_radiocb_s radiocb;   /* Interface to bind to radio */
 
   sem_t exclsem; /* Support exclusive access */
 
@@ -244,11 +250,11 @@ static int mac802154_applymib(FAR struct ieee802154_privmac_s *priv);
 
 /* IEEE 802.15.4 PHY Interface OPs */
 
-static int mac802154_poll_csma(FAR struct ieee802154_phyif_s *phyif,
+static int mac802154_poll_csma(FAR struct ieee802154_radiocb_s *radiocb,
                                FAR struct ieee802154_txdesc_s *tx_desc,
                                FAR uint8_t *buf);
 
-static int mac802154_poll_gts(FAR struct ieee802154_phyif_s *phyif, 
+static int mac802154_poll_gts(FAR struct ieee802154_radiocb_s *radiocb, 
                               FAR struct ieee802154_txdesc_s *tx_desc,
                               FAR uint8_t *buf);
 
@@ -256,11 +262,6 @@ static int mac802154_poll_gts(FAR struct ieee802154_phyif_s *phyif,
  * Private Data
  ****************************************************************************/
 
-static const struct ieee802154_phyifops_s mac802154_phyifops =
-{
-  mac802154_poll_csma,
-  mac802154_poll_gts
-};
 
 /****************************************************************************
  * Private Functions
@@ -351,6 +352,7 @@ static int mac802154_applymib(FAR struct ieee802154_privmac_s *priv)
 MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
 {
   FAR struct ieee802154_privmac_s *mac;
+  FAR struct ieee802154_radiocb_s *radiocb;
 
   /* Allocate object */
 
@@ -369,12 +371,17 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
   mac802154_defaultmib(mac);
   mac802154_applymib(mac);
 
-  mac->phyif.ops = &mac802154_phyifops;
-  mac->phyif.priv = mac;
+  /* Initialize the Radio callbacks */
 
-  /* Bind our PHY interface to the radio */
+  mac->radiocb.priv = mac;
 
-  radiodev->ops->bind(radiodev, &mac->phyif);
+  radiocb             = &mac->radiocb.cb;
+  radiocb->poll_cmsa  = mac802154_poll_csma;
+  radiocb->poll_gts   = mac802154_poll_gts;
+
+  /* Bind our callback structure */
+
+  radiodev->ops->bind(radiodev, &mac->radiocb.cb);
 
   return (MACHANDLE)mac;
 }
@@ -701,16 +708,18 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
 
 /* Called from interrupt level or worker thread with interrupts disabled */
 
-static int mac802154_poll_csma(FAR struct ieee802154_phyif_s *phyif,
+static int mac802154_poll_csma(FAR struct ieee802154_radiocb_s *radiocb,
                                FAR struct ieee802154_txdesc_s *tx_desc,
                                FAR uint8_t *buf)
 {
-  FAR struct ieee802154_privmac_s *priv =
-      (FAR struct ieee802154_privmac_s *)&phyif->priv;
+  FAR struct mac802154_radiocb_s *cb =
+    (FAR struct mac802154_radiocb_s *)radiocb;
+  FAR struct ieee802154_privmac_s *priv;
   FAR struct mac802154_trans_s *trans;
   int ret = 0;
 
-  DEBUGASSERT(priv != 0);
+  DEBUGASSERT(cb != NULL && cb->priv != NULL);
+  priv = cb->priv;
 
   /* Get exclusive access to the driver structure.  We don't care about any
    * signals so if we see one, just go back to trying to get access again.
@@ -753,10 +762,29 @@ static int mac802154_poll_csma(FAR struct ieee802154_phyif_s *phyif,
   return ret;
 }
 
-static int mac802154_poll_gts(FAR struct ieee802154_phyif_s *phyif, 
+static int mac802154_poll_gts(FAR struct ieee802154_radiocb_s *radiocb, 
                               FAR struct ieee802154_txdesc_s *tx_desc,
                               FAR uint8_t *buf)
 {
+  FAR struct mac802154_radiocb_s *cb =
+    (FAR struct mac802154_radiocb_s *)radiocb;
+  FAR struct ieee802154_privmac_s *priv;
+  FAR struct mac802154_trans_s *trans;
+  int ret = 0;
+
+  DEBUGASSERT(cb != NULL && cb->priv != NULL);
+  priv = cb->priv;
+
+  /* Get exclusive access to the driver structure.  We don't care about any
+   * signals so if we see one, just go back to trying to get access again.
+   */
+
+  while (mac802154_takesem(&priv->exclsem) != 0);
+
+#warning Missing logic.
+
+  mac802154_givesem(&priv->exclsem);
+
   return 0;
 }
 

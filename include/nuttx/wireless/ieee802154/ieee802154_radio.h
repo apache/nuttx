@@ -167,23 +167,12 @@ struct ieee802154_txdesc_s
   /* TODO: Add slotting information for GTS transactions */
 };
 
-struct ieee802154_phyif_s; /* Forward Reference */
-
-struct ieee802154_phyifops_s
+struct ieee802154_radiocb_s
 {
-  CODE int (*poll_csma) (FAR struct ieee802154_phyif_s *phyif,
+  CODE int (*poll_csma) (FAR struct ieee802154_radiocb_s *radiocb,
              FAR struct ieee802154_txdesc_s *tx_desc, FAR uint8_t *buf);
-  CODE int (*poll_gts) (FAR struct ieee802154_phyif_s *phyif,
+  CODE int (*poll_gts) (FAR struct ieee802154_radiocb_s *radiocb,
              FAR struct ieee802154_txdesc_s *tx_desc, FAR uint8_t *buf);
-};
-
-struct ieee802154_phyif_s
-{
-  FAR const struct ieee802154_phyifops_s *ops;
-
-  /* Driver-specific information */
-
-  FAR void * priv;
 };
 
 struct ieee802154_radio_s; /* Forward reference */
@@ -191,7 +180,7 @@ struct ieee802154_radio_s; /* Forward reference */
 struct ieee802154_radioops_s
 {
   CODE int (*bind) (FAR struct ieee802154_radio_s *radio,
-             FAR struct ieee802154_phyif_s *phyif);
+             FAR struct ieee802154_radiocb_s *radiocb);
   CODE int (*ioctl)(FAR struct ieee802154_radio_s *radio, int cmd,
              unsigned long arg);
   CODE int (*rxenable)(FAR struct ieee802154_radio_s *radio, bool state,

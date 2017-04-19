@@ -112,10 +112,7 @@ struct mrf24j40_txdesc_s
 struct mrf24j40_radio_s
 {
   struct ieee802154_radio_s radio;  /* The public device instance */
-
-  /* Reference to the bound upper layer via the phyif interface */
-
-  FAR struct ieee802154_phyif_s *phyif;      
+  FAR struct ieee802154_radiocb_s *radiocb; /* Registered callbacks */      
 
   /* Low-level MCU-specific support */
 
@@ -215,7 +212,7 @@ static int  mrf24j40_energydetect(FAR struct mrf24j40_radio_s *radio,
 /* Driver operations */
 
 static int  mrf24j40_bind(FAR struct ieee802154_radio_s *radio,
-              FAR struct ieee802154_phyif_s *phyif);
+              FAR struct ieee802154_radiocb_s *radiocb);
 static int  mrf24j40_ioctl(FAR struct ieee802154_radio_s *radio, int cmd,
               unsigned long arg);
 static int  mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio,
@@ -250,12 +247,12 @@ static const struct ieee802154_radioops_s mrf24j40_devops =
  ****************************************************************************/
 
 static int mrf24j40_bind(FAR struct ieee802154_radio_s *radio,
-                         FAR struct ieee802154_phyif_s *phyif)
+                         FAR struct ieee802154_radiocb_s *radiocb)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
 
   DEBUGASSERT(dev != NULL);
-  dev->phyif = phyif;
+  dev->radiocb = radiocb;
   return OK;
 }
 
@@ -335,9 +332,8 @@ static void mrf24j40_dopoll_csma(FAR void *arg)
     {
       /* need to somehow allow for a handle to be passed */
 
-      ret = dev->phyif->ops->poll_csma(dev->phyif, 
-                                       &dev->csma_desc.pub,
-                                       &dev->tx_buf[0]);
+      ret = dev->radiocb->poll_csma(dev->radiocb, &dev->csma_desc.pub,
+                                    &dev->tx_buf[0]);
       if (ret > 0)
         {
           /* Now the txdesc is in use */
@@ -431,8 +427,8 @@ static void mrf24j40_dopoll_gts(FAR void *arg)
     {
       if (!dev->gts_desc[gts].busy)
         {
-          ret = dev->phyif->ops->poll_gts(dev->phyif, &dev->gts_desc[gts].pub,
-                                          &dev->tx_buf[0]);
+          ret = dev->radiocb->poll_gts(dev->radiocb, &dev->gts_desc[gts].pub,
+                                       &dev->tx_buf[0]);
           if (ret > 0)
             {
               /* Now the txdesc is in use */
