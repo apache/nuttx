@@ -96,10 +96,19 @@ struct mac802154dev_dwait_s
   FAR struct mac802154dev_dwait_s *mw_flink;
 };
 
+struct mac802154dev_callback_s
+{
+  /* This holds the information visible to the MAC layer */
+
+  struct ieee802154_maccb_s mc_cb;     /* Interface understood by the MAC layer */
+  FAR struct mac802154_devwrapper_s *mc_priv;    /* Our priv data */
+};
+
 struct mac802154_devwrapper_s
 {
-  MACHANDLE md_mac;    /* Saved binding to the mac layer */
-  sem_t md_exclsem;    /* Exclusive device access */
+  MACHANDLE md_mac;                     /* Saved binding to the mac layer */
+  struct mac802154dev_callback_s md_cb; /* Callback information */
+  sem_t md_exclsem;                     /* Exclusive device access */
 
   /* The following is a singly linked list of open references to the
    * MAC device.
@@ -138,6 +147,11 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
               FAR const char *buffer, size_t len);
 static int  mac802154dev_ioctl(FAR struct file *filep, int cmd,
               unsigned long arg);
+
+/* MAC callback helpers */
+
+static void mac802154dev_conf_data(FAR struct mac802154_devwrapper_s *dev,
+                                   FAR struct ieee802154_data_conf_s *conf);
 
 /****************************************************************************
  * Private Data
@@ -579,20 +593,53 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
   return ret;
 }
 
-void mac802154dev_conf_data(MACHANDLE mac,
-                            FAR struct ieee802154_data_conf_s *conf)
+static void mac802154dev_mlme_notify(FAR struct ieee802154_maccb_s *maccb,
+                                     enum ieee802154_macnotify_e notif,
+                                     FAR union ieee802154_mlme_notify_u *arg)
 {
-  FAR struct mac802154_devwrapper_s *dev = 
-    (FAR struct mac802154_devwrapper_s *)mac;
+  FAR struct mac802154dev_callback_s *cb =
+    (FAR struct mac802154dev_callback_s *)maccb;
+  FAR struct mac802154_devwrapper_s *dev;
+
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  dev = cb->mc_priv;
+
+  switch (notif)
+    {
+#warning Handle MLME notifications
+      default:
+        break;
+    }
+}
+
+static void mac802154dev_mcps_notify(FAR struct ieee802154_maccb_s *maccb,
+                                     enum ieee802154_macnotify_e notif,
+                                     FAR union ieee802154_mcps_notify_u *arg)
+{
+  FAR struct mac802154dev_callback_s *cb =
+    (FAR struct mac802154dev_callback_s *)maccb;
+  FAR struct mac802154_devwrapper_s *dev;
+
+  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
+  dev = cb->mc_priv;
+
+  switch (notif)
+    {
+      case IEEE802154_NOTIFY_CONF_DATA:
+        {
+          mac802154dev_conf_data(dev, &arg->dataconf);
+        }
+        break;
+      default:
+        break;
+    }
+}
+
+static void mac802154dev_conf_data(FAR struct mac802154_devwrapper_s *dev,
+                                   FAR struct ieee802154_data_conf_s *conf)
+{
   FAR struct mac802154dev_dwait_s *curr;
   FAR struct mac802154dev_dwait_s *prev;
-
-  /* Get the dev from the callback context.  This should have been set when
-   * the char driver was registered.
-   *
-   * REVISIT: See mac802154_netdev.c
-   */
-#warning Missing logic
 
   /* Get exclusive access to the driver structure.  We don't care about any
    * signals so if we see one, just go back to trying to get access again */
@@ -676,6 +723,7 @@ void mac802154dev_conf_data(MACHANDLE mac,
 int mac802154dev_register(MACHANDLE mac, int minor)
 {
   FAR struct mac802154_devwrapper_s *dev;
+  FAR struct ieee802154_maccb_s *maccb;
   char devname[DEVNAME_FMTLEN];
   int ret;
 
@@ -692,11 +740,25 @@ int mac802154dev_register(MACHANDLE mac, int minor)
   sem_init(&dev->md_exclsem, 0, 1); /* Allow the device to be opened once
                                      * before blocking */
 
-  /* Initialize the callbacks and bind them to the radio
-   *
-   * REVISIT: See mac802154_netdev.c
-   */
-#warning Missing logic
+  /* Initialize the MAC callbacks */
+
+  dev->md_cb.mc_priv  = dev;
+
+  maccb               = &dev->md_cb.mc_cb;
+  maccb->mlme_notify  = mac802154dev_mlme_notify;
+  maccb->mcps_notify  = mac802154dev_mcps_notify;
+
+  /* Bind the callback structure */
+
+  ret = mac802154_bind(mac, maccb);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to bind the MAC callbacks: %d\n", ret);
+
+      /* Free memory and return the error */
+      kmm_free(dev);
+      return ret;
+    }
 
   /* Create the character device name */
 
