@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_touchscreen.c
  *
- *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -624,11 +624,7 @@ errout:
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: board_tsc_setup
+ * Name: sim_tsc_initialize
  *
  * Description:
  *   Configure the simulated touchscreen.  This will register the driver as
@@ -643,7 +639,7 @@ errout:
  *
  ****************************************************************************/
 
-int board_tsc_setup(int minor)
+int sim_tsc_initialize(int minor)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)&g_simtouchscreen;
   char devname[DEV_NAMELEN];
@@ -699,7 +695,7 @@ errout_with_priv:
 }
 
 /****************************************************************************
- * Name: board_tsc_teardown
+ * Name: sim_tsc_uninitialize
  *
  * Description:
  *   Uninitialized the simulated touchscreen
@@ -712,7 +708,7 @@ errout_with_priv:
  *
  ****************************************************************************/
 
-void board_tsc_teardown(void)
+void sim_tsc_uninitialize(void)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)&g_simtouchscreen;
   char devname[DEV_NAMELEN];
