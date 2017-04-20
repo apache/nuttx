@@ -480,7 +480,11 @@ static inline bool stm32_rcc_enablehse(void)
   /* Enable External High-Speed Clock (HSE) */
 
   regval  = getreg32(STM32_RCC_CR);
+#ifdef STM32_HSEBYP_ENABLE          /* May be defined in board.h header file */
+  regval |= RCC_CR_HSEBYP;          /* Enable HSE clock bypass */
+#else
   regval &= ~RCC_CR_HSEBYP;         /* Disable HSE clock bypass */
+#endif
   regval |= RCC_CR_HSEON;           /* Enable HSE */
   putreg32(regval, STM32_RCC_CR);
 

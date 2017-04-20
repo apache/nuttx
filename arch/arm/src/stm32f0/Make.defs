@@ -87,6 +87,14 @@ ifeq ($(CONFIG_ARCH_IRQPRIO),y)
 CHIP_CSRCS += stm32f0_irqprio.c
 endif
 
+ifeq ($(CONFIG_STM32F0_HAVE_HSI48),y)
+CHIP_CSRCS += stm32f0_hsi48.c
+endif
+
+ifeq ($(CONFIG_STM32F0_USB),y)
+CHIP_CSRCS += stm32f0_usbdev.c
+endif
+
 ifeq ($(CONFIG_STM32F0_SPI0),y)
 CHIP_CSRCS += stm32f0_spi.c
 else

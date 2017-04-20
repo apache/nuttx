@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob_free_chain.c
+ * drivers/iob/iob_peek_queue.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,39 +39,57 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
+#include <debug.h>
 
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
-#include <nuttx/arch.h>
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 
 #include "iob.h"
+
+#if CONFIG_IOB_NCHAINS > 0
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef NULL
+#  define NULL ((FAR void *)0)
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_free_chain
+ * Name: iob_peek_queue
  *
  * Description:
- *   Free an entire buffer chain, starting at the beginning of the I/O
- *   buffer chain
+ *   Return a reference to the I/O buffer chain at the head of a queue. This
+ *   is similar to iob_remove_queue except that the I/O buffer chain is in
+ *   place at the head of the queue.  The I/O buffer chain may safely be
+ *   modified by the caller but must be removed from the queue before it can
+ *   be freed.
+ *
+ * Returned Value:
+ *   Returns a reference to the I/O buffer chain at the head of the queue.
  *
  ****************************************************************************/
 
-void iob_free_chain(FAR struct iob_s *iob)
+FAR struct iob_s *iob_peek_queue(FAR struct iob_queue_s *iobq)
 {
-  FAR struct iob_s *next;
+  FAR struct iob_qentry_s *qentry;
+  FAR struct iob_s *iob = NULL;
 
-  /* Free each IOB in the chain -- one at a time to keep the count straight */
+  /* Peek at the I/O buffer chain container at the head of the queue */
 
-  for (; iob; iob = next)
+  qentry = iobq->qh_head;
+  if (qentry)
     {
-      next = iob_free(iob);
+      /* Return the I/O buffer chain from the container */
+
+      iob = qentry->qe_head;
     }
+
+  return iob;
 }
+
+#endif /* CONFIG_IOB_NCHAINS > 0 */

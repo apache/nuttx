@@ -14,7 +14,7 @@ nuttx/:
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
-  (4)  pthreads (sched/pthread)
+  (3)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
   (8)  Kernel/Protected Build
   (3)  C++ Support
@@ -47,8 +47,8 @@ o Task/Scheduler (sched/)
   Priority:    Medium, required for good emulation of process/pthread model.
 
   Title:       pause() NON-COMPLIANCE
-  Description: In the POSIX description of this function is the pause() function
-               will suspend the calling thread until delivery of a signal whose
+  Description: In the POSIX description of this function the pause() function
+               must suspend the calling thread until delivery of a signal whose
                action is either to execute a signal-catching function or to
                terminate the process.  The current implementation only waits for
                any non-blocked signal to be received.  It should only wake up if
@@ -499,20 +499,6 @@ o pthreads (sched/pthreads)
   Status:      Open
   Priority:    Medium-low. Priority may be higher if system call overheade becomes
                an issue.
-
-  Title:       ROBUST MUTEX ATTRIBUTE NOT SUPPORTED
-  Description: In NuttX, all mutexes are 'robust' in the sense that an attmpt
-               to lock a mutex will return EOWNDERDEAD if the holder of the
-               mutex has died.  Unlocking of a mutex will fail if the caller
-               is not the holder of the mutex.
-
-               POSIX, however, requires that there be a mutex attribute called
-               robust that determines which behavior is supported.  non-robust
-               should be the default.  NuttX does not support this attribute
-               and robust behavior is the default and only supported behavior.
-  Status:      Open
-  Priority:    Low.  The non-robust behavior is dangerous and really should never
-               be used.
 
 o Message Queues (sched/mqueue)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1092,7 +1078,8 @@ o Network (net/, drivers/net)
   Title:       ETHERNET WITH MULTIPLE LPWORK THREADS
   Description: Recently, Ethernet drivers were modified to support multiple
                work queue structures.  The question was raised: "My only
-               reservation would be, how would this interact in the case of having CONFIG_STM32_ETHMAC_LPWORK and CONFIG_SCHED_LPNTHREADS
+               reservation would be, how would this interact in the case of
+               having CONFIG_STM32_ETHMAC_LPWORK and CONFIG_SCHED_LPNTHREADS
                > 1? Can it be guaranteed that one work item won't be
                interrupted and execution switched to another? I think so but
                am not 100% confident."
@@ -2124,4 +2111,3 @@ o Other Applications & Tests (apps/examples/)
                the artifact is larger.
   Status:      Open
   Priority:    Medium.
-

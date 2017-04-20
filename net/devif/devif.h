@@ -466,7 +466,7 @@ void devif_send(FAR struct net_driver_s *dev, FAR const void *buf, int len);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IOB
+#ifdef CONFIG_DRIVERS_IOB
 struct iob_s;
 void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *buf,
                     unsigned int len, unsigned int offset);

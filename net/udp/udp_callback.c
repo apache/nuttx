@@ -50,7 +50,6 @@
 #include <nuttx/net/udp.h>
 
 #include "devif/devif.h"
-#include "iob/iob.h"
 #include "udp/udp.h"
 
 /****************************************************************************

@@ -45,12 +45,12 @@
 #include <string.h>
 #include <debug.h>
 
+#include <nuttx/drivers/iob.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
 
 #include "devif/devif.h"
-#include "iob/iob.h"
 #include "tcp/tcp.h"
 
 /****************************************************************************

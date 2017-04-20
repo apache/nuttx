@@ -16,7 +16,7 @@ config ARCH_CHIP_STM32L151C6
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 48-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPRROM
+		STM32L 48-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPROM
 
 config ARCH_CHIP_STM32L151C8
 	bool "STM32L151C8"
@@ -24,7 +24,7 @@ config ARCH_CHIP_STM32L151C8
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 48-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPRROM
+		STM32L 48-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPROM
 
 config ARCH_CHIP_STM32L151CB
 	bool "STM32L151CB"
@@ -32,7 +32,7 @@ config ARCH_CHIP_STM32L151CB
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 48-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPRROM
+		STM32L 48-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPROM
 
 config ARCH_CHIP_STM32L151R6
 	bool "STM32L151R6"
@@ -40,7 +40,7 @@ config ARCH_CHIP_STM32L151R6
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 64-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPRROM
+		STM32L 64-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPROM
 
 config ARCH_CHIP_STM32L151R8
 	bool "STM32L151R8"
@@ -48,7 +48,7 @@ config ARCH_CHIP_STM32L151R8
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 64-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPRROM
+		STM32L 64-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPROM
 
 config ARCH_CHIP_STM32L151RB
 	bool "STM32L151RB"
@@ -56,7 +56,7 @@ config ARCH_CHIP_STM32L151RB
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 64-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPRROM
+		STM32L 64-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPROM
 
 config ARCH_CHIP_STM32L151V6
 	bool "STM32L151V6"
@@ -64,7 +64,7 @@ config ARCH_CHIP_STM32L151V6
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 100-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPRROM
+		STM32L 100-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPROM
 
 config ARCH_CHIP_STM32L151V8
 	bool "STM32L151V8"
@@ -72,7 +72,7 @@ config ARCH_CHIP_STM32L151V8
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 100-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPRROM
+		STM32L 100-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPROM
 
 config ARCH_CHIP_STM32L151VB
 	bool "STM32L151VB"
@@ -80,7 +80,7 @@ config ARCH_CHIP_STM32L151VB
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 100-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPRROM
+		STM32L 100-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPROM
 
 config ARCH_CHIP_STM32L152C6
 	bool "STM32L152C6"
@@ -88,8 +88,8 @@ config ARCH_CHIP_STM32L152C6
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 48-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPRROM with
-		4x16 LCD interface
+		STM32L 48-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPROM with
+		4x18 LCD interface
 
 config ARCH_CHIP_STM32L152C8
 	bool "STM32L152C8"
@@ -97,8 +97,8 @@ config ARCH_CHIP_STM32L152C8
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 48-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPRROM with
-		4x16 LCD interface
+		STM32L 48-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPROM with
+		4x18 LCD interface
 
 config ARCH_CHIP_STM32L152CB
 	bool "STM32L152CB"
@@ -106,8 +106,8 @@ config ARCH_CHIP_STM32L152CB
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 48-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPRROM with
-		4x16 LCD interface
+		STM32L 48-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPROM with
+		4x18 LCD interface
 
 config ARCH_CHIP_STM32L152R6
 	bool "STM32L152R6"
@@ -115,7 +115,7 @@ config ARCH_CHIP_STM32L152R6
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 64-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPRROM with
+		STM32L 64-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPROM with
 		4x32/8x28 LCD interface
 
 config ARCH_CHIP_STM32L152R8
@@ -124,7 +124,7 @@ config ARCH_CHIP_STM32L152R8
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 64-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPRROM with
+		STM32L 64-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPROM with
 		4x32/8x28 LCD interface
 
 config ARCH_CHIP_STM32L152RB
@@ -133,7 +133,7 @@ config ARCH_CHIP_STM32L152RB
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 64-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPRROM with
+		STM32L 64-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPROM with
 		4x32/8x28 LCD interface
 
 config ARCH_CHIP_STM32L152V6
@@ -142,7 +142,7 @@ config ARCH_CHIP_STM32L152V6
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 100-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPRROM with
+		STM32L 100-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPROM with
 		4x44/8x40 LCD interface
 
 config ARCH_CHIP_STM32L152V8
@@ -151,7 +151,7 @@ config ARCH_CHIP_STM32L152V8
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 100-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPRROM with
+		STM32L 100-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPROM with
 		4x44/8x40 LCD interface
 
 config ARCH_CHIP_STM32L152VB
@@ -160,7 +160,37 @@ config ARCH_CHIP_STM32L152VB
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 100-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPRROM with
+		STM32L 100-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPROM with
+		4x44/8x40 LCD interface
+
+config ARCH_CHIP_STM32L152CC
+	bool "STM32L152CC"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	select STM32_MEDIUMPLUSDENSITY
+	---help---
+		STM32L 48-pin EnergyLite, 256KB FLASH, 32KB SRAM, 8KB EEPROM with
+		4x18 LCD interface
+
+config ARCH_CHIP_STM32L152RC
+	bool "STM32L152RC"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	select STM32_MEDIUMPLUSDENSITY
+	---help---
+		STM32L 64-pin EnergyLite, 256KB FLASH, 32KB SRAM, 8KB EEPROM with
+		4x32/8x28 LCD interface
+
+config ARCH_CHIP_STM32L152VC
+	bool "STM32L152VC"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	select STM32_MEDIUMPLUSDENSITY
+	---help---
+		STM32L 100-pin EnergyLite, 256KB FLASH, 32KB SRAM, 8KB EEPROM with
 		4x44/8x40 LCD interface
 
 config ARCH_CHIP_STM32L162ZD
@@ -171,8 +201,8 @@ config ARCH_CHIP_STM32L162ZD
 	select STM32_HIGHDENSITY
 	select STM32_HAVE_AES
 	---help---
-		STM32L 144-pin EnergyLite, 384KB FLASH, 48KB SRAM, 12KB EEPRROM with
-		8x40 LCD interface
+		STM32L 144-pin EnergyLite, 384KB FLASH, 48KB SRAM, 12KB EEPROM with
+		4x44/8x40 LCD interface
 
 config ARCH_CHIP_STM32L162VE
 	bool "STM32L162VE"
@@ -182,8 +212,8 @@ config ARCH_CHIP_STM32L162VE
 	select STM32_HIGHDENSITY
 	select STM32_HAVE_AES
 	---help---
-		STM32L 100-pin EnergyLite, 512KB FLASH, 80KB SRAM, 16KB EEPRROM with
-		8x40 LCD interface
+		STM32L 100-pin EnergyLite, 512KB FLASH, 80KB SRAM, 16KB EEPROM with
+		4x44/8x40 LCD interface
 
 config ARCH_CHIP_STM32F100C8
 	bool "STM32F100C8"
@@ -1445,7 +1475,7 @@ config STM32_STM32F303
 
 config STM32_STM32F33XX
 	bool
-       	default n
+	default n
 	select STM32_HAVE_HRTIM1
 	select STM32_HAVE_COMP2
 	select STM32_HAVE_COMP4
@@ -1715,8 +1745,8 @@ config STM32_STM32F469
 	select STM32_HAVE_SPI4
 	select STM32_HAVE_SPI5
 	select STM32_HAVE_SPI6
-        select STM32_HAVE_SAIPLL
-        select STM32_HAVE_I2SPLL
+	select STM32_HAVE_SAIPLL
+	select STM32_HAVE_I2SPLL
 
 
 config STM32_DFU
@@ -1909,32 +1939,32 @@ config STM32_HAVE_CAN2
 	default n
 
 config STM32_HAVE_COMP1
-       bool
-       default n
+	bool
+	default n
 
 config STM32_HAVE_COMP2
-       bool
-       default n
+	bool
+	default n
 
 config STM32_HAVE_COMP3
-       bool
-       default n
+	bool
+	default n
 
 config STM32_HAVE_COMP4
-       bool
-       default n
+	bool
+	default n
 
 config STM32_HAVE_COMP5
-       bool
-       default n
+	bool
+	default n
 
 config STM32_HAVE_COMP6
-       bool
-       default n
+	bool
+	default n
 
 config STM32_HAVE_COMP7
-       bool
-       default n
+	bool
+	default n
 
 config STM32_HAVE_DAC1
 	bool
@@ -1989,20 +2019,20 @@ config STM32_HAVE_I2SPLL
 	default n
 
 config STM32_HAVE_OPAMP1
-       bool
-       default n
+	bool
+	default n
 
 config STM32_HAVE_OPAMP2
-       bool
-       default n
+	bool
+	default n
 
 config STM32_HAVE_OPAMP3
-       bool
-       default n
+	bool
+	default n
 
 config STM32_HAVE_OPAMP4
-       bool
-       default n
+	bool
+	default n
 
 # These are the peripheral selections proper
 

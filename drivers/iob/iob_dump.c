@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob_dump.c
+ * drivers/iob/iob_dump.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -42,7 +42,9 @@
 #include <stdint.h>
 #include <debug.h>
 
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
+
+#include "iob.h"
 
 #ifdef CONFIG_DEBUG_FEATURES
 
@@ -83,8 +85,8 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
 
   if (offset > head->io_pktlen)
     {
-      nerr("ERROR: offset is past the end of data: %u > %u\n",
-           offset, head->io_pktlen);
+      ioberr("ERROR: offset is past the end of data: %u > %u\n",
+             offset, head->io_pktlen);
       return;
     }
 

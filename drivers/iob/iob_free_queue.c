@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob_concat.c
+ * drivers/iob/iob_free_queue.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,45 +39,68 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
+#include <assert.h>
 
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
-#include <string.h>
-
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 
 #include "iob.h"
+
+#if CONFIG_IOB_NCHAINS > 0
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef NULL
+#  define NULL ((FAR void *)0)
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_concat
+ * Name: iob_free_queue
  *
  * Description:
- *   Concatenate iob_s chain iob2 to iob1.
+ *   Free an entire queue of I/O buffer chains.
  *
  ****************************************************************************/
 
-void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2)
+void iob_free_queue(FAR struct iob_queue_s *qhead)
 {
-  /* Find the last buffer in the iob1 buffer chain */
+  FAR struct iob_qentry_s *iobq;
+  FAR struct iob_qentry_s *nextq;
+  FAR struct iob_s *iob;
 
-  while (iob1->io_flink)
+  /* Detach the list from the queue head so first for safety (should be safe
+   * anyway).
+   */
+
+  iobq           = qhead->qh_head;
+  qhead->qh_head = NULL;
+
+  /* Remove each I/O buffer chain from the queue */
+
+  while (iobq)
     {
-      iob1 = iob1->io_flink;
+      /* Remove the I/O buffer chain from the head of the queue and
+       * discard the queue container.
+       */
+
+      iob = iobq->qe_head;
+      DEBUGASSERT(iob);
+
+      /* Remove the queue container from the list and discard it */
+
+      nextq = iobq->qe_flink;
+      iob_free_qentry(iobq);
+      iobq = nextq;
+
+      /* Free the I/O chain */
+
+      iob_free_chain(iob);
     }
-
-  /* Then connect iob2 buffer chain to the end of the iob1 chain */
-
-  iob1->io_flink = iob2;
-
-  /* Combine the total packet size */
-
-  iob1->io_pktlen += iob2->io_pktlen;
 }
+
+#endif /* CONFIG_IOB_NCHAINS > 0 */

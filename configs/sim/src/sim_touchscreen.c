@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/sim/src/sim_touchscreen.c
  *
- *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,8 @@
 #ifdef CONFIG_VNCSERVER
 #  include <nuttx/video/vnc.h>
 #endif
+
+#include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -159,17 +161,19 @@ int board_tsc_setup(int minor)
 
   /* Finally, initialize the touchscreen simulation on the X window */
 
-  ret = board_tsc_setup(minor);
+  ret = sim_tsc_initialize(minor);
   if (ret < 0)
     {
-      ierr("ERROR: board_tsc_setup failed: %d\n", ret);
+      ierr("ERROR: sim_tsc_initialize failed: %d\n", ret);
       goto errout_with_nx;
     }
+
   return OK;
 
 errout_with_nx:
   nx_close(g_simtc.hnx);
   goto errout;
+
 errout_with_fb:
   up_fbuninitialize(0);
 errout:
@@ -190,7 +194,7 @@ void board_tsc_teardown(void)
 {
   /* Shut down the touchscreen driver */
 
-  sim_tcuninitialize();
+  sim_tsc_uninitialize();
 
   /* Close NX */
 
