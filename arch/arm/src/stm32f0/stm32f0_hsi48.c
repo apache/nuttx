@@ -101,7 +101,7 @@ void stm32f0_enable_hsi48(enum syncsrc_e syncsrc)
     {
       /* Select the HSI48 as the USB clock source */
 
-      regval = getreg32(STM32F0_RCC_CFGR3);
+      regval  = getreg32(STM32F0_RCC_CFGR3);
       regval &= ~RCC_CFGR3_USBSW;
       putreg32(regval, STM32F0_RCC_CFGR3);
     }
