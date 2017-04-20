@@ -51,9 +51,6 @@
  * masks, and hardware address, and a few others
  */
 
-#define _SIOCVALID(c)   (_IOC_TYPE(c)==_SIOCBASE)
-#define _SIOC(nr)       _IOC(_SIOCBASE,nr)
-
 /* IPv4 interface control operations */
 
 #define SIOCGIFADDR      _SIOC(0x0001)  /* Get IP address */
