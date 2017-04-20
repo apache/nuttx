@@ -61,6 +61,7 @@
 
 #ifdef CONFIG_NET_6LOWPAN
 #  include <nuttx/net/sixlowpan.h>
+#  include <nuttx/wireless/wireless.h>
 #endif
 
 #ifdef CONFIG_NET_IGMP
@@ -326,32 +327,73 @@ static void ioctl_set_ipv6addr(FAR net_ipv6addr_t outaddr,
 #endif
 
 /****************************************************************************
- * Name: netdev_wifr_dev
+ * Name: netdev_sixlowpan_ioctl
  *
  * Description:
- *   Verify the struct iwreq and get the Wireless device.
+ *   Perform 6loWPAN network device specific operations.
  *
  * Parameters:
- *   req - The argument of the ioctl cmd
+ *   psock    Socket structure
+ *   dev      Ethernet driver device structure
+ *   cmd      The ioctl command
+ *   req      The argument of the ioctl cmd
  *
  * Return:
- *  A pointer to the driver structure on success; NULL on failure.
+ *   >=0 on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_WIRELESS_IOCTL)
-static FAR struct net_driver_s *netdev_wifr_dev(FAR struct iwreq *req)
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN)
+static int netdev_sixlowpan_ioctl(FAR struct socket *psock, int cmd,
+                                  FAR struct sixlowpan_req_s *req)
 {
-  if (req != NULL)
-    {
-      /* Find the network device associated with the device name
-       * in the request data.
-       */
+  FAR struct ieee802154_driver_s *ieee;
+  int ret = -ENOTTY;
 
-      return netdev_findbyname(req->ifrn_name);
+  /* Verify that this is a valid wireless network IOCTL command */
+
+  if (_WLIOCVALID(cmd) && (unsigned)_IOC_NR(cmd) <= WL_NNETCMDS)
+    {
+      switch (cmd)
+        {
+
+          case SIOCSWPANID:  /* Join PAN ID */
+            {
+              ieee = (FAR struct ieee802154_driver_s *)netdev_findbyname(req->ifr_name);
+              if (ieee == NULL)
+                {
+                  ret = -ENODEV;
+                }
+              else
+                {
+                  ieee->i_panid = req->u.panid.panid;
+                  ret = OK;
+                }
+            }
+            break;
+
+          case SIOCGWPANID:   /* Return PAN ID */
+            {
+              ieee = (FAR struct ieee802154_driver_s *)netdev_findbyname(req->ifr_name);
+              if (ieee == NULL)
+                {
+                  ret = -ENODEV;
+                }
+              else
+                {
+                  req->u.panid.panid = ieee->i_panid;
+                  ret = OK;
+                }
+            }
+            break;
+
+          default:
+            return -ENOTTY;
+        }
     }
 
-  return NULL;
+  return ret;
 }
 #endif
 
@@ -462,8 +504,8 @@ static int netdev_wifr_ioctl(FAR struct socket *psock, int cmd,
     {
       /* Get the wireless device associated with the IOCTL command */
 
-      dev = netdev_wifr_dev(req);
-      if (dev)
+      dev = netdev_findbyname(req->ifrn_name);
+      if (dev != NULL)
         {
           /* Just forward the IOCTL to the wireless driver */
 
@@ -1290,7 +1332,11 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
    * non-NULL.
    */
 
+#ifdef CONFIG_DRIVERS_WIRELESS
+  if (!_SIOCVALID(cmd) && !_WLIOCVALID(cmd))
+#else
   if (!_SIOCVALID(cmd))
+#endif
     {
       ret = -ENOTTY;
       goto errout;
@@ -1308,13 +1354,27 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
 
   ret = netdev_ifr_ioctl(psock, cmd, (FAR struct ifreq *)((uintptr_t)arg));
 
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN)
+  /* Check for a 6loWPAN network command */
+
+  if (ret == -ENOTTY)
+    {
+      FAR struct sixlowpan_req_s *slpreq;
+
+      slpreq = (FAR struct sixlowpan_req_s *)((uintptr_t)arg);
+      ret    = netdev_sixlowpan_ioctl(psock, cmd, slpreq);
+    }
+#endif
+
 #if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_WIRELESS_IOCTL)
   /* Check for a wireless network command */
 
   if (ret == -ENOTTY)
     {
-      ret = netdev_wifr_ioctl(psock, cmd,
-                              (FAR struct iwreq *)((uintptr_t)arg));
+      FAR struct iwreq *wifrreq;
+
+      wifrreq = (FAR struct sixlowpan_req_s *)((uintptr_t)arg);
+      ret     = netdev_wifr_ioctl(psock, cmd, wifrreq);
     }
 #endif
 

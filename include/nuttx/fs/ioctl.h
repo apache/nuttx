@@ -235,6 +235,12 @@
 #define _MTDIOCVALID(c)   (_IOC_TYPE(c)==_MTDIOCBASE)
 #define _MTDIOC(nr)       _IOC(_MTDIOCBASE,nr)
 
+/* Socket IOCTLs ************************************************************/
+/* See include/nuttx/net/ioctl.h */
+
+#define _SIOCVALID(c)    (_IOC_TYPE(c)==_SIOCBASE)
+#define _SIOC(nr)        _IOC(_SIOCBASE,nr)
+
 /* NuttX ARP driver ioctl definitions (see netinet/arp.h) *******************/
 
 #define _ARPIOCVALID(c)   (_IOC_TYPE(c)==_ARPIOCBASE)
