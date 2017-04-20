@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/net/iob.h
+ * include/nuttx/drivers/iob.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_NET_IOB_H
-#define _INCLUDE_NUTTX_NET_IOB_H
+#ifndef _INCLUDE_NUTTX_DRIVERS_IOB_H
+#define _INCLUDE_NUTTX_DRIVERS_IOB_H
 
 /****************************************************************************
  * Included Files
@@ -45,27 +45,19 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <nuttx/net/iob.h>
-
-#ifdef CONFIG_NET_IOB
+#ifdef CONFIG_DRIVERS_IOB
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-/* I/O buffer allocation logic supports a throttle value for the TCP
- * read-ahead buffering to prevent the read-ahead from consuming all
- * available I/O buffers.  This throttle only applies if both TCP write
- * buffering and TCP read-ahead buffering are enabled.
- */
-
-#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS) || !defined(CONFIG_NET_TCP_READAHEAD)
-#  undef CONFIG_IOB_THROTTLE
-#  define CONFIG_IOB_THROTTLE 0
-#endif
-
-/* The correct way to disable throttling is to the the throttle value to
+/* I/O buffer allocation logic supports a throttle value for read-ahead
+ * buffering to prevent the read-ahead logic from consuming all available I/O
+ * buffers and blocking the write buffering logic.  This throttle logic
+ * is only needed if both write buffering and read-ahead buffering are used.
+ *
+ * The correct way to disable throttling is to set the throttle value to
  * zero.
  */
 
@@ -417,6 +409,6 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
 #  define iob_dump(wrb)
 #endif
 
-#endif /* CONFIG_NET_IOB */
-#endif /* _INCLUDE_NUTTX_NET_IOB_H */
+#endif /* CONFIG_DRIVERS_IOB */
+#endif /* _INCLUDE_NUTTX_DRIVERS_IOB_H */
 

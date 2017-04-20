@@ -42,7 +42,7 @@
 
 #include <debug.h>
 
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 #include <nuttx/net/net.h>
 
 #include "socket/socket.h"
@@ -109,7 +109,7 @@ void net_setup(void)
 #endif
 #endif /* CONFIG_NET_IPv6 */
 
-#ifdef CONFIG_NET_IOB
+#ifdef CONFIG_DRIVERS_IOB
   /* Initialize I/O buffering */
 
   iob_initialize();

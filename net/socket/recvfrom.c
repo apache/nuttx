@@ -59,7 +59,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/cancelpt.h>
 #include <nuttx/net/net.h>
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/tcp.h>

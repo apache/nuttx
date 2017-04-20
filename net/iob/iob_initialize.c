@@ -49,7 +49,7 @@
 #include <stdbool.h>
 #include <semaphore.h>
 
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 
 #include "iob.h"
 

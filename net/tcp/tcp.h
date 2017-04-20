@@ -45,7 +45,7 @@
 #include <sys/types.h>
 #include <queue.h>
 
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 #include <nuttx/net/ip.h>
 
 #if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)

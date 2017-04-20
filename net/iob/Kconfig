@@ -5,14 +5,14 @@
 
 menu "Network I/O Buffer Support"
 
-config NET_IOB
+config DRIVERS_IOB
 	bool "Enable generic network I/O buffer support"
 	default n
 	---help---
 		This setting will build the networking I/O buffer (IOB) support
 		library.
 
-if NET_IOB
+if DRIVERS_IOB
 
 config IOB_NBUFFERS
 	int "Number of pre-allocated network I/O buffers"
@@ -71,5 +71,5 @@ config IOB_DEBUG
 		I/O buffer logic and do not want to get overloaded with other
 		network-related debug output.
 
-endif # NET_IOB
+endif # DRIVERS_IOB
 endmenu # Network I/O buffer support

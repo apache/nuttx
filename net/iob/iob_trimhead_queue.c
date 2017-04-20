@@ -49,7 +49,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 
 #include "iob.h"
 

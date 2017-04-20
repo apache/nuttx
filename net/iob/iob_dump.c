@@ -42,7 +42,7 @@
 #include <stdint.h>
 #include <debug.h>
 
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 
 #ifdef CONFIG_DEBUG_FEATURES
 

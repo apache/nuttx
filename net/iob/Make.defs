@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_NET_IOB),y)
+ifeq ($(CONFIG_DRIVERS_IOB),y)
 
 # Include IOB source files
 

@@ -44,9 +44,9 @@
 
 #include <semaphore.h>
 
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 
-#ifdef CONFIG_NET_IOB
+#ifdef CONFIG_DRIVERS_IOB
 
 /****************************************************************************
  * Public Data
@@ -122,5 +122,5 @@ FAR struct iob_s *iob_tryalloc(bool throttled);
 
 FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq);
 
-#endif /* CONFIG_NET_IOB */
+#endif /* CONFIG_DRIVERS_IOB */
 #endif /* __NET_IOB_IOB_H */
