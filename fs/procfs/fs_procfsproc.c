@@ -871,7 +871,7 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
 
   for (i = 0; i < group->tg_nmembers; i++)
     {
-      linesize   = snprintf(procfile->line, STATUS_LINELEN, " %d");
+      linesize   = snprintf(procfile->line, STATUS_LINELEN, " %d", group->tg_members[i]);
       copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
       totalsize += copysize;
