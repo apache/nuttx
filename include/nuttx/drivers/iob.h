@@ -177,6 +177,17 @@ void iob_initialize(void);
 FAR struct iob_s *iob_alloc(bool throttled);
 
 /****************************************************************************
+ * Name: iob_tryalloc
+ *
+ * Description:
+ *   Try to allocate an I/O buffer by taking the buffer at the head of the
+ *   free list without waiting for a buffer to become free.
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *iob_tryalloc(bool throttled);
+
+/****************************************************************************
  * Name: iob_free
  *
  * Description:

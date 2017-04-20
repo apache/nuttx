@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/iob/iob_pack.c
+ * drivers/iob/iob_trimhead.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,14 +39,8 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
-
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
-#include <string.h>
+#include <assert.h>
+#include <debug.h>
 
 #include <nuttx/drivers/iob.h>
 
@@ -56,8 +50,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef MIN
-#  define MIN(a,b) ((a) < (b) ? (a) : (b))
+#ifndef NULL
+#  define NULL ((FAR void *)0)
 #endif
 
 /****************************************************************************
@@ -65,93 +59,83 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_pack
+ * Name: iob_trimhead
  *
  * Description:
- *   Pack all data in the I/O buffer chain so that the data offset is zero
- *   and all but the final buffer in the chain are filled.  Any emptied
- *   buffers at the end of the chain are freed.
+ *   Remove bytes from the beginning of an I/O chain.  Emptied I/O buffers
+ *   are freed and, hence, the beginning of the chain may change.
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_pack(FAR struct iob_s *iob)
+FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
 {
-  FAR struct iob_s *head;
-  FAR struct iob_s *next;
-  unsigned int ncopy;
-  unsigned int navail;
+  uint16_t pktlen;
 
-  /* Handle special cases */
+  iobinfo("iob=%p trimlen=%d\n", iob, trimlen);
 
-  while (iob->io_len <= 0)
+  if (iob && trimlen > 0)
     {
-      iob = iob_free(iob);
-    }
+      /* Trim from the head of the I/IO buffer chain */
 
-  /* Now remember the head of the chain (for the return value) */
-
-  head = iob;
-
-  /* Pack each entry in the list */
-
-  while (iob)
-    {
-      next = iob->io_flink;
-
-      /* Eliminate the data offset in this entry */
-
-      if (iob->io_offset > 0)
+      pktlen = iob->io_pktlen;
+      while (trimlen > 0 && iob != NULL)
         {
-          memcpy(iob->io_data, &iob->io_data[iob->io_offset], iob->io_len);
-          iob->io_offset = 0;
+          /* Do we trim this entire I/O buffer away? */
+
+          iobinfo("iob=%p io_len=%d pktlen=%d trimlen=%d\n",
+                  iob, iob->io_len, pktlen, trimlen);
+
+          if (iob->io_len <= trimlen)
+            {
+              FAR struct iob_s *next;
+
+              /* Decrement the trim length and packet length by the full
+               * data size.
+               */
+
+              pktlen  -= iob->io_len;
+              trimlen -= iob->io_len;
+
+              /* Check if this was the last entry in the chain */
+
+              next = iob->io_flink;
+              if (next == NULL)
+                {
+                  /* Yes.. break out of the loop returning the empty
+                   * I/O buffer chain containing only one empty entry.
+                   */
+
+                  DEBUGASSERT(pktlen == 0);
+                  iob->io_len    = 0;
+                  iob->io_offset = 0;
+                  break;
+                }
+
+              /* Free this entry and set the next I/O buffer as the head */
+
+              iobinfo("iob=%p: Freeing\n", iob);
+              (void)iob_free(iob);
+              iob = next;
+            }
+          else
+            {
+              /* No, then just take what we need from this I/O buffer and
+               * stop the trim.
+               */
+
+              pktlen         -= trimlen;
+              iob->io_len    -= trimlen;
+              iob->io_offset += trimlen;
+              trimlen         = 0;
+            }
         }
 
-      /* Is there a buffer after this one? */
+      /* Adjust the pktlen by the number of bytes removed from the head
+       * of the I/O buffer chain.
+       */
 
-      if (next)
-        {
-          /* How many bytes can we copy from the next I/O buffer.  Limit the
-           * size of the copy to the amount of free space in current I/O
-           * buffer
-           */
-
-          ncopy  = next->io_len;
-          navail = CONFIG_IOB_BUFSIZE - iob->io_len;
-          if (ncopy > navail)
-            {
-              ncopy = navail;
-            }
-
-          if (ncopy > 0)
-            {
-              /* Copy the data from the next into the current I/O buffer iob */
-
-              memcpy(&iob->io_data[iob->io_len],
-                     &next->io_data[next->io_offset],
-                     ncopy);
-
-              /* Adjust lengths and offsets */
-
-              iob->io_len     += ncopy;
-              next->io_len    -= ncopy;
-              next->io_offset += ncopy;
-            }
-
-         /* Have we consumed all of the data in the next entry? */
-
-         if (next->io_len <= 0)
-           {
-             /* Yes.. free the next entry in I/O buffer chain */
-
-             next          = iob_free(next);
-             iob->io_flink = next;
-           }
-        }
-
-      /* Set up to pack the next entry in the chain */
-
-      iob = next;
+      iob->io_pktlen = pktlen;
     }
 
-  return head;
+  return iob;
 }

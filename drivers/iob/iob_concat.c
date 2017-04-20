@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob_copyout.c
+ * drivers/iob/iob_concat.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,93 +39,38 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
-
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
-#include <stdint.h>
 #include <string.h>
-#include <assert.h>
 
 #include <nuttx/drivers/iob.h>
 
 #include "iob.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef MIN
-#  define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_copyout
+ * Name: iob_concat
  *
  * Description:
- *  Copy data 'len' bytes of data into the user buffer starting at 'offset'
- *  in the I/O buffer, returning that actual number of bytes copied out.
+ *   Concatenate iob_s chain iob2 to iob1.
  *
  ****************************************************************************/
 
-int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
-                unsigned int len, unsigned int offset)
+void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2)
 {
-  FAR const uint8_t *src;
-  unsigned int ncopy;
-  unsigned int avail;
-  unsigned int remaining;
+  /* Find the last buffer in the iob1 buffer chain */
 
-  /* Skip to the I/O buffer containing the offset */
-
-  while (offset >= iob->io_len)
+  while (iob1->io_flink)
     {
-      offset -= iob->io_len;
-      iob     = iob->io_flink;
-      if (iob == NULL)
-        {
-          /* We have no requested data in iob chain */
-
-          return 0;
-        }
+      iob1 = iob1->io_flink;
     }
 
-  /* Then loop until all of the I/O data is copied to the user buffer */
+  /* Then connect iob2 buffer chain to the end of the iob1 chain */
 
-  remaining = len;
-  while (iob && remaining > 0)
-    {
-      /* Get the source I/O buffer offset address and the amount of data
-       * available from that address.
-       */
+  iob1->io_flink = iob2;
 
-      src   = &iob->io_data[iob->io_offset + offset];
-      avail = iob->io_len - offset;
+  /* Combine the total packet size */
 
-      /* Copy the from the I/O buffer in to the user buffer */
-
-      ncopy = MIN(avail, remaining);
-      memcpy(dest, src, ncopy);
-
-      /* Adjust the total length of the copy and the destination address in
-       * the user buffer.
-       */
-
-      remaining -= ncopy;
-      dest += ncopy;
-
-      /* Skip to the next I/O buffer in the chain */
-
-      iob = iob->io_flink;
-      offset = 0;
-    }
-
-  return len - remaining;
+  iob1->io_pktlen += iob2->io_pktlen;
 }

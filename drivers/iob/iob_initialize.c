@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/iob/iob_free.c
+ * drivers/iob/iob_initialize.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,93 +39,102 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
-
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
+#include <stdbool.h>
 #include <semaphore.h>
-#include <assert.h>
-#include <debug.h>
 
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
 #include <nuttx/drivers/iob.h>
 
 #include "iob.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* This is a pool of pre-allocated I/O buffers */
+
+static struct iob_s        g_iob_pool[CONFIG_IOB_NBUFFERS];
+#if CONFIG_IOB_NCHAINS > 0
+static struct iob_qentry_s g_iob_qpool[CONFIG_IOB_NCHAINS];
+#endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* A list of all free, unallocated I/O buffers */
+
+FAR struct iob_s *g_iob_freelist;
+
+/* A list of all free, unallocated I/O buffer queue containers */
+
+#if CONFIG_IOB_NCHAINS > 0
+FAR struct iob_qentry_s *g_iob_freeqlist;
+#endif
+
+/* Counting semaphores that tracks the number of free IOBs/qentries */
+
+sem_t g_iob_sem;            /* Counts free I/O buffers */
+#if CONFIG_IOB_THROTTLE > 0
+sem_t g_throttle_sem;       /* Counts available I/O buffers when throttled */
+#endif
+#if CONFIG_IOB_NCHAINS > 0
+sem_t g_qentry_sem;         /* Counts free I/O buffer queue containers */
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_free
+ * Name: iob_initialize
  *
  * Description:
- *   Free the I/O buffer at the head of a buffer chain returning it to the
- *   free list.  The link to  the next I/O buffer in the chain is return.
+ *   Set up the I/O buffers for normal operations.
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_free(FAR struct iob_s *iob)
+void iob_initialize(void)
 {
-  FAR struct iob_s *next = iob->io_flink;
-  irqstate_t flags;
+  static bool initialized = false;
+  int i;
 
-  ninfo("iob=%p io_pktlen=%u io_len=%u next=%p\n",
-        iob, iob->io_pktlen, iob->io_len, next);
+  /* Perform one-time initialization */
 
-  /* Copy the data that only exists in the head of a I/O buffer chain into
-   * the next entry.
-   */
-
-  if (next)
+  if (!initialized)
     {
-      /* Copy and decrement the total packet length, being careful to
-       * do nothing too crazy.
-       */
+      /* Add each I/O buffer to the free list */
 
-      if (iob->io_pktlen > iob->io_len)
+      for (i = 0; i < CONFIG_IOB_NBUFFERS; i++)
         {
-          /* Adjust packet length and move it to the next entry */
+          FAR struct iob_s *iob = &g_iob_pool[i];
 
-          next->io_pktlen = iob->io_pktlen - iob->io_len;
-          DEBUGASSERT(next->io_pktlen >= next->io_len);
-        }
-      else
-        {
-          /* This can only happen if the next entry is last entry in the
-           * chain... and if it is empty
-           */
+          /* Add the pre-allocate I/O buffer to the head of the free list */
 
-          next->io_pktlen = 0;
-          DEBUGASSERT(next->io_len == 0 && next->io_flink == NULL);
+          iob->io_flink  = g_iob_freelist;
+          g_iob_freelist = iob;
         }
 
-      ninfo("next=%p io_pktlen=%u io_len=%u\n",
-            next, next->io_pktlen, next->io_len);
-    }
+      sem_init(&g_iob_sem, 0, CONFIG_IOB_NBUFFERS);
 
-  /* Free the I/O buffer by adding it to the head of the free list. We don't
-   * know what context we are called from so we use extreme measures to
-   * protect the free list:  We disable interrupts very briefly.
-   */
-
-  flags = enter_critical_section();
-  iob->io_flink = g_iob_freelist;
-  g_iob_freelist = iob;
-
-  /* Signal that an IOB is available */
-
-  sem_post(&g_iob_sem);
 #if CONFIG_IOB_THROTTLE > 0
-  sem_post(&g_throttle_sem);
+      sem_init(&g_throttle_sem, 0, CONFIG_IOB_NBUFFERS - CONFIG_IOB_THROTTLE);
 #endif
-  leave_critical_section(flags);
 
-  /* And return the I/O buffer after the one that was freed */
+#if CONFIG_IOB_NCHAINS > 0
+      /* Add each I/O buffer chain queue container to the free list */
 
-  return next;
+      for (i = 0; i < CONFIG_IOB_NCHAINS; i++)
+        {
+          FAR struct iob_qentry_s *iobq = &g_iob_qpool[i];
+
+          /* Add the pre-allocate buffer container to the head of the free list */
+
+          iobq->qe_flink  = g_iob_freeqlist;
+          g_iob_freeqlist = iobq;
+        }
+
+      sem_init(&g_qentry_sem, 0, CONFIG_IOB_NCHAINS);
+#endif
+      initialized = true;
+    }
 }

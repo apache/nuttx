@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/iob/iob_concat.c
+ * drivers/iob/iob_free_qentry.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,45 +39,52 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
+#include <semaphore.h>
+#include <assert.h>
 
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
-#include <string.h>
-
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
 #include <nuttx/drivers/iob.h>
 
 #include "iob.h"
+
+#if CONFIG_IOB_NCHAINS > 0
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_concat
+ * Name: iob_free_qentry
  *
  * Description:
- *   Concatenate iob_s chain iob2 to iob1.
+ *   Free the I/O buffer chain container by returning it to the free list.
+ *   The link to  the next I/O buffer in the chain is return.
  *
  ****************************************************************************/
 
-void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2)
+FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq)
 {
-  /* Find the last buffer in the iob1 buffer chain */
+  FAR struct iob_qentry_s *nextq = iobq->qe_flink;
+  irqstate_t flags;
 
-  while (iob1->io_flink)
-    {
-      iob1 = iob1->io_flink;
-    }
+  /* Free the I/O buffer chain container by adding it to the head of the free
+   * list. We don't know what context we are called from so we use extreme
+   * measures to protect the free list:  We disable interrupts very briefly.
+   */
 
-  /* Then connect iob2 buffer chain to the end of the iob1 chain */
+  flags = enter_critical_section();
+  iobq->qe_flink = g_iob_freeqlist;
+  g_iob_freeqlist = iobq;
 
-  iob1->io_flink = iob2;
+  /* Signal that an I/O buffer chain container is available */
 
-  /* Combine the total packet size */
+  sem_post(&g_qentry_sem);
+  leave_critical_section(flags);
 
-  iob1->io_pktlen += iob2->io_pktlen;
+  /* And return the I/O buffer chain container after the one that was freed */
+
+  return nextq;
 }
+
+#endif /* CONFIG_IOB_NCHAINS > 0 */

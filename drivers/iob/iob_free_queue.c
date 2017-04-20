@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob_trimhead.c
+ * drivers/iob/iob_free_queue.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,19 +39,13 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
-
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
 #include <assert.h>
-#include <debug.h>
 
 #include <nuttx/drivers/iob.h>
 
 #include "iob.h"
+
+#if CONFIG_IOB_NCHAINS > 0
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -66,83 +60,47 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_trimhead
+ * Name: iob_free_queue
  *
  * Description:
- *   Remove bytes from the beginning of an I/O chain.  Emptied I/O buffers
- *   are freed and, hence, the beginning of the chain may change.
+ *   Free an entire queue of I/O buffer chains.
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
+void iob_free_queue(FAR struct iob_queue_s *qhead)
 {
-  uint16_t pktlen;
+  FAR struct iob_qentry_s *iobq;
+  FAR struct iob_qentry_s *nextq;
+  FAR struct iob_s *iob;
 
-  ninfo("iob=%p trimlen=%d\n", iob, trimlen);
+  /* Detach the list from the queue head so first for safety (should be safe
+   * anyway).
+   */
 
-  if (iob && trimlen > 0)
+  iobq           = qhead->qh_head;
+  qhead->qh_head = NULL;
+
+  /* Remove each I/O buffer chain from the queue */
+
+  while (iobq)
     {
-      /* Trim from the head of the I/IO buffer chain */
-
-      pktlen = iob->io_pktlen;
-      while (trimlen > 0 && iob != NULL)
-        {
-          /* Do we trim this entire I/O buffer away? */
-
-          ninfo("iob=%p io_len=%d pktlen=%d trimlen=%d\n",
-                iob, iob->io_len, pktlen, trimlen);
-
-          if (iob->io_len <= trimlen)
-            {
-              FAR struct iob_s *next;
-
-              /* Decrement the trim length and packet length by the full
-               * data size.
-               */
-
-              pktlen  -= iob->io_len;
-              trimlen -= iob->io_len;
-
-              /* Check if this was the last entry in the chain */
-
-              next = iob->io_flink;
-              if (next == NULL)
-                {
-                  /* Yes.. break out of the loop returning the empty
-                   * I/O buffer chain containing only one empty entry.
-                   */
-
-                  DEBUGASSERT(pktlen == 0);
-                  iob->io_len    = 0;
-                  iob->io_offset = 0;
-                  break;
-                }
-
-              /* Free this entry and set the next I/O buffer as the head */
-
-              ninfo("iob=%p: Freeing\n", iob);
-              (void)iob_free(iob);
-              iob = next;
-            }
-          else
-            {
-              /* No, then just take what we need from this I/O buffer and
-               * stop the trim.
-               */
-
-              pktlen         -= trimlen;
-              iob->io_len    -= trimlen;
-              iob->io_offset += trimlen;
-              trimlen         = 0;
-            }
-        }
-
-      /* Adjust the pktlen by the number of bytes removed from the head
-       * of the I/O buffer chain.
+      /* Remove the I/O buffer chain from the head of the queue and
+       * discard the queue container.
        */
 
-      iob->io_pktlen = pktlen;
-    }
+      iob = iobq->qe_head;
+      DEBUGASSERT(iob);
 
-  return iob;
+      /* Remove the queue container from the list and discard it */
+
+      nextq = iobq->qe_flink;
+      iob_free_qentry(iobq);
+      iobq = nextq;
+
+      /* Free the I/O chain */
+
+      iob_free_chain(iob);
+    }
 }
+
+#endif /* CONFIG_IOB_NCHAINS > 0 */

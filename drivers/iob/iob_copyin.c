@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/iob/iob_copyin.c
+ * drivers/iob/iob_copyin.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,13 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
-
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
 
 #include <stdint.h>
 #include <string.h>
@@ -97,15 +90,15 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
   unsigned int avail;
   unsigned int total = len;
 
-  ninfo("iob=%p len=%u offset=%u\n", iob, len, offset);
+  iobinfo("iob=%p len=%u offset=%u\n", iob, len, offset);
   DEBUGASSERT(iob && src);
 
   /* The offset must applied to data that is already in the I/O buffer chain */
 
   if (offset > iob->io_pktlen)
     {
-      nerr("ERROR: offset is past the end of data: %u > %u\n",
-           offset, iob->io_pktlen);
+      ioberr("ERROR: offset is past the end of data: %u > %u\n",
+             offset, iob->io_pktlen);
       return -ESPIPE;
     }
 
@@ -130,7 +123,7 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
       dest  = &iob->io_data[iob->io_offset + offset];
       avail = iob->io_len - offset;
 
-      ninfo("iob=%p avail=%u len=%u next=%p\n", iob, avail, len, next);
+      iobinfo("iob=%p avail=%u len=%u next=%p\n", iob, avail, len, next);
 
       /* Will the rest of the copy fit into this buffer, overwriting
        * existing data.
@@ -187,8 +180,8 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
       /* Copy from the user buffer to the I/O buffer.  */
 
       memcpy(dest, src, ncopy);
-      ninfo("iob=%p Copy %u bytes new len=%u\n",
-            iob, ncopy, iob->io_len);
+      iobinfo("iob=%p Copy %u bytes new len=%u\n",
+              iob, ncopy, iob->io_len);
 
       /* Adjust the total length of the copy and the destination address in
        * the user buffer.
@@ -220,14 +213,14 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
 
           if (next == NULL)
             {
-              nerr("ERROR: Failed to allocate I/O buffer\n");
+              ioberr("ERROR: Failed to allocate I/O buffer\n");
               return len;
             }
 
           /* Add the new, empty I/O buffer to the end of the buffer chain. */
 
           iob->io_flink = next;
-          ninfo("iob=%p added to the chain\n", iob);
+          iobinfo("iob=%p added to the chain\n", iob);
         }
 
       iob = next;

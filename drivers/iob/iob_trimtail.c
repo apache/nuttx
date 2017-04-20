@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/iob/iob_remove_queue.c
+ * drivers/iob/iob_trimtail.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,69 +39,100 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
-
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
+#include <string.h>
 #include <debug.h>
 
 #include <nuttx/drivers/iob.h>
 
 #include "iob.h"
 
-#if CONFIG_IOB_NCHAINS > 0
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef NULL
-#  define NULL ((FAR void *)0)
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_remove_queue
+ * Name: iob_trimtail
  *
  * Description:
- *   Remove and return one I/O buffer chain from the head of a queue.
- *
- * Returned Value:
- *   Returns a reference to the I/O buffer chain at the head of the queue.
+ *   Remove bytes from the end of an I/O chain
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq)
+FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
 {
-  FAR struct iob_qentry_s *qentry;
-  FAR struct iob_s *iob = NULL;
+  FAR struct iob_s *entry;
+  FAR struct iob_s *penultimate;
+  FAR struct iob_s *last;
+  int len;
 
-  /* Remove the I/O buffer chain from the head of the queue */
+  iobinfo("iob=%p pktlen=%d trimlen=%d\n", iob, iob->io_pktlen, trimlen);
 
-  qentry = iobq->qh_head;
-  if (qentry)
+  if (iob && trimlen > 0)
     {
-      iobq->qh_head = qentry->qe_flink;
-      if (!iobq->qh_head)
+      len = trimlen;
+
+      /* Loop until complete the trim */
+
+      while (len > 0)
         {
-          iobq->qh_tail = NULL;
+          /* Calculate the total length of the data in the I/O buffer
+           * chain and find the last entry in the chain.
+           */
+
+          penultimate = NULL;
+          last = NULL;
+
+          for (entry = iob; entry; entry = entry->io_flink)
+            {
+              /* Remember the last and the next to the last in the chain */
+
+              penultimate = last;
+              last = entry;
+            }
+
+          /* Trim from the last entry in the chain.  Do we trim this entire
+           * I/O buffer away?
+           */
+
+          iobinfo("iob=%p len=%d vs %d\n", last, last->io_len, len);
+          if (last->io_len <= len)
+            {
+              /* Yes.. Consume the entire buffer */
+
+              iob->io_pktlen -= last->io_len;
+              len            -= last->io_len;
+              last->io_len    = 0;
+
+              /* Free the last, empty buffer in the list */
+
+              iob_free(last);
+
+              /* There should be a buffer before this one */
+
+              if (!penultimate)
+                {
+                  /* No.. we just freed the head of the chain */
+
+                  return NULL;
+                }
+
+              /* Unlink the penultimate from the freed buffer */
+
+              penultimate->io_flink = NULL;
+            }
+
+          else
+            {
+              /* No, then just take what we need from this I/O buffer and
+               * stop the trim.
+               */
+
+              iob->io_pktlen -= len;
+              last->io_len   -= len;
+              len             = 0;
+            }
         }
-
-      /* Extract the I/O buffer chain from the container and free the
-       * container.
-       */
-
-      iob = qentry->qe_head;
-      iob_free_qentry(qentry);
     }
 
   return iob;
 }
-
-#endif /* CONFIG_IOB_NCHAINS > 0 */

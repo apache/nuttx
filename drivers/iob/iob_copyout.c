@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob1/iob_copy.c
+ * drivers/iob/iob_copyout.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,17 +39,9 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
-
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
+#include <stdint.h>
 #include <string.h>
 #include <assert.h>
-#include <errno.h>
-#include <debug.h>
 
 #include <nuttx/drivers/iob.h>
 
@@ -68,115 +60,65 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_clone
+ * Name: iob_copyout
  *
  * Description:
- *   Duplicate (and pack) the data in iob1 in iob2.  iob2 must be empty.
+ *  Copy data 'len' bytes of data into the user buffer starting at 'offset'
+ *  in the I/O buffer, returning that actual number of bytes copied out.
  *
  ****************************************************************************/
 
-int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled)
+int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
+                unsigned int len, unsigned int offset)
 {
-  FAR uint8_t *src;
-  FAR uint8_t *dest;
+  FAR const uint8_t *src;
   unsigned int ncopy;
-  unsigned int avail1;
-  unsigned int avail2;
-  unsigned int offset1;
-  unsigned int offset2;
+  unsigned int avail;
+  unsigned int remaining;
 
-  DEBUGASSERT(iob2->io_len == 0 && iob2->io_offset == 0 &&
-              iob2->io_pktlen == 0 && iob2->io_flink == NULL);
+  /* Skip to the I/O buffer containing the offset */
 
-  /* Copy the total packet size from the I/O buffer at the head of the chain */
-
-  iob2->io_pktlen = iob1->io_pktlen;
-
-  /* Handle special case where there are empty buffers at the head
-   * the the list.
-   */
-
-  while (iob1->io_len <= 0)
+  while (offset >= iob->io_len)
     {
-      iob1 = iob1->io_flink;
+      offset -= iob->io_len;
+      iob     = iob->io_flink;
+      if (iob == NULL)
+        {
+          /* We have no requested data in iob chain */
+
+          return 0;
+        }
     }
 
-  /* Pack each entry from iob1 to iob2 */
+  /* Then loop until all of the I/O data is copied to the user buffer */
 
-  offset1 = 0;
-  offset2 = 0;
-
-  while (iob1)
+  remaining = len;
+  while (iob && remaining > 0)
     {
-      /* Get the source I/O buffer pointer and the number of bytes to copy
-       * from this address.
+      /* Get the source I/O buffer offset address and the amount of data
+       * available from that address.
        */
 
-      src    = &iob1->io_data[iob1->io_offset + offset1];
-      avail1 = iob1->io_len - offset1;
+      src   = &iob->io_data[iob->io_offset + offset];
+      avail = iob->io_len - offset;
 
-      /* Get the destination I/O buffer pointer and the number of bytes to
-       * copy to that address.
-       */
+      /* Copy the from the I/O buffer in to the user buffer */
 
-      dest   = &iob2->io_data[offset2];
-      avail2 = CONFIG_IOB_BUFSIZE - offset2;
-
-      /* Copy the smaller of the two and update the srce and destination
-       * offsets.
-       */
-
-      ncopy = MIN(avail1, avail2);
+      ncopy = MIN(avail, remaining);
       memcpy(dest, src, ncopy);
 
-      offset1 += ncopy;
-      offset2 += ncopy;
-
-      /* Have we taken all of the data from the source I/O buffer? */
-
-      if (offset1 >= iob1->io_len)
-        {
-          /* Skip over empty entries in the chain (there should not be any
-           * but just to be safe).
-           */
-
-          do
-            {
-              /* Yes.. move to the next source I/O buffer */
-
-              iob1 = iob1->io_flink;
-            }
-          while (iob1 && iob1->io_len <= 0);
-
-          /* Reset the offset to the beginning of the I/O buffer */
-
-          offset1 = 0;
-        }
-
-      /* Have we filled the destination I/O buffer? Is there more data to be
-       * transferred?
+      /* Adjust the total length of the copy and the destination address in
+       * the user buffer.
        */
 
-       if (offset2 >= CONFIG_IOB_BUFSIZE && iob1 != NULL)
-        {
-          FAR struct iob_s *next;
+      remaining -= ncopy;
+      dest += ncopy;
 
-          /* Allocate new destination I/O buffer and hook it into the
-           * destination I/O buffer chain.
-           */
+      /* Skip to the next I/O buffer in the chain */
 
-          next = iob_alloc(throttled);
-          if (!next)
-            {
-              nerr("ERROR: Failed to allocate an I/O buffer/n");
-              return -ENOMEM;
-            }
-
-          iob2->io_flink = next;
-          iob2 = next;
-          offset2 = 0;
-        }
+      iob = iob->io_flink;
+      offset = 0;
     }
 
-  return 0;
+  return len - remaining;
 }

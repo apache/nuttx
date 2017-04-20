@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob_initialize.c
+ * drivers/iob/iob_pack.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,53 +39,18 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
-
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
-#include <stdbool.h>
-#include <semaphore.h>
+#include <string.h>
 
 #include <nuttx/drivers/iob.h>
 
 #include "iob.h"
 
 /****************************************************************************
- * Private Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* This is a pool of pre-allocated I/O buffers */
-
-static struct iob_s        g_iob_pool[CONFIG_IOB_NBUFFERS];
-#if CONFIG_IOB_NCHAINS > 0
-static struct iob_qentry_s g_iob_qpool[CONFIG_IOB_NCHAINS];
-#endif
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* A list of all free, unallocated I/O buffers */
-
-FAR struct iob_s *g_iob_freelist;
-
-/* A list of all free, unallocated I/O buffer queue containers */
-
-#if CONFIG_IOB_NCHAINS > 0
-FAR struct iob_qentry_s *g_iob_freeqlist;
-#endif
-
-/* Counting semaphores that tracks the number of free IOBs/qentries */
-
-sem_t g_iob_sem;            /* Counts free I/O buffers */
-#if CONFIG_IOB_THROTTLE > 0
-sem_t g_throttle_sem;       /* Counts available I/O buffers when throttled */
-#endif
-#if CONFIG_IOB_NCHAINS > 0
-sem_t g_qentry_sem;         /* Counts free I/O buffer queue containers */
+#ifndef MIN
+#  define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
 /****************************************************************************
@@ -93,55 +58,93 @@ sem_t g_qentry_sem;         /* Counts free I/O buffer queue containers */
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_initialize
+ * Name: iob_pack
  *
  * Description:
- *   Set up the I/O buffers for normal operations.
+ *   Pack all data in the I/O buffer chain so that the data offset is zero
+ *   and all but the final buffer in the chain are filled.  Any emptied
+ *   buffers at the end of the chain are freed.
  *
  ****************************************************************************/
 
-void iob_initialize(void)
+FAR struct iob_s *iob_pack(FAR struct iob_s *iob)
 {
-  static bool initialized = false;
-  int i;
+  FAR struct iob_s *head;
+  FAR struct iob_s *next;
+  unsigned int ncopy;
+  unsigned int navail;
 
-  /* Perform one-time initialization */
+  /* Handle special cases */
 
-  if (!initialized)
+  while (iob->io_len <= 0)
     {
-      /* Add each I/O buffer to the free list */
-
-      for (i = 0; i < CONFIG_IOB_NBUFFERS; i++)
-        {
-          FAR struct iob_s *iob = &g_iob_pool[i];
-
-          /* Add the pre-allocate I/O buffer to the head of the free list */
-
-          iob->io_flink  = g_iob_freelist;
-          g_iob_freelist = iob;
-        }
-
-      sem_init(&g_iob_sem, 0, CONFIG_IOB_NBUFFERS);
-
-#if CONFIG_IOB_THROTTLE > 0
-      sem_init(&g_throttle_sem, 0, CONFIG_IOB_NBUFFERS - CONFIG_IOB_THROTTLE);
-#endif
-
-#if CONFIG_IOB_NCHAINS > 0
-      /* Add each I/O buffer chain queue container to the free list */
-
-      for (i = 0; i < CONFIG_IOB_NCHAINS; i++)
-        {
-          FAR struct iob_qentry_s *iobq = &g_iob_qpool[i];
-
-          /* Add the pre-allocate buffer container to the head of the free list */
-
-          iobq->qe_flink  = g_iob_freeqlist;
-          g_iob_freeqlist = iobq;
-        }
-
-      sem_init(&g_qentry_sem, 0, CONFIG_IOB_NCHAINS);
-#endif
-      initialized = true;
+      iob = iob_free(iob);
     }
+
+  /* Now remember the head of the chain (for the return value) */
+
+  head = iob;
+
+  /* Pack each entry in the list */
+
+  while (iob)
+    {
+      next = iob->io_flink;
+
+      /* Eliminate the data offset in this entry */
+
+      if (iob->io_offset > 0)
+        {
+          memcpy(iob->io_data, &iob->io_data[iob->io_offset], iob->io_len);
+          iob->io_offset = 0;
+        }
+
+      /* Is there a buffer after this one? */
+
+      if (next)
+        {
+          /* How many bytes can we copy from the next I/O buffer.  Limit the
+           * size of the copy to the amount of free space in current I/O
+           * buffer
+           */
+
+          ncopy  = next->io_len;
+          navail = CONFIG_IOB_BUFSIZE - iob->io_len;
+          if (ncopy > navail)
+            {
+              ncopy = navail;
+            }
+
+          if (ncopy > 0)
+            {
+              /* Copy the data from the next into the current I/O buffer iob */
+
+              memcpy(&iob->io_data[iob->io_len],
+                     &next->io_data[next->io_offset],
+                     ncopy);
+
+              /* Adjust lengths and offsets */
+
+              iob->io_len     += ncopy;
+              next->io_len    -= ncopy;
+              next->io_offset += ncopy;
+            }
+
+         /* Have we consumed all of the data in the next entry? */
+
+         if (next->io_len <= 0)
+           {
+             /* Yes.. free the next entry in I/O buffer chain */
+
+             next          = iob_free(next);
+             iob->io_flink = next;
+           }
+        }
+
+      /* Set up to pack the next entry in the chain */
+
+      iob = next;
+    }
+
+  return head;
 }

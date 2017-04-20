@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob_peek_queue.c
+ * drivers/iob/iob_peek_queue.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,13 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
-
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
 
 #include <debug.h>
 

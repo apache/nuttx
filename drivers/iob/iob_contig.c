@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob_contig.c
+ * drivers/iob/iob_contig.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,13 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
-
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
 
 #include <string.h>
 #include <assert.h>
@@ -161,7 +154,7 @@ int iob_contig(FAR struct iob_s *iob, unsigned int len)
 
   else
     {
-      nerr("ERROR: pktlen=%u < requested len=%u\n", iob->io_pktlen, len);
+      ioberr("ERROR: pktlen=%u < requested len=%u\n", iob->io_pktlen, len);
       return -ENOSPC;
     }
 }
