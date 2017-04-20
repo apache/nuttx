@@ -108,10 +108,8 @@
 #define STM32_USB_FNR                (STM32_USB_BASE+STM32_USB_FNR_OFFSET)
 #define STM32_USB_DADDR              (STM32_USB_BASE+STM32_USB_DADDR_OFFSET)
 #define STM32_USB_BTABLE             (STM32_USB_BASE+STM32_USB_BTABLE_OFFSET)
-#define STM32_USB_LPMCSR_OFFSET      0x0054  /* LPM control and status register (16-bits) */
-#define STM32_USB_LPMCSR_OFFSET      0x0054  /* LPM control and status register (16-bits) */
-#define STM32_USB_BCDR_OFFSET        0x0058  /* Battery charging detector (16-bits) */
-#define STM32_USB_BCDR_OFFSET        0x0058  /* Battery charging detector (16-bits) */
+#define STM32_USB_LPMCSR             (STM32_USB_BASE+STM32_USB_LPMCSR_OFFSET)
+#define STM32_USB_BCDR               (STM32_USB_BASE+STM32_USB_BCDR_OFFSET)
 
 /* Buffer Descriptor Table (Relatative to BTABLE address) */
 
