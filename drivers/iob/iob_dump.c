@@ -44,6 +44,8 @@
 
 #include <nuttx/drivers/iob.h>
 
+#include "iob.h"
+
 #ifdef CONFIG_DEBUG_FEATURES
 
 /****************************************************************************
