@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob_trimhead_queue.c
+ * drivers/iob/iob_concat.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,77 +39,38 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
+#include <string.h>
 
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
-#include <assert.h>
-#include <debug.h>
-
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 
 #include "iob.h"
-
-#if CONFIG_IOB_NCHAINS > 0
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef NULL
-#  define NULL ((FAR void *)0)
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_trimhead_queue
+ * Name: iob_concat
  *
  * Description:
- *   Remove bytes from the beginning of an I/O chain at the head of the
- *   queue.  Emptied I/O buffers are freed and, hence, the head of the
- *   queue may change.
- *
- *   This function is just a wrapper around iob_trimhead() that assures that
- *   the I/O buffer chain at the head of queue is modified with the trimming
- *   operation.
- *
- * Returned Value:
- *   The new I/O buffer chain at the head of the queue is returned.
+ *   Concatenate iob_s chain iob2 to iob1.
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_trimhead_queue(FAR struct iob_queue_s *qhead,
-                                     unsigned int trimlen)
+void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2)
 {
-  FAR struct iob_qentry_s *qentry;
-  FAR struct iob_s *iob = NULL;
+  /* Find the last buffer in the iob1 buffer chain */
 
-  /* Peek at the I/O buffer chain container at the head of the queue */
-
-  qentry = qhead->qh_head;
-  if (qentry)
+  while (iob1->io_flink)
     {
-      /* Verify that the queue entry contains an I/O buffer chain */
-
-      iob = qentry->qe_head;
-      if (iob)
-        {
-          /* Trim the I/Buffer chain and update the queue head */
-
-          iob = iob_trimhead(iob, trimlen);
-          qentry->qe_head = iob;
-        }
+      iob1 = iob1->io_flink;
     }
 
-  /* Return the new I/O buffer chain at the head of the queue */
+  /* Then connect iob2 buffer chain to the end of the iob1 chain */
 
-  return iob;
+  iob1->io_flink = iob2;
+
+  /* Combine the total packet size */
+
+  iob1->io_pktlen += iob2->io_pktlen;
 }
-
-#endif /* CONFIG_IOB_NCHAINS > 0 */

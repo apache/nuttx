@@ -466,6 +466,7 @@ config STM32F0_STM32F07X
 config STM32F0_STM32F09X
 	bool
 	default n
+	select STM32F0_HAVE_HSI48
 
 config STM32F0_VALUELINE
 	bool
@@ -528,6 +529,7 @@ config STM32F0_LOWVOLTLINE
 config STM32F0_USBLINE
 	bool
 	default n
+	select STM32F0_HAVE_HSI48
 	select STM32F0_HAVE_USART3
 	select STM32F0_HAVE_USART4
 	select STM32F0_HAVE_TIM1
@@ -576,6 +578,10 @@ config STM32F0_HAVE_CCM
 	bool
 	default n
 
+config STM32F0_HAVE_HSI48
+	bool
+	default n
+
 config STM32F0_HAVE_USBDEV
 	bool
 	default n
@@ -585,10 +591,6 @@ config STM32F0_HAVE_FSMC
 	default n
 
 config STM32F0_HAVE_HRTIM1
-	bool
-	default n
-
-config STM32F0_HAVE_LTDC
 	bool
 	default n
 

@@ -3,19 +3,19 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-menu "Network I/O Buffer Support"
+menu "Common  I/O Buffer Support"
 
-config NET_IOB
-	bool "Enable generic network I/O buffer support"
+config DRIVERS_IOB
+	bool "Enable generic I/O buffer support"
 	default n
 	---help---
-		This setting will build the networking I/O buffer (IOB) support
+		This setting will build the common I/O buffer (IOB) support
 		library.
 
-if NET_IOB
+if DRIVERS_IOB
 
 config IOB_NBUFFERS
-	int "Number of pre-allocated network I/O buffers"
+	int "Number of pre-allocated I/O buffers"
 	default 24 if (NET_TCP_WRITE_BUFFERS && !NET_TCP_READAHEAD) || (!NET_TCP_WRITE_BUFFERS && NET_TCP_READAHEAD)
 	default 36 if NET_TCP_WRITE_BUFFERS && NET_TCP_READAHEAD
 	default 8 if !NET_TCP_WRITE_BUFFERS && !NET_TCP_READAHEAD
@@ -25,7 +25,7 @@ config IOB_NBUFFERS
 		buffers available for packet data.
 
 config IOB_BUFSIZE
-	int "Payload size of one network I/O buffer"
+	int "Payload size of one I/O buffer"
 	default 196
 	---help---
 		Each packet is represented by a series of small I/O buffers in a
@@ -65,11 +65,10 @@ config IOB_DEBUG
 	default n
 	depends on DEBUG_FEATURES
 	---help---
-		This option will force debug output from I/O buffer logic,
-		even without network debug output.  This is not normally something
-		that would want to do but is convenient if you are debugging the
-		I/O buffer logic and do not want to get overloaded with other
-		network-related debug output.
+		This option will force debug output from I/O buffer logic.  This
+		is not normally something that would want to do but is convenient
+		if you are debugging the I/O buffer logic and do not want to get
+		overloaded with other un-related debug output.
 
-endif # NET_IOB
-endmenu # Network I/O buffer support
+endif # DRIVERS_IOB
+endmenu # Common I/O buffer support

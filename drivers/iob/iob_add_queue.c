@@ -1,8 +1,5 @@
 /****************************************************************************
- * net/iob/iob_test.c
- * Unit test driver.  This is of historical interest only since it requires
- * and custom build setup and modifications to the iob source and header
- * files.
+ * drivers/iob/iob_add_queue.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,54 +37,63 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <nuttx/config.h>
+
 #include <assert.h>
+#include <errno.h>
+#include <debug.h>
+
+#include <nuttx/drivers/iob.h>
 
 #include "iob.h"
 
+#if CONFIG_IOB_NCHAINS > 0
+
 /****************************************************************************
- * Private Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-static uint8_t buffer1[16384];
-static uint8_t buffer2[16384];
+#ifndef NULL
+#  define NULL ((FAR void *)0)
+#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static void dump_chain(struct iob_s *iob)
+/****************************************************************************
+ * Name: iob_add_queue_internal
+ *
+ * Description:
+ *   Add one I/O buffer chain to the end of a queue.  May fail due to lack
+ *   of resources.
+ *
+ ****************************************************************************/
+
+static int iob_add_queue_internal(FAR struct iob_s *iob,
+                                  FAR struct iob_queue_s *iobq,
+                                  FAR struct iob_qentry_s *qentry)
 {
-  struct iob_s *head = iob;
-  unsigned int pktlen;
-  int n;
+  /* Add the I/O buffer chain to the container */
 
-  printf("=========================================================\n");
-  printf("pktlen: %d\n", iob->io_pktlen);
+  qentry->qe_head = iob;
 
-  n = 0;
-  pktlen = 0;
+  /* Add the container to the end of the queue */
 
-  while (iob)
+  qentry->qe_flink = NULL;
+  if (!iobq->qh_head)
     {
-      printf("%d. len=%d, offset=%d\n", n, iob->io_len, iob->io_offset);
-
-      pktlen += iob->io_len;
-      iob = iob->io_flink;
-      n++;
+      iobq->qh_head = qentry;
+      iobq->qh_tail = qentry;
+    }
+  else
+    {
+      DEBUGASSERT(iobq->qh_tail);
+      iobq->qh_tail->qe_flink = qentry;
+      iobq->qh_tail = qentry;
     }
 
-  if (pktlen != head->io_pktlen)
-    {
-      printf("ERROR: Bad packet length=%u, actual=%u\n",
-             head->io_pktlen, pktlen);
-    }
-
-  printf("=========================================================\n");
+  return 0;
 }
 
 /****************************************************************************
@@ -95,102 +101,52 @@ static void dump_chain(struct iob_s *iob)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: main
+ * Name: iob_add_queue
  *
  * Description:
- *   A simple unit test for the I/O buffer logic
+ *   Add one I/O buffer chain to the end of a queue.  May fail due to lack
+ *   of resources.
  *
  ****************************************************************************/
 
-int main(int argc, char **argv)
+int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
 {
-  struct iob_s *iob;
-  int nbytes;
-  int i;
+  FAR struct iob_qentry_s *qentry;
 
-  iob_initialize();
-  iob = iob_alloc(false);
+  /* Allocate a container to hold the I/O buffer chain */
 
-  for (i = 0; i < 4096; i++)
+  qentry = iob_alloc_qentry();
+  if (!qentry)
     {
-      buffer1[i] = (uint8_t)(i & 0xff);
-    }
-  memset(buffer2, 0xff, 4096);
-
-  iob_copyin(iob, buffer2, 47, 0, false);
-  printf("Copy IN: 47, offset 0\n");
-  dump_chain(iob);
-
-  iob_copyin(iob, buffer1, 4096, 47, false);
-  printf("Copy IN: 4096, offset 47\n");
-  dump_chain(iob);
-
-  nbytes = iob_copyout(buffer2, iob, 4096, 47);
-  printf("Copy OUT: %d, offset 47\n", nbytes);
-
-  if (memcmp(buffer1, buffer2, nbytes) != 0)
-    {
-      fprintf(stderr, "Buffer1 does not match buffer2\n");
+      ioberr("ERROR: Failed to allocate a container\n");
+      return -ENOMEM;
     }
 
-  iob = iob_trimhead(iob, 47);
-  printf("Trim: 47 from the beginning of the list\n");
-  dump_chain(iob);
-
-  iob = iob_trimtail(iob, 493);
-  printf("Trim: 493 from the end of the list\n");
-  dump_chain(iob);
-
-  nbytes = iob_copyout(buffer2, iob, 4096, 0);
-  printf("Copy OUT: %d, offset 0\n", nbytes);
-
-  if (memcmp(buffer1, buffer2, nbytes) != 0)
-    {
-      fprintf(stderr, "Buffer1 does not match buffer2\n");
-    }
-
-  iob = iob_trimhead(iob, 1362);
-  printf("Trim: 1362 from the beginning of the list\n");
-  dump_chain(iob);
-
-  nbytes = iob_copyout(buffer2, iob, 4096, 0);
-  printf("Copy OUT: %d, offset 0\n", nbytes);
-
-  if (memcmp(&buffer1[1362], buffer2, nbytes) != 0)
-    {
-      fprintf(stderr, "Buffer1 does not match buffer2\n");
-    }
-
-  iob = iob_pack(iob);
-  printf("Packed\n");
-  dump_chain(iob);
-
-  nbytes = iob_copyout(buffer2, iob, 4096, 0);
-  printf("Copy OUT: %d, offset 0\n", nbytes);
-
-  if (memcmp(&buffer1[1362], buffer2, nbytes) != 0)
-    {
-      fprintf(stderr, "Buffer1 does not match buffer2\n");
-    }
-
-  while (iob) iob = iob_free(iob);
-  return EXIT_SUCCESS;
+  return iob_add_queue_internal(iob, iobq, qentry);
 }
 
 /****************************************************************************
- * Name: my_assert
+ * Name: iob_tryadd_queue
  *
  * Description:
- *   A stand-in for the NuttX assertion routine.
+ *   Add one I/O buffer chain to the end of a queue without waiting for
+ *   resources to become free.
  *
  ****************************************************************************/
 
-void my_assert(bool value)
+int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
 {
-  if (!value)
-    {
-      fprintf(stderr, "Assertion failed\n");
+  FAR struct iob_qentry_s *qentry;
 
-      abort();
+  /* Allocate a container to hold the I/O buffer chain */
+
+  qentry = iob_tryalloc_qentry();
+  if (!qentry)
+    {
+      ioberr("ERROR: Failed to allocate a container\n");
+      return -ENOMEM;
     }
+
+  return iob_add_queue_internal(iob, iobq, qentry);
 }
+#endif /* CONFIG_IOB_NCHAINS > 0 */

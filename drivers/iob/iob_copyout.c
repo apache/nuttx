@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/iob/iob_free.c
+ * drivers/iob/iob_copyout.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,93 +39,86 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
-
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
-#include <semaphore.h>
+#include <stdint.h>
+#include <string.h>
 #include <assert.h>
-#include <debug.h>
 
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 
 #include "iob.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef MIN
+#  define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_free
+ * Name: iob_copyout
  *
  * Description:
- *   Free the I/O buffer at the head of a buffer chain returning it to the
- *   free list.  The link to  the next I/O buffer in the chain is return.
+ *  Copy data 'len' bytes of data into the user buffer starting at 'offset'
+ *  in the I/O buffer, returning that actual number of bytes copied out.
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_free(FAR struct iob_s *iob)
+int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
+                unsigned int len, unsigned int offset)
 {
-  FAR struct iob_s *next = iob->io_flink;
-  irqstate_t flags;
+  FAR const uint8_t *src;
+  unsigned int ncopy;
+  unsigned int avail;
+  unsigned int remaining;
 
-  ninfo("iob=%p io_pktlen=%u io_len=%u next=%p\n",
-        iob, iob->io_pktlen, iob->io_len, next);
+  /* Skip to the I/O buffer containing the offset */
 
-  /* Copy the data that only exists in the head of a I/O buffer chain into
-   * the next entry.
-   */
-
-  if (next)
+  while (offset >= iob->io_len)
     {
-      /* Copy and decrement the total packet length, being careful to
-       * do nothing too crazy.
-       */
-
-      if (iob->io_pktlen > iob->io_len)
+      offset -= iob->io_len;
+      iob     = iob->io_flink;
+      if (iob == NULL)
         {
-          /* Adjust packet length and move it to the next entry */
+          /* We have no requested data in iob chain */
 
-          next->io_pktlen = iob->io_pktlen - iob->io_len;
-          DEBUGASSERT(next->io_pktlen >= next->io_len);
+          return 0;
         }
-      else
-        {
-          /* This can only happen if the next entry is last entry in the
-           * chain... and if it is empty
-           */
-
-          next->io_pktlen = 0;
-          DEBUGASSERT(next->io_len == 0 && next->io_flink == NULL);
-        }
-
-      ninfo("next=%p io_pktlen=%u io_len=%u\n",
-            next, next->io_pktlen, next->io_len);
     }
 
-  /* Free the I/O buffer by adding it to the head of the free list. We don't
-   * know what context we are called from so we use extreme measures to
-   * protect the free list:  We disable interrupts very briefly.
-   */
+  /* Then loop until all of the I/O data is copied to the user buffer */
 
-  flags = enter_critical_section();
-  iob->io_flink = g_iob_freelist;
-  g_iob_freelist = iob;
+  remaining = len;
+  while (iob && remaining > 0)
+    {
+      /* Get the source I/O buffer offset address and the amount of data
+       * available from that address.
+       */
 
-  /* Signal that an IOB is available */
+      src   = &iob->io_data[iob->io_offset + offset];
+      avail = iob->io_len - offset;
 
-  sem_post(&g_iob_sem);
-#if CONFIG_IOB_THROTTLE > 0
-  sem_post(&g_throttle_sem);
-#endif
-  leave_critical_section(flags);
+      /* Copy the from the I/O buffer in to the user buffer */
 
-  /* And return the I/O buffer after the one that was freed */
+      ncopy = MIN(avail, remaining);
+      memcpy(dest, src, ncopy);
 
-  return next;
+      /* Adjust the total length of the copy and the destination address in
+       * the user buffer.
+       */
+
+      remaining -= ncopy;
+      dest += ncopy;
+
+      /* Skip to the next I/O buffer in the chain */
+
+      iob = iob->io_flink;
+      offset = 0;
+    }
+
+  return len - remaining;
 }

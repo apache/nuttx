@@ -57,7 +57,6 @@ DEPPATH = --dep-path .
 
 include socket/Make.defs
 include netdev/Make.defs
-include iob/Make.defs
 include arp/Make.defs
 include icmp/Make.defs
 include icmpv6/Make.defs

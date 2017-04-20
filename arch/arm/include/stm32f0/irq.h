@@ -61,13 +61,13 @@
 /* Common Processor Exceptions (vectors 0-15) */
 
 #define STM32F0_IRQ_RESERVED       (0) /* Reserved vector (only used with CONFIG_DEBUG_FEATURES) */
-                                        /* Vector  0: Reset stack pointer value */
-                                        /* Vector  1: Reset (not handler as an IRQ) */
+                                       /* Vector  0: Reset stack pointer value */
+                                       /* Vector  1: Reset (not handler as an IRQ) */
 #define STM32F0_IRQ_NMI            (2) /* Vector  2: Non-Maskable Interrupt (NMI) */
 #define STM32F0_IRQ_HARDFAULT      (3) /* Vector  3: Hard fault */
-                                        /* Vectors 4-10: Reserved */
+                                       /* Vectors 4-10: Reserved */
 #define STM32F0_IRQ_SVCALL        (11) /* Vector 11: SVC call */
-                                        /* Vector 12-13: Reserved */
+                                       /* Vector 12-13: Reserved */
 #define STM32F0_IRQ_PENDSV        (14) /* Vector 14: Pendable system service request */
 #define STM32F0_IRQ_SYSTICK       (15) /* Vector 15: System tick */
 
@@ -108,8 +108,8 @@
 #define STM32F0_IRQ_CEC_CAN       (46) /* Vector 46: HDMI CEC and CAN */
 #define STM32F0_IRQ_USB           (47) /* Vector 47: USB */
 
-#define NR_VECTORS           (64) /* 64 vectors */
-#define NR_IRQS              (48) /* 64 interrupts but 48 IRQ numbers */
+#define NR_VECTORS                (48) /* 48 vectors */
+#define NR_IRQS                   (48) /* 32 interrupts plus 16 exceptions */
 
 /****************************************************************************
  * Public Types

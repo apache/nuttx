@@ -62,7 +62,6 @@
 
 #include "devif/devif.h"
 #include "netdev/netdev.h"
-#include "iob/iob.h"
 #include "udp/udp.h"
 
 /****************************************************************************

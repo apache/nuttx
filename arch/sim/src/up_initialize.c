@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_initialize.c
  *
- *   Copyright (C) 2007-2009, 2011-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched_note.h>
+#include <nuttx/drivers/iob.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/fs/ioctl.h>
@@ -198,6 +199,12 @@ void up_initialize(void)
    */
 
   up_pminitialize();
+#endif
+
+#ifdef CONFIG_DRIVERS_IOB
+  /* Initialize IO buffering */
+
+  iob_initialize();
 #endif
 
 #if CONFIG_NFILE_DESCRIPTORS > 0

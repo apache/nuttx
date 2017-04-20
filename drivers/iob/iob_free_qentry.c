@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/iob/iob_peek_queue.c
+ * drivers/iob/iob_free_qentry.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,64 +39,52 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
+#include <semaphore.h>
+#include <assert.h>
 
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
-#include <debug.h>
-
-#include <nuttx/net/iob.h>
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <nuttx/drivers/iob.h>
 
 #include "iob.h"
 
 #if CONFIG_IOB_NCHAINS > 0
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef NULL
-#  define NULL ((FAR void *)0)
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_peek_queue
+ * Name: iob_free_qentry
  *
  * Description:
- *   Return a reference to the I/O buffer chain at the head of a queue. This
- *   is similar to iob_remove_queue except that the I/O buffer chain is in
- *   place at the head of the queue.  The I/O buffer chain may safely be
- *   modified by the caller but must be removed from the queue before it can
- *   be freed.
- *
- * Returned Value:
- *   Returns a reference to the I/O buffer chain at the head of the queue.
+ *   Free the I/O buffer chain container by returning it to the free list.
+ *   The link to  the next I/O buffer in the chain is return.
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_peek_queue(FAR struct iob_queue_s *iobq)
+FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq)
 {
-  FAR struct iob_qentry_s *qentry;
-  FAR struct iob_s *iob = NULL;
+  FAR struct iob_qentry_s *nextq = iobq->qe_flink;
+  irqstate_t flags;
 
-  /* Peek at the I/O buffer chain container at the head of the queue */
+  /* Free the I/O buffer chain container by adding it to the head of the free
+   * list. We don't know what context we are called from so we use extreme
+   * measures to protect the free list:  We disable interrupts very briefly.
+   */
 
-  qentry = iobq->qh_head;
-  if (qentry)
-    {
-      /* Return the I/O buffer chain from the container */
+  flags = enter_critical_section();
+  iobq->qe_flink = g_iob_freeqlist;
+  g_iob_freeqlist = iobq;
 
-      iob = qentry->qe_head;
-    }
+  /* Signal that an I/O buffer chain container is available */
 
-  return iob;
+  sem_post(&g_qentry_sem);
+  leave_critical_section(flags);
+
+  /* And return the I/O buffer chain container after the one that was freed */
+
+  return nextq;
 }
 
 #endif /* CONFIG_IOB_NCHAINS > 0 */

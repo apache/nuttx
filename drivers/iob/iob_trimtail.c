@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/iob/iob_trimhead.c
+ * drivers/iob/iob_trimtail.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,109 +39,99 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
-
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
-#include <assert.h>
+#include <string.h>
 #include <debug.h>
 
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 
 #include "iob.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef NULL
-#  define NULL ((FAR void *)0)
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_trimhead
+ * Name: iob_trimtail
  *
  * Description:
- *   Remove bytes from the beginning of an I/O chain.  Emptied I/O buffers
- *   are freed and, hence, the beginning of the chain may change.
+ *   Remove bytes from the end of an I/O chain
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
+FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
 {
-  uint16_t pktlen;
+  FAR struct iob_s *entry;
+  FAR struct iob_s *penultimate;
+  FAR struct iob_s *last;
+  int len;
 
-  ninfo("iob=%p trimlen=%d\n", iob, trimlen);
+  iobinfo("iob=%p pktlen=%d trimlen=%d\n", iob, iob->io_pktlen, trimlen);
 
   if (iob && trimlen > 0)
     {
-      /* Trim from the head of the I/IO buffer chain */
+      len = trimlen;
 
-      pktlen = iob->io_pktlen;
-      while (trimlen > 0 && iob != NULL)
+      /* Loop until complete the trim */
+
+      while (len > 0)
         {
-          /* Do we trim this entire I/O buffer away? */
+          /* Calculate the total length of the data in the I/O buffer
+           * chain and find the last entry in the chain.
+           */
 
-          ninfo("iob=%p io_len=%d pktlen=%d trimlen=%d\n",
-                iob, iob->io_len, pktlen, trimlen);
+          penultimate = NULL;
+          last = NULL;
 
-          if (iob->io_len <= trimlen)
+          for (entry = iob; entry; entry = entry->io_flink)
             {
-              FAR struct iob_s *next;
+              /* Remember the last and the next to the last in the chain */
 
-              /* Decrement the trim length and packet length by the full
-               * data size.
-               */
+              penultimate = last;
+              last = entry;
+            }
 
-              pktlen  -= iob->io_len;
-              trimlen -= iob->io_len;
+          /* Trim from the last entry in the chain.  Do we trim this entire
+           * I/O buffer away?
+           */
 
-              /* Check if this was the last entry in the chain */
+          iobinfo("iob=%p len=%d vs %d\n", last, last->io_len, len);
+          if (last->io_len <= len)
+            {
+              /* Yes.. Consume the entire buffer */
 
-              next = iob->io_flink;
-              if (next == NULL)
+              iob->io_pktlen -= last->io_len;
+              len            -= last->io_len;
+              last->io_len    = 0;
+
+              /* Free the last, empty buffer in the list */
+
+              iob_free(last);
+
+              /* There should be a buffer before this one */
+
+              if (!penultimate)
                 {
-                  /* Yes.. break out of the loop returning the empty
-                   * I/O buffer chain containing only one empty entry.
-                   */
+                  /* No.. we just freed the head of the chain */
 
-                  DEBUGASSERT(pktlen == 0);
-                  iob->io_len    = 0;
-                  iob->io_offset = 0;
-                  break;
+                  return NULL;
                 }
 
-              /* Free this entry and set the next I/O buffer as the head */
+              /* Unlink the penultimate from the freed buffer */
 
-              ninfo("iob=%p: Freeing\n", iob);
-              (void)iob_free(iob);
-              iob = next;
+              penultimate->io_flink = NULL;
             }
+
           else
             {
               /* No, then just take what we need from this I/O buffer and
                * stop the trim.
                */
 
-              pktlen         -= trimlen;
-              iob->io_len    -= trimlen;
-              iob->io_offset += trimlen;
-              trimlen         = 0;
+              iob->io_pktlen -= len;
+              last->io_len   -= len;
+              len             = 0;
             }
         }
-
-      /* Adjust the pktlen by the number of bytes removed from the head
-       * of the I/O buffer chain.
-       */
-
-      iob->io_pktlen = pktlen;
     }
 
   return iob;
