@@ -281,6 +281,11 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
   ninfo("Sending packet length %d\n", buflen);
 
+  /* Set the source and destinatino address */
+
+  rimeaddr_copy(&g_pktaddrs[PACKETBUF_ADDR_SENDER], &ieee->i_nodeaddr);
+  rimeaddr_copy(&g_pktaddrs[PACKETBUF_ADDR_RECEIVER], destmac);
+
   /* Pre-calculate frame header length. */
 
   framer_hdrlen = sixlowpan_send_hdrlen(ieee, ieee->i_panid);
@@ -317,11 +322,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
   ninfo("Header of length %d\n", g_frame_hdrlen);
 
-  rimeaddr_copy(&g_pktaddrs[PACKETBUF_ADDR_RECEIVER], destmac);
-
   /* Check if we need to fragment the packet into several frames */
 
-  if (buflen > (CONFIG_NET_6LOWPAN_MAXPAYLOAD - g_frame_hdrlen))
+  if (buflen > (CONFIG_NET_6LOWPAN_FRAMELEN - g_frame_hdrlen))
     {
 #ifdef CONFIG_NET_6LOWPAN_FRAG
       /* ieee->i_framelist will hold the generated frames; frames will be
@@ -384,7 +387,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
        * bytes.
        */
 
-      paysize = (CONFIG_NET_6LOWPAN_MAXPAYLOAD - g_frame_hdrlen) & ~7;
+      paysize = (CONFIG_NET_6LOWPAN_FRAMELEN - g_frame_hdrlen) & ~7;
       memcpy(fptr + g_frame_hdrlen, buf,  paysize);
 
       /* Set outlen to what we already sent from the IP payload */
@@ -457,7 +460,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
           /* Copy payload and enqueue */
           /* Check for the last fragment */
 
-          paysize = (CONFIG_NET_6LOWPAN_MAXPAYLOAD - fragn_hdrlen) &
+          paysize = (CONFIG_NET_6LOWPAN_FRAMELEN - fragn_hdrlen) &
                     SIXLOWPAN_DISPATCH_FRAG_MASK;
           if (buflen - outlen < paysize)
             {

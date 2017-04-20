@@ -41,6 +41,7 @@
 
 #include <sys/mount.h>
 #include <sys/types.h>
+#include <debug.h>
 
 #include "nucleo-f072rb.h"
 
@@ -72,7 +73,7 @@ int stm32_bringup(void)
   ret = mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+      ferr("ERROR: Failed to mount procfs at /proc: %d\n", ret);
     }
 #endif
 

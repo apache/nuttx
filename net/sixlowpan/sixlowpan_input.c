@@ -167,7 +167,7 @@ int sixlowpan_recv_hdrlen(FAR const uint8_t *fptr)
     }
   else if (addrmode == FRAME802154_LONGADDRMODE)
     {
-      /* 2 byte dest PAN + 6 byte dest long address */
+      /* 2 byte dest PAN + 8 byte dest long address */
 
       hdrlen += 10;
     }
@@ -193,6 +193,8 @@ int sixlowpan_recv_hdrlen(FAR const uint8_t *fptr)
     }
   else
     {
+      /* Add source PANID if PANIDs are not compressed */
+
       if ((fptr[0] & (1 << FRAME802154_PANIDCOMP_SHIFT)) == 0)
         {
           hdrlen += 2;

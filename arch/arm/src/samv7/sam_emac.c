@@ -86,6 +86,7 @@
 #include "cache.h"
 
 #include "chip/sam_pinmap.h"
+#include "chip/sam_chipid.h"
 #include "sam_gpio.h"
 #include "sam_periphclks.h"
 #include "sam_ethernet.h"
@@ -331,7 +332,19 @@
 #define EMAC_QUEUE_0        0
 #define EMAC_QUEUE_1        1
 #define EMAC_QUEUE_2        2
-#define EMAC_NQUEUES        3
+
+#if defined(CONFIG_ARCH_CHIP_SAMV71)
+  /* After chip version 1, the SAMV71 increased from 3 to 6 queue */
+
+#  define EMAC_QUEUE_3      3
+#  define EMAC_QUEUE_4      4
+#  define EMAC_QUEUE_5      5
+#  define EMAC_NQUEUES      (g_emac_nqueues)
+#  define EMAC_MAX_NQUEUES  6
+#else
+#  define EMAC_NQUEUES      3
+#  define EMAC_MAX_NQUEUES  3
+#endif
 
 /* Interrupt settings */
 
@@ -537,7 +550,7 @@ struct sam_emac_s
 
   /* Transfer queues */
 
-  struct sam_queue_s    xfrq[EMAC_NQUEUES];
+  struct sam_queue_s    xfrq[EMAC_MAX_NQUEUES];
 
     /* Debug stuff */
 
@@ -924,6 +937,16 @@ static uint8_t g_pktbuf1[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
 /* EMAC1 peripheral state */
 
 static struct sam_emac_s g_emac1;
+
+#endif /* CONFIG_SAMV7_EMAC1 */
+
+/* The SAMV71 may support from 3 to 6 queue, depending upon the chip
+ * revision.  NOTE that this is a global setting and applies to both
+ * EMAC peripherals.
+ */
+
+#if defined(CONFIG_ARCH_CHIP_SAMV71)
+static uint8_t g_emac_nqueues = 3;
 #endif
 
 /****************************************************************************
@@ -2677,6 +2700,16 @@ static int sam_ifup(struct net_driver_s *dev)
   sam_emac_configure(priv);
   sam_queue_configure(priv, EMAC_QUEUE_1);
   sam_queue_configure(priv, EMAC_QUEUE_2);
+
+#if defined(CONFIG_ARCH_CHIP_SAMV71)
+  if (g_emac_nqueues > 3)
+    {
+      sam_queue_configure(priv, EMAC_QUEUE_3);
+      sam_queue_configure(priv, EMAC_QUEUE_4);
+      sam_queue_configure(priv, EMAC_QUEUE_5);
+    }
+#endif
+
   sam_queue0_configure(priv);
 
   /* Set the MAC address (should have been configured while we were down) */
@@ -4540,9 +4573,27 @@ static void sam_emac_reset(struct sam_emac_s *priv)
   sam_rxreset(priv, EMAC_QUEUE_1);
   sam_rxreset(priv, EMAC_QUEUE_2);
 
+#if defined(CONFIG_ARCH_CHIP_SAMV71)
+  if (g_emac_nqueues > 3)
+    {
+      sam_rxreset(priv, EMAC_QUEUE_3);
+      sam_rxreset(priv, EMAC_QUEUE_4);
+      sam_rxreset(priv, EMAC_QUEUE_5);
+    }
+#endif
+
   sam_txreset(priv, EMAC_QUEUE_0);
   sam_txreset(priv, EMAC_QUEUE_1);
   sam_txreset(priv, EMAC_QUEUE_2);
+
+#if defined(CONFIG_ARCH_CHIP_SAMV71)
+  if (g_emac_nqueues > 3)
+    {
+      sam_txreset(priv, EMAC_QUEUE_3);
+      sam_txreset(priv, EMAC_QUEUE_4);
+      sam_txreset(priv, EMAC_QUEUE_5);
+    }
+#endif
 
   /* Disable Rx and Tx, plus the statistics registers. */
 
@@ -4561,9 +4612,27 @@ static void sam_emac_reset(struct sam_emac_s *priv)
   sam_rxreset(priv, EMAC_QUEUE_1);
   sam_rxreset(priv, EMAC_QUEUE_2);
 
+#if defined(CONFIG_ARCH_CHIP_SAMV71)
+  if (g_emac_nqueues > 3)
+    {
+      sam_rxreset(priv, EMAC_QUEUE_3);
+      sam_rxreset(priv, EMAC_QUEUE_4);
+      sam_rxreset(priv, EMAC_QUEUE_5);
+    }
+#endif
+
   sam_txreset(priv, EMAC_QUEUE_0);
   sam_txreset(priv, EMAC_QUEUE_1);
   sam_txreset(priv, EMAC_QUEUE_2);
+
+#if defined(CONFIG_ARCH_CHIP_SAMV71)
+  if (g_emac_nqueues > 3)
+    {
+      sam_txreset(priv, EMAC_QUEUE_3);
+      sam_txreset(priv, EMAC_QUEUE_4);
+      sam_txreset(priv, EMAC_QUEUE_5);
+    }
+#endif
 
   /* Make sure that RX and TX are disabled; clear statistics registers */
 
@@ -4875,11 +4944,35 @@ int sam_emac_initialize(int intf)
 {
   struct sam_emac_s *priv;
   const struct sam_emacattr_s *attr;
+#if defined(CONFIG_ARCH_CHIP_SAMV71)
+  uint32_t regval;
+#endif
   uint8_t *pktbuf;
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
   uint8_t phytype;
 #endif
   int ret;
+
+#if defined(CONFIG_ARCH_CHIP_SAMV71)
+  /* Determine if the chip has 3 or 6 queues.  This logic is for the
+   * V71 only -- if you are using a different chip in the family,
+   * the version number at which to switch from 3 to 6 queues may
+   * be different.  For the V71, versions 1 and higher have 6 queues.
+   *
+   * If both emacs are enabled, this code will be run twice, which
+   * should not be a problem as the result will be the same each time
+   * it is run.
+   */
+
+  regval = getreg32(SAM_CHIPID_CIDR);
+  if ((regval & CHIPID_CIDR_ARCH_MASK) == CHIPID_CIDR_ARCH_SAMV71)
+    {
+      if (((regval & CHIPID_CIDR_VERSION_MASK) >> CHIPID_CIDR_VERSION_SHIFT) > 0)
+        {
+          g_emac_nqueues = 6;
+        }
+    }
+#endif
 
 #if defined(CONFIG_SAMV7_EMAC0)
   if (intf == EMAC0_INTF)
