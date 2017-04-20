@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob_free_queue.c
+ * drivers/iob/iob_trimhead_queue.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,16 +39,10 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
-
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
 #include <assert.h>
+#include <debug.h>
 
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 
 #include "iob.h"
 
@@ -67,47 +61,48 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_free_queue
+ * Name: iob_trimhead_queue
  *
  * Description:
- *   Free an entire queue of I/O buffer chains.
+ *   Remove bytes from the beginning of an I/O chain at the head of the
+ *   queue.  Emptied I/O buffers are freed and, hence, the head of the
+ *   queue may change.
+ *
+ *   This function is just a wrapper around iob_trimhead() that assures that
+ *   the I/O buffer chain at the head of queue is modified with the trimming
+ *   operation.
+ *
+ * Returned Value:
+ *   The new I/O buffer chain at the head of the queue is returned.
  *
  ****************************************************************************/
 
-void iob_free_queue(FAR struct iob_queue_s *qhead)
+FAR struct iob_s *iob_trimhead_queue(FAR struct iob_queue_s *qhead,
+                                     unsigned int trimlen)
 {
-  FAR struct iob_qentry_s *iobq;
-  FAR struct iob_qentry_s *nextq;
-  FAR struct iob_s *iob;
+  FAR struct iob_qentry_s *qentry;
+  FAR struct iob_s *iob = NULL;
 
-  /* Detach the list from the queue head so first for safety (should be safe
-   * anyway).
-   */
+  /* Peek at the I/O buffer chain container at the head of the queue */
 
-  iobq           = qhead->qh_head;
-  qhead->qh_head = NULL;
-
-  /* Remove each I/O buffer chain from the queue */
-
-  while (iobq)
+  qentry = qhead->qh_head;
+  if (qentry)
     {
-      /* Remove the I/O buffer chain from the head of the queue and
-       * discard the queue container.
-       */
+      /* Verify that the queue entry contains an I/O buffer chain */
 
-      iob = iobq->qe_head;
-      DEBUGASSERT(iob);
+      iob = qentry->qe_head;
+      if (iob)
+        {
+          /* Trim the I/Buffer chain and update the queue head */
 
-      /* Remove the queue container from the list and discard it */
-
-      nextq = iobq->qe_flink;
-      iob_free_qentry(iobq);
-      iobq = nextq;
-
-      /* Free the I/O chain */
-
-      iob_free_chain(iob);
+          iob = iob_trimhead(iob, trimlen);
+          qentry->qe_head = iob;
+        }
     }
+
+  /* Return the new I/O buffer chain at the head of the queue */
+
+  return iob;
 }
 
 #endif /* CONFIG_IOB_NCHAINS > 0 */

@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/iob/iob_initialize.c
+ * drivers/iob/iob.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,36 +33,55 @@
  *
  ****************************************************************************/
 
+#ifndef __DRIVERS_IOB_IOB_H
+#define __DRIVERS_IOB_IOB_H 1
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
-
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
-#include <stdbool.h>
 #include <semaphore.h>
+#include <debug.h>
 
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 
-#include "iob.h"
+#ifdef CONFIG_DRIVERS_IOB
 
 /****************************************************************************
- * Private Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* This is a pool of pre-allocated I/O buffers */
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
+#ifdef CONFIG_CPP_HAVE_VARARGS
 
-static struct iob_s        g_iob_pool[CONFIG_IOB_NBUFFERS];
-#if CONFIG_IOB_NCHAINS > 0
-static struct iob_qentry_s g_iob_qpool[CONFIG_IOB_NCHAINS];
+#  define ioberr(format, ...)    _err(format, ##__VA_ARGS__)
+#  define iobwarn(format, ...)   _warn(format, ##__VA_ARGS__)
+#  define iobinfo(format, ...)   _info(format, ##__VA_ARGS__)
+
+#else
+    
+#  define ioberr                 _err
+#  define iobwarn                _warn
+#  define iobinfo                _info
+
 #endif
+#else
+#ifdef CONFIG_CPP_HAVE_VARARGS
+
+#  define ioberr(format, ...)
+#  define iobwarn(format, ...)
+#  define iobinfo(format, ...)
+
+#else
+    
+#  define ioberr                 (void)
+#  define iobwarn                (void)
+#  define iobinfo                (void)
+
+#endif
+#endif /* CONFIG_DEBUG_FEATURES && CONFIG_IOB_DEBUG */
 
 /****************************************************************************
  * Public Data
@@ -70,78 +89,62 @@ static struct iob_qentry_s g_iob_qpool[CONFIG_IOB_NCHAINS];
 
 /* A list of all free, unallocated I/O buffers */
 
-FAR struct iob_s *g_iob_freelist;
+extern FAR struct iob_s *g_iob_freelist;
 
 /* A list of all free, unallocated I/O buffer queue containers */
 
 #if CONFIG_IOB_NCHAINS > 0
-FAR struct iob_qentry_s *g_iob_freeqlist;
+extern FAR struct iob_qentry_s *g_iob_freeqlist;
 #endif
 
 /* Counting semaphores that tracks the number of free IOBs/qentries */
 
-sem_t g_iob_sem;            /* Counts free I/O buffers */
+extern sem_t g_iob_sem;       /* Counts free I/O buffers */
 #if CONFIG_IOB_THROTTLE > 0
-sem_t g_throttle_sem;       /* Counts available I/O buffers when throttled */
+extern sem_t g_throttle_sem;  /* Counts available I/O buffers when throttled */
 #endif
 #if CONFIG_IOB_NCHAINS > 0
-sem_t g_qentry_sem;         /* Counts free I/O buffer queue containers */
+extern sem_t g_qentry_sem;    /* Counts free I/O buffer queue containers */
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_initialize
+ * Name: iob_alloc_qentry
  *
  * Description:
- *   Set up the I/O buffers for normal operations.
+ *   Allocate an I/O buffer chain container by taking the buffer at the head
+ *   of the free list. This function is intended only for internal use by
+ *   the IOB module.
  *
  ****************************************************************************/
 
-void iob_initialize(void)
-{
-  static bool initialized = false;
-  int i;
+FAR struct iob_qentry_s *iob_alloc_qentry(void);
 
-  /* Perform one-time initialization */
+/****************************************************************************
+ * Name: iob_tryalloc_qentry
+ *
+ * Description:
+ *   Try to allocate an I/O buffer chain container by taking the buffer at
+ *   the head of the free list without waiting for the container to become
+ *   free. This function is intended only for internal use by the IOB module.
+ *
+ ****************************************************************************/
 
-  if (!initialized)
-    {
-      /* Add each I/O buffer to the free list */
+FAR struct iob_qentry_s *iob_tryalloc_qentry(void);
 
-      for (i = 0; i < CONFIG_IOB_NBUFFERS; i++)
-        {
-          FAR struct iob_s *iob = &g_iob_pool[i];
+/****************************************************************************
+ * Name: iob_free_qentry
+ *
+ * Description:
+ *   Free the I/O buffer chain container by returning it to the  free list.
+ *   The link to  the next I/O buffer in the chain is return.
+ *
+ ****************************************************************************/
 
-          /* Add the pre-allocate I/O buffer to the head of the free list */
+FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq);
 
-          iob->io_flink  = g_iob_freelist;
-          g_iob_freelist = iob;
-        }
-
-      sem_init(&g_iob_sem, 0, CONFIG_IOB_NBUFFERS);
-
-#if CONFIG_IOB_THROTTLE > 0
-      sem_init(&g_throttle_sem, 0, CONFIG_IOB_NBUFFERS - CONFIG_IOB_THROTTLE);
-#endif
-
-#if CONFIG_IOB_NCHAINS > 0
-      /* Add each I/O buffer chain queue container to the free list */
-
-      for (i = 0; i < CONFIG_IOB_NCHAINS; i++)
-        {
-          FAR struct iob_qentry_s *iobq = &g_iob_qpool[i];
-
-          /* Add the pre-allocate buffer container to the head of the free list */
-
-          iobq->qe_flink  = g_iob_freeqlist;
-          g_iob_freeqlist = iobq;
-        }
-
-      sem_init(&g_qentry_sem, 0, CONFIG_IOB_NCHAINS);
-#endif
-      initialized = true;
-    }
-}
+#endif /* CONFIG_DRIVERS_IOB */
+#endif /* __DRIVERS_IOB_IOB_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob_dump.c
+ * drivers/iob/iob_copyout.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,14 +40,15 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <debug.h>
+#include <string.h>
+#include <assert.h>
 
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 
-#ifdef CONFIG_DEBUG_FEATURES
+#include "iob.h"
 
 /****************************************************************************
- * Pre-processor definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifndef MIN
@@ -59,107 +60,65 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: iob_dump
+ * Name: iob_copyout
  *
  * Description:
- *   Dump the contents of a I/O buffer chain
+ *  Copy data 'len' bytes of data into the user buffer starting at 'offset'
+ *  in the I/O buffer, returning that actual number of bytes copied out.
  *
  ****************************************************************************/
 
-void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
-              unsigned int offset)
+int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
+                unsigned int len, unsigned int offset)
 {
-  FAR struct iob_s *head;
-  uint8_t data[32];
-  unsigned int maxlen;
-  unsigned int nbytes;
-  unsigned int lndx;
-  unsigned int cndx;
+  FAR const uint8_t *src;
+  unsigned int ncopy;
+  unsigned int avail;
+  unsigned int remaining;
 
-  head = iob;
-  syslog(LOG_DEBUG, "%s: iob=%p pktlen=%d\n", msg, head, head->io_pktlen);
+  /* Skip to the I/O buffer containing the offset */
 
-  /* Check if the offset is beyond the data in the I/O buffer chain */
-
-  if (offset > head->io_pktlen)
+  while (offset >= iob->io_len)
     {
-      nerr("ERROR: offset is past the end of data: %u > %u\n",
-           offset, head->io_pktlen);
-      return;
-    }
-
-  /* Dump I/O buffer headers */
-
-  for (; iob; iob = iob->io_flink)
-    {
-      syslog(LOG_DEBUG, "  iob=%p len=%d offset=%d\n",
-             iob, iob->io_len, iob->io_offset);
-    }
-
-  /* Get the amount of data to be displayed, limited by the amount that we
-   * have beyond the offset.
-   */
-
-  maxlen = head->io_pktlen - offset;
-  len = MIN(len, maxlen);
-
-  /* Then beginning printing with the buffer containing the offset in groups
-   * of 32 bytes.
-   */
-
-  for (lndx = 0; lndx < len; lndx += 32, offset += 32)
-    {
-      /* Copy 32-bytes into our local buffer from the current offset */
-
-      nbytes = iob_copyout(data, head, 32, offset);
-
-      /* Make sure that we have something to print */
-
-      if (nbytes > 0)
+      offset -= iob->io_len;
+      iob     = iob->io_flink;
+      if (iob == NULL)
         {
-          syslog(LOG_DEBUG, "  %04x: ", offset);
+          /* We have no requested data in iob chain */
 
-          for (cndx = 0; cndx < 32; cndx++)
-            {
-              if (cndx == 16)
-                {
-                  syslog(LOG_DEBUG, " ");
-                }
-
-              if ((lndx + cndx) < len)
-                {
-                  syslog(LOG_DEBUG, "%02x", data[cndx]);
-                }
-              else
-                {
-                  syslog(LOG_DEBUG, "  ");
-                }
-            }
-
-          syslog(LOG_DEBUG, " ");
-          for (cndx = 0; cndx < 32; cndx++)
-            {
-              if (cndx == 16)
-                {
-                  syslog(LOG_DEBUG, " ");
-                }
-
-              if ((lndx + cndx) < len)
-                {
-                  if (data[cndx] >= 0x20 && data[cndx] < 0x7f)
-                    {
-                      syslog(LOG_DEBUG, "%c", data[cndx]);
-                    }
-                  else
-                    {
-                      syslog(LOG_DEBUG, ".");
-                    }
-                }
-            }
-
-          syslog(LOG_DEBUG, "\n");
+          return 0;
         }
     }
-}
 
-#endif /* CONFIG_DEBUG_FEATURES */
+  /* Then loop until all of the I/O data is copied to the user buffer */
+
+  remaining = len;
+  while (iob && remaining > 0)
+    {
+      /* Get the source I/O buffer offset address and the amount of data
+       * available from that address.
+       */
+
+      src   = &iob->io_data[iob->io_offset + offset];
+      avail = iob->io_len - offset;
+
+      /* Copy the from the I/O buffer in to the user buffer */
+
+      ncopy = MIN(avail, remaining);
+      memcpy(dest, src, ncopy);
+
+      /* Adjust the total length of the copy and the destination address in
+       * the user buffer.
+       */
+
+      remaining -= ncopy;
+      dest += ncopy;
+
+      /* Skip to the next I/O buffer in the chain */
+
+      iob = iob->io_flink;
+      offset = 0;
+    }
+
+  return len - remaining;
+}

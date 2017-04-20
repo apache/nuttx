@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/iob/iob_free.c
+ * drivers/iob/iob_remove_queue.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,93 +39,62 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
-
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
-#include <semaphore.h>
-#include <assert.h>
 #include <debug.h>
 
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 
 #include "iob.h"
+
+#if CONFIG_IOB_NCHAINS > 0
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef NULL
+#  define NULL ((FAR void *)0)
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_free
+ * Name: iob_remove_queue
  *
  * Description:
- *   Free the I/O buffer at the head of a buffer chain returning it to the
- *   free list.  The link to  the next I/O buffer in the chain is return.
+ *   Remove and return one I/O buffer chain from the head of a queue.
+ *
+ * Returned Value:
+ *   Returns a reference to the I/O buffer chain at the head of the queue.
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_free(FAR struct iob_s *iob)
+FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq)
 {
-  FAR struct iob_s *next = iob->io_flink;
-  irqstate_t flags;
+  FAR struct iob_qentry_s *qentry;
+  FAR struct iob_s *iob = NULL;
 
-  ninfo("iob=%p io_pktlen=%u io_len=%u next=%p\n",
-        iob, iob->io_pktlen, iob->io_len, next);
+  /* Remove the I/O buffer chain from the head of the queue */
 
-  /* Copy the data that only exists in the head of a I/O buffer chain into
-   * the next entry.
-   */
-
-  if (next)
+  qentry = iobq->qh_head;
+  if (qentry)
     {
-      /* Copy and decrement the total packet length, being careful to
-       * do nothing too crazy.
+      iobq->qh_head = qentry->qe_flink;
+      if (!iobq->qh_head)
+        {
+          iobq->qh_tail = NULL;
+        }
+
+      /* Extract the I/O buffer chain from the container and free the
+       * container.
        */
 
-      if (iob->io_pktlen > iob->io_len)
-        {
-          /* Adjust packet length and move it to the next entry */
-
-          next->io_pktlen = iob->io_pktlen - iob->io_len;
-          DEBUGASSERT(next->io_pktlen >= next->io_len);
-        }
-      else
-        {
-          /* This can only happen if the next entry is last entry in the
-           * chain... and if it is empty
-           */
-
-          next->io_pktlen = 0;
-          DEBUGASSERT(next->io_len == 0 && next->io_flink == NULL);
-        }
-
-      ninfo("next=%p io_pktlen=%u io_len=%u\n",
-            next, next->io_pktlen, next->io_len);
+      iob = qentry->qe_head;
+      iob_free_qentry(qentry);
     }
 
-  /* Free the I/O buffer by adding it to the head of the free list. We don't
-   * know what context we are called from so we use extreme measures to
-   * protect the free list:  We disable interrupts very briefly.
-   */
-
-  flags = enter_critical_section();
-  iob->io_flink = g_iob_freelist;
-  g_iob_freelist = iob;
-
-  /* Signal that an IOB is available */
-
-  sem_post(&g_iob_sem);
-#if CONFIG_IOB_THROTTLE > 0
-  sem_post(&g_throttle_sem);
-#endif
-  leave_critical_section(flags);
-
-  /* And return the I/O buffer after the one that was freed */
-
-  return next;
+  return iob;
 }
+
+#endif /* CONFIG_IOB_NCHAINS > 0 */

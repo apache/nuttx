@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob_trimhead.c
+ * drivers/iob/iob_dump.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,26 +39,19 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
-
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
-#include <assert.h>
+#include <stdint.h>
 #include <debug.h>
 
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 
-#include "iob.h"
+#ifdef CONFIG_DEBUG_FEATURES
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor definitions
  ****************************************************************************/
 
-#ifndef NULL
-#  define NULL ((FAR void *)0)
+#ifndef MIN
+#  define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
 /****************************************************************************
@@ -66,83 +59,107 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_trimhead
+ * Function: iob_dump
  *
  * Description:
- *   Remove bytes from the beginning of an I/O chain.  Emptied I/O buffers
- *   are freed and, hence, the beginning of the chain may change.
+ *   Dump the contents of a I/O buffer chain
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
+void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
+              unsigned int offset)
 {
-  uint16_t pktlen;
+  FAR struct iob_s *head;
+  uint8_t data[32];
+  unsigned int maxlen;
+  unsigned int nbytes;
+  unsigned int lndx;
+  unsigned int cndx;
 
-  ninfo("iob=%p trimlen=%d\n", iob, trimlen);
+  head = iob;
+  syslog(LOG_DEBUG, "%s: iob=%p pktlen=%d\n", msg, head, head->io_pktlen);
 
-  if (iob && trimlen > 0)
+  /* Check if the offset is beyond the data in the I/O buffer chain */
+
+  if (offset > head->io_pktlen)
     {
-      /* Trim from the head of the I/IO buffer chain */
-
-      pktlen = iob->io_pktlen;
-      while (trimlen > 0 && iob != NULL)
-        {
-          /* Do we trim this entire I/O buffer away? */
-
-          ninfo("iob=%p io_len=%d pktlen=%d trimlen=%d\n",
-                iob, iob->io_len, pktlen, trimlen);
-
-          if (iob->io_len <= trimlen)
-            {
-              FAR struct iob_s *next;
-
-              /* Decrement the trim length and packet length by the full
-               * data size.
-               */
-
-              pktlen  -= iob->io_len;
-              trimlen -= iob->io_len;
-
-              /* Check if this was the last entry in the chain */
-
-              next = iob->io_flink;
-              if (next == NULL)
-                {
-                  /* Yes.. break out of the loop returning the empty
-                   * I/O buffer chain containing only one empty entry.
-                   */
-
-                  DEBUGASSERT(pktlen == 0);
-                  iob->io_len    = 0;
-                  iob->io_offset = 0;
-                  break;
-                }
-
-              /* Free this entry and set the next I/O buffer as the head */
-
-              ninfo("iob=%p: Freeing\n", iob);
-              (void)iob_free(iob);
-              iob = next;
-            }
-          else
-            {
-              /* No, then just take what we need from this I/O buffer and
-               * stop the trim.
-               */
-
-              pktlen         -= trimlen;
-              iob->io_len    -= trimlen;
-              iob->io_offset += trimlen;
-              trimlen         = 0;
-            }
-        }
-
-      /* Adjust the pktlen by the number of bytes removed from the head
-       * of the I/O buffer chain.
-       */
-
-      iob->io_pktlen = pktlen;
+      ioberr("ERROR: offset is past the end of data: %u > %u\n",
+             offset, head->io_pktlen);
+      return;
     }
 
-  return iob;
+  /* Dump I/O buffer headers */
+
+  for (; iob; iob = iob->io_flink)
+    {
+      syslog(LOG_DEBUG, "  iob=%p len=%d offset=%d\n",
+             iob, iob->io_len, iob->io_offset);
+    }
+
+  /* Get the amount of data to be displayed, limited by the amount that we
+   * have beyond the offset.
+   */
+
+  maxlen = head->io_pktlen - offset;
+  len = MIN(len, maxlen);
+
+  /* Then beginning printing with the buffer containing the offset in groups
+   * of 32 bytes.
+   */
+
+  for (lndx = 0; lndx < len; lndx += 32, offset += 32)
+    {
+      /* Copy 32-bytes into our local buffer from the current offset */
+
+      nbytes = iob_copyout(data, head, 32, offset);
+
+      /* Make sure that we have something to print */
+
+      if (nbytes > 0)
+        {
+          syslog(LOG_DEBUG, "  %04x: ", offset);
+
+          for (cndx = 0; cndx < 32; cndx++)
+            {
+              if (cndx == 16)
+                {
+                  syslog(LOG_DEBUG, " ");
+                }
+
+              if ((lndx + cndx) < len)
+                {
+                  syslog(LOG_DEBUG, "%02x", data[cndx]);
+                }
+              else
+                {
+                  syslog(LOG_DEBUG, "  ");
+                }
+            }
+
+          syslog(LOG_DEBUG, " ");
+          for (cndx = 0; cndx < 32; cndx++)
+            {
+              if (cndx == 16)
+                {
+                  syslog(LOG_DEBUG, " ");
+                }
+
+              if ((lndx + cndx) < len)
+                {
+                  if (data[cndx] >= 0x20 && data[cndx] < 0x7f)
+                    {
+                      syslog(LOG_DEBUG, "%c", data[cndx]);
+                    }
+                  else
+                    {
+                      syslog(LOG_DEBUG, ".");
+                    }
+                }
+            }
+
+          syslog(LOG_DEBUG, "\n");
+        }
+    }
 }
+
+#endif /* CONFIG_DEBUG_FEATURES */

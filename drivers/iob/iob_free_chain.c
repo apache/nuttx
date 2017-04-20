@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob_remove_queue.c
+ * drivers/iob/iob_free_chain.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,69 +39,32 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
-
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
-#include <debug.h>
-
-#include <nuttx/net/iob.h>
+#include <nuttx/arch.h>
+#include <nuttx/drivers/iob.h>
 
 #include "iob.h"
-
-#if CONFIG_IOB_NCHAINS > 0
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef NULL
-#  define NULL ((FAR void *)0)
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_remove_queue
+ * Name: iob_free_chain
  *
  * Description:
- *   Remove and return one I/O buffer chain from the head of a queue.
- *
- * Returned Value:
- *   Returns a reference to the I/O buffer chain at the head of the queue.
+ *   Free an entire buffer chain, starting at the beginning of the I/O
+ *   buffer chain
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq)
+void iob_free_chain(FAR struct iob_s *iob)
 {
-  FAR struct iob_qentry_s *qentry;
-  FAR struct iob_s *iob = NULL;
+  FAR struct iob_s *next;
 
-  /* Remove the I/O buffer chain from the head of the queue */
+  /* Free each IOB in the chain -- one at a time to keep the count straight */
 
-  qentry = iobq->qh_head;
-  if (qentry)
+  for (; iob; iob = next)
     {
-      iobq->qh_head = qentry->qe_flink;
-      if (!iobq->qh_head)
-        {
-          iobq->qh_tail = NULL;
-        }
-
-      /* Extract the I/O buffer chain from the container and free the
-       * container.
-       */
-
-      iob = qentry->qe_head;
-      iob_free_qentry(qentry);
+      next = iob_free(iob);
     }
-
-  return iob;
 }
-
-#endif /* CONFIG_IOB_NCHAINS > 0 */

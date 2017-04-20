@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/iob/iob_trimhead_queue.c
+ * drivers/iob/iob_trimhead.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,21 +39,12 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
-
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 
 #include "iob.h"
-
-#if CONFIG_IOB_NCHAINS > 0
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -68,48 +59,83 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_trimhead_queue
+ * Name: iob_trimhead
  *
  * Description:
- *   Remove bytes from the beginning of an I/O chain at the head of the
- *   queue.  Emptied I/O buffers are freed and, hence, the head of the
- *   queue may change.
- *
- *   This function is just a wrapper around iob_trimhead() that assures that
- *   the I/O buffer chain at the head of queue is modified with the trimming
- *   operation.
- *
- * Returned Value:
- *   The new I/O buffer chain at the head of the queue is returned.
+ *   Remove bytes from the beginning of an I/O chain.  Emptied I/O buffers
+ *   are freed and, hence, the beginning of the chain may change.
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_trimhead_queue(FAR struct iob_queue_s *qhead,
-                                     unsigned int trimlen)
+FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
 {
-  FAR struct iob_qentry_s *qentry;
-  FAR struct iob_s *iob = NULL;
+  uint16_t pktlen;
 
-  /* Peek at the I/O buffer chain container at the head of the queue */
+  iobinfo("iob=%p trimlen=%d\n", iob, trimlen);
 
-  qentry = qhead->qh_head;
-  if (qentry)
+  if (iob && trimlen > 0)
     {
-      /* Verify that the queue entry contains an I/O buffer chain */
+      /* Trim from the head of the I/IO buffer chain */
 
-      iob = qentry->qe_head;
-      if (iob)
+      pktlen = iob->io_pktlen;
+      while (trimlen > 0 && iob != NULL)
         {
-          /* Trim the I/Buffer chain and update the queue head */
+          /* Do we trim this entire I/O buffer away? */
 
-          iob = iob_trimhead(iob, trimlen);
-          qentry->qe_head = iob;
+          iobinfo("iob=%p io_len=%d pktlen=%d trimlen=%d\n",
+                  iob, iob->io_len, pktlen, trimlen);
+
+          if (iob->io_len <= trimlen)
+            {
+              FAR struct iob_s *next;
+
+              /* Decrement the trim length and packet length by the full
+               * data size.
+               */
+
+              pktlen  -= iob->io_len;
+              trimlen -= iob->io_len;
+
+              /* Check if this was the last entry in the chain */
+
+              next = iob->io_flink;
+              if (next == NULL)
+                {
+                  /* Yes.. break out of the loop returning the empty
+                   * I/O buffer chain containing only one empty entry.
+                   */
+
+                  DEBUGASSERT(pktlen == 0);
+                  iob->io_len    = 0;
+                  iob->io_offset = 0;
+                  break;
+                }
+
+              /* Free this entry and set the next I/O buffer as the head */
+
+              iobinfo("iob=%p: Freeing\n", iob);
+              (void)iob_free(iob);
+              iob = next;
+            }
+          else
+            {
+              /* No, then just take what we need from this I/O buffer and
+               * stop the trim.
+               */
+
+              pktlen         -= trimlen;
+              iob->io_len    -= trimlen;
+              iob->io_offset += trimlen;
+              trimlen         = 0;
+            }
         }
-    }
 
-  /* Return the new I/O buffer chain at the head of the queue */
+      /* Adjust the pktlen by the number of bytes removed from the head
+       * of the I/O buffer chain.
+       */
+
+      iob->io_pktlen = pktlen;
+    }
 
   return iob;
 }
-
-#endif /* CONFIG_IOB_NCHAINS > 0 */

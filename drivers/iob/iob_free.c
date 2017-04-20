@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/tcp/tcp_wrbuffer_dump.c
+ * drivers/iob/iob_free.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,33 +39,86 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <semaphore.h>
+#include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
 #include <nuttx/drivers/iob.h>
 
-#include "tcp/tcp.h"
-
-#ifdef CONFIG_DEBUG_FEATURES
+#include "iob.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tcp_wrbuffer_dump
+ * Name: iob_free
  *
  * Description:
- *  Dump the contents of a write buffer
+ *   Free the I/O buffer at the head of a buffer chain returning it to the
+ *   free list.  The link to  the next I/O buffer in the chain is return.
  *
  ****************************************************************************/
 
-void tcp_wrbuffer_dump(FAR const char *msg, FAR struct tcp_wrbuffer_s *wrb,
-                       unsigned int len, unsigned int offset)
+FAR struct iob_s *iob_free(FAR struct iob_s *iob)
 {
-  syslog(LOG_DEBUG, "%s: wrb=%p segno=%d sent=%d nrtx=%d\n",
-         msg, wrb, WRB_SEQNO(wrb), WRB_SENT(wrb), WRB_NRTX(wrb));
-  iob_dump("I/O Buffer Chain", WRB_IOB(wrb), len, offset);
-}
+  FAR struct iob_s *next = iob->io_flink;
+  irqstate_t flags;
 
-#endif /* CONFIG_DEBUG_FEATURES */
+  iobinfo("iob=%p io_pktlen=%u io_len=%u next=%p\n",
+          iob, iob->io_pktlen, iob->io_len, next);
+
+  /* Copy the data that only exists in the head of a I/O buffer chain into
+   * the next entry.
+   */
+
+  if (next)
+    {
+      /* Copy and decrement the total packet length, being careful to
+       * do nothing too crazy.
+       */
+
+      if (iob->io_pktlen > iob->io_len)
+        {
+          /* Adjust packet length and move it to the next entry */
+
+          next->io_pktlen = iob->io_pktlen - iob->io_len;
+          DEBUGASSERT(next->io_pktlen >= next->io_len);
+        }
+      else
+        {
+          /* This can only happen if the next entry is last entry in the
+           * chain... and if it is empty
+           */
+
+          next->io_pktlen = 0;
+          DEBUGASSERT(next->io_len == 0 && next->io_flink == NULL);
+        }
+
+      iobinfo("next=%p io_pktlen=%u io_len=%u\n",
+              next, next->io_pktlen, next->io_len);
+    }
+
+  /* Free the I/O buffer by adding it to the head of the free list. We don't
+   * know what context we are called from so we use extreme measures to
+   * protect the free list:  We disable interrupts very briefly.
+   */
+
+  flags = enter_critical_section();
+  iob->io_flink = g_iob_freelist;
+  g_iob_freelist = iob;
+
+  /* Signal that an IOB is available */
+
+  sem_post(&g_iob_sem);
+#if CONFIG_IOB_THROTTLE > 0
+  sem_post(&g_throttle_sem);
+#endif
+  leave_critical_section(flags);
+
+  /* And return the I/O buffer after the one that was freed */
+
+  return next;
+}

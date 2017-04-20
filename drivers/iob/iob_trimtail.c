@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/iob/iob_copyout.c
+ * drivers/iob/iob_trimtail.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,93 +39,100 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
-
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
-#include <stdint.h>
 #include <string.h>
-#include <assert.h>
+#include <debug.h>
 
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 
 #include "iob.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef MIN
-#  define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_copyout
+ * Name: iob_trimtail
  *
  * Description:
- *  Copy data 'len' bytes of data into the user buffer starting at 'offset'
- *  in the I/O buffer, returning that actual number of bytes copied out.
+ *   Remove bytes from the end of an I/O chain
  *
  ****************************************************************************/
 
-int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
-                unsigned int len, unsigned int offset)
+FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
 {
-  FAR const uint8_t *src;
-  unsigned int ncopy;
-  unsigned int avail;
-  unsigned int remaining;
+  FAR struct iob_s *entry;
+  FAR struct iob_s *penultimate;
+  FAR struct iob_s *last;
+  int len;
 
-  /* Skip to the I/O buffer containing the offset */
+  iobinfo("iob=%p pktlen=%d trimlen=%d\n", iob, iob->io_pktlen, trimlen);
 
-  while (offset >= iob->io_len)
+  if (iob && trimlen > 0)
     {
-      offset -= iob->io_len;
-      iob     = iob->io_flink;
-      if (iob == NULL)
-        {
-          /* We have no requested data in iob chain */
+      len = trimlen;
 
-          return 0;
+      /* Loop until complete the trim */
+
+      while (len > 0)
+        {
+          /* Calculate the total length of the data in the I/O buffer
+           * chain and find the last entry in the chain.
+           */
+
+          penultimate = NULL;
+          last = NULL;
+
+          for (entry = iob; entry; entry = entry->io_flink)
+            {
+              /* Remember the last and the next to the last in the chain */
+
+              penultimate = last;
+              last = entry;
+            }
+
+          /* Trim from the last entry in the chain.  Do we trim this entire
+           * I/O buffer away?
+           */
+
+          iobinfo("iob=%p len=%d vs %d\n", last, last->io_len, len);
+          if (last->io_len <= len)
+            {
+              /* Yes.. Consume the entire buffer */
+
+              iob->io_pktlen -= last->io_len;
+              len            -= last->io_len;
+              last->io_len    = 0;
+
+              /* Free the last, empty buffer in the list */
+
+              iob_free(last);
+
+              /* There should be a buffer before this one */
+
+              if (!penultimate)
+                {
+                  /* No.. we just freed the head of the chain */
+
+                  return NULL;
+                }
+
+              /* Unlink the penultimate from the freed buffer */
+
+              penultimate->io_flink = NULL;
+            }
+
+          else
+            {
+              /* No, then just take what we need from this I/O buffer and
+               * stop the trim.
+               */
+
+              iob->io_pktlen -= len;
+              last->io_len   -= len;
+              len             = 0;
+            }
         }
     }
 
-  /* Then loop until all of the I/O data is copied to the user buffer */
-
-  remaining = len;
-  while (iob && remaining > 0)
-    {
-      /* Get the source I/O buffer offset address and the amount of data
-       * available from that address.
-       */
-
-      src   = &iob->io_data[iob->io_offset + offset];
-      avail = iob->io_len - offset;
-
-      /* Copy the from the I/O buffer in to the user buffer */
-
-      ncopy = MIN(avail, remaining);
-      memcpy(dest, src, ncopy);
-
-      /* Adjust the total length of the copy and the destination address in
-       * the user buffer.
-       */
-
-      remaining -= ncopy;
-      dest += ncopy;
-
-      /* Skip to the next I/O buffer in the chain */
-
-      iob = iob->io_flink;
-      offset = 0;
-    }
-
-  return len - remaining;
+  return iob;
 }

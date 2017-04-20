@@ -54,7 +54,7 @@
 #include <stdint.h>
 
 #include <nuttx/clock.h>
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 #include <nuttx/net/netdev.h>
 
 #ifdef CONFIG_NET_6LOWPAN
@@ -334,7 +334,7 @@
 /* The IEEE802.15.4 MAC driver structures includes a list of IOB
  * structures, i_framelist, containing frames to be sent by the driver or
  * that were received by the driver.  The IOB structure is defined in
- * include/nuttx/net/iob.h.  The length of data in the IOB is provided by
+ * include/nuttx/drivers/iob.h.  The length of data in the IOB is provided by
  * the io_len field of the IOB structure.
  *
  * NOTE that IOBs must be configured such that CONFIG_IOB_BUFSIZE >=

@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob_free_chain.c
+ * drivers/iob/iob_concat.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,15 +39,9 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-/* Force debug output (from this file only) */
+#include <string.h>
 
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
-#endif
-
-#include <nuttx/arch.h>
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 
 #include "iob.h"
 
@@ -56,22 +50,27 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_free_chain
+ * Name: iob_concat
  *
  * Description:
- *   Free an entire buffer chain, starting at the beginning of the I/O
- *   buffer chain
+ *   Concatenate iob_s chain iob2 to iob1.
  *
  ****************************************************************************/
 
-void iob_free_chain(FAR struct iob_s *iob)
+void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2)
 {
-  FAR struct iob_s *next;
+  /* Find the last buffer in the iob1 buffer chain */
 
-  /* Free each IOB in the chain -- one at a time to keep the count straight */
-
-  for (; iob; iob = next)
+  while (iob1->io_flink)
     {
-      next = iob_free(iob);
+      iob1 = iob1->io_flink;
     }
+
+  /* Then connect iob2 buffer chain to the end of the iob1 chain */
+
+  iob1->io_flink = iob2;
+
+  /* Combine the total packet size */
+
+  iob1->io_pktlen += iob2->io_pktlen;
 }

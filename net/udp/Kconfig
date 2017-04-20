@@ -60,7 +60,7 @@ config NET_RXAVAIL
 config NET_UDP_READAHEAD
 	bool "Enable UDP/IP read-ahead buffering"
 	default y
-	select NET_IOB
+	select DRIVERS_IOB
 
 endif # NET_UDP && !NET_UDP_NO_STACK
 endmenu # UDP Networking
