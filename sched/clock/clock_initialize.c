@@ -68,6 +68,18 @@
 #define SEC_PER_HOUR ((time_t)60 * SEC_PER_MIN)
 #define SEC_PER_DAY  ((time_t)24 * SEC_PER_HOUR)
 
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_SYSTEM_TIME64)
+/* Initial system timer ticks value close to maximum 32-bit value, to test
+ * 64-bit system-timer after going over 32-bit value. This is to make errors
+ * of casting 64-bit system-timer to 32-bit variables more visible.
+ */
+
+#  define INITIAL_SYSTEM_TIMER_TICKS \
+          ((uint64_t)(UINT32_MAX - (TICK_PER_SEC * 5)))
+#else
+#  define INITIAL_SYSTEM_TIMER_TICKS 0
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -192,8 +204,36 @@ static void clock_inittime(void)
   clock_basetime(&g_basetime);
 #endif
 #ifndef CONFIG_SCHED_TICKLESS
-  g_system_timer = 0;
-#endif
+  g_system_timer = INITIAL_SYSTEM_TIMER_TICKS;
+  if (g_system_timer > 0)
+    {
+      struct timespec ts;
+
+      (void)clock_ticks2time((ssystime_t)g_system_timer, &ts);
+
+      /* Adjust base time to hide initial timer ticks. */
+
+      g_basetime.tv_sec  -= ts.tv_sec;
+      g_basetime.tv_nsec -= ts.tv_nsec;
+      while (g_basetime.tv_nsec < 0)
+        {
+          g_basetime.tv_nsec += NSEC_PER_SEC;
+          g_basetime.tv_sec--;
+        }
+
+#ifdef CONFIG_CLOCK_MONOTONIC
+      /* Adjust monotonic clock offset to hide initial timer ticks. */
+
+      g_monotonic_basetime.tv_sec  -= ts.tv_sec;
+      g_monotonic_basetime.tv_nsec -= ts.tv_nsec;
+      while (g_monotonic_basetime.tv_nsec < 0)
+        {
+          g_monotonic_basetime.tv_nsec += NSEC_PER_SEC;
+          g_monotonic_basetime.tv_sec--;
+        }
+#endif /* CONFIG_CLOCK_MONOTONIC */
+    }
+#endif /* !CONFIG_SCHED_TICKLESS */
 #else
   clock_inittimekeeping();
 #endif
