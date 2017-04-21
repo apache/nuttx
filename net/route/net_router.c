@@ -77,7 +77,7 @@ struct route_ipv6_match_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_ipv4_match
+ * Name: net_ipv4_match
  *
  * Description:
  *   Return 1 if the IPv4 route is available
@@ -114,7 +114,7 @@ static int net_ipv4_match(FAR struct net_route_s *route, FAR void *arg)
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Function: net_ipv6_match
+ * Name: net_ipv6_match
  *
  * Description:
  *   Return 1 if the IPv6 route is available
@@ -155,7 +155,7 @@ static int net_ipv6_match(FAR struct net_route_ipv6_s *route, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_ipv4_router
+ * Name: net_ipv4_router
  *
  * Description:
  *   Given an IPv4 address on a external network, return the address of the
@@ -213,7 +213,7 @@ int net_ipv4_router(in_addr_t target, FAR in_addr_t *router)
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Function: net_ipv6_router
+ * Name: net_ipv6_router
  *
  * Description:
  *   Given an IPv6 address on a external network, return the address of the

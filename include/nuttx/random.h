@@ -110,7 +110,7 @@ extern struct entropy_pool_s board_entropy_pool;
 #ifdef CONFIG_CRYPTO_RANDOM_POOL
 
 /****************************************************************************
- * Function: up_rngaddint
+ * Name: up_rngaddint
  *
  * Description:
  *   Add one integer to entropy pool, contributing a specific kind
@@ -128,7 +128,7 @@ extern struct entropy_pool_s board_entropy_pool;
 void up_rngaddint(enum rnd_source_t kindof, int val);
 
 /****************************************************************************
- * Function: up_rngaddentropy
+ * Name: up_rngaddentropy
  *
  * Description:
  *   Add buffer of integers to entropy pool.
@@ -147,7 +147,7 @@ void up_rngaddentropy(enum rnd_source_t kindof, FAR const uint32_t *buf,
                       size_t n);
 
 /****************************************************************************
- * Function: up_rngreseed
+ * Name: up_rngreseed
  *
  * Description:
  *   Force reseeding random number generator from entropy pool
@@ -157,7 +157,7 @@ void up_rngaddentropy(enum rnd_source_t kindof, FAR const uint32_t *buf,
 void up_rngreseed(void);
 
 /****************************************************************************
- * Function: up_randompool_initialize
+ * Name: up_randompool_initialize
  *
  * Description:
  *   Initialize entropy pool and random number generator

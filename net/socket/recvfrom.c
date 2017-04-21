@@ -115,7 +115,7 @@ struct recvfrom_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: recvfrom_add_recvlen
+ * Name: recvfrom_add_recvlen
  *
  * Description:
  *   Update information about space available for new data and update size
@@ -149,7 +149,7 @@ static inline void recvfrom_add_recvlen(FAR struct recvfrom_s *pstate,
 #endif /* NET_UDP_HAVE_STACK || NET_TCP_HAVE_STACK || CONFIG_NET_PKT */
 
 /****************************************************************************
- * Function: recvfrom_newdata
+ * Name: recvfrom_newdata
  *
  * Description:
  *   Copy the read data from the packet
@@ -197,7 +197,7 @@ static size_t recvfrom_newdata(FAR struct net_driver_s *dev,
 #endif /* NET_UDP_HAVE_STACK || NET_TCP_HAVE_STACK */
 
 /****************************************************************************
- * Function: recvfrom_newpktdata
+ * Name: recvfrom_newpktdata
  *
  * Description:
  *   Copy the read data from the packet
@@ -241,7 +241,7 @@ static void recvfrom_newpktdata(FAR struct net_driver_s *dev,
 #endif /* CONFIG_NET_PKT */
 
 /****************************************************************************
- * Function: recvfrom_newtcpdata
+ * Name: recvfrom_newtcpdata
  *
  * Description:
  *   Copy the read data from the packet
@@ -313,7 +313,7 @@ static inline void recvfrom_newtcpdata(FAR struct net_driver_s *dev,
 #endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
- * Function: recvfrom_newudpdata
+ * Name: recvfrom_newudpdata
  *
  * Description:
  *   Copy the read data from the packet
@@ -345,7 +345,7 @@ static inline void recvfrom_newudpdata(FAR struct net_driver_s *dev,
 #endif /* NET_UDP_HAVE_STACK */
 
 /****************************************************************************
- * Function: recvfrom_tcpreadahead
+ * Name: recvfrom_tcpreadahead
  *
  * Description:
  *   Copy the read data from the packet
@@ -513,7 +513,7 @@ out:
 #endif
 
 /****************************************************************************
- * Function: recvfrom_timeout
+ * Name: recvfrom_timeout
  *
  * Description:
  *   Check for recvfrom timeout.
@@ -587,7 +587,7 @@ static int recvfrom_timeout(struct recvfrom_s *pstate)
 #endif /* NET_UDP_HAVE_STACK || NET_TCP_HAVE_STACK */
 
 /****************************************************************************
- * Function: recvfrom_pktsender
+ * Name: recvfrom_pktsender
  *
  * Description:
  *
@@ -607,7 +607,7 @@ static inline void recvfrom_pktsender(FAR struct net_driver_s *dev,
 #endif /* CONFIG_NET_PKT */
 
 /****************************************************************************
- * Function: recvfrom_pktinterrupt
+ * Name: recvfrom_pktinterrupt
  *
  * Description:
  *
@@ -670,7 +670,7 @@ static uint16_t recvfrom_pktinterrupt(FAR struct net_driver_s *dev,
 #endif /* CONFIG_NET_PKT */
 
 /****************************************************************************
- * Function: recvfrom_tcpsender
+ * Name: recvfrom_tcpsender
  *
  * Description:
  *   Getting the sender's address from the UDP packet
@@ -741,7 +741,7 @@ static inline void recvfrom_tcpsender(FAR struct net_driver_s *dev,
 #endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
- * Function: recvfrom_tcpinterrupt
+ * Name: recvfrom_tcpinterrupt
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -964,7 +964,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
 #endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
- * Function: recvfrom_udpsender
+ * Name: recvfrom_udpsender
  *
  * Description:
  *   Getting the sender's address from the UDP packet
@@ -1065,7 +1065,7 @@ static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_
 #endif /* NET_UDP_HAVE_STACK */
 
 /****************************************************************************
- * Function: recvfrom_udp_terminate
+ * Name: recvfrom_udp_terminate
  *
  * Description:
  *   Terminate the UDP transfer.
@@ -1101,7 +1101,7 @@ static void recvfrom_udp_terminate(FAR struct recvfrom_s *pstate, int result)
 #endif /* NET_UDP_HAVE_STACK */
 
 /****************************************************************************
- * Function: recvfrom_udp_interrupt
+ * Name: recvfrom_udp_interrupt
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -1195,7 +1195,7 @@ static uint16_t recvfrom_udp_interrupt(FAR struct net_driver_s *dev,
 #endif /* NET_UDP_HAVE_STACK */
 
 /****************************************************************************
- * Function: recvfrom_init
+ * Name: recvfrom_init
  *
  * Description:
  *   Initialize the state structure
@@ -1253,7 +1253,7 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf,
 #endif /* NET_UDP_HAVE_STACK || NET_TCP_HAVE_STACK */
 
 /****************************************************************************
- * Function: recvfrom_result
+ * Name: recvfrom_result
  *
  * Description:
  *   Evaluate the result of the recv operations
@@ -1302,7 +1302,7 @@ static ssize_t recvfrom_result(int result, struct recvfrom_s *pstate)
 #endif /* NET_UDP_HAVE_STACK || NET_TCP_HAVE_STACK */
 
 /****************************************************************************
- * Function: recvfromo_pkt_rxnotify
+ * Name: recvfromo_pkt_rxnotify
  *
  * Description:
  *   Notify the appropriate device driver that we are ready to receive a
@@ -1324,7 +1324,7 @@ static void recvfromo_pkt_rxnotify(FAR struct pkt_conn_s *conn)
 #endif
 
 /****************************************************************************
- * Function: recvfrom_udp_rxnotify
+ * Name: recvfrom_udp_rxnotify
  *
  * Description:
  *   Notify the appropriate device driver that we are ready to receive a
@@ -1381,7 +1381,7 @@ static inline void recvfrom_udp_rxnotify(FAR struct socket *psock,
 #endif /* NET_UDP_HAVE_STACK */
 
 /****************************************************************************
- * Function: pkt_recvfrom
+ * Name: pkt_recvfrom
  *
  * Description:
  *   Perform the recvfrom operation for packet socket
@@ -1475,7 +1475,7 @@ errout_with_state:
 #endif /* CONFIG_NET_PKT */
 
 /****************************************************************************
- * Function: udp_recvfrom
+ * Name: udp_recvfrom
  *
  * Description:
  *   Perform the recvfrom operation for a UDP SOCK_DGRAM
@@ -1615,7 +1615,7 @@ errout_with_state:
 #endif /* NET_UDP_HAVE_STACK */
 
 /****************************************************************************
- * Function: tcp_recvfrom
+ * Name: tcp_recvfrom
  *
  * Description:
  *   Perform the recvfrom operation for a TCP/IP SOCK_STREAM
@@ -1797,7 +1797,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_recvfrom
+ * Name: psock_recvfrom
  *
  * Description:
  *   recvfrom() receives messages from a socket, and may be used to receive
@@ -2057,7 +2057,7 @@ errout:
 }
 
 /****************************************************************************
- * Function: recvfrom
+ * Name: recvfrom
  *
  * Description:
  *   recvfrom() receives messages from a socket, and may be used to receive

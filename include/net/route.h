@@ -84,7 +84,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_addroute
+ * Name: net_addroute
  *
  * Description:
  *   Add a new route to the routing table.  This is just a convenience
@@ -107,7 +107,7 @@ int addroute(int sockfd, FAR struct sockaddr_storage *target,
              FAR struct sockaddr_storage *router);
 
 /****************************************************************************
- * Function: net_delroute
+ * Name: net_delroute
  *
  * Description:
  *   Add a new route to the routing table.  This is just a convenience

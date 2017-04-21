@@ -293,7 +293,7 @@ void net_lostconnection(FAR struct socket *psock, uint16_t flags);
 #endif
 
 /****************************************************************************
- * Function: psock_close
+ * Name: psock_close
  *
  * Description:
  *   Performs the close operation on a socket instance
@@ -311,7 +311,7 @@ void net_lostconnection(FAR struct socket *psock, uint16_t flags);
 int psock_close(FAR struct socket *psock);
 
 /****************************************************************************
- * Function: net_close
+ * Name: net_close
  *
  * Description:
  *   Performs the close operation on socket descriptors
@@ -329,7 +329,7 @@ int psock_close(FAR struct socket *psock);
 int net_close(int sockfd);
 
 /****************************************************************************
- * Function: net_timeo
+ * Name: net_timeo
  *
  * Description:
  *   Check if a timeout has elapsed.  This can be called from a socket poll
@@ -351,7 +351,7 @@ int net_timeo(systime_t start_time, socktimeo_t timeo);
 #endif
 
 /****************************************************************************
- * Function: psock_send
+ * Name: psock_send
  *
  * Description:
  *   The send() call may be used only when the socket is in a connected state

@@ -214,7 +214,7 @@ static void setup_conn_recvfrom(FAR struct usrsock_conn_s *conn,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: usrsock_recvfrom
+ * Name: usrsock_recvfrom
  *
  * Description:
  *   recvfrom() receives messages from a socket, and may be used to receive

@@ -58,7 +58,7 @@ static const uint16_t g_daysbeforemonth[13] =
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  clock_daysbeforemonth
+ * Name:  clock_daysbeforemonth
  *
  * Description:
  *    Get the number of days that occurred before the beginning of the

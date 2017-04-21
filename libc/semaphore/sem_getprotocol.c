@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sem_getprotocol
+ * Name: sem_getprotocol
  *
  * Description:
  *    Return the value of the semaphore protocol attribute.

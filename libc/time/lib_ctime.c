@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  ctime
+ * Name:  ctime
  *
  * Description:
  *   ctime and ctime_r convert the time provided in seconds since the

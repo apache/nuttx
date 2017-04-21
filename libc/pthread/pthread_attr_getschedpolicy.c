@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_getschedpolicy
+ * Name:  pthread_attr_getschedpolicy
  *
  * Description:
  *   Obtain the scheduling algorithm attribute.

@@ -70,7 +70,7 @@ static unsigned int g_count   = 0;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: _net_takesem
+ * Name: _net_takesem
  *
  * Description:
  *   Take the semaphore
@@ -94,7 +94,7 @@ static void _net_takesem(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_lockinitialize
+ * Name: net_lockinitialize
  *
  * Description:
  *   Initialize the locking facility
@@ -107,7 +107,7 @@ void net_lockinitialize(void)
 }
 
 /****************************************************************************
- * Function: net_lock
+ * Name: net_lock
  *
  * Description:
  *   Take the lock
@@ -140,7 +140,7 @@ void net_lock(void)
 }
 
 /****************************************************************************
- * Function: net_unlock
+ * Name: net_unlock
  *
  * Description:
  *   Release the lock.
@@ -170,7 +170,7 @@ void net_unlock(void)
 }
 
 /****************************************************************************
- * Function: net_timedwait
+ * Name: net_timedwait
  *
  * Description:
  *   Atomically wait for sem (or a timeout( while temporarily releasing
@@ -237,7 +237,7 @@ int net_timedwait(sem_t *sem, FAR const struct timespec *abstime)
 }
 
 /****************************************************************************
- * Function: net_lockedwait
+ * Name: net_lockedwait
  *
  * Description:
  *   Atomically wait for sem while temporarily releasing g_netlock.

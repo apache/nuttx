@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_getsockopt
+ * Name: psock_getsockopt
  *
  * Description:
  *   getsockopt() retrieve thse value for the option specified by the
@@ -277,7 +277,7 @@ errout:
 }
 
 /****************************************************************************
- * Function: getsockopt
+ * Name: getsockopt
  *
  * Description:
  *   getsockopt() retrieve thse value for the option specified by the

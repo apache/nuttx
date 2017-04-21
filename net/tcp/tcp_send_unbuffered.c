@@ -117,7 +117,7 @@ struct send_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: send_timeout
+ * Name: send_timeout
  *
  * Description:
  *   Check for send timeout.
@@ -157,7 +157,7 @@ static inline int send_timeout(FAR struct send_s *pstate)
 #endif /* CONFIG_NET_SOCKOPTS */
 
 /****************************************************************************
- * Function: tcpsend_ipselect
+ * Name: tcpsend_ipselect
  *
  * Description:
  *   If both IPv4 and IPv6 support are enabled, then we will need to select
@@ -200,7 +200,7 @@ static inline void tcpsend_ipselect(FAR struct net_driver_s *dev,
 #endif
 
 /****************************************************************************
- * Function: psock_send_addrchck
+ * Name: psock_send_addrchck
  *
  * Description:
  *   Check if the destination IP address is in the IPv4 ARP or IPv6 Neighbor
@@ -263,7 +263,7 @@ static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
 #endif /* CONFIG_NET_ETHERNET */
 
 /****************************************************************************
- * Function: tcpsend_interrupt
+ * Name: tcpsend_interrupt
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -597,7 +597,7 @@ end_wait:
 }
 
 /****************************************************************************
- * Function: send_txnotify
+ * Name: send_txnotify
  *
  * Description:
  *   Notify the appropriate device driver that we are have data ready to
@@ -656,7 +656,7 @@ static inline void send_txnotify(FAR struct socket *psock,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_tcp_send
+ * Name: psock_tcp_send
  *
  * Description:
  *   psock_tcp_send() call may be used only when the TCP socket is in a
@@ -884,7 +884,7 @@ errout:
 }
 
 /****************************************************************************
- * Function: psock_tcp_cansend
+ * Name: psock_tcp_cansend
  *
  * Description:
  *   psock_tcp_cansend() returns a value indicating if a write to the socket

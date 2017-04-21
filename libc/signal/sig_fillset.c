@@ -44,7 +44,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sigfillset
+ * Name: sigfillset
  *
  * Description:
  *   This function initializes the signal set specified by set such that all

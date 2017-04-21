@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_ipv4_txnotify
+ * Name: netdev_ipv4_txnotify
  *
  * Description:
  *   Notify the device driver that forwards the IPv4 address that new TX
@@ -101,7 +101,7 @@ void netdev_ipv4_txnotify(in_addr_t ripaddr)
 
 
 /****************************************************************************
- * Function: netdev_ipv6_txnotify
+ * Name: netdev_ipv6_txnotify
  *
  * Description:
  *   Notify the device driver that forwards the IPv4 address that new TX
@@ -147,7 +147,7 @@ void netdev_ipv6_txnotify(FAR const net_ipv6addr_t ripaddr)
 #endif /* CONFIG_NET_IPv6 */
 
 /****************************************************************************
- * Function: netdev_txnotify_dev
+ * Name: netdev_txnotify_dev
  *
  * Description:
  *   Notify the device driver that new TX data is available.  This variant

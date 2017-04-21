@@ -680,7 +680,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 }
 
 /****************************************************************************
- * Function: sixlowpan_dispatch
+ * Name: sixlowpan_dispatch
  *
  * Description:
  *   Inject the packet in d_buf into the network for normal packet processing.

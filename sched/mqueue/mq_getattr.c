@@ -47,7 +47,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  mq_getattr
+ * Name:  mq_getattr
  *
  * Description:
  *   This functions gets status information and attributes

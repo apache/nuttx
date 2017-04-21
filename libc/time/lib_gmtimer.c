@@ -86,7 +86,7 @@ static void   clock_utc2julian(time_t jdn, int *year, int *month, int *day);
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  clock_utc2calendar, clock_utc2gregorian, and clock_utc2julian
+ * Name:  clock_utc2calendar, clock_utc2gregorian, and clock_utc2julian
  *
  * Description:
  *    Calendar to UTC conversion routines.  These conversions
@@ -291,7 +291,7 @@ static void clock_utc2calendar(time_t days, FAR int *year, FAR int *month,
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  gmtime_r
+ * Name:  gmtime_r
  *
  * Description:
  *  Time conversion (based on the POSIX API)

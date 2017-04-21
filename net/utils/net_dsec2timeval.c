@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_dsec2timeval
+ * Name: net_dsec2timeval
  *
  * Description:
  *   Convert a decisecond timeout value to a struct timeval.  Needed by

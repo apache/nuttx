@@ -188,7 +188,7 @@ struct arp_notify_s
 void arp_reset(void);
 
 /****************************************************************************
- * Function: arp_timer_initialize
+ * Name: arp_timer_initialize
  *
  * Description:
  *   Initialized the 10 second timer that is need by the ARP logic in order
@@ -239,7 +239,7 @@ struct net_driver_s; /* Forward reference */
 void arp_format(FAR struct net_driver_s *dev, in_addr_t ipaddr);
 
 /****************************************************************************
- * Function: arp_send
+ * Name: arp_send
  *
  * Description:
  *   The arp_send() call may be to send an ARP request to resolve an IPv4
@@ -274,7 +274,7 @@ int arp_send(in_addr_t ipaddr);
 #endif
 
 /****************************************************************************
- * Function: arp_poll
+ * Name: arp_poll
  *
  * Description:
  *   Poll all pending transfer for ARP requests to send.
@@ -293,7 +293,7 @@ int arp_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback);
 #endif
 
 /****************************************************************************
- * Function: arp_wait_setup
+ * Name: arp_wait_setup
  *
  * Description:
  *   Called BEFORE an ARP request is sent.  This function sets up the ARP
@@ -313,7 +313,7 @@ void arp_wait_setup(in_addr_t ipaddr, FAR struct arp_notify_s *notify);
 #endif
 
 /****************************************************************************
- * Function: arp_wait_cancel
+ * Name: arp_wait_cancel
  *
  * Description:
  *   Cancel any wait set after arp_wait_setup is called but before arm_wait()
@@ -332,7 +332,7 @@ int arp_wait_cancel(FAR struct arp_notify_s *notify);
 #endif
 
 /****************************************************************************
- * Function: arp_wait
+ * Name: arp_wait
  *
  * Description:
  *   Called each time that a ARP request is sent.  This function will sleep
@@ -353,7 +353,7 @@ int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout);
 #endif
 
 /****************************************************************************
- * Function: arp_notify
+ * Name: arp_notify
  *
  * Description:
  *   Called each time that a ARP response is received in order to wake-up

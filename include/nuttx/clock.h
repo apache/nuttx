@@ -239,7 +239,7 @@ EXTERN volatile systime_t g_system_timer;
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  clock_synchronize
+ * Name:  clock_synchronize
  *
  * Description:
  *   Synchronize the system timer to a hardware RTC.  This operation is
@@ -302,7 +302,7 @@ void clock_resynchronize(FAR struct timespec *rtc_diff);
 #endif
 
 /****************************************************************************
- * Function:  clock_systimer
+ * Name:  clock_systimer
  *
  * Description:
  *   Return the current value of the 32/64-bit system timer counter.
@@ -347,7 +347,7 @@ systime_t clock_systimer(void);
 int clock_systimespec(FAR struct timespec *ts);
 
 /****************************************************************************
- * Function:  clock_cpuload
+ * Name:  clock_cpuload
  *
  * Description:
  *   Return load measurement data for the select PID.

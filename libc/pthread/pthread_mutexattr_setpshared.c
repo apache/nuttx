@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_mutexattr_setpshared
+ * Name:  pthread_mutexattr_setpshared
  *
  * Description:
  *    Set pshared  mutex attribute.

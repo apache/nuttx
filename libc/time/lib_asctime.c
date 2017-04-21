@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  asctime
+ * Name:  asctime
  *
  * Description:
  *   asctime and asctime_r convert the time provided in a struct tm to a

@@ -143,7 +143,7 @@ int sem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay);
 int sem_reset(FAR sem_t *sem, int16_t count);
 
 /****************************************************************************
- * Function: sem_getprotocol
+ * Name: sem_getprotocol
  *
  * Description:
  *    Return the value of the semaphore protocol attribute.
@@ -163,7 +163,7 @@ int sem_reset(FAR sem_t *sem, int16_t count);
 int sem_getprotocol(FAR sem_t *sem, FAR int *protocol);
 
 /****************************************************************************
- * Function: sem_setprotocol
+ * Name: sem_setprotocol
  *
  * Description:
  *    Set semaphore protocol attribute.

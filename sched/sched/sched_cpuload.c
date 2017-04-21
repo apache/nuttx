@@ -219,7 +219,7 @@ void weak_function sched_process_cpuload(void)
 }
 
 /****************************************************************************
- * Function:  clock_cpuload
+ * Name:  clock_cpuload
  *
  * Description:
  *   Return load measurement data for the select PID.

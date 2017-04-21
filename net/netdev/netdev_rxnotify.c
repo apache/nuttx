@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_ipv4_rxnotify
+ * Name: netdev_ipv4_rxnotify
  *
  * Description:
  *   Notify the device driver that forwards the IPv4 address that the
@@ -100,7 +100,7 @@ void netdev_ipv4_rxnotify(in_addr_t ripaddr)
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Function: netdev_ipv6_rxnotify
+ * Name: netdev_ipv6_rxnotify
  *
  * Description:
  *   Notify the device driver that forwards the IPv6 address that the

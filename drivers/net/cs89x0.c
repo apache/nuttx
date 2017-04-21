@@ -137,7 +137,7 @@ static int cs89x0_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
  ****************************************************************************/
 
 /****************************************************************************
- * Function: cs89x0_getreg and cs89x0_putreg
+ * Name: cs89x0_getreg and cs89x0_putreg
  *
  * Description:
  *   Read from and write to a CS89x0 register
@@ -172,7 +172,7 @@ static void cs89x0_putreg(struct cs89x0_driver_s *cs89x0, int offset, uint16_t v
 }
 
 /****************************************************************************
- * Function: cs89x0_getppreg and cs89x0_putppreg
+ * Name: cs89x0_getppreg and cs89x0_putppreg
  *
  * Description:
  *   Read from and write to a CS89x0 page packet register
@@ -257,7 +257,7 @@ static void cs89x0_putppreg(struct cs89x0_driver_s *cs89x0, int addr, uint16_t v
 }
 
 /****************************************************************************
- * Function: cs89x0_transmit
+ * Name: cs89x0_transmit
  *
  * Description:
  *   Start hardware transmission.  Called either from the txdone interrupt
@@ -298,7 +298,7 @@ static int cs89x0_transmit(struct cs89x0_driver_s *cs89x0)
 }
 
 /****************************************************************************
- * Function: cs89x0_txpoll
+ * Name: cs89x0_txpoll
  *
  * Description:
  *   The transmitter is available, check if the network has any outgoing packets ready
@@ -368,7 +368,7 @@ static int cs89x0_txpoll(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: cs89x0_receive
+ * Name: cs89x0_receive
  *
  * Description:
  *   An interrupt was received indicating the availability of a new RX packet
@@ -554,7 +554,7 @@ static void cs89x0_receive(FAR struct cs89x0_driver_s *cs89x0, uint16_t isq)
 }
 
 /****************************************************************************
- * Function: cs89x0_txdone
+ * Name: cs89x0_txdone
  *
  * Description:
  *   An interrupt was received indicating that the last TX packet(s) is done
@@ -611,7 +611,7 @@ static void cs89x0_txdone(struct cs89x0_driver_s *cs89x0, uint16_t isq)
 }
 
 /****************************************************************************
- * Function: cs89x0_interrupt
+ * Name: cs89x0_interrupt
  *
  * Description:
  *   Hardware interrupt handler
@@ -680,7 +680,7 @@ static int cs89x0_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 
 /****************************************************************************
- * Function: cs89x0_txtimeout
+ * Name: cs89x0_txtimeout
  *
  * Description:
  *   Our TX watchdog timed out.  Called from the timer interrupt handler.
@@ -713,7 +713,7 @@ static void cs89x0_txtimeout(int argc, uint32_t arg, ...)
 }
 
 /****************************************************************************
- * Function: cs89x0_polltimer
+ * Name: cs89x0_polltimer
  *
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
@@ -747,7 +747,7 @@ static void cs89x0_polltimer(int argc, uint32_t arg, ...)
 }
 
 /****************************************************************************
- * Function: cs89x0_ifup
+ * Name: cs89x0_ifup
  *
  * Description:
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
@@ -787,7 +787,7 @@ static int cs89x0_ifup(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: cs89x0_ifdown
+ * Name: cs89x0_ifdown
  *
  * Description:
  *   NuttX Callback: Stop the interface.
@@ -825,7 +825,7 @@ static int cs89x0_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: cs89x0_txavail
+ * Name: cs89x0_txavail
  *
  * Description:
  *   Driver callback invoked when new TX data is available.  This is a
@@ -867,7 +867,7 @@ static int cs89x0_txavail(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: cs89x0_addmac
+ * Name: cs89x0_addmac
  *
  * Description:
  *   NuttX Callback: Add the specified MAC address to the hardware multicast
@@ -897,7 +897,7 @@ static int cs89x0_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
- * Function: cs89x0_rmmac
+ * Name: cs89x0_rmmac
  *
  * Description:
  *   NuttX Callback: Remove the specified MAC address from the hardware multicast
@@ -931,7 +931,7 @@ static int cs89x0_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: cs89x0_initialize
+ * Name: cs89x0_initialize
  *
  * Description:
  *   Initialize the Ethernet driver

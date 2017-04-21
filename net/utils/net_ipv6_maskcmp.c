@@ -50,7 +50,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_ipv6addr_maskcmp
+ * Name: net_ipv6addr_maskcmp
  *
  * Description:
  *   Compare two IPv6 addresses under a netmask.  The mask is used to mask

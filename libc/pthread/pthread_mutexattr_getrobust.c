@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: pthread_mutexattr_getrobust
+ * Name: pthread_mutexattr_getrobust
  *
  * Description:
  *   Return the mutex robustneess from the mutex attributes.

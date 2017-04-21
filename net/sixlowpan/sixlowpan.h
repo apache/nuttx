@@ -79,7 +79,7 @@ struct sockaddr;     /* Forward reference */
 void sixlowpan_initialize(void);
 
 /****************************************************************************
- * Function: psock_6lowpan_tcp_send
+ * Name: psock_6lowpan_tcp_send
  *
  * Description:
  *   psock_6lowpan_tcp_send() call may be used only when the TCP socket is in a
@@ -107,7 +107,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 #endif
 
 /****************************************************************************
- * Function: sixlowpan_tcp_send
+ * Name: sixlowpan_tcp_send
  *
  * Description:
  *   TCP output comes through three different mechansims.  Either from:
@@ -139,7 +139,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 void sixlowpan_tcp_send(FAR struct net_driver_s *dev);
 
 /****************************************************************************
- * Function: psock_6lowpan_udp_send
+ * Name: psock_6lowpan_udp_send
  *
  * Description:
  *   psock_6lowpan_udp_send() call may be used with connectionlesss UDP
@@ -167,7 +167,7 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
 #endif
 
 /****************************************************************************
- * Function: psock_6lowpan_udp_sendto
+ * Name: psock_6lowpan_udp_sendto
  *
  * Description:
  *   If sendto() is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)

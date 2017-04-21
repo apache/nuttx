@@ -99,7 +99,7 @@ struct icmp_ping_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: ping_timeout
+ * Name: ping_timeout
  *
  * Description:
  *   Check for send timeout.
@@ -127,7 +127,7 @@ static inline int ping_timeout(FAR struct icmp_ping_s *pstate)
 }
 
 /****************************************************************************
- * Function: ping_interrupt
+ * Name: ping_interrupt
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual

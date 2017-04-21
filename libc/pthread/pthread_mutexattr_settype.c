@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: pthread_mutexattr_settype
+ * Name: pthread_mutexattr_settype
  *
  * Description:
  *   Set the mutex type in the mutex attributes.

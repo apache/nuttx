@@ -54,7 +54,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: tcp_find_ipv4_device
+ * Name: tcp_find_ipv4_device
  *
  * Description:
  *   Select the network driver to use with the IPv4 TCP connection.
@@ -112,7 +112,7 @@ static int tcp_find_ipv4_device(FAR struct tcp_conn_s *conn, in_addr_t addr)
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Function: tcp_find_ipv6_device
+ * Name: tcp_find_ipv6_device
  *
  * Description:
  *   Select the network driver to use with the IPv6 TCP transaction.
@@ -175,7 +175,7 @@ static int tcp_find_ipv6_device(FAR struct tcp_conn_s *conn,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: tcp_local_ipv4_device
+ * Name: tcp_local_ipv4_device
  *
  * Description:
  *   Select the network driver to use with the IPv4 TCP transaction based
@@ -203,7 +203,7 @@ int tcp_local_ipv4_device(FAR struct tcp_conn_s *conn)
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Function: tcp_remote_ipv4_device
+ * Name: tcp_remote_ipv4_device
  *
  * Description:
  *   Select the network driver to use with the IPv4 TCP transaction based
@@ -227,7 +227,7 @@ int tcp_remote_ipv4_device(FAR struct tcp_conn_s *conn)
 #endif
 
 /****************************************************************************
- * Function: tcp_local_ipv6_device
+ * Name: tcp_local_ipv6_device
  *
  * Description:
  *   Select the network driver to use with the IPv6 TCP transaction.
@@ -254,7 +254,7 @@ int tcp_local_ipv6_device(FAR struct tcp_conn_s *conn)
 #endif /* CONFIG_NET_IPv6 */
 
 /****************************************************************************
- * Function: tcp_remote_ipv6_device
+ * Name: tcp_remote_ipv6_device
  *
  * Description:
  *   Select the network driver to use with the IPv6 TCP transaction based

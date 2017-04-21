@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_send
+ * Name: psock_send
  *
  * Description:
  *   The send() call may be used only when the socket is in a connected state
@@ -259,7 +259,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 }
 
 /****************************************************************************
- * Function: send
+ * Name: send
  *
  * Description:
  *   The send() call may be used only when the socket is in a connected state

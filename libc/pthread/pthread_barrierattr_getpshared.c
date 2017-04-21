@@ -48,7 +48,7 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Function: pthread_barrierattr_getpshared
+ * Name: pthread_barrierattr_getpshared
  *
  * Description:
  *   The pthread_barrierattr_getpshared() function will obtain the value of the

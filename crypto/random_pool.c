@@ -136,7 +136,7 @@ static const uint32_t pool_twist[8] =
  ****************************************************************************/
 
 /****************************************************************************
- * Function: addentropy
+ * Name: addentropy
  *
  * Description:
  *
@@ -201,7 +201,7 @@ static void addentropy(FAR const uint32_t *buf, size_t n, bool inc_new)
 }
 
 /****************************************************************************
- * Function: getentropy
+ * Name: getentropy
  *
  * Description:
  *   Hash entropy pool to BLAKE2s context. This is an internal interface for
@@ -385,7 +385,7 @@ static void rng_init(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: up_rngaddint
+ * Name: up_rngaddint
  *
  * Description:
  *   Add one integer to entropy pool, contributing a specific kind
@@ -410,7 +410,7 @@ void up_rngaddint(enum rnd_source_t kindof, int val)
 }
 
 /****************************************************************************
- * Function: up_rngaddentropy
+ * Name: up_rngaddentropy
  *
  * Description:
  *   Add buffer of integers to entropy pool.
@@ -490,7 +490,7 @@ void up_rngaddentropy(enum rnd_source_t kindof, FAR const uint32_t *buf,
 }
 
 /****************************************************************************
- * Function: up_rngreseed
+ * Name: up_rngreseed
  *
  * Description:
  *   Force reseeding random number generator from entropy pool
@@ -513,7 +513,7 @@ void up_rngreseed(void)
 }
 
 /****************************************************************************
- * Function: up_randompool_initialize
+ * Name: up_randompool_initialize
  *
  * Description:
  *   Initialize entropy pool and random number generator
@@ -530,7 +530,7 @@ void up_randompool_initialize(void)
 }
 
 /****************************************************************************
- * Function: getrandom
+ * Name: getrandom
  *
  * Description:
  *   Fill a buffer of arbitrary length with randomness. This is the

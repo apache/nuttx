@@ -74,7 +74,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Function: vnc_fbinitialize
+ * Name: vnc_fbinitialize
  *
  * Description:
  *   Initialize the VNC frame buffer driver.  The VNC frame buffer driver
@@ -132,7 +132,7 @@ int vnc_fbinitialize(int display, vnc_kbdout_t kbdout,
                      vnc_mouseout_t mouseout, FAR void *arg);
 
 /****************************************************************************
- * Function: vnc_mouse and vnc_kbdout
+ * Name: vnc_mouse and vnc_kbdout
  *
  * Description:
  *   These are the default keyboard/mouse callout functions.  They are
@@ -162,7 +162,7 @@ void vnc_mouseout(FAR void *arg, nxgl_coord_t x, nxgl_coord_t y,
 #endif
 
 /****************************************************************************
- * Function: vnc_default_fbinitialize
+ * Name: vnc_default_fbinitialize
  *
  * Description:
  *   This is just a wrapper around vnc_fbinitialize() that will establish

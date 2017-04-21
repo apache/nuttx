@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_verify
+ * Name: netdev_verify
  *
  * Description:
  *   Verify that the specified device still exists

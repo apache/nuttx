@@ -61,7 +61,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: usrsock_event
+ * Name: usrsock_event
  *
  * Description:
  *   Handler for received connection events

@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_mutexattr_destroy
+ * Name:  pthread_mutexattr_destroy
  *
  * Description:
  *    Destroy mutex attributes.

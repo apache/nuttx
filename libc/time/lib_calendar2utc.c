@@ -50,7 +50,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  clock_gregorian2utc, clock_julian2utc
+ * Name:  clock_gregorian2utc, clock_julian2utc
  *
  * Description:
  *    UTC conversion routines.  These conversions are based
@@ -90,7 +90,7 @@ static time_t clock_julian2utc(int year, int month, int day)
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  clock_calendar2utc
+ * Name:  clock_calendar2utc
  *
  * Description:
  *    Calendar/UTC conversion based on algorithms from p. 604

@@ -344,7 +344,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
                    uint16_t timeout);
 
 /****************************************************************************
- * Function: sixlowpan_send_hdrlen
+ * Name: sixlowpan_send_hdrlen
  *
  * Description:
  *   This function is before the first frame has been sent in order to
@@ -366,7 +366,7 @@ int sixlowpan_send_hdrlen(FAR struct ieee802154_driver_s *ieee,
                      uint16_t dest_panid);
 
 /****************************************************************************
- * Function: sixlowpan_framecreate
+ * Name: sixlowpan_framecreate
  *
  * Description:
  *   This function is called after the IEEE802.15.4 MAC driver polls for

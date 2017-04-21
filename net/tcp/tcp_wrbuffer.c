@@ -93,7 +93,7 @@ static struct wrbuffer_s g_wrbuffer;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: tcp_wrbuffer_initialize
+ * Name: tcp_wrbuffer_initialize
  *
  * Description:
  *   Initialize the list of free write buffers
@@ -118,7 +118,7 @@ void tcp_wrbuffer_initialize(void)
 }
 
 /****************************************************************************
- * Function: tcp_wrbuffer_alloc
+ * Name: tcp_wrbuffer_alloc
  *
  * Description:
  *   Allocate a TCP write buffer by taking a pre-allocated buffer from
@@ -169,7 +169,7 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void)
 }
 
 /****************************************************************************
- * Function: tcp_wrbuffer_release
+ * Name: tcp_wrbuffer_release
  *
  * Description:
  *   Release a TCP write buffer by returning the buffer to the free list.
@@ -198,7 +198,7 @@ void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb)
 }
 
 /****************************************************************************
- * Function: tcp_wrbuffer_test
+ * Name: tcp_wrbuffer_test
  *
  * Description:
  *   Check if there is room in the write buffer.  Does not reserve any space.

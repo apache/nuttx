@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  time
+ * Name:  time
  *
  * Description:
  *   Get the current calendar time as a time_t object.  The function returns

@@ -630,7 +630,7 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
 }
 
 /****************************************************************************
- * Function: vnc_kbdout
+ * Name: vnc_kbdout
  *
  * Description:
  *   This is the default keyboard callout function.  This is simply wrappers around nx_kdbout(), respectively.  When configured using vnc_fbinitialize(), the 'arg' must be the correct NXHANDLE value.

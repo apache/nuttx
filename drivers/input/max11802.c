@@ -159,7 +159,7 @@ static struct max11802_dev_s *g_max11802list;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: max11802_lock
+ * Name: max11802_lock
  *
  * Description:
  *   Lock the SPI bus and re-configure as necessary.  This function must be
@@ -196,7 +196,7 @@ static void max11802_lock(FAR struct spi_dev_s *spi)
 }
 
 /****************************************************************************
- * Function: max11802_unlock
+ * Name: max11802_unlock
  *
  * Description:
  *   Un-lock the SPI bus after each transfer, possibly losing the current

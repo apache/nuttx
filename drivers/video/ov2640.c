@@ -672,7 +672,7 @@ static const struct ovr2640_reg_s g_ov2640_jpeg_uxga_resolution[] =
  ****************************************************************************/
 
 /****************************************************************************
- * Function: ov2640_putreg
+ * Name: ov2640_putreg
  *
  * Description:
  *   Set one OV2640 register
@@ -723,7 +723,7 @@ static int ov2640_putreg(FAR struct i2c_master_s *i2c, uint8_t regaddr,
 }
 
 /****************************************************************************
- * Function: ov2640_getreg
+ * Name: ov2640_getreg
  *
  * Description:
  *   Set one OV2640 register
@@ -779,7 +779,7 @@ static uint8_t ov2640_getreg(FAR struct i2c_master_s *i2c, uint8_t regaddr)
 }
 
 /****************************************************************************
- * Function: ov2640_putreglist
+ * Name: ov2640_putreglist
  *
  * Description:
  *   Set a list of OV2640 register values.
@@ -816,7 +816,7 @@ static int ov2640_putreglist(FAR struct i2c_master_s *i2c,
 }
 
 /****************************************************************************
- * Function: ovr2640_chipid
+ * Name: ovr2640_chipid
  *
  * Description:
  *   Read and verify the CHIP ID
@@ -869,7 +869,7 @@ static int ovr2640_chipid(FAR struct i2c_master_s *i2c)
 }
 
 /****************************************************************************
- * Function: ov2640_reset
+ * Name: ov2640_reset
  *
  * Description:
  *   Reset the OV2640.
@@ -904,7 +904,7 @@ static int ov2640_reset(FAR struct i2c_master_s *i2c)
  * Public Functions
  ****************************************************************************/
 /****************************************************************************
- * Function: ov2640_initialize
+ * Name: ov2640_initialize
  *
  * Description:
  *   Initialize the OV2640 camera.

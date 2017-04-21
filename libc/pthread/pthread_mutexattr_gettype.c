@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: pthread_mutexattr_gettype
+ * Name: pthread_mutexattr_gettype
  *
  * Description:
  *   Return the mutex type from the mutex attributes.

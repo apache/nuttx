@@ -214,7 +214,7 @@ static void slip_semtake(FAR struct slip_driver_s *priv)
 #define slip_semgive(p) sem_post(&(p)->waitsem);
 
 /****************************************************************************
- * Function: slip_write
+ * Name: slip_write
  *
  * Description:
  *   Just an inline wrapper around fwrite with error checking.
@@ -238,7 +238,7 @@ static inline void slip_write(FAR struct slip_driver_s *priv,
 }
 
 /****************************************************************************
- * Function: slip_putc
+ * Name: slip_putc
  *
  * Description:
  *   Just an inline wrapper around putc with error checking.
@@ -256,7 +256,7 @@ static inline void slip_putc(FAR struct slip_driver_s *priv, int ch)
 }
 
 /****************************************************************************
- * Function: slip_transmit
+ * Name: slip_transmit
  *
  * Description:
  *   Start hardware transmission.  Called either from the txdone interrupt
@@ -368,7 +368,7 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: slip_txpoll
+ * Name: slip_txpoll
  *
  * Description:
  *   Check if the network has any outgoing packets ready to send.  This is a
@@ -409,7 +409,7 @@ static int slip_txpoll(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: slip_txtask
+ * Name: slip_txtask
  *
  * Description:
  *   Polling and transmission is performed on tx thread.
@@ -499,7 +499,7 @@ static void slip_txtask(int argc, FAR char *argv[])
 }
 
 /****************************************************************************
- * Function: slip_getc
+ * Name: slip_getc
  *
  * Description:
  *   Get one byte from the serial input.
@@ -525,7 +525,7 @@ static inline int slip_getc(FAR struct slip_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: slip_receive
+ * Name: slip_receive
  *
  * Description:
  *   Read a packet from the serial input
@@ -630,7 +630,7 @@ static inline void slip_receive(FAR struct slip_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: slip_rxtask
+ * Name: slip_rxtask
  *
  * Description:
  *   Wait for incoming data.
@@ -751,7 +751,7 @@ static int slip_rxtask(int argc, FAR char *argv[])
 }
 
 /****************************************************************************
- * Function: slip_ifup
+ * Name: slip_ifup
  *
  * Description:
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
@@ -782,7 +782,7 @@ static int slip_ifup(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: slip_ifdown
+ * Name: slip_ifdown
  *
  * Description:
  *   NuttX Callback: Stop the interface.
@@ -808,7 +808,7 @@ static int slip_ifdown(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: slip_txavail
+ * Name: slip_txavail
  *
  * Description:
  *   Driver callback invoked when new TX data is available.  This is a
@@ -841,7 +841,7 @@ static int slip_txavail(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: slip_addmac
+ * Name: slip_addmac
  *
  * Description:
  *   NuttX Callback: Add the specified MAC address to the hardware multicast
@@ -870,7 +870,7 @@ static int slip_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
- * Function: slip_rmmac
+ * Name: slip_rmmac
  *
  * Description:
  *   NuttX Callback: Remove the specified MAC address from the hardware multicast
@@ -903,7 +903,7 @@ static int slip_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: slip_initialize
+ * Name: slip_initialize
  *
  * Description:
  *   Instantiate a SLIP network interface.

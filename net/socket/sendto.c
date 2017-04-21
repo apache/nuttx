@@ -59,7 +59,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_sendto
+ * Name: psock_sendto
  *
  * Description:
  *   If sendto() is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)
@@ -279,7 +279,7 @@ errout:
 }
 
 /****************************************************************************
- * Function: sendto
+ * Name: sendto
  *
  * Description:
  *   If sendto() is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)
