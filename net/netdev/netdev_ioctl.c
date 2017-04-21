@@ -348,6 +348,7 @@ static void ioctl_set_ipv6addr(FAR net_ipv6addr_t outaddr,
 static int netdev_sixlowpan_ioctl(FAR struct socket *psock, int cmd,
                                   FAR struct sixlowpan_req_s *req)
 {
+#if 0 /* None yet defined */
   FAR struct ieee802154_driver_s *ieee;
   int ret = -ENOTTY;
 
@@ -358,42 +359,15 @@ static int netdev_sixlowpan_ioctl(FAR struct socket *psock, int cmd,
       switch (cmd)
         {
 
-          case SIOCSWPANID:  /* Join PAN ID */
-            {
-              ieee = (FAR struct ieee802154_driver_s *)netdev_findbyname(req->ifr_name);
-              if (ieee == NULL)
-                {
-                  ret = -ENODEV;
-                }
-              else
-                {
-                  ieee->i_panid = req->u.panid.panid;
-                  ret = OK;
-                }
-            }
-            break;
-
-          case SIOCGWPANID:   /* Return PAN ID */
-            {
-              ieee = (FAR struct ieee802154_driver_s *)netdev_findbyname(req->ifr_name);
-              if (ieee == NULL)
-                {
-                  ret = -ENODEV;
-                }
-              else
-                {
-                  req->u.panid.panid = ieee->i_panid;
-                  ret = OK;
-                }
-            }
-            break;
-
           default:
             return -ENOTTY;
         }
     }
 
   return ret;
+#else
+  return -ENOTTY;
+#endif
 }
 #endif
 
