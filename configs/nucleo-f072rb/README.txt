@@ -1,9 +1,9 @@
 Nucleo-F072RB README
 ====================
 
-  This README file discusess the port of NuttX to the STMicro Nucleo-F4072RB
-  board.  That board features the STM32F072RBT6 MCU with 128KiB with 128KiB
-  of FLASH and 16KiB of SRAM.
+  This README file discusses the port of NuttX to the STMicro Nucleo-F072RB
+  board.  That board features the STM32F072RBT6 MCU with 128KiB of FLASH
+  and 16KiB of SRAM.
 
 Contents
 ========
@@ -53,8 +53,8 @@ LEDs
 
   These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
   defined.  In that case, the usage by the board port is defined in
-  include/board.h and src/sam_leds.c. The LEDs are used to encode OS-related
-  events as follows when the red LED (PE24) is available:
+  include/board.h and src/stm32_autoleds.c. The LEDs are used to encode
+  OS-related events as follows when the red LED (PE24) is available:
 
     SYMBOL                Meaning                   LD2
     -------------------  -----------------------  -----------
@@ -192,11 +192,11 @@ Configurations
 
   Information Common to All Configurations
   ----------------------------------------
-  Each Clicker2 configuration is maintained in a sub-directory and can be
+  Each configuration is maintained in a sub-directory and can be
   selected as follow:
 
     cd tools
-    ./configure.sh nucleo-f702rb/<subdir>
+    ./configure.sh nucleo-f072rb/<subdir>
     cd -
     . ./setenv.sh
 

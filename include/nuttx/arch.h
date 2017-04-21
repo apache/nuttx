@@ -2186,6 +2186,35 @@ int up_rtc_getdatetime(FAR struct tm *tp);
 #endif
 
 /************************************************************************************
+ * Name: up_rtc_getdatetime_with_subseconds
+ *
+ * Description:
+ *   Get the current date and time from the date/time RTC.  This interface
+ *   is only supported by the date/time RTC hardware implementation.
+ *   It is used to replace the system timer.  It is only used by the RTOS during
+ *   initialization to set up the system time when CONFIG_RTC and CONFIG_RTC_DATETIME
+ *   are selected (and CONFIG_RTC_HIRES is not).
+ *
+ *   NOTE: This interface exposes sub-second accuracy capability of RTC hardware.
+ *   This interface allow maintaining timing accuracy when system time needs constant
+ *   resynchronization with RTC, for example on MCU with low-power state that
+ *   stop system timer.
+ *
+ * Input Parameters:
+ *   tp - The location to return the high resolution time value.
+ *   nsec - The location to return the subsecond time value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_RTC) && defined(CONFIG_RTC_DATETIME) && \
+    defined(CONFIG_ARCH_HAVE_RTC_SUBSECONDS)
+int up_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec);
+#endif
+
+/************************************************************************************
  * Name: up_rtc_settime
  *
  * Description:

@@ -100,6 +100,33 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 #else
       ret = clock_systimespec(tp);
 #endif
+
+#ifndef CONFIG_CLOCK_TIMEKEEPING
+      if (ret == OK)
+        {
+          irqstate_t flags;
+
+          /* Add the offset time to this. The offset time allows
+           * CLOCK_MONOTONIC be introduced additional increases to systime.
+           */
+
+          flags = enter_critical_section();
+
+          tp->tv_sec  += (uint32_t)g_monotonic_basetime.tv_sec;
+          tp->tv_nsec += (uint32_t)g_monotonic_basetime.tv_nsec;
+
+          leave_critical_section(flags);
+
+          /* Handle carry to seconds. */
+
+          if (tp->tv_nsec >= NSEC_PER_SEC)
+            {
+              carry        = tp->tv_nsec / NSEC_PER_SEC;
+              tp->tv_sec  += carry;
+              tp->tv_nsec -= (carry * NSEC_PER_SEC);
+            }
+        }
+#endif /* CONFIG_CLOCK_TIMEKEEPING */
     }
   else
 #endif
@@ -129,13 +156,19 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 #ifndef CONFIG_CLOCK_TIMEKEEPING
       if (ret == OK)
         {
+          irqstate_t flags;
+
           /* Add the base time to this.  The base time is the time-of-day
            * setting.  When added to the elapsed time since the time-of-day
            * was last set, this gives us the current time.
            */
 
+          flags = enter_critical_section();
+
           ts.tv_sec  += (uint32_t)g_basetime.tv_sec;
           ts.tv_nsec += (uint32_t)g_basetime.tv_nsec;
+
+          leave_critical_section(flags);
 
           /* Handle carry to seconds. */
 

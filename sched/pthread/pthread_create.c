@@ -358,8 +358,8 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   if (policy == SCHED_SPORADIC)
     {
       FAR struct sporadic_s *sporadic;
-      int repl_ticks;
-      int budget_ticks;
+      ssystime_t repl_ticks;
+      ssystime_t budget_ticks;
 
       /* Convert timespec values to system clock ticks */
 

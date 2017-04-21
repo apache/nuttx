@@ -67,7 +67,8 @@
  *
  ****************************************************************************/
 
-int clock_time2ticks(FAR const struct timespec *reltime, FAR int *ticks)
+int clock_time2ticks(FAR const struct timespec *reltime,
+                     FAR ssystime_t *ticks)
 {
 #ifdef CONFIG_HAVE_LONG_LONG
   int64_t relnsec;
@@ -83,7 +84,7 @@ int clock_time2ticks(FAR const struct timespec *reltime, FAR int *ticks)
    * that is greater than or equal to the exact number of tick.
    */
 
-  *ticks = (int)((relnsec + NSEC_PER_TICK - 1) / NSEC_PER_TICK);
+  *ticks = (ssystime_t)((relnsec + NSEC_PER_TICK - 1) / NSEC_PER_TICK);
   return OK;
 #else
   int32_t relusec;
@@ -110,7 +111,7 @@ int clock_time2ticks(FAR const struct timespec *reltime, FAR int *ticks)
    * that is greater than or equal to the exact number of tick.
    */
 
-  *ticks = (int)((relusec + USEC_PER_TICK - 1) / USEC_PER_TICK);
+  *ticks = (ssystime_t)((relusec + USEC_PER_TICK - 1) / USEC_PER_TICK);
   return OK;
 #endif
 }
