@@ -1618,6 +1618,8 @@ static int mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio, bool state,
 
 static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
 {
+  FAR struct iob_s *iob;
+  struct ieee802154_txdesc_s rxdesc;
   uint32_t addr;
   uint32_t index;
   uint8_t  reg;
@@ -1634,25 +1636,46 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
 
   mrf24j40_setreg(dev->spi, MRF24J40_BBREG1, MRF24J40_BBREG1_RXDECINV);
 
+
+  /* Allocate an IOB to put the packet in */
+
+  iob = iob_alloc(true);
+  DEBUGASSERT(iob != NULL);
+
+  iob->io_flink  = NULL;
+  iob->io_len    = 0;
+  iob->io_offset = 0;
+  iob->io_pktlen = 0;
+
   /* Read packet */
 
   addr = MRF24J40_RXBUF_BASE;
-  dev->radio.rxbuf->len = mrf24j40_getreg(dev->spi, addr++);
+
+  iob->io_len= mrf24j40_getreg(dev->spi, addr++);
   /* wlinfo("len %3d\n", dev->radio.rxbuf->len); */
 
-  for (index = 0; index < dev->radio.rxbuf->len; index++)
+  /* TODO: This needs to be changed.  It is inefficient to do the SPI read byte
+   * by byte */
+
+  for (index = 0; index < iob->io_len; index++)
     {
-      dev->radio.rxbuf->data[index] = mrf24j40_getreg(dev->spi, addr++);
+      iob->io_data[index] = mrf24j40_getreg(dev->spi, addr++);
     }
 
-  dev->radio.rxbuf->lqi  = mrf24j40_getreg(dev->spi, addr++);
-  dev->radio.rxbuf->rssi = mrf24j40_getreg(dev->spi, addr++);
+  /* Copy meta-data into RX descriptor */
+
+  rxdesc.lqi  = mrf24j40_getreg(dev->spi, addr++);
+  rxdesc.rssi = mrf24j40_getreg(dev->spi, addr++);
 
   /* Reduce len by 2, we only receive frames with correct crc, no check
    * required.
    */
 
-  dev->radio.rxbuf->len -= 2;
+  iob->io_len -= 2;
+
+  /* Callback the receiver in the next highest layer */
+
+  dev->radiocb->rx_frame(dev->radiocb, &rxdesc, iob);
 
   /* Enable reception of next packet by flushing the fifo.
    * This is an MRF24J40 errata (no. 1).
@@ -1664,7 +1687,6 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
 
   mrf24j40_setreg(dev->spi, MRF24J40_BBREG1, 0);
 
-  sem_post(&dev->radio.rxsem);
 }
 
 /****************************************************************************

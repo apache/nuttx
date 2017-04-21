@@ -168,6 +168,12 @@ struct ieee802154_txdesc_s
   /* TODO: Add slotting information for GTS transactions */
 };
 
+struct ieee802154_rxdesc_s
+{
+  uint8_t lqi;
+  uint8_t rssi;
+};
+
 struct ieee802154_radiocb_s
 {
   CODE int (*poll_csma) (FAR struct ieee802154_radiocb_s *radiocb,
@@ -178,6 +184,9 @@ struct ieee802154_radiocb_s
              FAR const struct ieee802154_txdesc_s *tx_desc);
   CODE int (*txdone_gts) (FAR struct ieee802154_radiocb_s *radiocb,
              FAR const struct ieee802154_txdesc_s *tx_desc);
+  CODE int (*rx_frame) (FAR struct ieee802154_radiocb_s *radiocb,
+             FAR const struct ieee8021254_rxdesc_s *rx_desc,
+             FAR struct iob_s *frame);
 };
 
 struct ieee802154_radio_s; /* Forward reference */
@@ -197,13 +206,6 @@ struct ieee802154_radioops_s
 struct ieee802154_radio_s
 {
   FAR const struct ieee802154_radioops_s *ops;
-
-  /* Packet reception management */
-
-  struct ieee802154_packet_s *rxbuf; /* packet reception buffer, filled by
-                                      * rx interrupt, NULL if rx not enabled */
-  sem_t rxsem;                       /* Semaphore posted after reception of
-                                      * a packet */
 };
 
 #ifdef __cplusplus

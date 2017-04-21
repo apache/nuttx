@@ -77,7 +77,7 @@
  */
 
 #if CONFIG_NET_6LOWPAN_MTU > (CONFIG_IOB_BUFSIZE * CONFIG_IOB_NBUFFERS)
-#  error Not enough IOBs to hold one full IEEE802.14.5 packet
+#  error Not enough IOBs to hold one full 6LoWPAN packet
 #endif
 
 /****************************************************************************
