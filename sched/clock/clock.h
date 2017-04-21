@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/clock/clock.h
  *
- *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,6 +81,10 @@ extern volatile uint32_t g_system_timer;
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
 extern struct timespec   g_basetime;
+
+#ifdef CONFIG_CLOCK_MONOTONIC
+extern struct timespec   g_monotonic_basetime;
+#endif
 #endif
 
 /****************************************************************************

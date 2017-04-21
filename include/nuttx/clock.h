@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/clock.h
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2014, 2016 Gregory Nutt.
+ *   Copyright (C) 2007-2009, 2011-2012, 2014, 2016-2017 Gregory Nutt.
              All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -50,6 +50,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 /* Efficient, direct access to OS global timer variables will be supported
  * if the execution environment has direct access to kernel global data.
@@ -71,12 +72,12 @@
    /* Case 1: There is no global timer data */
 
 #elif defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)
-     /* Case 3: Kernel mode of protected kernel build */
+   /* Case 3: Kernel mode of protected kernel build */
 
 #    define __HAVE_KERNEL_GLOBALS 1
 
 #elif defined(CONFIG_BUILD_KERNEL) && defined(__KERNEL__)
-     /* Case 3: Kernel only build */
+   /* Case 3: Kernel only build */
 
 #    define __HAVE_KERNEL_GLOBALS 1
 
@@ -259,6 +260,37 @@ EXTERN volatile systime_t g_system_timer;
 
 #ifdef CONFIG_RTC
 void clock_synchronize(void);
+#endif
+
+/****************************************************************************
+ * Name: clock_resynchronize
+ *
+ * Description:
+ *   Resynchronize the system timer to a hardware RTC.  The user can
+ *   explicitly re-synchronize the system timer to the RTC under certain
+ *   conditions where the system timer is known to be in error.  For example,
+ *   in certain low-power states, the system timer may be stopped but the
+ *   RTC will continue keep correct time.  After recovering from such
+ *   low-power state, this function should be called to restore the correct
+ *   system time. Function also keeps monotonic clock at rate of RTC.
+ *
+ *   Calling this function will not result in system time going "backward" in
+ *   time. If setting system time with RTC would result time going "backward"
+ *   then resynchronization is not performed.
+ *
+ * Parameters:
+ *   diff:  amount of time system-time is adjusted forward with RTC
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_RTC) && !defined(CONFIG_SCHED_TICKLESS) && \
+    !defined(CONFIG_CLOCK_TIMEKEEPING)
+void clock_resynchronize(FAR struct timespec *rtc_diff);
 #endif
 
 /****************************************************************************
