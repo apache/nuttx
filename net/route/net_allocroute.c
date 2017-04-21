@@ -93,7 +93,7 @@ static struct net_route_ipv6_s g_preallocroutes_ipv6[CONFIG_NET_MAXROUTES];
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_initroute
+ * Name: net_initroute
  *
  * Description:
  *   Initialize to the routing table
@@ -143,7 +143,7 @@ void net_initroute(void)
 }
 
 /****************************************************************************
- * Function: net_allocroute
+ * Name: net_allocroute
  *
  * Description:
  *   Allocate one route by removing it from the free list
@@ -196,7 +196,7 @@ FAR struct net_route_ipv6_s *net_allocroute_ipv6(void)
 #endif
 
 /****************************************************************************
- * Function: net_freeroute
+ * Name: net_freeroute
  *
  * Description:
  *   Free one route by adding it from the free list

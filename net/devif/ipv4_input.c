@@ -140,7 +140,7 @@ static uint8_t g_reassembly_flags;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: devif_reassembly
+ * Name: devif_reassembly
  *
  * Description:
  *   IP fragment reassembly: not well-tested.
@@ -302,7 +302,7 @@ nullreturn:
  ****************************************************************************/
 
 /****************************************************************************
- * Function: ipv4_input
+ * Name: ipv4_input
  *
  * Description:
  *

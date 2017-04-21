@@ -244,7 +244,7 @@ static void ftmac100_ipv6multicast(FAR struct ftmac100_driver_s *priv);
  ****************************************************************************/
 
 /****************************************************************************
- * Function: ftmac100_transmit
+ * Name: ftmac100_transmit
  *
  * Description:
  *   Start hardware transmission.  Called either from the txdone interrupt
@@ -331,7 +331,7 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: ftmac100_txpoll
+ * Name: ftmac100_txpoll
  *
  * Description:
  *   The transmitter is available, check if the network has any outgoing packets
@@ -405,7 +405,7 @@ static int ftmac100_txpoll(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: ftmac100_reset
+ * Name: ftmac100_reset
  *
  * Description:
  *   Do the HW reset
@@ -434,7 +434,7 @@ static void ftmac100_reset(FAR struct ftmac100_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: ftmac100_init
+ * Name: ftmac100_init
  *
  * Description:
  *   Perform HW initialization
@@ -542,7 +542,7 @@ static void ftmac100_init(FAR struct ftmac100_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: ftmac100_mdio_read
+ * Name: ftmac100_mdio_read
  *
  * Description:
  *   Read MII registers
@@ -583,7 +583,7 @@ static uint32_t ftmac100_mdio_read(FAR struct ftmac100_register_s *iobase, int r
 }
 
 /****************************************************************************
- * Function: ftmac100_set_mac
+ * Name: ftmac100_set_mac
  *
  * Description:
  *   Set the MAC address
@@ -613,7 +613,7 @@ static void ftmac100_set_mac(FAR struct ftmac100_driver_s *priv,
 }
 
 /****************************************************************************
- * Function: ftmac100_receive
+ * Name: ftmac100_receive
  *
  * Description:
  *   An interrupt was received indicating the availability of a new RX packet
@@ -787,7 +787,7 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: ftmac100_txdone
+ * Name: ftmac100_txdone
  *
  * Description:
  *   An interrupt was received indicating that the last TX packet(s) is done
@@ -850,7 +850,7 @@ static void ftmac100_txdone(FAR struct ftmac100_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: ftmac100_interrupt_work
+ * Name: ftmac100_interrupt_work
  *
  * Description:
  *   Perform interrupt related work from the worker thread
@@ -954,7 +954,7 @@ out:
 }
 
 /****************************************************************************
- * Function: ftmac100_interrupt
+ * Name: ftmac100_interrupt
  *
  * Description:
  *   Hardware interrupt handler
@@ -1009,7 +1009,7 @@ static int ftmac100_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 
 /****************************************************************************
- * Function: ftmac100_txtimeout_work
+ * Name: ftmac100_txtimeout_work
  *
  * Description:
  *   Perform TX timeout related work from the worker thread
@@ -1042,7 +1042,7 @@ static void ftmac100_txtimeout_work(FAR void *arg)
 }
 
 /****************************************************************************
- * Function: ftmac100_txtimeout_expiry
+ * Name: ftmac100_txtimeout_expiry
  *
  * Description:
  *   Our TX watchdog timed out.  Called from the timer interrupt handler.
@@ -1077,7 +1077,7 @@ static void ftmac100_txtimeout_expiry(int argc, uint32_t arg, ...)
 }
 
 /****************************************************************************
- * Function: ftmac100_poll_work
+ * Name: ftmac100_poll_work
  *
  * Description:
  *   Perform periodic polling from the worker thread
@@ -1120,7 +1120,7 @@ static void ftmac100_poll_work(FAR void *arg)
 }
 
 /****************************************************************************
- * Function: ftmac100_poll_expiry
+ * Name: ftmac100_poll_expiry
  *
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
@@ -1147,7 +1147,7 @@ static void ftmac100_poll_expiry(int argc, uint32_t arg, ...)
 }
 
 /****************************************************************************
- * Function: ftmac100_ifup
+ * Name: ftmac100_ifup
  *
  * Description:
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
@@ -1208,7 +1208,7 @@ static int ftmac100_ifup(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: ftmac100_ifdown
+ * Name: ftmac100_ifdown
  *
  * Description:
  *   NuttX Callback: Stop the interface.
@@ -1254,7 +1254,7 @@ static int ftmac100_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: ftmac100_txavail_work
+ * Name: ftmac100_txavail_work
  *
  * Description:
  *   Perform an out-of-cycle poll on the worker thread.
@@ -1293,7 +1293,7 @@ static void ftmac100_txavail_work(FAR void *arg)
 }
 
 /****************************************************************************
- * Function: ftmac100_txavail
+ * Name: ftmac100_txavail
  *
  * Description:
  *   Driver callback invoked when new TX data is available.  This is a
@@ -1331,7 +1331,7 @@ static int ftmac100_txavail(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: ftmac100_addmac
+ * Name: ftmac100_addmac
  *
  * Description:
  *   NuttX Callback: Add the specified MAC address to the hardware multicast
@@ -1385,7 +1385,7 @@ static int ftmac100_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
- * Function: ftmac100_rmmac
+ * Name: ftmac100_rmmac
  *
  * Description:
  *   NuttX Callback: Remove the specified MAC address from the hardware multicast
@@ -1430,7 +1430,7 @@ static int ftmac100_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
- * Function: ftmac100_ipv6multicast
+ * Name: ftmac100_ipv6multicast
  *
  * Description:
  *   Configure the IPv6 multicast MAC address.
@@ -1507,7 +1507,7 @@ static void ftmac100_ipv6multicast(FAR struct ftmac100_driver_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: ftmac100_initialize
+ * Name: ftmac100_initialize
  *
  * Description:
  *   Initialize the Ethernet controller and driver

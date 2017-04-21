@@ -70,7 +70,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_pollsetup
+ * Name: net_pollsetup
  *
  * Description:
  *   Setup to monitor events on one socket
@@ -138,7 +138,7 @@ static inline int net_pollsetup(FAR struct socket *psock,
 }
 
 /****************************************************************************
- * Function: net_pollteardown
+ * Name: net_pollteardown
  *
  * Description:
  *   Teardown monitoring of events on an socket
@@ -211,7 +211,7 @@ static inline int net_pollteardown(FAR struct socket *psock,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_poll
+ * Name: psock_poll
  *
  * Description:
  *   The standard poll() operation redirects operations on socket descriptors
@@ -264,7 +264,7 @@ int psock_poll(FAR struct socket *psock, FAR struct pollfd *fds, bool setup)
 }
 
 /****************************************************************************
- * Function: net_poll
+ * Name: net_poll
  *
  * Description:
  *   The standard poll() operation redirects operations on socket descriptors

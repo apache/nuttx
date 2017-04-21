@@ -74,7 +74,7 @@ struct accept_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: accept_tcpsender
+ * Name: accept_tcpsender
  *
  * Description:
  *   Get the sender's address from the UDP packet
@@ -145,7 +145,7 @@ static inline void accept_tcpsender(FAR struct socket *psock,
 #endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
- * Function: accept_interrupt
+ * Name: accept_interrupt
  *
  * Description:
  *   Receive interrupt level callbacks when connections occur
@@ -203,7 +203,7 @@ static int accept_interrupt(FAR struct tcp_conn_s *listener,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: tcp_accept
+ * Name: tcp_accept
  *
  * Description:
  *   This function implements accept() for TCP/IP sockets.  See the

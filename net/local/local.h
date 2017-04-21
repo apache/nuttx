@@ -321,7 +321,7 @@ int local_release(FAR struct local_conn_s *conn);
 int local_listen(FAR struct local_conn_s *server, int backlog);
 
 /****************************************************************************
- * Function: psock_local_accept
+ * Name: psock_local_accept
  *
  * Description:
  *   This function implements accept() for Unix domain sockets.  See the
@@ -371,7 +371,7 @@ ssize_t psock_local_send(FAR struct socket *psock, FAR const void *buf,
 #endif
 
 /****************************************************************************
- * Function: psock_local_sendto
+ * Name: psock_local_sendto
  *
  * Description:
  *   This function implements the Unix domain-specific logic of the
@@ -421,7 +421,7 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
 int local_send_packet(int fd, FAR const uint8_t *buf, size_t len);
 
 /****************************************************************************
- * Function: psock_recvfrom
+ * Name: psock_recvfrom
  *
  * Description:
  *   recvfrom() receives messages from a local socket, and may be used to
@@ -646,7 +646,7 @@ void local_accept_pollnotify(FAR struct local_conn_s *conn,
 #endif
 
 /****************************************************************************
- * Function: local_pollsetup
+ * Name: local_pollsetup
  *
  * Description:
  *   Setup to monitor events on one Unix domain socket
@@ -666,7 +666,7 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
 #endif
 
 /****************************************************************************
- * Function: local_pollteardown
+ * Name: local_pollteardown
  *
  * Description:
  *   Teardown monitoring of events on a Unix domain socket

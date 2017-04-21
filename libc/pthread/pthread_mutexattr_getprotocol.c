@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: pthread_mutexattr_getprotocol
+ * Name: pthread_mutexattr_getprotocol
  *
  * Description:
  *    Return the value of the mutex protocol attribute.

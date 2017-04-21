@@ -189,7 +189,7 @@ static int do_sendto_request(FAR struct usrsock_conn_s *conn,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: usrsock_sendto
+ * Name: usrsock_sendto
  *
  * Description:
  *   If sendto() is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)

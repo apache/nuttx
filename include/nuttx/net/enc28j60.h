@@ -108,7 +108,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Function: enc_initialize
+ * Name: enc_initialize
  *
  * Description:
  *   Initialize the Ethernet driver.  The ENC28J60 device is assumed to be

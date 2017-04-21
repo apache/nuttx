@@ -70,7 +70,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_unregister
+ * Name: netdev_unregister
  *
  * Description:
  *   Unregister a network device driver.

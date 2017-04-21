@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_listen
+ * Name: psock_listen
  *
  * Description:
  *   To accept connections, a socket is first created with psock_socket(), a
@@ -168,7 +168,7 @@ errout:
 }
 
 /****************************************************************************
- * Function: listen
+ * Name: listen
  *
  * Description:
  *   To accept connections, a socket is first created with socket(), a

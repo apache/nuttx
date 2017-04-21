@@ -217,7 +217,7 @@ struct ftmac100_rxdes_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: ftmac100_initialize
+ * Name: ftmac100_initialize
  *
  * Description:
  *   Initialize the Ethernet controller and driver

@@ -60,7 +60,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_setsockopt
+ * Name: psock_setsockopt
  *
  * Description:
  *   psock_setsockopt() sets the option specified by the 'option' argument,
@@ -315,7 +315,7 @@ errout:
 }
 
 /****************************************************************************
- * Function: setsockopt
+ * Name: setsockopt
  *
  * Description:
  *   setsockopt() sets the option specified by the 'option' argument,

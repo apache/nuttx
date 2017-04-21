@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: pthread_mutexattr_setrobust
+ * Name: pthread_mutexattr_setrobust
  *
  * Description:
  *   Set the mutex robustness in the mutex attributes.

@@ -50,7 +50,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_setschedpolicy
+ * Name:  pthread_attr_setschedpolicy
  *
  * Description:
  *   Set the scheduling algorithm attribute.

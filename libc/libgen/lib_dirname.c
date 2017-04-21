@@ -53,7 +53,7 @@ static char g_retchar[2];
  ****************************************************************************/
 
 /****************************************************************************
- * Function: dirname
+ * Name: dirname
  *
  * Description:
  *   dirname() extracts the directory component from a null-terminated

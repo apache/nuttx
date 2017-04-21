@@ -91,7 +91,7 @@ struct tcp_close_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: close_timeout
+ * Name: close_timeout
  *
  * Description:
  *   Check for a timeout on a lingering close.
@@ -136,7 +136,7 @@ static inline int close_timeout(FAR struct tcp_close_s *pstate)
 #endif /* NET_TCP_HAVE_STACK && CONFIG_NET_SOLINGER */
 
 /****************************************************************************
- * Function: netclose_interrupt
+ * Name: netclose_interrupt
  *
  * Description:
  *   Handle network callback events.
@@ -260,7 +260,7 @@ end_wait:
 #endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
- * Function: netclose_txnotify
+ * Name: netclose_txnotify
  *
  * Description:
  *   Notify the appropriate device driver that we are have data ready to
@@ -317,7 +317,7 @@ static inline void netclose_txnotify(FAR struct socket *psock,
 #endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
- * Function: netclose_disconnect
+ * Name: netclose_disconnect
  *
  * Description:
  *   Break any current TCP connection
@@ -455,7 +455,7 @@ static inline int netclose_disconnect(FAR struct socket *psock)
 #endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
- * Function: local_close
+ * Name: local_close
  *
  * Description:
  *   Performs the close operation on a local socket instance
@@ -498,7 +498,7 @@ static void local_close(FAR struct socket *psock)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_close
+ * Name: psock_close
  *
  * Description:
  *   Performs the close operation on a socket instance
@@ -733,7 +733,7 @@ errout:
 }
 
 /****************************************************************************
- * Function: net_close
+ * Name: net_close
  *
  * Description:
  *   Performs the close operation on socket descriptors

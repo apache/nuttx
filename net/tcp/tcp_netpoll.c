@@ -69,7 +69,7 @@ struct tcp_poll_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: tcp_poll_interrupt
+ * Name: tcp_poll_interrupt
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -144,7 +144,7 @@ static uint16_t tcp_poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: tcp_pollsetup
+ * Name: tcp_pollsetup
  *
  * Description:
  *   Setup to monitor events on one TCP/IP socket
@@ -305,7 +305,7 @@ errout_with_lock:
 }
 
 /****************************************************************************
- * Function: tcp_pollteardown
+ * Name: tcp_pollteardown
  *
  * Description:
  *   Teardown monitoring of events on an TCP/IP socket

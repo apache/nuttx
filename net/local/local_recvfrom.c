@@ -120,7 +120,7 @@ static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
 }
 
 /****************************************************************************
- * Function: psock_stream_recvfrom
+ * Name: psock_stream_recvfrom
  *
  * Description:
  *   psock_stream_recvfrom() receives messages from a local stream socket.
@@ -216,7 +216,7 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 #endif /* CONFIG_NET_LOCAL_STREAM */
 
 /****************************************************************************
- * Function: psock_dgram_recvfrom
+ * Name: psock_dgram_recvfrom
  *
  * Description:
  *   psock_dgram_recvfrom() receives messages from a local datagram socket.
@@ -387,7 +387,7 @@ errout_with_halfduplex:
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_local_recvfrom
+ * Name: psock_local_recvfrom
  *
  * Description:
  *   psock_local_recvfrom() receives messages from a local socket and may be

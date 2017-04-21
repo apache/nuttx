@@ -127,7 +127,7 @@ static int do_close_request(FAR struct usrsock_conn_s *conn)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: usrsock_close
+ * Name: usrsock_close
  *
  * Description:
  *

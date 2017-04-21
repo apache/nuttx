@@ -651,7 +651,7 @@ int up_fbinitialize(int display)
 }
 
 /****************************************************************************
- * Function: vnc_fbinitialize
+ * Name: vnc_fbinitialize
  *
  * Description:
  *   Initialize the VNC frame buffer driver.  The VNC frame buffer driver

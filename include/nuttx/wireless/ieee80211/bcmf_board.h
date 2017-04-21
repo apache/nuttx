@@ -59,7 +59,7 @@ extern "C"
  ****************************************************************************/
 
 /************************************************************************************
- * Function: bcmf_board_initialize
+ * Name: bcmf_board_initialize
  *
  * Description:
  *   Board specific function called from Broadcom FullMAC driver
@@ -73,7 +73,7 @@ extern "C"
 void bcmf_board_initialize(int minor);
 
 /************************************************************************************
- * Function: bcmf_board_power
+ * Name: bcmf_board_power
  *
  * Description:
  *   Board specific function called from Broadcom FullMAC driver
@@ -88,7 +88,7 @@ void bcmf_board_initialize(int minor);
 void bcmf_board_power(int minor, bool power);
 
 /************************************************************************************
- * Function: bcmf_board_reset
+ * Name: bcmf_board_reset
  *
  * Description:
  *   Board specific function called from Broadcom FullMAC driver

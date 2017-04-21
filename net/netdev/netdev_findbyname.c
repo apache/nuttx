@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_findbyname
+ * Name: netdev_findbyname
  *
  * Description:
  *   Find a previously registered network device using its assigned

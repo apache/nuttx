@@ -103,7 +103,7 @@ static const char * const g_monthname[12] =
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  strftime
+ * Name:  strftime
  *
  * Description:
  *   The  strftime()  function  formats the broken-down time tm according to

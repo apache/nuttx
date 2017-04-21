@@ -103,7 +103,7 @@ struct net_driver_s *g_netdevices = NULL;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: find_devnum
+ * Name: find_devnum
  *
  * Description:
  *   Given a device name format string, find the next device number for the
@@ -156,7 +156,7 @@ static int find_devnum(FAR const char *devfmt)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_register
+ * Name: netdev_register
  *
  * Description:
  *   Register a network device driver and assign a name to it so that it can

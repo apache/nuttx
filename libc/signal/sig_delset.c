@@ -45,7 +45,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sigdelset
+ * Name: sigdelset
  *
  * Description:
  *   This function deletes the signal specified by signo from the signal

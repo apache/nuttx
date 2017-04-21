@@ -108,7 +108,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Function: enc_initialize
+ * Name: enc_initialize
  *
  * Description:
  *   Initialize the Ethernet driver.  The ENCX24J600 device is assumed to be

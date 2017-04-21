@@ -77,7 +77,7 @@ struct net_driver_s;      /* Forward reference */
 struct timeval;           /* Forward reference */
 
 /****************************************************************************
- * Function: net_lockinitialize
+ * Name: net_lockinitialize
  *
  * Description:
  *   Initialize the locking facility
@@ -87,7 +87,7 @@ struct timeval;           /* Forward reference */
 void net_lockinitialize(void);
 
 /****************************************************************************
- * Function: net_dsec2timeval
+ * Name: net_dsec2timeval
  *
  * Description:
  *   Convert a decisecond value to a struct timeval.  Needed by getsockopt()
@@ -107,7 +107,7 @@ void net_lockinitialize(void);
 void net_dsec2timeval(uint16_t dsec, FAR struct timeval *tv);
 
 /****************************************************************************
- * Function: net_dsec2tick
+ * Name: net_dsec2tick
  *
  * Description:
  *   Convert a decisecond value to a system clock ticks.  Used by IGMP logic.
@@ -123,7 +123,7 @@ void net_dsec2timeval(uint16_t dsec, FAR struct timeval *tv);
 unsigned int net_dsec2tick(int dsec);
 
 /****************************************************************************
- * Function: net_timeval2dsec
+ * Name: net_timeval2dsec
  *
  * Description:
  *   Convert a struct timeval to deciseconds.  Needed by setsockopt() to
@@ -172,7 +172,7 @@ uint8_t net_ipv6_mask2pref(FAR const uint16_t *mask);
 #endif
 
 /****************************************************************************
- * Function: net_ipv6_pref2mask
+ * Name: net_ipv6_pref2mask
  *
  * Description:
  *   Convert a IPv6 prefix length to a network mask.  The prefix length

@@ -67,7 +67,7 @@ static const char * const g_mon_name[12] =
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  asctime_r
+ * Name:  asctime_r
  *
  * Description:
  *   asctime and asctime_r convert the time provided in a struct tm to a

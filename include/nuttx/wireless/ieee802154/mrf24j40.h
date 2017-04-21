@@ -82,7 +82,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Function: mrf24j40_init
+ * Name: mrf24j40_init
  *
  * Description:
  *   Initialize the IEEE802.15.4 driver.  The MRF24J40 device is assumed to be

@@ -64,7 +64,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: get_ipv4_sockname
+ * Name: get_ipv4_sockname
  *
  * Description:
  *   The getsockname() function retrieves the locally-bound name of the
@@ -187,7 +187,7 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 #endif
 
 /****************************************************************************
- * Function: ipv6_getsockname
+ * Name: ipv6_getsockname
  *
  * Description:
  *   The getsockname() function retrieves the locally-bound name of the
@@ -314,7 +314,7 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: getsockname
+ * Name: getsockname
  *
  * Description:
  *   The getsockname() function retrieves the locally-bound name of the

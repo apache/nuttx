@@ -49,7 +49,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_addroute
+ * Name: net_addroute
  *
  * Description:
  *   Add a new route to the routing table.  This is just a convenience

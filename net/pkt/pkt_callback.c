@@ -54,7 +54,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: pkt_callback
+ * Name: pkt_callback
  *
  * Description:
  *   Inform the application holding the packet socket of a change in state.

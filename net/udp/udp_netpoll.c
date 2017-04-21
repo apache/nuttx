@@ -69,7 +69,7 @@ struct udp_poll_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: udp_poll_interrupt
+ * Name: udp_poll_interrupt
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -141,7 +141,7 @@ static uint16_t udp_poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: udp_pollsetup
+ * Name: udp_pollsetup
  *
  * Description:
  *   Setup to monitor events on one UDP/IP socket
@@ -271,7 +271,7 @@ errout_with_lock:
 }
 
 /****************************************************************************
- * Function: udp_pollteardown
+ * Name: udp_pollteardown
  *
  * Description:
  *   Teardown monitoring of events on an UDP/IP socket

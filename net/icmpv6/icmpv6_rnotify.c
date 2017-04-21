@@ -79,7 +79,7 @@ static struct icmpv6_rnotify_s *g_icmpv6_rwaiters;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: icmpv6_setaddresses
+ * Name: icmpv6_setaddresses
  *
  * Description:
  *   We successfully obtained the Router Advertisement.  See the new IPv6
@@ -143,7 +143,7 @@ static void icmpv6_setaddresses(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: icmpv6_rwait_setup
+ * Name: icmpv6_rwait_setup
  *
  * Description:
  *   Called BEFORE an Router Solicitation is sent.  This function sets up
@@ -204,7 +204,7 @@ void icmpv6_rwait_setup(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
- * Function: icmpv6_rwait_cancel
+ * Name: icmpv6_rwait_cancel
  *
  * Description:
  *   Cancel any wait set after icmpv6_rwait_setup() is called but before
@@ -269,7 +269,7 @@ int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify)
 }
 
 /****************************************************************************
- * Function: icmpv6_rwait
+ * Name: icmpv6_rwait
  *
  * Description:
  *   Called each time that a Router Solicitation is sent.  This function
@@ -326,7 +326,7 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
 }
 
 /****************************************************************************
- * Function: icmpv6_rnotify
+ * Name: icmpv6_rnotify
  *
  * Description:
  *   Called each time that a Router Advertisement is received in order to

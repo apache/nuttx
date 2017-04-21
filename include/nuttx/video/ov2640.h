@@ -63,7 +63,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Function: ov2640_initialize
+ * Name: ov2640_initialize
  *
  * Description:
  *   Initialize the OV2640 camera.

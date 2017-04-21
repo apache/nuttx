@@ -54,7 +54,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: tcp_ipv4_select
+ * Name: tcp_ipv4_select
  *
  * Description:
  *   Configure to send or receive an TCP IPv4 packet
@@ -75,7 +75,7 @@ void tcp_ipv4_select(FAR struct net_driver_s *dev)
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Function: tcp_ipv6_select
+ * Name: tcp_ipv6_select
  *
  * Description:
  *   Configure to send or receive an TCP IPv6 packet

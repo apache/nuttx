@@ -168,7 +168,7 @@ static void setup_conn_getsockname(FAR struct usrsock_conn_s *conn,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: usrsock_getsockname
+ * Name: usrsock_getsockname
  *
  * Description:
  *   The getsockname() function retrieves the locally-bound name of the

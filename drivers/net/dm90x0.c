@@ -419,7 +419,7 @@ static void dm9x_reset(struct dm9x_driver_s *priv);
  ****************************************************************************/
 
 /****************************************************************************
- * Function: getreg and setreg
+ * Name: getreg and setreg
  *
  * Description:
  *   Access to memory-mapped DM90x0 8-bit registers
@@ -448,7 +448,7 @@ static void putreg(int reg, uint8_t value)
 }
 
 /****************************************************************************
- * Function: read8, read16, read32
+ * Name: read8, read16, read32
  *
  * Description:
  *   Read packet data from the DM90x0 SRAM based on its current I/O mode
@@ -496,7 +496,7 @@ static void read32(FAR uint8_t *ptr, int len)
 }
 
 /****************************************************************************
- * Function: discard8, discard16, discard32
+ * Name: discard8, discard16, discard32
  *
  * Description:
  *   Read and discard packet data in the DM90x0 SRAM based on its current
@@ -540,7 +540,7 @@ static void discard32(int len)
 }
 
 /****************************************************************************
- * Function: write8, write16, write32
+ * Name: write8, write16, write32
  *
  * Description:
  *   Write packet data into the DM90x0 SRAM based on its current I/O mode
@@ -591,7 +591,7 @@ static void write32(FAR const uint8_t *ptr, int len)
 }
 
 /****************************************************************************
- * Function: dm9x_readsrom
+ * Name: dm9x_readsrom
  *
  * Description:
  *   Read a word from SROM
@@ -619,7 +619,7 @@ static uint16_t dm9x_readsrom(struct dm9x_driver_s *priv, int offset)
 #endif
 
 /****************************************************************************
- * Function: dm9x_phyread and dm9x_phywrite
+ * Name: dm9x_phyread and dm9x_phywrite
  *
  * Description:
  *   Read/write data from/to the PHY
@@ -672,7 +672,7 @@ static void dm9x_phywrite(struct dm9x_driver_s *priv, int reg, uint16_t value)
 }
 
 /****************************************************************************
- * Function: dm9x_rxchecksumready
+ * Name: dm9x_rxchecksumready
  *
  * Description:
  *   Return true if the RX checksum is available
@@ -700,7 +700,7 @@ static inline bool dm9x_rxchecksumready(uint8_t rxbyte)
 #endif
 
 /****************************************************************************
- * Function: dm9x_transmit
+ * Name: dm9x_transmit
  *
  * Description:
  *   Start hardware transmission.  Called either from the txdone interrupt
@@ -767,7 +767,7 @@ static int dm9x_transmit(struct dm9x_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: dm9x_txpoll
+ * Name: dm9x_txpoll
  *
  * Description:
  *   The transmitter is available, check if the network has any outgoing packets ready
@@ -843,7 +843,7 @@ static int dm9x_txpoll(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: dm9x_receive
+ * Name: dm9x_receive
  *
  * Description:
  *   An interrupt was received indicating the availability of a new RX packet
@@ -1041,7 +1041,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: dm9x_txdone
+ * Name: dm9x_txdone
  *
  * Description:
  *   An interrupt was received indicating that the last TX packet(s) is done
@@ -1104,7 +1104,7 @@ static void dm9x_txdone(struct dm9x_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: dm9x_interrupt_work
+ * Name: dm9x_interrupt_work
  *
  * Description:
  *   Perform interrupt related work from the worker thread
@@ -1223,7 +1223,7 @@ static void dm9x_interrupt_work(FAR void *arg)
 }
 
 /****************************************************************************
- * Function: dm9x_interrupt
+ * Name: dm9x_interrupt
  *
  * Description:
  *   Hardware interrupt handler
@@ -1275,7 +1275,7 @@ static int dm9x_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 
 /****************************************************************************
- * Function: dm9x_txtimeout_work
+ * Name: dm9x_txtimeout_work
  *
  * Description:
  *   Perform TX timeout related work from the worker thread
@@ -1319,7 +1319,7 @@ static void dm9x_txtimeout_work(FAR void *arg)
 }
 
 /****************************************************************************
- * Function: dm9x_txtimeout_expiry
+ * Name: dm9x_txtimeout_expiry
  *
  * Description:
  *   Our TX watchdog timed out.  Called from the timer interrupt handler.
@@ -1354,7 +1354,7 @@ static void dm9x_txtimeout_expiry(int argc, wdparm_t arg, ...)
 }
 
 /****************************************************************************
- * Function: dm9x_poll_work
+ * Name: dm9x_poll_work
  *
  * Description:
  *   Perform periodic polling from the worker thread
@@ -1407,7 +1407,7 @@ static void dm9x_poll_work(FAR void *arg)
 }
 
 /****************************************************************************
- * Function: dm9x_poll_expiry
+ * Name: dm9x_poll_expiry
  *
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
@@ -1434,7 +1434,7 @@ static void dm9x_poll_expiry(int argc, wdparm_t arg, ...)
 }
 
 /****************************************************************************
- * Function: dm9x_phymode
+ * Name: dm9x_phymode
  *
  * Description:
  *   Configure the PHY operating mode
@@ -1478,7 +1478,7 @@ static inline void dm9x_phymode(struct dm9x_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: dm9x_ifup
+ * Name: dm9x_ifup
  *
  * Description:
  *   NuttX Callback: Bring up the DM90x0 interface when an IP address is
@@ -1545,7 +1545,7 @@ static int dm9x_ifup(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: dm9x_ifdown
+ * Name: dm9x_ifdown
  *
  * Description:
  *   NuttX Callback: Stop the interface.
@@ -1591,7 +1591,7 @@ static int dm9x_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: dm9x_txavail_work
+ * Name: dm9x_txavail_work
  *
  * Description:
  *   Perform an out-of-cycle poll on the worker thread.
@@ -1635,7 +1635,7 @@ static void dm9x_txavail_work(FAR void *arg)
 }
 
 /****************************************************************************
- * Function: dm9x_txavail
+ * Name: dm9x_txavail
  *
  * Description:
  *   Driver callback invoked when new TX data is available.  This is a
@@ -1673,7 +1673,7 @@ static int dm9x_txavail(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: dm9x_addmac
+ * Name: dm9x_addmac
  *
  * Description:
  *   NuttX Callback: Add the specified MAC address to the hardware multicast
@@ -1703,7 +1703,7 @@ static int dm9x_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
- * Function: dm9x_rmmac
+ * Name: dm9x_rmmac
  *
  * Description:
  *   NuttX Callback: Remove the specified MAC address from the hardware multicast
@@ -1733,7 +1733,7 @@ static int dm9x_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
- * Function: dm9x_bringup
+ * Name: dm9x_bringup
  *
  * Description:
  *   Initialize the dm90x0 chip
@@ -1829,7 +1829,7 @@ static void dm9x_bringup(struct dm9x_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: dm9x_reset
+ * Name: dm9x_reset
  *
  * Description:
  *   Stop, reset, re-initialize, and restart the DM90x0 chip and driver.  At
@@ -1886,7 +1886,7 @@ static void dm9x_reset(struct dm9x_driver_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: dm9x_initialize
+ * Name: dm9x_initialize
  *
  * Description:
  *   Initialize the DM90x0 driver

@@ -50,7 +50,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_timeval2dsec
+ * Name: net_timeval2dsec
  *
  * Description:
  *   Convert a struct timeval to deciseconds.  Needed by setsockopt() to

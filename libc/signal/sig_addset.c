@@ -45,7 +45,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sigaddset
+ * Name: sigaddset
  *
  * Description:
  *   This function adds the signal specified by signo to the signal set

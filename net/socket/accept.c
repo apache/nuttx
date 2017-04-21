@@ -61,7 +61,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_accept
+ * Name: psock_accept
  *
  * Description:
  *   The psock_accept function is used with connection-based socket types
@@ -305,7 +305,7 @@ errout:
 }
 
 /****************************************************************************
- * Function: accept
+ * Name: accept
  *
  * Description:
  *   The accept function is used with connection-based socket types

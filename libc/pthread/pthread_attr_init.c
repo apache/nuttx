@@ -66,7 +66,7 @@ const pthread_attr_t g_default_pthread_attr = PTHREAD_ATTR_INITIALIZER;
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_init
+ * Name:  pthread_attr_init
  *
  * Description:
  *   Initializes a thread attributes object (attr) with

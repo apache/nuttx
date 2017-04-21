@@ -245,7 +245,7 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: file_poll
+ * Name: file_poll
  *
  * Description:
  *   Low-level poll operation based on struc file.  This is used both to (1)
@@ -288,7 +288,7 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 #endif
 
 /****************************************************************************
- * Function: fdesc_poll
+ * Name: fdesc_poll
  *
  * Description:
  *   The standard poll() operation redirects operations on file descriptors

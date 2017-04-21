@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_condattr_init
+ * Name:  pthread_condattr_init
  *
  * Description:
  *   Operations on condition variable attributes

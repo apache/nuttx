@@ -616,7 +616,7 @@ uint16_t ipv6_chksum(FAR struct net_driver_s *dev);
 #endif
 
 /****************************************************************************
- * Function: netdev_ipv4_hdrlen
+ * Name: netdev_ipv4_hdrlen
  *
  * Description:
  *    Provide header length for interface based on device
@@ -637,7 +637,7 @@ uint16_t ipv6_chksum(FAR struct net_driver_s *dev);
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Function: netdev_ipv6_hdrlen
+ * Name: netdev_ipv6_hdrlen
  *
  * Description:
  *    Provide header length for interface based on device

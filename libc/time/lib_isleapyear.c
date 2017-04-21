@@ -74,7 +74,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  clock_isleapyear
+ * Name:  clock_isleapyear
  *
  * Description:
  *    Return true if the specified year is a leap year

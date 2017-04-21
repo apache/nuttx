@@ -54,7 +54,7 @@
 #ifdef HAVE_LOCAL_POLL
 
 /****************************************************************************
- * Function: local_accept_pollsetup
+ * Name: local_accept_pollsetup
  ****************************************************************************/
 
 #ifdef CONFIG_NET_LOCAL_STREAM
@@ -160,7 +160,7 @@ void local_accept_pollnotify(FAR struct local_conn_s *conn,
 }
 
 /****************************************************************************
- * Function: local_pollsetup
+ * Name: local_pollsetup
  *
  * Description:
  *   Setup to monitor events on one Unix domain socket
@@ -299,7 +299,7 @@ pollerr:
 }
 
 /****************************************************************************
- * Function: local_pollteardown
+ * Name: local_pollteardown
  *
  * Description:
  *   Teardown monitoring of events on a Unix domain socket

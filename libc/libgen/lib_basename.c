@@ -53,7 +53,7 @@ static char g_retchar[2];
  ****************************************************************************/
 
 /****************************************************************************
- * Function: basename
+ * Name: basename
  *
  * Description:
  *   basename() extracts the filename component from a null-terminated

@@ -86,7 +86,7 @@ void netdev_ifup(FAR struct net_driver_s *dev);
 void netdev_ifdown(FAR struct net_driver_s *dev);
 
 /****************************************************************************
- * Function: netdev_verify
+ * Name: netdev_verify
  *
  * Description:
  *   Verify that the specified device still exists
@@ -99,7 +99,7 @@ void netdev_ifdown(FAR struct net_driver_s *dev);
 bool netdev_verify(FAR struct net_driver_s *dev);
 
 /****************************************************************************
- * Function: netdev_findbyname
+ * Name: netdev_findbyname
  *
  * Description:
  *   Find a previously registered network device using its assigned
@@ -121,7 +121,7 @@ FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname);
 #endif
 
 /****************************************************************************
- * Function: netdev_findby_ipv4addr
+ * Name: netdev_findby_ipv4addr
  *
  * Description:
  *   Find a previously registered network device by matching an arbitrary
@@ -151,7 +151,7 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr);
 #endif
 
 /****************************************************************************
- * Function: netdev_findby_ipv6addr
+ * Name: netdev_findby_ipv6addr
  *
  * Description:
  *   Find a previously registered network device by matching an arbitrary
@@ -181,7 +181,7 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t ripaddr);
 #endif
 
 /****************************************************************************
- * Function: netdev_findbyindex
+ * Name: netdev_findbyindex
  *
  * Description:
  *   Find a previously registered network device by its position in the
@@ -205,7 +205,7 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t ripaddr);
 FAR struct net_driver_s *netdev_findbyindex(int index);
 
 /****************************************************************************
- * Function: netdev_default
+ * Name: netdev_default
  *
  * Description:
  *   Return the default network device.  REVISIT:  At present this function
@@ -233,7 +233,7 @@ FAR struct net_driver_s *netdev_default(void);
 #endif
 
 /****************************************************************************
- * Function: netdev_ipv4_txnotify
+ * Name: netdev_ipv4_txnotify
  *
  * Description:
  *   Notify the device driver that forwards the IPv4 address that new TX
@@ -261,7 +261,7 @@ void netdev_ipv4_txnotify(in_addr_t ripaddr);
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Function: netdev_ipv6_txnotify
+ * Name: netdev_ipv6_txnotify
  *
  * Description:
  *   Notify the device driver that forwards the IPv4 address that new TX
@@ -290,7 +290,7 @@ void netdev_ipv6_txnotify(FAR const net_ipv6addr_t ripaddr);
 #endif /* CONFIG_NSOCKET_DESCRIPTORS > 0 */
 
 /****************************************************************************
- * Function: netdev_txnotify_dev
+ * Name: netdev_txnotify_dev
  *
  * Description:
  *   Notify the device driver that new TX data is available.  This variant
@@ -311,7 +311,7 @@ void netdev_ipv6_txnotify(FAR const net_ipv6addr_t ripaddr);
 void netdev_txnotify_dev(FAR struct net_driver_s *dev);
 
 /****************************************************************************
- * Function: netdev_ipv4_rxnotify
+ * Name: netdev_ipv4_rxnotify
  *
  * Description:
  *   Notify the device driver that forwards the IPv4 address that the
@@ -340,7 +340,7 @@ void netdev_ipv4_rxnotify(in_addr_t ripaddr);
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Function: netdev_ipv6_rxnotify
+ * Name: netdev_ipv6_rxnotify
  *
  * Description:
  *   Notify the device driver that forwards the IPv6 address that the
@@ -386,7 +386,7 @@ void netdev_ipv6_rxnotify(FAR const net_ipv6addr_t ripaddr);
 #endif
 
 /****************************************************************************
- * Function: netdev_count
+ * Name: netdev_count
  *
  * Description:
  *   Return the number of network devices

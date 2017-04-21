@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: arp_poll
+ * Name: arp_poll
  *
  * Description:
  *   Poll all pending transfer for ARP requests to send.

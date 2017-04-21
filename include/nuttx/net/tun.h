@@ -82,7 +82,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Function: tun_initialize
+ * Name: tun_initialize
  *
  * Description:
  *   Instantiate a SLIP network interface.

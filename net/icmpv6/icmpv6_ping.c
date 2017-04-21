@@ -110,7 +110,7 @@ struct icmpv6_ping_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: ping_timeout
+ * Name: ping_timeout
  *
  * Description:
  *   Check for send timeout.
@@ -228,7 +228,7 @@ static void icmpv6_echo_request(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
- * Function: ping_interrupt
+ * Name: ping_interrupt
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual

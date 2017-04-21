@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_mutexattr_init
+ * Name:  pthread_mutexattr_init
  *
  * Description:
  *    Create mutex attributes.
