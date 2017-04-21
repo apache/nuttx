@@ -1327,6 +1327,8 @@ union ieee802154_mcps_notify_u
 
 union ieee802154_macarg_u
 {
+  /* To be determined */                        /* MAC802154IOC_MCPS_REGISTER */
+  /* To be determined */                        /* MAC802154IOC_MLME_REGISTER */
   struct ieee802154_assoc_req_s    assocreq;    /* MAC802154IOC_MLME_ASSOC_REQUEST */
   struct ieee802154_assoc_resp_s   assocresp;   /* MAC802154IOC_MLME_ASSOC_RESPONSE */
   struct ieee802154_disassoc_req_s disassocreq; /* MAC802154IOC_MLME_DISASSOC_REQUEST */
