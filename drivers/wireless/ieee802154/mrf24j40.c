@@ -1520,7 +1520,7 @@ static void mrf24j40_irqwork_txnorm(FAR struct mrf24j40_radio_s *dev)
 
   /* Inform the next layer of the transmission success/failure */
 
-  dev->radiocb->txdone_csma(dev->radiocb, &dev->csma_desc.pub);
+  dev->radiocb->txdone(dev->radiocb, &dev->csma_desc.pub);
 
   /* We are now done with the transaction */
 
@@ -1566,7 +1566,7 @@ static void mrf24j40_irqwork_txgts(FAR struct mrf24j40_radio_s *dev,
 
   /* Inform the next layer of the transmission success/failure */
 
-  dev->radiocb->txdone_gts(dev->radiocb, &dev->gts_desc[gts].pub);
+  dev->radiocb->txdone(dev->radiocb, &dev->gts_desc[gts].pub);
 
   /* We are now done with the transaction */
 
