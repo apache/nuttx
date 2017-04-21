@@ -180,9 +180,7 @@ struct ieee802154_radiocb_s
              FAR struct ieee802154_txdesc_s *tx_desc, FAR uint8_t *buf);
   CODE int (*poll_gts) (FAR struct ieee802154_radiocb_s *radiocb,
              FAR struct ieee802154_txdesc_s *tx_desc, FAR uint8_t *buf);
-  CODE int (*txdone_csma) (FAR struct ieee802154_radiocb_s *radiocb,
-             FAR const struct ieee802154_txdesc_s *tx_desc);
-  CODE int (*txdone_gts) (FAR struct ieee802154_radiocb_s *radiocb,
+  CODE int (*txdone) (FAR struct ieee802154_radiocb_s *radiocb,
              FAR const struct ieee802154_txdesc_s *tx_desc);
   CODE int (*rx_frame) (FAR struct ieee802154_radiocb_s *radiocb,
              FAR const struct ieee8021254_rxdesc_s *rx_desc,
