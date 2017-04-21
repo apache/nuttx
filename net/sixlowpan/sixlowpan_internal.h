@@ -344,7 +344,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
                    uint16_t timeout);
 
 /****************************************************************************
- * Function: sixlowpan_send_hdrlen
+ * Name: sixlowpan_send_hdrlen
  *
  * Description:
  *   This function is before the first frame has been sent in order to
@@ -366,7 +366,7 @@ int sixlowpan_send_hdrlen(FAR struct ieee802154_driver_s *ieee,
                      uint16_t dest_panid);
 
 /****************************************************************************
- * Function: sixlowpan_framecreate
+ * Name: sixlowpan_framecreate
  *
  * Description:
  *   This function is called after the IEEE802.15.4 MAC driver polls for
@@ -606,5 +606,23 @@ void sixlowpan_rimefromip(const net_ipv6addr_t ipaddr,
 bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
                           FAR const struct rimeaddr_s *rime);
 
+/****************************************************************************
+ * Name: sixlowpan_src_panid
+ *
+ * Description:
+ *   Get the source PAN ID from the IEEE802.15.4 radio.
+ *
+ * Input parameters:
+ *   ieee  - A reference IEEE802.15.4 MAC network device structure.
+ *   panid - The location in which to return the PAN ID.  0xfff may be
+ *           returned if the device is not associated.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int sixlowpan_src_panid(FAR struct ieee802154_driver_s *ieee,
+                        FAR uint16_t *panid);
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* _NET_SIXLOWPAN_SIXLOWPAN_INTERNAL_H */

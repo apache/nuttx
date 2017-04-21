@@ -54,6 +54,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/sixlowpan.h>
+#include <nuttx/wireless/ieee802154/ieee802154_radio.h>
 #include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
 
 #include "mac802154.h"
@@ -94,6 +95,7 @@ struct lo_driver_s
 {
   bool lo_bifup;               /* true:ifup false:ifdown */
   bool lo_txdone;              /* One RX packet was looped back */
+  uint16_t lo_panid;           /* Fake PAN ID for testing */
   WDOG_ID lo_polldog;          /* TX poll timer */
   struct work_s lo_work;       /* For deferring poll work to the work queue */
 
@@ -130,6 +132,10 @@ static int lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #ifdef CONFIG_NET_IGMP
 static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
+#endif
+#ifdef CONFIG_NETDEV_IOCTL
+static int  lo_ioctl(FAR struct net_driver_s *dev, int cmd,
+              unsigned long arg);
 #endif
 
 /****************************************************************************
@@ -371,11 +377,11 @@ static int lo_ifup(FAR struct net_driver_s *dev)
          priv->lo_ieee.i_nodeaddr.u8[2], priv->lo_ieee.i_nodeaddr.u8[3],
          priv->lo_ieee.i_nodeaddr.u8[4], priv->lo_ieee.i_nodeaddr.u8[5],
          priv->lo_ieee.i_nodeaddr.u8[6], priv->lo_ieee.i_nodeaddr.u8[7],
-         priv->lo_ieee.i_panid);
+         priv->lo_panid);
 #else
   ninfo("             Node: %02x:%02x PANID=%04x\n",
          priv->lo_ieee.i_nodeaddr.u8[0], priv->lo_ieee.i_nodeaddr.u8[1],
-         priv->lo_ieee.i_panid);
+         priv->lo_panid);
 #endif
 
   /* Set and activate a timer process */
@@ -571,6 +577,74 @@ static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
+ * Name: macnet_ioctl
+ *
+ * Description:
+ *   Handle network IOCTL commands directed to this device.
+ *
+ * Parameters:
+ *   dev - Reference to the NuttX driver state structure
+ *   cmd - The IOCTL command
+ *   arg - The argument for the IOCTL command
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_IOCTL
+static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
+                    unsigned long arg)
+{
+  FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
+  int ret = -ENOTTY;
+
+#if 0
+  /* Check for IOCTLs aimed at the IEEE802.15.4 MAC layer */
+
+  if (_MAC802154IOCVALID(cmd))
+    {
+      FAR struct ieee802154_netmac_s *netmac =
+        (FAR struct ieee802154_netmac_s *)arg;
+    }
+
+  /* No, check for IOCTLs aimed at the IEEE802.15.4 radio layer */
+
+  else
+#endif
+  if (_PHY802154IOCVALID(cmd))
+    {
+      FAR struct ieee802154_netradio_s *netradio =
+        (FAR struct ieee802154_netradio_s *)arg;
+
+      /* Pick out radio settings of interest.  There is, of course, no
+       * radio in this loopback.
+       */
+
+      switch (cmd)
+        {
+           case PHY802154IOC_SET_PANID:
+             priv->lo_panid = netradio->u.panid;
+             ret = OK;
+             break;
+
+           case PHY802154IOC_GET_PANID:
+             netradio->u.panid = priv->lo_panid;
+             ret = OK;
+             break;
+
+           default:
+             break;
+        }
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -612,6 +686,9 @@ int ieee8021514_loopback(void)
 #ifdef CONFIG_NET_IGMP
   dev->d_addmac  = lo_addmac;     /* Add multicast MAC address */
   dev->d_rmmac   = lo_rmmac;      /* Remove multicast MAC address */
+#endif
+#ifdef CONFIG_NETDEV_IOCTL
+  dev->d_ioctl   = lo_ioctl;      /* Handle network IOCTL commands */
 #endif
   dev->d_buf     = g_iobuffer;    /* Attach the IO buffer */
   dev->d_private = (FAR void *)priv; /* Used to recover private state from dev */

@@ -1301,21 +1301,6 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
 {
   int ret;
 
-  /* Check if this is a valid command.  In all cases, arg is a pointer that has
-   * been cast to unsigned long.  Verify that the value of the to-be-pointer is
-   * non-NULL.
-   */
-
-#ifdef CONFIG_DRIVERS_WIRELESS
-  if (!_SIOCVALID(cmd) && !_WLIOCVALID(cmd))
-#else
-  if (!_SIOCVALID(cmd))
-#endif
-    {
-      ret = -ENOTTY;
-      goto errout;
-    }
-
   /* Verify that the psock corresponds to valid, allocated socket */
 
   if (psock == NULL || psock->s_crefs <= 0)

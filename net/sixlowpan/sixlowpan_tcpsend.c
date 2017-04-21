@@ -136,7 +136,7 @@ static uint16_t sixlowpan_tcp_chksum(FAR struct ipv6tcp_hdr_s *ipv6tcp,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_6lowpan_tcp_send
+ * Name: psock_6lowpan_tcp_send
  *
  * Description:
  *   psock_6lowpan_tcp_send() call may be used only when the TCP socket is in a
@@ -348,7 +348,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 }
 
 /****************************************************************************
- * Function: sixlowpan_tcp_send
+ * Name: sixlowpan_tcp_send
  *
  * Description:
  *   TCP output comes through three different mechansims.  Either from:

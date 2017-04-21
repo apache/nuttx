@@ -217,6 +217,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
   struct rimeaddr_s bcastmac;
   uint16_t pktlen;
   uint16_t paysize;
+  uint16_t dest_panid;
 #ifdef CONFIG_NET_6LOWPAN_FRAG
   uint16_t outlen = 0;
 #endif
@@ -286,9 +287,18 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
   rimeaddr_copy(&g_pktaddrs[PACKETBUF_ADDR_SENDER], &ieee->i_nodeaddr);
   rimeaddr_copy(&g_pktaddrs[PACKETBUF_ADDR_RECEIVER], destmac);
 
+  /* Get the destination PAN ID.
+   *
+   * REVISIT: For now I am assuming that the source and destination
+   * PAN IDs are the same.
+   */
+
+  dest_panid = 0xffff;
+  (void)sixlowpan_src_panid(ieee, &dest_panid);
+
   /* Pre-calculate frame header length. */
 
-  framer_hdrlen = sixlowpan_send_hdrlen(ieee, ieee->i_panid);
+  framer_hdrlen = sixlowpan_send_hdrlen(ieee, dest_panid);
   if (framer_hdrlen < 0)
     {
       /* Failed to determine the size of the header failed. */
@@ -349,7 +359,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
       /* Create 1st Fragment */
       /* Add the frame header using the pre-allocated IOB. */
 
-      verify = sixlowpan_framecreate(ieee, iob, ieee->i_panid);
+      verify = sixlowpan_framecreate(ieee, iob, dest_panid);
       DEBUGASSERT(verify == framer_hdrlen);
       UNUSED(verify);
 
@@ -513,7 +523,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
       /* Add the frame header to the preallocated IOB. */
 
-      verify = sixlowpan_framecreate(ieee, iob, ieee->i_panid);
+      verify = sixlowpan_framecreate(ieee, iob, dest_panid);
       DEBUGASSERT(verify == framer_hdrlen);
       UNUSED(verify);
 

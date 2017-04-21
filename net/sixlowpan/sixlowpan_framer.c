@@ -82,7 +82,7 @@ struct field_length_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sixlowpan_addrlen
+ * Name: sixlowpan_addrlen
  *
  * Description:
  *   Return the address length associated with a 2-bit address mode
@@ -109,7 +109,7 @@ static inline uint8_t sixlowpan_addrlen(uint8_t addrmode)
 }
 
 /****************************************************************************
- * Function: sixlowpan_addrnull
+ * Name: sixlowpan_addrnull
  *
  * Description:
  *   If the output address is NULL in the Rime buf, then it is broadcast
@@ -140,7 +140,7 @@ static bool sixlowpan_addrnull(FAR uint8_t *addr)
 
 
 /****************************************************************************
- * Function: sixlowpan_fieldlengths
+ * Name: sixlowpan_fieldlengths
  *
  * Description:
  *   Return the lengths associated fields of the IEEE802.15.4 header.
@@ -228,7 +228,7 @@ static void sixlowpan_fieldlengths(FAR struct frame802154_s *finfo,
 }
 
 /****************************************************************************
- * Function: sixlowpan_fieldlengths
+ * Name: sixlowpan_fieldlengths
  *
  * Description:
  *   Return the lengths associated fields of the IEEE802.15.4 header.
@@ -249,7 +249,7 @@ static int sixlowpan_flen_hdrlen(FAR const struct field_length_s *flen)
 }
 
 /****************************************************************************
- * Function: sixlowpan_802154_hdrlen
+ * Name: sixlowpan_802154_hdrlen
  *
  * Description:
  *   Calculates the length of the frame header.  This function is meant to
@@ -272,7 +272,7 @@ static int sixlowpan_802154_hdrlen(FAR struct frame802154_s *finfo)
 }
 
 /****************************************************************************
- * Function: sixlowpan_setup_params
+ * Name: sixlowpan_setup_params
  *
  * Description:
  *   Configure frame parmeters structure.
@@ -293,6 +293,7 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
                                    uint16_t dest_panid,
                                    FAR struct frame802154_s *params)
 {
+  uint16_t src_panid;
   bool rcvrnull;
 
   /* Initialize all prameters to all zero */
@@ -331,9 +332,14 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
     }
 
   /* Complete the addressing fields. */
+  /* Get the source PAN ID from the IEEE802.15.4 radio driver */
+
+  src_panid = 0xffff;
+  (void)sixlowpan_src_panid(ieee, &src_panid);
+
   /* Set the source and destination PAN ID. */
 
-  params->src_pid  = ieee->i_panid;
+  params->src_pid  = src_panid;
   params->dest_pid = dest_panid;
 
   /* If the output address is NULL in the Rime buf, then it is broadcast
@@ -382,7 +388,7 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sixlowpan_send_hdrlen
+ * Name: sixlowpan_send_hdrlen
  *
  * Description:
  *   This function is before the first frame has been sent in order to
@@ -415,7 +421,7 @@ int sixlowpan_send_hdrlen(FAR struct ieee802154_driver_s *ieee,
 }
 
 /****************************************************************************
- * Function: sixlowpan_802154_framecreate
+ * Name: sixlowpan_802154_framecreate
  *
  * Description:
  *   Creates a frame for transmission over the air.  This function is meant
@@ -514,7 +520,7 @@ int sixlowpan_802154_framecreate(FAR struct frame802154_s *finfo,
 }
 
 /****************************************************************************
- * Function: sixlowpan_framecreate
+ * Name: sixlowpan_framecreate
  *
  * Description:
  *   This function is called after eiether (1) the IEEE802.15.4 MAC driver

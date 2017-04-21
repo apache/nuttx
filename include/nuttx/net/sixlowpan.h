@@ -426,15 +426,12 @@ struct rimeaddr_s
  * this structure.  In general, all fields must be set to NULL.  In
  * addtion:
  *
- * 1. i_panid must be set to identify the network.  It may be set to 0xfff
- *    if the device is not associated.
- *
- * 2. i_dsn must be set to a random value.  After that, it will be managed
+ * 1. i_dsn must be set to a random value.  After that, it will be managed
  *    by the network.
  *
- * 3. i_nodeaddr must be set after the MAC is assigned an address.
+ * 2. i_nodeaddr must be set after the MAC is assigned an address.
  *
- * 4. On a TX poll, the IEEE802.15.4 MAC driver should provide its driver
+ * 3. On a TX poll, the IEEE802.15.4 MAC driver should provide its driver
  *    structure with i_framelist set to NULL.  At the conclusion of the
  *    poll, if there are frames to be sent, they will have been added to
  *    the i_framelist.  The non-empty frame list at the conclusion of the
@@ -449,7 +446,7 @@ struct rimeaddr_s
  *    After sending each frame, the driver must return the IOB to the pool
  *    of free IOBs using the FROM_IOB_FREE() macro.
  *
- * 5. When receiving data both buffers must be provided:
+ * 4. When receiving data both buffers must be provided:
  *
  *    The IEEE802.15.4 MAC driver should receive the frame data directly
  *    into the payload area of an IOB structure.  That IOB structure may be
@@ -500,16 +497,6 @@ struct ieee802154_driver_s
   FAR struct iob_s *i_framelist;
 
   /* Driver Configuration ***************************************************/
-  /* i_panid.  The PAN ID is 16-bit number that identifies the network. It
-   * must be unique to differentiate a network. All the nodes in the same
-   * network should have the same PAN ID.  This value must be provided to
-   * the network from the IEEE802.15.4 MAC driver.
-   *
-   * If this value is 0xffff, the device is not associated.
-   */
-
-  uint16_t i_panid;
-
   /* i_node_addr.  The address assigned to this node. */
 
   struct rimeaddr_s i_nodeaddr;

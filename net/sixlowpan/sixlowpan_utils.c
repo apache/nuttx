@@ -54,8 +54,10 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/net/sixlowpan.h>
+#include <nuttx/wireless/ieee802154/ieee802154_radio.h>
 
 #include "sixlowpan/sixlowpan_internal.h"
 
@@ -154,6 +156,41 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
   return (ipaddr[5] == HTONS(0x00ff) && ipaddr[6] == HTONS(0xfe00) &&
           ipaddr[7] == htons((GETINT16(rimeptr, 0) ^ 0x0200)));
 #endif
+}
+
+/****************************************************************************
+ * Name: sixlowpan_src_panid
+ *
+ * Description:
+ *   Get the source PAN ID from the IEEE802.15.4 radio.
+ *
+ * Input parameters:
+ *   ieee  - A reference IEEE802.15.4 MAC network device structure.
+ *   panid - The location in which to return the PAN ID.  0xfff may be
+ *           returned if the device is not associated.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int sixlowpan_src_panid(FAR struct ieee802154_driver_s *ieee,
+                        FAR uint16_t *panid)
+{
+  FAR struct net_driver_s *dev = &ieee->i_dev;
+  struct ieee802154_netradio_s arg;
+  int ret;
+
+  memcpy(arg.ifr_name, ieee->i_dev.d_ifname, IFNAMSIZ);
+  ret = dev->d_ioctl(dev, PHY802154IOC_GET_PANID, (unsigned long)((uintptr_t)&arg));
+  if (ret < 0)
+    {
+      wlerr("ERROR: PHY802154IOC_GET_PANID failed: %d\n", ret);
+      return ret;
+    }
+
+  *panid = arg.u.panid;
+  return OK;
 }
 
 #endif /* CONFIG_NET_6LOWPAN */

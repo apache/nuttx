@@ -125,7 +125,7 @@ static uint16_t sixlowpan_udp_chksum(FAR struct ipv6udp_hdr_s *ipv6udp,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_6lowpan_udp_sendto
+ * Name: psock_6lowpan_udp_sendto
  *
  * Description:
  *   If sendto() is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)
@@ -323,7 +323,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
 }
 
 /****************************************************************************
- * Function: psock_6lowpan_udp_send
+ * Name: psock_6lowpan_udp_send
  *
  * Description:
  *   psock_6lowpan_udp_send() call may be used with connectionlesss UDP
