@@ -1292,30 +1292,6 @@ struct ieee802154_poll_conf_s
   enum ieee802154_status_e status;
 };
 
-/* A pointer to this structure is passed as the argument of each IOCTL
- * command.
- */
-
-union ieee802154_macarg_u
-{
-  struct ieee802154_assoc_req_s    assocreq;    /* MAC802154IOC_MLME_ASSOC_REQUEST */
-  struct ieee802154_assoc_resp_s   assocresp;   /* MAC802154IOC_MLME_ASSOC_RESPONSE */
-  struct ieee802154_disassoc_req_s disassocreq; /* MAC802154IOC_MLME_DISASSOC_REQUEST */
-  struct ieee802154_get_req_s      getreq;      /* MAC802154IOC_MLME_GET_REQUEST */
-  struct ieee802154_gts_req_s      gtsreq;      /* MAC802154IOC_MLME_GTS_REQUEST */
-  struct ieee802154_orphan_resp_s  orphanresp;  /* MAC802154IOC_MLME_ORPHAN_RESPONSE */
-  struct ieee802154_reset_req_s    resetreq;    /* MAC802154IOC_MLME_RESET_REQUEST */
-  struct ieee802154_rxenable_req_s rxenabreq;   /* MAC802154IOC_MLME_RXENABLE_REQUEST */
-  struct ieee802154_scan_req_s     scanreq;     /* MAC802154IOC_MLME_SCAN_REQUEST */
-  struct ieee802154_set_req_s      setreq;      /* MAC802154IOC_MLME_SET_REQUEST */
-  struct ieee802154_start_req_s    startreq;    /* MAC802154IOC_MLME_START_REQUEST */
-  struct ieee802154_sync_req_s     syncreq;     /* MAC802154IOC_MLME_SYNC_REQUEST */
-  struct ieee802154_poll_req_s     pollreq;     /* MAC802154IOC_MLME_POLL_REQUEST */
-  /* To be determined */                        /* MAC802154IOC_MLME_DPS_REQUEST */
-  /* To be determined */                        /* MAC802154IOC_MLME_SOUNDING_REQUEST */
-  /* To be determined */                        /* MAC802154IOC_MLME_CALIBRATE_REQUEST */
-};
-
 union ieee802154_mlme_notify_u
 {
   struct ieee802154_assoc_conf_s       assocconf;
@@ -1343,6 +1319,30 @@ union ieee802154_mcps_notify_u
   struct ieee802154_data_conf_s        dataconf;
   struct ieee802154_purge_conf_s       purgeconf;
   struct ieee802154_data_ind_s         dataind;
+};
+
+/* A pointer to this structure is passed as the argument of each IOCTL
+ * command.
+ */
+
+union ieee802154_macarg_u
+{
+  struct ieee802154_assoc_req_s    assocreq;    /* MAC802154IOC_MLME_ASSOC_REQUEST */
+  struct ieee802154_assoc_resp_s   assocresp;   /* MAC802154IOC_MLME_ASSOC_RESPONSE */
+  struct ieee802154_disassoc_req_s disassocreq; /* MAC802154IOC_MLME_DISASSOC_REQUEST */
+  struct ieee802154_get_req_s      getreq;      /* MAC802154IOC_MLME_GET_REQUEST */
+  struct ieee802154_gts_req_s      gtsreq;      /* MAC802154IOC_MLME_GTS_REQUEST */
+  struct ieee802154_orphan_resp_s  orphanresp;  /* MAC802154IOC_MLME_ORPHAN_RESPONSE */
+  struct ieee802154_reset_req_s    resetreq;    /* MAC802154IOC_MLME_RESET_REQUEST */
+  struct ieee802154_rxenable_req_s rxenabreq;   /* MAC802154IOC_MLME_RXENABLE_REQUEST */
+  struct ieee802154_scan_req_s     scanreq;     /* MAC802154IOC_MLME_SCAN_REQUEST */
+  struct ieee802154_set_req_s      setreq;      /* MAC802154IOC_MLME_SET_REQUEST */
+  struct ieee802154_start_req_s    startreq;    /* MAC802154IOC_MLME_START_REQUEST */
+  struct ieee802154_sync_req_s     syncreq;     /* MAC802154IOC_MLME_SYNC_REQUEST */
+  struct ieee802154_poll_req_s     pollreq;     /* MAC802154IOC_MLME_POLL_REQUEST */
+  /* To be determined */                        /* MAC802154IOC_MLME_DPS_REQUEST */
+  /* To be determined */                        /* MAC802154IOC_MLME_SOUNDING_REQUEST */
+  /* To be determined */                        /* MAC802154IOC_MLME_CALIBRATE_REQUEST */
 };
 
 #ifdef CONFIG_NET_6LOWPAN

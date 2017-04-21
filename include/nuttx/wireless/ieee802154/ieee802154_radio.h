@@ -99,7 +99,7 @@
 
 #define PHY802154IOC_ENERGYDETECT     _PHY802154IOC(0x0011)
 
-#define EADDR_SIZE                    8  /* REVISIT */
+#define EADDR_SIZE                    8  /* Extended address size */
 
 /****************************************************************************
  * Public Types
