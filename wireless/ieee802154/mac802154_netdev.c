@@ -181,36 +181,36 @@ static void macnet_conf_get(FAR struct macnet_driver_s *priv,
 static void macnet_conf_gts(FAR struct macnet_driver_s *priv,
              FAR struct ieee802154_gts_conf_s *conf);
 static void macnet_conf_reset(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_reset_conf_s *conf); 
+             FAR struct ieee802154_reset_conf_s *conf);
 static void macnet_conf_rxenable(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_rxenable_conf_s *conf); 
+             FAR struct ieee802154_rxenable_conf_s *conf);
 static void macnet_conf_scan(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_scan_conf_s *conf); 
+             FAR struct ieee802154_scan_conf_s *conf);
 static void macnet_conf_set(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_set_conf_s *conf); 
+             FAR struct ieee802154_set_conf_s *conf);
 static void macnet_conf_start(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_start_conf_s *conf); 
+             FAR struct ieee802154_start_conf_s *conf);
 static void macnet_conf_poll(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_poll_conf_s *conf); 
+             FAR struct ieee802154_poll_conf_s *conf);
 
   /* Asynchronous event indications, replied to synchronously with responses */
 
 static void macnet_ind_data(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_data_ind_s *conf); 
+             FAR struct ieee802154_data_ind_s *conf);
 static void macnet_ind_associate(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_assoc_ind_s *conf); 
+             FAR struct ieee802154_assoc_ind_s *conf);
 static void macnet_ind_disassociate(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_disassoc_ind_s *conf); 
+             FAR struct ieee802154_disassoc_ind_s *conf);
 static void macnet_ind_beaconnotify(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_beaconnotify_ind_s *conf); 
+             FAR struct ieee802154_beaconnotify_ind_s *conf);
 static void macnet_ind_gts(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_gts_ind_s *conf); 
+             FAR struct ieee802154_gts_ind_s *conf);
 static void macnet_ind_orphan(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_orphan_ind_s *conf); 
+             FAR struct ieee802154_orphan_ind_s *conf);
 static void macnet_ind_commstatus(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_commstatus_ind_s *conf); 
+             FAR struct ieee802154_commstatus_ind_s *conf);
 static void macnet_ind_syncloss(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_syncloss_ind_s *conf); 
+             FAR struct ieee802154_syncloss_ind_s *conf);
 
 /* Network interface support ************************************************/
 /* Common TX logic */
@@ -1576,8 +1576,8 @@ int mac802154netdev_register(MACHANDLE mac)
   priv->md_cb.mc_priv = priv;
 
   maccb               = &priv->md_cb.mc_cb;
-  maccb->mlme_notify  = macdev_mlme_notify;       
-  maccb->mcps_notify  = macdev_mcps_notify;       
+  maccb->mlme_notify  = macdev_mlme_notify;
+  maccb->mcps_notify  = macdev_mcps_notify;
 
   /* Bind the callback structure */
 

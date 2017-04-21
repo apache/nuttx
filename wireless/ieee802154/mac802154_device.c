@@ -461,7 +461,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
 
       mac802154dev_givesem(&dev->md_exclsem);
   }
- 
+
   /* Pass the request to the MAC layer */
 
   ret = mac802154_req_data(dev->md_mac, req);

@@ -58,7 +58,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
- 
+
 struct mac802154_trans_s
 {
   /* Supports a singly linked list */
@@ -265,7 +265,7 @@ static int mac802154_poll_csma(FAR struct ieee802154_radiocb_s *radiocb,
                                FAR struct ieee802154_txdesc_s *tx_desc,
                                FAR uint8_t *buf);
 
-static int mac802154_poll_gts(FAR struct ieee802154_radiocb_s *radiocb, 
+static int mac802154_poll_gts(FAR struct ieee802154_radiocb_s *radiocb,
                               FAR struct ieee802154_txdesc_s *tx_desc,
                               FAR uint8_t *buf);
 
@@ -342,7 +342,7 @@ static int mac802154_applymib(FAR struct ieee802154_privmac_s *priv)
  *   Called from the radio driver through the callback struct.  This function is
  *   called when the radio has room for another CSMA transaction.  If the MAC
  *   layer has a CSMA transaction, it copies it into the supplied buffer and
- *   returns the length.  A descriptor is also populated with the transaction. 
+ *   returns the length.  A descriptor is also populated with the transaction.
  *
  ****************************************************************************/
 
@@ -406,11 +406,11 @@ static int mac802154_poll_csma(FAR struct ieee802154_radiocb_s *radiocb,
  *   Called from the radio driver through the callback struct.  This function is
  *   called when the radio has room for another GTS transaction.  If the MAC
  *   layer has a GTS transaction, it copies it into the supplied buffer and
- *   returns the length.  A descriptor is also populated with the transaction. 
+ *   returns the length.  A descriptor is also populated with the transaction.
  *
  ****************************************************************************/
 
-static int mac802154_poll_gts(FAR struct ieee802154_radiocb_s *radiocb, 
+static int mac802154_poll_gts(FAR struct ieee802154_radiocb_s *radiocb,
                               FAR struct ieee802154_txdesc_s *tx_desc,
                               FAR uint8_t *buf)
 {
@@ -474,9 +474,9 @@ static int mac802154_txdone(FAR struct ieee802154_radiocb_s *radiocb,
     {
       mac802154_givesem(&priv->exclsem);
 
-      return -ENOMEM; 
+      return -ENOMEM;
     }
-  
+
   /* Copy the txdesc over and link it into our list */
 
   memcpy(desc, tx_desc, sizeof(ieee802154_txdesc_s));
@@ -490,10 +490,10 @@ static int mac802154_txdone(FAR struct ieee802154_radiocb_s *radiocb,
   /* Schedule work with the work queue to process the completion further */
 
   if (work_available(&priv->tx_work))
-  {
-    work_queue(MAC802154_WORK, &priv->tx_work, mac802154_txdone_worker,
-               (FAR void *)dev, 0);
-  }
+    {
+      work_queue(MAC802154_WORK, &priv->tx_work, mac802154_txdone_worker,
+                 (FAR void *)dev, 0);
+    }
 }
 
 /****************************************************************************
@@ -508,10 +508,8 @@ static int mac802154_txdone(FAR struct ieee802154_radiocb_s *radiocb,
 
 static void mac802154_txdone_worker(FAR void *arg)
 {
-  FAR struct ieee802154_privmanc_s *priv = 
+  FAR struct ieee802154_privmanc_s *priv =
     (FAR struct ieee802154_privmanc_s *)arg;
-  
-
 }
 
 /****************************************************************************
@@ -524,7 +522,7 @@ static void mac802154_txdone_worker(FAR void *arg)
  *   descriptor is passed along with the iob, but it must be copied here as it
  *   is allocated directly on the caller's stack.  We simply link the frame,
  *   copy the RX descriptor, and schedule a worker to process the frame later so
- *   that we do not hold up the radio. 
+ *   that we do not hold up the radio.
  *
  ****************************************************************************/
 
@@ -580,12 +578,11 @@ static void mac802154_rxframe_worker(FAR void *arg)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)arg;
-  
+
   /* The radio layer is responsible for handling all ACKs and retries. If for
-   * some reason an ACK gets here, just throw it out */
-
+   * some reason an ACK gets here, just throw it out.
+   */
 }
-
 
 /****************************************************************************
  * Public Functions
