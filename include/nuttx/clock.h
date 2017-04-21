@@ -199,6 +199,14 @@ typedef uint64_t systime_t;
 typedef uint32_t systime_t;
 #endif
 
+/* This type used to hold relative ticks that may have negative value */
+
+#ifdef CONFIG_SYSTEM_TIME64
+typedef int64_t ssystime_t;
+#else
+typedef int32_t ssystime_t;
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/

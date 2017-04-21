@@ -99,7 +99,7 @@ static long compare_timespec(FAR const struct timespec *a,
  ****************************************************************************/
 
 int clock_abstime2ticks(clockid_t clockid, FAR const struct timespec *abstime,
-                        FAR int *ticks)
+                        FAR ssystime_t *ticks)
 {
   struct timespec currtime;
   struct timespec reltime;
