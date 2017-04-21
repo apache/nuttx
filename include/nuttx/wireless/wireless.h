@@ -164,14 +164,11 @@
  *  3. To the IEEE802.15.4 radio device layer, as documented in,
  *     include/nuttx/wireless/ieee802154/ioeee802154_radio.h.
  *
- * SIOCSWPANID - Join the specified PAN ID
+ * This is a placeholder; no 6LoWPAN IOCTL commands have been defined.
  */
 
-#define SIOCSWPANID         _WLIOC(0x0033)  /* Join PAN ID */
-#define SIOCGWPANID         _WLIOC(0x0034)  /* Return PAN ID */
-
-#define WL_FIRSTCHAR        0x0035
-#define WL_NNETCMDS         0x0034
+#define WL_FIRSTCHAR        0x0033
+#define WL_NNETCMDS         0x0032
 
 /* Character Driver IOCTL commands *************************************************/
 /* Non-compatible, NuttX only IOCTL definitions for use with low-level wireless
@@ -179,23 +176,23 @@
  * requires a file descriptor created by the open() interface.
  */
 
-#define WLIOC_SETRADIOFREQ  _WLIOC(0x0035)  /* arg: Pointer to uint32_t, frequency
+#define WLIOC_SETRADIOFREQ  _WLIOC(0x0033)  /* arg: Pointer to uint32_t, frequency
                                              * value (in Mhz) */
-#define WLIOC_GETRADIOFREQ  _WLIOC(0x0036)  /* arg: Pointer to uint32_t, frequency
+#define WLIOC_GETRADIOFREQ  _WLIOC(0x0034)  /* arg: Pointer to uint32_t, frequency
                                              * value (in Mhz) */
-#define WLIOC_SETADDR       _WLIOC(0x0037)  /* arg: Pointer to address value, format
+#define WLIOC_SETADDR       _WLIOC(0x0035)  /* arg: Pointer to address value, format
                                              * of the address is driver specific */
-#define WLIOC_GETADDR       _WLIOC(0x0038)  /* arg: Pointer to address value, format
+#define WLIOC_GETADDR       _WLIOC(0x0036)  /* arg: Pointer to address value, format
                                              * of the address is driver specific */
-#define WLIOC_SETTXPOWER    _WLIOC(0x0039)  /* arg: Pointer to int32_t, output power
+#define WLIOC_SETTXPOWER    _WLIOC(0x0036)  /* arg: Pointer to int32_t, output power
                                              * (in dBm) */
-#define WLIOC_GETTXPOWER    _WLIOC(0x003a)  /* arg: Pointer to int32_t, output power
+#define WLIOC_GETTXPOWER    _WLIOC(0x0038)  /* arg: Pointer to int32_t, output power
                                              * (in dBm) */
 
 /* Device-specific IOCTL commands **************************************************/
 
 #define WL_FIRST            0x0001          /* First common command */
-#define WL_NCMDS            0x003a          /* Number of common commands */
+#define WL_NCMDS            0x0038          /* Number of common commands */
 
 /* User defined ioctl commands are also supported. These will be forwarded
  * by the upper-half QE driver to the lower-half QE driver via the ioctl()
