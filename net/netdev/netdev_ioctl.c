@@ -327,51 +327,6 @@ static void ioctl_set_ipv6addr(FAR net_ipv6addr_t outaddr,
 #endif
 
 /****************************************************************************
- * Name: netdev_sixlowpan_ioctl
- *
- * Description:
- *   Perform 6loWPAN network device specific operations.
- *
- * Parameters:
- *   psock    Socket structure
- *   dev      Ethernet driver device structure
- *   cmd      The ioctl command
- *   req      The argument of the ioctl cmd
- *
- * Return:
- *   >=0 on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN)
-static int netdev_sixlowpan_ioctl(FAR struct socket *psock, int cmd,
-                                  FAR struct sixlowpan_req_s *req)
-{
-#if 0 /* None yet defined */
-  FAR struct ieee802154_driver_s *ieee;
-  int ret = -ENOTTY;
-
-  /* Verify that this is a valid wireless network IOCTL command */
-
-  if (_WLIOCVALID(cmd) && (unsigned)_IOC_NR(cmd) <= WL_NNETCMDS)
-    {
-      switch (cmd)
-        {
-
-          default:
-            return -ENOTTY;
-        }
-    }
-
-  return ret;
-#else
-  return -ENOTTY;
-#endif
-}
-#endif
-
-/****************************************************************************
  * Name: netdev_iee802154_ioctl
  *
  * Description:
@@ -1312,18 +1267,6 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
   /* Execute the command.  First check for a standard network IOCTL command. */
 
   ret = netdev_ifr_ioctl(psock, cmd, (FAR struct ifreq *)((uintptr_t)arg));
-
-#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN)
-  /* Check for a 6loWPAN network command */
-
-  if (ret == -ENOTTY)
-    {
-      FAR struct sixlowpan_req_s *slpreq;
-
-      slpreq = (FAR struct sixlowpan_req_s *)((uintptr_t)arg);
-      ret    = netdev_sixlowpan_ioctl(psock, cmd, slpreq);
-    }
-#endif
 
 #if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_WIRELESS_IOCTL)
   /* Check for a wireless network command */
