@@ -56,12 +56,16 @@
 #include <net/ethernet.h>
 #include <arpa/inet.h>
 
+#include <nuttx/net/netconfig.h>
+#include <nuttx/net/ip.h>
+
 #ifdef CONFIG_NET_IGMP
 #  include <nuttx/net/igmp.h>
 #endif
 
-#include <nuttx/net/netconfig.h>
-#include <nuttx/net/ip.h>
+#ifdef CONFIG_NET_6LOWPAN
+#  include <nuttx/net/ieee802154.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -207,10 +211,22 @@ struct net_driver_s
 #endif
 #endif
 
-#ifdef CONFIG_NET_ETHERNET
-  /* Ethernet device identity */
+#if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_NET_6LOWPAN)
+  /* Link layer address */
 
-  struct ether_addr d_mac;      /* Device MAC address */
+  union
+  {
+#ifdef CONFIG_NET_ETHERNET
+    /* Ethernet device identity */
+
+    struct ether_addr ether;    /* Device Ethernet MAC address */
+#endif
+#ifdef CONFIG_NET_6LOWPAN
+  /* The address assigned to an IEEE 802.15.4 radio. */
+
+    struct rimeaddr_s ieee802154; /* IEEE 802.15.4 Radio address */
+#endif
+  } d_mac;
 #endif
 
   /* Network identity */

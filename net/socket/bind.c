@@ -105,7 +105,7 @@ static int pkt_bind(FAR struct pkt_conn_s *conn,
 #if 0
   /* Get the MAC address of that interface */
 
-  memcpy(hwaddr, g_netdevices->d_mac, 6);
+  memcpy(hwaddr, g_netdevices->d_mac.ether, 6);
 #endif
 
   /* Put ifindex and mac address into connection */

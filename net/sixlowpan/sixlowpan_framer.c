@@ -372,7 +372,8 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
 
   /* Set the source address to the node address assigned to the device */
 
-  rimeaddr_copy((struct rimeaddr_s *)&params->src_addr, &ieee->i_nodeaddr);
+  rimeaddr_copy((struct rimeaddr_s *)&params->src_addr,
+                &ieee->i_dev.d_mac.ieee802154);
 
   /* Use short soruce address mode if so configured */
 

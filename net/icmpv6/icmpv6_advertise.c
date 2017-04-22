@@ -139,7 +139,7 @@ void icmpv6_advertise(FAR struct net_driver_s *dev,
    * REVISIT:  What if the link layer is not Ethernet?
    */
 
-  memcpy(adv->tgtlladdr, &dev->d_mac, IFHWADDRLEN);
+  memcpy(adv->tgtlladdr, &dev->d_mac.ether, IFHWADDRLEN);
 
   /* Calculate the checksum over both the ICMP header and payload */
 
@@ -166,7 +166,7 @@ void icmpv6_advertise(FAR struct net_driver_s *dev,
       FAR struct eth_hdr_s *eth = ETHBUF;
 
       memcpy(eth->dest, eth->src, ETHER_ADDR_LEN);
-      memcpy(eth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
+      memcpy(eth->src, dev->d_mac.ether.ether_addr_octet, ETHER_ADDR_LEN);
 
       /* Set the IPv6 Ethernet type */
 

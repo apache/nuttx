@@ -3755,22 +3755,22 @@ static void tiva_macaddress(FAR struct tiva_ethmac_s *priv)
 
   ninfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         dev->d_ifname,
-        dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
-        dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
-        dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
+        dev->d_mac.ether.ether_addr_octet[0], dev->d_mac.ether.ether_addr_octet[1],
+        dev->d_mac.ether.ether_addr_octet[2], dev->d_mac.ether.ether_addr_octet[3],
+        dev->d_mac.ether.ether_addr_octet[4], dev->d_mac.ether.ether_addr_octet[5]);
 
   /* Set the MAC address high register */
 
-  regval = ((uint32_t)dev->d_mac.ether_addr_octet[5] << 8) |
-            (uint32_t)dev->d_mac.ether_addr_octet[4];
+  regval = ((uint32_t)dev->d_mac.ether.ether_addr_octet[5] << 8) |
+            (uint32_t)dev->d_mac.ether.ether_addr_octet[4];
   tiva_putreg(regval, TIVA_EMAC_ADDR0H);
 
   /* Set the MAC address low register */
 
-  regval = ((uint32_t)dev->d_mac.ether_addr_octet[3] << 24) |
-           ((uint32_t)dev->d_mac.ether_addr_octet[2] << 16) |
-           ((uint32_t)dev->d_mac.ether_addr_octet[1] <<  8) |
-            (uint32_t)dev->d_mac.ether_addr_octet[0];
+  regval = ((uint32_t)dev->d_mac.ether.ether_addr_octet[3] << 24) |
+           ((uint32_t)dev->d_mac.ether.ether_addr_octet[2] << 16) |
+           ((uint32_t)dev->d_mac.ether.ether_addr_octet[1] <<  8) |
+            (uint32_t)dev->d_mac.ether.ether_addr_octet[0];
   tiva_putreg(regval, TIVA_EMAC_ADDR0L);
 }
 
@@ -4056,7 +4056,7 @@ int tiva_ethinitialize(int intf)
    * is called (and the MAC can be overwritten with a netdev ioctl call).
    */
 
-  tiva_ethernetmac(&priv->dev.d_mac);
+  tiva_ethernetmac(&priv->dev.d_mac.ether);
 #endif
 
   /* Enable power and clocking to the Ethernet MAC

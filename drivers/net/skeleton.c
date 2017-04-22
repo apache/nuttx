@@ -803,7 +803,7 @@ static int skel_ifup(FAR struct net_driver_s *dev)
 
   /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
 
-  /* Instantiate the MAC address from priv->sk_dev.d_mac.ether_addr_octet */
+  /* Instantiate the MAC address from priv->sk_dev.d_mac.ether.ether_addr_octet */
 
 #ifdef CONFIG_NET_ICMPv6
   /* Set up IPv6 multicast address filtering */
@@ -1187,7 +1187,7 @@ int skel_initialize(int intf)
    * the device and/or calling skel_ifdown().
    */
 
-  /* Read the MAC address from the hardware into priv->sk_dev.d_mac.ether_addr_octet */
+  /* Read the MAC address from the hardware into priv->sk_dev.d_mac.ether.ether_addr_octet */
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

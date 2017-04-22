@@ -249,7 +249,7 @@ void arp_out(FAR struct net_driver_s *dev)
 
   /* Finish populating the Ethernet header */
 
-  memcpy(peth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
+  memcpy(peth->src, dev->d_mac.ether.ether_addr_octet, ETHER_ADDR_LEN);
   peth->type  = HTONS(ETHTYPE_IP);
   dev->d_len += ETH_HDRLEN;
 }
