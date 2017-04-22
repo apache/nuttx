@@ -1276,7 +1276,7 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
     {
       FAR struct iwreq *wifrreq;
 
-      wifrreq = (FAR FAR struct iwreq *)((uintptr_t)arg);
+      wifrreq = (FAR struct iwreq *)((uintptr_t)arg);
       ret     = netdev_wifr_ioctl(psock, cmd, wifrreq);
     }
 #endif
