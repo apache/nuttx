@@ -56,23 +56,13 @@
 #include <nuttx/clock.h>
 #include <nuttx/drivers/iob.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/ieee802154.h>
 
 #ifdef CONFIG_NET_6LOWPAN
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* By default, a 2-byte Rime address is used for the IEEE802.15.4 MAC
- * device's link  layer address.  If CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
- * is selected, then an 8-byte Rime address will be used.
- */
-
-#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
-#  define NET_6LOWPAN_RIMEADDR_SIZE 8
-#else
-#  define NET_6LOWPAN_RIMEADDR_SIZE 2
-#endif
 
 /* Frame format definitions *************************************************/
 /* Fragment header.
@@ -107,49 +97,6 @@
 #define RIME_HC1_HC_UDP_TTL              3  /* 8 bit */
 #define RIME_HC1_HC_UDP_PORTS            4  /* 8 bit */
 #define RIME_HC1_HC_UDP_CHKSUM           5  /* 16 bit */
-
-/* These are some definitions of element values used in the FCF.  See the
- * IEEE802.15.4 spec for details.
- */
-
-#define FRAME802154_FRAMETYPE_SHIFT      (0)  /* Bits 0-2: Frame type */
-#define FRAME802154_FRAMETYPE_MASK       (7 << FRAME802154_FRAMETYPE_SHIFT)
-#define FRAME802154_SECENABLED_SHIFT     (3)  /* Bit 3: Security enabled */
-#define FRAME802154_FRAMEPENDING_SHIFT   (4)  /* Bit 4: Frame pending */
-#define FRAME802154_ACKREQUEST_SHIFT     (5)  /* Bit 5: ACK request */
-#define FRAME802154_PANIDCOMP_SHIFT      (6)  /* Bit 6: PANID compression */
-                                              /* Bits 7-9: Reserved */
-#define FRAME802154_DSTADDR_SHIFT        (2)  /* Bits 10-11: Dest address mode */
-#define FRAME802154_DSTADDR_MASK         (3 << FRAME802154_DSTADDR_SHIFT)
-#define FRAME802154_VERSION_SHIFT        (4)  /* Bit 12-13: Frame version */
-#define FRAME802154_VERSION_MASK         (3 << FRAME802154_VERSION_SHIFT)
-#define FRAME802154_SRCADDR_SHIFT        (6)  /* Bits 14-15: Source address mode */
-#define FRAME802154_SRCADDR_MASK         (3 << FRAME802154_SRCADDR_SHIFT)
-
-/* Unshifted values for use in struct frame802154_fcf_s */
-
-#define FRAME802154_BEACONFRAME          (0)
-#define FRAME802154_DATAFRAME            (1)
-#define FRAME802154_ACKFRAME             (2)
-#define FRAME802154_CMDFRAME             (3)
-
-#define FRAME802154_BEACONREQ            (7)
-
-#define FRAME802154_IEEERESERVED         (0)
-#define FRAME802154_NOADDR               (0)  /* Only valid for ACK or Beacon frames */
-#define FRAME802154_SHORTADDRMODE        (2)
-#define FRAME802154_LONGADDRMODE         (3)
-
-#define FRAME802154_NOBEACONS            0x0f
-
-#define FRAME802154_BROADCASTADDR        0xffff
-#define FRAME802154_BROADCASTPANDID      0xffff
-
-#define FRAME802154_IEEE802154_2003      (0)
-#define FRAME802154_IEEE802154_2006      (1)
-
-#define FRAME802154_SECURITY_LEVEL_NONE  (0)
-#define FRAME802154_SECURITY_LEVEL_128   (3)
 
 /* Min and Max compressible UDP ports - HC06 */
 
@@ -260,12 +207,6 @@
 #define SIXLOWPAN_HC1_HC_UDP_HDR_LEN     7
 #define SIXLOWPAN_FRAG1_HDR_LEN          4
 #define SIXLOWPAN_FRAGN_HDR_LEN          5
-
-/* This maximum size of an IEEE802.15.4 frame.  Certain, non-standard
- * devices may exceed this value, however.
- */
-
-#define SIXLOWPAN_MAC_STDFRAME 127
 
 /* Address compressibility test macros **************************************/
 
@@ -388,13 +329,6 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
-/* Rime address representation */
-
-struct rimeaddr_s
-{
-  uint8_t u8[NET_6LOWPAN_RIMEADDR_SIZE];
-};
 
 /* The device structure for IEEE802.15.4 MAC network device differs from the
  * standard Ethernet MAC device structure.  The main reason for this
