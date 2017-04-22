@@ -1185,9 +1185,9 @@ static int ftmac100_ifup(struct net_driver_s *dev)
 
   ftmac100_init(priv);
 
-  /* Instantiate the MAC address from priv->ft_dev.d_mac.ether_addr_octet */
+  /* Instantiate the MAC address from priv->ft_dev.d_mac.ether.ether_addr_octet */
 
-  ftmac100_set_mac(priv, priv->ft_dev.d_mac.ether_addr_octet);
+  ftmac100_set_mac(priv, priv->ft_dev.d_mac.ether.ether_addr_octet);
 
 #ifdef CONFIG_NET_ICMPv6
   /* Set up IPv6 multicast address filtering */
@@ -1566,9 +1566,9 @@ int ftmac100_initialize(int intf)
    */
   ftmac100_reset(priv);
 
-  /* Read the MAC address from the hardware into priv->ft_dev.d_mac.ether_addr_octet */
+  /* Read the MAC address from the hardware into priv->ft_dev.d_mac.ether.ether_addr_octet */
 
-  memcpy(priv->ft_dev.d_mac.ether_addr_octet, (void *)(CONFIG_FTMAC100_MAC0_ENV_ADDR), 6);
+  memcpy(priv->ft_dev.d_mac.ether.ether_addr_octet, (void *)(CONFIG_FTMAC100_MAC0_ENV_ADDR), 6);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

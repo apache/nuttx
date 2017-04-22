@@ -1955,7 +1955,7 @@ int dm9x_initialize(void)
 
   /* Read the MAC address */
 
-  mptr = g_dm9x[0].dm_dev.d_mac.ether_addr_octet;
+  mptr = g_dm9x[0].dm_dev.d_mac.ether.ether_addr_octet;
   for (i = 0, j = DM9X_PAB0; i < ETHER_ADDR_LEN; i++, j++)
     {
       mptr[i] = getreg(j);

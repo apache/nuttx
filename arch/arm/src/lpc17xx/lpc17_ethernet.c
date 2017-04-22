@@ -1591,16 +1591,16 @@ static int lpc17_ifup(struct net_driver_s *dev)
 
   /* Configure the MAC station address */
 
-  regval = (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[5] << 8 |
-           (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[4];
+  regval = (uint32_t)priv->lp_dev.d_mac.ether.ether_addr_octet[5] << 8 |
+           (uint32_t)priv->lp_dev.d_mac.ether.ether_addr_octet[4];
   lpc17_putreg(regval, LPC17_ETH_SA0);
 
-  regval = (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[3] << 8 |
-           (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[2];
+  regval = (uint32_t)priv->lp_dev.d_mac.ether.ether_addr_octet[3] << 8 |
+           (uint32_t)priv->lp_dev.d_mac.ether.ether_addr_octet[2];
   lpc17_putreg(regval, LPC17_ETH_SA1);
 
-  regval = (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[1] << 8 |
-           (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[0];
+  regval = (uint32_t)priv->lp_dev.d_mac.ether.ether_addr_octet[1] << 8 |
+           (uint32_t)priv->lp_dev.d_mac.ether.ether_addr_octet[0];
   lpc17_putreg(regval, LPC17_ETH_SA2);
 
 #ifdef CONFIG_NET_ICMPv6

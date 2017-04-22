@@ -3535,22 +3535,22 @@ static void lpc43_macaddress(FAR struct lpc43_ethmac_s *priv)
 
   ninfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         dev->d_ifname,
-        dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
-        dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
-        dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
+        dev->d_mac.ether.ether_addr_octet[0], dev->d_mac.ether.ether_addr_octet[1],
+        dev->d_mac.ether.ether_addr_octet[2], dev->d_mac.ether.ether_addr_octet[3],
+        dev->d_mac.ether.ether_addr_octet[4], dev->d_mac.ether.ether_addr_octet[5]);
 
   /* Set the MAC address high register */
 
-  regval = ((uint32_t)dev->d_mac.ether_addr_octet[5] << 8) |
-            (uint32_t)dev->d_mac.ether_addr_octet[4];
+  regval = ((uint32_t)dev->d_mac.ether.ether_addr_octet[5] << 8) |
+            (uint32_t)dev->d_mac.ether.ether_addr_octet[4];
   lpc43_putreg(regval, LPC43_ETH_MACA0HI);
 
   /* Set the MAC address low register */
 
-  regval = ((uint32_t)dev->d_mac.ether_addr_octet[3] << 24) |
-           ((uint32_t)dev->d_mac.ether_addr_octet[2] << 16) |
-           ((uint32_t)dev->d_mac.ether_addr_octet[1] <<  8) |
-            (uint32_t)dev->d_mac.ether_addr_octet[0];
+  regval = ((uint32_t)dev->d_mac.ether.ether_addr_octet[3] << 24) |
+           ((uint32_t)dev->d_mac.ether.ether_addr_octet[2] << 16) |
+           ((uint32_t)dev->d_mac.ether.ether_addr_octet[1] <<  8) |
+            (uint32_t)dev->d_mac.ether.ether_addr_octet[0];
   lpc43_putreg(regval, LPC43_ETH_MACA0LO);
 }
 

@@ -1999,9 +1999,9 @@ static int ez80emac_ifup(FAR struct net_driver_s *dev)
   int ret;
 
   ninfo("Bringing up: MAC %02x:%02x:%02x:%02x:%02x:%02x\n",
-        dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
-        dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
-        dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
+        dev->d_mac.ether.ether_addr_octet[0], dev->d_mac.ether.ether_addr_octet[1],
+        dev->d_mac.ether.ether_addr_octet[2], dev->d_mac.ether.ether_addr_octet[3],
+        dev->d_mac.ether.ether_addr_octet[4], dev->d_mac.ether.ether_addr_octet[5]);
   ninfo("             IP  %d.%d.%d.%d\n",
         dev->d_ipaddr >> 24,       (dev->d_ipaddr >> 16) & 0xff,
        (dev->d_ipaddr >> 8) & 0xff, dev->d_ipaddr & 0xff);
@@ -2028,12 +2028,12 @@ static int ez80emac_ifup(FAR struct net_driver_s *dev)
 
       /* Set the MAC address */
 
-      outp(EZ80_EMAC_STAD_0, priv->dev.d_mac.ether_addr_octet[0]);
-      outp(EZ80_EMAC_STAD_1, priv->dev.d_mac.ether_addr_octet[1]);
-      outp(EZ80_EMAC_STAD_2, priv->dev.d_mac.ether_addr_octet[2]);
-      outp(EZ80_EMAC_STAD_3, priv->dev.d_mac.ether_addr_octet[3]);
-      outp(EZ80_EMAC_STAD_4, priv->dev.d_mac.ether_addr_octet[4]);
-      outp(EZ80_EMAC_STAD_5, priv->dev.d_mac.ether_addr_octet[5]);
+      outp(EZ80_EMAC_STAD_0, priv->dev.d_mac.ether.ether_addr_octet[0]);
+      outp(EZ80_EMAC_STAD_1, priv->dev.d_mac.ether.ether_addr_octet[1]);
+      outp(EZ80_EMAC_STAD_2, priv->dev.d_mac.ether.ether_addr_octet[2]);
+      outp(EZ80_EMAC_STAD_3, priv->dev.d_mac.ether.ether_addr_octet[3]);
+      outp(EZ80_EMAC_STAD_4, priv->dev.d_mac.ether.ether_addr_octet[4]);
+      outp(EZ80_EMAC_STAD_5, priv->dev.d_mac.ether.ether_addr_octet[5]);
 
       /* Enable/disable promiscuous mode */
 
@@ -2542,7 +2542,7 @@ int up_netinitialize(void)
   priv->txpoll        = wd_create();        /* Create periodic poll timer */
   priv->txtimeout     = wd_create();        /* Create TX timeout timer */
 
-  /* Read the MAC address from the hardware into priv->dev.d_mac.ether_addr_octet */
+  /* Read the MAC address from the hardware into priv->dev.d_mac.ether.ether_addr_octet */
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

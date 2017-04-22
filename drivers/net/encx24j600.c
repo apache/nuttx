@@ -2591,7 +2591,7 @@ static void enc_pwrsave(FAR struct enc_driver_s *priv)
 static void enc_ldmacaddr(FAR struct enc_driver_s *priv)
 {
   uint16_t regval;
-  uint8_t *mac = priv->dev.d_mac.ether_addr_octet;
+  uint8_t *mac = priv->dev.d_mac.ether.ether_addr_octet;
 
   ninfo("Using ENCX24J600's built in MAC address\n");
 
@@ -2629,12 +2629,12 @@ static void enc_ldmacaddr(FAR struct enc_driver_s *priv)
 
 static void enc_setmacaddr(FAR struct enc_driver_s *priv)
 {
-  uint8_t *mac = priv->dev.d_mac.ether_addr_octet;
+  uint8_t *mac = priv->dev.d_mac.ether.ether_addr_octet;
   struct ether_addr zmac;
 
   memset(&zmac, 0, sizeof(zmac));
 
-  if (memcmp(&priv->dev.d_mac, &zmac, sizeof(zmac)) == 0)
+  if (memcmp(&priv->dev.d_mac.ether, &zmac, sizeof(zmac)) == 0)
     {
       /* No user defined MAC address. Read it from the device. */
 

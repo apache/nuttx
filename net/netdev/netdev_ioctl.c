@@ -694,7 +694,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
                 {
                   req->ifr_hwaddr.sa_family = AF_INETX;
                   memcpy(req->ifr_hwaddr.sa_data,
-                         dev->d_mac.ether_addr_octet, IFHWADDRLEN);
+                         dev->d_mac.ether.ether_addr_octet, IFHWADDRLEN);
                   ret = OK;
                 }
               else
@@ -736,7 +736,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
               if (true)
 #endif
                 {
-                  memcpy(dev->d_mac.ether_addr_octet,
+                  memcpy(dev->d_mac.ether.ether_addr_octet,
                          req->ifr_hwaddr.sa_data, IFHWADDRLEN);
                   ret = OK;
                 }

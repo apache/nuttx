@@ -207,10 +207,17 @@ struct net_driver_s
 #endif
 #endif
 
-#ifdef CONFIG_NET_ETHERNET
-  /* Ethernet device identity */
+#if defined(CONFIG_NET_ETHERNET)
+  /* Link layer address */
 
-  struct ether_addr d_mac;      /* Device MAC address */
+  union
+  {
+#ifdef CONFIG_NET_ETHERNET
+    /* Ethernet device identity */
+
+    struct ether_addr ether;    /* Device Ethernet MAC address */
+#endif
+  } d_mac;
 #endif
 
   /* Network identity */

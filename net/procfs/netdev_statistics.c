@@ -147,7 +147,7 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
       case NET_LL_ETHERNET:
         len += snprintf(&netfile->line[len], NET_LINELEN - len,
                         "%s\tLink encap:Ethernet HWaddr %s",
-                        dev->d_ifname, ether_ntoa(&dev->d_mac));
+                        dev->d_ifname, ether_ntoa(&dev->d_mac.ether));
         break;
 #endif
 
@@ -215,7 +215,7 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
 #elif defined(CONFIG_NET_ETHERNET)
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   "%s\tLink encap:Ethernet HWaddr %s at %s\n",
-                  dev->d_ifname, ether_ntoa(&dev->d_mac), status);
+                  dev->d_ifname, ether_ntoa(&dev->d_mac.ether), status);
 
 #elif defined(CONFIG_NET_6LOWPAN)
   ieee = (FAR struct ieee802154_driver_s *)dev;
