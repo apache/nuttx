@@ -170,7 +170,7 @@
                                              * of the address is driver specific */
 #define WLIOC_GETADDR       _WLIOC(0x0036)  /* arg: Pointer to address value, format
                                              * of the address is driver specific */
-#define WLIOC_SETTXPOWER    _WLIOC(0x0036)  /* arg: Pointer to int32_t, output power
+#define WLIOC_SETTXPOWER    _WLIOC(0x0037)  /* arg: Pointer to int32_t, output power
                                              * (in dBm) */
 #define WLIOC_GETTXPOWER    _WLIOC(0x0038)  /* arg: Pointer to int32_t, output power
                                              * (in dBm) */

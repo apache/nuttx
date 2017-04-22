@@ -61,7 +61,6 @@
 
 #ifdef CONFIG_NET_6LOWPAN
 #  include <nuttx/net/sixlowpan.h>
-#  include <nuttx/wireless/wireless.h>
 #endif
 
 #ifdef CONFIG_NET_IGMP
@@ -757,7 +756,9 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
         }
         break;
 
-      /* MAC address operations only make sense if Ethernet is supported */
+      /* MAC address operations only make sense if Ethernet or 6loWPAN are
+       * supported.
+       */
 
 #if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_NET_6LOWPAN)
       case SIOCGIFHWADDR:  /* Get hardware address */
@@ -1275,7 +1276,7 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
     {
       FAR struct iwreq *wifrreq;
 
-      wifrreq = (FAR struct sixlowpan_req_s *)((uintptr_t)arg);
+      wifrreq = (FAR FAR struct iwreq *)((uintptr_t)arg);
       ret     = netdev_wifr_ioctl(psock, cmd, wifrreq);
     }
 #endif
