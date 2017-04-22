@@ -673,31 +673,14 @@ int bcmf_sdio_initialize(int minor, FAR struct sdio_dev_s *dev)
       goto exit_uninit_hw;
     }
 
-  /* Device is up and running
-     TODO Create a wlan device name and register network driver here */
+  /* sdio bus is ready, init driver */
 
-  // TODO remove: basic iovar test
-  up_mdelay(1000);
-  char fw_version[64];
-  uint32_t out_len = sizeof(fw_version);
-  ret = bcmf_sdpcm_iovar_request(priv, CHIP_STA_INTERFACE, false,
-                                 IOVAR_STR_VERSION, fw_version,
-                                 &out_len);
-  if (ret == OK)
+  ret = bcmf_wl_initialize(priv);
+  if (ret != OK)
     {
-      _info("fw version %d <%s>\n", out_len, fw_version);
-    }
-
-  up_mdelay(100);
-  out_len = 6;
-  ret = bcmf_sdpcm_iovar_request(priv, CHIP_STA_INTERFACE, false,
-                                 IOVAR_STR_CUR_ETHERADDR, fw_version,
-                                 &out_len);
-  if (ret == OK)
-    {
-      _info("MAC address %d %02X:%02X:%02X:%02X:%02X:%02X\n", out_len,
-                            fw_version[0], fw_version[1], fw_version[2],
-                            fw_version[3], fw_version[4], fw_version[5]);
+      _err("Cannot init wlan driver %d\n", ret);
+      ret = -EIO;
+      goto exit_uninit_hw;
     }
 
   return OK;
@@ -793,14 +776,14 @@ int bcmf_sdio_thread(int argc, char **argv)
           bcmf_write_sbregw(priv,
                        CORE_BUS_REG(priv->get_core_base_address(SDIOD_CORE_ID),
                        intstatus), priv->intstatus);
-          _info("intstatus %x\n", priv->intstatus);
+          // _info("intstatus %x\n", priv->intstatus);
         }
 
       /* On frame indication, read available frames */
 
       if (priv->intstatus & I_HMB_FRAME_IND)
         {
-          _info("Frames available\n");
+          // _info("Frames available\n");
 
           do
             {
@@ -825,7 +808,7 @@ int bcmf_sdio_thread(int argc, char **argv)
       /* If we're done for now, turn off clock request. */
 
       // TODO add wakelock
-      bcmf_sdio_bus_sleep(priv, true);
+      // bcmf_sdio_bus_sleep(priv, true);
     }
     return 0;
 }

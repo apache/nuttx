@@ -206,7 +206,8 @@ int bcmf_sdpcm_process_header(FAR struct bcmf_dev_s *priv,
  ****************************************************************************/
 
 // FIXME remove
-uint8_t tmp_buffer[512];
+uint8_t tmp_buffer[1024];
+uint8_t tmp_buffer_ctl[1024];
 int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
 {
   int ret;
@@ -241,7 +242,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
     }
 
   // FIXME define for size
-  if (len > 512)
+  if (len > sizeof(tmp_buffer))
     {
       _err("Frame is too large, cancel %d\n", len);
       ret = -ENOMEM;
@@ -258,8 +259,8 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
       goto exit_free_abort;
     }
 
-  _info("Receive frame\n");
-  bcmf_hexdump((uint8_t*)header, len, (unsigned int)header);
+  // _info("Receive frame\n");
+  // bcmf_hexdump((uint8_t*)header, len, (unsigned int)header);
 
   /* Process and validate header */
 
@@ -276,7 +277,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
   switch (header->channel & 0x0f)
     {
       case SDPCM_CONTROL_CHANNEL:
-        _info("Control message\n");
+        // _info("Control message\n");
 
         /* Check frame */
 
@@ -295,7 +296,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
         if (header->size < sizeof(struct bcmf_sdpcm_header) + 
                            sizeof(struct bcmf_sdpcm_cdc_header) +
                            cdc_header->len ||
-            cdc_header->len > 512 -
+            cdc_header->len > sizeof(tmp_buffer) -
                               sizeof(struct bcmf_sdpcm_header) -
                               sizeof(struct bcmf_sdpcm_cdc_header))
           {
@@ -310,7 +311,10 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
           {
             /* Expected frame received, send it back to user */
 
-            priv->control_rxframe = (uint8_t*)header;
+            // TODO allocate real buffer
+            memcpy(tmp_buffer_ctl, tmp_buffer, header->size);
+            priv->control_rxframe = tmp_buffer_ctl;
+            // priv->control_rxframe = (uint8_t*)header;
 
             sem_post(&priv->control_timeout);
             return OK;
@@ -325,6 +329,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
 
       case SDPCM_EVENT_CHANNEL:
         _info("Event message\n");
+        bcmf_hexdump((uint8_t*)header, header->size, (unsigned long)header);
         ret = OK;
         break;
 
@@ -380,9 +385,9 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
 
   frame->header.sequence = priv->tx_seq++;
 
-  _info("Send frame\n");
-  bcmf_hexdump((uint8_t*)&frame->header, frame->header.size,
-               (unsigned int)&frame->header);
+  // _info("Send frame\n");
+  // bcmf_hexdump((uint8_t*)&frame->header, frame->header.size,
+  //              (unsigned int)&frame->header);
 
   ret = bcmf_transfer_bytes(priv, true, 2, 0, (uint8_t*)&frame->header,
                             frame->header.size);
@@ -423,29 +428,39 @@ exit_post_sem:
 // FIXME remove
 uint8_t tmp_buffer2[512];
 uint8_t* bcmf_sdpcm_allocate_iovar(FAR struct bcmf_dev_s *priv, char *name,
-                              char *data, uint32_t *len)
+                              uint8_t *data, uint32_t *len)
 {
   uint32_t data_len;
-  uint16_t name_len = strlen(name) + 1;
+  uint16_t name_len;
 
-  if (!data)
+  if (name)
+    {
+      name_len = strlen(name) + 1;
+    }
+  else
+    {
+      name_len = 0;
+    }
+
+  if (data)
+    {
+      data_len = *len;
+    }
+  else
     {
       data_len = 0;
     }
-  else
-   {
-      data_len = *len;
-   }
+
+  *len = 0;
 
   // FIXME allocate buffer and use max_size instead of 512
   if (data_len > 512-sizeof(struct bcmf_sdpcm_cdc_frame) ||
       (data_len + name_len) > 512-sizeof(struct bcmf_sdpcm_cdc_frame))
     {
-      *len = 0;
       return NULL;
     }
 
-  // TODO allocate buffer
+  // TODO allocate buffer len + sizeof(struct bcmf_sdpcm_cdc_frame)
 
   /* Copy name string and data */
 
@@ -532,12 +547,13 @@ int bcmf_sdpcm_send_cdc_frame(FAR struct bcmf_dev_s *priv, uint32_t cmd,
   return bcmf_sdpcm_queue_frame(priv, SDPCM_CONTROL_CHANNEL, data, len);
 }
 
-int bcmf_sdpcm_iovar_request(FAR struct bcmf_dev_s *priv,
-                             uint32_t ifidx, bool set, char *name,
-                             char *data, uint32_t *len)
+int bcmf_sdpcm_control_request(FAR struct bcmf_dev_s *priv,
+                               uint32_t ifidx, bool set, uint32_t cmd,
+                               char *name, uint8_t *data, uint32_t *len)
 {
   int ret;
   uint8_t *iovar_buf;
+  uint32_t out_len = *len;
   uint32_t iovar_buf_len = *len;
 
   *len = 0;
@@ -559,13 +575,14 @@ int bcmf_sdpcm_iovar_request(FAR struct bcmf_dev_s *priv,
       goto exit_sem_post;
     }
 
-  /* Send control frame. Frame buffer is freed when sent */
+  /* Send control frame. iovar buffer is freed when sent */
 
-  ret = bcmf_sdpcm_send_cdc_frame(priv, set ? WLC_SET_VAR : WLC_GET_VAR,
+  ret = bcmf_sdpcm_send_cdc_frame(priv, cmd,
                              ifidx, set, iovar_buf, iovar_buf_len);
   if (ret != OK)
     {
-       goto exit_free_iovar;
+      // TODO free allocated iovar buffer here
+      goto exit_sem_post;
     }
 
   /* Wait for response */
@@ -579,25 +596,58 @@ int bcmf_sdpcm_iovar_request(FAR struct bcmf_dev_s *priv,
       goto exit_sem_post;
     }
 
+  /* Check frame status */
+
+  struct bcmf_sdpcm_cdc_dcmd *rxframe =
+              (struct bcmf_sdpcm_cdc_dcmd*)priv->control_rxframe;
+
+  priv->control_status = rxframe->cdc_header.status;
+
+  if (priv->control_status != 0)
+    {
+      _err("Invalid cdc status 0x%x\n", priv->control_status);
+      ret = -EIO;
+      goto exit_free_rx_frame;
+    }
+
   if (!set)
     {
       /* Request sent, copy received data back */
 
-      struct bcmf_sdpcm_cdc_dcmd *rxframe =
-              (struct bcmf_sdpcm_cdc_dcmd*)priv->control_rxframe;
-
-      memcpy(data, rxframe->data, rxframe->cdc_header.len);
-
-      *len = rxframe->cdc_header.len;
+      if (rxframe->cdc_header.len > out_len)
+        {
+          _err("RX frame too big %d %d\n", rxframe->cdc_header.len, out_len);
+          memcpy(data, rxframe->data, out_len);
+          *len = out_len;
+        }
+      else
+        {
+          memcpy(data, rxframe->data, rxframe->cdc_header.len);
+          *len = rxframe->cdc_header.len;
+        }
     }
 
+exit_free_rx_frame:
   // TODO free rxframe buffer */
+  priv->control_rxframe = NULL;
 
-  goto exit_sem_post;
-
-exit_free_iovar:
-  // TODO free allocated buffer here
 exit_sem_post:
   sem_post(&priv->control_mutex);
   return ret;
+}
+
+int bcmf_sdpcm_iovar_request(FAR struct bcmf_dev_s *priv,
+                             uint32_t ifidx, bool set, char *name,
+                             uint8_t *data, uint32_t *len)
+{
+  return bcmf_sdpcm_control_request(priv, ifidx, set,
+                                  set ? WLC_SET_VAR : WLC_GET_VAR, name,
+                                  data, len);
+}
+
+int bcmf_sdpcm_ioctl(FAR struct bcmf_dev_s *priv,
+                     uint32_t ifidx, bool set, uint32_t cmd,
+                     uint8_t *data, uint32_t *len)
+{
+   return bcmf_sdpcm_control_request(priv, ifidx, set, cmd, NULL, data, len);
 }

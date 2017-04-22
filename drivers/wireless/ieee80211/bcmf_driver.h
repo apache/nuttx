@@ -73,10 +73,13 @@ struct bcmf_dev_s
   sem_t control_timeout;           /* Semaphore to wait for control frame rsp */
   uint16_t control_reqid;          /* Current control request id */
   uint8_t *control_rxframe;        /* Received control frame response */
+  uint32_t control_status;         /* Last received frame status */
 
   // FIXME use mutex instead of semaphore
   sem_t tx_queue_mutex;            /* Lock for transmit queue */
   dq_queue_t tx_queue;             /* Queue of frames to tramsmit */
+
+  uint8_t mac_addr[6];             /* Current mac address */
 };
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H */
