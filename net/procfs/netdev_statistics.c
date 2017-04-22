@@ -112,9 +112,6 @@ static const linegen_t g_linegen[] =
 static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
 {
   FAR struct net_driver_s *dev;
-#ifdef CONFIG_NET_6LOWPAN
-  FAR struct ieee802154_driver_s *ieee;
-#endif
   FAR const char *status;
   int len = 0;
 
@@ -154,22 +151,20 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
 #ifdef CONFIG_NET_6LOWPAN
       case NET_LL_IEEE802154:
         {
-          ieee = (FAR struct ieee802154_driver_s *)dev;
-
 #ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
           len += snprintf(&netfile->line[len], NET_LINELEN - len,
                           "%s\tLink encap:6loWPAN HWaddr "
                           "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
                           dev->d_ifname,
-                          ieee->i_nodeaddr.u8[0], ieee->i_nodeaddr.u8[1],
-                          ieee->i_nodeaddr.u8[2], ieee->i_nodeaddr.u8[3],
-                          ieee->i_nodeaddr.u8[4], ieee->i_nodeaddr.u8[5],
-                          ieee->i_nodeaddr.u8[6], ieee->i_nodeaddr.u8[7]);
+                          dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
+                          dev->d_mac.ieee802154.u8[2], dev->d_mac.ieee802154.u8[3],
+                          dev->d_mac.ieee802154.u8[4], dev->d_mac.ieee802154.u8[5],
+                          dev->d_mac.ieee802154.u8[6], dev->d_mac.ieee802154.u8[7]);
 #else
           len += snprintf(&netfile->line[len], NET_LINELEN - len,
                           "%s\tLink encap:6loWPAN HWaddr %02x:%02x",
                           dev->d_ifname,
-                          ieee->i_nodeaddr.u8[0], ieee->i_nodeaddr.u8[1]);
+                          dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1]);
 #endif
         }
         break;
@@ -218,23 +213,21 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
                   dev->d_ifname, ether_ntoa(&dev->d_mac.ether), status);
 
 #elif defined(CONFIG_NET_6LOWPAN)
-  ieee = (FAR struct ieee802154_driver_s *)dev;
-
 #ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   "%s\tLink encap:6loWPAN HWaddr "
                   "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x at %s\n",
                   dev->d_ifname,
-                  ieee->i_nodeaddr.u8[0], ieee->i_nodeaddr.u8[1],
-                  ieee->i_nodeaddr.u8[2], ieee->i_nodeaddr.u8[3],
-                  ieee->i_nodeaddr.u8[4], ieee->i_nodeaddr.u8[5],
-                  ieee->i_nodeaddr.u8[6], ieee->i_nodeaddr.u8[7],
+                  dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
+                  dev->d_mac.ieee802154.u8[2], dev->d_mac.ieee802154.u8[3],
+                  dev->d_mac.ieee802154.u8[4], dev->d_mac.ieee802154.u8[5],
+                  dev->d_mac.ieee802154.u8[6], dev->d_mac.ieee802154.u8[7],
                   status);
 #else
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   "%s\tLink encap:6loWPAN HWaddr %02x:%02x at %s\n",
                   dev->d_ifname,
-                  ieee->i_nodeaddr.u8[0], ieee->i_nodeaddr.u8[1],
+                  dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
                   status);
 #endif
 #elif defined(CONFIG_NET_LOOPBACK)

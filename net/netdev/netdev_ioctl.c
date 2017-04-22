@@ -707,13 +707,9 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
               if (true)
 #endif
                 {
-                  FAR struct ieee802154_driver_s *ieee =
-                    (FAR struct ieee802154_driver_s *)dev;
-
                    req->ifr_hwaddr.sa_family = AF_INETX;
-                   memcpy(req->ifr_hwaddr.sa_data, ieee->i_nodeaddr.u8,
-                          NET_6LOWPAN_RIMEADDR_SIZE);
-                   ret = OK;
+                   memcpy(req->ifr_hwaddr.sa_data,
+                         dev->d_mac.ieee802154.u8, NET_6LOWPAN_RIMEADDR_SIZE);                          
                 }
                else
 #endif
@@ -750,13 +746,9 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
               if (true)
 #endif
                 {
-                  FAR struct ieee802154_driver_s *ieee =
-                    (FAR struct ieee802154_driver_s *)dev;
-
-                   req->ifr_hwaddr.sa_family = AF_INETX;
-                   memcpy(ieee->i_nodeaddr.u8, req->ifr_hwaddr.sa_data,
-                          NET_6LOWPAN_RIMEADDR_SIZE);
-                   ret = OK;
+                  memcpy(dev->d_mac.ieee802154.u8,
+                         req->ifr_hwaddr.sa_data, NET_6LOWPAN_RIMEADDR_SIZE);
+                  ret = OK;
                 }
               else
 #endif

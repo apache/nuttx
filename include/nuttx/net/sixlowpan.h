@@ -366,9 +366,7 @@
  * 2. i_dsn must be set to a random value.  After that, it will be managed
  *    by the network.
  *
- * 3. i_nodeaddr must be set after the MAC is assigned an address.
- *
- * 4. On a TX poll, the IEEE802.15.4 MAC driver should provide its driver
+ * 3. On a TX poll, the IEEE802.15.4 MAC driver should provide its driver
  *    structure with i_framelist set to NULL.  At the conclusion of the
  *    poll, if there are frames to be sent, they will have been added to
  *    the i_framelist.  The non-empty frame list at the conclusion of the
@@ -383,7 +381,7 @@
  *    After sending each frame, the driver must return the IOB to the pool
  *    of free IOBs using the FROM_IOB_FREE() macro.
  *
- * 5. When receiving data both buffers must be provided:
+ * 4. When receiving data both buffers must be provided:
  *
  *    The IEEE802.15.4 MAC driver should receive the frame data directly
  *    into the payload area of an IOB structure.  That IOB structure may be
@@ -443,10 +441,6 @@ struct ieee802154_driver_s
    */
 
   uint16_t i_panid;
-
-  /* i_node_addr.  The address assigned to this node. */
-
-  struct rimeaddr_s i_nodeaddr;
 
   /* i_dsn.  The sequence number in the range 0x00-0xff added to the
    * transmitted data or MAC command frame. The default is a random value

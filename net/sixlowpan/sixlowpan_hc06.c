@@ -614,7 +614,8 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
       /* Compression compare with this nodes address (source) */
 
-      iphc1   |= compress_addr_64(ipv6->srcipaddr, &ieee->i_nodeaddr,
+      iphc1   |= compress_addr_64(ipv6->srcipaddr,
+                                  &ieee->i_dev.d_mac.ieee802154,
                                   SIXLOWPAN_IPHC_SAM_BIT);
     }
 
@@ -624,7 +625,8 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
            ipv6->destipaddr[1] == 0 &&  ipv6->destipaddr[2] == 0 &&
            ipv6->destipaddr[3] == 0)
     {
-      iphc1 |= compress_addr_64(ipv6->srcipaddr, &ieee->i_nodeaddr,
+      iphc1 |= compress_addr_64(ipv6->srcipaddr,
+                                &ieee->i_dev.d_mac.ieee802154,
                                 SIXLOWPAN_IPHC_SAM_BIT);
     }
   else

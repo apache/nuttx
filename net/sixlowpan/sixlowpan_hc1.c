@@ -129,7 +129,7 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
 
   if (ipv6->vtc != 0x60 || ipv6->tcf != 0 || ipv6->flow != 0 ||
       !sixlowpan_islinklocal(ipv6->srcipaddr) ||
-      !sixlowpan_ismacbased(ipv6->srcipaddr, &ieee->i_nodeaddr) ||
+      !sixlowpan_ismacbased(ipv6->srcipaddr, &ieee->i_dev.d_mac.ieee802154) ||
       !sixlowpan_islinklocal(ipv6->destipaddr) ||
       !sixlowpan_ismacbased(ipv6->destipaddr, destmac) ||
       (ipv6->proto != IP_PROTO_ICMP6 && ipv6->proto != IP_PROTO_UDP &&
