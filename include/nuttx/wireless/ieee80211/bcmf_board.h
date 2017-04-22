@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #include <stdbool.h>
+#include <nuttx/irq.h>
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

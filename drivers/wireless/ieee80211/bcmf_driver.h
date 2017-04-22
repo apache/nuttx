@@ -82,4 +82,6 @@ struct bcmf_dev_s
   uint8_t mac_addr[6];             /* Current mac address */
 };
 
+int bcmf_wl_initialize(FAR struct bcmf_dev_s *priv);
+
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H */
