@@ -68,6 +68,8 @@ NM = $(ARCROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 
+# See http://dfu-util.sourceforge.net/
+
 DFUSUFFIX = dfu-suffix
 DFUUTIL = dfu-util
 
@@ -134,3 +136,4 @@ define DOWNLOAD
 endef
 
 endif
+
