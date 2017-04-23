@@ -1155,12 +1155,12 @@ config SAM34_TWIM1_FREQUENCY
 	default 100000
 	depends on SAM34_TWIM1
 
-config SAM34_TWI2_FREQUENCY
+config SAM34_TWIM2_FREQUENCY
 	int "TWI2 Frequency"
 	default 100000
 	depends on SAM34_TWIM2
 
-config SAM34_TWI3_FREQUENCY
+config SAM34_TWIM3_FREQUENCY
 	int "TWI3 Frequency"
 	default 100000
 	depends on SAM34_TWIM3
