@@ -202,7 +202,7 @@ int bcmf_cdc_control_request(FAR struct bcmf_dev_s *priv,
   frame = bcmf_cdc_allocate_frame(priv, name, data, out_len);
   if (!frame)
     {
-      _err("Cannot allocate cdc frame\n");
+      wlerr("Cannot allocate cdc frame\n");
       ret = -ENOMEM;
       goto exit_sem_post;
     }
@@ -224,7 +224,7 @@ int bcmf_cdc_control_request(FAR struct bcmf_dev_s *priv,
   ret = bcmf_sem_wait(&priv->control_timeout, CDC_CONTROL_TIMEOUT_MS);
   if (ret != OK)
     {
-      _err("Error while waiting for control response %d\n", ret);
+      wlerr("Error while waiting for control response %d\n", ret);
       goto exit_sem_post;
     }
 
@@ -234,7 +234,7 @@ int bcmf_cdc_control_request(FAR struct bcmf_dev_s *priv,
 
   if (priv->control_status != 0)
     {
-      _err("Invalid cdc status 0x%x\n", priv->control_status);
+      wlerr("Invalid cdc status 0x%x\n", priv->control_status);
       ret = -EINVAL;
     }
 
@@ -275,7 +275,7 @@ int bcmf_cdc_process_control_frame(FAR struct bcmf_dev_s *priv,
 
   if (data_size < sizeof(struct bcmf_cdc_header))
     {
-      _err("Control frame too small\n");
+      wlerr("Control frame too small\n");
       return -EINVAL;
     }
 
@@ -284,7 +284,7 @@ int bcmf_cdc_process_control_frame(FAR struct bcmf_dev_s *priv,
   if (data_size < cdc_header->len ||
       data_size < sizeof(struct bcmf_cdc_header) + cdc_header->len)
     {
-      _err("Invalid control frame size\n");
+      wlerr("Invalid control frame size\n");
       return -EINVAL;
     }
 
@@ -300,7 +300,7 @@ int bcmf_cdc_process_control_frame(FAR struct bcmf_dev_s *priv,
         {
           if (priv->control_rxdata_len > cdc_header->len)
             {
-              _err("Not enough data %d %d\n",
+              wlerr("Not enough data %d %d\n",
                       priv->control_rxdata_len, cdc_header->len);
               priv->control_rxdata_len = cdc_header->len;
             }
@@ -312,14 +312,14 @@ int bcmf_cdc_process_control_frame(FAR struct bcmf_dev_s *priv,
       return OK;
     }
 
-  _info("Got unexpected control frame\n");
+  wlinfo("Got unexpected control frame\n");
   return -EINVAL;
 }
 
 int bcmf_cdc_process_event_frame(FAR struct bcmf_dev_s *priv,
                    struct bcmf_frame_s *frame)
 {
-  _info("Event message\n");
+  wlinfo("Event message\n");
   bcmf_hexdump(frame->base, frame->len, (unsigned long)frame->base);
   return OK;
 }
@@ -327,7 +327,7 @@ int bcmf_cdc_process_event_frame(FAR struct bcmf_dev_s *priv,
 int bcmf_cdc_process_data_frame(FAR struct bcmf_dev_s *priv,
                    struct bcmf_frame_s *frame)
 {
-  _info("Data message\n");
+  wlinfo("Data message\n");
   bcmf_hexdump(frame->base, frame->len, (unsigned long)frame->base);
   return OK;
 }

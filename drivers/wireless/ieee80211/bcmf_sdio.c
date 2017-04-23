@@ -155,7 +155,7 @@ int bcmf_sdio_bus_sleep(FAR struct bcmf_sdio_dev_s *sbus, bool sleep)
                            SBSDIO_HT_AVAIL_REQ | SBSDIO_FORCE_HT);
       if (ret != OK)
         {
-          _err("HT Avail request failed %d\n", ret);
+          wlerr("HT Avail request failed %d\n", ret);
           return ret;
         }
   
@@ -181,7 +181,7 @@ int bcmf_sdio_bus_sleep(FAR struct bcmf_sdio_dev_s *sbus, bool sleep)
   
       if (loops <= 0)
         {
-          _err("HT clock not ready\n");
+          wlerr("HT clock not ready\n");
           return -ETIMEDOUT;
         }
 
@@ -254,7 +254,7 @@ int bcmf_probe(FAR struct bcmf_sdio_dev_s *sbus)
 
 exit_error:
 
-  _err("ERROR: failed to probe device %d\n", sbus->minor);
+  wlerr("ERROR: failed to probe device %d\n", sbus->minor);
   return ret;
 }
 
@@ -300,7 +300,7 @@ int bcmf_businitialize(FAR struct bcmf_sdio_dev_s *sbus)
 
   if (loops <= 0)
     {
-      _err("failed to enable ALP\n");
+      wlerr("failed to enable ALP\n");
       return -ETIMEDOUT;
     }
 
@@ -651,7 +651,7 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
 
   if (ret <= 0)
     {
-      _err("Cannot spawn bcmf thread\n");
+      wlerr("Cannot spawn bcmf thread\n");
       ret = -EBADE;
       goto exit_uninit_hw;
     }
@@ -684,19 +684,19 @@ int bcmf_chipinitialize(FAR struct bcmf_sdio_dev_s *sbus)
     {
       return ret;
     }
-  _info("chip id is 0x%x\n", value);
+  wlinfo("chip id is 0x%x\n", value);
 
   int chipid = value & 0xffff;
   switch (chipid)
     {
 #ifdef CONFIG_IEEE80211_BROADCOM_BCM43362
       case SDIO_DEVICE_ID_BROADCOM_43362:
-        _info("bcm43362 chip detected\n");
+        wlinfo("bcm43362 chip detected\n");
         sbus->chip = (struct bcmf_sdio_chip*)&bcmf_43362_config_sdio;
         break;
 #endif
       default:
-        _err("chip 0x%x is not supported\n", chipid);
+        wlerr("chip 0x%x is not supported\n", chipid);
         return -ENODEV;
    }
   return OK;
@@ -718,7 +718,7 @@ int bcmf_sdio_thread(int argc, char **argv)
   FAR struct bcmf_dev_s *priv = g_sdio_priv;
   FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s*)priv->bus;
   
-  _info("Enter\n");
+  wlinfo("Enter\n");
 
   /*  FIXME wait for the chip to be ready to receive commands */
 
@@ -731,7 +731,7 @@ int bcmf_sdio_thread(int argc, char **argv)
       ret = sem_wait(&sbus->thread_signal);
       if (ret != OK)
         {
-          _err("Error while waiting for semaphore\n");
+          wlerr("Error while waiting for semaphore\n");
           break;
         }
 
@@ -759,14 +759,14 @@ int bcmf_sdio_thread(int argc, char **argv)
           bcmf_write_sbregw(sbus,
                        CORE_BUS_REG(sbus->chip->core_base[SDIOD_CORE_ID],
                        intstatus), sbus->intstatus);
-          // _info("intstatus %x\n", sbus->intstatus);
+          // wlinfo("intstatus %x\n", sbus->intstatus);
         }
 
       /* On frame indication, read available frames */
 
       if (sbus->intstatus & I_HMB_FRAME_IND)
         {
-          // _info("Frames available\n");
+          // wlinfo("Frames available\n");
 
           do
             {
@@ -794,7 +794,7 @@ int bcmf_sdio_thread(int argc, char **argv)
       // bcmf_sdio_bus_sleep(sbus, true);
     }
 
-  _info("Exit\n");
+  wlinfo("Exit\n");
 
   return 0;
 }

@@ -165,7 +165,7 @@ int bcmf_upload_binary(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
                                 address & SBSDIO_SB_OFT_ADDR_MASK, buf, size);
       if (ret != OK)
         {
-            _err("transfer failed %d %x %d\n", ret, address, size);
+            wlerr("transfer failed %d %x %d\n", ret, address, size);
             return ret;
         }
 
@@ -186,7 +186,7 @@ int bcmf_upload_nvram(FAR struct bcmf_sdio_dev_s *sbus)
 
   nvram_sz = (*sbus->chip->nvram_image_size + 63) & (-64);
 
-  _info("nvram size is %d %d bytes\n", nvram_sz,
+  wlinfo("nvram size is %d %d bytes\n", nvram_sz,
                                        *sbus->chip->nvram_image_size);
 
   /* Write image */
@@ -262,7 +262,7 @@ int bcmf_core_upload_firmware(FAR struct bcmf_sdio_dev_s *sbus)
 {
   int ret;
 
-  _info("upload firmware\n");
+  wlinfo("upload firmware\n");
 
   /* Disable ARMCM3 core and reset SOCRAM core
    * to set device in firmware upload mode */
@@ -274,23 +274,23 @@ int bcmf_core_upload_firmware(FAR struct bcmf_sdio_dev_s *sbus)
 
   /* Flash chip firmware */
 
-  _info("firmware size is %d bytes\n", *sbus->chip->firmware_image_size);
+  wlinfo("firmware size is %d bytes\n", *sbus->chip->firmware_image_size);
   ret = bcmf_upload_binary(sbus, 0, sbus->chip->firmware_image,
                            *sbus->chip->firmware_image_size);
 
   if (ret != OK)
     {
-        _err("Failed to upload firmware\n");
+        wlerr("Failed to upload firmware\n");
         return ret;
     }
 
   /* Flash NVRAM configuration file */
 
-  _info("upload nvram configuration\n");
+  wlinfo("upload nvram configuration\n");
   ret = bcmf_upload_nvram(sbus);
   if (ret != OK)
     {
-        _err("Failed to upload nvram\n");
+        wlerr("Failed to upload nvram\n");
         return ret;
     }
 
@@ -304,7 +304,7 @@ int bcmf_core_upload_firmware(FAR struct bcmf_sdio_dev_s *sbus)
   up_mdelay(10);
   if (!bcmf_core_isup(sbus, WLAN_ARMCM3_CORE_ID))
     {
-      _err("Cannot start ARMCM3 core\n");
+      wlerr("Cannot start ARMCM3 core\n");
       return -ETIMEDOUT;
     }
 
@@ -317,7 +317,7 @@ bool bcmf_core_isup(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core)
 
   if (core >= MAX_CORE_ID)
     {
-      _err("Invalid core id %d\n", core);
+      wlerr("Invalid core id %d\n", core);
       return false;
     }
   uint32_t base = sbus->chip->core_base[core];
@@ -340,7 +340,7 @@ void bcmf_core_disable(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core)
 
   if (core >= MAX_CORE_ID)
     {
-      _err("Invalid core id %d\n", core);
+      wlerr("Invalid core id %d\n", core);
       return;
     }
   uint32_t base = sbus->chip->core_base[core];
@@ -378,7 +378,7 @@ void bcmf_core_reset(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core)
 
   if (core >= MAX_CORE_ID)
     {
-      _err("Invalid core id %d\n", core);
+      wlerr("Invalid core id %d\n", core);
       return;
     }
   uint32_t base = sbus->chip->core_base[core];

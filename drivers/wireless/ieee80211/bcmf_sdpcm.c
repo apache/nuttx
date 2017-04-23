@@ -147,19 +147,19 @@ int bcmf_sdpcm_process_header(FAR struct bcmf_sdio_dev_s *sbus,
   if (header->data_offset < sizeof(struct bcmf_sdpcm_header) ||
       header->data_offset > header->size)
     {
-      _err("Invalid data offset\n");
+      wlerr("Invalid data offset\n");
       bcmf_sdpcm_rxfail(sbus, false);
       return -ENXIO;
     }
 
   /* Update tx credits */
 
-  // _info("update credit %x %x %x\n", header->credit,
+  // wlinfo("update credit %x %x %x\n", header->credit,
   //                                   sbus->tx_seq, sbus->max_seq);
 
   if (header->credit - sbus->tx_seq > 0x40)
     {
-      _err("seq %d: max tx seq number error\n", sbus->tx_seq);
+      wlerr("seq %d: max tx seq number error\n", sbus->tx_seq);
       sbus->max_seq = sbus->tx_seq + 2;
     }
   else
@@ -194,7 +194,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
   ret = bcmf_transfer_bytes(sbus, false, 2, 0, (uint8_t*)header, 4);
   if (ret != OK)
     {
-      _info("failread size\n");
+      wlinfo("failread size\n");
       ret = -EIO;
       goto exit_abort;
     }
@@ -211,7 +211,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
 
   if (((~len & 0xffff) ^ checksum) || len < sizeof(struct bcmf_sdpcm_header))
     {
-      _err("Invalid header checksum or len %x %x\n", len, checksum);
+      wlerr("Invalid header checksum or len %x %x\n", len, checksum);
       ret = -EINVAL;
       goto exit_abort;
     }
@@ -219,7 +219,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
   // FIXME define for size
   if (len > sizeof(tmp_buffer))
     {
-      _err("Frame is too large, cancel %d\n", len);
+      wlerr("Frame is too large, cancel %d\n", len);
       ret = -ENOMEM;
       goto exit_abort;
     }
@@ -234,7 +234,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
       goto exit_free_abort;
     }
 
-  // _info("Receive frame\n");
+  // wlinfo("Receive frame\n");
   // bcmf_hexdump((uint8_t*)header, header->size, (unsigned int)header);
 
   /* Process and validate header */
@@ -242,7 +242,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
   ret = bcmf_sdpcm_process_header(sbus, header);
   if (ret != OK)
     {
-      _err("Error while processing header %d\n", ret);
+      wlerr("Error while processing header %d\n", ret);
       ret = -EINVAL;
       goto exit_free_frame;
     }
@@ -270,7 +270,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
         break;
 
       default:
-        _err("Got unexpected message type %d\n", header->channel);
+        wlerr("Got unexpected message type %d\n", header->channel);
         ret = OK;
     }
 
@@ -302,7 +302,7 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
   if (sbus->tx_seq == sbus->max_seq)
     {
       // TODO handle this case
-      _err("No credit to send frame\n");
+      wlerr("No credit to send frame\n");
       return -EAGAIN;
     }
 
@@ -320,7 +320,7 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
 
   header->sequence = sbus->tx_seq++;
 
-  // _info("Send frame\n");
+  // wlinfo("Send frame\n");
   // bcmf_hexdump(sframe->frame_header.base, sframe->frame_header.len,
   //              (unsigned long)sframe->frame_header.base);
 
@@ -328,7 +328,7 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
                             sframe->frame_header.len);
   if (ret != OK)
     {
-      _info("fail send frame %d\n", ret);
+      wlinfo("fail send frame %d\n", ret);
       ret = -EIO;
       goto exit_abort;
       // TODO handle retry count and remove frame from queue + abort TX

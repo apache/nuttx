@@ -151,7 +151,7 @@ int bcmf_wl_set_mac_address(FAR struct bcmf_dev_s *priv, uint8_t *addr)
       return ret;
     }
 
-  _info("MAC address updated %02X:%02X:%02X:%02X:%02X:%02X\n",
+  wlinfo("MAC address updated %02X:%02X:%02X:%02X:%02X:%02X\n",
                             addr[0], addr[1], addr[2],
                             addr[3], addr[4], addr[5]);
   memcpy(priv->mac_addr, addr, 6);
@@ -312,7 +312,7 @@ int bcmf_run_escan(FAR struct bcmf_dev_s *priv)
 
   params->params.channel_num = 0;
 
-  _info("start scan\n");
+  wlinfo("start scan\n");
 
   out_len = sizeof(*params);
   ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
@@ -365,7 +365,7 @@ int bcmf_wl_initialize(FAR struct bcmf_dev_s *priv)
 
   memcpy(priv->mac_addr, tmp_buf, 6);
 
-  _info("MAC address is %02X:%02X:%02X:%02X:%02X:%02X\n",
+  wlinfo("MAC address is %02X:%02X:%02X:%02X:%02X:%02X\n",
                         tmp_buf[0], tmp_buf[1], tmp_buf[2],
                         tmp_buf[3], tmp_buf[4], tmp_buf[5]);
   
@@ -387,7 +387,7 @@ int bcmf_wl_initialize(FAR struct bcmf_dev_s *priv)
       tmp_buf[out_len-1] = 0;
     }
 
-  _info("fw version <%s>\n", tmp_buf);
+  wlinfo("fw version <%s>\n", tmp_buf);
 
   /* FIXME Configure event mask to enable all asynchronous events */
 
@@ -412,7 +412,7 @@ int bcmf_sdio_initialize(int minor, FAR struct sdio_dev_s *dev)
   int ret;
   FAR struct bcmf_dev_s *priv;
 
-  _info("minor: %d\n", minor);
+  wlinfo("minor: %d\n", minor);
 
   priv = bcmf_allocate_device();
   if (!priv)

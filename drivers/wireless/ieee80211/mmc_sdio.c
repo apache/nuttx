@@ -60,7 +60,7 @@ int sdio_sendcmdpoll(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
       ret = SDIO_WAITRESPONSE(dev, cmd);
       if (ret != OK)
         {
-          _err("ERROR: Wait for response to cmd: %08x failed: %d\n",
+          wlerr("ERROR: Wait for response to cmd: %08x failed: %d\n",
                cmd, ret);
         }
     }
@@ -98,7 +98,7 @@ int sdio_io_rw_direct(FAR struct sdio_dev_s *dev, bool write,
 
     if (ret != OK)
       {
-        _err("ERROR: SDIO_RECVR5 failed %d\n", ret);
+        wlerr("ERROR: SDIO_RECVR5 failed %d\n", ret);
         return ret;
       }
 
@@ -144,7 +144,7 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
       {
         /* Use byte mode */
 
-        // _info("byte mode\n");
+        // wlinfo("byte mode\n");
         arg.cmd53.block_mode = 0;
         arg.cmd53.byte_block_count = blocklen;
         nblocks = 1;
@@ -165,7 +165,7 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
 
     if (write)
       {
-        // _info("prep write %d %d\n", blocklen, nblocks);
+        // wlinfo("prep write %d %d\n", blocklen, nblocks);
         sdio_sendcmdpoll(dev, SDIO_ACMD53, (uint32_t)arg.value);
         ret = SDIO_RECVR5(dev, SDIO_ACMD53, (uint32_t*)&resp);
 
@@ -174,7 +174,7 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
       }
     else
       {
-        // _info("prep read %d\n", blocklen * nblocks);
+        // wlinfo("prep read %d\n", blocklen * nblocks);
         SDIO_RECVSETUP(dev, buf, blocklen * nblocks);
         SDIO_SENDCMD(dev, SDIO_ACMD53, (uint32_t)arg.value);
 
@@ -184,7 +184,7 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
 
     if (ret != OK)
       {
-        _err("ERROR: SDIO_RECVR5 failed %d\n", ret);
+        wlerr("ERROR: SDIO_RECVR5 failed %d\n", ret);
         return ret;
       }
 
@@ -192,17 +192,17 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
 
     if (wkupevent & SDIOWAIT_TIMEOUT)
       {
-        _err("timeout\n");
+        wlerr("timeout\n");
         return -ETIMEDOUT;
       }
     if (resp.flags.error || (wkupevent & SDIOWAIT_ERROR))
       {
-        _err("error 1\n");
+        wlerr("error 1\n");
         return -EIO;
       }
     if (resp.flags.function_number || resp.flags.out_of_range)
       {
-        _err("error 2\n");
+        wlerr("error 2\n");
         return -EINVAL;
       }
 
@@ -266,11 +266,11 @@ int sdio_probe(FAR struct sdio_dev_s *dev)
   ret = SDIO_RECVR6(dev, SD_CMD3, &data);
     if (ret != OK)
     {
-        _err("ERROR: RCA request failed: %d\n", ret);
+        wlerr("ERROR: RCA request failed: %d\n", ret);
         return ret;
     }
 
-    _info("rca is %x\n", data >> 16);
+    wlinfo("rca is %x\n", data >> 16);
 
   /* Send CMD7 with the argument == RCA in order to select the card
    * and put it in Transfer State */
@@ -280,7 +280,7 @@ int sdio_probe(FAR struct sdio_dev_s *dev)
   ret = SDIO_RECVR1(dev, MMCSD_CMD7S, &data);
   if (ret != OK)
     {
-      _err("ERROR: card selection failed: %d\n", ret);
+      wlerr("ERROR: card selection failed: %d\n", ret);
       return ret;
     }
 
@@ -358,7 +358,7 @@ int sdio_enable_function(FAR struct sdio_dev_s *dev, uint8_t function)
         {
           /* Function enabled */
 
-          _info("Function %d enabled\n", function);
+          wlinfo("Function %d enabled\n", function);
           return OK;
         }
     }
