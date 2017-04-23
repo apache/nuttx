@@ -7,12 +7,10 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv);
 
 int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv);
 
-int bcmf_sdpcm_iovar_request(FAR struct bcmf_dev_s *priv,
-                             uint32_t ifidx, bool set, char *name,
-                             uint8_t *data, uint32_t *len);
+int bcmf_sdpcm_queue_frame(FAR struct bcmf_dev_s *priv,
+                           struct bcmf_frame_s *frame);
 
-int bcmf_sdpcm_ioctl(FAR struct bcmf_dev_s *priv,
-                     uint32_t ifidx, bool set, uint32_t cmd,
-                     uint8_t *data, uint32_t *len);
+struct bcmf_frame_s* bcmf_sdpcm_allocate_frame(FAR struct bcmf_dev_s *priv,
+                                unsigned int len, bool control, bool block);
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_SDPCM_H */

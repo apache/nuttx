@@ -61,16 +61,13 @@
 #define I_HMB_SW_MASK                 ( (uint32_t) 0x000000F0 )
 #define I_HMB_FRAME_IND               ( 1<<6 )
 
-#define CHIP_STA_INTERFACE   0
-#define CHIP_AP_INTERFACE    1
-#define CHIP_P2P_INTERFACE   2
-
 enum {
-    CHIPCOMMON_CORE_ID,
+    CHIPCOMMON_CORE_ID = 0,
     DOT11MAC_CORE_ID,
     SDIOD_CORE_ID,
     WLAN_ARMCM3_CORE_ID,
-    SOCSRAM_CORE_ID
+    SOCSRAM_CORE_ID,
+    MAX_CORE_ID
 };
 
 struct chip_core_info {
@@ -211,9 +208,5 @@ struct sdpcmd_regs {
 
 	uint16_t PAD[0x80];
 };
-
-#ifdef CONFIG_IEEE80211_BROADCOM_BCM43362
-#include "bcmf_chip_43362.h"
-#endif
 
 #endif /* _BCMF_SDIO_CHIP_H_ */

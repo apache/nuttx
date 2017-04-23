@@ -37,7 +37,8 @@
 #define __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H
 
 #include <stdbool.h>
-#include <nuttx/sdio.h>
+#include <stdint.h>
+#include <semaphore.h>
 
 #define BCMF_STATUS_BUS_UP (1<<0) /* Chip is flashed and running */
 #define BCMF_STATUS_READY  (1<<1) /* Chip is ready to receive requests */
@@ -45,43 +46,56 @@
 #define BCMF_STATUS_SLEEP  (1<<2) /* Chip is in low power mode */
 #define BCMF_STATUS_WAIT_CONTROL (1<<3) /* Waiting for control response */
 
+struct bcmf_bus_dev_s;
+struct bcmf_frame_s;
+
 /* This structure contains the unique state of the Broadcom FullMAC driver */
 
 struct bcmf_dev_s
 {
-  FAR struct sdio_dev_s *sdio_dev; /* The SDIO device bound to this instance */
-  int minor;                       /* Device minor number */
-
-  uint32_t backplane_current_addr; /* Current function 1 backplane base addr */
-
-  uint32_t (*get_core_base_address)(unsigned int core); /* Get chip specific
-                                      base address for evey cores */
-
-  sem_t thread_signal;             /* Semaphore for processing thread event */
-  struct wdog_s *waitdog;          /* Processing thread waitdog */
-  bool ready;                      /* Current device status */
-  bool sleeping;                   /* Current sleep status */
-  volatile bool irq_pending;       /* True if interrupt is pending */
-  uint32_t intstatus;              /* Copy of device current interrupt status */
-
-  uint8_t max_seq;                 /* Maximum transmit sequence allowed */
-  uint8_t tx_seq;                  /* Transmit sequence number (next) */
-  uint8_t rx_seq;                  /* Receive sequence number (expected) */
+  FAR struct bcmf_bus_dev_s *bus;  /* Bus interface structure */
 
   // FIXME use mutex instead of semaphore
-  sem_t control_mutex;             /* Cannot handle multiple control requests */
-  sem_t control_timeout;           /* Semaphore to wait for control frame rsp */
-  uint16_t control_reqid;          /* Current control request id */
-  uint8_t *control_rxframe;        /* Received control frame response */
-  uint32_t control_status;         /* Last received frame status */
+  sem_t control_mutex;         /* Cannot handle multiple control requests */
+  sem_t control_timeout;       /* Semaphore to wait for control frame rsp */
+  uint16_t control_reqid;      /* Current control request id */
+  uint16_t control_rxdata_len; /* Received control frame out buffer length */
+  uint8_t *control_rxdata;     /* Received control frame out buffer */
+  uint32_t control_status;     /* Last received frame status */
 
-  // FIXME use mutex instead of semaphore
-  sem_t tx_queue_mutex;            /* Lock for transmit queue */
-  dq_queue_t tx_queue;             /* Queue of frames to tramsmit */
-
-  uint8_t mac_addr[6];             /* Current mac address */
+  uint8_t mac_addr[6];         /* Current mac address */
 };
 
-int bcmf_wl_initialize(FAR struct bcmf_dev_s *priv);
+/* Default bus interface structure */
+
+struct bcmf_bus_dev_s {
+  void (*stop)(FAR struct bcmf_dev_s *priv);
+  int (*txframe)(FAR struct bcmf_dev_s *priv, struct bcmf_frame_s *frame);
+
+  /* Frame buffer allocation primitive
+   * len     - requested payload length
+   * control - true if control frame else false
+   * block   - true to block until free frame is available
+   */
+  struct bcmf_frame_s* (*allocate_frame)(FAR struct bcmf_dev_s *priv,
+          unsigned int len, bool control, bool block);
+};
+
+/* bcmf frame definition */
+
+struct bcmf_frame_s {
+  uint8_t *base;    /* Frame base buffer used by low level layer (SDIO) */
+  uint8_t *data;    /* Payload data (Control, data and event messages) */
+  unsigned int len; /* Frame buffer size */
+};
+
+/* Notify driver frame is available */
+
+void bcmf_notify_rxframe(FAR struct bcmf_dev_s *priv,
+                         struct bcmf_frame_s *frame);
+
+/* Notify driver bus is ready */
+
+int brcmf_bus_start(FAR struct bcmf_dev_s *priv);
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H */

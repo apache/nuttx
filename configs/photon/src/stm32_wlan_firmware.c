@@ -45,7 +45,7 @@
  * Character array of NVRAM image
  */
 
-const char __attribute__((section(".wlan_nvram_image"))) bcmf_nvram_image[] =
+const char __attribute__((section(".wlan_nvram_image"))) bcm43362_nvram_image[] =
         "manfid=0x2d0"                                              "\x00"
         "prodid=0x492"                                              "\x00"
         "vendid=0x14e4"                                             "\x00"
@@ -106,10 +106,10 @@ const char __attribute__((section(".wlan_nvram_image"))) bcmf_nvram_image[] =
         "edoffthd=-76"                                              "\x00"
         "\x00\x00";
 
-const unsigned int bcmf_nvram_image_len = sizeof(bcmf_nvram_image);
+const unsigned int bcm43362_nvram_image_len = sizeof(bcm43362_nvram_image);
 
 const uint8_t
-__attribute__((section(".wlan_firmware_image"))) bcmf_firmware_image[] = {
+__attribute__((section(".wlan_firmware_image"))) bcm43362_firmware_image[] = {
   0x00, 0x00, 0x00, 0x00, 0xcd, 0xc2, 0x00, 0x00, 0x91, 0xc1, 0x00, 0x00,
   0x91, 0xc1, 0x00, 0x00, 0x91, 0xc1, 0x00, 0x00, 0x91, 0xc1, 0x00, 0x00,
   0x91, 0xc1, 0x00, 0x00, 0x91, 0xc1, 0x00, 0x00, 0x91, 0xc1, 0x00, 0x00,
@@ -17647,4 +17647,4 @@ __attribute__((section(".wlan_firmware_image"))) bcmf_firmware_image[] = {
   0xd2, 0x58, 0x82, 0x92
 };
 
-const unsigned int bcmf_firmware_image_len = sizeof(bcmf_firmware_image);
+const unsigned int bcm43362_firmware_image_len = sizeof(bcm43362_firmware_image);

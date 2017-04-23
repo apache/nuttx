@@ -40,18 +40,23 @@ ifeq ($(CONFIG_DRIVERS_IEEE80211),y)
 
 # Include IEEE 802.11 drivers into the build
 
-ifeq ($(CONFIG_IEEE80211_BROADCOM_FULLMAC_SDIO),y)
+ifeq ($(CONFIG_IEEE80211_BROADCOM_FULLMAC),y)
   CSRCS += bcmf_driver.c
+  CSRCS += bcmf_cdc.c
+  CSRCS += bcmf_utils.c
+
+ifeq ($(CONFIG_IEEE80211_BROADCOM_FULLMAC_SDIO),y)  
+  CSRCS += mmc_sdio.c
   CSRCS += bcmf_sdio.c
   CSRCS += bcmf_core.c
   CSRCS += bcmf_sdpcm.c
-  CSRCS += bcmf_hexdump.c
-  CSRCS += mmc_sdio.c
 endif
 
 ifeq ($(CONFIG_IEEE80211_BROADCOM_BCM43362),y)
 CSRCS += bcmf_chip_43362.c
 endif
+
+endif # CONFIG_IEEE80211_BROADCOM_FULLMAC
 
 # Include IEEE 802.11 build support
 

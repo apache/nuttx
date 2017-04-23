@@ -52,7 +52,10 @@
 #include "bcmf_sdio.h"
 #include "bcmf_core.h"
 #include "bcmf_sdpcm.h"
-#include "bcmf_ioctl.h"
+#include "bcmf_cdc.h"
+#include "bcmf_utils.h"
+
+#include "bcmf_sdio_regs.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -70,26 +73,14 @@
 #define SMB_USE_OOB (1 << 2)  /* Use OOB Wakeup */
 #define SMB_DEV_INT (1 << 3)  /* Miscellaneous Interrupt */
 
-/* CDC flag definitions */
-#define CDC_DCMD_ERROR    0x01       /* 1=cmd failed */
-#define CDC_DCMD_SET      0x02       /* 0=get, 1=set cmd */
-#define CDC_DCMD_IF_MASK  0xF000     /* I/F index */
-#define CDC_DCMD_IF_SHIFT 12
-#define CDC_DCMD_ID_MASK  0xFFFF0000 /* id an cmd pairing */
-#define CDC_DCMD_ID_SHIFT 16         /* ID Mask shift bits */
-#define CDC_DCMD_ID(flags)  \
-  (((flags) & CDC_DCMD_ID_MASK) >> CDC_DCMD_ID_SHIFT)
-
 #define SDPCM_CONTROL_CHANNEL 0  /* Control */
 #define SDPCM_EVENT_CHANNEL   1  /* Asyc Event Indication */
 #define SDPCM_DATA_CHANNEL    2  /* Data Xmit/Recv */
 #define SDPCM_GLOM_CHANNEL    3  /* Coalesced packets */
 #define SDPCM_TEST_CHANNEL    15 /* Test/debug packets */
 
-#define SDPCM_CONTROL_TIMEOUT_MS 1000
-
-// TODO remove
-void bcmf_hexdump(uint8_t *data, unsigned int len, unsigned long offset);
+#define container_of(ptr, type, member) \
+        (type *)( (uint8_t *)(ptr) - offsetof(type,member) )
 
 /****************************************************************************
  * Private Types
@@ -107,40 +98,18 @@ struct bcmf_sdpcm_header {
     uint16_t padding;
 };
 
-struct bcmf_sdpcm_cdc_header {
-    uint32_t cmd;    /* dongle command value */
-    uint32_t len;    /* lower 16: output buflen;
-                      * upper 16: input buflen (excludes header) */
-    uint32_t flags;  /* flag defns given below */
-    uint32_t status; /* status code returned from the device */
-};
-
-struct bcmf_sdpcm_cdc_dcmd {
-    struct bcmf_sdpcm_header     header;
-    struct bcmf_sdpcm_cdc_header cdc_header;
-    uint8_t                      data[0];
-};
-
 struct bcmf_sdpcm_frame {
+    struct bcmf_frame_s          frame_header;
     dq_entry_t                   list_entry;
-    struct bcmf_sdpcm_header     header;
-    uint8_t                      data[0];
-};
-
-struct bcmf_sdpcm_cdc_frame {
-    dq_entry_t                   list_entry;
-    struct bcmf_sdpcm_header     header;
-    struct bcmf_sdpcm_cdc_header cdc_header;
-    uint8_t                      data[0];
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int bcmf_sdpcm_rxfail(FAR struct bcmf_dev_s *priv, bool retry);
+static int bcmf_sdpcm_rxfail(FAR struct bcmf_sdio_dev_s *sbus, bool retry);
 
-static int bcmf_sdpcm_process_header(FAR struct bcmf_dev_s *priv,
+static int bcmf_sdpcm_process_header(FAR struct bcmf_sdio_dev_s *sbus,
                               struct bcmf_sdpcm_header *header);
 
 /****************************************************************************
@@ -151,51 +120,51 @@ static int bcmf_sdpcm_process_header(FAR struct bcmf_dev_s *priv,
  * Private Functions
  ****************************************************************************/
 
-int bcmf_sdpcm_rxfail(FAR struct bcmf_dev_s *priv, bool retry)
+int bcmf_sdpcm_rxfail(FAR struct bcmf_sdio_dev_s *sbus, bool retry)
 {
   /* issue abort command for F2 through F0 */
 
-  bcmf_write_reg(priv, 0, SDIO_CCCR_IOABORT, 2);
+  bcmf_write_reg(sbus, 0, SDIO_CCCR_IOABORT, 2);
 
-  bcmf_write_reg(priv, 1, SBSDIO_FUNC1_FRAMECTRL, SFC_RF_TERM);
+  bcmf_write_reg(sbus, 1, SBSDIO_FUNC1_FRAMECTRL, SFC_RF_TERM);
 
   /* TODO Wait until the packet has been flushed (device/FIFO stable) */
 
   /* Send NAK to retry to read frame */
   if (retry)
     {
-      bcmf_write_sbregb(priv,
-                  CORE_BUS_REG(priv->get_core_base_address(SDIOD_CORE_ID),
+      bcmf_write_sbregb(sbus,
+                  CORE_BUS_REG(sbus->chip->core_base[SDIOD_CORE_ID],
                   tosbmailbox), SMB_NAK);
     }
 
   return 0;
 }
 
-int bcmf_sdpcm_process_header(FAR struct bcmf_dev_s *priv,
+int bcmf_sdpcm_process_header(FAR struct bcmf_sdio_dev_s *sbus,
                               struct bcmf_sdpcm_header *header)
 {
   if (header->data_offset < sizeof(struct bcmf_sdpcm_header) ||
       header->data_offset > header->size)
     {
       _err("Invalid data offset\n");
-      bcmf_sdpcm_rxfail(priv, false);
+      bcmf_sdpcm_rxfail(sbus, false);
       return -ENXIO;
     }
 
   /* Update tx credits */
 
-  _info("update credit %x %x %x\n", header->credit,
-                                    priv->tx_seq, priv->max_seq);
+  // _info("update credit %x %x %x\n", header->credit,
+  //                                   sbus->tx_seq, sbus->max_seq);
 
-  if (header->credit - priv->tx_seq > 0x40)
+  if (header->credit - sbus->tx_seq > 0x40)
     {
-      _err("seq %d: max tx seq number error\n", priv->tx_seq);
-      priv->max_seq = priv->tx_seq + 2;
+      _err("seq %d: max tx seq number error\n", sbus->tx_seq);
+      sbus->max_seq = sbus->tx_seq + 2;
     }
   else
     {
-      priv->max_seq = header->credit;
+      sbus->max_seq = header->credit;
     }
 
   return OK;
@@ -207,16 +176,22 @@ int bcmf_sdpcm_process_header(FAR struct bcmf_dev_s *priv,
 
 // FIXME remove
 uint8_t tmp_buffer[1024];
-uint8_t tmp_buffer_ctl[1024];
 int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
 {
   int ret;
   uint16_t len, checksum;
-  struct bcmf_sdpcm_header *header = (struct bcmf_sdpcm_header*)tmp_buffer;
+  struct bcmf_sdpcm_header *header;
+  struct bcmf_sdpcm_frame *sframe;
+  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s*)priv->bus;
+
+  /* TODO request free frame buffer */
+
+  sframe = (struct bcmf_sdpcm_frame*)tmp_buffer;
+  header = (struct bcmf_sdpcm_header*)&sframe[1];
 
   /* Read header */
 
-  ret = bcmf_transfer_bytes(priv, false, 2, 0, (uint8_t*)header, 4);
+  ret = bcmf_transfer_bytes(sbus, false, 2, 0, (uint8_t*)header, 4);
   if (ret != OK)
     {
       _info("failread size\n");
@@ -252,7 +227,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
   /* Read remaining frame data */
   // TODO allocate buffer
 
-  ret = bcmf_transfer_bytes(priv, false, 2, 0, (uint8_t*)header+4, len - 4);
+  ret = bcmf_transfer_bytes(sbus, false, 2, 0, (uint8_t*)header+4, len - 4);
   if (ret != OK)
     {
       ret = -EIO;
@@ -260,11 +235,11 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
     }
 
   // _info("Receive frame\n");
-  // bcmf_hexdump((uint8_t*)header, len, (unsigned int)header);
+  // bcmf_hexdump((uint8_t*)header, header->size, (unsigned int)header);
 
   /* Process and validate header */
 
-  ret = bcmf_sdpcm_process_header(priv, header);
+  ret = bcmf_sdpcm_process_header(sbus, header);
   if (ret != OK)
     {
       _err("Error while processing header %d\n", ret);
@@ -272,70 +247,26 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
       goto exit_free_frame;
     }
 
+  /* Setup new frame structure */  
+
+  sframe->frame_header.len = header->size;
+  sframe->frame_header.data = (uint8_t*)header + header->data_offset;
+  sframe->frame_header.base = (uint8_t*)header;
+
   /* Process received frame content */
 
   switch (header->channel & 0x0f)
     {
       case SDPCM_CONTROL_CHANNEL:
-        // _info("Control message\n");
-
-        /* Check frame */
-
-        if (header->size < sizeof(struct bcmf_sdpcm_header) + 
-                           sizeof(struct bcmf_sdpcm_cdc_header))
-          {
-            _err("Control frame too small\n");
-            ret = -EINVAL;
-            goto exit_free_frame;
-
-          }
-
-        struct bcmf_sdpcm_cdc_header *cdc_header =
-                (struct bcmf_sdpcm_cdc_header*)&header[1];
-
-        if (header->size < sizeof(struct bcmf_sdpcm_header) + 
-                           sizeof(struct bcmf_sdpcm_cdc_header) +
-                           cdc_header->len ||
-            cdc_header->len > sizeof(tmp_buffer) -
-                              sizeof(struct bcmf_sdpcm_header) -
-                              sizeof(struct bcmf_sdpcm_cdc_header))
-          {
-            _err("Invalid control frame size\n");
-            ret = -EINVAL;
-            goto exit_free_frame;
-          }
-
-        // TODO check interface ?
-
-        if (cdc_header->flags >> CDC_DCMD_ID_SHIFT == priv->control_reqid)
-          {
-            /* Expected frame received, send it back to user */
-
-            // TODO allocate real buffer
-            memcpy(tmp_buffer_ctl, tmp_buffer, header->size);
-            priv->control_rxframe = tmp_buffer_ctl;
-            // priv->control_rxframe = (uint8_t*)header;
-
-            sem_post(&priv->control_timeout);
-            return OK;
-          }
-        else
-          {
-            _info("Got unexpected control frame\n");
-            ret = -EINVAL;
-            goto exit_free_frame;
-          }
+        ret = bcmf_cdc_process_control_frame(priv, &sframe->frame_header);
         break;
 
       case SDPCM_EVENT_CHANNEL:
-        _info("Event message\n");
-        bcmf_hexdump((uint8_t*)header, header->size, (unsigned long)header);
-        ret = OK;
+        ret = bcmf_cdc_process_event_frame(priv, &sframe->frame_header);
         break;
 
       case SDPCM_DATA_CHANNEL:
-        _info("Data message\n");
-        ret = OK;
+        ret = bcmf_cdc_process_data_frame(priv, &sframe->frame_header);
         break;
 
       default:
@@ -350,23 +281,25 @@ exit_free_frame:
 exit_free_abort:
   // TODO free frame buffer
 exit_abort:
-  bcmf_sdpcm_rxfail(priv, false);
+  bcmf_sdpcm_rxfail(sbus, false);
   return ret;
 }
 
 int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
 {
   int ret;
-  struct bcmf_sdpcm_frame *frame;
+  struct bcmf_sdpcm_frame *sframe;
+  struct bcmf_sdpcm_header *header;
+  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s*)priv->bus;
 
-  if (priv->tx_queue.tail == NULL)
+  if (sbus->tx_queue.tail == NULL)
     {
       /* No more frames to send */
 
       return -ENODATA;
     }
 
-  if (priv->tx_seq == priv->max_seq)
+  if (sbus->tx_seq == sbus->max_seq)
     {
       // TODO handle this case
       _err("No credit to send frame\n");
@@ -374,23 +307,25 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
     }
 
 
-  if ((ret = sem_wait(&priv->tx_queue_mutex)) != OK)
+  if ((ret = sem_wait(&sbus->tx_queue_mutex)) != OK)
     {
       return ret;
     }
 
-  frame = (struct bcmf_sdpcm_frame*)priv->tx_queue.tail;
+  sframe = container_of(sbus->tx_queue.tail,
+                        struct bcmf_sdpcm_frame, list_entry);
+  header = (struct bcmf_sdpcm_header*)sframe->frame_header.base;
 
   /* Set frame sequence id */
 
-  frame->header.sequence = priv->tx_seq++;
+  header->sequence = sbus->tx_seq++;
 
   // _info("Send frame\n");
-  // bcmf_hexdump((uint8_t*)&frame->header, frame->header.size,
-  //              (unsigned int)&frame->header);
+  // bcmf_hexdump(sframe->frame_header.base, sframe->frame_header.len,
+  //              (unsigned long)sframe->frame_header.base);
 
-  ret = bcmf_transfer_bytes(priv, true, 2, 0, (uint8_t*)&frame->header,
-                            frame->header.size);
+  ret = bcmf_transfer_bytes(sbus, true, 2, 0, sframe->frame_header.base,
+                            sframe->frame_header.len);
   if (ret != OK)
     {
       _info("fail send frame %d\n", ret);
@@ -401,17 +336,17 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
 
   /* Frame sent, remove it from queue */
 
-  if (priv->tx_queue.head == &frame->list_entry)
+  if (sbus->tx_queue.head == &sframe->list_entry)
     {
       /* List is empty */
 
-      priv->tx_queue.head = NULL;
-      priv->tx_queue.tail = NULL;
+      sbus->tx_queue.head = NULL;
+      sbus->tx_queue.tail = NULL;
     }
   else
     {
-      priv->tx_queue.tail = frame->list_entry.blink;
-      frame->list_entry.blink->flink = priv->tx_queue.head;
+      sbus->tx_queue.tail = sframe->list_entry.blink;
+      sframe->list_entry.blink->flink = sbus->tx_queue.head;
     }
 
   /* TODO free frame buffer */
@@ -419,235 +354,110 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
   goto exit_post_sem;
 
 exit_abort:
-  // bcmf_sdpcm_txfail(priv, false);
+  // bcmf_sdpcm_txfail(sbus, false);
 exit_post_sem:
-  sem_post(&priv->tx_queue_mutex);
+  sem_post(&sbus->tx_queue_mutex);
   return ret;
 }
 
 // FIXME remove
 uint8_t tmp_buffer2[512];
-uint8_t* bcmf_sdpcm_allocate_iovar(FAR struct bcmf_dev_s *priv, char *name,
-                              uint8_t *data, uint32_t *len)
+struct bcmf_frame_s* bcmf_sdpcm_allocate_frame(FAR struct bcmf_dev_s *priv,
+                                   unsigned int len, bool control, bool block)
 {
-  uint32_t data_len;
-  uint16_t name_len;
+  unsigned int frame_len;
 
-  if (name)
-    {
-      name_len = strlen(name) + 1;
-    }
-  else
-    {
-      name_len = 0;
-    }
+  /* Integer overflow check */
 
-  if (data)
-    {
-      data_len = *len;
-    }
-  else
-    {
-      data_len = 0;
-    }
-
-  *len = 0;
-
-  // FIXME allocate buffer and use max_size instead of 512
-  if (data_len > 512-sizeof(struct bcmf_sdpcm_cdc_frame) ||
-      (data_len + name_len) > 512-sizeof(struct bcmf_sdpcm_cdc_frame))
+  if (len > 512)
     {
       return NULL;
     }
 
-  // TODO allocate buffer len + sizeof(struct bcmf_sdpcm_cdc_frame)
+  frame_len = len + sizeof(struct bcmf_sdpcm_frame)
+                  + sizeof(struct bcmf_sdpcm_header);
+  if (!control)
+    {
+      /* Data frames needs 2 bytes padding */
 
-  /* Copy name string and data */
+      frame_len += 2;
+    }
 
-  memcpy(tmp_buffer2+sizeof(struct bcmf_sdpcm_cdc_frame), name, name_len);
-  memcpy(tmp_buffer2+sizeof(struct bcmf_sdpcm_cdc_frame)+name_len,
-         data, data_len);
+  if (frame_len > 512)
+    {
+      return NULL;
+    }
 
-  *len = sizeof(struct bcmf_sdpcm_cdc_frame)+name_len+data_len;
-  return tmp_buffer2;
-}
+  // FIXME allocate buffer and use max_size instead of 512
+  // allocate buffer len + sizeof(struct bcmf_sdpcm_frame)
 
-int bcmf_sdpcm_queue_frame(FAR struct bcmf_dev_s *priv, uint8_t channel,
-                           uint8_t *data, uint32_t len)
-{
-  int ret;
-  struct bcmf_sdpcm_frame *frame = (struct bcmf_sdpcm_frame*)data;
-  uint16_t frame_size = len - sizeof(frame->list_entry);
+  struct bcmf_sdpcm_frame *sframe = (struct bcmf_sdpcm_frame*)tmp_buffer2;
+  struct bcmf_sdpcm_header *header = (struct bcmf_sdpcm_header*)&sframe[1];
 
   /* Prepare sw header */
 
-  memset(&frame->header, 0, sizeof(struct bcmf_sdpcm_header));
-  frame->header.size = frame_size;
-  frame->header.checksum = ~frame_size;
-  frame->header.channel = channel;
-  frame->header.data_offset = sizeof(struct bcmf_sdpcm_header);
+  memset(header, 0, sizeof(struct bcmf_sdpcm_header));
+  header->size = frame_len - sizeof(struct bcmf_sdpcm_frame);
+  header->checksum = ~header->size;
+
+  if (control)
+    {
+      header->channel = SDPCM_CONTROL_CHANNEL;
+      header->data_offset = sizeof(struct bcmf_sdpcm_header);
+    }
+  else
+    {
+      header->channel = SDPCM_DATA_CHANNEL;
+      header->data_offset = sizeof(struct bcmf_sdpcm_header)+2;
+    }
+
+  sframe->frame_header.len = header->size;
+  sframe->frame_header.base = (uint8_t*)header;
+  sframe->frame_header.data = (uint8_t*)header + header->data_offset;
+
+  return &sframe->frame_header;
+}
+
+int bcmf_sdpcm_queue_frame(FAR struct bcmf_dev_s *priv,
+                           struct bcmf_frame_s *frame)
+{
+  int ret;
+  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s*)priv->bus;
+  struct bcmf_sdpcm_frame *sframe = (struct bcmf_sdpcm_frame*)frame;
 
   /* Add frame in tx queue */
 
-  if ((ret = sem_wait(&priv->tx_queue_mutex)) != OK)
+  if ((ret = sem_wait(&sbus->tx_queue_mutex)) != OK)
     {
       return ret;
     }
 
-  if (priv->tx_queue.head == NULL)
+  if (sbus->tx_queue.head == NULL)
     {
       /* List is empty */
 
-      priv->tx_queue.head = &frame->list_entry;
-      priv->tx_queue.tail = &frame->list_entry;
+      sbus->tx_queue.head = &sframe->list_entry;
+      sbus->tx_queue.tail = &sframe->list_entry;
 
-      frame->list_entry.flink = &frame->list_entry;
-      frame->list_entry.blink = &frame->list_entry;
+      sframe->list_entry.flink = &sframe->list_entry;
+      sframe->list_entry.blink = &sframe->list_entry;
     }
   else
     {
       /* Insert entry at list head */
 
-      frame->list_entry.flink = priv->tx_queue.head;
-      frame->list_entry.blink = priv->tx_queue.tail;
+      sframe->list_entry.flink = sbus->tx_queue.head;
+      sframe->list_entry.blink = sbus->tx_queue.tail;
 
-      priv->tx_queue.head->blink = &frame->list_entry;
-      priv->tx_queue.head = &frame->list_entry;
+      sbus->tx_queue.head->blink = &sframe->list_entry;
+      sbus->tx_queue.head = &sframe->list_entry;
     }
 
-  sem_post(&priv->tx_queue_mutex);
+  sem_post(&sbus->tx_queue_mutex);
 
   /* Notify bcmf thread tx frame is ready */
 
-  sem_post(&priv->thread_signal);
+  sem_post(&sbus->thread_signal);
 
   return OK;
-}
-
-int bcmf_sdpcm_send_cdc_frame(FAR struct bcmf_dev_s *priv, uint32_t cmd,
-                         int ifidx, bool set, uint8_t *data, uint32_t len)
-{
-  struct bcmf_sdpcm_cdc_frame *msg = (struct bcmf_sdpcm_cdc_frame*)data;
-
-  /* Setup cdc_dcmd header */
-
-  msg->cdc_header.cmd = cmd;
-  msg->cdc_header.len = len-sizeof(struct bcmf_sdpcm_cdc_frame);
-  msg->cdc_header.status = 0;
-  msg->cdc_header.flags = ++priv->control_reqid << CDC_DCMD_ID_SHIFT;
-  msg->cdc_header.flags |= ifidx << CDC_DCMD_IF_SHIFT;
-
-  if (set)
-  {
-    msg->cdc_header.flags |= CDC_DCMD_SET;
-  }
-
-  /* Queue frame */
-
-  return bcmf_sdpcm_queue_frame(priv, SDPCM_CONTROL_CHANNEL, data, len);
-}
-
-int bcmf_sdpcm_control_request(FAR struct bcmf_dev_s *priv,
-                               uint32_t ifidx, bool set, uint32_t cmd,
-                               char *name, uint8_t *data, uint32_t *len)
-{
-  int ret;
-  uint8_t *iovar_buf;
-  uint32_t out_len = *len;
-  uint32_t iovar_buf_len = *len;
-
-  *len = 0;
-
-  /* Take device control mutex */
-
-  if ((ret = sem_wait(&priv->control_mutex)) !=OK)
-   {
-      return ret;
-   }
-
-  /* Prepare control frame */
-
-  iovar_buf = bcmf_sdpcm_allocate_iovar(priv, name, data, &iovar_buf_len);
-  if (!iovar_buf)
-    {
-      _err("Cannot allocate iovar buf\n");
-      ret = -ENOMEM;
-      goto exit_sem_post;
-    }
-
-  /* Send control frame. iovar buffer is freed when sent */
-
-  ret = bcmf_sdpcm_send_cdc_frame(priv, cmd,
-                             ifidx, set, iovar_buf, iovar_buf_len);
-  if (ret != OK)
-    {
-      // TODO free allocated iovar buffer here
-      goto exit_sem_post;
-    }
-
-  /* Wait for response */
-
-  priv->control_rxframe = NULL;
-
-  ret = bcmf_sem_wait(&priv->control_timeout, SDPCM_CONTROL_TIMEOUT_MS);
-  if (ret != OK)
-    {
-      _err("Error while waiting for control response %d\n", ret);
-      goto exit_sem_post;
-    }
-
-  /* Check frame status */
-
-  struct bcmf_sdpcm_cdc_dcmd *rxframe =
-              (struct bcmf_sdpcm_cdc_dcmd*)priv->control_rxframe;
-
-  priv->control_status = rxframe->cdc_header.status;
-
-  if (priv->control_status != 0)
-    {
-      _err("Invalid cdc status 0x%x\n", priv->control_status);
-      ret = -EIO;
-      goto exit_free_rx_frame;
-    }
-
-  if (!set)
-    {
-      /* Request sent, copy received data back */
-
-      if (rxframe->cdc_header.len > out_len)
-        {
-          _err("RX frame too big %d %d\n", rxframe->cdc_header.len, out_len);
-          memcpy(data, rxframe->data, out_len);
-          *len = out_len;
-        }
-      else
-        {
-          memcpy(data, rxframe->data, rxframe->cdc_header.len);
-          *len = rxframe->cdc_header.len;
-        }
-    }
-
-exit_free_rx_frame:
-  // TODO free rxframe buffer */
-  priv->control_rxframe = NULL;
-
-exit_sem_post:
-  sem_post(&priv->control_mutex);
-  return ret;
-}
-
-int bcmf_sdpcm_iovar_request(FAR struct bcmf_dev_s *priv,
-                             uint32_t ifidx, bool set, char *name,
-                             uint8_t *data, uint32_t *len)
-{
-  return bcmf_sdpcm_control_request(priv, ifidx, set,
-                                  set ? WLC_SET_VAR : WLC_GET_VAR, name,
-                                  data, len);
-}
-
-int bcmf_sdpcm_ioctl(FAR struct bcmf_dev_s *priv,
-                     uint32_t ifidx, bool set, uint32_t cmd,
-                     uint8_t *data, uint32_t *len)
-{
-   return bcmf_sdpcm_control_request(priv, ifidx, set, cmd, NULL, data, len);
 }

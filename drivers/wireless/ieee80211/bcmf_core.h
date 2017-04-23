@@ -39,45 +39,44 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "bcmf_driver.h"
+#include "bcmf_sdio.h"
 
-
-int bcmf_read_sbreg(FAR struct bcmf_dev_s *priv, uint32_t address,
+int bcmf_read_sbreg(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
                           uint8_t *reg, unsigned int len);
 
-int bcmf_write_sbreg(FAR struct bcmf_dev_s *priv, uint32_t address,
+int bcmf_write_sbreg(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
                           uint8_t *reg, unsigned int len);
 
-bool bcmf_core_isup(FAR struct bcmf_dev_s *priv, unsigned int core);
+bool bcmf_core_isup(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core);
 
-void bcmf_core_disable(FAR struct bcmf_dev_s *priv, unsigned int core);
+void bcmf_core_disable(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core);
 
-void bcmf_core_reset(FAR struct bcmf_dev_s *priv, unsigned int core);
+void bcmf_core_reset(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core);
 
-int bcmf_core_upload_firmware(FAR struct bcmf_dev_s *priv);
+int bcmf_core_upload_firmware(FAR struct bcmf_sdio_dev_s *sbus);
 
-static inline int bcmf_read_sbregb(FAR struct bcmf_dev_s *priv,
+static inline int bcmf_read_sbregb(FAR struct bcmf_sdio_dev_s *sbus,
                                    uint32_t address, uint8_t *reg)
 {
-    return bcmf_read_sbreg(priv, address, reg, 1);
+    return bcmf_read_sbreg(sbus, address, reg, 1);
 }
 
-static inline int bcmf_read_sbregw(FAR struct bcmf_dev_s *priv,
+static inline int bcmf_read_sbregw(FAR struct bcmf_sdio_dev_s *sbus,
                                    uint32_t address, uint32_t *reg)
 {
-    return bcmf_read_sbreg(priv, address, (uint8_t*)reg, 4);
+    return bcmf_read_sbreg(sbus, address, (uint8_t*)reg, 4);
 }
 
-static inline int bcmf_write_sbregb(FAR struct bcmf_dev_s *priv,
+static inline int bcmf_write_sbregb(FAR struct bcmf_sdio_dev_s *sbus,
                                     uint32_t address, uint8_t reg)
 {
-    return bcmf_write_sbreg(priv, address, &reg, 1);
+    return bcmf_write_sbreg(sbus, address, &reg, 1);
 }
 
-static inline int bcmf_write_sbregw(FAR struct bcmf_dev_s *priv,
+static inline int bcmf_write_sbregw(FAR struct bcmf_sdio_dev_s *sbus,
                                     uint32_t address, uint32_t reg)
 {
-    return bcmf_write_sbreg(priv, address, (uint8_t*)&reg, 4);
+    return bcmf_write_sbreg(sbus, address, (uint8_t*)&reg, 4);
 }
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_CORE_H */

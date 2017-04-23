@@ -48,9 +48,11 @@
 #include <nuttx/kmalloc.h>
 
 #include "bcmf_driver.h"
-#include "bcmf_sdpcm.h"
-#include "bcmf_sdio_core.h"
+#include "bcmf_cdc.h"
 #include "bcmf_ioctl.h"
+
+#include <nuttx/sdio.h>
+#include "bcmf_sdio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -62,6 +64,11 @@
 #define WL_SCAN_UNASSOC_TIME   40
 #define WL_SCAN_PASSIVE_TIME   120
 
+/* Chip interfaces */
+#define CHIP_STA_INTERFACE   0
+#define CHIP_AP_INTERFACE    1
+#define CHIP_P2P_INTERFACE   2
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -70,7 +77,12 @@
  * Private Function Prototypes
  ****************************************************************************/
 
+static FAR struct bcmf_dev_s* bcmf_allocate_device(void);
+static void bcmf_free_device(FAR struct bcmf_dev_s *priv);
+
+#if 0
 static int bcmf_run_escan(FAR struct bcmf_dev_s *priv);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -80,12 +92,58 @@ static int bcmf_run_escan(FAR struct bcmf_dev_s *priv);
  * Private Functions
  ****************************************************************************/
 
+FAR struct bcmf_dev_s* bcmf_allocate_device(void)
+{
+  int ret;
+  FAR struct bcmf_dev_s *priv;
+
+  /* Allocate a bcmf device structure */
+
+  priv = (FAR struct bcmf_dev_s *)kmm_malloc(sizeof(*priv));
+  if (!priv)
+    {
+      return NULL;
+    }
+
+  /* Initialize bcmf device structure */
+
+  memset(priv, 0, sizeof(*priv));
+
+  /* Init control frames mutex and timeout signal */
+
+  if ((ret = sem_init(&priv->control_mutex, 0, 1)) != OK)
+    {
+      goto exit_free_priv;
+    }
+  if ((ret = sem_init(&priv->control_timeout, 0, 0)) != OK)
+    {
+      goto exit_free_priv;
+    }
+  if ((ret = sem_setprotocol(&priv->control_timeout, SEM_PRIO_NONE)) != OK)
+    {
+      goto exit_free_priv;
+    }
+
+  return priv;
+
+exit_free_priv:
+  kmm_free(priv);
+  return NULL;
+}
+
+void bcmf_free_device(FAR struct bcmf_dev_s *priv)
+{
+  /* TODO deinitialize device structures */
+
+  kmm_free(priv);
+}
+
 int bcmf_wl_set_mac_address(FAR struct bcmf_dev_s *priv, uint8_t *addr)
 {
   int ret;
   uint32_t out_len = 6;
 
-  ret = bcmf_sdpcm_iovar_request(priv, CHIP_STA_INTERFACE, true,
+  ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
                                  IOVAR_STR_CUR_ETHERADDR, addr,
                                  &out_len);
   if (ret != OK)
@@ -109,7 +167,7 @@ int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable)
   /* TODO chek device state */
 
   out_len = 0;
-  ret = bcmf_sdpcm_ioctl(priv, CHIP_STA_INTERFACE, true,
+  ret = bcmf_cdc_ioctl(priv, CHIP_STA_INTERFACE, true,
                          enable ? WLC_UP : WLC_DOWN, NULL, &out_len);
   
   if (ret == OK)
@@ -128,7 +186,7 @@ int bcmf_dongle_scantime(FAR struct bcmf_dev_s *priv, int32_t scan_assoc_time,
 
   out_len = 4;
   value = scan_assoc_time;
-  ret = bcmf_sdpcm_ioctl(priv, CHIP_STA_INTERFACE, true,
+  ret = bcmf_cdc_ioctl(priv, CHIP_STA_INTERFACE, true,
                          WLC_SET_SCAN_CHANNEL_TIME, (uint8_t*)&value,
                          &out_len);
   if (ret != OK)
@@ -138,7 +196,7 @@ int bcmf_dongle_scantime(FAR struct bcmf_dev_s *priv, int32_t scan_assoc_time,
 
   out_len = 4;
   value = scan_unassoc_time;
-  ret = bcmf_sdpcm_ioctl(priv, CHIP_STA_INTERFACE, true,
+  ret = bcmf_cdc_ioctl(priv, CHIP_STA_INTERFACE, true,
                          WLC_SET_SCAN_UNASSOC_TIME, (uint8_t*)&value,
                          &out_len);
   if (ret != OK)
@@ -148,7 +206,7 @@ int bcmf_dongle_scantime(FAR struct bcmf_dev_s *priv, int32_t scan_assoc_time,
 
   out_len = 4;
   value = scan_passive_time;
-  ret = bcmf_sdpcm_ioctl(priv, CHIP_STA_INTERFACE, true,
+  ret = bcmf_cdc_ioctl(priv, CHIP_STA_INTERFACE, true,
                          WLC_SET_SCAN_PASSIVE_TIME, (uint8_t*)&value,
                          &out_len);
   if (ret != OK)
@@ -182,7 +240,7 @@ int bcmf_dongle_initialize(FAR struct bcmf_dev_s *priv)
 
   out_len = 4;
   value = 0;
-  ret = bcmf_sdpcm_ioctl(priv, CHIP_STA_INTERFACE, true,
+  ret = bcmf_cdc_ioctl(priv, CHIP_STA_INTERFACE, true,
                          WLC_SET_PM, (uint8_t*)&value, &out_len);
   if (ret != OK)
     {
@@ -193,7 +251,7 @@ int bcmf_dongle_initialize(FAR struct bcmf_dev_s *priv)
 
   out_len = 4;
   value = GMODE_AUTO;
-  ret = bcmf_sdpcm_ioctl(priv, CHIP_STA_INTERFACE, true,
+  ret = bcmf_cdc_ioctl(priv, CHIP_STA_INTERFACE, true,
                          WLC_SET_GMODE, (uint8_t*)&value, &out_len);
   if (ret != OK)
     {
@@ -204,22 +262,25 @@ int bcmf_dongle_initialize(FAR struct bcmf_dev_s *priv)
 
   out_len = 4;
   value = 1;
-  ret = bcmf_sdpcm_iovar_request(priv, CHIP_STA_INTERFACE, true,
+  ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
                                  IOVAR_STR_ROAM_OFF, (uint8_t*)&value,
                                  &out_len);
 
   // FIXME remove
-
+#if 0
   /* Try scan */
 
   value = 0;
   out_len = 4;
-  ret = bcmf_sdpcm_ioctl(priv, CHIP_STA_INTERFACE, true,
+  ret = bcmf_cdc_ioctl(priv, CHIP_STA_INTERFACE, true,
                          WLC_SET_PASSIVE_SCAN, (uint8_t*)&value, &out_len);
   bcmf_run_escan(priv);
-  return OK;
+#endif
+
+  return ret;
 }
 
+#if 0
 int bcmf_run_escan(FAR struct bcmf_dev_s *priv)
 {
   int ret;
@@ -254,7 +315,7 @@ int bcmf_run_escan(FAR struct bcmf_dev_s *priv)
   _info("start scan\n");
 
   out_len = sizeof(*params);
-  ret = bcmf_sdpcm_iovar_request(priv, CHIP_STA_INTERFACE, true,
+  ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
                                  IOVAR_STR_ESCAN, (uint8_t*)params,
                                  &out_len);
 
@@ -267,6 +328,7 @@ int bcmf_run_escan(FAR struct bcmf_dev_s *priv)
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -282,7 +344,7 @@ int bcmf_wl_initialize(FAR struct bcmf_dev_s *priv)
 
   out_len = 4;
   *(uint32_t*)tmp_buf = 0;
-  ret = bcmf_sdpcm_iovar_request(priv, CHIP_STA_INTERFACE, false,
+  ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, false,
                                  IOVAR_STR_TX_GLOM, tmp_buf,
                                  &out_len);
   if (ret != OK)
@@ -293,7 +355,7 @@ int bcmf_wl_initialize(FAR struct bcmf_dev_s *priv)
   /* Query MAC address */
 
   out_len = 6;
-  ret = bcmf_sdpcm_iovar_request(priv, CHIP_STA_INTERFACE, false,
+  ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, false,
                                  IOVAR_STR_CUR_ETHERADDR, tmp_buf,
                                  &out_len);
   if (ret != OK)
@@ -310,7 +372,7 @@ int bcmf_wl_initialize(FAR struct bcmf_dev_s *priv)
   /* Query firmware version string */
 
   out_len = sizeof(tmp_buf);
-  ret = bcmf_sdpcm_iovar_request(priv, CHIP_STA_INTERFACE, false,
+  ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, false,
                                  IOVAR_STR_VERSION, tmp_buf,
                                  &out_len);
   if (ret != OK)
@@ -333,7 +395,7 @@ int bcmf_wl_initialize(FAR struct bcmf_dev_s *priv)
   memset(event_mask, 0xff, sizeof(event_mask));
 
   out_len = sizeof(event_mask);
-  ret = bcmf_sdpcm_iovar_request(priv, CHIP_STA_INTERFACE, true,
+  ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
                                  IOVAR_STR_EVENT_MSGS, event_mask,
                                  &out_len);
   if (ret != OK)
@@ -343,4 +405,35 @@ int bcmf_wl_initialize(FAR struct bcmf_dev_s *priv)
   // TODO Create a wlan device name and register network driver
 
   return bcmf_dongle_initialize(priv);
+}
+
+int bcmf_sdio_initialize(int minor, FAR struct sdio_dev_s *dev)
+{
+  int ret;
+  FAR struct bcmf_dev_s *priv;
+
+  _info("minor: %d\n", minor);
+
+  priv = bcmf_allocate_device();
+  if (!priv)
+    {
+      return -ENOMEM;
+    }
+
+  /* Init sdio bus */
+
+  ret = bcmf_bus_sdio_initialize(priv, minor, dev);
+  if (ret != OK)
+    {
+      ret = -EIO;
+      goto exit_free_device;
+    }
+
+  /* Bus initialized, register network driver */
+
+  return bcmf_wl_initialize(priv);
+
+exit_free_device:
+  bcmf_free_device(priv);
+  return ret;
 }

@@ -1,28 +1,73 @@
-#include "bcmf_chip_43362.h"
-#include "bcm43362_constants.h"
+/****************************************************************************
+ * drivers/wireless/ieee80211/bcmf_chip_43362.c
+ *
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Simon Piriou <spiriou31@gmail.com>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ****************************************************************************/
 
-#include <stdint.h>
-#include <debug.h>
-#include "bcmf_sdio_core.h"
+#include "bcmf_sdio.h"
+          
+#define WRAPPER_REGISTER_OFFSET  0x100000
 
-#define WRAPPER_REGISTER_OFFSET  (0x100000)
+extern const char bcm43362_nvram_image[];
+extern const unsigned int bcm43362_nvram_image_len;
 
-uint32_t bcmf_43362_get_core_base_address(unsigned int core)
-{
-  switch (core)
-    {
-      case CHIPCOMMON_CORE_ID:
-        return CHIPCOMMON_BASE_ADDRESS;
-      case DOT11MAC_CORE_ID:
-        return DOT11MAC_BASE_ADDRESS;
-      case SDIOD_CORE_ID:
-        return SDIO_BASE_ADDRESS;
-      case WLAN_ARMCM3_CORE_ID:
-        return WLAN_ARMCM3_BASE_ADDRESS + WRAPPER_REGISTER_OFFSET;
-      case SOCSRAM_CORE_ID:
-        return SOCSRAM_BASE_ADDRESS + WRAPPER_REGISTER_OFFSET;
-      default:
-        _err("Invalid core id %d\n", core);
-    }
-  return 0;
-}
+extern const uint8_t bcm43362_firmware_image[];
+extern const unsigned int bcm43362_firmware_image_len;
+
+const struct bcmf_sdio_chip bcmf_43362_config_sdio = {
+
+  /* General chip stats */
+
+  .ram_size = 0x3C000,
+
+  /* Backplane architecture */
+
+  .core_base = {
+    [CHIPCOMMON_CORE_ID]  = 0x18000000,  /* Chipcommon core register base   */
+    [DOT11MAC_CORE_ID]    = 0x18001000,  /* dot11mac core register base     */
+    [SDIOD_CORE_ID]       = 0x18002000,  /* SDIOD Device core register base */
+    [WLAN_ARMCM3_CORE_ID] = 0x18003000 + /* ARMCM3 core register base       */
+                            WRAPPER_REGISTER_OFFSET,
+    [SOCSRAM_CORE_ID]     = 0x18004000 + /* SOCSRAM core register base      */
+                            WRAPPER_REGISTER_OFFSET
+  },
+
+  /* Firmware images */
+
+  // TODO find something smarter than using image_len references
+
+  .firmware_image      = bcm43362_firmware_image,
+  .firmware_image_size = (unsigned int*)&bcm43362_firmware_image_len,
+
+  .nvram_image         = bcm43362_nvram_image,
+  .nvram_image_size    = (unsigned int*)&bcm43362_nvram_image_len
+};
