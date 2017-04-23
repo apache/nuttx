@@ -781,7 +781,7 @@ int emac_initialize(int intf)
    * the device and/or calling emac_ifdown().
    */
 
-  /* Read the MAC address from the hardware into priv->d_dev.d_mac.ether_addr_octet */
+  /* Read the MAC address from the hardware into priv->d_dev.d_mac.ether.ether_addr_octet */
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

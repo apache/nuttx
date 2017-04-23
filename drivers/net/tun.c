@@ -631,7 +631,7 @@ static int tun_ifup(struct net_driver_s *dev)
 
   /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
 
-  /* Instantiate the MAC address from priv->dev.d_mac.ether_addr_octet */
+  /* Instantiate the MAC address from priv->dev.d_mac.ether.ether_addr_octet */
 
 #ifdef CONFIG_NET_ICMPv6
   /* Set up IPv6 multicast address filtering */

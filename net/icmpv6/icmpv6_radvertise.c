@@ -176,7 +176,7 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   srcaddr           = &adv->srcaddr;
   srcaddr->opttype  = ICMPv6_OPT_SRCLLADDR;
   srcaddr->optlen   = 1;
-  memcpy(srcaddr->srclladdr, &dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
+  memcpy(srcaddr->srclladdr, &dev->d_mac.ether.ether_addr_octet, ETHER_ADDR_LEN);
 
   /* Set up the MTU option */
 
@@ -228,7 +228,7 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
       FAR struct eth_hdr_s *eth = ETHBUF;
 
       memcpy(eth->dest, g_ipv6_ethallnodes.ether_addr_octet, ETHER_ADDR_LEN);
-      memcpy(eth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
+      memcpy(eth->src, dev->d_mac.ether.ether_addr_octet, ETHER_ADDR_LEN);
 
       /* Set the IPv6 Ethernet type */
 

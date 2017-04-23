@@ -1006,7 +1006,7 @@ int cs89x0_initialize(FAR const cs89x0_driver_s *cs89x0, int devno)
   cs89x0->cs_txpoll       = wd_create();         /* Create periodic poll timer */
   cs89x0->cs_txtimeout    = wd_create();         /* Create TX timeout timer */
 
-  /* Read the MAC address from the hardware into cs89x0->cs_dev.d_mac.ether_addr_octet */
+  /* Read the MAC address from the hardware into cs89x0->cs_dev.d_mac.ether.ether_addr_octet */
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

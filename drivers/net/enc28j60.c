@@ -2440,12 +2440,12 @@ static void enc_setmacaddr(FAR struct enc_driver_s *priv)
    *   MAADR6  MAC Address Byte 6 (MAADR<7:0>)
    */
 
-  enc_wrbreg(priv, ENC_MAADR1, priv->dev.d_mac.ether_addr_octet[0]);
-  enc_wrbreg(priv, ENC_MAADR2, priv->dev.d_mac.ether_addr_octet[1]);
-  enc_wrbreg(priv, ENC_MAADR3, priv->dev.d_mac.ether_addr_octet[2]);
-  enc_wrbreg(priv, ENC_MAADR4, priv->dev.d_mac.ether_addr_octet[3]);
-  enc_wrbreg(priv, ENC_MAADR5, priv->dev.d_mac.ether_addr_octet[4]);
-  enc_wrbreg(priv, ENC_MAADR6, priv->dev.d_mac.ether_addr_octet[5]);
+  enc_wrbreg(priv, ENC_MAADR1, priv->dev.d_mac.ether.ether_addr_octet[0]);
+  enc_wrbreg(priv, ENC_MAADR2, priv->dev.d_mac.ether.ether_addr_octet[1]);
+  enc_wrbreg(priv, ENC_MAADR3, priv->dev.d_mac.ether.ether_addr_octet[2]);
+  enc_wrbreg(priv, ENC_MAADR4, priv->dev.d_mac.ether.ether_addr_octet[3]);
+  enc_wrbreg(priv, ENC_MAADR5, priv->dev.d_mac.ether.ether_addr_octet[4]);
+  enc_wrbreg(priv, ENC_MAADR6, priv->dev.d_mac.ether.ether_addr_octet[5]);
 }
 
 /****************************************************************************

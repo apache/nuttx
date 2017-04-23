@@ -283,7 +283,8 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
   /* Set the source and destinatino address */
 
-  rimeaddr_copy(&g_pktaddrs[PACKETBUF_ADDR_SENDER], &ieee->i_nodeaddr);
+  rimeaddr_copy(&g_pktaddrs[PACKETBUF_ADDR_SENDER],
+                &ieee->i_dev.d_mac.ieee802154);
   rimeaddr_copy(&g_pktaddrs[PACKETBUF_ADDR_RECEIVER], destmac);
 
   /* Pre-calculate frame header length. */

@@ -365,14 +365,14 @@ static int lo_ifup(FAR struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
   ninfo("             Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x PANID=%04x\n",
-         priv->lo_ieee.i_nodeaddr.u8[0], priv->lo_ieee.i_nodeaddr.u8[1],
-         priv->lo_ieee.i_nodeaddr.u8[2], priv->lo_ieee.i_nodeaddr.u8[3],
-         priv->lo_ieee.i_nodeaddr.u8[4], priv->lo_ieee.i_nodeaddr.u8[5],
-         priv->lo_ieee.i_nodeaddr.u8[6], priv->lo_ieee.i_nodeaddr.u8[7],
+         dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
+         dev->d_mac.ieee802154.u8[2], dev->d_mac.ieee802154.u8[3],
+         dev->d_mac.ieee802154.u8[4], dev->d_mac.ieee802154.u8[5],
+         dev->d_mac.ieee802154.u8[6], dev->d_mac.ieee802154.u8[7],
          priv->lo_ieee.i_panid);
 #else
   ninfo("             Node: %02x:%02x PANID=%04x\n",
-         priv->lo_ieee.i_nodeaddr.u8[0], priv->lo_ieee.i_nodeaddr.u8[1],
+         dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
          priv->lo_ieee.i_panid);
 #endif
 

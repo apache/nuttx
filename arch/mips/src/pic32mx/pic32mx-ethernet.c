@@ -2216,29 +2216,29 @@ static int pic32mx_ifup(struct net_driver_s *dev)
    */
 
 #if 0
-  regval = (uint32_t)priv->pd_dev.d_mac.ether_addr_octet[5] << 8 |
-           (uint32_t)priv->pd_dev.d_mac.ether_addr_octet[4];
+  regval = (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[5] << 8 |
+           (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[4];
   pic32mx_putreg(regval, PIC32MX_EMAC1_SA0);
 
-  regval = (uint32_t)priv->pd_dev.d_mac.ether_addr_octet[3] << 8 |
-           (uint32_t)priv->pd_dev.d_mac.ether_addr_octet[2];
+  regval = (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[3] << 8 |
+           (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[2];
   pic32mx_putreg(regval, PIC32MX_EMAC1_SA1);
 
-  regval = (uint32_t)priv->pd_dev.d_mac.ether_addr_octet[1] << 8 |
-           (uint32_t)priv->pd_dev.d_mac.ether_addr_octet[0];
+  regval = (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[1] << 8 |
+           (uint32_t)priv->pd_dev.d_mac.ether.ether_addr_octet[0];
   pic32mx_putreg(regval, PIC32MX_EMAC1_SA2);
 #else
   regval = pic32mx_getreg(PIC32MX_EMAC1_SA0);
-  priv->pd_dev.d_mac.ether_addr_octet[4] = (uint32_t)(regval & 0xff);
-  priv->pd_dev.d_mac.ether_addr_octet[5] = (uint32_t)((regval >> 8) & 0xff);
+  priv->pd_dev.d_mac.ether.ether_addr_octet[4] = (uint32_t)(regval & 0xff);
+  priv->pd_dev.d_mac.ether.ether_addr_octet[5] = (uint32_t)((regval >> 8) & 0xff);
 
   regval = pic32mx_getreg(PIC32MX_EMAC1_SA1);
-  priv->pd_dev.d_mac.ether_addr_octet[2] = (uint32_t)(regval & 0xff);
-  priv->pd_dev.d_mac.ether_addr_octet[3] = (uint32_t)((regval >> 8) & 0xff);
+  priv->pd_dev.d_mac.ether.ether_addr_octet[2] = (uint32_t)(regval & 0xff);
+  priv->pd_dev.d_mac.ether.ether_addr_octet[3] = (uint32_t)((regval >> 8) & 0xff);
 
   regval = pic32mx_getreg(PIC32MX_EMAC1_SA2);
-  priv->pd_dev.d_mac.ether_addr_octet[0] = (uint32_t)(regval & 0xff);
-  priv->pd_dev.d_mac.ether_addr_octet[1] = (uint32_t)((regval >> 8) & 0xff);
+  priv->pd_dev.d_mac.ether.ether_addr_octet[0] = (uint32_t)(regval & 0xff);
+  priv->pd_dev.d_mac.ether.ether_addr_octet[1] = (uint32_t)((regval >> 8) & 0xff);
 #endif
 
   /* Continue Ethernet Controller Initialization ****************************/
