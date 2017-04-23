@@ -432,7 +432,7 @@ static void twi_wakeup(struct twi_dev_s *priv, int result)
  *
  ****************************************************************************/
 
-static int twi_interrupt(int irq, FAR void *context, FAR void *arg);
+static int twi_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)arg;
   struct i2c_msg_s *msg;
