@@ -1180,7 +1180,7 @@ int bcmf_initialize(int intf)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->bc_dev, NET_LL_ETHERNET);
+  (void)netdev_register(&priv->bc_dev, NET_LL_IEEE80211);
   return OK;
 }
 
