@@ -377,7 +377,7 @@ static inline FAR const char *ug_powerstring(uint8_t power)
 }
 
 /**************************************************************************************
- * Function: ug_select
+ * Name: ug_select
  *
  * Description:
  *   Select the SPI, locking and  re-configuring if necessary
@@ -414,7 +414,7 @@ static void ug_select(FAR struct spi_dev_s *spi)
 }
 
 /**************************************************************************************
- * Function: ug_deselect
+ * Name: ug_deselect
  *
  * Description:
  *   De-select the SPI

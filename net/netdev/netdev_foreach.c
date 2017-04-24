@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_foreach
+ * Name: netdev_foreach
  *
  * Description:
  *   Enumerate each registered network device.

@@ -48,7 +48,7 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Function: pthread_barrierattr_destroy
+ * Name: pthread_barrierattr_destroy
  *
  * Description:
  *   The pthread_barrierattr_destroy() function will destroy a barrier attributes

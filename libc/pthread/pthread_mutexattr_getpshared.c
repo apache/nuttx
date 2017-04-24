@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_mutexattr_getpshared
+ * Name:  pthread_mutexattr_getpshared
  *
  * Description:
  *    Get pshared mutex attribute.

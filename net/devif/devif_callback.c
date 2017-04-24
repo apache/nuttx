@@ -64,7 +64,7 @@ static FAR struct devif_callback_s *g_cbfreelist = NULL;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: devif_callback_free
+ * Name: devif_callback_free
  *
  * Description:
  *   Return a callback container to the free list.
@@ -167,7 +167,7 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: devif_callback_init
+ * Name: devif_callback_init
  *
  * Description:
  *   Configure the pre-allocated callback structures into a free list.
@@ -189,7 +189,7 @@ void devif_callback_init(void)
 }
 
 /****************************************************************************
- * Function: devif_callback_alloc
+ * Name: devif_callback_alloc
  *
  * Description:
  *   Allocate a callback container from the free list.
@@ -267,7 +267,7 @@ FAR struct devif_callback_s *
 }
 
 /****************************************************************************
- * Function: devif_conn_callback_free
+ * Name: devif_conn_callback_free
  *
  * Description:
  *   Return a connection/port callback container to the free list.
@@ -306,7 +306,7 @@ void devif_conn_callback_free(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
- * Function: devif_dev_callback_free
+ * Name: devif_dev_callback_free
  *
  * Description:
  *   Return a device callback container to the free list.
@@ -357,7 +357,7 @@ void devif_dev_callback_free(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
- * Function: devif_conn_event
+ * Name: devif_conn_event
  *
  * Description:
  *   Execute a list of callbacks using the packet event chain.
@@ -421,7 +421,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, void *pvconn,
 }
 
 /****************************************************************************
- * Function: devif_dev_event
+ * Name: devif_dev_event
  *
  * Description:
  *   Execute a list of callbacks using the device event chain.

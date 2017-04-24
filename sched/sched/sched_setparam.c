@@ -134,8 +134,8 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
     {
       FAR struct sporadic_s *sporadic;
       irqstate_t flags;
-      int repl_ticks;
-      int budget_ticks;
+      ssystime_t repl_ticks;
+      ssystime_t budget_ticks;
 
       if (param->sched_ss_max_repl < 1 ||
           param->sched_ss_max_repl > CONFIG_SCHED_SPORADIC_MAXREPL)

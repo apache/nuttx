@@ -59,7 +59,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Function: bcmf_sdio_initialize
+ * Name: bcmf_sdio_initialize
  *
  * Description:
  *   Initialize Broadcom FullMAC driver.

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/clock/clock.h
  *
- *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,6 +81,10 @@ extern volatile uint32_t g_system_timer;
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
 extern struct timespec   g_basetime;
+
+#ifdef CONFIG_CLOCK_MONOTONIC
+extern struct timespec   g_monotonic_basetime;
+#endif
 #endif
 
 /****************************************************************************
@@ -94,9 +98,10 @@ void weak_function clock_timer(void);
 
 int  clock_abstime2ticks(clockid_t clockid,
                          FAR const struct timespec *abstime,
-                         FAR int *ticks);
-int  clock_time2ticks(FAR const struct timespec *reltime, FAR int *ticks);
-int  clock_ticks2time(int ticks, FAR struct timespec *reltime);
+                         FAR ssystime_t *ticks);
+int  clock_time2ticks(FAR const struct timespec *reltime,
+                      FAR ssystime_t *ticks);
+int  clock_ticks2time(ssystime_t ticks, FAR struct timespec *reltime);
 void clock_timespec_add(FAR const struct timespec *ts1,
                         FAR const struct timespec *ts2,
                         FAR struct timespec *ts3);

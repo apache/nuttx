@@ -1125,7 +1125,7 @@ static int kinetis_ifup(struct net_driver_s *dev)
 {
   FAR struct kinetis_driver_s *priv =
     (FAR struct kinetis_driver_s *)dev->d_private;
-  uint8_t *mac = dev->d_mac.ether_addr_octet;
+  uint8_t *mac = dev->d_mac.ether.ether_addr_octet;
   uint32_t regval;
   int ret;
 
@@ -2144,7 +2144,7 @@ int kinetis_netinitialize(int intf)
 
   uidl   = getreg32(KINETIS_SIM_UIDL);
   uidml  = getreg32(KINETIS_SIM_UIDML);
-  mac    = priv->dev.d_mac.ether_addr_octet;
+  mac    = priv->dev.d_mac.ether.ether_addr_octet;
 
   uidml |= 0x00000200;
   uidml &= 0x0000FEFF;

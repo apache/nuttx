@@ -72,7 +72,7 @@ static WDOG_ID g_arptimer;           /* ARP timer */
  ****************************************************************************/
 
 /****************************************************************************
- * Function: arptimer_poll
+ * Name: arptimer_poll
  *
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
@@ -104,7 +104,7 @@ static void arptimer_poll(int argc, wdparm_t arg, ...)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: arp_timer_initialize
+ * Name: arp_timer_initialize
  *
  * Description:
  *   Initialized the 10 second timer that is need by the ARP logic in order

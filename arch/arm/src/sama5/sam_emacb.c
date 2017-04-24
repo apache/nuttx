@@ -4106,20 +4106,20 @@ static void sam_macaddress(struct sam_emac_s *priv)
 
   ninfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         dev->d_ifname,
-        dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
-        dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
-        dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
+        dev->d_mac.ether.ether_addr_octet[0], dev->d_mac.ether.ether_addr_octet[1],
+        dev->d_mac.ether.ether_addr_octet[2], dev->d_mac.ether.ether_addr_octet[3],
+        dev->d_mac.ether.ether_addr_octet[4], dev->d_mac.ether.ether_addr_octet[5]);
 
   /* Set the MAC address */
 
-  regval = (uint32_t)dev->d_mac.ether_addr_octet[0] |
-           (uint32_t)dev->d_mac.ether_addr_octet[1] << 8 |
-           (uint32_t)dev->d_mac.ether_addr_octet[2] << 16 |
-           (uint32_t)dev->d_mac.ether_addr_octet[3] << 24;
+  regval = (uint32_t)dev->d_mac.ether.ether_addr_octet[0] |
+           (uint32_t)dev->d_mac.ether.ether_addr_octet[1] << 8 |
+           (uint32_t)dev->d_mac.ether.ether_addr_octet[2] << 16 |
+           (uint32_t)dev->d_mac.ether.ether_addr_octet[3] << 24;
   sam_putreg(priv, SAM_EMAC_SAB1_OFFSET, regval);
 
-  regval = (uint32_t)dev->d_mac.ether_addr_octet[4] |
-           (uint32_t)dev->d_mac.ether_addr_octet[5] << 8;
+  regval = (uint32_t)dev->d_mac.ether.ether_addr_octet[4] |
+           (uint32_t)dev->d_mac.ether.ether_addr_octet[5] << 8;
   sam_putreg(priv, SAM_EMAC_SAT1_OFFSET, regval);
 }
 

@@ -57,7 +57,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: tcp_backlogcreate
+ * Name: tcp_backlogcreate
  *
  * Description:
  *   Called from the listen() logic to setup the backlog as specified in the
@@ -139,7 +139,7 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg)
 }
 
 /****************************************************************************
- * Function: tcp_backlogdestroy
+ * Name: tcp_backlogdestroy
  *
  * Description:
  *   (1) Called from tcp_free() whenever a connection is freed.
@@ -203,7 +203,7 @@ int tcp_backlogdestroy(FAR struct tcp_conn_s *conn)
 }
 
 /****************************************************************************
- * Function: tcp_backlogadd
+ * Name: tcp_backlogadd
  *
  * Description:
  *  Called tcp_listen when a new connection is made with a listener socket
@@ -257,7 +257,7 @@ int tcp_backlogadd(FAR struct tcp_conn_s *conn, FAR struct tcp_conn_s *blconn)
 }
 
 /****************************************************************************
- * Function: tcp_backlogremove
+ * Name: tcp_backlogremove
  *
  * Description:
  *  Called from poll().  Before waiting for a new connection, poll will
@@ -276,7 +276,7 @@ bool tcp_backlogavailable(FAR struct tcp_conn_s *conn)
 #endif
 
 /****************************************************************************
- * Function: tcp_backlogremove
+ * Name: tcp_backlogremove
  *
  * Description:
  *  Called from accept().  Before waiting for a new connection, accept will
@@ -325,7 +325,7 @@ FAR struct tcp_conn_s *tcp_backlogremove(FAR struct tcp_conn_s *conn)
 }
 
 /****************************************************************************
- * Function: tcp_backlogdelete
+ * Name: tcp_backlogdelete
  *
  * Description:
  *  Called from tcp_free() when a connection is freed that this also

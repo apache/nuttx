@@ -47,6 +47,8 @@
 #  include "chip/stm32f05x_pinmap.h"
 #elif defined(CONFIG_STM32F0_STM32F07X)
 #  include "chip/stm32f07x_pinmap.h"
+#elif defined(CONFIG_STM32F0_STM32F09X)
+#  include "chip/stm32f09x_pinmap.h"
 #else
 #  error "Unsupported STM32F0 pin map"
 #endif

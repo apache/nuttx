@@ -49,7 +49,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_getinheritsched
+ * Name:  pthread_attr_getinheritsched
  *
  * Description:
  *   Report whether the scheduling info in the pthread

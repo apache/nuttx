@@ -108,7 +108,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Function: cs89x0_initialize
+ * Name: cs89x0_initialize
  *
  * Description:
  *   Initialize the Ethernet driver

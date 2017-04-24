@@ -67,7 +67,7 @@ static FAR struct tcp_conn_s *tcp_listenports[CONFIG_NET_MAX_LISTENPORTS];
  ****************************************************************************/
 
 /****************************************************************************
- * Function: tcp_findlistener
+ * Name: tcp_findlistener
  *
  * Description:
  *   Return the connection listener for connections on this port (if any)
@@ -108,7 +108,7 @@ FAR struct tcp_conn_s *tcp_findlistener(uint16_t portno)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: tcp_listen_initialize
+ * Name: tcp_listen_initialize
  *
  * Description:
  *   Setup the listening data structures
@@ -129,7 +129,7 @@ void tcp_listen_initialize(void)
 }
 
 /****************************************************************************
- * Function: tcp_unlisten
+ * Name: tcp_unlisten
  *
  * Description:
  *   Stop listening to the port bound to the specified TCP connection
@@ -160,7 +160,7 @@ int tcp_unlisten(FAR struct tcp_conn_s *conn)
 }
 
 /****************************************************************************
- * Function: tcp_listen
+ * Name: tcp_listen
  *
  * Description:
  *   Start listening to the port bound to the specified TCP connection
@@ -219,7 +219,7 @@ int tcp_listen(FAR struct tcp_conn_s *conn)
 }
 
 /****************************************************************************
- * Function: tcp_islistener
+ * Name: tcp_islistener
  *
  * Description:
  *   Return true is there is a listener for the specified port
@@ -235,7 +235,7 @@ bool tcp_islistener(uint16_t portno)
 }
 
 /****************************************************************************
- * Function: tcp_accept_connection
+ * Name: tcp_accept_connection
  *
  * Description:
  *   Accept the new connection for the specified listening port.

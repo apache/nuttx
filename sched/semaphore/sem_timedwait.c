@@ -98,7 +98,7 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
 {
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
-  int        ticks;
+  ssystime_t ticks;
   int        errcode;
   int        ret = ERROR;
 

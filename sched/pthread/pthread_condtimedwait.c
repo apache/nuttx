@@ -169,7 +169,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
   uint16_t oldstate;
-  int ticks;
+  ssystime_t ticks;
   int mypid = (int)getpid();
   int ret = OK;
   int status;

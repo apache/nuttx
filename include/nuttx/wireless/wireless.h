@@ -63,7 +63,6 @@
  * interface.
  */
 
-/* IEEE802.11 */
 /* Wireless identification */
 
 #define SIOCSIWCOMMIT       _WLIOC(0x0001)  /* Commit pending changes to driver */
@@ -154,24 +153,8 @@
 
 #define SIOCSIWPMKSA        _WLIOC(0x0032)  /* PMKSA cache operation */
 
-/* IEEE802.15.4 6loWPAN
- *
- *  IEEE802.15.4 IOCTLs may be directed at one of three layers:
- *
- *  1. To the 6loWPAN network layer, as documented here,
- *  2. To the IEEE802.15.4 MAC layer, as documented in,
- *     include/nuttx/wireless/ieee802154/ioeee802154_mac.h, or to
- *  3. To the IEEE802.15.4 radio device layer, as documented in,
- *     include/nuttx/wireless/ieee802154/ioeee802154_radio.h.
- *
- * SIOCSWPANID - Join the specified PAN ID
- */
-
-#define SIOCSWPANID         _WLIOC(0x0033)  /* Join PAN ID */
-#define SIOCGWPANID         _WLIOC(0x0034)  /* Return PAN ID */
-
-#define WL_FIRSTCHAR        0x0035
-#define WL_NNETCMDS         0x0034
+#define WL_FIRSTCHAR        0x0033
+#define WL_NNETCMDS         0x0032
 
 /* Character Driver IOCTL commands *************************************************/
 /* Non-compatible, NuttX only IOCTL definitions for use with low-level wireless
@@ -179,23 +162,23 @@
  * requires a file descriptor created by the open() interface.
  */
 
-#define WLIOC_SETRADIOFREQ  _WLIOC(0x0035)  /* arg: Pointer to uint32_t, frequency
+#define WLIOC_SETRADIOFREQ  _WLIOC(0x0033)  /* arg: Pointer to uint32_t, frequency
                                              * value (in Mhz) */
-#define WLIOC_GETRADIOFREQ  _WLIOC(0x0036)  /* arg: Pointer to uint32_t, frequency
+#define WLIOC_GETRADIOFREQ  _WLIOC(0x0034)  /* arg: Pointer to uint32_t, frequency
                                              * value (in Mhz) */
-#define WLIOC_SETADDR       _WLIOC(0x0037)  /* arg: Pointer to address value, format
+#define WLIOC_SETADDR       _WLIOC(0x0035)  /* arg: Pointer to address value, format
                                              * of the address is driver specific */
-#define WLIOC_GETADDR       _WLIOC(0x0038)  /* arg: Pointer to address value, format
+#define WLIOC_GETADDR       _WLIOC(0x0036)  /* arg: Pointer to address value, format
                                              * of the address is driver specific */
-#define WLIOC_SETTXPOWER    _WLIOC(0x0039)  /* arg: Pointer to int32_t, output power
+#define WLIOC_SETTXPOWER    _WLIOC(0x0037)  /* arg: Pointer to int32_t, output power
                                              * (in dBm) */
-#define WLIOC_GETTXPOWER    _WLIOC(0x003a)  /* arg: Pointer to int32_t, output power
+#define WLIOC_GETTXPOWER    _WLIOC(0x0038)  /* arg: Pointer to int32_t, output power
                                              * (in dBm) */
 
 /* Device-specific IOCTL commands **************************************************/
 
 #define WL_FIRST            0x0001          /* First common command */
-#define WL_NCMDS            0x003a          /* Number of common commands */
+#define WL_NCMDS            0x0038          /* Number of common commands */
 
 /* User defined ioctl commands are also supported. These will be forwarded
  * by the upper-half QE driver to the lower-half QE driver via the ioctl()
@@ -370,36 +353,6 @@ struct iw_event
   uint16_t           len;   /* Real length of ata */
   uint16_t           cmd;   /* Wireless IOCTL command*/
   union iwreq_data   u;     /* Fixed IOCTL payload */
-};
-
-/* 6loWPAN */
-/* This structure is used with the SIOCSWPANID IOCTL command to select the
- * PAN ID to join.
- */
-
-struct sixlowpan_panid_s
-{
-  uint16_t           panid; /* The PAN ID to join */
-};
-
-/* This union defines the data payload of an 6loWPAN or SIOCGWPANID ioctl
- * command and is used in struct sixlowpan_req_s below.
- */
-
-union sixlowpan_data
-{
-  struct sixlowpan_panid_s panid;  /* PAN ID to join */
-};
-
-/* This is the structure used to exchange data in wireless IOCTLs.  This
- * structure is the same as 'struct ifreq', but defined for use with
- * 6loWPAN IOCTLs.
- */
-
-struct sixlowpan_req_s
-{
-  char ifr_name[IFNAMSIZ];  /* Interface name, e.g. "wpan0" */
-  union sixlowpan_data u;   /* Data payload */
 };
 
 #endif /* CONFIG_DRIVERS_WIRELESS */

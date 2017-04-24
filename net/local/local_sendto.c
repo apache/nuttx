@@ -57,7 +57,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_local_sendto
+ * Name: psock_local_sendto
  *
  * Description:
  *   This function implements the Unix domain-specific logic of the

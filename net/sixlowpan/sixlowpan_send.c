@@ -93,7 +93,7 @@ struct sixlowpan_send_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: send_timeout
+ * Name: send_timeout
  *
  * Description:
  *   Check for send timeout.
@@ -134,7 +134,7 @@ static inline bool send_timeout(FAR struct sixlowpan_send_s *sinfo)
 }
 
 /****************************************************************************
- * Function: send_interrupt
+ * Name: send_interrupt
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual

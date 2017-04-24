@@ -81,7 +81,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Function:  clock_isleapyear
+ * Name:  clock_isleapyear
  *
  * Description:
  *    Return true if the specified year is a leap year
@@ -91,7 +91,7 @@ extern "C"
 int clock_isleapyear(int year);
 
 /****************************************************************************
- * Function:  clock_daysbeforemonth
+ * Name:  clock_daysbeforemonth
  *
  * Description:
  *    Get the number of days that occurred before the beginning of the month.
@@ -101,7 +101,7 @@ int clock_isleapyear(int year);
 int clock_daysbeforemonth(int month, bool leapyear);
 
 /****************************************************************************
- * Function:  clock_dayoftheweek
+ * Name:  clock_dayoftheweek
  *
  * Description:
  *    Get the day of the week
@@ -121,7 +121,7 @@ int clock_dayoftheweek(int mday, int month, int year);
 #endif
 
 /****************************************************************************
- * Function:  clock_calendar2utc
+ * Name:  clock_calendar2utc
  *
  * Description:
  *    Calendar/UTC conversion based on algorithms from p. 604

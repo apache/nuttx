@@ -93,7 +93,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Function: slip_initialize
+ * Name: slip_initialize
  *
  * Description:
  *   Instantiate a SLIP network interface.

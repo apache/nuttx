@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  difftime
+ * Name:  difftime
  *
  * Description:
  *   The difftime() function returns the number of seconds elapsed

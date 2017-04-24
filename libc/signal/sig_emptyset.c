@@ -44,7 +44,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sigemptyset
+ * Name: sigemptyset
  *
  * Description:
  *   This function initializes the signal set specified by set such that all

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/clock.h
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2014, 2016 Gregory Nutt.
+ *   Copyright (C) 2007-2009, 2011-2012, 2014, 2016-2017 Gregory Nutt.
              All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -50,6 +50,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 /* Efficient, direct access to OS global timer variables will be supported
  * if the execution environment has direct access to kernel global data.
@@ -71,12 +72,12 @@
    /* Case 1: There is no global timer data */
 
 #elif defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)
-     /* Case 3: Kernel mode of protected kernel build */
+   /* Case 3: Kernel mode of protected kernel build */
 
 #    define __HAVE_KERNEL_GLOBALS 1
 
 #elif defined(CONFIG_BUILD_KERNEL) && defined(__KERNEL__)
-     /* Case 3: Kernel only build */
+   /* Case 3: Kernel only build */
 
 #    define __HAVE_KERNEL_GLOBALS 1
 
@@ -198,6 +199,14 @@ typedef uint64_t systime_t;
 typedef uint32_t systime_t;
 #endif
 
+/* This type used to hold relative ticks that may have negative value */
+
+#ifdef CONFIG_SYSTEM_TIME64
+typedef int64_t ssystime_t;
+#else
+typedef int32_t ssystime_t;
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -230,7 +239,7 @@ EXTERN volatile systime_t g_system_timer;
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  clock_synchronize
+ * Name:  clock_synchronize
  *
  * Description:
  *   Synchronize the system timer to a hardware RTC.  This operation is
@@ -262,7 +271,38 @@ void clock_synchronize(void);
 #endif
 
 /****************************************************************************
- * Function:  clock_systimer
+ * Name: clock_resynchronize
+ *
+ * Description:
+ *   Resynchronize the system timer to a hardware RTC.  The user can
+ *   explicitly re-synchronize the system timer to the RTC under certain
+ *   conditions where the system timer is known to be in error.  For example,
+ *   in certain low-power states, the system timer may be stopped but the
+ *   RTC will continue keep correct time.  After recovering from such
+ *   low-power state, this function should be called to restore the correct
+ *   system time. Function also keeps monotonic clock at rate of RTC.
+ *
+ *   Calling this function will not result in system time going "backward" in
+ *   time. If setting system time with RTC would result time going "backward"
+ *   then resynchronization is not performed.
+ *
+ * Parameters:
+ *   diff:  amount of time system-time is adjusted forward with RTC
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_RTC) && !defined(CONFIG_SCHED_TICKLESS) && \
+    !defined(CONFIG_CLOCK_TIMEKEEPING)
+void clock_resynchronize(FAR struct timespec *rtc_diff);
+#endif
+
+/****************************************************************************
+ * Name:  clock_systimer
  *
  * Description:
  *   Return the current value of the 32/64-bit system timer counter.
@@ -307,7 +347,7 @@ systime_t clock_systimer(void);
 int clock_systimespec(FAR struct timespec *ts);
 
 /****************************************************************************
- * Function:  clock_cpuload
+ * Name:  clock_cpuload
  *
  * Description:
  *   Return load measurement data for the select PID.

@@ -78,7 +78,7 @@ struct route_ipv6_devmatch_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_ipv4_devmatch
+ * Name: net_ipv4_devmatch
  *
  * Description:
  *   Return 1 if the IPv4 route is available on the device's network.
@@ -119,7 +119,7 @@ static int net_ipv4_devmatch(FAR struct net_route_s *route, FAR void *arg)
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Function: net_ipv6_devmatch
+ * Name: net_ipv6_devmatch
  *
  * Description:
  *   Return 1 if the IPv6 route is available on the device's network.
@@ -164,7 +164,7 @@ static int net_ipv6_devmatch(FAR struct net_route_ipv6_s *route, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_ipv4_router
+ * Name: netdev_ipv4_router
  *
  * Description:
  *   Given an IPv4 address on a external network, return the address of the
@@ -220,7 +220,7 @@ void netdev_ipv4_router(FAR struct net_driver_s *dev, in_addr_t target,
 #endif
 
 /****************************************************************************
- * Function: netdev_ipv6_router
+ * Name: netdev_ipv6_router
  *
  * Description:
  *   Given an IPv6 address on a external network, return the address of the

@@ -50,7 +50,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_default
+ * Name: netdev_default
  *
  * Description:
  *   Return the default network device.  REVISIT:  At present this function

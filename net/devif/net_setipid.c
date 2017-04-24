@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_setipid
+ * Name: net_setipid
  *
  * Description:
  *   This function may be used at boot time to set the initial ip_id.

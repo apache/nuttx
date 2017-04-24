@@ -153,7 +153,7 @@ static int do_socket_request(FAR struct usrsock_conn_s *conn, int domain,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: usrsock_socket
+ * Name: usrsock_socket
  *
  * Description:
  *   socket() creates an endpoint for communication and returns a socket

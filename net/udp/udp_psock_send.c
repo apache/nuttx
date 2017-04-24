@@ -54,7 +54,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_udp_send
+ * Name: psock_udp_send
  *
  * Description:
  *   Implements send() for connected UDP sockets

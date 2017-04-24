@@ -61,7 +61,6 @@
 
 #ifdef CONFIG_NET_6LOWPAN
 #  include <nuttx/net/sixlowpan.h>
-#  include <nuttx/wireless/wireless.h>
 #endif
 
 #ifdef CONFIG_NET_IGMP
@@ -318,77 +317,6 @@ static void ioctl_set_ipv6addr(FAR net_ipv6addr_t outaddr,
 {
   FAR const struct sockaddr_in6 *src = (FAR const struct sockaddr_in6 *)inaddr;
   memcpy(outaddr, src->sin6_addr.in6_u.u6_addr8, 16);
-}
-#endif
-
-/****************************************************************************
- * Name: netdev_sixlowpan_ioctl
- *
- * Description:
- *   Perform 6loWPAN network device specific operations.
- *
- * Parameters:
- *   psock    Socket structure
- *   dev      Ethernet driver device structure
- *   cmd      The ioctl command
- *   req      The argument of the ioctl cmd
- *
- * Return:
- *   >=0 on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN)
-static int netdev_sixlowpan_ioctl(FAR struct socket *psock, int cmd,
-                                  FAR struct sixlowpan_req_s *req)
-{
-  FAR struct ieee802154_driver_s *ieee;
-  int ret = -ENOTTY;
-
-  /* Verify that this is a valid wireless network IOCTL command */
-
-  if (_WLIOCVALID(cmd) && (unsigned)_IOC_NR(cmd) <= WL_NNETCMDS)
-    {
-      switch (cmd)
-        {
-
-          case SIOCSWPANID:  /* Join PAN ID */
-            {
-              ieee = (FAR struct ieee802154_driver_s *)netdev_findbyname(req->ifr_name);
-              if (ieee == NULL)
-                {
-                  ret = -ENODEV;
-                }
-              else
-                {
-                  ieee->i_panid = req->u.panid.panid;
-                  ret = OK;
-                }
-            }
-            break;
-
-          case SIOCGWPANID:   /* Return PAN ID */
-            {
-              ieee = (FAR struct ieee802154_driver_s *)netdev_findbyname(req->ifr_name);
-              if (ieee == NULL)
-                {
-                  ret = -ENODEV;
-                }
-              else
-                {
-                  req->u.panid.panid = ieee->i_panid;
-                  ret = OK;
-                }
-            }
-            break;
-
-          default:
-            return -ENOTTY;
-        }
-    }
-
-  return ret;
 }
 #endif
 
@@ -747,7 +675,9 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
         }
         break;
 
-      /* MAC address operations only make sense if Ethernet is supported */
+      /* MAC address operations only make sense if Ethernet or 6loWPAN are
+       * supported.
+       */
 
 #if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_NET_6LOWPAN)
       case SIOCGIFHWADDR:  /* Get hardware address */
@@ -764,7 +694,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
                 {
                   req->ifr_hwaddr.sa_family = AF_INETX;
                   memcpy(req->ifr_hwaddr.sa_data,
-                         dev->d_mac.ether_addr_octet, IFHWADDRLEN);
+                         dev->d_mac.ether.ether_addr_octet, IFHWADDRLEN);
                   ret = OK;
                 }
               else
@@ -777,13 +707,9 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
               if (true)
 #endif
                 {
-                  FAR struct ieee802154_driver_s *ieee =
-                    (FAR struct ieee802154_driver_s *)dev;
-
                    req->ifr_hwaddr.sa_family = AF_INETX;
-                   memcpy(req->ifr_hwaddr.sa_data, ieee->i_nodeaddr.u8,
-                          NET_6LOWPAN_RIMEADDR_SIZE);
-                   ret = OK;
+                   memcpy(req->ifr_hwaddr.sa_data,
+                         dev->d_mac.ieee802154.u8, NET_6LOWPAN_RIMEADDR_SIZE);                          
                 }
                else
 #endif
@@ -806,7 +732,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
               if (true)
 #endif
                 {
-                  memcpy(dev->d_mac.ether_addr_octet,
+                  memcpy(dev->d_mac.ether.ether_addr_octet,
                          req->ifr_hwaddr.sa_data, IFHWADDRLEN);
                   ret = OK;
                 }
@@ -820,13 +746,9 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
               if (true)
 #endif
                 {
-                  FAR struct ieee802154_driver_s *ieee =
-                    (FAR struct ieee802154_driver_s *)dev;
-
-                   req->ifr_hwaddr.sa_family = AF_INETX;
-                   memcpy(ieee->i_nodeaddr.u8, req->ifr_hwaddr.sa_data,
-                          NET_6LOWPAN_RIMEADDR_SIZE);
-                   ret = OK;
+                  memcpy(dev->d_mac.ieee802154.u8,
+                         req->ifr_hwaddr.sa_data, NET_6LOWPAN_RIMEADDR_SIZE);
+                  ret = OK;
                 }
               else
 #endif
@@ -1246,21 +1168,6 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
 {
   int ret;
 
-  /* Check if this is a valid command.  In all cases, arg is a pointer that has
-   * been cast to unsigned long.  Verify that the value of the to-be-pointer is
-   * non-NULL.
-   */
-
-#ifdef CONFIG_DRIVERS_WIRELESS
-  if (!_SIOCVALID(cmd) && !_WLIOCVALID(cmd))
-#else
-  if (!_SIOCVALID(cmd))
-#endif
-    {
-      ret = -ENOTTY;
-      goto errout;
-    }
-
   /* Verify that the psock corresponds to valid, allocated socket */
 
   if (psock == NULL || psock->s_crefs <= 0)
@@ -1273,18 +1180,6 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
 
   ret = netdev_ifr_ioctl(psock, cmd, (FAR struct ifreq *)((uintptr_t)arg));
 
-#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN)
-  /* Check for a 6loWPAN network command */
-
-  if (ret == -ENOTTY)
-    {
-      FAR struct sixlowpan_req_s *slpreq;
-
-      slpreq = (FAR struct sixlowpan_req_s *)((uintptr_t)arg);
-      ret    = netdev_sixlowpan_ioctl(psock, cmd, slpreq);
-    }
-#endif
-
 #if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_WIRELESS_IOCTL)
   /* Check for a wireless network command */
 
@@ -1292,7 +1187,7 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
     {
       FAR struct iwreq *wifrreq;
 
-      wifrreq = (FAR struct sixlowpan_req_s *)((uintptr_t)arg);
+      wifrreq = (FAR struct iwreq *)((uintptr_t)arg);
       ret     = netdev_wifr_ioctl(psock, cmd, wifrreq);
     }
 #endif

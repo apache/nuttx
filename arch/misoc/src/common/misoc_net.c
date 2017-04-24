@@ -833,7 +833,7 @@ static int misoc_net_ifup(FAR struct net_driver_s *dev)
 
   /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
 
-  /* Instantiate the MAC address from priv->misoc_net_dev.d_mac.ether_addr_octet */
+  /* Instantiate the MAC address from priv->misoc_net_dev.d_mac.ether.ether_addr_octet */
 
 #ifdef CONFIG_NET_ICMPv6
   /* Set up IPv6 multicast address filtering */
@@ -1182,7 +1182,7 @@ int misoc_net_initialize(int intf)
    */
 
   /* Read the MAC address from the hardware into
-   * priv->misoc_net_dev.d_mac.ether_addr_octet
+   * priv->misoc_net_dev.d_mac.ether.ether_addr_octet
    */
 
   /* Register the device with the OS so that socket IOCTLs can be performed */

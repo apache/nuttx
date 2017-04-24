@@ -228,7 +228,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr);
 int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr);
 
 /****************************************************************************
- * Function: udp_ipv4_select
+ * Name: udp_ipv4_select
  *
  * Description:
  *   Configure to send or receive an UDP IPv4 packet
@@ -240,7 +240,7 @@ void udp_ipv4_select(FAR struct net_driver_s *dev);
 #endif
 
 /****************************************************************************
- * Function: udp_ipv6_select
+ * Name: udp_ipv6_select
  *
  * Description:
  *   Configure to send or receive an UDP IPv6 packet
@@ -338,7 +338,7 @@ int udp_ipv6_input(FAR struct net_driver_s *dev);
 #endif
 
 /****************************************************************************
- * Function: udp_find_ipv4_device
+ * Name: udp_find_ipv4_device
  *
  * Description:
  *   Select the network driver to use with the IPv4 UDP transaction.
@@ -358,7 +358,7 @@ FAR struct net_driver_s *udp_find_ipv4_device(FAR struct udp_conn_s *conn,
 #endif
 
 /****************************************************************************
- * Function: udp_find_ipv6_device
+ * Name: udp_find_ipv6_device
  *
  * Description:
  *   Select the network driver to use with the IPv6 UDP transaction.
@@ -378,7 +378,7 @@ FAR struct net_driver_s *udp_find_ipv6_device(FAR struct udp_conn_s *conn,
 #endif
 
 /****************************************************************************
- * Function: udp_find_laddr_device
+ * Name: udp_find_laddr_device
  *
  * Description:
  *   Select the network driver to use with the UDP transaction using the
@@ -395,7 +395,7 @@ FAR struct net_driver_s *udp_find_ipv6_device(FAR struct udp_conn_s *conn,
 FAR struct net_driver_s *udp_find_laddr_device(FAR struct udp_conn_s *conn);
 
 /****************************************************************************
- * Function: udp_find_raddr_device
+ * Name: udp_find_raddr_device
  *
  * Description:
  *   Select the network driver to use with the UDP transaction using the
@@ -412,7 +412,7 @@ FAR struct net_driver_s *udp_find_laddr_device(FAR struct udp_conn_s *conn);
 FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn);
 
 /****************************************************************************
- * Function: udp_callback
+ * Name: udp_callback
  *
  * Description:
  *   Inform the application holding the UDP socket of a change in state.
@@ -429,7 +429,7 @@ uint16_t udp_callback(FAR struct net_driver_s *dev,
                       FAR struct udp_conn_s *conn, uint16_t flags);
 
 /****************************************************************************
- * Function: psock_udp_send
+ * Name: psock_udp_send
  *
  * Description:
  *   Implements send() for connected UDP sockets
@@ -440,7 +440,7 @@ ssize_t psock_udp_send(FAR struct socket *psock, FAR const void *buf,
                        size_t len);
 
 /****************************************************************************
- * Function: psock_udp_sendto
+ * Name: psock_udp_sendto
  *
  * Description:
  *   This function implements the UDP-specific logic of the standard
@@ -469,7 +469,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
                          socklen_t tolen);
 
 /****************************************************************************
- * Function: udp_pollsetup
+ * Name: udp_pollsetup
  *
  * Description:
  *   Setup to monitor events on one UDP/IP socket
@@ -489,7 +489,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
 #endif
 
 /****************************************************************************
- * Function: udp_pollteardown
+ * Name: udp_pollteardown
  *
  * Description:
  *   Teardown monitoring of events on an UDP/IP socket

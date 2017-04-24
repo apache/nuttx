@@ -49,7 +49,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: pthread_mutexattr_setprotocol
+ * Name: pthread_mutexattr_setprotocol
  *
  * Description:
  *    Set mutex protocol attribute.

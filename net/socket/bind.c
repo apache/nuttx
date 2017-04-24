@@ -68,7 +68,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: pkt_bind
+ * Name: pkt_bind
  *
  * Description:
  *   Bind a raw socket to an network device.
@@ -105,7 +105,7 @@ static int pkt_bind(FAR struct pkt_conn_s *conn,
 #if 0
   /* Get the MAC address of that interface */
 
-  memcpy(hwaddr, g_netdevices->d_mac, 6);
+  memcpy(hwaddr, g_netdevices->d_mac.ether, 6);
 #endif
 
   /* Put ifindex and mac address into connection */
@@ -122,7 +122,7 @@ static int pkt_bind(FAR struct pkt_conn_s *conn,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_bind
+ * Name: psock_bind
  *
  * Description:
  *   bind() gives the socket 'psock' the local address 'addr'. 'addr' is
@@ -345,7 +345,7 @@ errout:
 }
 
 /****************************************************************************
- * Function: bind
+ * Name: bind
  *
  * Description:
  *   bind() gives the socket 'sockfd' the local address 'addr'. 'addr' is

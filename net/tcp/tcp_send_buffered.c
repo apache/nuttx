@@ -106,7 +106,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_insert_segment
+ * Name: psock_insert_segment
  *
  * Description:
  *   Insert a new segment in a write buffer queue, keep the segment queue in
@@ -155,7 +155,7 @@ static void psock_insert_segment(FAR struct tcp_wrbuffer_s *wrb,
 }
 
 /****************************************************************************
- * Function: psock_lost_connection
+ * Name: psock_lost_connection
  *
  * Description:
  *   The TCP connection has been lost.  Free all write buffers.
@@ -206,7 +206,7 @@ static inline void psock_lost_connection(FAR struct socket *psock,
 }
 
 /****************************************************************************
- * Function: send_ipselect
+ * Name: send_ipselect
  *
  * Description:
  *   If both IPv4 and IPv6 support are enabled, then we will need to select
@@ -249,7 +249,7 @@ static inline void send_ipselect(FAR struct net_driver_s *dev,
 #endif
 
 /****************************************************************************
- * Function: psock_send_addrchck
+ * Name: psock_send_addrchck
  *
  * Description:
  *   Check if the destination IP address is in the IPv4 ARP or IPv6 Neighbor
@@ -312,7 +312,7 @@ static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
 #endif /* CONFIG_NET_ETHERNET */
 
 /****************************************************************************
- * Function: psock_send_interrupt
+ * Name: psock_send_interrupt
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -828,7 +828,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
- * Function: send_txnotify
+ * Name: send_txnotify
  *
  * Description:
  *   Notify the appropriate device driver that we are have data ready to
@@ -887,7 +887,7 @@ static inline void send_txnotify(FAR struct socket *psock,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_tcp_send
+ * Name: psock_tcp_send
  *
  * Description:
  *   psock_tcp_send() call may be used only when the TCP socket is in a
@@ -1119,7 +1119,7 @@ errout:
 }
 
 /****************************************************************************
- * Function: psock_tcp_cansend
+ * Name: psock_tcp_cansend
  *
  * Description:
  *   psock_tcp_cansend() returns a value indicating if a write to the socket

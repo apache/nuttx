@@ -637,7 +637,7 @@ static const uint8_t g_setcon[] =
  **************************************************************************************/
 
 /**************************************************************************************
- * Function: nokia_select
+ * Name: nokia_select
  *
  * Description:
  *   Select the SPI, locking and  re-configuring if necessary
@@ -674,7 +674,7 @@ static void nokia_select(FAR struct spi_dev_s *spi)
 }
 
 /**************************************************************************************
- * Function: nokia_deselect
+ * Name: nokia_deselect
  *
  * Description:
  *   De-select the SPI

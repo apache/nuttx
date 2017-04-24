@@ -290,7 +290,7 @@ static void nrf24l01_lock(FAR struct spi_dev_s *spi)
 }
 
 /****************************************************************************
- * Function: nrf24l01_unlock
+ * Name: nrf24l01_unlock
  *
  * Description:
  *   Un-lock the SPI bus after each transfer, possibly losing the current
@@ -314,7 +314,7 @@ static void nrf24l01_unlock(FAR struct spi_dev_s *spi)
 }
 
 /****************************************************************************
- * Function: nrf24l01_configspi
+ * Name: nrf24l01_configspi
  *
  * Description:
  *   Configure the SPI for use with the NRF24L01.

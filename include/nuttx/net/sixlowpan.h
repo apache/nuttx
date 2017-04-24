@@ -56,23 +56,13 @@
 #include <nuttx/clock.h>
 #include <nuttx/drivers/iob.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/ieee802154.h>
 
 #ifdef CONFIG_NET_6LOWPAN
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* By default, a 2-byte Rime address is used for the IEEE802.15.4 MAC
- * device's link  layer address.  If CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
- * is selected, then an 8-byte Rime address will be used.
- */
-
-#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
-#  define NET_6LOWPAN_RIMEADDR_SIZE 8
-#else
-#  define NET_6LOWPAN_RIMEADDR_SIZE 2
-#endif
 
 /* Frame format definitions *************************************************/
 /* Fragment header.
@@ -107,49 +97,6 @@
 #define RIME_HC1_HC_UDP_TTL              3  /* 8 bit */
 #define RIME_HC1_HC_UDP_PORTS            4  /* 8 bit */
 #define RIME_HC1_HC_UDP_CHKSUM           5  /* 16 bit */
-
-/* These are some definitions of element values used in the FCF.  See the
- * IEEE802.15.4 spec for details.
- */
-
-#define FRAME802154_FRAMETYPE_SHIFT      (0)  /* Bits 0-2: Frame type */
-#define FRAME802154_FRAMETYPE_MASK       (7 << FRAME802154_FRAMETYPE_SHIFT)
-#define FRAME802154_SECENABLED_SHIFT     (3)  /* Bit 3: Security enabled */
-#define FRAME802154_FRAMEPENDING_SHIFT   (4)  /* Bit 4: Frame pending */
-#define FRAME802154_ACKREQUEST_SHIFT     (5)  /* Bit 5: ACK request */
-#define FRAME802154_PANIDCOMP_SHIFT      (6)  /* Bit 6: PANID compression */
-                                              /* Bits 7-9: Reserved */
-#define FRAME802154_DSTADDR_SHIFT        (2)  /* Bits 10-11: Dest address mode */
-#define FRAME802154_DSTADDR_MASK         (3 << FRAME802154_DSTADDR_SHIFT)
-#define FRAME802154_VERSION_SHIFT        (4)  /* Bit 12-13: Frame version */
-#define FRAME802154_VERSION_MASK         (3 << FRAME802154_VERSION_SHIFT)
-#define FRAME802154_SRCADDR_SHIFT        (6)  /* Bits 14-15: Source address mode */
-#define FRAME802154_SRCADDR_MASK         (3 << FRAME802154_SRCADDR_SHIFT)
-
-/* Unshifted values for use in struct frame802154_fcf_s */
-
-#define FRAME802154_BEACONFRAME          (0)
-#define FRAME802154_DATAFRAME            (1)
-#define FRAME802154_ACKFRAME             (2)
-#define FRAME802154_CMDFRAME             (3)
-
-#define FRAME802154_BEACONREQ            (7)
-
-#define FRAME802154_IEEERESERVED         (0)
-#define FRAME802154_NOADDR               (0)  /* Only valid for ACK or Beacon frames */
-#define FRAME802154_SHORTADDRMODE        (2)
-#define FRAME802154_LONGADDRMODE         (3)
-
-#define FRAME802154_NOBEACONS            0x0f
-
-#define FRAME802154_BROADCASTADDR        0xffff
-#define FRAME802154_BROADCASTPANDID      0xffff
-
-#define FRAME802154_IEEE802154_2003      (0)
-#define FRAME802154_IEEE802154_2006      (1)
-
-#define FRAME802154_SECURITY_LEVEL_NONE  (0)
-#define FRAME802154_SECURITY_LEVEL_128   (3)
 
 /* Min and Max compressible UDP ports - HC06 */
 
@@ -260,12 +207,6 @@
 #define SIXLOWPAN_HC1_HC_UDP_HDR_LEN     7
 #define SIXLOWPAN_FRAG1_HDR_LEN          4
 #define SIXLOWPAN_FRAGN_HDR_LEN          5
-
-/* This maximum size of an IEEE802.15.4 frame.  Certain, non-standard
- * devices may exceed this value, however.
- */
-
-#define SIXLOWPAN_MAC_STDFRAME 127
 
 /* Address compressibility test macros **************************************/
 
@@ -389,13 +330,6 @@
  * Public Types
  ****************************************************************************/
 
-/* Rime address representation */
-
-struct rimeaddr_s
-{
-  uint8_t u8[NET_6LOWPAN_RIMEADDR_SIZE];
-};
-
 /* The device structure for IEEE802.15.4 MAC network device differs from the
  * standard Ethernet MAC device structure.  The main reason for this
  * difference is that fragmentation must be supported.
@@ -432,9 +366,7 @@ struct rimeaddr_s
  * 2. i_dsn must be set to a random value.  After that, it will be managed
  *    by the network.
  *
- * 3. i_nodeaddr must be set after the MAC is assigned an address.
- *
- * 4. On a TX poll, the IEEE802.15.4 MAC driver should provide its driver
+ * 3. On a TX poll, the IEEE802.15.4 MAC driver should provide its driver
  *    structure with i_framelist set to NULL.  At the conclusion of the
  *    poll, if there are frames to be sent, they will have been added to
  *    the i_framelist.  The non-empty frame list at the conclusion of the
@@ -449,7 +381,7 @@ struct rimeaddr_s
  *    After sending each frame, the driver must return the IOB to the pool
  *    of free IOBs using the FROM_IOB_FREE() macro.
  *
- * 5. When receiving data both buffers must be provided:
+ * 4. When receiving data both buffers must be provided:
  *
  *    The IEEE802.15.4 MAC driver should receive the frame data directly
  *    into the payload area of an IOB structure.  That IOB structure may be
@@ -509,10 +441,6 @@ struct ieee802154_driver_s
    */
 
   uint16_t i_panid;
-
-  /* i_node_addr.  The address assigned to this node. */
-
-  struct rimeaddr_s i_nodeaddr;
 
   /* i_dsn.  The sequence number in the range 0x00-0xff added to the
    * transmitted data or MAC command frame. The default is a random value

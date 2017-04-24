@@ -151,7 +151,7 @@ static int do_setsockopt_request(FAR struct usrsock_conn_s *conn,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: usrsock_setsockopt
+ * Name: usrsock_setsockopt
  *
  * Description:
  *   psock_setsockopt() sets the option specified by the 'option' argument,

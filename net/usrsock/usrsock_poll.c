@@ -152,7 +152,7 @@ static uint16_t poll_event(FAR struct net_driver_s *dev, FAR void *pvconn,
 }
 
 /****************************************************************************
- * Function: usrsock_poll
+ * Name: usrsock_poll
  *
  * Description:
  *   Setup to monitor events on an usrsock socket
@@ -299,7 +299,7 @@ errout_unlock:
 }
 
 /****************************************************************************
- * Function: usrsock_pollteardown
+ * Name: usrsock_pollteardown
  *
  * Description:
  *   Teardown monitoring of events on an usrsock socket
@@ -357,7 +357,7 @@ static int usrsock_pollteardown(FAR struct socket *psock,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: usrsock_poll
+ * Name: usrsock_poll
  *
  * Description:
  *   The standard poll() operation redirects operations on socket descriptors

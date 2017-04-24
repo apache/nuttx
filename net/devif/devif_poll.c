@@ -85,7 +85,7 @@ systime_t g_polltime;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: devif_packet_conversion
+ * Name: devif_packet_conversion
  *
  * Description:
  *   Generic output conversion hook.  Only needed for IEEE802.15.4 for now
@@ -157,7 +157,7 @@ static void devif_packet_conversion(FAR struct net_driver_s *dev,
 #endif /* CONFIG_NET_6LOWPAN */
 
 /****************************************************************************
- * Function: devif_poll_pkt_connections
+ * Name: devif_poll_pkt_connections
  *
  * Description:
  *   Poll all packet connections for available packets to send.
@@ -197,7 +197,7 @@ static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
 #endif /* CONFIG_NET_PKT */
 
 /****************************************************************************
- * Function: devif_poll_icmp
+ * Name: devif_poll_icmp
  *
  * Description:
  *   Poll all of the connections waiting to send an ICMP ECHO request
@@ -223,7 +223,7 @@ static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
 #endif /* CONFIG_NET_ICMP && CONFIG_NET_ICMP_PING */
 
 /****************************************************************************
- * Function: devif_poll_icmpv6
+ * Name: devif_poll_icmpv6
  *
  * Description:
  *   Poll all of the connections waiting to send an ICMPv6 ECHO request
@@ -249,7 +249,7 @@ static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
 #endif /* CONFIG_NET_ICMPv6_PING || CONFIG_NET_ICMPv6_NEIGHBOR*/
 
 /****************************************************************************
- * Function: devif_poll_igmp
+ * Name: devif_poll_igmp
  *
  * Description:
  *   Poll all IGMP connections for available packets to send.
@@ -279,7 +279,7 @@ static inline int devif_poll_igmp(FAR struct net_driver_s *dev,
 #endif /* CONFIG_NET_IGMP */
 
 /****************************************************************************
- * Function: devif_poll_udp_connections
+ * Name: devif_poll_udp_connections
  *
  * Description:
  *   Poll all UDP connections for available packets to send.
@@ -319,7 +319,7 @@ static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
 #endif /* NET_UDP_HAVE_STACK */
 
 /****************************************************************************
- * Function: devif_poll_tcp_connections
+ * Name: devif_poll_tcp_connections
  *
  * Description:
  *   Poll all UDP connections for available packets to send.
@@ -361,7 +361,7 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
 #endif
 
 /****************************************************************************
- * Function: devif_poll_tcp_timer
+ * Name: devif_poll_tcp_timer
  *
  * Description:
  *   The TCP timer has expired.  Update TCP timing state in each active,
@@ -409,7 +409,7 @@ static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: devif_poll
+ * Name: devif_poll
  *
  * Description:
  *   This function will traverse each active network connection structure and
@@ -513,7 +513,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 }
 
 /****************************************************************************
- * Function: devif_timer
+ * Name: devif_timer
  *
  * Description:
  *   These function will traverse each active network connection structure and

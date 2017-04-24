@@ -133,14 +133,19 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
         }
     }
 
+  if (npfds <= 0)
+    {
+      errcode = EINVAL;
+      goto errout;
+    }
+
   /* Allocate the descriptor list for poll() */
 
   pollset = (struct pollfd *)kmm_zalloc(npfds * sizeof(struct pollfd));
   if (!pollset)
     {
-      set_errno(ENOMEM);
-      leave_cancellation_point();
-      return ERROR;
+      errcode = ENOMEM;
+      goto errout;
     }
 
   /* Initialize the descriptor list for poll() */
@@ -279,16 +284,16 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
   /* Did poll() fail above? */
 
-  if (ret < 0)
+  if (ret >= 0)
     {
-      /* Yes.. restore the errno value */
-
-      set_errno(errcode);
+      leave_cancellation_point();
+      return ret;
     }
 
+errout:
+  set_errno(errcode);
   leave_cancellation_point();
-  return ret;
+  return ERROR;
 }
 
 #endif /* CONFIG_DISABLE_POLL */
-

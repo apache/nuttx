@@ -159,7 +159,7 @@ static struct ads7843e_dev_s *g_ads7843elist;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: ads7843e_lock
+ * Name: ads7843e_lock
  *
  * Description:
  *   Lock the SPI bus and re-configure as necessary.  This function must be
@@ -198,7 +198,7 @@ static void ads7843e_lock(FAR struct spi_dev_s *spi)
 }
 
 /****************************************************************************
- * Function: ads7843e_unlock
+ * Name: ads7843e_unlock
  *
  * Description:
  *   Un-lock the SPI bus after each transfer,  possibly losing the current

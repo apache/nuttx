@@ -177,7 +177,7 @@ static void setup_conn_getsockopt(FAR struct usrsock_conn_s *conn,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: usrsock_getsockopt
+ * Name: usrsock_getsockopt
  *
  * Description:
  *   getsockopt() retrieve thse value for the option specified by the

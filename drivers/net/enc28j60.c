@@ -358,7 +358,7 @@ static int  enc_reset(FAR struct enc_driver_s *priv);
  ****************************************************************************/
 
 /****************************************************************************
- * Function: enc_configspi
+ * Name: enc_configspi
  *
  * Description:
  *   Configure the SPI for use with the ENC28J60
@@ -384,7 +384,7 @@ static inline void enc_configspi(FAR struct spi_dev_s *spi)
 }
 
 /****************************************************************************
- * Function: enc_lock
+ * Name: enc_lock
  *
  * Description:
  *   Select the SPI, locking and  re-configuring if necessary
@@ -418,7 +418,7 @@ static void enc_lock(FAR struct enc_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: enc_unlock
+ * Name: enc_unlock
  *
  * Description:
  *   De-select the SPI
@@ -441,7 +441,7 @@ static inline void enc_unlock(FAR struct enc_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: enc_rdgreg2
+ * Name: enc_rdgreg2
  *
  * Description:
  *   Read a global register (EIE, EIR, ESTAT, ECON2, or ECON1).  The cmd
@@ -484,7 +484,7 @@ static uint8_t enc_rdgreg2(FAR struct enc_driver_s *priv, uint8_t cmd)
 }
 
 /****************************************************************************
- * Function: enc_wrgreg2
+ * Name: enc_wrgreg2
  *
  * Description:
  *   Write to a global register (EIE, EIR, ESTAT, ECON2, or ECON1).  The cmd
@@ -525,7 +525,7 @@ static void enc_wrgreg2(FAR struct enc_driver_s *priv, uint8_t cmd,
 }
 
 /****************************************************************************
- * Function: enc_src
+ * Name: enc_src
  *
  * Description:
  *   Send the single byte system reset command (SRC).
@@ -579,7 +579,7 @@ static inline void enc_src(FAR struct enc_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: enc_setbank
+ * Name: enc_setbank
  *
  * Description:
  *   Set the bank for these next control register access.
@@ -622,7 +622,7 @@ static void enc_setbank(FAR struct enc_driver_s *priv, uint8_t bank)
 }
 
 /****************************************************************************
- * Function: enc_rdbreg
+ * Name: enc_rdbreg
  *
  * Description:
  *   Read from a banked control register using the RCR command.
@@ -677,7 +677,7 @@ static uint8_t enc_rdbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
 }
 
 /****************************************************************************
- * Function: enc_wrbreg
+ * Name: enc_wrbreg
  *
  * Description:
  *   Write to a banked control register using the WCR command.  Unlike
@@ -723,7 +723,7 @@ static void enc_wrbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
 }
 
 /****************************************************************************
- * Function: enc_waitbreg
+ * Name: enc_waitbreg
  *
  * Description:
  *   Wait until banked register bit(s) take a specific value (or a timeout
@@ -764,7 +764,7 @@ static int enc_waitbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
 }
 
 /****************************************************************************
- * Function: enc_txdump enc_rxdump
+ * Name: enc_txdump enc_rxdump
  *
  * Description:
  *   Dump registers associated with receiving or sending packets.
@@ -836,7 +836,7 @@ static void enc_txdump(FAR struct enc_driver_s *priv)
 #endif
 
 /****************************************************************************
- * Function: enc_rdbuffer
+ * Name: enc_rdbuffer
  *
  * Description:
  *   Read a buffer of data.
@@ -878,7 +878,7 @@ static void enc_rdbuffer(FAR struct enc_driver_s *priv, FAR uint8_t *buffer,
 }
 
 /****************************************************************************
- * Function: enc_wrbuffer
+ * Name: enc_wrbuffer
  *
  * Description:
  *   Write a buffer of data.
@@ -961,7 +961,7 @@ static inline void enc_wrbuffer(FAR struct enc_driver_s *priv,
 }
 
 /****************************************************************************
- * Function: enc_rdphy
+ * Name: enc_rdphy
  *
  * Description:
  *   Read 16-bits of PHY data.
@@ -1022,7 +1022,7 @@ static uint16_t enc_rdphy(FAR struct enc_driver_s *priv, uint8_t phyaddr)
 }
 
 /****************************************************************************
- * Function: enc_wrphy
+ * Name: enc_wrphy
  *
  * Description:
  *   write 16-bits of PHY data.
@@ -1075,7 +1075,7 @@ static void enc_wrphy(FAR struct enc_driver_s *priv, uint8_t phyaddr,
 }
 
 /****************************************************************************
- * Function: enc_transmit
+ * Name: enc_transmit
  *
  * Description:
  *   Start hardware transmission.  Called either from:
@@ -1159,7 +1159,7 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: enc_txpoll
+ * Name: enc_txpoll
  *
  * Description:
  *   The transmitter is available, check if the network has any outgoing packets ready
@@ -1230,7 +1230,7 @@ static int enc_txpoll(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: enc_linkstatus
+ * Name: enc_linkstatus
  *
  * Description:
  *   The current link status can be obtained from the PHSTAT1.LLSTAT or
@@ -1256,7 +1256,7 @@ static void enc_linkstatus(FAR struct enc_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: enc_txif
+ * Name: enc_txif
  *
  * Description:
  *   An TXIF interrupt was received indicating that the last TX packet(s) is
@@ -1293,7 +1293,7 @@ static void enc_txif(FAR struct enc_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: enc_txerif
+ * Name: enc_txerif
  *
  * Description:
  *   An TXERIF interrupt was received indicating that a TX abort has occurred.
@@ -1336,7 +1336,7 @@ static void enc_txerif(FAR struct enc_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: enc_rxerif
+ * Name: enc_rxerif
  *
  * Description:
  *   An RXERIF interrupt was received indicating that the last TX packet(s) is
@@ -1358,7 +1358,7 @@ static void enc_rxerif(FAR struct enc_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: enc_rxdispatch
+ * Name: enc_rxdispatch
  *
  * Description:
  *   Give the newly received packet to the network.
@@ -1489,7 +1489,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: enc_pktif
+ * Name: enc_pktif
  *
  * Description:
  *   An interrupt was received indicating the availability of a new RX packet
@@ -1595,7 +1595,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: enc_irqworker
+ * Name: enc_irqworker
  *
  * Description:
  *   Perform interrupt handling logic outside of the interrupt handler (on
@@ -1815,7 +1815,7 @@ static void enc_irqworker(FAR void *arg)
 }
 
 /****************************************************************************
- * Function: enc_interrupt
+ * Name: enc_interrupt
  *
  * Description:
  *   Hardware interrupt handler
@@ -1854,7 +1854,7 @@ static int enc_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 
 /****************************************************************************
- * Function: enc_toworker
+ * Name: enc_toworker
  *
  * Description:
  *   Our TX watchdog timed out.  This is the worker thread continuation of
@@ -1906,7 +1906,7 @@ static void enc_toworker(FAR void *arg)
 }
 
 /****************************************************************************
- * Function: enc_txtimeout
+ * Name: enc_txtimeout
  *
  * Description:
  *   Our TX watchdog timed out.  Called from the timer interrupt handler.
@@ -1947,7 +1947,7 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
 }
 
 /****************************************************************************
- * Function: enc_pollworker
+ * Name: enc_pollworker
  *
  * Description:
  *   Periodic timer handler continuation.
@@ -2002,7 +2002,7 @@ static void enc_pollworker(FAR void *arg)
 }
 
 /****************************************************************************
- * Function: enc_polltimer
+ * Name: enc_polltimer
  *
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
@@ -2042,7 +2042,7 @@ static void enc_polltimer(int argc, uint32_t arg, ...)
 }
 
 /****************************************************************************
- * Function: enc_ifup
+ * Name: enc_ifup
  *
  * Description:
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
@@ -2114,7 +2114,7 @@ static int enc_ifup(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: enc_ifdown
+ * Name: enc_ifdown
  *
  * Description:
  *   NuttX Callback: Stop the interface.
@@ -2168,7 +2168,7 @@ static int enc_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: enc_txavail
+ * Name: enc_txavail
  *
  * Description:
  *   Driver callback invoked when new TX data is available.  This is a
@@ -2222,7 +2222,7 @@ static int enc_txavail(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: enc_addmac
+ * Name: enc_addmac
  *
  * Description:
  *   NuttX Callback: Add the specified MAC address to the hardware multicast
@@ -2260,7 +2260,7 @@ static int enc_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
- * Function: enc_rmmac
+ * Name: enc_rmmac
  *
  * Description:
  *   NuttX Callback: Remove the specified MAC address from the hardware multicast
@@ -2298,7 +2298,7 @@ static int enc_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
- * Function: enc_pwrsave
+ * Name: enc_pwrsave
  *
  * Description:
  *   The ENC28J60 may be commanded to power-down via the SPI interface.
@@ -2360,7 +2360,7 @@ static void enc_pwrsave(FAR struct enc_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: enc_pwrfull
+ * Name: enc_pwrfull
  *
  * Description:
  *   When normal operation is desired, the host controller must perform
@@ -2412,7 +2412,7 @@ static void enc_pwrfull(FAR struct enc_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: enc_setmacaddr
+ * Name: enc_setmacaddr
  *
  * Description:
  *   Set the MAC address to the configured value.  This is done after ifup
@@ -2440,16 +2440,16 @@ static void enc_setmacaddr(FAR struct enc_driver_s *priv)
    *   MAADR6  MAC Address Byte 6 (MAADR<7:0>)
    */
 
-  enc_wrbreg(priv, ENC_MAADR1, priv->dev.d_mac.ether_addr_octet[0]);
-  enc_wrbreg(priv, ENC_MAADR2, priv->dev.d_mac.ether_addr_octet[1]);
-  enc_wrbreg(priv, ENC_MAADR3, priv->dev.d_mac.ether_addr_octet[2]);
-  enc_wrbreg(priv, ENC_MAADR4, priv->dev.d_mac.ether_addr_octet[3]);
-  enc_wrbreg(priv, ENC_MAADR5, priv->dev.d_mac.ether_addr_octet[4]);
-  enc_wrbreg(priv, ENC_MAADR6, priv->dev.d_mac.ether_addr_octet[5]);
+  enc_wrbreg(priv, ENC_MAADR1, priv->dev.d_mac.ether.ether_addr_octet[0]);
+  enc_wrbreg(priv, ENC_MAADR2, priv->dev.d_mac.ether.ether_addr_octet[1]);
+  enc_wrbreg(priv, ENC_MAADR3, priv->dev.d_mac.ether.ether_addr_octet[2]);
+  enc_wrbreg(priv, ENC_MAADR4, priv->dev.d_mac.ether.ether_addr_octet[3]);
+  enc_wrbreg(priv, ENC_MAADR5, priv->dev.d_mac.ether.ether_addr_octet[4]);
+  enc_wrbreg(priv, ENC_MAADR6, priv->dev.d_mac.ether.ether_addr_octet[5]);
 }
 
 /****************************************************************************
- * Function: enc_reset
+ * Name: enc_reset
  *
  * Description:
  *   Stop, reset, re-initialize, and restart the ENC28J60.  This is done
@@ -2588,7 +2588,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: enc_initialize
+ * Name: enc_initialize
  *
  * Description:
  *   Initialize the Ethernet driver.  The ENC28J60 device is assumed to be

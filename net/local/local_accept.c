@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: local_waitlisten
+ * Name: local_waitlisten
  ****************************************************************************/
 
 static int local_waitlisten(FAR struct local_conn_s *server)
@@ -88,7 +88,7 @@ static int local_waitlisten(FAR struct local_conn_s *server)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_local_accept
+ * Name: psock_local_accept
  *
  * Description:
  *   This function implements accept() for Unix domain sockets.  See the

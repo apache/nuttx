@@ -343,7 +343,7 @@ static struct st7567_dev_s g_st7567dev =
  **************************************************************************************/
 
 /**************************************************************************************
- * Function: st7567_select
+ * Name: st7567_select
  *
  * Description:
  *   Select the SPI, locking and  re-configuring if necessary
@@ -380,7 +380,7 @@ static void st7567_select(FAR struct spi_dev_s *spi)
 }
 
 /**************************************************************************************
- * Function: st7567_deselect
+ * Name: st7567_deselect
  *
  * Description:
  *   De-select the SPI

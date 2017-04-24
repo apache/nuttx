@@ -205,7 +205,7 @@ static int psock_local_alloc(FAR struct socket *psock)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_socket
+ * Name: psock_socket
  *
  * Description:
  *   socket() creates an endpoint for communication and returns a socket
@@ -545,7 +545,7 @@ errout:
 }
 
 /****************************************************************************
- * Function: socket
+ * Name: socket
  *
  * Description:
  *   socket() creates an endpoint for communication and returns a descriptor.

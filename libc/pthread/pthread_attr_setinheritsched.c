@@ -50,7 +50,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_setinheritsched
+ * Name:  pthread_attr_setinheritsched
  *
  * Description:
  *   Indicate whether the scheduling info in the pthread

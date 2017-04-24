@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sem_setprotocol
+ * Name: sem_setprotocol
  *
  * Description:
  *    Set semaphore protocol attribute.

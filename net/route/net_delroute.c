@@ -76,7 +76,7 @@ struct route_match_ipv6_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_match
+ * Name: net_match
  *
  * Description:
  *   Return 1 if the route is available
@@ -175,7 +175,7 @@ static int net_match_ipv6(FAR struct net_route_ipv6_s *route, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_delroute
+ * Name: net_delroute
  *
  * Description:
  *   Remove an existing route from the routing table

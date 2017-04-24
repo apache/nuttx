@@ -50,7 +50,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_ipv6_pref2mask
+ * Name: net_ipv6_pref2mask
  *
  * Description:
  *   Convert a IPv6 prefix length to a network mask.  The prefix length

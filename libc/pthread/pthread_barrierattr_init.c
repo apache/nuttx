@@ -48,7 +48,7 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Function: pthread_barrierattr_init
+ * Name: pthread_barrierattr_init
  *
  * Description:
  *   The pthread_barrierattr_init() function will initialize a barrier attribute

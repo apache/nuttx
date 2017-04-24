@@ -51,7 +51,7 @@
 #ifdef CONFIG_CRYPTO_RANDOM_POOL
 
 /****************************************************************************
- * Function: getrandom
+ * Name: getrandom
  *
  * Description:
  *   Fill a buffer of arbitrary length with randomness. This is the

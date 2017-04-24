@@ -60,7 +60,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_finddevice_ipv4addr
+ * Name: netdev_finddevice_ipv4addr
  *
  * Description:
  *   Find a previously registered network device by matching a local address
@@ -113,7 +113,7 @@ static FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr)
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Function: netdev_finddevice_ipv6addr
+ * Name: netdev_finddevice_ipv6addr
  *
  * Description:
  *   Find a previously registered network device by matching a local address
@@ -171,7 +171,7 @@ netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_findby_ipv4addr
+ * Name: netdev_findby_ipv4addr
  *
  * Description:
  *   Find a previously registered network device by matching an arbitrary
@@ -293,7 +293,7 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr)
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Function: netdev_findby_ipv6addr
+ * Name: netdev_findby_ipv6addr
  *
  * Description:
  *   Find a previously registered network device by matching an arbitrary

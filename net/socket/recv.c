@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: recv
+ * Name: recv
  *
  * Description:
  *   The recv() call is identical to recvfrom() with a NULL from parameter.

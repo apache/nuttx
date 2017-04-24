@@ -406,7 +406,7 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob);
 int iob_contig(FAR struct iob_s *iob, unsigned int len);
 
 /****************************************************************************
- * Function: iob_dump
+ * Name: iob_dump
  *
  * Description:
  *   Dump the contents of a I/O buffer chain

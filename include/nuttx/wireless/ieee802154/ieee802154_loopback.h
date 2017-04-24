@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: ieee8021514_loopback
+ * Name: ieee8021514_loopback
  *
  * Description:
  *   Initialize and register the Ieee802.15.4 MAC loopback network driver.

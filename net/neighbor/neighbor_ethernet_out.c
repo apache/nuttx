@@ -245,7 +245,7 @@ void neighbor_out(FAR struct net_driver_s *dev)
 
   /* Finish populating the Ethernet header */
 
-  memcpy(eth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
+  memcpy(eth->src, dev->d_mac.ether.ether_addr_octet, ETHER_ADDR_LEN);
   eth->type  = HTONS(ETHTYPE_IP6);
 
   /* Add the size of the layer layer header to the total size of the

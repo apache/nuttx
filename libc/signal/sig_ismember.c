@@ -44,7 +44,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sigismember
+ * Name: sigismember
  *
  * Description:
  *   This function tests whether the signal specified by signo is a member

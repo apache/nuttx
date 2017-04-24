@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_dupsd2
+ * Name: net_dupsd2
  *
  * Description:
  *   Clone a socket descriptor to an arbitray descriptor number.  If file
