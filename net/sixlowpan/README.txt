@@ -10,12 +10,14 @@ Optimal 6loWPAN Configuration
 
    128  112  96   80    64   48   32   16
    ---- ---- ---- ----  ---- ---- ---- ----
-   xxxx xxxx xxxx xxxx  xxxx 00ff fe00 MMMM 2-byte Rime address IEEE 48-bit MAC
-   fe80 0000 0000 0000  NNNN NNNN NNNN NNNN 8-byte Rime address IEEE EUI-64
+   AAAA xxxx xxxx xxxx  xxxx 00ff fe00 MMMM 2-byte Rime address IEEE 48-bit MAC
+   AAAA 0000 0000 0000  NNNN NNNN NNNN NNNN 8-byte Rime address IEEE EUI-64
 
-   Where MMM is the 2-byte rime address XOR 0x0200.  For example, the MAC
+   Where MMM is the 2-byte rime address XORed 0x0200.  For example, the MAC
    address of 0xabcd would be 0xa9cd.  And NNNN NNNN NNNN NNNN is the 8-byte
-   rime address address XOR 02000 0000 0000 0000
+   rime address address XOR 02000 0000 0000 0000.
+
+   For link-local address, AAAA is 0xfe80
 
 3. MAC based link-local addresses
 
@@ -33,9 +35,9 @@ Optimal 6loWPAN Configuration
 Fragmentation Headers
 ---------------------
 A fragment header is placed at the beginning of the outgoing packet just
-after the MAC when the payload is too large to fit in a single IEEE 802.15.4
-frame. The fragment header contains three fields: Datagram size, datagram tag
-and datagram offset.
+after the MAC header when the payload is too large to fit in a single IEEE
+802.15.4 frame. The fragment header contains three fields: Datagram size,
+datagram tag and datagram offset.
 
 1. Datagram size describes the total (un-fragmented) payload.
 2. Datagram tag identifies the set of fragments and is used to match
@@ -65,7 +67,7 @@ this is a HC1 compressed first frame of a packet
 This is the second frame of the same transfer:
 
   41 88 01 cefa 3412 cdab                       ### 9-byte MAC header
-  e50e 000b 0a                                  ### 5 byte FRAGN header
+  e50e 000b 0d                                  ### 5 byte FRAGN header
   42                                            ### SIXLOWPAN_DISPATCH_HC1
     fb                                          ### RIME_HC1_HC_UDP_HC1_ENCODING
     e0                                          ### RIME_HC1_HC_UDP_UDP_ENCODING
@@ -81,5 +83,5 @@ This is the second frame of the same transfer:
 
 The payload length is encoded in the LS 11-bits of the first 16-bit value:
 In this example the payload size is 0x050e or 1,294.  The tag is 0x000b.  In
-the second frame, the fifth byte contains the offset 0x0a which is 10 << 3 =
-80 bytes, the size of the payload on the first packet.
+the second frame, the fifth byte contains the offset 0x0d which is 13 << 3 =
+104 bytes, the size of the payload on the first packet.
