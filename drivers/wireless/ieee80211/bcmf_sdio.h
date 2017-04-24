@@ -1,3 +1,42 @@
+/****************************************************************************
+ * drivers/wireless/ieee80211/bcmf_sdio.h
+ *
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Simon Piriou <spiriou31@gmail.com>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_H
 #define __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_H
 
@@ -10,22 +49,28 @@
 
 #include "bcmf_sdio_core.h"
 
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
 /* sdio chip configuration structure */
 
-struct bcmf_sdio_chip {
-	uint32_t ram_size;
-	uint32_t core_base[MAX_CORE_ID];
+struct bcmf_sdio_chip
+{
+  uint32_t ram_size;
+  uint32_t core_base[MAX_CORE_ID];
 
-	uint8_t      *firmware_image;
-	unsigned int *firmware_image_size;
+  uint8_t      *firmware_image;
+  unsigned int *firmware_image_size;
 
-	uint8_t      *nvram_image;
-	unsigned int *nvram_image_size;
+  uint8_t      *nvram_image;
+  unsigned int *nvram_image_size;
 };
 
 /* sdio bus structure extension */
 
-struct bcmf_sdio_dev_s {
+struct bcmf_sdio_dev_s
+{
   struct bcmf_bus_dev_s bus;       /* Default bcmf bus structure */
   FAR struct sdio_dev_s *sdio_dev; /* The SDIO device bound to this instance */
   int minor;                       /* Device minor number */
@@ -52,8 +97,12 @@ struct bcmf_sdio_dev_s {
   dq_queue_t tx_queue;             /* Queue of frames to tramsmit */
 };
 
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
 int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
-					int minor, FAR struct sdio_dev_s *dev);
+          int minor, FAR struct sdio_dev_s *dev);
 
 /* FIXME: Low level bus data transfer function
  * To avoid bus error, len will be aligned to:
