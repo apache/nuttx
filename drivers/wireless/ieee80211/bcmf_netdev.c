@@ -61,6 +61,10 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
+#include "bcmf_driver.h"
+#include "bcmf_cdc.h"
+#include "bcmf_ioctl.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -108,23 +112,6 @@
  * Private Types
  ****************************************************************************/
 
-/* The bcmf_driver_s encapsulates all state information for a single hardware
- * interface
- */
-
-struct bcmf_driver_s
-{
-  bool bc_bifup;               /* true:ifup false:ifdown */
-  WDOG_ID bc_txpoll;           /* TX poll timer */
-  WDOG_ID bc_txtimeout;        /* TX timeout timer */
-  struct work_s bc_irqwork;    /* For deferring interupt work to the work queue */
-  struct work_s bc_pollwork;   /* For deferring poll work to the work queue */
-
-  /* This holds the information visible to the NuttX network */
-
-  struct net_driver_s bc_dev;  /* Interface understood by the network */
-};
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -144,23 +131,19 @@ struct bcmf_driver_s
 
 static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
 
-/* Driver state structure */
-
-static struct bcmf_driver_s g_bcmf_interface[CONFIG_IEEE80211_BROADCOM_NINTERFACES];
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
 /* Common TX logic */
 
-static int  bcmf_transmit(FAR struct bcmf_driver_s *priv);
+static int  bcmf_transmit(FAR struct bcmf_dev_s *priv);
 static int  bcmf_txpoll(FAR struct net_driver_s *dev);
 
 /* Interrupt handling */
 
-static void bcmf_receive(FAR struct bcmf_driver_s *priv);
-static void bcmf_txdone(FAR struct bcmf_driver_s *priv);
+static void bcmf_receive(FAR struct bcmf_dev_s *priv);
+static void bcmf_txdone(FAR struct bcmf_dev_s *priv);
 
 static void bcmf_interrupt_work(FAR void *arg);
 static int  bcmf_interrupt(int irq, FAR void *context, FAR void *arg);
@@ -189,7 +172,7 @@ static int  bcmf_rmmac(FAR struct net_driver_s *dev,
               FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NET_ICMPv6
-static void bcmf_ipv6multicast(FAR struct bcmf_driver_s *priv);
+static void bcmf_ipv6multicast(FAR struct bcmf_dev_s *priv);
 #endif
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
@@ -220,7 +203,7 @@ static int  bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
  *
  ****************************************************************************/
 
-static int bcmf_transmit(FAR struct bcmf_driver_s *priv)
+static int bcmf_transmit(FAR struct bcmf_dev_s *priv)
 {
   /* Verify that the hardware is ready to send another packet.  If we get
    * here, then we are committed to sending a packet; Higher level logic
@@ -268,7 +251,7 @@ static int bcmf_transmit(FAR struct bcmf_driver_s *priv)
 
 static int bcmf_txpoll(FAR struct net_driver_s *dev)
 {
-  FAR struct bcmf_driver_s *priv = (FAR struct bcmf_driver_s *)dev->d_private;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
@@ -331,7 +314,7 @@ static int bcmf_txpoll(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void bcmf_receive(FAR struct bcmf_driver_s *priv)
+static void bcmf_receive(FAR struct bcmf_dev_s *priv)
 {
   do
     {
@@ -453,7 +436,7 @@ static void bcmf_receive(FAR struct bcmf_driver_s *priv)
           NETDEV_RXDROPPED(&priv->bc_dev);
         }
     }
-  while (); /* While there are more packets to be processed */
+  while (1); /* While there are more packets to be processed */
 }
 
 /****************************************************************************
@@ -473,7 +456,7 @@ static void bcmf_receive(FAR struct bcmf_driver_s *priv)
  *
  ****************************************************************************/
 
-static void bcmf_txdone(FAR struct bcmf_driver_s *priv)
+static void bcmf_txdone(FAR struct bcmf_dev_s *priv)
 {
   int delay;
 
@@ -515,7 +498,7 @@ static void bcmf_txdone(FAR struct bcmf_driver_s *priv)
 
 static void bcmf_interrupt_work(FAR void *arg)
 {
-  FAR struct bcmf_driver_s *priv = (FAR struct bcmf_driver_s *)arg;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
 
   /* Lock the network and serialize driver operations if necessary.
    * NOTE: Serialization is only required in the case where the driver work
@@ -566,7 +549,7 @@ static void bcmf_interrupt_work(FAR void *arg)
 
 static int bcmf_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  FAR struct bcmf_driver_s *priv = (FAR struct bcmf_driver_s *)arg;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
 
   DEBUGASSERT(priv != NULL);
 
@@ -612,7 +595,7 @@ static int bcmf_interrupt(int irq, FAR void *context, FAR void *arg)
 
 static void bcmf_txtimeout_work(FAR void *arg)
 {
-  FAR struct bcmf_driver_s *priv = (FAR struct bcmf_driver_s *)arg;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
 
   /* Lock the network and serialize driver operations if necessary.
    * NOTE: Serialization is only required in the case where the driver work
@@ -655,7 +638,7 @@ static void bcmf_txtimeout_work(FAR void *arg)
 
 static void bcmf_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
-  FAR struct bcmf_driver_s *priv = (FAR struct bcmf_driver_s *)arg;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
 
   /* Disable further Ethernet interrupts.  This will prevent some race
    * conditions with interrupt work.  There is still a potential race
@@ -685,7 +668,7 @@ static void bcmf_txtimeout_expiry(int argc, wdparm_t arg, ...)
  *
  ****************************************************************************/
 
-static inline void bcmf_poll_process(FAR struct bcmf_driver_s *priv)
+static inline void bcmf_poll_process(FAR struct bcmf_dev_s *priv)
 {
 }
 
@@ -708,7 +691,7 @@ static inline void bcmf_poll_process(FAR struct bcmf_driver_s *priv)
 
 static void bcmf_poll_work(FAR void *arg)
 {
-  FAR struct bcmf_driver_s *priv = (FAR struct bcmf_driver_s *)arg;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
 
   /* Lock the network and serialize driver operations if necessary.
    * NOTE: Serialization is only required in the case where the driver work
@@ -758,7 +741,7 @@ static void bcmf_poll_work(FAR void *arg)
 
 static void bcmf_poll_expiry(int argc, wdparm_t arg, ...)
 {
-  FAR struct bcmf_driver_s *priv = (FAR struct bcmf_driver_s *)arg;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
@@ -784,7 +767,7 @@ static void bcmf_poll_expiry(int argc, wdparm_t arg, ...)
 
 static int bcmf_ifup(FAR struct net_driver_s *dev)
 {
-  FAR struct bcmf_driver_s *priv = (FAR struct bcmf_driver_s *)dev->d_private;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
 
 #ifdef CONFIG_NET_IPv4
   ninfo("Bringing up: %d.%d.%d.%d\n",
@@ -838,7 +821,7 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
 
 static int bcmf_ifdown(FAR struct net_driver_s *dev)
 {
-  FAR struct bcmf_driver_s *priv = (FAR struct bcmf_driver_s *)dev->d_private;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
   irqstate_t flags;
 
   /* Disable the hardware interrupt */
@@ -882,7 +865,7 @@ static int bcmf_ifdown(FAR struct net_driver_s *dev)
 
 static void bcmf_txavail_work(FAR void *arg)
 {
-  FAR struct bcmf_driver_s *priv = (FAR struct bcmf_driver_s *)arg;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
 
   /* Lock the network and serialize driver operations if necessary.
    * NOTE: Serialization is only required in the case where the driver work
@@ -927,7 +910,7 @@ static void bcmf_txavail_work(FAR void *arg)
 
 static int bcmf_txavail(FAR struct net_driver_s *dev)
 {
-  FAR struct bcmf_driver_s *priv = (FAR struct bcmf_driver_s *)dev->d_private;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
 
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
@@ -965,7 +948,7 @@ static int bcmf_txavail(FAR struct net_driver_s *dev)
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
 static int bcmf_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  FAR struct bcmf_driver_s *priv = (FAR struct bcmf_driver_s *)dev->d_private;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 
@@ -994,7 +977,7 @@ static int bcmf_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 #ifdef CONFIG_NET_IGMP
 static int bcmf_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  FAR struct bcmf_driver_s *priv = (FAR struct bcmf_driver_s *)dev->d_private;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 
@@ -1019,7 +1002,7 @@ static int bcmf_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6
-static void bcmf_ipv6multicast(FAR struct bcmf_driver_s *priv)
+static void bcmf_ipv6multicast(FAR struct bcmf_dev_s *priv)
 {
   FAR struct net_driver_s *dev;
   uint16_t tmp16;
@@ -1098,7 +1081,7 @@ static void bcmf_ipv6multicast(FAR struct bcmf_driver_s *priv)
 static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
                       unsigned long arg)
 {
-  FAR struct bcmf_driver_s *priv = (FAR struct bcmf_driver_s *)dev->d_private;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
   int ret;
 
   /* Decode and dispatch the driver-specific IOCTL command */
@@ -1124,11 +1107,10 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
  * Name: bcmf_netdev_register
  *
  * Description:
- *   Initialize the Broadcom 43362 controller and driver
+ *   Register a network driver and set Broadcom chip in a proper state
  *
  * Parameters:
- *   intf - In the case where there are multiple EMACs, this value
- *          identifies which EMAC is to be initialized.
+ *   priv - Broadcom driver device
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -1137,21 +1119,14 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
  *
  ****************************************************************************/
 
-int bcmf_netdev_register(int intf)
+int bcmf_netdev_register(FAR struct bcmf_dev_s *priv)
 {
-  FAR struct bcmf_driver_s *priv;
+  int ret;
+  uint32_t out_len;
 
-  /* Get the interface structure associated with this interface number. */
+  /* Initialize network driver structure */
 
-  DEBUGASSERT(intf < CONFIG_IEEE80211_BROADCOM_NINTERFACES);
-  priv = &g_bcmf_interface[intf];
-
-  /* Attach the IRQ to the driver */
-#warning Missing logic
-
-  /* Initialize the driver structure */
-
-  memset(priv, 0, sizeof(struct bcmf_driver_s));
+  memset(&priv->bc_dev, 0, sizeof(priv->bc_dev));
   priv->bc_dev.d_buf     = g_pktbuf;      /* Single packet buffer */
   priv->bc_dev.d_ifup    = bcmf_ifup;     /* I/F up (new IP address) callback */
   priv->bc_dev.d_ifdown  = bcmf_ifdown;   /* I/F down callback */
@@ -1163,7 +1138,7 @@ int bcmf_netdev_register(int intf)
 #ifdef CONFIG_NETDEV_IOCTL
   priv->bc_dev.d_ioctl   = bcmf_ioctl;    /* Handle network IOCTL commands */
 #endif
-  priv->bc_dev.d_private = (FAR void *)g_bcmf_interface; /* Used to recover private state from dev */
+  priv->bc_dev.d_private = (FAR void *)priv; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
@@ -1176,7 +1151,31 @@ int bcmf_netdev_register(int intf)
    * the device and/or calling bcmf_ifdown().
    */
 
-  /* Read the MAC address from the hardware into priv->bc_dev.d_mac.ether.ether_addr_octet */
+  ret = bcmf_wl_enable(priv, false);
+  if (ret != OK)
+    {
+      return -EIO;
+    }
+
+  /* Query MAC address */
+
+  out_len = ETHER_ADDR_LEN;
+  ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, false,
+                                 IOVAR_STR_CUR_ETHERADDR,
+                                 priv->bc_dev.d_mac.ether.ether_addr_octet,
+                                 &out_len);
+  if (ret != OK)
+    {
+      return -EIO;
+    }
+
+  wlinfo("MAC address is %02X:%02X:%02X:%02X:%02X:%02X\n",
+                        priv->bc_dev.d_mac.ether.ether_addr_octet[0],
+                        priv->bc_dev.d_mac.ether.ether_addr_octet[1],
+                        priv->bc_dev.d_mac.ether.ether_addr_octet[2],
+                        priv->bc_dev.d_mac.ether.ether_addr_octet[3],
+                        priv->bc_dev.d_mac.ether.ether_addr_octet[4],
+                        priv->bc_dev.d_mac.ether.ether_addr_octet[5]);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

@@ -40,11 +40,15 @@
 #include <stdint.h>
 #include <semaphore.h>
 
-#define BCMF_STATUS_BUS_UP (1<<0) /* Chip is flashed and running */
-#define BCMF_STATUS_READY  (1<<1) /* Chip is ready to receive requests */
+#include <nuttx/net/netdev.h>
+#include <nuttx/wdog.h>
+#include <nuttx/wqueue.h>
 
-#define BCMF_STATUS_SLEEP  (1<<2) /* Chip is in low power mode */
-#define BCMF_STATUS_WAIT_CONTROL (1<<3) /* Waiting for control response */
+/* Chip interfaces */
+
+#define CHIP_STA_INTERFACE   0
+#define CHIP_AP_INTERFACE    1
+#define CHIP_P2P_INTERFACE   2
 
 struct bcmf_bus_dev_s;
 struct bcmf_frame_s;
@@ -53,7 +57,18 @@ struct bcmf_frame_s;
 
 struct bcmf_dev_s
 {
-  FAR struct bcmf_bus_dev_s *bus;  /* Bus interface structure */
+  FAR struct bcmf_bus_dev_s *bus; /* Bus interface structure */
+
+  bool bc_bifup;             /* true:ifup false:ifdown */
+  WDOG_ID bc_txpoll;         /* TX poll timer */
+  WDOG_ID bc_txtimeout;      /* TX timeout timer */
+  struct work_s bc_irqwork;  /* For deferring interrupt work to the work queue */
+  struct work_s bc_pollwork; /* For deferring poll work to the work queue */
+
+  /* This holds the information visible to the NuttX network */
+
+  struct net_driver_s bc_dev;  /* Network interface structure */
+
 
   // FIXME use mutex instead of semaphore
   sem_t control_mutex;         /* Cannot handle multiple control requests */
@@ -62,8 +77,6 @@ struct bcmf_dev_s
   uint16_t control_rxdata_len; /* Received control frame out buffer length */
   uint8_t *control_rxdata;     /* Received control frame out buffer */
   uint32_t control_status;     /* Last received frame status */
-
-  uint8_t mac_addr[6];         /* Current mac address */
 };
 
 /* Default bus interface structure */
@@ -89,13 +102,6 @@ struct bcmf_frame_s {
   unsigned int len; /* Frame buffer size */
 };
 
-/* Notify driver frame is available */
-
-void bcmf_notify_rxframe(FAR struct bcmf_dev_s *priv,
-                         struct bcmf_frame_s *frame);
-
-/* Notify driver bus is ready */
-
-int brcmf_bus_start(FAR struct bcmf_dev_s *priv);
+int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable);
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H */

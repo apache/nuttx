@@ -49,7 +49,7 @@ extern "C" {
 typedef uint16_t wl_chanspec_t;
 typedef uint16_t chanspec_t;
 #define    ETHER_ADDR_LEN        6
-typedef struct ether_addr
+typedef struct ether_addr_dup
 {
     uint8_t octet[ETHER_ADDR_LEN];
 } wl_ether_addr_t;

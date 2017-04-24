@@ -45,6 +45,8 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <net/ethernet.h>
+
 #include <nuttx/kmalloc.h>
 
 #include "bcmf_driver.h"
@@ -64,11 +66,6 @@
 #define WL_SCAN_UNASSOC_TIME   40
 #define WL_SCAN_PASSIVE_TIME   120
 
-/* Chip interfaces */
-#define CHIP_STA_INTERFACE   0
-#define CHIP_AP_INTERFACE    1
-#define CHIP_P2P_INTERFACE   2
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -79,6 +76,11 @@
 
 static FAR struct bcmf_dev_s* bcmf_allocate_device(void);
 static void bcmf_free_device(FAR struct bcmf_dev_s *priv);
+
+static int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv);
+
+// FIXME add bcmf_netdev.h file
+int bcmf_netdev_register(FAR struct bcmf_dev_s *priv);
 
 #if 0
 static int bcmf_run_escan(FAR struct bcmf_dev_s *priv);
@@ -154,28 +156,9 @@ int bcmf_wl_set_mac_address(FAR struct bcmf_dev_s *priv, uint8_t *addr)
   wlinfo("MAC address updated %02X:%02X:%02X:%02X:%02X:%02X\n",
                             addr[0], addr[1], addr[2],
                             addr[3], addr[4], addr[5]);
-  memcpy(priv->mac_addr, addr, 6);
+  memcpy(priv->bc_dev.d_mac.ether.ether_addr_octet, addr, ETHER_ADDR_LEN);
     
   return OK;
-}
-
-int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable)
-{
-  int ret;
-  uint32_t out_len;
-
-  /* TODO chek device state */
-
-  out_len = 0;
-  ret = bcmf_cdc_ioctl(priv, CHIP_STA_INTERFACE, true,
-                         enable ? WLC_UP : WLC_DOWN, NULL, &out_len);
-  
-  if (ret == OK)
-    {
-      /* TODO update device state */
-    }
-
-  return ret;
 }
 
 int bcmf_dongle_scantime(FAR struct bcmf_dev_s *priv, int32_t scan_assoc_time,
@@ -220,8 +203,6 @@ int bcmf_dongle_scantime(FAR struct bcmf_dev_s *priv, int32_t scan_assoc_time,
 int bcmf_dongle_initialize(FAR struct bcmf_dev_s *priv)
 {
   int ret;
-  uint32_t out_len;
-  uint32_t value;
 
   ret = bcmf_wl_enable(priv, true);
   if (ret)
@@ -235,36 +216,6 @@ int bcmf_dongle_initialize(FAR struct bcmf_dev_s *priv)
     {
       return ret;
     }
-
-  /* FIXME disable power save mode */
-
-  out_len = 4;
-  value = 0;
-  ret = bcmf_cdc_ioctl(priv, CHIP_STA_INTERFACE, true,
-                         WLC_SET_PM, (uint8_t*)&value, &out_len);
-  if (ret != OK)
-    {
-      return ret;
-    }
-
-  /* Set the GMode */
-
-  out_len = 4;
-  value = GMODE_AUTO;
-  ret = bcmf_cdc_ioctl(priv, CHIP_STA_INTERFACE, true,
-                         WLC_SET_GMODE, (uint8_t*)&value, &out_len);
-  if (ret != OK)
-    {
-      return ret;
-    }
-
-  /* TODO configure roaming if needed. Disable for now */
-
-  out_len = 4;
-  value = 1;
-  ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
-                                 IOVAR_STR_ROAM_OFF, (uint8_t*)&value,
-                                 &out_len);
 
   // FIXME remove
 #if 0
@@ -330,14 +281,10 @@ int bcmf_run_escan(FAR struct bcmf_dev_s *priv)
 }
 #endif
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-int bcmf_wl_initialize(FAR struct bcmf_dev_s *priv)
+int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
 {
   int ret;
-  uint32_t out_len;
+  uint32_t out_len, value;
   uint8_t tmp_buf[64];
 
   /* Disable TX Gloming feature */
@@ -352,22 +299,35 @@ int bcmf_wl_initialize(FAR struct bcmf_dev_s *priv)
       return -EIO;
     }
 
-  /* Query MAC address */
+  /* FIXME disable power save mode */
 
-  out_len = 6;
-  ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, false,
-                                 IOVAR_STR_CUR_ETHERADDR, tmp_buf,
-                                 &out_len);
+  out_len = 4;
+  value = 0;
+  ret = bcmf_cdc_ioctl(priv, CHIP_STA_INTERFACE, true,
+                         WLC_SET_PM, (uint8_t*)&value, &out_len);
   if (ret != OK)
     {
-      return -EIO;
+      return ret;
     }
 
-  memcpy(priv->mac_addr, tmp_buf, 6);
+  /* Set the GMode to auto */
 
-  wlinfo("MAC address is %02X:%02X:%02X:%02X:%02X:%02X\n",
-                        tmp_buf[0], tmp_buf[1], tmp_buf[2],
-                        tmp_buf[3], tmp_buf[4], tmp_buf[5]);
+  out_len = 4;
+  value = GMODE_AUTO;
+  ret = bcmf_cdc_ioctl(priv, CHIP_STA_INTERFACE, true,
+                         WLC_SET_GMODE, (uint8_t*)&value, &out_len);
+  if (ret != OK)
+    {
+      return ret;
+    }
+
+  /* TODO configure roaming if needed. Disable for now */
+
+  out_len = 4;
+  value = 1;
+  ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
+                                 IOVAR_STR_ROAM_OFF, (uint8_t*)&value,
+                                 &out_len);
   
   /* Query firmware version string */
 
@@ -402,10 +362,15 @@ int bcmf_wl_initialize(FAR struct bcmf_dev_s *priv)
     {
       return -EIO;
     }
-  // TODO Create a wlan device name and register network driver
 
-  return bcmf_dongle_initialize(priv);
+  /* Register network driver */
+
+  return bcmf_netdev_register(priv);
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 int bcmf_sdio_initialize(int minor, FAR struct sdio_dev_s *dev)
 {
@@ -431,9 +396,28 @@ int bcmf_sdio_initialize(int minor, FAR struct sdio_dev_s *dev)
 
   /* Bus initialized, register network driver */
 
-  return bcmf_wl_initialize(priv);
+  return bcmf_driver_initialize(priv);
 
 exit_free_device:
   bcmf_free_device(priv);
+  return ret;
+}
+
+int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable)
+{
+  int ret;
+  uint32_t out_len;
+
+  /* TODO chek device state */
+
+  out_len = 0;
+  ret = bcmf_cdc_ioctl(priv, CHIP_STA_INTERFACE, true,
+                         enable ? WLC_UP : WLC_DOWN, NULL, &out_len);
+
+  if (ret == OK)
+    {
+      /* TODO update device state */
+    }
+
   return ret;
 }
