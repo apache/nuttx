@@ -168,7 +168,7 @@
 #  define CHILD_FLAG_TTYPE_TASK    (0 << CHILD_FLAG_TTYPE_SHIFT) /* Normal user task */
 #  define CHILD_FLAG_TTYPE_PTHREAD (1 << CHILD_FLAG_TTYPE_SHIFT) /* User pthread */
 #  define CHILD_FLAG_TTYPE_KERNEL  (2 << CHILD_FLAG_TTYPE_SHIFT) /* Kernel thread */
-#define CHILD_FLAG_EXITED          (1 << 0) /* Bit 2: The child thread has exit'ed */
+#define CHILD_FLAG_EXITED          (1 << 2) /* Bit 2: The child thread has exit'ed */
                                             /* Bits 3-7: Available */
 
 /* Sporadic scheduler flags */
