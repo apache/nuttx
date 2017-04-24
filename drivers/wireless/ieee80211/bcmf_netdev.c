@@ -1121,7 +1121,7 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bcmf_initialize
+ * Name: bcmf_netdev_register
  *
  * Description:
  *   Initialize the Broadcom 43362 controller and driver
@@ -1137,7 +1137,7 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
  *
  ****************************************************************************/
 
-int bcmf_initialize(int intf)
+int bcmf_netdev_register(int intf)
 {
   FAR struct bcmf_driver_s *priv;
 
