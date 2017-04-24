@@ -22,8 +22,10 @@ config IEEE80211_BROADCOM_FULLMAC_SDIO
 		This selection enables support for broadcom
 		FullMAC-compliant devices using SDIO bus.
 
+if IEEE80211_BROADCOM_FULLMAC
+
 choice
-	prompt "Broadcom 43362 driver work queue"
+	prompt "Broadcom FullMAC driver work queue"
 	default IEEE80211_BROADCOM_LPWORK if SCHED_LPWORK
 	default IEEE80211_BROADCOM_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
 	depends on SCHED_WORKQUEUE
@@ -41,11 +43,12 @@ config IEEE80211_BROADCOM_LPWORK
 	depends on SCHED_LPWORK
 
 endchoice # Work queue
-endif # NETDEV_IEEE80211_BROADCOM_
 
 config IEEE80211_BROADCOM_NINTERFACES
-	int "Nubmer of Broadcom 43362 interfaces"
+	int "Number of Broadcom FullMAC interfaces"
 	default 1
 	depends on EXPERIMENTAL
+
+endif # IEEE80211_BROADCOM_FULLMAC
 
 endif # DRIVERS_IEEE80211
