@@ -1027,9 +1027,6 @@ static void stm32_dataconfig(uint32_t timeout, uint32_t dlen, uint32_t dctrl)
   dctrl  &=  (SDIO_DCTRL_DTDIR | SDIO_DCTRL_DTMODE | SDIO_DCTRL_DBLOCKSIZE_MASK);
   regval |=  (dctrl | SDIO_DCTRL_DTEN | SDIO_DCTRL_SDIOEN);
   putreg32(regval, STM32_SDIO_DCTRL);
-
-  struct stm32_dev_s *priv = &g_sdiodev;
-  // mcinfo("data cfg: %08x %08x %08x (bs=%d)\n", timeout, dlen, regval, 1<<priv->block_size);
 }
 
 /****************************************************************************
@@ -1869,7 +1866,7 @@ static int stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
   cmdidx  = (cmd & MMCSD_CMDIDX_MASK) >> MMCSD_CMDIDX_SHIFT;
   regval |= cmdidx | SDIO_CMD_CPSMEN;
 
-  // mcinfo("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
+  mcinfo("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
 
   /* Write the SDIO CMD */
 
@@ -2261,7 +2258,6 @@ static int stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t
 
   putreg32(SDIO_RESPDONE_ICR | SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
   *rshort = getreg32(STM32_SDIO_RESP1);
-  // mcinfo("data: %08x %08x\n", *rshort, respcmd);
   return ret;
 }
 
@@ -2362,7 +2358,6 @@ static int stm32_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *r
   if (rshort)
     {
       *rshort = getreg32(STM32_SDIO_RESP1);
-      // mcinfo("data: %08x\n", *rshort);
     }
 
   return ret;
