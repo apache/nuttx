@@ -572,7 +572,6 @@ config SAM34_TWIS
 	bool
 	default n
 
-
 config SAM34_TWIM0
 	bool "Two-wire Master Interface 0 (TWIM0)"
 	default n
@@ -1141,6 +1140,41 @@ config SAM34_SPI_REGDEBUG
 
 endmenu # AT91SAM3/4 SPI device driver options
 endif # SAM34_SPI0 || SAM34_SPI1
+
+if SAM34_TWIM
+
+menu "AT91SAM3/4 TWI master device driver options"
+
+config SAM34_TWIM0_FREQUENCY
+	int "TWI0 Frequency"
+	default 100000
+	depends on SAM34_TWIM0
+
+config SAM34_TWIM1_FREQUENCY
+	int "TWI1 Frequency"
+	default 100000
+	depends on SAM34_TWIM1
+
+config SAM34_TWIM2_FREQUENCY
+	int "TWI2 Frequency"
+	default 100000
+	depends on SAM34_TWIM2
+
+config SAM34_TWIM3_FREQUENCY
+	int "TWI3 Frequency"
+	default 100000
+	depends on SAM34_TWIM3
+
+config SAM34_TWI_REGDEBUG
+	bool "TWI register level debug"
+	depends on DEBUG_I2C_INFO
+	default n
+	---help---
+		Output detailed register-level TWI device debug information.
+		Very invasive! Requires also CONFIG_DEBUG_I2C_INFO.
+
+endmenu # TWI device driver options
+endif # SAM34_TWIM
 
 menu "AT91SAM3/4 EMAC device driver options"
 	depends on SAM34_EMAC
