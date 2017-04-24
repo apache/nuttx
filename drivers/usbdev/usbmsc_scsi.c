@@ -508,7 +508,7 @@ static inline int usbmsc_cmdrequestsense(FAR struct usbmsc_dev_s *priv,
 static inline int usbmsc_cmdread6(FAR struct usbmsc_dev_s *priv)
 {
   FAR struct scsicmd_read6_s *read6 = (FAR struct scsicmd_read6_s *)priv->cdb;
-  FAR struct usbmsc_lun_s *lun = priv->lun;
+  FAR struct usbmsc_lun_s *lun;
   int ret;
 
   priv->u.xfrlen = (uint16_t)read6->xfrlen;
@@ -521,6 +521,8 @@ static inline int usbmsc_cmdread6(FAR struct usbmsc_dev_s *priv)
                         USBMSC_FLAGS_DIRDEVICE2HOST | USBMSC_FLAGS_BLOCKXFR);
   if (ret == OK)
     {
+      lun = priv->lun;
+
       /* Get the Logical Block Address (LBA) from cdb[] as the starting sector */
 
       priv->sector = (uint32_t)(read6->mslba & SCSICMD_READ6_MSLBAMASK) << 16 |
@@ -568,7 +570,7 @@ static inline int usbmsc_cmdread6(FAR struct usbmsc_dev_s *priv)
 static inline int usbmsc_cmdwrite6(FAR struct usbmsc_dev_s *priv)
 {
   FAR struct scsicmd_write6_s *write6 = (FAR struct scsicmd_write6_s *)priv->cdb;
-  FAR struct usbmsc_lun_s *lun = priv->lun;
+  FAR struct usbmsc_lun_s *lun;
   int ret;
 
   priv->u.xfrlen = (uint16_t)write6->xfrlen;
@@ -581,6 +583,8 @@ static inline int usbmsc_cmdwrite6(FAR struct usbmsc_dev_s *priv)
                         USBMSC_FLAGS_DIRHOST2DEVICE | USBMSC_FLAGS_BLOCKXFR);
   if (ret == OK)
     {
+      lun = priv->lun;
+
       /* Get the Logical Block Address (LBA) from cdb[] as the starting sector */
 
       priv->sector = (uint32_t)(write6->mslba & SCSICMD_WRITE6_MSLBAMASK) << 16 | (uint32_t)usbmsc_getbe16(write6->lslba);
@@ -880,7 +884,7 @@ static inline int usbmsc_cmdpreventmediumremoval(FAR struct usbmsc_dev_s *priv)
 #ifdef CONFIG_USBMSC_REMOVABLE
   FAR struct scsicmd_preventmediumremoval_s *pmr = (FAR struct scsicmd_preventmediumremoval_s *)priv->cdb;
 #endif
-  FAR struct usbmsc_lun_s *lun = priv->lun;
+  FAR struct usbmsc_lun_s *lun;
   int ret;
 
   priv->u.alloclen = 0;
@@ -888,6 +892,8 @@ static inline int usbmsc_cmdpreventmediumremoval(FAR struct usbmsc_dev_s *priv)
                         USBMSC_FLAGS_DIRNONE);
   if (ret == OK)
     {
+      lun = priv->lun;
+
 #ifndef CONFIG_USBMSC_REMOVABLE
       lun->sd = SCSI_KCQIR_INVALIDCOMMAND;
       ret = -EINVAL;
@@ -919,7 +925,7 @@ static inline int usbmsc_cmdreadformatcapacity(FAR struct usbmsc_dev_s *priv,
 {
   FAR struct scsicmd_readformatcapcacities_s *rfc = (FAR struct scsicmd_readformatcapcacities_s *)priv->cdb;
   FAR struct scsiresp_readformatcapacities_s *hdr;
-  FAR struct usbmsc_lun_s *lun = priv->lun;
+  FAR struct usbmsc_lun_s *lun;
   int ret;
 
   priv->u.alloclen = usbmsc_getbe16(rfc->alloclen);
@@ -927,6 +933,8 @@ static inline int usbmsc_cmdreadformatcapacity(FAR struct usbmsc_dev_s *priv,
                         USBMSC_FLAGS_DIRDEVICE2HOST);
   if (ret == OK)
     {
+      lun = priv->lun;
+
       hdr = (FAR struct scsiresp_readformatcapacities_s *)buf;
       memset(hdr, 0, SCSIRESP_READFORMATCAPACITIES_SIZEOF);
       hdr->listlen = SCSIRESP_CURRCAPACITYDESC_SIZEOF;
@@ -955,7 +963,7 @@ static int inline usbmsc_cmdreadcapacity10(FAR struct usbmsc_dev_s *priv,
 {
   FAR struct scsicmd_readcapacity10_s *rcc = (FAR struct scsicmd_readcapacity10_s *)priv->cdb;
   FAR struct scsiresp_readcapacity10_s *rcr = (FAR struct scsiresp_readcapacity10_s *)buf;
-  FAR struct usbmsc_lun_s *lun = priv->lun;
+  FAR struct usbmsc_lun_s *lun;
   uint32_t lba;
   int ret;
 
@@ -964,6 +972,8 @@ static int inline usbmsc_cmdreadcapacity10(FAR struct usbmsc_dev_s *priv,
                         USBMSC_FLAGS_DIRDEVICE2HOST);
   if (ret == OK)
     {
+      lun = priv->lun;
+
       /* Check the PMI and LBA fields */
 
       lba = usbmsc_getbe32(rcc->lba);
@@ -996,7 +1006,7 @@ static int inline usbmsc_cmdreadcapacity10(FAR struct usbmsc_dev_s *priv,
 static inline int usbmsc_cmdread10(FAR struct usbmsc_dev_s *priv)
 {
   struct scsicmd_read10_s *read10 = (struct scsicmd_read10_s *)priv->cdb;
-  FAR struct usbmsc_lun_s *lun = priv->lun;
+  FAR struct usbmsc_lun_s *lun;
   int ret;
 
   priv->u.xfrlen = usbmsc_getbe16(read10->xfrlen);
@@ -1004,6 +1014,8 @@ static inline int usbmsc_cmdread10(FAR struct usbmsc_dev_s *priv)
                         USBMSC_FLAGS_DIRDEVICE2HOST | USBMSC_FLAGS_BLOCKXFR);
   if (ret == OK)
     {
+      lun = priv->lun;
+
       /* Get the Logical Block Address (LBA) from cdb[] as the starting sector */
 
       priv->sector = usbmsc_getbe32(read10->lba);
@@ -1058,7 +1070,7 @@ static inline int usbmsc_cmdread10(FAR struct usbmsc_dev_s *priv)
 static inline int usbmsc_cmdwrite10(FAR struct usbmsc_dev_s *priv)
 {
   struct scsicmd_write10_s *write10 = (struct scsicmd_write10_s *)priv->cdb;
-  FAR struct usbmsc_lun_s *lun = priv->lun;
+  FAR struct usbmsc_lun_s *lun;
   int ret;
 
   priv->u.xfrlen = usbmsc_getbe16(write10->xfrlen);
@@ -1066,6 +1078,8 @@ static inline int usbmsc_cmdwrite10(FAR struct usbmsc_dev_s *priv)
                         USBMSC_FLAGS_DIRHOST2DEVICE | USBMSC_FLAGS_BLOCKXFR);
   if (ret == OK)
     {
+      lun = priv->lun;
+
       /* Get the Logical Block Address (LBA) from cdb[] as the starting sector */
 
       priv->sector = usbmsc_getbe32(write10->lba);
@@ -1129,7 +1143,7 @@ static inline int usbmsc_cmdwrite10(FAR struct usbmsc_dev_s *priv)
 static inline int usbmsc_cmdverify10(FAR struct usbmsc_dev_s *priv)
 {
   FAR struct scsicmd_verify10_s *verf = (FAR struct scsicmd_verify10_s *)priv->cdb;
-  FAR struct usbmsc_lun_s *lun = priv->lun;
+  FAR struct usbmsc_lun_s *lun;
   uint32_t  lba;
   uint16_t  blocks;
   size_t  sector;
@@ -1141,6 +1155,8 @@ static inline int usbmsc_cmdverify10(FAR struct usbmsc_dev_s *priv)
   ret = usbmsc_setupcmd(priv, SCSICMD_VERIFY10_SIZEOF, USBMSC_FLAGS_DIRNONE);
   if (ret == OK)
     {
+      lun = priv->lun;
+
       /* Verify the starting and ending LBA */
 
       lba    = usbmsc_getbe32(verf->lba);
@@ -1317,7 +1333,7 @@ static int inline usbmsc_cmdmodesense10(FAR struct usbmsc_dev_s *priv,
 static inline int usbmsc_cmdread12(FAR struct usbmsc_dev_s *priv)
 {
   struct scsicmd_read12_s *read12 = (struct scsicmd_read12_s *)priv->cdb;
-  FAR struct usbmsc_lun_s *lun = priv->lun;
+  FAR struct usbmsc_lun_s *lun;
   int ret;
 
   priv->u.xfrlen = usbmsc_getbe32(read12->xfrlen);
@@ -1325,6 +1341,8 @@ static inline int usbmsc_cmdread12(FAR struct usbmsc_dev_s *priv)
                         USBMSC_FLAGS_DIRDEVICE2HOST | USBMSC_FLAGS_BLOCKXFR);
   if (ret == OK)
     {
+      lun = priv->lun;
+
       /* Get the Logical Block Address (LBA) from cdb[] as the starting sector */
 
       priv->sector = usbmsc_getbe32(read12->lba);
@@ -1379,7 +1397,7 @@ static inline int usbmsc_cmdread12(FAR struct usbmsc_dev_s *priv)
 static inline int usbmsc_cmdwrite12(FAR struct usbmsc_dev_s *priv)
 {
   struct scsicmd_write12_s *write12 = (struct scsicmd_write12_s *)priv->cdb;
-  FAR struct usbmsc_lun_s *lun = priv->lun;
+  FAR struct usbmsc_lun_s *lun;
   int ret;
 
   priv->u.xfrlen = usbmsc_getbe32(write12->xfrlen);
@@ -1387,6 +1405,8 @@ static inline int usbmsc_cmdwrite12(FAR struct usbmsc_dev_s *priv)
                         USBMSC_FLAGS_DIRHOST2DEVICE | USBMSC_FLAGS_BLOCKXFR);
   if (ret == OK)
     {
+      lun = priv->lun;
+
       /* Get the Logical Block Address (LBA) from cdb[] as the starting sector */
 
       priv->sector = usbmsc_getbe32(write12->lba);
