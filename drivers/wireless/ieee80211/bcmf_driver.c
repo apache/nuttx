@@ -117,10 +117,12 @@ FAR struct bcmf_dev_s* bcmf_allocate_device(void)
     {
       goto exit_free_priv;
     }
+
   if ((ret = sem_init(&priv->control_timeout, 0, 0)) != OK)
     {
       goto exit_free_priv;
     }
+
   if ((ret = sem_setprotocol(&priv->control_timeout, SEM_PRIO_NONE)) != OK)
     {
       goto exit_free_priv;
@@ -165,7 +167,8 @@ int bcmf_dongle_scantime(FAR struct bcmf_dev_s *priv, int32_t scan_assoc_time,
           int32_t scan_unassoc_time, int32_t scan_passive_time)
 {
   int ret;
-  uint32_t out_len, value;
+  uint32_t out_len;
+  uint32_t value;
 
   out_len = 4;
   value = scan_assoc_time;
@@ -284,7 +287,8 @@ int bcmf_run_escan(FAR struct bcmf_dev_s *priv)
 int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
 {
   int ret;
-  uint32_t out_len, value;
+  uint32_t out_len;
+  uint32_t value;
   uint8_t tmp_buf[64];
 
   /* Disable TX Gloming feature */
@@ -341,6 +345,7 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
     }
 
   /* Remove line feed */
+
   out_len = strlen((char*)tmp_buf);
   if (out_len > 0 && tmp_buf[out_len-1] == '\n')
     {

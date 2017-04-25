@@ -150,16 +150,5 @@ int photon_wlan_initialize()
       return ERROR;
     }
 
-#if 0 /* Not yet */
-  /* Register the nework device */
-
-  ret = bcmf_netdev_register(0);
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "Failed to register bcmf network device: %d\n", ret);
-      return ret;
-    }
-#endif
-
   return OK;
 }
