@@ -55,9 +55,7 @@
 #include "chip.h"
 #include "stm32l4_gpio.h"
 
-#if defined(CONFIG_STM32L4_STM32L478XX) || defined(CONFIG_STM32L4_STM32L486XX)
-#  include "chip/stm32l4_syscfg.h"
-#endif
+#include "chip/stm32l4_syscfg.h"
 
 /****************************************************************************
  * Public Data

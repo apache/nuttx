@@ -43,7 +43,8 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX)
+#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX) || \
+    defined(CONFIG_STM32L4_STM32L496XX)
 #  include "chip/stm32l4x6xx_pinmap.h"
 #else
 #  error "Unsupported STM32 L4 pin map"

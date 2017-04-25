@@ -45,7 +45,12 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* STM32F476, STM32F486.  Differences between family members: 486 has AES.
+/* STM32L476, STM32L486, STM32L496, STM32L4A6
+ *
+ * Differences between family members:
+ *  - L486 has AES
+ *  - L496, L4A6 has 320 Kib SRAM, 2xCAN and CameraIF. Most (all?) of these have I2C4.
+ *  - L4A6 has AES and HASH
  * 
  *   ----------- ---------------- ----- ------ ------ ---- ---- -----
  *   PART        PACKAGE          GPIOs LCD    Tamper FSMC CapS AdcCh
@@ -56,6 +61,7 @@
  *   STM32L4x6Rx LQFP64             51   8x28   2     No    12   16
  *   STM32L4x6Vx LQFP100            82   8x40   3     Yes   21   16
  *   STM32L4x6Zx LQFP144           114   8x40   3     Yes   24   24
+ *   STM32L4x6Ax UFBGA169          132   8x40   3     Yes   24   24
  *   ----------- ---------------- ----- ------ ------ ---- ---- -----
  *
  * Parts STM32L4x6xC have 256Kb of FLASH
@@ -66,8 +72,13 @@
  * selection.
  */
 
+#if defined(CONFIG_STM32L4_STM32L496XX)
+#  define STM32L4_SRAM1_SIZE       (256*1024)  /* 256Kb SRAM1 on AHB bus Matrix */
+#  define STM32L4_SRAM2_SIZE       (64*1024)   /* 64Kb  SRAM2 on AHB bus Matrix */
+#else
 #  define STM32L4_SRAM1_SIZE       (96*1024)   /* 96Kb SRAM1 on AHB bus Matrix */
 #  define STM32L4_SRAM2_SIZE       (32*1024)   /* 32Kb SRAM2 on AHB bus Matrix */
+#endif
 
 #  define STM32L4_NFSMC                    1   /* Have FSMC memory controller */
 #  define STM32L4_NATIM                    2   /* Two advanced timers TIM1 and 8 */
@@ -81,14 +92,22 @@
 #  define STM32L4_NUSART                   3   /* USART 1-3 */
 #  define STM32L4_NLPUART                  1   /* LPUART 1 */
 #  define STM32L4_NSPI                     3   /* SPI1-3 */
+#if defined(CONFIG_STM32L4_STM32L496XX)
+#  define STM32L4_NI2C                     4   /* I2C1-4 */
+#else
 #  define STM32L4_NI2C                     3   /* I2C1-3 */
+#endif
 #  define STM32L4_NUSBOTGFS                1   /* USB OTG FS */
+#if defined(CONFIG_STM32L4_STM32L496XX)
+#  define STM32L4_NCAN                     2   /* CAN1-2 */
+#else
 #  define STM32L4_NCAN                     1   /* CAN1 */
+#endif
 #  define STM32L4_NSAI                     2   /* SAI1-2 */
 #  define STM32L4_NSDMMC                   1   /* SDMMC interface */
 #  define STM32L4_NDMA                     2   /* DMA1-2 */
 #  define STM32L4_NPORTS                   8   /* 8 GPIO ports, GPIOA-H */
-#  define STM32L4_NADC                     3   /* 12-bit ADC1-3, 24 channels *except V series) */
+#  define STM32L4_NADC                     3   /* 12-bit ADC1-3, 24 channels (except V series) */
 #  define STM32L4_NDAC                     2   /* 12-bit DAC1-2 */
 #  define STM32L4_NCRC                     1   /* CRC */
 #  define STM32L4_NCOMP                    2   /* Comparators */

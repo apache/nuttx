@@ -47,7 +47,8 @@
 
 /* Include the correct firewall register definitions for this STM32L4 family */
 
-#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX)
+#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX) || \
+    defined(CONFIG_STM32L4_STM32L496XX)
 #  include "chip/stm32l4x6xx_firewall.h"
 #else
 #  error "Unsupported STM32L4 chip"

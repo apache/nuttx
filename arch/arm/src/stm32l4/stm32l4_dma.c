@@ -67,7 +67,8 @@
  * chip.h that can associate an STM32 part number with an STM32 family.
  */
 
-#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX)
+#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX) || \
+    defined(CONFIG_STM32L4_STM32L496XX)
 #include "stm32l4x6xx_dma.c"
 #else
 #  error "Unsupported STM32L4 chip"
