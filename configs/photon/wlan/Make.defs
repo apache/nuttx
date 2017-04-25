@@ -40,7 +40,7 @@ include ${TOPDIR}/arch/arm/src/armv7-m/Toolchain.defs
 ifeq ($(CONFIG_PHOTON_DFU_BOOTLOADER),y)
 LDSCRIPT = photon_dfu.ld
 else
-LDSCRIPT = ld.script
+LDSCRIPT = photon_jtag.ld
 endif
 
 ifeq ($(WINTOOL),y)

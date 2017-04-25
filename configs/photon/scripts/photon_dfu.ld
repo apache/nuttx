@@ -33,7 +33,7 @@
  ****************************************************************************/
 
 /* The STM32F205RG has 1024Kb of FLASH beginning at address 0x0800:0000 and
- * 112Kb of SRAM.
+ * 112Kb of SRAM in main SRAM1 and 16 Kb in auxiliary SRAM2.
  *
  * Bootloader jumps at 0x0802:0000.
  */
