@@ -432,7 +432,7 @@ static int netdev_wifr_ioctl(FAR struct socket *psock, int cmd,
     {
       /* Get the wireless device associated with the IOCTL command */
 
-      dev = netdev_findbyname(req->ifrn_name);
+      dev = netdev_findbyname(req->ifr_name);
       if (dev != NULL)
         {
           /* Just forward the IOCTL to the wireless driver */
