@@ -139,6 +139,14 @@ struct mac802154_chardevice_s
 static inline int mac802154dev_takesem(sem_t *sem);
 #define mac802154dev_givesem(s) sem_post(s);
 
+static void mac802154dev_mlme_notify(FAR const struct ieee802154_maccb_s *maccb,
+                                     enum ieee802154_macnotify_e notif,
+                                     FAR const union ieee802154_mlme_notify_u *arg);
+
+static void mac802154dev_mcps_notify(FAR const struct ieee802154_maccb_s *maccb,
+                                     enum ieee802154_macnotify_e notif,
+                                     FAR const union ieee802154_mcps_notify_u *arg);
+
 static int  mac802154dev_open(FAR struct file *filep);
 static int  mac802154dev_close(FAR struct file *filep);
 static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
@@ -151,7 +159,7 @@ static int  mac802154dev_ioctl(FAR struct file *filep, int cmd,
 /* MAC callback helpers */
 
 static void mac802154dev_conf_data(FAR struct mac802154_chardevice_s *dev,
-                                   FAR struct ieee802154_data_conf_s *conf);
+                                   FAR const struct ieee802154_data_conf_s *conf);
 
 /****************************************************************************
  * Private Data
@@ -591,9 +599,9 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
   return ret;
 }
 
-static void mac802154dev_mlme_notify(FAR struct ieee802154_maccb_s *maccb,
+static void mac802154dev_mlme_notify(FAR const struct ieee802154_maccb_s *maccb,
                                      enum ieee802154_macnotify_e notif,
-                                     FAR union ieee802154_mlme_notify_u *arg)
+                                     FAR const union ieee802154_mlme_notify_u *arg)
 {
   FAR struct mac802154dev_callback_s *cb =
     (FAR struct mac802154dev_callback_s *)maccb;
@@ -610,9 +618,9 @@ static void mac802154dev_mlme_notify(FAR struct ieee802154_maccb_s *maccb,
     }
 }
 
-static void mac802154dev_mcps_notify(FAR struct ieee802154_maccb_s *maccb,
+static void mac802154dev_mcps_notify(FAR const struct ieee802154_maccb_s *maccb,
                                      enum ieee802154_macnotify_e notif,
-                                     FAR union ieee802154_mcps_notify_u *arg)
+                                     FAR const union ieee802154_mcps_notify_u *arg)
 {
   FAR struct mac802154dev_callback_s *cb =
     (FAR struct mac802154dev_callback_s *)maccb;
@@ -634,7 +642,7 @@ static void mac802154dev_mcps_notify(FAR struct ieee802154_maccb_s *maccb,
 }
 
 static void mac802154dev_conf_data(FAR struct mac802154_chardevice_s *dev,
-                                   FAR struct ieee802154_data_conf_s *conf)
+                                   FAR const struct ieee802154_data_conf_s *conf)
 {
   FAR struct mac802154dev_dwait_s *curr;
   FAR struct mac802154dev_dwait_s *prev;
@@ -647,7 +655,7 @@ static void mac802154dev_conf_data(FAR struct mac802154_chardevice_s *dev,
   /* Search to see if there is a dwait pending for this transaction */
 
   for (prev = NULL, curr = dev->md_dwait;
-       curr && curr->mw_handle != conf->msdu_handle;
+       curr && curr->mw_handle != conf->handle;
        prev = curr, curr = curr->mw_flink);
 
   /* If a dwait is found */
@@ -669,7 +677,7 @@ static void mac802154dev_conf_data(FAR struct mac802154_chardevice_s *dev,
 
       /* Copy the transmission status into the dwait struct */
 
-      curr->mw_status = conf->msdu_handle;
+      curr->mw_status = conf->status;
 
       /* Wake the thread waiting for the data transmission */
 

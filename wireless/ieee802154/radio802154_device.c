@@ -254,13 +254,13 @@ static ssize_t radio802154dev_read(FAR struct file *filep, FAR char *buffer, siz
       goto done;
     }
 
-  ret = dev->child->ops->rxenable(dev->child, 1, buf);
+#warning Receive needs to be redone!
 #if 0
+  ret = dev->child->ops->rxenable(dev->child, 1, buf);
   if (ret < 0)
     {
       goto done;
     }
-#endif
 
   /* if no packet is received, this will produce -EAGAIN
    * The user is responsible for sleeping until sth arrives
@@ -281,6 +281,8 @@ static ssize_t radio802154dev_read(FAR struct file *filep, FAR char *buffer, siz
 
   dev->child->ops->rxenable(dev->child, 0, NULL);
   ret = buf->len;
+
+#endif
 
 done:
   return ret;
