@@ -56,6 +56,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/wireless/wireless.h>
 
 #ifdef CONFIG_NET_PKT
 #  include <nuttx/net/pkt.h>
@@ -1088,14 +1089,73 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
 
   switch (cmd)
     {
-      /* Add cases here to support the IOCTL commands */
+      case SIOCSIWFREQ:     /* Set channel/frequency (Hz) */
+        wlwarn("WARNING: SIOCSIWFREQ not implemented\n");
+        ret = -ENOSYS;
+        break;
+
+      case SIOCGIWFREQ:     /* Get channel/frequency (Hz) */
+        wlwarn("WARNING: SIOCGIWFREQ not implemented\n");
+        ret = -ENOSYS;
+        break;
+
+      case SIOCSIWMODE:     /* Set operation mode */
+        wlwarn("WARNING: SIOCSIWMODE not implemented\n");
+        ret = -ENOSYS;
+        break;
+
+      case SIOCGIWMODE:     /* Get operation mode */
+        wlwarn("WARNING: SIOCGIWMODE not implemented\n");
+        ret = -ENOSYS;
+        break;
+
+      case SIOCSIWAP:       /* Set access point MAC addresses */
+        wlwarn("WARNING: SIOCSIWAP not implemented\n");
+        ret = -ENOSYS;
+        break;
+
+      case SIOCGIWAP:       /* Get access point MAC addresses */
+        wlwarn("WARNING: SIOCGIWAP not implemented\n");
+        ret = -ENOSYS;
+        break;
+
+      case SIOCSIWESSID:    /* Set ESSID (network name) */
+        wlwarn("WARNING: SIOCSIWESSID not implemented\n");
+        ret = -ENOSYS;
+        break;
+
+      case SIOCGIWESSID:    /* Get ESSID */
+        wlwarn("WARNING: SIOCGIWESSID not implemented\n");
+        ret = -ENOSYS;
+        break;
+
+      case SIOCSIWRATE:     /* Set default bit rate (bps) */
+        wlwarn("WARNING: SIOCSIWRATE not implemented\n");
+        ret = -ENOSYS;
+        break;
+
+      case SIOCGIWRATE:     /* Get default bit rate (bps) */
+        wlwarn("WARNING: SIOCGIWRATE not implemented\n");
+        ret = -ENOSYS;
+        break;
+
+      case SIOCSIWTXPOW:    /* Set transmit power (dBm) */
+        wlwarn("WARNING: SIOCSIWTXPOW not implemented\n");
+        ret = -ENOSYS;
+        break;
+
+      case SIOCGIWTXPOW:    /* Get transmit power (dBm) */
+        wlwarn("WARNING: SIOCGIWTXPOW not implemented\n");
+        ret = -ENOSYS;
+        break;
 
       default:
         nerr("ERROR: Unrecognized IOCTL command: %d\n", command);
-        return -ENOTTY;  /* Special return value for this case */
+        ret = -ENOTTY;  /* Special return value for this case */
+        break;
     }
 
-  return OK;
+  return ret;
 }
 #endif
 
