@@ -158,12 +158,30 @@ struct ieee802154_netradio_s
 
 /* IEEE802.15.4 Radio Interface Operations **********************************/
 
+/* This is a work-around to allow the MAC upper layer have a struct with
+ * identical members but with a different name. */
+
+#ifdef CONFIG_IEEE802154_RANGING
+#define IEEE802154_TXDESC_FIELDS \ 
+  uint8_t handle; \
+  uint32_t timestamp; \
+  uint8_t status;
+#else
+#define IEEE802154_TXDESC_FIELDS \ 
+  uint8_t handle; \
+  uint32_t timestamp; \
+  uint8_t status;
+  bool rng_rcvd; \
+  uint32_t rng_counter_start; \ 
+  uint32_t rng_counter_stop; \ 
+  uint32_t rng_tracking_interval; \
+  uint32_t rng_offset;\
+  uint8_t rng_fom;
+#endif
+
 struct ieee802154_txdesc_s
 {
-  uint8_t psdu_handle;  /* The psdu handle identifying the transaction */
-  uint16_t psdu_length; /* The length of the PSDU */
-  uint8_t status;       /* The status of the transaction.  This is set by the
-                         * radio layer prior to calling txdone_csma */
+  IEEE802154_TXDESC_FIELDS
 
   /* TODO: Add slotting information for GTS transactions */
 };
@@ -176,13 +194,13 @@ struct ieee802154_rxdesc_s
 
 struct ieee802154_radiocb_s
 {
-  CODE int (*poll_csma) (FAR struct ieee802154_radiocb_s *radiocb,
+  CODE int (*poll_csma) (FAR const struct ieee802154_radiocb_s *radiocb,
              FAR struct ieee802154_txdesc_s *tx_desc, FAR uint8_t *buf);
-  CODE int (*poll_gts) (FAR struct ieee802154_radiocb_s *radiocb,
+  CODE int (*poll_gts) (FAR const struct ieee802154_radiocb_s *radiocb,
              FAR struct ieee802154_txdesc_s *tx_desc, FAR uint8_t *buf);
-  CODE int (*txdone) (FAR struct ieee802154_radiocb_s *radiocb,
+  CODE void (*txdone) (FAR const struct ieee802154_radiocb_s *radiocb,
              FAR const struct ieee802154_txdesc_s *tx_desc);
-  CODE int (*rx_frame) (FAR struct ieee802154_radiocb_s *radiocb,
+  CODE void (*rxframe) (FAR const struct ieee802154_radiocb_s *radiocb,
              FAR const struct ieee8021254_rxdesc_s *rx_desc,
              FAR struct iob_s *frame);
 };
@@ -195,8 +213,7 @@ struct ieee802154_radioops_s
              FAR struct ieee802154_radiocb_s *radiocb);
   CODE int (*ioctl)(FAR struct ieee802154_radio_s *radio, int cmd,
              unsigned long arg);
-  CODE int (*rxenable)(FAR struct ieee802154_radio_s *radio, bool state,
-             FAR struct ieee802154_packet_s *packet);
+  CODE int (*rxenable)(FAR struct ieee802154_radio_s *radio);
   CODE int (*txnotify_csma)(FAR struct ieee802154_radio_s *radio);
   CODE int (*txnotify_gts)(FAR struct ieee802154_radio_s *radio);
 };

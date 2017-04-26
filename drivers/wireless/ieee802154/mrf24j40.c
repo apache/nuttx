@@ -56,6 +56,8 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
 
+#include <nuttx/drivers/iob.h>
+
 #include <nuttx/wireless/ieee802154/mrf24j40.h>
 #include <nuttx/wireless/ieee802154/ieee802154_radio.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
@@ -221,8 +223,7 @@ static int  mrf24j40_bind(FAR struct ieee802154_radio_s *radio,
               FAR struct ieee802154_radiocb_s *radiocb);
 static int  mrf24j40_ioctl(FAR struct ieee802154_radio_s *radio, int cmd,
               unsigned long arg);
-static int  mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio,
-              bool state, FAR struct ieee802154_packet_s *packet);
+static int  mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio);
 static int  mrf24j40_transmit(FAR struct ieee802154_radio_s *radio,
               FAR uint8_t *buf, uint16_t buf_len);
 static int mrf24j40_txnotify_csma(FAR struct ieee802154_radio_s *radio);
@@ -324,7 +325,7 @@ static int mrf24j40_txnotify_csma(FAR struct ieee802154_radio_s *radio)
 static void mrf24j40_dopoll_csma(FAR void *arg)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)arg;
-  int ret = 0;
+  int len = 0;
 
   /* Need to get exlusive access to the device so that we can use the copy
    * buffer.
@@ -338,9 +339,9 @@ static void mrf24j40_dopoll_csma(FAR void *arg)
     {
       /* need to somehow allow for a handle to be passed */
 
-      ret = dev->radiocb->poll_csma(dev->radiocb, &dev->csma_desc.pub,
+      len = dev->radiocb->poll_csma(dev->radiocb, &dev->csma_desc.pub,
                                     &dev->tx_buf[0]);
-      if (ret > 0)
+      if (len > 0)
         {
           /* Now the txdesc is in use */
 
@@ -348,8 +349,7 @@ static void mrf24j40_dopoll_csma(FAR void *arg)
 
           /* Setup the transaction on the device in the CSMA FIFO */
 
-          mrf24j40_csma_setup(dev, &dev->tx_buf[0],
-                              dev->csma_desc.pub.psdu_length);
+          mrf24j40_csma_setup(dev, &dev->tx_buf[0], len);
         }
     }
 
@@ -419,7 +419,7 @@ static void mrf24j40_dopoll_gts(FAR void *arg)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)arg;
   int gts = 0;
-  int ret = 0;
+  int len = 0;
 
   /* Need to get exclusive access to the device so that we can use the copy
    * buffer.
@@ -431,9 +431,9 @@ static void mrf24j40_dopoll_gts(FAR void *arg)
     {
       if (!dev->gts_desc[gts].busy)
         {
-          ret = dev->radiocb->poll_gts(dev->radiocb, &dev->gts_desc[gts].pub,
+          len = dev->radiocb->poll_gts(dev->radiocb, &dev->gts_desc[gts].pub,
                                        &dev->tx_buf[0]);
-          if (ret > 0)
+          if (len > 0)
             {
               /* Now the txdesc is in use */
 
@@ -441,8 +441,7 @@ static void mrf24j40_dopoll_gts(FAR void *arg)
 
               /* Setup the transaction on the device in the open GTS FIFO */
 
-              mrf24j40_gts_setup(dev, gts, &dev->tx_buf[0],
-                                 dev->gts_desc[gts].pub.psdu_length);
+              mrf24j40_gts_setup(dev, gts, &dev->tx_buf[0], len);
             }
         }
     }
@@ -1583,27 +1582,18 @@ static void mrf24j40_irqwork_txgts(FAR struct mrf24j40_radio_s *dev,
  *
  ****************************************************************************/
 
-static int mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio, bool state,
-                             FAR struct ieee802154_packet_s *packet)
+static int mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
   uint8_t reg;
 
-  if (state)
-    {
-      mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
-      radio->rxbuf = packet;
+  mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
 
-      /* Enable rx int */
+  /* Enable rx int */
 
-      reg = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
-      reg &= ~MRF24J40_INTCON_RXIE;
-      mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
-    }
-  else
-    {
-      radio->rxbuf = NULL;
-    }
+  reg = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
+  reg &= ~MRF24J40_INTCON_RXIE;
+  mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
 
   return OK;
 }
@@ -1619,7 +1609,7 @@ static int mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio, bool state,
 static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
 {
   FAR struct iob_s *iob;
-  struct ieee802154_txdesc_s rxdesc;
+  struct ieee802154_rxdesc_s rxdesc;
   uint32_t addr;
   uint32_t index;
   uint8_t  reg;
@@ -1635,7 +1625,6 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
   /* Disable packet reception */
 
   mrf24j40_setreg(dev->spi, MRF24J40_BBREG1, MRF24J40_BBREG1_RXDECINV);
-
 
   /* Allocate an IOB to put the packet in */
 
@@ -1675,7 +1664,8 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
 
   /* Callback the receiver in the next highest layer */
 
-  dev->radiocb->rx_frame(dev->radiocb, &rxdesc, iob);
+  dev->radiocb->rxframe(dev->radiocb,
+                        (FAR const struct ieee802154_rxdesc_s *)&rxdesc, iob);
 
   /* Enable reception of next packet by flushing the fifo.
    * This is an MRF24J40 errata (no. 1).
@@ -1830,16 +1820,6 @@ FAR struct ieee802154_radio_s *mrf24j40_init(FAR struct spi_dev_s *spi,
     }
 
   dev->radio.ops = &mrf24j40_devops;
-
-  /* Initialize semaphores */
-
-  sem_init(&dev->radio.rxsem, 0, 0);
-
-  /* These semaphores are all used for signaling and, hence, should
-   * not have priority inheritance enabled.
-   */
-
-  sem_setprotocol(&dev->radio.rxsem, SEM_PRIO_NONE);
 
   dev->lower    = lower;
   dev->spi      = spi;

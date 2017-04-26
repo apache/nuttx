@@ -67,10 +67,6 @@
 #  error Wireless support requires CONFIG_DRIVERS_WIRELESS
 #endif
 
-#ifndef CONFIG_IEEE802154_DEV
-#  error IEEE802.15.4 radio character device required (CONFIG_IEEE802154_DEV)
-#endif
-
 #if !defined(CONFIG_CLICKER2_STM32_MB1_BEE) && \
     !defined(CONFIG_CLICKER2_STM32_MB2_BEE)
 #  error Only the Mikroe BEE board is supported

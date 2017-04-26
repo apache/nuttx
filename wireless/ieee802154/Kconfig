@@ -6,13 +6,14 @@
 config WIRELESS_IEEE802154
 	bool "IEEE 802.15.4 Wireless Support"
 	default n
+	select DRIVERS_IOB
 	---help---
 		Enables support for the IEEE 802.14.5 Wireless library.
 
 if WIRELESS_IEEE802154
 
-config IEEE802154_MAC
-	bool "Generic Media Access Control layer for 802.15.4 radios"
+menuconfig IEEE802154_MAC
+	bool "Generic Media Access Control (MAC) layer for 802.15.4 radios"
 	default n
 	depends on WIRELESS_IEEE802154
 	---help---
@@ -21,6 +22,8 @@ config IEEE802154_MAC
 		such as 6lowpan. It is not required to use 802.15.4 radios,
 		but is strongly suggested to ensure exchange of valid frames.
 
+if IEEE802154_MAC
+
 config IEEE802154_MAC_DEV
 	bool "Character driver for IEEE 802.15.4 MAC layer"
 	default n
@@ -28,6 +31,34 @@ config IEEE802154_MAC_DEV
 	---help---
 		Enable the device driver to expose the IEEE 802.15.4 MAC layer
 		access to user space as IOCTLs
+
+choice
+	prompt "IEEE 802.15.4 work queue"
+	default MAC802154_LPWORK if SCHED_LPWORK
+	default MAC802154_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the IEEE 802.15.4 MAC layer.
+		If the low priority work queue is available, then it should be used by
+		the driver.
+
+config MAC802154_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config MAC802154_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
+
+config IEEE802154_NTXDESC
+	int "Number or TX descriptors"
+	default 3
+	---help---
+		Configured number of Tx descriptors. Default: 3
+		
+endif # IEEE802154_MAC
 
 config IEEE802154_DEV
 	bool "Debug character driver for ieee802.15.4 radio interfaces"

@@ -46,7 +46,10 @@
 #include <string.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/wireless/ieee802154/ieee802154_radio.h>
+#include <nuttx/wqueue.h>
+
+#include <nuttx/drivers/iob.h>
+
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 #include "mac802154.h"
@@ -54,6 +57,25 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+/* If processing is not done at the interrupt level, then work queue support
+ * is required.
+ */
+
+#if !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
+#else
+
+  /* Use the low priority work queue if possible */
+
+#  if defined(CONFIG_MAC802154_HPWORK)
+#    define MAC802154_WORK HPWORK
+#  elif defined(CONFIG_MAC802154_LPWORK)
+#    define MAC802154_WORK LPWORK
+#  else
+#    error Neither CONFIG_MAC802154_HPWORK nor CONFIG_MAC802154_LPWORK defined
+#  endif
+#endif
 
 /****************************************************************************
  * Private Types
@@ -128,9 +150,12 @@ struct ieee802154_privmac_s
   FAR struct mac802154_trans_s *indirect_head;
   FAR struct mac802154_trans_s *indirect_tail;
 
-  FAR struct ieee802154_txdesc_s *txhead; /* Next TX descriptor to handle */
-  FAR struct ieee802154_txdesc_s *txtail; /* Location to push TX descriptor */
-  struct ieee802154_txdesc_s txtable[CONFIG_IEEE802154_NTXDESC];
+  uint8_t txdesc_count;
+  struct ieee802154_txdesc_s txdesc[CONFIG_IEEE802154_NTXDESC];
+
+  /* Support a singly linked list of frames received */
+  FAR struct iob_s *rxframes_head;
+  FAR struct iob_s *rxframes_tail;
 
   /* MAC PIB attributes, grouped to save memory */
 
@@ -254,6 +279,9 @@ struct ieee802154_privmac_s
 static inline int mac802154_takesem(sem_t *sem);
 #define mac802154_givesem(s) sem_post(s);
 
+static void mac802154_txdone_worker(FAR void *arg);
+static void mac802154_rxframe_worker(FAR void *arg);
+
 /* Internal Functions */
 
 static int mac802154_defaultmib(FAR struct ieee802154_privmac_s *priv);
@@ -261,16 +289,20 @@ static int mac802154_applymib(FAR struct ieee802154_privmac_s *priv);
 
 /* IEEE 802.15.4 PHY Interface OPs */
 
-static int mac802154_poll_csma(FAR struct ieee802154_radiocb_s *radiocb,
+static int mac802154_poll_csma(FAR const struct ieee802154_radiocb_s *radiocb,
                                FAR struct ieee802154_txdesc_s *tx_desc,
                                FAR uint8_t *buf);
 
-static int mac802154_poll_gts(FAR struct ieee802154_radiocb_s *radiocb,
+static int mac802154_poll_gts(FAR const struct ieee802154_radiocb_s *radiocb,
                               FAR struct ieee802154_txdesc_s *tx_desc,
                               FAR uint8_t *buf);
 
-static int mac802154_txdone(FAR struct ieee802154_radiocb_s *radiocb,
-                            FAR struct ieee802154_txdesc_s *tx_desc);
+static void mac802154_txdone(FAR const struct ieee802154_radiocb_s *radiocb,
+                             FAR const struct ieee802154_txdesc_s *tx_desc);
+
+static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
+                              FAR struct ieee802154_rxdesc_s *rx_desc,
+                              FAR struct iob_s *frame);
 
 /****************************************************************************
  * Private Data
@@ -346,7 +378,7 @@ static int mac802154_applymib(FAR struct ieee802154_privmac_s *priv)
  *
  ****************************************************************************/
 
-static int mac802154_poll_csma(FAR struct ieee802154_radiocb_s *radiocb,
+static int mac802154_poll_csma(FAR const struct ieee802154_radiocb_s *radiocb,
                                FAR struct ieee802154_txdesc_s *tx_desc,
                                FAR uint8_t *buf)
 {
@@ -377,8 +409,7 @@ static int mac802154_poll_csma(FAR struct ieee802154_radiocb_s *radiocb,
 
       /* Setup the transmit descriptor */
 
-      tx_desc->psdu_handle = trans->msdu_handle;
-      tx_desc->psdu_length = trans->mhr_len + trans->d_len;
+      tx_desc->handle = trans->msdu_handle;
 
       /* Copy the frame into the buffer */
 
@@ -392,7 +423,7 @@ static int mac802154_poll_csma(FAR struct ieee802154_radiocb_s *radiocb,
        */
 
       sem_post(&trans->sem);
-      return tx_desc->psdu_length;
+      return (trans->mhr_len + trans->d_len);
     }
 
   mac802154_givesem(&priv->exclsem);
@@ -410,7 +441,7 @@ static int mac802154_poll_csma(FAR struct ieee802154_radiocb_s *radiocb,
  *
  ****************************************************************************/
 
-static int mac802154_poll_gts(FAR struct ieee802154_radiocb_s *radiocb,
+static int mac802154_poll_gts(FAR const struct ieee802154_radiocb_s *radiocb,
                               FAR struct ieee802154_txdesc_s *tx_desc,
                               FAR uint8_t *buf)
 {
@@ -449,14 +480,12 @@ static int mac802154_poll_gts(FAR struct ieee802154_radiocb_s *radiocb,
  *
  ****************************************************************************/
 
-static int mac802154_txdone(FAR struct ieee802154_radiocb_s *radiocb,
+static void mac802154_txdone(FAR const struct ieee802154_radiocb_s *radiocb,
                             FAR const struct ieee802154_txdesc_s *tx_desc)
 {
   FAR struct mac802154_radiocb_s *cb =
     (FAR struct mac802154_radiocb_s *)radiocb;
   FAR struct ieee802154_privmac_s *priv;
-  FAR struct ieee802154_txdesc_s *desc;
-  int ret = 0;
 
   DEBUGASSERT(cb != NULL && cb->priv != NULL);
   priv = cb->priv;
@@ -467,23 +496,20 @@ static int mac802154_txdone(FAR struct ieee802154_radiocb_s *radiocb,
 
   while (mac802154_takesem(&priv->exclsem) != 0);
 
-  /* Allocate a tx_desc */
+  /* Check to see if there is an available tx descriptor slot.  If there is
+   * not we simply drop the notification */
 
-  desc = kmm_zalloc(sizeof(struct ieee802154_txdesc_s));
-  if (desc == NULL)
+  if (priv->txdesc_count < CONFIG_IEEE802154_NTXDESC)
     {
-      mac802154_givesem(&priv->exclsem);
+      /* Copy the txdesc over and link it into our list */
 
-      return -ENOMEM;
+      memcpy(&priv->txdesc[priv->txdesc_count++], tx_desc,
+             sizeof(struct ieee802154_txdesc_s));
     }
-
-  /* Copy the txdesc over and link it into our list */
-
-  memcpy(desc, tx_desc, sizeof(ieee802154_txdesc_s));
-
-  /* Link the descriptor */
-
-#warning Missing Logic!
+  else
+    {
+      wlinfo("MAC802154: No room for TX Desc.\n");
+    }
 
   mac802154_givesem(&priv->exclsem);
 
@@ -492,7 +518,7 @@ static int mac802154_txdone(FAR struct ieee802154_radiocb_s *radiocb,
   if (work_available(&priv->tx_work))
     {
       work_queue(MAC802154_WORK, &priv->tx_work, mac802154_txdone_worker,
-                 (FAR void *)dev, 0);
+                 (FAR void *)priv, 0);
     }
 }
 
@@ -508,8 +534,30 @@ static int mac802154_txdone(FAR struct ieee802154_radiocb_s *radiocb,
 
 static void mac802154_txdone_worker(FAR void *arg)
 {
-  FAR struct ieee802154_privmanc_s *priv =
-    (FAR struct ieee802154_privmanc_s *)arg;
+  FAR struct ieee802154_privmac_s *priv = 
+    (FAR struct ieee802154_privmac_s *)arg;
+  int i = 0;
+  
+  /* Get exclusive access to the driver structure.  We don't care about any
+   * signals so if we see one, just go back to trying to get access again.
+   */
+
+  while (mac802154_takesem(&priv->exclsem) != 0);
+
+  /* For each pending TX descriptor, send an application callback */
+
+  for (i = 0; i < priv->txdesc_count; i++)
+    {
+      priv->cb->mcps_notify(priv->cb, IEEE802154_NOTIFY_CONF_DATA,
+                  (FAR const union ieee802154_mcps_notify_u *) &priv->txdesc[i]);
+    }
+
+  /* We've handled all the descriptors and no further desc could have been added
+   * since we have the struct locked */
+
+  priv->txdesc_count = 0;
+
+  mac802154_givesem(&priv->exclsem);
 }
 
 /****************************************************************************
@@ -526,15 +574,14 @@ static void mac802154_txdone_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-static void mac802154_rxframe(FAR struct ieee802154_radiocb_s *radiocb,
+static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
                               FAR struct ieee802154_rxdesc_s *rx_desc,
                               FAR struct iob_s *frame)
 {
   FAR struct mac802154_radiocb_s *cb =
     (FAR struct mac802154_radiocb_s *)radiocb;
   FAR struct ieee802154_privmac_s *priv;
-  FAR struct ieee802154_txdesc_s *desc;
-  int ret = 0;
+  FAR struct ieee802154_rxdesc_s *desc;
 
   DEBUGASSERT(cb != NULL && cb->priv != NULL);
   priv = cb->priv;
@@ -549,8 +596,8 @@ static void mac802154_rxframe(FAR struct ieee802154_radiocb_s *radiocb,
 
   /* Push the iob onto the tail of the frame list for processing */
 
-  priv->rxframes_tail->io_flink = iob;
-  priv->rxframes_tail = iob;
+  priv->rxframes_tail->io_flink = frame;
+  priv->rxframes_tail = frame;
 
   mac802154_givesem(&priv->exclsem);
 
@@ -642,6 +689,7 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
   radiocb->poll_csma   = mac802154_poll_csma;
   radiocb->poll_gts    = mac802154_poll_gts;
   radiocb->txdone      = mac802154_txdone;
+  radiocb->rxframe     = mac802154_rxframe;
 
   /* Bind our callback structure */
 
@@ -981,7 +1029,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
  *
  ****************************************************************************/
 
-int mac802154_req_purge(MACHANDLE mac, uint8_t handle)
+int mac802154_req_purge(MACHANDLE mac, FAR struct ieee802154_purge_req_s *req)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
@@ -1060,7 +1108,7 @@ int mac802154_req_disassociate(MACHANDLE mac,
  *
  ****************************************************************************/
 
-int mac802154_req_get(MACHANDLE mac, enum ieee802154_pib_attr_e attr)
+int mac802154_req_get(MACHANDLE mac, FAR struct ieee802154_get_req_s *req)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
@@ -1078,7 +1126,7 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_pib_attr_e attr)
  *
  ****************************************************************************/
 
-int mac802154_req_gts(MACHANDLE mac, FAR uint8_t *characteristics)
+int mac802154_req_gts(MACHANDLE mac, FAR struct ieee802154_gts_req_s *req)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
@@ -1095,7 +1143,7 @@ int mac802154_req_gts(MACHANDLE mac, FAR uint8_t *characteristics)
  *
  ****************************************************************************/
 
-int mac802154_req_reset(MACHANDLE mac, bool setdefaults)
+int mac802154_req_reset(MACHANDLE mac, FAR struct ieee802154_reset_req_s *req)
 {
   FAR struct ieee802154_privmac_s * priv =
     (FAR struct ieee802154_privmac_s *) mac;
@@ -1113,8 +1161,8 @@ int mac802154_req_reset(MACHANDLE mac, bool setdefaults)
  *
  ****************************************************************************/
 
-int mac802154_req_rxenable(MACHANDLE mac, bool deferrable, int ontime,
-                           int duration)
+int mac802154_req_rxenable(MACHANDLE mac,
+                           FAR struct ieee802154_rxenable_req_s *req)
 {
   FAR struct ieee802154_privmac_s * priv =
     (FAR struct ieee802154_privmac_s *)mac;
@@ -1136,8 +1184,7 @@ int mac802154_req_rxenable(MACHANDLE mac, bool deferrable, int ontime,
  *
  ****************************************************************************/
 
-int mac802154_req_scan(MACHANDLE mac, uint8_t type, uint32_t channels,
-                       int duration)
+int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
@@ -1154,8 +1201,7 @@ int mac802154_req_scan(MACHANDLE mac, uint8_t type, uint32_t channels,
  *
  ****************************************************************************/
 
-int mac802154_req_set(MACHANDLE mac, int attribute, FAR uint8_t *value,
-                      int valuelen)
+int mac802154_req_set(MACHANDLE mac, FAR struct ieee802154_set_req_s *req)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
@@ -1172,9 +1218,7 @@ int mac802154_req_set(MACHANDLE mac, int attribute, FAR uint8_t *value,
  *
  ****************************************************************************/
 
-int mac802154_req_start(MACHANDLE mac, uint16_t panid, int channel,
-                        uint8_t bo, uint8_t fo, bool coord, bool batext,
-                        bool realign)
+int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
@@ -1192,7 +1236,7 @@ int mac802154_req_start(MACHANDLE mac, uint16_t panid, int channel,
  *
  ****************************************************************************/
 
-int mac802154_req_sync(MACHANDLE mac, int channel, bool track)
+int mac802154_req_sync(MACHANDLE mac, FAR struct ieee802154_sync_req_s *req)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
@@ -1210,7 +1254,7 @@ int mac802154_req_sync(MACHANDLE mac, int channel, bool track)
  *
  ****************************************************************************/
 
-int mac802154_req_poll(MACHANDLE mac, FAR uint8_t *coordaddr)
+int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
@@ -1226,8 +1270,8 @@ int mac802154_req_poll(MACHANDLE mac, FAR uint8_t *coordaddr)
  *
  ****************************************************************************/
 
-int mac802154_rsp_associate(MACHANDLE mac, uint8_t eadr, uint16_t saddr,
-                            int status)
+int mac802154_rsp_associate(MACHANDLE mac,
+                            FAR struct ieee802154_assoc_resp_s *resp)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
@@ -1243,8 +1287,8 @@ int mac802154_rsp_associate(MACHANDLE mac, uint8_t eadr, uint16_t saddr,
  *
  ****************************************************************************/
 
-int mac802154_rsp_orphan(MACHANDLE mac, FAR uint8_t *orphanaddr,
-                         uint16_t saddr, bool associated)
+int mac802154_rsp_orphan(MACHANDLE mac,
+                         FAR struct ieee802154_orphan_resp_s *resp)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;

@@ -55,6 +55,8 @@
 #  include <net/if.h>
 #endif
 
+#include <nuttx/wireless/ieee802154/ieee802154_radio.h>
+
 #include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
@@ -553,45 +555,7 @@ struct ieee802154_data_req_s
 
 struct ieee802154_data_conf_s
 {
-  uint8_t msdu_handle;              /* Handle assoc. with MSDU */
-
-  /* The time, in symbols, at which the data were transmitted */
-
-  uint32_t timestamp;
-
-  enum ieee802154_status_e status;  /* The status of the MSDU transmission */
-
-#ifdef CONFIG_IEEE802154_RANGING
-  bool rng_rcvd;                    /* Ranging indicated by MSDU */
-
-  /* A count of the time units corresponding to an RMARKER at the antenna at
-   * the beginning of the ranging exchange
-   */
-
-  uint32_t rng_counter_start; 
-
-  /* A count of the time units corresponding to an RMARKER at the antenna at
-   * end of the ranging exchange
-   */
-
-  uint32_t rng_counter_stop; 
-
-  /* A count of the time units in a message exchange over which the tracking
-   * offset was measured
-   */
-
-  uint34_t rng_tracking_interval;
-
-  /* A count of the time units slipped or advanced by the radio tracking
-   * system over the course of the entire tracking interval
-   */
-
-  uint32_t rng_offset;
-
-  /* The Figure of Merit (FoM) characterizing the ranging measurement */ 
-
-  uint8_t rng_fom; 
-#endif
+  IEEE802154_TXDESC_FIELDS
 };
 
 /*****************************************************************************
@@ -1111,7 +1075,6 @@ struct ieee802154_rxenable_conf_s
 
 struct ieee802154_scan_req_s
 {
-
   enum ieee802154_scantype_e type;
   uint8_t duration;
   uint8_t ch_page;
@@ -1406,13 +1369,13 @@ enum ieee802154_macnotify_e
 
 struct ieee802154_maccb_s
 {
-  CODE void (*mlme_notify) (FAR struct ieee802154_maccb_s *maccb,
+  CODE void (*mlme_notify) (FAR const struct ieee802154_maccb_s *maccb,
                             enum ieee802154_macnotify_e notif,
-                            FAR union ieee802154_mlme_notify_u *arg);
+                            FAR const union ieee802154_mlme_notify_u *arg);
 
-  CODE void (*mcps_notify) (FAR struct ieee802154_maccb_s *maccb,
+  CODE void (*mcps_notify) (FAR const struct ieee802154_maccb_s *maccb,
                             enum ieee802154_macnotify_e notif,
-                            FAR union ieee802154_mcps_notify_u *arg);
+                            FAR const union ieee802154_mcps_notify_u *arg);
 };
 
 #ifdef __cplusplus

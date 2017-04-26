@@ -120,7 +120,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req);
  *
  ****************************************************************************/
 
-int mac802154_req_purge(MACHANDLE mac, uint8_t handle);
+int mac802154_req_purge(MACHANDLE mac, FAR struct ieee802154_purge_req_s *req);
 
 /****************************************************************************
  * Name: mac802154_req_associate
@@ -162,7 +162,7 @@ int mac802154_req_disassociate(MACHANDLE mac,
  *
  ****************************************************************************/
 
-int mac802154_req_get(MACHANDLE mac, enum ieee802154_pib_attr_e attr);
+int mac802154_req_get(MACHANDLE mac, FAR struct ieee802154_get_req_s *req);
 
 /****************************************************************************
  * Name: mac802154_req_gts
@@ -175,7 +175,7 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_pib_attr_e attr);
  *
  ****************************************************************************/
 
-int mac802154_req_gts(MACHANDLE mac, FAR uint8_t *characteristics);
+int mac802154_req_gts(MACHANDLE mac, FAR struct ieee802154_gts_req_s *req);
 
 /****************************************************************************
  * Name: mac802154_req_reset
@@ -187,7 +187,7 @@ int mac802154_req_gts(MACHANDLE mac, FAR uint8_t *characteristics);
  *
  ****************************************************************************/
 
-int mac802154_req_reset(MACHANDLE mac, bool setdefaults);
+int mac802154_req_reset(MACHANDLE mac, FAR struct ieee802154_reset_req_s *req);
 
 /****************************************************************************
  * Name: mac802154_req_rxenable
@@ -200,8 +200,8 @@ int mac802154_req_reset(MACHANDLE mac, bool setdefaults);
  *
  ****************************************************************************/
 
-int mac802154_req_rxenable(MACHANDLE mac, bool deferrable, int ontime,
-                           int duration);
+int mac802154_req_rxenable(MACHANDLE mac,
+                           FAR struct ieee802154_rxenable_req_s *req);
 
 /****************************************************************************
  * Name: mac802154_req_scan
@@ -218,8 +218,7 @@ int mac802154_req_rxenable(MACHANDLE mac, bool deferrable, int ontime,
  *
  ****************************************************************************/
 
-int mac802154_req_scan(MACHANDLE mac, uint8_t type, uint32_t channels,
-                       int duration);
+int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req);
 
 /****************************************************************************
  * Name: mac802154_req_set
@@ -231,8 +230,7 @@ int mac802154_req_scan(MACHANDLE mac, uint8_t type, uint32_t channels,
  *
  ****************************************************************************/
 
-int mac802154_req_set(MACHANDLE mac, int attribute, FAR uint8_t *value,
-                      int valuelen);
+int mac802154_req_set(MACHANDLE mac, FAR struct ieee802154_set_req_s *req);
 
 /****************************************************************************
  * Name: mac802154_req_start
@@ -244,9 +242,7 @@ int mac802154_req_set(MACHANDLE mac, int attribute, FAR uint8_t *value,
  *
  ****************************************************************************/
 
-int mac802154_req_start(MACHANDLE mac, uint16_t panid, int channel,
-                        uint8_t bo, uint8_t fo, bool coord, bool batext,
-                        bool realign);
+int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req);
 
 /****************************************************************************
  * Name: mac802154_req_sync
@@ -259,7 +255,7 @@ int mac802154_req_start(MACHANDLE mac, uint16_t panid, int channel,
  *
  ****************************************************************************/
 
-int mac802154_req_sync(MACHANDLE mac, int channel, bool track);
+int mac802154_req_sync(MACHANDLE mac, FAR struct ieee802154_sync_req_s *req);
 
 /****************************************************************************
  * Name: mac802154_req_poll
@@ -272,7 +268,7 @@ int mac802154_req_sync(MACHANDLE mac, int channel, bool track);
  *
  ****************************************************************************/
 
-int mac802154_req_poll(MACHANDLE mac, FAR uint8_t *coordaddr);
+int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req);
 
 /****************************************************************************
  * Name: mac802154_rsp_associate
@@ -283,8 +279,8 @@ int mac802154_req_poll(MACHANDLE mac, FAR uint8_t *coordaddr);
  *
  ****************************************************************************/
 
-int mac802154_rsp_associate(MACHANDLE mac, uint8_t eadr, uint16_t saddr,
-                            int status);
+int mac802154_rsp_associate(MACHANDLE mac,
+                            FAR struct ieee802154_assoc_resp_s *resp);
 
 /****************************************************************************
  * Name: mac802154_rsp_orphan
@@ -295,8 +291,8 @@ int mac802154_rsp_associate(MACHANDLE mac, uint8_t eadr, uint16_t saddr,
  *
  ****************************************************************************/
 
-int mac802154_rsp_orphan(MACHANDLE mac, FAR uint8_t *orphanaddr,
-                         uint16_t saddr, bool associated);
+int mac802154_rsp_orphan(MACHANDLE mac,
+                         FAR struct ieee802154_orphan_resp_s *resp);
 
 #undef EXTERN
 #ifdef __cplusplus
