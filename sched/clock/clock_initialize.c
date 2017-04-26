@@ -68,7 +68,8 @@
 #define SEC_PER_HOUR ((time_t)60 * SEC_PER_MIN)
 #define SEC_PER_DAY  ((time_t)24 * SEC_PER_HOUR)
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_SYSTEM_TIME64)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_SYSTEM_TIME64) && \
+    defined(CONFIG_CLOCK_MONOTONIC)
 /* Initial system timer ticks value close to maximum 32-bit value, to test
  * 64-bit system-timer after going over 32-bit value. This is to make errors
  * of casting 64-bit system-timer to 32-bit variables more visible.

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/syslog/vsyslog.c
  *
- *   Copyright (C) 2007-2009, 2011-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,15 +70,29 @@ int _vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
   struct lib_outstream_s stream;
 #ifdef CONFIG_SYSLOG_TIMESTAMP
   struct timespec ts;
+  int ret = -1;
 
   /* Get the current time.  Since debug output may be generated very early
    * in the start-up sequence, hardware timer support may not yet be
    * available.
    */
 
-  if (!OSINIT_HW_READY() || clock_systimespec(&ts) < 0)
+  if (OSINIT_HW_READY())
     {
-      /* Timer hardware is not available, or clock_systimespec failed */
+      /* Prefer monotonic when enabled, as it can be synchronized to
+       * RTC with clock_resynchronize.
+       */
+
+#ifdef CONFIG_CLOCK_MONOTONIC
+      ret = clock_gettime(CLOCK_MONOTONIC, &ts);
+#else
+      ret = clock_systimespec(&ts);
+#endif
+    }
+
+  if (ret < 0)
+    {
+      /* Timer hardware is not available, or clock function failed */
 
       ts.tv_sec  = 0;
       ts.tv_nsec = 0;
