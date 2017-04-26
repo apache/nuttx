@@ -108,22 +108,6 @@ if [ ! -r "${src_makedefs}" ]; then
   exit 4
 fi
 
-src_setenv="${configpath}/setenv.sh"
-unset have_setenv
-
-if [ -r "${src_setenv}" ]; then
-  dest_setenv=${TOPDIR}/setenv.sh
-  have_setenv=y
-else
-  src_setenv="${configpath}/setenv.bat"
-  if [ -r "${src_setenv}" ]; then
-    dest_setenv=${TOPDIR}/setenv.bat
-    have_setenv=y
-  else
-    unset src_setenv
-  fi
-fi
-
 src_config="${configpath}/defconfig"
 dest_config="${TOPDIR}/.config"
 
@@ -134,8 +118,7 @@ fi
 
 # Extract values needed from the defconfig file.  We need:
 # (1) The CONFIG_WINDOWS_NATIVE setting to know it this is target for a
-#     native Windows (meaning that we want setenv.bat vs setenv.sh and we need
-#     to use backslashes in the CONFIG_APPS_DIR setting).
+#     native Windows
 # (2) The CONFIG_APPS_DIR setting to see if there is a configured location for the
 #     application directory.  This can be overridden from the command line.
 
@@ -191,11 +174,6 @@ fi
 
 install -m 644 "${src_makedefs}" "${dest_makedefs}" || \
   { echo "Failed to copy \"${src_makedefs}\"" ; exit 7 ; }
-if [ "X${have_setenv}" = "Xy" ]; then
-  install "${src_setenv}" "${dest_setenv}" || \
-    { echo "Failed to copy ${src_setenv}" ; exit 8 ; }
-  chmod 755 "${dest_setenv}"
-fi
 install -m 644 "${src_config}" "${dest_config}" || \
   { echo "Failed to copy \"${src_config}\"" ; exit 9 ; }
 
