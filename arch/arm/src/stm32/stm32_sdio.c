@@ -2721,7 +2721,17 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Then set up the SDIO data path */
 
-  dblocksize = stm32_log2(buflen) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+#ifdef CONFIG_SDIO_BLOCKSETUP
+  if (priv->block_size != STM32_SDIO_USE_DEFAULT_BLOCKSIZE)
+    {
+      dblocksize = priv->block_size << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+    }
+  else
+#endif
+    {
+      dblocksize = stm32_log2(buflen) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+    }
+
   stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, buflen, dblocksize | SDIO_DCTRL_DTDIR);
 
   /* Configure the RX DMA */
@@ -2790,7 +2800,17 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Then set up the SDIO data path */
 
-  dblocksize = stm32_log2(buflen) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+#ifdef CONFIG_SDIO_BLOCKSETUP
+  if (priv->block_size != STM32_SDIO_USE_DEFAULT_BLOCKSIZE)
+    {
+      dblocksize = priv->block_size << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+    }
+  else
+#endif
+    {
+      dblocksize = stm32_log2(buflen) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+    }
+
   stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, buflen, dblocksize);
 
   /* Configure the TX DMA */

@@ -78,6 +78,8 @@ int sdio_io_rw_direct(FAR struct sdio_dev_s *dev, bool write,
 
     /* Setup CMD52 argument */
 
+    arg.value = 0;
+
     if (write)
       {
         arg.cmd52.write_data       = inb;
@@ -135,6 +137,7 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
 
     /* Setup CMD53 argument */
 
+    arg.value = 0;
     arg.cmd53.register_address = address & 0x1ffff;
     arg.cmd53.op_code          = inc_addr;
     arg.cmd53.function_number  = function & 7;
@@ -169,13 +172,13 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
         sdio_sendcmdpoll(dev, SDIO_ACMD53, (uint32_t)arg.value);
         ret = SDIO_RECVR5(dev, SDIO_ACMD53, (uint32_t*)&resp);
 
-        SDIO_SENDSETUP(dev, buf, blocklen * nblocks);
+        SDIO_DMASENDSETUP(dev, buf, blocklen * nblocks);
         wkupevent = SDIO_EVENTWAIT(dev, SDIO_CMD53_TIMEOUT_MS);
       }
     else
       {
         // wlinfo("prep read %d\n", blocklen * nblocks);
-        SDIO_RECVSETUP(dev, buf, blocklen * nblocks);
+        SDIO_DMARECVSETUP(dev, buf, blocklen * nblocks);
         SDIO_SENDCMD(dev, SDIO_ACMD53, (uint32_t)arg.value);
 
         wkupevent = SDIO_EVENTWAIT(dev, SDIO_CMD53_TIMEOUT_MS);

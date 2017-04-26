@@ -237,6 +237,17 @@
 #  define SDIO_SDXFR_CLKDIV     (2 << SDIO_CLKCR_CLKDIV_SHIFT)
 #endif
 
+/* DMA Channl/Stream Selections *****************************************************/
+/* Stream selections are arbitrary for now but might become important in the future
+ * if we set aside more DMA channels/streams.
+ *
+ * SDIO DMA
+ *   DMAMAP_SDIO_1 = Channel 4, Stream 3
+ *   DMAMAP_SDIO_2 = Channel 4, Stream 6
+ */
+
+#define DMAMAP_SDIO DMAMAP_SDIO_1
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
