@@ -24,7 +24,7 @@ config ARCH_CHIP_STM32L476RE
 	select STM32L4_STM32L476XX
 	select STM32L4_FLASH_512KB
 	---help---
-		STM32 L4 Cortex M4, 512 FLASH, 96+32 Kb SRAM
+		STM32 L4 Cortex M4, 512Kb FLASH, 96+32 Kb SRAM
 
 config ARCH_CHIP_STM32L486
 	bool "STM32L486xx"
@@ -32,6 +32,29 @@ config ARCH_CHIP_STM32L486
 	select STM32L4_HAVE_AES
 	---help---
 		STM32 L4 Cortex M4, AES, 1024Kb FLASH, 96+32 Kb SRAM
+
+config ARCH_CHIP_STM32L496ZE
+	bool "STM32L496ZE"
+	select STM32L4_STM32L496XX
+	select STM32L4_FLASH_512KB
+	---help---
+		STM32 L4 Cortex M4, 512Kb FLASH, 320 Kb SRAM
+
+config ARCH_CHIP_STM32L496ZG
+	bool "STM32L496ZG"
+	select STM32L4_STM32L496XX
+	select STM32L4_FLASH_1024KB
+	---help---
+		STM32 L4 Cortex M4, 1024Kb FLASH, 320 Kb SRAM
+
+config ARCH_CHIP_STM32L4A6
+	bool "STM32L4A6xx"
+	select STM32L4_STM32L496XX   # Close enough to L496
+	select STM32L4_FLASH_1024KB
+	select STM32L4_HAVE_AES
+	select STM32L4_HAVE_HASH
+	---help---
+		STM32 L4 Cortex M4, AES, HASH, 1024Kb FLASH, 320 Kb SRAM
 
 endchoice # STM32 L4 Chip Selection
 
@@ -82,12 +105,25 @@ config STM32L4_STM32L486XX
 	select ARMV7M_HAVE_DTCM
 	select STM32L4_FLASH_1024KB
 
+config STM32L4_STM32L496XX
+	bool
+	default n
+	select STM32L4_STM32L4X6
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU # REVISIT
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32L4_HAVE_I2C4
+	select STM32L4_HAVE_CAN2
+	select STM32L4_HAVE_DCMI
+
 choice
 	prompt "Embedded FLASH size"
 	default STM32L4_FLASH_1024KB
 
 config STM32L4_FLASH_256KB
 	bool "256 KB"
+	depends on !STM32L4_STM32L496XX
 
 config STM32L4_FLASH_512KB
 	bool "512 KB"
@@ -132,6 +168,30 @@ menu "STM32L4 Peripheral Support"
 # These "hidden" settings determine is a peripheral option is available for the
 # selection MCU
 
+config STM32L4_HAVE_AES
+	bool
+	default n
+
+config STM32L4_HAVE_CAN2
+	bool
+	default n
+
+config STM32L4_HAVE_COMP
+	bool
+	default n
+
+config STM32L4_HAVE_DCMI
+	bool
+	default n
+
+config STM32L4_HAVE_HASH
+	bool
+	default n
+
+config STM32L4_HAVE_I2C4
+	bool
+	default n
+
 config STM32L4_HAVE_LTDC
 	bool
 	default n
@@ -141,10 +201,6 @@ config STM32L4_HAVE_LPTIM1
 	default n
 
 config STM32L4_HAVE_LPTIM2
-	bool
-	default n
-
-config STM32L4_HAVE_COMP
 	bool
 	default n
 
@@ -244,6 +300,17 @@ config STM32L4_ADC3
 config STM32L4_AES
 	bool "AES"
 	default n
+	depends on STM32L4_HAVE_AES
+
+config STM32L4_DCMI
+	bool "DCMI"
+	default n
+	depends on STM32L4_HAVE_DCMI
+
+config STM32L4_HASH
+	bool "HASH"
+	default n
+	depends on STM32L4_HAVE_HASH
 
 config STM32L4_RNG
 	bool "RNG"
@@ -534,11 +601,24 @@ config STM32L4_I2C3
 	default n
 	select STM32L4_I2C
 
+config STM32L4_I2C4
+	bool "I2C4"
+	default n
+	select STM32L4_I2C
+	depends on STM32L4_HAVE_I2C4
+
 config STM32L4_CAN1
 	bool "CAN1"
 	default n
 	select CAN
 	select STM32L4_CAN
+
+config STM32L4_CAN2
+	bool "CAN2"
+	default n
+	select CAN
+	select STM32L4_CAN
+	depends on STM32L4_HAVE_CAN2
 
 config STM32L4_DAC1
 	bool "DAC1"
@@ -2865,7 +2945,7 @@ config STM32L4_I2C_DUTY16_9
 endmenu
 
 menu "CAN driver configuration"
-	depends on STM32L4_CAN1
+	depends on STM32L4_CAN1 || STM32L4_CAN2
 
 config CAN1_BAUD
 	int "CAN1 BAUD"
@@ -2873,6 +2953,13 @@ config CAN1_BAUD
 	depends on STM32L4_CAN1
 	---help---
 		CAN1 BAUD rate.  Required if CONFIG_STM32L4_CAN1 is defined.
+
+config CAN2_BAUD
+	int "CAN2 BAUD"
+	default 250000
+	depends on STM32L4_CAN2
+	---help---
+		CAN2 BAUD rate.  Required if CONFIG_STM32L4_CAN2 is defined.
 
 config CAN_TSEG1
 	int "TSEG1 quanta"

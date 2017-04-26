@@ -50,8 +50,8 @@ GNU Toolchain Options
     CONFIG_ARM_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
     CONFIG_ARM_TOOLCHAIN_GNU_EABIL : Generic arm-none-eabi toolchain
 
-  If you are not using CONFIG_ARM_TOOLCHAIN_BUILDROOT, then you may also have to modify
-  the PATH in the setenv.h file if your make cannot find the tools.
+  You may also have to modify the PATH environment variable if your make cannot
+  find the tools.
 
   The toolchain may also be set using the kconfig-mconf utility (make menuconfig) or by
   passing CONFIG_ARM_TOOLCHAIN=<toolchain> to make, where <toolchain> is one
@@ -140,7 +140,7 @@ IDEs
 NuttX buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  A GNU GCC-based toolchain is assumed.  The PATH environment variable should
   be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
   different from the default in your PATH variable).
 
@@ -167,8 +167,8 @@ NuttX buildroot Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   detailed PLUS some special instructions that you will need to follow if you are
@@ -209,16 +209,13 @@ Image Format
   - cd tools/                     # Configure Nuttx
   - ./configure.sh ea3131/nsh     # (using the nsh configuration for this example)
   - cd ..                         # Set up environment
-  - . ./setenv.sh                 # (see notes below)
   - make                          # Make NuttX.  This will produce nuttx.bin
   - mklpc.sh                      # Make the bootloader binary (nuttx.lpc)
 
   NOTES:
 
-    1. setenv.sh just sets up pathes to the toolchain and also to
-       configs/ea3131/tools where mklpc.sh resides. Use of setenv.sh is optional.
-       If you don't use setenv.sh, then just set your PATH variable appropriately or
-       use the full path to mklpc.sh in the final step.
+    1. You will need to set your PATH variable appropriately or use the full path
+       to mklpc.sh in the final step.
     2. You can instruct Symantec to ignore the errors and it will stop quarantining
        the NXP program.
     3. The CRC32 logic in configs/ea3131/tools doesn't seem to work.  As a result,
@@ -603,7 +600,6 @@ Common Configuration Notes
        cd tools
        ./configure.sh ea3131/<subdir>
        cd -
-       . ./setenv.sh
 
      Where <subdir> is one of the configuration sub-directories described in
      the following paragraph.

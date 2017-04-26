@@ -83,9 +83,8 @@ Using OpenOCD and GDB with ICDI
 
       oocd.sh $PWD
 
-    The relative path to the oocd.sh script is configs/dk-tm4c129x/tools,
-    but that should have been added to your PATH variable when you sourced
-    the setenv.sh script.
+    Assuming that you have included the path to the oocd.sh script,
+    configs/dk-tm4c129x/tools, in PATH variable.
 
     Note that OpenOCD needs to be run with administrator privileges in
     some environments (sudo).
@@ -660,7 +659,6 @@ sub-directory and can be selected as follow:
     cd tools
     ./configure.sh dk-tm4c129x/<subdir>
     cd -
-    . ./setenv.sh
 
 Where <subdir> is one of the following:
 

@@ -50,9 +50,11 @@ General instructions.
 6. Build Nuttx:
 
   cd <directory>nuttx
-  . ./setenv.sh
   make
   mv nuttx /tftpboot/nuttx.dm320
+
+  You may also have to modify the PATH environment variable if your make cannot
+  find the tools.
 
 7. Configure the OSD u-boot:
 

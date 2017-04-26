@@ -72,12 +72,10 @@ following characteristics:
   |   `-- (board-specific source files)
   |-- <config1-dir>
   |   |-- Make.defs
-  |   |-- defconfig
-  |   `-- setenv.sh
+  |   `-- defconfig
   |-- <config2-dir>
   |   |-- Make.defs
-  |   |-- defconfig
-  |   `-- setenv.sh
+  |   `-- defconfig
   ...
 
 Summary of Files
@@ -101,10 +99,10 @@ src/Makefile -- This makefile will be invoked to build the board specific
   and distclean.
 
 A board may have various different configurations using these common source
-files.  Each board configuration is described by three files:  Make.defs,
-defconfig, and setenv.sh.  Typically, each set of configuration files is
-retained in a separate configuration sub-directory (<config1-dir>,
-<config2-dir>, .. in the above diagram).
+files.  Each board configuration is described by two files:  Make.defs and
+defconfig.  Typically, each set of configuration files is retained in a
+separate configuration sub-directory (<config1-dir>, <config2-dir>, .. in
+the above diagram).
 
 Make.defs -- This makefile fragment provides architecture and
   tool-specific build options.  It will be included by all other
@@ -140,12 +138,6 @@ defconfig -- This is a configuration file similar to the Linux
     (1) as a makefile fragment included in other makefiles, and
     (2) to generate include/nuttx/config.h which is included by
         most C files in the system.
-
-setenv.sh -- This is a script that you can include that will be installed at
-  the toplevel of the directory structure and can be sourced to set any
-  necessary environment variables.  You will most likely have to customize the
-  default setenv.sh script in order for it to work correctly in your
-  environment.
 
 Configuration Variables
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -816,7 +808,6 @@ Configuring NuttX
 Configuring NuttX requires only copying
 
   configs/<board-name>/<config-dir>/Make.def to ${TOPDIR}/Make.defs
-  configs/<board-name>/<config-dir>/setenv.sh to ${TOPDIR}/setenv.sh
   configs/<board-name>/<config-dir>/defconfig to ${TOPDIR}/.config
 
 tools/configure.sh

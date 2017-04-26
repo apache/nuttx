@@ -650,12 +650,6 @@ can be selected as follow:
     cd tools
     ./configure.sh STM32F429I-DISCO/<subdir>
     cd -
-    . ./setenv.sh
-
-If this is a Windows native build, then configure.bat should be used
-instead of configure.sh:
-
-    configure.bat STM32F429I-DISCO\<subdir>
 
 Where <subdir> is one of the following:
 
@@ -957,7 +951,6 @@ Where <subdir> is one of the following:
        2. Make the build context (only)
 
           $ cd ..
-          $ . ./setenv.sh
           $ make context
           ...
 

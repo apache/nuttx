@@ -64,16 +64,17 @@
  * following definitions must be provided to specify the size and
  * location of internal (system) SRAM1 and SRAM2:
  *
- * SRAM1_END     0x20018000
+ * SRAM1_START   0x20000000
+ * SRAM1_END
  * SRAM2_START   0x10000000
- * SRAM2_END     0x10008000
+ * SRAM2_END
  *
  * In addition to internal SRAM, memory may also be available through the FSMC.
  * In order to use FSMC SRAM, the following additional things need to be
  * present in the NuttX configuration file:
  *
- * CONFIG_STM32L4_FSMC=y        : Enables the FSMC
- * CONFIG_STM32L4_FSMC_SRAM=y   : Indicates that SRAM is available via the
+ * CONFIG_STM32L4_FSMC=y      : Enables the FSMC
+ * CONFIG_STM32L4_FSMC_SRAM=y : Indicates that SRAM is available via the
  *                              FSMC (as opposed to an LCD or FLASH).
  * CONFIG_HEAP2_BASE          : The base address of the SRAM in the FSMC
  *                              address space
@@ -87,22 +88,28 @@
 #  undef CONFIG_STM32L4_FSMC_SRAM
 #endif
 
-/* STM32L4x6xx have 128Kib in two banks, both accessible to DMA:
+/* STM32L4[7,8]6xx have 128 Kib in two banks, both accessible to DMA:
  *
- *   1) 96KiB of System SRAM beginning at address 0x2000:0000 - 0x2001:8000
- *   2) 32KiB of System SRAM beginning at address 0x1000:0000 - 0x1000:8000
+ *   1) 96 KiB of System SRAM beginning at address 0x2000:0000 - 0x2001:8000
+ *   2) 32 KiB of System SRAM beginning at address 0x1000:0000 - 0x1000:8000
+ *
+ * STM32L496xx have 320 Kib in two banks, both accessible to DMA:
+ *
+ *   1) 256 KiB of System SRAM beginning at address 0x2000:0000 - 0x2004:0000
+ *   2) 64 KiB of System SRAM beginning at address 0x1000:0000 - 0x1001:0000
  *
  * In addition, external FSMC SRAM may be available.
  */
 
-/* Set the end of system SRAM */
+/* Set the range of system SRAM */
 
-#define SRAM1_END 0x20018000
+#define SRAM1_START  STM32L4_SRAM_BASE
+#define SRAM1_END    (SRAM1_START + STM32L4_SRAM1_SIZE)
 
 /* Set the range of SRAM2 as well, requires a second memory region */
 
-#define SRAM2_START 0x10000000
-#define SRAM2_END   0x10008000
+#define SRAM2_START  STM32L4_SRAM2_BASE
+#define SRAM2_END    (SRAM2_START + STM32L4_SRAM2_SIZE)
 
 #if defined(CONFIG_STM32L4_SRAM2_HEAP) && defined(CONFIG_STM32L4_FSMC_SRAM_HEAP)
 #  if CONFIG_MM_REGIONS < 3

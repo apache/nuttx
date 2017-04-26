@@ -175,11 +175,9 @@ Configurations
     cd tools
     ./configure.sh launchxl-tms57004/<subdir>
     cd -
-    . ./setenv.sh
 
-  Before sourcing the setenv.sh file above, you should examine it and perform
-  edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
-  than holds your toolchain binaries.
+  Before building, make sure the PATH environment variable includes the
+  correct path to the directory than holds your toolchain binaries.
 
   And then build NuttX by simply typing the following.  At the conclusion of
   the make, the nuttx binary will reside in an ELF file called, simply, nuttx.

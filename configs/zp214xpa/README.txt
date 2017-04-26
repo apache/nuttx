@@ -236,9 +236,8 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
       configs/zp214xpa/tools/oocd.sh $PWD
 
-    If you use the setenv.sh file, that the path to oocd.sh will be added
-    to your PATH environment variabl.  So, in that case, the command simplifies
-    to just:
+    If you add that path to your PATH environment variable, ithe commandi
+    simplifies to just:
 
       oocd.sh $PWD
 
@@ -288,7 +287,6 @@ Configurations:
     cd tools
     ./configure.sh zp214xpa/<subdir>
     cd -
-    . ./setenv.sh
 
   Where <subdir> is one of the following:
 

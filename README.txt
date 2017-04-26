@@ -550,13 +550,6 @@ Instantiating "Canned" Configurations
       and link code.  You may need to modify this file to match the
       specific needs of your toolchain.
 
-    Copy configs/<board-name>/<config-dir>/setenv.sh to ${TOPDIR}/setenv.sh
-
-      setenv.sh is an optional convenience file that I use to set
-      the PATH variable to the toolchain binaries.  You may chose to
-      use setenv.sh or not.  If you use it, then it may need to be
-      modified to include the path to your toolchain binaries.
-
     Copy configs/<board-name>/<config-dir>/defconfig to ${TOPDIR}/.config
 
       The defconfig file holds the actual build configuration.  This
@@ -928,10 +921,8 @@ Cross-Development Toolchains
   That README file contains suggestions and information about appropriate
   tools and development environments for use with your board.
 
-  In any case, the script, setenv.sh that was deposited in the top-
-  level directory when NuttX was configured should be edited to set
-  the path to where you installed the toolchain.  The use of setenv.sh
-  is optional but can save a lot of confusion in the future.
+  In any case, the PATH environment variable will need to be updated to
+  include the loction where the build can find the toolchain binaries.
 
 NuttX Buildroot Toolchain
 -------------------------
@@ -1009,12 +1000,11 @@ Building
 
   NuttX builds in-place in the source tree.  You do not need to create
   any special build directories.  Assuming that your Make.defs is setup
-  properly for your tool chain and that setenv.sh contains the path to where
-  your cross-development tools are installed, the following steps are all that
-  are required to build NuttX:
+  properly for your tool chain and that PATH environment variable contains
+  the path to where your cross-development tools are installed, the
+  following steps are all that are required to build NuttX:
 
     cd ${TOPDIR}
-    . ./setenv.sh
     make
 
   At least one configuration (eagle100) requires additional command line
@@ -1185,10 +1175,6 @@ Native Windows Build
     (1) It has not been verified on all targets and tools, and
     (2) it still lacks some of the creature-comforts of the more mature
         environments.
-
-  There is an alternative to the setenv.sh script available for the Windows
-  native environment: tools/configure.bat.  See tools/README.txt for additional
-  information.
 
 Installing GNUWin32
 -------------------

@@ -380,7 +380,6 @@ as follow:
     cd tools
     ./configure.sh bambino-200e/<subdir>
     cd -
-    . ./setenv.sh
 
 Where <subdir> is one of the following:
 

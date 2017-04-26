@@ -466,11 +466,9 @@ Configurations
     cd tools
     ./configure.sh samd21-xplained/<subdir>
     cd -
-    . ./setenv.sh
 
-  Before sourcing the setenv.sh file above, you should examine it and perform
-  edits as necessary so that BUILDROOT_BIN is the correct path to the directory
-  than holds your toolchain binaries.
+  Before building, make sure the the PATH environment varaible include the
+  correct path to the directory than holds your toolchain binaries.
 
   And then build NuttX by simply typing the following.  At the conclusion of
   the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
@@ -557,9 +555,7 @@ Configurations
 
      Also, make sure that your PATH variable has the new path to your
      Atmel tools.  Try 'which arm-none-eabi-gcc' to make sure that you
-     are selecting the right tool.  setenv.sh is available for you to
-     use to set or PATH variable.  The path in the that file may not,
-     however, be correct for your installation.
+     are selecting the right tool.
 
      See also the "NOTE about Windows native toolchains" in the section
      called "GNU Toolchain Options" above.

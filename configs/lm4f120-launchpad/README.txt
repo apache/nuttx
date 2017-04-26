@@ -192,9 +192,8 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
       oocd.sh $PWD
 
-    The relative path to the oocd.sh script is configs/lm4f120-launchpad/tools,
-    but that should have been added to your PATH variable when you sourced
-    the setenv.sh script.
+    provided that you have the path to the oocd.sh script, configs/lm4f120-launchpad/tools,
+    added to your PATH variable.
 
     Note that OpenOCD needs to be run with administrator privileges in
     some environments (sudo).
@@ -269,8 +268,8 @@ GNU Toolchain Options
 
     CONFIG_ARMV7M_OABI_TOOLCHAIN=y           : If you use an older, OABI buildroot toolchain
 
-  If you change the default toolchain, then you may also have to modify the PATH in
-  the setenv.h file if your make cannot find the tools.
+  You may also have to modify the PATH environment variable if your make cannot
+  find the tools.
 
   NOTE: the CodeSourcery (for Windows), Atollic, devkitARM, and Code Red (for Windows)
   toolchains are Windows native toolchains.  The CodeSourcey (for Linux) and NuttX
@@ -336,7 +335,7 @@ IDEs
 NuttX EABI "buildroot" Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  A GNU GCC-based toolchain is assumed.  The PATH environment variable should
   be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
   different from the default in your PATH variable).
 
@@ -363,8 +362,8 @@ NuttX EABI "buildroot" Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   details PLUS some special instructions that you will need to follow if you
@@ -425,8 +424,8 @@ NXFLAT Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly builtNXFLAT binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     NXFLAT binaries.
 
 LEDs
 ^^^^
@@ -671,7 +670,6 @@ sub-directory and can be selected as follow:
     cd tools
     ./configure.sh lm4f120-launchpad/<subdir>
     cd -
-    . ./setenv.sh
 
 Where <subdir> is one of the following:
 

@@ -536,8 +536,6 @@ ifeq ($(CONFIG_BUILD_2PASS),y)
 	$(Q) $(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" distclean
 endif
 	$(call DELFILE, Make.defs)
-	$(call DELFILE, setenv.sh)
-	$(call DELFILE, setenv.bat)
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
 

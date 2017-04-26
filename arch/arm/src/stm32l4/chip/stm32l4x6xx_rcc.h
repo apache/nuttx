@@ -44,7 +44,8 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX)
+#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX) || \
+    defined(CONFIG_STM32L4_STM32L496XX)
 
 /****************************************************************************************************
  * Pre-processor Definitions
