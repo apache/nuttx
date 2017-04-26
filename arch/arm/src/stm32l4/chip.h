@@ -53,13 +53,13 @@
 
 /* If the common ARMv7-M vector handling logic is used, then it expects the
  * following definition in this file that provides the number of supported external
- * interrupts which, for this architecture, is provided in the arch/stm32f7/chip.h
+ * interrupts which, for this architecture, is provided in the arch/stm32l4/chip.h
  * header file.
  */
 
 #define ARMV7M_PERIPHERAL_INTERRUPTS NR_INTERRUPTS
 
-/* Cache line sizes (in bytes)for the STM32L4 */
+/* Cache line sizes (in bytes) for the STM32L4 */
 
 #define ARMV7M_DCACHE_LINESIZE 0  /* no cache */
 #define ARMV7M_ICACHE_LINESIZE 0  /* no cache */

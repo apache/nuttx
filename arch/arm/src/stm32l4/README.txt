@@ -27,7 +27,7 @@ DMA      : works; at least tested with QSPI
 SRAM2    : OK; can be included in MM region or left separate for special app purposes
 FIREWALL : Code written, to be tested, requires support from ldscript
 SPI      : Code written, to be tested, including DMA
-I2C      : Registers defined
+I2C      : Code written, to be tested (I2C4 missing)
 RTC      : works
 QSPI     : works in polling, interrupt, DMA, and also memory-mapped modes
 CAN      : TODO
@@ -58,4 +58,5 @@ DFSDM    : TODO (Digital Filter and Sigma-Delta Modulator)
 LCD      : TODO (Segment LCD controller)
 SAIPLL   : works (PLL For Digital Audio interfaces, and other things)
 SAI      : TODO (Digital Audio interfaces, I2S, SPDIF, etc)
-
+HASH     : TODO (SHA-1, SHA-224, SHA-256, HMAC)
+DCMI     : TODO (Digital Camera interfaces)

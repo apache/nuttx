@@ -68,7 +68,6 @@
  *               Mapped as boot memory address 0x0000:0000 at reset.
  * 0x080f:ffff - End of flash region (assuming the max of 2MiB of FLASH).
  * 0x1000:0000 - Start of internal SRAM2
- * 0x1000:7fff - End of internal SRAM2
  * 0x2000:0000 - Start of internal SRAM and start of .data (_sdata)
  *             - End of .data (_edata) and start of .bss (_sbss)
  *             - End of .bss (_ebss) and bottom of idle stack
@@ -76,11 +75,11 @@
  *               start of heap. NOTE that the ARM uses a decrement before
  *               store stack so that the correct initial value is the end of
  *               the stack + 4;
- * 0x2001:7fff - End of internal SRAM and end of heap
  */
 
-#define SRAM2_START 0x10000000
-#define SRAM2_END   0x10008000
+#define SRAM2_START  STM32L4_SRAM2_BASE
+#define SRAM2_END    (SRAM2_START + STM32L4_SRAM2_SIZE)
+
 #define IDLE_STACK ((uintptr_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
 #define HEAP_BASE  ((uintptr_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE)
 
