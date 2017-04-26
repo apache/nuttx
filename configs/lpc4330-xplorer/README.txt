@@ -155,8 +155,8 @@ GNU Toolchain Options
     CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
     CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
 
-  If you are not using CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT, then you may also have to modify
-  the PATH in the setenv.h file if your make cannot find the tools.
+  You may also have to modify the PATH environment variable if your make cannot
+  find the tools.
 
   NOTE: the Code Red, CodeSourcery (for Windows), Atollic and devkitARM toolchains
   are Windows native toolchains.  The CodeSourcery (for Linux) and NuttX buildroot
@@ -282,13 +282,13 @@ Code Red IDE/Tools
   (The "free" RedSuite version has a download limit of 8K; the "free" LPCXpresso
   version has a download limit of 128K).
 
-  NOTE that the following alias is defined in the setenv.sh file and
-  can be used to enter the boot mode with a simpler command:
+  NOTE that the following alias may be defined to enter the boot mode with a
+  simpler command:
 
     alias lpc43xx='${SCRIPT_BIN}/Scripts/bootLPCXpresso.cmd winusb'
 
-  Be default, the setenv.sh scripts uses the LPCXpresso path shown above.
-  Once setenv.sh has been sources, then entering boot mode becomes simply:
+  You may also have to modify the PATH environment variable if your make cannot
+  find the tools.
 
     $ lpc43xx
     Booting LPC-Link with LPCXpressoWIN.enc
@@ -453,7 +453,7 @@ Code Red IDE/Tools
 NuttX EABI "buildroot" Toolchain
 ================================
 
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  A GNU GCC-based toolchain is assumed.  The PATH environment variable should
   be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
   different from the default in your PATH variable).
 
@@ -480,8 +480,8 @@ NuttX EABI "buildroot" Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   details PLUS some special instructions that you will need to follow if you
@@ -542,8 +542,8 @@ NXFLAT Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly builtNXFLAT binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     NXFLAT binaries.
 
 Serial Console
 ==============
@@ -867,7 +867,6 @@ as follow:
     cd tools
     ./configure.sh lpc4330-xplorer/<subdir>
     cd -
-    . ./setenv.sh
 
 Where <subdir> is one of the following:
 

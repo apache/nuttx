@@ -55,17 +55,15 @@ Configuring NuttX
     1) From a POSIX window:
        cd tools
        ./configure.sh xtrs/ostest
-    2) From a CMD.exe window
-       setenv.bat
+    2) Modify your PATH environment variable to include the path to the
+       SDCC toolchain.
+    3) From a CMD.exe window
        make
 
     If this is a Windows native build, then configure.bat should be used
     in step 1) instead of configure.sh:
 
       configure.bat xtrs\ostest
-
-    The setenv.bat will need to be updated to include the PATH to the XTRS
-    hex2cmd program.
 
     NOTES:
 
@@ -91,17 +89,15 @@ Configuring NuttX
     1) From a POSIX window:
        cd tools
        ./configure.sh xtrs/nsh
-    2) From a CMD.exe window
-       setenv.bat
+    2) Modify your PATH environment variable to include the path to the
+       SDCC toolchain.
+    3) From a CMD.exe window
        make
 
     If this is a Windows native build, then configure.bat should be used
     in step 1) instead of configure.sh:
 
       configure.bat xtrs\nsh
-
-    The setenv.bat will need to be updated to include the PATH to the XTRS
-    hex2cmd program.
 
     NOTES:
 
@@ -134,17 +130,15 @@ Configuring NuttX
     1) From a POSIX window:
        cd tools
        ./configure.sh xtrs/pashello
-    2) From a CMD.exe window
-       setenv.bat
+    2) Modify your PATH environment variable to include the path to the
+       SDCC toolchain.
+    3) From a CMD.exe window
        make
 
     If this is a Windows native build, then configure.bat should be used
     in step 1) instead of configure.sh:
 
       configure.bat xtrs\pashello
-
-    The setenv.bat will need to be updated to include the PATH to the XTRS
-    hex2cmd program.
 
     NOTES:
 
@@ -194,11 +188,6 @@ in the .config file because the backslash may upset some Unix-based tools.
 
 This configuration will require a recent version of SDCC (ca. 3.2.1) for Linux
 or custom built for Cygwin (see below).
-
-You cannot use the default setenv.bat in these Unix-like enviroments because
-that is a Windows batch file.  Use configs/z80sim/script/setenv.sh instead.
-setenv.sh must include the path to the installation location of SDCC (probably
-/usr/local/bin).
 
 SDCC
 ^^^^

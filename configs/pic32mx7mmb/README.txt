@@ -301,8 +301,7 @@ Creating Compatible NuttX HEX files
 
     To use this file, you need to do the following things:
 
-      . ./setenv.sh    # Source setenv.sh.  Among other this, this script
-                       # will add the NuttX tools/pic32mx directory to your
+      export PATH=???  # Add the NuttX tools/pic32mx directory to your
                        # PATH variable
       make             # Build nuttx and nuttx.hex
       mkpichex $PWD    #  Convert addresses in nuttx.hex.  $PWD is the path
@@ -597,7 +596,6 @@ selected as follow:
     cd tools
     ./configure.sh pic32mx7mmb/<subdir>
     cd -
-    . ./setenv.sh
 
 Where <subdir> is one of the following:
 

@@ -137,12 +137,6 @@ Configurations
     cd tools
     ./configure.sh olimex-efm32g880f128-stk/<subdir>
     cd -
-    . ./setenv.sh
-
-  If this is a Windows native build, then configure.bat should be used
-  instead of configure.sh:
-
-    configure.bat olimex-efm32g880f128-stk\<subdir>
 
   Where <subdir> is one of the following:
 

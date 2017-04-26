@@ -171,9 +171,6 @@ GNU Toolchain Options
     CONFIG_ARMV7M_TOOLCHAIN_CODEREDL=y      : Code Red toolchain under Linux
     CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=y       : The Atollic toolchain
 
-  You may also have to modify the PATH in the setenv.h file if your make cannot
-  find the tools.
-
   NOTE: the CodeSourcery (for Windows), devkitARM, and Code Red (for Windoes)
   are Windows native toolchains.  The CodeSourcey (for Linux), Code Red (for Linux)
   and NuttX buildroot toolchains are Cygwin and/or Linux native toolchains. There
@@ -208,9 +205,9 @@ GNU Toolchain Options
 NuttX buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
-  be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
-  different from the default in your PATH variable).
+  A GNU GCC-based toolchain is assumed.  The PATH variable should be modified to
+  point to the correct path to the Cortex-M3 GCC toolchain (if different from the
+  default in your PATH variable).
 
   If you have no Cortex-M3 toolchain, one can be downloaded from the NuttX
   Bitbucket download site (https://bitbucket.org/nuttx/nuttx/downloads/).
@@ -235,8 +232,8 @@ NuttX buildroot Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built binaries.
+  8. Make sure that your PATH variable includes the path to the newly built
+     binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   detailed PLUS some special instructions that you will need to follow if you
@@ -280,8 +277,8 @@ NXFLAT Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly builtNXFLAT binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     NXFLAT binaries.
 
 LEDs
 ^^^^
@@ -521,7 +518,6 @@ selected as follow:
     cd tools
     ./configure.sh zkit-arm-1769/<subdir>
     cd -
-    . ./setenv.sh
 
 Where <subdir> is one of the following:
 

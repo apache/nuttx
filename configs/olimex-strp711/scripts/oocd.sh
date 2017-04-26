@@ -19,7 +19,6 @@ fi
 if [ -z $STR41XSCRIPTS ]; then
 	echo "Environment variable $STR41XSCRIPTS is not defined"
 	echo "Has NuttX been configured?"
-	echo "If so, try sourcing the setenv.sh script in the top-level directory"
 	exit 1
 fi
 

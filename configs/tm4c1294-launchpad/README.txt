@@ -28,7 +28,6 @@ sub-directory and can be selected as follow:
     cd tools
     ./configure.sh tm4c1294-launchpad/<subdir>
     cd -
-    . ./setenv.sh
 
 Where <subdir> is one of the following:
 

@@ -77,11 +77,9 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
        cd tools
        ./configure.sh sama5d2-xult/dramboot
        cd -
-       . ./setenv.sh
 
-     Before sourcing the setenv.sh file above, you should examine it and
-     perform edits as necessary so that TOOLCHAIN_BIN is the correct path
-     to the directory than holds your toolchain binaries.
+     Before building, make sure the PATH environment variable includes the
+     correct path to the directory than holds your toolchain binaries.
 
      NOTE:  Be aware that the default dramboot also disables the watchdog.
      Since you will not be able to re-enable the watchdog later, you may
@@ -185,11 +183,9 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
        cd tools
        ./configure.sh sama5d2-xult/at25boot
        cd -
-       . ./setenv.sh
 
-     Before sourcing the setenv.sh file above, you should examine it and
-     perform edits as necessary so that TOOLCHAIN_BIN is the correct path
-     to the directory than holds your toolchain binaries.
+     Before building, make sure the PATH environment variable includes the
+     correct path to the directory than holds your toolchain binaries.
 
      Then make AT25BOOT:
 
@@ -916,11 +912,9 @@ Configurations
     cd tools
     ./configure.sh sama5d2-xult/<subdir>
     cd -
-    . ./setenv.sh
 
-  Before sourcing the setenv.sh file above, you should examine it and perform
-  edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
-  than holds your toolchain binaries.
+  Before building, make sure the PATH environment variable includes the
+  correct path to the directory than holds your toolchain binaries.
 
   And then build NuttX by simply typing the following.  At the conclusion of
   the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
@@ -961,10 +955,6 @@ Configurations
      variable so that those tools are selected instead of the CodeSourcery
      tools.  Try 'which arm-none-eabi-gcc' to make sure that you are
      selecting the right tool.
-
-     The setenv.sh file is available for you to use to set the PATH
-     variable.  The path in the that file may not, however, be correct
-     for your installation.
 
      See also the "NOTE about Windows native toolchains" in the section call
      "GNU Toolchain Options" above.

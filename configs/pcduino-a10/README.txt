@@ -329,11 +329,9 @@ Configurations
     cd tools
     ./configure.sh pcduino-a10/<subdir>
     cd -
-    . ./setenv.sh
 
-  Before sourcing the setenv.sh file above, you should examine it and perform
-  edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
-  than holds your toolchain binaries.
+  Before building, make sure the PATH environment variable includes the
+  correct path to the directory than holds your toolchain binaries.
 
   And then build NuttX by simply typing the following.  At the conclusion of
   the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
@@ -368,11 +366,6 @@ Configurations
 
      System Type -> Toolchain:
        CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
-
-     The setenv.sh file is available for you to use to set the PATH
-     variable.  The path in the that file may not, however, be correct
-     for your installation.  Try 'which arm-none-eabi-gcc' to make sure that
-     you are selecting the right tool.
 
   Configuration Sub-directories
   -----------------------------
