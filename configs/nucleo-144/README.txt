@@ -173,8 +173,8 @@ Development Environment
   All testing has been conducted using the GNU toolchain from ARM for Linux.
   found here https://launchpad.net/gcc-arm-embedded/4.9/4.9-2015-q3-update/+download/gcc-arm-none-eabi-4_9-2015q3-20150921-linux.tar.bz2
 
-  If you change the default toolchain, then you may also have to modify the PATH in
-  the setenv.h file if your make cannot find the tools.
+  If you change the default toolchain, then you may also have to modify the
+  PATH environment variable to include the path to the toolchain binaries.
 
 IDEs
 ====
@@ -193,7 +193,7 @@ IDEs
 Basic configuration & build steps
 ==================================
 
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  A GNU GCC-based toolchain is assumed.  The PATH environment variable should
   be modified to point to the correct path to the Cortex-M7 GCC toolchain (if
   different from the default in your PATH variable).
 

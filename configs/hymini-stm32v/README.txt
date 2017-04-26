@@ -50,8 +50,8 @@ GNU Toolchain Options
     CONFIG_ARMV7M_TOOLCHAIN_RAISONANCE=y     : Raisonance RIDE7 under Windows
     CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
 
-  If you are not using CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT, then you may also have to modify
-  the PATH in the setenv.h file if your make cannot find the tools.
+  You may also have to modify the PATH environment variable if your make cannot
+  find the tools.
 
   NOTE: the CodeSourcery (for Windows), devkitARM, and Raisonance toolchains are
   Windows native toolchains.  The CodeSourcey (for Linux) and NuttX buildroot
@@ -118,7 +118,7 @@ IDEs
 NuttX EABI "buildroot" Toolchain
 ================================
 
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  A GNU GCC-based toolchain is assumed.  The PATH environment variable should
   be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
   different from the default in your PATH variable).
 
@@ -145,8 +145,8 @@ NuttX EABI "buildroot" Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   details PLUS some special instructions that you will need to follow if you are
@@ -207,8 +207,8 @@ NXFLAT Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly builtNXFLAT binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     NXFLAT binaries.
 
 ST Bootloader
 =============
@@ -557,7 +557,6 @@ can be selected as follow:
     cd tools
     ./configure.sh hymini-stm32v/<subdir>
     cd -
-    . ./setenv.sh
 
 Where <subdir> is one of the following:
 
@@ -594,9 +593,8 @@ Where <subdir> is one of the following:
                                         apps/examples/nximage
     =========== ======================= ================================
 
-    (1) You will probably need to modify nsh/setenv.sh or nsh2/setenv.sh
-        to set up the correct PATH variable for whichever toolchain you
-        may use.
+    (1) You will probably need to the PATH environment variable to set
+        up the correct PATH variable for whichever toolchain you may use.
     (2) When any other device other than /dev/console is used for a user
         interface, (1) linefeeds (\n) will not be expanded to carriage return
         / linefeeds \r\n). You will need to configure your terminal program

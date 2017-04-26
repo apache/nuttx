@@ -84,11 +84,9 @@ Configurations
     cd tools
     ./configure.sh xmc5400-relax/<subdir>
     cd -
-    . ./setenv.sh
 
-  Before sourcing the setenv.sh file above, you should examine it and
-  perform edits as necessary so that TOOLCHAIN_BIN is the correct path
-  to the directory than holds your toolchain binaries.
+  Before starting the build, make sure that your PATH environment variable
+  includes the correct path to your toolchain.
 
   And then build NuttX by simply typing the following.  At the conclusion of
   the make, the nuttx binary will reside in an ELF file called, simply, nuttx.

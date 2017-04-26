@@ -191,9 +191,6 @@ GNU Toolchain Options
     CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y       : devkitARM under Windows
     CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y       : NuttX buildroot under Linux or Cygwin (default)
 
-  If you are not using CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT, then you may also have to modify
-  the PATH in the setenv.h file if your make cannot find the tools.
-
   NOTE: the CodeSourcery (for Windows)and devkitARM are Windows native toolchains.
   The CodeSourcey (for Linux) and NuttX buildroot toolchains are Cygwin and/or
   Linux native toolchains. There are several limitations to using a Windows based
@@ -257,7 +254,7 @@ IDEs
 NuttX EABI "buildroot" Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  A GNU GCC-based toolchain is assumed.  The PATH environment variable should
   be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
   different from the default in your PATH variable).
 
@@ -284,8 +281,8 @@ NuttX EABI "buildroot" Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   details PLUS some special instructions that you will need to follow if you
@@ -346,8 +343,8 @@ NXFLAT Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly builtNXFLAT binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     NXFLAT binaries.
 
 LEDs
 ^^^^
@@ -578,9 +575,8 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
       configs/olimex-lpc1766stk/tools/oocd.sh $PWD
 
-    If you use the setenv.sh file, that the path to oocd.sh will be added
-    to your PATH environment variabl.  So, in that case, the command simplifies
-    to just:
+    If you add the path to oocd.sh to your PATH environment variable,
+    the command simplifies to just:
 
       oocd.sh $PWD
 
@@ -869,7 +865,6 @@ Common Configuration Notes
        cd tools
        ./configure.sh olimex-lpc1766stk/<subdir>
        cd -
-       . ./setenv.sh
 
      Where <subdir> is one of the sub-directories identified in the following
      paragraphs.

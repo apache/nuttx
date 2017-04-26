@@ -626,9 +626,8 @@ GNU Toolchain Options
 
     CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y
 
-     If you are not using CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT, then you may
-     also have to modify the PATH in the setenv.h file if your make cannot
-     find the tools.
+  You may also have to modify the PATH environment variable if your make cannot
+  find the tools.
 
   NOTE:  Using native Windows toolchains under Cygwin has some limitations.
   This incuudes the CodeSourcery (for Windows) and devkitARM toolchains are
@@ -822,7 +821,6 @@ can be selected as follow:
     cd tools
     ./configure.sh freedom-k64f/<subdir>
     cd -
-    . ./setenv.sh
 
 Where <subdir> is one of the following:
 

@@ -234,7 +234,6 @@ CONFIGURATIONS
     cd tools
     ./configure.sh efm32-g8xx-stk/<subdir>
     cd -
-    . ./setenv.sh
 
   If this is a Windows native build, then configure.bat should be used
   instead of configure.sh:

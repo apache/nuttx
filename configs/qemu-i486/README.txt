@@ -99,9 +99,8 @@ Toolchains
     suspect that this was not necessary, but it was a simple work-around
     that allowed that person to build a work-able system.
 
-  In any event, the file */setenv.sh should be modified to point to the correct
-  path to the GCC toolchain (if different from the default in your PATH
-  variable).
+  In any event, the PATH environment variable should be modified to point to
+  the correct path to the GCC toolchain.
 
 Cygwin Buildroot Toolchain
 --------------------------
@@ -136,8 +135,8 @@ Buildroot Instructions
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   detailed PLUS some special instructions that you will need to follow if you
@@ -165,7 +164,6 @@ Common Configuration Notes
        cd tools
        ./configure.sh qemu-i486/<subdir>
        cd -
-       . ./setenv.sh
 
      Where <subdir> is one of the configuration sub-directories described in
      the following paragraph.

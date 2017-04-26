@@ -79,7 +79,7 @@ GNU Toolchain Options
 NuttX buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  A GNU GCC-based toolchain is assumed.  The PATH environment variable should
   be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
   different from the default in your PATH variable).
 
@@ -106,8 +106,8 @@ NuttX buildroot Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   detailed PLUS some special instructions that you will need to follow if you are
@@ -320,7 +320,6 @@ Configurations
        cd tools
        ./configure.sh mcu123-lpc214x/<subdir>
        cd -
-       . ./setenv.sh
 
      Where <subdir> is one of the configuration sub-directories described in
      the following paragraph.

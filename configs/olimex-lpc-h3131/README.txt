@@ -55,9 +55,6 @@ GNU Toolchain Options
     CONFIG_ARM_TOOLCHAIN_GNU_EABIL        : Generic arm-none-eabi toolchain for Linux
     CONFIG_ARM_TOOLCHAIN_GNU_EABIW        : Generic arm-none-eabi toolchain for Windows
 
-  If you are not using CONFIG_ARM_TOOLCHAIN_BUILDROOT, then you may also have to modify
-  the PATH in the setenv.h file if your make cannot find the tools.
-
   The toolchain may also be set using the kconfig-mconf utility (make menuconfig) or by
   passing CONFIG_ARM_TOOLCHAIN=<toolchain> to make, where <toolchain> is one
   of CODESOURCERYW, CODESOURCERYL, DEVKITARM, BUILDROOT or GNU_EABI as described
@@ -145,7 +142,7 @@ IDEs
 NuttX buildroot Toolchain
 =========================
 
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  A GNU GCC-based toolchain is assumed.  The PATH environment variable should
   be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
   different from the default in your PATH variable).
 
@@ -172,8 +169,8 @@ NuttX buildroot Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   detailed PLUS some special instructions that you will need to follow if you are
@@ -260,17 +257,13 @@ Image Format
   - cd tools/                     # Configure Nuttx
   - ./configure.sh olimex-lpc-h3131/ostest  # (using the ostest configuration for this example)
   - cd ..                         # Set up environment
-  - . ./setenv.sh                 # (see notes below)
   - make                          # Make NuttX.  This will produce nuttx.bin
   - mklpc.sh                      # Make the bootloader binary (nuttx.lpc)
 
   NOTES:
 
-    1. setenv.sh just sets up pathes to the toolchain and also to
-       configs/olimex-lpc-h3131/tools where mklpc.sh resides. Use of
-       setenv.sh is optional.  If you don't use setenv.sh, then just set
-       your PATH variable appropriately or use the full path to mklpc.sh
-       in the final step.
+    1. Make sure to set your PATH variable appropriately or use the full path
+       to mklpc.sh in the final step.
     2. You can instruct Symantec to ignore the errors and it will stop
        quarantining the NXP program.
     3. The CRC32 logic in configs/olimex-lpc-h3131/tools doesn't seem to
@@ -504,11 +497,9 @@ Configurations
     cd tools
     ./configure.sh olimex-lpc-h3131/<subdir>
     cd -
-    . ./setenv.sh
 
-  Before sourcing the setenv.sh file above, you should examine it and perform
-  edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
-  than holds your toolchain binaries.
+  Before building, make sure the PATH environment variable includes the
+  correct path to the directory than holds your toolchain binaries.
 
   And then build NuttX by simply typing the following.  At the conclusion of
   the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
@@ -547,10 +538,6 @@ Configurations
 
      System Type -> Toolchain:
        CONFIG_ARM_TOOLCHAIN_GNU_EABIW=y : GNU EABI toolchain for windows
-
-     The setenv.sh file is available for you to use to set the PATH
-     variable.  The path in the that file may not, however, be correct
-     for your installation.
 
   Configuration sub-directories
   -----------------------------

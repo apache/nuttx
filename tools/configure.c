@@ -87,8 +87,6 @@ static char       *g_verstring     = "0.0"; /* Version String */
 
 static char       *g_srcdefconfig  = NULL;  /* Source defconfig file */
 static char       *g_srcmakedefs   = NULL;  /* Source Make.defs file */
-static char       *g_srcsetenvsh   = NULL;  /* Source setenv.sh file (optional) */
-static char       *g_srcsetenvbat  = NULL;  /* Source setenv.bat file (optional) */
 
 static bool        g_winnative     = false; /* True: Windows native configuration */
 static bool        g_needapppath   = true;  /* Need to add app path to the .config file */
@@ -634,29 +632,6 @@ static void check_configuration(void)
     }
 
   g_srcmakedefs = strdup(g_buffer);
-
-  /* Windows native configurations may provide setenv.bat; POSIX
-   * configurations may provide a setenv.sh.
-   */
-
-  if (g_winnative)
-    {
-      snprintf(g_buffer, BUFFER_SIZE, "%s%csetenv.bat", g_configpath, g_delim);
-      debug("check_configuration: Checking %s\n", g_buffer);
-      if (verify_file(g_buffer))
-        {
-          g_srcsetenvbat = strdup(g_buffer);
-        }
-    }
-  else
-    {
-      snprintf(g_buffer, BUFFER_SIZE, "%s%csetenv.sh", g_configpath, g_delim);
-      debug("check_configuration: Checking %s\n", g_buffer);
-      if (verify_file(g_buffer))
-        {
-          g_srcsetenvsh = strdup(g_buffer);
-        }
-    }
 }
 
 static void copy_file(const char *srcpath, const char *destpath, mode_t mode)
@@ -755,24 +730,6 @@ static void configure(void)
   snprintf(g_buffer, BUFFER_SIZE, "%s%cMake.defs", g_topdir, g_delim);
   debug("configure: Copying from %s to %s\n", g_srcmakedefs, g_buffer);
   copy_file(g_srcmakedefs, g_buffer, 0644);
-
-  /* Copy the setenv.sh file if have one and need one */
-
-  if (g_srcsetenvsh)
-    {
-      snprintf(g_buffer, BUFFER_SIZE, "%s%csetenv.sh", g_topdir, g_delim);
-      debug("configure: Copying from %s to %s\n", g_srcsetenvsh, g_buffer);
-      copy_file(g_srcsetenvsh, g_buffer, 0755);
-    }
-
-  /* Copy the setenv.bat file if have one and need one */
-
-  if (g_srcsetenvbat)
-    {
-      snprintf(g_buffer, BUFFER_SIZE, "%s%csetenv.bat", g_topdir, g_delim);
-      debug("configure: Copying from %s to %s\n", g_srcsetenvbat, g_buffer);
-      copy_file(g_srcsetenvbat, g_buffer, 0644);
-    }
 
   /* If we did not use the CONFIG_APPS_DIR that was in the defconfig config file,
    * then append the correct application information to the tail of the .config

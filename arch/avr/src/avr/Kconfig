@@ -19,9 +19,6 @@ config AVR_WINAVR_TOOLCHAIN
 		For Cygwin development environment on Windows machines, you
 		can use WinAVR: http://sourceforge.net/projects/winavr/files/
 
-		It is assumed in some places that WinAVR is installed at
-		C:/WinAVR. Edit the setenv.sh file if this is not the case.
-
 		WARNING: There is an incompatible version of cygwin.dll in
 		the WinAVR/bin directory! Make sure that the path to the
 		correct cygwin.dll file precedes the path to the WinAVR
@@ -49,20 +46,12 @@ config AVR_CROSSPACK_TOOLCHAIN
 		For OS X, the AVR CrossPack toolchain is supported:
 		http://www.obdev.at/products/crosspack/index.html
 
-		It is assumed that /usr/local/CrossPack-AVR/bin is on the
-		user's path. Edit the setenv.sh file if this is not the
-		case.
-
 config AVR_BUILDROOT_TOOLCHAIN
 	bool "Buildroot"
 	---help---
 		There is a DIY buildroot version for the AVR boards here:
 		http://sourceforge.net/projects/nuttx/files/buildroot/. See
 		the following section for details on building this toolchain.
-
-		It is assumed in some places that buildroot toolchain is
-		available at ../buildroot/build_avr. Edit the setenv.sh
-		file if this is not the case.
 
 endchoice # Toolchain
 

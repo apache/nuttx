@@ -1597,11 +1597,9 @@ can be selected as follow:
   cd tools
   ./configure.sh samv71-xult/<subdir>
   cd -
-  . ./setenv.sh
 
-Before sourcing the setenv.sh file above, you should examine it and perform
-edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
-than holds your toolchain binaries.
+Before building, make sure the the PATH environment variable include the
+correct path to the directory than holds your toolchain binaries.
 
 And then build NuttX by simply typing the following.  At the conclusion of
 the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
@@ -1635,11 +1633,6 @@ NOTES:
      As of this writing (2015-03-11), full support is difficult to find
      for the Cortex-M7, but is supported by at least this realeasse of
      the ARM GNU tools:
-
-       https://launchpadlibrarian.net/192228215/release.txt
-
-     Current (2105-07-31) setenv.sh file are configured to use this
-     release:
 
        https://launchpadlibrarian.net/209776344/release.txt
 
@@ -2237,15 +2230,8 @@ Configuration sub-directories
        b. Make the build context (only)
 
           $ cd ..
-          $ . ./setenv.sh
           $ make context
           ...
-
-          NOTE: the use of the setenv.sh file is optional.  All that it will
-          do is to adjust your PATH variable so that the build system can find
-          your tools.  If you use it, you will most likely need to modify the
-          script so that it has the correct path to your tool binaries
-          directory.
 
        c. Install the nxwm unit test
 
@@ -2427,15 +2413,8 @@ Configuration sub-directories
        b. Make the build context (only)
 
           $ cd ..
-          $ . ./setenv.sh
           $ make context
           ...
-
-          NOTE: the use of the setenv.sh file is optional.  All that it will
-          do is to adjust your PATH variable so that the build system can find
-          your tools.  If you use it, you will most likely need to modify the
-          script so that it has the correct path to your tool binaries
-          directory.
 
        c. Install the nxwm unit test
 

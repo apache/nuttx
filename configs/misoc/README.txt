@@ -10,7 +10,7 @@ Misoc README
 Buildroot Toolchain
 ===================
 
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  A GNU GCC-based toolchain is assumed.  The PATH environment variable should
   be modified to point to the correct path to the LM32 GCC toolchain (if
   different from the default in your PATH variable).
 
@@ -48,10 +48,8 @@ Buildroot Toolchain
 
        ../buildroot/build_lm32/staging_dir/bin
 
-     The setenv.sh files in these sub-directories are already set to use
-     the relative path.  It you choose to install the buildroot package
-     in some other location, you may need to edit the setenv.h file so
-     that the PATH variable includes the path to the newly built binaries.
+     Make sure that he PATH variable includes the path to the newly built
+     binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   detailed PLUS some special instructions that you will need to follow if you

@@ -199,9 +199,8 @@ Buildroot:
   http://bitbucket.org/nuttx/buildroot/downloads/.  See the
   following section for details on building this toolchain.
 
-  It is assumed in some places that buildroot toolchain is available
-  at ../buildroot/build_avr.  Edit the setenv.sh file if
-  this is not the case.
+  You may also have to modify the PATH environment variable if your make cannot
+  find the tools.
 
   After configuring NuttX, make sure that CONFIG_AVR_BUILDROOT_TOOLCHAIN=y is set in your
   .config file.
@@ -211,8 +210,8 @@ WinAVR:
   For Cygwin development environment on Windows machines, you can use
   WinAVR: http://sourceforge.net/projects/winavr/files/
 
-  It is assumed in some places that WinAVR is installed at C:/WinAVR.  Edit the
-  setenv.sh file if this is not the case.
+  You may also have to modify the PATH environment variable if your make cannot
+  find the tools.
 
   After configuring NuttX, make sure that CONFIG_AVR_WINAVR_TOOLCHAIN=y is set in your
   .config file.
@@ -297,8 +296,8 @@ NuttX buildroot Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   detailed PLUS some special instructions that you will need to follow if you
@@ -493,7 +492,6 @@ Common Configuration Notes
        cd tools
        ./configure.sh amber/<subdir>
        cd -
-       . ./setenv.sh
 
      Where <subdir> is one of the configuration sub-directories described in
      the following paragraph.
