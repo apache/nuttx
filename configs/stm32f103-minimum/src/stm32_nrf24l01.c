@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/stm32f103-minimum//src/stm32_cc3000.c
+ * configs/stm32f103-minimum//src/stm32_nrf24l01.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Laurent Latil <laurent@latil.nom.fr>
@@ -82,7 +82,7 @@ static FAR void *g_arg;
 
 static int stm32tiny_wl_irq_attach(xcpt_t isr, FAR void *arg)
 {
-  winfo("Attach IRQ\n");
+  wlinfo("Attach IRQ\n");
   g_isr = isr;
   g_arg = arg;
   (void)stm32_gpiosetevent(GPIO_NRF24L01_IRQ, false, true, false, g_isr, g_arg);
@@ -91,7 +91,7 @@ static int stm32tiny_wl_irq_attach(xcpt_t isr, FAR void *arg)
 
 static void stm32tiny_wl_chip_enable(bool enable)
 {
-  winfo("CE:%d\n", enable);
+  wlinfo("CE:%d\n", enable);
   stm32_gpiowrite(GPIO_NRF24L01_CE, enable);
 }
 
@@ -132,14 +132,14 @@ void stm32_wlinitialize(void)
   spidev = stm32_spibus_initialize(1);
   if (!spidev)
     {
-      werr("ERROR: Failed to initialize SPI bus\n");
+      wlerr("ERROR: Failed to initialize SPI bus\n");
       return;
     }
 
   result = nrf24l01_register(spidev, &nrf_cfg);
   if (result != OK)
     {
-      werr("ERROR: Failed to register initialize SPI bus\n");
+      wlerr("ERROR: Failed to register initialize SPI bus\n");
       return;
     }
 }
