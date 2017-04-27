@@ -75,9 +75,11 @@
 #if defined(CONFIG_STM32L4_STM32L496XX)
 #  define STM32L4_SRAM1_SIZE       (256*1024)  /* 256Kb SRAM1 on AHB bus Matrix */
 #  define STM32L4_SRAM2_SIZE       (64*1024)   /* 64Kb  SRAM2 on AHB bus Matrix */
-#else
+#elif defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX)
 #  define STM32L4_SRAM1_SIZE       (96*1024)   /* 96Kb SRAM1 on AHB bus Matrix */
 #  define STM32L4_SRAM2_SIZE       (32*1024)   /* 32Kb SRAM2 on AHB bus Matrix */
+#else
+#  error "Unsupported STM32L4 chip"
 #endif
 
 #  define STM32L4_NFSMC                    1   /* Have FSMC memory controller */

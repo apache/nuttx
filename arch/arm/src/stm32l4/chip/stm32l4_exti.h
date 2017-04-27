@@ -49,8 +49,8 @@
 
 #define STM32L4_NEXTI1         31
 #define STM32L4_EXTI1_MASK     0xffffffff
-#define STM32L4_NEXTI2         8
-#define STM32L4_EXTI2_MASK     0x000000ff
+#define STM32L4_NEXTI2         9
+#define STM32L4_EXTI2_MASK     0x000001ff
 
 #define STM32L4_EXTI1_BIT(n)        (1 << (n))
 #define STM32L4_EXTI2_BIT(n)        (1 << (n))
@@ -114,6 +114,7 @@
 #define EXTI2_PVM3                (1 <<  5) /* EXTI line 37 is connected to the PVM3 wakeup */
 #define EXTI2_PVM4                (1 <<  6) /* EXTI line 38 is connected to the PVM4 wakeup */
 #define EXTI2_LCD                 (1 <<  7) /* EXTI line 39 is connected to the LCD wakeup */
+#define EXTI2_I2C4                (1 <<  8) /* EXTI line 40 is connected to the I2C4 wakeup */
 
 /* Interrupt mask register */
 
