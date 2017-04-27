@@ -1029,32 +1029,32 @@ static void stm32f0serial_setapbclock(FAR struct uart_dev_s *dev, bool on)
       return;
 #ifdef CONFIG_STM32F0_USART1
     case STM32F0_USART1_BASE:
-      rcc_en = RCC_APB2ENR_USART1EN;
+      rcc_en  = RCC_APB2ENR_USART1EN;
       regaddr = STM32F0_RCC_APB2ENR;
       break;
 #endif
 #ifdef CONFIG_STM32F0_USART2
     case STM32F0_USART2_BASE:
-      rcc_en = RCC_APB1ENR_USART2EN;
-      regaddr =STM32F0_RCC_APB1ENR;
+      rcc_en  = RCC_APB1ENR_USART2EN;
+      regaddr = STM32F0_RCC_APB1ENR;
       break;
 #endif
 #ifdef CONFIG_STM32F0_USART3
     case STM32F0_USART3_BASE:
-      rcc_en = RCC_APB1ENR_USART3EN;
-      regaddr =STM32F0_RCC_APB1ENR;
+      rcc_en  = RCC_APB1ENR_USART3EN;
+      regaddr = STM32F0_RCC_APB1ENR;
       break;
 #endif
 #ifdef CONFIG_STM32F0_USART4
     case STM32F0_USART4_BASE:
-      rcc_en = RCC_APB1ENR_USART4EN;
-      regaddr =STM32F0_RCC_APB1ENR;
+      rcc_en  = RCC_APB1ENR_USART4EN;
+      regaddr = STM32F0_RCC_APB1ENR;
       break;
 #endif
 #ifdef CONFIG_STM32F0_USART5
     case STM32F0_USART5_BASE:
-      rcc_en = RCC_APB1ENR_USART5EN;
-      regaddr =STM32F0_RCC_APB1ENR;
+      rcc_en  = RCC_APB1ENR_USART5EN;
+      regaddr = STM32F0_RCC_APB1ENR;
       break;
 #endif
     }
