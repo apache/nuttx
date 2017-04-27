@@ -51,6 +51,7 @@
 #include "stm32f0_rcc.h"
 #include "stm32f0_clockconfig.h"
 #include "chip/stm32f0_syscfg.h"
+#include "chip/stm32f0_flash.h"
 #include "chip/stm32f0_gpio.h"
 
 /****************************************************************************
@@ -91,11 +92,35 @@ void stm32f0_clockconfig(void)
   putreg32(regval, STM32F0_RCC_CR);
   while ((getreg32(STM32F0_RCC_CR) & RCC_CR_PLLRDY) != 0);
 
-  /* Configure the PLL. Multiply the HSI to get System Clock */
+  /* Enable FLASH prefetch buffer and set flash latency */
+
+  regval = getreg32(STM32_FLASH_ACR);
+  regval &= ~FLASH_ACR_LATENCY_MASK;
+  regval |= (FLASH_ACR_LATENCY_1 | FLASH_ACR_PRTFBE);
+  putreg32(regval, STM32_FLASH_ACR);
+
+  /* Set HCLK = SYSCLK */
 
   regval  = getreg32(STM32F0_RCC_CFGR);
-  regval &= ~RCC_CFGR_PLLMUL_MASK;
-  regval |= STM32F0_CFGR_PLLMUL;
+  regval &= ~RCC_CFGR_HPRE_MASK;
+  regval |= RCC_CFGR_HPRE_SYSCLK;
+  putreg32(regval, STM32F0_RCC_CFGR);
+
+  /* Set PCLK = HCLK */
+
+  regval &= ~RCC_CFGR_PPRE1_MASK;
+  regval |= RCC_CFGR_PPRE1_HCLK;
+  putreg32(regval, STM32F0_RCC_CFGR);
+
+  /* Configure the PLL to generate the system clock
+   *
+   * 1. Use source = HSI/2
+   * 2. Use PREDIV = 1
+   * 3. Use multiplier from board.h
+   */
+
+  regval &= ~(RCC_CFGR_PLLSRC_MASK | RCC_CFGR_PLLXTPRE_MASK | RCC_CFGR_PLLMUL_MASK);
+  regval |= (RCC_CFGR_PLLSRC_HSId2 | RCC_CFGR_PLLXTPRE_DIV1 | STM32F0_CFGR_PLLMUL);
   putreg32(regval, STM32F0_RCC_CFGR);
 
   /* Enable the PLL */

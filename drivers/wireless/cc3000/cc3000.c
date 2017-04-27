@@ -73,7 +73,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
 
-#include <nuttx/wireless/wireless.h>
+#include <nuttx/wireless/ioctl.h>
 #include <nuttx/wireless/cc3000.h>
 #include <nuttx/wireless/cc3000/include/cc3000_upif.h>
 #include <nuttx/wireless/cc3000/cc3000_common.h>

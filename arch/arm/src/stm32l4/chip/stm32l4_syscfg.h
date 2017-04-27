@@ -63,6 +63,7 @@
 #define STM32L4_SYSCFG_CFGR2_OFFSET     0x001c /* SYSCFG configuration register 2 */
 #define STM32L4_SYSCFG_SWPR_OFFSET      0x0020 /* SYSCFG SRAM2 write protection register */
 #define STM32L4_SYSCFG_SKR_OFFSET       0x0024 /* SYSCFG SRAM2 key register */
+#define STM32L4_SYSCFG_SWPR2_OFFSET     0x0028 /* SYSCFG SRAM2 write protection register 2 */
 
 /* Register Addresses *******************************************************************************/
 
@@ -100,8 +101,9 @@
 #define SYSCFG_CFGR1_I2C_PB8_FMP      (1 << 18) /* Bit 18: Fast-mode Plus (Fm+) driving capability activation on PB8 */
 #define SYSCFG_CFGR1_I2C_PB9_FMP      (1 << 19) /* Bit 19: Fast-mode Plus (Fm+) driving capability activation on PB9 */
 #define SYSCFG_CFGR1_I2C1_FMP         (1 << 20) /* Bit 20: I2C1 Fast-mode Plus (Fm+) driving capability activation */
-#define SYSCFG_CFGR1_I2C2_FMP         (1 << 21) /* Bit 21: I2C1 Fast-mode Plus (Fm+) driving capability activation */
-#define SYSCFG_CFGR1_I2C3_FMP         (1 << 22) /* Bit 22: I2C1 Fast-mode Plus (Fm+) driving capability activation */
+#define SYSCFG_CFGR1_I2C2_FMP         (1 << 21) /* Bit 21: I2C2 Fast-mode Plus (Fm+) driving capability activation */
+#define SYSCFG_CFGR1_I2C3_FMP         (1 << 22) /* Bit 22: I2C3 Fast-mode Plus (Fm+) driving capability activation */
+#define SYSCFG_CFGR1_I2C4_FMP         (1 << 23) /* Bit 23: I2C4 Fast-mode Plus (Fm+) driving capability activation */
 #define SYSCFG_CFGR1_FPU_IE0          (1 << 26) /* Bit 26: FPU Invalid operation interrupt enable */
 #define SYSCFG_CFGR1_FPU_IE1          (1 << 27) /* Bit 27: FPU Divide-by-zero interrupt enable */
 #define SYSCFG_CFGR1_FPU_IE2          (1 << 28) /* Bit 28: FPU Underflow interrupt enable */
@@ -118,45 +120,47 @@
 #define SYSCFG_EXTICR_PORTE           (4)       /* 0100: PE[x] pin */
 #define SYSCFG_EXTICR_PORTF           (5)       /* 0101: PF[C] pin */
 #define SYSCFG_EXTICR_PORTG           (6)       /* 0110: PG[x] pin */
+#define SYSCFG_EXTICR_PORTH           (7)       /* 0111: PH[x] pin (only on STM32L496xx/4A6xx) */
+#define SYSCFG_EXTICR_PORTI           (8)       /* 1000: PI[x] pin (only on STM32L496xx/4A6xx) */
 
-#define SYSCFG_EXTICR_PORT_MASK       (7)
+#define SYSCFG_EXTICR_PORT_MASK       (15)
 #define SYSCFG_EXTICR_EXTI_SHIFT(g)   (((g) & 3) << 2)
 #define SYSCFG_EXTICR_EXTI_MASK(g)    (SYSCFG_EXTICR_PORT_MASK << (SYSCFG_EXTICR_EXTI_SHIFT(g)))
 
-#define SYSCFG_EXTICR1_EXTI0_SHIFT    (0)       /* Bits 0-2: EXTI 0 coinfiguration */
+#define SYSCFG_EXTICR1_EXTI0_SHIFT    (0)       /* Bits 0-2: EXTI 0 configuration */
 #define SYSCFG_EXTICR1_EXTI0_MASK     (SYSCFG_EXTICR_PORT_MASK << SYSCFG_EXTICR1_EXTI0_SHIFT)
-#define SYSCFG_EXTICR1_EXTI1_SHIFT    (4)       /* Bits 4-6: EXTI 1 coinfiguration */
+#define SYSCFG_EXTICR1_EXTI1_SHIFT    (4)       /* Bits 4-6: EXTI 1 configuration */
 #define SYSCFG_EXTICR1_EXTI1_MASK     (SYSCFG_EXTICR_PORT_MASK << SYSCFG_EXTICR1_EXTI1_SHIFT)
-#define SYSCFG_EXTICR1_EXTI2_SHIFT    (8)       /* Bits 8-10: EXTI 2 coinfiguration */
+#define SYSCFG_EXTICR1_EXTI2_SHIFT    (8)       /* Bits 8-10: EXTI 2 configuration */
 #define SYSCFG_EXTICR1_EXTI2_MASK     (SYSCFG_EXTICR_PORT_MASK << SYSCFG_EXTICR1_EXTI2_SHIFT)
-#define SYSCFG_EXTICR1_EXTI3_SHIFT    (12)      /* Bits 12-14: EXTI 3 coinfiguration */
+#define SYSCFG_EXTICR1_EXTI3_SHIFT    (12)      /* Bits 12-14: EXTI 3 configuration */
 #define SYSCFG_EXTICR1_EXTI3_MASK     (SYSCFG_EXTICR_PORT_MASK << SYSCFG_EXTICR1_EXTI3_SHIFT)
 
-#define SYSCFG_EXTICR2_EXTI4_SHIFT    (0)       /* Bits 0-2: EXTI 4 coinfiguration */
+#define SYSCFG_EXTICR2_EXTI4_SHIFT    (0)       /* Bits 0-2: EXTI 4 configuration */
 #define SYSCFG_EXTICR2_EXTI4_MASK     (SYSCFG_EXTICR_PORT_MASK << SYSCFG_EXTICR2_EXTI4_SHIFT)
-#define SYSCFG_EXTICR2_EXTI5_SHIFT    (4)       /* Bits 4-6: EXTI 5 coinfiguration */
+#define SYSCFG_EXTICR2_EXTI5_SHIFT    (4)       /* Bits 4-6: EXTI 5 configuration */
 #define SYSCFG_EXTICR2_EXTI5_MASK     (SYSCFG_EXTICR_PORT_MASK << SYSCFG_EXTICR2_EXTI5_SHIFT)
-#define SYSCFG_EXTICR2_EXTI6_SHIFT    (8)       /* Bits 8-10: EXTI 6 coinfiguration */
+#define SYSCFG_EXTICR2_EXTI6_SHIFT    (8)       /* Bits 8-10: EXTI 6 configuration */
 #define SYSCFG_EXTICR2_EXTI6_MASK     (SYSCFG_EXTICR_PORT_MASK << SYSCFG_EXTICR2_EXTI6_SHIFT)
-#define SYSCFG_EXTICR2_EXTI7_SHIFT    (12)      /* Bits 12-14: EXTI 7 coinfiguration */
+#define SYSCFG_EXTICR2_EXTI7_SHIFT    (12)      /* Bits 12-14: EXTI 7 configuration */
 #define SYSCFG_EXTICR2_EXTI7_MASK     (SYSCFG_EXTICR_PORT_MASK << SYSCFG_EXTICR2_EXTI7_SHIFT)
 
-#define SYSCFG_EXTICR3_EXTI8_SHIFT    (0)       /* Bits 0-2: EXTI 8 coinfiguration */
+#define SYSCFG_EXTICR3_EXTI8_SHIFT    (0)       /* Bits 0-2: EXTI 8 configuration */
 #define SYSCFG_EXTICR3_EXTI8_MASK     (SYSCFG_EXTICR_PORT_MASK << SYSCFG_EXTICR3_EXTI8_SHIFT)
-#define SYSCFG_EXTICR3_EXTI9_SHIFT    (4)       /* Bits 4-6: EXTI 9 coinfiguration */
+#define SYSCFG_EXTICR3_EXTI9_SHIFT    (4)       /* Bits 4-6: EXTI 9 configuration */
 #define SYSCFG_EXTICR3_EXTI9_MASK     (SYSCFG_EXTICR_PORT_MASK << SYSCFG_EXTICR3_EXTI9_SHIFT)
-#define SYSCFG_EXTICR3_EXTI10_SHIFT   (8)       /* Bits 8-10: EXTI 10 coinfiguration */
+#define SYSCFG_EXTICR3_EXTI10_SHIFT   (8)       /* Bits 8-10: EXTI 10 configuration */
 #define SYSCFG_EXTICR3_EXTI10_MASK    (SYSCFG_EXTICR_PORT_MASK << SYSCFG_EXTICR3_EXTI10_SHIFT)
-#define SYSCFG_EXTICR3_EXTI11_SHIFT   (12)      /* Bits 12-14: EXTI 11 coinfiguration */
+#define SYSCFG_EXTICR3_EXTI11_SHIFT   (12)      /* Bits 12-14: EXTI 11 configuration */
 #define SYSCFG_EXTICR3_EXTI11_MASK    (SYSCFG_EXTICR_PORT_MASK << SYSCFG_EXTICR3_EXTI11_SHIFT)
 
-#define SYSCFG_EXTICR4_EXTI12_SHIFT   (0)       /* Bits 0-2: EXTI 12 coinfiguration */
+#define SYSCFG_EXTICR4_EXTI12_SHIFT   (0)       /* Bits 0-2: EXTI 12 configuration */
 #define SYSCFG_EXTICR4_EXTI12_MASK    (SYSCFG_EXTICR_PORT_MASK << SYSCFG_EXTICR4_EXTI12_SHIFT)
-#define SYSCFG_EXTICR4_EXTI13_SHIFT   (4)       /* Bits 4-6: EXTI 13 coinfiguration */
+#define SYSCFG_EXTICR4_EXTI13_SHIFT   (4)       /* Bits 4-6: EXTI 13 configuration */
 #define SYSCFG_EXTICR4_EXTI13_MASK    (SYSCFG_EXTICR_PORT_MASK << SYSCFG_EXTICR4_EXTI13_SHIFT)
-#define SYSCFG_EXTICR4_EXTI14_SHIFT   (8)       /* Bits 8-10: EXTI 14 coinfiguration */
+#define SYSCFG_EXTICR4_EXTI14_SHIFT   (8)       /* Bits 8-10: EXTI 14 configuration */
 #define SYSCFG_EXTICR4_EXTI14_MASK    (SYSCFG_EXTICR_PORT_MASK << SYSCFG_EXTICR4_EXTI14_SHIFT)
-#define SYSCFG_EXTICR4_EXTI15_SHIFT   (12)      /* Bits 12-14: EXTI 15 coinfiguration */
+#define SYSCFG_EXTICR4_EXTI15_SHIFT   (12)      /* Bits 12-14: EXTI 15 configuration */
 #define SYSCFG_EXTICR4_EXTI15_MASK    (SYSCFG_EXTICR_PORT_MASK << SYSCFG_EXTICR4_EXTI15_SHIFT)
 
 /* SYSCFG SRAM2 control and status register */
@@ -173,13 +177,16 @@
 #define SYSCFG_CFGR2_SPF              (1 <<  8) /* Bit  8: SRAM2 parity error flag */
 
 /* SYSCFG SRAM2 write protection register */
-/* There is one bit per SRAM2 page */
+/* There is one bit per SRAM2 page (0 to 31) */
 
 /* SYSCFG SRAM2 key register */
 
 #define SYSCFG_SKR_SHIFT              0
 #define SYSCFG_SKR_MASK               (0xFF << SYSCFG_SKR_SHIFT)
 
-#endif /* CONFIG_STM32L4_STM32L476XX || CONFIG_STM32L4_STM32L486XX */
+/* SYSCFG SRAM2 write protection register 2 (only on STM32L496xx/4A6xx) */
+/* There is one bit per SRAM2 page (32 to 63) */
+
+#endif /* CONFIG_STM32L4_STM32L476XX || CONFIG_STM32L4_STM32L486XX || CONFIG_STM32L4_STM32L496XX */
 #endif /* __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_SYSCFG_H */
 

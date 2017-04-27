@@ -47,7 +47,6 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/spi/spi.h>
-#include <nuttx/wireless/wireless.h>
 #include <nuttx/wireless/cc3000.h>
 #include <nuttx/wireless/cc3000/include/cc3000_upif.h>
 
