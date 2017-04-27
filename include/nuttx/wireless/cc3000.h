@@ -67,13 +67,13 @@
 
 /* IOCTL commands */
 
-#define CC3000IOC_GETQUESEMID  _WLIOC(CC3000_FIRST+0) /* arg: Address of int for number*/
-#define CC3000IOC_ADDSOCKET    _WLIOC(CC3000_FIRST+1) /* arg: Address of int for result*/
-#define CC3000IOC_REMOVESOCKET _WLIOC(CC3000_FIRST+2) /* arg: Address of int for result*/
-#define CC3000IOC_SELECTDATA   _WLIOC(CC3000_FIRST+3) /* arg: Address of int for result*/
-#define CC3000IOC_SELECTACCEPT _WLIOC(CC3000_FIRST+4) /* arg: Address of struct cc3000_acceptcfg_s */
-#define CC3000IOC_SETRX_SIZE   _WLIOC(CC3000_FIRST+5) /* arg: Address of int for new size */
-#define CC3000IOC_REMOTECLOSEDSOCKET _WLIOC(CC3000_FIRST+6) /* arg: Address of int for result*/
+#define CC3000IOC_GETQUESEMID  _WLCIOC(CC3000_FIRST+0) /* arg: Address of int for number*/
+#define CC3000IOC_ADDSOCKET    _WLCIOC(CC3000_FIRST+1) /* arg: Address of int for result*/
+#define CC3000IOC_REMOVESOCKET _WLCIOC(CC3000_FIRST+2) /* arg: Address of int for result*/
+#define CC3000IOC_SELECTDATA   _WLCIOC(CC3000_FIRST+3) /* arg: Address of int for result*/
+#define CC3000IOC_SELECTACCEPT _WLCIOC(CC3000_FIRST+4) /* arg: Address of struct cc3000_acceptcfg_s */
+#define CC3000IOC_SETRX_SIZE   _WLCIOC(CC3000_FIRST+5) /* arg: Address of int for new size */
+#define CC3000IOC_REMOTECLOSEDSOCKET _WLCIOC(CC3000_FIRST+6) /* arg: Address of int for result*/
 
 /****************************************************************************
  * Public Types
