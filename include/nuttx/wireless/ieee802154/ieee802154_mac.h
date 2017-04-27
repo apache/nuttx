@@ -85,9 +85,6 @@
  * Request and Response primitives.
  */
 
-#define MAC802154IOC_MCPS_REGISTER             _MAC802154IOC(0x0001)
-
-#define MAC802154IOC_MLME_REGISTER             _MAC802154IOC(0x0002)
 #define MAC802154IOC_MLME_ASSOC_REQUEST        _MAC802154IOC(0x0003)
 #define MAC802154IOC_MLME_ASSOC_RESPONSE       _MAC802154IOC(0x0004)
 #define MAC802154IOC_MLME_DISASSOC_REQUEST     _MAC802154IOC(0x0005)
@@ -1290,8 +1287,6 @@ union ieee802154_mcps_notify_u
 
 union ieee802154_macarg_u
 {
-  union  ieee802154_mcps_notify_u  mcpsnotify;  /* MAC802154IOC_MCPS_REGISTER */
-  union  ieee802154_mlme_notify_u  mlmenotify;  /* MAC802154IOC_MLME_REGISTER */
   struct ieee802154_assoc_req_s    assocreq;    /* MAC802154IOC_MLME_ASSOC_REQUEST */
   struct ieee802154_assoc_resp_s   assocresp;   /* MAC802154IOC_MLME_ASSOC_RESPONSE */
   struct ieee802154_disassoc_req_s disassocreq; /* MAC802154IOC_MLME_DISASSOC_REQUEST */
