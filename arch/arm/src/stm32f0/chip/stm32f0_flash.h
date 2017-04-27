@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/chip/stm32fo_flash.h
+ * arch/arm/src/stm32/chip/stm32f0_flash.h
  *
  *   Copyright (C) 20017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

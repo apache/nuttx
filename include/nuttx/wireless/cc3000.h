@@ -50,7 +50,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <nuttx/wireless/wireless.h>
+#include <nuttx/wireless/ioctl.h>
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -1,5 +1,6 @@
 /************************************************************************************
  * include/nuttx/wireless/wireless.h
+ * Wireless network IOCTL commands
  *
  *   Copyright (C) 2011-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Laurent Latil <gnutt@nuttx.org>
@@ -33,7 +34,7 @@
  *
  ************************************************************************************/
 
-/* This file includes common definitions to be used in all wireless drivers
+/* This file includes common definitions to be used in all wireless network drivers
  * (when applicable).
  */
 
@@ -153,49 +154,11 @@
 
 #define SIOCSIWPMKSA        _WLIOC(0x0032)  /* PMKSA cache operation */
 
-#define WL_FIRSTCHAR        0x0033
-#define WL_NNETCMDS         0x0032
+/* Device-specific network IOCTL commands ******************************************/
 
-/* Character Driver IOCTL commands *************************************************/
-/* Non-compatible, NuttX only IOCTL definitions for use with low-level wireless
- * drivers that are accessed via a character device.  Use of these IOCTL commands
- * requires a file descriptor created by the open() interface.
- */
-
-#define WLIOC_SETRADIOFREQ  _WLIOC(0x0033)  /* arg: Pointer to uint32_t, frequency
-                                             * value (in Mhz) */
-#define WLIOC_GETRADIOFREQ  _WLIOC(0x0034)  /* arg: Pointer to uint32_t, frequency
-                                             * value (in Mhz) */
-#define WLIOC_SETADDR       _WLIOC(0x0035)  /* arg: Pointer to address value, format
-                                             * of the address is driver specific */
-#define WLIOC_GETADDR       _WLIOC(0x0036)  /* arg: Pointer to address value, format
-                                             * of the address is driver specific */
-#define WLIOC_SETTXPOWER    _WLIOC(0x0037)  /* arg: Pointer to int32_t, output power
-                                             * (in dBm) */
-#define WLIOC_GETTXPOWER    _WLIOC(0x0038)  /* arg: Pointer to int32_t, output power
-                                             * (in dBm) */
-
-/* Device-specific IOCTL commands **************************************************/
-
-#define WL_FIRST            0x0001          /* First common command */
-#define WL_NCMDS            0x0038          /* Number of common commands */
-
-/* User defined ioctl commands are also supported. These will be forwarded
- * by the upper-half QE driver to the lower-half QE driver via the ioctl()
- * method fo the QE lower-half interface.  However, the lower-half driver
- * must reserve a block of commands as follows in order prevent IOCTL
- * command numbers from overlapping.
- */
-
-/* See include/nuttx/wireless/cc3000.h */
-
-#define CC3000_FIRST        (WL_FIRST + WL_NCMDS)
-#define CC3000_NCMDS        7
-
-/* See include/nuttx/wireless/nrf24l01.h */
-
-#define NRF24L01_FIRST      (CC3000_FIRST + CC3000_NCMDS)
-#define NRF24L01_NCMDS      14
+#define WL_NETFIRST         0x0001          /* First network command */
+#define WL_NNETCMDS         0x0032          /* Number of network commands */
+#define WL_USERFIRST        (WL_NETFIRST + WL_NNETCMDS)
 
 /* Other Common Wireless Definitions ***********************************************/
 
