@@ -25,17 +25,17 @@ DMA      : works; at least tested with QSPI
 SRAM2    : OK; can be included in MM region or left separate for special app
          : purposes
 FIREWALL : Code written, to be tested, requires support from ldscript
-SPI      : Code written, to be tested, including DMA
+SPI      : OK, tested (Including DMA)
 I2C      : Code written, to be tested (I2C4 missing)
 RTC      : works
 QSPI     : works in polling, interrupt, DMA, and also memory-mapped modes
-CAN      : TODO
+CAN      : OK, tested
 OTGFS    : dev implemented, tested, outstanding issue with CDCACM
          : (ACM_SET_LINE_CODING, but otherwise works); host implemented,
          : only build smoke-tested (i.e. builds, but no functional testing
          : yet)
 Timers   : Implemented, with PWM oneshot and freerun, tickless OS support.
-         : Limited testing (focused on tickless OS so far)
+         : Limited testing (focused on tickless OS so far), PWM and QE tested OK.
 PM       : TODO, PWR registers defined
 FSMC     : TODO
 AES      : TODO
