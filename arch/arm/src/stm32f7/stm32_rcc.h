@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F7_STM32_RRC_H
-#define __ARCH_ARM_SRC_STM32F7_STM32_RRC_H
+#ifndef __ARCH_ARM_SRC_STM32F7_STM32_RCC_H
+#define __ARCH_ARM_SRC_STM32F7_STM32_RCC_H
 
 /************************************************************************************
  * Included Files
@@ -211,11 +211,7 @@ void stm32_clockenable(void);
  * Name: stm32_rcc_enablelse
  *
  * Description:
- *   Enable the External Low-Speed (LSE) Oscillator and, if the RTC is
- *   configured, setup the LSE as the RTC clock source, and enable the RTC.
- *
- *   For the STM32L15X family, this will also select the LSE as the clock source of
- *   the LCD.
+ *   Enable the External Low-Speed (LSE) Oscillator.
  *
  * Input Parameters:
  *   None
@@ -252,4 +248,4 @@ void stm32_rcc_disablelsi(void);
 }
 #endif
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32F7_STM32_RRC_H */
+#endif /* __ARCH_ARM_SRC_STM32F7_STM32_RCC_H */

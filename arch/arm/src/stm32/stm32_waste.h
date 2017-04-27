@@ -76,4 +76,4 @@ void up_waste(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32_STM32_RRC_H */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_WASTE_H */
