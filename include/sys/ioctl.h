@@ -45,11 +45,25 @@
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
 
-/* Include network ioctls info */
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
+/* Include network IOCTL definitions */
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-# include <nuttx/net/ioctl.h>
+#  include <nuttx/net/ioctl.h>
+
+#ifdef CONFIG_NETDEV_WIRELESS_IOCTL
+/* Include wireless network IOCTL definitions */
+
+#  include <nuttx/wireless/wireless.h>
 #endif
+#endif /* CONFIG_NET */
+
+#ifdef CONFIG_DRIVERS_WIRELESS
+/* Include wireless character driver IOCTL definitions */
+
+#  include <nuttx/wireless/ioctl.h>
+#endif
+#endif /* CONFIG_NSOCKET_DESCRIPTORS > 0 */
 
 /****************************************************************************
  * Pre-processor Definitions

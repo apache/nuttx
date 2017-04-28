@@ -26,7 +26,7 @@ SRAM2    : OK; can be included in MM region or left separate for special app
          : purposes
 FIREWALL : Code written, to be tested, requires support from ldscript
 SPI      : OK, tested (Including DMA)
-I2C      : Code written, to be tested (I2C4 missing)
+I2C      : Code written, to be tested
 RTC      : works
 QSPI     : works in polling, interrupt, DMA, and also memory-mapped modes
 CAN      : OK, tested
@@ -57,7 +57,7 @@ SWP      : TODO (Single wire protocol master, to connect with NFC enabled
 LPUART   : TODO (Low power UART working with LSE at low baud rates)
 LPTIMER  : TODO (Low power TIMER)
 OPAMP    : TODO (Analog operational amplifier)
-COMP     : TODO (Analog comparators)
+COMP     : There is some code (Analog comparators)
 DFSDM    : TODO (Digital Filter and Sigma-Delta Modulator)
 LCD      : TODO (Segment LCD controller)
 SAIPLL   : works (PLL For Digital Audio interfaces, and other things)
