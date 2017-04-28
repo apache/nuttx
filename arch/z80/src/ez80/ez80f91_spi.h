@@ -145,9 +145,9 @@ FAR struct spi_dev_s *ez80_spibus_initialize(int port);
  *
  ************************************************************************************/
 
-void ez80_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t ez80_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-int ez80_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+void ez80_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t ez80_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
+int ez80_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 
 #undef EXTERN
 #ifdef __cplusplus

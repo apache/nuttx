@@ -338,7 +338,7 @@ int hcs12_ethinitialize(int intf);
  ****************************************************************************/
 
 struct spi_dev_s;  /* Forward reference */
-enum spi_dev_e;    /* Forward reference */
+uint32_t;    /* Forward reference */
 
 FAR struct spi_dev_s *hcs12_spibus_initialize(int port);
 
@@ -367,8 +367,8 @@ FAR struct spi_dev_s *hcs12_spibus_initialize(int port);
  *
  ************************************************************************************/
 
-void  hcs12_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t hcs12_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  hcs12_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t hcs12_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
 
 #undef EXTERN
 #if defined(__cplusplus)

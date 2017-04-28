@@ -677,7 +677,7 @@ void z16f_reset(void);
 #ifdef CONFIG_Z16F_ESPI
 
 struct spi_dev_s;  /* Forward reference */
-enum spi_dev_e;    /* Forward reference */
+uint32_t;    /* Forward reference */
 
 /* Initialize the selected SPI port */
 
@@ -685,16 +685,16 @@ FAR struct spi_dev_s *z16_spibus_initialize(int port);
 
 /* Select an SPI device (see include/nuttx/spi/spi.h) */
 
-void z16f_espi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+void z16f_espi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
 
 /* Provide SPI device status (see include/nuttx/spi/spi.h) */
 
-uint8_t z16f_espi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+uint8_t z16f_espi_status(FAR struct spi_dev_s *dev, uint32_t devid);
 
 /* Select CMD/DATA options (often used with LCD devices) */
 
 #ifdef CONFIG_SPI_CMDDATA
-int z16f_espi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int z16f_espi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
