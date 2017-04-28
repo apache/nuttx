@@ -56,28 +56,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CDC flag definitions */
-#define CDC_DCMD_ERROR    0x01       /* 1=cmd failed */
-#define CDC_DCMD_SET      0x02       /* 0=get, 1=set cmd */
-#define CDC_DCMD_IF_MASK  0xF000     /* I/F index */
-#define CDC_DCMD_IF_SHIFT 12
-#define CDC_DCMD_ID_MASK  0xFFFF0000 /* id an cmd pairing */
-#define CDC_DCMD_ID_SHIFT 16         /* ID Mask shift bits */
-#define CDC_DCMD_ID(flags)  \
-  (((flags) & CDC_DCMD_ID_MASK) >> CDC_DCMD_ID_SHIFT)
+/* Control header flags */
 
-#define CDC_CONTROL_TIMEOUT_MS 1000
+#define BCMF_CONTROL_ERROR    0x01      /* Command failure flag */
+#define BCMF_CONTROL_SET      0x02      /* Command type: SET = 1, GET = 0 */
+#define BCMF_CONTROL_INTERFACE_SHIFT 12
+#define BCMF_CONTROL_REQID_SHIFT     16
+
+#define BCMF_CONTROL_TIMEOUT_MS 1000
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct bcmf_cdc_header {
-    uint32_t cmd;    /* dongle command value */
-    uint32_t len;    /* lower 16: output buflen;
-                      * upper 16: input buflen (excludes header) */
-    uint32_t flags;  /* flag defns given below */
-    uint32_t status; /* status code returned from the device */
+struct __attribute__((packed)) bcmf_cdc_header {
+    uint32_t cmd;    /* Command to be sent */
+    uint32_t len;    /* Size of command data */
+    uint32_t flags;  /* cdc request flags, see above */
+    uint32_t status; /* Returned status code from chip */
 };
 
 /****************************************************************************
@@ -92,6 +88,10 @@ static int bcmf_cdc_sendframe(FAR struct bcmf_dev_s *priv, uint32_t cmd,
                          int ifidx, bool set, struct bcmf_frame_s *frame);
 
 static int bcmf_cdc_control_request(FAR struct bcmf_dev_s *priv,
+                               uint32_t ifidx, bool set, uint32_t cmd,
+                               char *name, uint8_t *data, uint32_t *len);
+
+static int bcmf_cdc_control_request_unsafe(FAR struct bcmf_dev_s *priv,
                                uint32_t ifidx, bool set, uint32_t cmd,
                                char *name, uint8_t *data, uint32_t *len);
 
@@ -161,21 +161,21 @@ int bcmf_cdc_sendframe(FAR struct bcmf_dev_s *priv, uint32_t cmd,
   struct bcmf_cdc_header* header =
                   (struct bcmf_cdc_header*)frame->data;
 
-  /* Setup cdc_dcmd header */
+  /* Setup control frame header */
 
   uint32_t cdc_data_len = frame->len - (uint32_t)(frame->data-frame->base);
   header->cmd = cmd;
   header->len = cdc_data_len-sizeof(struct bcmf_cdc_header);
   header->status = 0;
-  header->flags = ++priv->control_reqid << CDC_DCMD_ID_SHIFT;
-  header->flags |= ifidx << CDC_DCMD_IF_SHIFT;
+  header->flags = ++priv->control_reqid << BCMF_CONTROL_REQID_SHIFT;
+  header->flags |= ifidx << BCMF_CONTROL_INTERFACE_SHIFT;
 
   if (set)
   {
-    header->flags |= CDC_DCMD_SET;
+    header->flags |= BCMF_CONTROL_SET;
   }
 
-  /* Queue frame */
+  /* Send frame */
 
   return priv->bus->txframe(priv, frame);
 }
@@ -185,10 +185,6 @@ int bcmf_cdc_control_request(FAR struct bcmf_dev_s *priv,
                                char *name, uint8_t *data, uint32_t *len)
 {
   int ret;
-  struct bcmf_frame_s *frame;
-  uint32_t out_len = *len;
-
-  *len = 0;
 
   /* Take device control mutex */
 
@@ -197,14 +193,31 @@ int bcmf_cdc_control_request(FAR struct bcmf_dev_s *priv,
       return ret;
    }
 
+  ret = bcmf_cdc_control_request_unsafe(priv, ifidx, set, cmd,
+                                        name, data, len);
+
+  sem_post(&priv->control_mutex);
+
+  return ret;
+}
+
+int bcmf_cdc_control_request_unsafe(FAR struct bcmf_dev_s *priv,
+                               uint32_t ifidx, bool set, uint32_t cmd,
+                               char *name, uint8_t *data, uint32_t *len)
+{
+  int ret;
+  struct bcmf_frame_s *frame;
+  uint32_t out_len = *len;
+
+  *len = 0;
+
   /* Prepare control frame */
 
   frame = bcmf_cdc_allocate_frame(priv, name, data, out_len);
   if (!frame)
     {
       wlerr("Cannot allocate cdc frame\n");
-      ret = -ENOMEM;
-      goto exit_sem_post;
+      return -ENOMEM;
     }
 
   /* Setup buffer to store response */
@@ -218,14 +231,14 @@ int bcmf_cdc_control_request(FAR struct bcmf_dev_s *priv,
   if (ret != OK)
     {
       // TODO free allocated iovar buffer here
-      goto exit_sem_post;
+      return ret;
     }
 
-  ret = bcmf_sem_wait(&priv->control_timeout, CDC_CONTROL_TIMEOUT_MS);
+  ret = bcmf_sem_wait(&priv->control_timeout, BCMF_CONTROL_TIMEOUT_MS);
   if (ret != OK)
     {
       wlerr("Error while waiting for control response %d\n", ret);
-      goto exit_sem_post;
+      return ret;
     }
 
   *len = priv->control_rxdata_len;
@@ -235,12 +248,10 @@ int bcmf_cdc_control_request(FAR struct bcmf_dev_s *priv,
   if (priv->control_status != 0)
     {
       wlerr("Invalid cdc status 0x%x\n", priv->control_status);
-      ret = -EINVAL;
+      return -EINVAL;
     }
 
-exit_sem_post:
-  sem_post(&priv->control_mutex);
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -252,6 +263,15 @@ int bcmf_cdc_iovar_request(FAR struct bcmf_dev_s *priv,
                              uint8_t *data, uint32_t *len)
 {
   return bcmf_cdc_control_request(priv, ifidx, set,
+                                  set ? WLC_SET_VAR : WLC_GET_VAR, name,
+                                  data, len);
+}
+
+int bcmf_cdc_iovar_request_unsafe(FAR struct bcmf_dev_s *priv,
+                             uint32_t ifidx, bool set, char *name,
+                             uint8_t *data, uint32_t *len)
+{
+  return bcmf_cdc_control_request_unsafe(priv, ifidx, set,
                                   set ? WLC_SET_VAR : WLC_GET_VAR, name,
                                   data, len);
 }
@@ -290,7 +310,7 @@ int bcmf_cdc_process_control_frame(FAR struct bcmf_dev_s *priv,
 
   // TODO check interface ?
 
-  if (cdc_header->flags >> CDC_DCMD_ID_SHIFT == priv->control_reqid)
+  if (cdc_header->flags >> BCMF_CONTROL_REQID_SHIFT == priv->control_reqid)
     {
       /* Expected frame received, send it back to user */
 
@@ -314,20 +334,4 @@ int bcmf_cdc_process_control_frame(FAR struct bcmf_dev_s *priv,
 
   wlinfo("Got unexpected control frame\n");
   return -EINVAL;
-}
-
-int bcmf_cdc_process_event_frame(FAR struct bcmf_dev_s *priv,
-                   struct bcmf_frame_s *frame)
-{
-  wlinfo("Event message\n");
-  bcmf_hexdump(frame->base, frame->len, (unsigned long)frame->base);
-  return OK;
-}
-
-int bcmf_cdc_process_data_frame(FAR struct bcmf_dev_s *priv,
-                   struct bcmf_frame_s *frame)
-{
-  wlinfo("Data message\n");
-  bcmf_hexdump(frame->base, frame->len, (unsigned long)frame->base);
-  return OK;
 }

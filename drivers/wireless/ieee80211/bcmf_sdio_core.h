@@ -61,6 +61,13 @@
 #define I_HMB_SW_MASK                 ( (uint32_t) 0x000000F0 )
 #define I_HMB_FRAME_IND               ( 1<<6 )
 
+/* tosbmailbox bits corresponding to intstatus bits */
+
+#define SMB_NAK     (1 << 0)  /* Frame NAK */
+#define SMB_INT_ACK (1 << 1)  /* Host Interrupt ACK */
+#define SMB_USE_OOB (1 << 2)  /* Use OOB Wakeup */
+#define SMB_DEV_INT (1 << 3)  /* Miscellaneous Interrupt */
+
 enum {
     CHIPCOMMON_CORE_ID = 0,
     DOT11MAC_CORE_ID,

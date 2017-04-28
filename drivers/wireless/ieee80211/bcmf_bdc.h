@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/ieee80211/bcmf_cdc.h
+ * drivers/wireless/ieee80211/bcmf_bdc.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -37,33 +37,50 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_CDC_H
-#define __DRIVERS_WIRELESS_IEEE80211_BCMF_CDC_H
+#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_BDC_H
+#define __DRIVERS_WIRELESS_IEEE80211_BCMF_BDC_H
 
 #include "bcmf_driver.h"
-#include <stdbool.h>
-#include <stdint.h>
+#include "bcmf_ioctl.h"
+
+/* Event frame content */
+
+struct __attribute__((packed)) bcmf_event_s
+{
+  uint16_t version;       /* Vendor specific type */
+  uint16_t flags;
+  uint32_t type;          /* Id of received event */
+  uint32_t status;        /* Event status code */
+  uint32_t reason;        /* Reason code */
+  uint32_t auth_type;
+  uint32_t len;           /* Data size following this header */
+  struct ether_addr addr; /* AP MAC address */
+  char     src_name[16];  /* Event source interface name */
+  uint8_t  dst_id;        /* Event destination interface id */
+  uint8_t  bss_cfg_id;
+};
+
+/* Event callback handler */
+
+typedef void (*event_handler_t)(FAR struct bcmf_dev_s *priv,
+                                struct bcmf_event_s *event, unsigned int len);
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Send safe cdc request */
+int bcmf_bdc_process_data_frame(FAR struct bcmf_dev_s *priv,
+                                struct bcmf_frame_s *frame);
 
-int bcmf_cdc_iovar_request(FAR struct bcmf_dev_s *priv, uint32_t ifidx,
-                           bool set, char *name, uint8_t *data, uint32_t *len);
+int bcmf_bdc_process_event_frame(FAR struct bcmf_dev_s *priv,
+                                 struct bcmf_frame_s *frame);
 
-int bcmf_cdc_ioctl(FAR struct bcmf_dev_s *priv, uint32_t ifidx, bool set,
-                   uint32_t cmd, uint8_t *data, uint32_t *len);
+int bcmf_event_register(FAR struct bcmf_dev_s *priv, event_handler_t handler,
+                        unsigned int event_id);
 
-/* Send cdc request without locking control_mutex */
+int bcmf_event_unregister(FAR struct bcmf_dev_s *priv,
+                          unsigned int event_id);
 
-int bcmf_cdc_iovar_request_unsafe(FAR struct bcmf_dev_s *priv, uint32_t ifidx,
-                           bool set, char *name, uint8_t *data, uint32_t *len);
+int bcmf_event_push_config(FAR struct bcmf_dev_s *priv);
 
-/* Callback used by bus layer to notify cdc response frame is available */
-
-int bcmf_cdc_process_control_frame(FAR struct bcmf_dev_s *priv,
-                                   struct bcmf_frame_s *frame);
-
-#endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_CDC_H */
+#endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_BDC_H */

@@ -53,6 +53,7 @@
 #include "bcmf_core.h"
 #include "bcmf_sdpcm.h"
 #include "bcmf_cdc.h"
+#include "bcmf_bdc.h"
 #include "bcmf_utils.h"
 
 #include "bcmf_sdio_regs.h"
@@ -61,23 +62,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* SDA_FRAMECTRL */
-#define SFC_RF_TERM  (1 << 0)  /* Read Frame Terminate */
-#define SFC_WF_TERM  (1 << 1)  /* Write Frame Terminate */
-#define SFC_CRC4WOOS (1 << 2)  /* CRC error for write out of sync */
-#define SFC_ABORTALL (1 << 3)  /* Abort all in-progress frames */
-
-/* tosbmailbox bits corresponding to intstatus bits */
-#define SMB_NAK     (1 << 0)  /* Frame NAK */
-#define SMB_INT_ACK (1 << 1)  /* Host Interrupt ACK */
-#define SMB_USE_OOB (1 << 2)  /* Use OOB Wakeup */
-#define SMB_DEV_INT (1 << 3)  /* Miscellaneous Interrupt */
-
-#define SDPCM_CONTROL_CHANNEL 0  /* Control */
-#define SDPCM_EVENT_CHANNEL   1  /* Asyc Event Indication */
-#define SDPCM_DATA_CHANNEL    2  /* Data Xmit/Recv */
-#define SDPCM_GLOM_CHANNEL    3  /* Coalesced packets */
-#define SDPCM_TEST_CHANNEL    15 /* Test/debug packets */
+#define SDPCM_CONTROL_CHANNEL 0  /* Control frame id */
+#define SDPCM_EVENT_CHANNEL   1  /* Asynchronous event frame id */
+#define SDPCM_DATA_CHANNEL    2  /* Data frame id */
 
 #define container_of(ptr, type, member) \
         (type *)( (uint8_t *)(ptr) - offsetof(type,member) )
@@ -86,7 +73,7 @@
  * Private Types
  ****************************************************************************/
 
-struct bcmf_sdpcm_header {
+struct __attribute__((packed)) bcmf_sdpcm_header {
     uint16_t size;
     uint16_t checksum;
     uint8_t  sequence;
@@ -262,11 +249,20 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
         break;
 
       case SDPCM_EVENT_CHANNEL:
-        ret = bcmf_cdc_process_event_frame(priv, &sframe->frame_header);
+        if (header->data_offset == header->size)
+          {
+            /* Empty event, ignore */
+
+            ret = OK;
+          }
+        else
+          {
+            ret = bcmf_bdc_process_event_frame(priv, &sframe->frame_header);
+          }
         break;
 
       case SDPCM_DATA_CHANNEL:
-        ret = bcmf_cdc_process_data_frame(priv, &sframe->frame_header);
+        ret = bcmf_bdc_process_data_frame(priv, &sframe->frame_header);
         break;
 
       default:

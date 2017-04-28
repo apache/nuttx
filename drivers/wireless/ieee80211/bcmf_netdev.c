@@ -801,6 +801,12 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
 
   priv->bc_bifup = true;
 #warning Missing logic
+
+  if (bcmf_wl_enable(priv, true) != OK)
+    {
+      return -EIO;
+    }
+
   return OK;
 }
 
@@ -824,6 +830,8 @@ static int bcmf_ifdown(FAR struct net_driver_s *dev)
 {
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
   irqstate_t flags;
+
+  bcmf_wl_enable(priv, false);
 
   /* Disable the hardware interrupt */
 
@@ -1082,13 +1090,21 @@ static void bcmf_ipv6multicast(FAR struct bcmf_dev_s *priv)
 static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
                       unsigned long arg)
 {
-  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
   int ret;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
 
   /* Decode and dispatch the driver-specific IOCTL command */
 
   switch (cmd)
     {
+      case SIOCSIWSCAN:
+        ret = bcmf_wl_start_scan(priv);
+        break;
+
+      case SIOCGIWSCAN:
+        ret = bcmf_wl_is_scan_done(priv);
+        break;
+
       case SIOCSIWFREQ:     /* Set channel/frequency (Hz) */
         wlwarn("WARNING: SIOCSIWFREQ not implemented\n");
         ret = -ENOSYS;
@@ -1150,7 +1166,7 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
         break;
 
       default:
-        nerr("ERROR: Unrecognized IOCTL command: %d\n", command);
+        nerr("ERROR: Unrecognized IOCTL command: %d\n", cmd);
         ret = -ENOTTY;  /* Special return value for this case */
         break;
     }
@@ -1181,7 +1197,6 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
 
 int bcmf_netdev_register(FAR struct bcmf_dev_s *priv)
 {
-  int ret;
   uint32_t out_len;
 
   /* Initialize network driver structure */
@@ -1211,8 +1226,7 @@ int bcmf_netdev_register(FAR struct bcmf_dev_s *priv)
    * the device and/or calling bcmf_ifdown().
    */
 
-  ret = bcmf_wl_enable(priv, false);
-  if (ret != OK)
+  if (bcmf_wl_enable(priv, false) != OK)
     {
       return -EIO;
     }
@@ -1220,22 +1234,13 @@ int bcmf_netdev_register(FAR struct bcmf_dev_s *priv)
   /* Query MAC address */
 
   out_len = ETHER_ADDR_LEN;
-  ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, false,
+  if (bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, false,
                                  IOVAR_STR_CUR_ETHERADDR,
                                  priv->bc_dev.d_mac.ether.ether_addr_octet,
-                                 &out_len);
-  if (ret != OK)
+                                 &out_len) != OK)
     {
       return -EIO;
     }
-
-  wlinfo("MAC address is %02X:%02X:%02X:%02X:%02X:%02X\n",
-                        priv->bc_dev.d_mac.ether.ether_addr_octet[0],
-                        priv->bc_dev.d_mac.ether.ether_addr_octet[1],
-                        priv->bc_dev.d_mac.ether.ether_addr_octet[2],
-                        priv->bc_dev.d_mac.ether.ether_addr_octet[3],
-                        priv->bc_dev.d_mac.ether.ether_addr_octet[4],
-                        priv->bc_dev.d_mac.ether.ether_addr_octet[5]);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

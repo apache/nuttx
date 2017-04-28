@@ -80,7 +80,6 @@
 #define SBSDIO_WATERMARK		0x10008
 /* control busy signal generation */
 #define SBSDIO_DEVICE_CTL		0x10009
-
 /* SB Address Window Low (b15) */
 #define SBSDIO_FUNC1_SBADDRLOW		0x1000A
 /* SB Address Window Mid (b23:b16) */
@@ -89,24 +88,34 @@
 #define SBSDIO_FUNC1_SBADDRHIGH		0x1000C
 /* Frame Control (frame term/abort) */
 #define SBSDIO_FUNC1_FRAMECTRL		0x1000D
+/* Read Frame Terminate */
+#define SFC_RF_TERM		(1 << 0)
+/* Write Frame Terminate */
+#define SFC_WF_TERM		(1 << 1)
+/* CRC error for write out of sync */
+#define SFC_CRC4WOOS	(1 << 2)
+/* Abort all in-progress frames */
+#define SFC_ABORTALL	(1 << 3)
+
 /* ChipClockCSR (ALP/HT ctl/status) */
 #define SBSDIO_FUNC1_CHIPCLKCSR		0x1000E
 /* Force ALP request to backplane */
-#define SBSDIO_FORCE_ALP		0x01
+#define SBSDIO_FORCE_ALP			0x01
 /* Force HT request to backplane */
-#define SBSDIO_FORCE_HT			0x02
+#define SBSDIO_FORCE_HT				0x02
 /* Force ILP request to backplane */
-#define SBSDIO_FORCE_ILP		0x04
+#define SBSDIO_FORCE_ILP			0x04
 /* Make ALP ready (power up xtal) */
 #define SBSDIO_ALP_AVAIL_REQ		0x08
 /* Make HT ready (power up PLL) */
-#define SBSDIO_HT_AVAIL_REQ		0x10
+#define SBSDIO_HT_AVAIL_REQ			0x10
 /* Squelch clock requests from HW */
 #define SBSDIO_FORCE_HW_CLKREQ_OFF	0x20
 /* Status: ALP is ready */
-#define SBSDIO_ALP_AVAIL		0x40
+#define SBSDIO_ALP_AVAIL			0x40
 /* Status: HT is ready */
-#define SBSDIO_HT_AVAIL			0x80
+#define SBSDIO_HT_AVAIL				0x80
+
 /* SdioPullUp (on cmd, d0-d2) */
 #define SBSDIO_FUNC1_SDIOPULLUP		0x1000F
 /* Write Frame Byte Count Low */

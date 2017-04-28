@@ -44,14 +44,18 @@
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 
+struct bcmf_dev_s;
+struct bcmf_frame_s;
+
+#include "bcmf_bdc.h"
+
+struct bcmf_bus_dev_s;
+
 /* Chip interfaces */
 
 #define CHIP_STA_INTERFACE   0
 #define CHIP_AP_INTERFACE    1
 #define CHIP_P2P_INTERFACE   2
-
-struct bcmf_bus_dev_s;
-struct bcmf_frame_s;
 
 /* This structure contains the unique state of the Broadcom FullMAC driver */
 
@@ -69,6 +73,9 @@ struct bcmf_dev_s
 
   struct net_driver_s bc_dev;  /* Network interface structure */
 
+  /* Event registration array */
+
+  event_handler_t event_handlers[BCMF_EVENT_COUNT];
 
   // FIXME use mutex instead of semaphore
   sem_t control_mutex;         /* Cannot handle multiple control requests */
@@ -77,6 +84,13 @@ struct bcmf_dev_s
   uint16_t control_rxdata_len; /* Received control frame out buffer length */
   uint8_t *control_rxdata;     /* Received control frame out buffer */
   uint32_t control_status;     /* Last received frame status */
+
+  /* AP Scan state machine.
+   * During scan, control_mutex is locked to prevent control requests */
+
+  int scan_status;                     /* Current scan status */
+  WDOG_ID scan_timeout;                /* Scan timeout timer */
+  struct wl_escan_params *scan_params; /* Current scan parameters */
 };
 
 /* Default bus interface structure */
@@ -103,5 +117,9 @@ struct bcmf_frame_s {
 };
 
 int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable);
+
+int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv);
+
+int bcmf_wl_is_scan_done(FAR struct bcmf_dev_s *priv);
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H */
