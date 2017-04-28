@@ -401,10 +401,10 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 
 #if (MSEC_PER_TICK * USEC_PER_MSEC) != USEC_PER_TICK && \
     defined(CONFIG_HAVE_LONG_LONG)
-          ticks = ((long long)timeout * USEC_PER_MSEC) + (USEC_PER_TICK - 1) /
+          ticks = ((unsigned long long)timeout * USEC_PER_MSEC) + (USEC_PER_TICK - 1) /
                   USEC_PER_TICK;
 #else
-          ticks = (timeout + (MSEC_PER_TICK - 1)) / MSEC_PER_TICK;
+          ticks = ((unsigned int)timeout + (MSEC_PER_TICK - 1)) / MSEC_PER_TICK;
 #endif
 
           /* Either wait for either a poll event(s), for a signal to occur,
