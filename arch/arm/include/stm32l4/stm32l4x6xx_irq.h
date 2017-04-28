@@ -149,8 +149,8 @@
 /* STM32L496xx/4A6xx only: */
 
 #define STM32L4_IRQ_HASH_CRS    (STM32L4_IRQ_FIRST+82) /* 82: HASH and CRS global interrupt */
-#define STM32L4_IRQ_I2C4_EV     (STM32L4_IRQ_FIRST+83) /* 83: I2C4 event interrupt */
-#define STM32L4_IRQ_I2C4_ER     (STM32L4_IRQ_FIRST+84) /* 84: I2C4 error interrupt */
+#define STM32L4_IRQ_I2C4EV      (STM32L4_IRQ_FIRST+83) /* 83: I2C4 event interrupt */
+#define STM32L4_IRQ_I2C4ER      (STM32L4_IRQ_FIRST+84) /* 84: I2C4 error interrupt */
 #define STM32L4_IRQ_DCMI        (STM32L4_IRQ_FIRST+85) /* 85: DCMI global interrupt */
 #define STM32L4_IRQ_CAN2TX      (STM32L4_IRQ_FIRST+86) /* 86: CAN2 TX interrupts */
 #define STM32L4_IRQ_CAN2RX0     (STM32L4_IRQ_FIRST+87) /* 87: CAN2 RX0 interrupts */
