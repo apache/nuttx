@@ -263,7 +263,7 @@ void weak_function lpc1766stk_sspdev_initialize(void)
  ************************************************************************************/
 
 #ifdef CONFIG_LPC17_SSP0
-void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void  lpc17_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   if (devid == SPIDEV_DISPLAY)
@@ -276,7 +276,7 @@ void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
     }
 }
 
-uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   spiinfo("Returning nothing\n");
   return 0;
@@ -284,7 +284,7 @@ uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #endif
 
 #ifdef CONFIG_LPC17_SSP1
-void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void  lpc17_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   if (devid == SPIDEV_MMCSD)
@@ -297,7 +297,7 @@ void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
     }
 }
 
-uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   spiinfo("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
