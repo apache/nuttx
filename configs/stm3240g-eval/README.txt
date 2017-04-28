@@ -61,9 +61,6 @@ GNU Toolchain Options
     CONFIG_ARMV7M_TOOLCHAIN_RAISONANCE=y     : Raisonance RIDE7 under Windows
     CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
 
-  If you change the default toolchain, then you may also have to modify the PATH in
-  the setenv.h file if your make cannot find the tools.
-
   NOTE: the CodeSourcery (for Windows), Atollic, devkitARM, and Raisonance toolchains are
   Windows native toolchains.  The CodeSourcery (for Linux) and NuttX buildroot
   toolchains are Cygwin and/or Linux native toolchains. There are several limitations
@@ -168,7 +165,7 @@ IDEs
 NuttX EABI "buildroot" Toolchain
 ================================
 
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  A GNU GCC-based toolchain is assumed.  The PATH environment variable should
   be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
   different from the default in your PATH variable).
 
@@ -195,8 +192,8 @@ NuttX EABI "buildroot" Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   details PLUS some special instructions that you will need to follow if you are
@@ -257,8 +254,8 @@ NXFLAT Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly builtNXFLAT binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     NXFLAT binaries.
 
 Ethernet
 ========
@@ -890,7 +887,6 @@ can be selected as follow:
     cd tools
     ./configure.sh stm3240g-eval/<subdir>
     cd -
-    . ./setenv.sh
 
 Where <subdir> is one of the following:
 
@@ -1467,7 +1463,6 @@ Where <subdir> is one of the following:
     2. Make the build context (only)
 
        $ cd ..
-       $ . ./setenv.sh
        $ make context
        ...
 

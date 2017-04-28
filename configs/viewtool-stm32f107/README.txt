@@ -536,11 +536,9 @@ Configurations
     cd tools
     ./configure.sh viewtool-stm32f107/<subdir>
     cd -
-    . ./setenv.sh
 
-  Before sourcing the setenv.sh file above, you should examine it and perform
-  edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
-  than holds your toolchain binaries.
+  Before starting the build, make sure that your PATH environment variable
+  includes the correct path to your toolchain.
 
   And then build NuttX by simply typing the following.  At the conclusion of
   the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
@@ -578,10 +576,6 @@ Configurations
 
      System Type -> Toolchain:
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : GNU EABI toolchain for windows
-
-     The setenv.sh file is available for you to use to set the PATH
-     variable.  The path in the that file may not, however, be correct
-     for your installation.
 
      See also the "NOTE about Windows native toolchains" in the section call
      "GNU Toolchain Options" above.

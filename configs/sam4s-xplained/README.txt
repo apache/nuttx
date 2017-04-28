@@ -103,10 +103,6 @@ GNU Toolchain Options
     CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y      : Generic GCC ARM EABI toolchain for Linux
     CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y      : Generic GCC ARM EABI toolchain for Windows
 
-  If you are not using CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT, then you may also
-  have to modify the PATH in the setenv.h file if your make cannot find the
-  tools.
-
   NOTE about Windows native toolchains
   ------------------------------------
 
@@ -176,7 +172,7 @@ IDEs
 NuttX EABI "buildroot" Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  A GNU GCC-based toolchain is assumed.  The PATH environment variable should
   be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
   different from the default in your PATH variable).
 
@@ -203,8 +199,8 @@ NuttX EABI "buildroot" Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   details PLUS some special instructions that you will need to follow if you are
@@ -265,8 +261,8 @@ NXFLAT Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly builtNXFLAT binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     NXFLAT binaries.
 
 Buttons and LEDs
 ^^^^^^^^^^^^^^^^
@@ -483,11 +479,9 @@ Configurations
     cd tools
     ./configure.shsam4s-xplained/<subdir>
     cd -
-    . ./setenv.sh
 
-  Before sourcing the setenv.sh file above, you should examine it and perform
-  edits as necessary so that BUILDROOT_BIN is the correct path to the directory
-  than holds your toolchain binaries.
+  Before building, make sure the PATH environment variable includes the
+  correct path to the directory than holds your toolchain binaries.
 
   And then build NuttX by simply typing the following.  At the conclusion of
   the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
@@ -561,9 +555,7 @@ Configurations
 
      Also, make sure that your PATH variable has the new path to your
      Atmel tools.  Try 'which arm-none-eabi-gcc' to make sure that you
-     are selecting the right tool.  setenv.sh is available for you to
-     use to set or PATH variable.  The path in the that file may not,
-     however, be correct for your installation.
+     are selecting the right tool.
 
      See also the "NOTE about Windows native toolchains" in the section call
      "GNU Toolchain Options" above.

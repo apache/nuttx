@@ -54,7 +54,6 @@
 #include <nuttx/config.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/irq.h>
-#include <nuttx/wireless/wireless.h>
 
 #if defined(CONFIG_DRIVERS_WIRELESS) && defined(CONFIG_WL_CC3000)
 

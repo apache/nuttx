@@ -585,11 +585,9 @@ Configurations
     ./configure.sh esp32-core/<subdir>
     cd -
     make oldconfig
-    . ./setenv.sh
 
-  Before sourcing the setenv.sh file above, you should examine it and
-  perform edits as necessary so that TOOLCHAIN_BIN is the correct path to
-  the directory than holds your toolchain binaries.
+  Before building, make sure the PATH environment variable includes the
+  correct path to the directory than holds your toolchain binaries.
 
   If this is a Windows native build, then configure.bat should be used
   instead of configure.sh:

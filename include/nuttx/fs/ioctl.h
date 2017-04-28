@@ -68,25 +68,26 @@
 #define _QEIOCBASE      (0x0f00) /* Quadrature encoder ioctl commands */
 #define _AUDIOIOCBASE   (0x1000) /* Audio ioctl commands */
 #define _SLCDIOCBASE    (0x1100) /* Segment LCD ioctl commands */
-#define _WLIOCBASE      (0x1200) /* Wireless modules ioctl commands */
-#define _CFGDIOCBASE    (0x1300) /* Config Data device (app config) ioctl commands */
-#define _TCIOCBASE      (0x1400) /* Timer ioctl commands */
-#define _DJOYBASE       (0x1500) /* Discrete joystick ioctl commands */
-#define _AJOYBASE       (0x1600) /* Analog joystick ioctl commands */
-#define _PIPEBASE       (0x1700) /* FIFO/pipe ioctl commands */
-#define _RTCBASE        (0x1800) /* RTC ioctl commands */
-#define _RELAYBASE      (0x1900) /* Relay devices ioctl commands */
-#define _CANBASE        (0x1a00) /* CAN ioctl commands */
-#define _BTNBASE        (0x1b00) /* Button ioctl commands */
-#define _ULEDBASE       (0x1c00) /* User LED ioctl commands */
-#define _ZCBASE         (0x1d00) /* Zero Cross ioctl commands */
-#define _LOOPBASE       (0x1e00) /* Loop device commands */
-#define _MODEMBASE      (0x1f00) /* Modem ioctl commands */
-#define _I2CBASE        (0x2000) /* I2C driver commands */
-#define _SPIBASE        (0x2100) /* SPI driver commands */
-#define _GPIOBASE       (0x2200) /* GPIO driver commands */
-#define _CLIOCBASE      (0x2300) /* Contactless modules ioctl commands */
-#define _USBCBASE       (0x2400) /* USB-C controller ioctl commands */
+#define _WLIOCBASE      (0x1200) /* Wireless modules ioctl network commands */
+#define _WLCIOCBASE     (0x1300) /* Wireless modules ioctl character driver commands */
+#define _CFGDIOCBASE    (0x1400) /* Config Data device (app config) ioctl commands */
+#define _TCIOCBASE      (0x1500) /* Timer ioctl commands */
+#define _DJOYBASE       (0x1600) /* Discrete joystick ioctl commands */
+#define _AJOYBASE       (0x1700) /* Analog joystick ioctl commands */
+#define _PIPEBASE       (0x1800) /* FIFO/pipe ioctl commands */
+#define _RTCBASE        (0x1900) /* RTC ioctl commands */
+#define _RELAYBASE      (0x1a00) /* Relay devices ioctl commands */
+#define _CANBASE        (0x1b00) /* CAN ioctl commands */
+#define _BTNBASE        (0x1c00) /* Button ioctl commands */
+#define _ULEDBASE       (0x1d00) /* User LED ioctl commands */
+#define _ZCBASE         (0x1e00) /* Zero Cross ioctl commands */
+#define _LOOPBASE       (0x1f00) /* Loop device commands */
+#define _MODEMBASE      (0x2000) /* Modem ioctl commands */
+#define _I2CBASE        (0x2100) /* I2C driver commands */
+#define _SPIBASE        (0x2200) /* SPI driver commands */
+#define _GPIOBASE       (0x2300) /* GPIO driver commands */
+#define _CLIOCBASE      (0x2400) /* Contactless modules ioctl commands */
+#define _USBCBASE       (0x2500) /* USB-C controller ioctl commands */
 
 /* boardctl() commands share the same number space */
 
@@ -294,11 +295,17 @@
 #define _SLCDIOCVALID(c)  (_IOC_TYPE(c)==_SLCDIOCBASE)
 #define _SLCDIOC(nr)      _IOC(_SLCDIOCBASE,nr)
 
-/* Wireless driver ioctl definitions ****************************************/
+/* Wireless driver networki ioctl definitions *******************************/
 /* (see nuttx/include/wireless/wireless.h */
 
 #define _WLIOCVALID(c)    (_IOC_TYPE(c)==_WLIOCBASE)
 #define _WLIOC(nr)        _IOC(_WLIOCBASE,nr)
+
+/* Wireless driver character driver ioctl definitions ***********************/
+/* (see nuttx/include/wireless/ioctl.h */
+
+#define _WLCIOCVALID(c)   (_IOC_TYPE(c)==_WLCIOCBASE)
+#define _WLCIOC(nr)       _IOC(_WLCIOCBASE,nr)
 
 /* Application Config Data driver ioctl definitions *************************/
 /* (see nuttx/include/configdata.h */

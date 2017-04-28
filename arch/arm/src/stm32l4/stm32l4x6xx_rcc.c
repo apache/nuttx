@@ -159,6 +159,12 @@ static inline void rcc_enableahb1(void)
   regval |= RCC_AHB1ENR_TSCEN;
 #endif
 
+#ifdef CONFIG_STM32L4_DMA2D
+  /* DMA2D clock enable */
+
+  regval |= RCC_AHB1ENR_DMA2DEN;
+#endif
+
   putreg32(regval, STM32L4_RCC_AHB1ENR);   /* Enable peripherals */
 }
 
@@ -220,10 +226,22 @@ static inline void rcc_enableahb2(void)
   regval |= RCC_AHB2ENR_ADCEN;
 #endif
 
+#ifdef CONFIG_STM32L4_DCMI
+  /* Digital Camera interfaces clock enable */
+
+  regval |= RCC_AHB2ENR_DCMIEN;
+#endif
+
 #ifdef CONFIG_STM32L4_AES
   /* Cryptographic modules clock enable */
 
   regval |= RCC_AHB2ENR_AESEN;
+#endif
+
+#ifdef CONFIG_STM32L4_HASH
+  /* HASH module clock enable */
+
+  regval |= RCC_AHB2ENR_HASHEN;
 #endif
 
 #ifdef CONFIG_STM32L4_RNG
@@ -389,6 +407,12 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR1_CAN1EN;
 #endif
 
+#ifdef CONFIG_STM32L4_CAN2
+  /* CAN 2 clock enable */
+
+  regval |= RCC_APB1ENR1_CAN2EN;
+#endif
+
   /* Power interface clock enable.  The PWR block is always enabled so that
    * we can set the internal voltage regulator as required.
    */
@@ -423,6 +447,12 @@ static inline void rcc_enableapb1(void)
   /* Low power uart clock enable */
 
   regval |= RCC_APB1ENR2_LPUART1EN;
+#endif
+
+#ifdef CONFIG_STM32L4_I2C4
+  /* I2C4 clock enable */
+
+  regval |= RCC_APB1ENR2_I2C4EN;
 #endif
 
 #ifdef CONFIG_STM32L4_SWPMI
@@ -889,7 +919,7 @@ static void stm32l4_stdclockconfig(void)
 #endif
 
 /****************************************************************************
- * Name: rcc_enableperiphals
+ * Name: rcc_enableperipherals
  ****************************************************************************/
 
 static inline void rcc_enableperipherals(void)

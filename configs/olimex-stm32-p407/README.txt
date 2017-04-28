@@ -241,14 +241,12 @@ selected as follow:
     cd tools
     ./configure.sh olimex-stm32-p407/<subdir>
     cd -
-    . ./setenv.sh
 
 Where <subdir> is one of the configuration sub-directories listed in the
 following section.
 
-Before sourcing the setenv.sh file above, you should examine it and perform
-edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
-than holds your toolchain binaries.
+Before building, make sure the PATH environment variable includes the
+correct path to the directory than holds your toolchain binaries.
 
 And then build NuttX by simply typing the following.  At the conclusion of
 the make, the nuttx binary will reside in an ELF file called, simply, nuttx.

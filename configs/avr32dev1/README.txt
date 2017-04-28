@@ -228,10 +228,8 @@ AVR32 Bootloader
   driver in the FLIP usb directory.  Then in the bin directory where
   you installed FLIP, you will also find batchisp.exe.
 
-  NOTE: The AVR32DEV1 setenv.sh files will add the path to the BatchISP
-  bin directory to the Cygwin PATH variable.  If you use a different
-  version of FLIP or if you install FLIP in a different location, you
-  will need to modify the setenv.sh files.
+  NOTE: You will need to set the PATH environment variable to include the
+  path to the BatchISP bin directory.
 
   Notes from "AVR32 UC3 USB DFU Bootloader" (doc7745.pdf)
 
@@ -436,7 +434,6 @@ Common Configuration Notes
        cd tools
        ./configure.sh avr32dev1/<subdir>
        cd -
-       . ./setenv.sh
 
      Where <subdir> is one of the configuration sub-directories described in
      the following paragraph.

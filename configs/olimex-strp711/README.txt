@@ -164,7 +164,7 @@ GNU Toolchain Options
 NuttX buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  A GNU GCC-based toolchain is assumed.  The PATH environment variable should
   be modified to point to the correct path to the ARM toolchain (if
   different from the default).
 
@@ -190,8 +190,8 @@ NuttX buildroot Toolchain
 
   7. make
 
-  8. Edit setenv.h so that the PATH variable includes the path to the
-     newly built binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     binaries.
 
 Linux OpenOCD with Wiggler JTAG
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -275,9 +275,8 @@ Windows OpenOCD will Olimex JTAG
     - If you are working under Linux you will need to change any
       occurances of `cygpath -w blablabla` to just blablabla
 
-  The setenv.sh file includes some environment varialble settings
-  that are needed by oocd.sh.  If you have $PATH and other environment
-  variables set up, then you should be able to start the OpenOCD daemon like:
+  If you have $PATH and other environment variables set up, then you should
+  be able to start the OpenOCD daemon like:
 
     oocd.sh
 
@@ -375,7 +374,6 @@ Common Configuration Notes:
        cd tools
        ./configure.sh olimex-strp711/<subdir>
        cd -
-       . ./setenv.sh
 
      Where <subdir> is one of the configuration sub-directories described in
      the following paragraph.

@@ -53,9 +53,10 @@
 #include <stdint.h>
 #include <mqueue.h>
 #include <pthread.h>
+
 #include <nuttx/spi/spi.h>
 #include <nuttx/irq.h>
-#include <nuttx/wireless/wireless.h>
+#include <nuttx/wireless/ioctl.h>
 #include <nuttx/wireless/cc3000.h>
 #include <nuttx/wireless/cc3000/cc3000_common.h>
 

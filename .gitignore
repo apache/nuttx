@@ -14,8 +14,6 @@ core
 /.config.old
 /.version
 /Make.defs
-/setenv.sh
-/setenv.bat
 /nuttx
 /nuttx.*
 /nuttx-*

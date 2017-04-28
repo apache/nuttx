@@ -382,12 +382,6 @@ Common Configuration Information
        cd <nuttx-directory>/tools
        ./configure.sh sim/<subdir>
        cd -
-       . ./setenv.sh
-
-     If this is a Windows native build, then configure.bat should be used
-     instead of configure.sh:
-
-        configure.bat sim\<subdir>
 
      Where <subdir> is one of the following sub-directories.
 

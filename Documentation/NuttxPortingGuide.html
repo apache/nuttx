@@ -742,12 +742,10 @@
 |   `-- <i>(board-specific source files)</i>
 |-- <i>&lt;config1-dir&gt;</i>
 |   |-- Make.defs
-|   |-- defconfig
-|   `-- setenv.sh
+|   `-- defconfig
 |-- <i>&lt;config2-dir&gt;</i>
 |   |-- Make.defs
-|   |-- defconfig
-|   `-- setenv.sh
+|   `-- defconfig
 |   ...
 `-- <i>(other board-specific configuration sub-directories)</i>/
 </pre></ul>
@@ -780,7 +778,7 @@
   The <code>configs/</code><i>&lt;board-name&gt;</i><code>/</code> sub-directory holds all of the
   files that are necessary to configure NuttX for the particular board.
   A board may have various different configurations using the common source files.
-  Each board configuration is described by three files:  <code>Make.defs</code>, <code>defconfig</code>, and <code>setenv.sh</code>.
+  Each board configuration is described by two files:  <code>Make.defs</code> and <code>defconfig</code>.
   Typically, each set of configuration files is retained in a separate configuration sub-directory
   (<i>&lt;config1-dir&gt;</i>, <i>&lt;config2-dir&gt;</i>, .. in the above diagram).
 
@@ -835,15 +833,6 @@
       <li>to generate <code>include/nuttx/config.h</code> which is included by
           most C files in the system.</li>
     </ol>
-  </li>
-  <li>
-    <p>
-      <code>setenv.sh</code>: This is a script that can be included that will be installed at
-      the top level of the directory structure and can be sourced to set any
-      necessary environment variables.
-      You will most likely have to customize the default <code>setenv.sh</code> script in order
-      for it to work correctly in your environment.
-    </p>
   </li>
 </ul>
 
@@ -1364,7 +1353,6 @@ tools/
 </p>
 <ul>
   <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/]Make.defs</code> to <code>${TOPDIR}/Make.defs</code>,<li>
-  <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/]setenv.sh</code> to <code>${TOPDIR}/setenv.sh</code>, and</li>
   <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/]defconfig</code> to <code>${TOPDIR}/.config</code></li>
 </ul>
 
@@ -1464,7 +1452,6 @@ tools/version.h -v 6.1 .version
 </p>
 <ul><pre>
 cd ${TOPDIR}
-source ./setenv.sh
 make
 </pre></ul>
 <p>
@@ -1477,15 +1464,12 @@ make
   That directory also holds:
 </p>
 <ul>
-  <li>The makefile fragment <a href="#boardconfigsubdirs"><code>.config</code></a> that describes the current configuration.</li>
-  <li>The makefile fragment <a href="#boardconfigsubdirs"><code>Make.defs</code></a> that provides customized build targets, and</li>
-  <li>The shell script <a href="#boardconfigsubdirs"><code>setenv.sh</code></a> that sets up the configuration environment for the build.</li>
+  <li>The makefile fragment <a href="#boardconfigsubdirs"><code>.config</code></a> that describes the current configuration, and</li>
+  <li>The makefile fragment <a href="#boardconfigsubdirs"><code>Make.defs</code></a> that provides customized build targets.</li>
 </ul>
 <p>
-The <a href="#boardconfigsubdirs"><code>setenv.sh</code></a> contains Linux/Cygwin environmental settings that are needed for the build.
+<b>Environment Variables</b>.
 The specific environmental definitions are unique for each board but should include, as a minimum, updates to the <code>PATH</code> variable to include the full path to the architecture-specific toolchain identified in <a href="#boardconfigsubdirs"><code>Make.defs</code></a>.
-The <a href="#boardconfigsubdirs"><code>setenv.sh</code></a> only needs to be source'ed at the beginning of a session.
-The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 <p>
   <b>First Time Make.</b>

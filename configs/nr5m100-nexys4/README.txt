@@ -235,12 +235,6 @@ can be selected as follow:
     cd tools
     ./configure.sh nr5m100-nexys4/<subdir>
     cd -
-    . ./setenv.sh
-
-If this is a Windows native build, then configure.bat should be used
-instead of configure.sh:
-
-    configure.bat nr5m100-nexys4\<subdir>
 
 Where <subdir> is one of the following:
 
