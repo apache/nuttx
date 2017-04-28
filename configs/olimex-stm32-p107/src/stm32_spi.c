@@ -108,7 +108,7 @@ void weak_function stm32_spidev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_SPI3
-void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void stm32_spi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
@@ -120,7 +120,7 @@ void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
     }
 }
 
-uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return SPI_STATUS_PRESENT;
 }
