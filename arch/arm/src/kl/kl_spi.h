@@ -64,7 +64,7 @@ extern "C"
  ************************************************************************************/
 
 struct spi_dev_s;  /* Forward reference */
-enum spi_dev_e;    /* Forward reference */
+uint32_t;    /* Forward reference */
 
 /****************************************************************************
  * Name: kl_spibus_initialize
@@ -111,18 +111,18 @@ FAR struct spi_dev_s *kl_spibus_initialize(int port);
  ************************************************************************************/
 
 #ifdef CONFIG_KL_SPI0
-void  kl_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t kl_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  kl_spi0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t kl_spi0status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int kl_spi0cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int kl_spi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_KL_SPI1
-void  kl_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t kl_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  kl_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t kl_spi1status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int kl_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int kl_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 

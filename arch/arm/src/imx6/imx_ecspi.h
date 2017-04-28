@@ -70,7 +70,7 @@ extern "C"
  ************************************************************************************/
 
 struct spi_dev_s; /* Forward reference */
-enum spi_dev_e;   /* Forward reference */
+uint32_t;   /* Forward reference */
 
 /************************************************************************************
  * Name: imx_spibus_initialize
@@ -118,42 +118,42 @@ FAR struct spi_dev_s *imx_spibus_initialize(int port);
  ************************************************************************************/
 
 #ifdef CONFIG_IMX6_ECSPI1
-void imx_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t imx_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void imx_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t imx_spi1status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int imx_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int imx_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_IMX6_ECSPI2
-void imx_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t imx_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void imx_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t imx_spi2status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int imx_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int imx_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_IMX6_ECSPI3
-void imx_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t imx_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void imx_spi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t imx_spi3status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int imx_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int imx_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_IMX6_ECSPI4
-void imx_spi4select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t imx_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void imx_spi4select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t imx_spi4status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int imx_spi4cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int imx_spi4cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_IMX6_ECSPI5
-void imx_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t imx_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void imx_spi5select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t imx_spi5status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int imx_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int imx_spi5cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 

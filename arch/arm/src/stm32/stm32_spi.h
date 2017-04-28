@@ -117,39 +117,39 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus);
  ************************************************************************************/
 
 #ifdef CONFIG_STM32_SPI1
-void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-int stm32_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid);
+int stm32_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-int stm32_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid);
+int stm32_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_STM32_SPI3
-void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-int stm32_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+void stm32_spi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid);
+int stm32_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_STM32_SPI4
-void stm32_spi4select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t stm32_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-int stm32_spi4cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+void stm32_spi4select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t stm32_spi4status(FAR struct spi_dev_s *dev, uint32_t devid);
+int stm32_spi4cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_STM32_SPI5
-void stm32_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t stm32_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-int stm32_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+void stm32_spi5select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t stm32_spi5status(FAR struct spi_dev_s *dev, uint32_t devid);
+int stm32_spi5cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_STM32_SPI6
-void stm32_spi6select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t stm32_spi6status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-int stm32_spi6cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+void stm32_spi6select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t stm32_spi6status(FAR struct spi_dev_s *dev, uint32_t devid);
+int stm32_spi6cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 /************************************************************************************

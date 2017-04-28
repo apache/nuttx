@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 struct spi_dev_s;  /* Forward reference */
-enum spi_dev_e;    /* Forward reference */
+uint32_t;    /* Forward reference */
 
 /****************************************************************************
  * Name: efm32_spibus_initialize
@@ -101,26 +101,26 @@ struct spi_dev_s *efm32_spibus_initialize(int port);
  ****************************************************************************/
 
 #ifdef CONFIG_EFM32_USART0_ISSPI
-void efm32_spi0_select(struct spi_dev_s *dev, enum spi_dev_e devid,
+void efm32_spi0_select(struct spi_dev_s *dev, uint32_t devid,
                        bool selected);
-uint8_t efm32_spi0_status(struct spi_dev_s *dev, enum spi_dev_e devid);
-int efm32_spi0_cmddata(struct spi_dev_s *dev, enum spi_dev_e devid,
+uint8_t efm32_spi0_status(struct spi_dev_s *dev, uint32_t devid);
+int efm32_spi0_cmddata(struct spi_dev_s *dev, uint32_t devid,
                        bool cmd);
 #endif
 
 #ifdef CONFIG_EFM32_USART1_ISSPI
-void efm32_spi1_select(struct spi_dev_s *dev, enum spi_dev_e devid,
+void efm32_spi1_select(struct spi_dev_s *dev, uint32_t devid,
                        bool selected);
-uint8_t efm32_spi1_status(struct spi_dev_s *dev, enum spi_dev_e devid);
-int efm32_spi1_cmddata(struct spi_dev_s *dev, enum spi_dev_e devid,
+uint8_t efm32_spi1_status(struct spi_dev_s *dev, uint32_t devid);
+int efm32_spi1_cmddata(struct spi_dev_s *dev, uint32_t devid,
                        bool cmd);
 #endif
 
 #ifdef CONFIG_EFM32_USART2_ISSPI
-void efm32_spi2_select(struct spi_dev_s *dev, enum spi_dev_e devid,
+void efm32_spi2_select(struct spi_dev_s *dev, uint32_t devid,
                        bool selected);
-uint8_t efm32_spi2_status(struct spi_dev_s *dev, enum spi_dev_e devid);
-int efm32_spi2_cmddata(struct spi_dev_s *dev, enum spi_dev_e devid,
+uint8_t efm32_spi2_status(struct spi_dev_s *dev, uint32_t devid);
+int efm32_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid,
                        bool cmd);
 #endif
 

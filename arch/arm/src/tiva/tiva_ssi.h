@@ -108,11 +108,11 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port);
  ****************************************************************************/
 
 struct spi_dev_s;
-enum spi_dev_e;
-void tiva_ssiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t tiva_ssistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+uint32_t;
+void tiva_ssiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t tiva_ssistatus(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int tiva_ssicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int tiva_ssicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #if defined(__cplusplus)

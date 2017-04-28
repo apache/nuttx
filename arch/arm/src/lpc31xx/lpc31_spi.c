@@ -115,11 +115,11 @@ static inline uint16_t spi_readword(FAR struct lpc31_spidev_s *priv);
 static inline void spi_writeword(FAR struct lpc31_spidev_s *priv, uint16_t word);
 
 static int         spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static void        spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+static void        spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
 static uint32_t    spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
 static void        spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void        spi_setbits(FAR struct spi_dev_s *dev, int nbits);
-static uint8_t     spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+static uint8_t     spi_status(FAR struct spi_dev_s *dev, uint32_t devid);
 static uint16_t    spi_send(FAR struct spi_dev_s *dev, uint16_t word);
 static void        spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                                 FAR void *rxbuffer, size_t nwords);
@@ -482,7 +482,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   struct lpc31_spidev_s *priv = (struct lpc31_spidev_s *) dev;
   uint8_t slave = 0;
@@ -689,7 +689,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
  *
  ****************************************************************************/
 
-static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   /* FIXME: is there anyway to determine this
    *        it should probably be board dependant anyway */

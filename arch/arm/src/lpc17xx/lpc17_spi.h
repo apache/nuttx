@@ -71,7 +71,7 @@ extern "C"
  ************************************************************************************/
 
 struct spi_dev_s; /* Forward reference */
-enum spi_dev_e;   /* Forward reference */
+uint32_t;   /* Forward reference */
 
 /************************************************************************************
  * Name: lpc17_spibus_initialize
@@ -115,10 +115,10 @@ FAR struct spi_dev_s *lpc17_spibus_initialize(int port);
  *
  ************************************************************************************/
 
-void lpc17_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t lpc17_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void lpc17_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t lpc17_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int lpc17_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int lpc17_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 /****************************************************************************

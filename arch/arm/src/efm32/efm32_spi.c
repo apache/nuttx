@@ -109,11 +109,11 @@ struct efm32_spiconfig_s
 
   /* SPI-specific methods */
 
-  void (*select)(struct spi_dev_s *dev, enum spi_dev_e devid,
+  void (*select)(struct spi_dev_s *dev, uint32_t devid,
                  bool selected);
-  uint8_t (*status)(struct spi_dev_s *dev, enum spi_dev_e devid);
+  uint8_t (*status)(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-  int (*cmddata)(struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+  int (*cmddata)(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 };
 
@@ -180,7 +180,7 @@ static inline void spi_dmatxstart(FAR struct efm32_spidev_s *priv);
 /* SPI methods */
 
 static int       spi_lock(struct spi_dev_s *dev, bool lock);
-static void      spi_select(struct spi_dev_s *dev, enum spi_dev_e devid,
+static void      spi_select(struct spi_dev_s *dev, uint32_t devid,
                    bool selected);
 static uint32_t  spi_setfrequency(struct spi_dev_s *dev,
                    uint32_t frequency);
@@ -190,9 +190,9 @@ static void      spi_setbits(struct spi_dev_s *dev, int nbits);
 static int       spi_hwfeatures(FAR struct spi_dev_s *dev,
                                 spi_hwfeatures_t features);
 #endif
-static uint8_t   spi_status(struct spi_dev_s *dev, enum spi_dev_e devid);
+static uint8_t   spi_status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-static int       spi_cmddata(struct spi_dev_s *dev, enum spi_dev_e devid,
+static int       spi_cmddata(struct spi_dev_s *dev, uint32_t devid,
                    bool cmd);
 #endif
 static uint16_t  spi_send(struct spi_dev_s *dev, uint16_t wd);
@@ -781,7 +781,7 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static void spi_select(struct spi_dev_s *dev, enum spi_dev_e devid,
+static void spi_select(struct spi_dev_s *dev, uint32_t devid,
                        bool selected)
 {
   struct efm32_spidev_s *priv = (struct efm32_spidev_s *)dev;
@@ -1147,7 +1147,7 @@ static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
  *
  ****************************************************************************/
 
-static uint8_t spi_status(struct spi_dev_s *dev, enum spi_dev_e devid)
+static uint8_t spi_status(struct spi_dev_s *dev, uint32_t devid)
 {
   struct efm32_spidev_s *priv = (struct efm32_spidev_s *)dev;
   const struct efm32_spiconfig_s *config;
@@ -1185,7 +1185,7 @@ static uint8_t spi_status(struct spi_dev_s *dev, enum spi_dev_e devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-static int spi_cmddata(struct spi_dev_s *dev, enum spi_dev_e devid,
+static int spi_cmddata(struct spi_dev_s *dev, uint32_t devid,
                        bool cmd);
 {
   struct efm32_spidev_s *priv = (struct efm32_spidev_s *)dev;

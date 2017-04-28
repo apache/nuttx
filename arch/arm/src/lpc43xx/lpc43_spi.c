@@ -103,7 +103,7 @@ struct lpc43_spidev_s
 /* SPI methods */
 
 static int      spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static void     spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+static void     spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
 static void     spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void     spi_setbits(FAR struct spi_dev_s *dev, int nbits);
