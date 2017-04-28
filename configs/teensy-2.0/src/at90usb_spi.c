@@ -136,7 +136,7 @@ void weak_function at90usb_spidev_initialize(void)
  *
  ************************************************************************************/
 
-void  avr_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void  avr_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
@@ -152,7 +152,7 @@ void  avr_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool select
     }
 }
 
-uint8_t avr_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t avr_spistatus(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t ret = 0;
   uint8_t regval = PINB;

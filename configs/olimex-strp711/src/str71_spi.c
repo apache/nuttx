@@ -400,11 +400,11 @@ static inline void spi_drain(FAR struct str71x_spidev_s *priv);
 /* SPI methods */
 
 static int    spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static void   spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+static void   spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
-static uint8_t  spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+static uint8_t  spi_status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-static int    spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+static int    spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
 static void   spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t buflen);
@@ -608,7 +608,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   FAR struct str71x_spidev_s *priv = (FAR struct str71x_spidev_s *)dev;
   uint16_t reg16;
@@ -713,7 +713,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
  *
  ****************************************************************************/
 
-static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t ret = 0;
   uint16_t reg16 = getreg16(STR71X_GPIO1_PD);
@@ -756,7 +756,7 @@ static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-static int spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
 #  error "spi_cmddata not implemented"
   return -ENOSYS;
