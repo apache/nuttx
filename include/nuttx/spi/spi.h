@@ -420,41 +420,7 @@
 #define SPI_REGISTERCALLBACK(d,c,a) \
   ((d)->ops->registercallback ? (d)->ops->registercallback(d,c,a) : -ENOSYS)
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* The type of the media change callback function */
-
-typedef void (*spi_mediachange_t)(FAR void *arg);
-
-/* If the board supports multiple SPI devices types, this enumeration
- * identifies which is selected or de-selected.
- * There may be more than one instance of each type on a bus, see below.
- */
-
-enum spi_devtype_e
-{
-  SPIDEVTYPE_NONE = 0,      /* Not a valid value */
-  SPIDEVTYPE_MMCSD,         /* Select SPI MMC/SD device */
-  SPIDEVTYPE_FLASH,         /* Select SPI FLASH device */
-  SPIDEVTYPE_ETHERNET,      /* Select SPI Ethernet device */
-  SPIDEVTYPE_DISPLAY,       /* Select SPI LCD/OLED display device */
-  SPIDEVTYPE_CAMERA,        /* Select SPI imaging device */
-  SPIDEVTYPE_WIRELESS,      /* Select SPI Wireless device */
-  SPIDEVTYPE_TOUCHSCREEN,   /* Select SPI touchscreen device */
-  SPIDEVTYPE_EXPANDER,      /* Select SPI I/O expander device */
-  SPIDEVTYPE_MUX,           /* Select SPI multiplexer device */
-  SPIDEVTYPE_AUDIO_DATA,    /* Select SPI audio codec device data port */
-  SPIDEVTYPE_AUDIO_CTRL,    /* Select SPI audio codec device control port */
-  SPIDEVTYPE_EEPROM,        /* Select SPI EEPROM device */
-  SPIDEVTYPE_ACCELEROMETER, /* Select SPI Accelerometer device */
-  SPIDEVTYPE_BAROMETER,     /* Select SPI Pressure/Barometer device */
-  SPIDEVTYPE_TEMPERATURE,   /* Select SPI Temperature sensor device */
-  SPIDEVTYPE_IEEE802154,    /* Select SPI IEEE 802.15.4 wireless device */
-  SPIDEVTYPE_CONTACTLESS,   /* Select SPI Contactless device */
-  SPIDEVTYPE_USER           /* Board-specific values start here */
-};
+/* SPI Device Macros ********************************************************/
 
 /* This builds a SPI devid from its type and index */
 
@@ -490,6 +456,42 @@ enum spi_devtype_e
 #define SPIDEV_IEEE802154    SPIDEV_ID(SPIDEVTYPE_IEEE802154   , 0)
 #define SPIDEV_CONTACTLESS   SPIDEV_ID(SPIDEVTYPE_CONTACTLESS  , 0)
 #define SPIDEV_USER          SPIDEV_ID(SPIDEVTYPE_USER         , 0)
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* The type of the media change callback function */
+
+typedef void (*spi_mediachange_t)(FAR void *arg);
+
+/* If the board supports multiple SPI devices types, this enumeration
+ * identifies which is selected or de-selected.
+ * There may be more than one instance of each type on a bus, see below.
+ */
+
+enum spi_devtype_e
+{
+  SPIDEVTYPE_NONE = 0,      /* Not a valid value */
+  SPIDEVTYPE_MMCSD,         /* Select SPI MMC/SD device */
+  SPIDEVTYPE_FLASH,         /* Select SPI FLASH device */
+  SPIDEVTYPE_ETHERNET,      /* Select SPI Ethernet device */
+  SPIDEVTYPE_DISPLAY,       /* Select SPI LCD/OLED display device */
+  SPIDEVTYPE_CAMERA,        /* Select SPI imaging device */
+  SPIDEVTYPE_WIRELESS,      /* Select SPI Wireless device */
+  SPIDEVTYPE_TOUCHSCREEN,   /* Select SPI touchscreen device */
+  SPIDEVTYPE_EXPANDER,      /* Select SPI I/O expander device */
+  SPIDEVTYPE_MUX,           /* Select SPI multiplexer device */
+  SPIDEVTYPE_AUDIO_DATA,    /* Select SPI audio codec device data port */
+  SPIDEVTYPE_AUDIO_CTRL,    /* Select SPI audio codec device control port */
+  SPIDEVTYPE_EEPROM,        /* Select SPI EEPROM device */
+  SPIDEVTYPE_ACCELEROMETER, /* Select SPI Accelerometer device */
+  SPIDEVTYPE_BAROMETER,     /* Select SPI Pressure/Barometer device */
+  SPIDEVTYPE_TEMPERATURE,   /* Select SPI Temperature sensor device */
+  SPIDEVTYPE_IEEE802154,    /* Select SPI IEEE 802.15.4 wireless device */
+  SPIDEVTYPE_CONTACTLESS,   /* Select SPI Contactless device */
+  SPIDEVTYPE_USER           /* Board-specific values start here */
+};
 
 /* Certain SPI devices may required different clocking modes */
 
