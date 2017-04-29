@@ -142,7 +142,7 @@ static uint8_t mpl115a_getreg8(FAR struct mpl115a_dev_s *priv, uint8_t regaddr)
 
   /* Select the MPL115A */
 
-  SPI_SELECT(priv->spi, SPIDEV_BAROMETER, true);
+  SPI_SELECT(priv->spi, SPIDEV_BAROMETER(0), true);
 
   /* Send register to read and get the next byte */
 
@@ -151,7 +151,7 @@ static uint8_t mpl115a_getreg8(FAR struct mpl115a_dev_s *priv, uint8_t regaddr)
 
   /* Deselect the MPL115A */
 
-  SPI_SELECT(priv->spi, SPIDEV_BAROMETER, false);
+  SPI_SELECT(priv->spi, SPIDEV_BAROMETER(0), false);
 
   /* Unlock bus */
 

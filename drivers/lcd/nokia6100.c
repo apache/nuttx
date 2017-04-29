@@ -661,7 +661,7 @@ static void nokia_select(FAR struct spi_dev_s *spi)
   lcdinfo("SELECTED\n");
 
   SPI_LOCK(spi, true);
-  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
+  SPI_SELECT(spi, SPIDEV_DISPLAY(0), true);
 
   /* Now make sure that the SPI bus is configured for the Nokia 6100 (it
    * might have gotten configured for a different device while unlocked)
@@ -695,7 +695,7 @@ static void nokia_deselect(FAR struct spi_dev_s *spi)
 
   lcdinfo("DE-SELECTED\n");
 
-  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
+  SPI_SELECT(spi, SPIDEV_DISPLAY(0), false);
   SPI_LOCK(spi, false);
 }
 

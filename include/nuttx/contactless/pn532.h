@@ -72,7 +72,7 @@ struct pn532_config_s
 {
   int (*reset)(uint8_t enable);
 
-  /* External CS, if NULL then SPIDEV_WIRELESS CS is used */
+  /* External CS, if NULL then SPIDEV_WIRELESS(n) CS is used */
 
   int (*select)(struct pn532_dev_s *dev, bool sel);
   int (*irqattach)(void* dev, xcpt_t isr);

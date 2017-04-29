@@ -154,29 +154,28 @@ void weak_function pic32mx_spi2initialize(void)
  ************************************************************************************/
 
 struct spi_dev_s;
-enum spi_dev_e;
 
-void  pic32mx_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void  pic32mx_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-  if (devid == SPIDEV_FLASH)
+  if (devid == SPIDEV_FLASH(0))
     {
       pic32mx_gpiowrite(GPIO_SST25VF032B_CS, !selected);
     }
-  else if (devid == SPIDEV_MUX)
+  else if (devid == SPIDEV_MUX(0))
     {
       pic32mx_gpiowrite(GPIO_PGA117_CS, !selected);
     }
 }
 
-uint8_t pic32mx_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t pic32mx_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 
 #ifdef CONFIG_SPI_CMDDATA
-int pic32mx_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+int pic32mx_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return 0;
 }

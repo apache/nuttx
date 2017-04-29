@@ -116,6 +116,7 @@ config STM32L4_STM32L496XX
 	select STM32L4_HAVE_I2C4
 	select STM32L4_HAVE_CAN2
 	select STM32L4_HAVE_DCMI
+	select STM32L4_HAVE_DMA2D
 
 choice
 	prompt "Embedded FLASH size"
@@ -181,6 +182,10 @@ config STM32L4_HAVE_COMP
 	default n
 
 config STM32L4_HAVE_DCMI
+	bool
+	default n
+
+config STM32L4_HAVE_DMA2D
 	bool
 	default n
 
@@ -306,6 +311,11 @@ config STM32L4_DCMI
 	bool "DCMI"
 	default n
 	depends on STM32L4_HAVE_DCMI
+
+config STM32L4_DMA2D
+	bool "DMA2D"
+	default n
+	depends on STM32L4_HAVE_DMA2D
 
 config STM32L4_HASH
 	bool "HASH"

@@ -91,11 +91,11 @@ void weak_function hcs12_spidev_initialize(void)
  *
  ****************************************************************************/
 
-void hcs12_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void hcs12_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
 }
 
-uint8_t hcs12_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t hcs12_spistatus(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return SPI_STATUS_PRESENT;
 }

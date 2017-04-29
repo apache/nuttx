@@ -43,7 +43,6 @@
 #include <nuttx/config.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/irq.h>
-#include <nuttx/wireless/wireless.h>
 
 #include <stdint.h>
 #include <stdbool.h>

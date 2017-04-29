@@ -231,7 +231,7 @@ static uint16_t max11802_sendcmd(FAR struct max11802_dev_s *priv,
 
   /* Select the MAX11802 */
 
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, true);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
 
   /* Send the command */
 
@@ -240,7 +240,7 @@ static uint16_t max11802_sendcmd(FAR struct max11802_dev_s *priv,
   /* Read the data */
 
   SPI_RECVBLOCK(priv->spi, buffer, 2);
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
   result = ((uint16_t)buffer[0] << 8) | (uint16_t)buffer[1];
   *tags = result & 0xF;
@@ -1225,32 +1225,32 @@ int max11802_register(FAR struct spi_dev_s *spi,
 
   /* Configure MAX11802 registers */
 
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, true);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
   (void)SPI_SEND(priv->spi, MAX11802_CMD_MODE_WR);
   (void)SPI_SEND(priv->spi, MAX11802_MODE);
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, true);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
   (void)SPI_SEND(priv->spi, MAX11802_CMD_AVG_WR);
   (void)SPI_SEND(priv->spi, MAX11802_AVG);
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, true);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
   (void)SPI_SEND(priv->spi, MAX11802_CMD_TIMING_WR);
   (void)SPI_SEND(priv->spi, MAX11802_TIMING);
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, true);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
   (void)SPI_SEND(priv->spi, MAX11802_CMD_DELAY_WR);
   (void)SPI_SEND(priv->spi, MAX11802_DELAY);
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
   /* Test that the device access was successful. */
 
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, true);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
   (void)SPI_SEND(priv->spi, MAX11802_CMD_MODE_RD);
   ret = SPI_SEND(priv->spi, 0);
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
   /* Unlock the bus */
 

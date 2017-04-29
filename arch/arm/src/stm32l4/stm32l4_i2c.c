@@ -96,7 +96,8 @@
 
 /* At least one I2C peripheral must be enabled */
 
-#if defined(CONFIG_STM32L4_I2C1) || defined(CONFIG_STM32L4_I2C2) || defined(CONFIG_STM32L4_I2C3)
+#if defined(CONFIG_STM32L4_I2C1) || defined(CONFIG_STM32L4_I2C2) || \
+    defined(CONFIG_STM32L4_I2C3) || defined(CONFIG_STM32L4_I2C4)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -214,7 +215,6 @@ struct stm32l4_i2c_config_s
   uint32_t scl_pin;           /* GPIO configuration for SCL as SCL */
   uint32_t sda_pin;           /* GPIO configuration for SDA as SDA */
 #ifndef CONFIG_I2C_POLLED
-  int (*isr)(int, void *, void *);    /* Interrupt handler */
   uint32_t ev_irq;            /* Event IRQ */
   uint32_t er_irq;            /* Error IRQ */
 #endif
@@ -289,17 +289,9 @@ static inline void stm32l4_i2c_sendstart(FAR struct stm32l4_i2c_priv_s *priv);
 static inline void stm32l4_i2c_clrstart(FAR struct stm32l4_i2c_priv_s *priv);
 static inline void stm32l4_i2c_sendstop(FAR struct stm32l4_i2c_priv_s *priv);
 static inline uint32_t stm32l4_i2c_getstatus(FAR struct stm32l4_i2c_priv_s *priv);
-static int stm32l4_i2c_isr(struct stm32l4_i2c_priv_s * priv);
+static int stm32l4_i2c_isr_process(struct stm32l4_i2c_priv_s *priv);
 #ifndef CONFIG_I2C_POLLED
-#ifdef CONFIG_STM32L4_I2C1
-static int stm32l4_i2c1_isr(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_STM32L4_I2C2
-static int stm32l4_i2c2_isr(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_STM32L4_I2C3
-static int stm32l4_i2c3_isr(int irq, void *context, FAR void *arg);
-#endif
+static int stm32l4_i2c_isr(int irq, void *context, FAR void *arg);
 #endif
 static int stm32l4_i2c_init(FAR struct stm32l4_i2c_priv_s *priv);
 static int stm32l4_i2c_deinit(FAR struct stm32l4_i2c_priv_s *priv);
@@ -332,7 +324,6 @@ static const struct stm32l4_i2c_config_s stm32l4_i2c1_config =
   .scl_pin    = GPIO_I2C1_SCL,
   .sda_pin    = GPIO_I2C1_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .isr        = stm32l4_i2c1_isr,
   .ev_irq     = STM32L4_IRQ_I2C1EV,
   .er_irq     = STM32L4_IRQ_I2C1ER
 #endif
@@ -362,7 +353,6 @@ static const struct stm32l4_i2c_config_s stm32l4_i2c2_config =
   .scl_pin    = GPIO_I2C2_SCL,
   .sda_pin    = GPIO_I2C2_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .isr        = stm32l4_i2c2_isr,
   .ev_irq     = STM32L4_IRQ_I2C2EV,
   .er_irq     = STM32L4_IRQ_I2C2ER
 #endif
@@ -392,7 +382,6 @@ static const struct stm32l4_i2c_config_s stm32l4_i2c3_config =
   .scl_pin    = GPIO_I2C3_SCL,
   .sda_pin    = GPIO_I2C3_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .isr        = stm32l4_i2c3_isr,
   .ev_irq     = STM32L4_IRQ_I2C3EV,
   .er_irq     = STM32L4_IRQ_I2C3ER
 #endif
@@ -402,6 +391,35 @@ struct stm32l4_i2c_priv_s stm32l4_i2c3_priv =
 {
   .ops        = &stm32l4_i2c_ops,
   .config     = &stm32l4_i2c3_config,
+  .refs       = 0,
+  .intstate   = INTSTATE_IDLE,
+  .msgc       = 0,
+  .msgv       = NULL,
+  .ptr        = NULL,
+  .dcnt       = 0,
+  .flags      = 0,
+  .status     = 0
+};
+#endif
+
+#ifdef CONFIG_STM32L4_I2C4
+static const struct stm32l4_i2c_config_s stm32l4_i2c4_config =
+{
+  .base       = STM32L4_I2C4_BASE,
+  .clk_bit    = RCC_APB1ENR2_I2C4EN,
+  .reset_bit  = RCC_APB1RSTR2_I2C4RST,
+  .scl_pin    = GPIO_I2C4_SCL,
+  .sda_pin    = GPIO_I2C4_SDA,
+#ifndef CONFIG_I2C_POLLED
+  .ev_irq     = STM32L4_IRQ_I2C4EV,
+  .er_irq     = STM32L4_IRQ_I2C4ER
+#endif
+};
+
+struct stm32l4_i2c_priv_s stm32l4_i2c4_priv =
+{
+  .ops        = &stm32l4_i2c_ops,
+  .config     = &stm32l4_i2c4_config,
   .refs       = 0,
   .intstate   = INTSTATE_IDLE,
   .msgc       = 0,
@@ -656,7 +674,7 @@ static inline int stm32l4_i2c_sem_waitdone(FAR struct stm32l4_i2c_priv_s *priv)
        * reports that it is done.
        */
 
-      stm32l4_i2c_isr(priv);
+      stm32l4_i2c_isr_process(priv);
     }
 
   /* Loop until the transfer is complete. */
@@ -1265,7 +1283,7 @@ static inline uint32_t stm32l4_i2c_getstatus(FAR struct stm32l4_i2c_priv_s *priv
 }
 
 /************************************************************************************
- * Name: stm32l4_i2c_isr
+ * Name: stm32l4_i2c_isr_startmessage
  *
  * Description:
  *   Common logic when a message is started.  Just adds the even to the trace buffer
@@ -1298,14 +1316,14 @@ static inline void stm32l4_i2c_clearinterrupts(struct stm32l4_i2c_priv_s *priv)
 }
 
 /************************************************************************************
- * Name: stm32l4_i2c_isr
+ * Name: stm32l4_i2c_isr_process
  *
  * Description:
- *  Common Interrupt Service Routine
+ *  I2C processing logic common to polled and non-polled operation.
  *
  ************************************************************************************/
 
-static int stm32l4_i2c_isr(struct stm32l4_i2c_priv_s *priv)
+static int stm32l4_i2c_isr_process(struct stm32l4_i2c_priv_s *priv)
 {
   uint32_t status = stm32l4_i2c_getstatus(priv);
 
@@ -1507,55 +1525,22 @@ static int stm32l4_i2c_isr(struct stm32l4_i2c_priv_s *priv)
 }
 
 /************************************************************************************
- * Name: stm32l4_i2c1_isr
+ * Name: stm32l4_i2c_isr
  *
  * Description:
- *   I2C1 interrupt service routine
- *
- ************************************************************************************/
-
-#ifndef CONFIG_I2C_POLLED
-#ifdef CONFIG_STM32L4_I2C1
-static int stm32l4_i2c1_isr(int irq, void *context, FAR void *arg)
-{
-  return stm32l4_i2c_isr(&stm32l4_i2c1_priv);
-}
-#endif
-
-/************************************************************************************
- * Name: stm32l4_i2c2_isr
- *
- * Description:
- *   I2C2 interrupt service routine
+ *   I2C interrupt service routine
  *
  ************************************************************************************/
 
 #ifdef CONFIG_STM32L4_I2C2
-static int stm32l4_i2c2_isr(int irq, void *context, FAR void *arg)
+static int stm32l4_i2c_isr(int irq, void *context, FAR void *arg)
 {
-  return stm32l4_i2c_isr(&stm32l4_i2c2_priv);
+  struct stm32l4_i2c_priv_s *priv = (struct stm32l4_i2c_priv_s *priv)arg;
+
+  DEBUGASSERT(priv != NULL);
+  return stm32l4_i2c_isr_process(priv);
 }
 #endif
-
-/************************************************************************************
- * Name: stm32l4_i2c3_isr
- *
- * Description:
- *   I2C2 interrupt service routine
- *
- ************************************************************************************/
-
-#ifdef CONFIG_STM32L4_I2C3
-static int stm32l4_i2c3_isr(int irq, void *context, FAR void *arg)
-{
-  return stm32l4_i2c_isr(&stm32l4_i2c3_priv);
-}
-#endif
-#endif
-
-/************************************************************************************
- * Private Initialization and Deinitialization
- ************************************************************************************/
 
 /************************************************************************************
  * Name: stm32l4_i2c_init
@@ -1591,8 +1576,8 @@ static int stm32l4_i2c_init(FAR struct stm32l4_i2c_priv_s *priv)
   /* Attach ISRs */
 
 #ifndef CONFIG_I2C_POLLED
-  irq_attach(priv->config->ev_irq, priv->config->isr, NULL);
-  irq_attach(priv->config->er_irq, priv->config->isr, NULL);
+  irq_attach(priv->config->ev_irq, stm32l4_i2c_isr, priv);
+  irq_attach(priv->config->er_irq, stm32l4_i2c_isr, priv);
   up_enable_irq(priv->config->ev_irq);
   up_enable_irq(priv->config->er_irq);
 #endif
@@ -2010,6 +1995,11 @@ FAR struct i2c_master_s *stm32l4_i2cbus_initialize(int port)
         priv = (struct stm32l4_i2c_priv_s *)&stm32l4_i2c3_priv;
         break;
 #endif
+#ifdef CONFIG_STM32L4_I2C4
+      case 4:
+        priv = (struct stm32l4_i2c_priv_s *)&stm32l4_i2c4_priv;
+        break;
+#endif
       default:
         return NULL;
     }
@@ -2072,5 +2062,5 @@ int stm32l4_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
   return OK;
 }
 
-#endif /* CONFIG_STM32L4_I2C1 || CONFIG_STM32L4_I2C2 || CONFIG_STM32L4_I2C3 */
+#endif /* CONFIG_STM32L4_I2C1 || CONFIG_STM32L4_I2C2 || CONFIG_STM32L4_I2C3 || CONFIG_STM32L4_I2C4 */
 

@@ -312,7 +312,7 @@ static volatile int cc1101_interrupt = 0;
 void cc1101_access_begin(FAR struct cc1101_dev_s *dev)
 {
   (void)SPI_LOCK(dev->spi, true);
-  SPI_SELECT(dev->spi, SPIDEV_WIRELESS, true);
+  SPI_SELECT(dev->spi, SPIDEV_WIRELESS(0), true);
   SPI_SETMODE(dev->spi, SPIDEV_MODE0);     /* CPOL=0, CPHA=0 */
   SPI_SETBITS(dev->spi, 8);
   (void)SPI_HWFEATURES(dev->spi, 0);
@@ -320,7 +320,7 @@ void cc1101_access_begin(FAR struct cc1101_dev_s *dev)
 
 void cc1101_access_end(FAR struct cc1101_dev_s *dev)
 {
-  SPI_SELECT(dev->spi, SPIDEV_WIRELESS, false);
+  SPI_SELECT(dev->spi, SPIDEV_WIRELESS(0), false);
   (void)SPI_LOCK(dev->spi, false);
 }
 

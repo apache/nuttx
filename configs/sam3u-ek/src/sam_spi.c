@@ -138,7 +138,7 @@ void weak_function sam_spidev_initialize(void)
  *
  ****************************************************************************/
 
-void sam_spi0select(enum spi_dev_e devid, bool selected)
+void sam_spi0select(uint32_t devid, bool selected)
 {
   /* The touchscreen chip select is implemented as a GPIO OUTPUT that must
    * be controlled by this function.  This is because the ADS7843E driver
@@ -149,7 +149,7 @@ void sam_spi0select(enum spi_dev_e devid, bool selected)
    */
 
 #if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
-  if (devid == SPIDEV_TOUCHSCREEN)
+  if (devid == SPIDEV_TOUCHSCREEN(0))
     {
       sam_gpiowrite(GPIO_TSC_NPCS2, !selected);
     }
@@ -170,7 +170,7 @@ void sam_spi0select(enum spi_dev_e devid, bool selected)
  *
  ****************************************************************************/
 
-uint8_t sam_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t sam_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }

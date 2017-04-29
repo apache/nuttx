@@ -143,15 +143,34 @@
 #define STM32L4_IRQ_TSC         (STM32L4_IRQ_FIRST+77) /* 77: TSC global interrupt */
 #define STM32L4_IRQ_LCD         (STM32L4_IRQ_FIRST+78) /* 78: LCD global interrupt */
 #define STM32L4_IRQ_AES         (STM32L4_IRQ_FIRST+79) /* 79: AES crypto global interrupt */
-#define STM32L4_IRQ_RNG         (STM32L4_IRQ_FIRST+80) /* 80: Rng global interrupt */
+#define STM32L4_IRQ_RNG         (STM32L4_IRQ_FIRST+80) /* 80: RNG global interrupt */
 #define STM32L4_IRQ_FPU         (STM32L4_IRQ_FIRST+81) /* 81: FPU global interrupt */
 
-#define NR_INTERRUPTS         82
-#define NR_VECTORS            (STM32L4_IRQ_FIRST+NR_INTERRUPTS)
+/* STM32L496xx/4A6xx only: */
+
+#define STM32L4_IRQ_HASH_CRS    (STM32L4_IRQ_FIRST+82) /* 82: HASH and CRS global interrupt */
+#define STM32L4_IRQ_I2C4EV      (STM32L4_IRQ_FIRST+83) /* 83: I2C4 event interrupt */
+#define STM32L4_IRQ_I2C4ER      (STM32L4_IRQ_FIRST+84) /* 84: I2C4 error interrupt */
+#define STM32L4_IRQ_DCMI        (STM32L4_IRQ_FIRST+85) /* 85: DCMI global interrupt */
+#define STM32L4_IRQ_CAN2TX      (STM32L4_IRQ_FIRST+86) /* 86: CAN2 TX interrupts */
+#define STM32L4_IRQ_CAN2RX0     (STM32L4_IRQ_FIRST+87) /* 87: CAN2 RX0 interrupts */
+#define STM32L4_IRQ_CAN2RX1     (STM32L4_IRQ_FIRST+88) /* 88: CAN2 RX1 interrupt */
+#define STM32L4_IRQ_CAN2SCE     (STM32L4_IRQ_FIRST+89) /* 89: CAN2 SCE interrupt */
+#define STM32L4_IRQ_DMA2D       (STM32L4_IRQ_FIRST+90) /* 90: DMA2D global interrupt */
+
+#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX)
+#  define NR_INTERRUPTS         82
+#elif defined(CONFIG_STM32L4_STM32L496XX)
+#  define NR_INTERRUPTS         91
+#else
+#  error "Unsupported STM32L4 chip"
+#endif
+
+#define NR_VECTORS              (STM32L4_IRQ_FIRST+NR_INTERRUPTS)
 
 /* EXTI interrupts (Do not use IRQ numbers) */
 
-#define NR_IRQS               NR_VECTORS
+#define NR_IRQS                 NR_VECTORS
 
 /****************************************************************************************************
  * Public Types

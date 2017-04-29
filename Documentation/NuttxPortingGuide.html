@@ -5014,11 +5014,11 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
     That structure defines a call table with the following methods:
     <ul>
      <p><code>void lock(FAR struct spi_dev_s *dev);</code></p>
-     <p><code>void select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);</code><br>
+     <p><code>void select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);</code><br>
      <code>uint32_t setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);</code><br>
      <code>void setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);</code><br>
      <code>void setbits(FAR struct spi_dev_s *dev, int nbits);</code><br>
-     <code>uint8_t status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);</code><br>
+     <code>uint8_t status(FAR struct spi_dev_s *dev, uint32_t devid);</code><br>
      <code>uint16_t send(FAR struct spi_dev_s *dev, uint16_t wd);</code><br>
      <code>void exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer, FAR void *rxbuffer, size_t nwords);</code><br>
      <p><code>int registercallback(FAR struct spi_dev_s *dev, mediachange_t callback, void *arg);</code></p>

@@ -123,12 +123,12 @@ void weak_function zkit_spidev_initialize(void)
  *
  ************************************************************************************/
 
-void  lpc17_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void  lpc17_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   spi_dumpgpio("lpc17_spiselect() Entry");
 
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       /* Assert/de-assert the CS pin to the card */
 
@@ -138,9 +138,9 @@ void  lpc17_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
   spi_dumpgpio("lpc17_spiselect() Exit");
 }
 
-uint8_t lpc17_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t lpc17_spistatus(FAR struct spi_dev_s *dev, uint32_t devid)
 {
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       /* Read the state of the card-detect bit */
 
@@ -163,7 +163,7 @@ uint8_t lpc17_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  *
  ****************************************************************************/
 
-int lpc17_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+int lpc17_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return OK;
 }

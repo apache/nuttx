@@ -124,15 +124,17 @@
 #  define RCC_CFGR_PPRE1_HCLKd4     (5 << RCC_CFGR_PPRE1_SHIFT) /* 101: HCLK divided by 4 */
 #  define RCC_CFGR_PPRE1_HCLKd8     (6 << RCC_CFGR_PPRE1_SHIFT) /* 110: HCLK divided by 8 */
 #  define RCC_CFGR_PPRE1_HCLKd16    (7 << RCC_CFGR_PPRE1_SHIFT) /* 111: HCLK divided by 16 */
-                                    /* Bits 13-11: Reserve. Keep the reset value */
+                                              /* Bits 13-11: Reserve. Keep the reset value */
 #define RCC_CFGR_ADCPRE             (1 << 14) /* Bit 14: ADC prescaler, Obsolete use ADC_CFGR2 */
-#define RCC_CFGR_PLLSRC_SHIFT           (15) /* Bit 15: PLL input clock source */
+#define RCC_CFGR_PLLSRC_SHIFT           (15)  /* Bit 15: PLL input clock source */
 #define RCC_CFGR_PLLSRC_MASK            (3 << RCC_CFGR_PLLSRC_SHIFT)
 #  define RCC_CFGR_PLLSRC_HSId2         (0 << RCC_CFGR_PLLSRC_SHIFT) /* 00: HSI/2 as PLL input clock */
 #  define RCC_CFGR_PLLSRC_HS1_PREDIV    (1 << RCC_CFGR_PLLSRC_SHIFT) /* 01: HSE/PREDIV as PLL input clock */
 #  define RCC_CFGR_PLLSRC_HSE_PREDIV    (2 << RCC_CFGR_PLLSRC_SHIFT) /* 10: HSE/PREDIV as PLL input clock */
 #  define RCC_CFGR_PLLSRC_HSI48_PREDIV  (3 << RCC_CFGR_PLLSRC_SHIFT) /* 11: HSI48/PREDIV as PLL input clock */
-#define RCC_CFGR_PLLXTPRE           (1 << 17) /* Bit 17: HSE divider for PLL entry */
+#define RCC_CFGR_PLLXTPRE_MASK      (1 << 17) /* Bit 17: HSE divider for PLL entry */
+#  define RCC_CFGR_PLLXTPRE_DIV1    (0 << 17) /*         0=No divistion */
+#  define RCC_CFGR_PLLXTPRE_DIV2    (1 << 17) /*         1=Divide by two */
 #define RCC_CFGR_PLLMUL_SHIFT       (18)      /* Bits 21-18: PLL Multiplication Factor */
 #define RCC_CFGR_PLLMUL_MASK        (0x0f << RCC_CFGR_PLLMUL_SHIFT)
 #  define RCC_CFGR_PLLMUL_CLKx2     (0 << RCC_CFGR_PLLMUL_SHIFT)  /* 0000: PLL input clock x 2 */

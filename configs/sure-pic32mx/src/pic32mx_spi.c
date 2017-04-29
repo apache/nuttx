@@ -174,28 +174,28 @@ void weak_function pic32mx_spidev_initialize(void)
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MX_SPI2
-void pic32mx_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void pic32mx_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
   /* The SD card chip select is pulled high and active low */
 
 #ifdef PIC32_HAVE_SD
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       pic32mx_gpiowrite(GPIO_SD_CS, !selected);
     }
 #endif
 
 #ifdef PIC32_HAVE_SOIC
-  if (devid == SPIDEV_FLASH)
+  if (devid == SPIDEV_FLASH(0))
     {
       pic32mx_gpiowrite(GPIO_SOIC_CS, !selected);
     }
 #endif
 }
 
-uint8_t pic32mx_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t pic32mx_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t ret = 0;
 
@@ -204,7 +204,7 @@ uint8_t pic32mx_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
    */
 
 #ifdef PIC32_HAVE_SD
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       if (!pic32mx_gpioread(GPIO_SD_CD))
         {
@@ -223,7 +223,7 @@ uint8_t pic32mx_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #endif
 
 #ifdef PIC32_HAVE_SOIC
-  if (devid == SPIDEV_FLASH)
+  if (devid == SPIDEV_FLASH(0))
     {
       ret = SPI_STATUS_PRESENT;
 

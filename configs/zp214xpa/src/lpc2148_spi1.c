@@ -111,11 +111,11 @@
  ****************************************************************************/
 
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
-static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-static int spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t ch);
 static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords);
@@ -213,14 +213,14 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
 #ifdef CONFIG_DEBUG_SPI_INFO
   uint32_t regval;
 #endif
   uint32_t bit = 1 << 20;
 
-  /* We do not bother to check if devid == SPIDEV_DISPLAY because that is the
+  /* We do not bother to check if devid == SPIDEV_DISPLAY(0) because that is the
    * only thing on the bus.
    */
 
@@ -315,7 +315,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
  *
  ****************************************************************************/
 
-static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   spiinfo("Return 0\n");
   return 0;
@@ -346,14 +346,14 @@ static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-static int spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
 #ifdef CONFIG_DEBUG_SPI_INFO
   uint32_t regval;
 #endif
   uint32_t bit = 1 << 23;
 
-  /* We do not bother to check if devid == SPIDEV_DISPLAY because that is the
+  /* We do not bother to check if devid == SPIDEV_DISPLAY(0) because that is the
    * only thing on the bus.
    */
 

@@ -121,17 +121,17 @@ void weak_function stm32_spidev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_SPI3
-void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void stm32_spi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
 
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
 #if defined(CONFIG_VS1053)
-  if (devid == SPIDEV_AUDIO_DATA)
+  if (devid == SPIDEV_AUDIO_DATA(0))
     {
       stm32_gpiowrite(GPIO_CS_MP3_DATA, !selected);
     }
-  else if (devid == SPIDEV_AUDIO_CTRL)
+  else if (devid == SPIDEV_AUDIO_CTRL(0))
     {
       stm32_gpiowrite(GPIO_CS_MP3_CMD, !selected);
     }
@@ -139,7 +139,7 @@ void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
 #endif
 
 #if defined(CONFIG_MMCSD)
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       stm32_gpiowrite(GPIO_CS_MMCSD, !selected);
     }
@@ -147,7 +147,7 @@ void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
 #endif
 
 #if defined(CONFIG_MTD_M25P)
-  if (devid == SPIDEV_FLASH)
+  if (devid == SPIDEV_FLASH(0))
     {
       stm32_gpiowrite(GPIO_CS_FLASH, !selected);
     }
@@ -156,18 +156,18 @@ void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
 
   /* Must be the expansion header device */
 
-  if (devid == SPIDEV_EXPANDER)
+  if (devid == SPIDEV_EXPANDER(0))
     {
       stm32_gpiowrite(GPIO_CS_EXP_SPI3, !selected);
     }
 }
 
-uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t ret = 0;
 
 #if defined(CONFIG_MMCSD)
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       /* A low value indicates the card is present */
 
@@ -183,24 +183,24 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 }
 
-uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_STM32_SPI1
-void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 }
 
-uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
@@ -231,21 +231,21 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 
 #ifdef CONFIG_SPI_CMDDATA
 #ifdef CONFIG_STM32_SPI1
-int stm32_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+int stm32_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-int stm32_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+int stm32_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return OK;
 }
 #endif
 
 #ifdef CONFIG_STM32_SPI3
-int stm32_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+int stm32_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return OK;
 }

@@ -130,7 +130,7 @@ void ssd1306_select(FAR struct ssd1306_dev_s *priv, bool cs)
 
   /* Select/deselect SPI device */
 
-  SPI_SELECT(priv->spi, SPIDEV_DISPLAY, cs);
+  SPI_SELECT(priv->spi, SPIDEV_DISPLAY(0), cs);
 
   /* If we are deselecting the device */
 
@@ -154,6 +154,6 @@ void ssd1306_cmddata(FAR struct ssd1306_dev_s *priv, bool cmd)
 {
   /* Select command transfer */
 
-  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, cmd);
+  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY(0), cmd);
 }
 #endif /* CONFIG_LCD_SSD1306 && CONFIG_LCD_SSD1306_SPI */

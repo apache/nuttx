@@ -117,51 +117,51 @@ void stm32_spidev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_SPI1
-void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
 #if defined(CONFIG_CL_MFRC522)
-  if (devid == SPIDEV_WIRELESS)
+  if (devid == SPIDEV_WIRELESS(0))
     {
       stm32_gpiowrite(GPIO_CS_MFRC522, !selected);
     }
 #endif
 
 #ifdef CONFIG_LCD_ST7567
-  if (devid == SPIDEV_DISPLAY)
+  if (devid == SPIDEV_DISPLAY(0))
     {
       stm32_gpiowrite(GPIO_CS_MFRC522, !selected);
     }
 #endif
 
 #ifdef CONFIG_WL_NRF24L01
-  if (devid == SPIDEV_WIRELESS)
+  if (devid == SPIDEV_WIRELESS(0))
     {
       stm32_gpiowrite(GPIO_NRF24L01_CS, !selected);
     }
 #endif
 
 #ifdef CONFIG_MMCSD_SPI
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       stm32_gpiowrite(GPIO_SDCARD_CS, !selected);
     }
 #endif
 }
 
-uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t status = 0;
 
 #ifdef CONFIG_WL_NRF24L01
-  if (devid == SPIDEV_WIRELESS)
+  if (devid == SPIDEV_WIRELESS(0))
     {
        status |= SPI_STATUS_PRESENT;
     }
 #endif
 
 #ifdef CONFIG_MMCSD_SPI
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
        status |= SPI_STATUS_PRESENT;
     }
@@ -172,12 +172,12 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
 }
 
-uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
@@ -209,11 +209,11 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 
 #ifdef CONFIG_SPI_CMDDATA
 #ifdef CONFIG_STM32_SPI1
-int stm32_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+int stm32_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
                       bool cmd)
 {
 #ifdef CONFIG_LCD_ST7567
-  if (devid == SPIDEV_DISPLAY)
+  if (devid == SPIDEV_DISPLAY(0))
     {
       /*  This is the Data/Command control pad which determines whether the
        *  data bits are data or a command.

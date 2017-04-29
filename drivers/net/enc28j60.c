@@ -466,7 +466,7 @@ static uint8_t enc_rdgreg2(FAR struct enc_driver_s *priv, uint8_t cmd)
 
   /* Select ENC28J60 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), true);
 
   /* Send the read command and collect the data.  The sequence requires
    * 16-clocks:  8 to clock out the cmd + 8 to clock in the data.
@@ -477,7 +477,7 @@ static uint8_t enc_rdgreg2(FAR struct enc_driver_s *priv, uint8_t cmd)
 
   /* De-select ENC28J60 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), false);
 
   enc_rddump(cmd, rddata);
   return rddata;
@@ -509,7 +509,7 @@ static void enc_wrgreg2(FAR struct enc_driver_s *priv, uint8_t cmd,
 
   /* Select ENC28J60 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), true);
 
   /* Send the write command and data.  The sequence requires 16-clocks:
    * 8 to clock out the cmd + 8 to clock out the data.
@@ -520,7 +520,7 @@ static void enc_wrgreg2(FAR struct enc_driver_s *priv, uint8_t cmd,
 
   /* De-select ENC28J60 chip. */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), false);
   enc_wrdump(cmd, wrdata);
 }
 
@@ -553,7 +553,7 @@ static inline void enc_src(FAR struct enc_driver_s *priv)
 
   /* Select ENC28J60 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), true);
 
   /* Send the system reset command. */
 
@@ -574,7 +574,7 @@ static inline void enc_src(FAR struct enc_driver_s *priv)
 
   /* De-select ENC28J60 chip. */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), false);
   enc_cmddump(ENC_SRC);
 }
 
@@ -650,7 +650,7 @@ static uint8_t enc_rdbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
 
   /* Re-select ENC28J60 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), true);
 
   /* Send the RCR command and collect the data.  How we collect the data
    * depends on if this is a PHY/CAN or not.  The normal sequence requires
@@ -671,7 +671,7 @@ static uint8_t enc_rdbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
 
   /* De-select ENC28J60 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), false);
   enc_rddump(ENC_RCR | GETADDR(ctrlreg), rddata);
   return rddata;
 }
@@ -707,7 +707,7 @@ static void enc_wrbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
 
   /* Re-select ENC28J60 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), true);
 
   /* Send the WCR command and data.  The sequence requires 16-clocks:
    * 8 to clock out the cmd + 8 to clock out the data.
@@ -718,7 +718,7 @@ static void enc_wrbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
 
   /* De-select ENC28J60 chip. */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), false);
   enc_wrdump(ENC_WCR | GETADDR(ctrlreg), wrdata);
 }
 
@@ -861,7 +861,7 @@ static void enc_rdbuffer(FAR struct enc_driver_s *priv, FAR uint8_t *buffer,
 
   /* Select ENC28J60 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), true);
 
   /* Send the read buffer memory command (ignoring the response) */
 
@@ -873,7 +873,7 @@ static void enc_rdbuffer(FAR struct enc_driver_s *priv, FAR uint8_t *buffer,
 
   /* De-select ENC28J60 chip. */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), false);
   enc_bmdump(ENC_WBM, buffer, buflen);
 }
 
@@ -906,7 +906,7 @@ static inline void enc_wrbuffer(FAR struct enc_driver_s *priv,
    * "The WBM command is started by lowering the CS pin. ..."
    */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), true);
 
   /* Send the write buffer memory command (ignoring the response)
    *
@@ -956,7 +956,7 @@ static inline void enc_wrbuffer(FAR struct enc_driver_s *priv,
    * "The WBM command is terminated by bringing up the CS pin. ..."
    */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), false);
   enc_bmdump(ENC_WBM, buffer, buflen+1);
 }
 

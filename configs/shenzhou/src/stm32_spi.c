@@ -117,19 +117,19 @@ void weak_function stm32_spidev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_SPI1
-void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
   /* SPI1 connects to the SD CARD and to the SPI FLASH */
 
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       /* Set the GPIO low to select and high to de-select */
 
       stm32_gpiowrite(GPIO_SD_CS, !selected);
     }
-  else if (devid == SPIDEV_FLASH)
+  else if (devid == SPIDEV_FLASH(0))
     {
       /* Set the GPIO low to select and high to de-select */
 
@@ -137,7 +137,7 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
     }
 }
 
-uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   /* The card detect pin is pulled up so that we detect the presence of a card
    * by see a low value on the input pin.
@@ -153,7 +153,7 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #endif
 
 #ifdef CONFIG_STM32_SPI3
-void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void stm32_spi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
@@ -161,25 +161,25 @@ void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
    * wireless module.
    */
 
-  if (devid == SPIDEV_TOUCHSCREEN)
+  if (devid == SPIDEV_TOUCHSCREEN(0))
     {
       /* Set the GPIO low to select and high to de-select */
 
       stm32_gpiowrite(GPIO_TP_CS, !selected);
     }
-  else if (devid == SPIDEV_MMCSD)
+  else if (devid == SPIDEV_MMCSD(0))
     {
       /* Set the GPIO low to select and high to de-select */
 
       stm32_gpiowrite(GPIO_LCDDF_CS, !selected);
     }
-  else if (devid == SPIDEV_FLASH)
+  else if (devid == SPIDEV_FLASH(0))
     {
       /* Set the GPIO low to select and high to de-select */
 
       stm32_gpiowrite(GPIO_LCDSD_CS, !selected);
     }
-  else if (devid == SPIDEV_WIRELESS)
+  else if (devid == SPIDEV_WIRELESS(0))
     {
       /* Set the GPIO low to select and high to de-select */
 
@@ -187,7 +187,7 @@ void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
     }
 }
 
-uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }

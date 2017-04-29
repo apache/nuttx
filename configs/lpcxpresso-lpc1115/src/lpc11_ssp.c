@@ -130,7 +130,7 @@ void weak_function lpcxpresso_sspdev_initialize(void)
  ************************************************************************************/
 
 #ifdef CONFIG_LPC17_SSP0
-void  lpc11_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void  lpc11_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   ssp_dumpgpio("lpc11_ssp0select() Entry");
@@ -140,7 +140,7 @@ void  lpc11_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
   ssp_dumpgpio("lpc11_ssp0select() Exit");
 }
 
-uint8_t lpc11_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t lpc11_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   spiinfo("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
@@ -148,19 +148,19 @@ uint8_t lpc11_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #endif
 
 #ifdef CONFIG_LPC17_SSP1
-void  lpc11_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void  lpc11_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   ssp_dumpgpio("lpc11_ssp1select() Entry");
 
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       /* Assert/de-assert the CS pin to the card */
 
       (void)lpc11_gpiowrite(LPCXPRESSO_SD_CS, !selected);
     }
 #ifdef CONFIG_NX_LCDDRIVER
-  else if (devid == SPIDEV_DISPLAY)
+  else if (devid == SPIDEV_DISPLAY(0))
     {
       /* Assert the CS pin to the OLED display */
 
@@ -170,9 +170,9 @@ void  lpc11_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
   ssp_dumpgpio("lpc11_ssp1select() Exit");
 }
 
-uint8_t lpc11_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t lpc11_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       /* Read the state of the card-detect bit */
 

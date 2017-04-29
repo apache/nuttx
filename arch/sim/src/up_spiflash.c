@@ -200,11 +200,11 @@ static void        spiflash_setbits(FAR struct spi_dev_s *dev, int nbits);
 static uint16_t    spiflash_send(FAR struct spi_dev_s *dev, uint16_t wd);
 static void        spiflash_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                                 FAR void *rxbuffer, size_t nwords);
-static void        spiflash_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+static void        spiflash_select(FAR struct spi_dev_s *dev, uint32_t devid,
                      bool selected);
-static uint8_t     spiflash_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+static uint8_t     spiflash_status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-static int         spiflash_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+static int         spiflash_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #ifndef CONFIG_SPI_EXCHANGE
 static void        spiflash_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
@@ -357,12 +357,12 @@ static int spiflash_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ************************************************************************************/
 
-static void spiflash_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+static void spiflash_select(FAR struct spi_dev_s *dev, uint32_t devid,
                             bool selected)
 {
   FAR struct sim_spiflashdev_s *priv = (FAR struct sim_spiflashdev_s *)dev;
 
-  if (devid == SPIDEV_FLASH)
+  if (devid == SPIDEV_FLASH(0))
     {
       priv->selected = selected;
 
@@ -392,7 +392,7 @@ static void spiflash_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
  ************************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-static int spiflash_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+static int spiflash_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return 0;
 }
@@ -467,7 +467,7 @@ static void spiflash_setbits(FAR struct spi_dev_s *dev, int nbits)
  *
  ************************************************************************************/
 
-static uint8_t spiflash_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+static uint8_t spiflash_status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }

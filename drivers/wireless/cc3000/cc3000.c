@@ -73,7 +73,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
 
-#include <nuttx/wireless/wireless.h>
+#include <nuttx/wireless/ioctl.h>
 #include <nuttx/wireless/cc3000.h>
 #include <nuttx/wireless/cc3000/include/cc3000_upif.h>
 #include <nuttx/wireless/cc3000/cc3000_common.h>
@@ -289,7 +289,7 @@ static void cc3000_lock_and_select(FAR struct spi_dev_s *spi)
    */
 
   cc3000_configspi(spi);
-  SPI_SELECT(spi, SPIDEV_WIRELESS, true);
+  SPI_SELECT(spi, SPIDEV_WIRELESS(0), true);
 }
 
 /****************************************************************************
@@ -313,7 +313,7 @@ static void cc3000_deselect_and_unlock(FAR struct spi_dev_s *spi)
 {
    /* De select */
 
-  SPI_SELECT(spi, SPIDEV_WIRELESS, false);
+  SPI_SELECT(spi, SPIDEV_WIRELESS(0), false);
 
   /* Relinquish the SPI bus. */
 

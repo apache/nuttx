@@ -199,7 +199,7 @@ static ssize_t max6675_read(FAR struct file *filep, FAR char *buffer, size_t buf
   /* Enable MAX6675's chip select */
 
   max6675_lock(priv->spi);
-  SPI_SELECT(priv->spi, SPIDEV_TEMPERATURE, true);
+  SPI_SELECT(priv->spi, SPIDEV_TEMPERATURE(0), true);
 
   /* Read temperature */
 
@@ -207,7 +207,7 @@ static ssize_t max6675_read(FAR struct file *filep, FAR char *buffer, size_t buf
 
   /* Disable MAX6675's chip select */
 
-  SPI_SELECT(priv->spi, SPIDEV_TEMPERATURE, false);
+  SPI_SELECT(priv->spi, SPIDEV_TEMPERATURE(0), false);
   max6675_unlock(priv->spi);
 
   regval  = (regmsb & 0xFF00) >> 8;

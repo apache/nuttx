@@ -292,7 +292,7 @@ static uint16_t vs1053_readreg(FAR struct vs1053_struct_s *dev, uint8_t reg)
 
   /* Select the AUDIO_CTRL device on the SPI bus */
 
-  SPI_SELECT(spi, SPIDEV_AUDIO_CTRL, true);
+  SPI_SELECT(spi, SPIDEV_AUDIO_CTRL(0), true);
 
   /* Send the WRITE command followed by the address */
 
@@ -306,7 +306,7 @@ static uint16_t vs1053_readreg(FAR struct vs1053_struct_s *dev, uint8_t reg)
 
   /* Deselect the CODEC */
 
-  SPI_SELECT(spi, SPIDEV_AUDIO_CTRL, false);
+  SPI_SELECT(spi, SPIDEV_AUDIO_CTRL(0), false);
 
   return ret;
 }
@@ -324,7 +324,7 @@ static void vs1053_writereg(FAR struct vs1053_struct_s *dev, uint8_t reg, uint16
 
   audinfo("Write Reg %d = 0x%0X\n", reg, val);
 
-  SPI_SELECT(spi, SPIDEV_AUDIO_CTRL, true);
+  SPI_SELECT(spi, SPIDEV_AUDIO_CTRL(0), true);
 
   /* Send the WRITE command followed by the address */
 
@@ -338,7 +338,7 @@ static void vs1053_writereg(FAR struct vs1053_struct_s *dev, uint8_t reg, uint16
 
   /* Deselect the CODEC */
 
-  SPI_SELECT(spi, SPIDEV_AUDIO_CTRL, false);
+  SPI_SELECT(spi, SPIDEV_AUDIO_CTRL(0), false);
 
   /* Short delay after a write for VS1053 processing time */
 
@@ -955,7 +955,7 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
    */
 
   vs1053_spi_lock(spi, VS1053_DATA_FREQ);   /* Lock the SPI bus */
-  SPI_SELECT(spi, SPIDEV_AUDIO_DATA, true); /* Select the VS1053 data bus */
+  SPI_SELECT(spi, SPIDEV_AUDIO_DATA(0), true); /* Select the VS1053 data bus */
 
   /* Local stack copy of our active buffer */
 
@@ -970,7 +970,7 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
     }
   else if (!dev->endmode)
     {
-      SPI_SELECT(spi, SPIDEV_AUDIO_DATA, false);
+      SPI_SELECT(spi, SPIDEV_AUDIO_DATA(0), false);
       vs1053_spi_unlock(spi);
       return;
     }
@@ -1194,7 +1194,7 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
 
   /* Deselect the SPI bus and unlock it */
 err_out:
-  SPI_SELECT(spi, SPIDEV_AUDIO_DATA, false);
+  SPI_SELECT(spi, SPIDEV_AUDIO_DATA(0), false);
   vs1053_spi_unlock(spi);
 }
 

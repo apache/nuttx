@@ -622,11 +622,11 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
   /* Lock and select device */
 
   ug2864ambag01_lock(priv->spi);
-  SPI_SELECT(priv->spi, SPIDEV_DISPLAY, true);
+  SPI_SELECT(priv->spi, SPIDEV_DISPLAY(0), true);
 
   /* Select command transfer */
 
-  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, true);
+  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY(0), true);
 
   /* Set the starting position for the run */
   /* Set the column address to the XOFFSET value */
@@ -640,7 +640,7 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
 
   /* Select data transfer */
 
-  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, false);
+  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY(0), false);
 
   /* Then transfer all of the data */
 
@@ -648,7 +648,7 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
 
   /* De-select and unlock the device */
 
-  SPI_SELECT(priv->spi, SPIDEV_DISPLAY, false);
+  SPI_SELECT(priv->spi, SPIDEV_DISPLAY(0), false);
   ug2864ambag01_unlock(priv->spi);
   return OK;
 }
@@ -892,7 +892,7 @@ static int ug2864ambag01_setpower(struct lcd_dev_s *dev, int power)
   /* Lock and select device */
 
   ug2864ambag01_lock(priv->spi);
-  SPI_SELECT(priv->spi, SPIDEV_DISPLAY, true);
+  SPI_SELECT(priv->spi, SPIDEV_DISPLAY(0), true);
 
   if (power <= 0)
     {
@@ -911,7 +911,7 @@ static int ug2864ambag01_setpower(struct lcd_dev_s *dev, int power)
 
   /* De-select and unlock the device */
 
-  SPI_SELECT(priv->spi, SPIDEV_DISPLAY, false);
+  SPI_SELECT(priv->spi, SPIDEV_DISPLAY(0), false);
   ug2864ambag01_unlock(priv->spi);
   return OK;
 }
@@ -971,11 +971,11 @@ static int ug2864ambag01_setcontrast(struct lcd_dev_s *dev, unsigned int contras
   /* Lock and select device */
 
   ug2864ambag01_lock(priv->spi);
-  SPI_SELECT(priv->spi, SPIDEV_DISPLAY, true);
+  SPI_SELECT(priv->spi, SPIDEV_DISPLAY(0), true);
 
   /* Select command transfer */
 
-  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, true);
+  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY(0), true);
 
   /* Set the contrast */
 
@@ -985,7 +985,7 @@ static int ug2864ambag01_setcontrast(struct lcd_dev_s *dev, unsigned int contras
 
   /* De-select and unlock the device */
 
-  SPI_SELECT(priv->spi, SPIDEV_DISPLAY, false);
+  SPI_SELECT(priv->spi, SPIDEV_DISPLAY(0), false);
   ug2864ambag01_unlock(priv->spi);
   return OK;
 }
@@ -1029,11 +1029,11 @@ FAR struct lcd_dev_s *ug2864ambag01_initialize(FAR struct spi_dev_s *spi, unsign
   /* Lock and select device */
 
   ug2864ambag01_lock(priv->spi);
-  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
+  SPI_SELECT(spi, SPIDEV_DISPLAY(0), true);
 
   /* Select command transfer */
 
-  SPI_CMDDATA(spi, SPIDEV_DISPLAY, true);
+  SPI_CMDDATA(spi, SPIDEV_DISPLAY(0), true);
 
   /* Configure the device */
 
@@ -1064,7 +1064,7 @@ FAR struct lcd_dev_s *ug2864ambag01_initialize(FAR struct spi_dev_s *spi, unsign
 
   /* De-select and unlock the device */
 
-  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
+  SPI_SELECT(spi, SPIDEV_DISPLAY(0), false);
   ug2864ambag01_unlock(priv->spi);
 
   /* Clear the display */
@@ -1112,7 +1112,7 @@ void ug2864ambag01_fill(FAR struct lcd_dev_s *dev, uint8_t color)
   /* Lock and select device */
 
   ug2864ambag01_lock(priv->spi);
-  SPI_SELECT(priv->spi, SPIDEV_DISPLAY, true);
+  SPI_SELECT(priv->spi, SPIDEV_DISPLAY(0), true);
 
   /* Visit each page */
 
@@ -1120,7 +1120,7 @@ void ug2864ambag01_fill(FAR struct lcd_dev_s *dev, uint8_t color)
     {
       /* Select command transfer */
 
-      SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, true);
+      SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY(0), true);
 
       /* Set the column address to the XOFFSET value */
 
@@ -1133,7 +1133,7 @@ void ug2864ambag01_fill(FAR struct lcd_dev_s *dev, uint8_t color)
 
       /* Select data transfer */
 
-      SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, false);
+      SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY(0), false);
 
       /* Transfer one page of the selected color */
 
@@ -1143,7 +1143,7 @@ void ug2864ambag01_fill(FAR struct lcd_dev_s *dev, uint8_t color)
 
   /* De-select and unlock the device */
 
-  SPI_SELECT(priv->spi, SPIDEV_DISPLAY, false);
+  SPI_SELECT(priv->spi, SPIDEV_DISPLAY(0), false);
   ug2864ambag01_unlock(priv->spi);
 }
 

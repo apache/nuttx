@@ -264,19 +264,19 @@ static inline int sst25xx_readid(struct sst25xx_dev_s *priv)
   /* Lock the SPI bus, configure the bus, and select this FLASH part. */
 
   sst25xx_lock(priv->dev);
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send the "Read ID (RDID)" command and read the first three ID bytes */
 
   (void)SPI_SEND(priv->dev, SST25_RDID);
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
   manufacturer = SPI_SEND(priv->dev, SST25_DUMMY);
   memory       = SPI_SEND(priv->dev, SST25_DUMMY);
   capacity     = SPI_SEND(priv->dev, SST25_DUMMY);
 
   /* Deselect the FLASH and unlock the bus */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
   sst25xx_unlock(priv->dev);
 
   finfo("manufacturer: %02x memory: %02x capacity: %02x\n",
@@ -326,7 +326,7 @@ static void sst25xx_waitwritecomplete(struct sst25xx_dev_s *priv)
     {
       /* Select this FLASH part */
 
-      SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+      SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
       /* Send "Read Status Register (RDSR)" command */
 
@@ -338,7 +338,7 @@ static void sst25xx_waitwritecomplete(struct sst25xx_dev_s *priv)
 
       /* Deselect the FLASH */
 
-      SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+      SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
 
       /* Given that writing could take up to few tens of milliseconds, and erasing
        * could take more.  The following short delay in the "busy" case will allow
@@ -367,7 +367,7 @@ static void sst25xx_writeenable(struct sst25xx_dev_s *priv)
 {
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send "Write Enable (WREN)" command */
 
@@ -375,7 +375,7 @@ static void sst25xx_writeenable(struct sst25xx_dev_s *priv)
 
   /* Deselect the FLASH */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
   finfo("Enabled\n");
 }
 
@@ -387,23 +387,23 @@ static void sst25xx_unprotect(struct sst25xx_dev_s *priv)
 {
   /* Send "Write enable status (EWSR)" */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
   (void)SPI_SEND(priv->dev, SST25_EWSR);
 
   /* Deselect the FLASH */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
 
   /* Send "Write status (WRSR)" */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
   SPI_SEND(priv->dev, SST25_WRSR);
 
   /* Followed by the new status value */
 
   SPI_SEND(priv->dev, 0);
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
 }
 
 /************************************************************************************
@@ -432,7 +432,7 @@ static void sst25xx_sectorerase(struct sst25xx_dev_s *priv, off_t sector, uint8_
 
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send the "Sector Erase (SE)" or Sub-Sector Erase (SSE) instruction
    * that was passed in as the erase type.
@@ -452,7 +452,7 @@ static void sst25xx_sectorerase(struct sst25xx_dev_s *priv, off_t sector, uint8_
 
   /* Deselect the FLASH */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
   finfo("Erased\n");
 }
 
@@ -478,7 +478,7 @@ static inline int sst25xx_bulkerase(struct sst25xx_dev_s *priv)
 
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send the "Bulk Erase (BE)" instruction */
 
@@ -486,7 +486,7 @@ static inline int sst25xx_bulkerase(struct sst25xx_dev_s *priv)
 
   /* Deselect the FLASH */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
   sst25xx_waitwritecomplete(priv);
 
   finfo("Return: OK\n");
@@ -518,7 +518,7 @@ static inline void sst25xx_pagewrite(struct sst25xx_dev_s *priv, FAR const uint8
 
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send "Page Program (PP)" command */
 
@@ -537,7 +537,7 @@ static inline void sst25xx_pagewrite(struct sst25xx_dev_s *priv, FAR const uint8
 
   /* Deselect the FLASH: Chip Select high */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
   finfo("Written\n");
 }
 
@@ -565,7 +565,7 @@ static inline void sst25xx_bytewrite(struct sst25xx_dev_s *priv, FAR const uint8
 
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send "Page Program (PP)" command */
 
@@ -584,7 +584,7 @@ static inline void sst25xx_bytewrite(struct sst25xx_dev_s *priv, FAR const uint8
 
   /* Deselect the FLASH: Chip Select high */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
   finfo("Written\n");
 }
 #endif
@@ -740,7 +740,7 @@ static ssize_t sst25xx_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
   /* Lock the SPI bus and select this FLASH part */
 
   sst25xx_lock(priv->dev);
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send "Read from Memory " instruction */
 
@@ -758,7 +758,7 @@ static ssize_t sst25xx_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
 
   /* Deselect the FLASH and unlock the SPI bus */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
   sst25xx_unlock(priv->dev);
   finfo("return nbytes: %d\n", (int)nbytes);
   return nbytes;
@@ -921,7 +921,7 @@ FAR struct mtd_dev_s *sst25xx_initialize(FAR struct spi_dev_s *dev)
   /* Allocate a state structure (we allocate the structure instead of using
    * a fixed, static allocation so that we can handle multiple FLASH devices.
    * The current implementation would handle only one FLASH part per SPI
-   * device (only because of the SPIDEV_FLASH definition) and so would have
+   * device (only because of the SPIDEV_FLASH(0) definition) and so would have
    * to be extended to handle multiple FLASH parts on the same SPI bus.
    */
 
@@ -945,7 +945,7 @@ FAR struct mtd_dev_s *sst25xx_initialize(FAR struct spi_dev_s *dev)
 
       /* Deselect the FLASH */
 
-      SPI_SELECT(dev, SPIDEV_FLASH, false);
+      SPI_SELECT(dev, SPIDEV_FLASH(0), false);
 
       /* Identify the FLASH chip and get its capacity */
 

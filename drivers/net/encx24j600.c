@@ -458,7 +458,7 @@ static void enc_cmd(FAR struct enc_driver_s *priv, uint8_t cmd, uint16_t arg)
 
   /* Select ENCX24J600 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), true);
 
   (void)SPI_SEND(priv->spi, cmd);          /* Clock out the command */
   (void)SPI_SEND(priv->spi, arg & 0xff);   /* Clock out the low byte */
@@ -466,7 +466,7 @@ static void enc_cmd(FAR struct enc_driver_s *priv, uint8_t cmd, uint16_t arg)
 
   /* De-select ENCX24J600 chip. */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), false);
   enc_wrdump(cmd, arg);
 }
 
@@ -492,7 +492,7 @@ static inline void enc_setethrst(FAR struct enc_driver_s *priv)
 
   /* Select ENCX24J600 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), true);
 
   /* Send the system reset command. */
 
@@ -502,7 +502,7 @@ static inline void enc_setethrst(FAR struct enc_driver_s *priv)
 
   /* De-select ENCX24J600 chip. */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), false);
   enc_cmddump(ENC_SETETHRST);
 }
 
@@ -570,7 +570,7 @@ static uint16_t enc_rdreg(FAR struct enc_driver_s *priv, uint16_t ctrlreg)
   DEBUGASSERT(priv && priv->spi);
   DEBUGASSERT((ctrlreg & 0xe0) == 0); /* banked regeitsers only */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), true);
 
   enc_setbank(priv, GETBANK(ctrlreg));
 
@@ -580,7 +580,7 @@ static uint16_t enc_rdreg(FAR struct enc_driver_s *priv, uint16_t ctrlreg)
   rddata |= SPI_SEND(priv->spi, 0) << 8;  /* Clock in the high byte */
 
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), false);
   enc_rddump(GETADDR(ctrlreg), rddata);
 
   return rddata;
@@ -610,7 +610,7 @@ static void enc_wrreg(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
   DEBUGASSERT(priv && priv->spi);
   DEBUGASSERT((ctrlreg & 0xe0) == 0); /* banked regeitsers only */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), true);
 
   enc_setbank(priv, GETBANK(ctrlreg));
 
@@ -618,7 +618,7 @@ static void enc_wrreg(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
   SPI_SEND(priv->spi, wrdata & 0xff); /* Clock out the low byte */
   SPI_SEND(priv->spi, wrdata >> 8);   /* Clock out the high byte */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), false);
   enc_wrdump(GETADDR(ctrlreg), wrdata);
 }
 
@@ -688,7 +688,7 @@ static void enc_bfs(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
 
   /* Select ENCX24J600 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), true);
 
   /* Set the bank */
 
@@ -704,7 +704,7 @@ static void enc_bfs(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
 
   /* De-select ENCX24J600 chip. */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), false);
   enc_bfsdump(GETADDR(ctrlreg), bits);
 }
 
@@ -733,7 +733,7 @@ static void enc_bfc(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
 
   /* Select ENCX24J600 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), true);
 
   /* Set the bank */
 
@@ -749,7 +749,7 @@ static void enc_bfc(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
 
   /* De-select ENCX24J600 chip. */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), false);
   enc_bfcdump(GETADDR(ctrlreg), bits);
 }
 
@@ -851,7 +851,7 @@ static void enc_rdbuffer(FAR struct enc_driver_s *priv, FAR uint8_t *buffer,
 
   /* Select ENCX24J600 chip */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), true);
 
   /* Send the read buffer memory command (ignoring the response) */
 
@@ -863,7 +863,7 @@ static void enc_rdbuffer(FAR struct enc_driver_s *priv, FAR uint8_t *buffer,
 
   /* De-select ENCX24J600 chip. */
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), false);
   enc_bmdump(ENC_RRXDATA, buffer, buflen);
 }
 
@@ -891,12 +891,12 @@ static inline void enc_wrbuffer(FAR struct enc_driver_s *priv,
 {
   DEBUGASSERT(priv && priv->spi);
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), true);
 
   SPI_SEND(priv->spi, ENC_WGPDATA);
   SPI_SNDBLOCK(priv->spi, buffer, buflen);
 
-  SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
+  SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), false);
   enc_bmdump(ENC_WGPDATA, buffer, buflen);
 }
 
