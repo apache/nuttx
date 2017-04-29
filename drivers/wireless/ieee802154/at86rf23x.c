@@ -265,9 +265,9 @@ static void at86rf23x_setreg(FAR struct spi_dev_s *spi, uint32_t addr,
 
   reg[1] = val;
   at86rf23x_lock(spi);
-  SPI_SELECT(spi, SPIDEV_IEEE802154, true);
+  SPI_SELECT(spi, SPIDEV_IEEE802154(0), true);
   SPI_SNDBLOCK(spi, reg, 2);
-  SPI_SELECT(spi, SPIDEV_IEEE802154, false);
+  SPI_SELECT(spi, SPIDEV_IEEE802154(0), false);
   at86rf23x_unlock(spi);
 
   wlinfo("0x%02X->r[0x%02X]\n", val, addr);
@@ -292,9 +292,9 @@ static uint8_t at86rf23x_getreg(FAR struct spi_dev_s *spi, uint32_t addr)
 
   at86rf23x_lock (spi);
 
-  SPI_SELECT(spi, SPIDEV_IEEE802154, true);
+  SPI_SELECT(spi, SPIDEV_IEEE802154(0), true);
   SPI_EXCHANGE(spi, reg, val, 2);
-  SPI_SELECT(spi, SPIDEV_IEEE802154, false);
+  SPI_SELECT(spi, SPIDEV_IEEE802154(0), false);
 
   at86rf23x_unlock(spi);
 
@@ -359,12 +359,12 @@ static int at86rf23x_writeframe(FAR struct spi_dev_s *spi, FAR uint8_t *frame,
 
   at86rf23x_lock(spi);
 
-  SPI_SELECT(spi, SPIDEV_IEEE802154, true);
+  SPI_SELECT(spi, SPIDEV_IEEE802154(0), true);
 
   SPI_SNDBLOCK(spi, &reg, 1);
   SPI_SNDBLOCK(spi, &frame, len);
 
-  SPI_SELECT(spi, SPIDEV_IEEE802154, false);
+  SPI_SELECT(spi, SPIDEV_IEEE802154(0), false);
 
   at86rf23x_unlock(spi);
 
@@ -388,13 +388,13 @@ static uint8_t at86rf23x_readframe(FAR struct spi_dev_s *spi,
   reg = RF23X_SPI_FRAME_READ;
 
   at86rf23x_lock(spi);
-  SPI_SELECT(spi, SPIDEV_IEEE802154, true);
+  SPI_SELECT(spi, SPIDEV_IEEE802154(0), true);
 
   SPI_SNDBLOCK(spi, &reg, 1);
   SPI_RECVBLOCK(spi, &len, 1);
   SPI_RECVBLOCK(spi, frame_rx, len+3);
 
-  SPI_SELECT(spi, SPIDEV_IEEE802154, false);
+  SPI_SELECT(spi, SPIDEV_IEEE802154(0), false);
   at86rf23x_unlock(spi);
 
   return len;
