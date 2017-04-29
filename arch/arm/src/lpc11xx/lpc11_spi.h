@@ -112,10 +112,10 @@ FAR struct spi_dev_s *lpc11_spibus_initialize(int port);
  *
  ************************************************************************************/
 
-void lpc11_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t lpc11_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void lpc11_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t lpc11_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int lpc11_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int lpc11_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 /************************************************************************************

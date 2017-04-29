@@ -109,7 +109,7 @@ struct spi_sequence_s
 {
   /* Properties that are fixed throughout the transfer */
 
-  uint8_t dev;                 /* See enum spi_dev_e */
+  uint32_t dev;                /* See enum spi_devtype_e */
   uint8_t mode;                /* See enum spi_mode_e */
   uint8_t nbits;               /* Number of bits */
   uint8_t ntrans;              /* Number of transactions */

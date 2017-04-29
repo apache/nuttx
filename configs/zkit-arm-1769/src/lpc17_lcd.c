@@ -156,7 +156,7 @@ void board_lcd_uninitialize(void)
  *
  ****************************************************************************/
 
-int lpc17_ssp0cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+int lpc17_ssp0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   if (devid == SPIDEV_DISPLAY)
     {

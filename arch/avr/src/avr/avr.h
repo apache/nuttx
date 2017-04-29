@@ -95,6 +95,8 @@ extern uint16_t g_idle_topstack;
 
 #ifndef __ASSEMBLY__
 
+struct spi_dev_s; /* Forward references */
+
 /************************************************************************************
  * Name:  up_copystate
  *
@@ -150,9 +152,6 @@ uint8_t *up_doirq(uint8_t irq, uint8_t *regs);
  *
  ****************************************************************************/
 
-struct spi_dev_s; /* Forward references */
-enum spi_dev_e;   /* Forward references */
-
 FAR struct spi_dev_s *avr_spibus_initialize(int port);
 
 /************************************************************************************
@@ -183,10 +182,10 @@ FAR struct spi_dev_s *avr_spibus_initialize(int port);
  ************************************************************************************/
 
 #ifdef CONFIG_AVR_SPI
-void  avr_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t avr_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  avr_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t avr_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int avr_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int avr_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 

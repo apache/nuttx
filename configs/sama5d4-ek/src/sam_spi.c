@@ -140,7 +140,7 @@ void weak_function sam_spidev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_SPI0
-void sam_spi0select(enum spi_dev_e devid, bool selected)
+void sam_spi0select(uint32_t devid, bool selected)
 {
 #ifdef CONFIG_MTD_AT25
   /* The AT25 serial FLASH connects using NPCS0 */
@@ -154,7 +154,7 @@ void sam_spi0select(enum spi_dev_e devid, bool selected)
 #endif
 
 #ifdef CONFIG_SAMA5_SPI1
-void sam_spi1select(enum spi_dev_e devid, bool selected)
+void sam_spi1select(uint32_t devid, bool selected)
 {
 }
 #endif
@@ -174,14 +174,14 @@ void sam_spi1select(enum spi_dev_e devid, bool selected)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_SPI0
-uint8_t sam_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t sam_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_SAMA5_SPI0
-uint8_t sam_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t sam_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }

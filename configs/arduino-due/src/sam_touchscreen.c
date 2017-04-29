@@ -121,11 +121,11 @@
  ****************************************************************************/
 /* Lower-half SPI */
 
-static void spi_select(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid,
+static void spi_select(FAR struct spi_bitbang_s *priv, uint32_t devid,
                        bool selected);
-static uint8_t spi_status(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid);
+static uint8_t spi_status(FAR struct spi_bitbang_s *priv, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-static int spi_cmddata(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid,
+static int spi_cmddata(FAR struct spi_bitbang_s *priv, uint32_t devid,
                        bool cmd);
 #endif
 
@@ -198,7 +198,7 @@ static struct ads7843e_config_s g_tscinfo =
  *
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid,
+static void spi_select(FAR struct spi_bitbang_s *priv, uint32_t devid,
                        bool selected)
 {
   /* The touchscreen controller is always selected */
@@ -219,7 +219,7 @@ static void spi_select(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid,
  *
  ****************************************************************************/
 
-static uint8_t spi_status(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid)
+static uint8_t spi_status(FAR struct spi_bitbang_s *priv, uint32_t devid)
 {
   return 0;
 }
@@ -241,7 +241,7 @@ static uint8_t spi_status(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-static int spi_cmddata(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid,
+static int spi_cmddata(FAR struct spi_bitbang_s *priv, uint32_t devid,
                        bool cmd)
 {
   return OK;

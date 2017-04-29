@@ -99,13 +99,13 @@ void weak_function lpc31_spidev_intialize(void)
  *
  ************************************************************************************/
 
-void lpc31_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void lpc31_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
-uint8_t lpc31_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t lpc31_spistatus(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return SPI_STATUS_PRESENT;
 }

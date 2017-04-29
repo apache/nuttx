@@ -154,7 +154,6 @@
  ************************************************************************************/
 
 struct spi_dev_s;  /* Forward reference */
-enum spi_dev_e;    /* Forward reference */
 
 /****************************************************************************
  * Name: lpc23_spibus_initialize
@@ -178,7 +177,7 @@ FAR struct spi_dev_s *lpc23_spibus_initialize(int port);
  *
  ****************************************************************************/
 
-void  lpc23xx_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t lpc23xx_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  lpc23xx_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t lpc23xx_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
 
 #endif /* __ARCH_ARM_SRC_LPC2378_LPC23XX_SPI_H */

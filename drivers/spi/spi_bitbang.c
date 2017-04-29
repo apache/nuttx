@@ -86,7 +86,7 @@
 /* SPI methods */
 
 static int      spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static void     spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+static void     spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
                   bool selected);
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
                   uint32_t frequency);
@@ -103,9 +103,9 @@ static void     spi_sndblock(FAR struct spi_dev_s *dev,
 static void     spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
                   size_t nwords);
 #endif
-static uint8_t  spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+static uint8_t  spi_status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-static int      spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+static int      spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
                   bool cmd);
 #endif
 
@@ -206,7 +206,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
                        bool selected)
 {
   FAR struct spi_bitbang_s *priv = (FAR struct spi_bitbang_s *)dev;
@@ -481,7 +481,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
  *
  ****************************************************************************/
 
-static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   FAR struct spi_bitbang_s *priv = (FAR struct spi_bitbang_s *)dev;
   DEBUGASSERT(priv && priv->low && priv->low->status);
@@ -506,7 +506,7 @@ static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-static int spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
                        bool cmd)
 {
   FAR struct spi_bitbang_s *priv = (FAR struct spi_bitbang_s *)dev;

@@ -185,8 +185,6 @@ void lpc31_clockconfig(void);
  ************************************************************************************/
 
 struct spi_dev_s; /* Forward reference */
-enum spi_dev_e;   /* Forward reference */
-
 FAR struct spi_dev_s *lpc31_spibus_initialize(int port);
 
 /************************************************************************************
@@ -218,10 +216,10 @@ FAR struct spi_dev_s *lpc31_spibus_initialize(int port);
  *
  ************************************************************************************/
 
-void  lpc31_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t lpc31_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  lpc31_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t lpc31_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int lpc31_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int lpc31_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 /************************************************************************************
