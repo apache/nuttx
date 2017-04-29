@@ -425,7 +425,7 @@
 /* This builds a SPI devid from its type and index */
 
 #define SPIDEV_ID(type,index) ((((uint32_t)(type)  & 0xffff) << 16) | \
-                                 (uint32_t)(index) & 0xffff)
+                                ((uint32_t)(index) & 0xffff))
 
 /* This retrieves the fields from a SPI devid */
 
