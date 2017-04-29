@@ -677,7 +677,6 @@ void z16f_reset(void);
 #ifdef CONFIG_Z16F_ESPI
 
 struct spi_dev_s;  /* Forward reference */
-uint32_t;    /* Forward reference */
 
 /* Initialize the selected SPI port */
 

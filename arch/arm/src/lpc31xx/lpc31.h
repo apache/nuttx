@@ -185,8 +185,6 @@ void lpc31_clockconfig(void);
  ************************************************************************************/
 
 struct spi_dev_s; /* Forward reference */
-uint32_t;   /* Forward reference */
-
 FAR struct spi_dev_s *lpc31_spibus_initialize(int port);
 
 /************************************************************************************

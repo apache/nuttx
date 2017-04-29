@@ -158,7 +158,6 @@ extern "C"
  ****************************************************************************/
 
 struct spi_dev_s;    /* Forward reference */
-uint32_t;      /* Forward reference */
 struct spi_sctrlr_s; /* Forward reference */
 
 /****************************************************************************

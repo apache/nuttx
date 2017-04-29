@@ -108,7 +108,6 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port);
  ****************************************************************************/
 
 struct spi_dev_s;
-uint32_t;
 void tiva_ssiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
 uint8_t tiva_ssistatus(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA

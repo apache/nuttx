@@ -338,8 +338,6 @@ int hcs12_ethinitialize(int intf);
  ****************************************************************************/
 
 struct spi_dev_s;  /* Forward reference */
-uint32_t;    /* Forward reference */
-
 FAR struct spi_dev_s *hcs12_spibus_initialize(int port);
 
 /************************************************************************************

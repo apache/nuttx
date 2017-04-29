@@ -100,7 +100,6 @@ void weak_function pic32mz_spidev_initialize(void)
  ************************************************************************************/
 
 struct spi_dev_s;
-uint32_t;
 
 #ifdef CONFIG_PIC32MZ_SPI1
 void  pic32mz_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)

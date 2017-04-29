@@ -208,8 +208,6 @@ int i486_dumpgpio(uint16_t pinset, const char *msg);
  ****************************************************************************/
 
 struct spi_dev_s;  /* Forward reference */
-uint32_t;    /* Forward reference */
-
 FAR struct spi_dev_s *i486_spibus_initialize(int port);
 
 /************************************************************************************
@@ -242,7 +240,6 @@ FAR struct spi_dev_s *i486_spibus_initialize(int port);
  ************************************************************************************/
 
 struct spi_dev_s;
-uint32_t;
 
 #ifdef CONFIG_I486_SPI
 void  i486_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);

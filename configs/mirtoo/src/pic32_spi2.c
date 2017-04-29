@@ -154,7 +154,6 @@ void weak_function pic32mx_spi2initialize(void)
  ************************************************************************************/
 
 struct spi_dev_s;
-uint32_t;
 
 void  pic32mx_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {

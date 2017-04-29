@@ -151,8 +151,6 @@ uint8_t *up_doirq(uint8_t irq, uint8_t *regs);
  ****************************************************************************/
 
 struct spi_dev_s; /* Forward references */
-uint32_t;   /* Forward references */
-
 FAR struct spi_dev_s *avr_spibus_initialize(int port);
 
 /************************************************************************************
