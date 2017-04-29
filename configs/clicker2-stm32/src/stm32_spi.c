@@ -139,7 +139,7 @@ void stm32_spi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
   switch(devid)
   {
 #ifdef CONFIG_IEEE802154_MRF24J40
-    case SPIDEV_IEEE802154:
+    case SPIDEV_IEEE802154(0):
       /* Set the GPIO low to select and high to de-select */
       stm32_gpiowrite(GPIO_MB1_CS, !selected);
       break;

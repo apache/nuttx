@@ -145,7 +145,7 @@ void sam_spi0select(uint32_t devid, bool selected)
 #ifdef CONFIG_MTD_AT25
   /* The AT25 serial FLASH connects using NPCS0 */
 
-  if (devid == SPIDEV_FLASH)
+  if (devid == SPIDEV_FLASH(0))
     {
       sam_piowrite(PIO_AT25_NPCS0, !selected);
     }

@@ -109,7 +109,7 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
 #if defined(CONFIG_LCD_SSD1351)
-  if (devid == SPIDEV_DISPLAY)
+  if (devid == SPIDEV_DISPLAY(0))
     {
       stm32_gpiowrite(GPIO_OLED_CS, !selected);
     }
@@ -176,7 +176,7 @@ int stm32_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
                       bool cmd)
 {
 #ifdef CONFIG_LCD_SSD1351
-  if (devid == SPIDEV_DISPLAY)
+  if (devid == SPIDEV_DISPLAY(0))
     {
       (void)stm32_gpiowrite(GPIO_OLED_DC, !cmd);
       return OK;

@@ -158,7 +158,7 @@ void board_lcd_uninitialize(void)
 
 int lpc17_ssp0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-  if (devid == SPIDEV_DISPLAY)
+  if (devid == SPIDEV_DISPLAY(0))
     {
       /* Set GPIO to 1 for data, 0 for command */
 

@@ -110,7 +110,7 @@ void weak_function stm32_spidev_initialize(void)
 void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  if (devid == SPIDEV_USER)
+  if (devid == SPIDEV_USER(0))
     {
       stm32_gpiowrite(USER_CSn, !selected);
     }
@@ -127,7 +127,7 @@ void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #if defined(CONFIG_MMCSD)
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       stm32_gpiowrite(MMCSD_CSn, !selected);
     }

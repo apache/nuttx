@@ -1406,7 +1406,7 @@ FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi, bool unpro
   /* Allocate a state structure (we allocate the structure instead of using
    * a fixed, static allocation so that we can handle multiple FLASH devices.
    * The current implementation would handle only one FLASH part per QuadSPI
-   * device (only because of the QSPIDEV_FLASH definition) and so would have
+   * device (only because of the QSPIDEV_FLASH(0) definition) and so would have
    * to be extended to handle multiple FLASH parts on the same QuadSPI bus.
    */
 

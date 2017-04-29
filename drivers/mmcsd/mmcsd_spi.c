@@ -842,7 +842,7 @@ static void mmcsd_checkwrprotect(FAR struct mmcsd_slot_s *slot, uint8_t *csd)
    * reports temporary write protect.
    */
 
-  if ((SPI_STATUS(spi, SPIDEV_MMCSD) & SPI_STATUS_WRPROTECTED) != 0 ||
+  if ((SPI_STATUS(spi, SPIDEV_MMCSD(0)) & SPI_STATUS_WRPROTECTED) != 0 ||
       MMCSD_CSD_PERMWRITEPROTECT(csd) ||
       MMCSD_CSD_TMPWRITEPROTECT(csd))
     {
@@ -1056,7 +1056,7 @@ static int mmcsd_open(FAR struct inode *inode)
 
   ret = -ENODEV;
   mmcsd_semtake(slot);
-  if ((SPI_STATUS(spi, SPIDEV_MMCSD) & SPI_STATUS_PRESENT) != 0)
+  if ((SPI_STATUS(spi, SPIDEV_MMCSD(0)) & SPI_STATUS_PRESENT) != 0)
     {
       /* Yes.. a card is present.  Has it been initialized? */
 
@@ -1074,9 +1074,9 @@ static int mmcsd_open(FAR struct inode *inode)
 
       /* Make sure that the card is ready */
 
-      SPI_SELECT(spi, SPIDEV_MMCSD, true);
+      SPI_SELECT(spi, SPIDEV_MMCSD(0), true);
       ret = mmcsd_waitready(slot);
-      SPI_SELECT(spi, SPIDEV_MMCSD, false);
+      SPI_SELECT(spi, SPIDEV_MMCSD(0), false);
     }
 
 errout_with_sem:
@@ -1177,7 +1177,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
   /* Select the slave */
 
   mmcsd_semtake(slot);
-  SPI_SELECT(spi, SPIDEV_MMCSD, true);
+  SPI_SELECT(spi, SPIDEV_MMCSD(0), true);
 
   /* Single or multiple block read? */
 
@@ -1235,7 +1235,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
   /* On success, return the number of sectors transfer */
 
-  SPI_SELECT(spi, SPIDEV_MMCSD, false);
+  SPI_SELECT(spi, SPIDEV_MMCSD(0), false);
   SPI_SEND(spi, 0xff);
   mmcsd_semgive(slot);
 
@@ -1244,7 +1244,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
   return nsectors;
 
 errout_with_eio:
-  SPI_SELECT(spi, SPIDEV_MMCSD, false);
+  SPI_SELECT(spi, SPIDEV_MMCSD(0), false);
   mmcsd_semgive(slot);
   return -EIO;
 }
@@ -1341,7 +1341,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
   /* Select the slave */
 
   mmcsd_semtake(slot);
-  SPI_SELECT(spi, SPIDEV_MMCSD, true);
+  SPI_SELECT(spi, SPIDEV_MMCSD(0), true);
 
   /* Single or multiple block transfer? */
 
@@ -1422,7 +1422,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
   /* Wait until the card is no longer busy */
 
   (void)mmcsd_waitready(slot);
-  SPI_SELECT(spi, SPIDEV_MMCSD, false);
+  SPI_SELECT(spi, SPIDEV_MMCSD(0), false);
   SPI_SEND(spi, 0xff);
   mmcsd_semgive(slot);
 
@@ -1431,7 +1431,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
   return nsectors;
 
 errout_with_sem:
-  SPI_SELECT(spi, SPIDEV_MMCSD, false);
+  SPI_SELECT(spi, SPIDEV_MMCSD(0), false);
   mmcsd_semgive(slot);
   return -EIO;
 }
@@ -1482,9 +1482,9 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
   /* Re-sample the CSD */
 
   mmcsd_semtake(slot);
-  SPI_SELECT(spi, SPIDEV_MMCSD, true);
+  SPI_SELECT(spi, SPIDEV_MMCSD(0), true);
   ret = mmcsd_getcsd(slot, csd);
-  SPI_SELECT(spi, SPIDEV_MMCSD, false);
+  SPI_SELECT(spi, SPIDEV_MMCSD(0), false);
 
   if (ret < 0)
     {
@@ -1564,7 +1564,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
    * interface
    */
 
-  if ((SPI_STATUS(spi, SPIDEV_MMCSD) & SPI_STATUS_PRESENT) == 0)
+  if ((SPI_STATUS(spi, SPIDEV_MMCSD(0)) & SPI_STATUS_PRESENT) == 0)
     {
       fwarn("WARNING: No card present\n");
       slot->state |= MMCSD_SLOTSTATUS_NODISK;
@@ -1602,7 +1602,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
        */
 
       finfo("Send CMD0\n");
-      SPI_SELECT(spi, SPIDEV_MMCSD, true);
+      SPI_SELECT(spi, SPIDEV_MMCSD(0), true);
       result = mmcsd_sendcmd(slot, &g_cmd0, 0);
       if (result == MMCSD_SPIR1_IDLESTATE)
         {
@@ -1614,7 +1614,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
 
       /* De-select card and try again */
 
-      SPI_SELECT(spi, SPIDEV_MMCSD, false);
+      SPI_SELECT(spi, SPIDEV_MMCSD(0), false);
     }
 
   /* Verify that we exit the above loop with the card reporting IDLE state */
@@ -1622,7 +1622,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
   if (result != MMCSD_SPIR1_IDLESTATE)
     {
       ferr("ERROR: Send CMD0 failed: R1=%02x\n", result);
-      SPI_SELECT(spi, SPIDEV_MMCSD, false);
+      SPI_SELECT(spi, SPIDEV_MMCSD(0), false);
       mmcsd_semgive(slot);
       return -EIO;
     }
@@ -1749,7 +1749,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
       if (elapsed >= MMCSD_DELAY_1SEC)
         {
           ferr("ERROR: Failed to exit IDLE state\n");
-          SPI_SELECT(spi, SPIDEV_MMCSD, false);
+          SPI_SELECT(spi, SPIDEV_MMCSD(0), false);
           mmcsd_semgive(slot);
           return -EIO;
         }
@@ -1758,7 +1758,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
   if (slot->type == MMCSD_CARDTYPE_UNKNOWN)
     {
       ferr("ERROR: Failed to identify card\n");
-      SPI_SELECT(spi, SPIDEV_MMCSD, false);
+      SPI_SELECT(spi, SPIDEV_MMCSD(0), false);
       mmcsd_semgive(slot);
       return -EIO;
     }
@@ -1770,7 +1770,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
   if (result != OK)
     {
       ferr("ERROR: mmcsd_getcsd(CMD9) failed: %d\n", result);
-      SPI_SELECT(spi, SPIDEV_MMCSD, false);
+      SPI_SELECT(spi, SPIDEV_MMCSD(0), false);
       mmcsd_semgive(slot);
       return -EIO;
     }
@@ -1814,7 +1814,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
 #endif
 
   slot->state &= ~MMCSD_SLOTSTATUS_NOTREADY;
-  SPI_SELECT(spi, SPIDEV_MMCSD, false);
+  SPI_SELECT(spi, SPIDEV_MMCSD(0), false);
   return OK;
 }
 
@@ -1853,7 +1853,7 @@ static void mmcsd_mediachanged(void *arg)
   slot->state &= ~(MMCSD_SLOTSTATUS_NODISK | MMCSD_SLOTSTATUS_NOTREADY |
                    MMCSD_SLOTSTATUS_MEDIACHGD);
 
-  if ((SPI_STATUS(spi, SPIDEV_MMCSD) & SPI_STATUS_PRESENT) == 0)
+  if ((SPI_STATUS(spi, SPIDEV_MMCSD(0)) & SPI_STATUS_PRESENT) == 0)
     {
       /* Media is not present */
 

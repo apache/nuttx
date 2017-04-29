@@ -116,7 +116,7 @@ config PGA11X_MULTIPLE
 		Can be defined to support multiple PGA11X devices on board with separate
 		chip selects (not daisy chained).  Each device will require a customized
 		SPI interface to distinguish them when SPI_SELECT is called with
-		devid=SPIDEV_MUX.
+		devid=SPIDEV_MUX(n).
 
 endif # if ADC_PGA11X
 endif # ADC

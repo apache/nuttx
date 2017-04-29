@@ -78,7 +78,7 @@ void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid,
 {
   spiinfo("INFO: Selecting spi dev: %d, state: %d\n", devid, select);
 
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       stm32_gpiowrite(GPIO_SD_CS, !select);
     }
@@ -95,7 +95,7 @@ uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)
 {
   spiinfo("INFO: Requesting info from spi dev: %d\n", devid);
 
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       if (stm32_gpioread(GPIO_SD_CD) == 0)
         {

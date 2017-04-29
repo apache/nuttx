@@ -358,7 +358,7 @@ static void ee25xx_waitwritecomplete(struct ee25xx_dev_s *priv)
     {
       /* Select this FLASH part */
 
-      SPI_SELECT(priv->spi, SPIDEV_EEPROM, true);
+      SPI_SELECT(priv->spi, SPIDEV_EEPROM(0), true);
 
       /* Send "Read Status Register (RDSR)" command */
 
@@ -372,7 +372,7 @@ static void ee25xx_waitwritecomplete(struct ee25xx_dev_s *priv)
 
       /* Deselect the FLASH */
 
-      SPI_SELECT(priv->spi, SPIDEV_EEPROM, false);
+      SPI_SELECT(priv->spi, SPIDEV_EEPROM(0), false);
 
       /* Given that writing could take up to a few milliseconds,
        * the following short delay in the "busy" case will allow
@@ -401,11 +401,11 @@ static void ee25xx_waitwritecomplete(struct ee25xx_dev_s *priv)
 static void ee25xx_writeenable(FAR struct spi_dev_s *spi, int enable)
 {
   ee25xx_lock(spi);
-  SPI_SELECT(spi, SPIDEV_EEPROM, true);
+  SPI_SELECT(spi, SPIDEV_EEPROM(0), true);
 
   SPI_SEND(spi, enable ? EE25XX_CMD_WREN : EE25XX_CMD_WRDIS);
 
-  SPI_SELECT(spi, SPIDEV_EEPROM, false);
+  SPI_SELECT(spi, SPIDEV_EEPROM(0), false);
   ee25xx_unlock(spi);
 }
 
@@ -420,12 +420,12 @@ static void ee25xx_writepage(FAR struct ee25xx_dev_s *eedev, uint32_t devaddr,
                              FAR const char *data, size_t len)
 {
   ee25xx_lock(eedev->spi);
-  SPI_SELECT(eedev->spi, SPIDEV_EEPROM, true);
+  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(0), true);
 
   ee25xx_sendcmd(eedev->spi, EE25XX_CMD_WRITE, eedev->addrlen, devaddr);
   SPI_SNDBLOCK(eedev->spi, data, len);
 
-  SPI_SELECT(eedev->spi, SPIDEV_EEPROM, false);
+  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(0), false);
   ee25xx_unlock(eedev->spi);
 }
 
@@ -625,7 +625,7 @@ static ssize_t ee25xx_read(FAR struct file *filep, FAR char *buffer,
     }
 
   ee25xx_lock(eedev->spi);
-  SPI_SELECT(eedev->spi, SPIDEV_EEPROM, true);
+  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(0), true);
 
   /* STM32F4Disco: There is a 25 us delay here */
 
@@ -637,7 +637,7 @@ static ssize_t ee25xx_read(FAR struct file *filep, FAR char *buffer,
 
   /* STM32F4Disco: There is a 20 us delay here */
 
-  SPI_SELECT(eedev->spi, SPIDEV_EEPROM, false);
+  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(0), false);
   ee25xx_unlock(eedev->spi);
 
   /* Update the file position */

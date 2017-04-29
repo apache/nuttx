@@ -153,14 +153,14 @@ void  lpc11_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   ssp_dumpgpio("lpc11_ssp1select() Entry");
 
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       /* Assert/de-assert the CS pin to the card */
 
       (void)lpc11_gpiowrite(LPCXPRESSO_SD_CS, !selected);
     }
 #ifdef CONFIG_NX_LCDDRIVER
-  else if (devid == SPIDEV_DISPLAY)
+  else if (devid == SPIDEV_DISPLAY(0))
     {
       /* Assert the CS pin to the OLED display */
 
@@ -172,7 +172,7 @@ void  lpc11_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 
 uint8_t lpc11_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       /* Read the state of the card-detect bit */
 

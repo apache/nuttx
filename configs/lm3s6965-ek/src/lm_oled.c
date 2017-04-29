@@ -164,7 +164,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 
 int tiva_ssicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-  if (devid == SPIDEV_DISPLAY)
+  if (devid == SPIDEV_DISPLAY(0))
     {
       /* Set GPIO to 1 for data, 0 for command */
 

@@ -491,15 +491,15 @@ static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
    * be in board specific code..... */
   switch (devid)
     {
-    case SPIDEV_FLASH:
+    case SPIDEV_FLASH(0):
       slave = 0;
       break;
 
-    case SPIDEV_MMCSD:
+    case SPIDEV_MMCSD(0):
       slave = 1;
       break;
 
-    case SPIDEV_ETHERNET:
+    case SPIDEV_ETHERNET(0):
       slave = 2;
       break;
 

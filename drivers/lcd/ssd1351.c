@@ -502,7 +502,7 @@ static void ssd1351_select(FAR struct ssd1351_dev_s *priv)
   ginfo("SELECTED\n");
 
   SPI_LOCK(spi, true);
-  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
+  SPI_SELECT(spi, SPIDEV_DISPLAY(0), true);
 
   /* Now make sure that the SPI bus is configured for this device (it might
    * have gotten configured for a different device while unlocked)
@@ -532,7 +532,7 @@ static void ssd1351_deselect(FAR struct ssd1351_dev_s *priv)
 
   ginfo("DE-SELECTED\n");
 
-  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
+  SPI_SELECT(spi, SPIDEV_DISPLAY(0), false);
   SPI_LOCK(spi, false);
 }
 #endif
@@ -648,7 +648,7 @@ static void ssd1351_write(FAR struct ssd1351_dev_s *priv, uint8_t cmd,
 
   /* Select command transfer */
 
-  (void)SPI_CMDDATA(spi, SPIDEV_DISPLAY, true);
+  (void)SPI_CMDDATA(spi, SPIDEV_DISPLAY(0), true);
 
   /* Send the command */
 
@@ -660,7 +660,7 @@ static void ssd1351_write(FAR struct ssd1351_dev_s *priv, uint8_t cmd,
     {
       /* Yes, select data transfer */
 
-      (void)SPI_CMDDATA(spi, SPIDEV_DISPLAY, false);
+      (void)SPI_CMDDATA(spi, SPIDEV_DISPLAY(0), false);
 
       /* Transfer all of the data */
 

@@ -132,7 +132,7 @@ void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 #ifdef CONFIG_INPUT_ADS7843E
   /* Select/de-select the touchscreen */
 
-  if (devid == SPIDEV_TOUCHSCREEN)
+  if (devid == SPIDEV_TOUCHSCREEN(0))
     {
       stm32_gpiowrite(GPIO_LCDTP_CS, !selected);
     }

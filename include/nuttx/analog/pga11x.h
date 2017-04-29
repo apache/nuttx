@@ -70,7 +70,7 @@
  * CONFIG_PGA11X_MULTIPLE
  *   Can be defined to support multiple PGA11X devices on board.  Each
  *   device will require a customized SPI interface to distinguish them
- *   When SPI_SELECT is called with devid=SPIDEV_MUX.
+ *   When SPI_SELECT is called with devid=SPIDEV_MUX(n).
  *
  * Other settings that effect the driver:
  *   CONFIG_DEBUG_SPI_ERR/WARN/INFO -- This will enable debug output from

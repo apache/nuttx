@@ -146,14 +146,14 @@ void stm32l4_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
 #ifdef CONFIG_WL_CC3000
-  if (devid == SPIDEV_WIRELESS)
+  if (devid == SPIDEV_WIRELESS(0))
     {
       stm32l4_gpiowrite(GPIO_SPI_CS_WIFI, !selected);
     }
   else
 #endif
 #ifdef HAVE_MMCSD
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       stm32l4_gpiowrite(GPIO_SPI_CS_SD_CARD, !selected);
     }
@@ -172,7 +172,7 @@ void stm32l4_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
 #ifdef CONFIG_WL_CC3000
-  if (devid == SPIDEV_WIRELESS)
+  if (devid == SPIDEV_WIRELESS(0))
     {
       stm32l4_gpiowrite(GPIO_WIFI_CS, !selected);
     }

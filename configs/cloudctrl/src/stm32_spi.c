@@ -119,7 +119,7 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 
   /* SPI1 connects to the SD CARD and to the SPI FLASH */
 
-  if (devid == SPIDEV_FLASH)
+  if (devid == SPIDEV_FLASH(0))
     {
       /* Set the GPIO low to select and high to de-select */
 

@@ -134,7 +134,7 @@ void  pic32mx_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selecte
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       pic32mx_gpiowrite(GPIO_SD_CS, !selected);
     }
@@ -146,7 +146,7 @@ uint8_t pic32mx_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 
   /* Card detect active low. */
 
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       if (!pic32mx_gpioread(GPIO_SD_CD))
         {

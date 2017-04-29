@@ -154,7 +154,7 @@ void sam_spi0select(FAR struct spi_dev_s *dev, uint32_t devid,
 #ifdef CONFIG_SAMD21_XPLAINED_IOMODULE_EXT1
   /* Select/de-select the SD card */
 
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       /* Active low */
 
@@ -165,7 +165,7 @@ void sam_spi0select(FAR struct spi_dev_s *dev, uint32_t devid,
 #ifdef CONFIG_SAMD21_XPLAINED_OLED1MODULE_EXT1
   /* Select/de-select the OLED */
 
-  if (devid == SPIDEV_DISPLAY)
+  if (devid == SPIDEV_DISPLAY(0))
     {
       /* Active low */
 
@@ -182,7 +182,7 @@ void sam_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
 #ifdef CONFIG_SAMD21_XPLAINED_IOMODULE_EXT2
   /* Select/de-select the SD card */
 
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       /* Active low */
 
@@ -193,7 +193,7 @@ void sam_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
 #ifdef CONFIG_SAMD21_XPLAINED_OLED1MODULE_EXT2
   /* Select/de-select the OLED */
 
-  if (devid == SPIDEV_DISPLAY)
+  if (devid == SPIDEV_DISPLAY(0))
     {
       /* Active low */
 
@@ -254,7 +254,7 @@ uint8_t sam_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
 #ifdef CONFIG_SAMD21_XPLAINED_IOMODULE_EXT1
   /* Check if an SD card is present in the microSD slot */
 
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       /* Active low */
 
@@ -277,7 +277,7 @@ uint8_t sam_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 #ifdef CONFIG_SAMD21_XPLAINED_IOMODULE_EXT2
   /* Check if an SD card is present in the microSD slot */
 
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       /* Active low */
 
@@ -350,7 +350,7 @@ uint8_t sam_spi5status(FAR struct spi_dev_s *dev, uint32_t devid)
 int sam_spi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
 #ifdef CONFIG_SAMD21_XPLAINED_OLED1MODULE_EXT1
-  if (devid == SPIDEV_DISPLAY)
+  if (devid == SPIDEV_DISPLAY(0))
     {
       /* This is the Data/Command control pad which determines whether the
        * data bits are data or a command.
@@ -371,7 +371,7 @@ int sam_spi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 int sam_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
 #ifdef CONFIG_SAMD21_XPLAINED_OLED1MODULE_EXT2
-  if (devid == SPIDEV_DISPLAY)
+  if (devid == SPIDEV_DISPLAY(0))
     {
       /* This is the Data/Command control pad which determines whether the
        * data bits are data or a command.

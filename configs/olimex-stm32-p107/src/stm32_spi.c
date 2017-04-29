@@ -112,7 +112,7 @@ void stm32_spi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-  if (devid == SPIDEV_ETHERNET)
+  if (devid == SPIDEV_ETHERNET(0))
     {
       /* Set the GPIO low to select and high to de-select */
 

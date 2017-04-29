@@ -146,7 +146,7 @@ void kl_spi0select(FAR struct spi_dev_s *dev, uint32_t devid,
            (int)devid, selected ? "assert" : "de-assert");
 
 #ifdef CONFIG_ADXL345_SPI
-  if (devid == SPIDEV_ACCELEROMETER)
+  if (devid == SPIDEV_ACCELEROMETER(0))
     {
       /* Active low */
 
@@ -155,7 +155,7 @@ void kl_spi0select(FAR struct spi_dev_s *dev, uint32_t devid,
 #endif
 
 #if defined(CONFIG_WL_CC3000)
-  if (devid == SPIDEV_WIRELESS)
+  if (devid == SPIDEV_WIRELESS(0))
     {
       kl_gpiowrite(GPIO_WIFI_CS, !selected);
     }

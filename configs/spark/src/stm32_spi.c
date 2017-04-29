@@ -134,7 +134,7 @@ void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 
 #if defined(CONFIG_MTD_SST25)
 
-  if (devid == SPIDEV_FLASH)
+  if (devid == SPIDEV_FLASH(0))
     {
       stm32_gpiowrite(GPIO_MEM_CS, !selected);
     }
@@ -144,7 +144,7 @@ void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 #endif
 
 #if defined(CONFIG_WL_CC3000)
-  if (devid == SPIDEV_WIRELESS)
+  if (devid == SPIDEV_WIRELESS(0))
     {
       stm32_gpiowrite(GPIO_WIFI_CS, !selected);
     }

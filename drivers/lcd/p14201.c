@@ -449,7 +449,7 @@ static void rit_select(FAR struct spi_dev_s *spi)
    */
 
   SPI_LOCK(spi, true);
-  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
+  SPI_SELECT(spi, SPIDEV_DISPLAY(0), true);
 
   /* Now make sure that the SPI bus is configured for the P14201 (it
    * might have gotten configured for a different device while unlocked)
@@ -483,7 +483,7 @@ static void rit_deselect(FAR struct spi_dev_s *spi)
 {
   /* De-select P14201 chip and relinquish the SPI bus. */
 
-  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
+  SPI_SELECT(spi, SPIDEV_DISPLAY(0), false);
   SPI_LOCK(spi, false);
 }
 
@@ -518,7 +518,7 @@ static void rit_sndbytes(FAR struct rit_dev_s *priv, FAR const uint8_t *buffer,
 
   /* Clear/set the D/Cn bit to enable command or data mode */
 
-  (void)SPI_CMDDATA(spi, SPIDEV_DISPLAY, cmd);
+  (void)SPI_CMDDATA(spi, SPIDEV_DISPLAY(0), cmd);
 
   /* Loop until the entire command/data block is transferred */
 

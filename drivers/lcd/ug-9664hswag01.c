@@ -399,7 +399,7 @@ static void ug_select(FAR struct spi_dev_s *spi)
    */
 
   SPI_LOCK(spi, true);
-  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
+  SPI_SELECT(spi, SPIDEV_DISPLAY(0), true);
 
   /* Now make sure that the SPI bus is configured for the UG-9664HSWAG01 (it
    * might have gotten configured for a different device while unlocked)
@@ -433,7 +433,7 @@ static void ug_deselect(FAR struct spi_dev_s *spi)
 {
   /* De-select UG-9664HSWAG01 chip and relinquish the SPI bus. */
 
-  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
+  SPI_SELECT(spi, SPIDEV_DISPLAY(0), false);
   SPI_LOCK(spi, false);
 }
 
@@ -614,7 +614,7 @@ static int ug_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
 
   /* Select command transfer */
 
-  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, true);
+  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY(0), true);
 
   /* Set the starting position for the run */
 
@@ -624,7 +624,7 @@ static int ug_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
 
   /* Select data transfer */
 
-  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, false);
+  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY(0), false);
 
   /* Then transfer all of the data */
 
@@ -943,7 +943,7 @@ static int ug_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 
   /* Select command transfer */
 
-  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, true);
+  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY(0), true);
 
   /* Set the contrast */
 
@@ -985,7 +985,7 @@ static inline void up_clear(FAR struct ug_dev_s  *priv)
     {
       /* Select command transfer */
 
-      SPI_CMDDATA(spi, SPIDEV_DISPLAY, true);
+      SPI_CMDDATA(spi, SPIDEV_DISPLAY(0), true);
 
       /* Set the starting position for the run */
 
@@ -995,7 +995,7 @@ static inline void up_clear(FAR struct ug_dev_s  *priv)
 
       /* Select data transfer */
 
-      SPI_CMDDATA(spi, SPIDEV_DISPLAY, false);
+      SPI_CMDDATA(spi, SPIDEV_DISPLAY(0), false);
 
        /* Then transfer all 96 columns of data */
 
@@ -1055,7 +1055,7 @@ FAR struct lcd_dev_s *ug_initialize(FAR struct spi_dev_s *spi, unsigned int devn
 
   /* Select command transfer */
 
-  SPI_CMDDATA(spi, SPIDEV_DISPLAY, true);
+  SPI_CMDDATA(spi, SPIDEV_DISPLAY(0), true);
 
   /* Configure the device */
 

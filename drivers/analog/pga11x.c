@@ -278,9 +278,9 @@ static void pga11x_write(FAR struct spi_dev_s *spi, uint16_t cmd)
   /* Lock, select, send the 16-bit command, de-select, and un-lock. */
 
   pga11x_lock(spi);
-  SPI_SELECT(spi, SPIDEV_MUX, true);
+  SPI_SELECT(spi, SPIDEV_MUX(0), true);
   pga11x_send16(spi, cmd);
-  SPI_SELECT(spi, SPIDEV_MUX, false);
+  SPI_SELECT(spi, SPIDEV_MUX(0), false);
   pga11x_unlock(spi);
 }
 #else
@@ -293,10 +293,10 @@ static void pga11x_write(FAR struct spi_dev_s *spi, uint16_t u1cmd, uint16_t u2c
    */
 
   pga11x_lock(spi);
-  SPI_SELECT(spi, SPIDEV_MUX, true);
+  SPI_SELECT(spi, SPIDEV_MUX(0), true);
   pga11x_send16(spi, u2cmd);
   pga11x_send16(spi, u1cmd);
-  SPI_SELECT(spi, SPIDEV_MUX, false);
+  SPI_SELECT(spi, SPIDEV_MUX(0), false);
   pga11x_unlock(spi);
 }
 #endif
@@ -491,17 +491,17 @@ int pga11x_read(PGA11X_HANDLE handle, FAR struct pga11x_settings_s *settings)
    * for the part.
    */
 
-  SPI_SELECT(spi, SPIDEV_MUX, true);
+  SPI_SELECT(spi, SPIDEV_MUX(0), true);
   pga11x_send16(spi, PGA11X_CMD_READ);
   pga11x_send16(spi, PGA11X_DCCMD_READ);
-  SPI_SELECT(spi, SPIDEV_MUX, false);
+  SPI_SELECT(spi, SPIDEV_MUX(0), false);
 
   /* Re-select, get the returned values, de-select, and unlock */
 
-  SPI_SELECT(spi, SPIDEV_MUX, true);
+  SPI_SELECT(spi, SPIDEV_MUX(0), true);
   u2value = pga11x_recv16(spi);
   u1value = pga11x_recv16(spi);
-  SPI_SELECT(spi, SPIDEV_MUX, false);
+  SPI_SELECT(spi, SPIDEV_MUX(0), false);
   pga11x_unlock(spi);
 
   /* Decode the returned value */
@@ -528,15 +528,15 @@ int pga11x_read(PGA11X_HANDLE handle, FAR struct pga11x_settings_s *settings)
    * it is shown in the timing diagrams for the part.
    */
 
-  SPI_SELECT(spi, SPIDEV_MUX, true);
+  SPI_SELECT(spi, SPIDEV_MUX(0), true);
   pga11x_send16(spi, PGA11X_CMD_READ);
-  SPI_SELECT(spi, SPIDEV_MUX, false);
+  SPI_SELECT(spi, SPIDEV_MUX(0), false);
 
   /* Re-select, get the returned value, de-select, and unlock */
 
-  SPI_SELECT(spi, SPIDEV_MUX, true);
+  SPI_SELECT(spi, SPIDEV_MUX(0), true);
   value = pga11x_recv16(spi);
-  SPI_SELECT(spi, SPIDEV_MUX, false);
+  SPI_SELECT(spi, SPIDEV_MUX(0), false);
   pga11x_unlock(spi);
 
   /* Decode the returned value */
