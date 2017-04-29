@@ -458,12 +458,13 @@ enum spi_devtype_e
 
 /* This builds a SPI devid from its type and index */
 
-#define SPIDEV_ID(type,index) (((uint32_t)(type)&0xFFFF)<<16 | (uint32_t)(index)&0xFFFF)
+#define SPIDEV_ID(type,index) ((((uint32_t)(type)  & 0xffff) << 16) | \
+                                 (uint32_t)(index) & 0xffff)
 
 /* This retrieves the fields from a SPI devid */
 
-#define SPIDEVID_TYPE (devid) (((uint32_t)(devid)>>16)&0xFFFF)
-#define SPIDEVID_INDEX(devid) ( (uint32_t)(devid)     &0xFFFF)
+#define SPIDEVID_TYPE (devid) (((uint32_t)(devid) >> 16) & 0xffff)
+#define SPIDEVID_INDEX(devid)  ((uint32_t)(devid)        & 0xffff)
 
 /* These are replacement definitions for the currently used SPI device indexes.
  * They are meant as a compatibility measure. it is expected that new drivers
