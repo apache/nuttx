@@ -63,8 +63,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-struct  spi_dev_s; /* Forward reference */
-enum    spi_dev_e; /* Forward reference */
+struct spi_dev_s; /* Forward reference */
 
 /************************************************************************************
  * Name: stm32_spibus_initialize
