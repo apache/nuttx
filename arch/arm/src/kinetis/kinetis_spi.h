@@ -63,8 +63,7 @@ extern "C"
  * Public Data
  ************************************************************************************/
 
-struct  spi_dev_s;
-enum    spi_dev_e;
+struct spi_dev_s;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -115,24 +114,24 @@ FAR struct spi_dev_s *kinetis_spibus_initialize(int bus);
  ************************************************************************************/
 
 #ifdef CONFIG_KINETIS_SPI0
-void  kinetis_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t kinetis_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  kinetis_spi0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t kinetis_spi0status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int kinetis_spi0cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int kinetis_spi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 #ifdef CONFIG_KINETIS_SPI1
-void  kinetis_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t kinetis_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  kinetis_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t kinetis_spi1status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int kinetis_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int kinetis_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 #ifdef CONFIG_KINETIS_SPI2
-void  kinetis_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t kinetis_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  kinetis_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t kinetis_spi2status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int kinetis_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int kinetis_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 

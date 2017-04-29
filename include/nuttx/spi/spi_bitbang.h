@@ -63,7 +63,7 @@ struct spi_bitbang_ops_s
 {
   /* Platform specific chip select logic */
 
-  void (*select)(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid,
+  void (*select)(FAR struct spi_bitbang_s *priv, uint32_t devid,
                  bool selected);
 
   /* Platform-specific, SPI frequency function */
@@ -81,12 +81,12 @@ struct spi_bitbang_ops_s
 
   /* Platform-specific word exchange function */
 
-  uint8_t (*status)(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid);
+  uint8_t (*status)(FAR struct spi_bitbang_s *priv, uint32_t devid);
 
 #ifdef CONFIG_SPI_CMDDATA
   /* Platform-specific CMD/DATA function */
 
-  int (*cmddata)(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid,
+  int (*cmddata)(FAR struct spi_bitbang_s *priv, uint32_t devid,
                  bool cmd);
 #endif
 };

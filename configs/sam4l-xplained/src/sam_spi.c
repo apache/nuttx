@@ -140,7 +140,7 @@ void weak_function sam_spidev_initialize(void)
  *
  ****************************************************************************/
 
-void sam_spi0select(enum spi_dev_e devid, bool selected)
+void sam_spi0select(uint32_t devid, bool selected)
 {
 #ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
   /* Select/de-select the SD card */
@@ -183,7 +183,7 @@ void sam_spi0select(enum spi_dev_e devid, bool selected)
  *
  ****************************************************************************/
 
-uint8_t sam_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t sam_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t ret = 0;
 
@@ -231,7 +231,7 @@ uint8_t sam_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-int sam_spic0mddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+int sam_spic0mddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
 #ifdef CONFIG_SAM4L_XPLAINED_OLED1MODULE
   if (devid == SPIDEV_DISPLAY)

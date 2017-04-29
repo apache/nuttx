@@ -697,6 +697,10 @@ int ieee8021514_loopback(void)
 
   priv->lo_polldog = wd_create(); /* Create periodic poll timer */
 
+  /* Initialize the DSN to a "random" value */
+
+  priv->lo_ieee.i_dsn = 42;
+
   /* Register the loopabck device with the OS so that socket IOCTLs can b
    * performed.
    */

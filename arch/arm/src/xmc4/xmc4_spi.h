@@ -63,8 +63,7 @@ extern "C"
  * Public Data
  ************************************************************************************/
 
-struct  spi_dev_s;
-enum    spi_dev_e;
+struct spi_dev_s;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -115,24 +114,24 @@ FAR struct spi_dev_s *xmc4_spibus_initialize(int bus);
  ************************************************************************************/
 
 #ifdef CONFIG_XMC4_SPI0
-void  xmc4_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t xmc4_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  xmc4_spi0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t xmc4_spi0status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int xmc4_spi0cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int xmc4_spi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 #ifdef CONFIG_XMC4_SPI1
-void  xmc4_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t xmc4_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  xmc4_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t xmc4_spi1status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int xmc4_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int xmc4_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 #ifdef CONFIG_XMC4_SPI2
-void  xmc4_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t xmc4_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  xmc4_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t xmc4_spi2status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int xmc4_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int xmc4_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 

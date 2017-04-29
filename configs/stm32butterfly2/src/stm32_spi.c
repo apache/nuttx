@@ -73,7 +73,7 @@ void stm32_spidev_initialize(void)
  *   Function asserts given devid based on select
  ****************************************************************************/
 
-void stm32_spi1select(struct spi_dev_s *dev, enum spi_dev_e devid,
+void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid,
                       bool select)
 {
   spiinfo("INFO: Selecting spi dev: %d, state: %d\n", devid, select);
@@ -91,7 +91,7 @@ void stm32_spi1select(struct spi_dev_s *dev, enum spi_dev_e devid,
  *   Return status of devid
  ****************************************************************************/
 
-uint8_t stm32_spi1status(struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)
 {
   spiinfo("INFO: Requesting info from spi dev: %d\n", devid);
 

@@ -400,8 +400,6 @@ void pic32mx_dumpgpio(uint32_t pinset, const char *msg);
  ****************************************************************************/
 
 struct spi_dev_s;  /* Forward reference */
-enum spi_dev_e;    /* Forward reference */
-
 FAR struct spi_dev_s *pic32mx_spibus_initialize(int port);
 
 /************************************************************************************
@@ -433,38 +431,38 @@ FAR struct spi_dev_s *pic32mx_spibus_initialize(int port);
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MX_SPI1
-void  pic32mx_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+void  pic32mx_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
                          bool selected);
-uint8_t pic32mx_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+uint8_t pic32mx_spi1status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int pic32mx_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int pic32mx_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_PIC32MX_SPI2
-void  pic32mx_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+void  pic32mx_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
                          bool selected);
-uint8_t pic32mx_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+uint8_t pic32mx_spi2status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int pic32mx_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int pic32mx_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_PIC32MX_SPI3
-void  pic32mx_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+void  pic32mx_spi3select(FAR struct spi_dev_s *dev, uint32_t devid,
                          bool selected);
-uint8_t pic32mx_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+uint8_t pic32mx_spi3status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int pic32mx_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int pic32mx_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_PIC32MX_SPI3
-void  pic32mx_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+void  pic32mx_spi3select(FAR struct spi_dev_s *dev, uint32_t devid,
                          bool selected);
-uint8_t pic32mx_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+uint8_t pic32mx_spi3status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int pic32mx_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int pic32mx_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 

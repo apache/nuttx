@@ -109,18 +109,18 @@ void stm32_spidev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_SPI1
-void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
 }
 
-uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   switch(devid)
   {
@@ -138,7 +138,7 @@ void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
   }
 }
 
-uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t status = 0;
   switch(devid)

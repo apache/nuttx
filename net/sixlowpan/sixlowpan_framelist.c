@@ -282,7 +282,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
   ninfo("Sending packet length %d\n", buflen);
 
-  /* Set the source and destinatino address */
+  /* Set the source and destination address */
 
   rimeaddr_copy(&g_pktaddrs[PACKETBUF_ADDR_SENDER],
                 &ieee->i_dev.d_mac.ieee802154);
@@ -358,7 +358,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
       ninfo("Sending fragmented packet length %d\n", buflen);
 
       /* Create 1st Fragment */
-      /* Add the frame header using the pre-allocated IOB. */
+      /* Add the frame header using the pre-allocated IOB using the DSN
+       * selected by sixlowpan_send_hdrlen().
+       */
 
       verify = sixlowpan_framecreate(ieee, iob, dest_panid);
       DEBUGASSERT(verify == framer_hdrlen);
@@ -444,11 +446,17 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
           iob->io_pktlen = 0;
           fptr           = iob->io_data;
 
-          /* Copy the frame header at the beginning of the frame. */
+          /* Add a new frame header to the IOB (same as the first but with a
+           * different DSN).
+           */
 
-          memcpy(fptr, frame1, framer_hdrlen);
+          g_pktattrs[PACKETBUF_ATTR_MAC_SEQNO] = 0;
 
-          /* Move HC1/HC06/IPv6 header the frame header from first
+          verify = sixlowpan_framecreate(ieee, iob, ieee->i_panid);
+          DEBUGASSERT(verify == framer_hdrlen);
+          UNUSED(verify);
+
+          /* Copy the HC1/HC06/IPv6 header the frame header from first
            * frame, into the correct location after the FRAGN header
            * of subsequent frames.
            */

@@ -323,12 +323,12 @@ static void sixlowpan_setup_params(FAR struct ieee802154_driver_s *ieee,
 
   if (g_pktattrs[PACKETBUF_ATTR_MAC_SEQNO] != 0)
     {
-      params->seq = g_pktattrs[PACKETBUF_ATTR_MAC_SEQNO];
+      params->seq = g_pktattrs[PACKETBUF_ATTR_MAC_SEQNO] & 0xff;
     }
   else
     {
       params->seq = ieee->i_dsn++;
-      g_pktattrs[PACKETBUF_ATTR_MAC_SEQNO] = params->seq;
+      g_pktattrs[PACKETBUF_ATTR_MAC_SEQNO] = params->seq | 0x100;
     }
 
   /* Complete the addressing fields. */

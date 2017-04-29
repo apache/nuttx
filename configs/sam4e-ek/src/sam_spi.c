@@ -140,7 +140,7 @@ void weak_function sam_spidev_initialize(void)
  *
  ****************************************************************************/
 
-void sam_spi0select(enum spi_dev_e devid, bool selected)
+void sam_spi0select(uint32_t devid, bool selected)
 {
   switch (devid)
     {
@@ -185,7 +185,7 @@ void sam_spi0select(enum spi_dev_e devid, bool selected)
  *
  ****************************************************************************/
 
-uint8_t sam_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t sam_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
