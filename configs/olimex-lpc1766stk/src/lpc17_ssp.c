@@ -266,7 +266,7 @@ void weak_function lpc1766stk_sspdev_initialize(void)
 void  lpc17_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  if (devid == SPIDEV_DISPLAY)
+  if (devid == SPIDEV_DISPLAY(0))
     {
       /* Assert/de-assert the CS pin to the card */
 
@@ -287,7 +287,7 @@ uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid)
 void  lpc17_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       /* Assert/de-assert the CS pin to the card */
 

@@ -110,7 +110,7 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
 #  if defined(CONFIG_LCD_SHARP_MEMLCD)
-  if (devid == SPIDEV_DISPLAY)
+  if (devid == SPIDEV_DISPLAY(0))
     {
       stm32_gpiowrite(GPIO_MEMLCD_CS, selected);
     }

@@ -855,7 +855,7 @@ static inline void stm32_ili93414ws_cmddata(
 {
   FAR struct ili93414ws_lcd_s *priv = (FAR struct ili93414ws_lcd_s *)lcd;
 
-  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, cmd);
+  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY(0), cmd);
 }
 #else
 static inline void stm32_ili93414ws_cmddata(
@@ -912,7 +912,7 @@ static void stm32_ili93414ws_select(FAR struct ili9341_lcd_s *lcd)
    */
 
   SPI_LOCK(priv->spi, true);
-  SPI_SELECT(priv->spi, SPIDEV_DISPLAY, true);
+  SPI_SELECT(priv->spi, SPIDEV_DISPLAY(0), true);
 
   /* Configure spi and disable */
 
@@ -971,7 +971,7 @@ static void stm32_ili93414ws_deselect(FAR struct ili9341_lcd_s *lcd)
 
   /* de-select ili9341 and relinquish the spi bus. */
 
-  SPI_SELECT(priv->spi, SPIDEV_DISPLAY, false);
+  SPI_SELECT(priv->spi, SPIDEV_DISPLAY(0), false);
   SPI_LOCK(priv->spi, false);
 }
 #else

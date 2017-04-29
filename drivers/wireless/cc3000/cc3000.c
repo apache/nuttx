@@ -289,7 +289,7 @@ static void cc3000_lock_and_select(FAR struct spi_dev_s *spi)
    */
 
   cc3000_configspi(spi);
-  SPI_SELECT(spi, SPIDEV_WIRELESS, true);
+  SPI_SELECT(spi, SPIDEV_WIRELESS(0), true);
 }
 
 /****************************************************************************
@@ -313,7 +313,7 @@ static void cc3000_deselect_and_unlock(FAR struct spi_dev_s *spi)
 {
    /* De select */
 
-  SPI_SELECT(spi, SPIDEV_WIRELESS, false);
+  SPI_SELECT(spi, SPIDEV_WIRELESS(0), false);
 
   /* Relinquish the SPI bus. */
 

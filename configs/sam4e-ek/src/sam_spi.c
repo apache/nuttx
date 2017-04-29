@@ -153,7 +153,7 @@ void sam_spi0select(uint32_t devid, bool selected)
        * manually and hold it low throughout the SPI transfer.
        */
 
-      case SPIDEV_TOUCHSCREEN:
+      case SPIDEV_TOUCHSCREEN(0):
         sam_gpiowrite(GPIO_TSC_CS, !selected);
         break;
 #endif
@@ -161,7 +161,7 @@ void sam_spi0select(uint32_t devid, bool selected)
 #if defined(CONFIG_MTD_AT25)
        /* The AT25 Serial FLASH connects using NPCS3 (PA5). */
 
-      case SPIDEV_FLASH:
+      case SPIDEV_FLASH(0):
         sam_gpiowrite(GPIO_FLASH_CS, !selected);
         break;
 #endif

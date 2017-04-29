@@ -154,7 +154,7 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 void stm32_spi4select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
 #if defined(CONFIG_MTD_SST25XX)
-  if (devid == SPIDEV_FLASH)
+  if (devid == SPIDEV_FLASH(0))
     {
       stm32_gpiowrite(GPIO_CS_SST25, !selected);
     }
@@ -173,7 +173,7 @@ void stm32_spi5select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
 #if defined(CONFIG_STM32F429I_DISCO_ILI9341)
-  if (devid == SPIDEV_DISPLAY)
+  if (devid == SPIDEV_DISPLAY(0))
     {
       stm32_gpiowrite(GPIO_CS_LCD, !selected);
     }
@@ -247,7 +247,7 @@ int stm32_spi4cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 int stm32_spi5cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
 #if defined(CONFIG_STM32F429I_DISCO_ILI9341)
-  if (devid == SPIDEV_DISPLAY)
+  if (devid == SPIDEV_DISPLAY(0))
     {
       /*  This is the Data/Command control pad which determines whether the
        *  data bits are data or a command.

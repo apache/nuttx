@@ -166,7 +166,7 @@ void  lpc17_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
   ssp_dumpgpio("lpc17_ssp0select() Entry");
 
 #ifdef CONFIG_NX_LCDDRIVER
-  if (devid == SPIDEV_DISPLAY)
+  if (devid == SPIDEV_DISPLAY(0))
     {
       /* Assert the CS pin to the OLED display */
 
@@ -179,7 +179,7 @@ void  lpc17_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 
 uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
-  if (devid == SPIDEV_DISPLAY)
+  if (devid == SPIDEV_DISPLAY(0))
     {
       spiinfo("Returning SPI_STATUS_PRESENT\n");
       return SPI_STATUS_PRESENT;

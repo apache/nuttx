@@ -314,7 +314,7 @@ static inline int mx25l_readid(FAR struct mx25l_dev_s *priv)
   /* Lock the SPI bus, configure the bus, and select this FLASH part. */
 
   mx25l_lock(priv->dev);
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send the "Read ID (RDID)" command and read the first three ID bytes */
 
@@ -325,7 +325,7 @@ static inline int mx25l_readid(FAR struct mx25l_dev_s *priv)
 
   /* Deselect the FLASH and unlock the bus */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
   mx25l_unlock(priv->dev);
 
   mxlinfo("manufacturer: %02x memory: %02x capacity: %02x\n",
@@ -374,7 +374,7 @@ static void mx25l_waitwritecomplete(FAR struct mx25l_dev_s *priv)
     {
       /* Select this FLASH part */
 
-      SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+      SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
       /* Send "Read Status Register (RDSR)" command */
 
@@ -386,7 +386,7 @@ static void mx25l_waitwritecomplete(FAR struct mx25l_dev_s *priv)
 
       /* Deselect the FLASH */
 
-      SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+      SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
 
       /* Given that writing could take up to few tens of milliseconds, and erasing
        * could take more.  The following short delay in the "busy" case will allow
@@ -413,7 +413,7 @@ static void mx25l_writeenable(FAR struct mx25l_dev_s *priv)
 {
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send "Write Enable (WREN)" command */
 
@@ -421,7 +421,7 @@ static void mx25l_writeenable(FAR struct mx25l_dev_s *priv)
 
   /* Deselect the FLASH */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
 
   mxlinfo("Enabled\n");
 }
@@ -434,7 +434,7 @@ static void mx25l_writedisable(FAR struct mx25l_dev_s *priv)
 {
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send "Write Disable (WRDI)" command */
 
@@ -442,7 +442,7 @@ static void mx25l_writedisable(FAR struct mx25l_dev_s *priv)
 
   /* Deselect the FLASH */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
 
   mxlinfo("Disabled\n");
 }
@@ -465,7 +465,7 @@ static void mx25l_sectorerase(FAR struct mx25l_dev_s *priv, off_t sector)
 
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send the "Sector Erase (SE)" or "Block Erase (BE)" instruction
    * that was passed in as the erase type.
@@ -484,7 +484,7 @@ static void mx25l_sectorerase(FAR struct mx25l_dev_s *priv, off_t sector)
 
   /* Deselect the FLASH */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
 
   mx25l_waitwritecomplete(priv);
 
@@ -505,7 +505,7 @@ static inline int mx25l_chiperase(FAR struct mx25l_dev_s *priv)
 
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send the "Chip Erase (CE)" instruction */
 
@@ -513,7 +513,7 @@ static inline int mx25l_chiperase(FAR struct mx25l_dev_s *priv)
 
   /* Deselect the FLASH */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
 
   mx25l_waitwritecomplete(priv);
 
@@ -540,7 +540,7 @@ static void mx25l_byteread(FAR struct mx25l_dev_s *priv, FAR uint8_t *buffer,
 
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send "Read from Memory " instruction */
 
@@ -562,7 +562,7 @@ static void mx25l_byteread(FAR struct mx25l_dev_s *priv, FAR uint8_t *buffer,
 
   /* Deselect the FLASH */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
 }
 
 /************************************************************************************
@@ -583,7 +583,7 @@ static inline void mx25l_pagewrite(FAR struct mx25l_dev_s *priv,
       
       /* Select this FLASH part */
 
-      SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+      SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
       /* Send the "Page Program (MX25L_PP)" Command */
 
@@ -601,7 +601,7 @@ static inline void mx25l_pagewrite(FAR struct mx25l_dev_s *priv,
 
       /* Deselect the FLASH and setup for the next pass through the loop */
 
-      SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+      SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
       
       /* Wait for any preceding write or erase operation to complete. */
 
@@ -988,7 +988,7 @@ FAR struct mtd_dev_s *mx25l_initialize_spi(FAR struct spi_dev_s *dev)
   /* Allocate a state structure (we allocate the structure instead of using
    * a fixed, static allocation so that we can handle multiple FLASH devices.
    * The current implementation would handle only one FLASH part per SPI
-   * device (only because of the SPIDEV_FLASH definition) and so would have
+   * device (only because of the SPIDEV_FLASH(0) definition) and so would have
    * to be extended to handle multiple FLASH parts on the same SPI bus.
    */
 
@@ -1008,7 +1008,7 @@ FAR struct mtd_dev_s *mx25l_initialize_spi(FAR struct spi_dev_s *dev)
 
       /* Deselect the FLASH */
 
-      SPI_SELECT(dev, SPIDEV_FLASH, false);
+      SPI_SELECT(dev, SPIDEV_FLASH(0), false);
 
       /* Identify the FLASH chip and get its capacity */
 

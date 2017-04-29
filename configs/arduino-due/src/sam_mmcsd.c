@@ -145,7 +145,7 @@ static int spi_cmddata(FAR struct spi_bitbang_s *priv, uint32_t devid,
 static void spi_select(FAR struct spi_bitbang_s *priv, uint32_t devid,
                        bool selected)
 {
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       if (selected)
         {
@@ -175,7 +175,7 @@ static void spi_select(FAR struct spi_bitbang_s *priv, uint32_t devid,
 
 static uint8_t spi_status(FAR struct spi_bitbang_s *priv, uint32_t devid)
 {
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       return SPI_STATUS_PRESENT;
     }

@@ -128,7 +128,7 @@ void  lpc17_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   spi_dumpgpio("lpc17_spiselect() Entry");
 
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       /* Assert/de-assert the CS pin to the card */
 
@@ -140,7 +140,7 @@ void  lpc17_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 
 uint8_t lpc17_spistatus(FAR struct spi_dev_s *dev, uint32_t devid)
 {
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       /* Read the state of the card-detect bit */
 

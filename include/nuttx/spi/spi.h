@@ -433,29 +433,29 @@
 #define SPIDEVID_INDEX(devid)  ((uint32_t)(devid)        & 0xffff)
 
 /* These are replacement definitions for the currently used SPI device indexes.
- * They are meant as a compatibility measure. it is expected that new drivers
- * will use SPIDEV_ID directly.
+ * The argument, n, is the instance number. This should be zero is there is
+ * only one instance of the SPI device on the bus.
  */
 
-#define SPIDEV_NONE          SPIDEV_ID(SPIDEVTYPE_NONE,          0)
-#define SPIDEV_MMCSD         SPIDEV_ID(SPIDEVTYPE_MMCSD,         0)
-#define SPIDEV_FLASH         SPIDEV_ID(SPIDEVTYPE_FLASH,         0)
-#define SPIDEV_ETHERNET      SPIDEV_ID(SPIDEVTYPE_ETHERNET,      0)
-#define SPIDEV_DISPLAY       SPIDEV_ID(SPIDEVTYPE_DISPLAY,       0)
-#define SPIDEV_CAMERA        SPIDEV_ID(SPIDEVTYPE_CAMERA,        0)
-#define SPIDEV_WIRELESS      SPIDEV_ID(SPIDEVTYPE_WIRELESS,      0)
-#define SPIDEV_TOUCHSCREEN   SPIDEV_ID(SPIDEVTYPE_TOUCHSCREEN,   0)
-#define SPIDEV_EXPANDER      SPIDEV_ID(SPIDEVTYPE_EXPANDER,      0)
-#define SPIDEV_MUX           SPIDEV_ID(SPIDEVTYPE_MUX,           0)
-#define SPIDEV_AUDIO_DATA    SPIDEV_ID(SPIDEVTYPE_AUDIO_DATA,    0)
-#define SPIDEV_AUDIO_CTRL    SPIDEV_ID(SPIDEVTYPE_AUDIO_CTRL,    0)
-#define SPIDEV_EEPROM        SPIDEV_ID(SPIDEVTYPE_EEPROM,        0)
-#define SPIDEV_ACCELEROMETER SPIDEV_ID(SPIDEVTYPE_ACCELEROMETER, 0)
-#define SPIDEV_BAROMETER     SPIDEV_ID(SPIDEVTYPE_BAROMETER,     0)
-#define SPIDEV_TEMPERATURE   SPIDEV_ID(SPIDEVTYPE_TEMPERATURE,   0)
-#define SPIDEV_IEEE802154    SPIDEV_ID(SPIDEVTYPE_IEEE802154,    0)
-#define SPIDEV_CONTACTLESS   SPIDEV_ID(SPIDEVTYPE_CONTACTLESS,   0)
-#define SPIDEV_USER          SPIDEV_ID(SPIDEVTYPE_USER,          0)
+#define SPIDEV_NONE(n)          SPIDEV_ID(SPIDEVTYPE_NONE,          (n))
+#define SPIDEV_MMCSD(n)         SPIDEV_ID(SPIDEVTYPE_MMCSD,         (n))
+#define SPIDEV_FLASH(n)         SPIDEV_ID(SPIDEVTYPE_FLASH,         (n))
+#define SPIDEV_ETHERNET(n)      SPIDEV_ID(SPIDEVTYPE_ETHERNET,      (n))
+#define SPIDEV_DISPLAY(n)       SPIDEV_ID(SPIDEVTYPE_DISPLAY,       (n))
+#define SPIDEV_CAMERA(n)        SPIDEV_ID(SPIDEVTYPE_CAMERA,        (n))
+#define SPIDEV_WIRELESS(n)      SPIDEV_ID(SPIDEVTYPE_WIRELESS,      (n))
+#define SPIDEV_TOUCHSCREEN(n)   SPIDEV_ID(SPIDEVTYPE_TOUCHSCREEN,   (n))
+#define SPIDEV_EXPANDER(n)      SPIDEV_ID(SPIDEVTYPE_EXPANDER,      (n))
+#define SPIDEV_MUX(n)           SPIDEV_ID(SPIDEVTYPE_MUX,           (n))
+#define SPIDEV_AUDIO_DATA(n)    SPIDEV_ID(SPIDEVTYPE_AUDIO_DATA,    (n))
+#define SPIDEV_AUDIO_CTRL(n)    SPIDEV_ID(SPIDEVTYPE_AUDIO_CTRL,    (n))
+#define SPIDEV_EEPROM(n)        SPIDEV_ID(SPIDEVTYPE_EEPROM,        (n))
+#define SPIDEV_ACCELEROMETER(n) SPIDEV_ID(SPIDEVTYPE_ACCELEROMETER, (n))
+#define SPIDEV_BAROMETER(n)     SPIDEV_ID(SPIDEVTYPE_BAROMETER,     (n))
+#define SPIDEV_TEMPERATURE(n)   SPIDEV_ID(SPIDEVTYPE_TEMPERATURE,   (n))
+#define SPIDEV_IEEE802154(n)    SPIDEV_ID(SPIDEVTYPE_IEEE802154,    (n))
+#define SPIDEV_CONTACTLESS(n)   SPIDEV_ID(SPIDEVTYPE_CONTACTLESS,   (n))
+#define SPIDEV_USER(n)          SPIDEV_ID(SPIDEVTYPE_USER,          (n))
 
 /****************************************************************************
  * Public Types

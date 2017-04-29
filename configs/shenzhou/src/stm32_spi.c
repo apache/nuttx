@@ -123,13 +123,13 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 
   /* SPI1 connects to the SD CARD and to the SPI FLASH */
 
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
       /* Set the GPIO low to select and high to de-select */
 
       stm32_gpiowrite(GPIO_SD_CS, !selected);
     }
-  else if (devid == SPIDEV_FLASH)
+  else if (devid == SPIDEV_FLASH(0))
     {
       /* Set the GPIO low to select and high to de-select */
 
@@ -161,25 +161,25 @@ void stm32_spi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
    * wireless module.
    */
 
-  if (devid == SPIDEV_TOUCHSCREEN)
+  if (devid == SPIDEV_TOUCHSCREEN(0))
     {
       /* Set the GPIO low to select and high to de-select */
 
       stm32_gpiowrite(GPIO_TP_CS, !selected);
     }
-  else if (devid == SPIDEV_MMCSD)
+  else if (devid == SPIDEV_MMCSD(0))
     {
       /* Set the GPIO low to select and high to de-select */
 
       stm32_gpiowrite(GPIO_LCDDF_CS, !selected);
     }
-  else if (devid == SPIDEV_FLASH)
+  else if (devid == SPIDEV_FLASH(0))
     {
       /* Set the GPIO low to select and high to de-select */
 
       stm32_gpiowrite(GPIO_LCDSD_CS, !selected);
     }
-  else if (devid == SPIDEV_WIRELESS)
+  else if (devid == SPIDEV_WIRELESS(0))
     {
       /* Set the GPIO low to select and high to de-select */
 

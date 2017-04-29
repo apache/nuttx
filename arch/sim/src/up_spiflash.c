@@ -362,7 +362,7 @@ static void spiflash_select(FAR struct spi_dev_s *dev, uint32_t devid,
 {
   FAR struct sim_spiflashdev_s *priv = (FAR struct sim_spiflashdev_s *)dev;
 
-  if (devid == SPIDEV_FLASH)
+  if (devid == SPIDEV_FLASH(0))
     {
       priv->selected = selected;
 

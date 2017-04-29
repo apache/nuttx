@@ -189,12 +189,12 @@ static void ads7843e_lock(FAR struct spi_dev_s *spi)
    * unlocked)
    */
 
-  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, true);
+  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN(0), true);
   SPI_SETMODE(spi, CONFIG_ADS7843E_SPIMODE);
   SPI_SETBITS(spi, 8);
   (void)SPI_HWFEATURES(spi, 0);
   (void)SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY);
-  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, false);
+  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN(0), false);
 }
 
 /****************************************************************************
@@ -263,7 +263,7 @@ static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv, uint8_t cmd)
 
   /* Select the ADS7843E */
 
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, true);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
 
   /* Send the command */
 
@@ -276,7 +276,7 @@ static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv, uint8_t cmd)
   /* Read the 12-bit data (LS 4 bits will be padded with zero) */
 
   SPI_RECVBLOCK(priv->spi, buffer, 2);
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
   result = ((uint16_t)buffer[0] << 8) | (uint16_t)buffer[1];
   result = result >> 4;

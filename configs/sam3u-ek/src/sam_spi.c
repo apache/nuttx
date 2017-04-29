@@ -149,7 +149,7 @@ void sam_spi0select(uint32_t devid, bool selected)
    */
 
 #if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
-  if (devid == SPIDEV_TOUCHSCREEN)
+  if (devid == SPIDEV_TOUCHSCREEN(0))
     {
       sam_gpiowrite(GPIO_TSC_NPCS2, !selected);
     }

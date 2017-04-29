@@ -71,7 +71,7 @@ static struct l3gd20_config_s g_l3gd20_config =
 {
   .attach = l3gd20_attach,
   .irq = L3GD20_IRQ,
-  .spi_devid = SPIDEV_ACCELEROMETER
+  .spi_devid = SPIDEV_ACCELEROMETER(0)
 };
 
 /****************************************************************************

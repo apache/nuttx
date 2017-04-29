@@ -220,7 +220,7 @@ static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 #endif
   uint32_t bit = 1 << 20;
 
-  /* We do not bother to check if devid == SPIDEV_DISPLAY because that is the
+  /* We do not bother to check if devid == SPIDEV_DISPLAY(0) because that is the
    * only thing on the bus.
    */
 
@@ -353,7 +353,7 @@ static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 #endif
   uint32_t bit = 1 << 23;
 
-  /* We do not bother to check if devid == SPIDEV_DISPLAY because that is the
+  /* We do not bother to check if devid == SPIDEV_DISPLAY(0) because that is the
    * only thing on the bus.
    */
 
