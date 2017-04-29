@@ -452,7 +452,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
           g_pktattrs[PACKETBUF_ATTR_MAC_SEQNO] = 0;
 
-          verify = sixlowpan_framecreate(ieee, iob, ieee->i_panid);
+          verify = sixlowpan_framecreate(ieee, iob, dest_panid);
           DEBUGASSERT(verify == framer_hdrlen);
           UNUSED(verify);
 
