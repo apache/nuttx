@@ -83,6 +83,8 @@ extern "C"
  * Public Function Prototypes
  ************************************************************************************/
 
+struct spi_dev_s;  /* Forward reference */
+
 /************************************************************************************
  * Name: i486_clockconfig
  *
@@ -207,7 +209,6 @@ int i486_dumpgpio(uint16_t pinset, const char *msg);
  *
  ****************************************************************************/
 
-struct spi_dev_s;  /* Forward reference */
 FAR struct spi_dev_s *i486_spibus_initialize(int port);
 
 /************************************************************************************
@@ -239,8 +240,6 @@ FAR struct spi_dev_s *i486_spibus_initialize(int port);
  *
  ************************************************************************************/
 
-struct spi_dev_s;
-
 #ifdef CONFIG_I486_SPI
 void  i486_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
 uint8_t i486_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
@@ -265,7 +264,6 @@ int i486_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
  *
  ****************************************************************************/
 
-struct spi_dev_s;
 #ifdef CONFIG_I486_SPI
 void spi_flush(FAR struct spi_dev_s *dev);
 #endif

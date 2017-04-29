@@ -95,6 +95,8 @@ extern uint16_t g_idle_topstack;
 
 #ifndef __ASSEMBLY__
 
+struct spi_dev_s; /* Forward references */
+
 /************************************************************************************
  * Name:  up_copystate
  *
@@ -150,7 +152,6 @@ uint8_t *up_doirq(uint8_t irq, uint8_t *regs);
  *
  ****************************************************************************/
 
-struct spi_dev_s; /* Forward references */
 FAR struct spi_dev_s *avr_spibus_initialize(int port);
 
 /************************************************************************************
