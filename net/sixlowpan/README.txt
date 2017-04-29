@@ -49,7 +49,7 @@ The length of the fragment header length is four bytes for the first header
 (FRAG1) and five bytes for all subsequent headers (FRAGN).  For example,
 this is a HC1 compressed first frame of a packet
 
-  41 88 01 cefa 3412 cdab                       ### 9-byte MAC header
+  41 88 2a cefa 3412 cdab                       ### 9-byte MAC header
   c50e 000b                                     ### 4-byte FRAG1 header
   42                                            ### SIXLOWPAN_DISPATCH_HC1
     fb                                          ### RIME_HC1_HC_UDP_HC1_ENCODING
@@ -66,7 +66,7 @@ this is a HC1 compressed first frame of a packet
 
 This is the second frame of the same transfer:
 
-  41 88 01 cefa 3412 cdab                       ### 9-byte MAC header
+  41 88 2b cefa 3412 cdab                       ### 9-byte MAC header
   e50e 000b 0d                                  ### 5 byte FRAGN header
   42                                            ### SIXLOWPAN_DISPATCH_HC1
     fb                                          ### RIME_HC1_HC_UDP_HC1_ENCODING
