@@ -95,19 +95,19 @@ int stm32_bringup(void)
 #ifdef HAVE_I2C_DRIVER
   /* Get the I2C lower half instance */
 
-  i2c = stm32f0_i2cbus_initialize(0);
+  i2c = stm32f0_i2cbus_initialize(1);
   if (i2c == NULL)
     {
-      i2cerr("ERROR: Failed to mount procfs at /proc: %d\n", ret);
+      i2cerr("ERROR: Inialize I2C1: %d\n", ret);
     }
   else
     {
       /* Regiser the I2C character driver */
 
-      ret = i2c_register(i2c, 0);
+      ret = i2c_register(i2c, 1);
       if (ret < 0)
         {
-          i2cerr("ERROR: Failed to register I2C device: %d\n", ret);
+          i2cerr("ERROR: Failed to register I2C1 device: %d\n", ret);
         }
     }
 #endif

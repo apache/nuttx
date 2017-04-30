@@ -216,7 +216,6 @@ struct stm32f0_i2c_config_s
   uint32_t scl_pin;           /* GPIO configuration for SCL as SCL */
   uint32_t sda_pin;           /* GPIO configuration for SDA as SDA */
 #ifndef CONFIG_I2C_POLLED
-  int (*isr)(int, void *, void *);    /* Interrupt handler */
   uint32_t irq;               /* IRQ */
 #endif
 };
@@ -290,17 +289,9 @@ static inline void stm32f0_i2c_sendstart(FAR struct stm32f0_i2c_priv_s *priv);
 static inline void stm32f0_i2c_clrstart(FAR struct stm32f0_i2c_priv_s *priv);
 static inline void stm32f0_i2c_sendstop(FAR struct stm32f0_i2c_priv_s *priv);
 static inline uint32_t stm32f0_i2c_getstatus(FAR struct stm32f0_i2c_priv_s *priv);
-static int stm32f0_i2c_isr(struct stm32f0_i2c_priv_s * priv);
+static int stm32f0_i2c_isr_process(struct stm32f0_i2c_priv_s * priv);
 #ifndef CONFIG_I2C_POLLED
-#ifdef CONFIG_STM32F0_I2C1
-static int stm32f0_i2c1_isr(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_STM32F0_I2C2
-static int stm32f0_i2c2_isr(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_STM32F0_I2C3
-static int stm32f0_i2c3_isr(int irq, void *context, FAR void *arg);
-#endif
+static int stm32f0_i2c_isr(int irq, void *context, FAR void *arg);
 #endif
 static int stm32f0_i2c_init(FAR struct stm32f0_i2c_priv_s *priv);
 static int stm32f0_i2c_deinit(FAR struct stm32f0_i2c_priv_s *priv);
@@ -333,7 +324,6 @@ static const struct stm32f0_i2c_config_s stm32f0_i2c1_config =
   .scl_pin    = GPIO_I2C1_SCL,
   .sda_pin    = GPIO_I2C1_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .isr        = stm32f0_i2c1_isr,
   .irq        = STM32F0_IRQ_I2C1
 #endif
 };
@@ -362,7 +352,6 @@ static const struct stm32f0_i2c_config_s stm32f0_i2c2_config =
   .scl_pin    = GPIO_I2C2_SCL,
   .sda_pin    = GPIO_I2C2_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .isr        = stm32f0_i2c2_isr,
   .irq        = STM32F0_IRQ_I2C2
 #endif
 };
@@ -391,7 +380,6 @@ static const struct stm32f0_i2c_config_s stm32f0_i2c3_config =
   .scl_pin    = GPIO_I2C3_SCL,
   .sda_pin    = GPIO_I2C3_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .isr        = stm32f0_i2c3_isr,
   .irq        = STM32F0_IRQ_I2C3
 #endif
 };
@@ -424,7 +412,7 @@ struct stm32f0_i2c_priv_s stm32f0_i2c3_priv =
  ************************************************************************************/
 
 static inline uint32_t stm32f0_i2c_getreg32(FAR struct stm32f0_i2c_priv_s *priv,
-                                          uint8_t offset)
+                                            uint8_t offset)
 {
   return getreg32(priv->config->base + offset);
 }
@@ -438,7 +426,7 @@ static inline uint32_t stm32f0_i2c_getreg32(FAR struct stm32f0_i2c_priv_s *priv,
  ************************************************************************************/
 
 static inline void stm32f0_i2c_putreg32(FAR struct stm32f0_i2c_priv_s *priv,
-                                      uint8_t offset, uint32_t value)
+                                        uint8_t offset, uint32_t value)
 {
   putreg32(value, priv->config->base + offset);
 }
@@ -654,7 +642,7 @@ static inline int stm32f0_i2c_sem_waitdone(FAR struct stm32f0_i2c_priv_s *priv)
        * reports that it is done.
        */
 
-      stm32f0_i2c_isr(priv);
+      stm32f0_i2c_isr_process(priv);
     }
 
   /* Loop until the transfer is complete. */
@@ -695,7 +683,7 @@ stm32f0_i2c_set_7bit_address(FAR struct stm32f0_i2c_priv_s *priv)
 
 static inline void
 stm32f0_i2c_set_bytes_to_transfer(FAR struct stm32f0_i2c_priv_s *priv,
-                               uint8_t n_bytes)
+                                  uint8_t n_bytes)
 {
   stm32f0_i2c_modifyreg32(priv, STM32F0_I2C_CR2_OFFSET, I2C_CR2_NBYTES_MASK,
                         (n_bytes << I2C_CR2_NBYTES_SHIFT));
@@ -1262,7 +1250,7 @@ static inline uint32_t stm32f0_i2c_getstatus(FAR struct stm32f0_i2c_priv_s *priv
 }
 
 /************************************************************************************
- * Name: stm32f0_i2c_isr
+ * Name: stm32f0_i2c_isr_startmessage
  *
  * Description:
  *   Common logic when a message is started.  Just adds the even to the trace buffer
@@ -1295,14 +1283,14 @@ static inline void stm32f0_i2c_clearinterrupts(struct stm32f0_i2c_priv_s *priv)
 }
 
 /************************************************************************************
- * Name: stm32f0_i2c_isr
+ * Name: stm32f0_i2c_isr_process
  *
  * Description:
  *  Common Interrupt Service Routine
  *
  ************************************************************************************/
 
-static int stm32f0_i2c_isr(struct stm32f0_i2c_priv_s *priv)
+static int stm32f0_i2c_isr_process(struct stm32f0_i2c_priv_s *priv)
 {
   uint32_t status = stm32f0_i2c_getstatus(priv);
 
@@ -1501,50 +1489,21 @@ static int stm32f0_i2c_isr(struct stm32f0_i2c_priv_s *priv)
 }
 
 /************************************************************************************
- * Name: stm32f0_i2c1_isr
+ * Name: stm32f0_i2c_isr_process
  *
  * Description:
- *   I2C1 interrupt service routine
+ *   Common I2C interrupt service routine
  *
  ************************************************************************************/
 
 #ifndef CONFIG_I2C_POLLED
-#ifdef CONFIG_STM32F0_I2C1
-static int stm32f0_i2c1_isr(int irq, void *context, FAR void *arg)
+static int stm32f0_i2c_isr(int irq, void *context, FAR void *arg)
 {
-  return stm32f0_i2c_isr(&stm32f0_i2c1_priv);
+  struct stm32f0_i2c_priv_s *priv = (struct stm32f0_i2c_priv_s *)arg;
+
+  DEBUGASSERT(priv != NULL);
+  return stm32f0_i2c_isr_process(priv);
 }
-#endif
-
-/************************************************************************************
- * Name: stm32f0_i2c2_isr
- *
- * Description:
- *   I2C2 interrupt service routine
- *
- ************************************************************************************/
-
-#ifdef CONFIG_STM32F0_I2C2
-static int stm32f0_i2c2_isr(int irq, void *context, FAR void *arg)
-{
-  return stm32f0_i2c_isr(&stm32f0_i2c2_priv);
-}
-#endif
-
-/************************************************************************************
- * Name: stm32f0_i2c3_isr
- *
- * Description:
- *   I2C2 interrupt service routine
- *
- ************************************************************************************/
-
-#ifdef CONFIG_STM32F0_I2C3
-static int stm32f0_i2c3_isr(int irq, void *context, FAR void *arg)
-{
-  return stm32f0_i2c_isr(&stm32f0_i2c3_priv);
-}
-#endif
 #endif
 
 /************************************************************************************
@@ -1561,6 +1520,8 @@ static int stm32f0_i2c3_isr(int irq, void *context, FAR void *arg)
 
 static int stm32f0_i2c_init(FAR struct stm32f0_i2c_priv_s *priv)
 {
+  int ret;
+
   /* Power-up and configure GPIOs */
   /* Enable power and reset the peripheral */
 
@@ -1570,21 +1531,23 @@ static int stm32f0_i2c_init(FAR struct stm32f0_i2c_priv_s *priv)
 
   /* Configure pins */
 
-  if (stm32f0_configgpio(priv->config->scl_pin) < 0)
+  ret = stm32f0_configgpio(priv->config->scl_pin);
+  if (ret < 0)
     {
-      return ERROR;
+      return ret;
     }
 
-  if (stm32f0_configgpio(priv->config->sda_pin) < 0)
+  ret = stm32f0_configgpio(priv->config->sda_pin);
+  if (ret < 0)
     {
       stm32f0_unconfiggpio(priv->config->scl_pin);
-      return ERROR;
+      return ret;
     }
 
-  /* Attach ISRs */
-
 #ifndef CONFIG_I2C_POLLED
-  irq_attach(priv->config->irq, priv->config->isr, NULL);
+  /* Attach and enable the I2C interrupt */
+
+  irq_attach(priv->config->irq, stm32f0_i2c_isr, priv);
   up_enable_irq(priv->config->irq);
 #endif
 
@@ -1848,7 +1811,7 @@ static int stm32f0_i2c_reset(FAR struct i2c_master_s * dev)
   uint32_t scl_gpio;
   uint32_t sda_gpio;
   uint32_t frequency;
-  int ret = ERROR;
+  int ret = -EIO;
 
   ASSERT(dev);
 
@@ -1938,12 +1901,15 @@ static int stm32f0_i2c_reset(FAR struct i2c_master_s * dev)
 
   /* Re-init the port */
 
-  stm32f0_i2c_init(priv);
+  ret = stm32f0_i2c_init(priv);
+  if (ret < 0)
+    {
+      i2cerr("ERROR: stm32f0_i2c_init failed: %d\n", ret);
+    }
 
   /* Restore the frequency */
 
   stm32f0_i2c_setclock(priv, frequency);
-  ret = OK;
 
 out:
 
@@ -1970,6 +1936,7 @@ FAR struct i2c_master_s *stm32f0_i2cbus_initialize(int port)
 {
   struct stm32f0_i2c_priv_s *priv = NULL;
   irqstate_t flags;
+  int ret;
 
 #if STM32F0_PCLK1_FREQUENCY < 4000000
 #   warning STM32F0_I2C_INIT: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
@@ -2012,7 +1979,11 @@ FAR struct i2c_master_s *stm32f0_i2cbus_initialize(int port)
   if ((volatile int)priv->refs++ == 0)
     {
       stm32f0_i2c_sem_init(priv);
-      stm32f0_i2c_init(priv);
+      ret = stm32f0_i2c_init(priv);
+      if (ret < 0)
+        {
+          i2cerr("ERROR: stm32f0_i2c_init failed: %d\n", ret);
+        }
     }
 
   leave_critical_section(flags);
@@ -2038,7 +2009,7 @@ int stm32f0_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
 
   if (priv->refs == 0)
     {
-      return ERROR;
+      return -ENODEV;
     }
 
   flags = enter_critical_section();
