@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <queue.h>
 
 #ifdef CONFIG_NET_PKT
 
