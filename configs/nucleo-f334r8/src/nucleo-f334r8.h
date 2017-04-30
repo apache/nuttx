@@ -202,4 +202,16 @@ int stm32_can_setup(void);
 int stm32_comp_setup(void);
 #endif
 
+/****************************************************************************
+ * Name: stm32_opamp_setup
+ *
+ * Description:
+ *  Initialize OPAMP peripheral for the board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_OPAMP
+int stm32_opamp_setup(void);
+#endif
+
 #endif /* __CONFIGS_NUCLEO_F334R8_SRC_NUCLEO_F334R8_H */
