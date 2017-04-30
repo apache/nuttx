@@ -43,7 +43,19 @@
 #include <sys/types.h>
 #include <debug.h>
 
+#include <nuttx/i2c/i2c_master.h>
+
+#include "stm32f0_i2c.h"
 #include "nucleo-f072rb.h"
+
+/****************************************************************************
+ * Pre-processor Defintiionis
+ ****************************************************************************/
+
+#undef HAVE_I2C_DRIVER
+#if defined(CONFIG_STM32F0_I2C1) && defined(CONFIG_I2C_DRIVER)
+#  define HAVE_I2C_DRIVER 1
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -65,6 +77,9 @@
 
 int stm32_bringup(void)
 {
+#ifdef HAVE_I2C_DRIVER
+  FAR struct i2c_master_s *i2c;
+#endif
   int ret;
 
 #ifdef CONFIG_FS_PROCFS
@@ -74,6 +89,26 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       ferr("ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
+#endif
+
+#ifdef HAVE_I2C_DRIVER
+  /* Get the I2C lower half instance */
+
+  i2c = stm32f0_i2cbus_initialize(0);
+  if (i2c == NULL)
+    {
+      i2cerr("ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
+  else
+    {
+      /* Regiser the I2C character driver */
+
+      ret = i2c_register(i2c, 0);
+      if (ret < 0)
+        {
+          i2cerr("ERROR: Failed to register I2C device: %d\n", ret);
+        }
     }
 #endif
 

@@ -135,6 +135,8 @@ Serial Console
          PA14
          PD5
 
+  See "Virtual COM Port" and "RS-232 Shield" below.
+
   USART3
   ------
   Pins and Connectors:
@@ -147,8 +149,6 @@ Serial Console
          PC4
          PC10
          D8
-
-  See "Virtual COM Port" and "RS-232 Shield" below.
 
   USART3
   ------
@@ -177,8 +177,8 @@ Serial Console
 
   Configuring USART2 is the same as given above.
 
-  Question:  What BAUD should be configure to interface with the Virtual
-  COM port?  115200 8N1?
+  115200 8N1 BAUD should be configure to interface with the Virtual COM
+  port.
 
   Default
   -------
