@@ -79,11 +79,40 @@
 #  undef CONFIG_STM32F0_USART1
 #endif
 
+/* USART 3-8 are multiplexed to the same interrupt.  Current interrupt
+ * handling logic will support only one USART in that range.  That is
+ * not an issue for currently supported chips but could become an
+ * issue in the future.
+ */
+
+#if defined(CONFIG_STM32F0_USART3)
+#  undef CONFIG_STM32F0_USART4
+#  undef CONFIG_STM32F0_USART5
+#  undef CONFIG_STM32F0_USART6
+#  undef CONFIG_STM32F0_USART7
+#  undef CONFIG_STM32F0_USART8
+#elif defined(CONFIG_STM32F0_USART4)
+#  undef CONFIG_STM32F0_USART5
+#  undef CONFIG_STM32F0_USART6
+#  undef CONFIG_STM32F0_USART7
+#  undef CONFIG_STM32F0_USART8
+#elif defined(CONFIG_STM32F0_USART5)
+#  undef CONFIG_STM32F0_USART6
+#  undef CONFIG_STM32F0_USART7
+#  undef CONFIG_STM32F0_USART8
+#elif defined(CONFIG_STM32F0_USART6)
+#  undef CONFIG_STM32F0_USART7
+#  undef CONFIG_STM32F0_USART8
+#elif defined(CONFIG_STM32F0_USART7)
+#  undef CONFIG_STM32F0_USART8
+#endif
+
 /* Is there a USART enabled? */
 
 #if defined(CONFIG_STM32F0_USART1) || defined(CONFIG_STM32F0_USART2) || \
     defined(CONFIG_STM32F0_USART3) || defined(CONFIG_STM32F0_USART4) || \
-    defined(CONFIG_STM32F0_USART5)
+    defined(CONFIG_STM32F0_USART5) || defined(CONFIG_STM32F0_USART6) || \
+    defined(CONFIG_STM32F0_USART7) || defined(CONFIG_STM32F0_USART8)
 #  define HAVE_USART 1
 #endif
 

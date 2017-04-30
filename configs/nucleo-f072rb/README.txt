@@ -17,32 +17,16 @@ Contents
 
 Status
 ======
-  2017-04-27:  There are many problems.  On start up, I have to reset
-    several times before I get NSH prompt (or parts of it).  Apparently the
-    STM32 is either hanging (perhaps in clockconfig()) or perhaps it has
-    taken a hard fault before it is able to generate debug output?
+  2017-04-28:  After struggling with some clock configuration and FLASH wait
+    state issues, the board now boots and the basic NSH configurations works
+    without problem.
 
-   There are many hardfaults during initial serial output.  This change
-   seems to eliminate those hardfaults:
+    A USB device driver was added along with support for clocking from the
+    HSI48.  That driver remains untested.
 
-      @@ -2163,7 +2163,7 @@ static void stm32f0serial_txint(FAR struct uart_dev_s *dev, bool enable)
-            * interrupts disabled (note this may recurse).
-            */
-
-    -      uart_xmitchars(dev);
-    +//      uart_xmitchars(dev);
-     #endif
-         }
-       else
-
-   Which implies that the hardfaults are due to runaway recursion in the
-   serial driver?  This suggest some error in either determining when there
-   is TX data available or in disabling TX interrupts.
-
-   But this not a solution.  Even without the hard faults, it may hang
-   attempting to output the NSH greeting and prompt or hang unable to
-   receive input.  These symptoms suggest some issue with TX and RX
-   interrupt handling.
+  2017-04-30:  I tried using the I2C driver with the I2C tool (apps/system/i2c).
+    I may have something wrong, but at present the driver is just timing out
+    on all transfers.
 
 Nucleo-64 Boards
 ================
@@ -155,6 +139,8 @@ Serial Console
          PA14
          PD5
 
+  See "Virtual COM Port" and "RS-232 Shield" below.
+
   USART3
   ------
   Pins and Connectors:
@@ -167,8 +153,6 @@ Serial Console
          PC4
          PC10
          D8
-
-  See "Virtual COM Port" and "RS-232 Shield" below.
 
   USART3
   ------
@@ -197,8 +181,8 @@ Serial Console
 
   Configuring USART2 is the same as given above.
 
-  Question:  What BAUD should be configure to interface with the Virtual
-  COM port?  115200 8N1?
+  115200 8N1 BAUD should be configure to interface with the Virtual COM
+  port.
 
   Default
   -------

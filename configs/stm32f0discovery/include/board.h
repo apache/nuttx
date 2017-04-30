@@ -239,4 +239,9 @@
 #define GPIO_USART1_TX           GPIO_USART1_TX_1
 #define GPIO_USART1_RX           GPIO_USART1_RX_1
 
+/* I2C pins definition */
+
+#define GPIO_I2C1_SCL            GPIO_I2C1_SCL_1
+#define GPIO_I2C1_SDA            GPIO_I2C1_SDA_1
+
 #endif  /* __CONFIG_STM32F0DISCOVERY_INCLUDE_BOARD_H */

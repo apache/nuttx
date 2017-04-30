@@ -95,6 +95,10 @@ ifeq ($(CONFIG_STM32F0_USB),y)
 CHIP_CSRCS += stm32f0_usbdev.c
 endif
 
+ifeq ($(CONFIG_STM32F0_I2C),y)
+CHIP_CSRCS += stm32f0_i2c.c
+endif
+
 ifeq ($(CONFIG_STM32F0_SPI0),y)
 CHIP_CSRCS += stm32f0_spi.c
 else

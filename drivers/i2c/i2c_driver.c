@@ -82,8 +82,10 @@ struct i2c_driver_s
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     i2cdrvr_open(FAR struct file *filep);
 static int     i2cdrvr_close(FAR struct file *filep);
+#endif
 static ssize_t i2cdrvr_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
 static ssize_t i2cdrvr_write(FAR struct file *filep, FAR const char *buffer,
@@ -253,6 +255,7 @@ static int i2cdrvr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   priv = (FAR struct i2c_driver_s *)inode->i_private;
   DEBUGASSERT(priv);
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   /* Get exclusive access to the I2C driver state structure */
 
   ret = sem_wait(&priv->exclsem);
@@ -262,6 +265,7 @@ static int i2cdrvr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       DEBUGASSERT(errcode < 0);
       return -errcode;
     }
+#endif
 
   /* Process the IOCTL command */
 
@@ -306,7 +310,9 @@ static int i2cdrvr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   sem_post(&priv->exclsem);
+#endif
   return ret;
 }
 
