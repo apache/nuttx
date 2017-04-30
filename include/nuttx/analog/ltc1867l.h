@@ -97,12 +97,12 @@ enum ltc1867l_analog_input_mode_e
   LTC1867L_BIPOLAR = 0,
 };
 
-struct ltc1867l_channel_config_s
+begin_packed_struct struct ltc1867l_channel_config_s
 {
   uint8_t channel;                                                     /* This will be the channel number returned in struct adc_msg_s for a conversion */
   enum ltc1867l_analog_multiplexer_config_e analog_multiplexer_config; /* Analog multiplexer configuration */
   enum ltc1867l_analog_input_mode_e analog_inputMode;                  /* Analog input mode */
-} packed_struct;
+} end_packed_struct;
 
 /****************************************************************************
  * Public Function Prototypes

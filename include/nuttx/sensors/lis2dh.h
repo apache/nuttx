@@ -273,25 +273,25 @@ enum lis2dh_interrupt_mode
   LIS2DH_6D_POSITION = 0xc0,
 };
 
-struct lis2dh_vector_s
+begin_packed_struct struct lis2dh_vector_s
 {
   int16_t  x, y, z;
-} packed_struct;
+} end_packed_struct;
 
-struct lis2dh_res_header
+begin_packed_struct struct lis2dh_res_header
 {
   uint8_t meas_count;
   bool    int1_occurred;
   uint8_t int1_source;
   bool    int2_occurred;
   uint8_t int2_source;
-} packed_struct;
+} end_packed_struct;
 
-struct lis2dh_result
+begin_packed_struct struct lis2dh_result
 {
   struct lis2dh_res_header header;
   struct lis2dh_vector_s measurements[0];
-} packed_struct;
+} end_packed_struct;
 
 struct lis2dh_setup
 {
@@ -402,12 +402,12 @@ struct lis2dh_config_s
   CODE bool (*read_int2_pin)(void);
 };
 
-struct lis2dh_raw_data_s
+begin_packed_struct struct lis2dh_raw_data_s
 {
   uint16_t out_x;
   uint16_t out_y;
   uint16_t out_z;
-} packed_struct;
+} end_packed_struct;
 
 typedef struct lis2dh_raw_data_s lis2dh_raw_data_t;
 
