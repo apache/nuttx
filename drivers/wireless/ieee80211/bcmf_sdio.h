@@ -49,6 +49,10 @@
 
 #include "bcmf_sdio_core.h"
 
+#define HEADER_SIZE        0x12 /* Default sdpcm + bdc header size */
+// TODO move to Kconfig
+#define BCMF_PKT_POOL_SIZE 4    /* Frame pool size */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -93,8 +97,21 @@ struct bcmf_sdio_dev_s
   uint8_t tx_seq;                  /* Transmit sequence number (next) */
   uint8_t rx_seq;                  /* Receive sequence number (expected) */
 
-  sem_t tx_queue_mutex;            /* Lock for transmit queue */
+  sem_t queue_mutex;               /* Lock for TX/RX/free queues */
+  dq_queue_t free_queue;           /* Queue of available frames */
   dq_queue_t tx_queue;             /* Queue of frames to tramsmit */
+  dq_queue_t rx_queue;             /* Queue of frames used to receive */
+  volatile int tx_queue_count;     /* Count of items in TX queue */
+};
+
+/* Structure used to manage SDIO frames */
+
+struct bcmf_sdio_frame {
+    struct bcmf_frame_s header;
+    bool                tx;
+    dq_entry_t          list_entry;
+    uint8_t             data[HEADER_SIZE + MAX_NET_DEV_MTU +
+                                           CONFIG_NET_GUARDSIZE];
 };
 
 /****************************************************************************
@@ -119,5 +136,11 @@ int bcmf_read_reg(FAR struct bcmf_sdio_dev_s *sbus, uint8_t function,
 
 int bcmf_write_reg(FAR struct bcmf_sdio_dev_s *sbus, uint8_t function,
                    uint32_t address, uint8_t reg);
+
+struct bcmf_sdio_frame* bcmf_sdio_allocate_frame(FAR struct bcmf_dev_s *priv,
+                                                 bool block, bool tx);
+
+void bcmf_sdio_free_frame(FAR struct bcmf_dev_s *priv,
+                          struct bcmf_sdio_frame *sframe);
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_H */

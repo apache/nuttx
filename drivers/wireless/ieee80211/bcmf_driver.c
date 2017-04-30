@@ -49,13 +49,13 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wdog.h>
+#include <nuttx/sdio.h>
 
 #include "bcmf_driver.h"
 #include "bcmf_cdc.h"
 #include "bcmf_ioctl.h"
 #include "bcmf_utils.h"
-
-#include <nuttx/sdio.h>
+#include "bcmf_netdev.h"
 #include "bcmf_sdio.h"
 
 /****************************************************************************
@@ -90,9 +90,6 @@ static void bcmf_free_device(FAR struct bcmf_dev_s *priv);
 
 static int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv);
 
-// FIXME add bcmf_netdev.h file
-int bcmf_netdev_register(FAR struct bcmf_dev_s *priv);
-
 // FIXME only for debug purpose
 static void bcmf_wl_default_event_handler(FAR struct bcmf_dev_s *priv,
                             struct bcmf_event_s *event, unsigned int len);
@@ -103,9 +100,8 @@ static void bcmf_wl_radio_event_handler(FAR struct bcmf_dev_s *priv,
 static void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
                             struct bcmf_event_s *event, unsigned int len);
 
-#if 0
-static int bcmf_run_escan(FAR struct bcmf_dev_s *priv);
-#endif
+static void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
+                            struct bcmf_event_s *event, unsigned int len);
 
 /****************************************************************************
  * Private Data
@@ -149,6 +145,18 @@ FAR struct bcmf_dev_s* bcmf_allocate_device(void)
       goto exit_free_priv;
     }
 
+  /* Init authentication signal semaphore */
+
+  if ((ret = sem_init(&priv->auth_signal, 0, 0)) != OK)
+    {
+      goto exit_free_priv;
+    }
+
+  if ((ret = sem_setprotocol(&priv->auth_signal, SEM_PRIO_NONE)) != OK)
+    {
+      goto exit_free_priv;
+    }
+
   /* Init scan timeout timer */
 
   priv->scan_status = BCMF_SCAN_DISABLED;
@@ -173,23 +181,27 @@ void bcmf_free_device(FAR struct bcmf_dev_s *priv)
   kmm_free(priv);
 }
 
-int bcmf_wl_set_mac_address(FAR struct bcmf_dev_s *priv, uint8_t *addr)
+int bcmf_wl_set_mac_address(FAR struct bcmf_dev_s *priv, struct ifreq *req)
 {
   int ret;
-  uint32_t out_len = 6;
+  uint32_t out_len = IFHWADDRLEN;
 
   ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
-                                 IOVAR_STR_CUR_ETHERADDR, addr,
-                                 &out_len);
+                              IOVAR_STR_CUR_ETHERADDR,
+                              (uint8_t*)req->ifr_hwaddr.sa_data,
+                              &out_len);
   if (ret != OK)
     {
       return ret;
     }
 
   wlinfo("MAC address updated %02X:%02X:%02X:%02X:%02X:%02X\n",
-                            addr[0], addr[1], addr[2],
-                            addr[3], addr[4], addr[5]);
-  memcpy(priv->bc_dev.d_mac.ether.ether_addr_octet, addr, ETHER_ADDR_LEN);
+                req->ifr_hwaddr.sa_data[0], req->ifr_hwaddr.sa_data[1],
+                req->ifr_hwaddr.sa_data[2], req->ifr_hwaddr.sa_data[3],
+                req->ifr_hwaddr.sa_data[4], req->ifr_hwaddr.sa_data[5]);
+
+  memcpy(priv->bc_dev.d_mac.ether.ether_addr_octet,
+         req->ifr_hwaddr.sa_data, ETHER_ADDR_LEN);
     
   return OK;
 }
@@ -281,6 +293,10 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
 
   bcmf_event_register(priv, bcmf_wl_scan_event_handler, WLC_E_ESCAN_RESULT);
 
+  /*  Register SET_SSID event */
+
+  bcmf_event_register(priv, bcmf_wl_auth_event_handler, WLC_E_SET_SSID);
+
   if (bcmf_event_push_config(priv))
     {
       return -EIO;
@@ -301,8 +317,25 @@ void bcmf_wl_default_event_handler(FAR struct bcmf_dev_s *priv,
 void bcmf_wl_radio_event_handler(FAR struct bcmf_dev_s *priv,
                                  struct bcmf_event_s *event, unsigned int len)
 {
-  wlinfo("Got radio event %d from <%s>\n", bcmf_getle32(&event->type),
-                                           event->src_name);
+  // wlinfo("Got radio event %d from <%s>\n", bcmf_getle32(&event->type),
+  //                                          event->src_name);
+}
+
+void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
+                                   struct bcmf_event_s *event, unsigned int len)
+{
+  uint32_t type;
+
+  type = bcmf_getle32(&event->type);
+
+  wlinfo("Got auth event %d from <%s>\n", type, event->src_name);
+
+  if (type == WLC_E_SET_SSID)
+    {
+      /* Auth complete */
+
+      sem_post(&priv->auth_signal);
+    }
 }
 
 void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
@@ -508,8 +541,6 @@ int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv)
   uint32_t out_len;
   uint32_t value;
 
-  wlinfo("Enter\n");
-
   /* Set active scan mode */
 
   value = 0;
@@ -517,14 +548,15 @@ int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv)
   if (bcmf_cdc_ioctl(priv, CHIP_STA_INTERFACE, true,
                          WLC_SET_PASSIVE_SCAN, (uint8_t*)&value, &out_len))
     {
-      return -EIO;
+      ret = -EIO;
+      goto exit_failed;
     }
 
   /* Lock control_mutex semaphore */
 
   if ((ret = sem_wait(&priv->control_mutex)) != OK)
    {
-      return ret;
+      goto exit_failed;
    }
 
   /* Default request structure */
@@ -581,6 +613,8 @@ exit_free_params:
 exit_sem_post:
   sem_post(&priv->control_mutex);
   priv->scan_status = BCMF_SCAN_DISABLED;
+exit_failed:
+  wlinfo("Failed\n");
   return ret;
 }
 

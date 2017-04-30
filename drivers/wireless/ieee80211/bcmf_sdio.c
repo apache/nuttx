@@ -47,6 +47,7 @@
 #include <errno.h>
 #include <queue.h>
 #include <semaphore.h>
+#include <assert.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
@@ -60,6 +61,7 @@
 #include "bcmf_sdio.h"
 #include "bcmf_core.h"
 #include "bcmf_sdpcm.h"
+#include "bcmf_utils.h"
 
 #include "bcmf_sdio_core.h"
 #include "bcmf_sdio_regs.h"
@@ -113,6 +115,13 @@ static int  bcmf_sdio_find_block_size(unsigned int size);
 
 /* FIXME remove */
 FAR struct bcmf_dev_s *g_sdio_priv;
+
+/* Buffer pool for SDIO bus interface
+   This pool is shared between all driver devices */
+
+static struct bcmf_sdio_frame g_pktframes[BCMF_PKT_POOL_SIZE];
+
+// TODO free_queue should be static
 
 /****************************************************************************
  * Private Functions
@@ -564,16 +573,28 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
   sbus->sleeping = true;
 
   sbus->bus.txframe = bcmf_sdpcm_queue_frame;
-  sbus->bus.allocate_frame = bcmf_sdpcm_allocate_frame;
+  sbus->bus.rxframe = bcmf_sdpcm_get_rx_frame;
+  sbus->bus.allocate_frame = bcmf_sdpcm_alloc_frame;
+  sbus->bus.free_frame = bcmf_sdpcm_free_frame;
   sbus->bus.stop = NULL; // TODO
 
   /* Init transmit frames queue */
 
-  if ((ret = sem_init(&sbus->tx_queue_mutex, 0, 1)) != OK)
+  if ((ret = sem_init(&sbus->queue_mutex, 0, 1)) != OK)
     {
       goto exit_free_bus;
     }
   sq_init(&sbus->tx_queue);
+  sq_init(&sbus->rx_queue);
+  sq_init(&sbus->free_queue);
+
+  /* Setup free buffer list */
+
+  // FIXME this should be static to driver
+  for (ret = 0; ret < BCMF_PKT_POOL_SIZE; ret++)
+    {
+      bcmf_dqueue_push(&sbus->free_queue, &g_pktframes[ret].list_entry);
+    }
   
   /* Init thread semaphore */
 
@@ -622,7 +643,6 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
       goto exit_uninit_hw;
     }
 
-
   up_mdelay(100);
 
   sbus->ready = true;
@@ -642,7 +662,8 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
 
   /* Start the waitdog timer */
 
-  wd_start(sbus->waitdog, BCMF_WAITDOG_TIMEOUT_TICK, bcmf_sdio_waitdog_timeout, 0);
+  wd_start(sbus->waitdog, BCMF_WAITDOG_TIMEOUT_TICK, bcmf_sdio_waitdog_timeout,
+           (wdparm_t)priv);
 
   /* Spawn bcmf daemon thread */
 
@@ -658,8 +679,6 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
     }
 
   sbus->thread_id = ret;
-
-
 
   /* sdio bus is up and running */
 
@@ -685,7 +704,6 @@ int bcmf_chipinitialize(FAR struct bcmf_sdio_dev_s *sbus)
     {
       return ret;
     }
-  wlinfo("chip id is 0x%x\n", value);
 
   int chipid = value & 0xffff;
   switch (chipid)
@@ -705,11 +723,12 @@ int bcmf_chipinitialize(FAR struct bcmf_sdio_dev_s *sbus)
 
 void bcmf_sdio_waitdog_timeout(int argc, wdparm_t arg1, ...)
 {
-  FAR struct bcmf_dev_s *priv = g_sdio_priv;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s*)arg1;
   FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s*)priv->bus;
 
   /* Notify bcmf thread */
 
+  wlinfo("Notify bcmf thread\n");
   sem_post(&sbus->thread_signal);
 }
 
@@ -739,7 +758,7 @@ int bcmf_sdio_thread(int argc, char **argv)
       /* Restart the waitdog timer */
 
       wd_start(sbus->waitdog, BCMF_WAITDOG_TIMEOUT_TICK,
-               bcmf_sdio_waitdog_timeout, 0);
+               bcmf_sdio_waitdog_timeout, (wdparm_t)priv);
 
       /* Wake up device */
 
@@ -789,6 +808,15 @@ int bcmf_sdio_thread(int argc, char **argv)
           ret = bcmf_sdpcm_sendframe(priv);
         } while (ret == OK);
 
+      /* Check if RX frames are available */
+
+      if (sbus->intstatus & I_HMB_FRAME_IND)
+        {
+          /* Try again */
+          wlinfo("Try read again\n");
+          continue;
+        }
+
       /* If we're done for now, turn off clock request. */
 
       // TODO add wakelock
@@ -798,4 +826,74 @@ int bcmf_sdio_thread(int argc, char **argv)
   wlinfo("Exit\n");
 
   return 0;
+}
+
+struct bcmf_sdio_frame* bcmf_sdio_allocate_frame(FAR struct bcmf_dev_s *priv,
+                                                 bool block, bool tx)
+{
+  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s*)priv->bus;
+  struct bcmf_sdio_frame *sframe;
+  dq_entry_t *entry = NULL;
+
+  while (1)
+    {
+      if (sem_wait(&sbus->queue_mutex))
+        {
+          PANIC();
+        }
+
+      // if (!tx || sbus->tx_queue_count < BCMF_PKT_POOL_SIZE-1)
+        {
+          if ((entry = bcmf_dqueue_pop_tail(&sbus->free_queue)) != NULL)
+            {
+              if (tx)
+                {
+                  sbus->tx_queue_count += 1;
+                }
+
+              sem_post(&sbus->queue_mutex);
+              break;
+            }
+        }
+
+      sem_post(&sbus->queue_mutex);
+
+      if (block)
+        {
+          // TODO use signaling semaphore
+          wlinfo("alloc failed %d\n", tx);
+          up_mdelay(100);
+          continue;
+        }
+      wlinfo("No avail buffer\n");
+      return NULL;
+    }
+
+  sframe = container_of(entry, struct bcmf_sdio_frame, list_entry);
+
+  sframe->header.len = HEADER_SIZE + MAX_NET_DEV_MTU;
+  sframe->header.base = sframe->data;
+  sframe->header.data = sframe->data;
+  sframe->tx = tx;
+  return sframe;
+}
+
+void bcmf_sdio_free_frame(FAR struct bcmf_dev_s *priv,
+                          struct bcmf_sdio_frame *sframe)
+{
+  // wlinfo("free %p\n", sframe);
+  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s*)priv->bus;
+
+  if (sem_wait(&sbus->queue_mutex))
+    {
+      PANIC();
+    }
+
+  bcmf_dqueue_push(&sbus->free_queue, &sframe->list_entry);
+
+  if (sframe->tx)
+    {
+      sbus->tx_queue_count -= 1;
+    }
+  sem_post(&sbus->queue_mutex);
 }

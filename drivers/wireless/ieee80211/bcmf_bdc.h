@@ -69,11 +69,22 @@ typedef void (*event_handler_t)(FAR struct bcmf_dev_s *priv,
  * Public Function Prototypes
  ****************************************************************************/
 
-int bcmf_bdc_process_data_frame(FAR struct bcmf_dev_s *priv,
-                                struct bcmf_frame_s *frame);
+/* Function called from lower layer */
 
 int bcmf_bdc_process_event_frame(FAR struct bcmf_dev_s *priv,
                                  struct bcmf_frame_s *frame);
+
+/* Function called from upper layer */
+
+struct bcmf_frame_s* bcmf_bdc_allocate_frame(FAR struct bcmf_dev_s *priv,
+                                      uint32_t len, bool block);
+
+int bcmf_bdc_transmit_frame(FAR struct bcmf_dev_s *priv,
+                            struct bcmf_frame_s *frame);
+
+struct bcmf_frame_s* bcmf_bdc_rx_frame(FAR struct bcmf_dev_s *priv);
+
+/* Event frames API */
 
 int bcmf_event_register(FAR struct bcmf_dev_s *priv, event_handler_t handler,
                         unsigned int event_id);

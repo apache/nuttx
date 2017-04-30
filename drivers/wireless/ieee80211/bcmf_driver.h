@@ -41,6 +41,7 @@
 #include <semaphore.h>
 
 #include <nuttx/net/netdev.h>
+#include <net/if.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 
@@ -65,13 +66,13 @@ struct bcmf_dev_s
 
   bool bc_bifup;             /* true:ifup false:ifdown */
   WDOG_ID bc_txpoll;         /* TX poll timer */
-  WDOG_ID bc_txtimeout;      /* TX timeout timer */
   struct work_s bc_irqwork;  /* For deferring interrupt work to the work queue */
   struct work_s bc_pollwork; /* For deferring poll work to the work queue */
 
   /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s bc_dev;  /* Network interface structure */
+  struct net_driver_s bc_dev;        /* Network interface structure */
+  struct bcmf_frame_s *cur_tx_frame; /* Frame used to interface network layer */
 
   /* Event registration array */
 
@@ -91,35 +92,48 @@ struct bcmf_dev_s
   int scan_status;                     /* Current scan status */
   WDOG_ID scan_timeout;                /* Scan timeout timer */
   struct wl_escan_params *scan_params; /* Current scan parameters */
+
+  sem_t auth_signal; /* Authentication notification signal */
 };
 
 /* Default bus interface structure */
 
-struct bcmf_bus_dev_s {
+struct bcmf_bus_dev_s
+{
   void (*stop)(FAR struct bcmf_dev_s *priv);
-  int (*txframe)(FAR struct bcmf_dev_s *priv, struct bcmf_frame_s *frame);
+  int (*txframe)(FAR struct bcmf_dev_s *priv, struct bcmf_frame_s *frame,
+                 bool control);
+  struct bcmf_frame_s* (*rxframe)(FAR struct bcmf_dev_s *priv);
 
-  /* Frame buffer allocation primitive
+  /* Frame buffer allocation primitives
    * len     - requested payload length
    * control - true if control frame else false
    * block   - true to block until free frame is available
    */
   struct bcmf_frame_s* (*allocate_frame)(FAR struct bcmf_dev_s *priv,
-          unsigned int len, bool control, bool block);
+                                         unsigned int len, bool block,
+                                         bool control);
+
+  void (*free_frame)(FAR struct bcmf_dev_s *priv, struct bcmf_frame_s* frame);
 };
 
 /* bcmf frame definition */
 
-struct bcmf_frame_s {
-  uint8_t *base;    /* Frame base buffer used by low level layer (SDIO) */
-  uint8_t *data;    /* Payload data (Control, data and event messages) */
-  unsigned int len; /* Frame buffer size */
+struct bcmf_frame_s
+{
+  uint8_t *base; /* Frame base buffer used by low level layer (SDIO) */
+  uint8_t *data; /* Payload data (Control, data and event messages) */
+  uint16_t len;  /* Frame buffer size */
 };
+
+int bcmf_wl_set_mac_address(FAR struct bcmf_dev_s *priv, struct ifreq *req);
 
 int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable);
 
 int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv);
 
 int bcmf_wl_is_scan_done(FAR struct bcmf_dev_s *priv);
+
+int bcmf_wl_associate(FAR struct bcmf_dev_s *priv);
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H */

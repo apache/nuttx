@@ -43,6 +43,7 @@
 #include <semaphore.h>
 #include <debug.h>
 #include <stdio.h>
+#include <queue.h>
 
 #include "bcmf_utils.h"
 
@@ -114,4 +115,68 @@ int bcmf_sem_wait(sem_t *sem, unsigned int timeout_ms)
     }
 
   return sem_timedwait(sem, &abstime);
+}
+
+void bcmf_dqueue_push(dq_queue_t *queue, dq_entry_t *entry)
+{
+  if (queue->head == NULL)
+    {
+      /* List is empty */
+
+      queue->tail = entry;
+
+      entry->flink = entry;
+      entry->blink = entry;
+    }
+  else
+    {
+      /* Insert entry at list head */
+
+      entry->flink = queue->head;
+      entry->blink = queue->tail;
+
+      queue->head->blink = entry;
+    }
+
+  queue->head = entry;
+}
+
+dq_entry_t* bcmf_dqueue_pop_tail(dq_queue_t *queue)
+{
+  dq_entry_t *entry = queue->tail;
+
+  if (queue->head == queue->tail)
+    {
+      /* List is empty */
+
+      queue->head = NULL;
+      queue->tail = NULL;
+    }
+  else
+    {
+      /* Pop from queue tail */
+
+      queue->tail = entry->blink;
+      entry->blink->flink = queue->head;
+    }
+
+  return entry;
+}
+
+void bcmf_squeue_push(sq_queue_t *queue, sq_entry_t *entry)
+{
+  entry->flink = queue->head;
+  queue->head = entry;
+}
+
+sq_entry_t* bcmf_squeue_pop(sq_queue_t *queue)
+{
+  sq_entry_t *entry = queue->head;
+
+  if (queue->head != NULL)
+    {
+      queue->head = entry->flink;
+    }
+
+  return entry;
 }

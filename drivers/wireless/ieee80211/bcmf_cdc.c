@@ -128,13 +128,6 @@ struct bcmf_frame_s* bcmf_cdc_allocate_frame(FAR struct bcmf_dev_s *priv,
       data_len = 0;
     }
 
-  if (data_len + name_len + sizeof(struct bcmf_cdc_header) < data_len)
-    {
-      /* Integer overflow */
-
-      return NULL;
-    }
-
   /* Allocate control frame */
 
   frame = priv->bus->allocate_frame(priv,
@@ -177,7 +170,7 @@ int bcmf_cdc_sendframe(FAR struct bcmf_dev_s *priv, uint32_t cmd,
 
   /* Send frame */
 
-  return priv->bus->txframe(priv, frame);
+  return priv->bus->txframe(priv, frame, true);
 }
 
 int bcmf_cdc_control_request(FAR struct bcmf_dev_s *priv,
@@ -230,7 +223,9 @@ int bcmf_cdc_control_request_unsafe(FAR struct bcmf_dev_s *priv,
   ret = bcmf_cdc_sendframe(priv, cmd, ifidx, set, frame);
   if (ret != OK)
     {
-      // TODO free allocated iovar buffer here
+      /* Free allocated iovar buffer */
+
+      priv->bus->free_frame(priv, frame);
       return ret;
     }
 

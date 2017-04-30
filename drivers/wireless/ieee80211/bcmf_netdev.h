@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/ieee80211/bcmf_utils.h
+ * drivers/wireless/ieee80211/bcmf_netdev.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -33,44 +33,15 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_UTILS_H
-#define __DRIVERS_WIRELESS_IEEE80211_BCMF_UTILS_H
+#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_NETDEV_H
+#define __DRIVERS_WIRELESS_IEEE80211_BCMF_NETDEV_H
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
+#include "bcmf_driver.h"
 
-#include <stdint.h>
-#include <semaphore.h>
-#include <queue.h>
+int bcmf_netdev_register(FAR struct bcmf_dev_s *priv);
 
-#define container_of(ptr, type, member) \
-        (type *)( (uint8_t *)(ptr) - offsetof(type,member) )
+void bcmf_netdev_notify_rx(FAR struct bcmf_dev_s *priv);
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+void bcmf_netdev_notify_tx_done(FAR struct bcmf_dev_s *priv);
 
-void bcmf_hexdump(uint8_t *data, unsigned int len, unsigned long offset);
-
-int bcmf_sem_wait(sem_t *sem, unsigned int timeout_ms);
-
-sq_entry_t* bcmf_squeue_pop(sq_queue_t *queue);
-void bcmf_squeue_push(sq_queue_t *queue, sq_entry_t *entry);
-
-dq_entry_t* bcmf_dqueue_pop_tail(dq_queue_t *queue);
-void bcmf_dqueue_push(dq_queue_t *queue, dq_entry_t *entry);
-
-static inline uint16_t bcmf_getle16(uint16_t *val)
-{
-  uint8_t *valb = (uint8_t*)val;
-  return (uint16_t)valb[0] << 8 | (uint16_t)valb[1];
-}
-
-static inline uint16_t bcmf_getle32(uint32_t *val)
-{
-  uint16_t *valw = (uint16_t*)val;
-  return (uint32_t)bcmf_getle16(valw)<<16 | bcmf_getle16(valw+1);
-}
-
-#endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_UTILS_H */
+#endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_NETDEV_H */

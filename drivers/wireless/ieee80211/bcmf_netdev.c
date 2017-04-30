@@ -64,6 +64,7 @@
 
 #include "bcmf_driver.h"
 #include "bcmf_cdc.h"
+#include "bcmf_bdc.h"
 #include "bcmf_ioctl.h"
 
 /****************************************************************************
@@ -117,42 +118,19 @@
  * Private Data
  ****************************************************************************/
 
-/* These statically allocated structur would mean that only a single
- * instance of the device could be supported.  In order to support multiple
- * devices instances, this data would have to be allocated dynamically.
- */
-
-/* A single packet buffer per device is used here.  There might be multiple
- * packet buffers in a more complex, pipelined design.
- *
- * NOTE that if CONFIG_IEEE80211_BROADCOM_NINTERFACES were greater than 1, you would
- * need a minimum on one packetbuffer per instance.  Much better to be
- * allocated dynamically.
- */
-
-static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
 /* Common TX logic */
 
-static int  bcmf_transmit(FAR struct bcmf_dev_s *priv);
-static int  bcmf_txpoll(FAR struct net_driver_s *dev);
-
-/* Interrupt handling */
-
+static int bcmf_transmit(FAR struct bcmf_dev_s *priv,
+                         struct bcmf_frame_s *frame);
 static void bcmf_receive(FAR struct bcmf_dev_s *priv);
-static void bcmf_txdone(FAR struct bcmf_dev_s *priv);
-
-static void bcmf_interrupt_work(FAR void *arg);
-static int  bcmf_interrupt(int irq, FAR void *context, FAR void *arg);
+static int  bcmf_txpoll(FAR struct net_driver_s *dev);
+static void bcmf_rxpoll(FAR void *arg);
 
 /* Watchdog timer expirations */
-
-static void bcmf_txtimeout_work(FAR void *arg);
-static void bcmf_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static void bcmf_poll_work(FAR void *arg);
 static void bcmf_poll_expiry(int argc, wdparm_t arg, ...);
@@ -185,6 +163,27 @@ static int  bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
  * Private Functions
  ****************************************************************************/
 
+int bcmf_netdev_alloc_tx_frame(FAR struct bcmf_dev_s *priv)
+{
+  if (priv->cur_tx_frame != NULL)
+    {
+      /* Frame available */
+
+      return OK;
+    }
+
+  /* Allocate frame for TX */
+
+  priv->cur_tx_frame = bcmf_bdc_allocate_frame(priv, MAX_NET_DEV_MTU, true);
+  if (!priv->cur_tx_frame)
+    {
+      wlerr("Cannot allocate TX frame\n");
+      return -ENOMEM;
+    }
+
+  return OK;
+}
+
 /****************************************************************************
  * Name: bcmf_transmit
  *
@@ -204,98 +203,25 @@ static int  bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
  *
  ****************************************************************************/
 
-static int bcmf_transmit(FAR struct bcmf_dev_s *priv)
+static int bcmf_transmit(FAR struct bcmf_dev_s *priv,
+                         struct bcmf_frame_s *frame)
 {
-  /* Verify that the hardware is ready to send another packet.  If we get
-   * here, then we are committed to sending a packet; Higher level logic
-   * must have assured that there is no transmission in progress.
-   */
+  int ret;
 
-  /* Increment statistics */
+  frame->len = priv->bc_dev.d_len +
+      (unsigned int)(frame->data - frame->base);
+  
+  ret = bcmf_bdc_transmit_frame(priv, frame);
+
+  if (ret)
+    {
+      wlerr("Failed to transmit frame\n");
+      return -EIO;
+    }
 
   NETDEV_TXPACKETS(priv->bc_dev);
 
-  /* Send the packet: address=priv->bc_dev.d_buf, length=priv->bc_dev.d_len */
-
-  /* Enable Tx interrupts */
-
-  /* Setup the TX timeout watchdog (perhaps restarting the timer) */
-
-  (void)wd_start(priv->bc_txtimeout, BCMF_TXTIMEOUT,
-                 bcmf_txtimeout_expiry, 1, (wdparm_t)priv);
   return OK;
-}
-
-/****************************************************************************
- * Name: bcmf_txpoll
- *
- * Description:
- *   The transmitter is available, check if the network has any outgoing
- *   packets ready to send.  This is a callback from devif_poll().
- *   devif_poll() may be called:
- *
- *   1. When the preceding TX packet send is complete,
- *   2. When the preceding TX packet send timesout and the interface is reset
- *   3. During normal TX polling
- *
- * Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   the network is locked.
- *
- ****************************************************************************/
-
-static int bcmf_txpoll(FAR struct net_driver_s *dev)
-{
-  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
-
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
-   */
-
-  if (priv->bc_dev.d_len > 0)
-    {
-      /* Look up the destination MAC address and add it to the Ethernet
-       * header.
-       */
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv4(priv->bc_dev.d_flags))
-#endif
-        {
-          arp_out(&priv->bc_dev);
-        }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      else
-#endif
-        {
-          neighbor_out(&priv->bc_dev);
-        }
-#endif /* CONFIG_NET_IPv6 */
-
-      /* Send the packet */
-
-      bcmf_transmit(priv);
-
-      /* Check if there is room in the device to hold another packet. If not,
-       * return a non-zero value to terminate the poll.
-       */
-    }
-
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
-   */
-
-  return 0;
 }
 
 /****************************************************************************
@@ -317,8 +243,27 @@ static int bcmf_txpoll(FAR struct net_driver_s *dev)
 
 static void bcmf_receive(FAR struct bcmf_dev_s *priv)
 {
+  struct bcmf_frame_s *frame;
+  // wlinfo("Entry\n");
   do
     {
+      /* Request frame buffer from bus interface */
+
+      frame = bcmf_bdc_rx_frame(priv);
+
+      if (frame == NULL)
+        {
+          /* No more frame to process */
+          break;
+        }
+
+      priv->bc_dev.d_buf = frame->data;
+      priv->bc_dev.d_len = frame->len - (uint32_t)(frame->data - frame->base);
+
+      wlinfo("Got frame ! %p %d\n", frame, priv->bc_dev.d_len);
+      // bcmf_hexdump(priv->bc_dev.d_buf, priv->bc_dev.d_len,
+      //              (unsigned long)priv->bc_dev.d_buf);
+
       /* Check for errors and update statistics */
 
       /* Check if the packet is a valid size for the network buffer
@@ -340,7 +285,7 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          ninfo("IPv4 frame\n");
+          // ninfo("IPv4 frame\n");
           NETDEV_RXIPV4(&priv->bc_dev);
 
           /* Handle ARP on input then give the IPv4 packet to the network
@@ -373,7 +318,13 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
 
               /* And send the packet */
 
-              bcmf_transmit(priv);
+              bcmf_transmit(priv, frame);
+            }
+          else
+            {
+              /* Release RX frame buffer */
+
+              priv->bus->free_frame(priv, frame);
             }
         }
       else
@@ -411,7 +362,13 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
 
               /* And send the packet */
 
-              bcmf_transmit(priv);
+              bcmf_transmit(priv, frame);
+            }
+          else
+            {
+              /* Release RX frame buffer */
+
+              priv->bus->free_frame(priv, frame);
             }
         }
       else
@@ -428,12 +385,19 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
 
           if (priv->bc_dev.d_len > 0)
             {
-              bcmf_transmit(priv);
+              bcmf_transmit(priv, frame);
+            }
+          else
+            {
+              /* Release RX frame buffer */
+
+              priv->bus->free_frame(priv, frame);
             }
         }
       else
 #endif
         {
+          wlinfo("RX dropped\n");
           NETDEV_RXDROPPED(&priv->bc_dev);
         }
     }
@@ -441,53 +405,89 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: bcmf_txdone
+ * Name: bcmf_txpoll
  *
  * Description:
- *   An interrupt was received indicating that the last TX packet(s) is done
+ *   The transmitter is available, check if the network has any outgoing
+ *   packets ready to send.  This is a callback from devif_poll().
+ *   devif_poll() may be called:
+ *
+ *   1. When the preceding TX packet send is complete,
+ *   2. When the preceding TX packet send timesout and the interface is reset
+ *   3. During normal TX polling
  *
  * Parameters:
- *   priv - Reference to the driver state structure
+ *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
- *   None
+ *   OK on success; a negated errno on failure
  *
  * Assumptions:
- *   The network is locked.
+ *   May or may not be called from an interrupt handler.  In either case,
+ *   the network is locked.
  *
  ****************************************************************************/
 
-static void bcmf_txdone(FAR struct bcmf_dev_s *priv)
+static int bcmf_txpoll(FAR struct net_driver_s *dev)
 {
-  int delay;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
 
-  /* Check for errors and update statistics */
-
-  NETDEV_TXDONE(priv->bc_dev);
-
-  /* Check if there are pending transmissions */
-
-  /* If no further transmissions are pending, then cancel the TX timeout and
-   * disable further Tx interrupts.
+  wlinfo("Entry\n");
+  /* If the polling resulted in data that should be sent out on the network,
+   * the field d_len is set to a value > 0.
    */
 
-  wd_cancel(priv->bc_txtimeout);
+  if (priv->bc_dev.d_len > 0)
+    {
+      /* Look up the destination MAC address and add it to the Ethernet
+       * header.
+       */
 
-  /* And disable further TX interrupts. */
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      if (IFF_IS_IPv4(priv->bc_dev.d_flags))
+#endif
+        {
+          arp_out(&priv->bc_dev);
+        }
+#endif /* CONFIG_NET_IPv4 */
 
-  /* In any event, poll the network for new TX data */
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      else
+#endif
+        {
+          neighbor_out(&priv->bc_dev);
+        }
+#endif /* CONFIG_NET_IPv6 */
 
-  (void)devif_poll(&priv->bc_dev, bcmf_txpoll);
+      /* Send the packet */
+
+      bcmf_transmit(priv, priv->cur_tx_frame);
+
+      /* Check if there is room in the device to hold another packet. If not,
+       * return a non-zero value to terminate the poll.
+       */
+      // TODO
+      priv->cur_tx_frame = NULL;
+      return 1;
+    }
+
+  /* If zero is returned, the polling will continue until all connections have
+   * been examined.
+   */
+
+  return 0;
 }
 
 /****************************************************************************
- * Name: bcmf_interrupt_work
+ * Name: bcmf_rxpoll
  *
  * Description:
- *   Perform interrupt related work from the worker thread
+ *   Process RX frames
  *
  * Parameters:
- *   arg - The argument passed when work_queue() was called.
+ *   arg - context of device to use
  *
  * Returned Value:
  *   OK on success
@@ -497,8 +497,9 @@ static void bcmf_txdone(FAR struct bcmf_dev_s *priv)
  *
  ****************************************************************************/
 
-static void bcmf_interrupt_work(FAR void *arg)
+static void bcmf_rxpoll(FAR void *arg)
 {
+  // wlinfo("Entry\n");
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
 
   /* Lock the network and serialize driver operations if necessary.
@@ -508,14 +509,6 @@ static void bcmf_interrupt_work(FAR void *arg)
    */
 
   net_lock();
-
-  /* Process pending Ethernet interrupts */
-
-  /* Get and clear interrupt status bits */
-
-  /* Handle interrupts according to status bit settings */
-
-  /* Check if we received an incoming packet, if so, call bcmf_receive() */
 
   bcmf_receive(priv);
 
@@ -524,153 +517,42 @@ static void bcmf_interrupt_work(FAR void *arg)
    * transmissions.
    */
 
-  bcmf_txdone(priv);
-  net_unlock();
-
-  /* Re-enable Ethernet interrupts */
-#warning Missing logic
-}
-
-/****************************************************************************
- * Name: bcmf_interrupt
- *
- * Description:
- *   Hardware interrupt handler
- *
- * Parameters:
- *   irq     - Number of the IRQ that generated the interrupt
- *   context - Interrupt register state save info (architecture-specific)
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static int bcmf_interrupt(int irq, FAR void *context, FAR void *arg)
-{
-  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
-
-  DEBUGASSERT(priv != NULL);
-
-  /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
-   * also disabled if the TX timeout event occurs, there can be no race
-   * condition here.
-   */
-#warning Missing logic
-
-  /* TODO: Determine if a TX transfer just completed */
-
-    {
-      /* If a TX transfer just completed, then cancel the TX timeout so
-       * there will be no race condition between any subsequent timeout
-       * expiration and the deferred interrupt processing.
-       */
-
-       wd_cancel(priv->bc_txtimeout);
-    }
-
-  /* Schedule to perform the interrupt processing on the worker thread. */
-
-  work_queue(BCMFWORK, &priv->bc_irqwork, bcmf_interrupt_work, priv, 0);
-  return OK;
-}
-
-/****************************************************************************
- * Name: bcmf_txtimeout_work
- *
- * Description:
- *   Perform TX timeout related work from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void bcmf_txtimeout_work(FAR void *arg)
-{
-  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
-
-  /* Lock the network and serialize driver operations if necessary.
-   * NOTE: Serialization is only required in the case where the driver work
-   * is performed on an LP worker thread and where more than one LP worker
-   * thread has been configured.
-   */
-
-  net_lock();
-
-  /* Increment statistics and dump debug info */
-
-  NETDEV_TXTIMEOUTS(priv->bc_dev);
-
-  /* Then reset the hardware */
-
-  /* Then poll the network for new XMIT data */
-
-  (void)devif_poll(&priv->bc_dev, bcmf_txpoll);
+  // bcmf_txdone(priv);
   net_unlock();
 }
 
 /****************************************************************************
- * Name: bcmf_txtimeout_expiry
+ * Name: bcmf_netdev_notify_tx_done
  *
  * Description:
- *   Our TX watchdog timed out.  Called from the timer interrupt handler.
- *   The last TX never completed.  Reset the hardware and start again.
- *
- * Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
- *
- * Returned Value:
- *   None
+ *   Notify callback called when TX frame is sent and freed.
  *
  * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
  *
  ****************************************************************************/
 
-static void bcmf_txtimeout_expiry(int argc, wdparm_t arg, ...)
+void bcmf_netdev_notify_tx_done(FAR struct bcmf_dev_s *priv)
 {
-  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
+  // wlinfo("Entry\n");
 
-  /* Disable further Ethernet interrupts.  This will prevent some race
-   * conditions with interrupt work.  There is still a potential race
-   * condition with interrupt work that is already queued and in progress.
-   */
-#warning Missing logic
-
-  /* Schedule to perform the TX timeout processing on the worker thread. */
-
-  work_queue(BCMFWORK, &priv->bc_irqwork, bcmf_txtimeout_work, priv, 0);
+  /* TODO TX buffer may be available, try to send again if needed */
 }
 
 /****************************************************************************
- * Name: bcmf_poll_process
+ * Name: bcmf_netdev_notify_rx
  *
  * Description:
- *   Perform the periodic poll.  This may be called either from watchdog
- *   timer logic or from the worker thread, depending upon the configuration.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
+ *   Notify callback called when RX frame is available
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-static inline void bcmf_poll_process(FAR struct bcmf_dev_s *priv)
+void bcmf_netdev_notify_rx(FAR struct bcmf_dev_s *priv)
 {
+  /* Queue a job to process RX frames */
+
+  work_queue(BCMFWORK, &priv->bc_pollwork, bcmf_rxpoll, priv, 0);
 }
 
 /****************************************************************************
@@ -692,6 +574,7 @@ static inline void bcmf_poll_process(FAR struct bcmf_dev_s *priv)
 
 static void bcmf_poll_work(FAR void *arg)
 {
+  // wlinfo("Entry\n");
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
 
   /* Lock the network and serialize driver operations if necessary.
@@ -708,17 +591,25 @@ static void bcmf_poll_work(FAR void *arg)
    * the TX poll if he are unable to accept another packet for transmission.
    */
 
+  if (bcmf_netdev_alloc_tx_frame(priv))
+    {
+      goto exit_unlock;
+    }
+
   /* If so, update TCP timing states and poll the network for new XMIT data.
    * Hmmm.. might be bug here.  Does this mean if there is a transmit in
    * progress, we will missing TCP time state updates?
    */
 
+  priv->bc_dev.d_buf = priv->cur_tx_frame->data;
+  priv->bc_dev.d_len = 0;
   (void)devif_timer(&priv->bc_dev, bcmf_txpoll);
 
   /* Setup the watchdog poll timer again */
 
   (void)wd_start(priv->bc_txpoll, BCMF_WDDELAY, bcmf_poll_expiry, 1,
                  (wdparm_t)priv);
+exit_unlock:
   net_unlock();
 }
 
@@ -742,6 +633,7 @@ static void bcmf_poll_work(FAR void *arg)
 
 static void bcmf_poll_expiry(int argc, wdparm_t arg, ...)
 {
+  // wlinfo("Entry\n");
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
 
   /* Schedule to perform the interrupt processing on the worker thread. */
@@ -768,6 +660,7 @@ static void bcmf_poll_expiry(int argc, wdparm_t arg, ...)
 
 static int bcmf_ifup(FAR struct net_driver_s *dev)
 {
+  wlinfo("Entry\n");
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
 
 #ifdef CONFIG_NET_IPv4
@@ -828,20 +721,20 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
 
 static int bcmf_ifdown(FAR struct net_driver_s *dev)
 {
+  wlinfo("Entry\n");
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
   irqstate_t flags;
 
-  bcmf_wl_enable(priv, false);
+  // bcmf_wl_enable(priv, false);
 
   /* Disable the hardware interrupt */
 
   flags = enter_critical_section();
 #warning Missing logic
 
-  /* Cancel the TX poll timer and TX timeout timers */
+  /* Cancel the TX poll timer */
 
   wd_cancel(priv->bc_txpoll);
-  wd_cancel(priv->bc_txtimeout);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the bcmf_ifup() always
@@ -874,6 +767,7 @@ static int bcmf_ifdown(FAR struct net_driver_s *dev)
 
 static void bcmf_txavail_work(FAR void *arg)
 {
+  // wlinfo("Entry\n");
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
 
   /* Lock the network and serialize driver operations if necessary.
@@ -890,11 +784,19 @@ static void bcmf_txavail_work(FAR void *arg)
     {
       /* Check if there is room in the hardware to hold another outgoing packet. */
 
+      if (bcmf_netdev_alloc_tx_frame(priv))
+        {
+          goto exit_unlock;
+        }
+
       /* If so, then poll the network for new XMIT data */
 
+      priv->bc_dev.d_buf = priv->cur_tx_frame->data;
+      priv->bc_dev.d_len = 0;
       (void)devif_poll(&priv->bc_dev, bcmf_txpoll);
     }
 
+exit_unlock:
   net_unlock();
 }
 
@@ -957,6 +859,7 @@ static int bcmf_txavail(FAR struct net_driver_s *dev)
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
 static int bcmf_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
+  wlinfo("Entry\n");
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
@@ -986,6 +889,7 @@ static int bcmf_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 #ifdef CONFIG_NET_IGMP
 static int bcmf_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
+  wlinfo("Entry\n");
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
@@ -1013,6 +917,7 @@ static int bcmf_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 #ifdef CONFIG_NET_ICMPv6
 static void bcmf_ipv6multicast(FAR struct bcmf_dev_s *priv)
 {
+  wlinfo("Entry\n");
   FAR struct net_driver_s *dev;
   uint16_t tmp16;
   uint8_t mac[6];
@@ -1103,6 +1008,11 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
 
       case SIOCGIWSCAN:
         ret = bcmf_wl_is_scan_done(priv);
+        break;
+
+      case SIOCSIFHWADDR:
+        /* Update device MAC address */
+        ret = bcmf_wl_set_mac_address(priv, (struct ifreq*)arg);
         break;
 
       case SIOCSIWFREQ:     /* Set channel/frequency (Hz) */
@@ -1202,7 +1112,6 @@ int bcmf_netdev_register(FAR struct bcmf_dev_s *priv)
   /* Initialize network driver structure */
 
   memset(&priv->bc_dev, 0, sizeof(priv->bc_dev));
-  priv->bc_dev.d_buf     = g_pktbuf;      /* Single packet buffer */
   priv->bc_dev.d_ifup    = bcmf_ifup;     /* I/F up (new IP address) callback */
   priv->bc_dev.d_ifdown  = bcmf_ifdown;   /* I/F down callback */
   priv->bc_dev.d_txavail = bcmf_txavail;  /* New TX data callback */
@@ -1215,12 +1124,16 @@ int bcmf_netdev_register(FAR struct bcmf_dev_s *priv)
 #endif
   priv->bc_dev.d_private = (FAR void *)priv; /* Used to recover private state from dev */
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Create a watchdog for timing polling */
 
   priv->bc_txpoll        = wd_create();   /* Create periodic poll timer */
-  priv->bc_txtimeout     = wd_create();   /* Create TX timeout timer */
 
   DEBUGASSERT(priv->bc_txpoll != NULL && priv->bc_txtimeout != NULL);
+
+  /* Initialize network stack interface buffer */
+
+  priv->cur_tx_frame = NULL;
+  priv->bc_dev.d_buf = NULL;
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling bcmf_ifdown().
@@ -1235,9 +1148,9 @@ int bcmf_netdev_register(FAR struct bcmf_dev_s *priv)
 
   out_len = ETHER_ADDR_LEN;
   if (bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, false,
-                                 IOVAR_STR_CUR_ETHERADDR,
-                                 priv->bc_dev.d_mac.ether.ether_addr_octet,
-                                 &out_len) != OK)
+                             IOVAR_STR_CUR_ETHERADDR,
+                             priv->bc_dev.d_mac.ether.ether_addr_octet,
+                             &out_len) != OK)
     {
       return -EIO;
     }

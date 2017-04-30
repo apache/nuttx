@@ -101,31 +101,29 @@ static const uint8_t bcmf_broadcom_oui[] = {0x00, 0x10, 0x18};
  * Private Functions
  ****************************************************************************/
 
-struct bcmf_frame_s* bcmf_bdc_allocate_frame(FAR struct bcmf_dev_s *priv,
-                                      uint32_t len, bool block)
-{
-  if (len <= 0)
-    {
-      return NULL;
-    }
-
-  /* Allocate data frame */
-
-  return priv->bus->allocate_frame(priv,
-                sizeof(struct bcmf_bdc_header) + len,
-                false, block);
-}
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-int bcmf_bdc_process_data_frame(FAR struct bcmf_dev_s *priv,
-                   struct bcmf_frame_s *frame)
+struct bcmf_frame_s* bcmf_bdc_allocate_frame(FAR struct bcmf_dev_s *priv,
+                                      uint32_t len, bool block)
 {
-  wlinfo("Data message\n");
-  bcmf_hexdump(frame->base, frame->len, (unsigned long)frame->base);
-  return OK;
+  struct bcmf_frame_s *frame;
+
+  /* Allocate data frame */
+
+  // TODO check for integer overflow
+  frame = priv->bus->allocate_frame(priv,
+                sizeof(struct bcmf_bdc_header) + len, block, false);
+
+  if (!frame)
+    {
+      return NULL;
+    }
+
+  frame->data += sizeof(struct bcmf_bdc_header);
+
+  return frame; 
 }
 
 int bcmf_bdc_process_event_frame(FAR struct bcmf_dev_s *priv,
@@ -240,4 +238,48 @@ int bcmf_event_push_config(FAR struct bcmf_dev_s *priv)
     }
 
   return OK;
+}
+
+int bcmf_bdc_transmit_frame(FAR struct bcmf_dev_s *priv,
+                             struct bcmf_frame_s *frame)
+{
+  struct bcmf_bdc_header* header;
+
+  /* Set frame data for lower layer */
+
+  frame->data -= sizeof(struct bcmf_bdc_header);
+  header = (struct bcmf_bdc_header*)frame->data;
+
+  /* Setup data frame header */
+
+  header->flags = 0x20; /* Set bdc protocol version */
+  header->priority = 0; // TODO handle priority
+  header->flags2 = CHIP_STA_INTERFACE;
+  header->data_offset = 0;
+
+  /* Send frame */
+
+  return priv->bus->txframe(priv, frame, false);
+}
+
+struct bcmf_frame_s* bcmf_bdc_rx_frame(FAR struct bcmf_dev_s *priv)
+{
+  unsigned int frame_len;
+  struct bcmf_frame_s *frame = priv->bus->rxframe(priv);
+
+  /* Process bdc header */
+
+  frame_len = frame->len - (unsigned int)(frame->data - frame->base);
+
+  if (frame_len < sizeof(struct bcmf_bdc_header))
+    {
+      wlerr("Data frame too small\n");
+      priv->bus->free_frame(priv, frame);
+      return NULL;
+    }
+
+  /* Transmit frame to upper layer */
+
+  frame->data += sizeof(struct bcmf_bdc_header);
+  return frame;
 }
