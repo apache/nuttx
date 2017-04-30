@@ -24,6 +24,10 @@ Status
     A USB device driver was added along with support for clocking from the
     HSI48.  That driver remains untested.
 
+  2017-04-30:  I tried using the I2C driver with the I2C tool (apps/system/i2c).
+    I may have something wrong, but at present the driver is just timing out
+    on all transfers.
+
 Nucleo-64 Boards
 ================
 
