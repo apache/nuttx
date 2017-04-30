@@ -257,7 +257,6 @@ struct stm32_i2c_config_s
   uint32_t scl_pin;            /* GPIO configuration for SCL as SCL */
   uint32_t sda_pin;            /* GPIO configuration for SDA as SDA */
 #ifndef CONFIG_I2C_POLLED
-  int (*isr)(int, void *, void *);     /* Interrupt handler */
   uint32_t ev_irq;             /* Event IRQ */
   uint32_t er_irq;             /* Error IRQ */
 #endif
@@ -342,18 +341,10 @@ static inline uint32_t stm32_i2c_disablefsmc(FAR struct stm32_i2c_priv_s *priv);
 static inline void stm32_i2c_enablefsmc(uint32_t ahbenr);
 #endif /* I2C1_FSMC_CONFLICT */
 
-static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv);
+static int stm32_i2c_isr_process(struct stm32_i2c_priv_s * priv);
 
 #ifndef CONFIG_I2C_POLLED
-#ifdef CONFIG_STM32_I2C1
-static int stm32_i2c1_isr(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_STM32_I2C2
-static int stm32_i2c2_isr(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_STM32_I2C3
-static int stm32_i2c3_isr(int irq, void *context, FAR void *arg);
-#endif
+static int stm32_i2c_isr(int irq, void *context, FAR void *arg);
 #endif /* !CONFIG_I2C_POLLED */
 
 static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv);
@@ -387,7 +378,6 @@ static const struct stm32_i2c_config_s stm32_i2c1_config =
   .scl_pin    = GPIO_I2C1_SCL,
   .sda_pin    = GPIO_I2C1_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .isr        = stm32_i2c1_isr,
   .ev_irq     = STM32_IRQ_I2C1EV,
   .er_irq     = STM32_IRQ_I2C1ER
 #endif
@@ -417,7 +407,6 @@ static const struct stm32_i2c_config_s stm32_i2c2_config =
   .scl_pin    = GPIO_I2C2_SCL,
   .sda_pin    = GPIO_I2C2_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .isr        = stm32_i2c2_isr,
   .ev_irq     = STM32_IRQ_I2C2EV,
   .er_irq     = STM32_IRQ_I2C2ER
 #endif
@@ -447,7 +436,6 @@ static const struct stm32_i2c_config_s stm32_i2c3_config =
   .scl_pin    = GPIO_I2C3_SCL,
   .sda_pin    = GPIO_I2C3_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .isr        = stm32_i2c3_isr,
   .ev_irq     = STM32_IRQ_I2C3EV,
   .er_irq     = STM32_IRQ_I2C3ER
 #endif
@@ -686,7 +674,7 @@ static int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
        * reports that it is done.
        */
 
-      stm32_i2c_isr(priv);
+      stm32_i2c_isr_process(priv);
     }
 
   /* Loop until the transfer is complete. */
@@ -1180,7 +1168,7 @@ static inline void stm32_i2c_enablefsmc(uint32_t ahbenr)
 #endif /* I2C1_FSMC_CONFLICT */
 
 /************************************************************************************
- * Name: stm32_i2c_isr
+ * Name: stm32_i2c_isr_process
  *
  * Description:
  *  Common interrupt service routine (ISR) that handles I2C protocol logic.
@@ -1202,7 +1190,7 @@ static inline void stm32_i2c_enablefsmc(uint32_t ahbenr)
  *
  ************************************************************************************/
 
-static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
+static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 {
 #ifndef CONFIG_I2C_POLLED
   uint32_t regval;
@@ -1892,55 +1880,22 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 }
 
 /************************************************************************************
- * Name: stm32_i2c1_isr
+ * Name: stm32_i2c_isr
  *
  * Description:
- *   I2C1 interrupt service routine
+ *   Common I2C interrupt service routine
  *
  ************************************************************************************/
 
 #ifndef CONFIG_I2C_POLLED
-#ifdef CONFIG_STM32_I2C1
-static int stm32_i2c1_isr(int irq, void *context, FAR void *arg)
+static int stm32_i2c_isr(int irq, void *context, FAR void *arg)
 {
-  return stm32_i2c_isr(&stm32_i2c1_priv);
+  struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s )arg;
+
+  DEBUGASSERT(priv != NULL);
+  return stm32_i2c_isr_process(priv);
 }
 #endif
-
-/************************************************************************************
- * Name: stm32_i2c2_isr
- *
- * Description:
- *   I2C2 interrupt service routine
- *
- ************************************************************************************/
-
-#ifdef CONFIG_STM32_I2C2
-static int stm32_i2c2_isr(int irq, void *context, FAR void *arg)
-{
-  return stm32_i2c_isr(&stm32_i2c2_priv);
-}
-#endif
-
-/************************************************************************************
- * Name: stm32_i2c3_isr
- *
- * Description:
- *   I2C2 interrupt service routine
- *
- ************************************************************************************/
-
-#ifdef CONFIG_STM32_I2C3
-static int stm32_i2c3_isr(int irq, void *context, FAR void *arg)
-{
-  return stm32_i2c_isr(&stm32_i2c3_priv);
-}
-#endif
-#endif
-
-/************************************************************************************
- * Private Initialization and Deinitialization
- ************************************************************************************/
 
 /************************************************************************************
  * Name: stm32_i2c_init
@@ -1976,8 +1931,8 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
   /* Attach ISRs */
 
 #ifndef CONFIG_I2C_POLLED
-  irq_attach(priv->config->ev_irq, priv->config->isr, NULL);
-  irq_attach(priv->config->er_irq, priv->config->isr, NULL);
+  irq_attach(priv->config->ev_irq, stm32_i2c_isr, priv);
+  irq_attach(priv->config->er_irq, stm32_i2c_isr, priv);
   up_enable_irq(priv->config->ev_irq);
   up_enable_irq(priv->config->er_irq);
 #endif
