@@ -1819,6 +1819,10 @@ FAR struct ieee802154_radio_s *mrf24j40_init(FAR struct spi_dev_s *spi,
       return NULL;
     }
 
+  /* Allow exclusive access to the privmac struct */
+
+  sem_init(&dev->exclsem, 0, 1);
+
   dev->radio.ops = &mrf24j40_devops;
 
   dev->lower    = lower;

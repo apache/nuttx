@@ -425,8 +425,8 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
   /* Check to make sure that the buffer is big enough to hold at least one
    * packet. */
 
-  if ((len >= SIZEOF_IEEE802154_DATA_REQ_S(1)) &&
-      (len <= SIZEOF_IEEE802154_DATA_REQ_S(IEEE802154_MAX_MAC_PAYLOAD_SIZE)))
+  if ((len < SIZEOF_IEEE802154_DATA_REQ_S(1)) ||
+      (len > SIZEOF_IEEE802154_DATA_REQ_S(IEEE802154_MAX_MAC_PAYLOAD_SIZE)))
     {
       wlerr("ERROR: buffer isn't an ieee802154_data_req_s: %lu\n",
             (unsigned long)len);
@@ -463,6 +463,8 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
       dwait.mw_flink = dev->md_dwait;
       dev->md_dwait = &dwait;
 
+      sem_init(&dwait.mw_sem, 0, 1);
+
       mac802154dev_givesem(&dev->md_exclsem);
   }
 
@@ -484,6 +486,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
         {
           /* This should only happen if the wait was canceled by an signal */
 
+          sem_destroy(&dwait.mw_sem);
           DEBUGASSERT(errno == EINTR);
           return -EINTR;
         }
@@ -493,6 +496,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
        * the list in order to perform the sem_post.
        */
 
+      sem_destroy(&dwait.mw_sem);
       return dwait.mw_status;
     }
 
