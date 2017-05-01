@@ -50,6 +50,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 
+#include <nuttx/wireless/ieee802154/ieee802154_ioctl.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 #include "mac802154.h"
@@ -66,11 +67,6 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-struct mac802154dev_notify_s
-{
-  uint8_t mn_signo;       /* Signal number to use in the notification */
-};
 
 /* This structure describes the state of one open mac driver instance */
 

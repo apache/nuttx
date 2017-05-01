@@ -67,7 +67,11 @@
  * Public Types
  ************************************************************************************/
 
-/* To be provided */
+struct mac802154dev_notify_s
+{
+  uint8_t mn_signo;       /* Signal number to use in the notification */
+};
+
 
 #endif /* CONFIG_WIRELESS_IEEE802154 */
 #endif /* __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_IOCTL_H */
