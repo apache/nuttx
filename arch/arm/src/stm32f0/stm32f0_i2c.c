@@ -990,25 +990,25 @@ static void stm32f0_i2c_setclock(FAR struct stm32f0_i2c_priv_s *priv, uint32_t f
   uint8_t scl_l_period;
 
   /* XXX haque; these are the only freqs we support at the moment, until we can
-   * compute the values ourself.
+   * compute the values ourself.  Pick the highest supported frequency that does
+   * not exceed the requested frequency.
    */
 
-  if (frequency == 10000)
+  if (frequency < 100000)
     {
+      frequency = 10000;  /* 0Hz <= frequency < 100KHz: Use 10Khz */
     }
-  else if (frequency == 100000)
+  else if (frequency < 400000)
     {
+      frequency = 100000; /* 100KHz <= frequency < 400KHz: Use 100KHz */
     }
-  else if (frequency == 400000)
+  else if (frequency < 1000000)
     {
+      frequency = 400000; /* 400KHz <= frequency < 1MHz: Use 400Khz */
     }
   else
     {
-#if 1
-      frequency = 1000000;
-#else
-      frequency = 500000;
-#endif
+      frequency = 1000000; /* 1MHz <= frequency:  Use 1Mhz */
     }
 
   /* Has the I2C bus frequency changed? */
@@ -1074,8 +1074,6 @@ static void stm32f0_i2c_setclock(FAR struct stm32f0_i2c_priv_s *priv, uint32_t f
           scl_h_period = 0x03;    /* SCLH - SCL high period in master mode */
           h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
           s_time       = 0x01;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
-
-          frequency    = 1000000;
         }
 
       uint32_t timingr =
