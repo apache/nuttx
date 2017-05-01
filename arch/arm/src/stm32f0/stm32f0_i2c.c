@@ -1037,88 +1037,45 @@ static void stm32f0_i2c_setclock(FAR struct stm32f0_i2c_priv_s *priv, uint32_t f
 
       if (frequency == 10000)
         {
-#if 1
-          /* 10 KHz values from I2C timing tool with clock 80mhz */
+          /* 10 KHz values from I2C timing tool with clock 8mhz */
 
-          presc        = 0x0b;    /* PRESC - (+1) prescale I2CCLK */
-          scl_l_period = 0xff;    /* SCLL - SCL low period in master mode */
-          scl_h_period = 0xba;    /* SCLH - SCL high period in master mode */
-          h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
-          s_time       = 0x01;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
-
-#else
-          /* 10 KHz values from datasheet with clock 8mhz */
-
-          presc        = 0x03;    /* PRESC - (+1) prescale I2CCLK */
+          presc        = 0x01;    /* PRESC - (+1) prescale I2CCLK */
           scl_l_period = 0xc7;    /* SCLL - SCL low period in master mode */
           scl_h_period = 0xc3;    /* SCLH - SCL high period in master mode */
           h_time       = 0x02;    /* SDADEL - (+1) data hold time after SCL falling edge */
           s_time       = 0x04;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
-#endif
         }
      else if (frequency == 100000)
         {
-#if 1
-          /* 100 KHz values from I2C timing tool with clock 80mhz */
+          /* 100 KHz values from I2C timing tool with clock 8mhz */
 
           presc        = 0x01;    /* PRESC - (+1) prescale I2CCLK */
-          scl_l_period = 0xe7;    /* SCLL - SCL low period in master mode */
-          scl_h_period = 0x9b;    /* SCLH - SCL high period in master mode */
-          h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
-          s_time       = 0x0d;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
-#else
-          /* 100 KHz values from datasheet with clock 8mhz */
-
-          presc        = 0x01;
-          scl_l_period = 0x13;
-          scl_h_period = 0x0f;
-          h_time       = 0x02;
-          s_time       = 0x04;
-#endif
+          scl_l_period = 0x13;    /* SCLL - SCL low period in master mode */
+          scl_h_period = 0x0f;    /* SCLH - SCL high period in master mode */
+          h_time       = 0x02;    /* SDADEL - (+1) data hold time after SCL falling edge */
+          s_time       = 0x04;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
         }
       else if (frequency == 400000)
         {
-#if 1
-          /* 400 KHz values from I2C timing tool for clock of 80mhz */
+          /* 400 KHz values from I2C timing tool for clock of 8mhz */
 
-          presc        = 0x01;    /* PRESC - (+1) prescale I2CCLK */
-          scl_l_period = 0x43;    /* SCLL - SCL low period in master mode */
-          scl_h_period = 0x13;    /* SCLH - SCL high period in master mode */
-          h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
-          s_time       = 0x07;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
-#else
-          /* 400 KHz values from datasheet for clock of 8mhz */
-
-          presc        = 0x00;
-          scl_l_period = 0x09;
-          scl_h_period = 0x03;
-          h_time       = 0x01;
-          s_time       = 0x03;
-#endif
+          presc        = 0x00;    /* PRESC - (+1) prescale I2CCLK */
+          scl_l_period = 0x09;    /* SCLL - SCL low period in master mode */
+          scl_h_period = 0x03;    /* SCLH - SCL high period in master mode */
+          h_time       = 0x01;    /* SDADEL - (+1) data hold time after SCL falling edge */
+          s_time       = 0x03;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
         }
       else
         {
-#if 1
-          /* 1000 KHhz values from I2C timing tool for clock of 80mhz */
+          /* 1000 KHhz values from I2C timing tool for clock of 8mhz */
 
-          presc        = 0x01;    /* PRESC - (+1) prescale I2CCLK */
-          scl_l_period = 0x14;    /* SCLL - SCL low period in master mode */
-          scl_h_period = 0x13;    /* SCLH - SCL high period in master mode */
+          presc        = 0x00;    /* PRESC - (+1) prescale I2CCLK */
+          scl_l_period = 0x06;    /* SCLL - SCL low period in master mode */
+          scl_h_period = 0x03;    /* SCLH - SCL high period in master mode */
           h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
-          s_time       = 0x05;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
+          s_time       = 0x01;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
 
-          frequency = 1000000;
-#else
-          /* 500 KHhz values from datasheet for clock of 8mhz */
-
-          presc        = 0x00;
-          scl_l_period = 0x06;
-          scl_h_period = 0x03;
-          h_time       = 0x00;
-          s_time       = 0x01;
-
-          frequency = 500000;
-#endif
+          frequency    = 1000000;
         }
 
       uint32_t timingr =
