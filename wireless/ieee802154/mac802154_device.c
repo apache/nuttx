@@ -50,6 +50,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 
+#include <nuttx/drivers/iob.h>
+
 #include <nuttx/wireless/ieee802154/ieee802154_ioctl.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
@@ -373,17 +375,6 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
   DEBUGASSERT(inode->i_private);
   dev = (FAR struct mac802154_chardevice_s *)inode->i_private;
 
-  /* Check to make sure that the buffer is big enough to hold at least one
-   * packet.
-   */
-
-  if ((len >= SIZEOF_IEEE802154_DATA_REQ_S(1)) &&
-      (len <= SIZEOF_IEEE802154_DATA_REQ_S(IEEE802154_MAX_MAC_PAYLOAD_SIZE)))
-    {
-      wlerr("ERROR: buffer too small: %lu\n", (unsigned long)len);
-      return -EINVAL;
-    }
-
   /* Get exclusive access to the driver structure */
 
   ret = mac802154dev_takesem(&dev->md_exclsem);
@@ -413,7 +404,9 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
 {
   FAR struct inode *inode;
   FAR struct mac802154_chardevice_s *dev;
-  FAR struct ieee802154_data_req_s *req;
+  FAR struct mac802154dev_txframe_s *tx;
+  FAR struct iob_s *iob;
+  struct ieee802154_data_req_s req;
   struct mac802154dev_dwait_s dwait;
   int ret;
 
@@ -422,20 +415,44 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
   DEBUGASSERT(inode->i_private);
   dev  = (FAR struct mac802154_chardevice_s *)inode->i_private;
 
-  /* Check to make sure that the buffer is big enough to hold at least one
-   * packet. */
+  /* Check if the struct is write */
 
-  if ((len < SIZEOF_IEEE802154_DATA_REQ_S(1)) ||
-      (len > SIZEOF_IEEE802154_DATA_REQ_S(IEEE802154_MAX_MAC_PAYLOAD_SIZE)))
+  if (len != sizeof(struct mac802154dev_txframe_s))
     {
-      wlerr("ERROR: buffer isn't an ieee802154_data_req_s: %lu\n",
+      wlerr("ERROR: buffer isn't a mac802154dev_txframe_s: %lu\n",
             (unsigned long)len);
 
       return -EINVAL;
     }
 
   DEBUGASSERT(buffer != NULL);
-  req = (FAR struct ieee802154_data_req_s *)buffer;
+  tx = (FAR struct mac802154dev_txframe_s *)buffer;
+
+  /* Allocate an IOB to put the frame in */
+
+  iob = iob_alloc(false);
+  DEBUGASSERT(iob != NULL);
+
+  iob->io_flink  = NULL;
+  iob->io_len    = 0;
+  iob->io_offset = 0;
+  iob->io_pktlen = 0;
+
+  /* Get the MAC header length */
+
+  ret = mac802154_get_mhrlen(dev->md_mac, tx->meta);
+  if (ret < 0)
+    {
+      wlerr("ERROR: TX meta-data is invalid");
+      return ret;
+    }
+    
+  iob->io_offset = ret;
+  iob->io_len = iob->io_offset;
+
+  memcpy(&iob->io_data[iob->io_offset], tx->payload, tx->meta->msdu_length);
+
+  iob->io_len += tx->meta->msdu_length;
 
   /* If this is a blocking operation, we need to setup a wait struct so we
    * can unblock when the packet transmission has finished. If this is a
@@ -456,21 +473,25 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
 
       /* Setup the wait struct */
 
-      dwait.mw_handle = req->msdu_handle;
+      dwait.mw_handle = tx->meta->msdu_handle;
 
       /* Link the wait struct */
 
       dwait.mw_flink = dev->md_dwait;
       dev->md_dwait = &dwait;
 
-      sem_init(&dwait.mw_sem, 0, 1);
+      sem_init(&dwait.mw_sem, 0, 0);
+      sem_setprotocol(&dwait.mw_sem, SEM_PRIO_NONE);
 
       mac802154dev_givesem(&dev->md_exclsem);
   }
 
+  req.meta = tx->meta;
+  req.frame = iob;
+
   /* Pass the request to the MAC layer */
 
-  ret = mac802154_req_data(dev->md_mac, req);
+  ret = mac802154_req_data(dev->md_mac, &req);
 
   if (ret < 0)
     {

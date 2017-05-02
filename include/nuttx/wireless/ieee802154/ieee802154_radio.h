@@ -195,13 +195,15 @@ struct ieee802154_rxdesc_s
 struct ieee802154_radiocb_s
 {
   CODE int (*poll_csma) (FAR const struct ieee802154_radiocb_s *radiocb,
-             FAR struct ieee802154_txdesc_s *tx_desc, FAR uint8_t *buf);
+             FAR struct ieee802154_txdesc_s *tx_desc,
+             FAR struct iob_s **frame);
   CODE int (*poll_gts) (FAR const struct ieee802154_radiocb_s *radiocb,
-             FAR struct ieee802154_txdesc_s *tx_desc, FAR uint8_t *buf);
+             FAR struct ieee802154_txdesc_s *tx_desc,
+             FAR struct iob_s **frame);
   CODE void (*txdone) (FAR const struct ieee802154_radiocb_s *radiocb,
              FAR const struct ieee802154_txdesc_s *tx_desc);
   CODE void (*rxframe) (FAR const struct ieee802154_radiocb_s *radiocb,
-             FAR const struct ieee8021254_rxdesc_s *rx_desc,
+             FAR const struct ieee802154_rxdesc_s *rx_desc,
              FAR struct iob_s *frame);
 };
 
