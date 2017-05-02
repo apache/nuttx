@@ -536,11 +536,12 @@ struct ieee802154_data_req_s
    * to continue and make the struct "variable length"
    */ 
 
-  uint8_t msdu[1];
+  uint8_t msdu[IEEE802154_MAX_MAC_PAYLOAD_SIZE];
 };
 
 #define SIZEOF_IEEE802154_DATA_REQ_S(n) \
-        (sizeof(struct ieee802154_data_req_s) + (n) - 1)
+        (sizeof(struct ieee802154_data_req_s) \
+        - IEEE802154_MAX_MAC_PAYLOAD_SIZE + (n))
 
 /*****************************************************************************
  * Primitive: MCPS-DATA.confirm 

@@ -338,6 +338,78 @@ static inline int mac802154_takesem(sem_t *sem)
 }
 
 /****************************************************************************
+ * Name: mac802154_push_csma
+ *
+ * Description:
+ *   Push a CSMA transaction onto the list
+ *
+ ****************************************************************************/
+
+static void mac802154_push_csma(FAR struct ieee802154_privmac_s *priv,
+                                FAR struct mac802154_trans_s *trans)
+{
+  /* Ensure the transactions forward link is NULL */
+
+  trans->flink = NULL;
+
+  /* If the tail is not empty, make the transaction pointed to by the tail,
+   * point to the new transaction */ 
+  
+  if (priv->csma_tail != NULL)
+    {
+      priv->csma_tail->flink = trans;
+    }
+  
+  /* Point the tail at the new transaction */
+
+  priv->csma_tail = trans;
+
+  /* If the head is NULL, we need to point it at the transaction since there
+   * is only one transaction in the list at this point */
+
+  if (priv->csma_head == NULL)
+    {
+      priv->csma_head = trans;
+    }
+}
+
+/****************************************************************************
+ * Name: mac802154_pop_csma
+ *
+ * Description:
+ *   Pop a CSMA transaction from the list
+ *
+ ****************************************************************************/
+
+static FAR struct mac802154_trans_s * 
+  mac802154_pop_csma(FAR struct ieee802154_privmac_s *priv)
+{
+  FAR struct mac802154_trans_s *trans;
+
+  if (priv->csma_head == NULL)
+    {
+      return NULL;
+    }
+
+  /* Get the transaction from the head of the list */
+
+  trans = priv->csma_head;
+
+  /* Move the head pointer to the next transaction */
+
+  priv->csma_head = trans->flink;
+
+  /* If the head is now NULL, the list is empty, so clear the tail too */
+
+  if (priv->csma_head == NULL)
+    {
+      priv->csma_tail = NULL;
+    }
+
+  return trans;
+}
+
+/****************************************************************************
  * Name: mac802154_defaultmib
  *
  * Description:
@@ -398,14 +470,11 @@ static int mac802154_poll_csma(FAR const struct ieee802154_radiocb_s *radiocb,
 
   /* Check to see if there are any CSMA transactions waiting */
 
-  if (priv->csma_head)
+  trans = mac802154_pop_csma(priv);
+  mac802154_givesem(&priv->exclsem);
+
+  if (trans != NULL)
     {
-      /* Pop a CSMA transaction off the list */
-
-      trans = priv->csma_head;
-      priv->csma_head = priv->csma_head->flink;
-
-      mac802154_givesem(&priv->exclsem);
 
       /* Setup the transmit descriptor */
 
@@ -426,7 +495,6 @@ static int mac802154_poll_csma(FAR const struct ieee802154_radiocb_s *radiocb,
       return (trans->mhr_len + trans->d_len);
     }
 
-  mac802154_givesem(&priv->exclsem);
   return 0;
 }
 
@@ -673,6 +741,10 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
     {
       return NULL;
     }
+ 
+  /* Allow exclusive access to the privmac struct */
+
+  sem_init(&mac->exclsem, 0, 1);
 
   /* Initialize fields */
 
@@ -939,6 +1011,8 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
 
   trans.msdu_handle = req->msdu_handle;
 
+  sem_init(&trans.sem, 0, 1);
+
   /* If the TxOptions parameter specifies that a GTS transmission is required,
    * the MAC sublayer will determine whether it has a valid GTS as described
    * 5.1.7.3. If a valid GTS could not be found, the MAC sublayer will discard
@@ -1000,8 +1074,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
         {
           /* Link the transaction into the CSMA transaction list */
 
-          priv->csma_tail->flink = &trans;
-          priv->csma_tail = &trans;
+          mac802154_push_csma(priv, &trans);
 
           /* We no longer need to have the MAC layer locked. */
 
@@ -1015,6 +1088,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
         }
     }
 
+  sem_destroy(&trans.sem);
   return OK;
 }
 
