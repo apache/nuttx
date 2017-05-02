@@ -237,8 +237,14 @@
 #define GPIO_USART1_RX GPIO_USART1_RX_1 /* PA10 */
 #define GPIO_USART1_TX GPIO_USART1_TX_1 /* PA9 */
 
-/* HRTIM */
+/* COMP */
 
+/* OPAMP */
+
+#define OPAMP2_VMSEL OPAMP2_VMSEL_PC5
+#define OPAMP2_VPSEL OPAMP2_VPSEL_PB14
+
+/* HRTIM */
 
 /* DMA channels *************************************************************/
 /* ADC */

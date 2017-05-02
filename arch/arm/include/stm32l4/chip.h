@@ -108,8 +108,12 @@
 #  define STM32L4_NSAI                     2   /* SAI1-2 */
 #  define STM32L4_NSDMMC                   1   /* SDMMC interface */
 #  define STM32L4_NDMA                     2   /* DMA1-2 */
+#if defined(CONFIG_STM32L4_STM32L496XX)
+#  define STM32L4_NPORTS                   9   /* 9 GPIO ports, GPIOA-I */
+#else
 #  define STM32L4_NPORTS                   8   /* 8 GPIO ports, GPIOA-H */
-#  define STM32L4_NADC                     3   /* 12-bit ADC1-3, 24 channels (except V series) */
+#endif
+#  define STM32L4_NADC                     3   /* 12-bit ADC1-3, upto 24 channels */
 #  define STM32L4_NDAC                     2   /* 12-bit DAC1-2 */
 #  define STM32L4_NCRC                     1   /* CRC */
 #  define STM32L4_NCOMP                    2   /* Comparators */

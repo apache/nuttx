@@ -60,6 +60,16 @@ CSRCS += comp.c
 
 endif
 
+# Check for OPAMP devices
+
+ifeq ($(CONFIG_OPAMP),y)
+
+# Include the common OPAMP character driver
+
+CSRCS += opamp.c
+
+endif
+
 # Check for ADC devices
 
 ifeq ($(CONFIG_ADC),y)
@@ -105,6 +115,13 @@ ifeq ($(CONFIG_COMP),y)
   DEPPATH += --dep-path analog
   VPATH += :analog
   CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)analog}
+else
+ifeq ($(CONFIG_OPAMP),y)
+  DEPPATH += --dep-path analog
+  VPATH += :analog
+  CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)analog}
 endif
 endif
 endif
+endif
+

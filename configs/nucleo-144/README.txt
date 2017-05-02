@@ -32,14 +32,17 @@ Nucleo-144 Boards:
 The Nucleo-144 is a standard board for use with several STM32 parts in the
 LQFP144 package.  Variants include
 
-  STM32 Part    Board Variant Name
-  ------------- ------------------
-  STM32F207ZGT6 NUCLEO-F207ZG
-  STM32F303ZET6 NUCLEO-F303ZE
-  STM32F429ZIT6 NUCLEO-F429ZI
-  STM32F446ZET6 NUCLEO-F446ZE
-  STM32F746ZGT6 NUCLEO-F746ZG
-  STM32F767ZIT6 NUCLEO-F767ZI
+  STM32 Part     Board Variant Name
+  -------------  ------------------
+  STM32F207ZGT6  NUCLEO-F207ZG
+  STM32F303ZET6  NUCLEO-F303ZE
+  STM32F429ZIT6  NUCLEO-F429ZI
+  STM32F446ZET6  NUCLEO-F446ZE
+  STM32F746ZGT6  NUCLEO-F746ZG
+  STM32F767ZIT6  NUCLEO-F767ZI
+  STM32L496ZGT6  NUCLEO-L496ZG
+  STM32L496ZGT6P NUCLEO-L496ZG-P
+
   ------------- ------------------
 
 This directory is intended to support all Nucleo-144 variants since the
@@ -48,9 +51,10 @@ board design provides uniformity in the documentation from ST and should
 allow us to quickly change configurations by just cloning a configuration
 and changing the CPU choice and board initialization.  Unfortunately for
 the developer, the CPU specific information must be extracted from the
-common information in the documentation.
+common information in the documentation. The exception are the STM32L496ZG
+boards, which are supported by configs/nucleo-l496zg
 
-Please read the User Manaul UM1727: Getting started with STM32 Nucleo board
+Please read the User Manual UM1727: Getting started with STM32 Nucleo board
 software development tools and take note of the Powering options for the
 board (6.3 Power supply and power selection) and the Solder bridges based
 hardware configuration changes that are configurable (6.11 Solder bridges).
