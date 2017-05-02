@@ -101,12 +101,15 @@ void bcmf_hexdump(uint8_t *data, unsigned int len, unsigned long offset)
 int bcmf_sem_wait(sem_t *sem, unsigned int timeout_ms)
 {
   struct timespec abstime;
+  unsigned int timeout_sec;
 
   /* Get the current time */
 
   (void)clock_gettime(CLOCK_REALTIME, &abstime);
 
-  abstime.tv_nsec += 1000 * 1000* timeout_ms;
+  timeout_sec      = timeout_ms/1000;
+  abstime.tv_sec  += timeout_sec;
+  abstime.tv_nsec += 1000 * 1000* (timeout_ms % 1000);
 
   if (abstime.tv_nsec >= 1000 * 1000 * 1000)
     {

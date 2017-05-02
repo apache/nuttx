@@ -1010,9 +1010,16 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
         ret = bcmf_wl_is_scan_done(priv);
         break;
 
-      case SIOCSIFHWADDR:
-        /* Update device MAC address */
+      case SIOCSIFHWADDR:    /* Set device MAC address */
         ret = bcmf_wl_set_mac_address(priv, (struct ifreq*)arg);
+        break;
+
+      case SIOCSIWAUTH:
+        ret = bcmf_wl_set_auth_param(priv, (struct iwreq*)arg);
+        break;
+
+      case SIOCSIWENCODEEXT:
+        ret = bcmf_wl_set_encode_ext(priv, (struct iwreq*)arg);
         break;
 
       case SIOCSIWFREQ:     /* Set channel/frequency (Hz) */
@@ -1026,8 +1033,7 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
         break;
 
       case SIOCSIWMODE:     /* Set operation mode */
-        wlwarn("WARNING: SIOCSIWMODE not implemented\n");
-        ret = -ENOSYS;
+        ret = bcmf_wl_set_mode(priv, (struct iwreq*)arg);
         break;
 
       case SIOCGIWMODE:     /* Get operation mode */
@@ -1046,8 +1052,7 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
         break;
 
       case SIOCSIWESSID:    /* Set ESSID (network name) */
-        wlwarn("WARNING: SIOCSIWESSID not implemented\n");
-        ret = -ENOSYS;
+        ret = bcmf_wl_set_ssid(priv, (struct iwreq*)arg);
         break;
 
       case SIOCGIWESSID:    /* Get ESSID */

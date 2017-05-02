@@ -94,6 +94,7 @@ struct bcmf_dev_s
   struct wl_escan_params *scan_params; /* Current scan parameters */
 
   sem_t auth_signal; /* Authentication notification signal */
+  int   auth_status; /* Authentication status */
 };
 
 /* Default bus interface structure */
@@ -126,14 +127,26 @@ struct bcmf_frame_s
   uint16_t len;  /* Frame buffer size */
 };
 
+/* IOCTLs network interface implementation */
+
 int bcmf_wl_set_mac_address(FAR struct bcmf_dev_s *priv, struct ifreq *req);
 
 int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable);
+
+/* IOCTLs AP scan interface implementation */
 
 int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv);
 
 int bcmf_wl_is_scan_done(FAR struct bcmf_dev_s *priv);
 
-int bcmf_wl_associate(FAR struct bcmf_dev_s *priv);
+/* IOCTLs authentication interface implementation */
+
+int bcmf_wl_set_auth_param(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+
+int bcmf_wl_set_encode_ext(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+
+int bcmf_wl_set_mode(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+
+int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H */
