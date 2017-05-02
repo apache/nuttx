@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/nucleo-144/src/stm32_appinitilaize.c
+ * config/nucleo-144/src/stm32_appinitialize.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -42,6 +42,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/mount.h>
 #include <debug.h>
 #include <syslog.h>
 

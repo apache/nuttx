@@ -141,3 +141,9 @@ config DAC_AD5410
 	select SPI
 
 endif # DAC
+
+config OPAMP
+       bool "Operational Amplifier"
+       default n
+       ---help---
+		Select to enable support for Operational Amplifiers (OPAMPs).
