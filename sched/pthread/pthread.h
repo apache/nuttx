@@ -121,7 +121,7 @@ void pthread_mutex_inconsistent(FAR struct pthread_tcb_s *tcb);
 #  define pthread_mutex_give(m)    pthread_givesemaphore(&(m)->sem)
 #endif
 
-#ifdef CONFIG_CANCELLATION_POINTS
+#if defined(CONFIG_CANCELLATION_POINTS) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
 uint16_t pthread_disable_cancel(void);
 void pthread_enable_cancel(uint16_t oldstate);
 #else
