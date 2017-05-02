@@ -708,7 +708,7 @@ config ARCH_BOARD_NUCLEO_144
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		STMicro Nucleo-144 development board featuring STMicroelectronics
-		F2, F3, F4 and F7 MCU families.  The board is a "Hardware pattern"
+		F2, F3, F4, F7 and L4 MCU families.  The board is a "Hardware pattern"
 		that can be populated with the 144 pin package of the following MCUs:
 
 			Target STM32    Order code
@@ -716,13 +716,43 @@ config ARCH_BOARD_NUCLEO_144
 			STM32F303ZET6   NUCLEO-F303ZE
 			STM32F429ZIT6   NUCLEO-F429ZI
 			STM32F446ZET6   NUCLEO-F446ZE
+			STM32F746ZGT6   NUCLEO-F746ZG
+			STM32F767ZIT6   NUCLEO-F767ZI
+			STM32L496ZGT6   NUCLEO-L496ZG
+			STM32L496ZGT6P  NUCLEO-L496ZG-P
 
-		Supported in this release are:
+		Supported in this configuration are:
 
-			NUCLEO-F746ZG - STM32F746ZGT6 a 216MHz Cortex-M7, w/FPU - 1024KiB
-				Flash memory and 320KiB SRAM.
+			NUCLEO-F746ZG - STM32F746ZGT6 a 216MHz Cortex-M7, w/FPU -
+				1024KiB Flash memory and 320KiB SRAM.
 			NUCLEO-F767ZI - STM32F767ZIT6 a 216MHz Cortex-M7, w/DPFPU -
 				2048KiB Flash memory and 512KiB SRAM.
+
+config ARCH_BOARD_NUCLEO_L496ZG
+	bool "STM32L496 Nucleo L496ZG"
+	depends on ARCH_CHIP_STM32L496ZG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo-144 development board featuring STMicroelectronics
+		F2, F3, F4, F7 and L4 MCU families.  The board is a "Hardware pattern"
+		that can be populated with the 144 pin package of the following MCUs:
+
+			Target STM32    Order code
+			STM32F207ZGT6   NUCLEO-F207ZG
+			STM32F303ZET6   NUCLEO-F303ZE
+			STM32F429ZIT6   NUCLEO-F429ZI
+			STM32F446ZET6   NUCLEO-F446ZE
+			STM32F746ZGT6   NUCLEO-F746ZG
+			STM32F767ZIT6   NUCLEO-F767ZI
+			STM32L496ZGT6   NUCLEO-L496ZG
+			STM32L496ZGT6P  NUCLEO-L496ZG-P
+
+		Supported in this configuration are:
+
+			NUCLEO-L496ZG - STM32L496ZGT6 a 80MHz Cortex-M4, w/FPU -
+				1024KiB Flash memory and 320KiB SRAM.
 
 config ARCH_BOARD_NUCLEO_F072RB
 	bool "STM32F072 Nucleo F072RB"
@@ -1518,6 +1548,7 @@ config ARCH_BOARD
 	default "nucleo-f334r8"            if ARCH_BOARD_NUCLEO_F334R8
 	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 	default "nucleo-l476rg"            if ARCH_BOARD_NUCLEO_L476RG
+	default "nucleo-l496zg"            if ARCH_BOARD_NUCLEO_L496ZG
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
 	default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
@@ -1834,6 +1865,9 @@ source "configs/nucleo-f4x1re/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_L476RG
 source "configs/nucleo-l476rg/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_L496ZG
+source "configs/nucleo-l496zg/Kconfig"
 endif
 if ARCH_BOARD_QEMU_I486
 source "configs/qemu-i486/Kconfig"

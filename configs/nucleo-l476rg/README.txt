@@ -6,9 +6,9 @@ NucleoL476RG board from ST Micro.  See
 
   http://www.st.com/nucleo-l476rg
 
-NucleoF476RG:
+NucleoL476RG:
 
-  Microprocessor: 32-bit ARM Cortex M4 at 80MHz STM32F476RGT6
+  Microprocessor: 32-bit ARM Cortex M4 at 80MHz STM32L476RGT6
   Memory:         1024 KB Flash and 96+32 KB SRAM
   ADC:            2×12-bit, 2.4 MSPS A/D converter: up to 24 channels
   DMA:            16-stream DMA controllers with FIFOs and burst support

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-l476rg/scripts/l476rg.ld
+ * configs/nucleo-l496zg/scripts/l496zg-flash.ld
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-/* The STM32L476RG has 512Kb of FLASH beginning at address 0x0800:0000 and
- * 128Kb of SRAM beginning at address 0x2000:0000.  When booting from FLASH,
+/* The STM32L496ZG has 1024Kb of FLASH beginning at address 0x0800:0000 and
+ * 256Kb of SRAM beginning at address 0x2000:0000.  When booting from FLASH,
  * FLASH memory is aliased to address 0x0000:0000 where the code expects to
  * begin execution by jumping to the entry point in the 0x0800:0000 address
  * range.
@@ -43,8 +43,8 @@
 
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x08000000, LENGTH = 512K
-    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 96K
+    flash (rx) : ORIGIN = 0x08000000, LENGTH = 1024K
+    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 256K
 }
 
 OUTPUT_ARCH(arm)
@@ -85,7 +85,7 @@ SECTIONS
 
 	_eronly = ABSOLUTE(.);
 
-	/* The STM32L476RG has 96Kb of SRAM beginning at the following address */
+	/* The STM32L496ZG has 256Kb of SRAM beginning at the following address */
 
 	.data : {
 		_sdata = ABSOLUTE(.);

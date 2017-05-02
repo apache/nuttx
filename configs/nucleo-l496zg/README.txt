@@ -10,11 +10,7 @@ Contents
 ========
 
   - Nucleo-144 Boards
-  - Nucleo F746ZG
-  - Nucleo F767ZI
-  - Development Environment
-  - IDEs
-  - Basic configuaration & build steps
+  - Nucleo L496ZG
   - Hardware
     - Button
     - LED
@@ -23,8 +19,7 @@ Contents
     - SDIO - MMC
   - SPI Test
   - Configurations
-     f7xx-nsh
-     f7xx-evalos
+     nsh
 
 Nucleo-144 Boards:
 =================
@@ -45,19 +40,14 @@ LQFP144 package.  Variants include
 
   ------------- ------------------
 
-This directory is intended to support all Nucleo-144 variants since the
-boards are identical, differing only in the installed part.  This common
-board design provides uniformity in the documentation from ST and should
-allow us to quickly change configurations by just cloning a configuration
-and changing the CPU choice and board initialization.  Unfortunately for
-the developer, the CPU specific information must be extracted from the
-common information in the documentation. The exception are the STM32L496ZG
-boards, which are supported by configs/nucleo-l496zg
+This directory supports the L4 variants of Nucleo-144
 
-Please read the User Manual UM1727: Getting started with STM32 Nucleo board
+Please read the User Manual UM2179: Getting started with STM32 Nucleo board
 software development tools and take note of the Powering options for the
 board (6.3 Power supply and power selection) and the Solder bridges based
 hardware configuration changes that are configurable (6.11 Solder bridges).
+
+Also note that UM1727 is not valid for L4 Nucleo-144 boards!
 
 Common Board Features:
 ---------------------
@@ -70,33 +60,30 @@ Common Board Features:
 
   Expansion I/F:  ST Zio and Extended Ardino and Morpho Headers
 
-Nucleo F746ZG
+Nucleo L496ZG
 =============
 
-ST Nucleo F746ZG board from ST Micro is supported.  See
+ST Nucleo L496ZG board from ST Micro is supported.  See
 
-http://www.st.com/content/st_com/en/products/evaluation-tools/product-evaluation-tools/mcu-eval-tools/stm32-mcu-eval-tools/stm32-mcu-nucleo/nucleo-f746zg.html
+http://www.st.com/content/st_com/en/products/evaluation-tools/product-evaluation-tools/mcu-eval-tools/stm32-mcu-eval-tools/stm32-mcu-nucleo/nucleo-l496zg.html
 
-The Nucleo F746ZG order part number is NUCLEO-F746ZG. It is one member of
+The Nucleo L496ZG order part number is NUCLEO-L496ZG. It is one member of
 the STM32 Nucleo-144 board family.
 
-NUCLEO-F746ZG Features:
+NUCLEO-L496ZG Features:
 ----------------------
 
-  Microprocessor: STM32F746ZGT6 Core: ARM 32-bit Cortex®-M7 CPU with FPU,
-                  L1-cache: 4KB data cache and 4KB instruction cache, up to
-                  216 MHz, MPU, and DSP instructions.
-  Memory:         1024 KB Flash 320KB of SRAM (including 64KB of data TCM RAM)
-                  + 16KB of instruction TCM RAM + 4KB of backup SRAM
-  ADC:            3×12-bit, 2.4 MSPS ADC: up to 24 channels and 7.2 MSPS in
-                  triple interleaved mode
-  DMA:            2 X 16-stream DMA controllers with FIFOs and burst support
-  Timers:         Up to 18 timers: up to thirteen 16-bit (1x 16-bit lowpower),
-                  two 32-bit timers, 2x watchdogs, SysTick
+  Microprocessor: STM32L496ZGT6 Core: ARM 32-bit Cortex®-M4 CPU with FPU,
+                  80 MHz, MPU, and DSP instructions.
+  Memory:         1024 KB Flash 320KB of SRAM (including 64KB of SRAM2)
+  ADC:            3×12-bit: up to 24 channels 
+  DMA:            2 X 7-stream DMA controllers with FIFOs and burst support
+  Timers:         Up to 13 timers: (2x 16-bit lowpower), two 32-bit timers,
+                  2x watchdogs, SysTick
   GPIO:           114 I/O ports with interrupt capability
-  LCD:            LCD-TFT Controllerwith (DMA2D), Parallel interface
+  LCD:            LCD-TFT Controller, Parallel interface
   I2C:            4 × I2C interfaces (SMBus/PMBus)
-  U[S]ARTs:       4 USARTs, 4 UARTs (27 Mbit/s, ISO7816 interface, LIN, IrDA,
+  U[S]ARTs:       3 USARTs, 2 UARTs (27 Mbit/s, ISO7816 interface, LIN, IrDA,
                   modem control)
   SPI/12Ss:       6/3 (simplex) (up to 50 Mbit/s), 3 with muxed simplex I2S
                   for audio class accuracy via internal audio PLL or external
@@ -105,119 +92,22 @@ NUCLEO-F746ZG Features:
   SAIs:           2 Serial Audio Interfaces
   CAN:            2 X CAN interface
   SDMMC interface
-  SPDIFRX interface
   USB:            USB 2.0 full-speed device/host/OTG controller with on-chip
                   PHY
-  10/100 Ethernet: MAC with dedicated DMA: supports IEEE 1588v2 hardware,
-                   MII/RMII
   Camera Interface: 8/14 Bit
   CRC calculation unit
   TRG:            True random number generator
   RTC
 
-See https://developer.mbed.org/platforms/ST-Nucleo-F746ZG  for additional
+See https://developer.mbed.org/platforms/ST-Nucleo-L496ZG  for additional
 information about this board.
-
-Nucleo F767ZI
-=============
-
-ST Nucleo F7467ZI board from ST Micro is supported.  See
-
-http://www.st.com/content/st_com/en/products/evaluation-tools/product-evaluation-tools/mcu-eval-tools/stm32-mcu-eval-tools/stm32-mcu-nucleo/nucleo-f767zi.html
-
-The Nucleo F767ZI order part number is NUCLEO-F767ZI. It is one member of
-the STM32 Nucleo-144 board family.
-
-NUCLEO-F767ZI Features:
-----------------------
-
-  Microprocessor: STM32F767ZIT6 Core: ARM 32-bit Cortex®-M7 CPU with DPFPU,
-                  L1-cache: 16KB data cache and 16KB instruction cache, up to
-                  216 MHz, MPU, and DSP instructions.
-  Memory:         2048 KB Flash 512KB of SRAM (including 128KB of data TCM RAM)
-                  + 16KB of instruction TCM RAM + 4KB of backup SRAM
-  ADC:            3×12-bit, 2.4 MSPS ADC: up to 24 channels and 7.2 MSPS in
-                  triple interleaved mode
-  DMA:            2 X 16-stream DMA controllers with FIFOs and burst support
-  Timers:         Up to 18 timers: up to thirteen 16-bit (1x 16-bit lowpower),
-                  two 32-bit timers, 2x watchdogs, SysTick
-  GPIO:           114 I/O ports with interrupt capability
-  LCD:            LCD-TFT Controllerwith (DMA2D), Parallel interface
-  I2C:            4 × I2C interfaces (SMBus/PMBus)
-  U[S]ARTs:       4 USARTs, 4 UARTs (27 Mbit/s, ISO7816 interface, LIN, IrDA,
-                  modem control)
-  SPI/12Ss:       6/3 (simplex) (up to 50 Mbit/s), 3 with muxed simplex I2S
-                  for audio class accuracy via internal audio PLL or external
-                  clock
-  QSPI:           Dual mode Quad-SPI
-  SAIs:           2 Serial Audio Interfaces
-  CAN:            3 X CAN interface
-  SDMMC interface
-  SPDIFRX interface
-  USB:            USB 2.0 full/High-speed device/host/OTG controller with on-chip
-                  PHY
-  10/100 Ethernet: MAC with dedicated DMA: supports IEEE 1588v2 hardware,
-                   MII/RMII
-  Camera Interface: 8/14 Bit
-  CRC calculation unit
-  TRG:            True random number generator
-  RTC             subsecond accuracy, hardware calendar
-
-As of this writting the NUCLEO-F767ZI is not available on developer.mbed.org
-However, See https://developer.mbed.org/platforms/ST-Nucleo-F746ZG  for additional
-useful information.
-
-Development Environment
-=======================
-
-  Either Linux or Cygwin on Windows can be used for the development environment.
-  The source has been built only using the GNU toolchain (see below).  Other
-  toolchains will likely cause problems.
-
-  All testing has been conducted using the GNU toolchain from ARM for Linux.
-  found here https://launchpad.net/gcc-arm-embedded/4.9/4.9-2015-q3-update/+download/gcc-arm-none-eabi-4_9-2015q3-20150921-linux.tar.bz2
-
-  If you change the default toolchain, then you may also have to modify the
-  PATH environment variable to include the path to the toolchain binaries.
-
-IDEs
-====
-
-  NuttX is built using command-line make.  It can be used with an IDE, but some
-  effort will be required to create the project.
-
-  Makefile Build
-  --------------
-  Under Eclipse, it is pretty easy to set up an "empty makefile project" and
-  simply use the NuttX makefile to build the system.  That is almost for free
-  under Linux.  Under Windows, you will need to set up the "Cygwin GCC" empty
-  makefile project in order to work with Windows (Google for "Eclipse Cygwin" -
-  there is a lot of help on the internet).
-
-Basic configuration & build steps
-==================================
-
-  A GNU GCC-based toolchain is assumed.  The PATH environment variable should
-  be modified to point to the correct path to the Cortex-M7 GCC toolchain (if
-  different from the default in your PATH variable).
-
-   - Configures nuttx creating .config file in the nuttx directory.
-     $ cd tools && ./configure.sh nucleo-f746zg/nsh && cd ..
-   - Refreshes the .config file with the latest available configurations.
-     $ make oldconfig
-   - Select the features you want in the build.
-     $ make menuconfig
-   - Builds Nuttx with the features you selected.
-     $ make
 
 Hardware
 ========
+< Section needs updating >
 
-  GPIO - there are 144 I/O lines on the STM32F7xxZxT6 with various pins pined out
+  GPIO - there are 144 I/O lines on the STM32L4xxZx with various pins pined out
   on the Nucleo 144.
-
-  See https://developer.mbed.org/platforms/ST-Nucleo-F746ZG/ for slick graphic
-  pinouts.
 
   Keep in mind that:
    1) The I/O is 3.3 Volt not 5 Volt like on the Arduino products.
@@ -234,7 +124,7 @@ Hardware
   CONFIG_NUCLEO_CONSOLE_ARDUINO or CONFIG_NUCLEO_CONSOLE_MORPHO or
   CONFIG_NUCLEO_CONSOLE_VIRTUAL or CONFIG_NUCLEO_CONSOLE_NONE
 
-  The CONFIG_NUCLEO_CONSOLE_NONE makes no preset for the console. YOu shuld still visit
+  The CONFIG_NUCLEO_CONSOLE_NONE makes no preset for the console. You should still visit
   the U[S]ART selection and Device Drivers to disable any U[S]ART reamaing.
 
   The CONFIG_NUCLEO_CONSOLE_ARDUINO configurations assume that you are using a
@@ -263,7 +153,7 @@ Hardware
             SERIAL_RX         PD9
             SERIAL_TX         PD8
 
-  These signals are internalaly connected to the on board ST-Link
+  These signals are internally connected to the on board ST-Link
 
   Of course if your design  has used those pins you can choose a completely
   different U[S]ART to use as the console. In that Case, you will need to edit
@@ -328,6 +218,7 @@ Flashing RED - In the event of a fatal crash, all other LEDs will be
 
 Serial Consoles
 ===============
+< Section needs updating >
 
   USART6 (CONFIG_NUCLEO_CONSOLE_ARDUINO)
   ------
@@ -387,7 +278,7 @@ Serial Consoles
 
   Use make menuconfig to configure USART8 as the console:
 
-    CONFIG_STM32F7_UART8=y
+    CONFIG_STM32L4_UART8=y
     CONFIG_UART8_SERIALDRIVER=y
     CONFIG_UART8_SERIAL_CONSOLE=y
     CONFIG_UART8_RXBUFSIZE=256
@@ -442,44 +333,10 @@ SDIO
           DAT2   PC10 CN11-1
           CD     PC11 CN11-2
 
-SPI Test
-========
-
-  The builtin SPI test facility can be enabled with the following settings:
-
-    +CONFIG_STM32F7_SPI=y
-    +CONFIG_STM32F7_SPI1=y
-    +CONFIG_STM32F7_SPI2=y
-    +CONFIG_STM32F7_SPI3=y
-
-    +# CONFIG_STM32F7_SPI_INTERRUPTS is not set
-    +# CONFIG_STM32F7_SPI_DMA is not set
-     # CONFIG_STM32F7_CUSTOM_CLOCKCONFIG is not set
-
-    +CONFIG_NUCLEO_SPI_TEST=y
-    +CONFIG_NUCLEO_SPI_TEST_MESSAGE="Hello World"
-    +CONFIG_NUCLEO_SPI1_TEST=y
-    +CONFIG_NUCLEO_SPI1_TEST_FREQ=1000000
-    +CONFIG_NUCLEO_SPI1_TEST_BITS=8
-    +CONFIG_NUCLEO_SPI1_TEST_MODE3=y
-
-    +CONFIG_NUCLEO_SPI2_TEST=y
-    +CONFIG_NUCLEO_SPI2_TEST_FREQ=12000000
-    +CONFIG_NUCLEO_SPI2_TEST_BITS=8
-    +CONFIG_NUCLEO_SPI2_TEST_MODE3=y
-
-    +CONFIG_NUCLEO_SPI3_TEST=y
-    +CONFIG_NUCLEO_SPI3_TEST_FREQ=40000000
-    +CONFIG_NUCLEO_SPI3_TEST_BITS=8
-    +CONFIG_NUCLEO_SPI3_TEST_MODE3=y
-
-    +CONFIG_LIB_BOARDCTL=y
-    +CONFIG_NSH_ARCHINIT=y
-
 Configurations
 ==============
 
-f7xx-nsh:
+nsh:
 ----
   Configures the NuttShell (nsh) located at apps/examples/nsh for the
   Nucleo-144 boards.  The Configuration enables the serial interfaces
@@ -519,40 +376,3 @@ f7xx-nsh:
      device configured for UART8 (see instruction above under "Serial
      Consoles).
 
-f7xx-evalos:
--------
-  This configuration is designed to test the features of the board.
-    - Configures the NuttShell (nsh) located at apps/examples/nsh for the
-      Nucleo-144 boards. The console is available on serial interface USART3,
-      which is accessible over the USB ST-Link interface.
-    - Configures nsh with advanced features such as autocompletion.
-    - Configures the on-board LEDs to work with the 'leds' example app.
-    - Configures the 'helloxx' example app.
-
-  NOTES:
-
-  1. This configuration uses the mconf-based configuration tool.  To
-    change this configuration using that tool, you should:
-
-    a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-       see additional README.txt files in the NuttX tools repository.
-
-    b. If this is the intall configuration then Execute
-          'cd tools && ./configure.sh nucleo-144/evalos && cd ..'
-       in nuttx/ in order to start configuration process.
-       Caution: Doing this step more than once will overwrite .config with
-       the contents of the nucleo-144/evalos/defconfig file.
-
-    c. Execute 'make oldconfig' in nuttx/ in order to refresh the
-       configuration.
-
-    d. Execute 'make menuconfig' in nuttx/ in order to start the
-       reconfiguration process.
-
-    e. Save the .config file to reuse it in the future starting at step d.
-
-  2. By default, this configuration uses the ARM GNU toolchain
-    for Linux.  That can easily be reconfigured, of course.
-
-    CONFIG_HOST_LINUX=y                     : Builds under Linux
-    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y     : ARM GNU for Linux

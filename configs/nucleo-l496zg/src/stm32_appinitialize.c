@@ -49,6 +49,25 @@
 #include "nucleo-144.h"
 #include <nuttx/leds/userled.h>
 
+#include "stm32l4_i2c.h"
+
+/****************************************************************************
+ * Private Data
+ ***************************************************************************/
+
+#if defined(CONFIG_STM32L4_I2C1)
+struct i2c_master_s* i2c1;
+#endif
+#if defined(CONFIG_STM32L4_I2C2)
+struct i2c_master_s* i2c2;
+#endif
+#if defined(CONFIG_STM32L4_I2C3)
+struct i2c_master_s* i2c3;
+#endif
+#if defined(CONFIG_STM32L4_I2C4)
+struct i2c_master_s* i2c4;
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -113,12 +132,6 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#ifdef CONFIG_STM32F7_BBSRAM
-  /* Initialize battery-backed RAM */
-
-  (void)stm32_bbsram_int();
-#endif
-
 #if defined(CONFIG_FAT_DMAMEMORY)
   if (stm32_dma_alloc_init() < 0)
     {
@@ -141,13 +154,46 @@ int board_app_initialize(uintptr_t arg)
   /* Configure SDIO */
   /* Initialize the SDIO block driver */
 
-  ret = stm32_sdio_initialize();
+  ret = stm32l4_sdio_initialize();
   if (ret != OK)
     {
       ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
       return ret;
     }
 #endif
+
+#if defined(CONFIG_I2C)
+  /* Configure I2C */
+
+  /* REVISIT: this is ugly! */
+
+#if defined(CONFIG_STM32L4_I2C1)
+  i2c1 = stm32l4_i2cbus_initialize(1);
+#endif
+#if defined(CONFIG_STM32L4_I2C2)
+  i2c2 = stm32l4_i2cbus_initialize(2);
+#endif
+#if defined(CONFIG_STM32L4_I2C3)
+  i2c3 = stm32l4_i2cbus_initialize(3);
+#endif
+#if defined(CONFIG_STM32L4_I2C4)
+  i2c4 = stm32l4_i2cbus_initialize(4);
+#endif
+#ifdef CONFIG_I2C_DRIVER
+#if defined(CONFIG_STM32L4_I2C1)
+  i2c_register(i2c1, 1);
+#endif
+#if defined(CONFIG_STM32L4_I2C2)
+  i2c_register(i2c2, 2);
+#endif
+#if defined(CONFIG_STM32L4_I2C3)
+  i2c_register(i2c3, 3);
+#endif
+#if defined(CONFIG_STM32L4_I2C4)
+  i2c_register(i2c4, 4);
+#endif
+#endif
+#endif /* CONFIG_I2C */
 
   UNUSED(ret);
   return OK;
