@@ -219,8 +219,8 @@ struct ieee802154_privmac_s
 
   uint32_t batt_life_ext      : 1;  /* Is BLE enabled */
   uint32_t gts_permit         : 1;  /* Is PAN Coord. accepting GTS reqs. */
-  uint32_t promiscuous_mode   : 1;  /* Is promiscuous mode on? */
-  uint32_t ranging_supported  : 1;  /* Does MAC sublayer support ranging */
+  uint32_t promisc_mode       : 1;  /* Is promiscuous mode on? */
+  uint32_t rng_support        : 1;  /* Does MAC sublayer support ranging */
   uint32_t rx_when_idle       : 1;  /* Recvr. on during idle periods */
   uint32_t sec_enabled        : 1;  /* Does MAC sublayer have security en. */
 
@@ -415,7 +415,59 @@ static FAR struct mac802154_trans_s *
 
 static int mac802154_defaultmib(FAR struct ieee802154_privmac_s *priv)
 {
-  /* TODO: Set all MAC fields to default values */
+  priv->is_assoc = false;       /* Not associated with a PAN */
+  priv->assoc_permit = false;   /* Device (if coord) not accepting association */
+  priv->auto_req = true;        /* Auto send data req if addr. in beacon */
+  priv->batt_life_ext = false;  /* BLE disabled */
+  priv->beacon_payload_len = 0; /* Beacon payload NULL */
+  priv->beacon_order = 15;      /* Non-beacon enabled network */
+  priv->superframe_order = 15;  /* Length of active portion of outgoing SF */
+  priv->beacon_tx_time = 0;     /* Device never sent a beacon */
+  priv->bsn = 
+  priv->dsn = 
+  priv->gts_permit = true;      /* PAN Coord accepting GTS requests */
+  priv->min_be = 3;             /* Min value of backoff exponent (BE) */
+  priv->max_be = 5;             /* Max value of backoff exponent (BE) */
+  priv->max_csma_backoffs = 4;  /* Max # of backoffs before failure */
+  priv->max_retries = 3;        /* Max # of retries allowed after failure */
+  priv->promisc_mode = false;   /* Device not in promiscuous mode */
+  priv->rng_support = false;    /* Ranging not yet supported */
+  priv->resp_wait_time = 32;    /* 32 SF durations */
+  priv->rx_on_idle = false;     /* Don't receive while idle */
+  priv->sec_enabled = false;    /* Security disabled by default */
+  priv->tx_total_dur = 0;       /* 0 transmit duration */
+
+  priv->trans_persist_time = 0x01F4;
+
+
+  /* Reset the Coordinator address */
+
+  priv->coord_addr.mode = IEEE802154_ADDRMODE_NONE;
+  priv->coord_addr.saddr = IEEE802154_SADDR_UNSPEC;
+  memcpy(&priv->coord_addr.eaddr[0], IEEE802154_EADDR_UNSPEC, 8);
+
+  /* Reset the device's address */
+
+  priv->addr.mode = IEEE802154_ADDRMODE_NONE;
+  priv->addr.pan_id = IEEE802154_PAN_UNSPEC;
+  priv->addr.saddr = IEEE802154_SADDR_UNSPEC;
+  memcpy(&priv->addr.eaddr[0], IEEE802154_EADDR_UNSPEC, 8);
+
+
+  /* These attributes are effected and determined based on the PHY.  Need to
+   * figure out how to "share" attributes between the radio driver and this
+   * MAC layer
+   *
+   *    macAckWaitDuration
+   *    macBattLifeExtPeriods
+   *    macMaxFrameTotalWaitTime
+   *    macLIFSPeriod
+   *    macSIFSPeriod
+   *    macSyncSymbolOffset
+   *    macTimestampSupported
+   *    macTxControlActiveDuration
+   *    macTxControlPauseDuration
+   */
 
   return OK;
 }
