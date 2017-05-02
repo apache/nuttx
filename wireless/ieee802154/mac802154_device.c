@@ -446,7 +446,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
       wlerr("ERROR: TX meta-data is invalid");
       return ret;
     }
-    
+
   iob->io_offset = ret;
   iob->io_len = iob->io_offset;
 

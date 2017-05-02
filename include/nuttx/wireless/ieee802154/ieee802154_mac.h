@@ -68,7 +68,7 @@
 
 /* IEEE 802.15.4 MAC Character Driver IOCTL Commands ************************/
 
-/* The IEEE 802.15.4 standard specifies a MLME Service Access Point (SAP) 
+/* The IEEE 802.15.4 standard specifies a MLME Service Access Point (SAP)
  * including a series of primitives that are used as an interface between
  * the MLME and the next highest layer.  There are 4 types of primitives:
  *
@@ -76,7 +76,7 @@
  *   - Indication
  *   - Response
  *   - Confirm
- * 
+ *
  * Of these, Request and Response primitives are sent from the next highest layer
  * to the MLME.  Indication and Confirm primitives are used to notify the next
  * highest layer of changes or actions that have taken place.
@@ -130,7 +130,7 @@
 #define IEEE802154_SADDR_BCAST  (uint16_t)0xFFFE
 #define IEEE802154_EADDR_UNSPEC (uint8_t*)"\xff\xff\xff\xff\xff\xff\xff\xff"
 
-/* Frame control field masks, 2 bytes 
+/* Frame control field masks, 2 bytes
  * Seee IEEE 802.15.4/2011 5.2.1.1 page 57
  */
 
@@ -178,11 +178,11 @@
 
 #define IEEE802154_MAX_MPDU_UNSEC_OVERHEAD  \
         (IEEE802154_MAX_UNSEC_MHR_OVERHEAD + IEEE802154_MFR_LENGTH)
- 
+
 
 #define IEEE802154_MAX_SAFE_MAC_PAYLOAD_SIZE \
         (IEEE802154_MAX_PHY_PACKET_SIZE - IEEE802154_MAX_MPDU_UNSEC_OVERHEAD)
-  
+
 #define IEEE802154_MAX_MAC_PAYLOAD_SIZE \
         (IEEE802154_MAX_PHY_PACKET_SIZE - IEEE802154_MIN_MPDU_OVERHEAD)
 
@@ -346,7 +346,7 @@ struct ieee802154_addr_s
 {
   /* Address mode. Short or Extended */
 
-  enum ieee802154_addr_mode_e mode;  
+  enum ieee802154_addr_mode_e mode;
 
   uint16_t panid;     /* PAN identifier, can be IEEE802154_PAN_UNSPEC */
   uint16_t saddr;     /* short address */
@@ -444,7 +444,7 @@ struct ieee802154_pend_addr_s
     {
       uint8_t num_short_addr  : 3;  /* Number of short addresses pending */
       uint8_t reserved_3      : 1;  /* Reserved bit */
-      uint8_t num_ext_addr    : 3;  /* Number of extended addresses pending */       
+      uint8_t num_ext_addr    : 3;  /* Number of extended addresses pending */
       uint8_t reserved_7      : 1;  /* Reserved bit */
     } pa_addr;
   } u;
@@ -480,9 +480,9 @@ struct ieee802154_frame_meta_s
   struct ieee802154_addr_s dest_addr;         /* Destination Address */
 
   uint8_t msdu_handle;    /* Handle assoc. with MSDU */
-  
-  /* Number of bytes contained in the MAC Service Data Unit (MSDU) 
-   * to be transmitted by the MAC sublayer enitity 
+
+  /* Number of bytes contained in the MAC Service Data Unit (MSDU)
+   * to be transmitted by the MAC sublayer enitity
    * Note: This could be a uint8_t but if anyone ever wants to use
    * non-standard frame lengths, they may want a length larger than
    * a uint8_t.
@@ -492,7 +492,7 @@ struct ieee802154_frame_meta_s
 
   struct
   {
-    uint8_t ack_tx      : 1;  /* Acknowledge TX? */               
+    uint8_t ack_tx      : 1;  /* Acknowledge TX? */
     uint8_t gts_tx      : 1;  /* 1=GTS used for TX, 0=CAP used for TX */
     uint8_t indirect_tx : 1;  /* Should indirect transmission be used? */
   } msdu_flags;
@@ -513,7 +513,7 @@ struct ieee802154_frame_meta_s
    *    0, 16, 64, 1024, 4096
    */
 
-  uint16_t uwb_presym_rep;  
+  uint16_t uwb_presym_rep;
 
   /* The UWB Data Rate to be used for the transmission */
 
@@ -526,11 +526,11 @@ struct ieee802154_frame_meta_s
 /* Primitive Semantics *******************************************************/
 
 /*****************************************************************************
- * Primitive: MCPS-DATA.request 
+ * Primitive: MCPS-DATA.request
  *
  * Description:
- *    Requests the transfer of data to another device.  
- * 
+ *    Requests the transfer of data to another device.
+ *
  *****************************************************************************/
 
 struct ieee802154_data_req_s
@@ -540,11 +540,11 @@ struct ieee802154_data_req_s
 };
 
 /*****************************************************************************
- * Primitive: MCPS-DATA.confirm 
+ * Primitive: MCPS-DATA.confirm
  *
  * Description:
  *    Reports the results of a request to transfer data to another device.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_data_conf_s
@@ -553,11 +553,11 @@ struct ieee802154_data_conf_s
 };
 
 /*****************************************************************************
- * Primitive: MCPS-DATA.indication 
+ * Primitive: MCPS-DATA.indication
  *
  * Description:
  *    Indicates the reception of data from another device.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_data_ind_s
@@ -577,13 +577,13 @@ struct ieee802154_data_ind_s
    * the beginning of the ranging exchange
    */
 
-  uint32_t rng_counter_start; 
+  uint32_t rng_counter_start;
 
   /* A count of the time units corresponding to an RMARKER at the antenna at
    * end of the ranging exchange
    */
 
-  uint32_t rng_counter_stop; 
+  uint32_t rng_counter_stop;
 
   /* A count of the time units in a message exchange over which the tracking
    * offset was measured
@@ -597,18 +597,18 @@ struct ieee802154_data_ind_s
 
   uint32_t rng_offset;
 
-  /* The Figure of Merit (FoM) characterizing the ranging measurement */ 
+  /* The Figure of Merit (FoM) characterizing the ranging measurement */
 
-  uint8_t rng_fom; 
+  uint8_t rng_fom;
 #endif
 };
 
 /*****************************************************************************
- * Primitive: MCPS-PURGE.request 
+ * Primitive: MCPS-PURGE.request
  *
  * Description:
  *    Allows the next higher layer to purge an MSDU from the transaction queue.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_purge_req_s
@@ -617,12 +617,12 @@ struct ieee802154_purge_req_s
 };
 
 /*****************************************************************************
- * Primitive: MCPS-PURGE.confirm 
+ * Primitive: MCPS-PURGE.confirm
  *
  * Description:
  *    Allows the MAC sublayer to notify the next higher layer of the success of
  *    its request to purge an MSDU from the transaction queue.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_purge_conf_s
@@ -632,11 +632,11 @@ struct ieee802154_purge_conf_s
 };
 
 /*****************************************************************************
- * Primitive: MLME-ASSOCIATE.request 
+ * Primitive: MLME-ASSOCIATE.request
  *
  * Description:
  *    Used by a device to request an association with a coordinator.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_assoc_req_s
@@ -660,11 +660,11 @@ struct ieee802154_assoc_req_s
 };
 
 /*****************************************************************************
- * Primitive: MLME-ASSOCIATE.indication 
+ * Primitive: MLME-ASSOCIATE.indication
  *
  * Description:
  *    Used to indicate the reception of an association request command.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_assoc_ind_s
@@ -685,11 +685,11 @@ struct ieee802154_assoc_ind_s
 };
 
 /*****************************************************************************
- * Primitive: MLME-ASSOCIATE.response 
+ * Primitive: MLME-ASSOCIATE.response
  *
  * Description:
  *    Used to initiate a response to an MLME-ASSOCIATE.indication primitive.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_assoc_resp_s
@@ -700,7 +700,7 @@ struct ieee802154_assoc_resp_s
 
   /* Status of association attempt */
 
-  enum ieee802154_status_e status; 
+  enum ieee802154_status_e status;
 
 #ifdef CONFIG_IEEE802154_SECURITY
   /* Security information if enabled */
@@ -710,12 +710,12 @@ struct ieee802154_assoc_resp_s
 };
 
 /*****************************************************************************
- * Primitive: MLME-ASSOCIATE.confirm 
+ * Primitive: MLME-ASSOCIATE.confirm
  *
  * Description:
  *    Used to inform the next higher layer of the initiating device whether its
  *    request to associate was successful or unsuccessful.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_assoc_conf_s
@@ -739,13 +739,13 @@ struct ieee802154_assoc_conf_s
 };
 
 /*****************************************************************************
- * Primitive: MLME-DISASSOCIATE.request 
+ * Primitive: MLME-DISASSOCIATE.request
  *
  * Description:
  *    Used by an associated device to notify the coordinator of its intent to
  *    leave the PAN. It is also used by the coordinator to instruct an
  *    associated device to leave the PAN.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_disassoc_req_s
@@ -768,11 +768,11 @@ struct ieee802154_disassoc_req_s
 };
 
 /*****************************************************************************
- * Primitive: MLME-DISASSOCIATE.indication 
+ * Primitive: MLME-DISASSOCIATE.indication
  *
  * Description:
  *    Used to indicate the reception of a disassociation notification command.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_disassoc_ind_s
@@ -793,11 +793,11 @@ struct ieee802154_disassoc_ind_s
 };
 
 /*****************************************************************************
- * Primitive: MLME-DISASSOCIATE.confirm 
+ * Primitive: MLME-DISASSOCIATE.confirm
  *
  * Description:
  *    Reports the results of an MLME-DISASSOCIATE.request primitive.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_disassoc_conf_s
@@ -812,7 +812,7 @@ struct ieee802154_disassoc_conf_s
 };
 
 /*****************************************************************************
- * Primitive: MLME-BEACONNOTIFY.indication 
+ * Primitive: MLME-BEACONNOTIFY.indication
  *
  * Description:
  *    Used to send parameters contained within a beacon frame received by the
@@ -820,7 +820,7 @@ struct ieee802154_disassoc_conf_s
  *    FALSE or when the beacon frame contains one or more octets of payload. The
  *    primitive also sends a measure of the LQI and the time the beacon frame
  *    was received.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_beaconnotify_ind_s
@@ -837,7 +837,7 @@ struct ieee802154_beaconnotify_ind_s
 
   uint8_t sdu_length; /* Number of octets contained in the beacon
                        * payload of the received beacond frame */
-      
+
   /* Beacon payload */
 
   uint8_t sdu[IEEE802154_MAX_BEACON_PAYLOAD_LENGTH];
@@ -848,11 +848,11 @@ struct ieee802154_beaconnotify_ind_s
   - IEEE802154_MAX_BEACON_PAYLOAD_LENGTH + (n))
 
 /*****************************************************************************
- * Primitive: MLME-COMM-STATUS.indication 
+ * Primitive: MLME-COMM-STATUS.indication
  *
  * Description:
  *    Allows the MLME to indicate a communications status.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_commstatus_ind_s
@@ -869,11 +869,11 @@ struct ieee802154_commstatus_ind_s
 };
 
 /*****************************************************************************
- * Primitive: MLME-GET.request 
+ * Primitive: MLME-GET.request
  *
  * Description:
  *    Requests information about a given PIB attribute.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_get_req_s
@@ -882,11 +882,11 @@ struct ieee802154_get_req_s
 };
 
 /*****************************************************************************
- * Primitive: MLME-GET.confirm 
+ * Primitive: MLME-GET.confirm
  *
  * Description:
  *    Reports the results of an information request from the PIB.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_get_conf_s
@@ -903,7 +903,7 @@ struct ieee802154_get_conf_s
  *    Allows a device to send a request to the PAN coordinator to allocate a new
  *    GTS or to deallocate an existing GTS. This primitive is also used by the
  *    PAN coordinator to initiate a GTS deallocation.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_gts_req_s
@@ -923,7 +923,7 @@ struct ieee802154_gts_req_s
  * Description:
  *    Reports the results of a request to allocate a new GTS or to deallocate an
  *    existing GTS.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_gts_conf_s
@@ -938,7 +938,7 @@ struct ieee802154_gts_conf_s
  * Description:
  *    Indicates that a GTS has been allocated or that a previously allocated
  *    GTS has been deallocated.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_gts_ind_s
@@ -959,7 +959,7 @@ struct ieee802154_gts_ind_s
  * Description:
  *    Generated by the MLME of a coordinator and issued to its next higher layer
  *    on receipt of an orphan notification command.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_orphan_ind_s
@@ -979,7 +979,7 @@ struct ieee802154_orphan_ind_s
  * Description:
  *    Allows the next higher layer of a coordinator to respond to the
  *    MLME-ORPHAN.indication primitive.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_orphan_resp_s
@@ -999,7 +999,7 @@ struct ieee802154_orphan_resp_s
  * Description:
  *    Used by the next higher layer to request that the MLME performs a reset
  *    operation.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_reset_req_s
@@ -1012,7 +1012,7 @@ struct ieee802154_reset_req_s
  *
  * Description:
  *    Reports the results of the reset operation.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_reset_conf_s
@@ -1026,7 +1026,7 @@ struct ieee802154_reset_conf_s
  * Description:
  *    Allows the next higher layer to request that the receiver is either
  *    enabled for a finite period of time or disabled.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_rxenable_req_s
@@ -1035,7 +1035,7 @@ struct ieee802154_rxenable_req_s
    * receiver is to be enabled or disabled.
    */
 
-  uint32_t rxon_time;        
+  uint32_t rxon_time;
 
   /* Number of symbols for which the receiver is to be enabled */
 
@@ -1051,7 +1051,7 @@ struct ieee802154_rxenable_req_s
  *
  * Description:
  *    Reports the results of the attempt to enable or disable the receiver.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_rxenable_conf_s
@@ -1064,7 +1064,7 @@ struct ieee802154_rxenable_conf_s
  *
  * Description:
  *    Used to initiate a channel scan over a given list of channels.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_scan_req_s
@@ -1090,7 +1090,7 @@ struct ieee802154_scan_req_s
  *
  * Description:
  *    Reports the result of the channel scan request.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_scan_conf_s
@@ -1108,7 +1108,7 @@ struct ieee802154_scan_conf_s
  *
  * Description:
  *    Attempts to write the given value to the indicated PIB attribute.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_set_req_s
@@ -1122,7 +1122,7 @@ struct ieee802154_set_req_s
  *
  * Description:
  *    Reports the results of an attempt to write a value to a PIB attribute.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_set_conf_s
@@ -1139,7 +1139,7 @@ struct ieee802154_set_conf_s
  *    superframe configuration. This primitive is also used by a device already
  *    associated with an existing PAN to begin using a new superframe
  *    configuration.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_start_req_s
@@ -1148,7 +1148,7 @@ struct ieee802154_start_req_s
   uint8_t ch_num;
   uint8_t ch_page;
 
-  uint32_t start_time   : 24; 
+  uint32_t start_time   : 24;
   uint32_t beacon_order : 8;
 
   uint8_t sf_order;
@@ -1171,7 +1171,7 @@ struct ieee802154_start_req_s
  * Description:
  *    Reports the results of the attempt to start using a new superframe
  *    configuration.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_start_conf_s
@@ -1185,7 +1185,7 @@ struct ieee802154_start_conf_s
  * Description:
  *    Requests to synchronize with the coordinator by acquiring and, if
  *    specified, tracking its beacons.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_sync_req_s
@@ -1200,7 +1200,7 @@ struct ieee802154_sync_req_s
  *
  * Description:
  *    Indicates the loss of synchronization with a coordinator.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_syncloss_ind_s
@@ -1221,8 +1221,8 @@ struct ieee802154_syncloss_ind_s
  * Primitive: MLME-POLL.request
  *
  * Description:
- *    Prompts the device to request data from the coordinator. 
- * 
+ *    Prompts the device to request data from the coordinator.
+ *
  *****************************************************************************/
 
 struct ieee802154_poll_req_s
@@ -1241,7 +1241,7 @@ struct ieee802154_poll_req_s
  *
  * Description:
  *    Reports the results of a request to poll the coordinator for data.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_poll_conf_s

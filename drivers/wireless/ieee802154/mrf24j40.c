@@ -114,7 +114,7 @@ struct mrf24j40_txdesc_s
 struct mrf24j40_radio_s
 {
   struct ieee802154_radio_s radio;  /* The public device instance */
-  FAR struct ieee802154_radiocb_s *radiocb; /* Registered callbacks */      
+  FAR struct ieee802154_radiocb_s *radiocb; /* Registered callbacks */
 
   /* Low-level MCU-specific support */
 
@@ -310,7 +310,7 @@ static int mrf24j40_txnotify_csma(FAR struct ieee802154_radio_s *radio)
  *   2. When new TX data is available (mrf24j40_txnotify_csma), and
  *   3. After a TX timeout to restart the sending process
  *      (mrf24j40_txtimeout_csma).
- *  
+ *
  * Parameters:
  *   radio  - Reference to the radio driver state structure
  *
@@ -329,7 +329,7 @@ static void mrf24j40_dopoll_csma(FAR void *arg)
   /* Get exclusive access to the driver */
 
   while (sem_wait(&dev->exclsem) != 0) { }
-  
+
   /* If this a CSMA transaction and we have room in the CSMA fifo */
 
   if (!dev->csma_desc.busy)
@@ -401,7 +401,7 @@ static int mrf24j40_txnotify_gts(FAR struct ieee802154_radio_s *radio)
  *   2. When new TX data is available (mrf24j40_txnotify_gts), and
  *   3. After a TX timeout to restart the sending process
  *      (mrf24j40_txtimeout_gts).
- *  
+ *
  * Parameters:
  *   arg  - Reference to the radio driver state structure
  *
@@ -440,7 +440,7 @@ static void mrf24j40_dopoll_gts(FAR void *arg)
             }
         }
     }
-  
+
   sem_post(&dev->exclsem);
 }
 
@@ -754,7 +754,7 @@ static int mrf24j40_getchannel(FAR struct mrf24j40_radio_s *dev,
                                FAR uint8_t *chan)
 {
   *chan = dev->channel;
-  
+
   return OK;
 }
 
@@ -1369,7 +1369,7 @@ static int mrf24j40_csma_setup(FAR struct mrf24j40_radio_s *dev,
  * Name: mrf24j40_gts_setup
  *
  * Description:
- *   Setup a GTS transaction in one of the GTS FIFOs 
+ *   Setup a GTS transaction in one of the GTS FIFOs
  *
  ****************************************************************************/
 
@@ -1435,7 +1435,7 @@ static int mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
     {
       mrf24j40_setreg(dev->spi, fifo_addr++, frame->io_data[ret]);
     }
-  
+
   return ret;
 }
 
@@ -1764,7 +1764,7 @@ FAR struct ieee802154_radio_s *mrf24j40_init(FAR struct spi_dev_s *spi,
     {
       return NULL;
     }
-  
+
   /* Attach irq */
 
   if (lower->attach(lower, mrf24j40_interrupt, dev) != OK)

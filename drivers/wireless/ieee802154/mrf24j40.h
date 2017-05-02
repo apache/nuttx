@@ -167,10 +167,10 @@
 
 /* RXMCR bits */
 
-#define MRF24J40_RXMCR_PROMI       (1 << 0) /* Enable promisc mode (rx all valid packets) */ 
-#define MRF24J40_RXMCR_ERRPKT      0x02 /* Do not check CRC */ 
+#define MRF24J40_RXMCR_PROMI       (1 << 0) /* Enable promisc mode (rx all valid packets) */
+#define MRF24J40_RXMCR_ERRPKT      0x02 /* Do not check CRC */
 #define MRF24J40_RXMCR_COORD       0x04 /* Enable coordinator mode     ??? DIFFERENCE ??? - not used in datasheet! */
-#define MRF24J40_RXMCR_PANCOORD    0x08 /* Enable PAN coordinator mode ??? DIFFERENCE ??? */ 
+#define MRF24J40_RXMCR_PANCOORD    0x08 /* Enable PAN coordinator mode ??? DIFFERENCE ??? */
 #define MRF24J40_RXMCR_NOACKRSP    0x20 /* Enable auto ACK when a packet is rxed */
 
 /* TXMCR bits */

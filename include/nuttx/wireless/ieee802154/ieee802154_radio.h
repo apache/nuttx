@@ -162,18 +162,18 @@ struct ieee802154_netradio_s
  * identical members but with a different name. */
 
 #ifdef CONFIG_IEEE802154_RANGING
-#define IEEE802154_TXDESC_FIELDS \ 
+#define IEEE802154_TXDESC_FIELDS \
   uint8_t handle; \
   uint32_t timestamp; \
   uint8_t status;
 #else
-#define IEEE802154_TXDESC_FIELDS \ 
+#define IEEE802154_TXDESC_FIELDS \
   uint8_t handle; \
   uint32_t timestamp; \
   uint8_t status;
   bool rng_rcvd; \
-  uint32_t rng_counter_start; \ 
-  uint32_t rng_counter_stop; \ 
+  uint32_t rng_counter_start; \
+  uint32_t rng_counter_stop; \
   uint32_t rng_tracking_interval; \
   uint32_t rng_offset;\
   uint8_t rng_fom;

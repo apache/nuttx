@@ -349,13 +349,13 @@ static void mac802154_push_csma(FAR struct ieee802154_privmac_s *priv,
   trans->flink = NULL;
 
   /* If the tail is not empty, make the transaction pointed to by the tail,
-   * point to the new transaction */ 
-  
+   * point to the new transaction */
+
   if (priv->csma_tail != NULL)
     {
       priv->csma_tail->flink = trans;
     }
-  
+
   /* Point the tail at the new transaction */
 
   priv->csma_tail = trans;
@@ -377,7 +377,7 @@ static void mac802154_push_csma(FAR struct ieee802154_privmac_s *priv,
  *
  ****************************************************************************/
 
-static FAR struct mac802154_trans_s * 
+static FAR struct mac802154_trans_s *
   mac802154_pop_csma(FAR struct ieee802154_privmac_s *priv)
 {
   FAR struct mac802154_trans_s *trans;
@@ -593,10 +593,10 @@ static void mac802154_txdone(FAR const struct ieee802154_radiocb_s *radiocb,
 
 static void mac802154_txdone_worker(FAR void *arg)
 {
-  FAR struct ieee802154_privmac_s *priv = 
+  FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)arg;
   int i = 0;
-  
+
   /* Get exclusive access to the driver structure.  We don't care about any
    * signals so if we see one, just go back to trying to get access again.
    */
@@ -732,7 +732,7 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
     {
       return NULL;
     }
- 
+
   /* Allow exclusive access to the privmac struct */
 
   sem_init(&mac->exclsem, 0, 1);
@@ -843,7 +843,7 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-int mac802154_get_mhrlen(MACHANDLE mac, 
+int mac802154_get_mhrlen(MACHANDLE mac,
                          FAR struct ieee802154_frame_meta_s *meta)
 {
   FAR struct ieee802154_privmac_s *priv =
@@ -854,11 +854,11 @@ int mac802154_get_mhrlen(MACHANDLE mac,
    * to NONE */
 
   if (meta->dest_addr.mode == IEEE802154_ADDRMODE_NONE &&
-      meta->src_addr_mode == IEEE802154_ADDRMODE_NONE)  
+      meta->src_addr_mode == IEEE802154_ADDRMODE_NONE)
     {
       return -EINVAL;
     }
-  
+
   /* The source address can only be set to NONE if the device is the PAN coord */
 
   if (meta->src_addr_mode == IEEE802154_ADDRMODE_NONE && !priv->is_coord)
@@ -893,16 +893,16 @@ int mac802154_get_mhrlen(MACHANDLE mac,
           return ret;
         }
     }
-  
+
   /* If we are here, PAN ID compression is off, so include the dest and source
-   * PAN ID if the respective address is included 
+   * PAN ID if the respective address is included
    */
 
   if (meta->src_addr_mode != IEEE802154_ADDRMODE_NONE)
     {
       ret += 2; /* 2 bytes for source PAN ID */
     }
-  
+
   if (meta->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
     {
       ret += 2; /* 2 bytes for destination PAN ID */
@@ -931,7 +931,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
   uint16_t *frame_ctrl;
   uint8_t mhr_len = 3; /* Start assuming frame control and seq. num */
   int ret;
-  
+
   /* Check the required frame size */
 
   if (req->frame->io_len > IEEE802154_MAX_PHY_PACKET_SIZE)
@@ -964,11 +964,11 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
    * is required, the AR field will be set appropriately, as described in
    * 5.1.6.4 [1] pg. 118.
    */
-                         
+
   *frame_ctrl |= (meta->msdu_flags.ack_tx << IEEE802154_FRAMECTRL_SHIFT_ACKREQ);
 
   /* If the destination address is present, copy the PAN ID and one of the
-   * addresses, depending on mode, into the MHR. 
+   * addresses, depending on mode, into the MHR.
    */
 
   if (meta->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
