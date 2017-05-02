@@ -187,7 +187,7 @@ struct ieee802154_privmac_s
 
   /* Contents of beacon payload */
 
-  uint8_t beacon_payload[IEEE802154_MAX_BEACON_PAYLOAD_LENGTH];
+  uint8_t beacon_payload[IEEE802154_MAX_BEACON_PAYLOAD_LEN];
   uint8_t beacon_payload_len;       /* Length of beacon payload */
 
   uint8_t batt_life_ext_periods;    /* # of backoff periods during which rx is
@@ -423,8 +423,9 @@ static int mac802154_defaultmib(FAR struct ieee802154_privmac_s *priv)
   priv->beacon_order = 15;      /* Non-beacon enabled network */
   priv->superframe_order = 15;  /* Length of active portion of outgoing SF */
   priv->beacon_tx_time = 0;     /* Device never sent a beacon */
-  priv->bsn = 
-  priv->dsn = 
+#warning Set BSN and DSN to random values!
+  priv->bsn = 0;
+  priv->dsn = 0;
   priv->gts_permit = true;      /* PAN Coord accepting GTS requests */
   priv->min_be = 3;             /* Min value of backoff exponent (BE) */
   priv->max_be = 5;             /* Max value of backoff exponent (BE) */
@@ -433,7 +434,7 @@ static int mac802154_defaultmib(FAR struct ieee802154_privmac_s *priv)
   priv->promisc_mode = false;   /* Device not in promiscuous mode */
   priv->rng_support = false;    /* Ranging not yet supported */
   priv->resp_wait_time = 32;    /* 32 SF durations */
-  priv->rx_on_idle = false;     /* Don't receive while idle */
+  priv->rx_when_idle = false;     /* Don't receive while idle */
   priv->sec_enabled = false;    /* Security disabled by default */
   priv->tx_total_dur = 0;       /* 0 transmit duration */
 
@@ -449,7 +450,7 @@ static int mac802154_defaultmib(FAR struct ieee802154_privmac_s *priv)
   /* Reset the device's address */
 
   priv->addr.mode = IEEE802154_ADDRMODE_NONE;
-  priv->addr.pan_id = IEEE802154_PAN_UNSPEC;
+  priv->addr.panid = IEEE802154_PAN_UNSPEC;
   priv->addr.saddr = IEEE802154_SADDR_UNSPEC;
   memcpy(&priv->addr.eaddr[0], IEEE802154_EADDR_UNSPEC, 8);
 
@@ -859,6 +860,9 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg)
     (FAR struct ieee802154_privmac_s *)mac;
   int ret = -EINVAL;
 
+  FAR union ieee802154_macarg_u *macarg =
+    (FAR union ieee802154_macarg_u *)((uintptr_t)arg);
+
   DEBUGASSERT(priv != NULL);
 
   /* Check for IOCTLs aimed at the IEEE802.15.4 MAC layer */
@@ -866,7 +870,75 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg)
   if (_MAC802154IOCVALID(cmd))
     {
       /* Handle the MAC IOCTL command */
-#warning Missing logic
+
+      switch (cmd)
+        {
+          case MAC802154IOC_MLME_ASSOC_REQUEST:
+            {
+              mac802154_req_associate(mac, &macarg->assocreq);
+            }
+            break;
+          case MAC802154IOC_MLME_ASSOC_RESPONSE:
+            {
+              mac802154_resp_associate(mac, &macarg->assocresp);
+            }
+            break;
+          case MAC802154IOC_MLME_DISASSOC_REQUEST:
+            {
+              mac802154_req_disassociate(mac, &macarg->disassocreq);
+            }
+            break;
+          case MAC802154IOC_MLME_GET_REQUEST:
+            {
+              mac802154_req_get(mac, &macarg->getreq);
+            }
+            break;
+          case MAC802154IOC_MLME_GTS_REQUEST:
+            {
+              mac802154_req_gts(mac, &macarg->gtsreq);
+            }
+            break;
+          case MAC802154IOC_MLME_ORPHAN_RESPONSE:
+            {
+              mac802154_resp_orphan(mac, &macarg->orphanresp);
+            }
+            break;
+          case MAC802154IOC_MLME_RESET_REQUEST:
+            {
+              mac802154_req_reset(mac, &macarg->resetreq);
+            }
+            break;
+          case MAC802154IOC_MLME_RXENABLE_REQUEST:
+            {
+              mac802154_req_rxenable(mac, &macarg->rxenabreq);
+            }
+            break;
+          case MAC802154IOC_MLME_SCAN_REQUEST:
+            {
+              mac802154_req_scan(mac, &macarg->scanreq);
+            }
+            break;
+          case MAC802154IOC_MLME_SET_REQUEST:
+            {
+              mac802154_req_set(mac, &macarg->setreq);
+            }
+            break;
+          case MAC802154IOC_MLME_START_REQUEST:
+            {
+              mac802154_req_start(mac, &macarg->startreq);
+            }
+            break;
+          case MAC802154IOC_MLME_SYNC_REQUEST:
+            {
+              mac802154_req_sync(mac, &macarg->syncreq);
+            }
+            break;
+          case MAC802154IOC_MLME_POLL_REQUEST:
+            {
+              mac802154_req_poll(mac, &macarg->pollreq);
+            }
+            break;
+        }
     }
 
   /* No, other IOCTLs must be aimed at the IEEE802.15.4 radio layer */
@@ -1444,7 +1516,7 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
 }
 
 /****************************************************************************
- * Name: mac802154_rsp_associate
+ * Name: mac802154_resp_associate
  *
  * Description:
  *   The MLME-ASSOCIATE.response primitive is used to initiate a response to
@@ -1452,8 +1524,8 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
  *
  ****************************************************************************/
 
-int mac802154_rsp_associate(MACHANDLE mac,
-                            FAR struct ieee802154_assoc_resp_s *resp)
+int mac802154_resp_associate(MACHANDLE mac,
+                             FAR struct ieee802154_assoc_resp_s *resp)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
@@ -1461,7 +1533,7 @@ int mac802154_rsp_associate(MACHANDLE mac,
 }
 
 /****************************************************************************
- * Name: mac802154_rsp_orphan
+ * Name: mac802154_resp_orphan
  *
  * Description:
  *   The MLME-ORPHAN.response primitive allows the next higher layer of a
@@ -1469,8 +1541,8 @@ int mac802154_rsp_associate(MACHANDLE mac,
  *
  ****************************************************************************/
 
-int mac802154_rsp_orphan(MACHANDLE mac,
-                         FAR struct ieee802154_orphan_resp_s *resp)
+int mac802154_resp_orphan(MACHANDLE mac,
+                          FAR struct ieee802154_orphan_resp_s *resp)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
