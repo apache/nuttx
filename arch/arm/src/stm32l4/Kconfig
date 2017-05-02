@@ -12,57 +12,218 @@ choice
 	default ARCH_CHIP_STM32L476RG
 	depends on ARCH_CHIP_STM32L4
 
+config ARCH_CHIP_STM32L432KB
+	bool "STM32L432KB"
+	select STM32L4_STM32L432XX
+	select STM32L4_FLASH_CONFIG_B
+	select STM32L4_IO_CONFIG_K
+	---help---
+		STM32 L4 Cortex M4, 128 Kb FLASH, 64 Kb SRAM
+
+config ARCH_CHIP_STM32L432KC
+	bool "STM32L432KC"
+	select STM32L4_STM32L432XX
+	select STM32L4_FLASH_CONFIG_C
+	select STM32L4_IO_CONFIG_K
+	---help---
+		STM32 L4 Cortex M4, 256 Kb FLASH, 64 Kb SRAM
+
+config ARCH_CHIP_STM32L442KC
+	bool "STM32L442KC"
+	select STM32L4_STM32L442XX
+	select STM32L4_FLASH_CONFIG_C
+	select STM32L4_IO_CONFIG_K
+	---help---
+		STM32 L4 Cortex M4, AES, 256 Kb FLASH, 64 Kb SRAM
+
+config ARCH_CHIP_STM32L451CC
+	bool "STM32L451CC"
+	select STM32L4_STM32L451XX
+	select STM32L4_FLASH_CONFIG_C
+	select STM32L4_IO_CONFIG_C
+	---help---
+		STM32 L4 Cortex M4, 256 Kb FLASH, 128+32 Kb SRAM
+
+config ARCH_CHIP_STM32L451CE
+	bool "STM32L451CE"
+	select STM32L4_STM32L451XX
+	select STM32L4_FLASH_CONFIG_E
+	select STM32L4_IO_CONFIG_C
+	---help---
+		STM32 L4 Cortex M4, 512 Kb FLASH, 128+32 Kb SRAM
+
+config ARCH_CHIP_STM32L451RC
+	bool "STM32L451RC"
+	select STM32L4_STM32L451XX
+	select STM32L4_FLASH_CONFIG_C
+	select STM32L4_IO_CONFIG_R
+	---help---
+		STM32 L4 Cortex M4, 256 Kb FLASH, 128+32 Kb SRAM
+
+config ARCH_CHIP_STM32L451RE
+	bool "STM32L451RE"
+	select STM32L4_STM32L451XX
+	select STM32L4_FLASH_CONFIG_E
+	select STM32L4_IO_CONFIG_R
+	---help---
+		STM32 L4 Cortex M4, 512 Kb FLASH, 128+32 Kb SRAM
+
+config ARCH_CHIP_STM32L451VC
+	bool "STM32L451VC"
+	select STM32L4_STM32L451XX
+	select STM32L4_FLASH_CONFIG_C
+	select STM32L4_IO_CONFIG_V
+	---help---
+		STM32 L4 Cortex M4, 256 Kb FLASH, 128+32 Kb SRAM
+
+config ARCH_CHIP_STM32L451VE
+	bool "STM32L451VE"
+	select STM32L4_STM32L451XX
+	select STM32L4_FLASH_CONFIG_E
+	select STM32L4_IO_CONFIG_V
+	---help---
+		STM32 L4 Cortex M4, 512 Kb FLASH, 128+32 Kb SRAM
+
+config ARCH_CHIP_STM32L452CC
+	bool "STM32L452CC"
+	select STM32L4_STM32L452XX
+	select STM32L4_FLASH_CONFIG_C
+	select STM32L4_IO_CONFIG_C
+	---help---
+		STM32 L4 Cortex M4, 256 Kb FLASH, 128+32 Kb SRAM
+
+config ARCH_CHIP_STM32L452CE
+	bool "STM32L452CE"
+	select STM32L4_STM32L452XX
+	select STM32L4_FLASH_CONFIG_E
+	select STM32L4_IO_CONFIG_C
+	---help---
+		STM32 L4 Cortex M4, 512 Kb FLASH, 128+32 Kb SRAM
+
+config ARCH_CHIP_STM32L452RC
+	bool "STM32L452RC"
+	select STM32L4_STM32L452XX
+	select STM32L4_FLASH_CONFIG_C
+	select STM32L4_IO_CONFIG_R
+	---help---
+		STM32 L4 Cortex M4, 256 Kb FLASH, 128+32 Kb SRAM
+
+config ARCH_CHIP_STM32L452RE
+	bool "STM32L452RE"
+	select STM32L4_STM32L452XX
+	select STM32L4_FLASH_CONFIG_E
+	select STM32L4_IO_CONFIG_R
+	---help---
+		STM32 L4 Cortex M4, 512 Kb FLASH, 128+32 Kb SRAM
+
+config ARCH_CHIP_STM32L452VC
+	bool "STM32L452VC"
+	select STM32L4_STM32L452XX
+	select STM32L4_FLASH_CONFIG_C
+	select STM32L4_IO_CONFIG_V
+	---help---
+		STM32 L4 Cortex M4, 256 Kb FLASH, 128+32 Kb SRAM
+
+config ARCH_CHIP_STM32L452VE
+	bool "STM32L452VE"
+	select STM32L4_STM32L452XX
+	select STM32L4_FLASH_CONFIG_E
+	select STM32L4_IO_CONFIG_V
+	---help---
+		STM32 L4 Cortex M4, 512 Kb FLASH, 128+32 Kb SRAM
+
+config ARCH_CHIP_STM32L462CE
+	bool "STM32L462CE"
+	select STM32L4_STM32L462XX
+	select STM32L4_FLASH_CONFIG_E
+	select STM32L4_IO_CONFIG_C
+	---help---
+		STM32 L4 Cortex M4, USB FS, AES, 512 Kb FLASH, 128+32 Kb SRAM
+
+config ARCH_CHIP_STM32L462RE
+	bool "STM32L462RE"
+	select STM32L4_STM32L462XX
+	select STM32L4_FLASH_CONFIG_E
+	select STM32L4_IO_CONFIG_R
+	---help---
+		STM32 L4 Cortex M4, USB FS, AES, 512 Kb FLASH, 128+32 Kb SRAM
+
+config ARCH_CHIP_STM32L462VE
+	bool "STM32L462VE"
+	select STM32L4_STM32L462XX
+	select STM32L4_FLASH_CONFIG_E
+	select STM32L4_IO_CONFIG_V
+	---help---
+		STM32 L4 Cortex M4, USB FS, AES, 512 Kb FLASH, 128+32 Kb SRAM
+
 config ARCH_CHIP_STM32L476RG
 	bool "STM32L476RG"
 	select STM32L4_STM32L476XX
-	select STM32L4_FLASH_1024KB
+	select STM32L4_FLASH_CONFIG_G
+	select STM32L4_IO_CONFIG_R
 	---help---
 		STM32 L4 Cortex M4, 1024Kb FLASH, 96+32 Kb SRAM
 
 config ARCH_CHIP_STM32L476RE
 	bool "STM32L476RE"
 	select STM32L4_STM32L476XX
-	select STM32L4_FLASH_512KB
+	select STM32L4_FLASH_CONFIG_E
+	select STM32L4_IO_CONFIG_R
 	---help---
 		STM32 L4 Cortex M4, 512Kb FLASH, 96+32 Kb SRAM
 
-config ARCH_CHIP_STM32L486
+config ARCH_CHIP_STM32L486 # REVISIT: expand for each chip
 	bool "STM32L486xx"
 	select STM32L4_STM32L486XX
-	select STM32L4_HAVE_AES
+	select STM32L4_FLASH_CONFIG_G
 	---help---
 		STM32 L4 Cortex M4, AES, 1024Kb FLASH, 96+32 Kb SRAM
 
 config ARCH_CHIP_STM32L496ZE
 	bool "STM32L496ZE"
 	select STM32L4_STM32L496XX
-	select STM32L4_FLASH_512KB
+	select STM32L4_FLASH_CONFIG_E
+	select STM32L4_IO_CONFIG_Z
 	---help---
 		STM32 L4 Cortex M4, 512Kb FLASH, 320 Kb SRAM
 
 config ARCH_CHIP_STM32L496ZG
 	bool "STM32L496ZG"
 	select STM32L4_STM32L496XX
-	select STM32L4_FLASH_1024KB
+	select STM32L4_FLASH_CONFIG_G
+	select STM32L4_IO_CONFIG_Z
 	---help---
 		STM32 L4 Cortex M4, 1024Kb FLASH, 320 Kb SRAM
 
-config ARCH_CHIP_STM32L4A6
+config ARCH_CHIP_STM32L4A6 # REVISIT: expand for each chip
 	bool "STM32L4A6xx"
-	select STM32L4_STM32L496XX   # Close enough to L496
-	select STM32L4_FLASH_1024KB
-	select STM32L4_HAVE_AES
-	select STM32L4_HAVE_HASH
+	select STM32L4_STM32L4A6XX
+	select STM32L4_FLASH_CONFIG_G
 	---help---
 		STM32 L4 Cortex M4, AES, HASH, 1024Kb FLASH, 320 Kb SRAM
 
 endchoice # STM32 L4 Chip Selection
 
-# Chip families
+# Chip product lines
+
+config STM32L4_STM32L4X1
+	# Note: This is _not_ for L471xx as in RM0392
+	bool
+	default n
+	select STM32L4_STM32L4X3
+
+config STM32L4_STM32L4X2
+	bool
+	default n
+	select STM32L4_STM32L4X3
 
 config STM32L4_STM32L4X3
 	bool
 	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU # REVISIT
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
 	select STM32L4_HAVE_USART1
 	select STM32L4_HAVE_USART2
 	select STM32L4_HAVE_USART3 if !(STM32L4_L432XX || STM32L4_L442XX)
@@ -78,64 +239,259 @@ config STM32L4_STM32L4X5
 	select STM32L4_HAVE_USART1
 	select STM32L4_HAVE_USART2
 	select STM32L4_HAVE_USART3
+	select STM32L4_HAVE_UART4
+	select STM32L4_HAVE_UART5
+	select STM32L4_HAVE_ADC2
+	select STM32L4_HAVE_ADC3
+	select STM32L4_HAVE_DAC2
+	select STM32L4_HAVE_FSMC
+	select STM32L4_HAVE_TIM3
+	select STM32L4_HAVE_TIM4
+	select STM32L4_HAVE_TIM5
+	select STM32L4_HAVE_TIM7
+	select STM32L4_HAVE_TIM8
+	select STM32L4_HAVE_TIM17
 	select STM32L4_HAVE_LPTIM1
 	select STM32L4_HAVE_LPTIM2
 	select STM32L4_HAVE_COMP
 	select STM32L4_HAVE_SAI1
 	select STM32L4_HAVE_SAI2
+	select STM32L4_HAVE_SDMMC1
+	select STM32L4_HAVE_OTGFS
+	select STM32L4_HAVE_DFSDM1
 
 config STM32L4_STM32L4X6
 	bool
 	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU # REVISIT
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
 	select STM32L4_HAVE_USART1
 	select STM32L4_HAVE_USART2
 	select STM32L4_HAVE_USART3
 	select STM32L4_HAVE_UART4
 	select STM32L4_HAVE_UART5
+	select STM32L4_HAVE_ADC2
+	select STM32L4_HAVE_ADC3
+	select STM32L4_HAVE_DAC2
+	select STM32L4_HAVE_FSMC
+	select STM32L4_HAVE_TIM3
+	select STM32L4_HAVE_TIM4
+	select STM32L4_HAVE_TIM5
+	select STM32L4_HAVE_TIM7
+	select STM32L4_HAVE_TIM8
+	select STM32L4_HAVE_TIM17
 	select STM32L4_HAVE_LPTIM1
 	select STM32L4_HAVE_LPTIM2
 	select STM32L4_HAVE_COMP
 	select STM32L4_HAVE_SAI1
 	select STM32L4_HAVE_SAI2
+	select STM32L4_HAVE_SDMMC1
+	select STM32L4_HAVE_OTGFS
+	select STM32L4_HAVE_LCD
+
+# Chip subfamilies:
+
+config STM32L4_STM32L431XX
+	bool
+	default n
+	select STM32L4_STM32L4X1
+	select STM32L4_HAVE_TIM7
+	select STM32L4_HAVE_SDMMC1 if (STM32L4_IO_CONFIG_V || STM32L4_IO_CONFIG_R)
+
+config STM32L4_STM32L432XX
+	bool
+	default n
+	select STM32L4_STM32L4X2
+	select STM32L4_HAVE_TIM7
+
+config STM32L4_STM32L433XX
+	bool
+	default n
+	select STM32L4_STM32L4X3
+	select STM32L4_HAVE_TIM7
+
+config STM32L4_STM32L442XX
+	bool
+	default n
+	select STM32L4_STM32L4X2
+	select STM32L4_HAVE_TIM7
+	select STM32L4_HAVE_AES
+
+config STM32L4_STM32L443XX
+	bool
+	default n
+	select STM32L4_STM32L4X3
+	select STM32L4_HAVE_TIM7
+	select STM32L4_HAVE_SDMMC1
+	select STM32L4_HAVE_AES
+
+config STM32L4_STM32L451XX
+	bool
+	default n
+	select STM32L4_STM32L4X1
+	select STM32L4_HAVE_UART4
+	select STM32L4_HAVE_TIM3
+	select STM32L4_HAVE_I2C4
+	select STM32L4_HAVE_SDMMC1 if !STM32L4_IO_CONFIG_C
+	select STM32L4_HAVE_DFSDM1
+
+config STM32L4_STM32L452XX
+	bool
+	default n
+	select STM32L4_STM32L4X2
+	select STM32L4_HAVE_UART4
+	select STM32L4_HAVE_TIM3
+	select STM32L4_HAVE_I2C4
+	select STM32L4_HAVE_SDMMC1
+	select STM32L4_HAVE_DFSDM1
+
+config STM32L4_STM32L462XX
+	bool
+	default n
+	select STM32L4_STM32L4X2
+	select STM32L4_HAVE_UART4
+	select STM32L4_HAVE_TIM3
+	select STM32L4_HAVE_I2C4
+	select STM32L4_HAVE_SDMMC1
+	select STM32L4_HAVE_DFSDM1
+	select STM32L4_HAVE_AES
+
+config STM32L4_STM32L471XX
+	bool
+	default n
+	# TODO
 
 config STM32L4_STM32L476XX
 	bool
 	default n
 	select STM32L4_STM32L4X6
-	select ARCH_HAVE_FPU
 
 config STM32L4_STM32L486XX
 	bool
 	default n
 	select STM32L4_STM32L4X6
-	select ARCH_HAVE_FPU
-	select STM32L4_FLASH_1024KB
+	select STM32L4_HAVE_AES
 
 config STM32L4_STM32L496XX
 	bool
 	default n
 	select STM32L4_STM32L4X6
-	select ARCH_HAVE_FPU
 	select STM32L4_HAVE_I2C4
 	select STM32L4_HAVE_CAN2
 	select STM32L4_HAVE_DCMI
 	select STM32L4_HAVE_DMA2D
+	select STM32L4_HAVE_DFSDM1
+
+config STM32L4_STM32L4A6XX
+	bool
+	default n
+	select STM32L4_STM32L496XX
+	select STM32L4_HAVE_AES
+	select STM32L4_HAVE_HASH
 
 choice
-	prompt "Embedded FLASH size"
-	default STM32L4_FLASH_1024KB
+	prompt "Override Flash Size Designator"
+	depends on ARCH_CHIP_STM32L4
+	default STM32L4_FLASH_OVERRIDE_DEFAULT
+	---help---
+		STM32L4 series parts numbering (sans the package type) ends with a letter
+		that designates the FLASH size.
 
-config STM32L4_FLASH_256KB
-	bool "256 KB"
+			Designator  Size in KiB
+			     B         128
+			     C         256
+			     E         512
+			     G        1024
+
+		This configuration option defaults to using the configuration based on that designator
+		or the default smaller size if there is no last character designator is present in the
+		STM32 Chip Selection.
+
+		Examples:
+		   If the STM32L476VE is chosen, the Flash configuration would be 'E', if a variant of
+		   the part with a 1024 KiB Flash is released in the future one could simply select
+		   the 'G' designator here.
+
+		   If an STM32L4xxx Series parts is chosen the default Flash configuration will be set
+		   herein and can be changed.
+
+config STM32L4_FLASH_OVERRIDE_DEFAULT
+	bool "Default"
+
+config STM32L4_FLASH_OVERRIDE_B
+	bool "B 128 KB"
+
+config STM32L4_FLASH_OVERRIDE_C
+	bool "C 256 KB"
+
+config STM32L4_FLASH_OVERRIDE_E
+	bool "E 512 KB"
+
+config STM32L4_FLASH_OVERRIDE_G
+	bool "G 1024 KB"
+
+endchoice # "Override Flash Size Designator"
+
+# Flash configurations
+
+config STM32L4_FLASH_CONFIG_B
+	bool
+	default n
+	depends on STM32L4_STM32L4X1 || STM32L4_STM32L4X3
+
+config STM32L4_FLASH_CONFIG_C
+	bool
+	default n
 	depends on !STM32L4_STM32L496XX
 
-config STM32L4_FLASH_512KB
-	bool "512 KB"
+config STM32L4_FLASH_CONFIG_E
+	bool
+	default n
 
-config STM32L4_FLASH_1024KB
-	bool "1024 KB"
+config STM32L4_FLASH_CONFIG_G
+	bool
+	default n
+	depends on STM32L4_STM32L4X5 || STM32L4_STM32L4X6
 
-endchoice # Embedded FLASH size
+# Pin/package configurations
+
+config STM32L4_IO_CONFIG_K
+	bool
+	default n
+
+config STM32L4_IO_CONFIG_C
+	bool
+	default n
+
+config STM32L4_IO_CONFIG_R
+	bool
+	default n
+
+config STM32L4_IO_CONFIG_J
+	bool
+	default n
+
+config STM32L4_IO_CONFIG_M
+	bool
+	default n
+
+config STM32L4_IO_CONFIG_V
+	bool
+	default n
+
+config STM32L4_IO_CONFIG_Q
+	bool
+	default n
+
+config STM32L4_IO_CONFIG_Z
+	bool
+	default n
+
+config STM32L4_IO_CONFIG_A
+	bool
+	default n
 
 comment "STM32L4 SRAM2 Options"
 
@@ -172,6 +528,14 @@ menu "STM32L4 Peripheral Support"
 # These "hidden" settings determine is a peripheral option is available for the
 # selection MCU
 
+config STM32L4_HAVE_ADC2
+	bool
+	default n
+
+config STM32L4_HAVE_ADC3
+	bool
+	default n
+
 config STM32L4_HAVE_AES
 	bool
 	default n
@@ -184,11 +548,23 @@ config STM32L4_HAVE_COMP
 	bool
 	default n
 
+config STM32L4_HAVE_DAC2
+	bool
+	default n
+
 config STM32L4_HAVE_DCMI
 	bool
 	default n
 
+config STM32L4_HAVE_DFSDM1
+	bool
+	default n
+
 config STM32L4_HAVE_DMA2D
+	bool
+	default n
+
+config STM32L4_HAVE_FSMC
 	bool
 	default n
 
@@ -197,6 +573,10 @@ config STM32L4_HAVE_HASH
 	default n
 
 config STM32L4_HAVE_I2C4
+	bool
+	default n
+
+config STM32L4_HAVE_LCD
 	bool
 	default n
 
@@ -212,11 +592,43 @@ config STM32L4_HAVE_LPTIM2
 	bool
 	default n
 
+config STM32L4_HAVE_OTGFS
+	bool
+	default n
+
 config STM32L4_HAVE_SAI1
 	bool
 	default n
 
 config STM32L4_HAVE_SAI2
+	bool
+	default n
+
+config STM32L4_HAVE_SDMMC1
+	bool
+	default n
+
+config STM32L4_HAVE_TIM3
+	bool
+	default n
+
+config STM32L4_HAVE_TIM4
+	bool
+	default n
+
+config STM32L4_HAVE_TIM5
+	bool
+	default n
+
+config STM32L4_HAVE_TIM7
+	bool
+	default n
+
+config STM32L4_HAVE_TIM8
+	bool
+	default n
+
+config STM32L4_HAVE_TIM17
 	bool
 	default n
 
@@ -289,6 +701,7 @@ config STM32L4_OTGFS
 	bool "OTG FS"
 	default n
 	select USBHOST_HAVE_ASYNCH if USBHOST
+	depends on STM32L4_HAVE_OTGFS
 
 config STM32L4_ADC1
 	bool "ADC1"
@@ -299,11 +712,13 @@ config STM32L4_ADC2
 	bool "ADC2"
 	default n
 	select STM32L4_ADC
+	depends on STM32L4_HAVE_ADC2
 
 config STM32L4_ADC3
 	bool "ADC3"
 	default n
 	select STM32L4_ADC
+	depends on STM32L4_HAVE_ADC3
 
 config STM32L4_AES
 	bool "AES"
@@ -330,43 +745,12 @@ config STM32L4_RNG
 	default n
 	select ARCH_HAVE_RNG
 
-config STM32L4_SAI1_A
-	bool "SAI1 Block A"
-	default n
-	select AUDIO
-	select I2S
-	select SCHED_WORKQUEUE
-	select STM32L4_SAI
-
-config STM32L4_SAI1_B
-	bool "SAI1 Block B"
-	default n
-	select AUDIO
-	select I2S
-	select SCHED_WORKQUEUE
-	select STM32L4_SAI
-
-config STM32L4_SAI2_A
-	bool "SAI2 Block A"
-	default n
-	select AUDIO
-	select I2S
-	select SCHED_WORKQUEUE
-	select STM32L4_SAI
-
-config STM32L4_SAI2_B
-	bool "SAI2 Block B"
-	default n
-	select AUDIO
-	select I2S
-	select SCHED_WORKQUEUE
-	select STM32L4_SAI
-
 comment "AHB3 Peripherals"
 
-config STM32L4_FMC
-	bool "FMC"
+config STM32L4_FSMC
+	bool "FSMC"
 	default n
+	depends on STM32L4_HAVE_FSMC
 
 config STM32L4_QSPI
 	bool "QuadSPI"
@@ -526,14 +910,17 @@ config STM32L4_TIM2
 config STM32L4_TIM3
 	bool "TIM3"
 	default n
+	depends on STM32L4_HAVE_TIM3
 
 config STM32L4_TIM4
 	bool "TIM4"
 	default n
+	depends on STM32L4_HAVE_TIM4
 
 config STM32L4_TIM5
 	bool "TIM5"
 	default n
+	depends on STM32L4_HAVE_TIM5
 
 config STM32L4_TIM6
 	bool "TIM6"
@@ -542,14 +929,17 @@ config STM32L4_TIM6
 config STM32L4_TIM7
 	bool "TIM7"
 	default n
+	depends on STM32L4_HAVE_TIM7
 
 config STM32L4_LCD
 	bool "LCD"
 	default n
+	depends on STM32L4_HAVE_LCD
 
 config STM32L4_SPI2
 	bool "SPI2"
 	default n
+	depends on !(STM32L4_L432XX || STM32L4_L442XX)
 	select SPI
 	select STM32L4_SPI
 
@@ -607,6 +997,7 @@ config STM32L4_I2C1
 config STM32L4_I2C2
 	bool "I2C2"
 	default n
+	depends on !(STM32L4_L432XX || STM32L4_L442XX)
 	select STM32L4_I2C
 
 config STM32L4_I2C3
@@ -642,6 +1033,7 @@ config STM32L4_DAC2
 	bool "DAC2"
 	default n
 	select STM32L4_DAC
+	depends on STM32L4_HAVE_DAC2
 
 config STM32L4_OPAMP
 	bool "OPAMP"
@@ -684,6 +1076,7 @@ config STM32L4_SDMMC1
 	bool "SDMMC1"
 	default n
 	select ARCH_HAVE_SDIO
+	depends on STM32L4_HAVE_SDMMC1
 
 config STM32L4_TIM1
 	bool "TIM1"
@@ -698,6 +1091,7 @@ config STM32L4_SPI1
 config STM32L4_TIM8
 	bool "TIM8"
 	default n
+	depends on STM32L4_HAVE_TIM8
 
 config STM32L4_USART1
 	bool "USART1"
@@ -717,6 +1111,7 @@ config STM32L4_TIM16
 config STM32L4_TIM17
 	bool "TIM17"
 	default n
+	depends on STM32L4_HAVE_TIM17
 
 config STM32L4_COMP
 	bool "COMP"
@@ -728,14 +1123,51 @@ config STM32L4_SAI1
 	default n
 	depends on STM32L4_HAVE_SAI1
 
+config STM32L4_SAI1_A
+	bool "SAI1 Block A"
+	default n
+	select AUDIO
+	select I2S
+	select SCHED_WORKQUEUE
+	select STM32L4_SAI
+	depends on STM32L4_SAI1
+
+config STM32L4_SAI1_B
+	bool "SAI1 Block B"
+	default n
+	select AUDIO
+	select I2S
+	select SCHED_WORKQUEUE
+	select STM32L4_SAI
+	depends on STM32L4_SAI1
+
 config STM32L4_SAI2
 	bool "SAI2"
 	default n
 	depends on STM32L4_HAVE_SAI2
 
-config STM32L4_DFSDM
-	bool "DFSDM"
+config STM32L4_SAI2_A
+	bool "SAI2 Block A"
 	default n
+	select AUDIO
+	select I2S
+	select SCHED_WORKQUEUE
+	select STM32L4_SAI
+	depends on STM32L4_SAI2
+
+config STM32L4_SAI2_B
+	bool "SAI2 Block B"
+	default n
+	select AUDIO
+	select I2S
+	select SCHED_WORKQUEUE
+	select STM32L4_SAI
+	depends on STM32L4_SAI2
+
+config STM32L4_DFSDM1
+	bool "DFSDM1"
+	default n
+	depends on STM32L4_HAVE_DFSDM1
 
 comment "Other Peripherals"
 
@@ -809,6 +1241,7 @@ config STM32L4_SAI1PLL
 config STM32L4_SAI2PLL
 	bool "SAI2PLL"
 	default n
+	depends on STM32L4_HAVE_SAI2
 	---help---
 		The STM32L476 has a separate PLL for the SAI2 block.
 		Set this true and provide configuration parameters in
