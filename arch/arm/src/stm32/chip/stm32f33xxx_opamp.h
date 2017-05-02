@@ -54,7 +54,7 @@
 
 /* Register Addresses *******************************************************************************/
 
-#define STM32_OPAMP2_CSR            (STM32_OPAMP2_BASE+STM32_OPAMP2_CSR_OFFSET)
+#define STM32_OPAMP2_CSR            (STM32_OPAMP_BASE+STM32_OPAMP2_CSR_OFFSET)
 
 /* Register Bitfield Definitions ****************************************************/
 
@@ -66,7 +66,7 @@
 #define OPAMP_CSR_VPSEL_SHIFT       (3)         /* Bits 2-3: OPAMP non inverting input selection */
 #define OPAMP_CSR_VPSEL_MASK        (3 << OPAMP_CSR_VPSEL_SHIFT)
                                                                     /* 00: Reserved  */
-#  define OPAMP_CSR_VPSEL_PB13      (1 << OPAMP_CSR_VPSEL_SHIFT)    /* 01: PB14 */
+#  define OPAMP_CSR_VPSEL_PB14      (1 << OPAMP_CSR_VPSEL_SHIFT)    /* 01: PB14 */
 #  define OPAMP_CSR_VPSEL_PB0       (2 << OPAMP_CSR_VPSEL_SHIFT)    /* 10: PB0 */
 #  define OPAMP_CSR_VPSEL_PA7       (3 << OPAMP_CSR_VPSEL_SHIFT)    /* 11: PA7 */
                                                 /* Bit 4: Reserved  */
@@ -74,7 +74,7 @@
 #define OPAMP_CSR_VMSEL_MASK        (3 << OPAMP_CSR_VMSEL_SHIFT)
 #  define OPAMP_CSR_VMSEL_PC5       (0 << OPAMP_CSR_VMSEL_SHIFT)    /* 00: PC5 */
 #  define OPAMP_CSR_VMSEL_PA5       (1 << OPAMP_CSR_VMSEL_SHIFT)    /* 01: PA5 */
-#  define OPAMP_CSR_VMSEL_RESISTOR  (2 << OPAMP_CSR_VMSEL_SHIFT)    /* 10: Resistor feedback output */
+#  define OPAMP_CSR_VMSEL_PGA       (2 << OPAMP_CSR_VMSEL_SHIFT)    /* 10: Resistor feedback output (PGA mode)*/
 #  define OPAMP_CSR_VMSEL_FOLLOWER  (3 << OPAMP_CSR_VMSEL_SHIFT)    /* 11: Follower mode */
 #define OPAMP_CSR_TCMEN             (1 << 7)    /* Bit 7: Timer controlled Mux mode enable */
 #define OPAMP_CSR_VMSSEL            (1 << 8)    /* Bit 8: OPAMP inverting input secondary selection */

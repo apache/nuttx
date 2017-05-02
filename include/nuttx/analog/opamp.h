@@ -1,10 +1,8 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32.h
+ * include/nuttx/analog/opamp.h
  *
- *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Authors: Uros Platise <uros.platise@isotel.eu>
- *            Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,52 +33,77 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_H
-#define __ARCH_ARM_SRC_STM32_STM32_H
+#ifndef __INCLUDE_NUTTX_ANALOG_OPAMP_H
+#define __INCLUDE_NUTTX_ANALOG_OPAMP_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
+
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-
-#include "up_internal.h"
+#include <semaphore.h>
+#include <nuttx/fs/fs.h>
 
 /************************************************************************************
- * Pre-processor Definitions
+ * Public Types
  ************************************************************************************/
 
-/* Peripherals **********************************************************************/
+struct opamp_dev_s;
+struct opamp_ops_s
+{
+  /* Configure the OPAMP. This method is called the first time that the OPAMP
+   * device is opened.  This will occur when the port is first opened.
+   * This setup includes configuring and attaching OPAMP interrupts.  Interrupts
+   * are all disabled upon return.
+   */
 
-#include "chip.h"
-#include "stm32_adc.h"
-//#include "stm32_bkp.h"
-#include "stm32_can.h"
-#include "stm32_comp.h"
-#include "stm32_dbgmcu.h"
-#include "stm32_dma.h"
-#include "stm32_dac.h"
-#include "stm32_exti.h"
-#include "stm32_flash.h"
-#include "stm32_fsmc.h"
-#include "stm32_gpio.h"
-#include "stm32_i2c.h"
-#include "stm32_ltdc.h"
-#include "stm32_opamp.h"
-#include "stm32_pwr.h"
-#include "stm32_rcc.h"
-#include "stm32_rtc.h"
-#include "stm32_sdio.h"
-#include "stm32_spi.h"
-#include "stm32_tim.h"
-#include "stm32_uart.h"
-#include "stm32_usbdev.h"
-#include "stm32_wdg.h"
-#include "stm32_lowputc.h"
-#include "stm32_eth.h"
+  CODE int (*ao_setup)(FAR struct opamp_dev_s *dev);
 
-#endif /* __ARCH_ARM_SRC_STM32_STM32_H */
+  /* Disable the OPAMP.  This method is called when the OPAMP device is closed.
+   * This method reverses the operation the setup method.
+   * Works only if OPAMP device is not locked.
+   */
 
+  CODE void (*ao_shutdown)(FAR struct opamp_dev_s *dev);
+
+  /* All ioctl calls will be routed through this method */
+
+  CODE int (*ao_ioctl)(FAR struct opamp_dev_s *dev, int cmd, unsigned long arg);
+};
+
+struct opamp_dev_s
+{
+#ifdef CONFIG_OPAMP
+  /* Fields managed by common upper half OPAMP logic */
+
+  uint8_t                 ad_ocount;    /* The number of times the device has been opened */
+  sem_t                   ad_closesem;  /* Locks out new opens while close is in progress */
+#endif
+
+  /* Fields provided by lower half OPAMP logic */
+
+  FAR const struct opamp_ops_s *ad_ops;  /* Arch-specific operations */
+  FAR void                     *ad_priv; /* Used by the arch-specific logic */
+};
+
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
+
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
+
+int opamp_register(FAR const char *path, FAR struct opamp_dev_s *dev);
+
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __INCLUDE_NUTTX_ANALOG_OPAMP_H */
