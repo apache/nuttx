@@ -1,7 +1,7 @@
 /****************************************************************************
- * config/nucleo-f072rb/src/stm32_bringup.c
+ * arch/arm/src/stm32f0/stm32f0_i2c.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,85 +33,72 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_STM32F0_STM32F0_I2C_H
+#define __ARCH_ARM_SRC_STM32F0_STM32F0_I2C_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/mount.h>
-#include <sys/types.h>
-#include <debug.h>
-
 #include <nuttx/i2c/i2c_master.h>
 
-#include "stm32f0_i2c.h"
-#include "nucleo-f072rb.h"
+#include "chip.h"
+#include "chip/stm32f0_i2c.h"
 
 /****************************************************************************
- * Pre-processor Defintiionis
+ * Pre-processor Definitions
  ****************************************************************************/
 
-#undef HAVE_I2C_DRIVER
-#if defined(CONFIG_STM32F0_I2C1) && defined(CONFIG_I2C_DRIVER)
-#  define HAVE_I2C_DRIVER 1
+/* If a dynamic timeout is selected, then a non-negative, non-zero micro-
+ * seconds per byte value must be provided as well.
+ */
+
+#ifdef CONFIG_STM32F0_I2C_DYNTIMEO
+#  if CONFIG_STM32F0_I2C_DYNTIMEO_USECPERBYTE < 1
+#    warning "Ignoring CONFIG_STM32F0_I2C_DYNTIMEO because of CONFIG_STM32F0_I2C_DYNTIMEO_USECPERBYTE"
+#    undef CONFIG_STM32F0_I2C_DYNTIMEO
+#  endif
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_bringup
+ * Name: stm32f0_i2cbus_initialize
  *
  * Description:
- *   Perform architecture-specific initialization
+ *   Initialize the selected I2C port. And return a unique instance of struct
+ *   struct i2c_master_s.  This function may be called to obtain multiple
+ *   instances of the interface, each of which may be set up with a
+ *   different frequency and slave address.
  *
- *   CONFIG_BOARD_INITIALIZE=y :
- *     Called from board_initialize().
+ * Input Parameter:
+ *   Port number (for hardware that has multiple I2C interfaces)
  *
- *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
+ * Returned Value:
+ *   Valid I2C device structure reference on succcess; a NULL on failure
  *
  ****************************************************************************/
 
-int stm32_bringup(void)
-{
-#ifdef HAVE_I2C_DRIVER
-  FAR struct i2c_master_s *i2c;
-#endif
-  int ret;
+FAR struct i2c_master_s *stm32f0_i2cbus_initialize(int port);
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
+/****************************************************************************
+ * Name: stm32f0_i2cbus_uninitialize
+ *
+ * Description:
+ *   De-initialize the selected I2C port, and power down the device.
+ *
+ * Input Parameter:
+ *   Device structure as returned by the stm32f0_i2cbus_initialize()
+ *
+ * Returned Value:
+ *   OK on success, ERROR when internal reference count mismatch or dev
+ *   points to invalid hardware device.
+ *
+ ****************************************************************************/
 
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
-#endif
+int stm32f0_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
 
-#ifdef HAVE_I2C_DRIVER
-  /* Get the I2C lower half instance */
-
-  i2c = stm32f0_i2cbus_initialize(1);
-  if (i2c == NULL)
-    {
-      i2cerr("ERROR: Inialize I2C1: %d\n", ret);
-    }
-  else
-    {
-      /* Regiser the I2C character driver */
-
-      ret = i2c_register(i2c, 1);
-      if (ret < 0)
-        {
-          i2cerr("ERROR: Failed to register I2C1 device: %d\n", ret);
-        }
-    }
-#endif
-
-  UNUSED(ret);
-  return OK;
-}
+#endif /* __ARCH_ARM_SRC_STM32F0_STM32F0_I2C_H */

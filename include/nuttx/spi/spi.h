@@ -432,9 +432,10 @@
 #define SPIDEVID_TYPE (devid) (((uint32_t)(devid) >> 16) & 0xffff)
 #define SPIDEVID_INDEX(devid)  ((uint32_t)(devid)        & 0xffff)
 
-/* These are replacement definitions for the currently used SPI device indexes.
- * The argument, n, is the instance number. This should be zero is there is
- * only one instance of the SPI device on the bus.
+/* These are standard definitions for the defined SPI device IDs.  The index
+ * argument, n, is the instance number.  This should be zero if there is
+ * only one instance of the SPI device on the SPI bus. Indices greater than
+ * zero discriminate the additional devices of the same type on the SPI bus.
  */
 
 #define SPIDEV_NONE(n)          SPIDEV_ID(SPIDEVTYPE_NONE,          (n))
