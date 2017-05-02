@@ -86,15 +86,8 @@ struct mac802154_trans_s
   /* Supports a singly linked list */
 
   FAR struct mac802154_trans_s *flink;
-
+  FAR struct iob_s *frame;
   uint8_t msdu_handle;
-
-  FAR uint8_t *mhr_buf;
-  uint8_t mhr_len;
-
-  FAR uint8_t *d_buf;
-  uint8_t d_len;
-
   sem_t sem;
 };
 
@@ -291,23 +284,26 @@ static int mac802154_applymib(FAR struct ieee802154_privmac_s *priv);
 
 static int mac802154_poll_csma(FAR const struct ieee802154_radiocb_s *radiocb,
                                FAR struct ieee802154_txdesc_s *tx_desc,
-                               FAR uint8_t *buf);
+                               FAR struct iob_s **frame);
 
 static int mac802154_poll_gts(FAR const struct ieee802154_radiocb_s *radiocb,
                               FAR struct ieee802154_txdesc_s *tx_desc,
-                              FAR uint8_t *buf);
+                              FAR struct iob_s **frame);
 
 static void mac802154_txdone(FAR const struct ieee802154_radiocb_s *radiocb,
                              FAR const struct ieee802154_txdesc_s *tx_desc);
 
 static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
-                              FAR struct ieee802154_rxdesc_s *rx_desc,
+                              FAR const struct ieee802154_rxdesc_s *rx_desc,
                               FAR struct iob_s *frame);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
+/* Map between ieee802154_addr_mode_e enum and actual address length */
+
+static const uint8_t mac802154_addr_length[4] = {0, 0, 2, 8};
 
 /****************************************************************************
  * Private Functions
@@ -452,7 +448,7 @@ static int mac802154_applymib(FAR struct ieee802154_privmac_s *priv)
 
 static int mac802154_poll_csma(FAR const struct ieee802154_radiocb_s *radiocb,
                                FAR struct ieee802154_txdesc_s *tx_desc,
-                               FAR uint8_t *buf)
+                               FAR struct iob_s **frame)
 {
   FAR struct mac802154_radiocb_s *cb =
     (FAR struct mac802154_radiocb_s *)radiocb;
@@ -475,24 +471,19 @@ static int mac802154_poll_csma(FAR const struct ieee802154_radiocb_s *radiocb,
 
   if (trans != NULL)
     {
-
       /* Setup the transmit descriptor */
 
       tx_desc->handle = trans->msdu_handle;
 
-      /* Copy the frame into the buffer */
-
-      memcpy(&buf[0], trans->mhr_buf, trans->mhr_len);
-      memcpy(&buf[trans->mhr_len], trans->d_buf, trans->d_len);
+      *frame = trans->frame;
 
       /* Now that we've passed off the data, notify the waiting thread.
        * NOTE: The transaction was allocated on the waiting thread's stack so
        * it will be automatically deallocated when that thread awakens and
-       * returns.
-       */
+       * returns. */
 
       sem_post(&trans->sem);
-      return (trans->mhr_len + trans->d_len);
+      return (trans->frame->io_len);
     }
 
   return 0;
@@ -511,7 +502,7 @@ static int mac802154_poll_csma(FAR const struct ieee802154_radiocb_s *radiocb,
 
 static int mac802154_poll_gts(FAR const struct ieee802154_radiocb_s *radiocb,
                               FAR struct ieee802154_txdesc_s *tx_desc,
-                              FAR uint8_t *buf)
+                              FAR struct iob_s **frame)
 {
   FAR struct mac802154_radiocb_s *cb =
     (FAR struct mac802154_radiocb_s *)radiocb;
@@ -643,7 +634,7 @@ static void mac802154_txdone_worker(FAR void *arg)
  ****************************************************************************/
 
 static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
-                              FAR struct ieee802154_rxdesc_s *rx_desc,
+                              FAR const struct ieee802154_rxdesc_s *rx_desc,
                               FAR struct iob_s *frame)
 {
   FAR struct mac802154_radiocb_s *cb =
@@ -845,6 +836,82 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: mac802154_get_mhrlen
+ *
+ * Description:
+ *   Calculate the MAC header length given the frame meta-data.
+ *
+ ****************************************************************************/
+
+int mac802154_get_mhrlen(MACHANDLE mac, 
+                         FAR struct ieee802154_frame_meta_s *meta)
+{
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
+  int ret = 3; /* Always frame control (2 bytes) and seq. num (1 byte) */
+
+  /* Check to make sure both the dest address and the source address are not set
+   * to NONE */
+
+  if (meta->dest_addr.mode == IEEE802154_ADDRMODE_NONE &&
+      meta->src_addr_mode == IEEE802154_ADDRMODE_NONE)  
+    {
+      return -EINVAL;
+    }
+  
+  /* The source address can only be set to NONE if the device is the PAN coord */
+
+  if (meta->src_addr_mode == IEEE802154_ADDRMODE_NONE && !priv->is_coord)
+    {
+      return -EINVAL;
+    }
+
+  /* Add the destination address length */
+
+  ret += mac802154_addr_length[meta->dest_addr.mode];
+
+  /* Add the source address length */
+
+  ret += mac802154_addr_length[ meta->src_addr_mode];
+
+  /* If both destination and source addressing information is present, the MAC
+   * sublayer shall compare the destination and source PAN identifiers.
+   * [1] pg. 41.
+   */
+
+  if (meta->src_addr_mode  != IEEE802154_ADDRMODE_NONE &&
+      meta->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
+    {
+      /* If the PAN identifiers are identical, the PAN ID Compression field
+       * shall be set to one, and the source PAN identifier shall be omitted
+       * from the transmitted frame. [1] pg. 41.
+       */
+
+      if (meta->dest_addr.panid == priv->addr.panid)
+        {
+          ret += 2; /* 2 bytes for destination PAN ID */
+          return ret;
+        }
+    }
+  
+  /* If we are here, PAN ID compression is off, so include the dest and source
+   * PAN ID if the respective address is included 
+   */
+
+  if (meta->src_addr_mode != IEEE802154_ADDRMODE_NONE)
+    {
+      ret += 2; /* 2 bytes for source PAN ID */
+    }
+  
+  if (meta->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
+    {
+      ret += 2; /* 2 bytes for destination PAN ID */
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: mac802154_req_data
  *
  * Description:
@@ -860,73 +927,70 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
   FAR struct mac802154_trans_s trans;
-  struct mac802154_unsec_mhr_s mhr;
+  FAR struct ieee802154_frame_meta_s *meta = req->meta;
+  uint16_t *frame_ctrl;
+  uint8_t mhr_len = 3; /* Start assuming frame control and seq. num */
   int ret;
+  
+  /* Check the required frame size */
 
-  /* Start off assuming there is only the frame_control field in the MHR */
+  if (req->frame->io_len > IEEE802154_MAX_PHY_PACKET_SIZE)
+  {
+    return -E2BIG;
+  }
 
-  mhr.length = 2;
+  /* Cast the first two bytes of the IOB to a uint16_t frame control field */
 
-  /* Do a preliminary check to make sure the MSDU isn't too long for even
-   * the best case.
-   */
-
-  if (req->msdu_length > IEEE802154_MAX_MAC_PAYLOAD_SIZE)
-    {
-      return -EINVAL;
-    }
+  frame_ctrl = (uint16_t *)&req->frame->io_data[0];
 
   /* Ensure we start with a clear frame control field */
 
-  mhr.u.frame_control = 0;
+  *frame_ctrl = 0;
 
   /* Set the frame type to Data */
 
-  mhr.u.frame_control |= IEEE802154_FRAME_DATA <<
-                         IEEE802154_FRAMECTRL_SHIFT_FTYPE;
+  *frame_ctrl |= IEEE802154_FRAME_DATA << IEEE802154_FRAMECTRL_SHIFT_FTYPE;
 
   /* If the msduLength is greater than aMaxMACSafePayloadSize, the MAC
    * sublayer will set the Frame Version to one. [1] pg. 118.
    */
 
-  if (req->msdu_length > IEEE802154_MAX_SAFE_MAC_PAYLOAD_SIZE)
+  if (meta->msdu_length > IEEE802154_MAX_SAFE_MAC_PAYLOAD_SIZE)
     {
-      mhr.u.frame_control |= IEEE802154_FRAMECTRL_VERSION;
+      *frame_ctrl |= IEEE802154_FRAMECTRL_VERSION;
     }
 
   /* If the TXOptions parameter specifies that an acknowledged transmission
    * is required, the AR field will be set appropriately, as described in
    * 5.1.6.4 [1] pg. 118.
    */
-
-  mhr.u.frame_control |= (req->msdu_flags.ack_tx <<
-                          IEEE802154_FRAMECTRL_SHIFT_ACKREQ);
+                         
+  *frame_ctrl |= (meta->msdu_flags.ack_tx << IEEE802154_FRAMECTRL_SHIFT_ACKREQ);
 
   /* If the destination address is present, copy the PAN ID and one of the
-   * addresses, depending on mode, into the MHR .
+   * addresses, depending on mode, into the MHR. 
    */
 
-  if (req->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
+  if (meta->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
     {
-      memcpy(&mhr.u.data[mhr.length], &req->dest_addr.panid, 2);
-      mhr.length += 2;
+      memcpy(&req->frame->io_data[mhr_len], &meta->dest_addr.panid, 2);
+      mhr_len += 2;
 
-      if (req->dest_addr.mode == IEEE802154_ADDRMODE_SHORT)
+      if (meta->dest_addr.mode == IEEE802154_ADDRMODE_SHORT)
         {
-          memcpy(&mhr.u.data[mhr.length], &req->dest_addr.saddr, 2);
-          mhr.length += 2;
+          memcpy(&req->frame->io_data[mhr_len], &meta->dest_addr.saddr, 2);
+          mhr_len += 2;
         }
-      else if (req->dest_addr.mode == IEEE802154_ADDRMODE_EXTENDED)
+      else if (meta->dest_addr.mode == IEEE802154_ADDRMODE_EXTENDED)
         {
-          memcpy(&mhr.u.data[mhr.length], &req->dest_addr.eaddr, 8);
-          mhr.length += 8;
+          memcpy(&req->frame->io_data[mhr_len], &meta->dest_addr.eaddr, 8);
+          mhr_len += 8;
         }
     }
 
-  /* Set the destination addr mode inside the frame contorl field */
+  /* Set the destination addr mode inside the frame control field */
 
-  mhr.u.frame_control |= (req->dest_addr.mode <<
-                          IEEE802154_FRAMECTRL_SHIFT_DADDR);
+  *frame_ctrl |= (meta->dest_addr.mode << IEEE802154_FRAMECTRL_SHIFT_DADDR);
 
   /* From this point on, we need exclusive access to the privmac struct */
 
@@ -942,75 +1006,70 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
    * [1] pg. 41.
    */
 
-  if (req->src_addr_mode  != IEEE802154_ADDRMODE_NONE &&
-      req->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
+  if (meta->src_addr_mode  != IEEE802154_ADDRMODE_NONE &&
+      meta->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
     {
       /* If the PAN identifiers are identical, the PAN ID Compression field
        * shall be set to one, and the source PAN identifier shall be omitted
        * from the transmitted frame. [1] pg. 41.
        */
 
-      if (req->dest_addr.panid == priv->addr.panid)
+      if (meta->dest_addr.panid == priv->addr.panid)
         {
-          mhr.u.frame_control |= IEEE802154_FRAMECTRL_PANIDCOMP;
+          *frame_ctrl |= IEEE802154_FRAMECTRL_PANIDCOMP;
         }
     }
 
-  if (req->src_addr_mode != IEEE802154_ADDRMODE_NONE)
+  if (meta->src_addr_mode != IEEE802154_ADDRMODE_NONE)
     {
       /* If the destination address is not included, or if PAN ID Compression
        * is off, we need to include the Source PAN ID.
        */
 
-      if ((req->dest_addr.mode == IEEE802154_ADDRMODE_NONE) ||
-          (mhr.u.frame_control & IEEE802154_FRAMECTRL_PANIDCOMP))
+      if ((meta->dest_addr.mode == IEEE802154_ADDRMODE_NONE) ||
+          (*frame_ctrl & IEEE802154_FRAMECTRL_PANIDCOMP))
         {
-          memcpy(&mhr.u.data[mhr.length], &priv->addr.panid, 2);
-          mhr.length += 2;
+          memcpy(&req->frame->io_data[mhr_len], &priv->addr.panid, 2);
+          mhr_len += 2;
         }
 
-      if (req->src_addr_mode == IEEE802154_ADDRMODE_SHORT)
+      if (meta->src_addr_mode == IEEE802154_ADDRMODE_SHORT)
         {
-          memcpy(&mhr.u.data[mhr.length], &priv->addr.saddr, 2);
-          mhr.length += 2;
+          memcpy(&req->frame->io_data[mhr_len], &priv->addr.saddr, 2);
+          mhr_len += 2;
         }
-      else if (req->src_addr_mode == IEEE802154_ADDRMODE_EXTENDED)
+      else if (meta->src_addr_mode == IEEE802154_ADDRMODE_EXTENDED)
         {
-          memcpy(&mhr.u.data[mhr.length], &priv->addr.eaddr, 8);
-          mhr.length += 8;
+          memcpy(&req->frame->io_data[mhr_len], &priv->addr.eaddr, 8);
+          mhr_len += 8;
         }
     }
 
   /* Set the source addr mode inside the frame control field */
 
-  mhr.u.frame_control |= (req->src_addr_mode <<
-                          IEEE802154_FRAMECTRL_SHIFT_SADDR);
+  *frame_ctrl |= (meta->src_addr_mode << IEEE802154_FRAMECTRL_SHIFT_SADDR);
 
   /* Each time a data or a MAC command frame is generated, the MAC sublayer
    * shall copy the value of macDSN into the Sequence Number field of the MHR
    * of the outgoing frame and then increment it by one. [1] pg. 40.
    */
 
-  mhr.u.data[mhr.length++] = priv->dsn++;
+  req->frame->io_data[2] = priv->dsn++;
 
-  /* Now that we know which fields are included in the header, we can make
-   * sure we actually have enough room in the PSDU.
+  /* The MAC header we just created must never have exceeded where the app
+   * data starts.  This should never happen since the offset should have
+   * been set via the same logic to calculate the header length as the logic
+   * here that created the header
    */
 
-  if (mhr.length + req->msdu_length + IEEE802154_MFR_LENGTH >
-      IEEE802154_MAX_PHY_PACKET_SIZE)
-  {
-    return -E2BIG;
-  }
+  DEBUGASSERT(mhr_len == req->frame->io_offset);
 
-  trans.mhr_buf = &mhr.u.data[0];
-  trans.mhr_len = mhr.length;
+  req->frame->io_offset = 0; /* Set the offset to 0 to include the header */
 
-  trans.d_buf = &req->msdu[0];
-  trans.d_len = req->msdu_length;
+  /* Setup our transaction */
 
-  trans.msdu_handle = req->msdu_handle;
-
+  trans.msdu_handle = meta->msdu_handle;
+  trans.frame = req->frame;
   sem_init(&trans.sem, 0, 1);
 
   /* If the TxOptions parameter specifies that a GTS transmission is required,
@@ -1025,7 +1084,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
    * [1] pg. 118.
    */
 
-  if (req->msdu_flags.gts_tx)
+  if (meta->msdu_flags.gts_tx)
     {
       /* TODO: Support GTS transmission. This should just change where we link
        * the transaction.  Instead of going in the CSMA transaction list, it
@@ -1044,7 +1103,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
        * described in 5.1.5 and 5.1.6.3. [1]
        */
 
-      if (req->msdu_flags.indirect_tx)
+      if (meta->msdu_flags.indirect_tx)
         {
           /* If the TxOptions parameter specifies that an indirect transmission
            * is required and if the device receiving this primitive is not a
@@ -1053,24 +1112,22 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
            * transmission option will be ignored. [1]
            */
 
-          if (priv->is_coord && req->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
+          if (priv->is_coord && meta->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
             {
               /* Link the transaction into the indirect_trans list */
 
-              priv->indirect_tail->flink = &trans;
-              priv->indirect_tail = &trans;
             }
           else
             {
               /* Override the setting since it wasn't valid */
 
-              req->msdu_flags.indirect_tx = 0;
+              meta->msdu_flags.indirect_tx = 0;
             }
         }
 
       /* If this is a direct transmission not during a GTS */
 
-      if (!req->msdu_flags.indirect_tx)
+      if (!meta->msdu_flags.indirect_tx)
         {
           /* Link the transaction into the CSMA transaction list */
 
@@ -1091,7 +1148,6 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
   sem_destroy(&trans.sem);
   return OK;
 }
-
 
 /****************************************************************************
  * Name: mac802154_req_purge

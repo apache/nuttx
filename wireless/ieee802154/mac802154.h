@@ -98,6 +98,17 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg);
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: mac802154_get_mhrlen
+ *
+ * Description:
+ *   Calculate the MAC header length given the frame meta-data.
+ *
+ ****************************************************************************/
+
+int mac802154_get_mhrlen(MACHANDLE mac, 
+                         FAR struct ieee802154_frame_meta_s *meta);
+
+/****************************************************************************
  * Name: mac802154_req_data
  *
  * Description:

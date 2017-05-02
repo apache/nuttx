@@ -138,9 +138,10 @@ struct mrf24j40_radio_s
   /* Buffer Allocations */
 
   struct mrf24j40_txdesc_s csma_desc;
-  struct mrf24j40_txdesc_s gts_desc[MRF24J40_GTS_SLOTS];
+  FAR struct iob_s *csma_frame;
 
-  uint8_t tx_buf[IEEE802154_MAX_PHY_PACKET_SIZE];
+  struct mrf24j40_txdesc_s gts_desc[MRF24J40_GTS_SLOTS];
+  FAR struct iob_s *gts_frame[MRF24J40_GTS_SLOTS];
 };
 
 /****************************************************************************
@@ -174,11 +175,11 @@ static void mrf24j40_dopoll_csma(FAR void *arg);
 static void mrf24j40_dopoll_gts(FAR void *arg);
 
 static int  mrf24j40_csma_setup(FAR struct mrf24j40_radio_s *dev,
-              FAR uint8_t *buf, uint16_t buf_len);
+              FAR struct iob_s *frame);
 static int  mrf24j40_gts_setup(FAR struct mrf24j40_radio_s *dev, uint8_t gts,
-              FAR uint8_t *buf, uint16_t buf_len);
+              FAR struct iob_s *frame);
 static int  mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
-              FAR uint8_t *buf, uint16_t buf_len, uint32_t fifo_addr);
+              FAR struct iob_s *frame, uint32_t fifo_addr);
 
 /* IOCTL helpers */
 
@@ -224,10 +225,8 @@ static int  mrf24j40_bind(FAR struct ieee802154_radio_s *radio,
 static int  mrf24j40_ioctl(FAR struct ieee802154_radio_s *radio, int cmd,
               unsigned long arg);
 static int  mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio);
-static int  mrf24j40_transmit(FAR struct ieee802154_radio_s *radio,
-              FAR uint8_t *buf, uint16_t buf_len);
-static int mrf24j40_txnotify_csma(FAR struct ieee802154_radio_s *radio);
-static int mrf24j40_txnotify_gts(FAR struct ieee802154_radio_s *radio);
+static int  mrf24j40_txnotify_csma(FAR struct ieee802154_radio_s *radio);
+static int  mrf24j40_txnotify_gts(FAR struct ieee802154_radio_s *radio);
 
 /****************************************************************************
  * Private Data
@@ -327,9 +326,7 @@ static void mrf24j40_dopoll_csma(FAR void *arg)
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)arg;
   int len = 0;
 
-  /* Need to get exlusive access to the device so that we can use the copy
-   * buffer.
-   */
+  /* Get exclusive access to the driver */
 
   while (sem_wait(&dev->exclsem) != 0) { }
   
@@ -340,7 +337,7 @@ static void mrf24j40_dopoll_csma(FAR void *arg)
       /* need to somehow allow for a handle to be passed */
 
       len = dev->radiocb->poll_csma(dev->radiocb, &dev->csma_desc.pub,
-                                    &dev->tx_buf[0]);
+                                    &dev->csma_frame);
       if (len > 0)
         {
           /* Now the txdesc is in use */
@@ -349,7 +346,7 @@ static void mrf24j40_dopoll_csma(FAR void *arg)
 
           /* Setup the transaction on the device in the CSMA FIFO */
 
-          mrf24j40_csma_setup(dev, &dev->tx_buf[0], len);
+          mrf24j40_csma_setup(dev, dev->csma_frame);
         }
     }
 
@@ -421,9 +418,7 @@ static void mrf24j40_dopoll_gts(FAR void *arg)
   int gts = 0;
   int len = 0;
 
-  /* Need to get exclusive access to the device so that we can use the copy
-   * buffer.
-   */
+  /* Get exclusive access to the driver */
 
   while (sem_wait(&dev->exclsem) != 0) { }
 
@@ -432,7 +427,7 @@ static void mrf24j40_dopoll_gts(FAR void *arg)
       if (!dev->gts_desc[gts].busy)
         {
           len = dev->radiocb->poll_gts(dev->radiocb, &dev->gts_desc[gts].pub,
-                                       &dev->tx_buf[0]);
+                                       &dev->gts_frame[0]);
           if (len > 0)
             {
               /* Now the txdesc is in use */
@@ -441,7 +436,7 @@ static void mrf24j40_dopoll_gts(FAR void *arg)
 
               /* Setup the transaction on the device in the open GTS FIFO */
 
-              mrf24j40_gts_setup(dev, gts, &dev->tx_buf[0], len);
+              mrf24j40_gts_setup(dev, gts, dev->gts_frame[0]);
             }
         }
     }
@@ -1327,52 +1322,6 @@ static int mrf24j40_energydetect(FAR struct mrf24j40_radio_s *dev,
   return OK;
 }
 
-/* Packet exchange */
-
-/****************************************************************************
- * Name: mrf24j40_transmit
- *
- * Description:
- *   Send a regular packet over the air.
- *
- ****************************************************************************/
-
-static int mrf24j40_transmit(FAR struct ieee802154_radio_s *radio,
-                             FAR uint8_t *buf, uint16_t buf_len)
-{
-  FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
-  uint8_t  reg;
-  int      ret;
-
-  mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
-
-  /* Enable tx int */
-
-  reg  = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
-  reg &= ~MRF24J40_INTCON_TXNIE;
-  mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
-
-  /* Setup the FIFO */
-
-  ret = mrf24j40_setup_fifo(dev, buf, buf_len, MRF24J40_TXNORM_FIFO);
-
-  /* If the frame control field contains
-   * an acknowledgment request, set the TXNACKREQ bit.
-   * See IEEE 802.15.4/2003 7.2.1.1 page 112 for info.
-   */
-
-  reg = MRF24J40_TXNCON_TXNTRIG;
-  if (buf[0] & IEEE802154_FRAMECTRL_ACKREQ)
-    {
-      reg |= MRF24J40_TXNCON_TXNACKREQ;
-    }
-
-  /* Trigger packet emission */
-
-  mrf24j40_setreg(dev->spi, MRF24J40_TXNCON, reg);
-  return ret;
-}
-
 /****************************************************************************
  * Name: mrf24j40_csma_setup
  *
@@ -1382,7 +1331,7 @@ static int mrf24j40_transmit(FAR struct ieee802154_radio_s *radio,
  ****************************************************************************/
 
 static int mrf24j40_csma_setup(FAR struct mrf24j40_radio_s *dev,
-                               FAR uint8_t *buf, uint16_t buf_len)
+                               FAR struct iob_s *frame)
 {
   uint8_t reg;
   int     ret;
@@ -1397,7 +1346,7 @@ static int mrf24j40_csma_setup(FAR struct mrf24j40_radio_s *dev,
 
   /* Setup the FIFO */
 
-  ret = mrf24j40_setup_fifo(dev, buf, buf_len, MRF24J40_TXNORM_FIFO);
+  ret = mrf24j40_setup_fifo(dev, frame, MRF24J40_TXNORM_FIFO);
 
   /* If the frame control field contains
    * an acknowledgment request, set the TXNACKREQ bit.
@@ -1405,7 +1354,7 @@ static int mrf24j40_csma_setup(FAR struct mrf24j40_radio_s *dev,
    */
 
   reg = MRF24J40_TXNCON_TXNTRIG;
-  if (buf[0] & IEEE802154_FRAMECTRL_ACKREQ)
+  if (frame->io_data[0] & IEEE802154_FRAMECTRL_ACKREQ)
     {
       reg |= MRF24J40_TXNCON_TXNACKREQ;
     }
@@ -1425,7 +1374,7 @@ static int mrf24j40_csma_setup(FAR struct mrf24j40_radio_s *dev,
  ****************************************************************************/
 
 static int mrf24j40_gts_setup(FAR struct mrf24j40_radio_s *dev, uint8_t fifo,
-                              FAR uint8_t *buf, uint16_t buf_len)
+                              FAR struct iob_s *frame)
 {
   return -ENOTTY;
 }
@@ -1438,8 +1387,7 @@ static int mrf24j40_gts_setup(FAR struct mrf24j40_radio_s *dev, uint8_t fifo,
  ****************************************************************************/
 
 static int mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
-                               FAR uint8_t *buf, uint16_t buf_len,
-                               uint32_t fifo_addr)
+                               FAR struct iob_s *frame, uint32_t fifo_addr)
 {
   int      ret;
   int      hlen = 3; /* Include frame control and seq number */
@@ -1447,8 +1395,8 @@ static int mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
 
   /* Analyze frame control to compute header length */
 
-  frame_ctrl = buf[0];
-  frame_ctrl |= (buf[1] << 8);
+  frame_ctrl = frame->io_data[0];
+  frame_ctrl |= (frame->io_data[1] << 8);
 
   if ((frame_ctrl & IEEE802154_FRAMECTRL_DADDR)== IEEE802154_ADDRMODE_SHORT)
     {
@@ -1479,13 +1427,13 @@ static int mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
 
   /* Frame length */
 
-  mrf24j40_setreg(dev->spi, fifo_addr++, buf_len);
+  mrf24j40_setreg(dev->spi, fifo_addr++, frame->io_len);
 
   /* Frame data */
 
-  for (ret = 0; ret < buf_len; ret++) /* this sets the correct val for ret */
+  for (ret = 0; ret < frame->io_len; ret++) /* this sets the correct val for ret */
     {
-      mrf24j40_setreg(dev->spi, fifo_addr++, buf[ret]);
+      mrf24j40_setreg(dev->spi, fifo_addr++, frame->io_data[ret]);
     }
   
   return ret;
@@ -1524,6 +1472,10 @@ static void mrf24j40_irqwork_txnorm(FAR struct mrf24j40_radio_s *dev)
   /* We are now done with the transaction */
 
   dev->csma_desc.busy = 0;
+
+  /* Free the IOB */
+
+  iob_free(dev->csma_frame);
 
   mrf24j40_dopoll_csma(dev);
 }
@@ -1570,6 +1522,10 @@ static void mrf24j40_irqwork_txgts(FAR struct mrf24j40_radio_s *dev,
   /* We are now done with the transaction */
 
   dev->gts_desc[gts].busy = 0;
+
+  /* Free the IOB */
+
+  iob_free(dev->gts_frame[gts]);
 
   mrf24j40_dopoll_gts(dev);
 }

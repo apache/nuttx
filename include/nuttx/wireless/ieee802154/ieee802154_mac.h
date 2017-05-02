@@ -474,20 +474,12 @@ enum ieee802154_scantype_e
   IEEE802154_SCANTYPE_ORPHAN
 };
 
-/* Primitive Semantics *******************************************************/
-
-/*****************************************************************************
- * Primitive: MCPS-DATA.request 
- *
- * Description:
- *    Requests the transfer of data to another device.  
- * 
- *****************************************************************************/
-
-struct ieee802154_data_req_s
+struct ieee802154_frame_meta_s
 {
   enum ieee802154_addr_mode_e src_addr_mode;  /* Source Address Mode */
   struct ieee802154_addr_s dest_addr;         /* Destination Address */
+
+  uint8_t msdu_handle;    /* Handle assoc. with MSDU */
   
   /* Number of bytes contained in the MAC Service Data Unit (MSDU) 
    * to be transmitted by the MAC sublayer enitity 
@@ -498,7 +490,6 @@ struct ieee802154_data_req_s
 
   uint16_t msdu_length;
 
-  uint8_t msdu_handle;    /* Handle assoc. with MSDU */
   struct
   {
     uint8_t ack_tx      : 1;  /* Acknowledge TX? */               
@@ -530,18 +521,23 @@ struct ieee802154_data_req_s
 #endif
 
   enum ieee802154_ranging_e ranging;
-
-  /* The MAC service data unit array that is to be transmitted
-   * This must be at the end of the struct to allow the array
-   * to continue and make the struct "variable length"
-   */ 
-
-  uint8_t msdu[IEEE802154_MAX_MAC_PAYLOAD_SIZE];
 };
 
-#define SIZEOF_IEEE802154_DATA_REQ_S(n) \
-        (sizeof(struct ieee802154_data_req_s) \
-        - IEEE802154_MAX_MAC_PAYLOAD_SIZE + (n))
+/* Primitive Semantics *******************************************************/
+
+/*****************************************************************************
+ * Primitive: MCPS-DATA.request 
+ *
+ * Description:
+ *    Requests the transfer of data to another device.  
+ * 
+ *****************************************************************************/
+
+struct ieee802154_data_req_s
+{
+  FAR struct ieee802154_frame_meta_s *meta; /* Metadata describing the req */
+  FAR struct iob_s *frame;                  /* Frame IOB with payload */
+};
 
 /*****************************************************************************
  * Primitive: MCPS-DATA.confirm 
