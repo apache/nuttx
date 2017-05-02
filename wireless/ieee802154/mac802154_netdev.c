@@ -257,6 +257,11 @@ static void macnet_ipv6multicast(FAR struct macnet_driver_s *priv);
 static int  macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
               unsigned long arg);
 #endif
+static int macnet_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
+              FAR struct ieee802154_frame_meta_s *meta);
+static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
+              FAR struct ieee802154_frame_meta_s *meta,
+              FAR struct iob_s *frames);
 
 /****************************************************************************
  * Private Functions
@@ -1495,6 +1500,86 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
 #endif
 
 /****************************************************************************
+ * Name: macnet_get_mhrlen
+ *
+ * Description:
+ *   Calculate the MAC header length given the frame meta-data.
+ *
+ ****************************************************************************/
+
+static int macnet_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
+                             FAR struct ieee802154_frame_meta_s *meta)
+{
+  FAR struct macnet_driver_s *priv;
+
+  DEBUGASSERT(netdev != NULL && netdev->i_dev.d_private != NULL && iob != NULL);
+  priv = (FAR struct macnet_driver_s *)netdev->i_dev.d_private;
+
+  return mac802154_get_mhrlen(priv->md_mac, meta);
+}
+
+/****************************************************************************
+ * Name: macnet_req_data
+ *
+ * Description:
+ *   The MCPS-DATA.request primitive requests the transfer of a data SPDU
+ *   (i.e., MSDU) from a local SSCS entity to a single peer SSCS entity.
+ *   Confirmation is returned via the
+ *   struct ieee802154_maccb_s->conf_data callback.
+ *
+ ****************************************************************************/
+
+static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
+                           FAR struct ieee802154_frame_meta_s *meta,
+                           FAR struct iob_s *frames)
+{
+  FAR struct macnet_driver_s *priv;
+  struct ieee802154_data_req_s req;
+  FAR struct iob_s *iob;
+  int ret;
+
+  DEBUGASSERT(netdev != NULL && netdev->i_dev.d_private != NULL && iob != NULL);
+  priv = (FAR struct macnet_driver_s *)netdev->i_dev.d_private;
+
+  /* Add the incoming list of frames to the MAC's outgoing queue */
+
+  for (iob = frames; iob != NULL; iob = frames)
+    {
+      /* Increment statistics */
+
+      NETDEV_RXPACKETS(&priv->lo_ieee.i_dev);
+
+      /* Remove the IOB from the queue */
+
+      frames        = iob->io_flink;
+      iob->io_flink = NULL;
+
+      /* Transfer the frame to the MAC */
+
+      req.meta  = mets;
+      req.frame = iob;
+      ret = mac802154_req_data(priv->md_mac, req);
+      if (ret < 0)
+        {
+          wlerr("ERROR: mac802154_req_data failed: %d\n", ret);
+
+          iob_free(iob);
+          for (iob = frames; ; iob != NULL; iob = frames)
+            {
+              /* Remove the IOB from the queue and free */
+
+              frames = iob->io_flink;
+              iob_free(iob);
+            }
+
+          return ret;
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1517,7 +1602,8 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
 int mac802154netdev_register(MACHANDLE mac)
 {
   FAR struct macnet_driver_s *priv;
-  FAR struct net_driver_s *dev;
+  FAR struct ieee802154_driver_s *ieee;
+  FAR struct net_driver_s  *dev;
   FAR struct ieee802154_maccb_s *maccb;
   FAR uint8_t *pktbuf;
   int ret;
@@ -1549,27 +1635,33 @@ int mac802154netdev_register(MACHANDLE mac)
 
   /* Initialize the driver structure */
 
-  dev                = &priv->md_dev.i_dev;
-  dev->d_buf         = pktbuf;            /* Single packet buffer */
-  dev->d_ifup        = macnet_ifup;       /* I/F up (new IP address) callback */
-  dev->d_ifdown      = macnet_ifdown;     /* I/F down callback */
-  dev->d_txavail     = macnet_txavail;    /* New TX data callback */
+  ieee                = &priv->lo_ieee;
+  dev                 = &ieee->i_dev;
+  dev->d_buf          = pktbuf;            /* Single packet buffer */
+  dev->d_ifup         = macnet_ifup;       /* I/F up (new IP address) callback */
+  dev->d_ifdown       = macnet_ifdown;     /* I/F down callback */
+  dev->d_txavail      = macnet_txavail;    /* New TX data callback */
 #ifdef CONFIG_NET_IGMP
-  dev->d_addmac      = macnet_addmac;     /* Add multicast MAC address */
-  dev->d_rmmac       = macnet_rmmac;      /* Remove multicast MAC address */
+  dev->d_addmac       = macnet_addmac;     /* Add multicast MAC address */
+  dev->d_rmmac        = macnet_rmmac;      /* Remove multicast MAC address */
 #endif
  #ifdef CONFIG_NETDEV_IOCTL
-  dev->d_ioctl       = macnet_ioctl;      /* Handle network IOCTL commands */
+  dev->d_ioctl        = macnet_ioctl;      /* Handle network IOCTL commands */
 #endif
-  dev->d_private     = (FAR void *)priv;  /* Used to recover private state from dev */
+  dev->d_private      = (FAR void *)priv;  /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  priv->md_mac       = mac;               /* Save the MAC interface instance */
-  priv->md_txpoll    = wd_create();       /* Create periodic poll timer */
-  priv->md_txtimeout = wd_create();       /* Create TX timeout timer */
+  priv->md_mac        = mac;               /* Save the MAC interface instance */
+  priv->md_txpoll     = wd_create();       /* Create periodic poll timer */
+  priv->md_txtimeout  = wd_create();       /* Create TX timeout timer */
 
   DEBUGASSERT(priv->md_txpoll != NULL && priv->md_txtimeout != NULL);
+
+  /* Initialize the Network frame-related callbacks */
+
+  ieee->i_get_mhrlen  = macnet_get_mhrlen; /* Get MAC header length */
+  ieee->i_req_data    = macnet_req_data;   /* Enqueue frame for transmission */
 
   /* Initialize the MAC callbacks */
 

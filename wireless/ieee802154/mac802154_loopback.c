@@ -83,6 +83,10 @@
 
 #define LO_WDDELAY   (1*CLK_TCK)
 
+/* Fake value for MAC header length */
+
+#define MAC_HDRLEN   9
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -98,6 +102,8 @@ struct lo_driver_s
   uint16_t lo_panid;           /* Fake PAN ID for testing */
   WDOG_ID lo_polldog;          /* TX poll timer */
   struct work_s lo_work;       /* For deferring poll work to the work queue */
+  FAR struct iob_s *head;      /* Head of IOBs queued for loopback */
+  FAR struct iob_s *tail;      /* Tail of IOBs queued for loopback */
 
   /* This holds the information visible to the NuttX network */
 
@@ -117,33 +123,39 @@ static uint8_t g_iobuffer[CONFIG_NET_6LOWPAN_MTU + CONFIG_NET_GUARDSIZE];
 
 /* Polling logic */
 
-static int  lo_txpoll(FAR struct net_driver_s *dev);
+static int  lo_loopback(FAR struct net_driver_s *dev);
+static void lo_loopback_work(FAR void *arg);
 static void lo_poll_work(FAR void *arg);
 static void lo_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
-static int lo_ifup(FAR struct net_driver_s *dev);
-static int lo_ifdown(FAR struct net_driver_s *dev);
+static int  lo_ifup(FAR struct net_driver_s *dev);
+static int  lo_ifdown(FAR struct net_driver_s *dev);
 static void lo_txavail_work(FAR void *arg);
-static int lo_txavail(FAR struct net_driver_s *dev);
+static int  lo_txavail(FAR struct net_driver_s *dev);
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
-static int lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
+static int  lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #ifdef CONFIG_NET_IGMP
-static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
+static int  lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
 static int  lo_ioctl(FAR struct net_driver_s *dev, int cmd,
               unsigned long arg);
 #endif
+static int lo_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
+              FAR struct ieee802154_frame_meta_s *meta);
+static int lo_req_data(FAR struct ieee802154_driver_s *netdev,
+              FAR struct ieee802154_frame_meta_s *meta,
+              FAR struct iob_s *frames);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lo_txpoll
+ * Name: lo_loopback
  *
  * Description:
  *   Check if the network has any outgoing packets ready to send.  This is
@@ -162,7 +174,7 @@ static int  lo_ioctl(FAR struct net_driver_s *dev, int cmd,
  *
  ****************************************************************************/
 
-static int lo_txpoll(FAR struct net_driver_s *dev)
+static int lo_loopback(FAR struct net_driver_s *dev)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
   FAR struct iob_s *head;
@@ -271,6 +283,34 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
+ * Name: lo_loopback_work
+ *
+ * Description:
+ *   Perform loopback of received frames.
+ *
+ * Parameters:
+ *   arg - The argument passed when work_queue() as called.
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *   The network is locked
+ *
+ ****************************************************************************/
+
+static void lo_loopback_work(FAR void *arg)
+{
+  FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)arg;
+
+  /* Perform the loopback */
+
+  net_lock();
+  (void)lo_loopback(&priv->lo_ieee.i_dev);
+  net_unlock();
+}
+
+/****************************************************************************
  * Name: lo_poll_work
  *
  * Description:
@@ -295,7 +335,7 @@ static void lo_poll_work(FAR void *arg)
 
   net_lock();
   priv->lo_txdone = false;
-  (void)devif_timer(&priv->lo_ieee.i_dev, lo_txpoll);
+  (void)devif_timer(&priv->lo_ieee.i_dev, lo_loopback);
 
   /* Was something received and looped back? */
 
@@ -304,7 +344,7 @@ static void lo_poll_work(FAR void *arg)
       /* Yes, poll again for more TX data */
 
       priv->lo_txdone = false;
-      (void)devif_poll(&priv->lo_ieee.i_dev, lo_txpoll);
+      (void)devif_poll(&priv->lo_ieee.i_dev, lo_loopback);
     }
 
   /* Setup the watchdog poll timer again */
@@ -458,7 +498,7 @@ static void lo_txavail_work(FAR void *arg)
           /* If so, then poll the network for new XMIT data */
 
           priv->lo_txdone = false;
-          (void)devif_poll(&priv->lo_ieee.i_dev, lo_txpoll);
+          (void)devif_poll(&priv->lo_ieee.i_dev, lo_loopback);
         }
       while (priv->lo_txdone);
     }
@@ -492,8 +532,8 @@ static int lo_txavail(FAR struct net_driver_s *dev)
   ninfo("Available: %u\n", work_available(&priv->lo_work));
 
   /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions and we will have to ignore the Tx
-   * availability action.
+   * pending actions and we will have to ignore the Tx availability
+   * action.
    */
 
   if (work_available(&priv->lo_work))
@@ -645,6 +685,92 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
 #endif
 
 /****************************************************************************
+ * Name: lo_get_mhrlen
+ *
+ * Description:
+ *   Calculate the MAC header length given the frame meta-data.
+ *
+ ****************************************************************************/
+
+static int lo_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
+                         FAR struct ieee802154_frame_meta_s *meta)
+{
+  return MAC_HDRLEN;
+}
+
+/****************************************************************************
+ * Name: lo_req_data
+ *
+ * Description:
+ *   The MCPS-DATA.request primitive requests the transfer of a data SPDU
+ *   (i.e., MSDU) from a local SSCS entity to a single peer SSCS entity.
+ *   Confirmation is returned via the
+ *   struct ieee802154_maccb_s->conf_data callback.
+ *
+ ****************************************************************************/
+
+static int lo_req_data(FAR struct ieee802154_driver_s *netdev,
+                       FAR struct ieee802154_frame_meta_s *meta,
+                       FAR struct iob_s *frames)
+{
+  FAR struct lo_driver_s *priv;
+  FAR struct iob_s *iob;
+
+  DEBUGASSERT(netdev != NULL && netdev->i_dev.d_private != NULL && iob != NULL);
+  priv = (FAR struct lo_driver_s *)netdev->i_dev.d_private;
+
+  /* Add the incoming list of frames to queue of frames to loopback */
+
+  for (iob = frames; iob != NULL; iob = frames)
+    {
+      /* Increment statistics */
+
+      NETDEV_RXPACKETS(&priv->lo_ieee.i_dev);
+
+      /* Remove the IOB from the queue */
+
+      frames        = iob->io_flink;
+      iob->io_flink = NULL;
+
+      /* Just zero the MAC header for test purposes */
+
+      DEBUGASSERT(iob->io_offset == MAC_HDRLEN);
+      memset(iob->io_data, 0, MAC_HDRLEN);
+
+      /* Add the IOB to the tail of teh queue of frames to be looped back */
+
+      if (priv->tail == NULL)
+        {
+          priv->head = iob;
+        }
+      else
+        {
+          priv->tail->io_flink = iob;
+        }
+
+      /* Find the new tail of the IOB queue */
+
+      for (priv->tail = iob, iob = iob->io_flink;
+           iob != NULL;
+           priv->tail = iob, iob = iob->io_flink);
+    }
+
+  /* Is our single work structure available?  It may not be if there are
+   * pending actions and we will have to ignore the Tx availability
+   * action.
+   */
+
+  if (work_available(&priv->lo_work))
+    {
+      /* Schedule to serialize the poll on the worker thread. */
+
+      work_queue(LPBKWORK, &priv->lo_work, lo_loopback_work, priv, 0);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -666,7 +792,8 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
 
 int ieee8021514_loopback(void)
 {
-  FAR struct lo_driver_s  *priv;
+  FAR struct lo_driver_s *priv;
+  FAR struct ieee802154_driver_s *ieee;
   FAR struct net_driver_s *dev;
 
   ninfo("Initializing\n");
@@ -679,27 +806,33 @@ int ieee8021514_loopback(void)
 
   memset(priv, 0, sizeof(struct lo_driver_s));
 
-  dev            = &priv->lo_ieee.i_dev;
-  dev->d_ifup    = lo_ifup;       /* I/F up (new IP address) callback */
-  dev->d_ifdown  = lo_ifdown;     /* I/F down callback */
-  dev->d_txavail = lo_txavail;    /* New TX data callback */
+  ieee               = &priv->lo_ieee;
+  dev                = &ieee->i_dev;
+  dev->d_ifup        = lo_ifup;          /* I/F up (new IP address) callback */
+  dev->d_ifdown      = lo_ifdown;        /* I/F down callback */
+  dev->d_txavail     = lo_txavail;       /* New TX data callback */
 #ifdef CONFIG_NET_IGMP
-  dev->d_addmac  = lo_addmac;     /* Add multicast MAC address */
-  dev->d_rmmac   = lo_rmmac;      /* Remove multicast MAC address */
+  dev->d_addmac      = lo_addmac;        /* Add multicast MAC address */
+  dev->d_rmmac       = lo_rmmac;         /* Remove multicast MAC address */
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
-  dev->d_ioctl   = lo_ioctl;      /* Handle network IOCTL commands */
+  dev->d_ioctl       = lo_ioctl;         /* Handle network IOCTL commands */
 #endif
-  dev->d_buf     = g_iobuffer;    /* Attach the IO buffer */
-  dev->d_private = (FAR void *)priv; /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->lo_polldog = wd_create(); /* Create periodic poll timer */
+  dev->d_buf         = g_iobuffer;       /* Attach the IO buffer */
+  dev->d_private     = (FAR void *)priv; /* Used to recover private state from dev */
 
   /* Initialize the DSN to a "random" value */
 
-  priv->lo_ieee.i_dsn = 42;
+  ieee->i_dsn        = 42;
+
+  /* Initialize the Network frame-related callbacks */
+
+  ieee->i_get_mhrlen = lo_get_mhrlen;    /* Get MAC header length */
+  ieee->i_req_data   = lo_req_data;      /* Enqueue frame for transmission */
+
+  /* Create a watchdog for timing polling for and timing of transmissions */
+
+  priv->lo_polldog  = wd_create();     /* Create periodic poll timer */
 
   /* Register the loopabck device with the OS so that socket IOCTLs can b
    * performed.

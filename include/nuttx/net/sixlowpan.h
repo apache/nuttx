@@ -402,6 +402,8 @@
  *    frame list.
  */
 
+struct ieee802154_frame_meta_s; /* Forward reference */
+
 struct ieee802154_driver_s
 {
   /* This definitiona must appear first in the structure definition to
@@ -498,6 +500,33 @@ struct ieee802154_driver_s
 
   systime_t i_time;
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
+
+  /* MAC network driver callback functions **********************************/
+  /**************************************************************************
+   * Name: mac802154_get_mhrlen
+   *
+   * Description:
+   *   Calculate the MAC header length given the frame meta-data.
+   *
+   **************************************************************************/
+
+  CODE int (*i_get_mhrlen)(FAR struct ieee802154_driver_s *netdev,
+                           FAR struct ieee802154_frame_meta_s *meta);
+
+  /**************************************************************************
+   * Name: mac802154_req_data
+   *
+   * Description:
+   *   The MCPS-DATA.request primitive requests the transfer of a data SPDU
+   *   (i.e., MSDU) from a local SSCS entity to a single peer SSCS entity.
+   *   Confirmation is returned via the
+   *   struct ieee802154_maccb_s->conf_data callback.
+   *
+   **************************************************************************/
+
+  CODE int (*i_req_data)(FAR struct ieee802154_driver_s *netdev,
+                         FAR struct ieee802154_frame_meta_s *meta,
+                         FAR struct iob_s *frames);
 };
 
 /****************************************************************************

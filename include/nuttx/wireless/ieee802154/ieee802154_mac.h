@@ -479,7 +479,7 @@ struct ieee802154_frame_meta_s
   enum ieee802154_addr_mode_e src_addr_mode;  /* Source Address Mode */
   struct ieee802154_addr_s dest_addr;         /* Destination Address */
 
-  uint8_t msdu_handle;    /* Handle assoc. with MSDU */
+  uint8_t msdu_handle;        /* Handle assoc. with MSDU */
 
   /* Number of bytes contained in the MAC Service Data Unit (MSDU)
    * to be transmitted by the MAC sublayer enitity
