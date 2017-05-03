@@ -1454,8 +1454,8 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_I2C_POLLED
-static int stm32_i2c2_isr(int irq, void *context, FAR void *arg)
+#ifndef CONFIG_I2C_POLLED
+static int stm32_i2c_isr(int irq, void *context, FAR void *arg)
 {
   struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s *)arg;
 
