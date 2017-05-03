@@ -1776,7 +1776,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
            * sequence.  Otherwise, additional bytes may be received.
            */
 
-#ifdef CONFIG_I2C_POLLED
+#ifndef CONFIG_I2C_POLLED
           irqstate_t state = enter_critical_section();
 #endif
           /* Receive a byte */
@@ -1793,7 +1793,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 
           priv->dcnt--;
 
-#ifdef CONFIG_I2C_POLLED
+#ifndef CONFIG_I2C_POLLED
           leave_critical_section(state);
 #endif
         }
