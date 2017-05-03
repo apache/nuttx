@@ -1306,7 +1306,7 @@ static int stm32f0_i2c_isr_process(struct stm32f0_i2c_priv_s *priv)
            * device.
            */
 
-#ifdef CONFIG_I2C_POLLED
+#ifndef CONFIG_I2C_POLLED
           irqstate_t flags = enter_critical_section();
 #endif
           /* Receive a byte */
@@ -1321,7 +1321,7 @@ static int stm32f0_i2c_isr_process(struct stm32f0_i2c_priv_s *priv)
               /* autoend? */
             }
 
-#ifdef CONFIG_I2C_POLLED
+#ifndef CONFIG_I2C_POLLED
           leave_critical_section(flags);
 #endif
         }
