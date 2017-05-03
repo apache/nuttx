@@ -66,9 +66,6 @@
 #include "bcmf_sdio_core.h"
 #include "bcmf_sdio_regs.h"
 
-// TODO remove
-#include "bcmf_ioctl.h"
-
 /* Supported chip configurations */
 #ifdef CONFIG_IEEE80211_BROADCOM_BCM43362
   extern const struct bcmf_sdio_chip bcmf_43362_config_sdio;

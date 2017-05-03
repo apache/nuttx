@@ -36,90 +36,53 @@
  * Custom OID/ioctl definitions for
  * Broadcom 802.11abg Networking Device Driver
  */
-#ifndef _wlioctl_h_
-#define    _wlioctl_h_
+#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_IOCTL_H
+#define __DRIVERS_WIRELESS_IEEE80211_BCMF_IOCTL_H
 
 #include <stdint.h>
+#include <net/ethernet.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#define ACTION_FRAME_SIZE 1040
 typedef uint16_t wl_chanspec_t;
 typedef uint16_t chanspec_t;
-#define    ETHER_ADDR_LEN        6
-typedef struct ether_addr_dup
-{
-    uint8_t octet[ETHER_ADDR_LEN];
-} wl_ether_addr_t;
-struct wl_ether_header
-{
-    uint8_t   ether_dhost[ETHER_ADDR_LEN];
-    uint8_t   ether_shost[ETHER_ADDR_LEN];
-    uint16_t  ether_type;
-};
+
+#define ACTION_FRAME_SIZE 1040
+
 typedef struct wl_action_frame
 {
-    wl_ether_addr_t  da;
-    uint16_t         len;
-    uint32_t         packetId;
-    uint8_t          data[ACTION_FRAME_SIZE];
+    struct ether_addr da;
+    uint16_t          len;
+    uint32_t          packetId;
+    uint8_t           data[ACTION_FRAME_SIZE];
 } wl_action_frame_t;
-/* ether types */
-#define ETHER_TYPE_LEN      2
-#define ETHER_TYPE_MIN      0x0600      /* Anything less than MIN is a length */
-#define ETHER_TYPE_IP       0x0800      /* IP */
-#define ETHER_TYPE_ARP      0x0806      /* ARP */
-#define ETHER_TYPE_8021Q    0x8100      /* 802.1Q */
-#define ETHER_TYPE_802_1X   0x888e      /* 802.1x */
-#ifdef BCMWAPI_WPI
-#define ETHER_TYPE_WAI      0x88b4      /* WAPI WAI */
-#endif /* BCMWAPI_WPI */
-#define ETHER_TYPE_802_1X_PREAUTH 0x88c7    /* 802.1x preauthentication */
-#define WL_WIFI_ACTION_FRAME_SIZE sizeof(struct wl_action_frame)
-#define BWL_DEFAULT_PACKING
 
-#define RWL_ACTION_WIFI_CATEGORY    127
-#define RWL_WIFI_OUI_BYTE1        0x90
-#define RWL_WIFI_OUI_BYTE2        0x4C
-#define RWL_WIFI_OUI_BYTE3        0x0F
-#define RWL_WIFI_ACTION_FRAME_SIZE    sizeof(struct dot11_action_wifi_vendor_specific)
-#define RWL_WIFI_DEFAULT                0x00
-#define RWL_WIFI_FIND_MY_PEER        0x09
-#define RWL_WIFI_FOUND_PEER        0x0A
-#define RWL_ACTION_WIFI_FRAG_TYPE    0x55
 typedef struct ssid_info
 {
     uint8_t ssid_len;
     uint8_t ssid[32];
 } ssid_info_t;
+
 typedef struct cnt_rx
 {
     uint32_t cnt_rxundec;
     uint32_t cnt_rxframe;
 } cnt_rx_t;
-#define RWL_REF_MAC_ADDRESS_OFFSET    17
-#define RWL_DUT_MAC_ADDRESS_OFFSET    23
-#define RWL_WIFI_CLIENT_CHANNEL_OFFSET    50
-#define RWL_WIFI_SERVER_CHANNEL_OFFSET    51
-#define    WL_BSS_INFO_VERSION    108
-#define MCSSET_LEN    16
+
+#define MCSSET_LEN 16
 
 typedef struct wl_bss_info {
     uint32_t      version;                /* version field */
     uint32_t      length;                 /* byte length of data in this record,   */
                                           /* starting at version and including IEs */
-    wl_ether_addr_t BSSID;
+    struct ether_addr BSSID;
     uint16_t      beacon_period;          /* units are Kusec */
     uint16_t      capability;             /* Capability information */
     uint8_t       SSID_len;
     uint8_t       SSID[32];
     struct {
-        uint32_t    count;                /* # rates in this set */
+        uint32_t  count;                  /* # rates in this set */
         uint8_t   rates[16];              /* rates in 500kbps units w/hi bit set if basic */
     } rateset;                            /* supported rates */
-    wl_chanspec_t  chanspec;              /* chanspec for bss */
+    wl_chanspec_t chanspec;               /* chanspec for bss */
     uint16_t      atim_window;            /* units are Kusec */
     uint8_t       dtim_period;            /* DTIM period */
     int16_t       RSSI;                   /* receive signal strength (in dBm) */
@@ -145,15 +108,17 @@ typedef struct wlc_ssid
     uint32_t SSID_len;
     uint8_t  SSID[32];
 } wlc_ssid_t;
+
 #define WL_BSSTYPE_INFRA 1
 #define WL_BSSTYPE_INDEP 0
 #define WL_BSSTYPE_ANY   2
 #define WL_SCANFLAGS_PASSIVE 0x01
 #define WL_SCANFLAGS_PROHIBITED    0x04
+
 typedef struct wl_scan_params
 {
     wlc_ssid_t         ssid;
-    wl_ether_addr_t  bssid;
+    struct ether_addr  bssid;
     int8_t             bss_type;
     int8_t             scan_type;
     int32_t            nprobes;
@@ -163,6 +128,7 @@ typedef struct wl_scan_params
     int32_t            channel_num;
     uint16_t           channel_list[1];
 } wl_scan_params_t;
+
 #define WL_SCAN_PARAMS_FIXED_SIZE          (64)
 #define WL_SCAN_PARAMS_COUNT_MASK  (0x0000ffff)
 #define WL_SCAN_PARAMS_NSSID_SHIFT         (16)
@@ -170,6 +136,7 @@ typedef struct wl_scan_params
 #define WL_SCAN_ACTION_CONTINUE             (2)
 #define WL_SCAN_ACTION_ABORT                (3)
 #define ISCAN_REQ_VERSION                   (1)
+
 typedef struct wl_iscan_params
 {
     uint32_t          version;
@@ -177,7 +144,9 @@ typedef struct wl_iscan_params
     uint16_t          scan_duration;
     wl_scan_params_t  params;
 } wl_iscan_params_t;
+
 #define WL_ISCAN_PARAMS_FIXED_SIZE (offsetof(wl_iscan_params_t, params) + sizeof(wlc_ssid_t))
+
 typedef struct wl_scan_results
 {
     uint32_t       buflen;
@@ -185,6 +154,7 @@ typedef struct wl_scan_results
     uint32_t       count;
     wl_bss_info_t  bss_info[1];
 } wl_scan_results_t;
+
 #define WL_SCAN_RESULTS_FIXED_SIZE  (12)
 #define WL_SCAN_RESULTS_SUCCESS         (0)
 #define WL_SCAN_RESULTS_PARTIAL         (1)
@@ -192,6 +162,7 @@ typedef struct wl_scan_results
 #define WL_SCAN_RESULTS_ABORTED         (3)
 #define WL_SCAN_RESULTS_NO_MEM         (4)
 #define ESCAN_REQ_VERSION 1
+
 typedef struct wl_escan_params
 {
     uint32_t          version;
@@ -199,7 +170,9 @@ typedef struct wl_escan_params
     uint16_t          sync_id;
     wl_scan_params_t  params;
 } wl_escan_params_t;
+
 #define WL_ESCAN_PARAMS_FIXED_SIZE (offsetof(wl_escan_params_t, params) + sizeof(wlc_ssid_t))
+
 typedef struct wl_escan_result
 {
     uint32_t       buflen;
@@ -208,15 +181,19 @@ typedef struct wl_escan_result
     uint16_t       bss_count;
     wl_bss_info_t  bss_info[1];
 } wl_escan_result_t;
+
 #define WL_ESCAN_RESULTS_FIXED_SIZE (sizeof(wl_escan_result_t) - sizeof(wl_bss_info_t))
+
 typedef struct wl_iscan_results
 {
     uint32_t           status;
     wl_scan_results_t  results;
 } wl_iscan_results_t;
+
 #define WL_ISCAN_RESULTS_FIXED_SIZE \
     (WL_SCAN_RESULTS_FIXED_SIZE + offsetof(wl_iscan_results_t, results))
 #define WL_MAXRATES_IN_SET      16  /* max # of rates in a rateset */
+
 typedef struct wl_rateset
 {
     uint32_t  count;          /* # rates in this set */
@@ -230,20 +207,16 @@ typedef struct wl_uint32_list
 } wl_uint32_list_t;
 
 typedef struct wl_join_scan_params {
-    uint8_t scan_type;                /* 0 use default, active or passive scan */
-    int32_t nprobes;                  /* -1 use default, number of probes per channel */
-    int32_t active_time;              /* -1 use default, dwell time per channel for
-                     * active scanning
-                     */
-    int32_t passive_time;             /* -1 use default, dwell time per channel
-                     * for passive scanning
-                     */
-    int32_t home_time;                /* -1 use default, dwell time for the home channel
-                     * between channel scans
-                     */
+    uint8_t scan_type;    /* 0 use default, active or passive scan */
+    int32_t nprobes;      /* -1 use default, number of probes per channel */
+    int32_t active_time;  /* -1 use default, dwell time per channel for
+                           * active scanning */
+    int32_t passive_time; /* -1 use default, dwell time per channel
+                           * for passive scanning */
+    int32_t home_time;    /* -1 use default, dwell time for the home channel
+                           * between channel scans */
 } wl_join_scan_params_t;
 
-#if !defined(ESTA_POSTMOGRIFY_REMOVAL)
 #define NRATE_MCS_INUSE            (0x00000080)
 #define NRATE_RATE_MASK         (0x0000007f)
 #define NRATE_STF_MASK            (0x0000ff00)
@@ -271,19 +244,23 @@ typedef struct wl_join_scan_params {
 #define ANT_SELCFG_RX_UNICAST             (1)
 #define ANT_SELCFG_TX_DEF                 (2)
 #define ANT_SELCFG_RX_DEF                 (3)
+
 typedef struct
 {
     uint8_t ant_config[ANT_SELCFG_MAX];
     uint8_t num_antcfg;
 } wlc_antselcfg_t;
+
 #define HIGHEST_SINGLE_STREAM_MCS    (7)
 #define WLC_CNTRY_BUF_SZ    (4)
+
 typedef struct wl_country
 {
     int8_t    country_abbrev[WLC_CNTRY_BUF_SZ];
     int32_t rev;
     int8_t ccode[WLC_CNTRY_BUF_SZ];
 } wl_country_t;
+
 typedef struct wl_channels_in_country
 {
     uint32_t buflen;
@@ -292,6 +269,7 @@ typedef struct wl_channels_in_country
     uint32_t count;
     uint32_t channel[1];
 } wl_channels_in_country_t;
+
 typedef struct wl_country_list
 {
     uint32_t buflen;
@@ -300,14 +278,16 @@ typedef struct wl_country_list
     uint32_t count;
     int8_t country_abbrev[1];
 } wl_country_list_t;
-#define WL_NUM_RPI_BINS        8
-#define WL_RM_TYPE_BASIC    1
-#define WL_RM_TYPE_CCA        2
-#define WL_RM_TYPE_RPI        3
-#define WL_RM_FLAG_PARALLEL    (1<<0)
-#define WL_RM_FLAG_LATE        (1<<1)
-#define WL_RM_FLAG_INCAPABLE    (1<<2)
-#define WL_RM_FLAG_REFUSED    (1<<3)
+
+#define WL_NUM_RPI_BINS      8
+#define WL_RM_TYPE_BASIC     1
+#define WL_RM_TYPE_CCA       2
+#define WL_RM_TYPE_RPI       3
+#define WL_RM_FLAG_PARALLEL  (1<<0)
+#define WL_RM_FLAG_LATE      (1<<1)
+#define WL_RM_FLAG_INCAPABLE (1<<2)
+#define WL_RM_FLAG_REFUSED   (1<<3)
+
 typedef struct wl_rm_req_elt
 {
     int8_t type;
@@ -318,6 +298,7 @@ typedef struct wl_rm_req_elt
     uint32_t tsf_l;
     uint32_t dur;
 } wl_rm_req_elt_t;
+
 typedef struct wl_rm_req
 {
     uint32_t token;
@@ -326,7 +307,9 @@ typedef struct wl_rm_req
     void* cb_arg;
     wl_rm_req_elt_t req[1];
 } wl_rm_req_t;
+
 #define WL_RM_REQ_FIXED_LEN    offsetof(wl_rm_req_t, req)
+
 typedef struct wl_rm_rep_elt
 {
     int8_t type;
@@ -339,8 +322,10 @@ typedef struct wl_rm_rep_elt
     uint32_t len;
     uint8_t data[1];
 } wl_rm_rep_elt_t;
+
 #define WL_RM_REP_ELT_FIXED_LEN    24
 #define WL_RPI_REP_BIN_NUM 8
+
 typedef struct wl_rm_rpi_rep
 {
     uint8_t rpi[WL_RPI_REP_BIN_NUM];
@@ -352,25 +337,29 @@ typedef struct wl_rm_rep
     uint32_t len;
     wl_rm_rep_elt_t rep[1];
 } wl_rm_rep_t;
+
 #define WL_RM_REP_FIXED_LEN    8
-#endif
-#define    CRYPTO_ALGO_OFF            0
-#define    CRYPTO_ALGO_WEP1        1
-#define    CRYPTO_ALGO_TKIP        2
-#define    CRYPTO_ALGO_WEP128        3
-#define CRYPTO_ALGO_AES_CCM        4
-#define CRYPTO_ALGO_AES_OCB_MSDU    5
-#define CRYPTO_ALGO_AES_OCB_MPDU    6
-#define CRYPTO_ALGO_NALG        7
-#define WSEC_GEN_MIC_ERROR    0x0001
-#define WSEC_GEN_REPLAY        0x0002
-#define WSEC_GEN_ICV_ERROR    0x0004
-#define WL_SOFT_KEY    (1 << 0)
-#define WL_PRIMARY_KEY    (1 << 1)
-#define WL_KF_RES_4    (1 << 4)
-#define WL_KF_RES_5    (1 << 5)
-#define WL_IBSS_PEER_GROUP_KEY    (1 << 6)
-#define DOT11_MAX_KEY_SIZE    32
+
+#define CRYPTO_ALGO_OFF          0
+#define CRYPTO_ALGO_WEP1         1
+#define CRYPTO_ALGO_TKIP         2
+#define CRYPTO_ALGO_WEP128       3
+#define CRYPTO_ALGO_AES_CCM      4
+#define CRYPTO_ALGO_AES_OCB_MSDU 5
+#define CRYPTO_ALGO_AES_OCB_MPDU 6
+#define CRYPTO_ALGO_NALG         7
+
+#define WSEC_GEN_MIC_ERROR 0x0001
+#define WSEC_GEN_REPLAY    0x0002
+#define WSEC_GEN_ICV_ERROR 0x0004
+
+#define WL_SOFT_KEY            (1 << 0)
+#define WL_PRIMARY_KEY         (1 << 1)
+#define WL_KF_RES_4            (1 << 4)
+#define WL_KF_RES_5            (1 << 5)
+#define WL_IBSS_PEER_GROUP_KEY (1 << 6)
+#define DOT11_MAX_KEY_SIZE     32
+
 typedef struct wl_wsec_key
 {
     uint32_t index;
@@ -389,11 +378,13 @@ typedef struct wl_wsec_key
         uint16_t lo;
     } rxiv;
     uint32_t pad_5[2];
-    wl_ether_addr_t ea;
+    struct ether_addr ea;
 } wl_wsec_key_t;
+
 #define WSEC_MIN_PSK_LEN    8
 #define WSEC_MAX_PSK_LEN    64
 #define WSEC_PASSPHRASE        (1<<0)
+
 typedef struct
 {
     uint16_t key_len;
@@ -407,98 +398,93 @@ typedef struct
 #define TKIP_ENABLED                0x0002
 #define AES_ENABLED                 0x0004
 #define WSEC_SWFLAG                 0x0008
-#ifdef BCMCCX
-#define CKIP_KP_ENABLED             0x0010
-#define CKIP_MIC_ENABLED            0x0020
-#endif
 #define SES_OW_ENABLED              0x0040
-#ifdef WLFIPS
-#define FIPS_ENABLED                0x0080
-#endif
-#ifdef BCMWAPI_WPI
-#define SMS4_ENABLED                0x0100
-#endif
 #define WPA_AUTH_DISABLED           0x0000
 #define WPA_AUTH_NONE               0x0001
 #define WPA_AUTH_UNSPECIFIED        0x0002
 #define WPA_AUTH_PSK                0x0004
-#if defined(BCMCCX) || defined(BCMEXTCCX)
-#define WPA_AUTH_CCKM               0x0008
-#define WPA2_AUTH_CCKM              0x0010
-#endif
 #define WPA2_AUTH_UNSPECIFIED       0x0040
 #define WPA2_AUTH_PSK               0x0080
 #define BRCM_AUTH_PSK               0x0100
 #define BRCM_AUTH_DPT               0x0200
-#ifdef BCMWAPI_WPI
-#define WPA_AUTH_WAPI               0x0400
-#endif
 #define WPA_AUTH_PFN_ANY            0xffffffff
-#define    MAXPMKID                 16
+#define MAXPMKID                    16
 #define WPA2_PMKID_LEN              16
+
 typedef struct _pmkid
 {
-    wl_ether_addr_t BSSID;
+    struct ether_addr BSSID;
     uint8_t PMKID[WPA2_PMKID_LEN];
 } pmkid_t;
+
 typedef struct _pmkid_list
 {
     uint32_t npmkid;
     pmkid_t pmkid[1];
 } pmkid_list_t;
+
 typedef struct _pmkid_cand
 {
-    wl_ether_addr_t BSSID;
+    struct ether_addr BSSID;
     uint8_t preauth;
 } pmkid_cand_t;
+
 typedef struct _pmkid_cand_list
 {
     uint32_t npmkid_cand;
     pmkid_cand_t pmkid_cand[1];
 } pmkid_cand_list_t;
-#if !defined(ESTA_POSTMOGRIFY_REMOVAL)
+
 typedef struct wl_led_info
 {
     uint32_t index;
     uint32_t behavior;
     uint8_t activehi;
 } wl_led_info_t;
+
 struct wl_dot11_assoc_req
 {
     uint16_t capability;
     uint16_t listen;
 };
+
 struct wl_dot11_assoc_resp
 {
     uint16_t capability;
     uint16_t status;
     uint16_t aid;
 };
+
 typedef struct wl_assoc_info
 {
     uint32_t req_len;
     uint32_t resp_len;
     uint32_t flags;
     struct wl_dot11_assoc_req req;
-    wl_ether_addr_t reassoc_bssid;
+    struct ether_addr reassoc_bssid;
     struct wl_dot11_assoc_resp resp;
 } wl_assoc_info_t;
+
 #define WLC_ASSOC_REQ_IS_REASSOC 0x01
+
 typedef struct
 {
     uint32_t byteoff;
     uint32_t nbytes;
     uint16_t buf[1];
 } srom_rw_t;
+
 typedef struct
 {
     uint32_t source;
     uint32_t byteoff;
     uint32_t nbytes;
 } cis_rw_t;
-#define WLC_CIS_DEFAULT    0
+
+#define WLC_CIS_DEFAULT 0
 #define WLC_CIS_SROM    1
-#define WLC_CIS_OTP    2
+#define WLC_CIS_OTP     2
+
 typedef struct
 {
     uint32_t byteoff;
@@ -506,9 +492,11 @@ typedef struct
     uint32_t size;
     uint32_t band;
 } rw_reg_t;
-#define WL_ATTEN_APP_INPUT_PCL_OFF    0
+
+#define WL_ATTEN_APP_INPUT_PCL_OFF 0
 #define WL_ATTEN_PCL_ON            1
-#define WL_ATTEN_PCL_OFF        2
+#define WL_ATTEN_PCL_OFF           2
+
 typedef struct
 {
     uint16_t auto_ctrl;
@@ -516,6 +504,7 @@ typedef struct
     uint16_t radio;
     uint16_t txctl1;
 } atten_t;
+
 struct wme_tx_params_s
 {
     uint8_t short_retry;
@@ -525,19 +514,21 @@ struct wme_tx_params_s
     uint16_t max_rate;
 };
 typedef struct wme_tx_params_s wme_tx_params_t;
+
 #define WL_WME_TX_PARAMS_IO_BYTES (sizeof(wme_tx_params_t) * AC_COUNT)
 #define WL_PWRIDX_PCL_OFF    -2
 #define WL_PWRIDX_PCL_ON    -1
 #define WL_PWRIDX_LOWER_LIMIT    -2
 #define WL_PWRIDX_UPPER_LIMIT    63
-#endif
+
 typedef struct
 {
     uint32_t val;
-    wl_ether_addr_t ea;
+    struct ether_addr ea;
 } scb_val_t;
-#if !defined(ESTA_POSTMOGRIFY_REMOVAL)
+
 #define BCM_MAC_STATUS_INDICATION    (0x40010200L)
+
 typedef struct
 {
     uint16_t ver;
@@ -545,7 +536,7 @@ typedef struct
     uint16_t cap;
     uint32_t flags;
     uint32_t idle;
-    wl_ether_addr_t ea;
+    struct ether_addr ea;
     wl_rateset_t rateset;
     uint32_t in;
     uint32_t listen_interval_inms;
@@ -556,11 +547,12 @@ typedef struct
     uint32_t tx_rate;
     uint32_t rx_rate;
 } sta_info_t;
+
 #define WL_OLD_STAINFO_SIZE    offsetof(sta_info_t, tx_pkts)
-#define WL_STA_VER        2
-#define WL_STA_BRCM        0x1
-#define WL_STA_WME        0x2
-#define WL_STA_ABCAP        0x4
+#define WL_STA_VER             2
+#define WL_STA_BRCM            0x1
+#define WL_STA_WME             0x2
+#define WL_STA_ABCAP           0x4
 #define WL_STA_AUTHE        0x8
 #define WL_STA_ASSOC        0x10
 #define WL_STA_AUTHO        0x20
@@ -574,7 +566,7 @@ typedef struct
 #define WL_STA_N_CAP        0x2000
 #define WL_STA_SCBSTATS        0x4000
 #define WL_WDS_LINKUP        WL_STA_WDS_LINKUP
-#endif
+
 typedef struct channel_info
 {
     int32_t hw_channel;
@@ -584,7 +576,7 @@ typedef struct channel_info
 struct mac_list
 {
     uint32_t count;
-    wl_ether_addr_t ea[1];
+    struct ether_addr ea[1];
 };
 typedef struct get_pktcnt
 {
@@ -603,7 +595,7 @@ typedef struct wl_ioctl
     uint32_t used;
     uint32_t needed;
 } wl_ioctl_t;
-#if !defined(ESTA_POSTMOGRIFY_REMOVAL)
+
 typedef struct wlc_rev_info
 {
     uint32_t vendorid;
@@ -622,26 +614,30 @@ typedef struct wlc_rev_info
     uint32_t phyrev;
     uint32_t anarev;
 } wlc_rev_info_t;
+
 #define WL_REV_INFO_LEGACY_LENGTH    48
 #define WL_BRAND_MAX 10
+
 typedef struct wl_instance_info
 {
     uint32_t instance;
     int8_t brand[WL_BRAND_MAX];
 } wl_instance_info_t;
+
 typedef struct wl_txfifo_sz
 {
     uint8_t fifo;
     uint8_t size;
 } wl_txfifo_sz_t;
+
 #define WLC_IOV_NAME_LEN 30
+
 typedef struct wlc_iov_trx_s
 {
     uint8_t module;
     uint8_t type;
     int8_t name[WLC_IOV_NAME_LEN];
 } wlc_iov_trx_t;
-#endif
 
 #define IOVAR_STR_BSSCFG_WPA_AUTH        "bsscfg:wpa_auth"
 #define IOVAR_STR_BSSCFG_WSEC            "bsscfg:wsec"
@@ -999,9 +995,6 @@ typedef struct wlc_iov_trx_s
 #define WLC_GET_RANDOM_BYTES               ( (uint32_t) 319 )
 #define WLC_LAST                           ( (uint32_t) 320 )
 
-#ifndef EPICTRL_COOKIE
-#define EPICTRL_COOKIE        0xABADCEDE
-#endif
 #define CMN_IOCTL_OFF 0x180
 #define WL_OID_BASE        0xFFE41420
 #define OID_WL_GETINSTANCE    (WL_OID_BASE + WLC_GET_INSTANCE)
@@ -1031,21 +1024,6 @@ typedef struct wlc_iov_trx_s
 #define WL_DECRYPT_STATUS_UNKNOWN    3
 #define WLC_UPGRADE_SUCCESS            0
 #define WLC_UPGRADE_PENDING            1
-#ifdef CONFIG_USBRNDIS_RETAIL
-typedef struct
-{
-    int8_t* name;
-    void* param;
-}ndconfig_item_t;
-#endif
-#ifdef EXT_STA
-typedef struct _wl_assoc_result
-{
-    ulong associated;
-    ulong NDIS_auth;
-    ulong NDIS_infra;
-}wl_assoc_result_t;
-#endif
 #define WL_RADIO_SW_DISABLE        (1<<0)
 #define WL_RADIO_HW_DISABLE        (1<<1)
 #define WL_RADIO_MPC_DISABLE       (1<<2)
@@ -1129,6 +1107,7 @@ typedef struct _wl_assoc_result
 #define WLAN_MANUAL                  (2)
 #define WLAN_AUTO                    (3)
 #define AUTO_ACTIVE             (1 << 7)
+
 typedef struct wl_aci_args
 {
     int32_t enter_aci_thresh;
@@ -1144,8 +1123,9 @@ typedef struct wl_aci_args
     uint16_t nphy_b_energy_md_aci;
     uint16_t nphy_b_energy_hi_aci;
 } wl_aci_args_t;
+
 #define WL_ACI_ARGS_LEGACY_LENGTH    16
-#if !defined(ESTA_POSTMOGRIFY_REMOVAL)
+
 typedef struct
 {
     int32_t npulses;
@@ -1168,26 +1148,30 @@ typedef struct
     uint16_t t2_min;
     uint32_t version;
 } wl_radar_args_t;
+
 #define WL_RADAR_ARGS_VERSION 1
-#define WL_RADAR_DETECTOR_OFF        0
-#define WL_RADAR_DETECTOR_ON        1
-#define WL_RADAR_SIMULATED        2
-#define WL_RSSI_ANT_VERSION    1
-#define WL_RSSI_ANT_MAX        4
+#define WL_RADAR_DETECTOR_OFF 0
+#define WL_RADAR_DETECTOR_ON  1
+#define WL_RADAR_SIMULATED    2
+#define WL_RSSI_ANT_VERSION   1
+#define WL_RSSI_ANT_MAX       4
+
 typedef struct
 {
     uint32_t version;
     uint32_t count;
     int8_t rssi_ant[WL_RSSI_ANT_MAX];
 } wl_rssi_ant_t;
+
 #define WL_DFS_CACSTATE_IDLE        0
-#define    WL_DFS_CACSTATE_PREISM_CAC    1
-#define WL_DFS_CACSTATE_ISM        2
-#define WL_DFS_CACSTATE_CSA        3
-#define WL_DFS_CACSTATE_POSTISM_CAC    4
-#define WL_DFS_CACSTATE_PREISM_OOC    5
-#define WL_DFS_CACSTATE_POSTISM_OOC    6
-#define WL_DFS_CACSTATES        7
+#define WL_DFS_CACSTATE_PREISM_CAC  1
+#define WL_DFS_CACSTATE_ISM         2
+#define WL_DFS_CACSTATE_CSA         3
+#define WL_DFS_CACSTATE_POSTISM_CAC 4
+#define WL_DFS_CACSTATE_PREISM_OOC  5
+#define WL_DFS_CACSTATE_POSTISM_OOC 6
+#define WL_DFS_CACSTATES            7
+
 typedef struct
 {
     uint32_t state;
@@ -1195,7 +1179,9 @@ typedef struct
     wl_chanspec_t chanspec_cleared;
     uint16_t pad;
 } wl_dfs_status_t;
+
 #define NUM_PWRCTRL_RATES 12
+
 typedef struct
 {
     uint8_t txpwr_band_max[NUM_PWRCTRL_RATES];
@@ -1212,23 +1198,25 @@ typedef struct
     int8_t txpwr_antgain[2];
     uint8_t txpwr_est_Pout_gofdm;
 } tx_power_legacy_t;
-#define WL_TX_POWER_RATES    45
-#define WL_TX_POWER_CCK_FIRST    0
-#define WL_TX_POWER_CCK_NUM    4
+
+#define WL_TX_POWER_RATES         45
+#define WL_TX_POWER_CCK_FIRST     0
+#define WL_TX_POWER_CCK_NUM       4
 #define WL_TX_POWER_OFDM_FIRST    4
-#define WL_TX_POWER_OFDM_NUM    8
-#define WL_TX_POWER_MCS_SISO_NUM 8
-#define WL_TX_POWER_MCS20_FIRST    12
-#define WL_TX_POWER_MCS20_NUM    16
-#define WL_TX_POWER_MCS40_FIRST    28
-#define WL_TX_POWER_MCS40_NUM    17
-#define WL_TX_POWER_MCS20SISO_NUM    8
+#define WL_TX_POWER_OFDM_NUM      8
+#define WL_TX_POWER_MCS_SISO_NUM  8
+#define WL_TX_POWER_MCS20_FIRST   12
+#define WL_TX_POWER_MCS20_NUM     16
+#define WL_TX_POWER_MCS40_FIRST   28
+#define WL_TX_POWER_MCS40_NUM     17
+#define WL_TX_POWER_MCS20SISO_NUM 8
 #define WL_TX_POWER_MCS40_LAST    44
-#define WL_TX_POWER_F_ENABLED    1
-#define WL_TX_POWER_F_HW    2
-#define WL_TX_POWER_F_MIMO    4
-#define WL_TX_POWER_F_SISO    8
-#define WL_TX_POWER_F_40M_CAP    16
+#define WL_TX_POWER_F_ENABLED     1
+#define WL_TX_POWER_F_HW          2
+#define WL_TX_POWER_F_MIMO        4
+#define WL_TX_POWER_F_SISO        8
+#define WL_TX_POWER_F_40M_CAP     16
+
 typedef struct
 {
     uint32_t flags;
@@ -1245,37 +1233,39 @@ typedef struct
     uint8_t board_limit[WL_TX_POWER_RATES];
     uint8_t target[WL_TX_POWER_RATES];
 } tx_power_t;
+
 typedef struct tx_inst_power
 {
     uint8_t txpwr_est_Pout[2];
     uint8_t txpwr_est_Pout_gofdm;
 } tx_inst_power_t;
-#define WLC_MEASURE_TPC            1
-#define WLC_MEASURE_CHANNEL_BASIC    2
-#define WLC_MEASURE_CHANNEL_CCA        3
-#define WLC_MEASURE_CHANNEL_RPI        4
-#define SPECT_MNGMT_OFF            0
-#define SPECT_MNGMT_LOOSE_11H        1
-#define SPECT_MNGMT_STRICT_11H        2
-#define SPECT_MNGMT_STRICT_11D        3
-#define SPECT_MNGMT_LOOSE_11H_D        4
+
+#define WLC_MEASURE_TPC           1
+#define WLC_MEASURE_CHANNEL_BASIC 2
+#define WLC_MEASURE_CHANNEL_CCA   3
+#define WLC_MEASURE_CHANNEL_RPI   4
+#define SPECT_MNGMT_OFF         0
+#define SPECT_MNGMT_LOOSE_11H   1
+#define SPECT_MNGMT_STRICT_11H  2
+#define SPECT_MNGMT_STRICT_11D  3
+#define SPECT_MNGMT_LOOSE_11H_D 4
 #define WL_CHAN_VALID_HW    (1 << 0)
 #define WL_CHAN_VALID_SW    (1 << 1)
-#define WL_CHAN_BAND_5G        (1 << 2)
-#define WL_CHAN_RADAR        (1 << 3)
+#define WL_CHAN_BAND_5G     (1 << 2)
+#define WL_CHAN_RADAR       (1 << 3)
 #define WL_CHAN_INACTIVE    (1 << 4)
-#define WL_CHAN_PASSIVE        (1 << 5)
-#define WL_CHAN_RESTRICTED    (1 << 6)
-#define    WL_BTC_DISABLE        0
-#define WL_BTC_ENABLE        (1 << 0)
-#define WL_BTC_PREMPT        (1 << 1)
-#define WL_BTC_PARTIAL        (1 << 2)
-#define WL_BTC_DEFAULT        (1 << 3)
-#define WL_BTC_HYBRID        (WL_BTC_ENABLE | WL_BTC_PARTIAL)
-#define WL_INF_BTC_DISABLE      0
-#define WL_INF_BTC_ENABLE       1
-#define WL_INF_BTC_AUTO         3
-#define    WL_BTC_DEFWIRE        0
+#define WL_CHAN_PASSIVE     (1 << 5)
+#define WL_CHAN_RESTRICTED  (1 << 6)
+#define    WL_BTC_DISABLE   0
+#define WL_BTC_ENABLE       (1 << 0)
+#define WL_BTC_PREMPT       (1 << 1)
+#define WL_BTC_PARTIAL      (1 << 2)
+#define WL_BTC_DEFAULT      (1 << 3)
+#define WL_BTC_HYBRID       (WL_BTC_ENABLE | WL_BTC_PARTIAL)
+#define WL_INF_BTC_DISABLE  0
+#define WL_INF_BTC_ENABLE   1
+#define WL_INF_BTC_AUTO     3
+#define WL_BTC_DEFWIRE      0
 #define WL_BTC_2WIRE        2
 #define WL_BTC_3WIRE        3
 #define WL_BTC_4WIRE        4
@@ -1284,85 +1274,79 @@ typedef struct tx_inst_power
 #define WL_BTC_FLAG_ACTIVE_PROT          (1 << 2)
 #define WL_BTC_FLAG_SIM_RSP              (1 << 3)
 #define WL_BTC_FLAG_PS_PROTECT           (1 << 4)
-#define WL_BTC_FLAG_SIM_TX_LP             (1 << 5)
+#define WL_BTC_FLAG_SIM_TX_LP            (1 << 5)
 #define WL_BTC_FLAG_ECI                  (1 << 6)
-#endif
-#define WL_ERROR_VAL        0x00000001
-#define WL_TRACE_VAL        0x00000002
-#define WL_PRHDRS_VAL        0x00000004
-#define WL_PRPKT_VAL        0x00000008
-#define WL_INFORM_VAL        0x00000010
-#define WL_TMP_VAL        0x00000020
-#define WL_OID_VAL        0x00000040
+#define WL_ERROR_VAL       0x00000001
+#define WL_TRACE_VAL       0x00000002
+#define WL_PRHDRS_VAL      0x00000004
+#define WL_PRPKT_VAL       0x00000008
+#define WL_INFORM_VAL      0x00000010
+#define WL_TMP_VAL         0x00000020
+#define WL_OID_VAL         0x00000040
 #define WL_RATE_VAL        0x00000080
-#define WL_ASSOC_VAL        0x00000100
-#define WL_PRUSR_VAL        0x00000200
-#define WL_PS_VAL        0x00000400
-#define WL_TXPWR_VAL        0x00000800
+#define WL_ASSOC_VAL       0x00000100
+#define WL_PRUSR_VAL       0x00000200
+#define WL_PS_VAL          0x00000400
+#define WL_TXPWR_VAL       0x00000800
 #define WL_PORT_VAL        0x00001000
 #define WL_DUAL_VAL        0x00002000
 #define WL_WSEC_VAL        0x00004000
-#define WL_WSEC_DUMP_VAL    0x00008000
-#define WL_LOG_VAL        0x00010000
-#define WL_NRSSI_VAL        0x00020000
+#define WL_WSEC_DUMP_VAL   0x00008000
+#define WL_LOG_VAL         0x00010000
+#define WL_NRSSI_VAL       0x00020000
 #define WL_LOFT_VAL        0x00040000
-#define WL_REGULATORY_VAL    0x00080000
-#define WL_PHYCAL_VAL        0x00100000
-#define WL_RADAR_VAL        0x00200000
-#define WL_MPC_VAL        0x00400000
-#define WL_APSTA_VAL        0x00800000
-#define WL_DFS_VAL        0x01000000
-#define WL_BA_VAL        0x02000000
-#if defined(WLNINTENDO)
-#define WL_NITRO_VAL        0x04000000
-#endif
+#define WL_REGULATORY_VAL  0x00080000
+#define WL_PHYCAL_VAL      0x00100000
+#define WL_RADAR_VAL       0x00200000
+#define WL_MPC_VAL         0x00400000
+#define WL_APSTA_VAL       0x00800000
+#define WL_DFS_VAL         0x01000000
+#define WL_BA_VAL          0x02000000
 #define WL_MBSS_VAL        0x04000000
-#define WL_CAC_VAL        0x08000000
-#define WL_AMSDU_VAL        0x10000000
-#define WL_AMPDU_VAL        0x20000000
-#define WL_FFPLD_VAL        0x40000000
-#if defined(WLNINTENDO)
-#define WL_NIN_VAL        0x80000000
-#endif
+#define WL_CAC_VAL         0x08000000
+#define WL_AMSDU_VAL       0x10000000
+#define WL_AMPDU_VAL       0x20000000
+#define WL_FFPLD_VAL       0x40000000
 #define WL_DPT_VAL         0x00000001
 #define WL_SCAN_VAL        0x00000002
 #define WL_WOWL_VAL        0x00000004
 #define WL_COEX_VAL        0x00000008
 #define WL_RTDC_VAL        0x00000010
-#define WL_BTA_VAL        0x00000040
-#define    WL_LED_NUMGPIO        16
-#define    WL_LED_OFF        0
-#define    WL_LED_ON        1
-#define    WL_LED_ACTIVITY        2
-#define    WL_LED_RADIO        3
-#define    WL_LED_ARADIO        4
-#define    WL_LED_BRADIO        5
-#define    WL_LED_BGMODE        6
-#define    WL_LED_WI1        7
-#define    WL_LED_WI2        8
-#define    WL_LED_WI3        9
-#define    WL_LED_ASSOC        10
-#define    WL_LED_INACTIVE        11
-#define    WL_LED_ASSOCACT        12
-#define    WL_LED_NUMBEHAVIOR    13
-#define    WL_LED_BEH_MASK        0x7f
-#define    WL_LED_AL_MASK        0x80
+#define WL_BTA_VAL         0x00000040
+#define WL_LED_NUMGPIO        16
+#define WL_LED_OFF            0
+#define WL_LED_ON             1
+#define WL_LED_ACTIVITY       2
+#define WL_LED_RADIO          3
+#define WL_LED_ARADIO         4
+#define WL_LED_BRADIO         5
+#define WL_LED_BGMODE         6
+#define WL_LED_WI1            7
+#define WL_LED_WI2            8
+#define WL_LED_WI3            9
+#define WL_LED_ASSOC          10
+#define WL_LED_INACTIVE       11
+#define WL_LED_ASSOCACT       12
+#define WL_LED_NUMBEHAVIOR    13
+#define WL_LED_BEH_MASK       0x7f
+#define WL_LED_AL_MASK        0x80
 #define WL_NUMCHANNELS        64
-#define WL_NUMCHANSPECS        100
-#define WL_WDS_WPA_ROLE_AUTH    0
-#define WL_WDS_WPA_ROLE_SUP    1
-#define WL_WDS_WPA_ROLE_AUTO    255
-#define WL_EVENTING_MASK_LEN    ((WLC_E_LAST + 7) / 8)
+#define WL_NUMCHANSPECS       100
+#define WL_WDS_WPA_ROLE_AUTH  0
+#define WL_WDS_WPA_ROLE_SUP   1
+#define WL_WDS_WPA_ROLE_AUTO  255
+#define WL_EVENTING_MASK_LEN  ((WLC_E_LAST + 7) / 8)
 
-#define VNDR_IE_CMD_LEN        4
-#define VNDR_IE_BEACON_FLAG    0x1
-#define VNDR_IE_PRBRSP_FLAG    0x2
-#define VNDR_IE_ASSOCRSP_FLAG    0x4
-#define VNDR_IE_AUTHRSP_FLAG    0x8
-#define VNDR_IE_PRBREQ_FLAG    0x10
-#define VNDR_IE_ASSOCREQ_FLAG    0x20
-#define VNDR_IE_CUSTOM_FLAG        0x100
-#define VNDR_IE_INFO_HDR_LEN    (sizeof(uint32_t))
+#define VNDR_IE_CMD_LEN       4
+#define VNDR_IE_BEACON_FLAG   0x1
+#define VNDR_IE_PRBRSP_FLAG   0x2
+#define VNDR_IE_ASSOCRSP_FLAG 0x4
+#define VNDR_IE_AUTHRSP_FLAG  0x8
+#define VNDR_IE_PRBREQ_FLAG   0x10
+#define VNDR_IE_ASSOCREQ_FLAG 0x20
+#define VNDR_IE_CUSTOM_FLAG   0x100
+#define VNDR_IE_INFO_HDR_LEN  (sizeof(uint32_t))
+
 struct wl_vndr_ie
 {
     uint8_t id;
@@ -1371,35 +1355,39 @@ struct wl_vndr_ie
     uint8_t data[1];
 };
 typedef struct wl_vndr_ie wl_vndr_ie_t;
+
 typedef struct
 {
     uint32_t pktflag;
     wl_vndr_ie_t vndr_ie_data;
 } vndr_ie_info_t;
+
 typedef struct
 {
     int32_t iecount;
     vndr_ie_info_t vndr_ie_list[1];
 } vndr_ie_buf_t;
+
 typedef struct
 {
     int8_t cmd[VNDR_IE_CMD_LEN];
     vndr_ie_buf_t vndr_ie_buffer;
 } vndr_ie_setbuf_t;
+
 #define WL_JOIN_PREF_RSSI    1
-#define WL_JOIN_PREF_WPA    2
+#define WL_JOIN_PREF_WPA     2
 #define WL_JOIN_PREF_BAND    3
-#define WLJP_BAND_ASSOC_PREF    255
-#define WL_WPA_ACP_MCS_ANY    "\x00\x00\x00\x00"
+#define WLJP_BAND_ASSOC_PREF 255
+#define WL_WPA_ACP_MCS_ANY   "\x00\x00\x00\x00"
+
 struct tsinfo_arg
 {
     uint8_t octets[3];
 };
-#define    NFIFO            6
-#define    WL_CNT_T_VERSION    6
-#define    WL_CNT_EXT_T_VERSION    1
 
-
+#define    NFIFO                6
+#define    WL_CNT_T_VERSION     6
+#define    WL_CNT_EXT_T_VERSION 1
 
 typedef struct
 {
@@ -2214,66 +2202,36 @@ typedef struct wl_mkeep_alive_pkt {
 #define WL_MKEEP_ALIVE_FIXED_LEN    offsetof(wl_mkeep_alive_pkt_t, data)
 #define WL_MKEEP_ALIVE_PRECISION    500
 
-#if !defined(ESTA_POSTMOGRIFY_REMOVAL)
-#ifdef WLBA
-#define    WLC_BA_CNT_VERSION    1
-typedef struct wlc_ba_cnt
-{
-    uint16_t version;
-    uint16_t length;
-    uint32_t txpdu;
-    uint32_t txsdu;
-    uint32_t txfc;
-    uint32_t txfci;
-    uint32_t txretrans;
-    uint32_t txbatimer;
-    uint32_t txdrop;
-    uint32_t txaddbareq;
-    uint32_t txaddbaresp;
-    uint32_t txdelba;
-    uint32_t txba;
-    uint32_t txbar;
-    uint32_t txpad[4];
-    uint32_t rxpdu;
-    uint32_t rxqed;
-    uint32_t rxdup;
-    uint32_t rxnobuf;
-    uint32_t rxaddbareq;
-    uint32_t rxaddbaresp;
-    uint32_t rxdelba;
-    uint32_t rxba;
-    uint32_t rxbar;
-    uint32_t rxinvba;
-    uint32_t rxbaholes;
-    uint32_t rxunexp;
-    uint32_t rxpad[4];
-}wlc_ba_cnt_t;
-#endif
 struct ampdu_tid_control
 {
     uint8_t tid;
     uint8_t enable;
 };
+
 struct wl_msglevel2
 {
     uint32_t low;
     uint32_t high;
 };
+
 struct ampdu_ea_tid
 {
-    wl_ether_addr_t ea;
+    struct ether_addr ea;
     uint8_t tid;
 };
+
 struct ampdu_retry_tid
 {
     uint8_t tid;
     uint8_t retry;
 };
+
 struct ampdu_ba_sizes
 {
     uint8_t ba_tx_wsize;
     uint8_t ba_rx_wsize;
 };
+
 #define    DPT_DISCOVERY_MANUAL    0x01
 #define    DPT_DISCOVERY_AUTO    0x02
 #define    DPT_DISCOVERY_SCAN    0x04
@@ -2287,7 +2245,7 @@ struct ampdu_ba_sizes
 #define DPT_MANUAL_EP_DELETE    3
 typedef struct dpt_iovar
 {
-    wl_ether_addr_t ea;
+    struct ether_addr ea;
     uint8_t mode;
     uint32_t pad;
 } dpt_iovar_t;
@@ -2349,7 +2307,7 @@ typedef struct tspec_arg
 } tspec_arg_t;
 typedef struct tspec_per_sta_arg
 {
-    wl_ether_addr_t ea;
+    struct ether_addr ea;
     struct tspec_arg ts;
 } tspec_per_sta_arg_t;
 typedef struct wme_max_bandwidth
@@ -2366,16 +2324,6 @@ typedef struct wme_max_bandwidth
 #define TSPEC_REJECTED        2
 #define TSPEC_UNKNOWN        3
 #define TSPEC_STATUS_MASK    7
-#ifdef BCMCCX
-#define WL_WLAN_ASSOC_REASON_NORMAL_NETWORK    0
-#define WL_WLAN_ASSOC_REASON_ROAM_FROM_CELLULAR_NETWORK    1
-#define WL_WLAN_ASSOC_REASON_ROAM_FROM_LAN    2
-#define WL_WLAN_ASSOC_REASON_MAX        2
-#endif
-#ifdef WLAFTERBURNER
-#define WL_SWFL_ABBFL        0x0001
-#define WL_SWFL_ABENCORE    0x0002
-#endif
 #define WL_SWFL_NOHWRADIO    0x0004
 #define WL_LIFETIME_MAX 0xFFFF
 typedef struct wl_lifetime
@@ -2390,15 +2338,17 @@ typedef struct wl_chan_switch
     wl_chanspec_t chspec;
     uint8_t reg;
 } wl_chan_switch_t;
-#endif
+
 #define WLC_ROAM_TRIGGER_DEFAULT    0
 #define WLC_ROAM_TRIGGER_BANDWIDTH    1
 #define WLC_ROAM_TRIGGER_DISTANCE    2
 #define WLC_ROAM_TRIGGER_MAX_VALUE    2
+
 enum
 {
     PFN_LIST_ORDER, PFN_RSSI
 };
+
 #define SORT_CRITERIA_BIT        0
 #define AUTO_NET_SWITCH_BIT        1
 #define ENABLE_BKGRD_SCAN_BIT    2
@@ -2410,6 +2360,7 @@ enum
 #define IMMEDIATE_SCAN_MASK        0x08
 #define    AUTO_CONNECT_MASK        0x10
 #define PFN_VERSION            1
+
 typedef struct wl_pfn_param
 {
     int32_t version;
@@ -2418,6 +2369,7 @@ typedef struct wl_pfn_param
     int16_t flags;
     int16_t rssi_margin;
 } wl_pfn_param_t;
+
 typedef struct wl_pfn
 {
     wlc_ssid_t ssid;
@@ -2426,19 +2378,14 @@ typedef struct wl_pfn
     int32_t auth;
     uint32_t wpa_auth;
     int32_t wsec;
-#ifdef WLPFN_AUTO_CONNECT
-union
-{
-    wl_wsec_key_t sec_key;
-    wsec_pmk_t wpa_sec_key;
-}pfn_security;
-#endif
 } wl_pfn_t;
+
 #define TOE_TX_CSUM_OL        0x00000001
 #define TOE_RX_CSUM_OL        0x00000002
 #define TOE_ERRTEST_TX_CSUM    0x00000001
 #define TOE_ERRTEST_RX_CSUM    0x00000002
 #define TOE_ERRTEST_RX_CSUM2    0x00000004
+
 struct toe_ol_stats_t
 {
     uint32_t tx_summed;
@@ -2461,6 +2408,7 @@ struct toe_ol_stats_t
     uint32_t rx_udp_errinj;
     uint32_t rx_icmp_errinj;
 };
+
 #define ARP_OL_AGENT        0x00000001
 #define ARP_OL_SNOOP        0x00000002
 #define ARP_OL_HOST_AUTO_REPLY    0x00000004
@@ -2468,6 +2416,7 @@ struct toe_ol_stats_t
 #define ARP_ERRTEST_REPLY_PEER    0x1
 #define ARP_ERRTEST_REPLY_HOST    0x2
 #define ARP_MULTIHOMING_MAX    8
+
 struct arp_ol_stats_t
 {
     uint32_t host_ip_entries;
@@ -2483,24 +2432,30 @@ struct arp_ol_stats_t
     uint32_t peer_reply_drop;
     uint32_t peer_service;
 };
+
 typedef struct wl_keep_alive_pkt
 {
     uint32_t period_msec;
     uint16_t len_bytes;
     uint8_t data[1];
 } wl_keep_alive_pkt_t;
+
 #define WL_KEEP_ALIVE_FIXED_LEN        offsetof(wl_keep_alive_pkt_t, data)
+
 typedef enum wl_pkt_filter_type
 {
     WL_PKT_FILTER_TYPE_PATTERN_MATCH
 } wl_pkt_filter_type_t;
+
 #define WL_PKT_FILTER_TYPE wl_pkt_filter_type_t
+
 typedef struct wl_pkt_filter_pattern
 {
     uint32_t offset;
     uint32_t size_bytes;
     uint8_t mask_and_pattern[1];
 } wl_pkt_filter_pattern_t;
+
 typedef struct wl_pkt_filter
 {
     uint32_t id;
@@ -2511,30 +2466,37 @@ typedef struct wl_pkt_filter
         wl_pkt_filter_pattern_t pattern;
     } u;
 } wl_pkt_filter_t;
+
 #define WL_PKT_FILTER_FIXED_LEN              offsetof(wl_pkt_filter_t, u)
 #define WL_PKT_FILTER_PATTERN_FIXED_LEN      offsetof(wl_pkt_filter_pattern_t, mask_and_pattern)
+
 typedef struct wl_pkt_filter_enable
 {
     uint32_t id;
     uint32_t enable;
 } wl_pkt_filter_enable_t;
+
 typedef struct wl_pkt_filter_list
 {
     uint32_t num;
     wl_pkt_filter_t filter[1];
 } wl_pkt_filter_list_t;
+
 #define WL_PKT_FILTER_LIST_FIXED_LEN      offsetof(wl_pkt_filter_list_t, filter)
+
 typedef struct wl_pkt_filter_stats
 {
     uint32_t num_pkts_matched;
     uint32_t num_pkts_forwarded;
     uint32_t num_pkts_discarded;
 } wl_pkt_filter_stats_t;
+
 typedef struct wl_seq_cmd_ioctl
 {
     uint32_t cmd;
     uint32_t len;
 } wl_seq_cmd_ioctl_t;
+
 #define WL_SEQ_CMD_ALIGN_BYTES    4
 #define WL_SEQ_CMDS_GET_IOCTL_FILTER(cmd) \
     (((cmd) == WLC_GET_MAGIC)        || \
@@ -2549,6 +2511,7 @@ typedef struct wl_seq_cmd_ioctl
 #define WL_PKTENG_PER_RX_STOP            0x08
 #define WL_PKTENG_PER_MASK            0xff
 #define WL_PKTENG_SYNCHRONOUS            0x100
+
 typedef struct wl_pkteng
 {
     uint32_t flags;
@@ -2556,13 +2519,15 @@ typedef struct wl_pkteng
     uint32_t nframes;
     uint32_t length;
     uint8_t seqno;
-    wl_ether_addr_t dest;
-    wl_ether_addr_t src;
+    struct ether_addr dest;
+    struct ether_addr src;
 } wl_pkteng_t;
+
 #define NUM_80211b_RATES    4
 #define NUM_80211ag_RATES    8
 #define NUM_80211n_RATES    32
 #define NUM_80211_RATES        (NUM_80211b_RATES+NUM_80211ag_RATES+NUM_80211n_RATES)
+
 typedef struct wl_pkteng_stats
 {
     uint32_t lostfrmcnt;
@@ -2570,44 +2535,7 @@ typedef struct wl_pkteng_stats
     int32_t snr;
     uint16_t rxpktcnt[NUM_80211_RATES + 1];
 } wl_pkteng_stats_t;
-#if !defined(BCMDONGLEHOST) || defined(BCMINTERNAL) || defined(WLTEST)
-typedef struct wl_sslpnphy_papd_debug_data
-{
-    uint8_t psat_pwr;
-    uint8_t psat_indx;
-    uint8_t final_idx;
-    uint8_t start_idx;
-    int32_t min_phase;
-    int32_t voltage;
-    int8_t temperature;
-} wl_sslpnphy_papd_debug_data_t;
-typedef struct wl_sslpnphy_debug_data
-{
-    int16_t papdcompRe[64];
-    int16_t papdcompIm[64];
-} wl_sslpnphy_debug_data_t;
-typedef struct wl_sslpnphy_spbdump_data
-{
-    uint16_t tbl_length;
-    int16_t spbreal[256];
-    int16_t spbimg[256];
-} wl_sslpnphy_spbdump_data_t;
-typedef struct wl_sslpnphy_percal_debug_data
-{
-    uint32_t cur_idx;
-    uint32_t tx_drift;
-    uint8_t prev_cal_idx;
-    uint32_t percal_ctr;
-    int32_t nxt_cal_idx;
-    uint32_t force_1idxcal;
-    uint32_t onedxacl_req;
-    int32_t last_cal_volt;
-    int8_t last_cal_temp;
-    uint32_t vbat_ripple;
-    uint32_t exit_route;
-    int32_t volt_winner;
-} wl_sslpnphy_percal_debug_data_t;
-#endif
+
 #define WL_WOWL_MAGIC    (1 << 0)
 #define WL_WOWL_NET    (1 << 1)
 #define WL_WOWL_DIS    (1 << 2)
@@ -2616,6 +2544,7 @@ typedef struct wl_sslpnphy_percal_debug_data
 #define WL_WOWL_TST    (1 << 5)
 #define WL_WOWL_BCAST    (1 << 15)
 #define MAGIC_PKT_MINLEN 102
+
 typedef struct
 {
     uint32_t masksize;
@@ -2623,48 +2552,48 @@ typedef struct
     uint32_t patternoffset;
     uint32_t patternsize;
 } wl_wowl_pattern_t;
+
 typedef struct
 {
     uint32_t count;
     wl_wowl_pattern_t pattern[1];
 } wl_wowl_pattern_list_t;
+
 typedef struct
 {
     uint8_t pci_wakeind;
     uint16_t ucode_wakeind;
 } wl_wowl_wakeind_t;
+
 typedef struct wl_txrate_class
 {
     uint8_t init_rate;
     uint8_t min_rate;
     uint8_t max_rate;
 } wl_txrate_class_t;
-#if defined(DSLCPE_DELAY)
-#define WL_DELAYMODE_DEFER    0
-#define WL_DELAYMODE_FORCE    1
-#define WL_DELAYMODE_AUTO    2
-#endif
-#define WLC_OBSS_SCAN_PASSIVE_DWELL_DEFAULT        100
-#define WLC_OBSS_SCAN_PASSIVE_DWELL_MIN            5
-#define WLC_OBSS_SCAN_PASSIVE_DWELL_MAX            1000
-#define WLC_OBSS_SCAN_ACTIVE_DWELL_DEFAULT        20
-#define WLC_OBSS_SCAN_ACTIVE_DWELL_MIN            10
-#define WLC_OBSS_SCAN_ACTIVE_DWELL_MAX            1000
-#define WLC_OBSS_SCAN_WIDTHSCAN_INTERVAL_DEFAULT    300
-#define WLC_OBSS_SCAN_WIDTHSCAN_INTERVAL_MIN        10
-#define WLC_OBSS_SCAN_WIDTHSCAN_INTERVAL_MAX        900
-#define WLC_OBSS_SCAN_CHANWIDTH_TRANSITION_DLY_DEFAULT    5
-#define WLC_OBSS_SCAN_CHANWIDTH_TRANSITION_DLY_MIN    5
-#define WLC_OBSS_SCAN_CHANWIDTH_TRANSITION_DLY_MAX    100
-#define WLC_OBSS_SCAN_PASSIVE_TOTAL_PER_CHANNEL_DEFAULT    200
-#define WLC_OBSS_SCAN_PASSIVE_TOTAL_PER_CHANNEL_MIN    200
-#define WLC_OBSS_SCAN_PASSIVE_TOTAL_PER_CHANNEL_MAX    10000
-#define WLC_OBSS_SCAN_ACTIVE_TOTAL_PER_CHANNEL_DEFAULT    20
-#define WLC_OBSS_SCAN_ACTIVE_TOTAL_PER_CHANNEL_MIN    20
-#define WLC_OBSS_SCAN_ACTIVE_TOTAL_PER_CHANNEL_MAX    10000
-#define WLC_OBSS_SCAN_ACTIVITY_THRESHOLD_DEFAULT    25
-#define WLC_OBSS_SCAN_ACTIVITY_THRESHOLD_MIN        0
-#define WLC_OBSS_SCAN_ACTIVITY_THRESHOLD_MAX        100
+
+#define WLC_OBSS_SCAN_PASSIVE_DWELL_DEFAULT             100
+#define WLC_OBSS_SCAN_PASSIVE_DWELL_MIN                 5
+#define WLC_OBSS_SCAN_PASSIVE_DWELL_MAX                 1000
+#define WLC_OBSS_SCAN_ACTIVE_DWELL_DEFAULT              20
+#define WLC_OBSS_SCAN_ACTIVE_DWELL_MIN                  10
+#define WLC_OBSS_SCAN_ACTIVE_DWELL_MAX                  1000
+#define WLC_OBSS_SCAN_WIDTHSCAN_INTERVAL_DEFAULT        300
+#define WLC_OBSS_SCAN_WIDTHSCAN_INTERVAL_MIN            10
+#define WLC_OBSS_SCAN_WIDTHSCAN_INTERVAL_MAX            900
+#define WLC_OBSS_SCAN_CHANWIDTH_TRANSITION_DLY_DEFAULT  5
+#define WLC_OBSS_SCAN_CHANWIDTH_TRANSITION_DLY_MIN      5
+#define WLC_OBSS_SCAN_CHANWIDTH_TRANSITION_DLY_MAX      100
+#define WLC_OBSS_SCAN_PASSIVE_TOTAL_PER_CHANNEL_DEFAULT 200
+#define WLC_OBSS_SCAN_PASSIVE_TOTAL_PER_CHANNEL_MIN     200
+#define WLC_OBSS_SCAN_PASSIVE_TOTAL_PER_CHANNEL_MAX     10000
+#define WLC_OBSS_SCAN_ACTIVE_TOTAL_PER_CHANNEL_DEFAULT  20
+#define WLC_OBSS_SCAN_ACTIVE_TOTAL_PER_CHANNEL_MIN      20
+#define WLC_OBSS_SCAN_ACTIVE_TOTAL_PER_CHANNEL_MAX      10000
+#define WLC_OBSS_SCAN_ACTIVITY_THRESHOLD_DEFAULT        25
+#define WLC_OBSS_SCAN_ACTIVITY_THRESHOLD_MIN            0
+#define WLC_OBSS_SCAN_ACTIVITY_THRESHOLD_MAX            100
+
 typedef struct wl_obss_scan_arg
 {
     int16_t passive_dwell;
@@ -2675,41 +2604,44 @@ typedef struct wl_obss_scan_arg
     int16_t chanwidth_transition_delay;
     int16_t activity_threshold;
 } wl_obss_scan_arg_t;
-#define WL_OBSS_SCAN_PARAM_LEN    sizeof(wl_obss_scan_arg_t)
+
+#define WL_OBSS_SCAN_PARAM_LEN   sizeof(wl_obss_scan_arg_t)
 #define WL_MIN_NUM_OBSS_SCAN_ARG 7
 #define WL_COEX_INFO_MASK        0x07
-#define WL_COEX_INFO_REQ        0x01
-#define    WL_COEX_40MHZ_INTOLERANT    0x02
-#define    WL_COEX_WIDTH20            0x04
+#define WL_COEX_INFO_REQ         0x01
+#define WL_COEX_40MHZ_INTOLERANT 0x02
+#define WL_COEX_WIDTH20          0x04
+
 typedef struct wl_action_obss_coex_req
 {
     uint8_t info;
     uint8_t num;
     uint8_t ch_list[1];
 } wl_action_obss_coex_req_t;
+
 #define MAX_RSSI_LEVELS 8
+
 typedef struct wl_rssi_event
 {
     uint32_t rate_limit_msec;
     uint8_t num_rssi_levels;
     int8_t rssi_levels[MAX_RSSI_LEVELS];
 } wl_rssi_event_t;
-#define WLFEATURE_DISABLE_11N        0x00000001
-#define WLFEATURE_DISABLE_11N_STBC_TX    0x00000002
-#define WLFEATURE_DISABLE_11N_STBC_RX    0x00000004
-#define WLFEATURE_DISABLE_11N_SGI_TX    0x00000008
-#define WLFEATURE_DISABLE_11N_SGI_RX    0x00000010
-#define WLFEATURE_DISABLE_11N_AMPDU_TX    0x00000020
-#define WLFEATURE_DISABLE_11N_AMPDU_RX    0x00000040
-#define WLFEATURE_DISABLE_11N_GF    0x00000080
 
-
+#define WLFEATURE_DISABLE_11N          0x00000001
+#define WLFEATURE_DISABLE_11N_STBC_TX  0x00000002
+#define WLFEATURE_DISABLE_11N_STBC_RX  0x00000004
+#define WLFEATURE_DISABLE_11N_SGI_TX   0x00000008
+#define WLFEATURE_DISABLE_11N_SGI_RX   0x00000010
+#define WLFEATURE_DISABLE_11N_AMPDU_TX 0x00000020
+#define WLFEATURE_DISABLE_11N_AMPDU_RX 0x00000040
+#define WLFEATURE_DISABLE_11N_GF       0x00000080
 
 #pragma pack(1)
 
 typedef struct sta_prbreq_wps_ie_hdr
 {
-    wl_ether_addr_t staAddr;
+    struct ether_addr staAddr;
     uint16_t ieLen;
 } sta_prbreq_wps_ie_hdr_t;
 
@@ -2724,7 +2656,6 @@ typedef  struct sta_prbreq_wps_ie_list
     uint32_t totLen;
     uint8_t ieDataList[1];
 } sta_prbreq_wps_ie_list_t;
-
 
 /* EDCF related items from 802.11.h */
 
@@ -2756,7 +2687,6 @@ struct edcf_acparam {
     uint16_t  TXOP;       /* stored in network order (ls octet first) */
 } ;
 typedef struct edcf_acparam edcf_acparam_t;
-
 
 /* Stop packing structures */
 #pragma pack()
@@ -2899,13 +2829,13 @@ typedef enum
     WLC_E_LAST                           = 129, /** highest val + 1 for range checking */
 
     WLC_E_FORCE_32_BIT                   = 0x7FFFFFFE  /** Force enum to be stored in 32 bit variable */
-} wwd_event_num_t;
+} wl_event_num_t;
 
 #define BCMF_EVENT_COUNT WLC_E_LAST
 
-
 #define WLC_SUP_STATUS_OFFSET      (256)
 #define WLC_DOT11_SC_STATUS_OFFSET (512)
+
 /**
  * Enumerated list of event status codes
  * @note : WLC_SUP values overlap other values, so it is necessary
@@ -2975,12 +2905,11 @@ typedef enum
     WLC_DOT11_SC_INVALID_FTIE             = 55 + WLC_DOT11_SC_STATUS_OFFSET,  /* Association denied due to invalid FTIE */
 
     WLC_E_STATUS_FORCE_32_BIT   = 0x7FFFFFFE                     /** Force enum to be stored in 32 bit variable */
-} wwd_event_status_t;
+} wl_event_status_t;
 
 #define WLC_E_PRUNE_REASON_OFFSET    (256)
 #define WLC_E_SUP_REASON_OFFSET      (512)
 #define WLC_E_DOT11_RC_REASON_OFFSET (768)
-
 
 /**
  * Enumerated list of event reason codes
@@ -3065,11 +2994,6 @@ typedef enum
     DOT11_RC_MAX                  = 23 + WLC_E_DOT11_RC_REASON_OFFSET, /* Reason codes > 23 are reserved */
 
     WLC_E_REASON_FORCE_32_BIT     = 0x7FFFFFFE                     /** Force enum to be stored in 32 bit variable */
-} wwd_event_reason_t;
+} wl_event_reason_t;
 
-
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
-
-#endif
+#endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_IOCTL_H */

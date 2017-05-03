@@ -55,9 +55,6 @@ void bcmf_hexdump(uint8_t *data, unsigned int len, unsigned long offset);
 
 int bcmf_sem_wait(sem_t *sem, unsigned int timeout_ms);
 
-sq_entry_t* bcmf_squeue_pop(sq_queue_t *queue);
-void bcmf_squeue_push(sq_queue_t *queue, sq_entry_t *entry);
-
 dq_entry_t* bcmf_dqueue_pop_tail(dq_queue_t *queue);
 void bcmf_dqueue_push(dq_queue_t *queue, dq_entry_t *entry);
 

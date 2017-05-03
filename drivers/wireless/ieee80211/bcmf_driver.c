@@ -62,9 +62,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-// TODO move elsewhere
-#define DOT11_BSSTYPE_ANY     2
-
+#define DOT11_BSSTYPE_ANY      2
 #define BCMF_SCAN_TIMEOUT_TICK (5*CLOCKS_PER_SEC)
 #define BCMF_AUTH_TIMEOUT_MS   10000
 
@@ -106,10 +104,6 @@ static void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
 
 static int bcmf_wl_get_interface(FAR struct bcmf_dev_s *priv,
                             struct iwreq *iwr);
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -440,10 +434,10 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
           goto exit_invalid_frame;
         }
 
-      wlinfo("Scan result: <%.32s> %02x:%02x:%02x:%02x:%02x:%02x\n",
-             bss->SSID, bss->BSSID.octet[0], bss->BSSID.octet[1],
-                        bss->BSSID.octet[2], bss->BSSID.octet[3],
-                        bss->BSSID.octet[4], bss->BSSID.octet[5]);
+      wlinfo("Scan result: <%.32s> %02x:%02x:%02x:%02x:%02x:%02x\n", bss->SSID,
+               bss->BSSID.ether_addr_octet[0], bss->BSSID.ether_addr_octet[1],
+               bss->BSSID.ether_addr_octet[3], bss->BSSID.ether_addr_octet[3],
+               bss->BSSID.ether_addr_octet[4], bss->BSSID.ether_addr_octet[5]);
 
       /* Process next bss_info */
 
@@ -473,15 +467,6 @@ wl_escan_result_processed:
 
   wd_cancel(priv->scan_timeout);
 
-  if (!priv->scan_params)
-    {
-      /* Scan has already timedout */
-
-      return;
-    }
-
-  free(priv->scan_params);
-  priv->scan_params = NULL;
   priv->scan_status = BCMF_SCAN_DONE;
   sem_post(&priv->control_mutex);
 
@@ -506,8 +491,6 @@ void bcmf_wl_scan_timeout(int argc, wdparm_t arg1, ...)
   wlerr("Scan timeout detected\n");
 
   priv->scan_status = BCMF_SCAN_TIMEOUT;
-  free(priv->scan_params);
-  priv->scan_params = NULL;
   sem_post(&priv->control_mutex);
 }
 
@@ -573,15 +556,72 @@ int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable)
   return ret;
 }
 
-int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv)
+int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
   int ret;
   uint32_t out_len;
   uint32_t value;
+  int interface;
+  struct iw_scan_req *req;
+  struct wl_escan_params scan_params;
+
+  interface = bcmf_wl_get_interface(priv, iwr);
+
+  if (interface < 0)
+    {
+      return -EINVAL;
+    }
+
+  memset(&scan_params, 0, sizeof(scan_params));
+
+  scan_params.version = ESCAN_REQ_VERSION;
+  scan_params.action = WL_SCAN_ACTION_START;
+  scan_params.sync_id = 0xabcd; /* Not used for now */
+
+  memset(&scan_params.params.bssid, 0xFF,
+          sizeof(scan_params.params.bssid));
+
+  scan_params.params.bss_type = DOT11_BSSTYPE_ANY;
+  scan_params.params.nprobes = -1;
+  scan_params.params.active_time = -1;
+  scan_params.params.passive_time = -1;
+  scan_params.params.home_time = -1;
+  scan_params.params.channel_num = 0;
+
+  if (iwr->u.data.pointer && iwr->u.data.length >= sizeof(*req))
+    {
+      req = (struct iw_scan_req*)iwr->u.data.pointer;
+
+      memcpy(&scan_params.params.bssid, req->bssid.sa_data,
+             sizeof(scan_params.params.bssid));
+
+      scan_params.params.scan_type =
+                  req->scan_type == IW_SCAN_TYPE_ACTIVE ? 0:1;
+
+      if (iwr->u.data.flags & IW_SCAN_THIS_ESSID &&
+          req->essid_len < sizeof(scan_params.params.ssid.SSID))
+        {
+          /* Scan specific ESSID */
+
+          memcpy(scan_params.params.ssid.SSID, req->essid, req->essid_len);
+          scan_params.params.ssid.SSID_len = req->essid_len;
+        }
+    }
+  else
+    {
+      /* Default scan parameters */
+
+      wlinfo("Use default scan parameters\n");
+
+      memset(&scan_params.params.bssid, 0xFF,
+             sizeof(scan_params.params.bssid));
+
+      scan_params.params.scan_type = 0; /* Active scan */
+    }
 
   /* Set active scan mode */
 
-  value = 0;
+  value = scan_params.params.scan_type;
   out_len = 4;
   if (bcmf_cdc_ioctl(priv, CHIP_STA_INTERFACE, true,
                          WLC_SET_PASSIVE_SCAN, (uint8_t*)&value, &out_len))
@@ -597,45 +637,18 @@ int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv)
       goto exit_failed;
    }
 
-  /* Default request structure */
-
-  priv->scan_params = (struct wl_escan_params*)
-                      kmm_malloc(sizeof(*priv->scan_params));
-  if (!priv->scan_params)
-    {
-      ret = -ENOMEM;
-      goto exit_sem_post;
-    }
-
-  memset(priv->scan_params, 0, sizeof(*priv->scan_params));
-
-  priv->scan_params->version = ESCAN_REQ_VERSION;
-  priv->scan_params->action = WL_SCAN_ACTION_START;
-  priv->scan_params->sync_id = 0xabcd; /* Not used for now */
-
-  memset(&priv->scan_params->params.bssid, 0xFF,
-          sizeof(priv->scan_params->params.bssid));
-  priv->scan_params->params.bss_type = DOT11_BSSTYPE_ANY;
-  priv->scan_params->params.scan_type = 0; /* Active scan */
-  priv->scan_params->params.nprobes = -1;
-  priv->scan_params->params.active_time = -1;
-  priv->scan_params->params.passive_time = -1;
-  priv->scan_params->params.home_time = -1;
-  priv->scan_params->params.channel_num = 0;
-
   wlinfo("start scan\n");
 
   priv->scan_status = BCMF_SCAN_RUN;
 
-  out_len = sizeof(*priv->scan_params);
-
+  out_len = sizeof(scan_params);
 
   if (bcmf_cdc_iovar_request_unsafe(priv, CHIP_STA_INTERFACE, true,
-                                 IOVAR_STR_ESCAN, (uint8_t*)priv->scan_params,
+                                 IOVAR_STR_ESCAN, (uint8_t*)&scan_params,
                                  &out_len))
     {
       ret = -EIO;
-      goto exit_free_params;
+      goto exit_sem_post;
     }
 
   /*  Start scan_timeout timer */
@@ -645,9 +658,6 @@ int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv)
 
   return OK;
 
-exit_free_params:
-  free(priv->scan_params);
-  priv->scan_params = NULL;
 exit_sem_post:
   sem_post(&priv->control_mutex);
   priv->scan_status = BCMF_SCAN_DISABLED;
@@ -656,8 +666,12 @@ exit_failed:
   return ret;
 }
 
-int bcmf_wl_is_scan_done(FAR struct bcmf_dev_s *priv)
+int bcmf_wl_get_scan_results(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
+  /* Not implemented yet, set len to zero */
+
+  iwr->u.data.length = 0;
+
   if (priv->scan_status == BCMF_SCAN_RUN)
     {
       return -EAGAIN;

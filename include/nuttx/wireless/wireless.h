@@ -195,7 +195,33 @@
 
 /* Scan-related */
 
-#define IW_SCAN_MAX_DATA    4096 /* Maximum size of returned data */
+/* Scanning request flags */
+#define IW_SCAN_DEFAULT    0x0000  /* Default scan of the driver */
+#define IW_SCAN_ALL_ESSID  0x0001  /* Scan all ESSIDs */
+#define IW_SCAN_THIS_ESSID 0x0002  /* Scan only this ESSID */
+#define IW_SCAN_ALL_FREQ   0x0004  /* Scan all Frequencies */
+#define IW_SCAN_THIS_FREQ  0x0008  /* Scan only this Frequency */
+#define IW_SCAN_ALL_MODE   0x0010  /* Scan all Modes */
+#define IW_SCAN_THIS_MODE  0x0020  /* Scan only this Mode */
+#define IW_SCAN_ALL_RATE   0x0040  /* Scan all Bit-Rates */
+#define IW_SCAN_THIS_RATE  0x0080  /* Scan only this Bit-Rate */
+/* struct iw_scan_req scan_type */
+#define IW_SCAN_TYPE_ACTIVE  0
+#define IW_SCAN_TYPE_PASSIVE 1
+/* Maximum size of returned data */
+#define IW_SCAN_MAX_DATA     4096  /* In bytes */
+
+/* Scan capability flags - in (struct iw_range *)->scan_capa */
+#define IW_SCAN_CAPA_NONE    0x00
+#define IW_SCAN_CAPA_ESSID   0x01
+#define IW_SCAN_CAPA_BSSID   0x02
+#define IW_SCAN_CAPA_CHANNEL 0x04
+#define IW_SCAN_CAPA_MODE    0x08
+#define IW_SCAN_CAPA_RATE    0x10
+#define IW_SCAN_CAPA_TYPE    0x20
+#define IW_SCAN_CAPA_TIME    0x40
+
+#define IW_SCAN_MAX_DATA     4096 /* Maximum size of returned data */
 
 /* SIOCSIWAUTH/SIOCGIWAUTH struct iw_param flags */
 
@@ -396,6 +422,53 @@ struct  iw_encode_ext
   uint16_t   alg;           /* IW_ENCODE_ALG_* */
   uint16_t   key_len;
   uint8_t    key[0];
+};
+
+/*
+ *  Optional data for scan request
+ *
+ *  Note: these optional parameters are controlling parameters for the
+ *  scanning behavior, these do not apply to getting scan results
+ *  (SIOCGIWSCAN). Drivers are expected to keep a local BSS table and
+ *  provide a merged results with all BSSes even if the previous scan
+ *  request limited scanning to a subset, e.g., by specifying an SSID.
+ *  Especially, scan results are required to include an entry for the
+ *  current BSS if the driver is in Managed mode and associated with an AP.
+ */
+struct  iw_scan_req
+{
+  uint8_t scan_type; /* IW_SCAN_TYPE_{ACTIVE,PASSIVE} */
+  uint8_t essid_len;
+  uint8_t num_channels; /* num entries in channel_list;
+               * 0 = scan all allowed channels */
+  uint8_t flags; /* reserved as padding; use zero, this may
+        * be used in the future for adding flags
+        * to request different scan behavior */
+  struct sockaddr bssid; /* ff:ff:ff:ff:ff:ff for broadcast BSSID or
+        * individual address of a specific BSS */
+
+  /*
+   * Use this ESSID if IW_SCAN_THIS_ESSID flag is used instead of using
+   * the current ESSID. This allows scan requests for specific ESSID
+   * without having to change the current ESSID and potentially breaking
+   * the current association.
+   */
+  uint8_t essid[IW_ESSID_MAX_SIZE];
+
+  /*
+   * Optional parameters for changing the default scanning behavior.
+   * These are based on the MLME-SCAN.request from IEEE Std 802.11.
+   * TU is 1.024 ms. If these are set to 0, driver is expected to use
+   * reasonable default values. min_channel_time defines the time that
+   * will be used to wait for the first reply on each channel. If no
+   * replies are received, next channel will be scanned after this. If
+   * replies are received, total time waited on the channel is defined by
+   * max_channel_time.
+   */
+  uint32_t min_channel_time; /* in TU */
+  uint32_t max_channel_time; /* in TU */
+
+  struct iw_freq  channel_list[IW_MAX_FREQUENCIES];
 };
 
 #endif /* CONFIG_DRIVERS_WIRELESS */

@@ -41,7 +41,6 @@
 #define __DRIVERS_WIRELESS_IEEE80211_BCMF_BDC_H
 
 #include "bcmf_driver.h"
-#include "bcmf_ioctl.h"
 
 /* Event frame content */
 

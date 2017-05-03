@@ -257,22 +257,17 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
           break;
         }
 
+      if (!priv->bc_bifup)
+        {
+          /* Interface down, drop frame */
+          priv->bus->free_frame(priv, frame);
+          continue;
+        }
+
       priv->bc_dev.d_buf = frame->data;
       priv->bc_dev.d_len = frame->len - (uint32_t)(frame->data - frame->base);
 
-      wlinfo("Got frame ! %p %d\n", frame, priv->bc_dev.d_len);
-      // bcmf_hexdump(priv->bc_dev.d_buf, priv->bc_dev.d_len,
-      //              (unsigned long)priv->bc_dev.d_buf);
-
-      /* Check for errors and update statistics */
-
-      /* Check if the packet is a valid size for the network buffer
-       * configuration.
-       */
-
-      /* Copy the data data from the hardware to priv->bc_dev.d_buf.  Set
-       * amount of data in priv->bc_dev.d_len
-       */
+      wlinfo("Got frame %p %d\n", frame, priv->bc_dev.d_len);
 
 #ifdef CONFIG_NET_PKT
       /* When packet sockets are enabled, feed the frame into the packet tap */
@@ -285,7 +280,7 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
 #ifdef CONFIG_NET_IPv4
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
-          // ninfo("IPv4 frame\n");
+          ninfo("IPv4 frame\n");
           NETDEV_RXIPV4(&priv->bc_dev);
 
           /* Handle ARP on input then give the IPv4 packet to the network
@@ -399,6 +394,7 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
         {
           wlinfo("RX dropped\n");
           NETDEV_RXDROPPED(&priv->bc_dev);
+          priv->bus->free_frame(priv, frame);
         }
     }
   while (1); /* While there are more packets to be processed */
@@ -693,12 +689,6 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
   /* Enable the hardware interrupt */
 
   priv->bc_bifup = true;
-#warning Missing logic
-
-  if (bcmf_wl_enable(priv, true) != OK)
-    {
-      return -EIO;
-    }
 
   return OK;
 }
@@ -724,8 +714,6 @@ static int bcmf_ifdown(FAR struct net_driver_s *dev)
   wlinfo("Entry\n");
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
   irqstate_t flags;
-
-  // bcmf_wl_enable(priv, false);
 
   /* Disable the hardware interrupt */
 
@@ -1003,11 +991,11 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
   switch (cmd)
     {
       case SIOCSIWSCAN:
-        ret = bcmf_wl_start_scan(priv);
+        ret = bcmf_wl_start_scan(priv, (struct ifreq*)arg);
         break;
 
       case SIOCGIWSCAN:
-        ret = bcmf_wl_is_scan_done(priv);
+        ret = bcmf_wl_get_scan_results(priv, (struct ifreq*)arg);
         break;
 
       case SIOCSIFHWADDR:    /* Set device MAC address */
@@ -1144,7 +1132,9 @@ int bcmf_netdev_register(FAR struct bcmf_dev_s *priv)
    * the device and/or calling bcmf_ifdown().
    */
 
-  if (bcmf_wl_enable(priv, false) != OK)
+  /* Enable chip */
+
+  if (bcmf_wl_enable(priv, true) != OK)
     {
       return -EIO;
     }

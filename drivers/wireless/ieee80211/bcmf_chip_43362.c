@@ -34,7 +34,8 @@
  ****************************************************************************/
 
 #include "bcmf_sdio.h"
-          
+#include <stdint.h>
+
 #define WRAPPER_REGISTER_OFFSET  0x100000
 
 extern const char bcm43362_nvram_image[];

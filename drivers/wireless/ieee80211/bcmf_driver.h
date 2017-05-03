@@ -45,6 +45,8 @@
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 
+#include "bcmf_ioctl.h"
+
 struct bcmf_dev_s;
 struct bcmf_frame_s;
 
@@ -91,7 +93,6 @@ struct bcmf_dev_s
 
   int scan_status;                     /* Current scan status */
   WDOG_ID scan_timeout;                /* Scan timeout timer */
-  struct wl_escan_params *scan_params; /* Current scan parameters */
 
   sem_t auth_signal; /* Authentication notification signal */
   int   auth_status; /* Authentication status */
@@ -135,9 +136,9 @@ int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable);
 
 /* IOCTLs AP scan interface implementation */
 
-int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv);
+int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 
-int bcmf_wl_is_scan_done(FAR struct bcmf_dev_s *priv);
+int bcmf_wl_get_scan_results(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 
 /* IOCTLs authentication interface implementation */
 

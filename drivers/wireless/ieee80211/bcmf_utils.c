@@ -165,21 +165,3 @@ dq_entry_t* bcmf_dqueue_pop_tail(dq_queue_t *queue)
 
   return entry;
 }
-
-void bcmf_squeue_push(sq_queue_t *queue, sq_entry_t *entry)
-{
-  entry->flink = queue->head;
-  queue->head = entry;
-}
-
-sq_entry_t* bcmf_squeue_pop(sq_queue_t *queue)
-{
-  sq_entry_t *entry = queue->head;
-
-  if (queue->head != NULL)
-    {
-      queue->head = entry->flink;
-    }
-
-  return entry;
-}
