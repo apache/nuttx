@@ -206,7 +206,7 @@
 
 enum ieee802154_status_e
 {
-  IEEE802154_STATUS_OK = 0,
+  IEEE802154_STATUS_SUCCESS = 0,
   IEEE802154_STATUS_BEACON_LOSS = 0xE0,
   IEEE802154_STATUS_CHANNEL_ACCESS_FAILURE,
   IEEE802154_STATUS_DENIED,
@@ -455,7 +455,49 @@ struct ieee802154_pend_addr_s
 
 union ieee802154_attr_val_u
 {
-  /* TODO: Finish this */
+  uint8_t eaddr[8];
+  uint16_t saddr;
+  uint16_t pan_id;
+
+  uint8_t coord_eaddr[8];
+  uint16_t coord_saddr;
+
+  uint8_t is_assoc          : 1;
+  uint8_t assoc_permit      : 1;
+  uint8_t auto_req          : 1;
+  uint8_t batt_life_ext     : 1;
+  uint8_t gts_permit        : 1;
+  uint8_t promisc_mode      : 1;
+  uint8_t rng_support       : 1;
+  uint8_t resp_wait_time;
+  uint8_t rx_when_idle      : 1;
+  uint8_t sec_enabled       : 1;
+  uint8_t timestamp_support : 1;
+
+  uint32_t ack_wait_dur;
+  uint8_t batt_life_ext_periods;
+  uint8_t max_csma_backoffs : 3;
+  uint8_t max_be : 4;
+  uint8_t min_be : 4;
+  uint32_t max_frame_wait_time;
+  uint8_t max_retries;
+  uint8_t lifs_period;
+  uint8_t sifs_period;
+  uint32_t sync_symb_offset : 12;
+  uint16_t trans_persist_time;
+  uint32_t tx_ctrl_active_dur;
+  uint32_t tx_ctrl_pause_dur;
+  uint32_t tx_total_dur;
+
+  uint8_t beacon_payload[IEEE802154_PIB_MAC_BEACON_PAYLOAD_LEN];
+  uint8_t beacon_payload_len;
+  uint8_t beacon_order;
+  uint32_t beacon_tx_time : 24;
+
+  uint8_t superframe_order;
+
+  uint8_t bsn;
+  uint8_t dsn;
 };
 
 struct ieee802154_gts_info_s
@@ -1109,26 +1151,18 @@ struct ieee802154_scan_conf_s
  * Description:
  *    Attempts to write the given value to the indicated PIB attribute.
  *
+ *  NOTE: The standard specifies that confirmation should be indicated via 
+ *  the asynchronous MLME-SET.confirm primitve.  However, in our implementation
+ *  there is no reason not to synchronously return the status immediately.
+ *  Therefore, we do merge the functionality of the MLME-SET.request and 
+ *  MLME-SET.confirm primitives together.
+ * 
  *****************************************************************************/
 
 struct ieee802154_set_req_s
 {
   enum ieee802154_pib_attr_e pib_attr;
   union ieee802154_attr_val_u attr_value;
-};
-
-/*****************************************************************************
- * Primitive: MLME-SET.confirm
- *
- * Description:
- *    Reports the results of an attempt to write a value to a PIB attribute.
- *
- *****************************************************************************/
-
-struct ieee802154_set_conf_s
-{
-  enum ieee802154_status_e status;
-  enum ieee802154_pib_attr_e pib_attr;
 };
 
 /*****************************************************************************
@@ -1258,7 +1292,6 @@ union ieee802154_mlme_notify_u
   struct ieee802154_reset_conf_s       resetconf;
   struct ieee802154_rxenable_conf_s    rxenableconf;
   struct ieee802154_scan_conf_s        scanconf;
-  struct ieee802154_set_conf_s         setconf;
   struct ieee802154_start_conf_s       startconf;
   struct ieee802154_poll_conf_s        pollconf;
 

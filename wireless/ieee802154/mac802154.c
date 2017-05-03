@@ -1450,8 +1450,13 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
  *
  * Description:
  *   The MLME-SET.request primitive attempts to write the given value to the
- *   indicated MAC PIB attribute. Confirmation is returned via the
- *   struct ieee802154_maccb_s->conf_set callback.
+ *   indicated MAC PIB attribute. 
+ *
+ *   NOTE: The standard specifies that confirmation should be indicated via 
+ *   the asynchronous MLME-SET.confirm primitve.  However, in our implementation
+ *   there is no reason not to synchronously return the status immediately.
+ *   Therefore, we do merge the functionality of the MLME-SET.request and 
+ *   MLME-SET.confirm primitives together.
  *
  ****************************************************************************/
 
@@ -1459,7 +1464,35 @@ int mac802154_req_set(MACHANDLE mac, FAR struct ieee802154_set_req_s *req)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
-  return -ENOTTY;
+  union ieee802154_radioarg_u radio_arg;
+  int ret;
+
+  switch (req->pib_attr)
+    {
+      case IEEE802154_PIB_MAC_EXTENDED_ADDR:
+        {
+          /* Set the attribute in the structure to the new value */
+
+          memcpy(&priv->addr.eaddr[0], &req->attr_value.eaddr[0], 8);
+
+
+          /* The radio device needs to be updated as well */
+
+          memcpy(&radio_arg.eaddr[0], &priv->addr.eaddr[0], 8);
+          ret = priv->radio->ops->ioctl(priv->radio, PHY802154IOC_SET_EADDR,
+                                        (unsigned long)&radio_arg);
+                          
+          ret = IEEE802154_STATUS_SUCCESS;
+        }
+        break;
+      default:
+        {
+          ret = -IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE;
+        }
+        break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
