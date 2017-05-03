@@ -504,7 +504,7 @@ struct ieee802154_frame_meta_s
 #endif
 
 #ifdef CONFIG_IEEE802154_UWB
-  /* The UWB Pulse Repetion Frequency to be used for the transmission */
+  /* The UWB Pulse Repetition Frequency to be used for the transmission */
 
   enum ieee802154_uwbprf_e uwb_prf;
 
@@ -535,8 +535,8 @@ struct ieee802154_frame_meta_s
 
 struct ieee802154_data_req_s
 {
-  FAR struct ieee802154_frame_meta_s *meta; /* Metadata describing the req */
-  FAR struct iob_s *frame;                  /* Frame IOB with payload */
+  FAR const struct ieee802154_frame_meta_s *meta; /* Metadata describing the req */
+  FAR struct iob_s *frame;                        /* Frame IOB with payload */
 };
 
 /*****************************************************************************
