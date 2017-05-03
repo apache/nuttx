@@ -102,8 +102,8 @@ struct lo_driver_s
   uint16_t lo_panid;           /* Fake PAN ID for testing */
   WDOG_ID lo_polldog;          /* TX poll timer */
   struct work_s lo_work;       /* For deferring poll work to the work queue */
-  FAR struct iob_s *head;      /* Head of IOBs queued for loopback */
-  FAR struct iob_s *tail;      /* Tail of IOBs queued for loopback */
+  FAR struct iob_s *lo_head;   /* Head of IOBs queued for loopback */
+  FAR struct iob_s *lo_tail;   /* Tail of IOBs queued for loopback */
 
   /* This holds the information visible to the NuttX network */
 
@@ -145,9 +145,9 @@ static int  lo_ioctl(FAR struct net_driver_s *dev, int cmd,
               unsigned long arg);
 #endif
 static int lo_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
-              FAR struct ieee802154_frame_meta_s *meta);
+              FAR const struct ieee802154_frame_meta_s *meta);
 static int lo_req_data(FAR struct ieee802154_driver_s *netdev,
-              FAR struct ieee802154_frame_meta_s *meta,
+              FAR const struct ieee802154_frame_meta_s *meta,
               FAR struct iob_s *frames);
 
 /****************************************************************************
@@ -177,43 +177,15 @@ static int lo_req_data(FAR struct ieee802154_driver_s *netdev,
 static int lo_loopback(FAR struct net_driver_s *dev)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
-  FAR struct iob_s *head;
-  FAR struct iob_s *tail;
   FAR struct iob_s *iob;
   int ret;
 
-  if (dev->d_len > 0 || priv->lo_ieee.i_framelist != NULL)
-    {
-      ninfo("d_len: %u i_framelist: %p\n",
-            dev->d_len, priv->lo_ieee.i_framelist);
-
-      /* The only two valid settings are:
-       *
-       * 1. Nothing to send:
-       *    dev->d_len == 0 && priv->lo_ieee.i_framelist == NULL
-       * 2. Outgoing packet has been converted to IEEE802.15.4 frames:
-       *    dev->d_len == 0 && priv->lo_ieee.i_framelist != NULL
-       */
-
-      DEBUGASSERT(dev->d_len == 0 && priv->lo_ieee.i_framelist != NULL);
-    }
-
-  /* Remove the queued IOBs from driver structure */
-
-  head = priv->lo_ieee.i_framelist;
-
-  /* Find the tail of the IOB queue */
-
-  for (tail = NULL, iob = head;
-       iob != NULL;
-       tail = iob, iob = iob->io_flink);
-
-  /* Loop while there frames to be sent, i.e., while the IOB list is not
-   * emtpy. Sending, of course, just means relaying back through the network
+  /* Loop while there frames to be sent, i.e., while the freme list is not
+   * emtpy.  Sending, of course, just means relaying back through the network
    * for this driver.
    */
 
-  while (head != NULL)
+  while (priv->lo_head != NULL)
     {
       /* Increment statistics */
 
@@ -221,24 +193,23 @@ static int lo_loopback(FAR struct net_driver_s *dev)
 
       /* Remove the IOB from the queue */
 
-      iob           = head;
-      head          = iob->io_flink;
+      iob           = priv->lo_head;
+      priv->lo_head = iob->io_flink;
       iob->io_flink = NULL;
 
-      /* Is the queue now empty? */
+      /* Did the framelist become empty? */
 
-      if (head == NULL)
+      if (priv->lo_head == NULL)
         {
-          tail = NULL;
+          priv->lo_tail = NULL;
         }
 
       /* Return the next frame to the network */
 
-      iob->io_flink      = NULL;
-      priv->lo_ieee.i_framelist = iob;
+      ninfo("Send frame %p to the network:  Offset=%u Length=%u\n",
+            iob, iob->io_offset, iob->io_len);
 
-      ninfo("Send frame %p to the network. Length=%u\n", iob, iob->io_len);
-      ret = sixlowpan_input(&priv->lo_ieee);
+      ret = sixlowpan_input(&priv->lo_ieee, iob);
 
       /* Increment statistics */
 
@@ -250,33 +221,6 @@ static int lo_loopback(FAR struct net_driver_s *dev)
           NETDEV_TXERRORS(&priv->lo_ieee.i_dev);
           NETDEV_ERRORS(&priv->lo_ieee.i_dev);
         }
-
-      /* What if the network responds with more frames to send? */
-
-      if (priv->lo_ieee.i_framelist != NULL)
-        {
-          /* Append the new list to the tail of the queue */
-
-          iob                       = priv->lo_ieee.i_framelist;
-          priv->lo_ieee.i_framelist = NULL;
-
-          if (tail == NULL)
-            {
-              head = iob;
-            }
-          else
-            {
-              tail->io_flink = iob;
-            }
-
-          /* Find the new tail of the IOB queue */
-
-          for (tail = iob, iob = iob->io_flink;
-               iob != NULL;
-               tail = iob, iob = iob->io_flink);
-        }
-
-      priv->lo_txdone = true;
     }
 
   return 0;
@@ -693,7 +637,7 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
  ****************************************************************************/
 
 static int lo_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
-                         FAR struct ieee802154_frame_meta_s *meta)
+                         FAR const struct ieee802154_frame_meta_s *meta)
 {
   return MAC_HDRLEN;
 }
@@ -710,13 +654,14 @@ static int lo_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
  ****************************************************************************/
 
 static int lo_req_data(FAR struct ieee802154_driver_s *netdev,
-                       FAR struct ieee802154_frame_meta_s *meta,
+                       FAR const struct ieee802154_frame_meta_s *meta,
                        FAR struct iob_s *frames)
 {
   FAR struct lo_driver_s *priv;
   FAR struct iob_s *iob;
 
-  DEBUGASSERT(netdev != NULL && netdev->i_dev.d_private != NULL && iob != NULL);
+  DEBUGASSERT(netdev != NULL && netdev->i_dev.d_private != NULL &&
+              frames != NULL);
   priv = (FAR struct lo_driver_s *)netdev->i_dev.d_private;
 
   /* Add the incoming list of frames to queue of frames to loopback */
@@ -737,22 +682,18 @@ static int lo_req_data(FAR struct ieee802154_driver_s *netdev,
       DEBUGASSERT(iob->io_offset == MAC_HDRLEN);
       memset(iob->io_data, 0, MAC_HDRLEN);
 
-      /* Add the IOB to the tail of teh queue of frames to be looped back */
+      /* Add the IOB to the tail of the queue of frames to be looped back */
 
-      if (priv->tail == NULL)
+      if (priv->lo_tail == NULL)
         {
-          priv->head = iob;
+          priv->lo_head = iob;
         }
       else
         {
-          priv->tail->io_flink = iob;
+          priv->lo_tail->io_flink = iob;
         }
 
-      /* Find the new tail of the IOB queue */
-
-      for (priv->tail = iob, iob = iob->io_flink;
-           iob != NULL;
-           priv->tail = iob, iob = iob->io_flink);
+      priv->lo_tail = iob;
     }
 
   /* Is our single work structure available?  It may not be if there are
@@ -820,10 +761,6 @@ int ieee8021514_loopback(void)
 #endif
   dev->d_buf         = g_iobuffer;       /* Attach the IO buffer */
   dev->d_private     = (FAR void *)priv; /* Used to recover private state from dev */
-
-  /* Initialize the DSN to a "random" value */
-
-  ieee->i_dsn        = 42;
 
   /* Initialize the Network frame-related callbacks */
 

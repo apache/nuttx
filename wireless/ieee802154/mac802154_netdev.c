@@ -140,16 +140,6 @@ struct macnet_driver_s
   WDOG_ID md_txtimeout;           /* TX timeout timer */
   struct work_s md_irqwork;       /* Defer interupt work to the work queue */
   struct work_s md_pollwork;      /* Defer poll work to the work queue */
-
-  /* This is queue of outgoing, ready-to-send frames that will be sent
-   * indirectly.  This list should only be used by a MAC acting as a
-   * coordinator.  These transactions will stay here until the data is
-   * extracted by the destination device sending a Data Request MAC
-   * command or if too much time passes.
-   */
-
-  FAR volatile struct iob_s *md_head;
-  FAR volatile struct iob_s *md_tail;
 };
 
 /****************************************************************************
@@ -258,9 +248,9 @@ static int  macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
               unsigned long arg);
 #endif
 static int macnet_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
-              FAR struct ieee802154_frame_meta_s *meta);
+              FAR const struct ieee802154_frame_meta_s *meta);
 static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
-              FAR struct ieee802154_frame_meta_s *meta,
+              FAR const struct ieee802154_frame_meta_s *meta,
               FAR struct iob_s *frames);
 
 /****************************************************************************
@@ -655,57 +645,6 @@ static int macnet_transmit(FAR struct macnet_driver_s *priv)
 }
 
 /****************************************************************************
- * Name: macnet_txqueue
- *
- * Description:
- *   Add new frames from the network to the list of outgoing frames.
- *
- * Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   the network is locked.
- *
- ****************************************************************************/
-
-static void macnet_txqueue(FAR struct net_driver_s *dev)
-{
-  /* Check if there is a new list of outgoing frames from the network. */
-
-  if (priv->lo_ieee.i_framelist != NULL)
-    {
-      /* Yes.. Remove the frame list from the driver structure */
-
-      iob                       = priv->lo_ieee.i_framelist;
-      priv->lo_ieee.i_framelist = NULL;
-
-      /* Append the new list to the tail of the queue of outgoing frames. */
-
-      if (priv->md_tail == NULL)
-        {
-          priv->md_head = iob;
-        }
-      else
-        {
-          priv->md_tail->io_flink = iob;
-        }
-
-      /* Find the new tail of the outgoing frame queue */
-
-      for (priv->md_tail = iob, iob = iob->io_flink;
-           iob != NULL;
-           priv->md_tail = iob, iob = iob->io_flink);
-
-       /* Notify the radio driver that there is data available */
-#warning Missing logic
-    }
-}
-
-/****************************************************************************
  * Name: macnet_txpoll
  *
  * Description:
@@ -724,30 +663,12 @@ static void macnet_txqueue(FAR struct net_driver_s *dev)
  *   OK on success; a negated errno on failure
  *
  * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   the network is locked.
+ *   The network is locked.
  *
  ****************************************************************************/
 
 static int macnet_txpoll(FAR struct net_driver_s *dev)
 {
-  FAR struct macnet_driver_s *priv =
-    (FAR struct macnet_driver_s *)dev->d_private;
-  FAR struct iob_s *iob;
-
-  /* If the polling resulted in data that should be sent out, the field
-   * i_framelist will set to a new, outgoing list of frames.
-   */
-
-  if (priv->lo_ieee.i_framelist != NULL)
-    {
-      /* Remove the frame list from the driver structure and append it to
-       * the tail of the ist of outgoing frames.
-       */
-
-      macnet_txqueue(priv);
-    }
-
   /* If zero is returned, the polling will continue until all connections have
    * been examined.
    */
@@ -781,6 +702,7 @@ static void macnet_receive(FAR struct macnet_driver_s *priv)
 
   net_lock();
   iob = iob_alloc(false);
+#warning Allocated by radio layer, right?
   if (iob == NULL)
     {
       nerr("ERROR: Failed to allocate an IOB\n")
@@ -796,22 +718,7 @@ static void macnet_receive(FAR struct macnet_driver_s *priv)
 
   /* Transfer the frame to the network logic */
 
-  priv->md_dev.framelist = iob;
-  sixlowpan_input(&priv->md_dev);
-
-  /* If the above function invocation resulted in data that should be sent
-   * out, the field i_framelist will have been set to a new, outgoing list
-   * of frames.
-   */
-
-  if (priv->md_dev.i_framelist != NULL)
-    {
-      /* Remove the frame list from the driver structure and append it to
-       * the tail of the ist of outgoing frames.
-       */
-
-      macnet_txqueue(priv);
-    }
+  sixlowpan_input(&priv->md_dev, iob);
 }
 
 /****************************************************************************
@@ -1508,7 +1415,7 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
  ****************************************************************************/
 
 static int macnet_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
-                             FAR struct ieee802154_frame_meta_s *meta)
+                             FAR const struct ieee802154_frame_meta_s *meta)
 {
   FAR struct macnet_driver_s *priv;
 
@@ -1530,7 +1437,7 @@ static int macnet_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
  ****************************************************************************/
 
 static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
-                           FAR struct ieee802154_frame_meta_s *meta,
+                           FAR const struct ieee802154_frame_meta_s *meta,
                            FAR struct iob_s *frames)
 {
   FAR struct macnet_driver_s *priv;

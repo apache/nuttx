@@ -107,28 +107,27 @@
 #define PACKETBUF_ATTR_LISTEN_TIME            7
 #define PACKETBUF_ATTR_TRANSMIT_TIME          8
 #define PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS  9
-#define PACKETBUF_ATTR_MAC_SEQNO              10
-#define PACKETBUF_ATTR_MAC_ACK                11
+#define PACKETBUF_ATTR_MAC_ACK                10
 
 /* Scope 1 attributes: used between two neighbors only. */
 
-#define PACKETBUF_ATTR_RELIABLE               12
-#define PACKETBUF_ATTR_PACKET_ID              13
-#define PACKETBUF_ATTR_PACKET_TYPE            14
-#define PACKETBUF_ATTR_REXMIT                 15
-#define PACKETBUF_ATTR_MAX_REXMIT             16
-#define PACKETBUF_ATTR_NUM_REXMIT             17
-#define PACKETBUF_ATTR_PENDING                18
+#define PACKETBUF_ATTR_RELIABLE               11
+#define PACKETBUF_ATTR_PACKET_ID              12
+#define PACKETBUF_ATTR_PACKET_TYPE            13
+#define PACKETBUF_ATTR_REXMIT                 14
+#define PACKETBUF_ATTR_MAX_REXMIT             15
+#define PACKETBUF_ATTR_NUM_REXMIT             16
+#define PACKETBUF_ATTR_PENDING                17
 
 /* Scope 2 attributes: used between end-to-end nodes. */
 
-#define PACKETBUF_ATTR_HOPS                   11
-#define PACKETBUF_ATTR_TTL                    20
-#define PACKETBUF_ATTR_EPACKET_ID             21
-#define PACKETBUF_ATTR_EPACKET_TYPE           22
-#define PACKETBUF_ATTR_ERELIABLE              23
+#define PACKETBUF_ATTR_HOPS                   18
+#define PACKETBUF_ATTR_TTL                    19
+#define PACKETBUF_ATTR_EPACKET_ID             20
+#define PACKETBUF_ATTR_EPACKET_TYPE           21
+#define PACKETBUF_ATTR_ERELIABLE              22
 
-#define PACKETBUF_NUM_ATTRS                   24
+#define PACKETBUF_NUM_ATTRS                   23
 
 /* Addresses (indices into g_pktaddrs) */
 
@@ -186,69 +185,6 @@ struct ipv6icmp_hdr_s
 {
   struct ipv6_hdr_s     ipv6;
   struct icmpv6_iphdr_s icmp;
-};
-
-/* IEEE802.15.4 Frame Definitions *******************************************/
-/* The IEEE 802.15.4 frame has a number of constant/fixed fields that can be
- * counted to make frame construction and max payload calculations easier.
- * These include:
- *
- *   1. FCF                  - 2 bytes       - Fixed
- *   2. Sequence number      - 1 byte        - Fixed
- *   3. Addressing fields    - 4 - 20 bytes  - Variable
- *   4. Aux security header  - 0 - 14 bytes  - Variable
- *   5. CRC                  - 2 bytes       - Fixed
-*/
-
-/* Defines the bitfields of the frame control field (FCF). */
-
-struct frame802154_fcf_s
-{
-  uint8_t frame_type;        /* 3 bit. Frame type field, see 802.15.4 */
-  uint8_t security_enabled;  /* 1 bit. True if security is used in this frame */
-  uint8_t frame_pending;     /* 1 bit. True if sender has more data to send */
-  uint8_t ack_required;      /* 1 bit. Is an ack frame required? */
-  uint8_t panid_compression; /* 1 bit. Is this a compressed header? */
-                             /* 3 bit. Unused bits */
-  uint8_t dest_addr_mode;    /* 2 bit. Destination address mode, see 802.15.4 */
-  uint8_t frame_version;     /* 2 bit. 802.15.4 frame version */
-  uint8_t src_addr_mode;     /* 2 bit. Source address mode, see 802.15.4 */
-};
-
-/* 802.15.4 security control bitfield.  See section 7.6.2.2.1 in 802.15.4
- * specification.
- */
-
-struct frame802154_scf_s
-{
-  uint8_t security_level;    /* 3 bit. security level      */
-  uint8_t key_id_mode;       /* 2 bit. Key identifier mode */
-  uint8_t reserved;          /* 3 bit. Reserved bits       */
-};
-
-/* 802.15.4 Aux security header */
-
-struct frame802154_aux_hdr_s
-{
-  struct frame802154_scf_s security_control;  /* Security control bitfield */
-  uint32_t frame_counter;    /* Frame counter, used for security */
-  uint8_t  key[9];           /* The key itself, or an index to the key */
-};
-
-/* Parameters used by the frame802154_create() function.  These  parameters
- * are used in the 802.15.4 frame header.  See the 802.15.4 specification
- * for details.
- */
-
-struct frame802154_s
-{
-  struct frame802154_fcf_s fcf;          /* Frame control field  */
-  uint8_t seq;               /* Sequence number */
-  uint16_t dest_pid;         /* Destination PAN ID */
-  uint8_t dest_addr[8];      /* Destination address */
-  uint16_t src_pid;          /* Source PAN ID */
-  uint8_t src_addr[8];       /* Source address */
-  struct frame802154_aux_hdr_s aux_hdr;  /* Aux security header */
 };
 
 /****************************************************************************
@@ -313,9 +249,8 @@ struct iob_s;                /* Forward reference */
  *
  *   The payload data is in the caller 'buf' and is of length 'buflen'.
  *   Compressed headers will be added and if necessary the packet is
- *   fragmented. The resulting packet/fragments are put in ieee->i_framelist
- *   and the entire list of frames will be delivered to the 802.15.4 MAC via
- *   ieee->i_framelist.
+ *   fragmented. The resulting packet/fragments are submitted to the MAC
+ *   via the network driver i_req_data method.
  *
  * Input Parameters:
  *   dev     - The IEEE802.15.4 MAC network driver interface.
@@ -344,7 +279,30 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
                    uint16_t timeout);
 
 /****************************************************************************
- * Name: sixlowpan_send_hdrlen
+ * Name: sixlowpan_meta_data
+ *
+ * Description:
+ *   Based on the collected attributes and addresses, construct the MAC meta
+ *   data structure that we need to interface with the IEEE802.15.4 MAC.
+ *
+ * Input Parameters:
+ *   dest_panid - PAN ID of the destination.  May be 0xffff if the destination
+ *                is not associated.
+ *   meta       - Location to return the corresponding meta data.
+ *
+ * Returned Value:
+ *   Ok is returned on success; Othewise a negated errno value is returned.
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+int sixlowpan_meta_data(uint16_t dest_panid,
+                        FAR struct ieee802154_frame_meta_s *meta);
+
+/****************************************************************************
+ * Name: sixlowpan_frame_hdrlen
  *
  * Description:
  *   This function is before the first frame has been sent in order to
@@ -352,9 +310,8 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
  *   buffer is required to make this determination.
  *
  * Input parameters:
- *   ieee       - A reference IEEE802.15.4 MAC network device structure.
- *   dest_panid - PAN ID of the destination.  May be 0xffff if the destination
- *                is not associated.
+ *   ieee - A reference IEEE802.15.4 MAC network device structure.
+ *   meta - Meta data that describes the MAC header
  *
  * Returned Value:
  *   The frame header length is returnd on success; otherwise, a negated
@@ -362,30 +319,32 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int sixlowpan_send_hdrlen(FAR struct ieee802154_driver_s *ieee,
-                     uint16_t dest_panid);
+int sixlowpan_frame_hdrlen(FAR struct ieee802154_driver_s *ieee,
+                           FAR const struct ieee802154_frame_meta_s *meta);
 
 /****************************************************************************
- * Name: sixlowpan_framecreate
+ * Name: sixlowpan_frame_submit
  *
  * Description:
- *   This function is called after the IEEE802.15.4 MAC driver polls for
- *   TX data.  It creates the IEEE802.15.4 header in the frame buffer.
+ *   This function is called after eiether (1) the IEEE802.15.4 MAC driver
+ *   polls for TX data or (2) after the IEEE802.15.4 MAC driver provides a
+ *   new incoming frame and the network responds with an outgoing packet.  It
+ *   submits any new outgoing frame to the MAC.
  *
  * Input parameters:
- *   ieee       - A reference IEEE802.15.4 MAC network device structure.
- *   iob        - The IOB in which to create the frame.
- *   dest_panid - PAN ID of the destination.  May be 0xffff if the destination
- *                is not associated.
+ *   ieee  - A reference IEEE802.15.4 MAC network device structure.
+ *   meta  - Meta data that describes the MAC header
+ *   frame - The IOB containing the frame to be submitted.
  *
  * Returned Value:
- *   The frame header length is returnd on success; otherwise, a negated
- *   errno value is return on failure.
+ *   Zero (OK) is returned on success; otherwise, a negated errno value is
+ *   return on any failure.
  *
  ****************************************************************************/
 
-int sixlowpan_framecreate(FAR struct ieee802154_driver_s *ieee,
-                          FAR struct iob_s *iob, uint16_t dest_panid);
+int sixlowpan_frame_submit(FAR struct ieee802154_driver_s *ieee,
+                           FAR const struct ieee802154_frame_meta_s *meta,
+                           FAR struct iob_s *frame);
 
 /****************************************************************************
  * Name: sixlowpan_queue_frames
@@ -397,9 +356,8 @@ int sixlowpan_framecreate(FAR struct ieee802154_driver_s *ieee,
  *
  *   The payload data is in the caller 'buf' and is of length 'buflen'.
  *   Compressed headers will be added and if necessary the packet is
- *   fragmented. The resulting packet/fragments are put in ieee->i_framelist
- *   and the entire list of frames will be delivered to the 802.15.4 MAC via
- *   ieee->i_framelist.
+ *   fragmented. The resulting packet/fragments are submitted to the MAC
+ *   via the network driver i_req_data method.
  *
  * Input Parameters:
  *   ieee    - The IEEE802.15.4 MAC driver instance

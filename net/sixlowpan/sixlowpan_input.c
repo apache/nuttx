@@ -130,92 +130,6 @@ static uint8_t g_bitbucket[UNCOMP_MAXHDR];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sixlowpan_recv_hdrlen
- *
- * Description:
- *   Get the length of the IEEE802.15.4 FCF header on the received frame.
- *
- * Input Parameters:
- *   ieee - The IEEE802.15.4 MAC network driver interface.
- *   iob  - The IOB containing the frame.
- *
- * Returned Value:
- *   Ok is returned on success; Othewise a negated errno value is returned.
- *
- * Assumptions:
- *   Network is locked
- *
- ****************************************************************************/
-
-int sixlowpan_recv_hdrlen(FAR const uint8_t *fptr)
-{
-  uint16_t hdrlen;
-  uint8_t addrmode;
-
-  /* Minimum header:  2 byte FCF + 1 byte sequence number */
-
-  hdrlen = 3;
-
-  /* Account for destination address size */
-
-  addrmode = (fptr[1] & FRAME802154_DSTADDR_MASK) >> FRAME802154_DSTADDR_SHIFT;
-  if (addrmode == FRAME802154_SHORTADDRMODE)
-    {
-      /* 2 byte dest PAN + 2 byte dest short address */
-
-      hdrlen += 4;
-    }
-  else if (addrmode == FRAME802154_LONGADDRMODE)
-    {
-      /* 2 byte dest PAN + 8 byte dest long address */
-
-      hdrlen += 10;
-    }
-  else if (addrmode != FRAME802154_NOADDR)
-    {
-      nwarn("WARNING: Unrecognized address mode\n");
-
-      return -ENOSYS;
-    }
-  else if ((fptr[0] & (1 << FRAME802154_PANIDCOMP_SHIFT)) != 0)
-    {
-      nwarn("WARNING: PAN compression, but no destination address\n");
-
-      return -EINVAL;
-    }
-
-  /* Account for source address size */
-
-  addrmode = (fptr[1] & FRAME802154_SRCADDR_MASK) >> FRAME802154_SRCADDR_SHIFT;
-  if (addrmode == FRAME802154_NOADDR)
-    {
-      return hdrlen;
-    }
-  else
-    {
-      /* Add source PANID if PANIDs are not compressed */
-
-      if ((fptr[0] & (1 << FRAME802154_PANIDCOMP_SHIFT)) == 0)
-        {
-          hdrlen += 2;
-        }
-
-      /* Add the length of the source address */
-
-      if (addrmode == FRAME802154_SHORTADDRMODE)
-        {
-          return hdrlen + 2;
-        }
-      else if (addrmode == FRAME802154_LONGADDRMODE)
-        {
-          return hdrlen + 8;
-        }
-    }
-
-  return 0;
-}
-
-/****************************************************************************
  * Name: sixlowpan_compress_ipv6hdr
  *
  * Description:
@@ -245,7 +159,7 @@ static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr, FAR uint8_t *bptr)
 {
   FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)bptr;
   uint16_t protosize;
- 
+
   /* Put uncompressed IPv6 header in d_buf. */
 
   g_frame_hdrlen  += SIXLOWPAN_IPV6_HDR_LEN;
@@ -355,8 +269,8 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
    * This size includes both fragmentation and FCF headers.
    */
 
-  fptr    = iob->io_data;
-  hdrsize = sixlowpan_recv_hdrlen(fptr);
+  fptr    = iob->io_data;    /* Frame data is in I/O buffer */
+  hdrsize = iob->io_offset;  /* Offset past the MAC header */
   if (hdrsize < 0)
     {
       nwarn("Invalid IEEE802.15.2 header: %d\n", hdrsize);
@@ -729,25 +643,32 @@ static int sixlowpan_dispatch(FAR struct ieee802154_driver_s *ieee)
  * Description:
  *   Process an incoming 6loWPAN frame.
  *
- *   This function is called when the device driver has received a 6loWPAN
- *   frame from the network. The frame from the device driver must be
- *   provided in a IOB present in the i_framelist:  The frame data is in the
- *   IOB io_data[] buffer and the length of the frame is in the IOB io_len
- *   field.  Only a single IOB is expected in the i_framelist.  This incoming
- *   data will be processed one frame at a time.
+ *   This function is called when the device driver has received an
+ *   IEEE802.15.4 frame from the network.  The frame from the device
+ *   driver must be provided in by the IOB frame argument of the
+ *   function call:
  *
- *   An non-NULL d_buf of size CONFIG_NET_6LOWPAN_MTU must also be provided.
- *   The frame will be decompressed and placed in the d_buf. Fragmented
- *   packets will also be reassembled in the d_buf as they are received
- *   (meaning for the driver, that two packet buffers are required:  One for
- *   reassembly of RX packets and one used for TX polling).
+ *   - The frame data is in the IOB io_data[] buffer,
+ *   - The length of the frame is in the IOB io_len field, and
+ *   - The offset past the IEEE802.15.4 MAC header is provided in the
+ *     io_offset field.
  *
- *   After each frame is processed into d_buf, the IOB is removed and
- *   deallocated.  i_framelist will be nullified.  If reassembly is
- *   incomplete, this function will return to called with i_framelist
- *   equal to NULL.  The partially reassembled packet must be preserved by
- *   the IEEE802.15.4 MAC and provided again when the next frame is
- *   received.
+ *   The frame argument may refer to a single frame (a list of length one)
+ *   or may it be the head of a list of multiple frames.
+ *
+ *   - The io_flink field points to the next frame in the list (if enable)
+ *   - The last frame in the list will have io_flink == NULL.
+ *
+ *   An non-NULL d_buf of size CONFIG_NET_6LOWPAN_MTU + CONFIG_NET_GUARDSIZE
+ *   must also be provided.  The frame will be decompressed and placed in
+ *   the d_buf. Fragmented packets will also be reassembled in the d_buf as
+ *   they are received (meaning for the driver, that two packet buffers are
+ *   required:  One for reassembly of RX packets and one used for TX polling).
+ *
+ *   After each frame is processed into d_buf, the IOB is deallocated.  If
+ *   reassembly is incomplete, the partially reassembled packet must be
+ *   preserved by the IEEE802.15.4 MAC network drvier sand provided again
+ *   when the next frame is received.
  *
  *   When the packet in the d_buf is fully reassembled, it will be provided
  *   to the network as with any other received packet.  d_len will be set
@@ -755,43 +676,40 @@ static int sixlowpan_dispatch(FAR struct ieee802154_driver_s *ieee)
  *
  *   After the network processes the packet, d_len will be set to zero.
  *   Network logic may also decide to send a response to the packet.  In
- *   that case, the outgoing network packet will be placed in d_buf the
- *   d_buf and d_len will be set to a non-zero value.  That case is handled
- *   by this function.
+ *   that case, the outgoing network packet will be placed in d_buf and
+ *   d_len will be set to a non-zero value.  That case is handled by this
+ *   function.
  *
  *   If that case occurs, the packet will be converted to a list of
- *   compressed and possibly fragmented frames in i_framelist as with other
- *   TX operations.
- *
- *   So from the standpoint of the IEEE802.15.4 MAC driver, there are two
- *   possible results:  (1) i_framelist is NULL meaning that the frame
- *   was fully processed and freed, or (2) i_framelist is non-NULL meaning
- *   that there are outgoing frame(s) to be sent.
+ *   compressed and possibly fragmented frames and provided to the MAC
+ *   network driver via the req_data() method as with other TX operations.
  *
  * Input Parameters:
- *   ieee - The IEEE802.15.4 MAC network driver interface.
+ *   ieee      - The IEEE802.15.4 MAC network driver interface.
+ *   framelist - The head of an incoming list of frames.
  *
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.
  *
  ****************************************************************************/
 
-int sixlowpan_input(FAR struct ieee802154_driver_s *ieee)
+int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
+                    FAR struct iob_s *framelist)
 {
   int ret = -EINVAL;
 
-  DEBUGASSERT(ieee != NULL && !FRAME_IOB_EMPTY(ieee));
+  DEBUGASSERT(ieee != NULL && framelist != NULL);
 
-  /* Verify that an IOB is provided in the device structure */
+  /* Verify that an frame has been provided. */
 
-  while (!FRAME_IOB_EMPTY(ieee))
+  while (framelist != NULL)
     {
       FAR struct iob_s *iob;
 
       /* Remove the IOB containing the frame from the device structure */
 
-      FRAME_IOB_REMOVE(ieee, iob);
-      DEBUGASSERT(iob != NULL);
+      iob       = framelist;
+      framelist = iob->io_flink;
 
       sixlowpan_dumpbuffer("Incoming frame", iob->io_data, iob->io_len);
 

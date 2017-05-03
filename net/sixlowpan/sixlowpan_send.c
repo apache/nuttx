@@ -246,11 +246,10 @@ end_wait:
  *   it to be sent on an 802.15.4 network using 6lowpan.  Called from common
  *   UDP/TCP send logic.
  *
- *   The payload data is in the caller 'buf' and is of length 'len'.
+ *   The payload data is in the caller 'buf' and is of length 'buflen'.
  *   Compressed headers will be added and if necessary the packet is
- *   fragmented. The resulting packet/fragments are put in ieee->i_framelist
- *   and the entire list of frames will be delivered to the 802.15.4 MAC via
- *   ieee->i_framelist.
+ *   fragmented. The resulting packet/fragments are submitted to the MAC
+ *   via the network driver i_req_data method.
  *
  * Input Parameters:
  *   dev     - The IEEE802.15.4 MAC network driver interface.

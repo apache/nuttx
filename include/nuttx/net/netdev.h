@@ -437,7 +437,9 @@ int ipv6_input(FAR struct net_driver_s *dev);
 
 #ifdef CONFIG_NET_6LOWPAN
 struct ieee802154_driver_s;  /* See sixlowpan.h */
-int sixlowpan_input(FAR struct ieee802154_driver_s *ieee);
+struct iob_s;                /* See iob.h */
+int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
+                    FAR struct iob_s *framelist);
 #endif
 
 /****************************************************************************
@@ -513,7 +515,7 @@ int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback);
  *
  *   If no Neighbor Table entry is found for the destination IPv6 address,
  *   the packet in the d_buf[] is replaced by an ICMPv6 Neighbor Solict
- *   request packet for the IPv6 address. The IPv6 packet is dropped and 
+ *   request packet for the IPv6 address. The IPv6 packet is dropped and
  *   it is assumed that the higher level protocols (e.g., TCP) eventually
  *   will retransmit the dropped packet.
  *
