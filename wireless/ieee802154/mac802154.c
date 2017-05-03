@@ -844,7 +844,7 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg)
  ****************************************************************************/
 
 int mac802154_get_mhrlen(MACHANDLE mac,
-                         FAR struct ieee802154_frame_meta_s *meta)
+                         FAR const struct ieee802154_frame_meta_s *meta)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
@@ -927,7 +927,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
   FAR struct mac802154_trans_s trans;
-  FAR struct ieee802154_frame_meta_s *meta = req->meta;
+  FAR const struct ieee802154_frame_meta_s *meta = req->meta;
   uint16_t *frame_ctrl;
   uint8_t mhr_len = 3; /* Start assuming frame control and seq. num */
   int ret;

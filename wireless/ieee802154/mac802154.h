@@ -106,7 +106,7 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg);
  ****************************************************************************/
 
 int mac802154_get_mhrlen(MACHANDLE mac,
-                         FAR struct ieee802154_frame_meta_s *meta);
+                         FAR const struct ieee802154_frame_meta_s *meta);
 
 /****************************************************************************
  * Name: mac802154_req_data
