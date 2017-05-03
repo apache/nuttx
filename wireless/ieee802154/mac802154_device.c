@@ -602,17 +602,13 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
         }
         break;
 #endif
-
-      case MAC802154IOC_MLME_ASSOC_REQUEST:
-        {
-          FAR struct ieee802154_assoc_req_s *req =
-            (FAR struct ieee802154_assoc_req_s *)((uintptr_t)arg);
-        }
-        break;
-
       default:
-        wlerr("ERROR: Unrecognized command %ld\n", cmd);
-        ret = -EINVAL;
+        {
+          /* Forward any unrecognized commands to the MAC layer */
+          
+          mac802154_ioctl(dev->md_mac, cmd, arg);
+        }
+        
         break;
     }
 

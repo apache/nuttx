@@ -282,7 +282,7 @@ int mac802154_req_sync(MACHANDLE mac, FAR struct ieee802154_sync_req_s *req);
 int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req);
 
 /****************************************************************************
- * Name: mac802154_rsp_associate
+ * Name: mac802154_resp_associate
  *
  * Description:
  *   The MLME-ASSOCIATE.response primitive is used to initiate a response to
@@ -290,11 +290,11 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req);
  *
  ****************************************************************************/
 
-int mac802154_rsp_associate(MACHANDLE mac,
-                            FAR struct ieee802154_assoc_resp_s *resp);
+int mac802154_resp_associate(MACHANDLE mac,
+                             FAR struct ieee802154_assoc_resp_s *resp);
 
 /****************************************************************************
- * Name: mac802154_rsp_orphan
+ * Name: mac802154_resp_orphan
  *
  * Description:
  *   The MLME-ORPHAN.response primitive allows the next higher layer of a
@@ -302,8 +302,8 @@ int mac802154_rsp_associate(MACHANDLE mac,
  *
  ****************************************************************************/
 
-int mac802154_rsp_orphan(MACHANDLE mac,
-                         FAR struct ieee802154_orphan_resp_s *resp);
+int mac802154_resp_orphan(MACHANDLE mac,
+                          FAR struct ieee802154_orphan_resp_s *resp);
 
 #undef EXTERN
 #ifdef __cplusplus

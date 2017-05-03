@@ -168,7 +168,7 @@
 #define IEEE802154_GTS_DESC_PERSISTENCE_TIME  4
 #define IEEE802154_MAX_BEACON_OVERHEAD        75
 
-#define IEEE802154_MAX_BEACON_PAYLOAD_LENGTH \
+#define IEEE802154_MAX_BEACON_PAYLOAD_LEN \
         (IEEE802154_MAX_PHY_PACKET_SIZE - IEEE802154_MAX_BEACON_OVERHEAD)
 
 #define IEEE802154_MAX_LOST_BEACONS           4
@@ -840,12 +840,12 @@ struct ieee802154_beaconnotify_ind_s
 
   /* Beacon payload */
 
-  uint8_t sdu[IEEE802154_MAX_BEACON_PAYLOAD_LENGTH];
+  uint8_t sdu[IEEE802154_MAX_BEACON_PAYLOAD_LEN];
 };
 
 #define SIZEOF_IEEE802154_BEACONNOTIFY_IND_S(n) \
   (sizeof(struct ieee802154_beaconnotify_ind_s) \
-  - IEEE802154_MAX_BEACON_PAYLOAD_LENGTH + (n))
+  - IEEE802154_MAX_BEACON_PAYLOAD_LEN + (n))
 
 /*****************************************************************************
  * Primitive: MLME-COMM-STATUS.indication
