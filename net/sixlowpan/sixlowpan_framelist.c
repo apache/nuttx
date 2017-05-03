@@ -511,19 +511,16 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
           qhead->io_pktlen += iob->io_len;
         }
 
-      /* Submit all of the fragments to the MAC */
+      /* Submit all of the fragments to the MAC.  We send all frames back-
+       * to-back like this to eliminate any possible condition where some
+       * frame which is not a fragment from this sequence from intervening.
+       */
 
-      while (qhead != NULL)
-      {
-        iob   = qhead;
-        qhead = iob->io_flink;
-
-        ret = sixlowpan_frame_submit(ieee, &meta, iob);
-        if (ret < 0)
-          {
-            nerr("ERROR: sixlowpan_frame_submit() failed: %d\n", ret);
-          }
-      }
+      ret = sixlowpan_frame_submit(ieee, &meta, qhead);
+      if (ret < 0)
+        {
+          nerr("ERROR: sixlowpan_frame_submit() failed: %d\n", ret);
+        }
 
       /* Update the datagram TAG value */
 

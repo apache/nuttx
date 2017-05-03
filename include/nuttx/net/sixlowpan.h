@@ -437,6 +437,14 @@ struct ieee802154_driver_s
    * Description:
    *   Calculate the MAC header length given the frame meta-data.
    *
+   * Input parameters:
+   *   netdev    - The networkd device that will mediate the MAC interface
+   *   meta      - Meta data needed to recreate the MAC header
+   *
+   * Returned Value:
+   *   A non-negative MAC headeer length is returned on success; a negated
+   *   errno value is returned on any failure.
+   *
    **************************************************************************/
 
   CODE int (*i_get_mhrlen)(FAR struct ieee802154_driver_s *netdev,
@@ -446,16 +454,22 @@ struct ieee802154_driver_s
    * Name: mac802154_req_data
    *
    * Description:
-   *   The MCPS-DATA.request primitive requests the transfer of a data SPDU
-   *   (i.e., MSDU) from a local SSCS entity to a single peer SSCS entity.
-   *   Confirmation is returned via the
-   *   struct ieee802154_maccb_s->conf_data callback.
+   *   Requests the transfer of a list of frames to the MAC.
+   *
+   * Input parameters:
+   *   netdev    - The networkd device that will mediate the MAC interface
+   *   meta      - Meta data needed to recreate the MAC header
+   *   framelist - Head of a list of frames to be transferred.
+   *
+   * Returned Value:
+   *   Zero (OK) returned on success; a negated errno value is returned on
+   *   any failure.
    *
    **************************************************************************/
 
   CODE int (*i_req_data)(FAR struct ieee802154_driver_s *netdev,
                          FAR const struct ieee802154_frame_meta_s *meta,
-                         FAR struct iob_s *frames);
+                         FAR struct iob_s *framelist);
 };
 
 /****************************************************************************

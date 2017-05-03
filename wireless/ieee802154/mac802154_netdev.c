@@ -251,7 +251,7 @@ static int macnet_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
               FAR const struct ieee802154_frame_meta_s *meta);
 static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
               FAR const struct ieee802154_frame_meta_s *meta,
-              FAR struct iob_s *frames);
+              FAR struct iob_s *framelist);
 
 /****************************************************************************
  * Private Functions
@@ -1412,6 +1412,14 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
  * Description:
  *   Calculate the MAC header length given the frame meta-data.
  *
+ * Input parameters:
+ *   netdev    - The networkd device that will mediate the MAC interface
+ *   meta      - Meta data needed to recreate the MAC header
+ *
+ * Returned Value:
+ *   A non-negative MAC headeer length is returned on success; a negated
+ *   errno value is returned on any failure.
+ *
  ****************************************************************************/
 
 static int macnet_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
@@ -1429,16 +1437,22 @@ static int macnet_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
  * Name: macnet_req_data
  *
  * Description:
- *   The MCPS-DATA.request primitive requests the transfer of a data SPDU
- *   (i.e., MSDU) from a local SSCS entity to a single peer SSCS entity.
- *   Confirmation is returned via the
- *   struct ieee802154_maccb_s->conf_data callback.
+ *   Requests the transfer of a list of frames to the MAC.
+ *
+ * Input parameters:
+ *   netdev    - The networkd device that will mediate the MAC interface
+ *   meta      - Meta data needed to recreate the MAC header
+ *   framelist - Head of a list of frames to be transferred.
+ *
+ * Returned Value:
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
 static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
                            FAR const struct ieee802154_frame_meta_s *meta,
-                           FAR struct iob_s *frames)
+                           FAR struct iob_s *framelist)
 {
   FAR struct macnet_driver_s *priv;
   struct ieee802154_data_req_s req;
@@ -1450,7 +1464,7 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
 
   /* Add the incoming list of frames to the MAC's outgoing queue */
 
-  for (iob = frames; iob != NULL; iob = frames)
+  for (iob = framelist; iob != NULL; iob = framelist)
     {
       /* Increment statistics */
 
@@ -1458,7 +1472,7 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
 
       /* Remove the IOB from the queue */
 
-      frames        = iob->io_flink;
+      framelist     = iob->io_flink;
       iob->io_flink = NULL;
 
       /* Transfer the frame to the MAC */
@@ -1471,11 +1485,11 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
           wlerr("ERROR: mac802154_req_data failed: %d\n", ret);
 
           iob_free(iob);
-          for (iob = frames; ; iob != NULL; iob = frames)
+          for (iob = framelist; ; iob != NULL; iob = framelist)
             {
               /* Remove the IOB from the queue and free */
 
-              frames = iob->io_flink;
+              framelist = iob->io_flink;
               iob_free(iob);
             }
 

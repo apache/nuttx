@@ -67,33 +67,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sixlowpan_addrlen
- *
- * Description:
- *   Return the address length associated with a 2-bit address mode
- *
- * Input parameters:
- *   addrmode - The address mode
- *
- * Returned Value:
- *   The address length associated with the address mode.
- *
- ****************************************************************************/
-
-static inline uint8_t sixlowpan_addrlen(uint8_t addrmode)
-{
-  switch (addrmode)
-    {
-    case FRAME802154_SHORTADDRMODE:  /* 16-bit address */
-      return 2;
-    case FRAME802154_LONGADDRMODE:   /* 64-bit address */
-      return 8;
-    default:
-      return 0;
-    }
-}
-
-/****************************************************************************
  * Name: sixlowpan_addrnull
  *
  * Description:
