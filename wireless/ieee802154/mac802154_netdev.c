@@ -718,7 +718,7 @@ static void macnet_receive(FAR struct macnet_driver_s *priv)
 
   /* Transfer the frame to the network logic */
 
-  sixlowpan_input(&priv->md_dev, iob);
+  sixlowpan_input(&priv->md_dev, iob, NULL);
 }
 
 /****************************************************************************

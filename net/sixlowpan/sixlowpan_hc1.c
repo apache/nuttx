@@ -271,14 +271,6 @@ int sixlowpan_uncompresshdr_hc1(uint16_t iplen, FAR struct iob_s *iob,
   ipv6->tcf    = 0;     /* Bits 0-3: traffic class (LS), 4-bits: flow label (MS) */
   ipv6->flow   = 0;     /* 16-bit flow label (LS) */
 
-  /* Use stateless auto-configuration to set source and destination IP
-   * addresses.
-   */
-
-  sixlowpan_ipfromaddr(&g_pktaddrs[PACKETBUF_ADDR_SENDER],
-                       ipv6->srcipaddr);
-  sixlowpan_ipfromaddr(&g_pktaddrs[PACKETBUF_ADDR_RECEIVER],
-                       ipv6->destipaddr);
   g_uncomp_hdrlen += IPv6_HDRLEN;
 
   /* len[], proto, and ttl depend on the encoding */

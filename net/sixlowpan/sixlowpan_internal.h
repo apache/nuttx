@@ -74,13 +74,31 @@
 /* IEEE 802.15.4  addres macros */
 /* Copy a an IEEE 802.15.4 address */
 
+#define sixlowpan_anyaddrcopy(dest,src,len) \
+  memcpy(dest, src, len)
+
+#define sixlowpan_saddrcopy(dest,src) \
+  sixlowpan_anyaddrcopy(dest,src,NET_6LOWPAN_SADDRSIZE)
+
+#define sixlowpan_aeddrcopy(dest,src)  \
+  sixlowpan_anyaddrcopy(dest,src,NET_6LOWPAN_EADDRSIZE)
+
 #define sixlowpan_addrcopy(dest,src)  \
-  memcpy(dest, src, NET_6LOWPAN_ADDRSIZE)
+  sixlowpan_anyaddrcopy(dest,src,NET_6LOWPAN_ADDRSIZE)
 
 /* Compare two IEEE 802.15.4 addresses */
 
+#define sixlowpan_anyaddrcmp(addr1,addr2,len) \
+  (memcmp(addr1, addr2, len) == 0)
+
+#define sixlowpan_saddrcmp(addr1,addr2) \
+  sixlowpan_anyaddrcmp(addr1,addr2,NET_6LOWPAN_SADDRSIZE)
+
+#define sixlowpan_eaddrcmp(addr1,addr2) \
+  sixlowpan_anyaddrcmp(addr1,addr2,NET_6LOWPAN_EADDRSIZE)
+
 #define sixlowpan_addrcmp(addr1,addr2) \
-  (memcmp(addr1, addr2, NET_6LOWPAN_ADDRSIZE) == 0)
+  sixlowpan_anyaddrcmp(addr1,addr2,NET_6LOWPAN_ADDRSIZE)
 
 /* Packet buffer Definitions */
 
@@ -126,15 +144,6 @@
 #define PACKETBUF_ATTR_ERELIABLE              22
 
 #define PACKETBUF_NUM_ATTRS                   23
-
-/* Addresses (indices into g_pktaddrs) */
-
-#define PACKETBUF_ADDR_SENDER                 0
-#define PACKETBUF_ADDR_RECEIVER               1
-#define PACKETBUF_ADDR_ESENDER                2
-#define PACKETBUF_ADDR_ERECEIVER              3
-
-#define PACKETBUF_NUM_ADDRS                   4
 
 /* General helper macros ****************************************************/
 
@@ -185,6 +194,26 @@ struct ipv6icmp_hdr_s
   struct icmpv6_iphdr_s icmp;
 };
 
+/* In order to provide a customizable IEEE 802.15.4 MAC header, a structure
+ * of meta data is passed to the MAC network driver, struct
+ * ieee802154_frame_meta_s.  Many of the settings in this meta data are
+ * fixed, deterimined by the 6loWPAN configuration.  Other settings depend
+ * on the protocol used in the current packet or on chacteristics of the
+ * destination node.
+ *
+ * The following structure is used to summarize those per-packet
+ * customizations and, along, with the fixed configuratin settings,
+ * determines the full form of that meta data.
+ */
+
+struct packet_metadata_s
+{
+  uint8_t sextended : 1;            /* Extended source address */
+  uint8_t dextended : 1;            /* Extended destination address */
+  union sixlowpan_anyaddr_u source; /* Source IEEE 802.15.4 address */
+  union sixlowpan_anyaddr_u dest;   /* Destination IEEE 802.15.4 address */
+};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -212,7 +241,7 @@ extern uint8_t g_frame_hdrlen;
 /* Packet buffer metadata: Attributes and addresses */
 
 extern uint16_t g_pktattrs[PACKETBUF_NUM_ATTRS];
-extern struct sixlowpan_addr_s g_pktaddrs[PACKETBUF_NUM_ADDRS];
+extern struct packet_metadata_s g_packet_meta;
 
 /****************************************************************************
  * Public Types

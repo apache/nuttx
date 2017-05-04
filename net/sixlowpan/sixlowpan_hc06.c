@@ -275,7 +275,7 @@ static uint8_t compress_addr_64(FAR const net_ipv6addr_t ipaddr,
  ****************************************************************************/
 
 static void uncompress_addr(FAR net_ipv6addr_t ipaddr, uint8_t const prefix[],
-                            uint8_t prefpost, FAR struct sixlowpan_addr_s *macaddr)
+                            uint8_t prefpost)
 {
   uint8_t prefcount = prefpost >> 4;
   uint8_t postcount = prefpost & 0x0f;
@@ -316,7 +316,7 @@ static void uncompress_addr(FAR net_ipv6addr_t ipaddr, uint8_t const prefix[],
     {
       /* No IID based configuration if no prefix and no data => unspec */
 
-      sixlowpan_ipfromaddr(macaddr, ipaddr);
+      nwarn("WARNING: No IID based configuration\n")
     }
 
   ninfo("Uncompressing %d + %d => %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
@@ -983,18 +983,22 @@ void sixlowpan_uncompresshdr_hc06(uint16_t iplen, FAR struct iob_s *iob,
             }
         }
 
-      /* If tmp == 0 we do not have a Address context and therefore no prefix */
+      /* If tmp == 0 we do not have a address context and therefore no prefix */
+      /* REVISIT: Source address may not be the same size as the destination
+       * address.
+       */
 
       uncompress_addr(ipv6->srcipaddr,
-                      tmp != 0 ? addrcontext->prefix : NULL, g_unc_ctxconf[tmp],
-                      (FAR struct sixlowpan_addr_s *)&g_pktaddrs[PACKETBUF_ADDR_SENDER]);
+                      tmp != 0 ? addrcontext->prefix : NULL, g_unc_ctxconf[tmp]);
     }
   else
     {
       /* No compression and link local */
+      /* REVISIT: Source address may not be the same size as the destination
+       * address.
+       */
 
-      uncompress_addr(ipv6->srcipaddr, g_llprefix, g_unc_llconf[tmp],
-                      (FAR struct sixlowpan_addr_s *)&g_pktaddrs[PACKETBUF_ADDR_SENDER]);
+      uncompress_addr(ipv6->srcipaddr, g_llprefix, g_unc_llconf[tmp]);
     }
 
   /* Destination address */
@@ -1029,7 +1033,7 @@ void sixlowpan_uncompresshdr_hc06(uint16_t iplen, FAR struct iob_s *iob,
               g_hc06ptr++;
             }
 
-          uncompress_addr(ipv6->destipaddr, prefix, g_unc_mxconf[tmp], NULL);
+          uncompress_addr(ipv6->destipaddr, prefix, g_unc_mxconf[tmp]);
         }
     }
   else
@@ -1052,15 +1056,13 @@ void sixlowpan_uncompresshdr_hc06(uint16_t iplen, FAR struct iob_s *iob,
               return;
             }
 
-          uncompress_addr(ipv6->destipaddr, addrcontext->prefix, g_unc_ctxconf[tmp],
-                          (FAR struct sixlowpan_addr_s *)&g_pktaddrs[PACKETBUF_ADDR_RECEIVER]);
+          uncompress_addr(ipv6->destipaddr, addrcontext->prefix, g_unc_ctxconf[tmp]);
         }
       else
         {
           /* Not address context based => link local M = 0, DAC = 0 - same as SAC */
 
-          uncompress_addr(ipv6->destipaddr, g_llprefix, g_unc_llconf[tmp],
-                          (FAR struct sixlowpan_addr_s *)&g_pktaddrs[PACKETBUF_ADDR_RECEIVER]);
+          uncompress_addr(ipv6->destipaddr, g_llprefix, g_unc_llconf[tmp]);
         }
     }
 

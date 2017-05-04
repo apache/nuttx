@@ -67,33 +67,72 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sixlowpan_addrnull
+ * Name: sixlowpan_anyaddrnull
  *
  * Description:
- *   If the output address is NULL in the MAC header buf, then it is
+ *   If the destination address is all zero in the MAC header buf, then it is
  *   broadcast on the 802.15.4 network.
  *
  * Input parameters:
- *   addrmode - The address mode
+ *   addr    - The address to check
+ *   addrlen - The length of the address in bytes
  *
  * Returned Value:
- *   The address length associated with the address mode.
+ *   True if the address is all zero.
  *
  ****************************************************************************/
 
-static bool sixlowpan_addrnull(FAR uint8_t *addr)
+static bool sixlowpan_anyaddrnull(FAR uint8_t *addr, uint8_t addrlen)
 {
-  int i = NET_6LOWPAN_ADDRSIZE;
-
-  while (i-- > 0)
+  while (addrlen-- > 0)
     {
-      if (addr[i] != 0x00)
+      if (addr[addrlen] != 0x00)
         {
           return false;
         }
     }
 
   return true;
+}
+
+/****************************************************************************
+ * Name: sixlowpan_saddrnull
+ *
+ * Description:
+ *   If the destination address is all zero in the MAC header buf, then it is
+ *   broadcast on the 802.15.4 network.
+ *
+ * Input parameters:
+ *   eaddr - The short address to check
+ *
+ * Returned Value:
+ *   The address length associated with the address mode.
+ *
+ ****************************************************************************/
+
+static inline bool sixlowpan_saddrnull(FAR uint8_t *saddr)
+{
+  return sixlowpan_anyaddrnull(saddr, NET_6LOWPAN_SADDRSIZE);
+}
+
+/****************************************************************************
+ * Name: sixlowpan_eaddrnull
+ *
+ * Description:
+ *   If the destination address is all zero in the MAC header buf, then it is
+ *   broadcast on the 802.15.4 network.
+ *
+ * Input parameters:
+ *   eaddr - The extended address to check
+ *
+ * Returned Value:
+ *   The address length associated with the address mode.
+ *
+ ****************************************************************************/
+
+static inline bool sixlowpan_eaddrnull(FAR uint8_t *eaddr)
+{
+  return sixlowpan_anyaddrnull(eaddr, NET_6LOWPAN_EADDRSIZE);
 }
 
 /****************************************************************************
@@ -142,7 +181,15 @@ int sixlowpan_meta_data(uint16_t dest_panid,
    * broadcast on the 802.15.4 network.
    */
 
-  rcvrnull = sixlowpan_addrnull(g_pktaddrs[PACKETBUF_ADDR_RECEIVER].u8);
+  if (g_packet_meta.dextended != 0)
+    {
+      rcvrnull = sixlowpan_eaddrnull(g_packet_meta.dest.eaddr.u8);
+    }
+  else
+    {
+      rcvrnull = sixlowpan_saddrnull(g_packet_meta.dest.saddr.u8);
+    }
+
   if (rcvrnull)
     {
       meta->fcf.ack_required = g_pktattrs[PACKETBUF_ATTR_MAC_ACK];
@@ -175,26 +222,30 @@ int sixlowpan_meta_data(uint16_t dest_panid,
       meta->dest_addr[0] = 0xff;
       meta->dest_addr[1] = 0xff;
     }
+  else if (g_packet_meta.dextended != 0)
+    {
+      meta->fcf.dest_addr_mode = FRAME802154_LONGADDRMODE;
+      sixlowpan_eaddrcopy((struct sixlowpan_addr_s *)&meta->dest_addr,
+                           g_packet_meta.dest.eaddr.u8);
+    }
   else
     {
-      /* Copy the destination address */
-
-      sixlowpan_addrcopy((struct sixlowpan_addr_s *)&meta->dest_addr,
-                    g_pktaddrs[PACKETBUF_ADDR_RECEIVER].u8);
-
-      /* Use short destination address mode if so configured */
-
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-      meta->fcf.dest_addr_mode = FRAME802154_LONGADDRMODE;
-#else
       meta->fcf.dest_addr_mode = FRAME802154_SHORTADDRMODE;
-#endif
+      sixlowpan_saddrcopy((struct sixlowpan_addr_s *)&meta->dest_addr,
+                           g_packet_meta.dest.saddr.u8);
     }
 
-  /* Set the source address to the node address assigned to the device */
-
-  sixlowpan_addrcopy((struct sixlowpan_addr_s *)&meta->src_addr,
-                &ieee->i_dev.d_mac.ieee802154);
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+  DEBUGASSERT(g_packet_meta.sextended != 0);
+  meta->fcf.src_addr_mode = FRAME802154_LONGADDRMODE;
+  sixlowpan_eaddrcopy((struct sixlowpan_addr_s *)&meta->src_addr,
+                       g_packet_meta.source.eaddr.u8);
+#else
+  DEBUGASSERT(g_packet_meta.sextended == 0);
+  meta->fcf.src_addr_mode = FRAME802154_SHORTADDRMODE;
+  sixlowpan_saddrcopy((struct sixlowpan_addr_s *)&meta->src_addr,
+                       g_packet_meta.source.saddr.u8);
+#endif
 
   /* Use short soruce address mode if so configured */
 
@@ -203,7 +254,7 @@ int sixlowpan_meta_data(uint16_t dest_panid,
 #else
   meta->fcf.src_addr_mode = FRAME802154_SHORTADDRMODE;
 #endif
-#endif
+#endif /* 0 */
 
 #warning Missing logic
   return -ENOSYS;

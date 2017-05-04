@@ -401,8 +401,8 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
       /* Verify that this fragment is part of that reassembly sequence */
 
-      else if (fragsize != ieee->i_pktlen || ieee->i_reasstag != fragtag ||
-               !sixlowpan_addrcmp(&ieee->i_fragsrc, &g_pktaddrs[PACKETBUF_ADDR_SENDER]))
+      else if (fragsize != ieee->i_pktlen || ieee->i_reasstag != fragtag /* ||
+               !sixlowpan_addrcmp(&ieee->i_fragsrc, &ind->???) */)
         {
           /* The packet is a fragment that does not belong to the packet
            * being reassembled or the packet is not a fragment.
@@ -454,7 +454,15 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       ninfo("Starting reassembly: i_pktlen %u, i_reasstag %d\n",
             ieee->i_pktlen, ieee->i_reasstag);
 
-      sixlowpan_addrcopy(&ieee->i_fragsrc, &g_pktaddrs[PACKETBUF_ADDR_SENDER]);
+      /* Extract the source address from the 'ind' meta data.  NOTE that the
+       * size of the source address may be different that our local, destination
+       * address.
+       */
+
+#warning Missing logic
+#if 0
+      sixlowpan_addrcopy(&ieee->i_fragsrc, ind->???]);
+#endif
     }
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
@@ -496,7 +504,6 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 #ifdef CONFIG_NET_6LOWPAN_FRAG
   /* Is this the first fragment is a sequence? */
 
-
   if (isfirstfrag)
     {
       /* Yes.. Remember the offset from the beginning of d_buf where we
@@ -516,6 +523,8 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
       g_uncomp_hdrlen = ieee->i_boffset;
     }
+
+
 
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
@@ -686,7 +695,12 @@ static int sixlowpan_dispatch(FAR struct ieee802154_driver_s *ieee)
  *
  * Input Parameters:
  *   ieee      - The IEEE802.15.4 MAC network driver interface.
- *   framelist - The head of an incoming list of frames.
+ *   framelist - The head of an incoming list of frames.  Normally this
+ *               would be a single frame.  A list may be provided if
+ *               appropriate, however.
+ *   ind       - Meta data characterizing the received packet.  If there are
+ *               multilple frames in the list, this meta data must apply to
+ *               all of the frames!
  *
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.
@@ -694,7 +708,8 @@ static int sixlowpan_dispatch(FAR struct ieee802154_driver_s *ieee)
  ****************************************************************************/
 
 int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
-                    FAR struct iob_s *framelist)
+                    FAR struct iob_s *framelist,
+                    FAR const struct eee802154_data_ind_s *ind)
 {
   int ret = -EINVAL;
 

@@ -234,7 +234,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
   /* Reset address buffer and packet buffer metatadata */
 
   memset(g_pktattrs, 0, PACKETBUF_NUM_ATTRS * sizeof(uint16_t));
-  memset(g_pktaddrs, 0, PACKETBUF_NUM_ADDRS * sizeof(struct sixlowpan_addr_s));
+  memset(&g_packet_meta, 0, sizeof(struct packet_metadata_s));
 
   g_pktattrs[PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS] =
     CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS;
@@ -284,11 +284,30 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
   ninfo("Sending packet length %d\n", buflen);
 
-  /* Set the source and destination address */
+  /* Set the source and destination address.  The source MAC address
+   * is a fixed size, determined by a configuration setting.  The
+   * destination MAC address many be either short or extended.
+   */
 
-  sixlowpan_addrcopy(&g_pktaddrs[PACKETBUF_ADDR_SENDER],
-                &ieee->i_dev.d_mac.ieee802154);
-  sixlowpan_addrcopy(&g_pktaddrs[PACKETBUF_ADDR_RECEIVER], destmac);
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+  g_packet_meta.sextended = TRUE;
+  sixlowpan_eaddrcopy(g_packet_meta.source.eaddr.u8,
+                      &ieee->i_dev.d_mac.ieee802154);
+#else
+  sixlowpan_saddrcopy(g_packet_meta.source.saddr.u8,
+                      &ieee->i_dev.d_mac.ieee802154);
+#endif
+
+  /* REVISIT: Destination MAC address could be of different size than
+   * the source MAC address.
+   */
+
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+  g_packet_meta.dextended = TRUE;
+  sixlowpan_addrcopy(g_packet_meta.dest.eaddr.u8, destmac);
+#else
+  sixlowpan_addrcopy(g_packet_meta.dest.saddr.u8, destmac);
+#endif
 
   /* Get the destination PAN ID.
    *

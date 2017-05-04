@@ -211,7 +211,7 @@ static int lo_loopback(FAR struct net_driver_s *dev)
       ninfo("Send frame %p to the network:  Offset=%u Length=%u\n",
             iob, iob->io_offset, iob->io_len);
 
-      ret = sixlowpan_input(&priv->lo_ieee, iob);
+      ret = sixlowpan_input(&priv->lo_ieee, iob, NULL);
 
       /* Increment statistics */
 

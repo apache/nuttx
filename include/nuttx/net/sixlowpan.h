@@ -342,6 +342,7 @@
  */
 
 struct ieee802154_frame_meta_s; /* Forward reference */
+struct eee802154_data_ind_s;    /* Forward reference */
 struct iob_s;                   /* Forward reference */
 
 struct ieee802154_driver_s
@@ -420,7 +421,7 @@ struct ieee802154_driver_s
 
   /* The source MAC address of the fragments being merged */
 
-  struct sixlowpan_addr_s i_fragsrc;
+  union sixlowpan_anyaddr_u i_fragsrc;
 
   /* That time at which reassembly was started.  If the elapsed time
    * exceeds CONFIG_NET_6LOWPAN_MAXAGE, then the reassembly will
@@ -525,7 +526,12 @@ struct ieee802154_driver_s
  *
  * Input Parameters:
  *   ieee      - The IEEE802.15.4 MAC network driver interface.
- *   framelist - The head of an incoming list of frames.
+ *   framelist - The head of an incoming list of frames.  Normally this
+ *               would be a single frame.  A list may be provided if
+ *               appropriate, however.
+ *   ind       - Meta data characterizing the received packet.  If there are
+ *               multilple frames in the list, this meta data must apply to
+ *               all of the frames!
  *
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.
@@ -533,7 +539,8 @@ struct ieee802154_driver_s
  ****************************************************************************/
 
 int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
-                    FAR struct iob_s *framelist);
+                    FAR struct iob_s *framelist,
+                    FAR const struct eee802154_data_ind_s *ind);
 
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* __INCLUDE_NUTTX_NET_SIXLOWPAN_H */
