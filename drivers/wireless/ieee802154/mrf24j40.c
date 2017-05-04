@@ -224,7 +224,7 @@ static int  mrf24j40_bind(FAR struct ieee802154_radio_s *radio,
               FAR struct ieee802154_radiocb_s *radiocb);
 static int  mrf24j40_ioctl(FAR struct ieee802154_radio_s *radio, int cmd,
               unsigned long arg);
-static int  mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio);
+static int  mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio bool enable);
 static int  mrf24j40_txnotify_csma(FAR struct ieee802154_radio_s *radio);
 static int  mrf24j40_txnotify_gts(FAR struct ieee802154_radio_s *radio);
 
@@ -1336,8 +1336,6 @@ static int mrf24j40_csma_setup(FAR struct mrf24j40_radio_s *dev,
   uint8_t reg;
   int     ret;
 
-  mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
-
   /* Enable tx int */
 
   reg  = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
@@ -1534,22 +1532,31 @@ static void mrf24j40_irqwork_txgts(FAR struct mrf24j40_radio_s *dev,
  * Name: mrf24j40_rxenable
  *
  * Description:
- *  Enable reception of a packet. The interrupt will signal the rx semaphore.
+ *  Enable/Disable receiver.
  *
  ****************************************************************************/
 
-static int mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio)
+static int mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio, bool enable)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
   uint8_t reg;
 
-  mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
+  if (enable)
+    {
+      /* Enable rx int */
 
-  /* Enable rx int */
+      reg = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
+      reg &= ~MRF24J40_INTCON_RXIE;
+      mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
+    }
+  else
+    {
+      /* Disable rx int */
 
-  reg = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
-  reg &= ~MRF24J40_INTCON_RXIE;
-  mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
+      reg  = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
+      reg |= MRF24J40_INTCON_RXIE;
+      mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
+    }
 
   return OK;
 }
@@ -1570,15 +1577,13 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
   uint32_t index;
   uint8_t  reg;
 
-  /* wlinfo("!\n"); */
-
   /* Disable rx int */
 
   reg  = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
   reg |= MRF24J40_INTCON_RXIE;
   mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
 
-  /* Disable packet reception */
+  /* Disable packet reception. See pg. 109 of datasheet */
 
   mrf24j40_setreg(dev->spi, MRF24J40_BBREG1, MRF24J40_BBREG1_RXDECINV);
 
@@ -1597,7 +1602,6 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
   addr = MRF24J40_RXBUF_BASE;
 
   iob->io_len= mrf24j40_getreg(dev->spi, addr++);
-  /* wlinfo("len %3d\n", dev->radio.rxbuf->len); */
 
   /* TODO: This needs to be changed.  It is inefficient to do the SPI read byte
    * by byte */
@@ -1633,6 +1637,11 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
 
   mrf24j40_setreg(dev->spi, MRF24J40_BBREG1, 0);
 
+  /* Enable rx int */
+
+  reg = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
+  reg &= ~MRF24J40_INTCON_RXIE;
+  mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
 }
 
 /****************************************************************************

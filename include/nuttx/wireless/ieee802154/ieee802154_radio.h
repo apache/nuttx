@@ -215,7 +215,7 @@ struct ieee802154_radioops_s
              FAR struct ieee802154_radiocb_s *radiocb);
   CODE int (*ioctl)(FAR struct ieee802154_radio_s *radio, int cmd,
              unsigned long arg);
-  CODE int (*rxenable)(FAR struct ieee802154_radio_s *radio);
+  CODE int (*rxenable)(FAR struct ieee802154_radio_s *radio, bool enable);
   CODE int (*txnotify_csma)(FAR struct ieee802154_radio_s *radio);
   CODE int (*txnotify_gts)(FAR struct ieee802154_radio_s *radio);
 };
