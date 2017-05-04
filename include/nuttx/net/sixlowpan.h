@@ -420,7 +420,7 @@ struct ieee802154_driver_s
 
   /* The source MAC address of the fragments being merged */
 
-  struct rimeaddr_s i_fragsrc;
+  struct sixlowpan_addr_s i_fragsrc;
 
   /* That time at which reassembly was started.  If the elapsed time
    * exceeds CONFIG_NET_6LOWPAN_MAXAGE, then the reassembly will

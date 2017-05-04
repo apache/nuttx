@@ -209,13 +209,13 @@ static void sixlowpan_compress_ipv6hdr(FAR const struct ipv6_hdr_s *ipv6hdr,
 int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
                            FAR const struct ipv6_hdr_s *destip,
                            FAR const void *buf, size_t buflen,
-                           FAR const struct rimeaddr_s *destmac)
+                           FAR const struct sixlowpan_addr_s *destmac)
 {
   struct ieee802154_frame_meta_s meta;
   FAR struct iob_s *iob;
   FAR uint8_t *fptr;
   int framer_hdrlen;
-  struct rimeaddr_s bcastmac;
+  struct sixlowpan_addr_s bcastmac;
   uint16_t pktlen;
   uint16_t paysize;
   uint16_t dest_panid;
@@ -234,7 +234,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
   /* Reset rime buffer, packet buffer metatadata */
 
   memset(g_pktattrs, 0, PACKETBUF_NUM_ATTRS * sizeof(uint16_t));
-  memset(g_pktaddrs, 0, PACKETBUF_NUM_ADDRS * sizeof(struct rimeaddr_s));
+  memset(g_pktaddrs, 0, PACKETBUF_NUM_ADDRS * sizeof(struct sixlowpan_addr_s));
 
   g_pktattrs[PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS] =
     CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS;
@@ -263,7 +263,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
   if (destmac == NULL)
     {
-      memset(&bcastmac, 0, sizeof(struct rimeaddr_s));
+      memset(&bcastmac, 0, sizeof(struct sixlowpan_addr_s));
       destmac = &bcastmac;
     }
 

@@ -350,7 +350,7 @@ static int lo_ifup(FAR struct net_driver_s *dev)
         dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
         dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 
-#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
   ninfo("             Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x PANID=%04x\n",
          dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
          dev->d_mac.ieee802154.u8[2], dev->d_mac.ieee802154.u8[3],
@@ -507,7 +507,7 @@ static int lo_txavail(FAR struct net_driver_s *dev)
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
 static int lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
   ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], mac[6], mac[7]);
 #else
@@ -542,7 +542,7 @@ static int lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 #ifdef CONFIG_NET_IGMP
 static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
   ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], mac[6], mac[7]);
 #else

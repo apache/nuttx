@@ -233,7 +233,7 @@ static FAR struct sixlowpan_addrcontext_s *
  ****************************************************************************/
 
 static uint8_t compress_addr_64(FAR const net_ipv6addr_t ipaddr,
-                                FAR const struct rimeaddr_s *macaddr,
+                                FAR const struct sixlowpan_addr_s *macaddr,
                                 uint8_t bitpos)
 {
   ninfo("ipaddr=%p macaddr=%p bitpos=%u g_hc06ptr=%p\n",
@@ -275,7 +275,7 @@ static uint8_t compress_addr_64(FAR const net_ipv6addr_t ipaddr,
  ****************************************************************************/
 
 static void uncompress_addr(FAR net_ipv6addr_t ipaddr, uint8_t const prefix[],
-                            uint8_t prefpost, FAR struct rimeaddr_s *macaddr)
+                            uint8_t prefpost, FAR struct sixlowpan_addr_s *macaddr)
 {
   uint8_t prefcount = prefpost >> 4;
   uint8_t postcount = prefpost & 0x0f;
@@ -446,7 +446,7 @@ void sixlowpan_hc06_initialize(void)
 
 void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                                 FAR const struct ipv6_hdr_s *ipv6,
-                                FAR const struct rimeaddr_s *destmac,
+                                FAR const struct sixlowpan_addr_s *destmac,
                                 FAR uint8_t *fptr)
 {
   FAR uint8_t *iphc = fptr + g_frame_hdrlen;
@@ -987,14 +987,14 @@ void sixlowpan_uncompresshdr_hc06(uint16_t iplen, FAR struct iob_s *iob,
 
       uncompress_addr(ipv6->srcipaddr,
                       tmp != 0 ? addrcontext->prefix : NULL, g_unc_ctxconf[tmp],
-                      (FAR struct rimeaddr_s *)&g_pktaddrs[PACKETBUF_ADDR_SENDER]);
+                      (FAR struct sixlowpan_addr_s *)&g_pktaddrs[PACKETBUF_ADDR_SENDER]);
     }
   else
     {
       /* No compression and link local */
 
       uncompress_addr(ipv6->srcipaddr, g_llprefix, g_unc_llconf[tmp],
-                      (FAR struct rimeaddr_s *)&g_pktaddrs[PACKETBUF_ADDR_SENDER]);
+                      (FAR struct sixlowpan_addr_s *)&g_pktaddrs[PACKETBUF_ADDR_SENDER]);
     }
 
   /* Destination address */
@@ -1053,14 +1053,14 @@ void sixlowpan_uncompresshdr_hc06(uint16_t iplen, FAR struct iob_s *iob,
             }
 
           uncompress_addr(ipv6->destipaddr, addrcontext->prefix, g_unc_ctxconf[tmp],
-                          (FAR struct rimeaddr_s *)&g_pktaddrs[PACKETBUF_ADDR_RECEIVER]);
+                          (FAR struct sixlowpan_addr_s *)&g_pktaddrs[PACKETBUF_ADDR_RECEIVER]);
         }
       else
         {
           /* Not address context based => link local M = 0, DAC = 0 - same as SAC */
 
           uncompress_addr(ipv6->destipaddr, g_llprefix, g_unc_llconf[tmp],
-                          (FAR struct rimeaddr_s *)&g_pktaddrs[PACKETBUF_ADDR_RECEIVER]);
+                          (FAR struct sixlowpan_addr_s *)&g_pktaddrs[PACKETBUF_ADDR_RECEIVER]);
         }
     }
 

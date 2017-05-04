@@ -58,15 +58,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* By default, a 2-byte Rime address is used for the IEEE802.15.4 MAC
- * device's link  layer address.  If CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
- * is selected, then an 8-byte Rime address will be used.
+/* By default, a 2-byte short address is used for the IEEE802.15.4 MAC
+ * device's link layer address.  If CONFIG_NET_6LOWPAN_EXTENDEDADDR
+ * is selected, then an 8-byte extended address will be used.
  */
 
-#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
-#  define NET_6LOWPAN_RIMEADDR_SIZE 8
+#define NET_6LOWPAN_SADDRSIZE  2
+#define NET_6LOWPAN_EADDRSIZE  8
+
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+#  define NET_6LOWPAN_ADDRSIZE NET_6LOWPAN_EADDRSIZE
 #else
-#  define NET_6LOWPAN_RIMEADDR_SIZE 2
+#  define NET_6LOWPAN_ADDRSIZE NET_6LOWPAN_SADDRSIZE
 #endif
 
 /* Frame format definitions *************************************************/
@@ -123,11 +126,29 @@
  * Public Types
  ****************************************************************************/
 
-/* Rime address representation */
+/* IEEE 802.15.4 address representations */
 
-struct rimeaddr_s
+struct sixlowpan_saddr_s
 {
-  uint8_t u8[NET_6LOWPAN_RIMEADDR_SIZE];
+  uint8_t u8[NET_6LOWPAN_SADDRSIZE];
+};
+
+struct sixlowpan_eaddr_s
+{
+  uint8_t u8[NET_6LOWPAN_EADDRSIZE];
+};
+
+union sixlowpan_anyaddr_u
+{
+  struct sixlowpan_saddr_s saddr;
+  struct sixlowpan_eaddr_s eaddr;
+};
+
+/* Represents the configured address size */
+
+struct sixlowpan_addr_s
+{
+  uint8_t u8[NET_6LOWPAN_ADDRSIZE];
 };
 
 /****************************************************************************

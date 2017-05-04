@@ -151,7 +151,7 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
 #ifdef CONFIG_NET_6LOWPAN
       case NET_LL_IEEE802154:
         {
-#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
           len += snprintf(&netfile->line[len], NET_LINELEN - len,
                           "%s\tLink encap:6loWPAN HWaddr "
                           "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
@@ -213,7 +213,7 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
                   dev->d_ifname, ether_ntoa(&dev->d_mac.ether), status);
 
 #elif defined(CONFIG_NET_6LOWPAN)
-#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   "%s\tLink encap:6loWPAN HWaddr "
                   "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x at %s\n",

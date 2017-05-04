@@ -120,7 +120,7 @@
 
 void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
                                FAR const struct ipv6_hdr_s *ipv6,
-                               FAR const struct rimeaddr_s *destmac,
+                               FAR const struct sixlowpan_addr_s *destmac,
                                FAR uint8_t *fptr)
 {
   FAR uint8_t *hc1 = fptr + g_frame_hdrlen;

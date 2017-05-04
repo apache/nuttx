@@ -164,7 +164,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
   FAR struct tcp_conn_s *conn;
   FAR struct net_driver_s *dev;
   struct ipv6tcp_hdr_s ipv6tcp;
-  struct rimeaddr_s destmac;
+  struct sixlowpan_addr_s destmac;
   uint16_t timeout;
   uint16_t iplen;
   int ret;
@@ -409,7 +409,7 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev)
         }
       else
         {
-          struct rimeaddr_s destmac;
+          struct sixlowpan_addr_s destmac;
           FAR uint8_t *buf;
           uint16_t hdrlen;
           uint16_t buflen;

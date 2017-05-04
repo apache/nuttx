@@ -75,12 +75,12 @@
 /* Copy a Rime address */
 
 #define rimeaddr_copy(dest,src)  \
-  memcpy(dest, src, NET_6LOWPAN_RIMEADDR_SIZE)
+  memcpy(dest, src, NET_6LOWPAN_ADDRSIZE)
 
 /* Compare two Rime addresses */
 
 #define rimeaddr_cmp(addr1,addr2) \
-  (memcmp(addr1, addr2, NET_6LOWPAN_RIMEADDR_SIZE) == 0)
+  (memcmp(addr1, addr2, NET_6LOWPAN_ADDRSIZE) == 0)
 
 /* Pointers in the Rime buffer */
 
@@ -222,7 +222,7 @@ extern uint8_t g_frame_hdrlen;
 /* Packet buffer metadata: Attributes and addresses */
 
 extern uint16_t g_pktattrs[PACKETBUF_NUM_ATTRS];
-extern struct rimeaddr_s g_pktaddrs[PACKETBUF_NUM_ADDRS];
+extern struct sixlowpan_addr_s g_pktaddrs[PACKETBUF_NUM_ADDRS];
 
 /****************************************************************************
  * Public Types
@@ -236,7 +236,7 @@ struct net_driver_s;         /* Forward reference */
 struct ieee802154_driver_s;  /* Forward reference */
 struct devif_callback_s;     /* Forward reference */
 struct ipv6_hdr_s;           /* Forward reference */
-struct rimeaddr_s;           /* Forward reference */
+struct sixlowpan_addr_s;           /* Forward reference */
 struct iob_s;                /* Forward reference */
 
 /****************************************************************************
@@ -275,7 +275,7 @@ struct iob_s;                /* Forward reference */
 int sixlowpan_send(FAR struct net_driver_s *dev,
                    FAR struct devif_callback_s **list,
                    FAR const struct ipv6_hdr_s *ipv6hdr, FAR const void *buf,
-                   size_t buflen, FAR const struct rimeaddr_s *raddr,
+                   size_t buflen, FAR const struct sixlowpan_addr_s *raddr,
                    uint16_t timeout);
 
 /****************************************************************************
@@ -381,7 +381,7 @@ int sixlowpan_frame_submit(FAR struct ieee802154_driver_s *ieee,
 int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
                            FAR const struct ipv6_hdr_s *ipv6hdr,
                            FAR const void *buf,  size_t buflen,
-                           FAR const struct rimeaddr_s *destmac);
+                           FAR const struct sixlowpan_addr_s *destmac);
 
 /****************************************************************************
  * Name: sixlowpan_hc06_initialize
@@ -437,7 +437,7 @@ void sixlowpan_hc06_initialize(void);
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
 void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                                 FAR const struct ipv6_hdr_s *ipv6,
-                                FAR const struct rimeaddr_s *destmac,
+                                FAR const struct sixlowpan_addr_s *destmac,
                                 FAR uint8_t *fptr);
 #endif
 
@@ -498,7 +498,7 @@ void sixlowpan_uncompresshdr_hc06(uint16_t iplen, FAR struct iob_s *iob,
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
 void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
                                FAR const struct ipv6_hdr_s *ipv6,
-                               FAR const struct rimeaddr_s *destmac,
+                               FAR const struct sixlowpan_addr_s *destmac,
                                FAR uint8_t *fptr);
 #endif
 
@@ -557,12 +557,12 @@ int sixlowpan_uncompresshdr_hc1(uint16_t iplen, FAR struct iob_s *iob,
 
 #define sixlowpan_islinklocal(ipaddr) ((ipaddr)[0] == NTOHS(0xfe80))
 
-void sixlowpan_ipfromrime(FAR const struct rimeaddr_s *rime,
+void sixlowpan_ipfromrime(FAR const struct sixlowpan_addr_s *rime,
                           net_ipv6addr_t ipaddr);
 void sixlowpan_rimefromip(const net_ipv6addr_t ipaddr,
-                          FAR struct rimeaddr_s *rime);
+                          FAR struct sixlowpan_addr_s *rime);
 bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
-                          FAR const struct rimeaddr_s *rime);
+                          FAR const struct sixlowpan_addr_s *rime);
 
 /****************************************************************************
  * Name: sixlowpan_src_panid

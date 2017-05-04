@@ -740,7 +740,7 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
                 {
                   FAR struct ipv6_hdr_s *ipv6hdr;
                   FAR uint8_t *buffer;
-                  struct rimeaddr_s destmac;
+                  struct sixlowpan_addr_s destmac;
                   size_t hdrlen;
                   size_t buflen;
 

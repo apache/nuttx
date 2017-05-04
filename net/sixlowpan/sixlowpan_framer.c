@@ -83,7 +83,7 @@
 
 static bool sixlowpan_addrnull(FAR uint8_t *addr)
 {
-  int i = NET_6LOWPAN_RIMEADDR_SIZE;
+  int i = NET_6LOWPAN_ADDRSIZE;
 
   while (i-- > 0)
     {
@@ -179,12 +179,12 @@ int sixlowpan_meta_data(uint16_t dest_panid,
     {
       /* Copy the destination address */
 
-      rimeaddr_copy((struct rimeaddr_s *)&meta->dest_addr,
+      rimeaddr_copy((struct sixlowpan_addr_s *)&meta->dest_addr,
                     g_pktaddrs[PACKETBUF_ADDR_RECEIVER].u8);
 
       /* Use short destination address mode if so configured */
 
-#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
       meta->fcf.dest_addr_mode = FRAME802154_LONGADDRMODE;
 #else
       meta->fcf.dest_addr_mode = FRAME802154_SHORTADDRMODE;
@@ -193,12 +193,12 @@ int sixlowpan_meta_data(uint16_t dest_panid,
 
   /* Set the source address to the node address assigned to the device */
 
-  rimeaddr_copy((struct rimeaddr_s *)&meta->src_addr,
+  rimeaddr_copy((struct sixlowpan_addr_s *)&meta->src_addr,
                 &ieee->i_dev.d_mac.ieee802154);
 
   /* Use short soruce address mode if so configured */
 
-#ifdef CONFIG_NET_6LOWPAN_RIMEADDR_EXTENDED
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
   meta->fcf.src_addr_mode = FRAME802154_LONGADDRMODE;
 #else
   meta->fcf.src_addr_mode = FRAME802154_SHORTADDRMODE;

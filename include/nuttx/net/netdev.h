@@ -224,7 +224,7 @@ struct net_driver_s
 #ifdef CONFIG_NET_6LOWPAN
   /* The address assigned to an IEEE 802.15.4 radio. */
 
-    struct rimeaddr_s ieee802154; /* IEEE 802.15.4 Radio address */
+    struct sixlowpan_addr_s ieee802154; /* IEEE 802.15.4 Radio address */
 #endif
   } d_mac;
 #endif
