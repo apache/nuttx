@@ -80,7 +80,7 @@
 #define sixlowpan_saddrcopy(dest,src) \
   sixlowpan_anyaddrcopy(dest,src,NET_6LOWPAN_SADDRSIZE)
 
-#define sixlowpan_aeddrcopy(dest,src)  \
+#define sixlowpan_eaddrcopy(dest,src)  \
   sixlowpan_anyaddrcopy(dest,src,NET_6LOWPAN_EADDRSIZE)
 
 #define sixlowpan_addrcopy(dest,src)  \
@@ -99,14 +99,6 @@
 
 #define sixlowpan_addrcmp(addr1,addr2) \
   sixlowpan_anyaddrcmp(addr1,addr2,NET_6LOWPAN_ADDRSIZE)
-
-/* Frame meta data definitions */
-
-#define FRAME_ATTR_TYPE_DATA        0
-#define FRAME_ATTR_TYPE_ACK         1
-#define FRAME_ATTR_TYPE_STREAM      2
-#define FRAME_ATTR_TYPE_STREAM_END  3
-#define FRAME_ATTR_TYPE_TIMESTAMP   4
 
 /* General helper macros ****************************************************/
 
@@ -171,12 +163,10 @@ struct ipv6icmp_hdr_s
 
 struct packet_metadata_s
 {
-  uint8_t type      : 3;            /* See FRAME_ATTR_TYPE_* definitons */
-  uint8_t pending   : 1;            /* Pending attribute */
-  uint8_t macack    : 1;            /* MAC ACK */
   uint8_t sextended : 1;            /* Extended source address */
   uint8_t dextended : 1;            /* Extended destination address */
   uint8_t xmits;                    /* Max MAC transmisstion */
+  uint16_t dpanid;                  /* Destination PAN ID */
   union sixlowpan_anyaddr_u source; /* Source IEEE 802.15.4 address */
   union sixlowpan_anyaddr_u dest;   /* Destination IEEE 802.15.4 address */
 };
@@ -271,9 +261,9 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
  *   data structure that we need to interface with the IEEE802.15.4 MAC.
  *
  * Input Parameters:
- *   dest_panid - PAN ID of the destination.  May be 0xffff if the destination
- *                is not associated.
- *   meta       - Location to return the corresponding meta data.
+ *   ieee   - IEEE 802.15.4 MAC driver state reference.
+ *   meta   - Location to return the corresponding meta data.
+ *   paylen - The size of the data payload to be sent.
  *
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.
@@ -283,8 +273,9 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int sixlowpan_meta_data(uint16_t dest_panid,
-                        FAR struct ieee802154_frame_meta_s *meta);
+int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
+                        FAR struct ieee802154_frame_meta_s *meta,
+                        uint16_t paylen);
 
 /****************************************************************************
  * Name: sixlowpan_frame_hdrlen

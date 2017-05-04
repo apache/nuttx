@@ -147,9 +147,9 @@ static inline bool sixlowpan_eaddrnull(FAR uint8_t *eaddr)
  *   data structure that we need to interface with the IEEE802.15.4 MAC.
  *
  * Input Parameters:
- *   dest_panid - PAN ID of the destination.  May be 0xffff if the destination
- *                is not associated.
- *   meta       - Location to return the corresponding meta data.
+ *   ieee   - IEEE 802.15.4 MAC driver state reference.
+ *   meta   - Location to return the corresponding meta data.
+ *   paylen - The size of the data payload to be sent.
  *
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.
@@ -159,105 +159,97 @@ static inline bool sixlowpan_eaddrnull(FAR uint8_t *eaddr)
  *
  ****************************************************************************/
 
-int sixlowpan_meta_data(uint16_t dest_panid,
-                        FAR struct ieee802154_frame_meta_s *meta)
+int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
+                        FAR struct ieee802154_frame_meta_s *meta,
+                        uint16_t paylen)
 {
-#if 0 /* To be provided */
-  /* Set up the frame parameters */
-
-  uint16_t src_panid;
   bool rcvrnull;
 
-  /* Initialize all prameters to all zero */
+  /* Initialize all settings to all zero */
 
   memset(meta, 0, sizeof(struct ieee802154_frame_meta_s));
 
-  /* Build the FCF (Only non-zero elements need to be initialized). */
+  /* Source address mode */
 
-  meta->fcf.frame_type    = FRAME802154_DATAFRAME;
-  meta->fcf.frame_pending = g_packet_meta.pending;
+  meta->src_addr_mode = g_packet_meta.sextended != 0?
+                        IEEE802154_ADDRMODE_EXTENDED :
+                        IEEE802154_ADDRMODE_SHORT;
 
-  /* If the output address is NULL in the MAC header buf, then it is
-   * broadcast on the 802.15.4 network.
-   */
+  /* Check for a broadcast destination address (all zero) */
 
   if (g_packet_meta.dextended != 0)
     {
+      /* Extended destination address mode */
+
       rcvrnull = sixlowpan_eaddrnull(g_packet_meta.dest.eaddr.u8);
     }
   else
     {
+      /* Short destination address mode */
+
       rcvrnull = sixlowpan_saddrnull(g_packet_meta.dest.saddr.u8);
     }
 
   if (rcvrnull)
     {
-      meta->fcf.ack_required = g_packet_meta.macack;
+      meta->msdu_flags.ack_tx = TRUE;
     }
 
-  /* Insert IEEE 802.15.4 (2003) version bit. */
+  /* Destination address */
 
-  meta->fcf.frame_version = FRAME802154_IEEE802154_2003;
-
-  /* Complete the addressing fields. */
-  /* Get the source PAN ID from the IEEE802.15.4 radio driver */
-
-  src_panid = 0xffff;
-  (void)sixlowpan_src_panid(ieee, &src_panid);
-
-  /* Set the source and destination PAN ID. */
-
-  meta->src_pid  = src_panid;
-  meta->dest_pid = dest_panid;
-
-  /* If the output address is NULL in the MAC header buf, then it is
-   * broadcast on the 802.15.4 network.
+  /* If the output address is NULL, then it is broadcast on the 802.15.4
+   * network.
    */
 
   if (rcvrnull)
     {
       /* Broadcast requires short address mode. */
 
-      meta->fcf.dest_addr_mode = FRAME802154_SHORTADDRMODE;
-      meta->dest_addr[0] = 0xff;
-      meta->dest_addr[1] = 0xff;
+      meta->dest_addr.mode  = IEEE802154_ADDRMODE_SHORT;
+      meta->dest_addr.saddr = 0;
     }
   else if (g_packet_meta.dextended != 0)
     {
-      meta->fcf.dest_addr_mode = FRAME802154_LONGADDRMODE;
-      sixlowpan_eaddrcopy((struct sixlowpan_addr_s *)&meta->dest_addr,
-                           g_packet_meta.dest.eaddr.u8);
+      /* Extended destination address mode */
+
+      meta->dest_addr.mode = IEEE802154_ADDRMODE_EXTENDED;
+      sixlowpan_eaddrcopy(&meta->dest_addr.eaddr, g_packet_meta.dest.eaddr.u8);
     }
   else
     {
-      meta->fcf.dest_addr_mode = FRAME802154_SHORTADDRMODE;
-      sixlowpan_saddrcopy((struct sixlowpan_addr_s *)&meta->dest_addr,
-                           g_packet_meta.dest.saddr.u8);
+      /* Short destination address mode */
+
+      meta->dest_addr.mode = IEEE802154_ADDRMODE_SHORT;
+      sixlowpan_saddrcopy(&meta->dest_addr.saddr, g_packet_meta.dest.saddr.u8);
     }
 
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  DEBUGASSERT(g_packet_meta.sextended != 0);
-  meta->fcf.src_addr_mode = FRAME802154_LONGADDRMODE;
-  sixlowpan_eaddrcopy((struct sixlowpan_addr_s *)&meta->src_addr,
-                       g_packet_meta.source.eaddr.u8);
-#else
-  DEBUGASSERT(g_packet_meta.sextended == 0);
-  meta->fcf.src_addr_mode = FRAME802154_SHORTADDRMODE;
-  sixlowpan_saddrcopy((struct sixlowpan_addr_s *)&meta->src_addr,
-                       g_packet_meta.source.saddr.u8);
+  meta->dest_addr.panid = g_packet_meta.dpanid;
+
+  /* Handle associated with MSDU.  Will increment once per packet, not
+   * necesarily per frame:  The MSDU handler will be used for each fragment
+   * of a disassembled packet.
+   */
+
+  meta->msdu_handle = ieee->i_msdu_handle++;
+
+  /* Number of bytes contained in the MAC Service Data Unit (MSDU) */
+
+  meta->msdu_length = paylen;
+
+  /* MSDU flags that may be non-zero */
+
+
+#ifdef CONFIG_IEEE802154_SECURITY
+#  warning CONFIG_IEEE802154_SECURITY not yet supported"
+#endif
+  
+#ifdef CONFIG_IEEE802154_UWB
+#  warning CONFIG_IEEE802154_UWB not yet supported"
 #endif
 
-  /* Use short soruce address mode if so configured */
+  /* Ranging left zero */
 
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  meta->fcf.src_addr_mode = FRAME802154_LONGADDRMODE;
-#else
-  meta->fcf.src_addr_mode = FRAME802154_SHORTADDRMODE;
-#endif
-#endif /* 0 */
-
-#warning Missing logic
-  return -ENOSYS;
+  return OK;
 }
 
 /****************************************************************************

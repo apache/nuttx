@@ -218,7 +218,6 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
   struct sixlowpan_addr_s bcastmac;
   uint16_t pktlen;
   uint16_t paysize;
-  uint16_t dest_panid;
 #ifdef CONFIG_NET_6LOWPAN_FRAG
   uint16_t outlen = 0;
 #endif
@@ -238,6 +237,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
   /* Set stream mode for all TCP packets, except FIN packets. */
 
+#if 0 /* Currently the frame type is always data */
   if (destip->proto == IP_PROTO_TCP)
     {
       FAR const struct tcp_hdr_s *tcp =
@@ -253,6 +253,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
           g_packet_meta.type = FRAME_ATTR_TYPE_STREAM_END;
         }
     }
+#endif
 
   /* The destination address will be tagged to each outbound packet. If the
    * argument destmac is NULL, we are sending a broadcast packet.
@@ -312,14 +313,14 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
    * PAN IDs are the same.
    */
 
-  dest_panid = 0xffff;
-  (void)sixlowpan_src_panid(ieee, &dest_panid);
+  g_packet_meta.dpanid = 0xffff;
+  (void)sixlowpan_src_panid(ieee, &g_packet_meta.dpanid);
 
   /* Based on the collected attributes and addresses, construct the MAC meta
    * data structure that we need to interface with the IEEE802.15.4 MAC.
    */
 
-  ret = sixlowpan_meta_data(dest_panid, &meta);
+  ret = sixlowpan_meta_data(ieee, &meta, 0);
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_meta_data() failed: %d\n", ret);
@@ -528,14 +529,42 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
         }
 
       /* Submit all of the fragments to the MAC.  We send all frames back-
-       * to-back like this to eliminate any possible condition where some
+       * to-back like this to minimize any possible condition where some
        * frame which is not a fragment from this sequence from intervening.
        */
 
-      ret = sixlowpan_frame_submit(ieee, &meta, qhead);
-      if (ret < 0)
+      paysize = 0;
+      for (iob = qhead; iob != NULL; iob = qhead)
         {
-          nerr("ERROR: sixlowpan_frame_submit() failed: %d\n", ret);
+          uint16_t newsize;
+
+          /* Remove the IOB from the list */
+
+          qhead         = iob->io_flink;
+          iob->io_flink = NULL;
+
+          /* Re-construct the MAC meta data structure using the correct
+           * payload size for this frame (if it is different than the
+           * payload size of the previous frame).
+           */
+
+          newsize = iob->io_len - iob->io_offset;
+          if (newsize != paysize)
+            {
+              ret = sixlowpan_meta_data(ieee, &meta, newsize);
+              if (ret < 0)
+                {
+                  nerr("ERROR: sixlowpan_meta_data() failed: %d\n", ret);
+                }
+
+              paysize = newsize;
+            }
+
+          ret = sixlowpan_frame_submit(ieee, &meta, iob);
+          if (ret < 0)
+            {
+              nerr("ERROR: sixlowpan_frame_submit() failed: %d\n", ret);
+            }
         }
 
       /* Update the datagram TAG value */
@@ -564,6 +593,16 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
       ninfo("Non-fragmented: length %d\n", iob->io_len);
       sixlowpan_dumpbuffer("Outgoing frame",
                        (FAR const uint8_t *)iob->io_data, iob->io_len);
+
+      /* Re-construct the MAC meta data structure using the correct payload
+       * size for this frame.
+       */
+
+      ret = sixlowpan_meta_data(ieee, &meta, iob->io_len - iob->io_offset);
+      if (ret < 0)
+        {
+          nerr("ERROR: sixlowpan_meta_data() failed: %d\n", ret);
+        }
 
       /* Submit the frame to the MAC */
 

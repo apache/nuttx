@@ -524,7 +524,7 @@ struct ieee802154_frame_meta_s
   uint8_t msdu_handle;        /* Handle assoc. with MSDU */
 
   /* Number of bytes contained in the MAC Service Data Unit (MSDU)
-   * to be transmitted by the MAC sublayer enitity
+   * to be transmitted by the MAC sublayer entity
    * Note: This could be a uint8_t but if anyone ever wants to use
    * non-standard frame lengths, they may want a length larger than
    * a uint8_t.
