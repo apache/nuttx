@@ -231,7 +231,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
   g_uncomp_hdrlen = 0;
   g_frame_hdrlen  = 0;
 
-  /* Reset rime buffer, packet buffer metatadata */
+  /* Reset address buffer and packet buffer metatadata */
 
   memset(g_pktattrs, 0, PACKETBUF_NUM_ATTRS * sizeof(uint16_t));
   memset(g_pktaddrs, 0, PACKETBUF_NUM_ADDRS * sizeof(struct sixlowpan_addr_s));
@@ -286,9 +286,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
   /* Set the source and destination address */
 
-  rimeaddr_copy(&g_pktaddrs[PACKETBUF_ADDR_SENDER],
+  sixlowpan_addrcopy(&g_pktaddrs[PACKETBUF_ADDR_SENDER],
                 &ieee->i_dev.d_mac.ieee802154);
-  rimeaddr_copy(&g_pktaddrs[PACKETBUF_ADDR_RECEIVER], destmac);
+  sixlowpan_addrcopy(&g_pktaddrs[PACKETBUF_ADDR_RECEIVER], destmac);
 
   /* Get the destination PAN ID.
    *
@@ -400,9 +400,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
        */
 
       pktlen = buflen + g_uncomp_hdrlen;
-      PUTINT16(fragptr, RIME_FRAG_DISPATCH_SIZE,
+      PUTINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE,
                ((SIXLOWPAN_DISPATCH_FRAG1 << 8) | pktlen));
-      PUTINT16(fragptr, RIME_FRAG_TAG, ieee->i_dgramtag);
+      PUTINT16(fragptr, SIXLOWPAN_FRAG_TAG, ieee->i_dgramtag);
 
       g_frame_hdrlen += SIXLOWPAN_FRAG1_HDR_LEN;
 
@@ -469,10 +469,10 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
           /* Setup up the FRAGN header after the frame header. */
 
-          PUTINT16(fragptr, RIME_FRAG_DISPATCH_SIZE,
+          PUTINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE,
                    ((SIXLOWPAN_DISPATCH_FRAGN << 8) | pktlen));
-          PUTINT16(fragptr, RIME_FRAG_TAG, ieee->i_dgramtag);
-          fragptr[RIME_FRAG_OFFSET] = outlen >> 3;
+          PUTINT16(fragptr, SIXLOWPAN_FRAG_TAG, ieee->i_dgramtag);
+          fragptr[SIXLOWPAN_FRAG_OFFSET] = outlen >> 3;
 
           fragn_hdrlen += SIXLOWPAN_FRAGN_HDR_LEN;
 

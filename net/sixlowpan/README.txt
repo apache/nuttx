@@ -10,12 +10,12 @@ Optimal 6loWPAN Configuration
 
    128  112  96   80    64   48   32   16
    ---- ---- ---- ----  ---- ---- ---- ----
-   AAAA xxxx xxxx xxxx  xxxx 00ff fe00 MMMM 2-byte Rime address IEEE 48-bit MAC
-   AAAA 0000 0000 0000  NNNN NNNN NNNN NNNN 8-byte Rime address IEEE EUI-64
+   AAAA xxxx xxxx xxxx  xxxx 00ff fe00 MMMM 2-byte short address IEEE 48-bit MAC
+   AAAA 0000 0000 0000  NNNN NNNN NNNN NNNN 8-byte extended address IEEE EUI-64
 
-   Where MMM is the 2-byte rime address XORed 0x0200.  For example, the MAC
+   Where MMM is the 2-byte short address XORed 0x0200.  For example, the MAC
    address of 0xabcd would be 0xa9cd.  And NNNN NNNN NNNN NNNN is the 8-byte
-   rime address address XOR 02000 0000 0000 0000.
+   extended address address XOR 02000 0000 0000 0000.
 
    For link-local address, AAAA is 0xfe80
 
@@ -23,8 +23,8 @@ Optimal 6loWPAN Configuration
 
    128  112  96   80    64   48   32   16
    ---- ---- ---- ----  ---- ---- ---- ----
-   fe80 0000 0000 0000  0000 00ff fe00 MMMM 2-byte Rime address IEEE 48-bit MAC
-   fe80 0000 0000 0000  NNNN NNNN NNNN NNNN 8-byte Rime address IEEE EUI-64
+   fe80 0000 0000 0000  0000 00ff fe00 MMMM 2-byte short address IEEE 48-bit MAC
+   fe80 0000 0000 0000  NNNN NNNN NNNN NNNN 8-byte extended address IEEE EUI-64
 
 4. Compressable port numbers in the rangs 0xf0b0-0xf0bf
 
@@ -52,11 +52,11 @@ this is a HC1 compressed first frame of a packet
   41 88 2a cefa 3412 cdab                       ### 9-byte MAC header
   c50e 000b                                     ### 4-byte FRAG1 header
   42                                            ### SIXLOWPAN_DISPATCH_HC1
-    fb                                          ### RIME_HC1_HC_UDP_HC1_ENCODING
-    e0                                          ### RIME_HC1_HC_UDP_UDP_ENCODING
-    00                                          ### RIME_HC1_HC_UDP_TTL
-    10                                          ### RIME_HC1_HC_UDP_PORTS
-    0000                                        ### RIME_HC1_HC_UDP_CHKSUM
+    fb                                          ### SIXLOWPAN_HC1_HC_UDP_HC1_ENCODING
+    e0                                          ### SIXLOWPAN_HC1_HC_UDP_UDP_ENCODING
+    00                                          ### SIXLOWPAN_HC1_HC_UDP_TTL
+    10                                          ### SIXLOWPAN_HC1_HC_UDP_PORTS
+    0000                                        ### SIXLOWPAN_HC1_HC_UDP_CHKSUM
 
   104 byte Payload follows:
   4f4e452064617920 48656e6e792d7065 6e6e792077617320 7069636b696e6720
@@ -69,11 +69,11 @@ This is the second frame of the same transfer:
   41 88 2b cefa 3412 cdab                       ### 9-byte MAC header
   e50e 000b 0d                                  ### 5 byte FRAGN header
   42                                            ### SIXLOWPAN_DISPATCH_HC1
-    fb                                          ### RIME_HC1_HC_UDP_HC1_ENCODING
-    e0                                          ### RIME_HC1_HC_UDP_UDP_ENCODING
-    00                                          ### RIME_HC1_HC_UDP_TTL
-    10                                          ### RIME_HC1_HC_UDP_PORTS
-    0000                                        ### RIME_HC1_HC_UDP_CHKSUM
+    fb                                          ### SIXLOWPAN_HC1_HC_UDP_HC1_ENCODING
+    e0                                          ### SIXLOWPAN_HC1_HC_UDP_UDP_ENCODING
+    00                                          ### SIXLOWPAN_HC1_HC_UDP_TTL
+    10                                          ### SIXLOWPAN_HC1_HC_UDP_PORTS
+    0000                                        ### SIXLOWPAN_HC1_HC_UDP_CHKSUM
 
   104 byte Payload follows:
   476f6f646e657373 2067726163696f75 73206d6521272073 6169642048656e6e

@@ -71,18 +71,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Rime addres macros */
-/* Copy a Rime address */
+/* IEEE 802.15.4  addres macros */
+/* Copy a an IEEE 802.15.4 address */
 
-#define rimeaddr_copy(dest,src)  \
+#define sixlowpan_addrcopy(dest,src)  \
   memcpy(dest, src, NET_6LOWPAN_ADDRSIZE)
 
-/* Compare two Rime addresses */
+/* Compare two IEEE 802.15.4 addresses */
 
-#define rimeaddr_cmp(addr1,addr2) \
+#define sixlowpan_addrcmp(addr1,addr2) \
   (memcmp(addr1, addr2, NET_6LOWPAN_ADDRSIZE) == 0)
-
-/* Pointers in the Rime buffer */
 
 /* Packet buffer Definitions */
 
@@ -197,14 +195,6 @@ struct ipv6icmp_hdr_s
  * devices.  The network lock provides exclusive use of these globals
  * during that processing
  */
-
-/* A pointer to the rime buffer.
- *
- * We initialize it to the beginning of the rime buffer, then access
- * different fields by updating the offset ieee->g_frame_hdrlen.
- */
-
-extern FAR uint8_t *g_rimeptr;
 
 /* g_uncomp_hdrlen is the length of the headers before compression (if HC2
  * is used this includes the UDP header in addition to the IP header).
@@ -449,8 +439,8 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  *   sixlowpan_buf
  *
  *   This function is called by the input function when the dispatch is HC06.
- *   We process the packet in the rime buffer, uncompress the header fields,
- *   and copy the result in the sixlowpan buffer.  At the end of the
+ *   We process the frame in the IOB buffer, uncompress the header fields,
+ *   and copy the result into the driver packet buffer.  At the end of the
  *   decompression, g_frame_hdrlen and g_uncompressed_hdrlen are set to the
  *   appropriate values
  *
@@ -509,8 +499,8 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
  *   Uncompress HC1 (and HC_UDP) headers and put them in sixlowpan_buf
  *
  *   This function is called by the input function when the dispatch is
- *   HC1.  It processes the packet in the rime buffer, uncompresses the
- *   header fields, and copies the result in the sixlowpan buffer.  At the
+ *   HC1.  It processes the frame in the IOB buffer, uncompresses the
+ *   header fields, and copies the result in the packet buffer.  At the
  *   end of the decompression, g_frame_hdrlen and uncompressed_hdr_len
  *   are set to the appropriate values
  *
@@ -535,34 +525,34 @@ int sixlowpan_uncompresshdr_hc1(uint16_t iplen, FAR struct iob_s *iob,
 #endif
 
 /****************************************************************************
- * Name: sixlowpan_islinklocal, sixlowpan_ipfromrime, sixlowpan_rimefromip,
+ * Name: sixlowpan_islinklocal, sixlowpan_ipfromaddr, sixlowpan_addrfromip,
  *       and sixlowpan_ismacbased
  *
  * Description:
- *   sixlowpan_ipfromrime: Create a link local IPv6 address from a rime
- *   address.
+ *   sixlowpan_ipfromaddr: Create a link local IPv6 address from an IEEE
+ *   802.15.4 address.
  *
- *   sixlowpan_rimefromip: Extract the rime address from a link local IPv6
- *   address.
+ *   sixlowpan_addrfromip: Extract the IEEE 802.15.14 address from a link
+ *   local IPv6 address.
  *
  *   sixlowpan_islinklocal and sixlowpan_ismacbased will return true for
  *   address created in this fashion.
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  xxxx 0000 0000 0000 2-byte Rime address (VALID?)
- *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte Rime address
+ *    fe80 0000 0000 0000  xxxx 0000 0000 0000 2-byte short address (VALID?)
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address
  *
  ****************************************************************************/
 
 #define sixlowpan_islinklocal(ipaddr) ((ipaddr)[0] == NTOHS(0xfe80))
 
-void sixlowpan_ipfromrime(FAR const struct sixlowpan_addr_s *rime,
+void sixlowpan_ipfromaddr(FAR const struct sixlowpan_addr_s *addr,
                           net_ipv6addr_t ipaddr);
-void sixlowpan_rimefromip(const net_ipv6addr_t ipaddr,
-                          FAR struct sixlowpan_addr_s *rime);
+void sixlowpan_addrfromip(const net_ipv6addr_t ipaddr,
+                          FAR struct sixlowpan_addr_s *addr);
 bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
-                          FAR const struct sixlowpan_addr_s *rime);
+                          FAR const struct sixlowpan_addr_s *addr);
 
 /****************************************************************************
  * Name: sixlowpan_src_panid

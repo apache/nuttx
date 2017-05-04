@@ -68,19 +68,19 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sixlowpan_ipfromrime
+ * Name: sixlowpan_ipfromaddr
  *
  * Description:
- *   Create a link local IPv6 address from a rime address:
+ *   Create a link local IPv6 address from an IEEE 802.15.4 address:
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte Rime address IEEE 48-bit MAC
- *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte Rime address IEEE EUI-64
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte address IEEE EUI-64
  *
  ****************************************************************************/
 
-void sixlowpan_ipfromrime(FAR const struct sixlowpan_addr_s *rime,
+void sixlowpan_ipfromaddr(FAR const struct sixlowpan_addr_s *addr,
                           net_ipv6addr_t ipaddr)
 {
   /* We consider only links with IEEE EUI-64 identifier or IEEE 48-bit MAC
@@ -91,42 +91,42 @@ void sixlowpan_ipfromrime(FAR const struct sixlowpan_addr_s *rime,
   ipaddr[0] = HTONS(0xfe80);
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  memcpy(&ipaddr[4], rime, NET_6LOWPAN_ADDRSIZE);
+  memcpy(&ipaddr[4], addr, NET_6LOWPAN_ADDRSIZE);
   ipaddr[4] ^= HTONS(0x0200);
 #else
   ipaddr[5]  = HTONS(0x00ff);
   ipaddr[6]  = HTONS(0xfe00);
-  memcpy(&ipaddr[7], rime, NET_6LOWPAN_ADDRSIZE);
+  memcpy(&ipaddr[7], addr, NET_6LOWPAN_ADDRSIZE);
   ipaddr[7] ^= HTONS(0x0200);
 #endif
 }
 
 /****************************************************************************
- * Name: sixlowpan_rimefromip
+ * Name: sixlowpan_addrfromip
  *
  * Description:
- *   Extract the rime address from a link local IPv6 address:
+ *   Extract the IEEE 802.15.4 address from a link local IPv6 address:
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte Rime address IEEE 48-bit MAC
- *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte Rime address IEEE EUI-64
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
  *
  ****************************************************************************/
 
-void sixlowpan_rimefromip(const net_ipv6addr_t ipaddr,
-                          FAR struct sixlowpan_addr_s *rime)
+void sixlowpan_addrfromip(const net_ipv6addr_t ipaddr,
+                          FAR struct sixlowpan_addr_s *addr)
 {
-  /* REVISIT: See notes about 2 byte addresses in sixlowpan_ipfromrime() */
+  /* REVISIT: See notes about 2 byte addresses in sixlowpan_ipfromaddr() */
 
   DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  memcpy(rime, &ipaddr[4], NET_6LOWPAN_ADDRSIZE);
+  memcpy(addr, &ipaddr[4], NET_6LOWPAN_ADDRSIZE);
 #else
-  memcpy(rime, &ipaddr[7], NET_6LOWPAN_ADDRSIZE);
+  memcpy(addr, &ipaddr[7], NET_6LOWPAN_ADDRSIZE);
 #endif
-  rime->u8[0] ^= 0x02;
+  addr->u8[0] ^= 0x02;
 }
 
 /****************************************************************************
@@ -137,24 +137,24 @@ void sixlowpan_rimefromip(const net_ipv6addr_t ipaddr,
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte Rime address IEEE 48-bit MAC
- *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte Rime address IEEE EUI-64
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
  *
  ****************************************************************************/
 
 bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
-                          FAR const struct sixlowpan_addr_s *rime)
+                          FAR const struct sixlowpan_addr_s *addr)
 {
-  FAR const uint8_t *rimeptr = rime->u8;
+  FAR const uint8_t *byteptr = addr->u8;
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  return (ipaddr[4] == htons((GETINT16(rimeptr, 0) ^ 0x0200)) &&
-          ipaddr[5] == GETINT16(rimeptr, 2) &&
-          ipaddr[6] == GETINT16(rimeptr, 4) &&
-          ipaddr[7] == GETINT16(rimeptr, 6));
+  return (ipaddr[4] == htons((GETINT16(byteptr, 0) ^ 0x0200)) &&
+          ipaddr[5] == GETINT16(byteptr, 2) &&
+          ipaddr[6] == GETINT16(byteptr, 4) &&
+          ipaddr[7] == GETINT16(byteptr, 6));
 #else
   return (ipaddr[5] == HTONS(0x00ff) && ipaddr[6] == HTONS(0xfe00) &&
-          ipaddr[7] == htons((GETINT16(rimeptr, 0) ^ 0x0200)));
+          ipaddr[7] == htons((GETINT16(byteptr, 0) ^ 0x0200)));
 #endif
 }
 

@@ -316,7 +316,7 @@ static void uncompress_addr(FAR net_ipv6addr_t ipaddr, uint8_t const prefix[],
     {
       /* No IID based configuration if no prefix and no data => unspec */
 
-      sixlowpan_ipfromrime(macaddr, ipaddr);
+      sixlowpan_ipfromaddr(macaddr, ipaddr);
     }
 
   ninfo("Uncompressing %d + %d => %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
@@ -828,8 +828,8 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  *   sixlowpan_buf
  *
  *   This function is called by the input function when the dispatch is HC06.
- *   We process the packet in the rime buffer, uncompress the header fields,
- *   and copy the result in the sixlowpan buffer.  At the end of the
+ *   We process the frame in the IOB buffer, uncompress the header fields,
+ *   and copy the result into the driver packet buffer.  At the end of the
  *   decompression, g_frame_hdrlen and g_uncompressed_hdrlen are set to the
  *   appropriate values
  *

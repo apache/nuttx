@@ -317,11 +317,11 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
 
-  /* Get the Rime MAC address of the destination  This assumes an encoding
-   * of the MAC address in the IPv6 address.
+  /* Get the IEEE 802.15.4 MAC address of the destination.  This assumes
+   * an encoding of the MAC address in the IPv6 address.
    */
 
-  sixlowpan_rimefromip(conn->u.ipv6.raddr, &destmac);
+  sixlowpan_addrfromip(conn->u.ipv6.raddr, &destmac);
 
   /* If routable, then call sixlowpan_send() to format and send the 6loWPAN
    * packet.
@@ -414,11 +414,11 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev)
           uint16_t hdrlen;
           uint16_t buflen;
 
-          /* Get the Rime MAC address of the destination.  This assumes an
-           * encoding of the MAC address in the IPv6 address.
+          /* Get the IEEE 802.15.4 MAC address of the destination.  This
+           * assumes an encoding of the MAC address in the IPv6 address.
            */
 
-          sixlowpan_rimefromip(ipv6hdr->ipv6.destipaddr, &destmac);
+          sixlowpan_addrfromip(ipv6hdr->ipv6.destipaddr, &destmac);
 
           /* Get the IPv6 + TCP combined header length.  The size of the TCP
            * header is encoded in the top 4 bits of the tcpoffset field (in

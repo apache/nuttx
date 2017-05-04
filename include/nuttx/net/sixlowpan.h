@@ -82,132 +82,132 @@
  * bytes for all subsequent headers.
  */
 
-#define RIME_FRAG_DISPATCH_SIZE          0  /* 16 bit */
-#define RIME_FRAG_TAG                    2  /* 16 bit */
-#define RIME_FRAG_OFFSET                 4  /* 8 bit */
+#define SIXLOWPAN_FRAG_DISPATCH_SIZE      0  /* 16 bit */
+#define SIXLOWPAN_FRAG_TAG                2  /* 16 bit */
+#define SIXLOWPAN_FRAG_OFFSET             4  /* 8 bit */
 
-/* Define the Rime buffer as a byte array */
+/* Define the frame buffer as a byte array */
 
-#define RIME_HC1_DISPATCH                0  /* 8 bit */
-#define RIME_HC1_ENCODING                1  /* 8 bit */
-#define RIME_HC1_TTL                     2  /* 8 bit */
+#define SIXLOWPAN_HC1_DISPATCH            0  /* 8 bit */
+#define SIXLOWPAN_HC1_ENCODING            1  /* 8 bit */
+#define SIXLOWPAN_HC1_TTL                 2  /* 8 bit */
 
-#define RIME_HC1_HC_UDP_DISPATCH         0  /* 8 bit */
-#define RIME_HC1_HC_UDP_HC1_ENCODING     1  /* 8 bit */
-#define RIME_HC1_HC_UDP_UDP_ENCODING     2  /* 8 bit */
-#define RIME_HC1_HC_UDP_TTL              3  /* 8 bit */
-#define RIME_HC1_HC_UDP_PORTS            4  /* 8 bit */
-#define RIME_HC1_HC_UDP_CHKSUM           5  /* 16 bit */
+#define SIXLOWPAN_HC1_HC_UDP_DISPATCH     0  /* 8 bit */
+#define SIXLOWPAN_HC1_HC_UDP_HC1_ENCODING 1  /* 8 bit */
+#define SIXLOWPAN_HC1_HC_UDP_UDP_ENCODING 2  /* 8 bit */
+#define SIXLOWPAN_HC1_HC_UDP_TTL          3  /* 8 bit */
+#define SIXLOWPAN_HC1_HC_UDP_PORTS        4  /* 8 bit */
+#define SIXLOWPAN_HC1_HC_UDP_CHKSUM       5  /* 16 bit */
 
 /* Min and Max compressible UDP ports - HC06 */
 
-#define SIXLOWPAN_UDP_4_BIT_PORT_MIN     0xf0b0
-#define SIXLOWPAN_UDP_4_BIT_PORT_MAX     0xf0bf   /* f0b0 + 15 */
-#define SIXLOWPAN_UDP_8_BIT_PORT_MIN     0xf000
-#define SIXLOWPAN_UDP_8_BIT_PORT_MAX     0xf0ff   /* f000 + 255 */
+#define SIXLOWPAN_UDP_4_BIT_PORT_MIN      0xf0b0
+#define SIXLOWPAN_UDP_4_BIT_PORT_MAX      0xf0bf   /* f0b0 + 15 */
+#define SIXLOWPAN_UDP_8_BIT_PORT_MIN      0xf000
+#define SIXLOWPAN_UDP_8_BIT_PORT_MAX      0xf0ff   /* f000 + 255 */
 
 /* 6lowpan dispatches */
 
-#define SIXLOWPAN_DISPATCH_NALP          0x00 /* 00xxxxxx Not a LoWPAN packet */
-#define SIXLOWPAN_DISPATCH_NALP_MASK     0xc0 /* 11000000 */
+#define SIXLOWPAN_DISPATCH_NALP           0x00 /* 00xxxxxx Not a LoWPAN packet */
+#define SIXLOWPAN_DISPATCH_NALP_MASK      0xc0 /* 11000000 */
 
-#define SIXLOWPAN_DISPATCH_IPV6          0x41 /* 01000001 Uncompressed IPv6 addresses */
-#define SIXLOWPAN_DISPATCH_HC1           0x42 /* 01000010 HC1 Compressed IPv6 header */
-#define SIXLOWPAN_DISPATCH_BC0           0x50 /* 01010000 BC0 Broadcast header */
-#define SIXLOWPAN_DISPATCH_ESC           0x7f /* 01111111 Additional Dispatch octet follows  */
+#define SIXLOWPAN_DISPATCH_IPV6           0x41 /* 01000001 Uncompressed IPv6 addresses */
+#define SIXLOWPAN_DISPATCH_HC1            0x42 /* 01000010 HC1 Compressed IPv6 header */
+#define SIXLOWPAN_DISPATCH_BC0            0x50 /* 01010000 BC0 Broadcast header */
+#define SIXLOWPAN_DISPATCH_ESC            0x7f /* 01111111 Additional Dispatch octet follows  */
 
-#define SIXLOWPAN_DISPATCH_IPHC          0x60 /* 011xxxxx IP Header Compression (IPHC)*/
-#define SIXLOWPAN_DISPATCH_IPHC_MASK     0xe0 /* 11100000 */
+#define SIXLOWPAN_DISPATCH_IPHC           0x60 /* 011xxxxx IP Header Compression (IPHC)*/
+#define SIXLOWPAN_DISPATCH_IPHC_MASK      0xe0 /* 11100000 */
 
-#define SIXLOWPAN_DISPATCH_MESH          0x80 /* 10xxxxxx Mesh routing header */
-#define SIXLOWPAN_DISPATCH_MESH_MASK     0xc0 /* 11000000 */
+#define SIXLOWPAN_DISPATCH_MESH           0x80 /* 10xxxxxx Mesh routing header */
+#define SIXLOWPAN_DISPATCH_MESH_MASK      0xc0 /* 11000000 */
 
-#define SIXLOWPAN_DISPATCH_FRAG1         0xc0 /* 11000xxx Fragmentation header (ﬁrst) */
-#define SIXLOWPAN_DISPATCH_FRAGN         0xe0 /* 11100xxx Fragmentation header (subsequent) */
-#define SIXLOWPAN_DISPATCH_FRAG_MASK     0xf8 /* 11111000 */
+#define SIXLOWPAN_DISPATCH_FRAG1          0xc0 /* 11000xxx Fragmentation header (ﬁrst) */
+#define SIXLOWPAN_DISPATCH_FRAGN          0xe0 /* 11100xxx Fragmentation header (subsequent) */
+#define SIXLOWPAN_DISPATCH_FRAG_MASK      0xf8 /* 11111000 */
 
 /* HC1 encoding */
 
-#define SIXLOWPAN_HC1_NH_UDP             0x02
-#define SIXLOWPAN_HC1_NH_TCP             0x06
-#define SIXLOWPAN_HC1_NH_ICMP6           0x04
+#define SIXLOWPAN_HC1_NH_UDP              0x02
+#define SIXLOWPAN_HC1_NH_TCP              0x06
+#define SIXLOWPAN_HC1_NH_ICMP6            0x04
 
 /* HC_UDP encoding (works together with HC1) */
 
-#define SIXLOWPAN_HC_UDP_ALL_C           0xe0
+#define SIXLOWPAN_HC_UDP_ALL_C            0xe0
 
 /* IPHC encoding
  *
  * Values of fields within the IPHC encoding first byte
  * (Using MS-to-LS bit numbering of the draft RFC)
  */
-                                               /* Bits 0-2: 011 */
-#define SIXLOWPAN_IPHC_TC_MASK           0x18  /* Bits 3-4: Traffic Class, Flow Label */
-#  define SIXLOWPAN_IPHC_TC_00           0x00  /*   ECN+DSCP+4-bit Pad+Flow Label (4 bytes) */
-#  define SIXLOWPAN_IPHC_TC_01           0x08  /*   ECN+2-bit Pad+ Flow Label (3 bytes), DSCP is elided. */
-#  define SIXLOWPAN_IPHC_TC_10           0x10  /*   ECN+DSCP (1 byte), Flow Label is elided */
-#  define SIXLOWPAN_IPHC_TC_11           0x11  /*   Traffic Class and Flow Label are elided */
-#define SIXLOWPAN_IPHC_NH                0x04  /* Bit 5: Next Header Compressed */
-#define SIXLOWPAN_IPHC_HLIM_MASK         0x03  /* Bits 6-7: Hop Limit */
-#  define SIXLOWPAN_IPHC_HLIM_INLINE     0x00  /*   Carried in-line */
-#  define SIXLOWPAN_IPHC_HLIM_1          0x01  /*   Compressed hop limit of 1 */
-#  define SIXLOWPAN_IPHC_HLIM_64         0x02  /*   Compressed hop limit of 64 */
-#  define SIXLOWPAN_IPHC_HLIM_255        0x03  /*   Compressed hop limit of 255 */
+                                                /* Bits 0-2: 011 */
+#define SIXLOWPAN_IPHC_TC_MASK            0x18  /* Bits 3-4: Traffic Class, Flow Label */
+#  define SIXLOWPAN_IPHC_TC_00            0x00  /*   ECN+DSCP+4-bit Pad+Flow Label (4 bytes) */
+#  define SIXLOWPAN_IPHC_TC_01            0x08  /*   ECN+2-bit Pad+ Flow Label (3 bytes), DSCP is elided. */
+#  define SIXLOWPAN_IPHC_TC_10            0x10  /*   ECN+DSCP (1 byte), Flow Label is elided */
+#  define SIXLOWPAN_IPHC_TC_11            0x11  /*   Traffic Class and Flow Label are elided */
+#define SIXLOWPAN_IPHC_NH                 0x04  /* Bit 5: Next Header Compressed */
+#define SIXLOWPAN_IPHC_HLIM_MASK          0x03  /* Bits 6-7: Hop Limit */
+#  define SIXLOWPAN_IPHC_HLIM_INLINE      0x00  /*   Carried in-line */
+#  define SIXLOWPAN_IPHC_HLIM_1           0x01  /*   Compressed hop limit of 1 */
+#  define SIXLOWPAN_IPHC_HLIM_64          0x02  /*   Compressed hop limit of 64 */
+#  define SIXLOWPAN_IPHC_HLIM_255         0x03  /*   Compressed hop limit of 255 */
 
 /* Values of fields within the IPHC encoding second byte */
 
-#define SIXLOWPAN_IPHC_CID               0x80  /* Bit 8: Context identifier extension */
-#define SIXLOWPAN_IPHC_SAC               0x40  /* Bit 9: Source address compression */
-#define SIXLOWPAN_IPHC_SAM_MASK          0x30  /* Bits 10-11: Source address mode */
-#  define SIXLOWPAN_IPHC_SAM_128         0x00  /*   128-bits */
-#  define SIXLOWPAN_IPHC_SAM_64          0x10  /*   64-bits */
-#  define SIXLOWPAN_IPHC_SAM_16          0x20  /*   16-bits */
-#  define SIXLOWPAN_IPHC_SAM_0           0x30  /*   0-bits */
-#define SIXLOWPAN_IPHC_M                 0x08  /* Bit 12: Multicast compression */
-#define SIXLOWPAN_IPHC_DAC               0x04  /* Bit 13: Destination address compression */
-#define SIXLOWPAN_IPHC_DAM_MASK          0x03  /* Bits 14-15: Destination address mode */
-#  define SIXLOWPAN_IPHC_DAM_128         0x00  /*   128-bits */
-#  define SIXLOWPAN_IPHC_DAM_64          0x01  /*   64-bits */
-#  define SIXLOWPAN_IPHC_DAM_16          0x02  /*   16-bits */
-#  define SIXLOWPAN_IPHC_DAM_0           0x03  /*   0-bits */
+#define SIXLOWPAN_IPHC_CID                0x80  /* Bit 8: Context identifier extension */
+#define SIXLOWPAN_IPHC_SAC                0x40  /* Bit 9: Source address compression */
+#define SIXLOWPAN_IPHC_SAM_MASK           0x30  /* Bits 10-11: Source address mode */
+#  define SIXLOWPAN_IPHC_SAM_128          0x00  /*   128-bits */
+#  define SIXLOWPAN_IPHC_SAM_64           0x10  /*   64-bits */
+#  define SIXLOWPAN_IPHC_SAM_16           0x20  /*   16-bits */
+#  define SIXLOWPAN_IPHC_SAM_0            0x30  /*   0-bits */
+#define SIXLOWPAN_IPHC_M                  0x08  /* Bit 12: Multicast compression */
+#define SIXLOWPAN_IPHC_DAC                0x04  /* Bit 13: Destination address compression */
+#define SIXLOWPAN_IPHC_DAM_MASK           0x03  /* Bits 14-15: Destination address mode */
+#  define SIXLOWPAN_IPHC_DAM_128          0x00  /*   128-bits */
+#  define SIXLOWPAN_IPHC_DAM_64           0x01  /*   64-bits */
+#  define SIXLOWPAN_IPHC_DAM_16           0x02  /*   16-bits */
+#  define SIXLOWPAN_IPHC_DAM_0            0x03  /*   0-bits */
 
-#define SIXLOWPAN_IPHC_SAM_BIT           4
-#define SIXLOWPAN_IPHC_DAM_BIT           0
+#define SIXLOWPAN_IPHC_SAM_BIT            4
+#define SIXLOWPAN_IPHC_DAM_BIT            0
 
 /* Link local context number */
 
-#define SIXLOWPAN_IPHC_ADDR_CONTEXT_LL   0
+#define SIXLOWPAN_IPHC_ADDR_CONTEXT_LL    0
 
 /* 16-bit multicast addresses compression */
 
-#define SIXLOWPAN_IPHC_MCAST_RANGE       0xa0
+#define SIXLOWPAN_IPHC_MCAST_RANGE        0xa0
 
 /* NHC_EXT_HDR */
 
-#define SIXLOWPAN_NHC_MASK               0xf0
-#define SIXLOWPAN_NHC_EXT_HDR            0xe0
+#define SIXLOWPAN_NHC_MASK                0xf0
+#define SIXLOWPAN_NHC_EXT_HDR             0xe0
 
 /* LOWPAN_UDP encoding (works together with IPHC) */
 
-#define SIXLOWPAN_NHC_UDP_MASK           0xf8
-#define SIXLOWPAN_NHC_UDP_ID             0xf0
-#define SIXLOWPAN_NHC_UDP_CHECKSUMC      0x04
-#define SIXLOWPAN_NHC_UDP_CHECKSUMI      0x00
+#define SIXLOWPAN_NHC_UDP_MASK            0xf8
+#define SIXLOWPAN_NHC_UDP_ID              0xf0
+#define SIXLOWPAN_NHC_UDP_CHECKSUMC       0x04
+#define SIXLOWPAN_NHC_UDP_CHECKSUMI       0x00
 
 /* Values for port compression, _with checksum_ ie bit 5 set to 0 */
 
-#define SIXLOWPAN_NHC_UDP_CS_P_00        0xf0 /* All inline */
-#define SIXLOWPAN_NHC_UDP_CS_P_01        0xf1 /* Source 16bit inline, dest = 0xf0 + 8 bit inline */
-#define SIXLOWPAN_NHC_UDP_CS_P_10        0xf2 /* Source = 0xf0 + 8bit inline, dest = 16 bit inline */
-#define SIXLOWPAN_NHC_UDP_CS_P_11        0xf3 /* Source & dest = 0xf0b + 4bit inline */
+#define SIXLOWPAN_NHC_UDP_CS_P_00         0xf0 /* All inline */
+#define SIXLOWPAN_NHC_UDP_CS_P_01         0xf1 /* Source 16bit inline, dest = 0xf0 + 8 bit inline */
+#define SIXLOWPAN_NHC_UDP_CS_P_10         0xf2 /* Source = 0xf0 + 8bit inline, dest = 16 bit inline */
+#define SIXLOWPAN_NHC_UDP_CS_P_11         0xf3 /* Source & dest = 0xf0b + 4bit inline */
 
 /* The 6lowpan "headers" length */
 
-#define SIXLOWPAN_IPV6_HDR_LEN           1    /* One byte */
-#define SIXLOWPAN_HC1_HDR_LEN            3
-#define SIXLOWPAN_HC1_HC_UDP_HDR_LEN     7
-#define SIXLOWPAN_FRAG1_HDR_LEN          4
-#define SIXLOWPAN_FRAGN_HDR_LEN          5
+#define SIXLOWPAN_IPV6_HDR_LEN            1    /* One byte */
+#define SIXLOWPAN_HC1_HDR_LEN             3
+#define SIXLOWPAN_HC1_HC_UDP_HDR_LEN      7
+#define SIXLOWPAN_FRAG1_HDR_LEN           4
+#define SIXLOWPAN_FRAGN_HDR_LEN           5
 
 /* Address compressibility test macros **************************************/
 

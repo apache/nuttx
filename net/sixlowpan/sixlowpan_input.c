@@ -291,7 +291,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
    */
 
   fragptr = fptr + hdrsize;
-  switch ((GETINT16(fragptr, RIME_FRAG_DISPATCH_SIZE) & 0xf800) >> 8)
+  switch ((GETINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0xf800) >> 8)
     {
     /* First fragment of new reassembly */
 
@@ -299,8 +299,8 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       {
         /* Set up for the reassembly */
 
-        fragsize        = GETINT16(fragptr, RIME_FRAG_DISPATCH_SIZE) & 0x07ff;
-        fragtag         = GETINT16(fragptr, RIME_FRAG_TAG);
+        fragsize        = GETINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0x07ff;
+        fragtag         = GETINT16(fragptr, SIXLOWPAN_FRAG_TAG);
         g_frame_hdrlen += SIXLOWPAN_FRAG1_HDR_LEN;
 
         ninfo("FRAG1: fragsize=%d fragtag=%d fragoffset=%d\n",
@@ -317,9 +317,9 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       {
         /* Set offset, tag, size.  Offset is in units of 8 bytes. */
 
-        fragoffset      = fragptr[RIME_FRAG_OFFSET];
-        fragtag         = GETINT16(fragptr, RIME_FRAG_TAG);
-        fragsize        = GETINT16(fragptr, RIME_FRAG_DISPATCH_SIZE) & 0x07ff;
+        fragoffset      = fragptr[SIXLOWPAN_FRAG_OFFSET];
+        fragtag         = GETINT16(fragptr, SIXLOWPAN_FRAG_TAG);
+        fragsize        = GETINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0x07ff;
         g_frame_hdrlen += SIXLOWPAN_FRAGN_HDR_LEN;
 
         ninfo("FRAGN: fragsize=%d fragtag=%d fragoffset=%d\n",
@@ -402,7 +402,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       /* Verify that this fragment is part of that reassembly sequence */
 
       else if (fragsize != ieee->i_pktlen || ieee->i_reasstag != fragtag ||
-               !rimeaddr_cmp(&ieee->i_fragsrc, &g_pktaddrs[PACKETBUF_ADDR_SENDER]))
+               !sixlowpan_addrcmp(&ieee->i_fragsrc, &g_pktaddrs[PACKETBUF_ADDR_SENDER]))
         {
           /* The packet is a fragment that does not belong to the packet
            * being reassembled or the packet is not a fragment.
@@ -454,7 +454,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       ninfo("Starting reassembly: i_pktlen %u, i_reasstag %d\n",
             ieee->i_pktlen, ieee->i_reasstag);
 
-      rimeaddr_copy(&ieee->i_fragsrc, &g_pktaddrs[PACKETBUF_ADDR_SENDER]);
+      sixlowpan_addrcopy(&ieee->i_fragsrc, &g_pktaddrs[PACKETBUF_ADDR_SENDER]);
     }
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
@@ -463,7 +463,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
   hc1 = fptr + g_frame_hdrlen;
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
-  if ((hc1[RIME_HC1_DISPATCH] & SIXLOWPAN_DISPATCH_IPHC_MASK) == SIXLOWPAN_DISPATCH_IPHC)
+  if ((hc1[SIXLOWPAN_HC1_DISPATCH] & SIXLOWPAN_DISPATCH_IPHC_MASK) == SIXLOWPAN_DISPATCH_IPHC)
     {
       ninfo("IPHC Dispatch\n");
       sixlowpan_uncompresshdr_hc06(fragsize, iob, fptr, bptr);
@@ -472,7 +472,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 #endif /* CONFIG_NET_6LOWPAN_COMPRESSION_HC06 */
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
-  if (hc1[RIME_HC1_DISPATCH] == SIXLOWPAN_DISPATCH_HC1)
+  if (hc1[SIXLOWPAN_HC1_DISPATCH] == SIXLOWPAN_DISPATCH_HC1)
     {
       ninfo("HC1 Dispatch\n");
       sixlowpan_uncompresshdr_hc1(fragsize, iob, fptr, bptr);
@@ -480,7 +480,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
   else
 #endif /* CONFIG_NET_6LOWPAN_COMPRESSION_HC1 */
 
-  if (hc1[RIME_HC1_DISPATCH] == SIXLOWPAN_DISPATCH_IPV6)
+  if (hc1[SIXLOWPAN_HC1_DISPATCH] == SIXLOWPAN_DISPATCH_IPV6)
     {
       ninfo("IPv6 Dispatch\n");
       sixlowpan_uncompress_ipv6hdr(fptr, bptr);
@@ -489,7 +489,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
     {
       /* Unknown or unsupported header */
 
-      nwarn("WARNING: Unknown dispatch: %u\n",  hc1[RIME_HC1_DISPATCH]);
+      nwarn("WARNING: Unknown dispatch: %u\n",  hc1[SIXLOWPAN_HC1_DISPATCH]);
       return OK;
     }
 
@@ -519,10 +519,10 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
-  /* Copy "payload" from the rime buffer to the IEEE802.15.4 MAC driver's
-   * d_buf.  If this frame is a first fragment or not part of a fragmented
-   * packet, we have already copied the compressed headers, g_uncomp_hdrlen
-   * and g_frame_hdrlen are non-zerio, fragoffset is.
+  /* Copy "payload" from the frame buffer to the IEEE802.15.4 MAC driver's
+   * packet buffer, d_buf.  If this frame is a first fragment or not part of
+   * a fragmented packet, we have already copied the compressed headers,
+   * g_uncomp_hdrlen and g_frame_hdrlen are non-zerio, fragoffset is.
    */
 
   paysize = iob->io_len - g_frame_hdrlen;
@@ -751,12 +751,12 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
 
                   ipv6hdr = IPv6BUF(&ieee->i_dev);
 
-                  /* Get the Rime MAC address of the destination.  This
-                   * assumes an encoding of the MAC address in the IPv6
+                  /* Get the IEEE 802.15.4 MAC address of the destination.
+                   * This assumes an encoding of the MAC address in the IPv6
                    * address.
                    */
 
-                  sixlowpan_rimefromip(ipv6hdr->destipaddr, &destmac);
+                  sixlowpan_addrfromip(ipv6hdr->destipaddr, &destmac);
 
                   /* The data payload should follow the IPv6 header plus
                    * the protocol header.
