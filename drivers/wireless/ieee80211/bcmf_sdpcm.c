@@ -152,7 +152,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
   uint16_t len, checksum;
   struct bcmf_sdpcm_header *header;
   struct bcmf_sdio_frame *sframe;
-  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s*)priv->bus;
+  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
 
   /* Request free frame buffer */
 
@@ -164,11 +164,11 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
       return -EAGAIN;
     }
 
-  header = (struct bcmf_sdpcm_header*)sframe->data;
+  header = (struct bcmf_sdpcm_header *)sframe->data;
 
   /* Read header */
 
-  ret = bcmf_transfer_bytes(sbus, false, 2, 0, (uint8_t*)header, 4);
+  ret = bcmf_transfer_bytes(sbus, false, 2, 0, (uint8_t *)header, 4);
   if (ret != OK)
     {
       wlinfo("failread size\n");
@@ -203,7 +203,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
 
   /* Read remaining frame data */
 
-  ret = bcmf_transfer_bytes(sbus, false, 2, 0, (uint8_t*)header+4, len - 4);
+  ret = bcmf_transfer_bytes(sbus, false, 2, 0, (uint8_t *)header + 4, len - 4);
   if (ret != OK)
     {
       ret = -EIO;
@@ -211,7 +211,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
     }
 
   // wlinfo("Receive frame %p %d\n", sframe, len);
-  // bcmf_hexdump((uint8_t*)header, header->size, (unsigned int)header);
+  // bcmf_hexdump((uint8_t *)header, header->size, (unsigned int)header);
 
   /* Process and validate header */
 
@@ -289,7 +289,7 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
   dq_entry_t *entry;
   struct bcmf_sdio_frame *sframe;
   struct bcmf_sdpcm_header *header;
-  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s*)priv->bus;
+  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
 
   if (sbus->tx_queue.tail == NULL)
     {
@@ -313,7 +313,7 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
 
   entry = sbus->tx_queue.tail;
   sframe = container_of(entry, struct bcmf_sdio_frame, list_entry);
-  header = (struct bcmf_sdpcm_header*)sframe->header.base;
+  header = (struct bcmf_sdpcm_header *)sframe->header.base;
 
   /* Set frame sequence id */
 
@@ -361,9 +361,9 @@ exit_abort:
 int bcmf_sdpcm_queue_frame(FAR struct bcmf_dev_s *priv,
                            struct bcmf_frame_s *frame, bool control)
 {
-  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s*)priv->bus;
-  struct bcmf_sdio_frame *sframe = (struct bcmf_sdio_frame*)frame;
-  struct bcmf_sdpcm_header *header = (struct bcmf_sdpcm_header*)sframe->data;
+  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
+  struct bcmf_sdio_frame *sframe = (struct bcmf_sdio_frame *)frame;
+  struct bcmf_sdpcm_header *header = (struct bcmf_sdpcm_header *)sframe->data;
 
   /* Prepare sw header */
 
@@ -399,9 +399,9 @@ int bcmf_sdpcm_queue_frame(FAR struct bcmf_dev_s *priv,
   return OK;
 }
 
-struct bcmf_frame_s* bcmf_sdpcm_alloc_frame(FAR struct bcmf_dev_s *priv,
-                                      unsigned int len, bool block,
-                                      bool control)
+struct bcmf_frame_s *bcmf_sdpcm_alloc_frame(FAR struct bcmf_dev_s *priv,
+                                            unsigned int len, bool block,
+                                            bool control)
 {
   struct bcmf_sdio_frame *sframe;
   unsigned int header_len = sizeof(struct bcmf_sdpcm_header);
@@ -436,14 +436,14 @@ struct bcmf_frame_s* bcmf_sdpcm_alloc_frame(FAR struct bcmf_dev_s *priv,
 void bcmf_sdpcm_free_frame(FAR struct bcmf_dev_s *priv,
                      struct bcmf_frame_s *frame)
 {
-  return bcmf_sdio_free_frame(priv, (struct bcmf_sdio_frame*)frame);
+  return bcmf_sdio_free_frame(priv, (struct bcmf_sdio_frame *)frame);
 }
 
-struct bcmf_frame_s* bcmf_sdpcm_get_rx_frame(FAR struct bcmf_dev_s *priv)
+struct bcmf_frame_s *bcmf_sdpcm_get_rx_frame(FAR struct bcmf_dev_s *priv)
 {
   dq_entry_t *entry;
   struct bcmf_sdio_frame *sframe;
-  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s*)priv->bus;
+  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
 
   if (sem_wait(&sbus->queue_mutex))
     {

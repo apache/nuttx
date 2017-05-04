@@ -64,7 +64,7 @@ static inline int bcmf_read_sbregb(FAR struct bcmf_sdio_dev_s *sbus,
 static inline int bcmf_read_sbregw(FAR struct bcmf_sdio_dev_s *sbus,
                                    uint32_t address, uint32_t *reg)
 {
-    return bcmf_read_sbreg(sbus, address, (uint8_t*)reg, 4);
+    return bcmf_read_sbreg(sbus, address, (uint8_t *)reg, 4);
 }
 
 static inline int bcmf_write_sbregb(FAR struct bcmf_sdio_dev_s *sbus,
@@ -76,7 +76,7 @@ static inline int bcmf_write_sbregb(FAR struct bcmf_sdio_dev_s *sbus,
 static inline int bcmf_write_sbregw(FAR struct bcmf_sdio_dev_s *sbus,
                                     uint32_t address, uint32_t reg)
 {
-    return bcmf_write_sbreg(sbus, address, (uint8_t*)&reg, 4);
+    return bcmf_write_sbreg(sbus, address, (uint8_t *)&reg, 4);
 }
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_CORE_H */

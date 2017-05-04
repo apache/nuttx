@@ -80,7 +80,7 @@ struct __attribute__((packed)) bcmf_cdc_header {
  * Private Function Prototypes
  ****************************************************************************/
 
-static struct bcmf_frame_s* bcmf_cdc_allocate_frame(
+static struct bcmf_frame_s *bcmf_cdc_allocate_frame(
                                 FAR struct bcmf_dev_s *priv, char *name,
                                 uint8_t *data, uint32_t len);
 
@@ -99,8 +99,9 @@ static int bcmf_cdc_control_request_unsafe(FAR struct bcmf_dev_s *priv,
  * Private Functions
  ****************************************************************************/
 
-struct bcmf_frame_s* bcmf_cdc_allocate_frame(FAR struct bcmf_dev_s *priv,
-                                char *name, uint8_t *data, uint32_t len)
+struct bcmf_frame_s *bcmf_cdc_allocate_frame(FAR struct bcmf_dev_s *priv,
+                                             char *name, uint8_t *data,
+                                             uint32_t len)
 {
   uint32_t data_len;
   uint16_t name_len;
@@ -145,10 +146,10 @@ struct bcmf_frame_s* bcmf_cdc_allocate_frame(FAR struct bcmf_dev_s *priv,
 }
 
 int bcmf_cdc_sendframe(FAR struct bcmf_dev_s *priv, uint32_t cmd,
-                         int ifidx, bool set, struct bcmf_frame_s *frame)
+                       int ifidx, bool set, struct bcmf_frame_s *frame)
 {
-  struct bcmf_cdc_header* header =
-                  (struct bcmf_cdc_header*)frame->data;
+  struct bcmf_cdc_header *header =
+                  (struct bcmf_cdc_header *)frame->data;
 
   /* Setup control frame header */
 
@@ -290,7 +291,7 @@ int bcmf_cdc_process_control_frame(FAR struct bcmf_dev_s *priv,
       return -EINVAL;
     }
 
-  cdc_header = (struct bcmf_cdc_header*)frame->data;
+  cdc_header = (struct bcmf_cdc_header *)frame->data;
 
   if (data_size < cdc_header->len ||
       data_size < sizeof(struct bcmf_cdc_header) + cdc_header->len)
@@ -315,8 +316,9 @@ int bcmf_cdc_process_control_frame(FAR struct bcmf_dev_s *priv,
                       priv->control_rxdata_len, cdc_header->len);
               priv->control_rxdata_len = cdc_header->len;
             }
-          memcpy(priv->control_rxdata, (uint8_t*)&cdc_header[1],
-                                       priv->control_rxdata_len);
+
+          memcpy(priv->control_rxdata, (uint8_t *)&cdc_header[1],
+                 priv->control_rxdata_len);
         }
 
       sem_post(&priv->control_timeout);

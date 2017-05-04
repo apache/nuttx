@@ -75,13 +75,13 @@ int bcmf_bdc_process_event_frame(FAR struct bcmf_dev_s *priv,
 
 /* Function called from upper layer */
 
-struct bcmf_frame_s* bcmf_bdc_allocate_frame(FAR struct bcmf_dev_s *priv,
-                                      uint32_t len, bool block);
+struct bcmf_frame_s *bcmf_bdc_allocate_frame(FAR struct bcmf_dev_s *priv,
+                                             uint32_t len, bool block);
 
 int bcmf_bdc_transmit_frame(FAR struct bcmf_dev_s *priv,
                             struct bcmf_frame_s *frame);
 
-struct bcmf_frame_s* bcmf_bdc_rx_frame(FAR struct bcmf_dev_s *priv);
+struct bcmf_frame_s *bcmf_bdc_rx_frame(FAR struct bcmf_dev_s *priv);
 
 /* Event frames API */
 

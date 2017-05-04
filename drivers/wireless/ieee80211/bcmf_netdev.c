@@ -755,8 +755,9 @@ static int bcmf_ifdown(FAR struct net_driver_s *dev)
 
 static void bcmf_txavail_work(FAR void *arg)
 {
-  // wlinfo("Entry\n");
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
+
+  // wlinfo("Entry\n");
 
   /* Lock the network and serialize driver operations if necessary.
    * NOTE: Serialization is only required in the case where the driver work
@@ -991,23 +992,23 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
   switch (cmd)
     {
       case SIOCSIWSCAN:
-        ret = bcmf_wl_start_scan(priv, (struct ifreq*)arg);
+        ret = bcmf_wl_start_scan(priv, (struct ifreq *)arg);
         break;
 
       case SIOCGIWSCAN:
-        ret = bcmf_wl_get_scan_results(priv, (struct ifreq*)arg);
+        ret = bcmf_wl_get_scan_results(priv, (struct ifreq *)arg);
         break;
 
       case SIOCSIFHWADDR:    /* Set device MAC address */
-        ret = bcmf_wl_set_mac_address(priv, (struct ifreq*)arg);
+        ret = bcmf_wl_set_mac_address(priv, (struct ifreq *)arg);
         break;
 
       case SIOCSIWAUTH:
-        ret = bcmf_wl_set_auth_param(priv, (struct iwreq*)arg);
+        ret = bcmf_wl_set_auth_param(priv, (struct iwreq *)arg);
         break;
 
       case SIOCSIWENCODEEXT:
-        ret = bcmf_wl_set_encode_ext(priv, (struct iwreq*)arg);
+        ret = bcmf_wl_set_encode_ext(priv, (struct iwreq *)arg);
         break;
 
       case SIOCSIWFREQ:     /* Set channel/frequency (Hz) */
@@ -1021,7 +1022,7 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
         break;
 
       case SIOCSIWMODE:     /* Set operation mode */
-        ret = bcmf_wl_set_mode(priv, (struct iwreq*)arg);
+        ret = bcmf_wl_set_mode(priv, (struct iwreq *)arg);
         break;
 
       case SIOCGIWMODE:     /* Get operation mode */
@@ -1040,7 +1041,7 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
         break;
 
       case SIOCSIWESSID:    /* Set ESSID (network name) */
-        ret = bcmf_wl_set_ssid(priv, (struct iwreq*)arg);
+        ret = bcmf_wl_set_ssid(priv, (struct iwreq *)arg);
         break;
 
       case SIOCGIWESSID:    /* Get ESSID */

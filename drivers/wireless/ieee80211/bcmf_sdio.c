@@ -114,7 +114,8 @@ static int  bcmf_sdio_find_block_size(unsigned int size);
 FAR struct bcmf_dev_s *g_sdio_priv;
 
 /* Buffer pool for SDIO bus interface
-   This pool is shared between all driver devices */
+ * This pool is shared between all driver devices
+ */
 
 static struct bcmf_sdio_frame g_pktframes[BCMF_PKT_POOL_SIZE];
 
@@ -126,11 +127,12 @@ static struct bcmf_sdio_frame g_pktframes[BCMF_PKT_POOL_SIZE];
 
 int bcmf_oob_irq(int irq, FAR void *context, FAR void *arg)
 {
-  FAR struct bcmf_sdio_dev_s *sbus = (struct bcmf_sdio_dev_s*)arg;
+  FAR struct bcmf_sdio_dev_s *sbus = (struct bcmf_sdio_dev_s *)arg;
 
   if (sbus->ready)
     {
       /*  Signal bmcf thread */
+
       sbus->irq_pending = true;
 
       sem_post(&sbus->thread_signal);
@@ -360,7 +362,7 @@ int bcmf_bus_setup_interrupts(FAR struct bcmf_sdio_dev_s *sbus)
 
   /* Configure gpio interrupt pin */
 
-  bcmf_board_setup_oob_irq(sbus->minor, bcmf_oob_irq, (void*)sbus);
+  bcmf_board_setup_oob_irq(sbus->minor, bcmf_oob_irq, (void *)sbus);
 
   /* Enable function 2 interrupt */
 
@@ -455,16 +457,18 @@ int bcmf_sdio_find_block_size(unsigned int size)
 {
   int ret = 0;
   int size_copy = size;
-  while (size_copy) {
-    size_copy >>= 1;
-    ret++;
-  }
+  while (size_copy)
+    {
+      size_copy >>= 1;
+      ret++;
+   }
 
   if (size & (size-1))
     {
-      return 1<<ret;
+      return 1 << ret;
     }
-  return 1<<(ret-1);
+
+  return 1 << (ret - 1);
 }
 
 /****************************************************************************
@@ -554,7 +558,7 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
 
   /* Allocate sdio bus structure */
 
-  sbus = (FAR struct bcmf_sdio_dev_s*)kmm_malloc(sizeof(*sbus));
+  sbus = (FAR struct bcmf_sdio_dev_s *)kmm_malloc(sizeof(*sbus));
 
   if (!sbus)
     {
@@ -581,6 +585,7 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
     {
       goto exit_free_bus;
     }
+
   sq_init(&sbus->tx_queue);
   sq_init(&sbus->rx_queue);
   sq_init(&sbus->free_queue);
@@ -599,6 +604,7 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
     {
       goto exit_free_bus;
     }
+
   if ((ret = sem_setprotocol(&sbus->thread_signal, SEM_PRIO_NONE)) != OK)
     {
       goto exit_free_bus;
@@ -708,7 +714,7 @@ int bcmf_chipinitialize(FAR struct bcmf_sdio_dev_s *sbus)
 #ifdef CONFIG_IEEE80211_BROADCOM_BCM43362
       case SDIO_DEVICE_ID_BROADCOM_43362:
         wlinfo("bcm43362 chip detected\n");
-        sbus->chip = (struct bcmf_sdio_chip*)&bcmf_43362_config_sdio;
+        sbus->chip = (struct bcmf_sdio_chip *)&bcmf_43362_config_sdio;
         break;
 #endif
       default:
@@ -720,8 +726,8 @@ int bcmf_chipinitialize(FAR struct bcmf_sdio_dev_s *sbus)
 
 void bcmf_sdio_waitdog_timeout(int argc, wdparm_t arg1, ...)
 {
-  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s*)arg1;
-  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s*)priv->bus;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg1;
+  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
 
   /* Notify bcmf thread */
 
@@ -733,7 +739,7 @@ int bcmf_sdio_thread(int argc, char **argv)
 {
   int ret;
   FAR struct bcmf_dev_s *priv = g_sdio_priv;
-  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s*)priv->bus;
+  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
   
   wlinfo("Enter\n");
 
@@ -788,7 +794,8 @@ int bcmf_sdio_thread(int argc, char **argv)
           do
             {
               ret = bcmf_sdpcm_readframe(priv);
-            } while (ret == OK);
+            }
+          while (ret == OK);
           
           if (ret == -ENODATA)
             {
@@ -803,7 +810,8 @@ int bcmf_sdio_thread(int argc, char **argv)
       do
         {
           ret = bcmf_sdpcm_sendframe(priv);
-        } while (ret == OK);
+        }
+      while (ret == OK);
 
       /* Check if RX frames are available */
 
@@ -825,10 +833,10 @@ int bcmf_sdio_thread(int argc, char **argv)
   return 0;
 }
 
-struct bcmf_sdio_frame* bcmf_sdio_allocate_frame(FAR struct bcmf_dev_s *priv,
+struct bcmf_sdio_frame *bcmf_sdio_allocate_frame(FAR struct bcmf_dev_s *priv,
                                                  bool block, bool tx)
 {
-  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s*)priv->bus;
+  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
   struct bcmf_sdio_frame *sframe;
   dq_entry_t *entry = NULL;
 
@@ -879,7 +887,7 @@ void bcmf_sdio_free_frame(FAR struct bcmf_dev_s *priv,
                           struct bcmf_sdio_frame *sframe)
 {
   // wlinfo("free %p\n", sframe);
-  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s*)priv->bus;
+  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
 
   if (sem_wait(&sbus->queue_mutex))
     {

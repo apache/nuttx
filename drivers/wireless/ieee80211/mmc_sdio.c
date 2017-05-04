@@ -7,43 +7,48 @@
 #define SDIO_CMD53_TIMEOUT_MS 100
 #define SDIO_IDLE_DELAY_MS    50
 
-struct __attribute__((packed)) sdio_cmd52 {
-    uint32_t write_data       : 8;
-    uint32_t reserved_8       : 1;
-    uint32_t register_address : 17;
-    uint32_t reserved_26      : 1;
-    uint32_t raw_flag         : 1;
-    uint32_t function_number  : 3;
-    uint32_t rw_flag          : 1;
+struct __attribute__((packed)) sdio_cmd52
+{
+  uint32_t write_data       : 8;
+  uint32_t reserved_8       : 1;
+  uint32_t register_address : 17;
+  uint32_t reserved_26      : 1;
+  uint32_t raw_flag         : 1;
+  uint32_t function_number  : 3;
+  uint32_t rw_flag          : 1;
 };
 
-struct __attribute__((packed)) sdio_cmd53 {
-    uint32_t byte_block_count : 9;
-    uint32_t register_address : 17;
-    uint32_t op_code          : 1;
-    uint32_t block_mode       : 1;
-    uint32_t function_number  : 3;
-    uint32_t rw_flag          : 1;
+struct __attribute__((packed)) sdio_cmd53
+{
+  uint32_t byte_block_count : 9;
+  uint32_t register_address : 17;
+  uint32_t op_code          : 1;
+  uint32_t block_mode       : 1;
+  uint32_t function_number  : 3;
+  uint32_t rw_flag          : 1;
 };
 
-struct __attribute__((packed)) sdio_resp_R5 {
-    uint32_t data             : 8;
-    struct {
-        uint32_t out_of_range     : 1;
-        uint32_t function_number  : 1;
-        uint32_t rfu              : 1;
-        uint32_t error            : 1;
-        uint32_t io_current_state : 2;
-        uint32_t illegal_command  : 1;
-        uint32_t com_crc_error    : 1;
-    } flags;
-    uint32_t reserved_16      : 16;
+struct __attribute__((packed)) sdio_resp_R5
+{
+  uint32_t data             : 8;
+  struct
+  {
+    uint32_t out_of_range     : 1;
+    uint32_t function_number  : 1;
+    uint32_t rfu              : 1;
+    uint32_t error            : 1;
+    uint32_t io_current_state : 2;
+    uint32_t illegal_command  : 1;
+    uint32_t com_crc_error    : 1;
+  } flags;
+  uint32_t reserved_16      : 16;
 };
 
-union sdio_cmd5x {
-    uint32_t value;
-    struct sdio_cmd52 cmd52;
-    struct sdio_cmd53 cmd53;
+union sdio_cmd5x
+{
+  uint32_t value;
+  struct sdio_cmd52 cmd52;
+  struct sdio_cmd53 cmd53;
 };
 
 int sdio_sendcmdpoll(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
@@ -70,7 +75,7 @@ int sdio_sendcmdpoll(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
 
 int sdio_io_rw_direct(FAR struct sdio_dev_s *dev, bool write,
                       uint8_t function, uint32_t address,
-                      uint8_t inb, uint8_t* outb)
+                      uint8_t inb, uint8_t *outb)
 {
     union sdio_cmd5x arg;
     struct sdio_resp_R5 resp;
@@ -96,7 +101,7 @@ int sdio_io_rw_direct(FAR struct sdio_dev_s *dev, bool write,
     /* Send CMD52 command */
 
     sdio_sendcmdpoll(dev, SDIO_ACMD52, arg.value);
-    ret = SDIO_RECVR5(dev, SDIO_ACMD52, (uint32_t*)&resp);
+    ret = SDIO_RECVR5(dev, SDIO_ACMD52, (uint32_t *)&resp);
 
     if (ret != OK)
       {
@@ -110,6 +115,7 @@ int sdio_io_rw_direct(FAR struct sdio_dev_s *dev, bool write,
       {
         return -EIO;
       }
+
     if (resp.flags.function_number || resp.flags.out_of_range)
       {
         return -EINVAL;
@@ -170,7 +176,7 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
       {
         // wlinfo("prep write %d %d\n", blocklen, nblocks);
         sdio_sendcmdpoll(dev, SDIO_ACMD53, (uint32_t)arg.value);
-        ret = SDIO_RECVR5(dev, SDIO_ACMD53, (uint32_t*)&resp);
+        ret = SDIO_RECVR5(dev, SDIO_ACMD53, (uint32_t *)&resp);
 
         SDIO_DMASENDSETUP(dev, buf, blocklen * nblocks);
         wkupevent = SDIO_EVENTWAIT(dev, SDIO_CMD53_TIMEOUT_MS);
@@ -182,7 +188,7 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
         SDIO_SENDCMD(dev, SDIO_ACMD53, (uint32_t)arg.value);
 
         wkupevent = SDIO_EVENTWAIT(dev, SDIO_CMD53_TIMEOUT_MS);
-        ret = SDIO_RECVR5(dev, SDIO_ACMD53, (uint32_t*)&resp);
+        ret = SDIO_RECVR5(dev, SDIO_ACMD53, (uint32_t *)&resp);
       }
 
     if (ret != OK)
@@ -198,11 +204,13 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
         wlerr("timeout\n");
         return -ETIMEDOUT;
       }
+
     if (resp.flags.error || (wkupevent & SDIOWAIT_ERROR))
       {
         wlerr("error 1\n");
         return -EIO;
       }
+
     if (resp.flags.function_number || resp.flags.out_of_range)
       {
         wlerr("error 2\n");
@@ -233,7 +241,7 @@ int sdio_set_wide_bus(struct sdio_dev_s *dev)
   ret = sdio_io_rw_direct(dev, true, 0, SDIO_CCCR_BUS_IF, value, NULL);
   if (ret != OK)
     {
-  	  return ret;
+      return ret;
     }
   
   SDIO_WIDEBUS(dev, true);

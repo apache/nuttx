@@ -68,7 +68,7 @@ void bcmf_hexdump(uint8_t *data, unsigned int len, unsigned long offset)
   char char_line[20];
   char hex_line[64];
 
-  for(i = 0; i < len; i++)
+  for (i = 0; i < len; i++)
     {
       if (char_count >= LINE_LEN)
       {
@@ -107,9 +107,9 @@ int bcmf_sem_wait(sem_t *sem, unsigned int timeout_ms)
 
   (void)clock_gettime(CLOCK_REALTIME, &abstime);
 
-  timeout_sec      = timeout_ms/1000;
+  timeout_sec      = timeout_ms / 1000;
   abstime.tv_sec  += timeout_sec;
-  abstime.tv_nsec += 1000 * 1000* (timeout_ms % 1000);
+  abstime.tv_nsec += 1000 * 1000 * (timeout_ms % 1000);
 
   if (abstime.tv_nsec >= 1000 * 1000 * 1000)
     {
@@ -144,7 +144,7 @@ void bcmf_dqueue_push(dq_queue_t *queue, dq_entry_t *entry)
   queue->head = entry;
 }
 
-dq_entry_t* bcmf_dqueue_pop_tail(dq_queue_t *queue)
+dq_entry_t *bcmf_dqueue_pop_tail(dq_queue_t *queue)
 {
   dq_entry_t *entry = queue->tail;
 

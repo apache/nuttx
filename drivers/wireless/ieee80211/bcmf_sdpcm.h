@@ -55,9 +55,10 @@ int bcmf_sdpcm_queue_frame(FAR struct bcmf_dev_s *priv,
 
 void bcmf_sdpcm_free_frame(FAR struct bcmf_dev_s *priv, struct bcmf_frame_s *frame);
 
-struct bcmf_frame_s* bcmf_sdpcm_alloc_frame(FAR struct bcmf_dev_s *priv,
-                                      unsigned int len, bool block, bool control);
+struct bcmf_frame_s *bcmf_sdpcm_alloc_frame(FAR struct bcmf_dev_s *priv,
+                                            unsigned int len, bool block,
+                                            bool control);
 
-struct bcmf_frame_s* bcmf_sdpcm_get_rx_frame(FAR struct bcmf_dev_s *priv);
+struct bcmf_frame_s *bcmf_sdpcm_get_rx_frame(FAR struct bcmf_dev_s *priv);
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_SDPCM_H */

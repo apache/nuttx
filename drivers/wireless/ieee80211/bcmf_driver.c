@@ -84,12 +84,13 @@ enum
  * Private Function Prototypes
  ****************************************************************************/
 
-static FAR struct bcmf_dev_s* bcmf_allocate_device(void);
+static FAR struct bcmf_dev_s *bcmf_allocate_device(void);
 static void bcmf_free_device(FAR struct bcmf_dev_s *priv);
 
 static int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv);
 
 // FIXME only for debug purpose
+
 static void bcmf_wl_default_event_handler(FAR struct bcmf_dev_s *priv,
                             struct bcmf_event_s *event, unsigned int len);
 
@@ -109,7 +110,7 @@ static int bcmf_wl_get_interface(FAR struct bcmf_dev_s *priv,
  * Private Functions
  ****************************************************************************/
 
-FAR struct bcmf_dev_s* bcmf_allocate_device(void)
+FAR struct bcmf_dev_s *bcmf_allocate_device(void)
 {
   int ret;
   FAR struct bcmf_dev_s *priv;
@@ -186,7 +187,7 @@ int bcmf_wl_set_mac_address(FAR struct bcmf_dev_s *priv, struct ifreq *req)
 
   ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
                               IOVAR_STR_CUR_ETHERADDR,
-                              (uint8_t*)req->ifr_hwaddr.sa_data,
+                              (uint8_t *)req->ifr_hwaddr.sa_data,
                               &out_len);
   if (ret != OK)
     {
@@ -215,10 +216,10 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
   /* Disable TX Gloming feature */
 
   out_len = 4;
-  *(uint32_t*)tmp_buf = 0;
+  *(uint32_t *)tmp_buf = 0;
   ret = bcmf_cdc_iovar_request(priv, interface, false,
-                                 IOVAR_STR_TX_GLOM, tmp_buf,
-                                 &out_len);
+                               IOVAR_STR_TX_GLOM, tmp_buf,
+                               &out_len);
   if (ret != OK)
     {
       return -EIO;
@@ -229,7 +230,7 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
   out_len = 4;
   value = 0;
   ret = bcmf_cdc_ioctl(priv, interface, true, WLC_SET_PM,
-                       (uint8_t*)&value, &out_len);
+                       (uint8_t *)&value, &out_len);
   if (ret != OK)
     {
       return ret;
@@ -240,7 +241,7 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
   out_len = 4;
   value = GMODE_AUTO;
   ret = bcmf_cdc_ioctl(priv, interface, true, WLC_SET_GMODE,
-                       (uint8_t*)&value, &out_len);
+                       (uint8_t *)&value, &out_len);
   if (ret != OK)
     {
       return ret;
@@ -251,14 +252,14 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
   out_len = 4;
   value = 1;
   ret = bcmf_cdc_iovar_request(priv, interface, true, IOVAR_STR_ROAM_OFF,
-                               (uint8_t*)&value,
+                               (uint8_t *)&value,
                                &out_len);
 
   /* TODO configure EAPOL version to default */
 
   out_len = 8;
-  ((uint32_t*)tmp_buf)[0] = interface;
-  ((uint32_t*)tmp_buf)[1] = (uint32_t)-1;
+  ((uint32_t *)tmp_buf)[0] = interface;
+  ((uint32_t *)tmp_buf)[1] = (uint32_t)-1;
 
   if (bcmf_cdc_iovar_request(priv, interface, true,
                              "bsscfg:"IOVAR_STR_SUP_WPA2_EAPVER, tmp_buf,
@@ -282,10 +283,10 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
 
   /* Remove line feed */
 
-  out_len = strlen((char*)tmp_buf);
-  if (out_len > 0 && tmp_buf[out_len-1] == '\n')
+  out_len = strlen((char *)tmp_buf);
+  if (out_len > 0 && tmp_buf[out_len - 1] == '\n')
     {
-      tmp_buf[out_len-1] = 0;
+      tmp_buf[out_len - 1] = 0;
     }
 
   wlinfo("fw version <%s>\n", tmp_buf);
@@ -353,7 +354,7 @@ void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
 
   wlinfo("Got auth event %d from <%s>\n", type, event->src_name);
 
-  bcmf_hexdump((uint8_t*)event, len, (unsigned long)event);
+  bcmf_hexdump((uint8_t *)event, len, (unsigned long)event);
 
   if (type == WLC_E_SET_SSID && status == WLC_E_STATUS_SUCCESS)
     {
@@ -408,7 +409,7 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
 
   /* Process escan result payload */
 
-  result = (struct wl_escan_result*)&event[1];
+  result = (struct wl_escan_result *)&event[1];
 
   if (len < result->buflen || result->buflen < sizeof(struct wl_escan_result))
     {
@@ -442,7 +443,7 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
       /* Process next bss_info */
 
       len -= bss_info_len;
-      bss = (struct wl_bss_info*)((uint8_t*)bss + bss_info_len);
+      bss = (struct wl_bss_info *)((uint8_t *)bss + bss_info_len);
       bss_count += 1;
     }
 
@@ -474,12 +475,12 @@ wl_escan_result_processed:
 
 exit_invalid_frame:
   wlerr("Invalid scan result event\n");
-  bcmf_hexdump((uint8_t*)event, event_len, (unsigned long)event);
+  bcmf_hexdump((uint8_t *)event, event_len, (unsigned long)event);
 }
 
 void bcmf_wl_scan_timeout(int argc, wdparm_t arg1, ...)
 {
-  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s*)arg1;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg1;
 
   if (priv->scan_status < BCMF_SCAN_RUN)
     {
@@ -590,7 +591,7 @@ int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   if (iwr->u.data.pointer && iwr->u.data.length >= sizeof(*req))
     {
-      req = (struct iw_scan_req*)iwr->u.data.pointer;
+      req = (struct iw_scan_req *)iwr->u.data.pointer;
 
       memcpy(&scan_params.params.bssid, req->bssid.sa_data,
              sizeof(scan_params.params.bssid));
@@ -624,7 +625,7 @@ int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   value = scan_params.params.scan_type;
   out_len = 4;
   if (bcmf_cdc_ioctl(priv, CHIP_STA_INTERFACE, true,
-                         WLC_SET_PASSIVE_SCAN, (uint8_t*)&value, &out_len))
+                         WLC_SET_PASSIVE_SCAN, (uint8_t *)&value, &out_len))
     {
       ret = -EIO;
       goto exit_failed;
@@ -644,7 +645,7 @@ int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   out_len = sizeof(scan_params);
 
   if (bcmf_cdc_iovar_request_unsafe(priv, CHIP_STA_INTERFACE, true,
-                                 IOVAR_STR_ESCAN, (uint8_t*)&scan_params,
+                                 IOVAR_STR_ESCAN, (uint8_t *)&scan_params,
                                  &out_len))
     {
       ret = -EIO;
@@ -727,15 +728,15 @@ int bcmf_wl_set_auth_param(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
         if (bcmf_cdc_iovar_request(priv, interface, true,
                                    "bsscfg:"IOVAR_STR_SUP_WPA,
-                                   (uint8_t*)wpa_version,
+                                   (uint8_t *)wpa_version,
                                    &out_len))
           {
             return -EIO;
           }
 
         out_len = 4;
-        if(bcmf_cdc_ioctl(priv, interface, true, WLC_SET_WPA_AUTH,
-                          (uint8_t*)&auth_mode, &out_len))
+        if (bcmf_cdc_ioctl(priv, interface, true, WLC_SET_WPA_AUTH,
+                           (uint8_t *)&auth_mode, &out_len))
           {
             return -EIO;
           }
@@ -767,8 +768,8 @@ int bcmf_wl_set_auth_param(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
           }
 
         out_len = 4;
-        if(bcmf_cdc_ioctl(priv, interface, true,
-                          WLC_SET_WSEC, (uint8_t*)&cipher_mode, &out_len))
+        if (bcmf_cdc_ioctl(priv, interface, true,
+                           WLC_SET_WSEC, (uint8_t *)&cipher_mode, &out_len))
           {
             return -EIO;
           }
@@ -776,8 +777,8 @@ int bcmf_wl_set_auth_param(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
         /* Set authentication mode */
 
         out_len = 4;
-        if(bcmf_cdc_ioctl(priv, interface, true,
-                          WLC_SET_AUTH, (uint8_t*)&wep_auth, &out_len))
+        if (bcmf_cdc_ioctl(priv, interface, true,
+                           WLC_SET_AUTH, (uint8_t *)&wep_auth, &out_len))
           {
             return -EIO;
           }
@@ -815,8 +816,8 @@ int bcmf_wl_set_mode(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   out_len = 4;
   value = iwr->u.mode == IW_MODE_INFRA ? 1 : 0;
-  if(bcmf_cdc_ioctl(priv, interface, true,
-                         WLC_SET_INFRA, (uint8_t*)&value, &out_len))
+  if (bcmf_cdc_ioctl(priv, interface, true,
+                     WLC_SET_INFRA, (uint8_t *)&value, &out_len))
     {
       return -EIO;
     }
@@ -838,7 +839,7 @@ int bcmf_wl_set_encode_ext(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
       return -EINVAL;
     }
 
-  ext = (struct iw_encode_ext*)iwr->u.encoding.pointer;
+  ext = (struct iw_encode_ext *)iwr->u.encoding.pointer;
 
   switch (ext->alg)
     {
@@ -860,7 +861,7 @@ int bcmf_wl_set_encode_ext(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   out_len = sizeof(psk);
   return bcmf_cdc_ioctl(priv, interface, true,
-                        WLC_SET_WSEC_PMK, (uint8_t*)&psk, &out_len);
+                        WLC_SET_WSEC_PMK, (uint8_t *)&psk, &out_len);
 }
 
 int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
@@ -883,8 +884,8 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   /* Configure AP SSID and trig authentication request */
 
   out_len = sizeof(ssid);
-  if(bcmf_cdc_ioctl(priv, interface, true,
-                         WLC_SET_SSID, (uint8_t*)&ssid, &out_len))
+  if (bcmf_cdc_ioctl(priv, interface, true,
+                     WLC_SET_SSID, (uint8_t *)&ssid, &out_len))
     {
       return -EIO;
     }
@@ -911,3 +912,4 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
     }
   return OK;
  }
+ 

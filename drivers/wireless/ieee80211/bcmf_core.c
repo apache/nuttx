@@ -190,23 +190,23 @@ int bcmf_upload_nvram(FAR struct bcmf_sdio_dev_s *sbus)
   ret = bcmf_upload_binary(sbus, sbus->chip->ram_size - 4 - nvram_sz,
                            sbus->chip->nvram_image,
                            *sbus->chip->nvram_image_size);
-  if ( ret != OK)
-  {
+  if (ret != OK)
+    {
       return ret;
-  }
+    }
 
-  /* generate length token */
+  /* Generate length token */
 
   token = nvram_sz / 4;
   token = (~token << 16) | (token & 0x0000FFFF);
 
   /* Write the length token to the last word */
 
-  ret = bcmf_write_sbreg(sbus, sbus->chip->ram_size - 4, (uint8_t*)&token, 4);
-  if ( ret != OK)
-  {
+  ret = bcmf_write_sbreg(sbus, sbus->chip->ram_size - 4, (uint8_t *)&token, 4);
+  if (ret != OK)
+    {
       return ret;
-  }
+    }
 
   return OK;
 }

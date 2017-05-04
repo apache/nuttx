@@ -44,7 +44,8 @@ extern const unsigned int bcm43362_nvram_image_len;
 extern const uint8_t bcm43362_firmware_image[];
 extern const unsigned int bcm43362_firmware_image_len;
 
-const struct bcmf_sdio_chip bcmf_43362_config_sdio = {
+const struct bcmf_sdio_chip bcmf_43362_config_sdio =
+{
 
   /* General chip stats */
 
@@ -52,7 +53,8 @@ const struct bcmf_sdio_chip bcmf_43362_config_sdio = {
 
   /* Backplane architecture */
 
-  .core_base = {
+  .core_base =
+  {
     [CHIPCOMMON_CORE_ID]  = 0x18000000,  /* Chipcommon core register base   */
     [DOT11MAC_CORE_ID]    = 0x18001000,  /* dot11mac core register base     */
     [SDIOD_CORE_ID]       = 0x18002000,  /* SDIOD Device core register base */
@@ -66,9 +68,9 @@ const struct bcmf_sdio_chip bcmf_43362_config_sdio = {
 
   // TODO find something smarter than using image_len references
 
-  .firmware_image      = (uint8_t*)bcm43362_firmware_image,
-  .firmware_image_size = (unsigned int*)&bcm43362_firmware_image_len,
+  .firmware_image      = (uint8_t *)bcm43362_firmware_image,
+  .firmware_image_size = (unsigned int *)&bcm43362_firmware_image_len,
 
-  .nvram_image         = (uint8_t*)bcm43362_nvram_image,
-  .nvram_image_size    = (unsigned int*)&bcm43362_nvram_image_len
+  .nvram_image         = (uint8_t *)bcm43362_nvram_image,
+  .nvram_image_size    = (unsigned int *)&bcm43362_nvram_image_len
 };

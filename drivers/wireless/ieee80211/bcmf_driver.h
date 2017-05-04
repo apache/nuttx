@@ -105,18 +105,18 @@ struct bcmf_bus_dev_s
   void (*stop)(FAR struct bcmf_dev_s *priv);
   int (*txframe)(FAR struct bcmf_dev_s *priv, struct bcmf_frame_s *frame,
                  bool control);
-  struct bcmf_frame_s* (*rxframe)(FAR struct bcmf_dev_s *priv);
+  struct bcmf_frame_s *(*rxframe)(FAR struct bcmf_dev_s *priv);
 
   /* Frame buffer allocation primitives
    * len     - requested payload length
    * control - true if control frame else false
    * block   - true to block until free frame is available
    */
-  struct bcmf_frame_s* (*allocate_frame)(FAR struct bcmf_dev_s *priv,
+  struct bcmf_frame_s *(*allocate_frame)(FAR struct bcmf_dev_s *priv,
                                          unsigned int len, bool block,
                                          bool control);
 
-  void (*free_frame)(FAR struct bcmf_dev_s *priv, struct bcmf_frame_s* frame);
+  void (*free_frame)(FAR struct bcmf_dev_s *priv, struct bcmf_frame_s *frame);
 };
 
 /* bcmf frame definition */

@@ -97,8 +97,8 @@ static const uint8_t bcmf_broadcom_oui[] = {0x00, 0x10, 0x18};
  * Public Functions
  ****************************************************************************/
 
-struct bcmf_frame_s* bcmf_bdc_allocate_frame(FAR struct bcmf_dev_s *priv,
-                                      uint32_t len, bool block)
+struct bcmf_frame_s *bcmf_bdc_allocate_frame(FAR struct bcmf_dev_s *priv,
+                                             uint32_t len, bool block)
 {
   struct bcmf_frame_s *frame;
 
@@ -136,7 +136,7 @@ int bcmf_bdc_process_event_frame(FAR struct bcmf_dev_s *priv,
       goto exit_invalid_frame;
     }
 
-  header = (struct bcmf_bdc_header*)frame->data;
+  header = (struct bcmf_bdc_header *)frame->data;
 
   data_size -= sizeof(struct bcmf_bdc_header) + header->data_offset;
 
@@ -149,9 +149,9 @@ int bcmf_bdc_process_event_frame(FAR struct bcmf_dev_s *priv,
 
   /* Check ethernet header */
 
-  event_msg = (struct bcmf_event_msg*)(frame->data +
-                                      sizeof(struct bcmf_bdc_header) +
-                                      header->data_offset);
+  event_msg = (struct bcmf_event_msg *)(frame->data +
+                                        sizeof(struct bcmf_bdc_header) +
+                                        header->data_offset);
 
   if (event_msg->eth.ether_type != BCMF_EVENT_ETHER_TYPE ||
       memcmp(event_msg->bcm_eth.oui, bcmf_broadcom_oui, 3))
@@ -207,15 +207,15 @@ int bcmf_event_push_config(FAR struct bcmf_dev_s *priv)
 {
   int i;
   uint32_t out_len;
-  uint8_t event_mask[(BCMF_EVENT_COUNT+7)>>3];
+  uint8_t event_mask[(BCMF_EVENT_COUNT + 7) >> 3];
 
   memset(event_mask, 0, sizeof(event_mask));
 
-  for (i=0; i<BCMF_EVENT_COUNT; i++)
+  for (i = 0; i < BCMF_EVENT_COUNT; i++)
     {
       if (priv->event_handlers[i] != NULL)
         {
-          event_mask[i>>3] |= 1 << (i & 0x7);
+          event_mask[i >> 3] |= 1 << (i & 0x7);
         }
     }
 
@@ -233,20 +233,20 @@ int bcmf_event_push_config(FAR struct bcmf_dev_s *priv)
 }
 
 int bcmf_bdc_transmit_frame(FAR struct bcmf_dev_s *priv,
-                             struct bcmf_frame_s *frame)
+                            struct bcmf_frame_s *frame)
 {
-  struct bcmf_bdc_header* header;
+  struct bcmf_bdc_header *header;
 
   /* Set frame data for lower layer */
 
   frame->data -= sizeof(struct bcmf_bdc_header);
-  header = (struct bcmf_bdc_header*)frame->data;
+  header = (struct bcmf_bdc_header *)frame->data;
 
   /* Setup data frame header */
 
-  header->flags = 0x20; /* Set bdc protocol version */
-  header->priority = 0; // TODO handle priority
-  header->flags2 = CHIP_STA_INTERFACE;
+  header->flags       = 0x20; /* Set bdc protocol version */
+  header->priority    = 0; // TODO handle priority
+  header->flags2      = CHIP_STA_INTERFACE;
   header->data_offset = 0;
 
   /* Send frame */
@@ -254,7 +254,7 @@ int bcmf_bdc_transmit_frame(FAR struct bcmf_dev_s *priv,
   return priv->bus->txframe(priv, frame, false);
 }
 
-struct bcmf_frame_s* bcmf_bdc_rx_frame(FAR struct bcmf_dev_s *priv)
+struct bcmf_frame_s *bcmf_bdc_rx_frame(FAR struct bcmf_dev_s *priv)
 {
   unsigned int frame_len;
   struct bcmf_frame_s *frame = priv->bus->rxframe(priv);

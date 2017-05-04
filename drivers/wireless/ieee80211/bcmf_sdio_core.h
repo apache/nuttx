@@ -1,4 +1,4 @@
-/*
+/****************************************************************************
  * Copyright (c) 2011 Broadcom Corporation
  *
  * Permission to use, copy, modify, and/or distribute this software for any
@@ -12,7 +12,8 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
+ *
+ ****************************************************************************/
 
 #ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_CORE_H
 #define __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_CORE_H
@@ -26,6 +27,7 @@
 #endif
 
 /* SDIO device ID */
+
 #define SDIO_DEVICE_ID_BROADCOM_43143        43143
 #define SDIO_DEVICE_ID_BROADCOM_43241        0x4324
 #define SDIO_DEVICE_ID_BROADCOM_4329        0x4329
@@ -34,10 +36,10 @@
 #define SDIO_DEVICE_ID_BROADCOM_4335_4339    0x4335
 #define SDIO_DEVICE_ID_BROADCOM_43362        43362
 
-/*
- * Core reg address translation.
+/* Core reg address translation.
  * Both macro's returns a 32 bits byte address on the backplane bus.
  */
+
 #define CORE_CC_REG(base, field) \
         (base + offsetof(struct chipcregs, field))
 #define CORE_BUS_REG(base, field) \
@@ -68,152 +70,157 @@
 #define SMB_USE_OOB (1 << 2)  /* Use OOB Wakeup */
 #define SMB_DEV_INT (1 << 3)  /* Miscellaneous Interrupt */
 
-enum {
-    CHIPCOMMON_CORE_ID = 0,
-    DOT11MAC_CORE_ID,
-    SDIOD_CORE_ID,
-    WLAN_ARMCM3_CORE_ID,
-    SOCSRAM_CORE_ID,
-    MAX_CORE_ID
+enum
+{
+  CHIPCOMMON_CORE_ID = 0,
+  DOT11MAC_CORE_ID,
+  SDIOD_CORE_ID,
+  WLAN_ARMCM3_CORE_ID,
+  SOCSRAM_CORE_ID,
+  MAX_CORE_ID
 };
 
-struct chip_core_info {
-    uint16_t id;
-    uint16_t rev;
-    uint32_t base;
-    uint32_t wrapbase;
-    uint32_t caps;
-    uint32_t cib;
+struct chip_core_info
+{
+  uint16_t id;
+  uint16_t rev;
+  uint32_t base;
+  uint32_t wrapbase;
+  uint32_t caps;
+  uint32_t cib;
 };
 
-struct sbconfig {
-    uint8_t  PAD[0xf00];
-    uint32_t PAD[2];
-    uint32_t sbipsflag;     /* initiator port ocp slave flag */
-    uint32_t PAD[3];
-    uint32_t sbtpsflag;     /* target port ocp slave flag */
-    uint32_t PAD[11];
-    uint32_t sbtmerrloga;   /* (sonics >= 2.3) */
-    uint32_t PAD;
-    uint32_t sbtmerrlog;    /* (sonics >= 2.3) */
-    uint32_t PAD[3];
-    uint32_t sbadmatch3;    /* address match3 */
-    uint32_t PAD;
-    uint32_t sbadmatch2;    /* address match2 */
-    uint32_t PAD;
-    uint32_t sbadmatch1;    /* address match1 */
-    uint32_t PAD[7];
-    uint32_t sbimstate;     /* initiator agent state */
-    uint32_t sbintvec;      /* interrupt mask */
-    uint32_t sbtmstatelow;  /* target state */
-    uint32_t sbtmstatehigh; /* target state */
-    uint32_t sbbwa0;        /* bandwidth allocation table0 */
-    uint32_t PAD;
-    uint32_t sbimconfiglow;  /* initiator configuration */
-    uint32_t sbimconfighigh; /* initiator configuration */
-    uint32_t sbadmatch0;     /* address match0 */
-    uint32_t PAD;
-    uint32_t sbtmconfiglow;  /* target configuration */
-    uint32_t sbtmconfighigh; /* target configuration */
-    uint32_t sbbconfig;      /* broadcast configuration */
-    uint32_t PAD;
-    uint32_t sbbstate;       /* broadcast state */
-    uint32_t PAD[3];
-    uint32_t sbactcnfg;      /* activate configuration */
-    uint32_t PAD[3];
-    uint32_t sbflagst;       /* current sbflags */
-    uint32_t PAD[3];
-    uint32_t sbidlow;        /* identification */
-    uint32_t sbidhigh;       /* identification */
+struct sbconfig
+{
+  uint8_t  PAD[0xf00];
+  uint32_t PAD[2];
+  uint32_t sbipsflag;     /* initiator port ocp slave flag */
+  uint32_t PAD[3];
+  uint32_t sbtpsflag;     /* target port ocp slave flag */
+  uint32_t PAD[11];
+  uint32_t sbtmerrloga;   /* (sonics >= 2.3) */
+  uint32_t PAD;
+  uint32_t sbtmerrlog;    /* (sonics >= 2.3) */
+  uint32_t PAD[3];
+  uint32_t sbadmatch3;    /* address match3 */
+  uint32_t PAD;
+  uint32_t sbadmatch2;    /* address match2 */
+  uint32_t PAD;
+  uint32_t sbadmatch1;    /* address match1 */
+  uint32_t PAD[7];
+  uint32_t sbimstate;     /* initiator agent state */
+  uint32_t sbintvec;      /* interrupt mask */
+  uint32_t sbtmstatelow;  /* target state */
+  uint32_t sbtmstatehigh; /* target state */
+  uint32_t sbbwa0;        /* bandwidth allocation table0 */
+  uint32_t PAD;
+  uint32_t sbimconfiglow;  /* initiator configuration */
+  uint32_t sbimconfighigh; /* initiator configuration */
+  uint32_t sbadmatch0;     /* address match0 */
+  uint32_t PAD;
+  uint32_t sbtmconfiglow;  /* target configuration */
+  uint32_t sbtmconfighigh; /* target configuration */
+  uint32_t sbbconfig;      /* broadcast configuration */
+  uint32_t PAD;
+  uint32_t sbbstate;       /* broadcast state */
+  uint32_t PAD[3];
+  uint32_t sbactcnfg;      /* activate configuration */
+  uint32_t PAD[3];
+  uint32_t sbflagst;       /* current sbflags */
+  uint32_t PAD[3];
+  uint32_t sbidlow;        /* identification */
+  uint32_t sbidhigh;       /* identification */
 };
 
 /* sdio core registers */
-struct sdpcmd_regs {
-    uint32_t corecontrol;        /* 0x00, rev8 */
-    uint32_t corestatus;         /* rev8 */
-    uint32_t PAD[1];
-    uint32_t biststatus;         /* rev8 */
 
-    /* PCMCIA access */
-    uint16_t pcmciamesportaladdr;  /* 0x010, rev8 */
-    uint16_t PAD[1];
-    uint16_t pcmciamesportalmask;  /* rev8 */
-    uint16_t PAD[1];
-    uint16_t pcmciawrframebc;      /* rev8 */
-    uint16_t PAD[1];
-    uint16_t pcmciaunderflowtimer; /* rev8 */
-    uint16_t PAD[1];
+struct sdpcmd_regs
+{
+  uint32_t corecontrol;        /* 0x00, rev8 */
+  uint32_t corestatus;         /* rev8 */
+  uint32_t PAD[1];
+  uint32_t biststatus;         /* rev8 */
 
-    /* interrupt */
-    uint32_t intstatus;         /* 0x020, rev8 */
-    uint32_t hostintmask;       /* rev8 */
-    uint32_t intmask;           /* rev8 */
-    uint32_t sbintstatus;       /* rev8 */
-    uint32_t sbintmask;         /* rev8 */
-    uint32_t funcintmask;       /* rev4 */
-    uint32_t PAD[2];
-    uint32_t tosbmailbox;       /* 0x040, rev8 */
-    uint32_t tohostmailbox;     /* rev8 */
-    uint32_t tosbmailboxdata;   /* rev8 */
-    uint32_t tohostmailboxdata; /* rev8 */
+  /* PCMCIA access */
+  uint16_t pcmciamesportaladdr;  /* 0x010, rev8 */
+  uint16_t PAD[1];
+  uint16_t pcmciamesportalmask;  /* rev8 */
+  uint16_t PAD[1];
+  uint16_t pcmciawrframebc;      /* rev8 */
+  uint16_t PAD[1];
+  uint16_t pcmciaunderflowtimer; /* rev8 */
+  uint16_t PAD[1];
 
-    /* synchronized access to registers in SDIO clock domain */
-    uint32_t sdioaccess;        /* 0x050, rev8 */
-    uint32_t PAD[3];
+  /* interrupt */
+  uint32_t intstatus;         /* 0x020, rev8 */
+  uint32_t hostintmask;       /* rev8 */
+  uint32_t intmask;           /* rev8 */
+  uint32_t sbintstatus;       /* rev8 */
+  uint32_t sbintmask;         /* rev8 */
+  uint32_t funcintmask;       /* rev4 */
+  uint32_t PAD[2];
+  uint32_t tosbmailbox;       /* 0x040, rev8 */
+  uint32_t tohostmailbox;     /* rev8 */
+  uint32_t tosbmailboxdata;   /* rev8 */
+  uint32_t tohostmailboxdata; /* rev8 */
 
-    /* PCMCIA frame control */
-    uint8_t pcmciaframectrl;    /* 0x060, rev8 */
-    uint8_t PAD[3];
-    uint8_t pcmciawatermark;    /* rev8 */
-    uint8_t PAD[155];
+  /* synchronized access to registers in SDIO clock domain */
+  uint32_t sdioaccess;        /* 0x050, rev8 */
+  uint32_t PAD[3];
 
-    /* interrupt batching control */
-    uint32_t intrcvlazy;        /* 0x100, rev8 */
-    uint32_t PAD[3];
+  /* PCMCIA frame control */
+  uint8_t pcmciaframectrl;    /* 0x060, rev8 */
+  uint8_t PAD[3];
+  uint8_t pcmciawatermark;    /* rev8 */
+  uint8_t PAD[155];
 
-    /* counters */
-    uint32_t cmd52rd;           /* 0x110, rev8 */
-    uint32_t cmd52wr;           /* rev8 */
-    uint32_t cmd53rd;           /* rev8 */
-    uint32_t cmd53wr;           /* rev8 */
-    uint32_t abort;             /* rev8 */
-    uint32_t datacrcerror;      /* rev8 */
-    uint32_t rdoutofsync;       /* rev8 */
-    uint32_t wroutofsync;       /* rev8 */
-    uint32_t writebusy;         /* rev8 */
-    uint32_t readwait;          /* rev8 */
-    uint32_t readterm;          /* rev8 */
-    uint32_t writeterm;         /* rev8 */
-    uint32_t PAD[40];
-    uint32_t clockctlstatus;    /* rev8 */
-    uint32_t PAD[7];
+  /* interrupt batching control */
+  uint32_t intrcvlazy;        /* 0x100, rev8 */
+  uint32_t PAD[3];
 
-    uint32_t PAD[128];          /* DMA engines */
+  /* counters */
+  uint32_t cmd52rd;           /* 0x110, rev8 */
+  uint32_t cmd52wr;           /* rev8 */
+  uint32_t cmd53rd;           /* rev8 */
+  uint32_t cmd53wr;           /* rev8 */
+  uint32_t abort;             /* rev8 */
+  uint32_t datacrcerror;      /* rev8 */
+  uint32_t rdoutofsync;       /* rev8 */
+  uint32_t wroutofsync;       /* rev8 */
+  uint32_t writebusy;         /* rev8 */
+  uint32_t readwait;          /* rev8 */
+  uint32_t readterm;          /* rev8 */
+  uint32_t writeterm;         /* rev8 */
+  uint32_t PAD[40];
+  uint32_t clockctlstatus;    /* rev8 */
+  uint32_t PAD[7];
 
-    /* SDIO/PCMCIA CIS region */
-    char cis[512];              /* 0x400-0x5ff, rev6 */
+  uint32_t PAD[128];          /* DMA engines */
 
-    /* PCMCIA function control registers */
-    char pcmciafcr[256];        /* 0x600-6ff, rev6 */
-    uint16_t PAD[55];
+  /* SDIO/PCMCIA CIS region */
+  char cis[512];              /* 0x400-0x5ff, rev6 */
 
-    /* PCMCIA backplane access */
-    uint16_t backplanecsr;      /* 0x76E, rev6 */
-    uint16_t backplaneaddr0;    /* rev6 */
-    uint16_t backplaneaddr1;    /* rev6 */
-    uint16_t backplaneaddr2;    /* rev6 */
-    uint16_t backplaneaddr3;    /* rev6 */
-    uint16_t backplanedata0;    /* rev6 */
-    uint16_t backplanedata1;    /* rev6 */
-    uint16_t backplanedata2;    /* rev6 */
-    uint16_t backplanedata3;    /* rev6 */
-    uint16_t PAD[31];
+  /* PCMCIA function control registers */
+  char pcmciafcr[256];        /* 0x600-6ff, rev6 */
+  uint16_t PAD[55];
 
-    /* sprom "size" & "blank" info */
-    uint16_t spromstatus;       /* 0x7BE, rev2 */
-    uint32_t PAD[464];
+  /* PCMCIA backplane access */
+  uint16_t backplanecsr;      /* 0x76E, rev6 */
+  uint16_t backplaneaddr0;    /* rev6 */
+  uint16_t backplaneaddr1;    /* rev6 */
+  uint16_t backplaneaddr2;    /* rev6 */
+  uint16_t backplaneaddr3;    /* rev6 */
+  uint16_t backplanedata0;    /* rev6 */
+  uint16_t backplanedata1;    /* rev6 */
+  uint16_t backplanedata2;    /* rev6 */
+  uint16_t backplanedata3;    /* rev6 */
+  uint16_t PAD[31];
 
-    uint16_t PAD[0x80];
+  /* sprom "size" & "blank" info */
+  uint16_t spromstatus;       /* 0x7BE, rev2 */
+  uint32_t PAD[464];
+
+  uint16_t PAD[0x80];
 };
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_CORE_H */
