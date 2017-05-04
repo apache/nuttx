@@ -119,7 +119,9 @@ int mac802154_get_mhrlen(MACHANDLE mac,
  *
  ****************************************************************************/
 
-int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req);
+int mac802154_req_data(MACHANDLE mac, 
+                       FAR const struct ieee802154_frame_meta_s *meta,
+                       FAR struct iob_s *frame);
 
 /****************************************************************************
  * Name: mac802154_req_purge
@@ -129,9 +131,15 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req);
  *   an MSDU from the transaction queue. Confirmation is returned via
  *   the struct ieee802154_maccb_s->conf_purge callback.
  *
+ *   NOTE: The standard specifies that confirmation should be indicated via 
+ *   the asynchronous MLME-PURGE.confirm primitve.  However, in our
+ *   implementation we synchronously return the status from the request.
+ *   Therefore, we merge the functionality of the MLME-PURGE.request and 
+ *   MLME-PURGE.confirm primitives together.
+ *
  ****************************************************************************/
 
-int mac802154_req_purge(MACHANDLE mac, FAR struct ieee802154_purge_req_s *req);
+int mac802154_req_purge(MACHANDLE mac, uint8_t msdu_handle);
 
 /****************************************************************************
  * Name: mac802154_req_associate
@@ -164,18 +172,6 @@ int mac802154_req_disassociate(MACHANDLE mac,
                                FAR struct ieee802154_disassoc_req_s *req);
 
 /****************************************************************************
- * Name: mac802154_req_get
- *
- * Description:
- *   The MLME-GET.request primitive requests information about a given PIB
- *   attribute. Actual data is returned via the
- *   struct ieee802154_maccb_s->conf_get callback.
- *
- ****************************************************************************/
-
-int mac802154_req_get(MACHANDLE mac, FAR struct ieee802154_get_req_s *req);
-
-/****************************************************************************
  * Name: mac802154_req_gts
  *
  * Description:
@@ -193,12 +189,21 @@ int mac802154_req_gts(MACHANDLE mac, FAR struct ieee802154_gts_req_s *req);
  *
  * Description:
  *   The MLME-RESET.request primitive allows the next higher layer to request
- *   that the MLME performs a reset operation. Confirmation is returned via
- *   the struct ieee802154_maccb_s->conf_reset callback.
+ *   that the MLME performs a reset operation.
+ *
+ *   NOTE: The standard specifies that confirmation should be provided via
+ *   via the asynchronous MLME-RESET.confirm primitve.  However, in our
+ *   implementation we synchronously return the value immediately. Therefore,
+ *   we merge the functionality of the MLME-RESET.request and MLME-RESET.confirm
+ *   primitives together.
+ *
+ * Input Parameters:
+ *   mac          - Handle to the MAC layer instance
+ *   rst_pibattr  - Whether or not to reset the MAC PIB attributes to defaults
  *
  ****************************************************************************/
 
-int mac802154_req_reset(MACHANDLE mac, FAR struct ieee802154_reset_req_s *req);
+int mac802154_req_reset(MACHANDLE mac, bool rst_pibattr);
 
 /****************************************************************************
  * Name: mac802154_req_rxenable
@@ -232,12 +237,35 @@ int mac802154_req_rxenable(MACHANDLE mac,
 int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req);
 
 /****************************************************************************
+ * Name: mac802154_req_get
+ *
+ * Description:
+ *   The MLME-GET.request primitive requests information about a given PIB
+ *   attribute.
+ *
+ *   NOTE: The standard specifies that the attribute value should be returned
+ *   via the asynchronous MLME-GET.confirm primitve.  However, in our
+ *   implementation, we synchronously return the value immediately.Therefore, we
+ *   merge the functionality of the MLME-GET.request and MLME-GET.confirm
+ *   primitives together.
+ *
+ ****************************************************************************/
+
+int mac802154_req_get(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
+                      FAR union ieee802154_attr_val_u *attr_value);
+
+/****************************************************************************
  * Name: mac802154_req_set
  *
  * Description:
  *   The MLME-SET.request primitive attempts to write the given value to the
- *   indicated MAC PIB attribute. Confirmation is returned via the
- *   struct ieee802154_maccb_s->conf_set callback.
+ *   indicated MAC PIB attribute. 
+ *
+ *   NOTE: The standard specifies that confirmation should be indicated via 
+ *   the asynchronous MLME-SET.confirm primitve.  However, in our implementation
+ *   we synchronously return the status from the request. Therefore, we do merge
+ *   the functionality of the MLME-SET.request and MLME-SET.confirm primitives
+ *   together.
  *
  ****************************************************************************/
 

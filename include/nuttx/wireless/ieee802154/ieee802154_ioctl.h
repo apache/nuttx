@@ -48,6 +48,8 @@
 #include <nuttx/config.h>
 #include <nuttx/wireless/ioctl.h>
 
+#include <nuttx/wireless/ieee802154/ieee802154_mac.h>
+
 #ifdef CONFIG_WIRELESS_IEEE802154
 
 /************************************************************************************
@@ -74,7 +76,7 @@ struct mac802154dev_notify_s
 
 struct mac802154dev_txframe_s
 {
-  FAR struct ieee802154_frame_meta_s *meta;
+  struct ieee802154_frame_meta_s meta;
   FAR uint8_t *payload;
 };
 

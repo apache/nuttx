@@ -462,17 +462,17 @@ union ieee802154_attr_val_u
   uint8_t coord_eaddr[8];
   uint16_t coord_saddr;
 
-  uint8_t is_assoc          : 1;
-  uint8_t assoc_permit      : 1;
-  uint8_t auto_req          : 1;
-  uint8_t batt_life_ext     : 1;
-  uint8_t gts_permit        : 1;
-  uint8_t promisc_mode      : 1;
-  uint8_t rng_support       : 1;
-  uint8_t resp_wait_time;
-  uint8_t rx_when_idle      : 1;
-  uint8_t sec_enabled       : 1;
-  uint8_t timestamp_support : 1;
+  bool is_assoc;
+  bool assoc_permit;
+  bool auto_req;
+  bool batt_life_ext;
+  bool gts_permit;
+  bool promisc_mode;
+  bool rng_support;
+  bool resp_wait_time;
+  bool rx_when_idle;
+  bool sec_enabled;
+  bool timestamp_support;
 
   uint32_t ack_wait_dur;
   uint8_t batt_life_ext_periods;
@@ -568,20 +568,6 @@ struct ieee802154_frame_meta_s
 /* Primitive Semantics *******************************************************/
 
 /*****************************************************************************
- * Primitive: MCPS-DATA.request
- *
- * Description:
- *    Requests the transfer of data to another device.
- *
- *****************************************************************************/
-
-struct ieee802154_data_req_s
-{
-  FAR const struct ieee802154_frame_meta_s *meta; /* Metadata describing the req */
-  FAR struct iob_s *frame;                        /* Frame IOB with payload */
-};
-
-/*****************************************************************************
  * Primitive: MCPS-DATA.confirm
  *
  * Description:
@@ -656,21 +642,6 @@ struct ieee802154_data_ind_s
 struct ieee802154_purge_req_s
 {
   uint8_t msdu_handle;              /* Handle assoc. with MSDU */
-};
-
-/*****************************************************************************
- * Primitive: MCPS-PURGE.confirm
- *
- * Description:
- *    Allows the MAC sublayer to notify the next higher layer of the success of
- *    its request to purge an MSDU from the transaction queue.
- *
- *****************************************************************************/
-
-struct ieee802154_purge_conf_s
-{
-  uint8_t msdu_handle;              /* Handle assoc. with MSDU */
-  enum ieee802154_status_e status;  /* The status of the MSDU transmission */
 };
 
 /*****************************************************************************
@@ -921,21 +892,7 @@ struct ieee802154_commstatus_ind_s
 struct ieee802154_get_req_s
 {
   enum ieee802154_pib_attr_e pib_attr;
-};
-
-/*****************************************************************************
- * Primitive: MLME-GET.confirm
- *
- * Description:
- *    Reports the results of an information request from the PIB.
- *
- *****************************************************************************/
-
-struct ieee802154_get_conf_s
-{
-  enum ieee802154_status_e status;
-  enum ieee802154_pib_attr_e pib_attr;
-  union ieee802154_attr_val_u attr_value;
+  FAR union ieee802154_attr_val_u *attr_value;
 };
 
 /*****************************************************************************
@@ -1047,19 +1004,6 @@ struct ieee802154_orphan_resp_s
 struct ieee802154_reset_req_s
 {
   bool rst_pibattr;
-};
-
-/*****************************************************************************
- * Primitive: MLME-RESET.confirm
- *
- * Description:
- *    Reports the results of the reset operation.
- *
- *****************************************************************************/
-
-struct ieee802154_reset_conf_s
-{
-  enum ieee802154_status_e status;
 };
 
 /*****************************************************************************
@@ -1287,9 +1231,7 @@ union ieee802154_mlme_notify_u
 {
   struct ieee802154_assoc_conf_s       assocconf;
   struct ieee802154_disassoc_conf_s    disassocconf;
-  struct ieee802154_get_conf_s         getconf;
   struct ieee802154_gts_conf_s         gtsconf;
-  struct ieee802154_reset_conf_s       resetconf;
   struct ieee802154_rxenable_conf_s    rxenableconf;
   struct ieee802154_scan_conf_s        scanconf;
   struct ieee802154_start_conf_s       startconf;
@@ -1307,7 +1249,6 @@ union ieee802154_mlme_notify_u
 union ieee802154_mcps_notify_u
 {
   struct ieee802154_data_conf_s        dataconf;
-  struct ieee802154_purge_conf_s       purgeconf;
   struct ieee802154_data_ind_s         dataind;
 };
 
@@ -1362,19 +1303,16 @@ enum ieee802154_macnotify_e
   /* MCPS Notifications */
 
   IEEE802154_NOTIFY_CONF_DATA = 0x00,
-  IEEE802154_NOTIFY_CONF_PURGE,
   IEEE802154_NOTIFY_IND_DATA,
 
   /* MLME Notifications */
 
   IEEE802154_NOTIFY_CONF_ASSOC,
   IEEE802154_NOTIFY_CONF_DISASSOC,
-  IEEE802154_NOTIFY_CONF_GET,
   IEEE802154_NOTIFY_CONF_GTS,
   IEEE802154_NOTIFY_CONF_RESET,
   IEEE802154_NOTIFY_CONF_RXENABLE,
   IEEE802154_NOTIFY_CONF_SCAN,
-  IEEE802154_NOTIFY_CONF_SET,
   IEEE802154_NOTIFY_CONF_START,
   IEEE802154_NOTIFY_CONF_POLL,
 
