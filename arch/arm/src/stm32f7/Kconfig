@@ -26,7 +26,7 @@ config ARCH_CHIP_STM32F745VE
 	select STM32F7_FLASH_CONFIG_E
 	select STM32F7_IO_CONFIG_V
 	---help---
-		STM32 F7 Cortex M7, 512 320K FLASH, 320K (240+16+64) Kb SRAM
+		STM32 F7 Cortex M7, 512 FLASH, 320K (240+16+64) Kb SRAM
 
 config ARCH_CHIP_STM32F745IG
 	bool "STM32F745IG"
@@ -835,7 +835,7 @@ config STM32F7_FLASH_CONFIG_E
 	bool
 	default n
 
-config STM32F7_FLASH_CONFIG_I
+config STM32F7_FLASH_CONFIG_G
 	bool
 	default n
 
@@ -844,7 +844,7 @@ config STM32F7_FLASH_CONFIG_I
 	default n
 
 choice
-	prompt "Overrdide Flash Size Designator"
+	prompt "Override Flash Size Designator"
 	depends on ARCH_CHIP_STM32F7
 	default STM32F7_FLASH_OVERRIDE_DEFAULT
 	---help---
@@ -862,7 +862,7 @@ choice
 
 		Examples:
 		   If the STM32F745VE is chosen, the Flash configuration would be 'E', if a variant of
-		   the part with a  2048 KiB Flash is released in the future one could simply select
+		   the part with a 2048 KiB Flash is released in the future one could simply select
 		   the 'I' designator here.
 
 		   If an STM32F7xxx Series parts is chosen the default Flash configuration will be set
@@ -880,7 +880,7 @@ config STM32F7_FLASH_OVERRIDE_G
 config STM32F7_FLASH_OVERRIDE_I
 			bool "I 2048KiB"
 
-endchoice # "Overrdide Flash Size Designator"
+endchoice # "Override Flash Size Designator"
 
 menu "STM32 Peripheral Support"
 
@@ -894,7 +894,6 @@ config STM32F7_HAVE_LTDC
 config STM32F7_HAVE_FSMC
 	bool
 	default n
-
 
 config STM32F7_HAVE_ETHRNET
 	bool
@@ -927,7 +926,6 @@ config STM32F7_HAVE_ADC2_DMA
 config STM32F7_HAVE_ADC3_DMA
 	bool
 	default n
-
 
 config STM32F7_HAVE_CAN3
 	bool
@@ -966,7 +964,7 @@ config STM32F7_HAVE_DFSDM1
 	default n
 
 # These "hidden" settings are the OR of individual peripheral selections
-# indicating that the general capabilitiy is required.
+# indicating that the general capability is required.
 
 config STM32F7_ADC
 	bool
@@ -1615,6 +1613,18 @@ config UART8_RXDMA
 	depends on STM32F7_UART8 && STM32F7_DMA2
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config STM32F7_SERIAL_RXDMA_BUFFER_SIZE
+	int "Rx DMA buffer size"
+	default 32
+	depends on USART1_RXDMA || USART2_RXDMA || USART3_RXDMA || UART4_RXDMA || UART5_RXDMA || USART6_RXDMA || UART7_RXDMA || UART8_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half this number of bytes.
+
+		Value given here will be rounded up to next multiple of 32 bytes.
 
 config SERIAL_DISABLE_REORDERING
 	bool "Disable reordering of ttySx devices."

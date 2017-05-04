@@ -40,7 +40,7 @@ include ${TOPDIR}/arch/arm/src/armv7-m/Toolchain.defs
 ifeq ($(CONFIG_PHOTON_DFU_BOOTLOADER),y)
 LDSCRIPT = photon_dfu.ld
 else
-LDSCRIPT = ld.script
+LDSCRIPT = photon_jtag.ld
 endif
 
 ifeq ($(WINTOOL),y)
@@ -67,6 +67,11 @@ AR = $(ARCROSSDEV)ar rcs
 NM = $(ARCROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
+
+# See http://dfu-util.sourceforge.net/
+
+DFUSUFFIX = dfu-suffix
+DFUUTIL = dfu-util
 
 ARCHCCVERSION = ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q'}
 ARCHCCMAJOR = ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
@@ -114,3 +119,21 @@ HOSTCC = gcc
 HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
 HOSTLDFLAGS =
+
+ifeq ($(CONFIG_DFU_BINARY),y)
+
+define DOWNLOAD
+  $(Q) echo "DFUSUFFIX: $(1).dfu"
+  $(Q) $(OBJCOPY) $(OBJCOPYARGS) -O binary $(1) $(1).dfu
+  $(Q) $(DFUSUFFIX) -v $(subst 0x,,$(CONFIG_DFU_VID)) -p $(subst 0x,,$(CONFIG_DFU_PID)) -a $(1).dfu
+  $(Q) $(DFUUTIL) -d $(CONFIG_DFU_VID):$(CONFIG_DFU_PID) -a 0 -s $(CONFIG_DFU_BASE) -D $(1).dfu
+endef
+
+else
+
+define DOWNLOAD
+  $(Q) $(ECHO) "Photon firmware upload through JTAG is not supported"
+endef
+
+endif
+

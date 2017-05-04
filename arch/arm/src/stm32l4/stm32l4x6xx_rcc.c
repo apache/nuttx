@@ -211,6 +211,9 @@ static inline void rcc_enableahb2(void)
 #if STM32L4_NPORTS > 7
              | RCC_AHB2ENR_GPIOHEN
 #endif
+#if STM32L4_NPORTS > 8
+             | RCC_AHB2ENR_GPIOIEN
+#endif
              );
 #endif
 

@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #include <stdbool.h>
+#include <nuttx/irq.h>
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -101,6 +102,22 @@ void bcmf_board_power(int minor, bool power);
  ************************************************************************************/
 
 void bcmf_board_reset(int minor, bool reset);
+
+/************************************************************************************
+ * Function: bcmf_board_setup_oob_irq
+ *
+ * Description:
+ *   Board specific function called from Broadcom FullMAC driver
+ *   that must be implemented to use WLAN chip interrupt signal
+ *
+ * Parameters:
+ *   minor - zero based minor device number which is unique
+ *           for each wlan device.
+ *   func  - WLAN chip callback function that must be called on gpio event
+ *   arg   - WLAN chip internal structure that must be passed to callback
+ ************************************************************************************/
+
+void bcmf_board_setup_oob_irq(int minor, xcpt_t func, void *arg);
 
 #undef EXTERN
 #ifdef __cplusplus

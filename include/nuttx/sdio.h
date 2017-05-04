@@ -328,6 +328,44 @@
 #define SDIO_ACMD52     (SDIO_ACMDIDX52|MMCSD_R5_RESPONSE |MMCSD_NODATAXFR)
 #define SDIO_ACMD53     (SDIO_ACMDIDX53|MMCSD_R5_RESPONSE |MMCSD_NODATAXFR)
 
+/* SDIO Card Common Control Registers definitions
+ * see https://www.sdcard.org/developers/overview/sdio/
+ *                             sdio_spec/Simplified_SDIO_Card_Spec.pdf */
+
+#define SDIO_CCCR_REV                    0x00 /* CCCR/SDIO Revision        */
+#define SDIO_CCCR_SD_SPEC_REV            0x01 /* SD Specification Revision */
+#define SDIO_CCCR_IOEN                   0x02 /* I/O Enable                */
+#define SDIO_CCCR_IORDY                  0x03 /* I/O Ready                 */
+#define SDIO_CCCR_INTEN                  0x04 /* Int Enable                */
+#define SDIO_CCCR_INTPEND                0x05 /* Int Pending               */
+#define SDIO_CCCR_IOABORT                0x06 /* I/O Abort                 */
+#define SDIO_CCCR_BUS_IF                 0x07 /* Bus Interface Control     */
+#define SDIO_CCCR_CARD_CAP               0x08 /* Card Capabilitiy          */
+#define SDIO_CCCR_CCP                    0x09 /* Common CIS Pointer        */
+#define SDIO_CCCR_BUS_SUSP               0x0C /* Bus Suspend               */
+#define SDIO_CCCR_FUNCSEL                0x0D /* Function Select           */
+#define SDIO_CCCR_EXEC_FLAGS             0x0E /* Exec Flags                */
+#define SDIO_CCCR_RDY_FLAGS              0x0F /* Ready Flags               */
+#define SDIO_CCCR_FN0_BLKSIZE_0          0x10 /* FN0 Block Size            */
+#define SDIO_CCCR_FN0_BLKSIZE_1          0x11 /* FN0 Block Size            */
+#define SDIO_CCCR_POWER                  0x12 /* Power Control             */
+#define SDIO_CCCR_HIGHSPEED              0x13 /* High-Speed                */
+#define SDIO_CCCR_RFU                    0x14 /* Reserved for future use   */
+#define SDIO_CCCR_VENDOR                 0xF0 /* Reserved for Vendors      */
+
+#define SDIO_CCCR_BUS_IF_WIDTH_MASK      0x03 /* Bus width configuration   */
+#define SDIO_CCCR_BUS_IF_1_BIT           0x01 /* 1 bit bus width setting   */
+#define SDIO_CCCR_BUS_IF_4_BITS          0x02 /* 4 bits bus width setting  */
+
+#define SDIO_FBR_SHIFT   8                     /* FBR bit shift            */
+#define SDIO_FN1_BR_BASE (1 << SDIO_FBR_SHIFT) /* Func 1 registers base    */
+#define SDIO_FN2_BR_BASE (2 << SDIO_FBR_SHIFT) /* Func 2 registers base    */
+#define SDIO_FN3_BR_BASE (3 << SDIO_FBR_SHIFT) /* Func 3 registers base    */
+#define SDIO_FN4_BR_BASE (4 << SDIO_FBR_SHIFT) /* Func 4 registers base    */
+#define SDIO_FN5_BR_BASE (5 << SDIO_FBR_SHIFT) /* Func 5 registers base    */
+#define SDIO_FN6_BR_BASE (6 << SDIO_FBR_SHIFT) /* Func 6 registers base    */
+#define SDIO_FN7_BR_BASE (7 << SDIO_FBR_SHIFT) /* Func 7 registers base    */
+
 /****************************************************************************
  * Name: SDIO_LOCK
  *

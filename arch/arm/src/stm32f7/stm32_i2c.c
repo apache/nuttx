@@ -2141,7 +2141,7 @@ static int stm32_i2c_isr(int irq, void *context, FAR void *arg)
   struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s *)arg;
 
   DEBUGASSERT(priv != NULL);
-  return stm32_i2c_isr_process(&stm32_i2c1_priv);
+  return stm32_i2c_isr_process(priv);
 }
 #endif
 
@@ -2189,7 +2189,7 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
    * - Provide means to set peripheral clock source via RCC_CFGR3_I2CxSW
    * - Set to HSI by default, make Kconfig option
    */
-   
+
   /* Force a frequency update */
 
   priv->frequency = 0;

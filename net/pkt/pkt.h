@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <queue.h>
 
 #ifdef CONFIG_NET_PKT
 
@@ -94,9 +95,9 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-struct eth_hdr_s; /* Forward reference */
+struct net_driver_s; /* Forward reference */
+struct eth_hdr_s;    /* Forward reference */
 
-/* Defined in pkt_conn.c ****************************************************/
 /****************************************************************************
  * Name: pkt_initialize()
  *
@@ -158,7 +159,6 @@ struct pkt_conn_s *pkt_active(FAR struct eth_hdr_s *buf);
 
 struct pkt_conn_s *pkt_nextconn(FAR struct pkt_conn_s *conn);
 
-/* Defined in pkt_callback.c ************************************************/
 /****************************************************************************
  * Name: pkt_callback
  *
@@ -176,7 +176,6 @@ struct pkt_conn_s *pkt_nextconn(FAR struct pkt_conn_s *conn);
 uint16_t pkt_callback(FAR struct net_driver_s *dev,
                       FAR struct pkt_conn_s *conn, uint16_t flags);
 
-/* Defined in pkt_input.c ***************************************************/
 /****************************************************************************
  * Name: pkt_input
  *

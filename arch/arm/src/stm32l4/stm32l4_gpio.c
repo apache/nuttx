@@ -88,6 +88,9 @@ const uint32_t g_gpiobase[STM32L4_NPORTS] =
 #if STM32L4_NPORTS > 7
   STM32L4_GPIOH_BASE,
 #endif
+#if STM32L4_NPORTS > 8
+  STM32L4_GPIOI_BASE,
+#endif
 };
 
 /****************************************************************************

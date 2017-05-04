@@ -99,6 +99,24 @@ void bcmf_board_initialize(int minor)
 }
 
 /****************************************************************************
+ * Name: bcmf_board_setup_oob_irq
+ ****************************************************************************/
+
+void bcmf_board_setup_oob_irq(int minor, xcpt_t func, void *arg)
+{
+  if (minor != SDIO_WLAN0_MINOR)
+    {
+      return;
+    }
+
+  /* Configure interrupt pin */
+
+  stm32_configgpio(GPIO_WLAN0_OOB_INT);
+
+  stm32_gpiosetevent(GPIO_WLAN0_OOB_INT, true, false, false, func, arg);
+}
+
+/****************************************************************************
  * Name: photon_wlan_initialize
  ****************************************************************************/
 

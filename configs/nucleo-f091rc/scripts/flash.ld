@@ -1,7 +1,9 @@
 /****************************************************************************
- * configs/photon/scripts/ld.script
+ * configs/nucleo-f091rc/scripts/flash.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,26 +34,28 @@
  *
  ****************************************************************************/
 
-/* The STM32F205RG has 1024Kb of FLASH beginning at address 0x0800:0000 and
- * 112Kb of SRAM.
+/* The STM32F091RCT6 has 256Kb of FLASH beginning at address 0x0800:0000 and
+ * 32Kb of SRAM at address 0x20000000.
  *
  * When booting from FLASH, FLASH memory is aliased to address 0x0000:0000
  * where the code expects to begin execution by jumping to the entry point in
- * the 0x0800:0000 address
- * range.
+ * the 0x0800:0000 address range.
  */
 
 MEMORY
 {
-	flash (rx) : ORIGIN = 0x08000000, LENGTH = 1024K
-	sram (rwx) : ORIGIN = 0x20000000, LENGTH = 112K
+    flash (rx) : ORIGIN = 0x08000000, LENGTH = 256K
+    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 32K
 }
 
 OUTPUT_ARCH(arm)
+EXTERN(_vectors)
 ENTRY(_stext)
+
 SECTIONS
 {
-	.text : {
+	.text :
+	{
 		_stext = ABSOLUTE(.);
 		*(.vectors)
 		*(.text .text.*)
@@ -67,25 +71,29 @@ SECTIONS
 		_etext = ABSOLUTE(.);
 	} > flash
 
-	.init_section : {
+	.init_section :
+	{
 		_sinit = ABSOLUTE(.);
 		*(.init_array .init_array.*)
 		_einit = ABSOLUTE(.);
 	} > flash
 
-	.ARM.extab : {
+	.ARM.extab :
+	{
 		*(.ARM.extab*)
 	} > flash
 
 	__exidx_start = ABSOLUTE(.);
-	.ARM.exidx : {
+	.ARM.exidx :
+	{
 		*(.ARM.exidx*)
 	} > flash
 	__exidx_end = ABSOLUTE(.);
 
 	_eronly = ABSOLUTE(.);
 
-	.data : {
+	.data :
+	{
 		_sdata = ABSOLUTE(.);
 		*(.data .data.*)
 		*(.gnu.linkonce.d.*)
@@ -93,7 +101,8 @@ SECTIONS
 		_edata = ABSOLUTE(.);
 	} > sram AT > flash
 
-	.bss : {
+	.bss :
+	{
 		_sbss = ABSOLUTE(.);
 		*(.bss .bss.*)
 		*(.gnu.linkonce.b.*)
@@ -102,6 +111,7 @@ SECTIONS
 	} > sram
 
 	/* Stabs debugging sections. */
+
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }

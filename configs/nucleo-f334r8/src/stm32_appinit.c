@@ -137,6 +137,16 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_OPAMP
+  /* Initialize OPAMP and register the OPAMP driver. */
+
+  ret = stm32_opamp_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_opamp_setup failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
