@@ -130,7 +130,7 @@ struct bcmf_frame_s *bcmf_cdc_allocate_frame(FAR struct bcmf_dev_s *priv,
   frame = priv->bus->allocate_frame(priv,
                 sizeof(struct bcmf_cdc_header) + data_len + name_len,
                 true, true);
-  
+
   if (!frame)
     {
       return NULL;

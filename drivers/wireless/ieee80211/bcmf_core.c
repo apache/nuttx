@@ -339,8 +339,9 @@ void bcmf_core_disable(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core)
       wlerr("Invalid core id %d\n", core);
       return;
     }
+
   uint32_t base = sbus->chip->core_base[core];
-  
+
   /* Check if core is already in reset state */
 
   bcmf_read_sbregb(sbus, base + BCMA_RESET_CTL, &value);

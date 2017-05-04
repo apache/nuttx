@@ -115,7 +115,7 @@ struct bcmf_frame_s *bcmf_bdc_allocate_frame(FAR struct bcmf_dev_s *priv,
 
   frame->data += sizeof(struct bcmf_bdc_header);
 
-  return frame; 
+  return frame;
 }
 
 int bcmf_bdc_process_event_frame(FAR struct bcmf_dev_s *priv,

@@ -223,7 +223,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
       goto exit_free_frame;
     }
 
-  /* Update frame structure */  
+  /* Update frame structure */
 
   sframe->header.len = header->size;
   sframe->header.data += header->data_offset;

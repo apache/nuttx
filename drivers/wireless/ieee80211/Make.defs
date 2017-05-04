@@ -47,7 +47,7 @@ ifeq ($(CONFIG_IEEE80211_BROADCOM_FULLMAC),y)
   CSRCS += bcmf_utils.c
   CSRCS += bcmf_netdev.c
 
-ifeq ($(CONFIG_IEEE80211_BROADCOM_FULLMAC_SDIO),y)  
+ifeq ($(CONFIG_IEEE80211_BROADCOM_FULLMAC_SDIO),y)
   CSRCS += mmc_sdio.c
   CSRCS += bcmf_sdio.c
   CSRCS += bcmf_core.c

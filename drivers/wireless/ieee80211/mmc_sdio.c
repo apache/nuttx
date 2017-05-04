@@ -243,7 +243,7 @@ int sdio_set_wide_bus(struct sdio_dev_s *dev)
     {
       return ret;
     }
-  
+
   SDIO_WIDEBUS(dev, true);
   return OK;
 }
@@ -343,7 +343,7 @@ int sdio_enable_function(FAR struct sdio_dev_s *dev, uint8_t function)
     {
       return ret;
     }
- 
+
   ret = sdio_io_rw_direct(dev, true, 0, SDIO_CCCR_IOEN, value | (1 << function), NULL);
 
   if (ret != OK)
