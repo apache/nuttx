@@ -210,7 +210,7 @@ static int bcmf_transmit(FAR struct bcmf_dev_s *priv,
 
   frame->len = priv->bc_dev.d_len +
       (unsigned int)(frame->data - frame->base);
-  
+
   ret = bcmf_bdc_transmit_frame(priv, frame);
 
   if (ret)

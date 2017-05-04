@@ -201,7 +201,7 @@ int bcmf_wl_set_mac_address(FAR struct bcmf_dev_s *priv, struct ifreq *req)
 
   memcpy(priv->bc_dev.d_mac.ether.ether_addr_octet,
          req->ifr_hwaddr.sa_data, ETHER_ADDR_LEN);
-    
+
   return OK;
 }
 
@@ -912,4 +912,3 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
     }
   return OK;
  }
- 

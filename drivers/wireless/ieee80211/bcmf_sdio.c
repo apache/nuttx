@@ -159,7 +159,7 @@ int bcmf_sdio_bus_sleep(FAR struct bcmf_sdio_dev_s *sbus, bool sleep)
   else
     {
       /* Request HT Avail */
-  
+
       ret = bcmf_write_reg(sbus, 1, SBSDIO_FUNC1_CHIPCLKCSR,
                            SBSDIO_HT_AVAIL_REQ | SBSDIO_FORCE_HT);
       if (ret != OK)
@@ -167,27 +167,27 @@ int bcmf_sdio_bus_sleep(FAR struct bcmf_sdio_dev_s *sbus, bool sleep)
           wlerr("HT Avail request failed %d\n", ret);
           return ret;
         }
-  
+
       /* Wait for High Troughput clock */
-  
+
       loops = 20;
       while (--loops > 0)
         {
           up_mdelay(1);
           ret = bcmf_read_reg(sbus, 1, SBSDIO_FUNC1_CHIPCLKCSR, &value);
-  
+
           if (ret != OK)
             {
               return ret;
             }
-  
+
           if (value & SBSDIO_HT_AVAIL)
             {
               /* High Throughput clock is ready */
               break;
             }
         }
-  
+
       if (loops <= 0)
         {
           wlerr("HT clock not ready\n");
@@ -196,7 +196,7 @@ int bcmf_sdio_bus_sleep(FAR struct bcmf_sdio_dev_s *sbus, bool sleep)
 
       sbus->sleeping = false;
     }
-  
+
   return OK;
 }
 
@@ -597,7 +597,7 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
     {
       bcmf_dqueue_push(&sbus->free_queue, &g_pktframes[ret].list_entry);
     }
-  
+
   /* Init thread semaphore */
 
   if ((ret = sem_init(&sbus->thread_signal, 0, 0)) != OK)
@@ -740,13 +740,13 @@ int bcmf_sdio_thread(int argc, char **argv)
   int ret;
   FAR struct bcmf_dev_s *priv = g_sdio_priv;
   FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
-  
+
   wlinfo("Enter\n");
 
   /*  FIXME wait for the chip to be ready to receive commands */
 
   up_mdelay(50);
-  
+
   while (sbus->ready)
     {
       /* Wait for event (device interrupt, user request or waitdog timer) */
@@ -796,7 +796,7 @@ int bcmf_sdio_thread(int argc, char **argv)
               ret = bcmf_sdpcm_readframe(priv);
             }
           while (ret == OK);
-          
+
           if (ret == -ENODATA)
             {
               /*  All frames processed */
