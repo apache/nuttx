@@ -317,7 +317,8 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
   (void)sixlowpan_src_panid(ieee, &g_packet_meta.dpanid);
 
   /* Based on the collected attributes and addresses, construct the MAC meta
-   * data structure that we need to interface with the IEEE802.15.4 MAC.
+   * data structure that we need to interface with the IEEE802.15.4 MAC (we
+   * will update the MSDU payload size when the IOB has been setup).
    */
 
   ret = sixlowpan_meta_data(ieee, &meta, 0);
@@ -533,32 +534,18 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
        * frame which is not a fragment from this sequence from intervening.
        */
 
-      paysize = 0;
       for (iob = qhead; iob != NULL; iob = qhead)
         {
-          uint16_t newsize;
-
           /* Remove the IOB from the list */
 
           qhead         = iob->io_flink;
           iob->io_flink = NULL;
 
-          /* Re-construct the MAC meta data structure using the correct
-           * payload size for this frame (if it is different than the
-           * payload size of the previous frame).
-           */
+          /* Update the MSDU length in the metadata */
 
-          newsize = iob->io_len - iob->io_offset;
-          if (newsize != paysize)
-            {
-              ret = sixlowpan_meta_data(ieee, &meta, newsize);
-              if (ret < 0)
-                {
-                  nerr("ERROR: sixlowpan_meta_data() failed: %d\n", ret);
-                }
+          meta.msdu_length = iob->io_len - iob->io_offset;
 
-              paysize = newsize;
-            }
+          /* And submit the frame to the MAC */
 
           ret = sixlowpan_frame_submit(ieee, &meta, iob);
           if (ret < 0)
@@ -594,17 +581,11 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
       sixlowpan_dumpbuffer("Outgoing frame",
                        (FAR const uint8_t *)iob->io_data, iob->io_len);
 
-      /* Re-construct the MAC meta data structure using the correct payload
-       * size for this frame.
-       */
+      /* Update the MSDU length in the metadata */
 
-      ret = sixlowpan_meta_data(ieee, &meta, iob->io_len - iob->io_offset);
-      if (ret < 0)
-        {
-          nerr("ERROR: sixlowpan_meta_data() failed: %d\n", ret);
-        }
+      meta.msdu_length = iob->io_len - iob->io_offset;
 
-      /* Submit the frame to the MAC */
+      /* And submit the frame to the MAC */
 
       ret = sixlowpan_frame_submit(ieee, &meta, iob);
       if (ret < 0)

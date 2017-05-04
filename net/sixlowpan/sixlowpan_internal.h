@@ -511,13 +511,9 @@ int sixlowpan_uncompresshdr_hc1(uint16_t iplen, FAR struct iob_s *iob,
 #endif
 
 /****************************************************************************
- * Name: sixlowpan_islinklocal, sixlowpan_ipfromaddr, sixlowpan_addrfromip,
- *       and sixlowpan_ismacbased
+ * Name: sixlowpan_islinklocal, sixlowpan_addrfromip, and sixlowpan_ismacbased
  *
  * Description:
- *   sixlowpan_ipfromaddr: Create a link local IPv6 address from an IEEE
- *   802.15.4 address.
- *
  *   sixlowpan_addrfromip: Extract the IEEE 802.15.14 address from a link
  *   local IPv6 address.
  *
@@ -533,8 +529,6 @@ int sixlowpan_uncompresshdr_hc1(uint16_t iplen, FAR struct iob_s *iob,
 
 #define sixlowpan_islinklocal(ipaddr) ((ipaddr)[0] == NTOHS(0xfe80))
 
-void sixlowpan_ipfromaddr(FAR const struct sixlowpan_addr_s *addr,
-                          net_ipv6addr_t ipaddr);
 void sixlowpan_addrfromip(const net_ipv6addr_t ipaddr,
                           FAR struct sixlowpan_addr_s *addr);
 bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,

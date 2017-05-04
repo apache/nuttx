@@ -316,7 +316,7 @@ static void uncompress_addr(FAR net_ipv6addr_t ipaddr, uint8_t const prefix[],
     {
       /* No IID based configuration if no prefix and no data => unspec */
 
-      nwarn("WARNING: No IID based configuration\n")
+      nwarn("WARNING: No IID based configuration\n");
     }
 
   ninfo("Uncompressing %d + %d => %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",

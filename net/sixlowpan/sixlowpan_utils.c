@@ -68,40 +68,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sixlowpan_ipfromaddr
- *
- * Description:
- *   Create a link local IPv6 address from an IEEE 802.15.4 address:
- *
- *    128  112  96   80    64   48   32   16
- *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte address IEEE 48-bit MAC
- *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte address IEEE EUI-64
- *
- ****************************************************************************/
-
-void sixlowpan_ipfromaddr(FAR const struct sixlowpan_addr_s *addr,
-                          net_ipv6addr_t ipaddr)
-{
-  /* We consider only links with IEEE EUI-64 identifier or IEEE 48-bit MAC
-   * addresses.
-   */
-
-  memset(ipaddr, 0, sizeof(net_ipv6addr_t));
-  ipaddr[0] = HTONS(0xfe80);
-
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  memcpy(&ipaddr[4], addr, NET_6LOWPAN_ADDRSIZE);
-  ipaddr[4] ^= HTONS(0x0200);
-#else
-  ipaddr[5]  = HTONS(0x00ff);
-  ipaddr[6]  = HTONS(0xfe00);
-  memcpy(&ipaddr[7], addr, NET_6LOWPAN_ADDRSIZE);
-  ipaddr[7] ^= HTONS(0x0200);
-#endif
-}
-
-/****************************************************************************
  * Name: sixlowpan_addrfromip
  *
  * Description:
@@ -117,8 +83,6 @@ void sixlowpan_ipfromaddr(FAR const struct sixlowpan_addr_s *addr,
 void sixlowpan_addrfromip(const net_ipv6addr_t ipaddr,
                           FAR struct sixlowpan_addr_s *addr)
 {
-  /* REVISIT: See notes about 2 byte addresses in sixlowpan_ipfromaddr() */
-
   DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
