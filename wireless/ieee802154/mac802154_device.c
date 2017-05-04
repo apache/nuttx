@@ -406,7 +406,6 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
   FAR struct mac802154_chardevice_s *dev;
   FAR struct mac802154dev_txframe_s *tx;
   FAR struct iob_s *iob;
-  struct ieee802154_data_req_s req;
   struct mac802154dev_dwait_s dwait;
   int ret;
 
@@ -440,7 +439,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
 
   /* Get the MAC header length */
 
-  ret = mac802154_get_mhrlen(dev->md_mac, tx->meta);
+  ret = mac802154_get_mhrlen(dev->md_mac, &tx->meta);
   if (ret < 0)
     {
       wlerr("ERROR: TX meta-data is invalid");
@@ -450,9 +449,9 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
   iob->io_offset = ret;
   iob->io_len = iob->io_offset;
 
-  memcpy(&iob->io_data[iob->io_offset], tx->payload, tx->meta->msdu_length);
+  memcpy(&iob->io_data[iob->io_offset], tx->payload, tx->meta.msdu_length);
 
-  iob->io_len += tx->meta->msdu_length;
+  iob->io_len += tx->meta.msdu_length;
 
   /* If this is a blocking operation, we need to setup a wait struct so we
    * can unblock when the packet transmission has finished. If this is a
@@ -473,7 +472,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
 
       /* Setup the wait struct */
 
-      dwait.mw_handle = tx->meta->msdu_handle;
+      dwait.mw_handle = tx->meta.msdu_handle;
 
       /* Link the wait struct */
 
@@ -486,12 +485,9 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
       mac802154dev_givesem(&dev->md_exclsem);
   }
 
-  req.meta = tx->meta;
-  req.frame = iob;
-
   /* Pass the request to the MAC layer */
 
-  ret = mac802154_req_data(dev->md_mac, &req);
+  ret = mac802154_req_data(dev->md_mac, &tx->meta, iob);
 
   if (ret < 0)
     {

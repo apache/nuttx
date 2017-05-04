@@ -890,7 +890,8 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg)
             break;
           case MAC802154IOC_MLME_GET_REQUEST:
             {
-              mac802154_req_get(mac, &macarg->getreq);
+              mac802154_req_get(mac, macarg->getreq.pib_attr,
+                                macarg->getreq.attr_value);
             }
             break;
           case MAC802154IOC_MLME_GTS_REQUEST:
@@ -905,7 +906,7 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg)
             break;
           case MAC802154IOC_MLME_RESET_REQUEST:
             {
-              mac802154_req_reset(mac, &macarg->resetreq);
+              mac802154_req_reset(mac, macarg->resetreq.rst_pibattr);
             }
             break;
           case MAC802154IOC_MLME_RXENABLE_REQUEST:
@@ -1046,26 +1047,27 @@ int mac802154_get_mhrlen(MACHANDLE mac,
  *
  ****************************************************************************/
 
-int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
+int mac802154_req_data(MACHANDLE mac, 
+                       FAR const struct ieee802154_frame_meta_s *meta,
+                       FAR struct iob_s *frame)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
   FAR struct mac802154_trans_s trans;
-  FAR const struct ieee802154_frame_meta_s *meta = req->meta;
   uint16_t *frame_ctrl;
   uint8_t mhr_len = 3; /* Start assuming frame control and seq. num */
   int ret;
 
   /* Check the required frame size */
 
-  if (req->frame->io_len > IEEE802154_MAX_PHY_PACKET_SIZE)
+  if (frame->io_len > IEEE802154_MAX_PHY_PACKET_SIZE)
   {
     return -E2BIG;
   }
 
   /* Cast the first two bytes of the IOB to a uint16_t frame control field */
 
-  frame_ctrl = (uint16_t *)&req->frame->io_data[0];
+  frame_ctrl = (uint16_t *)&frame->io_data[0];
 
   /* Ensure we start with a clear frame control field */
 
@@ -1097,17 +1099,17 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
 
   if (meta->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
     {
-      memcpy(&req->frame->io_data[mhr_len], &meta->dest_addr.panid, 2);
+      memcpy(&frame->io_data[mhr_len], &meta->dest_addr.panid, 2);
       mhr_len += 2;
 
       if (meta->dest_addr.mode == IEEE802154_ADDRMODE_SHORT)
         {
-          memcpy(&req->frame->io_data[mhr_len], &meta->dest_addr.saddr, 2);
+          memcpy(&frame->io_data[mhr_len], &meta->dest_addr.saddr, 2);
           mhr_len += 2;
         }
       else if (meta->dest_addr.mode == IEEE802154_ADDRMODE_EXTENDED)
         {
-          memcpy(&req->frame->io_data[mhr_len], &meta->dest_addr.eaddr, 8);
+          memcpy(&frame->io_data[mhr_len], &meta->dest_addr.eaddr, 8);
           mhr_len += 8;
         }
     }
@@ -1153,18 +1155,18 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
       if ((meta->dest_addr.mode == IEEE802154_ADDRMODE_NONE) ||
           (*frame_ctrl & IEEE802154_FRAMECTRL_PANIDCOMP))
         {
-          memcpy(&req->frame->io_data[mhr_len], &priv->addr.panid, 2);
+          memcpy(&frame->io_data[mhr_len], &priv->addr.panid, 2);
           mhr_len += 2;
         }
 
       if (meta->src_addr_mode == IEEE802154_ADDRMODE_SHORT)
         {
-          memcpy(&req->frame->io_data[mhr_len], &priv->addr.saddr, 2);
+          memcpy(&frame->io_data[mhr_len], &priv->addr.saddr, 2);
           mhr_len += 2;
         }
       else if (meta->src_addr_mode == IEEE802154_ADDRMODE_EXTENDED)
         {
-          memcpy(&req->frame->io_data[mhr_len], &priv->addr.eaddr, 8);
+          memcpy(&frame->io_data[mhr_len], &priv->addr.eaddr, 8);
           mhr_len += 8;
         }
     }
@@ -1178,7 +1180,7 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
    * of the outgoing frame and then increment it by one. [1] pg. 40.
    */
 
-  req->frame->io_data[2] = priv->dsn++;
+  frame->io_data[2] = priv->dsn++;
 
   /* The MAC header we just created must never have exceeded where the app
    * data starts.  This should never happen since the offset should have
@@ -1186,14 +1188,14 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
    * here that created the header
    */
 
-  DEBUGASSERT(mhr_len == req->frame->io_offset);
+  DEBUGASSERT(mhr_len == frame->io_offset);
 
-  req->frame->io_offset = 0; /* Set the offset to 0 to include the header */
+  frame->io_offset = 0; /* Set the offset to 0 to include the header */
 
   /* Setup our transaction */
 
   trans.msdu_handle = meta->msdu_handle;
-  trans.frame = req->frame;
+  trans.frame = frame;
   sem_init(&trans.sem, 0, 1);
 
   /* If the TxOptions parameter specifies that a GTS transmission is required,
@@ -1234,6 +1236,9 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
            * coordinator, the destination address is not present, or the
            * TxOptions parameter also specifies a GTS transmission, the indirect
            * transmission option will be ignored. [1]
+           *
+           * NOTE: We don't just ignore the parameter.  Instead, we throw an
+           * error, since this really shouldn't be happening.
            */
 
           if (priv->is_coord && meta->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
@@ -1243,15 +1248,10 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
             }
           else
             {
-              /* Override the setting since it wasn't valid */
-
-              meta->msdu_flags.indirect_tx = 0;
+              return -EINVAL;
             }
         }
-
-      /* If this is a direct transmission not during a GTS */
-
-      if (!meta->msdu_flags.indirect_tx)
+      else
         {
           /* Link the transaction into the CSMA transaction list */
 
@@ -1281,9 +1281,15 @@ int mac802154_req_data(MACHANDLE mac, FAR struct ieee802154_data_req_s *req)
  *   an MSDU from the transaction queue. Confirmation is returned via
  *   the struct ieee802154_maccb_s->conf_purge callback.
  *
+ *   NOTE: The standard specifies that confirmation should be indicated via 
+ *   the asynchronous MLME-PURGE.confirm primitve.  However, in our
+ *   implementation we synchronously return the status from the request.
+ *   Therefore, we merge the functionality of the MLME-PURGE.request and 
+ *   MLME-PURGE.confirm primitives together.
+ *
  ****************************************************************************/
 
-int mac802154_req_purge(MACHANDLE mac, FAR struct ieee802154_purge_req_s *req)
+int mac802154_req_purge(MACHANDLE mac, uint8_t msdu_handle)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
@@ -1352,22 +1358,6 @@ int mac802154_req_disassociate(MACHANDLE mac,
   return -ENOTTY;
 }
 
-/****************************************************************************
- * Name: mac802154_req_get
- *
- * Description:
- *   The MLME-GET.request primitive requests information about a given PIB
- *   attribute. Actual data is returned via the
- *   struct ieee802154_maccb_s->conf_get callback.
- *
- ****************************************************************************/
-
-int mac802154_req_get(MACHANDLE mac, FAR struct ieee802154_get_req_s *req)
-{
-  FAR struct ieee802154_privmac_s *priv =
-    (FAR struct ieee802154_privmac_s *)mac;
-  return -ENOTTY;
-}
 
 /****************************************************************************
  * Name: mac802154_req_gts
@@ -1392,12 +1382,21 @@ int mac802154_req_gts(MACHANDLE mac, FAR struct ieee802154_gts_req_s *req)
  *
  * Description:
  *   The MLME-RESET.request primitive allows the next higher layer to request
- *   that the MLME performs a reset operation. Confirmation is returned via
- *   the struct ieee802154_maccb_s->conf_reset callback.
+ *   that the MLME performs a reset operation.
+ *
+ *   NOTE: The standard specifies that confirmation should be provided via
+ *   via the asynchronous MLME-RESET.confirm primitve.  However, in our
+ *   implementation we synchronously return the value immediately. Therefore,
+ *   we merge the functionality of the MLME-RESET.request and MLME-RESET.confirm
+ *   primitives together.
+ *
+ * Input Parameters:
+ *   mac          - Handle to the MAC layer instance
+ *   rst_pibattr  - Whether or not to reset the MAC PIB attributes to defaults
  *
  ****************************************************************************/
 
-int mac802154_req_reset(MACHANDLE mac, FAR struct ieee802154_reset_req_s *req)
+int mac802154_req_reset(MACHANDLE mac, bool rst_pibattr)
 {
   FAR struct ieee802154_privmac_s * priv =
     (FAR struct ieee802154_privmac_s *) mac;
@@ -1446,6 +1445,29 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
 }
 
 /****************************************************************************
+ * Name: mac802154_req_get
+ *
+ * Description:
+ *   The MLME-GET.request primitive requests information about a given PIB
+ *   attribute.
+ *
+ *   NOTE: The standard specifies that the attribute value should be returned
+ *   via the asynchronous MLME-GET.confirm primitve.  However, in our
+ *   implementation, we synchronously return the value immediately.Therefore, we
+ *   merge the functionality of the MLME-GET.request and MLME-GET.confirm
+ *   primitives together.
+ *
+ ****************************************************************************/
+
+int mac802154_req_get(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
+                      FAR union ieee802154_attr_val_u *attr_value)
+{
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
+  return -ENOTTY;
+}
+
+/****************************************************************************
  * Name: mac802154_req_set
  *
  * Description:
@@ -1454,9 +1476,9 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
  *
  *   NOTE: The standard specifies that confirmation should be indicated via 
  *   the asynchronous MLME-SET.confirm primitve.  However, in our implementation
- *   there is no reason not to synchronously return the status immediately.
- *   Therefore, we do merge the functionality of the MLME-SET.request and 
- *   MLME-SET.confirm primitives together.
+ *   we synchronously return the status from the request. Therefore, we do merge
+ *   the functionality of the MLME-SET.request and MLME-SET.confirm primitives
+ *   together.
  *
  ****************************************************************************/
 
