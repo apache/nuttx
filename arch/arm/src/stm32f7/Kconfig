@@ -1614,6 +1614,18 @@ config UART8_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
+config STM32F7_SERIAL_RXDMA_BUFFER_SIZE
+	int "Rx DMA buffer size"
+	default 32
+	depends on USART1_RXDMA || USART2_RXDMA || USART3_RXDMA || UART4_RXDMA || UART5_RXDMA || USART6_RXDMA || UART7_RXDMA || UART8_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half this number of bytes.
+
+		Value given here will be rounded up to next multiple of 32 bytes.
+
 config SERIAL_DISABLE_REORDERING
 	bool "Disable reordering of ttySx devices."
 	depends on STM32F7_USART1 || STM32F7_USART2 || STM32F7_USART3 || STM32F7_UART4 || STM32F7_UART5 || STM32F7_USART6 || STM32F7_UART7 || STM32F7_UART8

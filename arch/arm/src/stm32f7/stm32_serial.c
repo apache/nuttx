@@ -159,15 +159,30 @@
 
 /* The DMA buffer size when using RX DMA to emulate a FIFO.
  *
- * When streaming data, the generic serial layer will be called
- * every time the FIFO receives half this number of bytes.
+ * When streaming data, the generic serial layer will be called every time
+ * the FIFO receives half this number of bytes.
  *
- * This buffer size should be an even multiple of the Cortex-M7
- * D-Cache line size so that it can be individually invalidated.
+ * This buffer size should be an even multiple of the Cortex-M7 D-Cache line
+ * size, ARMV7M_DCACHE_LINESIZE, so that it can be individually invalidated.
+ *
+ * Should there be a Cortex-M7 without a D-Cache, ARMV7M_DCACHE_LINESIZE
+ * would be zero!
  */
 
+#  if !defined(ARMV7M_DCACHE_LINESIZE) || ARMV7M_DCACHE_LINESIZE == 0
+#    undef ARMV7M_DCACHE_LINESIZE
+#    define ARMV7M_DCACHE_LINESIZE 32
+#  endif
+
+#  if !defined(CONFIG_STM32F7_SERIAL_RXDMA_BUFFER_SIZE) || \
+      (CONFIG_STM32F7_SERIAL_RXDMA_BUFFER_SIZE < ARMV7M_DCACHE_LINESIZE)
+#    undef CONFIG_STM32F7_SERIAL_RXDMA_BUFFER_SIZE
+#    define CONFIG_STM32F7_SERIAL_RXDMA_BUFFER_SIZE ARMV7M_DCACHE_LINESIZE
+#  endif
+
 #  define RXDMA_BUFFER_MASK   (ARMV7M_DCACHE_LINESIZE - 1)
-#  define RXDMA_BUFFER_SIZE   ((32 + RXDMA_BUFFER_MASK) & ~RXDMA_BUFFER_MASK)
+#  define RXDMA_BUFFER_SIZE   ((CONFIG_STM32F7_SERIAL_RXDMA_BUFFER_SIZE \
+                                + RXDMA_BUFFER_MASK) & ~RXDMA_BUFFER_MASK)
 
 /* DMA priority */
 
