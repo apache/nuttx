@@ -227,7 +227,10 @@ enum ieee802154_status_e
   IEEE802154_STATUS_TRANSACTION_OVERFLOW,
   IEEE802154_STATUS_TX_ACTIVE,
   IEEE802154_STATUS_UNAVAILABLE_KEY,
-  IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE
+  IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE,
+  IEEE802154_STATUS_FAILED /* This value is not outlined in the standard.  It is
+                            * a catch-all for any failures that are not outlined
+                            * in the standard */
 };
 
 /* IEEE 802.15.4 PHY/MAC PIB attributes IDs */

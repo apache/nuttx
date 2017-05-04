@@ -1493,17 +1493,39 @@ int mac802154_req_set(MACHANDLE mac, FAR struct ieee802154_set_req_s *req)
     {
       case IEEE802154_PIB_MAC_EXTENDED_ADDR:
         {
-          /* Set the attribute in the structure to the new value */
-
-          memcpy(&priv->addr.eaddr[0], &req->attr_value.eaddr[0], 8);
-
-
-          /* The radio device needs to be updated as well */
+          /* Update the radio's extended address */
 
           memcpy(&radio_arg.eaddr[0], &priv->addr.eaddr[0], 8);
           ret = priv->radio->ops->ioctl(priv->radio, PHY802154IOC_SET_EADDR,
                                         (unsigned long)&radio_arg);
-                          
+          if (ret < 0)
+            {
+              return -IEEE802154_STATUS_FAILED;
+            }
+
+          /* Set the attribute in the table */
+
+          memcpy(&priv->addr.eaddr[0], &req->attr_value.eaddr[0], 8);
+                         
+          ret = IEEE802154_STATUS_SUCCESS;
+        }
+        break;
+      case IEEE802154_PIB_MAC_PROMISCUOUS_MODE:
+        {
+          /* Try and enable/disable promiscuous mode at the radio */
+
+          radio_arg.promisc = priv->promisc_mode;
+          ret = priv->radio->ops->ioctl(priv->radio, PHY802154IOC_SET_PROMISC,
+                                        (unsigned long)&radio_arg);
+          if (ret < 0)
+            {
+              return -IEEE802154_STATUS_FAILED;
+            }
+
+          /* Set the attribute in the table */
+
+          priv->promisc_mode = req->attr_value.promics_mode;
+
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
