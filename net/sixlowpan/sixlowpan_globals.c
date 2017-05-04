@@ -79,10 +79,6 @@ uint8_t g_frame_hdrlen;
  * determines the full form of that meta data.
  */
 
-/* Packet buffer metadata: Attributes and addresses */
-
-uint16_t g_pktattrs[PACKETBUF_NUM_ATTRS];
-
 struct packet_metadata_s g_packet_meta;
 
 #endif /* CONFIG_NET_6LOWPAN */

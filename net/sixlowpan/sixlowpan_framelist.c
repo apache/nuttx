@@ -231,13 +231,10 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
   g_uncomp_hdrlen = 0;
   g_frame_hdrlen  = 0;
 
-  /* Reset address buffer and packet buffer metatadata */
+  /* Reset frame meta data */
 
-  memset(g_pktattrs, 0, PACKETBUF_NUM_ATTRS * sizeof(uint16_t));
   memset(&g_packet_meta, 0, sizeof(struct packet_metadata_s));
-
-  g_pktattrs[PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS] =
-    CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS;
+  g_packet_meta.xmits = CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS;
 
   /* Set stream mode for all TCP packets, except FIN packets. */
 
@@ -249,11 +246,11 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
       if ((tcp->flags & TCP_FIN) == 0 &&
           (tcp->flags & TCP_CTL) != TCP_ACK)
         {
-          g_pktattrs[PACKETBUF_ATTR_PACKET_TYPE] = PACKETBUF_ATTR_PACKET_TYPE_STREAM;
+          g_packet_meta.type = FRAME_ATTR_TYPE_STREAM;
         }
       else if ((tcp->flags & TCP_FIN) == TCP_FIN)
         {
-          g_pktattrs[PACKETBUF_ATTR_PACKET_TYPE] = PACKETBUF_ATTR_PACKET_TYPE_STREAM_END;
+          g_packet_meta.type = FRAME_ATTR_TYPE_STREAM_END;
         }
     }
 

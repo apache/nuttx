@@ -100,50 +100,13 @@
 #define sixlowpan_addrcmp(addr1,addr2) \
   sixlowpan_anyaddrcmp(addr1,addr2,NET_6LOWPAN_ADDRSIZE)
 
-/* Packet buffer Definitions */
+/* Frame meta data definitions */
 
-#define PACKETBUF_ATTR_PACKET_TYPE_DATA       0
-#define PACKETBUF_ATTR_PACKET_TYPE_ACK        1
-#define PACKETBUF_ATTR_PACKET_TYPE_STREAM     2
-#define PACKETBUF_ATTR_PACKET_TYPE_STREAM_END 3
-#define PACKETBUF_ATTR_PACKET_TYPE_TIMESTAMP  4
-
-/* Packet buffer attributes (indices into g_pktattrs) */
-
-#define PACKETBUF_ATTR_NONE                   0
-
-/* Scope 0 attributes: used only on the local node. */
-
-#define PACKETBUF_ATTR_CHANNEL                1
-#define PACKETBUF_ATTR_NETWORK_ID             2
-#define PACKETBUF_ATTR_LINK_QUALITY           3
-#define PACKETBUF_ATTR_RSSI                   4
-#define PACKETBUF_ATTR_TIMESTAMP              5
-#define PACKETBUF_ATTR_RADIO_TXPOWER          6
-#define PACKETBUF_ATTR_LISTEN_TIME            7
-#define PACKETBUF_ATTR_TRANSMIT_TIME          8
-#define PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS  9
-#define PACKETBUF_ATTR_MAC_ACK                10
-
-/* Scope 1 attributes: used between two neighbors only. */
-
-#define PACKETBUF_ATTR_RELIABLE               11
-#define PACKETBUF_ATTR_PACKET_ID              12
-#define PACKETBUF_ATTR_PACKET_TYPE            13
-#define PACKETBUF_ATTR_REXMIT                 14
-#define PACKETBUF_ATTR_MAX_REXMIT             15
-#define PACKETBUF_ATTR_NUM_REXMIT             16
-#define PACKETBUF_ATTR_PENDING                17
-
-/* Scope 2 attributes: used between end-to-end nodes. */
-
-#define PACKETBUF_ATTR_HOPS                   18
-#define PACKETBUF_ATTR_TTL                    19
-#define PACKETBUF_ATTR_EPACKET_ID             20
-#define PACKETBUF_ATTR_EPACKET_TYPE           21
-#define PACKETBUF_ATTR_ERELIABLE              22
-
-#define PACKETBUF_NUM_ATTRS                   23
+#define FRAME_ATTR_TYPE_DATA        0
+#define FRAME_ATTR_TYPE_ACK         1
+#define FRAME_ATTR_TYPE_STREAM      2
+#define FRAME_ATTR_TYPE_STREAM_END  3
+#define FRAME_ATTR_TYPE_TIMESTAMP   4
 
 /* General helper macros ****************************************************/
 
@@ -208,8 +171,12 @@ struct ipv6icmp_hdr_s
 
 struct packet_metadata_s
 {
+  uint8_t type      : 3;            /* See FRAME_ATTR_TYPE_* definitons */
+  uint8_t pending   : 1;            /* Pending attribute */
+  uint8_t macack    : 1;            /* MAC ACK */
   uint8_t sextended : 1;            /* Extended source address */
   uint8_t dextended : 1;            /* Extended destination address */
+  uint8_t xmits;                    /* Max MAC transmisstion */
   union sixlowpan_anyaddr_u source; /* Source IEEE 802.15.4 address */
   union sixlowpan_anyaddr_u dest;   /* Destination IEEE 802.15.4 address */
 };
@@ -240,7 +207,6 @@ extern uint8_t g_frame_hdrlen;
 
 /* Packet buffer metadata: Attributes and addresses */
 
-extern uint16_t g_pktattrs[PACKETBUF_NUM_ATTRS];
 extern struct packet_metadata_s g_packet_meta;
 
 /****************************************************************************

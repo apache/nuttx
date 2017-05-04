@@ -175,7 +175,7 @@ int sixlowpan_meta_data(uint16_t dest_panid,
   /* Build the FCF (Only non-zero elements need to be initialized). */
 
   meta->fcf.frame_type    = FRAME802154_DATAFRAME;
-  meta->fcf.frame_pending = g_pktattrs[PACKETBUF_ATTR_PENDING];
+  meta->fcf.frame_pending = g_packet_meta.pending;
 
   /* If the output address is NULL in the MAC header buf, then it is
    * broadcast on the 802.15.4 network.
@@ -192,7 +192,7 @@ int sixlowpan_meta_data(uint16_t dest_panid,
 
   if (rcvrnull)
     {
-      meta->fcf.ack_required = g_pktattrs[PACKETBUF_ATTR_MAC_ACK];
+      meta->fcf.ack_required = g_packet_meta.macack;
     }
 
   /* Insert IEEE 802.15.4 (2003) version bit. */

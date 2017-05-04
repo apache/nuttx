@@ -151,6 +151,7 @@ config NET_6LOWPAN_MAXAGE
 config NET_6LOWPAN_MAX_MACTRANSMITS
 	int "Max MAC transmissions"
 	default 4
+	range 1 255
 	---help---
 		CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS specifies how many times the MAC
 		layer should resend packets if no link-layer ACK wasreceived. This
