@@ -670,6 +670,7 @@ static int kinetis_ioctl(struct file *filep, int cmd, unsigned long arg)
           {
             regval &= ~(LPUART_CTRL_LOOPS | LPUART_CTRL_RSRC);
           }
+
         kinetis_serialout(priv, KINETIS_LPUART_CTRL_OFFSET, regval);
       }
      break;
