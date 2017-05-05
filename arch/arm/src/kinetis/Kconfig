@@ -268,14 +268,22 @@ config ARCH_FAMILY_K60
 config ARCH_FAMILY_K64
 	bool
 	default n
+	select KINETIS_HAVE_FTM3
 	select KINETIS_HAVE_UART5
 
 config ARCH_FAMILY_K66
 	bool
 	default n
+	select KINETIS_HAVE_FTM3
 	select KINETIS_HAVE_LPUART0
+	select KINETIS_HAVE_TPM1
+	select KINETIS_HAVE_TPM2
 
 menu "Kinetis Peripheral Support"
+
+config KINETIS_HAVE_FTM3
+	bool
+	default n
 
 config KINETIS_HAVE_I2C1
 	bool
@@ -294,6 +302,14 @@ config KINETIS_HAVE_SPI1
 	default n
 
 config KINETIS_HAVE_SPI2
+	bool
+	default n
+
+config KINETIS_HAVE_TPM1
+	bool
+	default n
+
+config KINETIS_HAVE_TPM2
 	bool
 	default n
 
@@ -531,9 +547,23 @@ config KINETIS_FTM2
 config KINETIS_FTM3
 	bool "FTM3"
 	default n
-	depends on ARCH_FAMILY_K64 || ARCH_FAMILY_K66
+	depends on KINETIS_HAVE_FTM3
 	---help---
 		Support FlexTimer 3
+
+config KINETIS_TPM1
+	bool "TPM1"
+	default n
+	depends on KINETIS_HAVE_TPM1
+	---help---
+		Support TPM module 1
+
+config KINETIS_TPM2
+	bool "TPM2"
+	default n
+	depends on KINETIS_HAVE_TPM2
+	---help---
+		Support TPM module 2
 
 config KINETIS_LPTIMER
 	bool "Low power timer (LPTIMER)"
