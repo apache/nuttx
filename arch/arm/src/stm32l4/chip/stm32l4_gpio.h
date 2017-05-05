@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32l4/chip/stm32l4x6xx_gpio.h
+ * arch/arm/src/stm32l4/chip/stm32l4_gpio.h
  *
  *   Copyright (C) 2016, Sebastien Lorquet. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4X6XX_GPIO_H
-#define __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4X6XX_GPIO_H
+#ifndef __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_GPIO_H
+#define __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_GPIO_H
 
 /************************************************************************************
  * Included Files
@@ -371,5 +371,5 @@
 #define GPIO_AFRH15_SHIFT          (28)
 #define GPIO_AFRH15_MASK           (15 << GPIO_AFRH15_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4X6XX_GPIO_H */
+#endif /* __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_GPIO_H */
 

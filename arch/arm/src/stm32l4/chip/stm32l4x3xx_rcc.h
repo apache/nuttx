@@ -1,10 +1,11 @@
 /****************************************************************************************************
- * arch/arm/src/stm32l4/chip/stm32l4x6xx_rcc.h
+ * arch/arm/src/stm32l4/chip/stm32l4x3xx_rcc.h
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2016 Sebastien Lorquet. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
+ *   Author: Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,8 +36,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4X6XX_RCC_H
-#define __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4X6XX_RCC_H
+#ifndef __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4X3XX_RCC_H
+#define __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4X3XX_RCC_H
 
 /****************************************************************************************************
  * Included Files
@@ -44,7 +45,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32L4_STM32L4X6)
+#if defined(CONFIG_STM32L4_STM32L4X3)
 
 /****************************************************************************************************
  * Pre-processor Definitions
@@ -83,7 +84,6 @@
 #define STM32L4_RCC_BDCR_OFFSET       0x0090  /* Backup domain control register */
 #define STM32L4_RCC_CSR_OFFSET        0x0094  /* Control/status register */
 #define STM32L4_RCC_CRRCR_OFFSET      0x0098  /* Clock recovery RC register */
-#define STM32L4_RCC_CCIPR2_OFFSET     0x009c  /* Peripherals independent clock configuration register 2 */
 
 /* Register Addresses *******************************************************************************/
 
@@ -118,7 +118,6 @@
 #define STM32L4_RCC_BDCR              (STM32L4_RCC_BASE+STM32L4_RCC_BDCR_OFFSET)
 #define STM32L4_RCC_CSR               (STM32L4_RCC_BASE+STM32L4_RCC_CSR_OFFSET)
 #define STM32L4_RCC_CRRCR             (STM32L4_RCC_BASE+STM32L4_RCC_CRRCR_OFFSET)
-#define STM32L4_RCC_CCIPR2            (STM32L4_RCC_BASE+STM32L4_RCC_CCIPR2_OFFSET)
 
 /* Register Bitfield Definitions ********************************************************************/
 
@@ -395,11 +394,7 @@
 #define RCC_AHB2RSTR_GPIOCRST       (1 << 2)  /* Bit 2:  IO port C reset */
 #define RCC_AHB2RSTR_GPIODRST       (1 << 3)  /* Bit 3:  IO port D reset */
 #define RCC_AHB2RSTR_GPIOERST       (1 << 4)  /* Bit 4:  IO port E reset */
-#define RCC_AHB2RSTR_GPIOFRST       (1 << 5)  /* Bit 5:  IO port F reset */
-#define RCC_AHB2RSTR_GPIOGRST       (1 << 6)  /* Bit 6:  IO port G reset */
 #define RCC_AHB2RSTR_GPIOHRST       (1 << 7)  /* Bit 7:  IO port H reset */
-#define RCC_AHB2RSTR_GPIOIRST       (1 << 8)  /* Bit 8:  IO port I reset */
-#define RCC_AHB2RSTR_OTGFSRST       (1 << 12) /* Bit 12: USB OTG FS module reset */
 #define RCC_AHB2RSTR_ADCRST         (1 << 13) /* Bit 13: ADC interface reset (common to all ADCs) */
 #define RCC_AHB2RSTR_DCMIRST        (1 << 14) /* Bit 14: DCMI interface reset */
 #define RCC_AHB2RSTR_AESRST         (1 << 16) /* Bit 16: AES Cryptographic module reset */
@@ -431,7 +426,7 @@
 #define RCC_APB1RSTR1_I2C3RST       (1 << 23) /* Bit 23: I2C3 reset */
 #define RCC_APB1RSTR1_CRSRST        (1 << 24) /* Bit 24: CRS reset */
 #define RCC_APB1RSTR1_CAN1RST       (1 << 25) /* Bit 25: CAN1 reset */
-#define RCC_APB1RSTR1_CAN2RST       (1 << 26) /* Bit 26: CAN2 reset */
+#define RCC_APB1RSTR1_USBFSRST      (1 << 26) /* Bit 26: USB FS reset */
 #define RCC_APB1RSTR1_PWRRST        (1 << 28) /* Bit 28: Power interface reset */
 #define RCC_APB1RSTR1_DAC1RST       (1 << 29) /* Bit 29: DAC1 reset */
 #define RCC_APB1RSTR1_OPAMPRST      (1 << 30) /* Bit 30: OPAMP reset */
@@ -475,11 +470,7 @@
 #define RCC_AHB2ENR_GPIOCEN         (1 << 2)  /* Bit 2:  IO port C enable */
 #define RCC_AHB2ENR_GPIODEN         (1 << 3)  /* Bit 3:  IO port D enable */
 #define RCC_AHB2ENR_GPIOEEN         (1 << 4)  /* Bit 4:  IO port E enable */
-#define RCC_AHB2ENR_GPIOFEN         (1 << 5)  /* Bit 5:  IO port F enable */
-#define RCC_AHB2ENR_GPIOGEN         (1 << 6)  /* Bit 6:  IO port G enable */
 #define RCC_AHB2ENR_GPIOHEN         (1 << 7)  /* Bit 7:  IO port H enable */
-#define RCC_AHB2ENR_GPIOIEN         (1 << 8)  /* Bit 8:  IO port I enable */
-#define RCC_AHB2ENR_OTGFSEN         (1 << 12) /* Bit 12: USB OTG FS module enable */
 #define RCC_AHB2ENR_ADCEN           (1 << 13) /* Bit 13: ADC interface enable (common to all ADCs) */
 #define RCC_AHB2ENR_DCMIEN          (1 << 14) /* Bit 14: DCMI interface enable */
 #define RCC_AHB2ENR_AESEN           (1 << 16) /* Bit 16: AES Cryptographic module enable */
@@ -513,7 +504,7 @@
 #define RCC_APB1ENR1_I2C3EN         (1 << 23) /* Bit 23: I2C3 enable */
 #define RCC_APB1ENR1_CRSEN          (1 << 24) /* Bit 24: CRSEN enable */
 #define RCC_APB1ENR1_CAN1EN         (1 << 25) /* Bit 25: CAN1 enable */
-#define RCC_APB1ENR1_CAN2EN         (1 << 26) /* Bit 26: CAN2 enable */
+#define RCC_APB1ENR1_USBFSEN        (1 << 26) /* Bit 26: USB FS enable */
 #define RCC_APB1ENR1_PWREN          (1 << 28) /* Bit 28: Power interface enable */
 #define RCC_APB1ENR1_DAC1EN         (1 << 29) /* Bit 29: DAC1 enable */
 #define RCC_APB1ENR1_OPAMPEN        (1 << 30) /* Bit 30: OPAMP enable */
@@ -559,12 +550,8 @@
 #define RCC_AHB2SMENR_GPIOCSMEN     (1 << 2)  /* Bit 2:  IO port C enable during Sleep mode */
 #define RCC_AHB2SMENR_GPIODSMEN     (1 << 3)  /* Bit 3:  IO port D enable during Sleep mode */
 #define RCC_AHB2SMENR_GPIOESMEN     (1 << 4)  /* Bit 4:  IO port E enable during Sleep mode */
-#define RCC_AHB2SMENR_GPIOFSMEN     (1 << 5)  /* Bit 5:  IO port F enable during Sleep mode */
-#define RCC_AHB2SMENR_GPIOGSMEN     (1 << 6)  /* Bit 6:  IO port G enable during Sleep mode */
 #define RCC_AHB2SMENR_GPIOHSMEN     (1 << 7)  /* Bit 7:  IO port H enable during Sleep mode */
-#define RCC_AHB2SMENR_GPIOISMEN     (1 << 8)  /* Bit 8:  IO port I enable during Sleep mode */
 #define RCC_AHB2SMENR_SRAM2SMEN     (1 << 9)  /* Bit 9:  SRAM2 enable during Sleep mode */
-#define RCC_AHB2SMENR_OTGFSSMEN     (1 << 12) /* Bit 12: USB OTG FS module enable during Sleep mode */
 #define RCC_AHB2SMENR_ADCSMEN       (1 << 13) /* Bit 13: ADC interface enable during Sleep mode (common to all ADCs) */
 #define RCC_AHB2SMENR_DCMISMEN      (1 << 14) /* Bit 14: DCMI interface enable during Sleep mode */
 #define RCC_AHB2SMENR_AESSMEN       (1 << 16) /* Bit 16: AES Cryptographic module enable during Sleep mode */
@@ -598,7 +585,7 @@
 #define RCC_APB1SMENR1_I2C3SMEN     (1 << 23) /* Bit 23: I2C3 enable during Sleep mode */
 #define RCC_APB1SMENR1_CRSSMEN      (1 << 24) /* Bit 24: CRS enable during Sleep mode */
 #define RCC_APB1SMENR1_CAN1SMEN     (1 << 25) /* Bit 25: CAN1 enable during Sleep mode */
-#define RCC_APB1SMENR1_CAN2SMEN     (1 << 26) /* Bit 26: CAN2 enable during Sleep mode */
+#define RCC_APB1SMENR1_USBFSSMEN    (1 << 26) /* Bit 26: USB FS enable during Sleep mode */
 #define RCC_APB1SMENR1_PWRSMEN      (1 << 28) /* Bit 28: Power interface enable during Sleep mode */
 #define RCC_APB1SMENR1_DAC1SMEN     (1 << 29) /* Bit 29: DAC1 enable during Sleep mode */
 #define RCC_APB1SMENR1_OPAMPSMEN    (1 << 30) /* Bit 30: OPAMP enable during Sleep mode */
@@ -790,7 +777,7 @@
 #define RCC_CSR_WWDGRSTF            (1 << 30) /* Bit 30: Window watchdog reset flag */
 #define RCC_CSR_LPWRRSTF            (1 << 31) /* Bit 31: Low-Power reset flag */
 
-/* Clock recovery RC register (only on STM32L496xx/4A6xx) */
+/* Clock recovery RC register */
 
 #define RCC_CRRCR_HSI48CAL_SHIFT    7
 #  define RCC_CRRCR_HSI48CAL_MASK   (0x01ff << RCC_CRRCR_HSI48CAL_SHIFT) /* HSI48 clock calibration */
@@ -798,13 +785,5 @@
 #define RCC_CRRCR_HSI48ON           (1 << 0)  /* Bit 0: HSI48 clock enable */
 #define RCC_CRRCR_HSI48RDY          (1 << 1)  /* Bit 1: HSI48 clock ready flag */
 
-/* Peripheral Independent Clock Configuration 2 register (only on STM32L496xx/4A6xx) */
-
-#define RCC_CCIPR2_I2C4SEL_SHIFT       (0)
-#define RCC_CCIPR2_I2C4SEL_MASK        (3 << RCC_CCIPR2_I2C4SEL_SHIFT)
-#  define RCC_CCIPR2_I2C4SEL_PCLK      (0 << RCC_CCIPR2_I2C4SEL_SHIFT)
-#  define RCC_CCIPR2_I2C4SEL_SYSCLK    (1 << RCC_CCIPR2_I2C4SEL_SHIFT)
-#  define RCC_CCIPR2_I2C4SEL_HSI       (2 << RCC_CCIPR2_I2C4SEL_SHIFT)
-
-#endif /* CONFIG_STM32L4_STM32L4X6 */
-#endif /* __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4X6XX_RCC_H */
+#endif /* CONFIG_STM32L4_STM32L4X3 */
+#endif /* __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4X3XX_RCC_H */

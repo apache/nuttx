@@ -41,42 +41,72 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+/* Flash size is known from the chip selection:
+ *
+ *   When CONFIG_STM32L4_FLASH_OVERRIDE_DEFAULT is set the
+ *   CONFIG_STM32L4_FLASH_CONFIG_x selects the default FLASH size based on the chip
+ *   part number. This value can be overridden with CONFIG_STM32L4_FLASH_OVERRIDE_x
+ *
+ *   Parts STM32L4xxE have 512Kb of FLASH
+ *   Parts STM32L4xxG have 1024Kb of FLASH
+ *
+ *   N.B. Only Single bank mode is supported
+ */
+
 #define _K(x) ((x)*1024)
 
-#if !defined(CONFIG_STM32L4_FLASH_CONFIG_DEFAULT) && \
+#if !defined(CONFIG_STM32L4_FLASH_OVERRIDE_DEFAULT) && \
+    !defined(CONFIG_STM32L4_FLASH_OVERRIDE_B) && \
+    !defined(CONFIG_STM32L4_FLASH_OVERRIDE_C) && \
+    !defined(CONFIG_STM32L4_FLASH_OVERRIDE_E) && \
+    !defined(CONFIG_STM32L4_FLASH_OVERRIDE_G) && \
+    !defined(CONFIG_STM32L4_FLASH_CONFIG_B) && \
     !defined(CONFIG_STM32L4_FLASH_CONFIG_C) && \
     !defined(CONFIG_STM32L4_FLASH_CONFIG_E) && \
     !defined(CONFIG_STM32L4_FLASH_CONFIG_G)
-#  define CONFIG_STM32L4_FLASH_CONFIG_DEFAULT
+#  define CONFIG_STM32L4_FLASH_OVERRIDE_E
+#  warning "Flash size not defined defaulting to 512KiB (E)"
 #endif
 
-#if defined(CONFIG_STM32L4_FLASH_CONFIG_DEFAULT)
-#  define STM32L4_FLASH_NPAGES        512
-#  define STM32L4_FLASH_PAGESIZE      2048
-#endif /* CONFIG_STM32L4_FLASH_CONFIG_DEFAULT */
+/* Override of the Flash has been chosen */
 
-/* Override of the Flash Has been Chosen */
-
-#if !defined(CONFIG_STM32L4_FLASH_CONFIG_DEFAULT)
-
-/* Define the Valid Configuration the F1 and F3  */
-
-#  if defined(CONFIG_STM32L4_FLASH_CONFIG_C) /* 256 kB */
-#    define STM32L4_FLASH_NPAGES      128
-#    define STM32L4_FLASH_PAGESIZE    2048
-#  elif defined(CONFIG_STM32L4_FLASH_CONFIG_E) /* 512 kB */
-#    define STM32L4_FLASH_NPAGES      256
-#    define STM32L4_FLASH_PAGESIZE    2048
-#  elif defined(CONFIG_STM32L4_FLASH_CONFIG_G) /* 1 MB */
-#    define STM32L4_FLASH_NPAGES      512
-#    define STM32L4_FLASH_PAGESIZE    2048
-#  else
+#if !defined(CONFIG_STM32L4_FLASH_OVERRIDE_DEFAULT)
+#  undef CONFIG_STM32L4_FLASH_CONFIG_B
+#  undef CONFIG_STM32L4_FLASH_CONFIG_C
+#  undef CONFIG_STM32L4_FLASH_CONFIG_E
+#  undef CONFIG_STM32L4_FLASH_CONFIG_G
+#  if defined(CONFIG_STM32L4_FLASH_OVERRIDE_B)
+#    define CONFIG_STM32L4_FLASH_CONFIG_B
+#  elif defined(CONFIG_STM32L4_FLASH_OVERRIDE_C)
+#    define CONFIG_STM32L4_FLASH_CONFIG_C
+#  elif defined(CONFIG_STM32L4_FLASH_OVERRIDE_E)
+#    define CONFIG_STM32L4_FLASH_CONFIG_E
+#  elif defined(CONFIG_STM32L4_FLASH_OVERRIDE_G)
+#    define CONFIG_STM32L4_FLASH_CONFIG_G
 #  endif
+#endif
+
+/* Define the valid configuration  */
+
+#if defined(CONFIG_STM32L4_FLASH_CONFIG_B) /* 128 kB */
+#  define STM32L4_FLASH_NPAGES      64
+#  define STM32L4_FLASH_PAGESIZE    2048
+#elif defined(CONFIG_STM32L4_FLASH_CONFIG_C) /* 256 kB */
+#  define STM32L4_FLASH_NPAGES      128
+#  define STM32L4_FLASH_PAGESIZE    2048
+#elif defined(CONFIG_STM32L4_FLASH_CONFIG_E) /* 512 kB */
+#  define STM32L4_FLASH_NPAGES      256
+#  define STM32L4_FLASH_PAGESIZE    2048
+#elif defined(CONFIG_STM32L4_FLASH_CONFIG_G) /* 1 MB */
+#  define STM32L4_FLASH_NPAGES      512
+#  define STM32L4_FLASH_PAGESIZE    2048
+#else
+#  error "unknown flash configuration!"
 #endif
 
 #ifdef STM32L4_FLASH_PAGESIZE
 #  define STM32L4_FLASH_SIZE            (STM32L4_FLASH_NPAGES * STM32L4_FLASH_PAGESIZE)
-#endif /* def STM32L4_FLASH_PAGESIZE */
+#endif
 
 /* Register Offsets *****************************************************************/
 
@@ -128,7 +158,7 @@
 #  define FLASH_ACR_LATENCY_3     (3 << FLASH_ACR_LATENCY_SHIFT)    /* 011: Three wait states            <=64  <=26 */
 #  define FLASH_ACR_LATENCY_4     (4 << FLASH_ACR_LATENCY_SHIFT)    /* 100: Four wait states             <=80  <=26 */
 
-#define FLASH_ACR_PRFTEN            (1 << 8)  /* Bit 8:  Pprefetch enable */
+#define FLASH_ACR_PRFTEN            (1 << 8)  /* Bit 8:  Prefetch enable */
 #define FLASH_ACR_ICEN              (1 << 9)  /* Bit 9:  Instruction cache enable */
 #define FLASH_ACR_DCEN              (1 << 10) /* Bit 10: Data cache enable */
 #define FLASH_ACR_ICRST             (1 << 11) /* Bit 11: Instruction cache reset */

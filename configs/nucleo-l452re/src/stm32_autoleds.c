@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/stm32l4/stm32l4_dma.c
+ * configs/nucleo-l452re/src/stm32_autoleds.c
  *
- *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,19 +39,58 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
+
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
 #include "chip.h"
+#include "up_arch.h"
+#include "up_internal.h"
+#include "stm32l4_gpio.h"
+#include "nucleo-l452re.h"
 
-/* This file is only a thin shell that includes the correct DMA implementation
- * for the selected STM32 family.  The correct file cannot be selected by
- * the make system because it needs the intelligence that only exists in
- * chip.h that can associate an STM32 part number with an STM32 family.
- *
- * TODO: do we need separate implementation for STM32L4X3?
- */
+#ifdef CONFIG_ARCH_LEDS
 
-#if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4X3)
-#include "stm32l4x6xx_dma.c"
-#else
-#  error "Unsupported STM32L4 chip"
-#endif
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
+/****************************************************************************
+ * Name: board_autoled_initialize
+ ****************************************************************************/
+
+void board_autoled_initialize(void)
+{
+  /* Configure LD2 GPIO for output */
+
+  stm32l4_configgpio(GPIO_LD2);
+}
+
+/****************************************************************************
+ * Name: board_autoled_on
+ ****************************************************************************/
+
+void board_autoled_on(int led)
+{
+  if (led == 1)
+    {
+      stm32l4_gpiowrite(GPIO_LD2, true);
+    }
+}
+
+/****************************************************************************
+ * Name: board_autoled_off
+ ****************************************************************************/
+
+void board_autoled_off(int led)
+{
+  if (led == 1)
+    {
+      stm32l4_gpiowrite(GPIO_LD2, false);
+    }
+}
+
+#endif /* CONFIG_ARCH_LEDS */

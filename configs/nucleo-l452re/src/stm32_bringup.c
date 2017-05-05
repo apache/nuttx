@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/stm32l4/stm32l4_dma.c
+ * config/nucleo-l452re/src/stm32_bringup.c
  *
- *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,19 +39,79 @@
 
 #include <nuttx/config.h>
 
-#include "chip.h"
+#include <sys/mount.h>
+#include <sys/types.h>
+#include <debug.h>
 
-/* This file is only a thin shell that includes the correct DMA implementation
- * for the selected STM32 family.  The correct file cannot be selected by
- * the make system because it needs the intelligence that only exists in
- * chip.h that can associate an STM32 part number with an STM32 family.
- *
- * TODO: do we need separate implementation for STM32L4X3?
- */
+#include <nuttx/i2c/i2c_master.h>
 
-#if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4X3)
-#include "stm32l4x6xx_dma.c"
-#else
-#  error "Unsupported STM32L4 chip"
+#include "stm32l4_i2c.h"
+#include "nucleo-l452re.h"
+
+/****************************************************************************
+ * Pre-processor Defintiionis
+ ****************************************************************************/
+
+#undef HAVE_I2C_DRIVER
+#if defined(CONFIG_STM32L4_I2C1) && defined(CONFIG_I2C_DRIVER)
+#  define HAVE_I2C_DRIVER 1
 #endif
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
+ *
+ *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
+ *
+ ****************************************************************************/
+
+int stm32_bringup(void)
+{
+#ifdef HAVE_I2C_DRIVER
+  FAR struct i2c_master_s *i2c;
+#endif
+  int ret;
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
+#endif
+
+#ifdef HAVE_I2C_DRIVER
+  /* Get the I2C lower half instance */
+
+  i2c = stm32l4_i2cbus_initialize(1);
+  if (i2c == NULL)
+    {
+      i2cerr("ERROR: Initialize I2C1: %d\n", ret);
+    }
+  else
+    {
+      /* Register the I2C character driver */
+
+      ret = i2c_register(i2c, 1);
+      if (ret < 0)
+        {
+          i2cerr("ERROR: Failed to register I2C1 device: %d\n", ret);
+        }
+    }
+#endif
+
+  UNUSED(ret);
+  return OK;
+}

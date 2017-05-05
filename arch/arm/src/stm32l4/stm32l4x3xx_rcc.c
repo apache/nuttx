@@ -1,10 +1,11 @@
 /****************************************************************************
- * arch/arm/src/stm32l4/stm32l4x6xx_rcc.c
+ * arch/arm/src/stm32l4/stm32l4x3xx_rcc.c
  *
  *   Copyright (C) 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2016 Sebastien Lorquet. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Sebastien Lorquet <sebastien@lorquet.fr>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Sebastien Lorquet <sebastien@lorquet.fr>
+ *            Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -159,12 +160,6 @@ static inline void rcc_enableahb1(void)
   regval |= RCC_AHB1ENR_TSCEN;
 #endif
 
-#ifdef CONFIG_STM32L4_DMA2D
-  /* DMA2D clock enable */
-
-  regval |= RCC_AHB1ENR_DMA2DEN;
-#endif
-
   putreg32(regval, STM32L4_RCC_AHB1ENR);   /* Enable peripherals */
 }
 
@@ -180,13 +175,13 @@ static inline void rcc_enableahb2(void)
 {
   uint32_t regval;
 
-  /* Set the appropriate bits in the AHB2ENR register to enabled the
+  /* Set the appropriate bits in the AHB2ENR register to enable the
    * selected AHB2 peripherals.
    */
 
   regval = getreg32(STM32L4_RCC_AHB2ENR);
 
-  /* Enable GPIOA, GPIOB, .... GPIOI */
+  /* Enable GPIOA, GPIOB, .... GPIOH */
 
 #if STM32L4_NPORTS > 0
   regval |= (RCC_AHB2ENR_GPIOAEN
@@ -202,25 +197,11 @@ static inline void rcc_enableahb2(void)
 #if STM32L4_NPORTS > 4
              | RCC_AHB2ENR_GPIOEEN
 #endif
-#if STM32L4_NPORTS > 5
-             | RCC_AHB2ENR_GPIOFEN
-#endif
-#if STM32L4_NPORTS > 6
-             | RCC_AHB2ENR_GPIOGEN
-#endif
+/* These chips have no GPIOF, GPIOG or GPIOI */
 #if STM32L4_NPORTS > 7
              | RCC_AHB2ENR_GPIOHEN
 #endif
-#if STM32L4_NPORTS > 8
-             | RCC_AHB2ENR_GPIOIEN
-#endif
              );
-#endif
-
-#ifdef CONFIG_STM32L4_OTGFS
-  /* USB OTG FS clock enable */
-
-  regval |= RCC_AHB2ENR_OTGFSEN;
 #endif
 
 #if defined(CONFIG_STM32L4_ADC1) || defined(CONFIG_STM32L4_ADC2) || defined(CONFIG_STM32L4_ADC3)
@@ -229,22 +210,10 @@ static inline void rcc_enableahb2(void)
   regval |= RCC_AHB2ENR_ADCEN;
 #endif
 
-#ifdef CONFIG_STM32L4_DCMI
-  /* Digital Camera interfaces clock enable */
-
-  regval |= RCC_AHB2ENR_DCMIEN;
-#endif
-
 #ifdef CONFIG_STM32L4_AES
   /* Cryptographic modules clock enable */
 
   regval |= RCC_AHB2ENR_AESEN;
-#endif
-
-#ifdef CONFIG_STM32L4_HASH
-  /* HASH module clock enable */
-
-  regval |= RCC_AHB2ENR_HASHEN;
 #endif
 
 #ifdef CONFIG_STM32L4_RNG
@@ -273,13 +242,6 @@ static inline void rcc_enableahb3(void)
    */
 
   regval = getreg32(STM32L4_RCC_AHB3ENR);
-
-#ifdef CONFIG_STM32L4_FSMC
-  /* Flexible static memory controller module clock enable */
-
-  regval |= RCC_AHB3ENR_FSMCEN;
-#endif
-
 
 #ifdef CONFIG_STM32L4_QSPI
   /* QuadSPI module clock enable */
@@ -318,18 +280,6 @@ static inline void rcc_enableapb1(void)
   /* TIM3 clock enable */
 
   regval |= RCC_APB1ENR1_TIM3EN;
-#endif
-
-#ifdef CONFIG_STM32L4_TIM4
-  /* TIM4 clock enable */
-
-  regval |= RCC_APB1ENR1_TIM4EN;
-#endif
-
-#ifdef CONFIG_STM32L4_TIM5
-  /* TIM5 clock enable */
-
-  regval |= RCC_APB1ENR1_TIM5EN;
 #endif
 
 #ifdef CONFIG_STM32L4_TIM6
@@ -380,12 +330,6 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR1_UART4EN;
 #endif
 
-#ifdef CONFIG_STM32L4_UART5
-  /* UART5 clock enable */
-
-  regval |= RCC_APB1ENR1_UART5EN;
-#endif
-
 #ifdef CONFIG_STM32L4_I2C1
   /* I2C1 clock enable */
 
@@ -410,10 +354,10 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR1_CAN1EN;
 #endif
 
-#ifdef CONFIG_STM32L4_CAN2
-  /* CAN 2 clock enable */
+#ifdef CONFIG_STM32L4_USBFS
+  /* USB FS clock enable */
 
-  regval |= RCC_APB1ENR1_CAN2EN;
+  regval |= RCC_APB1ENR1_USBFSEN;
 #endif
 
   /* Power interface clock enable.  The PWR block is always enabled so that
@@ -521,12 +465,6 @@ static inline void rcc_enableapb2(void)
   regval |= RCC_APB2ENR_SPI1EN;
 #endif
 
-#ifdef CONFIG_STM32L4_TIM8
-  /* TIM8 clock enable */
-
-  regval |= RCC_APB2ENR_TIM8EN;
-#endif
-
 #ifdef CONFIG_STM32L4_USART1
   /* USART1 clock enable */
 
@@ -545,22 +483,10 @@ static inline void rcc_enableapb2(void)
   regval |= RCC_APB2ENR_TIM16EN;
 #endif
 
-#ifdef CONFIG_STM32L4_TIM17
-  /* TIM17 clock enable */
-
-  regval |= RCC_APB2ENR_TIM17EN;
-#endif
-
 #ifdef CONFIG_STM32L4_SAI1
   /* SAI1 clock enable */
 
   regval |= RCC_APB2ENR_SAI1EN;
-#endif
-
-#ifdef CONFIG_STM32L4_SAI2
-  /* SAI2 clock enable */
-
-  regval |= RCC_APB2ENR_SAI2EN;
 #endif
 
 #ifdef CONFIG_STM32L4_DFSDM1

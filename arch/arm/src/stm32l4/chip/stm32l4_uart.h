@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32l4/chip/stm32l4x6xx_uart.h
+ * arch/arm/src/stm32l4/chip/stm32l4_uart.h
  *
  *   Copyright (C) 2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4X6XX_UART_H
-#define __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4X6XX_UART_H
+#ifndef __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_UART_H
+#define __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_UART_H
 
 /************************************************************************************
  * Included Files
@@ -57,7 +57,7 @@
 #define STM32L4_USART_GTPR_OFFSET   0x0010  /* Guard time and prescaler register */
 #define STM32L4_USART_RTOR_OFFSET   0x0014  /* Receiver timeout register */
 #define STM32L4_USART_RQR_OFFSET    0x0018  /* Request register */
-#define STM32L4_USART_ISR_OFFSET    0x001c  /* Interrupot and status register */
+#define STM32L4_USART_ISR_OFFSET    0x001c  /* Interrupt and status register */
 #define STM32L4_USART_ICR_OFFSET    0x0020  /* Interrupt flag clear register */
 #define STM32L4_USART_RDR_OFFSET    0x0024  /* Receive Data register */
 #define STM32L4_USART_TDR_OFFSET    0x0028  /* Transmit Data register */
@@ -139,7 +139,7 @@
 /* Control register 1 */
 
 #define USART_CR1_UE              (1 << 0)  /* Bit 0: USART Enable */
-#define USART_CR1_UESM            (1 << 1)  /* Bit 1: USART Enable in Stop mode*/
+#define USART_CR1_UESM            (1 << 1)  /* Bit 1: USART Enable in Stop mode */
 #define USART_CR1_RE              (1 << 2)  /* Bit 2: Receiver Enable */
 #define USART_CR1_TE              (1 << 3)  /* Bit 3: Transmitter Enable */
 #define USART_CR1_IDLEIE          (1 << 4)  /* Bit 4: IDLE Interrupt Enable */
@@ -150,7 +150,7 @@
 #define USART_CR1_PS              (1 << 9)  /* Bit 9: Parity Selection */
 #define USART_CR1_PCE             (1 << 10) /* Bit 10: Parity Control Enable */
 #define USART_CR1_WAKE            (1 << 11) /* Bit 11: Wakeup method */
-#define USART_CR1_M0              (1 << 12) /* Bit 12: word length */
+#define USART_CR1_M0              (1 << 12) /* Bit 12: Word length */
 #define USART_CR1_MME             (1 << 13) /* Bit 13: Mute mode enable */
 #define USART_CR1_CMIE            (1 << 14) /* Bit 14: Character match interrupt enable */
 #define USART_CR1_OVER8           (1 << 15) /* Bit 15: Oversampling mode */
@@ -163,7 +163,7 @@
 
 #define USART_CR1_RTOIE           (1 << 26) /* Bit 26: Receiver timeout interrupt enable */
 #define USART_CR1_EOBIE           (1 << 27) /* Bit 27: End of block interrupt enable */
-#define USART_CR1_M1              (1 << 28) /* Bit 12: word length */
+#define USART_CR1_M1              (1 << 28) /* Bit 28: Word length */
 
 #define USART_CR1_ALLINTS         (USART_CR1_IDLEIE|USART_CR1_RXNEIE| \
 	USART_CR1_TCIE|USART_CR1_TXEIE|USART_CR1_PEIE|USART_CR1_CMIE| \
@@ -171,7 +171,7 @@
 
 /* Control register 2 */
 
-#define USART_CR2_ADDM7           (1 << 4)  /* Bit 4:  */
+#define USART_CR2_ADDM7           (1 << 4)  /* Bit 4: 7-bit/4-bit Address Detection */
 #define USART_CR2_LBDL            (1 << 5)  /* Bit 5: LIN Break Detection Length */
 #define USART_CR2_LBDIE           (1 << 6)  /* Bit 6: LIN Break Detection Interrupt Enable */
 #define USART_CR2_LBCL            (1 << 8)  /* Bit 8: Last Bit Clock pulse */
@@ -314,5 +314,5 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_STC_STM32L4_CHIP_STM32L4X6XX_UART_H */
+#endif /* __ARCH_ARM_STC_STM32L4_CHIP_STM32L4_UART_H */
 

@@ -1,8 +1,9 @@
 /************************************************************************************
- * arch/arm/src/stm32l4/stm32l4_firewall.h
+ * configs/nucleo-l452re/src/stm32_boot.c
  *
- *   Copyright (C) 2016 Sebastien Lorquet. All rights reserved.
- *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,81 +34,61 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_FIREWALL_H
-#define __ARCH_ARM_SRC_STM32L4_STM32L4_FIREWALL_H
-
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
-#include "chip.h"
+#include <debug.h>
 
-/* Include the correct firewall register definitions for this STM32L4 family */
+#include <nuttx/board.h>
+#include <arch/board/board.h>
 
-#if defined(CONFIG_STM32L4_STM32L4X6)
-#  include "chip/stm32l4x6xx_firewall.h"
-#elif defined(CONFIG_STM32L4_STM32L4X3)
-#  include "chip/stm32l4x3xx_firewall.h"
-#else
-#  error "Unsupported STM32L4 chip"
-#endif
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-struct stm32l4_firewall_t
-  {
-  uintptr_t   codestart;
-  size_t      codelen;
-  uintptr_t   nvdatastart;
-  size_t      nvdatalen;
-  uintptr_t   datastart;
-  size_t      datalen;
-  uint8_t     datashared:1;
-  uint8_t     dataexec  :1;
-  };
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+#include "up_arch.h"
+#include "nucleo-l452re.h"
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-/****************************************************************************
- * Name: stm32l4_firewallsetup
+/************************************************************************************
+ * Name: stm32l4_boardinitialize
  *
  * Description:
- *   Configure the STM32L4 firewall. After this, protected code will only
- *   be accessible via the "entry gate".
- *   Once enabled, the firewall cannot be enabled until the next reset.
- *   Returns 0 when OK, -1 when addresses and length are not properly aligned.
+ *   All STM32 architectures must provide the following entry point.  This entry point
+ *   is called early in the intitialization -- after all memory has been configured
+ *   and mapped but before any devices have been initialized.
+ *
+ ************************************************************************************/
+
+void stm32l4_boardinitialize(void)
+{
+#ifdef CONFIG_ARCH_LEDS
+  /* Configure on-board LEDs if LED support has been selected. */
+
+  board_autoled_initialize();
+#endif
+}
+
+/****************************************************************************
+ * Name: board_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_initialize().  board_initialize() will be
+ *   called immediately after up_initialize() is called and just before the
+ *   initial application is started.  This additional initialization phase
+ *   may be used, for example, to initialize board-specific device drivers.
  *
  ****************************************************************************/
 
-int stm32l4_firewallsetup(FAR struct stm32l4_firewall_t *setup);
+#ifdef CONFIG_BOARD_INITIALIZE
+void board_initialize(void)
+{
+  /* Perform board-specific initialization here if so configured */
 
-#undef EXTERN
-#if defined(__cplusplus)
+  (void)stm32_bringup();
 }
 #endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_FIREWALL_H */
-
