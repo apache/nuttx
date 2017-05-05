@@ -47,7 +47,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/wireless/ieee802154/ieee802154_radio.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 #include <nuttx/wireless/ieee802154/mrf24j40.h>
 
@@ -83,8 +82,6 @@
 #    error Mikroe BEE on mikroBUS1 requires CONFIG_STM32_SPI2
 #  endif
 #endif
-
-#define RADIO_DEVNAME "/dev/mrf24j40"
 
 /****************************************************************************
  * Private Types
@@ -287,18 +284,7 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
       return ret;
     }
 #endif
-#elif defined(CONFIG_IEEE802154_DEV)
-  /* Register a character driver to access the IEEE 802.15.4 radio from
-   * user-space
-   */
 
-  ret = radio802154dev_register(radio, RADIO_DEVNAME);
-  if (ret < 0)
-    {
-      wlerr("ERROR: Failed to register the radio device %s: %d\n",
-            RADIO_DEVNAME, ret);
-      return ret;
-    }
 #endif /* CONFIG_IEEE802154_MAC */
 
   return OK;

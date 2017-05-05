@@ -60,14 +60,6 @@ config IEEE802154_NTXDESC
 		
 endif # IEEE802154_MAC
 
-config IEEE802154_DEV
-	bool "Debug character driver for ieee802.15.4 radio interfaces"
-	default n
-	depends on WIRELESS_IEEE802154
-	---help---
-		Enables a device driver to expose ieee802.15.4 radio controls
-		to user space as IOCTLs.
-
 config IEEE802154_NETDEV
 	bool "IEEE802154 6loWPAN Network Device"
 	default n

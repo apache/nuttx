@@ -2,6 +2,7 @@
  * drivers/wireless/ieee802154/mrf24j40.c
  *
  *   Copyright (C) 2015-2016 Sebastien Lorquet. All rights reserved.
+ *   Copyright (C) 2017 Verge Inc. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
  *   Author: Anthony Merlino <anthony@vergeaero.com>
  *
@@ -90,6 +91,10 @@
 #define MRF24J40_RXMODE_PROMISC 1
 #define MRF24J40_RXMODE_NOCRC   2
 
+#define MRF24J40_MODE_DEVICE    0
+#define MRF24J40_MODE_COORD     1
+#define MRF24J40_MODE_PANCOORD  2
+
 /* Definitions for PA control on high power modules */
 
 #define MRF24J40_PA_AUTO   1
@@ -125,9 +130,8 @@ struct mrf24j40_radio_s
   struct work_s   pollwork;  /* For deferring poll work to the work queue */
   sem_t           exclsem;   /* Exclusive access to this struct */
 
-  uint16_t        panid;     /* PAN identifier, FFFF = not set */
-  uint16_t        saddr;     /* short address, FFFF = not set */
-  uint8_t         eaddr[8];  /* extended address, FFFFFFFFFFFFFFFF = not set */
+  struct ieee802154_addr_s addr;
+
   uint8_t         channel;   /* 11 to 26 for the 2.4 GHz band */
   uint8_t         devmode;   /* device mode: device, coord, pancoord */
   uint8_t         paenabled; /* enable usage of PA */
@@ -181,7 +185,6 @@ static int  mrf24j40_gts_setup(FAR struct mrf24j40_radio_s *dev, uint8_t gts,
 static int  mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
               FAR struct iob_s *frame, uint32_t fifo_addr);
 
-/* IOCTL helpers */
 
 static int  mrf24j40_setchannel(FAR struct mrf24j40_radio_s *radio,
               uint8_t chan);
@@ -196,7 +199,7 @@ static int  mrf24j40_setsaddr(FAR struct mrf24j40_radio_s *radio,
 static int  mrf24j40_getsaddr(FAR struct mrf24j40_radio_s *radio,
               FAR uint16_t *saddr);
 static int  mrf24j40_seteaddr(FAR struct mrf24j40_radio_s *radio,
-              FAR uint8_t *eaddr);
+              FAR const uint8_t *eaddr);
 static int  mrf24j40_geteaddr(FAR struct mrf24j40_radio_s *radio,
               FAR uint8_t *eaddr);
 static int  mrf24j40_setpromisc(FAR struct mrf24j40_radio_s *radio,
@@ -222,11 +225,14 @@ static int  mrf24j40_energydetect(FAR struct mrf24j40_radio_s *radio,
 
 static int  mrf24j40_bind(FAR struct ieee802154_radio_s *radio,
               FAR struct ieee802154_radiocb_s *radiocb);
-static int  mrf24j40_ioctl(FAR struct ieee802154_radio_s *radio, int cmd,
-              unsigned long arg);
-static int  mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio);
 static int  mrf24j40_txnotify_csma(FAR struct ieee802154_radio_s *radio);
 static int  mrf24j40_txnotify_gts(FAR struct ieee802154_radio_s *radio);
+static int  mrf24j40_get_attr(FAR struct ieee802154_radio_s *radio,
+              enum ieee802154_pib_attr_e pib_attr,
+              FAR union ieee802154_attr_val_u *attr_value);
+static int mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
+              enum ieee802154_pib_attr_e pib_attr,
+              FAR const union ieee802154_attr_val_u *attr_value);
 
 /****************************************************************************
  * Private Data
@@ -242,14 +248,14 @@ static int  mrf24j40_txnotify_gts(FAR struct ieee802154_radio_s *radio);
 static const struct ieee802154_radioops_s mrf24j40_devops =
 {
   mrf24j40_bind,
-  mrf24j40_ioctl,
-  mrf24j40_rxenable,
   mrf24j40_txnotify_csma,
   mrf24j40_txnotify_gts,
+  mrf24j40_get_attr,
+  mrf24j40_set_attr
 };
 
 /****************************************************************************
- * Private Functions
+ * Radio Interface Functions
  ****************************************************************************/
 
 static int mrf24j40_bind(FAR struct ieee802154_radio_s *radio,
@@ -298,6 +304,103 @@ static int mrf24j40_txnotify_csma(FAR struct ieee802154_radio_s *radio)
 
   return OK;
 }
+
+/****************************************************************************
+ * Function: mrf24j40_txnotify_gts
+ *
+ * Description:
+ *   Driver callback invoked when new TX data is available.  This is a
+ *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
+ *   latency.
+ *
+ * Parameters:
+ *   radio  - Reference to the radio driver state structure
+ *
+ * Returned Value:
+ *  None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int mrf24j40_txnotify_gts(FAR struct ieee802154_radio_s *radio)
+{
+  FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
+
+  /* Is our single work structure available?  It may not be if there are
+   * pending interrupt actions and we will have to ignore the Tx
+   * availability action.
+   */
+
+  if (work_available(&dev->pollwork))
+    {
+      /* Schedule to serialize the poll on the worker thread. */
+
+      work_queue(HPWORK, &dev->pollwork, mrf24j40_dopoll_gts, dev, 0);
+    }
+
+  return OK;
+}
+
+static int  mrf24j40_get_attr(FAR struct ieee802154_radio_s *radio,
+                              enum ieee802154_pib_attr_e pib_attr,
+                              FAR union ieee802154_attr_val_u *attr_value)
+{
+  FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
+  int ret;
+
+  switch (pib_attr)
+    {
+      case IEEE802154_PIB_MAC_EXTENDED_ADDR:
+        {
+          memcpy(&attr_value->mac.eaddr[0], &dev->addr.eaddr[0], 8);
+          ret = IEEE802154_STATUS_SUCCESS;
+        }
+        break;
+      default:
+        ret = IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE;
+    }
+  return ret;
+}
+
+static int mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
+                             enum ieee802154_pib_attr_e pib_attr,
+                             FAR const union ieee802154_attr_val_u *attr_value)
+{
+  FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
+  int ret;
+
+  switch (pib_attr)
+    {
+      case IEEE802154_PIB_MAC_EXTENDED_ADDR:
+        {
+          mrf24j40_seteaddr(dev, &attr_value->mac.eaddr[0]);
+          ret = IEEE802154_STATUS_SUCCESS;
+        }
+        break;
+      case IEEE802154_PIB_MAC_PROMISCUOUS_MODE:
+        {
+          if (attr_value->mac.promisc_mode)
+            {
+              mrf24j40_setrxmode(dev, MRF24J40_RXMODE_PROMISC); 
+            }
+          else
+            {
+              mrf24j40_setrxmode(dev, MRF24J40_RXMODE_NORMAL); 
+            }
+
+          ret = IEEE802154_STATUS_SUCCESS;
+        }
+        break;
+      default:
+        ret = IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE;
+    }
+  return ret;
+}
+
+/****************************************************************************
+ * Internal Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Function: mrf24j40_dopoll_csma
@@ -351,43 +454,6 @@ static void mrf24j40_dopoll_csma(FAR void *arg)
     }
 
   sem_post(&dev->exclsem);
-}
-
-/****************************************************************************
- * Function: mrf24j40_txnotify_gts
- *
- * Description:
- *   Driver callback invoked when new TX data is available.  This is a
- *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
- *   latency.
- *
- * Parameters:
- *   radio  - Reference to the radio driver state structure
- *
- * Returned Value:
- *  None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static int mrf24j40_txnotify_gts(FAR struct ieee802154_radio_s *radio)
-{
-  FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
-
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions and we will have to ignore the Tx
-   * availability action.
-   */
-
-  if (work_available(&dev->pollwork))
-    {
-      /* Schedule to serialize the poll on the worker thread. */
-
-      work_queue(HPWORK, &dev->pollwork, mrf24j40_dopoll_gts, dev, 0);
-    }
-
-  return OK;
 }
 
 /****************************************************************************
@@ -772,7 +838,7 @@ static int mrf24j40_setpanid(FAR struct mrf24j40_radio_s *dev,
   mrf24j40_setreg(dev->spi, MRF24J40_PANIDH, (uint8_t)(panid>>8));
   mrf24j40_setreg(dev->spi, MRF24J40_PANIDL, (uint8_t)(panid&0xFF));
 
-  dev->panid = panid;
+  dev->addr.panid = panid;
   wlinfo("%04X\n", (unsigned)panid);
 
   return OK;
@@ -789,7 +855,7 @@ static int mrf24j40_setpanid(FAR struct mrf24j40_radio_s *dev,
 static int mrf24j40_getpanid(FAR struct mrf24j40_radio_s *dev,
                              FAR uint16_t *panid)
 {
-  *panid = dev->panid;
+  *panid = dev->addr.panid;
 
   return OK;
 }
@@ -810,7 +876,7 @@ static int mrf24j40_setsaddr(FAR struct mrf24j40_radio_s *dev,
   mrf24j40_setreg(dev->spi, MRF24J40_SADRH, (uint8_t)(saddr>>8));
   mrf24j40_setreg(dev->spi, MRF24J40_SADRL, (uint8_t)(saddr&0xFF));
 
-  dev->saddr = saddr;
+  dev->addr.saddr = saddr;
   wlinfo("%04X\n", (unsigned)saddr);
   return OK;
 }
@@ -826,7 +892,7 @@ static int mrf24j40_setsaddr(FAR struct mrf24j40_radio_s *dev,
 static int mrf24j40_getsaddr(FAR struct mrf24j40_radio_s *dev,
                              FAR uint16_t *saddr)
 {
-  *saddr = dev->saddr;
+  *saddr = dev->addr.saddr;
 
   return OK;
 }
@@ -841,14 +907,14 @@ static int mrf24j40_getsaddr(FAR struct mrf24j40_radio_s *dev,
  ****************************************************************************/
 
 static int mrf24j40_seteaddr(FAR struct mrf24j40_radio_s *dev,
-                             FAR uint8_t *eaddr)
+                             FAR const uint8_t *eaddr)
 {
   int i;
 
   for (i = 0; i < 8; i++)
     {
       mrf24j40_setreg(dev->spi, MRF24J40_EADR0 + i, eaddr[i]);
-      dev->eaddr[i] = eaddr[i];
+      dev->addr.eaddr[i] = eaddr[i];
     }
 
   return OK;
@@ -865,39 +931,7 @@ static int mrf24j40_seteaddr(FAR struct mrf24j40_radio_s *dev,
 static int mrf24j40_geteaddr(FAR struct mrf24j40_radio_s *dev,
                              FAR uint8_t *eaddr)
 {
-  memcpy(eaddr, dev->eaddr, 8);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: mrf24j40_setpromisc
- *
- * Description:
- *   Set the device into promiscuous mode, e.g do not filter any incoming
- *   frame.
- *
- ****************************************************************************/
-
-static int mrf24j40_setpromisc(FAR struct mrf24j40_radio_s *dev,
-                               bool promisc)
-{
-  return mrf24j40_setrxmode(dev, promisc ? MRF24J40_RXMODE_PROMISC :
-                                 MRF24J40_RXMODE_NORMAL);
-}
-
-/****************************************************************************
- * Name: mrf24j40_getpromisc
- *
- * Description:
- *   Get the device receive mode.
- *
- ****************************************************************************/
-
-static int mrf24j40_getpromisc(FAR struct mrf24j40_radio_s *dev,
-                               FAR bool *promisc)
-{
-  *promisc = (dev->rxmode == MRF24J40_RXMODE_PROMISC);
+  memcpy(eaddr, dev->addr.eaddr, 8);
 
   return OK;
 }
@@ -927,17 +961,17 @@ static int mrf24j40_setdevmode(FAR struct mrf24j40_radio_s *dev,
 
   reg = mrf24j40_getreg(dev->spi, MRF24J40_RXMCR);
 
-  if (mode == IEEE802154_MODE_PANCOORD)
+  if (mode == MRF24J40_MODE_PANCOORD)
     {
       reg |=  MRF24J40_RXMCR_PANCOORD;
       reg &= ~MRF24J40_RXMCR_COORD;
     }
-  else if (mode == IEEE802154_MODE_COORD)
+  else if (mode == MRF24J40_MODE_COORD)
     {
       reg |=  MRF24J40_RXMCR_COORD;
       reg &= ~MRF24J40_RXMCR_PANCOORD;
     }
-  else if (mode == IEEE802154_MODE_DEVICE)
+  else if (mode == MRF24J40_MODE_DEVICE)
     {
       reg &= ~MRF24J40_RXMCR_PANCOORD;
       reg &= ~MRF24J40_RXMCR_COORD;
@@ -1176,106 +1210,6 @@ static int mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev)
 }
 
 /****************************************************************************
- * Name: mrf24j40_ioctl
- *
- * Description:
- *   Misc/unofficial device controls.
- *
- ****************************************************************************/
-
-static int mrf24j40_ioctl(FAR struct ieee802154_radio_s *radio, int cmd,
-                          unsigned long arg)
-{
-  FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
-  FAR union ieee802154_radioarg_u *u =
-    (FAR union ieee802154_radioarg_u *)((uintptr_t)arg);
-  int ret;
-
-  switch(cmd)
-    {
-      case PHY802154IOC_SET_CHAN:
-        ret = mrf24j40_setchannel(dev, u->channel);
-        break;
-
-      case PHY802154IOC_GET_CHAN:
-        ret =  mrf24j40_getchannel(dev, &u->channel);
-        break;
-
-      case PHY802154IOC_SET_PANID:
-        ret = mrf24j40_setpanid(dev, u->panid);
-        break;
-
-      case PHY802154IOC_GET_PANID:
-        ret = mrf24j40_getpanid(dev, &u->panid);
-        break;
-
-      case PHY802154IOC_SET_SADDR:
-        ret = mrf24j40_setsaddr(dev, u->saddr);
-        break;
-
-      case PHY802154IOC_GET_SADDR:
-        ret = mrf24j40_getsaddr(dev, &u->saddr);
-        break;
-
-      case PHY802154IOC_SET_EADDR:
-        ret = mrf24j40_seteaddr(dev, u->eaddr);
-        break;
-
-      case PHY802154IOC_GET_EADDR:
-        ret = mrf24j40_geteaddr(dev, u->eaddr);
-        break;
-
-      case PHY802154IOC_SET_PROMISC:
-        ret = mrf24j40_setpromisc(dev, u->promisc);
-        break;
-
-      case PHY802154IOC_GET_PROMISC:
-        ret = mrf24j40_getpromisc(dev, &u->promisc);
-        break;
-
-      case PHY802154IOC_SET_DEVMODE:
-        ret = mrf24j40_setdevmode(dev, u->devmode);
-        break;
-
-      case PHY802154IOC_GET_DEVMODE:
-        ret = mrf24j40_getdevmode(dev, &u->devmode);
-        break;
-
-      case PHY802154IOC_SET_TXPWR:
-        ret = mrf24j40_settxpower(dev, u->txpwr);
-        break;
-
-      case PHY802154IOC_GET_TXPWR:
-        ret = mrf24j40_gettxpower(dev, &u->txpwr);
-        break;
-
-      case PHY802154IOC_SET_CCA:
-        ret = mrf24j40_setcca(dev, &u->cca);
-        break;
-
-      case PHY802154IOC_GET_CCA:
-        ret = mrf24j40_getcca(dev, &u->cca);
-        break;
-
-      case PHY802154IOC_ENERGYDETECT:
-        ret = mrf24j40_energydetect(dev, &u->energy);
-        break;
-
-      case 1000:
-        return mrf24j40_regdump(dev);
-
-      case 1001: dev->paenabled = (uint8_t)arg;
-        wlinfo("PA %sabled\n", arg ? "en" : "dis");
-        return OK;
-
-      default:
-        return -ENOTTY;
-    }
-
-  return ret;
-}
-
-/****************************************************************************
  * Name: mrf24j40_energydetect
  *
  * Description:
@@ -1335,8 +1269,6 @@ static int mrf24j40_csma_setup(FAR struct mrf24j40_radio_s *dev,
 {
   uint8_t reg;
   int     ret;
-
-  mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
 
   /* Enable tx int */
 
@@ -1534,22 +1466,31 @@ static void mrf24j40_irqwork_txgts(FAR struct mrf24j40_radio_s *dev,
  * Name: mrf24j40_rxenable
  *
  * Description:
- *  Enable reception of a packet. The interrupt will signal the rx semaphore.
+ *  Enable/Disable receiver.
  *
  ****************************************************************************/
 
-static int mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio)
+static int mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio, bool enable)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
   uint8_t reg;
 
-  mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
+  if (enable)
+    {
+      /* Enable rx int */
 
-  /* Enable rx int */
+      reg = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
+      reg &= ~MRF24J40_INTCON_RXIE;
+      mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
+    }
+  else
+    {
+      /* Disable rx int */
 
-  reg = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
-  reg &= ~MRF24J40_INTCON_RXIE;
-  mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
+      reg  = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
+      reg |= MRF24J40_INTCON_RXIE;
+      mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
+    }
 
   return OK;
 }
@@ -1570,15 +1511,13 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
   uint32_t index;
   uint8_t  reg;
 
-  /* wlinfo("!\n"); */
-
   /* Disable rx int */
 
   reg  = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
   reg |= MRF24J40_INTCON_RXIE;
   mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
 
-  /* Disable packet reception */
+  /* Disable packet reception. See pg. 109 of datasheet */
 
   mrf24j40_setreg(dev->spi, MRF24J40_BBREG1, MRF24J40_BBREG1_RXDECINV);
 
@@ -1597,7 +1536,6 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
   addr = MRF24J40_RXBUF_BASE;
 
   iob->io_len= mrf24j40_getreg(dev->spi, addr++);
-  /* wlinfo("len %3d\n", dev->radio.rxbuf->len); */
 
   /* TODO: This needs to be changed.  It is inefficient to do the SPI read byte
    * by byte */
@@ -1633,6 +1571,11 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
 
   mrf24j40_setreg(dev->spi, MRF24J40_BBREG1, 0);
 
+  /* Enable rx int */
+
+  reg = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
+  reg &= ~MRF24J40_INTCON_RXIE;
+  mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
 }
 
 /****************************************************************************

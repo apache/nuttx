@@ -2,7 +2,9 @@
  * wireless/ieee802154/mac802154.c
  *
  *   Copyright (C) 2016 Sebastien Lorquet. All rights reserved.
+ *   Copyright (C) 2017 Verge Inc. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
+ *   Author: Anthony Merlino <anthony@vergeaero.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -51,6 +53,7 @@
 #include <nuttx/drivers/iob.h>
 
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
+#include <nuttx/wireless/ieee802154/ieee802154_radio.h>
 
 #include "mac802154.h"
 
@@ -445,14 +448,15 @@ static int mac802154_defaultmib(FAR struct ieee802154_privmac_s *priv)
 
   priv->coord_addr.mode = IEEE802154_ADDRMODE_NONE;
   priv->coord_addr.saddr = IEEE802154_SADDR_UNSPEC;
-  memcpy(&priv->coord_addr.eaddr[0], IEEE802154_EADDR_UNSPEC, 8);
+  memcpy(&priv->coord_addr.eaddr[0], IEEE802154_EADDR_UNSPEC,
+         IEEE802154_EADDR_LEN);
 
   /* Reset the device's address */
 
   priv->addr.mode = IEEE802154_ADDRMODE_NONE;
   priv->addr.panid = IEEE802154_PAN_UNSPEC;
   priv->addr.saddr = IEEE802154_SADDR_UNSPEC;
-  memcpy(&priv->addr.eaddr[0], IEEE802154_EADDR_UNSPEC, 8);
+  memcpy(&priv->addr.eaddr[0], IEEE802154_EADDR_UNSPEC, IEEE802154_EADDR_LEN);
 
 
   /* These attributes are effected and determined based on the PHY.  Need to
@@ -875,85 +879,78 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg)
         {
           case MAC802154IOC_MLME_ASSOC_REQUEST:
             {
-              mac802154_req_associate(mac, &macarg->assocreq);
+              ret = mac802154_req_associate(mac, &macarg->assocreq);
             }
             break;
           case MAC802154IOC_MLME_ASSOC_RESPONSE:
             {
-              mac802154_resp_associate(mac, &macarg->assocresp);
+              ret = mac802154_resp_associate(mac, &macarg->assocresp);
             }
             break;
           case MAC802154IOC_MLME_DISASSOC_REQUEST:
             {
-              mac802154_req_disassociate(mac, &macarg->disassocreq);
+              ret = mac802154_req_disassociate(mac, &macarg->disassocreq);
             }
             break;
           case MAC802154IOC_MLME_GET_REQUEST:
             {
-              mac802154_req_get(mac, macarg->getreq.pib_attr,
-                                macarg->getreq.attr_value);
+              ret = mac802154_req_get(mac, macarg->getreq.pib_attr,
+                                      &macarg->getreq.attr_value);
             }
             break;
           case MAC802154IOC_MLME_GTS_REQUEST:
             {
-              mac802154_req_gts(mac, &macarg->gtsreq);
+              ret = mac802154_req_gts(mac, &macarg->gtsreq);
             }
             break;
           case MAC802154IOC_MLME_ORPHAN_RESPONSE:
             {
-              mac802154_resp_orphan(mac, &macarg->orphanresp);
+              ret = mac802154_resp_orphan(mac, &macarg->orphanresp);
             }
             break;
           case MAC802154IOC_MLME_RESET_REQUEST:
             {
-              mac802154_req_reset(mac, macarg->resetreq.rst_pibattr);
+              ret = mac802154_req_reset(mac, macarg->resetreq.rst_pibattr);
             }
             break;
           case MAC802154IOC_MLME_RXENABLE_REQUEST:
             {
-              mac802154_req_rxenable(mac, &macarg->rxenabreq);
+              ret = mac802154_req_rxenable(mac, &macarg->rxenabreq);
             }
             break;
           case MAC802154IOC_MLME_SCAN_REQUEST:
             {
-              mac802154_req_scan(mac, &macarg->scanreq);
+              ret = mac802154_req_scan(mac, &macarg->scanreq);
             }
             break;
           case MAC802154IOC_MLME_SET_REQUEST:
             {
-              mac802154_req_set(mac, &macarg->setreq);
+              ret = mac802154_req_set(mac, macarg->setreq.pib_attr,
+                                      &macarg->setreq.attr_value);
             }
             break;
           case MAC802154IOC_MLME_START_REQUEST:
             {
-              mac802154_req_start(mac, &macarg->startreq);
+              ret = mac802154_req_start(mac, &macarg->startreq);
             }
             break;
           case MAC802154IOC_MLME_SYNC_REQUEST:
             {
-              mac802154_req_sync(mac, &macarg->syncreq);
+              ret = mac802154_req_sync(mac, &macarg->syncreq);
             }
             break;
           case MAC802154IOC_MLME_POLL_REQUEST:
             {
-              mac802154_req_poll(mac, &macarg->pollreq);
+              ret = mac802154_req_poll(mac, &macarg->pollreq);
             }
             break;
+          default:
+              wlerr("ERROR: Unrecognized cmd: %d\n", cmd);
+              ret = -ENOTTY;
+              break;
         }
     }
-
-  /* No, other IOCTLs must be aimed at the IEEE802.15.4 radio layer */
-
-  else
-   {
-     DEBUGASSERT(priv->radio != NULL &&
-                 priv->radio->ops != NULL &&
-                 priv->radio->ops->ioctl != NULL);
-
-     ret = priv->radio->ops->ioctl(priv->radio, cmd, arg);
-   }
-
- return ret;
+  return ret;
 }
 
 /****************************************************************************
@@ -1109,8 +1106,10 @@ int mac802154_req_data(MACHANDLE mac,
         }
       else if (meta->dest_addr.mode == IEEE802154_ADDRMODE_EXTENDED)
         {
-          memcpy(&frame->io_data[mhr_len], &meta->dest_addr.eaddr, 8);
-          mhr_len += 8;
+          memcpy(&frame->io_data[mhr_len], &meta->dest_addr.eaddr,
+                 IEEE802154_EADDR_LEN);
+
+          mhr_len += IEEE802154_EADDR_LEN;
         }
     }
 
@@ -1166,8 +1165,10 @@ int mac802154_req_data(MACHANDLE mac,
         }
       else if (meta->src_addr_mode == IEEE802154_ADDRMODE_EXTENDED)
         {
-          memcpy(&frame->io_data[mhr_len], &priv->addr.eaddr, 8);
-          mhr_len += 8;
+          memcpy(&frame->io_data[mhr_len], &priv->addr.eaddr,
+                 IEEE802154_EADDR_LEN);
+
+          mhr_len += IEEE802154_EADDR_LEN;
         }
     }
 
@@ -1482,38 +1483,39 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
  *
  ****************************************************************************/
 
-int mac802154_req_set(MACHANDLE mac, FAR struct ieee802154_set_req_s *req)
+int mac802154_req_set(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
+                      FAR const union ieee802154_attr_val_u *attr_value)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
-  union ieee802154_radioarg_u radio_arg;
   int ret;
 
-  switch (req->pib_attr)
+  switch (pib_attr)
     {
       case IEEE802154_PIB_MAC_EXTENDED_ADDR:
         {
-          /* Set the attribute in the structure to the new value */
+          /* Set the MAC copy of the address in the table */
 
-          memcpy(&priv->addr.eaddr[0], &req->attr_value.eaddr[0], 8);
+          memcpy(&priv->addr.eaddr[0], &attr_value->mac.eaddr[0],
+                 IEEE802154_EADDR_LEN);
 
+          /* Tell the radio about the attribute */
 
-          /* The radio device needs to be updated as well */
-
-          memcpy(&radio_arg.eaddr[0], &priv->addr.eaddr[0], 8);
-          ret = priv->radio->ops->ioctl(priv->radio, PHY802154IOC_SET_EADDR,
-                                        (unsigned long)&radio_arg);
-                          
+          priv->radio->ops->set_attr(priv->radio, pib_attr, attr_value);
+                         
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
       default:
         {
-          ret = -IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE;
+          /* The attribute may be handled soley in the radio driver, so pass
+           * it along.
+           */
+
+          ret = priv->radio->ops->set_attr(priv->radio, pib_attr, attr_value);
         }
         break;
     }
-
   return ret;
 }
 

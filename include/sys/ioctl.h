@@ -65,11 +65,6 @@
 #endif
 
 #ifdef CONFIG_WIRELESS_IEEE802154
-#ifdef CONFIG_IEEE802154_DEV
-/* Include ieee802.15.4 radio IOCTL definitions */
-
-#  include <nuttx/wireless/ieee802154/ ieee802154_radio.h>
-#endif
 
 #ifdef CONFIG_IEEE802154_MAC
 /* Include ieee802.15.4 MAC IOCTL definitions */

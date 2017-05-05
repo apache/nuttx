@@ -269,7 +269,8 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
  *
  ****************************************************************************/
 
-int mac802154_req_set(MACHANDLE mac, FAR struct ieee802154_set_req_s *req);
+int mac802154_req_set(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
+                      FAR const union ieee802154_attr_val_u *attr_value);
 
 /****************************************************************************
  * Name: mac802154_req_start
