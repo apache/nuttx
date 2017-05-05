@@ -44,8 +44,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX) || \
-    defined(CONFIG_STM32L4_STM32L496XX)
+#if defined(CONFIG_STM32L4_STM32L4X6)
 
 /****************************************************************************************************
  * Pre-processor Definitions
@@ -807,5 +806,5 @@
 #  define RCC_CCIPR2_I2C4SEL_SYSCLK    (1 << RCC_CCIPR2_I2C4SEL_SHIFT)
 #  define RCC_CCIPR2_I2C4SEL_HSI       (2 << RCC_CCIPR2_I2C4SEL_SHIFT)
 
-#endif /* CONFIG_STM32L4_STM32L476XX || CONFIG_STM32L4_STM32L486XX || CONFIG_STM32L4_STM32L496XX */
+#endif /* CONFIG_STM32L4_STM32L4X6 */
 #endif /* __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4X6XX_RCC_H */

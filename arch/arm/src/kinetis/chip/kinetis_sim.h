@@ -328,7 +328,7 @@
                                                                                      divided by the PLLFLLCLK fractional divider
                                                                                      as configured by SIM_CLKDIV3[PLLFLLFRAC, PLLFLLDIV] */
 #      define SIM_SOPT2_TPMSRC_OCSERCLK       (2 << SIM_SOPT2_TPMSRC_SHIFT) /* OSCERCLK clock */
-#      define SIM_SOPT2_TPMSRC_EXTBYP         (3 << SIM_SOPT2_TPMSRC_SHIFT) /* MCGIRCLK clock */
+#      define SIM_SOPT2_TPMSRC_MCGIRCLK       (3 << SIM_SOPT2_TPMSRC_SHIFT) /* MCGIRCLK clock */
 #  endif
 #  if defined(KINETIS_SIM_HAS_SOPT2_I2SSRC)
 #      define SIM_SOPT2_I2SSRC_SHIFT          (24)      /* Bits 24-25: I2S master clock source select */
@@ -348,7 +348,7 @@
                                                                                   divided by the PLLFLLCLK fractional divider
                                                                                   as configured by SIM_CLKDIV3[PLLFLLFRAC, PLLFLLDIV] */
 #      define SIM_SOPT2_LPUARTSRC_OCSERCLK    (2 << SIM_SOPT2_LPUARTSRC_SHIFT) /* OSCERCLK clock */
-#      define SIM_SOPT2_LPUARTSRC_EXTBYP      (3 << SIM_SOPT2_LPUARTSRC_SHIFT) /* MCGIRCLK clock */
+#      define SIM_SOPT2_LPUARTSRC_MCGIRCLK    (3 << SIM_SOPT2_LPUARTSRC_SHIFT) /* MCGIRCLK clock */
 #  endif
 #  if defined(KINETIS_SIM_HAS_SOPT2_SDHCSRC)
 #    define SIM_SOPT2_SDHCSRC_SHIFT           (28)      /* Bits 28-29: SDHC clock source select */

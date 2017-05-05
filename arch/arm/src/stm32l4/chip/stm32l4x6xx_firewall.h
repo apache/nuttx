@@ -89,11 +89,19 @@
 
 /* Volatile Data Segment Start Address */
 #define FIREWALL_VDSADD_SHIFT           6
+#if defined(CONFIG_STM32L4_STM32L496XX)
+#define FIREWALL_VDSADD_MASK            (0x0FFF << FIREWALL_VDSADD_SHIFT)
+#else
 #define FIREWALL_VDSADD_MASK            (0x07FF << FIREWALL_VDSADD_SHIFT)
+#endif
 
 /* Volatile Data Segment Length */
 #define FIREWALL_VDSLENG_SHIFT          6
+#if defined(CONFIG_STM32L4_STM32L496XX)
+#define FIREWALL_VDSLENG_MASK           (0x0FFF << FIREWALL_VDSLENG_SHIFT)
+#else
 #define FIREWALL_VDSLENG_MASK           (0x07FF << FIREWALL_VDSLENG_SHIFT)
+#endif
 
 /* Configuration Register */
 #define FIREWALL_CR_FPA                 (1 << 0) /* Bit 0: Firewall prearm */

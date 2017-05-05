@@ -277,7 +277,7 @@ static inline void rcc_enableahb3(void)
 #ifdef CONFIG_STM32L4_FSMC
   /* Flexible static memory controller module clock enable */
 
-  regval |= RCC_AHB3ENR_FMCEN;
+  regval |= RCC_AHB3ENR_FSMCEN;
 #endif
 
 
@@ -563,7 +563,7 @@ static inline void rcc_enableapb2(void)
   regval |= RCC_APB2ENR_SAI2EN;
 #endif
 
-#ifdef CONFIG_STM32L4_DFSDM
+#ifdef CONFIG_STM32L4_DFSDM1
   /* DFSDM clock enable */
 
   regval |= RCC_APB2ENR_DFSDMEN;
@@ -814,7 +814,6 @@ static void stm32l4_stdclockconfig(void)
 
       regval  = getreg32(STM32L4_RCC_PLLSAI2CFG);
 
-      /* Enable the SAI2 PLL */
       /* Set the PLL dividers and multipliers to configure the SAI2 PLL */
 
       regval = (STM32L4_PLLSAI2CFG_PLLN | STM32L4_PLLSAI2CFG_PLLP |
@@ -829,7 +828,7 @@ static void stm32l4_stdclockconfig(void)
 
       putreg32(regval, STM32L4_RCC_PLLSAI2CFG);
 
-      /* Enable the SAI1 PLL */
+      /* Enable the SAI2 PLL */
 
       regval  = getreg32(STM32L4_RCC_CR);
       regval |= RCC_CR_PLLSAI2ON;
@@ -842,7 +841,7 @@ static void stm32l4_stdclockconfig(void)
         }
 #endif
 
-      /* Enable FLASH prefetch, instruction cache, data cache, and 5 wait states */
+      /* Enable FLASH prefetch, instruction cache, data cache, and 4 wait states */
 
 #ifdef CONFIG_STM32L4_FLASH_PREFETCH
       regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_PRFTEN);

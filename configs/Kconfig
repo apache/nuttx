@@ -810,6 +810,15 @@ config ARCH_BOARD_NUCLEO_F411RE
 		This is a minimal configuration that supports low-level test of the
 		Nucleo F411RE in the NuttX source tree.
 
+config ARCH_BOARD_NUCLEO_L452RE
+	bool "STM32L452 Nucleo L452RE"
+	depends on ARCH_CHIP_STM32L452RE
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo L452RE board based on the STMicro STM32L452RET6 MCU.
+
 config ARCH_BOARD_NUCLEO_L476RG
 	bool "STM32L476 Nucleo L476RG"
 	depends on ARCH_CHIP_STM32L476RG
@@ -1557,6 +1566,7 @@ config ARCH_BOARD
 	default "nucleo-f303re"            if ARCH_BOARD_NUCLEO_F303RE
 	default "nucleo-f334r8"            if ARCH_BOARD_NUCLEO_F334R8
 	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
+	default "nucleo-l452re"            if ARCH_BOARD_NUCLEO_L452RE
 	default "nucleo-l476rg"            if ARCH_BOARD_NUCLEO_L476RG
 	default "nucleo-l496zg"            if ARCH_BOARD_NUCLEO_L496ZG
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
@@ -1875,6 +1885,9 @@ source "configs/nucleo-f334r8/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 source "configs/nucleo-f4x1re/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_L452RE
+source "configs/nucleo-l452re/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_L476RG
 source "configs/nucleo-l476rg/Kconfig"

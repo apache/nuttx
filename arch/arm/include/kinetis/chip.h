@@ -1438,8 +1438,9 @@
 #  define KINETIS_NDAC6           4            /* Four 6-bit DAC */
 #  define KINETIS_NDAC12          2            /* Two 12-bit DAC */
 #  define KINETIS_NVREF           1            /* Voltage reference */
-#  define KINETIS_NTIMERS8        2            /* ? Two 8 channel timers */
-#  define KINETIS_NTIMERS2        2            /* ? Two 2 channel timers */
+#  define KINETIS_NTIMERS8        2            /* Two 8 channel FTM timers */
+#  define KINETIS_NTIMERS2        2            /* Two 2 channel FTM timers */
+#  define KINETIS_NTPMTIMERS2     2            /* Two 2 channel TPM timers */
 #  define KINETIS_NRTC            1            /* Real time clock */
 #  define KINETIS_NRNG            1            /* Random number generator */
 #  define KINETIS_NMMCAU          1            /* Hardware encryption */
