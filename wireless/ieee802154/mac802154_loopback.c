@@ -577,10 +577,9 @@ static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
                     unsigned long arg)
 {
-  FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
-  int ret = -ENOTTY;
-
 #if 0
+  FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
+
   /* Check for IOCTLs aimed at the IEEE802.15.4 MAC layer */
 
   if (_MAC802154IOCVALID(cmd))
@@ -588,12 +587,13 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
       FAR struct ieee802154_netmac_s *netmac =
         (FAR struct ieee802154_netmac_s *)arg;
     }
-
-  /* No, check for IOCTLs aimed at the IEEE802.15.4 radio layer */
-
   else
 #endif
-  return ret;
+    {
+      /* Not a valid IEEE 802.15.4 MAC IOCTL command */
+
+      return -ENOTTY;
+    }
 }
 #endif
 

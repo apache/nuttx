@@ -57,6 +57,7 @@
 #include <debug.h>
 
 #include <nuttx/net/sixlowpan.h>
+#include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 #include "sixlowpan/sixlowpan_internal.h"
 
@@ -193,7 +194,7 @@ int sixlowpan_src_panid(FAR struct ieee802154_driver_s *ieee,
       return ret;
     }
 
-  *panid = arg.u.getreq.attr_value->panid;
+  *panid = arg.u.getreq.attr_value.mac.panid;
   return OK;
 }
 

@@ -425,8 +425,8 @@
 /* 802.15.4 MAC driver ioctl definitions ************************************/
 /* (see nuttx/include/wireless/ieee802154/ieee802154_mac.h */
 
-#define _MAC802154IOCVALID(c)   (_IOC_TYPE(c)==_MAC802154BASE)
-#define _MAC802154IOC(nr)       _IOC(_MAC802154BASE,nr)
+#define _MAC802154IOCVALID(c)  (_IOC_TYPE(c)==_MAC802154BASE)
+#define _MAC802154IOC(nr)      _IOC(_MAC802154BASE,nr)
 
 /* boardctl() command definitions *******************************************/
 

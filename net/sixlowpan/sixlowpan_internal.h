@@ -134,7 +134,9 @@
  * Public Types
  ****************************************************************************/
 
-/* IPv^ TCP/UDP Definitions *************************************************/
+/* IPv6 TCP/UDP/ICMPv6 Definitions ******************************************/
+
+#ifdef CONFIG_NET_TCP
 /* IPv6 + TCP header.  Cast compatible based on IPv6 protocol field. */
 
 struct ipv6tcp_hdr_s
@@ -142,7 +144,9 @@ struct ipv6tcp_hdr_s
   struct ipv6_hdr_s     ipv6;
   struct tcp_hdr_s      tcp;
 };
+#endif
 
+#ifdef CONFIG_NET_UDP
 /* IPv6 + UDP header */
 
 struct ipv6udp_hdr_s
@@ -150,7 +154,9 @@ struct ipv6udp_hdr_s
   struct ipv6_hdr_s     ipv6;
   struct udp_hdr_s      udp;
 };
+#endif
 
+#ifdef CONFIG_NET_ICMPv6
 /* IPv6 + ICMPv6 header */
 
 struct ipv6icmp_hdr_s
@@ -158,6 +164,7 @@ struct ipv6icmp_hdr_s
   struct ipv6_hdr_s     ipv6;
   struct icmpv6_iphdr_s icmp;
 };
+#endif
 
 /* In order to provide a customizable IEEE 802.15.4 MAC header, a structure
  * of meta data is passed to the MAC network driver, struct
