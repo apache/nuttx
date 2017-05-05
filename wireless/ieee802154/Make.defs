@@ -37,8 +37,6 @@ ifeq ($(CONFIG_WIRELESS_IEEE802154),y)
 
 # Include IEEE 802.15.4 support
 
-CSRCS = radio802154_ioctl.c
-
 # Include wireless devices build support
 
 ifeq ($(CONFIG_IEEE802154_MAC),y)

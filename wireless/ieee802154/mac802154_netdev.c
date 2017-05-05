@@ -1381,20 +1381,6 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
         }
     }
 
-  /* No, check for IOCTLs aimed at the IEEE802.15.4 radio layer */
-
-  else if (_PHY802154IOCVALID(cmd))
-    {
-      FAR struct ieee802154_netradio_s *netradio =
-        (FAR struct ieee802154_netradio_s *)arg;
-
-      if (netradio != NULL)
-        {
-          unsigned long radioarg = (unsigned int)((uintptr_t)&netradio->u);
-          ret = priv->md_mac.macops.ioctl(priv->md_mac, cmd, radioarg);
-        }
-    }
-
   /* Okay, we have no idea what this command is.. just give to the
    * IEEE802.15.4 MAC layer without modification.
    */

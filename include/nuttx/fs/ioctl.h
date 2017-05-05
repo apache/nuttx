@@ -89,7 +89,6 @@
 #define _CLIOCBASE      (0x2400) /* Contactless modules ioctl commands */
 #define _USBCBASE       (0x2500) /* USB-C controller ioctl commands */
 #define _MAC802154BASE  (0x2600) /* 802.15.4 MAC ioctl commands */
-#define _PHY802154BASE  (0x2700) /* 802.15.4 Radio ioctl commands */
 
 /* boardctl() commands share the same number space */
 
@@ -428,12 +427,6 @@
 
 #define _MAC802154IOCVALID(c)   (_IOC_TYPE(c)==_MAC802154BASE)
 #define _MAC802154IOC(nr)       _IOC(_MAC802154BASE,nr)
-
-/* 802.15.4 Radio driver ioctl definitions **********************************/
-/* (see nuttx/ieee802154/wireless/ieee802154_radio.h */
-
-#define _PHY802154IOCVALID(c)    (_IOC_TYPE(c)==_PHY802154BASE)
-#define _PHY802154IOC(nr)       _IOC(_PHY802154BASE,nr)
 
 /* boardctl() command definitions *******************************************/
 

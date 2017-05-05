@@ -54,7 +54,6 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/sixlowpan.h>
-#include <nuttx/wireless/ieee802154/ieee802154_radio.h>
 #include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
 
 #include "mac802154.h"
@@ -594,32 +593,6 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
 
   else
 #endif
-  if (_PHY802154IOCVALID(cmd))
-    {
-      FAR struct ieee802154_netradio_s *netradio =
-        (FAR struct ieee802154_netradio_s *)arg;
-
-      /* Pick out radio settings of interest.  There is, of course, no
-       * radio in this loopback.
-       */
-
-      switch (cmd)
-        {
-           case PHY802154IOC_SET_PANID:
-             priv->lo_panid = netradio->u.panid;
-             ret = OK;
-             break;
-
-           case PHY802154IOC_GET_PANID:
-             netradio->u.panid = priv->lo_panid;
-             ret = OK;
-             break;
-
-           default:
-             break;
-        }
-    }
-
   return ret;
 }
 #endif

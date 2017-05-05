@@ -74,7 +74,6 @@
 
 #if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN)
 #  include <nuttx/wireless/ieee802154/ieee802154_mac.h>
-#  include <nuttx/wireless/ieee802154/ieee802154_radio.h>
 #endif
 
 #include "arp/arp.h"
@@ -353,22 +352,7 @@ static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
 
   if (arg != 0ul)
     {
-      /* Verify that this is either a valid IEEE802.15.4 radio IOCTL command
-       * or a valid IEEE802.15.4 MAC IOCTL command.
-       */
-
-      if (_PHY802154IOCVALID(cmd))
-        {
-          /* Get the IEEE802.15.4 network device to receive the radio IOCTL
-           * commdand
-           */
-
-          FAR struct ieee802154_netradio_s *radio =
-            (FAR struct ieee802154_netradio_s *)((uintptr_t)arg);
-
-          ifname = radio->ifr_name;
-        }
-      else if (_MAC802154IOCVALID(cmd))
+      if (_MAC802154IOCVALID(cmd))
         {
           /* Get the IEEE802.15.4 MAC device to receive the radio IOCTL
            * commdand

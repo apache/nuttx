@@ -55,8 +55,6 @@
 #  include <net/if.h>
 #endif
 
-#include <nuttx/wireless/ieee802154/ieee802154_radio.h>
-
 #include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
@@ -331,6 +329,8 @@ enum ieee802154_pib_attr_e
   IEEE802154_PIB_MAC_PANCOORD_SHORT_ADDR,
 };
 
+#define IEEE802154_EADDR_LEN 8
+
 /* IEEE 802.15.4 Device address
  * The addresses in ieee802154 have several formats:
  * No address                : [none]
@@ -351,9 +351,10 @@ struct ieee802154_addr_s
 
   enum ieee802154_addr_mode_e mode;
 
-  uint16_t panid;     /* PAN identifier, can be IEEE802154_PAN_UNSPEC */
-  uint16_t saddr;     /* short address */
-  uint8_t  eaddr[8];  /* extended address */
+  uint16_t panid;                        /* PAN identifier, can be 
+                                          * IEEE802154_PAN_UNSPEC */
+  uint16_t saddr;                        /* short address */
+  uint8_t  eaddr[IEEE802154_EADDR_LEN];  /* extended address */
 };
 
 #define IEEE802154_ADDRSTRLEN 22 /* (2*2+1+8*2, PPPP/EEEEEEEEEEEEEEEE) */
@@ -454,15 +455,54 @@ struct ieee802154_pend_addr_s
   struct ieee802154_addr_s addr[7]; /* Array of at most 7 addresses */
 };
 
+#ifdef CONFIG_IEEE802154_RANGING
+#define IEEE802154_TXDESC_FIELDS \
+  uint8_t handle; \
+  uint32_t timestamp; \
+  uint8_t status;
+#else
+#define IEEE802154_TXDESC_FIELDS \
+  uint8_t handle; \
+  uint32_t timestamp; \
+  uint8_t status;
+  bool rng_rcvd; \
+  uint32_t rng_counter_start; \
+  uint32_t rng_counter_stop; \
+  uint32_t rng_tracking_interval; \
+  uint32_t rng_offset;\
+  uint8_t rng_fom;
+#endif
+
+struct ieee802154_txdesc_s
+{
+  IEEE802154_TXDESC_FIELDS
+
+  /* TODO: Add slotting information for GTS transactions */
+};
+
+struct ieee802154_rxdesc_s
+{
+  uint8_t lqi;
+  uint8_t rssi;
+};
+
+struct ieee802154_cca_s
+{
+  uint8_t use_ed  : 1; /* CCA using ED */
+  uint8_t use_cs  : 1; /* CCA using carrier sense */
+  uint8_t edth;        /* Energy detection threshold for CCA */
+  uint8_t csth;        /* Carrier sense threshold for CCA */
+};
+
 /* Primitive Support Types ***************************************************/
 
-union ieee802154_attr_val_u
+union ieee802154_macattr_u
 {
-  uint8_t eaddr[8];
+  uint8_t eaddr[IEEE802154_EADDR_LEN];
   uint16_t saddr;
-  uint16_t pan_id;
+  uint16_t panid;
 
-  uint8_t coord_eaddr[8];
+  uint8_t coord_eaddr[IEEE802154_EADDR_LEN];
   uint16_t coord_saddr;
 
   bool is_assoc;
@@ -501,6 +541,25 @@ union ieee802154_attr_val_u
 
   uint8_t bsn;
   uint8_t dsn;
+};
+
+union ieee802154_phyattr_u
+{
+  uint8_t channel;
+  int32_t txpwr
+  /* TODO: Fill this out as we implement supported get/set commands */
+};
+
+union ieee802154_secattr_u
+{
+  /* TODO: Fill this out as we implement supported get/set commands */
+};
+
+union ieee802154_attr_val_u
+{
+  union ieee802154_macattr_u mac;
+  union ieee802154_phyattr_u phy;
+  union ieee802154_secattr_u sec;
 };
 
 struct ieee802154_gts_info_s
@@ -885,20 +944,6 @@ struct ieee802154_commstatus_ind_s
 };
 
 /*****************************************************************************
- * Primitive: MLME-GET.request
- *
- * Description:
- *    Requests information about a given PIB attribute.
- *
- *****************************************************************************/
-
-struct ieee802154_get_req_s
-{
-  enum ieee802154_pib_attr_e pib_attr;
-  FAR union ieee802154_attr_val_u *attr_value;
-};
-
-/*****************************************************************************
  * Primitive: MLME-GTS.request
  *
  * Description:
@@ -1090,6 +1135,20 @@ struct ieee802154_scan_conf_s
   uint8_t num_channels;
 
 #warning Figure out how to handle missing primitive semantics. See standard.
+};
+
+/*****************************************************************************
+ * Primitive: MLME-GET.request
+ *
+ * Description:
+ *    Requests information about a given PIB attribute.
+ *
+ *****************************************************************************/
+
+struct ieee802154_get_req_s
+{
+  enum ieee802154_pib_attr_e pib_attr;
+  union ieee802154_attr_val_u attr_value;
 };
 
 /*****************************************************************************
