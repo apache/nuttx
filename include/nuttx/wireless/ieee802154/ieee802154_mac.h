@@ -652,10 +652,13 @@ struct ieee802154_data_conf_s
 
 struct ieee802154_data_ind_s
 {
+  FAR struct ieee802154_data_ind_s *flink;
+
   struct ieee802154_addr_s src;     /* Source addressing information */
   struct ieee802154_addr_s dest;    /* Destination addressing infromation */
   uint8_t lqi;                      /* Link Quality Index */
   uint8_t dsn;                      /* Data Sequence Number */
+  uint8_t pool;                     /* Memory pool (Needed for deallocation) */
   uint32_t timestamp;               /* Time of received frame */
 
 #ifdef CONFIG_IEEE802154_SECURITY

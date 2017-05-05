@@ -60,6 +60,35 @@ config IEEE802154_NTXDESC
 		
 endif # IEEE802154_MAC
 
+config IEEE802154_IND_PREALLOC
+	int "Number of pre-allocated meta-data structures"
+	default 20
+	---help---
+		This specifies the total number of preallocated meta data structures
+		must be allocated with each incoming packet.  These may be allocated
+		from either from tasking logic or from interrupt level logic.
+
+config IEEE802154_IND_IRQRESERVE
+	int "Rserved pre-allocated meta-data structures"
+	default 10
+	---help---
+		If meta-data structures can be allocated from interrupt handlers,
+		then this specifies the number of pre-allocatd meta-data structures
+		that are reserved for for use only by interrupt handlers.  This may
+		be zero to reserve no meta-data structures for interrupt handlers.
+		In that case, the allocation will fail if tasking logic has
+		allocated them all.
+
+		Interrupt logic will first attempt to allocate fromt the general,
+		pre-allocated structure pool that will contain up to (size
+		CONFIG_IEEE802154_IND_PREALLOC - CONFIG_IEEE802154_IND_IRQRESERVE)
+		entries.  If that fails, then it will try to take a structure from
+		the reserve (size CONFIG_IEEE802154_IND_IRQRESERVE).
+
+		Non-interrupt logic will also first attempt to allocate fromt the
+		general, pre-allocated structure pool.  If that fails, it will
+		dynamically allocate the meta data structure with an additional cost in performance.
+
 config IEEE802154_NETDEV
 	bool "IEEE802154 6loWPAN Network Device"
 	default n
