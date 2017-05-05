@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/photon/scripts/ld.script
+ * configs/photon/scripts/photon_jtag.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *
@@ -33,7 +33,7 @@
  ****************************************************************************/
 
 /* The STM32F205RG has 1024Kb of FLASH beginning at address 0x0800:0000 and
- * 112Kb of SRAM.
+ * 112Kb of SRAM in main SRAM1 and 16 Kb in auxiliary SRAM2.
  *
  * When booting from FLASH, FLASH memory is aliased to address 0x0000:0000
  * where the code expects to begin execution by jumping to the entry point in

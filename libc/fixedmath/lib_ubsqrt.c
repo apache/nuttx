@@ -1,8 +1,7 @@
 /****************************************************************************
- * configs/photon/src/stm32_wlan.c
+ * libc/fixedmath/lib_ubsqrt.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Simon Piriou <spiriou31@gmail.com>
+ *   Copyright (C) 2014,2017 Jussi Kivilinna <jussi.kivilinna@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,117 +37,100 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <debug.h>
-
-#include <nuttx/wireless/ieee80211/bcmf_sdio.h>
-#include <nuttx/wireless/ieee80211/bcmf_board.h>
-
-#include <arch/board/board.h>
-
-#include "stm32_gpio.h"
-#include "stm32_sdio.h"
-
-#include "photon.h"
+#include <fixedmath.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_HAVE_LONG_LONG
+
 /****************************************************************************
- * Name: bcmf_board_reset
+ * Name: ub32sqrtub16
+ *
+ * Description:
+ *   ub32sqrtub16 calculates square root for 'a'
+ *
  ****************************************************************************/
 
-void bcmf_board_reset(int minor, bool reset)
+ub16_t ub32sqrtub16(ub32_t a)
 {
-  if (minor != SDIO_WLAN0_MINOR)
+  uint64_t n = a;
+  uint64_t xk = n;
+
+  /* Direct conversion of ub32_t to uint64_t is same operation as multiplying
+   * 'a' by 2^32, therefore n = a * 2^32.
+   */
+
+  if (xk == UINT64_MAX)
     {
-      return;
+      /* Avoid 'xk + n / xk' overflow on first iteration. */
+
+      xk = 1ULL << 63;
     }
 
-  stm32_gpiowrite(GPIO_WLAN0_RESET, !reset);
+  do
+    {
+      uint64_t xk1 = (xk + n / xk) >> 1;
+
+      if (xk1 >= xk)
+        {
+          break;
+        }
+
+      xk = xk1;
+    }
+  while (1);
+
+  /* 'xk' now holds 'sqrt(n)' => 'sqrt(a * 2^32)' => 'sqrt(a) * 2^16', thus
+   * 'xk' holds square root of 'a' in ub16_t format.
+   */
+
+  return (ub16_t)xk;
 }
 
-/****************************************************************************
- * Name: bcmf_board_power
- ****************************************************************************/
-
-void bcmf_board_power(int minor, bool power)
-{
-  /* Power signal is not used on Photon board */
-}
+#endif
 
 /****************************************************************************
- * Name: bcmf_board_initialize
+ * Name: ub16sqrtub8
+ *
+ * Description:
+ *   ub16sqrtub8 calculates square root for 'a'
+ *
  ****************************************************************************/
 
-void bcmf_board_initialize(int minor)
+ub8_t ub16sqrtub8(ub16_t a)
 {
-  if (minor != SDIO_WLAN0_MINOR)
+  uint32_t n = a;
+  uint32_t xk = n;
+
+  /* Direct conversion of ub16_t to uint32_t is same operation as multiplying
+   * 'a' by 2^16, therefore n = a * 2^16.
+   */
+
+  if (xk == UINT32_MAX)
     {
-      return;
+      /* Avoid 'xk + n / xk' overflow on first iteration. */
+
+      xk = 1U << 31;
     }
 
-  /* Configure reset pin */
-
-  stm32_configgpio(GPIO_WLAN0_RESET);
-
-  /* Put wlan chip in reset state */
-
-  bcmf_board_reset(minor, true);
-}
-
-/****************************************************************************
- * Name: bcmf_board_setup_oob_irq
- ****************************************************************************/
-
-void bcmf_board_setup_oob_irq(int minor, xcpt_t func, void *arg)
-{
-  if (minor != SDIO_WLAN0_MINOR)
+  do
     {
-      return;
+      uint32_t xk1 = (xk + n / xk) >> 1;
+
+      if (xk1 >= xk)
+        {
+          break;
+        }
+
+      xk = xk1;
     }
+  while (1);
 
-  /* Configure interrupt pin */
+  /* 'xk' now holds 'sqrt(n)' => 'sqrt(a * 2^16)' => 'sqrt(a) * 2^8', thus
+   * 'xk' holds square root of 'a' in ub8_t format.
+   */
 
-  stm32_configgpio(GPIO_WLAN0_OOB_INT);
-
-  stm32_gpiosetevent(GPIO_WLAN0_OOB_INT, true, false, false, func, arg);
-}
-
-/****************************************************************************
- * Name: photon_wlan_initialize
- ****************************************************************************/
-
-int photon_wlan_initialize()
-{
-  int ret;
-  struct sdio_dev_s *sdio_dev;
-
-  /* Initialize sdio interface */
-
-  wlinfo("Initializing SDIO slot %d\n", SDIO_WLAN0_SLOTNO);
-
-  sdio_dev = sdio_initialize(SDIO_WLAN0_SLOTNO);
-
-  if (!sdio_dev)
-    {
-      wlerr("ERROR: Failed to initialize SDIO with slot %d\n",
-             SDIO_WLAN0_SLOTNO);
-      return ERROR;
-    }
-
-  /* Bind the SDIO interface to the bcmf driver */
-
-  ret = bcmf_sdio_initialize(SDIO_WLAN0_MINOR, sdio_dev);
-
-  if (ret != OK)
-    {
-      wlerr("ERROR: Failed to bind SDIO to bcmf driver\n");
-
-      /* FIXME deinitialize sdio device */
-      return ERROR;
-    }
-
-  return OK;
+  return (ub8_t)xk;
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/netdev/netdev_unregister.c
+ * include/nuttx/wireless/ieee80211/bcmf_netdev.h
  *
- *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,114 +33,53 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_WIRELESS_IEEE80211_BCMF_NETDEV_H
+#define __INCLUDE_NUTTX_WIRELESS_IEEE80211_BCMF_NETDEV_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#include <nuttx/mmcsd.h>
 
-#include <sys/socket.h>
-#include <stdio.h>
-#include <semaphore.h>
-#include <assert.h>
-#include <string.h>
-#include <errno.h>
-#include <debug.h>
-
-#include <net/if.h>
-#include <net/ethernet.h>
-#include <nuttx/net/netdev.h>
-
-#include "utils/utils.h"
-#include "netdev/netdev.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifdef CONFIG_NET_SLIP
-#  define NETDEV_FORMAT "sl%d"
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
 #else
-#  define NETDEV_FORMAT "eth%d"
+#define EXTERN extern
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Name: netdev_unregister
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: bcmf_netdev_register
  *
  * Description:
- *   Unregister a network device driver.
+ *   Initialize the Broadcom 43362 controller and driver
  *
  * Parameters:
- *   dev - The device driver structure to un-register
+ *   intf - In the case where there are multiple EMACs, this value
+ *          identifies which EMAC is to be initialized.
  *
  * Returned Value:
- *   0:Success; negated errno on failure
+ *   OK on success; Negated errno on failure.
  *
  * Assumptions:
- *   Currently only called for USB networking devices when the device is
- *   physically removed from the slot
  *
  ****************************************************************************/
 
-int netdev_unregister(FAR struct net_driver_s *dev)
-{
-  struct net_driver_s *prev;
-  struct net_driver_s *curr;
+int bcmf_netdev_register(int intf);
 
-  if (dev)
-    {
-      net_lock();
-
-      /* Find the device in the list of known network devices */
-
-      for (prev = NULL, curr = g_netdevices;
-           curr && curr != dev;
-           prev = curr, curr = curr->flink);
-
-      /* Remove the device to the list of known network devices */
-
-      if (curr)
-        {
-          /* Where was the entry */
-
-          if (prev)
-            {
-              /* The entry was in the middle or at the end of the list */
-
-              prev->flink = curr->flink;
-            }
-          else
-            {
-               /* The entry was at the beginning of the list */
-
-               g_netdevices = curr->flink;
-            }
-
-          curr->flink = NULL;
-        }
-
-      net_unlock();
-
-#ifdef CONFIG_NET_ETHERNET
-      ninfo("Unregistered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",
-            dev->d_mac.ether.ether_addr_octet[0],
-            dev->d_mac.ether.ether_addr_octet[1],
-            dev->d_mac.ether.ether_addr_octet[2],
-            dev->d_mac.ether.ether_addr_octet[3],
-            dev->d_mac.ether.ether_addr_octet[4],
-            dev->d_mac.ether.ether_addr_octet[5], dev->d_ifname);
-#else
-      ninfo("Registered dev: %s\n", dev->d_ifname);
-#endif
-      return OK;
-    }
-
-  return -EINVAL;
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */
+#endif /* __INCLUDE_NUTTX_WIRELESS_IEEE80211_BCMF_NETDEV_H */

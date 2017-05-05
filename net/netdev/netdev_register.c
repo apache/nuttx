@@ -70,10 +70,10 @@
 
 #if defined(CONFIG_NET_SLIP)
 #  define NETDEV_DEFAULT_FORMAT NETDEV_SLIP_FORMAT
+#elif defined(CONFIG_DRIVERS_IEEE80211) /* Usually also has CONFIG_NET_ETHERNET */
+#  define NETDEV_DEFAULT_FORMAT NETDEV_WLAN_FORMAT
 #elif defined(CONFIG_NET_ETHERNET)
 #  define NETDEV_DEFAULT_FORMAT NETDEV_ETH_FORMAT
-#elif defined(CONFIG_DRIVERS_IEEE80211)
-#  define NETDEV_DEFAULT_FORMAT NETDEV_WLAN_FORMAT
 #elif defined(CONFIG_NET_6LOWPAN)
 #  define NETDEV_DEFAULT_FORMAT NETDEV_WPAN_FORMAT
 #else /* if defined(CONFIG_NET_LOOPBACK) */
@@ -332,7 +332,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #endif
       net_unlock();
 
-#ifdef CONFIG_NET_ETHERNET
+#if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_DRIVERS_IEEE80211)
       ninfo("Registered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",
             dev->d_mac.ether.ether_addr_octet[0], dev->d_mac.ether.ether_addr_octet[1],
             dev->d_mac.ether.ether_addr_octet[2], dev->d_mac.ether.ether_addr_octet[3],

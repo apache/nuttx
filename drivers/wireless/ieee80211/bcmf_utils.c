@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/photon/src/stm32_wlan.c
+ * drivers/wireless/ieee80211/bcmf_utils.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -37,118 +37,131 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
+#include <stdint.h>
+#include <string.h>
+#include <time.h>
+#include <semaphore.h>
 #include <debug.h>
+#include <stdio.h>
+#include <queue.h>
 
-#include <nuttx/wireless/ieee80211/bcmf_sdio.h>
-#include <nuttx/wireless/ieee80211/bcmf_board.h>
+#include "bcmf_utils.h"
 
-#include <arch/board/board.h>
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
-#include "stm32_gpio.h"
-#include "stm32_sdio.h"
-
-#include "photon.h"
+#define LINE_LEN 16
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bcmf_board_reset
+ * Name: bcmf_hexdump
  ****************************************************************************/
 
-void bcmf_board_reset(int minor, bool reset)
+void bcmf_hexdump(uint8_t *data, unsigned int len, unsigned long offset)
 {
-  if (minor != SDIO_WLAN0_MINOR)
+  unsigned int i;
+  unsigned int char_count = 0;
+  char char_line[20];
+  char hex_line[64];
+
+  for (i = 0; i < len; i++)
     {
-      return;
+      if (char_count >= LINE_LEN)
+      {
+        /* Flush line */
+
+        wlinfo("%08x: %s%s\n", offset+i-char_count, hex_line, char_line);
+        char_count = 0;
+      }
+
+      sprintf(hex_line+3*char_count, "%02x ", data[i]);
+      sprintf(char_line+char_count, "%c",
+              data[i] < 0x20 || data[i] >= 0x7f? '.': data[i]);
+      char_count ++;
     }
 
-  stm32_gpiowrite(GPIO_WLAN0_RESET, !reset);
+  if (char_count > 0)
+    {
+      /* Flush last line */
+
+      memset(hex_line+3*char_count, ' ', 3*(LINE_LEN-char_count));
+      hex_line[3*LINE_LEN] = 0;
+      wlinfo("%08x: %s%s\n", offset+i-char_count, hex_line, char_line);
+    }
 }
 
 /****************************************************************************
- * Name: bcmf_board_power
+ * Name: bcmf_sem_wait
  ****************************************************************************/
 
-void bcmf_board_power(int minor, bool power)
+int bcmf_sem_wait(sem_t *sem, unsigned int timeout_ms)
 {
-  /* Power signal is not used on Photon board */
+  struct timespec abstime;
+  unsigned int timeout_sec;
+
+  /* Get the current time */
+
+  (void)clock_gettime(CLOCK_REALTIME, &abstime);
+
+  timeout_sec      = timeout_ms / 1000;
+  abstime.tv_sec  += timeout_sec;
+  abstime.tv_nsec += 1000 * 1000 * (timeout_ms % 1000);
+
+  if (abstime.tv_nsec >= 1000 * 1000 * 1000)
+    {
+      abstime.tv_sec++;
+      abstime.tv_nsec -= 1000 * 1000 * 1000;
+    }
+
+  return sem_timedwait(sem, &abstime);
 }
 
-/****************************************************************************
- * Name: bcmf_board_initialize
- ****************************************************************************/
-
-void bcmf_board_initialize(int minor)
+void bcmf_dqueue_push(dq_queue_t *queue, dq_entry_t *entry)
 {
-  if (minor != SDIO_WLAN0_MINOR)
+  if (queue->head == NULL)
     {
-      return;
+      /* List is empty */
+
+      queue->tail = entry;
+
+      entry->flink = entry;
+      entry->blink = entry;
+    }
+  else
+    {
+      /* Insert entry at list head */
+
+      entry->flink = queue->head;
+      entry->blink = queue->tail;
+
+      queue->head->blink = entry;
     }
 
-  /* Configure reset pin */
-
-  stm32_configgpio(GPIO_WLAN0_RESET);
-
-  /* Put wlan chip in reset state */
-
-  bcmf_board_reset(minor, true);
+  queue->head = entry;
 }
 
-/****************************************************************************
- * Name: bcmf_board_setup_oob_irq
- ****************************************************************************/
-
-void bcmf_board_setup_oob_irq(int minor, xcpt_t func, void *arg)
+dq_entry_t *bcmf_dqueue_pop_tail(dq_queue_t *queue)
 {
-  if (minor != SDIO_WLAN0_MINOR)
+  dq_entry_t *entry = queue->tail;
+
+  if (queue->head == queue->tail)
     {
-      return;
+      /* List is empty */
+
+      queue->head = NULL;
+      queue->tail = NULL;
+    }
+  else
+    {
+      /* Pop from queue tail */
+
+      queue->tail = entry->blink;
+      entry->blink->flink = queue->head;
     }
 
-  /* Configure interrupt pin */
-
-  stm32_configgpio(GPIO_WLAN0_OOB_INT);
-
-  stm32_gpiosetevent(GPIO_WLAN0_OOB_INT, true, false, false, func, arg);
-}
-
-/****************************************************************************
- * Name: photon_wlan_initialize
- ****************************************************************************/
-
-int photon_wlan_initialize()
-{
-  int ret;
-  struct sdio_dev_s *sdio_dev;
-
-  /* Initialize sdio interface */
-
-  wlinfo("Initializing SDIO slot %d\n", SDIO_WLAN0_SLOTNO);
-
-  sdio_dev = sdio_initialize(SDIO_WLAN0_SLOTNO);
-
-  if (!sdio_dev)
-    {
-      wlerr("ERROR: Failed to initialize SDIO with slot %d\n",
-             SDIO_WLAN0_SLOTNO);
-      return ERROR;
-    }
-
-  /* Bind the SDIO interface to the bcmf driver */
-
-  ret = bcmf_sdio_initialize(SDIO_WLAN0_MINOR, sdio_dev);
-
-  if (ret != OK)
-    {
-      wlerr("ERROR: Failed to bind SDIO to bcmf driver\n");
-
-      /* FIXME deinitialize sdio device */
-      return ERROR;
-    }
-
-  return OK;
+  return entry;
 }

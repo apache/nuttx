@@ -1384,7 +1384,7 @@ static int stm32l4_i2c_isr_process(struct stm32l4_i2c_priv_s *priv)
            * device.
            */
 
-#ifndef CONFIG_I2C_POLLED
+#ifdef CONFIG_I2C_POLLED
           irqstate_t flags = enter_critical_section();
 #endif
           /* Receive a byte */
@@ -1399,7 +1399,7 @@ static int stm32l4_i2c_isr_process(struct stm32l4_i2c_priv_s *priv)
               /* autoend? */
             }
 
-#ifndef CONFIG_I2C_POLLED
+#ifdef CONFIG_I2C_POLLED
           leave_critical_section(flags);
 #endif
         }
@@ -1532,7 +1532,7 @@ static int stm32l4_i2c_isr_process(struct stm32l4_i2c_priv_s *priv)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_STM32L4_I2C2
+#ifndef CONFIG_I2C_POLLED
 static int stm32l4_i2c_isr(int irq, void *context, FAR void *arg)
 {
   struct stm32l4_i2c_priv_s *priv = (struct stm32l4_i2c_priv_s *)arg;

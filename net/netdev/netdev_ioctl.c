@@ -709,7 +709,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
                 {
                    req->ifr_hwaddr.sa_family = AF_INETX;
                    memcpy(req->ifr_hwaddr.sa_data,
-                         dev->d_mac.ieee802154.u8, NET_6LOWPAN_RIMEADDR_SIZE);                          
+                         dev->d_mac.ieee802154.u8, NET_6LOWPAN_RIMEADDR_SIZE);
                 }
                else
 #endif
@@ -942,7 +942,7 @@ static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
       case SIOCSARP:  /* Set an ARP mapping */
         {
           if (req != NULL &&
-              req->arp_pa.sa_family == AF_INET && 
+              req->arp_pa.sa_family == AF_INET &&
               req->arp_ha.sa_family == ARPHRD_ETHER)
             {
               FAR struct sockaddr_in *addr =

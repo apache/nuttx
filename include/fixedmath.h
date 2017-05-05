@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/fixedmath.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/compiler.h>
 #include <stdint.h>
 
 /****************************************************************************
@@ -124,7 +125,7 @@
 #define ub8toi(a)       ((a) >> 8)              /* Conversion to unsigned integer */
 #define itob8(i)        (((b8_t)(i)) << 8)      /* Conversion from integer */
 #define uitoub8(i)      (((ub8_t)(i)) << 8)     /* Conversion from unsigned integer */
-#define b8tof(b)        (((float)b)/256.0)      /* Conversion to float */
+#define b8tof(b)        (((float)(b))/256.0)    /* Conversion to float */
 #define ftob8(f)        (b8_t)(((f)*256.0))     /* Conversion from float */
 #define b8trunc(a)      ((a) & 0xff00)          /* Truncate to integer b8 */
 #define b8round(a)      (((a)+0x0080) & 0xff00) /* Round to integer b8 */
@@ -138,13 +139,13 @@
 #define b8addi(a,i)     ((a)+itob8(i))          /* Add integer from b16 */
 #define b8subb8(a,b)    ((a)-(b))               /* Subtraction */
 #define b8subi(a,i)     ((a)-itob8(i))          /* Subtract integer from b8 */
-#define b8mulb8(a,b)    b16tob8((b16_t)(a)*(b16_t)(b) /* Muliplication */
-#define ub8mulub8(a,b)  ub16toub8((ub16_t)(a)*(ub16_t)(b) /* Muliplication */
+#define b8mulb8(a,b)    (b16tob8((b16_t)(a)*(b16_t)(b)) /* Muliplication */
+#define ub8mulub8(a,b)  (ub16toub8((ub16_t)(a)*(ub16_t)(b)) /* Muliplication */
 #define b8muli(a,i)     ((a)*(i))               /* Simple multiplication by integer */
 #define b8sqr(a)        b8mulb8(a,a)            /* Square */
 #define ub8sqr(a)       ub8mulub8(a,a)          /* Square */
-#define b8divb8(a,b)    b8tob16(a)/(b16_t)(b)   /* Division */
-#define ub8divub8(a,b)  ub8toub16(a)/(ub16_t)(b) /* Division */
+#define b8divb8(a,b)    (b8tob16(a)/(b16_t)(b)) /* Division */
+#define ub8divub8(a,b)  (ub8toub16(a)/(ub16_t)(b)) /* Division */
 #define b8divi(a,i)     ((a)/(i))               /* Simple division by integer */
 #define b8idiv(i,j)     (((i)<<8)/j)            /* Division of integer, b8 result */
 
@@ -156,7 +157,7 @@
 #define ub16toi(a)      ((a) >> 16)             /* Conversion to unsgined integer */
 #define itob16(i)       (((b16_t)(i)) << 16)    /* Conversion from integer */
 #define uitoub16(i)     (((ub16_t)(i)) << 16)   /* Conversion from unsigned integer */
-#define b16tof(b)       (((float)b)/65536.0)    /* Conversion to float */
+#define b16tof(b)       (((float)(b))/65536.0)  /* Conversion to float */
 #define ftob16(f)       (b16_t)(((f)*65536.0))  /* Conversion from float */
 #define b16trunc(a)     ((a) & 0xffff0000)      /* Truncate to integer */
 #define b16round(a)     (((a)+0x00008000) & 0xffff0000)
@@ -189,6 +190,27 @@
 
 #  define b16divb16(a,b)   (b16_t)(b16tob32(a)/(b32_t)(b))
 #  define ub16divub16(a,b) (ub16_t)(ub16toub32(a)/(ub32_t)(b))
+
+/* Square root operators */
+
+#  define ub16sqrtub16(a)  ub32sqrtub16(ub16toub32(a))
+#else
+#  define ub16sqrtub16(a)  ub8toub16(ub16sqrtub8(a))
+#endif
+
+/* 64-bit values with 32 bits of precision ********************************/
+
+#ifdef CONFIG_HAVE_LONG_LONG
+/* Conversions */
+
+#define b32toi(a)       ((a) >> 32)                  /* Conversion to integer */
+#define itob32(i)       (((b32_t)(i)) << 32)         /* Conversion from integer */
+#define uitoub32(i)     (((ub32_t)(i)) << 32)        /* Conversion from unsigned integer */
+#define b32tod(b)       (((double)(b))/((long long)1 << 32)) /* Conversion to double */
+#define dtob32(f)       (b32_t)(((f)*(double)((long long)1 << 32))) /* Conversion from double */
+#define b32trunc(a)     ((a) & 0xffffffff00000000)   /* Truncate to integer */
+#define b32round(a)     (((a)+0x0000000080000000) & 0xffffffff00000000)
+#define b32frac(a)      ((a) & 0x00000000ffffffff)   /* Take fractional part */
 #endif
 
 /****************************************************************************
@@ -239,6 +261,13 @@ ub16_t ub16divub16(ub16_t num, ub16_t denom);
 b16_t  b16sin(b16_t rad);
 b16_t  b16cos(b16_t rad);
 b16_t  b16atan2(b16_t y, b16_t x);
+
+/* Square root operators */
+
+#ifdef CONFIG_HAVE_LONG_LONG
+ub16_t ub32sqrtub16(ub32_t a);
+#endif
+ub8_t ub16sqrtub8(ub16_t a);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -314,6 +314,25 @@ config UIMAGE_ENTRY_POINT
 	default 0x0
 
 endif
+
+menuconfig DFU_BINARY
+	bool "DFU binary format"
+	select RAW_BINARY
+	---help---
+	Create the dfu binary used with dfu-utils.
+
+if DFU_BINARY
+
+config DFU_BASE
+	hex "Address DFU image is loaded to"
+
+config DFU_VID
+	hex "VID to use for DFU image"
+
+config DFU_PID
+	hex "PID to use for DFU image"
+
+endif
 endmenu # Binary Output Formats
 
 menu "Customize Header Files"
