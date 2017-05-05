@@ -176,8 +176,11 @@ static int lo_req_data(FAR struct ieee802154_driver_s *netdev,
 static int lo_loopback(FAR struct net_driver_s *dev)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
+  struct ieee802154_data_ind_s ind;
   FAR struct iob_s *iob;
   int ret;
+
+  memset(&ind, 0, sizeof(struct ieee802154_data_ind_s));
 
   /* Loop while there framelist to be sent, i.e., while the freme list is not
    * emtpy.  Sending, of course, just means relaying back through the network
@@ -210,7 +213,7 @@ static int lo_loopback(FAR struct net_driver_s *dev)
       ninfo("Send frame %p to the network:  Offset=%u Length=%u\n",
             iob, iob->io_offset, iob->io_len);
 
-      ret = sixlowpan_input(&priv->lo_ieee, iob, NULL);
+      ret = sixlowpan_input(&priv->lo_ieee, iob, &ind);
 
       /* Increment statistics */
 

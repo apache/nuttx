@@ -342,7 +342,7 @@
  */
 
 struct ieee802154_frame_meta_s; /* Forward reference */
-struct eee802154_data_ind_s;    /* Forward reference */
+struct ieee802154_data_ind_s;   /* Forward reference */
 struct iob_s;                   /* Forward reference */
 
 struct ieee802154_driver_s
@@ -421,7 +421,7 @@ struct ieee802154_driver_s
 
   /* The source MAC address of the fragments being merged */
 
-  union sixlowpan_anyaddr_u i_fragsrc;
+  struct sixlowpan_tagaddr_s i_fragsrc;
 
   /* That time at which reassembly was started.  If the elapsed time
    * exceeds CONFIG_NET_6LOWPAN_MAXAGE, then the reassembly will
@@ -540,7 +540,7 @@ struct ieee802154_driver_s
 
 int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
                     FAR struct iob_s *framelist,
-                    FAR const struct eee802154_data_ind_s *ind);
+                    FAR const struct ieee802154_data_ind_s *ind);
 
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* __INCLUDE_NUTTX_NET_SIXLOWPAN_H */

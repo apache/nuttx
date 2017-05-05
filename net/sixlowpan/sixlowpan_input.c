@@ -61,6 +61,7 @@
 #include "nuttx/net/netdev.h"
 #include "nuttx/net/ip.h"
 #include "nuttx/net/sixlowpan.h"
+#include "nuttx/wireless/ieee802154/ieee802154_mac.h"
 
 #ifdef CONFIG_NET_PKT
 #  include "pkt/pkt.h"
@@ -128,6 +129,55 @@ static uint8_t g_bitbucket[UNCOMP_MAXHDR];
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: sixlowpan_compare_fragsrc
+ *
+ * Description:
+ *   Check if the fragment that we just received is from the same source as
+ *   the previosly received fragements.
+ *
+ * Input Parameters:
+ *   ieee - IEEE 802.15.4 MAC driver state reference
+ *   ind  - Characteristics of the newly received frame
+ *
+ * Returned Value:
+ *   true if the sources are the same.
+ *
+ ****************************************************************************/
+
+static bool sixlowpan_compare_fragsrc(FAR struct ieee802154_driver_s *ieee,
+                                      FAR const struct ieee802154_data_ind_s *ind)
+{
+  /* Check for an extended source address */
+
+  if (ind->src.mode == IEEE802154_ADDRMODE_EXTENDED)
+    {
+      /* Was the first source address also extended? */
+
+      if (ieee->i_fragsrc.extended)
+        {
+          /* Yes.. perform the extended address comparison */
+
+          return sixlowpan_eaddrcmp(ieee->i_fragsrc.u.eaddr.u8, ind->src.eaddr);
+        }
+    }
+  else
+    {
+      /* Short source address.  Was the first source address also short? */
+
+      if (!ieee->i_fragsrc.extended)
+        {
+          /* Yes.. perform the extended short comparison */
+
+          return sixlowpan_saddrcmp(ieee->i_fragsrc.u.saddr.u8, &ind->src.saddr);
+        }
+    }
+
+  /* Address are different size and, hence, cannot match */
+
+  return false;
+}
 
 /****************************************************************************
  * Name: sixlowpan_compress_ipv6hdr
@@ -235,6 +285,7 @@ static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr, FAR uint8_t *bptr)
  *
  * Input Parameters:
  *   ieee - The IEEE802.15.4 MAC network driver interface.
+ *   ind  - Meta data characterizing the received frame.
  *   iob  - The IOB containing the frame.
  *
  * Returned Value:
@@ -246,6 +297,7 @@ static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr, FAR uint8_t *bptr)
  ****************************************************************************/
 
 static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
+                                   FAR const struct ieee802154_data_ind_s *ind,
                                    FAR struct iob_s *iob)
 {
   FAR uint8_t *fptr;          /* Convenience pointer to beginning of the frame */
@@ -401,8 +453,8 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
       /* Verify that this fragment is part of that reassembly sequence */
 
-      else if (fragsize != ieee->i_pktlen || ieee->i_reasstag != fragtag /* ||
-               !sixlowpan_addrcmp(&ieee->i_fragsrc, &ind->???) */)
+      else if (fragsize != ieee->i_pktlen || ieee->i_reasstag != fragtag  ||
+               !sixlowpan_compare_fragsrc(ieee, ind))
         {
           /* The packet is a fragment that does not belong to the packet
            * being reassembled or the packet is not a fragment.
@@ -459,10 +511,16 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
        * address.
        */
 
-#warning Missing logic
-#if 0
-      sixlowpan_addrcopy(&ieee->i_fragsrc, ind->???]);
-#endif
+      if (ind->src.mode == IEEE802154_ADDRMODE_EXTENDED)
+        {
+          ieee->i_fragsrc.extended = true;
+          sixlowpan_eaddrcopy(ieee->i_fragsrc.u.eaddr.u8, ind->src.eaddr);
+        }
+      else
+        {
+          memset(&ieee->i_fragsrc, 0, sizeof(struct sixlowpan_tagaddr_s));
+          sixlowpan_saddrcopy(ieee->i_fragsrc.u.saddr.u8, &ind->src.saddr);
+        }
     }
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
@@ -698,7 +756,7 @@ static int sixlowpan_dispatch(FAR struct ieee802154_driver_s *ieee)
  *   framelist - The head of an incoming list of frames.  Normally this
  *               would be a single frame.  A list may be provided if
  *               appropriate, however.
- *   ind       - Meta data characterizing the received packet.  If there are
+ *   ind       - Meta data characterizing the received frame.  If there are
  *               multilple frames in the list, this meta data must apply to
  *               all of the frames!
  *
@@ -709,7 +767,7 @@ static int sixlowpan_dispatch(FAR struct ieee802154_driver_s *ieee)
 
 int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
                     FAR struct iob_s *framelist,
-                    FAR const struct eee802154_data_ind_s *ind)
+                    FAR const struct ieee802154_data_ind_s *ind)
 {
   int ret = -EINVAL;
 
@@ -730,7 +788,7 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
 
       /* Process the frame, decompressing it into the packet buffer */
 
-      ret = sixlowpan_frame_process(ieee, iob);
+      ret = sixlowpan_frame_process(ieee, ind, iob);
 
       /* Free the IOB the held the consumed frame */
 

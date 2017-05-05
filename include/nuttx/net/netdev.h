@@ -436,12 +436,12 @@ int ipv6_input(FAR struct net_driver_s *dev);
 #endif
 
 #ifdef CONFIG_NET_6LOWPAN
-struct ieee802154_driver_s;  /* See sixlowpan.h */
-struct eee802154_data_ind_s; /* See sixlowpan.h */
-struct iob_s;                /* See iob.h */
+struct ieee802154_driver_s;   /* See sixlowpan.h */
+struct ieee802154_data_ind_s; /* See ieee8021454_mac.h */
+struct iob_s;                 /* See iob.h */
 int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
                     FAR struct iob_s *framelist,
-                    FAR const struct eee802154_data_ind_s *ind);
+                    FAR const struct ieee802154_data_ind_s *ind);
 #endif
 
 /****************************************************************************
