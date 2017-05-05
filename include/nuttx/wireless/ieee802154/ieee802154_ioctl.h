@@ -78,6 +78,7 @@ struct mac802154dev_txframe_s
 {
   struct ieee802154_frame_meta_s meta;
   FAR uint8_t *payload;
+  uint16_t length;
 };
 
 #endif /* CONFIG_WIRELESS_IEEE802154 */
