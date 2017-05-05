@@ -43,6 +43,9 @@
 #include <string.h>
 
 #include <nuttx/kmalloc.h>
+
+#include <nuttx/drivers/iob.h>
+
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 #include "mac802154.h"
@@ -73,6 +76,21 @@
 #define POOL_IND_DYNAMIC  2
 
 /****************************************************************************
+ * Private Data Types
+ ****************************************************************************/
+
+/* Private data type that extends the ieee802154_data_ind_s struct */
+
+struct ieee802154_priv_ind_s
+{
+  /* Must be first member so we can cast to/from */
+
+  struct ieee802154_data_ind_s pub;
+  FAR struct ieee802154_priv_ind_s *flink;
+  uint8_t pool;
+};
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -83,7 +101,7 @@
  * item.
  */
 
-static struct ieee802154_data_ind_s *g_indfree;
+static struct ieee802154_priv_ind_s *g_indfree;
 #endif
 
 #if CONFIG_IEEE802154_IND_IRQRESERVE > 0
@@ -91,12 +109,12 @@ static struct ieee802154_data_ind_s *g_indfree;
  * use by only by interrupt handlers.
  */
 
-static struct ieee802154_data_ind_s *g_indfree_irq;
+static struct ieee802154_priv_ind_s *g_indfree_irq;
 #endif
 
 /* Pool of pre-allocated meta-data stuctures */
 
-static struct ieee802154_data_ind_s g_indpool[CONFIG_IEEE802154_IND_PREALLOC];
+static struct ieee802154_priv_ind_s g_indpool[CONFIG_IEEE802154_IND_PREALLOC];
 #endif /* CONFIG_IEEE802154_IND_PREALLOC > 0 */
 
 /****************************************************************************
@@ -122,7 +140,7 @@ static struct ieee802154_data_ind_s g_indpool[CONFIG_IEEE802154_IND_PREALLOC];
 void ieee802154_indpool_initialize(void)
 {
 #if CONFIG_IEEE802154_IND_PREALLOC > 0
-  FAR struct ieee802154_data_ind_s *pool = g_indpool;
+  FAR struct ieee802154_priv_ind_s *pool = g_indpool;
   int remaining = CONFIG_IEEE802154_IND_PREALLOC;
 
 #if CONFIG_IEEE802154_IND_PREALLOC > CONFIG_IEEE802154_IND_IRQRESERVE
@@ -133,7 +151,7 @@ void ieee802154_indpool_initialize(void)
   g_indfree = NULL;
   while (remaining > CONFIG_IEEE802154_IND_IRQRESERVE)
     {
-      FAR struct ieee802154_data_ind_s *ind = pool;
+      FAR struct ieee802154_priv_ind_s *ind = pool;
 
       /* Add the next meta data structure from the pool to the list of
        * general structures.
@@ -157,7 +175,7 @@ void ieee802154_indpool_initialize(void)
   g_indfree_irq = NULL;
   while (remaining > 0)
     {
-      FAR struct ieee802154_data_ind_s *ind = pool;
+      FAR struct ieee802154_priv_ind_s *ind = pool;
 
       /* Add the next meta data structure from the pool to the list of
        * general structures.
@@ -204,7 +222,7 @@ void ieee802154_indpool_initialize(void)
 FAR struct ieee802154_data_ind_s *ieee802154_ind_allocate(void)
 {
 #if CONFIG_IEEE802154_IND_PREALLOC > 0
-  FAR struct ieee802154_data_ind_s *ind;
+  FAR struct ieee802154_priv_ind_s *ind;
   irqstate_t flags;
   uint8_t pool;
 
@@ -271,8 +289,8 @@ FAR struct ieee802154_data_ind_s *ieee802154_ind_allocate(void)
            */
 
           leave_critical_section(flags);
-          ind = (FAR struct ieee802154_data_ind_s *)
-            kmm_malloc((sizeof (struct ieee802154_data_ind_s)));
+          ind = (FAR struct ieee802154_priv_ind_s *)
+            kmm_malloc((sizeof (struct ieee802154_priv_ind_s)));
 
           /* Check if we allocated the meta-data structure */
 
@@ -289,9 +307,27 @@ FAR struct ieee802154_data_ind_s *ieee802154_ind_allocate(void)
    * Zero and tag the alloated meta-data structure.
    */
 
-  memset(ind, 0, sizeof(struct ieee802154_data_ind_s));
   ind->pool = pool;
-  return ind;
+  memset(&ind->pub, 0, sizeof(struct ieee802154_data_ind_s));
+
+  /* Allocate the IOB for the frame */
+
+  ind->pub.frame = iob_alloc(true);
+  if (ind->pub.frame == NULL)
+    {
+      /* Deallocate the ind */
+
+      ieee802154_ind_free(&ind->pub);
+
+      return NULL;
+    }
+
+  ind->pub.frame->io_flink  = NULL;
+  ind->pub.frame->io_len    = 0;
+  ind->pub.frame->io_offset = 0;
+  ind->pub.frame->io_pktlen = 0;
+
+  return &ind->pub;
 #else
   return NULL;
 #endif
@@ -318,21 +354,33 @@ void ieee802154_ind_free(FAR struct ieee802154_data_ind_s *ind)
 {
 #if CONFIG_IEEE802154_IND_PREALLOC > 0
   irqstate_t flags;
+  FAR struct ieee802154_priv_ind_s *priv =
+    (FAR struct ieee802154_priv_ind_s *)ind;
+
+  /* Check if the IOB is not NULL. The only time it should be NULL is if we
+   * allocated the data_ind, but the IOB allocation failed so we now have to
+   * free the data_ind but not the IOB. This really should happen rarely if at all.
+   */
+
+  if (ind->frame != NULL)
+    {
+      iob_free(ind->frame);
+    }
 
 #if CONFIG_IEEE802154_IND_PREALLOC > CONFIG_IEEE802154_IND_IRQRESERVE
   /* If this is a generally available pre-allocated meta-data structure,
    * then just put it back in the free list.
    */
 
-  if (ind->pool == POOL_IND_GENERAL)
+  if (priv->pool == POOL_IND_GENERAL)
     {
       /* Make sure we avoid concurrent access to the free
        * list from interrupt handlers.
        */
 
       flags = enter_critical_section();
-      ind->flink = g_indfree;
-      g_indfree  = ind;
+      priv->flink = g_indfree;
+      g_indfree  = priv;
       leave_critical_section(flags);
     }
   else
@@ -343,15 +391,15 @@ void ieee802154_ind_free(FAR struct ieee802154_data_ind_s *ind)
    * then put it back in the correct free list.
    */
 
-  if (ind->pool == POOL_IND_IRQ)
+  if (priv->pool == POOL_IND_IRQ)
     {
       /* Make sure we avoid concurrent access to the free
        * list from interrupt handlers.
        */
 
       flags = enter_critical_section();
-      ind->flink     = g_indfree_irq;
-      g_indfree_irq  = ind;
+      priv->flink    = g_indfree_irq;
+      g_indfree_irq  = priv;
       leave_critical_section(flags);
     }
   else
@@ -360,8 +408,8 @@ void ieee802154_ind_free(FAR struct ieee802154_data_ind_s *ind)
     {
       /* Otherwise, deallocate it. */
 
-      DEBUGASSERT(ind->pool == POOL_IND_DYNAMIC);
-      sched_kfree(ind);
+      DEBUGASSERT(priv->pool == POOL_IND_DYNAMIC);
+      sched_kfree(priv);
     }
 #endif
 }

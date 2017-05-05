@@ -79,13 +79,13 @@ config IEEE802154_IND_IRQRESERVE
 		In that case, the allocation will fail if tasking logic has
 		allocated them all.
 
-		Interrupt logic will first attempt to allocate fromt the general,
+		Interrupt logic will first attempt to allocate from the general,
 		pre-allocated structure pool that will contain up to (size
 		CONFIG_IEEE802154_IND_PREALLOC - CONFIG_IEEE802154_IND_IRQRESERVE)
 		entries.  If that fails, then it will try to take a structure from
 		the reserve (size CONFIG_IEEE802154_IND_IRQRESERVE).
 
-		Non-interrupt logic will also first attempt to allocate fromt the
+		Non-interrupt logic will also first attempt to allocate from the
 		general, pre-allocated structure pool.  If that fails, it will
 		dynamically allocate the meta data structure with an additional cost in performance.
 

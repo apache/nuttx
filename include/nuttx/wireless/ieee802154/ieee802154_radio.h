@@ -71,8 +71,7 @@ struct ieee802154_radiocb_s
   CODE void (*txdone) (FAR const struct ieee802154_radiocb_s *radiocb,
              FAR const struct ieee802154_txdesc_s *tx_desc);
   CODE void (*rxframe) (FAR const struct ieee802154_radiocb_s *radiocb,
-             FAR const struct ieee802154_rxdesc_s *rx_desc,
-             FAR struct iob_s *frame);
+             FAR struct ieee802154_data_ind_s *ind);
 };
 
 struct ieee802154_radio_s; /* Forward reference */

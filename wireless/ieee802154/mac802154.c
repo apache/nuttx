@@ -84,11 +84,11 @@
  * Private Types
  ****************************************************************************/
 
-struct mac802154_trans_s
+struct mac802154_txframe_s
 {
   /* Supports a singly linked list */
 
-  FAR struct mac802154_trans_s *flink;
+  FAR struct mac802154_txframe_s *flink;
   FAR struct iob_s *frame;
   uint8_t msdu_handle;
   sem_t sem;
@@ -132,8 +132,8 @@ struct ieee802154_privmac_s
    * during the CAP of the Coordinator's superframe.
    */
 
-  FAR struct mac802154_trans_s *csma_head;
-  FAR struct mac802154_trans_s *csma_tail;
+  FAR struct mac802154_txframe_s *csma_head;
+  FAR struct mac802154_txframe_s *csma_tail;
 
   /* Support a singly linked list of transactions that will be sent indirectly.
    * This list should only be used by a MAC acting as a coordinator.  These
@@ -143,15 +143,15 @@ struct ieee802154_privmac_s
    * beacon frame.
    */
 
-  FAR struct mac802154_trans_s *indirect_head;
-  FAR struct mac802154_trans_s *indirect_tail;
+  FAR struct mac802154_txframe_s *indirect_head;
+  FAR struct mac802154_txframe_s *indirect_tail;
 
   uint8_t txdesc_count;
   struct ieee802154_txdesc_s txdesc[CONFIG_IEEE802154_NTXDESC];
 
   /* Support a singly linked list of frames received */
-  FAR struct iob_s *rxframes_head;
-  FAR struct iob_s *rxframes_tail;
+  FAR struct ieee802154_data_ind_s *rxframes_head;
+  FAR struct ieee802154_data_ind_s *rxframes_tail;
 
   /* MAC PIB attributes, grouped to save memory */
 
@@ -297,8 +297,7 @@ static void mac802154_txdone(FAR const struct ieee802154_radiocb_s *radiocb,
                              FAR const struct ieee802154_txdesc_s *tx_desc);
 
 static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
-                              FAR const struct ieee802154_rxdesc_s *rx_desc,
-                              FAR struct iob_s *frame);
+                              FAR struct ieee802154_data_ind_s *ind);
 
 /****************************************************************************
  * Private Data
@@ -345,7 +344,7 @@ static inline int mac802154_takesem(sem_t *sem)
  ****************************************************************************/
 
 static void mac802154_push_csma(FAR struct ieee802154_privmac_s *priv,
-                                FAR struct mac802154_trans_s *trans)
+                                FAR struct mac802154_txframe_s *trans)
 {
   /* Ensure the transactions forward link is NULL */
 
@@ -380,10 +379,10 @@ static void mac802154_push_csma(FAR struct ieee802154_privmac_s *priv,
  *
  ****************************************************************************/
 
-static FAR struct mac802154_trans_s *
+static FAR struct mac802154_txframe_s *
   mac802154_pop_csma(FAR struct ieee802154_privmac_s *priv)
 {
-  FAR struct mac802154_trans_s *trans;
+  FAR struct mac802154_txframe_s *trans;
 
   if (priv->csma_head == NULL)
     {
@@ -510,7 +509,7 @@ static int mac802154_poll_csma(FAR const struct ieee802154_radiocb_s *radiocb,
   FAR struct mac802154_radiocb_s *cb =
     (FAR struct mac802154_radiocb_s *)radiocb;
   FAR struct ieee802154_privmac_s *priv;
-  FAR struct mac802154_trans_s *trans;
+  FAR struct mac802154_txframe_s *trans;
 
   DEBUGASSERT(cb != NULL && cb->priv != NULL);
   priv = cb->priv;
@@ -564,7 +563,7 @@ static int mac802154_poll_gts(FAR const struct ieee802154_radiocb_s *radiocb,
   FAR struct mac802154_radiocb_s *cb =
     (FAR struct mac802154_radiocb_s *)radiocb;
   FAR struct ieee802154_privmac_s *priv;
-  FAR struct mac802154_trans_s *trans;
+  FAR struct mac802154_txframe_s *trans;
   int ret = 0;
 
   DEBUGASSERT(cb != NULL && cb->priv != NULL);
@@ -691,13 +690,11 @@ static void mac802154_txdone_worker(FAR void *arg)
  ****************************************************************************/
 
 static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
-                              FAR const struct ieee802154_rxdesc_s *rx_desc,
-                              FAR struct iob_s *frame)
+                              FAR struct ieee802154_data_ind_s *ind)
 {
   FAR struct mac802154_radiocb_s *cb =
     (FAR struct mac802154_radiocb_s *)radiocb;
   FAR struct ieee802154_privmac_s *priv;
-  FAR struct ieee802154_rxdesc_s *desc;
 
   DEBUGASSERT(cb != NULL && cb->priv != NULL);
   priv = cb->priv;
@@ -708,12 +705,10 @@ static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
 
   while (mac802154_takesem(&priv->exclsem) != 0);
 
-  /* TODO: Copy the frame descriptor to some type of list */
-
   /* Push the iob onto the tail of the frame list for processing */
 
-  priv->rxframes_tail->io_flink = frame;
-  priv->rxframes_tail = frame;
+  priv->rxframes_tail->flink = ind;
+  priv->rxframes_tail = ind;
 
   mac802154_givesem(&priv->exclsem);
 
@@ -1050,7 +1045,7 @@ int mac802154_req_data(MACHANDLE mac,
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
-  FAR struct mac802154_trans_s trans;
+  FAR struct mac802154_txframe_s trans;
   uint16_t *frame_ctrl;
   uint8_t mhr_len = 3; /* Start assuming frame control and seq. num */
   int ret;
@@ -1606,67 +1601,3 @@ int mac802154_resp_orphan(MACHANDLE mac,
   return -ENOTTY;
 }
 
-/****************************************************************************
- * Name: ieee802154_indpool_initialize
- *
- * Description:
- *   This function initializes the meta-data allocator.  This function must
- *   be called early in the initialization sequence before any radios
- *   begin operation.
- *
- * Inputs:
- *   None
- *
- * Return Value:
- *   None
- *
- ****************************************************************************/
-
-void ieee802154_indpool_initialize(void);
-
-/****************************************************************************
- * Name: ieee802154_ind_allocate
- *
- * Description:
- *   The ieee802154_ind_allocate function will get a free meta-data
- *   structure for use by the IEEE 802.15.4 MAC.
- *
- *   Interrupt handling logic will first attempt to allocate from the
- *   g_indfree list.  If that list is empty, it will attempt to allocate
- *   from its reserve, g_indfree_irq.  If that list is empty, then the
- *   allocation fails (NULL is returned).
- *
- *   Non-interrupt handler logic will attempt to allocate from g_indfree
- *   list.  If that the list is empty, then the meta-data structure will be
- *   allocated from the dynamic memory pool.
- *
- * Inputs:
- *   None
- *
- * Return Value:
- *   A reference to the allocated msg structure.  All user fields in this
- *   structure have been zeroed.  On a failure to allocate, NULL is
- *   returned.
- *
- ****************************************************************************/
-
-FAR struct ieee802154_data_ind_s *ieee802154_ind_allocate(void);
-
-/****************************************************************************
- * Name: ieee802154_ind_free
- *
- * Description:
- *   The ieee802154_ind_free function will return a meta-data structure to
- *   the free pool of  messages if it was a pre-allocated meta-data
- *   structure. If the meta-data structure was allocated dynamically it will
- *   be deallocated.
- *
- * Inputs:
- *   ind - meta-data structure to free
- *
- * Return Value:
- *   None
- *
- ****************************************************************************/
-
-void ieee802154_ind_free(FAR struct ieee802154_data_ind_s *ind);

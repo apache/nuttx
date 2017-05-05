@@ -480,12 +480,6 @@ struct ieee802154_txdesc_s
   /* TODO: Add slotting information for GTS transactions */
 };
 
-struct ieee802154_rxdesc_s
-{
-  uint8_t lqi;
-  uint8_t rssi;
-};
-
 struct ieee802154_cca_s
 {
   uint8_t use_ed  : 1; /* CCA using ED */
@@ -645,11 +639,13 @@ struct ieee802154_data_ind_s
 {
   FAR struct ieee802154_data_ind_s *flink;
 
+  FAR struct iob_s *frame;
+
   struct ieee802154_addr_s src;     /* Source addressing information */
   struct ieee802154_addr_s dest;    /* Destination addressing infromation */
   uint8_t lqi;                      /* Link Quality Index */
+  uint8_t rssi;                     /* Non-standard field */
   uint8_t dsn;                      /* Data Sequence Number */
-  uint8_t pool;                     /* Memory pool (Needed for deallocation) */
   uint32_t timestamp;               /* Time of received frame */
 
 #ifdef CONFIG_IEEE802154_SECURITY
