@@ -163,8 +163,8 @@ void ieee802154_indpool_initialize(void)
        * general structures.
        */
 
-      ind->flink = g_indfree_irq;
-      g_indfree_irq  = ind;
+      ind->flink    = g_indfree_irq;
+      g_indfree_irq = ind;
 
       /* Set up for the next structure from the pool */
 
