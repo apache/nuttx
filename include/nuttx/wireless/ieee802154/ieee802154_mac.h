@@ -652,13 +652,34 @@ struct ieee802154_data_conf_s
 
 struct ieee802154_data_ind_s
 {
-  uint8_t msdu_handle;              /* Handle assoc. with MSDU */
+  struct ieee802154_addr_s src;     /* Source addressing information */
+  struct ieee802154_addr_s dest;    /* Destination addressing infromation */
+  uint8_t lqi;                      /* Link Quality Index */
+  uint8_t dsn;                      /* Data Sequence Number */
+  uint32_t timestamp;               /* Time of received frame */
 
-  /* The time, in symbols, at which the data were transmitted */
+#ifdef CONFIG_IEEE802154_SECURITY
+  /* Security information if enabled */
 
-  uint32_t timestamp;
+  struct ieee802154_security_s security;
+#endif /* CONFIG_IEEE802154_SECURITY */
 
-  enum ieee802154_status_e status;  /* The status of the MSDU transmission */
+#ifdef CONFIG_IEEE802154_UWB
+  /* The UWB Pulse Repetition Frequency to be used for the transmission */
+
+  enum ieee802154_uwbprf_e uwb_prf;
+
+  /* The UWB preamble symbol repititions
+   *  Should be one of:
+   *    0, 16, 64, 1024, 4096
+   */
+
+  uint16_t uwb_presym_rep;
+
+  /* The UWB Data Rate to be used for the transmission */
+
+  enum ieee802154_uwb_datarate_e data_rate;
+#endif /* CONFIG_IEEE802154_UWB */
 
 #ifdef CONFIG_IEEE802154_RANGING
   bool rng_rcvd;                    /* Ranging indicated by MSDU */
@@ -690,7 +711,7 @@ struct ieee802154_data_ind_s
   /* The Figure of Merit (FoM) characterizing the ranging measurement */
 
   uint8_t rng_fom;
-#endif
+#endif /* CONFIG_IEEE802154_RANGING */
 };
 
 /*****************************************************************************
