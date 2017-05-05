@@ -239,6 +239,10 @@ config KINETIS_HAVE_LPUART1
 # will automatically be selected and will represent the 'OR' of the
 # instances selected.
 
+config KINETIS_SERIALDRIVER
+	bool
+	default n
+
 config KINETIS_LPUART
 	bool
 	default n
@@ -330,6 +334,8 @@ config KINETIS_UART0
 	default n
 	select UART0_SERIALDRIVER
 	select KINETIS_UART
+	select KINETIS_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 	---help---
 		Support UART0
 
@@ -338,6 +344,8 @@ config KINETIS_UART1
 	default n
 	select UART1_SERIALDRIVER
 	select KINETIS_UART
+	select KINETIS_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 	---help---
 		Support UART1
 
@@ -346,6 +354,8 @@ config KINETIS_UART2
 	default n
 	select UART2_SERIALDRIVER
 	select KINETIS_UART
+	select KINETIS_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 	---help---
 		Support UART2
 
@@ -354,6 +364,8 @@ config KINETIS_UART3
 	default n
 	select UART3_SERIALDRIVER
 	select KINETIS_UART
+	select KINETIS_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 	---help---
 		Support UART3
 
@@ -362,6 +374,8 @@ config KINETIS_UART4
 	default n
 	select UART4_SERIALDRIVER
 	select KINETIS_UART
+	select KINETIS_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 	---help---
 		Support UART4
 
@@ -371,6 +385,8 @@ config KINETIS_UART5
 	depends on KINETIS_HAVE_UART5
 	select UART5_SERIALDRIVER
 	select KINETIS_UART
+	select KINETIS_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 	---help---
 		Support UART5
 
@@ -380,6 +396,8 @@ config KINETIS_LPUART0
 	depends on KINETIS_HAVE_LPUART0
 	select OTHER_UART_SERIALDRIVER
 	select KINETIS_LPUART
+	select KINETIS_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 	---help---
 		Support the low power UART0
 
@@ -389,6 +407,8 @@ config KINETIS_LPUART1
 	depends on KINETIS_HAVE_LPUART1
 	select OTHER_UART_SERIALDRIVER
 	select KINETIS_LPUART
+	select KINETIS_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 	---help---
 		Support the low power UART1
 
@@ -933,6 +953,43 @@ endmenu # Kinetis SDHC Configuration
 #
 
 menu "Kinetis UART Configuration"
+if KINETIS_SERIALDRIVER || OTHER_SERIALDRIVER
+
+comment "Serial Driver Configuration"
+
+config KINETIS_UART_BREAKS
+	bool "Add TIOxSBRK to support sending Breaks"
+	depends on KINETIS_UART || KINETIS_LPUART
+	default n
+	---help---
+		Add TIOCxBRK routines to send a line break per the Kinetis manual, the
+		break will be a pulse based on the value M. This is not a BSD compatible
+		break.
+
+config KINETIS_UART_EXTEDED_BREAK
+	bool  "Selects a longer transmitted break character length"
+	depends on KINETIS_UART_BREAKS
+	default n
+	---help---
+		Sets BRK13 to send a longer transmitted break character.
+
+config KINETIS_SERIALBRK_BSDCOMPAT
+	bool "BSD compatible break the break asserted until released"
+	depends on (KINETIS_UART || KINETIS_LPUART) && KINETIS_UART_BREAKS
+	default n
+	---help---
+		Enable using a BSD compatible break: TIOCSBRK will start the break
+		and TIOCCBRK will end the break.
+
+config KINETIS_UART_SINGLEWIRE
+	bool "Single Wire Support"
+	default n
+	depends on KINETIS_UART || KINETIS_LPUART
+	---help---
+		Enable single wire UART and LPUART support. The option enables support
+		for the TIOCSSINGLEWIRE ioctl in the Kineteis serial drivers.
+
+endif # KINETIS_SERIALDRIVER || OTHER_SERIALDRIVER
 
 config KINETIS_UARTFIFOS
 	bool "Enable UART0 FIFO"
