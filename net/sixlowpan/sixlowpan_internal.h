@@ -102,9 +102,19 @@
 
 /* General helper macros ****************************************************/
 
-#define GETINT16(ptr,index) \
+/* GET 16-bit data:  source in network order, result in host order */
+
+#define GETHOST16(ptr,index) \
   ((((uint16_t)((ptr)[index])) << 8) | ((uint16_t)(((ptr)[(index) + 1]))))
-#define PUTINT16(ptr,index,value) \
+
+/* GET 16-bit data:  source in network order, result in network order */
+
+#define GETNET16(ptr,index) \
+  ((((uint16_t)((ptr)[(index) + 1])) << 8) | ((uint16_t)(((ptr)[index]))))
+
+/* PUT 16-bit data:  source in host order, result in newtwork order */
+
+#define PUTHOST16(ptr,index,value) \
   do \
     { \
       (ptr)[index]     = ((uint16_t)(value) >> 8) & 0xff; \
@@ -211,7 +221,7 @@ struct net_driver_s;         /* Forward reference */
 struct ieee802154_driver_s;  /* Forward reference */
 struct devif_callback_s;     /* Forward reference */
 struct ipv6_hdr_s;           /* Forward reference */
-struct sixlowpan_addr_s;           /* Forward reference */
+struct sixlowpan_addr_s;     /* Forward reference */
 struct iob_s;                /* Forward reference */
 
 /****************************************************************************
@@ -232,7 +242,7 @@ struct iob_s;                /* Forward reference */
  *   list    - Head of callback list for send interrupt
  *   ipv6hdr - IPv6 plus TCP or UDP headers.
  *   buf     - Data to send
- *   buflen  - Length of data to send
+ *   len     - Length of data to send
  *   raddr   - The MAC address of the destination
  *   timeout - Send timeout in deciseconds
  *
@@ -250,7 +260,7 @@ struct iob_s;                /* Forward reference */
 int sixlowpan_send(FAR struct net_driver_s *dev,
                    FAR struct devif_callback_s **list,
                    FAR const struct ipv6_hdr_s *ipv6hdr, FAR const void *buf,
-                   size_t buflen, FAR const struct sixlowpan_addr_s *raddr,
+                   size_t len, FAR const struct sixlowpan_tagaddr_s *destmac,
                    uint16_t timeout);
 
 /****************************************************************************
@@ -357,7 +367,7 @@ int sixlowpan_frame_submit(FAR struct ieee802154_driver_s *ieee,
 int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
                            FAR const struct ipv6_hdr_s *ipv6hdr,
                            FAR const void *buf,  size_t buflen,
-                           FAR const struct sixlowpan_addr_s *destmac);
+                           FAR const struct sixlowpan_tagaddr_s *destmac);
 
 /****************************************************************************
  * Name: sixlowpan_hc06_initialize
@@ -413,7 +423,7 @@ void sixlowpan_hc06_initialize(void);
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
 void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                                 FAR const struct ipv6_hdr_s *ipv6,
-                                FAR const struct sixlowpan_addr_s *destmac,
+                                FAR const struct sixlowpan_tagaddr_s *destmac,
                                 FAR uint8_t *fptr);
 #endif
 
@@ -474,7 +484,7 @@ void sixlowpan_uncompresshdr_hc06(uint16_t iplen, FAR struct iob_s *iob,
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
 void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
                                FAR const struct ipv6_hdr_s *ipv6,
-                               FAR const struct sixlowpan_addr_s *destmac,
+                               FAR const struct sixlowpan_tagaddr_s *destmac,
                                FAR uint8_t *fptr);
 #endif
 
@@ -529,10 +539,15 @@ int sixlowpan_uncompresshdr_hc1(uint16_t iplen, FAR struct iob_s *iob,
 
 #define sixlowpan_islinklocal(ipaddr) ((ipaddr)[0] == NTOHS(0xfe80))
 
+void sixlowpan_saddrfromip(const net_ipv6addr_t ipaddr,
+                          FAR struct sixlowpan_saddr_s *saddr);
+void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr,
+                          FAR struct sixlowpan_eaddr_s *eaddr);
 void sixlowpan_addrfromip(const net_ipv6addr_t ipaddr,
-                          FAR struct sixlowpan_addr_s *addr);
+                          FAR struct sixlowpan_tagaddr_s *addr);
+
 bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
-                          FAR const struct sixlowpan_addr_s *addr);
+                          FAR const struct sixlowpan_tagaddr_s *addr);
 
 /****************************************************************************
  * Name: sixlowpan_src_panid

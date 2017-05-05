@@ -228,7 +228,7 @@
 
 #define SIXLOWPAN_IS_IID_16BIT_COMPRESSABLE(a) \
   ((((a)[4]) == 0x0000) && (((a)[5]) == HTONS(0x00ff)) && \
-   (((a)[6]) == 0xfe00))
+   (((a)[6]) == HTONS(0xfe00)))
 
 /* Check whether the 9-bit group-id of the compressed multicast address is
  * known. It is true if the 9-bit group is the all nodes or all routers

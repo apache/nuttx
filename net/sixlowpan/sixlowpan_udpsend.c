@@ -162,7 +162,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
   FAR struct udp_conn_s *conn;
   FAR struct net_driver_s *dev;
   struct ipv6udp_hdr_s ipv6udp;
-  struct sixlowpan_addr_s destmac;
+  struct sixlowpan_tagaddr_s destmac;
   uint16_t iplen;
   uint16_t timeout;
   int ret;

@@ -209,13 +209,13 @@ static void sixlowpan_compress_ipv6hdr(FAR const struct ipv6_hdr_s *ipv6hdr,
 int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
                            FAR const struct ipv6_hdr_s *destip,
                            FAR const void *buf, size_t buflen,
-                           FAR const struct sixlowpan_addr_s *destmac)
+                           FAR const struct sixlowpan_tagaddr_s *destmac)
 {
   struct ieee802154_frame_meta_s meta;
   FAR struct iob_s *iob;
   FAR uint8_t *fptr;
   int framer_hdrlen;
-  struct sixlowpan_addr_s bcastmac;
+  struct sixlowpan_tagaddr_s bcastmac;
   uint16_t pktlen;
   uint16_t paysize;
 #ifdef CONFIG_NET_6LOWPAN_FRAG
@@ -261,7 +261,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
   if (destmac == NULL)
     {
-      memset(&bcastmac, 0, sizeof(struct sixlowpan_addr_s));
+      memset(&bcastmac, 0, sizeof(struct sixlowpan_tagaddr_s));
       destmac = &bcastmac;
     }
 
@@ -296,16 +296,15 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
                       &ieee->i_dev.d_mac.ieee802154);
 #endif
 
-  /* REVISIT: Destination MAC address could be of different size than
-   * the source MAC address.
-   */
-
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  g_packet_meta.dextended = TRUE;
-  sixlowpan_addrcopy(g_packet_meta.dest.eaddr.u8, destmac);
-#else
-  sixlowpan_addrcopy(g_packet_meta.dest.saddr.u8, destmac);
-#endif
+  if (destmac->extended)
+    {
+      g_packet_meta.dextended = TRUE;
+      sixlowpan_eaddrcopy(g_packet_meta.dest.eaddr.u8, destmac->u.eaddr.u8);
+    }
+  else
+    {
+      sixlowpan_saddrcopy(g_packet_meta.dest.saddr.u8, destmac->u.saddr.u8);
+    }
 
   /* Get the destination PAN ID.
    *
@@ -418,9 +417,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
        */
 
       pktlen = buflen + g_uncomp_hdrlen;
-      PUTINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE,
-               ((SIXLOWPAN_DISPATCH_FRAG1 << 8) | pktlen));
-      PUTINT16(fragptr, SIXLOWPAN_FRAG_TAG, ieee->i_dgramtag);
+      PUTHOST16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE,
+                ((SIXLOWPAN_DISPATCH_FRAG1 << 8) | pktlen));
+      PUTHOST16(fragptr, SIXLOWPAN_FRAG_TAG, ieee->i_dgramtag);
 
       g_frame_hdrlen += SIXLOWPAN_FRAG1_HDR_LEN;
 
@@ -487,9 +486,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
           /* Setup up the FRAGN header after the frame header. */
 
-          PUTINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE,
-                   ((SIXLOWPAN_DISPATCH_FRAGN << 8) | pktlen));
-          PUTINT16(fragptr, SIXLOWPAN_FRAG_TAG, ieee->i_dgramtag);
+          PUTHOST16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE,
+                    ((SIXLOWPAN_DISPATCH_FRAGN << 8) | pktlen));
+          PUTHOST16(fragptr, SIXLOWPAN_FRAG_TAG, ieee->i_dgramtag);
           fragptr[SIXLOWPAN_FRAG_OFFSET] = outlen >> 3;
 
           fragn_hdrlen += SIXLOWPAN_FRAGN_HDR_LEN;

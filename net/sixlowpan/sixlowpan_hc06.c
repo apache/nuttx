@@ -220,7 +220,7 @@ static FAR struct sixlowpan_addrcontext_s *
 }
 
 /****************************************************************************
- * Name: compress_addr_64
+ * Name: compress_tagaddr and compress_laddr
  *
  * Description:
  *   Uncompress addresses based on a prefix and a postfix with zeroes in
@@ -232,12 +232,12 @@ static FAR struct sixlowpan_addrcontext_s *
  *
  ****************************************************************************/
 
-static uint8_t compress_addr_64(FAR const net_ipv6addr_t ipaddr,
-                                FAR const struct sixlowpan_addr_s *macaddr,
+static uint8_t compress_tagaddr(FAR const net_ipv6addr_t ipaddr,
+                                FAR const struct sixlowpan_tagaddr_s *macaddr,
                                 uint8_t bitpos)
 {
-  ninfo("ipaddr=%p macaddr=%p bitpos=%u g_hc06ptr=%p\n",
-         ipaddr, macaddr, bitpos, g_hc06ptr);
+  ninfo("ipaddr=%p macaddr=%p extended=%u bitpos=%u g_hc06ptr=%p\n",
+         ipaddr, macaddr, macaddr->extended, bitpos, g_hc06ptr);
 
   if (sixlowpan_ismacbased(ipaddr, macaddr))
     {
@@ -259,6 +259,23 @@ static uint8_t compress_addr_64(FAR const net_ipv6addr_t ipaddr,
       g_hc06ptr += 8;
       return 1 << bitpos;       /* 64-bits */
     }
+}
+
+static uint8_t compress_laddr(FAR const net_ipv6addr_t ipaddr,
+                                FAR const struct sixlowpan_addr_s *macaddr,
+                                uint8_t bitpos)
+{
+  struct sixlowpan_tagaddr_s tagaddr;
+
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+  tagaddr.extended = true;
+  sixlowpan_eaddrcopy(tagaddr.u.eaddr.u8, macaddr->u8);
+#else
+  tagaddr.extended = false;
+  sixlowpan_saddrcopy(tagaddr.u.saddr.u8, macaddr->u8);
+#endif
+
+  return compress_tagaddr(ipaddr, &tagaddr, bitpos);
 }
 
 /****************************************************************************
@@ -446,7 +463,7 @@ void sixlowpan_hc06_initialize(void)
 
 void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                                 FAR const struct ipv6_hdr_s *ipv6,
-                                FAR const struct sixlowpan_addr_s *destmac,
+                                FAR const struct sixlowpan_tagaddr_s *destmac,
                                 FAR uint8_t *fptr)
 {
   FAR uint8_t *iphc = fptr + g_frame_hdrlen;
@@ -614,9 +631,9 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
       /* Compression compare with this nodes address (source) */
 
-      iphc1   |= compress_addr_64(ipv6->srcipaddr,
-                                  &ieee->i_dev.d_mac.ieee802154,
-                                  SIXLOWPAN_IPHC_SAM_BIT);
+      iphc1   |= compress_laddr(ipv6->srcipaddr,
+                                &ieee->i_dev.d_mac.ieee802154,
+                                SIXLOWPAN_IPHC_SAM_BIT);
     }
 
   /* No address context found for this address */
@@ -625,9 +642,9 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
            ipv6->destipaddr[1] == 0 &&  ipv6->destipaddr[2] == 0 &&
            ipv6->destipaddr[3] == 0)
     {
-      iphc1 |= compress_addr_64(ipv6->srcipaddr,
-                                &ieee->i_dev.d_mac.ieee802154,
-                                SIXLOWPAN_IPHC_SAM_BIT);
+      iphc1 |= compress_laddr(ipv6->srcipaddr,
+                              &ieee->i_dev.d_mac.ieee802154,
+                              SIXLOWPAN_IPHC_SAM_BIT);
     }
   else
     {
@@ -701,7 +718,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
           /* Compession compare with link adress (destination) */
 
-          iphc1 |= compress_addr_64(ipv6->destipaddr, destmac,
+          iphc1 |= compress_tagaddr(ipv6->destipaddr, destmac,
                                     SIXLOWPAN_IPHC_DAM_BIT);
 
           /* No address context found for this address */
@@ -710,7 +727,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                ipv6->destipaddr[1] == 0 && ipv6->destipaddr[2] == 0 &&
                ipv6->destipaddr[3] == 0)
         {
-          iphc1 |= compress_addr_64(ipv6->destipaddr, destmac,
+          iphc1 |= compress_tagaddr(ipv6->destipaddr, destmac,
                                     SIXLOWPAN_IPHC_DAM_BIT);
         }
       else

@@ -100,6 +100,12 @@ union sixlowpan_anyaddr_u
   struct sixlowpan_eaddr_s eaddr;
 };
 
+struct sixlowpan_tagaddr_s
+{
+  bool extended;
+  union sixlowpan_anyaddr_u u;
+};
+
 /* Represents the configured address size */
 
 struct sixlowpan_addr_s

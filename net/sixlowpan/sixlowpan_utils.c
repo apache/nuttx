@@ -80,17 +80,39 @@
  *
  ****************************************************************************/
 
-void sixlowpan_addrfromip(const net_ipv6addr_t ipaddr,
-                          FAR struct sixlowpan_addr_s *addr)
+void sixlowpan_saddrfromip(const net_ipv6addr_t ipaddr,
+                          FAR struct sixlowpan_saddr_s *saddr)
 {
   DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
 
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  memcpy(addr, &ipaddr[4], NET_6LOWPAN_ADDRSIZE);
-#else
-  memcpy(addr, &ipaddr[7], NET_6LOWPAN_ADDRSIZE);
-#endif
-  addr->u8[0] ^= 0x02;
+  memcpy(saddr, &ipaddr[7], NET_6LOWPAN_SADDRSIZE);
+  saddr->u8[0] ^= 0x02;
+}
+
+void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr,
+                          FAR struct sixlowpan_eaddr_s *eaddr)
+{
+  DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
+
+  memcpy(eaddr, &ipaddr[4], NET_6LOWPAN_EADDRSIZE);
+  eaddr->u8[0] ^= 0x02;
+}
+
+void sixlowpan_addrfromip(const net_ipv6addr_t ipaddr,
+                          FAR struct sixlowpan_tagaddr_s *addr)
+{
+  DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
+
+  if (SIXLOWPAN_IS_IID_16BIT_COMPRESSABLE(ipaddr))
+    {
+      memset(addr, 0, sizeof(struct sixlowpan_tagaddr_s));
+      sixlowpan_saddrfromip(ipaddr, &addr->u.saddr);
+    }
+  else
+    {
+      sixlowpan_eaddrfromip(ipaddr, &addr->u.eaddr);
+      addr->extended = true;
+    }
 }
 
 /****************************************************************************
@@ -106,20 +128,37 @@ void sixlowpan_addrfromip(const net_ipv6addr_t ipaddr,
  *
  ****************************************************************************/
 
-bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
-                          FAR const struct sixlowpan_addr_s *addr)
+bool sixlowpan_issaddrbased(const net_ipv6addr_t ipaddr,
+                            FAR const struct sixlowpan_saddr_s *saddr)
 {
-  FAR const uint8_t *byteptr = addr->u8;
+  FAR const uint8_t *byteptr = saddr->u8;
 
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  return (ipaddr[4] == htons((GETINT16(byteptr, 0) ^ 0x0200)) &&
-          ipaddr[5] == GETINT16(byteptr, 2) &&
-          ipaddr[6] == GETINT16(byteptr, 4) &&
-          ipaddr[7] == GETINT16(byteptr, 6));
-#else
   return (ipaddr[5] == HTONS(0x00ff) && ipaddr[6] == HTONS(0xfe00) &&
-          ipaddr[7] == htons((GETINT16(byteptr, 0) ^ 0x0200)));
-#endif
+          ipaddr[7] == (GETNET16(byteptr, 0) ^ HTONS(0x0200)));
+}
+
+bool sixlowpan_iseaddrbased(const net_ipv6addr_t ipaddr,
+                            FAR const struct sixlowpan_eaddr_s *eaddr)
+{
+  FAR const uint8_t *byteptr = eaddr->u8;
+
+  return (ipaddr[4] == (GETNET16(byteptr, 0) ^ HTONS(0x0200)) &&
+          ipaddr[5] == GETNET16(byteptr, 2) &&
+          ipaddr[6] == GETNET16(byteptr, 4) &&
+          ipaddr[7] == GETNET16(byteptr, 6));
+}
+
+bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
+                          FAR const struct sixlowpan_tagaddr_s *addr)
+{
+  if (addr->extended)
+    {
+      return sixlowpan_iseaddrbased(ipaddr, &addr->u.eaddr);
+    }
+   else
+    {
+      return sixlowpan_issaddrbased(ipaddr, &addr->u.saddr);
+    }
 }
 
 /****************************************************************************

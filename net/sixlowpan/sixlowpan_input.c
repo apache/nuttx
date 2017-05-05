@@ -291,7 +291,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
    */
 
   fragptr = fptr + hdrsize;
-  switch ((GETINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0xf800) >> 8)
+  switch ((GETHOST16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0xf800) >> 8)
     {
     /* First fragment of new reassembly */
 
@@ -299,8 +299,8 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       {
         /* Set up for the reassembly */
 
-        fragsize        = GETINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0x07ff;
-        fragtag         = GETINT16(fragptr, SIXLOWPAN_FRAG_TAG);
+        fragsize        = GETHOST16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0x07ff;
+        fragtag         = GETHOST16(fragptr, SIXLOWPAN_FRAG_TAG);
         g_frame_hdrlen += SIXLOWPAN_FRAG1_HDR_LEN;
 
         ninfo("FRAG1: fragsize=%d fragtag=%d fragoffset=%d\n",
@@ -318,8 +318,8 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
         /* Set offset, tag, size.  Offset is in units of 8 bytes. */
 
         fragoffset      = fragptr[SIXLOWPAN_FRAG_OFFSET];
-        fragtag         = GETINT16(fragptr, SIXLOWPAN_FRAG_TAG);
-        fragsize        = GETINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0x07ff;
+        fragtag         = GETHOST16(fragptr, SIXLOWPAN_FRAG_TAG);
+        fragsize        = GETHOST16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0x07ff;
         g_frame_hdrlen += SIXLOWPAN_FRAGN_HDR_LEN;
 
         ninfo("FRAGN: fragsize=%d fragtag=%d fragoffset=%d\n",
@@ -755,7 +755,7 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
                 {
                   FAR struct ipv6_hdr_s *ipv6hdr;
                   FAR uint8_t *buffer;
-                  struct sixlowpan_addr_s destmac;
+                  struct sixlowpan_tagaddr_s destmac;
                   size_t hdrlen;
                   size_t buflen;
 
