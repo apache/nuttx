@@ -1322,7 +1322,7 @@ union ieee802154_mlme_notify_u
 union ieee802154_mcps_notify_u
 {
   struct ieee802154_data_conf_s        dataconf;
-  struct ieee802154_data_ind_s         dataind;
+  struct ieee802154_data_ind_s         *dataind;
 };
 
 /* A pointer to this structure is passed as the argument of each IOCTL

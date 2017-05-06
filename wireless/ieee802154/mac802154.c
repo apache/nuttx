@@ -150,8 +150,8 @@ struct ieee802154_privmac_s
   struct ieee802154_txdesc_s txdesc[CONFIG_IEEE802154_NTXDESC];
 
   /* Support a singly linked list of frames received */
-  FAR struct ieee802154_data_ind_s *rxframes_head;
-  FAR struct ieee802154_data_ind_s *rxframes_tail;
+  FAR struct ieee802154_data_ind_s *dataind_head;
+  FAR struct ieee802154_data_ind_s *dataind_tail;
 
   /* MAC PIB attributes, grouped to save memory */
 
@@ -392,6 +392,7 @@ static FAR struct mac802154_txframe_s *
   /* Get the transaction from the head of the list */
 
   trans = priv->csma_head;
+  trans->flink = NULL;
 
   /* Move the head pointer to the next transaction */
 
@@ -405,6 +406,79 @@ static FAR struct mac802154_txframe_s *
     }
 
   return trans;
+}
+
+/****************************************************************************
+ * Name: mac802154_push_rxframe
+ *
+ * Description:
+ *   Push a data indication onto the list to be processed
+ *
+ ****************************************************************************/
+
+static void mac802154_push_dataind(FAR struct ieee802154_privmac_s *priv,
+                                   FAR struct ieee802154_data_ind_s *ind)
+{
+  /* Ensure the forward link is NULL */
+
+  ind->flink = NULL;
+
+  /* If the tail is not empty, make the frame pointed to by the tail,
+   * point to the new data indication */
+
+  if (priv->dataind_tail != NULL)
+    {
+      priv->dataind_tail->flink = ind;
+    }
+
+  /* Point the tail at the new frame */
+
+  priv->dataind_tail = ind;
+
+  /* If the head is NULL, we need to point it at the data indication since there
+   * is only one indication in the list at this point */
+
+  if (priv->dataind_head == NULL)
+    {
+      priv->dataind_head = ind;
+    }
+}
+
+/****************************************************************************
+ * Name: mac802154_pop_dataind
+ *
+ * Description:
+ *   Pop a data indication from the list
+ *
+ ****************************************************************************/
+
+static FAR struct ieee802154_data_ind_s *
+  mac802154_pop_dataind(FAR struct ieee802154_privmac_s *priv)
+{
+  FAR struct ieee802154_data_ind_s *ind;
+
+  if (priv->dataind_head == NULL)
+    {
+      return NULL;
+    }
+
+  /* Get the data indication from the head of the list */
+
+  ind = priv->dataind_head;
+  ind->flink = NULL;
+
+  /* Move the head pointer to the next data indication */
+
+  priv->dataind_head = ind->flink;
+
+  /* If the head is now NULL, the list is empty, so clear the tail too */
+
+  if (priv->dataind_head == NULL)
+    {
+      priv->dataind_tail = NULL;
+    }
+
+  return ind;
 }
 
 /****************************************************************************
@@ -707,8 +781,7 @@ static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
 
   /* Push the iob onto the tail of the frame list for processing */
 
-  priv->rxframes_tail->flink = ind;
-  priv->rxframes_tail = ind;
+  mac802154_push_dataind(priv, ind);
 
   mac802154_givesem(&priv->exclsem);
 
@@ -736,10 +809,150 @@ static void mac802154_rxframe_worker(FAR void *arg)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)arg;
+  FAR struct ieee802154_data_ind_s *ind;
+  union ieee802154_mcps_notify_u mcps_notify;
+  FAR struct iob_s *frame;
+  uint16_t *frame_ctrl;
+  bool panid_comp;
 
-  /* The radio layer is responsible for handling all ACKs and retries. If for
-   * some reason an ACK gets here, just throw it out.
-   */
+  while(1)
+    {
+      /* Get exclusive access to the driver structure.  We don't care about any
+       * signals so if we see one, just go back to trying to get access again.
+       */
+
+      while (mac802154_takesem(&priv->exclsem) != 0);
+
+      /* Push the iob onto the tail of the frame list for processing */
+
+      ind = mac802154_pop_dataind(priv);
+
+      if (ind == NULL)
+        {
+          mac802154_givesem(&priv->exclsem);
+          break;
+        }
+
+      /* Once we pop off the indication, we don't need to keep the mac locked */
+
+      mac802154_givesem(&priv->exclsem);
+
+      /* Get a local copy of the frame to make it easier to access */
+
+      frame = iob->frame;
+
+      /* Set a local pointer to the frame control then move the offset past 
+       * the frame control field
+       */
+
+      frame_ctrl = (uint16_t *)&frame->io_data[frame->io_offset];
+      frame->io_offset += 2;
+
+      /* We use the data_ind_s as a container for the frame information even if
+       * this isn't a data frame
+       */
+
+      ind->src.mode = (frame_ctrl & IEEE802154_FRAMECTRL_SADDR) >>
+                      IEEE802154_FRAMECTRL_SHIFT_SADDR;
+
+      ind->dest.mode = (frame_ctrl & IEEE802154_FRAMECTRL_DADDR) >>
+                       IEEE802154_FRAMECTRL_SHIFT_DADDR;
+
+      panid_comp = (frame_ctrl & IEEE802154_FRAMECTRL_PANIDCOMP) >>
+                   IEEE802154_FRAMECTRL_SHIFT_PANIDCOMP;
+
+      ind->dsn = iob->frame->io_data[frame->io_offset++];
+
+      /* If the destination address is included */
+
+      if (ind->dest.mode != IEEE802154_ADDRMODE_NONE)
+        {
+          /* Get the destination PAN ID */
+
+          ind->dest.panid = frame->io_data[frame->io_offset];
+          frame->io_offset += 2;
+
+          if (ind->dest.mode == IEEE802154_ADDRMODE_SHORT)
+            {
+              ind->dest.saddr = frame->io_data[frame->io_offset];
+              frame->io_offset += 2;
+            }
+          else if (ind->dest.mode == IEEE802154_ADDRMODE_EXTENDED)
+            {
+              memcpy(&ind->dest.eaddr[0], frame->io_data[frame->io_offset], 
+                     IEEE802154_EADDR_LEN);
+              frame->io_offset += 8;
+            }
+        }
+
+      if (ind->src.mode != IEEE802154_ADDRMODE_NONE)
+        {
+          /* If the source address is included, and the PAN ID compression field
+           * is set, get the PAN ID from the header.
+           */
+
+          if (!panid_comp)
+            {
+              ind->src.panid = frame->io_data[frame->io_offset];
+              frame->io_offset += 2;
+            }
+          
+          /* If the source address is included, and the PAN ID compression field
+           * is set, the source PAN ID is the same as the destination PAN ID
+           */
+
+          else
+            {
+              ind->src.panid = ind->dest.panid;
+            }
+
+          if (ind->src.mode == IEEE802154_ADDRMODE_SHORT)
+            {
+              ind->src.saddr = frame->io_data[frame->io_offset];
+              frame->io_offset += 2;
+            }
+          else if (ind->src.mode == IEEE802154_ADDRMODE_EXTENDED)
+            {
+              memcpy(&ind->src.eaddr[0], frame->io_data[frame->io_offset], 
+                     IEEE802154_EADDR_LEN);
+              frame->io_offset += 8;
+            }
+        }
+      
+      if (frame_ctrl & IEEE802154_FRAMECTRL_FTYPE == IEEE802154_FRAME_DATA)
+        {
+          /* If there is a registered MCPS callback receiver registered, send
+           * the frame, otherwise, throw it out.
+           */
+
+          if (priv->cb->mcps_notify != NULL)
+            {
+              mcps_notify.dataind = ind;
+              priv->cb->mcps_notify(priv->cb, IEEE802154_NOTIFY_IND_DATA,
+                                    mcps_notify);
+            }
+          else
+            {
+              /* Free the data indication struct from the pool */
+
+              ieee802154_ind_free(ind);
+            }
+        }
+      else if (frame_ctrl & IEEE802154_FRAMECTRL_FTYPE == IEEE802154_FRAME_COMMAND)
+        {
+
+        }
+      else if (frame_ctrl & IEEE802154_FRAMECTRL_FTYPE == IEEE802154_FRAME_BEACON)
+        {
+
+        }
+      else
+        {
+          /* The radio layer is responsible for handling all ACKs and retries. If for
+           * some reason an ACK gets here, just throw it out.
+           */
+        }
+    }
 }
 
 /****************************************************************************
