@@ -980,7 +980,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
   uint8_t regval;
 #endif
 #if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_KINETIS_SERIALBRK_BSDCOMPAT)
-  struct up_dev_s   *priv  = (struct up_dev_s *)dev->priv;
+  struct up_dev_s   *priv;
   bool               iflow = false;
   bool               oflow = false;
 #endif
@@ -992,6 +992,10 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
   inode = filep->f_inode;
   dev   = inode->i_private;
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
+#endif
+
+#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_KINETIS_SERIALBRK_BSDCOMPAT)
+  priv  = (struct up_dev_s *)dev->priv;
 #endif
 
   switch (cmd)
