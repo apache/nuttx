@@ -226,25 +226,18 @@ int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
   meta->dest_addr.panid = g_packet_meta.dpanid;
 
   /* Handle associated with MSDU.  Will increment once per packet, not
-   * necesarily per frame:  The MSDU handler will be used for each fragment
-   * of a disassembled packet.
+   * necesarily per frame:  The same MSDU handle will be used for each
+   * fragment of a disassembled packet.
    */
 
   meta->msdu_handle = ieee->i_msdu_handle++;
 
-  /* Number of bytes contained in the MAC Service Data Unit (MSDU) */
-
-  meta->msdu_length = paylen;
-
-  /* MSDU flags that may be non-zero */
-
-
 #ifdef CONFIG_IEEE802154_SECURITY
-#  warning CONFIG_IEEE802154_SECURITY not yet supported"
+#  warning CONFIG_IEEE802154_SECURITY not yet supported
 #endif
   
 #ifdef CONFIG_IEEE802154_UWB
-#  warning CONFIG_IEEE802154_UWB not yet supported"
+#  warning CONFIG_IEEE802154_UWB not yet supported
 #endif
 
   /* Ranging left zero */

@@ -535,14 +535,10 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
       for (iob = qhead; iob != NULL; iob = qhead)
         {
-          /* Remove the IOB from the list */
+          /* Remove the IOB containing the frame from the list */
 
           qhead         = iob->io_flink;
           iob->io_flink = NULL;
-
-          /* Update the MSDU length in the metadata */
-
-          meta.msdu_length = iob->io_len - iob->io_offset;
 
           /* And submit the frame to the MAC */
 
@@ -579,10 +575,6 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
       ninfo("Non-fragmented: length %d\n", iob->io_len);
       sixlowpan_dumpbuffer("Outgoing frame",
                        (FAR const uint8_t *)iob->io_data, iob->io_len);
-
-      /* Update the MSDU length in the metadata */
-
-      meta.msdu_length = iob->io_len - iob->io_offset;
 
       /* And submit the frame to the MAC */
 
