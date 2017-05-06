@@ -1505,8 +1505,7 @@ static int mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio, bool enable)
 
 static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
 {
-  FAR struct iob_s *iob;
-  struct ieee802154_rxdesc_s rxdesc;
+  FAR struct ieee802154_data_ind_s *ind;
   uint32_t addr;
   uint32_t index;
   uint8_t  reg;
@@ -1521,46 +1520,43 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
 
   mrf24j40_setreg(dev->spi, MRF24J40_BBREG1, MRF24J40_BBREG1_RXDECINV);
 
-  /* Allocate an IOB to put the packet in */
+  /* Allocate a data_ind to put the frame in */
 
-  iob = iob_alloc(true);
-  DEBUGASSERT(iob != NULL);
-
-  iob->io_flink  = NULL;
-  iob->io_len    = 0;
-  iob->io_offset = 0;
-  iob->io_pktlen = 0;
+  ind = ieee802154_ind_allocate();
+  if (ind == NULL)
+    {
+      wlerr("ERROR: Unable to allocate data_ind. Discarding frame");
+      goto done;
+    }
 
   /* Read packet */
 
   addr = MRF24J40_RXBUF_BASE;
 
-  iob->io_len= mrf24j40_getreg(dev->spi, addr++);
+  ind->frame->io_len= mrf24j40_getreg(dev->spi, addr++);
 
   /* TODO: This needs to be changed.  It is inefficient to do the SPI read byte
    * by byte */
 
-  for (index = 0; index < iob->io_len; index++)
+  for (index = 0; index < ind->frame->io_len; index++)
     {
-      iob->io_data[index] = mrf24j40_getreg(dev->spi, addr++);
+      ind->frame->io_data[index] = mrf24j40_getreg(dev->spi, addr++);
     }
 
-  /* Copy meta-data into RX descriptor */
-
-  rxdesc.lqi  = mrf24j40_getreg(dev->spi, addr++);
-  rxdesc.rssi = mrf24j40_getreg(dev->spi, addr++);
+  ind->lqi  = mrf24j40_getreg(dev->spi, addr++);
+  ind->rssi = mrf24j40_getreg(dev->spi, addr++);
 
   /* Reduce len by 2, we only receive frames with correct crc, no check
    * required.
    */
 
-  iob->io_len -= 2;
+  ind->frame->io_len -= 2;
 
   /* Callback the receiver in the next highest layer */
 
-  dev->radiocb->rxframe(dev->radiocb,
-                        (FAR const struct ieee802154_rxdesc_s *)&rxdesc, iob);
+  dev->radiocb->rxframe(dev->radiocb, ind);
 
+done:
   /* Enable reception of next packet by flushing the fifo.
    * This is an MRF24J40 errata (no. 1).
    */

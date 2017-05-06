@@ -84,11 +84,11 @@
  * Private Types
  ****************************************************************************/
 
-struct mac802154_trans_s
+struct mac802154_txframe_s
 {
   /* Supports a singly linked list */
 
-  FAR struct mac802154_trans_s *flink;
+  FAR struct mac802154_txframe_s *flink;
   FAR struct iob_s *frame;
   uint8_t msdu_handle;
   sem_t sem;
@@ -132,8 +132,8 @@ struct ieee802154_privmac_s
    * during the CAP of the Coordinator's superframe.
    */
 
-  FAR struct mac802154_trans_s *csma_head;
-  FAR struct mac802154_trans_s *csma_tail;
+  FAR struct mac802154_txframe_s *csma_head;
+  FAR struct mac802154_txframe_s *csma_tail;
 
   /* Support a singly linked list of transactions that will be sent indirectly.
    * This list should only be used by a MAC acting as a coordinator.  These
@@ -143,15 +143,15 @@ struct ieee802154_privmac_s
    * beacon frame.
    */
 
-  FAR struct mac802154_trans_s *indirect_head;
-  FAR struct mac802154_trans_s *indirect_tail;
+  FAR struct mac802154_txframe_s *indirect_head;
+  FAR struct mac802154_txframe_s *indirect_tail;
 
   uint8_t txdesc_count;
   struct ieee802154_txdesc_s txdesc[CONFIG_IEEE802154_NTXDESC];
 
   /* Support a singly linked list of frames received */
-  FAR struct iob_s *rxframes_head;
-  FAR struct iob_s *rxframes_tail;
+  FAR struct ieee802154_data_ind_s *dataind_head;
+  FAR struct ieee802154_data_ind_s *dataind_tail;
 
   /* MAC PIB attributes, grouped to save memory */
 
@@ -297,8 +297,7 @@ static void mac802154_txdone(FAR const struct ieee802154_radiocb_s *radiocb,
                              FAR const struct ieee802154_txdesc_s *tx_desc);
 
 static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
-                              FAR const struct ieee802154_rxdesc_s *rx_desc,
-                              FAR struct iob_s *frame);
+                              FAR struct ieee802154_data_ind_s *ind);
 
 /****************************************************************************
  * Private Data
@@ -345,7 +344,7 @@ static inline int mac802154_takesem(sem_t *sem)
  ****************************************************************************/
 
 static void mac802154_push_csma(FAR struct ieee802154_privmac_s *priv,
-                                FAR struct mac802154_trans_s *trans)
+                                FAR struct mac802154_txframe_s *trans)
 {
   /* Ensure the transactions forward link is NULL */
 
@@ -380,10 +379,10 @@ static void mac802154_push_csma(FAR struct ieee802154_privmac_s *priv,
  *
  ****************************************************************************/
 
-static FAR struct mac802154_trans_s *
+static FAR struct mac802154_txframe_s *
   mac802154_pop_csma(FAR struct ieee802154_privmac_s *priv)
 {
-  FAR struct mac802154_trans_s *trans;
+  FAR struct mac802154_txframe_s *trans;
 
   if (priv->csma_head == NULL)
     {
@@ -393,6 +392,7 @@ static FAR struct mac802154_trans_s *
   /* Get the transaction from the head of the list */
 
   trans = priv->csma_head;
+  trans->flink = NULL;
 
   /* Move the head pointer to the next transaction */
 
@@ -406,6 +406,79 @@ static FAR struct mac802154_trans_s *
     }
 
   return trans;
+}
+
+/****************************************************************************
+ * Name: mac802154_push_rxframe
+ *
+ * Description:
+ *   Push a data indication onto the list to be processed
+ *
+ ****************************************************************************/
+
+static void mac802154_push_dataind(FAR struct ieee802154_privmac_s *priv,
+                                   FAR struct ieee802154_data_ind_s *ind)
+{
+  /* Ensure the forward link is NULL */
+
+  ind->flink = NULL;
+
+  /* If the tail is not empty, make the frame pointed to by the tail,
+   * point to the new data indication */
+
+  if (priv->dataind_tail != NULL)
+    {
+      priv->dataind_tail->flink = ind;
+    }
+
+  /* Point the tail at the new frame */
+
+  priv->dataind_tail = ind;
+
+  /* If the head is NULL, we need to point it at the data indication since there
+   * is only one indication in the list at this point */
+
+  if (priv->dataind_head == NULL)
+    {
+      priv->dataind_head = ind;
+    }
+}
+
+/****************************************************************************
+ * Name: mac802154_pop_dataind
+ *
+ * Description:
+ *   Pop a data indication from the list
+ *
+ ****************************************************************************/
+
+static FAR struct ieee802154_data_ind_s *
+  mac802154_pop_dataind(FAR struct ieee802154_privmac_s *priv)
+{
+  FAR struct ieee802154_data_ind_s *ind;
+
+  if (priv->dataind_head == NULL)
+    {
+      return NULL;
+    }
+
+  /* Get the data indication from the head of the list */
+
+  ind = priv->dataind_head;
+  ind->flink = NULL;
+
+  /* Move the head pointer to the next data indication */
+
+  priv->dataind_head = ind->flink;
+
+  /* If the head is now NULL, the list is empty, so clear the tail too */
+
+  if (priv->dataind_head == NULL)
+    {
+      priv->dataind_tail = NULL;
+    }
+
+  return ind;
 }
 
 /****************************************************************************
@@ -510,7 +583,7 @@ static int mac802154_poll_csma(FAR const struct ieee802154_radiocb_s *radiocb,
   FAR struct mac802154_radiocb_s *cb =
     (FAR struct mac802154_radiocb_s *)radiocb;
   FAR struct ieee802154_privmac_s *priv;
-  FAR struct mac802154_trans_s *trans;
+  FAR struct mac802154_txframe_s *trans;
 
   DEBUGASSERT(cb != NULL && cb->priv != NULL);
   priv = cb->priv;
@@ -564,7 +637,7 @@ static int mac802154_poll_gts(FAR const struct ieee802154_radiocb_s *radiocb,
   FAR struct mac802154_radiocb_s *cb =
     (FAR struct mac802154_radiocb_s *)radiocb;
   FAR struct ieee802154_privmac_s *priv;
-  FAR struct mac802154_trans_s *trans;
+  FAR struct mac802154_txframe_s *trans;
   int ret = 0;
 
   DEBUGASSERT(cb != NULL && cb->priv != NULL);
@@ -691,13 +764,11 @@ static void mac802154_txdone_worker(FAR void *arg)
  ****************************************************************************/
 
 static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
-                              FAR const struct ieee802154_rxdesc_s *rx_desc,
-                              FAR struct iob_s *frame)
+                              FAR struct ieee802154_data_ind_s *ind)
 {
   FAR struct mac802154_radiocb_s *cb =
     (FAR struct mac802154_radiocb_s *)radiocb;
   FAR struct ieee802154_privmac_s *priv;
-  FAR struct ieee802154_rxdesc_s *desc;
 
   DEBUGASSERT(cb != NULL && cb->priv != NULL);
   priv = cb->priv;
@@ -708,12 +779,9 @@ static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
 
   while (mac802154_takesem(&priv->exclsem) != 0);
 
-  /* TODO: Copy the frame descriptor to some type of list */
-
   /* Push the iob onto the tail of the frame list for processing */
 
-  priv->rxframes_tail->io_flink = frame;
-  priv->rxframes_tail = frame;
+  mac802154_push_dataind(priv, ind);
 
   mac802154_givesem(&priv->exclsem);
 
@@ -741,10 +809,150 @@ static void mac802154_rxframe_worker(FAR void *arg)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)arg;
+  FAR struct ieee802154_data_ind_s *ind;
+  union ieee802154_mcps_notify_u mcps_notify;
+  FAR struct iob_s *frame;
+  uint16_t *frame_ctrl;
+  bool panid_comp;
 
-  /* The radio layer is responsible for handling all ACKs and retries. If for
-   * some reason an ACK gets here, just throw it out.
-   */
+  while(1)
+    {
+      /* Get exclusive access to the driver structure.  We don't care about any
+       * signals so if we see one, just go back to trying to get access again.
+       */
+
+      while (mac802154_takesem(&priv->exclsem) != 0);
+
+      /* Push the iob onto the tail of the frame list for processing */
+
+      ind = mac802154_pop_dataind(priv);
+
+      if (ind == NULL)
+        {
+          mac802154_givesem(&priv->exclsem);
+          break;
+        }
+
+      /* Once we pop off the indication, we don't need to keep the mac locked */
+
+      mac802154_givesem(&priv->exclsem);
+
+      /* Get a local copy of the frame to make it easier to access */
+
+      frame = iob->frame;
+
+      /* Set a local pointer to the frame control then move the offset past 
+       * the frame control field
+       */
+
+      frame_ctrl = (uint16_t *)&frame->io_data[frame->io_offset];
+      frame->io_offset += 2;
+
+      /* We use the data_ind_s as a container for the frame information even if
+       * this isn't a data frame
+       */
+
+      ind->src.mode = (frame_ctrl & IEEE802154_FRAMECTRL_SADDR) >>
+                      IEEE802154_FRAMECTRL_SHIFT_SADDR;
+
+      ind->dest.mode = (frame_ctrl & IEEE802154_FRAMECTRL_DADDR) >>
+                       IEEE802154_FRAMECTRL_SHIFT_DADDR;
+
+      panid_comp = (frame_ctrl & IEEE802154_FRAMECTRL_PANIDCOMP) >>
+                   IEEE802154_FRAMECTRL_SHIFT_PANIDCOMP;
+
+      ind->dsn = iob->frame->io_data[frame->io_offset++];
+
+      /* If the destination address is included */
+
+      if (ind->dest.mode != IEEE802154_ADDRMODE_NONE)
+        {
+          /* Get the destination PAN ID */
+
+          ind->dest.panid = frame->io_data[frame->io_offset];
+          frame->io_offset += 2;
+
+          if (ind->dest.mode == IEEE802154_ADDRMODE_SHORT)
+            {
+              ind->dest.saddr = frame->io_data[frame->io_offset];
+              frame->io_offset += 2;
+            }
+          else if (ind->dest.mode == IEEE802154_ADDRMODE_EXTENDED)
+            {
+              memcpy(&ind->dest.eaddr[0], frame->io_data[frame->io_offset], 
+                     IEEE802154_EADDR_LEN);
+              frame->io_offset += 8;
+            }
+        }
+
+      if (ind->src.mode != IEEE802154_ADDRMODE_NONE)
+        {
+          /* If the source address is included, and the PAN ID compression field
+           * is set, get the PAN ID from the header.
+           */
+
+          if (!panid_comp)
+            {
+              ind->src.panid = frame->io_data[frame->io_offset];
+              frame->io_offset += 2;
+            }
+          
+          /* If the source address is included, and the PAN ID compression field
+           * is set, the source PAN ID is the same as the destination PAN ID
+           */
+
+          else
+            {
+              ind->src.panid = ind->dest.panid;
+            }
+
+          if (ind->src.mode == IEEE802154_ADDRMODE_SHORT)
+            {
+              ind->src.saddr = frame->io_data[frame->io_offset];
+              frame->io_offset += 2;
+            }
+          else if (ind->src.mode == IEEE802154_ADDRMODE_EXTENDED)
+            {
+              memcpy(&ind->src.eaddr[0], frame->io_data[frame->io_offset], 
+                     IEEE802154_EADDR_LEN);
+              frame->io_offset += 8;
+            }
+        }
+      
+      if (frame_ctrl & IEEE802154_FRAMECTRL_FTYPE == IEEE802154_FRAME_DATA)
+        {
+          /* If there is a registered MCPS callback receiver registered, send
+           * the frame, otherwise, throw it out.
+           */
+
+          if (priv->cb->mcps_notify != NULL)
+            {
+              mcps_notify.dataind = ind;
+              priv->cb->mcps_notify(priv->cb, IEEE802154_NOTIFY_IND_DATA,
+                                    mcps_notify);
+            }
+          else
+            {
+              /* Free the data indication struct from the pool */
+
+              ieee802154_ind_free(ind);
+            }
+        }
+      else if (frame_ctrl & IEEE802154_FRAMECTRL_FTYPE == IEEE802154_FRAME_COMMAND)
+        {
+
+        }
+      else if (frame_ctrl & IEEE802154_FRAMECTRL_FTYPE == IEEE802154_FRAME_BEACON)
+        {
+
+        }
+      else
+        {
+          /* The radio layer is responsible for handling all ACKs and retries. If for
+           * some reason an ACK gets here, just throw it out.
+           */
+        }
+    }
 }
 
 /****************************************************************************
@@ -1050,7 +1258,7 @@ int mac802154_req_data(MACHANDLE mac,
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
-  FAR struct mac802154_trans_s trans;
+  FAR struct mac802154_txframe_s trans;
   uint16_t *frame_ctrl;
   uint8_t mhr_len = 3; /* Start assuming frame control and seq. num */
   int ret;
@@ -1606,67 +1814,3 @@ int mac802154_resp_orphan(MACHANDLE mac,
   return -ENOTTY;
 }
 
-/****************************************************************************
- * Name: ieee802154_indpool_initialize
- *
- * Description:
- *   This function initializes the meta-data allocator.  This function must
- *   be called early in the initialization sequence before any radios
- *   begin operation.
- *
- * Inputs:
- *   None
- *
- * Return Value:
- *   None
- *
- ****************************************************************************/
-
-void ieee802154_indpool_initialize(void);
-
-/****************************************************************************
- * Name: ieee802154_ind_allocate
- *
- * Description:
- *   The ieee802154_ind_allocate function will get a free meta-data
- *   structure for use by the IEEE 802.15.4 MAC.
- *
- *   Interrupt handling logic will first attempt to allocate from the
- *   g_indfree list.  If that list is empty, it will attempt to allocate
- *   from its reserve, g_indfree_irq.  If that list is empty, then the
- *   allocation fails (NULL is returned).
- *
- *   Non-interrupt handler logic will attempt to allocate from g_indfree
- *   list.  If that the list is empty, then the meta-data structure will be
- *   allocated from the dynamic memory pool.
- *
- * Inputs:
- *   None
- *
- * Return Value:
- *   A reference to the allocated msg structure.  All user fields in this
- *   structure have been zeroed.  On a failure to allocate, NULL is
- *   returned.
- *
- ****************************************************************************/
-
-FAR struct ieee802154_data_ind_s *ieee802154_ind_allocate(void);
-
-/****************************************************************************
- * Name: ieee802154_ind_free
- *
- * Description:
- *   The ieee802154_ind_free function will return a meta-data structure to
- *   the free pool of  messages if it was a pre-allocated meta-data
- *   structure. If the meta-data structure was allocated dynamically it will
- *   be deallocated.
- *
- * Inputs:
- *   ind - meta-data structure to free
- *
- * Return Value:
- *   None
- *
- ****************************************************************************/
-
-void ieee802154_ind_free(FAR struct ieee802154_data_ind_s *ind);
