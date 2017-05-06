@@ -1,8 +1,9 @@
 /********************************************************************************************
  * arch/arm/src/kinetis/chip/kinetis_k20pinmux.h
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -159,14 +160,14 @@
 #  define PIN_FTM2_QD_PHA     (PIN_ALT6 | PIN_PORTB | PIN18)
 #  define PIN_FTM2_QD_PHB     (PIN_ALT6 | PIN_PORTB | PIN19)
 
-#  define PIN_I2C0_SCL_1      (PIN_ALT2 | PIN_PORTB | PIN0)
-#  define PIN_I2C0_SCL_2      (PIN_ALT2 | PIN_PORTB | PIN2)
-#  define PIN_I2C0_SDA_1      (PIN_ALT2 | PIN_PORTB | PIN1)
-#  define PIN_I2C0_SDA_2      (PIN_ALT2 | PIN_PORTB | PIN3)
-#  define PIN_I2C1_SCL_1      (PIN_ALT2 | PIN_PORTC | PIN10)
-#  define PIN_I2C1_SCL_2      (PIN_ALT6 | PIN_PORTE | PIN1)
-#  define PIN_I2C1_SDA_1      (PIN_ALT2 | PIN_PORTC | PIN11)
-#  define PIN_I2C1_SDA_2      (PIN_ALT6 | PIN_PORTE | PIN0)
+#  define PIN_I2C0_SCL_1      (PIN_ALT2_OPENDRAIN | PIN_PORTB | PIN0)
+#  define PIN_I2C0_SCL_2      (PIN_ALT2_OPENDRAIN | PIN_PORTB | PIN2)
+#  define PIN_I2C0_SDA_1      (PIN_ALT2_OPENDRAIN | PIN_PORTB | PIN1)
+#  define PIN_I2C0_SDA_2      (PIN_ALT2_OPENDRAIN | PIN_PORTB | PIN3)
+#  define PIN_I2C1_SCL_1      (PIN_ALT2_OPENDRAIN | PIN_PORTC | PIN10)
+#  define PIN_I2C1_SCL_2      (PIN_ALT6_OPENDRAIN | PIN_PORTE | PIN1)
+#  define PIN_I2C1_SDA_1      (PIN_ALT2_OPENDRAIN | PIN_PORTC | PIN11)
+#  define PIN_I2C1_SDA_2      (PIN_ALT6_OPENDRAIN | PIN_PORTE | PIN0)
 
 #  define PIN_I2S0_MCLK_1     (PIN_ALT4 | PIN_PORTC | PIN8)
 #  define PIN_I2S0_MCLK_2     (PIN_ALT6 | PIN_PORTC | PIN6)
