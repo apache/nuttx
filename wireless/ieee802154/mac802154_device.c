@@ -449,9 +449,9 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
   iob->io_offset = ret;
   iob->io_len = iob->io_offset;
 
-  memcpy(&iob->io_data[iob->io_offset], tx->payload, tx->meta.msdu_length);
+  memcpy(&iob->io_data[iob->io_offset], tx->payload, tx->length);
 
-  iob->io_len += tx->meta.msdu_length;
+  iob->io_len += tx->length;
 
   /* If this is a blocking operation, we need to setup a wait struct so we
    * can unblock when the packet transmission has finished. If this is a

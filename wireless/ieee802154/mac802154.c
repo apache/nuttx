@@ -1078,7 +1078,7 @@ int mac802154_req_data(MACHANDLE mac,
    * sublayer will set the Frame Version to one. [1] pg. 118.
    */
 
-  if (meta->msdu_length > IEEE802154_MAX_SAFE_MAC_PAYLOAD_SIZE)
+  if ((frame->io_len - frame->io_offset) > IEEE802154_MAX_SAFE_MAC_PAYLOAD_SIZE)
     {
       *frame_ctrl |= IEEE802154_FRAMECTRL_VERSION;
     }
