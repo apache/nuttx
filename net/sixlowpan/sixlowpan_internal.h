@@ -528,19 +528,27 @@ int sixlowpan_uncompresshdr_hc1(uint16_t iplen, FAR struct iob_s *iob,
 #endif
 
 /****************************************************************************
- * Name: sixlowpan_islinklocal, sixlowpan_addrfromip, and sixlowpan_ismacbased
+ * Name: sixlowpan_islinklocal, sixlowpan_addrfromip, and
+ *       sixlowpan_ismacbased
  *
  * Description:
- *   sixlowpan_addrfromip: Extract the IEEE 802.15.14 address from a link
- *   local IPv6 address.
+ *   sixlowpan_addrfromip(): Extract the IEEE 802.15.14 address from a MAC
+ *   based IPv6 address.  sixlowpan_addrfromip() is intended to handle a
+ *   tagged address or any size; sixlowpan_saddrfromip() and
+ *   sixlowpan_eaddrfromip() specifically handle short and extended
+ *   addresses.
  *
- *   sixlowpan_islinklocal and sixlowpan_ismacbased will return true for
- *   address created in this fashion.
+ *   sixlowpan_islinklocal() and sixlowpan_ismacbased() will return true for
+ *   address created in this fashion.  sixlowpan_addrfromip() is intended to
+ *   handle a tagged address or any size; sixlowpan_issaddrbased() and
+ *   sixlowpan_iseaddrbased() specifically handle short and extended
+ *   addresses.  Local addresses are of a fixed but configurable size and
+ *   sixlowpan_isaddrbased() is for use with such local addresses.
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  xxxx 0000 0000 0000 2-byte short address (VALID?)
- *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
  *
  ****************************************************************************/
 
@@ -552,6 +560,19 @@ void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr,
                           FAR struct sixlowpan_eaddr_s *eaddr);
 void sixlowpan_addrfromip(const net_ipv6addr_t ipaddr,
                           FAR struct sixlowpan_tagaddr_s *addr);
+
+bool sixlowpan_issaddrbased(const net_ipv6addr_t ipaddr,
+                            FAR const struct sixlowpan_saddr_s *saddr);
+bool sixlowpan_iseaddrbased(const net_ipv6addr_t ipaddr,
+                            FAR const struct sixlowpan_eaddr_s *eaddr);
+
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+#  define sixlowpan_isaddrbased(ipaddr,addr) \
+     sixlowpan_iseaddrbased(ipaddr,(FAR struct sixlowpan_eaddr_s *)addr)
+#else
+#  define sixlowpan_isaddrbased(ipaddr,addr) \
+     sixlowpan_issaddrbased(ipaddr,(FAR struct sixlowpan_saddr_s *)addr)
+#endif
 
 bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
                           FAR const struct sixlowpan_tagaddr_s *addr);

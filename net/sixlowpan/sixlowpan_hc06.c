@@ -220,7 +220,7 @@ static FAR struct sixlowpan_addrcontext_s *
 }
 
 /****************************************************************************
- * Name: compress_tagaddr and compress_laddr
+ * Name: comporess_ipaddr, compress_tagaddr, and compress_laddr
  *
  * Description:
  *   Uncompress addresses based on a prefix and a postfix with zeroes in
@@ -230,20 +230,16 @@ static FAR struct sixlowpan_addrcontext_s *
  *   prefpost takes a byte where the first nibble specify prefix count
  *   and the second postfix count (NOTE: 15/0xf => 16 bytes copy).
  *
+ *   compress_tagaddr() accepts a remote, variable length, taged MAC address;
+ *   compress_laddr() accepts a local, fixed length MAC address.
+ *   compress_ipaddr() is simply the common logic that does not depend on
+ *   the size of the MAC address.
+ *
  ****************************************************************************/
 
-static uint8_t compress_tagaddr(FAR const net_ipv6addr_t ipaddr,
-                                FAR const struct sixlowpan_tagaddr_s *macaddr,
-                                uint8_t bitpos)
+static uint8_t compress_ipaddr(FAR const net_ipv6addr_t ipaddr, uint8_t bitpos)
 {
-  ninfo("ipaddr=%p macaddr=%p extended=%u bitpos=%u g_hc06ptr=%p\n",
-         ipaddr, macaddr, macaddr->extended, bitpos, g_hc06ptr);
-
-  if (sixlowpan_ismacbased(ipaddr, macaddr))
-    {
-      return 3 << bitpos;       /* 0-bits */
-    }
-  else if (SIXLOWPAN_IS_IID_16BIT_COMPRESSABLE(ipaddr))
+  if (SIXLOWPAN_IS_IID_16BIT_COMPRESSABLE(ipaddr))
     {
       /* Compress IID to 16 bits: xxxx:xxxx:xxxx:xxxx:0000:00ff:fe00:XXXX */
 
@@ -261,21 +257,38 @@ static uint8_t compress_tagaddr(FAR const net_ipv6addr_t ipaddr,
     }
 }
 
-static uint8_t compress_laddr(FAR const net_ipv6addr_t ipaddr,
-                                FAR const struct sixlowpan_addr_s *macaddr,
+static uint8_t compress_tagaddr(FAR const net_ipv6addr_t ipaddr,
+                                FAR const struct sixlowpan_tagaddr_s *macaddr,
                                 uint8_t bitpos)
 {
-  struct sixlowpan_tagaddr_s tagaddr;
+  ninfo("ipaddr=%p macaddr=%p extended=%u bitpos=%u g_hc06ptr=%p\n",
+         ipaddr, macaddr, macaddr->extended, bitpos, g_hc06ptr);
 
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  tagaddr.extended = true;
-  sixlowpan_eaddrcopy(tagaddr.u.eaddr.u8, macaddr->u8);
-#else
-  tagaddr.extended = false;
-  sixlowpan_saddrcopy(tagaddr.u.saddr.u8, macaddr->u8);
-#endif
+  if (sixlowpan_ismacbased(ipaddr, macaddr))
+    {
+      return 3 << bitpos;       /* 0-bits */
+    }
+  else
+    {
+      return compress_ipaddr(ipaddr, bitpos);
+    }
+}
 
-  return compress_tagaddr(ipaddr, &tagaddr, bitpos);
+static uint8_t compress_laddr(FAR const net_ipv6addr_t ipaddr,
+                              FAR const struct sixlowpan_addr_s *macaddr,
+                              uint8_t bitpos)
+{
+  ninfo("ipaddr=%p macaddr=%p bitpos=%u g_hc06ptr=%p\n",
+         ipaddr, macaddr, bitpos, g_hc06ptr);
+
+  if (sixlowpan_isaddrbased(ipaddr, macaddr))
+    {
+      return 3 << bitpos;       /* 0-bits */
+    }
+  else
+    {
+      return compress_ipaddr(ipaddr, bitpos);
+    }
 }
 
 /****************************************************************************
@@ -642,9 +655,9 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
            ipv6->destipaddr[1] == 0 &&  ipv6->destipaddr[2] == 0 &&
            ipv6->destipaddr[3] == 0)
     {
-      iphc1 |= compress_laddr(ipv6->srcipaddr,
-                              &ieee->i_dev.d_mac.ieee802154,
-                              SIXLOWPAN_IPHC_SAM_BIT);
+      iphc1   |= compress_laddr(ipv6->srcipaddr,
+                                &ieee->i_dev.d_mac.ieee802154,
+                                SIXLOWPAN_IPHC_SAM_BIT);
     }
   else
     {

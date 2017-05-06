@@ -71,12 +71,16 @@
  * Name: sixlowpan_addrfromip
  *
  * Description:
- *   Extract the IEEE 802.15.4 address from a link local IPv6 address:
+ *   sixlowpan_addrfromip(): Extract the IEEE 802.15.14 address from a MAC
+ *   based IPv6 address.  sixlowpan_addrfromip() is intended to handle a
+ *   tagged address or and size; sixlowpan_saddrfromip() and
+ *   sixlowpan_eaddrfromip() specifically handler short and extended
+ *   addresses.
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
- *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
+ *    xxxx 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
+ *    xxxx 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
  *
  ****************************************************************************/
 
@@ -119,7 +123,13 @@ void sixlowpan_addrfromip(const net_ipv6addr_t ipaddr,
  * Name: sixlowpan_ismacbased
  *
  * Description:
- *   Check if the MAC address is encoded in the IP address:
+ *   sixlowpan_ismacbased() will return true for IP addresses formed from
+ *   IEEE802.15.4 MAC addresses.  sixlowpan_addrfromip() is intended to
+ *   handle a tagged address or any size; sixlowpan_issaddrbased() and
+ *   sixlowpan_iseaddrbased() specifically handle short and extended
+ *   addresses.  Local addresses are of a fixed but configurable size and
+ *   sixlowpan_isaddrbased() is for use with such local addresses.
+ *
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
