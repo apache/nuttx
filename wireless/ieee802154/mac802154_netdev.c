@@ -51,14 +51,14 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/net/iob.h>
+#include <nuttx/drivers/iob.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/sixlowpan.h>
-#include <nuttx/wireless/ieee80154_device.h>
-#include <nuttx/wireless/ieee80154_mac.h>
+#include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 #include "mac802154.h"
 
@@ -79,11 +79,11 @@
    /* Use the selected work queue */
 
 #  if defined(CONFIG_IEEE802154_NETDEV_HPWORK)
-#    define ETHWORK HPWORK
+#     define WPANWORK HPWORK
 #  elif defined(CONFIG_IEEE802154_NETDEV_LPWORK)
-#    define ETHWORK LPWORK
+#     define WPANWORK LPWORK
 #  else
-#    error Neither CONFIG_IEEE802154_NETDEV_HPWORK nor CONFIG_IEEE802154_NETDEV_LPWORK defined
+#     error Neither CONFIG_IEEE802154_NETDEV_HPWORK nor CONFIG_IEEE802154_NETDEV_LPWORK defined
 #  endif
 #endif
 
@@ -97,15 +97,7 @@
 
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
-#define skeleton_WDDELAY   (1*CLK_TCK)
-
-/* TX timeout = 1 minute */
-
-#define skeleton_TXTIMEOUT (60*CLK_TCK)
-
-/* This is a helper pointer for accessing the contents of the Ethernet header */
-
-#define BUF ((struct eth_hdr_s *)priv->md_dev.d_buf)
+#define TXPOLL_WDDELAY   (1*CLK_TCK)
 
 /****************************************************************************
  * Private Types
@@ -137,8 +129,6 @@ struct macnet_driver_s
   MACHANDLE md_mac;               /* Contained MAC interface */
   bool md_bifup;                  /* true:ifup false:ifdown */
   WDOG_ID md_txpoll;              /* TX poll timer */
-  WDOG_ID md_txtimeout;           /* TX timeout timer */
-  struct work_s md_irqwork;       /* Defer interupt work to the work queue */
   struct work_s md_pollwork;      /* Defer poll work to the work queue */
 };
 
@@ -148,36 +138,27 @@ struct macnet_driver_s
 
 /* IEE802.15.4 MAC callback functions ***************************************/
 
-static void macnet_mlme_notify(FAR struct ieee802154_maccb_s *maccb,
+static void macnet_mlme_notify(FAR const struct ieee802154_maccb_s *maccb,
                                enum ieee802154_macnotify_e notif,
-                               FAR union ieee802154_mlme_notify_u *arg);
-
-static void macnet_mcps_notify(FAR struct ieee802154_maccb_s *maccb,
+                               FAR const union ieee802154_mlme_notify_u *arg);
+static void macnet_mcps_notify(FAR const struct ieee802154_maccb_s *maccb,
                                enum ieee802154_macnotify_e notif,
-                               FAR union ieee802154_mcps_notify_u *arg);
+                               FAR const union ieee802154_mcps_notify_u *arg);
 
 /* Asynchronous confirmations to requests */
 
 static void macnet_conf_data(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_data_conf_s *conf);
-static void macnet_conf_purge(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_purge_conf_s *conf);
+             FAR const struct ieee802154_data_conf_s *conf);
 static void macnet_conf_associate(FAR struct macnet_driver_s *priv,
              FAR struct ieee802154_assoc_conf_s *conf);
 static void macnet_conf_disassociate(FAR struct macnet_driver_s *priv,
              FAR struct ieee802154_disassoc_conf_s *conf);
-static void macnet_conf_get(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_get_conf_s *conf);
 static void macnet_conf_gts(FAR struct macnet_driver_s *priv,
              FAR struct ieee802154_gts_conf_s *conf);
-static void macnet_conf_reset(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_reset_conf_s *conf);
 static void macnet_conf_rxenable(FAR struct macnet_driver_s *priv,
              FAR struct ieee802154_rxenable_conf_s *conf);
 static void macnet_conf_scan(FAR struct macnet_driver_s *priv,
              FAR struct ieee802154_scan_conf_s *conf);
-static void macnet_conf_set(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_set_conf_s *conf);
 static void macnet_conf_start(FAR struct macnet_driver_s *priv,
              FAR struct ieee802154_start_conf_s *conf);
 static void macnet_conf_poll(FAR struct macnet_driver_s *priv,
@@ -205,24 +186,9 @@ static void macnet_ind_syncloss(FAR struct macnet_driver_s *priv,
 /* Network interface support ************************************************/
 /* Common TX logic */
 
-static int  macnet_transmit(FAR struct macnet_driver_s *priv);
-static int  macnet_txpoll(FAR struct net_driver_s *dev);
-
-/* Frame transfer */
-
-static void macnet_receive(FAR struct macnet_driver_s *priv);
-static void macnet_txdone(FAR struct macnet_driver_s *priv);
-
-static void macnet_transfer_work(FAR void *arg);
-static int  macnet_transfer(int irq, FAR void *context, FAR void *arg);
-
-/* Watchdog timer expirations */
-
-static void macnet_txtimeout_work(FAR void *arg);
-static void macnet_txtimeout_expiry(int argc, wdparm_t arg, ...);
-
-static void macnet_poll_work(FAR void *arg);
-static void macnet_poll_expiry(int argc, wdparm_t arg, ...);
+static int  macnet_txpoll_callback(FAR struct net_driver_s *dev);
+static void macnet_txpoll_work(FAR void *arg);
+static void macnet_txpoll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -264,12 +230,12 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
  *
  ****************************************************************************/
 
-static void macnet_mlme_notify(FAR struct ieee802154_maccb_s *maccb,
+static void macnet_mlme_notify(FAR const struct ieee802154_maccb_s *maccb,
                                enum ieee802154_macnotify_e notif,
-                               FAR union ieee802154_mlme_notify_u *arg)
+                               FAR const union ieee802154_mlme_notify_u *arg)
 {
-  FAR struct macdev_callback_s *cb =
-    (FAR struct macdev_callback_s *)maccb;
+  FAR struct macnet_callback_s *cb =
+    (FAR struct macnet_callback_s *)maccb;
   FAR struct macnet_driver_s *priv;
 
   DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
@@ -290,13 +256,13 @@ static void macnet_mlme_notify(FAR struct ieee802154_maccb_s *maccb,
  *
  ****************************************************************************/
 
-static void macnet_mcps_notify(FAR struct ieee802154_maccb_s *maccb,
+static void macnet_mcps_notify(FAR const struct ieee802154_maccb_s *maccb,
                                enum ieee802154_macnotify_e notif,
-                               FAR union ieee802154_mcps_notify_u *arg)
+                               FAR const union ieee802154_mcps_notify_u *arg)
 {
-  FAR struct macdev_callback_s *cb =
-    (FAR struct macdev_callback_s *)maccb;
-  FAR struct macdev_driver_s *priv;
+  FAR struct macnet_callback_s *cb =
+    (FAR struct macnet_callback_s *)maccb;
+  FAR struct macnet_driver_s *priv;
 
   DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
   priv = cb->mc_priv;
@@ -309,15 +275,9 @@ static void macnet_mcps_notify(FAR struct ieee802154_maccb_s *maccb,
         }
         break;
 
-      case IEEE802154_NOTIFY_CONF_PURGE:
-        {
-          macnet_conf_purge(priv, &arg->purgeconf);
-        }
-        break;
-
       case IEEE802154_NOTIFY_IND_DATA:
         {
-          macnet_ind_data(priv, &arg->dataind);
+          macnet_ind_data(priv, arg->dataind);
         }
         break;
 
@@ -335,21 +295,7 @@ static void macnet_mcps_notify(FAR struct ieee802154_maccb_s *maccb,
  ****************************************************************************/
 
 static void macnet_conf_data(FAR struct macnet_driver_s *priv,
-                             FAR struct ieee802154_data_conf_s *conf)
-{
-
-}
-
-/****************************************************************************
- * Name: macnet_conf_purge
- *
- * Description:
- *   Data frame was purged
- *
- ****************************************************************************/
-
-static void macnet_conf_purge(FAR struct macnet_driver_s *priv,
-                             FAR struct ieee802154_purge_conf_s *conf)
+                             FAR const struct ieee802154_data_conf_s *conf)
 {
 
 }
@@ -383,20 +329,6 @@ static void macnet_conf_disassociate(FAR struct macnet_driver_s *priv,
 }
 
 /****************************************************************************
- * Name: macnet_conf_get
- *
- * Description:
- *   PIB data returned
- *
- ****************************************************************************/
-
-static void macnet_conf_get(FAR struct macnet_driver_s *priv,
-                            FAR struct ieee802154_get_conf_s *conf)
-{
-
-}
-
-/****************************************************************************
  * Name: macnet_conf_gts
  *
  * Description:
@@ -406,20 +338,6 @@ static void macnet_conf_get(FAR struct macnet_driver_s *priv,
 
 static void macnet_conf_gts(FAR struct macnet_driver_s *priv,
                             FAR struct ieee802154_gts_conf_s *conf)
-{
-
-}
-
-/****************************************************************************
- * Name: macnet_conf_reset
- *
- * Description:
- *   MAC reset completed
- *
- ****************************************************************************/
-
-static void macnet_conf_reset(FAR struct macnet_driver_s *priv,
-                              FAR struct ieee802154_reset_conf_s *conf)
 {
 
 }
@@ -446,19 +364,6 @@ static void macnet_conf_rxenable(FAR struct macnet_driver_s *priv,
 
 static void macnet_conf_scan(FAR struct macnet_driver_s *priv,
                              FAR struct ieee802154_scan_conf_s *conf)
-{
-
-}
-
-/****************************************************************************
- * Name: macnet_conf_set
- *
- * Description:
- *
- ****************************************************************************/
-
-static void macnet_conf_set(FAR struct macnet_driver_s *priv,
-                            FAR struct ieee802154_set_conf_s *conf)
 {
 
 }
@@ -500,7 +405,23 @@ static void macnet_conf_poll(FAR struct macnet_driver_s *priv,
 static void macnet_ind_data(FAR struct macnet_driver_s *priv,
                             FAR struct ieee802154_data_ind_s *ind)
 {
+  FAR struct iob_s *iob;
 
+  /* Extract the IOB containing the frame from the struct ieee802154_data_ind_s */
+
+  DEBUGASSERT(priv != NULL && ind != NULL && ind->frame != NULL);
+  iob        = ind->frame;
+  ind->frame = NULL;
+
+  /* Transfer the frame to the network logic */
+
+  sixlowpan_input(&priv->md_dev, iob, ind);
+
+  /* sixlowpan_input() will free the IOB, but we must free the struct
+   * ieee802154_data_ind_s container here.
+   */
+
+  ieee802154_ind_free(ind);
 }
 
 /****************************************************************************
@@ -600,52 +521,7 @@ static void macnet_ind_syncloss(FAR struct macnet_driver_s *priv,
 }
 
 /****************************************************************************
- * Name: macnet_transmit
- *
- * Description:
- *   This function is called from the lower MAC layer when thre radio device
- *   is ready to accept another outgoing frame.  It removes one of the
- *   previously queued fram IOBs and provides that to the MAC layer.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- * Assumptions:
- *   May or may not be called from an interrupt handler.
- *
- ****************************************************************************/
-
-static int macnet_transmit(FAR struct macnet_driver_s *priv)
-{
-  /* Cancel the TX timeout watchdog
-   *
-   * REVISIT:  Is there not a race condition here?  Might the TX timeout
-   * already be queued?.
-   */
-
-  wd_cancel(priv->md_txtimeout);
-
-  /* Increment statistics */
-
-  NETDEV_TXPACKETS(priv->md_dev);
-
-  /* Provide the pre-formatted packet to the radio device (via the lower MAC
-   * layer).
-   */
-#warning Missing logic
-
-  /* Setup the TX timeout watchdog (perhaps restarting the timer) */
-
-  (void)wd_start(priv->md_txtimeout, skeleton_TXTIMEOUT,
-                 macnet_txtimeout_expiry, 1, (wdparm_t)priv);
-  return OK;
-}
-
-/****************************************************************************
- * Name: macnet_txpoll
+ * Name: macnet_txpoll_callback
  *
  * Description:
  *   The transmitter is available, check if the network has any outgoing
@@ -667,7 +543,7 @@ static int macnet_transmit(FAR struct macnet_driver_s *priv)
  *
  ****************************************************************************/
 
-static int macnet_txpoll(FAR struct net_driver_s *dev)
+static int macnet_txpoll_callback(FAR struct net_driver_s *dev)
 {
   /* If zero is returned, the polling will continue until all connections have
    * been examined.
@@ -677,265 +553,7 @@ static int macnet_txpoll(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Name: macnet_receive
- *
- * Description:
- *   An interrupt was received indicating the availability of a new RX packet
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void macnet_receive(FAR struct macnet_driver_s *priv)
-{
-  FAR struct iob_s *iob;
-  FAR struct iob_s *fptr;
-
-  /* Allocate an IOB to hold the frame */
-
-  net_lock();
-  iob = iob_alloc(false);
-#warning Allocated by radio layer, right?
-  if (iob == NULL)
-    {
-      nerr("ERROR: Failed to allocate an IOB\n")
-      return;
-    }
-
-  /* Copy the frame data into the IOB.
-   * REVISIT:  Can a copy be avoided?
-   */
-
-  fptr = iob->io_data;
-#warning Missing logic
-
-  /* Transfer the frame to the network logic */
-
-  sixlowpan_input(&priv->md_dev, iob, NULL);
-}
-
-/****************************************************************************
- * Name: macnet_txdone
- *
- * Description:
- *   An interrupt was received indicating that the last TX packet(s) is done
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void macnet_txdone(FAR struct macnet_driver_s *priv)
-{
-  int delay;
-
-  /* Check for errors and update statistics */
-
-  NETDEV_TXDONE(priv->md_dev);
-
-  /* Check if there are pending transmissions */
-
-  /* If no further transmissions are pending, then cancel the TX timeout and
-   * disable further Tx interrupts.
-   */
-
-  wd_cancel(priv->md_txtimeout);
-
-  /* And disable further TX interrupts. */
-
-  /* In any event, poll the network for new TX data */
-
-  (void)devif_poll(&priv->md_dev, macnet_txpoll);
-}
-
-/****************************************************************************
- * Name: macnet_transfer_work
- *
- * Description:
- *   Perform interrupt related work from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() was called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void macnet_transfer_work(FAR void *arg)
-{
-  FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)arg;
-
-  /* Lock the network and serialize driver operations if necessary.
-   * NOTE: Serialization is only required in the case where the driver work
-   * is performed on an LP worker thread and where more than one LP worker
-   * thread has been configured.
-   */
-
-  net_lock();
-
-  /* Process pending Ethernet interrupts */
-
-  /* Get and clear interrupt status bits */
-
-  /* Handle interrupts according to status bit settings */
-
-  /* Check if we received an incoming packet, if so, call macnet_receive() */
-
-  macnet_receive(priv);
-
-  /* Check if a packet transmission just completed.  If so, call macnet_txdone.
-   * This may disable further Tx interrupts if there are no pending
-   * transmissions.
-   */
-
-  macnet_txdone(priv);
-  net_unlock();
-
-  /* Re-enable Ethernet interrupts */
-
-  up_enable_irq(CONFIG_IEEE802154_NETDEV_IRQ);
-}
-
-/****************************************************************************
- * Name: macnet_transfer
- *
- * Description:
- *   Hardware interrupt handler
- *
- * Parameters:
- *   irq     - Number of the IRQ that generated the interrupt
- *   context - Interrupt register state save info (architecture-specific)
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static int macnet_transfer(int irq, FAR void *context, FAR void *arg)
-{
-  FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)arg;
-
-  /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
-   * also disabled if the TX timeout event occurs, there can be no race
-   * condition here.
-   */
-
-  up_disable_irq(CONFIG_IEEE802154_NETDEV_IRQ);
-
-  /* TODO: Determine if a TX transfer just completed */
-
-    {
-      /* If a TX transfer just completed, then cancel the TX timeout so
-       * there will be no race condition between any subsequent timeout
-       * expiration and the deferred interrupt processing.
-       */
-
-       wd_cancel(priv->md_txtimeout);
-    }
-
-  /* Schedule to perform the interrupt processing on the worker thread. */
-
-  work_queue(ETHWORK, &priv->md_irqwork, macnet_transfer_work, priv, 0);
-  return OK;
-}
-
-/****************************************************************************
- * Name: macnet_txtimeout_work
- *
- * Description:
- *   Perform TX timeout related work from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void macnet_txtimeout_work(FAR void *arg)
-{
-  FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)arg;
-
-  /* Lock the network and serialize driver operations if necessary.
-   * NOTE: Serialization is only required in the case where the driver work
-   * is performed on an LP worker thread and where more than one LP worker
-   * thread has been configured.
-   */
-
-  net_lock();
-
-  /* Increment statistics and dump debug info */
-
-  NETDEV_TXTIMEOUTS(priv->md_dev);
-
-  /* Then reset the hardware */
-
-  /* Then poll the network for new XMIT data */
-
-  (void)devif_poll(&priv->md_dev, macnet_txpoll);
-  net_unlock();
-}
-
-/****************************************************************************
- * Name: macnet_txtimeout_expiry
- *
- * Description:
- *   Our TX watchdog timed out.  Called from the timer interrupt handler.
- *   The last TX never completed.  Reset the hardware and start again.
- *
- * Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static void macnet_txtimeout_expiry(int argc, wdparm_t arg, ...)
-{
-  FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)arg;
-
-  /* Disable further Ethernet interrupts.  This will prevent some race
-   * conditions with interrupt work.  There is still a potential race
-   * condition with interrupt work that is already queued and in progress.
-   */
-
-  up_disable_irq(CONFIG_IEEE802154_NETDEV_IRQ);
-
-  /* Schedule to perform the TX timeout processing on the worker thread. */
-
-  work_queue(ETHWORK, &priv->md_irqwork, macnet_txtimeout_work, priv, 0);
-}
-
-/****************************************************************************
- * Name: macnet_poll_process
+ * Name: macnet_txpoll_process
  *
  * Description:
  *   Perform the periodic poll.  This may be called either from watchdog
@@ -951,12 +569,12 @@ static void macnet_txtimeout_expiry(int argc, wdparm_t arg, ...)
  *
  ****************************************************************************/
 
-static inline void macnet_poll_process(FAR struct macnet_driver_s *priv)
+static inline void macnet_txpoll_process(FAR struct macnet_driver_s *priv)
 {
 }
 
 /****************************************************************************
- * Name: macnet_poll_work
+ * Name: macnet_txpoll_work
  *
  * Description:
  *   Perform periodic polling from the worker thread
@@ -972,7 +590,7 @@ static inline void macnet_poll_process(FAR struct macnet_driver_s *priv)
  *
  ****************************************************************************/
 
-static void macnet_poll_work(FAR void *arg)
+static void macnet_txpoll_work(FAR void *arg)
 {
   FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)arg;
 
@@ -995,17 +613,17 @@ static void macnet_poll_work(FAR void *arg)
    * progress, we will missing TCP time state updates?
    */
 
-  (void)devif_timer(&priv->md_dev, macnet_txpoll);
+  (void)devif_timer(&priv->md_dev.i_dev, macnet_txpoll_callback);
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->md_txpoll, skeleton_WDDELAY, macnet_poll_expiry, 1,
+  (void)wd_start(priv->md_txpoll, TXPOLL_WDDELAY, macnet_txpoll_expiry, 1,
                  (wdparm_t)priv);
   net_unlock();
 }
 
 /****************************************************************************
- * Name: macnet_poll_expiry
+ * Name: macnet_txpoll_expiry
  *
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
@@ -1022,21 +640,21 @@ static void macnet_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void macnet_poll_expiry(int argc, wdparm_t arg, ...)
+static void macnet_txpoll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)arg;
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->md_pollwork, macnet_poll_work, priv, 0);
+  work_queue(WPANWORK, &priv->md_pollwork, macnet_txpoll_work, priv, 0);
 }
 
 /****************************************************************************
  * Name: macnet_ifup
  *
  * Description:
- *   NuttX Callback: Bring up the Ethernet interface when an IP address is
- *   provided
+ *   NuttX Callback: Bring up the IEEE 802.15.4 interface when an IP address
+ *   is provided
  *
  * Parameters:
  *   dev - Reference to the NuttX driver state structure
@@ -1064,9 +682,10 @@ static int macnet_ifup(FAR struct net_driver_s *dev)
         dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
 
-  /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
+  /* Initialize PHYs, the IEEE 802.15.4 interface, and setup up IEEE 802.15.4 interrupts */
+#warning Missing logic
 
-  /* Instantiate the MAC address from priv->md_dev.d_mac.ether_addr_octet */
+  /* Instantiate the MAC address from priv->md_dev.i_dev.d_mac.ether_addr_octet */
 
 #ifdef CONFIG_NET_ICMPv6
   /* Set up IPv6 multicast address filtering */
@@ -1076,13 +695,12 @@ static int macnet_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->md_txpoll, skeleton_WDDELAY, macnet_poll_expiry, 1,
+  (void)wd_start(priv->md_txpoll, TXPOLL_WDDELAY, macnet_txpoll_expiry, 1,
                  (wdparm_t)priv);
 
-  /* Enable the Ethernet interrupt */
+  /* Enable the IEEE 802.15.4 radio */
 
   priv->md_bifup = true;
-  up_enable_irq(CONFIG_IEEE802154_NETDEV_IRQ);
   return OK;
 }
 
@@ -1107,15 +725,13 @@ static int macnet_ifdown(FAR struct net_driver_s *dev)
   FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)dev->d_private;
   irqstate_t flags;
 
-  /* Disable the Ethernet interrupt */
+  /* Disable interruption */
 
   flags = enter_critical_section();
-  up_disable_irq(CONFIG_IEEE802154_NETDEV_IRQ);
 
   /* Cancel the TX poll timer and TX timeout timers */
 
   wd_cancel(priv->md_txpoll);
-  wd_cancel(priv->md_txtimeout);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the macnet_ifup() always
@@ -1166,7 +782,7 @@ static void macnet_txavail_work(FAR void *arg)
 
       /* If so, then poll the network for new XMIT data */
 
-      (void)devif_poll(&priv->md_dev, macnet_txpoll);
+      (void)devif_poll(&priv->md_dev.i_dev, macnet_txpoll_callback);
     }
 
   net_unlock();
@@ -1204,7 +820,7 @@ static int macnet_txavail(FAR struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(ETHWORK, &priv->md_pollwork, macnet_txavail_work, priv, 0);
+      work_queue(WPANWORK, &priv->md_pollwork, macnet_txavail_work, priv, 0);
     }
 
   return OK;
@@ -1293,10 +909,10 @@ static void macnet_ipv6multicast(FAR struct macnet_driver_s *priv)
 
   /* For ICMPv6, we need to add the IPv6 multicast address
    *
-   * For IPv6 multicast addresses, the Ethernet MAC is derived by
+   * For IPv6 multicast addresses, the IEEE 802.15.4 MAC is derived by
    * the four low-order octets OR'ed with the MAC 33:33:00:00:00:00,
    * so for example the IPv6 address FF02:DEAD:BEEF::1:3 would map
-   * to the Ethernet MAC address 33:33:00:01:00:03.
+   * to the IEEE 802.15.4 MAC address 33:33:00:01:00:03.
    *
    * NOTES:  This appears correct for the ICMPv6 Router Solicitation
    * Message, but the ICMPv6 Neighbor Solicitation message seems to
@@ -1321,7 +937,7 @@ static void macnet_ipv6multicast(FAR struct macnet_driver_s *priv)
   (void)macnet_addmac(dev, mac);
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
-  /* Add the IPv6 all link-local nodes Ethernet address.  This is the
+  /* Add the IPv6 all link-local nodes IEEE 802.15.4 address.  This is the
    * address that we expect to receive ICMPv6 Router Advertisement
    * packets.
    */
@@ -1331,7 +947,7 @@ static void macnet_ipv6multicast(FAR struct macnet_driver_s *priv)
 #endif /* CONFIG_NET_ICMPv6_AUTOCONF */
 
 #ifdef CONFIG_NET_ICMPv6_ROUTER
-  /* Add the IPv6 all link-local routers Ethernet address.  This is the
+  /* Add the IPv6 all link-local routers IEEE 802.15.4 address.  This is the
    * address that we expect to receive ICMPv6 Router Solicitation
    * packets.
    */
@@ -1377,7 +993,8 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
       if (netmac != NULL)
         {
           unsigned long macarg = (unsigned int)((uintptr_t)&netmac->u);
-          ret = priv->md_mac.macops.ioctl(priv->md_mac, cmd, macarg);
+          ret = mac802154_ioctl(priv->md_mac, cmd, macarg);
+
         }
     }
 
@@ -1387,8 +1004,10 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
 
   else
    {
-     ret = priv->md_mac.macops.ioctl(priv->md_mac, cmd, arg);
+     ret = mac802154_ioctl(priv->md_mac, cmd, arg);
    }
+
+ return ret;
 }
 #endif
 
@@ -1413,7 +1032,7 @@ static int macnet_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
 {
   FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(netdev != NULL && netdev->i_dev.d_private != NULL && iob != NULL);
+  DEBUGASSERT(netdev != NULL && netdev->i_dev.d_private != NULL && meta != NULL);
   priv = (FAR struct macnet_driver_s *)netdev->i_dev.d_private;
 
   return mac802154_get_mhrlen(priv->md_mac, meta);
@@ -1441,12 +1060,13 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
                            FAR struct iob_s *framelist)
 {
   FAR struct macnet_driver_s *priv;
-  struct ieee802154_data_req_s req;
   FAR struct iob_s *iob;
   int ret;
 
-  DEBUGASSERT(netdev != NULL && netdev->i_dev.d_private != NULL && iob != NULL);
+  DEBUGASSERT(netdev != NULL && netdev->i_dev.d_private != NULL);
   priv = (FAR struct macnet_driver_s *)netdev->i_dev.d_private;
+
+  DEBUGASSERT(meta != NULL && framelist != NULL);
 
   /* Add the incoming list of frames to the MAC's outgoing queue */
 
@@ -1454,7 +1074,7 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
     {
       /* Increment statistics */
 
-      NETDEV_RXPACKETS(&priv->lo_ieee.i_dev);
+      NETDEV_TXPACKETS(&priv->md_dev.i_dev);
 
       /* Remove the IOB from the queue */
 
@@ -1463,15 +1083,13 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
 
       /* Transfer the frame to the MAC */
 
-      req.meta  = mets;
-      req.frame = iob;
-      ret = mac802154_req_data(priv->md_mac, req);
+      ret = mac802154_req_data(priv->md_mac, meta, iob);
       if (ret < 0)
         {
           wlerr("ERROR: mac802154_req_data failed: %d\n", ret);
 
           iob_free(iob);
-          for (iob = framelist; ; iob != NULL; iob = framelist)
+          for (iob = framelist; iob != NULL; iob = framelist)
             {
               /* Remove the IOB from the queue and free */
 
@@ -1533,7 +1151,7 @@ int mac802154netdev_register(MACHANDLE mac)
    */
 
   pktbuf = (FAR uint8_t *)kmm_malloc(CONFIG_NET_6LOWPAN_MTU + CONFIG_NET_GUARDSIZE);
-  if (pktbuf == NULL
+  if (pktbuf == NULL)
     {
       nerr("ERROR: Failed to allocate the packet buffer\n");
       kmm_free(priv);
@@ -1542,7 +1160,7 @@ int mac802154netdev_register(MACHANDLE mac)
 
   /* Initialize the driver structure */
 
-  ieee                = &priv->lo_ieee;
+  ieee                = &priv->md_dev;
   dev                 = &ieee->i_dev;
   dev->d_buf          = pktbuf;            /* Single packet buffer */
   dev->d_ifup         = macnet_ifup;       /* I/F up (new IP address) callback */
@@ -1561,9 +1179,8 @@ int mac802154netdev_register(MACHANDLE mac)
 
   priv->md_mac        = mac;               /* Save the MAC interface instance */
   priv->md_txpoll     = wd_create();       /* Create periodic poll timer */
-  priv->md_txtimeout  = wd_create();       /* Create TX timeout timer */
 
-  DEBUGASSERT(priv->md_txpoll != NULL && priv->md_txtimeout != NULL);
+  DEBUGASSERT(priv->md_txpoll != NULL);
 
   /* Initialize the Network frame-related callbacks */
 
@@ -1575,22 +1192,22 @@ int mac802154netdev_register(MACHANDLE mac)
   priv->md_cb.mc_priv = priv;
 
   maccb               = &priv->md_cb.mc_cb;
-  maccb->mlme_notify  = macdev_mlme_notify;
-  maccb->mcps_notify  = macdev_mcps_notify;
+  maccb->mlme_notify  = macnet_mlme_notify;
+  maccb->mcps_notify  = macnet_mcps_notify;
 
   /* Bind the callback structure */
 
   ret = mac802154_bind(mac, maccb);
-  if (ret < 0
+  if (ret < 0)
     {
       nerr("ERROR: Failed to bind the MAC callbacks: %d\n", ret);
 
       /* Release wdog timers */
 
       wd_delete(priv->md_txpoll);
-      wd_delete(priv->md_txtimeout);
 
       /* Free memory and return the error */
+
       kmm_free(pktbuf);
       kmm_free(priv);
       return ret;
@@ -1602,7 +1219,7 @@ int mac802154netdev_register(MACHANDLE mac)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->md_dev, NET_LL_IEEE802154);
+  (void)netdev_register(&priv->md_dev.i_dev, NET_LL_IEEE802154);
   return OK;
 }
 

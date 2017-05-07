@@ -1405,13 +1405,13 @@ enum ieee802154_macnotify_e
 
 struct ieee802154_maccb_s
 {
-  CODE void (*mlme_notify) (FAR const struct ieee802154_maccb_s *maccb,
-                            enum ieee802154_macnotify_e notif,
-                            FAR const union ieee802154_mlme_notify_u *arg);
+  CODE void (*mlme_notify)(FAR const struct ieee802154_maccb_s *maccb,
+                           enum ieee802154_macnotify_e notif,
+                           FAR const union ieee802154_mlme_notify_u *arg);
 
-  CODE void (*mcps_notify) (FAR const struct ieee802154_maccb_s *maccb,
-                            enum ieee802154_macnotify_e notif,
-                            FAR const union ieee802154_mcps_notify_u *arg);
+  CODE void (*mcps_notify)(FAR const struct ieee802154_maccb_s *maccb,
+                           enum ieee802154_macnotify_e notif,
+                           FAR const union ieee802154_mcps_notify_u *arg);
 };
 
 #ifdef __cplusplus
