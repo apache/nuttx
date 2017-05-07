@@ -604,15 +604,6 @@ static void macnet_txpoll_work(FAR void *arg)
 
   /* Perform the poll */
 
-  /* Check if there is room in the send another TX packet.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
-   */
-
-  /* If so, update TCP timing states and poll the network for new XMIT data.
-   * Hmmm.. might be bug here.  Does this mean if there is a transmit in
-   * progress, we will missing TCP time state updates?
-   */
-
   (void)devif_timer(&priv->md_dev.i_dev, macnet_txpoll_callback);
 
   /* Setup the watchdog poll timer again */
