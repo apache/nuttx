@@ -121,6 +121,10 @@ struct mrf24j40_radio_s
   struct ieee802154_radio_s radio;  /* The public device instance */
   FAR struct ieee802154_radiocb_s *radiocb; /* Registered callbacks */
 
+  /* MAC Attributes */
+
+  bool rxonidle : 1;
+
   /* Low-level MCU-specific support */
 
   FAR const struct mrf24j40_lower_s *lower;
@@ -186,40 +190,41 @@ static int  mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
               FAR struct iob_s *frame, uint32_t fifo_addr);
 
 
-static int  mrf24j40_setchannel(FAR struct mrf24j40_radio_s *radio,
+static int  mrf24j40_setchannel(FAR struct mrf24j40_radio_s *dev,
               uint8_t chan);
-static int  mrf24j40_getchannel(FAR struct mrf24j40_radio_s *radio,
+static int  mrf24j40_getchannel(FAR struct mrf24j40_radio_s *dev,
               FAR uint8_t *chan);
-static int  mrf24j40_setpanid(FAR struct mrf24j40_radio_s *radio,
+static int  mrf24j40_setpanid(FAR struct mrf24j40_radio_s *dev,
               uint16_t panid);
-static int  mrf24j40_getpanid(FAR struct mrf24j40_radio_s *radio,
+static int  mrf24j40_getpanid(FAR struct mrf24j40_radio_s *dev,
               FAR uint16_t *panid);
-static int  mrf24j40_setsaddr(FAR struct mrf24j40_radio_s *radio,
+static int  mrf24j40_setsaddr(FAR struct mrf24j40_radio_s *dev,
               uint16_t saddr);
-static int  mrf24j40_getsaddr(FAR struct mrf24j40_radio_s *radio,
+static int  mrf24j40_getsaddr(FAR struct mrf24j40_radio_s *dev,
               FAR uint16_t *saddr);
-static int  mrf24j40_seteaddr(FAR struct mrf24j40_radio_s *radio,
+static int  mrf24j40_seteaddr(FAR struct mrf24j40_radio_s *dev,
               FAR const uint8_t *eaddr);
-static int  mrf24j40_geteaddr(FAR struct mrf24j40_radio_s *radio,
+static int  mrf24j40_geteaddr(FAR struct mrf24j40_radio_s *dev,
               FAR uint8_t *eaddr);
-static int  mrf24j40_setpromisc(FAR struct mrf24j40_radio_s *radio,
+static int  mrf24j40_setpromisc(FAR struct mrf24j40_radio_s *dev,
               bool promisc);
-static int  mrf24j40_getpromisc(FAR struct mrf24j40_radio_s *radio,
+static int  mrf24j40_getpromisc(FAR struct mrf24j40_radio_s *dev,
               FAR bool *promisc);
-static int  mrf24j40_setdevmode(FAR struct mrf24j40_radio_s *radio,
+static int  mrf24j40_setdevmode(FAR struct mrf24j40_radio_s *dev,
               uint8_t mode);
-static int  mrf24j40_getdevmode(FAR struct mrf24j40_radio_s *radio,
+static int  mrf24j40_getdevmode(FAR struct mrf24j40_radio_s *dev,
               FAR uint8_t *mode);
-static int  mrf24j40_settxpower(FAR struct mrf24j40_radio_s *radio,
+static int  mrf24j40_settxpower(FAR struct mrf24j40_radio_s *dev,
               int32_t txpwr);
-static int  mrf24j40_gettxpower(FAR struct mrf24j40_radio_s *radio,
+static int  mrf24j40_gettxpower(FAR struct mrf24j40_radio_s *dev,
               FAR int32_t *txpwr);
-static int  mrf24j40_setcca(FAR struct mrf24j40_radio_s *radio,
+static int  mrf24j40_setcca(FAR struct mrf24j40_radio_s *dev,
               FAR struct ieee802154_cca_s *cca);
-static int  mrf24j40_getcca(FAR struct mrf24j40_radio_s *radio,
+static int  mrf24j40_getcca(FAR struct mrf24j40_radio_s *dev,
               FAR struct ieee802154_cca_s *cca);
-static int  mrf24j40_energydetect(FAR struct mrf24j40_radio_s *radio,
+static int  mrf24j40_energydetect(FAR struct mrf24j40_radio_s *dev,
               FAR uint8_t *energy);
+static int  mrf24j40_rxenable(FAR struct mrf24j40_radio_s *dev, bool enable);
 
 /* Driver operations */
 
@@ -390,6 +395,12 @@ static int mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
             }
 
           ret = IEEE802154_STATUS_SUCCESS;
+        }
+        break;
+      case IEEE802154_PIB_MAC_RX_ON_WHEN_IDLE:
+        {
+          dev->rxonidle = attr_value->mac.rxonidle;
+          mrf24j40_rxenable(dev, dev->rxonidle);
         }
         break;
       default:
@@ -1470,9 +1481,8 @@ static void mrf24j40_irqwork_txgts(FAR struct mrf24j40_radio_s *dev,
  *
  ****************************************************************************/
 
-static int mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio, bool enable)
+static int mrf24j40_rxenable(FAR struct mrf24j40_radio_s *dev, bool enable)
 {
-  FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
   uint8_t reg;
 
   if (enable)
@@ -1567,11 +1577,14 @@ done:
 
   mrf24j40_setreg(dev->spi, MRF24J40_BBREG1, 0);
 
-  /* Enable rx int */
+  /* Only enable RX interrupt if we are to be listening when IDLE */
 
-  reg = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
-  reg &= ~MRF24J40_INTCON_RXIE;
-  mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
+  if (dev->rxonidle)
+    {
+      reg = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
+      reg &= ~MRF24J40_INTCON_RXIE;
+      mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
+    }
 }
 
 /****************************************************************************

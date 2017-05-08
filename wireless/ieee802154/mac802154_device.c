@@ -108,12 +108,20 @@ struct mac802154_chardevice_s
   struct mac802154dev_callback_s md_cb; /* Callback information */
   sem_t md_exclsem;                     /* Exclusive device access */
 
+  bool readpending;                     /* Is there a read using the semaphore? */
+  sem_t readsem;                        /* Signaling semaphore for waiting read */
+
   /* The following is a singly linked list of open references to the
    * MAC device.
    */
 
   FAR struct mac802154dev_open_s *md_open;
   FAR struct mac802154dev_dwait_s *md_dwait;
+
+  /* Hold a list of transactions as a "readahead" buffer */
+
+  FAR struct ieee802154_data_ind_s *dataind_head;
+  FAR struct ieee802154_data_ind_s *dataind_tail;
 
 #ifndef CONFIG_DISABLE_SIGNALS
   /* MCPS Service notification information */
@@ -137,6 +145,12 @@ struct mac802154_chardevice_s
 static inline int mac802154dev_takesem(sem_t *sem);
 #define mac802154dev_givesem(s) sem_post(s);
 
+static void mac802154dev_push_dataind(FAR struct mac802154_chardevice_s *dev,
+                                      FAR struct ieee802154_data_ind_s *ind);
+static FAR struct ieee802154_data_ind_s *
+  mac802154dev_pop_dataind(FAR struct mac802154_chardevice_s *dev);
+
+
 static void mac802154dev_mlme_notify(FAR const struct ieee802154_maccb_s *maccb,
                                      enum ieee802154_macnotify_e notif,
                                      FAR const union ieee802154_mlme_notify_u *arg);
@@ -158,6 +172,8 @@ static int  mac802154dev_ioctl(FAR struct file *filep, int cmd,
 
 static void mac802154dev_conf_data(FAR struct mac802154_chardevice_s *dev,
                                    FAR const struct ieee802154_data_conf_s *conf);
+static void mac802154dev_ind_data(FAR struct mac802154_chardevice_s *dev,
+                                  FAR struct ieee802154_data_ind_s *ind);
 
 /****************************************************************************
  * Private Data
@@ -205,6 +221,79 @@ static inline int mac802154dev_takesem(sem_t *sem)
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: mac802154dev_push_dataind
+ *
+ * Description:
+ *   Push a data indication onto the list to be processed
+ *
+ ****************************************************************************/
+
+static void mac802154dev_push_dataind(FAR struct mac802154_chardevice_s *dev,
+                                      FAR struct ieee802154_data_ind_s *ind)
+{
+  /* Ensure the forward link is NULL */
+
+  ind->flink = NULL;
+
+  /* If the tail is not empty, make the frame pointed to by the tail,
+   * point to the new data indication */
+
+  if (dev->dataind_tail != NULL)
+    {
+      dev->dataind_tail->flink = ind;
+    }
+
+  /* Point the tail at the new frame */
+
+  dev->dataind_tail = ind;
+
+  /* If the head is NULL, we need to point it at the data indication since there
+   * is only one indication in the list at this point */
+
+  if (dev->dataind_head == NULL)
+    {
+      dev->dataind_head = ind;
+    }
+}
+
+/****************************************************************************
+ * Name: mac802154dev_pop_dataind
+ *
+ * Description:
+ *   Pop a data indication from the list
+ *
+ ****************************************************************************/
+
+static FAR struct ieee802154_data_ind_s *
+  mac802154dev_pop_dataind(FAR struct mac802154_chardevice_s *dev)
+{
+  FAR struct ieee802154_data_ind_s *ind;
+
+  if (dev->dataind_head == NULL)
+    {
+      return NULL;
+    }
+
+  /* Get the data indication from the head of the list */
+
+  ind = dev->dataind_head;
+  ind->flink = NULL;
+
+  /* Move the head pointer to the next data indication */
+
+  dev->dataind_head = ind->flink;
+
+  /* If the head is now NULL, the list is empty, so clear the tail too */
+
+  if (dev->dataind_head == NULL)
+    {
+      dev->dataind_tail = NULL;
+    }
+
+  return ind;
 }
 
 /****************************************************************************
@@ -368,6 +457,8 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct inode *inode;
   FAR struct mac802154_chardevice_s *dev;
+  FAR struct mac802154dev_rxframe_s *rx;
+  FAR struct ieee802154_data_ind_s *ind;
   int ret;
 
   DEBUGASSERT(filep && filep->f_inode);
@@ -375,20 +466,94 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
   DEBUGASSERT(inode->i_private);
   dev = (FAR struct mac802154_chardevice_s *)inode->i_private;
 
-  /* Get exclusive access to the driver structure */
+  /* Check to make sure the buffer is the right size for the struct */
 
-  ret = mac802154dev_takesem(&dev->md_exclsem);
-  if (ret < 0)
+  if (len != sizeof(struct mac802154dev_rxframe_s))
     {
-      wlerr("ERROR: mac802154dev_takesem failed: %d\n", ret);
-      return ret;
+      wlerr("ERROR: buffer isn't a mac802154dev_rxframe_s: %lu\n",
+            (unsigned long)len);
+      return -EINVAL;
     }
 
-  /* TODO: Add code to read a packet and return it */
-  ret = -ENOTSUP;
+  DEBUGASSERT(buffer != NULL);
+  rx = (FAR struct mac802154dev_rxframe_s *)buffer;
 
-  mac802154dev_givesem(&dev->md_exclsem);
-  return ret;
+  while (1)
+    {
+      /* Get exclusive access to the driver structure */
+
+      ret = mac802154dev_takesem(&dev->md_exclsem);
+      if (ret < 0)
+        {
+          wlerr("ERROR: mac802154dev_takesem failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Try popping a data indication off the list */
+
+      ind = mac802154dev_pop_dataind(dev);
+      
+      /* If the indication is not null, we can exit the loop and copy the data */
+
+      if (ind != NULL)
+        {
+          mac802154dev_givesem(&dev->md_exclsem);
+          break;
+        }
+
+      /* If this is a non-blocking call, or if there is another read operation 
+       * already pending, don't block. This driver returns EAGAIN even when 
+       * configured as non-blocking if another read operation is already pending
+       * This situation should be rare. It will only occur when there are 2 calls
+       * to read from separate threads and there was no data in the rx list.
+       */
+
+      if ((filep->f_oflags & O_NONBLOCK) || dev->readpending)
+        {
+          mac802154dev_givesem(&dev->md_exclsem);
+          return -EAGAIN;
+        }
+
+      dev->readpending = true;
+      mac802154dev_givesem(&dev->md_exclsem);
+
+      /* Wait to be signaled when a frame is added to the list */
+      
+      if (sem_wait(&dev->readsem) < 0)
+        {
+          DEBUGASSERT(errno == EINTR);
+          /* Need to get exclusive access again to change the pending bool */
+
+          ret = mac802154dev_takesem(&dev->md_exclsem);
+          dev->readpending = false;
+          mac802154dev_givesem(&dev->md_exclsem);
+          return -EINTR;
+        }
+
+      /* Let the loop wrap back around, we will then pop a indication and this
+       * time, it should have a data indication
+       */
+    }
+          
+ rx->length = (ind->frame->io_len - ind->frame->io_offset);
+
+ /* Copy the data from the IOB to the user supplied struct */
+
+ memcpy(&rx->payload[0], &ind->frame->io_data[ind->frame->io_offset],
+        rx->length); 
+
+ memcpy(&rx->meta, ind, sizeof(struct ieee802154_data_ind_s));
+
+ /* Zero out the forward link and IOB reference */
+ 
+ rx->meta.flink = NULL;
+ rx->meta.frame = NULL;
+
+ /* Deallocate the data indication */
+
+ ieee802154_ind_free(ind);
+
+ return OK;
 }
 
 /****************************************************************************
@@ -649,6 +814,11 @@ static void mac802154dev_mcps_notify(FAR const struct ieee802154_maccb_s *maccb,
           mac802154dev_conf_data(dev, &arg->dataconf);
         }
         break;
+      case IEEE802154_NOTIFY_IND_DATA:
+        {
+          mac802154dev_ind_data(dev, arg->dataind);
+        }
+        break;
       default:
         break;
     }
@@ -717,6 +887,48 @@ static void mac802154dev_conf_data(FAR struct mac802154_chardevice_s *dev,
 #endif
 }
 
+static void mac802154dev_ind_data(FAR struct mac802154_chardevice_s *dev,
+                                  FAR struct ieee802154_data_ind_s *ind)
+{
+  /* Get exclusive access to the driver structure.  We don't care about any
+   * signals so if we see one, just go back to trying to get access again */
+
+  while (mac802154dev_takesem(&dev->md_exclsem) != 0);
+
+  /* Push the indication onto the list */
+
+  mac802154dev_push_dataind(dev, ind);
+
+  /* Check if there is a read waiting for data */
+
+  if (dev->readpending)
+    {
+      /* Wake the thread waiting for the data transmission */
+
+      dev->readpending = false;
+      sem_post(&dev->readsem);
+    }
+ 
+  /* Release the driver */
+
+  mac802154dev_givesem(&dev->md_exclsem);
+
+#ifndef CONFIG_DISABLE_SIGNALS
+  /* Send a signal to the registered application */
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  /* Copy the status as the signal data to be optionally used by app */
+
+  union sigval value;
+  value.sival_int = IEEE802154_STATUS_SUCCESS;
+  (void)sigqueue(dev->md_mcps_pid, dev->md_mcps_notify.mn_signo, value);
+#else
+  (void)sigqueue(dev->md_mcps_pid, dev->md_mcps_notify.mn_signo,
+                 value.sival_ptr);
+#endif
+#endif
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -758,6 +970,10 @@ int mac802154dev_register(MACHANDLE mac, int minor)
   dev->md_mac = mac;
   sem_init(&dev->md_exclsem, 0, 1); /* Allow the device to be opened once
                                      * before blocking */
+                                     
+  sem_init(&dev->readsem, 0, 0);
+  sem_setprotocol(&dev->readsem, SEM_PRIO_NONE);
+  dev->readpending = false;
 
   /* Initialize the MAC callbacks */
 

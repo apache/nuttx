@@ -507,7 +507,7 @@ union ieee802154_macattr_u
   bool promisc_mode;
   bool rng_support;
   bool resp_wait_time;
-  bool rx_when_idle;
+  bool rxonidle;
   bool sec_enabled;
   bool timestamp_support;
 
@@ -1491,6 +1491,72 @@ int mac802154dev_register(MACHANDLE mac, int minor);
  ****************************************************************************/
 
 int mac802154netdev_register(MACHANDLE mac);
+
+/****************************************************************************
+ * Name: ieee802154_indpool_initialize
+ *
+ * Description:
+ *   This function initializes the meta-data allocator.  This function must
+ *   be called early in the initialization sequence before any radios
+ *   begin operation.
+ *
+ * Inputs:
+ *   None
+ *
+ * Return Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void ieee802154_indpool_initialize(void);
+
+/****************************************************************************
+ * Name: ieee802154_ind_allocate
+ *
+ * Description:
+ *   The ieee802154_ind_allocate function will get a free meta-data
+ *   structure for use by the IEEE 802.15.4 MAC.
+ *
+ *   Interrupt handling logic will first attempt to allocate from the
+ *   g_indfree list.  If that list is empty, it will attempt to allocate
+ *   from its reserve, g_indfree_irq.  If that list is empty, then the
+ *   allocation fails (NULL is returned).
+ *
+ *   Non-interrupt handler logic will attempt to allocate from g_indfree
+ *   list.  If that the list is empty, then the meta-data structure will be
+ *   allocated from the dynamic memory pool.
+ *
+ * Inputs:
+ *   None
+ *
+ * Return Value:
+ *   A reference to the allocated msg structure.  All user fields in this
+ *   structure have been zeroed.  On a failure to allocate, NULL is
+ *   returned.
+ *
+ ****************************************************************************/
+
+FAR struct ieee802154_data_ind_s *ieee802154_ind_allocate(void);
+
+/****************************************************************************
+ * Name: ieee802154_ind_free
+ *
+ * Description:
+ *   The ieee802154_ind_free function will return a meta-data structure to
+ *   the free pool of  messages if it was a pre-allocated meta-data
+ *   structure. If the meta-data structure was allocated dynamically it will
+ *   be deallocated.
+ *
+ * Inputs:
+ *   ind - meta-data structure to free
+ *
+ * Return Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void ieee802154_ind_free(FAR struct ieee802154_data_ind_s *ind);
+
 
 #undef EXTERN
 #ifdef __cplusplus
