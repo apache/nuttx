@@ -409,7 +409,7 @@ static FAR struct mac802154_txframe_s *
 }
 
 /****************************************************************************
- * Name: mac802154_push_rxframe
+ * Name: mac802154_push_dataind
  *
  * Description:
  *   Push a data indication onto the list to be processed
@@ -814,6 +814,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
   FAR struct iob_s *frame;
   uint16_t *frame_ctrl;
   bool panid_comp;
+  uint8_t ftype;
 
   while(1)
     {
@@ -839,7 +840,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
 
       /* Get a local copy of the frame to make it easier to access */
 
-      frame = iob->frame;
+      frame = ind->frame;
 
       /* Set a local pointer to the frame control then move the offset past 
        * the frame control field
@@ -852,16 +853,16 @@ static void mac802154_rxframe_worker(FAR void *arg)
        * this isn't a data frame
        */
 
-      ind->src.mode = (frame_ctrl & IEEE802154_FRAMECTRL_SADDR) >>
+      ind->src.mode = (*frame_ctrl & IEEE802154_FRAMECTRL_SADDR) >>
                       IEEE802154_FRAMECTRL_SHIFT_SADDR;
 
-      ind->dest.mode = (frame_ctrl & IEEE802154_FRAMECTRL_DADDR) >>
+      ind->dest.mode = (*frame_ctrl & IEEE802154_FRAMECTRL_DADDR) >>
                        IEEE802154_FRAMECTRL_SHIFT_DADDR;
 
-      panid_comp = (frame_ctrl & IEEE802154_FRAMECTRL_PANIDCOMP) >>
+      panid_comp = (*frame_ctrl & IEEE802154_FRAMECTRL_PANIDCOMP) >>
                    IEEE802154_FRAMECTRL_SHIFT_PANIDCOMP;
 
-      ind->dsn = iob->frame->io_data[frame->io_offset++];
+      ind->dsn = frame->io_data[frame->io_offset++];
 
       /* If the destination address is included */
 
@@ -879,7 +880,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
             }
           else if (ind->dest.mode == IEEE802154_ADDRMODE_EXTENDED)
             {
-              memcpy(&ind->dest.eaddr[0], frame->io_data[frame->io_offset], 
+              memcpy(&ind->dest.eaddr[0], &frame->io_data[frame->io_offset], 
                      IEEE802154_EADDR_LEN);
               frame->io_offset += 8;
             }
@@ -913,13 +914,16 @@ static void mac802154_rxframe_worker(FAR void *arg)
             }
           else if (ind->src.mode == IEEE802154_ADDRMODE_EXTENDED)
             {
-              memcpy(&ind->src.eaddr[0], frame->io_data[frame->io_offset], 
+              memcpy(&ind->src.eaddr[0], &frame->io_data[frame->io_offset], 
                      IEEE802154_EADDR_LEN);
               frame->io_offset += 8;
             }
         }
+
+      ftype = (*frame_ctrl & IEEE802154_FRAMECTRL_FTYPE) >>
+              IEEE802154_FRAMECTRL_SHIFT_FTYPE;
       
-      if (frame_ctrl & IEEE802154_FRAMECTRL_FTYPE == IEEE802154_FRAME_DATA)
+      if (ftype == IEEE802154_FRAME_DATA)
         {
           /* If there is a registered MCPS callback receiver registered, send
            * the frame, otherwise, throw it out.
@@ -929,7 +933,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
             {
               mcps_notify.dataind = ind;
               priv->cb->mcps_notify(priv->cb, IEEE802154_NOTIFY_IND_DATA,
-                                    mcps_notify);
+                                    &mcps_notify);
             }
           else
             {
@@ -938,11 +942,11 @@ static void mac802154_rxframe_worker(FAR void *arg)
               ieee802154_ind_free(ind);
             }
         }
-      else if (frame_ctrl & IEEE802154_FRAMECTRL_FTYPE == IEEE802154_FRAME_COMMAND)
+      else if (ftype == IEEE802154_FRAME_COMMAND)
         {
 
         }
-      else if (frame_ctrl & IEEE802154_FRAMECTRL_FTYPE == IEEE802154_FRAME_BEACON)
+      else if (ftype == IEEE802154_FRAME_BEACON)
         {
 
         }
@@ -1022,6 +1026,10 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
   /* Bind our callback structure */
 
   radiodev->ops->bind(radiodev, &mac->radiocb.cb);
+
+  /* Initialize our data indication pool */
+
+  ieee802154_indpool_initialize();
 
   return (MACHANDLE)mac;
 }
@@ -1360,7 +1368,7 @@ int mac802154_req_data(MACHANDLE mac,
        */
 
       if ((meta->dest_addr.mode == IEEE802154_ADDRMODE_NONE) ||
-          (*frame_ctrl & IEEE802154_FRAMECTRL_PANIDCOMP))
+          (!(*frame_ctrl & IEEE802154_FRAMECTRL_PANIDCOMP)))
         {
           memcpy(&frame->io_data[mhr_len], &priv->addr.panid, 2);
           mhr_len += 2;
