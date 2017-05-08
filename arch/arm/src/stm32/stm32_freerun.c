@@ -137,6 +137,7 @@ int stm32_freerun_initialize(struct stm32_freerun_s *freerun, int chan,
    */
 
   freerun->chan         = chan;
+  freerun->width        = STM32_TIM_GETWIDTH(freerun->tch);
   freerun->running      = false;
 
 #ifdef CONFIG_CLOCK_TIMEKEEPING
@@ -153,7 +154,7 @@ int stm32_freerun_initialize(struct stm32_freerun_s *freerun, int chan,
 
   /* Set timer period */
 
-  STM32_TIM_SETPERIOD(freerun->tch, UINT32_MAX);
+  STM32_TIM_SETPERIOD(freerun->tch, (uint32_t)((1ull << freerun->width) - 1));
 
   /* Start the counter */
 
@@ -248,7 +249,8 @@ int stm32_freerun_counter(struct stm32_freerun_s *freerun,
    *   usecs     = (ticks * USEC_PER_SEC) / frequency;
    */
 
-  usec = ((((uint64_t)overflow << 32) + (uint64_t)counter) * USEC_PER_SEC) /
+  usec = ((((uint64_t)overflow << freerun->width) +
+            (uint64_t)counter) * USEC_PER_SEC) /
          freerun->frequency;
 
   /* And return the value of the timer */
