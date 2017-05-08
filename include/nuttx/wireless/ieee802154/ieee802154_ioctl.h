@@ -81,5 +81,12 @@ struct mac802154dev_txframe_s
   uint16_t length;
 };
 
+struct mac802154dev_rxframe_s
+{
+  struct ieee802154_data_ind_s meta;
+  uint8_t payload[IEEE802154_MAX_MAC_PAYLOAD_SIZE];
+  uint16_t length;
+};
+
 #endif /* CONFIG_WIRELESS_IEEE802154 */
 #endif /* __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_IOCTL_H */
