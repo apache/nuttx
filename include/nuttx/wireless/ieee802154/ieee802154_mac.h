@@ -507,7 +507,7 @@ union ieee802154_macattr_u
   bool promisc_mode;
   bool rng_support;
   bool resp_wait_time;
-  bool rx_when_idle;
+  bool rxonidle;
   bool sec_enabled;
   bool timestamp_support;
 
