@@ -187,7 +187,7 @@
 #  endif
 #  define RXDMA_MUTIPLE  4
 #  define RXDMA_BUFFER_SIZE   ((CONFIG_STM32_SERIAL_RXDMA_BUFFER_SIZE \
-                                + RXDMA_MUTIPLE) & ~RXDMA_MUTIPLE)
+                                + RXDMA_MUTIPLE) & ~(RXDMA_MUTIPLE-1))
 
 /* DMA priority */
 
