@@ -334,22 +334,23 @@ static void stm32_tim_gpioconfig(uint32_t cfg, stm32_tim_channel_t mode);
 
 /* Timer methods */
 
-static int stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t mode);
-static int stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev, uint32_t freq);
+static int  stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t mode);
+static int  stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev, uint32_t freq);
 static void stm32_tim_setperiod(FAR struct stm32_tim_dev_s *dev,
                                 uint32_t period);
 static uint32_t stm32_tim_getcounter(FAR struct stm32_tim_dev_s *dev);
-static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
-                                stm32_tim_channel_t mode);
-static int stm32_tim_setcompare(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
-                                uint32_t compare);
-static int stm32_tim_getcapture(FAR struct stm32_tim_dev_s *dev, uint8_t channel);
-static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev, xcpt_t handler,
-                            void *arg, int source);
+static int  stm32_tim_getwidth(FAR struct stm32_tim_dev_s *dev);
+static int  stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
+                                 stm32_tim_channel_t mode);
+static int  stm32_tim_setcompare(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
+                                 uint32_t compare);
+static int  stm32_tim_getcapture(FAR struct stm32_tim_dev_s *dev, uint8_t channel);
+static int  stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev, xcpt_t handler,
+                             void *arg, int source);
 static void stm32_tim_enableint(FAR struct stm32_tim_dev_s *dev, int source);
 static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev, int source);
 static void stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev, int source);
-static int stm32_tim_checkint(FAR struct stm32_tim_dev_s *dev, int source);
+static int  stm32_tim_checkint(FAR struct stm32_tim_dev_s *dev, int source);
 
 /************************************************************************************
  * Private Data
@@ -361,6 +362,7 @@ static const struct stm32_tim_ops_s stm32_tim_ops =
   .setclock   = stm32_tim_setclock,
   .setperiod  = stm32_tim_setperiod,
   .getcounter = stm32_tim_getcounter,
+  .getwidth   = stm32_tim_getwidth,
   .setchannel = stm32_tim_setchannel,
   .setcompare = stm32_tim_setcompare,
   .getcapture = stm32_tim_getcapture,
@@ -902,6 +904,41 @@ static uint32_t stm32_tim_getcounter(FAR struct stm32_tim_dev_s *dev)
 {
   DEBUGASSERT(dev != NULL);
   return stm32_getreg32(dev, STM32_BTIM_CNT_OFFSET);
+}
+
+/************************************************************************************
+ * Name: stm32_tim_getwidth
+ ************************************************************************************/
+
+static int stm32_tim_getwidth(FAR struct stm32_tim_dev_s *dev)
+{
+  /* Only TIM2 and TIM5 timers may be 32-bits in width
+   *
+   * Reference Table 2 of en.DM00042534.pdf
+   */
+
+  switch (((struct stm32_tim_priv_s *)dev)->base)
+    {
+      /* TIM2 is 32-bits on all except F10x, L0x, and L1x lines */
+
+#if defined(CONFIG_STM32_TIM2) && !defined(STM32_STM32F10XX) && \
+   !defined(STM32_STM32L15XX)
+      case STM32_TIM2_BASE:
+        return 32;
+#endif
+
+      /* TIM5 is 32-bits on all except F10x lines */
+
+#if defined(CONFIG_STM32_TIM5) && !defined(STM32_STM32F10XX)
+      case STM32_TIM5_BASE:
+        return 32;
+#endif
+
+      /* All others are 16-bit times */
+
+      default:
+        return 16;
+    }
 }
 
 /************************************************************************************
