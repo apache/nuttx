@@ -756,7 +756,7 @@ config DEBUG_WIRELESS
 	default n
 	depends on WIRELESS || DRIVERS_WIRELESS
 	---help---
-		Enable DEBUG_WIRELESS debug features.
+		Enable wireless debug features.
 
 if DEBUG_WIRELESS
 

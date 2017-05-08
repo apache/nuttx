@@ -6,7 +6,6 @@
 config WIRELESS
 	bool "Wireless Support"
 	default n
-	depends on EXPERIMENTAL
 	---help---
 		Enables overall support for Wireless library.
 

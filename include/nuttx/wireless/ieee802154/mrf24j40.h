@@ -40,6 +40,8 @@
  * Included files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+#include <stdbool.h>
 #include <nuttx/arch.h>
 
 /****************************************************************************
@@ -52,18 +54,19 @@
  *
  * The MRF24J40 interrupt is an active low, *level* interrupt. From Datasheet:
  * "Note 1: The INTEDGE polarity defaults to:
- * 0 = Falling Edge. Ensure that the inter-
- * rupt polarity matches the interrupt pin
- * polarity of the host microcontroller.
- * Note 2: The INT pin will remain high or low,
- * depending on INTEDGE polarity setting,
- * until INTSTAT register is read."
+ *
+ *   0 = Falling Edge. Ensure that the interrupt polarity matches the
+ *       interrupt pin polarity of the host microcontroller.
+ *
+ *  Note 2: The INT pin will remain high or low, depending on INTEDGE
+ *   polarity setting, until INTSTAT register is read."
  */
 
 struct mrf24j40_lower_s
 {
-  int  (*attach)(FAR const struct mrf24j40_lower_s *lower, xcpt_t handler);
-  void (*enable)(FAR const struct mrf24j40_lower_s *lower, int state);
+  int  (*attach)(FAR const struct mrf24j40_lower_s *lower, xcpt_t handler,
+                 FAR void *arg);
+  void (*enable)(FAR const struct mrf24j40_lower_s *lower, bool state);
 };
 
 #ifdef __cplusplus
@@ -100,8 +103,9 @@ extern "C"
  ****************************************************************************/
 
 struct spi_dev_s; /* Forward reference */
-FAR struct ieee802154_dev_s *mrf24j40_init(FAR struct spi_dev_s *spi,
-                                           FAR const struct mrf24j40_lower_s *lower);
+FAR struct ieee802154_radio_s *
+  mrf24j40_init(FAR struct spi_dev_s *spi,
+                FAR const struct mrf24j40_lower_s *lower);
 
 #undef EXTERN
 #ifdef __cplusplus

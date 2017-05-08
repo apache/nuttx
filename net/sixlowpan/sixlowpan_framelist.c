@@ -55,6 +55,7 @@
 #include <debug.h>
 
 #include <nuttx/net/netdev.h>
+#include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 #include "sixlowpan/sixlowpan_internal.h"
 
@@ -77,7 +78,7 @@
  */
 
 #if CONFIG_NET_6LOWPAN_MTU > (CONFIG_IOB_BUFSIZE * CONFIG_IOB_NBUFFERS)
-#  error Not enough IOBs to hold one full IEEE802.14.5 packet
+#  error Not enough IOBs to hold one full 6LoWPAN packet
 #endif
 
 /****************************************************************************
@@ -183,9 +184,8 @@ static void sixlowpan_compress_ipv6hdr(FAR const struct ipv6_hdr_s *ipv6hdr,
  *
  *   The payload data is in the caller 'buf' and is of length 'buflen'.
  *   Compressed headers will be added and if necessary the packet is
- *   fragmented. The resulting packet/fragments are put in ieee->i_framelist
- *   and the entire list of frames will be delivered to the 802.15.4 MAC via
- *   ieee->i_framelist.
+ *   fragmented. The resulting packet/fragments are submitted to the MAC
+ *   where they are queue for transfer.
  *
  * Input Parameters:
  *   ieee    - The IEEE802.15.4 MAC driver instance
@@ -209,17 +209,20 @@ static void sixlowpan_compress_ipv6hdr(FAR const struct ipv6_hdr_s *ipv6hdr,
 int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
                            FAR const struct ipv6_hdr_s *destip,
                            FAR const void *buf, size_t buflen,
-                           FAR const struct rimeaddr_s *destmac)
+                           FAR const struct sixlowpan_tagaddr_s *destmac)
 {
+  struct packet_metadata_s pktmeta;
+  struct ieee802154_frame_meta_s meta;
   FAR struct iob_s *iob;
   FAR uint8_t *fptr;
   int framer_hdrlen;
-  struct rimeaddr_s bcastmac;
+  struct sixlowpan_tagaddr_s bcastmac;
   uint16_t pktlen;
   uint16_t paysize;
 #ifdef CONFIG_NET_6LOWPAN_FRAG
   uint16_t outlen = 0;
 #endif
+  int ret;
 
   /* Initialize global data.  Locking the network guarantees that we have
    * exclusive use of the global values for intermediate calculations.
@@ -228,16 +231,14 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
   g_uncomp_hdrlen = 0;
   g_frame_hdrlen  = 0;
 
-  /* Reset rime buffer, packet buffer metatadata */
+  /* Reset frame meta data */
 
-  memset(g_pktattrs, 0, PACKETBUF_NUM_ATTRS * sizeof(uint16_t));
-  memset(g_pktaddrs, 0, PACKETBUF_NUM_ADDRS * sizeof(struct rimeaddr_s));
-
-  g_pktattrs[PACKETBUF_ATTR_MAX_MAC_TRANSMISSIONS] =
-    CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS;
+  memset(&pktmeta, 0, sizeof(struct packet_metadata_s));
+  pktmeta.xmits = CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS;
 
   /* Set stream mode for all TCP packets, except FIN packets. */
 
+#if 0 /* Currently the frame type is always data */
   if (destip->proto == IP_PROTO_TCP)
     {
       FAR const struct tcp_hdr_s *tcp =
@@ -246,13 +247,14 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
       if ((tcp->flags & TCP_FIN) == 0 &&
           (tcp->flags & TCP_CTL) != TCP_ACK)
         {
-          g_pktattrs[PACKETBUF_ATTR_PACKET_TYPE] = PACKETBUF_ATTR_PACKET_TYPE_STREAM;
+          pktmeta.type = FRAME_ATTR_TYPE_STREAM;
         }
       else if ((tcp->flags & TCP_FIN) == TCP_FIN)
         {
-          g_pktattrs[PACKETBUF_ATTR_PACKET_TYPE] = PACKETBUF_ATTR_PACKET_TYPE_STREAM_END;
+          pktmeta.type = FRAME_ATTR_TYPE_STREAM_END;
         }
     }
+#endif
 
   /* The destination address will be tagged to each outbound packet. If the
    * argument destmac is NULL, we are sending a broadcast packet.
@@ -260,7 +262,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
   if (destmac == NULL)
     {
-      memset(&bcastmac, 0, sizeof(struct rimeaddr_s));
+      memset(&bcastmac, 0, sizeof(struct sixlowpan_tagaddr_s));
       destmac = &bcastmac;
     }
 
@@ -281,24 +283,67 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
   ninfo("Sending packet length %d\n", buflen);
 
-  /* Set the source and destination address */
+  /* Set the source and destination address.  The source MAC address
+   * is a fixed size, determined by a configuration setting.  The
+   * destination MAC address many be either short or extended.
+   */
 
-  rimeaddr_copy(&g_pktaddrs[PACKETBUF_ADDR_SENDER],
-                &ieee->i_dev.d_mac.ieee802154);
-  rimeaddr_copy(&g_pktaddrs[PACKETBUF_ADDR_RECEIVER], destmac);
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+  pktmeta.sextended = TRUE;
+  sixlowpan_eaddrcopy(pktmeta.source.eaddr.u8,
+                      &ieee->i_dev.d_mac.ieee802154);
+#else
+  sixlowpan_saddrcopy(pktmeta.source.saddr.u8,
+                      &ieee->i_dev.d_mac.ieee802154);
+#endif
+
+  if (destmac->extended)
+    {
+      pktmeta.dextended = TRUE;
+      sixlowpan_eaddrcopy(pktmeta.dest.eaddr.u8, destmac->u.eaddr.u8);
+    }
+  else
+    {
+      sixlowpan_saddrcopy(pktmeta.dest.saddr.u8, destmac->u.saddr.u8);
+    }
+
+  /* Get the destination PAN ID.
+   *
+   * REVISIT: For now I am assuming that the source and destination
+   * PAN IDs are the same.
+   */
+
+  pktmeta.dpanid = 0xffff;
+  (void)sixlowpan_src_panid(ieee, &pktmeta.dpanid);
+
+  /* Based on the collected attributes and addresses, construct the MAC meta
+   * data structure that we need to interface with the IEEE802.15.4 MAC (we
+   * will update the MSDU payload size when the IOB has been setup).
+   */
+
+  ret = sixlowpan_meta_data(ieee, &pktmeta, &meta, 0);
+  if (ret < 0)
+    {
+      nerr("ERROR: sixlowpan_meta_data() failed: %d\n", ret);
+    }
 
   /* Pre-calculate frame header length. */
 
-  framer_hdrlen = sixlowpan_send_hdrlen(ieee, ieee->i_panid);
+  framer_hdrlen = sixlowpan_frame_hdrlen(ieee, &meta);
   if (framer_hdrlen < 0)
     {
       /* Failed to determine the size of the header failed. */
 
-      nerr("ERROR: sixlowpan_send_hdrlen() failed: %d\n", framer_hdrlen);
+      nerr("ERROR: sixlowpan_frame_hdrlen() failed: %d\n", framer_hdrlen);
       return framer_hdrlen;
     }
 
-  g_frame_hdrlen  = framer_hdrlen;
+  /* This sill be the initial offset into io_data.  Valid data begins at
+   * this offset and must be reflected in io_offset.
+   */
+
+  g_frame_hdrlen = framer_hdrlen;
+  iob->io_offset = framer_hdrlen;
 
 #ifndef CONFIG_NET_6LOWPAN_COMPRESSION_IPv6
   if (buflen >= CONFIG_NET_6LOWPAN_COMPRESSION_THRESHOLD)
@@ -328,15 +373,15 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
   if (buflen > (CONFIG_NET_6LOWPAN_FRAMELEN - g_frame_hdrlen))
     {
 #ifdef CONFIG_NET_6LOWPAN_FRAG
-      /* ieee->i_framelist will hold the generated frames; frames will be
+      /* qhead will hold the generated frame list; frames will be
        * added at qtail.
        */
 
+      FAR struct iob_s *qhead;
       FAR struct iob_s *qtail;
       FAR uint8_t *frame1;
       FAR uint8_t *fragptr;
       uint16_t frag1_hdrlen;
-      int verify;
 
       /* The outbound IPv6 packet is too large to fit into a single 15.4
        * packet, so we fragment it into multiple packets and send them.
@@ -348,13 +393,6 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
       ninfo("Sending fragmented packet length %d\n", buflen);
 
       /* Create 1st Fragment */
-      /* Add the frame header using the pre-allocated IOB using the DSN
-       * selected by sixlowpan_send_hdrlen().
-       */
-
-      verify = sixlowpan_framecreate(ieee, iob, ieee->i_panid);
-      DEBUGASSERT(verify == framer_hdrlen);
-      UNUSED(verify);
 
       /* Move HC1/HC06/IPv6 header to make space for the FRAG1 header at the
        * beginning of the frame.
@@ -380,9 +418,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
        */
 
       pktlen = buflen + g_uncomp_hdrlen;
-      PUTINT16(fragptr, RIME_FRAG_DISPATCH_SIZE,
-               ((SIXLOWPAN_DISPATCH_FRAG1 << 8) | pktlen));
-      PUTINT16(fragptr, RIME_FRAG_TAG, ieee->i_dgramtag);
+      PUTHOST16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE,
+                ((SIXLOWPAN_DISPATCH_FRAG1 << 8) | pktlen));
+      PUTHOST16(fragptr, SIXLOWPAN_FRAG_TAG, ieee->i_dgramtag);
 
       g_frame_hdrlen += SIXLOWPAN_FRAG1_HDR_LEN;
 
@@ -395,8 +433,8 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
       /* Set outlen to what we already sent from the IP payload */
 
-      iob->io_len       = paysize + g_frame_hdrlen;
-      outlen            = paysize;
+      iob->io_len    = paysize + g_frame_hdrlen;
+      outlen         = paysize;
 
       ninfo("First fragment: length %d, tag %d\n",
             paysize, ieee->i_dgramtag);
@@ -405,17 +443,17 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
       /* Add the first frame to the IOB queue */
 
-      ieee->i_framelist = iob;
-      qtail             = iob;
+      qhead          = iob;
+      qtail          = iob;
 
       /* Keep track of the total amount of data queue */
 
-      iob->io_pktlen    = iob->io_len;
+      iob->io_pktlen = iob->io_len;
 
       /* Create following fragments */
 
-      frame1            = iob->io_data;
-      frag1_hdrlen      = g_frame_hdrlen;
+      frame1         = iob->io_data;
+      frag1_hdrlen   = g_frame_hdrlen;
 
       while (outlen < buflen)
         {
@@ -432,19 +470,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
           iob->io_flink  = NULL;
           iob->io_len    = 0;
-          iob->io_offset = 0;
+          iob->io_offset = framer_hdrlen;
           iob->io_pktlen = 0;
           fptr           = iob->io_data;
-
-          /* Add a new frame header to the IOB (same as the first but with a
-           * different DSN).
-           */
-
-          g_pktattrs[PACKETBUF_ATTR_MAC_SEQNO] = 0;
-
-          verify = sixlowpan_framecreate(ieee, iob, ieee->i_panid);
-          DEBUGASSERT(verify == framer_hdrlen);
-          UNUSED(verify);
 
           /* Copy the HC1/HC06/IPv6 header the frame header from first
            * frame, into the correct location after the FRAGN header
@@ -459,10 +487,10 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
           /* Setup up the FRAGN header after the frame header. */
 
-          PUTINT16(fragptr, RIME_FRAG_DISPATCH_SIZE,
-                   ((SIXLOWPAN_DISPATCH_FRAGN << 8) | pktlen));
-          PUTINT16(fragptr, RIME_FRAG_TAG, ieee->i_dgramtag);
-          fragptr[RIME_FRAG_OFFSET] = outlen >> 3;
+          PUTHOST16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE,
+                    ((SIXLOWPAN_DISPATCH_FRAGN << 8) | pktlen));
+          PUTHOST16(fragptr, SIXLOWPAN_FRAG_TAG, ieee->i_dgramtag);
+          fragptr[SIXLOWPAN_FRAG_OFFSET] = outlen >> 3;
 
           fragn_hdrlen += SIXLOWPAN_FRAGN_HDR_LEN;
 
@@ -498,7 +526,28 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
           /* Keep track of the total amount of data queue */
 
-          ieee->i_framelist->io_pktlen += iob->io_len;
+          qhead->io_pktlen += iob->io_len;
+        }
+
+      /* Submit all of the fragments to the MAC.  We send all frames back-
+       * to-back like this to minimize any possible condition where some
+       * frame which is not a fragment from this sequence from intervening.
+       */
+
+      for (iob = qhead; iob != NULL; iob = qhead)
+        {
+          /* Remove the IOB containing the frame from the list */
+
+          qhead         = iob->io_flink;
+          iob->io_flink = NULL;
+
+          /* And submit the frame to the MAC */
+
+          ret = sixlowpan_frame_submit(ieee, &meta, iob);
+          if (ret < 0)
+            {
+              nerr("ERROR: sixlowpan_frame_submit() failed: %d\n", ret);
+            }
         }
 
       /* Update the datagram TAG value */
@@ -514,34 +563,27 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
     }
   else
     {
-      int verify;
-
       /* The packet does not need to be fragmented just copy the "payload"
        * and send in one frame.
        */
 
-      /* Add the frame header to the preallocated IOB. */
-
-      verify = sixlowpan_framecreate(ieee, iob, ieee->i_panid);
-      DEBUGASSERT(verify == framer_hdrlen);
-      UNUSED(verify);
-
-      /* Copy the payload and queue */
+      /* Copy the payload into the frame. */
 
       memcpy(fptr + g_frame_hdrlen, buf, buflen);
-      iob->io_len = buflen + g_frame_hdrlen;
+      iob->io_len    = buflen + g_frame_hdrlen;
+      iob->io_pktlen = iob->io_len;
 
       ninfo("Non-fragmented: length %d\n", iob->io_len);
       sixlowpan_dumpbuffer("Outgoing frame",
                        (FAR const uint8_t *)iob->io_data, iob->io_len);
 
-      /* Add the first frame to the IOB queue */
+      /* And submit the frame to the MAC */
 
-      ieee->i_framelist = iob;
-
-      /* Keep track of the total amount of data queue */
-
-      iob->io_pktlen    = iob->io_len;
+      ret = sixlowpan_frame_submit(ieee, &meta, iob);
+      if (ret < 0)
+        {
+          nerr("ERROR: sixlowpan_frame_submit() failed: %d\n", ret);
+        }
     }
 
   return OK;

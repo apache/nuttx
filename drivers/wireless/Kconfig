@@ -20,7 +20,6 @@ source drivers/wireless/cc3000/Kconfig
 menuconfig DRIVERS_IEEE802154
 	bool "IEEE 802.15.4 Device Support"
 	default n
-	depends on EXPERIMENTAL
 	---help---
 		This directory holds implementations of IEEE802.15.4 device drivers.
 
@@ -29,7 +28,6 @@ source drivers/wireless/ieee802154/Kconfig
 menuconfig DRIVERS_IEEE80211
 	bool "IEEE 802.11 Device Support"
 	default n
-	depends on EXPERIMENTAL
 	---help---
 		This directory holds implementations of IEEE802.11 device drivers.
 

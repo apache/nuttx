@@ -47,6 +47,7 @@
 #include <arch/board/board.h>
 
 #include "stm32_gpio.h"
+#include "stm32_exti.h"
 
 #include "clicker2-stm32.h"
 

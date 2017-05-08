@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs/ioctl.h
  *
- *   Copyright (C) 2008, 2009, 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009, 2011-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,6 +88,7 @@
 #define _GPIOBASE       (0x2300) /* GPIO driver commands */
 #define _CLIOCBASE      (0x2400) /* Contactless modules ioctl commands */
 #define _USBCBASE       (0x2500) /* USB-C controller ioctl commands */
+#define _MAC802154BASE  (0x2600) /* 802.15.4 MAC ioctl commands */
 
 /* boardctl() commands share the same number space */
 
@@ -420,6 +421,12 @@
 
 #define _USBCIOCVALID(c)  (_IOC_TYPE(c)==_USBCBASE)
 #define _USBCIOC(nr)      _IOC(_USBCBASE,nr)
+
+/* 802.15.4 MAC driver ioctl definitions ************************************/
+/* (see nuttx/include/wireless/ieee802154/ieee802154_mac.h */
+
+#define _MAC802154IOCVALID(c)  (_IOC_TYPE(c)==_MAC802154BASE)
+#define _MAC802154IOC(nr)      _IOC(_MAC802154BASE,nr)
 
 /* boardctl() command definitions *******************************************/
 

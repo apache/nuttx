@@ -1,11 +1,9 @@
 /****************************************************************************
- * include/nuttx/net/ieee802154.h
+ * include/nuttx/ieee802154/at86rf23x.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Includes some definitions that a compatible with the LGPL GNU C Library
- * header file of the same name.
+ *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015 Sebastien Lorquet. All rights reserved.
+ *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,27 +34,81 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_H
-#define __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_H
+#ifndef __INCLUDE_NUTTX_IEEE802154_AT86RF23X_H
+#define __INCLUDE_NUTTX_IEEE802154_AT86RF23X_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <nuttx/net/netconfig.h>
-
-/****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
+#include <stdbool.h>
 
 /****************************************************************************
- * Public Data
+ * Public Types
  ****************************************************************************/
+
+/* The at86rf23x provides interrupts to the MCU via a GPIO pin.  The
+ * following structure provides an MCU-independent mechanixm for controlling
+ * the at86rf23x GPIO interrupt.
+ *
+ * The at86rf23x interrupt is an active low, *level* interrupt. From Datasheet:
+ * "Note 1: The INTEDGE polarity defaults to: 0 = Falling Edge. Ensure that
+ *  the interrupt polarity matches the interrupt pin polarity of the host
+ *  microcontroller.
+ * "Note 2: The INT pin will remain high or low, depending on INTEDGE polarity
+ *  setting, until INTSTAT register is read."
+ */
+
+struct at86rf23x_lower_s
+{
+  int  (*attach)(FAR const struct at86rf23x_lower_s *lower, xcpt_t handler,
+                FAR void *arg);
+  void (*enable)(FAR const struct at86rf23x_lower_s *lower, bool state);
+  void (*slptr)(FAR const struct at86rf23x_lower_s *lower, bool state);
+  void (*reset)(FAR const struct at86rf23x_lower_s *lower, bool state);
+};
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_H */
+/****************************************************************************
+ * Function: at86rf23x_init
+ *
+ * Description:
+ *   Initialize the IEEE802.15.4 driver.  The at86rf23x device is assumed to be
+ *   in the post-reset state upon entry to this function.
+ *
+ * Parameters:
+ *   spi   - A reference to the platform's SPI driver for the at86rf23x
+ *   lower - The MCU-specific interrupt used to control low-level MCU
+ *           functions (i.e., at86rf23x GPIO interrupts).
+ *   devno - If more than one at86rf23x is supported, then this is the
+ *           zero based number that identifies the at86rf23x;
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+FAR struct ieee802154_radio_s *
+  at86rf23x_init(FAR struct spi_dev_s *spi,
+                 FAR const struct at86rf23x_lower_s *lower);
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __INCLUDE_NUTTX_IEEE802154__AT86RF23X_H */

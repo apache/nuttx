@@ -45,6 +45,10 @@ ifeq ($(CONFIG_IEEE802154_MRF24J40),y)
   CSRCS += mrf24j40.c
 endif
 
+ifeq ($(CONFIG_IEEE802154_AT86RF233),y)
+  CSRCS += at86rf23x.c
+endif
+
 # Include IEEE 802.15.4 build support
 
 DEPPATH += --dep-path wireless$(DELIM)ieee802154

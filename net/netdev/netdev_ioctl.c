@@ -72,6 +72,10 @@
 #  include <nuttx/wireless/wireless.h>
 #endif
 
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN)
+#  include <nuttx/wireless/ieee802154/ieee802154_mac.h>
+#endif
+
 #include "arp/arp.h"
 #include "socket/socket.h"
 #include "netdev/netdev.h"
@@ -317,6 +321,67 @@ static void ioctl_set_ipv6addr(FAR net_ipv6addr_t outaddr,
 {
   FAR const struct sockaddr_in6 *src = (FAR const struct sockaddr_in6 *)inaddr;
   memcpy(outaddr, src->sin6_addr.in6_u.u6_addr8, 16);
+}
+#endif
+
+/****************************************************************************
+ * Name: netdev_iee802154_ioctl
+ *
+ * Description:
+ *   Perform IEEE802.15.4 network device specific operations.
+ *
+ * Parameters:
+ *   psock    Socket structure
+ *   dev      Ethernet driver device structure
+ *   cmd      The ioctl command
+ *   req      The argument of the ioctl cmd
+ *
+ * Return:
+ *   >=0 on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN)
+static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
+                                  unsigned long arg)
+{
+  FAR struct net_driver_s *dev;
+  FAR char *ifname;
+  int ret = -ENOTTY;
+
+  if (arg != 0ul)
+    {
+      if (_MAC802154IOCVALID(cmd))
+        {
+          /* Get the IEEE802.15.4 MAC device to receive the radio IOCTL
+           * commdand
+           */
+
+          FAR struct ieee802154_netmac_s *netmac =
+            (FAR struct ieee802154_netmac_s *)((uintptr_t)arg);
+
+          ifname = netmac->ifr_name;
+        }
+      else
+        {
+          /* The IOCTL command is neither */
+
+          return -ENOTTY;
+        }
+
+      /* Find the device with this name */
+
+      dev = netdev_findbyname(ifname);
+      if (dev != NULL)
+        {
+          /* Perform the device IOCTL */
+
+          ret = dev->d_ioctl(dev, cmd, arg);
+        }
+    }
+
+  return ret;
 }
 #endif
 
@@ -709,7 +774,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
                 {
                    req->ifr_hwaddr.sa_family = AF_INETX;
                    memcpy(req->ifr_hwaddr.sa_data,
-                         dev->d_mac.ieee802154.u8, NET_6LOWPAN_RIMEADDR_SIZE);
+                         dev->d_mac.ieee802154.u8, NET_6LOWPAN_ADDRSIZE);
                 }
                else
 #endif
@@ -747,7 +812,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 #endif
                 {
                   memcpy(dev->d_mac.ieee802154.u8,
-                         req->ifr_hwaddr.sa_data, NET_6LOWPAN_RIMEADDR_SIZE);
+                         req->ifr_hwaddr.sa_data, NET_6LOWPAN_ADDRSIZE);
                   ret = OK;
                 }
               else
@@ -1189,6 +1254,15 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
 
       wifrreq = (FAR struct iwreq *)((uintptr_t)arg);
       ret     = netdev_wifr_ioctl(psock, cmd, wifrreq);
+    }
+#endif
+
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN)
+  /* Check for a IEEE802.15.4 network device command */
+
+  if (ret == -ENOTTY)
+    {
+      ret = netdev_iee802154_ioctl(psock, cmd, arg);
     }
 #endif
 
