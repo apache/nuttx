@@ -211,6 +211,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
                            FAR const void *buf, size_t buflen,
                            FAR const struct sixlowpan_tagaddr_s *destmac)
 {
+  struct packet_metadata_s pktmeta;
   struct ieee802154_frame_meta_s meta;
   FAR struct iob_s *iob;
   FAR uint8_t *fptr;
@@ -232,8 +233,8 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
   /* Reset frame meta data */
 
-  memset(&g_packet_meta, 0, sizeof(struct packet_metadata_s));
-  g_packet_meta.xmits = CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS;
+  memset(&pktmeta, 0, sizeof(struct packet_metadata_s));
+  pktmeta.xmits = CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS;
 
   /* Set stream mode for all TCP packets, except FIN packets. */
 
@@ -246,11 +247,11 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
       if ((tcp->flags & TCP_FIN) == 0 &&
           (tcp->flags & TCP_CTL) != TCP_ACK)
         {
-          g_packet_meta.type = FRAME_ATTR_TYPE_STREAM;
+          pktmeta.type = FRAME_ATTR_TYPE_STREAM;
         }
       else if ((tcp->flags & TCP_FIN) == TCP_FIN)
         {
-          g_packet_meta.type = FRAME_ATTR_TYPE_STREAM_END;
+          pktmeta.type = FRAME_ATTR_TYPE_STREAM_END;
         }
     }
 #endif
@@ -288,22 +289,22 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
    */
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  g_packet_meta.sextended = TRUE;
-  sixlowpan_eaddrcopy(g_packet_meta.source.eaddr.u8,
+  pktmeta.sextended = TRUE;
+  sixlowpan_eaddrcopy(pktmeta.source.eaddr.u8,
                       &ieee->i_dev.d_mac.ieee802154);
 #else
-  sixlowpan_saddrcopy(g_packet_meta.source.saddr.u8,
+  sixlowpan_saddrcopy(pktmeta.source.saddr.u8,
                       &ieee->i_dev.d_mac.ieee802154);
 #endif
 
   if (destmac->extended)
     {
-      g_packet_meta.dextended = TRUE;
-      sixlowpan_eaddrcopy(g_packet_meta.dest.eaddr.u8, destmac->u.eaddr.u8);
+      pktmeta.dextended = TRUE;
+      sixlowpan_eaddrcopy(pktmeta.dest.eaddr.u8, destmac->u.eaddr.u8);
     }
   else
     {
-      sixlowpan_saddrcopy(g_packet_meta.dest.saddr.u8, destmac->u.saddr.u8);
+      sixlowpan_saddrcopy(pktmeta.dest.saddr.u8, destmac->u.saddr.u8);
     }
 
   /* Get the destination PAN ID.
@@ -312,15 +313,15 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
    * PAN IDs are the same.
    */
 
-  g_packet_meta.dpanid = 0xffff;
-  (void)sixlowpan_src_panid(ieee, &g_packet_meta.dpanid);
+  pktmeta.dpanid = 0xffff;
+  (void)sixlowpan_src_panid(ieee, &pktmeta.dpanid);
 
   /* Based on the collected attributes and addresses, construct the MAC meta
    * data structure that we need to interface with the IEEE802.15.4 MAC (we
    * will update the MSDU payload size when the IOB has been setup).
    */
 
-  ret = sixlowpan_meta_data(ieee, &meta, 0);
+  ret = sixlowpan_meta_data(ieee, &pktmeta, &meta, 0);
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_meta_data() failed: %d\n", ret);

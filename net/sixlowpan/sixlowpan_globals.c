@@ -67,18 +67,4 @@ uint8_t g_uncomp_hdrlen;
 
 uint8_t g_frame_hdrlen;
 
-/* In order to provide a customizable IEEE 802.15.4 MAC header, a structure
- * of meta data is passed to the MAC network driver, struct
- * ieee802154_frame_meta_s.  Many of the settings in this meta data are
- * fixed, deterimined by the 6loWPAN configuration.  Other settings depend
- * on the protocol used in the current packet or on chacteristics of the
- * destination node.
- *
- * The following structure is used to summarize those per-packet
- * customizations and, along, with the fixed configuratin settings,
- * determines the full form of that meta data.
- */
-
-struct packet_metadata_s g_packet_meta;
-
 #endif /* CONFIG_NET_6LOWPAN */

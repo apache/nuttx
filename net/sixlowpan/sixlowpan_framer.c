@@ -100,7 +100,7 @@ static bool sixlowpan_anyaddrnull(FAR uint8_t *addr, uint8_t addrlen)
  *
  ****************************************************************************/
 
-static inline bool sixlowpan_saddrnull(FAR uint8_t *saddr)
+static inline bool sixlowpan_saddrnull(FAR const uint8_t *saddr)
 {
   return sixlowpan_anyaddrnull(saddr, NET_6LOWPAN_SADDRSIZE);
 }
@@ -120,7 +120,7 @@ static inline bool sixlowpan_saddrnull(FAR uint8_t *saddr)
  *
  ****************************************************************************/
 
-static inline bool sixlowpan_eaddrnull(FAR uint8_t *eaddr)
+static inline bool sixlowpan_eaddrnull(FAR const uint8_t *eaddr)
 {
   return sixlowpan_anyaddrnull(eaddr, NET_6LOWPAN_EADDRSIZE);
 }
@@ -137,9 +137,10 @@ static inline bool sixlowpan_eaddrnull(FAR uint8_t *eaddr)
  *   data structure that we need to interface with the IEEE802.15.4 MAC.
  *
  * Input Parameters:
- *   ieee   - IEEE 802.15.4 MAC driver state reference.
- *   meta   - Location to return the corresponding meta data.
- *   paylen - The size of the data payload to be sent.
+ *   ieee    - IEEE 802.15.4 MAC driver state reference.
+ *   pktmeta - Meta-data specific to the current outgoing frame
+ *   meta    - Location to return the corresponding meta data.
+ *   paylen  - The size of the data payload to be sent.
  *
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.
@@ -150,6 +151,7 @@ static inline bool sixlowpan_eaddrnull(FAR uint8_t *eaddr)
  ****************************************************************************/
 
 int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
+                        FAR const struct packet_metadata_s *pktmeta,
                         FAR struct ieee802154_frame_meta_s *meta,
                         uint16_t paylen)
 {
@@ -161,23 +163,23 @@ int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
 
   /* Source address mode */
 
-  meta->src_addr_mode = g_packet_meta.sextended != 0?
+  meta->src_addr_mode = pktmeta->sextended != 0?
                         IEEE802154_ADDRMODE_EXTENDED :
                         IEEE802154_ADDRMODE_SHORT;
 
   /* Check for a broadcast destination address (all zero) */
 
-  if (g_packet_meta.dextended != 0)
+  if (pktmeta->dextended != 0)
     {
       /* Extended destination address mode */
 
-      rcvrnull = sixlowpan_eaddrnull(g_packet_meta.dest.eaddr.u8);
+      rcvrnull = sixlowpan_eaddrnull(pktmeta->dest.eaddr.u8);
     }
   else
     {
       /* Short destination address mode */
 
-      rcvrnull = sixlowpan_saddrnull(g_packet_meta.dest.saddr.u8);
+      rcvrnull = sixlowpan_saddrnull(pktmeta->dest.saddr.u8);
     }
 
   if (rcvrnull)
@@ -198,22 +200,22 @@ int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
       meta->dest_addr.mode  = IEEE802154_ADDRMODE_SHORT;
       meta->dest_addr.saddr = 0;
     }
-  else if (g_packet_meta.dextended != 0)
+  else if (pktmeta->dextended != 0)
     {
       /* Extended destination address mode */
 
       meta->dest_addr.mode = IEEE802154_ADDRMODE_EXTENDED;
-      sixlowpan_eaddrcopy(&meta->dest_addr.eaddr, g_packet_meta.dest.eaddr.u8);
+      sixlowpan_eaddrcopy(&meta->dest_addr.eaddr, pktmeta->dest.eaddr.u8);
     }
   else
     {
       /* Short destination address mode */
 
       meta->dest_addr.mode = IEEE802154_ADDRMODE_SHORT;
-      sixlowpan_saddrcopy(&meta->dest_addr.saddr, g_packet_meta.dest.saddr.u8);
+      sixlowpan_saddrcopy(&meta->dest_addr.saddr, pktmeta->dest.saddr.u8);
     }
 
-  meta->dest_addr.panid = g_packet_meta.dpanid;
+  meta->dest_addr.panid = pktmeta->dpanid;
 
   /* Handle associated with MSDU.  Will increment once per packet, not
    * necesarily per frame:  The same MSDU handle will be used for each
