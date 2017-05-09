@@ -68,7 +68,7 @@
  * Parts STM32L4x6xE have 512Kb of FLASH
  * Parts STM32L4x6xG have 1024Kb of FLASH
  *
- * The correct FLASH size must be set with a CONFIG_STM32L4_FLASH_*KB
+ * The correct FLASH size must be set with a CONFIG_STM32L4_FLASH_CONFIG_*
  * selection.
  */
 
@@ -78,10 +78,18 @@
 #elif defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX)
 #  define STM32L4_SRAM1_SIZE       (96*1024)   /* 96Kb SRAM1 on AHB bus Matrix */
 #  define STM32L4_SRAM2_SIZE       (32*1024)   /* 32Kb SRAM2 on AHB bus Matrix */
+#elif defined(CONFIG_STM32L4_STM32L451XX) || defined(CONFIG_STM32L4_STM32L452XX) || \
+      defined(CONFIG_STM32L4_STM32L462XX)
+#  define STM32L4_SRAM1_SIZE       (128*1024)  /* 128Kb SRAM1 on AHB bus Matrix */
+#  define STM32L4_SRAM2_SIZE       (32*1024)   /* 32Kb SRAM2 on AHB bus Matrix */
+#elif defined(CONFIG_STM32L4_STM32L432XX)
+#  define STM32L4_SRAM1_SIZE       (48*1024)   /* 48Kb SRAM1 on AHB bus Matrix */
+#  define STM32L4_SRAM2_SIZE       (16*1024)   /* 16Kb SRAM2 on AHB bus Matrix */
 #else
 #  error "Unsupported STM32L4 chip"
 #endif
 
+#if defined(CONFIG_STM32L4_STM32L4X6)
 #  define STM32L4_NFSMC                    1   /* Have FSMC memory controller */
 #  define STM32L4_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32L4_NGTIM32                  2   /* 32-bit general timers TIM2 and 5 with DMA */
@@ -100,6 +108,7 @@
 #  define STM32L4_NI2C                     3   /* I2C1-3 */
 #endif
 #  define STM32L4_NUSBOTGFS                1   /* USB OTG FS */
+#  define STM32L4_NUSBFS                   0   /* No USB FS */
 #if defined(CONFIG_STM32L4_STM32L496XX)
 #  define STM32L4_NCAN                     2   /* CAN1-2 */
 #else
@@ -118,6 +127,72 @@
 #  define STM32L4_NCRC                     1   /* CRC */
 #  define STM32L4_NCOMP                    2   /* Comparators */
 #  define STM32L4_NOPAMP                   2   /* Operational Amplifiers */
+#endif /* CONFIG_STM32L4_STM32L4X6 */
+
+#if defined(CONFIG_STM32L4_STM32L451XX) || defined(CONFIG_STM32L4_STM32L452XX) || \
+    defined(CONFIG_STM32L4_STM32L462XX)
+#  define STM32L4_NFSMC                    0   /* No FSMC memory controller */
+#  define STM32L4_NATIM                    1   /* One advanced timer TIM1 */
+#  define STM32L4_NGTIM32                  1   /* 32-bit general timer TIM2 with DMA */
+#  define STM32L4_NGTIM16                  3   /* 16-bit general timers TIM3, TIM15-16 with DMA */
+#  define STM32L4_NGTIMNDMA                0   /* No 16-bit general timers without DMA */
+#  define STM32L4_NBTIM                    1   /* One basic timer, TIM6 */
+#  define STM32L4_NLPTIM                   2   /* Two low-power timers, LPTIM1-2 */
+#  define STM32L4_NRNG                     1   /* Random number generator (RNG) */
+#  define STM32L4_NUART                    1   /* UART 4 */
+#  define STM32L4_NUSART                   3   /* USART 1-3 */
+#  define STM32L4_NLPUART                  1   /* LPUART 1 */
+#  define STM32L4_NSPI                     3   /* SPI1-3 */
+#  define STM32L4_NI2C                     4   /* I2C1-4 */
+#  define STM32L4_NUSBOTGFS                0   /* No USB OTG FS */
+#if defined(CONFIG_STM32L4_STM32L451XX)
+#  define STM32L4_NUSBFS                   0   /* No USB FS */
+#else
+#  define STM32L4_NUSBFS                   1   /* USB FS */
+#endif
+#  define STM32L4_NCAN                     1   /* CAN1 */
+#  define STM32L4_NSAI                     1   /* SAI1 */
+#if defined(CONFIG_STM32L4_HAVE_SDMMC1)
+#  define STM32L4_NSDMMC                   1   /* SDMMC interface */
+#else
+#  define STM32L4_NSDMMC                   0   /* No SDMMC interface */
+#endif
+#  define STM32L4_NDMA                     2   /* DMA1-2 */
+#  define STM32L4_NPORTS                   8   /* 8 GPIO ports, GPIOA-H */
+#  define STM32L4_NADC                     1   /* 12-bit ADC1, 16 channels (10 in CE,CV) */
+#  define STM32L4_NDAC                     1   /* 12-bit DAC1 */
+#  define STM32L4_NCRC                     1   /* CRC */
+#  define STM32L4_NCOMP                    2   /* Comparators */
+#  define STM32L4_NOPAMP                   1   /* Operational Amplifiers */
+#endif /* CONFIG_STM32L4_STM32L451XX */
+
+#if defined(CONFIG_STM32L4_STM32L432XX)
+#  define STM32L4_NFSMC                    0   /* No FSMC memory controller */
+#  define STM32L4_NATIM                    1   /* One advanced timer TIM1 */
+#  define STM32L4_NGTIM32                  1   /* 32-bit general timer TIM2 with DMA */
+#  define STM32L4_NGTIM16                  2   /* 16-bit general timers TIM15-16 with DMA */
+#  define STM32L4_NGTIMNDMA                0   /* No 16-bit general timers without DMA */
+#  define STM32L4_NBTIM                    2   /* Two basic timers, TIM6-7 */
+#  define STM32L4_NLPTIM                   2   /* Two low-power timers, LPTIM1-2 */
+#  define STM32L4_NRNG                     1   /* Random number generator (RNG) */
+#  define STM32L4_NUART                    0   /* No UART */
+#  define STM32L4_NUSART                   2   /* USART 1-2 */
+#  define STM32L4_NLPUART                  1   /* LPUART 1 */
+#  define STM32L4_NSPI                     2   /* SPI1, SPI3 */
+#  define STM32L4_NI2C                     2   /* I2C1, I2C3 */
+#  define STM32L4_NUSBOTGFS                0   /* No USB OTG FS */
+#  define STM32L4_NUSBFS                   1   /* USB FS */
+#  define STM32L4_NCAN                     1   /* CAN1 */
+#  define STM32L4_NSAI                     1   /* SAI1 */
+#  define STM32L4_NSDMMC                   0   /* No SDMMC interface */
+#  define STM32L4_NDMA                     2   /* DMA1-2 */
+#  define STM32L4_NPORTS                   8   /* 8 GPIO ports, GPIOA-H */
+#  define STM32L4_NADC                     1   /* 12-bit ADC1, 10 channels */
+#  define STM32L4_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32L4_NCRC                     1   /* CRC */
+#  define STM32L4_NCOMP                    2   /* Comparators */
+#  define STM32L4_NOPAMP                   1   /* Operational Amplifiers */
+#endif /* CONFIG_STM32L4_STM32L432XX */
 
 /* NVIC priority levels *************************************************************/
 /* 16 Programmable interrupt levels */

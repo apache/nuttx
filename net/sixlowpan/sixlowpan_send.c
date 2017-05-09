@@ -83,7 +83,7 @@ struct sixlowpan_send_s
   uint16_t                     s_timeout; /* Send timeout in deciseconds */
   systime_t                    s_time;    /* Last send time for determining timeout */
   FAR const struct ipv6_hdr_s *s_ipv6hdr; /* IPv6 header, followed by UDP or TCP header. */
-  FAR const struct rimeaddr_s *s_destmac; /* Destination MAC address */
+  FAR const struct sixlowpan_tagaddr_s *s_destmac; /* Destination MAC address */
   FAR const void              *s_buf;     /* Data to send */
   size_t                       s_len;     /* Length of data in buf */
 };
@@ -246,11 +246,10 @@ end_wait:
  *   it to be sent on an 802.15.4 network using 6lowpan.  Called from common
  *   UDP/TCP send logic.
  *
- *   The payload data is in the caller 'buf' and is of length 'len'.
+ *   The payload data is in the caller 'buf' and is of length 'buflen'.
  *   Compressed headers will be added and if necessary the packet is
- *   fragmented. The resulting packet/fragments are put in ieee->i_framelist
- *   and the entire list of frames will be delivered to the 802.15.4 MAC via
- *   ieee->i_framelist.
+ *   fragmented. The resulting packet/fragments are submitted to the MAC
+ *   via the network driver i_req_data method.
  *
  * Input Parameters:
  *   dev     - The IEEE802.15.4 MAC network driver interface.
@@ -275,7 +274,7 @@ end_wait:
 int sixlowpan_send(FAR struct net_driver_s *dev,
                    FAR struct devif_callback_s **list,
                    FAR const struct ipv6_hdr_s *ipv6hdr, FAR const void *buf,
-                   size_t len, FAR const struct rimeaddr_s *destmac,
+                   size_t len, FAR const struct sixlowpan_tagaddr_s *destmac,
                    uint16_t timeout)
 {
   struct sixlowpan_send_s sinfo;

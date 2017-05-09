@@ -67,9 +67,4 @@ uint8_t g_uncomp_hdrlen;
 
 uint8_t g_frame_hdrlen;
 
-/* Packet buffer metadata: Attributes and addresses */
-
-uint16_t g_pktattrs[PACKETBUF_NUM_ATTRS];
-struct rimeaddr_s g_pktaddrs[PACKETBUF_NUM_ADDRS];
-
 #endif /* CONFIG_NET_6LOWPAN */

@@ -49,6 +49,7 @@
 #include "chip/kinetis_pmc.h"
 #include "chip/kinetis_llwu.h"
 #include "chip/kinetis_pinmux.h"
+#include "chip/kinetis_osc.h"
 
 #include <arch/board/board.h>
 
@@ -198,6 +199,18 @@ void kinetis_pllconfig(void)
   uint32_t regval32;
 #endif
   uint8_t regval8;
+
+#if defined(BOARD_OSC_CR)
+  /* Use complete BOARD_OSC_CR settings */
+
+  putreg8(BOARD_OSC_CR, KINETIS_OSC_CR);
+#endif
+
+#if defined(BOARD_OSC_DIV)
+  /* Use complete BOARD_OSC_DIV settings */
+
+  putreg8(BOARD_OSC_DIV, KINETIS_OSC_DIV);
+#endif
 
 #if defined(BOARD_MCG_C2)
 

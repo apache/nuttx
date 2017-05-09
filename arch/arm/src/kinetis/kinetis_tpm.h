@@ -1,11 +1,9 @@
 /****************************************************************************
- * include/nuttx/net/ieee802154.h
+ * arch/arm/src/kinetis/kinetis_tpm.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Includes some definitions that a compatible with the LGPL GNU C Library
- * header file of the same name.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_H
-#define __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_H
+#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_TPM_H
+#define __ARCH_ARM_SRC_KINETIS_KINETIS_TPM_H
 
 /****************************************************************************
  * Included Files
@@ -45,18 +43,16 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/net/netconfig.h>
+#include "chip.h"
 
-/****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
+/* This file is just a wrapper around tmp header files for the Kinetis family
+ * selected by the logic in chip.h.
+ */
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+#if defined(KINETIS_K66)
+#  include "chip/kinetis_kx6tpm.h"
+#else
+#  error "No TMP definitions for this Kinetis part"
+#endif
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#endif /* __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_TPM_H */

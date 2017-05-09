@@ -317,31 +317,31 @@
 
 /* I2C */
 
-#define PIN_I2C0_SCL_1            (PIN_ALT2   | PIN_PORTB | PIN0)
-#define PIN_I2C0_SCL_2            (PIN_ALT2   | PIN_PORTB | PIN2)
-#define PIN_I2C0_SCL_3            (PIN_ALT2   | PIN_PORTD | PIN8)
-#define PIN_I2C0_SCL_4            (PIN_ALT5   | PIN_PORTE | PIN24)
-#define PIN_I2C0_SCL_5            (PIN_ALT7   | PIN_PORTD | PIN2)
-#define PIN_I2C0_SDA_1            (PIN_ALT2   | PIN_PORTB | PIN1)
-#define PIN_I2C0_SDA_2            (PIN_ALT2   | PIN_PORTB | PIN3)
-#define PIN_I2C0_SDA_3            (PIN_ALT2   | PIN_PORTD | PIN9)
-#define PIN_I2C0_SDA_4            (PIN_ALT5   | PIN_PORTE | PIN25)
-#define PIN_I2C0_SDA_5            (PIN_ALT7   | PIN_PORTD | PIN3)
+#define PIN_I2C0_SCL_1            (PIN_ALT2_OPENDRAIN | PIN_PORTB | PIN0)
+#define PIN_I2C0_SCL_2            (PIN_ALT2_OPENDRAIN | PIN_PORTB | PIN2)
+#define PIN_I2C0_SCL_3            (PIN_ALT2_OPENDRAIN | PIN_PORTD | PIN8)
+#define PIN_I2C0_SCL_4            (PIN_ALT5_OPENDRAIN | PIN_PORTE | PIN24)
+#define PIN_I2C0_SCL_5            (PIN_ALT7_OPENDRAIN | PIN_PORTD | PIN2)
+#define PIN_I2C0_SDA_1            (PIN_ALT2_OPENDRAIN | PIN_PORTB | PIN1)
+#define PIN_I2C0_SDA_2            (PIN_ALT2_OPENDRAIN | PIN_PORTB | PIN3)
+#define PIN_I2C0_SDA_3            (PIN_ALT2_OPENDRAIN | PIN_PORTD | PIN9)
+#define PIN_I2C0_SDA_4            (PIN_ALT5_OPENDRAIN | PIN_PORTE | PIN25)
+#define PIN_I2C0_SDA_5            (PIN_ALT7_OPENDRAIN | PIN_PORTD | PIN3)
 
-#define PIN_I2C1_SCL_1            (PIN_ALT2   | PIN_PORTC | PIN10)
-#define PIN_I2C1_SCL_2            (PIN_ALT6   | PIN_PORTE | PIN1)
-#define PIN_I2C1_SDA_1            (PIN_ALT2   | PIN_PORTC | PIN11)
-#define PIN_I2C1_SDA_2            (PIN_ALT6   | PIN_PORTE | PIN0)
+#define PIN_I2C1_SCL_1            (PIN_ALT2_OPENDRAIN | PIN_PORTC | PIN10)
+#define PIN_I2C1_SCL_2            (PIN_ALT6_OPENDRAIN | PIN_PORTE | PIN1)
+#define PIN_I2C1_SDA_1            (PIN_ALT2_OPENDRAIN | PIN_PORTC | PIN11)
+#define PIN_I2C1_SDA_2            (PIN_ALT6_OPENDRAIN | PIN_PORTE | PIN0)
 
-#define PIN_I2C2_SCL_1            (PIN_ALT5   | PIN_PORTA | PIN12)
-#define PIN_I2C2_SCL_2            (PIN_ALT5   | PIN_PORTA | PIN14)
-#define PIN_I2C2_SDA_1            (PIN_ALT5   | PIN_PORTA | PIN11)
-#define PIN_I2C2_SDA_2            (PIN_ALT5   | PIN_PORTA | PIN13)
+#define PIN_I2C2_SCL_1            (PIN_ALT5_OPENDRAIN | PIN_PORTA | PIN12)
+#define PIN_I2C2_SCL_2            (PIN_ALT5_OPENDRAIN | PIN_PORTA | PIN14)
+#define PIN_I2C2_SDA_1            (PIN_ALT5_OPENDRAIN | PIN_PORTA | PIN11)
+#define PIN_I2C2_SDA_2            (PIN_ALT5_OPENDRAIN | PIN_PORTA | PIN13)
 
-#define PIN_I2C3_SCL_1            (PIN_ALT2   | PIN_PORTE | PIN11)
-#define PIN_I2C3_SCL_2            (PIN_ALT4   | PIN_PORTA | PIN2)
-#define PIN_I2C3_SDA_1            (PIN_ALT2   | PIN_PORTE | PIN10)
-#define PIN_I2C3_SDA_2            (PIN_ALT4   | PIN_PORTA | PIN1)
+#define PIN_I2C3_SCL_1            (PIN_ALT2_OPENDRAIN | PIN_PORTE | PIN11)
+#define PIN_I2C3_SCL_2            (PIN_ALT4_OPENDRAIN | PIN_PORTA | PIN2)
+#define PIN_I2C3_SDA_1            (PIN_ALT2_OPENDRAIN | PIN_PORTE | PIN10)
+#define PIN_I2C3_SDA_2            (PIN_ALT4_OPENDRAIN | PIN_PORTA | PIN1)
 
 /* I2S */
 

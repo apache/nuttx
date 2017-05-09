@@ -49,9 +49,10 @@
 
 /* Include the correct DMA register definitions for this STM32 family */
 
-#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX) || \
-    defined(CONFIG_STM32L4_STM32L496XX)
+#if defined(CONFIG_STM32L4_STM32L4X6)
 #  include "chip/stm32l4x6xx_dma.h"
+#elif defined(CONFIG_STM32L4_STM32L4X3)
+#  include "chip/stm32l4x3xx_dma.h"
 #else
 #  error "Unsupported STM32L4 chip"
 #endif

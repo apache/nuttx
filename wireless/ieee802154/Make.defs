@@ -1,7 +1,7 @@
 ############################################################################
 # wireless/ieee802145/Make.defs
 #
-#   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,25 @@ ifeq ($(CONFIG_WIRELESS_IEEE802154),y)
 
 # Include IEEE 802.15.4 support
 
+CSRCS += mac802154_indalloc.c
+
 # Include wireless devices build support
+
+ifeq ($(CONFIG_IEEE802154_MAC),y)
+CSRCS += mac802154.c
+endif
+
+ifeq ($(CONFIG_IEEE802154_MAC_DEV),y)
+CSRCS += mac802154_device.c
+endif
+
+ifeq ($(CONFIG_IEEE802154_DEV),y)
+CSRCS += radio802154_device.c
+endif
+
+ifeq ($(CONFIG_IEEE802154_NETDEV),y)
+CSRCS += mac802154_netdev.c
+endif
 
 ifeq ($(CONFIG_IEEE802154_LOOPBACK),y)
 CSRCS += mac802154_loopback.c

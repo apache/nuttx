@@ -133,13 +133,13 @@ config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_1
 endif # NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_0
 endif # NET_6LOWPAN_COMPRESSION_HC06
 
-config NET_6LOWPAN_RIMEADDR_EXTENDED
-	bool "Extended Rime address"
+config NET_6LOWPAN_EXTENDEDADDR
+	bool "Extended IEEE 802.15.4 address"
 	default n
 	---help---
-		By default, a 2-byte Rime address is used for the IEEE802.15.4 MAC
+		By default, a 2-byte short address is used for the IEEE802.15.4 MAC
 		device's link layer address.  If this option is selected, then an
-		8-byte Rime address will be used.
+		8-byte extended address will be used.
 
 config NET_6LOWPAN_MAXAGE
 	int "Packet reassembly timeout"
@@ -151,6 +151,7 @@ config NET_6LOWPAN_MAXAGE
 config NET_6LOWPAN_MAX_MACTRANSMITS
 	int "Max MAC transmissions"
 	default 4
+	range 1 255
 	---help---
 		CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS specifies how many times the MAC
 		layer should resend packets if no link-layer ACK wasreceived. This

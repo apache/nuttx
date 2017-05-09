@@ -224,7 +224,7 @@ struct net_driver_s
 #ifdef CONFIG_NET_6LOWPAN
   /* The address assigned to an IEEE 802.15.4 radio. */
 
-    struct rimeaddr_s ieee802154; /* IEEE 802.15.4 Radio address */
+    struct sixlowpan_addr_s ieee802154; /* IEEE 802.15.4 Radio address */
 #endif
   } d_mac;
 #endif
@@ -436,8 +436,12 @@ int ipv6_input(FAR struct net_driver_s *dev);
 #endif
 
 #ifdef CONFIG_NET_6LOWPAN
-struct ieee802154_driver_s;  /* See sixlowpan.h */
-int sixlowpan_input(FAR struct ieee802154_driver_s *ieee);
+struct ieee802154_driver_s;   /* See sixlowpan.h */
+struct ieee802154_data_ind_s; /* See ieee8021454_mac.h */
+struct iob_s;                 /* See iob.h */
+int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
+                    FAR struct iob_s *framelist,
+                    FAR const struct ieee802154_data_ind_s *ind);
 #endif
 
 /****************************************************************************
@@ -513,7 +517,7 @@ int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback);
  *
  *   If no Neighbor Table entry is found for the destination IPv6 address,
  *   the packet in the d_buf[] is replaced by an ICMPv6 Neighbor Solict
- *   request packet for the IPv6 address. The IPv6 packet is dropped and 
+ *   request packet for the IPv6 address. The IPv6 packet is dropped and
  *   it is assumed that the higher level protocols (e.g., TCP) eventually
  *   will retransmit the dropped packet.
  *

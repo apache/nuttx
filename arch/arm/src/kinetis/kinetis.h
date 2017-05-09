@@ -468,7 +468,8 @@ void kinetis_lpuartreset(uintptr_t uart_base);
 #ifdef HAVE_UART_DEVICE
 void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
                            unsigned int parity, unsigned int nbits,
-                           unsigned int stop2);
+                           unsigned int stop2,
+                           bool iflow, bool oflow);
 #endif
 
 /****************************************************************************
@@ -482,7 +483,8 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
 #ifdef HAVE_LPUART_DEVICE
 void kinetis_lpuartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
                            unsigned int parity, unsigned int nbits,
-                           unsigned int stop2);
+                           unsigned int stop2,
+                           bool iflow, bool oflow);
 #endif
 
 /************************************************************************************

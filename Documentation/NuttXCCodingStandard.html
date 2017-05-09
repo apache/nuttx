@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX C Coding Standard</i>
       </font></big></h1>
-      <p>Last Updated: April 18, 2017</p>
+      <p>Last Updated: May 6, 2017</p>
     </td>
   </tr>
 </table>
@@ -405,8 +405,11 @@
 <p>
   <b>Line Spacing</b>
   A single blank line should precede and follow each comment.
-  The only exception is for the file header block comment that begins on line one;
+  The only exceptions are (1) for the file header block comment that begins on line one;
   there is no preceding blank line in that case.
+  And (2) for conditional compilation.
+  Conditional compilation should include the conditional logic <i>and</i> all comments associated with the conditional logic.
+  In this case, the blank line appears <i>before</i> the conditional, not after it.
 </p>
 <center><table width="60%" border=1>
 <tr><td bgcolor="white">
@@ -416,6 +419,12 @@
   a = b;
   /* set b equal to c */
   b = c;
+
+  /* Do the impossible */
+
+#ifdef CONFIG_THE_IMPOSSIBLE
+  the_impossible();
+#endif
 </ul></pre></font>
 </td></tr>
 <tr><td bgcolor="white">
@@ -430,6 +439,11 @@
 
   b = c;
 
+#ifdef CONFIG_THE_IMPOSSIBLE
+  /* Do the impossible */
+
+  the_impossible();
+#endif
 </ul></pre></font>
 </td></tr>
 </table></center>
@@ -1611,7 +1625,7 @@ enum xyz_state_e
   </li>
   <li>
     <b>Lowercase Exceptions</b>.
-    There are3 a few lower case values in NuttX macro names.  Such as a lower-case <code>p</code> for a period or decimal point (such as <code>VOLTAGE_3p3V</code>).
+    There are a few lower case values in NuttX macro names.  Such as a lower-case <code>p</code> for a period or decimal point (such as <code>VOLTAGE_3p3V</code>).
     I have also used lower-case <code>v</code> for a version number (such as <code>CONFIG_NET_IPv6</code>).
     However, these are exceptions to the rule rather than illustrating a rule.
   </li>

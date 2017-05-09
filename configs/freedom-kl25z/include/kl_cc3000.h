@@ -70,9 +70,8 @@ void WriteWlanEnablePin(uint8_t val);
 
 void AssertWlanCS(void);
 
-/*
- * Deassert CC3000 CS
- */
+/* Deassert CC3000 CS */
+
 void DeassertWlanCS(void);
 
 /* Setup needed pins */
