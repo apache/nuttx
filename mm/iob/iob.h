@@ -1,7 +1,7 @@
 /****************************************************************************
- * drivers/iob/iob_add_queue.c
+ * mm/iob/iob.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,120 +33,119 @@
  *
  ****************************************************************************/
 
+#ifndef __MM_IOB_IOB_H
+#define __MM_IOB_IOB_H 1
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <assert.h>
-#include <errno.h>
+#include <semaphore.h>
 #include <debug.h>
 
-#include <nuttx/drivers/iob.h>
+#include <nuttx/mm/iob.h>
 
-#include "iob.h"
-
-#if CONFIG_IOB_NCHAINS > 0
+#ifdef CONFIG_MM_IOB
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef NULL
-#  define NULL ((FAR void *)0)
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
+#ifdef CONFIG_CPP_HAVE_VARARGS
+
+#  define ioberr(format, ...)    _err(format, ##__VA_ARGS__)
+#  define iobwarn(format, ...)   _warn(format, ##__VA_ARGS__)
+#  define iobinfo(format, ...)   _info(format, ##__VA_ARGS__)
+
+#else
+    
+#  define ioberr                 _err
+#  define iobwarn                _warn
+#  define iobinfo                _info
+
+#endif
+#else
+#ifdef CONFIG_CPP_HAVE_VARARGS
+
+#  define ioberr(format, ...)
+#  define iobwarn(format, ...)
+#  define iobinfo(format, ...)
+
+#else
+    
+#  define ioberr                 (void)
+#  define iobwarn                (void)
+#  define iobinfo                (void)
+
+#endif
+#endif /* CONFIG_DEBUG_FEATURES && CONFIG_IOB_DEBUG */
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* A list of all free, unallocated I/O buffers */
+
+extern FAR struct iob_s *g_iob_freelist;
+
+/* A list of all free, unallocated I/O buffer queue containers */
+
+#if CONFIG_IOB_NCHAINS > 0
+extern FAR struct iob_qentry_s *g_iob_freeqlist;
+#endif
+
+/* Counting semaphores that tracks the number of free IOBs/qentries */
+
+extern sem_t g_iob_sem;       /* Counts free I/O buffers */
+#if CONFIG_IOB_THROTTLE > 0
+extern sem_t g_throttle_sem;  /* Counts available I/O buffers when throttled */
+#endif
+#if CONFIG_IOB_NCHAINS > 0
+extern sem_t g_qentry_sem;    /* Counts free I/O buffer queue containers */
 #endif
 
 /****************************************************************************
- * Private Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_add_queue_internal
+ * Name: iob_alloc_qentry
  *
  * Description:
- *   Add one I/O buffer chain to the end of a queue.  May fail due to lack
- *   of resources.
+ *   Allocate an I/O buffer chain container by taking the buffer at the head
+ *   of the free list. This function is intended only for internal use by
+ *   the IOB module.
  *
  ****************************************************************************/
 
-static int iob_add_queue_internal(FAR struct iob_s *iob,
-                                  FAR struct iob_queue_s *iobq,
-                                  FAR struct iob_qentry_s *qentry)
-{
-  /* Add the I/O buffer chain to the container */
-
-  qentry->qe_head = iob;
-
-  /* Add the container to the end of the queue */
-
-  qentry->qe_flink = NULL;
-  if (!iobq->qh_head)
-    {
-      iobq->qh_head = qentry;
-      iobq->qh_tail = qentry;
-    }
-  else
-    {
-      DEBUGASSERT(iobq->qh_tail);
-      iobq->qh_tail->qe_flink = qentry;
-      iobq->qh_tail = qentry;
-    }
-
-  return 0;
-}
+FAR struct iob_qentry_s *iob_alloc_qentry(void);
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: iob_add_queue
+ * Name: iob_tryalloc_qentry
  *
  * Description:
- *   Add one I/O buffer chain to the end of a queue.  May fail due to lack
- *   of resources.
+ *   Try to allocate an I/O buffer chain container by taking the buffer at
+ *   the head of the free list without waiting for the container to become
+ *   free. This function is intended only for internal use by the IOB module.
  *
  ****************************************************************************/
 
-int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
-{
-  FAR struct iob_qentry_s *qentry;
-
-  /* Allocate a container to hold the I/O buffer chain */
-
-  qentry = iob_alloc_qentry();
-  if (!qentry)
-    {
-      ioberr("ERROR: Failed to allocate a container\n");
-      return -ENOMEM;
-    }
-
-  return iob_add_queue_internal(iob, iobq, qentry);
-}
+FAR struct iob_qentry_s *iob_tryalloc_qentry(void);
 
 /****************************************************************************
- * Name: iob_tryadd_queue
+ * Name: iob_free_qentry
  *
  * Description:
- *   Add one I/O buffer chain to the end of a queue without waiting for
- *   resources to become free.
+ *   Free the I/O buffer chain container by returning it to the  free list.
+ *   The link to  the next I/O buffer in the chain is return.
  *
  ****************************************************************************/
 
-int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
-{
-  FAR struct iob_qentry_s *qentry;
+FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq);
 
-  /* Allocate a container to hold the I/O buffer chain */
+#endif /* CONFIG_MM_IOB */
+#endif /* __MM_IOB_IOB_H */
 
-  qentry = iob_tryalloc_qentry();
-  if (!qentry)
-    {
-      ioberr("ERROR: Failed to allocate a container\n");
-      return -ENOMEM;
-    }
-
-  return iob_add_queue_internal(iob, iobq, qentry);
-}
-#endif /* CONFIG_IOB_NCHAINS > 0 */

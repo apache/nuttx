@@ -98,8 +98,6 @@ source drivers/loop/Kconfig
 
 menu "Buffering"
 
-source "drivers/iob/Kconfig"
-
 config DRVR_WRITEBUFFER
 	bool "Enable write buffer support"
 	default n

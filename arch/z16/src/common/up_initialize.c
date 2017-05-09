@@ -44,7 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/sched_note.h>
-#include <nuttx/drivers/iob.h>
+#include <nuttx/mm/iob.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/net/loopback.h>
@@ -160,7 +160,7 @@ void up_initialize(void)
   z16_timer_initialize();
 #endif
 
-#ifdef CONFIG_DRIVERS_IOB
+#ifdef CONFIG_MM_IOB
   /* Initialize IO buffering */
 
   iob_initialize();

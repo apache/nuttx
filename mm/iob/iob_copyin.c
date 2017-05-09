@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/iob/iob_copyin.c
+ * mm/iob/iob_copyin.c
  *
  *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,7 +45,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/drivers/iob.h>
+#include <nuttx/mm/iob.h>
 
 #include "iob.h"
 

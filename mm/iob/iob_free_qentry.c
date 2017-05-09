@@ -1,7 +1,7 @@
 /****************************************************************************
- * drivers/iob/iob_copyout.c
+ * mm/iob/iob_free_qentry.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,86 +39,52 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <string.h>
+#include <semaphore.h>
 #include <assert.h>
 
-#include <nuttx/drivers/iob.h>
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <nuttx/mm/iob.h>
 
 #include "iob.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef MIN
-#  define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
+#if CONFIG_IOB_NCHAINS > 0
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_copyout
+ * Name: iob_free_qentry
  *
  * Description:
- *  Copy data 'len' bytes of data into the user buffer starting at 'offset'
- *  in the I/O buffer, returning that actual number of bytes copied out.
+ *   Free the I/O buffer chain container by returning it to the free list.
+ *   The link to  the next I/O buffer in the chain is return.
  *
  ****************************************************************************/
 
-int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
-                unsigned int len, unsigned int offset)
+FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq)
 {
-  FAR const uint8_t *src;
-  unsigned int ncopy;
-  unsigned int avail;
-  unsigned int remaining;
+  FAR struct iob_qentry_s *nextq = iobq->qe_flink;
+  irqstate_t flags;
 
-  /* Skip to the I/O buffer containing the offset */
+  /* Free the I/O buffer chain container by adding it to the head of the free
+   * list. We don't know what context we are called from so we use extreme
+   * measures to protect the free list:  We disable interrupts very briefly.
+   */
 
-  while (offset >= iob->io_len)
-    {
-      offset -= iob->io_len;
-      iob     = iob->io_flink;
-      if (iob == NULL)
-        {
-          /* We have no requested data in iob chain */
+  flags = enter_critical_section();
+  iobq->qe_flink = g_iob_freeqlist;
+  g_iob_freeqlist = iobq;
 
-          return 0;
-        }
-    }
+  /* Signal that an I/O buffer chain container is available */
 
-  /* Then loop until all of the I/O data is copied to the user buffer */
+  sem_post(&g_qentry_sem);
+  leave_critical_section(flags);
 
-  remaining = len;
-  while (iob && remaining > 0)
-    {
-      /* Get the source I/O buffer offset address and the amount of data
-       * available from that address.
-       */
+  /* And return the I/O buffer chain container after the one that was freed */
 
-      src   = &iob->io_data[iob->io_offset + offset];
-      avail = iob->io_len - offset;
-
-      /* Copy the from the I/O buffer in to the user buffer */
-
-      ncopy = MIN(avail, remaining);
-      memcpy(dest, src, ncopy);
-
-      /* Adjust the total length of the copy and the destination address in
-       * the user buffer.
-       */
-
-      remaining -= ncopy;
-      dest += ncopy;
-
-      /* Skip to the next I/O buffer in the chain */
-
-      iob = iob->io_flink;
-      offset = 0;
-    }
-
-  return len - remaining;
+  return nextq;
 }
+
+#endif /* CONFIG_IOB_NCHAINS > 0 */

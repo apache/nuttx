@@ -1,7 +1,7 @@
 /****************************************************************************
- * drivers/iob/iob.h
+ * mm/iob/iob_initialize.c
  *
- *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,55 +33,29 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_IOB_IOB_H
-#define __DRIVERS_IOB_IOB_H 1
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <semaphore.h>
-#include <debug.h>
 
-#include <nuttx/drivers/iob.h>
+#include <nuttx/mm/iob.h>
 
-#ifdef CONFIG_DRIVERS_IOB
+#include "iob.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-#ifdef CONFIG_CPP_HAVE_VARARGS
+/* This is a pool of pre-allocated I/O buffers */
 
-#  define ioberr(format, ...)    _err(format, ##__VA_ARGS__)
-#  define iobwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define iobinfo(format, ...)   _info(format, ##__VA_ARGS__)
-
-#else
-    
-#  define ioberr                 _err
-#  define iobwarn                _warn
-#  define iobinfo                _info
-
+static struct iob_s        g_iob_pool[CONFIG_IOB_NBUFFERS];
+#if CONFIG_IOB_NCHAINS > 0
+static struct iob_qentry_s g_iob_qpool[CONFIG_IOB_NCHAINS];
 #endif
-#else
-#ifdef CONFIG_CPP_HAVE_VARARGS
-
-#  define ioberr(format, ...)
-#  define iobwarn(format, ...)
-#  define iobinfo(format, ...)
-
-#else
-    
-#  define ioberr                 (void)
-#  define iobwarn                (void)
-#  define iobinfo                (void)
-
-#endif
-#endif /* CONFIG_DEBUG_FEATURES && CONFIG_IOB_DEBUG */
 
 /****************************************************************************
  * Public Data
@@ -89,62 +63,78 @@
 
 /* A list of all free, unallocated I/O buffers */
 
-extern FAR struct iob_s *g_iob_freelist;
+FAR struct iob_s *g_iob_freelist;
 
 /* A list of all free, unallocated I/O buffer queue containers */
 
 #if CONFIG_IOB_NCHAINS > 0
-extern FAR struct iob_qentry_s *g_iob_freeqlist;
+FAR struct iob_qentry_s *g_iob_freeqlist;
 #endif
 
 /* Counting semaphores that tracks the number of free IOBs/qentries */
 
-extern sem_t g_iob_sem;       /* Counts free I/O buffers */
+sem_t g_iob_sem;            /* Counts free I/O buffers */
 #if CONFIG_IOB_THROTTLE > 0
-extern sem_t g_throttle_sem;  /* Counts available I/O buffers when throttled */
+sem_t g_throttle_sem;       /* Counts available I/O buffers when throttled */
 #endif
 #if CONFIG_IOB_NCHAINS > 0
-extern sem_t g_qentry_sem;    /* Counts free I/O buffer queue containers */
+sem_t g_qentry_sem;         /* Counts free I/O buffer queue containers */
 #endif
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_alloc_qentry
+ * Name: iob_initialize
  *
  * Description:
- *   Allocate an I/O buffer chain container by taking the buffer at the head
- *   of the free list. This function is intended only for internal use by
- *   the IOB module.
+ *   Set up the I/O buffers for normal operations.
  *
  ****************************************************************************/
 
-FAR struct iob_qentry_s *iob_alloc_qentry(void);
+void iob_initialize(void)
+{
+  static bool initialized = false;
+  int i;
 
-/****************************************************************************
- * Name: iob_tryalloc_qentry
- *
- * Description:
- *   Try to allocate an I/O buffer chain container by taking the buffer at
- *   the head of the free list without waiting for the container to become
- *   free. This function is intended only for internal use by the IOB module.
- *
- ****************************************************************************/
+  /* Perform one-time initialization */
 
-FAR struct iob_qentry_s *iob_tryalloc_qentry(void);
+  if (!initialized)
+    {
+      /* Add each I/O buffer to the free list */
 
-/****************************************************************************
- * Name: iob_free_qentry
- *
- * Description:
- *   Free the I/O buffer chain container by returning it to the  free list.
- *   The link to  the next I/O buffer in the chain is return.
- *
- ****************************************************************************/
+      for (i = 0; i < CONFIG_IOB_NBUFFERS; i++)
+        {
+          FAR struct iob_s *iob = &g_iob_pool[i];
 
-FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq);
+          /* Add the pre-allocate I/O buffer to the head of the free list */
 
-#endif /* CONFIG_DRIVERS_IOB */
-#endif /* __DRIVERS_IOB_IOB_H */
+          iob->io_flink  = g_iob_freelist;
+          g_iob_freelist = iob;
+        }
+
+      sem_init(&g_iob_sem, 0, CONFIG_IOB_NBUFFERS);
+
+#if CONFIG_IOB_THROTTLE > 0
+      sem_init(&g_throttle_sem, 0, CONFIG_IOB_NBUFFERS - CONFIG_IOB_THROTTLE);
+#endif
+
+#if CONFIG_IOB_NCHAINS > 0
+      /* Add each I/O buffer chain queue container to the free list */
+
+      for (i = 0; i < CONFIG_IOB_NCHAINS; i++)
+        {
+          FAR struct iob_qentry_s *iobq = &g_iob_qpool[i];
+
+          /* Add the pre-allocate buffer container to the head of the free list */
+
+          iobq->qe_flink  = g_iob_freeqlist;
+          g_iob_freeqlist = iobq;
+        }
+
+      sem_init(&g_qentry_sem, 0, CONFIG_IOB_NCHAINS);
+#endif
+      initialized = true;
+    }
+}

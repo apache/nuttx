@@ -1,7 +1,7 @@
 /****************************************************************************
- * drivers/iob/iob_free_qentry.c
+ * mm/iob/iob_trimtail.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,52 +39,100 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
-#include <assert.h>
+#include <string.h>
+#include <debug.h>
 
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-#include <nuttx/drivers/iob.h>
+#include <nuttx/mm/iob.h>
 
 #include "iob.h"
-
-#if CONFIG_IOB_NCHAINS > 0
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_free_qentry
+ * Name: iob_trimtail
  *
  * Description:
- *   Free the I/O buffer chain container by returning it to the free list.
- *   The link to  the next I/O buffer in the chain is return.
+ *   Remove bytes from the end of an I/O chain
  *
  ****************************************************************************/
 
-FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq)
+FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
 {
-  FAR struct iob_qentry_s *nextq = iobq->qe_flink;
-  irqstate_t flags;
+  FAR struct iob_s *entry;
+  FAR struct iob_s *penultimate;
+  FAR struct iob_s *last;
+  int len;
 
-  /* Free the I/O buffer chain container by adding it to the head of the free
-   * list. We don't know what context we are called from so we use extreme
-   * measures to protect the free list:  We disable interrupts very briefly.
-   */
+  iobinfo("iob=%p pktlen=%d trimlen=%d\n", iob, iob->io_pktlen, trimlen);
 
-  flags = enter_critical_section();
-  iobq->qe_flink = g_iob_freeqlist;
-  g_iob_freeqlist = iobq;
+  if (iob && trimlen > 0)
+    {
+      len = trimlen;
 
-  /* Signal that an I/O buffer chain container is available */
+      /* Loop until complete the trim */
 
-  sem_post(&g_qentry_sem);
-  leave_critical_section(flags);
+      while (len > 0)
+        {
+          /* Calculate the total length of the data in the I/O buffer
+           * chain and find the last entry in the chain.
+           */
 
-  /* And return the I/O buffer chain container after the one that was freed */
+          penultimate = NULL;
+          last = NULL;
 
-  return nextq;
+          for (entry = iob; entry; entry = entry->io_flink)
+            {
+              /* Remember the last and the next to the last in the chain */
+
+              penultimate = last;
+              last = entry;
+            }
+
+          /* Trim from the last entry in the chain.  Do we trim this entire
+           * I/O buffer away?
+           */
+
+          iobinfo("iob=%p len=%d vs %d\n", last, last->io_len, len);
+          if (last->io_len <= len)
+            {
+              /* Yes.. Consume the entire buffer */
+
+              iob->io_pktlen -= last->io_len;
+              len            -= last->io_len;
+              last->io_len    = 0;
+
+              /* Free the last, empty buffer in the list */
+
+              iob_free(last);
+
+              /* There should be a buffer before this one */
+
+              if (!penultimate)
+                {
+                  /* No.. we just freed the head of the chain */
+
+                  return NULL;
+                }
+
+              /* Unlink the penultimate from the freed buffer */
+
+              penultimate->io_flink = NULL;
+            }
+
+          else
+            {
+              /* No, then just take what we need from this I/O buffer and
+               * stop the trim.
+               */
+
+              iob->io_pktlen -= len;
+              last->io_len   -= len;
+              len             = 0;
+            }
+        }
+    }
+
+  return iob;
 }
-
-#endif /* CONFIG_IOB_NCHAINS > 0 */

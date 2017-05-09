@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/iob/iob_alloc.c
+ * mm/iob/iob_alloc_qentry.c
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,61 +45,55 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/drivers/iob.h>
+#include <nuttx/mm/iob.h>
 
 #include "iob.h"
+
+#if CONFIG_IOB_NCHAINS > 0
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_allocwait
+ * Name: iob_allocwait_qentry
  *
  * Description:
- *   Allocate an I/O buffer, waiting if necessary.  This function cannot be
- *   called from any interrupt level logic.
+ *   Allocate an I/O buffer chain container by taking the buffer at the head
+ *   of the free list.  This function is intended only for internal use by
+ *   the IOB module.
  *
  ****************************************************************************/
 
-static FAR struct iob_s *iob_allocwait(bool throttled)
+static FAR struct iob_qentry_s *iob_allocwait_qentry(void)
 {
-  FAR struct iob_s *iob;
+  FAR struct iob_qentry_s *qentry;
   irqstate_t flags;
-  FAR sem_t *sem;
   int ret = OK;
 
-#if CONFIG_IOB_THROTTLE > 0
-  /* Select the semaphore count to check. */
-
-  sem = (throttled ? &g_throttle_sem : &g_iob_sem);
-#else
-  sem = &g_iob_sem;
-#endif
-
   /* The following must be atomic; interrupt must be disabled so that there
-   * is no conflict with interrupt level I/O buffer allocations.  This is
-   * not as bad as it sounds because interrupts will be re-enabled while
-   * we are waiting for I/O buffers to become free.
+   * is no conflict with interrupt level I/O buffer chain container
+   * allocations.  This is not as bad as it sounds because interrupts will be
+   * re-enabled while we are waiting for I/O buffers to become free.
    */
 
   flags = enter_critical_section();
   do
     {
-      /* Try to get an I/O buffer.  If successful, the semaphore count
-       * will be decremented atomically.
+      /* Try to get an I/O buffer chain container.  If successful, the
+       * semaphore count will be decremented atomically.
        */
 
-      iob = iob_tryalloc(throttled);
-      if (!iob)
+      qentry = iob_tryalloc_qentry();
+      if (!qentry)
         {
           /* If not successful, then the semaphore count was less than or
            * equal to zero (meaning that there are no free buffers).  We
-           * need to wait for an I/O buffer to be released when the semaphore
-           * count will be incremented.
+           * need to wait for an I/O buffer chain container to be released
+           * when the semaphore count will be incremented.
            */
 
-          ret = sem_wait(sem);
+          ret = sem_wait(&g_qentry_sem);
           if (ret < 0)
             {
               int errcode = get_errno();
@@ -131,29 +125,29 @@ static FAR struct iob_s *iob_allocwait(bool throttled)
             }
           else
             {
-              /* When we wake up from wait successfully, an I/O buffer was
-               * returned to the free list.  However, if there are concurrent
-               * allocations from interrupt handling, then I suspect that
-               * there is a race condition.  But no harm, we will just wait
-               * again in that case.
+              /* When we wake up from wait successfully, an I/O buffer chain
+               * container was returned to the free list.  However, if there
+               * are concurrent allocations from interrupt handling, then I
+               * suspect that there is a race condition.  But no harm, we
+               * will just wait again in that case.
                *
                * We need release our count so that it is available to
-               * iob_tryalloc(), perhaps allowing another thread to take our
-               * count.  In that event, iob_tryalloc() will fail above and
-               * we will have to wait again.
+               * iob_tryalloc_qentry(), perhaps allowing another thread to
+               * take our count.  In that event, iob_tryalloc_qentry() will
+               * fail above and we will have to wait again.
                *
                * TODO: Consider a design modification to permit us to
                * complete the allocation without losing our count.
                */
 
-              sem_post(sem);
+              sem_post(&g_qentry_sem);
             }
         }
     }
-  while (ret == OK && iob == NULL);
+  while (ret == OK && !qentry);
 
   leave_critical_section(flags);
-  return iob;
+  return qentry;
 }
 
 /****************************************************************************
@@ -161,14 +155,16 @@ static FAR struct iob_s *iob_allocwait(bool throttled)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_alloc
+ * Name: iob_alloc_qentry
  *
  * Description:
- *   Allocate an I/O buffer by taking the buffer at the head of the free list.
+ *   Allocate an I/O buffer chain container by taking the buffer at the head
+ *   of the free list. This function is intended only for internal use by
+ *   the IOB module.
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_alloc(bool throttled)
+FAR struct iob_qentry_s *iob_alloc_qentry(void)
 {
   /* Were we called from the interrupt level? */
 
@@ -176,93 +172,63 @@ FAR struct iob_s *iob_alloc(bool throttled)
     {
       /* Yes, then try to allocate an I/O buffer without waiting */
 
-      return iob_tryalloc(throttled);
+      return iob_tryalloc_qentry();
     }
   else
     {
       /* Then allocate an I/O buffer, waiting as necessary */
 
-      return iob_allocwait(throttled);
+      return iob_allocwait_qentry();
     }
 }
 
 /****************************************************************************
- * Name: iob_tryalloc
+ * Name: iob_tryalloc_qentry
  *
  * Description:
- *   Try to allocate an I/O buffer by taking the buffer at the head of the
- *   free list without waiting for a buffer to become free.
+ *   Try to allocate an I/O buffer chain container by taking the buffer at
+ *   the head of the free list without waiting for the container to become
+ *   free. This function is intended only for internal use by the IOB module.
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_tryalloc(bool throttled)
+FAR struct iob_qentry_s *iob_tryalloc_qentry(void)
 {
-  FAR struct iob_s *iob;
+  FAR struct iob_qentry_s *iobq;
   irqstate_t flags;
-#if CONFIG_IOB_THROTTLE > 0
-  FAR sem_t *sem;
-#endif
-
-#if CONFIG_IOB_THROTTLE > 0
-  /* Select the semaphore count to check. */
-
-  sem = (throttled ? &g_throttle_sem : &g_iob_sem);
-#endif
 
   /* We don't know what context we are called from so we use extreme measures
    * to protect the free list:  We disable interrupts very briefly.
    */
 
   flags = enter_critical_section();
-
-#if CONFIG_IOB_THROTTLE > 0
-  /* If there are free I/O buffers for this allocation */
-
-  if (sem->semcount > 0)
-#endif
+  iobq  = g_iob_freeqlist;
+  if (iobq)
     {
-      /* Take the I/O buffer from the head of the free list */
+      /* Remove the I/O buffer chain container from the free list and
+       * decrement the counting semaphore that tracks the number of free
+       * containers.
+       */
 
-      iob = g_iob_freelist;
-      if (iob)
-        {
-          /* Remove the I/O buffer from the free list and decrement the
-           * counting semaphore(s) that tracks the number of available
-           * IOBs.
-           */
+      g_iob_freeqlist = iobq->qe_flink;
 
-          g_iob_freelist = iob->io_flink;
+      /* Take a semaphore count.  Note that we cannot do this in
+       * in the orthodox way by calling sem_wait() or sem_trywait()
+       * because this function may be called from an interrupt
+       * handler. Fortunately we know at at least one free buffer
+       * so a simple decrement is all that is needed.
+       */
 
-          /* Take a semaphore count.  Note that we cannot do this in
-           * in the orthodox way by calling sem_wait() or sem_trywait()
-           * because this function may be called from an interrupt
-           * handler. Fortunately we know at at least one free buffer
-           * so a simple decrement is all that is needed.
-           */
+      g_qentry_sem.semcount--;
+      DEBUGASSERT(g_qentry_sem.semcount >= 0);
 
-          g_iob_sem.semcount--;
-          DEBUGASSERT(g_iob_sem.semcount >= 0);
+      /* Put the I/O buffer in a known state */
 
-#if CONFIG_IOB_THROTTLE > 0
-          /* The throttle semaphore is a little more complicated because
-           * it can be negative!  Decrementing is still safe, however.
-           */
-
-          g_throttle_sem.semcount--;
-          DEBUGASSERT(g_throttle_sem.semcount >= -CONFIG_IOB_THROTTLE);
-#endif
-          leave_critical_section(flags);
-
-          /* Put the I/O buffer in a known state */
-
-          iob->io_flink  = NULL; /* Not in a chain */
-          iob->io_len    = 0;    /* Length of the data in the entry */
-          iob->io_offset = 0;    /* Offset to the beginning of data */
-          iob->io_pktlen = 0;    /* Total length of the packet */
-          return iob;
-        }
+      iobq->qe_head = NULL; /* Nothing is contained */
     }
 
   leave_critical_section(flags);
-  return NULL;
+  return iobq;
 }
+
+#endif /* CONFIG_IOB_NCHAINS > 0 */

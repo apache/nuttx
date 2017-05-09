@@ -571,7 +571,7 @@ CONFIG_DEV_NULL=y
 #
 # Common  I/O Buffer Support
 #
-# CONFIG_DRIVERS_IOB is not set
+# CONFIG_MM_IOB is not set
 # CONFIG_DRVR_WRITEBUFFER is not set
 # CONFIG_DRVR_READAHEAD is not set
 # CONFIG_RAMDISK is not set

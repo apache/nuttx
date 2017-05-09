@@ -153,3 +153,15 @@ This directory contains the NuttX memory management logic.  This include:
 
    The shared memory management logic has its own README file that can be
    found at nuttx/mm/shm/README.txt.
+
+5) I/O Buffers
+
+   The iob subdirectory contains a simple allocator of I/O buffers.  These
+   I/O buffers, IOBs, are used extensively for networking but are generally
+   available for usage by drivers.  The I/O buffers have these properties:
+
+   1. Uses a pool of a fixed number of fixed fixed size buffers.
+   2. Free buffers are retained in free list:  When a buffer is allocated
+      it is removed from the free list; when a buffer is freed it is
+      returned to the free list.
+   3. The calling application will wait if there are not free buffers.

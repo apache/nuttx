@@ -48,7 +48,7 @@
 #include <nuttx/net/ip.h>
 
 #ifdef CONFIG_NET_UDP_READAHEAD
-#  include <nuttx/drivers/iob.h>
+#  include <nuttx/mm/iob.h>
 #endif
 
 #if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)

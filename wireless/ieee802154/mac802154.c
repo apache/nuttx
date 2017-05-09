@@ -50,7 +50,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 
-#include <nuttx/drivers/iob.h>
+#include <nuttx/mm/iob.h>
 
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 #include <nuttx/wireless/ieee802154/ieee802154_radio.h>

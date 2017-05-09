@@ -72,7 +72,7 @@
  *
  ****************************************************************************/
 
-static bool sixlowpan_anyaddrnull(FAR uint8_t *addr, uint8_t addrlen)
+static bool sixlowpan_anyaddrnull(FAR const uint8_t *addr, uint8_t addrlen)
 {
   while (addrlen-- > 0)
     {

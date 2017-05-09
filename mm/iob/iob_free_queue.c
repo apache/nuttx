@@ -1,7 +1,7 @@
 /****************************************************************************
- * drivers/iob/iob_trimtail.c
+ * mm/iob/iob_free_queue.c
  *
- *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,100 +39,68 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
-#include <debug.h>
+#include <assert.h>
 
-#include <nuttx/drivers/iob.h>
+#include <nuttx/mm/iob.h>
 
 #include "iob.h"
+
+#if CONFIG_IOB_NCHAINS > 0
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef NULL
+#  define NULL ((FAR void *)0)
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_trimtail
+ * Name: iob_free_queue
  *
  * Description:
- *   Remove bytes from the end of an I/O chain
+ *   Free an entire queue of I/O buffer chains.
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
+void iob_free_queue(FAR struct iob_queue_s *qhead)
 {
-  FAR struct iob_s *entry;
-  FAR struct iob_s *penultimate;
-  FAR struct iob_s *last;
-  int len;
+  FAR struct iob_qentry_s *iobq;
+  FAR struct iob_qentry_s *nextq;
+  FAR struct iob_s *iob;
 
-  iobinfo("iob=%p pktlen=%d trimlen=%d\n", iob, iob->io_pktlen, trimlen);
+  /* Detach the list from the queue head so first for safety (should be safe
+   * anyway).
+   */
 
-  if (iob && trimlen > 0)
+  iobq           = qhead->qh_head;
+  qhead->qh_head = NULL;
+
+  /* Remove each I/O buffer chain from the queue */
+
+  while (iobq)
     {
-      len = trimlen;
+      /* Remove the I/O buffer chain from the head of the queue and
+       * discard the queue container.
+       */
 
-      /* Loop until complete the trim */
+      iob = iobq->qe_head;
+      DEBUGASSERT(iob);
 
-      while (len > 0)
-        {
-          /* Calculate the total length of the data in the I/O buffer
-           * chain and find the last entry in the chain.
-           */
+      /* Remove the queue container from the list and discard it */
 
-          penultimate = NULL;
-          last = NULL;
+      nextq = iobq->qe_flink;
+      iob_free_qentry(iobq);
+      iobq = nextq;
 
-          for (entry = iob; entry; entry = entry->io_flink)
-            {
-              /* Remember the last and the next to the last in the chain */
+      /* Free the I/O chain */
 
-              penultimate = last;
-              last = entry;
-            }
-
-          /* Trim from the last entry in the chain.  Do we trim this entire
-           * I/O buffer away?
-           */
-
-          iobinfo("iob=%p len=%d vs %d\n", last, last->io_len, len);
-          if (last->io_len <= len)
-            {
-              /* Yes.. Consume the entire buffer */
-
-              iob->io_pktlen -= last->io_len;
-              len            -= last->io_len;
-              last->io_len    = 0;
-
-              /* Free the last, empty buffer in the list */
-
-              iob_free(last);
-
-              /* There should be a buffer before this one */
-
-              if (!penultimate)
-                {
-                  /* No.. we just freed the head of the chain */
-
-                  return NULL;
-                }
-
-              /* Unlink the penultimate from the freed buffer */
-
-              penultimate->io_flink = NULL;
-            }
-
-          else
-            {
-              /* No, then just take what we need from this I/O buffer and
-               * stop the trim.
-               */
-
-              iob->io_pktlen -= len;
-              last->io_len   -= len;
-              len             = 0;
-            }
-        }
+      iob_free_chain(iob);
     }
-
-  return iob;
 }
+
+#endif /* CONFIG_IOB_NCHAINS > 0 */

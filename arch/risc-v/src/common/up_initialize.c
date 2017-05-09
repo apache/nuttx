@@ -43,7 +43,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
-#include <nuttx/drivers/iob.h>
+#include <nuttx/mm/iob.h>
 
 #include <arch/board/board.h>
 
@@ -151,7 +151,7 @@ void up_initialize(void)
   riscv_timer_initialize();
 #endif
 
-#ifdef CONFIG_DRIVERS_IOB
+#ifdef CONFIG_MM_IOB
   /* Initialize IO buffering */
 
   iob_initialize();

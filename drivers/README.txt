@@ -74,10 +74,6 @@ eeprom/
   interface but instead use the simple character interface provided by
   the EEPROM drivers.
 
-iob/
-  Common driver I/O buffer support.  Used primarily by networking and
-  network-related drivers but available for any usage.
-
 i2c/
   I2C drivers and support logic.  See include/nuttx/i2c/i2c_master.h
 

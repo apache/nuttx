@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/iob/iob_dump.c
+ * mm/iob/iob_dump.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -42,7 +42,7 @@
 #include <stdint.h>
 #include <debug.h>
 
-#include <nuttx/drivers/iob.h>
+#include <nuttx/mm/iob.h>
 
 #include "iob.h"
 

@@ -54,7 +54,6 @@ include audio$(DELIM)Make.defs
 include bch$(DELIM)Make.defs
 include i2c$(DELIM)Make.defs
 include input$(DELIM)Make.defs
-include iob$(DELIM)Make.defs
 include ioexpander$(DELIM)Make.defs
 include lcd$(DELIM)Make.defs
 include leds$(DELIM)Make.defs

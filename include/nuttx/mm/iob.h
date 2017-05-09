@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/drivers/iob.h
+ * include/nuttx/mm/iob.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_DRIVERS_IOB_H
-#define _INCLUDE_NUTTX_DRIVERS_IOB_H
+#ifndef _INCLUDE_NUTTX_MM_IOB_H
+#define _INCLUDE_NUTTX_MM_IOB_H
 
 /****************************************************************************
  * Included Files
@@ -45,7 +45,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#ifdef CONFIG_DRIVERS_IOB
+#ifdef CONFIG_MM_IOB
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -420,6 +420,6 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
 #  define iob_dump(wrb)
 #endif
 
-#endif /* CONFIG_DRIVERS_IOB */
-#endif /* _INCLUDE_NUTTX_DRIVERS_IOB_H */
+#endif /* CONFIG_MM_IOB */
+#endif /* _INCLUDE_NUTTX_MM_IOB_H */
 

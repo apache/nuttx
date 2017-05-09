@@ -55,7 +55,7 @@
 #include <debug.h>
 
 #include <nuttx/net/net.h>
-#include <nuttx/drivers/iob.h>
+#include <nuttx/mm/iob.h>
 
 #include "tcp/tcp.h"
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/iob/iob_initialize.c
+ * mm/iob/iob_trimhead_queue.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,46 +39,21 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-#include <semaphore.h>
+#include <assert.h>
+#include <debug.h>
 
-#include <nuttx/drivers/iob.h>
+#include <nuttx/mm/iob.h>
 
 #include "iob.h"
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* This is a pool of pre-allocated I/O buffers */
-
-static struct iob_s        g_iob_pool[CONFIG_IOB_NBUFFERS];
 #if CONFIG_IOB_NCHAINS > 0
-static struct iob_qentry_s g_iob_qpool[CONFIG_IOB_NCHAINS];
-#endif
 
 /****************************************************************************
- * Public Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* A list of all free, unallocated I/O buffers */
-
-FAR struct iob_s *g_iob_freelist;
-
-/* A list of all free, unallocated I/O buffer queue containers */
-
-#if CONFIG_IOB_NCHAINS > 0
-FAR struct iob_qentry_s *g_iob_freeqlist;
-#endif
-
-/* Counting semaphores that tracks the number of free IOBs/qentries */
-
-sem_t g_iob_sem;            /* Counts free I/O buffers */
-#if CONFIG_IOB_THROTTLE > 0
-sem_t g_throttle_sem;       /* Counts available I/O buffers when throttled */
-#endif
-#if CONFIG_IOB_NCHAINS > 0
-sem_t g_qentry_sem;         /* Counts free I/O buffer queue containers */
+#ifndef NULL
+#  define NULL ((FAR void *)0)
 #endif
 
 /****************************************************************************
@@ -86,55 +61,48 @@ sem_t g_qentry_sem;         /* Counts free I/O buffer queue containers */
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_initialize
+ * Name: iob_trimhead_queue
  *
  * Description:
- *   Set up the I/O buffers for normal operations.
+ *   Remove bytes from the beginning of an I/O chain at the head of the
+ *   queue.  Emptied I/O buffers are freed and, hence, the head of the
+ *   queue may change.
+ *
+ *   This function is just a wrapper around iob_trimhead() that assures that
+ *   the I/O buffer chain at the head of queue is modified with the trimming
+ *   operation.
+ *
+ * Returned Value:
+ *   The new I/O buffer chain at the head of the queue is returned.
  *
  ****************************************************************************/
 
-void iob_initialize(void)
+FAR struct iob_s *iob_trimhead_queue(FAR struct iob_queue_s *qhead,
+                                     unsigned int trimlen)
 {
-  static bool initialized = false;
-  int i;
+  FAR struct iob_qentry_s *qentry;
+  FAR struct iob_s *iob = NULL;
 
-  /* Perform one-time initialization */
+  /* Peek at the I/O buffer chain container at the head of the queue */
 
-  if (!initialized)
+  qentry = qhead->qh_head;
+  if (qentry)
     {
-      /* Add each I/O buffer to the free list */
+      /* Verify that the queue entry contains an I/O buffer chain */
 
-      for (i = 0; i < CONFIG_IOB_NBUFFERS; i++)
+      iob = qentry->qe_head;
+      if (iob)
         {
-          FAR struct iob_s *iob = &g_iob_pool[i];
+          /* Trim the I/Buffer chain and update the queue head */
 
-          /* Add the pre-allocate I/O buffer to the head of the free list */
-
-          iob->io_flink  = g_iob_freelist;
-          g_iob_freelist = iob;
+          iob = iob_trimhead(iob, trimlen);
+          qentry->qe_head = iob;
         }
-
-      sem_init(&g_iob_sem, 0, CONFIG_IOB_NBUFFERS);
-
-#if CONFIG_IOB_THROTTLE > 0
-      sem_init(&g_throttle_sem, 0, CONFIG_IOB_NBUFFERS - CONFIG_IOB_THROTTLE);
-#endif
-
-#if CONFIG_IOB_NCHAINS > 0
-      /* Add each I/O buffer chain queue container to the free list */
-
-      for (i = 0; i < CONFIG_IOB_NCHAINS; i++)
-        {
-          FAR struct iob_qentry_s *iobq = &g_iob_qpool[i];
-
-          /* Add the pre-allocate buffer container to the head of the free list */
-
-          iobq->qe_flink  = g_iob_freeqlist;
-          g_iob_freeqlist = iobq;
-        }
-
-      sem_init(&g_qentry_sem, 0, CONFIG_IOB_NCHAINS);
-#endif
-      initialized = true;
     }
+
+  /* Return the new I/O buffer chain at the head of the queue */
+
+  return iob;
 }
+
+#endif /* CONFIG_IOB_NCHAINS > 0 */

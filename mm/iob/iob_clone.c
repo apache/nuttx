@@ -1,7 +1,7 @@
 /****************************************************************************
- * drivers/iob/iob_contig.c
+ * mm/iob/iob_copy.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/drivers/iob.h>
+#include <nuttx/mm/iob.h>
 
 #include "iob.h"
 
@@ -61,100 +61,115 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_contig
+ * Name: iob_clone
  *
  * Description:
- *   Ensure that there is'len' bytes of contiguous space at the beginning
- *   of the I/O buffer chain starting at 'iob'.
+ *   Duplicate (and pack) the data in iob1 in iob2.  iob2 must be empty.
  *
  ****************************************************************************/
 
-int iob_contig(FAR struct iob_s *iob, unsigned int len)
+int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled)
 {
-  FAR struct iob_s *next;
+  FAR uint8_t *src;
+  FAR uint8_t *dest;
   unsigned int ncopy;
+  unsigned int avail1;
+  unsigned int avail2;
+  unsigned int offset1;
+  unsigned int offset2;
 
-  /* We can't make more contiguous space that the size of one I/O buffer.
-   * If you get this assertion and really need that much contiguous data,
-   * then you will need to increase CONFIG_IOB_BUFSIZE.
+  DEBUGASSERT(iob2->io_len == 0 && iob2->io_offset == 0 &&
+              iob2->io_pktlen == 0 && iob2->io_flink == NULL);
+
+  /* Copy the total packet size from the I/O buffer at the head of the chain */
+
+  iob2->io_pktlen = iob1->io_pktlen;
+
+  /* Handle special case where there are empty buffers at the head
+   * the the list.
    */
 
-  DEBUGASSERT(len <= CONFIG_IOB_BUFSIZE);
-
-  /* Check if there is already sufficient, contiguous space at the beginning
-   * of the packet
-   */
-
-  if (len <= iob->io_len)
+  while (iob1->io_len <= 0)
     {
-      /* Yes we are good */
-
-      return 0;
+      iob1 = iob1->io_flink;
     }
 
-  /* Can we get the required amount of contiguous data by just packing the
-   * head I/0 buffer?
-   */
+  /* Pack each entry from iob1 to iob2 */
 
-  else if (len <= iob->io_pktlen)
+  offset1 = 0;
+  offset2 = 0;
+
+  while (iob1)
     {
-      /* Yes.. First eliminate any leading offset */
-
-      if (iob->io_offset > 0)
-        {
-          memcpy(iob->io_data, &iob->io_data[iob->io_offset], iob->io_len);
-          iob->io_offset = 0;
-        }
-
-      /* Then move what we need from the next I/O buffer(s) */
-
-      do
-        {
-          /* Get the next I/O buffer in the chain */
-
-          next = iob->io_flink;
-          DEBUGASSERT(next != NULL && next->io_len > 0);
-
-          /* Copy what we need or what we can from the next buffer */
-
-          ncopy = len - iob->io_len;
-          ncopy = MIN(ncopy, next->io_len);
-          memcpy(&iob->io_data[iob->io_len],
-                 &next->io_data[next->io_offset], ncopy);
-
-          /* Adjust counts and offsets */
-
-          iob->io_len     += ncopy;
-          next->io_offset += ncopy;
-          next->io_len    -= ncopy;
-
-          /* Handle a (improbable) case where we just emptied the second
-           * buffer in the chain.
-           */
-
-          if (next->io_len == 0)
-            {
-              iob->io_flink = iob_free(next);
-            }
-        }
-      while (len > iob->io_len);
-
-      /* This should always succeed because we know that:
-       *
-       *   pktlen >= CONFIG_IOB_BUFSIZE >= len
+      /* Get the source I/O buffer pointer and the number of bytes to copy
+       * from this address.
        */
 
-      return 0;
+      src    = &iob1->io_data[iob1->io_offset + offset1];
+      avail1 = iob1->io_len - offset1;
+
+      /* Get the destination I/O buffer pointer and the number of bytes to
+       * copy to that address.
+       */
+
+      dest   = &iob2->io_data[offset2];
+      avail2 = CONFIG_IOB_BUFSIZE - offset2;
+
+      /* Copy the smaller of the two and update the srce and destination
+       * offsets.
+       */
+
+      ncopy = MIN(avail1, avail2);
+      memcpy(dest, src, ncopy);
+
+      offset1 += ncopy;
+      offset2 += ncopy;
+
+      /* Have we taken all of the data from the source I/O buffer? */
+
+      if (offset1 >= iob1->io_len)
+        {
+          /* Skip over empty entries in the chain (there should not be any
+           * but just to be safe).
+           */
+
+          do
+            {
+              /* Yes.. move to the next source I/O buffer */
+
+              iob1 = iob1->io_flink;
+            }
+          while (iob1 && iob1->io_len <= 0);
+
+          /* Reset the offset to the beginning of the I/O buffer */
+
+          offset1 = 0;
+        }
+
+      /* Have we filled the destination I/O buffer? Is there more data to be
+       * transferred?
+       */
+
+       if (offset2 >= CONFIG_IOB_BUFSIZE && iob1 != NULL)
+        {
+          FAR struct iob_s *next;
+
+          /* Allocate new destination I/O buffer and hook it into the
+           * destination I/O buffer chain.
+           */
+
+          next = iob_alloc(throttled);
+          if (!next)
+            {
+              ioberr("ERROR: Failed to allocate an I/O buffer/n");
+              return -ENOMEM;
+            }
+
+          iob2->io_flink = next;
+          iob2 = next;
+          offset2 = 0;
+        }
     }
 
-  /* Otherwise, the request for contiguous data is larger then the entire
-   * packet.  We can't do that without extending the I/O buffer chain with
-   * garbage (which would probably not be what the caller wants).
-   */
-
-  else
-    {
-      ioberr("ERROR: pktlen=%u < requested len=%u\n", iob->io_pktlen, len);
-      return -ENOSPC;
-    }
+  return 0;
 }

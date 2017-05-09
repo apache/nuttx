@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/iob/iob_free_queue.c
+ * mm/iob/iob_free_chain.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,68 +39,32 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
-
-#include <nuttx/drivers/iob.h>
+#include <nuttx/arch.h>
+#include <nuttx/mm/iob.h>
 
 #include "iob.h"
-
-#if CONFIG_IOB_NCHAINS > 0
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef NULL
-#  define NULL ((FAR void *)0)
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_free_queue
+ * Name: iob_free_chain
  *
  * Description:
- *   Free an entire queue of I/O buffer chains.
+ *   Free an entire buffer chain, starting at the beginning of the I/O
+ *   buffer chain
  *
  ****************************************************************************/
 
-void iob_free_queue(FAR struct iob_queue_s *qhead)
+void iob_free_chain(FAR struct iob_s *iob)
 {
-  FAR struct iob_qentry_s *iobq;
-  FAR struct iob_qentry_s *nextq;
-  FAR struct iob_s *iob;
+  FAR struct iob_s *next;
 
-  /* Detach the list from the queue head so first for safety (should be safe
-   * anyway).
-   */
+  /* Free each IOB in the chain -- one at a time to keep the count straight */
 
-  iobq           = qhead->qh_head;
-  qhead->qh_head = NULL;
-
-  /* Remove each I/O buffer chain from the queue */
-
-  while (iobq)
+  for (; iob; iob = next)
     {
-      /* Remove the I/O buffer chain from the head of the queue and
-       * discard the queue container.
-       */
-
-      iob = iobq->qe_head;
-      DEBUGASSERT(iob);
-
-      /* Remove the queue container from the list and discard it */
-
-      nextq = iobq->qe_flink;
-      iob_free_qentry(iobq);
-      iobq = nextq;
-
-      /* Free the I/O chain */
-
-      iob_free_chain(iob);
+      next = iob_free(iob);
     }
 }
-
-#endif /* CONFIG_IOB_NCHAINS > 0 */

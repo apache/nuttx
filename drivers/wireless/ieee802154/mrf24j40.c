@@ -57,7 +57,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
 
-#include <nuttx/drivers/iob.h>
+#include <nuttx/mm/iob.h>
 
 #include <nuttx/wireless/ieee802154/mrf24j40.h>
 #include <nuttx/wireless/ieee802154/ieee802154_radio.h>

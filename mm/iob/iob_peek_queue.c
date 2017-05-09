@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/iob/iob_concat.c
+ * mm/iob/iob_peek_queue.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,38 +39,57 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
+#include <debug.h>
 
-#include <nuttx/drivers/iob.h>
+#include <nuttx/mm/iob.h>
 
 #include "iob.h"
+
+#if CONFIG_IOB_NCHAINS > 0
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef NULL
+#  define NULL ((FAR void *)0)
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_concat
+ * Name: iob_peek_queue
  *
  * Description:
- *   Concatenate iob_s chain iob2 to iob1.
+ *   Return a reference to the I/O buffer chain at the head of a queue. This
+ *   is similar to iob_remove_queue except that the I/O buffer chain is in
+ *   place at the head of the queue.  The I/O buffer chain may safely be
+ *   modified by the caller but must be removed from the queue before it can
+ *   be freed.
+ *
+ * Returned Value:
+ *   Returns a reference to the I/O buffer chain at the head of the queue.
  *
  ****************************************************************************/
 
-void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2)
+FAR struct iob_s *iob_peek_queue(FAR struct iob_queue_s *iobq)
 {
-  /* Find the last buffer in the iob1 buffer chain */
+  FAR struct iob_qentry_s *qentry;
+  FAR struct iob_s *iob = NULL;
 
-  while (iob1->io_flink)
+  /* Peek at the I/O buffer chain container at the head of the queue */
+
+  qentry = iobq->qh_head;
+  if (qentry)
     {
-      iob1 = iob1->io_flink;
+      /* Return the I/O buffer chain from the container */
+
+      iob = qentry->qe_head;
     }
 
-  /* Then connect iob2 buffer chain to the end of the iob1 chain */
-
-  iob1->io_flink = iob2;
-
-  /* Combine the total packet size */
-
-  iob1->io_pktlen += iob2->io_pktlen;
+  return iob;
 }
+
+#endif /* CONFIG_IOB_NCHAINS > 0 */

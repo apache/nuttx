@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/devif/devif_iobsend.c
+ * mm/iob/iob_add_queue.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,79 +39,114 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
 #include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/mm/iob.h>
-#include <nuttx/net/netdev.h>
 
-#ifdef CONFIG_MM_IOB
+#include "iob.h"
+
+#if CONFIG_IOB_NCHAINS > 0
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef NULL
+#  define NULL ((FAR void *)0)
+#endif
+
 /****************************************************************************
- * Private Type Declarations
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
+ * Name: iob_add_queue_internal
+ *
+ * Description:
+ *   Add one I/O buffer chain to the end of a queue.  May fail due to lack
+ *   of resources.
+ *
  ****************************************************************************/
 
-/****************************************************************************
- * Public Constant Data
- ****************************************************************************/
+static int iob_add_queue_internal(FAR struct iob_s *iob,
+                                  FAR struct iob_queue_s *iobq,
+                                  FAR struct iob_qentry_s *qentry)
+{
+  /* Add the I/O buffer chain to the container */
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+  qentry->qe_head = iob;
 
-/****************************************************************************
- * Private Constant Data
- ****************************************************************************/
+  /* Add the container to the end of the queue */
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+  qentry->qe_flink = NULL;
+  if (!iobq->qh_head)
+    {
+      iobq->qh_head = qentry;
+      iobq->qh_tail = qentry;
+    }
+  else
+    {
+      DEBUGASSERT(iobq->qh_tail);
+      iobq->qh_tail->qe_flink = qentry;
+      iobq->qh_tail = qentry;
+    }
+
+  return 0;
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: devif_iob_send
+ * Name: iob_add_queue
  *
  * Description:
- *   Called from socket logic in response to a xmit or poll request from the
- *   the network interface driver.
- *
- *   This is identical to calling devif_send() except that the data is
- *   in an I/O buffer chain, rather than a flat buffer.
- *
- * Assumptions:
- *   Called from the interrupt level or, at a minimum, with interrupts
- *   disabled.
+ *   Add one I/O buffer chain to the end of a queue.  May fail due to lack
+ *   of resources.
  *
  ****************************************************************************/
 
-void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
-                    unsigned int len, unsigned int offset)
+int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
 {
-  DEBUGASSERT(dev && len > 0 && len < NET_DEV_MTU(dev));
+  FAR struct iob_qentry_s *qentry;
 
-  /* Copy the data from the I/O buffer chain to the device buffer */
+  /* Allocate a container to hold the I/O buffer chain */
 
-  iob_copyout(dev->d_appdata, iob, len, offset);
-  dev->d_sndlen = len;
+  qentry = iob_alloc_qentry();
+  if (!qentry)
+    {
+      ioberr("ERROR: Failed to allocate a container\n");
+      return -ENOMEM;
+    }
 
-#ifdef CONFIG_NET_TCP_WRBUFFER_DUMP
-  /* Dump the outgoing device buffer */
-
-  lib_dumpbuffer("devif_iob_send", dev->d_appdata, len);
-#endif
+  return iob_add_queue_internal(iob, iobq, qentry);
 }
 
-#endif /* CONFIG_MM_IOB */
+/****************************************************************************
+ * Name: iob_tryadd_queue
+ *
+ * Description:
+ *   Add one I/O buffer chain to the end of a queue without waiting for
+ *   resources to become free.
+ *
+ ****************************************************************************/
 
+int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
+{
+  FAR struct iob_qentry_s *qentry;
+
+  /* Allocate a container to hold the I/O buffer chain */
+
+  qentry = iob_tryalloc_qentry();
+  if (!qentry)
+    {
+      ioberr("ERROR: Failed to allocate a container\n");
+      return -ENOMEM;
+    }
+
+  return iob_add_queue_internal(iob, iobq, qentry);
+}
+#endif /* CONFIG_IOB_NCHAINS > 0 */

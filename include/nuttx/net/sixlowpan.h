@@ -55,7 +55,7 @@
 #include <stdint.h>
 
 #include <nuttx/clock.h>
-#include <nuttx/drivers/iob.h>
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ieee802154.h>
 

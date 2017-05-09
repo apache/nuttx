@@ -3,16 +3,16 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-menu "Common  I/O Buffer Support"
+menu "Common I/O Buffer Support"
 
-config DRIVERS_IOB
+config MM_IOB
 	bool "Enable generic I/O buffer support"
 	default n
 	---help---
 		This setting will build the common I/O buffer (IOB) support
 		library.
 
-if DRIVERS_IOB
+if MM_IOB
 
 config IOB_NBUFFERS
 	int "Number of pre-allocated I/O buffers"
@@ -70,5 +70,5 @@ config IOB_DEBUG
 		if you are debugging the I/O buffer logic and do not want to get
 		overloaded with other un-related debug output.
 
-endif # DRIVERS_IOB
+endif # MM_IOB
 endmenu # Common I/O buffer support

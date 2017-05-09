@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/iob/iob_remove_queue.c
+ * mm/iob/iob_concat.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,62 +39,38 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <string.h>
 
-#include <nuttx/drivers/iob.h>
+#include <nuttx/mm/iob.h>
 
 #include "iob.h"
-
-#if CONFIG_IOB_NCHAINS > 0
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef NULL
-#  define NULL ((FAR void *)0)
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_remove_queue
+ * Name: iob_concat
  *
  * Description:
- *   Remove and return one I/O buffer chain from the head of a queue.
- *
- * Returned Value:
- *   Returns a reference to the I/O buffer chain at the head of the queue.
+ *   Concatenate iob_s chain iob2 to iob1.
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq)
+void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2)
 {
-  FAR struct iob_qentry_s *qentry;
-  FAR struct iob_s *iob = NULL;
+  /* Find the last buffer in the iob1 buffer chain */
 
-  /* Remove the I/O buffer chain from the head of the queue */
-
-  qentry = iobq->qh_head;
-  if (qentry)
+  while (iob1->io_flink)
     {
-      iobq->qh_head = qentry->qe_flink;
-      if (!iobq->qh_head)
-        {
-          iobq->qh_tail = NULL;
-        }
-
-      /* Extract the I/O buffer chain from the container and free the
-       * container.
-       */
-
-      iob = qentry->qe_head;
-      iob_free_qentry(qentry);
+      iob1 = iob1->io_flink;
     }
 
-  return iob;
-}
+  /* Then connect iob2 buffer chain to the end of the iob1 chain */
 
-#endif /* CONFIG_IOB_NCHAINS > 0 */
+  iob1->io_flink = iob2;
+
+  /* Combine the total packet size */
+
+  iob1->io_pktlen += iob2->io_pktlen;
+}

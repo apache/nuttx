@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/iob/iob_test.c
+ * mm/iob/iob_test.c
  * Unit test driver.  This is of historical interest only since it requires
  * and custom build setup and modifications to the iob source and header
  * files.
