@@ -1536,13 +1536,21 @@ nuttx/
  |   |   `- README.txt
  |   |- nucleo-f072rb/
  |   |   `- README.txt
+ |   |- nucleo-f091rc/
+ |   |   `- README.txt
  |   |- nucleo-f303re/
  |   |   `- README.txt
  |   |- nucleo-f334r8/
  |   |   `- README.txt
  |   |- nucleo-f4x1re/
  |   |   `- README.txt
+ |   |- nucleo-l432kc/
+ |   |   `- README.txt
+ |   |- nucleo-l452re/
+ |   |   `- README.txt
  |   |- nucleo-l476rg/
+ |   |   `- README.txt
+ |   |- nucleo-l496zg/
  |   |   `- README.txt
  |   |- nutiny-nuc120/
  |   |   `- README.txt
