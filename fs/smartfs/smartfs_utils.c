@@ -486,6 +486,11 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs,
   struct      smart_read_write_s readwrite;
   struct      smartfs_entry_header_s *entry;
 
+  /* Set the initial value of the output */
+
+  *parentdirsector = 0xffff;
+  *filename = NULL;
+
   /* Initialize directory level zero as the root sector */
 
   dirstack[0] = fs->fs_rootsector;
