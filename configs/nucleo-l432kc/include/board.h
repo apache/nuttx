@@ -90,20 +90,12 @@
 #  define GPIO_USART1_TX GPIO_USART1_TX_2    /* PB6  */
 #endif
 
-/* USART2: Connected to STLInk Debug via PA2, PA3
- *   RXD: PA3   CN9 pin 1 (See SB13, 14, 62, 63). CN10 pin 37
- *        PD6
- *   TXD: PA2   CN9 pin 2 (See SB13, 14, 62, 63). CN10 pin 35
- *        PD5
- */
+/* USART2: Connected to STLInk Debug via PA2(TX), PA15(RX) */
 
-#define GPIO_USART2_RX   GPIO_USART2_RX_1    /* PA3 */
+#define GPIO_USART2_RX   GPIO_USART2_RX_2    /* PA15 */
 #define GPIO_USART2_TX   GPIO_USART2_TX_1    /* PA2 */
 #define GPIO_USART2_RTS  GPIO_USART2_RTS_2
 #define GPIO_USART2_CTS  GPIO_USART2_CTS_2
-
-#define GPIO_UART4_RX   GPIO_UART4_RX_1    /* PA1 */
-#define GPIO_UART4_TX   GPIO_UART4_TX_1    /* PA0 */
 
 /* I2C
  *
