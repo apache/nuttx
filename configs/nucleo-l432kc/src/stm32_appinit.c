@@ -76,7 +76,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_WL_CC3000
+#ifdef CONFIG_NET
 void up_netinitialize(void)
 {
 }
@@ -207,19 +207,6 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32l4_adc_setup failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_AJOYSTICK
-  /* Initialize and register the joystick driver */
-
-  ret = board_ajoy_initialize();
-  if (ret != OK)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to register the joystick driver: %d\n",
-             ret);
-      return ret;
     }
 #endif
 

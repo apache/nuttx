@@ -3,6 +3,7 @@
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Sebastien Lorquet. All rights reserved.
  *           Sebastien Lorquet <sebastien@lorquet.fr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +35,8 @@
  *
  ****************************************************************************/
 
-/* The STM32F411RE has 512Kb of FLASH beginning at address 0x0800:0000 and
- * 128Kb of SRAM beginning at address 0x2000:0000.  When booting from FLASH,
+/* The STM32L432KC has 256Kb of FLASH beginning at address 0x0800:0000 and
+ * 64Kb of SRAM beginning at address 0x2000:0000.  When booting from FLASH,
  * FLASH memory is aliased to address 0x0000:0000 where the code expects to
  * begin execution by jumping to the entry point in the 0x0800:0000 address
  * range.
@@ -43,8 +44,8 @@
 
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x08000000, LENGTH = 512K
-    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 96K
+    flash (rx) : ORIGIN = 0x08000000, LENGTH = 256K
+    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
 }
 
 OUTPUT_ARCH(arm)
@@ -85,7 +86,7 @@ SECTIONS
 
 	_eronly = ABSOLUTE(.);
 
-	/* The STM32L432KC has 96Kb of SRAM beginning at the following address */
+	/* The STM32L432KC has 64Kb of SRAM beginning at the following address */
 
 	.data : {
 		_sdata = ABSOLUTE(.);

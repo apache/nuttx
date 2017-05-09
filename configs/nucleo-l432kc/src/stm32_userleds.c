@@ -183,7 +183,7 @@ void board_userled(int led, bool ledon)
 {
   if (led == 1)
     {
-      stm32_gpiowrite(GPIO_LD2, ldeon);
+      stm32_gpiowrite(GPIO_LD2, ledon);
     }
 }
 
