@@ -1482,7 +1482,11 @@ int mac802154_req_data(MACHANDLE mac,
 
           priv->radio->ops->txnotify_csma(priv->radio);
 
-          sem_wait(&trans.sem);
+          ret = sem_wait(&trans.sem);
+          if (ret < 0)
+            {
+              return -EINTR;
+            }
         }
     }
 
