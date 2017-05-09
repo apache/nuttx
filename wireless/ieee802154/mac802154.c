@@ -1758,7 +1758,95 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
-  return -ENOTTY;
+  int ret;
+
+  /* Get exclusive access to the MAC */
+  
+  ret = mac802154_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      wlerr("ERROR: mac802154_takesem failed: %d\n", ret);
+      return ret;
+    }
+
+  /* When the CoordRealignment parameter is set to TRUE, the coordinator
+   * attempts to transmit a coordinator realignment command frame as described
+   * in 5.1.2.3.2. If the transmission of the coordinator realignment command
+   * fails due to a channel access failure, the MLME will not make any changes
+   * to the superframe configuration. (i.e., no PIB attributes will be changed).
+   * If the coordinator realignment command is successfully transmitted, the
+   * MLME updates the PIB attributes BeaconOrder, SuperframeOrder, PANId,
+   * ChannelPage, and ChannelNumber parameters. [1] pg. 106
+   */
+
+  if (req->coordrealign)
+    {
+      /* TODO: Finish the realignment functionality */
+
+      return -ENOTTY;
+    }
+  
+  /* Set the PANID attribute */
+
+  priv->addr.panid = req->panid;
+  priv->radio->ops->set_attr(priv->radio, IEEE802154_PIB_MAC_PANID,
+                             (FAR const union ieee802154_attr_u *)&req->panid);
+
+  /* Set the radio attributes */
+  priv->radio->ops->set_attr(priv->radio, IEEE802154_PIB_PHY_CURRENT_CHANNEL,
+                             (FAR const union ieee802154_attr_u *)&req->chnum);
+
+  priv->radio->ops->set_attr(priv->radio, IEEE802154_PIB_PHY_CURRENT_PAGE,
+                             (FAR const union ieee802154_attr_u *)&req->chpage);
+  
+  /* Set the superframe order */
+
+  if(req->superframeorder > 15)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  priv->superframeorder = req->superframeorder;
+
+  /* Set the beacon order */
+
+  if(req->beaconorder > 15)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  priv->beaconorder = req->beaconorder;
+
+  if (req->pancoord)
+    {
+      priv->devmode = IEEE802154_DEVMODE_PANCOORD;
+    }
+  else
+    {
+      priv->devmode = IEEE802154_DEVMODE_COORD;
+    }
+
+ /* If the BeaconOrder parameter is less than 15, the MLME sets macBattLifeExt to
+  * the value of the BatteryLifeExtension parameter. If the BeaconOrder parameter
+  * equals 15, the value of the BatteryLifeExtension parameter is ignored. 
+  * [1] pg. 106
+  */
+
+  if (priv->beaconorder < 15)
+    {
+      priv->battlifeext = req->battlifeext;
+
+      /* TODO: Finish starting beacon enabled network */
+      return -ENOTTY;  
+    }
+
+  return OK;
+
+errout:
+  mac802154_givesem(&priv->exclsem);
+  return ret;
 }
 
 /****************************************************************************
