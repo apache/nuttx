@@ -299,7 +299,7 @@ enum ieee802154_pib_attr_e
   IEEE802154_PIB_MAC_MIN_BE,
   IEEE802154_PIB_MAC_LIFS_PERIOD,
   IEEE802154_PIB_MAC_SIFS_PERIOD,
-  IEEE802154_PIB_MAC_PAN_ID,
+  IEEE802154_PIB_MAC_PANID,
   IEEE802154_PIB_MAC_PROMISCUOUS_MODE,
   IEEE802154_PIB_MAC_RANGING_SUPPORT,
   IEEE802154_PIB_MAC_RESPONSE_WAIT_TIME,
@@ -329,6 +329,13 @@ enum ieee802154_pib_attr_e
   IEEE802154_PIB_MAC_PANCOORD_SHORT_ADDR,
 };
 
+enum ieee802154_devmode_e
+{
+  IEEE802154_DEVMODE_ENDPOINT,
+  IEEE802154_DEVMODE_COORD,
+  IEEE802154_DEVMODE_PANCOORD
+};
+
 #define IEEE802154_EADDR_LEN 8
 
 /* IEEE 802.15.4 Device address
@@ -338,7 +345,7 @@ enum ieee802154_pib_attr_e
  * Extended address + PAN id : PPPP/LLLLLLLLLLLLLLLL
  */
 
-enum ieee802154_addr_mode_e
+enum ieee802154_addrmode_e
 {
   IEEE802154_ADDRMODE_NONE = 0,
   IEEE802154_ADDRMODE_SHORT = 2,
@@ -349,7 +356,7 @@ struct ieee802154_addr_s
 {
   /* Address mode. Short or Extended */
 
-  enum ieee802154_addr_mode_e mode;
+  enum ieee802154_addrmode_e mode;
 
   uint16_t panid;                        /* PAN identifier, can be 
                                           * IEEE802154_PAN_UNSPEC */
@@ -549,7 +556,7 @@ union ieee802154_secattr_u
   /* TODO: Fill this out as we implement supported get/set commands */
 };
 
-union ieee802154_attr_val_u
+union ieee802154_attr_u
 {
   union ieee802154_macattr_u mac;
   union ieee802154_phyattr_u phy;
@@ -574,7 +581,7 @@ enum ieee802154_scantype_e
 
 struct ieee802154_frame_meta_s
 {
-  enum ieee802154_addr_mode_e src_addr_mode;  /* Source Address Mode */
+  enum ieee802154_addrmode_e src_addrmode;  /* Source Address Mode */
   struct ieee802154_addr_s dest_addr;         /* Destination Address */
 
   uint8_t msdu_handle;        /* Handle assoc. with MSDU */
@@ -1159,7 +1166,7 @@ struct ieee802154_scan_conf_s
 struct ieee802154_get_req_s
 {
   enum ieee802154_pib_attr_e pib_attr;
-  union ieee802154_attr_val_u attr_value;
+  union ieee802154_attr_u attrval;
 };
 
 /*****************************************************************************
@@ -1179,7 +1186,7 @@ struct ieee802154_get_req_s
 struct ieee802154_set_req_s
 {
   enum ieee802154_pib_attr_e pib_attr;
-  union ieee802154_attr_val_u attr_value;
+  union ieee802154_attr_u attrval;
 };
 
 /*****************************************************************************
@@ -1195,23 +1202,23 @@ struct ieee802154_set_req_s
 
 struct ieee802154_start_req_s
 {
-  uint16_t pan_id;
-  uint8_t ch_num;
-  uint8_t ch_page;
+  uint16_t panid;
+  uint8_t chnum;
+  uint8_t chpage;
 
-  uint32_t start_time   : 24;
-  uint32_t beacon_order : 8;
+  uint32_t starttime   : 24;
+  uint32_t beaconorder : 8;
 
-  uint8_t sf_order;
+  uint8_t superframeorder;
 
-  uint8_t pan_coord     : 1;
-  uint8_t batt_life_ext : 1;
-  uint8_t coord_realign : 1;
+  uint8_t pancoord     : 1;
+  uint8_t battlifeext  : 1;
+  uint8_t coordrealign : 1;
 
 #ifdef CONFIG_IEEE802154_SECURITY
   /* Security information if enabled */
 
-  struct ieee802154_security_s coord_realign;
+  struct ieee802154_security_s coordrealign;
   struct ieee802154_security_s beacon;
 #endif
 };

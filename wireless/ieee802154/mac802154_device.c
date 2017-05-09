@@ -653,7 +653,6 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
   /* Pass the request to the MAC layer */
 
   ret = mac802154_req_data(dev->md_mac, &tx->meta, iob);
-
   if (ret < 0)
     {
       wlerr("ERROR: req_data failed %d\n", ret);

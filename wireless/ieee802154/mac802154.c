@@ -161,7 +161,7 @@ struct ieee802154_privmac_s
 
   /* Holds all address information (Extended, Short) for Coordinator */
 
-  struct ieee802154_addr_s coord_addr;
+  struct ieee802154_addr_s coordaddr;
 
   /* The maximum number of symbols to wait for an acknowledgement frame to
    * arrive following a transmitted data frame. [1] pg. 126
@@ -170,7 +170,7 @@ struct ieee802154_privmac_s
    * sure at the time what the range of reasonable values was.
    */
 
-  uint32_t ack_wait_dur;
+  uint32_t ack_waitdur;
 
   /* The maximum time to wait either for a frame intended as a response to a
    * data request frame or for a broadcast frame following a beacon with the
@@ -180,59 +180,59 @@ struct ieee802154_privmac_s
    * sure at the time what the range of reasonable values was.
    */
 
-  uint32_t max_frame_wait_time;
+  uint32_t max_frame_waittime;
 
   /* The maximum time (in unit periods) that a transaction is stored by a
    * coordinator and indicated in its beacon.
    */
 
-  uint16_t trans_persist_time;
+  uint16_t trans_persisttime;
 
   /* Contents of beacon payload */
 
   uint8_t beacon_payload[IEEE802154_MAX_BEACON_PAYLOAD_LEN];
   uint8_t beacon_payload_len;       /* Length of beacon payload */
 
-  uint8_t batt_life_ext_periods;    /* # of backoff periods during which rx is
+  uint8_t battlifeext_periods;    /* # of backoff periods during which rx is
                                      * enabled after the IFS following beacon */
 
   uint8_t bsn;                      /* Seq. num added to tx beacon frame */
   uint8_t dsn;                      /* Seq. num added to tx data or MAC frame */
-  uint8_t max_retries;              /* Max # of retries alloed after tx failure */
+  uint8_t maxretries;               /* Max # of retries alloed after tx failure */
 
   /* The maximum time, in multiples of aBaseSuperframeDuration, a device shall
    * wait for a response command frame to be available following a request
    * command frame. [1] 128.
    */
 
-  uint8_t resp_wait_time;
+  uint8_t resp_waittime;
 
   /* The total transmit duration (including PHY header and FCS) specified in
    * symbols. [1] pg. 129.
    */
 
-  uint32_t tx_total_dur;
+  uint32_t tx_totaldur;
 
   /* Start of 32-bit bitfield */
 
-  uint32_t is_assoc           : 1;  /* Are we associated to the PAN */
-  uint32_t assoc_permit       : 1;  /* Are we allowing assoc. as a coord. */
-  uint32_t auto_req           : 1;  /* Automatically send data req. if addr
+  uint32_t isassoc            : 1;  /* Are we associated to the PAN */
+  uint32_t assocpermit        : 1;  /* Are we allowing assoc. as a coord. */
+  uint32_t autoreq            : 1;  /* Automatically send data req. if addr
                                      * addr is in the beacon frame */
 
-  uint32_t batt_life_ext      : 1;  /* Is BLE enabled */
-  uint32_t gts_permit         : 1;  /* Is PAN Coord. accepting GTS reqs. */
-  uint32_t promisc_mode       : 1;  /* Is promiscuous mode on? */
-  uint32_t rng_support        : 1;  /* Does MAC sublayer support ranging */
-  uint32_t rx_when_idle       : 1;  /* Recvr. on during idle periods */
+  uint32_t battlifeext        : 1;  /* Is BLE enabled */
+  uint32_t gtspermit          : 1;  /* Is PAN Coord. accepting GTS reqs. */
+  uint32_t promisc            : 1;  /* Is promiscuous mode on? */
+  uint32_t rngsupport         : 1;  /* Does MAC sublayer support ranging */
   uint32_t sec_enabled        : 1;  /* Does MAC sublayer have security en. */
+  uint32_t timestamp_support  : 1;  /* Does MAC layer supports timestamping */
 
-  uint32_t max_csma_backoffs  : 3;  /* Max num backoffs for CSMA algorithm
+  uint32_t max_csmabackoffs   : 3;  /* Max num backoffs for CSMA algorithm
                                      * before declaring ch access failure */
 
-  uint32_t beacon_order       : 4;  /* Freq. that beacon is transmitted */
+  uint32_t beaconorder        : 4;  /* Freq. that beacon is transmitted */
 
-  uint32_t superframe_order   : 4;  /* Length of active portion of outgoing
+  uint32_t superframeorder    : 4;  /* Length of active portion of outgoing
                                      * superframe, including the beacon */
 
   /* The offset, measured is symbols, between the symbol boundary at which the
@@ -241,27 +241,30 @@ struct ieee802154_privmac_s
    * the frames [1] pg. 129.
    */
 
-  uint32_t sync_symb_offset   : 12;
+  uint32_t sync_symboffset    : 12;
 
   /* End of 32-bit bitfield */
 
   /* Start of 32-bit bitfield */
 
-  uint32_t beacon_tx_time     : 24; /* Time of last beacon transmit */
-  uint32_t min_be             : 4;  /* Min value of backoff exponent (BE) */
-  uint32_t max_be             : 4;  /* Max value of backoff exponent (BE) */
+  uint32_t beacon_txtime      : 24; /* Time of last beacon transmit */
+  uint32_t minbe              : 4;  /* Min value of backoff exponent (BE) */
+  uint32_t maxbe              : 4;  /* Max value of backoff exponent (BE) */
 
   /* End of 32-bit bitfield */
 
   /* Start of 32-bit bitfield */
 
-  uint32_t tx_ctrl_active_dur : 17; /* Duration for which tx is permitted to
-                                     * be active */
-  uint32_t tx_ctrl_pause_dur  : 1;  /* Duration after tx before another tx is
+  uint32_t txctrl_activedur   : 17; /* Duration for which tx is permitted to
+                                       * be active */
+  uint32_t txctrl_pausedur    : 1;  /* Duration after tx before another tx is
                                      * permitted. 0=2000, 1= 10000 */
-  uint32_t timestamp_support  : 1;  /* Does MAC layer supports timestamping */
-  uint32_t is_coord           : 1;  /* Is this device acting as coordinator */
-                                    /* 12-bits remaining */
+
+  /* What type of device is this node acting as */
+
+  enum ieee802154_devmode_e devmode : 2;
+
+                                    /* 11-bits remaining */
 
   /* End of 32-bit bitfield. */
 
@@ -303,7 +306,7 @@ static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
  * Private Data
  ****************************************************************************/
 
-/* Map between ieee802154_addr_mode_e enum and actual address length */
+/* Map between ieee802154_addrmode_e enum and actual address length */
 
 static const uint8_t mac802154_addr_length[4] = {0, 0, 2, 8};
 
@@ -491,37 +494,36 @@ static FAR struct ieee802154_data_ind_s *
 
 static int mac802154_defaultmib(FAR struct ieee802154_privmac_s *priv)
 {
-  priv->is_assoc = false;       /* Not associated with a PAN */
-  priv->assoc_permit = false;   /* Device (if coord) not accepting association */
-  priv->auto_req = true;        /* Auto send data req if addr. in beacon */
-  priv->batt_life_ext = false;  /* BLE disabled */
+  priv->isassoc = false;        /* Not associated with a PAN */
+  priv->assocpermit = false;    /* Device (if coord) not accepting association */
+  priv->autoreq = true;         /* Auto send data req if addr. in beacon */
+  priv->battlifeext = false;    /* BLE disabled */
   priv->beacon_payload_len = 0; /* Beacon payload NULL */
-  priv->beacon_order = 15;      /* Non-beacon enabled network */
-  priv->superframe_order = 15;  /* Length of active portion of outgoing SF */
-  priv->beacon_tx_time = 0;     /* Device never sent a beacon */
+  priv->beaconorder = 15;       /* Non-beacon enabled network */
+  priv->superframeorder = 15;   /* Length of active portion of outgoing SF */
+  priv->beacon_txtime = 0;      /* Device never sent a beacon */
 #warning Set BSN and DSN to random values!
   priv->bsn = 0;
   priv->dsn = 0;
-  priv->gts_permit = true;      /* PAN Coord accepting GTS requests */
-  priv->min_be = 3;             /* Min value of backoff exponent (BE) */
-  priv->max_be = 5;             /* Max value of backoff exponent (BE) */
-  priv->max_csma_backoffs = 4;  /* Max # of backoffs before failure */
-  priv->max_retries = 3;        /* Max # of retries allowed after failure */
-  priv->promisc_mode = false;   /* Device not in promiscuous mode */
-  priv->rng_support = false;    /* Ranging not yet supported */
-  priv->resp_wait_time = 32;    /* 32 SF durations */
-  priv->rx_when_idle = false;     /* Don't receive while idle */
+  priv->gtspermit = true;       /* PAN Coord accepting GTS requests */
+  priv->minbe = 3;              /* Min value of backoff exponent (BE) */
+  priv->maxbe = 5;              /* Max value of backoff exponent (BE) */
+  priv->max_csmabackoffs = 4;   /* Max # of backoffs before failure */
+  priv->maxretries = 3;         /* Max # of retries allowed after failure */
+  priv->promisc = false;        /* Device not in promiscuous mode */
+  priv->rngsupport = false;     /* Ranging not yet supported */
+  priv->resp_waittime = 32;     /* 32 SF durations */
   priv->sec_enabled = false;    /* Security disabled by default */
-  priv->tx_total_dur = 0;       /* 0 transmit duration */
+  priv->tx_totaldur = 0;        /* 0 transmit duration */
 
-  priv->trans_persist_time = 0x01F4;
+  priv->trans_persisttime = 0x01F4;
 
 
   /* Reset the Coordinator address */
 
-  priv->coord_addr.mode = IEEE802154_ADDRMODE_NONE;
-  priv->coord_addr.saddr = IEEE802154_SADDR_UNSPEC;
-  memcpy(&priv->coord_addr.eaddr[0], IEEE802154_EADDR_UNSPEC,
+  priv->coordaddr.mode = IEEE802154_ADDRMODE_NONE;
+  priv->coordaddr.saddr = IEEE802154_SADDR_UNSPEC;
+  memcpy(&priv->coordaddr.eaddr[0], IEEE802154_EADDR_UNSPEC,
          IEEE802154_EADDR_LEN);
 
   /* Reset the device's address */
@@ -545,6 +547,7 @@ static int mac802154_defaultmib(FAR struct ieee802154_privmac_s *priv)
    *    macTimestampSupported
    *    macTxControlActiveDuration
    *    macTxControlPauseDuration
+   *    macRxOnWhenIdle
    */
 
   return OK;
@@ -1111,7 +1114,7 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg)
           case MAC802154IOC_MLME_GET_REQUEST:
             {
               ret = mac802154_req_get(mac, macarg->getreq.pib_attr,
-                                      &macarg->getreq.attr_value);
+                                      &macarg->getreq.attrval);
             }
             break;
           case MAC802154IOC_MLME_GTS_REQUEST:
@@ -1142,7 +1145,7 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg)
           case MAC802154IOC_MLME_SET_REQUEST:
             {
               ret = mac802154_req_set(mac, macarg->setreq.pib_attr,
-                                      &macarg->setreq.attr_value);
+                                      &macarg->setreq.attrval);
             }
             break;
           case MAC802154IOC_MLME_START_REQUEST:
@@ -1192,14 +1195,15 @@ int mac802154_get_mhrlen(MACHANDLE mac,
    * to NONE */
 
   if (meta->dest_addr.mode == IEEE802154_ADDRMODE_NONE &&
-      meta->src_addr_mode == IEEE802154_ADDRMODE_NONE)
+      meta->src_addrmode == IEEE802154_ADDRMODE_NONE)
     {
       return -EINVAL;
     }
 
   /* The source address can only be set to NONE if the device is the PAN coord */
 
-  if (meta->src_addr_mode == IEEE802154_ADDRMODE_NONE && !priv->is_coord)
+  if (meta->src_addrmode == IEEE802154_ADDRMODE_NONE && 
+      priv->devmode != IEEE802154_DEVMODE_PANCOORD)
     {
       return -EINVAL;
     }
@@ -1210,14 +1214,14 @@ int mac802154_get_mhrlen(MACHANDLE mac,
 
   /* Add the source address length */
 
-  ret += mac802154_addr_length[ meta->src_addr_mode];
+  ret += mac802154_addr_length[ meta->src_addrmode];
 
   /* If both destination and source addressing information is present, the MAC
    * sublayer shall compare the destination and source PAN identifiers.
    * [1] pg. 41.
    */
 
-  if (meta->src_addr_mode  != IEEE802154_ADDRMODE_NONE &&
+  if (meta->src_addrmode  != IEEE802154_ADDRMODE_NONE &&
       meta->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
     {
       /* If the PAN identifiers are identical, the PAN ID Compression field
@@ -1236,7 +1240,7 @@ int mac802154_get_mhrlen(MACHANDLE mac,
    * PAN ID if the respective address is included
    */
 
-  if (meta->src_addr_mode != IEEE802154_ADDRMODE_NONE)
+  if (meta->src_addrmode != IEEE802154_ADDRMODE_NONE)
     {
       ret += 2; /* 2 bytes for source PAN ID */
     }
@@ -1347,7 +1351,7 @@ int mac802154_req_data(MACHANDLE mac,
    * [1] pg. 41.
    */
 
-  if (meta->src_addr_mode  != IEEE802154_ADDRMODE_NONE &&
+  if (meta->src_addrmode  != IEEE802154_ADDRMODE_NONE &&
       meta->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
     {
       /* If the PAN identifiers are identical, the PAN ID Compression field
@@ -1361,7 +1365,7 @@ int mac802154_req_data(MACHANDLE mac,
         }
     }
 
-  if (meta->src_addr_mode != IEEE802154_ADDRMODE_NONE)
+  if (meta->src_addrmode != IEEE802154_ADDRMODE_NONE)
     {
       /* If the destination address is not included, or if PAN ID Compression
        * is off, we need to include the Source PAN ID.
@@ -1374,12 +1378,12 @@ int mac802154_req_data(MACHANDLE mac,
           mhr_len += 2;
         }
 
-      if (meta->src_addr_mode == IEEE802154_ADDRMODE_SHORT)
+      if (meta->src_addrmode == IEEE802154_ADDRMODE_SHORT)
         {
           memcpy(&frame->io_data[mhr_len], &priv->addr.saddr, 2);
           mhr_len += 2;
         }
-      else if (meta->src_addr_mode == IEEE802154_ADDRMODE_EXTENDED)
+      else if (meta->src_addrmode == IEEE802154_ADDRMODE_EXTENDED)
         {
           memcpy(&frame->io_data[mhr_len], &priv->addr.eaddr,
                  IEEE802154_EADDR_LEN);
@@ -1390,7 +1394,7 @@ int mac802154_req_data(MACHANDLE mac,
 
   /* Set the source addr mode inside the frame control field */
 
-  *frame_ctrl |= (meta->src_addr_mode << IEEE802154_FRAMECTRL_SHIFT_SADDR);
+  *frame_ctrl |= (meta->src_addrmode << IEEE802154_FRAMECTRL_SHIFT_SADDR);
 
   /* Each time a data or a MAC command frame is generated, the MAC sublayer
    * shall copy the value of macDSN into the Sequence Number field of the MHR
@@ -1458,7 +1462,8 @@ int mac802154_req_data(MACHANDLE mac,
            * error, since this really shouldn't be happening.
            */
 
-          if (priv->is_coord && meta->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
+          if (priv->devmode == IEEE802154_DEVMODE_PANCOORD &&
+              meta->dest_addr.mode != IEEE802154_ADDRMODE_NONE)
             {
               /* Link the transaction into the indirect_trans list */
 
@@ -1681,7 +1686,7 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
  ****************************************************************************/
 
 int mac802154_req_get(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
-                      FAR union ieee802154_attr_val_u *attr_value)
+                      FAR union ieee802154_attr_u *attrval)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
@@ -1704,7 +1709,7 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
  ****************************************************************************/
 
 int mac802154_req_set(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
-                      FAR const union ieee802154_attr_val_u *attr_value)
+                      FAR const union ieee802154_attr_u *attrval)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
@@ -1716,12 +1721,12 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
         {
           /* Set the MAC copy of the address in the table */
 
-          memcpy(&priv->addr.eaddr[0], &attr_value->mac.eaddr[0],
+          memcpy(&priv->addr.eaddr[0], &attrval->mac.eaddr[0],
                  IEEE802154_EADDR_LEN);
 
           /* Tell the radio about the attribute */
 
-          priv->radio->ops->set_attr(priv->radio, pib_attr, attr_value);
+          priv->radio->ops->set_attr(priv->radio, pib_attr, attrval);
                          
           ret = IEEE802154_STATUS_SUCCESS;
         }
@@ -1732,7 +1737,7 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
            * it along.
            */
 
-          ret = priv->radio->ops->set_attr(priv->radio, pib_attr, attr_value);
+          ret = priv->radio->ops->set_attr(priv->radio, pib_attr, attrval);
         }
         break;
     }
