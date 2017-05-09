@@ -2,7 +2,7 @@ README
 ======
 
 This README discusses issues unique to NuttX configurations for the ST
-Nucleoi-l432kc board from ST Micro.  See
+Nucleo-l432kc board from ST Micro.  See
 
   http://www.st.com/nucleo-l432kc
 
