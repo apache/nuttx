@@ -90,6 +90,7 @@ void stm32l4_spiinitialize(void)
 #endif
 
   _info("SPI1 initialized\n");
+#endif
 
 #ifdef CONFIG_STM32L4_SPI2
   /* Configure SPI-based devices */
