@@ -195,7 +195,7 @@ int sixlowpan_src_panid(FAR struct ieee802154_driver_s *ieee,
   int ret;
 
   memcpy(arg.ifr_name, ieee->i_dev.d_ifname, IFNAMSIZ);
-  arg.u.getreq.pib_attr = IEEE802154_PIB_MAC_PAN_ID;
+  arg.u.getreq.pib_attr = IEEE802154_PIB_MAC_PANID;
   ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
                      (unsigned long)((uintptr_t)&arg));
   if (ret < 0)
@@ -204,7 +204,7 @@ int sixlowpan_src_panid(FAR struct ieee802154_driver_s *ieee,
       return ret;
     }
 
-  *panid = arg.u.getreq.attr_value.mac.panid;
+  *panid = arg.u.getreq.attrval.mac.panid;
   return OK;
 }
 

@@ -234,10 +234,10 @@ static int  mrf24j40_txnotify_csma(FAR struct ieee802154_radio_s *radio);
 static int  mrf24j40_txnotify_gts(FAR struct ieee802154_radio_s *radio);
 static int  mrf24j40_get_attr(FAR struct ieee802154_radio_s *radio,
               enum ieee802154_pib_attr_e pib_attr,
-              FAR union ieee802154_attr_val_u *attr_value);
+              FAR union ieee802154_attr_u *attrval);
 static int mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
               enum ieee802154_pib_attr_e pib_attr,
-              FAR const union ieee802154_attr_val_u *attr_value);
+              FAR const union ieee802154_attr_u *attrval);
 
 /****************************************************************************
  * Private Data
@@ -349,7 +349,7 @@ static int mrf24j40_txnotify_gts(FAR struct ieee802154_radio_s *radio)
 
 static int  mrf24j40_get_attr(FAR struct ieee802154_radio_s *radio,
                               enum ieee802154_pib_attr_e pib_attr,
-                              FAR union ieee802154_attr_val_u *attr_value)
+                              FAR union ieee802154_attr_u *attrval)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
   int ret;
@@ -358,7 +358,7 @@ static int  mrf24j40_get_attr(FAR struct ieee802154_radio_s *radio,
     {
       case IEEE802154_PIB_MAC_EXTENDED_ADDR:
         {
-          memcpy(&attr_value->mac.eaddr[0], &dev->addr.eaddr[0], 8);
+          memcpy(&attrval->mac.eaddr[0], &dev->addr.eaddr[0], 8);
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
@@ -370,7 +370,7 @@ static int  mrf24j40_get_attr(FAR struct ieee802154_radio_s *radio,
 
 static int mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
                              enum ieee802154_pib_attr_e pib_attr,
-                             FAR const union ieee802154_attr_val_u *attr_value)
+                             FAR const union ieee802154_attr_u *attrval)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
   int ret;
@@ -379,13 +379,13 @@ static int mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
     {
       case IEEE802154_PIB_MAC_EXTENDED_ADDR:
         {
-          mrf24j40_seteaddr(dev, &attr_value->mac.eaddr[0]);
+          mrf24j40_seteaddr(dev, &attrval->mac.eaddr[0]);
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
       case IEEE802154_PIB_MAC_PROMISCUOUS_MODE:
         {
-          if (attr_value->mac.promisc_mode)
+          if (attrval->mac.promisc_mode)
             {
               mrf24j40_setrxmode(dev, MRF24J40_RXMODE_PROMISC); 
             }
@@ -399,7 +399,7 @@ static int mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
         break;
       case IEEE802154_PIB_MAC_RX_ON_WHEN_IDLE:
         {
-          dev->rxonidle = attr_value->mac.rxonidle;
+          dev->rxonidle = attrval->mac.rxonidle;
           mrf24j40_rxenable(dev, dev->rxonidle);
         }
         break;
