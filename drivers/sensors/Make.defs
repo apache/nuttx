@@ -57,10 +57,6 @@ ifeq ($(CONFIG_LIS2DH),y)
   CSRCS += lis2dh.c
 endif
 
-ifeq ($(CONFIG_LIS3DSH),y)
-  CSRCS += lis3dsh.c
-endif
-
 ifeq ($(CONFIG_LIS331DL),y)
   CSRCS += lis331dl.c
 endif
@@ -124,6 +120,10 @@ endif # CONFIG_I2C
 ifeq ($(CONFIG_SPI),y)
 ifeq ($(CONFIG_ADXL345_SPI),y)
   CSRCS += adxl345_spi.c
+endif
+
+ifeq ($(CONFIG_LIS3DSH),y)
+  CSRCS += lis3dsh.c
 endif
 
 ifeq ($(CONFIG_MAX31855),y)
