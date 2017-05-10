@@ -245,7 +245,7 @@ errout:
 /****************************************************************************
  * Name: mtdconfig_writebytes
  *
- *    Writes bytes to the contained MTD device.  This will either usee
+ *    Writes bytes to the contained MTD device.  This will either use
  *    the byte write function or if that is not available, the bwrite.
  *
  ****************************************************************************/
@@ -285,6 +285,17 @@ static int  mtdconfig_writebytes(FAR struct mtdconfig_struct_s *dev, int offset,
               ret = -EIO;
               goto errout;
             }
+
+          /* Now erase the block */
+
+          ret = MTD_ERASE(dev->mtd, block, 1);
+          if (ret < 0)
+            {
+              /* Error erasing the block */
+
+              ret = -EIO;
+              goto errout;
+          }
 
           index = offset - block * dev->blocksize;
           bytes_this_block = dev->blocksize - index;
@@ -1035,8 +1046,12 @@ static int mtdconfig_setconfig(FAR struct mtdconfig_struct_s *dev,
   /* Allocate a temp block buffer */
 
   dev->buffer = (FAR uint8_t *) kmm_malloc(dev->blocksize);
+  if (dev->buffer == NULL)
+    {
+      return -ENOMEM;
+    }
 
-  /* Read and vaidate the signature bytes */
+  /* Read and validate the signature bytes */
 
 retry:
   offset = mtdconfig_findfirstentry(dev, &hdr);
@@ -1180,7 +1195,15 @@ retry_find:
       hdr.len = pdata->len;
       hdr.flags = MTD_ERASED_FLAGS;
 
-      mtdconfig_writebytes(dev, offset, (uint8_t *)&hdr, sizeof(hdr));
+      ret = mtdconfig_writebytes(dev, offset, (uint8_t *)&hdr, sizeof(hdr));
+      if (ret < 0)
+        {
+          /* Cannot write even header! */
+
+          ret = -EIO;
+          goto errout;
+        }
+
       bytes = mtdconfig_writebytes(dev, offset + sizeof(hdr), pdata->configdata,
                                    pdata->len);
       if (bytes != pdata->len)

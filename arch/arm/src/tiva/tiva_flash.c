@@ -57,6 +57,7 @@
 #include "up_arch.h"
 #include "chip.h"
 
+#include "tiva_flash.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -340,7 +341,7 @@ static int tiva_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *up_flashinitialize(void)
+FAR struct mtd_dev_s *tiva_flash_initialize(void)
 {
   /* Return the implementation-specific state structure as the MTD device */
 
