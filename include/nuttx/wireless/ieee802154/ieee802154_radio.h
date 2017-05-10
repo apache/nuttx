@@ -84,10 +84,10 @@ struct ieee802154_radioops_s
   CODE int (*txnotify_gts)(FAR struct ieee802154_radio_s *radio);
   CODE int (*get_attr) (FAR struct ieee802154_radio_s *radio,
              enum ieee802154_pib_attr_e pib_attr,
-             FAR union ieee802154_attr_val_u *attr_value);
+             FAR union ieee802154_attr_u *attrval);
   CODE int (*set_attr) (FAR struct ieee802154_radio_s *radio,
              enum ieee802154_pib_attr_e pib_attr,
-             FAR const union ieee802154_attr_val_u *attr_value);
+             FAR const union ieee802154_attr_u *attrval);
 };
 
 struct ieee802154_radio_s

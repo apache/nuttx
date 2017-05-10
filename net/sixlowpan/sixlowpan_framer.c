@@ -163,7 +163,7 @@ int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
 
   /* Source address mode */
 
-  meta->src_addr_mode = pktmeta->sextended != 0?
+  meta->src_addrmode = pktmeta->sextended != 0?
                         IEEE802154_ADDRMODE_EXTENDED :
                         IEEE802154_ADDRMODE_SHORT;
 
