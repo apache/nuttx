@@ -68,15 +68,17 @@
 int _vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 {
   struct lib_syslogstream_s stream;
+  int ret;
+
 #ifdef CONFIG_SYSLOG_TIMESTAMP
   struct timespec ts;
-  int ret = -1;
 
   /* Get the current time.  Since debug output may be generated very early
    * in the start-up sequence, hardware timer support may not yet be
    * available.
    */
 
+  ret = -EAGAIN;
   if (OSINIT_HW_READY())
     {
       /* Prefer monotonic when enabled, as it can be synchronized to
@@ -114,7 +116,7 @@ int _vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
     {
       /* Use the normal SYSLOG stream */
 
-      syslogstream(&stream);
+      syslogstream_create(&stream);
     }
 
 #if defined(CONFIG_SYSLOG_TIMESTAMP)
@@ -124,5 +126,18 @@ int _vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
                     ts.tv_sec, ts.tv_nsec/1000);
 #endif
 
-  return lib_vsprintf(&stream.public, fmt, *ap);
+  /* Generate the output */
+
+  ret = lib_vsprintf(&stream.public, fmt, *ap);
+
+#ifdef CONFIG_SYSLOG_BUFFER
+  /* Destroy the syslog stream buffer */
+
+  if (priority != LOG_EMERG)
+    {
+      syslogstream_destroy(&stream);
+    }
+#endif
+
+  return ret;
 }

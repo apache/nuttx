@@ -45,6 +45,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/sched.h>
 #include <nuttx/mm/iob.h>
 
 #include "iob.h"
@@ -172,7 +173,7 @@ FAR struct iob_s *iob_alloc(bool throttled)
 {
   /* Were we called from the interrupt level? */
 
-  if (up_interrupt_context())
+  if (up_interrupt_context() || sched_idletask())
     {
       /* Yes, then try to allocate an I/O buffer without waiting */
 

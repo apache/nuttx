@@ -86,25 +86,15 @@ config SYSLOG_BUFFER
 	bool "Use buffered output"
 	default n
 	depends on SYSLOG_WRITE
+	select MM_IOB
 	---help---
 		Enables an buffering logic that will be used to serialize debug
 		output from concurrent tasks. This enables allocation of one buffer
-		per thread, each of size CONFIG_SYSLOG_BUFSIZE.
+		per thread, each of size CONFIG_IOB_BUFSIZE.
 
 		The use of SYSLOG buffering is optional.  If not enabled, however,
 		then the output from multiple tasks that attempt to generate SYSLOG
 		output may be interleaved and difficult to read.
-
-config SYSLOG_BUFSIZE
-	int "Output buffer size"
-	default 32
-	range 1 65535
-	depends on SYSLOG_BUFFER
-	---help---
-		If CONFIG_SYSLOG_BUFFER is enabled, then CONFIG_SYSLOG_BUFSIZE
-		provides the size of the per-thread output buffer.  Setting
-		CONFIG_SYSLOG_BUFSIZE to a value less than one effectly disables
-		output SYSLOG buffering.
 
 config SYSLOG_INTBUFFER
 	bool "Use interrupt buffer"

@@ -51,6 +51,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/sched.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/serial/serial.h>
@@ -365,7 +366,7 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
    * a little differently.
    */
 
-  if (up_interrupt_context() || getpid() == 0)
+  if (up_interrupt_context() || sched_idletask())
     {
 #ifdef CONFIG_SERIAL_REMOVABLE
       /* If the removable device is no longer connected, refuse to write to
