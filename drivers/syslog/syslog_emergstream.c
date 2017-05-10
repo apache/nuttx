@@ -99,7 +99,7 @@ static void emergstream_putc(FAR struct lib_outstream_s *this, int ch)
  *
  * Input parameters:
  *   stream - User allocated, uninitialized instance of struct
- *            lib_lowoutstream_s to be initialized.
+ *            lib_outstream_s to be initialized.
  *
  * Returned Value:
  *   None (User allocated instance initialized).

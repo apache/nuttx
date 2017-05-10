@@ -74,6 +74,9 @@ static int syslog_devchan_force(int ch);
 
 static const struct syslog_channel_s g_syslog_dev_channel =
 {
+#ifdef CONFIG_SYSLOG_WRITE
+  syslog_dev_write,
+#endif
 #ifdef CONFIG_SYSLOG_CHAR_CRLF
   syslog_devchan_putc,
 #else
