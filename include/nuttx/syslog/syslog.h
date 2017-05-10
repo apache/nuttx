@@ -43,6 +43,8 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+
+#include <sys/types.h>
 #include <stdarg.h>
 
 /****************************************************************************
@@ -104,6 +106,7 @@ enum syslog_init_e
 
 /* This structure provides the interface to a SYSLOG device */
 
+typedef CODE ssize_t (*syslog_write_t)(FAR const char *buf, size_t buflen);
 typedef CODE int (*syslog_putc_t)(int ch);
 typedef CODE int (*syslog_flush_t)(void);
 
@@ -111,8 +114,11 @@ struct syslog_channel_s
 {
   /* I/O redirection methods */
 
-  syslog_putc_t sc_putc;    /* Normal buffered output */
-  syslog_putc_t sc_force;   /* Low-level output for interrupt handlers */
+#ifdef CONFIG_SYSLOG_WRITE
+  syslog_write_t sc_write;  /* Write multiple bytes */
+#endif
+  syslog_putc_t  sc_putc;   /* Normal buffered output */
+  syslog_putc_t  sc_force;  /* Low-level output for interrupt handlers */
   syslog_flush_t sc_flush;  /* Flush buffered output (on crash) */
 
   /* Implementation specific logic may follow */

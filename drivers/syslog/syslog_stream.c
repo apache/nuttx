@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/syslog/syslog_stream.c
  *
- *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,6 +59,24 @@
 
 static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
+#ifdef CONFIG_SYSLOG_BUFFER
+  FAR struct lib_syslogstream_s *stream = (FAR struct lib_syslogstream_s *)this;
+
+  /* Add the incoming character to the buffer */
+
+  stream->buf[stream->nbuf] = ch;
+  stream->nbuf++;
+  this->nput++;
+
+  /* Is the buffer full?  Did we encounter a new line? */
+
+  if (stream->nbuf >= CONFIG_SYSLOG_BUFSIZE || ch == '\n')
+    {
+      /* Yes.. then flush the buffer */
+
+      (void)this->flush(this);
+    }
+#else
   int ret;
 
   /* Try writing until the write was successful or until an irrecoverable
@@ -83,8 +101,45 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
        * ignored in this context.
        */
     }
-  while (errno == -EINTR);
+  while (get_errno() == -EINTR);
+#endif
 }
+
+/****************************************************************************
+ * Name: syslogstream_flush
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSLOG_BUFFER
+static int syslogstream_flush(FAR struct lib_outstream_s *this)
+{
+  FAR struct lib_syslogstream_s *stream = (FAR struct lib_syslogstream_s *)this;
+  int ret = OK;
+
+  /* Is there anything buffered? */
+
+  if (stream->nbuf > 0)
+    {
+      /* Yes write the buffered data */
+
+      do
+        {
+          int status = syslog_write(stream->buf, stream->nbuf);
+          if (status < 0)
+            {
+              ret = -get_errno();
+            }
+          else
+            {
+              stream->nbuf = 0;
+              ret = OK;
+            }
+        }
+      while (ret == -EINTR);
+    }
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -99,16 +154,23 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
  *
  * Input parameters:
  *   stream - User allocated, uninitialized instance of struct
- *            lib_lowoutstream_s to be initialized.
+ *            lib_syslogstream_s to be initialized.
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void syslogstream(FAR struct lib_outstream_s *stream)
+void syslogstream(FAR struct lib_syslogstream_s *stream)
 {
-  stream->put   = syslogstream_putc;
-  stream->flush = lib_noflush;
-  stream->nput  = 0;
+#ifdef CONFIG_SYSLOG_BUFFER
+  stream->public.put   = syslogstream_putc;
+  stream->public.flush = syslogstream_flush;
+  stream->public.nput  = 0;
+  stream->nbuf         = 0;
+#else
+  stream->public.put   = syslogstream_putc;
+  stream->public.flush = lib_noflush;
+  stream->public.nput  = 0;
+#endif
 }

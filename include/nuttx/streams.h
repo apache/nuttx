@@ -189,6 +189,18 @@ struct lib_rawsostream_s
   int                    fd;
 };
 
+/* This is a special stream that does buffered character I/O.  NOTE that is
+ * CONFIG_SYSLOG_BUFFER is not defined, it is the same as struct lib_outstream_s */
+
+struct lib_syslogstream_s
+{
+  struct lib_outstream_s public;
+#ifdef CONFIG_SYSLOG_BUFFER
+  unsigned int           nbuf;
+  char                   buf[CONFIG_SYSLOG_BUFSIZE];
+#endif
+};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -360,7 +372,7 @@ void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream);
  *
  ****************************************************************************/
 
-void syslogstream(FAR struct lib_outstream_s *stream);
+void syslogstream(FAR struct lib_syslogstream_s *stream);
 
 /****************************************************************************
  * Name: emergstream

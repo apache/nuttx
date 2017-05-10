@@ -67,7 +67,7 @@
 
 int _vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 {
-  struct lib_outstream_s stream;
+  struct lib_syslogstream_s stream;
 #ifdef CONFIG_SYSLOG_TIMESTAMP
   struct timespec ts;
   int ret = -1;
@@ -114,7 +114,7 @@ int _vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
     {
       /* Use the normal SYSLOG stream */
 
-      syslogstream((FAR struct lib_outstream_s *)&stream);
+      syslogstream((FAR struct lib_syslogstream_s *)&stream);
     }
 
 #if defined(CONFIG_SYSLOG_TIMESTAMP)

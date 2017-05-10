@@ -185,6 +185,114 @@ static inline void syslog_dev_givesem(void)
 }
 
 /****************************************************************************
+ * Name: syslog_dev_outputready
+ *
+ * Description:
+ * Ignore any output:
+ *
+ * (1) Before the SYSLOG device has been initialized.  This could happen
+ *     from debug output that occurs early in the boot sequence before
+ *     syslog_dev_initialize() is called (SYSLOG_UNINITIALIZED).
+ * (2) While the device is being initialized.  The case could happen if
+ *     debug output is generated while syslog_dev_initialize() executes
+ *     (SYSLOG_INITIALIZING).
+ * (3) While we are generating SYSLOG output.  The case could happen if
+ *     debug output is generated while syslog_dev_putc() executes
+ *     (This case is actually handled inside of syslog_semtake()).
+ * (4) Any debug output generated from interrupt handlers.  A disadvantage
+ *     of using the generic character device for the SYSLOG is that it
+ *     cannot handle debug output generated from interrupt level handlers.
+ * (5) Any debug output generated from the IDLE loop.  The character
+ *     driver interface is blocking and the IDLE thread is not permitted
+ *     to block.
+ * (6) If an irrecoverable failure occurred during initialization.  In
+ *     this case, we won't ever bother to try again (ever).
+ *
+ * NOTE: That the third case is different.  It applies only to the thread
+ * that currently holds the sl_sem sempaphore.  Other threads should wait.
+ * that is why that case is handled in syslog_semtake().
+ *
+ * Input Parameters:
+ *   ch - The character to add to the SYSLOG (must be positive).
+ *
+ * Returned Value:
+ *   On success, the character is echoed back to the caller.  A negated
+ *   errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+static int syslog_dev_outputready(void)
+{
+  int ret;
+
+  /* Cases (4) and (5) */
+
+  if (up_interrupt_context() || getpid() == 0)
+    {
+      return -ENOSYS;
+    }
+
+  /* We can save checks in the usual case:  That after the SYSLOG device
+   * has been successfully opened.
+   */
+
+  if (g_syslog_dev.sl_state != SYSLOG_OPENED)
+    {
+      /* Case (1) and (2) */
+
+      if (g_syslog_dev.sl_state == SYSLOG_UNINITIALIZED ||
+          g_syslog_dev.sl_state == SYSLOG_INITIALIZING)
+       {
+         return -EAGAIN; /* Can't access the SYSLOG now... maybe next time? */
+       }
+
+      /* Case (6) */
+
+      if (g_syslog_dev.sl_state == SYSLOG_FAILURE)
+        {
+          return -ENXIO;  /* There is no SYSLOG device */
+        }
+
+      /* syslog_dev_initialize() is called as soon as enough of the operating
+       * system is in place to support the open operation... but it is
+       * possible that the SYSLOG device is not yet registered at that time.
+       * In this case, we know that the system is sufficiently initialized
+       * to support an attempt to re-open the SYSLOG device.
+       *
+       * NOTE that the scheduler is locked.  That is because we do not have
+       * fully initialized semaphore capability until the SYSLOG device is
+       * successfully initialized
+       */
+
+      sched_lock();
+      if (g_syslog_dev.sl_state == SYSLOG_REOPEN)
+        {
+          /* Try again to initialize the device.  We may do this repeatedly
+           * because the log device might be something that was not ready
+           * the first time that syslog_dev_initializee() was called (such as a
+           * USB serial device that has not yet been connected or a file in
+           * an NFS mounted file system that has not yet been mounted).
+           */
+
+          DEBUGASSERT(g_syslog_dev.sl_devpath != NULL);
+          ret = syslog_dev_initialize(g_syslog_dev.sl_devpath,
+                                      (int)g_syslog_dev.sl_oflags,
+                                      (int)g_syslog_dev.sl_mode);
+          if (ret < 0)
+            {
+              sched_unlock();
+              return ret;
+            }
+        }
+
+      sched_unlock();
+      DEBUGASSERT(g_syslog_dev.sl_state == SYSLOG_OPENED);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -355,18 +463,166 @@ int syslog_dev_uninitialize(void)
 #endif /* CONFIG_SYSLOG_FILE */
 
 /****************************************************************************
+ * Name: syslog_dev_write
+ *
+ * Description:
+ *   This is the low-level, multile byte, system logging interface provided
+ *   for the character driver interface.
+ *
+ * Input Parameters:
+ *   buffer - The buffer containing the data to be output
+ *   buflen - The number of bytes in the buffer
+ *
+ * Returned Value:
+ *   On success, the character is echoed back to the caller.  Minus one
+ *   is returned on any failure with the errno set correctly.
+ *
+ ****************************************************************************/
+
+ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen)
+{
+  FAR const char *endptr;
+  ssize_t nwritten;
+  size_t writelen;
+  int errcode;
+  int ret;
+
+  /* Check if the system is ready to do output operations */
+
+  ret = syslog_dev_outputready();
+  if (ret < 0)
+    {
+      errcode = -ret;
+      goto errout_with_errcode;
+    }
+
+  /* The syslog device is ready for writing */
+
+  ret = syslog_dev_takesem();
+  if (ret < 0)
+    {
+      /* We probably already hold the semaphore and were probably
+       * re-entered by the logic kicked off by file_write().
+       * We might also have been interrupted by a signal.  Either
+       * way, we are outta here.
+       */
+
+      errcode = -ret;
+      goto errout_with_errcode;
+    }
+
+  /* Loop until we have output all characters */
+
+  for (endptr = buffer; *endptr != '\n'; endptr++)
+    {
+      switch (*endptr)
+        {
+          case '\r':
+            {
+              /* Write everything up to this point, ignore the carriage
+               * return.
+               *
+               * - buffer points to next byte to output.
+               * - endptr points to the carriage return.
+               */
+
+              writelen = (size_t)((uintptr_t)endptr - (uintptr_t)buffer);
+              if (writelen > 0)
+                {
+                  nwritten = file_write(&g_syslog_dev.sl_file, buffer, writelen);
+                  if (nwritten < 0)
+                    {
+                      errcode = -nwritten;
+                      goto errout_with_sem;
+                    }
+                }
+
+              /* Adjust pointers */
+
+              writelen++;         /* Skip the carriage return */
+              buffer += writelen; /* Points past the carriage return */
+            }
+            break;
+
+          case '\n':
+            {
+              /* Write everything up to this point, then add a carriage
+               * return and linefeed;
+               *
+               * - buffer points to next byte to output.
+               * - endptr points to the new line.
+               */
+
+               writelen = (size_t)((uintptr_t)endptr - (uintptr_t)buffer);
+               if (writelen > 0)
+                {
+                  nwritten = file_write(&g_syslog_dev.sl_file, buffer, writelen);
+                  if (nwritten < 0)
+                    {
+                      errcode = -nwritten;
+                      goto errout_with_sem;
+                    }
+                }
+
+              nwritten = file_write(&g_syslog_dev.sl_file, g_syscrlf, 2);
+              if (nwritten < 0)
+                {
+                  errcode = -nwritten;
+                  goto errout_with_sem;
+                }
+
+              /* Adjust pointers */
+
+              writelen++;         /* Skip the line feed */
+              buffer += writelen; /* Points past the line feed */
+            }
+            break;
+
+          default:
+            break;
+        }
+    }
+
+  /* Write any data at the end of the buffer.
+   *
+   * - buffer points to next byte to output.
+   * - endptr points to the NULL terminator.
+   */
+
+  writelen = (size_t)((uintptr_t)endptr - (uintptr_t)buffer);
+  if (writelen > 0)
+    {
+      nwritten = file_write(&g_syslog_dev.sl_file, buffer, writelen);
+      if (nwritten < 0)
+        {
+          errcode = -nwritten;
+          goto errout_with_sem;
+        }
+    }
+
+  syslog_dev_givesem();
+  return buflen;
+
+errout_with_sem:
+  syslog_dev_givesem();
+errout_with_errcode:
+  set_errno(errcode);
+  return -1;
+}
+
+/****************************************************************************
  * Name: syslog_dev_putc
  *
  * Description:
- *   This is the low-level system logging interface provided for the
- *   character driver interface.
+ *   This is the low-level, single character, system logging interface
+ *   provided for the character driver interface.
  *
  * Input Parameters:
  *   ch - The character to add to the SYSLOG (must be positive).
  *
  * Returned Value:
- *   On success, the character is echoed back to the caller.  A negated
- *   errno value is returned on any failure.
+ *   On success, the character is echoed back to the caller.  Minus one
+ *   is returned on any failure with the errno set correctly.
  *
  ****************************************************************************/
 
@@ -377,97 +633,13 @@ int syslog_dev_putc(int ch)
   int errcode;
   int ret;
 
-  /* Ignore any output:
-   *
-   * (1) Before the SYSLOG device has been initialized.  This could happen
-   *     from debug output that occurs early in the boot sequence before
-   *     syslog_dev_initialize() is called (SYSLOG_UNINITIALIZED).
-   * (2) While the device is being initialized.  The case could happen if
-   *     debug output is generated while syslog_dev_initialize() executes
-   *     (SYSLOG_INITIALIZING).
-   * (3) While we are generating SYSLOG output.  The case could happen if
-   *     debug output is generated while syslog_dev_putc() executes
-   *     (This case is actually handled inside of syslog_semtake()).
-   * (4) Any debug output generated from interrupt handlers.  A disadvantage
-   *     of using the generic character device for the SYSLOG is that it
-   *     cannot handle debug output generated from interrupt level handlers.
-   * (5) Any debug output generated from the IDLE loop.  The character
-   *     driver interface is blocking and the IDLE thread is not permitted
-   *     to block.
-   * (6) If an irrecoverable failure occurred during initialization.  In
-   *     this case, we won't ever bother to try again (ever).
-   *
-   * NOTE: That the third case is different.  It applies only to the thread
-   * that currently holds the sl_sem sempaphore.  Other threads should wait.
-   * that is why that case is handled in syslog_semtake().
-   */
+  /* Check if the system is ready to do output operations */
 
-  /* Cases (4) and (5) */
-
-  if (up_interrupt_context() || getpid() == 0)
+  ret = syslog_dev_outputready();
+  if (ret < 0)
     {
-      errcode = ENOSYS;
+      errcode = -ret;
       goto errout_with_errcode;
-    }
-
-  /* We can save checks in the usual case:  That after the SYSLOG device
-   * has been successfully opened.
-   */
-
-  if (g_syslog_dev.sl_state != SYSLOG_OPENED)
-    {
-      /* Case (1) and (2) */
-
-      if (g_syslog_dev.sl_state == SYSLOG_UNINITIALIZED ||
-          g_syslog_dev.sl_state == SYSLOG_INITIALIZING)
-       {
-         errcode = EAGAIN; /* Can't access the SYSLOG now... maybe next time? */
-         goto errout_with_errcode;
-       }
-
-      /* Case (6) */
-
-      if (g_syslog_dev.sl_state == SYSLOG_FAILURE)
-        {
-          errcode = ENXIO;  /* There is no SYSLOG device */
-          goto errout_with_errcode;
-        }
-
-      /* syslog_dev_initialize() is called as soon as enough of the operating
-       * system is in place to support the open operation... but it is
-       * possible that the SYSLOG device is not yet registered at that time.
-       * In this case, we know that the system is sufficiently initialized
-       * to support an attempt to re-open the SYSLOG device.
-       *
-       * NOTE that the scheduler is locked.  That is because we do not have
-       * fully initialized semaphore capability until the SYSLOG device is
-       * successfully initialized
-       */
-
-      sched_lock();
-      if (g_syslog_dev.sl_state == SYSLOG_REOPEN)
-        {
-          /* Try again to initialize the device.  We may do this repeatedly
-           * because the log device might be something that was not ready
-           * the first time that syslog_dev_initializee() was called (such as a
-           * USB serial device that has not yet been connected or a file in
-           * an NFS mounted file system that has not yet been mounted).
-           */
-
-          DEBUGASSERT(g_syslog_dev.sl_devpath != NULL);
-          ret = syslog_dev_initialize(g_syslog_dev.sl_devpath,
-                                      (int)g_syslog_dev.sl_oflags,
-                                      (int)g_syslog_dev.sl_mode);
-          if (ret < 0)
-            {
-              sched_unlock();
-              errcode = -ret;
-              goto errout_with_errcode;
-            }
-        }
-
-      sched_unlock();
-      DEBUGASSERT(g_syslog_dev.sl_state == SYSLOG_OPENED);
     }
 
   /* Ignore carriage returns */
