@@ -129,6 +129,9 @@ SYSLOG Channels
     {
       /* I/O redirection methods */
 
+    #ifdef CONFIG_SYSLOG_WRITE
+      syslog_write_t sc_write;  /* Write multiple bytes */
+    #endif
       syslog_putc_t sc_putc;    /* Normal buffered output */
       syslog_putc_t sc_force;   /* Low-level output for interrupt handlers */
       syslog_flush_t sc_flush;  /* Flush buffered output (on crash) */

@@ -1,7 +1,7 @@
 /****************************************************************************
- * drivers/syslog/syslog_chardev.c
+ * drivers/syslog/syslog_write.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,80 +40,68 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <stdbool.h>
-#include <string.h>
-#include <poll.h>
-#include <errno.h>
-
-#include <nuttx/fs/fs.h>
 #include <nuttx/syslog/syslog.h>
 
 #include "syslog.h"
-
-#ifdef CONFIG_SYSLOG_CHARDEV
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-static ssize_t syslog_chardev_write(FAR struct file *filep,
-                                    FAR const char *buffer, size_t buflen);
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static const struct file_operations syslog_fops =
-{
-  NULL,          /* open */
-  NULL,          /* close */
-  NULL,          /* read */
-  syslog_chardev_write, /* write */
-  NULL,          /* seek */
-  NULL           /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL         /* poll */
-#endif
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL         /* unlink */
-#endif
-};
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: syslog_chardev_write
- ****************************************************************************/
-
-static ssize_t syslog_chardev_write(FAR struct file *filep,
-                                    FAR const char *buffer, size_t len)
-{
-  return syslog_write(buffer, len);
-}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslog_register
+ * Name: syslog_default_write
  *
  * Description:
- *   Register a simple character driver at /dev/syslog whose write() method
- *   will transfer data to the SYSLOG device.  This can be useful if, for
- *   example, you want to redirect the output of a program to the SYSLOG.
+ *   This provides a default write method for syslog devices that do not
+ *   support multiple byte writes  This functions simply loops, outputting
+ *   one cahracter at a time.
  *
- *   NOTE that unlike other syslog output, this data is unformatted raw
- *   byte output with no time-stamping or any other SYSLOG features
- *   supported.
+ * Input Parameters:
+ *   buffer - The buffer containing the data to be output
+ *   buflen - The number of bytes in the buffer
+ *
+ * Returned Value:
+ *   On success, the number of characters written is returned.  A negated
+ *   errno value is returned on any failure.
  *
  ****************************************************************************/
 
-void syslog_register(void)
+ssize_t syslog_default_write(FAR const char *buffer, size_t buflen)
 {
-  (void)register_driver("/dev/syslog", &syslog_fops, 0222, NULL);
+  size_t nwritten;
+  int ret;
+
+  for (nwritten = 0; nwritten < buflen; nwritten++)
+    {
+      int ch = *buffer++;
+      ret = syslog_putc(ch);
+      UNUSED(ret);
+    }
+
+  return buflen;
 }
 
-#endif /* CONFIG_SYSLOG_CHARDEV */
+/****************************************************************************
+ * Name: syslog_write
+ *
+ * Description:
+ *   This is the low-level, multiple character, system logging interface.
+ *
+ * Input Parameters:
+ *   buffer - The buffer containing the data to be output
+ *   buflen - The number of bytes in the buffer
+ *
+ * Returned Value:
+ *   On success, the number of characters written is returned.  A negated
+ *   errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+ssize_t syslog_write(FAR const char *buffer, size_t buflen)
+{
+#ifdef CONFIG_SYSLOG_WRITE
+  return g_syslog_channel->sc_write(buffer, buflen);
+#else
+  return syslog_default_write(buffer, buflen);
+#endif
+}

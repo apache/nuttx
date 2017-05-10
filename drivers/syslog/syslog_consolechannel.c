@@ -83,6 +83,9 @@ static int syslog_console_force(int ch);
 
 static const struct syslog_channel_s g_syslog_console_channel =
 {
+#ifdef CONFIG_SYSLOG_WRITE
+  syslog_dev_write,
+#endif
   syslog_dev_putc,
 #ifdef HAVE_LOWPUTC
   up_putc,

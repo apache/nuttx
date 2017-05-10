@@ -240,18 +240,56 @@ int syslog_flush_intbuffer(FAR const struct syslog_channel_s *channel,
  * Name: syslog_putc
  *
  * Description:
- *   This is the low-level system logging interface.
+ *   This is the low-level, single character, system logging interface.
  *
  * Input Parameters:
  *   ch - The character to add to the SYSLOG (must be positive).
  *
  * Returned Value:
- *   On success, the character is echoed back to the caller.  A negated
- *   errno value is returned on any failure.
+ *   On success, the character is echoed back to the caller.  Minus one
+ *   is returned on any failure with the errno set correctly.
  *
  ****************************************************************************/
 
 int syslog_putc(int ch);
+
+/****************************************************************************
+ * Name: syslog_write
+ *
+ * Description:
+ *   This is the low-level, multiple character, system logging interface.
+ *
+ * Input Parameters:
+ *   buffer - The buffer containing the data to be output
+ *   buflen - The number of bytes in the buffer
+ *
+ * Returned Value:
+ *   On success, the number of characters written is returned.  A negated
+ *   errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+ssize_t syslog_write(FAR const char *buffer, size_t buflen);
+
+/****************************************************************************
+ * Name: syslog_default_write
+ *
+ * Description:
+ *   This provides a default write method for syslog devices that do not
+ *   support multiple byte writes  This functions simply loops, outputting
+ *   one cahracter at a time.
+ *
+ * Input Parameters:
+ *   buffer - The buffer containing the data to be output
+ *   buflen - The number of bytes in the buffer
+ *
+ * Returned Value:
+ *   On success, the number of characters written is returned.  A negated
+ *   errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+ssize_t syslog_default_write(FAR const char *buffer, size_t buflen);
 
 /****************************************************************************
  * Name: syslog_force
@@ -271,6 +309,25 @@ int syslog_putc(int ch);
  ****************************************************************************/
 
 int syslog_force(int ch);
+
+/****************************************************************************
+ * Name: syslog_dev_write
+ *
+ * Description:
+ *   This is the low-level, multile byte, system logging interface provided
+ *   for the character driver interface.
+ *
+ * Input Parameters:
+ *   buffer - The buffer containing the data to be output
+ *   buflen - The number of bytes in the buffer
+ *
+ * Returned Value:
+ *   On success, the character is echoed back to the caller.  Minus one
+ *   is returned on any failure with the errno set correctly.
+ *
+ ****************************************************************************/
+
+ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen);
 
 /****************************************************************************
  * Name: syslog_dev_putc
