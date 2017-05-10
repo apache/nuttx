@@ -1,7 +1,7 @@
 /************************************************************************************
  * drivers/serial/serial.c
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1207,26 +1207,31 @@ static int uart_close(FAR struct file *filep)
 
   uart_disablerxint(dev);
 
-  /* Now we wait for the transmit buffer to clear */
+  /* Prevent blocking if the device is opened with O_NONBLOCK */
 
-  while (dev->xmit.head != dev->xmit.tail)
+  if ((filep->f_oflags & O_NONBLOCK) == 0)
     {
-#ifndef CONFIG_DISABLE_SIGNALS
-      usleep(HALF_SECOND_USEC);
-#else
-      up_mdelay(HALF_SECOND_MSEC);
-#endif
-    }
+      /* Now we wait for the transmit buffer to clear */
 
-  /* And wait for the TX fifo to drain */
-
-  while (!uart_txempty(dev))
-    {
+      while (dev->xmit.head != dev->xmit.tail)
+        {
 #ifndef CONFIG_DISABLE_SIGNALS
-      usleep(HALF_SECOND_USEC);
+          usleep(HALF_SECOND_USEC);
 #else
-      up_mdelay(HALF_SECOND_MSEC);
+          up_mdelay(HALF_SECOND_MSEC);
 #endif
+        }
+
+     /* And wait for the TX fifo to drain */
+
+      while (!uart_txempty(dev))
+        {
+#ifndef CONFIG_DISABLE_SIGNALS
+          usleep(HALF_SECOND_USEC);
+#else
+          up_mdelay(HALF_SECOND_MSEC);
+#endif
+        }
     }
 
   /* Free the IRQ and disable the UART */
