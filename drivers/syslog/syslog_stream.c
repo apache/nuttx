@@ -62,19 +62,24 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
 #ifdef CONFIG_SYSLOG_BUFFER
   FAR struct lib_syslogstream_s *stream = (FAR struct lib_syslogstream_s *)this;
 
-  /* Add the incoming character to the buffer */
+  /* Discard carriage returns */
 
-  stream->buf[stream->nbuf] = ch;
-  stream->nbuf++;
-  this->nput++;
-
-  /* Is the buffer full?  Did we encounter a new line? */
-
-  if (stream->nbuf >= CONFIG_SYSLOG_BUFSIZE || ch == '\n')
+  if (ch != '\r')
     {
-      /* Yes.. then flush the buffer */
+      /* Add the incoming character to the buffer */
 
-      (void)this->flush(this);
+      stream->buf[stream->nbuf] = ch;
+      stream->nbuf++;
+      this->nput++;
+
+      /* Is the buffer full?  Did we encounter a new line? */
+
+      if (stream->nbuf >= CONFIG_SYSLOG_BUFSIZE || ch == '\n')
+        {
+          /* Yes.. then flush the buffer */
+
+          (void)this->flush(this);
+        }
     }
 #else
   int ret;
@@ -123,8 +128,8 @@ static int syslogstream_flush(FAR struct lib_outstream_s *this)
 
       do
         {
-          int status = syslog_write(stream->buf, stream->nbuf);
-          if (status < 0)
+          ssize_t nbytes = syslog_write(stream->buf, stream->nbuf);
+          if (nbytes < 0)
             {
               ret = -get_errno();
             }

@@ -108,21 +108,21 @@ int _vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
     {
       /* Use the SYSLOG emergency stream */
 
-      emergstream((FAR struct lib_outstream_s *)&stream);
+      emergstream(&stream.public);
     }
   else
     {
       /* Use the normal SYSLOG stream */
 
-      syslogstream((FAR struct lib_syslogstream_s *)&stream);
+      syslogstream(&stream);
     }
 
 #if defined(CONFIG_SYSLOG_TIMESTAMP)
   /* Pre-pend the message with the current time, if available */
 
-  (void)lib_sprintf((FAR struct lib_outstream_s *)&stream,
-                    "[%6d.%06d]", ts.tv_sec, ts.tv_nsec/1000);
+  (void)lib_sprintf(&stream.public, "[%6d.%06d]",
+                    ts.tv_sec, ts.tv_nsec/1000);
 #endif
 
-  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, *ap);
+  return lib_vsprintf(&stream.public, fmt, *ap);
 }

@@ -133,7 +133,7 @@ int syslog_remove_intbuffer(void)
 
   flags = enter_critical_section();
 
-  /* How much space is left in the inbuffer? */
+  /* How much space is left in the intbuffer? */
 
   inndx  = (uint32_t)g_syslog_intbuffer.si_inndx;
   outndx = (uint32_t)g_syslog_intbuffer.si_outndx;
@@ -211,7 +211,7 @@ int syslog_add_intbuffer(int ch)
 
   flags = enter_critical_section();
 
-  /* How much space is left in the inbuffer? */
+  /* How much space is left in the intbuffer? */
 
   inndx  = (uint32_t)g_syslog_intbuffer.si_inndx;
   outndx = (uint32_t)g_syslog_intbuffer.si_outndx;

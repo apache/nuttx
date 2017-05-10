@@ -484,6 +484,7 @@ ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen)
   FAR const char *endptr;
   ssize_t nwritten;
   size_t writelen;
+  size_t remaining;
   int errcode;
   int ret;
 
@@ -513,80 +514,57 @@ ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen)
 
   /* Loop until we have output all characters */
 
-  for (endptr = buffer; *endptr != '\n'; endptr++)
+  for (endptr = buffer, remaining = buflen;
+       remaining > 0;
+       endptr++, remaining--)
     {
-      switch (*endptr)
+      /* Special case carriage return and line feed */
+
+      if (*endptr == '\r' || *endptr == '\n')
         {
-          case '\r':
+          /* Write everything up to this point, ignore the special
+           * character.
+           *
+           * - buffer points to next byte to output.
+           * - endptr points to the special character.
+           */
+
+           writelen = (size_t)((uintptr_t)endptr - (uintptr_t)buffer);
+           if (writelen > 0)
             {
-              /* Write everything up to this point, ignore the carriage
-               * return.
-               *
-               * - buffer points to next byte to output.
-               * - endptr points to the carriage return.
-               */
-
-              writelen = (size_t)((uintptr_t)endptr - (uintptr_t)buffer);
-              if (writelen > 0)
+              nwritten = file_write(&g_syslog_dev.sl_file, buffer, writelen);
+              if (nwritten < 0)
                 {
-                  nwritten = file_write(&g_syslog_dev.sl_file, buffer, writelen);
-                  if (nwritten < 0)
-                    {
-                      errcode = -nwritten;
-                      goto errout_with_sem;
-                    }
+                  errcode = -nwritten;
+                  goto errout_with_sem;
                 }
-
-              /* Adjust pointers */
-
-              writelen++;         /* Skip the carriage return */
-              buffer += writelen; /* Points past the carriage return */
             }
-            break;
 
-          case '\n':
+          /* Ignore the carriage return, but for the linefeed, output
+           * both a carriage return and a linefeed.
+           */
+
+          if (*endptr == '\n')
             {
-              /* Write everything up to this point, then add a carriage
-               * return and linefeed;
-               *
-               * - buffer points to next byte to output.
-               * - endptr points to the new line.
-               */
-
-               writelen = (size_t)((uintptr_t)endptr - (uintptr_t)buffer);
-               if (writelen > 0)
-                {
-                  nwritten = file_write(&g_syslog_dev.sl_file, buffer, writelen);
-                  if (nwritten < 0)
-                    {
-                      errcode = -nwritten;
-                      goto errout_with_sem;
-                    }
-                }
-
               nwritten = file_write(&g_syslog_dev.sl_file, g_syscrlf, 2);
               if (nwritten < 0)
                 {
                   errcode = -nwritten;
                   goto errout_with_sem;
                 }
-
-              /* Adjust pointers */
-
-              writelen++;         /* Skip the line feed */
-              buffer += writelen; /* Points past the line feed */
             }
-            break;
 
-          default:
-            break;
+          /* Adjust pointers */
+
+           writelen++;         /* Skip the special character */
+           buffer += writelen; /* Points past the special character */
         }
     }
 
-  /* Write any data at the end of the buffer.
+  /* Write any unterminated data at the end of the buffer.
    *
    * - buffer points to next byte to output.
-   * - endptr points to the NULL terminator.
+   * - endptr points to the end of the buffer plus 1.
    */
 
   writelen = (size_t)((uintptr_t)endptr - (uintptr_t)buffer);
