@@ -60,8 +60,8 @@ int pthread_cancel(pthread_t thread)
 
   if (thread == 0)
     {
-      /* pid == 0 is the IDLE task.  Callers cannot cancel the
-       * IDLE task.
+      /* pid == 0 is the IDLE task (in a single CPU configuration).  Callers
+       * cannot cancel the IDLE task.
        */
 
       return ESRCH;

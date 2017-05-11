@@ -84,6 +84,10 @@ bool sched_idletask(void)
        * (1) It always lies at the end of the task list,
        * (2) It always has priority zero, and
        * (3) It should have the TCB_FLAG_CPU_LOCKED flag set.
+       *
+       * In the non-SMP case, the IDLE task will also have PID=0, but that
+       * is not a portable test because there are multiple IDLE tasks with
+       * different PIDs in the SMP configuration.
        */
 
       return (rtcb->flink == NULL);
