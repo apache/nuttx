@@ -62,7 +62,7 @@
 
 FAR struct lconv *localeconv(void)
 {
-  /* NULL indicates the the locale was not changed */
+  /* NULL indicates the locale was not changed */
 
   return NULL;
 }

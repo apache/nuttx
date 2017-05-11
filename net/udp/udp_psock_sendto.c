@@ -181,7 +181,7 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
   FAR struct socket *psock = pstate->st_sock;
   DEBUGASSERT(psock);
 
-  /* Which domain the the socket support */
+  /* Which domain the socket support */
 
   if (psock->s_domain == PF_INET)
     {

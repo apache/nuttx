@@ -297,7 +297,7 @@ int arp_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback);
  *
  * Description:
  *   Called BEFORE an ARP request is sent.  This function sets up the ARP
- *   response timeout before the the ARP request is sent so that there is
+ *   response timeout before the ARP request is sent so that there is
  *   no race condition when arp_wait() is called.
  *
  * Assumptions:

@@ -2634,7 +2634,7 @@ uint32_t tiva_timer32_remaining(TIMER_HANDLE handle)
            * the timeout event (0x0), the timer reloads its start value
            * from the GPTMTAILR register on the next cycle.
            *
-           * The time remaining it then just the the value of the counter
+           * The time remaining it then just the value of the counter
            * register.
            *
            * REVISIT: Or the counter value +1?

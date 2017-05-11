@@ -2065,7 +2065,7 @@ o Pascal Add-On (pcode/)
   Priority:    Medium
 
   Title:       PDBG
-  Description: Move the the pascal p-code debugger into the NuttX apps/ tree
+  Description: Move the pascal p-code debugger into the NuttX apps/ tree
                where it can be used from the NSH command line.
   Status:      Open
   Priority:    Low

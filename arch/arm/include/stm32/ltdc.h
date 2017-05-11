@@ -410,7 +410,7 @@ struct ltdc_layer_s
    *   On error - -EINVAL
    *
    * Procedure Information:
-   *   If the srcxpos and srcypos unequal the the xpos and ypos of the coord
+   *   If the srcxpos and srcypos unequal the xpos and ypos of the coord
    *   structure this acts like moving the visible area to another position on
    *   the screen during the next update operation.
    *

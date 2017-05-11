@@ -111,7 +111,7 @@ static int usbhost_trsyslog(uint32_t event, FAR void *arg)
       syslog(LOG_INFO, fmt, (unsigned int)TRACE_DECODE_U23(event));
     }
 
-  /* No, then it must the the two argument format first. */
+  /* No, then it must the two argument format first. */
 
   else
     {

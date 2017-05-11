@@ -147,7 +147,7 @@ NuttX EABI "buildroot" Toolchain
   building a Cortex-M3 toolchain for Cygwin under Windows.
 
   NOTE:  Unfortunately, the 4.6.3 (and later) GCC toolchain is not compatible
-  with the the NXFLAT tools.  See the top-level TODO file (under "Binary loaders")
+  with the NXFLAT tools.  See the top-level TODO file (under "Binary loaders")
   for more information about this problem. If you plan to use NXFLAT, please do
   not use the GCC 4.6.3 toochain; instead use an older toolchain (such as the GCC
   4.3.3 OABI toolchain discussed below).

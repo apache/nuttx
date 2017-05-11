@@ -79,7 +79,7 @@
 typedef FAR void *DMA_HANDLE;
 
 /* Description:
- *   This is the type of the callback that is used to inform the user of the the
+ *   This is the type of the callback that is used to inform the user of the
  *   completion of the DMA.
  *
  * Input Parameters:

@@ -10770,8 +10770,8 @@
 	  serial device servers.  From Anton D. Kachalov (2015-07-29).
 	* drivers/net/ and include/nuttx/net: Add support for a Faraday
 	* FTMAC100 Ethernet MAC Driver.  From Anton D. Kachalov (2015-07-29).
-	* 16550 UART Driver: Add a configuration option to indicate the the
-	  THR empty bit is inverted.  This is the the case for the moxART SoC.
+	* 16550 UART Driver: Add a configuration option to indicate the
+	  THR empty bit is inverted.  This is the case for the moxART SoC.
 	  Based comments from Anton D. Kachalov (2015-07-29).
 	* STM32 F4:  Add DMA support to the ADC driver for STM32 F4.  From
 	  Max Kriegler (2015-07-30).
@@ -13129,7 +13129,7 @@
 	  protect code.
 
 	  So this change adds locking (via enter_critical section) to wdog
-	  expiration logic for the the case if the SMP configuration
+	  expiration logic for the case if the SMP configuration
 	  (2016-11-18).
 	* SAM3/4: Add delay between setting and clearing the endpoint RESET bit
 	  in sam_ep_resume().  We need to add a delay between setting and
@@ -13248,7 +13248,7 @@
 	  select to log only notes from certain CPUs (2016-11-28).
 	* Misoc LM3: Add Misoc Ethernet driver.  Integrate network support into
 	  configs/misoc/hello.  Remove configs/misoc/include/generated directory.
-	  I suppose the the intent now is that this is a symbolic link?  DANGER!
+	  I suppose the intent now is that this is a symbolic link?  DANGER!
 	  This means that you cannot compile this code with first generating
 	  these files a providing a symbolic link to this location!  From Ramtin
 	  Amin (2016-11-28).

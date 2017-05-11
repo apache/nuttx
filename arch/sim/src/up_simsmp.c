@@ -248,7 +248,7 @@ static void sim_handle_signal(int signo, siginfo_t *info, void *context)
  *
  * Description:
  *   Create the pthread-specific data key and set the indication of CPU0
- *   the the main thread.
+ *   the main thread.
  *
  * Input Parameters:
  *   None

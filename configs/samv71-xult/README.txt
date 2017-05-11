@@ -1598,7 +1598,7 @@ can be selected as follow:
   ./configure.sh samv71-xult/<subdir>
   cd -
 
-Before building, make sure the the PATH environment variable include the
+Before building, make sure the PATH environment variable include the
 correct path to the directory than holds your toolchain binaries.
 
 And then build NuttX by simply typing the following.  At the conclusion of

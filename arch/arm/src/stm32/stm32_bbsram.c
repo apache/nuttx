@@ -612,7 +612,7 @@ static int stm32_bbsram_ioctl(FAR struct file *filep, int cmd,
  *  This function will remove the remove the file from the file system
  *  it will zero the contents and time stamp. It will leave the fileno
  *  and pointer to the BBSRAM intact.
- *  It should be called called on the the file used for the crash dump
+ *  It should be called called on the file used for the crash dump
  *  to remove it from visibility in the file system after it is created or
  *  read thus arming it.
  *

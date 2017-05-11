@@ -50,7 +50,7 @@ Version 5.1.1
   Paths were also updated that are specific to a 32-bit toolchain running on
   a 64 bit windows platform.  Change to a different toolchain, you will need
   to modify the versioning in Make.defs; if you want to build on a different
-  platform, you will need to change the path the the ZDS binaries in that
+  platform, you will need to change the path the ZDS binaries in that
   files as well as in your PATH environment variable.
 
 Version 5.2.1

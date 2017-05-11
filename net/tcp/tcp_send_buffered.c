@@ -230,7 +230,7 @@ static inline void psock_lost_connection(FAR struct socket *psock,
 static inline void send_ipselect(FAR struct net_driver_s *dev,
                                  FAR struct tcp_conn_s *conn)
 {
-  /* Which domain the the socket support */
+  /* Which domain the socket support */
 
   if (conn->domain == PF_INET)
     {

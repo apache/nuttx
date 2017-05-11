@@ -78,7 +78,7 @@ Status
     - lpc43_ssp.c
 
     These LPC17xx drivers were not brought into the LPC43xx port because
-    it appears the these peripherals have been completely redesigned:
+    it appears that these peripherals have been completely redesigned:
 
     - CAN,
     - Ethernet,

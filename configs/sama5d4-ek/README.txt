@@ -1276,7 +1276,7 @@ Networking
 
   The ETH1 signals go through line drivers that are enabled via the board
   LCD_ETH1_CONFIG signal.  Jumper JP2 selects either the EMAC1 or the LCD by
-  controlling the the LCD_ETH1_CONFIG signal on the board.
+  controlling the LCD_ETH1_CONFIG signal on the board.
 
     - JP2 open, LCD_ETH1_CONFIG pulled high:
 
@@ -3243,7 +3243,7 @@ TM7000 LCD/Touchscreen
   J9 pin 8 LCD_TWD0_PA30   J4 pin 8 SDA_0
   ------------------------ -----------------
 
-  The schematic indicates the the MXT468E address is 0x4c/0x4d.
+  The schematic indicates the MXT468E address is 0x4c/0x4d.
 
   Here are the configuration settings the configuration settings that will
   enable the maXTouch touchscreen controller:
@@ -3720,7 +3720,7 @@ Configurations
 
     NOTES:
 
-    1. This configuration uses the the USART3 for the serial console
+    1. This configuration uses the USART3 for the serial console
        which is available at the "DBGU" RS-232 connector (J24).  That
        is easily changed by reconfiguring to (1) enable a different
        serial peripheral, and (2) selecting that serial peripheral as
@@ -3747,7 +3747,7 @@ Configurations
 
         The ETH1 signals go through line drivers that are enabled via the
         board LCD_ETH1_CONFIG signal.  Jumper JP2 selects either the EMAC1
-        or the LCD by controlling the the LCD_ETH1_CONFIG signal on the
+        or the LCD by controlling the LCD_ETH1_CONFIG signal on the
         board.
 
         - JP2 open, LCD_ETH1_CONFIG pulled high:
@@ -3789,7 +3789,7 @@ Configurations
 
     NOTES:
 
-    1. This configuration uses the the USART3 for the serial console
+    1. This configuration uses the USART3 for the serial console
        which is available at the "DBGU" RS-232 connector (J24).  That
        is easily changed by reconfiguring to (1) enable a different
        serial peripheral, and (2) selecting that serial peripheral as
@@ -3868,7 +3868,7 @@ Configurations
 
     NOTES:
 
-    1. This configuration uses the the USART3 for the serial console
+    1. This configuration uses the USART3 for the serial console
        which is available at the "DBGU" RS-232 connector (J24).  That
        is easily changed by reconfiguring to (1) enable a different
        serial peripheral, and (2) selecting that serial peripheral as
@@ -4021,7 +4021,7 @@ Configurations
 
     NOTES:
 
-    1. This configuration uses the the USART3 for the serial console
+    1. This configuration uses the USART3 for the serial console
        which is available at the "DBGU" RS-232 connector (J24).  That
        is easily changed by reconfiguring to (1) enable a different
        serial peripheral, and (2) selecting that serial peripheral as
@@ -4109,7 +4109,7 @@ Configurations
        Then you will need to follow some special build instructions below
        in order to build and install the ROMFS file system image.
 
-       UPDATE: The ROMFS configuration is pre-configured in the the
+       UPDATE: The ROMFS configuration is pre-configured in the
        file nuttx/configs/sama5d4-ek/knsh/defconfig.ROMFS
 
     5. Board initialization is performed performed before the application
@@ -4166,7 +4166,7 @@ Configurations
         $ make import                       : This will build the file system.
 
       You will then need to copy the files from apps/bin to an SD card to
-      create the the bootable SD card.
+      create the bootable SD card.
 
     6b. General build directions (boot from ROMFS image):
 
@@ -4225,7 +4225,7 @@ Configurations
 
     NOTES:
 
-    1. This configuration uses the the USART3 for the serial console
+    1. This configuration uses the USART3 for the serial console
        which is available at the "DBGU" RS-232 connector (J24).  That
        is easily changed by reconfiguring to (1) enable a different
        serial peripheral, and (2) selecting that serial peripheral as
@@ -4933,7 +4933,7 @@ Configurations
 
     NOTES:
 
-    1. This configuration uses the the USART3 for the serial console
+    1. This configuration uses the USART3 for the serial console
        which is available at the "DBGU" RS-232 connector (J24).  That
        is easily changed by reconfiguring to (1) enable a different
        serial peripheral, and (2) selecting that serial peripheral as

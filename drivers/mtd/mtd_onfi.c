@@ -261,7 +261,7 @@ bool onfi_compatible(uintptr_t cmdaddr, uintptr_t addraddr,
  *   onfi     - The ONFI data structure to populate.
  *
  * Returned Value:
- *   OK is returned on success and the the ONFI data structure is initialized
+ *   OK is returned on success and the ONFI data structure is initialized
  *   with NAND data.  A negated errno value is returned in the event of an
  *   error.
  *

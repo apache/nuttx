@@ -64,7 +64,7 @@
  *   thread.
  * CONFIG_WM8904_BUFFER_SIZE - Preferred buffer size
  * CONFIG_WM8904_NUM_BUFFERS - Preferred number of buffers
- * CONFIG_WM8904_WORKER_STACKSIZE - Stack size to use when creating the the
+ * CONFIG_WM8904_WORKER_STACKSIZE - Stack size to use when creating the
  *   WM8904 worker thread.
  * CONFIG_WM8904_REGDUMP - Enable logic to dump all WM8904 registers to
  *   the SYSLOG device.

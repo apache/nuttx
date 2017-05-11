@@ -142,7 +142,7 @@ config USBHOST_CDCACM_REDUCED
 		status lines. This mode is useful if the number of available
 		endpoints is limited by hardware restrictions.
 
-		If the the CDC/ACM compliant protocol is selected, then the reduced
+		If the CDC/ACM compliant protocol is selected, then the reduced
 		protocol is supported for devices that provide not interrupt IN
 		endpoint.  This option is then most useful for testing purposes or
 		if there are insufficient resources to support the compliant

@@ -61,7 +61,7 @@
  * system clock ticks per second.  That value is a user configurable setting
  * that defaults to 100 (100 ticks per second = 10 MS interval).
  *
- * Then, for example, if the CPU clock is the the SysTick and
+ * Then, for example, if the CPU clock is the SysTick and
  * BOARD_CPU_FREQUENCY is 48MHz and CLK_TCK is 100, then the reload value
  * would be:
  *

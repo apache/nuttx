@@ -789,7 +789,7 @@ int up_putc(int ch)
    * driver operation.
    *
    * REVISIT:  I can imagine scenarios where the follow logic gets pre-empted
-   * and the the UART interrupts get left in a bad state.
+   * and the UART interrupts get left in a bad state.
    */
 
   state = z16f_disableuartirq(&CONSOLE_DEV);

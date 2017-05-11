@@ -429,5 +429,5 @@ STATUS
   CCM memory is not included in the heap (CONFIG_STM32_CCMEXCLUDE=y) because
   it does not suport DMA, leaving only 128KiB for program usage.
 
-2107-01-23:  Added the the knsh configuration and support for the PROTECTED
+2107-01-23:  Added the knsh configuration and support for the PROTECTED
   build mode.

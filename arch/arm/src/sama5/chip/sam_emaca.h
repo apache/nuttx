@@ -1,6 +1,6 @@
 /************************************************************************************
  * arch/arm/src/sama5/chip/sam_emaca.h
- * This is the form of the EMAC interface used the the SAMA5D3 
+ * This is the form of the EMAC interface used the SAMA5D3 
  *
  *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

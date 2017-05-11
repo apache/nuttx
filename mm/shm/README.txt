@@ -79,7 +79,7 @@ Concepts
     int shmctl(int shmid, int cmd, struct shmid_ds *buf);
 
   In order for a process to make use of the memory region, it must be
-  "attached" the the process using:
+  "attached" the process using:
 
     FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg);
 

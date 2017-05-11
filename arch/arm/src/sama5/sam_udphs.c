@@ -1298,7 +1298,7 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
  *     When this function starts a transfer it will update the request
  *     'inflight' field to indicate the size of the transfer.
  *
- *     When the transfer completes, the the 'inflight' field must hold the
+ *     When the transfer completes, the 'inflight' field must hold the
  *     number of bytes that have completed the transfer.  This function will
  *     update 'xfrd' with the new size of the transfer.
  *
@@ -4554,7 +4554,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
       up_enable_irq(SAM_IRQ_UDPHS);
 
       /* Enable pull-up to connect the device.  The host should enumerate us
-       * some time after this.  The next thing we expect the the ENDRESET
+       * some time after this.  The next thing we expect the ENDRESET
        * interrupt.
        */
 

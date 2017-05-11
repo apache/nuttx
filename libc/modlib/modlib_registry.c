@@ -248,7 +248,7 @@ int modlib_registry_del(FAR struct module_s *modp)
  *
  * Returned Value:
  *   If the registry entry is found, a pointer to the module entry is
- *   returned.  NULL is returned if the they entry is not found.
+ *   returned.  NULL is returned if the entry is not found.
  *
  * Assumptions:
  *   The caller holds the lock on the module registry.

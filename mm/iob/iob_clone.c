@@ -86,7 +86,7 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled)
   iob2->io_pktlen = iob1->io_pktlen;
 
   /* Handle special case where there are empty buffers at the head
-   * the the list.
+   * the list.
    */
 
   while (iob1->io_len <= 0)

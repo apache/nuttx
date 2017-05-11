@@ -1,6 +1,6 @@
 /************************************************************************************
  * arch/arm/src/samv7/chip/sam_emac.h
- * This is the form of the EMAC interface used the the SAMV7.
+ * This is the form of the EMAC interface used the SAMV7.
  * This is referred as GMAC in the documentation even though it does not support
  * Gibabit Ethernet.
  *

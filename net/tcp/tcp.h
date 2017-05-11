@@ -259,7 +259,7 @@ struct tcp_conn_s
    *   accept_private: This is private data that will be available to the
    *     accept() handler when it is invoked with a point to this structure
    *     as an argument.
-   *   accept: This is the the pointer to the accept handler.
+   *   accept: This is the pointer to the accept handler.
    */
 
   FAR void *accept_private;
@@ -273,7 +273,7 @@ struct tcp_conn_s
    *     this structure as an argument.
    *   connection_devcb: this is the allocated callback structure that is
    *     used to
-   *   connection_event: This is the the pointer to the connection event
+   *   connection_event: This is the pointer to the connection event
    *     handler.
    */
 

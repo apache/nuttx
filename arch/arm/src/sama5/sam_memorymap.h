@@ -50,7 +50,7 @@
  ************************************************************************************/
 
 /* The vectors are, by default, positioned at the beginning of the text
- * section.  Under what conditions do we have to remap the these vectors?
+ * section.  Under what conditions do we have to remap these vectors?
  *
  * 1) If we are using high vectors (CONFIG_ARCH_LOWVECTORS=n).  In this case,
  *    the vectors will lie at virtual address 0xffff:000 and we will need

@@ -2291,7 +2291,7 @@ config ARCH_SIM
       In the default configuration where system time is provided by a periodic timer interrupt, the default system timer is configure the timer for 100Hz or <code>CONFIG_USEC_PER_TICK=10000</code>. If <code>CONFIG_SCHED_TICKLESS</code> is selected, then there are no system timer interrupt. In this case, <code>CONFIG_USEC_PER_TICK</code> does not control any timer rates. Rather, it only determines the resolution of time reported by <code>clock_systimer()</code> and the resolution of times that can be set for certain delays including watchdog timers and delayed work.
     </p>
     <p>
-      In this case there is still a trade-off: It is better to have the <code>CONFIG_USEC_PER_TICK</code> as low as possible for higher timing resolution. However, the the time is currently held in <code>unsigned int</code>. On some systems, this may be 16-bits in width but on most contemporary systems it will be 32-bits. In either case, smaller values of <code>CONFIG_USEC_PER_TICK</code> will reduce the range of values that delays that can be represented. So the trade-off is between range and resolution (you could also modify the code to use a 64-bit value if you really want both).
+      In this case there is still a trade-off: It is better to have the <code>CONFIG_USEC_PER_TICK</code> as low as possible for higher timing resolution. However, the time is currently held in <code>unsigned int</code>. On some systems, this may be 16-bits in width but on most contemporary systems it will be 32-bits. In either case, smaller values of <code>CONFIG_USEC_PER_TICK</code> will reduce the range of values that delays that can be represented. So the trade-off is between range and resolution (you could also modify the code to use a 64-bit value if you really want both).
     </p>
     <p>
       The default, 100 microseconds, will provide for a range of delays up to 120 hours.
@@ -2408,7 +2408,7 @@ int up_timer_gettime(FAR struct timespec *ts);
 </ul>
 <p><b>Assumptions</b>:</p>
 <ul>
-  Called from the the normal tasking context. The implementation must provide whatever mutual exclusion is necessary for correct operation. This can include disabling interrupts in order to assure atomic register operations.
+  Called from the normal tasking context. The implementation must provide whatever mutual exclusion is necessary for correct operation. This can include disabling interrupts in order to assure atomic register operations.
 </ul>
 
 <h5><a name="upalarmcancel">4.3.4.4.3 <code>up_alarm_cancel()</code></a></h5>
@@ -2761,7 +2761,7 @@ typedef uint32_t  wdparm_t;
 <h3><a name="wqclasses">4.4.1 Classes of Work Queues</a></h3>
 
 <p><b>Classes of Work Queues</b>.
-  There are three different classes of work queues, each with different properties and intended usage.  These class of work queues along with the the common work queue interface are described in the following paragraphs.
+  There are three different classes of work queues, each with different properties and intended usage.  These class of work queues along with the common work queue interface are described in the following paragraphs.
 </p>
 
 <h4><a name="hpwork">4.4.1.1 High Priority Kernel Work queue</a></h4>
@@ -2786,7 +2786,7 @@ typedef uint32_t  wdparm_t;
     The execution priority of the high-priority worker thread.  Default: 224
   </li>
   <li><code>CONFIG_SCHED_HPWORKPERIOD</code>.
-    How often the worker thread re-checks for work in units of microseconds.  This work period is really only necessary if the the high priority thread is performing periodic garbage collection.  The worker thread will be awakened immediately with it is queued work to be done.  If the high priority worker thread is performing garbage collection, then the default is 50*1000 (50 MS).  Otherwise, if the lower priority worker thread is performing garbage collection, the default is 100*1000.
+    How often the worker thread re-checks for work in units of microseconds.  This work period is really only necessary if the high priority thread is performing periodic garbage collection.  The worker thread will be awakened immediately with it is queued work to be done.  If the high priority worker thread is performing garbage collection, then the default is 50*1000 (50 MS).  Otherwise, if the lower priority worker thread is performing garbage collection, the default is 100*1000.
   <li><code>CONFIG_SCHED_HPWORKSTACKSIZE</code>.
     The stack size allocated for the worker thread in bytes.  Default: 2048.
   </li>

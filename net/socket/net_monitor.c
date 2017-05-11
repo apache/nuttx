@@ -241,7 +241,7 @@ int net_startmonitor(FAR struct socket *psock)
       conn->connection_devcb   = NULL;
       conn->connection_event   = NULL;
 
-      /* And return -ENOTCONN to indicate the the monitor was not started
+      /* And return -ENOTCONN to indicate the monitor was not started
        * because the socket was already disconnected.
        */
 

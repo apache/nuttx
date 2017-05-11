@@ -69,7 +69,7 @@
  * real work.
  * Since there is no real data transfer to/or from a battery, all of the
  * driver interaction is through IOCTIL commands.  The IOCTL commands
- * supported by the upper-half driver simply provide calls into the the
+ * supported by the upper-half driver simply provide calls into the
  * lower half as summarized below:
  *
  * BATIOC_STATE - Return the current state of the battery (see

@@ -102,7 +102,7 @@ static inline void arm_tmprestore(uint32_t l1save)
  *
  * Description:
  *   If the page memory pool is statically mapped, then we do not have to
- *   go through the the temporary mapping.  We simply have to perform a
+ *   go through the temporary mapping.  We simply have to perform a
  *   physical to virtual memory address mapping.
  *
  ****************************************************************************/

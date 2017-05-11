@@ -120,7 +120,7 @@ void usbhost_devaddr_initialize(FAR struct usbhost_roothubport_s *rhport);
  *     newly connected and so is in need of a function address.
  *
  * Returned Value:
- *   On success, a new device function address in the the range 0x01 to 0x7f
+ *   On success, a new device function address in the range 0x01 to 0x7f
  *   is returned.  On failure, a negated errno value is returned.
  *
  ****************************************************************************/

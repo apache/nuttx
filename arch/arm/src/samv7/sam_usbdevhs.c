@@ -1359,7 +1359,7 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
  *     When this function starts a transfer it will update the request
  *     'inflight' field to indicate the size of the transfer.
  *
- *     When the transfer completes, the the 'inflight' field must hold the
+ *     When the transfer completes, the 'inflight' field must hold the
  *     number of bytes that have completed the transfer.  This function will
  *     update 'xfrd' with the new size of the transfer.
  *

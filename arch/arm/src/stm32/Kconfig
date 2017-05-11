@@ -6855,7 +6855,7 @@ config STM32_LTDC_DITHER_BLUE
 config STM32_LTDC_FB_BASE
 	hex "Framebuffer memory start address"
 	---help---
-		If you are using the the LTDC, then you must provide the address
+		If you are using the LTDC, then you must provide the address
 		of the start of the framebuffer.  This address will typically
 		be in the SRAM or SDRAM memory region of the FSMC.
 

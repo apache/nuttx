@@ -68,7 +68,7 @@
  *   avoid potentially very long (600Ms+) busy waiting in the MMCSD driver.
  *
  *   To implement D0 Busy signalling, the underlying SDIO driver must be
- *   capable of switching the the D0 GPIO to be a rising edge sensitive
+ *   capable of switching the D0 GPIO to be a rising edge sensitive
  *   interrupt pin. It must then, condition that pin to detect the rising
  *   edge on receipt of SDWAIT_WRCOMPLETE in the SDIO_WAITENABLE call and
  *   return it back to regular SDIO mode, when either the ISR fires or pin

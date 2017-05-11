@@ -326,7 +326,7 @@ Code Red IDE
   ------------------------------------
 
   Under Cygwin, the Code Red command line tools (e.g., arm-non-eabi-gcc) cannot
-  be executed because the they only have execut privileges for Administrators.  I
+  be executed because they only have execute privileges for Administrators.  I
   worked around this by:
 
   Opening a native Cygwin RXVT as Administrator (Right click, "Run as administrator"),

@@ -430,7 +430,7 @@ Freescale MPL115A barometer sensor
 LCD/Touchscreen Interface
 =========================
 
-  An LCD may be connected via J11.  Only the the STM32F103 supports the FSMC signals
+  An LCD may be connected via J11.  Only the STM32F103 supports the FSMC signals
   needed to drive the LCD.
 
   The LCD features an (1) HY32D module with built-in SSD1289 LCD controller, and (a)
@@ -599,7 +599,7 @@ Configurations
 
     NOTES:
     1. This configuration will work only on the version the viewtool
-       board with the the STM32F107VCT6 installed.  If you have a board
+       board with the STM32F107VCT6 installed.  If you have a board
        with the STM32F103VCT6 installed, please use the nsh configuration
        described below.
 

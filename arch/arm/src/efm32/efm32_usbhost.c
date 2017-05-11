@@ -1955,8 +1955,8 @@ static ssize_t efm32_in_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
           /* Check for a special case:  If (1) the transfer was NAKed and (2)
            * no Tx FIFO empty or Rx FIFO not-empty event occurred, then we
            * should be able to just flush the Rx and Tx FIFOs and try again.
-           * We can detect this latter case because the then the transfer
-           * buffer pointer and buffer size will be unaltered.
+           * We can detect this latter case because then the transfer buffer
+           * pointer and buffer size will be unaltered.
            */
 
           elapsed = clock_systimer() - start;
@@ -2221,8 +2221,8 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
           /* Check for a special case:  If (1) the transfer was NAKed and (2)
            * no Tx FIFO empty or Rx FIFO not-empty event occurred, then we
            * should be able to just flush the Rx and Tx FIFOs and try again.
-           * We can detect this latter case because the then the transfer
-           * buffer pointer and buffer size will be unaltered.
+           * We can detect this latter case because then the transfer buffer
+           * pointer and buffer size will be unaltered.
            */
 
           elapsed = clock_systimer() - start;
@@ -4613,7 +4613,7 @@ static ssize_t efm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
  *   enqueue the transfer request and return immediately.  When the transfer
- *   completes, the the callback will be invoked with the provided transfer.
+ *   completes, the callback will be invoked with the provided transfer.
  *   This method is useful for receiving interrupt transfers which may come
  *   infrequently.
  *

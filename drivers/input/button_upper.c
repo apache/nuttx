@@ -824,7 +824,7 @@ errout_with_dusem:
  *
  * Input Parameters:
  *   devname - The name of the button device to be registered.
- *     This should be a string of the form "/dev/btnN" where N is the the
+ *     This should be a string of the form "/dev/btnN" where N is the
  *     minor device number.
  *   lower - An instance of the platform-specific button lower half driver.
  *

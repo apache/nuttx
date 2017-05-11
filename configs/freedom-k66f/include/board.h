@@ -147,7 +147,7 @@
 
 /*
  * Kinetis does not have pullups on their Freedom-K66F board
- * So allow the the board config to enable them.
+ * So allow the board config to enable them.
  */
 
 #define BOARD_SDHC_ENABLE_PULLUPS 1

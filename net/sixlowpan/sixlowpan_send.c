@@ -312,7 +312,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
           sinfo.s_cb->priv    = (FAR void *)&sinfo;
           sinfo.s_cb->event   = send_interrupt;
 
-          /* Notify the the IEEE802.15.4 MAC that we have data to send. */
+          /* Notify the IEEE802.15.4 MAC that we have data to send. */
 
           netdev_txnotify_dev(dev);
 

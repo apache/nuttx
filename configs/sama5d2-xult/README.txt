@@ -24,7 +24,7 @@ STATUS
 1. Most of this document is a partially corrected clone of the SAMA5D4-EK
    README.txt and still contains errors and inconsistencies.
 
-2. Coding is complete for the the basic SAMA5D2-XULT NSH configuration, but
+2. Coding is complete for the basic SAMA5D2-XULT NSH configuration, but
    is completely untested as of this writing (2015-09-15).  The primary
    issue is  that I have not yet determine how to load and test code.
 
@@ -994,7 +994,7 @@ Configurations
 
     NOTES:
 
-    1. This configuration uses the the USART3 for the serial console
+    1. This configuration uses the USART3 for the serial console
        which is available at the "DBGU" RS-232 connector (J24).  That
        is easily changed by reconfiguring to (1) enable a different
        serial peripheral, and (2) selecting that serial peripheral as

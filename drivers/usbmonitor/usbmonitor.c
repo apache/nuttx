@@ -272,7 +272,7 @@ int usbmonitor_stop(void)
   if (g_usbmonitor.started)
     {
       /* Stop the USB monitor.  The next time the monitor wakes up,
-       * it will see the the stop indication and will exist.
+       * it will see the stop indication and will exist.
        */
 
       uinfo("Stopping: %d\n", g_usbmonitor.pid);

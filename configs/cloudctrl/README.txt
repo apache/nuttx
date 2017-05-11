@@ -340,7 +340,7 @@ NuttX EABI buildroot Toolchain
      -CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y
      +CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y
 
-  9. Set the the PATH variable so tht it includes the path to the newly built
+  9. Set the PATH variable so tht it includes the path to the newly built
      binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more

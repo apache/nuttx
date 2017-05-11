@@ -207,7 +207,7 @@
 
 /* LCD
  *
- * An LCD may be connected via J11.  Only the the STM32F103 supports the FSMC signals
+ * An LCD may be connected via J11.  Only the STM32F103 supports the FSMC signals
  * needed to drive the LCD.
  *
  * The LCD features an (1) HY32D module with built-in SSD1289 LCD controller, and (a)

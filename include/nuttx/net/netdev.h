@@ -258,7 +258,7 @@ struct net_driver_s
   FAR uint8_t *d_buf;
 
   /* d_appdata points to the location where application data can be read from
-   * or written to in the the packet buffer.
+   * or written to in the packet buffer.
    */
 
   uint8_t *d_appdata;

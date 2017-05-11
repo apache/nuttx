@@ -100,8 +100,8 @@ struct exepath_s
  *   On success, exepath_init() return a non-NULL, opaque handle that may
  *   subsequently be used in calls to exepath_next() and exepath_release().
  *   On error, a NULL handle value will be returned.  The most likely cause
- *   of an error would be that the there is no value associated with the
- *   PATH variable.
+ *   of an error would be that there is no value associated with the PATH
+ *   variable.
  *
  ****************************************************************************/
 

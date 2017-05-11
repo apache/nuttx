@@ -1464,7 +1464,7 @@
 
 /* UART_PRE_IDLE_NUM : R/W ;bitpos:[23:0] ;default: 24'h186a00 ; */
 /* Description: This register is used to configure the idle duration time
- * before the first at_cmd is received by receiver. when the the duration
+ * before the first at_cmd is received by receiver. when the duration
  * is less than this register value it will not take the next data received
  * as at_cmd char.
  */

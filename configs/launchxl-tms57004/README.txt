@@ -46,7 +46,7 @@ Toolchain
 
   Endian-ness Issues
   ------------------
-  I started using the the "GNU Tools for ARM Embedded Processors" that is
+  I started using the "GNU Tools for ARM Embedded Processors" that is
   maintained by ARM.
 
     https://launchpad.net/gcc-arm-embedded

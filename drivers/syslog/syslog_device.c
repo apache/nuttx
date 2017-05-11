@@ -335,7 +335,7 @@ int syslog_dev_initialize(FAR const char *devpath, int oflags, int mode)
   DEBUGASSERT(g_syslog_dev.sl_state == SYSLOG_UNINITIALIZED ||
               g_syslog_dev.sl_state == SYSLOG_REOPEN);
 
-  /* Save the the path to the device in case we have to re-open it.
+  /* Save the path to the device in case we have to re-open it.
    * If we get here and sl_devpath is not equal to NULL, that is a clue
    * that we will are re-openingthe file.
    */

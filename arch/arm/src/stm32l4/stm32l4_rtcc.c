@@ -1295,7 +1295,7 @@ int stm32l4_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
   ASSERT(alminfo != NULL);
   DEBUGASSERT(RTC_ALARM_LAST > alminfo->as_id);
 
-  /* Make sure the the alarm interrupt is enabled at the NVIC */
+  /* Make sure the alarm interrupt is enabled at the NVIC */
 
   rtc_enable_alarm();
 

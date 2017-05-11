@@ -1551,7 +1551,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
         {
           priv->segments++;
 
-          /* Check if the there is only one segment in the frame */
+          /* Check if there is only one segment in the frame */
 
           if (priv->segments == 1)
             {

@@ -72,7 +72,7 @@ static FAR struct arp_notify_s *g_arp_waiters;
  *
  * Description:
  *   Called BEFORE an ARP request is sent.  This function sets up the ARP
- *   response timeout before the the ARP request is sent so that there is
+ *   response timeout before the ARP request is sent so that there is
  *   no race condition when arp_wait() is called.
  *
  * Assumptions:

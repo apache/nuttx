@@ -3164,7 +3164,7 @@ static void lpc17_asynch_completion(struct lpc17_usbhost_s *priv,
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
  *   enqueue the transfer request and return immediately.  When the transfer
- *   completes, the the callback will be invoked with the provided transfer.
+ *   completes, the callback will be invoked with the provided transfer.
  *   This method is useful for receiving interrupt transfers which may come
  *   infrequently.
  *

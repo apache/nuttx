@@ -1427,7 +1427,7 @@ uint32_t sam_tc_divfreq(TC_HANDLE handle)
 
   DEBUGASSERT(chan);
 
-  /* Get the the TC_CMR register contents for this channel and extract the
+  /* Get the TC_CMR register contents for this channel and extract the
    * TCCLKS index.
    */
 

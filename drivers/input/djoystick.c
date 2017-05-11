@@ -828,7 +828,7 @@ errout_with_dusem:
  *
  * Input Parameters:
  *   devname - The name of the discrete joystick device to be registers.
- *     This should be a string of the form "/priv/djoyN" where N is the the
+ *     This should be a string of the form "/priv/djoyN" where N is the
  *     minor device number.
  *   lower - An instance of the platform-specific discrete joystick lower
  *     half driver.

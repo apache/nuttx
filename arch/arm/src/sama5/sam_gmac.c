@@ -834,7 +834,7 @@ static int sam_txpoll(struct net_driver_s *dev)
 
       sam_transmit(priv);
 
-      /* Check if the there are any free TX descriptors.  We cannot perform
+      /* Check if there are any free TX descriptors.  We cannot perform
        * the TX poll if we do not have buffering for another packet.
        */
 
@@ -881,7 +881,7 @@ static void sam_dopoll(struct sam_gmac_s *priv)
 {
   struct net_driver_s *dev = &priv->dev;
 
-  /* Check if the there are any free TX descriptors.  We cannot perform the
+  /* Check if there are any free TX descriptors.  We cannot perform the
    * TX poll if we do not have buffering for another packet.
    */
 
@@ -1735,7 +1735,7 @@ static void sam_poll_work(FAR void *arg)
   FAR struct sam_gmac_s *priv = (FAR struct sam_gmac_s *)arg;
   struct net_driver_s *dev  = &priv->dev;
 
-  /* Check if the there are any free TX descriptors.  We cannot perform the
+  /* Check if there are any free TX descriptors.  We cannot perform the
    * TX poll if we do not have buffering for another packet.
    */
 

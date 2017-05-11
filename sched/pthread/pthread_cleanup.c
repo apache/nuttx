@@ -127,7 +127,7 @@ static void pthread_cleanup_pop_tcb(FAR struct pthread_tcb_s *tcb, int execute)
  *   - The thread calls pthread_cleanup_pop() with a non-zero execute argument.
  *
  * Input Parameters:
- *   routine - The cleanup routine to be pushed on the the cleanup stack.
+ *   routine - The cleanup routine to be pushed on the cleanup stack.
  *   arg     - An argument that will accompany the callback.
  *   execute - Execute the popped cleanup function immediately.
  *

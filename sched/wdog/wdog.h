@@ -116,7 +116,7 @@ void weak_function wd_initialize(void);
  *
  * Parameters:
  *   ticks - If CONFIG_SCHED_TICKLESS is defined then the number of ticks
- *     in the the interval that just expired is provided.  Otherwise,
+ *     in the interval that just expired is provided.  Otherwise,
  *     this function is called on each timer interrupt and a value of one
  *     is implicit.
  *

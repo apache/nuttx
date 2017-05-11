@@ -46,7 +46,7 @@
  *    definitions provide the common interface between NuttX and the
  *    architecture-specific implementation in arch/
  *
- *    These definitions are retained in the the header file
+ *    These definitions are retained in the header file
  *    nuttx/include/arch.h
  *
  *    NOTE: up_ is supposed to stand for microprocessor; the u is like the
@@ -148,7 +148,7 @@ void board_initialize(void);
  *   arg - The boardctl() argument is passed to the board_app_initialize()
  *         implementation without modification.  The argument has no
  *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the the
+ *         between the board-specific initalization logic and the
  *         matching application logic.  The value cold be such things as a
  *         mode enumeration value, a set of DIP switch switch settings, a
  *         pointer to configuration data read from a file or serial FLASH,

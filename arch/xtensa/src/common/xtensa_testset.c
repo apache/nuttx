@@ -133,7 +133,7 @@ spinlock_t up_testset(volatile FAR spinlock_t *lock)
    *  code."
    *
    * In any case, the return value of SP_UNLOCKED can be trusted and will
-   * always mean that the the spinlock was set.
+   * always mean that the spinlock was set.
    */
 
   return (prev == SP_UNLOCKED) ? SP_UNLOCKED : SP_LOCKED;

@@ -682,7 +682,7 @@ refresh.sh
   The steps to refresh the file taken by refresh.sh are:
 
   1. Make tools/cmpconfig if it is not already built.
-  2. Copy the the defconfig file to the top-level NuttX
+  2. Copy the defconfig file to the top-level NuttX
      directory as .config (being careful to save any previous
      .config file that you might want to keep!).
   3. Execute 'make oldconfig' to update the configuration.

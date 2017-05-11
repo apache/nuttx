@@ -249,7 +249,7 @@ struct smart_struct_s
   uint8_t               minwearlevel;     /* Min level in the wear level bits */
   uint8_t               maxwearlevel;     /* Max level in the wear level bits */
   uint8_t              *wearstatus;       /* Array of wear leveling bits */
-  uint32_t              uneven_wearcount; /* Number of times the the wear level has gone over max */
+  uint32_t              uneven_wearcount; /* Number of times the wear level has gone over max */
 #endif
 #ifdef CONFIG_MTD_SMART_ENABLE_CRC
   FAR struct smart_allocsector_s  *allocsector; /* Pointer to first alloc sector */

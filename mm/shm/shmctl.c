@@ -106,7 +106,7 @@
  *       to be stored in the structure pointed to by the buf argument.
  *
  * POSIX Deviations:
- *     - IPC_SET.  Does not set the the shm_perm.uid or shm_perm.gid
+ *     - IPC_SET.  Does not set the shm_perm.uid or shm_perm.gid
  *       members of the shmid_ds data structure associated with shmid
  *       because user and group IDs are not yet supported by NuttX
  *     - IPC_SET.  Does not restrict the operation to processes with
@@ -195,7 +195,7 @@ int shmctl(int shmid, int cmd, struct shmid_ds *buf)
         goto errout_with_semaphore;
     }
 
-  /* Save the process ID of the the last operation */
+  /* Save the process ID of the last operation */
 
   region = &g_shminfo.si_region[shmid];
   region->sr_ds.shm_lpid = getpid();

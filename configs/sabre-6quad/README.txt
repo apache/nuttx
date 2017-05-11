@@ -370,7 +370,7 @@ some other debuggers that you might want to consider.
 
 These instructions all assume that you have built NuttX with debug symbols
 enabled.  When debugging the nuttx.bin file on the SD card, it is also
-assumed the the nuttx ELF file with the debug symbol addresses is from the
+assumed the nuttx ELF file with the debug symbol addresses is from the
 same build so that the symbols match up.
 
 Debugging the NuttX image on the SD card

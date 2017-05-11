@@ -580,7 +580,7 @@ void sam_dbgu_devinitialize(void)
   putreg32(DBGU_INT_ALLINTS, SAM_DBGU_IDR);
 
 #ifdef CONFIG_SAMA5_DBGU_CONSOLE
-  /* Configuration the DBGU as the the console */
+  /* Configuration the DBGU as the console */
 
   g_dbgu_port.isconsole = true;
   dbgu_configure();

@@ -279,7 +279,7 @@ static size_t vnc_copy32(FAR struct vnc_session_s *session,
  *
  * Returned Value:
  *   Zero (OK) on success; A negated errno value is returned on failure that
- *   indicates the the nature of the failure.  A failure is only returned
+ *   indicates the nature of the failure.  A failure is only returned
  *   in cases of a network failure and unexpected internal failures.
  *
  ****************************************************************************/

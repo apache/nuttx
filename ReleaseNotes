@@ -11146,7 +11146,7 @@ Additional new features and extended functionality:
       - SYSLOG character device channel will now expand LF to CR-LF.
         Controllable with a configuration option.
       - Add a SYSLOG character device that can be used to re-direct output
-        to the SYSLOG channel (Not be be confused the the SYSLGO output to a
+        to the SYSLOG channel (Not be be confused the SYSLGO output to a
         character device).
       - Debug features are now enabled separately from debug output.
         (1) CONFIG_DEBUG is gone. It is replaced with CONFIG_DEBUG_FEATURES.
@@ -12417,7 +12417,7 @@ Additional new features and extended functionality:
       - Misoc LM32 Qemu:  Integrate network support into configs/misoc/hello.
         From Ramtin Amin.
       - Misoc LM32 Qemu:  Remove configs/misoc/include/generated directory.  I
-        suppose the the intent now is that this is a symbolic link?  DANGER!
+        suppose the intent now is that this is a symbolic link?  DANGER!
         This means that you cannot compile this code with first generating
         these files a providing a symbolic link to this location!   There is a
         sample directory containing generated sources.  This is really only

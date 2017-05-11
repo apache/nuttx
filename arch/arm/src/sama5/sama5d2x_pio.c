@@ -571,13 +571,13 @@ bool sam_pioread(pio_pinset_t pinset)
       pin = sam_piopin(pinset);
 
       /* For output PIOs, the ODSR register provides the output value to
-       * drive the pin.  The PDSR register, on the the other hand, provides
+       * drive the pin.  The PDSR register, on the other hand, provides
        * the current sensed value on a pin, whether the pin is configured
        * as an input, an output or as a peripheral.
        *
        * There is small delay between the setting in ODSR and PDSR but
-       * otherwise the they should be the same unless something external
-       * is driving the pin.
+       * otherwise they should be the same unless something external is
+       * driving the pin.
        *
        * Let's assume that PDSR is what the caller wants.
        */

@@ -101,7 +101,7 @@ config USEC_PER_TICK
 		In the "normal" configuration where system time is provided by a
 		periodic timer interrupt, the default system timer is expected to
 		run at 100Hz or USEC_PER_TICK=10000.  This setting must be defined
-		to inform of NuttX the interval that the the processor hardware is
+		to inform of NuttX the interval that the processor hardware is
 		providing system timer interrupts to the OS.
 
 		If SCHED_TICKLESS is selected, then there are no system timer
@@ -110,7 +110,7 @@ config USEC_PER_TICK
 		by clock_systimer() and the resolution of times that can be set for
 		certain delays including watchdog timers and delayed work.  In this
 		case there is a trade-off:  It is better to have the USEC_PER_TICK as
-		low as possible for higher timing resolution.  However, the the time
+		low as possible for higher timing resolution.  However, the time
 		is currently held in 'unsigned int' on some systems, this may be
 		16-bits but on most contemporary systems it will be 32-bits.  In
 		either case, smaller values of USEC_PER_TICK will reduce the range

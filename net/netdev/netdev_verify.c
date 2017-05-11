@@ -71,7 +71,7 @@ bool netdev_verify(FAR struct net_driver_s *dev)
   net_lock();
   for (chkdev = g_netdevices; chkdev != NULL; chkdev = chkdev->flink)
     {
-      /* Is the the network device that we are looking for? */
+      /* Is the network device that we are looking for? */
 
       if (chkdev == dev)
         {

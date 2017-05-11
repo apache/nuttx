@@ -6433,7 +6433,7 @@ The cancellation cleanup handler will be popped from the cancellation cleanup st
 <b>Input Parameters:</b>
 <p>
 <ul>
-  <li><code>routine</code>.  The cleanup routine to be pushed on the the cleanup stack.</li>
+  <li><code>routine</code>.  The cleanup routine to be pushed on the cleanup stack.</li>
   <li><code>arg</code>.  An argument that will accompany the callback.</li>
 </ul>
 <p>
@@ -10115,7 +10115,7 @@ int shmctl(int shmid, int cmd, FAR struct shmid_ds *buf);
 <ul>
   <li>
     <code>IPC_SET</code>.
-    Does not set the the <code>shm_perm.uid</code> or <code>shm_perm.gid</code>members of the <code>shmid_ds</code> data structure associated with <code>shmid</code> because user and group IDs are not yet supported by NuttX
+    Does not set the <code>shm_perm.uid</code> or <code>shm_perm.gid</code>members of the <code>shmid_ds</code> data structure associated with <code>shmid</code> because user and group IDs are not yet supported by NuttX
   </li>
   <li>
     <code>IPC_SET</code>.

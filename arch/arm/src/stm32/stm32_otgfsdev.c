@@ -5238,7 +5238,7 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
 # endif
 
 #else
-  /* In the case of the the all others the meaning of the bit is No VBUS
+  /* In the case of the all others the meaning of the bit is No VBUS
    * Sense when Set
    */
 

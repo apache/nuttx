@@ -175,7 +175,7 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
 
   region->sr_ds.shm_nattch++;
 
-  /* Save the process ID of the the last operation */
+  /* Save the process ID of the last operation */
 
   region->sr_ds.shm_lpid = tcb->pid;
 

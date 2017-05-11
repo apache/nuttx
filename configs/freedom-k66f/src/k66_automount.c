@@ -305,7 +305,7 @@ void k66_automount_event(bool inserted)
 
       if (!state->enable)
         {
-          /* Yes.. just remember the there is a pending interrupt. We will
+          /* Yes.. just remember that there is a pending interrupt. We will
            * deliver the interrupt when interrupts are "re-enabled."
            */
 

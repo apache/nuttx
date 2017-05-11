@@ -262,7 +262,7 @@ static void sam_pio_enableclk(pio_pinset_t cfgset)
  *   1) No pins are configured as PIO inputs (peripheral inputs don't need
  *      clocking, and
  *   2) Glitch and debounce filtering are not enabled.  Currently, this can
- *      only happen if the the pin is a PIO input, but we may need to
+ *      only happen if the pin is a PIO input, but we may need to
  *      implement glitch filtering on peripheral inputs as well in the
  *      future???
  *   3) The port is not configured for PIO interrupts.  At present, the logic
@@ -816,13 +816,13 @@ bool sam_pioread(pio_pinset_t pinset)
       pin = sam_piopin(pinset);
 
       /* For output PIOs, the ODSR register provides the output value to
-       * drive the pin.  The PDSR register, on the the other hand, provides
+       * drive the pin.  The PDSR register, on the other hand, provides
        * the current sensed value on a pin, whether the pin is configured
        * as an input, an output or as a peripheral.
        *
        * There is small delay between the setting in ODSR and PDSR but
-       * otherwise the they should be the same unless something external
-       * is driving the pin.
+       * otherwise they should be the same unless something external is
+       * driving the pin.
        *
        * Let's assume that PDSR is what the caller wants.
        */

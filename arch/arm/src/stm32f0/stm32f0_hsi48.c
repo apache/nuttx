@@ -137,7 +137,7 @@ void stm32f0_enable_hsi48(enum syncsrc_e syncsrc)
 
   putreg32(regval, STM32F0_CRS_CFGR);
 
-  /* Set the AUTOTRIMEN bit the the CRS_CR register to enables the automatic
+  /* Set the AUTOTRIMEN bit the CRS_CR register to enables the automatic
    * hardware adjustment of TRIM bits according to the measured frequency
    * error between the selected SYNC event.
    */

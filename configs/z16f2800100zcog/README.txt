@@ -142,7 +142,7 @@ following steps:
 Where <sub-directory> is the specific board configuration that you
 wish to build.  The following board-specific configurations are
 available.  You may also need to apply a path to NuttX before making.
-Please refer the the section "Patches" above"
+Please refer the section "Patches" above"
 
 Configuration Sub-directories
 =============================

@@ -1245,7 +1245,7 @@ static int nand_wait_dma(struct sam_nandcs_s *priv)
  *
  * Description:
  *   Called when one NAND DMA sequence completes.  This function just wakes
- *   the the waiting NAND driver logic.
+ *   the waiting NAND driver logic.
  *
  ****************************************************************************/
 

@@ -739,7 +739,7 @@ static int sixlowpan_dispatch(FAR struct ieee802154_driver_s *ieee)
  *
  *   When the packet in the d_buf is fully reassembled, it will be provided
  *   to the network as with any other received packet.  d_len will be set
- *   the the length of the uncompressed, reassembled packet.
+ *   the length of the uncompressed, reassembled packet.
  *
  *   After the network processes the packet, d_len will be set to zero.
  *   Network logic may also decide to send a response to the packet.  In

@@ -227,10 +227,10 @@ configs/eagle100
   arm-nuttx-elf toolchain*.  STATUS:  This port is complete and mature.
 
 configs/efm32-g8xx-stk
-  The port of NuttX to the the EFM32 Gecko Starter Kit (EFM32-G8XX-STK).
+  The port of NuttX to the EFM32 Gecko Starter Kit (EFM32-G8XX-STK).
 
 configs/efm32gg-stk3700
-  The port of NuttX to the the EFM32 Giant Gecko Starter Kit
+  The port of NuttX to the EFM32 Giant Gecko Starter Kit
   (EFM32GG-STK3700).
 
 configs/ekk-lm3s9b96

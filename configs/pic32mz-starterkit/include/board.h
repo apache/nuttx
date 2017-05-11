@@ -269,7 +269,7 @@
  *   --------------- --------- -------------- ------------
  *
  * The following pin assignment is used with the MEB-II board.  If you are
- * using signals from PIC32MZEC Adaptor Board (as described in the the README
+ * using signals from PIC32MZEC Adaptor Board (as described in the README
  * file), then UART1 signals are available at these locations on the adaptor
  * board:
  *

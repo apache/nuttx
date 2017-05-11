@@ -93,7 +93,7 @@ struct pcm_decode_s
   /* These are our operations that intervene between the player application
    * and the lower level driver.  Unlike the ops in the struct
    * audio_lowerhalf_s, these are writeable because we need to customize a
-   * few of the methods based upon what is supported by the the lower level
+   * few of the methods based upon what is supported by the lower level
    * driver.
    */
 
@@ -414,7 +414,7 @@ static bool pcm_parsewav(FAR struct pcm_decode_s *priv, uint8_t *data)
 #endif
     }
 
-  /* And return true if the the file is a valid WAV header file */
+  /* And return true if the file is a valid WAV header file */
 
   return ret;
 }
