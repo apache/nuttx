@@ -130,6 +130,10 @@ int _vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 
   ret = lib_vsprintf(&stream.public, fmt, *ap);
 
+  /* Flush the output */
+
+  stream.public.flush(&stream.public);
+
 #ifdef CONFIG_SYSLOG_BUFFER
   /* Destroy the syslog stream buffer */
 

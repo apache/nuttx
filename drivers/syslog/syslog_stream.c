@@ -82,9 +82,9 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
           iob->io_len++;
           this->nput++;
 
-          /* Is the buffer full?  Did we encounter a new line? */
+          /* Is the buffer full? */
 
-          if (iob->io_len >= CONFIG_IOB_BUFSIZE || ch == '\n')
+          if (iob->io_len >= CONFIG_IOB_BUFSIZE)
             {
               /* Yes.. then flush the buffer */
 
