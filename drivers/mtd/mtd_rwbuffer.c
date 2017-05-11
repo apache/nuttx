@@ -357,57 +357,60 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd)
    */
 
   priv = (FAR struct mtd_rwbuffer_s *)kmm_zalloc(sizeof(struct mtd_rwbuffer_s));
-  if (priv)
+  if (!priv)
     {
-      /* Initialize the allocated structure. (unsupported methods/fields
-       * were already nullified by kmm_zalloc).
-       */
+      ferr("ERROR: Failed to allocate mtd_rwbuffer\n");
+      return NULL;
+    }
 
-      priv->mtd.erase    = mtd_erase;  /* Our MTD erase method */
-      priv->mtd.bread    = mtd_bread;  /* Our MTD bread method */
-      priv->mtd.bwrite   = mtd_bwrite; /* Our MTD bwrite method */
-      priv->mtd.read     = mtd_read;   /* Our MTD read method */
-      priv->mtd.ioctl    = mtd_ioctl;  /* Our MTD ioctl method */
+  /* Initialize the allocated structure. (unsupported methods/fields
+   * were already nullified by kmm_zalloc).
+   */
 
-      priv->dev          = mtd;        /* The contained MTD instance */
+  priv->mtd.erase    = mtd_erase;  /* Our MTD erase method */
+  priv->mtd.bread    = mtd_bread;  /* Our MTD bread method */
+  priv->mtd.bwrite   = mtd_bwrite; /* Our MTD bwrite method */
+  priv->mtd.read     = mtd_read;   /* Our MTD read method */
+  priv->mtd.ioctl    = mtd_ioctl;  /* Our MTD ioctl method */
 
-      /* Sectors per block.  The erase block size must be an even multiple
-       * of the sector size.
-       */
+  priv->dev          = mtd;        /* The contained MTD instance */
 
-      priv->spb          = geo.erasesize / geo.blocksize;
-      DEBUGASSERT((size_t)priv->spb * geo.blocksize == geo.erasesize);
+  /* Sectors per block.  The erase block size must be an even multiple
+   * of the sector size.
+   */
 
-      /* Values must be provided to rwb_initialize() */
-      /* Supported geometry */
+  priv->spb          = geo.erasesize / geo.blocksize;
+  DEBUGASSERT((size_t)priv->spb * geo.blocksize == geo.erasesize);
 
-      priv->rwb.blocksize = geo.blocksize;
-      priv->rwb.nblocks   = geo.neraseblocks * priv->spb;
+  /* Values must be provided to rwb_initialize() */
+  /* Supported geometry */
 
-      /* Buffer setup */
+  priv->rwb.blocksize = geo.blocksize;
+  priv->rwb.nblocks   = geo.neraseblocks * priv->spb;
+
+  /* Buffer setup */
 
 #ifdef CONFIG_DRVR_WRITEBUFFER
-      priv->rwb.wrmaxblocks = CONFIG_MTD_NWRBLOCKS;
+  priv->rwb.wrmaxblocks = CONFIG_MTD_NWRBLOCKS;
 #endif
 #ifdef CONFIG_DRVR_READAHEAD
-      priv->rwb.rhmaxblocks = CONFIG_MTD_NRDBLOCKS;
+  priv->rwb.rhmaxblocks = CONFIG_MTD_NRDBLOCKS;
 #endif
 
-      /* Callouts */
+  /* Callouts */
 
-      priv->rwb.dev       = priv;             /* Device state passed to callouts */
-      priv->rwb.wrflush   = mtd_flush;        /* Callout to flush buffer */
-      priv->rwb.rhreload  = mtd_reload;       /* Callout to reload buffer */
+  priv->rwb.dev       = priv;             /* Device state passed to callouts */
+  priv->rwb.wrflush   = mtd_flush;        /* Callout to flush buffer */
+  priv->rwb.rhreload  = mtd_reload;       /* Callout to reload buffer */
 
-      /* Initialize read-ahead/write buffering */
+  /* Initialize read-ahead/write buffering */
 
-      ret = rwb_initialize(&priv->rwb);
-      if (ret < 0)
-        {
-          ferr("ERROR: rwb_initialize failed: %d\n", ret);
-          kmm_free(priv);
-          return NULL;
-        }
+  ret = rwb_initialize(&priv->rwb);
+  if (ret < 0)
+    {
+      ferr("ERROR: rwb_initialize failed: %d\n", ret);
+      kmm_free(priv);
+      return NULL;
     }
 
   /* Register the MTD with the procfs system if enabled */
@@ -418,7 +421,6 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd)
 
   /* Return the implementation-specific state structure as the MTD device */
 
-  finfo("Return %p\n", priv);
   return &priv->mtd;
 }
 

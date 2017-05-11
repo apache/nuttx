@@ -29,7 +29,7 @@ config MTD_PARTITION
 config FTL_WRITEBUFFER
 	bool "Enable write buffering in the FTL layer"
 	default n
-	depends on DRVR_WRITEBUFFER
+	depends on DRVR_WRITEBUFFER && FS_WRITABLE
 
 config FTL_READAHEAD
 	bool "Enable read-ahead buffering in the FTL layer"

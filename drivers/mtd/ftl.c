@@ -528,7 +528,7 @@ int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd)
 
   /* Allocate a FTL device structure */
 
-  dev = (struct ftl_struct_s *)kmm_malloc(sizeof(struct ftl_struct_s));
+  dev = (struct ftl_struct_s *)kmm_zalloc(sizeof(struct ftl_struct_s));
   if (dev)
     {
       /* Initialize the FTL device structure */
@@ -586,6 +586,9 @@ int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd)
       if (ret < 0)
         {
           ferr("ERROR: rwb_initialize failed: %d\n", ret);
+#ifdef CONFIG_FS_WRITABLE
+          kmm_free(dev->eblock);
+#endif
           kmm_free(dev);
           return ret;
         }
@@ -601,6 +604,9 @@ int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd)
       if (ret < 0)
         {
           ferr("ERROR: register_blockdriver failed: %d\n", -ret);
+#ifdef CONFIG_FS_WRITABLE
+          kmm_free(dev->eblock);
+#endif
           kmm_free(dev);
         }
     }
