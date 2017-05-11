@@ -41,6 +41,7 @@
 
 #include <stdio.h>
 #include <syslog.h>
+#include <errno.h>
 
 #include <nuttx/init.h>
 #include <nuttx/arch.h>
