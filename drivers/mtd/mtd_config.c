@@ -148,7 +148,7 @@ static const struct file_operations mtdconfig_fops =
 /****************************************************************************
  * Name: mtdconfig_readbytes
  *
- *    Reads bytes from the contained MTD device.  This will either usee
+ *    Reads bytes from the contained MTD device.  This will either use
  *    the read function or if that is not available, the bread with a copy.
  *
  ****************************************************************************/
@@ -162,9 +162,9 @@ static int  mtdconfig_readbytes(FAR struct mtdconfig_struct_s *dev, int offset,
   int    ret = OK;
   size_t bytes;
 
-  /* Test if read interface supported.  If it is, use it directly */
+  /* Test if read interface supported.  If it is, use it directly. */
 
-  if ((dev->mtd->read == NULL) && (readlen < dev->blocksize))
+  if ((dev->mtd->read != NULL) && (readlen < dev->blocksize))
     {
       /* Read interface available.  Read directly to buffer */
 
