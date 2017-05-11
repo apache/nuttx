@@ -962,7 +962,7 @@ static int tmpfs_find_object(FAR struct tmpfs_s *fs,
 
       next_segment = strtok_r(NULL, "/", &tkptr);
 
-      /* Search the the next directory. */
+      /* Search the next directory. */
 
       tdo = next_tdo;
 
@@ -1301,7 +1301,7 @@ static int tmpfs_foreach(FAR struct tmpfs_directory_s *tdo,
           FAR struct tmpfs_directory_s *next =
             (FAR struct tmpfs_directory_s *)to;
 
-          /* Yes.. traverse its children first in the case the the final
+          /* Yes.. traverse its children first in the case the final
            * action will be to delete the directory.
            */
 
