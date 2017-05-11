@@ -1,9 +1,10 @@
 /************************************************************************************
- * arch/arm/src/stm32l4/chip/stm32l4_flash.h
+ * arch/arm/src/stm32l4/stm32l4_flash.h
  *
- *   Copyright (C) 2009, 2011, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           David Sidrane <david_s5@nscdg.com>
+ *   Copyright (C) 2009, 2011, 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
+ *            Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,8 +35,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_FLASH_H
-#define __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_FLASH_H
+#ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_FLASH_H
+#define __ARCH_ARM_SRC_STM32L4_STM32L4_FLASH_H
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -122,10 +123,12 @@
 #define STM32L4_FLASH_PCROP1ER_OFFSET 0x0028
 #define STM32L4_FLASH_WRP1AR_OFFSET   0x002c
 #define STM32L4_FLASH_WRP1BR_OFFSET   0x0030
-#define STM32L4_FLASH_PCROP2SR_OFFSET 0x0044
-#define STM32L4_FLASH_PCROP2ER_OFFSET 0x0048
-#define STM32L4_FLASH_WRP2AR_OFFSET   0x004c
-#define STM32L4_FLASH_WRP2BR_OFFSET   0x0050
+#if defined(CONFIG_STM32L4_STM32L4X6)
+#  define STM32L4_FLASH_PCROP2SR_OFFSET 0x0044
+#  define STM32L4_FLASH_PCROP2ER_OFFSET 0x0048
+#  define STM32L4_FLASH_WRP2AR_OFFSET   0x004c
+#  define STM32L4_FLASH_WRP2BR_OFFSET   0x0050
+#endif
 
 /* Register Addresses ***************************************************************/
 
@@ -141,10 +144,12 @@
 #define STM32L4_FLASH_PCROP1ER       (STM32L4_FLASHIF_BASE+STM32L4_FLASH_PCROP1ER_OFFSET)
 #define STM32L4_FLASH_WRP1AR         (STM32L4_FLASHIF_BASE+STM32L4_FLASH_WRP1AR_OFFSET)
 #define STM32L4_FLASH_WRP1BR         (STM32L4_FLASHIF_BASE+STM32L4_FLASH_WRP1BR_OFFSET)
-#define STM32L4_FLASH_PCROP2SR       (STM32L4_FLASHIF_BASE+STM32L4_FLASH_PCROP2SR_OFFSET)
-#define STM32L4_FLASH_PCROP2ER       (STM32L4_FLASHIF_BASE+STM32L4_FLASH_PCROP2ER_OFFSET)
-#define STM32L4_FLASH_WRP2AR         (STM32L4_FLASHIF_BASE+STM32L4_FLASH_WRP2AR_OFFSET)
-#define STM32L4_FLASH_WRP2BR         (STM32L4_FLASHIF_BASE+STM32L4_FLASH_WRP2BR_OFFSET)
+#if defined(CONFIG_STM32L4_STM32L4X6)
+#  define STM32L4_FLASH_PCROP2SR       (STM32L4_FLASHIF_BASE+STM32L4_FLASH_PCROP2SR_OFFSET)
+#  define STM32L4_FLASH_PCROP2ER       (STM32L4_FLASHIF_BASE+STM32L4_FLASH_PCROP2ER_OFFSET)
+#  define STM32L4_FLASH_WRP2AR         (STM32L4_FLASHIF_BASE+STM32L4_FLASH_WRP2AR_OFFSET)
+#  define STM32L4_FLASH_WRP2BR         (STM32L4_FLASHIF_BASE+STM32L4_FLASH_WRP2BR_OFFSET)
+#endif
 
 /* Register Bitfield Definitions ****************************************************/
 /* Flash Access Control Register (ACR) */
@@ -170,6 +175,7 @@
 
 #define FLASH_SR_EOP                (1 << 0)  /* Bit 0:  End of operation */
 #define FLASH_SR_OPERR              (1 << 1)  /* Bit 1:  Operation error */
+#define FLASH_SR_PROGERR            (1 << 3)  /* Bit 3:  Programming error */
 #define FLASH_SR_WRPERR             (1 << 4)  /* Bit 4:  Write protection error */
 #define FLASH_SR_PGAERR             (1 << 5)  /* Bit 5:  Programming alignment error */
 #define FLASH_SR_SIZERR             (1 << 6)  /* Bit 6:  Size error */
@@ -179,6 +185,9 @@
 #define FLASH_SR_RDERR              (1 << 14) /* Bit 14: PCROP read error */
 #define FLASH_SR_OPTVERR            (1 << 15) /* Bit 15: Option validity error */
 #define FLASH_SR_BSY                (1 << 16) /* Bit 16: Busy */
+#if defined(CONFIG_STM32L4_STM32L4X3)
+#  define FLASH_SR_PEMPTY           (1 << 17) /* Bit 17: Program empty */
+#endif
 
 /* Flash Control Register (CR) */
 
@@ -190,8 +199,10 @@
 #define FLASH_CR_PNB_MASK           (0xFF << FLASH_CR_PNB_SHIFT)
 #define FLASH_CR_PNB(n)             ((n)  << FLASH_CR_PNB_SHIFT) /* Page n (if BKER=0) or n+256 (if BKER=1), n=0..255 */
 
-#define FLASH_CR_BKER               (1 << 11)               /* Bit 11: Page number MSB (Bank selection) */
-#define FLASH_CR_MER2               (1 << 15)               /* Bit 15: Mass Erase Bank 2 */
+#if defined(CONFIG_STM32L4_STM32L4X6)
+#  define FLASH_CR_BKER             (1 << 11)               /* Bit 11: Page number MSB (Bank selection) */
+#  define FLASH_CR_MER2             (1 << 15)               /* Bit 15: Mass Erase Bank 2 */
+#endif
 #define FLASH_CR_START              (1 << 16)               /* Bit 16: Start Erase */
 #define FLASH_CR_OPTSTRT            (1 << 17)               /* Bit 17: Options modification Start */
 #define FLASH_CR_FSTPG              (1 << 23)               /* Bit 23: Fast programming */
@@ -206,7 +217,9 @@
 
 #define FLASH_ECCR_ADDR_ECC_SHIFT   (0)                    /* Bits 8-15: Read protect */
 #define FLASH_ECCR_ADDR_ECC_MASK    (0x07ffff << FLASH_ECCR_ADDR_ECC_SHIFT)
-#define FLASH_ECCR_BK_ECC           (1 << 19)               /* Bit 19: ECC fail bank */
+#if defined(CONFIG_STM32L4_STM32L4X6)
+#  define FLASH_ECCR_BK_ECC         (1 << 19)               /* Bit 19: ECC fail bank */
+#endif
 #define FLASH_ECCR_SYSF_ECC         (1 << 20)               /* Bit 20: System Flash ECC fail */
 #define FLASH_ECCR_ECCCIE           (1 << 24)               /* Bit 24: ECC correction interrupt enable */
 #define FLASH_ECCR_ECCC             (1 << 30)               /* Bit 30: ECC correction */
@@ -221,11 +234,18 @@
 #define FLASH_OPTCR_IWDG_STOP       (1 << 17)               /* Bit 17: Independent watchdog counter freeze in Stop mode */
 #define FLASH_OPTCR_IWDG_STDBY      (1 << 18)               /* Bit 18: Independent watchdog counter freeze in Standby mode*/
 #define FLASH_OPTCR_WWDG_SW         (1 << 19)               /* Bit 19: Window watchdog selection */
-#define FLASH_OPTCR_BFB2            (1 << 20)               /* Bit 20: Dual bank boot */
-#define FLASH_OPTCR_DUALBANK        (1 << 21)               /* Bit 21: Dual bank enable */
+#if defined(CONFIG_STM32L4_STM32L4X6)
+#  define FLASH_OPTCR_BFB2          (1 << 20)               /* Bit 20: Dual bank boot */
+#  define FLASH_OPTCR_DUALBANK      (1 << 21)               /* Bit 21: Dual bank enable */
+#endif
 #define FLASH_OPTCR_NBOOT1          (1 << 23)               /* Bit 23: Boot configuration */
 #define FLASH_OPTCR_SRAM2_PE        (1 << 24)               /* Bit 24: SRAM2 parity check enable */
-#define FLASH_OPTCR_SRAM2_RST       (1 << 25)               /* Bit 24: SRAM2 Erase when system reset */
+#define FLASH_OPTCR_SRAM2_RST       (1 << 25)               /* Bit 25: SRAM2 Erase when system reset */
+#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L496XX)
+#  define FLASH_OPTCR_NSWBOOT0      (1 << 26)               /* Bit 26: Software BOOT0 */
+#  define FLASH_OPTCR_NBOOT0        (1 << 27)               /* Bit 27: nBOOT0 option bit */
+#endif
+
 #define FLASH_OPTCR_BORLEV_SHIFT    (8)                     /* Bits 8-10: BOR reset Level */
 #define FLASH_OPTCR_BORLEV_MASK     (7 << FLASH_OPTCR_BORLEV_SHIFT)
 #define FLASH_OPTCR_VBOR0           (0 << FLASH_OPTCR_BORLEV_SHIFT) /* 000: BOR Level 0 (1.7 V) */
@@ -242,7 +262,7 @@
  * Public Functions
  ************************************************************************************/
 
-void STM32L4_flash_lock(void);
-void STM32L4_flash_unlock(void);
+void stm32l4_flash_lock(void);
+void stm32l4_flash_unlock(void);
 
-#endif /* __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_FLASH_H */
+#endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_FLASH_H */
