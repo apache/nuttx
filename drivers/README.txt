@@ -12,11 +12,11 @@ Contents:
 Files in this directory
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-dev_null.c and dev_zero.c
-  These files provide the standard /dev/null and /dev/zero devices.
-  See include/nuttx/fs/fs.h for functions that should be called if you
-  want to register these devices (devnull_register() and
-  devzero_register()).
+dev_null.c, dev_urandom, and dev_zero.c
+  These files provide the standard /dev/null, /dev/urandom, and /dev/zero
+  devices.  See include/nuttx/drivers/driers.h for prototypes of functions
+  that should be called if you want to register these devices
+  (devnull_register(), devurandom_register(), and devzero_register()).
 
 pwm.c
   Provides the "upper half" of a pulse width modulation (PWM) driver.
