@@ -490,7 +490,7 @@ o pthreads (sched/pthreads)
   Status:      Not really open.  This is just the way it is.
   Priority:    Nothing additional is planned.
 
-  Title:       PTHREAD FILES IN WRONG LOCATTION
+  Title:       PTHREAD FILES IN WRONG LOCATION
   Description: There are many pthread interface functions in files located in
                sched/pthread.  These should be moved from that location to
                libc/pthread.  In the flat build, this really does not matter,
