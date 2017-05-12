@@ -357,7 +357,7 @@
 #define _RELAYIOC(nr)     _IOC(_RELAYBASE,nr)
 
 /* CAN driver ioctl definitions *********************************************/
-/* (see nuttx/drivers/can.h */
+/* (see nuttx/can/can.h */
 
 #define _CANIOCVALID(c)   (_IOC_TYPE(c)==_CANBASE)
 #define _CANIOC(nr)       _IOC(_CANBASE,nr)
