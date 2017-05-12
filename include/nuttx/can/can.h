@@ -1,5 +1,5 @@
 /************************************************************************************
- * include/nuttx/drivers/can.h
+ * include/nuttx/can/can.h
  *
  *   Copyright (C) 2008, 2009, 2011-2012, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_DRVERS_CAN_H
-#define __INCLUDE_NUTTX_DRVERS_CAN_H
+#ifndef __INCLUDE_NUTTX_CAN_CAN_H
+#define __INCLUDE_NUTTX_CAN_CAN_H
 
 /************************************************************************************
  * Included Files
@@ -819,4 +819,4 @@ int can_txready(FAR struct can_dev_s *dev);
 #endif
 
 #endif /* CONFIG_CAN */
-#endif /* __INCLUDE_NUTTX_DRVERS_CAN_H */
+#endif /* __INCLUDE_NUTTX_CAN_CAN_H */

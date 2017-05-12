@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/can.c
+ * drivers/can/can.c
  *
  *   Copyright (C) 2008-2009, 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -57,7 +57,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/drivers/can.h>
+#include <nuttx/can/can.h>
 
 #ifdef CONFIG_CAN_TXREADY
 #  include <nuttx/wqueue.h>
