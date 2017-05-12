@@ -12,10 +12,6 @@ Contents:
 Files in this directory
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-can.c
-  This is a CAN driver.  See include/nuttx/drivers/can.h for usage
-  information.
-
 dev_null.c and dev_zero.c
   These files provide the standard /dev/null and /dev/zero devices.
   See include/nuttx/fs/fs.h for functions that should be called if you
@@ -54,6 +50,10 @@ bch/
   a character driver.  This is the complementary conversion as that
   performed by loop.c.  See include/nuttx/fs/fs.h for registration
   information.
+
+can/
+  This is the CAN drivers and logic support.  See include/nuttx/can/can.h
+  for usage information.
 
 contactless/
   Contactless devices are related to wireless devices.  They are not

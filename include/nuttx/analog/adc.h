@@ -6,7 +6,7 @@
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
  *           Gregory Nutt <gnutt@nuttx.org>
  *
- * Derived from include/nuttx/drivers/can.h
+ * Derived from include/nuttx/can/can.h
  *
  *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
