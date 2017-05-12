@@ -518,9 +518,22 @@ ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen)
        remaining > 0;
        endptr++, remaining--)
     {
+      bool crlf = false;
+
+      /* Check for a CR-LF sequence */
+
+      if (remaining > 1 &&
+          ((endptr[0] == '\r' && endptr[1] == '\n') ||
+           (endptr[0] == '\n' && endptr[1] == '\r')))
+        {
+          endptr++;
+          remaining--;
+          crlf = true;
+        }
+
       /* Special case carriage return and line feed */
 
-      if (*endptr == '\r' || *endptr == '\n')
+      if (!crlf && (*endptr == '\r' || *endptr == '\n'))
         {
           /* Write everything up to this point, ignore the special
            * character.

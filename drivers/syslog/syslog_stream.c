@@ -95,6 +95,33 @@ static int syslogstream_flush(FAR struct lib_syslogstream_s *stream)
 #endif
 
 /****************************************************************************
+ * Name: syslogstream_addchar
+ ****************************************************************************/
+
+static void syslogstream_addchar(FAR struct lib_syslogstream_s *stream, int ch)
+{
+  FAR struct iob_s *iob = stream->iob;
+
+  /* Add the incoming character to the buffer */
+
+  iob->io_data[iob->io_len] = ch;
+  iob->io_len++;
+
+  /* Increment the total number of bytes buffered. */
+
+  stream->public.nput++;
+
+  /* Is the buffer full? */
+
+  if (iob->io_len >= CONFIG_IOB_BUFSIZE)
+    {
+      /* Yes.. then flush the buffer */
+
+      syslogstream_flush(stream);
+    }
+}
+
+/****************************************************************************
  * Name: syslogstream_putc
  ****************************************************************************/
 
@@ -105,31 +132,27 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
   if (ch != '\r')
     {
 #ifdef CONFIG_SYSLOG_BUFFER
-      FAR struct lib_syslogstream_s *stream;
-      FAR struct iob_s *iob;
+      FAR struct lib_syslogstream_s *stream =
+        (FAR struct lib_syslogstream_s *)this;
 
-      DEBUGASSERT(this != NULL);
-      stream = (FAR struct lib_syslogstream_s *)this;
-      iob    = stream->iob;
+      DEBUGASSERT(stream != NULL);
 
       /* Do we have an IO buffer? */
 
-      if (iob != NULL)
+      if (stream->iob != NULL)
         {
-          /* Yes.. Add the incoming character to the buffer */
+          /* Is this a linefeed? */
 
-          iob->io_data[iob->io_len] = ch;
-          iob->io_len++;
-          this->nput++;
-
-          /* Is the buffer full? */
-
-          if (iob->io_len >= CONFIG_IOB_BUFSIZE)
+          if (ch == '\n')
             {
-              /* Yes.. then flush the buffer */
+              /* Yes... pre-pend carriage return */
 
-              syslogstream_flush(stream);
+              syslogstream_addchar(stream, '\r');
             }
+
+          /* Add the incoming character to the buffer */
+
+          syslogstream_addchar(stream, ch);
         }
       else
 #endif
