@@ -49,7 +49,7 @@
 #include "chip.h"
 #include "chip/stm32l4_can.h"
 
-#include <nuttx/drivers/can.h>
+#include <nuttx/can/can.h>
 
 /************************************************************************************
  * Pre-processor Definitions
