@@ -518,59 +518,60 @@ ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen)
        remaining > 0;
        endptr++, remaining--)
     {
-      bool crlf = false;
+      /* Check for carriage return or line feed */
 
-      /* Check for a CR-LF sequence */
-
-      if (remaining > 1 &&
-          ((endptr[0] == '\r' && endptr[1] == '\n') ||
-           (endptr[0] == '\n' && endptr[1] == '\r')))
+      if (*endptr == '\r' || *endptr == '\n')
         {
-          endptr++;
-          remaining--;
-          crlf = true;
-        }
+          /* Check for pre-formatted CR-LF sequence */
 
-      /* Special case carriage return and line feed */
-
-      if (!crlf && (*endptr == '\r' || *endptr == '\n'))
-        {
-          /* Write everything up to this point, ignore the special
-           * character.
-           *
-           * - buffer points to next byte to output.
-           * - endptr points to the special character.
-           */
-
-           writelen = (size_t)((uintptr_t)endptr - (uintptr_t)buffer);
-           if (writelen > 0)
+          if (remaining > 1 &&
+              ((endptr[0] == '\r' && endptr[1] == '\n') ||
+               (endptr[0] == '\n' && endptr[1] == '\r')))
             {
-              nwritten = file_write(&g_syslog_dev.sl_file, buffer, writelen);
-              if (nwritten < 0)
-                {
-                  errcode = -nwritten;
-                  goto errout_with_sem;
-                }
+              /* Just skip over pre-formatted CR-LF or LF-CR sequence */
+
+              endptr++;
+              remaining--;
             }
-
-          /* Ignore the carriage return, but for the linefeed, output
-           * both a carriage return and a linefeed.
-           */
-
-          if (*endptr == '\n')
+          else
             {
-              nwritten = file_write(&g_syslog_dev.sl_file, g_syscrlf, 2);
-              if (nwritten < 0)
+              /* Write everything up to the position of the special
+               * character.
+               *
+               * - buffer points to next byte to output.
+               * - endptr points to the special character.
+               */
+
+               writelen = (size_t)((uintptr_t)endptr - (uintptr_t)buffer);
+               if (writelen > 0)
                 {
-                  errcode = -nwritten;
-                  goto errout_with_sem;
+                  nwritten = file_write(&g_syslog_dev.sl_file, buffer, writelen);
+                  if (nwritten < 0)
+                    {
+                      errcode = -nwritten;
+                      goto errout_with_sem;
+                    }
                 }
+
+              /* Ignore the carriage return, but for the linefeed, output
+               * both a carriage return and a linefeed.
+               */
+
+              if (*endptr == '\n')
+                {
+                  nwritten = file_write(&g_syslog_dev.sl_file, g_syscrlf, 2);
+                  if (nwritten < 0)
+                    {
+                      errcode = -nwritten;
+                      goto errout_with_sem;
+                    }
+                }
+
+              /* Adjust pointers */
+
+               writelen++;         /* Skip the special character */
+               buffer += writelen; /* Points past the special character */
             }
-
-          /* Adjust pointers */
-
-           writelen++;         /* Skip the special character */
-           buffer += writelen; /* Points past the special character */
         }
     }
 
