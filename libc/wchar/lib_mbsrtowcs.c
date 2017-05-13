@@ -54,7 +54,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mbsrtowcs 
+ * Name: mbsrtowcs
  *
  * Description:
  *   Convert a multibyte string to a wide-character string
