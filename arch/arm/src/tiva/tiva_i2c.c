@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/tiva/tiva_i2c.c
  *
- *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * The basic structure of this driver derives in spirit (if nothing more) from the
@@ -1378,7 +1378,7 @@ static int tiva_i2c_process(struct tiva_i2c_priv_s *priv, uint32_t status)
  *
  ************************************************************************************/
 
-#if !defined(CONFIG_I2C_POLLED) && defined(CONFIG_TIVA_I2C0)
+#ifndef CONFIG_I2C_POLLED
 static int tiva_i2c_interrupt(int irq, void *context, void *arg)
 {
   struct tiva_i2c_priv_s *priv = (struct tiva_i2c_priv_s *)arg;
