@@ -353,7 +353,7 @@
    /* The STM32 F2 and the STM32 F401/F411 have no CCM SRAM */
 
 #  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F401) || \
-      defined(CONFIG_STM32_STM32F411)
+      defined(CONFIG_STM32_STM32F411) || defined(CONFIG_STM32_STM32F410)
 #    undef CONFIG_STM32_CCMEXCLUDE
 #    define CONFIG_STM32_CCMEXCLUDE 1
 #  endif
@@ -362,6 +362,8 @@
 
 #  if defined(CONFIG_STM32_STM32F401)
 #    define SRAM1_END 0x20018000
+#  elif defined(CONFIG_STM32_STM32F410)
+#    define SRAM1_END 0x20008000
 #  elif defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 #    define SRAM1_END 0x20030000
 #  elif defined(CONFIG_STM32_STM32F446)

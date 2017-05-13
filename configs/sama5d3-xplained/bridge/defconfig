@@ -34,6 +34,7 @@ CONFIG_INTELHEX_BINARY=y
 # CONFIG_MOTOROLA_SREC is not set
 CONFIG_RAW_BINARY=y
 # CONFIG_UBOOT_UIMAGE is not set
+# CONFIG_DFU_BINARY is not set
 
 #
 # Customize Header Files
@@ -329,6 +330,7 @@ CONFIG_SAMA5_BOOT_SDRAM=y
 #
 # CONFIG_SAMA5_ISRAM_HEAP is not set
 # CONFIG_SAMA5_DDRCS_RESERVE is not set
+CONFIG_ARCH_TOOLCHAIN_GNU=y
 
 #
 # Architecture Options
@@ -349,6 +351,7 @@ CONFIG_ARCH_NAND_HWECC=y
 # CONFIG_ARCH_HAVE_EXTCLK is not set
 # CONFIG_ARCH_HAVE_POWEROFF is not set
 # CONFIG_ARCH_HAVE_RESET is not set
+# CONFIG_ARCH_HAVE_RTC_SUBSECONDS is not set
 CONFIG_ARCH_USE_MMU=y
 # CONFIG_ARCH_ADDRENV is not set
 # CONFIG_PAGING is not set
@@ -544,11 +547,6 @@ CONFIG_DEV_NULL=y
 #
 # Buffering
 #
-
-#
-# Common  I/O Buffer Support
-#
-# CONFIG_MM_IOB is not set
 # CONFIG_DRVR_WRITEBUFFER is not set
 # CONFIG_DRVR_READAHEAD is not set
 # CONFIG_RAMDISK is not set
@@ -699,7 +697,9 @@ CONFIG_OTHER_SERIAL_CONSOLE=y
 # System Logging
 #
 # CONFIG_ARCH_SYSLOG is not set
+CONFIG_SYSLOG_WRITE=y
 # CONFIG_RAMLOG is not set
+# CONFIG_SYSLOG_BUFFER is not set
 # CONFIG_SYSLOG_INTBUFFER is not set
 # CONFIG_SYSLOG_TIMESTAMP is not set
 CONFIG_SYSLOG_SERIAL_CONSOLE=y
@@ -867,6 +867,11 @@ CONFIG_MM_REGIONS=1
 # CONFIG_MM_PGALLOC is not set
 
 #
+# Common I/O Buffer Support
+#
+# CONFIG_MM_IOB is not set
+
+#
 # Audio Support
 #
 # CONFIG_AUDIO is not set
@@ -874,6 +879,7 @@ CONFIG_MM_REGIONS=1
 #
 # Wireless Support
 #
+# CONFIG_WIRELESS is not set
 
 #
 # Binary Loader
@@ -1203,3 +1209,10 @@ CONFIG_READLINE_ECHO=y
 #
 # Wireless Libraries and NSH Add-Ons
 #
+
+#
+# IEEE 802.15.4 applications
+#
+# CONFIG_IEEE802154_LIBMAC is not set
+# CONFIG_IEEE802154_LIBUTILS is not set
+# CONFIG_IEEE802154_I8SAK is not set
