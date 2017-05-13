@@ -82,7 +82,8 @@
 /* Port Modes */
                                                        /* Unshifted versions: */
 #define PIN_MODE_ANALOG        (0)                     /*   000 Pin Disabled (Analog) */
-#define PIN_MODE_GPIO          (1)                     /*   001 Alternative 1 (GPIO) */
+#define PIN_MODE_ALT1          (1)                     /*   001 Alternative 1 */
+#define PIN_MODE_GPIO          PIN_MODE_ALT1           /*   001 Alternative 1 (GPIO) */
 #define PIN_MODE_ALT2          (2)                     /*   010 Alternative 2 */
 #define PIN_MODE_ALT3          (3)                     /*   011 Alternative 3 */
 #define PIN_MODE_ALT4          (4)                     /*   100 Alternative 4 */
@@ -91,6 +92,7 @@
 #define PIN_MODE_ALT7          (7)                     /*   111 Alternative 7 */
                                                        /* Shifted versions: */
 #define _PIN_MODE_ANALOG       (0 << _PIN_MODE_SHIFT)  /*   000 Pin Disabled (Analog) */
+#define _PIN_MODE_ALT1         (1 << _PIN_MODE_SHIFT)  /*   001 Alternative 1 */
 #define _PIN_MODE_GPIO         (1 << _PIN_MODE_SHIFT)  /*   001 Alternative 1 (GPIO) */
 #define _PIN_MODE_ALT2         (2 << _PIN_MODE_SHIFT)  /*   010 Alternative 2 */
 #define _PIN_MODE_ALT3         (3 << _PIN_MODE_SHIFT)  /*   011 Alternative 3 */
@@ -136,6 +138,17 @@
 #define GPIO_OPENDRAIN         (_PIN_MODE_GPIO | _PIN_OUTPUT_OPENDRAIN)
 #define GPIO_LOWDRIVE          (_PIN_MODE_GPIO | _PIN_OUTPUT_LOWDRIVE)
 #define GPIO_HIGHDRIVE         (_PIN_MODE_GPIO | _PIN_OUTPUT_HIGHDRIVE)
+
+#define PIN_ALT1               _PIN_MODE_ALT1
+#define PIN_ALT1_INPUT         (_PIN_MODE_ALT1 | _PIN_INPUT)
+#define PIN_ALT1_PULLDOWN      (_PIN_MODE_ALT1 | _PIN_INPUT_PULLDOWN)
+#define PIN_ALT1_PULLUP        (_PIN_MODE_ALT1 | _PIN_INPUT_PULLUP)
+#define PIN_ALT1_OUTPUT        (_PIN_MODE_ALT1 | _PIN_OUTPUT)
+#define PIN_ALT1_FAST          (_PIN_MODE_ALT1 | _PIN_OUTPUT_FAST)
+#define PIN_ALT1_SLOW          (_PIN_MODE_ALT1 | _PIN_OUTPUT_SLOW)
+#define PIN_ALT1_OPENDRAIN     (_PIN_MODE_ALT1 | _PIN_OUTPUT_OPENDRAIN)
+#define PIN_ALT1_LOWDRIVE      (_PIN_MODE_ALT1 | _PIN_OUTPUT_LOWDRIVE)
+#define PIN_ALT1_HIGHDRIVE     (_PIN_MODE_ALT1 | _PIN_OUTPUT_HIGHDRIVE)
 
 #define PIN_ALT2               _PIN_MODE_ALT2
 #define PIN_ALT2_INPUT         (_PIN_MODE_ALT2 | _PIN_INPUT)
