@@ -463,6 +463,7 @@ config ARM_TOOLCHAIN_IAR
 config ARM_TOOLCHAIN_GNU
 	bool
 	default n
+	select ARCH_TOOLCHAIN_GNU
 
 config ARMV7M_USEBASEPRI
 	bool "Use BASEPRI Register"
