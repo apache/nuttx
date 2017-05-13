@@ -615,7 +615,7 @@
 #define PIN_TPM1_CH1_3            (PIN_ALT6   | PIN_PORTB | PIN1)
 #define PIN_TPM2_CH0_1            (PIN_ALT6   | PIN_PORTA | PIN10)
 #define PIN_TPM2_CH0_2            (PIN_ALT6   | PIN_PORTB | PIN18)
-#define PIN_TPM2_CH1_1            (PIN_ALT1   | PIN_PORTA | PIN11)
+#define PIN_TPM2_CH1_1            (PIN_ALT6   | PIN_PORTA | PIN11)
 #define PIN_TPM2_CH1_2            (PIN_ALT6   | PIN_PORTB | PIN19)
 
 #define PIN_TPM_CLKIN0_1          (PIN_ALT7   | PIN_PORTA | PIN18)
