@@ -1842,6 +1842,8 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
       return -ENOTTY;  
     }
 
+  mac802154_givesem(&priv->exclsem);
+
   return OK;
 
 errout:
