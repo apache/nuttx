@@ -185,6 +185,8 @@ static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
                */
 
               conn->crefs = 1;
+
+#ifndef CONFIG_NET_ACCEPT_ON_ACK
               if (tcp_accept_connection(dev, conn, tmp16) != OK)
                 {
                   /* No, then we have to give the connection back and drop the packet */
@@ -193,6 +195,7 @@ static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
                   tcp_free(conn);
                   conn = NULL;
                 }
+#endif
             }
 
           if (!conn)
@@ -463,6 +466,23 @@ found:
         if ((flags & TCP_ACKDATA) != 0)
           {
             conn->tcpstateflags = TCP_ESTABLISHED;
+
+#ifdef CONFIG_NET_ACCEPT_ON_ACK
+            if (tcp_accept_connection(dev, conn, tcp->destport) != OK)
+              {
+                /* No more listener for current port.  We can free conn here
+                 * because it has not been shared with upper layers yet as
+                 * handshake is not complete
+                 */
+
+                nerr("Listen canceled while waiting for ACK on port %d\n",
+                     tcp->destport);
+                conn->crefs = 0;
+                tcp_free(conn);
+                conn = NULL;
+                goto drop;
+              }
+#endif
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
             conn->isn           = tcp_getsequence(tcp->ackno);
