@@ -486,10 +486,16 @@ found:
 
                 nerr("Listen canceled while waiting for ACK on port %d\n",
                      tcp->destport);
+
+                /* Free the connection structure */
+
                 conn->crefs = 0;
                 tcp_free(conn);
                 conn = NULL;
-                goto drop;
+
+                /* And send a reset packet to the remote host. */
+
+                goto reset;
               }
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
