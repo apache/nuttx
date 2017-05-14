@@ -257,7 +257,7 @@ int tcp_accept_connection(FAR struct net_driver_s *dev,
    */
 
   listener = tcp_findlistener(portno);
-  if (listener)
+  if (listener != NULL)
     {
       /* Yes, there is a listener.  Is it accepting connections now? */
 

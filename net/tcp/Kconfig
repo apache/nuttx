@@ -156,13 +156,6 @@ config NET_TCPBACKLOG
 		Incoming connections pend in a backlog until accept() is called.
 		The size of the backlog is selected when listen() is called.
 
-config NET_ACCEPT_ON_ACK
-	bool "accept() returns on TCP 3-Way Handshake completion"
-	default n
-	---help---
-		accept() returns after 3-Way Handshake is complete (SYN, SYN/ACK, ACK).
-		Without this flag it returns after SYN packet is received.
-
 config NET_TCP_SPLIT
 	bool "Enable packet splitting"
 	default n

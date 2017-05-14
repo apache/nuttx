@@ -179,23 +179,25 @@ static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
           conn = tcp_alloc_accept(dev, tcp);
           if (conn)
             {
-              /* The connection structure was successfully allocated.  Now see if
-               * there is an application waiting to accept the connection (or at
-               * least queue it it for acceptance).
+              /* The connection structure was successfully allocated and has
+               * been initialized in the TCP_SYN_RECVD state.  The expected
+               * sequence of events is then the rest of the 3-way handshake:
+               *
+               *  1. We just received a TCP SYN packet from a remote host.
+               *  2. We will send the SYN-ACK response below (perhaps
+               *     repeatedly in the event of a timeout)
+               *  3. Then we expect to receive an ACK from the remote host
+               *     indicated the TCP socket connection is ESTABLISHED.
+               *
+               * Possible failure:
+               *
+               *  1. The ACK is never received.  This will be handled by
+               *     a timeout managed by tcp_timer().
+               *  2. The listener "unlistens()".  This will be handled by
+               *     the failure of tcp_accept_connection() when the ACK is received.
                */
 
               conn->crefs = 1;
-
-#ifndef CONFIG_NET_ACCEPT_ON_ACK
-              if (tcp_accept_connection(dev, conn, tmp16) != OK)
-                {
-                  /* No, then we have to give the connection back and drop the packet */
-
-                  conn->crefs = 0;
-                  tcp_free(conn);
-                  conn = NULL;
-                }
-#endif
             }
 
           if (!conn)
@@ -465,9 +467,14 @@ found:
 
         if ((flags & TCP_ACKDATA) != 0)
           {
+            /* The three way handshake is complete and the TCP connection
+             * is now in the ESTABLISHED state.
+             */
+
             conn->tcpstateflags = TCP_ESTABLISHED;
 
-#ifdef CONFIG_NET_ACCEPT_ON_ACK
+            /* Wake up any listener waiting for a connection on this port */
+
             if (tcp_accept_connection(dev, conn, tcp->destport) != OK)
               {
                 /* No more listener for current port.  We can free conn here
@@ -482,7 +489,6 @@ found:
                 conn = NULL;
                 goto drop;
               }
-#endif
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
             conn->isn           = tcp_getsequence(tcp->ackno);
