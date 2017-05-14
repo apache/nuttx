@@ -37,20 +37,12 @@ ifeq ($(CONFIG_WIRELESS_IEEE802154),y)
 
 # Include IEEE 802.15.4 support
 
-CSRCS += mac802154_indalloc.c
+CSRCS += mac802154.c mac802154_indalloc.c
 
 # Include wireless devices build support
 
-ifeq ($(CONFIG_IEEE802154_MAC),y)
-CSRCS += mac802154.c
-endif
-
 ifeq ($(CONFIG_IEEE802154_MAC_DEV),y)
 CSRCS += mac802154_device.c
-endif
-
-ifeq ($(CONFIG_IEEE802154_DEV),y)
-CSRCS += radio802154_device.c
 endif
 
 ifeq ($(CONFIG_IEEE802154_NETDEV),y)
