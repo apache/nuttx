@@ -220,7 +220,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 #endif
               /* Check for a timeout on connection in the TCP_SYN_RCVD state.
                * On such timeouts, we would normally resend the SYNACK until
-               * the ACK is received, completing the 3-way handshek.  But if
+               * the ACK is received, completing the 3-way handshake.  But if
                * the retry count elapsed, then we must assume that no ACK is
                * forthcoming and terminate the attempted connection.
                */
@@ -233,7 +233,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                   conn->tcpstateflags = TCP_CLOSED;
                   ninfo("TCP state: TCP_CLOSED\n");
 
-                  /* Find the listener for this connectins */
+                  /* Find the listener for this connection. */
 
                   listener = tcp_findlistener(conn->lport);
                   if (listener != NULL)

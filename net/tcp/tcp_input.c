@@ -194,7 +194,8 @@ static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
                *  1. The ACK is never received.  This will be handled by
                *     a timeout managed by tcp_timer().
                *  2. The listener "unlistens()".  This will be handled by
-               *     the failure of tcp_accept_connection() when the ACK is received.
+               *     the failure of tcp_accept_connection() when the ACK is
+               *     received.
                */
 
               conn->crefs = 1;
@@ -202,10 +203,11 @@ static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 
           if (!conn)
             {
-              /* Either (1) all available connections are in use, or (2) there is no
-               * application in place to accept the connection.  We drop packet and hope that
-               * the remote end will retransmit the packet at a time when we
-               * have more spare connections or someone waiting to accept the connection.
+              /* Either (1) all available connections are in use, or (2)
+               * there is no application in place to accept the connection.
+               * We drop packet and hope that the remote end will retransmit
+               * the packet at a time when we have more spare connections
+               * or someone waiting to accept the connection.
                */
 
 #ifdef CONFIG_NET_STATISTICS

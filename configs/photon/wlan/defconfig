@@ -1311,10 +1311,6 @@ CONFIG_HAVE_CXX=y
 #
 
 #
-# NxWidgets/NxWM
-#
-
-#
 # Built-In Applications
 #
 CONFIG_BUILTIN_PROXY_STACKSIZE=1024
@@ -1584,6 +1580,10 @@ CONFIG_NSH_IOBUFFER_SIZE=512
 # CONFIG_NSH_LOGIN is not set
 # CONFIG_NSH_CONSOLE_LOGIN is not set
 # CONFIG_NSH_TELNET_LOGIN is not set
+
+#
+# NxWidgets/NxWM
+#
 
 #
 # Platform-specific Support
