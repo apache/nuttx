@@ -177,7 +177,7 @@ int bcmf_netdev_alloc_tx_frame(FAR struct bcmf_dev_s *priv)
   priv->cur_tx_frame = bcmf_bdc_allocate_frame(priv, MAX_NET_DEV_MTU, true);
   if (!priv->cur_tx_frame)
     {
-      wlerr("Cannot allocate TX frame\n");
+      wlerr("ERROR: Cannot allocate TX frame\n");
       return -ENOMEM;
     }
 
@@ -215,7 +215,7 @@ static int bcmf_transmit(FAR struct bcmf_dev_s *priv,
 
   if (ret)
     {
-      wlerr("Failed to transmit frame\n");
+      wlerr("ERROR: Failed to transmit frame\n");
       return -EIO;
     }
 
@@ -392,7 +392,7 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
       else
 #endif
         {
-          wlinfo("RX dropped\n");
+          wlerr("ERROR: RX dropped\n");
           NETDEV_RXDROPPED(&priv->bc_dev);
           priv->bus->free_frame(priv, frame);
         }
@@ -992,11 +992,11 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
   switch (cmd)
     {
       case SIOCSIWSCAN:
-        ret = bcmf_wl_start_scan(priv, (struct ifreq *)arg);
+        ret = bcmf_wl_start_scan(priv, (struct iwreq *)arg);
         break;
 
       case SIOCGIWSCAN:
-        ret = bcmf_wl_get_scan_results(priv, (struct ifreq *)arg);
+        ret = bcmf_wl_get_scan_results(priv, (struct iwreq *)arg);
         break;
 
       case SIOCSIFHWADDR:    /* Set device MAC address */

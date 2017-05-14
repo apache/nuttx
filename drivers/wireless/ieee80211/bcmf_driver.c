@@ -370,7 +370,6 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
                                    struct bcmf_event_s *event, unsigned int len)
 {
   uint32_t status;
-  uint32_t reason;
   uint32_t event_len;
   struct wl_escan_result *result;
   struct wl_bss_info *bss;
@@ -387,7 +386,6 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
     }
 
   status = bcmf_getle32(&event->status);
-  reason = bcmf_getle32(&event->reason);
   escan_result_len = bcmf_getle32(&event->len);
 
   len -= sizeof(struct bcmf_event_s);
@@ -464,7 +462,7 @@ wl_escan_result_processed:
 
   /* Scan done */
 
-  wlinfo("escan done event %d %d\n", status, reason);
+  wlinfo("escan done event %d %d\n", status, bcmf_getle32(&event->reason));
 
   wd_cancel(priv->scan_timeout);
 

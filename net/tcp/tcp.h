@@ -698,6 +698,19 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 void tcp_listen_initialize(void);
 
 /****************************************************************************
+ * Name: tcp_findlistener
+ *
+ * Description:
+ *   Return the connection listener for connections on this port (if any)
+ *
+ * Assumptions:
+ *   Called at interrupt level
+ *
+ ****************************************************************************/
+
+FAR struct tcp_conn_s *tcp_findlistener(uint16_t portno);
+
+/****************************************************************************
  * Name: tcp_unlisten
  *
  * Description:
