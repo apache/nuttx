@@ -141,13 +141,16 @@ static int ubxmdm_ioctl(FAR struct file* filep,
                         unsigned long arg)
 {
   FAR struct inode*         inode = filep->f_inode;
-  FAR struct ubxmdm_upper*  upper = inode->i_private;
-  FAR struct ubxmdm_lower*  lower = upper->lower;
+  FAR struct ubxmdm_upper*  upper;
+  FAR struct ubxmdm_lower*  lower;
   int                       ret;
   FAR struct ubxmdm_status* status;
 
   m_info("cmd: %d arg: %ld\n", cmd, arg);
-  DEBUGASSERT(upper && lower);
+  upper = inode->i_private;
+  DEBUGASSERT(upper != NULL);
+  lower = upper->lower;
+  DEBUGASSERT(lower != NULL);
 
   switch (cmd)
     {
@@ -320,8 +323,9 @@ void ubxmdm_unregister(FAR void *handle)
   FAR struct ubxmdm_lower *lower;
 
   upper = (FAR struct ubxmdm_upper*) handle;
+  DEBUGASSERT(upper != NULL);
   lower = upper->lower;
-  DEBUGASSERT(upper && lower);
+  DEBUGASSERT(lower != NULL);
 
   m_info("Unregistering: %s\n", upper->path);
 

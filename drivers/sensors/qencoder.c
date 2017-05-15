@@ -276,12 +276,15 @@ static ssize_t qe_write(FAR struct file *filep, FAR const char *buffer, size_t b
 static int qe_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode          *inode = filep->f_inode;
-  FAR struct qe_upperhalf_s *upper = inode->i_private;
-  FAR struct qe_lowerhalf_s *lower = upper->lower;
+  FAR struct qe_upperhalf_s *upper;
+  FAR struct qe_lowerhalf_s *lower;
   int                        ret;
 
   sninfo("cmd: %d arg: %ld\n", cmd, arg);
-  DEBUGASSERT(upper && lower);
+  upper = inode->i_private;
+  DEBUGASSERT(upper != NULL);
+  lower = upper->lower;
+  DEBUGASSERT(lower != NULL);
 
   /* Get exclusive access to the device structures */
 

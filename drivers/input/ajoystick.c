@@ -201,7 +201,7 @@ static inline int ajoy_takesem(sem_t *sem)
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
 static void ajoy_enable(FAR struct ajoy_upperhalf_s *priv)
 {
-  FAR const struct ajoy_lowerhalf_s *lower = priv->au_lower;
+  FAR const struct ajoy_lowerhalf_s *lower;
   FAR struct ajoy_open_s *opriv;
   ajoy_buttonset_t press;
   ajoy_buttonset_t release;
@@ -210,8 +210,9 @@ static void ajoy_enable(FAR struct ajoy_upperhalf_s *priv)
   int i;
 #endif
 
-  DEBUGASSERT(priv && priv->au_lower);
+  DEBUGASSERT(priv);
   lower = priv->au_lower;
+  DEBUGASSERT(lower);
 
   /* This routine is called both task level and interrupt level, so
    * interrupts must be disabled.
@@ -295,7 +296,7 @@ static void ajoy_interrupt(FAR const struct ajoy_lowerhalf_s *lower,
 
 static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
 {
-  FAR const struct ajoy_lowerhalf_s *lower = priv->au_lower;
+  FAR const struct ajoy_lowerhalf_s *lower;
   FAR struct ajoy_open_s *opriv;
   ajoy_buttonset_t sample;
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
@@ -308,8 +309,9 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
   int i;
 #endif
 
-  DEBUGASSERT(priv && priv->au_lower);
+  DEBUGASSERT(priv);
   lower = priv->au_lower;
+  DEBUGASSERT(lower);
 
   /* This routine is called both task level and interrupt level, so
    * interrupts must be disabled.
