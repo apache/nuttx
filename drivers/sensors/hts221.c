@@ -201,10 +201,10 @@ static int hts221_do_transfer(FAR struct hts221_dev_s *priv,
               break;
             }
 
-          ret = up_i2creset(priv->i2c);
+          ret = I2C_RESET(priv->i2c);
           if (ret < 0)
             {
-              hts221_dbg("up_i2creset failed: %d\n", ret);
+              hts221_dbg("I2C_RESET failed: %d\n", ret);
               return ret;
             }
 #endif
@@ -892,7 +892,7 @@ static int hts221_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct hts221_dev_s *priv = inode->i_private;
-  int32_t ret = 0;
+  int ret = OK;
 
   while (sem_wait(&priv->devsem) != 0)
     {
@@ -932,7 +932,7 @@ static int hts221_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
 
     default:
-      ret = -EINVAL;
+      ret = -ENOTTY;
       break;
     }
 
