@@ -231,7 +231,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                   FAR struct tcp_conn_s *listener;
 
                   conn->tcpstateflags = TCP_CLOSED;
-                  ninfo("TCP state: TCP_CLOSED\n");
+                  ninfo("TCP state: TCP_SYN_RCVD->TCP_CLOSED\n");
 
                   /* Find the listener for this connection. */
 

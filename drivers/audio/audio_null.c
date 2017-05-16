@@ -653,6 +653,8 @@ static int null_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
   bool done;
 
+  DEBUGASSERT(priv && apb && priv->dev.upper);
+
   audinfo("apb=%p curbyte=%d nbytes=%d\n", apb, apb->curbyte, apb->nbytes);
 
   /* Say that we consumed all of the data */
@@ -662,10 +664,6 @@ static int null_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   /* Check if this was the last buffer in the stream */
 
   done = ((apb->flags & AUDIO_APB_FINAL) != 0);
-
-  /* And return the buffer to the upper level */
-
-  DEBUGASSERT(priv && apb && priv->dev.upper);
 
   /* The buffer belongs to to an upper level.  Just forward the event to
    * the next level up.

@@ -314,10 +314,44 @@ found:
 
   if ((tcp->flags & TCP_RST) != 0)
     {
-      conn->tcpstateflags = TCP_CLOSED;
-      nwarn("WARNING: RESET - TCP state: TCP_CLOSED\n");
+      FAR struct tcp_conn_s *listener = NULL;
 
-      (void)tcp_callback(dev, conn, TCP_ABORT);
+      /* An RST received during the 3-way connection handshake requires
+       * little more clean-up.
+       */
+
+      if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_RCVD)
+        {
+          conn->tcpstateflags = TCP_CLOSED;
+          nwarn("WARNING: RESET in TCP_SYN_RCVD\n");
+
+          /* Notify the listener for the connection of the reset event */
+
+          listener = tcp_findlistener(conn->lport);
+
+          /* We must free this TCP connection structure; this connection
+           * will never be established.
+           */
+
+          tcp_free(conn);
+        }
+      else
+        {
+          conn->tcpstateflags = TCP_CLOSED;
+          nwarn("WARNING: RESET TCP state: TCP_CLOSED\n");
+
+          /* Notify this connection of the reset event */
+
+          listener = conn;
+        }
+
+      /* Perform the TCP_ABORT callback and drop the packet */
+
+      if (listener != NULL)
+        {
+          (void)tcp_callback(dev, listener, TCP_ABORT);
+        }
+
       goto drop;
     }
 

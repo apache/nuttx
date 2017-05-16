@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_can.c
  *
- *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
@@ -73,10 +73,6 @@
 /* Time out for INAK bit */
 
 #define INAK_TIMEOUT 65535
-
-/* Mailboxes ****************************************************************/
-
-#define CAN_ALL_MAILBOXES (CAN_TSR_TME0 | CAN_TSR_TME1 | CAN_TSR_TME2)
 
 /* Bit timing ***************************************************************/
 
@@ -171,6 +167,12 @@ static int  stm32can_exitinitmode(FAR struct stm32_can_s *priv);
 static int  stm32can_bittiming(FAR struct stm32_can_s *priv);
 static int  stm32can_cellinit(FAR struct stm32_can_s *priv);
 static int  stm32can_filterinit(FAR struct stm32_can_s *priv);
+
+/* TX mailbox status */
+
+static bool stm32can_txmb0empty(uint32_t tsr_regval);
+static bool stm32can_txmb1empty(uint32_t tsr_regval);
+static bool stm32can_txmb2empty(uint32_t tsr_regval);
 
 /****************************************************************************
  * Private Data
@@ -1170,15 +1172,15 @@ static int stm32can_send(FAR struct can_dev_s *dev,
   /* Select one empty transmit mailbox */
 
   regval = stm32can_getreg(priv, STM32_CAN_TSR_OFFSET);
-  if ((regval & CAN_TSR_TME0) != 0 && (regval & CAN_TSR_RQCP0) == 0)
+  if (stm32can_txmb0empty(regval))
     {
       txmb = 0;
     }
-  else if ((regval & CAN_TSR_TME1) != 0 && (regval & CAN_TSR_RQCP1) == 0)
+  else if (stm32can_txmb1empty(regval))
     {
       txmb = 1;
     }
-  else if ((regval & CAN_TSR_TME2) != 0 && (regval & CAN_TSR_RQCP2) == 0)
+  else if (stm32can_txmb2empty(regval))
     {
       txmb = 2;
     }
@@ -1321,7 +1323,8 @@ static bool stm32can_txready(FAR struct can_dev_s *dev)
   regval = stm32can_getreg(priv, STM32_CAN_TSR_OFFSET);
   caninfo("CAN%d TSR: %08x\n", priv->port, regval);
 
-  return (regval & CAN_ALL_MAILBOXES) != 0;
+  return stm32can_txmb0empty(regval) || stm32can_txmb1empty(regval) ||
+         stm32can_txmb2empty(regval);
 }
 
 /****************************************************************************
@@ -1352,7 +1355,8 @@ static bool stm32can_txempty(FAR struct can_dev_s *dev)
   regval = stm32can_getreg(priv, STM32_CAN_TSR_OFFSET);
   caninfo("CAN%d TSR: %08x\n", priv->port, regval);
 
-  return (regval & CAN_ALL_MAILBOXES) == CAN_ALL_MAILBOXES;
+  return stm32can_txmb0empty(regval) && stm32can_txmb1empty(regval) &&
+         stm32can_txmb2empty(regval);
 }
 
 /****************************************************************************
@@ -1553,14 +1557,9 @@ static int stm32can_txinterrupt(int irq, FAR void *context, FAR void *arg)
 
       stm32can_putreg(priv, STM32_CAN_TSR_OFFSET, CAN_TSR_RQCP0);
 
-      /* Check for errors */
+      /* Tell the upper half that the transfer is finished. */
 
-      if ((regval & CAN_TSR_TXOK0) != 0)
-        {
-          /* Tell the upper half that the tansfer is finished. */
-
-          (void)can_txdone(dev);
-        }
+      (void)can_txdone(dev);
     }
 
   /* Check for RQCP1: Request completed mailbox 1 */
@@ -1573,14 +1572,9 @@ static int stm32can_txinterrupt(int irq, FAR void *context, FAR void *arg)
 
       stm32can_putreg(priv, STM32_CAN_TSR_OFFSET, CAN_TSR_RQCP1);
 
-      /* Check for errors */
+      /* Tell the upper half that the transfer is finished. */
 
-      if ((regval & CAN_TSR_TXOK1) != 0)
-        {
-          /* Tell the upper half that the tansfer is finished. */
-
-          (void)can_txdone(dev);
-        }
+      (void)can_txdone(dev);
     }
 
   /* Check for RQCP2: Request completed mailbox 2 */
@@ -1593,14 +1587,9 @@ static int stm32can_txinterrupt(int irq, FAR void *context, FAR void *arg)
 
       stm32can_putreg(priv, STM32_CAN_TSR_OFFSET, CAN_TSR_RQCP2);
 
-      /* Check for errors */
+      /* Tell the upper half that the transfer is finished. */
 
-      if ((regval & CAN_TSR_TXOK2) != 0)
-        {
-          /* Tell the upper half that the tansfer is finished. */
-
-          (void)can_txdone(dev);
-        }
+      (void)can_txdone(dev);
     }
 
   return OK;
@@ -2109,6 +2098,57 @@ static int stm32can_addstdfilter(FAR struct stm32_can_s *priv,
 static int stm32can_delstdfilter(FAR struct stm32_can_s *priv, int arg)
 {
   return -ENOTTY;
+}
+
+/****************************************************************************
+ * Name: stm32can_txmb0empty
+ *
+ * Input Parameter:
+ *   tsr_regval - value of CAN transmit status register
+ *
+ * Returned Value:
+ *   Returns true if mailbox 0 is empty and can be used for sending.
+ *
+ ****************************************************************************/
+
+static bool stm32can_txmb0empty(uint32_t tsr_regval)
+{
+  return (tsr_regval & CAN_TSR_TME0) != 0 &&
+         (tsr_regval & CAN_TSR_RQCP0) == 0;
+}
+
+/****************************************************************************
+ * Name: stm32can_txmb1empty
+ *
+ * Input Parameter:
+ *   tsr_regval - value of CAN transmit status register
+ *
+ * Returned Value:
+ *   Returns true if mailbox 1 is empty and can be used for sending.
+ *
+ ****************************************************************************/
+
+static bool stm32can_txmb1empty(uint32_t tsr_regval)
+{
+  return (tsr_regval & CAN_TSR_TME1) != 0 &&
+         (tsr_regval & CAN_TSR_RQCP1) == 0;
+}
+
+/****************************************************************************
+ * Name: stm32can_txmb2empty
+ *
+ * Input Parameter:
+ *   tsr_regval - value of CAN transmit status register
+ *
+ * Returned Value:
+ *   Returns true if mailbox 2 is empty and can be used for sending.
+ *
+ ****************************************************************************/
+
+static bool stm32can_txmb2empty(uint32_t tsr_regval)
+{
+  return (tsr_regval & CAN_TSR_TME2) != 0 &&
+         (tsr_regval & CAN_TSR_RQCP2) == 0;
 }
 
 /****************************************************************************

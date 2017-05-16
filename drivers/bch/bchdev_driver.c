@@ -339,12 +339,13 @@ static int bch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       bchlib_semtake(bch);
       if (!bchr || bch->refs == MAX_OPENCNT)
         {
-          ret = -EINVAL;
+          ret   = -EINVAL;
         }
       else
         {
           bch->refs++;
           *bchr = bch;
+          ret   = OK;
         }
 
       bchlib_semgive(bch);

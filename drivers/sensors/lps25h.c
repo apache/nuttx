@@ -257,10 +257,10 @@ static int lps25h_do_transfer(FAR struct lps25h_dev_s *dev,
               break;
             }
 
-          ret = up_i2creset(dev->i2c);
+          ret = I2C_RESET(dev->i2c);
           if (ret < 0)
             {
-              lps25h_dbg("up_i2creset failed: %d\n", ret);
+              lps25h_dbg("I2C_RESET failed: %d\n", ret);
               return ret;
             }
 #endif
@@ -708,7 +708,7 @@ static int lps25h_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct lps25h_dev_s *dev = inode->i_private;
-  int ret = 0;
+  int ret = OK;
 
   while (sem_wait(&dev->devsem) != 0)
     {
@@ -742,7 +742,7 @@ static int lps25h_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
 
     default:
-      ret = -EINVAL;
+      ret = -ENOTTY;
       break;
     }
 

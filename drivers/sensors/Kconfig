@@ -201,6 +201,7 @@ config MS58XX_I2C_FREQUENCY
 config MS58XX_VDD
 	int "MEAS MS58XX VDD"
 	default 30
+	depends on MS58XX
 
 config MPL115A
 	bool "Freescale MPL115A Barometer Sensor support"
