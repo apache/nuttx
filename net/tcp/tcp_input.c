@@ -325,11 +325,11 @@ found:
           conn->tcpstateflags = TCP_CLOSED;
           nwarn("WARNING: RESET in TCP_SYN_RCVD\n");
 
-          /* Notify the listerner for connection of the reset event */
+          /* Notify the listener for the connection of the reset event */
 
           listener = tcp_findlistener(conn->lport);
 
-          /* We must free this TCP connection structure, this connection
+          /* We must free this TCP connection structure; this connection
            * will never be established.
            */
 
