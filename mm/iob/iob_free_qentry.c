@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/iob/iob_free_qentry.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,16 +68,37 @@ FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq)
   FAR struct iob_qentry_s *nextq = iobq->qe_flink;
   irqstate_t flags;
 
-  /* Free the I/O buffer chain container by adding it to the head of the free
-   * list. We don't know what context we are called from so we use extreme
-   * measures to protect the free list:  We disable interrupts very briefly.
+  /* Free the I/O buffer chain container by adding it to the head of the
+   * free or the committed list. We don't know what context we are called
+   * from so we use extreme measures to protect the free list:  We disable
+   * interrupts very briefly.
    */
 
   flags = enter_critical_section();
-  iobq->qe_flink = g_iob_freeqlist;
-  g_iob_freeqlist = iobq;
 
-  /* Signal that an I/O buffer chain container is available */
+  /* Which list?  If there is a task waiting for an IOB, then put
+   * the IOB on either the free list or on the committed list where
+   * it is reserved for that allocation (and not available to
+   * iob_tryalloc()).
+   */
+
+  if (g_iob_sem.semcount < 0)
+    {
+      iobq->qe_flink   = g_iob_qcommitted;
+      g_iob_qcommitted = iobq;
+    }
+  else
+    {
+      iobq->qe_flink   = g_iob_freeqlist;
+      g_iob_freeqlist  = iobq;
+    }
+
+  /* Signal that an I/O buffer chain container is available.  If there
+   * is a thread waiting for an I/O buffer chain container, this will
+   * wake up exactly one thread.  The semaphore count will correctly
+   * indicated that the awakened task owns an I/O buffer chain container
+   * and should find it in the committed list.
+   */
 
   sem_post(&g_qentry_sem);
   leave_critical_section(flags);

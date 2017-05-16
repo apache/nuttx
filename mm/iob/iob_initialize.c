@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/iob/iob_initialize.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,14 @@
 #include "iob.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef NULL
+#  define NULL ((FAR void *)0)
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -65,10 +73,18 @@ static struct iob_qentry_s g_iob_qpool[CONFIG_IOB_NCHAINS];
 
 FAR struct iob_s *g_iob_freelist;
 
-/* A list of all free, unallocated I/O buffer queue containers */
+/* A list of I/O buffers that are committed for allocation */
+
+FAR struct iob_s *g_iob_committed;
 
 #if CONFIG_IOB_NCHAINS > 0
+/* A list of all free, unallocated I/O buffer queue containers */
+
 FAR struct iob_qentry_s *g_iob_freeqlist;
+
+/* A list of I/O buffer queue containers that are committed for allocation */
+
+extern FAR struct iob_s *g_iob_qcommitted;
 #endif
 
 /* Counting semaphores that tracks the number of free IOBs/qentries */
@@ -114,8 +130,9 @@ void iob_initialize(void)
           g_iob_freelist = iob;
         }
 
-      sem_init(&g_iob_sem, 0, CONFIG_IOB_NBUFFERS);
+      g_iob_committed = NULL;
 
+      sem_init(&g_iob_sem, 0, CONFIG_IOB_NBUFFERS);
 #if CONFIG_IOB_THROTTLE > 0
       sem_init(&g_throttle_sem, 0, CONFIG_IOB_NBUFFERS - CONFIG_IOB_THROTTLE);
 #endif
@@ -132,6 +149,8 @@ void iob_initialize(void)
           iobq->qe_flink  = g_iob_freeqlist;
           g_iob_freeqlist = iobq;
         }
+
+      g_iob_qcommitted = NULL;
 
       sem_init(&g_qentry_sem, 0, CONFIG_IOB_NCHAINS);
 #endif

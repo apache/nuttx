@@ -91,10 +91,18 @@
 
 extern FAR struct iob_s *g_iob_freelist;
 
-/* A list of all free, unallocated I/O buffer queue containers */
+/* A list of I/O buffers that are committed for allocation */
+
+extern FAR struct iob_s *g_iob_committed;
 
 #if CONFIG_IOB_NCHAINS > 0
+/* A list of all free, unallocated I/O buffer queue containers */
+
 extern FAR struct iob_qentry_s *g_iob_freeqlist;
+
+/* A list of I/O buffer queue containers that are committed for allocation */
+
+extern FAR struct iob_s *g_iob_qcommitted;
 #endif
 
 /* Counting semaphores that tracks the number of free IOBs/qentries */
