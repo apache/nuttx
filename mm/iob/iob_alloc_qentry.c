@@ -64,7 +64,7 @@
  *
  ****************************************************************************/
 
-FAR struct iob_qentry_s *iob_alloc_qcommitted(void)
+static FAR struct iob_qentry_s *iob_alloc_qcommitted(void)
 {
   FAR struct iob_qentry_s *iobq = NULL;
   irqstate_t flags;
