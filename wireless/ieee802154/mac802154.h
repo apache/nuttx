@@ -55,6 +55,26 @@
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 /****************************************************************************
+ * Public Data Types
+ ****************************************************************************/
+
+
+
+/* Callback operations to notify the next highest layer of various asynchronous
+ * events, usually triggered by some previous request or response invoked by the
+ * upper layer.
+ */
+
+struct mac802154_maccb_s
+{
+  CODE void (*notify)(FAR const struct mac802154_maccb_s *maccb,
+                      FAR struct ieee802154_notif_s *notif);
+
+  CODE void (*rxframe)(FAR const struct mac802154_maccb_s *maccb,
+                       FAR struct ieee802154_data_ind_s *ind);
+};
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -75,7 +95,7 @@ struct iob_s;  /* Forward reference */
  *
  ****************************************************************************/
 
-int mac802154_bind(MACHANDLE mac, FAR const struct ieee802154_maccb_s *cb);
+int mac802154_bind(MACHANDLE mac, FAR const struct mac802154_maccb_s *cb);
 
 /****************************************************************************
  * Name: mac802154_ioctl
@@ -117,7 +137,7 @@ int mac802154_get_mhrlen(MACHANDLE mac,
  *   The MCPS-DATA.request primitive requests the transfer of a data SPDU
  *   (i.e., MSDU) from a local SSCS entity to a single peer SSCS entity.
  *   Confirmation is returned via the
- *   struct ieee802154_maccb_s->conf_data callback.
+ *   struct mac802154_maccb_s->conf_data callback.
  *
  ****************************************************************************/
 
@@ -131,7 +151,7 @@ int mac802154_req_data(MACHANDLE mac,
  * Description:
  *   The MCPS-PURGE.request primitive allows the next higher layer to purge
  *   an MSDU from the transaction queue. Confirmation is returned via
- *   the struct ieee802154_maccb_s->conf_purge callback.
+ *   the struct mac802154_maccb_s->conf_purge callback.
  *
  *   NOTE: The standard specifies that confirmation should be indicated via 
  *   the asynchronous MLME-PURGE.confirm primitve.  However, in our
@@ -149,7 +169,7 @@ int mac802154_req_purge(MACHANDLE mac, uint8_t msdu_handle);
  * Description:
  *   The MLME-ASSOCIATE.request primitive allows a device to request an
  *   association with a coordinator. Confirmation is returned via the
- *   struct ieee802154_maccb_s->conf_associate callback.
+ *   struct mac802154_maccb_s->conf_associate callback.
  *
  ****************************************************************************/
 
@@ -166,7 +186,7 @@ int mac802154_req_associate(MACHANDLE mac,
  *   PAN.
  *
  *   Confirmation is returned via the
- *   struct ieee802154_maccb_s->conf_disassociate callback.
+ *   struct mac802154_maccb_s->conf_disassociate callback.
  *
  ****************************************************************************/
 
@@ -180,7 +200,7 @@ int mac802154_req_disassociate(MACHANDLE mac,
  *   The MLME-GTS.request primitive allows a device to send a request to the
  *   PAN coordinator to allocate a new GTS or to deallocate an existing GTS.
  *   Confirmation is returned via the
- *   struct ieee802154_maccb_s->conf_gts callback.
+ *   struct mac802154_maccb_s->conf_gts callback.
  *
  ****************************************************************************/
 
@@ -214,7 +234,7 @@ int mac802154_req_reset(MACHANDLE mac, bool rst_pibattr);
  *   The MLME-RX-ENABLE.request primitive allows the next higher layer to
  *   request that the receiver is enable for a finite period of time.
  *   Confirmation is returned via the
- *   struct ieee802154_maccb_s->conf_rxenable callback.
+ *   struct mac802154_maccb_s->conf_rxenable callback.
  *
  ****************************************************************************/
 
@@ -230,7 +250,7 @@ int mac802154_req_rxenable(MACHANDLE mac,
  *   the energy on the channel, search for the coordinator with which it
  *   associated, or search for all coordinators transmitting beacon frames
  *   within the POS of the scanning device. Scan results are returned
- *   via MULTIPLE calls to the struct ieee802154_maccb_s->conf_scan
+ *   via MULTIPLE calls to the struct mac802154_maccb_s->conf_scan
  *   callback.  This is a difference with the official 802.15.4
  *   specification, implemented here to save memory.
  *
@@ -280,7 +300,7 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
  * Description:
  *   The MLME-START.request primitive makes a request for the device to
  *   start using a new superframe configuration. Confirmation is returned
- *   via the struct ieee802154_maccb_s->conf_start callback.
+ *   via the struct mac802154_maccb_s->conf_start callback.
  *
  ****************************************************************************/
 
@@ -293,7 +313,7 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req);
  *   The MLME-SYNC.request primitive requests to synchronize with the
  *   coordinator by acquiring and, if specified, tracking its beacons.
  *   Confirmation is returned via the
- *   struct ieee802154_maccb_s->int_commstatus callback. TOCHECK.
+ *   struct mac802154_maccb_s->int_commstatus callback. TOCHECK.
  *
  ****************************************************************************/
 
@@ -305,8 +325,8 @@ int mac802154_req_sync(MACHANDLE mac, FAR struct ieee802154_sync_req_s *req);
  * Description:
  *   The MLME-POLL.request primitive prompts the device to request data from
  *   the coordinator. Confirmation is returned via the
- *   struct ieee802154_maccb_s->conf_poll callback, followed by a
- *   struct ieee802154_maccb_s->ind_data callback.
+ *   struct mac802154_maccb_s->conf_poll callback, followed by a
+ *   struct mac802154_maccb_s->ind_data callback.
  *
  ****************************************************************************/
 
@@ -336,6 +356,18 @@ int mac802154_resp_associate(MACHANDLE mac,
 int mac802154_resp_orphan(MACHANDLE mac,
                           FAR struct ieee802154_orphan_resp_s *resp);
 
+/****************************************************************************
+ * Name: mac802154_notif_free
+ *
+ * Description:
+ *   When the MAC calls the registered callback, it passes a reference
+ *   to a mac802154_notify_s structure.  This structure needs to be freed
+ *   after the callback handler is done using it.
+ *
+ ****************************************************************************/
+
+int mac802154_notif_free(MACHANDLE mac,
+                          FAR struct ieee802154_notif_s *notif);
 
 #undef EXTERN
 #ifdef __cplusplus

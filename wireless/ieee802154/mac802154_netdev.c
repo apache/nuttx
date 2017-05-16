@@ -109,7 +109,7 @@ struct macnet_callback_s
 {
   /* This holds the information visible to the MAC layer */
 
-  struct ieee802154_maccb_s mc_cb;        /* Interface understood by the MAC layer */
+  struct mac802154_maccb_s mc_cb;        /* Interface understood by the MAC layer */
   FAR struct macnet_driver_s *mc_priv; /* Our priv data */
 };
 
@@ -138,12 +138,10 @@ struct macnet_driver_s
 
 /* IEE802.15.4 MAC callback functions ***************************************/
 
-static void macnet_mlme_notify(FAR const struct ieee802154_maccb_s *maccb,
-                               enum ieee802154_macnotify_e notif,
-                               FAR const union ieee802154_mlme_notify_u *arg);
-static void macnet_mcps_notify(FAR const struct ieee802154_maccb_s *maccb,
-                               enum ieee802154_macnotify_e notif,
-                               FAR const union ieee802154_mcps_notify_u *arg);
+static void macnet_notify(FAR const struct mac802154_maccb_s *maccb,
+                          FAR struct ieee802154_notif_s *notif);
+static void macnet_rxframe(FAR const struct mac802154_maccb_s *maccb,
+                           FAR struct ieee802154_data_ind_s *ind);
 
 /* Asynchronous confirmations to requests */
 
@@ -166,8 +164,6 @@ static void macnet_conf_poll(FAR struct macnet_driver_s *priv,
 
   /* Asynchronous event indications, replied to synchronously with responses */
 
-static void macnet_ind_data(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_data_ind_s *conf);
 static void macnet_ind_associate(FAR struct macnet_driver_s *priv,
              FAR struct ieee802154_assoc_ind_s *conf);
 static void macnet_ind_disassociate(FAR struct macnet_driver_s *priv,
@@ -221,15 +217,14 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: macnet_mlme_notify
+ * Name: macnet_notify
  *
  * Description:
  *
  ****************************************************************************/
 
-static void macnet_mlme_notify(FAR const struct ieee802154_maccb_s *maccb,
-                               enum ieee802154_macnotify_e notif,
-                               FAR const union ieee802154_mlme_notify_u *arg)
+static void macnet_notify(FAR const struct mac802154_maccb_s *maccb,
+                          FAR struct ieee802154_notif_s *notif)
 {
   FAR struct macnet_callback_s *cb =
     (FAR struct macnet_callback_s *)maccb;
@@ -238,8 +233,13 @@ static void macnet_mlme_notify(FAR const struct ieee802154_maccb_s *maccb,
   DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
   priv = cb->mc_priv;
 
-  switch (notif)
+  switch (notif->notiftype)
     {
+      case IEEE802154_NOTIFY_CONF_DATA:
+        {
+          macnet_conf_data(priv, &notif->u.dataconf);
+        }
+        break;
 
       default:
         break;
@@ -247,40 +247,38 @@ static void macnet_mlme_notify(FAR const struct ieee802154_maccb_s *maccb,
 }
 
 /****************************************************************************
- * Name: macnet_mcps_notify
+ * Name: macnet_rxframe
  *
  * Description:
  *
  ****************************************************************************/
 
-static void macnet_mcps_notify(FAR const struct ieee802154_maccb_s *maccb,
-                               enum ieee802154_macnotify_e notif,
-                               FAR const union ieee802154_mcps_notify_u *arg)
+static void macnet_rxframe(FAR const struct mac802154_maccb_s *maccb,
+                           FAR struct ieee802154_data_ind_s *ind)
 {
   FAR struct macnet_callback_s *cb =
     (FAR struct macnet_callback_s *)maccb;
   FAR struct macnet_driver_s *priv;
+  FAR struct iob_s *iob;
 
   DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
   priv = cb->mc_priv;
 
-  switch (notif)
-    {
-      case IEEE802154_NOTIFY_CONF_DATA:
-        {
-          macnet_conf_data(priv, &arg->dataconf);
-        }
-        break;
+  /* Extract the IOB containing the frame from the struct ieee802154_data_ind_s */
 
-      case IEEE802154_NOTIFY_IND_DATA:
-        {
-          macnet_ind_data(priv, arg->dataind);
-        }
-        break;
+  DEBUGASSERT(priv != NULL && ind != NULL && ind->frame != NULL);
+  iob        = ind->frame;
+  ind->frame = NULL;
 
-      default:
-        break;
-    }
+  /* Transfer the frame to the network logic */
+
+  sixlowpan_input(&priv->md_dev, iob, ind);
+
+  /* sixlowpan_input() will free the IOB, but we must free the struct
+   * ieee802154_data_ind_s container here.
+   */
+
+  ieee802154_ind_free(ind);
 }
 
 /****************************************************************************
@@ -389,36 +387,6 @@ static void macnet_conf_poll(FAR struct macnet_driver_s *priv,
                              FAR struct ieee802154_poll_conf_s *conf)
 {
 
-}
-
-/****************************************************************************
- * Name: macnet_ind_data
- *
- * Description:
- *    Data frame received
- *
- ****************************************************************************/
-
-static void macnet_ind_data(FAR struct macnet_driver_s *priv,
-                            FAR struct ieee802154_data_ind_s *ind)
-{
-  FAR struct iob_s *iob;
-
-  /* Extract the IOB containing the frame from the struct ieee802154_data_ind_s */
-
-  DEBUGASSERT(priv != NULL && ind != NULL && ind->frame != NULL);
-  iob        = ind->frame;
-  ind->frame = NULL;
-
-  /* Transfer the frame to the network logic */
-
-  sixlowpan_input(&priv->md_dev, iob, ind);
-
-  /* sixlowpan_input() will free the IOB, but we must free the struct
-   * ieee802154_data_ind_s container here.
-   */
-
-  ieee802154_ind_free(ind);
 }
 
 /****************************************************************************
@@ -1041,7 +1009,7 @@ int mac802154netdev_register(MACHANDLE mac)
   FAR struct macnet_driver_s *priv;
   FAR struct ieee802154_driver_s *ieee;
   FAR struct net_driver_s  *dev;
-  FAR struct ieee802154_maccb_s *maccb;
+  FAR struct mac802154_maccb_s *maccb;
   FAR uint8_t *pktbuf;
   int ret;
 
@@ -1103,9 +1071,9 @@ int mac802154netdev_register(MACHANDLE mac)
 
   priv->md_cb.mc_priv = priv;
 
-  maccb               = &priv->md_cb.mc_cb;
-  maccb->mlme_notify  = macnet_mlme_notify;
-  maccb->mcps_notify  = macnet_mcps_notify;
+  maccb           = &priv->md_cb.mc_cb;
+  maccb->notify   = macnet_notify;
+  maccb->rxframe  = macnet_rxframe;
 
   /* Bind the callback structure */
 

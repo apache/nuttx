@@ -107,13 +107,6 @@
  * Private Types
  ****************************************************************************/
 
-struct mrf24j40_txdesc_s
-{
-  struct ieee802154_txdesc_s pub;
-
-  uint8_t busy : 1; /* Is this txdesc being used */
-};
-
 /* A MRF24J40 device instance */
 
 struct mrf24j40_radio_s
@@ -145,11 +138,13 @@ struct mrf24j40_radio_s
 
   /* Buffer Allocations */
 
-  struct mrf24j40_txdesc_s csma_desc;
+  struct ieee802154_txdesc_s *csma_desc;
   FAR struct iob_s *csma_frame;
+  bool csma_busy;
 
-  struct mrf24j40_txdesc_s gts_desc[MRF24J40_GTS_SLOTS];
+  struct ieee802154_txdesc_s *gts_desc[MRF24J40_GTS_SLOTS];
   FAR struct iob_s *gts_frame[MRF24J40_GTS_SLOTS];
+  bool gts_busy[MRF24J40_GTS_SLOTS];
 };
 
 /****************************************************************************
@@ -189,7 +184,6 @@ static int  mrf24j40_gts_setup(FAR struct mrf24j40_radio_s *dev, uint8_t gts,
 static int  mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
               FAR struct iob_s *frame, uint32_t fifo_addr);
 
-
 static int  mrf24j40_setchannel(FAR struct mrf24j40_radio_s *dev,
               uint8_t chan);
 static int  mrf24j40_getchannel(FAR struct mrf24j40_radio_s *dev,
@@ -206,10 +200,6 @@ static int  mrf24j40_seteaddr(FAR struct mrf24j40_radio_s *dev,
               FAR const uint8_t *eaddr);
 static int  mrf24j40_geteaddr(FAR struct mrf24j40_radio_s *dev,
               FAR uint8_t *eaddr);
-static int  mrf24j40_setpromisc(FAR struct mrf24j40_radio_s *dev,
-              bool promisc);
-static int  mrf24j40_getpromisc(FAR struct mrf24j40_radio_s *dev,
-              FAR bool *promisc);
 static int  mrf24j40_setdevmode(FAR struct mrf24j40_radio_s *dev,
               uint8_t mode);
 static int  mrf24j40_getdevmode(FAR struct mrf24j40_radio_s *dev,
@@ -446,17 +436,17 @@ static void mrf24j40_dopoll_csma(FAR void *arg)
 
   /* If this a CSMA transaction and we have room in the CSMA fifo */
 
-  if (!dev->csma_desc.busy)
+  if (!dev->csma_busy)
     {
       /* need to somehow allow for a handle to be passed */
 
-      len = dev->radiocb->poll_csma(dev->radiocb, &dev->csma_desc.pub,
+      len = dev->radiocb->poll_csma(dev->radiocb, &dev->csma_desc,
                                     &dev->csma_frame);
       if (len > 0)
         {
           /* Now the txdesc is in use */
 
-          dev->csma_desc.busy = 1;
+          dev->csma_busy = 1;
 
           /* Setup the transaction on the device in the CSMA FIFO */
 
@@ -501,15 +491,15 @@ static void mrf24j40_dopoll_gts(FAR void *arg)
 
   for (gts = 0; gts < MRF24J40_GTS_SLOTS; gts++)
     {
-      if (!dev->gts_desc[gts].busy)
+      if (!dev->gts_busy[gts])
         {
-          len = dev->radiocb->poll_gts(dev->radiocb, &dev->gts_desc[gts].pub,
+          len = dev->radiocb->poll_gts(dev->radiocb, &dev->gts_desc[gts],
                                        &dev->gts_frame[0]);
           if (len > 0)
             {
               /* Now the txdesc is in use */
 
-              dev->gts_desc[gts].busy = 1;
+              dev->gts_busy[gts]= 1;
 
               /* Setup the transaction on the device in the open GTS FIFO */
 
@@ -1406,15 +1396,15 @@ static void mrf24j40_irqwork_txnorm(FAR struct mrf24j40_radio_s *dev)
    */
 
   txstat = mrf24j40_getreg(dev->spi, MRF24J40_TXSTAT);
-  dev->csma_desc.pub.status = txstat & MRF24J40_TXSTAT_TXNSTAT;
+  dev->csma_desc->conf->status = txstat & MRF24J40_TXSTAT_TXNSTAT;
 
   /* Inform the next layer of the transmission success/failure */
 
-  dev->radiocb->txdone(dev->radiocb, &dev->csma_desc.pub);
+  dev->radiocb->txdone(dev->radiocb, dev->csma_desc);
 
   /* We are now done with the transaction */
 
-  dev->csma_desc.busy = 0;
+  dev->csma_busy = 0;
 
   /* Free the IOB */
 
@@ -1451,20 +1441,20 @@ static void mrf24j40_irqwork_txgts(FAR struct mrf24j40_radio_s *dev,
 
   if (gts == 0)
     {
-      dev->csma_desc.pub.status = txstat & MRF24J40_TXSTAT_TXG1STAT;
+      dev->csma_desc->conf->status = txstat & MRF24J40_TXSTAT_TXG1STAT;
     }
   else if (gts == 1)
     {
-      dev->csma_desc.pub.status = txstat & MRF24J40_TXSTAT_TXG2STAT;
+      dev->csma_desc->conf->status = txstat & MRF24J40_TXSTAT_TXG2STAT;
     }
 
   /* Inform the next layer of the transmission success/failure */
 
-  dev->radiocb->txdone(dev->radiocb, &dev->gts_desc[gts].pub);
+  dev->radiocb->txdone(dev->radiocb, dev->gts_desc[gts]);
 
   /* We are now done with the transaction */
 
-  dev->gts_desc[gts].busy = 0;
+  dev->gts_busy[gts]= 0;
 
   /* Free the IOB */
 
