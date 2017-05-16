@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <nuttx/sched.h>
 #include <nuttx/syslog/syslog.h>
 
 #include "syslog.h"
@@ -100,8 +101,21 @@ ssize_t syslog_default_write(FAR const char *buffer, size_t buflen)
 ssize_t syslog_write(FAR const char *buffer, size_t buflen)
 {
 #ifdef CONFIG_SYSLOG_WRITE
-  return g_syslog_channel->sc_write(buffer, buflen);
-#else
-  return syslog_default_write(buffer, buflen);
+  if (!up_interrupt_context() && !sched_idletask())
+    {
+#ifdef CONFIG_SYSLOG_INTBUFFER
+      /* Flush any characters that may have been added to the interrupt
+       * buffer.
+       */
+
+      (void)syslog_flush_intbuffer(g_syslog_channel, false);
 #endif
+
+      return g_syslog_channel->sc_write(buffer, buflen);
+    }
+  else
+#endif
+    {
+      return syslog_default_write(buffer, buflen);
+    }
 }
