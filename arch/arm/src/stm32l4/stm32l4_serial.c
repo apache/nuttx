@@ -765,11 +765,11 @@ static inline void stm32l4serial_putreg(FAR struct stm32l4_serial_s *priv,
 }
 
 /****************************************************************************
- * Name: stm32l4serial_restoreusartint
+ * Name: stm32l4serial_setusartint
  ****************************************************************************/
 
-static void stm32l4serial_restoreusartint(FAR struct stm32l4_serial_s *priv,
-                                          uint16_t ie)
+static inline void stm32l4serial_setusartint(FAR struct stm32l4_serial_s *priv,
+                                             uint16_t ie)
 {
   uint32_t cr;
 
@@ -791,12 +791,32 @@ static void stm32l4serial_restoreusartint(FAR struct stm32l4_serial_s *priv,
 }
 
 /****************************************************************************
+ * Name: up_restoreusartint
+ ****************************************************************************/
+
+static void stm32l4serial_restoreusartint(FAR struct stm32l4_serial_s *priv,
+                                          uint16_t ie)
+{
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  stm32l4serial_setusartint(priv, ie);
+
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
  * Name: stm32l4serial_disableusartint
  ****************************************************************************/
 
-static inline void stm32l4serial_disableusartint(FAR struct stm32l4_serial_s *priv,
-                                                 FAR uint16_t *ie)
+static void stm32l4serial_disableusartint(FAR struct stm32l4_serial_s *priv,
+                                          FAR uint16_t *ie)
 {
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
   if (ie)
     {
       uint32_t cr1;
@@ -833,7 +853,9 @@ static inline void stm32l4serial_disableusartint(FAR struct stm32l4_serial_s *pr
 
   /* Disable all interrupts */
 
-  stm32l4serial_restoreusartint(priv, 0);
+  stm32l4serial_setusartint(priv, 0);
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
