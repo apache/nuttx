@@ -2936,7 +2936,7 @@ static int stm32_phyintenable(struct stm32_ethmac_s *priv)
                            (phyval & ~MII_INT_CLREN) | MII_INT_SETEN);
     }
 
-  return 0;
+  return ret;
 }
 #endif
 
