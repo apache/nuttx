@@ -192,36 +192,38 @@
 
 /* These definitions are used to enable the PHY interrupts */
 
-#if defined( CONFIG_ETH0_PHY_AM79C874)
-#  error missing logic
-#elif defined( CONFIG_ETH0_PHY_KS8721)
-#  error missing logic
-#elif defined( CONFIG_ETH0_PHY_KSZ8041)
-#  error missing logic
-#elif defined( CONFIG_ETH0_PHY_KSZ8051)
-#  error missing logic
-#elif defined( CONFIG_ETH0_PHY_KSZ8061)
-#  error missing logic
-#elif defined( CONFIG_ETH0_PHY_KSZ8081)
-#  define MII_INT_REG    MII_KSZ8081_INT
-#  define MII_INT_SETEN  MII_KSZ80x1_INT_LDEN | MII_KSZ80x1_INT_LUEN
-#  define MII_INT_CLREN  0
-#elif defined( CONFIG_ETH0_PHY_KSZ90x1)
-#  error missing logic
-#elif defined( CONFIG_ETH0_PHY_DP83848C)
-#  error missing logic
-#elif defined( CONFIG_ETH0_PHY_LAN8720)
-#  error missing logic
-#elif defined( CONFIG_ETH0_PHY_LAN8740)
-#  error missing logic
-#elif defined( CONFIG_ETH0_PHY_LAN8740A)
-#  error missing logic
-#elif defined( CONFIG_ETH0_PHY_LAN8742A)
-#  error missing logic
-#elif defined( CONFIG_ETH0_PHY_DM9161)
-#  error missing logic
-#else
-#  error unknown PHY
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+#  if defined( CONFIG_ETH0_PHY_AM79C874)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_KS8721)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_KSZ8041)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_KSZ8051)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_KSZ8061)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_KSZ8081)
+#    define MII_INT_REG    MII_KSZ8081_INT
+#    define MII_INT_SETEN  MII_KSZ80x1_INT_LDEN | MII_KSZ80x1_INT_LUEN
+#    define MII_INT_CLREN  0
+#  elif defined( CONFIG_ETH0_PHY_KSZ90x1)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_DP83848C)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_LAN8720)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_LAN8740)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_LAN8740A)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_LAN8742A)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_DM9161)
+#    error missing logic
+#  else
+#    error unknown PHY
+#  endif
 #endif
 
 #ifdef CONFIG_STM32_ETH_PTP
