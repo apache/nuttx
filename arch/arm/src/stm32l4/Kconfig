@@ -1008,14 +1008,6 @@ config STM32L4_SPI3
 	select SPI
 	select STM32L4_SPI
 
-config STM32L4_USART1
-	bool "USART1"
-	default n
-	depends on STM32L4_HAVE_USART1
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select USART1_SERIALDRIVER
-	select STM32L4_USART
-
 config STM32L4_USART2
 	bool "USART2"
 	default n
@@ -1155,8 +1147,9 @@ config STM32L4_TIM8
 config STM32L4_USART1
 	bool "USART1"
 	default n
-	select USART1_SERIALDRIVER
+	depends on STM32L4_HAVE_USART1
 	select ARCH_HAVE_SERIAL_TERMIOS
+	select USART1_SERIALDRIVER
 	select STM32L4_USART
 
 config STM32L4_TIM15
@@ -1305,9 +1298,6 @@ config STM32L4_SAI2PLL
 		The STM32L476 has a separate PLL for the SAI2 block.
 		Set this true and provide configuration parameters in
 		board.h to use this PLL.
-
-config STM32L4_USART
-	bool
 
 menu "Timer Configuration"
 
