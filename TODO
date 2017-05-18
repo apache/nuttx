@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated April 15, 2017)
+NuttX TODO List (Last updated May 18, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -25,7 +25,7 @@ nuttx/:
  (12)  Libraries (libc/, libm/)
  (10)  File system/Generic drivers (fs/, drivers/)
   (9)  Graphics Subsystem (graphics/)
-  (2)  Build system / Toolchains
+  (3)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
 
@@ -1824,6 +1824,43 @@ o Build system
   Status:      Open
   Priority:    Low, since I am not aware of anyone using the Windows Native build.
                But, of course, very high if you want to use it.
+
+  Title:       CONTROL-C CAN BREAK DEPENDENCIES
+  Description: If you control C out of a make, then there are things that can go
+               wrong.  For one, you can break the dependencies in this scenario:
+
+               - The build in a given directory begins with all of the compilations.
+                 On terminal, this the long phase with CC: on each line.  As each
+                 .o file is created, it is timestamped with the current time.
+
+               - The dependencies on each .o are such that the C file will be re-
+                 compile if the .o file is OLDER that the corresponding .a archive
+                 file.
+
+               - The compilation phase is followed by a single, relatively short
+                 AR: phase that adds each of the file to the .a archive file.  As
+                 each file is added to archive, the timestamp of the of archive is
+                 updated to the current time.  After the first .o file has been
+                 added, then archive file will have a newly timestamp than any of
+                 the newly compiled .o file.
+
+               - If the user aborts with control-C during this AR: phase, then we
+                 are left with:  (1) not all of the files have bee added to the
+                 archive, and (2) the archive file has a newer timestamp than any
+                 of the .o file.
+
+               So when the make is restarted after a control, the dependencies will
+               see that the .a archive file has the newer time stamp and those .o
+               file will never be added to the archive until the directory is cleaned
+               or some other dependency changes.
+   Status      Open
+   Priority:   Medium-High.  It is a rare event that control-C happens at just the
+               point in time.  However, when it does occur the resulting code may
+               have binary incompatiblies in the code taken from the out-of-sync
+               archives and cost a lot of debug time before you realize the issue.
+
+               A work-around is to do 'make clean' if you ever decide to control-C
+               out of a make.
 
 o Other drivers (drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^
