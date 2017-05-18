@@ -82,7 +82,7 @@ static FAR struct iob_qentry_s *iob_alloc_qcommitted(void)
     {
       /* Remove the I/O buffer from the committed list */
 
-      g_iob_qcommitted = iobq->io_flink;
+      g_iob_qcommitted = iobq->qe_flink;
 
       /* Put the I/O buffer in a known state */
 
