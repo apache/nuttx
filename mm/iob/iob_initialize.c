@@ -84,7 +84,7 @@ FAR struct iob_qentry_s *g_iob_freeqlist;
 
 /* A list of I/O buffer queue containers that are committed for allocation */
 
-extern FAR struct iob_s *g_iob_qcommitted;
+FAR struct iob_s *g_iob_qcommitted;
 #endif
 
 /* Counting semaphores that tracks the number of free IOBs/qentries */
