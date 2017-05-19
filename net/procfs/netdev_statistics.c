@@ -61,9 +61,12 @@
  ****************************************************************************/
 
 static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile);
-static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile);
+#ifdef CONFIG_NET_IPv4
+static int netprocfs_inet4addresses(FAR struct netprocfs_file_s *netfile);
+#endif
 #ifdef CONFIG_NET_IPv6
-static int netprocfs_dripaddress(FAR struct netprocfs_file_s *netfile);
+static int netprocfs_inet6address(FAR struct netprocfs_file_s *netfile);
+static int netprocfs_inet6draddress(FAR struct netprocfs_file_s *netfile);
 #endif
 #ifdef CONFIG_NETDEV_STATISTICS
 static int netprocfs_rxstatistics_header(FAR struct netprocfs_file_s *netfile);
@@ -83,10 +86,13 @@ static int netprocfs_errors(FAR struct netprocfs_file_s *netfile);
 
 static const linegen_t g_linegen[] =
 {
-  netprocfs_linklayer,
-  netprocfs_ipaddresses
+  netprocfs_linklayer
+#ifdef CONFIG_NET_IPv4
+  , netprocfs_inet4addresses
+#endif
 #ifdef CONFIG_NET_IPv6
-  , netprocfs_dripaddress
+  , netprocfs_inet6address
+  , netprocfs_inet6draddress
 #endif
 #ifdef CONFIG_NETDEV_STATISTICS
   , netprocfs_rxstatistics_header,
@@ -255,25 +261,19 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
 }
 
 /****************************************************************************
- * Name: netprocfs_ipaddresses
+ * Name: netprocfs_inet4addresses
  ****************************************************************************/
 
-static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile)
+#ifdef CONFIG_NET_IPv4
+static int netprocfs_inet4addresses(FAR struct netprocfs_file_s *netfile)
 {
   FAR struct net_driver_s *dev;
-#ifdef CONFIG_NET_IPv4
   struct in_addr addr;
-#endif
-#ifdef CONFIG_NET_IPv6
-  char addrstr[INET6_ADDRSTRLEN];
-  uint8_t preflen;
-#endif
   int len = 0;
 
   DEBUGASSERT(netfile != NULL && netfile->dev != NULL);
   dev = netfile->dev;
 
-#ifdef CONFIG_NET_IPv4
   /* Show the IPv4 address */
 
   addr.s_addr = dev->d_ipaddr;
@@ -291,9 +291,25 @@ static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile)
   addr.s_addr = dev->d_netmask;
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   "Mask:%s\n\n", inet_ntoa(addr));
+  return len;
+}
 #endif
 
+/****************************************************************************
+ * Name: netprocfs_inet6address
+ ****************************************************************************/
+
 #ifdef CONFIG_NET_IPv6
+static int netprocfs_inet6address(FAR struct netprocfs_file_s *netfile)
+{
+  FAR struct net_driver_s *dev;
+  char addrstr[INET6_ADDRSTRLEN];
+  uint8_t preflen;
+  int len = 0;
+
+  DEBUGASSERT(netfile != NULL && netfile->dev != NULL);
+  dev = netfile->dev;
+
   /* Convert the 128 network mask to a human friendly prefix length */
 
   preflen = net_ipv6_mask2pref(dev->d_ipv6netmask);
@@ -305,17 +321,17 @@ static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile)
       len += snprintf(&netfile->line[len], NET_LINELEN - len,
                       "\tinet6 addr:%s/%d\n", addrstr, preflen);
     }
-#endif
 
   return len;
 }
+#endif
 
 /****************************************************************************
- * Name: netprocfs_dripaddress
+ * Name: netprocfs_inet6draddress
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-static int netprocfs_dripaddress(FAR struct netprocfs_file_s *netfile)
+static int netprocfs_inet6draddress(FAR struct netprocfs_file_s *netfile)
 {
   FAR struct net_driver_s *dev;
   char addrstr[INET6_ADDRSTRLEN];

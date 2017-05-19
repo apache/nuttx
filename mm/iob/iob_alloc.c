@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/iob/iob_alloc.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,47 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: iob_alloc_committed
+ *
+ * Description:
+ *   Allocate an I/O buffer by taking the buffer at the head of the committed
+ *   list.
+ *
+ ****************************************************************************/
+
+static FAR struct iob_s *iob_alloc_committed(void)
+{
+  FAR struct iob_s *iob = NULL;
+  irqstate_t flags;
+
+  /* We don't know what context we are called from so we use extreme measures
+   * to protect the committed list:  We disable interrupts very briefly.
+   */
+
+  flags = enter_critical_section();
+
+  /* Take the I/O buffer from the head of the committed list */
+
+  iob = g_iob_committed;
+  if (iob != NULL)
+    {
+      /* Remove the I/O buffer from the committed list */
+
+      g_iob_committed = iob->io_flink;
+
+      /* Put the I/O buffer in a known state */
+
+      iob->io_flink  = NULL; /* Not in a chain */
+      iob->io_len    = 0;    /* Length of the data in the entry */
+      iob->io_offset = 0;    /* Offset to the beginning of data */
+      iob->io_pktlen = 0;    /* Total length of the packet */
+    }
+
+  leave_critical_section(flags);
+  return iob;
+}
+
+/****************************************************************************
  * Name: iob_allocwait
  *
  * Description:
@@ -85,73 +126,76 @@ static FAR struct iob_s *iob_allocwait(bool throttled)
    */
 
   flags = enter_critical_section();
-  do
+
+  /* Try to get an I/O buffer.  If successful, the semaphore count will be
+   * decremented atomically.
+   */
+
+  iob = iob_tryalloc(throttled);
+  while (ret == OK && iob == NULL)
     {
-      /* Try to get an I/O buffer.  If successful, the semaphore count
-       * will be decremented atomically.
+      /* If not successful, then the semaphore count was less than or equal
+       * to zero (meaning that there are no free buffers).  We need to wait
+       * for an I/O buffer to be released and placed in the committed
+       * list.
        */
 
-      iob = iob_tryalloc(throttled);
-      if (!iob)
+      ret = sem_wait(sem);
+      if (ret < 0)
         {
-          /* If not successful, then the semaphore count was less than or
-           * equal to zero (meaning that there are no free buffers).  We
-           * need to wait for an I/O buffer to be released when the semaphore
-           * count will be incremented.
+          int errcode = get_errno();
+
+          /* EINTR is not an error!  EINTR simply means that we were
+           * awakened by a signal and we should try again.
+           *
+           * REVISIT:  Many end-user interfaces are required to return with
+           * an error if EINTR is set.  Most uses of this function are in
+           * internal, non-user logic.  But are there cases where the error
+           * should be returned.
            */
 
-          ret = sem_wait(sem);
-          if (ret < 0)
+          if (errcode == EINTR)
             {
-              int errcode = get_errno();
+              /* Force a success indication so that we will continue looping. */
 
-              /* EINTR is not an error!  EINTR simply means that we were
-               * awakened by a signal and we should try again.
-               *
-               * REVISIT:  Many end-user interfaces are required to return
-               * with an error if EINTR is set.  Most uses of this function
-               * is in internal, non-user logic.  But are there cases where
-               * the error should be returned.
-               */
-
-              if (errcode == EINTR)
-                {
-                  /* Force a success indication so that we will continue
-                   * looping.
-                   */
-
-                  ret = 0;
-                }
-              else
-                {
-                  /* Stop the loop and return a error */
-
-                  DEBUGASSERT(errcode > 0);
-                  ret = -errcode;
-                }
+              ret = 0;
             }
           else
             {
-              /* When we wake up from wait successfully, an I/O buffer was
-               * returned to the free list.  However, if there are concurrent
-               * allocations from interrupt handling, then I suspect that
-               * there is a race condition.  But no harm, we will just wait
-               * again in that case.
+              /* Stop the loop and return a error */
+
+              DEBUGASSERT(errcode > 0);
+              ret = -errcode;
+            }
+        }
+      else
+        {
+          /* When we wake up from wait successfully, an I/O buffer was
+           * freed and we hold a count for one IOB.  Unless somehting
+           * failed, we should have an IOB waiting for us in the
+           * committed list.
+           */
+
+          iob = iob_alloc_committed();
+          DEBUGASSERT(iob != NULL);
+
+          if (iob == NULL)
+            {
+              /* This should not fail, but we allow for that possibility to
+               * handle any potential, non-obvious race condition.  Perhaps
+               * the free IOB ended up in the g_iob_free list?
                *
                * We need release our count so that it is available to
                * iob_tryalloc(), perhaps allowing another thread to take our
                * count.  In that event, iob_tryalloc() will fail above and
                * we will have to wait again.
-               *
-               * TODO: Consider a design modification to permit us to
-               * complete the allocation without losing our count.
                */
 
               sem_post(sem);
+              iob = iob_tryalloc(throttled);
             }
         }
     }
-  while (ret == OK && iob == NULL);
 
   leave_critical_section(flags);
   return iob;
@@ -225,7 +269,7 @@ FAR struct iob_s *iob_tryalloc(bool throttled)
       /* Take the I/O buffer from the head of the free list */
 
       iob = g_iob_freelist;
-      if (iob)
+      if (iob != NULL)
         {
           /* Remove the I/O buffer from the free list and decrement the
            * counting semaphore(s) that tracks the number of available

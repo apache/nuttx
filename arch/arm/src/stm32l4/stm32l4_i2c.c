@@ -307,7 +307,7 @@ static int stm32l4_i2c_reset(FAR struct i2c_master_s *dev);
 
 /* Device Structures, Instantiation */
 
-const struct i2c_ops_s stm32l4_i2c_ops =
+static const struct i2c_ops_s stm32l4_i2c_ops =
 {
  .transfer = stm32l4_i2c_transfer
 #ifdef CONFIG_I2C_RESET
@@ -329,7 +329,7 @@ static const struct stm32l4_i2c_config_s stm32l4_i2c1_config =
 #endif
 };
 
-struct stm32l4_i2c_priv_s stm32l4_i2c1_priv =
+static struct stm32l4_i2c_priv_s stm32l4_i2c1_priv =
 {
   .ops        = &stm32l4_i2c_ops,
   .config     = &stm32l4_i2c1_config,
@@ -358,7 +358,7 @@ static const struct stm32l4_i2c_config_s stm32l4_i2c2_config =
 #endif
 };
 
-struct stm32l4_i2c_priv_s stm32l4_i2c2_priv =
+static struct stm32l4_i2c_priv_s stm32l4_i2c2_priv =
 {
   .ops        = &stm32l4_i2c_ops,
   .config     = &stm32l4_i2c2_config,
@@ -387,7 +387,7 @@ static const struct stm32l4_i2c_config_s stm32l4_i2c3_config =
 #endif
 };
 
-struct stm32l4_i2c_priv_s stm32l4_i2c3_priv =
+static struct stm32l4_i2c_priv_s stm32l4_i2c3_priv =
 {
   .ops        = &stm32l4_i2c_ops,
   .config     = &stm32l4_i2c3_config,
@@ -416,7 +416,7 @@ static const struct stm32l4_i2c_config_s stm32l4_i2c4_config =
 #endif
 };
 
-struct stm32l4_i2c_priv_s stm32l4_i2c4_priv =
+static struct stm32l4_i2c_priv_s stm32l4_i2c4_priv =
 {
   .ops        = &stm32l4_i2c_ops,
   .config     = &stm32l4_i2c4_config,
@@ -1831,7 +1831,7 @@ static int stm32l4_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg
  *   dev   - Device-specific state data
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   Zero (OK) on success; negative value on failure.
  *
  ************************************************************************************/
 

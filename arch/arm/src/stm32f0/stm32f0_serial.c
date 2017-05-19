@@ -769,10 +769,10 @@ static inline void stm32f0serial_putreg(FAR struct stm32f0_serial_s *priv,
 }
 
 /****************************************************************************
- * Name: stm32f0serial_restoreusartint
+ * Name: stm32f0serial_setusartint
  ****************************************************************************/
 
-static void stm32f0serial_restoreusartint(FAR struct stm32f0_serial_s *priv,
+static void stm32f0serial_setusartint(FAR struct stm32f0_serial_s *priv,
                                           uint16_t ie)
 {
   uint32_t cr;
@@ -795,12 +795,32 @@ static void stm32f0serial_restoreusartint(FAR struct stm32f0_serial_s *priv,
 }
 
 /****************************************************************************
+ * Name: stm32f0serial_restoreusartint
+ ****************************************************************************/
+
+static void stm32f0serial_restoreusartint(FAR struct stm32f0_serial_s *priv,
+                                          uint16_t ie)
+{
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  stm32f0serial_setusartint(priv, ie);
+
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
  * Name: stm32f0serial_disableusartint
  ****************************************************************************/
 
-static inline void stm32f0serial_disableusartint(FAR struct stm32f0_serial_s *priv,
-                                                 FAR uint16_t *ie)
+static void stm32f0serial_disableusartint(FAR struct stm32f0_serial_s *priv,
+                                          FAR uint16_t *ie)
 {
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
   if (ie)
     {
       uint32_t cr1;
@@ -837,7 +857,9 @@ static inline void stm32f0serial_disableusartint(FAR struct stm32f0_serial_s *pr
 
   /* Disable all interrupts */
 
-  stm32f0serial_restoreusartint(priv, 0);
+  stm32f0serial_setusartint(priv, 0);
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
