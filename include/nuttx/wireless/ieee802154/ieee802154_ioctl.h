@@ -62,8 +62,9 @@
 /* IEEE 802.15.4 MAC Character Driver IOCTL commands ********************************/
 
 
-#define MAC802154IOC_MCPS_REGISTER    _WLCIOC(IEEE802154_FIRST)
-#define MAC802154IOC_MLME_REGISTER    _WLCIOC(IEEE802154_FIRST+1)
+#define MAC802154IOC_NOTIFY_REGISTER    _WLCIOC(IEEE802154_FIRST)
+#define MAC802154IOC_GET_EVENT          _WLCIOC(IEEE802154_FIRST+1)
+#define MAC802154IOC_ENABLE_EVENTS      _WLCIOC(IEEE802154_FIRST+2)
 
 /************************************************************************************
  * Public Types
