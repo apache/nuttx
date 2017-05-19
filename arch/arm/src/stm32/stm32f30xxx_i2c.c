@@ -318,7 +318,7 @@ static int stm32_i2c_reset(FAR struct i2c_master_s *dev);
 
 /* Device Structures, Instantiation */
 
-const struct i2c_ops_s stm32_i2c_ops =
+static const struct i2c_ops_s stm32_i2c_ops =
 {
  .transfer = stm32_i2c_transfer
 #ifdef CONFIG_I2C_RESET
@@ -340,7 +340,7 @@ static const struct stm32_i2c_config_s stm32_i2c1_config =
 #endif
 };
 
-struct stm32_i2c_priv_s stm32_i2c1_priv =
+static struct stm32_i2c_priv_s stm32_i2c1_priv =
 {
   .ops        = &stm32_i2c_ops,
   .config     = &stm32_i2c1_config,
@@ -369,7 +369,7 @@ static const struct stm32_i2c_config_s stm32_i2c2_config =
 #endif
 };
 
-struct stm32_i2c_priv_s stm32_i2c2_priv =
+static struct stm32_i2c_priv_s stm32_i2c2_priv =
 {
   .ops        = &stm32_i2c_ops,
   .config     = &stm32_i2c2_config,
@@ -398,7 +398,7 @@ static const struct stm32_i2c_config_s stm32_i2c3_config =
 #endif
 };
 
-struct stm32_i2c_priv_s stm32_i2c3_priv =
+static struct stm32_i2c_priv_s stm32_i2c3_priv =
 {
   .ops        = &stm32_i2c_ops,
   .config     = &stm32_i2c3_config,
