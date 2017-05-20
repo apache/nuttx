@@ -160,6 +160,47 @@
 #define WL_NNETCMDS         0x0032          /* Number of network commands */
 #define WL_USERFIRST        (WL_NETFIRST + WL_NNETCMDS)
 
+/* ----------------------- WIRELESS EVENTS ----------------------- */
+/* Those are *NOT* ioctls, do not issue request on them !!! */
+/* Most events use the same identifier as ioctl requests */
+
+#define IWEVTXDROP      0x8C00    /* Packet dropped to excessive retry */
+#define IWEVQUAL        0x8C01    /* Quality part of statistics (scan) */
+#define IWEVCUSTOM      0x8C02    /* Driver specific ascii string */
+#define IWEVREGISTERED  0x8C03    /* Discovered a new node (AP mode) */
+#define IWEVEXPIRED     0x8C04    /* Expired a node (AP mode) */
+#define IWEVGENIE       0x8C05    /* Generic IE (WPA, RSN, WMM, ..)
+                                   * (scan results); This includes id and
+                                   * length fields. One IWEVGENIE may
+                                   * contain more than one IE. Scan
+                                   * results may contain one or more
+                                   * IWEVGENIE events. */
+#define IWEVMICHAELMICFAILURE 0x8C06  /* Michael MIC failure
+                                       * (struct iw_michaelmicfailure)
+                                       */
+#define IWEVASSOCREQIE  0x8C07    /* IEs used in (Re)Association Request.
+                                   * The data includes id and length
+                                   * fields and may contain more than one
+                                   * IE. This event is required in
+                                   * Managed mode if the driver
+                                   * generates its own WPA/RSN IE. This
+                                   * should be sent just before
+                                   * IWEVREGISTERED event for the
+                                   * association. */
+#define IWEVASSOCRESPIE 0x8C08    /* IEs used in (Re)Association
+                                   * Response. The data includes id and
+                                   * length fields and may contain more
+                                   * than one IE. This may be sent
+                                   * between IWEVASSOCREQIE and
+                                   * IWEVREGISTERED events for the
+                                   * association. */
+#define IWEVPMKIDCAND   0x8C09    /* PMKID candidate for RSN
+                                   * pre-authentication
+                                   * (struct iw_pmkid_cand) */
+
+#define IWEVFIRST       0x8C00
+#define IW_EVENT_IDX(cmd) ((cmd) - IWEVFIRST)
+
 /* Other Common Wireless Definitions ***********************************************/
 
 /* Maximum size of the ESSID and NICKN strings */
@@ -177,6 +218,31 @@
 #define IW_MODE_MONITOR     6    /* Passive monitor (listen only) */
 #define IW_MODE_MESH        7    /* Mesh (IEEE 802.11s) network */
 #define IW_MODE_NFLAGS      8
+
+/* Statistics flags (bitmask in updated) */
+
+#define IW_QUAL_QUAL_UPDATED  0x01  /* Value was updated since last read */
+#define IW_QUAL_LEVEL_UPDATED 0x02
+#define IW_QUAL_NOISE_UPDATED 0x04
+#define IW_QUAL_ALL_UPDATED   0x07
+#define IW_QUAL_DBM           0x08  /* Level + Noise are dBm */
+#define IW_QUAL_QUAL_INVALID  0x10  /* Driver doesn't provide value */
+#define IW_QUAL_LEVEL_INVALID 0x20
+#define IW_QUAL_NOISE_INVALID 0x40
+#define IW_QUAL_RCPI          0x80  /* Level + Noise are 802.11k RCPI */
+#define IW_QUAL_ALL_INVALID   0x70
+
+/* Flags for encoding (along with the token) */
+
+#define IW_ENCODE_INDEX      0x00FF  /* Token index (if needed) */
+#define IW_ENCODE_FLAGS      0xFF00  /* Flags defined below */
+#define IW_ENCODE_MODE       0xF000  /* Modes defined below */
+#define IW_ENCODE_DISABLED   0x8000  /* Encoding disabled */
+#define IW_ENCODE_ENABLED    0x0000  /* Encoding enabled */
+#define IW_ENCODE_RESTRICTED 0x4000  /* Refuse non-encoded packets */
+#define IW_ENCODE_OPEN       0x2000  /* Accept non-encoded packets */
+#define IW_ENCODE_NOKEY      0x0800  /* Key is write only, so not present */
+#define IW_ENCODE_TEMP       0x0400  /* Temporary key */
 
 /* Frequency flags */
 
