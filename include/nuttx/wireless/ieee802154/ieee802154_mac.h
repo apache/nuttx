@@ -102,31 +102,12 @@
 
 /* IEEE 802.15.4 MAC Interface **********************************************/
 
-/* Frame Type */
-
-#define IEEE802154_FRAME_BEACON       0x00
-#define IEEE802154_FRAME_DATA         0x01
-#define IEEE802154_FRAME_ACK          0x02
-#define IEEE802154_FRAME_COMMAND      0x03
-
-/* MAC commands */
-
-#define IEEE802154_CMD_ASSOC_REQ      0x01
-#define IEEE802154_CMD_ASSOC_RESP     0x02
-#define IEEE802154_CMD_DISASSOC_NOT   0x03
-#define IEEE802154_CMD_DATA_REQ       0x04
-#define IEEE802154_CMD_PANID_CONF_NOT 0x05
-#define IEEE802154_CMD_ORPHAN_NOT     0x06
-#define IEEE802154_CMD_BEACON_REQ     0x07
-#define IEEE802154_CMD_COORD_REALIGN  0x08
-#define IEEE802154_CMD_GTS_REQ        0x09
-
 /* Some addresses */
 
 #define IEEE802154_PAN_UNSPEC   (uint16_t)0xFFFF
 #define IEEE802154_SADDR_UNSPEC (uint16_t)0xFFFF
 #define IEEE802154_SADDR_BCAST  (uint16_t)0xFFFE
-#define IEEE802154_EADDR_UNSPEC (uint8_t*)"\xff\xff\xff\xff\xff\xff\xff\xff"
+#define IEEE802154_EADDR_UNSPEC (uint8_t[]){0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF}
 
 /* Frame control field masks, 2 bytes
  * Seee IEEE 802.15.4/2011 5.2.1.1 page 57
@@ -149,6 +130,22 @@
 #define IEEE802154_FRAMECTRL_SHIFT_DADDR      10 /* Dest addressing mode, bits 10-11 */
 #define IEEE802154_FRAMECTRL_SHIFT_VERSION    12 /* Source addressing mode, bits 12-13 */
 #define IEEE802154_FRAMECTRL_SHIFT_SADDR      14 /* Source addressing mode, bits 14-15 */
+
+/* Capability Information Bitfield
+ *
+ */
+
+#define IEEE802154_CAPABILITY_DEVTYPE         0x02
+#define IEEE802154_CAPABILITY_PWRSRC          0x04
+#define IEEE802154_CAPABILITY_RXONIDLE        0x08
+#define IEEE802154_CAPABILITY_SECURITY        0x40
+#define IEEE802154_CAPABILITY_ALLOCADDR       0x80
+
+#define IEEE802154_CAPABILITY_SHIFT_DEVTYPE   1
+#define IEEE802154_CAPABILITY_SHIFT_PWRSRC    2
+#define IEEE802154_CAPABILITY_SHIFT_RXONIDLE  3
+#define IEEE802154_CAPABILITY_SHIFT_SECURITY  6
+#define IEEE802154_CAPABILITY_SHIFT_ALLOCADDR 7
 
 /* IEEE 802.15.4 PHY constants */
 
@@ -194,7 +191,6 @@
 
 #define MAX_ORPHAN_ADDR   32  /* REVISIT */
 
-// TODO: Add macros
 
 /****************************************************************************
  * Public Types
@@ -329,6 +325,31 @@ enum ieee802154_pib_attr_e
   IEEE802154_PIB_MAC_PANCOORD_SHORT_ADDR,
 };
 
+/* Frame Type */
+
+enum ieee802154_frametype_e
+{
+  IEEE802154_FRAME_BEACON = 0,
+  IEEE802154_FRAME_DATA,
+  IEEE802154_FRAME_ACK,
+  IEEE802154_FRAME_COMMAND
+};
+
+/* MAC command IDs */
+
+enum ieee802154_cmdid_e
+{
+  IEEE802154_CMD_ASSOC_REQ = 1,
+  IEEE802154_CMD_ASSOC_RESP,
+  IEEE802154_CMD_DISASSOC_NOT,
+  IEEE802154_CMD_DATA_REQ,
+  IEEE802154_CMD_PANID_CONF_NOT,
+  IEEE802154_CMD_ORPHAN_NOT,
+  IEEE802154_CMD_BEACON_REQ,
+  IEEE802154_CMD_COORD_REALIGN,
+  IEEE802154_CMD_GTS_REQ,
+};
+
 enum ieee802154_devmode_e
 {
   IEEE802154_DEVMODE_ENDPOINT,
@@ -405,13 +426,13 @@ enum ieee802154_ranging_e
 struct ieee802154_capability_info_s
 {
   uint8_t reserved_0        : 1;  /* Reserved */
-  uint8_t device_type       : 1;  /* 0=RFD, 1=FFD */
-  uint8_t power_source      : 1;  /* 1=AC, 0=Other */
-  uint8_t rx_on_idle        : 1;  /* 0=Receiver off when idle
+  uint8_t devtype           : 1;  /* 0=RFD, 1=FFD */
+  uint8_t powersource       : 1;  /* 1=AC, 0=Other */
+  uint8_t rxonidle          : 1;  /* 0=Receiver off when idle
                                    * 1=Receiver on when idle */
   uint8_t reserved_45       : 2;  /* Reserved */
   uint8_t security          : 1;  /* 0=disabled, 1=enabled */
-  uint8_t allocate_addr     : 1;  /* 1=Coordinator allocates short address
+  uint8_t allocaddr         : 1;  /* 1=Coordinator allocates short address
                                    * 0=otherwise */
 };
 
@@ -460,31 +481,6 @@ struct ieee802154_pend_addr_s
     } pa_addr;
   } u;
   struct ieee802154_addr_s addr[7]; /* Array of at most 7 addresses */
-};
-
-#ifdef CONFIG_IEEE802154_RANGING
-#define IEEE802154_TXDESC_FIELDS \
-  uint8_t handle; \
-  uint32_t timestamp; \
-  uint8_t status;
-#else
-#define IEEE802154_TXDESC_FIELDS \
-  uint8_t handle; \
-  uint32_t timestamp; \
-  uint8_t status;
-  bool rng_rcvd; \
-  uint32_t rng_counter_start; \
-  uint32_t rng_counter_stop; \
-  uint32_t rng_tracking_interval; \
-  uint32_t rng_offset;\
-  uint8_t rng_fom;
-#endif
-
-struct ieee802154_txdesc_s
-{
-  IEEE802154_TXDESC_FIELDS
-
-  /* TODO: Add slotting information for GTS transactions */
 };
 
 struct ieee802154_cca_s
@@ -631,7 +627,44 @@ struct ieee802154_frame_meta_s
 
 struct ieee802154_data_conf_s
 {
-  IEEE802154_TXDESC_FIELDS
+  uint8_t handle;                   /* Handle assoc. with MSDU */
+
+  /* The time, in symbols, at which the data were transmitted */
+
+  uint32_t timestamp;
+  enum ieee802154_status_e status;  /* The status of the MSDU transmission */
+
+#ifdef CONFIG_IEEE802154_RANGING
+  bool rng_rcvd;                    /* Ranging indicated by MSDU */
+
+  /* A count of the time units corresponding to an RMARKER at the antenna at
+   * the beginning of the ranging exchange
+   */
+
+  uint32_t rng_counter_start; 
+
+  /* A count of the time units corresponding to an RMARKER at the antenna at
+   * end of the ranging exchange
+   */
+
+  uint32_t rng_counter_stop; 
+
+  /* A count of the time units in a message exchange over which the tracking
+   * offset was measured
+   */
+
+  uint32_t rng_tracking_interval;
+
+  /* A count of the time units slipped or advanced by the radio tracking
+   * system over the course of the entire tracking interval
+   */
+
+  uint32_t rng_offset;
+  
+  /* The Figure of Merit (FoM) characterizing the ranging measurement */ 
+
+  uint8_t rng_fom; 
+#endif
 };
 
 /*****************************************************************************
@@ -734,12 +767,12 @@ struct ieee802154_purge_req_s
 
 struct ieee802154_assoc_req_s
 {
-  uint8_t channel;          /* Channel number to attempt association */
-  uint8_t channel_page;     /* Channel page to attempt association */
+  uint8_t chnum;   /* Channel number to attempt association */
+  uint8_t chpage;  /* Channel page to attempt association */
 
   /* Coordinator Address with which to associate */
 
-  struct ieee802154_addr_s coord_addr;
+  struct ieee802154_addr_s coordaddr;
 
   /* Capabilities of associating device */
 
@@ -1307,8 +1340,42 @@ struct ieee802154_poll_conf_s
   enum ieee802154_status_e status;
 };
 
-union ieee802154_mlme_notify_u
+/* MAC Service Notifications */
+
+enum ieee802154_notify_e
 {
+  /* MCPS Notifications */
+
+  IEEE802154_NOTIFY_CONF_DATA = 0x00,
+
+  /* MLME Notifications */
+
+  IEEE802154_NOTIFY_CONF_ASSOC,
+  IEEE802154_NOTIFY_CONF_DISASSOC,
+  IEEE802154_NOTIFY_CONF_GTS,
+  IEEE802154_NOTIFY_CONF_RESET,
+  IEEE802154_NOTIFY_CONF_RXENABLE,
+  IEEE802154_NOTIFY_CONF_SCAN,
+  IEEE802154_NOTIFY_CONF_START,
+  IEEE802154_NOTIFY_CONF_POLL,
+
+  IEEE802154_NOTIFY_IND_ASSOC,
+  IEEE802154_NOTIFY_IND_DISASSOC,
+  IEEE802154_NOTIFY_IND_BEACONNOTIFY,
+  IEEE802154_NOTIFY_IND_GTS,
+  IEEE802154_NOTIFY_IND_ORPHAN,
+  IEEE802154_NOTIFY_IND_COMMSTATUS,
+  IEEE802154_NOTIFY_IND_SYNCLOSS
+};
+
+union ieee802154_notif_u
+{
+  /* MCPS Notifications */
+
+  struct ieee802154_data_conf_s        dataconf;
+
+  /* MLME Notifications */
+
   struct ieee802154_assoc_conf_s       assocconf;
   struct ieee802154_disassoc_conf_s    disassocconf;
   struct ieee802154_gts_conf_s         gtsconf;
@@ -1326,10 +1393,18 @@ union ieee802154_mlme_notify_u
   struct ieee802154_syncloss_ind_s     synclossind;
 };
 
-union ieee802154_mcps_notify_u
+struct ieee802154_notif_s
 {
-  struct ieee802154_data_conf_s        dataconf;
-  struct ieee802154_data_ind_s         *dataind;
+  /* Must be first member so that we can interchange between the actual
+   *notification and this extended struct.
+   */
+
+  union ieee802154_notif_u u;
+  enum ieee802154_notify_e notiftype;
+
+  /* Support a singly linked list */
+
+  FAR struct ieee802154_notif_s *flink;
 };
 
 /* A pointer to this structure is passed as the argument of each IOCTL
@@ -1375,51 +1450,6 @@ struct ieee802154_netmac_s
  */
 
 typedef FAR void *MACHANDLE;
-
-/* MAC Service Notifications */
-
-enum ieee802154_macnotify_e
-{
-  /* MCPS Notifications */
-
-  IEEE802154_NOTIFY_CONF_DATA = 0x00,
-  IEEE802154_NOTIFY_IND_DATA,
-
-  /* MLME Notifications */
-
-  IEEE802154_NOTIFY_CONF_ASSOC,
-  IEEE802154_NOTIFY_CONF_DISASSOC,
-  IEEE802154_NOTIFY_CONF_GTS,
-  IEEE802154_NOTIFY_CONF_RESET,
-  IEEE802154_NOTIFY_CONF_RXENABLE,
-  IEEE802154_NOTIFY_CONF_SCAN,
-  IEEE802154_NOTIFY_CONF_START,
-  IEEE802154_NOTIFY_CONF_POLL,
-
-  IEEE802154_NOTIFY_IND_ASSOC,
-  IEEE802154_NOTIFY_IND_DISASSOC,
-  IEEE802154_NOTIFY_IND_BEACONNOTIFY,
-  IEEE802154_NOTIFY_IND_GTS,
-  IEEE802154_NOTIFY_IND_ORPHAN,
-  IEEE802154_NOTIFY_IND_COMMSTATUS,
-  IEEE802154_NOTIFY_IND_SYNCLOSS
-};
-
-/* Callback operations to notify the next highest layer of various asynchronous
- * events, usually triggered by some previous request or response invoked by the
- * upper layer.
- */
-
-struct ieee802154_maccb_s
-{
-  CODE void (*mlme_notify)(FAR const struct ieee802154_maccb_s *maccb,
-                           enum ieee802154_macnotify_e notif,
-                           FAR const union ieee802154_mlme_notify_u *arg);
-
-  CODE void (*mcps_notify)(FAR const struct ieee802154_maccb_s *maccb,
-                           enum ieee802154_macnotify_e notif,
-                           FAR const union ieee802154_mcps_notify_u *arg);
-};
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
