@@ -181,7 +181,6 @@
     <a href="#iobs">4.12 I/O Buffer Management</a>
     <ul>
       <a href="#iobconfig">4.12.1 Configuration Options</a><br>
-      <a href="#iobconfig">4.12.1 Configuration Options</a><br>
       <a href="#iobthrottle">4.12.2 Throttling</a><br>
       <a href="#iobtypes">4.12.3 Public Types</a><br>
       <a href="#iobprotos">4.12.4 Public Function Prototypes</a>
@@ -4185,6 +4184,7 @@ void board_autoled_off(int led);
 NuttX supports generic I/O buffer management (IOB) logic.
 This logic was originally added to support network I/O buffering, but has been generalized to meet buffering requirements by all device drivers.
 At the time of this writing, IOBs are currently used not only be networking but also by logic in <code>drivers/syslog</code> and <code>drivers/wireless</code>.
+NOTE that some of the wording in this section still reflects those legacy roots as a part of the networking subsystem.
 This objectives of this feature are:
 
 <ol>
