@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: February 7, 2017</p>
+      <p>Last Updated: May 20, 2017</p>
     </td>
   </tr>
 </table>
@@ -177,6 +177,14 @@
       <a href="#ledheaders">4.11.1 Header Files</a><br>
       <a href="#leddefinitions">4.11.2 LED Definitions</a><br>
       <a href="#ledapis">4.11.3 Common LED interfaces</a>
+    </ul>
+    <a href="#iobs">4.12 I/O Buffer Management</a>
+    <ul>
+      <a href="#iobconfig">4.12.1 Configuration Options</a><br>
+      <a href="#iobconfig">4.12.1 Configuration Options</a><br>
+      <a href="#iobthrottle">4.12.2 Throttling</a><br>
+      <a href="#iobtypes">4.12.3 Public Types</a><br>
+      <a href="#iobprotos">4.12.4 Public Function Prototypes</a>
     </ul>
   </ul>
   <a href="#NxFileSystem">5.0 NuttX File System</a><br>
@@ -4171,6 +4179,428 @@ void board_autoled_off(int led);
   </p>
   </li>
 </ul>
+
+<h2><a name="iobs">4.12 I/O Buffer Management</a></h2>
+
+NuttX supports generic I/O buffer management (IOB) logic.
+This logic was originally added to support network I/O buffering, but has been generalized to meet buffering requirements by all device drivers.
+At the time of this writing, IOBs are currently used not only be networking but also by logic in <code>drivers/syslog</code> and <code>drivers/wireless</code>.
+This objectives of this feature are:
+
+<ol>
+  <li>
+    Provide common I/O buffer management logic for all drivers,
+  </li>
+  <li>
+    Support I/O buffer allocation from both the tasking and interrupt level contexts.
+  </li>
+  <li>
+    Use a fixed amount of pre-allocated memory.
+  </li>
+  <li>
+    No costly, non-deterministic dynamic memory allocation.
+  </li>
+  <li>
+    When the fixed number of pre-allocated I/O buffers is exhausted, further attempts to allocate memory from tasking logic will cause the task to block and wait until a an I/O buffer to be freed.
+  </li>
+  <li>
+    Each I/O buffer should be small, but can be chained together to support buffering of larger thinks such as full size network packets.
+  </li>
+  <li>
+    Support <i>throttling</i> logic to prevent lower priority tasks from hogging all available I/O buffering.
+  </li>
+</ol>
+
+<h3><a name="iobconfig">4.12.1 Configuration Options</a></h3>
+
+<dl>
+  <dt><code>CONFIG_MM_IOB</code>
+  <dd>Enables generic I/O buffer support.  This setting will build the common I/O buffer (IOB) support library.
+
+  <dt><code>CONFIG_IOB_NBUFFERS</code>
+  <dd>Number of pre-allocated I/O buffers.  Each packet is represented by a series of small I/O buffers in a chain.  This setting determines the number of preallocated I/O buffers available for packet data.
+
+  The default value is setup for network support.  The default is 8 buffers if neither TCP read-ahead or TCP write buffering is enabled (neither <code>CONFIG_NET_TCP_WRITE_BUFFERS</code> nor <code>CONFIG_NET_TCP_READAHEAD</code>), 24 if only write buffering is enabled, and 36 if both read-ahead and write buffering are enabled.
+
+  <dt><code>CONFIG_IOB_BUFSIZE</code>
+  <dd>Payload size of one I/O buffer.  Each packet is represented by a series of small I/O buffers in a chain.  This setting determines the data payload each preallocated I/O buffer.  The default value is 196 bytes.
+
+  <dt><code>CONFIG_IOB_NCHAINS</code>
+  <dd>Number of pre-allocated I/O buffer chain heads.  These tiny nodes are used as <i>containers</i> to support queueing of I/O buffer chains.  This will limit the number of I/O transactions that can be <i>in-flight</i> at any give time.  The default value of zero disables this features.
+
+  <dd>These generic I/O buffer chain containers are not currently used by any logic in NuttX.  That is because their other other specialized I/O buffer chain containers that also carry a payload of usage specific information.
+
+  The default value is zero if nether TCP nor UDP read-ahead buffering is enabled (i.e., neither <code>CONFIG_NET_TCP_READAHEAD</code> && !<code>CONFIG_NET_UDP_READAHEAD</code> or eight if either is enabled.
+
+  <dt><code>CONFIG_IOB_THROTTLE</code>
+  <dd>I/O buffer throttle value.  TCP write buffering and read-ahead buffer use the same pool of free I/O buffers.  In order to prevent uncontrolled incoming TCP packets from hogging all of the available, pre-allocated I/O buffers, a throttling value is required.  This throttle value assures that I/O buffers will be denied to the read-ahead logic before TCP writes are halted.
+
+  The default 0 if neither TCP write buffering nor TCP reada-ahead buffering is enabled.  Otherwise, the default is 8.
+
+  <dt><code>CONFIG_IOB_DEBUG</code>
+  <dd>Force I/O buffer debug. This option will force debug output from I/O buffer logic.  This is not normally something that would want to do but is convenient if you are debugging the I/O buffer logic and do not want to get overloaded with other un-related debug output.
+
+  NOTE that this selection is not avaiable if DEBUG features are not enabled (<code>CONFIG_DEBUG_FEATURES</code>) with IOBs are being used to syslog buffering logic (<code>CONFIG_SYSLOG_BUFFER</code>).
+</dl>
+
+<h3><a name="iobthrottle">4.12.2 Throttling</a></h3>
+
+<b></b>
+An allocation throttle was added.  I/O buffer allocation logic supports a throttle value originally for read-ahead buffering to prevent the read-ahead logic from consuming all available I/O buffers and blocking the write buffering logic.  This throttle logic is only needed for networking only if both write buffering and read-ahead buffering are used.  Of use of I/O buffering might have other motivations for throttling.
+
+<h3><a name="iobtypes">4.12.3 Public Types</a></h3>
+
+<p>
+  This structure epresents one I/O buffer.  A packet is contained by one or more I/O buffers in a chain.  The <code>io_pktlen</code> is only valid for the I/O buffer at the head of the chain.
+</p>
+
+<pre>
+struct iob_s
+{
+  /* Singly-link list support */
+
+  FAR struct iob_s *io_flink;
+
+  /* Payload */
+
+#if CONFIG_IOB_BUFSIZE < 256
+  uint8_t  io_len;      /* Length of the data in the entry */
+  uint8_t  io_offset;   /* Data begins at this offset */
+#else
+  uint16_t io_len;      /* Length of the data in the entry */
+  uint16_t io_offset;   /* Data begins at this offset */
+#endif
+  uint16_t io_pktlen;   /* Total length of the packet */
+
+  uint8_t  io_data[CONFIG_IOB_BUFSIZE];
+};
+</pre>
+
+<p>
+  This container structure supports queuing of I/O buffer chains.  This structure is intended only for internal use by the IOB module.
+</p>
+
+<pre>
+#if CONFIG_IOB_NCHAINS > 0
+struct iob_qentry_s
+{
+  /* Singly-link list support */
+
+  FAR struct iob_qentry_s *qe_flink;
+
+  /* Payload -- Head of the I/O buffer chain */
+
+  FAR struct iob_s *qe_head;
+};
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+</pre>
+
+<p>
+  The I/O buffer queue head structure.
+</p>
+
+<pre>
+#if CONFIG_IOB_NCHAINS > 0
+struct iob_queue_s
+{
+  /* Head of the I/O buffer chain list */
+
+  FAR struct iob_qentry_s *qh_head;
+  FAR struct iob_qentry_s *qh_tail;
+};
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+</pre>
+
+<h3><a name="iobprotos">4.12.4 Public Function Prototypes</a></h3>
+
+<ul>
+  <li><a href="#iob_initialize">4.12.4.1 <code>iob_initialize()</code></a></li>
+  <li><a href="#iob_alloc">4.12.4.2 <code>iob_alloc()</code></a></li>
+  <li><a href="#iob_tryalloc">4.12.4.3 <code>iob_tryalloc()</code></a></li>
+  <li><a href="#iob_free">4.12.4.4 <code>iob_free()</code></a></li>
+  <li><a href="#iob_free_chain">4.12.4.5 <code>iob_free_chain()</code></a></li>
+  <li><a href="#iob_add_queue">4.12.4.6 <code>iob_add_queue()</code></a></li>
+  <li><a href="#iob_tryadd_queue">4.12.4.7 <code>iob_tryadd_queue()</code></a></li>
+  <li><a href="#iob_remove_queue">4.12.4.8 <code>iob_remove_queue()</code></a></li>
+  <li><a href="#iob_peek_queue">4.12.4.9 <code>iob_peek_queue()</code></a></li>
+  <li><a href="#iob_free_queue">4.12.4.10 <code>iob_free_queue()</code></a></li>
+  <li><a href="#iob_copyin">4.12.4.11 <code>iob_copyin()</code></a></li>
+  <li><a href="#iob_trycopyin">4.12.4.12 <code>iob_trycopyin()</code></a></li>
+  <li><a href="#iob_copyout">4.12.4.13 <code>iob_copyout()</code></a></li>
+  <li><a href="#iob_clone">4.12.4.14 <code>iob_clone()</code></a></li>
+  <li><a href="#iob_concat">4.12.4.15 <code>iob_concat()</code></a></li>
+  <li><a href="#iob_trimhead">4.12.4.16 <code>iob_trimhead()</code></a></li>
+  <li><a href="#iob_trimhead_queue">4.12.4.17 <code>iob_trimhead_queue()</code></a></li>
+  <li><a href="#iob_trimtail">4.12.4.18 <code>iob_trimtail()</code></a></li>
+  <li><a href="#iob_pack">4.12.4.19 <code>iob_pack()</code></a></li>
+  <li><a href="#iob_contig">4.12.4.20 <code>iob_contig()</code></a></li>
+  <li><a href="#iob_dump">4.12.4.21 <code>iob_dump()</code></a></li>
+</ul>
+
+<h4><a name="iob_initialize">4.12.4.1 <code>iob_initialize()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+void iob_initialize(void);
+</pre>
+
+<p><b>Description</b>.
+  Set up the I/O buffers for normal operations.
+</p>
+
+<h4><a name="iob_alloc">4.12.4.2 <code>iob_alloc()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+FAR struct iob_s *iob_alloc(bool throttled);
+</pre>
+
+<p><b>Description</b>.
+  Allocate an I/O buffer by taking the buffer at the head of the free list.
+</p>
+
+<h4><a name="iob_tryalloc">4.12.4.3 <code>iob_tryalloc()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+FAR struct iob_s *iob_tryalloc(bool throttled);
+</pre>
+
+<p><b>Description</b>.
+  Try to allocate an I/O buffer by taking the buffer at the head of the free list without waiting for a buffer to become free.
+</p>
+
+<h4><a name="iob_free">4.12.4.4 <code>iob_free()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+FAR struct iob_s *iob_free(FAR struct iob_s *iob);
+</pre>
+
+<p><b>Description</b>.
+   Free the I/O buffer at the head of a buffer chain returning it to the free list.  The link to  the next I/O buffer in the chain is return.
+</p>
+
+<h4><a name="iob_free_chain">4.12.4.5 <code>iob_free_chain()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+void iob_free_chain(FAR struct iob_s *iob);
+</pre>
+
+<p><b>Description</b>.
+  Free an entire buffer chain, starting at the beginning of the I/O buffer chain
+</p>
+
+<h4><a name="iob_add_queue">4.12.4.6 <code>iob_add_queue()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+#if CONFIG_IOB_NCHAINS > 0
+int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+</pre>
+
+<p><b>Description</b>.
+  Add one I/O buffer chain to the end of a queue.  May fail due to lack of resources.
+</p>
+
+<h4><a name="iob_tryadd_queue">4.12.4.7 <code>iob_tryadd_queue()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+#if CONFIG_IOB_NCHAINS > 0
+int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+</pre>
+
+<p><b>Description</b>.
+  Add one I/O buffer chain to the end of a queue without waiting for resources to become free.
+</p>
+
+<h4><a name="iob_remove_queue">4.12.4.8 <code>iob_remove_queue()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+#if CONFIG_IOB_NCHAINS > 0
+FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+</pre>
+
+<p><b>Description</b>.
+  Remove and return one I/O buffer chain from the head of a queue.
+</p>
+
+<p><b>Returned Value</b>.
+  Returns a reference to the I/O buffer chain at the head of the queue.
+</p>
+
+<h4><a name="iob_peek_queue">4.12.4.9 <code>iob_peek_queue()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+#if CONFIG_IOB_NCHAINS > 0
+FAR struct iob_s *iob_peek_queue(FAR struct iob_queue_s *iobq);
+#endif
+</pre>
+
+<p><b>Description</b>.
+  Return a reference to the I/O buffer chain at the head of a queue. This is similar to iob_remove_queue except that the I/O buffer chain is in place at the head of the queue.  The I/O buffer chain may safely be modified by the caller but must be removed from the queue before it can be freed.
+</p>
+
+<p><b>Returned Value</b>.
+  Returns a reference to the I/O buffer chain at the head of the queue.
+</p>
+
+<h4><a name="iob_free_queue">4.12.4.10 <code>iob_free_queue()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+#if CONFIG_IOB_NCHAINS > 0
+void iob_free_queue(FAR struct iob_queue_s *qhead);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+</pre>
+
+<p><b>Description</b>.
+  Free an entire queue of I/O buffer chains.
+</p>
+
+<h4><a name="iob_copyin">4.12.4.11 <code>iob_copyin()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
+               unsigned int len, unsigned int offset, bool throttled);
+</pre>
+
+<p><b>Description</b>.
+  Copy data <code>len</code> bytes from a user buffer into the I/O buffer chain, starting at <code>offset</code>, extending the chain as necessary.
+</p>
+
+<h4><a name="iob_trycopyin">4.12.4.12 <code>iob_trycopyin()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src,
+                  unsigned int len, unsigned int offset, bool throttled);
+</pre>
+
+<p><b>Description</b>.
+ Copy data <code>len</code> bytes from a user buffer into the I/O buffer chain, starting at <code>offset</code>, extending the chain as necessary BUT without waiting if buffers are not available.
+</p>
+
+<h4><a name="iob_copyout">4.12.4.13 <code>iob_copyout()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
+                unsigned int len, unsigned int offset);
+</pre>
+
+<p><b>Description</b>.
+ Copy data <code>len</code> bytes of data into the user buffer starting at <code>offset</code> in the I/O buffer, returning that actual number of bytes copied out.
+</p>
+
+<h4><a name="iob_clone">4.12.4.14 <code>iob_clone()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled);
+</pre>
+
+<p><b>Description</b>.
+  Duplicate (and pack) the data in <code>iob1</code> in <code>iob2</code>.  <code>iob2</code> must be empty.
+</p>
+
+<h4><a name="iob_concat">4.12.4.15 <code>iob_concat()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2);
+</pre>
+
+<p><b>Description</b>.
+  Concatenate iob_s chain iob2 to iob1.
+</p>
+
+<h4><a name="iob_trimhead">4.12.4.16 <code>iob_trimhead()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen);
+</pre>
+
+<p><b>Description</b>.
+  Remove bytes from the beginning of an I/O chain.  Emptied I/O buffers are freed and, hence, the beginning of the chain may change.
+</p>
+
+<h4><a name="iob_trimhead_queue">4.12.4.17 <code>iob_trimhead_queue()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+#if CONFIG_IOB_NCHAINS > 0
+FAR struct iob_s *iob_trimhead_queue(FAR struct iob_queue_s *qhead,
+                                     unsigned int trimlen);
+#endif
+</pre>
+
+<p><b>Description</b>.
+  Remove bytes from the beginning of an I/O chain at the head of the queue.  Emptied I/O buffers are freed and, hence, the head of the queue may change.
+</p>
+<p>
+  This function is just a wrapper around iob_trimhead() that assures that the iob at the head of queue is modified with the trimming operations.
+</p>
+
+<p><b>Returned Value</b>.
+  The new iob at the head of the queue is returned.
+</p>
+
+<h4><a name="iob_trimtail">4.12.4.18 <code>iob_trimtail()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen);
+</pre>
+
+<p><b>Description</b>.
+  Remove bytes from the end of an I/O chain.  Emptied I/O buffers are freed NULL will be returned in the special case where the entry I/O buffer chain is freed.
+</p>
+
+<h4><a name="iob_pack">4.12.4.19 <code>iob_pack()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+FAR struct iob_s *iob_pack(FAR struct iob_s *iob);
+</pre>
+
+<p><b>Description</b>.
+  Pack all data in the I/O buffer chain so that the data offset is zero and all but the final buffer in the chain are filled.  Any emptied buffers at the end of the chain are freed.
+</p>
+
+<h4><a name="iob_contig">4.12.4.20 <code>iob_contig()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+int iob_contig(FAR struct iob_s *iob, unsigned int len);
+</pre>
+
+<p><b>Description</b>.
+  Ensure that there is <code>len</code> bytes of contiguous space at the beginning of the I/O buffer chain starting at <code>iob</code>.
+</p>
+
+<h4><a name="iob_dump">4.12.4.21 <code>iob_dump()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+#ifdef CONFIG_DEBUG_FEATURES
+void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
+              unsigned int offset);
+#endif
+</pre>
+
+<p><b>Description</b>.
+  Dump the contents of a I/O buffer chain
+</p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
