@@ -77,6 +77,7 @@
 #define HAVE_USBHOST    1
 #define HAVE_USBMONITOR 1
 #define HAVE_SDIO       1
+#define HAVE_CS43L22    1
 #define HAVE_RTC_DRIVER 1
 #define HAVE_ELF        1
 #define HAVE_NETMONITOR 1
@@ -148,6 +149,26 @@
 #  endif
 #endif
 
+/* The CS43L22 depends on the CS43L22 driver, I2C1, and I2S3 support */
+
+#if !defiend(CONFIG_AUDIO_CS43L22) || !defined(CONFIG_STM32_I2C1) || \
+    !defined(CONFIG_STM32_I2S3)
+#  undef HAVE_CS43L22
+#endif
+
+#ifdef HAVE_CS43L22
+  /* The CS43L22 communicates on I2C1, I2C address 0x1a for control
+   * operations
+   */
+
+#  define CS43L22_I2C_BUS      1
+#  define CS43L22_I2C_ADDRESS  (0x94 >> 1)
+
+  /* The CS43L22 transfers data on I2S3 */
+
+#  define CS43L22_I2S_BUS      3
+#endif
+
 /* Check if we can support the RTC driver */
 
 #if !defined(CONFIG_RTC) || !defined(CONFIG_RTC_DRIVER)
@@ -215,6 +236,8 @@
 /* ZERO CROSS pin definiton */
 
 #define GPIO_ZEROCROSS  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTD|GPIO_PIN0)
+
+#define GPIO_CS43L22_RESET  (GPIO_OUTPUT|GPIO_SPEED_50MHz|GPIO_PORTD|GPIO_PIN4)
 
 /* PWM
  *
@@ -368,6 +391,17 @@
  ****************************************************************************/
 
 void weak_function stm32_spidev_initialize(void);
+
+ /****************************************************************************
+  * Name: stm32_i2sdev_initialize
+  *
+  * Description:
+  *   Called to configure I2S chip select GPIO pins for the stm32f4discovery
+  *   board.
+  *
+  ****************************************************************************/
+
+ FAR struct i2s_dev_s *stm32_i2sdev_initialize(int port);
 
 /****************************************************************************
  * Name: stm32_bh1750initialize
@@ -607,6 +641,27 @@ int stm32_zerocross_initialize(void);
 #ifdef CONFIG_MAX6675
 int stm32_max6675initialize(FAR const char *devpath);
 #endif
+
+/****************************************************************************
+ * Name: stm32_cs43l22_initialize
+ *
+ * Description:
+ *   This function is called by platform-specific, setup logic to configure
+ *   and register the CS43L22 device.  This function will register the driver
+ *   as /dev/cs43l22[x] where x is determined by the minor device number.
+ *
+ * Input Parameters:
+ *   minor - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_CS43L22
+int stm32_cs43l22_initialize(int minor);
+#endif /* HAVE_CS43L22 */
 
 /****************************************************************************
  * Name: stm32_pca9635_initialize
