@@ -50,6 +50,8 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/wdog.h>
 #include <nuttx/sdio.h>
+#include <nuttx/net/arp.h>
+#include <nuttx/wireless/ieee80211/ieee80211.h>
 
 #include "bcmf_driver.h"
 #include "bcmf_cdc.h"
@@ -65,6 +67,12 @@
 #define DOT11_BSSTYPE_ANY      2
 #define BCMF_SCAN_TIMEOUT_TICK (5*CLOCKS_PER_SEC)
 #define BCMF_AUTH_TIMEOUT_MS   10000
+#define BCMF_SCAN_RESULT_SIZE  1024
+
+/* Helper to get iw_event size */
+
+#define BCMF_IW_EVENT_SIZE(field) \
+  (offsetof(struct iw_event, u)+sizeof(((union iwreq_data*)0)->field))
 
 /****************************************************************************
  * Private Types
@@ -366,6 +374,9 @@ void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
     }
 }
 
+/* bcmf_wl_scan_event_handler must run at high priority else
+ * race condition may occur on priv->scan_result field
+ */
 void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
                                    struct bcmf_event_s *event, unsigned int len)
 {
@@ -414,7 +425,7 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
       goto exit_invalid_frame;
     }
 
-  /* wl_escan_result already cointains a wl_bss_info field */
+  /* wl_escan_result structure cointains a wl_bss_info field */
 
   len = result->buflen - sizeof(struct wl_escan_result)
                        + sizeof(struct wl_bss_info);
@@ -425,6 +436,15 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
 
   while (len > 0 && bss_count < result->bss_count)
     {
+      struct iw_event *iwe;
+      unsigned int result_size;
+      size_t essid_len;
+      size_t essid_len_aligned;
+      uint8_t *ie_buffer;
+      unsigned int ie_offset;
+      unsigned int check_offset;
+      
+      result_size = BCMF_SCAN_RESULT_SIZE - priv->scan_result_size;
       bss_info_len = bss->length;
 
       if (len < bss_info_len)
@@ -433,11 +453,211 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
           goto exit_invalid_frame;
         }
 
+      /* Append current bss_info to priv->scan_results
+       * FIXME protect this against race conditions
+       */
+
+      /* Check if current bss AP is not already detected */
+
+      check_offset = 0;
+
+      while (priv->scan_result_size - check_offset
+                                     >= offsetof(struct iw_event, u))
+        {
+          iwe = (struct iw_event*)&priv->scan_result[check_offset];
+
+          if (iwe->cmd == SIOCGIWAP)
+            {
+              if (memcmp(&iwe->u.ap_addr.sa_data, bss->BSSID.ether_addr_octet,
+                         sizeof(bss->BSSID.ether_addr_octet)) == 0)
+                {
+                  goto process_next_bss;
+                }
+            }
+
+          check_offset += iwe->len;
+        }
+
       wlinfo("Scan result: <%.32s> %02x:%02x:%02x:%02x:%02x:%02x\n", bss->SSID,
                bss->BSSID.ether_addr_octet[0], bss->BSSID.ether_addr_octet[1],
-               bss->BSSID.ether_addr_octet[3], bss->BSSID.ether_addr_octet[3],
+               bss->BSSID.ether_addr_octet[2], bss->BSSID.ether_addr_octet[3],
                bss->BSSID.ether_addr_octet[4], bss->BSSID.ether_addr_octet[5]);
 
+      /* Copy BSSID */
+
+      if (result_size < BCMF_IW_EVENT_SIZE(ap_addr))
+        {
+          goto scan_result_full;
+        }
+
+      iwe = (struct iw_event*)&priv->scan_result[priv->scan_result_size];
+      iwe->len = BCMF_IW_EVENT_SIZE(ap_addr);
+      iwe->cmd = SIOCGIWAP;
+      memcpy(&iwe->u.ap_addr.sa_data, bss->BSSID.ether_addr_octet,
+             sizeof(bss->BSSID.ether_addr_octet));
+      iwe->u.ap_addr.sa_family = ARPHRD_ETHER;
+
+      priv->scan_result_size += BCMF_IW_EVENT_SIZE(ap_addr);
+      result_size -= BCMF_IW_EVENT_SIZE(ap_addr);
+
+      /* Copy ESSID */
+
+      essid_len = min(strlen((const char*)bss->SSID), 32);
+      essid_len_aligned = (essid_len + 3) & -4;
+
+      if (result_size < BCMF_IW_EVENT_SIZE(essid)+essid_len_aligned)
+        {
+          goto scan_result_full;
+        }
+
+      iwe = (struct iw_event*)&priv->scan_result[priv->scan_result_size];
+      iwe->len = BCMF_IW_EVENT_SIZE(essid)+essid_len_aligned;
+      iwe->cmd = SIOCGIWESSID;
+      iwe->u.essid.flags = 0;
+      iwe->u.essid.length = essid_len;
+
+      /* Special processing for iw_point, set offset in pointer field */
+
+      iwe->u.essid.pointer = (FAR void*)sizeof(iwe->u.essid);
+      memcpy(&iwe->u.essid+1, bss->SSID, essid_len);
+
+      priv->scan_result_size += BCMF_IW_EVENT_SIZE(essid)+essid_len_aligned;
+      result_size -= BCMF_IW_EVENT_SIZE(essid)+essid_len_aligned;
+
+      /* Copy link quality info */
+
+      if (result_size < BCMF_IW_EVENT_SIZE(qual))
+        {
+          goto scan_result_full;
+        }
+
+      iwe = (struct iw_event*)&priv->scan_result[priv->scan_result_size];
+      iwe->len = BCMF_IW_EVENT_SIZE(qual);
+      iwe->cmd = IWEVQUAL;
+      iwe->u.qual.qual = bss->SNR;
+      wlinfo("signal %d %d %d\n", bss->RSSI, bss->phy_noise, bss->SNR);
+      iwe->u.qual.level = bss->RSSI;
+      iwe->u.qual.noise = bss->phy_noise;
+      iwe->u.qual.updated = IW_QUAL_DBM | IW_QUAL_ALL_UPDATED;
+
+      priv->scan_result_size += BCMF_IW_EVENT_SIZE(qual);
+      result_size -= BCMF_IW_EVENT_SIZE(qual);
+
+      /* Copy AP mode */
+
+      if (result_size < BCMF_IW_EVENT_SIZE(mode))
+        {
+          goto scan_result_full;
+        }
+
+      iwe = (struct iw_event*)&priv->scan_result[priv->scan_result_size];
+      iwe->len = BCMF_IW_EVENT_SIZE(mode);
+      iwe->cmd = SIOCGIWMODE;
+      if (bss->capability & DOT11_CAP_ESS)
+        {
+          iwe->u.mode = IW_MODE_INFRA;
+        }
+      else if (bss->capability & DOT11_CAP_IBSS)
+        {
+          iwe->u.mode = IW_MODE_ADHOC;
+        }
+      else
+        {
+          iwe->u.mode = IW_MODE_AUTO;
+        }
+
+      priv->scan_result_size += BCMF_IW_EVENT_SIZE(mode);
+      result_size -= BCMF_IW_EVENT_SIZE(mode);
+
+      /* Copy AP encryption mode */
+
+      if (result_size < BCMF_IW_EVENT_SIZE(data))
+        {
+          goto scan_result_full;
+        }
+
+      iwe = (struct iw_event*)&priv->scan_result[priv->scan_result_size];
+      iwe->len = BCMF_IW_EVENT_SIZE(data);
+      iwe->cmd = SIOCGIWENCODE;
+      iwe->u.data.flags = bss->capability & DOT11_CAP_PRIVACY ?
+                          IW_ENCODE_ENABLED | IW_ENCODE_NOKEY :
+                          IW_ENCODE_DISABLED;
+      iwe->u.data.length = 0;
+      iwe->u.essid.pointer = NULL;
+
+      priv->scan_result_size += BCMF_IW_EVENT_SIZE(data);
+      result_size -= BCMF_IW_EVENT_SIZE(data);
+
+      /* Copy relevant raw IE frame */
+
+      if (bss->ie_offset >= bss_info_len ||
+          bss->ie_length > bss_info_len-bss->ie_offset)
+        {
+          goto process_next_bss;
+        }
+
+      ie_offset = 0;
+      ie_buffer = (uint8_t*)bss + bss->ie_offset;
+
+      while (1)
+        {
+          size_t ie_frame_size;
+
+          if (bss->ie_length - ie_offset < 2)
+            {
+              /* Minimum Information element size is 2 bytes */
+              break;
+            }
+
+          ie_frame_size = ie_buffer[ie_offset+1] + 2;
+
+          if (ie_frame_size > bss->ie_length - ie_offset)
+            {
+              /* Entry too big */
+              break;
+            }
+
+          switch (ie_buffer[ie_offset])
+            {
+              case IEEE80211_ELEMID_RSN:
+                {
+                size_t ie_frame_size_aligned;
+                ie_frame_size_aligned = (ie_frame_size + 3) & -4;
+                wlinfo("found RSN\n");
+                if (result_size < BCMF_IW_EVENT_SIZE(data) + ie_frame_size_aligned)
+                  {
+                    break;
+                  }
+
+                iwe = (struct iw_event*)&priv->scan_result[priv->scan_result_size];
+                iwe->len = BCMF_IW_EVENT_SIZE(data)+ie_frame_size_aligned;
+                iwe->cmd = IWEVGENIE;
+                iwe->u.data.flags = 0;
+                iwe->u.data.length = ie_frame_size;
+                iwe->u.data.pointer = (FAR void*)sizeof(iwe->u.data);
+                memcpy(&iwe->u.data+1, &ie_buffer[ie_offset], ie_frame_size);
+
+                priv->scan_result_size += BCMF_IW_EVENT_SIZE(essid)+ie_frame_size_aligned;
+                result_size -= BCMF_IW_EVENT_SIZE(essid)+ie_frame_size_aligned;
+                break;
+                }
+              default:
+                // wlinfo("unhandled IE entry %d %d\n", ie_buffer[ie_offset],
+                //                                      ie_buffer[ie_offset+1]);
+                break;
+            }
+
+          ie_offset += ie_buffer[ie_offset+1] + 2;
+        }
+
+      goto process_next_bss;
+
+    scan_result_full:
+      /* Continue instead of break to log dropped AP results */
+
+      wlerr("No more space in scan_result buffer\n");
+
+    process_next_bss:
       /* Process next bss_info */
 
       len -= bss_info_len;
@@ -632,12 +852,26 @@ int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   /* Lock control_mutex semaphore */
 
   if ((ret = sem_wait(&priv->control_mutex)) != OK)
+    {
+       goto exit_failed;
+    }
+
+  /* Allocate buffer to store scan result */
+
+  if (priv->scan_result == NULL)
    {
-      goto exit_failed;
+     priv->scan_result = kmm_malloc(BCMF_SCAN_RESULT_SIZE);
+     if (priv->scan_result == NULL)
+       {
+         wlerr("Cannot allocate result buffer\n");
+         ret = -ENOMEM;
+         goto exit_sem_post;
+       }
    }
 
   wlinfo("start scan\n");
 
+  priv->scan_result_size = 0;
   priv->scan_status = BCMF_SCAN_RUN;
 
   out_len = sizeof(scan_params);
@@ -658,8 +892,8 @@ int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   return OK;
 
 exit_sem_post:
-  sem_post(&priv->control_mutex);
   priv->scan_status = BCMF_SCAN_DISABLED;
+  sem_post(&priv->control_mutex);
 exit_failed:
   wlinfo("Failed\n");
   return ret;
@@ -667,19 +901,80 @@ exit_failed:
 
 int bcmf_wl_get_scan_results(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
-  /* Not implemented yet, set len to zero */
-
-  iwr->u.data.length = 0;
+  int ret = OK;
 
   if (priv->scan_status == BCMF_SCAN_RUN)
     {
-      return -EAGAIN;
+      ret = -EAGAIN;
+      goto exit_failed;
     }
-  if (priv->scan_status == BCMF_SCAN_DONE)
+
+  if (priv->scan_status != BCMF_SCAN_DONE)
     {
-      return OK;
+      ret = -EINVAL;
+      goto exit_failed;
     }
-  return -EINVAL;
+
+  /* Lock control_mutex semaphore to avoid race condition */
+
+  if ((ret = sem_wait(&priv->control_mutex)) != OK)
+   {
+      ret = -EIO;
+      goto exit_failed;
+   }
+
+  if (!priv->scan_result)
+    {
+      /* Result have already been requested */
+
+      ret = OK;
+      iwr->u.data.length = 0;
+      goto exit_sem_post;
+    }
+
+  if (iwr->u.data.pointer == NULL ||
+      iwr->u.data.length < priv->scan_result_size)
+    {
+      /* Stat request, return scan_result_size */
+
+      ret = -E2BIG;
+      iwr->u.data.pointer = NULL;
+      iwr->u.data.length = priv->scan_result_size;
+      goto exit_sem_post;
+    }
+
+  if (priv->scan_result_size <= 0)
+    {
+      ret = OK;
+      iwr->u.data.length = 0;
+      goto exit_free_buffer;
+    }
+
+  /* Copy result to user buffer */
+
+  if (iwr->u.data.length > priv->scan_result_size)
+    {
+      iwr->u.data.length = priv->scan_result_size;
+    }
+
+  memcpy(iwr->u.data.pointer, priv->scan_result, iwr->u.data.length);
+
+exit_free_buffer:
+  /* Free scan result buffer */
+
+  kmm_free(priv->scan_result);
+  priv->scan_result = NULL;
+  priv->scan_result_size = 0;
+
+exit_sem_post:
+  sem_post(&priv->control_mutex);
+
+exit_failed:
+  if (ret)
+    {
+      iwr->u.data.length = 0;
+    }
+  return ret;
 }
 
 int bcmf_wl_set_auth_param(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)

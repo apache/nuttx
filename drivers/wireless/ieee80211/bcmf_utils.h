@@ -47,6 +47,14 @@
 #define container_of(ptr, type, member) \
         (type *)((uint8_t *)(ptr) - offsetof(type, member))
 
+#ifndef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef max
+#define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
