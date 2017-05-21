@@ -151,7 +151,7 @@
 
 /* The CS43L22 depends on the CS43L22 driver, I2C1, and I2S3 support */
 
-#if !defiend(CONFIG_AUDIO_CS43L22) || !defined(CONFIG_STM32_I2C1) || \
+#if !defined(CONFIG_AUDIO_CS43L22) || !defined(CONFIG_STM32_I2C1) || \
     !defined(CONFIG_STM32_I2S3)
 #  undef HAVE_CS43L22
 #endif
