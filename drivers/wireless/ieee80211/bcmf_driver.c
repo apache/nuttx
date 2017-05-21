@@ -442,6 +442,7 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
       size_t essid_len_aligned;
       uint8_t *ie_buffer;
       unsigned int ie_offset;
+      unsigned int check_offset;
       
       result_size = BCMF_SCAN_RESULT_SIZE - priv->scan_result_size;
       bss_info_len = bss->length;
@@ -452,14 +453,35 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
           goto exit_invalid_frame;
         }
 
+      /* Append current bss_info to priv->scan_results
+       * FIXME protect this against race conditions
+       */
+
+      /* Check if current bss AP is not already detected */
+
+      check_offset = 0;
+
+      while (priv->scan_result_size - check_offset
+                                     >= offsetof(struct iw_event, u))
+        {
+          iwe = (struct iw_event*)&priv->scan_result[check_offset];
+
+          if (iwe->cmd == SIOCGIWAP)
+            {
+              if (memcmp(&iwe->u.ap_addr.sa_data, bss->BSSID.ether_addr_octet,
+                         sizeof(bss->BSSID.ether_addr_octet)) == 0)
+                {
+                  goto process_next_bss;
+                }
+            }
+
+          check_offset += iwe->len;
+        }
+
       wlinfo("Scan result: <%.32s> %02x:%02x:%02x:%02x:%02x:%02x\n", bss->SSID,
                bss->BSSID.ether_addr_octet[0], bss->BSSID.ether_addr_octet[1],
                bss->BSSID.ether_addr_octet[2], bss->BSSID.ether_addr_octet[3],
                bss->BSSID.ether_addr_octet[4], bss->BSSID.ether_addr_octet[5]);
-
-      /* Append current bss_info to priv->scan_results
-       * FIXME protect this against race conditions
-       */
 
       /* Copy BSSID */
 
@@ -620,12 +642,20 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
                 break;
                 }
               default:
-                wlinfo("unhandled IE entry %d %d\n", ie_buffer[ie_offset],
-                                                     ie_buffer[ie_offset+1]);
+                // wlinfo("unhandled IE entry %d %d\n", ie_buffer[ie_offset],
+                //                                      ie_buffer[ie_offset+1]);
+                break;
             }
 
           ie_offset += ie_buffer[ie_offset+1] + 2;
         }
+
+      goto process_next_bss;
+
+    scan_result_full:
+      /* Continue instead of break to log dropped AP results */
+
+      wlerr("No more space in scan_result buffer\n");
 
     process_next_bss:
       /* Process next bss_info */
@@ -633,13 +663,6 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
       len -= bss_info_len;
       bss = (struct wl_bss_info *)((uint8_t *)bss + bss_info_len);
       bss_count += 1;
-      continue;
-
-    scan_result_full:
-      /* Continue instead of break to log dropped AP results */
-
-      wlerr("No more space in scan_result buffer\n");
-      continue;
     }
 
 wl_escan_result_processed:
@@ -903,8 +926,20 @@ int bcmf_wl_get_scan_results(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   if (!priv->scan_result)
     {
       /* Result have already been requested */
+
       ret = OK;
       iwr->u.data.length = 0;
+      goto exit_sem_post;
+    }
+
+  if (iwr->u.data.pointer == NULL ||
+      iwr->u.data.length < priv->scan_result_size)
+    {
+      /* Stat request, return scan_result_size */
+
+      ret = -E2BIG;
+      iwr->u.data.pointer = NULL;
+      iwr->u.data.length = priv->scan_result_size;
       goto exit_sem_post;
     }
 
@@ -912,12 +947,6 @@ int bcmf_wl_get_scan_results(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
     {
       ret = OK;
       iwr->u.data.length = 0;
-      goto exit_free_buffer;
-    }
-
-  if (iwr->u.data.pointer == NULL)
-    {
-      ret = -EINVAL;
       goto exit_free_buffer;
     }
 
@@ -932,6 +961,7 @@ int bcmf_wl_get_scan_results(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
 exit_free_buffer:
   /* Free scan result buffer */
+
   kmm_free(priv->scan_result);
   priv->scan_result = NULL;
   priv->scan_result_size = 0;
