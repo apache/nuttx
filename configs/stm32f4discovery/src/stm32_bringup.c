@@ -216,6 +216,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef HAVE_CS43L22
+  /* Configure CS43L22 audio */
+
+  ret = stm32_cs43l22_initialize(1);
+  if (ret != OK)
+    {
+      serr("Failed to initialize CS43L22 audio: %d\n", ret);
+    }
+#endif
+
 #ifdef HAVE_ELF
   /* Initialize the ELF binary loader */
 

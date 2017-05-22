@@ -1530,6 +1530,7 @@ config STM32_STM32F40XX
 	select STM32_HAVE_TIM4
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
+	select STM32_HAVE_I2S3
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_I2C3
 
@@ -1542,6 +1543,9 @@ config STM32_STM32F401
 	select STM32_HAVE_TIM9
 	select STM32_HAVE_TIM10
 	select STM32_HAVE_TIM11
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_I2S3
 
 config STM32_STM32F410
 	bool
@@ -1563,6 +1567,9 @@ config STM32_STM32F411
 	select STM32_HAVE_TIM9
 	select STM32_HAVE_TIM10
 	select STM32_HAVE_TIM11
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_I2S3
 	select STM32_HAVE_SPI4
 	select STM32_HAVE_SPI5
 
@@ -1655,6 +1662,9 @@ config STM32_STM32F427
 	select STM32_HAVE_DAC2
 	select STM32_HAVE_RNG
 	select STM32_HAVE_ETHMAC
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_I2S3
 	select STM32_HAVE_SPI4
 	select STM32_HAVE_SPI5
 	select STM32_HAVE_SPI6
@@ -1691,6 +1701,9 @@ config STM32_STM32F429
 	select STM32_HAVE_DAC2
 	select STM32_HAVE_RNG
 	select STM32_HAVE_ETHMAC
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_I2S3
 	select STM32_HAVE_SPI4
 	select STM32_HAVE_SPI5
 	select STM32_HAVE_SPI6
@@ -2013,6 +2026,10 @@ config STM32_HAVE_SPI2
 	default n
 
 config STM32_HAVE_SPI3
+	bool
+	default n
+
+config STM32_HAVE_I2S3
 	bool
 	default n
 
@@ -2353,6 +2370,13 @@ config STM32_SPI3
 	select SPI
 	select STM32_SPI
 
+config STM32_I2S3
+	bool "I2S3"
+	default n
+	depends on STM32_HAVE_I2S3
+	select I2S
+	select STM32_I2S
+
 config STM32_SPI4
 	bool "SPI4"
 	default n
@@ -2609,6 +2633,11 @@ config STM32_SPI3_REMAP
 	bool "SPI3 Alternate Pin Mapping"
 	default n
 	depends on STM32_STM32F10XX && STM32_SPI3 && !STM32_VALUELINE
+
+config STM32_I2S3_REMAP
+	bool "I2S3 Alternate Pin Mapping"
+	default n
+	depends on STM32_STM32F10XX && STM32_I2S3 && !STM32_VALUELINE
 
 choice
 	prompt "TIM1 Alternate Pin Mappings"
@@ -6269,6 +6298,66 @@ config STM32_SPI_DMA
 		Use DMA to improve SPI transfer performance.  Cannot be used with STM32_SPI_INTERRUPT.
 
 endmenu
+
+menu "I2S Configuration"
+	depends on STM32_I2S3
+
+config STM32_I2S_MCK
+	bool "I2S_MCK"
+	default n
+	---help---
+		TBD.
+
+config STM32_I2S_MAXINFLIGHT
+	int "I2S queue size"
+	default 16
+	---help---
+		This is the total number of transfers, both RX and TX, that can be
+		enqueue before the caller is required to wait.  This setting
+		determines the number certain queue data structures that will be
+		pre-allocated.
+
+comment "I2S3 Configuration"
+
+config STM32_I2S3_DATALEN
+	int "Data width (bits)"
+	default 16
+	---help---
+		Data width in bits.  This is a default value and may be change
+		via the I2S interface
+
+#if STM32_I2S
+config STM32_I2S3_RX
+	bool "Enable I2C receiver"
+	default n
+	---help---
+		Enable I2S receipt logic
+
+config STM32_I2S3_TX
+	bool "Enable I2C transmitter"
+	default n
+	---help---
+		Enable I2S transmission logic
+
+config STM32_I2S_DMADEBUG
+	bool "I2S DMA transfer debug"
+	depends on DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation analyze I2S DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+config STM32_I2S_REGDEBUG
+	bool "SSC Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level SSC device debug information.
+		Very invasive! Requires also DEBUG.
+
+endmenu # I2S Configuration
 
 menu "I2C Configuration"
 	depends on STM32_I2C

@@ -1952,14 +1952,25 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
                       delay = 1000;
                     }
 
-                  /* Wait for the next polling interval.
+                  /* Wait for the next polling interval.  For interrupt and
+                   * isochronous endpoints, this is necessaryto assure the
+                   * polling interval.  It is used in other cases only to
+                   * prevent the polling from consuming too much CPU bandwith.
                    *
-                   * REVISIT:  This delay could require more resolution than
-                   * is provided by the system timer.  In that case, the
-                   * delay could be significantly longer than required.
+                   * Small delays could require more resolution than is provided
+                   * by the system timer.  For example, if the system timer
+                   * resolution is 10MS, then usleep(1000) will actually request
+                   * a delay 20MS (due to both quantization and rounding).
+                   *
+                   * REVISIT: So which is better?  To ignore tiny delays and
+                   * hog the system bandwidth?  Or to wait for an excessive
+                   * amount and destroy system throughput?
                    */
 
-                  usleep(delay);
+                  if (delay > CONFIG_USEC_PER_TICK)
+                    {
+                      usleep(delay - CONFIG_USEC_PER_TICK);
+                    }
                 }
             }
           else
