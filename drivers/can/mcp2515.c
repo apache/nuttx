@@ -1823,7 +1823,7 @@ static bool mcp2515_txready(FAR struct can_dev_s *dev)
 {
   FAR struct mcp2515_can_s *priv;
   uint8_t regval;
-  bool empty;
+  bool ready;
 
   DEBUGASSERT(dev);
   priv = dev->cd_priv;
@@ -1845,32 +1845,32 @@ static bool mcp2515_txready(FAR struct can_dev_s *dev)
   mcp2515_readregs(priv, MCP2515_TXB0CTRL, &regval, 1);
   if ((regval & TXBCTRL_TXREQ) == 0)
     {
-      empty = true;
+      ready = true;
     }
   else
     {
       mcp2515_readregs(priv, MCP2515_TXB1CTRL, &regval, 1);
       if ((regval & TXBCTRL_TXREQ) == 0)
         {
-          empty = true;
+          ready = true;
         }
      else
        {
          mcp2515_readregs(priv, MCP2515_TXB2CTRL, &regval, 1);
          if ((regval & TXBCTRL_TXREQ) == 0)
            {
-              empty = true;
+              ready = true;
            }
          else
            {
-             empty = false;
+             ready = false;
            }
        }
     }
 
   mcp2515_dev_unlock(priv);
 
-  return empty;
+  return ready;
 }
 
 /****************************************************************************
