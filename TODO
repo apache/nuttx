@@ -1889,6 +1889,9 @@ o Build system
                  the make during the archival, the timestamp on .archive is not
                  updated.
 
+                 The .archive file would have to be removed on 'make clean' and would
+                 also need to appear in .gitignore files.
+
 o Other drivers (drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^
 
