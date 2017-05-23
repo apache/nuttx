@@ -56,6 +56,44 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: iob_alloc_qcommitted
+ *
+ * Description:
+ *   Allocate an I/O buffer by taking the buffer at the head of the committed
+ *   list.
+ *
+ ****************************************************************************/
+
+static FAR struct iob_qentry_s *iob_alloc_qcommitted(void)
+{
+  FAR struct iob_qentry_s *iobq = NULL;
+  irqstate_t flags;
+
+  /* We don't know what context we are called from so we use extreme measures
+   * to protect the committed list:  We disable interrupts very briefly.
+   */
+
+  flags = enter_critical_section();
+
+  /* Take the I/O buffer from the head of the committed list */
+
+  iobq = g_iob_qcommitted;
+  if (iobq != NULL)
+    {
+      /* Remove the I/O buffer from the committed list */
+
+      g_iob_qcommitted = iobq->qe_flink;
+
+      /* Put the I/O buffer in a known state */
+
+      iobq->qe_head = NULL; /* Nothing is contained */
+    }
+
+  leave_critical_section(flags);
+  return iobq;
+}
+
+/****************************************************************************
  * Name: iob_allocwait_qentry
  *
  * Description:
@@ -78,73 +116,78 @@ static FAR struct iob_qentry_s *iob_allocwait_qentry(void)
    */
 
   flags = enter_critical_section();
-  do
+
+  /* Try to get an I/O buffer chain container.  If successful, the semaphore
+   * count will bedecremented atomically.
+   */
+
+  qentry = iob_tryalloc_qentry();
+  while (ret == OK && qentry == NULL)
     {
-      /* Try to get an I/O buffer chain container.  If successful, the
-       * semaphore count will be decremented atomically.
+      /* If not successful, then the semaphore count was less than or equal
+       * to zero (meaning that there are no free buffers).  We need to wait
+       * for an I/O buffer chain container to be released when the
+       * semaphore count will be incremented.
        */
 
-      qentry = iob_tryalloc_qentry();
-      if (!qentry)
+      ret = sem_wait(&g_qentry_sem);
+      if (ret < 0)
         {
-          /* If not successful, then the semaphore count was less than or
-           * equal to zero (meaning that there are no free buffers).  We
-           * need to wait for an I/O buffer chain container to be released
-           * when the semaphore count will be incremented.
+          int errcode = get_errno();
+
+          /* EINTR is not an error!  EINTR simply means that we were
+           * awakened by a signal and we should try again.
+           *
+           * REVISIT:  Many end-user interfaces are required to return
+           * with an error if EINTR is set.  Most uses of this function
+           * is in internal, non-user logic.  But are there cases where
+           * the error should be returned.
            */
 
-          ret = sem_wait(&g_qentry_sem);
-          if (ret < 0)
+          if (errcode == EINTR)
             {
-              int errcode = get_errno();
-
-              /* EINTR is not an error!  EINTR simply means that we were
-               * awakened by a signal and we should try again.
-               *
-               * REVISIT:  Many end-user interfaces are required to return
-               * with an error if EINTR is set.  Most uses of this function
-               * is in internal, non-user logic.  But are there cases where
-               * the error should be returned.
+              /* Force a success indication so that we will continue
+               * looping.
                */
 
-              if (errcode == EINTR)
-                {
-                  /* Force a success indication so that we will continue
-                   * looping.
-                   */
-
-                  ret = 0;
-                }
-              else
-                {
-                  /* Stop the loop and return a error */
-
-                  DEBUGASSERT(errcode > 0);
-                  ret = -errcode;
-                }
+              ret = 0;
             }
           else
             {
-              /* When we wake up from wait successfully, an I/O buffer chain
-               * container was returned to the free list.  However, if there
-               * are concurrent allocations from interrupt handling, then I
-               * suspect that there is a race condition.  But no harm, we
-               * will just wait again in that case.
+              /* Stop the loop and return a error */
+
+              DEBUGASSERT(errcode > 0);
+              ret = -errcode;
+            }
+        }
+      else
+        {
+          /* When we wake up from wait successfully, an I/O buffer chain container was
+           * freed and we hold a count for one IOB.  Unless somehting
+           * failed, we should have an IOB waiting for us in the
+           * committed list.
+           */
+
+          qentry = iob_alloc_qcommitted();
+          DEBUGASSERT(qentry != NULL);
+
+          if (qentry == NULL)
+            {
+              /* This should not fail, but we allow for that possibility to
+               * handle any potential, non-obvious race condition.  Perhaps
+               * the free IOB ended up in the g_iob_free list?
                *
                * We need release our count so that it is available to
-               * iob_tryalloc_qentry(), perhaps allowing another thread to
-               * take our count.  In that event, iob_tryalloc_qentry() will
-               * fail above and we will have to wait again.
-               *
-               * TODO: Consider a design modification to permit us to
-               * complete the allocation without losing our count.
+               * iob_tryalloc(), perhaps allowing another thread to take our
+               * count.  In that event, iob_tryalloc() will fail above and
+               * we will have to wait again.
                */
 
               sem_post(&g_qentry_sem);
+              qentry = iob_tryalloc_qentry();
             }
         }
     }
-  while (ret == OK && !qentry);
 
   leave_critical_section(flags);
   return qentry;

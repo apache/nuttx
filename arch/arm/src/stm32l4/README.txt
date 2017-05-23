@@ -8,7 +8,7 @@ Most code is copied and adapted from the STM32 Port.
 TODO list
 ---------
 
-Peripherals with equivalent implementation in STM32 port
+Peripherals with implementation in STM32 port:
 
 IRQs     : OK
 GPIO     : OK
@@ -42,10 +42,11 @@ AES      : TODO
 RNG      : works
 CRC      : TODO (configurable polynomial)
 WWDG     : TODO
-IWDG     : TODO
+IWDG     : works
 MMCSD    : TODO
 ADC      : TODO
 DAC      : TODO
+DMA2D    : TODO (Chrom-Art Accelerator for image manipulation)
 
 New peripherals with implementation to be written from scratch
 These are Low Priority TODO items, unless someone requests or contributes
@@ -61,7 +62,6 @@ COMP     : There is some code (Analog comparators)
 DFSDM    : TODO (Digital Filter and Sigma-Delta Modulator)
 LCD      : TODO (Segment LCD controller)
 SAIPLL   : works (PLL For Digital Audio interfaces, and other things)
-SAI      : TODO (Digital Audio interfaces, I2S, SPDIF, etc)
+SAI      : There is some code (Digital Audio interfaces, I2S, SPDIF, etc)
 HASH     : TODO (SHA-1, SHA-224, SHA-256, HMAC)
 DCMI     : TODO (Digital Camera interfaces)
-DMA2D    : TODO (Chrom-Art Accelerator for image manipulation)

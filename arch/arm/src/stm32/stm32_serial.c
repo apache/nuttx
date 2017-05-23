@@ -1050,10 +1050,10 @@ static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t valu
 }
 
 /****************************************************************************
- * Name: up_restoreusartint
+ * Name: up_setusartint
  ****************************************************************************/
 
-static void up_restoreusartint(struct up_dev_s *priv, uint16_t ie)
+static inline void up_setusartint(struct up_dev_s *priv, uint16_t ie)
 {
   uint32_t cr;
 
@@ -1075,11 +1075,30 @@ static void up_restoreusartint(struct up_dev_s *priv, uint16_t ie)
 }
 
 /****************************************************************************
+ * Name: up_restoreusartint
+ ****************************************************************************/
+
+static void up_restoreusartint(struct up_dev_s *priv, uint16_t ie)
+{
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  up_setusartint(priv, ie);
+
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
  * Name: up_disableusartint
  ****************************************************************************/
 
-static inline void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
+static void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
 {
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
   if (ie)
     {
       uint32_t cr1;
@@ -1116,7 +1135,9 @@ static inline void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
 
   /* Disable all interrupts */
 
-  up_restoreusartint(priv, 0);
+  up_setusartint(priv, 0);
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

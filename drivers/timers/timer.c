@@ -254,12 +254,15 @@ static ssize_t timer_write(FAR struct file *filep, FAR const char *buffer,
 static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode             *inode = filep->f_inode;
-  FAR struct timer_upperhalf_s *upper = inode->i_private;
-  FAR struct timer_lowerhalf_s *lower = upper->lower;
+  FAR struct timer_upperhalf_s *upper;
+  FAR struct timer_lowerhalf_s *lower;
   int                           ret;
 
   tmrinfo("cmd: %d arg: %ld\n", cmd, arg);
-  DEBUGASSERT(upper && lower);
+  upper = inode->i_private;
+  DEBUGASSERT(upper != NULL);
+  lower = upper->lower;
+  DEBUGASSERT(lower != NULL);
 
   /* Handle built-in ioctl commands */
 

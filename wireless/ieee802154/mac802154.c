@@ -52,10 +52,10 @@
 
 #include <nuttx/mm/iob.h>
 
+#include "mac802154.h"
+
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 #include <nuttx/wireless/ieee802154/ieee802154_radio.h>
-
-#include "mac802154.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -80,17 +80,32 @@
 #  endif
 #endif
 
+#if !defined(CONFIG_MAC802154_NNOTIF) || CONFIG_MAC802154_NNOTIF <= 0
+#  undef CONFIG_MAC802154_NNOTIF
+#  define CONFIG_MAC802154_NNOTIF 6 
+#endif
+
+#if !defined(CONFIG_MAC802154_NTXDESC) || CONFIG_MAC802154_NTXDESC <= 0
+#  undef CONFIG_MAC802154_NTXDESC
+#  define CONFIG_MAC802154_NTXDESC 3 
+#endif
+
+#if CONFIG_MAC802154_NTXDESC > CONFIG_MAC802154_NNOTIF
+#error CONFIG_MAC802154_NNOTIF must be greater than CONFIG_MAC802154_NTXDESC
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct mac802154_txframe_s
+struct mac802154_txtrans_s
 {
   /* Supports a singly linked list */
 
-  FAR struct mac802154_txframe_s *flink;
+  FAR struct mac802154_txtrans_s *flink;
   FAR struct iob_s *frame;
-  uint8_t msdu_handle;
+  uint8_t handle;
+  enum ieee802154_frametype_e frametype;
   sem_t sem;
 };
 
@@ -118,10 +133,45 @@ struct mac802154_radiocb_s
 struct ieee802154_privmac_s
 {
   FAR struct ieee802154_radio_s *radio;     /* Contained IEEE802.15.4 radio dev */
-  FAR const struct ieee802154_maccb_s *cb;  /* Contained MAC callbacks */
+  FAR const struct mac802154_maccb_s *cb;   /* Contained MAC callbacks */
   FAR struct mac802154_radiocb_s radiocb;   /* Interface to bind to radio */
 
   sem_t exclsem; /* Support exclusive access */
+
+  /* Support a single transaction dedicated to commands. As of now I see no
+   * condition where you need to have more than one command frame simultaneously
+   */ 
+  
+  struct
+    {
+      sem_t sem;                            /* Exclusive use of the cmdtrans */
+      enum ieee802154_cmdid_e type;         /* Type of cmd in the cmdtrans */
+      struct mac802154_txtrans_s trans;     /* Dedicated txframe for cmds */
+
+      /* Has the command been successfully sent. This is to help protect
+       * against an odd edge case that may or may not ever happen. The condition
+       * occurs when you receive a seemingly appropriate response to the command
+       * yet the command was never actually sent.
+       */
+
+      bool txdone;                              
+    } cmd;
+
+  /* Pre-allocated notifications to be passed to the registered callback.  These
+   * need to be freed by the application using mac802154_xxxxnotif_free when
+   * the callee layer is finished with it's use.
+   */
+
+  FAR struct ieee802154_notif_s *notif_free;
+  struct ieee802154_notif_s notif_alloc[CONFIG_MAC802154_NNOTIF];
+  sq_queue_t notif_queue;
+
+  FAR struct ieee802154_txdesc_s *txdesc_free;
+  struct ieee802154_txdesc_s txdesc_alloc[CONFIG_IEEE802154_NTXDESC];
+  sq_queue_t txdesc_queue;
+  sq_queue_t txdone_queue;
+
+  /* Work structures for offloading aynchronous work */
 
   struct work_s tx_work;
   struct work_s rx_work;
@@ -132,8 +182,7 @@ struct ieee802154_privmac_s
    * during the CAP of the Coordinator's superframe.
    */
 
-  FAR struct mac802154_txframe_s *csma_head;
-  FAR struct mac802154_txframe_s *csma_tail;
+  sq_queue_t csma_queue;
 
   /* Support a singly linked list of transactions that will be sent indirectly.
    * This list should only be used by a MAC acting as a coordinator.  These
@@ -142,16 +191,12 @@ struct ieee802154_privmac_s
    * list should also be used to populate the address list of the outgoing
    * beacon frame.
    */
-
-  FAR struct mac802154_txframe_s *indirect_head;
-  FAR struct mac802154_txframe_s *indirect_tail;
-
-  uint8_t txdesc_count;
-  struct ieee802154_txdesc_s txdesc[CONFIG_IEEE802154_NTXDESC];
+  
+  sq_queue_t indirect_queue;
 
   /* Support a singly linked list of frames received */
-  FAR struct ieee802154_data_ind_s *dataind_head;
-  FAR struct ieee802154_data_ind_s *dataind_tail;
+
+  sq_queue_t dataind_queue;
 
   /* MAC PIB attributes, grouped to save memory */
 
@@ -264,7 +309,10 @@ struct ieee802154_privmac_s
 
   enum ieee802154_devmode_e devmode : 2;
 
-                                    /* 11-bits remaining */
+  bool csma_tryagain          : 1;
+  bool gts_tryagain           : 1;
+
+                                    /* 10-bits remaining */
 
   /* End of 32-bit bitfield. */
 
@@ -275,25 +323,33 @@ struct ieee802154_privmac_s
  * Private Function Prototypes
  ****************************************************************************/
 
+/* Internal Functions */
+
 static inline int mac802154_takesem(sem_t *sem);
 #define mac802154_givesem(s) sem_post(s);
 
-static void mac802154_txdone_worker(FAR void *arg);
-static void mac802154_rxframe_worker(FAR void *arg);
-
-/* Internal Functions */
+static void mac802154_resetqueues(FAR struct ieee802154_privmac_s *priv);
+static void mac802154_notifpool_init(FAR struct ieee802154_privmac_s *priv);
+static FAR struct ieee802154_notif_s *
+  mac802154_notif_alloc(FAR struct ieee802154_privmac_s *priv);
 
 static int mac802154_defaultmib(FAR struct ieee802154_privmac_s *priv);
 static int mac802154_applymib(FAR struct ieee802154_privmac_s *priv);
 
+static void mac802154_txdone_worker(FAR void *arg);
+static void mac802154_rxframe_worker(FAR void *arg);
+
+static void mac802154_cmd_txdone(FAR struct ieee802154_privmac_s *priv,
+                                 FAR struct ieee802154_txdesc_s *txdesc);
+
 /* IEEE 802.15.4 PHY Interface OPs */
 
 static int mac802154_poll_csma(FAR const struct ieee802154_radiocb_s *radiocb,
-                               FAR struct ieee802154_txdesc_s *tx_desc,
+                               FAR struct ieee802154_txdesc_s **tx_desc,
                                FAR struct iob_s **frame);
 
 static int mac802154_poll_gts(FAR const struct ieee802154_radiocb_s *radiocb,
-                              FAR struct ieee802154_txdesc_s *tx_desc,
+                              FAR struct ieee802154_txdesc_s **tx_desc,
                               FAR struct iob_s **frame);
 
 static void mac802154_txdone(FAR const struct ieee802154_radiocb_s *radiocb,
@@ -339,149 +395,100 @@ static inline int mac802154_takesem(sem_t *sem)
 }
 
 /****************************************************************************
- * Name: mac802154_push_csma
+ * Name: mac802154_resetqueues
  *
  * Description:
- *   Push a CSMA transaction onto the list
+ *   Initializes the various queues used in the MAC layer. Called on creation
+ *   of MAC.
  *
  ****************************************************************************/
 
-static void mac802154_push_csma(FAR struct ieee802154_privmac_s *priv,
-                                FAR struct mac802154_txframe_s *trans)
+static void mac802154_resetqueues(FAR struct ieee802154_privmac_s *priv)
 {
-  /* Ensure the transactions forward link is NULL */
+  int i;
 
-  trans->flink = NULL;
+  sq_init(&priv->txdone_queue);
+  sq_init(&priv->csma_queue);
+  sq_init(&priv->indirect_queue);
+  sq_init(&priv->dataind_queue);
 
-  /* If the tail is not empty, make the transaction pointed to by the tail,
-   * point to the new transaction */
+  sq_init(&priv->notif_queue);
+  sq_init(&priv->txdesc_queue);
 
-  if (priv->csma_tail != NULL)
+  for (i = 0; i < CONFIG_MAC802154_NNOTIF; i++)
     {
-      priv->csma_tail->flink = trans;
+      sq_addlast((FAR sq_entry_t *)&priv->notif_alloc[i], &priv->notif_queue);
     }
 
-  /* Point the tail at the new transaction */
-
-  priv->csma_tail = trans;
-
-  /* If the head is NULL, we need to point it at the transaction since there
-   * is only one transaction in the list at this point */
-
-  if (priv->csma_head == NULL)
+  for (i = 0; i < CONFIG_MAC802154_NTXDESC; i++)
     {
-      priv->csma_head = trans;
+      sq_addlast((FAR sq_entry_t *)&priv->txdesc_alloc[i], &priv->txdesc_queue);
+    }
+  
+  mac802154_notifpool_init(priv);
+}
+
+/****************************************************************************
+ * Name: mac802154_notifpool_init
+ *
+ * Description:
+ *   This function initializes the notification structure pool. It allows the
+ *   MAC to pass notifications and for the callee to free them when they are
+ *   done using them, saving copying the data when passing.
+ *
+ ****************************************************************************/
+
+static void mac802154_notifpool_init(FAR struct ieee802154_privmac_s *priv)
+{
+  FAR struct ieee802154_notif_s *pool = priv->notif_alloc;
+  int remaining = CONFIG_MAC802154_NNOTIF;
+
+  priv->notif_free = NULL;
+  while (remaining > 0)
+    {
+      FAR struct ieee802154_notif_s *notif = pool;
+
+      /* Add the next meta data structure from the pool to the list of
+       * general structures.
+       */
+
+      notif->flink = priv->notif_free;
+      priv->notif_free  = notif;
+
+      /* Set up for the next structure from the pool */
+
+      pool++;
+      remaining--;
     }
 }
 
 /****************************************************************************
- * Name: mac802154_pop_csma
+ * Name: mac802154_notif_alloc
  *
  * Description:
- *   Pop a CSMA transaction from the list
+ *   This function allocates a free notification structure from the free list
+ *   to be used for passing to the registered notify callback. The callee software
+ *   is responsible for freeing the notification structure after it is done using
+ *   it via mac802154_notif_free.
+ *
+ * Assumptions:
+ *   priv MAC struct is locked when calling.
  *
  ****************************************************************************/
-
-static FAR struct mac802154_txframe_s *
-  mac802154_pop_csma(FAR struct ieee802154_privmac_s *priv)
+static FAR struct ieee802154_notif_s *
+  mac802154_notif_alloc(FAR struct ieee802154_privmac_s *priv)
 {
-  FAR struct mac802154_txframe_s *trans;
+  FAR struct ieee802154_notif_s *notif;
 
-  if (priv->csma_head == NULL)
+  if (priv->notif_free == NULL)
     {
       return NULL;
     }
 
-  /* Get the transaction from the head of the list */
+  notif             = priv->notif_free;
+  priv->notif_free  = notif->flink;
 
-  trans = priv->csma_head;
-  trans->flink = NULL;
-
-  /* Move the head pointer to the next transaction */
-
-  priv->csma_head = trans->flink;
-
-  /* If the head is now NULL, the list is empty, so clear the tail too */
-
-  if (priv->csma_head == NULL)
-    {
-      priv->csma_tail = NULL;
-    }
-
-  return trans;
-}
-
-/****************************************************************************
- * Name: mac802154_push_dataind
- *
- * Description:
- *   Push a data indication onto the list to be processed
- *
- ****************************************************************************/
-
-static void mac802154_push_dataind(FAR struct ieee802154_privmac_s *priv,
-                                   FAR struct ieee802154_data_ind_s *ind)
-{
-  /* Ensure the forward link is NULL */
-
-  ind->flink = NULL;
-
-  /* If the tail is not empty, make the frame pointed to by the tail,
-   * point to the new data indication */
-
-  if (priv->dataind_tail != NULL)
-    {
-      priv->dataind_tail->flink = ind;
-    }
-
-  /* Point the tail at the new frame */
-
-  priv->dataind_tail = ind;
-
-  /* If the head is NULL, we need to point it at the data indication since there
-   * is only one indication in the list at this point */
-
-  if (priv->dataind_head == NULL)
-    {
-      priv->dataind_head = ind;
-    }
-}
-
-/****************************************************************************
- * Name: mac802154_pop_dataind
- *
- * Description:
- *   Pop a data indication from the list
- *
- ****************************************************************************/
-
-static FAR struct ieee802154_data_ind_s *
-  mac802154_pop_dataind(FAR struct ieee802154_privmac_s *priv)
-{
-  FAR struct ieee802154_data_ind_s *ind;
-
-  if (priv->dataind_head == NULL)
-    {
-      return NULL;
-    }
-
-  /* Get the data indication from the head of the list */
-
-  ind = priv->dataind_head;
-  ind->flink = NULL;
-
-  /* Move the head pointer to the next data indication */
-
-  priv->dataind_head = ind->flink;
-
-  /* If the head is now NULL, the list is empty, so clear the tail too */
-
-  if (priv->dataind_head == NULL)
-    {
-      priv->dataind_tail = NULL;
-    }
-
-  return ind;
+  return notif;
 }
 
 /****************************************************************************
@@ -517,7 +524,6 @@ static int mac802154_defaultmib(FAR struct ieee802154_privmac_s *priv)
   priv->tx_totaldur = 0;        /* 0 transmit duration */
 
   priv->trans_persisttime = 0x01F4;
-
 
   /* Reset the Coordinator address */
 
@@ -580,13 +586,15 @@ static int mac802154_applymib(FAR struct ieee802154_privmac_s *priv)
  ****************************************************************************/
 
 static int mac802154_poll_csma(FAR const struct ieee802154_radiocb_s *radiocb,
-                               FAR struct ieee802154_txdesc_s *tx_desc,
+                               FAR struct ieee802154_txdesc_s **txdesc,
                                FAR struct iob_s **frame)
 {
   FAR struct mac802154_radiocb_s *cb =
     (FAR struct mac802154_radiocb_s *)radiocb;
   FAR struct ieee802154_privmac_s *priv;
-  FAR struct mac802154_txframe_s *trans;
+  FAR struct mac802154_txtrans_s *trans;
+  FAR struct ieee802154_txdesc_s *desc;
+  FAR struct ieee802154_notif_s *notif;
 
   DEBUGASSERT(cb != NULL && cb->priv != NULL);
   priv = cb->priv;
@@ -599,16 +607,41 @@ static int mac802154_poll_csma(FAR const struct ieee802154_radiocb_s *radiocb,
 
   /* Check to see if there are any CSMA transactions waiting */
 
-  trans = mac802154_pop_csma(priv);
+  trans = (FAR struct mac802154_txtrans_s *)sq_remfirst(&priv->csma_queue);
   mac802154_givesem(&priv->exclsem);
 
   if (trans != NULL)
     {
-      /* Setup the transmit descriptor */
+      /* Allocate a Tx descriptor to pass */
 
-      tx_desc->handle = trans->msdu_handle;
+      desc = (FAR struct ieee802154_txdesc_s *)sq_remfirst(&priv->txdesc_queue);
+      if (desc == NULL)
+        {
+          wlerr("ERROR: Failed to allocate ieee802154_txdesc_s");
+          goto errout;
+        }
+
+      /* Allocate a notif struct (ie data confirmation struct) to pass with
+       * the tx descriptor.
+       */
+      
+      notif = mac802154_notif_alloc(priv);
+      if (notif == NULL)
+        {
+          wlerr("ERROR: Failed to allocate ieee802154_notif_s");
+
+          /* Free the tx descriptor */
+
+          sq_addlast((FAR sq_entry_t *)desc, &priv->txdesc_queue);
+          goto errout;
+        }
+
+      desc->conf = (FAR struct ieee802154_data_conf_s *)notif;
+      desc->conf->handle = trans->handle;
+      desc->frametype = trans->frametype;
 
       *frame = trans->frame;
+      *txdesc = desc;
 
       /* Now that we've passed off the data, notify the waiting thread.
        * NOTE: The transaction was allocated on the waiting thread's stack so
@@ -619,6 +652,13 @@ static int mac802154_poll_csma(FAR const struct ieee802154_radiocb_s *radiocb,
       return (trans->frame->io_len);
     }
 
+errout:
+  /* Need to set flag to tell MAC to retry notifying radio layer about transmit
+   * since we couldn't allocate the required data structures at this time.
+   */
+
+  priv->csma_tryagain = true;
+  mac802154_givesem(&priv->exclsem);
   return 0;
 }
 
@@ -634,13 +674,14 @@ static int mac802154_poll_csma(FAR const struct ieee802154_radiocb_s *radiocb,
  ****************************************************************************/
 
 static int mac802154_poll_gts(FAR const struct ieee802154_radiocb_s *radiocb,
-                              FAR struct ieee802154_txdesc_s *tx_desc,
+                              FAR struct ieee802154_txdesc_s **tx_desc,
                               FAR struct iob_s **frame)
 {
   FAR struct mac802154_radiocb_s *cb =
     (FAR struct mac802154_radiocb_s *)radiocb;
   FAR struct ieee802154_privmac_s *priv;
-  FAR struct mac802154_txframe_s *trans;
+  FAR struct mac802154_txtrans_s *trans;
+  FAR struct ieee802154_txdesc_s *desc;
   int ret = 0;
 
   DEBUGASSERT(cb != NULL && cb->priv != NULL);
@@ -656,6 +697,15 @@ static int mac802154_poll_gts(FAR const struct ieee802154_radiocb_s *radiocb,
 
   mac802154_givesem(&priv->exclsem);
 
+  return 0;
+
+errout:
+  /* Need to set flag to tell MAC to retry notifying radio layer about transmit
+   * since we couldn't allocate the required data structures at this time.
+   */
+
+  priv->gts_tryagain = true;
+  mac802154_givesem(&priv->exclsem);
   return 0;
 }
 
@@ -673,7 +723,7 @@ static int mac802154_poll_gts(FAR const struct ieee802154_radiocb_s *radiocb,
  ****************************************************************************/
 
 static void mac802154_txdone(FAR const struct ieee802154_radiocb_s *radiocb,
-                            FAR const struct ieee802154_txdesc_s *tx_desc)
+                            FAR const struct ieee802154_txdesc_s *txdesc)
 {
   FAR struct mac802154_radiocb_s *cb =
     (FAR struct mac802154_radiocb_s *)radiocb;
@@ -688,20 +738,7 @@ static void mac802154_txdone(FAR const struct ieee802154_radiocb_s *radiocb,
 
   while (mac802154_takesem(&priv->exclsem) != 0);
 
-  /* Check to see if there is an available tx descriptor slot.  If there is
-   * not we simply drop the notification */
-
-  if (priv->txdesc_count < CONFIG_IEEE802154_NTXDESC)
-    {
-      /* Copy the txdesc over and link it into our list */
-
-      memcpy(&priv->txdesc[priv->txdesc_count++], tx_desc,
-             sizeof(struct ieee802154_txdesc_s));
-    }
-  else
-    {
-      wlinfo("MAC802154: No room for TX Desc.\n");
-    }
+  sq_addlast((FAR sq_entry_t *)txdesc, &priv->txdone_queue);
 
   mac802154_givesem(&priv->exclsem);
 
@@ -728,7 +765,11 @@ static void mac802154_txdone_worker(FAR void *arg)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)arg;
-  int i = 0;
+  FAR struct ieee802154_txdesc_s *txdesc;
+  FAR struct ieee802154_data_conf_s *conf;
+  FAR struct ieee802154_notif_s *notif;
+  enum ieee802154_frametype_e frametype;
+  int count;
 
   /* Get exclusive access to the driver structure.  We don't care about any
    * signals so if we see one, just go back to trying to get access again.
@@ -736,20 +777,121 @@ static void mac802154_txdone_worker(FAR void *arg)
 
   while (mac802154_takesem(&priv->exclsem) != 0);
 
-  /* For each pending TX descriptor, send an application callback */
-
-  for (i = 0; i < priv->txdesc_count; i++)
+  while (1)
     {
-      priv->cb->mcps_notify(priv->cb, IEEE802154_NOTIFY_CONF_DATA,
-                  (FAR const union ieee802154_mcps_notify_u *) &priv->txdesc[i]);
+      txdesc = (FAR struct ieee802154_txdesc_s *)sq_remfirst(&priv->txdone_queue);
+
+      if (txdesc == NULL)
+        {
+          break;
+        }
+
+      count++;
+      
+      /* Once we get the frametype and data confirmation struct, we can free
+       * the tx descriptor.
+       */
+
+      conf      = txdesc->conf;
+      frametype = txdesc->frametype;
+      sq_addlast((FAR sq_entry_t *)txdesc, &priv->txdesc_queue);
+
+      /* Cast the data_conf to a notification */
+
+      notif = (FAR struct ieee802154_notif_s *)conf;
+      
+      switch(frametype)
+        {
+          case IEEE802154_FRAME_DATA:
+            {
+              notif->notiftype = IEEE802154_NOTIFY_CONF_DATA;
+
+              /* Release the MAC then call the callback */
+
+              mac802154_givesem(&priv->exclsem);
+              priv->cb->notify(priv->cb, notif);
+            }
+            break;
+
+          case IEEE802154_FRAME_COMMAND:
+            {
+              mac802154_cmd_txdone(priv, txdesc);
+
+              /* We can deallocate the data conf notification as it is no longer
+               * needed. We don't use the public function here since we already
+               * have the MAC locked. Additionally, we are already handling the
+               * tx_tryagain here, so we wouldn't want to handle it twice.
+               */ 
+
+               notif->flink = priv->notif_free;
+               priv->notif_free = notif;
+               mac802154_givesem(&priv->exclsem);
+            }
+            break;
+
+          default:
+            {
+               mac802154_givesem(&priv->exclsem);
+            }
+            break;
+
+        }
     }
 
-  /* We've handled all the descriptors and no further desc could have been added
-   * since we have the struct locked */
+  /* If we've freed a tx descriptor or notification structure and a previous
+   * attempt at passing data to the radio layer failed due to insufficient
+   * available structures, try again now that we've freed some resources */
 
-  priv->txdesc_count = 0;
+  if (count > 0 && priv->csma_tryagain)
+    {
+      priv->csma_tryagain = false;
+      priv->radio->ops->txnotify_csma(priv->radio);
+    }
+  
+  if (count > 0 && priv->gts_tryagain)
+    {
+      priv->gts_tryagain = false;
+      priv->radio->ops->txnotify_gts(priv->radio);
+    }
+}
 
-  mac802154_givesem(&priv->exclsem);
+/****************************************************************************
+ * Name: mac802154_cmd_txdone
+ *
+ * Description:
+ *   Called from mac802154_txdone_worker, this is a helper function for
+ *   handling command frames that have either successfully sent or failed.
+ *
+ ****************************************************************************/
+
+static void mac802154_cmd_txdone(FAR struct ieee802154_privmac_s *priv,
+                                 FAR struct ieee802154_txdesc_s *txdesc)
+{
+
+  /* Check to see what type of command it was. All information about the command
+   * will still be valid because it is protected by a semaphore.
+   */
+
+  switch (priv->cmd.type)
+    {
+      case IEEE802154_CMD_ASSOC_REQ:
+        if(txdesc->conf->status != IEEE802154_STATUS_SUCCESS)
+          {
+            /* if the association request command cannot be sent due to a
+             * channel access failure, the MAC sublayer shall notify the next
+             * higher layer. [1] pg. 33
+             */
+
+
+          }
+        else
+          {
+            priv->cmd.txdone = true;
+          }
+        break;
+      default:
+        break;
+    }
 }
 
 /****************************************************************************
@@ -784,7 +926,7 @@ static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
 
   /* Push the iob onto the tail of the frame list for processing */
 
-  mac802154_push_dataind(priv, ind);
+  sq_addlast((FAR sq_entry_t *)ind, &priv->dataind_queue);
 
   mac802154_givesem(&priv->exclsem);
 
@@ -813,7 +955,6 @@ static void mac802154_rxframe_worker(FAR void *arg)
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)arg;
   FAR struct ieee802154_data_ind_s *ind;
-  union ieee802154_mcps_notify_u mcps_notify;
   FAR struct iob_s *frame;
   uint16_t *frame_ctrl;
   bool panid_comp;
@@ -829,7 +970,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
 
       /* Push the iob onto the tail of the frame list for processing */
 
-      ind = mac802154_pop_dataind(priv);
+      ind = (FAR struct ieee802154_data_ind_s *)sq_remfirst(&priv->dataind_queue);
 
       if (ind == NULL)
         {
@@ -932,11 +1073,9 @@ static void mac802154_rxframe_worker(FAR void *arg)
            * the frame, otherwise, throw it out.
            */
 
-          if (priv->cb->mcps_notify != NULL)
+          if (priv->cb->rxframe != NULL)
             {
-              mcps_notify.dataind = ind;
-              priv->cb->mcps_notify(priv->cb, IEEE802154_NOTIFY_IND_DATA,
-                                    &mcps_notify);
+              priv->cb->rxframe(priv->cb, ind);
             }
           else
             {
@@ -1009,6 +1148,15 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
 
   sem_init(&mac->exclsem, 0, 1);
 
+  /* Allow exlusive access to the dedicated command transaction */
+
+  sem_init(&mac->cmd.sem, 0, 1);
+
+  /* Setup the signaling semaphore for the dedicated command transaction */
+
+  sem_init(&mac->cmd.trans.sem, 0, 0);
+  sem_setprotocol(&mac->cmd.trans.sem, SEM_PRIO_NONE);
+
   /* Initialize fields */
 
   mac->radio = radiodev;
@@ -1030,10 +1178,11 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
 
   radiodev->ops->bind(radiodev, &mac->radiocb.cb);
 
-  /* Initialize our data indication pool */
+  /* Initialize our various data pools */
 
   ieee802154_indpool_initialize();
-
+  mac802154_resetqueues(mac);
+  
   return (MACHANDLE)mac;
 }
 
@@ -1052,7 +1201,7 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
  *
  ****************************************************************************/
 
-int mac802154_bind(MACHANDLE mac, FAR const struct ieee802154_maccb_s *cb)
+int mac802154_bind(MACHANDLE mac, FAR const struct mac802154_maccb_s *cb)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
@@ -1260,7 +1409,7 @@ int mac802154_get_mhrlen(MACHANDLE mac,
  *   The MCPS-DATA.request primitive requests the transfer of a data SPDU
  *   (i.e., MSDU) from a local SSCS entity to a single peer SSCS entity.
  *   Confirmation is returned via the
- *   struct ieee802154_maccb_s->conf_data callback.
+ *   struct mac802154_maccb_s->conf_data callback.
  *
  ****************************************************************************/
 
@@ -1270,7 +1419,7 @@ int mac802154_req_data(MACHANDLE mac,
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
-  FAR struct mac802154_txframe_s trans;
+  FAR struct mac802154_txtrans_s trans;
   uint16_t *frame_ctrl;
   uint8_t mhr_len = 3; /* Start assuming frame control and seq. num */
   int ret;
@@ -1284,7 +1433,7 @@ int mac802154_req_data(MACHANDLE mac,
 
   /* Cast the first two bytes of the IOB to a uint16_t frame control field */
 
-  frame_ctrl = (uint16_t *)&frame->io_data[0];
+  frame_ctrl = (FAR uint16_t *)&frame->io_data[0];
 
   /* Ensure we start with a clear frame control field */
 
@@ -1415,9 +1564,11 @@ int mac802154_req_data(MACHANDLE mac,
 
   /* Setup our transaction */
 
-  trans.msdu_handle = meta->msdu_handle;
+  trans.handle = meta->msdu_handle;
+  trans.frametype = IEEE802154_FRAME_DATA;
   trans.frame = frame;
-  sem_init(&trans.sem, 0, 1);
+  sem_init(&trans.sem, 0, 0);
+  sem_setprotocol(&trans.sem, SEM_PRIO_NONE);
 
   /* If the TxOptions parameter specifies that a GTS transmission is required,
    * the MAC sublayer will determine whether it has a valid GTS as described
@@ -1477,7 +1628,7 @@ int mac802154_req_data(MACHANDLE mac,
         {
           /* Link the transaction into the CSMA transaction list */
 
-          mac802154_push_csma(priv, &trans);
+          sq_addlast((FAR sq_entry_t *)&trans, &priv->csma_queue);
 
           /* We no longer need to have the MAC layer locked. */
 
@@ -1505,7 +1656,7 @@ int mac802154_req_data(MACHANDLE mac,
  * Description:
  *   The MCPS-PURGE.request primitive allows the next higher layer to purge
  *   an MSDU from the transaction queue. Confirmation is returned via
- *   the struct ieee802154_maccb_s->conf_purge callback.
+ *   the struct mac802154_maccb_s->conf_purge callback.
  *
  *   NOTE: The standard specifies that confirmation should be indicated via 
  *   the asynchronous MLME-PURGE.confirm primitve.  However, in our
@@ -1528,7 +1679,7 @@ int mac802154_req_purge(MACHANDLE mac, uint8_t msdu_handle)
  * Description:
  *   The MLME-ASSOCIATE.request primitive allows a device to request an
  *   association with a coordinator. Confirmation is returned via the
- *   struct ieee802154_maccb_s->conf_associate callback.
+ *   struct mac802154_maccb_s->conf_associate callback.
  *
  ****************************************************************************/
 
@@ -1537,31 +1688,213 @@ int mac802154_req_associate(MACHANDLE mac,
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
+  FAR struct mac802154_txtrans_s trans;
+  FAR struct iob_s *iob;
+  FAR uint16_t *u16;
+  bool rxonidle;
+  int ret;
 
-  /* Set the channel of the PHY layer */
-
-  /* Set the channel page of the PHY layer */
-
-  /* Set the macPANId */
-
-  /* Set either the macCoordExtendedAddress and macCoordShortAddress
-   * depending on the CoordAddrMode in the primitive.
+  /* On receipt of the MLME-ASSOCIATE.request primitive, the MLME of an
+   * unassociated device first updates the appropriate PHY and MAC PIB
+   * attributes, as described in 5.1.3.1, and then generates an association
+   * request command, as defined in 5.3.1 [1] pg.80
    */
 
-  if (req->coord_addr.mode == IEEE802154_ADDRMODE_EXTENDED)
-    {
+  /* Get exlusive access to the shared command transaction. This must happen
+   * before getting exclusive access to the MAC struct or else there could be
+   * a lockup condition. This would occur if another thread is using the cmdtrans
+   * but needs access to the MAC in order to unlock it.
+   */
 
+  if (sem_wait(&priv->cmd.sem) < 0)
+    {
+      /* EINTR is the only error that we expect */
+
+      int errcode = get_errno();
+      DEBUGASSERT(errcode == EINTR);
+      return -errcode;
     }
-  else if (req->coord_addr.mode == IEEE802154_ADDRMODE_EXTENDED)
-    {
 
+  /* Get exclusive access to the MAC */
+   
+   ret = mac802154_takesem(&priv->exclsem);
+   if (ret < 0)
+     {
+       wlerr("ERROR: mac802154_takesem failed: %d\n", ret);
+       return ret;
+     }
+
+  /* Set the channel and channel page of the PHY layer */
+
+  priv->radio->ops->set_attr(priv->radio, IEEE802154_PIB_PHY_CURRENT_CHANNEL,
+                             (FAR const union ieee802154_attr_u *)&req->chnum);
+
+  priv->radio->ops->set_attr(priv->radio, IEEE802154_PIB_PHY_CURRENT_PAGE,
+                             (FAR const union ieee802154_attr_u *)&req->chpage);
+
+  /* Set the PANID attribute */
+
+  priv->addr.panid = req->coordaddr.panid;
+  priv->coordaddr.panid = req->coordaddr.panid;
+  priv->radio->ops->set_attr(priv->radio, IEEE802154_PIB_MAC_PANID,
+                    (FAR const union ieee802154_attr_u *)&req->coordaddr.panid);
+
+  /* Set the coordinator address attributes */
+
+  priv->coordaddr.mode = req->coordaddr.mode;
+
+  if (priv->coordaddr.mode == IEEE802154_ADDRMODE_SHORT)
+    {
+      priv->coordaddr.saddr = req->coordaddr.saddr;
+      memcpy(&priv->coordaddr.eaddr[0], IEEE802154_EADDR_UNSPEC,
+             IEEE802154_EADDR_LEN);
+    }
+  else if (priv->coordaddr.mode == IEEE802154_ADDRMODE_EXTENDED)
+    {
+      priv->coordaddr.saddr = IEEE802154_SADDR_UNSPEC;
+      memcpy(&priv->coordaddr.eaddr[0], &req->coordaddr.eaddr[0],
+             IEEE802154_EADDR_LEN);
     }
   else
+  {
+    ret = -EINVAL;
+    goto errout;
+  }
+
+  /* Copy in the capabilities information bitfield */
+
+  priv->devmode = (req->capabilities.devtype) ? 
+                  IEEE802154_DEVMODE_COORD : IEEE802154_DEVMODE_ENDPOINT;
+
+  /* Unlike other attributes, we can't simply cast this one since it is a bit
+   * in a bitfield.  Casting it will give us unpredicatble results.  Instead
+   * of creating a ieee802154_attr_u, we use a local bool.  Allocating the
+   * ieee802154_attr_u value would take up more room on the stack since it is
+   * as large as the largest attribute type.
+   */
+
+  rxonidle = req->capabilities.rxonidle;
+  priv->radio->ops->set_attr(priv->radio, IEEE802154_PIB_MAC_RX_ON_WHEN_IDLE,
+                            (FAR const union ieee802154_attr_u *)&rxonidle); 
+                          
+  /* Allocate an IOB to put the frame in */
+
+  iob = iob_alloc(false);
+  DEBUGASSERT(iob != NULL);
+
+  iob->io_flink  = NULL;
+  iob->io_len    = 0;
+  iob->io_offset = 0;
+  iob->io_pktlen = 0;
+
+  /* Get a uin16_t reference to the first two bytes. ie frame control field */
+
+  u16 = (FAR uint16_t *)&iob->io_data[0];
+
+  *u16 = (IEEE802154_FRAME_COMMAND << IEEE802154_FRAMECTRL_SHIFT_FTYPE);
+  *u16 |= IEEE802154_FRAMECTRL_ACKREQ;
+  *u16 |= (priv->coordaddr.mode << IEEE802154_FRAMECTRL_SHIFT_DADDR);
+  *u16 |= (IEEE802154_ADDRMODE_EXTENDED << IEEE802154_FRAMECTRL_SHIFT_SADDR);
+
+  iob->io_len = 2;
+
+  /* Each time a data or a MAC command frame is generated, the MAC sublayer
+   * shall copy the value of macDSN into the Sequence Number field of the MHR
+   * of the outgoing frame and then increment it by one. [1] pg. 40.
+   */
+
+  iob->io_data[iob->io_len++] = priv->dsn++;
+
+  /* The Destination PAN Identifier field shall contain the identifier of the
+   * PAN to which to associate. [1] pg. 68
+   */
+
+  memcpy(&iob->io_data[iob->io_len], &priv->coordaddr.panid, 2);
+
+  /* The Destination Address field shall contain the address from the beacon
+   * frame that was transmitted by the coordinator to which the association
+   * request command is being sent. [1] pg. 68
+   */
+
+  if (priv->coordaddr.mode == IEEE802154_ADDRMODE_SHORT)
     {
-      return -EINVAL;
+      memcpy(&iob->io_data[iob->io_len], &priv->coordaddr.saddr, 2);
+      iob->io_len += 2;
+    }
+  else if (priv->coordaddr.mode == IEEE802154_ADDRMODE_EXTENDED)
+    {
+      memcpy(&iob->io_data[iob->io_len], &priv->coordaddr.eaddr[0],
+             IEEE802154_EADDR_LEN);
+      iob->io_len += IEEE802154_EADDR_LEN;
+    }
+  
+  /* The Source PAN Identifier field shall contain the broadcast PAN identifier.*/ 
+
+  u16 = (uint16_t *)&iob->io_data[iob->io_len];
+  *u16 = IEEE802154_SADDR_BCAST;
+  iob->io_len += 2;
+
+  /* The Source Address field shall contain the value of macExtendedAddress. */
+
+  memcpy(&iob->io_data[iob->io_len], &priv->addr.eaddr[0],
+        IEEE802154_EADDR_LEN);
+  iob->io_len += IEEE802154_EADDR_LEN;
+
+  /* Copy in the Command Frame Identifier */
+
+  iob->io_data[iob->io_len++] = IEEE802154_CMD_ASSOC_REQ;
+
+  /* Copy in the capability information bits */
+  
+  iob->io_data[iob->io_len] = 0;
+  iob->io_data[iob->io_len] |= (req->capabilities.devtype << 
+                                IEEE802154_CAPABILITY_SHIFT_DEVTYPE);
+  iob->io_data[iob->io_len] |= (req->capabilities.powersource << 
+                                IEEE802154_CAPABILITY_SHIFT_PWRSRC);
+  iob->io_data[iob->io_len] |= (req->capabilities.rxonidle << 
+                                IEEE802154_CAPABILITY_SHIFT_RXONIDLE);
+  iob->io_data[iob->io_len] |= (req->capabilities.security << 
+                                IEEE802154_CAPABILITY_SHIFT_SECURITY);
+  iob->io_data[iob->io_len] |= (req->capabilities.allocaddr << 
+                                IEEE802154_CAPABILITY_SHIFT_ALLOCADDR);
+  
+  iob->io_len++;
+
+  /* Copy reference to the frame into the shared command transaction */
+
+  priv->cmd.trans.frame = iob;
+  priv->cmd.trans.frametype = IEEE802154_FRAME_COMMAND;
+  priv->cmd.type = IEEE802154_CMD_ASSOC_REQ;
+  
+  /* Link the transaction into the CSMA transaction list */
+
+  sq_addlast((FAR sq_entry_t *)&trans, &priv->csma_queue);
+
+  /* We no longer need to have the MAC layer locked. */
+
+  mac802154_givesem(&priv->exclsem);
+
+  /* TODO: Need to setup a timeout here so that we can return an error to the
+   * user if the device never receives a response.
+   */
+
+  /* Notify the radio driver that there is data available */
+
+  priv->radio->ops->txnotify_csma(priv->radio);
+
+  /* Wait for the transaction to be passed to the radio layer */
+
+  ret = sem_wait(&priv->cmd.trans.sem);
+  if (ret < 0)
+    {
+      return -EINTR;
     }
 
-  return -ENOTTY;
+  return OK;
+
+errout:
+  mac802154_givesem(&priv->exclsem);
+  return ret;
 }
 
 /****************************************************************************
@@ -1572,7 +1905,7 @@ int mac802154_req_associate(MACHANDLE mac,
  *   notify the coordinator of its intent to leave the PAN. It is also used by
  *   the coordinator to instruct an associated device to leave the PAN.
  *   Confirmation is returned via the
- *   struct ieee802154_maccb_s->conf_disassociate callback.
+ *   struct mac802154_maccb_s->conf_disassociate callback.
  *
  ****************************************************************************/
 
@@ -1584,7 +1917,6 @@ int mac802154_req_disassociate(MACHANDLE mac,
   return -ENOTTY;
 }
 
-
 /****************************************************************************
  * Name: mac802154_req_gts
  *
@@ -1592,7 +1924,7 @@ int mac802154_req_disassociate(MACHANDLE mac,
  *   The MLME-GTS.request primitive allows a device to send a request to the PAN
  *   coordinator to allocate a new GTS or to deallocate an existing GTS.
  *   Confirmation is returned via the
- *   struct ieee802154_maccb_s->conf_gts callback.
+ *   struct mac802154_maccb_s->conf_gts callback.
  *
  ****************************************************************************/
 
@@ -1636,7 +1968,7 @@ int mac802154_req_reset(MACHANDLE mac, bool rst_pibattr)
  *   The MLME-RX-ENABLE.request primitive allows the next higher layer to
  *   request that the receiver is enable for a finite period of time.
  *   Confirmation is returned via the
- *   struct ieee802154_maccb_s->conf_rxenable callback.
+ *   struct mac802154_maccb_s->conf_rxenable callback.
  *
  ****************************************************************************/
 
@@ -1657,7 +1989,7 @@ int mac802154_req_rxenable(MACHANDLE mac,
  *   energy on the channel, search for the coordinator with which it associated,
  *   or search for all coordinators transmitting beacon frames within the POS of
  *   the scanning device. Scan results are returned
- *   via MULTIPLE calls to the struct ieee802154_maccb_s->conf_scan callback.
+ *   via MULTIPLE calls to the struct mac802154_maccb_s->conf_scan callback.
  *   This is a difference with the official 802.15.4 specification, implemented
  *   here to save memory.
  *
@@ -1750,7 +2082,7 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
  * Description:
  *   The MLME-START.request primitive makes a request for the device to start
  *   using a new superframe configuration. Confirmation is returned
- *   via the struct ieee802154_maccb_s->conf_start callback.
+ *   via the struct mac802154_maccb_s->conf_start callback.
  *
  ****************************************************************************/
 
@@ -1842,6 +2174,8 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
       return -ENOTTY;  
     }
 
+  mac802154_givesem(&priv->exclsem);
+
   return OK;
 
 errout:
@@ -1856,7 +2190,7 @@ errout:
  *   The MLME-SYNC.request primitive requests to synchronize with the
  *   coordinator by acquiring and, if specified, tracking its beacons.
  *   Confirmation is returned via the
- *   struct ieee802154_maccb_s->int_commstatus callback. TOCHECK.
+ *   struct mac802154_maccb_s->int_commstatus callback. TOCHECK.
  *
  ****************************************************************************/
 
@@ -1873,8 +2207,8 @@ int mac802154_req_sync(MACHANDLE mac, FAR struct ieee802154_sync_req_s *req)
  * Description:
  *   The MLME-POLL.request primitive prompts the device to request data from
  *   the coordinator. Confirmation is returned via the
- *   struct ieee802154_maccb_s->conf_poll callback, followed by a
- *   struct ieee802154_maccb_s->ind_data callback.
+ *   struct mac802154_maccb_s->conf_poll callback, followed by a
+ *   struct mac802154_maccb_s->ind_data callback.
  *
  ****************************************************************************/
 
@@ -1919,3 +2253,42 @@ int mac802154_resp_orphan(MACHANDLE mac,
   return -ENOTTY;
 }
 
+/****************************************************************************
+ * Name: mac802154_notif_free
+ *
+ * Description:
+ *   When the MAC calls the registered callback, it passes a reference
+ *   to a mac802154_notify_s structure.  This structure needs to be freed
+ *   after the callback handler is done using it.
+ *
+ ****************************************************************************/
+
+int mac802154_notif_free(MACHANDLE mac,
+                         FAR struct ieee802154_notif_s *notif)
+{
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
+
+  /* Get exclusive access to the MAC */
+  
+  while(mac802154_takesem(&priv->exclsem) < 0);
+  
+  notif->flink = priv->notif_free;
+  priv->notif_free = notif;
+
+  mac802154_givesem(&priv->exclsem);
+
+  if (priv->csma_tryagain)
+    {
+      priv->csma_tryagain = false;
+      priv->radio->ops->txnotify_csma(priv->radio);
+    }
+
+  if (priv->gts_tryagain)
+    {
+      priv->gts_tryagain = false;
+      priv->radio->ops->txnotify_gts(priv->radio);
+    }
+
+  return -ENOTTY;
+}

@@ -58,15 +58,35 @@
  * Public Types
  ****************************************************************************/
 
+/* Data only used between radio and MAC layer */
+
+struct ieee802154_txdesc_s
+{
+  /* Support a singly linked list of tx descriptors */
+
+  FAR struct ieee802154_txdesc_s *flink;
+
+  /* Pointer to the data confirmation structure to be populated upon
+   * success/failure of the transmission.
+   */
+
+  FAR struct ieee802154_data_conf_s *conf;
+
+  enum ieee802154_frametype_e frametype; /* Frame type.  Used by MAC layer to
+                                          * control how tx done is handled */
+
+  /* TODO: Add slotting information for GTS transactions */
+};
+
 /* IEEE802.15.4 Radio Interface Operations **********************************/
 
 struct ieee802154_radiocb_s
 {
   CODE int (*poll_csma) (FAR const struct ieee802154_radiocb_s *radiocb,
-             FAR struct ieee802154_txdesc_s *tx_desc,
+             FAR struct ieee802154_txdesc_s **tx_desc,
              FAR struct iob_s **frame);
   CODE int (*poll_gts) (FAR const struct ieee802154_radiocb_s *radiocb,
-             FAR struct ieee802154_txdesc_s *tx_desc,
+             FAR struct ieee802154_txdesc_s **tx_desc,
              FAR struct iob_s **frame);
   CODE void (*txdone) (FAR const struct ieee802154_radiocb_s *radiocb,
              FAR const struct ieee802154_txdesc_s *tx_desc);

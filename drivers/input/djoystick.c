@@ -201,7 +201,7 @@ static inline int djoy_takesem(sem_t *sem)
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
 static void djoy_enable(FAR struct djoy_upperhalf_s *priv)
 {
-  FAR const struct djoy_lowerhalf_s *lower = priv->du_lower;
+  FAR const struct djoy_lowerhalf_s *lower;
   FAR struct djoy_open_s *opriv;
   djoy_buttonset_t press;
   djoy_buttonset_t release;
@@ -210,8 +210,9 @@ static void djoy_enable(FAR struct djoy_upperhalf_s *priv)
   int i;
 #endif
 
-  DEBUGASSERT(priv && priv->du_lower);
+  DEBUGASSERT(priv);
   lower = priv->du_lower;
+  DEBUGASSERT(lower);
 
   /* This routine is called both task level and interrupt level, so
    * interrupts must be disabled.
@@ -295,7 +296,7 @@ static void djoy_interrupt(FAR const struct djoy_lowerhalf_s *lower,
 
 static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
 {
-  FAR const struct djoy_lowerhalf_s *lower = priv->du_lower;
+  FAR const struct djoy_lowerhalf_s *lower;
   FAR struct djoy_open_s *opriv;
   djoy_buttonset_t sample;
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
@@ -308,8 +309,9 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
   int i;
 #endif
 
-  DEBUGASSERT(priv && priv->du_lower);
+  DEBUGASSERT(priv);
   lower = priv->du_lower;
+  DEBUGASSERT(lower);
 
   /* This routine is called both task level and interrupt level, so
    * interrupts must be disabled.

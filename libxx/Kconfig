@@ -22,14 +22,6 @@ config HAVE_CXX
 
 if HAVE_CXX
 
-config HAVE_CXXINITIALIZE
-	bool "Have C++ initialization"
-	default n
-	---help---
-		The platform-specific logic includes support for initialization
-		of static C++ instances for this architecture and for the selected
-		toolchain (via up_cxxinitialize()).
-
 config CXX_NEWLONG
 	bool "size_t is type long"
 	default n

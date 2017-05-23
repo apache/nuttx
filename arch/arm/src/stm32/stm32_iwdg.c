@@ -271,10 +271,6 @@ static void stm32_putreg(uint16_t val, uint32_t addr)
  * Input Parameters:
  *   priv   - A pointer the internal representation of the "lower-half"
  *             driver state structure.
- *   timeout - The new timeout value in milliseconds.
- *
- * Returned Values:
- *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 

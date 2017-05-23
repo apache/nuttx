@@ -176,10 +176,10 @@ static int fusb301_getreg(FAR struct fusb301_dev_s *priv, uint8_t reg)
               break;
             }
 
-          ret = up_i2creset(priv->i2c);
+          ret = I2C_RESET(priv->i2c);
           if (ret < 0)
             {
-              fusb301_err("ERROR: up_i2creset failed: %d\n", ret);
+              fusb301_err("ERROR: I2C_RESET failed: %d\n", ret);
               return ret;
             }
 #endif
@@ -246,10 +246,10 @@ static int fusb301_putreg(FAR struct fusb301_dev_s *priv, uint8_t regaddr,
               break;
             }
 
-          ret = up_i2creset(priv->i2c);
+          ret = I2C_RESET(priv->i2c);
           if (ret < 0)
             {
-              fusb301_err("ERROR: up_i2creset failed: %d\n", ret);
+              fusb301_err("ERROR: I2C_RESET failed: %d\n", ret);
               return ret;
             }
 #endif

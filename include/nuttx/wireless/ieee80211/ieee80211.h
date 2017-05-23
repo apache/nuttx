@@ -504,7 +504,7 @@ begin_packed_struct struct ieee80211_qosframe
   uint8_t i_addr3[IEEE80211_ADDR_LEN];
   uint8_t i_seq[2];
   uint8_t i_qos[2];
-} end_packet_struct;
+} end_packed_struct;
 
 begin_packed_struct struct ieee80211_htframe  /* 11n */
 {
@@ -516,7 +516,7 @@ begin_packed_struct struct ieee80211_htframe  /* 11n */
   uint8_t i_seq[2];
   uint8_t i_qos[2];
   uint8_t i_ht[4];
-} end_packet_struct;
+} end_packed_struct;
 
 begin_packed_struct struct ieee80211_frame_addr4
 {
@@ -527,7 +527,7 @@ begin_packed_struct struct ieee80211_frame_addr4
   uint8_t i_addr3[IEEE80211_ADDR_LEN];
   uint8_t i_seq[2];
   uint8_t i_addr4[IEEE80211_ADDR_LEN];
-} end_packet_struct;
+} end_packed_struct;
 
 begin_packed_struct struct ieee80211_qosframe_addr4
 {
@@ -539,7 +539,7 @@ begin_packed_struct struct ieee80211_qosframe_addr4
   uint8_t i_seq[2];
   uint8_t i_addr4[IEEE80211_ADDR_LEN];
   uint8_t i_qos[2];
-} end_packet_struct;
+} end_packed_struct;
 
 begin_packed_struct struct ieee80211_htframe_addr4  /* 11n */
 {
@@ -552,7 +552,7 @@ begin_packed_struct struct ieee80211_htframe_addr4  /* 11n */
   uint8_t i_addr4[IEEE80211_ADDR_LEN];
   uint8_t i_qos[2];
   uint8_t i_ht[4];
-} end_packet_struct;
+} end_packed_struct;
 
 /* Control frames. */
 
@@ -565,7 +565,7 @@ begin_packed_struct struct ieee80211_frame_min
 
     /* FCS */
 
-} end_packet_struct;
+} end_packed_struct;
 
 begin_packed_struct struct ieee80211_frame_rts
 {
@@ -576,7 +576,7 @@ begin_packed_struct struct ieee80211_frame_rts
 
     /* FCS */
 
-} end_packet_struct;
+} end_packed_struct;
 
 struct ieee80211_frame_cts
 {
@@ -586,7 +586,7 @@ struct ieee80211_frame_cts
 
     /* FCS */
 
-} end_packet_struct;
+} end_packed_struct;
 
 struct ieee80211_frame_ack
 {
@@ -596,7 +596,7 @@ struct ieee80211_frame_ack
 
     /* FCS */
 
-} end_packet_struct;
+} end_packed_struct;
 
 struct ieee80211_frame_pspoll
 {
@@ -607,7 +607,7 @@ struct ieee80211_frame_pspoll
 
     /* FCS */
 
-} end_packet_struct;
+} end_packed_struct;
 
 struct ieee80211_frame_cfend
 {                             /* NB: also CF-End+CF-Ack */
@@ -618,7 +618,7 @@ struct ieee80211_frame_cfend
 
   /* FCS */
 
-} end_packet_struct;
+} end_packed_struct;
 
 /* Information elements (see Table 7-26). */
 
@@ -818,7 +818,7 @@ struct ieee80211_eapol_key
   uint8_t reserved[8];
   uint8_t mic[EAPOL_KEY_MIC_LEN];
   uint8_t paylen[2];
-} end_packet_struct;
+} end_packed_struct;
 
 /* Pairwise Transient Key (see 8.5.1.2) */
 
@@ -827,7 +827,7 @@ struct ieee80211_ptk
   uint8_t kck[16];            /* Key Confirmation Key */
   uint8_t kek[16];            /* Key Encryption Key */
   uint8_t tk[32];             /* Temporal Key */
-} end_packet_struct;
+} end_packed_struct;
 
 /* Key Data Encapsulation (see Table 62) */
 

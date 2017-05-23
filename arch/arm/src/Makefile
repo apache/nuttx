@@ -172,10 +172,10 @@ VPATH += chip
 VPATH += common
 VPATH += $(ARCH_SUBDIR)
 
-ifeq ($(CONFIG_ARM_TOOLCHAIN_IAR),y)
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_IAR),y)
   VPATH += chip$(DELIM)iar
   VPATH += $(ARCH_SUBDIR)$(DELIM)iar
-else # ifeq ($(CONFIG_ARM_TOOLCHAIN_GNU),y)
+else # ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
   VPATH += chip$(DELIM)gnu
   VPATH += $(ARCH_SUBDIR)$(DELIM)gnu
 endif

@@ -456,15 +456,6 @@ config ARCH_CHIP
 	default "tms570"	if ARCH_CHIP_TMS570
 	default "xmc4"		if ARCH_CHIP_XMC4
 
-config ARM_TOOLCHAIN_IAR
-	bool
-	default n
-
-config ARM_TOOLCHAIN_GNU
-	bool
-	default n
-	select ARCH_TOOLCHAIN_GNU
-
 config ARMV7M_USEBASEPRI
 	bool "Use BASEPRI Register"
 	default n

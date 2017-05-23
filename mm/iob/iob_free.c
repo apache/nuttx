@@ -74,7 +74,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
    * the next entry.
    */
 
-  if (next)
+  if (next != NULL)
     {
       /* Copy and decrement the total packet length, being careful to
        * do nothing too crazy.
@@ -101,16 +101,36 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
               next, next->io_pktlen, next->io_len);
     }
 
-  /* Free the I/O buffer by adding it to the head of the free list. We don't
-   * know what context we are called from so we use extreme measures to
-   * protect the free list:  We disable interrupts very briefly.
+  /* Free the I/O buffer by adding it to the head of the free or the
+   * committed list. We don't know what context we are called from so
+   * we use extreme measures to protect the free list:  We disable
+   * interrupts very briefly.
    */
 
   flags = enter_critical_section();
-  iob->io_flink = g_iob_freelist;
-  g_iob_freelist = iob;
 
-  /* Signal that an IOB is available */
+  /* Which list?  If there is a task waiting for an IOB, then put
+   * the IOB on either the free list or on the committed list where
+   * it is reserved for that allocation (and not available to
+   * iob_tryalloc()).
+   */
+
+  if (g_iob_sem.semcount < 0)
+    {
+      iob->io_flink   = g_iob_committed;
+      g_iob_committed = iob;
+    }
+  else
+    {
+      iob->io_flink   = g_iob_freelist;
+      g_iob_freelist  = iob;
+    }
+
+  /* Signal that an IOB is available.  If there is a thread waiting
+   * for an IOB, this will wake up exactly one thread.  The semaphore
+   * count will correctly indicated that the awakened task owns an
+   * IOB and should find it in the committed list.
+   */
 
   sem_post(&g_iob_sem);
 #if CONFIG_IOB_THROTTLE > 0

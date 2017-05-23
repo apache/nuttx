@@ -240,12 +240,15 @@ static ssize_t wdog_write(FAR struct file *filep, FAR const char *buffer, size_t
 static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode                *inode = filep->f_inode;
-  FAR struct watchdog_upperhalf_s *upper = inode->i_private;
-  FAR struct watchdog_lowerhalf_s *lower = upper->lower;
+  FAR struct watchdog_upperhalf_s *upper;
+  FAR struct watchdog_lowerhalf_s *lower;
   int                              ret;
 
   wdinfo("cmd: %d arg: %ld\n", cmd, arg);
-  DEBUGASSERT(upper && lower);
+  upper = inode->i_private;
+  DEBUGASSERT(upper != NULL);
+  lower = upper->lower;
+  DEBUGASSERT(lower != NULL);
 
   /* Get exclusive access to the device structures */
 
@@ -533,8 +536,9 @@ void watchdog_unregister(FAR void *handle)
   /* Recover the pointer to the upper-half driver state */
 
   upper = (FAR struct watchdog_upperhalf_s *)handle;
+  DEBUGASSERT(upper != NULL);
   lower = upper->lower;
-  DEBUGASSERT(upper && lower);
+  DEBUGASSERT(lower != NULL);
 
   wdinfo("Unregistering: %s\n", upper->path);
 

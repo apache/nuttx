@@ -51,7 +51,6 @@ config IOB_THROTTLE
 	int "I/O buffer throttle value"
 	default 0 if !NET_TCP_WRITE_BUFFERS || !NET_TCP_READAHEAD
 	default 8 if NET_TCP_WRITE_BUFFERS && NET_TCP_READAHEAD
-	depends on NET_TCP_WRITE_BUFFERS && NET_TCP_READAHEAD
 	---help---
 		TCP write buffering and read-ahead buffer use the same pool of free
 		I/O buffers.  In order to prevent uncontrolled incoming TCP packets
@@ -63,12 +62,15 @@ config IOB_THROTTLE
 config IOB_DEBUG
 	bool "Force I/O buffer debug"
 	default n
-	depends on DEBUG_FEATURES
+	depends on DEBUG_FEATURES && !SYSLOG_BUFFER
 	---help---
 		This option will force debug output from I/O buffer logic.  This
 		is not normally something that would want to do but is convenient
 		if you are debugging the I/O buffer logic and do not want to get
 		overloaded with other un-related debug output.
+
+		NOTE that this selection is not available if IOBs are being used
+		to syslog buffering logic (CONFIG_SYSLOG_BUFFER=y)!
 
 endif # MM_IOB
 endmenu # Common I/O buffer support

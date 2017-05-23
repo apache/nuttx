@@ -506,9 +506,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           dev = netdev_ifr_dev(req);
           if (dev)
             {
-              netdev_ifdown(dev);
               ioctl_set_ipv4addr(&dev->d_ipaddr, &req->ifr_addr);
-              netdev_ifup(dev);
               ret = OK;
             }
         }
@@ -599,9 +597,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
             {
               FAR struct lifreq *lreq = (FAR struct lifreq *)req;
 
-              netdev_ifdown(dev);
               ioctl_set_ipv6addr(dev->d_ipv6addr, &lreq->lifr_addr);
-              netdev_ifup(dev);
               ret = OK;
             }
         }
@@ -830,7 +826,6 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           dev = netdev_ifr_dev(req);
           if (dev)
             {
-              netdev_ifdown(dev);
 #ifdef CONFIG_NET_IPv4
               dev->d_ipaddr = 0;
 #endif

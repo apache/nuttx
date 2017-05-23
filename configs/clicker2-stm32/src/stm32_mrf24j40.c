@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/freedom-kl25z/src/stm32_mrf24j40.c
+ * configs/clicker2-stm32/src/stm32_mrf24j40.c
  *
  *   Copyright (C) 2017 Gregory Nutt, All rights reserver
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -220,9 +220,7 @@ static void stm32_enable_irq(FAR const struct mrf24j40_lower_s *lower,
 static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
 {
   FAR struct ieee802154_radio_s *radio;
-#ifdef CONFIG_IEEE802154_MAC
   MACHANDLE mac;
-#endif
   FAR struct spi_dev_s *spi;
   int ret;
 
@@ -248,7 +246,6 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
       return -ENODEV;
     }
 
-#if defined(CONFIG_IEEE802154_MAC)
   /* Create a 802.15.4 MAC device from a 802.15.4 compatible radio device. */
 
   mac = mac802154_create(radio);
@@ -284,8 +281,6 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
       return ret;
     }
 #endif
-
-#endif /* CONFIG_IEEE802154_MAC */
 
   return OK;
 }

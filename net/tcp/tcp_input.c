@@ -179,28 +179,35 @@ static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
           conn = tcp_alloc_accept(dev, tcp);
           if (conn)
             {
-              /* The connection structure was successfully allocated.  Now see if
-               * there is an application waiting to accept the connection (or at
-               * least queue it it for acceptance).
+              /* The connection structure was successfully allocated and has
+               * been initialized in the TCP_SYN_RECVD state.  The expected
+               * sequence of events is then the rest of the 3-way handshake:
+               *
+               *  1. We just received a TCP SYN packet from a remote host.
+               *  2. We will send the SYN-ACK response below (perhaps
+               *     repeatedly in the event of a timeout)
+               *  3. Then we expect to receive an ACK from the remote host
+               *     indicated the TCP socket connection is ESTABLISHED.
+               *
+               * Possible failure:
+               *
+               *  1. The ACK is never received.  This will be handled by
+               *     a timeout managed by tcp_timer().
+               *  2. The listener "unlistens()".  This will be handled by
+               *     the failure of tcp_accept_connection() when the ACK is
+               *     received.
                */
 
               conn->crefs = 1;
-              if (tcp_accept_connection(dev, conn, tmp16) != OK)
-                {
-                  /* No, then we have to give the connection back and drop the packet */
-
-                  conn->crefs = 0;
-                  tcp_free(conn);
-                  conn = NULL;
-                }
             }
 
           if (!conn)
             {
-              /* Either (1) all available connections are in use, or (2) there is no
-               * application in place to accept the connection.  We drop packet and hope that
-               * the remote end will retransmit the packet at a time when we
-               * have more spare connections or someone waiting to accept the connection.
+              /* Either (1) all available connections are in use, or (2)
+               * there is no application in place to accept the connection.
+               * We drop packet and hope that the remote end will retransmit
+               * the packet at a time when we have more spare connections
+               * or someone waiting to accept the connection.
                */
 
 #ifdef CONFIG_NET_STATISTICS
@@ -307,10 +314,44 @@ found:
 
   if ((tcp->flags & TCP_RST) != 0)
     {
-      conn->tcpstateflags = TCP_CLOSED;
-      nwarn("WARNING: RESET - TCP state: TCP_CLOSED\n");
+      FAR struct tcp_conn_s *listener = NULL;
 
-      (void)tcp_callback(dev, conn, TCP_ABORT);
+      /* An RST received during the 3-way connection handshake requires
+       * little more clean-up.
+       */
+
+      if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_RCVD)
+        {
+          conn->tcpstateflags = TCP_CLOSED;
+          nwarn("WARNING: RESET in TCP_SYN_RCVD\n");
+
+          /* Notify the listener for the connection of the reset event */
+
+          listener = tcp_findlistener(conn->lport);
+
+          /* We must free this TCP connection structure; this connection
+           * will never be established.
+           */
+
+          tcp_free(conn);
+        }
+      else
+        {
+          conn->tcpstateflags = TCP_CLOSED;
+          nwarn("WARNING: RESET TCP state: TCP_CLOSED\n");
+
+          /* Notify this connection of the reset event */
+
+          listener = conn;
+        }
+
+      /* Perform the TCP_ABORT callback and drop the packet */
+
+      if (listener != NULL)
+        {
+          (void)tcp_callback(dev, listener, TCP_ABORT);
+        }
+
       goto drop;
     }
 
@@ -462,7 +503,34 @@ found:
 
         if ((flags & TCP_ACKDATA) != 0)
           {
+            /* The three way handshake is complete and the TCP connection
+             * is now in the ESTABLISHED state.
+             */
+
             conn->tcpstateflags = TCP_ESTABLISHED;
+
+            /* Wake up any listener waiting for a connection on this port */
+
+            if (tcp_accept_connection(dev, conn, tcp->destport) != OK)
+              {
+                /* No more listener for current port.  We can free conn here
+                 * because it has not been shared with upper layers yet as
+                 * handshake is not complete
+                 */
+
+                nerr("Listen canceled while waiting for ACK on port %d\n",
+                     tcp->destport);
+
+                /* Free the connection structure */
+
+                conn->crefs = 0;
+                tcp_free(conn);
+                conn = NULL;
+
+                /* And send a reset packet to the remote host. */
+
+                goto reset;
+              }
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
             conn->isn           = tcp_getsequence(tcp->ackno);

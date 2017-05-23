@@ -82,7 +82,7 @@ void net_ipv6_pref2mask(uint8_t preflen, net_ipv6addr_t mask)
    *              1..6 7..2 3..8 9..4  5..0 1..6 7..2 3..8
    */
 
-  for (i = 0; i < 7; i++)
+  for (i = 0; i < 8; i++)
     {
       /* bit = {0, 16, 32, 48, 64, 80, 96, 112} */
 
@@ -92,7 +92,7 @@ void net_ipv6_pref2mask(uint8_t preflen, net_ipv6addr_t mask)
         {
           /* Eg. preflen = 38, bit = {0, 16, 32} */
 
-          if (preflen > (bit + 16))
+          if (preflen >= (bit + 16))
             {
               /* Eg. preflen = 38, bit = {0, 16} */
 
@@ -102,7 +102,7 @@ void net_ipv6_pref2mask(uint8_t preflen, net_ipv6addr_t mask)
             {
               /* Eg. preflen = 38, bit = {32}
                *     bit - preflen = 6
-               *     make = 0xffff << (16-6)
+               *     mask = 0xffff << (16-6)
                *          = 0xfc00
                */
 
@@ -111,7 +111,7 @@ void net_ipv6_pref2mask(uint8_t preflen, net_ipv6addr_t mask)
         }
       else
         {
-          /* Eg. preflen=38, bit= {48, 64, 80, 112} */
+          /* Eg. preflen=38, bit= {48, 64, 80, 96, 112} */
 
           mask[i] = 0x0000;
         }

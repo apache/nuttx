@@ -131,9 +131,11 @@ static int            lis2dh_get_reading(FAR struct lis2dh_dev_s *dev,
                         FAR struct lis2dh_vector_s *res, bool force_read);
 static int            lis2dh_powerdown(FAR struct lis2dh_dev_s *dev);
 static int            lis2dh_reboot(FAR struct lis2dh_dev_s *dev);
+#ifndef CONFIG_DISABLE_POLL
 static int            lis2dh_poll(FAR struct file *filep,
                         FAR struct pollfd *fds, bool setup);
 static void           lis2dh_notify(FAR struct lis2dh_dev_s *priv);
+#endif
 static int            lis2dh_int_handler(int irq, FAR void *context,
                         FAR void *arg);
 static int            lis2dh_setup(FAR struct lis2dh_dev_s *dev,
@@ -1614,10 +1616,10 @@ static int lis2dh_access(FAR struct lis2dh_dev_s *dev, uint8_t subaddr,
         {
           /* Some error. Try to reset I2C bus and keep trying. */
 #ifdef CONFIG_I2C_RESET
-          int ret = up_i2creset(dev->i2c);
+          int ret = I2C_RESET(dev->i2c);
           if (ret < 0)
             {
-              lis2dh_dbg("up_i2creset failed: %d\n", ret);
+              lis2dh_dbg("I2C_RESET failed: %d\n", ret);
               return ret;
             }
 #endif

@@ -106,6 +106,10 @@ typedef struct wl_bss_info
   /* variable length Information Elements */
 } wl_bss_info_t;
 
+#define DOT11_CAP_ESS     0x0001
+#define DOT11_CAP_IBSS    0x0002
+#define DOT11_CAP_PRIVACY 0x0010
+
 typedef struct wlc_ssid
 {
   uint32_t SSID_len;
