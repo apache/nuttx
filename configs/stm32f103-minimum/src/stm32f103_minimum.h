@@ -195,6 +195,18 @@ int stm32_rgbled_setup(void);
 #endif
 
 /************************************************************************************
+ * Name: stm32_mcp2515initialize
+ *
+ * Description:
+ *   Initialize and register the MCP2515 CAN driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_CAN_MCP2515
+int stm32_mcp2515initialize(FAR const char *devpath);
+#endif
+
+/************************************************************************************
  * Name: stm32_usbinitialize
  *
  * Description:

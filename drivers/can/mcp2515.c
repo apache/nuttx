@@ -1298,6 +1298,7 @@ static void mcp2515_rxint(FAR struct can_dev_s *dev, bool enable)
   DEBUGASSERT(config);
 
   caninfo("CAN%d enable: %d\n", config->devid, enable);
+  UNUSED(config);
 
   /* Enable/disable the receive interrupts */
 
@@ -1670,6 +1671,7 @@ static int mcp2515_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   caninfo("CAN%d\n", config->devid);
   caninfo("CAN%d ID: %d DLC: %d\n",
           config->devid, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
+  UNUSED(config);
 
   /* That that FIFO elements were configured.
    *
@@ -2241,7 +2243,8 @@ static int mcp2515_interrupt(FAR struct mcp2515_config_s *config, FAR void *arg)
         {
           /* Clear interrupt errors */
 
-          mcp2515_modifyreg(priv, MCP2515_CANINTF, MCP2515_ERROR_INTS, ~MCP2515_ERROR_INTS);
+          mcp2515_modifyreg(priv, MCP2515_CANINTF, MCP2515_ERROR_INTS,
+                            (uint8_t)~MCP2515_ERROR_INTS);
 
 #ifdef CONFIG_CAN_ERRORS
           /* Report errors */
@@ -2378,6 +2381,7 @@ static int mcp2515_hw_initialize(struct mcp2515_can_s *priv)
   uint8_t regval;
 
   caninfo("CAN%d\n", config->devid);
+  UNUSED(config);
 
   /* Setup CNF1 register */
 
