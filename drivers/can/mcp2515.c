@@ -225,9 +225,9 @@ struct mcp2515_can_s
 /* MCP2515 Register access */
 
 static void mcp2515_readregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
-              uint8_t *buffer, uint8_t len);
+              FAR uint8_t *buffer, uint8_t len);
 static void mcp2515_writeregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
-              uint8_t *buffer, uint8_t len);
+              FAR const uint8_t *buffer, uint8_t len);
 static void mcp2515_modifyreg(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
               uint8_t mask, uint8_t value);
 #ifdef CONFIG_MCP2515_REGDEBUG
@@ -273,7 +273,8 @@ static void mcp2515_error(FAR struct can_dev_s *dev, uint8_t status,
               uint8_t oldstatus);
 #endif
 static void mcp2515_receive(FAR struct can_dev_s *dev, uint8_t offset);
-static int  mcp2515_interrupt(FAR struct mcp2515_config_s *config, FAR void *arg);
+static int  mcp2515_interrupt(FAR struct mcp2515_config_s *config,
+             FAR void *arg);
 
 /* Hardware initialization */
 
@@ -285,16 +286,16 @@ static int  mcp2515_hw_initialize(FAR struct mcp2515_can_s *priv);
 
 static const struct can_ops_s g_mcp2515ops =
 {
-  .co_reset         = mcp2515_reset,
-  .co_setup         = mcp2515_setup,
-  .co_shutdown      = mcp2515_shutdown,
-  .co_rxint         = mcp2515_rxint,
-  .co_txint         = mcp2515_txint,
-  .co_ioctl         = mcp2515_ioctl,
-  .co_remoterequest = mcp2515_remoterequest,
-  .co_send          = mcp2515_send,
-  .co_txready       = mcp2515_txready,
-  .co_txempty       = mcp2515_txempty,
+  mcp2515_reset,         /* co_reset */
+  mcp2515_setup,         /* co_setup */
+  mcp2515_shutdown,      /* co_shutdown */
+  mcp2515_rxint,         /* co_rxint */
+  mcp2515_txint,         /* co_txint */
+  mcp2515_ioctl,         /* co_ioctl */
+  mcp2515_remoterequest, /* co_remoterequest */
+  mcp2515_send,          /* co_send */
+  mcp2515_txready,       /* co_txready */
+  mcp2515_txempty,       /* co_txempty */
 };
 
 /****************************************************************************
@@ -316,7 +317,7 @@ static const struct can_ops_s g_mcp2515ops =
  ****************************************************************************/
 
 static void mcp2515_readregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
-       uint8_t *buffer, uint8_t len)
+                             FAR uint8_t *buffer, uint8_t len)
 {
   FAR struct mcp2515_config_s *config = priv->config;
 #ifdef CONFIG_CANBUS_REGDEBUG
@@ -371,7 +372,7 @@ static void mcp2515_readregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
  ****************************************************************************/
 
 static void mcp2515_writeregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
-                              uint8_t *buffer, uint8_t len)
+                              FAR const uint8_t *buffer, uint8_t len)
 {
   FAR struct mcp2515_config_s *config = priv->config;
 #ifdef CONFIG_CANBUS_REGDEBUG
@@ -405,7 +406,6 @@ static void mcp2515_writeregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
   /* Unlock bus */
   
   (void)SPI_LOCK(config->spi, false);
-
 }
 
 /****************************************************************************
@@ -425,7 +425,7 @@ static void mcp2515_writeregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
  ****************************************************************************/
 
 static void mcp2515_modifyreg(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
-              uint8_t mask, uint8_t value)
+                              uint8_t mask, uint8_t value)
 {
   FAR struct mcp2515_config_s *config = priv->config;
 
@@ -458,7 +458,6 @@ static void mcp2515_modifyreg(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
   /* Unlock bus */
   
   (void)SPI_LOCK(config->spi, false);
-
 }
 
 /****************************************************************************
@@ -1187,7 +1186,6 @@ static void mcp2515_reset(FAR struct can_dev_s *dev)
   /* Execute the reset */
 
   mcp2515_reset_lowlevel(priv);
-
 }
 
 /****************************************************************************
@@ -2351,6 +2349,7 @@ static int mcp2515_interrupt(FAR struct mcp2515_config_s *config, FAR void *arg)
             }
 
           /* Acknowledge reading the FIFO entry */
+
           handled = true;
         }
     }

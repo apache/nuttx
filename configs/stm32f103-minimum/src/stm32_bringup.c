@@ -152,6 +152,8 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_CAN_MCP2515
+  /* Configure and initialize the MCP2515 CAN device */
+
   ret = stm32_mcp2515initialize("/dev/can0");
   if (ret < 0)
     {

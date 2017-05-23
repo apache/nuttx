@@ -127,49 +127,48 @@ config CAN_NPOLLWAITERS
 comment "CAN Bus Controllers:"
 
 config CAN_MCP2515
-        bool "Microchip MCP2515 CAN Bus Controller over SPI"
-        default n
-        depends on SPI
-        select ARCH_HAVE_CAN_ERRORS
-        ---help---
-                Enable driver support for Microchip MCP2515.
+	bool "Microchip MCP2515 CAN Bus Controller over SPI"
+	default n
+	depends on SPI
+	select ARCH_HAVE_CAN_ERRORS
+	---help---
+		Enable driver support for Microchip MCP2515.
 
 if CAN_MCP2515
 
 config MCP2515_BITRATE
-        int "MCP2515 bitrate"
-        default 500000
-        ---help---
-                MCP2515 bitrate in bits per second.
+	int "MCP2515 bitrate"
+	default 500000
+	---help---
+		MCP2515 bitrate in bits per second.
 
 config MCP2515_PROPSEG
-        int "MCP2515 Propagation Segment TQ"
-        default 2
-        range 1 8
-        ---help---
-                The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+	int "MCP2515 Propagation Segment TQ"
+	default 2
+	range 1 8
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config MCP2515_PHASESEG1
-        int "MCP2515 Phase Segment 1"
-        default 2
-        range 1 8
-        ---help---
-                The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+	int "MCP2515 Phase Segment 1"
+	default 2
+	range 1 8
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config MCP2515_PHASESEG2
-        int "MCP2515 Phase Segment 2"
-        default 3
-        range 2 8
-        ---help---
-                The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+	int "MCP2515 Phase Segment 2"
+	default 3
+	range 2 8
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config MCP2515_SJW
-        int "MCP2515 Synchronization Jump Width"
-        default 1
-        range 1 4
-        ---help---
-                The duration of a synchronization jump is SJW.
+	int "MCP2515 Synchronization Jump Width"
+	default 1
+	range 1 4
+	---help---
+		The duration of a synchronization jump is SJW.
 
 endif # CAN_MCP2515
-
 endif # CAN

@@ -61,15 +61,18 @@
  * Public Types
  ****************************************************************************/
 
-typedef void (*mcp2515_handler_t)(FAR struct mcp2515_config_s *config, FAR void *arg);
+typedef void (*mcp2515_handler_t)(FAR struct mcp2515_config_s *config,
+                                  FAR void *arg);
 
-/* A reference to a structure of this type must be passed to the MCP2515 driver when the
- * driver is instantiated. This structure provides information about the configuration of the
- * MCP2515 and provides some board-specific hooks.
+/* A reference to a structure of this type must be passed to the MCP2515
+ * driver when the driver is instantiated. This structure provides
+ * information about the configuration of the MCP2515 and provides some
+ * board-specific hooks.
  *
- * Memory for this structure is provided by the caller.  It is not copied by the driver
- * and is presumed to persist while the driver is active. The memory must be writeable
- * because, under certain circumstances, the driver may modify the frequency.
+ * Memory for this structure is provided by the caller.  It is not copied by
+ * the driver and is presumed to persist while the driver is active. The
+ * memory must be writeable because, under certain circumstances, the driver
+ * may modify the frequency.
  */
 
 struct mcp2515_config_s
@@ -97,8 +100,8 @@ struct mcp2515_config_s
    * attach  - Attach the ADXL345 interrupt handler to the GPIO interrupt
    */
 
-  int  (*attach)(FAR struct mcp2515_config_s *state, mcp2515_handler_t handler,
-                 FAR void *arg);
+  CODE int (*attach)(FAR struct mcp2515_config_s *state,
+                     mcp2515_handler_t handler, FAR void *arg);
 };
 
 

@@ -1,7 +1,7 @@
-/************************************************************************************
+/****************************************************************************
  * configs/stm32f4discovery/src/stm32_mcp2515.c
  *
- *   Copyright (C) 2015 Alan Carvalho de Assis. All rights reserved.
+ *   Copyright (C) 2017 Alan Carvalho de Assis. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,11 +49,12 @@
 #include "stm32_spi.h"
 #include "stm32f103_minimum.h"
 
-#if defined(CONFIG_SPI) && defined(CONFIG_STM32_SPI1) && defined(CONFIG_CAN_MCP2515)
+#if defined(CONFIG_SPI) && defined(CONFIG_STM32_SPI1) && \
+    defined(CONFIG_CAN_MCP2515)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define MCP2515_SPI_PORTNO 1   /* On SPI1 */
 
@@ -119,15 +120,20 @@ static struct stm32_mcp2515config_s g_mcp2515config =
 
 /* This is the MCP2515 Interupt handler */
 
-int mcp2515_interrupt(int irq, FAR void *context)
+int mcp2515_interrupt(int irq, FAR void *context, FAR void *arg)
 {
+  FAR struct stm32_mcp2515config_s *priv =
+             (FAR struct stm32_mcp2515config_s *)arg;
+
+  DEBUGASSERT(priv != NULL);
+
   /* Verify that we have a handler attached */
 
-  if (g_mcp2515config.handler)
+  if (priv->handler)
     {
       /* Yes.. forward with interrupt along with its argument */
 
-      g_mcp2515config.handler(&g_mcp2515config.config, g_mcp2515config.arg);
+      priv->handler(&priv->config, priv->arg);
     }
 
   return OK;
@@ -137,7 +143,7 @@ static int mcp2515_attach(FAR struct mcp2515_config_s *state,
                            mcp2515_handler_t handler, FAR void *arg)
 {
   FAR struct stm32_mcp2515config_s *priv =
-             (FAR struct stm32_mcp2515config_s *) state;
+             (FAR struct stm32_mcp2515config_s *)state;
   irqstate_t flags;
 
   caninfo("Saving handle %p\n", handler);
@@ -149,7 +155,8 @@ static int mcp2515_attach(FAR struct mcp2515_config_s *state,
 
   /* Configure the interrupt for falling edge*/
 
-  (void)stm32_gpiosetevent(GPIO_MCP2515_IRQ, false, true, false, mcp2515_interrupt, NULL);
+  (void)stm32_gpiosetevent(GPIO_MCP2515_IRQ, false, true, false,
+                           mcp2515_interrupt, priv);
 
   leave_critical_section(flags);
 
