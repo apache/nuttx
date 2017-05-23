@@ -74,6 +74,10 @@ void stm32_spidev_initialize(void)
    *       architecture.
    */
 
+#ifdef CONFIG_CAN_MCP2515
+  (void)stm32_configgpio(GPIO_MCP2515_CS);    /* MCP2515 chip select */
+#endif
+
 #ifdef CONFIG_CL_MFRC522
   (void)stm32_configgpio(GPIO_CS_MFRC522);    /* MFRC522 chip select */
 #endif
@@ -120,6 +124,13 @@ void stm32_spidev_initialize(void)
 void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
+#if defined(CONFIG_CAN_MCP2515)
+  if (devid == SPIDEV_CANBUS(0))
+    {
+      stm32_gpiowrite(GPIO_MCP2515_CS, !selected);
+    }
+#endif
+
 #if defined(CONFIG_CL_MFRC522)
   if (devid == SPIDEV_WIRELESS(0))
     {

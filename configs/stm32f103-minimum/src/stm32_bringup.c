@@ -151,6 +151,13 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_CAN_MCP2515
+  ret = stm32_mcp2515initialize("/dev/can0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_mcp2515initialize() failed: %d\n", ret);
+    }
+#endif
 
 #ifdef CONFIG_CL_MFRC522
   ret = stm32_mfrc522initialize("/dev/rfid0");
