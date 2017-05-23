@@ -1,8 +1,9 @@
 /****************************************************************************
- * arch/arm/src/stm32l4/stm32l4_wdg.h
+ * arch/arm/src/stm32l4/stm32l4_lsi.c
  *
- *   Copyright (C) 2012, 2015, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2012, 2015-2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,87 +34,54 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_WDG_H
-#define __ARCH_ARM_SRC_STM32L4_STM32L4_WDG_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include "chip.h"
-#include "chip/stm32l4_wdg.h"
-
-#ifdef CONFIG_WATCHDOG
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+#include "up_arch.h"
+#include "stm32l4_rcc.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_iwdginitialize
+ * Name: stm32l4_rcc_enablelsi
  *
  * Description:
- *   Initialize the IWDG watchdog time.  The watchdog timer is initialized
- *   and registers as 'devpath.  The initial state of the watchdog time is
- *   disabled.
- *
- * Input Parameters:
- *   devpath - The full path to the watchdog.  This should be of the form
- *     /dev/watchdog0
- *   lsifreq - The calibrated LSI clock frequency
- *
- * Returned Values:
- *   None
+ *   Enable the Internal Low-Speed (LSI) RC Oscillator.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_IWDG
-void stm32l4_iwdginitialize(FAR const char *devpath, uint32_t lsifreq);
-#endif
+void stm32l4_rcc_enablelsi(void)
+{
+  /* Enable the Internal Low-Speed (LSI) RC Oscillator by setting the LSION
+   * bit the RCC CSR register.
+   */
+
+  modifyreg32(STM32L4_RCC_CSR, 0, RCC_CSR_LSION);
+
+  /* Wait for the internal LSI oscillator to be stable. */
+
+  while ((getreg32(STM32L4_RCC_CSR) & RCC_CSR_LSIRDY) == 0);
+}
 
 /****************************************************************************
- * Name: stm32l4_wwdginitialize
+ * Name: stm32l4_rcc_disablelsi
  *
  * Description:
- *   Initialize the WWDG watchdog time.  The watchdog timer is initialized and
- *   registers as 'devpath.  The initial state of the watchdog time is
- *   disabled.
- *
- * Input Parameters:
- *   devpath - The full path to the watchdog.  This should be of the form
- *     /dev/watchdog0
- *
- * Returned Values:
- *   None
+ *   Disable the Internal Low-Speed (LSI) RC Oscillator.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_WWDG
-void stm32l4_wwdginitialize(FAR const char *devpath);
-#endif
+void stm32l4_rcc_disablelsi(void)
+{
+  /* Enable the Internal Low-Speed (LSI) RC Oscillator by setting the LSION
+   * bit the RCC CSR register.
+   */
 
-#undef EXTERN
-#if defined(__cplusplus)
+  modifyreg32(STM32L4_RCC_CSR, RCC_CSR_LSION, 0);
+
+  /* LSIRDY should go low after 3 LSI clock cycles */
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* CONFIG_WATCHDOG */
-#endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_WDG_H */
