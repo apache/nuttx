@@ -457,6 +457,7 @@
 #define SPIDEV_IEEE802154(n)    SPIDEV_ID(SPIDEVTYPE_IEEE802154,    (n))
 #define SPIDEV_CONTACTLESS(n)   SPIDEV_ID(SPIDEVTYPE_CONTACTLESS,   (n))
 #define SPIDEV_USER(n)          SPIDEV_ID(SPIDEVTYPE_USER,          (n))
+#define SPIDEV_CANBUS(n)        SPIDEV_ID(SPIDEVTYPE_CANBUS,        (n))
 
 /****************************************************************************
  * Public Types
@@ -491,7 +492,8 @@ enum spi_devtype_e
   SPIDEVTYPE_TEMPERATURE,   /* Select SPI Temperature sensor device */
   SPIDEVTYPE_IEEE802154,    /* Select SPI IEEE 802.15.4 wireless device */
   SPIDEVTYPE_CONTACTLESS,   /* Select SPI Contactless device */
-  SPIDEVTYPE_USER           /* Board-specific values start here */
+  SPIDEVTYPE_USER,          /* Board-specific values start here */
+  SPIDEVTYPE_CANBUS         /* Select SPI CAN Bus controller over SPI */
 };
 
 /* Certain SPI devices may required different clocking modes */
