@@ -202,9 +202,6 @@ static void btn_enable(FAR struct btn_upperhalf_s *priv)
   btn_buttonset_t press;
   btn_buttonset_t release;
   irqstate_t flags;
-#ifndef CONFIG_DISABLE_POLL
-  int i;
-#endif
 
   DEBUGASSERT(priv && priv->bu_lower);
   lower = priv->bu_lower;
@@ -223,19 +220,10 @@ static void btn_enable(FAR struct btn_upperhalf_s *priv)
   for (opriv = priv->bu_open; opriv; opriv = opriv->bo_flink)
     {
 #ifndef CONFIG_DISABLE_POLL
-      /* Are there any poll waiters? */
+      /* OR in the poll event buttons */
 
-      for (i = 0; i < CONFIG_BUTTONS_NPOLLWAITERS; i++)
-        {
-          if (opriv->bo_fds[i])
-            {
-              /* Yes.. OR in the poll event buttons */
-
-              press   |= opriv->bo_pollevents.bp_press;
-              release |= opriv->bo_pollevents.bp_release;
-              break;
-            }
-        }
+      press   |= opriv->bo_pollevents.bp_press;
+      release |= opriv->bo_pollevents.bp_release;
 #endif
 
 #ifndef CONFIG_DISABLE_SIGNALS
@@ -447,6 +435,10 @@ static int btn_open(FAR struct file *filep)
 
   filep->f_priv = (FAR void *)opriv;
   ret = OK;
+
+  /* Enable/disable interrupt handling */
+
+  btn_enable(priv);
 
 errout_with_sem:
   btn_givesem(&priv->bu_exclsem);
