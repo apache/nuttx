@@ -1860,7 +1860,37 @@ o Build system
                archives and cost a lot of debug time before you realize the issue.
 
                A work-around is to do 'make clean' if you ever decide to control-C
-               out of a make.
+               out of a make.  A couple of solutions have been considered:
+
+               - Currently, there is a sequence of compilations ins a directory
+                 with messages like CC:, CC:, CC: etc. This is followed by one big
+                 archival AR:
+
+                 The window in which the control-C problem can occur could be
+                 minimized (but not eliminated) by performing a archival for each
+                 compiliation like CC: AR:, CC: AR:, etc.
+
+               - Introduce a spurious dependency that has the correct time stamp.
+                 For example given Make like like (from nuttx/sched/Makefile):
+
+                   $(BIN): $(OBJS)
+                       $(call ARCHIVE, $@, $(OBJS))
+
+                 Could be changed like:
+
+                  .archive: $(OBJS)
+                       $(call ARCHIVE, $@, $(OBJS))
+                       @touch .archive
+
+                   $(BIN): .archive
+
+                 .archive would be a totally spurious file that is touched only AFTER
+                 ALL .o files have been archived. Thus is the user control-C's out of
+                 the make during the archival, the timestamp on .archive is not
+                 updated.
+
+                 The .archive file would have to be removed on 'make clean' and would
+                 also need to appear in .gitignore files.
 
 o Other drivers (drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^

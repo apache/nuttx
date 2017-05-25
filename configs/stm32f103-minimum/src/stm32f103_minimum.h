@@ -86,6 +86,9 @@
 #define STM32_LCD_CS      (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
 
+#define GPIO_MCP2515_CS   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
+
 #define GPIO_NRF24L01_CS  (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
 
@@ -113,6 +116,10 @@
 /* NRF24L01 IRQ line:  PA.0 */
 
 #define GPIO_NRF24L01_IRQ (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN0)
+
+/* MCP2515 IRQ line: PB.0 */
+
+#define GPIO_MCP2515_IRQ (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTB|GPIO_PIN0)
 
 /* USB Soft Connect Pullup: PC.13 */
 
@@ -185,6 +192,18 @@ int stm32_qencoder_initialize(FAR const char *devpath, int timer);
 
 #ifdef CONFIG_RGBLED
 int stm32_rgbled_setup(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_mcp2515initialize
+ *
+ * Description:
+ *   Initialize and register the MCP2515 CAN driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_CAN_MCP2515
+int stm32_mcp2515initialize(FAR const char *devpath);
 #endif
 
 /************************************************************************************
