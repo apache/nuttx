@@ -96,6 +96,18 @@ static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
   int      len;
   int      i;
 
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+  uint8_t  domain = PF_UNSPEC;
+  if (iplen == IPv4_HDRLEN)
+    {
+      domain = PF_INET;
+    }
+  else if (iplen == IPv6_HDRLEN)
+    {
+      domain = PF_INET6;
+    }
+#endif
+
 #ifdef CONFIG_NET_STATISTICS
   /* Bump up the count of TCP packets received */
 
@@ -165,7 +177,11 @@ static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
        */
 
       tmp16 = tcp->destport;
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+      if (tcp_islistener(tmp16, domain))
+#else
       if (tcp_islistener(tmp16))
+#endif
         {
           /* We matched the incoming packet with a connection in LISTEN.
            * We now need to create a new connection and send a SYNACK in
@@ -327,7 +343,11 @@ found:
 
           /* Notify the listener for the connection of the reset event */
 
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+          listener = tcp_findlistener(conn->lport, domain);
+#else
           listener = tcp_findlistener(conn->lport);
+#endif
 
           /* We must free this TCP connection structure; this connection
            * will never be established.
