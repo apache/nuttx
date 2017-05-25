@@ -72,8 +72,8 @@
  *
  * Parameters:
  *   dev   - The device driver structure containing the received TCP packet.
- *   tcp   - A pointer to the TCP header in the packet
- *   iplen - Combined length of the IP and TCP headers
+ *   domain - IP domain (PF_INET or PF_INET6)
+ *   iplen - Lngth of the IP header (IPv4_HDRLEN or IPv6_HDRLEN).
  *
  * Return:
  *   None
@@ -83,7 +83,8 @@
  *
  ****************************************************************************/
 
-static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
+static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
+                      unsigned int iplen)
 {
   FAR struct tcp_hdr_s *tcp;
   FAR struct tcp_conn_s *conn = NULL;
@@ -95,18 +96,6 @@ static void tcp_input(FAR struct net_driver_s *dev, unsigned int iplen)
   uint8_t  opt;
   int      len;
   int      i;
-
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-  uint8_t  domain = PF_UNSPEC;
-  if (iplen == IPv4_HDRLEN)
-    {
-      domain = PF_INET;
-    }
-  else if (iplen == IPv6_HDRLEN)
-    {
-      domain = PF_INET6;
-    }
-#endif
 
 #ifdef CONFIG_NET_STATISTICS
   /* Bump up the count of TCP packets received */
@@ -966,7 +955,7 @@ void tcp_ipv4_input(FAR struct net_driver_s *dev)
 
   /* Then process in the TCP IPv4 input */
 
-  tcp_input(dev, IPv4_HDRLEN);
+  tcp_input(dev, PF_INET, IPv4_HDRLEN);
 }
 #endif
 
@@ -996,7 +985,7 @@ void tcp_ipv6_input(FAR struct net_driver_s *dev)
 
   /* Then process in the TCP IPv6 input */
 
-  tcp_input(dev, IPv6_HDRLEN);
+  tcp_input(dev, PF_INET6, IPv6_HDRLEN);
 }
 #endif
 

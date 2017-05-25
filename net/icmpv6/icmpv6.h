@@ -215,11 +215,6 @@ void icmpv6_poll(FAR struct net_driver_s *dev);
 void icmpv6_solicit(FAR struct net_driver_s *dev,
                     FAR const net_ipv6addr_t ipaddr);
 
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
-
 /****************************************************************************
  * Name: icmpv6_rsolicit
  *
@@ -478,6 +473,11 @@ void icmpv6_rnotify(FAR struct net_driver_s *dev, const net_ipv6addr_t draddr,
                     const net_ipv6addr_t prefix, unsigned int preflen);
 #else
 #  define icmpv6_rnotify(d,p,l)
+#endif
+
+#undef EXTERN
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* CONFIG_NET_ICMPv6 */
