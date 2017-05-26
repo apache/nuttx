@@ -204,7 +204,7 @@
 #  define ADC_CFG1_ADIV_DIV1      (0 << ADC_CFG1_ADIV_SHIFT) /* Divider=1 rate=input clock */
 #  define ADC_CFG1_ADIV_DIV2      (1 << ADC_CFG1_ADIV_SHIFT) /* Divider=2 rate=input clock/2 */
 #  define ADC_CFG1_ADIV_DIV4      (2 << ADC_CFG1_ADIV_SHIFT) /* Divider=4 rate=input clock/4 */
-#  define ADC_CFG1_ADIV_DIV5      (3 << ADC_CFG1_ADIV_SHIFT) /* Divider=8 rate=input clock/8 */
+#  define ADC_CFG1_ADIV_DIV8      (3 << ADC_CFG1_ADIV_SHIFT) /* Divider=8 rate=input clock/8 */
 #define ADC_CFG1_ADLPC            (1 << 7)  /* Bit 7:  Low-power configuration */
                                             /* Bits 8-31: Reserved */
 /* Configuration register 2 */
