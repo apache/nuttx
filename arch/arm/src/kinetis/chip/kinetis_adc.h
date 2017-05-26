@@ -151,6 +151,7 @@
 
 #define ADC_SC1_ADCH_SHIFT        (0)       /* Bits 0-4: Input channel select */
 #define ADC_SC1_ADCH_MASK         (31 << ADC_SC1_ADCH_SHIFT)
+#  define ADC_SC1_ADCH(c)         (((c) & 0x1f) << ADC_SC1_ADCH_SHIFT)
 #  define ADC_SC1_ADCH_DADP0      (0 << ADC_SC1_ADCH_SHIFT)  /* DIFF=0 DADP0; DIFF=1, DAD0 */
 #  define ADC_SC1_ADCH_DADP1      (1 << ADC_SC1_ADCH_SHIFT)  /* DIFF=0 DADP1; DIFF=1, DAD1 */
 #  define ADC_SC1_ADCH_DADP2      (2 << ADC_SC1_ADCH_SHIFT)  /* DIFF=0 DADP2; DIFF=1, DAD2 */
