@@ -291,42 +291,51 @@ static uint8_t g_runbuffer[PCD8544_XSTRIDE+1];
 
 static const struct fb_videoinfo_s g_videoinfo =
 {
-  .fmt     = PCD8544_COLORFMT,    /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
-  .xres    = PCD8544_XRES,        /* Horizontal resolution in pixel columns */
-  .yres    = PCD8544_YRES,        /* Vertical resolution in pixel rows */
-  .nplanes = 1,                  /* Number of color planes supported */
+  PCD8544_COLORFMT,    /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
+  PCD8544_XRES,        /* Horizontal resolution in pixel columns */
+  PCD8544_YRES,        /* Vertical resolution in pixel rows */
+  1,                   /* Number of color planes supported */
 };
 
 /* This is the standard, NuttX Plane information object */
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  .putrun = pcd8544_putrun,              /* Put a run into LCD memory */
-  .getrun = pcd8544_getrun,              /* Get a run from LCD memory */
-  .buffer = (FAR uint8_t *)g_runbuffer, /* Run scratch buffer */
-  .bpp    = PCD8544_BPP,                 /* Bits-per-pixel */
+  pcd8544_putrun,              /* Put a run into LCD memory */
+  pcd8544_getrun,              /* Get a run from LCD memory */
+  (FAR uint8_t *)g_runbuffer,  /* Run scratch buffer */
+  PCD8544_BPP,                 /* Bits-per-pixel */
 };
 
 /* This is the standard, NuttX LCD driver object */
 
 static struct pcd8544_dev_s g_pcd8544dev =
 {
-  .dev =
+  /* struct lcd_dev_s */
   {
     /* LCD Configuration */
 
-    .getvideoinfo = pcd8544_getvideoinfo,
-    .getplaneinfo = pcd8544_getplaneinfo,
+    pcd8544_getvideoinfo,
+    pcd8544_getplaneinfo,
 
     /* LCD RGB Mapping -- Not supported */
+#ifdef CONFIG_FB_CMAP
+    NULL,
+    NULL,
+#endif
+
     /* Cursor Controls -- Not supported */
+#ifdef CONFIG_FB_HWCURSOR
+    NULL,
+    NULL,
+#endif
 
     /* LCD Specific Controls */
 
-    .getpower     = pcd8544_getpower,
-    .setpower     = pcd8544_setpower,
-    .getcontrast  = pcd8544_getcontrast,
-    .setcontrast  = pcd8544_setcontrast,
+    pcd8544_getpower,
+    pcd8544_setpower,
+    pcd8544_getcontrast,
+    pcd8544_setcontrast,
   },
 };
 
