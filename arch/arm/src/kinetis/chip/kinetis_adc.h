@@ -82,7 +82,6 @@
 #define KINETIS_ADC_CLM0_OFFSET  0x006c /* ADC minus-side general calibration value register */
 
 /* Register Addresses ***********************************************************************/
-# define KINETIS_ADC1_BASE       0x400bb000 /* Analog-to-digital converter (ADC) 1 */
 
 #define KINETIS_ADC0_SC1A        (KINETIS_ADC0_BASE+KINETIS_ADC_SC1A_OFFSET)
 #define KINETIS_ADC0_SC1B        (KINETIS_ADC0_BASE+KINETIS_ADC_SC1B_OFFSET)
@@ -152,6 +151,7 @@
 
 #define ADC_SC1_ADCH_SHIFT        (0)       /* Bits 0-4: Input channel select */
 #define ADC_SC1_ADCH_MASK         (31 << ADC_SC1_ADCH_SHIFT)
+#  define ADC_SC1_ADCH(c)         (((c) & 0x1f) << ADC_SC1_ADCH_SHIFT)
 #  define ADC_SC1_ADCH_DADP0      (0 << ADC_SC1_ADCH_SHIFT)  /* DIFF=0 DADP0; DIFF=1, DAD0 */
 #  define ADC_SC1_ADCH_DADP1      (1 << ADC_SC1_ADCH_SHIFT)  /* DIFF=0 DADP1; DIFF=1, DAD1 */
 #  define ADC_SC1_ADCH_DADP2      (2 << ADC_SC1_ADCH_SHIFT)  /* DIFF=0 DADP2; DIFF=1, DAD2 */
@@ -205,7 +205,7 @@
 #  define ADC_CFG1_ADIV_DIV1      (0 << ADC_CFG1_ADIV_SHIFT) /* Divider=1 rate=input clock */
 #  define ADC_CFG1_ADIV_DIV2      (1 << ADC_CFG1_ADIV_SHIFT) /* Divider=2 rate=input clock/2 */
 #  define ADC_CFG1_ADIV_DIV4      (2 << ADC_CFG1_ADIV_SHIFT) /* Divider=4 rate=input clock/4 */
-#  define ADC_CFG1_ADIV_DIV5      (3 << ADC_CFG1_ADIV_SHIFT) /* Divider=8 rate=input clock/8 */
+#  define ADC_CFG1_ADIV_DIV8      (3 << ADC_CFG1_ADIV_SHIFT) /* Divider=8 rate=input clock/8 */
 #define ADC_CFG1_ADLPC            (1 << 7)  /* Bit 7:  Low-power configuration */
                                             /* Bits 8-31: Reserved */
 /* Configuration register 2 */
