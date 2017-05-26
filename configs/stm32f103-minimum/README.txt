@@ -14,6 +14,7 @@ Contents
   - Using 128KiB of Flash instead of 64KiB
   - Quadrature Encoder
   - SDCard support
+  - Nokia 5110 LCD Display support
   - USB Console support
   - STM32F103 Minimum - specific Configuration Options
   - Configurations
@@ -306,6 +307,71 @@ SDCard support:
   And connect a SDCard/SPI board on SPI1. Connect the CS pin to PA4, SCK to
   PA5, MOSI to PA7 and MISO to PA6. Note: some chinese boards use MOSO instead
   of MISO.
+
+Nokia 5110 LCD Display support:
+===============================
+
+  You can connect a low cost Nokia 5110 LCD display in the STM32F103 Minimum
+  board this way: connect PA5 (SPI1 CLK) to CLK; PA7 (SPI1 MOSI) to DIN; PA4
+  to CE; PA3 to RST; PA2 to DC. Also connect 3.3V to VCC and GND to GND.
+
+  You can start with default "stm32f103-minimum/nsh" configuration option and
+  enable these options using "make menuconfig" :
+
+  System Type  --->
+      STM32 Peripheral Support  --->
+          [*] SPI1
+
+  Device Drivers  --->
+      -*- SPI Driver Support  --->
+          [*]   SPI exchange
+          [*]   SPI CMD/DATA
+
+  Device Drivers  --->
+      LCD Driver Support  --->
+          [*] Graphic LCD Driver Support  --->
+              [*]   Nokia 5110 LCD Display (Philips PCD8544)
+              (1)     Number of PCD8544 Devices
+              (84)    PCD8544 X Resolution
+              (48)    PCD8544 Y Resolution
+
+  Graphics Support  --->
+      [*] NX Graphics
+      (1)   Number of Color Planes
+
+      (0x0) Initial background color
+          Supported Pixel Depths  --->
+              [ ] Disable 1 BPP
+      [*]   Packed MS First
+
+      Font Selections  --->
+          (7) Bits in Character Set
+          [*] Mono 5x8
+
+  Application Configuration  --->
+      Examples  --->
+          [*] NX graphics "Hello, World!" example
+          (1)   Bits-Per-Pixel
+
+  After compiling and flashing the nuttx.bin inside the board, reset it.
+  You should see it:
+
+  NuttShell (NSH)                                                              
+  nsh> ?
+  help usage:  help [-v] [<cmd>]                                               
+
+    [           dd          free        mb          sh          usleep      
+    ?           echo        help        mh          sleep       xd          
+    cat         exec        hexdump     mw          test        
+    cd          exit        kill        pwd         true        
+    cp          false       ls          set         unset       
+
+  Builtin Apps:
+    nxhello
+
+  Now just run nxhello and you should see "Hello World" in the display:
+
+  nsh> nxhello
 
 USB Console support:
 ====================
