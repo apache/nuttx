@@ -149,7 +149,7 @@
       <a href="#up_addrenv_kstackfree">4.5.16 <code>up_addrenv_kstackfree()</code></a>
     </ul>
     <a href="#boardctl">4.6 <code>boardctl()</code> Application Interface</a><br>
-    <a href="#boardsmp">4.7 Symmetric Multiprocssing (SMP) Application Interface</a>
+    <a href="#boardsmp">4.7 Symmetric Multiprocessing (SMP) Application Interface</a>
     <ul>
       <a href="#uptestset">4.7.1 <code>up_testset()</code></a><br>
       <a href="#upcpuindex">4.7.2 <code>up_cpu_index()</code></a><br>
@@ -260,7 +260,7 @@
 
 <p>
   <b>Directory Structure</b>.
-  The general directly layout for NuttX is very similar to the directory structure
+  The general directory layout for NuttX is very similar to the directory structure
   of the Linux kernel -- at least at the most superficial layers.
   At the top level is the main makefile and a series of sub-directories identified
   below and discussed in the following paragraphs:
@@ -423,7 +423,7 @@
     <i>Chip/SoC specific files</i>.
     Each processor processor architecture is embedded in chip or <i>System-on-a-Chip</i> (SoC) architecture.
     The full chip architecture includes the processor architecture plus chip-specific interrupt logic,
-    clocking logic, general purpose I/O (GIO) logic, and specialized, internal peripherals (such as UARTs, USB, etc.).
+    clocking logic, general purpose I/O (GPIO) logic, and specialized, internal peripherals (such as UARTs, USB, etc.).
     <p>
       These chip-specific files are contained within chip-specific sub-directories in the
       <code>arch/</code><i>&lt;arch-name&gt;</i><code>/</code> directory and are selected via
@@ -908,7 +908,7 @@ config ARCH_BOARD
   In our case, these files reside in <code>configs/myboard</code> and we add the following to the long list of defaults (again in alphabetical order):
 </p>
 <ul><pre>
-    default "myboar"              if ARCH_BOARD_MYBOARD
+    default "myboard"             if ARCH_BOARD_MYBOARD
 </pre></ul>
 <p>
   Now the build system knows where to find your board configuration!
@@ -1011,7 +1011,7 @@ drivers/
 |-- spi/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common SPI-related drivers and helper fuctions)</i>
+|   `-- <i>(Common SPI-related drivers and helper functions)</i>
 |-- syslog/
 |   |-- Kconfig
 |   |-- Make.defs
@@ -1141,7 +1141,7 @@ include/
 |   |-input/
 |   |  `-- <i>(Input device driver header files)</i>
 |   |-ioexpander/
-|   |  `-- <i>(I/O exander and GPIO drvier header files)</i>
+|   |  `-- <i>(I/O expander and GPIO driver header files)</i>
 |   |-lcd/
 |   |  `-- <i>(LCD driver header files)</i>
 |   |-leds/
@@ -1184,7 +1184,7 @@ include/
 
 <p>
   This is a (almost) empty directory that has a holding place for generated static libraries.
-  The NuttX build system generates a collection of such static libraries in this directory during the compile phaase.
+  The NuttX build system generates a collection of such static libraries in this directory during the compile phase.
   These libraries are then in a known place for the final link phase where they are accessed to generated the final binaries.
 </p>
 
@@ -1309,7 +1309,7 @@ tools/
 |-- cnvwindeps.c
 |-- copydir.sh / copydir.bat
 |-- define.sh / define.bat
-|-- incdir.sh / indir.bat
+|-- incdir.sh / incdir.bat
 |-- indent.sh
 |-- link.sh / link.bat
 |-- mkconfig.c
@@ -2137,7 +2137,7 @@ else
   <dd>Most MCUs include RTC hardware built into the chip.
       Other RTCs, <i>external</i> MCUs, may be provided as separate chips typically
       interfacing with the MCU via a serial interface such as SPI or I2C.
-      These external RTCs differ from the builtin RTCs in that they cannot be initialized
+      These external RTCs differ from the built-in RTCs in that they cannot be initialized
       until the operating system is fully booted and can support the required serial
       communications.  <code>CONFIG_RTC_EXTERNAL</code> will configure the operating
       system so that it defers initialization of its time facilities.
@@ -2165,7 +2165,7 @@ else
 </p>
 <ul>
   <li><code>up_rtc_initialize()</code>.
-     Initialize the builtin, MCU hardware RTC per the selected configuration.
+     Initialize the built-in, MCU hardware RTC per the selected configuration.
      This function is called once very early in the OS initialization sequence.
      NOTE that initialization of external RTC hardware that depends on the
      availability of OS resources (such as SPI or I2C) must be deferred
@@ -2309,14 +2309,14 @@ config ARCH_SIM
   </li>
 </ul>
 
-<h4><a name="tickimport">4.3.4.4 Tickless Imported Intefaces</a></h4>
+<h4><a name="tickimport">4.3.4.4 Tickless Imported Interfaces</a></h4>
 <p>
   The interfaces that must be provided by the platform specified code are defined in <code>include/nuttx/arch.h</code>, listed below, and summarized in the following paragraphs:
 </p>
 <ul>
   <li>
     <a href="#uptimerinit"><i>&lt;arch&gt;</i><code>_timer_initialize()</code></a>:
-    Initializes the timer facilities.  Called early in the intialization sequence (by <code>up_intialize()</code>).
+    Initializes the timer facilities.  Called early in the initialization sequence (by <code>up_initialize()</code>).
   </li>
   <li>
     <a href="#uptimergettime"><code>up_timer_gettime()</code></a>:
@@ -2336,7 +2336,7 @@ config ARCH_SIM
   </li>
   <li>
     <a href="#upalarmstart"><code>up_alarm_start()</code></a>:
-    Enables (or re-enables) the alaram.
+    Enables (or re-enables) the alarm.
   </li>
 </ul>
 <p>
@@ -2379,7 +2379,7 @@ void <i>&lt;arch&gt;</i>_timer_initialize()(void);
 </pre></ul>
 <p><b>Description</b>:</p>
 <ul>
-  Initializes all platform-specific timer facilities. This function is called early in the initialization sequence by <code>up_intialize()</code>. On return, the current up-time should be available from <code>up_timer_gettime()</code> and the interval timer is ready for use (but not actively timing).
+  Initializes all platform-specific timer facilities. This function is called early in the initialization sequence by <code>up_initialize()</code>. On return, the current up-time should be available from <code>up_timer_gettime()</code> and the interval timer is ready for use (but not actively timing).
 </ul>
 <p><b>Input Parameters</b>:</p>
 <ul>
@@ -2438,7 +2438,7 @@ int up_alarm_cancel(FAR struct timespec *ts);
 </ul>
 <p><b>Assumptions</b>:</p>
 <ul>
-  May be called from interrupt level handling or from the normal tasking level. iterrupts may need to be disabled internally to assure non-reentrancy.
+  May be called from interrupt level handling or from the normal tasking level. interrupts may need to be disabled internally to assure non-reentrancy.
 </ul>
 
 <h5><a name="upalarmstart">4.3.4.4.4 <code>up_alarm_start()</code></a></h5>
@@ -2448,7 +2448,7 @@ int up_alarm_cancel(FAR struct timespec *ts);
 int up_alarm_start(FAR const struct timespec *ts);
 </pre></ul>
 <p><b>Description</b>:</p>
-  Start the alarm. <code>sched_timer_expiration()</code> will be called when the alarm occurs (unless <code>up_alaram_cancel</code> is called to stop it).
+  Start the alarm. <code>sched_timer_expiration()</code> will be called when the alarm occurs (unless <code>up_alarm_cancel</code> is called to stop it).
 <ul>
 </ul>
 <p><b>Input Parameters</b>:</p>
@@ -2484,7 +2484,7 @@ int up_timer_cancel(FAR struct timespec *ts);
 </ul>
 <p><b>Assumptions</b>:</p>
 <ul>
-  May be called from interrupt level handling or from the normal tasking level. iterrupts may need to be disabled internally to assure non-reentrancy.
+  May be called from interrupt level handling or from the normal tasking level. interrupts may need to be disabled internally to assure non-reentrancy.
 </ul>
 
 <h5><a name="uptimerstart">4.3.4.4.6 <code>up_timer_start()</code></a></h5>
@@ -2712,7 +2712,7 @@ VxWorks provides the following comparable interface:
 </p>
 <pre>
     #include &lt;nuttx/wdog.h&gt;
-    Sint wd_gettime(WDOG_ID wdog);
+    int wd_gettime(WDOG_ID wdog);
 </pre>
 <p>
   <b>Description:</b>
@@ -2787,7 +2787,7 @@ typedef uint32_t  wdparm_t;
 </p>
 <ul>
   <li><code>CONFIG_SCHED_HPWORK</code>.
-    Enables the hight prioirity work queue.
+    Enables the hight priority work queue.
   </li>
   <li><code>CONFIG_SCHED_HPWORKPRIORITY</code>.
     The execution priority of the high-priority worker thread.  Default: 224
@@ -2815,7 +2815,7 @@ typedef uint32_t  wdparm_t;
 </p>
 <p>
   <b>Compared to the High Priority Work Queue</b>.
-  The lower priority work queue runs at a lower priority than the high priority work queue, of course, and so is inapproperiate to serve as a driver <i>bottom half</i>.  The lower priority work queue has the other advantages, however, that make it better suited for some tasks:
+  The lower priority work queue runs at a lower priority than the high priority work queue, of course, and so is inappropriate to serve as a driver <i>bottom half</i>.  The lower priority work queue has the other advantages, however, that make it better suited for some tasks:
 </p>
 <ul>
   <li>
@@ -2925,7 +2925,7 @@ typedef uint32_t  wdparm_t;
   </li>
   <li>
     <code>struct work_s</code>.
-    Defines one entry in the work queue.  This is a client-allocated structure.  Work queue clients should not reference any field in this structure since they are subjec to change.  The user only needs this structure in order to declare instances of the work structure.  Handling of all fields is performed by the work queue interfaces described below.
+    Defines one entry in the work queue.  This is a client-allocated structure.  Work queue clients should not reference any field in this structure since they are subject to change.  The user only needs this structure in order to declare instances of the work structure.  Handling of all fields is performed by the work queue interfaces described below.
   </li>
 </ul>
 
@@ -3185,7 +3185,7 @@ void lpwork_restorepriority(uint8_t reqprio);
 <p>
   CPUs that support memory management units (MMUs) may provide <i>address environments</i> within which tasks and their child threads execute.
   The configuration indicates the CPUs ability to support address environments by setting the configuration variable <code>CONFIG_ARCH_HAVE_ADDRENV=y</code>.
-  That will enable the selection of the actual address evironment support which is indicated by the selection of the configuration variable  <code>CONFIG_ARCH_ADDRENV=y</code>.
+  That will enable the selection of the actual address environment support which is indicated by the selection of the configuration variable  <code>CONFIG_ARCH_ADDRENV=y</code>.
   These address environments are created only when tasks are created via <code>exec()</code> or <code>exec_module()</code> (see <code>include/nuttx/binfmt/binfmt.h</code>).
 </p>
 <p>
@@ -3697,7 +3697,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   -1 (<code>ERROR</code>) is returned on failure with the <code>errno</code> variable to to indicate the nature of the failure.
 </ul>
 
-<h4><a name="boardsmp">4.7 Symmetric Multiprocssing (SMP) Application Interface</a></h4>
+<h4><a name="boardsmp">4.7 Symmetric Multiprocessing (SMP) Application Interface</a></h4>
 <p>
 According to Wikipedia: "Symmetric multiprocessing (SMP) involves a symmetric multiprocessor system hardware and software architecture where two or more identical processors connect to a single, shared main memory, have full access to all I/O devices, and are controlled by a single operating system instance that treats all processors equally, reserving none for special purposes. Most multiprocessor systems today use an SMP architecture. In the case of multi-core processors, the SMP architecture applies to the cores, treating them as separate processors. 
 </p>
@@ -3780,7 +3780,7 @@ int up_cpu_start(int cpu);
 <p><b>Description</b>:</p>
 <ul>
   <p>
-    In an SMP configution, only one CPU is initially active (CPU 0).
+    In an SMP configuration, only one CPU is initially active (CPU 0).
     System initialization occurs on that single thread.
     At the completion of the initialization of the OS, just before beginning normal multitasking, the additional CPUs would be started by calling this function.
   </p>
@@ -3926,7 +3926,7 @@ void sched_timer_expiration(void);
   Base code implementation assumes that this function is called from interrupt handling logic with interrupts disabled.
 </ul>
 
-<h3><a name="schedalarmexpiration">4.8.5 <code>sched_alaram_expiration()</code></a></h3>
+<h3><a name="schedalarmexpiration">4.8.5 <code>sched_alarm_expiration()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -4156,11 +4156,11 @@ void board_autoled_off(int led);
   <small><blockquote>
     <b>NOTE:</b> In most architectures, <code>board_autoled_initialize()</code> is called from board-specific initialization logic.
     But there are a few architectures where this initialization function is still called from common chip architecture logic.
-    This interface is nott, however, a common board interface in any event.
+    This interface is not, however, a common board interface in any event.
   </blockquote>
   <blockquote>
     <b>WARNING:</b> This interface name will eventually be removed; do not use it in new board ports.
-    New implementations should not use the naming convention for common board interfaces, but should instted use the naming conventions for microprocessor-specific interfaces or the board-specific interfaces (such as <code>stm32_led_initialize()</code>).
+    New implementations should not use the naming convention for common board interfaces, but should instead use the naming conventions for microprocessor-specific interfaces or the board-specific interfaces (such as <code>stm32_led_initialize()</code>).
   </blockquote></small>
   </li>
   <li>
@@ -4235,12 +4235,12 @@ This objectives of this feature are:
   <dt><code>CONFIG_IOB_THROTTLE</code>
   <dd>I/O buffer throttle value.  TCP write buffering and read-ahead buffer use the same pool of free I/O buffers.  In order to prevent uncontrolled incoming TCP packets from hogging all of the available, pre-allocated I/O buffers, a throttling value is required.  This throttle value assures that I/O buffers will be denied to the read-ahead logic before TCP writes are halted.
 
-  The default 0 if neither TCP write buffering nor TCP reada-ahead buffering is enabled.  Otherwise, the default is 8.
+  The default 0 if neither TCP write buffering nor TCP read-ahead buffering is enabled.  Otherwise, the default is 8.
 
   <dt><code>CONFIG_IOB_DEBUG</code>
   <dd>Force I/O buffer debug. This option will force debug output from I/O buffer logic.  This is not normally something that would want to do but is convenient if you are debugging the I/O buffer logic and do not want to get overloaded with other un-related debug output.
 
-  NOTE that this selection is not avaiable if DEBUG features are not enabled (<code>CONFIG_DEBUG_FEATURES</code>) with IOBs are being used to syslog buffering logic (<code>CONFIG_SYSLOG_BUFFER</code>).
+  NOTE that this selection is not available if DEBUG features are not enabled (<code>CONFIG_DEBUG_FEATURES</code>) with IOBs are being used to syslog buffering logic (<code>CONFIG_SYSLOG_BUFFER</code>).
 </dl>
 
 <h3><a name="iobthrottle">4.12.2 Throttling</a></h3>
@@ -4251,7 +4251,7 @@ An allocation throttle was added.  I/O buffer allocation logic supports a thrott
 <h3><a name="iobtypes">4.12.3 Public Types</a></h3>
 
 <p>
-  This structure epresents one I/O buffer.  A packet is contained by one or more I/O buffers in a chain.  The <code>io_pktlen</code> is only valid for the I/O buffer at the head of the chain.
+  This structure represents one I/O buffer.  A packet is contained by one or more I/O buffers in a chain.  The <code>io_pktlen</code> is only valid for the I/O buffer at the head of the chain.
 </p>
 
 <pre>
@@ -6116,7 +6116,7 @@ int setlogmask(int mask);
   </li>
   <li>
     <p>
-      <i>Kernel Build</i>:  The kernel build is compliant with the POSIX requirement: There will be one mask for for each user process, controlling the SYSLOG output only form that process.  There will be a separate mask accessable only in the kernel code to control kernel SYSLOG output.
+      <i>Kernel Build</i>:  The kernel build is compliant with the POSIX requirement: There will be one mask for for each user process, controlling the SYSLOG output only form that process.  There will be a separate mask accessible only in the kernel code to control kernel SYSLOG output.
 </ul>
 <p>
   The above are all standard interfaces as defined at <a href="http://pubs.opengroup.org/onlinepubs/009695399/functions/closelog.html">OpenGroup.org</a>.  Those interfaces are available for use by application software.  The remaining interfaces discussed in this section are non-standard, OS-internal interfaces.
@@ -6124,7 +6124,7 @@ int setlogmask(int mask);
 
 <h4><a name="debugifs">6.4.1.4 Debug Interfaces</a></h4>
 <p>
-  In NuttX, syslog output is really synonymous to debug output and, herefore, the debugging interface macros defined in the header file
+  In NuttX, syslog output is really synonymous to debug output and, therefore, the debugging interface macros defined in the header file
   <code>include/debug.h</code> are also syslogging interfaces.  Those macros are simply wrappers around <code>syslog()</code>.  The debugging interfaces differ from the syslog interfaces in that:
 </p>
 <ul>
@@ -6158,7 +6158,7 @@ int setlogmask(int mask);
   <li>
     <p>
       <code>warn()</code>.  The <code>warn()</code> macro has medium priority (<code>LOG_WARN</code>) and is controlled by <code>CONFIG_DEBUG_<i>subsystem</i>_WARN</code>.  The <code>warn()</code> is intended to
-      note exceptional or unexpected conditions that meigh be potential
+      note exceptional or unexpected conditions that might be potential
       errors or, perhaps, minor errors that easily recovered.
   </li>
   <li>
@@ -6210,7 +6210,7 @@ int syslog_channel(FAR const struct syslog_channel_s *channel);
   <code>syslog_channel()</code> is a non-standard, internal OS interface and is not available to applications.  It may be called numerous times as necessary to change channel interfaces.
   By default, all system log output goes to console (<code>/dev/console</code>).
 </p>
-<p><b>Input Parmeters:</b>
+<p><b>Input Parameters:</b>
 <ul>
   <li>
     <p>
@@ -6331,7 +6331,7 @@ int syslog_initialize(enum syslog_init_e phase);
       </li>
       <li>
         <p>
-          The output generated by <code>up_putc()</code> is immediate and in real-time.  The normal SYSLOG output, on the other hand, is buffered in the serial driver and may be delayed with respect to the immediate output by many lines.  Therefore, the interrupt level SYSLOG ouput provided throug <code>up_putc()</code> is grossly out of synchronization with other debug output
+          The output generated by <code>up_putc()</code> is immediate and in real-time.  The normal SYSLOG output, on the other hand, is buffered in the serial driver and may be delayed with respect to the immediate output by many lines.  Therefore, the interrupt level SYSLOG output provided through <code>up_putc()</code> is grossly out of synchronization with other debug output
         </p>
       </li>
     </ul>
@@ -6383,7 +6383,7 @@ int syslog_initialize(enum syslog_init_e phase);
   </li>
   <li>
     <p>
-      <code>CONFIG_SYSLOG_CONSOLE</code>.  This configuration option is manually selected from the SYSLOG menu.  This is the option that acutally enables the SYSLOG console device.  It depends on <code>CONFIG_DEV_CONSOLE</code> and it will automatically select <code>CONFIG_SYSLOG_SERIAL_CONSOLE</code> if <code>CONFIG_SERIAL_CONSOLE</code> is selected.
+      <code>CONFIG_SYSLOG_CONSOLE</code>.  This configuration option is manually selected from the SYSLOG menu.  This is the option that actually enables the SYSLOG console device.  It depends on <code>CONFIG_DEV_CONSOLE</code> and it will automatically select <code>CONFIG_SYSLOG_SERIAL_CONSOLE</code> if <code>CONFIG_SERIAL_CONSOLE</code> is selected.
   </li>
   <li>
     <p>
@@ -6412,7 +6412,7 @@ int syslog_initialize(enum syslog_init_e phase);
   The system console device, <code>/dev/console</code>, is a character driver with some special properties.  However, any character driver may be used as the SYSLOG output channel.  For example, suppose you have a serial console on <code>/dev/ttyS0</code> and you want SYSLOG output on <code>/dev/ttyS1</code>.  Or suppose you support only a Telnet console but want to capture debug output <code>/dev/ttyS0</code>.
 </p>
 <p>
-  This SYSLOG device channel is selected with <code>CONFIG_SYSLOG_CHAR</code> and has no other dependencies.  Differences fromthe SYSLOG console channel include:
+  This SYSLOG device channel is selected with <code>CONFIG_SYSLOG_CHAR</code> and has no other dependencies.  Differences from the SYSLOG console channel include:
 </p>
 <ul>
   <li>
@@ -6564,7 +6564,7 @@ int syslog_file_channel(FAR const char *devpath);
 <ul>
   <li>
     <p>
-      Monitors activity from drivers (and from other parts of the syste), and
+      Monitors activity from drivers (and from other parts of the system), and
     </p>
   </li>
   <li>
@@ -6615,7 +6615,7 @@ int syslog_file_channel(FAR const char *devpath);
       however, <code>IDLE</code> and some simple simple steps to reduce power
       consumption provided that they do not interfere with normal
       Operation.  Simply dimming the a backlight might be an example
-      somethat that would be done when the system is idle.
+      some that that would be done when the system is idle.
   <dt><code>STANDBY</code>
   <dd>Standby is a lower power consumption mode that may involve more
       extensive power management steps such has disabling clocking or
