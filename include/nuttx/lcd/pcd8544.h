@@ -122,25 +122,6 @@ struct lcd_dev_s; /* see nuttx/lcd.h */
 struct spi_dev_s; /* see nuttx/spi/spi.h */
 FAR struct lcd_dev_s *pcd8544_initialize(FAR struct spi_dev_s *spi, unsigned int devno);
 
-/****************************************************************************
- * Name:  pcd8544_power
- *
- * Description:
- *   If the hardware supports a controllable LCD a power supply, this
- *   interface should be provided.  It may be called by the driver to turn
- *   the LCD power on and off as needed.
- *
- * Input Parameters:
- *
- *   devno - A value in the range of 0 throuh CONFIG_PCD8544_NINTERFACES-1.
- *     This allows support for multiple LCD devices.
- *   on - true:turn power on, false: turn power off.
- *
- * Returned Value:
- *   None
- *
- **************************************************************************************/
-
 #ifdef __cplusplus
 }
 #endif
