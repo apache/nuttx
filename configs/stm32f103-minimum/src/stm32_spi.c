@@ -86,6 +86,10 @@ void stm32_spidev_initialize(void)
   (void)stm32_configgpio(STM32_LCD_CS);       /* ST7567 chip select */
 #endif
 
+#ifdef CONFIG_LCD_PCD8544
+  (void)stm32_configgpio(STM32_LCD_CS);       /* ST7567 chip select */
+#endif
+
 #ifdef CONFIG_WL_NRF24L01
   stm32_configgpio(GPIO_NRF24L01_CS);         /* nRF24L01 chip select */
 #endif
@@ -138,10 +142,17 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
     }
 #endif
 
+#ifdef CONFIG_LCD_PCD8544
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      stm32_gpiowrite(STM32_LCD_CS, !selected);
+    }
+#endif
+
 #ifdef CONFIG_LCD_ST7567
   if (devid == SPIDEV_DISPLAY(0))
     {
-      stm32_gpiowrite(GPIO_CS_MFRC522, !selected);
+      stm32_gpiowrite(STM32_LCD_CS, !selected);
     }
 #endif
 
@@ -235,6 +246,20 @@ int stm32_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
       return OK;
     }
 #endif
+
+#ifdef CONFIG_LCD_PCD8544
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      /*  This is the Data/Command control pad which determines whether the
+       *  data bits are data or a command.
+       */
+
+      (void)stm32_gpiowrite(STM32_LCD_CD, !cmd);
+
+      return OK;
+    }
+#endif
+
 
   return -ENODEV;
 }
