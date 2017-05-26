@@ -576,6 +576,44 @@ config SSD1351_MSTRCONTRAST
 
 endif
 
+config LCD_PCD8544
+	bool "Nokia 5110 LCD Display (Philips PCD8544)"
+	default n
+	---help---
+		LCD Display Module, PCD8544, Philips
+
+		Required LCD driver settings:
+		LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
+
+if LCD_PCD8544
+
+config PCD8544_NINTERFACES
+	int "Number of PCD8544 Devices"
+	default 1
+	---help---
+		Specifies the number of physical PCD8544 devices that will be
+		supported.  NOTE:  At present, this must be undefined or defined to be 1.
+
+config PCD8544_XRES
+	int "PCD8544 X Resolution"
+	default 84
+	---help---
+		Specifies the X resolution of the LCD.
+
+config PCD8544_YRES
+	int "PCD8544 Y Resolution"
+	default 48
+	---help---
+		Specifies the Y resolution of the LCD.
+
+config PCD8544_INVERSE_VIDEO
+	bool "PCD8544 Inverse video"
+	default n
+	---help---
+		Inverse video on LCD.
+
+endif # LCD_PCD8544
+
 config LCD_ST7565
 	bool "ST7565 LCD Display Module"
 	default n
