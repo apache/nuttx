@@ -82,7 +82,6 @@
 #define KINETIS_ADC_CLM0_OFFSET  0x006c /* ADC minus-side general calibration value register */
 
 /* Register Addresses ***********************************************************************/
-# define KINETIS_ADC1_BASE       0x400bb000 /* Analog-to-digital converter (ADC) 1 */
 
 #define KINETIS_ADC0_SC1A        (KINETIS_ADC0_BASE+KINETIS_ADC_SC1A_OFFSET)
 #define KINETIS_ADC0_SC1B        (KINETIS_ADC0_BASE+KINETIS_ADC_SC1B_OFFSET)
