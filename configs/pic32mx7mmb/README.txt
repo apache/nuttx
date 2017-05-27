@@ -149,17 +149,19 @@ PIN CONFIGURATIONS                     SIGNAL NAME                ON-BOARD CONNE
 Toolchains
 ==========
 
-  MPLAB/C32
-  ---------
+  Pinguino mips-elf Toolchain
+  ---------------------------
 
-  I am using the free, "Lite" version of the PIC32MX toolchain available
-  for download from the microchip.com web site.  I am using the Windows
-  version.  The MicroChip toolchain is the only toolchain currently
-  supported in these configurations, but it should be a simple matter to
-  adapt to other toolchains by modifying the Make.defs file include in
-  each configuration.
+  These configurations currently assume the mips-elf toolchain used with the
+  Pinguino project.  This is a relatively current mips-elf GCC and should
+  provide free C++ support as well. This toolchain can be downloded from the
+  Pinguino website:  http://wiki.pinguino.cc/index.php/Main_Page#Download .
+  There is some general information about using the Pinguino mips-elf
+  toolchain in this thread:
+  https://groups.yahoo.com/neo/groups/nuttx/conversations/messages/1821
 
-  C32 Toolchain Options:
+  It should be a simple matter to adapt to other toolchains by modifying the
+  Make.defs file include ineach configuration.
 
     CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW      - MicroChip full toolchain for Windows
     CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL      - MicroChip full toolchain for Linux
@@ -169,6 +171,14 @@ Toolchains
     CONFIG_MIPS32_TOOLCHAIN_PINGUINOW       - Pinquino toolchain for Windows
     CONFIG_MIPS32_TOOLCHAIN_MICROCHIPOPENL  - Microchip open toolchain for Linux
     CONFIG_MIPS32_TOOLCHAIN_GNU_ELF         - General mips-elf toolchain for Linux
+
+  MPLAB/C32
+  ---------
+
+  Previously, I did use the old, obsoleted "Lite" version of the PIC32MX C32
+  toolchain that was available for download from the microchip.com web site.
+  That MicroChip toolchain is the only Microchip toolchain currently supported
+  in these configurations.
 
   NOTE:  The "Lite" versions of the toolchain does not support C++.  Also
   certain optimization levels are not supported by the "Lite" toolchain.
@@ -200,26 +210,12 @@ Toolchains
      Note that the tools will have the prefix, mypic32- so, for example, the
      compiler will be called mypic32-gcc.
 
-  Pinguino mips-elf Toolchain
-  ---------------------------
-
-  Another option is the mips-elf toolchain used with the Pinguino project.  This
-  is a relatively current mips-elf GCC and should provide free C++ support as
-  well. This toolchain can be downloded from the Pinguino website:
-  http://wiki.pinguino.cc/index.php/Main_Page#Download . There is some general
-  information about using the Pinguino mips-elf toolchain in this thread:
-  https://groups.yahoo.com/neo/groups/nuttx/conversations/messages/1821
-
-  See also configs/mirtoo/README.txt.  There is an experimental (untested)
-  configuration for the Mirtoo platform in that directory.
-
   MPLAB/C32 vs MPLABX/X32
   -----------------------
 
-  It appears that Microchip is phasing out the MPLAB/C32 toolchain and replacing
-  it with MPLABX and XC32.  At present, the XC32 toolchain is *not* compatible
-  with the NuttX build scripts.  Here are some of the issues that I see when trying
-  to build with XC32:
+  Microchip has phased out the MPLAB/C32 toolchain and replacingit with MPLABX and
+  XC32.  At present, the XC32 toolchain is *not* supported for this configuration.
+  Here are some of the issues that I see when trying to build with XC32:
 
   1) Make.def changes:  You have to change the tool prefix:
 
@@ -237,6 +233,15 @@ Toolchains
   email thread at https://groups.yahoo.com/neo/groups/nuttx/conversations/messages/1458 for more
   information.  You will have to solve at least this undefined symbol problem if
   you want to used the XC32 toolchain.
+
+  Update: There have since been several successful uses of XC32 toolchains with
+  NuttX.  XC32 is still not supported for this board, but you can see the README.txt
+  file and usage in other PIC32 configurations:
+
+    $ find . -name xc32-*
+    ./mirtoo/scripts/xc32-debug.ld
+    ./mirtoo/scripts/xc32-release.ld
+    ./pic32mz-starterkit/scripts/xc32-debug.ld
 
   Windows Native Toolchains
   -------------------------

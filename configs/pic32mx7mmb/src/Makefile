@@ -36,7 +36,7 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = pic32_boot.c pic32_leds.c pic32_spi.c pic32_mio283qt2.c
+CSRCS = pic32_boot.c pic32_bringup.c pic32_leds.c pic32_spi.c pic32_mio283qt2.c
 
 ifeq ($(CONFIG_PIC32MX_USBDEV),y)
 CSRCS += pic32_usbdev.c
