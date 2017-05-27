@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/pic32mx7mmb/nsh/ld.script
+ * configs/pic32mx7mmb/scripts/c32-release.ld
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

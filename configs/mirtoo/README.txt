@@ -457,8 +457,8 @@ Toolchains
 Loading NuttX with ICD3
 ========================
 
-  Intel Hex Forma Files:
-  ----------------------
+  Intel Hex Format Files:
+  -----------------------
 
     When NuttX is built it will produce two files in the top-level NuttX
     directory:
