@@ -107,7 +107,7 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 
       /* Take the semaphore */
 
-      status = pthread_takesemaphore((FAR sem_t *)&cond->sem, false);
+      status = pthread_sem_take((FAR sem_t *)&cond->sem, false);
       if (ret == OK)
         {
           /* Report the first failure that occurs */

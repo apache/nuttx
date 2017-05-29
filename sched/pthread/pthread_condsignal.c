@@ -105,7 +105,7 @@ int pthread_cond_signal(FAR pthread_cond_t *cond)
           if (sval < 0)
             {
               sinfo("Signalling...\n");
-              ret = pthread_givesemaphore((FAR sem_t *)&cond->sem);
+              ret = pthread_sem_give((FAR sem_t *)&cond->sem);
             }
         }
     }
