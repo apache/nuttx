@@ -196,7 +196,7 @@ o Task/Scheduler (sched/)
                OS can cause non-cancellation point interfaces to behave
                strangely.  There was a change recently in pthread_cond_wait()
                and pthread_cond_timedwait() recently to effectively disable
-               the cancellation point behavior of sem_init().  This was
+               the cancellation point behavior of sem_wait().  This was
                accomplished with two functions:  pthread_disable_cancel()
                and pthread_enable_cancel()
 

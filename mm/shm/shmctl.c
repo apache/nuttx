@@ -171,7 +171,9 @@ int shmctl(int shmid, int cmd, struct shmid_ds *buf)
 
           if (region->sr_ds.shm_nattch > 0)
             {
-              /* Yes.. just set the UNLINKED flag.  The region will be removed when there are no longer any processes attached to it.
+              /* Yes.. just set the UNLINKED flag.  The region will be
+               * removed when there are no longer any processes attached to
+               * it.
                */
 
                region->sr_flags |= SRFLAG_UNLINKED;

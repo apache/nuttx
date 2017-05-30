@@ -197,8 +197,25 @@ Ubuntu Bash under Windows 10
 
     C:\Users\Username\AppData\Local\lxss\rootfs
 
-  However, I am unable to see my files under the rootfs/home directory
-  so this is not very useful.
+  However, I am unable to see my files under the rootfs\home directory.
+  After some looking around, I find the home directory
+  %localappdata%\lxss\home.
+
+  With that trick access to the /home directory, you should actually be
+  able to use Windows tools outside of the Ubuntu sandbox with versions of
+  NuttX built within the sandbox using that path.
+
+  You can also execute Windows tools from within the Ubuntu sandbox:
+
+    $ /mnt/c/Program\ Files\ \(x86\)/Microchip/xc32/v1.43/bin/xc32-gcc.exe --version
+    Unable to translate current working directory. Using C:\WINDOWS\System32
+    xc32-gcc.exe (Microchip Technology) 4.8.3 MPLAB XC32 Compiler v1.43 Build date: Mar  1 2017
+    ...
+
+  The error message indicates that there are more issues:  You cannot mix
+  Windows tools that use Windows style paths in an environment that uses
+  POSIX paths.  I think you would have to use Linux tools only from within
+  the Ubuntu sandbox.
 
   Install Linux Software.
   -----------------------
