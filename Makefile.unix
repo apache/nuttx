@@ -282,6 +282,8 @@ tools/cnvwindeps$(HOSTEXEEXT):
 # configured directories.
 
 Make.defs:
+	echo "include $(TOPDIR)$(DELIM).config" > Make.defs
+	echo "include $(TOPDIR)$(DELIM)tools$(DELIM)Config.mk" >> Make.defs
 
 # Link the arch/<arch-name>/include directory to include/arch
 
