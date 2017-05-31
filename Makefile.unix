@@ -280,7 +280,9 @@ tools/cnvwindeps$(HOSTEXEEXT):
 # Directories links.  Most of establishing the NuttX configuration involves
 # setting up symbolic links with 'generic' directory names to specific,
 # configured directories.
-#
+
+Make.defs:
+
 # Link the arch/<arch-name>/include directory to include/arch
 
 include/arch: Make.defs
