@@ -80,6 +80,7 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
+#include "cache.h"
 #include "chip.h"
 #include "stm32_gpio.h"
 #include "stm32_dma.h"
@@ -110,12 +111,10 @@
 
 #ifdef CONFIG_STM32F7_SPI_DMA
 
-#  error "SPI DMA not yet supported"
-
 #  if defined(CONFIG_SPI_DMAPRIO)
 #    define SPI_DMA_PRIO  CONFIG_SPI_DMAPRIO
 #  elif defined(DMA_SCR_PRIMED)
-#    define SPI_DMA_PRIO  DMA_SCR_PRIMED
+#    define SPI_DMA_PRIO  DMA_SCR_PRILO
 #  else
 #    error "Unknown STM32 DMA"
 #  endif
@@ -264,8 +263,8 @@ static struct stm32_spidev_s g_spi1dev =
   .spiirq   = STM32_IRQ_SPI1,
 #endif
 #ifdef CONFIG_STM32F7_SPI_DMA
-  .rxch     = DMACHAN_SPI1_RX,
-  .txch     = DMACHAN_SPI1_TX,
+  .rxch     = DMAMAP_SPI1_RX,
+  .txch     = DMAMAP_SPI1_TX,
 #endif
 };
 #endif
@@ -308,8 +307,8 @@ static struct stm32_spidev_s g_spi2dev =
   .spiirq   = STM32_IRQ_SPI2,
 #endif
 #ifdef CONFIG_STM32F7_SPI_DMA
-  .rxch     = DMACHAN_SPI2_RX,
-  .txch     = DMACHAN_SPI2_TX,
+  .rxch     = DMAMAP_SPI2_RX,
+  .txch     = DMAMAP_SPI2_TX,
 #endif
 };
 #endif
@@ -352,8 +351,8 @@ static struct stm32_spidev_s g_spi3dev =
   .spiirq   = STM32_IRQ_SPI3,
 #endif
 #ifdef CONFIG_STM32F7_SPI_DMA
-  .rxch     = DMACHAN_SPI3_RX,
-  .txch     = DMACHAN_SPI3_TX,
+  .rxch     = DMAMAP_SPI3_RX,
+  .txch     = DMAMAP_SPI3_TX,
 #endif
 };
 #endif
@@ -396,8 +395,8 @@ static struct stm32_spidev_s g_spi4dev =
   .spiirq   = STM32_IRQ_SPI4,
 #endif
 #ifdef CONFIG_STM32F7_SPI_DMA
-  .rxch     = DMACHAN_SPI4_RX,
-  .txch     = DMACHAN_SPI4_TX,
+  .rxch     = DMAMAP_SPI4_RX,
+  .txch     = DMAMAP_SPI4_TX,
 #endif
 };
 #endif
@@ -440,8 +439,8 @@ static struct stm32_spidev_s g_spi5dev =
   .spiirq   = STM32_IRQ_SPI5,
 #endif
 #ifdef CONFIG_STM32F7_SPI_DMA
-  .rxch     = DMACHAN_SPI5_RX,
-  .txch     = DMACHAN_SPI5_TX,
+  .rxch     = DMAMAP_SPI5_RX,
+  .txch     = DMAMAP_SPI5_TX,
 #endif
 };
 #endif
@@ -484,8 +483,8 @@ static struct stm32_spidev_s g_spi6dev =
   .spiirq   = STM32_IRQ_SPI6,
 #endif
 #ifdef CONFIG_STM32F7_SPI_DMA
-  .rxch     = DMACHAN_SPI6_RX,
-  .txch     = DMACHAN_SPI6_TX,
+  .rxch     = DMAMAP_SPI6_RX,
+  .txch     = DMAMAP_SPI6_TX,
 #endif
 };
 #endif
@@ -927,7 +926,7 @@ static void spi_dmatxsetup(FAR struct stm32_spidev_s *priv, FAR const void *txbu
  ************************************************************************************/
 
 #ifdef CONFIG_STM32F7_SPI_DMA
-static inline void spi_dmarxstart(FAR struct stm32_spidev_s *priv)
+static void spi_dmarxstart(FAR struct stm32_spidev_s *priv)
 {
   priv->rxresult = 0;
   stm32_dmastart(priv->rxdma, spi_dmarxcallback, priv, false);
@@ -943,7 +942,7 @@ static inline void spi_dmarxstart(FAR struct stm32_spidev_s *priv)
  ************************************************************************************/
 
 #ifdef CONFIG_STM32F7_SPI_DMA
-static inline void spi_dmatxstart(FAR struct stm32_spidev_s *priv)
+static void spi_dmatxstart(FAR struct stm32_spidev_s *priv)
 {
   priv->txresult = 0;
   stm32_dmastart(priv->txdma, spi_dmatxcallback, priv, false);
@@ -1528,6 +1527,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 {
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
 
+  DEBUGASSERT(priv != NULL);
+
 #ifdef CONFIG_STM32F7_DMACAPABLE
   if ((txbuffer && !stm32_dmacapable((uint32_t)txbuffer, nwords, priv->txccr)) ||
       (rxbuffer && !stm32_dmacapable((uint32_t)rxbuffer, nwords, priv->rxccr)))
@@ -1539,16 +1540,30 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
   else
 #endif
     {
-      static uint16_t rxdummy = 0xffff;
+      static uint8_t rxdummy[ARMV7M_DCACHE_LINESIZE]
+        __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
       static const uint16_t txdummy = 0xffff;
+      size_t buflen = nwords;
+
+      if (spi_9to16bitmode(priv))
+        {
+          buflen = nwords * sizeof(uint16_t);
+        }
 
       spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
-      DEBUGASSERT(priv && priv->spibase);
+      DEBUGASSERT(priv->spibase != 0);
 
       /* Setup DMAs */
 
-      spi_dmarxsetup(priv, rxbuffer, &rxdummy, nwords);
+      spi_dmarxsetup(priv, rxbuffer, (uint16_t *)rxdummy, nwords);
       spi_dmatxsetup(priv, txbuffer, &txdummy, nwords);
+
+      /* Flush cache to physical memory */
+
+      if (txbuffer)
+        {
+          arch_flush_dcache((uintptr_t)txbuffer, (uintptr_t)txbuffer + buflen);
+        }
 
       /* Start the DMAs */
 
@@ -1559,6 +1574,19 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       spi_dmarxwait(priv);
       spi_dmatxwait(priv);
+
+      /* Force RAM re-read */
+
+      if (rxbuffer)
+        {
+          arch_invalidate_dcache((uintptr_t)rxbuffer,
+                                 (uintptr_t)rxbuffer + buflen);
+        }
+      else
+        {
+          arch_invalidate_dcache((uintptr_t)rxdummy,
+                                 (uintptr_t)rxdummy + sizeof(rxdummy));
+        }
     }
 }
 #endif /* CONFIG_STM32F7_SPI_DMA */
@@ -1694,7 +1722,7 @@ static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
   priv->txdma = stm32_dmachannel(priv->txch);
   DEBUGASSERT(priv->rxdma && priv->txdma);
 
-  spi_putreg(priv, STM32_SPI_CR2_OFFSET, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN);
+  spi_modifycr2(priv, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN, 0);
 #endif
 
   /* Enable spi */
