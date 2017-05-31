@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated May 18, 2017)
+NuttX TODO List (Last updated May 31, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -45,6 +45,13 @@ o Task/Scheduler (sched/)
                terminated?
   Status:      Closed.  No, this behavior will not be implemented.
   Priority:    Medium, required for good emulation of process/pthread model.
+               The current behavior allows for the main thread of a task to
+               exit() and any child pthreads will perist.  That does raise
+               some issues:  The main thread is treated much like just-another-
+               pthread but must follow the semantics of a task or a process.
+               That results in some inconsistencies (for example, with robust
+               mutexes, what should happen if the main thread exits while
+               holding a mutex?)
 
   Title:       pause() NON-COMPLIANCE
   Description: In the POSIX description of this function the pause() function
