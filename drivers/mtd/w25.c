@@ -247,6 +247,7 @@ static void w25_unprotect(FAR struct w25_dev_s *priv);
 static uint8_t w25_waitwritecomplete(FAR struct w25_dev_s *priv);
 static inline void w25_wren(FAR struct w25_dev_s *priv);
 static inline void w25_wrdi(FAR struct w25_dev_s *priv);
+static bool w25_is_erased(struct w25_dev_s *priv, off_t address, off_t size);
 static void w25_sectorerase(FAR struct w25_dev_s *priv, off_t offset);
 static inline int w25_chiperase(FAR struct w25_dev_s *priv);
 static void w25_byteread(FAR struct w25_dev_s *priv, FAR uint8_t *buffer,
@@ -550,6 +551,55 @@ static inline void w25_wrdi(struct w25_dev_s *priv)
 }
 
 /************************************************************************************
+ * Name:  w25_is_erased
+ ************************************************************************************/
+
+static bool w25_is_erased(struct w25_dev_s *priv, off_t address, off_t size)
+{
+  size_t npages = size >> W25_PAGE_SHIFT;
+  uint32_t erased_32;
+  unsigned int i;
+  uint32_t *buf;
+
+  DEBUGASSERT((address % W25_PAGE_SIZE) == 0);
+  DEBUGASSERT((size % W25_PAGE_SIZE) == 0);
+
+  buf = kmm_malloc(W25_PAGE_SIZE);
+  if (!buf)
+    {
+      return false;
+    }
+
+  memset(&erased_32, W25_ERASED_STATE, sizeof(erased_32));
+
+  /* Walk all pages in given area. */
+
+  while (npages)
+    {
+      /* Check if all bytes of page is in erased state. */
+
+      w25_byteread(priv, (unsigned char *)buf, address, W25_PAGE_SIZE);
+
+      for (i = 0; i < W25_PAGE_SIZE / sizeof(uint32_t); i++)
+        {
+          if (buf[i] != erased_32)
+            {
+              /* Page not in erased state! */
+
+              kmm_free(buf);
+              return false;
+            }
+        }
+
+      address += W25_PAGE_SIZE;
+      npages--;
+    }
+
+  kmm_free(buf);
+  return true;
+}
+
+/************************************************************************************
  * Name:  w25_sectorerase
  ************************************************************************************/
 
@@ -558,6 +608,15 @@ static void w25_sectorerase(struct w25_dev_s *priv, off_t sector)
   off_t address = sector << W25_SECTOR_SHIFT;
 
   finfo("sector: %08lx\n", (long)sector);
+
+  /* Check if sector is already erased. */
+
+  if (w25_is_erased(priv, address, W25_SECTOR_SIZE))
+    {
+      /* Sector already in erased state, so skip erase. */
+
+      return;
+    }
 
   /* Wait for any preceding write or erase operation to complete. */
 
