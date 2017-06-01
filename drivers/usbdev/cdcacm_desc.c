@@ -54,39 +54,6 @@
 #include "cdcacm.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* This little hack makes the compiler producing an error if the (constant)
- * condition is not true.
- *
- * e.g.
- *    COMPILE_TIME_ASSERTION(sizeof(uint8_t) == 1);
- *
- * when not true, the output is something like
- *
- * test.c:28:2: error: size of unnamed array is negative
- *    COMPILE_TIME_ASSERTION(sizeof(uint8_t) != 1);
- *    ^
- *
- * else the compiler produces the (empty) statement
- *
- * ((void)sizeof(char[1]))
- *
- * which is optimized out.
- */
-
-#define COMPILE_TIME_ASSERTION(condition) ((void)sizeof(char[1 - 2*!(condition)]))
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -367,7 +334,6 @@ int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
         return 0;
     }
 
-  COMPILE_TIME_ASSERTION(sizeof(struct usb_epdesc_s) == USB_SIZEOF_EPDESC);
   return sizeof(struct usb_epdesc_s);
 }
 
@@ -439,8 +405,6 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
                           CDCACM_REMOTEWAKEUP;
       dest->mxpower     = (CONFIG_USBDEV_MAXPOWER + 1) / 2;  /* Max power (mA/2) */
 
-      COMPILE_TIME_ASSERTION(sizeof(struct usb_cfgdesc_s) == USB_SIZEOF_CFGDESC);
-
       buf += sizeof(struct usb_cfgdesc_s);
     }
 
@@ -468,8 +432,6 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
       dest->protocol  = CDC_PROTO_NONE;                      /* Protocol code */
       dest->ifunction = 0;                                   /* Index to string identifying the function */
 
-      COMPILE_TIME_ASSERTION(sizeof(struct usb_iaddesc_s) == USB_SIZEOF_IADDESC);
-
       buf += sizeof(struct usb_iaddesc_s);
     }
   length += sizeof(struct usb_iaddesc_s);
@@ -495,8 +457,6 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
       dest->iif      = 0;                                    /* iInterface */
 #endif
 
-      COMPILE_TIME_ASSERTION(sizeof(struct usb_ifdesc_s) == USB_SIZEOF_IFDESC);
-
       buf += sizeof(struct usb_ifdesc_s);
     }
 
@@ -514,8 +474,6 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
       dest->cdc[0]  = LSBYTE(CDC_VERSIONNO);                 /* CDC release number in BCD */
       dest->cdc[1]  = MSBYTE(CDC_VERSIONNO);
 
-      COMPILE_TIME_ASSERTION(sizeof(struct cdc_hdr_funcdesc_s) == SIZEOF_HDR_FUNCDESC);
-
       buf += sizeof(struct cdc_hdr_funcdesc_s);
     }
 
@@ -532,8 +490,6 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
       dest->type    = USB_DESC_TYPE_CSINTERFACE;             /* Descriptor type */
       dest->subtype = CDC_DSUBTYPE_ACM;                      /* Descriptor sub-type */
       dest->caps    = 0x06;                                  /* Bit encoded capabilities */
-
-      COMPILE_TIME_ASSERTION(sizeof(struct cdc_acm_funcdesc_s) == SIZEOF_ACM_FUNCDESC);
 
       buf += sizeof(struct cdc_acm_funcdesc_s);
     }
@@ -554,8 +510,6 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
       dest->master   = devdesc->ifnobase;                     /* Master interface number */
       dest->slave[0] = devdesc->ifnobase + 1;                 /* Slave[0] interface number */
 
-      COMPILE_TIME_ASSERTION(sizeof(struct cdc_union_funcdesc_s) == SIZEOF_UNION_FUNCDESC(1));
-
       buf += sizeof(struct cdc_union_funcdesc_s);
     }
 
@@ -573,8 +527,6 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
       dest->subtype = CDC_DSUBTYPE_CALLMGMT;                  /* Descriptor sub-type */
       dest->caps    = 3;                                      /* Bit encoded capabilities */
       dest->ifno    = devdesc->ifnobase + 1;                  /* Interface number of Data Class interface */
-
-      COMPILE_TIME_ASSERTION(sizeof(struct cdc_callmgmt_funcdesc_s) == SIZEOF_CALLMGMT_FUNCDESC);
 
       buf += sizeof(struct cdc_callmgmt_funcdesc_s);
     }
@@ -610,8 +562,6 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 #else
       dest->iif      = 0;                                     /* iInterface */
 #endif
-
-      COMPILE_TIME_ASSERTION(sizeof(struct usb_ifdesc_s) == USB_SIZEOF_IFDESC);
 
       buf += sizeof(struct usb_ifdesc_s);
     }

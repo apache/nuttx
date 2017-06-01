@@ -51,41 +51,9 @@
 #include "usbmsc.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* This little hack makes the compiler producing an error if the (constant)
- * condition is not true.
- *
- * e.g.
- *    COMPILE_TIME_ASSERTION( sizeof(uint8_t) == 1 );
- *
- * when not true, the output is something like
- *
- * test.c:28:2: error: size of unnamed array is negative
- *    COMPILE_TIME_ASSERTION( sizeof(uint8_t) != 1 );
- *    ^
- *
- * else the compiler produces the (empty) statement
- *
- * ((void)sizeof(char[1]))
- *
- * which is optimized out.
- */
-
-#define COMPILE_TIME_ASSERTION(condition) ((void)sizeof(char[1 - 2*!(condition)]))
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Descriptors **************************************************************/
 /* Device descriptor.  If the USB mass storage device is configured as part
  * of a composite device, then the device descriptor will be provided by the
@@ -329,7 +297,6 @@ int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
         return 0;
     }
 
-  COMPILE_TIME_ASSERTION(sizeof(struct usb_epdesc_s) == USB_SIZEOF_EPDESC);
   return sizeof(struct usb_epdesc_s);
 }
 
@@ -392,9 +359,7 @@ int16_t usbmsc_mkcfgdesc(uint8_t *buf,
                         USBMSC_REMOTEWAKEUP;
     dest->mxpower     = (CONFIG_USBDEV_MAXPOWER + 1) / 2; /* Max power (mA/2) */
 
-    COMPILE_TIME_ASSERTION(sizeof(struct usb_cfgdesc_s) == USB_SIZEOF_CFGDESC);
-
-    buf += sizeof(struct usb_cfgdesc_s);
+    buf    += sizeof(struct usb_cfgdesc_s);
     length += sizeof(struct usb_cfgdesc_s);
   }
 #endif
@@ -416,9 +381,7 @@ int16_t usbmsc_mkcfgdesc(uint8_t *buf,
     dest->protocol = USBMSC_PROTO_BULKONLY;                    /* Interface protocol */
     dest->iif      = devdesc->strbase + USBMSC_INTERFACESTRID; /* iInterface */
 
-    COMPILE_TIME_ASSERTION(sizeof(struct usb_ifdesc_s) == USB_SIZEOF_IFDESC);
-
-    buf += sizeof(struct usb_ifdesc_s);
+    buf    += sizeof(struct usb_ifdesc_s);
     length += sizeof(struct usb_ifdesc_s);
   }
 
