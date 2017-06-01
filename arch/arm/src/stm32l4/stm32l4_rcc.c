@@ -114,7 +114,7 @@ static inline void rcc_resetbkp(void)
 
   /* Check if the RTC is already configured */
 
-  init_stat = rtc_is_inits();
+  init_stat = stm32l4_rtc_is_initialized();
   if(!init_stat)
     {
        /* Enable write access to the backup domain (RTC registers, RTC

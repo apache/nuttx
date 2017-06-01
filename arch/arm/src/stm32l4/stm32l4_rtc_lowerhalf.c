@@ -176,7 +176,7 @@ static void stm32l4_alarm_callback(FAR void *arg, unsigned int alarmid)
   rtc_alarm_callback_t cb;
   FAR void *priv;
 
-  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT(arg != NULL);
   DEBUGASSERT(alarmid == RTC_ALARMA || alarmid == RTC_ALARMB);
 
   lower        = (struct stm32l4_lowerhalf_s *)arg;

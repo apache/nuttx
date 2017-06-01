@@ -551,7 +551,7 @@ struct usb_strdesc_s;
 int usbmsc_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc);
 
 /************************************************************************************
- * Name: usbmsc_getepdesc
+ * Name: usbmsc_getdevdesc
  *
  * Description:
  *   Return a pointer to the raw device descriptor

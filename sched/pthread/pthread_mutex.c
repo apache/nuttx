@@ -58,7 +58,7 @@
  * Name: pthread_mutex_add
  *
  * Description:
- *   Add the mutex to the list of mutexes held by this thread.
+ *   Add the mutex to the list of mutexes held by this pthread.
  *
  * Parameters:
  *  mutex - The mux to be locked
@@ -70,17 +70,89 @@
 
 static void pthread_mutex_add(FAR struct pthread_mutex_s *mutex)
 {
-  FAR struct pthread_tcb_s *rtcb = (FAR struct pthread_tcb_s *)this_task();
-  irqstate_t flags;
+  FAR struct tcb_s *rtcb = this_task();
 
   DEBUGASSERT(mutex->flink == NULL);
 
-  /* Add the mutex to the list of mutexes held by this task */
+  /* Check if this is a pthread.  The main thread may also lock and unlock
+   * mutexes.  The main thread, however, does not participate in the mutex
+   * consistency logic.  Presumably, when the main thread exits, all of the
+   * child pthreads will also terminate.
+   *
+   * REVISIT:  NuttX does not support that behavior at present; child pthreads
+   * will persist after the main thread exits.
+   */
 
-  flags        = enter_critical_section();
-  mutex->flink = rtcb->mhead;
-  rtcb->mhead  = mutex;
-  leave_critical_section(flags);
+  if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+    {
+      FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)rtcb;
+      irqstate_t flags;
+
+      /* Add the mutex to the list of mutexes held by this pthread */
+
+      flags        = enter_critical_section();
+      mutex->flink = ptcb->mhead;
+      ptcb->mhead  = mutex;
+      leave_critical_section(flags);
+    }
+}
+
+/****************************************************************************
+ * Name: pthread_mutex_remove
+ *
+ * Description:
+ *   Remove the mutex to the list of mutexes held by this pthread.
+ *
+ * Parameters:
+ *  mutex - The mux to be locked
+ *
+ * Return Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
+{
+  FAR struct tcb_s *rtcb = this_task();
+
+  /* Check if this is a pthread.  The main thread may also lock and unlock
+   * mutexes.  The main thread, however, does not participate in the mutex
+   * consistency logic.
+   */
+
+  if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+    {
+      FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)rtcb;
+      FAR struct pthread_mutex_s *curr;
+      FAR struct pthread_mutex_s *prev;
+      irqstate_t flags;
+
+      flags = enter_critical_section();
+
+      /* Remove the mutex from the list of mutexes held by this task */
+
+      for (prev = NULL, curr = ptcb->mhead;
+           curr != NULL && curr != mutex;
+           prev = curr, curr = curr->flink);
+
+      DEBUGASSERT(curr == mutex);
+
+      /* Remove the mutex from the list.  prev == NULL means that the mutex
+       * to be removed is at the head of the list.
+       */
+
+      if (prev == NULL)
+        {
+          ptcb->mhead = mutex->flink;
+        }
+      else
+        {
+          prev->flink = mutex->flink;
+        }
+
+      mutex->flink = NULL;
+      leave_critical_section(flags);
+    }
 }
 
 /****************************************************************************
@@ -233,8 +305,6 @@ int pthread_mutex_trytake(FAR struct pthread_mutex_s *mutex)
 
 int pthread_mutex_give(FAR struct pthread_mutex_s *mutex)
 {
-  FAR struct pthread_mutex_s *curr;
-  FAR struct pthread_mutex_s *prev;
   int ret = EINVAL;
 
   /* Verify input parameters */
@@ -242,34 +312,9 @@ int pthread_mutex_give(FAR struct pthread_mutex_s *mutex)
   DEBUGASSERT(mutex != NULL);
   if (mutex != NULL)
     {
-      FAR struct pthread_tcb_s *rtcb = (FAR struct pthread_tcb_s *)this_task();
-      irqstate_t flags;
-
-      flags = enter_critical_section();
-
       /* Remove the mutex from the list of mutexes held by this task */
 
-      for (prev = NULL, curr = rtcb->mhead;
-           curr != NULL && curr != mutex;
-           prev = curr, curr = curr->flink);
-
-      DEBUGASSERT(curr == mutex);
-
-      /* Remove the mutex from the list.  prev == NULL means that the mutex
-       * to be removed is at the head of the list.
-       */
-
-      if (prev == NULL)
-        {
-          rtcb->mhead = mutex->flink;
-        }
-      else
-        {
-          prev->flink = mutex->flink;
-        }
-
-      mutex->flink = NULL;
-      leave_critical_section(flags);
+      pthread_mutex_remove(mutex);
 
       /* Now release the underlying semaphore */
 
@@ -300,7 +345,7 @@ int pthread_mutex_give(FAR struct pthread_mutex_s *mutex)
 #ifdef CONFIG_CANCELLATION_POINTS
 uint16_t pthread_disable_cancel(void)
 {
-   FAR struct pthread_tcb_s *tcb = (FAR struct pthread_tcb_s *)this_task();
+   FAR struct tcb_s *tcb = this_task();
    irqstate_t flags;
    uint16_t old;
 
@@ -309,15 +354,15 @@ uint16_t pthread_disable_cancel(void)
     */
 
    flags = enter_critical_section();
-   old = tcb->cmn.flags & (TCB_FLAG_CANCEL_PENDING | TCB_FLAG_NONCANCELABLE);
-   tcb->cmn.flags &= ~(TCB_FLAG_CANCEL_PENDING | TCB_FLAG_NONCANCELABLE);
+   old = tcb->flags & (TCB_FLAG_CANCEL_PENDING | TCB_FLAG_NONCANCELABLE);
+   tcb->flags &= ~(TCB_FLAG_CANCEL_PENDING | TCB_FLAG_NONCANCELABLE);
    leave_critical_section(flags);
    return old;
 }
 
 void pthread_enable_cancel(uint16_t cancelflags)
 {
-   FAR struct pthread_tcb_s *tcb = (FAR struct pthread_tcb_s *)this_task();
+   FAR struct tcb_s *tcb = this_task();
    irqstate_t flags;
 
    /* We need perform the following operations from within a critical section
@@ -325,7 +370,7 @@ void pthread_enable_cancel(uint16_t cancelflags)
     */
 
    flags = enter_critical_section();
-   tcb->cmn.flags |= cancelflags;
+   tcb->flags |= cancelflags;
 
    /* What should we do if there is a pending cancellation?
     *
@@ -337,8 +382,8 @@ void pthread_enable_cancel(uint16_t cancelflags)
     * then we need to terminate now by simply calling pthread_exit().
     */
 
-   if ((tcb->cmn.flags & TCB_FLAG_CANCEL_DEFERRED) == 0 &&
-       (tcb->cmn.flags & TCB_FLAG_CANCEL_PENDING) != 0)
+   if ((tcb->flags & TCB_FLAG_CANCEL_DEFERRED) == 0 &&
+       (tcb->flags & TCB_FLAG_CANCEL_PENDING) != 0)
      {
        pthread_exit(NULL);
      }

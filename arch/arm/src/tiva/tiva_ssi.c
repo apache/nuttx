@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/tiva_ssi.c
  *
- *   Copyright (C) 2009-2010, 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1616,8 +1616,8 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
        *   to the SSI3 peripheral, bringing it a fully functional state.
        */
 
-      tiva_ssi1_enablepwr();
-      tiva_ssi1_enableclk();
+      tiva_ssi3_enablepwr();
+      tiva_ssi3_enableclk();
 
       /* Configure SSI3 GPIOs */
 
@@ -1626,7 +1626,7 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
       tiva_configgpio(GPIO_SSI3_RX);   /* PE2: SSI3 receive (SSI3Rx) */
       tiva_configgpio(GPIO_SSI3_TX);   /* PE3: SSI3 transmit (SSI3Tx) */
       break;
-#endif /* CONFIG_TIVA_SSI1 */
+#endif /* CONFIG_TIVA_SSI3 */
 
     default:
       leave_critical_section(flags);

@@ -352,7 +352,14 @@ static int  mtdconfig_findfirstentry(FAR struct mtdconfig_struct_s *dev,
   off_t     bytes_left_in_block;
   uint16_t  endblock;
 
-  mtdconfig_readbytes(dev, 0, sig, sizeof(sig));  /* Read the signature bytes */
+  /* Read the signature bytes */
+
+  ret = mtdconfig_readbytes(dev, 0, sig, sizeof(sig));
+  if (ret != OK)
+    {
+      return 0;
+    }
+
   if (sig[0] != 'C' || sig[1] != 'D' || sig[2] != CONFIGDATA_FORMAT_VERSION)
     {
       /* Config Data partition not formatted. */
@@ -788,7 +795,14 @@ static off_t  mtdconfig_consolidate(FAR struct mtdconfig_struct_s *dev)
       /* Scan all headers and move them to the src_offset */
 
 retry_relocate:
-      MTD_READ(dev->mtd, src_offset, sizeof(hdr), (uint8_t *) &hdr);
+      bytes = MTD_READ(dev->mtd, src_offset, sizeof(hdr), (uint8_t *) &hdr);
+      if (bytes != sizeof(hdr))
+        {
+          /* I/O Error! */
+
+          goto errout;
+        }
+
       if (hdr.flags == MTD_ERASED_FLAGS)
         {
           /* Test if the source entry is active or if we are at the end
@@ -967,6 +981,11 @@ static ssize_t mtdconfig_read(FAR struct file *filep, FAR char *buffer,
   /* Read data from the file */
 
   bytes = MTD_READ(dev->mtd, dev->readoff, len, (uint8_t *) buffer);
+  if (bytes != len)
+    {
+      return -EIO;
+    }
+
   dev->readoff += bytes;
   return bytes;
 }
@@ -981,6 +1000,7 @@ static int mtdconfig_findentry(FAR struct mtdconfig_struct_s *dev,
                                FAR struct mtdconfig_header_s *phdr)
 {
   uint16_t  endblock;
+  int       ret;
 
 #ifdef CONFIG_MTD_CONFIG_RAM_CONSOLIDATE
   endblock = dev->neraseblocks;
@@ -1013,7 +1033,15 @@ static int mtdconfig_findentry(FAR struct mtdconfig_struct_s *dev,
 
           /* Read the 1st header from the next block */
 
-          mtdconfig_readbytes(dev, offset, (uint8_t *) phdr, sizeof(*phdr));
+          ret = mtdconfig_readbytes(dev, offset, (uint8_t *) phdr, sizeof(*phdr));
+          if (ret != OK)
+            {
+              /* Error reading the data */
+
+              offset = 0;
+              break;
+            }
+
           if (phdr->flags == MTD_ERASED_FLAGS)
             {
               continue;

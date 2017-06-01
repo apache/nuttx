@@ -65,6 +65,10 @@
 #  define lis2dh_dbg(x, ...)        sninfo(x, ##__VA_ARGS__)
 #endif
 
+#ifndef CONFIG_LIS2DH_I2C_FREQUENCY
+#  define CONFIG_LIS2DH_I2C_FREQUENCY   400000
+#endif
+
 #ifdef CONFIG_LIS2DH_DRIVER_SELFTEST
 #  define LSB_AT_10BIT_RESOLUTION       4
 #  define LSB_AT_12BIT_RESOLUTION       1
@@ -1594,16 +1598,18 @@ static int lis2dh_access(FAR struct lis2dh_dev_s *dev, uint8_t subaddr,
       struct i2c_msg_s msgv[2] =
       {
           {
-              .addr   = dev->addr,
-              .flags  = 0,
-              .buffer = &subaddr,
-              .length = 1
+              .frequency = CONFIG_LIS2DH_I2C_FREQUENCY,
+              .addr      = dev->addr,
+              .flags     = 0,
+              .buffer    = &subaddr,
+              .length    = 1
           },
           {
-              .addr   = dev->addr,
-              .flags  = flags,
-              .buffer = buf,
-              .length = length
+              .frequency = CONFIG_LIS2DH_I2C_FREQUENCY,
+              .addr      = dev->addr,
+              .flags     = flags,
+              .buffer    = buf,
+              .length    = length
           }
       };
 

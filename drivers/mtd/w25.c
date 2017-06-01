@@ -224,6 +224,7 @@ struct w25_dev_s
   struct mtd_dev_s      mtd;         /* MTD interface */
   FAR struct spi_dev_s *spi;         /* Saved SPI interface instance */
   uint16_t              nsectors;    /* Number of erase sectors */
+  uint8_t               prev_instr;  /* Previous instruction given to W25 device */
 
 #if defined(CONFIG_W25_SECTOR512) && !defined(CONFIG_W25_READONLY)
   uint8_t               flags;       /* Buffered sector flags */
@@ -247,6 +248,7 @@ static void w25_unprotect(FAR struct w25_dev_s *priv);
 static uint8_t w25_waitwritecomplete(FAR struct w25_dev_s *priv);
 static inline void w25_wren(FAR struct w25_dev_s *priv);
 static inline void w25_wrdi(FAR struct w25_dev_s *priv);
+static bool w25_is_erased(struct w25_dev_s *priv, off_t address, off_t size);
 static void w25_sectorerase(FAR struct w25_dev_s *priv, off_t offset);
 static inline int w25_chiperase(FAR struct w25_dev_s *priv);
 static void w25_byteread(FAR struct w25_dev_s *priv, FAR uint8_t *buffer,
@@ -494,17 +496,17 @@ static uint8_t w25_waitwritecomplete(struct w25_dev_s *priv)
 
       /* Given that writing could take up to few tens of milliseconds, and erasing
        * could take more.  The following short delay in the "busy" case will allow
-       * other peripherals to access the SPI bus.
+       * other peripherals to access the SPI bus.  Delay would slow down writing
+       * too much, so go to sleep only if previous operation was not a page program
+       * operation.
        */
 
-#if 0 /* Makes writes too slow */
-      if ((status & W25_SR_BUSY) != 0)
+      if (priv->prev_instr != W25_PP && (status & W25_SR_BUSY) != 0)
         {
           w25_unlock(priv->spi);
           usleep(1000);
           w25_lock(priv->spi);
         }
-#endif
     }
   while ((status & W25_SR_BUSY) != 0);
 
@@ -550,6 +552,55 @@ static inline void w25_wrdi(struct w25_dev_s *priv)
 }
 
 /************************************************************************************
+ * Name:  w25_is_erased
+ ************************************************************************************/
+
+static bool w25_is_erased(struct w25_dev_s *priv, off_t address, off_t size)
+{
+  size_t npages = size >> W25_PAGE_SHIFT;
+  uint32_t erased_32;
+  unsigned int i;
+  uint32_t *buf;
+
+  DEBUGASSERT((address % W25_PAGE_SIZE) == 0);
+  DEBUGASSERT((size % W25_PAGE_SIZE) == 0);
+
+  buf = kmm_malloc(W25_PAGE_SIZE);
+  if (!buf)
+    {
+      return false;
+    }
+
+  memset(&erased_32, W25_ERASED_STATE, sizeof(erased_32));
+
+  /* Walk all pages in given area. */
+
+  while (npages)
+    {
+      /* Check if all bytes of page is in erased state. */
+
+      w25_byteread(priv, (unsigned char *)buf, address, W25_PAGE_SIZE);
+
+      for (i = 0; i < W25_PAGE_SIZE / sizeof(uint32_t); i++)
+        {
+          if (buf[i] != erased_32)
+            {
+              /* Page not in erased state! */
+
+              kmm_free(buf);
+              return false;
+            }
+        }
+
+      address += W25_PAGE_SIZE;
+      npages--;
+    }
+
+  kmm_free(buf);
+  return true;
+}
+
+/************************************************************************************
  * Name:  w25_sectorerase
  ************************************************************************************/
 
@@ -558,6 +609,15 @@ static void w25_sectorerase(struct w25_dev_s *priv, off_t sector)
   off_t address = sector << W25_SECTOR_SHIFT;
 
   finfo("sector: %08lx\n", (long)sector);
+
+  /* Check if sector is already erased. */
+
+  if (w25_is_erased(priv, address, W25_SECTOR_SIZE))
+    {
+      /* Sector already in erased state, so skip erase. */
+
+      return;
+    }
 
   /* Wait for any preceding write or erase operation to complete. */
 
@@ -574,6 +634,7 @@ static void w25_sectorerase(struct w25_dev_s *priv, off_t sector)
   /* Send the "Sector Erase (SE)" instruction */
 
   (void)SPI_SEND(priv->spi, W25_SE);
+  priv->prev_instr = W25_SE;
 
   /* Send the sector address high byte first. Only the most significant bits (those
    * corresponding to the sector) have any meaning.
@@ -611,6 +672,7 @@ static inline int w25_chiperase(struct w25_dev_s *priv)
   /* Send the "Chip Erase (CE)" instruction */
 
   (void)SPI_SEND(priv->spi, W25_CE);
+  priv->prev_instr = W25_CE;
 
   /* Deselect the FLASH */
 
@@ -647,8 +709,10 @@ static void w25_byteread(FAR struct w25_dev_s *priv, FAR uint8_t *buffer,
 
 #ifdef CONFIG_W25_SLOWREAD
   (void)SPI_SEND(priv->spi, W25_RDDATA);
+  priv->prev_instr = W25_RDDATA;
 #else
   (void)SPI_SEND(priv->spi, W25_FRD);
+  priv->prev_instr = W25_FRD;
 #endif
 
   /* Send the address high byte first. */
@@ -704,6 +768,7 @@ static void w25_pagewrite(struct w25_dev_s *priv, FAR const uint8_t *buffer,
       /* Send the "Page Program (W25_PP)" Command */
 
       SPI_SEND(priv->spi, W25_PP);
+      priv->prev_instr = W25_PP;
 
       /* Send the address high byte first. */
 
@@ -760,6 +825,7 @@ static inline void w25_bytewrite(struct w25_dev_s *priv, FAR const uint8_t *buff
   /* Send "Page Program (PP)" command */
 
   (void)SPI_SEND(priv->spi, W25_PP);
+  priv->prev_instr = W25_PP;
 
   /* Send the page offset high byte first. */
 

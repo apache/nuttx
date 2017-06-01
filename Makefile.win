@@ -275,7 +275,11 @@ tools\mkdeps$(HOSTEXEEXT):
 # Directories links.  Most of establishing the NuttX configuration involves
 # setting up symbolic links with 'generic' directory names to specific,
 # configured directories.
-#
+
+Make.defs:
+	echo "include $(TOPDIR)$(DELIM).config" > Make.defs
+	echo "include $(TOPDIR)$(DELIM)tools$(DELIM)Config.mk" >> Make.defs
+
 # Link the arch\<arch-name>\include directory to include\arch
 
 include\arch: Make.defs

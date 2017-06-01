@@ -95,6 +95,10 @@
 # define CONFIG_RTC_MAGIC_REG (0)
 #endif
 
+#define RTC_MAGIC            CONFIG_RTC_MAGIC
+#define RTC_MAGIC_TIME_SET   CONFIG_RTC_MAGIC_TIME_SET
+#define RTC_MAGIC_REG        STM32L4_RTC_BKR(CONFIG_RTC_MAGIC_REG)
+
 /* Constants ************************************************************************/
 
 #define SYNCHRO_TIMEOUT  (0x00020000)
@@ -816,7 +820,7 @@ static inline void rtc_enable_alarm(void)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: rtc_is_inits
+ * Name: stm32l4_rtc_is_initialized
  *
  * Description:
  *    Returns 'true' if the RTC has been initialized (according to the RTC itself).
@@ -831,7 +835,7 @@ static inline void rtc_enable_alarm(void)
  *
  ************************************************************************************/
 
-bool rtc_is_inits(void)
+bool stm32l4_rtc_is_initialized(void)
 {
   uint32_t regval;
 
@@ -867,8 +871,7 @@ int up_rtc_initialize(void)
    * backed, we don't need or want to re-initialize on each reset.
    */
 
-  init_stat = rtc_is_inits();
-
+  init_stat = stm32l4_rtc_is_initialized();
   if (!init_stat)
     {
       /* Enable write access to the backup domain (RTC registers, RTC
@@ -1164,7 +1167,7 @@ int stm32l4_rtc_setdatetime(FAR const struct tm *tp)
 
   /* Then write the broken out values to the RTC */
 
-  /* Convert the struct tm format to RTC time register fields.  All of the STM32
+  /* Convert the struct tm format to RTC time register fields.
    * All of the ranges of values correspond between struct tm and the time
    * register.
    */
@@ -1216,10 +1219,10 @@ int stm32l4_rtc_setdatetime(FAR const struct tm *tp)
 
   /* Remember that the RTC is initialized and had its time set. */
 
-  if (getreg32(CONFIG_RTC_MAGIC_REG) != CONFIG_RTC_MAGIC_TIME_SET)
+  if (getreg32(RTC_MAGIC_REG) != RTC_MAGIC_TIME_SET)
     {
       stm32l4_pwr_enablebkp(true);
-      putreg32(CONFIG_RTC_MAGIC_TIME_SET, CONFIG_RTC_MAGIC_REG);
+      putreg32(RTC_MAGIC_TIME_SET, RTC_MAGIC_REG);
       stm32l4_pwr_enablebkp(false);
     }
 
@@ -1243,7 +1246,7 @@ int stm32l4_rtc_setdatetime(FAR const struct tm *tp)
 
 bool stm32l4_rtc_havesettime(void)
 {
-  return getreg32(CONFIG_RTC_MAGIC_REG) == CONFIG_RTC_MAGIC_TIME_SET;
+  return getreg32(RTC_MAGIC_REG) == RTC_MAGIC_TIME_SET;
 }
 
 /************************************************************************************

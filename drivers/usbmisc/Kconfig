@@ -14,6 +14,11 @@ config FUSB301
 
 if FUSB301
 
+config FUSB301_I2C_FREQUENCY
+	int "FUSB301 I2C frequency"
+	default 400000
+	range 1 400000
+
 config DEBUG_FUSB301
 	bool "Enable debug support for the FUSB301"
 	default n

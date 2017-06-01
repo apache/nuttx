@@ -186,6 +186,13 @@ Ubuntu Bash under Windows 10
   With these differences (perhaps a few other Windows quirks) the Ubuntu
   install works just like Ubuntu running natively on your PC.
 
+  A good tip for file sharing is to use symbolic links within your Ubuntu
+  home directory.  For example, suppose you have your "projects" directory
+  at C:\Documents\projects.  Then you can set up a link to the projects/
+  directory in your Ubuntu directory like:
+
+    $ ln -s /mnt/c/Documents/projects projects
+
   Accessing Ubuntu Files From Windows
   -----------------------------------
   In Ubuntu Userspace for Windows, the Ubuntu file system root directory is
@@ -205,6 +212,8 @@ Ubuntu Bash under Windows 10
   able to use Windows tools outside of the Ubuntu sandbox with versions of
   NuttX built within the sandbox using that path.
 
+  Executing Windows Tools from Ubuntu
+  -----------------------------------
   You can also execute Windows tools from within the Ubuntu sandbox:
 
     $ /mnt/c/Program\ Files\ \(x86\)/Microchip/xc32/v1.43/bin/xc32-gcc.exe --version
@@ -217,7 +226,7 @@ Ubuntu Bash under Windows 10
   POSIX paths.  I think you would have to use Linux tools only from within
   the Ubuntu sandbox.
 
-  Install Linux Software.
+  Install Ubuntu Software
   -----------------------
   Use "sudo apt-get install <package name>".  As examples, this is how
   you would get GIT:

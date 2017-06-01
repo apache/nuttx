@@ -61,6 +61,10 @@
 #  define hts221_dbg(x, ...)    sninfo(x, ##__VA_ARGS__)
 #endif
 
+#ifndef CONFIG_HTS221_I2C_FREQUENCY
+#  define CONFIG_HTS221_I2C_FREQUENCY 400000
+#endif
+
 #define HTS221_WHO_AM_I             0x0f
 #define HTS221_AV_CONF              0x10
 #define HTS221_CTRL_REG1            0x20
@@ -221,16 +225,18 @@ static int32_t hts221_write_reg8(FAR struct hts221_dev_s *priv,
   struct i2c_msg_s msgv[2] =
   {
     {
-      .addr   = priv->addr,
-      .flags  = 0,
-      .buffer = (FAR void *)&command[0],
-      .length = 1
+      .frequency = CONFIG_HTS221_I2C_FREQUENCY,
+      .addr      = priv->addr,
+      .flags     = 0,
+      .buffer    = (FAR void *)&command[0],
+      .length    = 1
     },
     {
-      .addr   = priv->addr,
-      .flags  = I2C_M_NORESTART,
-      .buffer = (FAR void *)&command[1],
-      .length = 1
+      .frequency = CONFIG_HTS221_I2C_FREQUENCY,
+      .addr      = priv->addr,
+      .flags     = I2C_M_NORESTART,
+      .buffer    = (FAR void *)&command[1],
+      .length    = 1
     }
   };
 
@@ -243,16 +249,18 @@ static int hts221_read_reg(FAR struct hts221_dev_s *priv,
   struct i2c_msg_s msgv[2] =
   {
     {
-      .addr   = priv->addr,
-      .flags  = 0,
-      .buffer = (FAR void *)command,
-      .length = 1
+      .frequency = CONFIG_HTS221_I2C_FREQUENCY,
+      .addr      = priv->addr,
+      .flags     = 0,
+      .buffer    = (FAR void *)command,
+      .length    = 1
     },
     {
-      .addr   = priv->addr,
-      .flags  = I2C_M_READ,
-      .buffer = value,
-      .length = 1
+      .frequency = CONFIG_HTS221_I2C_FREQUENCY,
+      .addr      = priv->addr,
+      .flags     = I2C_M_READ,
+      .buffer    = value,
+      .length    = 1
     }
   };
 

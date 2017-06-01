@@ -309,17 +309,15 @@ int stm32l4_configgpio(uint32_t cfgset)
 
   /* Otherwise, it is an input pin.  Should it configured as an EXTI interrupt? */
 
-  if ((cfgset & GPIO_EXTI) != 0)
+  if (pinmode != GPIO_MODER_OUTPUT && (cfgset & GPIO_EXTI) != 0)
     {
-#if 0
-      /* "In STM32 F1 the selection of the EXTI line source is performed through
-       *  the EXTIx bits in the AFIO_EXTICRx registers, while in F2 series this
-       *  selection is done through the EXTIx bits in the SYSCFG_EXTICRx registers.
+      /* The selection of the EXTI line source is performed through the EXTIx
+       * bits in the SYSCFG_EXTICRx registers.
        *
-       * "Only the mapping of the EXTICRx registers has been changed, without any
-       *  changes to the meaning of the EXTIx bits. However, the range of EXTI
-       *  bits values has been extended to 0b1000 to support the two ports added
-       *  in F2, port H and I (in F1 series the maximum value is 0b0110)."
+       * The range of EXTI bit values in STM32L4x6 goes to 0b1000 to support the
+       * ports up to PI in STM32L496xx devices. For STM32L4x3 the EXTI bit values
+       * end at 0b111 (for PH0, PH1 and PH3 only) and values for non-existent
+       * ports F and G are reserved.
        */
 
       uint32_t regaddr;
@@ -334,7 +332,6 @@ int stm32l4_configgpio(uint32_t cfgset)
       regval |= (((uint32_t)port) << shift);
 
       putreg32(regval, regaddr);
-#endif
     }
 
   leave_critical_section(flags);
