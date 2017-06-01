@@ -211,7 +211,6 @@ struct usbdev_description_s
 };
 
 #ifdef CONFIG_USBDEV_COMPOSITE
-
 struct composite_devdesc_s
 {
 #ifdef CONFIG_USBDEV_DUALSPEED
