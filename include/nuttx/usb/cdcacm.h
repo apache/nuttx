@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/usb/cdcacm.h
  *
- *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 /****************************************************************************
  * Preprocessor definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 /* CONFIG_CDCACM
  *   Enable compilation of the USB serial driver
@@ -96,6 +97,22 @@
  *   Size of the serial receive/transmit buffers. Default 256.
  */
 
+/* Informations needed in usbdev_description_s */
+
+#define CDCACM_NUM_EPS             (3)
+
+#define CDCACM_EP_INTIN_IDX        (0)
+#define CDCACM_EP_BULKIN_IDX       (1)
+#define CDCACM_EP_BULKOUT_IDX      (2)
+
+#define CDCACM_NCONFIGS            (1)      /* Number of configurations supported */
+
+/* Configuration descriptor values */
+
+#define CDCACM_CONFIGID            (1)      /* The only supported configuration ID */
+
+#define CDCACM_NINTERFACES         (2)      /* Number of interfaces in the configuration */
+
 /* EP0 max packet size */
 
 #ifndef CONFIG_CDCACM_EP0MAXPACKET
@@ -106,8 +123,10 @@
  * notification interrupt endpoint.
  */
 
-#ifndef CONFIG_CDCACM_EPINTIN
-#  define CONFIG_CDCACM_EPINTIN 1
+#ifndef CONFIG_CDCACM_COMPOSITE
+#  ifndef CONFIG_CDCACM_EPINTIN
+#    define CONFIG_CDCACM_EPINTIN 1
+#  endif
 #endif
 
 #ifndef CONFIG_CDCACM_EPINTIN_FSSIZE
@@ -127,8 +146,10 @@
  * size will be followed by a NULL packet.
  */
 
-#ifndef CONFIG_CDCACM_EPBULKIN
-#  define CONFIG_CDCACM_EPBULKIN 2
+#ifndef CONFIG_CDCACM_COMPOSITE
+#  ifndef CONFIG_CDCACM_EPBULKIN
+#    define CONFIG_CDCACM_EPBULKIN 2
+#  endif
 #endif
 
 #ifndef CONFIG_CDCACM_EPBULKIN_FSSIZE
@@ -155,8 +176,10 @@
  * maxpacket size.
  */
 
-#ifndef CONFIG_CDCACM_EPBULKOUT
-#  define CONFIG_CDCACM_EPBULKOUT 3
+#ifndef CONFIG_CDCACM_COMPOSITE
+#  ifndef CONFIG_CDCACM_EPBULKOUT
+#    define CONFIG_CDCACM_EPBULKOUT 3
+#  endif
 #endif
 
 #ifndef CONFIG_CDCACM_EPBULKOUT_FSSIZE
@@ -326,7 +349,9 @@ typedef FAR void (*cdcacm_callback_t)(enum cdcacm_event_e event);
 
 #if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_CDCACM_COMPOSITE)
 struct usbdevclass_driver_s;
-int board_cdcclassobject(FAR struct usbdevclass_driver_s **classdev);
+struct usbdev_description_s;
+int board_cdcclassobject(int minor, FAR struct usbdev_description_s *devdesc,
+                         FAR struct usbdevclass_driver_s **classdev);
 #endif
 
 /****************************************************************************
@@ -370,7 +395,9 @@ void board_cdcuninitialize(FAR struct usbdevclass_driver_s *classdev);
  ****************************************************************************/
 
 #if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_CDCACM_COMPOSITE)
-int cdcacm_classobject(int minor, FAR struct usbdevclass_driver_s **classdev);
+struct usbdev_description_s;
+int cdcacm_classobject(int minor, struct usbdev_description_s *devdesc,
+                       FAR struct usbdevclass_driver_s **classdev);
 #endif
 
 /****************************************************************************
@@ -423,6 +450,26 @@ int cdcacm_initialize(int minor, FAR void **handle);
 void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev);
 #else
 void cdcacm_uninitialize(FAR void *handle);
+#endif
+
+/****************************************************************************
+ * Name: cdcacm_get_composite_devdesc
+ *
+ * Description:
+ *   Helper function to fill in some constants into the composite
+ *   configuration struct.
+ *
+ * Input Parameters:
+ *     dev - Pointer to the configuration struct we should fill
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_CDCACM_COMPOSITE)
+struct composite_devdesc_s;
+void cdcacm_get_composite_devdesc(struct composite_devdesc_s *dev);
 #endif
 
 #undef EXTERN

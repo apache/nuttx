@@ -1,7 +1,7 @@
 /********************************************************************************************
  * include/nuttx/usb/cdc.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: "Universal Serial Bus Class Definitions for Communication
@@ -73,7 +73,7 @@
 /* Table 17: Communication Interface Class Control Protocol Codes */
 
 #define CDC_PROTO_NONE          0x00 /* No class specific protocol required */
-#define CDC_PROTO_ATM           0x01 /* Common AT commands (also known as Hayes compatible”) */
+#define CDC_PROTO_ATM           0x01 /* Common AT commands (also known as Hayes compatible) */
                                      /* 0x02-0xfe Reserved (future use) */
 #define CDC_PROTO_VENDOR        0xff /* Vendor-specific */
 
@@ -242,12 +242,12 @@
                                       * (Optional)
                                       */
 #define ECM_SET_MCAST_FILTERS   0x40 /* As applications are loaded and unloaded on the host,
-                                      * the networking transport will instruct the device’s MAC
-                                      * driver to change settings of the Networking device’s
+                                      * the networking transport will instruct the device's MAC
+                                      * driver to change settings of the Networking device's
                                       * multicast filters. (Optional)
                                       */
 #define ECM_SET_PM_PAT_FILTER   0x41 /* Some hosts are able to conserve energy and stay quiet
-                                      * in a “sleeping” state while not being used. USB
+                                      * in a "sleeping" state while not being used. USB
                                       * Networking devices may provide special pattern filtering
                                       * hardware that enables it to wake up the attached host
                                       * on demand when something is attempting to contact the
@@ -588,20 +588,20 @@ struct cdc_funcdesc_s
 
 /* Table 26: Class-Specific Descriptor Header Format */
 
-struct cdc_hdr_funcdesc_s
+begin_packed_struct struct cdc_hdr_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
   uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_HDR as defined in Table 25 */
-  uint8_t cdc[2];    /* bcdCDC, USB Class Definitions for Communication Devices Specification release
-                      * number in binary-coded decimal.
+  uint8_t cdc[2];    /* bcdCDC, USB Class Definitions for Communication Devices Specification
+                      * release number in binary-coded decimal.
                       */
-};
+} end_packed_struct;
 #define SIZEOF_HDR_FUNCDESC 5
 
 /* Table 27: Call Management Functional Descriptor */
 
-struct cdc_callmgmt_funcdesc_s
+begin_packed_struct struct cdc_callmgmt_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
   uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
@@ -610,18 +610,18 @@ struct cdc_callmgmt_funcdesc_s
   uint8_t ifno;      /* bDataInterface, Interface number of Data Class interface
                       * optionally used for call management
                       */
-};
+} end_packed_struct;
 #define SIZEOF_CALLMGMT_FUNCDESC 5
 
 /* Table 28: Abstract Control Management Functional Descriptor */
 
-struct cdc_acm_funcdesc_s
+begin_packed_struct struct cdc_acm_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
   uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_ACM as defined in Table 25 */
   uint8_t caps;      /* bmCapabilities: Bit encoded */
-};
+} end_packed_struct;
 #define SIZEOF_ACM_FUNCDESC 4
 
 /* Table 29: Direct Line Management Functional Descriptor */
@@ -673,7 +673,7 @@ struct cdc_tcmc_funcdesc_s
 
 /* Table 33: Union Interface Functional Descriptor */
 
-struct cdc_union_funcdesc_s
+begin_packed_struct struct cdc_union_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
   uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
@@ -685,7 +685,7 @@ struct cdc_union_funcdesc_s
   uint8_t slave[1];  /* bSlaveInterfaceN: Interface number of N slave or associated
                       * interface in the union
                       */
-};
+} end_packed_struct;
 #define SIZEOF_UNION_FUNCDESC(n) ((n)+4)
 
 /* Table 34: Country Selection Functional Descriptor */
@@ -788,7 +788,7 @@ struct cdc_capi_funcdesc_s
 };
 #define SIZEOF_CAPI_FUNCDESC 4
 
-/* Table 41: Ethernet Networking Functional Descriptor*/
+/* Table 41: Ethernet Networking Functional Descriptor */
 
 struct cdc_ecm_funcdesc_s
 {
@@ -833,7 +833,7 @@ struct cdc_atm_funcdesc_s
                       * capable of supporting
                       */
 };
-#define SIZEOF_CALLMGMT_FUNCDESC 12
+#define SIZEOF_ATM_FUNCDESC 12
 
 /* Descriptor Data Structures ***************************************************************/
 /* Table 50: Line Coding Structure */

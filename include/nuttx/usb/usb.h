@@ -306,7 +306,7 @@ struct usb_devdesc_s
 
 /* Configuration descriptor */
 
-struct usb_cfgdesc_s
+begin_packed_struct struct usb_cfgdesc_s
 {
   uint8_t len;               /* Descriptor length */
   uint8_t type;              /* Descriptor type */
@@ -316,7 +316,7 @@ struct usb_cfgdesc_s
   uint8_t icfg;              /* Configuration */
   uint8_t attr;              /* Attributes */
   uint8_t mxpower;           /* Max power (mA/2) */
-};
+} end_packed_struct;
 #define USB_SIZEOF_CFGDESC 9
 
 struct usb_otherspeedconfigdesc_s
@@ -343,7 +343,7 @@ struct usb_strdesc_s
 
 /* Interface descriptor */
 
-struct usb_ifdesc_s
+begin_packed_struct struct usb_ifdesc_s
 {
   uint8_t len;               /* Descriptor length */
   uint8_t type;              /* Descriptor type */
@@ -354,12 +354,12 @@ struct usb_ifdesc_s
   uint8_t subclass;          /* Interface sub-class */
   uint8_t protocol;          /* Interface protocol */
   uint8_t iif;               /* iInterface */
-};
+} end_packed_struct;
 #define USB_SIZEOF_IFDESC 9
 
 /* Endpoint descriptor */
 
-struct usb_epdesc_s
+begin_packed_struct struct usb_epdesc_s
 {
   uint8_t  len;               /* Descriptor length */
   uint8_t  type;              /* Descriptor type */
@@ -367,7 +367,7 @@ struct usb_epdesc_s
   uint8_t  attr;              /* Endpoint attributes */
   uint8_t  mxpacketsize[2];   /* Maximum packet size */
   uint8_t  interval;          /* Interval */
-};
+} end_packed_struct;
 #define USB_SIZEOF_EPDESC 7
 
 struct usb_audioepdesc_s
@@ -404,7 +404,7 @@ struct usb_qualdesc_s
  * interfaces.
  */
 
-struct usb_iaddesc_s
+begin_packed_struct struct usb_iaddesc_s
 {
   uint8_t  len;               /* Descriptor length */
   uint8_t  type;              /* Descriptor type */
@@ -414,7 +414,7 @@ struct usb_iaddesc_s
   uint8_t  subclass;          /* Sub-class code */
   uint8_t  protocol;          /* Protocol code */
   uint8_t  ifunction;         /* Index to string identifying the function */
-};
+} end_packed_struct;
 #define USB_SIZEOF_IADDESC 8
 
 /************************************************************************************

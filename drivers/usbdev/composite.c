@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/composite.c
  *
- *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,16 +60,6 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure describes the internal state of the driver */
-
-struct composite_dev_s
-{
-  FAR struct usbdev_s         *usbdev;   /* usbdev driver pointer */
-  uint8_t                      config;   /* Configuration number */
-  FAR struct usbdev_req_s     *ctrlreq;  /* Allocated control request */
-  struct usbdevclass_driver_s *dev1;     /* Device 1 class object */
-  struct usbdevclass_driver_s *dev2;     /* Device 2 class object */
-};
 
 /* The internal version of the class driver */
 
@@ -146,9 +136,6 @@ const char g_compserialstr[]  = CONFIG_COMPOSITE_SERIALSTR;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-/****************************************************************************
- * Helpers
- ****************************************************************************/
 
 /****************************************************************************
  * Name: composite_ep0incomplete
@@ -165,7 +152,8 @@ static void composite_ep0incomplete(FAR struct usbdev_ep_s *ep,
 
   if (req->result || req->xfrd != req->len)
     {
-      usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_REQRESULT), (uint16_t)-req->result);
+      usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_REQRESULT),
+               (uint16_t)-req->result);
     }
 }
 
@@ -185,17 +173,20 @@ static int composite_classsetup(FAR struct composite_dev_s *priv,
   uint16_t index;
   uint8_t  interface;
   int ret = -EOPNOTSUPP;
+  int i;
 
   index     = GETUINT16(ctrl->index);
   interface = (uint8_t)(index & 0xff);
 
-  if (interface >= DEV1_FIRSTINTERFACE && interface < (DEV1_FIRSTINTERFACE + DEV1_NINTERFACES))
+  for (i = 0; i < priv->ndevices; i++)
     {
-      ret = CLASS_SETUP(priv->dev1, dev, ctrl, dataout, outlen);
-    }
-  else if (interface >= DEV2_FIRSTINTERFACE && interface < (DEV2_FIRSTINTERFACE + DEV2_NINTERFACES))
-    {
-      ret = CLASS_SETUP(priv->dev2, dev, ctrl, dataout, outlen);
+      if (interface >= priv->device[i].compdesc.devdesc.ifnobase &&
+          interface < (priv->device[i].compdesc.devdesc.ifnobase +
+                       priv->device[i].compdesc.devdesc.ninterfaces))
+        {
+          ret = CLASS_SETUP(priv->device[i].dev, dev, ctrl, dataout, outlen);
+          break;
+        }
     }
 
   return ret;
@@ -225,6 +216,7 @@ static struct usbdev_req_s *composite_allocreq(FAR struct usbdev_ep_s *ep,
           req = NULL;
         }
     }
+
   return req;
 }
 
@@ -245,6 +237,7 @@ static void composite_freereq(FAR struct usbdev_ep_s *ep,
         {
           EP_FREEBUFFER(ep, req->buf);
         }
+
       EP_FREEREQ(ep, req);
     }
 }
@@ -266,6 +259,7 @@ static int composite_bind(FAR struct usbdevclass_driver_s *driver,
 {
   FAR struct composite_dev_s *priv = ((FAR struct composite_driver_s *)driver)->dev;
   int ret;
+  int i;
 
   usbtrace(TRACE_CLASSBIND, 0);
 
@@ -281,7 +275,7 @@ static int composite_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Preallocate one control request */
 
-  priv->ctrlreq = composite_allocreq(dev->ep0, COMPOSITE_CFGDESCSIZE);
+  priv->ctrlreq = composite_allocreq(dev->ep0, priv->cfgdescsize);
   if (priv->ctrlreq == NULL)
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_ALLOCCTRLREQ), 0);
@@ -295,16 +289,13 @@ static int composite_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Then bind each of the constituent class drivers */
 
-  ret = CLASS_BIND(priv->dev1, dev);
-  if (ret < 0)
+  for (i = 0; i < priv->ndevices; i++)
     {
-      goto errout;
-    }
-
-  ret = CLASS_BIND(priv->dev2, dev);
-  if (ret < 0)
-    {
-      goto errout;
+      ret = CLASS_BIND(priv->device[i].dev, dev);
+      if (ret < 0)
+        {
+          goto errout;
+        }
     }
 
   /* Report if we are selfpowered */
@@ -363,11 +354,15 @@ static void composite_unbind(FAR struct usbdevclass_driver_s *driver,
 
   if (priv != NULL)
     {
+      int i;
+
       /* Unbind the constituent class drivers */
 
       flags = enter_critical_section();
-      CLASS_UNBIND(priv->dev1, dev);
-      CLASS_UNBIND(priv->dev2, dev);
+      for (i = 0; i < priv->ndevices; i++)
+        {
+          CLASS_UNBIND(priv->device[i].dev, dev);
+        }
 
       /* Free the pre-allocated control request */
 
@@ -377,6 +372,7 @@ static void composite_unbind(FAR struct usbdevclass_driver_s *driver,
           composite_freereq(dev->ep0, priv->ctrlreq);
           priv->ctrlreq = NULL;
         }
+
       leave_critical_section(flags);
     }
 }
@@ -423,6 +419,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
       return -ENODEV;
     }
 #endif
+
   ctrlreq   = priv->ctrlreq;
 
   /* Extract the little-endian 16-bit values to host order */
@@ -472,10 +469,10 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
               case USB_DESC_TYPE_CONFIG:
                 {
 #ifdef CONFIG_USBDEV_DUALSPEED
-                  ret = composite_mkcfgdesc(ctrlreq->buf, dev->speed,
+                    ret = composite_mkcfgdesc(priv, ctrlreq->buf, dev->speed,
                                             ctrl->value[1]);
 #else
-                  ret = composite_mkcfgdesc(ctrlreq->buf);
+                    ret = composite_mkcfgdesc(priv, ctrlreq->buf);
 #endif
                 }
                 break;
@@ -491,18 +488,21 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
                     {
                       ret = composite_mkstrdesc(strid, buf);
                     }
-#if DEV1_NSTRIDS > 0
-                  else if (strid <= DEV1_STRIDBASE + DEV1_NSTRIDS)
+                  else
                     {
-                      ret = DEV1_MKSTRDESC(strid, buf);
+                      int i;
+
+                      for (i = 0; i < priv->ndevices; i++)
+                        {
+                          if (strid >= priv->device[i].compdesc.devdesc.strbase &&
+                              strid <  priv->device[i].compdesc.devdesc.strbase +
+                                       priv->device[i].compdesc.devdesc.nstrings)
+                            {
+                              ret = priv->device[i].compdesc.mkstrdesc(strid - priv->device[i].compdesc.devdesc.strbase, buf);
+                              break;
+                            }
+                        }
                     }
-#endif
-#if DEV2_NSTRIDS > 0
-                  else if (strid <= DEV2_STRIDBASE + DEV2_NSTRIDS)
-                    {
-                      ret = DEV2_MKSTRDESC(strid, buf);
-                    }
-#endif
                 }
                 break;
 
@@ -519,19 +519,17 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
           {
             if (ctrl->type == 0)
               {
+                int i;
+
                 /* Save the configuration and inform the constituent classes */
 
-                ret = CLASS_SETUP(priv->dev1, dev, ctrl, dataout, outlen);
-                dispatched = true;
-
-                if (ret >= 0)
+                for (i = 0; i < priv->ndevices; i++)
                   {
-                    ret = CLASS_SETUP(priv->dev2, dev, ctrl, dataout, outlen);
-                    if (ret >= 0)
-                      {
-                        priv->config = value;
-                      }
+                    ret = CLASS_SETUP(priv->device[i].dev, dev, ctrl, dataout, outlen);
                   }
+
+                dispatched = true;
+                priv->config = value;
               }
           }
           break;
@@ -635,6 +633,7 @@ static void composite_disconnect(FAR struct usbdevclass_driver_s *driver,
 {
   FAR struct composite_dev_s *priv;
   irqstate_t flags;
+  int i;
 
   usbtrace(TRACE_CLASSDISCONNECT, 0);
 
@@ -664,8 +663,12 @@ static void composite_disconnect(FAR struct usbdevclass_driver_s *driver,
 
   flags = enter_critical_section();
   priv->config = COMPOSITE_CONFIGIDNONE;
-  CLASS_DISCONNECT(priv->dev1, dev);
-  CLASS_DISCONNECT(priv->dev2, dev);
+
+  for (i = 0; i < priv->ndevices; i++)
+    {
+      CLASS_DISCONNECT(priv->device[i].dev, dev);
+    }
+
   leave_critical_section(flags);
 
   /* Perform the soft connect function so that we will we can be
@@ -688,6 +691,7 @@ static void composite_suspend(FAR struct usbdevclass_driver_s *driver,
 {
   FAR struct composite_dev_s *priv;
   irqstate_t flags;
+  int i;
 
   usbtrace(TRACE_CLASSSUSPEND, 0);
 
@@ -714,8 +718,12 @@ static void composite_suspend(FAR struct usbdevclass_driver_s *driver,
   /* Forward the suspend event to the constituent devices */
 
   flags = enter_critical_section();
-  CLASS_SUSPEND(priv->dev1, priv->usbdev);
-  CLASS_SUSPEND(priv->dev2, priv->usbdev);
+
+  for (i = 0; i < priv->ndevices; i++)
+    {
+      CLASS_SUSPEND(priv->device[i].dev, priv->usbdev);
+    }
+
   leave_critical_section(flags);
 }
 
@@ -732,6 +740,7 @@ static void composite_resume(FAR struct usbdevclass_driver_s *driver,
 {
   FAR struct composite_dev_s *priv = NULL;
   irqstate_t flags;
+  int i;
 
 #ifdef CONFIG_DEBUG_FEATURES
   if (!dev)
@@ -756,8 +765,12 @@ static void composite_resume(FAR struct usbdevclass_driver_s *driver,
   /* Forward the resume event to the constituent devices */
 
   flags = enter_critical_section();
-  CLASS_RESUME(priv->dev1, priv->usbdev);
-  CLASS_RESUME(priv->dev2, priv->usbdev);
+
+  for (i = 0; i < priv->ndevices; i++)
+    {
+      CLASS_RESUME(priv->device[i].dev, priv->usbdev);
+    }
+
   leave_critical_section(flags);
 }
 
@@ -786,16 +799,20 @@ static void composite_resume(FAR struct usbdevclass_driver_s *driver,
  *
  ****************************************************************************/
 
-FAR void *composite_initialize(void)
+FAR void *composite_initialize(uint8_t ndevices,
+                               FAR struct composite_devdesc_s *pdevices)
 {
   FAR struct composite_alloc_s *alloc;
   FAR struct composite_dev_s *priv;
   FAR struct composite_driver_s *drvr;
   int ret;
+  int i;
 
   /* Allocate the structures needed */
 
-  alloc = (FAR struct composite_alloc_s *)kmm_malloc(sizeof(struct composite_alloc_s));
+  alloc = (FAR struct composite_alloc_s *)
+    kmm_malloc(sizeof(struct composite_alloc_s));
+
   if (!alloc)
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_ALLOCDEVSTRUCT), 0);
@@ -811,21 +828,31 @@ FAR void *composite_initialize(void)
 
   memset(priv, 0, sizeof(struct composite_dev_s));
 
-  /* Get the constitueat class driver objects */
+  priv->cfgdescsize = USB_SIZEOF_CFGDESC;
+  priv->ninterfaces = 0;
 
-  ret = DEV1_CLASSOBJECT(&priv->dev1);
-  if (ret < 0)
+  /* Get the constituent class driver objects */
+
+  for (i = 0; i < ndevices; i++)
     {
-      usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_CLASSOBJECT), (uint16_t)-ret);
-      goto errout_with_alloc;
+      memcpy(&priv->device[i].compdesc, &pdevices[i],
+             sizeof(struct composite_devdesc_s));
+
+      ret = priv->device[i].compdesc.board_classobject(priv->device[i].compdesc.minor,
+                                                      &priv->device[i].compdesc.devdesc,
+                                                      &priv->device[i].dev);
+      if (ret < 0)
+        {
+          usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_CLASSOBJECT),
+                   (uint16_t)-ret);
+          goto errout_with_alloc;
+        }
+
+      priv->cfgdescsize += priv->device[i].compdesc.cfgdescsize;
+      priv->ninterfaces += priv->device[i].compdesc.devdesc.ninterfaces;
     }
 
-  ret = DEV2_CLASSOBJECT(&priv->dev2);
-  if (ret < 0)
-    {
-      usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_CLASSOBJECT), (uint16_t)-ret);
-      goto errout_with_alloc;
-    }
+  priv->ndevices = ndevices;
 
   /* Initialize the USB class driver structure */
 
@@ -875,6 +902,7 @@ void composite_uninitialize(FAR void *handle)
 {
   FAR struct composite_alloc_s *alloc = (FAR struct composite_alloc_s *)handle;
   FAR struct composite_dev_s *priv;
+  int i;
 
   DEBUGASSERT(alloc != NULL);
 
@@ -882,8 +910,10 @@ void composite_uninitialize(FAR void *handle)
 
   priv = &alloc->dev;
 
-  DEV1_UNINITIALIZE(priv->dev1);
-  DEV2_UNINITIALIZE(priv->dev2);
+  for (i = 0; i < priv->ndevices; i++)
+    {
+      priv->device[i].compdesc.board_uninitialize(priv->device[i].dev);
+    }
 
   /* Then unregister and destroy the composite class */
 
@@ -894,8 +924,10 @@ void composite_uninitialize(FAR void *handle)
 
   /* Second phase uninitialization:  Clean up all memory resources */
 
-  DEV1_UNINITIALIZE(priv->dev1);
-  DEV2_UNINITIALIZE(priv->dev2);
+  for (i = 0; i < priv->ndevices; i++)
+    {
+      priv->device[i].compdesc.board_uninitialize(priv->device[i].dev);
+    }
 
   /* Then free the composite driver state structure itself */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/composite_desc.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,12 +61,6 @@
  * Private Types
  ****************************************************************************/
 
-#ifdef CONFIG_USBDEV_DUALSPEED
-typedef int16_t (*mkcfgdesc)(FAR uint8_t *buf, uint8_t speed, uint8_t type);
-#else
-typedef int16_t (*mkcfgdesc)(FAR uint8_t *buf);
-#endif
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -74,6 +68,7 @@ typedef int16_t (*mkcfgdesc)(FAR uint8_t *buf);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Device Descriptor */
 
 static const struct usb_devdesc_s g_devdesc =
@@ -84,7 +79,7 @@ static const struct usb_devdesc_s g_devdesc =
     LSBYTE(0x0200),
     MSBYTE(0x0200)
   },
-#ifdef CONFIG_COMPOSITE_IAD
+#ifndef CONFIG_COMPOSITE_IAD
   USB_CLASS_MISC,                               /* classid */
   2,                                            /* subclass */
   1,                                            /* protocol */
@@ -110,25 +105,6 @@ static const struct usb_devdesc_s g_devdesc =
   COMPOSITE_PRODUCTSTRID,                       /* iproduct */
   COMPOSITE_SERIALSTRID,                        /* serno */
   COMPOSITE_NCONFIGS                            /* nconfigs */
-};
-
-/* Configuration descriptor for the composite device */
-
-static const struct usb_cfgdesc_s g_cfgdesc =
-{
-  USB_SIZEOF_CFGDESC,                           /* len */
-  USB_DESC_TYPE_CONFIG,                         /* type */
-  {
-    LSBYTE(COMPOSITE_CFGDESCSIZE),              /* LS totallen */
-    MSBYTE(COMPOSITE_CFGDESCSIZE)               /* MS totallen */
-  },
-  COMPOSITE_NINTERFACES,                        /* ninterfaces */
-  COMPOSITE_CONFIGID,                           /* cfgvalue */
-  COMPOSITE_CONFIGSTRID,                        /* icfg */
-  USB_CONFIG_ATTR_ONE |                         /* attr */
-    COMPOSITE_SELFPOWERED |
-    COMPOSITE_REMOTEWAKEUP,
-  (CONFIG_USBDEV_MAXPOWER + 1) / 2              /* mxpower */
 };
 
 #ifdef CONFIG_USBDEV_DUALSPEED
@@ -243,35 +219,52 @@ FAR const struct usb_devdesc_s *composite_getdevdesc(void)
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-int16_t composite_mkcfgdesc(uint8_t *buf, uint8_t speed, uint8_t type)
+int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv, FAR uint8_t *buf,
+                            uint8_t speed, uint8_t type)
 #else
-int16_t composite_mkcfgdesc(uint8_t *buf)
+int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv, FAR uint8_t *buf)
 #endif
 {
+  FAR struct usb_cfgdesc_s *cfgdesc = (FAR struct usb_cfgdesc_s *)buf;
   int16_t len;
   int16_t total;
+  int i;
 
-  /* Configuration descriptor -- Copy the canned configuration descriptor. */
+  /* Configuration descriptor for the composite device */
+  /* Fill in the values directly into the buf */
 
-  memcpy(buf, &g_cfgdesc, USB_SIZEOF_CFGDESC);
+  cfgdesc->len         = USB_SIZEOF_CFGDESC;               /* Descriptor length */
+  cfgdesc->type        = USB_DESC_TYPE_CONFIG;             /* Descriptor type */
+  cfgdesc->totallen[0] = LSBYTE(priv->cfgdescsize);        /* Lower Byte of Total length */
+  cfgdesc->totallen[1] = MSBYTE(priv->cfgdescsize);        /* High Byte of Total length */
+  cfgdesc->ninterfaces = priv->ninterfaces;                /* Number of interfaces */
+  cfgdesc->cfgvalue    = COMPOSITE_CONFIGID;               /* Configuration value */
+  cfgdesc->icfg        = COMPOSITE_CONFIGSTRID;            /* Configuration */
+  cfgdesc->attr        = USB_CONFIG_ATTR_ONE |             /* Attributes */
+                         COMPOSITE_SELFPOWERED |
+                         COMPOSITE_REMOTEWAKEUP;
+  cfgdesc->mxpower     = (CONFIG_USBDEV_MAXPOWER + 1) / 2; /* Max power (mA/2) */
+
+  /* increment the size and buf to point right behind the information filled in */
+
   total = USB_SIZEOF_CFGDESC;
-  buf  += USB_SIZEOF_CFGDESC;
+  buf += USB_SIZEOF_CFGDESC;
 
-  /* Copy DEV1/DEV2 interface descriptors */
+  /* Copy all contained interface descriptors into the buffer too */
 
+  for (i = 0; i < priv->numDevices; i++)
+    {
 #ifdef CONFIG_USBDEV_DUALSPEED
-  len    = DEV1_MKCFGDESC(buf, speed, type);
-  total += len;
-  buf   += len;
-  total += DEV2_MKCFGDESC(buf, speed, type);
+      len = priv->device[i].comp_devdesc.mkconfdesc(buf, &priv->device[i].comp_devdesc.usb_dev_desc, speed, type);
+      total += len;
+      buf += len;
 #else
-  len    = DEV1_MKCFGDESC(buf);
-  total += len;
-  buf   += len;
-  total += DEV2_MKCFGDESC(buf);
+      len = priv->device[i].comp_devdesc.mkconfdesc(buf, &priv->device[i].comp_devdesc.usb_dev_desc);
+      total += len;
+      buf += len;
 #endif
+    }
 
-  DEBUGASSERT(total == COMPOSITE_CFGDESCSIZE);
   return total;
 }
 

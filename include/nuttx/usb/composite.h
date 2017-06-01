@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/usb/composite.h
  *
- *   Copyright (C) 2008-2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,12 +41,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/usb/usbdev.h>
 
 #ifdef CONFIG_USBDEV_COMPOSITE
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 /* CONFIG_USBDEV_COMPOSITE
  *   Enables USB composite device support
@@ -69,6 +71,11 @@
  * CONFIG_COMPOSITE_VERSIONNO
  *   Interface version number.
  */
+
+#define COMPOSITE_NSTRIDS             (5)  /* The numer of String-IDs to
+                                            * reserve for the composite device */
+#define COMPOSITE_NCONFIGS            (1)  /* The number of configurations
+                                            * supported */
 
 /****************************************************************************
  * Public Types
@@ -113,7 +120,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR void *composite_initialize(void);
+FAR void *composite_initialize(uint8_t numDevices, struct composite_devdesc_s * pDevices);
 
 /****************************************************************************
  * Name: composite_uninitialize
@@ -134,30 +141,6 @@ FAR void *composite_initialize(void);
  ****************************************************************************/
 
 void composite_uninitialize(FAR void *handle);
-
-/****************************************************************************
- * Name: composite_initialize
- *
- * Description:
- *   Register USB composite device as configured.  This function will call
- *   board-specific implementations in order to obtain the class objects for
- *   each of the members of the composite (see board_mscclassobject(),
- *   board_cdcclassobjec(), ...)
- *
- * Input Parameter:
- *   None
- *
- * Returned Value:
- *   A non-NULL "handle" is returned on success.  This handle may be used
- *   later with composite_uninitialize() in order to removed the composite
- *   device.  This handle is the (untyped) internal representation of the
- *   the class driver instance.
- *
- *   NULL is returned on any failure.
- *
- ****************************************************************************/
-
-FAR void *composite_initialize(void);
 
 /****************************************************************************
  * Name: composite_ep0submit

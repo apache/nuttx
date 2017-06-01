@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbmsc.c
  *
- *   Copyright (C) 2008-2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2012, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Mass storage class device.  Bulk-only with SCSI subclass.
@@ -307,7 +307,8 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate the IN bulk endpoint */
 
-  priv->epbulkin = DEV_ALLOCEP(dev, USBMSC_EPINBULK_ADDR, true, USB_EP_ATTR_XFER_BULK);
+  priv->epbulkin = DEV_ALLOCEP(dev, USBMSC_MKEPBULKIN(&priv->usb_dev_desc),
+                               true, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkin)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_EPBULKINALLOCFAIL), 0);
@@ -319,7 +320,8 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate the OUT bulk endpoint */
 
-  priv->epbulkout = DEV_ALLOCEP(dev, USBMSC_EPOUTBULK_ADDR, false, USB_EP_ATTR_XFER_BULK);
+  priv->epbulkout = DEV_ALLOCEP(dev, USBMSC_MKEPBULKOUT(&priv->usb_dev_desc),
+                                false, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkout)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_EPBULKOUTALLOCFAIL), 0);
@@ -334,7 +336,8 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
   for (i = 0; i < CONFIG_USBMSC_NRDREQS; i++)
     {
       reqcontainer      = &priv->rdreqs[i];
-      reqcontainer->req = usbmsc_allocreq(priv->epbulkout, CONFIG_USBMSC_BULKOUTREQLEN);
+      reqcontainer->req = usbmsc_allocreq(priv->epbulkout,
+                                          CONFIG_USBMSC_BULKOUTREQLEN);
       if (reqcontainer->req == NULL)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_RDALLOCREQ),
@@ -342,6 +345,7 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
           ret = -ENOMEM;
           goto errout;
         }
+
       reqcontainer->req->priv     = reqcontainer;
       reqcontainer->req->callback = usbmsc_rdcomplete;
     }
@@ -359,6 +363,7 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
           ret = -ENOMEM;
           goto errout;
         }
+
       reqcontainer->req->priv     = reqcontainer;
       reqcontainer->req->callback = usbmsc_wrcomplete;
 
@@ -929,10 +934,8 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
 {
   FAR struct usbmsc_req_s *privreq;
   FAR struct usbdev_req_s *req;
-#ifdef CONFIG_USBDEV_DUALSPEED
-  FAR const struct usb_epdesc_s *epdesc;
-  bool hispeed = (priv->usbdev->speed == USB_SPEED_HIGH);
-#endif
+  struct usb_epdesc_s epdesc;
+  bool hispeed = false;
   int i;
   int ret = 0;
 
@@ -951,6 +954,10 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_ALREADYCONFIGURED), 0);
       return OK;
     }
+
+#ifdef CONFIG_USBDEV_DUALSPEED
+  hispeed = (priv->usbdev->speed == USB_SPEED_HIGH);
+#endif
 
   /* Discard the previous configuration data */
 
@@ -974,13 +981,9 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
 
   /* Configure the IN bulk endpoint */
 
-#ifdef CONFIG_USBDEV_DUALSPEED
-  epdesc = USBMSC_EPBULKINDESC(hispeed);
-  ret    = EP_CONFIGURE(priv->epbulkin, epdesc, false);
-#else
-  ret    = EP_CONFIGURE(priv->epbulkin,
-                        usbmsc_getepdesc(USBMSC_EPFSBULKIN), false);
-#endif
+  usbmsc_copy_epdesc(USBMSC_EPBULKIN, &epdesc, &priv->usb_dev_desc,
+                     hispeed);
+  ret = EP_CONFIGURE(priv->epbulkin, &epdesc, false);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_EPBULKINCONFIGFAIL), 0);
@@ -991,13 +994,9 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
 
   /* Configure the OUT bulk endpoint */
 
-#ifdef CONFIG_USBDEV_DUALSPEED
-  epdesc       = USBMSC_EPBULKOUTDESC(hispeed);
-  ret          = EP_CONFIGURE(priv->epbulkout, epdesc, true);
-#else
-  ret          = EP_CONFIGURE(priv->epbulkout,
-                              usbmsc_getepdesc(USBMSC_EPFSBULKOUT), true);
-#endif
+  usbmsc_copy_epdesc(USBMSC_EPBULKOUT, &epdesc, &priv->usb_dev_desc,
+                     hispeed);
+  ret = EP_CONFIGURE(priv->epbulkout, &epdesc, true);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_EPBULKOUTCONFIGFAIL), 0);
@@ -1015,6 +1014,7 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
       req->len      = CONFIG_USBMSC_BULKOUTREQLEN;
       req->priv     = privreq;
       req->callback = usbmsc_rdcomplete;
+
       ret           = EP_SUBMIT(priv->epbulkout, req);
       if (ret < 0)
         {
@@ -1719,7 +1719,7 @@ errout_with_lock:
  ****************************************************************************/
 
 #ifdef CONFIG_USBMSC_COMPOSITE
-int usbmsc_classobject(FAR void *handle,
+int usbmsc_classobject(FAR void *handle, FAR struct usbdev_description_s *usb_dev_desc,
                        FAR struct usbdevclass_driver_s **classdev)
 {
   FAR struct usbmsc_alloc_s *alloc = (FAR struct usbmsc_alloc_s *)handle;
@@ -1860,3 +1860,51 @@ void usbmsc_uninitialize(FAR void *handle)
   kmm_free(priv);
 #endif
 }
+
+/****************************************************************************
+ * Name: usbmsc_get_composite_devdesc
+ *
+ * Description:
+ *   Helper function to fill in some constants into the composite
+ *   configuration struct.
+ *
+ * Input Parameters:
+ *     dev - Pointer to the configuration struct we should fill
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
+void usbmsc_get_composite_devdesc(FAR struct composite_devdesc_s *dev)
+{
+  /* The callback functions for the CDC/ACM class */
+
+  dev->mkconfdesc         = usbmsc_mkcfgdesc;
+  dev->mkstrdesc          = usbmsc_mkstrdesc;
+  dev->board_classobject  = 0;
+  dev->board_uninitialize = 0;
+
+  dev->nconfigs           = USBMSC_NCONFIGS;          /* Number of configurations supported */
+  dev->configid           = USBMSC_CONFIGID;          /* The only supported configuration ID */
+  dev->cfgdescsize        = SIZEOF_USBMSC_CFGDESC;    /* The size of the config descriptor */
+  dev->minor              = 0;                        /* The minor interface number */
+
+  /* Interfaces */
+
+  dev->usb_dev_desc.ninterfaces = USBMSC_NINTERFACES; /* Number of interfaces in the configuration */
+  dev->usb_dev_desc.ifnobase    = 0;                  /* Offset to Interface-IDs */
+
+  /* Strings */
+
+  dev->usb_dev_desc.nstrings = USBMSC_NSTRIDS;        /* Number of Strings */
+  dev->usb_dev_desc.strbase  = 0;                     /* Offset to String Numbers */
+
+  /* Endpoints */
+
+  dev->usb_dev_desc.nendpoints                  = USBMSC_NENDPOINTS;
+  dev->usb_dev_desc.epno[USBMSC_EP_BULKIN_IDX]  = 0;
+  dev->usb_dev_desc.epno[USBMSC_EP_BULKOUT_IDX] = 0;
+}
+#endif
