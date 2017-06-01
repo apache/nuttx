@@ -157,7 +157,7 @@ static int     part_procfs_stat(FAR const char *relpath,
  ****************************************************************************/
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_PROCFS_EXCLUDE_PARTITIONS)
-struct mtd_partition_s *g_pfirstpartition = NULL;
+static struct mtd_partition_s *g_pfirstpartition = NULL;
 
 const struct procfs_operations part_procfsoperations =
 {
