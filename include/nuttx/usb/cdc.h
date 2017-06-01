@@ -588,20 +588,19 @@ struct cdc_funcdesc_s
 
 /* Table 26: Class-Specific Descriptor Header Format */
 
-begin_packed_struct struct cdc_hdr_funcdesc_s
+struct cdc_hdr_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
   uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_HDR as defined in Table 25 */
   uint8_t cdc[2];    /* bcdCDC, USB Class Definitions for Communication Devices Specification
-                      * release number in binary-coded decimal.
-                      */
-} end_packed_struct;
+                      * release number in binary-coded decimal. */
+};
 #define SIZEOF_HDR_FUNCDESC 5
 
 /* Table 27: Call Management Functional Descriptor */
 
-begin_packed_struct struct cdc_callmgmt_funcdesc_s
+struct cdc_callmgmt_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
   uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
@@ -610,18 +609,18 @@ begin_packed_struct struct cdc_callmgmt_funcdesc_s
   uint8_t ifno;      /* bDataInterface, Interface number of Data Class interface
                       * optionally used for call management
                       */
-} end_packed_struct;
+};
 #define SIZEOF_CALLMGMT_FUNCDESC 5
 
 /* Table 28: Abstract Control Management Functional Descriptor */
 
-begin_packed_struct struct cdc_acm_funcdesc_s
+struct cdc_acm_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
   uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_ACM as defined in Table 25 */
   uint8_t caps;      /* bmCapabilities: Bit encoded */
-} end_packed_struct;
+};
 #define SIZEOF_ACM_FUNCDESC 4
 
 /* Table 29: Direct Line Management Functional Descriptor */
@@ -673,7 +672,7 @@ struct cdc_tcmc_funcdesc_s
 
 /* Table 33: Union Interface Functional Descriptor */
 
-begin_packed_struct struct cdc_union_funcdesc_s
+struct cdc_union_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
   uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
@@ -685,7 +684,7 @@ begin_packed_struct struct cdc_union_funcdesc_s
   uint8_t slave[1];  /* bSlaveInterfaceN: Interface number of N slave or associated
                       * interface in the union
                       */
-} end_packed_struct;
+};
 #define SIZEOF_UNION_FUNCDESC(n) ((n)+4)
 
 /* Table 34: Country Selection Functional Descriptor */

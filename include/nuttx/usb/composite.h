@@ -120,7 +120,8 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR void *composite_initialize(uint8_t numDevices, struct composite_devdesc_s * pDevices);
+FAR void *composite_initialize(uint8_t ndevices,
+                               FAR struct composite_devdesc_s *pdevices);
 
 /****************************************************************************
  * Name: composite_uninitialize
