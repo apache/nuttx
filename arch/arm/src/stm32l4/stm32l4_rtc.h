@@ -76,7 +76,7 @@ enum alm_id_e
   RTC_ALARM_LAST
 };
 
-/* Structure used to pass parmaters to set an alarm */
+/* Structure used to pass parameters to set an alarm */
 
 struct alm_setalarm_s
 {
@@ -106,7 +106,7 @@ extern "C"
  ****************************************************************************/
 
 /************************************************************************************
- * Name: rtc_is_inits
+ * Name: stm32l4_rtc_is_initialized
  *
  * Description:
  *    Returns 'true' if the RTC has been initialized (according to the RTC itself).
@@ -120,10 +120,10 @@ extern "C"
  *   bool -- true if the INITS flag is set in the ISR.
  *
  ************************************************************************************/
-#ifdef CONFIG_RTC_DRIVER
-bool rtc_is_inits(void);
-#endif
 
+#ifdef CONFIG_RTC_DRIVER
+bool stm32l4_rtc_is_initialized(void);
+#endif
 
 /****************************************************************************
  * Name: stm32l4_rtc_getdatetime_with_subseconds
