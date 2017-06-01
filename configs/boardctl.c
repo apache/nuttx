@@ -182,6 +182,7 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
             case BOARDIOC_USBDEV_CONNECT:    /* Connect the Composite device */
               {
 #warning THIS DOES NOT BELONG HERE!!!!!!!!!!!!!!!!!!!!!!!!!!
+#warning THIS BELONGS IN BOARD-SPECIFIC LOGIC!!!!!!!!!!!!!!!!!!!!!!!!!!
                 /* Here we are composing the configuration of the usb composite device.
                  *
                  * The standard is to use one CDC/ACM and one USB mass storage device.
@@ -204,8 +205,8 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
                 /* Overwrite and correct some values... */
                 /* The callback functions for the CDC/ACM class */
 
-                dev[0].board_classobject  = board_cdcclassobject;
-                dev[0].board_uninitialize = board_cdcuninitialize;
+                dev[0].classobject  = board_cdcclassobject;
+                dev[0].uninitialize = board_cdcuninitialize;
 
                 /* Interfaces */
 
@@ -237,8 +238,8 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
                 /* Overwrite and correct some values... */
                 /* The callback functions for the USBMSC class */
 
-                dev[1].board_classobject  = board_mscclassobject;
-                dev[1].board_uninitialize = board_mscuninitialize;
+                dev[1].classobject  = board_mscclassobject;
+                dev[1].uninitialize = board_mscuninitialize;
 
                 /* Interfaces */
 
