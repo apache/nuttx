@@ -58,6 +58,10 @@
 #  define lps25h_dbg(x, ...)      sninfo(x, ##__VA_ARGS__)
 #endif
 
+#ifndef CONFIG_LPS25H_I2C_FREQUENCY
+#  define CONFIG_LPS25H_I2C_FREQUENCY     400000
+#endif
+
 #define LPS25H_PRESSURE_INTERNAL_DIVIDER  4096
 
 /* 'AN4450 - Hardware and software guidelines for use of LPS25H pressure
@@ -277,16 +281,18 @@ static int lps25h_write_reg8(struct lps25h_dev_s *dev, uint8_t reg_addr,
   struct i2c_msg_s msgv[2] =
   {
     {
-      .addr   = dev->addr,
-      .flags  = 0,
-      .buffer = &reg_addr,
-      .length = 1
+      .frequency = CONFIG_LPS25H_I2C_FREQUENCY,
+      .addr      = dev->addr,
+      .flags     = 0,
+      .buffer    = &reg_addr,
+      .length    = 1
     },
     {
-      .addr   = dev->addr,
-      .flags  = I2C_M_NORESTART,
-      .buffer = (void *)&value,
-      .length = 1
+      .frequency = CONFIG_LPS25H_I2C_FREQUENCY,
+      .addr      = dev->addr,
+      .flags     = I2C_M_NORESTART,
+      .buffer    = (void *)&value,
+      .length    = 1
     }
   };
 
@@ -300,16 +306,18 @@ static int lps25h_read_reg8(FAR struct lps25h_dev_s *dev,
   struct i2c_msg_s msgv[2] =
   {
     {
-      .addr   = dev->addr,
-      .flags  = 0,
-      .buffer = reg_addr,
-      .length = 1
+      .frequency = CONFIG_LPS25H_I2C_FREQUENCY,
+      .addr      = dev->addr,
+      .flags     = 0,
+      .buffer    = reg_addr,
+      .length    = 1
     },
     {
-      .addr   = dev->addr,
-      .flags  = I2C_M_READ,
-      .buffer = value,
-      .length = 1
+      .frequency = CONFIG_LPS25H_I2C_FREQUENCY,
+      .addr      = dev->addr,
+      .flags     = I2C_M_READ,
+      .buffer    = value,
+      .length    = 1
     }
   };
 

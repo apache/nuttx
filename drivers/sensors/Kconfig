@@ -41,6 +41,11 @@ config HTS221
 
 if HTS221
 
+config HTS221_I2C_FREQUENCY
+	int "HTS221 I2C frequency"
+	default 400000
+	range 1 400000
+
 config DEBUG_HTS221
 	bool "Debug support for the HTS221"
 	default n
@@ -83,6 +88,11 @@ config LIS2DH
 		Enable driver support for the STMicro LIS2DH accelerometer
 
 if LIS2DH
+
+config LIS2DH_I2C_FREQUENCY
+	int "LIS2DH I2C frequency"
+	default 400000
+	range 1 400000
 
 config DEBUG_LIS2DH
 	bool "Debug support for the LIS2DH"
@@ -143,6 +153,11 @@ config LPS25H
 		Enable driver support for the STMicro LPS25H barometer sensor.
 
 if LPS25H
+
+config LPS25H_I2C_FREQUENCY
+	int "LPS25H I2C frequency"
+	default 400000
+	range 1 400000
 
 config DEBUG_LPS25H
 	bool "Debug support for the LPS25H"

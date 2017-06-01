@@ -63,6 +63,10 @@
 #  define fusb301_info(x, ...)       uinfo(x, ##__VA_ARGS__)
 #endif
 
+#ifndef CONFIG_FUSB301_I2C_FREQUENCY
+#  define CONFIG_FUSB301_I2C_FREQUENCY 400000
+#endif
+
 /* Other macros */
 
 #define FUSB301_I2C_RETRIES  10
@@ -146,15 +150,17 @@ static int fusb301_getreg(FAR struct fusb301_dev_s *priv, uint8_t reg)
 
   DEBUGASSERT(priv);
 
-  msg[0].addr   = priv->addr;
-  msg[0].flags  = 0;
-  msg[0].buffer = &reg;
-  msg[0].length = 1;
+  msg[0].frequency = CONFIG_FUSB301_I2C_FREQUENCY;
+  msg[0].addr      = priv->addr;
+  msg[0].flags     = 0;
+  msg[0].buffer    = &reg;
+  msg[0].length    = 1;
 
-  msg[1].addr   = priv->addr;
-  msg[1].flags  = I2C_M_READ;
-  msg[1].buffer = &regval;
-  msg[1].length = 1;
+  msg[1].frequency = CONFIG_FUSB301_I2C_FREQUENCY;
+  msg[1].addr      = priv->addr;
+  msg[1].flags     = I2C_M_READ;
+  msg[1].buffer    = &regval;
+  msg[1].length    = 1;
 
   /* Perform the transfer */
 
@@ -220,10 +226,11 @@ static int fusb301_putreg(FAR struct fusb301_dev_s *priv, uint8_t regaddr,
 
   /* Setup 8-bit FUSB301 address write message */
 
-  msg.addr   = priv->addr;
-  msg.flags  = 0;
-  msg.buffer = txbuffer;
-  msg.length = 2;
+  msg.frequency = CONFIG_FUSB301_I2C_FREQUENCY;
+  msg.addr      = priv->addr;
+  msg.flags     = 0;
+  msg.buffer    = txbuffer;
+  msg.length    = 2;
 
   /* Perform the transfer */
 
