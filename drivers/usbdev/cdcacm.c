@@ -2602,20 +2602,20 @@ void cdcacm_get_composite_devdesc(struct composite_devdesc_s *dev)
 {
   /* The callback functions for the CDC/ACM class */
 
-  dev->mkconfdesc         = cdcacm_mkcfgdesc;
-  dev->mkstrdesc          = cdcacm_mkstrdesc;
-  dev->board_classobject  = 0;
-  dev->board_uninitialize = 0;
+  dev->mkconfdesc   = cdcacm_mkcfgdesc;
+  dev->mkstrdesc    = cdcacm_mkstrdesc;
+  dev->classobject  = 0;
+  dev->uninitialize = 0;
 
-  dev->nconfigs = CDCACM_NCONFIGS;               /* Number of configurations supported */
-  dev->configid = CDCACM_CONFIGID;               /* The only supported configuration ID */
+  dev->nconfigs     = CDCACM_NCONFIGS;               /* Number of configurations supported */
+  dev->configid     = CDCACM_CONFIGID;               /* The only supported configuration ID */
 
   /* Let the construction function calculate the size of the config descriptor */
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-  dev->cfgdescsize = cdcacm_mkcfgdesc(NULL, NULL, USB_SPEED_UNKNOWN, 0);
+  dev->cfgdescsize  = cdcacm_mkcfgdesc(NULL, NULL, USB_SPEED_UNKNOWN, 0);
 #else
-  dev->cfgdescsize = cdcacm_mkcfgdesc(NULL, NULL);
+  dev->cfgdescsize  = cdcacm_mkcfgdesc(NULL, NULL);
 #endif
 
   dev->minor = 0;                                /* The minor interface number */

@@ -838,9 +838,9 @@ FAR void *composite_initialize(uint8_t ndevices,
       memcpy(&priv->device[i].compdesc, &pdevices[i],
              sizeof(struct composite_devdesc_s));
 
-      ret = priv->device[i].compdesc.board_classobject(priv->device[i].compdesc.minor,
-                                                      &priv->device[i].compdesc.devdesc,
-                                                      &priv->device[i].dev);
+      ret = priv->device[i].compdesc.classobject(priv->device[i].compdesc.minor,
+                                                 &priv->device[i].compdesc.devdesc,
+                                                 &priv->device[i].dev);
       if (ret < 0)
         {
           usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_CLASSOBJECT),
@@ -912,7 +912,7 @@ void composite_uninitialize(FAR void *handle)
 
   for (i = 0; i < priv->ndevices; i++)
     {
-      priv->device[i].compdesc.board_uninitialize(priv->device[i].dev);
+      priv->device[i].compdesc.uninitialize(priv->device[i].dev);
     }
 
   /* Then unregister and destroy the composite class */
@@ -926,7 +926,7 @@ void composite_uninitialize(FAR void *handle)
 
   for (i = 0; i < priv->ndevices; i++)
     {
-      priv->device[i].compdesc.board_uninitialize(priv->device[i].dev);
+      priv->device[i].compdesc.uninitialize(priv->device[i].dev);
     }
 
   /* Then free the composite driver state structure itself */

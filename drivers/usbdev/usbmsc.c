@@ -1881,15 +1881,15 @@ void usbmsc_get_composite_devdesc(FAR struct composite_devdesc_s *dev)
 {
   /* The callback functions for the CDC/ACM class */
 
-  dev->mkconfdesc         = usbmsc_mkcfgdesc;
-  dev->mkstrdesc          = usbmsc_mkstrdesc;
-  dev->board_classobject  = 0;
-  dev->board_uninitialize = 0;
+  dev->mkconfdesc          = usbmsc_mkcfgdesc;
+  dev->mkstrdesc           = usbmsc_mkstrdesc;
+  dev->classobject         = 0;
+  dev->uninitialize        = 0;
 
-  dev->nconfigs           = USBMSC_NCONFIGS;          /* Number of configurations supported */
-  dev->configid           = USBMSC_CONFIGID;          /* The only supported configuration ID */
-  dev->cfgdescsize        = SIZEOF_USBMSC_CFGDESC;    /* The size of the config descriptor */
-  dev->minor              = 0;                        /* The minor interface number */
+  dev->nconfigs            = USBMSC_NCONFIGS;          /* Number of configurations supported */
+  dev->configid            = USBMSC_CONFIGID;          /* The only supported configuration ID */
+  dev->cfgdescsize         = SIZEOF_USBMSC_CFGDESC;    /* The size of the config descriptor */
+  dev->minor               = 0;                        /* The minor interface number */
 
   /* Interfaces */
 

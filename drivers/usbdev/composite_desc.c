@@ -252,7 +252,7 @@ int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv, FAR uint8_t *buf)
 
   /* Copy all contained interface descriptors into the buffer too */
 
-  for (i = 0; i < priv->numDevices; i++)
+  for (i = 0; i < priv->ndevices; i++)
     {
 #ifdef CONFIG_USBDEV_DUALSPEED
       len = priv->device[i].compdesc.mkconfdesc(buf,
