@@ -181,6 +181,7 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
 
             case BOARDIOC_USBDEV_CONNECT:    /* Connect the Composite device */
               {
+#warning THIS DOES NOT BELONG HERE!!!!!!!!!!!!!!!!!!!!!!!!!!
                 /* Here we are composing the configuration of the usb composite device.
                  *
                  * The standard is to use one CDC/ACM and one USB mass storage device.
