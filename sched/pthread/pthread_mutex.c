@@ -115,8 +115,6 @@ static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
 {
   FAR struct tcb_s *rtcb = this_task();
 
-  DEBUGASSERT(mutex->flink == NULL);
-
   /* Check if this is a pthread.  The main thread may also lock and unlock
    * mutexes.  The main thread, however, does not participate in the mutex
    * consistency logic.
