@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/boardctl.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -181,8 +181,84 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
 
             case BOARDIOC_USBDEV_CONNECT:    /* Connect the Composite device */
               {
+                /* Here we are composing the configuration of the usb composite device.
+                 *
+                 * The standard is to use one CDC/ACM and one USB mass storage device.
+                 */
+
+                struct composite_devdesc_s dev[2];
+                int ifnobase = 0;
+                int strbase = COMPOSITE_NSTRIDS;
+
                 DEBUGASSERT(ctrl->handle != NULL);
-                *ctrl->handle = composite_initialize();
+
+                /* Configure the CDC/ACM device */
+
+                /* Ask the cdcacm driver to fill in the constants we didn't
+                 * know here.
+                 */
+
+                cdcacm_get_composite_devdesc(&dev[0]);
+
+                /* Overwrite and correct some values... */
+                /* The callback functions for the CDC/ACM class */
+
+                dev[0].board_classobject  = board_cdcclassobject;
+                dev[0].board_uninitialize = board_cdcuninitialize;
+
+                /* Interfaces */
+
+                dev[0].usb_dev_desc.ifnobase = ifnobase;        /* Offset to Interface-IDs */
+                dev[0].minor = CONFIG_SYSTEM_COMPOSITE_TTYUSB;  /* The minor interface number */
+
+                /* Strings */
+
+                dev[0].usb_dev_desc.strbase = strbase;          /* Offset to String Numbers */
+
+                /* Endpoints */
+
+                dev[0].usb_dev_desc.epno[CDCACM_EP_INTIN_IDX] = 3;
+                dev[0].usb_dev_desc.epno[CDCACM_EP_BULKIN_IDX] = 4;
+                dev[0].usb_dev_desc.epno[CDCACM_EP_BULKOUT_IDX] = 5;
+
+                /* Count up the base numbers */
+
+                ifnobase += dev[0].usb_dev_desc.ninterfaces;
+                strbase  += dev[0].usb_dev_desc.nstrings;
+
+                /* Configure the mass storage device device */
+                /* Ask the usbmsc driver to fill in the constants we didn't
+                 * know here.
+                 */
+
+                usbmsc_get_composite_devdesc(&dev[1]);
+
+                /* Overwrite and correct some values... */
+                /* The callback functions for the USBMSC class */
+
+                dev[1].board_classobject  = board_mscclassobject;
+                dev[1].board_uninitialize = board_mscuninitialize;
+
+                /* Interfaces */
+
+                dev[1].usb_dev_desc.ifnobase = ifnobase;          /* Offset to Interface-IDs */
+                dev[1].minor = CONFIG_SYSTEM_COMPOSITE_DEVMINOR1; /* The minor interface number */
+
+                /* Strings */
+
+                dev[1].usb_dev_desc.strbase = strbase;            /* Offset to String Numbers */
+
+                /* Endpoints */
+
+                dev[1].usb_dev_desc.epno[USBMSC_EP_BULKIN_IDX] = 1;
+                dev[1].usb_dev_desc.epno[USBMSC_EP_BULKOUT_IDX] = 2;
+
+                /* Count up the base numbers */
+
+                ifnobase += dev[1].usb_dev_desc.ninterfaces;
+                strbase += dev[1].usb_dev_desc.nstrings;
+
+                *ctrl->handle = composite_initialize(2, dev);
                 if (*ctrl->handle == NULL)
                   {
                     ret = -EIO;

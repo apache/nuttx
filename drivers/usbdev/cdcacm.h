@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/cdcacm.h
  *
- *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,15 +104,8 @@
  * CDCACM_DATAALTIFID              No alternate for the data interface
  */
 
-#define CDCACM_NINTERFACES         (2)      /* Number of interfaces in the configuration */
-#define CDCACM_NOTIFID             (CONFIG_CDCACM_IFNOBASE+0)
 #define CDCACM_NOTALTIFID          (0)
-#define CDCACM_DATAIFID            (CONFIG_CDCACM_IFNOBASE+1)
 #define CDCACM_DATAALTIFID         (0)
-
-/* Configuration descriptor values */
-
-#define CDCACM_CONFIGID            (1)      /* The only supported configuration ID */
 
 /* Buffer big enough for any of our descriptors (the config descriptor is the
  * biggest).
@@ -124,7 +117,6 @@
 /* Device descriptor values */
 
 #define CDCACM_VERSIONNO           (0x0101) /* Device version number 1.1 (BCD) */
-#define CDCACM_NCONFIGS            (1)      /* Number of configurations supported */
 
 /* String language */
 
@@ -165,62 +157,16 @@
 #define CDCACM_LASTSTRID           CDCACM_DATAIFSTRID
 #define CDCACM_NSTRIDS             (CDCACM_LASTSTRID - CDCACM_STRBASE)
 
-/* Configuration descriptor size */
-
-#if !defined(CONFIG_CDCACM_COMPOSITE)
-
-/* Number of individual descriptors in the configuration descriptor:
- * Configuration descriptor + (2) interface descriptors + (3) endpoint
- * descriptors + (3) ACM descriptors.
- */
-
-#  define CDCACM_CFGGROUP_SIZE     (9)
-
-/* The size of the config descriptor: (9 + 2*9 + 3*7 + 4 + 5 + 5) = 62 */
-
-#  define SIZEOF_CDCACM_CFGDESC \
-     (USB_SIZEOF_CFGDESC + 2*USB_SIZEOF_IFDESC + 3*USB_SIZEOF_EPDESC + \
-      SIZEOF_ACM_FUNCDESC + SIZEOF_HDR_FUNCDESC + SIZEOF_UNION_FUNCDESC(1))
-
-#elif defined(CONFIG_COMPOSITE_IAD)
-
-/* Number of individual descriptors in the configuration descriptor:
- * (1) interface association descriptor + (2) interface descriptors +
- * (3) endpoint descriptors + (3) ACM descriptors.
- */
-
-#  define CDCACM_CFGGROUP_SIZE     (9)
-
-/* The size of the config descriptor: (8 + 2*9 + 3*7 + 4 + 5 + 5) = 61 */
-
-#  define SIZEOF_CDCACM_CFGDESC \
-     (USB_SIZEOF_IADDESC +2*USB_SIZEOF_IFDESC + 3*USB_SIZEOF_EPDESC + \
-      SIZEOF_ACM_FUNCDESC + SIZEOF_HDR_FUNCDESC + SIZEOF_UNION_FUNCDESC(1))
-
-#else
-
-/* Number of individual descriptors in the configuration descriptor:
- * (2) interface descriptors + (3) endpoint descriptors + (3) ACM descriptors.
- */
-
-#  define CDCACM_CFGGROUP_SIZE     (8)
-
-/* The size of the config descriptor: (2*9 + 3*7 + 4 + 5 + 5) = 53 */
-
-#  define SIZEOF_CDCACM_CFGDESC \
-     (2*USB_SIZEOF_IFDESC + 3*USB_SIZEOF_EPDESC + SIZEOF_ACM_FUNCDESC + \
-      SIZEOF_HDR_FUNCDESC + SIZEOF_UNION_FUNCDESC(1))
-#endif
 
 /* Endpoint configuration ****************************************************/
 
-#define CDCACM_EPINTIN_ADDR        (USB_DIR_IN | CONFIG_CDCACM_EPINTIN)
+#define CDCACM_MKEPINTIN(desc)     (USB_DIR_IN | (desc)->epno[CDCACM_EP_INTIN_IDX])
 #define CDCACM_EPINTIN_ATTR        (USB_EP_ATTR_XFER_INT)
 
-#define CDCACM_EPOUTBULK_ADDR      (CONFIG_CDCACM_EPBULKOUT)
+#define CDCACM_MKEPBULKIN(desc)    (USB_DIR_IN | (desc)->epno[CDCACM_EP_BULKIN_IDX])
 #define CDCACM_EPOUTBULK_ATTR      (USB_EP_ATTR_XFER_BULK)
 
-#define CDCACM_EPINBULK_ADDR       (USB_DIR_IN | CONFIG_CDCACM_EPBULKIN)
+#define CDCACM_MKEPBULKOUT(desc)   ((desc)->epno[CDCACM_EP_BULKOUT_IDX])
 #define CDCACM_EPINBULK_ATTR       (USB_EP_ATTR_XFER_BULK)
 
 /* Device driver definitions ************************************************/
@@ -287,7 +233,7 @@ enum cdcacm_epdesc_e
 int cdcacm_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc);
 
 /****************************************************************************
- * Name: cdcacm_getepdesc
+ * Name: cdcacm_getdevdesc
  *
  * Description:
  *   Return a pointer to the raw device descriptor
@@ -299,28 +245,18 @@ FAR const struct usb_devdesc_s *cdcacm_getdevdesc(void);
 #endif
 
 /****************************************************************************
- * Name: cdcacm_getepdesc
+ * Name: cdcacm_copy_epdesc
  *
  * Description:
- *   Return a pointer to the raw endpoint descriptor (used for configuring
- *   endpoints)
+ *   Copies the requested Endpoint Description into the buffer given.
+ *   Returns the number of Bytes filled in (sizeof(struct usb_epdesc_s)).
  *
  ****************************************************************************/
 
-FAR const struct usb_epdesc_s *cdcacm_getepdesc(enum cdcacm_epdesc_e epid);
-
-/****************************************************************************
- * Name: cdcacm_mkepdesc
- *
- * Description:
- *   Construct the endpoint descriptor using the correct max packet size.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-void cdcacm_mkepdesc(enum cdcacm_epdesc_e epid,
-                     uint16_t mxpacket, FAR struct usb_epdesc_s *outdesc);
-#endif
+int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
+                       FAR struct usb_epdesc_s *epdesc,
+                       FAR struct usbdev_description_s *devdesc,
+                       bool hispeed);
 
 /****************************************************************************
  * Name: cdcacm_mkcfgdesc
@@ -331,9 +267,10 @@ void cdcacm_mkepdesc(enum cdcacm_epdesc_e epid,
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf, uint8_t speed, uint8_t type);
+int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf, struct usbdev_description_s *devdesc,
+    uint8_t speed, uint8_t type);
 #else
-int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf);
+int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf, struct usbdev_description_s *devdesc);
 #endif
 
 /****************************************************************************
