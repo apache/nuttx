@@ -307,7 +307,7 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate the IN bulk endpoint */
 
-  priv->epbulkin = DEV_ALLOCEP(dev, USBMSC_MKEPBULKIN(&priv->usb_dev_desc),
+  priv->epbulkin = DEV_ALLOCEP(dev, USBMSC_MKEPBULKIN(&priv->devdesc),
                                true, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkin)
     {
@@ -320,7 +320,7 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate the OUT bulk endpoint */
 
-  priv->epbulkout = DEV_ALLOCEP(dev, USBMSC_MKEPBULKOUT(&priv->usb_dev_desc),
+  priv->epbulkout = DEV_ALLOCEP(dev, USBMSC_MKEPBULKOUT(&priv->devdesc),
                                 false, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkout)
     {
@@ -981,7 +981,7 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
 
   /* Configure the IN bulk endpoint */
 
-  usbmsc_copy_epdesc(USBMSC_EPBULKIN, &epdesc, &priv->usb_dev_desc,
+  usbmsc_copy_epdesc(USBMSC_EPBULKIN, &epdesc, &priv->devdesc,
                      hispeed);
   ret = EP_CONFIGURE(priv->epbulkin, &epdesc, false);
   if (ret < 0)
@@ -994,7 +994,7 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
 
   /* Configure the OUT bulk endpoint */
 
-  usbmsc_copy_epdesc(USBMSC_EPBULKOUT, &epdesc, &priv->usb_dev_desc,
+  usbmsc_copy_epdesc(USBMSC_EPBULKOUT, &epdesc, &priv->devdesc,
                      hispeed);
   ret = EP_CONFIGURE(priv->epbulkout, &epdesc, true);
   if (ret < 0)
@@ -1719,7 +1719,7 @@ errout_with_lock:
  ****************************************************************************/
 
 #ifdef CONFIG_USBMSC_COMPOSITE
-int usbmsc_classobject(FAR void *handle, FAR struct usbdev_description_s *usb_dev_desc,
+int usbmsc_classobject(FAR void *handle, FAR struct usbdev_description_s *devdesc,
                        FAR struct usbdevclass_driver_s **classdev)
 {
   FAR struct usbmsc_alloc_s *alloc = (FAR struct usbmsc_alloc_s *)handle;
@@ -1893,18 +1893,18 @@ void usbmsc_get_composite_devdesc(FAR struct composite_devdesc_s *dev)
 
   /* Interfaces */
 
-  dev->usb_dev_desc.ninterfaces = USBMSC_NINTERFACES; /* Number of interfaces in the configuration */
-  dev->usb_dev_desc.ifnobase    = 0;                  /* Offset to Interface-IDs */
+  dev->devdesc.ninterfaces = USBMSC_NINTERFACES; /* Number of interfaces in the configuration */
+  dev->devdesc.ifnobase    = 0;                  /* Offset to Interface-IDs */
 
   /* Strings */
 
-  dev->usb_dev_desc.nstrings = USBMSC_NSTRIDS;        /* Number of Strings */
-  dev->usb_dev_desc.strbase  = 0;                     /* Offset to String Numbers */
+  dev->devdesc.nstrings    = USBMSC_NSTRIDS;        /* Number of Strings */
+  dev->devdesc.strbase     = 0;                     /* Offset to String Numbers */
 
   /* Endpoints */
 
-  dev->usb_dev_desc.nendpoints                  = USBMSC_NENDPOINTS;
-  dev->usb_dev_desc.epno[USBMSC_EP_BULKIN_IDX]  = 0;
-  dev->usb_dev_desc.epno[USBMSC_EP_BULKOUT_IDX] = 0;
+  dev->devdesc.nendpoints                  = USBMSC_NENDPOINTS;
+  dev->devdesc.epno[USBMSC_EP_BULKIN_IDX]  = 0;
+  dev->devdesc.epno[USBMSC_EP_BULKOUT_IDX] = 0;
 }
 #endif

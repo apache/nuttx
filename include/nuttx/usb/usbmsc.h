@@ -113,7 +113,7 @@ extern "C"
 
 #if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
 struct usbdevclass_driver_s;
-int board_mscclassobject(int minor, FAR struct usbdev_description_s *usb_dev_desc,
+int board_mscclassobject(int minor, FAR struct usbdev_description_s *devdesc,
                          FAR struct usbdevclass_driver_s **classdev);
 #endif
 
@@ -239,7 +239,7 @@ int usbmsc_exportluns(FAR void *handle);
 
 #if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
 struct usbdevclass_driver_s;
-int usbmsc_classobject(FAR void *handle, FAR struct usbdev_description_s *usb_dev_desc,
+int usbmsc_classobject(FAR void *handle, FAR struct usbdev_description_s *devdesc,
                        FAR struct usbdevclass_driver_s **classdev);
 #endif
 

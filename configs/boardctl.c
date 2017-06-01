@@ -188,7 +188,7 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
 
                 struct composite_devdesc_s dev[2];
                 int ifnobase = 0;
-                int strbase = COMPOSITE_NSTRIDS;
+                int strbase  = COMPOSITE_NSTRIDS;
 
                 DEBUGASSERT(ctrl->handle != NULL);
 
@@ -208,23 +208,23 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
 
                 /* Interfaces */
 
-                dev[0].usb_dev_desc.ifnobase = ifnobase;        /* Offset to Interface-IDs */
+                dev[0].devdesc.ifnobase = ifnobase;             /* Offset to Interface-IDs */
                 dev[0].minor = CONFIG_SYSTEM_COMPOSITE_TTYUSB;  /* The minor interface number */
 
                 /* Strings */
 
-                dev[0].usb_dev_desc.strbase = strbase;          /* Offset to String Numbers */
+                dev[0].devdesc.strbase = strbase;               /* Offset to String Numbers */
 
                 /* Endpoints */
 
-                dev[0].usb_dev_desc.epno[CDCACM_EP_INTIN_IDX] = 3;
-                dev[0].usb_dev_desc.epno[CDCACM_EP_BULKIN_IDX] = 4;
-                dev[0].usb_dev_desc.epno[CDCACM_EP_BULKOUT_IDX] = 5;
+                dev[0].devdesc.epno[CDCACM_EP_INTIN_IDX]   = 3;
+                dev[0].devdesc.epno[CDCACM_EP_BULKIN_IDX]  = 4;
+                dev[0].devdesc.epno[CDCACM_EP_BULKOUT_IDX] = 5;
 
                 /* Count up the base numbers */
 
-                ifnobase += dev[0].usb_dev_desc.ninterfaces;
-                strbase  += dev[0].usb_dev_desc.nstrings;
+                ifnobase += dev[0].devdesc.ninterfaces;
+                strbase  += dev[0].devdesc.nstrings;
 
                 /* Configure the mass storage device device */
                 /* Ask the usbmsc driver to fill in the constants we didn't
@@ -241,22 +241,22 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
 
                 /* Interfaces */
 
-                dev[1].usb_dev_desc.ifnobase = ifnobase;          /* Offset to Interface-IDs */
+                dev[1].devdesc.ifnobase = ifnobase;               /* Offset to Interface-IDs */
                 dev[1].minor = CONFIG_SYSTEM_COMPOSITE_DEVMINOR1; /* The minor interface number */
 
                 /* Strings */
 
-                dev[1].usb_dev_desc.strbase = strbase;            /* Offset to String Numbers */
+                dev[1].devdesc.strbase = strbase;                 /* Offset to String Numbers */
 
                 /* Endpoints */
 
-                dev[1].usb_dev_desc.epno[USBMSC_EP_BULKIN_IDX] = 1;
-                dev[1].usb_dev_desc.epno[USBMSC_EP_BULKOUT_IDX] = 2;
+                dev[1].devdesc.epno[USBMSC_EP_BULKIN_IDX]  = 1;
+                dev[1].devdesc.epno[USBMSC_EP_BULKOUT_IDX] = 2;
 
                 /* Count up the base numbers */
 
-                ifnobase += dev[1].usb_dev_desc.ninterfaces;
-                strbase += dev[1].usb_dev_desc.nstrings;
+                ifnobase += dev[1].devdesc.ninterfaces;
+                strbase  += dev[1].devdesc.nstrings;
 
                 *ctrl->handle = composite_initialize(2, dev);
                 if (*ctrl->handle == NULL)
