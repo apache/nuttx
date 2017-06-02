@@ -823,7 +823,7 @@ int main(int argc, char **argv)
 
   /* Select an MCU */
 
-  printf("Select an MCU for architecutre=%s:\n", g_selected_arch);
+  printf("Select an MCU for architecture=%s:\n", g_selected_arch);
   g_selected_mcu = list_select(g_mcu, g_nmcu);
 
   /* Enumerate the boards for the selected MCU */
