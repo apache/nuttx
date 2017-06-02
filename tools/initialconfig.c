@@ -805,7 +805,7 @@ int main(int argc, char **argv)
 {
   char *archpath;
 
-  /* Enumerate the architectures */
+  /* Enumerate all of the architectures */
 
   g_narch = 0;
   foreach_dirent(g_archdir, enum_architectures, NULL);
@@ -815,7 +815,7 @@ int main(int argc, char **argv)
   printf("Select an architecture:\n");
   g_selected_arch = list_select(g_arch, g_narch);
 
-  /* Enumerate MCUs for the selected architecture */
+  /* Enumerate the MCUs for the selected architecture */
 
   g_nmcu = 0;
   asprintf(&archpath, "%s%c%s%csrc", g_archdir, g_delim, g_selected_arch, g_delim);
@@ -826,7 +826,7 @@ int main(int argc, char **argv)
   printf("Select an MCU for architecutre=%s:\n", g_selected_arch);
   g_selected_mcu = list_select(g_mcu, g_nmcu);
 
-  /* Enumerate the architectures */
+  /* Enumerate the boards for the selected MCU */
 
   g_nboard = 0;
   foreach_dirent(g_configdir, enum_boards, NULL);
