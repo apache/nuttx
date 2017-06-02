@@ -247,6 +247,7 @@ struct boardioc_usbdev_ctrl_s
   uint8_t usbdev;                 /* See enum boardioc_usbdev_identifier_e */
   uint8_t action;                 /* See enum boardioc_usbdev_action_e */
   uint8_t instance;               /* Identifies the USB device class instance */
+  uint8_t config;                 /* Configuration used with BOARDIOC_USBDEV_CONNECT */
   FAR void **handle;              /* Connection handle */
 };
 #endif /* CONFIG_BOARDCTL_USBDEVCTRL */
