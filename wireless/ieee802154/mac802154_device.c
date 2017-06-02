@@ -600,6 +600,8 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
   ret = mac802154_req_data(dev->md_mac, &tx->meta, iob);
   if (ret < 0)
     {
+      /* TODO: Should the IOB be freed here? */
+      
       wlerr("ERROR: req_data failed %d\n", ret);
       return ret;
     }
@@ -616,7 +618,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
  ****************************************************************************/
 
 static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
-                                   unsigned long arg)
+                              unsigned long arg)
 {
   FAR struct inode *inode;
   FAR struct mac802154_chardevice_s *dev;

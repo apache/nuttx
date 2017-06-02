@@ -58,8 +58,6 @@
  * Public Data Types
  ****************************************************************************/
 
-
-
 /* Callback operations to notify the next highest layer of various asynchronous
  * events, usually triggered by some previous request or response invoked by the
  * upper layer.

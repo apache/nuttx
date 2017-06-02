@@ -269,6 +269,7 @@ enum ieee802154_pib_attr_e
   IEEE802154_PIB_PHY_UWB_RX_RMARKER,
   IEEE802154_PIB_PHY_RFRAME_PROC_TIME,
   IEEE802154_PIB_PHY_CCA_DURATION,
+  IEEE802154_PIB_PHY_SYMBOL_DURATION, /* Non-standard attribute */
 
   /* MAC PIB Attributes */
 
@@ -543,7 +544,8 @@ union ieee802154_macattr_u
 union ieee802154_phyattr_u
 {
   uint8_t channel;
-  int32_t txpwr
+  int32_t txpwr;
+  uint32_t symdur_picosec;
   /* TODO: Fill this out as we implement supported get/set commands */
 };
 
@@ -851,7 +853,7 @@ struct ieee802154_assoc_conf_s
    * unsuccessful.
    */
 
-  struct ieee802154_addr_s dev_addr;
+  uint16_t saddr;
 
   /* Status of association attempt */
 
@@ -1185,7 +1187,7 @@ struct ieee802154_scan_conf_s
   uint8_t ch_page;
   uint8_t num_channels;
 
-#warning Figure out how to handle missing primitive semantics. See standard.
+  /* TODO: Figure out how to handle missing primitive semantics. See standard. */
 };
 
 /*****************************************************************************
@@ -1396,13 +1398,16 @@ union ieee802154_notif_u
 struct ieee802154_notif_s
 {
   /* Must be first member so that we can interchange between the actual
-   *notification and this extended struct.
+   * notification and this extended struct.
    */
 
   union ieee802154_notif_u u;
   enum ieee802154_notify_e notiftype;
 
-  /* Support a singly linked list */
+  /* Support a singly linked list. For use by receivers. The MAC has it's own
+   * extended struct type with another forward link that the MAC uses internally
+   * to handle allocation and freeing.
+   */
 
   FAR struct ieee802154_notif_s *flink;
 };

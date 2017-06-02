@@ -123,27 +123,28 @@ struct mrf24j40_radio_s
   FAR const struct mrf24j40_lower_s *lower;
   FAR struct spi_dev_s *spi; /* Saved SPI interface instance */
 
-  struct work_s   irqwork;   /* For deferring interrupt work to work queue */
-  struct work_s   pollwork;  /* For deferring poll work to the work queue */
-  sem_t           exclsem;   /* Exclusive access to this struct */
+  struct work_s irqwork;       /* For deferring interrupt work to work queue */
+  struct work_s csma_pollwork; /* For deferring poll work to the work queue */
+  struct work_s gts_pollwork;  /* For deferring poll work to the work queue */
+
+  sem_t         exclsem;       /* Exclusive access to this struct */
 
   struct ieee802154_addr_s addr;
 
-  uint8_t         channel;   /* 11 to 26 for the 2.4 GHz band */
-  uint8_t         devmode;   /* device mode: device, coord, pancoord */
-  uint8_t         paenabled; /* enable usage of PA */
-  uint8_t         rxmode;    /* Reception mode: Main, no CRC, promiscuous */
-  int32_t         txpower;   /* TX power in mBm = dBm/100 */
-  struct ieee802154_cca_s cca;  /* Clear channel assessement method */
+  uint8_t         channel;     /* 11 to 26 for the 2.4 GHz band */
+  uint8_t         devmode;     /* device mode: device, coord, pancoord */
+  uint8_t         paenabled;   /* enable usage of PA */
+  uint8_t         rxmode;      /* Reception mode: Main, no CRC, promiscuous */
+  int32_t         txpower;     /* TX power in mBm = dBm/100 */
+  struct ieee802154_cca_s cca; /* Clear channel assessement method */
 
-  /* Buffer Allocations */
+  struct ieee802154_txdesc_s *txdelayed_desc;
+  bool txdelayed_busy;
 
   struct ieee802154_txdesc_s *csma_desc;
-  FAR struct iob_s *csma_frame;
   bool csma_busy;
 
   struct ieee802154_txdesc_s *gts_desc[MRF24J40_GTS_SLOTS];
-  FAR struct iob_s *gts_frame[MRF24J40_GTS_SLOTS];
   bool gts_busy[MRF24J40_GTS_SLOTS];
 };
 
@@ -214,40 +215,29 @@ static int  mrf24j40_getcca(FAR struct mrf24j40_radio_s *dev,
               FAR struct ieee802154_cca_s *cca);
 static int  mrf24j40_energydetect(FAR struct mrf24j40_radio_s *dev,
               FAR uint8_t *energy);
-static int  mrf24j40_rxenable(FAR struct mrf24j40_radio_s *dev, bool enable);
+static void mrf24j40_mactimer(FAR struct mrf24j40_radio_s *dev, int numsymbols);
 
 /* Driver operations */
 
 static int  mrf24j40_bind(FAR struct ieee802154_radio_s *radio,
               FAR struct ieee802154_radiocb_s *radiocb);
-static int  mrf24j40_txnotify_csma(FAR struct ieee802154_radio_s *radio);
-static int  mrf24j40_txnotify_gts(FAR struct ieee802154_radio_s *radio);
+static int  mrf24j40_txnotify(FAR struct ieee802154_radio_s *radio, bool gts);
+static int  mrf24j40_txdelayed(FAR struct ieee802154_radio_s *radio,
+                               FAR struct ieee802154_txdesc_s *txdesc,
+                               uint32_t symboldelay);
 static int  mrf24j40_get_attr(FAR struct ieee802154_radio_s *radio,
               enum ieee802154_pib_attr_e pib_attr,
               FAR union ieee802154_attr_u *attrval);
-static int mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
+static int  mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
               enum ieee802154_pib_attr_e pib_attr,
               FAR const union ieee802154_attr_u *attrval);
+static int  mrf24j40_rxenable(FAR struct ieee802154_radio_s *dev, bool enable);
+static int  mrf24j40_req_rxenable(FAR struct ieee802154_radio_s *radio,
+              FAR struct ieee802154_rxenable_req_s *req);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-/* These are pointers to ALL registered MRF24J40 devices.
- * This table is used during irqs to find the context
- * Only one device is supported for now.
- * More devices can be supported in the future by lookup them up
- * using the IRQ number. See the ENC28J60 or CC3000 drivers for reference.
- */
-
-static const struct ieee802154_radioops_s mrf24j40_devops =
-{
-  mrf24j40_bind,
-  mrf24j40_txnotify_csma,
-  mrf24j40_txnotify_gts,
-  mrf24j40_get_attr,
-  mrf24j40_set_attr
-};
 
 /****************************************************************************
  * Radio Interface Functions
@@ -264,7 +254,7 @@ static int mrf24j40_bind(FAR struct ieee802154_radio_s *radio,
 }
 
 /****************************************************************************
- * Function: mrf24j40_txnotify_csma
+ * Function: mrf24j40_txnotify
  *
  * Description:
  *   Driver callback invoked when new TX data is available.  This is a
@@ -281,32 +271,49 @@ static int mrf24j40_bind(FAR struct ieee802154_radio_s *radio,
  *
  ****************************************************************************/
 
-static int mrf24j40_txnotify_csma(FAR struct ieee802154_radio_s *radio)
+static int mrf24j40_txnotify(FAR struct ieee802154_radio_s *radio, bool gts)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions and we will have to ignore the Tx
-   * availability action.
-   */
-
-  if (work_available(&dev->pollwork))
+  if (gts)
     {
-      /* Schedule to serialize the poll on the worker thread. */
+      /* Is our single work structure available?  It may not be if there are
+       * pending interrupt actions and we will have to ignore the Tx
+       * availability action.
+       */
 
-      work_queue(HPWORK, &dev->pollwork, mrf24j40_dopoll_csma, dev, 0);
+      if (work_available(&dev->gts_pollwork))
+        {
+          /* Schedule to serialize the poll on the worker thread. */
+
+          work_queue(HPWORK, &dev->gts_pollwork, mrf24j40_dopoll_gts, dev, 0);
+        }
+    }
+  else
+    {
+      /* Is our single work structure available?  It may not be if there are
+       * pending interrupt actions and we will have to ignore the Tx
+       * availability action.
+       */
+
+      if (work_available(&dev->csma_pollwork))
+        {
+          /* Schedule to serialize the poll on the worker thread. */
+
+          work_queue(HPWORK, &dev->csma_pollwork, mrf24j40_dopoll_csma, dev, 0);
+        }
     }
 
   return OK;
 }
 
 /****************************************************************************
- * Function: mrf24j40_txnotify_gts
+ * Function: mrf24j40_txdelayed
  *
  * Description:
- *   Driver callback invoked when new TX data is available.  This is a
- *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
- *   latency.
+ *   Transmit a packet without regard to supeframe structure after a certain
+ *   number of symbols.  This function is used to send Data Request responses. 
+ *   It can also be used to send data immediately is the delay is set to 0.
  *
  * Parameters:
  *   radio  - Reference to the radio driver state structure
@@ -318,28 +325,25 @@ static int mrf24j40_txnotify_csma(FAR struct ieee802154_radio_s *radio)
  *
  ****************************************************************************/
 
-static int mrf24j40_txnotify_gts(FAR struct ieee802154_radio_s *radio)
+static int mrf24j40_txdelayed(FAR struct ieee802154_radio_s *radio,
+                              FAR struct ieee802154_txdesc_s *txdesc,
+                              uint32_t symboldelay)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions and we will have to ignore the Tx
-   * availability action.
-   */
+  /* An immediate transaction uses the CSMA FIFO. If there is a CSMA transaction
+   * in use, cancel it and put it back when we are done */
 
-  if (work_available(&dev->pollwork))
-    {
-      /* Schedule to serialize the poll on the worker thread. */
+  
+  
+  
 
-      work_queue(HPWORK, &dev->pollwork, mrf24j40_dopoll_gts, dev, 0);
-    }
-
-  return OK;
+  return -ENOTTY;
 }
 
-static int  mrf24j40_get_attr(FAR struct ieee802154_radio_s *radio,
-                              enum ieee802154_pib_attr_e pib_attr,
-                              FAR union ieee802154_attr_u *attrval)
+static int mrf24j40_get_attr(FAR struct ieee802154_radio_s *radio,
+                             enum ieee802154_pib_attr_e pib_attr,
+                             FAR union ieee802154_attr_u *attrval)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
   int ret;
@@ -390,18 +394,59 @@ static int mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
       case IEEE802154_PIB_MAC_RX_ON_WHEN_IDLE:
         {
           dev->rxonidle = attrval->mac.rxonidle;
-          mrf24j40_rxenable(dev, dev->rxonidle);
+          mrf24j40_rxenable(radio, dev->rxonidle);
+          ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
       default:
         ret = IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE;
+        break;
     }
+
   return ret;
+}
+
+static int  mrf24j40_req_rxenable(FAR struct ieee802154_radio_s *radio,
+                                  FAR struct ieee802154_rxenable_req_s *req)
+{
+  return -ENOTTY;
 }
 
 /****************************************************************************
  * Internal Functions
  ****************************************************************************/
+
+static void mrf24j40_mactimer(FAR struct mrf24j40_radio_s *dev, int numsymbols)
+{
+  uint16_t nhalfsym;
+  uint8_t intcon;
+
+  nhalfsym = (numsymbols << 1);
+
+  /* Get exclusive access to the device */
+
+  while (sem_wait(&dev->exclsem) != 0) { }
+
+  /* Disable the interrupt, clear the timer count */
+
+  intcon  = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
+  intcon &= ~MRF24J40_INTCON_HSYMTMRIE;
+  mrf24j40_setreg(dev->spi, MRF24J40_INTCON, intcon);
+
+  mrf24j40_setreg(dev->spi, MRF24J40_HSYMTMRL, 0x00);
+  mrf24j40_setreg(dev->spi, MRF24J40_HSYMTMRH, 0x00);
+
+  /* Set the timer count and enable interrupts */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_HSYMTMRL, nhalfsym & 0xFF);
+  mrf24j40_setreg(dev->spi, MRF24J40_HSYMTMRH, (nhalfsym >> 8) & 0xFF);
+
+  intcon |= MRF24J40_INTCON_HSYMTMRIE;
+  mrf24j40_setreg(dev->spi, MRF24J40_INTCON, intcon);
+
+  sem_post(&dev->exclsem);
+}
+
 
 /****************************************************************************
  * Function: mrf24j40_dopoll_csma
@@ -411,7 +456,7 @@ static int mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
  *   This is done:
  *
  *   1. After completion of a transmission (mrf24j40_txdone_csma),
- *   2. When new TX data is available (mrf24j40_txnotify_csma), and
+ *   2. When new TX data is available (mrf24j40_txnotify), and
  *   3. After a TX timeout to restart the sending process
  *      (mrf24j40_txtimeout_csma).
  *
@@ -438,10 +483,8 @@ static void mrf24j40_dopoll_csma(FAR void *arg)
 
   if (!dev->csma_busy)
     {
-      /* need to somehow allow for a handle to be passed */
-
-      len = dev->radiocb->poll_csma(dev->radiocb, &dev->csma_desc,
-                                    &dev->csma_frame);
+      len = dev->radiocb->poll(dev->radiocb, false, &dev->csma_desc);
+                                    
       if (len > 0)
         {
           /* Now the txdesc is in use */
@@ -450,7 +493,7 @@ static void mrf24j40_dopoll_csma(FAR void *arg)
 
           /* Setup the transaction on the device in the CSMA FIFO */
 
-          mrf24j40_csma_setup(dev, dev->csma_frame);
+          mrf24j40_csma_setup(dev, dev->csma_desc->frame);
         }
     }
 
@@ -465,7 +508,7 @@ static void mrf24j40_dopoll_csma(FAR void *arg)
  *   This is done:
  *
  *   1. After completion of a transmission (mrf24j40_txdone_gts),
- *   2. When new TX data is available (mrf24j40_txnotify_gts), and
+ *   2. When new TX data is available (mrf24j40_txnotify), and
  *   3. After a TX timeout to restart the sending process
  *      (mrf24j40_txtimeout_gts).
  *
@@ -493,8 +536,8 @@ static void mrf24j40_dopoll_gts(FAR void *arg)
     {
       if (!dev->gts_busy[gts])
         {
-          len = dev->radiocb->poll_gts(dev->radiocb, &dev->gts_desc[gts],
-                                       &dev->gts_frame[0]);
+          len = dev->radiocb->poll(dev->radiocb, true, &dev->gts_desc[gts]);
+
           if (len > 0)
             {
               /* Now the txdesc is in use */
@@ -503,7 +546,7 @@ static void mrf24j40_dopoll_gts(FAR void *arg)
 
               /* Setup the transaction on the device in the open GTS FIFO */
 
-              mrf24j40_gts_setup(dev, gts, dev->gts_frame[0]);
+              mrf24j40_gts_setup(dev, gts, dev->gts_desc[gts]->frame);
             }
         }
     }
@@ -1281,9 +1324,8 @@ static int mrf24j40_csma_setup(FAR struct mrf24j40_radio_s *dev,
 
   ret = mrf24j40_setup_fifo(dev, frame, MRF24J40_TXNORM_FIFO);
 
-  /* If the frame control field contains
-   * an acknowledgment request, set the TXNACKREQ bit.
-   * See IEEE 802.15.4/2003 7.2.1.1 page 112 for info.
+  /* If the frame control field contains an acknowledgment request, set the
+   * TXNACKREQ bit. See IEEE 802.15.4/2003 7.2.1.1 page 112 for info.
    */
 
   reg = MRF24J40_TXNCON_TXNTRIG;
@@ -1406,10 +1448,6 @@ static void mrf24j40_irqwork_txnorm(FAR struct mrf24j40_radio_s *dev)
 
   dev->csma_busy = 0;
 
-  /* Free the IOB */
-
-  iob_free(dev->csma_frame);
-
   mrf24j40_dopoll_csma(dev);
 }
 
@@ -1456,10 +1494,6 @@ static void mrf24j40_irqwork_txgts(FAR struct mrf24j40_radio_s *dev,
 
   dev->gts_busy[gts]= 0;
 
-  /* Free the IOB */
-
-  iob_free(dev->gts_frame[gts]);
-
   mrf24j40_dopoll_gts(dev);
 }
 
@@ -1471,8 +1505,9 @@ static void mrf24j40_irqwork_txgts(FAR struct mrf24j40_radio_s *dev,
  *
  ****************************************************************************/
 
-static int mrf24j40_rxenable(FAR struct mrf24j40_radio_s *dev, bool enable)
+static int mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio, bool enable)
 {
+  FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
   uint8_t reg;
 
   if (enable)
@@ -1597,7 +1632,7 @@ done:
 static void mrf24j40_irqworker(FAR void *arg)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)arg;
-  uint8_t intstat;
+  uint8_t intstat, intcon;
 
   DEBUGASSERT(dev);
   DEBUGASSERT(dev->spi);
@@ -1608,6 +1643,17 @@ static void mrf24j40_irqworker(FAR void *arg)
   //wlinfo("INT%02X\n", intstat);
 
   /* Do work according to the pending interrupts */
+
+  if ((intstat & MRF24J40_INTSTAT_HSYMTMRIF))
+    {
+      /* TODO: What to do when timer expires? */
+
+      /* Timers are one-shot, so disable the interrupt */
+
+      intcon  = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
+      intcon &= ~MRF24J40_INTCON_HSYMTMRIE;
+      mrf24j40_setreg(dev->spi, MRF24J40_INTCON, intcon);
+    }
 
   if ((intstat & MRF24J40_INTSTAT_RXIF))
     {
@@ -1721,7 +1767,13 @@ FAR struct ieee802154_radio_s *mrf24j40_init(FAR struct spi_dev_s *spi,
 
   sem_init(&dev->exclsem, 0, 1);
 
-  dev->radio.ops = &mrf24j40_devops;
+  dev->radio.bind         = mrf24j40_bind;
+  dev->radio.txnotify     = mrf24j40_txnotify;
+  dev->radio.txdelayed    = mrf24j40_txdelayed;
+  dev->radio.get_attr     = mrf24j40_get_attr;
+  dev->radio.set_attr     = mrf24j40_set_attr;
+  dev->radio.rxenable     = mrf24j40_rxenable;
+  dev->radio.req_rxenable = mrf24j40_req_rxenable;
 
   dev->lower    = lower;
   dev->spi      = spi;
