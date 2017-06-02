@@ -278,8 +278,8 @@ tools\mkdeps$(HOSTEXEEXT):
 
 Make.defs:
 	$(Q) echo "No Make.defs file found, creating one"
-	echo "include $(TOPDIR)$(DELIM).config" > Make.defs
-	echo "include $(TOPDIR)$(DELIM)tools$(DELIM)Config.mk" >> Make.defs
+	$(Q) echo "include $(TOPDIR)$(DELIM).config" > Make.defs
+	$(Q) echo "include $(TOPDIR)$(DELIM)tools$(DELIM)Config.mk" >> Make.defs
 
 tools\initialconfig$(HOSTEXEEXT):
 	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" initialconfig$(HOSTEXEEXT)
