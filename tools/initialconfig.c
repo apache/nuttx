@@ -841,5 +841,10 @@ int main(int argc, char **argv)
    */
 
   create_config();
+
+  /* TODO:  Copy a Make.defs file from a configuration for the selected
+   * board that supports the selected MCU.
+   */
+
   return 0;
 }
