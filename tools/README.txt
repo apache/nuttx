@@ -82,6 +82,15 @@ cmdconfig.c
   This C file can be used to build a utility for comparing two NuttX
   configuration files.
 
+initialconfig.c
+---------------
+
+  This is a C file that can be used create an initial configuration.
+  This permits creating a new configuration from scratch, without
+  relying on any existing board configuration in place.  This utility
+  will create a barebones .config file sufficient only for
+  instantiating the symbolic links necesary to do a real configuration.
+
 kconfig2html.c
 --------------
 
