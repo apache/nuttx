@@ -584,7 +584,7 @@
 	* Added fixed precision math support
 	* Added some color converson routines into what may become a real graphics library someday.
 	* Added a framebuffer driver for the DM320 (untested on initial check-in)
-	* Network: add support for outgoing multicast addresses
+	* Network:  Add support for outgoing multicast addresses
 	* Added some rasterizers to the graphics library
 
 0.4.0 2008-12-06 Gregory Nutt <gnutt@nuttx.org>
@@ -924,7 +924,7 @@
 	  context switches and background/user context switches.  This change should
 	  improve the performance of those background/user context switches by a factor
 	  of about two.
-	* arch/arm/src/stm32/: fix several typos in the serial logic.	It turns out
+	* arch/arm/src/stm32/:  Fix several typos in the serial logic.	It turns out
 	  that these typose don't make any difference as long as you use only one
 	  serial port and all uarts are configured the same.  But the typos are bugs
 	  waiting to happen in any other configuration.
@@ -1591,7 +1591,7 @@
 	  where the GPL driver(s) can be re-installed into the NuttX source
 	  tree.  By re-installing the driver, you agree to the GPL licsensing
 	  and all of its implications.
-	* Makefile, apps/Makefile, tools/configure.sh: add logic to copy
+	* Makefile, apps/Makefile, tools/configure.sh:  Add logic to copy
 	  configs/<board>/<config>/appdir to apps/.config and to simply the
 	  application configuration logic.
 	* examples/nsh and apps/nshlib: Move the core NuttShell (NSH) logic
@@ -1617,7 +1617,7 @@
 	  without the SDcard (but one issue still exists in STM32)
 	* arch/arm/src/stm32/stm32_tim.*: Added basic timer support TIM1..TIM8
 	  with output PWMs and interrupt logic
-	* config/vsn/src: added basic support for Sensor Interface (GPIO and
+	* config/vsn/src:  Added basic support for Sensor Interface (GPIO and
 	  PWM Power Output, and the sif utility program)
 	* fs/: Reorgnize header so that file systems can be built outside
 	  of the nuttx source tree
@@ -6362,7 +6362,7 @@
 	  from Max Holtzberg (2014-1-4).
 	* configs/olimex-stm32-p107/nsh/Make.defs:  Add native Windows build
 	  support for the Olimex STM32 P107.  From Max Holtzberg (2014-1-4).
-	* Makefile.win:  Changes for native Windows build: fix creation of
+	* Makefile.win:  Changes for native Windows build:  Fix creation of
 	  a .version file if one does not exist.  Make sure that the APPDIR
 	  environment variable is set before configuring.  From Max Holtzberg
 	  (2014-1-4).
@@ -9341,11 +9341,11 @@
 	  That is because not handles not only the case of semaphore wait
 	  being awakened by a signal, but also the case with sem_timedwait.c
 	  when the semaphore wait is awakened by a timeout (2014-12-28).
-	* arch/arm/src/stm32/stm32_ltdc.c: stm32: fix faulty access to non-
+	* arch/arm/src/stm32/stm32_ltdc.c: stm32:  Fix faulty access to non-
 	  existing layer.  This disables operation that requires double layer
 	  support, when configured for single layer only.  From Marco Krahl
 	  (2014-12-29).
-	* arch/arm/src/stm32/stm32_ltdc.c: stm32: fix wait upon vertical blank.
+	* arch/arm/src/stm32/stm32_ltdc.c: stm32:  Fix wait upon vertical blank.
 	  This should never have occurred before.  From Marco Krahl (2014-12-29).
 	* configs/stm32f429i-disco/ltdc/defconfig and src/stm32_boot.c:
 	  stm32f429i-disco: change ltdc initializing during boot up. This moves
@@ -9465,7 +9465,7 @@
 	* arch/arm/src/tiva/tm4c_ethernet.c:  When calling into the stack
 	  from the worker thread, it is necessary to have the stack locked
 	  (2015-01-18).
-	* nuttx/arch/arm/src/stm32/stm32_serial.c: fix declaration and
+	* nuttx/arch/arm/src/stm32/stm32_serial.c:  Fix declaration and
 	definition of up_receive() and up_dma_receive() to match fields of
 	  uart_ops_s from nuttx/include/nuttx/serial/serial.h.  From Freddie
 	  Chopin (2015-01-19).
@@ -10323,7 +10323,7 @@
 	  LED, PWM, and UART0 have been tested. The SPI pins are mapped
 	  correctly but have not yet been tested.  From Michael Hope as
 	  SourceForge patch 51 (2015-05-07).
-	* arch/arm/src/kl/kl_pwm.c: fix PWM debugging. TPM1 and TPM2 have two
+	* arch/arm/src/kl/kl_pwm.c:  Fix PWM debugging. TPM1 and TPM2 have two
 	  channels instead of six and will hard fault if you try to read the
 	  missing channels.  From Michael Hope (2015-05-07).
 	* arch/arm/src/kl/kl_lowputc.c: enable the clocks to UART1 and UART2.
@@ -11954,7 +11954,7 @@
 	  stm32_pwm.c.  From Konstantin Berezenko (2016-06-09).
 	* arch/arm/src/kinetis: Support up to 8 channels per timer.  From kfazz
 	  (2016-06-09).
-	* lib/: crc16: fix error. From  Paul Alexander Patience (2016-06-10).
+	* lib/: crc16:  Fix error. From  Paul Alexander Patience (2016-06-10).
 	* lib/: Add crc64 support. From  Paul Alexander Patience (2016-06-10).
 	* arch/arm/src/kinetis: Added kl_dumpgpio functionality as
 	  kinetis_pindump. From kfazz (2016-06-10).
@@ -12243,7 +12243,7 @@
 	* drivers/syslog: Add a SYSLOG character device that can be used to re-
 	  direct output to the SYSLOG (2016-07-05).
 	* net/netdev: Break out internal interface psock_ioctl() (2016-07-06).
-	* configs/stm32f4disovery: add can driver for stm32f4discovery.  From
+	* configs/stm32f4disovery:  Add can driver for stm32f4discovery.  From
 	  Matthias Renner (2016-07-06).
 	* configs/freedom-k64f: Increase MCU clock to 120MHz (2016-07-06).
 	* arch/arm/src/stm32:  Add support for Tickless mode (two timer
@@ -12598,7 +12598,7 @@
 	  feature is EXPERIMENTAL because (1) it is untested and (2) has some
 	  know design issues that must be addressed before it can be of use
 	  (2016-08-28).
-	* CXXFLAGS: add -fcheck-new whenever -fno-exceptions is used.  From Beat
+	* CXXFLAGS:  Add -fcheck-new whenever -fno-exceptions is used.  From Beat
 	  Küng (2016-08-23).
 	* tools/mkfsdata.pl was still generating the old-style apps/include
 	  inclusion paths (2016-08-23).
@@ -12769,7 +12769,7 @@
 	  Mateusz Szafoni (2016-10-06).
 	* STM32 SPI: stm32_modifycr2 should be available on all platforms if DMA
 	  is enabled. (2016-10-06).
-	* STM32 DMA2D: fix an error in up_dma2dcreatelayer where an invalid
+	* STM32 DMA2D:  Fix an error in up_dma2dcreatelayer where an invalid
 	  pointer was returned when a certain underlying function failed.  From
 	  Jens Gräf (2016-10-07).
 
@@ -12808,10 +12808,10 @@
 	* libc/locale: Add clocale header file (2016-10-18).
 	* libc/wchar:  Add functions btowc, mbrtowc, mbtowc, wcscmp, wcscoll,
 	  wmemmove.  From Alan Carvalho de Assis (2016-10-18).
-	* usbhost/enumerate: fix possible buffer overwrite.  From Janne Rosberg
+	* usbhost/enumerate:  Fix possible buffer overwrite.  From Janne Rosberg
 	  (2016-10-18).
 	* configs/Board.mk: Add extra clean operations (2016-10-18).
-	* usbhost/composite: fix compile; missing semicolons.  From Jann
+	* usbhost/composite:  Fix compile; missing semicolons.  From Jann
 	  Rosberg (2016-10-18).
 	* libc/stdio: Include wchar.h in lib_libvsprintf.c to fix compilation
 	  error.  From Alan Carvalho de Assis (2016-10-18).
@@ -12843,7 +12843,7 @@
 	  From Alan Carvalho de Assis (2016-10-19).
 	* syslog: Fixes required for file syslog output.  From Max Kriegleder
 	  (2016-10-19).
-	* arch/arm/src/stm32: add TIM8 to STM32F103V pinmap.  From Maciej Wójcik
+	* arch/arm/src/stm32:  Add TIM8 to STM32F103V pinmap.  From Maciej Wójcik
 	  (2016-10-19).
 	* libc/locale: Allows c++ code to compile with or without
 	  CONFIG_LIBC_LOCALE and will generate a link error if CONFIG_LIBC_LOCALE
@@ -12989,24 +12989,24 @@
 	* arch/arm/src/armv7-r:  Fix compilation error.  This commit fixes
 	  compilation errors on MPU support for ARMv7-R.  From Heesub Shin
 	  (2016-11-06).
-	* arch/arm/src/armv7-r: fix invalid drbar handling.  In ARMv7-R,
+	* arch/arm/src/armv7-r:  Fix invalid drbar handling.  In ARMv7-R,
 	  [31:5] bits of DRBAR is physical base address and other bits are
 	  reserved and SBZ. Thus, there is no point in passing other than the
 	  base address.  From Heesub Shin (2016-11-06).
 	* arch/arm/src/armv7-r:  Remove the redundant update on SCTLR.
 	  mpu_control() is invoking cp15_wrsctlr() around SCTLR update
 	  redundantly.  From Heesub Shin (2016-11-06).
-	* arch/arm/src/armv7-r: add new Kconfig entries for d/i-cache.
+	* arch/arm/src/armv7-r:  Add new Kconfig entries for d/i-cache.
 	  Unlike in ARMv7-A/M, Kconfig entries for data and instruction caches
 	  are currently missing in ARMv7-R. This commit adds those missing
 	  Kconfig entries. Actual implmenetation for those functions will be
 	  added in the subsequent patches.  From Heesub Shin (2016-11-06).
-	* arch/arm/src/armv7-r: add cache handling functions.  This commit
+	* arch/arm/src/armv7-r:  Add cache handling functions.  This commit
 	  adds functions for enabling and disabling d/i-caches which were
 	  missing for ARMv7-R.  From Heesub Shin (2016-11-06).
-	* arch/arm/src/armv7-r: fix typo in mpu support.  s/ARMV7M/ARMV7R/g.
+	* arch/arm/src/armv7-r:  Fix typo in mpu support.  s/ARMV7M/ARMV7R/g.
 	  From Heesub Shin (2016-11-06).
-	* arch/arm/src/armv7-r: fix CPSR corruption after exception handling.
+	* arch/arm/src/armv7-r:  Fix CPSR corruption after exception handling.
 	  A sporadic hang with consequent crash was observed when booting. It
 	  seemed to be caused by the corrupted or wrong CPSR restored on return
 	  from exception. NuttX restores the context using code like this:
@@ -13027,7 +13027,7 @@
 	  result in the corruption of cpsr and thus unexpected behavior.
 
 	  From Heesub Shin (2016-11-06).
-	* arch/arm/src/armv7-r: fix to restore the Thumb flag in CPSR.  Thumb
+	* arch/arm/src/armv7-r:  Fix to restore the Thumb flag in CPSR.  Thumb
 	  flag in CPSR is not restored back when the context switch occurs while
 	  executing thumb instruction.  From Heesub Shin (2016-11-06).
 	* sched/wqueue:  When queuing new LP work, don't signal any threads
@@ -13271,9 +13271,9 @@
 	  CONFIG_NET_MULTIBUFFER (2016-11-29).
 	* stm32_otghshost: if STM32F446 increase number of channels to 16.  From
 	  Janne Rosberg (2016-11-30).
-	* usbhost_composite: fix end offset in usbhost_copyinterface().  From
+	* usbhost_composite:  Fix end offset in usbhost_copyinterface().  From
 	  Janne Rosberg (2016-11-30).
-	* usbhost_cdcacm: add CDC_SUBCLASS_ACM and CDC_PROTO_ATM to supported
+	* usbhost_cdcacm:  Add CDC_SUBCLASS_ACM and CDC_PROTO_ATM to supported
 	  class and proto.  From Janne Rosberg (2016-11-30).
 	* LPC43 SD/MMC:  Correct some git definitions on SMMC control register
 	  in lpc43_sdmmc.h.  From Alan Carvalho de Assis (2016-11-30).
@@ -13850,7 +13850,7 @@
 	* STM32L4:  Bring LPTIM driver in from the Motorola MDK (2017-02-18).
 	* drivers/sensors: Add driver for the ST L3GD20 3 axis gyro.  From
 	  raiden00 (2017-02-19).
-	* config/stm32f429i-disco: add support for the L3GD20 driver.  From
+	* config/stm32f429i-disco:  Add support for the L3GD20 driver.  From
 	  raiden00 (2017-02-19).
 	* STM32L4 COMP: Port from Motorola MDK (2017-02-19).
 	* Add twr-k64f120m config and fix some ENET related problems.  From Marc
@@ -14004,7 +14004,7 @@
 	  standardized approach.  From Mark Schulte (2017-03-01).
 	* Fix open() a block device with CONFIG_DISABLE_PSEUDOFS_OPERATIONS=y.
 	  From Masayuki Ishikawa (2017-03-01).
-	* net/: fixed a nullptr-dereference on iob_clone.  From Pascal Speck
+	* net/:  Fixed a nullptr-dereference on iob_clone.  From Pascal Speck
 	  (2017-03-01).
 	* configs/: All functions that used to return an xcpt_t old handler value,
 	  not return NULL.  The oldhandler value is no longer useful with the
@@ -14089,7 +14089,7 @@
 	  Janne Rosberg.  Adapt Janne Rosberg's patch to STM32 OTGHS host to
 	  OTGFS host, and to similar USB host implementations for STM32 L4 and
 	  F7 (2017-03-07).
-	* usbhost_cdcacm: fix tx outbuffer overflow and remove now invalid
+	* usbhost_cdcacm:  Fix tx outbuffer overflow and remove now invalid
 	  assert.  From Janne Rosberg (2017-03-07).
 
 7.21 2017-06-06 Gregory Nutt <gnutt@nuttx.org>
@@ -14313,7 +14313,7 @@
 	  architectures.  From David Cabecinhas (2017-03-18).
 	* configs/nucleo_f334r8:  Add ADC example.  From Mateusz Szafoni
 	  (2017-03-18).
-	* mtd/progmem: fix incorrect target address calculation.
+	* mtd/progmem:  Fix incorrect target address calculation.
 	  progmem_read/write() is incorrectly calculating the target address,
 	  expecting the offset argument is given in a block number. This is
 	  completely wrong and as a result invalid flash region is accessed.
@@ -14540,7 +14540,7 @@
 	  HW TCP/IP API requests while rest of the user-space can access
 	  standard socket API, with socket descriptors that can be used with
 	  NuttX system calls.  From Jussi Kivilinna (2017-03-31).
-	* STM32F7: add support for LSE RTC and enable RTC subseconds.  From
+	* STM32F7:  Add support for LSE RTC and enable RTC subseconds.  From
 	  Jussi Kivilinna (2017-03-31).
 	* TCP/IPv6: Fix a compile issue when IPv6, but not IPv4 is enabled
 	  (2017-03-31).
@@ -14580,12 +14580,12 @@
 	  loopback driver (2017-04-03).
 	* STM32:  Add I2C3 SDA pin mapping for STM32F411.  From no1wudi
 	  (2017-04-04).
-	* sensors: lis2dh: fix hardfault when reading from unconfigured
+	* sensors: lis2dh:  Fix hardfault when reading from unconfigured
 	  sensor.  From Juha Niskanen (2017-04-04).
-	* STM32: stm32_flash: add EEPROM writing for STM32L15XX.  From Juha
+	* STM32: stm32_flash:  Add EEPROM writing for STM32L15XX.  From Juha
 	  Niskanen (2017-04-04).
 	* 6loWPAN:  Add option to dump buffers (2017-04-04).
-	* STM32: stm32l15xx_rcc: add support for using MSI as system clock.
+	* STM32: stm32l15xx_rcc:  Add support for using MSI as system clock.
 	  From Juha Niskanen (2017-04-05).
 	* STM32:  stm32l15xxx_rcc: configure medium performance voltage range
 	  and zero wait-state when allowed by SYSCLK setting.  Zero wait-state
@@ -14601,7 +14601,7 @@
 	  (2017-04-05).
 	* STM32:  Fix SYSCFG_CFGR1_I2C_PBXFMP_SHIFT value.  From Alan Carvalho
 	  de Assis (2017-04-06).
-	* STM32F7:  Serial: add interface to get uart_dev_t by USART number,
+	* STM32F7:  Serial:  Add interface to get uart_dev_t by USART number,
 	  stm32_serial_get_uart.  From Jussi Kivilinna (2017-04-06).
 	* STM32F7:  Default CONFIG_STM32F7_DMACAPABLE to 'n'.  STM32F7 does not
 	  have CCM RAM but DTCM, so this option does not need to enabled.  DTCM
@@ -14609,7 +14609,7 @@
 	  (2017-04-06).
 	* STM32F7:  Fix UART7 and UART8 IFLOWCONTROL options.  From Jussi
 	  Kivilinna (2017-04-06).
-	* STM32F7: add warning for RXDMA + IFLOWCONTROL combination.
+	* STM32F7:  Add warning for RXDMA + IFLOWCONTROL combination.
 	  Combination of RXDMA + IFLOWCONTROL does not work as one might
 	  expect.  Since RXDMA uses circular DMA-buffer, DMA will always keep
 	  reading new data from USART peripheral even if DMA buffer underruns.
@@ -14619,7 +14619,7 @@
 	  inside irq critical section and feeding data to RXDMA+IFLOWCONTROL
 	  UART.  From Jussi Kivilinna (2017-04-06).
 	* sim/sixlowpan:  Now supports apps/examples/udpblaster too (2017-04-06).
-	* SAMV7: Watchdog: fix Forbidden Window Value.  According the Datasheet
+	* SAMV7: Watchdog:  Fix Forbidden Window Value.  According the Datasheet
 	  the WDD Value is the lower bound of a so called Forbidden Window and
 	  to disable this we have to set the WDD Value greater than or equal to
 	  the WDV Value.  This seems to be a bug in the datasheet. It looks
@@ -14629,7 +14629,7 @@
 	  Feature resets the System if WDD equals to WDV.  This Changeset
 	  disables the Forbidden Window by setting the WDD Value to the Maximum
 	  (0xfff) Value possible.  From Frank Benkert (2017-04-06).
-	* RTC: add interface for check if RTC time has been set.  New interface
+	* RTC:  Add interface for check if RTC time has been set.  New interface
 	  allows checking if RTC time has been set.  This allows to application
 	  to detect if RTC has valid time (after reset) or should application
 	  attempt to get real time by other means (for example, by launching
@@ -14735,7 +14735,7 @@
 	  wireless/ieee802154/mac802154.h (2017-04-14).
 	* radio802154_device.c now accesses the PHY layer via the IOCTL helper
 	  functions (2017-04-14).
-	* photon: add sdpcm + thread support for wlan.  From Simon Piriou
+	* photon:  Add sdpcm + thread support for wlan.  From Simon Piriou
 	  (2017-04-13).
 	* Not a clean fix, but at least makes DHCP working with
 	  CONFIG_NETDEV_MULTINIC.  From Andreas Bihlmaier (2017-04-15).
@@ -14927,7 +14927,7 @@
 	  (2017-04-27).
 	* net/socket:  Fix cloning of local and raw sockets.  From Jussi
 	  Kivilinna (2017-04-28).
-	* STM32L4: stm32l4_i2c: add I2C4 code.  From Juha Niskanen (2017-04-28).
+	* STM32L4: stm32l4_i2c:  Add I2C4 code.  From Juha Niskanen (2017-04-28).
 	* STM32L4:  I2C was not using current interrupt handling parameter
 	  passing logic (2017-04-28).
 	* vfs/poll: round timeout up to next full tick.  Calling poll() with
@@ -15019,7 +15019,7 @@
 	* 6loWPAN:  Fixes hang in loopback test (2017-05-03).
 	* drivers/wireless/bcmf:  Fix frame not freed when dropped + cleanup.
 	  From Simon Piriou (2017-05-03).
-	* STM32L4: stm32l4_i2c: change wrong macro to CONFIG_I2C_POLLED.  From
+	* STM32L4: stm32l4_i2c:  Change wrong macro to CONFIG_I2C_POLLED.  From
 	  Juha Niskanen (2017-05-04).
 	* STM32L4: modularize Kconfig to support different product
 	  lines/families.  This is modeled after STM32F7. Idea is to declare
@@ -15044,8 +15044,6 @@
 	  short/exended address terminology (2017-05-04).
 	* 6loWPAN:  Remove all ieee802.15.4 MAC knowledge from 6loWPAN.  Now
 	  relies on wires/ieee802154 for all MAC-related operations (2017-05-04).
-	* STM32L4:  stm32l4_i2c: change wrong macro to CONFIG_I2C_POLLED.  From
-	  Juha Niskanen (2017-05-04).
 	* 6loWPAN:  Local address length is fixed by the configuration.  The
 	  remote address be with short or extended (2017-05-04).
 	* STM32L4:  Separate SYSCFG into product line specific files for
@@ -15075,7 +15073,7 @@
 	* wireless/ieee802154:  Removes radio IOCTL.  Starts bringing radio and
 	  MAC closer with well-defined interface.  From Anthony Merlino
 	  (2017-05-05).
-	* STM32L4: add support for many new MCUs from STM32L4X3XX product line
+	* STM32L4:  Add support for many new MCUs from STM32L4X3XX product line
 	  and Nucleo-L452 board.  From Juha Niskanen (2017-05-05).
 	* 6loWPAN:  Use information in struct ieee802154_data_ind_s when
 	  reassembling a packet (2017-05-05).
@@ -15117,8 +15115,6 @@
 	  Merlino (2017-05-08).
 	* wireless/ieee802154: Completes basic receive functionality.  From
 	  Anthony Merlino (2017-05-08).
-	* STM32:  Serial DMA buffer round off not up.  From David Sidrane
-	  (2017-05-08).
 	* Final fixes to get the nucleo-l432kc config build.  Execution not
 	  tested yet.  From Sebastien Lorquet (2017-05-09).
 	* Adapt stm32l43x pin definitions.  From Sebastien Lorquet (2017-05-09).
@@ -15128,7 +15124,7 @@
 	  (2017-05-09).
 	* IOBs:  Move from driver/iob to a better location in mm/iob
 	  (2017-05-09).
-	* STM32L4: add dbgmcu header files.  From Juha Niskanen (2017-05-09).
+	* STM32L4:  Add dbgmcu header files.  From Juha Niskanen (2017-05-09).
 	* wireless/ieee802154: Fixes missing handle of read/write being able to
 	  be interrupted.  From Anthony Merlino (2017-05-09).
 	* wireless/ieee802154:  Starts implementing START.request primitive.
@@ -15149,7 +15145,7 @@
 	  (2017-05-10).
 	* syslog buffering:  Use IOBs to buffer data, not an on-stack buffer
 	  (2017-05-10).
-	* STM32L4: add internal flash write support.  From Juha Niskanen
+	* STM32L4:  Add internal flash write support.  From Juha Niskanen
 	  (2017-05-11).
 	* When syslog message has addition characters after last new-line. With
 	  buffering those now get lost as vsyslog does not flush output after
@@ -15208,7 +15204,7 @@
 	* locale.h:  Add a bogus definition of locale_t.  From  (2017-05-12).
 	* kinetis K66:  Fixed TMP2_CH1 definition.  From David Sidrane
 	  (2017-05-12).
-	* kinetis K66:  Fefine ALT1 to match ref manual.  From David Sidrane
+	* kinetis K66:  Define ALT1 to match ref manual.  From David Sidrane
 	  (2017-05-12).
 	* kinetis K66:  GPIO and pin mux cleanup.  From David Sidrane
 	  (2017-05-13).
@@ -15237,7 +15233,7 @@
 	* drivers:  fix some bad NULL checks.  From Juha Niskanen (2017-05-15).
 	* drivers:  rename newly introduced up_i2creset to I2C_RESET.  From
 	  Juha Niskanen (2017-05-15).
-	* TCP: An RST recevied suring the 3-way handshake requires a little
+	* TCP: An RST received during the 3-way handshake requires a little
 	  more clean-up (2017-05-15).
 	* STM32 CAN: I had the problem that the transmit FIFO size (= actual
 	  elements in FIFO) was slowly increasing over time, and was full after
@@ -15287,7 +15283,7 @@
 	  its IOB in the committed list, rather than free list.  In this way,
 	  the content of the free list and the value of the semaphore count
 	  always remain in sync (2017-05-16).
-	* stm32_serial: fix freezing serial port.  Serial interrupt
+	* stm32_serial:  Fix freezing serial port.  Serial interrupt
 	  enable/disable functions do not disable interrupts and can freeze
 	  device when serial interrupt is received while execution is at those
 	  functions. Trivially triggered with two or more threads write to
@@ -15311,7 +15307,7 @@
 	  change the link state.  From Sebastien Lorquet (2017-05-19).
 	* drivers/wireless/ieee80211: Add support for AP scanning.  From Simon
 	  Piriou (2017-05-21).
-	* drivers/audio: add cs43l22 audio driver  STM32F4: Add i2s driver.
+	* drivers/audio:  Add cs43l22 audio driver  STM32F4: Add i2s driver.
 	  From Taras Drozdovsky (2017-05-21).
 	* This is based on a patch by Taras Drozdovsky.  Basically, the delay
 	  that was added during the integration of the CDC/ACM host driver was
@@ -15332,7 +15328,7 @@
 	  started, as this seems to work on L4.  From Juha Niskanen (2017-05-23).
 	* drivers/can: Add Microchip MCP2515 CAN Bus controller driver.  From
 	  Alan Carvalho de Assis (2017-05-23).
-	* button_upper: fix interrupt enabling for poll-events.  From Jussi
+	* button_upper:  Fix interrupt enabling for poll-events.  From Jussi
 	  Kivilinna (2017-05-24).
 	* netdb: Fix bugs in lib_gethostbynamer.c. This fix sets h_name in
 	  struct hostent returned by gethostbyname().  From Masayuki Ishikawa
@@ -15347,7 +15343,7 @@
 	  Carvalho de Assis (2017-05-26).
 	* configs/stm32f103-miniumum: Add board support to use the Nokia 5110
 	  LCD display driver.  From Alan Carvalho de Assis (2017-05-26).
-	* configs/pic32mx7mmb: add support for the Pinquino toolchain
+	* configs/pic32mx7mmb:  Add support for the Pinquino toolchain
 	  (2017-05-27).
 	* configs/pic32mx7mmb: Repartition files to match newer
 	  configurations.   Add support for PROCFS file system.  Default is now
@@ -15356,11 +15352,11 @@
 	  initialkjc@yahoo.com.  When CONFIG_PTHREAD_MUTEX_UNSAFE=y, the
 	  special return value EAGAIN was not being detected due to differences
 	  in reporting of returned values (2017-05-29).
-	* vfs: fdopen: add missing file stream flags clearing.  Clear file
+	* vfs: fdopen:  Add missing file stream flags clearing.  Clear file
 	  stream structure regardless of config options. Structure clearing is
 	  needed as previous use of stream list entry might leave fs_flags
 	  set.  From Harri Luhtala (2017-05-31).
-	* drivers/input: add Cypress MBR3108 CapSense touch button driver.
+	* drivers/input:  Add Cypress MBR3108 CapSense touch button driver.
 	  From Juha Niskanen (2017-05-31).
 	* STM32L4: gpio: put back EXTI line source selection.  From Juha
 	  Niskanen (2017-05-31).
