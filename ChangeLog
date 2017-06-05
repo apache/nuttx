@@ -14092,7 +14092,7 @@
 	* usbhost_cdcacm:  Fix tx outbuffer overflow and remove now invalid
 	  assert.  From Janne Rosberg (2017-03-07).
 
-7.21 2017-06-06 Gregory Nutt <gnutt@nuttx.org>
+7.21 2017-06-05 Gregory Nutt <gnutt@nuttx.org>
 
 	* tools/kconfig2html:  Need to increase the maximum number of default
 	  values (2017-03-08).

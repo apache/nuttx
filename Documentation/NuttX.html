@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 8, 2017</p>
+      <p>Last Updated: June 5, 2017</p>
     </td>
   </tr>
 </table>
@@ -317,7 +317,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>POSIX/ANSI-like task controls, named message queues, counting semaphores, clocks/timers, signals, pthreads, cancellation points, environment variables, filesystem.</li>
+      <li>POSIX/ANSI-like task controls, named message queues, counting semaphores, clocks/timers, signals, pthreads, robust mutexes, cancellation points, environment variables, filesystem.</li>
     </p>
 </tr>
 
@@ -776,6 +776,14 @@
   <td><br></td>
   <td>
     <p>
+      <li>User space stacks.</li>
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
       <li>Stream and datagram sockets.</li>
     </p>
   </td>
@@ -792,7 +800,23 @@
   <td><br></td>
   <td>
     <p>
-      <li>DNS name resolution.</li>
+      <li>DNS name resolution / NetDB</li>
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>IEEE 802.11 FullMac</li>
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>IEEE 802.15.4 MAC + 6loWPAN</li>
     </p>
   </td>
 </tr>
@@ -1339,11 +1363,11 @@
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 7.20.
-  NuttX 7.20 is the 120<sup>th</sup> release of NuttX.
-  It was released on March 8, 2016, and is available for download from the
+  The current release is NuttX 7.21.
+  NuttX 7.21 is the 121<sup>st</sup> release of NuttX.
+  It was released on June 5, 2016, and is available for download from the
   <a href="https://bitbucket.org/nuttx/nuttx/downloads/">Bitbucket.org</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-7.20.tar.gz</code> and <code>apps-7.20.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-7.21.tar.gz</code> and <code>apps-7.21.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
 </p>
 
@@ -1352,7 +1376,7 @@
 <ul>
   <li><b>nuttx</b>.
     <ul><p>
-      Release notes for NuttX 7.20 are available <a href="https://bitbucket.org/nuttx/nuttx/downloads/">here</a>.
+      Release notes for NuttX 7.21 are available <a href="https://bitbucket.org/nuttx/nuttx/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for all releases of NuttX is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ChangeLog" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1360,7 +1384,7 @@
   </li></ul>
   <li><b>apps</b>.
     <ul><p>
-      Release notes for NuttX 7.20 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
+      Release notes for NuttX 7.21 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>
       The ChangeLog for the all releases of <code>apps/</code> is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/apps/src/master/ChangeLog.txt" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1416,9 +1440,9 @@
       <li><a href="#armcortexa8">ARM Cortex-A8</a> (1)</li>
       <li><a href="#armcortexa9">ARM Cortex-A9</a> (1)</li>
       <li><a href="#armcortexr4">ARM Cortex-R4</a> (1)</li>
-      <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (7)</li>
-      <li><a href="#armcortexm3">ARM Cortex-M3</a> (35)</li>
-      <li><a href="#armcortexm4">ARM Cortex-M4</a> (34)</li>
+      <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (10)</li>
+      <li><a href="#armcortexm3">ARM Cortex-M3</a> (36)</li>
+      <li><a href="#armcortexm4">ARM Cortex-M4</a> (40)</li>
       <li><a href="#armcortexm7">ARM Cortex-M7</a> (7)</li>
     </ul>
   <li>Atmel AVR
@@ -1525,6 +1549,11 @@
       <li><a href="#linuxusermode">Linux/Cygwin user mode simulation</a></li>
     </ul>
   </li>
+  <li>Infineon
+    <ul>
+      <li><a href="#xmd45xx">Infineon XMC45xx</a></li>
+    </ul>
+  </li>
   <li>Intel
     <ul>
       <li><a href="#80x86">Intel 80x86</a></li>
@@ -1597,6 +1626,7 @@
       <li><a href="#str71x">STMicro STR71x</a> <small>(ARM7TDMI)</small></li>
       <li><a href="#stm32l152">STMicro STM32L152</a> <small>(STM32 L &quot;EnergyLite&quot; Line, ARM Cortex-M3)</small></li>
       <li><a href="#stm32l162">STMicro STM32L162</a> <small>(STM32 L &quot;EnergyLite&quot; Medium+ Density, ARM Cortex-M3)</small></li>
+      <li><a href="#stm32f0xx">STMicro STM32F0xx</a> <small>(STM32 F0, ARM Cortex-M0)</small></li>
       <li><a href="#stm32f100x">STMicro STM32F100x</a> <small>(STM32 F1 &quot;Value Line&quot;Family, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f102x">STMicro STM32F102x</a> <small>(STM32 F1 Family, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f103cx">STMicro STM32F103C4/C8</a> <small>(STM32 F1 &quot;Low- and Medium-Density Line&quot; Family, ARM Cortex-M3)</small></li>
@@ -1608,19 +1638,22 @@
       <li><a href="#stm32302x">STMicro STM32F302x</a> <small>(STM32 F3 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32303x">STMicro STM32F303x</a> <small>(STM32 F3 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f372x">STMicro STM32 F372/F373</a> <small>(ARM Cortex-M4)</small></li>
-      <li><a href="#stm32f401x">STMicro STM32F401x</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
     </ul>
   </li>
   </td>
   <td bgcolor="#e4e4e4" valign="top" width="33%">
   <li>STMicroelectronics (Continued)
     <ul>
+      <li><a href="#stm32f4x1">STMicro STM32F4x1</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
+      <li><a href="#stm32f410">STMicro STM32F410</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f407x">STMicro STM32F407x</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f427x">STMicro STM32 F427/F437</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f429x">STMicro STM32 F429</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f446x">STMicro STM32 F446</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f46xxx">STMicro STM32 F46xx</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
+      <li><a href="#stm32l4x2">STMicro STM32 L4x2</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32l476">STMicro STM32 L476</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
+      <li><a href="#stm32l496">STMicro STM32 L496</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f74x">STMicro STM32 F745/F746</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
       <li><a href="#stm32f75x">STMicro STM32 F756</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
       <li><a href="#stm32f76xx77xx">STMicro STM32 F76xx/F77xx</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
@@ -2792,7 +2825,7 @@ nsh>
     </p>
     <ul>
       <p>
-        The STM32L-Discovery and 32L152CDISCOVERY kits are functionally equivalent.
+        The STM32L-Discovery and STM32L152C DISCOVERY kits are functionally equivalent.
         The difference is the internal Flash memory size (STM32L152RBT6 with 128 Kbytes or STM32L152RCT6 with 256 Kbytes).
         Both boards feature:
       </p>
@@ -2807,6 +2840,7 @@ nsh>
       <p>
         <b>STATUS</b>.
         Initial support for the STM32L-Discovery was released in NuttX-6.28.
+        Addition (architecture-only) support for the STM32L152xC family was added in NuttX-7.21.
         This initial support includes a configuration using the NuttShell (<a href="NuttShell.html">NSH</a>) that might be the basis for an application development.
         A driver for the on-board segment LCD is included as well as an option to drive the segment LCD from an NSH &quot;built-in&quot; command.
         As of this writing, a few more things are needed to make this a more complete port:  1) Verfication of more device drivers (timers, quadrature encoders, PWM, etc.), and 2) logic that actually uses the low-power consumption modes of the EnergyLite part.
@@ -2855,6 +2889,44 @@ nsh>
     </p>
   </td>
 </tr>
+
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="stm32f0xx"><b>STMicro STM32F0xx (STM32 F0, ARM Cortex-M0)</b>.</a>
+      Support for the STM32 F0 family was contributed by Alan Carvalho de Assis in NuttX-7.21.
+      There are ports to three different boards in this respository:
+    </p>
+    <ul>
+      <li>
+        <b>STM32F0-Discovery</b>
+        This board features the STM32 2F051R8 and was used by Alan to produce the initial STM32 F0 port.
+        However, its very limited 8KB SRAM makes this port unsuitable for for usages.
+        Contributed by Alan Carvalho de Assis in NuttX-7.21.
+      </li>
+      <li>
+        <b>Nucleo-F072RB</b>
+        With 16KB of SRAM the STM32 F072RB makes a much more usable platform.
+      </li>
+      <li>
+        <b>Nucleo-F091RC</b>
+        With 32KB of SRAM the STM32 F091RC this board is a great match for NuttX.
+        Contributed by Juha Niskanen in NuttX-7.21.
+      </li>
+    </ul>
+    <p><b>STATUS:</b>
+    In this initial release, the level of support for the STM32 F0 family is minimal.
+    Certainly enough is in place to support a robust NSH configuration.
+    There are also unverified I2C and USB device drivers available in NuttX-7.21.
+    </p>
+  </td>
+</tr>
+
 <tr>
   <td><br></td>
   <td><hr></td>
@@ -3176,11 +3248,18 @@ nsh>
   <td>
     <p>
       <a name="stm32f205x"><b>STMicro STM32F205 (STM32 F2 family)</b>.</a>
-      Architecture only support for the STM32F205RG was contributed as an anonymous contribution in NuttX-7.10
+      Architecture only support for the STM32F205RG was contributed as an anonymous contribution in NuttX-7.10.
+    </p>
+    <p>
+      <b>Particle.io Phone</b>.
+      Support for the Particle.io Photon board was contributed by Simon Pirious in NuttX-7.21.
+      The Photon board features the STM32F205RG MCU.
+      The STM32F205RG is a 120 MHz Cortex-M3 operation with 1Mbit Flash memory and 128kbytes.
+      The board port includes support for the on-board Broadcom BCM43362 WiFi and fully usable FullMac network support.
     </p>
     <ul>
       <b>STATUS:</b>
-      There are currently on board configurations for any board using the STM32F205.
+      In addition to the above-mention WiFI support, the Photon board support includes buttons, LEDS, IWDG, USB OTG HS, and procfs support.  Configurations available for nsh, usbnsh, and wlan configurations. See the Photon https://bitbucket.org/nuttx/nuttx/src/master/configs/photon/README.txt" target="_blank">README</a> file for additional information.
    </td>
 </tr>
 <tr>
@@ -3481,6 +3560,26 @@ nsh>
     <a name="armcortexm4"><b>ARM Cortex-M4</b>.</a>
   </td>
 </tr>
+
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="xmd45xx"><b>Infineon XMC45xx</b>.</a>
+      An initial but still incomplete port to the XMC4500 Relax board was released with NuttX-7.21 (although it is not really ready for prime time).
+      Much is functional but there are still some issues with the output to the NSH serial console.
+    </p>
+    <p>
+      This initial porting effort uses the Infineon XMC4500 Relax v1 board as described on the manufacturer's <a href="http://www.infineon.com/cms/en/product/evaluation-boards/KIT_XMC45_RELAX_V1/productType.html?productType=db3a304437849205013813b23ac17763">website</a>.
+      The current status of the board is available in the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/xmc4500-relax/README.txt" target="_blank">README</a> file
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
 <tr>
   <td><br></td>
   <td>
@@ -3499,6 +3598,7 @@ nsh>
     </ul>
   </td>
 </tr>
+
 <tr>
   <td><br></td>
   <td><hr></td>
@@ -3711,6 +3811,7 @@ nsh>
     </p>
   </td>
 </tr>
+
 <tr>
   <td><br></td>
   <td><hr></td>
@@ -3719,26 +3820,53 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <a name="stm32f401x"><b>STMicro STM32401x (STM32 F4 family)</b>.</a>
+      <a name="stm32f4x1"><b>STMicro STM324x1 (STM32 F4 family)</b>.</a>
     <p>
     <ul>
     <p>
       <b>Nucleo F401RE</b>.
-      This port uses the STMicro Nucleo F401RE board featuring the STM32F104RE MCU.
-      Refer to the <a href="http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/LN1847/PF260000">STMicro web site</a> for further information about this board.
+      This port uses the STMicro Nucleo F401RE board featuring the STM32F401RE MCU.
+      Refer to the <a href="http://www.st.com/en/evaluation-tools/nucleo-f401re.html">STMicro web site</a> for further information about this board.
+    </p>
+    <p>
+      <b>Nucleo F411RE</b>.
+      This port uses the STMicro Nucleo F411RE board featuring the STM32F411RE MCU.
+      Refer to the <a href="http://www.st.com/en/evaluation-tools/nucleo-f411re.html">STMicro web site</a> for further information about this board.
     </p>
     <p>
       <b>STATUS:</b>
       <ul>
         <li><b>NuttX-7.2</b>
           The basic port for STMicro Nucleo F401RE board was contributed by Frank Bennett.
+        </li>
+        <li><b>NuttX-7.6</b>
+          The basic port for STMicro Nucleo F401RE board was added by Serg Podtynnyi.
+        </li>
         <li>
-          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-f401re/README.txt" target="_blank">README</a> file for further information.
+          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-f4x1re/README.txt" target="_blank">README</a> file for further information.
         </li>
       </ul>
     </p>
   </td>
 </tr>
+
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="stm32f410"><b>STMicro STM32410 (STM32 F4 family)</b>.</a>
+    <p>
+    <ul>
+    <p>
+      Architecture-only support was contributed to NuttX-7.21 by Gwenhael Goavec-Merou.
+    </p>
+  </td>
+</tr>
+
 <tr>
   <td><br></td>
   <td><hr></td>
@@ -3867,6 +3995,20 @@ nsh>
       Support for the Olimex STM32 P407 development board appeared in NuttX-7.19.
       See the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/olimex-stm32-p407/README.txt" target="_blank">README</a> file for further information about the NuttX port.
     </p>
+    <p>
+      <b>MikroElektronika Clicker2 for STM32</b>.
+      This is yet another board supported by NuttX that uses the same STM32F407VGT6 MCU as does the STM32F4-Discovery board.
+      This board has been used primarily with the MRF24J40 Click board for the development of IEEE 802.15.4 MAC and 6loWPAN support.
+    <p>
+      See the <a href="https://shop.mikroe.com/development-boards/starter/clicker-2/stm32f4">Mikroelektronika</a> website for more information about this board and the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/clicker2-stm32/README.txt" target="_blank">README</a> file for further information about the NuttX port.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+        The basic port for the Clicker2 STM32 was contributed by Anthony Merlino and was first released in NuttX-7.21.
+        All compatible drivers for the STM32 F4 family may be used with this board as well.
+      </p>
+    </ul>
   </td>
 </tr>
 <tr>
@@ -4037,6 +4179,61 @@ nsh>
       <li>Power Managmement.</li>
       <li>LPTIM.</li>
       <li>Comparator (COMP).</li>
+    </ul>
+  </td>
+</tr>
+
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="stm32l4x2"><b>STMicro STM32 L4x2</b>.</a>
+      Architecture support for STM32 L4x2 family was contributed by Juha Niskanen in NuttX-7.21.
+      Two boards are currently supported.
+    </p>
+    <ul>
+      <li>
+        <p>
+          <b>Nucleo-L432KC</b>.
+          Board support for the STMicro Nucleo-L432KC board from ST Micro was contributed by JSebastien Lorquet in NuttX-7.21.  See the <a href="http://www.st.com/en/evaluation-tools/nucleo-l432kc.html" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-l432kc/README.txt" target="_blank">README</a> file for further information.
+        </p>
+      </li>
+      <li>
+        <p>
+          <b>Nucleo-L452RE</b>.
+          Board support for the STMicro Nucleo-L452RE board from ST Micro was contributed by Juha Niskanen in NuttX-7.21.  See the <a href="http://www.st.com/en/evaluation-tools/nucleo-l452re.html" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-l452re/README.txt" target="_blank">README</a> file for further information.
+        </p>
+      </li>
+    </ul>
+    <p>
+      See also the status above for the STM32 L476 most of which also applies to these parts.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="stm32l496"><b>STMicro STM32 L496</b>.</a>
+      Architecture support for STM32 L496 was contributed by Juha Niskanen along with board support for the Nucleo-L496ZG in NuttX-7.21:
+    </p>
+    <ul>
+      <li>
+        <p>
+          <b>Nucleo-L496ZG</b>.
+          Board support for the STMicro Nucleo-L496ZG board from ST Micro was contributed by Juha Niskanen in NuttX-7.21.  See the <a href="http://www.st.com/en/evaluation-tools/nucleo-l496zg.html" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-l496zg/README.txt" target="_blank">README</a> file for further information.
+          See also the status above for the STM32 L476 most of which also applies to this part.
+        </p>
+      </li>
     </ul>
   </td>
 </tr>

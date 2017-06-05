@@ -2025,7 +2025,7 @@ standard I/O buffer flushing.  See the ChangeLog for further details.
 NuttX-6.4
 ---------
 
-The 71st release of NuttX, Version 6.4, was made on June 6, 2011
+The 71st release of NuttX, Version 6.4, was made on June 5, 2011
 and is available for download from the SourceForge website.  The
 6.4 release includes several new features:
 
@@ -13762,7 +13762,7 @@ Additional new features and extended functionality:
 
       - Change STM32 tickless to use only one timer.  From Konstantin
         Berezenko.
-      - STM3 2F7:  Add support for LSE RTC and enable RTC subseconds.  From
+      - STM32 F7:  Add support for LSE RTC and enable RTC subseconds.  From
         Jussi Kivilinna.
       - STM32 L1: stm32l15xx_rcc:  Add support for using MSI as system
         clock. From Juha Niskanen.
