@@ -122,6 +122,7 @@ static inline int bq2425x_getreport(FAR struct bq2425x_dev_s *priv,
                                     uint8_t *report);
 static inline int bq2425x_reset(FAR struct bq2425x_dev_s *priv);
 static inline int bq2425x_watchdog(FAR struct bq2425x_dev_s *priv, bool enable);
+static inline int bq2425x_powersupply(FAR struct bq2425x_dev_s *priv, int current);
 static inline int bq2425x_setvolt(FAR struct bq2425x_dev_s *priv, int volts);
 static inline int bq2425x_setcurr(FAR struct bq2425x_dev_s *priv, int current);
 
@@ -132,6 +133,7 @@ static int bq2425x_health(struct battery_charger_dev_s *dev, int *health);
 static int bq2425x_online(struct battery_charger_dev_s *dev, bool *status);
 static int bq2425x_voltage(struct battery_charger_dev_s *dev, int value);
 static int bq2425x_current(struct battery_charger_dev_s *dev, int value);
+static int bq2425x_input_current(struct battery_charger_dev_s *dev, int value);
 
 /****************************************************************************
  * Private Data
@@ -143,7 +145,8 @@ static const struct battery_charger_operations_s g_bq2425xops =
   bq2425x_health,
   bq2425x_online,
   bq2425x_voltage,
-  bq2425x_current
+  bq2425x_current,
+  bq2425x_input_current
 };
 
 /****************************************************************************
@@ -273,7 +276,7 @@ static inline int bq2425x_reset(FAR struct bq2425x_dev_s *priv)
   ret = bq2425x_getreg8(priv, BQ2425X_REG_2, &regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error reading from BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error reading from BQ2425X! Error = %d\n", ret);
       return ret;
     }
 
@@ -283,7 +286,7 @@ static inline int bq2425x_reset(FAR struct bq2425x_dev_s *priv)
   ret = bq2425x_putreg8(priv, BQ2425X_REG_2, regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error writing to BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error writing to BQ2425X! Error = %d\n", ret);
       return ret;
     }
 
@@ -297,7 +300,7 @@ static inline int bq2425x_reset(FAR struct bq2425x_dev_s *priv)
   ret = bq2425x_putreg8(priv, BQ2425X_REG_2, regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error writing to BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error writing to BQ2425X! Error = %d\n", ret);
       return ret;
     }
 
@@ -320,7 +323,7 @@ static inline int bq2425x_watchdog(FAR struct bq2425x_dev_s *priv, bool enable)
   ret = bq2425x_getreg8(priv, BQ2425X_REG_1, &regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error reading from BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error reading from BQ2425X! Error = %d\n", ret);
       return ret;
     }
 
@@ -336,7 +339,7 @@ static inline int bq2425x_watchdog(FAR struct bq2425x_dev_s *priv, bool enable)
   ret = bq2425x_putreg8(priv, BQ2425X_REG_1, regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error writing to BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error writing to BQ2425X! Error = %d\n", ret);
       return ret;
     }
 
@@ -493,6 +496,10 @@ static inline int bq2425x_powersupply(FAR struct bq2425x_dev_s *priv, int curren
 
   switch (current)
   {
+  case BATTERY_INPUT_CURRENT_EXT_LIM:
+    idx = BQ2425X_INP_CURR_EXT_ILIM;
+    break;
+
   case 100:
     idx = BQ2425X_INP_CURR_LIM_100MA;
     break;
@@ -518,7 +525,7 @@ static inline int bq2425x_powersupply(FAR struct bq2425x_dev_s *priv, int curren
     break;
 
   default:
-    baterr("ERROR: Current not supported, setting default to 100mA.!\n");
+    baterr("ERROR: Current not supported, setting default to 100mA!\n");
     idx = BQ2425X_INP_CURR_LIM_100MA;
     break;
   }
@@ -528,7 +535,7 @@ static inline int bq2425x_powersupply(FAR struct bq2425x_dev_s *priv, int curren
   ret = bq2425x_getreg8(priv, BQ2425X_REG_2, &regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error reading from BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error reading from BQ2425X! Error = %d\n", ret);
       return ret;
     }
 
@@ -544,7 +551,7 @@ static inline int bq2425x_powersupply(FAR struct bq2425x_dev_s *priv, int curren
   ret = bq2425x_putreg8(priv, BQ2425X_REG_2, regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error writing to BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error writing to BQ2425X! Error = %d\n", ret);
       return ret;
     }
 
@@ -575,7 +582,7 @@ static inline int bq2425x_setvolt(FAR struct bq2425x_dev_s *priv, int volts)
   ret = bq2425x_getreg8(priv, BQ2425X_REG_3, &regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error reading from BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error reading from BQ2425X! Error = %d\n", ret);
       return ret;
     }
 
@@ -592,7 +599,7 @@ static inline int bq2425x_setvolt(FAR struct bq2425x_dev_s *priv, int volts)
   ret = bq2425x_putreg8(priv, BQ2425X_REG_3, regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error writing to BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error writing to BQ2425X! Error = %d\n", ret);
       return ret;
     }
 
@@ -623,7 +630,7 @@ static inline int bq2425x_setcurr(FAR struct bq2425x_dev_s *priv, int current)
   ret = bq2425x_getreg8(priv, BQ2425X_REG_4, &regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error reading from BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error reading from BQ2425X! Error = %d\n", ret);
       return ret;
     }
 
@@ -640,7 +647,7 @@ static inline int bq2425x_setcurr(FAR struct bq2425x_dev_s *priv, int current)
   ret = bq2425x_putreg8(priv, BQ2425X_REG_4, regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error writing to BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error writing to BQ2425X! Error = %d\n", ret);
       return ret;
     }
 
@@ -666,7 +673,7 @@ static int bq2425x_voltage(struct battery_charger_dev_s *dev, int value)
   ret = bq2425x_setvolt(priv, value);
   if (ret < 0)
     {
-      baterr("ERROR: Error setting voltage to BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error setting voltage to BQ2425X! Error = %d\n", ret);
       return ret;
     }
 
@@ -691,7 +698,30 @@ static int bq2425x_current(struct battery_charger_dev_s *dev, int value)
   ret = bq2425x_setcurr(priv, value);
   if (ret < 0)
     {
-      baterr("ERROR: Error setting current to BQ2425X! Error =  %d\n", ret);
+      baterr("ERROR: Error setting current to BQ2425X! Error = %d\n", ret);
+      return ret;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: bq2425x_input_current
+ *
+ * Description:
+ *   Set the power-supply input current limit
+ *
+ ****************************************************************************/
+
+static int bq2425x_input_current(struct battery_charger_dev_s *dev, int value)
+{
+  FAR struct bq2425x_dev_s *priv = (FAR struct bq2425x_dev_s *)dev;
+  int ret;
+
+  ret = bq2425x_powersupply(priv, value);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to set BQ2425x power supply input limit: %d\n", ret);
       return ret;
     }
 
@@ -718,18 +748,19 @@ static int bq2425x_current(struct battery_charger_dev_s *dev, int value)
  * Input Parameters:
  *   i2c       - An instance of the I2C interface to use to communicate with
  *               the BQ2425x
- *   addr      - The I2C address of the BQ2425x (Better be 0x36).
+ *   addr      - The I2C address of the BQ2425x (Better be 0x6a)
  *   frequency - The I2C frequency
+ *   current   - The input current our power-supply can offer to charger
  *
  * Returned Value:
- *   A pointer to the initializeed lower-half driver instance.  A NULL pointer
+ *   A pointer to the initialized lower-half driver instance.  A NULL pointer
  *   is returned on a failure to initialize the BQ2425x lower half.
  *
  ****************************************************************************/
 
 FAR struct battery_charger_dev_s *
   bq2425x_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
-                     uint32_t frequency)
+                     uint32_t frequency, int current)
 {
   FAR struct bq2425x_dev_s *priv;
   int ret;
@@ -767,12 +798,12 @@ FAR struct battery_charger_dev_s *
           return NULL;
         }
 
-      /* Define that our power supply can offer 2000mA to the charger */
+      /* Define the current that our power supply can offer to the charger. */
 
-      ret = bq2425x_powersupply(priv, 2000);
+      ret = bq2425x_powersupply(priv, current);
       if (ret < 0)
         {
-          baterr("ERROR: Failed to set BQ2425x power supply current: %d\n", ret);
+          baterr("ERROR: Failed to set BQ2425x power supply input limit: %d\n", ret);
           kmm_free(priv);
           return NULL;
         }
@@ -781,4 +812,4 @@ FAR struct battery_charger_dev_s *
   return (FAR struct battery_charger_dev_s *)priv;
 }
 
-#endif /* CONFIG_BATTERY && CONFIG_I2C && CONFIG_I2C_BQ2425X */
+#endif /* CONFIG_BATTERY_CHARGER && CONFIG_I2C && CONFIG_I2C_BQ2425X */

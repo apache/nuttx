@@ -46,7 +46,6 @@
 
 #include <stdbool.h>
 #include <semaphore.h>
-#include <fixedmath.h>
 
 #ifdef CONFIG_BATTERY_CHARGER
 
@@ -81,7 +80,17 @@
  *   Input value:  A pointer to type bool.
  * BATIOC_VOLTAGE - Define the wished charger voltage to charge the battery.
  *   Input value:  An int defining the voltage value.
+ * BATIOC_CURRENT - Define the wished charger current to charge the battery.
+ *   Input value:  An int defining the current value.
+ * BATIOC_INPUT_CURRENT - Define the input current limit of power supply.
+ *   Input value:  An int defining the input current limit value.
  */
+
+/* Special input values for BATIOC_INPUT_CURRENT that may optionally
+ * be supported by lower-half driver:
+ */
+
+#define BATTERY_INPUT_CURRENT_EXT_LIM   (-1) /* External input current limit */
 
 /****************************************************************************
  * Public Types
@@ -127,7 +136,7 @@ struct battery_charger_operations_s
 
   int (*health)(struct battery_charger_dev_s *dev, int *health);
 
-  /* Return true if the batter is online */
+  /* Return true if the battery is online */
 
   int (*online)(struct battery_charger_dev_s *dev, bool *status);
 
@@ -138,6 +147,10 @@ struct battery_charger_operations_s
   /* Set the wished current rate used for charging */
 
   int (*current)(struct battery_charger_dev_s *dev, int value);
+
+  /* Set the input current limit of power supply */
+
+  int (*input_current)(struct battery_charger_dev_s *dev, int value);
 };
 
 /* This structure defines the battery driver state structure */
@@ -201,27 +214,27 @@ int battery_charger_register(FAR const char *devpath,
  *   CONFIG_BATTERY_CHARGER - Upper half battery fuel gauge driver support
  *   CONFIG_I2C - I2C support
  *   CONFIG_I2C_BQ2425X - And the driver must be explictly selected.
- *   CONFIG_I2C_BQ24250 or CONFIG_I2C_BQ24251 - The driver must know which
- *     chip is on the board in order to scale the voltage correctly.
  *
  * Input Parameters:
  *   i2c       - An instance of the I2C interface to use to communicate with
  *               the BQ2425X
  *   addr      - The I2C address of the BQ2425X (Better be 0x6A).
  *   frequency - The I2C frequency
+ *   current   - The input current our power-supply can offer to charger
  *
  * Returned Value:
- *   A pointer to the initializeed battery driver instance.  A NULL pointer
+ *   A pointer to the initialized battery driver instance.  A NULL pointer
  *   is returned on a failure to initialize the BQ2425X lower half.
  *
  ****************************************************************************/
 
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_BQ2425X)
-struct i2c_master_s; /* Forward reference */
 
+struct i2c_master_s;
 FAR struct battery_charger_dev_s *bq2425x_initialize(FAR struct i2c_master_s *i2c,
                                                      uint8_t addr,
-                                                     uint32_t frequency);
+                                                     uint32_t frequency,
+                                                     int current);
 #endif
 
 #undef EXTERN
