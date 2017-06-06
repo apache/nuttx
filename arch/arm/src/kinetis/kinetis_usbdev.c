@@ -493,7 +493,6 @@ struct khci_usbdev_s
   uint8_t ctrlstate;                   /* Control EP state (see enum khci_ctrlstate_e) */
   uint8_t selfpowered:1;               /* 1: Device is self powered */
   uint8_t rwakeup:1;                   /* 1: Device supports remote wakeup */
-  uint8_t attached:1;                  /* Device is attached to the host */
   uint8_t ep0done:1;                   /* EP0 OUT already prepared */
   uint8_t rxbusy:1;                    /* EP0 OUT data transfer in progress */
   uint16_t epavail;                    /* Bitset of available endpoints */
@@ -618,9 +617,6 @@ static int    khci_selfpowered(struct usbdev_s *dev, bool selfpowered);
 
 static void   khci_reset(struct khci_usbdev_s *priv);
 static void   khci_attach(struct khci_usbdev_s *priv);
-#if defined(CONFIG_USBDEV_SELFPOWERED)
-static void   khci_detach(struct khci_usbdev_s *priv);
-#endif
 static void   khci_swreset(struct khci_usbdev_s *priv);
 static void   khci_hwreset(struct khci_usbdev_s *priv);
 static void   khci_swinitalize(struct khci_usbdev_s *priv);
@@ -2753,31 +2749,32 @@ static int khci_interrupt(int irq, void *context, FAR void *arg)
 
   /* Check if USB OTG SRP is ready */
 #  warning "Missing logic"
-    {
-      /* Check if the 1 millisecond timer has expired */
+  {
+    /* Check if the 1 millisecond timer has expired */
 
-      if ((otgir & USBOTG_INT_T1MSEC) != 0)
-        {
-          usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_T1MSEC), otgir);
+    if ((otgir & USBOTG_INT_T1MSEC) != 0)
+      {
+        usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_T1MSEC), otgir);
 
-          /* Check for the USB OTG SRP timeout */
+        /* Check for the USB OTG SRP timeout */
 #  warning "Missing logic"
-            {
+          {
               /* Handle OTG events of the SRP timeout has expired */
 #  warning "Missing logic"
-            }
+          }
 
-            /* Clear Interrupt 1 msec timer Flag */
+          /* Clear Interrupt 1 msec timer Flag */
 
-            khci_putreg(USBOTG_INT_T1MSEC, KINETIS_USB0_ISTAT);
-        }
-    }
+          khci_putreg(USBOTG_INT_T1MSEC, KINETIS_USB0_ISTAT);
+      }
+  }
 #endif
 
-    /* Handle events while we are in the attached state */
+  /* Handle events while we are in the attached state */
 
   if (priv->devstate == DEVSTATE_ATTACHED)
     {
+
       /* Now were are in the powered state */
 
       priv->devstate = DEVSTATE_POWERED;
@@ -2999,7 +2996,6 @@ static void khci_suspend(struct khci_usbdev_s *priv)
   regval  = khci_getreg(KINETIS_USB0_USBCTRL);
   regval |= USB_USBCTRL_SUSP;
   khci_putreg(regval, KINETIS_USB0_USBCTRL);
-
 }
 
 /****************************************************************************
@@ -3145,6 +3141,7 @@ khci_epreserved(struct khci_usbdev_s *priv, int epno)
 /****************************************************************************
  * Name: khci_ep0configure
  ****************************************************************************/
+
 static void khci_ep0configure(struct khci_usbdev_s *priv)
 {
   volatile struct usbotg_bdtentry_s *bdt;
@@ -3959,9 +3956,8 @@ static int khci_selfpowered(struct usbdev_s *dev, bool selfpowered)
  * Name: khci_reset
  *
  * Description:
- *   Reset the software and hardware states.  If the USB controller has been
- *   attached to a host, then connect to the bus as well.  At the end of
- *   this reset, the hardware should be in the full up, ready-to-run state.
+ *   Reset the software and hardware states.  At the end of this reset, the
+ *   hardware should be in the full up, ready-to-run state.
  *
  ****************************************************************************/
 
@@ -3975,18 +3971,9 @@ static void khci_reset(struct khci_usbdev_s *priv)
 
   khci_hwreset(priv);
 
-  /* khci_attach() was called, then the attach flag will be set and we
-   * should also attach to the USB bus.
-   */
+  /* Do the final hw attach */
 
-  if (priv->attached)
-   {
-      /* usbdev_attach() has already been called.. attach to the bus
-       * now
-       */
-
-      khci_attach(priv);
-    }
+  khci_attach(priv);
 }
 
 /****************************************************************************
@@ -4004,8 +3991,8 @@ static void khci_attach(struct khci_usbdev_s *priv)
       /* Disable USB interrupts at the interrupt controller */
 
       up_disable_irq(KINETIS_IRQ_USBOTG);
-  
-    /* Initialize the controller to known states. */
+
+      /* Initialize the controller to known states. */
 
       khci_putreg(USB_CTL_USBENSOFEN, KINETIS_USB0_CTL);
 
@@ -4072,62 +4059,9 @@ static void khci_attach(struct khci_usbdev_s *priv)
       /* Enable USB interrupts at the interrupt controller */
 
       up_enable_irq(KINETIS_IRQ_USBOTG);
-
     }
 }
 
-#if defined(CONFIG_USBDEV_SELFPOWERED)
-/****************************************************************************
- * Name: khci_detach
- ****************************************************************************/
-
-static void khci_detach(struct khci_usbdev_s *priv)
-{
-#ifdef CONFIG_USBOTG
-  uint32_t regval;
-#endif
-
-  /* Disable USB interrupts at the interrupt controller */
-
-  up_disable_irq(KINETIS_IRQ_USBOTG);
-
-  /* Disable the USB controller and detach from the bus. */
-
-  khci_putreg(0, KINETIS_USB0_CTL);
-
-  /* Mask all USB interrupts */
-
-  khci_putreg(0, KINETIS_USB0_INTEN);
-
-  /* We are now in the detached state  */
-
-  priv->attached = 0;
-  priv->devstate = DEVSTATE_DETACHED;
-
-#ifdef CONFIG_USBOTG
-  /* Disable the D+ Pullup */
-
-  regval  = khci_getreg(KINETIS_USB0_OTGCTL);
-  regval &= ~USBOTG_CON_DPPULUP;
-  khci_putreg(regval, KINETIS_USB0_OTGCTL);
-
-  /* Disable and deactivate HNP */
-#warning Missing Logic
-
-  /* Check if the ID Pin Changed State */
-
-  if ((khci_getreg(KINETIS_USB0_ISTAT) & khci_getreg(KINETIS_USB0_OTGICR) & USBOTG_INT_ID) != 0)
-    {
-      /* Re-detect & Initialize */
-#warning "Missing logic"
-
-      /* Clear ID Interrupt Flag */
-
-      khci_putreg(USBOTG_INT_ID, KINETIS_USB0_ISTAT);
-    }
-#endif
-}
-#endif
 /****************************************************************************
  * Name: khci_swreset
  ****************************************************************************/
@@ -4305,12 +4239,6 @@ static void khci_swinitalize(struct khci_usbdev_s *priv)
   priv->usbdev.speed = USB_SPEED_UNKNOWN;
   priv->epavail      = KHCI_ENDP_ALLSET & ~KHCI_ENDP_BIT(EP0);
   priv->rwakeup      = 1;
-
-#if defined(CONFIG_USBDEV_BUSPOWERED)
-  /* Since this code is running we are physically attached to power */
-
-  priv->attached = 1;
-#endif
 
   /* Initialize the watchdog timer that is used to perform a delayed
    * queue restart after recovering from a stall.
@@ -4570,10 +4498,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   else
     {
-      /* Setup the USB controller in it initial ready-to-run state (might
-       * be connected or unconnected, depending on usbdev_attach() has
-       * been called).
-       */
+      /* Setup the USB controller in it initial ready-to-run state */
 
       DEBUGASSERT(priv->devstate == DEVSTATE_DETACHED);
       khci_reset(priv);
@@ -4642,56 +4567,4 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   leave_critical_section(flags);
   return OK;
 }
-
-#if defined(CONFIG_USBDEV_SELFPOWERED)
-/****************************************************************************
- * Name: khci_usbattach and khci_usbdetach
- *
- * Description:
- *   The USB stack must be notified when the device is attached or detached
- *   by calling one of these functions.
- *
- ****************************************************************************/
-
-void khci_usbattach(void)
-{
-  /* For now there is only one USB controller, but we will always refer to
-   * it using a pointer to make any future ports to multiple USB controllers
-   * easier.
-   */
-
-  struct khci_usbdev_s *priv = &g_usbdev;
-
-  /* Mark that we are attached */
-
-  priv->attached = 1;
-
-  /* This API may be called asynchronously from other initialization
-   * interfaces.  In particular, we may not want to attach the bus yet...
-   * that should only be done when the class driver is attached.  Has
-   * the class driver been attached?
-   */
-
-  if (priv->driver)
-    {
-      /* Yes.. then attach to the bus */
-
-      khci_attach(priv);
-    }
-}
-
-void khci_usbdetach(void)
-{
-  /* For now there is only one USB controller, but we will always refer to
-   * it using a pointer to make any future ports to multiple USB controllers
-   * easier.
-   */
-
-  struct khci_usbdev_s *priv = &g_usbdev;
-
-  /* Detach from the bus */
-
-  khci_detach(priv);
-}
-#endif /* CONFIG_USBDEV_SELFPOWERED */
 #endif /* CONFIG_USBDEV && CONFIG_KHCI_USB */
