@@ -3,7 +3,7 @@
  * Driver for SPI-based M25P1 (128Kbit),  M25P64 (32Mbit), M25P64 (64Mbit), and
  * M25P128 (128Mbit) FLASH (and compatible).
  *
- *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -859,6 +859,7 @@ static ssize_t m25p_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
   startpage = offset / (1 << priv->pageshift);
   endpage = (offset + nbytes) / (1 << priv->pageshift);
 
+  m25p_lock(priv->dev);
   if (startpage == endpage)
     {
       /* All bytes within one programmable page.  Just do the write. */
@@ -901,6 +902,7 @@ static ssize_t m25p_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
         }
     }
 
+  m25p_unlock(priv->dev);
   return nbytes;
 }
 #endif /* CONFIG_MTD_BYTE_WRITE */

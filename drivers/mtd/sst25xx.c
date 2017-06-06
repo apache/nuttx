@@ -546,8 +546,9 @@ static inline void sst25xx_pagewrite(struct sst25xx_dev_s *priv, FAR const uint8
  ************************************************************************************/
 
 #ifdef CONFIG_MTD_BYTE_WRITE
-static inline void sst25xx_bytewrite(struct sst25xx_dev_s *priv, FAR const uint8_t *buffer,
-                                     off_t offset, uint16_t count)
+static inline void sst25xx_bytewrite(struct sst25xx_dev_s *priv,
+                                     FAR const uint8_t *buffer, off_t offset,
+                                     uint16_t count)
 {
   finfo("offset: %08lx  count:%d\n", (long)offset, count);
 
@@ -790,6 +791,7 @@ static ssize_t sst25xx_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nby
   startpage = offset / (1 << priv->pageshift);
   endpage = (offset + nbytes) / (1 << priv->pageshift);
 
+  sst25xx_lock(priv->dev);
   if (startpage == endpage)
     {
       /* All bytes within one programmable page.  Just do the write. */
@@ -834,6 +836,7 @@ static ssize_t sst25xx_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nby
       priv->lastwaswrite = true;
     }
 
+  sst25xx_unlock(priv->dev);
   return nbytes;
 }
 #endif /* CONFIG_MTD_BYTE_WRITE */

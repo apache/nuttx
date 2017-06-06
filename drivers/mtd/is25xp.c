@@ -4,7 +4,7 @@
  *
  *   Copyright (C) 2016 Marten Svanfeldt. All rights reserved.
  *
- *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
  *
  *   Copied from / based on m25px.c and sst25.c drivers written by
@@ -568,8 +568,9 @@ static inline void is25xp_pagewrite(struct is25xp_dev_s *priv, FAR const uint8_t
  ************************************************************************************/
 
 #ifdef CONFIG_MTD_BYTE_WRITE
-static inline void is25xp_bytewrite(struct is25xp_dev_s *priv, FAR const uint8_t *buffer,
-                                     off_t offset, uint16_t count)
+static inline void is25xp_bytewrite(struct is25xp_dev_s *priv,
+                                    FAR const uint8_t *buffer, off_t offset,
+                                    uint16_t count)
 {
   finfo("offset: %08lx  count:%d\n", (long)offset, count);
 
@@ -812,6 +813,7 @@ static ssize_t is25xp_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
   startpage = offset / (1 << priv->pageshift);
   endpage = (offset + nbytes) / (1 << priv->pageshift);
 
+  is25xp_lock(priv->dev);
   if (startpage == endpage)
     {
       /* All bytes within one programmable page.  Just do the write. */
@@ -856,6 +858,7 @@ static ssize_t is25xp_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
       priv->lastwaswrite = true;
     }
 
+  is25xp_unlock(priv->dev);
   return nbytes;
 }
 #endif /* CONFIG_MTD_BYTE_WRITE */

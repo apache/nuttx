@@ -8,7 +8,7 @@
  *
  * For SST25VF064, see sst25cxx.c driver instead.
  *
- *   Copyright (C) 2009-2011, 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
  *
@@ -791,6 +791,7 @@ static ssize_t sst26_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyte
   startpage = offset / (1 << priv->pageshift);
   endpage = (offset + nbytes) / (1 << priv->pageshift);
 
+  sst26_lock(priv->dev);
   if (startpage == endpage)
     {
       /* All bytes within one programmable page.  Just do the write. */
@@ -835,6 +836,7 @@ static ssize_t sst26_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyte
       priv->lastwaswrite = true;
     }
 
+  sst26_unlock(priv->dev);
   return nbytes;
 }
 #endif /* CONFIG_MTD_BYTE_WRITE */

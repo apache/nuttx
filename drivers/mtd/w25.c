@@ -2,7 +2,7 @@
  * drivers/mtd/w25.c
  * Driver for SPI-based W25x16, x32, and x64 and W25q16, q32, q64, and q128 FLASH
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -802,7 +802,7 @@ static void w25_pagewrite(struct w25_dev_s *priv, FAR const uint8_t *buffer,
 
 #if defined(CONFIG_MTD_BYTE_WRITE) && !defined(CONFIG_W25_READONLY)
 static inline void w25_bytewrite(struct w25_dev_s *priv, FAR const uint8_t *buffer,
-                                  off_t offset, uint16_t count)
+                                 off_t offset, uint16_t count)
 {
   finfo("offset: %08lx  count:%d\n", (long)offset, count);
 
@@ -1157,6 +1157,7 @@ static ssize_t w25_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
   startpage = offset / W25_PAGE_SIZE;
   endpage = (offset + nbytes) / W25_PAGE_SIZE;
 
+  w25_lock(priv->spi);
   if (startpage == endpage)
     {
       /* All bytes within one programmable page.  Just do the write. */
@@ -1198,6 +1199,7 @@ static ssize_t w25_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
         }
     }
 
+  w25_unlock(priv->spi);
   return nbytes;
 }
 #endif /* defined(CONFIG_MTD_BYTE_WRITE) && !defined(CONFIG_W25_READONLY) */
