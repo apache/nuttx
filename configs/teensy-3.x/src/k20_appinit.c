@@ -80,14 +80,6 @@ int board_app_initialize(uintptr_t arg)
 {
   int ret;
 
-#ifdef CONFIG_USBDEV
-  /* Teensy is powered from usb and (bug?) only boots from being programmed, 
-   * so if usb is compiled in signal the controller driver that we're attached now.
-   */
-
-  khci_usbattach();
-#endif
-
 #ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */
 
