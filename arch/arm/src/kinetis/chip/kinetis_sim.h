@@ -1057,7 +1057,7 @@
 #if defined(KINETIS_SIM_HAS_CLKDIV1_OUTDIV4)
 #  define SIM_CLKDIV1_OUTDIV4_SHIFT           (16)      /* Bits 16-19: Clock 4 output divider value */
 #  define SIM_CLKDIV1_OUTDIV4_MASK            (15 << SIM_CLKDIV1_OUTDIV4_SHIFT)
-#    define SIM_CLKDIV1_OUTDIV4(n)            ((uint32_t)((n)-1) << SIM_CLKDIV1_OUTDIV4_SHIFT) /* n=1..16 */
+#    define SIM_CLKDIV1_OUTDIV4(n)            ((uint32_t)(((n)-1) & 0xf) << SIM_CLKDIV1_OUTDIV4_SHIFT) /* n=1..16 */
 #    define SIM_CLKDIV1_OUTDIV4_1             (0 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 1 */
 #    define SIM_CLKDIV1_OUTDIV4_2             (1 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 2 */
 #    define SIM_CLKDIV1_OUTDIV4_3             (2 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 3 */
@@ -1078,7 +1078,7 @@
 #if defined(KINETIS_SIM_HAS_CLKDIV1_OUTDIV3)
 #  define SIM_CLKDIV1_OUTDIV3_SHIFT           (20)      /* Bits 20-23: Clock 3 output divider value */
 #  define SIM_CLKDIV1_OUTDIV3_MASK            (15 << SIM_CLKDIV1_OUTDIV3_SHIFT)
-#    define SIM_CLKDIV1_OUTDIV3(n)            ((uint32_t)((n)-1) << SIM_CLKDIV1_OUTDIV3_SHIFT) /* n=1..16 */
+#    define SIM_CLKDIV1_OUTDIV3(n)            ((uint32_t)(((n)-1) & 0xf) << SIM_CLKDIV1_OUTDIV3_SHIFT) /* n=1..16 */
 #    define SIM_CLKDIV1_OUTDIV3_1             (0 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 1 */
 #    define SIM_CLKDIV1_OUTDIV3_2             (1 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 2 */
 #    define SIM_CLKDIV1_OUTDIV3_3             (2 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 3 */
@@ -1099,7 +1099,7 @@
 #if defined(KINETIS_SIM_HAS_CLKDIV1_OUTDIV2)
 #  define SIM_CLKDIV1_OUTDIV2_SHIFT           (24)      /* Bits 24-27: Clock 2 output divider value */
 #  define SIM_CLKDIV1_OUTDIV2_MASK            (15 << SIM_CLKDIV1_OUTDIV2_SHIFT)
-#    define SIM_CLKDIV1_OUTDIV2(n)            ((uint32_t)((n)-1) << SIM_CLKDIV1_OUTDIV2_SHIFT) /* n=1..16 */
+#    define SIM_CLKDIV1_OUTDIV2(n)            ((uint32_t)(((n)-1) & 0xf) << SIM_CLKDIV1_OUTDIV2_SHIFT) /* n=1..16 */
 #    define SIM_CLKDIV1_OUTDIV2_1             (0 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 1 */
 #    define SIM_CLKDIV1_OUTDIV2_2             (1 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 2 */
 #    define SIM_CLKDIV1_OUTDIV2_3             (2 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 3 */
@@ -1119,7 +1119,7 @@
 #endif
 #define SIM_CLKDIV1_OUTDIV1_SHIFT             (28)      /* Bits 28-31: Clock 1 output divider value */
 #define SIM_CLKDIV1_OUTDIV1_MASK              (15 << SIM_CLKDIV1_OUTDIV1_SHIFT)
-#  define SIM_CLKDIV1_OUTDIV1(n)              ((uint32_t)((n)-1) << SIM_CLKDIV1_OUTDIV1_SHIFT) /* n=1..16 */
+#  define SIM_CLKDIV1_OUTDIV1(n)              ((uint32_t)(((n)-1) & 0xf) << SIM_CLKDIV1_OUTDIV1_SHIFT) /* n=1..16 */
 #  define SIM_CLKDIV1_OUTDIV1_1               (0 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 1 */
 #  define SIM_CLKDIV1_OUTDIV1_2               (1 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 2 */
 #  define SIM_CLKDIV1_OUTDIV1_3               (2 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 3 */
