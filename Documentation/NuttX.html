@@ -1624,8 +1624,8 @@
   <li>STMicroelectronics
     <ul>
       <li><a href="#str71x">STMicro STR71x</a> <small>(ARM7TDMI)</small></li>
-      <li><a href="#stm32l152">STMicro STM32L152</a> <small>(STM32 L &quot;EnergyLite&quot; Line, ARM Cortex-M3)</small></li>
-      <li><a href="#stm32l162">STMicro STM32L162</a> <small>(STM32 L &quot;EnergyLite&quot; Medium+ Density, ARM Cortex-M3)</small></li>
+      <li><a href="#stm32l152">STMicro STM32L152</a> <small>(STM32 L1 &quot;EnergyLite&quot; Line, ARM Cortex-M3)</small></li>
+      <li><a href="#stm32l162">STMicro STM32L162</a> <small>(STM32 L1 &quot;EnergyLite&quot; Medium+ Density, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f0xx">STMicro STM32F0xx</a> <small>(STM32 F0, ARM Cortex-M0)</small></li>
       <li><a href="#stm32f100x">STMicro STM32F100x</a> <small>(STM32 F1 &quot;Value Line&quot;Family, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f102x">STMicro STM32F102x</a> <small>(STM32 F1 Family, ARM Cortex-M3)</small></li>
@@ -1651,9 +1651,9 @@
       <li><a href="#stm32f429x">STMicro STM32 F429</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f446x">STMicro STM32 F446</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f46xxx">STMicro STM32 F46xx</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
-      <li><a href="#stm32l4x2">STMicro STM32 L4x2</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
-      <li><a href="#stm32l476">STMicro STM32 L476</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
-      <li><a href="#stm32l496">STMicro STM32 L496</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
+      <li><a href="#stm32l4x2">STMicro STM32 L4x2</a> <small>(STM32 L4 family, ARM Cortex-M4)</small></li>
+      <li><a href="#stm32l476">STMicro STM32 L476</a> <small>(STM32 L4 family, ARM Cortex-M4)</small></li>
+      <li><a href="#stm32l496">STMicro STM32 L496</a> <small>(STM32 L4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f74x">STMicro STM32 F745/F746</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
       <li><a href="#stm32f75x">STMicro STM32 F756</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
       <li><a href="#stm32f76xx77xx">STMicro STM32 F76xx/F77xx</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
@@ -2871,7 +2871,7 @@ Mem:         14096       3928      10168      10168
 nsh>
 </pre></ul>
     <p>
-      You can see that 9.9KB (62%) of SRAM heap is staill available for further application development while NSH is running.
+      You can see that 9.9KB (62%) of SRAM heap is still available for further application development while NSH is running.
     </p>
   </td>
 </tr>
@@ -2883,9 +2883,9 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <a name="stm32l162"><b>STMicro STM32F152x/162x(STM32 F1 &quot;EnergyLite&quot; Medium+ Density Family)</b>.</a>
-      Support for the STM32152 and STM32162 Medium+ density parts from Jussi Kivilinna and Sami Pelkonen was included in NuttX-7.3, extending the basic STM32F152x support.
-      This is <i>architecture-only</i> support, meaning that support for the boards with these chips is available, but not support for any publicly available boards is included.
+      <a name="stm32l162"><b>STMicro STM32L152x/162x (STM32 L1 &quot;EnergyLite&quot; Medium+ Density Family)</b>.</a>
+      Support for the STM32L152 and STM32L162 Medium+ density parts from Jussi Kivilinna and Sami Pelkonen was included in NuttX-7.3, extending the basic STM32L152x support.
+      This is <i>architecture-only</i> support, meaning that support for the boards with these chips is available, but no support for any publicly available boards is included.
     </p>
   </td>
 </tr>
@@ -2995,7 +2995,7 @@ nsh>
       </li>
       <li>
         <p>
-          The other port is for a generic minimual STM32F103CBT6 &quot;blue&quot; board contributed by Alan Carvalho de Assis.
+          The other port is for a generic minimal STM32F103CBT6 &quot;blue&quot; board contributed by Alan Carvalho de Assis.
           Alan added support for numerous sensors, tone generators, user LEDs, and LCD support in NuttX 7.18.
         </p>
       </li>
@@ -3170,7 +3170,7 @@ nsh>
   <td>
     <p>
       <a name="stm32f107x"><b>STMicro STM32F107x (STM32 F1 &quot;Connectivity Line&quot; family)</b>.</a>
-      Chip support for the STM32 F1 &quot;Connectivity Line&quot; family has been present in NuttX for some time and users have reported that they have successful brought up NuttX on theor proprietary boards using this logic.
+      Chip support for the STM32 F1 &quot;Connectivity Line&quot; family has been present in NuttX for some time and users have reported that they have successful brought up NuttX on their proprietary boards using this logic.
     </p>
     <ul>
     <li>
@@ -3259,7 +3259,7 @@ nsh>
     </p>
     <ul>
       <b>STATUS:</b>
-      In addition to the above-mention WiFI support, the Photon board support includes buttons, LEDS, IWDG, USB OTG HS, and procfs support.  Configurations available for nsh, usbnsh, and wlan configurations. See the Photon https://bitbucket.org/nuttx/nuttx/src/master/configs/photon/README.txt" target="_blank">README</a> file for additional information.
+      In addition to the above-mention WiFI support, the Photon board support includes buttons, LEDS, IWDG, USB OTG HS, and procfs support.  Configurations available for nsh, usbnsh, and wlan configurations. See the Photon <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/photon/README.txt" target="_blank">README</a> file for additional information.
    </td>
 </tr>
 <tr>
@@ -3783,7 +3783,7 @@ nsh>
     </ul>
 
     <p>
-      <b>STMicro ST Nucleo F303RE board.</b>.
+      <b>STMicro ST Nucleo F303RE board</b>.
       Contributed by Paul Alexander Patience.
     </p>
     <ul>
@@ -4047,7 +4047,7 @@ nsh>
     </p>
     <ul>
       <li>
-        The intial release included support from either OTG FS or OTG HS in FS mode.
+        The initial release included support from either OTG FS or OTG HS in FS mode.
       </li>
       <li>
         The F429 port adds support for the STM32F439 LCD and OTG HS (in FS mode).
@@ -4176,9 +4176,16 @@ nsh>
     </p>
     <ul>
       <li>Serial Audio Interface (SAI).</li>
-      <li>Power Managmement.</li>
+      <li>Power Management.</li>
       <li>LPTIM.</li>
       <li>Comparator (COMP).</li>
+    </ul>
+    <p>
+      <b>NuttX-7.21</b>.
+      Additional drivers were added:
+    </p>
+    <ul>
+      <li>Internal Watchdog (IWDG).</li>
     </ul>
   </td>
 </tr>
@@ -4481,7 +4488,7 @@ nsh>
           <li>
             This board supports included two configurations for the NuttShell (<a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
             Both are networked enabled:  One configured to support IPv4 and one configured to supported IPv6.
-            Instructions are included in the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/dk-tm4c129x/README.txt" target="_blank">README</a> file for configuring both IPv4 and IPv6 simultaneously..
+            Instructions are included in the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/dk-tm4c129x/README.txt" target="_blank">README</a> file for configuring both IPv4 and IPv6 simultaneously.
           </li>
           <li>
             Tiva PWM and Quadrature Encoder drivers were contributed to NuttX in 7.18 by Young.

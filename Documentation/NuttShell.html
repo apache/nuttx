@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: April 5, 2017</p>
+      <p>Last Updated: June 6, 2017</p>
     </td>
   </tr>
 </table>
@@ -779,7 +779,7 @@ nsh&gt;
 
 <p>
    <b>Optional Syntax Extensions</b>
-   Because these features commit significant resources, it is disabled by default.
+   Because these features commit significant resources, they are disabled by default.
 </p>
 <ul>
 <li>
@@ -804,7 +804,7 @@ set BAR 123
 set FOOBAR ABC_${FOO}_${BAR}
 </pre></ul>
   would set the environment variable <code>FOO</code> to <code>XYZ</code>, <code>BAR</code> to <code>123</code> and <code>FOOBAR</code> to <code>ABC_XYZ_123</code>.
-  If <code>CONFIG_NSH_ARGCAT</code> is not selected, then a slightly small FLASH footprint results but then also only simple environment variables like <code>$FOO</code> can be used on the command line.
+  If <code>CONFIG_NSH_ARGCAT</code> is not selected, then a slightly smaller FLASH footprint results but then also only simple environment variables like <code>$FOO</code> can be used on the command line.
 </li>
 </ul>
 
@@ -820,7 +820,7 @@ set FOOBAR ABC_${FOO}_${BAR}
   An <code>if-then[-else]-fi</code> construct is also supported in order to
   support conditional execution of commands.  This works from the
   command line but is primarily intended for use within NSH scripts
-  (see the <a href="#cmdsh"><code>sh</code></a> commnd).  The syntax is as follows:
+  (see the <a href="#cmdsh"><code>sh</code></a> command).  The syntax is as follows:
 </p>
 <ul><pre>
 if &lt;cmd&gt;
@@ -1058,7 +1058,7 @@ mount -t vfat /dev/ram1 /tmp
   All of the startup-behavior is contained in <code>rcS.template</code>.  The
   role of <code>mkromfsimg.sh</code> is to (1) apply the specific configuration
   settings to <code>rcS.template</code> to create the final <code>rcS</code>, and (2) to
-  generate the header file <code>nsh_romfsimg.h</code> containg the ROMFS
+  generate the header file <code>nsh_romfsimg.h</code> containing the ROMFS
   file system image.
 </p>
 
@@ -1139,7 +1139,7 @@ addroute &lt;target&gt; &lt;netmask&gt; &lt;router&gt;
 <p>
   <b>Synopsis</b>.
   This command adds an entry in the routing table.
-  The new entry will map the IP address of a router on a local network(&lt;router&gt;) to an external network characterized by the &lt;target&gt; IP address and a network mask &lt;netmask&gt;
+  The new entry will map the IP address of a router on a local network (&lt;router&gt;) to an external network characterized by the &lt;target&gt; IP address and a network mask &lt;netmask&gt;
 </p>
 <p>
   <b>Example:</b>
@@ -1274,7 +1274,7 @@ cat <code>&lt;path&gt;</code> [<code>&lt;path&gt;</code> [<code>&lt;path&gt;</co
 </pre></ul>
 <p>
   <b>Synopsis</b>.
-  This command copies and concatentates all of the files at <code>&lt;path&gt;</code>
+  This command copies and concatenates all of the files at <code>&lt;path&gt;</code>
   to the console (or to another file if the output is redirected).
 </p>
 
@@ -1425,7 +1425,7 @@ nsh&gt; dd if=/dev/zero of=/dev/ram0
 </pre></ul>
   </li>
   <li>
-    Read from a block devic, write to a character device.  This
+    Read from a block device, write to a character device.  This
     will read the entire block device and dump the contents in
     the bit bucket.
   </li>
@@ -1564,7 +1564,7 @@ exit
   <b>Synopsis</b>.
   Exit NSH.  Only useful for the serial front end if you have started some other tasks (perhaps
   using the <code><a href="#cmdexec">exec</a></code> command) and you would like to have NSH out of the
-  way.  For the telnet front-end, <code>exit</code> terminates the telenet session.
+  way.  For the telnet front-end, <code>exit</code> terminates the telnet session.
 </p>
 
 <table width ="100%">
@@ -1638,7 +1638,7 @@ get [-b|-n] [-f &lt;local-path&gt;] -h &lt;ip-address&gt; &lt;remote-path&gt;
   <tr>
     <td><b><code>-b|-n</code></b></td>
     <td>
-      Selects either binary (&quot;octet&quot;) or test (&quot;netascii&quot;) transfer
+      Selects either binary (&quot;octet&quot;) or text (&quot;netascii&quot;) transfer
       mode.  Default: text.
     </td>
   </tr>
@@ -1686,11 +1686,24 @@ help [-v] [&lt;cmd&gt;]
 
 <p><b>Command Syntax:</b></p>
 <ul><pre>
-hexdump &lt;file or device&gt;
+hexdump &lt;file or device&gt; [skip=&lt;bytes&gt;] [count=&lt;bytes&gt;]
 </pre></ul>
 <p>
   <b>Synopsis</b>.
   Dump data in hexadecimal format from a file or character device.
+</p>
+<ul><table>
+  <tr>
+    <td><b><code>skip=&lt;bytes&gt;</code></b></td>
+    <td>Will skip <code>&lt;bytes&gt;</code> number of bytes from the beginning.
+  </tr>
+  <tr>
+    <td><b><code>count=&lt;bytes&gt;</code></b></td>
+    <td>Will stop after dumping <code>&lt;bytes&gt;</code> number of bytes.
+  </tr>
+</table></ul>
+<p>
+The <code>skip</code> and <code>count</code> options are only available if <code>CONFIG_NSH_CMDOPT_HEXDUMP</code> is defined in the NuttX configuration.
 </p>
 
 <table width ="100%">
@@ -1707,7 +1720,7 @@ ifconfig [nic_name [&lt;ip-address&gt;|dhcp]] [dr|gw|gateway &lt;dr-address&gt;]
 </pre></ul>
 <p>
   <b>Synopsis</b>.
-  Multiple forms of the <code>ifconfig</code>command are supported:
+  Multiple forms of the <code>ifconfig</code> command are supported:
 </p>
 <ol>
   <li>
@@ -1880,7 +1893,7 @@ nsh&gt;
 <p><small>
   <b>NOTE</b>:
   NuttX does not support a FULL POSIX signalling system.
-  Standard signals like SIGCHLD, SIGINTR, SIGKILL, etc. do not exist in NuttX and sending those signal may not have the result that you expect.
+  Standard signals like SIGCHLD, SIGINTR, SIGKILL, etc. do not exist in NuttX and sending those signals may not have the result that you expect.
   Rather, NuttX supports only what are referred to as POSIX real-time signals.
   These signals may be used to communicate with running tasks, may be use to waiting waiting tasks, etc.
   But, as an example, <code>kill -9</code> (SIGKILL) will not terminate a task.
@@ -1942,22 +1955,22 @@ losetup d &lt;dev-path&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdln"><h2>2.30 List to a File or Directory (ln)</h2></a>
+    <a name="cmdln"><h2>2.30 Link to a File or Directory (ln)</h2></a>
   </td>
   </tr>
 </table>
 
 <p><b>Command Syntax:</b></p>
 <ul><pre>
-link [-s] &lt;target&gt; &lt;link&gt;
+ln [-s] &lt;target&gt; &lt;link&gt;
 </pre></ul>
 <p>
   <b>Synopsis</b>.
-  The <code>link</code> command will create a new symbolic link at &lt;link&gt; for the existing file or directory, &lt;target&gt;.
-  This implementation is simplied for use with NuttX in these ways:
+  The <code>ln</code> command will create a new symbolic link at &lt;link&gt; for the existing file or directory, &lt;target&gt;.
+  This implementation is simplified for use with NuttX in these ways:
 </p>
 <ul>
-    <li>Links may be created only within the NuttX top-level, pseudo file system.
+    <li>Links may be created only within the NuttX top-level, <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> filesystem</a>.
         No file system currently supported by NuttX provides symbolic links.</li>
     <li>For the same reason, only soft links are implemented.</li>
     <li>File privileges are ignored.</li>
@@ -2073,20 +2086,19 @@ mw &lt;hex-address&gt;[=&lt;hex-value&gt;][ &lt;hex-byte-count&gt;]
 </p>
 <ul><table>
   <tr>
-    <td><code>&lt;hex-address&gt;</code>.</td>
+    <td><code>&lt;hex-address&gt;</code></td>
     <td>Specifies the address to be accessed.  The current
       value at that address will always be read and displayed.
   </tr>
   <tr>
-    <td><code>&lt;hex-address&gt;=&lt;hex-value&gt;</code>.</td>
+    <td><code>&lt;hex-address&gt;=&lt;hex-value&gt;</code></td>
     <td>Read the value, then write <code>&lt;hex-value&gt;</code>
       to the location.
   </tr>
   <tr>
-    <td><code>&lt;hex-byte-count&gt;</code>.</td>
+    <td><code>&lt;hex-byte-count&gt;</code></td>
     <td>Perform the mb, mh, or mw operation on a total
-      of <code>&lt;hex-byte-count&gt;</code> bytes, increment the <code>&lt;hex-address&gt;</code> appropriately
-      after each access
+      of <code>&lt;hex-byte-count&gt;</code> bytes, increment the <code>&lt;hex-address&gt;</code> appropriately after each access.
   </tr>
 </table></ul>
 <p><b>Example:</b><p>
@@ -2307,8 +2319,8 @@ mount -t &lt;fstype&gt; [-o &lt;options&gt;] &lt;block-device&gt; <code>&lt;dir-
   If no parameters are provided on the command line after the <code>mount</code> command, then the <code>mount</code> command will enumerate all of the current mountpoints on the console.
 </p>
 <p>
-  If the mount parameters are provied on the command after the <code>mount</code> command, then the <code>mount</code> command will mount a file system in the NuttX pseudo-file system.
-  <code>mount</code>' performs a three way association, binding:
+  If the mount parameters are provided on the command after the <code>mount</code> command, then the <code>mount</code> command will mount a file system in the NuttX pseudo-file system.
+  <code>mount</code> performs a three way association, binding:
 </p>
 <ol>
   <li><b>File system.</b>
@@ -2335,7 +2347,7 @@ mount -t &lt;fstype&gt; [-o &lt;options&gt;] &lt;block-device&gt; <code>&lt;dir-
 <p>
   After the volume has been mounted in the NuttX
   <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> filesystem</a>,
-  it may be access in the same way as other objects in thefile system.
+  it may be access in the same way as other objects in the file system.
 </p>
 <p><b>Examples</b>:</p>
 <p>Using <code>mount</code> to mount a file system:</p>
@@ -2527,7 +2539,7 @@ put [-b|-n] [-f &lt;remote-path&gt;] -h &lt;ip-address&gt; &lt;local-path&gt;
   <tr>
     <td><b><code>-b|-n</code></b></td>
     <td>
-      Selects either binary (&quot;octet&quot;) or test (&quot;netascii&quot;) transfer
+      Selects either binary (&quot;octet&quot;) or text (&quot;netascii&quot;) transfer
       mode.  Default: text.
     </td>
   </tr>
@@ -2712,10 +2724,7 @@ set [{+|-}{e|x|xe|ex}] [&lt;name&gt; &lt;value&gt;]
 </pre></ul>
 <p>
   <b>Synopsis</b>.
-  Set the environment variable <code>&lt;name&gt;</code> to the string <code>&lt;value&gt;</code> and or set NSH
-  parser control options. For example,
-
-  For example,
+  Set the environment variable <code>&lt;name&gt;</code> to the string <code>&lt;value&gt;</code> and or set NSH parser control options. For example,
 </p>
 <ul><pre>
 nsh&gt; echo $foobar
@@ -2728,7 +2737,7 @@ nsh&gt;
 
 <p>
     Set the 'exit on error control' and/or 'print a trace' of commands when parsing
-    scripts in NSH.  The settinngs are in effect from the point of exection, until
+    scripts in NSH.  The settings are in effect from the point of execution, until
     they are changed again, or in the case of the init script, the settings are
     returned to the default settings when it exits. Included child scripts will run
     with the parents settings and changes made in the child script will effect the
@@ -2740,9 +2749,8 @@ nsh&gt;
 </p>
 <p>
     Use 'set -x' to enable and 'set +x' to disable (silence) printing a trace of the script
-    commands as they are ececuted.
-    The default is +x. No printing of a trace of script commands as they are executed.
-
+    commands as they are executed.
+    The default is +x: no printing of a trace of script commands as they are executed.
 </p>
 
   Example 1 - no exit on command not found
@@ -2757,16 +2765,16 @@ nsh&gt;
     notacommand
 </pre></ul>
 
-  Example 3 - will exit on command not found, and print a trace of the script commmands
+  Example 3 - will exit on command not found, and print a trace of the script commands
 <ul><pre>
     set -ex
 </pre></ul>
 
-  Example 4 - will exit on command not found, and print a trace of the script commmands
+  Example 4 - will exit on command not found, and print a trace of the script commands
               and set foobar to foovalue.
 <ul><pre>
     set -ex foobar foovalue
-    nsh> echo $foobar
+    nsh&gt; echo $foobar
     foovalue
 </pre></ul>
 
@@ -2855,8 +2863,7 @@ nsh&gt; time "sleep 2"
 nsh&gt;
 </pre></ul>
 <p>
-  The additional 10 millseconds in this example is due to the way that the sleep command works: It always waits one system clock tick longer than requested and this test setup used a 10 millisecond periodic system
-  timer.
+  The additional 10 milliseconds in this example is due to the way that the sleep command works: It always waits one system clock tick longer than requested and this test setup used a 10 millisecond periodic system timer.
   Sources of error could include various quantization errors, competing CPU usage, and the additional overhead of the time command execution itself which is included in the total.
 </p>
 <p>
@@ -2949,7 +2956,7 @@ uname [-a | -imnoprsv]
   <tr>
     <td><code>-n</code></td>
     <td>
-      Print the network node hostname (only availabel if <code>CONFIG_NET=y</code>)
+      Print the network node hostname (only available if <code>CONFIG_NET=y</code>)
     </td>
   </tr>
   <tr>
@@ -3167,7 +3174,7 @@ nsh&gt;
 </p>
 
 <p>
-  Note that in addition to general NuttX configuation settings, each NSH command can be
+  Note that in addition to general NuttX configuration settings, each NSH command can be
   individually disabled via the settings in the rightmost column.
   All of these settings make the configuration of NSH potentially complex but also allow it to
   squeeze into very small memory footprints.
@@ -3336,13 +3343,13 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>ln</code></b></td>
-    <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
-    <td><code>CONFIG_NSH_DISABLE_LL</code></td>
+    <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_PSEUDOFS_SOFTLINKS</code></td>
+    <td><code>CONFIG_NSH_DISABLE_LN</code></td>
   </tr>
   <tr>
     <td><b><code>ls</code></b></td>
     <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
-    <td><code>CONFIG_NSH_DISABLE_LS</code> &amp;&amp; <code>CONFIG_PSEUDOFS_SOFTLINKS</code></td>
+    <td><code>CONFIG_NSH_DISABLE_LS</code></td>
   </tr>
   <tr>
     <td><b><code>lsmod</code></b></td>
@@ -3442,6 +3449,11 @@ nsh&gt;
     <td><code>CONFIG_NSH_DISABLE_PWD</code></td>
   </tr>
   <tr>
+    <td><b><code>readlink</code></b></td>
+    <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_PSEUDOFS_SOFTLINKS</code></td>
+    <td><code>CONFIG_NSH_DISABLE_READLINK</code></td>
+  </tr>
+  <tr>
     <td><b><code>reboot</code></b></td>
     <td><code>CONFIG_BOARD_RESET</code></td>
     <td><code>CONFIG_NSH_DISABLE_REBOOT</code></td>
@@ -3488,7 +3500,7 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>time</code></b></td>
-    <td>&nbsp</td>
+    <td>&nbsp;</td>
     <td><code>CONFIG_NSH_DISABLE_TIME</code></td>
   </tr>
   <tr>
@@ -3498,7 +3510,7 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>uname</code></b></td>
-    <td>br</td>
+    <td>&nbsp;</td>
     <td><code>CONFIG_NSH_DISABLE_UNAME</code></td>
   </tr>
   <tr>
@@ -3547,7 +3559,7 @@ nsh&gt;
 <p><sup>1</sup><small>
   Because of hardware padding, the actual required packet size may be larger</small><br>
   <sup>2</sup><small>
-  Special TFTP server start-up optionss will probably be required to permit
+  Special TFTP server start-up options will probably be required to permit
   creation of files for the correct operation of the <code>put</code> command.</small><br>
   <sup>3</sup><small>
   <code>CONFIG_FS_READABLE</code> is not a user configuration but is set automatically
@@ -3837,7 +3849,7 @@ set FOOBAR ABC_${FOO}_${BAR}
   <tr>
     <td valign="top"><b><code>CONFIG_NSH_TELNET</code></b></td>
     <td>
-      If <code>CONFIG_NSH_TELNET</code> is set to <i>y</i>, then a TELENET
+      If <code>CONFIG_NSH_TELNET</code> is set to <i>y</i>, then a TELNET
       server front-end is selected.  When this option is provided,
       you may log into NuttX remotely using telnet in order to
       access NSH.
@@ -3932,7 +3944,7 @@ set FOOBAR ABC_${FOO}_${BAR}
     <td valign="top"><b><code>CONFIG_NSH_IOBUFFER_SIZE</code></b></td>
     <td>
       Determines the size of the I/O buffer to use for sending/
-      receiving TELNET commands/reponses
+      receiving TELNET commands/responses
     </td>
   </tr>
   <tr>
@@ -4364,7 +4376,7 @@ struct cmdmap_s
   That last string is what is printed when enter &quot;<code>nsh&gt help</code>&quot;.
 </p>
 <p>
-  So, for you sample commnd, you would add the following the to the <code>g_cmdmap[]</code> table:
+  So, for you sample command, you would add the following the to the <code>g_cmdmap[]</code> table:
 </p>
 <ul><pre>
 { &quot;mycmd&quot;, cmd_mycmd, 1, 1, NULL },
@@ -4525,7 +4537,7 @@ int hello_main(int argc, char *argv[])
     </p>
   <li>
     <p>
-      And finally, the <code>apps/examples/Makefile</code> will execute the <i>context</i> target in all configured <code>example</code>sub-directores, getting us finally to <code>apps/examples/Makefile</code> which is covered below.</p>
+      And finally, the <code>apps/examples/Makefile</code> will execute the <i>context</i> target in all configured <code>example</code>sub-directories, getting us finally to <code>apps/examples/Makefile</code> which is covered below.</p>
 </ol>
 
 <p>
@@ -4845,7 +4857,7 @@ mount -t vfat /dev/ram1 /tmp
 
 <p>
   All of the startup-behavior is contained in <code>rcS.template</code>.
-  The role of <code>mkromfsimg.sh</code> script is to (1) apply the specific configuration settings to <code>rcS.template</code> to create the final <code>rcS</code>, and (2) to generate the header file <code>nsh_romfsimg.h</code> containg the ROMFS file system image.
+  The role of <code>mkromfsimg.sh</code> script is to (1) apply the specific configuration settings to <code>rcS.template</code> to create the final <code>rcS</code>, and (2) to generate the header file <code>nsh_romfsimg.h</code> containing the ROMFS file system image.
   To do this,  <code>mkromfsimg.sh</code> uses two tools that must be installed in your system:
 </p>
 <ol>
@@ -5316,13 +5328,13 @@ xxd -i romfs_img >nsh_romfsimg.h
   <li><a href="#cmdinsmod"><code>insmod</code></a></li>
   <li><a href="#cmdkill"><code>kill</code></a></li>
   <li><a href="#cmdlosetup"><code>losetup</code></a></li>
-  <li><a href="#cmdln">ln</code></a></li>
-  <li><a href="#cmdls">ls</code></a></li>
+  <li><a href="#cmdln"><code>ln</code></a></li>
+  <li><a href="#cmdls"><code>ls</code></a></li>
   <li><a href="#cmdmbhw"><code>mb</code></a></li>
   <li><a href="#nshlogin">Login</a></li>
   <li><a href="#verifymethods">Login, Credentials</a></li>
   <li><a href="#cmdlsmod"><code>lsmod</code></a></li>
-  <li><a href="#cmdmd5">md5</a></li>
+  <li><a href="#cmdmd5"><code>md5</code></a></li>
   <li><a href="#cmdmbhw"><code>mh</code></a></li>
   <li><a href="#cmdmbhw"><code>mw</code></a></li>
   <li><a href="#cmdmkdir"><code>mkdir</code></a></li>
