@@ -1,20 +1,36 @@
-AIC    Advanced Interrupt Controller (Atmel SAM)
+6loWPAN IPv6 over Low power Wireless Personal Area Networks
+ACM    Abstract Control Model (USB)
 ADC    Analog to Digital Conversion
+AIC    Advanced Interrupt Controller (Atmel SAM)
 ARP    Address Resolution Protocol (networking)
 BCH    Block to Character
 BINFMT Binary Format (Dynamic Loader)
 CAN    Controller Area Network
+CDC    Communication Device Class (USB)
 CP15   Coprocessor 15 (ARM)
+CPU    Central Processing Unit
 DEVIF  Device Interface (networking)
 DAC    Digital to Analog Conversion
+DCD    Device Controller Driver (USB)
+DCMI   Digital Camera Interface
 DEV    Device
+DHCP   Dynamic Host Configuration Protocol
+DHCPC  DHCP Client
+DHCPD  DHCP Daemon (server)
 DMA    Direct Memory Access (hardware)
 DMAC   DMA Controller (hardware)
 DRAM   Dynamic RAM
+EABI   Embedded-Application Binary Interface
+EMAC   Ethernet Media Access Controller (networking)
 FAT    File Allocation Table (file systems)
 FTL    FLASH Translation Layer (MTD)
+GPIO   General Purpose Input/Output
+GMAC   Gigabit Media Access Controller (networking)
+HCD    Host Controller Driver (USB)
 HSMCI  High Speed Memory Card Interface (Atmel)
 I/O    Input/Output
+IOCTL  Input/Output Control
+IoT    Internet of Things
 IP     Internet Protocol (version 4?) (networking)
 IPv6   Internet Protocol Version 6 (networking)
 IRQ    Interrupt Request
@@ -22,36 +38,55 @@ I2C    Inter-Integrated Circuit
 I2S    Inter IC Sound
 ICMP   Internet Control Message Protocol (networking)
 IOB    I/O Buffer (networking)
+LAN    Local Area Network (networking)
 LIBC   The "C" Library
+MAC    Media Access Control (networking, OSI model)
 MCI    Memory Card Interface
+MCU    Microcontroller Unit
 MM     Memory Management/Manager
 MMAP   Memory Map
 MMC    Multi-Media Card
 MMCSD  See MMC and SD
+MMU    Memory Management Unit
+MPU    Memory Protection Unit
 MTD    Memory Technology Device
 NFS    Network File System
+NETDB  Network Data Base (networking)
 NETDEV Network Device (networking)
 NSH    NuttShell
 NX     NuttX, the NuttX Graphics server (graphics)
 NXFFS  NuttX Flash File System
 NXWM   The NuttX Window Manager (graphics)
 PID    Peripheral ID (Atmel SAM)
+OS     Operating System
+OTG    On-The-Go (USB)
 PWM    Pulse Width Modulation
 PKT    "Raw" Packet socket (networking)
+PRNG   Pseudo-Random Number Generator
 RAM    Random Access Memory
+RNG    Random Number Generator
 RTC    Real Time Clock
 RTCC   Real Time Clock/Calendar
+RTOS   Real Time Operating System
 SAIC   Secure Advanced Interrupt Controller (Atmel SAM)
 SD     Secure Digital
+SDHC   Secure Digital High Capacity (flash memory),
+       Secure Digital Host Controller
 SDIO   Secure Digital I/O
 SMC    Static Memory Controller (hardware)
 SPI    Serial Periperhal Interface
+SPRNG  Scalable Parallel Random Number Generator
+SYSLOG System Log
 TCP    Transmission Control Protocol (networking)
 TSC    Touchscreen Controller
+TUN    network TUNnel
 TWI    Two-Wire Interface
 UDP    User Datagram Protocol (networking)
 UART   Universal Asynchronous Receiver/Transmitter
 USB    Universal Serial Bus
 USART  Universal Synchronous/Asynchronous Receiver/Transmitter
+WAN    Wide Area Network (networking)
+WLAN   Wireless Local Area Network (networking)
+WPAN   Wireless Personal Area Network (networking)
 WDT    Watchdog Timer
 XDMAC  Extended DMA Controller (Atmel)
