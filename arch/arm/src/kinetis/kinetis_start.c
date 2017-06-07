@@ -341,6 +341,12 @@ void __start(void)
 
 #ifdef CONFIG_BUILD_PROTECTED
   kinetis_userspace();
+#else
+#  ifdef KINETIS_MPU
+  /* Disable the MPU so that all master may access all buses */
+
+  kinetis_mpudisable();
+#  endif
 #endif
 
   /* Initialize other on-board resources */

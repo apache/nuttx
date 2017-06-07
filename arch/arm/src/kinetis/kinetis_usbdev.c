@@ -1,8 +1,9 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_usbdev.c
  *
- *   Copyright (C) 2011-2014, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2011-2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * References:
  *   This file derives from the STM32 USB device driver with modifications
@@ -11,6 +12,9 @@
  *   - "USB On-The-Go (OTG)", DS61126E, Microchip Technology Inc., 2009
  *   - Sample code provided with the Sure Electronics PIC32 board
  *     (which seems to have derived from Microchip PICDEM PIC18 code).
+ *
+ *   K66 Sub-Family Reference Manual, Rev. 2, May 2015
+ *   How to Implement USB Suspend/Resume - Document Number: AN5385
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -169,6 +173,7 @@
 
 /* Endpoint register initialization parameters */
 
+#define KHCI_EP_DISABLED  (0)
 #define KHCI_EP_CONTROL   (USB_ENDPT_EPHSHK | USB_ENDPT_EPTXEN | USB_ENDPT_EPRXEN)
 #define KHCI_EP_BULKIN    (USB_ENDPT_EPTXEN | USB_ENDPT_EPCTLDIS | USB_ENDPT_EPHSHK)
 #define KHCI_EP_BULKOUT   (USB_ENDPT_EPRXEN | USB_ENDPT_EPCTLDIS | USB_ENDPT_EPHSHK)
@@ -188,6 +193,10 @@
 #define khci_rqtail(q)    ((q)->tail)
 
 #define RESTART_DELAY     (150 * CLOCKS_PER_SEC / 1000)
+
+#define USB0_USBTRC0_BIT6 0x40 /* Undocumented bit that is set in the
+                                * Kinetis lib
+                                */
 
 /* USB trace ****************************************************************/
 /* Trace error codes */
@@ -256,7 +265,8 @@
 #define KHCI_TRACEINTID_STALL              0x0021
 #define KHCI_TRACEINTID_UERR               0x0022
 #define KHCI_TRACEINTID_SUSPENDED          0x0023
-#define KHCI_TRACEINTID_WAITRESET          0x0024
+#define KHCI_TRACEINTID_RESUME             0x0024
+#define KHCI_TRACEINTID_WAITRESET          0x0025
 
 #ifdef CONFIG_USBDEV_TRACE_STRINGS
 const struct trace_msg_t g_usb_trace_strings_intdecode[] =
@@ -296,7 +306,8 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
   TRACE_STR(KHCI_TRACEINTID_STALL              ), /* 0x0021 */
   TRACE_STR(KHCI_TRACEINTID_UERR               ), /* 0x0022 */
   TRACE_STR(KHCI_TRACEINTID_SUSPENDED          ), /* 0x0023 */
-  TRACE_STR(KHCI_TRACEINTID_WAITRESET          ), /* 0x0024 */
+  TRACE_STR(KHCI_TRACEINTID_RESUME             ), /* 0x0024 */
+  TRACE_STR(KHCI_TRACEINTID_WAITRESET          ), /* 0x0025 */
   TRACE_STR_END
 };
 #endif
@@ -482,7 +493,6 @@ struct khci_usbdev_s
   uint8_t ctrlstate;                   /* Control EP state (see enum khci_ctrlstate_e) */
   uint8_t selfpowered:1;               /* 1: Device is self powered */
   uint8_t rwakeup:1;                   /* 1: Device supports remote wakeup */
-  uint8_t attached:1;                  /* Device is attached to the host */
   uint8_t ep0done:1;                   /* EP0 OUT already prepared */
   uint8_t rxbusy:1;                    /* EP0 OUT data transfer in progress */
   uint16_t epavail;                    /* Bitset of available endpoints */
@@ -508,6 +518,7 @@ static void khci_putreg(uint32_t val, uint32_t addr);
 /* Suspend/Resume Helpers ***************************************************/
 
 static void   khci_suspend(struct khci_usbdev_s *priv);
+static void   khci_remote_resume(struct khci_usbdev_s *priv);
 static void   khci_resume(struct khci_usbdev_s *priv);
 
 /* Request Queue Management *************************************************/
@@ -606,10 +617,10 @@ static int    khci_selfpowered(struct usbdev_s *dev, bool selfpowered);
 
 static void   khci_reset(struct khci_usbdev_s *priv);
 static void   khci_attach(struct khci_usbdev_s *priv);
-static void   khci_detach(struct khci_usbdev_s *priv);
 static void   khci_swreset(struct khci_usbdev_s *priv);
 static void   khci_hwreset(struct khci_usbdev_s *priv);
-static void   khci_stateinit(struct khci_usbdev_s *priv);
+static void   khci_swinitalize(struct khci_usbdev_s *priv);
+static void   khci_hwinitalize(struct khci_usbdev_s *priv);
 static void   khci_hwshutdown(struct khci_usbdev_s *priv);
 
 /****************************************************************************
@@ -766,7 +777,6 @@ static struct khci_req_s *khci_remfirst(struct khci_queue_s *queue)
 
   return ret;
 }
-
 
 /****************************************************************************
  * Name: khci_remlast
@@ -2715,67 +2725,108 @@ static void khci_ep0transfer(struct khci_usbdev_s *priv, uint16_t ustat)
 
 static int khci_interrupt(int irq, void *context, FAR void *arg)
 {
-  /* For now there is only one USB controller, but we will always refer to
-   * it using a pointer to make any future ports to multiple USB controllers
-   * easier.
-   */
-
-  struct khci_usbdev_s *priv = &g_usbdev;
   uint16_t usbir;
-  uint16_t otgir;
   uint32_t regval;
   int i;
+#ifdef CONFIG_USBOTG
+  uint16_t otgir;
+#endif
+
+  struct khci_usbdev_s *priv = (struct khci_usbdev_s *) arg;
 
   /* Get the set of pending USB and OTG interrupts interrupts */
 
   usbir = khci_getreg(KINETIS_USB0_ISTAT) & khci_getreg(KINETIS_USB0_INTEN);
+
+#if !defined(CONFIG_USBOTG)
+  usbtrace(TRACE_INTENTRY(KHCI_TRACEINTID_INTERRUPT), usbir);
+#else
   otgir = khci_getreg(KINETIS_USB0_OTGISTAT) & khci_getreg(KINETIS_USB0_OTGICR);
 
   usbtrace(TRACE_INTENTRY(KHCI_TRACEINTID_INTERRUPT), usbir | otgir);
 
-#ifdef CONFIG_USBOTG
   /* Session Request Protocol (SRP) Time Out Check */
 
   /* Check if USB OTG SRP is ready */
 #  warning "Missing logic"
-    {
-      /* Check if the 1 millisecond timer has expired */
+  {
+    /* Check if the 1 millisecond timer has expired */
 
-      if ((otgir & USBOTG_INT_T1MSEC) != 0)
-        {
-          usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_T1MSEC), otgir);
+    if ((otgir & USBOTG_INT_T1MSEC) != 0)
+      {
+        usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_T1MSEC), otgir);
 
-          /* Check for the USB OTG SRP timeout */
+        /* Check for the USB OTG SRP timeout */
 #  warning "Missing logic"
-            {
+          {
               /* Handle OTG events of the SRP timeout has expired */
 #  warning "Missing logic"
-            }
+          }
 
-            /* Clear Interrupt 1 msec timer Flag */
+          /* Clear Interrupt 1 msec timer Flag */
 
-            khci_putreg(USBOTG_INT_T1MSEC, KINETIS_USB0_ISTAT);
-        }
-    }
+          khci_putreg(USBOTG_INT_T1MSEC, KINETIS_USB0_ISTAT);
+      }
+  }
 #endif
 
   /* Handle events while we are in the attached state */
 
   if (priv->devstate == DEVSTATE_ATTACHED)
     {
-      /* Clear all USB interrupts */
-
-      khci_putreg(USB_INT_ALL, KINETIS_USB0_ISTAT);
-
-      /* Make sure that the USE reset and IDLE detect interrupts are enabled */
-
-      regval = khci_getreg(KINETIS_USB0_INTEN);
-      regval |= (USB_INT_USBRST | USB_INT_SLEEP);
-      khci_putreg(regval, KINETIS_USB0_INTEN);
 
       /* Now were are in the powered state */
 
       priv->devstate = DEVSTATE_POWERED;
+    }
+
+   /* Service error interrupts */
+
+  if ((usbir & USB_INT_ERROR) != 0)
+    {
+      usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_UERR), usbir);
+      uerr("ERROR: EIR=%04x\n", khci_getreg(KINETIS_USB0_ERRSTAT));
+
+      /* Clear all pending USB error interrupts */
+
+      khci_putreg(USB_EINT_ALL, KINETIS_USB0_ERRSTAT);
+    }
+
+  /* Service resume interrupts */
+
+  if ((usbir & USB_INT_RESUME) != 0)
+    {
+      usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_RESUME), usbir);
+      khci_resume(priv);
+    }
+
+  /* Service USB Bus Reset Interrupt. */
+
+  if ((usbir & USB_INT_USBRST) != 0)
+    {
+      usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_RESET), usbir);
+
+      /* Reset interrupt received. Restore our initial state.  NOTE:  the
+       * hardware automatically resets the USB address, so we really just
+       * need reset any existing configuration/transfer states.
+       */
+
+      khci_swreset(priv);
+      khci_hwreset(priv);
+
+      /* Configure EP0 */
+
+      khci_ep0configure(priv);
+      priv->devstate = DEVSTATE_DEFAULT;
+
+#ifdef CONFIG_USBOTG
+        /* Disable and deactivate HNP */
+#warning Missing Logic
+#endif
+      /* Acknowlege the reset interrupt */
+
+      khci_putreg(USB_INT_USBRST, KINETIS_USB0_ISTAT);
+      goto interrupt_exit;
     }
 
 #ifdef  CONFIG_USBOTG
@@ -2789,127 +2840,6 @@ static int khci_interrupt(int irq, void *context, FAR void *arg)
 #warning "Missing logic"
 
       khci_putreg(USBOTG_INT_ID, KINETIS_USB0_ISTAT);
-    }
-#endif
-#if 0
-  /* Service the USB Activity Interrupt */
-
-  if ((otgir & USBOTG_INT_ACTV) != 0)
-    {
-      usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_WKUP), otgir);
-
-      /* Wake-up from susepnd mode */
-
-      khci_putreg(USBOTG_INT_ACTV, KINETIS_USB0_ISTAT);
-      khci_resume(priv);
-    }
-
-  /*  It is pointless to continue servicing if the device is in suspend mode. */
-x
-  if ((khci_getreg(KINETIS_USB0_CTL) & USB_USBCTRL_SUSP) != 0)
-    {
-      /* Just clear the interrupt and return */
-
-      usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_SUSPENDED), khci_getreg(KINETIS_USB0_CTL));
-      goto interrupt_exit;
-    }
-#endif
-
-  /* Service USB Bus Reset Interrupt. When bus reset is received during
-   * suspend, ACTVIF will be set first, once the UCONbits.SUSPND is clear,
-   * then the URSTIF bit will be asserted. This is why URSTIF is checked
-   * after ACTVIF.  The USB reset flag is masked when the USB state is in
-   * DEVSTATE_DETACHED or DEVSTATE_ATTACHED, and therefore cannot cause a
-   * USB reset event during these two states.
-   */
-
-  if ((usbir & USB_INT_USBRST) != 0)
-    {
-      usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_RESET), usbir);
-
-      /* Reset interrupt received. Restore our initial state.  NOTE:  the
-       * hardware automatically resets the USB address, so we really just
-       * need reset any existing configuration/transfer states.
-       */
-      khci_reset(priv);
-      priv->devstate = DEVSTATE_DEFAULT;
-
-#ifdef CONFIG_USBOTG
-        /* Disable and deactivate HNP */
-#warning Missing Logic
-#endif
-      /* Acknowlege the reset interrupt */
-
-      khci_putreg(USB_INT_USBRST, KINETIS_USB0_ISTAT);
-      goto interrupt_exit;
-    }
-
-  /* Service IDLE interrupts */
-
-  if ((usbir & USB_INT_SLEEP) != 0)
-    {
-      usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_IDLE), usbir);
-
-#ifdef  CONFIG_USBOTG
-      /* If Suspended, Try to switch to Host */
-#warning "Missing logic"
-#else
-      khci_suspend(priv);
-
-#endif
-      khci_putreg(USB_INT_SLEEP, KINETIS_USB0_ISTAT);
-    }
-
-  /* Service SOF interrupts */
-
-#ifdef CONFIG_USB_SOFINTS
-  if ((usbir & USB_INT_SOFTOK) != 0)
-    {
-      usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_SOF), 0);
-
-      /* I am not sure why you would ever enable SOF interrupts */
-
-      khci_putreg(USB_INT_SOFTOK, KINETIS_USB0_ISTAT);
-    }
-#endif
-
-   /* Service stall interrupts */
-
-   if ((usbir & USB_INT_STALL) != 0)
-    {
-      usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_STALL), usbir);
-
-      khci_ep0stall(priv);
-
-      /* Clear the pending STALL interrupt */
-
-      khci_putreg(USB_INT_STALL, KINETIS_USB0_ISTAT);
-    }
-
-  /* Service error interrupts */
-
-  if ((usbir & USB_INT_ERROR) != 0)
-    {
-      usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_UERR), usbir);
-      uerr("ERROR: EIR=%04x\n", khci_getreg(KINETIS_USB0_ERRSTAT));
-
-      /* Clear all pending USB error interrupts */
-
-      khci_putreg(USB_EINT_ALL, KINETIS_USB0_ERRSTAT);
-    }
-
-  /* There is no point in continuing if the host has not sent a bus reset.
-   * Once bus reset is received, the device transitions into the DEFAULT
-   * state and is ready for communication.
-   */
-
-#if 0
-  if (priv->devstate < DEVSTATE_DEFAULT)
-    {
-      /* Just clear the interrupt and return */
-
-      usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_WAITRESET), priv->devstate);
-      goto interrupt_exit;
     }
 #endif
 
@@ -2958,7 +2888,57 @@ x
         }
     }
 
-  UNUSED(otgir); /* May not be used, depending on above conditional logic */
+  /* Service IDLE interrupts */
+
+  if ((usbir & USB_INT_SLEEP) != 0)
+    {
+      usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_IDLE), usbir);
+
+#ifdef  CONFIG_USBOTG
+      /* If Suspended, Try to switch to Host */
+#warning "Missing logic"
+#else
+      khci_suspend(priv);
+
+#endif
+      khci_putreg(USB_INT_SLEEP, KINETIS_USB0_ISTAT);
+    }
+
+  /*  It is pointless to continue servicing if the device is in suspend mode. */
+
+  if ((khci_getreg(KINETIS_USB0_USBCTRL) & USB_USBCTRL_SUSP) != 0)
+    {
+      /* Just clear the interrupt and return */
+
+      usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_SUSPENDED), khci_getreg(KINETIS_USB0_CTL));
+      goto interrupt_exit;
+    }
+
+  /* Service SOF interrupts */
+
+#ifdef CONFIG_USB_SOFINTS
+  if ((usbir & USB_INT_SOFTOK) != 0)
+    {
+      usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_SOF), 0);
+
+      /* I am not sure why you would ever enable SOF interrupts */
+
+      khci_putreg(USB_INT_SOFTOK, KINETIS_USB0_ISTAT);
+    }
+#endif
+
+   /* Service stall interrupts */
+
+   if ((usbir & USB_INT_STALL) != 0)
+    {
+      usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_STALL), usbir);
+
+      khci_ep0stall(priv);
+
+      /* Clear the pending STALL interrupt */
+
+      khci_putreg(USB_INT_STALL, KINETIS_USB0_ISTAT);
+    }
 
   /* Clear the pending USB interrupt.  Goto is used in the above to assure
    * that all interrupt exists pass through this logic.
@@ -2966,7 +2946,11 @@ x
 
 interrupt_exit:
   kinetis_clrpend(KINETIS_IRQ_USBOTG);
+#ifdef  CONFIG_USBOTG
   usbtrace(TRACE_INTEXIT(KHCI_TRACEINTID_INTERRUPT), usbir | otgir);
+#else
+  usbtrace(TRACE_INTEXIT(KHCI_TRACEINTID_INTERRUPT), usbir);
+#endif
   return OK;
 }
 
@@ -2979,9 +2963,7 @@ interrupt_exit:
 
 static void khci_suspend(struct khci_usbdev_s *priv)
 {
-#if 0
   uint32_t regval;
-#endif
 
   /* Notify the class driver of the suspend event */
 
@@ -2990,46 +2972,39 @@ static void khci_suspend(struct khci_usbdev_s *priv)
       CLASS_SUSPEND(priv->driver, &priv->usbdev);
     }
 
-#if 0
-  /* Enable the ACTV interrupt.
-   *
-   * NOTE: Do not clear UIRbits.ACTVIF here! Reason: ACTVIF is only
-   * generated once an IDLEIF has been generated. This is a 1:1 ratio
-   * interrupt generation. For every IDLEIF, there will be only one ACTVIF
-   * regardless of the number of subsequent bus transitions.  If the ACTIF
-   * is cleared here, a problem could occur. The driver services IDLEIF
-   * first because ACTIVIE=0. If this routine clears the only ACTIVIF,
-   * then it can never get out of the suspend mode.
-   */
-
-  regval  = khci_getreg(KINETIS_USB0_OTGICR);
-  regval |= USBOTG_INT_ACTV;
-  khci_putreg(regval, KINETIS_USB0_OTGICR);
-
   /* Disable further IDLE interrupts.  Once is enough. */
 
   regval  = khci_getreg(KINETIS_USB0_INTEN);
   regval &= ~USB_INT_SLEEP;
   khci_putreg(regval, KINETIS_USB0_INTEN);
-#endif
+
+  /* Enable Resume */
+
+  regval |= USB_INT_RESUME;
+  khci_putreg(regval, KINETIS_USB0_INTEN);
+
+  regval = khci_getreg(KINETIS_USB0_USBTRC0);
+  regval |= USB_USBTRC0_USBRESMEN;
+  khci_putreg(regval, KINETIS_USB0_USBTRC0);
 
   /* Invoke a callback into board-specific logic.  The board-specific logic
    * may enter into sleep or idle modes or switch to a slower clock, etc.
    */
 
   kinetis_usbsuspend((struct usbdev_s *)priv, false);
+
+  regval  = khci_getreg(KINETIS_USB0_USBCTRL);
+  regval |= USB_USBCTRL_SUSP;
+  khci_putreg(regval, KINETIS_USB0_USBCTRL);
 }
 
 /****************************************************************************
- * Name: khci_resume
+ * Name: khci_remote_resume
  ****************************************************************************/
 
-static void khci_resume(struct khci_usbdev_s *priv)
+static void khci_remote_resume(struct khci_usbdev_s *priv)
 {
-  irqstate_t flags;
   uint32_t regval;
-
-  flags = enter_critical_section();
 
   /* Start RESUME signaling */
 
@@ -3043,33 +3018,50 @@ static void khci_resume(struct khci_usbdev_s *priv)
 
   regval &= ~USB_CTL_RESUME;
   khci_putreg(regval, KINETIS_USB0_CTL);
+}
 
-  /* This function is called when the USB activity interrupt occurs.
+/****************************************************************************
+ * Name: khci_resume
+ ****************************************************************************/
+
+static void khci_resume(struct khci_usbdev_s *priv)
+{
+  irqstate_t flags;
+  uint32_t regval;
+
+  flags = enter_critical_section();
+
+  /* This function is called when the USB resume interrupt occurs.
    * If using clock switching, this is the place to call out to
    * logic to restore the original MCU core clock frequency.
    */
 
   kinetis_usbsuspend((struct usbdev_s *)priv, true);
 
-  /* Disable further activity interrupts */
-#if 0
-  regval  = khci_getreg(KINETIS_USB0_OTGICR);
-  regval &= ~USBOTG_INT_ACTV;
-  khci_putreg(regval, KINETIS_USB0_OTGICR);
-#endif
+  /* Unsuspend */
 
-  /* The ACTVIF bit cannot be cleared immediately after the USB module wakes
-   * up from Suspend or while the USB module is suspended. A few clock cycles
-   * are required to synchronize the internal hardware state machine before
-   * the ACTIVIF bit can be cleared by firmware. Clearing the ACTVIF bit
-   * before the internal hardware is synchronized may not have an effect on
-   * the value of ACTVIF. Additionally, if the USB module uses the clock from
-   * the 96 MHz PLL source, then after clearing the SUSPND bit, the USB
-   * module may not be immediately operational while waiting for the 96 MHz
-   * PLL to lock.
-   */
+  regval  = khci_getreg(KINETIS_USB0_USBCTRL);
+  regval &= ~USB_USBCTRL_SUSP;
+  khci_putreg(regval, KINETIS_USB0_USBCTRL);
 
-  khci_putreg(USB_INT_SLEEP, KINETIS_USB0_ISTAT);
+  /* Enable the IDLE interrupt */
+
+   regval  = khci_getreg(KINETIS_USB0_INTEN);
+   regval |= USB_INT_SLEEP;
+   khci_putreg(regval, KINETIS_USB0_INTEN);
+
+   /* Disable the RESUME interrupt */
+
+   regval &= ~USB_INT_RESUME;
+   khci_putreg(regval, KINETIS_USB0_INTEN);
+
+   /* Disable the the async resume interrupt */
+
+   regval = khci_getreg(KINETIS_USB0_USBTRC0);
+   regval &= ~USB_USBTRC0_USBRESMEN;
+   khci_putreg(regval, KINETIS_USB0_USBTRC0);
+
+  khci_putreg(USB_INT_RESUME, KINETIS_USB0_ISTAT);
 
   /* Notify the class driver of the resume event */
 
@@ -3156,14 +3148,14 @@ static void khci_ep0configure(struct khci_usbdev_s *priv)
   struct khci_ep_s *ep0;
   uint32_t bytecount;
 
-  /* Enable the EP0 endpoint */
-
-  khci_putreg(KHCI_EP_CONTROL, KINETIS_USB0_ENDPT0);
-
   /* Configure the OUT BDTs.  We assume that the ping-poing buffer index has
    * just been reset and we expect to receive on the EVEN BDT first.  Data
    * toggle synchronization is not needed for SETUP packets.
    */
+
+  /* Disabled the Endpoint first */
+
+  khci_putreg(KHCI_EP_DISABLED, KINETIS_USB0_ENDPT0);
 
   ep0         = &priv->eplist[EP0];
   bytecount   = (USB_SIZEOF_CTRLREQ << USB_BDT_BYTECOUNT_SHIFT);
@@ -3194,6 +3186,10 @@ static void khci_ep0configure(struct khci_usbdev_s *priv)
 
   ep0->rxdata1 = 0;
   ep0->txdata1 = 1;
+
+  /* Enable the EP0 endpoint */
+
+  khci_putreg(KHCI_EP_CONTROL, KINETIS_USB0_ENDPT0);
 }
 
 /****************************************************************************
@@ -3260,9 +3256,9 @@ static int khci_epconfigure(struct usbdev_ep_s *ep,
       return -EINVAL;
     }
 
-  /* Enable the endpoint */
+  /* First disable the endpoint */
 
-  khci_putreg(regval, KINETIS_USB0_ENDPT(epno));
+  khci_putreg(KHCI_EP_DISABLED, KINETIS_USB0_ENDPT(epno));
 
   /* Setup up buffer descriptor table (BDT) entry/ies for this endpoint */
 
@@ -3333,6 +3329,8 @@ static int khci_epconfigure(struct usbdev_ep_s *ep,
       ep->eplog = USB_EPOUT(epno);
     }
 
+  khci_putreg(regval, KINETIS_USB0_ENDPT(epno));
+
   return OK;
 }
 
@@ -3368,7 +3366,7 @@ static int khci_epdisable(struct usbdev_ep_s *ep)
 
   /* Disable the endpoint */
 
-  khci_putreg(0, KINETIS_USB0_ENDPT(epno));
+  khci_putreg(KHCI_EP_DISABLED, KINETIS_USB0_ENDPT(epno));
 
   /* Reset the BDTs for the endpoint.  Four BDT entries per endpoint; Two
    * 32-bit words per BDT.
@@ -3924,7 +3922,7 @@ static int khci_wakeup(struct usbdev_s *dev)
 
   /* Resume normal operation. */
 
-  khci_resume(priv);
+  khci_remote_resume(priv);
   return OK;
 }
 
@@ -3958,9 +3956,8 @@ static int khci_selfpowered(struct usbdev_s *dev, bool selfpowered)
  * Name: khci_reset
  *
  * Description:
- *   Reset the software and hardware states.  If the USB controller has been
- *   attached to a host, then connect to the bus as well.  At the end of
- *   this reset, the hardware should be in the full up, ready-to-run state.
+ *   Reset the software and hardware states.  At the end of this reset, the
+ *   hardware should be in the full up, ready-to-run state.
  *
  ****************************************************************************/
 
@@ -3974,18 +3971,9 @@ static void khci_reset(struct khci_usbdev_s *priv)
 
   khci_hwreset(priv);
 
-  /* khci_attach() was called, then the attach flag will be set and we
-   * should also attach to the USB bus.
-   */
+  /* Do the final hw attach */
 
-  if (priv->attached)
-   {
-      /* usbdev_attach() has already been called.. attach to the bus
-       * now
-       */
-
-      khci_attach(priv);
-    }
+  khci_attach(priv);
 }
 
 /****************************************************************************
@@ -4004,24 +3992,23 @@ static void khci_attach(struct khci_usbdev_s *priv)
 
       up_disable_irq(KINETIS_IRQ_USBOTG);
 
-      /* Initialize registers to known states. */
+      /* Initialize the controller to known states. */
 
-#if 1
-      khci_putreg(0x1,KINETIS_USB0_CTL);
-      khci_putreg(0,KINETIS_USB0_USBCTRL);
-#endif
+      khci_putreg(USB_CTL_USBENSOFEN, KINETIS_USB0_CTL);
+
+      /* Configure things like: pull ups, full/low-speed mode,
+       * set the ping pong mode, and set internal transceiver
+       */
+
+      khci_putreg(0, KINETIS_USB0_USBCTRL);
 
       /* Enable interrupts at the USB controller */
 
       khci_putreg(ERROR_INTERRUPTS, KINETIS_USB0_ERREN);
       khci_putreg(NORMAL_INTERRUPTS, KINETIS_USB0_INTEN);
 
-      /* Configure EP0 */
-
-      khci_ep0configure(priv);
-
       /* Flush any pending transactions */
-#if 1
+
       while ((khci_getreg(KINETIS_USB0_ISTAT) & USB_INT_TOKDNE) != 0)
         {
           khci_putreg(USB_INT_TOKDNE, KINETIS_USB0_ISTAT);
@@ -4053,6 +4040,10 @@ static void khci_attach(struct khci_usbdev_s *priv)
       khci_putreg(regval, KINETIS_USB0_OTGCTL);
 #endif
 
+      /* Configure EP0 */
+
+      khci_ep0configure(priv);
+
       /* Transition to the attached state */
 
       priv->devstate     = DEVSTATE_ATTACHED;
@@ -4062,69 +4053,13 @@ static void khci_attach(struct khci_usbdev_s *priv)
 
       khci_putreg(USB_EINT_ALL, KINETIS_USB0_ERRSTAT);
       khci_putreg(USB_INT_ALL, KINETIS_USB0_ISTAT);
-#endif
+
+      kinetis_clrpend(KINETIS_IRQ_USBOTG);
 
       /* Enable USB interrupts at the interrupt controller */
 
       up_enable_irq(KINETIS_IRQ_USBOTG);
-
-      /* Enable pull-up to connect the device.  The host should enumerate us
-       * some time after this
-       */
-
-      kinetis_usbpullup(&priv->usbdev, true);
     }
-}
-
-/****************************************************************************
- * Name: khci_detach
- ****************************************************************************/
-
-static void khci_detach(struct khci_usbdev_s *priv)
-{
-#ifdef CONFIG_USBOTG
-  uint32_t regval;
-#endif
-
-  /* Disable USB interrupts at the interrupt controller */
-
-  up_disable_irq(KINETIS_IRQ_USBOTG);
-
-  /* Disable the USB controller and detach from the bus. */
-
-  khci_putreg(0, KINETIS_USB0_CTL);
-
-  /* Mask all USB interrupts */
-
-  khci_putreg(0, KINETIS_USB0_INTEN);
-
-  /* We are now in the detached state  */
-
-  priv->attached = 0;
-  priv->devstate = DEVSTATE_DETACHED;
-
-#ifdef CONFIG_USBOTG
-  /* Disable the D+ Pullup */
-
-  regval  = khci_getreg(KINETIS_USB0_OTGCTL);
-  regval &= ~USBOTG_CON_DPPULUP;
-  khci_putreg(regval, KINETIS_USB0_OTGCTL);
-
-  /* Disable and deactivate HNP */
-#warning Missing Logic
-
-  /* Check if the ID Pin Changed State */
-
-  if ((khci_getreg(KINETIS_USB0_ISTAT) & khci_getreg(KINETIS_USB0_OTGICR) & USBOTG_INT_ID) != 0)
-    {
-      /* Re-detect & Initialize */
-#warning "Missing logic"
-
-      /* Clear ID Interrupt Flag */
-
-      khci_putreg(USBOTG_INT_ID, KINETIS_USB0_ISTAT);
-    }
-#endif
 }
 
 /****************************************************************************
@@ -4144,9 +4079,9 @@ static void khci_swreset(struct khci_usbdev_s *priv)
       CLASS_DISCONNECT(priv->driver, &priv->usbdev);
     }
 
-  /* Flush and reset endpoint states (except EP0) */
+  /* Flush and reset endpoint states */
 
-  for (epno = 1; epno < KHCI_NENDPOINTS; epno++)
+  for (epno = 0; epno < KHCI_NENDPOINTS; epno++)
     {
       struct khci_ep_s *privep = &priv->eplist[epno];
 
@@ -4158,7 +4093,7 @@ static void khci_swreset(struct khci_usbdev_s *priv)
        * for each of its configured endpoints.
        */
 
-      khci_cancelrequests(privep, -EAGAIN);
+      khci_cancelrequests(privep, -ESHUTDOWN);
 
       /* Reset endpoint status */
 
@@ -4167,18 +4102,7 @@ static void khci_swreset(struct khci_usbdev_s *priv)
       privep->txnullpkt = false;
     }
 
-  /* Reset to the default address */
-
-  khci_putreg(0, KINETIS_USB0_ADDR);
-
-  /* Unconfigure each endpoint by clearing the endpoint control registers
-   * (except EP0)
-   */
-
-  for (epno = 1; epno < KHCI_NENDPOINTS; epno++)
-    {
-      khci_putreg(0, KINETIS_USB0_ENDPT(epno));
-    }
+  priv->devstate = DEVSTATE_DETACHED;
 
   /* Reset the control state */
 
@@ -4196,55 +4120,27 @@ static void khci_swreset(struct khci_usbdev_s *priv)
 
 static void khci_hwreset(struct khci_usbdev_s *priv)
 {
+  int epno;
   uint32_t regval;
 
-#define USB_FLASH_ACCESS
-#ifdef USB_FLASH_ACCESS
-  /* Allow USBOTG-FS Controller to Read from FLASH */
+  /* When bus reset is received during suspend, ensure we resume */
 
-  regval = getreg32(KINETIS_FMC_PFAPR);
-  regval &= ~(FMC_PFAPR_M4AP_MASK);
-  regval |= (FMC_PFAPR_RDONLY << FMC_PFAPR_M4AP_SHIFT);
-  putreg32(regval, KINETIS_FMC_PFAPR);
-#endif
+  if ((khci_getreg(KINETIS_USB0_USBCTRL) & USB_USBCTRL_SUSP) != 0)
+    {
+      khci_resume(priv);
+    }
 
-  /* Clear all of the buffer descriptor table (BDT) entries */
+  /* Unconfigure each endpoint by clearing the endpoint control registers */
 
-  memset((void *)g_bdt, 0, sizeof(g_bdt));
+  for (epno = 0; epno < KHCI_NENDPOINTS; epno++)
+    {
+      khci_putreg(KHCI_EP_DISABLED, KINETIS_USB0_ENDPT(epno));
+    }
 
-  /* Soft reset the USB Module */
+  /* Reset the address */
 
-  regval = khci_getreg(KINETIS_USB0_USBTRC0);
-  regval |= USB_USBTRC0_USBRESET;
-  khci_putreg(regval,KINETIS_USB0_USBTRC0);
+  khci_putreg(0, KINETIS_USB0_ADDR);
 
-  /* Is this really necessary? */
-
-  while (khci_getreg(KINETIS_USB0_USBTRC0) & USB_USBTRC0_USBRESET);
-
-  /* Set the address of the buffer descriptor table (BDT)
-   *
-   * BDTP1: Bit 1-7: Bits 9-15 of the BDT base address
-   * BDTP2: Bit 0-7: Bits 16-23 of the BDT base address
-   * BDTP3: Bit 0-7: Bits 24-31 of the BDT base address
-   */
-
-  khci_putreg((uint8_t)((uint32_t)g_bdt >> 24), KINETIS_USB0_BDTPAGE3);
-  khci_putreg((uint8_t)((uint32_t)g_bdt >> 16), KINETIS_USB0_BDTPAGE2);
-  khci_putreg((uint8_t)(((uint32_t)g_bdt >>  8) & USB_BDTPAGE1_MASK), KINETIS_USB0_BDTPAGE1);
-
-  uinfo("BDT Address %hhx \n" ,&g_bdt);
-  uinfo("BDTPAGE3 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE3));
-  uinfo("BDTPAGE2 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE2));
-  uinfo("BDTPAGE1 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE1));
-
-  /* Clear any pending interrupts */
-
-  khci_putreg(0xFF, KINETIS_USB0_ERRSTAT);
-  khci_putreg(0xFF, KINETIS_USB0_ISTAT);
-  khci_putreg(0xFF,KINETIS_USB0_OTGISTAT);
-
-#if 1
   /* Assert reset request to all of the Ping Pong buffer pointers.  This
    * will reset all Even/Odd buffer pointers to the EVEN BD banks.
    */
@@ -4256,33 +4152,81 @@ static void khci_hwreset(struct khci_usbdev_s *priv)
   /* Bring the ping pong buffer pointers out of reset */
 
   regval &= ~USB_CTL_ODDRST;
-  khci_putreg(regval, KINETIS_USB0_CTL);
-#endif
+   khci_putreg(regval, KINETIS_USB0_CTL);
 
-#if 1
-  /* Undocumented bit */
+  /* Enable interrupts at the USB controller */
 
-  regval = khci_getreg(KINETIS_USB0_USBTRC0);
-  regval |= 0x40;
-  khci_putreg(regval,KINETIS_USB0_USBTRC0);
-#endif
-
-  priv->devstate = DEVSTATE_DETACHED;
+  khci_putreg(ERROR_INTERRUPTS, KINETIS_USB0_ERREN);
+  khci_putreg(NORMAL_INTERRUPTS, KINETIS_USB0_INTEN);
 }
 
 /****************************************************************************
- * Name: khci_stateinit
+ * Name: khci_hwinitalize
+ *
+ * Description:
+ *   Reset the hardware and leave it in a known, unready state.
+ *
  ****************************************************************************/
 
-static void khci_stateinit(struct khci_usbdev_s *priv)
+static void khci_hwinitalize(struct khci_usbdev_s *priv)
 {
-  int epno;
+  uint32_t regval;
 
-  /* Disconnect the device / disable the pull-up.  We don't want the
-   * host to enumerate us until the class driver is registered.
+  /* Initialize registers to known states. */
+
+  /* Reset USB Module */
+
+  regval = khci_getreg(KINETIS_USB0_USBTRC0);
+  regval |= USB_USBTRC0_USBRESET;
+  khci_putreg(regval, KINETIS_USB0_USBTRC0);
+
+  /* NOTE: This bit is always read as zero. Wait two
+   * USB clock cycles after setting this bit.That is ~42 Ns
    */
 
-  kinetis_usbpullup(&priv->usbdev, false);
+  /* Clear all of the buffer descriptor table (BDT) entries */
+
+  memset((void *)g_bdt, 0, sizeof(g_bdt));
+
+  /* Enable the USB-FS to operate */
+
+  khci_putreg(0, KINETIS_USB0_CTL);
+  up_udelay(2);
+  khci_putreg(USB_CTL_USBENSOFEN, KINETIS_USB0_CTL);
+
+  /* Set the address of the buffer descriptor table (BDT)
+   *
+   * BDTP1: Bit 1-7: Bits 9-15 of the BDT base address
+   * BDTP2: Bit 0-7: Bits 16-23 of the BDT base address
+   * BDTP3: Bit 0-7: Bits 24-31 of the BDT base address
+   */
+
+  khci_putreg((uint8_t)((uint32_t)g_bdt >> 24), KINETIS_USB0_BDTPAGE3);
+  khci_putreg((uint8_t)((uint32_t)g_bdt >> 16), KINETIS_USB0_BDTPAGE2);
+  khci_putreg((uint8_t)(((uint32_t)g_bdt >> 8) & USB_BDTPAGE1_MASK), KINETIS_USB0_BDTPAGE1);
+
+  uinfo("BDT Address %hhx \n" ,&g_bdt);
+  uinfo("BDTPAGE3 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE3));
+  uinfo("BDTPAGE2 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE2));
+  uinfo("BDTPAGE1 %hhx\n",khci_getreg(KINETIS_USB0_BDTPAGE1));
+
+#if defined(USB0_USBTRC0_BIT6)
+  /* Undocumented bit */
+
+  regval = khci_getreg(KINETIS_USB0_USBTRC0);
+  regval |= USB0_USBTRC0_BIT6;
+  khci_putreg(regval,KINETIS_USB0_USBTRC0);
+#endif
+
+}
+
+/****************************************************************************
+ * Name: khci_swinitalize
+ ****************************************************************************/
+
+static void khci_swinitalize(struct khci_usbdev_s *priv)
+{
+  int epno;
 
   /* Initialize the device state structure.  NOTE: many fields
    * have the initial value of zero and, hence, are not explicitly
@@ -4292,8 +4236,15 @@ static void khci_stateinit(struct khci_usbdev_s *priv)
   memset(priv, 0, sizeof(struct khci_usbdev_s));
   priv->usbdev.ops   = &g_devops;
   priv->usbdev.ep0   = &priv->eplist[EP0].ep;
+  priv->usbdev.speed = USB_SPEED_UNKNOWN;
   priv->epavail      = KHCI_ENDP_ALLSET & ~KHCI_ENDP_BIT(EP0);
   priv->rwakeup      = 1;
+
+  /* Initialize the watchdog timer that is used to perform a delayed
+   * queue restart after recovering from a stall.
+   */
+
+  priv->wdog      = wd_create();
 
   /* Initialize the endpoint list */
 
@@ -4332,15 +4283,6 @@ static void khci_stateinit(struct khci_usbdev_s *priv)
 
 static void khci_hwshutdown(struct khci_usbdev_s *priv)
 {
-#if 0
-  uint32_t regval;
-#endif
-
-  /* Put the hardware and driver in its initial, unconnected state */
-
-  khci_swreset(priv);
-  khci_hwreset(priv);
-  priv->usbdev.speed = USB_SPEED_UNKNOWN;
 
   /* Disable all interrupts and force the USB controller into reset */
 
@@ -4352,18 +4294,7 @@ static void khci_hwshutdown(struct khci_usbdev_s *priv)
   khci_putreg(USB_EINT_ALL, KINETIS_USB0_ERRSTAT);
   khci_putreg(USB_INT_ALL, KINETIS_USB0_ISTAT);
 
-  /* Disconnect the device / disable the pull-up */
-
-  kinetis_usbpullup(&priv->usbdev, false);
-
-  /* Power down the USB controller */
-#warning FIXME powerdown USB Controller
-
-#if 0
-  regval  = khci_getreg(KHCI_USB_PWRC);
-  regval &= ~USB_PWRC_USBPWR;
-  khci_putreg(regval, KHCI_USB_PWRC);
-#endif
+  kinetis_clrpend(KINETIS_IRQ_USBOTG);
 }
 
 /****************************************************************************
@@ -4376,6 +4307,13 @@ static void khci_hwshutdown(struct khci_usbdev_s *priv)
  * Description:
  *   Initialize the USB driver
  *
+ * Assumptions:
+ * - This function is called very early in the initialization sequence
+ * - PLL and GIO pin initialization is not performed here but should been in
+ *   the low-level  boot logic: SIM_SOPT2[PLLFLLSEL] and
+ *   SIM_CLKDIV2[USBFRAC, USBDIV] will have been configured in
+ *   kinetis_pllconfig.
+ *
  * Input Parameters:
  *   None
  *
@@ -4386,19 +4324,27 @@ static void khci_hwshutdown(struct khci_usbdev_s *priv)
 
 void up_usbinitialize(void)
 {
-  struct khci_usbdev_s *priv = &g_usbdev;
-  uint32_t regval;
-
   /* For now there is only one USB controller, but we will always refer to
    * it using a pointer to make any future ports to multiple USB controllers
    * easier.
    */
+
+  struct khci_usbdev_s *priv = &g_usbdev;
+  uint32_t regval;
+
+  usbtrace(TRACE_DEVINIT, 0);
+
+  /* Initialize the driver state structure */
+
+  khci_swinitalize(priv);
 
   /* Select clock source:
    * SIM_SOPT2[PLLFLLSEL] and SIM_CLKDIV2[USBFRAC, USBDIV] will have been
    * configured in kinetis_pllconfig. So here we select between USB_CLKIN
    * or the output of SIM_CLKDIV2[USBFRAC, USBDIV]
    */
+
+  /* 1: Select USB clock */
 
   regval = getreg32(KINETIS_SIM_SOPT2);
   regval &= ~(SIM_SOPT2_USBSRC);
@@ -4411,19 +4357,16 @@ void up_usbinitialize(void)
   regval |= SIM_SCGC4_USBOTG;
   putreg32(regval, KINETIS_SIM_SCGC4);
 
-  usbtrace(TRACE_DEVINIT, 0);
+#if defined(BOARD_USB_FLASHACCESS)
+  /* Allow USBOTG-FS Controller to Read from FLASH */
 
-  /* Initialize the driver state structure */
+  regval = getreg32(KINETIS_FMC_PFAPR);
+  regval &= ~(FMC_PFAPR_M4AP_MASK);
+  regval |= (FMC_PFAPR_RDONLY << FMC_PFAPR_M4AP_SHIFT);
+  putreg32(regval, KINETIS_FMC_PFAPR);
+#endif
 
-  khci_stateinit(priv);
-
-  /* Then perform a few one-time initialization operstions.  First, initialize
-   * the watchdog timer that is used to perform a delayed queue restart
-   * after recovering from a stall.
-   */
-
-  priv->epstalled = 0;
-  priv->wdog      = wd_create();
+  khci_swreset(priv);
 
   /* Attach USB controller interrupt handler.  The hardware will not be
    * initialized and interrupts will not be enabled until the class device
@@ -4431,11 +4374,12 @@ void up_usbinitialize(void)
    * them when we need them later.
    */
 
-  if (irq_attach(KINETIS_IRQ_USBOTG, khci_interrupt, NULL) != 0)
+  if (irq_attach(KINETIS_IRQ_USBOTG, khci_interrupt, priv) != 0)
     {
       usbtrace(TRACE_DEVERROR(KHCI_TRACEERR_IRQREGISTRATION),
                (uint16_t)KINETIS_IRQ_USBOTG);
       up_usbuninitialize();
+      return;
     }
 
 #ifdef CONFIG_ARCH_IRQPRIO
@@ -4443,6 +4387,8 @@ void up_usbinitialize(void)
 
   up_prioritize_irq(KINETIS_IRQ_USBOTG, 112);
 #endif
+
+  khci_hwinitalize(priv);
 }
 
 /****************************************************************************
@@ -4466,24 +4412,36 @@ void up_usbuninitialize(void)
 
   struct khci_usbdev_s *priv = &g_usbdev;
   irqstate_t flags;
+  uint32_t regval;
+
+  usbtrace(TRACE_DEVUNINIT, 0);
+
+  /* Disconnect the device */
 
   flags = enter_critical_section();
-  usbtrace(TRACE_DEVUNINIT, 0);
+
+  khci_swreset(priv);
+
+  kinetis_usbpullup(&priv->usbdev, false);
+
+  wd_delete(priv->wdog);
+
+  /* Put the hardware in an inactive state */
+
+  khci_hwreset(priv);
+  khci_hwshutdown(priv);
 
   /* Disable and detach the USB IRQs */
 
   up_disable_irq(KINETIS_IRQ_USBOTG);
   irq_detach(KINETIS_IRQ_USBOTG);
 
-  if (priv->driver)
-    {
-      usbtrace(TRACE_DEVERROR(KHCI_TRACEERR_DRIVERREGISTERED), 0);
-      usbdev_unregister(priv->driver);
-    }
+  /* Gate Off the USB controller */
 
-  /* Put the hardware in an inactive state */
+  regval = getreg32(KINETIS_SIM_SCGC4);
+  regval &= ~SIM_SCGC4_USBOTG;
+  putreg32(regval, KINETIS_SIM_SCGC4);
 
-  khci_hwshutdown(priv);
   leave_critical_section(flags);
 }
 
@@ -4540,10 +4498,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   else
     {
-      /* Setup the USB controller in it initial ready-to-run state (might
-       * be connected or unconnected, depending on usbdev_attach() has
-       * been called).
-       */
+      /* Setup the USB controller in it initial ready-to-run state */
 
       DEBUGASSERT(priv->devstate == DEVSTATE_DETACHED);
       khci_reset(priv);
@@ -4590,6 +4545,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   flags = enter_critical_section();
   khci_swreset(priv);
+  kinetis_usbpullup(&priv->usbdev, false);
   khci_hwreset(priv);
 
   /* Unbind the class driver */
@@ -4606,63 +4562,9 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
    */
 
   khci_hwshutdown(priv);
-  khci_stateinit(priv);
+  khci_swinitalize(priv);
 
-  /* Unhook the driver */
-
-  priv->driver = NULL;
   leave_critical_section(flags);
   return OK;
 }
-
-/****************************************************************************
- * Name: khci_usbattach and khci_usbdetach
- *
- * Description:
- *   The USB stack must be notified when the device is attached or detached
- *   by calling one of these functions.
- *
- ****************************************************************************/
-
-void khci_usbattach(void)
-{
-  /* For now there is only one USB controller, but we will always refer to
-   * it using a pointer to make any future ports to multiple USB controllers
-   * easier.
-   */
-
-  struct khci_usbdev_s *priv = &g_usbdev;
-
-  /* Mark that we are attached */
-
-  priv->attached = 1;
-
-  /* This API may be called asynchronously from other initialization
-   * interfaces.  In particular, we may not want to attach the bus yet...
-   * that should only be done when the class driver is attached.  Has
-   * the class driver been attached?
-   */
-
-  if (priv->driver)
-    {
-      /* Yes.. then attach to the bus */
-
-      khci_attach(priv);
-    }
-}
-
-void khci_usbdetach(void)
-{
-  /* For now there is only one USB controller, but we will always refer to
-   * it using a pointer to make any future ports to multiple USB controllers
-   * easier.
-   */
-
-  struct khci_usbdev_s *priv = &g_usbdev;
-
-  /* Detach from the bus */
-
-  khci_detach(priv);
-}
-
 #endif /* CONFIG_USBDEV && CONFIG_KHCI_USB */

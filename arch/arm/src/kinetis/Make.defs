@@ -116,6 +116,7 @@ CHIP_CSRCS += kinetis_lowputc.c kinetis_pin.c kinetis_pingpio.c
 CHIP_CSRCS += kinetis_serialinit.c kinetis_serial.c
 CHIP_CSRCS += kinetis_start.c kinetis_uid.c kinetis_wdog.c
 CHIP_CSRCS += kinetis_cfmconfig.c
+CHIP_CSRCS += kinetis_mpuinit.c
 
 # Configuration-dependent Kinetis files
 
@@ -124,7 +125,7 @@ CHIP_CSRCS += kinetis_timerisr.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CHIP_CSRCS += kinetis_userspace.c kinetis_mpuinit.c
+CHIP_CSRCS += kinetis_userspace.c
 endif
 
 ifeq ($(CONFIG_KINETIS_GPIOIRQ),y)
