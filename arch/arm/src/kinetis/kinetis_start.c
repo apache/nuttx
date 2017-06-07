@@ -51,6 +51,7 @@
 
 #include "kinetis.h"
 #include "chip/kinetis_smc.h"
+#include "kinetis_mpuinit.h"
 #include "kinetis_userspace.h"
 
 #ifdef CONFIG_ARCH_FPU
