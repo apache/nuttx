@@ -1,6 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32l4/chip/stm32l4_pinmap.h
  *
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Sebastien Lorquet. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
  *
@@ -43,10 +44,12 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32L4_STM32L4X6)
-#  include "chip/stm32l4x6xx_pinmap.h"
-#elif defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32L4_STM32L4X3)
 #  include "chip/stm32l4x3xx_pinmap.h"
+#elif defined(CONFIG_STM32L4_STM32L4X5)
+#  include "chip/stm32l4x5xx_pinmap.h"
+#elif defined(CONFIG_STM32L4_STM32L4X6)
+#  include "chip/stm32l4x6xx_pinmap.h"
 #else
 #  error "Unsupported STM32 L4 pin map"
 #endif
