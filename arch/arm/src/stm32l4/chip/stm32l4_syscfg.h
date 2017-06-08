@@ -54,4 +54,3 @@
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_SYSCFG_H */
-

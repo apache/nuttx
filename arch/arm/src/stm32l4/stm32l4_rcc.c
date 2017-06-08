@@ -78,10 +78,12 @@
 
 /* Include chip-specific clocking initialization logic */
 
-#if defined(CONFIG_STM32L4_STM32L4X6)
-#  include "stm32l4x6xx_rcc.c"
-#elif defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32L4_STM32L4X3)
 #  include "stm32l4x3xx_rcc.c"
+#elif defined(CONFIG_STM32L4_STM32L4X5)
+#  include "stm32l4x5xx_rcc.c"
+#elif defined(CONFIG_STM32L4_STM32L4X6)
+#  include "stm32l4x6xx_rcc.c"
 #else
 #  error "Unsupported STM32L4 chip"
 #endif

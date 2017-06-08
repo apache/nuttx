@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/stm32l4/stm32l4x6xx_rcc.c
+ * arch/arm/src/stm32l4/stm32l4x5xx_rcc.c
  *
- *   Copyright (C) 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2016 Sebastien Lorquet. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Sebastien Lorquet <sebastien@lorquet.fr>
@@ -159,12 +159,6 @@ static inline void rcc_enableahb1(void)
   regval |= RCC_AHB1ENR_TSCEN;
 #endif
 
-#ifdef CONFIG_STM32L4_DMA2D
-  /* DMA2D clock enable */
-
-  regval |= RCC_AHB1ENR_DMA2DEN;
-#endif
-
   putreg32(regval, STM32L4_RCC_AHB1ENR);   /* Enable peripherals */
 }
 
@@ -186,7 +180,7 @@ static inline void rcc_enableahb2(void)
 
   regval = getreg32(STM32L4_RCC_AHB2ENR);
 
-  /* Enable GPIOA, GPIOB, .... GPIOI */
+  /* Enable GPIOA, GPIOB, .... GPIOH */
 
 #if STM32L4_NPORTS > 0
   regval |= (RCC_AHB2ENR_GPIOAEN
@@ -211,9 +205,6 @@ static inline void rcc_enableahb2(void)
 #if STM32L4_NPORTS > 7
              | RCC_AHB2ENR_GPIOHEN
 #endif
-#if STM32L4_NPORTS > 8
-             | RCC_AHB2ENR_GPIOIEN
-#endif
              );
 #endif
 
@@ -227,24 +218,6 @@ static inline void rcc_enableahb2(void)
   /* ADC clock enable */
 
   regval |= RCC_AHB2ENR_ADCEN;
-#endif
-
-#ifdef CONFIG_STM32L4_DCMI
-  /* Digital Camera interfaces clock enable */
-
-  regval |= RCC_AHB2ENR_DCMIEN;
-#endif
-
-#ifdef CONFIG_STM32L4_AES
-  /* Cryptographic modules clock enable */
-
-  regval |= RCC_AHB2ENR_AESEN;
-#endif
-
-#ifdef CONFIG_STM32L4_HASH
-  /* HASH module clock enable */
-
-  regval |= RCC_AHB2ENR_HASHEN;
 #endif
 
 #ifdef CONFIG_STM32L4_RNG
@@ -344,12 +317,6 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR1_TIM7EN;
 #endif
 
-#ifdef CONFIG_STM32L4_LCD
-  /* LCD clock enable */
-
-  regval |= RCC_APB1ENR1_LCDEN;
-#endif
-
 #ifdef CONFIG_STM32L4_SPI2
   /* SPI2 clock enable */
 
@@ -410,12 +377,6 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR1_CAN1EN;
 #endif
 
-#ifdef CONFIG_STM32L4_CAN2
-  /* CAN 2 clock enable */
-
-  regval |= RCC_APB1ENR1_CAN2EN;
-#endif
-
   /* Power interface clock enable.  The PWR block is always enabled so that
    * we can set the internal voltage regulator as required.
    */
@@ -450,12 +411,6 @@ static inline void rcc_enableapb1(void)
   /* Low power uart clock enable */
 
   regval |= RCC_APB1ENR2_LPUART1EN;
-#endif
-
-#ifdef CONFIG_STM32L4_I2C4
-  /* I2C4 clock enable */
-
-  regval |= RCC_APB1ENR2_I2C4EN;
 #endif
 
 #ifdef CONFIG_STM32L4_SWPMI
