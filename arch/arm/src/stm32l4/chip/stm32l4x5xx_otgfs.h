@@ -450,7 +450,9 @@
 #define OTGFS_GCCFG_VBDEN               (1 << 21) /* Bit 21: USB VBUS detection enable */
                                                   /* Bits 22-31: Reserved, must be kept at reset value */
 
-/* Core ID register  (32-bit product ID) */
+/* Core ID register (32-bit product ID) */
+
+/* LPM configuration register */
 
 #define OTGFS_GLPMCFG_LPMEN             (1 << 0)  /* Bit 0: XXX */
 #define OTGFS_GLPMCFG_LPMACK            (1 << 1)  /* Bit 1: XXX */
@@ -475,12 +477,12 @@
 #define OTGFS_GLPMCFG_ENBESL            (1 << 28) /* Bit 28: XXX */
                                                   /* Bits 29-31: Reserved, must be kept at reset value */
 
-/* GPWRDN */
+/* Power down register */
 
 #define OTGFS_GPWRDN_ADPMEN             (1 << 0)  /* Bit 0: XXX */
 #define OTGFS_GPWRDN_ADPIF              (1 << 23) /* Bit 23: XXX */
 
-/* GADPCTL */
+/* ADP timer, control and status register */
 
 #define OTGFS_GADPCTL_PRBDSCHG_SHIFT    (0)       /* Bits 0-1: XXX */
 #define OTGFS_GADPCTL_PRBDSCHG_MASK     (3 << OTGFS_GADPCTL_PRBDSCHG_SHIFT)
