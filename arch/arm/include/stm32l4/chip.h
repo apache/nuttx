@@ -96,7 +96,7 @@
 #  error "Unsupported STM32L4 chip"
 #endif
 
-#if defined(CONFIG_STM32L4_STM32L4x5)
+#if defined(CONFIG_STM32L4_STM32L4X5)
 #  define STM32L4_NFSMC                    1   /* Have FSMC memory controller */
 #  define STM32L4_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32L4_NGTIM32                  2   /* 32-bit general timers TIM2 and 5 with DMA */
@@ -124,7 +124,7 @@
 #  define STM32L4_NCRC                     1   /* CRC */
 #  define STM32L4_NCOMP                    2   /* Comparators */
 #  define STM32L4_NOPAMP                   2   /* Operational Amplifiers */
-#endif /* CONFIG_STM32L4_STM32L4x5 */
+#endif /* CONFIG_STM32L4_STM32L4X5 */
 
 #if defined(CONFIG_STM32L4_STM32L4X6)
 #  define STM32L4_NFSMC                    1   /* Have FSMC memory controller */
