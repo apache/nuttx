@@ -88,7 +88,7 @@ int stm32_mfrc522initialize(FAR const char *devpath)
     }
 
   /* Then register the MFRC522 */
-  
+
   ret = mfrc522_register(devpath, spi);
   if (ret < 0)
     {

@@ -181,14 +181,14 @@ static int gpout_write(FAR struct gpio_dev_s *dev, bool value)
   gpioinfo("Writing %d\n", (int)value);
 
   stm32_gpiowrite(g_gpiooutputs[stm32gpio->id], value);
-  return OK;    
+  return OK;
 }
 
 static int gpint_attach(FAR struct gpio_dev_s *dev,
                         pin_interrupt_t callback)
 {
   FAR struct stm32gpint_dev_s *stm32gpint = (FAR struct stm32gpint_dev_s *)dev;
- 
+
   gpioinfo("Attaching the callback\n");
 
   /* Make sure the interrupt is disabled */
