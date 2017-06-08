@@ -54,7 +54,8 @@
 
 #include "chip.h"
 
-#if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
+    defined(CONFIG_STM32L4_STM32L4X6)
 #  include "chip/stm32l4_gpio.h"
 #else
 #  error "Unsupported STM32L4 chip"

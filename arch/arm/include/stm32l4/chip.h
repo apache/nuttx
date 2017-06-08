@@ -1,8 +1,10 @@
 /************************************************************************************
  * arch/arm/include/stm32l4/chip.h
  *
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2016 Sebastien Lorquet. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
+ *           Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -45,9 +47,11 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* STM32L476, STM32L486, STM32L496, STM32L4A6
+/* STM32L475, STM32L476, STM32L486, STM32L496, STM32L4A6
  *
  * Differences between family members:
+ *  - L475 has no TSC, no LCD, no AES, no I2C4, no CAN2, No Hash/CRS, no DCMI,
+ *    no DMA2D
  *  - L486 has AES
  *  - L496, L4A6 has 320 Kib SRAM, 2xCAN and CameraIF. Most (all?) of these have I2C4.
  *  - L4A6 has AES and HASH
@@ -55,6 +59,8 @@
  *   ----------- ---------------- ----- ------ ------ ---- ---- -----
  *   PART        PACKAGE          GPIOs LCD    Tamper FSMC CapS AdcCh
  *   ----------- ---------------- ----- ------ ------ ---- ---- -----
+ *   STM32L475Rx LQFP100            82          3     Yes   21   16
+ *   STM32L475Vx LQFP64             51          2     No    12   16
  *   STM32L4x6Jx WLCSP72L           57   8x28   2     No    12   16
  *   STM32L476Mx WLCSP81L           65   ?      ?     ?     ?    ?
  *   STM32L4x6Qx UFBGA132L         109   8x40   3     Yes   24   16
@@ -75,7 +81,8 @@
 #if defined(CONFIG_STM32L4_STM32L496XX)
 #  define STM32L4_SRAM1_SIZE       (256*1024)  /* 256Kb SRAM1 on AHB bus Matrix */
 #  define STM32L4_SRAM2_SIZE       (64*1024)   /* 64Kb  SRAM2 on AHB bus Matrix */
-#elif defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX)
+#elif defined(CONFIG_STM32L4_STM32L475XX) || defined(CONFIG_STM32L4_STM32L476XX) || \
+      defined(CONFIG_STM32L4_STM32L486XX)
 #  define STM32L4_SRAM1_SIZE       (96*1024)   /* 96Kb SRAM1 on AHB bus Matrix */
 #  define STM32L4_SRAM2_SIZE       (32*1024)   /* 32Kb SRAM2 on AHB bus Matrix */
 #elif defined(CONFIG_STM32L4_STM32L451XX) || defined(CONFIG_STM32L4_STM32L452XX) || \
@@ -89,6 +96,36 @@
 #  error "Unsupported STM32L4 chip"
 #endif
 
+#if defined(CONFIG_STM32L4_STM32L4x5)
+#  define STM32L4_NFSMC                    1   /* Have FSMC memory controller */
+#  define STM32L4_NATIM                    2   /* Two advanced timers TIM1 and 8 */
+#  define STM32L4_NGTIM32                  2   /* 32-bit general timers TIM2 and 5 with DMA */
+#  define STM32L4_NGTIM16                  2   /* 16-bit general timers TIM3 and 4 with DMA */
+#  define STM32L4_NGTIMNDMA                3   /* 16-bit general timers TIM15-17 without DMA */
+#  define STM32L4_NBTIM                    2   /* Two basic timers, TIM6-7 */
+#  define STM32L4_NLPTIM                   2   /* Two low-power timers, LPTIM1-2 */
+#  define STM32L4_NRNG                     1   /* Random number generator (RNG) */
+#  define STM32L4_NUART                    2   /* UART 4-5 */
+#  define STM32L4_NUSART                   3   /* USART 1-3 */
+#  define STM32L4_NLPUART                  1   /* LPUART 1 */
+#  define STM32L4_QSPI                     1   /* QuadSPI1 */
+#  define STM32L4_NSPI                     3   /* SPI1-3 */
+#  define STM32L4_NI2C                     3   /* I2C1-3 */
+#  define STM32L4_NSWPMI                   1   /* SWPMI1 */
+#  define STM32L4_NUSBOTGFS                1   /* USB OTG FS */
+#  define STM32L4_NUSBFS                   0   /* No USB FS */
+#  define STM32L4_NCAN                     1   /* CAN1 */
+#  define STM32L4_NSAI                     2   /* SAI1-2 */
+#  define STM32L4_NSDMMC                   1   /* SDMMC interface */
+#  define STM32L4_NDMA                     2   /* DMA1-2 */
+#  define STM32L4_NPORTS                   8   /* 8 GPIO ports, GPIOA-H */
+#  define STM32L4_NADC                     3   /* 12-bit ADC1-3, 16 channels */
+#  define STM32L4_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32L4_NCRC                     1   /* CRC */
+#  define STM32L4_NCOMP                    2   /* Comparators */
+#  define STM32L4_NOPAMP                   2   /* Operational Amplifiers */
+#endif /* CONFIG_STM32L4_STM32L4x5 */
+
 #if defined(CONFIG_STM32L4_STM32L4X6)
 #  define STM32L4_NFSMC                    1   /* Have FSMC memory controller */
 #  define STM32L4_NATIM                    2   /* Two advanced timers TIM1 and 8 */
@@ -101,12 +138,14 @@
 #  define STM32L4_NUART                    2   /* UART 4-5 */
 #  define STM32L4_NUSART                   3   /* USART 1-3 */
 #  define STM32L4_NLPUART                  1   /* LPUART 1 */
+#  define STM32L4_QSPI                     1   /* QuadSPI1 */
 #  define STM32L4_NSPI                     3   /* SPI1-3 */
 #if defined(CONFIG_STM32L4_STM32L496XX)
 #  define STM32L4_NI2C                     4   /* I2C1-4 */
 #else
 #  define STM32L4_NI2C                     3   /* I2C1-3 */
 #endif
+#  define STM32L4_NSWPMI                   1   /* SWPMI1 */
 #  define STM32L4_NUSBOTGFS                1   /* USB OTG FS */
 #  define STM32L4_NUSBFS                   0   /* No USB FS */
 #if defined(CONFIG_STM32L4_STM32L496XX)
@@ -142,8 +181,10 @@
 #  define STM32L4_NUART                    1   /* UART 4 */
 #  define STM32L4_NUSART                   3   /* USART 1-3 */
 #  define STM32L4_NLPUART                  1   /* LPUART 1 */
+#  define STM32L4_QSPI                     1   /* QuadSPI1 */
 #  define STM32L4_NSPI                     3   /* SPI1-3 */
 #  define STM32L4_NI2C                     4   /* I2C1-4 */
+#  define STM32L4_NSWPMI                   1   /* SWPMI1 */
 #  define STM32L4_NUSBOTGFS                0   /* No USB OTG FS */
 #if defined(CONFIG_STM32L4_STM32L451XX)
 #  define STM32L4_NUSBFS                   0   /* No USB FS */
@@ -178,8 +219,10 @@
 #  define STM32L4_NUART                    0   /* No UART */
 #  define STM32L4_NUSART                   2   /* USART 1-2 */
 #  define STM32L4_NLPUART                  1   /* LPUART 1 */
+#  define STM32L4_QSPI                     1   /* QuadSPI1 */
 #  define STM32L4_NSPI                     2   /* SPI1, SPI3 */
 #  define STM32L4_NI2C                     2   /* I2C1, I2C3 */
+#  define STM32L4_NSWPMI                   1   /* SWPMI1 */
 #  define STM32L4_NUSBOTGFS                0   /* No USB OTG FS */
 #  define STM32L4_NUSBFS                   1   /* USB FS */
 #  define STM32L4_NCAN                     1   /* CAN1 */
