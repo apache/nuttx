@@ -179,7 +179,7 @@ void stm32_spi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 
       stm32_gpiowrite(GPIO_LCDSD_CS, !selected);
     }
-  else if (devid == SPIDEV_WIRELESS(0))
+  else if (devid == SPIDEV_CONTACTLESS(0))
     {
       /* Set the GPIO low to select and high to de-select */
 

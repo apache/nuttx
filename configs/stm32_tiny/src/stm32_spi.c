@@ -125,7 +125,7 @@ void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
   switch(devid)
   {
 #ifdef CONFIG_WL_NRF24L01
-    case SPIDEV_WIRELESS(0):
+    case SPIDEV_CONTACTLESS(0):
       spiinfo("nRF24L01 device %s\n", selected ? "asserted" : "de-asserted");
 
       /* Set the GPIO low to select and high to de-select */
@@ -144,7 +144,7 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
   switch(devid)
    {
 #ifdef CONFIG_WL_NRF24L01
-     case SPIDEV_WIRELESS(0):
+     case SPIDEV_CONTACTLESS(0):
        status |= SPI_STATUS_PRESENT;
        break;
 #endif
