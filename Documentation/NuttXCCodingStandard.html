@@ -2169,8 +2169,8 @@ x++;
   </li>
   <li>
     <b>Statement(s) always enclosed in braces</b>.
-    Statement(s) following the <code>if &lt;condition&gt;</code> and <code>else</code> lines must always be enclosed in braces.
-    Braces must follow the <code>if &lt;condition&gt;</code> and <code>else</code> lines even in the case where these is no contained statement!
+    Statement(s) following the <code>if &lt;condition&gt;</code> and <code>else</code> keywords must always be enclosed in braces.
+    Braces must follow the <code>if &lt;condition&gt;</code> and <code>else</code> lines even in the cases where (a) there is no contained statement or (b) there is only a single statement!
   </li>
   <li>
     <b>Braces and indentation</b>.
@@ -2178,11 +2178,15 @@ x++;
   </li>
   <li>
     <b>Final brace followed by a single blank line</b>.
-    The <i>final</i> right brace must be followed by a blank line.
-    This may be the final brace of the <code>if</code> compound statement.
+    The <i>final</i> right brace of the <code>if</code>-<code>else</code> must be followed by a blank line in most cases (the exception given below).
+    This may be the final brace of the <code>if</code> compound statement if the <code>else</code> keyword is not present.
     Or it may be the the final brace of the <code>else</code> compound statement if present.
-    A blank line never follows the right brace closing the <code>if</code> compound statement if <code>else</code> is present.
+    A blank line never follows the right brace closing the <code>if</code> compound statement if the <code>else</code> keyword is present.
     Use of braces must follow all other standard rules for <a href="#braces">braces and spacing</a>.
+  </li>
+  <li>
+    <b>Exception where there is no blank line</b>.
+    That blank line must also be omitted for certain cases where the <code>if &lt;condition&gt;</code>-<code>else</code> statement is nested within another compound statement; there should be no blank lines between consecutive right braces as discussed in the standard rules for use of <a href="#braces">braces</a>.
   </li>
 </ul>
 <p>
