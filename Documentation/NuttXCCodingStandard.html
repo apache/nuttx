@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX C Coding Standard</i>
       </font></big></h1>
-      <p>Last Updated: May 6, 2017</p>
+      <p>Last Updated: June 9, 2017</p>
     </td>
   </tr>
 </table>
@@ -736,11 +736,24 @@ void some_function(void)
 <ul>
   <li>
     <b>Always on Separate Lines</b>.
-    Braces always appear on a separate line containing nothing else other that white space.
+    Braces always appear on a separate line containing nothing else other than white space.
   </li>
   <li>
     <b>Never Comments on Braces</b>.
     Do not put comments on the same line as braces.
+  </li>
+  <li>
+    <b>Compound Statements</b>.
+    Within this document, an opening left brace followed by a sequence of statments, and ending with a closing right brace is refered to as a <i>compound statement</i>.
+  </li>
+  <li>
+    <b>Nested Compound Statements</b>.
+    In the case where there are nested compound statements that end with several consecutive right braces, each closing right brace must lie on a separate line and must be indented to match the corresponding opening brace.
+  </li>
+  <li>
+    <b>Final brace followed by a single blank line</b>.
+    The <i>final</i> right brace must be followed by a blank line as per standard rules.
+    In the case where there are nested several consecutive right braces, no blank lines should be inserted except for after the <i>final</i> right brace.
   </li>
   <li>
     <b>Special Indentation Rules</b>.
@@ -763,6 +776,19 @@ while (true)
       ...
       } /* not valid */
   } /* end forever */
+if (a < b) {
+  if (a < 0) {
+      c = -a;
+  } else {
+      c = a;
+  }
+} else {
+  if (b < 0) {
+      c = -b;
+  } else {
+      c = b;
+  }
+}
 </ul></pre></font>
 </td></tr>
 <tr><td bgcolor="white">
@@ -779,12 +805,36 @@ while (true)
       ...
       }
   }
+
+if (a < b)
+  {
+    if (a < 0)
+      {
+        c = -a;
+      }
+    else
+      {
+        c = a;
+      }
+  }
+else
+  {
+    if (b < 0)
+      {
+        c = -b;
+      }
+    else
+      {
+        c = b;
+      }
+  }
+
 </ul></pre></font>
 </td></tr>
 </table></center>
 
 <p>
-  <b>Exceptions</b>.
+  <b>Exception to Indentation Rule for Braces</b>.
   The exception is braces that following structure, enumeration, union, and function declarations.
   There is no additional indentation for those braces;
   those braces align with the beginning of the definition
@@ -854,6 +904,7 @@ int animals(int animal)
 {
   ...
 }
+
 </ul></pre></font>
 </td></tr>
 </table></center>
@@ -2123,11 +2174,15 @@ x++;
   </li>
   <li>
     <b>Braces and indentation</b>.
-    The placement of braces and statements must follow the standard rules for braces and indentation.
+    The placement of braces and statements must follow the standard rules for <a href="#braces">braces and indentation</a>.
   </li>
   <li>
-    <b>Followed by a single blank line</b>.
-    The final right brace must be followed by a blank line.
+    <b>Final brace followed by a single blank line</b>.
+    The <i>final</i> right brace must be followed by a blank line.
+    This may be the final brace of the <code>if</code> compound statement.
+    Or it may be the the final brace of the <code>else</code> compound statement if present.
+    A blank line never follows the right brace closing the <code>if</code> compound statement if <code>else</code> is present.
+    Use of braces must follow all other standard rules for <a href="#braces">braces and spacing</a>.
   </li>
 </ul>
 <p>
