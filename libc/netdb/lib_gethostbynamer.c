@@ -546,7 +546,7 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
       ptr                 += addrlen;
       buflen              -= addrlen;
 
-      /* And copy name */
+      /* And copy the name */
 
       namelen = strlen(name);
       if (addrlen + namelen + 1 > buflen)
