@@ -10,47 +10,80 @@ README
 Contents
 ========
 
-  - Board Features
-  - LEDs and Buttons
-  - Serial Console
-  - Configurations
+  o STATUS
+  o Board Features
+  o LEDs and Buttons
+  o Serial Console
+  o Configurations
+
+STATUS
+======
+
+  o 2017-06-10:  I have no hardware in hand and I am not sure that I will
+    even pursue this port.  This README is really no more than a thought
+    experiment at the present time.
+
+    A few days ago, I did add support for the STM32L4x5 MCU family to
+    NuttX.  But no work has yet been done for this board port other
+    than writing this README file.
 
 Board Features
 ==============
 
   B-L475E-IOT01A Discovery kit key features and specifications:
 
-    - MCU:  STM32L475 Series MCU based on ARM Cortex-M4 core with 1 MB
-      Flash memory, 128 KB SRAM
-    - Storage: 64 Mbit (8MB)  Quad-SPI Flash memory (Macronix)
-    - Connectivity:
-      Bluetooth 4.1 LE module (SPBTLE-RF)
-      Sub-GHz (868 or 915 MHz) low-power-programmable RF module (SPSGRF-868
-        or SPSGRF-915)
-      Wi-Fi module based on Inventek ISM43362-M3G-L44 (802.11 b/g/n
-        compliant)
-      Dynamic NFC tag based on M24SR with its printed NFC antenna
-    - Sensors:
-      2x digital omni-directional microphones (MP34DT01)
-      Capacitive digital sensor for relative humidity and temperature
-        (HTS221)
-      3-axis magnetometer (LIS3MDL)
-      3D accelerometer and 3D gyroscope (LSM6DSL)
-      260-1260 hPa absolute digital output barometer (LPS22HB)
-      Time-of-Flight and gesture-detection sensor (VL53L0X
-    - USB – 1x micro USB OTG port (Full speed)
-    - Expansion – Arduino UNO V3 headers, PMOD header
-    - Debugging – On-board ST-LINK/V2-1 debugger/programmer with USB
-      re-enumeration capability: mass storage, virtual COM port and debug
-      port
-    - Misc – 2 push-buttons (user and reset)
-    - Power Supply – 5V via ST LINK USB VBUS or external sources
+  o MCU:  STM32L475 Series MCU based on ARM Cortex-M4 core with 1 MB
+    Flash memory, 128 KB SRAM
+  o Storage: 64 Mbit (8MB)  Quad-SPI Flash memory (Macronix)
+  o Connectivity:
+    - Bluetooth 4.1 LE module (SPBTLE-RF)
+    - Sub-GHz (868 or 915 MHz) low-power-programmable RF module (SPSGRF-868
+      or SPSGRF-915)
+    - Wi-Fi module based on Inventek ISM43362-M3G-L44 (802.11 b/g/n
+      compliant)
+    - Dynamic NFC tag based on M24SR with its printed NFC antenna
+  o Sensors:
+    - 2x digital omni-directional microphones (MP34DT01)
+    - Capacitive digital sensor for relative humidity and temperature
+      (HTS221)
+    - 3-axis magnetometer (LIS3MDL)
+    - 3D accelerometer and 3D gyroscope (LSM6DSL)
+    - 260-1260 hPa absolute digital output barometer (LPS22HB)
+    - Time-of-Flight and gesture-detection sensor (VL53L0X
+  o USB – 1x micro USB OTG port (Full speed)
+  o Expansion – Arduino UNO V3 headers, PMOD header
+  o Debugging – On-board ST-LINK/V2-1 debugger/programmer with USB
+    re-enumeration capability: mass storage, virtual COM port and debug
+    port
+  o Misc – 2 push-buttons (user and reset)
+  o Power Supply – 5V via ST LINK USB VBUS or external sources
 
   The board supports ARM mbed online compiler, but can also be programmed
   using IDEs such as IAR, Keil, and GCC-based IDEs.  STMicro also provides
   HAL libraries and code samples as part of the STM32Cube Package, as well
   as X-CUBE-AWS expansion software to connect to the Amazon Web Services
   (AWS) IoT platform.
+
+  NOTES:
+  1. The board usese Wi-Fi® module Inventek ISM43362-M3G-L44 (802.11 b/g/n
+     compliant), which consists of BCM43362 and STM32F205 host processor
+     that has a standard SPI or UART interface capability.  It means you
+     will only use AT command to talk with Wi-Fi® module by SPI. All the
+     tcp/ip stack is  built-in STM32F205 in Wi-Fi® module.
+
+     This cannot integrate cleanly with the NuttX network stack.  A
+     USERSOCK option was recently added that would permit implementation
+     of the Inventek support in an applications.  But that would then
+     preclude the 6loWPAN integration into IPv6.
+
+  2. The board uses Bluetooth® V4.1 module (SPBTLE-RF), which has built-in
+     BLE stack.  Similar with wifi, you only use simple AT command to talk
+     with this BLE module. 
+
+  3. STMicro provides contiki 6lowpan for mesh.
+     http://www.st.com/en/embedded-software/osxcontiki6lp.html but mesh
+     network is not popular in the market, star network is the mainstream
+     for its simplicity and robustness.
 
 LEDs and Buttons
 ================
@@ -68,7 +101,7 @@ LEDs and Buttons
     LD2     green LED2    PB14
 
   These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
-  defined.  In that case, the usage by the board port is defined in
+  selected.  In that case, the usage by the board port is defined in
   include/board.h and src/lpc31_leds.c. The LEDs are used to encode
   OS-related events as follows:
 
@@ -91,6 +124,9 @@ LEDs and Buttons
 
   NOTE: That LED2 is not used after completion of booting and may
   be used by other board-specific logic.
+
+  Of course, if CONFIG_ARCH_LEDS is not selected, then both LEDs are
+  available for use by other logic.
 
 Serial Console
 ==============
