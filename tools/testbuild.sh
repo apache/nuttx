@@ -43,6 +43,8 @@ wenv=cygwin
 sizet=uint
 APPSDIR=../apps
 NXWDIR=../NxWidgets
+MAKE_FLAGS=-i
+MAKE=make
 unset testfile
 
 function showusage {
@@ -58,6 +60,7 @@ function showusage {
     echo "  -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps"
     echo "  -n <nxdir> provides the relative path to the NxWidgets/ directory.  Default ../NxWidgets"
     echo "  -d enables script debug output"
+    echo "  -x exit on build failures"
     echo "  -h will show this help test and terminate"
     echo "  <testlist-file> selects the list of configurations to test.  No default"
     echo ""
@@ -95,6 +98,10 @@ while [ ! -z "$1" ]; do
     -s )
     host=windows
     sizet=long
+    ;;
+    -x )
+    MAKE_FLAGS='--silent --no-print-directory'
+    set -e
     ;;
     -a )
     shift
@@ -142,7 +149,7 @@ function distclean {
     cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
     if [ -f .config ]; then
         echo "  Cleaning..."
-        make distclean 1>/dev/null
+        ${MAKE} ${MAKE_FLAGS} distclean 1>/dev/null
     fi
 }
 
@@ -225,7 +232,7 @@ function configure {
 
     echo "  Refreshing..."
     cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
-    make olddefconfig 1>/dev/null 2>&1
+    ${MAKE} ${MAKE_FLAGS} olddefconfig 1>/dev/null 2>&1
 }
 
 # Build the NxWidgets libraries
@@ -237,7 +244,7 @@ function nxbuild {
 
     unset nxconfig
     if [ -d $NXWDIR ]; then
-        nxconfig=`grep CONFIG_NXWM=y $nuttx/.config`
+        nxconfig=`grep CONFIG_NXWM=y $nuttx/.config` || true
     fi
 
     if [ ! -z "$nxconfig" ]; then
@@ -247,18 +254,18 @@ function nxbuild {
         cd $nuttx/$NXTOOLS || { echo "Failed to CD to $NXTOOLS"; exit 1; }
         ./install.sh $nuttx/$APPSDIR nxwm 1>/dev/null
 
-        make -C $nuttx/$APPSDIR/external TOPDIR=$nuttx APPDIR=$nuttx/$APPSDIR TOPDIR=$nuttx clean 1>/dev/null
+        ${MAKE} ${MAKE_FLAGS} -C $nuttx/$APPSDIR/external TOPDIR=$nuttx APPDIR=$nuttx/$APPSDIR TOPDIR=$nuttx clean 1>/dev/null
 
         cd $nuttx || { echo "Failed to CD to $nuttx"; exit 1; }
-        make -i context 1>/dev/null
+        ${MAKE} ${MAKE_FLAGS} context 1>/dev/null
 
         cd $nuttx/$NXWIDGETSDIR || { echo "Failed to CD to $NXWIDGETSDIR"; exit 1; }
-        make -i TOPDIR=$nuttx clean 1>/dev/null
-        make -i TOPDIR=$nuttx  1>/dev/null
+        ${MAKE} ${MAKE_FLAGS} TOPDIR=$nuttx clean 1>/dev/null
+        ${MAKE} ${MAKE_FLAGS} TOPDIR=$nuttx  1>/dev/null
 
         cd $nuttx/$NXWMDIR || { echo "Failed to CD to $NXWMDIR"; exit 1; }
-        make -i TOPDIR=$nuttx clean 1>/dev/null
-        make -i TOPDIR=$nuttx  1>/dev/null
+        ${MAKE} ${MAKE_FLAGS} TOPDIR=$nuttx clean 1>/dev/null
+        ${MAKE} ${MAKE_FLAGS} TOPDIR=$nuttx  1>/dev/null
     fi
 }
 
@@ -268,7 +275,7 @@ function build {
     cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
     echo "  Building NuttX..."
     echo "------------------------------------------------------------------------------------"
-    make -i 1>/dev/null
+    ${MAKE} ${MAKE_FLAGS} 1>/dev/null
 }
 
 # Coordinate the steps for the next build test
