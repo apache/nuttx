@@ -57,7 +57,10 @@
  * Name: stm32_hrtim_setup
  *
  * Description:
- *   Initialize HRTIM
+ *  Initialize HRTIM driver
+ *
+ * Returned Value:
+ *  0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -74,7 +77,7 @@ int stm32_hrtim_setup(void)
       hrtim = stm32_hrtiminitialize();
       if (hrtim == NULL)
         {
-          aerr("ERROR: Failed to get HRTIM1interface\n");
+          tmrerr("ERROR: Failed to get HRTIM1 interface\n");
           return -ENODEV;
         }
 
@@ -83,7 +86,7 @@ int stm32_hrtim_setup(void)
       ret = hrtim_register("/dev/hrtim0", hrtim);
       if (ret < 0)
         {
-          aerr("ERROR: hrtim_register failed: %d\n", ret);
+          tmrerr("ERROR: hrtim_register failed: %d\n", ret);
           return ret;
         }
 
