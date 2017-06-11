@@ -222,6 +222,20 @@ enum stm32_hrtim_tim_prescaler_e
   HRTIM_PRESCALER_128,
 };
 
+struct hrtim_dev_s
+{
+#ifdef CONFIG_HRTIM
+  /* Fields managed by common upper half HRTIM logic */
+
+  uint8_t                 hd_ocount;    /* The number of times the device has been opened */
+  sem_t                   hd_closesem;  /* Locks out new opens while close is in progress */
+#endif
+
+  /* Fields provided by lower half HRTIM logic */
+
+  FAR void                     *hd_priv; /* Used by the arch-specific logic */
+};
+
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
@@ -254,6 +268,12 @@ extern "C"
  ****************************************************************************/
 
 FAR struct hrtim_dev_s* stm32_hrtiminitialize(void);
+
+/****************************************************************************
+ * Name: hrtim_register
+ ****************************************************************************/
+
+int hrtim_register(FAR const char *path, FAR struct hrtim_dev_s *dev);
 
 #undef EXTERN
 #ifdef __cplusplus

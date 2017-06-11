@@ -45,7 +45,6 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
-#include <nuttx/drivers/hrtim.h>
 
 #include "chip.h"
 #include "stm32.h"
@@ -248,7 +247,6 @@ struct stm32_hrtim_slave_priv_s
 struct stm32_hrtim_s
 {
   uint32_t base;                     /* Base adress of HRTIM block */
-  FAR const struct hrtim_ops_s *ops; /*  */
   struct stm32_hrtim_tim_s *master;  /* Master Timer */
 #ifdef CONFIG_STM32_HRTIM_TIMA
   struct stm32_hrtim_tim_s *tima;    /* HRTIM Timer A */
@@ -270,6 +268,12 @@ struct stm32_hrtim_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+/* HRTIM Driver Methods */
+
+static int stm32_hrtim_open(FAR struct file *filep);
+static int stm32_hrtim_close(FAR struct file *filep);
+static int stm32_hrtim_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /* HRTIM Register access */
 
@@ -293,10 +297,6 @@ static uint32_t hrtim_tim_getreg(FAR struct stm32_hrtim_s *priv, uint8_t index,
                                  int offset);
 static FAR struct stm32_hrtim_tim_s *hrtim_tim_get(FAR struct stm32_hrtim_s *priv,
                                                      uint8_t index);
-
-/* HRTIM Driver Methods */
-
-static int hrtim_ioctl(FAR struct hrtim_dev_s *dev, int cmd, unsigned long arg);
 
 /* Configuration */
 
@@ -338,11 +338,20 @@ static int stm32_hrtimconfig(FAR struct stm32_hrtim_s *priv);
  * Private Data
  ****************************************************************************/
 
-/* HRTIM interface operations */
-
-static const struct hrtim_ops_s g_hrtimops =
+static const struct file_operations hrtim_fops =
 {
-  .ho_ioctl = hrtim_ioctl,
+  stm32_hrtim_open,   /* open */
+  stm32_hrtim_close,  /* close */
+  NULL,               /* read */
+  NULL,               /* write */
+  NULL,               /* seek */
+  stm32_hrtim_ioctl   /* ioctl */
+#ifndef CONFIG_DISABLE_POLL
+  , NULL              /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL              /* unlink */
+#endif
 };
 
 /* Master Timer data */
@@ -439,13 +448,79 @@ static struct stm32_hrtim_s g_hrtim1priv =
 
 struct hrtim_dev_s g_hrtim1dev =
 {
-  .hd_ops   =  &g_hrtimops,
   .hd_priv  = &g_hrtim1priv,
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_hrtim_open
+ *
+ * Description:
+ *   This function is called whenever the HRTIM device is opened.
+ *
+ ****************************************************************************/
+
+static int stm32_hrtim_open(FAR struct file *filep)
+{
+#warning "stm32_hrtim_open: missing logic"
+  return OK;
+}
+
+/****************************************************************************
+ * Name: stm32_hrtim_close
+ *
+ * Description:
+ *   This function is called when the HRTIM device is closed.
+ *
+ ****************************************************************************/
+
+static int stm32_hrtim_close(FAR struct file *filep)
+{
+#warning "smt32_hrtim_close: missing logic"
+  return OK;
+}
+
+/****************************************************************************
+ * Name: stm32_hrtim_ioctl
+ *
+ * Description:
+ *   The standard ioctl method.  This is where ALL of the HRTIM work is done.
+ *
+ ****************************************************************************/
+
+static int stm32_hrtim_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct hrtim_dev_s  *dev;
+  FAR struct stm32_hrtim_s *hrtim;
+  int ret;
+
+  tmrinfo("cmd: %d arg: %ld\n", cmd, arg);
+  dev = inode->i_private;
+  DEBUGASSERT(dev != NULL);
+  hrtim = dev->hd_priv;
+
+  UNUSED(hrtim);
+
+#warning "smt32_hrtim_ioctl: missing logic"
+
+  /* Handle HRTIM ioctl commands */
+
+  switch (cmd)
+    {
+
+      default:
+        {
+          ret = -ENOSYS;
+          break;
+        }
+    }
+
+  return ret;
+}
 
 /****************************************************************************
  * Name: stm32_modifyreg32
@@ -463,12 +538,13 @@ struct hrtim_dev_s g_hrtim1dev =
  *
  ****************************************************************************/
 
+#ifdef HRTIM_HAVE_CLK_FROM_PLL
 static void stm32_modifyreg32(unsigned int addr, uint32_t clrbits,
                               uint32_t setbits)
 {
   putreg32((getreg32(addr) & ~clrbits) | setbits, addr);
 }
-
+#endif
 
 /****************************************************************************
  * Name: hrtim_getreg
@@ -728,28 +804,6 @@ static void hrtim_tim_modifyreg(FAR struct stm32_hrtim_s *priv, uint8_t index,
 {
   hrtim_tim_putreg(priv, index, offset,
                    (hrtim_tim_getreg(priv, index, offset) & ~clrbits) | setbits);
-}
-
-/****************************************************************************
- * Name: hrtim_ioctl
- *
- * Description:
- *   All ioctl calls will be routed through this method.
- *
- * Input Parameters:
- *   dev - pointer to device structure used by the driver
- *   cmd - command
- *   arg - arguments passed with command
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-static int hrtim_ioctl(FAR struct hrtim_dev_s *dev, int cmd, unsigned long arg)
-{
-#warning "hrtim_ioctl: missing logic"
-  return -ENOTTY;
 }
 
 /****************************************************************************
@@ -1512,6 +1566,33 @@ FAR struct hrtim_dev_s* stm32_hrtiminitialize(void)
     }
 
   return dev;
+}
+
+/****************************************************************************
+ * Name: hrtim_register
+ ****************************************************************************/
+
+int hrtim_register(FAR const char *path, FAR struct hrtim_dev_s *dev)
+{
+  int ret ;
+
+  /* Initialize the HRTIM device structure */
+
+  dev->hd_ocount = 0;
+
+  /* Initialize semaphores */
+
+  sem_init(&dev->hd_closesem, 0, 1);
+
+  /* Register the HRTIM character driver */
+
+  ret =  register_driver(path, &hrtim_fops, 0444, dev);
+  if (ret < 0)
+    {
+      sem_destroy(&dev->hd_closesem);
+    }
+
+  return ret;
 }
 
 #endif  /* CONFIG_STM32_STM32F33XX */
