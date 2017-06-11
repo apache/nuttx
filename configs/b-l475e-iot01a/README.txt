@@ -65,6 +65,7 @@ Board Features
   (AWS) IoT platform.
 
   NOTES:
+
   1. The board usese Wi-Fi® module Inventek ISM43362-M3G-L44 (802.11 b/g/n
      compliant), which consists of BCM43362 and STM32F205 host processor
      that has a standard SPI or UART interface capability.  It means you
@@ -194,8 +195,12 @@ Configurations
 
     1. The PATH environment variable include the correct path to the
        directory than holds your toolchain binaries.
-    2. Make sure that the configuration is set for your build platform
-       and that the toolchain is set for the toolchain type you are using.
+    2. Check the .config file.  Make sure that the configuration is set for
+       your build platform (e.g., Linux vs. Windows) and that the toolchain
+       is set for the toolchain type you are using.
+
+  The <subdir> that is provided above as an argument to the
+  tools/configure.sh must be is one of those listed below.
 
   And then build NuttX by simply typing the following.  At the conclusion of
   the make, the nuttx binary will reside in an ELF file called, simply,
@@ -204,8 +209,8 @@ Configurations
     make oldconfig
     make
 
-  The <subdir> that is provided above as an argument to the
-  tools/configure.sh must be is one of the following.
+  Where 'make oldconfig' brings the configuration up to data with the current configuration data and 'make' will compile all of the source
+  files and generate the final binary.
 
   NOTES:
 
