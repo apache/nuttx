@@ -82,6 +82,7 @@ struct stm32gpint_dev_s
 static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value);
 static int gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value);
 static int gpout_write(FAR struct gpio_dev_s *dev, bool value);
+static int gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value);
 static int gpint_attach(FAR struct gpio_dev_s *dev,
                         pin_interrupt_t callback);
 static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable);
@@ -108,7 +109,7 @@ static const struct gpio_operations_s gpout_ops =
 
 static const struct gpio_operations_s gpint_ops =
 {
-  .go_read   = gpin_read,
+  .go_read   = gpint_read,
   .go_write  = NULL,
   .go_attach = gpint_attach,
   .go_enable = gpint_enable,
@@ -195,6 +196,18 @@ static int gpout_write(FAR struct gpio_dev_s *dev, bool value)
   gpioinfo("Writing %d\n", (int)value);
 
   stm32_gpiowrite(g_gpiooutputs[stm32gpio->id], value);
+  return OK;
+}
+
+static int gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value)
+{
+  FAR struct stm32gpint_dev_s *stm32gpint = (FAR struct stm32gpint_dev_s *)dev;
+
+  DEBUGASSERT(stm32gpint != NULL && value != NULL);
+  DEBUGASSERT(stm32gpint->stm32gpio && stm32gpint->stm32gpio.id < BOARD_NGPIOINT);
+  gpioinfo("Reading int pin...\n");
+
+  *value = stm32_gpioread(g_gpiointinputs[stm32gpint->stm32gpio.id]);
   return OK;
 }
 
@@ -289,7 +302,7 @@ int stm32_gpio_initialize(void)
       (void)gpio_pin_register(&g_gpout[i].gpio, pincount);
 
       /* Configure the pin that will be used as output */
-
+      stm32_gpiowrite(g_gpiooutputs[i], 0);
       stm32_configgpio(g_gpiooutputs[i]);
 
       pincount++;

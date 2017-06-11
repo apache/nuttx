@@ -78,7 +78,7 @@ Board Features
 
   2. The board uses Bluetooth® V4.1 module (SPBTLE-RF), which has built-in
      BLE stack.  Similar with wifi, you only use simple AT command to talk
-     with this BLE module. 
+     with this BLE module.
 
   3. STMicro provides contiki 6lowpan for mesh.
      http://www.st.com/en/embedded-software/osxcontiki6lp.html but mesh
