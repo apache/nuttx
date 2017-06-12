@@ -1070,6 +1070,7 @@ static ssize_t w25_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbl
     {
       nbytes >>= W25_SECTOR512_SHIFT;
     }
+
 #else
   nbytes = w25_read(dev, startblock << W25_PAGE_SHIFT, nblocks << W25_PAGE_SHIFT, buffer);
   if (nbytes > 0)

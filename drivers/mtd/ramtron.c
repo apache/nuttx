@@ -532,8 +532,8 @@ static inline void ramtron_sendaddr(const struct ramtron_dev_s *priv, uint32_t a
  * Name:  ramtron_pagewrite
  ************************************************************************************/
 
-static inline int ramtron_pagewrite(struct ramtron_dev_s *priv, FAR const uint8_t *buffer,
-                                     off_t page)
+static inline int ramtron_pagewrite(struct ramtron_dev_s *priv,
+                                    FAR const uint8_t *buffer, off_t page)
 {
   off_t offset = page << priv->pageshift;
 
@@ -663,6 +663,12 @@ static ssize_t ramtron_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
 
   finfo("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
 
+  /* Lock the SPI bus NOW because the ramtron_waitwritecomplete call must be
+   * executed with the bus locked.
+   */
+
+  ramtron_lock(priv);
+
 #ifndef CONFIG_RAMTRON_WRITEWAIT
   /* Wait for any preceding write to complete.  We could simplify things by
    * perform this wait at the end of each write operation (rather than at
@@ -673,9 +679,8 @@ static ssize_t ramtron_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
   (void)ramtron_waitwritecomplete(priv);
 #endif
 
-  /* Lock the SPI bus and select this FLASH part */
+  /* Select this FLASH part */
 
-  ramtron_lock(priv);
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send "Read from Memory " instruction */
