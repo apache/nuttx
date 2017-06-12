@@ -432,6 +432,7 @@ static void m25p_waitwritecomplete(struct m25p_dev_s *priv)
     {
       /* Select this FLASH part */
 
+      m25p_lock(priv->dev);
       SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
       /* Send "Read Status Register (RDSR)" command */
@@ -445,6 +446,7 @@ static void m25p_waitwritecomplete(struct m25p_dev_s *priv)
       /* Deselect the FLASH */
 
       SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
+      m25p_unlock(priv->dev);
 
       /* Given that writing could take up to few tens of milliseconds, and erasing
        * could take more.  The following short delay in the "busy" case will allow
@@ -453,9 +455,7 @@ static void m25p_waitwritecomplete(struct m25p_dev_s *priv)
 
       if ((status & M25P_SR_WIP) != 0)
         {
-          m25p_unlock(priv->dev);
           usleep(1000);
-          m25p_lock(priv->dev);
         }
     }
   while ((status & M25P_SR_WIP) != 0);
@@ -471,6 +471,7 @@ static void m25p_writeenable(struct m25p_dev_s *priv)
 {
   /* Select this FLASH part */
 
+  m25p_lock(priv->dev);
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send "Write Enable (WREN)" command */
@@ -480,6 +481,8 @@ static void m25p_writeenable(struct m25p_dev_s *priv)
   /* Deselect the FLASH */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
+  m25p_unlock(priv->dev);
+
   finfo("Enabled\n");
 }
 
@@ -518,6 +521,7 @@ static void m25p_sectorerase(struct m25p_dev_s *priv, off_t sector, uint8_t type
 
   /* Select this FLASH part */
 
+  m25p_lock(priv->dev);
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send the "Sector Erase (SE)" or Sub-Sector Erase (SSE) instruction
@@ -538,6 +542,8 @@ static void m25p_sectorerase(struct m25p_dev_s *priv, off_t sector, uint8_t type
   /* Deselect the FLASH */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
+  m25p_unlock(priv->dev);
+
   finfo("Erased\n");
 }
 
@@ -563,6 +569,7 @@ static inline int m25p_bulkerase(struct m25p_dev_s *priv)
 
   /* Select this FLASH part */
 
+  m25p_lock(priv->dev);
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send the "Bulk Erase (BE)" instruction */
@@ -572,6 +579,8 @@ static inline int m25p_bulkerase(struct m25p_dev_s *priv)
   /* Deselect the FLASH */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
+  m25p_unlock(priv->dev);
+
   finfo("Return: OK\n");
   return OK;
 }
@@ -601,6 +610,7 @@ static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const uint8_t *bu
 
   /* Select this FLASH part */
 
+  m25p_lock(priv->dev);
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send "Page Program (PP)" command */
@@ -620,6 +630,8 @@ static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const uint8_t *bu
   /* Deselect the FLASH: Chip Select high */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
+  m25p_unlock(priv->dev);
+
   finfo("Written\n");
 }
 
@@ -647,6 +659,7 @@ static inline void m25p_bytewrite(struct m25p_dev_s *priv, FAR const uint8_t *bu
 
   /* Select this FLASH part */
 
+  m25p_lock(priv->dev);
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send "Page Program (PP)" command */
@@ -666,6 +679,8 @@ static inline void m25p_bytewrite(struct m25p_dev_s *priv, FAR const uint8_t *bu
   /* Deselect the FLASH: Chip Select high */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
+  m25p_unlock(priv->dev);
+
   finfo("Written\n");
 }
 #endif
@@ -683,7 +698,6 @@ static int m25p_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblock
 
   /* Lock access to the SPI bus until we complete the erase */
 
-  m25p_lock(priv->dev);
   while (blocksleft > 0)
     {
 #ifdef CONFIG_M25P_SUBSECTOR_ERASE
@@ -733,7 +747,6 @@ static int m25p_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblock
       blocksleft--;
     }
 
-  m25p_unlock(priv->dev);
   return (int)nblocks;
 }
 
@@ -775,7 +788,6 @@ static ssize_t m25p_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t n
 
   /* Lock the SPI bus and write each page to FLASH */
 
-  m25p_lock(priv->dev);
   while (blocksleft-- > 0)
     {
       m25p_pagewrite(priv, buffer, startblock);
@@ -783,7 +795,6 @@ static ssize_t m25p_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t n
       startblock++;
    }
 
-  m25p_unlock(priv->dev);
   return nblocks;
 }
 
@@ -829,6 +840,7 @@ static ssize_t m25p_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
   m25p_unlock(priv->dev);
+
   finfo("return nbytes: %d\n", (int)nbytes);
   return nbytes;
 }
@@ -961,9 +973,7 @@ static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         {
             /* Erase the entire device */
 
-            m25p_lock(priv->dev);
             ret = m25p_bulkerase(priv);
-            m25p_unlock(priv->dev);
         }
         break;
 
