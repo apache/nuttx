@@ -222,6 +222,26 @@ enum stm32_hrtim_tim_prescaler_e
   HRTIM_PRESCALER_128,
 };
 
+/* HRTIM Fault Source */
+
+enum stm32_hrtim_fault_src_e
+{
+  HRTIM_FAULT_SRC_PIN,
+  HRTIM_FAULT_SRC_INTERNAL
+};
+
+/* HRTIM External Event Source
+ * NOTE: according to Table 82 from STM32F334XX Manual
+ */
+
+enum stm32_hrtim_eev_src_e
+{
+  HRTIM_EEV_SRC_PIN,
+  HRTIM_EEV_SRC_ANALOG,
+  HRTIM_EEV_SRC_TRGO,
+  HRTIM_EEV_SRC_ADC
+};
+
 struct hrtim_dev_s
 {
 #ifdef CONFIG_HRTIM

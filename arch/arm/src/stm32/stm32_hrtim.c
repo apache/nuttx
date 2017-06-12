@@ -144,6 +144,24 @@
 #  define HRTIM_HAVE_CHOPPER 1
 #endif
 
+#if defined(CONFIG_STM32_HRTIM_SCOUT) || defined(CONFIG_STM32_HRTIM_SCIN)
+#  define HRTIM_HAVE_SYNC 1
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_FAULT1) || defined(CONFIG_STM32_HRTIM_FAULT2) || \
+    defined(CONFIG_STM32_HRTIM_FAULT3) || defined(CONFIG_STM32_HRTIM_FAULT4) || \
+    defined(CONFIG_STM32_HRTIM_FAULT5)
+#  define HRTIM_HAVE_FAULTS 1
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_EEV1) || defined(CONFIG_STM32_HRTIM_EEV2) || \
+    defined(CONFIG_STM32_HRTIM_EEV3) || defined(CONFIG_STM32_HRTIM_EEV4) || \
+    defined(CONFIG_STM32_HRTIM_EEV5) || defined(CONFIG_STM32_HRTIM_EEV6) || \
+    defined(CONFIG_STM32_HRTIM_EEV7) || defined(CONFIG_STM32_HRTIM_EEV8) || \
+    defined(CONFIG_STM32_HRTIM_EEV9) || defined(CONFIG_STM32_HRTIM_EEV10)
+#  define HRTIM_HAVE_EEV 1
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -242,6 +260,92 @@ struct stm32_hrtim_slave_priv_s
 #endif
 };
 
+#ifdef HRTIM_HAVE_FAULTS
+
+/* Structure describes single HRTIM Fault configuration */
+
+struct stm32_hrtim_fault_cfg_s
+{
+  uint8_t pol:1;                /* Fault poalrity */
+  uint8_t src:1;                /* Fault source */
+  uint8_t filter:4;             /* Fault filter */
+  uint8_t flts:1;               /* Fault Sampling clock division */
+  uint8_t lock:1;               /* Fault lock */
+};
+
+/* Structure describes HRTIM Faults configuration */
+
+struct stm32_hrtim_faults_s
+{
+#ifdef CONFIG_STM32_HRTIM_FAULT1
+  struct stm32_hrtim_fault_cfg_s flt1;
+#endif
+#ifdef CONFIG_STM32_HRTIM_FAULT2
+  struct stm32_hrtim_fault_cfg_s flt2;
+#endif
+#ifdef CONFIG_STM32_HRTIM_FAULT3
+  struct stm32_hrtim_fault_cfg_s flt3;
+#endif
+#ifdef CONFIG_STM32_HRTIM_FAULT4
+  struct stm32_hrtim_fault_cfg_s flt4;
+#endif
+#ifdef CONFIG_STM32_HRTIM_FAULT5
+  struct stm32_hrtim_fault_cfg_s flt5;
+#endif
+};
+#endif
+
+#ifdef HRTIM_HAVE_EEV
+
+/* Structure describes single HRTIM External Event configuration */
+
+struct stm32_hrtim_eev_cfg_s
+{
+  uint8_t filter:4;             /* External Event filter */
+  uint8_t src:4;                /* External Event source */
+  uint8_t pol:1;                /* External Event polarity */
+  uint8_t sen:1;                /* External Event sensivity */
+  uint8_t mode:1;               /* External Event mode */
+  uint8_t _res:5;
+};
+
+/* Structure describes HRTIM External Events configuration */
+
+struct stm32_hrtim_eev_s
+{
+#ifdef CONFIG_STM32_HRTIM_EEV1
+  struct stm32_hrtim_eev_cfg_s eev1;
+#endif
+#ifdef CONFIG_STM32_HRTIM_EEV2
+  struct stm32_hrtim_eev_cfg_s eev2;
+#endif
+#ifdef CONFIG_STM32_HRTIM_EEV3
+  struct stm32_hrtim_eev_cfg_s eev3;
+#endif
+#ifdef CONFIG_STM32_HRTIM_EEV4
+  struct stm32_hrtim_eev_cfg_s eev4;
+#endif
+#ifdef CONFIG_STM32_HRTIM_EEV5
+  struct stm32_hrtim_eev_cfg_s eev5;
+#endif
+#ifdef CONFIG_STM32_HRTIM_EEV6
+  struct stm32_hrtim_eev_cfg_s eev6;
+#endif
+#ifdef CONFIG_STM32_HRTIM_EEV7
+  struct stm32_hrtim_eev_cfg_s eev7;
+#endif
+#ifdef CONFIG_STM32_HRTIM_EEV8
+  struct stm32_hrtim_eev_cfg_s eev8;
+#endif
+#ifdef CONFIG_STM32_HRTIM_EEV9
+  struct stm32_hrtim_eev_cfg_s eev9;
+#endif
+#ifdef CONFIG_STM32_HRTIM_EEV10
+  struct stm32_hrtim_eev_cfg_s eev10;
+#endif
+};
+#endif
+
 /* This structure describes the configuration of HRTIM device */
 
 struct stm32_hrtim_s
@@ -262,6 +366,12 @@ struct stm32_hrtim_s
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIME
   struct stm32_hrtim_tim_s *time;    /* HRTIM Timer E */
+#endif
+#ifdef HRTIM_HAVE_FAULTS
+  struct stm32_hrtim_faults_s *flt;
+#endif
+#ifdef HRTIM_HAVE_EEV
+  struct stm32_hrtim_eev_s *eev;
 #endif
 };
 
@@ -423,6 +533,23 @@ static struct stm32_hrtim_tim_s g_tima =
 
 #endif
 
+/* Faults data */
+#ifdef HRTIM_HAVE_FAULTS
+struct stm32_hrtim_faults_s g_flt =
+{
+#warning "missing faults data"
+};
+#endif
+
+/* External Events data */
+
+#ifdef HRTIM_HAVE_EEV
+struct stm32_hrtim_eev_s g_eev =
+{
+#warning "missing eev data"
+};
+#endif
+
 /* HRTIM1 private data */
 
 static struct stm32_hrtim_s g_hrtim1priv =
@@ -443,6 +570,12 @@ static struct stm32_hrtim_s g_hrtim1priv =
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIME
   .time     = &g_time,
+#endif
+#ifdef HRTIM_HAVE_FAULTS
+  .flt = &g_flt;
+#endif
+#ifdef HRTIM_HAVE_EEV
+  .flt = &g_eev;
 #endif
 };
 
@@ -926,7 +1059,6 @@ errout:
   return ret;
 }
 
-
 /****************************************************************************
  * Name: stm32_tim_clocks_config
  *
@@ -1024,7 +1156,183 @@ errout:
 #if defined(HRTIM_HAVE_CAPTURE) || defined(HRTIM_HAVE_PWM) || defined(HRTIM_HAVE_SYNC)
 static int hrtim_gpios_config(FAR struct stm32_hrtim_s *priv)
 {
-#warning "hrtim_gpios_config: missing logic"
+#ifdef HRTIM_HAVE_EEV
+  FAR struct stm32_hrtim_eev_s* eev = priv->eev;
+#endif
+#ifdef HRTIM_HAVE_FAULTS
+  FAR struct stm32_hrtim_faults_s* flt = priv->flt;
+#endif
+
+  /* Configure Timer A Outputs */
+
+#ifdef CONFIG_STM32_HRTIM_TIMA_PWM_CH1
+  stm32_configgpio(GPIO_HRTIM1_CHA1);
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_TIMA_PWM_CH2
+  stm32_configgpio(GPIO_HRTIM1_CHA2);
+#endif
+
+  /* Configure Timer B Outputs */
+
+#ifdef CONFIG_STM32_HRTIM_TIMB_PWM_CH1
+  stm32_configgpio(GPIO_HRTIM1_CHB1);
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_TIMB_PWM_CH2
+  stm32_configgpio(GPIO_HRTIM1_CHB2);
+#endif
+
+  /* Configure Timer C Outputs */
+
+#ifdef CONFIG_STM32_HRTIM_TIMC_PWM_CH1
+  stm32_configgpio(GPIO_HRTIM1_CHC1);
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_TIMC_PWM_CH2
+  stm32_configgpio(GPIO_HRTIM1_CHC2);
+#endif
+
+  /* Configure Timer D Outputs */
+
+#ifdef CONFIG_STM32_HRTIM_TIMD_PWM_CH1
+  stm32_configgpio(GPIO_HRTIM1_CHD1);
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_TIMD_PWM_CH2
+  stm32_configgpio(GPIO_HRTIM1_CHD2);
+#endif
+
+  /* Configure Timer E Outputs */
+
+#ifdef CONFIG_STM32_HRTIM_TIME_PWM_CH1
+  stm32_configgpio(GPIO_HRTIM1_CHE1);
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_TIME_PWM_CH2
+  stm32_configgpio(GPIO_HRTIM1_CHE2);
+#endif
+  /* Configure SCOUT */
+
+#ifdef CONFIG_STM32_HRTIM_SCOUT
+  stm32_configgpio(GPIO_HRTIM1_SCOUT);
+#endif
+
+  /* Configure SCIN */
+
+#ifdef CONFIG_STM32_HRTIM_SCIN
+  stm32_configgpio(GPIO_HRTIM1_SCIN);
+#endif
+
+  /* Configure Faults Inputs */
+
+#ifdef CONFIG_STM32_HRTIM_FAULT1
+  if (flt->flt1.src == HRTIM_FAULT_PIN)
+    {
+      stm32_configgpio(GPIO_HRTIM1_FLT1);
+    }
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_FAULT2
+  if (flt->flt2.src == HRTIM_FAULT_PIN)
+    {
+      stm32_configgpio(GPIO_HRTIM1_FLT2);
+    }
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_FAULT3
+  if (flt->flt3.src == HRTIM_FAULT_PIN)
+    {
+      stm32_configgpio(GPIO_HRTIM1_FLT3);
+    }
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_FAULT4
+  if (flt->flt4.src == HRTIM_FAULT_PIN)
+    {
+      stm32_configgpio(GPIO_HRTIM1_FLT4);
+    }
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_FAULT5
+  if (flt->flt5.src == HRTIM_FAULT_PIN)
+    {
+      stm32_configgpio(GPIO_HRTIM1_FLT5);
+    }
+#endif
+
+  /* Configure External Events Inputs */
+
+#ifdef CONFIG_STM32_HRTIM_EEV1
+  if (eev->eev1.src == HRTIM_EEV_SRC_PIN)
+    {
+      stm32_configgpio(GPIO_HRTIM1_EEV1);
+    }
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_EEV2
+  if (eev->eev2.src == HRTIM_EEV_SRC_PIN)
+    {
+      stm32_configgpio(GPIO_HRTIM1_EEV2);
+    }
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_EEV3
+  if (eev->eev3.src == HRTIM_EEV_SRC_PIN)
+    {
+      stm32_configgpio(GPIO_HRTIM1_EEV3);
+    }
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_EEV4
+  if (eev->eev4.src == HRTIM_EEV_SRC_PIN)
+    {
+      stm32_configgpio(GPIO_HRTIM1_EEV4);
+    }
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_EEV5
+  if (eev->eev5.src == HRTIM_EEV_SRC_PIN)
+    {
+      stm32_configgpio(GPIO_HRTIM1_EEV5);
+    }
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_EEV6
+  if (eev->eev6.src == HRTIM_EEV_SRC_PIN)
+    {
+      stm32_configgpio(GPIO_HRTIM1_EEV6);
+    }
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_EEV7
+  if (eev->eev7.src == HRTIM_EEV_SRC_PIN)
+    {
+      stm32_configgpio(GPIO_HRTIM1_EEV7);
+    }
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_EEV8
+  if (eev->eev8.src == HRTIM_EEV_SRC_PIN)
+    {
+      stm32_configgpio(GPIO_HRTIM1_EEV8);
+    }
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_EEV9
+  if (eev->eev9.src == HRTIM_EEV_SRC_PIN)
+    {
+      stm32_configgpio(GPIO_HRTIM1_EEV9);
+    }
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_EEV10
+  if (eev->eev10.src == HRTIM_EEV_SRC_PIN)
+    {
+      stm32_configgpio(GPIO_HRTIM1_EEV10);
+    }
+#endif
+
   return OK;
 }
 #endif
