@@ -313,7 +313,7 @@ static int misoc_attach(struct uart_dev_s *dev)
 {
   struct misoc_dev_s *priv = (struct misoc_dev_s *)dev->priv;
 
-  (void)irq_attach(priv->irq, misoc_uart_interrupt, NULL);
+  (void)irq_attach(priv->irq, misoc_uart_interrupt, dev);
   up_enable_irq(priv->irq);
 
   return OK;
@@ -351,10 +351,10 @@ static void misoc_detach(struct uart_dev_s *dev)
 
 static int misoc_uart_interrupt(int irq, void *context, FAR void *arg)
 {
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   uint32_t stat;
-  struct uart_dev_s *dev = NULL;
 
-  dev = &g_uart1port;
+  DEBUGASSERT(dev != NULL);
 
   /* Read as much as we can */
 

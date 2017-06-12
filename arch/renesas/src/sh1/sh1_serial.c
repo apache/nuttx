@@ -485,17 +485,17 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach the RDR full IRQ (RXI) that is enabled by the RIE SCR bit */
 
-  ret = irq_attach(priv->irq + SH1_RXI_IRQ_OFFSET, up_interrupt, NULL);
+  ret = irq_attach(priv->irq + SH1_RXI_IRQ_OFFSET, up_interrupt, dev);
   if (ret == OK)
     {
       /* The RIE interrupt enable also enables the receive error interrupt (ERI) */
 
-      ret = irq_attach(priv->irq + SH1_ERI_IRQ_OFFSET, up_interrupt, NULL);
+      ret = irq_attach(priv->irq + SH1_ERI_IRQ_OFFSET, up_interrupt, dev);
       if (ret == OK)
         {
           /* Attach the TDR empty IRQ (TXI) enabled by the TIE SCR bit */
 
-          ret = irq_attach(priv->irq + SH1_TXI_IRQ_OFFSET, up_interrupt, NULL);
+          ret = irq_attach(priv->irq + SH1_TXI_IRQ_OFFSET, up_interrupt, dev);
           if (ret == OK)
             {
 #ifdef CONFIG_ARCH_IRQPRIO
@@ -569,28 +569,10 @@ static void up_detach(struct uart_dev_s *dev)
 
 static int up_interrupt(int irq, void *context, FAR void *arg)
 {
-  struct uart_dev_s *dev = NULL;
-  struct up_dev_s   *priv;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+  struct up_dev_s *priv;
 
-#ifdef CONFIG_SH1_SCI0
-  if ((irq >= g_sci0priv.irq) &&
-      (irq <= g_sci0priv.irq +  SH1_SCI_NIRQS))
-    {
-      dev = &g_sci0port;
-    }
-  else
-#endif
-#ifdef CONFIG_SH1_SCI1
-  if ((irq >= g_sci1priv.irq) &&
-      (irq <= g_sci1priv.irq +  SH1_SCI_NIRQS))
-    {
-      dev = &g_sci1port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct up_dev_s*)dev->priv;
 
   /* Get the current SCI status  */
