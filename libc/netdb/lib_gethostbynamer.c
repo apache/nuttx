@@ -196,12 +196,10 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
   ptr                 += addrlen;
   buflen              -= addrlen;
 
-  /* And copy name
-   * REVISIT: Should the check not be (namelen + 1 > buflen)?
-   */
+  /* And copy name */
 
   namelen = strlen(name);
-  if (addrlen + namelen + 1 > buflen)
+  if ((namelen + 1) > buflen)
     {
       return -ERANGE;
     }
@@ -286,12 +284,10 @@ static int lib_localhost(FAR const char *name, FAR struct hostent *host,
       dest                += addrlen;
       buflen              -= addrlen;
 
-      /* And copy name
-       * REVISIT: Should the check not be (namelen + 1 > buflen)?
-       */
+      /* And copy name */
 
       namelen = strlen(name);
-      if (addrlen + namelen + 1 > buflen)
+      if ((namelen + 1) > buflen)
         {
           return -ERANGE;
         }
@@ -404,12 +400,10 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
   ptr                 += addrlen;
   buflen              -= addrlen;
 
-  /* And copy name
-   * REVISIT: Should the check not be (namelen + 1 > buflen)?
-   */
+  /* And copy name */
 
   namelen = strlen(name);
-  if (addrlen + namelen + 1 > buflen)
+  if ((namelen + 1) > buflen)
     {
       return -ERANGE;
     }
@@ -552,12 +546,10 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
       ptr                 += addrlen;
       buflen              -= addrlen;
 
-      /* And copy name
-       * REVISIT: Should the check not be (namelen + 1 > buflen)?
-       */
+      /* And copy name */
 
       namelen = strlen(name);
-      if (addrlen + namelen + 1 > buflen)
+      if ((namelen + 1) > buflen)
         {
           return -ERANGE;
         }
