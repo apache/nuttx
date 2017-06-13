@@ -1300,7 +1300,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 
   timclk = priv->pclk / prescaler;
 
-  reload = timclk / info->frequency;
+  reload = timclk / info->frequency - 1;
   if (reload < 1)
     {
       reload = 1;
