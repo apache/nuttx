@@ -348,6 +348,24 @@
 #define PIN_I2C0_SCL      PIN_I2C0_SCL_3
 #define PIN_I2C0_SDA      PIN_I2C0_SDA_3
 
+/* RF/WIFI
+ *
+ *  J6 Pin Name   K66   Name
+ *  ------ ----- ------ ---------
+ *   1     GND
+ *   2     P3V3
+ *   3     CE     PTB20 PTB20
+ *   4     CS     PTD4  SPI1_PCS0 (use as GPIO)
+ *   5     SCK    PTD5  SPI1_SCK
+ *   6     MOSI   PTD6  SPI1_MOSI
+ *   7     MISO   PTD7  SPI1_MISO
+ *   8     IRQ    PTC18 PTC18
+ */
+
+#define PIN_SPI1_SCK     PIN_SPI1_SCK_3
+#define PIN_SPI1_OUT     PIN_SPI1_SOUT_3
+#define PIN_SPI1_SIN     PIN_SPI1_SIN_3
+
 /*
  * Ethernet MAC/KSZ8081 PHY
  *  ------------------------
