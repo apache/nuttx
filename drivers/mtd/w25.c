@@ -440,19 +440,16 @@ static inline int w25_readid(struct w25_dev_s *priv)
 #ifndef CONFIG_W25_READONLY
 static void w25_unprotect(FAR struct w25_dev_s *priv)
 {
-  /* Select this FLASH part */
+  /* Lock and configure the SPI bus */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
+  w25_lock(priv->spi);
 
   /* Send "Write enable (WREN)" */
 
   w25_wren(priv);
 
-  /* Re-select this FLASH part (This might not be necessary... but is it shown in
-   * the SST25 timing diagrams from which this code was leveraged.)
-   */
+  /* Select this FLASH part */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
   SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
 
   /* Send "Write enable status (EWSR)" */
@@ -463,6 +460,11 @@ static void w25_unprotect(FAR struct w25_dev_s *priv)
 
   SPI_SEND(priv->spi, 0);
   SPI_SEND(priv->spi, 0);
+
+  /* Deselect the FLASH and unlock the bus */
+
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
+  w25_unlock(priv->spi);
 }
 #endif
 
