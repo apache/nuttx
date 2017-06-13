@@ -337,9 +337,16 @@ static inline int w25_readid(struct w25_dev_s *priv)
 
   finfo("priv: %p\n", priv);
 
-  /* Lock the SPI bus, configure the bus, and select this FLASH part. */
+  /* Lock and configure the SPI bus */
 
   w25_lock(priv->spi);
+
+  /* Wait for any preceding write or erase operation to complete. */
+
+  (void)w25_waitwritecomplete(priv);
+
+  /* Select this FLASH part. */
+
   SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
 
   /* Send the "Read ID (RDID)" command and read the first three ID bytes */
@@ -444,6 +451,10 @@ static void w25_unprotect(FAR struct w25_dev_s *priv)
 
   w25_lock(priv->spi);
 
+  /* Wait for any preceding write or erase operation to complete. */
+
+  (void)w25_waitwritecomplete(priv);
+
   /* Send "Write enable (WREN)" */
 
   w25_wren(priv);
@@ -476,7 +487,11 @@ static uint8_t w25_waitwritecomplete(struct w25_dev_s *priv)
 {
   uint8_t status;
 
-  /* Loop as long as the memory is busy with a write cycle */
+  /* Loop as long as the memory is busy with a write cycle. Device sets BUSY
+   * flag to a 1 state whhen previous write or erase command is still executing
+   * and during this time, device will ignore further instructions except for
+   * "Read Status Register" and "Erase/Program Suspend" instructions.
+   */
 
   do
     {
