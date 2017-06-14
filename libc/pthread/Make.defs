@@ -44,6 +44,7 @@ CSRCS += pthread_attr_setstacksize.c pthread_attr_getstacksize.c
 CSRCS += pthread_attr_setschedparam.c pthread_attr_getschedparam.c
 CSRCS += pthread_barrierattr_init.c pthread_barrierattr_destroy.c
 CSRCS += pthread_barrierattr_getpshared.c pthread_barrierattr_setpshared.c
+CSRCS += pthread_barrierinit.c pthread_barrierdestroy.c pthread_barrierwait.c
 CSRCS += pthread_condattr_init.c pthread_condattr_destroy.c
 CSRCS += pthread_condinit.c pthread_conddestroy.c
 CSRCS += pthread_mutexattr_init.c pthread_mutexattr_destroy.c

@@ -281,9 +281,6 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
 /* The following are defined if pthreads are enabled */
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  SYSCALL_LOOKUP(pthread_barrier_destroy,  1, STUB_pthread_barrier_destroy)
-  SYSCALL_LOOKUP(pthread_barrier_init,     3, STUB_pthread_barrier_init)
-  SYSCALL_LOOKUP(pthread_barrier_wait,     1, STUB_pthread_barrier_wait)
   SYSCALL_LOOKUP(pthread_cancel,           1, STUB_pthread_cancel)
   SYSCALL_LOOKUP(pthread_cond_broadcast,   1, STUB_pthread_cond_broadcast)
   SYSCALL_LOOKUP(pthread_cond_signal,      1, STUB_pthread_cond_signal)
