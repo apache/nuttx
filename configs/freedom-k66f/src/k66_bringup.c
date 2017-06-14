@@ -47,8 +47,10 @@
 #include <debug.h>
 #include <nuttx/board.h>
 
+#include <nuttx/spi/spi.h>
 #include <nuttx/input/buttons.h>
 
+#include "kinetis_spi.h"
 #include "freedom-k66f.h"
 
 #if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_INITIALIZE)
@@ -67,6 +69,9 @@
 
 int k66_bringup(void)
 {
+#ifdef HAVE_SPI
+  FAR struct spi_dev_s *spi1;
+#endif
   int ret;
 
 #ifdef HAVE_PROC
@@ -151,8 +156,20 @@ int k66_bringup(void)
     }
 #endif
 
+#ifdef HAVE_SPI
+
+  /* Verify we can initialize SPI bus 1 */
+
+  spi1 = kinetis_spibus_initialize(1);
+
+  if (!spi1)
+    {
+      syslog(LOG_ERR, "ERROR:FAILED to initialize SPI port 1\n");
+      return -ENODEV;
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
-
 #endif /* CONFIG_LIB_BOARDCTL CONFIG_BOARD_INITIALIZE */
