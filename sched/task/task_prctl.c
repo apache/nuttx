@@ -129,14 +129,18 @@ int prctl(int option, ...)
 
         if (option == PR_SET_NAME)
           {
-            /* Ensure that tcb->name will be null-terminated, truncating if necessary */
+            /* Ensure that tcb->name will be null-terminated, truncating if
+             * necessary.
+             */
 
             strncpy(tcb->name, name, CONFIG_TASK_NAME_SIZE);
             tcb->name[CONFIG_TASK_NAME_SIZE] = '\0';
           }
         else
           {
-            /* The returned value will be null-terminated, truncating if necessary */
+            /* The returned value will be null-terminated, truncating if
+             * necessary.
+             */
 
             strncpy(name, tcb->name, CONFIG_TASK_NAME_SIZE-1);
             name[CONFIG_TASK_NAME_SIZE-1] = '\0';

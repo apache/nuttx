@@ -223,7 +223,8 @@ int os_smp_start(void)
        * this task is locked to this CPU.
        */
 
-      tcb->flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_NONCANCELABLE | TCB_FLAG_CPU_LOCKED);
+      tcb->flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_NONCANCELABLE |
+                    TCB_FLAG_CPU_LOCKED);
       tcb->cpu   = cpu;
     }
 

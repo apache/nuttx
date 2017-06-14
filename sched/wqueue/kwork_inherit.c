@@ -403,4 +403,5 @@ void lpwork_restorepriority(uint8_t reqprio)
   leave_critical_section(flags);
 }
 
-#endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_LPWORK && CONFIG_PRIORITY_INHERITANCE */
+#endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_LPWORK && \
+        * CONFIG_PRIORITY_INHERITANCE */
