@@ -2543,7 +2543,7 @@ FAR struct mcp2515_can_s *mcp2515_instantiate(FAR struct mcp2515_config_s *confi
 
   /* Return our private data structure as an opaque handle */
 
-  return (MCP2515_HANDLE)priv;
+  return priv;
 }
 
 /****************************************************************************
