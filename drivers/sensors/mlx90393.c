@@ -50,6 +50,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/sensors/mlx90393.h>
+#include <nuttx/random.h>
 
 #if defined(CONFIG_SPI) && defined(CONFIG_MLX90393)
 
@@ -232,6 +233,11 @@ static void mlx90393_read_measurement_data(FAR struct mlx90393_dev_s *dev)
   /* Give back the semaphore */
 
   sem_post(&dev->datasem);
+
+  /* Feed sensor data to entropy pool */
+
+  add_sensor_randomness((x_mag << 17) ^ (y_mag << 9) ^ (z_mag << 1) ^
+                        temperature);
 }
 
 /****************************************************************************

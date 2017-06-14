@@ -894,7 +894,7 @@ int up_rtc_initialize(void)
 
   stm32_pwr_enablebkp(true);
 
-  if (regval != RTC_MAGIC)
+  if (regval != RTC_MAGIC && regval != RTC_MAGIC_TIME_SET)
     {
       /* Some boards do not have the external 32khz oscillator installed,
        * for those boards we must fallback to the crummy internal RC clock
@@ -1011,7 +1011,7 @@ int up_rtc_initialize(void)
    * has been writing to to back-up date register DR0.
    */
 
-  if (regval != RTC_MAGIC)
+  if (regval != RTC_MAGIC && regval != RTC_MAGIC_TIME_SET)
     {
       rtcinfo("Do setup\n");
 
@@ -1287,6 +1287,15 @@ int stm32_rtc_setdatetime(FAR const struct tm *tp)
       ret = rtc_synchwait();
     }
 
+  /* Remember that the RTC is initialized and had its time set. */
+
+  if (getreg32(RTC_MAGIC_REG) != RTC_MAGIC_TIME_SET)
+    {
+      stm32_pwr_enablebkp(true);
+      putreg32(RTC_MAGIC_TIME_SET, RTC_MAGIC_REG);
+      stm32_pwr_enablebkp(false);
+    }
+
   /* Re-enable the write protection for RTC registers */
 
   rtc_wprlock();
@@ -1345,7 +1354,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
   ASSERT(alminfo != NULL);
   DEBUGASSERT(RTC_ALARM_LAST > alminfo->as_id);
 
-  /* Make sure the the alarm interrupt is enabled at the NVIC */
+  /* Make sure the alarm interrupt is enabled at the NVIC */
 
   rtc_enable_alarm();
 
@@ -1362,7 +1371,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
              (rtc_bin2bcd(alminfo->as_time.tm_min)  << RTC_ALRMR_MNU_SHIFT) |
              (rtc_bin2bcd(alminfo->as_time.tm_hour) << RTC_ALRMR_HU_SHIFT) |
              (rtc_bin2bcd(alminfo->as_time.tm_mday) << RTC_ALRMR_DU_SHIFT);
- 
+
   /* Set the alarm in hardware and enable interrupts from the RTC */
 
   switch (alminfo->as_id)

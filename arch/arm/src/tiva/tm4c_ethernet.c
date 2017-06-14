@@ -685,7 +685,8 @@ static void tiva_checksetup(void);
 
 static void tiva_initbuffer(FAR struct tiva_ethmac_s *priv);
 static inline uint8_t *tiva_allocbuffer(FAR struct tiva_ethmac_s *priv);
-static inline void tiva_freebuffer(FAR struct tiva_ethmac_s *priv, uint8_t *buffer);
+static inline void tiva_freebuffer(FAR struct tiva_ethmac_s *priv,
+              uint8_t *buffer);
 static inline bool tiva_isfreebuffer(FAR struct tiva_ethmac_s *priv);
 
 /* Common TX logic */
@@ -697,10 +698,11 @@ static void tiva_dopoll(FAR struct tiva_ethmac_s *priv);
 /* Interrupt handling */
 
 static void tiva_enableint(FAR struct tiva_ethmac_s *priv, uint32_t ierbit);
-static void tiva_disableint(FAR struct tiva_ethmac_s *priv, uint32_t ierbit);
+static void tiva_disableint(FAR struct tiva_ethmac_s *priv,
+              uint32_t ierbit);
 
 static void tiva_freesegment(FAR struct tiva_ethmac_s *priv,
-                             FAR struct emac_rxdesc_s *rxfirst, int segments);
+              FAR struct emac_rxdesc_s *rxfirst, int segments);
 static int  tiva_recvframe(FAR struct tiva_ethmac_s *priv);
 static void tiva_receive(FAR struct tiva_ethmac_s *priv);
 static void tiva_freeframe(FAR struct tiva_ethmac_s *priv);
@@ -732,7 +734,8 @@ static int  tiva_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 static int  tiva_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int  tiva_ioctl(struct net_driver_s *dev, int cmd, long arg);
+static int  tiva_ioctl(struct net_driver_s *dev, int cmd,
+              unsigned long arg);
 #endif
 
 /* Descriptor Initialization */
@@ -745,8 +748,10 @@ static void tiva_rxdescinit(FAR struct tiva_ethmac_s *priv);
 #ifdef CONFIG_TIVA_PHY_INTERRUPTS
 static void tiva_phy_intenable(bool enable);
 #endif
-static int  tiva_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
-static int  tiva_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value);
+static int  tiva_phyread(uint16_t phydevaddr, uint16_t phyregaddr,
+              uint16_t *value);
+static int  tiva_phywrite(uint16_t phydevaddr, uint16_t phyregaddr,
+              uint16_t value);
 static int  tiva_phyinit(FAR struct tiva_ethmac_s *priv);
 
 /* MAC/DMA Initialization */
@@ -766,6 +771,7 @@ static int  tive_emac_configure(FAR struct tiva_ethmac_s *priv);
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: tiva_getreg
  *
@@ -1585,7 +1591,7 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
         {
           priv->segments++;
 
-          /* Check if the there is only one segment in the frame */
+          /* Check if there is only one segment in the frame */
 
           if (priv->segments == 1)
             {
@@ -2855,7 +2861,7 @@ static void tiva_rxdescinit(FAR struct tiva_ethmac_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int tiva_ioctl(struct net_driver_s *dev, int cmd, long arg)
+static int tiva_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
   int ret;
 
@@ -3749,22 +3755,22 @@ static void tiva_macaddress(FAR struct tiva_ethmac_s *priv)
 
   ninfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         dev->d_ifname,
-        dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
-        dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
-        dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
+        dev->d_mac.ether.ether_addr_octet[0], dev->d_mac.ether.ether_addr_octet[1],
+        dev->d_mac.ether.ether_addr_octet[2], dev->d_mac.ether.ether_addr_octet[3],
+        dev->d_mac.ether.ether_addr_octet[4], dev->d_mac.ether.ether_addr_octet[5]);
 
   /* Set the MAC address high register */
 
-  regval = ((uint32_t)dev->d_mac.ether_addr_octet[5] << 8) |
-            (uint32_t)dev->d_mac.ether_addr_octet[4];
+  regval = ((uint32_t)dev->d_mac.ether.ether_addr_octet[5] << 8) |
+            (uint32_t)dev->d_mac.ether.ether_addr_octet[4];
   tiva_putreg(regval, TIVA_EMAC_ADDR0H);
 
   /* Set the MAC address low register */
 
-  regval = ((uint32_t)dev->d_mac.ether_addr_octet[3] << 24) |
-           ((uint32_t)dev->d_mac.ether_addr_octet[2] << 16) |
-           ((uint32_t)dev->d_mac.ether_addr_octet[1] <<  8) |
-            (uint32_t)dev->d_mac.ether_addr_octet[0];
+  regval = ((uint32_t)dev->d_mac.ether.ether_addr_octet[3] << 24) |
+           ((uint32_t)dev->d_mac.ether.ether_addr_octet[2] << 16) |
+           ((uint32_t)dev->d_mac.ether.ether_addr_octet[1] <<  8) |
+            (uint32_t)dev->d_mac.ether.ether_addr_octet[0];
   tiva_putreg(regval, TIVA_EMAC_ADDR0L);
 }
 
@@ -4050,7 +4056,7 @@ int tiva_ethinitialize(int intf)
    * is called (and the MAC can be overwritten with a netdev ioctl call).
    */
 
-  tiva_ethernetmac(&priv->dev.d_mac);
+  tiva_ethernetmac(&priv->dev.d_mac.ether);
 #endif
 
   /* Enable power and clocking to the Ethernet MAC
@@ -4191,7 +4197,7 @@ void up_netinitialize(void)
  *      and SIOCSMIIREG ioctl calls** to communicate with the PHY,
  *      determine what network event took place (Link Up/Down?), and
  *      take the appropriate actions.
- *   d. It should then interact the the PHY to clear any pending
+ *   d. It should then interact the PHY to clear any pending
  *      interrupts, then re-enable the PHY interrupt.
  *
  *    * This is an OS internal interface and should not be used from

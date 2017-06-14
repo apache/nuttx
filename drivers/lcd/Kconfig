@@ -48,6 +48,7 @@ config LCD_NOGETRUN
 
 config LCD_MAXCONTRAST
 	int "LCD maximum contrast"
+	default 31 if AQM_1248A
 	default 63 if NOKIA6100_S1D15G10 || LCD_SHARP_MEMLCD
 	default 127 if NOKIA6100_PCF8833
 	default 255 if LCD_P14201 || LCD_LCD1602
@@ -575,6 +576,44 @@ config SSD1351_MSTRCONTRAST
 
 endif
 
+config LCD_PCD8544
+	bool "Nokia 5110 LCD Display (Philips PCD8544)"
+	default n
+	---help---
+		LCD Display Module, PCD8544, Philips
+
+		Required LCD driver settings:
+		LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
+
+if LCD_PCD8544
+
+config PCD8544_NINTERFACES
+	int "Number of PCD8544 Devices"
+	default 1
+	---help---
+		Specifies the number of physical PCD8544 devices that will be
+		supported.  NOTE:  At present, this must be undefined or defined to be 1.
+
+config PCD8544_XRES
+	int "PCD8544 X Resolution"
+	default 84
+	---help---
+		Specifies the X resolution of the LCD.
+
+config PCD8544_YRES
+	int "PCD8544 Y Resolution"
+	default 48
+	---help---
+		Specifies the Y resolution of the LCD.
+
+config PCD8544_INVERSE_VIDEO
+	bool "PCD8544 Inverse video"
+	default n
+	---help---
+		Inverse video on LCD.
+
+endif # LCD_PCD8544
+
 config LCD_ST7565
 	bool "ST7565 LCD Display Module"
 	default n
@@ -596,6 +635,9 @@ config NHD_C12864KGZ
 config ERC_12864_3
 	bool "like ERC12864-3"
 
+config AQM_1248A
+	bool "like AQM1248A"
+
 endchoice
 
 config ST7565_NINTERFACES
@@ -613,6 +655,7 @@ config ST7565_XRES
 
 config ST7565_YRES
 	int "ST7565 Y Resolution"
+	default 48 if AQM_1248A
 	default 64
 	---help---
 		Specifies the Y resolution of the LCD.
@@ -625,6 +668,7 @@ config ST7565_MIRROR_X
 
 config ST7565_MIRROR_Y
 	bool "ST7565 apply mirror on Y"
+	default y if AQM_1248A
 	default n
 	---help---
 		Mirror Y on LCD.

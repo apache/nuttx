@@ -168,7 +168,7 @@
 #  define CHILD_FLAG_TTYPE_TASK    (0 << CHILD_FLAG_TTYPE_SHIFT) /* Normal user task */
 #  define CHILD_FLAG_TTYPE_PTHREAD (1 << CHILD_FLAG_TTYPE_SHIFT) /* User pthread */
 #  define CHILD_FLAG_TTYPE_KERNEL  (2 << CHILD_FLAG_TTYPE_SHIFT) /* Kernel thread */
-#define CHILD_FLAG_EXITED          (1 << 0) /* Bit 2: The child thread has exit'ed */
+#define CHILD_FLAG_EXITED          (1 << 2) /* Bit 2: The child thread has exit'ed */
                                             /* Bits 3-7: Available */
 
 /* Sporadic scheduler flags */
@@ -697,6 +697,12 @@ struct pthread_tcb_s
   pthread_addr_t arg;                    /* Startup argument                    */
   FAR void *joininfo;                    /* Detach-able info to support join    */
 
+  /* Robust mutex support *******************************************************/
+
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+  FAR struct pthread_mutex_s *mhead;     /* List of mutexes held by thread      */
+#endif
+
   /* Clean-up stack *************************************************************/
 
 #ifdef CONFIG_PTHREAD_CLEANUP
@@ -754,7 +760,7 @@ FAR struct tcb_s *sched_self(void);
 
 void sched_foreach(sched_foreach_t handler, FAR void *arg);
 
-/* Give a task ID, look up the corresponding TCB */
+/* Given a task ID, look up the corresponding TCB */
 
 FAR struct tcb_s *sched_gettcb(pid_t pid);
 

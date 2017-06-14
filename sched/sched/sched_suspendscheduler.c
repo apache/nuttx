@@ -84,7 +84,7 @@ void sched_suspend_scheduler(FAR struct tcb_s *tcb)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
-  /* Inidicate the the task has been suspended */
+  /* Inidicate the task has been suspended */
 
   sched_note_suspend(tcb);
 #endif

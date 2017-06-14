@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_initialize.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/sched_note.h>
+#include <nuttx/mm/iob.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/net/loopback.h>
@@ -161,15 +162,20 @@ void up_initialize(void)
     }
 #endif
 
+#if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)
   /* Initialize the system timer interrupt */
 
-#if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)
   xtensa_timer_initialize();
 #endif
 
-  /* Register devices */
+#ifdef CONFIG_MM_IOB
+  /* Initialize IO buffering */
+
+  iob_initialize();
+#endif
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
+  /* Register devices */
 
 #if defined(CONFIG_DEV_NULL)
   devnull_register();   /* Standard /dev/null */

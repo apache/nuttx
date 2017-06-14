@@ -43,6 +43,17 @@ ifeq ($(CONFIG_VS1053),y)
 CSRCS += vs1053.c
 endif
 
+ifeq ($(CONFIG_AUDIO_CS43L22),y)
+CSRCS += cs43l22.c
+ifeq ($(CONFIG_CS43L22_REGDUMP),y)
+CSRCS += cs43l22_debug.c
+else
+ifeq ($(CONFIG_CS43L22_CLKDEBUG),y)
+CSRCS += cs43l22_debug.c
+endif
+endif
+endif
+
 ifeq ($(CONFIG_AUDIO_WM8904),y)
 CSRCS += wm8904.c
 ifeq ($(CONFIG_WM8904_REGDUMP),y)

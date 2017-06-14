@@ -641,7 +641,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
   spi_flush(priv);
 
-  /* Make sure the the TEOF bit is not set (SSV must also be zero) */
+  /* Make sure the TEOF bit is not set (SSV must also be zero) */
 
   spi_putreg8(priv, 0, Z16F_ESPI_CTL);
 

@@ -33,11 +33,11 @@
  *
  ****************************************************************************/
 
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/compiler.h>
 #include <strings.h>
 
 /****************************************************************************
@@ -55,11 +55,11 @@
  *
  * Description:
  *   The ffs() function will find the first bit set (beginning with the least
- *   significant bit) in i, and return the index of that bit. Bits are
+ *   significant bit) in j, and return the index of that bit. Bits are
  *   numbered starting at one (the least significant bit).
  *
  * Returned Value:
- *   The ffs() function will return the index of the first bit set. If i is
+ *   The ffs() function will return the index of the first bit set. If j is
  *   0, then ffs() will return 0.
  *
  ****************************************************************************/
@@ -70,6 +70,11 @@ int ffs(int j)
 
   if (j != 0)
     {
+#ifdef CONFIG_HAVE_BUILTIN_CTZ
+      /* Count trailing zeros function can be used to implement ffs. */
+
+      ret = __builtin_ctz(j) + 1;
+#else
       unsigned int value = (unsigned int)j;
       int bitno;
 
@@ -81,6 +86,7 @@ int ffs(int j)
               break;
             }
         }
+#endif
     }
 
   return ret;

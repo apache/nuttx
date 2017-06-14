@@ -72,6 +72,8 @@
 #include "tcp/tcp.h"
 #include "socket/socket.h"
 
+#ifdef NET_TCP_HAVE_STACK
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -113,7 +115,7 @@ struct sendfile_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sendfile_timeout
+ * Name: sendfile_timeout
  *
  * Description:
  *   Check for send timeout.
@@ -236,7 +238,7 @@ static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
 }
 
 /****************************************************************************
- * Function: sendfile_addrcheck
+ * Name: sendfile_addrcheck
  *
  * Description:
  *   Check if the destination IP address is in the IPv4 ARP or IPv6 Neighbor
@@ -299,7 +301,7 @@ static inline bool sendfile_addrcheck(FAR struct tcp_conn_s *conn)
 #endif /* CONFIG_NET_ETHERNET */
 
 /****************************************************************************
- * Function: sendfile_interrupt
+ * Name: sendfile_interrupt
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -476,7 +478,7 @@ wait:
 }
 
 /****************************************************************************
- * Function: sendfile_txnotify
+ * Name: sendfile_txnotify
  *
  * Description:
  *   Notify the appropriate device driver that we are have data ready to
@@ -535,7 +537,7 @@ static inline void sendfile_txnotify(FAR struct socket *psock,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_sendfile
+ * Name: net_sendfile
  *
  * Description:
  *   The send() call may be used only when the socket is in a connected state
@@ -614,6 +616,21 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
       errcode = EBADF;
       goto errout;
     }
+
+#ifdef CONFIG_NET_USRSOCK
+  /* If this is a usrsock socket, use generic sendfile implementation. */
+
+  if (psock->s_type == SOCK_USRSOCK_TYPE)
+    {
+      int infd;
+
+      list = sched_getfiles();
+      DEBUGASSERT(list != NULL);
+
+      infd = infile - list->fl_files;
+      return lib_sendfile(outfd, infd, offset, count);
+    }
+#endif /* CONFIG_NET_USRSOCK */
 
   /* If this is an un-connected socket, then return ENOTCONN */
 
@@ -775,5 +792,7 @@ errout:
       return state.snd_sent;
     }
 }
+
+#endif /* NET_TCP_HAVE_STACK */
 
 #endif /* CONFIG_NET && CONFIG_NET_TCP */

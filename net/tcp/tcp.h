@@ -45,14 +45,17 @@
 #include <sys/types.h>
 #include <queue.h>
 
-#include <nuttx/net/iob.h>
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/ip.h>
 
-#ifdef CONFIG_NET_TCP
+#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define NET_TCP_HAVE_STACK 1
+
 /* Conditions for support TCP poll/select operations */
 
 #if !defined(CONFIG_DISABLE_POLL) && CONFIG_NSOCKET_DESCRIPTORS > 0 && \
@@ -256,7 +259,7 @@ struct tcp_conn_s
    *   accept_private: This is private data that will be available to the
    *     accept() handler when it is invoked with a point to this structure
    *     as an argument.
-   *   accept: This is the the pointer to the accept handler.
+   *   accept: This is the pointer to the accept handler.
    */
 
   FAR void *accept_private;
@@ -270,7 +273,7 @@ struct tcp_conn_s
    *     this structure as an argument.
    *   connection_devcb: this is the allocated callback structure that is
    *     used to
-   *   connection_event: This is the the pointer to the connection event
+   *   connection_event: This is the pointer to the connection event
    *     handler.
    */
 
@@ -410,7 +413,7 @@ FAR struct tcp_conn_s *tcp_active(FAR struct net_driver_s *dev,
 FAR struct tcp_conn_s *tcp_nextconn(FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
- * Function: tcp_local_ipv4_device
+ * Name: tcp_local_ipv4_device
  *
  * Description:
  *   Select the network driver to use with the IPv4 TCP transaction based
@@ -431,7 +434,7 @@ int tcp_local_ipv4_device(FAR struct tcp_conn_s *conn);
 #endif
 
 /****************************************************************************
- * Function: tcp_remote_ipv4_device
+ * Name: tcp_remote_ipv4_device
  *
  * Description:
  *   Select the network driver to use with the IPv4 TCP transaction based
@@ -452,7 +455,7 @@ int tcp_remote_ipv4_device(FAR struct tcp_conn_s *conn);
 #endif
 
 /****************************************************************************
- * Function: tcp_local_ipv6_device
+ * Name: tcp_local_ipv6_device
  *
  * Description:
  *   Select the network driver to use with the IPv6 TCP transaction based
@@ -473,7 +476,7 @@ int tcp_local_ipv6_device(FAR struct tcp_conn_s *conn);
 #endif
 
 /****************************************************************************
- * Function: tcp_remote_ipv6_device
+ * Name: tcp_remote_ipv6_device
  *
  * Description:
  *   Select the network driver to use with the IPv6 TCP transaction based
@@ -549,7 +552,7 @@ int tcp_bind(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr);
 int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr);
 
 /****************************************************************************
- * Function: tcp_ipv4_select
+ * Name: tcp_ipv4_select
  *
  * Description:
  *   Configure to send or receive an TCP IPv4 packet
@@ -561,7 +564,7 @@ void tcp_ipv4_select(FAR struct net_driver_s *dev);
 #endif
 
 /****************************************************************************
- * Function: tcp_ipv6_select
+ * Name: tcp_ipv6_select
  *
  * Description:
  *   Configure to send or receive an TCP IPv6 packet
@@ -681,7 +684,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                int hsec);
 
 /****************************************************************************
- * Function: tcp_listen_initialize
+ * Name: tcp_listen_initialize
  *
  * Description:
  *   Setup the listening data structures
@@ -695,7 +698,24 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 void tcp_listen_initialize(void);
 
 /****************************************************************************
- * Function: tcp_unlisten
+ * Name: tcp_findlistener
+ *
+ * Description:
+ *   Return the connection listener for connections on this port (if any)
+ *
+ * Assumptions:
+ *   Called at interrupt level
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+FAR struct tcp_conn_s *tcp_findlistener(uint16_t portno, uint8_t domain);
+#else
+FAR struct tcp_conn_s *tcp_findlistener(uint16_t portno);
+#endif
+
+/****************************************************************************
+ * Name: tcp_unlisten
  *
  * Description:
  *   Stop listening to the port bound to the specified TCP connection
@@ -708,7 +728,7 @@ void tcp_listen_initialize(void);
 int tcp_unlisten(FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
- * Function: tcp_listen
+ * Name: tcp_listen
  *
  * Description:
  *   Start listening to the port bound to the specified TCP connection
@@ -721,7 +741,7 @@ int tcp_unlisten(FAR struct tcp_conn_s *conn);
 int tcp_listen(FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
- * Function: tcp_islistener
+ * Name: tcp_islistener
  *
  * Description:
  *   Return true is there is a listener for the specified port
@@ -731,10 +751,14 @@ int tcp_listen(FAR struct tcp_conn_s *conn);
  *
  ****************************************************************************/
 
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+bool tcp_islistener(uint16_t portno, uint8_t domain);
+#else
 bool tcp_islistener(uint16_t portno);
+#endif
 
 /****************************************************************************
- * Function: tcp_accept_connection
+ * Name: tcp_accept_connection
  *
  * Description:
  *   Accept the new connection for the specified listening port.
@@ -900,7 +924,7 @@ void tcp_ipv6_input(FAR struct net_driver_s *dev);
 #endif
 
 /****************************************************************************
- * Function: tcp_callback
+ * Name: tcp_callback
  *
  * Description:
  *   Inform the application holding the TCP socket of a change in state.
@@ -914,7 +938,7 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
                       FAR struct tcp_conn_s *conn, uint16_t flags);
 
 /****************************************************************************
- * Function: tcp_datahandler
+ * Name: tcp_datahandler
  *
  * Description:
  *   Handle data that is not accepted by the application.  This may be called
@@ -945,7 +969,7 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
 #endif
 
 /****************************************************************************
- * Function: tcp_backlogcreate
+ * Name: tcp_backlogcreate
  *
  * Description:
  *   Called from the listen() logic to setup the backlog as specified in the
@@ -963,7 +987,7 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg);
 #endif
 
 /****************************************************************************
- * Function: tcp_backlogdestroy
+ * Name: tcp_backlogdestroy
  *
  * Description:
  *   (1) Called from tcp_free() whenever a connection is freed.
@@ -984,7 +1008,7 @@ int tcp_backlogdestroy(FAR struct tcp_conn_s *conn);
 #endif
 
 /****************************************************************************
- * Function: tcp_backlogadd
+ * Name: tcp_backlogadd
  *
  * Description:
  *  Called tcp_listen when a new connection is made with a listener socket
@@ -1004,7 +1028,7 @@ int tcp_backlogadd(FAR struct tcp_conn_s *conn,
 #endif
 
 /****************************************************************************
- * Function: tcp_backlogavailable
+ * Name: tcp_backlogavailable
  *
  * Description:
  *  Called from poll().  Before waiting for a new connection, poll will
@@ -1022,7 +1046,7 @@ bool tcp_backlogavailable(FAR struct tcp_conn_s *conn);
 #endif
 
 /****************************************************************************
- * Function: tcp_backlogremove
+ * Name: tcp_backlogremove
  *
  * Description:
  *  Called from accept().  Before waiting for a new connection, accept will
@@ -1040,7 +1064,7 @@ FAR struct tcp_conn_s *tcp_backlogremove(FAR struct tcp_conn_s *conn);
 #endif
 
 /****************************************************************************
- * Function: tcp_backlogdelete
+ * Name: tcp_backlogdelete
  *
  * Description:
  *  Called from tcp_free() when a connection is freed that this also
@@ -1060,7 +1084,7 @@ int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
 #endif
 
 /****************************************************************************
- * Function: tcp_accept
+ * Name: tcp_accept
  *
  * Description:
  *   This function implements accept() for TCP/IP sockets.  See the
@@ -1086,7 +1110,7 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                      FAR socklen_t *addrlen, FAR void **newconn);
 
 /****************************************************************************
- * Function: psock_tcp_send
+ * Name: psock_tcp_send
  *
  * Description:
  *   The psock_tcp_send() call may be used only when the TCP socket is in a
@@ -1147,7 +1171,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
                        size_t len);
 
 /****************************************************************************
- * Function: psock_tcp_cansend
+ * Name: psock_tcp_cansend
  *
  * Description:
  *   psock_tcp_cansend() returns a value indicating if a write to the socket
@@ -1176,7 +1200,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 int psock_tcp_cansend(FAR struct socket *psock);
 
 /****************************************************************************
- * Function: tcp_wrbuffer_initialize
+ * Name: tcp_wrbuffer_initialize
  *
  * Description:
  *   Initialize the list of free write buffers
@@ -1191,7 +1215,7 @@ void tcp_wrbuffer_initialize(void);
 #endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
 /****************************************************************************
- * Function: tcp_wrbuffer_alloc
+ * Name: tcp_wrbuffer_alloc
  *
  * Description:
  *   Allocate a TCP write buffer by taking a pre-allocated buffer from
@@ -1213,7 +1237,7 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void);
 #endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
 /****************************************************************************
- * Function: tcp_wrbuffer_release
+ * Name: tcp_wrbuffer_release
  *
  * Description:
  *   Release a TCP write buffer by returning the buffer to the free list.
@@ -1230,7 +1254,7 @@ void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb);
 #endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
 /****************************************************************************
- * Function: tcp_wrbuffer_test
+ * Name: tcp_wrbuffer_test
  *
  * Description:
  *   Check if there is room in the write buffer.  Does not reserve any space.
@@ -1245,7 +1269,7 @@ int tcp_wrbuffer_test(void);
 #endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
 /****************************************************************************
- * Function: tcp_wrbuffer_dump
+ * Name: tcp_wrbuffer_dump
  *
  * Description:
  *   Dump the contents of a write buffer.
@@ -1262,7 +1286,7 @@ void tcp_wrbuffer_dump(FAR const char *msg, FAR struct tcp_wrbuffer_s *wrb,
 #endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
 /****************************************************************************
- * Function: tcp_pollsetup
+ * Name: tcp_pollsetup
  *
  * Description:
  *   Setup to monitor events on one TCP/IP socket
@@ -1282,7 +1306,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
 #endif
 
 /****************************************************************************
- * Function: tcp_pollteardown
+ * Name: tcp_pollteardown
  *
  * Description:
  *   Teardown monitoring of events on an TCP/IP socket
@@ -1306,5 +1330,5 @@ int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
 }
 #endif
 
-#endif /* CONFIG_NET_TCP */
+#endif /* CONFIG_NET_TCP && !CONFIG_NET_TCP_NO_STACK */
 #endif /* _NET_TCP_TCP_H */

@@ -1044,7 +1044,7 @@ static off_t smartfs_seek_internal(struct smartfs_mountpt_s *fs,
       break;
 
     case SEEK_END:
-      newpos = sf->entry.datlen - offset;
+      newpos = sf->entry.datlen + offset;
       break;
   }
 

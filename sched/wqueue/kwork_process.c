@@ -185,7 +185,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, systime_t period, int wndx)
         {
           /* This one is not ready.
            *
-           * NOTE that elapsed is relative to the the current time,
+           * NOTE that elapsed is relative to the current time,
            * not the time of beginning of this queue processing pass.
            * So it may need an adjustment.
            */

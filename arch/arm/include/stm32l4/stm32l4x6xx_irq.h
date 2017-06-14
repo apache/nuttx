@@ -70,12 +70,12 @@
 #define STM32L4_IRQ_EXTI2       (STM32L4_IRQ_FIRST+8)  /* 8:  EXTI Line 2 interrupt */
 #define STM32L4_IRQ_EXTI3       (STM32L4_IRQ_FIRST+9)  /* 9:  EXTI Line 3 interrupt */
 #define STM32L4_IRQ_EXTI4       (STM32L4_IRQ_FIRST+10) /* 10: EXTI Line 4 interrupt */
-#define STM32L4_IRQ_DMA1CH1     (STM32L4_IRQ_FIRST+11) /* 12: DMA1 Channel 1 global interrupt */
-#define STM32L4_IRQ_DMA1CH2     (STM32L4_IRQ_FIRST+12) /* 13: DMA1 Channel 2 global interrupt */
-#define STM32L4_IRQ_DMA1CH3     (STM32L4_IRQ_FIRST+13) /* 14: DMA1 Channel 3 global interrupt */
-#define STM32L4_IRQ_DMA1CH4     (STM32L4_IRQ_FIRST+14) /* 15: DMA1 Channel 4 global interrupt */
-#define STM32L4_IRQ_DMA1CH5     (STM32L4_IRQ_FIRST+15) /* 16: DMA1 Channel 5 global interrupt */
-#define STM32L4_IRQ_DMA1CH6     (STM32L4_IRQ_FIRST+16) /* 17: DMA1 Channel 6 global interrupt */
+#define STM32L4_IRQ_DMA1CH1     (STM32L4_IRQ_FIRST+11) /* 11: DMA1 Channel 1 global interrupt */
+#define STM32L4_IRQ_DMA1CH2     (STM32L4_IRQ_FIRST+12) /* 12: DMA1 Channel 2 global interrupt */
+#define STM32L4_IRQ_DMA1CH3     (STM32L4_IRQ_FIRST+13) /* 13: DMA1 Channel 3 global interrupt */
+#define STM32L4_IRQ_DMA1CH4     (STM32L4_IRQ_FIRST+14) /* 14: DMA1 Channel 4 global interrupt */
+#define STM32L4_IRQ_DMA1CH5     (STM32L4_IRQ_FIRST+15) /* 15: DMA1 Channel 5 global interrupt */
+#define STM32L4_IRQ_DMA1CH6     (STM32L4_IRQ_FIRST+16) /* 16: DMA1 Channel 6 global interrupt */
 #define STM32L4_IRQ_DMA1CH7     (STM32L4_IRQ_FIRST+17) /* 17: DMA1 Channel 7 global interrupt */
 #define STM32L4_IRQ_ADC12       (STM32L4_IRQ_FIRST+18) /* 18: ADC1 and ADC2 global interrupt */
 #define STM32L4_IRQ_CAN1TX      (STM32L4_IRQ_FIRST+19) /* 19: CAN1 TX interrupts */
@@ -143,15 +143,34 @@
 #define STM32L4_IRQ_TSC         (STM32L4_IRQ_FIRST+77) /* 77: TSC global interrupt */
 #define STM32L4_IRQ_LCD         (STM32L4_IRQ_FIRST+78) /* 78: LCD global interrupt */
 #define STM32L4_IRQ_AES         (STM32L4_IRQ_FIRST+79) /* 79: AES crypto global interrupt */
-#define STM32L4_IRQ_RNG         (STM32L4_IRQ_FIRST+80) /* 80: Rng global interrupt */
+#define STM32L4_IRQ_RNG         (STM32L4_IRQ_FIRST+80) /* 80: RNG global interrupt */
 #define STM32L4_IRQ_FPU         (STM32L4_IRQ_FIRST+81) /* 81: FPU global interrupt */
 
-#define NR_INTERRUPTS         82
-#define NR_VECTORS            (STM32L4_IRQ_FIRST+NR_INTERRUPTS)
+/* STM32L496xx/4A6xx only: */
+
+#define STM32L4_IRQ_HASH_CRS    (STM32L4_IRQ_FIRST+82) /* 82: HASH and CRS global interrupt */
+#define STM32L4_IRQ_I2C4EV      (STM32L4_IRQ_FIRST+83) /* 83: I2C4 event interrupt */
+#define STM32L4_IRQ_I2C4ER      (STM32L4_IRQ_FIRST+84) /* 84: I2C4 error interrupt */
+#define STM32L4_IRQ_DCMI        (STM32L4_IRQ_FIRST+85) /* 85: DCMI global interrupt */
+#define STM32L4_IRQ_CAN2TX      (STM32L4_IRQ_FIRST+86) /* 86: CAN2 TX interrupts */
+#define STM32L4_IRQ_CAN2RX0     (STM32L4_IRQ_FIRST+87) /* 87: CAN2 RX0 interrupts */
+#define STM32L4_IRQ_CAN2RX1     (STM32L4_IRQ_FIRST+88) /* 88: CAN2 RX1 interrupt */
+#define STM32L4_IRQ_CAN2SCE     (STM32L4_IRQ_FIRST+89) /* 89: CAN2 SCE interrupt */
+#define STM32L4_IRQ_DMA2D       (STM32L4_IRQ_FIRST+90) /* 90: DMA2D global interrupt */
+
+#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX)
+#  define NR_INTERRUPTS         82
+#elif defined(CONFIG_STM32L4_STM32L496XX)
+#  define NR_INTERRUPTS         91
+#else
+#  error "Unsupported STM32L4 chip"
+#endif
+
+#define NR_VECTORS              (STM32L4_IRQ_FIRST+NR_INTERRUPTS)
 
 /* EXTI interrupts (Do not use IRQ numbers) */
 
-#define NR_IRQS               NR_VECTORS
+#define NR_IRQS                 NR_VECTORS
 
 /****************************************************************************************************
  * Public Types

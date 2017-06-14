@@ -148,7 +148,7 @@ int HostFlowControlConsumeBuff(int sd)
           return -1;
         }
 
-      /* We must yield here for the the Event to get processed that returns
+      /* We must yield here for the Event to get processed that returns
        * the buffers
        */
 

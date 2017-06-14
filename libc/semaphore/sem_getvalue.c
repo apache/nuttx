@@ -68,7 +68,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  sem_getvalue
+ * Name:  sem_getvalue
  *
  * Description:
  *   This function updates the location referenced by 'sval' argument to

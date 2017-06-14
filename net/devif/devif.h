@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/devif/devif.h
  *
- *   Copyright (C) 2007-2009, 2013-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -170,11 +170,13 @@
 #define TCP_NEWDATA      (1 << 1)
 #define UDP_NEWDATA      TCP_NEWDATA
 #define PKT_NEWDATA      TCP_NEWDATA
+#define WPAN_NEWDATA     TCP_NEWDATA
 #define TCP_SNDACK       (1 << 2)
 #define TCP_REXMIT       (1 << 3)
 #define TCP_POLL         (1 << 4)
 #define UDP_POLL         TCP_POLL
 #define PKT_POLL         TCP_POLL
+#define WPAN_POLL        TCP_POLL
 #define TCP_BACKLOG      (1 << 5)
 #define TCP_CLOSE        (1 << 6)
 #define TCP_ABORT        (1 << 7)
@@ -234,12 +236,17 @@
  */
 
 struct net_driver_s;       /* Forward reference */
+
+typedef CODE uint16_t (*devif_callback_event_t)(FAR struct net_driver_s *dev,
+                                                FAR void *pvconn,
+                                                FAR void *pvpriv,
+                                                uint16_t flags);
+
 struct devif_callback_s
 {
   FAR struct devif_callback_s *nxtconn;
   FAR struct devif_callback_s *nxtdev;
-  uint16_t (*event)(FAR struct net_driver_s *dev, FAR void *pvconn,
-                    FAR void *pvpriv, uint16_t flags);
+  FAR devif_callback_event_t event;
   FAR void *priv;
   uint16_t flags;
 };
@@ -290,7 +297,7 @@ extern "C"
 void devif_initialize(void);
 
 /****************************************************************************
- * Function: devif_callback_init
+ * Name: devif_callback_init
  *
  * Description:
  *   Configure the pre-allocated callback structures into a free list.
@@ -303,7 +310,7 @@ void devif_initialize(void);
 void devif_callback_init(void);
 
 /****************************************************************************
- * Function: devif_callback_alloc
+ * Name: devif_callback_alloc
  *
  * Description:
  *   Allocate a callback container from the free list.
@@ -323,7 +330,7 @@ FAR struct devif_callback_s *
                        FAR struct devif_callback_s **list);
 
 /****************************************************************************
- * Function: devif_conn_callback_free
+ * Name: devif_conn_callback_free
  *
  * Description:
  *   Return a connection/port callback container to the free list.
@@ -345,7 +352,7 @@ void devif_conn_callback_free(FAR struct net_driver_s *dev,
                               FAR struct devif_callback_s **list);
 
 /****************************************************************************
- * Function: devif_dev_callback_free
+ * Name: devif_dev_callback_free
  *
  * Description:
  *   Return a device callback container to the free list.
@@ -368,7 +375,7 @@ void devif_dev_callback_free(FAR struct net_driver_s *dev,
                              FAR struct devif_callback_s *cb);
 
 /****************************************************************************
- * Function: devif_conn_event
+ * Name: devif_conn_event
  *
  * Description:
  *   Execute a list of callbacks.
@@ -394,7 +401,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, FAR void *pvconn,
                           uint16_t flags, FAR struct devif_callback_s *list);
 
 /****************************************************************************
- * Function: devif_dev_event
+ * Name: devif_dev_event
  *
  * Description:
  *   Execute a list of callbacks using the device event chain.
@@ -459,7 +466,7 @@ void devif_send(FAR struct net_driver_s *dev, FAR const void *buf, int len);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IOB
+#ifdef CONFIG_MM_IOB
 struct iob_s;
 void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *buf,
                     unsigned int len, unsigned int offset);
@@ -470,7 +477,7 @@ void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *buf,
  *
  * Description:
  *   Called from socket logic in order to send a raw packet in response to
- *   an xmit or poll request from the the network interface driver.
+ *   an xmit or poll request from the network interface driver.
  *
  *   This is almost identical to calling devif_send() except that the data to
  *   be sent is copied into dev->d_buf (vs. dev->d_appdata), since there is

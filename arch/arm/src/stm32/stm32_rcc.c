@@ -131,7 +131,7 @@ static inline void rcc_resetbkp(void)
   stm32_pwr_initbkp(false);
 
   regval = getreg32(RTC_MAGIC_REG);
-  if (regval != RTC_MAGIC)
+  if (regval != RTC_MAGIC && regval != RTC_MAGIC_TIME_SET)
     {
       stm32_pwr_enablebkp(true);
 

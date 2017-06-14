@@ -1470,7 +1470,7 @@ int up_prioritize_irq(int irq, int priority);
  *   any failure.
  *
  * Assumptions:
- *   Called from the the normal tasking context.  The implementation must
+ *   Called from the normal tasking context.  The implementation must
  *   provide whatever mutual exclusion is necessary for correct operation.
  *   This can include disabling interrupts in order to assure atomic register
  *   operations.
@@ -1941,26 +1941,6 @@ void up_mdelay(unsigned int milliseconds);
 void up_udelay(useconds_t microseconds);
 
 /****************************************************************************
- * Name: up_cxxinitialize
- *
- * Description:
- *   If C++ and C++ static constructors are supported, then this function
- *   must be provided by board-specific logic in order to perform
- *   initialization of the static C++ class instances.
- *
- *   This function should then be called in the application-specific
- *   logic in order to perform the C++ initialization.  NOTE  that no
- *   component of the core NuttX RTOS logic is involved; This function
- *   definition only provides the 'contract' between application
- *   specific C++ code and platform-specific toolchain support
- *
- ****************************************************************************/
-
-#if defined(CONFIG_HAVE_CXX) && defined(CONFIG_HAVE_CXXINITIALIZE)
-void up_cxxinitialize(void);
-#endif
-
-/****************************************************************************
  * These are standard interfaces that are exported by the OS for use by the
  * architecture specific logic
  ****************************************************************************/
@@ -2186,6 +2166,35 @@ int up_rtc_getdatetime(FAR struct tm *tp);
 #endif
 
 /************************************************************************************
+ * Name: up_rtc_getdatetime_with_subseconds
+ *
+ * Description:
+ *   Get the current date and time from the date/time RTC.  This interface
+ *   is only supported by the date/time RTC hardware implementation.
+ *   It is used to replace the system timer.  It is only used by the RTOS during
+ *   initialization to set up the system time when CONFIG_RTC and CONFIG_RTC_DATETIME
+ *   are selected (and CONFIG_RTC_HIRES is not).
+ *
+ *   NOTE: This interface exposes sub-second accuracy capability of RTC hardware.
+ *   This interface allow maintaining timing accuracy when system time needs constant
+ *   resynchronization with RTC, for example on MCU with low-power state that
+ *   stop system timer.
+ *
+ * Input Parameters:
+ *   tp - The location to return the high resolution time value.
+ *   nsec - The location to return the subsecond time value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_RTC) && defined(CONFIG_RTC_DATETIME) && \
+    defined(CONFIG_ARCH_HAVE_RTC_SUBSECONDS)
+int up_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec);
+#endif
+
+/************************************************************************************
  * Name: up_rtc_settime
  *
  * Description:
@@ -2239,7 +2248,7 @@ int up_rtc_settime(FAR const struct timespec *tp);
  *      and SIOCSMIIREG ioctl calls** to communicate with the PHY,
  *      determine what network event took place (Link Up/Down?), and
  *      take the appropriate actions.
- *   d. It should then interact the the PHY to clear any pending
+ *   d. It should then interact the PHY to clear any pending
  *      interrupts, then re-enable the PHY interrupt.
  *
  *    * This is an OS internal interface and should not be used from

@@ -48,6 +48,33 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* LEDs */
+
+#define GPIO_LED1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN13)
+
+/* BUTTONS -- EXTI interrupts are available on Photon board button */
+
+#define MIN_IRQBUTTON   BOARD_BUTTON1
+#define MAX_IRQBUTTON   BOARD_BUTTON1
+#define NUM_IRQBUTTONS  1
+
+#define GPIO_BUTTON1    (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|GPIO_PORTC|GPIO_PIN7)
+
+/* WLAN chip */
+
+#define SDIO_WLAN0_SLOTNO 0 /* Photon board has only one sdio device */
+#define SDIO_WLAN0_MINOR  0 /* Register "wlan0" device */
+
+#define GPIO_WLAN0_RESET (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                          GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN1)
+
+#define GPIO_WLAN0_32K_CLK (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                            GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN1)
+
+#define GPIO_WLAN0_OOB_INT (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|\
+                           GPIO_PORTB|GPIO_PIN0)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -61,6 +88,70 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Called either by board_intialize() if CONFIG_BOARD_INITIALIZE or by
+ *   board_app_initialize if CONFIG_LIB_BOARDCTL is selected.  This function
+ *   initializes and configures all on-board features appropriate for the
+ *   selected configuration.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_INITIALIZE)
+int stm32_bringup(void);
+#endif
+
+/****************************************************************************
+ * Name: photon_watchdog_initialize()
+ *
+ * Description:
+ *   Perform architecture-specific initialization of the Watchdog hardware.
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PHOTON_WDG
+int photon_watchdog_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: photon_wlan_initialize
+ *
+ * Description:
+ *   Initialize wlan hardware and driver for Photon board.
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PHOTON_WLAN
+int photon_wlan_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_usbinitialize
+ *
+ * Description:
+ *   Called from stm32_usbinitialize very early in initialization to setup
+ *   USB-related GPIO pins for the Photon board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_OTGHS
+void weak_function stm32_usbinitialize(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_PHOTON_SRC_PHOTON_H */

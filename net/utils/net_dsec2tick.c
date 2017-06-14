@@ -45,7 +45,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_dsec2tick
+ * Name: net_dsec2tick
  *
  * Description:
  *   Convert a decisecond value to a system clock ticks.  Used by IGMP logic.

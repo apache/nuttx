@@ -90,8 +90,8 @@ void arp_format(FAR struct net_driver_s *dev, in_addr_t ipaddr)
 
   memset(eth->dest, 0xff, ETHER_ADDR_LEN);
   memset(arp->ah_dhwaddr, 0x00, ETHER_ADDR_LEN);
-  memcpy(eth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
-  memcpy(arp->ah_shwaddr, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
+  memcpy(eth->src, dev->d_mac.ether.ether_addr_octet, ETHER_ADDR_LEN);
+  memcpy(arp->ah_shwaddr, dev->d_mac.ether.ether_addr_octet, ETHER_ADDR_LEN);
 
   net_ipv4addr_hdrcopy(arp->ah_dipaddr, &ipaddr);
   net_ipv4addr_hdrcopy(arp->ah_sipaddr, &dev->d_ipaddr);

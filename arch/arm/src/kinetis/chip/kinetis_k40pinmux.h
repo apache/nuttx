@@ -1,8 +1,9 @@
 /********************************************************************************************
  * arch/arm/src/kinetis/chip/kinetis_k40pinmux.h
  *
- *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2011, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -160,7 +161,7 @@
 #define PIN_ADC0_SE8             (PIN_ANALOG | PIN_PORTB | PIN0)
 #define PIN_ADC1_SE8             (PIN_ANALOG | PIN_PORTB | PIN0)
 #define PIN_TSI0_CH0             (PIN_ANALOG | PIN_PORTB | PIN0)
-#define PIN_I2C0_SCL_1           (PIN_ALT2   | PIN_PORTB | PIN0)
+#define PIN_I2C0_SCL_1           (PIN_ALT2_OPENDRAIN | PIN_PORTB | PIN0)
 #define PIN_FTM1_CH0_3           (PIN_ALT3   | PIN_PORTB | PIN0)
 #define PIN_FTM1_QD_PHA_3        (PIN_ALT6   | PIN_PORTB | PIN0)
 #define PIN_LCD_P0F              (PIN_ALT7   | PIN_PORTB | PIN0)
@@ -168,21 +169,21 @@
 #define PIN_ADC0_SE9             (PIN_ANALOG | PIN_PORTB | PIN1)
 #define PIN_ADC1_SE9             (PIN_ANALOG | PIN_PORTB | PIN1)
 #define PIN_TSI0_CH6             (PIN_ANALOG | PIN_PORTB | PIN1)
-#define PIN_I2C0_SDA_1           (PIN_ALT2   | PIN_PORTB | PIN1)
+#define PIN_I2C0_SDA_1           (PIN_ALT2_OPENDRAIN | PIN_PORTB | PIN1)
 #define PIN_FTM1_CH1_3           (PIN_ALT3   | PIN_PORTB | PIN1)
 #define PIN_FTM1_QD_PHB          (PIN_ALT6   | PIN_PORTB | PIN1)
 #define PIN_LCD_P1F              (PIN_ALT7   | PIN_PORTB | PIN1)
 #define PIN_LCD_P2               (PIN_ANALOG | PIN_PORTB | PIN2)
 #define PIN_ADC0_SE12            (PIN_ANALOG | PIN_PORTB | PIN2)
 #define PIN_TSI0_CH7             (PIN_ANALOG | PIN_PORTB | PIN2)
-#define PIN_I2C0_SCL_2           (PIN_ALT2   | PIN_PORTB | PIN2)
+#define PIN_I2C0_SCL_2           (PIN_ALT2_OPENDRAIN| PIN_PORTB | PIN2)
 #define PIN_UART0_RTS_3          (PIN_ALT3   | PIN_PORTB | PIN2)
 #define PIN_FTM0_FLT3            (PIN_ALT6   | PIN_PORTB | PIN2)
 #define PIN_LCD_P2F              (PIN_ALT7   | PIN_PORTB | PIN2)
 #define PIN_LCD_P3               (PIN_ANALOG | PIN_PORTB | PIN3)
 #define PIN_ADC0_SE13            (PIN_ANALOG | PIN_PORTB | PIN3)
 #define PIN_TSI0_CH8             (PIN_ANALOG | PIN_PORTB | PIN3)
-#define PIN_I2C0_SDA_2           (PIN_ALT2   | PIN_PORTB | PIN3)
+#define PIN_I2C0_SDA_2           (PIN_ALT2_OPENDRAIN | PIN_PORTB | PIN3)
 #define PIN_UART0_CTS_3          (PIN_ALT3   | PIN_PORTB | PIN3)
 #define PIN_FTM0_FLT0_1          (PIN_ALT6   | PIN_PORTB | PIN3)
 #define PIN_LCD_P3F              (PIN_ALT7   | PIN_PORTB | PIN3)
@@ -325,12 +326,12 @@
 #define PIN_LCD_P30              (PIN_ANALOG | PIN_PORTC | PIN10)
 #define PIN_ADC1_SE6B            (PIN_ANALOG | PIN_PORTC | PIN10)
 #define PIN_CMP0_IN4             (PIN_ANALOG | PIN_PORTC | PIN10)
-#define PIN_I2C1_SCL_1           (PIN_ALT2   | PIN_PORTC | PIN10)
+#define PIN_I2C1_SCL_1           (PIN_ALT2_OPENDRAIN | PIN_PORTC | PIN10)
 #define PIN_I2S0_RX_FS_2         (PIN_ALT4   | PIN_PORTC | PIN10)
 #define PIN_LCD_P30F             (PIN_ALT7   | PIN_PORTC | PIN10)
 #define PIN_LCD_P31              (PIN_ANALOG | PIN_PORTC | PIN11)
 #define PIN_ADC1_SE7B            (PIN_ANALOG | PIN_PORTC | PIN11)
-#define PIN_I2C1_SDA_1           (PIN_ALT2   | PIN_PORTC | PIN11)
+#define PIN_I2C1_SDA_1           (PIN_ALT2_OPENDRAIN | PIN_PORTC | PIN11)
 #define PIN_I2S0_RXD_2           (PIN_ALT4   | PIN_PORTC | PIN11)
 #define PIN_LCD_P31F             (PIN_ALT7   | PIN_PORTC | PIN11)
 #define PIN_LCD_P32              (PIN_ANALOG | PIN_PORTC | PIN12)
@@ -427,13 +428,13 @@
 #define PIN_UART1_TX_2           (PIN_ALT3   | PIN_PORTE | PIN0)
 #define PIN_SDHC0_D1             (PIN_ALT4   | PIN_PORTE | PIN0)
 #define PIN_FB_AD27              (PIN_ALT5   | PIN_PORTE | PIN0)
-#define PIN_I2C1_SDA_2           (PIN_ALT6   | PIN_PORTE | PIN0)
+#define PIN_I2C1_SDA_2           (PIN_ALT6_OPENDRAIN | PIN_PORTE | PIN0)
 #define PIN_ADC1_SE5A            (PIN_ANALOG | PIN_PORTE | PIN1)
 #define PIN_SPI1_SOUT_2          (PIN_ALT2   | PIN_PORTE | PIN1)
 #define PIN_UART1_RX_2           (PIN_ALT3   | PIN_PORTE | PIN1)
 #define PIN_SDHC0_D0             (PIN_ALT4   | PIN_PORTE | PIN1)
 #define PIN_FB_AD26              (PIN_ALT5   | PIN_PORTE | PIN1)
-#define PIN_I2C1_SCL_2           (PIN_ALT6   | PIN_PORTE | PIN1)
+#define PIN_I2C1_SCL_2           (PIN_ALT6_OPENDRAIN | PIN_PORTE | PIN1)
 #define PIN_ADC1_SE6A            (PIN_ANALOG | PIN_PORTE | PIN2)
 #define PIN_SPI1_SCK_2           (PIN_ALT2   | PIN_PORTE | PIN2)
 #define PIN_UART1_CTS_2          (PIN_ALT3   | PIN_PORTE | PIN2)

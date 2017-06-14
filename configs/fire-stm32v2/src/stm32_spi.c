@@ -131,7 +131,7 @@ void weak_function stm32_spidev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_SPI1
-void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
@@ -145,14 +145,14 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
   else
 #endif
 #ifdef CONFIG_ENC28J60
-  if (devid == SPIDEV_ETHERNET)
+  if (devid == SPIDEV_ETHERNET(0))
     {
       /* Set the GPIO low to select and high to de-select */
 
       stm32_gpiowrite(GPIO_ENC28J60_CS, !selected);
     }
 #else
-  if (devid == SPIDEV_FLASH)
+  if (devid == SPIDEV_FLASH(0))
     {
       /* Set the GPIO low to select and high to de-select */
 
@@ -161,14 +161,14 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
 #endif
 }
 
-uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return SPI_STATUS_PRESENT;
 }
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
@@ -180,7 +180,7 @@ void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
     }
 }
 
-uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return SPI_STATUS_PRESENT;
 }

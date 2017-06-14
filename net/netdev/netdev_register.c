@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev_register.c
  *
- *   Copyright (C) 2007-2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,12 +63,15 @@
 
 #define NETDEV_ETH_FORMAT   "eth%d"
 #define NETDEV_LO_FORMAT    "lo"
-#define NETDEV_WPAN_FORMAT  "wpan%d"
 #define NETDEV_SLIP_FORMAT  "sl%d"
 #define NETDEV_TUN_FORMAT   "tun%d"
+#define NETDEV_WLAN_FORMAT  "wlan%d"
+#define NETDEV_WPAN_FORMAT  "wpan%d"
 
 #if defined(CONFIG_NET_SLIP)
 #  define NETDEV_DEFAULT_FORMAT NETDEV_SLIP_FORMAT
+#elif defined(CONFIG_DRIVERS_IEEE80211) /* Usually also has CONFIG_NET_ETHERNET */
+#  define NETDEV_DEFAULT_FORMAT NETDEV_WLAN_FORMAT
 #elif defined(CONFIG_NET_ETHERNET)
 #  define NETDEV_DEFAULT_FORMAT NETDEV_ETH_FORMAT
 #elif defined(CONFIG_NET_6LOWPAN)
@@ -100,7 +103,7 @@ struct net_driver_s *g_netdevices = NULL;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: find_devnum
+ * Name: find_devnum
  *
  * Description:
  *   Given a device name format string, find the next device number for the
@@ -153,7 +156,7 @@ static int find_devnum(FAR const char *devfmt)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_register
+ * Name: netdev_register
  *
  * Description:
  *   Register a network device driver and assign a name to it so that it can
@@ -213,9 +216,20 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
             break;
 #endif
 
+#ifdef CONFIG_DRIVERS_IEEE80211
+          case NET_LL_IEEE80211:  /* IEEE 802.11 */
+            dev->d_llhdrlen = ETH_HDRLEN;
+            dev->d_mtu      = CONFIG_NET_ETH_MTU;
+#ifdef CONFIG_NET_TCP
+            dev->d_recvwndo = CONFIG_NET_ETH_TCP_RECVWNDO;
+#endif
+            devfmt          = NETDEV_LPAN_FORMAT;
+            break;
+#endif
+
 #ifdef CONFIG_NET_6LOWPAN
-          case NET_LL_6LOWPAN:    /* IEEE 802.15.4 */
-            dev->d_llhdrlen = 0;  /* REVISIT */
+          case NET_LL_IEEE802154: /* IEEE 802.15.4 MAC */
+            dev->d_llhdrlen = 0;
             dev->d_mtu      = CONFIG_NET_6LOWPAN_MTU;
 #ifdef CONFIG_NET_TCP
             dev->d_recvwndo = CONFIG_NET_6LOWPAN_TCP_RECVWNDO;
@@ -237,7 +251,8 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 
 #ifdef CONFIG_NET_TUN
           case NET_LL_TUN:        /* Virtual Network Device (TUN) */
-            dev->d_llhdrlen = 0;
+            dev->d_llhdrlen = 0;  /* This will be overwritten by tun_ioctl
+                                   * if used as a TAP (layer 2) device */
             dev->d_mtu      = CONFIG_NET_TUN_MTU;
 #ifdef CONFIG_NET_TCP
             dev->d_recvwndo = CONFIG_NET_TUN_TCP_RECVWNDO;
@@ -317,11 +332,11 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #endif
       net_unlock();
 
-#ifdef CONFIG_NET_ETHERNET
+#if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_DRIVERS_IEEE80211)
       ninfo("Registered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",
-            dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
-            dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
-            dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5],
+            dev->d_mac.ether.ether_addr_octet[0], dev->d_mac.ether.ether_addr_octet[1],
+            dev->d_mac.ether.ether_addr_octet[2], dev->d_mac.ether.ether_addr_octet[3],
+            dev->d_mac.ether.ether_addr_octet[4], dev->d_mac.ether.ether_addr_octet[5],
             dev->d_ifname);
 #else
       ninfo("Registered dev: %s\n", dev->d_ifname);

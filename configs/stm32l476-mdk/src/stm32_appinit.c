@@ -90,7 +90,7 @@
  *   arg - The boardctl() argument is passed to the board_app_initialize()
  *         implementation without modification.  The argument has no
  *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the the
+ *         between the board-specific initalization logic and the
  *         matching application logic.  The value cold be such things as a
  *         mode enumeration value, a set of DIP switch switch settings, a
  *         pointer to configuration data read from a file or serial FLASH,
@@ -112,12 +112,6 @@ int board_app_initialize(uintptr_t arg)
   int ret;
 
   (void)ret;
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION
-  /* Configure CPU load estimation */
-
-  cpuload_initialize_once();
-#endif
 
 #ifdef HAVE_PROC
   /* mount the proc filesystem */

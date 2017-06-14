@@ -215,11 +215,6 @@ void icmpv6_poll(FAR struct net_driver_s *dev);
 void icmpv6_solicit(FAR struct net_driver_s *dev,
                     FAR const net_ipv6addr_t ipaddr);
 
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
-
 /****************************************************************************
  * Name: icmpv6_rsolicit
  *
@@ -290,7 +285,7 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev);
 #endif
 
 /****************************************************************************
- * Function: icmpv6_wait_setup
+ * Name: icmpv6_wait_setup
  *
  * Description:
  *   Called BEFORE an Neighbor Solicitation is sent.  This function sets up
@@ -311,7 +306,7 @@ void icmpv6_wait_setup(const net_ipv6addr_t ipaddr,
 #endif
 
 /****************************************************************************
- * Function: icmpv6_wait_cancel
+ * Name: icmpv6_wait_cancel
  *
  * Description:
  *   Cancel any wait set after icmpv6_wait_setup is called but before
@@ -331,7 +326,7 @@ int icmpv6_wait_cancel(FAR struct icmpv6_notify_s *notify);
 #endif
 
 /****************************************************************************
- * Function: icmpv6_wait
+ * Name: icmpv6_wait
  *
  * Description:
  *   Called each time that a Neighbor Solicitation is sent.  This function
@@ -353,7 +348,7 @@ int icmpv6_wait(FAR struct icmpv6_notify_s *notify,
 #endif
 
 /****************************************************************************
- * Function: icmpv6_notify
+ * Name: icmpv6_notify
  *
  * Description:
  *   Called each time that a Neighbor Advertisement is received in order to
@@ -393,7 +388,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev);
 #endif
 
 /****************************************************************************
- * Function: icmpv6_rwait_setup
+ * Name: icmpv6_rwait_setup
  *
  * Description:
  *   Called BEFORE an Router Solicitation is sent.  This function sets up
@@ -415,7 +410,7 @@ void icmpv6_rwait_setup(FAR struct net_driver_s *dev,
 #endif
 
 /****************************************************************************
- * Function: icmpv6_rwait_cancel
+ * Name: icmpv6_rwait_cancel
  *
  * Description:
  *   Cancel any wait set after icmpv6_rwait_setup() is called but before
@@ -435,7 +430,7 @@ int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify);
 #endif
 
 /****************************************************************************
- * Function: icmpv6_rwait
+ * Name: icmpv6_rwait
  *
  * Description:
  *   Called each time that a Router Solicitation is sent.  This function
@@ -457,7 +452,7 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
 #endif
 
 /****************************************************************************
- * Function: icmpv6_rnotify
+ * Name: icmpv6_rnotify
  *
  * Description:
  *   Called each time that a Router Advertisement is received in order to
@@ -478,6 +473,11 @@ void icmpv6_rnotify(FAR struct net_driver_s *dev, const net_ipv6addr_t draddr,
                     const net_ipv6addr_t prefix, unsigned int preflen);
 #else
 #  define icmpv6_rnotify(d,p,l)
+#endif
+
+#undef EXTERN
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* CONFIG_NET_ICMPv6 */

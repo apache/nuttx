@@ -43,7 +43,7 @@ CSRCS += kl_appinit.c
 endif
 
 ifeq ($(CONFIG_WL_CC3000),y)
-CSRCS += kl_wifi.c
+CSRCS += kl_cc3000.c
 endif
 
 ifeq ($(CONFIG_KL_TSI),y)

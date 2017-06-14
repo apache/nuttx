@@ -54,6 +54,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/sensors/max6675.h>
+#include <nuttx/random.h>
 
 #if defined(CONFIG_SPI) && defined(CONFIG_MAX6675)
 
@@ -198,7 +199,7 @@ static ssize_t max6675_read(FAR struct file *filep, FAR char *buffer, size_t buf
   /* Enable MAX6675's chip select */
 
   max6675_lock(priv->spi);
-  SPI_SELECT(priv->spi, SPIDEV_TEMPERATURE, true);
+  SPI_SELECT(priv->spi, SPIDEV_TEMPERATURE(0), true);
 
   /* Read temperature */
 
@@ -206,7 +207,7 @@ static ssize_t max6675_read(FAR struct file *filep, FAR char *buffer, size_t buf
 
   /* Disable MAX6675's chip select */
 
-  SPI_SELECT(priv->spi, SPIDEV_TEMPERATURE, false);
+  SPI_SELECT(priv->spi, SPIDEV_TEMPERATURE(0), false);
   max6675_unlock(priv->spi);
 
   regval  = (regmsb & 0xFF00) >> 8;
@@ -229,6 +230,10 @@ static ssize_t max6675_read(FAR struct file *filep, FAR char *buffer, size_t buf
       snerr("ERROR: The thermocouple input is not connected!\n");
       ret = -EINVAL;
     }
+
+  /* Feed sensor data to entropy pool */
+
+  add_sensor_randomness(regval);
 
   /* Get the temperature */
 

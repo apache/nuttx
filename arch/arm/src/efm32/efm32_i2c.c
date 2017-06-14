@@ -220,7 +220,6 @@ struct efm32_i2c_config_s
   uint32_t scl_pin;           /* GPIO configuration for SCL as SCL */
   uint32_t sda_pin;           /* GPIO configuration for SDA as SDA */
 #ifndef CONFIG_I2C_POLLED
-  int (*isr) (int, void *, void *);   /* Interrupt handler */
   uint32_t irq;               /* Event IRQ */
 #endif
 };
@@ -294,15 +293,10 @@ static void efm32_i2c_tracedump(FAR struct efm32_i2c_priv_s *priv);
 static void efm32_i2c_setclock(FAR struct efm32_i2c_priv_s *priv,
                                uint32_t frequency);
 
-static int efm32_i2c_isr(struct efm32_i2c_priv_s *priv);
+static int efm32_i2c_isr_process(struct efm32_i2c_priv_s *priv);
 
 #ifndef CONFIG_I2C_POLLED
-#ifdef CONFIG_EFM32_I2C0
-static int efm32_i2c0_isr(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_EFM32_I2C1
-static int efm32_i2c1_isr(int irq, void *context, FAR void *arg);
-#endif
+static int efm32_i2c_isr(int irq, void *context, FAR void *arg);
 #endif /* !CONFIG_I2C_POLLED */
 
 static void efm32_i2c_hwreset(FAR struct efm32_i2c_priv_s *priv);
@@ -343,7 +337,6 @@ static const struct efm32_i2c_config_s efm32_i2c0_config =
   .scl_pin = BOARD_I2C0_SCL,
   .sda_pin = BOARD_I2C0_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .isr = efm32_i2c0_isr,
   .irq = EFM32_IRQ_I2C0
 #endif
 };
@@ -371,7 +364,6 @@ static const struct efm32_i2c_config_s efm32_i2c1_config =
   .scl_pin = BOARD_I2C1_SCL,
   .sda_pin = BOARD_I2C1_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .isr = efm32_i2c1_isr,
   .irq = EFM32_IRQ_I2C1
 #endif
 };
@@ -553,7 +545,7 @@ static inline int efm32_i2c_sem_waitdone(FAR struct efm32_i2c_priv_s *priv)
 
 #ifdef CONFIG_EFM32_I2C_DYNTIMEO
       abstime.tv_nsec += 1000 * efm32_i2c_tousecs(priv->msgc, priv->msgv);
-      if (abstime.tv_nsec > 1000 * 1000 * 1000)
+      if (abstime.tv_nsec >= 1000 * 1000 * 1000)
         {
           abstime.tv_sec++;
           abstime.tv_nsec -= 1000 * 1000 * 1000;
@@ -561,7 +553,7 @@ static inline int efm32_i2c_sem_waitdone(FAR struct efm32_i2c_priv_s *priv)
 
 #elif CONFIG_EFM32_I2CTIMEOMS > 0
       abstime.tv_nsec += CONFIG_EFM32_I2CTIMEOMS * 1000 * 1000;
-      if (abstime.tv_nsec > 1000 * 1000 * 1000)
+      if (abstime.tv_nsec >= 1000 * 1000 * 1000)
         {
           abstime.tv_sec++;
           abstime.tv_nsec -= 1000 * 1000 * 1000;
@@ -632,7 +624,7 @@ static inline int efm32_i2c_sem_waitdone(FAR struct efm32_i2c_priv_s *priv)
        * that it is done.
        */
 
-      efm32_i2c_isr(priv);
+      efm32_i2c_isr_process(priv);
 
       /* Calculate the elapsed time */
 
@@ -869,14 +861,14 @@ static void efm32_i2c_setclock(FAR struct efm32_i2c_priv_s *priv,
 }
 
 /****************************************************************************
- * Name: efm32_i2c_isr
+ * Name: efm32_i2c_isr_process
  *
  * Description:
  *  Common Interrupt Service Routine
  *
  ****************************************************************************/
 
-static int efm32_i2c_isr(struct efm32_i2c_priv_s *priv)
+static int efm32_i2c_isr_process(struct efm32_i2c_priv_s *priv)
 {
   for (; ; )
     {
@@ -1279,43 +1271,23 @@ done:
   return OK;
 }
 
+/****************************************************************************
+ * Name: efm32_i2c_isr
+ *
+ * Description:
+ *   Common I2C interrupt service routine
+ *
+ ****************************************************************************/
+
 #ifndef CONFIG_I2C_POLLED
-
-/****************************************************************************
- * Name: efm32_i2c0_isr
- *
- * Description:
- *   I2C0 interrupt service routine
- *
- ****************************************************************************/
-
-#ifdef CONFIG_EFM32_I2C0
-static int efm32_i2c0_isr(int irq, void *context, FAR void *arg)
+static int efm32_i2c_isr(int irq, void *context, FAR void *arg)
 {
-  return efm32_i2c_isr(&efm32_i2c0_priv);
+  struct efm32_i2c_priv_s *priv = (struct efm32_i2c_priv_s *)arg;
+
+  DEBUGASSERT(priv != NULL);
+  return efm32_i2c_isr_process(priv);
 }
 #endif
-
-/****************************************************************************
- * Name: efm32_i2c1_isr
- *
- * Description:
- *   I2C1 interrupt service routine
- *
- ****************************************************************************/
-
-#ifdef CONFIG_EFM32_I2C1
-static int efm32_i2c1_isr(int irq, void *context, FAR void *arg)
-{
-  return efm32_i2c_isr(&efm32_i2c1_priv);
-}
-#endif
-
-#endif
-
-/****************************************************************************
- * Private Initialization and Deinitialization
- ****************************************************************************/
 
 /****************************************************************************
  * Name: efm32_i2c_hwreset
@@ -1389,7 +1361,7 @@ static int efm32_i2c_init(FAR struct efm32_i2c_priv_s *priv)
   /* Attach ISRs */
 
 #ifndef CONFIG_I2C_POLLED
-  irq_attach(priv->config->irq, priv->config->isr, NULL);
+  irq_attach(priv->config->irq, efm32_i2c_isr, priv);
   up_enable_irq(priv->config->irq);
 #endif
 
@@ -1523,7 +1495,7 @@ static int efm32_i2c_transfer(FAR struct i2c_master_s *dev,
    * be enabled in efm32_i2c_sem_waitdone if CONFIG_I2C_POLLED is NOT defined
    */
 
-  efm32_i2c_isr(priv);
+  efm32_i2c_isr_process(priv);
 
   /* Wait for an ISR, if there was a timeout, fetch latest status to get the
    * BUSY flag.

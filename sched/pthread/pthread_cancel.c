@@ -60,8 +60,8 @@ int pthread_cancel(pthread_t thread)
 
   if (thread == 0)
     {
-      /* pid == 0 is the IDLE task.  Callers cannot cancel the
-       * IDLE task.
+      /* pid == 0 is the IDLE task (in a single CPU configuration).  Callers
+       * cannot cancel the IDLE task.
        */
 
       return ESRCH;
@@ -150,9 +150,9 @@ int pthread_cancel(pthread_t thread)
    *
    * REVISIT: In this case, the clean-up callback will execute on the
    * thread of the caller of pthread cancel, not on the thread of
-   * the thread-to-be-canceled.  Is that an issue?  Presumably they
-   * are both within the same group and within the same process address
-   * space.
+   * the thread-to-be-canceled.  This is a problem when deferred
+   * cancellation is not supported because, for example, the clean-up
+   * function will be unable to unlock its own mutexes.
    */
 
   pthread_cleanup_popall(tcb);
@@ -161,6 +161,12 @@ int pthread_cancel(pthread_t thread)
   /* Complete pending join operations */
 
   (void)pthread_completejoin((pid_t)thread, PTHREAD_CANCELED);
+
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+  /* Recover any mutexes still held by the canceled thread */
+
+  pthread_mutex_inconsistent(tcb);
+#endif
 
   /* Then let task_terminate do the real work */
 

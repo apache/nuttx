@@ -56,8 +56,8 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t syslog_write(FAR struct file *filep, FAR const char *buffer,
-                 size_t buflen);
+static ssize_t syslog_chardev_write(FAR struct file *filep,
+                                    FAR const char *buffer, size_t buflen);
 
 /****************************************************************************
  * Private Data
@@ -68,7 +68,7 @@ static const struct file_operations syslog_fops =
   NULL,          /* open */
   NULL,          /* close */
   NULL,          /* read */
-  syslog_write,  /* write */
+  syslog_chardev_write, /* write */
   NULL,          /* seek */
   NULL           /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
@@ -84,23 +84,13 @@ static const struct file_operations syslog_fops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslog_write
+ * Name: syslog_chardev_write
  ****************************************************************************/
 
-static ssize_t syslog_write(FAR struct file *filep, FAR const char *buffer,
-                            size_t len)
+static ssize_t syslog_chardev_write(FAR struct file *filep,
+                                    FAR const char *buffer, size_t len)
 {
-  size_t nwritten;
-  int ret;
-
-  for (nwritten = 0; nwritten < len; nwritten++)
-    {
-      int ch = *buffer++;
-      ret = syslog_putc(ch);
-      UNUSED(ret);
-    }
-
-  return len;
+  return syslog_write(buffer, len);
 }
 
 /****************************************************************************

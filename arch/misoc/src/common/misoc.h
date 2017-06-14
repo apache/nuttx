@@ -118,7 +118,7 @@ void misoc_puts(const char *str);
  * Name: misoc_lowputc
  *
  * Description:
- *   Low-level, blocking character output the the serial console.
+ *   Low-level, blocking character output the serial console.
  *
  ****************************************************************************/
 

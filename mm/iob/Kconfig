@@ -1,0 +1,76 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "Common I/O Buffer Support"
+
+config MM_IOB
+	bool "Enable generic I/O buffer support"
+	default n
+	---help---
+		This setting will build the common I/O buffer (IOB) support
+		library.
+
+if MM_IOB
+
+config IOB_NBUFFERS
+	int "Number of pre-allocated I/O buffers"
+	default 24 if (NET_TCP_WRITE_BUFFERS && !NET_TCP_READAHEAD) || (!NET_TCP_WRITE_BUFFERS && NET_TCP_READAHEAD)
+	default 36 if NET_TCP_WRITE_BUFFERS && NET_TCP_READAHEAD
+	default 8 if !NET_TCP_WRITE_BUFFERS && !NET_TCP_READAHEAD
+	---help---
+		Each packet is represented by a series of small I/O buffers in a
+		chain.  This setting determines the number of preallocated I/O
+		buffers available for packet data.
+
+config IOB_BUFSIZE
+	int "Payload size of one I/O buffer"
+	default 196
+	---help---
+		Each packet is represented by a series of small I/O buffers in a
+		chain.  This setting determines the data payload each preallocated
+		I/O buffer.
+
+config IOB_NCHAINS
+	int "Number of pre-allocated I/O buffer chain heads"
+	default 0 if !NET_TCP_READAHEAD && !NET_UDP_READAHEAD
+	default 8 if NET_TCP_READAHEAD || NET_UDP_READAHEAD
+	---help---
+		These tiny nodes are used as "containers" to support queueing of
+		I/O buffer chains.  This will limit the number of I/O transactions
+		that can be "in-flight" at any give time.  The default value of
+		zero disables this features.
+
+		These generic I/O buffer chain containers are not currently used
+		by any logic in NuttX.  That is because their other other specialized
+		I/O buffer chain containers that also carry a payload of usage
+		specific information.
+
+config IOB_THROTTLE
+	int "I/O buffer throttle value"
+	default 0 if !NET_TCP_WRITE_BUFFERS || !NET_TCP_READAHEAD
+	default 8 if NET_TCP_WRITE_BUFFERS && NET_TCP_READAHEAD
+	---help---
+		TCP write buffering and read-ahead buffer use the same pool of free
+		I/O buffers.  In order to prevent uncontrolled incoming TCP packets
+		from hogging all of the available, pre-allocated I/O buffers, a
+		throttling value is required.  This throttle value assures that
+		I/O buffers will be denied to the read-ahead logic before TCP writes
+		are halted.
+
+config IOB_DEBUG
+	bool "Force I/O buffer debug"
+	default n
+	depends on DEBUG_FEATURES && !SYSLOG_BUFFER
+	---help---
+		This option will force debug output from I/O buffer logic.  This
+		is not normally something that would want to do but is convenient
+		if you are debugging the I/O buffer logic and do not want to get
+		overloaded with other un-related debug output.
+
+		NOTE that this selection is not available if IOBs are being used
+		to syslog buffering logic (CONFIG_SYSLOG_BUFFER=y)!
+
+endif # MM_IOB
+endmenu # Common I/O buffer support

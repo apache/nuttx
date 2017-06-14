@@ -61,4 +61,44 @@
 
 void stm32_boardinitialize(void)
 {
+#ifdef CONFIG_STM32_OTGHS
+  /* Initialize USB if the 1) OTG HS controller is in the configuration and 2)
+   * disabled, and 3) the weak function stm32_usbinitialize() has been brought
+   * into the build. Presumably either CONFIG_USBDEV or CONFIG_USBHOST is also
+   * selected.
+   */
+
+  if (stm32_usbinitialize)
+    {
+      stm32_usbinitialize();
+    }
+#endif
+
+#ifdef CONFIG_ARCH_LEDS
+  /* Configure on-board LEDs if LED support has been selected. */
+
+  board_autoled_initialize();
+#endif
 }
+
+/****************************************************************************
+ * Name: board_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_initialize().  board_initialize() will be
+ *   called immediately after up_intitialize() is called and just before the
+ *   initial application is started.  This additional initialization phase
+ *   may be used, for example, to initialize board-specific device drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_INITIALIZE
+void board_initialize(void)
+{
+  /* Perform board initialization */
+
+  (void)stm32_bringup();
+}
+#endif /* CONFIG_BOARD_INITIALIZE */

@@ -114,7 +114,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
    * because it will also attempt to get this semaphore.
    */
 
-  (void)pthread_takesemaphore(&group->tg_joinsem);
+  (void)pthread_sem_take(&group->tg_joinsem, false);
 
   /* Find the join information associated with this thread.
    * This can fail for one of three reasons:  (1) There is no
@@ -148,7 +148,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
           ret = EINVAL;
         }
 
-      (void)pthread_givesemaphore(&group->tg_joinsem);
+      (void)pthread_sem_give(&group->tg_joinsem);
     }
   else
     {
@@ -189,7 +189,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
            * semaphore.
            */
 
-          (void)pthread_givesemaphore(&group->tg_joinsem);
+          (void)pthread_sem_give(&group->tg_joinsem);
 
           /* Take the thread's thread exit semaphore.  We will sleep here
            * until the thread exits.  We need to exercise caution because
@@ -197,7 +197,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
            * pthread to exit.
            */
 
-          (void)pthread_takesemaphore(&pjoin->exit_sem);
+          (void)pthread_sem_take(&pjoin->exit_sem, false);
 
           /* The thread has exited! Get the thread exit value */
 
@@ -211,13 +211,13 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
            * will know that we have received the data.
            */
 
-          (void)pthread_givesemaphore(&pjoin->data_sem);
+          (void)pthread_sem_give(&pjoin->data_sem);
 
           /* Retake the join semaphore, we need to hold this when
            * pthread_destroyjoin is called.
            */
 
-          (void)pthread_takesemaphore(&group->tg_joinsem);
+          (void)pthread_sem_take(&group->tg_joinsem, false);
         }
 
       /* Pre-emption is okay now. The logic still cannot be re-entered
@@ -235,7 +235,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
           (void)pthread_destroyjoin(group, pjoin);
         }
 
-      (void)pthread_givesemaphore(&group->tg_joinsem);
+      (void)pthread_sem_give(&group->tg_joinsem);
       ret = OK;
     }
 

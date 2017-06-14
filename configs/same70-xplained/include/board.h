@@ -57,7 +57,7 @@
  *   Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 120MHz
  *   CPU clock: 120MHz
  *
- * There can be two on-board crystals.  However, the the 32.768 crystal is not
+ * There can be two on-board crystals.  However, the 32.768 crystal is not
  * populated on the stock SAME70.  The fallback is to use th on-chip, slow RC
  * oscillator which has a frequency of 22-42 KHz, nominally 32 KHz.
  */

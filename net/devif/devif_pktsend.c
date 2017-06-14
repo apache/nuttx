@@ -84,7 +84,7 @@
  *
  * Description:
  *   Called from socket logic in order to send a raw packet in response to
- *   an xmit or poll request from the the network interface driver.
+ *   an xmit or poll request from the network interface driver.
  *
  *   This is almost identical to calling devif_send() except that the data to
  *   be sent is copied into dev->d_buf (vs. dev->d_appdata), since there is

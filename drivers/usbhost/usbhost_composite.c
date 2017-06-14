@@ -70,7 +70,7 @@
 
 struct usbhost_member_s
 {
-  /* This the the classobject returned by each contained class */
+  /* This the classobject returned by each contained class */
 
   FAR struct usbhost_class_s *usbclass;
 

@@ -1,0 +1,38 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_CLICKER2_STM32
+
+config CLICKER2_STM32_MB1_SPI
+	bool "mikroBUS1 SPI"
+	default n
+	select STM32_SPI3
+	---help---
+		Enable SPI support on mikroBUS1 (STM32 SPI3)
+
+config CLICKER2_STM32_MB2_SPI
+	bool "mikroBUS2 SPI"
+	default n
+	select STM32_SPI2
+	---help---
+		Enable SPI support on mikroBUS1 (STM32 SPI2)
+
+config CLICKER2_STM32_MB1_BEE
+	bool "mikroBUS1 MRF24J40 BEE"
+	default y
+	depends on IEEE802154_MRF24J40
+	select CLICKER2_STM32_MB1_SPI
+	---help---
+		Enable support for MRF24J40 BEE on mikroBUS1
+
+config CLICKER2_STM32_MB2_BEE
+	bool "mikroBUS2 MRF24J40 BEE"
+	default n
+	depends on IEEE802154_MRF24J40
+	select CLICKER2_STM32_MB2_SPI
+	---help---
+		Enable support for MRF24J40 BEE on mikroBUS2
+
+endif # ARCH_BOARD_CLICKER2_STM32

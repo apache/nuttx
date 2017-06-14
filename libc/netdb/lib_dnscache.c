@@ -156,7 +156,7 @@ void dns_save_answer(FAR const char *hostname,
 #if CONFIG_NETDB_DNSCLIENT_LIFESEC > 0
   /* Get the current time, using CLOCK_MONOTONIC if possible */
 
-  (void)clock_settime(DNS_CLOCK, &now);
+  (void)clock_gettime(DNS_CLOCK, &now);
   entry->ctime = (time_t)now.tv_sec;
 #endif
 
@@ -218,7 +218,7 @@ int dns_find_answer(FAR const char *hostname, FAR struct sockaddr *addr,
 #if CONFIG_NETDB_DNSCLIENT_LIFESEC > 0
   /* Get the current time, using CLOCK_MONOTONIC if possible */
 
-  ret = clock_settime(DNS_CLOCK, &now);
+  ret = clock_gettime(DNS_CLOCK, &now);
 #endif
 
   /* REVISIT: This is not thread safe */
@@ -268,8 +268,8 @@ int dns_find_answer(FAR const char *hostname, FAR struct sockaddr *addr,
               /* We have a match.  Return the resolved host address */
 
 #ifdef CONFIG_NET_IPv4
-              if (entry->addr.addr.sa_family == AF_INET)
 #ifdef CONFIG_NET_IPv6
+              if (entry->addr.addr.sa_family == AF_INET)
 #endif
                 {
                    inlen = sizeof(struct sockaddr_in);
@@ -277,8 +277,8 @@ int dns_find_answer(FAR const char *hostname, FAR struct sockaddr *addr,
 #endif
 
 #ifdef CONFIG_NET_IPv6
-              else
 #ifdef CONFIG_NET_IPv4
+              else
 #endif
                 {
                    inlen = sizeof(struct sockaddr_in6);

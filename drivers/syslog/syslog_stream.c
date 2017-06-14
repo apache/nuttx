@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/syslog/syslog_stream.c
  *
- *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,8 +44,9 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/syslog/syslog.h>
 #include <nuttx/streams.h>
+#include <nuttx/mm/iob.h>
+#include <nuttx/syslog/syslog.h>
 
 #include "syslog.h"
 
@@ -54,36 +55,137 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: syslogstream_flush
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSLOG_BUFFER
+static int syslogstream_flush(FAR struct lib_syslogstream_s *stream)
+{
+  FAR struct iob_s *iob;
+  int ret = OK;
+
+  DEBUGASSERT(stream != NULL);
+  iob = stream->iob;
+
+  /* Do we have an IO buffer? Is there anything buffered? */
+
+  if (iob != NULL && iob->io_len > 0)
+    {
+      /* Yes write the buffered data */
+
+      do
+        {
+          ssize_t nbytes = syslog_write((FAR const char *)iob->io_data,
+                                        (size_t)iob->io_len);
+          if (nbytes < 0)
+            {
+              ret = -get_errno();
+            }
+          else
+            {
+              iob->io_len = 0;
+              ret = OK;
+            }
+        }
+      while (ret == -EINTR);
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: syslogstream_addchar
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSLOG_BUFFER
+static void syslogstream_addchar(FAR struct lib_syslogstream_s *stream, int ch)
+{
+  FAR struct iob_s *iob = stream->iob;
+
+  /* Add the incoming character to the buffer */
+
+  iob->io_data[iob->io_len] = ch;
+  iob->io_len++;
+
+  /* Increment the total number of bytes buffered. */
+
+  stream->public.nput++;
+
+  /* Is the buffer full? */
+
+  if (iob->io_len >= CONFIG_IOB_BUFSIZE)
+    {
+      /* Yes.. then flush the buffer */
+
+      syslogstream_flush(stream);
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: syslogstream_putc
  ****************************************************************************/
 
 static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
-  int ret;
+  /* Discard carriage returns */
 
-  /* Try writing until the write was successful or until an irrecoverable
-   * error occurs.
-   */
-
-  do
+  if (ch != '\r')
     {
-      /* Write the character to the supported logging device.  On failure,
-       * syslog_putc returns EOF with the errno value set;
-       */
+#ifdef CONFIG_SYSLOG_BUFFER
+      FAR struct lib_syslogstream_s *stream =
+        (FAR struct lib_syslogstream_s *)this;
 
-      ret = syslog_putc(ch);
-      if (ret != EOF)
+      DEBUGASSERT(stream != NULL);
+
+      /* Do we have an IO buffer? */
+
+      if (stream->iob != NULL)
         {
-          this->nput++;
-          return;
-        }
+          /* Is this a linefeed? */
 
-      /* The special errno value -EINTR means that syslog_putc() was
-       * awakened by a signal.  This is not a real error and must be
-       * ignored in this context.
-       */
+          if (ch == '\n')
+            {
+              /* Yes... pre-pend carriage return */
+
+              syslogstream_addchar(stream, '\r');
+            }
+
+          /* Add the incoming character to the buffer */
+
+          syslogstream_addchar(stream, ch);
+        }
+      else
+#endif
+        {
+          int ret;
+
+          /* Try writing until the write was successful or until an
+           * irrecoverable error occurs.
+           */
+
+          do
+            {
+              /* Write the character to the supported logging device.  On
+               * failure, syslog_putc returns EOF with the errno value set;
+               */
+
+              ret = syslog_putc(ch);
+              if (ret != EOF)
+                {
+                  this->nput++;
+                  return;
+                }
+
+              /* The special errno value -EINTR means that syslog_putc() was
+               * awakened by a signal.  This is not a real error and must be
+               * ignored in this context.
+               */
+            }
+          while (get_errno() == -EINTR);
+        }
     }
-  while (errno == -EINTR);
 }
 
 /****************************************************************************
@@ -91,7 +193,7 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslogstream
+ * Name: syslogstream_create
  *
  * Description:
  *   Initializes a stream for use with the configured syslog interface.
@@ -106,9 +208,69 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
  *
  ****************************************************************************/
 
-void syslogstream(FAR struct lib_outstream_s *stream)
+void syslogstream_create(FAR struct lib_syslogstream_s *stream)
 {
-  stream->put   = syslogstream_putc;
-  stream->flush = lib_noflush;
-  stream->nput  = 0;
+#ifdef CONFIG_SYSLOG_BUFFER
+  FAR struct iob_s *iob;
+#endif
+
+  DEBUGASSERT(stream != NULL);
+
+  /* Initialize the common fields */
+
+  stream->public.put   = syslogstream_putc;
+  stream->public.flush = lib_noflush;
+  stream->public.nput  = 0;
+
+#ifdef CONFIG_SYSLOG_BUFFER
+  /* Allocate an IOB */
+
+  iob                  = iob_alloc(true);
+  stream->iob          = iob;
+
+  if (iob != NULL)
+    {
+      /* Initialize the IOB */
+
+      iob->io_len      = 0;
+      iob->io_offset   = 0;
+      iob->io_pktlen   = 0;
+    }
+#endif
 }
+
+/****************************************************************************
+ * Name: syslogstream_destroy
+ *
+ * Description:
+ *   Free resources held by the syslog stream.
+ *
+ * Input parameters:
+ *   stream - User allocated, uninitialized instance of struct
+ *            lib_lowoutstream_s to be initialized.
+ *
+ * Returned Value:
+ *   None (Resources freed).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSLOG_BUFFER
+void syslogstream_destroy(FAR struct lib_syslogstream_s *stream)
+{
+  DEBUGASSERT(stream != NULL);
+
+  /* Verify that there is an IOB attached (there should be) */
+
+  if (stream->iob != NULL)
+    {
+      /* Flush the output buffered in the IOB */
+
+      syslogstream_flush(stream);
+
+      /* Free the IOB */
+
+      iob_free(stream->iob);
+      stream->iob = NULL;
+    }
+}
+#endif

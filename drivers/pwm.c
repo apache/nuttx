@@ -318,11 +318,13 @@ static ssize_t pwm_write(FAR struct file *filep, FAR const char *buffer,
 #ifdef CONFIG_PWM_PULSECOUNT
 static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
 {
-  FAR struct pwm_lowerhalf_s *lower = upper->dev;
+  FAR struct pwm_lowerhalf_s *lower;
   irqstate_t flags;
   int ret = OK;
 
-  DEBUGASSERT(upper != NULL && lower->ops->start != NULL);
+  DEBUGASSERT(upper != NULL);
+  lower = upper->dev;
+  DEBUGASSERT(lower != NULL && lower->ops->start != NULL);
 
   /* Verify that the PWM is not already running */
 
@@ -385,10 +387,12 @@ static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
 #else
 static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
 {
-  FAR struct pwm_lowerhalf_s *lower = upper->dev;
+  FAR struct pwm_lowerhalf_s *lower;
   int ret = OK;
 
-  DEBUGASSERT(upper != NULL && lower->ops->start != NULL);
+  DEBUGASSERT(upper != NULL);
+  lower = upper->dev;
+  DEBUGASSERT(lower != NULL && lower->ops->start != NULL);
 
   /* Verify that the PWM is not already running */
 

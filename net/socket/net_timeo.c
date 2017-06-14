@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_timeo
+ * Name: net_timeo
  *
  * Description:
  *   Check if a timeout has elapsed.  This can be called from a socket poll
@@ -78,6 +78,7 @@ int net_timeo(systime_t start_time, socktimeo_t timeo)
     {
       return TRUE;
     }
+
   return FALSE;
 }
 

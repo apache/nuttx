@@ -414,7 +414,7 @@ static int  sam_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int  sam_ioctl(struct net_driver_s *dev, int cmd, long arg);
+static int  sam_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg);
 #endif
 
 /* PHY Initialization */
@@ -902,7 +902,7 @@ static int sam_txpoll(struct net_driver_s *dev)
 
       sam_transmit(priv);
 
-      /* Check if the there are any free TX descriptors.  We cannot perform
+      /* Check if there are any free TX descriptors.  We cannot perform
        * the TX poll if we do not have buffering for another packet.
        */
 
@@ -949,7 +949,7 @@ static void sam_dopoll(struct sam_emac_s *priv)
 {
   struct net_driver_s *dev = &priv->dev;
 
-  /* Check if the there are any free TX descriptors.  We cannot perform the
+  /* Check if there are any free TX descriptors.  We cannot perform the
    * TX poll if we do not have buffering for another packet.
    */
 
@@ -1783,7 +1783,7 @@ static void sam_poll_work(FAR void *arg)
   FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
   struct net_driver_s *dev  = &priv->dev;
 
-  /* Check if the there are any free TX descriptors.  We cannot perform the
+  /* Check if there are any free TX descriptors.  We cannot perform the
    * TX poll if we do not have buffering for another packet.
    */
 
@@ -2346,7 +2346,7 @@ static int sam_rmmac(struct net_driver_s *dev, const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int sam_ioctl(struct net_driver_s *dev, int cmd, long arg)
+static int sam_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
   struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
   int ret;
@@ -3458,20 +3458,20 @@ static void sam_macaddress(struct sam_emac_s *priv)
 
   ninfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         dev->d_ifname,
-        dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
-        dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
-        dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
+        dev->d_mac.ether.ether_addr_octet[0], dev->d_mac.ether.ether_addr_octet[1],
+        dev->d_mac.ether.ether_addr_octet[2], dev->d_mac.ether.ether_addr_octet[3],
+        dev->d_mac.ether.ether_addr_octet[4], dev->d_mac.ether.ether_addr_octet[5]);
 
   /* Set the MAC address */
 
-  regval = (uint32_t)dev->d_mac.ether_addr_octet[0] |
-           (uint32_t)dev->d_mac.ether_addr_octet[1] << 8 |
-           (uint32_t)dev->d_mac.ether_addr_octet[2] << 16 |
-           (uint32_t)dev->d_mac.ether_addr_octet[3] << 24;
+  regval = (uint32_t)dev->d_mac.ether.ether_addr_octet[0] |
+           (uint32_t)dev->d_mac.ether.ether_addr_octet[1] << 8 |
+           (uint32_t)dev->d_mac.ether.ether_addr_octet[2] << 16 |
+           (uint32_t)dev->d_mac.ether.ether_addr_octet[3] << 24;
   sam_putreg(priv, SAM_EMAC_SA1B, regval);
 
-  regval = (uint32_t)dev->d_mac.ether_addr_octet[4] |
-           (uint32_t)dev->d_mac.ether_addr_octet[5] << 8;
+  regval = (uint32_t)dev->d_mac.ether.ether_addr_octet[4] |
+           (uint32_t)dev->d_mac.ether.ether_addr_octet[5] << 8;
   sam_putreg(priv, SAM_EMAC_SA1T, regval);
 }
 

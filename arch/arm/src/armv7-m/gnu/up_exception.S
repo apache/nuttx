@@ -60,7 +60,7 @@
    * stale MSP, there will most likely be a system failure.
    *
    * If the interrupt stack is selected, on the other hand, then the interrupt
-   * handler will always set the the MSP to the interrupt stack.  So when the high
+   * handler will always set the MSP to the interrupt stack.  So when the high
    * priority interrupt occurs, it will either use the MSP of the last privileged
    * thread to run or, in the case of the nested interrupt, the interrupt stack if
    * no privileged task has run.
@@ -70,7 +70,7 @@
 #    error Interrupt stack must be used with high priority interrupts in kernel mode
 #  endif
 
-  /* Use the the BASEPRI to control interrupts is required if nested, high
+  /* Use the BASEPRI to control interrupts is required if nested, high
    * priority interrupts are supported.
    */
 
@@ -323,7 +323,7 @@ exception_common:
 	.global	g_intstackbase
 	.align	8
 g_intstackalloc:
-	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~7)
+	.skip	((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)
 g_intstackbase:
 	.size	g_intstackalloc, .-g_intstackalloc
 #endif

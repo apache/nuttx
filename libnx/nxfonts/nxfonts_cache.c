@@ -300,7 +300,7 @@ nxf_findglyph(FAR struct nxfonts_fcache_s *priv, uint8_t ch)
         glyph != NULL;
         prev = glyph, glyph = glyph->flink)
     {
-      /* Check if we found the the glyph for this character */
+      /* Check if we found the glyph for this character */
 
       if (glyph->code == ch)
         {

@@ -124,6 +124,14 @@ source arch/xtensa/Kconfig
 source arch/z16/Kconfig
 source arch/z80/Kconfig
 
+config ARCH_TOOLCHAIN_IAR
+	bool
+	default n
+
+config ARCH_TOOLCHAIN_GNU
+	bool
+	default n
+
 comment "Architecture Options"
 
 config ARCH_NOINTC
@@ -187,6 +195,10 @@ config ARCH_HAVE_POWEROFF
 	default n
 
 config ARCH_HAVE_RESET
+	bool
+	default n
+
+config ARCH_HAVE_RTC_SUBSECONDS
 	bool
 	default n
 
@@ -763,7 +775,7 @@ config ARCH_HIPRI_INTERRUPT
 		there will most likely be a system failure.
 
 		If the interrupt stack is selected, on the other hand, then the
-		interrupt handler will always set the the MSP to the interrupt
+		interrupt handler will always set the MSP to the interrupt
 		stack.  So when the high priority interrupt occurs, it will either
 		use the MSP of the last privileged thread to run or, in the case of
 		the nested interrupt, the interrupt stack if no privileged task has

@@ -140,7 +140,7 @@ static uint8_t g_reassembly_flags;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: devif_reassembly
+ * Name: devif_reassembly
  *
  * Description:
  *   IP fragment reassembly: not well-tested.
@@ -302,7 +302,7 @@ nullreturn:
  ****************************************************************************/
 
 /****************************************************************************
- * Function: ipv4_input
+ * Name: ipv4_input
  *
  * Description:
  *
@@ -391,7 +391,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
 #endif /* CONFIG_NET_TCP_REASSEMBLY */
     }
 
-#if defined(CONFIG_NET_BROADCAST) && defined(CONFIG_NET_UDP)
+#if defined(CONFIG_NET_BROADCAST) && defined(NET_UDP_HAVE_STACK)
   /* If IP broadcast support is configured, we check for a broadcast
    * UDP packet, which may be destined to us (even if there is no IP
    * address yet assigned to the device as is the case when we are
@@ -459,13 +459,13 @@ int ipv4_input(FAR struct net_driver_s *dev)
 
   switch (pbuf->proto)
     {
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
       case IP_PROTO_TCP:   /* TCP input */
         tcp_ipv4_input(dev);
         break;
 #endif
 
-#ifdef CONFIG_NET_UDP
+#ifdef NET_UDP_HAVE_STACK
       case IP_PROTO_UDP:   /* UDP input */
         udp_ipv4_input(dev);
         break;

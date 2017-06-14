@@ -80,7 +80,7 @@ static struct icmpv6_notify_s *g_icmpv6_waiters;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: icmpv6_wait_setup
+ * Name: icmpv6_wait_setup
  *
  * Description:
  *   Called BEFORE an Neighbor Solicitation is sent.  This function sets up
@@ -119,7 +119,7 @@ void icmpv6_wait_setup(const net_ipv6addr_t ipaddr,
 }
 
 /****************************************************************************
- * Function: icmpv6_wait_cancel
+ * Name: icmpv6_wait_cancel
  *
  * Description:
  *   Cancel any wait set after icmpv6_wait_setup is called but before
@@ -169,7 +169,7 @@ int icmpv6_wait_cancel(FAR struct icmpv6_notify_s *notify)
 }
 
 /****************************************************************************
- * Function: icmpv6_wait
+ * Name: icmpv6_wait
  *
  * Description:
  *   Called each time that a Neighbor Solicitation is sent.  This function
@@ -224,7 +224,7 @@ int icmpv6_wait(FAR struct icmpv6_notify_s *notify,
 }
 
 /****************************************************************************
- * Function: icmpv6_notify
+ * Name: icmpv6_notify
  *
  * Description:
  *   Called each time that a Neighbor Advertisement is received in order to

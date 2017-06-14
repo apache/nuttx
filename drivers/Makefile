@@ -52,6 +52,7 @@ VPATH = .
 include analog$(DELIM)Make.defs
 include audio$(DELIM)Make.defs
 include bch$(DELIM)Make.defs
+include can$(DELIM)Make.defs
 include i2c$(DELIM)Make.defs
 include input$(DELIM)Make.defs
 include ioexpander$(DELIM)Make.defs
@@ -72,6 +73,7 @@ include syslog$(DELIM)Make.defs
 include timers$(DELIM)Make.defs
 include usbdev$(DELIM)Make.defs
 include usbhost$(DELIM)Make.defs
+include usbmisc$(DELIM)Make.defs
 include usbmonitor$(DELIM)Make.defs
 include video$(DELIM)Make.defs
 include wireless$(DELIM)Make.defs
@@ -89,10 +91,6 @@ ifeq ($(CONFIG_DRVR_READAHEAD),y)
   CSRCS += rwbuffer.c
 endif
 endif
-endif
-
-ifeq ($(CONFIG_CAN),y)
-  CSRCS += can.c
 endif
 
 ifeq ($(CONFIG_PWM),y)

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/a1x/a1x_serial.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1035,7 +1035,7 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, uart_interrupt, priv);
+  ret = irq_attach(priv->irq, uart_interrupt, dev);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -1080,7 +1080,7 @@ static void up_detach(struct uart_dev_s *dev)
 static int uart_interrupt(int irq, void *context, void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
-  struct up_dev_s *priv = (struct up_dev_s *)arg;
+  struct up_dev_s *priv;
   uint32_t status;
   int passes;
 

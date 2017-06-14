@@ -54,13 +54,14 @@
 #include "tcp/tcp.h"
 #include "local/local.h"
 #include "socket/socket.h"
+#include "usrsock/usrsock.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_accept
+ * Name: psock_accept
  *
  * Description:
  *   The psock_accept function is used with connection-based socket types
@@ -129,7 +130,9 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                  FAR socklen_t *addrlen, FAR struct socket *newsock)
 {
   int errcode;
+#if defined(NET_TCP_HAVE_STACK) || defined(CONFIG_NET_LOCAL_STREAM)
   int ret;
+#endif
 
   DEBUGASSERT(psock != NULL);
 
@@ -141,6 +144,13 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   if (psock->s_type != SOCK_STREAM)
     {
+#ifdef CONFIG_NET_USRSOCK
+      if (psock->s_type == SOCK_USRSOCK_TYPE)
+        {
+#warning "Missing logic"
+        }
+#endif
+
       errcode = EOPNOTSUPP;
       goto errout;
     }
@@ -238,6 +248,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   else
 #endif
     {
+#ifdef NET_TCP_HAVE_STACK
       /* Perform the local accept operation (with the network locked) */
 
       net_lock();
@@ -267,6 +278,10 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
         }
 
       net_unlock();
+#else
+      errcode = EOPNOTSUPP;
+      goto errout;
+#endif /* NET_TCP_HAVE_STACK */
     }
 #endif /* CONFIG_NET_TCP */
 
@@ -278,8 +293,10 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   leave_cancellation_point();
   return OK;
 
+#ifdef NET_TCP_HAVE_STACK
 errout_after_accept:
   psock_close(newsock);
+#endif
 
 errout:
   set_errno(errcode);
@@ -288,7 +305,7 @@ errout:
 }
 
 /****************************************************************************
- * Function: accept
+ * Name: accept
  *
  * Description:
  *   The accept function is used with connection-based socket types

@@ -399,7 +399,7 @@ pid_t task_vforkstart(FAR struct task_tcb_s *child)
 
   /* Eliminate a race condition by disabling pre-emption.  The child task
    * can be instantiated, but cannot run until we call waitpid().  This
-   * assures us that we cannot miss the the death-of-child signal (only
+   * assures us that we cannot miss the death-of-child signal (only
    * needed in the SMP case).
    */
 

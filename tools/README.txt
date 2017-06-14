@@ -82,6 +82,15 @@ cmdconfig.c
   This C file can be used to build a utility for comparing two NuttX
   configuration files.
 
+initialconfig.c
+---------------
+
+  This is a C file that can be used create an initial configuration.
+  This permits creating a new configuration from scratch, without
+  relying on any existing board configuration in place.  This utility
+  will create a barebones .config file sufficient only for
+  instantiating the symbolic links necesary to do a real configuration.
+
 kconfig2html.c
 --------------
 
@@ -682,7 +691,7 @@ refresh.sh
   The steps to refresh the file taken by refresh.sh are:
 
   1. Make tools/cmpconfig if it is not already built.
-  2. Copy the the defconfig file to the top-level NuttX
+  2. Copy the defconfig file to the top-level NuttX
      directory as .config (being careful to save any previous
      .config file that you might want to keep!).
   3. Execute 'make oldconfig' to update the configuration.

@@ -24,7 +24,7 @@ layer for specific lower-half audio device drivers.
   pcm_decode.c - Routines to decode PCM / WAV type data.
   README       - This file!
 
-Portions of the the audio system interface have application interfaces.  Those
+Portions of the audio system interface have application interfaces.  Those
 portions reside in the nuttx/libc/audio directory where the will be built for
 access by both OS driver logic and user application logic.  Those relevant
 files in nuttx/libc/audio include:

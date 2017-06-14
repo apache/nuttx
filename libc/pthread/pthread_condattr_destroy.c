@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_condattr_destroy
+ * Name:  pthread_condattr_destroy
  *
  * Description:
  *   Operations on condition variable attributes

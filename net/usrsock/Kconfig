@@ -1,0 +1,39 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+menu "User-space networking stack API"
+
+config NET_USRSOCK
+	bool "User-space networking stack API"
+	default n
+	depends on NET
+	---help---
+		Enable or disable user-space networking stack support.
+
+if NET_USRSOCK
+
+config NET_USRSOCK_CONNS
+	int "Number of usrsock connections"
+	default 6
+	---help---
+		Maximum number of usrsock connections (all tasks).
+
+		Note: Usrsock daemon can impose additional restrictions for
+		maximum number of concurrent connections supported.
+
+config NET_USRSOCK_UDP
+	bool "User-space daemon provides UDP sockets"
+	default n
+	select NET_UDP
+	---help---
+
+config NET_USRSOCK_TCP
+	bool "User-space daemon provides TCP sockets"
+	default n
+	select NET_TCP
+	---help---
+
+endif # NET_USRSOCK
+endmenu # User-space networking stack API

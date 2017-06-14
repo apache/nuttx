@@ -50,6 +50,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/sensors/mpl115a.h>
+#include <nuttx/random.h>
 
 #if defined(CONFIG_SPI) && defined(CONFIG_MPL115A)
 
@@ -141,7 +142,7 @@ static uint8_t mpl115a_getreg8(FAR struct mpl115a_dev_s *priv, uint8_t regaddr)
 
   /* Select the MPL115A */
 
-  SPI_SELECT(priv->spi, SPIDEV_BAROMETER, true);
+  SPI_SELECT(priv->spi, SPIDEV_BAROMETER(0), true);
 
   /* Send register to read and get the next byte */
 
@@ -150,7 +151,7 @@ static uint8_t mpl115a_getreg8(FAR struct mpl115a_dev_s *priv, uint8_t regaddr)
 
   /* Deselect the MPL115A */
 
-  SPI_SELECT(priv->spi, SPIDEV_BAROMETER, false);
+  SPI_SELECT(priv->spi, SPIDEV_BAROMETER(0), false);
 
   /* Unlock bus */
 
@@ -227,6 +228,11 @@ static void mpl115a_read_press_temp(FAR struct mpl115a_dev_s *priv)
   priv->mpl115a_temperature >>= 6; /* Tadc is 10bit unsigned */
 
   sninfo("Temperature = %d\n", priv->mpl115a_temperature);
+
+  /* Feed sensor data to entropy pool */
+
+  add_sensor_randomness((priv->mpl115a_pressure << 16) ^
+                        priv->mpl115a_temperature);
 }
 
 /****************************************************************************

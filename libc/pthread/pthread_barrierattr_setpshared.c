@@ -68,7 +68,7 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Function: pthread_barrierattr_setpshared
+ * Name: pthread_barrierattr_setpshared
  *
  * Description:
  *   The process-shared attribute is set to PTHREAD_PROCESS_SHARED to permit a

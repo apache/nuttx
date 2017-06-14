@@ -158,4 +158,4 @@ config MM_SHM
 		Build in support for the shared memory interfaces shmget(), shmat(),
 		shmctl(), and shmdt().
 
-
+source "mm/iob/Kconfig"

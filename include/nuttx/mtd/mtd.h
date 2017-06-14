@@ -2,7 +2,7 @@
  * include/nuttx/mtd/mtd.h
  * Memory Technology Device (MTD) interface
  *
- *   Copyright (C) 2009-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,7 +99,7 @@
 #endif
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MTD)
-#define CONFIG_MTD_REGISTRATION   1
+#  define CONFIG_MTD_REGISTRATION   1
 #endif
 
 /****************************************************************************
@@ -549,16 +549,6 @@ FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi,
                                          bool unprotect);
 
 /****************************************************************************
- * Name: up_flashinitialize
- *
- * Description:
- *   Create an initialized MTD device instance for internal flash.
- *
- ****************************************************************************/
-
-FAR struct mtd_dev_s *up_flashinitialize(void);
-
-/****************************************************************************
  * Name: filemtd_initialize
  *
  * Description:
@@ -594,7 +584,7 @@ bool filemtd_isfilemtd(FAR struct mtd_dev_s* mtd);
  *
  * Description:
  *   Registers MTD device with the procfs file system.  This assigns a unique
- *   MTD number and associates the given device name, then  add adds it to
+ *   MTD number and associates the given device name, then adds it to
  *   the list of registered devices.
  *
  * In an embedded system, this all is really unnecessary, but is provided

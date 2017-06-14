@@ -382,12 +382,6 @@ Common Configuration Information
        cd <nuttx-directory>/tools
        ./configure.sh sim/<subdir>
        cd -
-       . ./setenv.sh
-
-     If this is a Windows native build, then configure.bat should be used
-     instead of configure.sh:
-
-        configure.bat sim\<subdir>
 
      Where <subdir> is one of the following sub-directories.
 
@@ -806,6 +800,18 @@ ostest
 pashello
 
   Configures to use apps/examples/pashello.
+
+sixlowpan
+
+  This configuration was intended only for unit-level testing of the
+  6loWPAN stack.  It enables networking with 6loWPAN support and uses
+  only a IEEE802.15.4 MAC loopback network device to supported testing.
+
+  This configuration includes apps/examples/nettest and apps/examples/udpblaster.
+  Neither are truly functional.  The only intent of this configuration
+  is to verify that the 6loWPAN stack correctly encodes IEEE802.15.4
+  packets on output to the loopback device and correct decodes the
+  returned packet.
 
 touchscreen
 

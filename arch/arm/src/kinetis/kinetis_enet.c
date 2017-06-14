@@ -297,28 +297,30 @@ static void kinetis_polltimer_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int kinetis_ifup(struct net_driver_s *dev);
-static int kinetis_ifdown(struct net_driver_s *dev);
+static int  kinetis_ifup(struct net_driver_s *dev);
+static int  kinetis_ifdown(struct net_driver_s *dev);
 
 static void kinetis_txavail_work(FAR void *arg);
-static int kinetis_txavail(struct net_driver_s *dev);
+static int  kinetis_txavail(struct net_driver_s *dev);
 
 #ifdef CONFIG_NET_IGMP
-static int kinetis_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
-static int kinetis_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int  kinetis_addmac(struct net_driver_s *dev,
+              FAR const uint8_t *mac);
+static int  kinetis_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int kinetis_ioctl(struct net_driver_s *dev, int cmd, long arg);
+static int  kinetis_ioctl(struct net_driver_s *dev, int cmd,
+            unsigned long arg);
 #endif
 
 /* PHY/MII support */
 
 static inline void kinetis_initmii(struct kinetis_driver_s *priv);
 static int kinetis_writemii(struct kinetis_driver_s *priv, uint8_t phyaddr,
-                            uint8_t regaddr, uint16_t data);
+             uint8_t regaddr, uint16_t data);
 static int kinetis_readmii(struct kinetis_driver_s *priv, uint8_t phyaddr,
-                           uint8_t regaddr, uint16_t *data);
+             uint8_t regaddr, uint16_t *data);
 static inline int kinetis_initphy(struct kinetis_driver_s *priv);
 
 /* Initialization */
@@ -1123,7 +1125,7 @@ static int kinetis_ifup(struct net_driver_s *dev)
 {
   FAR struct kinetis_driver_s *priv =
     (FAR struct kinetis_driver_s *)dev->d_private;
-  uint8_t *mac = dev->d_mac.ether_addr_octet;
+  uint8_t *mac = dev->d_mac.ether.ether_addr_octet;
   uint32_t regval;
   int ret;
 
@@ -1447,7 +1449,7 @@ static int kinetis_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int kinetis_ioctl(struct net_driver_s *dev, int cmd, long arg)
+static int kinetis_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
   int ret;
   FAR struct kinetis_driver_s *priv =
@@ -2142,7 +2144,7 @@ int kinetis_netinitialize(int intf)
 
   uidl   = getreg32(KINETIS_SIM_UIDL);
   uidml  = getreg32(KINETIS_SIM_UIDML);
-  mac    = priv->dev.d_mac.ether_addr_octet;
+  mac    = priv->dev.d_mac.ether.ether_addr_octet;
 
   uidml |= 0x00000200;
   uidml &= 0x0000FEFF;

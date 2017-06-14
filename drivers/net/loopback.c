@@ -145,7 +145,7 @@ static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
  ****************************************************************************/
 
 /****************************************************************************
- * Function: lo_txpoll
+ * Name: lo_txpoll
  *
  * Description:
  *   Check if the network has any outgoing packets ready to send.  This is
@@ -219,7 +219,7 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: lo_poll_work
+ * Name: lo_poll_work
  *
  * Description:
  *   Perform periodic polling from the worker thread
@@ -262,7 +262,7 @@ static void lo_poll_work(FAR void *arg)
 }
 
 /****************************************************************************
- * Function: lo_poll_expiry
+ * Name: lo_poll_expiry
  *
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
@@ -289,7 +289,7 @@ static void lo_poll_expiry(int argc, wdparm_t arg, ...)
 }
 
 /****************************************************************************
- * Function: lo_ifup
+ * Name: lo_ifup
  *
  * Description:
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
@@ -331,7 +331,7 @@ static int lo_ifup(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: lo_ifdown
+ * Name: lo_ifdown
  *
  * Description:
  *   NuttX Callback: Stop the interface.
@@ -361,7 +361,7 @@ static int lo_ifdown(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: lo_txavail_work
+ * Name: lo_txavail_work
  *
  * Description:
  *   Perform an out-of-cycle poll on the worker thread.
@@ -400,7 +400,7 @@ static void lo_txavail_work(FAR void *arg)
 }
 
 /****************************************************************************
- * Function: lo_txavail
+ * Name: lo_txavail
  *
  * Description:
  *   Driver callback invoked when new TX data is available.  This is a
@@ -438,7 +438,7 @@ static int lo_txavail(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: lo_addmac
+ * Name: lo_addmac
  *
  * Description:
  *   NuttX Callback: Add the specified MAC address to the hardware multicast
@@ -465,7 +465,7 @@ static int lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
- * Function: lo_rmmac
+ * Name: lo_rmmac
  *
  * Description:
  *   NuttX Callback: Remove the specified MAC address from the hardware multicast
@@ -496,7 +496,7 @@ static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: localhost_initialize
+ * Name: localhost_initialize
  *
  * Description:
  *   Initialize the Ethernet controller and driver

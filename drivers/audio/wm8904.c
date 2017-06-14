@@ -3,7 +3,7 @@
  *
  * Audio device driver for Wolfson Microelectronics WM8904 Audio codec.
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -72,6 +72,14 @@
 #include <nuttx/lib/math.h>
 
 #include "wm8904.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Maximum number of retries */
+
+#define MAX_RETRIES  3
 
 /****************************************************************************
  * Private Function Prototypes
@@ -251,7 +259,7 @@ uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
 
   /* Try up to three times to read the register */
 
-  for (retries = 1; retries <= 3; retries++)
+  for (retries = 1; retries <= MAX_RETRIES; retries++)
     {
       struct i2c_msg_s msg[2];
       uint8_t data[2];
@@ -281,15 +289,20 @@ uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
       if (ret < 0)
         {
 #ifdef CONFIG_I2C_RESET
-          /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
+          /* Perhaps the I2C bus is locked up?  Try to shake the bus free.
+           * Don't bother with the reset if this was the last attempt.
+           */
 
-          audwarn("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
-
-          ret = I2C_RESET(priv->i2c);
-          if (ret < 0)
+          if (retries < MAX_RETRIES)
             {
-              auderr("ERROR: I2C_RESET failed: %d\n", ret);
-              break;
+              audwarn("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+
+              ret = I2C_RESET(priv->i2c);
+              if (ret < 0)
+                {
+                  auderr("ERROR: I2C_RESET failed: %d\n", ret);
+                  break;
+                }
             }
 #else
           auderr("ERROR: I2C_TRANSFER failed: %d\n", ret);
@@ -338,7 +351,7 @@ static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
 
   /* Try up to three times to read the register */
 
-  for (retries = 1; retries <= 3; retries++)
+  for (retries = 1; retries <= MAX_RETRIES; retries++)
     {
       uint8_t data[3];
       int ret;
@@ -357,15 +370,20 @@ static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
       if (ret < 0)
         {
 #ifdef CONFIG_I2C_RESET
-          /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
+          /* Perhaps the I2C bus is locked up?  Try to shake the bus free.
+           * Don't bother with the reset if this was the last attempt.
+           */
 
-          audwarn("WARNING: i2c_write failed: %d ... Resetting\n", ret);
-
-          ret = I2C_RESET(priv->i2c);
-          if (ret < 0)
+          if (retries < MAX_RETRIES)
             {
-              auderr("ERROR: I2C_RESET failed: %d\n", ret);
-              break;
+              audwarn("WARNING: i2c_write failed: %d ... Resetting\n", ret);
+
+              ret = I2C_RESET(priv->i2c);
+              if (ret < 0)
+                {
+                  auderr("ERROR: I2C_RESET failed: %d\n", ret);
+                  break;
+                }
             }
 #else
           auderr("ERROR: I2C_TRANSFER failed: %d\n", ret);

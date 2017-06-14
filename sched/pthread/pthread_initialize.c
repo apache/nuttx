@@ -40,7 +40,9 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <semaphore.h>
+#include <assert.h>
 #include <errno.h>
 
 #include "pthread/pthread.h"
@@ -63,8 +65,6 @@
  * Return Value:
  *   None
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 void pthread_initialize(void)
@@ -72,58 +72,88 @@ void pthread_initialize(void)
 }
 
 /****************************************************************************
- * Name: pthread_takesemaphore and pthread_givesemaphore
+ * Name: pthread_sem_take, pthread_sem_trytake, and
+ *       pthread_sem_give
  *
  * Description:
  *   Support managed access to the private data sets.
  *
+ *   REVISIT: These functions really do nothing more than match the return
+ *   value of the semaphore functions (0 or -1 with errno set) to the
+ *   return value of more pthread functions (0 or errno).  A better solution
+ *   would be to use an internal version of the semaphore functions that
+ *   return the error value in the correct form.
+ *
  * Parameters:
- *   None
+ *  sem  - The semaphore to lock or unlock
+ *  intr - false: ignore EINTR errors when locking; true tread EINTR as
+ *         other errors by returning the errno value
  *
  * Return Value:
- *   0 on success or an ERROR on failure with errno value set to EINVAL.
- *   Note that the errno EINTR is never returned by this function.
- *
- * Assumptions:
+ *   0 on success or an errno value on failure.
  *
  ****************************************************************************/
 
-int pthread_takesemaphore(sem_t *sem)
+int pthread_sem_take(sem_t *sem, bool intr)
 {
   /* Verify input parameters */
 
-  if (sem)
+  DEBUGASSERT(sem != NULL);
+  if (sem != NULL)
     {
       /* Take the semaphore */
 
       while (sem_wait(sem) != OK)
         {
+          int errcode = get_errno();
+
           /* Handle the special case where the semaphore wait was
            * awakened by the receipt of a signal.
            */
 
-          if (get_errno() != EINTR)
+          if (intr || errcode != EINTR)
             {
-              set_errno(EINVAL);
-              return ERROR;
+              return errcode;
             }
         }
+
       return OK;
     }
   else
     {
       /* NULL semaphore pointer! */
 
-      set_errno(EINVAL);
-      return ERROR;
+      return EINVAL;
     }
 }
 
-int pthread_givesemaphore(sem_t *sem)
+#ifdef CONFIG_PTHREAD_MUTEX_UNSAFE
+int pthread_sem_trytake(sem_t *sem)
+{
+  int ret = EINVAL;
+
+  /* Verify input parameters */
+
+  DEBUGASSERT(sem != NULL);
+  if (sem != NULL)
+    {
+      /* Try to take the semaphore */
+
+      int status = sem_trywait(sem);
+      ret = status < 0 ? get_errno() : OK;
+    }
+
+  return ret;
+}
+#endif
+
+int pthread_sem_give(sem_t *sem)
 {
   /* Verify input parameters */
 
-  if (sem)
+
+  DEBUGASSERT(sem != NULL);
+  if (sem != NULL)
     {
       /* Give the semaphore */
 
@@ -135,16 +165,13 @@ int pthread_givesemaphore(sem_t *sem)
         {
           /* sem_post() reported an error */
 
-          set_errno(EINVAL);
-          return ERROR;
+          return get_errno();
         }
     }
   else
     {
       /* NULL semaphore pointer! */
 
-      set_errno(EINVAL);
-      return ERROR;
+      return EINVAL;
     }
 }
-

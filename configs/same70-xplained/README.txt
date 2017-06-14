@@ -1099,11 +1099,9 @@ can be selected as follow:
   cd tools
   ./configure.sh same70-xplained/<subdir>
   cd -
-  . ./setenv.sh
 
-Before sourcing the setenv.sh file above, you should examine it and perform
-edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
-than holds your toolchain binaries.
+Before building, make sure that the PATH environment variable include the
+correct path to the directory than holds your toolchain binaries.
 
 And then build NuttX by simply typing the following.  At the conclusion of
 the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
@@ -1165,11 +1163,6 @@ NOTES:
      As of this writing (2015-03-11), full support is difficult to find
      for the Cortex-M7, but is supported by at least this realeasse of
      the ARM GNU tools:
-
-       https://launchpadlibrarian.net/192228215/release.txt
-
-     Current (2105-07-31) setenv.sh file are configured to use this
-     release:
 
        https://launchpadlibrarian.net/209776344/release.txt
 

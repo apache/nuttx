@@ -50,7 +50,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: pkt_find_device
+ * Name: pkt_find_device
  *
  * Description:
  *   Select the network driver to use with the PKT transaction.

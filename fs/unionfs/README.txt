@@ -37,7 +37,7 @@ fs/unionfs/README.txt
   in functions provide CGI programs.  But the BINFS file system cannot hold
   content.  Fixed content would need to be retained in a more standard file
   system such as ROMFS.  With this Union File System, you can overly the
-  BINFS mountpoint on the the ROMFS mountpoint, providing a single directory
+  BINFS mountpoint on the ROMFS mountpoint, providing a single directory
   that appears to contain the executables from the BINFS file system along
   with the web content from the ROMFS file system.
 

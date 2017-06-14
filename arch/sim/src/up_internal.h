@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_internal.h
  *
- *   Copyright (C) 2007, 2009, 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011-2012, 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -230,7 +230,7 @@ void up_longjmp(xcpt_reg_t *jb, int val) noreturn_function;
 /* up_simsmp.c ************************************************************/
 
 #ifdef CONFIG_SMP
-int sim_cpu0_initialize(void);
+int  sim_cpu0_initialize(void);
 void sim_cpu0_start(void);
 #endif
 
@@ -261,8 +261,8 @@ void up_registerblockdevice(void);
 /* up_simuart.c ***********************************************************/
 
 void simuart_start(void);
-int simuart_putc(int ch);
-int simuart_getc(void);
+int  simuart_putc(int ch);
+int  simuart_getc(void);
 bool simuart_checkc(void);
 void simuart_terminate(void);
 
@@ -294,6 +294,11 @@ int up_x11cmap(unsigned short first, unsigned short len,
                unsigned char *blue, unsigned char  *transp);
 #endif
 #endif
+
+/* up_touchscreen.c *******************************************************/
+
+int  sim_tsc_initialize(int minor);
+void sim_tsc_uninitialize(void);
 
 /* up_eventloop.c *********************************************************/
 

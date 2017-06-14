@@ -156,12 +156,10 @@ static void pthread_condtimedout(int argc, uint32_t pid, uint32_t signo)
  *   abstime - wait until this absolute time
  *
  * Return Value:
- *   OK (0) on success; ERROR (-1) on failure with errno
- *   set appropriately.
+ *   OK (0) on success; A non-zero errno value is returned on failure.
  *
  * Assumptions:
- *   Timing is of resolution 1 msec, with +/-1 millisecond
- *   accuracy.
+ *   Timing is of resolution 1 msec, with +/-1 millisecond accuracy.
  *
  ****************************************************************************/
 
@@ -169,9 +167,10 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                            FAR const struct timespec *abstime)
 {
   FAR struct tcb_s *rtcb = this_task();
-  int ticks;
-  int mypid = (int)getpid();
   irqstate_t flags;
+  uint16_t oldstate;
+  ssystime_t ticks;
+  int mypid = (int)getpid();
   int ret = OK;
   int status;
 
@@ -236,7 +235,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
           if (ret)
             {
               /* Restore interrupts  (pre-emption will be enabled when
-               * we fall through the if/then/else
+               * we fall through the if/then/else)
                */
 
               leave_critical_section(flags);
@@ -262,8 +261,8 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                   /* Give up the mutex */
 
                   mutex->pid = -1;
-                  ret = pthread_givesemaphore((FAR sem_t *)&mutex->sem);
-                  if (ret)
+                  ret = pthread_mutex_give(mutex);
+                  if (ret != 0)
                     {
                       /* Restore interrupts  (pre-emption will be enabled when
                        * we fall through the if/then/else)
@@ -318,12 +317,16 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                   /* Reacquire the mutex (retaining the ret). */
 
                   sinfo("Re-locking...\n");
-                  status = pthread_takesemaphore((FAR sem_t *)&mutex->sem);
-                  if (!status)
+
+                  oldstate = pthread_disable_cancel();
+                  status = pthread_mutex_take(mutex, false);
+                  pthread_enable_cancel(oldstate);
+
+                  if (status == OK)
                     {
                       mutex->pid = mypid;
                     }
-                  else if (!ret)
+                  else if (ret == 0)
                     {
                       ret = status;
                     }

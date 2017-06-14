@@ -48,6 +48,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/sensors/adxl345.h>
+#include <nuttx/random.h>
 
 #include "adxl345.h"
 
@@ -164,6 +165,9 @@ static ssize_t adxl345_read(FAR struct file *filep, FAR char *buffer, size_t len
   sample.data_y = (sample.data_y << 8) | adxl345_getreg8(priv, ADXL345_DATAY0);
   sample.data_z =  adxl345_getreg8(priv, ADXL345_DATAZ1);
   sample.data_z = (sample.data_z << 8) | adxl345_getreg8(priv, ADXL345_DATAZ0);
+
+  add_sensor_randomness(sample.data_x);
+  add_sensor_randomness((sample.data_z << 16) | sample.data_y);
 
   /* Return read sample */
 

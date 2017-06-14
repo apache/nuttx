@@ -375,7 +375,7 @@ void sam_automount_event(int slotno, bool inserted)
 
       if (!state->enable)
         {
-          /* Yes.. just remember the there is a pending interrupt. We will
+          /* Yes.. just remember that there is a pending interrupt. We will
            * deliver the interrupt when interrupts are "re-enabled."
            */
 

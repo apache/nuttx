@@ -92,7 +92,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Function: vs1053_initialize
+ * Name: vs1053_initialize
  *
  * Description:
  *   Initialize the VS1053 driver.  This will perform a chip reset of the

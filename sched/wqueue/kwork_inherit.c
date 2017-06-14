@@ -110,6 +110,11 @@ static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
                   wtcb->pend_reprios[wtcb->npend_reprio] = wtcb->sched_priority;
                   wtcb->npend_reprio++;
                 }
+              else
+                {
+                  serr("ERROR: CONFIG_SEM_NNESTPRIO exceeded\n");
+                  DEBUGASSERT(wtcb->npend_reprio < CONFIG_SEM_NNESTPRIO);
+                }
             }
 
           /* Raise the priority of the worker.  This cannot cause a context
@@ -129,8 +134,16 @@ static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
            * saved priority and not to the base priority.
            */
 
-          wtcb->pend_reprios[wtcb->npend_reprio] = reqprio;
-          wtcb->npend_reprio++;
+          if (wtcb->npend_reprio < CONFIG_SEM_NNESTPRIO)
+            {
+              wtcb->pend_reprios[wtcb->npend_reprio] = reqprio;
+              wtcb->npend_reprio++;
+            }
+          else
+            {
+              serr("ERROR: CONFIG_SEM_NNESTPRIO exceeded\n");
+              DEBUGASSERT(wtcb->npend_reprio < CONFIG_SEM_NNESTPRIO);
+            }
         }
     }
 #else
@@ -390,4 +403,5 @@ void lpwork_restorepriority(uint8_t reqprio)
   leave_critical_section(flags);
 }
 
-#endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_LPWORK && CONFIG_PRIORITY_INHERITANCE */
+#endif /* CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_LPWORK && \
+        * CONFIG_PRIORITY_INHERITANCE */

@@ -173,7 +173,7 @@ int shmdt(FAR const void *shmaddr)
       region->sr_ds.shm_nattch--;
     }
 
-  /* Save the process ID of the the last operation */
+  /* Save the process ID of the last operation */
 
   region->sr_ds.shm_lpid = tcb->pid;
 

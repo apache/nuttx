@@ -113,6 +113,12 @@ ifeq ($(CONFIG_WIRELESS),y)
 NUTTXLIBS += lib$(DELIM)libwireless$(LIBEXT)
 endif
 
+# Add C++ library
+
+ifeq ($(CONFIG_HAVE_CXX),y)
+NUTTXLIBS += lib$(DELIM)libcxx$(LIBEXT)
+endif
+
 # Export only the user libraries
 
 EXPORTLIBS = $(USERLIBS)

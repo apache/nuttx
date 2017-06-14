@@ -173,7 +173,7 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
   FAR struct mqueue_inode_s *msgq;
   FAR struct mqueue_msg_s *mqmsg = NULL;
   irqstate_t flags;
-  int ticks;
+  ssystime_t ticks;
   int result;
   int ret = ERROR;
 

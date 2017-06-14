@@ -129,7 +129,7 @@ static inline void rcc_enableahb1(void)
 {
   uint32_t regval;
 
-  /* Set the appropriate bits in the AHB1ENR register to enabled the
+  /* Set the appropriate bits in the AHB1ENR register to enable the
    * selected AHB1 peripherals.
    */
 
@@ -157,6 +157,12 @@ static inline void rcc_enableahb1(void)
   /* TSC clock enable */
 
   regval |= RCC_AHB1ENR_TSCEN;
+#endif
+
+#ifdef CONFIG_STM32L4_DMA2D
+  /* DMA2D clock enable */
+
+  regval |= RCC_AHB1ENR_DMA2DEN;
 #endif
 
   putreg32(regval, STM32L4_RCC_AHB1ENR);   /* Enable peripherals */
@@ -205,6 +211,9 @@ static inline void rcc_enableahb2(void)
 #if STM32L4_NPORTS > 7
              | RCC_AHB2ENR_GPIOHEN
 #endif
+#if STM32L4_NPORTS > 8
+             | RCC_AHB2ENR_GPIOIEN
+#endif
              );
 #endif
 
@@ -220,10 +229,22 @@ static inline void rcc_enableahb2(void)
   regval |= RCC_AHB2ENR_ADCEN;
 #endif
 
+#ifdef CONFIG_STM32L4_DCMI
+  /* Digital Camera interfaces clock enable */
+
+  regval |= RCC_AHB2ENR_DCMIEN;
+#endif
+
 #ifdef CONFIG_STM32L4_AES
   /* Cryptographic modules clock enable */
 
   regval |= RCC_AHB2ENR_AESEN;
+#endif
+
+#ifdef CONFIG_STM32L4_HASH
+  /* HASH module clock enable */
+
+  regval |= RCC_AHB2ENR_HASHEN;
 #endif
 
 #ifdef CONFIG_STM32L4_RNG
@@ -256,7 +277,7 @@ static inline void rcc_enableahb3(void)
 #ifdef CONFIG_STM32L4_FSMC
   /* Flexible static memory controller module clock enable */
 
-  regval |= RCC_AHB3ENR_FMCEN;
+  regval |= RCC_AHB3ENR_FSMCEN;
 #endif
 
 
@@ -389,6 +410,12 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR1_CAN1EN;
 #endif
 
+#ifdef CONFIG_STM32L4_CAN2
+  /* CAN 2 clock enable */
+
+  regval |= RCC_APB1ENR1_CAN2EN;
+#endif
+
   /* Power interface clock enable.  The PWR block is always enabled so that
    * we can set the internal voltage regulator as required.
    */
@@ -423,6 +450,12 @@ static inline void rcc_enableapb1(void)
   /* Low power uart clock enable */
 
   regval |= RCC_APB1ENR2_LPUART1EN;
+#endif
+
+#ifdef CONFIG_STM32L4_I2C4
+  /* I2C4 clock enable */
+
+  regval |= RCC_APB1ENR2_I2C4EN;
 #endif
 
 #ifdef CONFIG_STM32L4_SWPMI
@@ -530,7 +563,7 @@ static inline void rcc_enableapb2(void)
   regval |= RCC_APB2ENR_SAI2EN;
 #endif
 
-#ifdef CONFIG_STM32L4_DFSDM
+#ifdef CONFIG_STM32L4_DFSDM1
   /* DFSDM clock enable */
 
   regval |= RCC_APB2ENR_DFSDMEN;
@@ -781,7 +814,6 @@ static void stm32l4_stdclockconfig(void)
 
       regval  = getreg32(STM32L4_RCC_PLLSAI2CFG);
 
-      /* Enable the SAI2 PLL */
       /* Set the PLL dividers and multipliers to configure the SAI2 PLL */
 
       regval = (STM32L4_PLLSAI2CFG_PLLN | STM32L4_PLLSAI2CFG_PLLP |
@@ -796,7 +828,7 @@ static void stm32l4_stdclockconfig(void)
 
       putreg32(regval, STM32L4_RCC_PLLSAI2CFG);
 
-      /* Enable the SAI1 PLL */
+      /* Enable the SAI2 PLL */
 
       regval  = getreg32(STM32L4_RCC_CR);
       regval |= RCC_CR_PLLSAI2ON;
@@ -809,7 +841,7 @@ static void stm32l4_stdclockconfig(void)
         }
 #endif
 
-      /* Enable FLASH prefetch, instruction cache, data cache, and 5 wait states */
+      /* Enable FLASH prefetch, instruction cache, data cache, and 4 wait states */
 
 #ifdef CONFIG_STM32L4_FLASH_PREFETCH
       regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_PRFTEN);
@@ -889,7 +921,7 @@ static void stm32l4_stdclockconfig(void)
 #endif
 
 /****************************************************************************
- * Name: rcc_enableperiphals
+ * Name: rcc_enableperipherals
  ****************************************************************************/
 
 static inline void rcc_enableperipherals(void)

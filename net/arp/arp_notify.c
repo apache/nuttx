@@ -68,11 +68,11 @@ static FAR struct arp_notify_s *g_arp_waiters;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: arp_wait_setup
+ * Name: arp_wait_setup
  *
  * Description:
  *   Called BEFORE an ARP request is sent.  This function sets up the ARP
- *   response timeout before the the ARP request is sent so that there is
+ *   response timeout before the ARP request is sent so that there is
  *   no race condition when arp_wait() is called.
  *
  * Assumptions:
@@ -106,7 +106,7 @@ void arp_wait_setup(in_addr_t ipaddr, FAR struct arp_notify_s *notify)
 }
 
 /****************************************************************************
- * Function: arp_wait_cancel
+ * Name: arp_wait_cancel
  *
  * Description:
  *   Cancel any wait set after arp_wait_setup is called but before arp_wait()
@@ -155,7 +155,7 @@ int arp_wait_cancel(FAR struct arp_notify_s *notify)
 }
 
 /****************************************************************************
- * Function: arp_wait
+ * Name: arp_wait
  *
  * Description:
  *   Called each time that a ARP request is sent.  This function will sleep
@@ -220,7 +220,7 @@ int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout)
 }
 
 /****************************************************************************
- * Function: arp_notify
+ * Name: arp_notify
  *
  * Description:
  *   Called each time that a ARP response is received in order to wake-up

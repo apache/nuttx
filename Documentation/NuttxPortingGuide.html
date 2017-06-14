@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: February 7, 2017</p>
+      <p>Last Updated: May 20, 2017</p>
     </td>
   </tr>
 </table>
@@ -149,7 +149,7 @@
       <a href="#up_addrenv_kstackfree">4.5.16 <code>up_addrenv_kstackfree()</code></a>
     </ul>
     <a href="#boardctl">4.6 <code>boardctl()</code> Application Interface</a><br>
-    <a href="#boardsmp">4.7 Symmetric Multiprocssing (SMP) Application Interface</a>
+    <a href="#boardsmp">4.7 Symmetric Multiprocessing (SMP) Application Interface</a>
     <ul>
       <a href="#uptestset">4.7.1 <code>up_testset()</code></a><br>
       <a href="#upcpuindex">4.7.2 <code>up_cpu_index()</code></a><br>
@@ -177,6 +177,13 @@
       <a href="#ledheaders">4.11.1 Header Files</a><br>
       <a href="#leddefinitions">4.11.2 LED Definitions</a><br>
       <a href="#ledapis">4.11.3 Common LED interfaces</a>
+    </ul>
+    <a href="#iobs">4.12 I/O Buffer Management</a>
+    <ul>
+      <a href="#iobconfig">4.12.1 Configuration Options</a><br>
+      <a href="#iobthrottle">4.12.2 Throttling</a><br>
+      <a href="#iobtypes">4.12.3 Public Types</a><br>
+      <a href="#iobprotos">4.12.4 Public Function Prototypes</a>
     </ul>
   </ul>
   <a href="#NxFileSystem">5.0 NuttX File System</a><br>
@@ -253,7 +260,7 @@
 
 <p>
   <b>Directory Structure</b>.
-  The general directly layout for NuttX is very similar to the directory structure
+  The general directory layout for NuttX is very similar to the directory structure
   of the Linux kernel -- at least at the most superficial layers.
   At the top level is the main makefile and a series of sub-directories identified
   below and discussed in the following paragraphs:
@@ -416,7 +423,7 @@
     <i>Chip/SoC specific files</i>.
     Each processor processor architecture is embedded in chip or <i>System-on-a-Chip</i> (SoC) architecture.
     The full chip architecture includes the processor architecture plus chip-specific interrupt logic,
-    clocking logic, general purpose I/O (GIO) logic, and specialized, internal peripherals (such as UARTs, USB, etc.).
+    clocking logic, general purpose I/O (GPIO) logic, and specialized, internal peripherals (such as UARTs, USB, etc.).
     <p>
       These chip-specific files are contained within chip-specific sub-directories in the
       <code>arch/</code><i>&lt;arch-name&gt;</i><code>/</code> directory and are selected via
@@ -742,12 +749,10 @@
 |   `-- <i>(board-specific source files)</i>
 |-- <i>&lt;config1-dir&gt;</i>
 |   |-- Make.defs
-|   |-- defconfig
-|   `-- setenv.sh
+|   `-- defconfig
 |-- <i>&lt;config2-dir&gt;</i>
 |   |-- Make.defs
-|   |-- defconfig
-|   `-- setenv.sh
+|   `-- defconfig
 |   ...
 `-- <i>(other board-specific configuration sub-directories)</i>/
 </pre></ul>
@@ -780,7 +785,7 @@
   The <code>configs/</code><i>&lt;board-name&gt;</i><code>/</code> sub-directory holds all of the
   files that are necessary to configure NuttX for the particular board.
   A board may have various different configurations using the common source files.
-  Each board configuration is described by three files:  <code>Make.defs</code>, <code>defconfig</code>, and <code>setenv.sh</code>.
+  Each board configuration is described by two files:  <code>Make.defs</code> and <code>defconfig</code>.
   Typically, each set of configuration files is retained in a separate configuration sub-directory
   (<i>&lt;config1-dir&gt;</i>, <i>&lt;config2-dir&gt;</i>, .. in the above diagram).
 
@@ -835,15 +840,6 @@
       <li>to generate <code>include/nuttx/config.h</code> which is included by
           most C files in the system.</li>
     </ol>
-  </li>
-  <li>
-    <p>
-      <code>setenv.sh</code>: This is a script that can be included that will be installed at
-      the top level of the directory structure and can be sourced to set any
-      necessary environment variables.
-      You will most likely have to customize the default <code>setenv.sh</code> script in order
-      for it to work correctly in your environment.
-    </p>
   </li>
 </ul>
 
@@ -912,7 +908,7 @@ config ARCH_BOARD
   In our case, these files reside in <code>configs/myboard</code> and we add the following to the long list of defaults (again in alphabetical order):
 </p>
 <ul><pre>
-    default "myboar"              if ARCH_BOARD_MYBOARD
+    default "myboard"             if ARCH_BOARD_MYBOARD
 </pre></ul>
 <p>
   Now the build system knows where to find your board configuration!
@@ -1015,7 +1011,7 @@ drivers/
 |-- spi/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common SPI-related drivers and helper fuctions)</i>
+|   `-- <i>(Common SPI-related drivers and helper functions)</i>
 |-- syslog/
 |   |-- Kconfig
 |   |-- Make.defs
@@ -1145,7 +1141,7 @@ include/
 |   |-input/
 |   |  `-- <i>(Input device driver header files)</i>
 |   |-ioexpander/
-|   |  `-- <i>(I/O exander and GPIO drvier header files)</i>
+|   |  `-- <i>(I/O expander and GPIO driver header files)</i>
 |   |-lcd/
 |   |  `-- <i>(LCD driver header files)</i>
 |   |-leds/
@@ -1188,7 +1184,7 @@ include/
 
 <p>
   This is a (almost) empty directory that has a holding place for generated static libraries.
-  The NuttX build system generates a collection of such static libraries in this directory during the compile phaase.
+  The NuttX build system generates a collection of such static libraries in this directory during the compile phase.
   These libraries are then in a known place for the final link phase where they are accessed to generated the final binaries.
 </p>
 
@@ -1313,7 +1309,7 @@ tools/
 |-- cnvwindeps.c
 |-- copydir.sh / copydir.bat
 |-- define.sh / define.bat
-|-- incdir.sh / indir.bat
+|-- incdir.sh / incdir.bat
 |-- indent.sh
 |-- link.sh / link.bat
 |-- mkconfig.c
@@ -1364,7 +1360,6 @@ tools/
 </p>
 <ul>
   <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/]Make.defs</code> to <code>${TOPDIR}/Make.defs</code>,<li>
-  <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/]setenv.sh</code> to <code>${TOPDIR}/setenv.sh</code>, and</li>
   <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/]defconfig</code> to <code>${TOPDIR}/.config</code></li>
 </ul>
 
@@ -1464,7 +1459,6 @@ tools/version.h -v 6.1 .version
 </p>
 <ul><pre>
 cd ${TOPDIR}
-source ./setenv.sh
 make
 </pre></ul>
 <p>
@@ -1477,15 +1471,12 @@ make
   That directory also holds:
 </p>
 <ul>
-  <li>The makefile fragment <a href="#boardconfigsubdirs"><code>.config</code></a> that describes the current configuration.</li>
-  <li>The makefile fragment <a href="#boardconfigsubdirs"><code>Make.defs</code></a> that provides customized build targets, and</li>
-  <li>The shell script <a href="#boardconfigsubdirs"><code>setenv.sh</code></a> that sets up the configuration environment for the build.</li>
+  <li>The makefile fragment <a href="#boardconfigsubdirs"><code>.config</code></a> that describes the current configuration, and</li>
+  <li>The makefile fragment <a href="#boardconfigsubdirs"><code>Make.defs</code></a> that provides customized build targets.</li>
 </ul>
 <p>
-The <a href="#boardconfigsubdirs"><code>setenv.sh</code></a> contains Linux/Cygwin environmental settings that are needed for the build.
+<b>Environment Variables</b>.
 The specific environmental definitions are unique for each board but should include, as a minimum, updates to the <code>PATH</code> variable to include the full path to the architecture-specific toolchain identified in <a href="#boardconfigsubdirs"><code>Make.defs</code></a>.
-The <a href="#boardconfigsubdirs"><code>setenv.sh</code></a> only needs to be source'ed at the beginning of a session.
-The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 <p>
   <b>First Time Make.</b>
@@ -2146,7 +2137,7 @@ else
   <dd>Most MCUs include RTC hardware built into the chip.
       Other RTCs, <i>external</i> MCUs, may be provided as separate chips typically
       interfacing with the MCU via a serial interface such as SPI or I2C.
-      These external RTCs differ from the builtin RTCs in that they cannot be initialized
+      These external RTCs differ from the built-in RTCs in that they cannot be initialized
       until the operating system is fully booted and can support the required serial
       communications.  <code>CONFIG_RTC_EXTERNAL</code> will configure the operating
       system so that it defers initialization of its time facilities.
@@ -2174,7 +2165,7 @@ else
 </p>
 <ul>
   <li><code>up_rtc_initialize()</code>.
-     Initialize the builtin, MCU hardware RTC per the selected configuration.
+     Initialize the built-in, MCU hardware RTC per the selected configuration.
      This function is called once very early in the OS initialization sequence.
      NOTE that initialization of external RTC hardware that depends on the
      availability of OS resources (such as SPI or I2C) must be deferred
@@ -2307,7 +2298,7 @@ config ARCH_SIM
       In the default configuration where system time is provided by a periodic timer interrupt, the default system timer is configure the timer for 100Hz or <code>CONFIG_USEC_PER_TICK=10000</code>. If <code>CONFIG_SCHED_TICKLESS</code> is selected, then there are no system timer interrupt. In this case, <code>CONFIG_USEC_PER_TICK</code> does not control any timer rates. Rather, it only determines the resolution of time reported by <code>clock_systimer()</code> and the resolution of times that can be set for certain delays including watchdog timers and delayed work.
     </p>
     <p>
-      In this case there is still a trade-off: It is better to have the <code>CONFIG_USEC_PER_TICK</code> as low as possible for higher timing resolution. However, the the time is currently held in <code>unsigned int</code>. On some systems, this may be 16-bits in width but on most contemporary systems it will be 32-bits. In either case, smaller values of <code>CONFIG_USEC_PER_TICK</code> will reduce the range of values that delays that can be represented. So the trade-off is between range and resolution (you could also modify the code to use a 64-bit value if you really want both).
+      In this case there is still a trade-off: It is better to have the <code>CONFIG_USEC_PER_TICK</code> as low as possible for higher timing resolution. However, the time is currently held in <code>unsigned int</code>. On some systems, this may be 16-bits in width but on most contemporary systems it will be 32-bits. In either case, smaller values of <code>CONFIG_USEC_PER_TICK</code> will reduce the range of values that delays that can be represented. So the trade-off is between range and resolution (you could also modify the code to use a 64-bit value if you really want both).
     </p>
     <p>
       The default, 100 microseconds, will provide for a range of delays up to 120 hours.
@@ -2318,14 +2309,14 @@ config ARCH_SIM
   </li>
 </ul>
 
-<h4><a name="tickimport">4.3.4.4 Tickless Imported Intefaces</a></h4>
+<h4><a name="tickimport">4.3.4.4 Tickless Imported Interfaces</a></h4>
 <p>
   The interfaces that must be provided by the platform specified code are defined in <code>include/nuttx/arch.h</code>, listed below, and summarized in the following paragraphs:
 </p>
 <ul>
   <li>
     <a href="#uptimerinit"><i>&lt;arch&gt;</i><code>_timer_initialize()</code></a>:
-    Initializes the timer facilities.  Called early in the intialization sequence (by <code>up_intialize()</code>).
+    Initializes the timer facilities.  Called early in the initialization sequence (by <code>up_initialize()</code>).
   </li>
   <li>
     <a href="#uptimergettime"><code>up_timer_gettime()</code></a>:
@@ -2345,7 +2336,7 @@ config ARCH_SIM
   </li>
   <li>
     <a href="#upalarmstart"><code>up_alarm_start()</code></a>:
-    Enables (or re-enables) the alaram.
+    Enables (or re-enables) the alarm.
   </li>
 </ul>
 <p>
@@ -2388,7 +2379,7 @@ void <i>&lt;arch&gt;</i>_timer_initialize()(void);
 </pre></ul>
 <p><b>Description</b>:</p>
 <ul>
-  Initializes all platform-specific timer facilities. This function is called early in the initialization sequence by <code>up_intialize()</code>. On return, the current up-time should be available from <code>up_timer_gettime()</code> and the interval timer is ready for use (but not actively timing).
+  Initializes all platform-specific timer facilities. This function is called early in the initialization sequence by <code>up_initialize()</code>. On return, the current up-time should be available from <code>up_timer_gettime()</code> and the interval timer is ready for use (but not actively timing).
 </ul>
 <p><b>Input Parameters</b>:</p>
 <ul>
@@ -2424,7 +2415,7 @@ int up_timer_gettime(FAR struct timespec *ts);
 </ul>
 <p><b>Assumptions</b>:</p>
 <ul>
-  Called from the the normal tasking context. The implementation must provide whatever mutual exclusion is necessary for correct operation. This can include disabling interrupts in order to assure atomic register operations.
+  Called from the normal tasking context. The implementation must provide whatever mutual exclusion is necessary for correct operation. This can include disabling interrupts in order to assure atomic register operations.
 </ul>
 
 <h5><a name="upalarmcancel">4.3.4.4.3 <code>up_alarm_cancel()</code></a></h5>
@@ -2447,7 +2438,7 @@ int up_alarm_cancel(FAR struct timespec *ts);
 </ul>
 <p><b>Assumptions</b>:</p>
 <ul>
-  May be called from interrupt level handling or from the normal tasking level. iterrupts may need to be disabled internally to assure non-reentrancy.
+  May be called from interrupt level handling or from the normal tasking level. interrupts may need to be disabled internally to assure non-reentrancy.
 </ul>
 
 <h5><a name="upalarmstart">4.3.4.4.4 <code>up_alarm_start()</code></a></h5>
@@ -2457,7 +2448,7 @@ int up_alarm_cancel(FAR struct timespec *ts);
 int up_alarm_start(FAR const struct timespec *ts);
 </pre></ul>
 <p><b>Description</b>:</p>
-  Start the alarm. <code>sched_timer_expiration()</code> will be called when the alarm occurs (unless <code>up_alaram_cancel</code> is called to stop it).
+  Start the alarm. <code>sched_timer_expiration()</code> will be called when the alarm occurs (unless <code>up_alarm_cancel</code> is called to stop it).
 <ul>
 </ul>
 <p><b>Input Parameters</b>:</p>
@@ -2493,7 +2484,7 @@ int up_timer_cancel(FAR struct timespec *ts);
 </ul>
 <p><b>Assumptions</b>:</p>
 <ul>
-  May be called from interrupt level handling or from the normal tasking level. iterrupts may need to be disabled internally to assure non-reentrancy.
+  May be called from interrupt level handling or from the normal tasking level. interrupts may need to be disabled internally to assure non-reentrancy.
 </ul>
 
 <h5><a name="uptimerstart">4.3.4.4.6 <code>up_timer_start()</code></a></h5>
@@ -2721,7 +2712,7 @@ VxWorks provides the following comparable interface:
 </p>
 <pre>
     #include &lt;nuttx/wdog.h&gt;
-    Sint wd_gettime(WDOG_ID wdog);
+    int wd_gettime(WDOG_ID wdog);
 </pre>
 <p>
   <b>Description:</b>
@@ -2777,7 +2768,7 @@ typedef uint32_t  wdparm_t;
 <h3><a name="wqclasses">4.4.1 Classes of Work Queues</a></h3>
 
 <p><b>Classes of Work Queues</b>.
-  There are three different classes of work queues, each with different properties and intended usage.  These class of work queues along with the the common work queue interface are described in the following paragraphs.
+  There are three different classes of work queues, each with different properties and intended usage.  These class of work queues along with the common work queue interface are described in the following paragraphs.
 </p>
 
 <h4><a name="hpwork">4.4.1.1 High Priority Kernel Work queue</a></h4>
@@ -2796,13 +2787,13 @@ typedef uint32_t  wdparm_t;
 </p>
 <ul>
   <li><code>CONFIG_SCHED_HPWORK</code>.
-    Enables the hight prioirity work queue.
+    Enables the hight priority work queue.
   </li>
   <li><code>CONFIG_SCHED_HPWORKPRIORITY</code>.
     The execution priority of the high-priority worker thread.  Default: 224
   </li>
   <li><code>CONFIG_SCHED_HPWORKPERIOD</code>.
-    How often the worker thread re-checks for work in units of microseconds.  This work period is really only necessary if the the high priority thread is performing periodic garbage collection.  The worker thread will be awakened immediately with it is queued work to be done.  If the high priority worker thread is performing garbage collection, then the default is 50*1000 (50 MS).  Otherwise, if the lower priority worker thread is performing garbage collection, the default is 100*1000.
+    How often the worker thread re-checks for work in units of microseconds.  This work period is really only necessary if the high priority thread is performing periodic garbage collection.  The worker thread will be awakened immediately with it is queued work to be done.  If the high priority worker thread is performing garbage collection, then the default is 50*1000 (50 MS).  Otherwise, if the lower priority worker thread is performing garbage collection, the default is 100*1000.
   <li><code>CONFIG_SCHED_HPWORKSTACKSIZE</code>.
     The stack size allocated for the worker thread in bytes.  Default: 2048.
   </li>
@@ -2824,7 +2815,7 @@ typedef uint32_t  wdparm_t;
 </p>
 <p>
   <b>Compared to the High Priority Work Queue</b>.
-  The lower priority work queue runs at a lower priority than the high priority work queue, of course, and so is inapproperiate to serve as a driver <i>bottom half</i>.  The lower priority work queue has the other advantages, however, that make it better suited for some tasks:
+  The lower priority work queue runs at a lower priority than the high priority work queue, of course, and so is inappropriate to serve as a driver <i>bottom half</i>.  The lower priority work queue has the other advantages, however, that make it better suited for some tasks:
 </p>
 <ul>
   <li>
@@ -2934,7 +2925,7 @@ typedef uint32_t  wdparm_t;
   </li>
   <li>
     <code>struct work_s</code>.
-    Defines one entry in the work queue.  This is a client-allocated structure.  Work queue clients should not reference any field in this structure since they are subjec to change.  The user only needs this structure in order to declare instances of the work structure.  Handling of all fields is performed by the work queue interfaces described below.
+    Defines one entry in the work queue.  This is a client-allocated structure.  Work queue clients should not reference any field in this structure since they are subject to change.  The user only needs this structure in order to declare instances of the work structure.  Handling of all fields is performed by the work queue interfaces described below.
   </li>
 </ul>
 
@@ -3194,7 +3185,7 @@ void lpwork_restorepriority(uint8_t reqprio);
 <p>
   CPUs that support memory management units (MMUs) may provide <i>address environments</i> within which tasks and their child threads execute.
   The configuration indicates the CPUs ability to support address environments by setting the configuration variable <code>CONFIG_ARCH_HAVE_ADDRENV=y</code>.
-  That will enable the selection of the actual address evironment support which is indicated by the selection of the configuration variable  <code>CONFIG_ARCH_ADDRENV=y</code>.
+  That will enable the selection of the actual address environment support which is indicated by the selection of the configuration variable  <code>CONFIG_ARCH_ADDRENV=y</code>.
   These address environments are created only when tasks are created via <code>exec()</code> or <code>exec_module()</code> (see <code>include/nuttx/binfmt/binfmt.h</code>).
 </p>
 <p>
@@ -3706,7 +3697,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   -1 (<code>ERROR</code>) is returned on failure with the <code>errno</code> variable to to indicate the nature of the failure.
 </ul>
 
-<h4><a name="boardsmp">4.7 Symmetric Multiprocssing (SMP) Application Interface</a></h4>
+<h4><a name="boardsmp">4.7 Symmetric Multiprocessing (SMP) Application Interface</a></h4>
 <p>
 According to Wikipedia: "Symmetric multiprocessing (SMP) involves a symmetric multiprocessor system hardware and software architecture where two or more identical processors connect to a single, shared main memory, have full access to all I/O devices, and are controlled by a single operating system instance that treats all processors equally, reserving none for special purposes. Most multiprocessor systems today use an SMP architecture. In the case of multi-core processors, the SMP architecture applies to the cores, treating them as separate processors. 
 </p>
@@ -3789,7 +3780,7 @@ int up_cpu_start(int cpu);
 <p><b>Description</b>:</p>
 <ul>
   <p>
-    In an SMP configution, only one CPU is initially active (CPU 0).
+    In an SMP configuration, only one CPU is initially active (CPU 0).
     System initialization occurs on that single thread.
     At the completion of the initialization of the OS, just before beginning normal multitasking, the additional CPUs would be started by calling this function.
   </p>
@@ -3935,7 +3926,7 @@ void sched_timer_expiration(void);
   Base code implementation assumes that this function is called from interrupt handling logic with interrupts disabled.
 </ul>
 
-<h3><a name="schedalarmexpiration">4.8.5 <code>sched_alaram_expiration()</code></a></h3>
+<h3><a name="schedalarmexpiration">4.8.5 <code>sched_alarm_expiration()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -4165,11 +4156,11 @@ void board_autoled_off(int led);
   <small><blockquote>
     <b>NOTE:</b> In most architectures, <code>board_autoled_initialize()</code> is called from board-specific initialization logic.
     But there are a few architectures where this initialization function is still called from common chip architecture logic.
-    This interface is nott, however, a common board interface in any event.
+    This interface is not, however, a common board interface in any event.
   </blockquote>
   <blockquote>
     <b>WARNING:</b> This interface name will eventually be removed; do not use it in new board ports.
-    New implementations should not use the naming convention for common board interfaces, but should instted use the naming conventions for microprocessor-specific interfaces or the board-specific interfaces (such as <code>stm32_led_initialize()</code>).
+    New implementations should not use the naming convention for common board interfaces, but should instead use the naming conventions for microprocessor-specific interfaces or the board-specific interfaces (such as <code>stm32_led_initialize()</code>).
   </blockquote></small>
   </li>
   <li>
@@ -4187,6 +4178,429 @@ void board_autoled_off(int led);
   </p>
   </li>
 </ul>
+
+<h2><a name="iobs">4.12 I/O Buffer Management</a></h2>
+
+NuttX supports generic I/O buffer management (IOB) logic.
+This logic was originally added to support network I/O buffering, but has been generalized to meet buffering requirements by all device drivers.
+At the time of this writing, IOBs are currently used not only be networking but also by logic in <code>drivers/syslog</code> and <code>drivers/wireless</code>.
+NOTE that some of the wording in this section still reflects those legacy roots as a part of the networking subsystem.
+This objectives of this feature are:
+
+<ol>
+  <li>
+    Provide common I/O buffer management logic for all drivers,
+  </li>
+  <li>
+    Support I/O buffer allocation from both the tasking and interrupt level contexts.
+  </li>
+  <li>
+    Use a fixed amount of pre-allocated memory.
+  </li>
+  <li>
+    No costly, non-deterministic dynamic memory allocation.
+  </li>
+  <li>
+    When the fixed number of pre-allocated I/O buffers is exhausted, further attempts to allocate memory from tasking logic will cause the task to block and wait until a an I/O buffer to be freed.
+  </li>
+  <li>
+    Each I/O buffer should be small, but can be chained together to support buffering of larger thinks such as full size network packets.
+  </li>
+  <li>
+    Support <i>throttling</i> logic to prevent lower priority tasks from hogging all available I/O buffering.
+  </li>
+</ol>
+
+<h3><a name="iobconfig">4.12.1 Configuration Options</a></h3>
+
+<dl>
+  <dt><code>CONFIG_MM_IOB</code>
+  <dd>Enables generic I/O buffer support.  This setting will build the common I/O buffer (IOB) support library.
+
+  <dt><code>CONFIG_IOB_NBUFFERS</code>
+  <dd>Number of pre-allocated I/O buffers.  Each packet is represented by a series of small I/O buffers in a chain.  This setting determines the number of preallocated I/O buffers available for packet data.
+
+  The default value is setup for network support.  The default is 8 buffers if neither TCP read-ahead or TCP write buffering is enabled (neither <code>CONFIG_NET_TCP_WRITE_BUFFERS</code> nor <code>CONFIG_NET_TCP_READAHEAD</code>), 24 if only write buffering is enabled, and 36 if both read-ahead and write buffering are enabled.
+
+  <dt><code>CONFIG_IOB_BUFSIZE</code>
+  <dd>Payload size of one I/O buffer.  Each packet is represented by a series of small I/O buffers in a chain.  This setting determines the data payload each preallocated I/O buffer.  The default value is 196 bytes.
+
+  <dt><code>CONFIG_IOB_NCHAINS</code>
+  <dd>Number of pre-allocated I/O buffer chain heads.  These tiny nodes are used as <i>containers</i> to support queueing of I/O buffer chains.  This will limit the number of I/O transactions that can be <i>in-flight</i> at any give time.  The default value of zero disables this features.
+
+  <dd>These generic I/O buffer chain containers are not currently used by any logic in NuttX.  That is because their other other specialized I/O buffer chain containers that also carry a payload of usage specific information.
+
+  The default value is zero if nether TCP nor UDP read-ahead buffering is enabled (i.e., neither <code>CONFIG_NET_TCP_READAHEAD</code> && !<code>CONFIG_NET_UDP_READAHEAD</code> or eight if either is enabled.
+
+  <dt><code>CONFIG_IOB_THROTTLE</code>
+  <dd>I/O buffer throttle value.  TCP write buffering and read-ahead buffer use the same pool of free I/O buffers.  In order to prevent uncontrolled incoming TCP packets from hogging all of the available, pre-allocated I/O buffers, a throttling value is required.  This throttle value assures that I/O buffers will be denied to the read-ahead logic before TCP writes are halted.
+
+  The default 0 if neither TCP write buffering nor TCP read-ahead buffering is enabled.  Otherwise, the default is 8.
+
+  <dt><code>CONFIG_IOB_DEBUG</code>
+  <dd>Force I/O buffer debug. This option will force debug output from I/O buffer logic.  This is not normally something that would want to do but is convenient if you are debugging the I/O buffer logic and do not want to get overloaded with other un-related debug output.
+
+  NOTE that this selection is not available if DEBUG features are not enabled (<code>CONFIG_DEBUG_FEATURES</code>) with IOBs are being used to syslog buffering logic (<code>CONFIG_SYSLOG_BUFFER</code>).
+</dl>
+
+<h3><a name="iobthrottle">4.12.2 Throttling</a></h3>
+
+<b></b>
+An allocation throttle was added.  I/O buffer allocation logic supports a throttle value originally for read-ahead buffering to prevent the read-ahead logic from consuming all available I/O buffers and blocking the write buffering logic.  This throttle logic is only needed for networking only if both write buffering and read-ahead buffering are used.  Of use of I/O buffering might have other motivations for throttling.
+
+<h3><a name="iobtypes">4.12.3 Public Types</a></h3>
+
+<p>
+  This structure represents one I/O buffer.  A packet is contained by one or more I/O buffers in a chain.  The <code>io_pktlen</code> is only valid for the I/O buffer at the head of the chain.
+</p>
+
+<pre>
+struct iob_s
+{
+  /* Singly-link list support */
+
+  FAR struct iob_s *io_flink;
+
+  /* Payload */
+
+#if CONFIG_IOB_BUFSIZE < 256
+  uint8_t  io_len;      /* Length of the data in the entry */
+  uint8_t  io_offset;   /* Data begins at this offset */
+#else
+  uint16_t io_len;      /* Length of the data in the entry */
+  uint16_t io_offset;   /* Data begins at this offset */
+#endif
+  uint16_t io_pktlen;   /* Total length of the packet */
+
+  uint8_t  io_data[CONFIG_IOB_BUFSIZE];
+};
+</pre>
+
+<p>
+  This container structure supports queuing of I/O buffer chains.  This structure is intended only for internal use by the IOB module.
+</p>
+
+<pre>
+#if CONFIG_IOB_NCHAINS > 0
+struct iob_qentry_s
+{
+  /* Singly-link list support */
+
+  FAR struct iob_qentry_s *qe_flink;
+
+  /* Payload -- Head of the I/O buffer chain */
+
+  FAR struct iob_s *qe_head;
+};
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+</pre>
+
+<p>
+  The I/O buffer queue head structure.
+</p>
+
+<pre>
+#if CONFIG_IOB_NCHAINS > 0
+struct iob_queue_s
+{
+  /* Head of the I/O buffer chain list */
+
+  FAR struct iob_qentry_s *qh_head;
+  FAR struct iob_qentry_s *qh_tail;
+};
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+</pre>
+
+<h3><a name="iobprotos">4.12.4 Public Function Prototypes</a></h3>
+
+<ul>
+  <li><a href="#iob_initialize">4.12.4.1 <code>iob_initialize()</code></a></li>
+  <li><a href="#iob_alloc">4.12.4.2 <code>iob_alloc()</code></a></li>
+  <li><a href="#iob_tryalloc">4.12.4.3 <code>iob_tryalloc()</code></a></li>
+  <li><a href="#iob_free">4.12.4.4 <code>iob_free()</code></a></li>
+  <li><a href="#iob_free_chain">4.12.4.5 <code>iob_free_chain()</code></a></li>
+  <li><a href="#iob_add_queue">4.12.4.6 <code>iob_add_queue()</code></a></li>
+  <li><a href="#iob_tryadd_queue">4.12.4.7 <code>iob_tryadd_queue()</code></a></li>
+  <li><a href="#iob_remove_queue">4.12.4.8 <code>iob_remove_queue()</code></a></li>
+  <li><a href="#iob_peek_queue">4.12.4.9 <code>iob_peek_queue()</code></a></li>
+  <li><a href="#iob_free_queue">4.12.4.10 <code>iob_free_queue()</code></a></li>
+  <li><a href="#iob_copyin">4.12.4.11 <code>iob_copyin()</code></a></li>
+  <li><a href="#iob_trycopyin">4.12.4.12 <code>iob_trycopyin()</code></a></li>
+  <li><a href="#iob_copyout">4.12.4.13 <code>iob_copyout()</code></a></li>
+  <li><a href="#iob_clone">4.12.4.14 <code>iob_clone()</code></a></li>
+  <li><a href="#iob_concat">4.12.4.15 <code>iob_concat()</code></a></li>
+  <li><a href="#iob_trimhead">4.12.4.16 <code>iob_trimhead()</code></a></li>
+  <li><a href="#iob_trimhead_queue">4.12.4.17 <code>iob_trimhead_queue()</code></a></li>
+  <li><a href="#iob_trimtail">4.12.4.18 <code>iob_trimtail()</code></a></li>
+  <li><a href="#iob_pack">4.12.4.19 <code>iob_pack()</code></a></li>
+  <li><a href="#iob_contig">4.12.4.20 <code>iob_contig()</code></a></li>
+  <li><a href="#iob_dump">4.12.4.21 <code>iob_dump()</code></a></li>
+</ul>
+
+<h4><a name="iob_initialize">4.12.4.1 <code>iob_initialize()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+void iob_initialize(void);
+</pre>
+
+<p><b>Description</b>.
+  Set up the I/O buffers for normal operations.
+</p>
+
+<h4><a name="iob_alloc">4.12.4.2 <code>iob_alloc()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+FAR struct iob_s *iob_alloc(bool throttled);
+</pre>
+
+<p><b>Description</b>.
+  Allocate an I/O buffer by taking the buffer at the head of the free list.
+</p>
+
+<h4><a name="iob_tryalloc">4.12.4.3 <code>iob_tryalloc()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+FAR struct iob_s *iob_tryalloc(bool throttled);
+</pre>
+
+<p><b>Description</b>.
+  Try to allocate an I/O buffer by taking the buffer at the head of the free list without waiting for a buffer to become free.
+</p>
+
+<h4><a name="iob_free">4.12.4.4 <code>iob_free()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+FAR struct iob_s *iob_free(FAR struct iob_s *iob);
+</pre>
+
+<p><b>Description</b>.
+   Free the I/O buffer at the head of a buffer chain returning it to the free list.  The link to  the next I/O buffer in the chain is return.
+</p>
+
+<h4><a name="iob_free_chain">4.12.4.5 <code>iob_free_chain()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+void iob_free_chain(FAR struct iob_s *iob);
+</pre>
+
+<p><b>Description</b>.
+  Free an entire buffer chain, starting at the beginning of the I/O buffer chain
+</p>
+
+<h4><a name="iob_add_queue">4.12.4.6 <code>iob_add_queue()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+#if CONFIG_IOB_NCHAINS > 0
+int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+</pre>
+
+<p><b>Description</b>.
+  Add one I/O buffer chain to the end of a queue.  May fail due to lack of resources.
+</p>
+
+<h4><a name="iob_tryadd_queue">4.12.4.7 <code>iob_tryadd_queue()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+#if CONFIG_IOB_NCHAINS > 0
+int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+</pre>
+
+<p><b>Description</b>.
+  Add one I/O buffer chain to the end of a queue without waiting for resources to become free.
+</p>
+
+<h4><a name="iob_remove_queue">4.12.4.8 <code>iob_remove_queue()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+#if CONFIG_IOB_NCHAINS > 0
+FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+</pre>
+
+<p><b>Description</b>.
+  Remove and return one I/O buffer chain from the head of a queue.
+</p>
+
+<p><b>Returned Value</b>.
+  Returns a reference to the I/O buffer chain at the head of the queue.
+</p>
+
+<h4><a name="iob_peek_queue">4.12.4.9 <code>iob_peek_queue()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+#if CONFIG_IOB_NCHAINS > 0
+FAR struct iob_s *iob_peek_queue(FAR struct iob_queue_s *iobq);
+#endif
+</pre>
+
+<p><b>Description</b>.
+  Return a reference to the I/O buffer chain at the head of a queue. This is similar to iob_remove_queue except that the I/O buffer chain is in place at the head of the queue.  The I/O buffer chain may safely be modified by the caller but must be removed from the queue before it can be freed.
+</p>
+
+<p><b>Returned Value</b>.
+  Returns a reference to the I/O buffer chain at the head of the queue.
+</p>
+
+<h4><a name="iob_free_queue">4.12.4.10 <code>iob_free_queue()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+#if CONFIG_IOB_NCHAINS > 0
+void iob_free_queue(FAR struct iob_queue_s *qhead);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+</pre>
+
+<p><b>Description</b>.
+  Free an entire queue of I/O buffer chains.
+</p>
+
+<h4><a name="iob_copyin">4.12.4.11 <code>iob_copyin()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
+               unsigned int len, unsigned int offset, bool throttled);
+</pre>
+
+<p><b>Description</b>.
+  Copy data <code>len</code> bytes from a user buffer into the I/O buffer chain, starting at <code>offset</code>, extending the chain as necessary.
+</p>
+
+<h4><a name="iob_trycopyin">4.12.4.12 <code>iob_trycopyin()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src,
+                  unsigned int len, unsigned int offset, bool throttled);
+</pre>
+
+<p><b>Description</b>.
+ Copy data <code>len</code> bytes from a user buffer into the I/O buffer chain, starting at <code>offset</code>, extending the chain as necessary BUT without waiting if buffers are not available.
+</p>
+
+<h4><a name="iob_copyout">4.12.4.13 <code>iob_copyout()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
+                unsigned int len, unsigned int offset);
+</pre>
+
+<p><b>Description</b>.
+ Copy data <code>len</code> bytes of data into the user buffer starting at <code>offset</code> in the I/O buffer, returning that actual number of bytes copied out.
+</p>
+
+<h4><a name="iob_clone">4.12.4.14 <code>iob_clone()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled);
+</pre>
+
+<p><b>Description</b>.
+  Duplicate (and pack) the data in <code>iob1</code> in <code>iob2</code>.  <code>iob2</code> must be empty.
+</p>
+
+<h4><a name="iob_concat">4.12.4.15 <code>iob_concat()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2);
+</pre>
+
+<p><b>Description</b>.
+  Concatenate iob_s chain iob2 to iob1.
+</p>
+
+<h4><a name="iob_trimhead">4.12.4.16 <code>iob_trimhead()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen);
+</pre>
+
+<p><b>Description</b>.
+  Remove bytes from the beginning of an I/O chain.  Emptied I/O buffers are freed and, hence, the beginning of the chain may change.
+</p>
+
+<h4><a name="iob_trimhead_queue">4.12.4.17 <code>iob_trimhead_queue()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+#if CONFIG_IOB_NCHAINS > 0
+FAR struct iob_s *iob_trimhead_queue(FAR struct iob_queue_s *qhead,
+                                     unsigned int trimlen);
+#endif
+</pre>
+
+<p><b>Description</b>.
+  Remove bytes from the beginning of an I/O chain at the head of the queue.  Emptied I/O buffers are freed and, hence, the head of the queue may change.
+</p>
+<p>
+  This function is just a wrapper around iob_trimhead() that assures that the iob at the head of queue is modified with the trimming operations.
+</p>
+
+<p><b>Returned Value</b>.
+  The new iob at the head of the queue is returned.
+</p>
+
+<h4><a name="iob_trimtail">4.12.4.18 <code>iob_trimtail()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen);
+</pre>
+
+<p><b>Description</b>.
+  Remove bytes from the end of an I/O chain.  Emptied I/O buffers are freed NULL will be returned in the special case where the entry I/O buffer chain is freed.
+</p>
+
+<h4><a name="iob_pack">4.12.4.19 <code>iob_pack()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+FAR struct iob_s *iob_pack(FAR struct iob_s *iob);
+</pre>
+
+<p><b>Description</b>.
+  Pack all data in the I/O buffer chain so that the data offset is zero and all but the final buffer in the chain are filled.  Any emptied buffers at the end of the chain are freed.
+</p>
+
+<h4><a name="iob_contig">4.12.4.20 <code>iob_contig()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+int iob_contig(FAR struct iob_s *iob, unsigned int len);
+</pre>
+
+<p><b>Description</b>.
+  Ensure that there is <code>len</code> bytes of contiguous space at the beginning of the I/O buffer chain starting at <code>iob</code>.
+</p>
+
+<h4><a name="iob_dump">4.12.4.21 <code>iob_dump()</code></a></h4>
+<p><b>Function Prototype</b>:
+<pre>
+#include &lt;nuttx/mm/iob.h&gt;
+#ifdef CONFIG_DEBUG_FEATURES
+void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
+              unsigned int offset);
+#endif
+</pre>
+
+<p><b>Description</b>.
+  Dump the contents of a I/O buffer chain
+</p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -4561,7 +4975,7 @@ void board_autoled_off(int led);
 </p>
 <ul>
   <li><b>Interface Definition</b>.
-    The header file for the NuttX CAN driver resides at <code>include/nuttx/drivers/can.h</code>.
+    The header file for the NuttX CAN driver resides at <code>include/nuttx/can/can.h</code>.
     This header file includes both the application level interface to the CAN driver as well as the interface between the &quot;upper half&quot; and &quot;lower half&quot; drivers.
     The CAN module uses a standard character driver framework.
   </li>
@@ -5030,11 +5444,11 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
     That structure defines a call table with the following methods:
     <ul>
      <p><code>void lock(FAR struct spi_dev_s *dev);</code></p>
-     <p><code>void select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);</code><br>
+     <p><code>void select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);</code><br>
      <code>uint32_t setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);</code><br>
      <code>void setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);</code><br>
      <code>void setbits(FAR struct spi_dev_s *dev, int nbits);</code><br>
-     <code>uint8_t status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);</code><br>
+     <code>uint8_t status(FAR struct spi_dev_s *dev, uint32_t devid);</code><br>
      <code>uint16_t send(FAR struct spi_dev_s *dev, uint16_t wd);</code><br>
      <code>void exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer, FAR void *rxbuffer, size_t nwords);</code><br>
      <p><code>int registercallback(FAR struct spi_dev_s *dev, mediachange_t callback, void *arg);</code></p>
@@ -5702,7 +6116,7 @@ int setlogmask(int mask);
   </li>
   <li>
     <p>
-      <i>Kernel Build</i>:  The kernel build is compliant with the POSIX requirement: There will be one mask for for each user process, controlling the SYSLOG output only form that process.  There will be a separate mask accessable only in the kernel code to control kernel SYSLOG output.
+      <i>Kernel Build</i>:  The kernel build is compliant with the POSIX requirement: There will be one mask for for each user process, controlling the SYSLOG output only form that process.  There will be a separate mask accessible only in the kernel code to control kernel SYSLOG output.
 </ul>
 <p>
   The above are all standard interfaces as defined at <a href="http://pubs.opengroup.org/onlinepubs/009695399/functions/closelog.html">OpenGroup.org</a>.  Those interfaces are available for use by application software.  The remaining interfaces discussed in this section are non-standard, OS-internal interfaces.
@@ -5710,7 +6124,7 @@ int setlogmask(int mask);
 
 <h4><a name="debugifs">6.4.1.4 Debug Interfaces</a></h4>
 <p>
-  In NuttX, syslog output is really synonymous to debug output and, herefore, the debugging interface macros defined in the header file
+  In NuttX, syslog output is really synonymous to debug output and, therefore, the debugging interface macros defined in the header file
   <code>include/debug.h</code> are also syslogging interfaces.  Those macros are simply wrappers around <code>syslog()</code>.  The debugging interfaces differ from the syslog interfaces in that:
 </p>
 <ul>
@@ -5744,7 +6158,7 @@ int setlogmask(int mask);
   <li>
     <p>
       <code>warn()</code>.  The <code>warn()</code> macro has medium priority (<code>LOG_WARN</code>) and is controlled by <code>CONFIG_DEBUG_<i>subsystem</i>_WARN</code>.  The <code>warn()</code> is intended to
-      note exceptional or unexpected conditions that meigh be potential
+      note exceptional or unexpected conditions that might be potential
       errors or, perhaps, minor errors that easily recovered.
   </li>
   <li>
@@ -5796,7 +6210,7 @@ int syslog_channel(FAR const struct syslog_channel_s *channel);
   <code>syslog_channel()</code> is a non-standard, internal OS interface and is not available to applications.  It may be called numerous times as necessary to change channel interfaces.
   By default, all system log output goes to console (<code>/dev/console</code>).
 </p>
-<p><b>Input Parmeters:</b>
+<p><b>Input Parameters:</b>
 <ul>
   <li>
     <p>
@@ -5917,7 +6331,7 @@ int syslog_initialize(enum syslog_init_e phase);
       </li>
       <li>
         <p>
-          The output generated by <code>up_putc()</code> is immediate and in real-time.  The normal SYSLOG output, on the other hand, is buffered in the serial driver and may be delayed with respect to the immediate output by many lines.  Therefore, the interrupt level SYSLOG ouput provided throug <code>up_putc()</code> is grossly out of synchronization with other debug output
+          The output generated by <code>up_putc()</code> is immediate and in real-time.  The normal SYSLOG output, on the other hand, is buffered in the serial driver and may be delayed with respect to the immediate output by many lines.  Therefore, the interrupt level SYSLOG output provided through <code>up_putc()</code> is grossly out of synchronization with other debug output
         </p>
       </li>
     </ul>
@@ -5969,7 +6383,7 @@ int syslog_initialize(enum syslog_init_e phase);
   </li>
   <li>
     <p>
-      <code>CONFIG_SYSLOG_CONSOLE</code>.  This configuration option is manually selected from the SYSLOG menu.  This is the option that acutally enables the SYSLOG console device.  It depends on <code>CONFIG_DEV_CONSOLE</code> and it will automatically select <code>CONFIG_SYSLOG_SERIAL_CONSOLE</code> if <code>CONFIG_SERIAL_CONSOLE</code> is selected.
+      <code>CONFIG_SYSLOG_CONSOLE</code>.  This configuration option is manually selected from the SYSLOG menu.  This is the option that actually enables the SYSLOG console device.  It depends on <code>CONFIG_DEV_CONSOLE</code> and it will automatically select <code>CONFIG_SYSLOG_SERIAL_CONSOLE</code> if <code>CONFIG_SERIAL_CONSOLE</code> is selected.
   </li>
   <li>
     <p>
@@ -5998,7 +6412,7 @@ int syslog_initialize(enum syslog_init_e phase);
   The system console device, <code>/dev/console</code>, is a character driver with some special properties.  However, any character driver may be used as the SYSLOG output channel.  For example, suppose you have a serial console on <code>/dev/ttyS0</code> and you want SYSLOG output on <code>/dev/ttyS1</code>.  Or suppose you support only a Telnet console but want to capture debug output <code>/dev/ttyS0</code>.
 </p>
 <p>
-  This SYSLOG device channel is selected with <code>CONFIG_SYSLOG_CHAR</code> and has no other dependencies.  Differences fromthe SYSLOG console channel include:
+  This SYSLOG device channel is selected with <code>CONFIG_SYSLOG_CHAR</code> and has no other dependencies.  Differences from the SYSLOG console channel include:
 </p>
 <ul>
   <li>
@@ -6150,7 +6564,7 @@ int syslog_file_channel(FAR const char *devpath);
 <ul>
   <li>
     <p>
-      Monitors activity from drivers (and from other parts of the syste), and
+      Monitors activity from drivers (and from other parts of the system), and
     </p>
   </li>
   <li>
@@ -6201,7 +6615,7 @@ int syslog_file_channel(FAR const char *devpath);
       however, <code>IDLE</code> and some simple simple steps to reduce power
       consumption provided that they do not interfere with normal
       Operation.  Simply dimming the a backlight might be an example
-      somethat that would be done when the system is idle.
+      some that that would be done when the system is idle.
   <dt><code>STANDBY</code>
   <dd>Standby is a lower power consumption mode that may involve more
       extensive power management steps such has disabling clocking or

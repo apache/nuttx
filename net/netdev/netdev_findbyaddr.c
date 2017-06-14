@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev_findbyaddr.c
  *
- *   Copyright (C) 2007-2009, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_finddevice_ipv4addr
+ * Name: netdev_finddevice_ipv4addr
  *
  * Description:
  *   Find a previously registered network device by matching a local address
@@ -113,7 +113,7 @@ static FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr)
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Function: netdev_finddevice_ipv6addr
+ * Name: netdev_finddevice_ipv6addr
  *
  * Description:
  *   Find a previously registered network device by matching a local address
@@ -171,7 +171,7 @@ netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_findby_ipv4addr
+ * Name: netdev_findby_ipv4addr
  *
  * Description:
  *   Find a previously registered network device by matching an arbitrary
@@ -217,9 +217,13 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr)
            * broadcast packet out ALL local networks.  I am not sure
            * of that and, in any event, there is nothing we can do
            * about that here.
+           *
+           * REVISIT:  For now, arbitrarily return the first network
+           * interface in the list of network devices.  The broadcast
+           * will be sent on that device only.
            */
 
-          return NULL;
+          return g_netdevices;
         }
       else
         {
@@ -289,7 +293,7 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr)
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Function: netdev_findby_ipv6addr
+ * Name: netdev_findby_ipv6addr
  *
  * Description:
  *   Find a previously registered network device by matching an arbitrary
@@ -335,9 +339,13 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t ripaddr)
            * broadcast packet out ALL local networks.  I am not sure
            * of that and, in any event, there is nothing we can do
            * about that here.
+           *
+           * REVISIT:  For now, arbitrarily return the first network
+           * interface in the list of network devices.  The broadcast
+           * will be sent on that device only.
            */
 
-          return NULL;
+          return g_netdevices;
         }
       else
         {

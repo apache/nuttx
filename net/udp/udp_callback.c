@@ -50,7 +50,6 @@
 #include <nuttx/net/udp.h>
 
 #include "devif/devif.h"
-#include "iob/iob.h"
 #include "udp/udp.h"
 
 /****************************************************************************
@@ -68,7 +67,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: udp_datahandler
+ * Name: udp_datahandler
  *
  * Description:
  *   Handle the receipt of UDP data by adding the newly received packet to
@@ -231,7 +230,7 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev, FAR struct udp_con
 #endif /* CONFIG_NET_UDP_READAHEAD */
 
 /****************************************************************************
- * Function: net_dataevent
+ * Name: net_dataevent
  *
  * Description:
  *   Handling the network UDP_NEWDATA event.
@@ -288,7 +287,7 @@ net_dataevent(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: udp_callback
+ * Name: udp_callback
  *
  * Description:
  *   Inform the application holding the UDP socket of a change in state.

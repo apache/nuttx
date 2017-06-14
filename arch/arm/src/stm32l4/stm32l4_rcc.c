@@ -78,7 +78,11 @@
 
 /* Include chip-specific clocking initialization logic */
 
-#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX)
+#if defined(CONFIG_STM32L4_STM32L4X3)
+#  include "stm32l4x3xx_rcc.c"
+#elif defined(CONFIG_STM32L4_STM32L4X5)
+#  include "stm32l4x5xx_rcc.c"
+#elif defined(CONFIG_STM32L4_STM32L4X6)
 #  include "stm32l4x6xx_rcc.c"
 #else
 #  error "Unsupported STM32L4 chip"
@@ -112,7 +116,7 @@ static inline void rcc_resetbkp(void)
 
   /* Check if the RTC is already configured */
 
-  init_stat = rtc_is_inits();
+  init_stat = stm32l4_rtc_is_initialized();
   if(!init_stat)
     {
        /* Enable write access to the backup domain (RTC registers, RTC

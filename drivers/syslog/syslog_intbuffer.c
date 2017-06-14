@@ -120,11 +120,8 @@ static const char g_overrun_msg[SYSLOG_BUFOVERRUN_SIZE] = SYSLOG_BUFOVERRUN_MESS
 int syslog_remove_intbuffer(void)
 {
   irqstate_t flags;
-  uint32_t inndx;
   uint32_t outndx;
-  uint32_t endndx;
-  int inuse = 0;
-  int ch;
+  int ret = EOF;
 
   /* Extraction of the character and adjustment of the circular buffer
    * indices must be performed in a critical section to protect from
@@ -133,25 +130,14 @@ int syslog_remove_intbuffer(void)
 
   flags = enter_critical_section();
 
-  /* How much space is left in the inbuffer? */
+  /* Check if the interrupt buffer? is empty */
 
-  inndx  = (uint32_t)g_syslog_intbuffer.si_inndx;
   outndx = (uint32_t)g_syslog_intbuffer.si_outndx;
-  if (inndx != outndx)
+  if (outndx != (uint32_t)g_syslog_intbuffer.si_inndx)
     {
-      /* Handle the case where the inndx has wrapped around */
+      /* Not empty.. Take the next character from the interrupt buffer */
 
-      endndx = inndx;
-      if (endndx < outndx)
-        {
-          endndx += SYSLOG_INTBUFSIZE;
-        }
-
-      inuse = (int)(endndx - outndx);
-
-      /* Take the next character from the interrupt buffer */
-
-      ch = g_syslog_intbuffer.si_buffer[outndx];
+      ret = g_syslog_intbuffer.si_buffer[outndx];
 
       /* Increment the OUT index, handling wrap-around */
 
@@ -167,7 +153,7 @@ int syslog_remove_intbuffer(void)
 
   /* Now we can send the extracted character to the SYSLOG device */
 
-  return (inuse > 0) ? ch : EOF;
+  return ret;
 }
 
 /****************************************************************************
@@ -211,7 +197,7 @@ int syslog_add_intbuffer(int ch)
 
   flags = enter_critical_section();
 
-  /* How much space is left in the inbuffer? */
+  /* How much space is left in the intbuffer? */
 
   inndx  = (uint32_t)g_syslog_intbuffer.si_inndx;
   outndx = (uint32_t)g_syslog_intbuffer.si_outndx;

@@ -24,7 +24,7 @@ STATUS
 1. Most of this document is a partially corrected clone of the SAMA5D4-EK
    README.txt and still contains errors and inconsistencies.
 
-2. Coding is complete for the the basic SAMA5D2-XULT NSH configuration, but
+2. Coding is complete for the basic SAMA5D2-XULT NSH configuration, but
    is completely untested as of this writing (2015-09-15).  The primary
    issue is  that I have not yet determine how to load and test code.
 
@@ -77,11 +77,9 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
        cd tools
        ./configure.sh sama5d2-xult/dramboot
        cd -
-       . ./setenv.sh
 
-     Before sourcing the setenv.sh file above, you should examine it and
-     perform edits as necessary so that TOOLCHAIN_BIN is the correct path
-     to the directory than holds your toolchain binaries.
+     Before building, make sure the PATH environment variable includes the
+     correct path to the directory than holds your toolchain binaries.
 
      NOTE:  Be aware that the default dramboot also disables the watchdog.
      Since you will not be able to re-enable the watchdog later, you may
@@ -185,11 +183,9 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
        cd tools
        ./configure.sh sama5d2-xult/at25boot
        cd -
-       . ./setenv.sh
 
-     Before sourcing the setenv.sh file above, you should examine it and
-     perform edits as necessary so that TOOLCHAIN_BIN is the correct path
-     to the directory than holds your toolchain binaries.
+     Before building, make sure the PATH environment variable includes the
+     correct path to the directory than holds your toolchain binaries.
 
      Then make AT25BOOT:
 
@@ -916,11 +912,9 @@ Configurations
     cd tools
     ./configure.sh sama5d2-xult/<subdir>
     cd -
-    . ./setenv.sh
 
-  Before sourcing the setenv.sh file above, you should examine it and perform
-  edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
-  than holds your toolchain binaries.
+  Before building, make sure the PATH environment variable includes the
+  correct path to the directory than holds your toolchain binaries.
 
   And then build NuttX by simply typing the following.  At the conclusion of
   the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
@@ -962,10 +956,6 @@ Configurations
      tools.  Try 'which arm-none-eabi-gcc' to make sure that you are
      selecting the right tool.
 
-     The setenv.sh file is available for you to use to set the PATH
-     variable.  The path in the that file may not, however, be correct
-     for your installation.
-
      See also the "NOTE about Windows native toolchains" in the section call
      "GNU Toolchain Options" above.
 
@@ -1004,7 +994,7 @@ Configurations
 
     NOTES:
 
-    1. This configuration uses the the USART3 for the serial console
+    1. This configuration uses the USART3 for the serial console
        which is available at the "DBGU" RS-232 connector (J24).  That
        is easily changed by reconfiguring to (1) enable a different
        serial peripheral, and (2) selecting that serial peripheral as

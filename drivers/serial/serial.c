@@ -1,7 +1,7 @@
 /************************************************************************************
  * drivers/serial/serial.c
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/sched.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/serial/serial.h>
@@ -365,7 +366,7 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
    * a little differently.
    */
 
-  if (up_interrupt_context() || getpid() == 0)
+  if (up_interrupt_context() || sched_idletask())
     {
 #ifdef CONFIG_SERIAL_REMOVABLE
       /* If the removable device is no longer connected, refuse to write to
@@ -1207,26 +1208,31 @@ static int uart_close(FAR struct file *filep)
 
   uart_disablerxint(dev);
 
-  /* Now we wait for the transmit buffer to clear */
+  /* Prevent blocking if the device is opened with O_NONBLOCK */
 
-  while (dev->xmit.head != dev->xmit.tail)
+  if ((filep->f_oflags & O_NONBLOCK) == 0)
     {
-#ifndef CONFIG_DISABLE_SIGNALS
-      usleep(HALF_SECOND_USEC);
-#else
-      up_mdelay(HALF_SECOND_MSEC);
-#endif
-    }
+      /* Now we wait for the transmit buffer to clear */
 
-  /* And wait for the TX fifo to drain */
-
-  while (!uart_txempty(dev))
-    {
+      while (dev->xmit.head != dev->xmit.tail)
+        {
 #ifndef CONFIG_DISABLE_SIGNALS
-      usleep(HALF_SECOND_USEC);
+          usleep(HALF_SECOND_USEC);
 #else
-      up_mdelay(HALF_SECOND_MSEC);
+          up_mdelay(HALF_SECOND_MSEC);
 #endif
+        }
+
+     /* And wait for the TX fifo to drain */
+
+      while (!uart_txempty(dev))
+        {
+#ifndef CONFIG_DISABLE_SIGNALS
+          usleep(HALF_SECOND_USEC);
+#else
+          up_mdelay(HALF_SECOND_MSEC);
+#endif
+        }
     }
 
   /* Free the IRQ and disable the UART */

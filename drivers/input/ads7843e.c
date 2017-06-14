@@ -70,6 +70,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/random.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/input/touchscreen.h>
@@ -158,7 +159,7 @@ static struct ads7843e_dev_s *g_ads7843elist;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: ads7843e_lock
+ * Name: ads7843e_lock
  *
  * Description:
  *   Lock the SPI bus and re-configure as necessary.  This function must be
@@ -188,16 +189,16 @@ static void ads7843e_lock(FAR struct spi_dev_s *spi)
    * unlocked)
    */
 
-  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, true);
+  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN(0), true);
   SPI_SETMODE(spi, CONFIG_ADS7843E_SPIMODE);
   SPI_SETBITS(spi, 8);
   (void)SPI_HWFEATURES(spi, 0);
   (void)SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY);
-  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, false);
+  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN(0), false);
 }
 
 /****************************************************************************
- * Function: ads7843e_unlock
+ * Name: ads7843e_unlock
  *
  * Description:
  *   Un-lock the SPI bus after each transfer,  possibly losing the current
@@ -262,7 +263,7 @@ static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv, uint8_t cmd)
 
   /* Select the ADS7843E */
 
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, true);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
 
   /* Send the command */
 
@@ -275,7 +276,7 @@ static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv, uint8_t cmd)
   /* Read the 12-bit data (LS 4 bits will be padded with zero) */
 
   SPI_RECVBLOCK(priv->spi, buffer, 2);
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
   result = ((uint16_t)buffer[0] << 8) | (uint16_t)buffer[1];
   result = result >> 4;
@@ -623,6 +624,8 @@ static void ads7843e_worker(FAR void *arg)
       x = ads7843e_sendcmd(priv, ADS7843_CMD_XPOSITION);
       y = ads7843e_sendcmd(priv, ADS7843_CMD_YPOSITION);
 #endif
+
+      add_ui_randomness((x << 16) | y);
 
       /* Perform a thresholding operation so that the results will be more stable.
        * If the difference from the last sample is small, then ignore the event.

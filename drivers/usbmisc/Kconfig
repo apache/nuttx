@@ -1,0 +1,34 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+comment "USB Miscellaneous drivers"
+
+config FUSB301
+	bool "Fairchild FUSB301 USB type-C controller support"
+	default n
+	select I2C
+	---help---
+		Enable device driver for Fairchild USB type-C controller
+
+if FUSB301
+
+config FUSB301_I2C_FREQUENCY
+	int "FUSB301 I2C frequency"
+	default 400000
+	range 1 400000
+
+config DEBUG_FUSB301
+	bool "Enable debug support for the FUSB301"
+	default n
+	---help---
+		Enables debug support for the FUSB301
+
+config FUSB301_NPOLLWAITERS
+	int "Number of waiters to poll"
+	default 2
+	---help---
+		Maximum number of threads that can be waiting on poll()
+
+endif

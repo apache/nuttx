@@ -121,18 +121,18 @@ FAR struct spi_dev_s *lpc43_sspbus_initialize(int port);
  ************************************************************************************/
 
 #ifdef CONFIG_LPC43_SSP0
-void  lpc43_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t lpc43_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  lpc43_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t lpc43_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int lpc43_ssp0cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int lpc43_ssp0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_LPC43_SSP1
-void  lpc43_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t lpc43_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  lpc43_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t lpc43_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int lpc43_ssp1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int lpc43_ssp1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 

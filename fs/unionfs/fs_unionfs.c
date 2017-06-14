@@ -275,7 +275,7 @@ static FAR const char *unionfs_offsetpath(FAR const char *relpath,
   FAR const char *trypath;
   int pfxlen;
 
-  /* Is there a prefix on the the path to this file system? */
+  /* Is there a prefix on the path to this file system? */
 
   if (prefix && (pfxlen = strlen(prefix)) > 0)
     {
@@ -1634,7 +1634,7 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   DEBUGASSERT(dir);
   fu = &dir->u.unionfs;
 
-  /* Check if we are at the end of the the directory listing. */
+  /* Check if we are at the end of the directory listing. */
 
   if (fu->fu_eod)
     {

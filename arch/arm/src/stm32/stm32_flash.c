@@ -47,6 +47,10 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
+
+#include <stdbool.h>
+#include <semaphore.h>
+#include <assert.h>
 #include <errno.h>
 
 #include "stm32_flash.h"
@@ -55,10 +59,10 @@
 
 #include "up_arch.h"
 
-/* Only for the STM32F[1|3|4]0xx family for now */
+/* Only for the STM32F[1|3|4]0xx family and STM32L15xx (EEPROM only) for now */
 
 #if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined (CONFIG_STM32_STM32F40XX)
+    defined (CONFIG_STM32_STM32F40XX) || defined(CONFIG_STM32_STM32L15XX)
 
 #if defined(CONFIG_STM32_FLASH_CONFIG_DEFAULT) && \
     (defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX))
@@ -69,25 +73,53 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#define FLASH_KEY1      0x45670123
-#define FLASH_KEY2      0xCDEF89AB
+#if defined(CONFIG_STM32_STM32L15XX)
+#  define FLASH_KEY1      0x8C9DAEBF
+#  define FLASH_KEY2      0x13141516
+#else
+#  define FLASH_KEY1      0x45670123
+#  define FLASH_KEY2      0xCDEF89AB
+#endif
 
 #if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
-#define FLASH_CR_PAGE_ERASE              FLASH_CR_PER
-#define FLASH_SR_WRITE_PROTECTION_ERROR  FLASH_SR_WRPRT_ERR
+#  define FLASH_CR_PAGE_ERASE              FLASH_CR_PER
+#  define FLASH_SR_WRITE_PROTECTION_ERROR  FLASH_SR_WRPRT_ERR
 #elif defined(CONFIG_STM32_STM32F40XX)
-#define FLASH_CR_PAGE_ERASE              FLASH_CR_SER
-#define FLASH_SR_WRITE_PROTECTION_ERROR  FLASH_SR_WRPERR
+#  define FLASH_CR_PAGE_ERASE              FLASH_CR_SER
+#  define FLASH_SR_WRITE_PROTECTION_ERROR  FLASH_SR_WRPERR
 #endif
+
+#if defined(CONFIG_STM32_STM32L15XX)
+#  define EEPROM_KEY1     0x89ABCDEF
+#  define EEPROM_KEY2     0x02030405
+#endif
+
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
+
+static sem_t g_sem = SEM_INITIALIZER(1);
 
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
-void stm32_flash_unlock(void)
+static void sem_lock(void)
+{
+  while (sem_wait(&g_sem) < 0)
+    {
+      DEBUGASSERT(errno == EINTR);
+    }
+}
+
+static inline void sem_unlock(void)
+{
+  sem_post(&g_sem);
+}
+
+#if !defined(CONFIG_STM32_STM32L15XX)
+
+static void flash_unlock(void)
 {
   while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
     {
@@ -103,14 +135,256 @@ void stm32_flash_unlock(void)
     }
 }
 
-void stm32_flash_lock(void)
+static void flash_lock(void)
 {
   modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_LOCK);
 }
 
+#endif /* !defined(CONFIG_STM32_STM32L15XX) */
+
+#if defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
+static void data_cache_disable(void)
+{
+  modifyreg32(STM32_FLASH_ACR, FLASH_ACR_DCEN, 0);
+}
+
+static void data_cache_enable(void)
+{
+  /* Reset data cache */
+
+  modifyreg32(STM32_FLASH_ACR, 0, FLASH_ACR_DCRST);
+
+  /* Enable data cache */
+
+  modifyreg32(STM32_FLASH_ACR, 0, FLASH_ACR_DCEN);
+}
+#endif /* defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW) */
+
+#if defined(CONFIG_STM32_STM32L15XX)
+
+static void stm32_eeprom_unlock(void)
+{
+  while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
+    {
+      up_waste();
+    }
+
+  if (getreg32(STM32_FLASH_PECR) & FLASH_PECR_PELOCK)
+    {
+      /* Unlock sequence */
+
+      putreg32(EEPROM_KEY1, STM32_FLASH_PEKEYR);
+      putreg32(EEPROM_KEY2, STM32_FLASH_PEKEYR);
+    }
+}
+
+static void stm32_eeprom_lock(void)
+{
+  modifyreg32(STM32_FLASH_PECR, 0, FLASH_PECR_PELOCK);
+}
+
+static void flash_unlock(void)
+{
+  if (getreg32(STM32_FLASH_PECR) & FLASH_PECR_PRGLOCK)
+    {
+      stm32_eeprom_unlock();
+
+      /* Unlock sequence */
+
+      putreg32(FLASH_KEY1, STM32_FLASH_PRGKEYR);
+      putreg32(FLASH_KEY2, STM32_FLASH_PRGKEYR);
+    }
+}
+
+static void flash_lock(void)
+{
+  modifyreg32(STM32_FLASH_PECR, 0, FLASH_PECR_PRGLOCK);
+  stm32_eeprom_lock();
+}
+
+static ssize_t stm32_eeprom_erase_write(size_t addr, const void *buf,
+                                        size_t buflen)
+{
+  const char *cbuf = buf;
+  size_t i;
+
+  if (buflen == 0)
+    {
+      return 0;
+    }
+
+  /* Check for valid address range */
+
+  if (addr >= STM32_EEPROM_BASE)
+    {
+      addr -= STM32_EEPROM_BASE;
+    }
+
+  if (addr >= STM32_EEPROM_SIZE)
+    {
+      return -EINVAL;
+    }
+
+  /* TODO: Voltage range must be range 1 or 2. Erase/program not allowed in
+   * range 3.
+   */
+
+  stm32_eeprom_unlock();
+
+  /* Clear pending status flags. */
+
+  putreg32(FLASH_SR_WRPERR | FLASH_SR_PGAERR |
+           FLASH_SR_SIZERR | FLASH_SR_OPTVERR |
+           FLASH_SR_OPTVERRUSR | FLASH_SR_RDERR, STM32_FLASH_SR);
+
+  /* Enable automatic erasing (by disabling 'fixed time' programming). */
+
+  modifyreg32(STM32_FLASH_PECR, FLASH_PECR_FTDW, 0);
+
+  /* Write buffer to EEPROM data memory. */
+
+  addr += STM32_EEPROM_BASE;
+  i = 0;
+  while (i < buflen)
+    {
+      uint32_t writeval;
+      size_t left = buflen - i;
+
+      if ((addr & 0x03) == 0x00 && left >= 4)
+        {
+          /* Read/erase/write word */
+
+          writeval = cbuf ? *(uint32_t *)cbuf : 0;
+          putreg32(writeval, addr);
+        }
+      else if ((addr & 0x01) == 0x00 && left >= 2)
+        {
+          /* Read/erase/write half-word */
+
+          writeval = cbuf ? *(uint16_t *)cbuf : 0;
+          putreg16(writeval, addr);
+        }
+      else
+        {
+          /* Read/erase/write byte */
+
+          writeval = cbuf ? *(uint8_t *)cbuf : 0;
+          putreg8(writeval, addr);
+        }
+
+      /* ... and wait to complete. */
+
+      while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
+        {
+          up_waste();
+        }
+
+      /* Verify */
+
+      /* We do not check Options Byte invalid flags FLASH_SR_OPTVERR
+       * and FLASH_SR_OPTVERRUSR for EEPROM erase/write. They are unrelated
+       * and STM32L standard library does not check for these either.
+       */
+
+      if (getreg32(STM32_FLASH_SR) & (FLASH_SR_WRPERR | FLASH_SR_PGAERR |
+                                      FLASH_SR_SIZERR | FLASH_SR_RDERR))
+        {
+          stm32_eeprom_lock();
+          return -EROFS;
+        }
+
+      if ((addr & 0x03) == 0x00 && left >= 4)
+        {
+          if (getreg32(addr) != writeval)
+            {
+              stm32_eeprom_lock();
+              return -EIO;
+            }
+
+          addr += 4;
+          i += 4;
+          cbuf += !!(cbuf) * 4;
+        }
+      else if ((addr & 0x01) == 0x00 && left >= 2)
+        {
+          if (getreg16(addr) != writeval)
+            {
+              stm32_eeprom_lock();
+              return -EIO;
+            }
+
+          addr += 2;
+          i += 2;
+          cbuf += !!(cbuf) * 2;
+        }
+      else
+        {
+          if (getreg8(addr) != writeval)
+            {
+              stm32_eeprom_lock();
+              return -EIO;
+            }
+
+          addr += 1;
+          i += 1;
+          cbuf += !!(cbuf) * 1;
+        }
+    }
+
+  stm32_eeprom_lock();
+  return buflen;
+}
+
+#endif /* defined(CONFIG_STM32_STM32L15XX) */
+
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
+
+void stm32_flash_unlock(void)
+{
+  sem_lock();
+  flash_unlock();
+  sem_unlock();
+}
+
+void stm32_flash_lock(void)
+{
+  sem_lock();
+  flash_lock();
+  sem_unlock();
+}
+
+#if defined(CONFIG_STM32_STM32L15XX)
+
+size_t stm32_eeprom_size(void)
+{
+  return STM32_EEPROM_SIZE;
+}
+
+size_t stm32_eeprom_getaddress(void)
+{
+  return STM32_EEPROM_BASE;
+}
+
+ssize_t stm32_eeprom_write(size_t addr, const void *buf, size_t buflen)
+{
+  if (!buf)
+    {
+      return -EINVAL;
+    }
+
+  return stm32_eeprom_erase_write(addr, buf, buflen);
+}
+
+ssize_t stm32_eeprom_erase(size_t addr, size_t eraselen)
+{
+  return stm32_eeprom_erase_write(addr, NULL, eraselen);
+}
+
+#endif /* defined(CONFIG_STM32_STM32L15XX) */
 
 #if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
-
 size_t up_progmem_pagesize(size_t page)
 {
   return STM32_FLASH_PAGESIZE;
@@ -206,6 +480,8 @@ size_t up_progmem_getaddress(size_t page)
 
 #endif /* def CONFIG_STM32_STM32F40XX */
 
+#if !defined(CONFIG_STM32_STM32L15XX)
+
 size_t up_progmem_npages(void)
 {
   return STM32_FLASH_NPAGES;
@@ -217,30 +493,33 @@ bool up_progmem_isuniform(void)
   return true;
 #else
   return false;
-#endif /* def STM32_FLASH_PAGESIZE */
+#endif
 }
 
 ssize_t up_progmem_erasepage(size_t page)
 {
 #if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
   size_t page_address;
-#endif /* defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) */
+#endif
 
   if (page >= STM32_FLASH_NPAGES)
     {
       return -EFAULT;
     }
 
+  sem_lock();
+
 #if !defined(CONFIG_STM32_STM32F40XX)
   if (!(getreg32(STM32_RCC_CR) & RCC_CR_HSION))
     {
+      sem_unlock();
       return -EPERM;
     }
 #endif
 
   /* Get flash ready and begin erasing single page */
 
-  stm32_flash_unlock();
+  flash_unlock();
 
   modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_PAGE_ERASE);
 
@@ -259,6 +538,7 @@ ssize_t up_progmem_erasepage(size_t page)
   while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY) up_waste();
 
   modifyreg32(STM32_FLASH_CR, FLASH_CR_PAGE_ERASE, 0);
+  sem_unlock();
 
   /* Verify */
   if (up_progmem_ispageerased(page) == 0)
@@ -320,16 +600,23 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
       return -EFAULT;
     }
 
+  sem_lock();
+
 #if !defined(CONFIG_STM32_STM32F40XX)
   if (!(getreg32(STM32_RCC_CR) & RCC_CR_HSION))
     {
+      sem_unlock();
       return -EPERM;
     }
 #endif
 
   /* Get flash ready and begin flashing */
 
-  stm32_flash_unlock();
+  flash_unlock();
+
+#if defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
+  data_cache_disable();
+#endif
 
   modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_PG);
 
@@ -351,19 +638,29 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
       if (getreg32(STM32_FLASH_SR) & FLASH_SR_WRITE_PROTECTION_ERROR)
         {
           modifyreg32(STM32_FLASH_CR, FLASH_CR_PG, 0);
+          sem_unlock();
           return -EROFS;
         }
 
       if (getreg16(addr) != *hword)
         {
           modifyreg32(STM32_FLASH_CR, FLASH_CR_PG, 0);
+          sem_unlock();
           return -EIO;
         }
     }
 
   modifyreg32(STM32_FLASH_CR, FLASH_CR_PG, 0);
+
+#if defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
+  data_cache_enable();
+#endif
+
+  sem_unlock();
   return written;
 }
 
+#endif /* !defined(CONFIG_STM32_STM32L15XX) */
+
 #endif /* defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
-          defined (CONFIG_STM32_STM32F40XX) */
+          defined(CONFIG_STM32_STM32F40XX) || defined(CONFIG_STM32_STM32L15XX) */

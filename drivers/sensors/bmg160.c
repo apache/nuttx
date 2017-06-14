@@ -51,6 +51,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/sensors/bmg160.h>
+#include <nuttx/random.h>
 
 #if defined(CONFIG_SPI) && defined(CONFIG_BMG160)
 
@@ -243,6 +244,10 @@ static void bmg160_read_measurement_data(FAR struct bmg160_dev_s *dev)
   /* Give back the semaphore */
 
   sem_post(&dev->datasem);
+
+  /* Feed sensor data to entropy pool */
+
+  add_sensor_randomness((x_gyr << 16) ^ (y_gyr << 8) ^ z_gyr);
 }
 
 /****************************************************************************

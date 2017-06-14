@@ -156,7 +156,7 @@ endef
 # Example: $(call MOVEOBJ, prefix, directory)
 #
 # This is only used in directories that keep object files in sub-directories.
-# Certain compilers (ZDS-II) always place the resulting files in the the
+# Certain compilers (ZDS-II) always place the resulting files in the
 # directory where the compiler was invoked with not option to generate objects
 # in a different location.
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_heap/mm_realloc.c
  *
- *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,6 +79,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
   FAR struct mm_allocnode_s *oldnode;
   FAR struct mm_freenode_s  *prev;
   FAR struct mm_freenode_s  *next;
+  size_t newsize;
   size_t oldsize;
   size_t prevsize = 0;
   size_t nextsize = 0;
@@ -86,7 +87,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   /* If oldmem is NULL, then realloc is equivalent to malloc */
 
-  if (!oldmem)
+  if (oldmem == NULL)
     {
       return mm_malloc(heap, size);
     }
@@ -103,7 +104,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
    * (2) to make sure that it is an even multiple of our granule size.
    */
 
-  size = MM_ALIGN_UP(size + SIZEOF_MM_ALLOCNODE);
+  newsize = MM_ALIGN_UP(size + SIZEOF_MM_ALLOCNODE);
 
   /* Map the memory chunk into an allocated node structure */
 
@@ -116,15 +117,15 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
   /* Check if this is a request to reduce the size of the allocation. */
 
   oldsize = oldnode->size;
-  if (size <= oldsize)
+  if (newsize <= oldsize)
     {
       /* Handle the special case where we are not going to change the size
        * of the allocation.
        */
 
-      if (size < oldsize)
+      if (newsize < oldsize)
         {
-          mm_shrinkchunk(heap, oldnode, size);
+          mm_shrinkchunk(heap, oldnode, newsize);
         }
 
       /* Then return the original address */
@@ -152,9 +153,9 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   /* Now, check if we can extend the current allocation or not */
 
-  if (nextsize + prevsize + oldsize >= size)
+  if (nextsize + prevsize + oldsize >= newsize)
     {
-      size_t needed   = size - oldsize;
+      size_t needed   = newsize - oldsize;
       size_t takeprev = 0;
       size_t takenext = 0;
 

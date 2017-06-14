@@ -179,6 +179,9 @@
 #define BOARD_USB_CLKSRC              SIM_SOPT2_USBSRC
 #define BOARD_USB_FREQ                BOARD_SIM_CLKDIV2_FREQ
 
+/* Allow USBOTG-FS Controller to Read from FLASH */
+
+#define BOARD_USB_FLASHACCESS
 
 /* PWM Configuration */
 /* FTM0 Channels */

@@ -268,7 +268,7 @@
  * 1) struct spi_sctrlr_s:   Defines one interface between the SPI
  *    slave device and the SPI slave controller hardware.  This interface
  *    is implemented by the SPI slave device controller lower-half driver
- *    and is provided to the the SPI slave device driver when that driver
+ *    and is provided to the SPI slave device driver when that driver
  *    is initialized.  That SPI slave device initialization function is
  *    unique to the SPI slave implementation.  The prototype is probably
  *    something like:

@@ -480,7 +480,11 @@ static inline bool stm32_rcc_enablehse(void)
   /* Enable External High-Speed Clock (HSE) */
 
   regval  = getreg32(STM32_RCC_CR);
+#ifdef STM32_HSEBYP_ENABLE          /* May be defined in board.h header file */
+  regval |= RCC_CR_HSEBYP;          /* Enable HSE clock bypass */
+#else
   regval &= ~RCC_CR_HSEBYP;         /* Disable HSE clock bypass */
+#endif
   regval |= RCC_CR_HSEON;           /* Enable HSE */
   putreg32(regval, STM32_RCC_CR);
 
@@ -524,6 +528,8 @@ static void stm32_stdclockconfig(void)
 #if defined(CONFIG_RTC_HSECLOCK) || defined(CONFIG_LCD_HSECLOCK)
   uint16_t pwrcr;
 #endif
+  uint32_t pwr_vos;
+  bool flash_1ws;
 
   /* Enable PWR clock from APB1 to give access to PWR_CR register */
 
@@ -537,11 +543,38 @@ static void stm32_stdclockconfig(void)
    * Range 1: PLLVCO up to 96MHz in range 1 (1.8V)
    * Range 2: PLLVCO up to 48MHz in range 2 (1.5V) (default)
    * Range 3: PLLVCO up to 24MHz in range 3 (1.2V)
+   *
+   * Range 1: SYSCLK up to 32Mhz
+   * Range 2: SYSCLK up to 16Mhz
+   * Range 3: SYSCLK up to 4.2Mhz
+   *
+   * Range 1: Flash 1WS if SYSCLK > 16Mhz
+   * Range 2: Flash 1WS if SYSCLK > 8Mhz
+   * Range 3: Flash 1WS if SYSCLK > 2.1Mhz
    */
 
-#if STM32_PLL_FREQUENCY > 48000000
-  stm32_pwr_setvos(PWR_CR_VOS_SCALE_1);
+  pwr_vos   = PWR_CR_VOS_SCALE_2;
+  flash_1ws = false;
+
+#ifdef STM32_PLL_FREQUENCY
+  if (STM32_PLL_FREQUENCY > 48000000)
+    {
+      pwr_vos = PWR_CR_VOS_SCALE_1;
+    }
 #endif
+
+  if (STM32_SYSCLK_FREQUENCY > 16000000)
+    {
+      pwr_vos = PWR_CR_VOS_SCALE_1;
+    }
+
+  if ((pwr_vos == PWR_CR_VOS_SCALE_1 && STM32_SYSCLK_FREQUENCY > 16000000) ||
+      (pwr_vos == PWR_CR_VOS_SCALE_2 && STM32_SYSCLK_FREQUENCY > 8000000))
+    {
+      flash_1ws = true;
+    }
+
+  stm32_pwr_setvos(pwr_vos);
 
 #if defined(CONFIG_RTC_HSECLOCK) || defined(CONFIG_LCD_HSECLOCK)
   /* If RTC / LCD selects HSE as clock source, the RTC prescaler
@@ -579,12 +612,11 @@ static void stm32_stdclockconfig(void)
 
 #endif
 
-  /* Enable the source clock for the PLL (via HSE or HSI), HSE, and HSI.
-   * NOTE that only PLL, HSE, or HSI are supported for the system clock
-   * in this implementation
-   */
+  /* Enable the source clock for the PLL (via HSE or HSI), HSE, and HSI. */
 
-#if (STM32_CFGR_PLLSRC == RCC_CFGR_PLLSRC) || (STM32_SYSCLK_SW == RCC_CFGR_SW_HSE)
+#if (STM32_SYSCLK_SW == RCC_CFGR_SW_HSE) || \
+    ((STM32_SYSCLK_SW == RCC_CFGR_SW_PLL) && (STM32_CFGR_PLLSRC == RCC_CFGR_PLLSRC))
+
   /* The PLL is using the HSE, or the HSE is the system clock.  In either
    * case, we need to enable HSE clocking.
    */
@@ -599,7 +631,9 @@ static void stm32_stdclockconfig(void)
       return;
     }
 
-#elif (STM32_CFGR_PLLSRC == 0) || (STM32_SYSCLK_SW == RCC_CFGR_SW_HSI)
+#elif (STM32_SYSCLK_SW == RCC_CFGR_SW_HSI) || \
+      ((STM32_SYSCLK_SW == RCC_CFGR_SW_PLL) && STM32_CFGR_PLLSRC == 0)
+
   /* The PLL is using the HSI, or the HSI is the system clock.  In either
    * case, we need to enable HSI clocking.
    */
@@ -615,6 +649,8 @@ static void stm32_stdclockconfig(void)
   while ((getreg32(STM32_RCC_CR) & RCC_CR_HSIRDY) == 0);
 
 #endif
+
+#if (STM32_SYSCLK_SW != RCC_CFGR_SW_MSI)
 
   /* Increasing the CPU frequency (in the same voltage range):
    *
@@ -643,13 +679,23 @@ static void stm32_stdclockconfig(void)
   regval |= FLASH_ACR_ACC64;          /* 64-bit access mode */
   putreg32(regval, STM32_FLASH_ACR);
 
-  regval |= FLASH_ACR_LATENCY;        /* One wait state */
+  if (flash_1ws)
+    {
+      regval |= FLASH_ACR_LATENCY;    /* One wait state */
+    }
+  else
+    {
+      regval &= ~FLASH_ACR_LATENCY;   /* Zero wait state */
+    }
+
   putreg32(regval, STM32_FLASH_ACR);
 
   /* Enable FLASH prefetch */
 
   regval |= FLASH_ACR_PRFTEN;
   putreg32(regval, STM32_FLASH_ACR);
+
+#endif /* STM32_SYSCLK_SW != RCC_CFGR_SW_MSI */
 
   /* Set the HCLK source/divider */
 

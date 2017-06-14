@@ -360,7 +360,7 @@ Toolchains
 
     CONFIG_MIPS32_TOOLCHAIN_MICROCHIPOPENL - microchipOpen toolchain for Linux
 
-  And set the path appropriately in the setenv.sh file.
+  And set the path appropriately in the PATH environment variable.
 
   Building MicrochipOpen (on Linux)
   ---------------------------------
@@ -399,8 +399,9 @@ Toolchains
     CONFIG_MIPS32_TOOLCHAIN_PINGUINOW - Pinguino mips-elf toolchain for Windows
     CONFIG_MIPS32_TOOLCHAIN_GNU_ELF   - mips-elf toolchain for Linux or OS X
 
-  And set the path appropriately in the setenv.sh file.  These tool configurations
-  are untested -- expect some additional integration issues.  Good luck!
+  And set the path appropriately in the PATH environment variable.  These tool
+  configurations are untested -- expect some additional integration issues.
+  Good luck!
 
   This configuration will also work with any generic mips-elf GCC past version
   4.6 or so.
@@ -456,8 +457,8 @@ Toolchains
 Loading NuttX with ICD3
 ========================
 
-  Intel Hex Forma Files:
-  ----------------------
+  Intel Hex Format Files:
+  -----------------------
 
     When NuttX is built it will produce two files in the top-level NuttX
     directory:
@@ -488,8 +489,7 @@ Loading NuttX with ICD3
 
     To use this file, you need to do the following things:
 
-      . ./setenv.sh    # Source setenv.sh.  Among other this, this script
-                       # will add the NuttX tools/pic32mx directory to your
+      export PATH=???  # Add the NuttX tools/pic32mx directory to your
                        # PATH variable
       make             # Build nuttx and nuttx.hex
       mkpichex $PWD    # Convert addresses in nuttx.hex.  $PWD is the path
@@ -844,7 +844,6 @@ selected as follow:
     cd tools
     ./configure.sh mirtoo/<subdir>
     cd -
-    . ./setenv.sh
 
 Where <subdir> is one of the following:
 
@@ -882,8 +881,8 @@ Where <subdir> is one of the following:
 
        To switch to the Linux C32 toolchain you will have to change (1) the
        toolchain selection in .config (after configuration) and (2) the
-       path to the toolchain in setenv.sh.  See notes above with regard to
-       the XC32 toolchain.
+       path to the toolchain in the PATH environment variable.  See notes above
+       with regard to the XC32 toolchain.
 
     4. PGA117 Support
 

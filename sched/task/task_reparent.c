@@ -163,7 +163,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
     {
       /* Has the new parent's task group supressed child exit status? */
 
-      if ((pgrp->tg_flags && GROUP_FLAG_NOCLDWAIT) == 0)
+      if ((pgrp->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0)
         {
           /* No.. Add the child status entry to the new parent's task group */
 
@@ -186,7 +186,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
        * suppressed child exit status.
        */
 
-      ret = ((ogrp->tg_flags && GROUP_FLAG_NOCLDWAIT) == 0) ? -ENOENT : OK;
+      ret = ((ogrp->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0) ? -ENOENT : OK;
     }
 
 #else /* CONFIG_SCHED_CHILD_STATUS */
@@ -276,7 +276,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
     {
       /* Has the new parent's task group supressed child exit status? */
 
-      if ((ptcb->group->tg_flags && GROUP_FLAG_NOCLDWAIT) == 0)
+      if ((ptcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0)
         {
           /* No.. Add the child status entry to the new parent's task group */
 
@@ -299,7 +299,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
        * suppressed child exit status.
        */
 
-      ret = ((otcb->group->tg_flags && GROUP_FLAG_NOCLDWAIT) == 0) ? -ENOENT : OK;
+      ret = ((otcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0) ? -ENOENT : OK;
     }
 
 #else /* CONFIG_SCHED_CHILD_STATUS */

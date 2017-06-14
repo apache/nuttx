@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #ifndef __ASSEMBLY__
-#  include <stdint.h>
+#  include <stdbool.h>
 #endif
 
 #include "stm32_rcc.h"
@@ -146,6 +146,56 @@
 #define STM32_APB2_TIM10_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 #define STM32_APB2_TIM11_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 
+/* USB OTG HS definitions ***********************************************************/
+/* Do not enable external PHY clock or OTG_HS module will not work */
+
+#undef  BOARD_ENABLE_USBOTG_HSULPI
+
+/* LED definitions ******************************************************************/
+/* LEDs
+ *
+ * A single LED is available driven by PA13.
+ */
+
+/* LED index values for use with board_userled() */
+
+#define BOARD_LED1        0
+#define BOARD_NLEDS       1
+
+/* LED bits for use with board_userled_all() */
+
+#define BOARD_LED1_BIT    (1 << BOARD_LED1)
+
+/* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+ * defined.  In that case, the usage by the board port is defined in
+ * include/board.h and src/sam_autoleds.c. The LEDs are used to encode
+ * OS-related events as follows:
+ *
+ *   ------------------- ---------------------------- ------
+ *   SYMBOL                  Meaning                  LED
+ *   ------------------- ---------------------------- ------   */
+
+#define LED_STARTED      0 /* NuttX has been started  OFF      */
+#define LED_HEAPALLOCATE 0 /* Heap has been allocated OFF      */
+#define LED_IRQSENABLED  0 /* Interrupts enabled      OFF      */
+#define LED_STACKCREATED 1 /* Idle stack created      ON       */
+#define LED_INIRQ        2 /* In an interrupt         N/C      */
+#define LED_SIGNAL       2 /* In a signal handler     N/C      */
+#define LED_ASSERTION    2 /* An assertion failed     N/C      */
+#define LED_PANIC        3 /* The system has crashed  FLASH    */
+#undef  LED_IDLE           /* MCU is is sleep mode    Not used */
+
+/* Thus if LED is statically on, NuttX has successfully  booted and is,
+ * apparently, running normally.  If LED is flashing at approximately
+ * 2Hz, then a fatal error has been detected and the system has halted.
+ */
+
+/* Button definitions ***************************************************************/
+
+#define BOARD_BUTTON1     0
+#define NUM_BUTTONS       1
+#define BOARD_BUTTON1_BIT (1 << BOARD_BUTTON1)
+
 /* Alternate function pin selections ************************************************/
 /* UART1 */
 
@@ -153,6 +203,50 @@
 #  define GPIO_USART1_RX GPIO_USART1_RX_1
 #  define GPIO_USART1_TX GPIO_USART1_TX_1
 #endif
+
+/* SDIO definitions *****************************************************************/
+
+/* Note that slower clocking is required when DMA is disabled in order
+ * to avoid RX overrun/TX underrun errors due to delayed responses
+ * to service FIFOs in interrupt driven mode.
+ *
+ * These values have not been tuned!!!
+ *
+ * SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(118+2)=400 KHz
+ */
+
+#define SDIO_INIT_CLKDIV        (118 << SDIO_CLKCR_CLKDIV_SHIFT)
+
+/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
+ * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+ */
+
+#ifdef CONFIG_SDIO_DMA
+#  define SDIO_MMCXFR_CLKDIV    (1 << SDIO_CLKCR_CLKDIV_SHIFT)
+#else
+#  define SDIO_MMCXFR_CLKDIV    (2 << SDIO_CLKCR_CLKDIV_SHIFT)
+#endif
+
+/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
+ * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+ */
+
+#ifdef CONFIG_SDIO_DMA
+#  define SDIO_SDXFR_CLKDIV     (1 << SDIO_CLKCR_CLKDIV_SHIFT)
+#else
+#  define SDIO_SDXFR_CLKDIV     (2 << SDIO_CLKCR_CLKDIV_SHIFT)
+#endif
+
+/* DMA Channl/Stream Selections *****************************************************/
+/* Stream selections are arbitrary for now but might become important in the future
+ * if we set aside more DMA channels/streams.
+ *
+ * SDIO DMA
+ *   DMAMAP_SDIO_1 = Channel 4, Stream 3
+ *   DMAMAP_SDIO_2 = Channel 4, Stream 6
+ */
+
+#define DMAMAP_SDIO DMAMAP_SDIO_1
 
 /************************************************************************************
  * Public Data

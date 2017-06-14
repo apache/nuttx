@@ -547,7 +547,7 @@ static ssize_t fat_read(FAR struct file *filep, FAR char *buffer,
       ret = fat_currentsector(fs, ff, filep->f_pos);
       if (ret < 0)
         {
-           return ret;
+          goto errout_with_semaphore;
         }
     }
 
@@ -799,7 +799,7 @@ static ssize_t fat_write(FAR struct file *filep, FAR const char *buffer,
       ret = fat_currentsector(fs, ff, filep->f_pos);
       if (ret < 0)
         {
-           return ret;
+          goto errout_with_semaphore;
         }
     }
 

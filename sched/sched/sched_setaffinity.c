@@ -137,7 +137,7 @@ int sched_setaffinity(pid_t pid, size_t cpusetsize, FAR const cpu_set_t *mask)
 
       if ((tcb->affinity & (1 << tcb->cpu)) == 0)
         {
-          /* No.. then we will need to move the task from the the assigned
+          /* No.. then we will need to move the task from the assigned
            * task list to some other ready to run list.
            *
            * sched_setpriority() will do just what we want... it will remove

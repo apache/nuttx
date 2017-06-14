@@ -123,28 +123,38 @@ config NET_USER_DEVFMT
 
 config NET_ETHERNET
 	bool "Ethernet support"
-	default y if !NET_SLIP
-	default n if NET_SLIP
-	select NETDEV_MULTINIC if NET_LOOPBACK || NET_SLIP || NET_TUN
-	select NET_MULTILINK if NET_LOOPBACK || NET_SLIP || NET_TUN
+	default y
+	select NETDEV_MULTINIC if NET_6LOWPAN || NET_LOOPBACK || NET_SLIP || NET_TUN
+	select NET_MULTILINK if NET_6LOWPAN || NET_LOOPBACK || NET_SLIP || NET_TUN
 	---help---
 		If NET_SLIP is not selected, then Ethernet will be used (there is
 		no need to define anything special in the configuration file to use
 		Ethernet -- it is the default).
 
+config NET_6LOWPAN
+	bool "IEEE 802.15.4 6LoWPAN support"
+	default n
+	select NETDEV_MULTINIC if NET_ETHERNET || NET_LOOPBACK || NET_SLIP || NET_TUN
+	select NET_MULTILINK if NET_ETHERNET || NET_LOOPBACK || NET_SLIP || NET_TUN
+	select NETDEV_IOCTL
+	depends on EXPERIMENTAL && NET_IPv6
+	---help---
+		Enable support for IEEE 802.15.4 Low power Wireless Personal Area
+		Networking (6LoWPAN).
+
 config NET_LOOPBACK
 	bool "Local loopback"
 	default n
-	select NETDEV_MULTINIC if NET_ETHERNET || NET_SLIP || NET_TUN
-	select NET_MULTILINK if NET_ETHERNET || NET_SLIP || NET_TUN
+	select NETDEV_MULTINIC if NET_ETHERNET || NET_6LOWPAN || NET_SLIP || NET_TUN
+	select NET_MULTILINK if NET_ETHERNET || NET_6LOWPAN || NET_SLIP || NET_TUN
 	---help---
 		Add support for the local network loopback device, lo.
 
 config NET_SLIP
 	bool "SLIP support"
 	default n
-	select NETDEV_MULTINIC if NET_ETHERNET || NET_LOOPBACK || NET_TUN
-	select NET_MULTILINK if NET_ETHERNET || NET_LOOPBACK || NET_TUN
+	select NETDEV_MULTINIC if NET_ETHERNET || NET_6LOWPAN || NET_LOOPBACK || NET_TUN
+	select NET_MULTILINK if NET_ETHERNET || NET_6LOWPAN || NET_LOOPBACK || NET_TUN
 	---help---
 		Enables building of the SLIP driver. SLIP requires
 		at least one IP protocol selected.
@@ -190,8 +200,8 @@ endif # NET_SLIP
 config NET_TUN
 	bool "TUN Virtual Network Device support"
 	default n
-	select NETDEV_MULTINIC if NET_ETHERNET || NET_LOOPBACK || NET_SLIP
-	select NET_MULTILINK if NET_ETHERNET || NET_LOOPBACK || NET_SLIP
+	select NETDEV_MULTINIC if NET_ETHERNET || NET_6LOWPAN || NET_LOOPBACK || NET_SLIP
+	select NET_MULTILINK if NET_ETHERNET || NET_6LOWPAN || NET_LOOPBACK || NET_SLIP
 	select ARCH_HAVE_NETDEV_STATISTICS
 
 if NET_TUN
@@ -236,6 +246,23 @@ config TUN_LPWORK
 endchoice # Work queue
 endif # NET_TUN
 
+config NET_USRSOCK
+	bool "User-space networking stack API"
+	default n
+	---help---
+		Enable or disable user-space networking stack support.
+
+		User-space networking stack API allows user-space daemon to
+		provide TCP/IP stack implementation for NuttX network.
+
+		Main use for this is to allow use and integration of
+		HW-provided TCP/IP stacks for NuttX.
+
+		For example, user-space daemon can translate /dev/usrsock API
+		requests to HW TCP/IP API requests while rest of the user-space
+		can access standard socket API, with socket descriptors that
+		can be used with NuttX system calls.
+
 endmenu # Data link support
 
 source "net/netdev/Kconfig"
@@ -255,7 +282,7 @@ menuconfig NET_IPv6
 		Build in support for IPv6.
 
 source "net/neighbor/Kconfig"
-source "net/6lowpan/Kconfig"
+source "net/sixlowpan/Kconfig"
 
 endmenu # Internet Protocol Selection
 
@@ -269,8 +296,8 @@ source "net/icmpv6/Kconfig"
 source "net/igmp/Kconfig"
 source "net/arp/Kconfig"
 source "net/loopback/Kconfig"
-source "net/iob/Kconfig"
 source "net/procfs/Kconfig"
+source "net/usrsock/Kconfig"
 source "net/utils/Kconfig"
 
 config NET_STATISTICS

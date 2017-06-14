@@ -33,13 +33,6 @@ config ADC_FIFOSIZE
 		this is a ring buffer, the actual number of bytes that can be
 		retained in buffer is (ADC_FIFOSIZE - 1).
 
-config ADC_NO_STARTUP_CONV
-	bool "Do not start conversion when opening ADC device"
-	default n
-	depends on ARCH_CHIP_STM32
-	---help---
-		Do not start conversion when opening ADC device.
-
 config ADC_ADS1242
 	bool "TI ADS1242 support"
 	default n
@@ -65,6 +58,25 @@ config ADS1255_FREQUENCY
 	default 1000000
 
 endif # ADC_ADS125X
+
+config ADC_LTC1867L
+	bool "LTC 1863L/1867L support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the LTC 1863L (12 bit) and LTC 1867L (16 bit) SPI powered ADC.
+
+		Note that the ADC conversion is started via the ANIOC_TRIGGER iotcl.
+
+if ADC_LTC1867L
+
+config LTC1867L_FREQUENCY
+	int "LTC 1863L/1867L SPI frequency"
+	default 1000000
+	---help---
+		LTC 1863L/1867L SPI frequency. Maximum is 20 MHz.
+
+endif # ADC_LTC1867L
 
 config ADC_PGA11X
 	bool "TI PGA112/3/6/7 support"
@@ -104,10 +116,16 @@ config PGA11X_MULTIPLE
 		Can be defined to support multiple PGA11X devices on board with separate
 		chip selects (not daisy chained).  Each device will require a customized
 		SPI interface to distinguish them when SPI_SELECT is called with
-		devid=SPIDEV_MUX.
+		devid=SPIDEV_MUX(n).
 
 endif # if ADC_PGA11X
 endif # ADC
+
+config COMP
+	bool "Analog Comparator"
+	default n
+	---help---
+		Select to enable support for Analog Comparators (COMPs).
 
 config DAC
 	bool "Digital-to-Analog Conversion"
@@ -123,3 +141,9 @@ config DAC_AD5410
 	select SPI
 
 endif # DAC
+
+config OPAMP
+       bool "Operational Amplifier"
+       default n
+       ---help---
+		Select to enable support for Operational Amplifiers (OPAMPs).

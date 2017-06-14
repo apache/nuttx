@@ -72,12 +72,10 @@ following characteristics:
   |   `-- (board-specific source files)
   |-- <config1-dir>
   |   |-- Make.defs
-  |   |-- defconfig
-  |   `-- setenv.sh
+  |   `-- defconfig
   |-- <config2-dir>
   |   |-- Make.defs
-  |   |-- defconfig
-  |   `-- setenv.sh
+  |   `-- defconfig
   ...
 
 Summary of Files
@@ -101,10 +99,10 @@ src/Makefile -- This makefile will be invoked to build the board specific
   and distclean.
 
 A board may have various different configurations using these common source
-files.  Each board configuration is described by three files:  Make.defs,
-defconfig, and setenv.sh.  Typically, each set of configuration files is
-retained in a separate configuration sub-directory (<config1-dir>,
-<config2-dir>, .. in the above diagram).
+files.  Each board configuration is described by two files:  Make.defs and
+defconfig.  Typically, each set of configuration files is retained in a
+separate configuration sub-directory (<config1-dir>, <config2-dir>, .. in
+the above diagram).
 
 Make.defs -- This makefile fragment provides architecture and
   tool-specific build options.  It will be included by all other
@@ -140,12 +138,6 @@ defconfig -- This is a configuration file similar to the Linux
     (1) as a makefile fragment included in other makefiles, and
     (2) to generate include/nuttx/config.h which is included by
         most C files in the system.
-
-setenv.sh -- This is a script that you can include that will be installed at
-  the toplevel of the directory structure and can be sourced to set any
-  necessary environment variables.  You will most likely have to customize the
-  default setenv.sh script in order for it to work correctly in your
-  environment.
 
 Configuration Variables
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -201,6 +193,9 @@ configs/c5471evm
   NuttX runs on the ARM core and is built with a GNU arm-nuttx-elf toolchain*.
   This port is complete and verified.
 
+config/clicker2-stm32
+  Mikroe Clicker2 STM32 board based on the STMicro STM32F407VGT6 MCU.
+
 configs/cloudctrl
   Darcy's CloudController board.  This is a small network relay development
   board. Based on the Shenzhou IV development board design.  It is based on
@@ -232,10 +227,10 @@ configs/eagle100
   arm-nuttx-elf toolchain*.  STATUS:  This port is complete and mature.
 
 configs/efm32-g8xx-stk
-  The port of NuttX to the the EFM32 Gecko Starter Kit (EFM32-G8XX-STK).
+  The port of NuttX to the EFM32 Gecko Starter Kit (EFM32-G8XX-STK).
 
 configs/efm32gg-stk3700
-  The port of NuttX to the the EFM32 Giant Gecko Starter Kit
+  The port of NuttX to the EFM32 Giant Gecko Starter Kit
   (EFM32GG-STK3700).
 
 configs/ekk-lm3s9b96
@@ -407,6 +402,9 @@ configs/nucleo-144
   And (2) the Nucleo-F746ZG board featuring the STM32F767ZIT6 MCU. The
   STM32F767ZIT6 is a 216MHz Cortex-M7 operation with 2048Kb Flash memory
   and 512Kb SRAM.
+
+configs/nucleo-f072rb
+  STMicro Nucleo F072RB board based on the STMicro STM32F072RBT6 MCU.
 
 configs/nucleo-f4x1re
   STMicro ST Nucleo F401RE and F411RE boards.  See
@@ -657,6 +655,10 @@ configs/stm32butterfly2
   Kamami stm32butterfly2 development board with optional ETH phy.  See
   https://kamami.pl/zestawy-uruchomieniowe-stm32/178507-stm32butterfly2.html
 
+configs/stm32f0discovery
+  STMicro STM32F-Discovery board based on the STMicro ARCH_CHIP_STM32F051R8
+  MCU.
+
 configs/stm32f103-minimum
   Generic STM32F103C8T6 Minimum ARM Development Board.
 
@@ -763,6 +765,9 @@ configs/viewtool-stm32f107
   board may be fitted with either: (1) STM32F107VCT6 or (2) STM32F103VCT6.
   See http://www.viewtool.com/ for further information.
 
+config/xmc4500-relax
+  Infineon XMC4000 Relax Lite v1
+
 configs/xtrs
   TRS80 Model 3.  This port uses a vintage computer based on the Z80.
   An emulator for this computer is available to run TRS80 programs on a
@@ -803,7 +808,6 @@ Configuring NuttX
 Configuring NuttX requires only copying
 
   configs/<board-name>/<config-dir>/Make.def to ${TOPDIR}/Make.defs
-  configs/<board-name>/<config-dir>/setenv.sh to ${TOPDIR}/setenv.sh
   configs/<board-name>/<config-dir>/defconfig to ${TOPDIR}/.config
 
 tools/configure.sh

@@ -70,7 +70,7 @@
 
 static void     spi_delay(uint32_t holdtime);
 static void     spi_select(FAR struct spi_bitbang_s *priv,
-                  enum spi_dev_e devid, bool selected);
+                  uint32_t devid, bool selected);
 static uint32_t spi_setfrequency(FAR struct spi_bitbang_s *priv,
                   uint32_t frequency);
 static void     spi_setmode(FAR struct spi_bitbang_s *priv,
@@ -90,10 +90,10 @@ static uint16_t spi_bitexchange3(uint16_t dataout, uint32_t holdtime);
 static uint16_t spi_exchange(FAR struct spi_bitbang_s *priv,
                   uint16_t dataout);
 static uint8_t  spi_status(FAR struct spi_bitbang_s *priv,
-                  enum spi_dev_e devid);
+                  uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
 static int      spi_cmddata(FAR struct spi_bitbang_s *priv,
-                  enum spi_dev_e devid, bool cmd);
+                  uint32_t devid, bool cmd);
 #endif
 
 /****************************************************************************

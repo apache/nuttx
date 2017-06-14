@@ -245,7 +245,7 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: file_poll
+ * Name: file_poll
  *
  * Description:
  *   Low-level poll operation based on struc file.  This is used both to (1)
@@ -288,7 +288,7 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 #endif
 
 /****************************************************************************
- * Function: fdesc_poll
+ * Name: fdesc_poll
  *
  * Description:
  *   The standard poll() operation redirects operations on file descriptors
@@ -388,6 +388,25 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
         }
       else if (timeout > 0)
         {
+          systime_t ticks;
+
+          /* "Implementations may place limitations on the granularity of
+           * timeout intervals. If the requested timeout interval requires
+           * a finer granularity than the implementation supports, the
+           * actual timeout interval will be rounded up to the next
+           * supported value." -- opengroup.org
+           *
+           * Round timeout up to next full tick.
+           */
+
+#if (MSEC_PER_TICK * USEC_PER_MSEC) != USEC_PER_TICK && \
+    defined(CONFIG_HAVE_LONG_LONG)
+          ticks = (((unsigned long long)timeout * USEC_PER_MSEC) + (USEC_PER_TICK - 1)) /
+                  USEC_PER_TICK;
+#else
+          ticks = ((unsigned int)timeout + (MSEC_PER_TICK - 1)) / MSEC_PER_TICK;
+#endif
+
           /* Either wait for either a poll event(s), for a signal to occur,
            * or for the specified timeout to elapse with no event.
            *
@@ -396,7 +415,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
            * immediately.
            */
 
-           ret = sem_tickwait(&sem, clock_systimer(), MSEC2TICK(timeout));
+           ret = sem_tickwait(&sem, clock_systimer(), ticks);
            if (ret < 0)
              {
                if (ret == -ETIMEDOUT)

@@ -178,7 +178,7 @@ int dns_bind(void);
  * Name: dns_query
  *
  * Description:
- *   Using the DNS resolver socket (sd), look up the the 'hostname', and
+ *   Using the DNS resolver socket (sd), look up the 'hostname', and
  *   return its IP address in 'ipaddr'
  *
  * Input Parameters:

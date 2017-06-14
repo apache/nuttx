@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_mutexunlock.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,63 +80,116 @@
 
 int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
 {
-  int ret = OK;
+  int ret = EINVAL;
 
   sinfo("mutex=0x%p\n", mutex);
+  DEBUGASSERT(mutex != NULL);
 
-  if (!mutex)
+  /* Make sure the semaphore is stable while we make the following checks.
+   * This all needs to be one atomic action.
+   */
+
+  sched_lock();
+  if (mutex != NULL)
     {
-      ret = EINVAL;
-    }
-  else
-    {
-      /* Make sure the semaphore is stable while we make the following
-       * checks.  This all needs to be one atomic action.
+#if !defined(CONFIG_PTHREAD_MUTEX_UNSAFE) || defined(CONFIG_PTHREAD_MUTEX_TYPES)
+      /* Does the calling thread own the semaphore?  If no, should we return
+       * an error?
+       *
+       * Error checking is always performed for ERRORCHECK and RECURSIVE
+       * mutex types.  Error checking is only performed for NORMAL (or
+       * DEFAULT) mutex type if the NORMAL mutex is robust.  That is either:
+       *
+       *   1. CONFIG_PTHREAD_MUTEX_ROBUST is defined, or
+       *   2. CONFIG_PTHREAD_MUTEX_BOTH is defined and the robust flag is set
        */
 
-      sched_lock();
-
-      /* Does the calling thread own the semaphore? */
+#if defined(CONFIG_PTHREAD_MUTEX_ROBUST)
+      /* Not that error checking is always performed if the configuration has
+       * CONFIG_PTHREAD_MUTEX_ROBUST defined.  Just check if the calling
+       * thread owns the semaphore.
+       */
 
       if (mutex->pid != (int)getpid())
+
+#elif defined(CONFIG_PTHREAD_MUTEX_UNSAFE) && defined(CONFIG_PTHREAD_MUTEX_TYPES)
+      /* If mutex types are not supported, then all mutexes are NORMAL (or
+       * DEFAULT).  Error checking should never be performed for the
+       * non-robust NORMAL mutex type.
+       */
+
+      if (mutex->type != PTHREAD_MUTEX_NORMAL && mutex->pid != (int)getpid())
+
+#else /* CONFIG_PTHREAD_MUTEX_BOTH */
+      /* Skip the error check if this is a non-robust NORMAL mutex */
+
+      bool errcheck = ((mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0);
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
+      errcheck     |= (mutex->type != PTHREAD_MUTEX_NORMAL);
+#endif
+
+      /* Does the calling thread own the semaphore?  If not should we report
+       * the EPERM error?
+       */
+
+      if (errcheck && mutex->pid != (int)getpid())
+#endif
         {
-          /* No... return an error (default behavior is like PTHREAD_MUTEX_ERRORCHECK) */
+          /* No... return an EPERM error.
+           *
+           * Per POSIX:  "EPERM should be returned if the mutex type is
+           * PTHREAD_MUTEX_ERRORCHECK or PTHREAD_MUTEX_RECURSIVE, or the
+           * mutex is a robust mutex, and the current thread does not own
+           * the mutex."
+           *
+           * For the case of the non-robust PTHREAD_MUTEX_NORMAL mutex,
+           * the behavior is undefined.
+           */
 
           serr("ERROR: Holder=%d returning EPERM\n", mutex->pid);
           ret = EPERM;
         }
+      else
+#endif /* !CONFIG_PTHREAD_MUTEX_UNSAFE || CONFIG_PTHREAD_MUTEX_TYPES */
 
-
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
       /* Yes, the caller owns the semaphore.. Is this a recursive mutex? */
 
-#ifdef CONFIG_MUTEX_TYPES
-      else if (mutex->type == PTHREAD_MUTEX_RECURSIVE && mutex->nlocks > 1)
+      if (mutex->type == PTHREAD_MUTEX_RECURSIVE && mutex->nlocks > 1)
         {
           /* This is a recursive mutex and we there are multiple locks held. Retain
            * the mutex lock, just decrement the count of locks held, and return
            * success.
            */
+
           mutex->nlocks--;
+          ret = OK;
         }
-#endif
+      else
+
+#endif /* CONFIG_PTHREAD_MUTEX_TYPES */
 
       /* This is either a non-recursive mutex or is the outermost unlock of
        * a recursive mutex.
+       *
+       * In the case where the calling thread is NOT the holder of the thread,
+       * the behavior is undefined per POSIX.  Here we do the same as GLIBC:
+       * We allow the other thread to release the mutex even though it does
+       * not own it.
        */
 
-      else
         {
           /* Nullify the pid and lock count then post the semaphore */
 
           mutex->pid    = -1;
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
           mutex->nlocks = 0;
 #endif
-          ret = pthread_givesemaphore((FAR sem_t *)&mutex->sem);
+          ret = pthread_mutex_give(mutex);
         }
-      sched_unlock();
     }
 
+  sched_unlock();
   sinfo("Returning %d\n", ret);
   return ret;
 }

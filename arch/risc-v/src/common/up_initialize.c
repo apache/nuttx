@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/risc-v/src/common/up_initialize.c
  *
- *   Copyright (C) 2007-2010, 2012-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2012-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,19 +43,12 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/mm/iob.h>
 
 #include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -158,9 +151,14 @@ void up_initialize(void)
   riscv_timer_initialize();
 #endif
 
-  /* Register devices */
+#ifdef CONFIG_MM_IOB
+  /* Initialize IO buffering */
+
+  iob_initialize();
+#endif
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
+  /* Register devices */
 
 #if defined(CONFIG_DEV_NULL)
   devnull_register();   /* Standard /dev/null */

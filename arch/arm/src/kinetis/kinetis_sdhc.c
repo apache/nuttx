@@ -95,7 +95,7 @@
 /* Enable pull-up resistors
  *
  * Kinetis does not have pullups on all their development boards
- * So allow the the board config to enable them.
+ * So allow the board config to enable them.
  */
 
 #if defined(BOARD_SDHC_ENABLE_PULLUPS)

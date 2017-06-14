@@ -137,7 +137,7 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
                */
 
               stream->fs_flags |= __FS_FLAG_ERROR;
-              ret = -get_errno();;
+              ret = -get_errno();
               goto errout_with_sem;
             }
 

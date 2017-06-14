@@ -210,7 +210,7 @@ void parse_file(FILE *stream, struct variable_s **list)
 
           parse_line(ptr, &varname, &varval);
 
-          /* If the variable has not value (or the special value 'n'), then
+          /* If the variable has no value (or the special value 'n'), then
            * ignore it.
            */
 

@@ -46,7 +46,7 @@
  *    definitions provide the common interface between NuttX and the
  *    architecture-specific implementation in arch/
  *
- *    These definitions are retained in the the header file
+ *    These definitions are retained in the header file
  *    nuttx/include/arch.h
  *
  *    NOTE: up_ is supposed to stand for microprocessor; the u is like the
@@ -148,7 +148,7 @@ void board_initialize(void);
  *   arg - The boardctl() argument is passed to the board_app_initialize()
  *         implementation without modification.  The argument has no
  *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the the
+ *         between the board-specific initalization logic and the
  *         matching application logic.  The value cold be such things as a
  *         mode enumeration value, a set of DIP switch switch settings, a
  *         pointer to configuration data read from a file or serial FLASH,
@@ -581,7 +581,7 @@ void board_button_initialize(void);
  * Description:
  *   After board_button_initialize() has been called, board_buttons() may be
  *   called to collect the state of all buttons.  board_buttons() returns an
- *   8-bit bit set with each bit associated with a button.  A bit set to
+ *   32-bit bit set with each bit associated with a button.  A bit set to
  *   "1" means that the button is depressed; a bit set to "0" means that
  *   the button is released.  The correspondence of the each button bit
  *   and physical buttons is board-specific.
@@ -593,7 +593,7 @@ void board_button_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_BUTTONS
-uint8_t board_buttons(void);
+uint32_t board_buttons(void);
 #endif
 
 /****************************************************************************
@@ -644,6 +644,22 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg);
 void board_crashdump(uintptr_t currentsp, FAR void *tcb,
                      FAR const uint8_t *filename,
                      int lineno);
+#endif
+
+/****************************************************************************
+ * Name: board_initrngseed
+ *
+ * Description:
+ *   If CONFIG_BOARD_INITRNGSEED is selected then board_init_rngseed is
+ *   called at up_randompool_initialize() to feed initial random seed
+ *   to RNG. Implemenation of this functions should feed at least
+ *   MIN_SEED_NEW_ENTROPY_WORDS 32-bit random words to entropy-pool using
+ *   up_rngaddentropy() or up_rngaddint().
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_INITRNGSEED
+void board_init_rngseed(void);
 #endif
 
 #endif /* __INCLUDE_NUTTX_BOARD_H */

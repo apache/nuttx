@@ -201,7 +201,7 @@ static inline void pn532_select(struct pn532_dev_s *dev)
     }
   else
     {
-      SPI_SELECT(dev->spi, SPIDEV_CONTACTLESS, true);
+      SPI_SELECT(dev->spi, SPIDEV_CONTACTLESS(0), true);
     }
 }
 
@@ -213,7 +213,7 @@ static inline void pn532_deselect(struct pn532_dev_s *dev)
     }
   else
     {
-      SPI_SELECT(dev->spi, SPIDEV_CONTACTLESS, false);
+      SPI_SELECT(dev->spi, SPIDEV_CONTACTLESS(0), false);
     }
 }
 

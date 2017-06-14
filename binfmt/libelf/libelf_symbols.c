@@ -126,7 +126,7 @@ static int elf_symname(FAR struct elf_loadinfo_s *loadinfo,
       /* Read that number of bytes into the array */
 
       buffer = &loadinfo->iobuffer[bytesread];
-      ret = elf_read(loadinfo, buffer, readlen, offset);
+      ret = elf_read(loadinfo, buffer, readlen, offset + bytesread);
       if (ret < 0)
         {
           berr("elf_read failed: %d\n", ret);

@@ -60,6 +60,15 @@ config ARCH_BOARD_C5471EVM
 		NuttX runs on the ARM core and is built with a GNU arm-nuttx-elf toolchain*.
 		This port is complete and verified.
 
+config ARCH_BOARD_CLICKER2_STM32
+	bool "Mikrow Clicker2 STM32"
+	depends on ARCH_CHIP_STM32F407VG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Mikroe Clicker2 STM32 board based on the STMicro STM32F407VGT6 MCU.
+
 config ARCH_BOARD_CLOUDCTRL
 	bool "Darcy's CloudController stm32f10x board"
 	depends on ARCH_CHIP_STM32F107VC
@@ -498,7 +507,7 @@ config ARCH_BOARD_OLIMEX_LPC_H3131
 	depends on ARCH_CHIP_LPC3131
 	select ARCH_HAVE_LEDS
 	---help---
-		Olimex LPC-H3131 development board.  This board is based on the the
+		Olimex LPC-H3131 development board.  This board is based on the
 		NXP LPC3131 MCU.
 
 config ARCH_BOARD_OLIMEX_STRP711
@@ -699,7 +708,7 @@ config ARCH_BOARD_NUCLEO_144
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		STMicro Nucleo-144 development board featuring STMicroelectronics
-		F2, F3, F4 and F7 MCU families.  The board is a "Hardware pattern"
+		F2, F3, F4, F7 and L4 MCU families.  The board is a "Hardware pattern"
 		that can be populated with the 144 pin package of the following MCUs:
 
 			Target STM32    Order code
@@ -707,13 +716,61 @@ config ARCH_BOARD_NUCLEO_144
 			STM32F303ZET6   NUCLEO-F303ZE
 			STM32F429ZIT6   NUCLEO-F429ZI
 			STM32F446ZET6   NUCLEO-F446ZE
+			STM32F746ZGT6   NUCLEO-F746ZG
+			STM32F767ZIT6   NUCLEO-F767ZI
+			STM32L496ZGT6   NUCLEO-L496ZG
+			STM32L496ZGT6P  NUCLEO-L496ZG-P
 
-		Supported in this release are:
+		Supported in this configuration are:
 
-			NUCLEO-F746ZG - STM32F746ZGT6 a 216MHz Cortex-M7, w/FPU - 1024KiB
-				Flash memory and 320KiB SRAM.
+			NUCLEO-F746ZG - STM32F746ZGT6 a 216MHz Cortex-M7, w/FPU -
+				1024KiB Flash memory and 320KiB SRAM.
 			NUCLEO-F767ZI - STM32F767ZIT6 a 216MHz Cortex-M7, w/DPFPU -
 				2048KiB Flash memory and 512KiB SRAM.
+
+config ARCH_BOARD_NUCLEO_L496ZG
+	bool "STM32L496 Nucleo L496ZG"
+	depends on ARCH_CHIP_STM32L496ZG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo-144 development board featuring STMicroelectronics
+		F2, F3, F4, F7 and L4 MCU families.  The board is a "Hardware pattern"
+		that can be populated with the 144 pin package of the following MCUs:
+
+			Target STM32    Order code
+			STM32F207ZGT6   NUCLEO-F207ZG
+			STM32F303ZET6   NUCLEO-F303ZE
+			STM32F429ZIT6   NUCLEO-F429ZI
+			STM32F446ZET6   NUCLEO-F446ZE
+			STM32F746ZGT6   NUCLEO-F746ZG
+			STM32F767ZIT6   NUCLEO-F767ZI
+			STM32L496ZGT6   NUCLEO-L496ZG
+			STM32L496ZGT6P  NUCLEO-L496ZG-P
+
+		Supported in this configuration are:
+
+			NUCLEO-L496ZG - STM32L496ZGT6 a 80MHz Cortex-M4, w/FPU -
+				1024KiB Flash memory and 320KiB SRAM.
+
+config ARCH_BOARD_NUCLEO_F072RB
+	bool "STM32F072 Nucleo F072RB"
+	depends on ARCH_CHIP_STM32F072RB
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo F072RB board based on the STMicro STM32F072RBT6 MCU.
+
+config ARCH_BOARD_NUCLEO_F091RC
+	bool "STM32F091 Nucleo F091RC"
+	depends on ARCH_CHIP_STM32F091RC
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo F091RC board based on the STMicro STM32F091RCT6 MCU.
 
 config ARCH_BOARD_NUCLEO_F303RE
 	bool "STM32F303 Nucleo F303RE"
@@ -752,6 +809,24 @@ config ARCH_BOARD_NUCLEO_F411RE
 	---help---
 		This is a minimal configuration that supports low-level test of the
 		Nucleo F411RE in the NuttX source tree.
+
+config ARCH_BOARD_NUCLEO_L432KC
+	bool "STM32L432 Nucleo-32 L432KC"
+	depends on ARCH_CHIP_STM32L432KC
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo-32 L432KC board based on the STMicro STM32L432KCU6 MCU.
+
+config ARCH_BOARD_NUCLEO_L452RE
+	bool "STM32L452 Nucleo L452RE"
+	depends on ARCH_CHIP_STM32L452RE
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo L452RE board based on the STMicro STM32L452RET6 MCU.
 
 config ARCH_BOARD_NUCLEO_L476RG
 	bool "STM32L476 Nucleo L476RG"
@@ -959,6 +1034,9 @@ config ARCH_BOARD_SPARK
 config ARCH_BOARD_PHOTON
 	bool "Photon wifi board"
 	depends on ARCH_CHIP_STM32F205RG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		A configuration for the Photon from Particle Devices
 		(https://www.particle.io). This board features the STM32F205RGY6
@@ -1024,6 +1102,15 @@ config ARCH_BOARD_STM3240G_EVAL
 		STMicro STM3240G-EVAL development board based on the STMicro STM32F103ZET6
 		microcontroller (ARM Cortex-M4 with FPU).  This port uses a GNU Cortex-M4
 		toolchain (such as CodeSourcery).
+
+config ARCH_BOARD_STM32F0_DISCOVERY
+	bool "STMicro STM32F0-Discovery board"
+	depends on ARCH_CHIP_STM32F051R8
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro STM32F-Discovery board based on the STMicro ARCH_CHIP_STM32F051R8 MCU.
 
 config ARCH_BOARD_STM32F3_DISCOVERY
 	bool "STMicro STM32F3-Discovery board"
@@ -1267,6 +1354,15 @@ config ARCH_BOARD_VIEWTOOL_STM32F107
 		board may be fitted with either: (1) STM32F107VCT6 or (2) STM32F103VCT6.
 		See http://www.viewtool.com/ for further information.
 
+config ARCH_BOARD_XMC4500RELAX
+	bool "Infineon XMC4500 Relax"
+	depends on ARCH_CHIP_XMC4500
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Infineon XMC4000 Relax Lite v1
+
 config ARCH_BOARD_XTRS
 	bool "XTRS TRS80 Model 3 emulation"
 	depends on ARCH_CHIP_Z80
@@ -1365,7 +1461,7 @@ config ARCH_BOARD_CUSTOM_DIR
 		to also tell the build system where it can find the board directory
 		for the custom board.
 
-		In this case, the board directory is assume to lie outside the the
+		In this case, the board directory is assume to lie outside the
 		NuttX directory.  The provided path must then be a full, absolute
 		path to some location outside of the NuttX source tree (like
 		"~/projects/myboard").
@@ -1411,6 +1507,7 @@ config ARCH_BOARD
 	default "avr32dev1"                if ARCH_BOARD_AVR32DEV1
 	default "bambino-200e"             if ARCH_BOARD_BAMBINO_200E
 	default "c5471evm"                 if ARCH_BOARD_C5471EVM
+	default "clicker2-stm32"           if ARCH_BOARD_CLICKER2_STM32
 	default "cloudctrl"                if ARCH_BOARD_CLOUDCTRL
 	default "demo9s12ne64"             if ARCH_BOARD_DEMOS92S12NEC64
 	default "dk-tm4c129x"              if ARCH_BOARD_DK_TM4C129X
@@ -1473,10 +1570,15 @@ config ARCH_BOARD
 	default "pic32mx7mmb"              if ARCH_BOARD_PIC32MX7MMB
 	default "pic32mz-starterkit"       if ARCH_BOARD_PIC32MZ_STARTERKIT
 	default "nucleo-144"               if ARCH_BOARD_NUCLEO_144
+	default "nucleo-f072rb"            if ARCH_BOARD_NUCLEO_F072RB
+	default "nucleo-f091rc"            if ARCH_BOARD_NUCLEO_F091RC
 	default "nucleo-f303re"            if ARCH_BOARD_NUCLEO_F303RE
 	default "nucleo-f334r8"            if ARCH_BOARD_NUCLEO_F334R8
 	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
+	default "nucleo-l432kc"            if ARCH_BOARD_NUCLEO_L432KC
+	default "nucleo-l452re"            if ARCH_BOARD_NUCLEO_L452RE
 	default "nucleo-l476rg"            if ARCH_BOARD_NUCLEO_L476RG
+	default "nucleo-l496zg"            if ARCH_BOARD_NUCLEO_L496ZG
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
 	default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
@@ -1500,6 +1602,7 @@ config ARCH_BOARD
 	default "photon"                   if ARCH_BOARD_PHOTON
 	default "stm32butterfly2"          if ARCH_BOARD_STM32_BUTTERFLY2
 	default "stm32_tiny"               if ARCH_BOARD_STM32_TINY
+	default "stm32f0discovery"         if ARCH_BOARD_STM32F0_DISCOVERY
 	default "stm32f103-minimum"        if ARCH_BOARD_STM32F103_MINIMUM
 	default "stm3210e-eval"            if ARCH_BOARD_STM3210E_EVAL
 	default "stm3220g-eval"            if ARCH_BOARD_STM3220G_EVAL
@@ -1528,6 +1631,7 @@ config ARCH_BOARD
 	default "ubw32"                    if ARCH_BOARD_UBW32
 	default "us7032evb1"               if ARCH_BOARD_US7032EVB1
 	default "viewtool-stm32f107"       if ARCH_BOARD_VIEWTOOL_STM32F107
+	default "xmc4500-relax"            if ARCH_BOARD_XMC4500RELAX
 	default "xtrs"                     if ARCH_BOARD_XTRS
 	default "z16f2800100zcog"          if ARCH_BOARD_Z16F2800100ZCOG
 	default "z80sim"                   if ARCH_BOARD_Z80SIM
@@ -1590,6 +1694,9 @@ source "configs/bambino-200e/Kconfig"
 endif
 if ARCH_BOARD_C5471EVM
 source "configs/c5471evm/Kconfig"
+endif
+if ARCH_BOARD_CLICKER2_STM32
+source "configs/clicker2-stm32/Kconfig"
 endif
 if ARCH_BOARD_CLOUDCTRL
 source "configs/cloudctrl/Kconfig"
@@ -1774,6 +1881,12 @@ endif
 if ARCH_BOARD_NUCLEO_144
 source "configs/nucleo-144/Kconfig"
 endif
+if ARCH_BOARD_NUCLEO_F072RB
+source "configs/nucleo-f072rb/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F091RC
+source "configs/nucleo-f091rc/Kconfig"
+endif
 if ARCH_BOARD_NUCLEO_F303RE
 source "configs/nucleo-f303re/Kconfig"
 endif
@@ -1783,8 +1896,17 @@ endif
 if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 source "configs/nucleo-f4x1re/Kconfig"
 endif
+if ARCH_BOARD_NUCLEO_L432KC
+source "configs/nucleo-l432kc/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_L452RE
+source "configs/nucleo-l452re/Kconfig"
+endif
 if ARCH_BOARD_NUCLEO_L476RG
 source "configs/nucleo-l476rg/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_L496ZG
+source "configs/nucleo-l496zg/Kconfig"
 endif
 if ARCH_BOARD_QEMU_I486
 source "configs/qemu-i486/Kconfig"
@@ -1854,6 +1976,9 @@ source "configs/stm32butterfly2/Kconfig"
 endif
 if ARCH_BOARD_STM32_TINY
 source "configs/stm32_tiny/Kconfig"
+endif
+if ARCH_BOARD_STM32F0_DISCOVERY
+source "configs/stm32f0discovery/Kconfig"
 endif
 if ARCH_BOARD_STM32F103_MINIMUM
 source "configs/stm32f103-minimum/Kconfig"
@@ -1933,6 +2058,9 @@ endif
 if ARCH_BOARD_VIEWTOOL_STM32F107
 source "configs/viewtool-stm32f107/Kconfig"
 endif
+if ARCH_BOARD_XMC4500RELAX
+source "configs/xmc4500-relax/Kconfig"
+endif
 if ARCH_BOARD_XTRS
 source "configs/xtrs/Kconfig"
 endif
@@ -1985,6 +2113,27 @@ config BOARD_RESET_ON_CRASH
 	---help---
 		If selected the board_crashdump should reset the machine after
 		saveing the state of the machine
+
+config BOARD_ENTROPY_POOL
+	bool "Enable Board level storing of entropy pool structure"
+	default n
+	depends on CRYPTO_RANDOM_POOL
+	---help---
+		Entropy pool structure can be provided by board source.
+		Use for this is, for example, to allocate entropy pool
+		from special area of RAM which content is kept over
+		system reset.
+
+config BOARD_INITRNGSEED
+	bool "Enable Board level initial seeding of entropy pool RNG"
+	default n
+	depends on CRYPTO_RANDOM_POOL
+	---help---
+		If enabled, entropy pool random number generator will call
+		board_init_rndseed() upon initialization. This function
+		can then provide early entropy seed to the pool through
+		entropy injection APIs provided at 'nuttx/random.h'.
+#endif
 
 config LIB_BOARDCTL
 	bool "Enable boardctl() interface"

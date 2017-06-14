@@ -315,9 +315,9 @@ int sig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
   if (sigismember(&stcb->sigprocmask, info->si_signo))
     {
-      /* Check if the task is waiting for this pending signal.  If so, then unblock it.
-       * This must be performed in a critical section because signals can be queued
-       * from the interrupt level.
+      /* Check if the task is waiting for this pending signal.  If so, then
+       * unblock it.  This must be performed in a critical section because
+       * signals can be queued * from the interrupt level.
        */
 
       flags = enter_critical_section();

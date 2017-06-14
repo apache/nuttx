@@ -3014,7 +3014,7 @@ static int stm32_getblendmode(FAR struct ltdc_layer_s *layer, uint32_t *mode)
  *   On error - -EINVAL
  *
  * Procedure Information:
- *   If the srcxpos and srcypos unequal the the xpos and ypos of the area
+ *   If the srcxpos and srcypos unequal the xpos and ypos of the area
  *   structure this acts like moving the visible area to another position on
  *   the screen during the next update operation.
  *

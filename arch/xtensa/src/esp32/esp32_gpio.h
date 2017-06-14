@@ -100,7 +100,7 @@
 
 #ifndef __ASSEMBLY__
 
-/* Must be big enough to hold the the above encodings */
+/* Must be big enough to hold the above encodings */
 
 typedef uint16_t gpio_pinattr_t;
 typedef uint8_t gpio_intrtype_t;

@@ -35,7 +35,8 @@
 
 # Add the string C files to the build
 
-CSRCS += lib_ffs.c lib_isbasedigit.c lib_memset.c lib_memchr.c
+CSRCS += lib_ffs.c lib_ffsl.c lib_ffsll.c lib_fls.c lib_flsl.c
+CSRCS += lib_flsll.c lib_isbasedigit.c lib_memset.c lib_memchr.c
 CSRCS += lib_memccpy.c lib_memcmp.c lib_memmove.c lib_skipspace.c
 CSRCS += lib_stpcpy.c lib_strcasecmp.c lib_strcat.c lib_strchr.c
 CSRCS += lib_strcpy.c lib_strcmp.c lib_strcspn.c lib_strdup.c
@@ -43,6 +44,7 @@ CSRCS += lib_strerror.c lib_strlen.c lib_strnlen.c lib_strncasecmp.c
 CSRCS += lib_strncat.c lib_strncmp.c lib_strncpy.c lib_strndup.c
 CSRCS += lib_strcasestr.c lib_strpbrk.c lib_strrchr.c lib_strspn.c
 CSRCS += lib_strstr.c lib_strtok.c lib_strtokr.c lib_strerrorr.c
+CSRCS += lib_explicit_bzero.c
 
 ifneq ($(CONFIG_LIBC_ARCH_MEMCPY),y)
 ifeq ($(CONFIG_MEMCPY_VIK),y)

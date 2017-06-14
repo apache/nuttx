@@ -411,7 +411,7 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
  * Name: dns_query_callback
  *
  * Description:
- *   Using the DNS information and this DNS server address, look up the the
+ *   Using the DNS information and this DNS server address, look up the
  *   hostname.
  *
  * Input Parameters:
@@ -494,7 +494,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
 
           nerr("ERROR: IPv4 dns_recv_response failed: %d\n", ret);
 
-          if (ret != -EADDRNOTAVAIL)
+          if (ret == -EADDRNOTAVAIL)
             {
               /* The IPv4 address is not available.  Return zero to
                * continue the tranversal with the next nameserver
@@ -575,7 +575,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
 
           nerr("ERROR: IPv6 dns_recv_response failed: %d\n", ret);
 
-          if (ret != -EADDRNOTAVAIL)
+          if (ret == -EADDRNOTAVAIL)
             {
               /* The IPv6 address is not available.  Return zero to
                * continue the tranversal with the next nameserver
@@ -624,7 +624,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
  * Name: dns_query
  *
  * Description:
- *   Using the DNS resolver socket (sd), look up the the 'hostname', and
+ *   Using the DNS resolver socket (sd), look up the 'hostname', and
  *   return its IP address in 'ipaddr'
  *
  * Input Parameters:

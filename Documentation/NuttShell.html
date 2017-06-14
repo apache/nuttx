@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: February 5, 2017</p>
+      <p>Last Updated: June 13, 2017</p>
     </td>
   </tr>
 </table>
@@ -305,7 +305,7 @@
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdmkfatfs">2.37 Create a FAT Filesystem (mkfatfs)</a>
+    <a href="#cmdmkfatfs">2.37 Create a FAT File System (mkfatfs)</a>
   </td>
 </tr>
 <tr>
@@ -335,7 +335,7 @@
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdnfsmount">2.42 Mount an NFS file system (nfsmount)</a>
+    <a href="#cmdnfsmount">2.42 Mount an NFS File System (nfsmount)</a>
   </td>
 </tr>
 <tr>
@@ -619,9 +619,35 @@
 NuttShell (NSH)
 nsh&gt;
 </pre></ul>
-  The greating may also include NuttX versioning information if you are using a versioned copy of NuttX.
+  The greeting may also include NuttX versioning information if you are using a versioned copy of NuttX.
   <code>nsh&gt;</code> is the NSH prompt and indicates that you may enter a command from the console.
 </p>
+<p>
+  <a name="usbstartup"><b>USB console startup</b></a>.
+  When using a USB console, the start-up sequence differs a little:  In this case, you are required to press <i>ENTER</i> three times.  Then NSH prompt will appear as described above.
+  This is required for the following reasons:
+</p>
+<ol>
+  <li>
+    This assures that the USB connection is stable.
+    The USB connection may be made, broken, and re-established a few times if the USB cable is not yet fully seated.
+    Waiting for <i>ENTER</i> to be pressed three times assures that the connection is stable.
+  </li>
+  <li>
+    The establishment of the connection is two step process:  First, the USB serial connection is made with the host PC.  Then the application that uses the serial interface is started on the host.
+    When the serial connection is established on the host, the host operating system may send several <i>AT</i> modem commands to the host depending upon how the host serial port is configured.
+    By waiting for <i>ENTER</i> to be pressed three consecutive times, all of these modem commands will go to the bit-bucket and will not be interpreted as NSH command input.
+  </li>
+  <li>
+    Similarly, in the second step when the applications is started, there may be additional <i>AT</i> modem commands sent out the serial port.
+    Most serial terminal programs will do this unless they are specifically configured to suppress the modem command output.
+    Waiting for the <i>ENTER</i> input eliminates the invalid command errors from both (2) and (3).
+  </li>
+  <li>
+    Finally, if NSH did not wait for some positive indication that the serial terminal program is up and running, then the output of the NSH greeting and initial NSH prompt would be lost.
+  </li>
+</ol>
+
 <p>
   <a name="cle"><b>Extended Command Line Editing</b></a>.
   By default, NuttX uses a simple command line editor that allows command entry after the <code>nsh&gt;</code> and supports only the <i>backspace</i> key for editing.
@@ -752,7 +778,7 @@ nsh&gt;
     <td><code>&lt;file&gt;</code></td>
     <td>
       is the full or relative path to any writable object
-      in the filesystem name space (file or character driver).
+      in the file system name space (file or character driver).
       Such objects will be referred to simply as files throughout
       this document.
     </td>
@@ -779,7 +805,7 @@ nsh&gt;
 
 <p>
    <b>Optional Syntax Extensions</b>
-   Because these features commit significant resources, it is disabled by default.
+   Because these features commit significant resources, they are disabled by default.
 </p>
 <ul>
 <li>
@@ -804,7 +830,7 @@ set BAR 123
 set FOOBAR ABC_${FOO}_${BAR}
 </pre></ul>
   would set the environment variable <code>FOO</code> to <code>XYZ</code>, <code>BAR</code> to <code>123</code> and <code>FOOBAR</code> to <code>ABC_XYZ_123</code>.
-  If <code>CONFIG_NSH_ARGCAT</code> is not selected, then a slightly small FLASH footprint results but then also only simple environment variables like <code>$FOO</code> can be used on the command line.
+  If <code>CONFIG_NSH_ARGCAT</code> is not selected, then a slightly smaller FLASH footprint results but then also only simple environment variables like <code>$FOO</code> can be used on the command line.
 </li>
 </ul>
 
@@ -820,7 +846,7 @@ set FOOBAR ABC_${FOO}_${BAR}
   An <code>if-then[-else]-fi</code> construct is also supported in order to
   support conditional execution of commands.  This works from the
   command line but is primarily intended for use within NSH scripts
-  (see the <a href="#cmdsh"><code>sh</code></a> commnd).  The syntax is as follows:
+  (see the <a href="#cmdsh"><code>sh</code></a> command).  The syntax is as follows:
 </p>
 <ul><pre>
 if &lt;cmd&gt;
@@ -968,7 +994,7 @@ done
   <ul>
     <li>
       NSH will create a read-only RAM disk (a ROM disk), containing a tiny
-      ROMFS filesystem containing the following:
+      ROMFS file system containing the following:
 <ul><pre>
 `--init.d/
      `-- rcS
@@ -976,7 +1002,7 @@ done
       Where rcS is the NSH start-up script.
     </li>
     <li>
-      NSH will then mount the ROMFS filesystem at <code>/etc</code>, resulting in:
+      NSH will then mount the ROMFS file system at <code>/etc</code>, resulting in:
 <ul><pre>
 |--dev/
 |   `-- ram0
@@ -1058,7 +1084,7 @@ mount -t vfat /dev/ram1 /tmp
   All of the startup-behavior is contained in <code>rcS.template</code>.  The
   role of <code>mkromfsimg.sh</code> is to (1) apply the specific configuration
   settings to <code>rcS.template</code> to create the final <code>rcS</code>, and (2) to
-  generate the header file <code>nsh_romfsimg.h</code> containg the ROMFS
+  generate the header file <code>nsh_romfsimg.h</code> containing the ROMFS
   file system image.
 </p>
 
@@ -1139,7 +1165,7 @@ addroute &lt;target&gt; &lt;netmask&gt; &lt;router&gt;
 <p>
   <b>Synopsis</b>.
   This command adds an entry in the routing table.
-  The new entry will map the IP address of a router on a local network(&lt;router&gt;) to an external network characterized by the &lt;target&gt; IP address and a network mask &lt;netmask&gt;
+  The new entry will map the IP address of a router on a local network (&lt;router&gt;) to an external network characterized by the &lt;target&gt; IP address and a network mask &lt;netmask&gt;
 </p>
 <p>
   <b>Example:</b>
@@ -1274,7 +1300,7 @@ cat <code>&lt;path&gt;</code> [<code>&lt;path&gt;</code> [<code>&lt;path&gt;</co
 </pre></ul>
 <p>
   <b>Synopsis</b>.
-  This command copies and concatentates all of the files at <code>&lt;path&gt;</code>
+  This command copies and concatenates all of the files at <code>&lt;path&gt;</code>
   to the console (or to another file if the output is redirected).
 </p>
 
@@ -1352,7 +1378,7 @@ cp &lt;source-path&gt; &lt;dest-path&gt;
 <p>
   <b>Synopsis</b>.
   Copy of the contents of the file at <code>&lt;source-path&gt;</code> to the location
-  in the filesystem indicated by <code>&lt;dest-path&gt;</code>.
+  in the file system indicated by <code>&lt;dest-path&gt;</code>.
 </p>
 
 <table width ="100%">
@@ -1425,7 +1451,7 @@ nsh&gt; dd if=/dev/zero of=/dev/ram0
 </pre></ul>
   </li>
   <li>
-    Read from a block devic, write to a character device.  This
+    Read from a block device, write to a character device.  This
     will read the entire block device and dump the contents in
     the bit bucket.
   </li>
@@ -1564,7 +1590,7 @@ exit
   <b>Synopsis</b>.
   Exit NSH.  Only useful for the serial front end if you have started some other tasks (perhaps
   using the <code><a href="#cmdexec">exec</a></code> command) and you would like to have NSH out of the
-  way.  For the telnet front-end, <code>exit</code> terminates the telenet session.
+  way.  For the telnet front-end, <code>exit</code> terminates the telnet session.
 </p>
 
 <table width ="100%">
@@ -1638,7 +1664,7 @@ get [-b|-n] [-f &lt;local-path&gt;] -h &lt;ip-address&gt; &lt;remote-path&gt;
   <tr>
     <td><b><code>-b|-n</code></b></td>
     <td>
-      Selects either binary (&quot;octet&quot;) or test (&quot;netascii&quot;) transfer
+      Selects either binary (&quot;octet&quot;) or text (&quot;netascii&quot;) transfer
       mode.  Default: text.
     </td>
   </tr>
@@ -1686,11 +1712,24 @@ help [-v] [&lt;cmd&gt;]
 
 <p><b>Command Syntax:</b></p>
 <ul><pre>
-hexdump &lt;file or device&gt;
+hexdump &lt;file or device&gt; [skip=&lt;bytes&gt;] [count=&lt;bytes&gt;]
 </pre></ul>
 <p>
   <b>Synopsis</b>.
   Dump data in hexadecimal format from a file or character device.
+</p>
+<ul><table>
+  <tr>
+    <td><b><code>skip=&lt;bytes&gt;</code></b></td>
+    <td>Will skip <code>&lt;bytes&gt;</code> number of bytes from the beginning.
+  </tr>
+  <tr>
+    <td><b><code>count=&lt;bytes&gt;</code></b></td>
+    <td>Will stop after dumping <code>&lt;bytes&gt;</code> number of bytes.
+  </tr>
+</table></ul>
+<p>
+The <code>skip</code> and <code>count</code> options are only available if <code>CONFIG_NSH_CMDOPT_HEXDUMP</code> is defined in the NuttX configuration.
 </p>
 
 <table width ="100%">
@@ -1707,13 +1746,13 @@ ifconfig [nic_name [&lt;ip-address&gt;|dhcp]] [dr|gw|gateway &lt;dr-address&gt;]
 </pre></ul>
 <p>
   <b>Synopsis</b>.
-  Multiple forms of the <code>ifconfig</code>command are supported:
+  Multiple forms of the <code>ifconfig</code> command are supported:
 </p>
 <ol>
   <li>
     <p>
       With one or no arguments, <code>ifconfig</code> will shows the
-      current configuration of the network and, perhaps, the status of ethernet
+      current configuration of the network and, perhaps, the status of Ethernet
       device:
     </p>
     <ul><pre>
@@ -1736,7 +1775,7 @@ eth0    HWaddr 00:18:11:80:10:06
   <li>
     <p>
       If both the network interface name and an IP address are supplied as arguments,
-      then <code>ifconfig</code> will set the address of the ethernet device:
+      then <code>ifconfig</code> will set the address of the Ethernet device:
     </p>
     <ul><pre>
 ifconfig nic_name ip_address
@@ -1880,7 +1919,7 @@ nsh&gt;
 <p><small>
   <b>NOTE</b>:
   NuttX does not support a FULL POSIX signalling system.
-  Standard signals like SIGCHLD, SIGINTR, SIGKILL, etc. do not exist in NuttX and sending those signal may not have the result that you expect.
+  Standard signals like SIGCHLD, SIGINTR, SIGKILL, etc. do not exist in NuttX and sending those signals may not have the result that you expect.
   Rather, NuttX supports only what are referred to as POSIX real-time signals.
   These signals may be used to communicate with running tasks, may be use to waiting waiting tasks, etc.
   But, as an example, <code>kill -9</code> (SIGKILL) will not terminate a task.
@@ -1942,22 +1981,22 @@ losetup d &lt;dev-path&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdln"><h2>2.30 List to a File or Directory (ln)</h2></a>
+    <a name="cmdln"><h2>2.30 Link to a File or Directory (ln)</h2></a>
   </td>
   </tr>
 </table>
 
 <p><b>Command Syntax:</b></p>
 <ul><pre>
-link [-s] &lt;target&gt; &lt;link&gt;
+ln [-s] &lt;target&gt; &lt;link&gt;
 </pre></ul>
 <p>
   <b>Synopsis</b>.
-  The <code>link</code> command will create a new symbolic link at &lt;link&gt; for the existing file or directory, &lt;target&gt;.
-  This implementation is simplied for use with NuttX in these ways:
+  The <code>ln</code> command will create a new symbolic link at &lt;link&gt; for the existing file or directory, &lt;target&gt;.
+  This implementation is simplified for use with NuttX in these ways:
 </p>
 <ul>
-    <li>Links may be created only within the NuttX top-level, pseudo file system.
+    <li>Links may be created only within the NuttX top-level, <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> file system</a>.
         No file system currently supported by NuttX provides symbolic links.</li>
     <li>For the same reason, only soft links are implemented.</li>
     <li>File privileges are ignored.</li>
@@ -1979,7 +2018,7 @@ ls [-lRs] &lt;dir-path&gt;
 <p>
   <b>Synopsis</b>.
   Show the contents of the directory at <code>&lt;dir-path&gt;</code>.  NOTE:
-  <code>&lt;dir-path&gt;</code> must refer to a directory and no other filesystem
+  <code>&lt;dir-path&gt;</code> must refer to a directory and no other file system
   object.
 </p>
 <p><b>Options:</b></p>
@@ -2073,20 +2112,19 @@ mw &lt;hex-address&gt;[=&lt;hex-value&gt;][ &lt;hex-byte-count&gt;]
 </p>
 <ul><table>
   <tr>
-    <td><code>&lt;hex-address&gt;</code>.</td>
+    <td><code>&lt;hex-address&gt;</code></td>
     <td>Specifies the address to be accessed.  The current
       value at that address will always be read and displayed.
   </tr>
   <tr>
-    <td><code>&lt;hex-address&gt;=&lt;hex-value&gt;</code>.</td>
+    <td><code>&lt;hex-address&gt;=&lt;hex-value&gt;</code></td>
     <td>Read the value, then write <code>&lt;hex-value&gt;</code>
       to the location.
   </tr>
   <tr>
-    <td><code>&lt;hex-byte-count&gt;</code>.</td>
+    <td><code>&lt;hex-byte-count&gt;</code></td>
     <td>Perform the mb, mh, or mw operation on a total
-      of <code>&lt;hex-byte-count&gt;</code> bytes, increment the <code>&lt;hex-address&gt;</code> appropriately
-      after each access
+      of <code>&lt;hex-byte-count&gt;</code> bytes, increment the <code>&lt;hex-address&gt;</code> appropriately after each access.
   </tr>
 </table></ul>
 <p><b>Example:</b><p>
@@ -2160,10 +2198,10 @@ mkdir &lt;path&gt;
 </p>
 <p>
   <b>Limited to Mounted File Systems</b>.
-  Recall that NuttX uses a <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> filesystem</a> for its root file
+  Recall that NuttX uses a <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> file system</a> for its root file
   system.
   The <code>mkdir</code> command can only be used to create directories in volumes set up with the
-  <a href="#cmdmount"><code>mount</code></a> command; it cannot be used to create directories in the <i>pseudo</i> filesystem.
+  <a href="#cmdmount"><code>mount</code></a> command; it cannot be used to create directories in the <i>pseudo</i> file system.
 </p>
 <p><b>Example:</b></p>
 <ul><pre>
@@ -2178,7 +2216,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdmkfatfs"><h2>2.37 Create a FAT Filesystem (mkfatfs)</h2></a>
+    <a name="cmdmkfatfs"><h2>2.37 Create a FAT File System (mkfatfs)</h2></a>
   </td>
 </tr>
 </table>
@@ -2196,7 +2234,7 @@ mkfatfs [-F &lt;fatsize&gt;] &lt;block-driver&gt;
 </p>
 <p>
   NSH provides this command to access the <a href="mkfatfs"><code>mkfatfs()</code></a> NuttX API.
-  This block device must reside in the NuttX <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> filesystem</a> and
+  This block device must reside in the NuttX <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> file system</a> and
   must have been created by some call to <code>register_blockdriver()</code> (see <code>include/nuttx/fs/fs.h</code>).
 </p>
 
@@ -2307,26 +2345,26 @@ mount -t &lt;fstype&gt; [-o &lt;options&gt;] &lt;block-device&gt; <code>&lt;dir-
   If no parameters are provided on the command line after the <code>mount</code> command, then the <code>mount</code> command will enumerate all of the current mountpoints on the console.
 </p>
 <p>
-  If the mount parameters are provied on the command after the <code>mount</code> command, then the <code>mount</code> command will mount a file system in the NuttX pseudo-file system.
-  <code>mount</code>' performs a three way association, binding:
+  If the mount parameters are provided on the command after the <code>mount</code> command, then the <code>mount</code> command will mount a file system in the NuttX pseudo-file system.
+  <code>mount</code> performs a three way association, binding:
 </p>
 <ol>
-  <li><b>File system.</b>
+  <li><b>File System.</b>
     The '-t <code>&lt;fstype&gt;</code>' option identifies the type of
     file system that has been formatted on the <code>&lt;block-device&gt;</code>.
     As of this writing, <code>vfat</code> is the only supported value for <code>&lt;fstype&gt;</code>
   </li>
   <li><b>Block Device.</b>
     The <code>&lt;block-device&gt;</code> argument is the full or relative
-    path to a block driver inode in the <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> filesystem</a>.
+    path to a block driver inode in the <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> file system</a>.
     By convention, this is a name under the <code>/dev</code> sub-directory.
     This <code>&lt;block-device&gt;</code>  must have been previously formatted with the same file system
     type as specified by <code>&lt;fstype&gt;</code>
   </li>
   <li><b>Mount Point.</b>
     The mount point, <code>&lt;dir-path&gt;</code>, is the location in the
-    <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> filesystem</a> where the mounted volume will appear.
-    This mount point can only reside in the NuttX <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> filesystem</a>.
+    <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> file system</a> where the mounted volume will appear.
+    This mount point can only reside in the NuttX <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> file system</a>.
     By convention, this mount point is a subdirectory under <code>/mnt</code>.
     The mount command will create whatever pseudo directories that may be needed to complete the
     full path but the full path must not already exist.
@@ -2334,8 +2372,8 @@ mount -t &lt;fstype&gt; [-o &lt;options&gt;] &lt;block-device&gt; <code>&lt;dir-
 </ol>
 <p>
   After the volume has been mounted in the NuttX
-  <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> filesystem</a>,
-  it may be access in the same way as other objects in thefile system.
+  <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> file system</a>,
+  it may be access in the same way as other objects in the file system.
 </p>
 <p><b>Examples</b>:</p>
 <p>Using <code>mount</code> to mount a file system:</p>
@@ -2383,7 +2421,7 @@ mv &lt;old-path&gt; &lt;new-path&gt;
 <p>
   <b>Synopsis</b>.
   Rename the file object at <code>&lt;old-path&gt;</code> to <code>&lt;new-path&gt;</code>.
-  Both paths must reside in the same mounted filesystem.
+  Both paths must reside in the same mounted file system.
 </p>
 
 <table width ="100%">
@@ -2527,7 +2565,7 @@ put [-b|-n] [-f &lt;remote-path&gt;] -h &lt;ip-address&gt; &lt;local-path&gt;
   <tr>
     <td><b><code>-b|-n</code></b></td>
     <td>
-      Selects either binary (&quot;octet&quot;) or test (&quot;netascii&quot;) transfer
+      Selects either binary (&quot;octet&quot;) or text (&quot;netascii&quot;) transfer
       mode.  Default: text.
     </td>
   </tr>
@@ -2616,11 +2654,11 @@ rm &lt;file-path&gt;
 <p>
   <b>Synopsis</b>.
   Remove the specified <code>&lt;file-path&gt;</code> name from the mounted file system.
-  Recall that NuttX uses a <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> filesystem</a> for its root file
+  Recall that NuttX uses a <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> file system</a> for its root file
   system.
   The <code>rm</code> command can only be used to remove (unlink) files in volumes set up with the
   <a href="#cmdmount"><code>mount</code></a> command;
-  it cannot be used to remove names in the <i>pseudo</i> filesystem.
+  it cannot be used to remove names in the <i>pseudo</i> file system.
 </p>
 <p><b>Example:</b></p>
 <ul><pre>
@@ -2650,11 +2688,11 @@ rmdir &lt;dir-path&gt;
 <p>
   <b>Synopsis</b>.
   Remove the specified <code>&lt;dir-path&gt;</code> directory from the mounted file system.
-  Recall that NuttX uses a <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> filesystem</a> for its root file
+  Recall that NuttX uses a <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> file system</a> for its root file
   system.
   The <code>rmdir</code> command can only be used to remove directories from volumes set up with the
   <a href="#cmdmount"><code>mount</code></a> command;
-  it cannot be used to remove directories from the <i>pseudo</i> filesystem.
+  it cannot be used to remove directories from the <i>pseudo</i> file system.
 </p>
 <p><b>Example:</b></p>
 <ul><pre>
@@ -2708,12 +2746,11 @@ nsh&gt;
 
 <p><b>Command Syntax:</b></p>
 <ul><pre>
-set &lt;name&gt; &lt;value&gt;
+set [{+|-}{e|x|xe|ex}] [&lt;name&gt; &lt;value&gt;]
 </pre></ul>
 <p>
   <b>Synopsis</b>.
-  Set the environment variable <code>&lt;name&gt;</code> to the string <code>&lt;value&gt;</code>.
-  For example,
+  Set the environment variable <code>&lt;name&gt;</code> to the string <code>&lt;value&gt;</code> and or set NSH parser control options. For example,
 </p>
 <ul><pre>
 nsh&gt; echo $foobar
@@ -2723,6 +2760,50 @@ nsh&gt; echo $foobar
 foovalue
 nsh&gt;
 </pre></ul>
+
+<p>
+    Set the 'exit on error control' and/or 'print a trace' of commands when parsing
+    scripts in NSH.  The settings are in effect from the point of execution, until
+    they are changed again, or in the case of the init script, the settings are
+    returned to the default settings when it exits. Included child scripts will run
+    with the parents settings and changes made in the child script will effect the
+    parent on return.
+</p>
+<p>
+    Use 'set -e' to enable and 'set +e' to disable (ignore) the exit condition on commands.
+    The default is -e. Errors cause script to exit.
+</p>
+<p>
+    Use 'set -x' to enable and 'set +x' to disable (silence) printing a trace of the script
+    commands as they are executed.
+    The default is +x: no printing of a trace of script commands as they are executed.
+</p>
+
+  Example 1 - no exit on command not found
+<ul><pre>
+    set +e
+    notacommand
+</pre></ul>
+
+  Example 2 - will exit on command not found
+<ul><pre>
+    set -e
+    notacommand
+</pre></ul>
+
+  Example 3 - will exit on command not found, and print a trace of the script commands
+<ul><pre>
+    set -ex
+</pre></ul>
+
+  Example 4 - will exit on command not found, and print a trace of the script commands
+              and set foobar to foovalue.
+<ul><pre>
+    set -ex foobar foovalue
+    nsh&gt; echo $foobar
+    foovalue
+</pre></ul>
+
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -2808,8 +2889,7 @@ nsh&gt; time "sleep 2"
 nsh&gt;
 </pre></ul>
 <p>
-  The additional 10 millseconds in this example is due to the way that the sleep command works: It always waits one system clock tick longer than requested and this test setup used a 10 millisecond periodic system
-  timer.
+  The additional 10 milliseconds in this example is due to the way that the sleep command works: It always waits one system clock tick longer than requested and this test setup used a 10 millisecond periodic system timer.
   Sources of error could include various quantization errors, competing CPU usage, and the additional overhead of the time command execution itself which is included in the total.
 </p>
 <p>
@@ -2902,7 +2982,7 @@ uname [-a | -imnoprsv]
   <tr>
     <td><code>-n</code></td>
     <td>
-      Print the network node hostname (only availabel if <code>CONFIG_NET=y</code>)
+      Print the network node hostname (only available if <code>CONFIG_NET=y</code>)
     </td>
   </tr>
   <tr>
@@ -3120,7 +3200,7 @@ nsh&gt;
 </p>
 
 <p>
-  Note that in addition to general NuttX configuation settings, each NSH command can be
+  Note that in addition to general NuttX configuration settings, each NSH command can be
   individually disabled via the settings in the rightmost column.
   All of these settings make the configuration of NSH potentially complex but also allow it to
   squeeze into very small memory footprints.
@@ -3289,13 +3369,13 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>ln</code></b></td>
-    <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
-    <td><code>CONFIG_NSH_DISABLE_LL</code></td>
+    <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_PSEUDOFS_SOFTLINKS</code></td>
+    <td><code>CONFIG_NSH_DISABLE_LN</code></td>
   </tr>
   <tr>
     <td><b><code>ls</code></b></td>
     <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
-    <td><code>CONFIG_NSH_DISABLE_LS</code> &amp;&amp; <code>CONFIG_PSEUDOFS_SOFTLINKS</code></td>
+    <td><code>CONFIG_NSH_DISABLE_LS</code></td>
   </tr>
   <tr>
     <td><b><code>lsmod</code></b></td>
@@ -3395,6 +3475,11 @@ nsh&gt;
     <td><code>CONFIG_NSH_DISABLE_PWD</code></td>
   </tr>
   <tr>
+    <td><b><code>readlink</code></b></td>
+    <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_PSEUDOFS_SOFTLINKS</code></td>
+    <td><code>CONFIG_NSH_DISABLE_READLINK</code></td>
+  </tr>
+  <tr>
     <td><b><code>reboot</code></b></td>
     <td><code>CONFIG_BOARD_RESET</code></td>
     <td><code>CONFIG_NSH_DISABLE_REBOOT</code></td>
@@ -3441,7 +3526,7 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>time</code></b></td>
-    <td>&nbsp</td>
+    <td>&nbsp;</td>
     <td><code>CONFIG_NSH_DISABLE_TIME</code></td>
   </tr>
   <tr>
@@ -3451,7 +3536,7 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>uname</code></b></td>
-    <td>br</td>
+    <td>&nbsp;</td>
     <td><code>CONFIG_NSH_DISABLE_UNAME</code></td>
   </tr>
   <tr>
@@ -3500,15 +3585,15 @@ nsh&gt;
 <p><sup>1</sup><small>
   Because of hardware padding, the actual required packet size may be larger</small><br>
   <sup>2</sup><small>
-  Special TFTP server start-up optionss will probably be required to permit
+  Special TFTP server start-up options will probably be required to permit
   creation of files for the correct operation of the <code>put</code> command.</small><br>
   <sup>3</sup><small>
   <code>CONFIG_FS_READABLE</code> is not a user configuration but is set automatically
-  if any readable filesystem is selected.  At present, this is either <code>CONFIG_FS_FAT</code>
+  if any readable file system is selected.  At present, this is either <code>CONFIG_FS_FAT</code>
   or <code>CONFIG_FS_ROMFS</code>.</small><br>
   <sup>4</sup><small>
   <code>CONFIG_FS_WRITABLE</code> is not a user configuration but is set automatically
-  if any writable filesystem is selected.  At present, this is only <code>CONFIG_FS_FAT</code>.</small><br>
+  if any writable file system is selected.  At present, this is only <code>CONFIG_FS_FAT</code>.</small><br>
   <sup>5</sup><small>
   Verbose help output can be suppressed by defining <code>CONFIG_NSH_HELP_TERSE</code>.
   In that case, the help command is still available but will be slightly smaller.
@@ -3566,7 +3651,7 @@ nsh&gt;
     <td valign="top"><b><code>CONFIG_NSH_FILEIOSIZE</code></b></td>
     <td>
       Size of a static I/O buffer used for file access (ignored if
-      there is no filesystem). Default is 1024.
+      there is no file system). Default is 1024.
     </td>
   </tr>
   <tr>
@@ -3639,7 +3724,7 @@ set FOOBAR ABC_${FOO}_${BAR}
     <td valign="top"><b><code>CONFIG_NSH_NESTDEPTH</code></b></td>
     <td>
       The maximum number of nested <a href="#conditional"><code>if-then[-else]-fi</code></a> sequences that
-      are permissable.  Default: 3
+      are permissible.  Default: 3
     </td>
   </tr>
   <tr>
@@ -3687,7 +3772,7 @@ set FOOBAR ABC_${FOO}_${BAR}
   <tr>
     <td valign="top"><b><code>CONFIG_NSH_ROMFSETC</code></b></td>
     <td>
-      Mount a ROMFS filesystem at <code>/etc</code> and provide a startup script
+      Mount a ROMFS file system at <code>/etc</code> and provide a startup script
       at <code>/etc/init.d/rcS</code>.  The default startup script will mount
       a FAT FS RAMDISK at <code>/tmp</code> but the logic is
       <a href="#startupscript">easily extensible</a>.
@@ -3790,7 +3875,7 @@ set FOOBAR ABC_${FOO}_${BAR}
   <tr>
     <td valign="top"><b><code>CONFIG_NSH_TELNET</code></b></td>
     <td>
-      If <code>CONFIG_NSH_TELNET</code> is set to <i>y</i>, then a TELENET
+      If <code>CONFIG_NSH_TELNET</code> is set to <i>y</i>, then a TELNET
       server front-end is selected.  When this option is provided,
       you may log into NuttX remotely using telnet in order to
       access NSH.
@@ -3885,7 +3970,7 @@ set FOOBAR ABC_${FOO}_${BAR}
     <td valign="top"><b><code>CONFIG_NSH_IOBUFFER_SIZE</code></b></td>
     <td>
       Determines the size of the I/O buffer to use for sending/
-      receiving TELNET commands/reponses
+      receiving TELNET commands/responses
     </td>
   </tr>
   <tr>
@@ -3916,7 +4001,7 @@ set FOOBAR ABC_${FOO}_${BAR}
   <tr>
     <td valign="top"><b><code>CONFIG_NSH_NOMAC</code></b></td>
     <td>
-      Set if your ethernet hardware has no built-in MAC address.
+      Set if your Ethernet hardware has no built-in MAC address.
       If set, a bogus MAC will be assigned.
     </td>
   </tr>
@@ -4189,7 +4274,7 @@ mount -t vfat /dev/ram1 /tmp
       </p>
     <li>
       <p>
-        Mount the  FAT filesystem at a configured mountpoint, <code>/tmp</code>.
+        Mount the  FAT file system at a configured mountpoint, <code>/tmp</code>.
       </p>
     </ul>
     <p>
@@ -4317,7 +4402,7 @@ struct cmdmap_s
   That last string is what is printed when enter &quot;<code>nsh&gt help</code>&quot;.
 </p>
 <p>
-  So, for you sample commnd, you would add the following the to the <code>g_cmdmap[]</code> table:
+  So, for you sample command, you would add the following the to the <code>g_cmdmap[]</code> table:
 </p>
 <ul><pre>
 { &quot;mycmd&quot;, cmd_mycmd, 1, 1, NULL },
@@ -4478,7 +4563,7 @@ int hello_main(int argc, char *argv[])
     </p>
   <li>
     <p>
-      And finally, the <code>apps/examples/Makefile</code> will execute the <i>context</i> target in all configured <code>example</code>sub-directores, getting us finally to <code>apps/examples/Makefile</code> which is covered below.</p>
+      And finally, the <code>apps/examples/Makefile</code> will execute the <i>context</i> target in all configured <code>example</code>sub-directories, getting us finally to <code>apps/examples/Makefile</code> which is covered below.</p>
 </ol>
 
 <p>
@@ -4607,7 +4692,7 @@ CONFIG_SCHED_WAITPID=y
     <p>
       You replace the sample code at <code>apps/examples/nsh/nsh_main.c</code> with whatever start-up logic that you want.
       NSH is a library at <code>apps/nshlib</code>.
-      <code>apps.examplex/nsh</code> is just a tiny, example start-up function (<code>CONFIG_USER_ENTRYPOINT</code>()) that that runs immediately and illustrates how to start NSH
+      <code>apps.examples/nsh</code> is just a tiny, example start-up function (<code>CONFIG_USER_ENTRYPOINT</code>()) that that runs immediately and illustrates how to start NSH
       If you want something else to run immediately then you can write your write your own custom <code>CONFIG_USER_ENTRYPOINT</code>() function and then start other tasks from your custom <code>CONFIG_USER_ENTRYPOINT</code>().
     </p>
   <li>
@@ -4664,7 +4749,7 @@ CONFIG_SCHED_WAITPID=y
 <ul>
   <li>
     <p>
-      NSH will create a read-only RAM disk (a ROM disk), containing a tiny ROMFS filesystem containing the following:
+      NSH will create a read-only RAM disk (a ROM disk), containing a tiny ROMFS file system containing the following:
     </p>
 <ul><pre>
 `--init.d/
@@ -4675,7 +4760,7 @@ CONFIG_SCHED_WAITPID=y
     </p>
   <li>
     <p>
-      NSH will then mount the ROMFS filesystem at <code>/etc</code>, resulting in:
+      NSH will then mount the ROMFS file system at <code>/etc</code>, resulting in:
     </p>
 <ul><pre>
 |--dev/
@@ -4782,7 +4867,7 @@ mount -t vfat /dev/ram1 /tmp
     </p>
     <p>
        To generate a custom <code>rcS</code> file a copy of <code>rcS.template</code> needs to be placed at <code>tools/</code> and changed according to the desired start-up behaviour.
-       Running <code>tools/mkromfsimg.h</code> creates <code>nsh_romfsimg.h</code> which needs to be copied to <code>apps/nhslib</code> OR if <code>CONFIG_NSH_ARCHROMFS</code> is defined to <code>configs/&lt;board&gt;/include</code>.
+       Running <code>tools/mkromfsimg.h</code> creates <code>nsh_romfsimg.h</code> which needs to be copied to <code>apps/nshlib</code> OR if <code>CONFIG_NSH_ARCHROMFS</code> is defined to <code>configs/&lt;board&gt;/include</code>.
     </p>
 </ol>
 
@@ -4798,7 +4883,7 @@ mount -t vfat /dev/ram1 /tmp
 
 <p>
   All of the startup-behavior is contained in <code>rcS.template</code>.
-  The role of <code>mkromfsimg.sh</code> script is to (1) apply the specific configuration settings to <code>rcS.template</code> to create the final <code>rcS</code>, and (2) to generate the header file <code>nsh_romfsimg.h</code> containg the ROMFS file system image.
+  The role of <code>mkromfsimg.sh</code> script is to (1) apply the specific configuration settings to <code>rcS.template</code> to create the final <code>rcS</code>, and (2) to generate the header file <code>nsh_romfsimg.h</code> containing the ROMFS file system image.
   To do this,  <code>mkromfsimg.sh</code> uses two tools that must be installed in your system:
 </p>
 <ol>
@@ -5269,13 +5354,13 @@ xxd -i romfs_img >nsh_romfsimg.h
   <li><a href="#cmdinsmod"><code>insmod</code></a></li>
   <li><a href="#cmdkill"><code>kill</code></a></li>
   <li><a href="#cmdlosetup"><code>losetup</code></a></li>
-  <li><a href="#cmdln">ln</code></a></li>
-  <li><a href="#cmdls">ls</code></a></li>
+  <li><a href="#cmdln"><code>ln</code></a></li>
+  <li><a href="#cmdls"><code>ls</code></a></li>
   <li><a href="#cmdmbhw"><code>mb</code></a></li>
   <li><a href="#nshlogin">Login</a></li>
   <li><a href="#verifymethods">Login, Credentials</a></li>
   <li><a href="#cmdlsmod"><code>lsmod</code></a></li>
-  <li><a href="#cmdmd5">md5</a></li>
+  <li><a href="#cmdmd5"><code>md5</code></a></li>
   <li><a href="#cmdmbhw"><code>mh</code></a></li>
   <li><a href="#cmdmbhw"><code>mw</code></a></li>
   <li><a href="#cmdmkdir"><code>mkdir</code></a></li>
@@ -5284,10 +5369,10 @@ xxd -i romfs_img >nsh_romfsimg.h
   <li><a href="#cmdmkrd"><code>mkrd</code></a></li>
   <li><a href="#custinit"><code>mkromfsimg.sh</code></a></li>
   <li><a href="#cmdmount"><code>mount</code></a></li>
+  <li><a href="#cmdmv"><code>mv</code></a></li>
 </ul></td>
 <td width="34%" valign="top">
 <ul>
-  <li><a href="#cmdmv"><code>mv</code></a></li>
   <li><a href="#cmdnfsmount"><code>nfsmount</code></a></li>
   <li><a href="#cmdoverview"><code>nice</code></a></li>
   <li><a href="#custonshlib">NSH library (<code>nshlib</code>)</a></li>
@@ -5344,6 +5429,7 @@ xxd -i romfs_img >nsh_romfsimg.h
   <li><a href="#custonshlib"><code>up_cxxinitialize()</code></a></li>
   <li><a href="#cmdurldec"><code>urldecode</code></a></li>
   <li><a href="#cmdurlencode"><code>urlencode</code></a></li>
+  <li><a href="#usbstartup">USB console startup</a></li>
   <li><a href="#cmduseradd"><code>useradd</code></a></li>
   <li><a href="#cmduserdel"><code>userdel</code></a></li>
   <li><a href="#cmdusleep"><code>usleep</code></a></li>

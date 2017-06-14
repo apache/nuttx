@@ -381,7 +381,7 @@ static int dac_timer_init(struct sam_dac_s *priv, uint32_t freq_required,
 
   DEBUGASSERT(priv && (freq_required > 0) && (channel >= 0 && channel <= 2));
 
-  /* Set the timer/counter waveform mode the the clock input. Use smallest
+  /* Set the timer/counter waveform mode the clock input. Use smallest
    * MCK divisor of 8 to have highest clock resolution thus smallest frequency
    * error. With 32 bit counter the lowest possible frequency of 1 Hz is easily
    * supported.

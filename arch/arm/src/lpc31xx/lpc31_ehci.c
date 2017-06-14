@@ -3008,7 +3008,7 @@ static inline void lpc31_ioc_bottomhalf(void)
   qh = (struct lpc31_qh_s *)lpc31_virtramaddr(lpc31_swap32(*bp) & QH_HLP_MASK);
 
   /* If the asynchronous queue is empty, then the forward point in the
-   * asynchronous queue head will point back to the the queue head.
+   * asynchronous queue head will point back to the queue head.
    */
 
   if (qh && qh != &g_asynchead)
@@ -4362,7 +4362,7 @@ errout_with_sem:
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
  *   enqueue the transfer request and return immediately.  When the transfer
- *   completes, the the callback will be invoked with the provided transfer.
+ *   completes, the callback will be invoked with the provided transfer.
  *   This method is useful for receiving interrupt transfers which may come
  *   infrequently.
  *
@@ -4560,7 +4560,7 @@ static int lpc31_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
           qh = (struct lpc31_qh_s *)lpc31_virtramaddr(lpc31_swap32(*bp) & QH_HLP_MASK);
 
           /* If the asynchronous queue is empty, then the forward point in
-           * the asynchronous queue head will point back to the the queue
+           * the asynchronous queue head will point back to the queue
            * head.
            */
 

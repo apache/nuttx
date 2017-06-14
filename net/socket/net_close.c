@@ -67,12 +67,13 @@
 #include "pkt/pkt.h"
 #include "local/local.h"
 #include "socket/socket.h"
+#include "usrsock/usrsock.h"
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 struct tcp_close_s
 {
   FAR struct devif_callback_s *cl_cb; /* Reference to TCP callback instance */
@@ -90,7 +91,7 @@ struct tcp_close_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: close_timeout
+ * Name: close_timeout
  *
  * Description:
  *   Check for a timeout on a lingering close.
@@ -106,7 +107,7 @@ struct tcp_close_s
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_TCP) && defined(CONFIG_NET_SOLINGER)
+#if defined(NET_TCP_HAVE_STACK) && defined(CONFIG_NET_SOLINGER)
 static inline int close_timeout(FAR struct tcp_close_s *pstate)
 {
   FAR struct socket *psock = 0;
@@ -132,10 +133,10 @@ static inline int close_timeout(FAR struct tcp_close_s *pstate)
 
   return FALSE;
 }
-#endif /* CONFIG_NET_SOCKOPTS && CONFIG_NET_SOLINGER */
+#endif /* NET_TCP_HAVE_STACK && CONFIG_NET_SOLINGER */
 
 /****************************************************************************
- * Function: netclose_interrupt
+ * Name: netclose_interrupt
  *
  * Description:
  *   Handle network callback events.
@@ -151,7 +152,7 @@ static inline int close_timeout(FAR struct tcp_close_s *pstate)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 static uint16_t netclose_interrupt(FAR struct net_driver_s *dev,
                                    FAR void *pvconn, FAR void *pvpriv,
                                    uint16_t flags)
@@ -256,10 +257,10 @@ end_wait:
   return 0;
 #endif
 }
-#endif /* CONFIG_NET_TCP */
+#endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
- * Function: netclose_txnotify
+ * Name: netclose_txnotify
  *
  * Description:
  *   Notify the appropriate device driver that we are have data ready to
@@ -274,7 +275,7 @@ end_wait:
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 static inline void netclose_txnotify(FAR struct socket *psock,
                                      FAR struct tcp_conn_s *conn)
 {
@@ -313,10 +314,10 @@ static inline void netclose_txnotify(FAR struct socket *psock,
     }
 #endif /* CONFIG_NET_IPv6 */
 }
-#endif /* CONFIG_NET_TCP */
+#endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
- * Function: netclose_disconnect
+ * Name: netclose_disconnect
  *
  * Description:
  *   Break any current TCP connection
@@ -332,7 +333,7 @@ static inline void netclose_txnotify(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 static inline int netclose_disconnect(FAR struct socket *psock)
 {
   struct tcp_close_s state;
@@ -451,10 +452,10 @@ static inline int netclose_disconnect(FAR struct socket *psock)
   net_unlock();
   return ret;
 }
-#endif /* CONFIG_NET_TCP */
+#endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
- * Function: local_close
+ * Name: local_close
  *
  * Description:
  *   Performs the close operation on a local socket instance
@@ -497,7 +498,7 @@ static void local_close(FAR struct socket *psock)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_close
+ * Name: psock_close
  *
  * Description:
  *   Performs the close operation on a socket instance
@@ -557,6 +558,7 @@ int psock_close(FAR struct socket *psock)
               else
 #endif
                 {
+#ifdef NET_TCP_HAVE_STACK
                   FAR struct tcp_conn_s *conn = psock->s_conn;
 
                   /* Is this the last reference to the connection structure
@@ -592,6 +594,7 @@ int psock_close(FAR struct socket *psock)
 
                       conn->crefs--;
                     }
+#endif /* NET_TCP_HAVE_STACK */
                 }
 #endif /* CONFIG_NET_TCP || CONFIG_NET_LOCAL_STREAM */
             }
@@ -617,6 +620,7 @@ int psock_close(FAR struct socket *psock)
               else
 #endif
                 {
+#ifdef NET_UDP_HAVE_STACK
                   FAR struct udp_conn_s *conn = psock->s_conn;
 
                   /* Is this the last reference to the connection structure
@@ -636,6 +640,7 @@ int psock_close(FAR struct socket *psock)
 
                       conn->crefs--;
                     }
+#endif /* NET_UDP_HAVE_STACK */
                 }
 #endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL_DGRAM */
             }
@@ -668,6 +673,44 @@ int psock_close(FAR struct socket *psock)
             break;
 #endif
 
+#ifdef CONFIG_NET_USRSOCK
+          case SOCK_USRSOCK_TYPE:
+            {
+              FAR struct usrsock_conn_s *conn = psock->s_conn;
+
+              /* Is this the last reference to the connection structure (there
+               * could be more if the socket was dup'ed).
+               */
+
+              if (conn->crefs <= 1)
+                {
+                  /* Yes... inform user-space daemon of socket close. */
+
+                  errcode = usrsock_close(conn);
+
+                  /* Free the connection structure */
+
+                  conn->crefs = 0;
+                  usrsock_free(psock->s_conn);
+
+                  if (errcode < 0)
+                    {
+                      /* Return with error code, but free resources. */
+
+                      errcode = -errcode;
+                      goto errout_with_psock;
+                    }
+                }
+              else
+                {
+                  /* No.. Just decrement the reference count */
+
+                  conn->crefs--;
+                }
+            }
+            break;
+#endif
+
           default:
             errcode = EBADF;
             goto errout;
@@ -679,7 +722,7 @@ int psock_close(FAR struct socket *psock)
   sock_release(psock);
   return OK;
 
-#ifdef CONFIG_NET_TCP
+#if defined(NET_TCP_HAVE_STACK) || defined(CONFIG_NET_USRSOCK)
 errout_with_psock:
   sock_release(psock);
 #endif
@@ -690,7 +733,7 @@ errout:
 }
 
 /****************************************************************************
- * Function: net_close
+ * Name: net_close
  *
  * Description:
  *   Performs the close operation on socket descriptors

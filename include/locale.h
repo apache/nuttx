@@ -59,6 +59,10 @@
  * Public Type Definitions
  ****************************************************************************/
 
+/* OpenGroup.org: "The locale.h header shall define the lconv structure,
+ *  which shall include at least the following members. ..."
+ */
+
 struct lconv
 {
   FAR char *decimal_point;
@@ -86,6 +90,12 @@ struct lconv
   FAR char int_p_sep_by_space;
   FAR char int_p_sign_posn;
 };
+
+/* OpenGroup.org:  The locale.h header shall define the locale_t type,
+ * representing a locale object
+ */
+
+typedef FAR void *locale_t;
 
 /****************************************************************************
  * Public Function Prototypes

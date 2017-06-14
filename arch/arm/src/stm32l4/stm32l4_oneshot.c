@@ -395,7 +395,7 @@ int stm32l4_oneshot_cancel(FAR struct stm32l4_oneshot_s *oneshot,
    * If the counter expires while we are doing this, the counter clock will
    * be stopped, but the clock will not be disabled.
    *
-   * The expected behavior is that the the counter register will freezes at
+   * The expected behavior is that the counter register will freezes at
    * a value equal to the RC register when the timer expires.  The counter
    * should have values between 0 and RC in all other cased.
    *

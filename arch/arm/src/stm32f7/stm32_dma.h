@@ -69,7 +69,7 @@
 typedef FAR void *DMA_HANDLE;
 
 /* Description:
- *   This is the type of the callback that is used to inform the user of the the
+ *   This is the type of the callback that is used to inform the user of the
  *   completion of the DMA.  NOTE:  The DMA module does *NOT* perform any cache
  *   operations.  It is the responsibility of the DMA client to invalidate DMA
  *   buffers after completion of the DMA RX operations.

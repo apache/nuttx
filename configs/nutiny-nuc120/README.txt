@@ -35,7 +35,7 @@ GNU Toolchain Options
 NuttX Buildroot Toolchain
 =========================
 
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  A GNU GCC-based toolchain is assumed.  The PATH environment variable should
   be modified to point to the correct path to the Cortex-M0 GCC toolchain (if
   different from the default in your PATH variable).
 
@@ -62,8 +62,8 @@ NuttX Buildroot Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   details PLUS some special instructions that you will need to follow if you are
@@ -271,12 +271,6 @@ can be selected as follow:
     cd tools
     ./configure.sh nutiny-nuc120/<subdir>
     cd -
-    . ./setenv.sh
-
-If this is a Windows native build, then configure.bat should be used
-instead of configure.sh:
-
-    configure.bat nutiny-nuc120\<subdir>
 
 Where <subdir> is one of the following:
 

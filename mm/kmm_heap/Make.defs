@@ -36,6 +36,7 @@
 # Kernel heap allocator
 
 ifeq ($(CONFIG_MM_KERNEL_HEAP),y)
+
 CSRCS += kmm_initialize.c kmm_addregion.c kmm_sem.c
 CSRCS += kmm_brkaddr.c kmm_calloc.c kmm_extend.c kmm_free.c kmm_mallinfo.c
 CSRCS += kmm_malloc.c kmm_memalign.c kmm_realloc.c kmm_zalloc.c
@@ -52,4 +53,5 @@ endif
 
 DEPPATH += --dep-path kmm_heap
 VPATH += :kmm_heap
-endif
+
+endif # CONFIG_MM_KERNEL_HEAP

@@ -49,7 +49,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  mq_setattr
+ * Name:  mq_setattr
  *
  * Description:
  *   This function sets the attributes associated with the

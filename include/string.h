@@ -93,6 +93,8 @@ FAR void  *memcpy(FAR void *dest, FAR const void *src, size_t n);
 FAR void  *memmove(FAR void *dest, FAR const void *src, size_t count);
 FAR void  *memset(FAR void *s, int c, size_t n);
 
+void explicit_bzero(FAR void *s, size_t n);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

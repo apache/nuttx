@@ -8,13 +8,13 @@ config USBMONITOR_STACKSIZE
 	int "USB Monitor daemon stack size"
 	default 2048
 	---help---
-		The stack size to use the the USB monitor daemon.  Default: 2048
+		The stack size to use the USB monitor daemon.  Default: 2048
 
 config USBMONITOR_PRIORITY
 	int "USB Monitor daemon priority"
 	default 50
 	---help---
-		The priority to use the the USB monitor daemon.  Default: 50
+		The priority to use the USB monitor daemon.  Default: 50
 
 config USBMONITOR_INTERVAL
 	int "USB Monitor dump frequency"

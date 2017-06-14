@@ -12,15 +12,11 @@ Contents:
 Files in this directory
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-can.c
-  This is a CAN driver.  See include/nuttx/drivers/can.h for usage
-  information.
-
-dev_null.c and dev_zero.c
-  These files provide the standard /dev/null and /dev/zero devices.
-  See include/nuttx/fs/fs.h for functions that should be called if you
-  want to register these devices (devnull_register() and
-  devzero_register()).
+dev_null.c, dev_urandom, and dev_zero.c
+  These files provide the standard /dev/null, /dev/urandom, and /dev/zero
+  devices.  See include/nuttx/drivers/driers.h for prototypes of functions
+  that should be called if you want to register these devices
+  (devnull_register(), devurandom_register(), and devzero_register()).
 
 pwm.c
   Provides the "upper half" of a pulse width modulation (PWM) driver.
@@ -54,6 +50,10 @@ bch/
   a character driver.  This is the complementary conversion as that
   performed by loop.c.  See include/nuttx/fs/fs.h for registration
   information.
+
+can/
+  This is the CAN drivers and logic support.  See include/nuttx/can/can.h
+  for usage information.
 
 contactless/
   Contactless devices are related to wireless devices.  They are not

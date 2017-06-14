@@ -48,9 +48,10 @@
 /* Include the correct DMA register definitions for this STM32 family */
 
 #if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-    defined(CONFIG_STM32_STM32F37XX)
+    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
 #  include "chip/stm32f10xxx_dma.h"
+#elif defined(CONFIG_STM32_STM32F33XX)
+#  include "chip/stm32f33xxx_dma.h"
 #elif defined(CONFIG_STM32_STM32F20XX)
 #  include "chip/stm32f20xxx_dma.h"
 #elif defined(CONFIG_STM32_STM32F40XX)
@@ -93,7 +94,7 @@
 typedef FAR void *DMA_HANDLE;
 
 /* Description:
- *   This is the type of the callback that is used to inform the user of the the
+ *   This is the type of the callback that is used to inform the user of the
  *   completion of the DMA.
  *
  * Input Parameters:

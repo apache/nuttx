@@ -290,7 +290,7 @@
 #if !defined(CONFIG_STM32F7_I2CTIMEOSEC) && !defined(CONFIG_STM32F7_I2CTIMEOMS)
 #  define CONFIG_STM32F7_I2CTIMEOSEC 0
 #  define CONFIG_STM32F7_I2CTIMEOMS  500   /* Default is 500 milliseconds */
-#  warning "Using Defualt 500 Ms Timeout"
+#  warning "Using Default 500 Ms Timeout"
 #elif !defined(CONFIG_STM32F7_I2CTIMEOSEC)
 #  define CONFIG_STM32F7_I2CTIMEOSEC 0     /* User provided milliseconds */
 #elif !defined(CONFIG_STM32F7_I2CTIMEOMS)
@@ -402,7 +402,6 @@ struct stm32_i2c_config_s
   uint32_t scl_pin;           /* GPIO configuration for SCL as SCL */
   uint32_t sda_pin;           /* GPIO configuration for SDA as SDA */
 #ifndef CONFIG_I2C_POLLED
-  int (*isr)(int, void *, void *);    /* Interrupt handler */
   uint32_t ev_irq;            /* Event IRQ */
   uint32_t er_irq;            /* Error IRQ */
 #endif
@@ -446,7 +445,7 @@ struct stm32_i2c_priv_s
 
 struct stm32_i2c_inst_s
 {
-  struct i2c_ops_s        *ops;  /* Standard I2C operations */
+  const struct i2c_ops_s  *ops;  /* Standard I2C operations */
   struct stm32_i2c_priv_s *priv; /* Common driver private data structure */
 };
 
@@ -484,20 +483,9 @@ static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv,
 static inline void stm32_i2c_sendstart(FAR struct stm32_i2c_priv_s *priv);
 static inline void stm32_i2c_sendstop(FAR struct stm32_i2c_priv_s *priv);
 static inline uint32_t stm32_i2c_getstatus(FAR struct stm32_i2c_priv_s *priv);
-static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv);
+static int stm32_i2c_isr_process(struct stm32_i2c_priv_s * priv);
 #ifndef CONFIG_I2C_POLLED
-#  ifdef CONFIG_STM32F7_I2C1
-static int stm32_i2c1_isr(int irq, void *context, FAR void *arg);
-#  endif
-#  ifdef CONFIG_STM32F7_I2C2
-static int stm32_i2c2_isr(int irq, void *context, FAR void *arg);
-#  endif
-#  ifdef CONFIG_STM32F7_I2C3
-static int stm32_i2c3_isr(int irq, void *context, FAR void *arg);
-#  endif
-#  ifdef CONFIG_STM32F7_I2C4
-static int stm32_i2c4_isr(int irq, void *context, FAR void *arg);
-#  endif
+static int stm32_i2c_isr(int irq, void *context, FAR void *arg);
 #endif
 static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv);
 static int stm32_i2c_deinit(FAR struct stm32_i2c_priv_s *priv);
@@ -507,7 +495,7 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
 static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
                               int count);
 #ifdef CONFIG_I2C_RESET
-int stm32_i2c_reset(FAR struct i2c_master_s * dev);
+static int stm32_i2c_reset(FAR struct i2c_master_s * dev);
 #endif
 
 /************************************************************************************
@@ -523,13 +511,12 @@ static const struct stm32_i2c_config_s stm32_i2c1_config =
   .scl_pin    = GPIO_I2C1_SCL,
   .sda_pin    = GPIO_I2C1_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .isr        = stm32_i2c1_isr,
   .ev_irq     = STM32_IRQ_I2C1EV,
   .er_irq     = STM32_IRQ_I2C1ER
 #endif
 };
 
-struct stm32_i2c_priv_s stm32_i2c1_priv =
+static struct stm32_i2c_priv_s stm32_i2c1_priv =
 {
   .config     = &stm32_i2c1_config,
   .refs       = 0,
@@ -553,13 +540,12 @@ static const struct stm32_i2c_config_s stm32_i2c2_config =
   .scl_pin    = GPIO_I2C2_SCL,
   .sda_pin    = GPIO_I2C2_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .isr        = stm32_i2c2_isr,
   .ev_irq     = STM32_IRQ_I2C2EV,
   .er_irq     = STM32_IRQ_I2C2ER
 #endif
 };
 
-struct stm32_i2c_priv_s stm32_i2c2_priv =
+static struct stm32_i2c_priv_s stm32_i2c2_priv =
 {
   .config     = &stm32_i2c2_config,
   .refs       = 0,
@@ -583,13 +569,12 @@ static const struct stm32_i2c_config_s stm32_i2c3_config =
   .scl_pin    = GPIO_I2C3_SCL,
   .sda_pin    = GPIO_I2C3_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .isr        = stm32_i2c3_isr,
   .ev_irq     = STM32_IRQ_I2C3EV,
   .er_irq     = STM32_IRQ_I2C3ER
 #endif
 };
 
-struct stm32_i2c_priv_s stm32_i2c3_priv =
+static struct stm32_i2c_priv_s stm32_i2c3_priv =
 {
   .config     = &stm32_i2c3_config,
   .refs       = 0,
@@ -613,13 +598,12 @@ static const struct stm32_i2c_config_s stm32_i2c4_config =
   .scl_pin    = GPIO_I2C4_SCL,
   .sda_pin    = GPIO_I2C4_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .isr        = stm32_i2c4_isr,
   .ev_irq     = STM32_IRQ_I2C4EV,
   .er_irq     = STM32_IRQ_I2C4ER
 #endif
 };
 
-struct stm32_i2c_priv_s stm32_i2c4_priv =
+static struct stm32_i2c_priv_s stm32_i2c4_priv =
 {
   .config     = &stm32_i2c4_config,
   .refs       = 0,
@@ -636,7 +620,7 @@ struct stm32_i2c_priv_s stm32_i2c4_priv =
 
 /* Device Structures, Instantiation */
 
-struct i2c_ops_s stm32_i2c_ops =
+static const struct i2c_ops_s stm32_i2c_ops =
 {
   .transfer = stm32_i2c_transfer
 #ifdef CONFIG_I2C_RESET
@@ -905,7 +889,7 @@ static inline int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
        * reports that it is done.
        */
 
-      stm32_i2c_isr(priv);
+      stm32_i2c_isr_process(priv);
     }
 
   /* Loop until the transfer is complete. */
@@ -1538,7 +1522,7 @@ static inline void stm32_i2c_clearinterrupts(struct stm32_i2c_priv_s *priv)
 }
 
 /************************************************************************************
- * Name: stm32_i2c_isr
+ * Name: stm32_i2c_isr_process
  *
  * Description:
  *  Common interrupt service routine (ISR) that handles I2C protocol logic.
@@ -1555,7 +1539,7 @@ static inline void stm32_i2c_clearinterrupts(struct stm32_i2c_priv_s *priv)
  *
  ************************************************************************************/
 
-static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
+static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 {
   uint32_t status;
 
@@ -2144,70 +2128,22 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 }
 
 /************************************************************************************
- * Name: stm32_i2c1_isr
+ * Name: stm32_i2c_isr
  *
  * Description:
- *   I2C1 interrupt service routine
+ *   Common I2C interrupt service routine
  *
  ************************************************************************************/
 
 #ifndef CONFIG_I2C_POLLED
-#  ifdef CONFIG_STM32F7_I2C1
-static int stm32_i2c1_isr(int irq, void *context, FAR void *arg)
+static int stm32_i2c_isr(int irq, void *context, FAR void *arg)
 {
-  return stm32_i2c_isr(&stm32_i2c1_priv);
+  struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s *)arg;
+
+  DEBUGASSERT(priv != NULL);
+  return stm32_i2c_isr_process(priv);
 }
-#  endif
-
-/************************************************************************************
- * Name: stm32_i2c2_isr
- *
- * Description:
- *   I2C2 interrupt service routine
- *
- ************************************************************************************/
-
-# ifdef CONFIG_STM32F7_I2C2
-static int stm32_i2c2_isr(int irq, void *context, FAR void *arg)
-{
-  return stm32_i2c_isr(&stm32_i2c2_priv);
-}
-#  endif
-
-/************************************************************************************
- * Name: stm32_i2c3_isr
- *
- * Description:
- *   I2C2 interrupt service routine
- *
- ************************************************************************************/
-
-#  ifdef CONFIG_STM32F7_I2C3
-static int stm32_i2c3_isr(int irq, void *context, FAR void *arg)
-{
-  return stm32_i2c_isr(&stm32_i2c3_priv);
-}
-#  endif
-
-/************************************************************************************
- * Name: stm32_i2c4_isr
- *
- * Description:
- *   I2C2 interrupt service routine
- *
- ************************************************************************************/
-
-#  ifdef CONFIG_STM32F7_I2C4
-static int stm32_i2c4_isr(int irq, void *context, FAR void *arg)
-{
-  return stm32_i2c_isr(&stm32_i2c4_priv);
-}
-#  endif
 #endif
-
-/************************************************************************************
- * Private Initialization and Deinitialization
- ************************************************************************************/
 
 /************************************************************************************
  * Name: stm32_i2c_init
@@ -2243,8 +2179,8 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
 #ifndef CONFIG_I2C_POLLED
   /* Attach error and event interrupts to the ISRs */
 
-  irq_attach(priv->config->ev_irq, priv->config->isr, NULL);
-  irq_attach(priv->config->er_irq, priv->config->isr, NULL);
+  irq_attach(priv->config->ev_irq, stm32_i2c_isr, priv);
+  irq_attach(priv->config->er_irq, stm32_i2c_isr, priv);
   up_enable_irq(priv->config->ev_irq);
   up_enable_irq(priv->config->er_irq);
 #endif
@@ -2253,7 +2189,7 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
    * - Provide means to set peripheral clock source via RCC_CFGR3_I2CxSW
    * - Set to HSI by default, make Kconfig option
    */
-   
+
   /* Force a frequency update */
 
   priv->frequency = 0;
@@ -2550,6 +2486,124 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s
 }
 
 /************************************************************************************
+ * Name: stm32_i2c_reset
+ *
+ * Description:
+ *   Reset an I2C bus
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_I2C_RESET
+static int stm32_i2c_reset(FAR struct i2c_master_s * dev)
+{
+  struct stm32_i2c_priv_s * priv;
+  unsigned int clock_count;
+  unsigned int stretch_count;
+  uint32_t scl_gpio;
+  uint32_t sda_gpio;
+  int ret = ERROR;
+
+  ASSERT(dev);
+
+  /* Get I2C private structure */
+
+  priv = ((struct stm32_i2c_inst_s *)dev)->priv;
+
+  /* Our caller must own a ref */
+
+  ASSERT(priv->refs > 0);
+
+  /* Lock out other clients */
+
+  stm32_i2c_sem_wait(dev);
+
+  /* De-init the port */
+
+  stm32_i2c_deinit(priv);
+
+  /* Use GPIO configuration to un-wedge the bus */
+
+  scl_gpio = MKI2C_OUTPUT(priv->config->scl_pin);
+  sda_gpio = MKI2C_OUTPUT(priv->config->sda_pin);
+
+  /* Let SDA go high */
+
+  stm32_gpiowrite(sda_gpio, 1);
+
+  /* Clock the bus until any slaves currently driving it let it go. */
+
+  clock_count = 0;
+  while (!stm32_gpioread(sda_gpio))
+    {
+      /* Give up if we have tried too hard */
+
+      if (clock_count++ > 10)
+        {
+          goto out;
+        }
+
+      /* Sniff to make sure that clock stretching has finished.
+       *
+       * If the bus never relaxes, the reset has failed.
+       */
+
+      stretch_count = 0;
+      while (!stm32_gpioread(scl_gpio))
+        {
+          /* Give up if we have tried too hard */
+
+          if (stretch_count++ > 10)
+            {
+              goto out;
+            }
+
+          up_udelay(10);
+        }
+
+      /* Drive SCL low */
+
+      stm32_gpiowrite(scl_gpio, 0);
+      up_udelay(10);
+
+      /* Drive SCL high again */
+
+      stm32_gpiowrite(scl_gpio, 1);
+      up_udelay(10);
+    }
+
+  /* Generate a start followed by a stop to reset slave
+   * state machines.
+   */
+
+  stm32_gpiowrite(sda_gpio, 0);
+  up_udelay(10);
+  stm32_gpiowrite(scl_gpio, 0);
+  up_udelay(10);
+  stm32_gpiowrite(scl_gpio, 1);
+  up_udelay(10);
+  stm32_gpiowrite(sda_gpio, 1);
+  up_udelay(10);
+
+  /* Revert the GPIO configuration. */
+
+  stm32_unconfiggpio(sda_gpio);
+  stm32_unconfiggpio(scl_gpio);
+
+  /* Re-init the port */
+
+  stm32_i2c_init(priv);
+  ret = OK;
+
+out:
+
+  /* Release the port for re-use by other clients */
+
+  stm32_i2c_sem_post(dev);
+  return ret;
+}
+#endif /* CONFIG_I2C_RESET */
+
+/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -2671,123 +2725,5 @@ int stm32_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
   kmm_free(dev);
   return OK;
 }
-
-/************************************************************************************
- * Name: stm32_i2c_reset
- *
- * Description:
- *   Reset an I2C bus
- *
- ************************************************************************************/
-
-#ifdef CONFIG_I2C_RESET
-int stm32_i2c_reset(FAR struct i2c_master_s * dev)
-{
-  struct stm32_i2c_priv_s * priv;
-  unsigned int clock_count;
-  unsigned int stretch_count;
-  uint32_t scl_gpio;
-  uint32_t sda_gpio;
-  int ret = ERROR;
-
-  ASSERT(dev);
-
-  /* Get I2C private structure */
-
-  priv = ((struct stm32_i2c_inst_s *)dev)->priv;
-
-  /* Our caller must own a ref */
-
-  ASSERT(priv->refs > 0);
-
-  /* Lock out other clients */
-
-  stm32_i2c_sem_wait(dev);
-
-  /* De-init the port */
-
-  stm32_i2c_deinit(priv);
-
-  /* Use GPIO configuration to un-wedge the bus */
-
-  scl_gpio = MKI2C_OUTPUT(priv->config->scl_pin);
-  sda_gpio = MKI2C_OUTPUT(priv->config->sda_pin);
-
-  /* Let SDA go high */
-
-  stm32_gpiowrite(sda_gpio, 1);
-
-  /* Clock the bus until any slaves currently driving it let it go. */
-
-  clock_count = 0;
-  while (!stm32_gpioread(sda_gpio))
-    {
-      /* Give up if we have tried too hard */
-
-      if (clock_count++ > 10)
-        {
-          goto out;
-        }
-
-      /* Sniff to make sure that clock stretching has finished.
-       *
-       * If the bus never relaxes, the reset has failed.
-       */
-
-      stretch_count = 0;
-      while (!stm32_gpioread(scl_gpio))
-        {
-          /* Give up if we have tried too hard */
-
-          if (stretch_count++ > 10)
-            {
-              goto out;
-            }
-
-          up_udelay(10);
-        }
-
-      /* Drive SCL low */
-
-      stm32_gpiowrite(scl_gpio, 0);
-      up_udelay(10);
-
-      /* Drive SCL high again */
-
-      stm32_gpiowrite(scl_gpio, 1);
-      up_udelay(10);
-    }
-
-  /* Generate a start followed by a stop to reset slave
-   * state machines.
-   */
-
-  stm32_gpiowrite(sda_gpio, 0);
-  up_udelay(10);
-  stm32_gpiowrite(scl_gpio, 0);
-  up_udelay(10);
-  stm32_gpiowrite(scl_gpio, 1);
-  up_udelay(10);
-  stm32_gpiowrite(sda_gpio, 1);
-  up_udelay(10);
-
-  /* Revert the GPIO configuration. */
-
-  stm32_unconfiggpio(sda_gpio);
-  stm32_unconfiggpio(scl_gpio);
-
-  /* Re-init the port */
-
-  stm32_i2c_init(priv);
-  ret = OK;
-
-out:
-
-  /* Release the port for re-use by other clients */
-
-  stm32_i2c_sem_post(dev);
-  return ret;
-}
-#endif /* CONFIG_I2C_RESET */
 
 #endif /* CONFIG_STM32F7_I2C1 || CONFIG_STM32F7_I2C2 || CONFIG_STM32F7_I2C3 */

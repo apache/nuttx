@@ -54,6 +54,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/net/phy.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
@@ -90,9 +91,7 @@
 #  error "Logic to support multiple Ethernet interfaces is incomplete"
 #endif
 
-/* If processing is not done at the interrupt level, then work queue support
- * is required.
- */
+/* Work queue support is required. */
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required
@@ -188,6 +187,42 @@
 #    ifndef CONFIG_STM32_PHYSR_FULLDUPLEX
 #      error "CONFIG_STM32_PHYSR_FULLDUPLEX must be defined in the NuttX configuration"
 #    endif
+#  endif
+#endif
+
+/* These definitions are used to enable the PHY interrupts */
+
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+#  if defined( CONFIG_ETH0_PHY_AM79C874)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_KS8721)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_KSZ8041)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_KSZ8051)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_KSZ8061)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_KSZ8081)
+#    define MII_INT_REG    MII_KSZ8081_INT
+#    define MII_INT_SETEN  MII_KSZ80x1_INT_LDEN | MII_KSZ80x1_INT_LUEN
+#    define MII_INT_CLREN  0
+#  elif defined( CONFIG_ETH0_PHY_KSZ90x1)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_DP83848C)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_LAN8720)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_LAN8740)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_LAN8740A)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_LAN8742A)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_DM9161)
+#    error missing logic
+#  else
+#    error unknown PHY
 #  endif
 #endif
 
@@ -637,7 +672,8 @@ static void stm32_checksetup(void);
 
 static void stm32_initbuffer(FAR struct stm32_ethmac_s *priv);
 static inline uint8_t *stm32_allocbuffer(FAR struct stm32_ethmac_s *priv);
-static inline void stm32_freebuffer(FAR struct stm32_ethmac_s *priv, uint8_t *buffer);
+static inline void stm32_freebuffer(FAR struct stm32_ethmac_s *priv,
+              uint8_t *buffer);
 static inline bool stm32_isfreebuffer(FAR struct stm32_ethmac_s *priv);
 
 /* Common TX logic */
@@ -648,11 +684,13 @@ static void stm32_dopoll(FAR struct stm32_ethmac_s *priv);
 
 /* Interrupt handling */
 
-static void stm32_enableint(FAR struct stm32_ethmac_s *priv, uint32_t ierbit);
-static void stm32_disableint(FAR struct stm32_ethmac_s *priv, uint32_t ierbit);
+static void stm32_enableint(FAR struct stm32_ethmac_s *priv,
+              uint32_t ierbit);
+static void stm32_disableint(FAR struct stm32_ethmac_s *priv,
+              uint32_t ierbit);
 
 static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
-                              FAR struct eth_rxdesc_s *rxfirst, int segments);
+              FAR struct eth_rxdesc_s *rxfirst, int segments);
 static int  stm32_recvframe(FAR struct stm32_ethmac_s *priv);
 static void stm32_receive(FAR struct stm32_ethmac_s *priv);
 static void stm32_freeframe(FAR struct stm32_ethmac_s *priv);
@@ -684,7 +722,8 @@ static int  stm32_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 static int  stm32_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int  stm32_ioctl(struct net_driver_s *dev, int cmd, long arg);
+static int  stm32_ioctl(struct net_driver_s *dev, int cmd,
+              unsigned long arg);
 #endif
 
 /* Descriptor Initialization */
@@ -699,9 +738,11 @@ static int  stm32_phyintenable(FAR struct stm32_ethmac_s *priv);
 #endif
 #if defined(CONFIG_STM32_AUTONEG) || defined(CONFIG_NETDEV_PHY_IOCTL) || \
     defined(CONFIG_ETH0_PHY_DM9161)
-static int  stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
+static int  stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr,
+              uint16_t *value);
 #endif
-static int  stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value);
+static int  stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr,
+              uint16_t value);
 #ifdef CONFIG_ETH0_PHY_DM9161
 static inline int stm32_dm9161(FAR struct stm32_ethmac_s *priv);
 #endif
@@ -1547,7 +1588,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
         {
           priv->segments++;
 
-          /* Check if the there is only one segment in the frame */
+          /* Check if there is only one segment in the frame */
 
           if (priv->segments == 1)
             {
@@ -2807,7 +2848,7 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int stm32_ioctl(struct net_driver_s *dev, int cmd, long arg)
+static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
@@ -2885,8 +2926,19 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, long arg)
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
 static int stm32_phyintenable(struct stm32_ethmac_s *priv)
 {
-#warning Missing logic
-  return -ENOSYS;
+  uint16_t phyval;
+  int ret;
+
+  ret = stm32_phyread(CONFIG_STM32_PHYADDR, MII_INT_REG, &phyval);
+  if (ret == OK)
+    {
+      /* Enable link up/down interrupts */
+
+      ret = stm32_phywrite(CONFIG_STM32_PHYADDR, MII_INT_REG,
+                           (phyval & ~MII_INT_CLREN) | MII_INT_SETEN);
+    }
+
+  return ret;
 }
 #endif
 
@@ -3670,22 +3722,22 @@ static void stm32_macaddress(FAR struct stm32_ethmac_s *priv)
 
   ninfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         dev->d_ifname,
-        dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
-        dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
-        dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
+        dev->d_mac.ether.ether_addr_octet[0], dev->d_mac.ether.ether_addr_octet[1],
+        dev->d_mac.ether.ether_addr_octet[2], dev->d_mac.ether.ether_addr_octet[3],
+        dev->d_mac.ether.ether_addr_octet[4], dev->d_mac.ether.ether_addr_octet[5]);
 
   /* Set the MAC address high register */
 
-  regval = ((uint32_t)dev->d_mac.ether_addr_octet[5] << 8) |
-            (uint32_t)dev->d_mac.ether_addr_octet[4];
+  regval = ((uint32_t)dev->d_mac.ether.ether_addr_octet[5] << 8) |
+            (uint32_t)dev->d_mac.ether.ether_addr_octet[4];
   stm32_putreg(regval, STM32_ETH_MACA0HR);
 
   /* Set the MAC address low register */
 
-  regval = ((uint32_t)dev->d_mac.ether_addr_octet[3] << 24) |
-           ((uint32_t)dev->d_mac.ether_addr_octet[2] << 16) |
-           ((uint32_t)dev->d_mac.ether_addr_octet[1] <<  8) |
-            (uint32_t)dev->d_mac.ether_addr_octet[0];
+  regval = ((uint32_t)dev->d_mac.ether.ether_addr_octet[3] << 24) |
+           ((uint32_t)dev->d_mac.ether.ether_addr_octet[2] << 16) |
+           ((uint32_t)dev->d_mac.ether.ether_addr_octet[1] <<  8) |
+            (uint32_t)dev->d_mac.ether.ether_addr_octet[0];
   stm32_putreg(regval, STM32_ETH_MACA0LR);
 }
 

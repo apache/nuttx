@@ -3176,7 +3176,7 @@ static void sam_callback(void *arg)
       priv->cbevents = 0;
 
       /* This function is called either from (1) the context of the calling
-       * thread or from the the context of (2) card detection logic.  The
+       * thread or from the context of (2) card detection logic.  The
        * caller may or may not have interrupts disabled (we have them
        * disabled here!).
        *

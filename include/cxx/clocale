@@ -48,6 +48,7 @@
 
 namespace std
 {
+  using ::locale_t;
   using ::setlocale;
   using ::localeconv;
 }

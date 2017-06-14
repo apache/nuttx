@@ -60,7 +60,7 @@ pid_t getpid(void)
 {
   FAR struct tcb_s *rtcb;
 
-  /* Get the the TCB at the head of the ready-to-run task list.  That
+  /* Get the TCB at the head of the ready-to-run task list.  That
    * will be the currently executing task.  There is an exception to
    * this:  Early in the start-up sequence, the ready-to-run list may be
    * empty!  This case, of course, the start-up/IDLE thread with pid == 0

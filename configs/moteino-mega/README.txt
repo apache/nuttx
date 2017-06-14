@@ -251,7 +251,6 @@ Common Configuration Notes
        cd tools
        ./configure.sh moteino-mega/<subdir>
        cd -
-       . ./setenv.sh
 
      Where <subdir> is one of the configuration sub-directories described in
      the following paragraph.

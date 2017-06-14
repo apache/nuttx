@@ -50,14 +50,17 @@
 
 #include "tcp/tcp.h"
 #include "udp/udp.h"
+#include "pkt/pkt.h"
+#include "local/local.h"
 #include "socket/socket.h"
+#include "usrsock/usrsock.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_clone
+ * Name: net_clone
  *
  * Description:
  *   Performs the low level, common portion of net_dupsd() and net_dupsd2()
@@ -96,7 +99,25 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
   DEBUGASSERT(psock2->s_conn);
   psock2->s_crefs    = 1;                   /* One reference on the new socket itself */
 
-#ifdef CONFIG_NET_TCP
+#ifdef CONFIG_NET_LOCAL
+  if (psock2->s_domain == PF_LOCAL)
+    {
+      FAR struct local_conn_s *conn = psock2->s_conn;
+      DEBUGASSERT(conn->lc_crefs > 0 && conn->lc_crefs < 255);
+      conn->lc_crefs++;
+    }
+  else
+#endif
+#ifdef CONFIG_NET_PKT
+  if (psock2->s_type == SOCK_RAW)
+    {
+      FAR struct pkt_conn_s *conn = psock2->s_conn;
+      DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
+      conn->crefs++;
+    }
+  else
+#endif
+#ifdef NET_TCP_HAVE_STACK
   if (psock2->s_type == SOCK_STREAM)
     {
       FAR struct tcp_conn_s *conn = psock2->s_conn;
@@ -105,10 +126,19 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
     }
   else
 #endif
-#ifdef CONFIG_NET_UDP
+#ifdef NET_UDP_HAVE_STACK
   if (psock2->s_type == SOCK_DGRAM)
     {
       FAR struct udp_conn_s *conn = psock2->s_conn;
+      DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
+      conn->crefs++;
+    }
+  else
+#endif
+#ifdef CONFIG_NET_USRSOCK
+  if (psock2->s_type == SOCK_USRSOCK_TYPE)
+    {
+      FAR struct usrsock_conn_s *conn = psock2->s_conn;
       DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
       conn->crefs++;
     }

@@ -42,7 +42,7 @@
 #include <stdint.h>
 #include <debug.h>
 
-#include <nuttx/net/iob.h>
+#include <nuttx/mm/iob.h>
 
 #include "tcp/tcp.h"
 

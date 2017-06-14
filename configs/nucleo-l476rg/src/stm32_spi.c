@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-l476rg/src/stm32_spi.c
+ * configs/nucleo-l476rg/src/stm32l4_spi.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,17 +53,17 @@
 
 #include "nucleo-l476rg.h"
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
+#if defined(CONFIG_STM32L4_SPI1) || defined(CONFIG_STM32L4_SPI2) || defined(CONFIG_STM32L4_SPI3)
 
 /************************************************************************************
  * Public Data
  ************************************************************************************/
 /* Global driver instances */
 
-#ifdef CONFIG_STM32_SPI1
+#ifdef CONFIG_STM32L4_SPI1
 struct spi_dev_s *g_spi1;
 #endif
-#ifdef CONFIG_STM32_SPI2
+#ifdef CONFIG_STM32L4_SPI2
 struct spi_dev_s *g_spi2;
 #endif
 
@@ -72,7 +72,7 @@ struct spi_dev_s *g_spi2;
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_spiinitialize
+ * Name: stm32l4_spiinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Nucleo-F401RE and
@@ -80,55 +80,55 @@ struct spi_dev_s *g_spi2;
  *
  ************************************************************************************/
 
-void weak_function stm32_spiinitialize(void)
+void weak_function stm32l4_spiinitialize(void)
 {
-#ifdef CONFIG_STM32_SPI1
+#ifdef CONFIG_STM32L4_SPI1
   /* Configure SPI-based devices */
 
-  g_spi1 = up_spiinitialize(1);
+  g_spi1 = stm32l4_spibus_initialize(1);
   if (!g_spi1)
     {
       spierr("ERROR: FAILED to initialize SPI port 1\n");
     }
 
 #ifdef CONFIG_WL_CC3000
-  stm32_configgpio(GPIO_SPI_CS_WIFI);
+  stm32l4_configgpio(GPIO_SPI_CS_WIFI);
 #endif
 
 #ifdef HAVE_MMCSD
-  stm32_configgpio(GPIO_SPI_CS_SD_CARD);
+  stm32l4_configgpio(GPIO_SPI_CS_SD_CARD);
 #endif
 #endif
 
-#ifdef CONFIG_STM32_SPI2
+#ifdef CONFIG_STM32L4_SPI2
   /* Configure SPI-based devices */
 
-  g_spi2 = up_spiinitialize(2);
+  g_spi2 = stm32l4_spibus_initialize(2);
 
   /* Setup CS, EN & IRQ line IOs */
 
 #ifdef CONFIG_WL_CC3000
-  stm32_configgpio(GPIO_WIFI_CS);
-  stm32_configgpio(GPIO_WIFI_EN);
-  stm32_configgpio(GPIO_WIFI_INT);
+  stm32l4_configgpio(GPIO_WIFI_CS);
+  stm32l4_configgpio(GPIO_WIFI_EN);
+  stm32l4_configgpio(GPIO_WIFI_INT);
 #endif
 #endif
 }
 
 /****************************************************************************
- * Name:  stm32_spi1/2/3select and stm32_spi1/2/3status
+ * Name:  stm32l4_spi1/2/3select and stm32l4_spi1/2/3status
  *
  * Description:
- *   The external functions, stm32_spi1/2/3select and stm32_spi1/2/3status must be
+ *   The external functions, stm32l4_spi1/2/3select and stm32l4_spi1/2/3status must be
  *   provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
  *   include/nuttx/spi/spi.h). All other methods (including up_spiinitialize())
  *   are provided by common STM32 logic.  To use this common SPI logic on your
  *   board:
  *
- *   1. Provide logic in stm32_boardinitialize() to configure SPI chip select
+ *   1. Provide logic in stm32l4_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide stm32_spi1/2/3select() and stm32_spi1/2/3status() functions in your
+ *   2. Provide stm32l4_spi1/2/3select() and stm32l4_spi1/2/3status() functions in your
  *      board-specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
  *   3. Add a calls to up_spiinitialize() in your low level application
@@ -140,65 +140,65 @@ void weak_function stm32_spiinitialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_SPI1
-void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+#ifdef CONFIG_STM32L4_SPI1
+void stm32l4_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
 #ifdef CONFIG_WL_CC3000
-  if (devid == SPIDEV_WIRELESS)
+  if (devid == SPIDEV_WIRELESS(0))
     {
-      stm32_gpiowrite(GPIO_SPI_CS_WIFI, !selected);
+      stm32l4_gpiowrite(GPIO_SPI_CS_WIFI, !selected);
     }
   else
 #endif
 #ifdef HAVE_MMCSD
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD(0))
     {
-      stm32_gpiowrite(GPIO_SPI_CS_SD_CARD, !selected);
+      stm32l4_gpiowrite(GPIO_SPI_CS_SD_CARD, !selected);
     }
 #endif
 }
 
-uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32l4_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
-#ifdef CONFIG_STM32_SPI2
-void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+#ifdef CONFIG_STM32L4_SPI2
+void stm32l4_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
 #ifdef CONFIG_WL_CC3000
-  if (devid == SPIDEV_WIRELESS)
+  if (devid == SPIDEV_WIRELESS(0))
     {
-      stm32_gpiowrite(GPIO_WIFI_CS, !selected);
+      stm32l4_gpiowrite(GPIO_WIFI_CS, !selected);
     }
 #endif
 }
 
-uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32l4_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
-#ifdef CONFIG_STM32_SPI3
-void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+#ifdef CONFIG_STM32L4_SPI3
+void stm32l4_spi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 }
 
-uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32l4_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 /****************************************************************************
- * Name: stm32_spi1cmddata
+ * Name: stm32l4_spi1cmddata
  *
  * Description:
  *   Set or clear the SH1101A A0 or SD1306 D/C n bit to select data (true)
@@ -221,26 +221,26 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-#ifdef CONFIG_STM32_SPI1
-int stm32_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+#ifdef CONFIG_STM32L4_SPI1
+int stm32l4_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return OK;
 }
 #endif
 
-#ifdef CONFIG_STM32_SPI2
-int stm32_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+#ifdef CONFIG_STM32L4_SPI2
+int stm32l4_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return OK;
 }
 #endif
 
-#ifdef CONFIG_STM32_SPI3
-int stm32_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+#ifdef CONFIG_STM32L4_SPI3
+int stm32l4_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return OK;
 }
 #endif
 #endif /* CONFIG_SPI_CMDDATA */
 
-#endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2 || CONFIG_STM32_SPI3 */
+#endif /* CONFIG_STM32L4_SPI1 || CONFIG_STM32L4_SPI2 || CONFIG_STM32L4_SPI3 */

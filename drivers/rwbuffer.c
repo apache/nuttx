@@ -406,7 +406,9 @@ static int rwb_rhreload(struct rwbuffer_s *rwb, off_t startblock)
 int rwb_invalidate_writebuffer(FAR struct rwbuffer_s *rwb,
                                off_t startblock, size_t blockcount)
 {
-  int ret;
+  int ret = OK;
+
+  /* Is there a write buffer?  Is data saved in the write buffer? */
 
   if (rwb->wrmaxblocks > 0 && rwb->wrnblocks > 0)
     {
@@ -909,7 +911,7 @@ ssize_t rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
        */
     }
   else
-#else
+#endif /* CONFIG_DRVR_WRITEBUFFER */
     {
       /* No write buffer.. just pass the write operation through via the
        * flush callback.
@@ -917,7 +919,6 @@ ssize_t rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
 
       ret = rwb->wrflush(rwb->dev, wrbuffer, startblock, nblocks);
     }
-#endif
 
   return (ssize_t)ret;
 }

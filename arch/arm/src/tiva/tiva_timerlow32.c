@@ -433,7 +433,7 @@ static int tiva_settimeout(struct timer_lowerhalf_s *lower, uint32_t timeout)
 
   tmrinfo("Entry: timeout=%d\n", timeout);
 
-  /* Calculate the the new time settings */
+  /* Calculate the new time settings */
 
   tiva_timeout(priv, timeout);
 

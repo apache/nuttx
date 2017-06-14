@@ -42,10 +42,6 @@
  ****************************************************************************************************/
 
 #include <nuttx/config.h>
-
-#include "chip.h"
-
-#include <nuttx/config.h>
 #include "chip.h"
 
 #if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX) || \

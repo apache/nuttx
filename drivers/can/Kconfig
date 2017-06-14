@@ -1,0 +1,174 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if CAN
+
+config CAN_EXTID
+	bool "CAN extended IDs"
+	default n
+	---help---
+		Enables support for the 29-bit extended ID.  Default Standard 11-bit
+		IDs.
+
+config ARCH_HAVE_CAN_ERRORS
+	bool
+	default n
+
+config CAN_ERRORS
+	bool "CAN error reporting"
+	default n
+	depends on ARCH_HAVE_CAN_ERRORS
+	---help---
+		Support CAN error reporting.  If this option is selected then CAN
+		error reporting is enabled.  In the event of an error, the ch_error
+		bit will be set in the CAN message and the following message payload
+		will include a more detailed description of certain errors.
+
+config CAN_FD
+	bool "CAN FD"
+	default n
+	---help---
+		Enables support for the CAN_FD mode.
+
+config CAN_FIFOSIZE
+	int "CAN driver I/O buffer size"
+	default 8
+	---help---
+		The size of the circular buffer of CAN messages. Default: 8
+
+config CAN_NPENDINGRTR
+	int "Number of pending RTRs"
+	default 4
+	---help---
+		The size of the list of pending RTR requests. Default: 4
+
+config CAN_TXREADY
+	bool "can_txready interface"
+	default n
+	select SCHED_WORKQUEUE
+	---help---
+		This selection enables the can_txready() interface.  This interface
+		is needed only for CAN hardware that supports queing of outgoing
+		messages in a H/W FIFO.
+
+		The CAN upper half driver also supports a queue of output messages
+		in a S/W FIFO.  Messages are added to that queue when when
+		can_write() is called and removed from the queue in can_txdone()
+		when each TX message is complete.
+
+		After each message is added to the S/W FIFO, the CAN upper half
+		driver will attempt to send the message by calling into the lower
+		half driver.  That send will not be performed if the lower half
+		driver is busy, i.e., if dev_txready() returns false.  In that
+		case, the number of messages in the S/W FIFO can grow.  If the
+		S/W FIFO becomes full, then can_write() will wait for space in
+		the S/W FIFO.
+
+		If the CAN hardware does not support a H/W FIFO then busy means
+		that the hardware is actively sending the message and is
+		guaranteed to become non busy (i.e, dev_txready()) when the
+		send transfer completes and can_txdone() is called.  So the call
+		to can_txdone() means that the transfer has completed and also
+		that the hardware is ready to accept another transfer.
+
+		If the CAN hardware supports a H/W FIFO, can_txdone() is not
+		called when the tranfer is complete, but rather when the
+		transfer is queued in the H/W FIFO.  When the H/W FIFO becomes
+		full, then dev_txready() will report false and the number of
+		queued messages in the S/W FIFO will grow.
+
+		There is no mechanism in this case to inform the upper half
+		driver when the hardware is again available, when there is
+		again space in the H/W FIFO.  can_txdone() will not be called
+		again.  If the S/W FIFO becomes full, then the upper half
+		driver will wait for space to become available, but there is
+		no event to awaken it and the driver will hang.
+
+		Enabling this feature adds support for the can_txready()
+		interface.  This function is called from the lower half
+		driver's CAN interrupt handler each time a TX transfer
+		completes.  This is a sure indication that the H/W FIFO is
+		no longer full.  can_txready() will then awaken the
+		can_write() logic and the hang condition is avoided.
+
+choice
+	prompt "TX Ready Work Queue"
+	default CAN_TXREADY_HIPRI
+	depends on CAN_TXREADY
+
+config CAN_TXREADY_LOPRI
+	bool "Low-priority work queue"
+	select SCHED_LPWORK
+
+config CAN_TXREADY_HIPRI
+	bool "High-priority work queue"
+	select SCHED_HPWORK
+
+endchoice # TX Ready Work Queue
+
+config CAN_LOOPBACK
+	bool "CAN loopback mode"
+	default n
+	---help---
+		A CAN driver may or may not support a loopback mode for testing. If the
+		driver does support loopback mode, the setting will enable it. (If the
+		driver does not, this setting will have no effect).
+
+config CAN_NPOLLWAITERS
+	int "Number of poll waiters"
+	default 2
+	depends on !DISABLE_POLL
+	---help---
+		The maximum number of threads that may be waiting on the
+		poll method.
+
+comment "CAN Bus Controllers:"
+
+config CAN_MCP2515
+	bool "Microchip MCP2515 CAN Bus Controller over SPI"
+	default n
+	depends on SPI
+	select ARCH_HAVE_CAN_ERRORS
+	---help---
+		Enable driver support for Microchip MCP2515.
+
+if CAN_MCP2515
+
+config MCP2515_BITRATE
+	int "MCP2515 bitrate"
+	default 500000
+	---help---
+		MCP2515 bitrate in bits per second.
+
+config MCP2515_PROPSEG
+	int "MCP2515 Propagation Segment TQ"
+	default 2
+	range 1 8
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config MCP2515_PHASESEG1
+	int "MCP2515 Phase Segment 1"
+	default 2
+	range 1 8
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config MCP2515_PHASESEG2
+	int "MCP2515 Phase Segment 2"
+	default 3
+	range 2 8
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config MCP2515_SJW
+	int "MCP2515 Synchronization Jump Width"
+	default 1
+	range 1 4
+	---help---
+		The duration of a synchronization jump is SJW.
+
+endif # CAN_MCP2515
+endif # CAN

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/misoc/src/lm32/lm32_initialize.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Ramtin Amin <keytwo@gmail.com>
  *
@@ -44,6 +44,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched_note.h>
+#include <nuttx/mm/iob.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/net/loopback.h>
@@ -78,8 +79,13 @@ void up_initialize(void)
 
   misoc_timer_initialize();
 
+#ifdef CONFIG_MM_IOB
+  /* Initialize IO buffering */
+
+  iob_initialize();
+#endif
+
   /* Initialize the network cores */
 
   misoc_net_initialize(0);
-
 }

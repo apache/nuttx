@@ -138,12 +138,12 @@
  /* Per SPI callouts to board-specific logic */
  
 typedef CODE void (*imx_select_t)(FAR struct spi_dev_s *dev,
-                                  enum spi_dev_e devid, bool selected);
+                                  uint32_t devid, bool selected);
 typedef CODE uint8_t (*imx_status_t)(FAR struct spi_dev_s *dev,
-                                     enum spi_dev_e devid);
+                                     uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
 typedef CODE int (*imx_cmddata_t)(FAR struct spi_dev_s *dev,
-                                  enum spi_dev_e devid, bool cmd);
+                                  uint32_t devid, bool cmd);
 #endif
 
 struct imx_spidev_s
@@ -228,16 +228,16 @@ static int    spi_interrupt(int irq, void *context, FAR void *arg);
 /* SPI methods */
 
 static int    spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static void   spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+static void   spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
                          bool selected);
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
                                  uint32_t frequency);
 static void   spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void   spi_setbits(FAR struct spi_dev_s *dev, int nbits);
 static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
-static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-static int spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
                        bool cmd);
 #endif
 #ifdef CONFIG_SPI_EXCHANGE
@@ -835,7 +835,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
                        bool selected)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
@@ -1051,7 +1051,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  *
  ****************************************************************************/
 
-static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
   uint8_t ret = 0;
@@ -1091,7 +1091,7 @@ static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-static int spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
                        bool cmd)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;

@@ -61,6 +61,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
+#include "stm32l4_gpio.h"
 #include "stm32l4_uart.h"
 #include "stm32l4_dma.h"
 #include "stm32l4_rcc.h"
@@ -198,6 +199,10 @@ struct stm32l4_serial_s
   struct uart_dev_s dev;       /* Generic UART device */
   uint16_t          ie;        /* Saved interrupt mask bits value */
   uint16_t          sr;        /* Saved status bits */
+
+  /* Has been initialized and HW is setup. */
+
+  bool              initialized;
 
   /* If termios are supported, then the following fields may vary at
    * runtime.
@@ -760,11 +765,11 @@ static inline void stm32l4serial_putreg(FAR struct stm32l4_serial_s *priv,
 }
 
 /****************************************************************************
- * Name: stm32l4serial_restoreusartint
+ * Name: stm32l4serial_setusartint
  ****************************************************************************/
 
-static void stm32l4serial_restoreusartint(FAR struct stm32l4_serial_s *priv,
-                                          uint16_t ie)
+static inline void stm32l4serial_setusartint(FAR struct stm32l4_serial_s *priv,
+                                             uint16_t ie)
 {
   uint32_t cr;
 
@@ -786,12 +791,32 @@ static void stm32l4serial_restoreusartint(FAR struct stm32l4_serial_s *priv,
 }
 
 /****************************************************************************
+ * Name: up_restoreusartint
+ ****************************************************************************/
+
+static void stm32l4serial_restoreusartint(FAR struct stm32l4_serial_s *priv,
+                                          uint16_t ie)
+{
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  stm32l4serial_setusartint(priv, ie);
+
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
  * Name: stm32l4serial_disableusartint
  ****************************************************************************/
 
-static inline void stm32l4serial_disableusartint(FAR struct stm32l4_serial_s *priv,
-                                                 FAR uint16_t *ie)
+static void stm32l4serial_disableusartint(FAR struct stm32l4_serial_s *priv,
+                                          FAR uint16_t *ie)
 {
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
   if (ie)
     {
       uint32_t cr1;
@@ -828,7 +853,9 @@ static inline void stm32l4serial_disableusartint(FAR struct stm32l4_serial_s *pr
 
   /* Disable all interrupts */
 
-  stm32l4serial_restoreusartint(priv, 0);
+  stm32l4serial_setusartint(priv, 0);
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1168,6 +1195,11 @@ static int stm32l4serial_setup(FAR struct uart_dev_s *dev)
   /* Set up the cached interrupt enables value */
 
   priv->ie    = 0;
+
+  /* Mark device as initialized. */
+
+  priv->initialized = true;
+
   return OK;
 }
 
@@ -1277,6 +1309,10 @@ static void stm32l4serial_shutdown(FAR struct uart_dev_s *dev)
 {
   FAR struct stm32l4_serial_s *priv = (FAR struct stm32l4_serial_s *)dev->priv;
   uint32_t regval;
+
+  /* Mark device as uninitialized. */
+
+  priv->initialized = false;
 
   /* Disable all interrupts */
 
@@ -2327,6 +2363,32 @@ static int stm32l4serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
 #ifdef USE_SERIALDRIVER
 
 /****************************************************************************
+ * Name: stm32l4_serial_get_uart
+ *
+ * Description:
+ *   Get serial driver structure for STM32 USART
+ *
+ ****************************************************************************/
+
+FAR uart_dev_t *stm32l4_serial_get_uart(int uart_num)
+{
+  int uart_idx = uart_num - 1;
+
+  if (uart_idx < 0 || uart_idx >= STM32L4_NUSART+STM32L4_NUART || \
+      !uart_devs[uart_idx])
+    {
+      return NULL;
+    }
+
+  if (!uart_devs[uart_idx]->initialized)
+    {
+      return NULL;
+    }
+
+  return &uart_devs[uart_idx]->dev;
+}
+
+/****************************************************************************
  * Name: up_earlyserialinit
  *
  * Description:
@@ -2359,10 +2421,10 @@ void up_earlyserialinit(void)
 #endif
 #endif /* HAVE UART */
 }
-#endif
+#endif /* USE_EARLYSERIALINIT */
 
 /****************************************************************************
- * Name: stm32l4serial_getregit
+ * Name: up_serialinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
@@ -2440,7 +2502,7 @@ void up_serialinit(void)
 }
 
 /****************************************************************************
- * Name: stm32l4serial_dmapoll
+ * Name: stm32l4_serial_dma_poll
  *
  * Description:
  *   Checks receive DMA buffers for received bytes that have not accumulated
@@ -2451,7 +2513,7 @@ void up_serialinit(void)
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_DMA
-void stm32l4serial_dmapoll(void)
+void stm32l4_serial_dma_poll(void)
 {
     irqstate_t flags;
 

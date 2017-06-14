@@ -89,9 +89,9 @@ void board_button_initialize(void)
  * Name: board_buttons
  ****************************************************************************/
 
-uint8_t board_buttons(void)
+uint32_t board_buttons(void)
 {
-  uint8_t swset  = 0;
+  uint32_t swset  = 0;
   uint8_t regval = getreg8(M16C_P8);
 
   if (SW_PRESSED(regval, SW1_BIT))

@@ -320,7 +320,7 @@
  *
  ****************************************************************************/
 
-#define SPI_SEND(d,wd) ((d)->ops->send(d,(uint16_t)wd))
+#define SPI_SEND(d,wd) ((d)->ops->send(d,(uint16_t)(wd)))
 
 /****************************************************************************
  * Name: SPI_SNDBLOCK
@@ -420,6 +420,45 @@
 #define SPI_REGISTERCALLBACK(d,c,a) \
   ((d)->ops->registercallback ? (d)->ops->registercallback(d,c,a) : -ENOSYS)
 
+/* SPI Device Macros ********************************************************/
+
+/* This builds a SPI devid from its type and index */
+
+#define SPIDEV_ID(type,index) ((((uint32_t)(type)  & 0xffff) << 16) | \
+                                ((uint32_t)(index) & 0xffff))
+
+/* This retrieves the fields from a SPI devid */
+
+#define SPIDEVID_TYPE (devid) (((uint32_t)(devid) >> 16) & 0xffff)
+#define SPIDEVID_INDEX(devid)  ((uint32_t)(devid)        & 0xffff)
+
+/* These are standard definitions for the defined SPI device IDs.  The index
+ * argument, n, is the instance number.  This should be zero if there is
+ * only one instance of the SPI device on the SPI bus. Indices greater than
+ * zero discriminate the additional devices of the same type on the SPI bus.
+ */
+
+#define SPIDEV_NONE(n)          SPIDEV_ID(SPIDEVTYPE_NONE,          (n))
+#define SPIDEV_MMCSD(n)         SPIDEV_ID(SPIDEVTYPE_MMCSD,         (n))
+#define SPIDEV_FLASH(n)         SPIDEV_ID(SPIDEVTYPE_FLASH,         (n))
+#define SPIDEV_ETHERNET(n)      SPIDEV_ID(SPIDEVTYPE_ETHERNET,      (n))
+#define SPIDEV_DISPLAY(n)       SPIDEV_ID(SPIDEVTYPE_DISPLAY,       (n))
+#define SPIDEV_CAMERA(n)        SPIDEV_ID(SPIDEVTYPE_CAMERA,        (n))
+#define SPIDEV_WIRELESS(n)      SPIDEV_ID(SPIDEVTYPE_WIRELESS,      (n))
+#define SPIDEV_TOUCHSCREEN(n)   SPIDEV_ID(SPIDEVTYPE_TOUCHSCREEN,   (n))
+#define SPIDEV_EXPANDER(n)      SPIDEV_ID(SPIDEVTYPE_EXPANDER,      (n))
+#define SPIDEV_MUX(n)           SPIDEV_ID(SPIDEVTYPE_MUX,           (n))
+#define SPIDEV_AUDIO_DATA(n)    SPIDEV_ID(SPIDEVTYPE_AUDIO_DATA,    (n))
+#define SPIDEV_AUDIO_CTRL(n)    SPIDEV_ID(SPIDEVTYPE_AUDIO_CTRL,    (n))
+#define SPIDEV_EEPROM(n)        SPIDEV_ID(SPIDEVTYPE_EEPROM,        (n))
+#define SPIDEV_ACCELEROMETER(n) SPIDEV_ID(SPIDEVTYPE_ACCELEROMETER, (n))
+#define SPIDEV_BAROMETER(n)     SPIDEV_ID(SPIDEVTYPE_BAROMETER,     (n))
+#define SPIDEV_TEMPERATURE(n)   SPIDEV_ID(SPIDEVTYPE_TEMPERATURE,   (n))
+#define SPIDEV_IEEE802154(n)    SPIDEV_ID(SPIDEVTYPE_IEEE802154,    (n))
+#define SPIDEV_CONTACTLESS(n)   SPIDEV_ID(SPIDEVTYPE_CONTACTLESS,   (n))
+#define SPIDEV_CANBUS(n)        SPIDEV_ID(SPIDEVTYPE_CANBUS,        (n))
+#define SPIDEV_USER(n)          SPIDEV_ID(SPIDEVTYPE_USER,          (n))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -428,31 +467,34 @@
 
 typedef void (*spi_mediachange_t)(FAR void *arg);
 
-/* If the board supports multiple SPI devices, this enumeration identifies
- * which is selected or de-selected.
+/* If the board supports multiple SPI devices types, this enumeration
+ * identifies which is selected or de-selected.
+ * There may be more than one instance of each type on a bus, see below.
  */
 
-enum spi_dev_e
+enum spi_devtype_e
 {
-  SPIDEV_NONE = 0,      /* Not a valid value */
-  SPIDEV_MMCSD,         /* Select SPI MMC/SD device */
-  SPIDEV_FLASH,         /* Select SPI FLASH device */
-  SPIDEV_ETHERNET,      /* Select SPI Ethernet device */
-  SPIDEV_DISPLAY,       /* Select SPI LCD/OLED display device */
-  SPIDEV_CAMERA,        /* Select SPI imaging device */
-  SPIDEV_WIRELESS,      /* Select SPI Wireless device */
-  SPIDEV_TOUCHSCREEN,   /* Select SPI touchscreen device */
-  SPIDEV_EXPANDER,      /* Select SPI I/O expander device */
-  SPIDEV_MUX,           /* Select SPI multiplexer device */
-  SPIDEV_AUDIO_DATA,    /* Select SPI audio codec device data port */
-  SPIDEV_AUDIO_CTRL,    /* Select SPI audio codec device control port */
-  SPIDEV_EEPROM,        /* Select SPI EEPROM device */
-  SPIDEV_ACCELEROMETER, /* Select SPI Accelerometer device */
-  SPIDEV_BAROMETER,     /* Select SPI Pressure/Barometer device */
-  SPIDEV_TEMPERATURE,   /* Select SPI Temperature sensor device */
-  SPIDEV_IEEE802154,    /* Select SPI IEEE 802.15.4 wireless device */
-  SPIDEV_CONTACTLESS,   /* Select SPI Contactless device */
-  SPIDEV_USER           /* Board-specific values start here */
+  SPIDEVTYPE_NONE = 0,      /* Not a valid value */
+  SPIDEVTYPE_MMCSD,         /* Select SPI MMC/SD device */
+  SPIDEVTYPE_FLASH,         /* Select SPI FLASH device */
+  SPIDEVTYPE_ETHERNET,      /* Select SPI Ethernet device */
+  SPIDEVTYPE_DISPLAY,       /* Select SPI LCD/OLED display device */
+  SPIDEVTYPE_CAMERA,        /* Select SPI imaging device */
+  SPIDEVTYPE_WIRELESS,      /* Select SPI Wireless device */
+  SPIDEVTYPE_TOUCHSCREEN,   /* Select SPI touchscreen device */
+  SPIDEVTYPE_EXPANDER,      /* Select SPI I/O expander device */
+  SPIDEVTYPE_MUX,           /* Select SPI multiplexer device */
+  SPIDEVTYPE_AUDIO_DATA,    /* Select SPI audio codec device data port */
+  SPIDEVTYPE_AUDIO_CTRL,    /* Select SPI audio codec device control port */
+  SPIDEVTYPE_EEPROM,        /* Select SPI EEPROM device */
+  SPIDEVTYPE_ACCELEROMETER, /* Select SPI Accelerometer device */
+  SPIDEVTYPE_BAROMETER,     /* Select SPI Pressure/Barometer device */
+  SPIDEVTYPE_TEMPERATURE,   /* Select SPI Temperature sensor device */
+  SPIDEVTYPE_IEEE802154,    /* Select SPI IEEE 802.15.4 wireless device */
+  SPIDEVTYPE_CONTACTLESS,   /* Select SPI Contactless device */
+  SPIDEVTYPE_CANBUS,        /* Select SPI CAN Bus controller over SPI */
+  SPIDEVTYPE_USER           /* Board-specific values start here
+                             * This must always be the last definition. */
 };
 
 /* Certain SPI devices may required different clocking modes */
@@ -477,7 +519,7 @@ struct spi_dev_s;
 struct spi_ops_s
 {
   CODE int      (*lock)(FAR struct spi_dev_s *dev, bool lock);
-  CODE void     (*select)(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+  CODE void     (*select)(FAR struct spi_dev_s *dev, uint32_t devid,
                   bool selected);
   CODE uint32_t (*setfrequency)(FAR struct spi_dev_s *dev, uint32_t frequency);
 #ifdef CONFIG_SPI_CS_DELAY_CONTROL
@@ -490,9 +532,9 @@ struct spi_ops_s
   CODE int      (*hwfeatures)(FAR struct spi_dev_s *dev,
                   spi_hwfeatures_t features);
 #endif
-  CODE uint8_t  (*status)(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+  CODE uint8_t  (*status)(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-  CODE int      (*cmddata)(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+  CODE int      (*cmddata)(FAR struct spi_dev_s *dev, uint32_t devid,
                   bool cmd);
 #endif
   CODE uint16_t (*send)(FAR struct spi_dev_s *dev, uint16_t wd);

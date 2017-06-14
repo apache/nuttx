@@ -81,7 +81,7 @@ static const char spaces[] = " \t\n\r\f\v";
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  findwidth
+ * Name:  findwidth
  *
  * Description:
  *    Try to figure out the width of the input data.
@@ -139,7 +139,7 @@ static int findwidth(FAR const char *buf, FAR const char *fmt)
 }
 
 /****************************************************************************
- * Function:  findscanset
+ * Name:  findscanset
  *
  * Description:
  *    Fill in the given table from the scanset at the given format.
@@ -265,7 +265,7 @@ doexit:
 #endif
 
 /****************************************************************************
- * Function:  scansetwidth
+ * Name:  scansetwidth
  ****************************************************************************/
 
 #ifdef CONFIG_LIBC_SCANSET
@@ -295,7 +295,7 @@ static int scansetwidth(FAR const char *buf,
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  sscanf
+ * Name:  sscanf
  *
  * Description:
  *    ANSI standard sscanf implementation.
@@ -314,7 +314,7 @@ int sscanf(FAR const char *buf, FAR const char *fmt, ...)
 }
 
 /****************************************************************************
- * Function:  vsscanf
+ * Name:  vsscanf
  *
  * Description:
  *    ANSI standard vsscanf implementation.

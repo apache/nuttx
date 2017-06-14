@@ -312,9 +312,9 @@ static inline void at45db_unlock(FAR struct at45db_dev_s *priv)
 #ifdef CONFIG_AT45DB_PWRSAVE
 static void at45db_pwrdown(FAR struct at45db_dev_s *priv)
 {
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
   SPI_SEND(priv->spi, AT45DB_PWRDOWN);
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
 }
 #endif
 
@@ -325,9 +325,9 @@ static void at45db_pwrdown(FAR struct at45db_dev_s *priv)
 #ifdef CONFIG_AT45DB_PWRSAVE
 static void at45db_resume(FAR struct at45db_dev_s *priv)
 {
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
   SPI_SEND(priv->spi, AT45DB_RESUME);
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
   up_udelay(50);
 }
 #endif
@@ -347,7 +347,7 @@ static inline int at45db_rdid(FAR struct at45db_dev_s *priv)
    * locked the bus for exclusive access)
    */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
 
   /* Send the " Manufacturer and Device ID Read" command and read the next three
    * ID bytes from the FLASH.
@@ -358,7 +358,7 @@ static inline int at45db_rdid(FAR struct at45db_dev_s *priv)
 
   /* Deselect the FLASH */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
 
   finfo("manufacturer: %02x devid1: %02x devid2: %02x\n",
         devid[0], devid[1], devid[2]);
@@ -438,10 +438,10 @@ static inline uint8_t at45db_rdsr(FAR struct at45db_dev_s *priv)
 {
   uint8_t retval;
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
   SPI_SEND(priv->spi, AT45DB_RDSR);
   retval = SPI_SEND(priv->spi, 0xff);
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
   return retval;
 }
 
@@ -503,9 +503,9 @@ static inline void at45db_pgerase(FAR struct at45db_dev_s *priv, off_t sector)
 
   /* Erase the page */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
   SPI_SNDBLOCK(priv->spi, erasecmd, 4);
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
 
   /* Wait for any erase to complete if we are not trying to improve write
    * performance. (see comments above).
@@ -545,9 +545,9 @@ static inline int at32db_chiperase(FAR struct at45db_dev_s *priv)
    * down...
    */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
   SPI_SNDBLOCK(priv->spi, g_chiperase, CHIP_ERASE_SIZE);
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
 
   /* Wait for any erase to complete if we are not trying to improve write
    * performance. (see comments above).
@@ -589,10 +589,10 @@ static inline void at45db_pgwrite(FAR struct at45db_dev_s *priv,
   at45db_waitbusy(priv);
 #endif
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
   SPI_SNDBLOCK(priv->spi, wrcmd, 4);
   SPI_SNDBLOCK(priv->spi, buffer, 1 << priv->pageshift);
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
 
   /* Wait for any erase to complete if we are not trying to improve write
    * performance. (see comments above).
@@ -733,10 +733,10 @@ static ssize_t at45db_read(FAR struct mtd_dev_s *mtd, off_t offset, size_t nbyte
 
   /* Perform the read */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
   SPI_SNDBLOCK(priv->spi, rdcmd, 5);
   SPI_RECVBLOCK(priv->spi, buffer, nbytes);
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
 
   at45db_pwrdown(priv);
   at45db_unlock(priv);
@@ -835,7 +835,7 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
   /* Allocate a state structure (we allocate the structure instead of using a fixed,
    * static allocation so that we can handle multiple FLASH devices.  The current
    * implementation would handle only one FLASH part per SPI device (only because
-   * of the SPIDEV_FLASH definition) and so would have to be extended to handle
+   * of the SPIDEV_FLASH(0) definition) and so would have to be extended to handle
    * multiple FLASH parts on the same SPI bus.
    */
 
@@ -855,7 +855,7 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
 
       /* Deselect the FLASH */
 
-      SPI_SELECT(spi, SPIDEV_FLASH, false);
+      SPI_SELECT(spi, SPIDEV_FLASH(0), false);
 
       /* Lock and configure the SPI bus. */
 
@@ -889,9 +889,9 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
 
           fwarn("WARNING: Reprogramming page size\n");
 
-          SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+          SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
           SPI_SNDBLOCK(priv->spi, g_binpgsize, BINPGSIZE_SIZE);
-          SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
+          SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
           goto errout;
         }
 

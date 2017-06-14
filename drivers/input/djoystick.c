@@ -60,6 +60,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/input/djoystick.h>
+#include <nuttx/random.h>
 
 #include <nuttx/irq.h>
 
@@ -200,7 +201,7 @@ static inline int djoy_takesem(sem_t *sem)
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
 static void djoy_enable(FAR struct djoy_upperhalf_s *priv)
 {
-  FAR const struct djoy_lowerhalf_s *lower = priv->du_lower;
+  FAR const struct djoy_lowerhalf_s *lower;
   FAR struct djoy_open_s *opriv;
   djoy_buttonset_t press;
   djoy_buttonset_t release;
@@ -209,8 +210,9 @@ static void djoy_enable(FAR struct djoy_upperhalf_s *priv)
   int i;
 #endif
 
-  DEBUGASSERT(priv && priv->du_lower);
+  DEBUGASSERT(priv);
   lower = priv->du_lower;
+  DEBUGASSERT(lower);
 
   /* This routine is called both task level and interrupt level, so
    * interrupts must be disabled.
@@ -294,7 +296,7 @@ static void djoy_interrupt(FAR const struct djoy_lowerhalf_s *lower,
 
 static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
 {
-  FAR const struct djoy_lowerhalf_s *lower = priv->du_lower;
+  FAR const struct djoy_lowerhalf_s *lower;
   FAR struct djoy_open_s *opriv;
   djoy_buttonset_t sample;
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
@@ -307,8 +309,9 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
   int i;
 #endif
 
-  DEBUGASSERT(priv && priv->du_lower);
+  DEBUGASSERT(priv);
   lower = priv->du_lower;
+  DEBUGASSERT(lower);
 
   /* This routine is called both task level and interrupt level, so
    * interrupts must be disabled.
@@ -320,6 +323,8 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
 
   DEBUGASSERT(lower->dl_sample);
   sample = lower->dl_sample(lower);
+
+  add_ui_randomness(sample);
 
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
   /* Determine which buttons have been newly pressed and which have been
@@ -825,7 +830,7 @@ errout_with_dusem:
  *
  * Input Parameters:
  *   devname - The name of the discrete joystick device to be registers.
- *     This should be a string of the form "/priv/djoyN" where N is the the
+ *     This should be a string of the form "/priv/djoyN" where N is the
  *     minor device number.
  *   lower - An instance of the platform-specific discrete joystick lower
  *     half driver.

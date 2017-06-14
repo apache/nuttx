@@ -63,7 +63,7 @@
  *   arg - The boardctl() argument is passed to the board_app_initialize()
  *         implementation without modification.  The argument has no
  *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the the
+ *         between the board-specific initalization logic and the
  *         matching application logic.  The value cold be such things as a
  *         mode enumeration value, a set of DIP switch switch settings, a
  *         pointer to configuration data read from a file or serial FLASH,
@@ -79,14 +79,6 @@
 int board_app_initialize(uintptr_t arg)
 {
   int ret;
-
-#ifdef CONFIG_USBDEV
-  /* Teensy is powered from usb and (bug?) only boots from being programmed, 
-   * so if usb is compiled in signal the controller driver that we're attached now.
-   */
-
-  khci_usbattach();
-#endif
 
 #ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */

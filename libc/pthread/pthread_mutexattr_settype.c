@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: pthread_mutexattr_settype
+ * Name: pthread_mutexattr_settype
  *
  * Description:
  *   Set the mutex type in the mutex attributes.
@@ -67,7 +67,7 @@ int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type)
 {
   if (attr && type >= PTHREAD_MUTEX_NORMAL && type <= PTHREAD_MUTEX_RECURSIVE)
     {
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
       attr->type = type;
 #else
       if (type != PTHREAD_MUTEX_NORMAL)

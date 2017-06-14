@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/net/net.h
  *
- *   Copyright (C) 2007, 2009-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,7 +67,10 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-/* Data link layer type */
+
+/* Data link layer type.  This type is used with netdev_register in order to
+ * identify the type of the network driver.
+ */
 
 enum net_lltype_e
 {
@@ -75,7 +78,8 @@ enum net_lltype_e
   NET_LL_LOOPBACK,     /* Local loopback */
   NET_LL_SLIP,         /* Serial Line Internet Protocol (SLIP) */
   NET_LL_TUN,          /* TUN Virtual Network Device */
-  NET_LL_6LOWPAN       /* IEEE 802.15.4 6LoWPAN*/
+  NET_LL_IEEE80211,    /* IEEE 802.11 */
+  NET_LL_IEEE802154    /* IEEE 802.15.4 MAC */
 };
 
 /* This defines a bitmap big enough for one bit for each socket option */
@@ -211,7 +215,7 @@ void net_initialize(void);
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_lock
+ * Name: net_lock
  *
  * Description:
  *   Take the lock
@@ -221,7 +225,7 @@ void net_initialize(void);
 void net_lock(void);
 
 /****************************************************************************
- * Function: net_unlock
+ * Name: net_unlock
  *
  * Description:
  *   Release the lock.
@@ -231,7 +235,7 @@ void net_lock(void);
 void net_unlock(void);
 
 /****************************************************************************
- * Function: net_timedwait
+ * Name: net_timedwait
  *
  * Description:
  *   Atomically wait for sem (or a timeout( while temporarily releasing
@@ -252,7 +256,7 @@ struct timespec;
 int net_timedwait(sem_t *sem, FAR const struct timespec *abstime);
 
 /****************************************************************************
- * Function: net_lockedwait
+ * Name: net_lockedwait
  *
  * Description:
  *   Atomically wait for sem while temporarily releasing lock on the network.
@@ -270,7 +274,7 @@ int net_timedwait(sem_t *sem, FAR const struct timespec *abstime);
 int net_lockedwait(sem_t *sem);
 
 /****************************************************************************
- * Function: net_setipid
+ * Name: net_setipid
  *
  * Description:
  *   This function may be used at boot time to set the initial ip_id.
@@ -345,7 +349,7 @@ void net_releaselist(FAR struct socketlist *list);
 FAR struct socket *sockfd_socket(int sockfd);
 
 /****************************************************************************
- * Function: psock_socket
+ * Name: psock_socket
  *
  * Description:
  *   socket() creates an endpoint for communication and returns a socket
@@ -385,7 +389,7 @@ FAR struct socket *sockfd_socket(int sockfd);
 int psock_socket(int domain, int type, int protocol, FAR struct socket *psock);
 
 /****************************************************************************
- * Function: net_close
+ * Name: net_close
  *
  * Description:
  *   Performs the close operation on socket descriptors
@@ -403,7 +407,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock);
 int net_close(int sockfd);
 
 /****************************************************************************
- * Function: psock_close
+ * Name: psock_close
  *
  * Description:
  *   Performs the close operation on a socket instance
@@ -421,7 +425,7 @@ int net_close(int sockfd);
 int psock_close(FAR struct socket *psock);
 
 /****************************************************************************
- * Function: psock_bind
+ * Name: psock_bind
  *
  * Description:
  *   bind() gives the socket 'psock' the local address 'addr'. 'addr' is
@@ -455,7 +459,7 @@ int psock_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
                socklen_t addrlen);
 
 /****************************************************************************
- * Function: psock_listen
+ * Name: psock_listen
  *
  * Description:
  *   To accept connections, a socket is first created with psock_socket(), a
@@ -486,7 +490,7 @@ int psock_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
 int psock_listen(FAR struct socket *psock, int backlog);
 
 /****************************************************************************
- * Function: psock_accept
+ * Name: psock_accept
  *
  * Description:
  *   The psock_accept function is used with connection-based socket types
@@ -627,7 +631,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
                   socklen_t addrlen);
 
 /****************************************************************************
- * Function: psock_send
+ * Name: psock_send
  *
  * Description:
  *   The send() call may be used only when the socket is in a connected state
@@ -694,7 +698,7 @@ ssize_t psock_send(FAR struct socket *psock, const void *buf, size_t len,
                    int flags);
 
 /****************************************************************************
- * Function: psock_sendto
+ * Name: psock_sendto
  *
  * Description:
  *   If sendto() is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)
@@ -763,7 +767,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
                      socklen_t tolen);
 
 /****************************************************************************
- * Function: psock_recvfrom
+ * Name: psock_recvfrom
  *
  * Description:
  *   recvfrom() receives messages from a socket, and may be used to receive
@@ -826,7 +830,7 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   psock_recvfrom(psock,buf,len,flags,NULL,0)
 
 /****************************************************************************
- * Function: psock_getsockopt
+ * Name: psock_getsockopt
  *
  * Description:
  *   getsockopt() retrieve thse value for the option specified by the
@@ -870,7 +874,7 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
                      FAR void *value, FAR socklen_t *value_len);
 
 /****************************************************************************
- * Function: psock_setsockopt
+ * Name: psock_setsockopt
  *
  * Description:
  *   psock_setsockopt() sets the option specified by the 'option' argument,
@@ -985,7 +989,7 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg);
 int netdev_ioctl(int sockfd, int cmd, unsigned long arg);
 
 /****************************************************************************
- * Function: psock_poll
+ * Name: psock_poll
  *
  * Description:
  *   The standard poll() operation redirects operations on socket descriptors
@@ -1008,7 +1012,7 @@ int psock_poll(FAR struct socket *psock, struct pollfd *fds, bool setup);
 #endif
 
 /****************************************************************************
- * Function: net_poll
+ * Name: net_poll
  *
  * Description:
  *   The standard poll() operation redirects operations on socket descriptors
@@ -1031,7 +1035,7 @@ int net_poll(int sockfd, struct pollfd *fds, bool setup);
 #endif
 
 /****************************************************************************
- * Function: net_dupsd
+ * Name: net_dupsd
  *
  * Description:
  *   Clone a socket descriptor to an arbitray descriptor number.  If file
@@ -1044,7 +1048,7 @@ int net_poll(int sockfd, struct pollfd *fds, bool setup);
 int net_dupsd(int sockfd, int minsd);
 
 /****************************************************************************
- * Function: net_dupsd2
+ * Name: net_dupsd2
  *
  * Description:
  *   Clone a socket descriptor to an arbitray descriptor number.  If file
@@ -1057,7 +1061,7 @@ int net_dupsd(int sockfd, int minsd);
 int net_dupsd2(int sockfd1, int sockfd2);
 
 /****************************************************************************
- * Function: net_clone
+ * Name: net_clone
  *
  * Description:
  *   Performs the low level, common portion of net_dupsd() and net_dupsd2()
@@ -1067,7 +1071,7 @@ int net_dupsd2(int sockfd1, int sockfd2);
 int net_clone(FAR struct socket *psock1, FAR struct socket *psock2);
 
 /****************************************************************************
- * Function: net_sendfile
+ * Name: net_sendfile
  *
  * Description:
  *   The send() call may be used only when the socket is in a connected state
@@ -1155,7 +1159,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset, size_t count
 int net_vfcntl(int sockfd, int cmd, va_list ap);
 
 /****************************************************************************
- * Function: netdev_register
+ * Name: netdev_register
  *
  * Description:
  *   Register a network device driver and assign a name to it so that it can
@@ -1176,7 +1180,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap);
 int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype);
 
 /****************************************************************************
- * Function: netdev_unregister
+ * Name: netdev_unregister
  *
  * Description:
  *   Unregister a network device driver.
@@ -1196,7 +1200,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype);
 int netdev_unregister(FAR struct net_driver_s *dev);
 
 /****************************************************************************
- * Function: netdev_foreach
+ * Name: netdev_foreach
  *
  * Description:
  *   Enumerate each registered network device.

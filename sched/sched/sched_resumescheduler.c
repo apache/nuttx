@@ -96,11 +96,12 @@ void sched_resume_scheduler(FAR struct tcb_s *tcb)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
-  /* Inidicate the the task has been resumed */
+  /* Inidicate the task has been resumed */
 
   sched_note_resume(tcb);
 #endif
 
 }
 
-#endif /* CONFIG_RR_INTERVAL > 0 || CONFIG_SCHED_SPORADIC || CONFIG_SCHED_INSTRUMENTATION */
+#endif /* CONFIG_RR_INTERVAL > 0 || CONFIG_SCHED_SPORADIC || \
+        * CONFIG_SCHED_INSTRUMENTATION */

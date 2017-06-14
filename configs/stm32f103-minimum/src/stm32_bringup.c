@@ -112,6 +112,15 @@ int stm32_bringup(void)
 #endif
   int ret = OK;
 
+#ifdef CONFIG_DEV_GPIO
+  ret = stm32_gpio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_MMCSD
   ret = stm32_mmcsd_initialize(MMCSD_MINOR);
   if (ret < 0)
@@ -151,6 +160,15 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_CAN_MCP2515
+  /* Configure and initialize the MCP2515 CAN device */
+
+  ret = stm32_mcp2515initialize("/dev/can0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_mcp2515initialize() failed: %d\n", ret);
+    }
+#endif
 
 #ifdef CONFIG_CL_MFRC522
   ret = stm32_mfrc522initialize("/dev/rfid0");

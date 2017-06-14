@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_clrpend.c
- * arch/arm/src/chip/kinetis_clrpend.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

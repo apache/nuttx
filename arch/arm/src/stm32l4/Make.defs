@@ -102,8 +102,8 @@ CHIP_ASRCS  =
 CHIP_CSRCS  = stm32l4_allocateheap.c stm32l4_exti_gpio.c stm32l4_gpio.c
 CHIP_CSRCS += stm32l4_idle.c stm32l4_irq.c stm32l4_lowputc.c stm32l4_rcc.c
 CHIP_CSRCS += stm32l4_serial.c stm32l4_start.c stm32l4_waste.c stm32l4_uid.c
-CHIP_CSRCS += stm32l4_spi.c stm32l4_i2c.c stm32l4_lse.c stm32l4_pwr.c
-CHIP_CSRCS += stm32l4_tim.c
+CHIP_CSRCS += stm32l4_spi.c stm32l4_i2c.c stm32l4_lse.c stm32l4_lsi.c
+CHIP_CSRCS += stm32l4_pwr.c stm32l4_tim.c stm32l4_flash.c
 
 ifeq ($(CONFIG_TIMER),y)
 CHIP_CSRCS += stm32l4_tim_lowerhalf.c
@@ -125,13 +125,6 @@ endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += stm32l4_userspace.c stm32l4_mpuinit.c
-endif
-
-ifeq ($(CONFIG_ARMV7M_DTCM),y)
-CHIP_CSRCS += stm32l4_dtcm.c
-ifeq ($(CONFIG_STM32L4_DTCM_PROCFS),y)
-CHIP_CSRCS += stm32l4_procfs_dtcm.c
-endif
 endif
 
 ifeq ($(CONFIG_STM32L4_DMA),y)
@@ -219,3 +212,10 @@ ifeq ($(CONFIG_STM32L4_CAN),y)
 CHIP_CSRCS += stm32l4_can.c
 endif
 
+ifeq ($(CONFIG_STM32L4_FIREWALL),y)
+CHIP_CSRCS += stm32l4_firewall.c
+endif
+
+ifeq ($(CONFIG_STM32L4_IWDG),y)
+CHIP_CSRCS += stm32l4_iwdg.c
+endif

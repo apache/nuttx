@@ -247,7 +247,7 @@ static int ptmx_open(FAR struct file *filep)
   DEBUGASSERT(fd >= 0);  /* open() should never fail */
 
   /* No unlink the master.  This will remove it from the VFS namespace,
-   * the the driver will still persist because of the open count on the
+   * the driver will still persist because of the open count on the
    * driver.
    */
 

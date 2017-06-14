@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated March 7, 2017)
+NuttX TODO List (Last updated June 14, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -9,23 +9,23 @@ issues related to each board port.
 
 nuttx/:
 
- (10)  Task/Scheduler (sched/)
+ (11)  Task/Scheduler (sched/)
   (1)  SMP
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
-  (2)  pthreads (sched/pthread)
+  (3)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
   (8)  Kernel/Protected Build
   (3)  C++ Support
   (6)  Binary loaders (binfmt/)
- (13)  Network (net/, drivers/net)
+ (14)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
  (12)  Libraries (libc/, libm/)
  (10)  File system/Generic drivers (fs/, drivers/)
   (9)  Graphics Subsystem (graphics/)
-  (2)  Build system / Toolchains
+  (3)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
 
@@ -45,10 +45,17 @@ o Task/Scheduler (sched/)
                terminated?
   Status:      Closed.  No, this behavior will not be implemented.
   Priority:    Medium, required for good emulation of process/pthread model.
+               The current behavior allows for the main thread of a task to
+               exit() and any child pthreads will perist.  That does raise
+               some issues:  The main thread is treated much like just-another-
+               pthread but must follow the semantics of a task or a process.
+               That results in some inconsistencies (for example, with robust
+               mutexes, what should happen if the main thread exits while
+               holding a mutex?)
 
   Title:       pause() NON-COMPLIANCE
-  Description: In the POSIX description of this function is the pause() function
-               will suspend the calling thread until delivery of a signal whose
+  Description: In the POSIX description of this function the pause() function
+               must suspend the calling thread until delivery of a signal whose
                action is either to execute a signal-catching function or to
                terminate the process.  The current implementation only waits for
                any non-blocked signal to be received.  It should only wake up if
@@ -108,9 +115,10 @@ o Task/Scheduler (sched/)
                2. They run in supervisor mode (if applicable), and
                3. They do not obey any setup of PIC or address
                   environments. Do they need to?
-               4. In the case of task_delete() and pthread_cancel(), these
-                  callbacks will run on the thread of execution and address
-                  context of the caller of task.  That is very bad!
+               4. In the case of task_delete() and pthread_cancel() without
+                  defferred cancellation, these callbacks will run on the
+                  thread of execution and address context of the caller of
+                  task_delete() or pthread_cancel().  That is very bad!
 
                The fix for all of these issues it to have the callbacks
                run on the caller's thread as is currently done with
@@ -184,6 +192,74 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Low.  Things are just the way that we want them for the way
                that NuttX is used today.
+
+  Title:       INTERNAL VERSIONS OF USER FUNCTIONS
+  Description: The internal NuttX logic uses the same interfaces as does
+               the application.  That sometime produces a problem because
+               there is "overloaded" functionality in those user interfaces
+               that are not desireable.
+
+               For example, having cancellation points hidden inside of the
+               OS can cause non-cancellation point interfaces to behave
+               strangely.  There was a change recently in pthread_cond_wait()
+               and pthread_cond_timedwait() recently to effectively disable
+               the cancellation point behavior of sem_wait().  This was
+               accomplished with two functions:  pthread_disable_cancel()
+               and pthread_enable_cancel()
+
+               Here is another issue:  Internal OS functions should not set
+               errno and should never have to look at the errno value to
+               determine the cause of the failure.  The errno is provided
+               for compatibility with POSIX application interface
+               requirements and really doesn't need to be used within the
+               OS.
+
+               Both of these could be fixed if there were special internal
+               versions these functions.  For example, there could be a an
+               nx_sem_wait() that does all of the same things as sem_wait()
+               was does not create a cancellation point and does not set
+               the errno value on failures.
+
+               Everything inside the OS would use nx_sem_wait().
+               Applications would call sem_wait() which would just be a
+               wrapper around nx_sem_wait() that adds the cancellation point
+               and that sets the errno value on failures.
+
+               Changes like that could clean up some of this internal
+               craziness.  The condition variable change described above is
+               really a "bandaid" to handle the case that sem_wait() is a
+               cancellation point.
+  Status:      Open
+  Priority:    Low.  Things are working OK the way they are.  But the design
+               could be improved and made a little more efficient with this
+               change.
+
+  Title:       INAPPROPRIATE USE OF sched_lock() BY pthreads
+  Description: In implementation of standard pthread functions, the non-
+               standard, NuttX function sched_lock() is used.  This is very
+               strong sense it disables pre-emption for all threads in all
+               task groups.  I believe it is only really necessary in most
+               cases to lock threads in the task group with a new non-
+               standard interface, say pthread_lock().
+
+               This is because the OS resources used by a thread such as
+               mutexes, condition variable, barriers, etc. are only
+               meaningful from within the task group.  So, in order to
+               performance exclusive operations on these resources, it is
+               only necessary to block other threads executing within the
+               task group.
+
+               This is an easy change:  pthread_lock() and pthread_unlock()
+               would simply operate on a semaphore retained in the task
+               group structure.  I am, however, hesitant to make this change:
+               I the flat build model, there is nothing that prevents people
+               from accessing the inter-thread controls from threads in
+               differnt task groups.  Making this change, while correct,
+               might introduce subtle bugs in code by people who are not
+               using NuttX correctly.
+  Status:      Open
+  Priority:    Low.  This change would improve real-time performance of the
+               OS but is not otherwise required.
 
 o SMP
   ^^^
@@ -346,7 +422,7 @@ o Signals (sched/signal, arch/)
   Priority:    Low. Even if there are only 31 usable signals, that is still a lot.
 
 o pthreads (sched/pthreads)
-  ^^^^^^^^^^^^^^^^^
+  ^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       PTHREAD_PRIO_PROTECT
   Description: Extend pthread_mutexattr_setprotocol().  It should support
@@ -448,6 +524,16 @@ o pthreads (sched/pthreads)
   Status:      Not really open.  This is just the way it is.
   Priority:    Nothing additional is planned.
 
+  Title:       PTHREAD FILES IN WRONG LOCATION
+  Description: There are many pthread interface functions in files located in
+               sched/pthread.  These should be moved from that location to
+               libc/pthread.  In the flat build, this really does not matter,
+               but in the protected build that location means that system calls
+               are required to access the pthread interface functions.
+  Status:      Open
+  Priority:    Medium-low. Priority may be higher if system call overheade becomes
+               an issue.
+
 o Message Queues (sched/mqueue)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -507,7 +593,7 @@ o Kernel/Protected Build
                in the nuttx/ directory.  However, the user interfaces must be
                moved into a NuttX library or into apps/.  Currently
                applications calls to the NxTerm user interfaces are
-               undefined.
+               undefined in the Kernel/Protected builds.
   Status:      Open
   Priority:    Medium
 
@@ -940,8 +1026,8 @@ o Network (net/, drivers/net)
                however.  Others support the address filtering interfaces but
                have never been verifed:
 
-               C5471, LM3X, ez80, DM0x90 NIC, PIC: Do not support address
-                 filteringing.
+               C5471, LM3S, ez80, DM0x90 NIC, PIC: Do not support address
+                 filtering.
                Kinetis, LPC17xx, LPC43xx:  Untested address filter support
 
   Status:      Open
@@ -1023,19 +1109,11 @@ o Network (net/, drivers/net)
   Status:      Open
   Priority:    Low
 
-  Title:       REMOVE CONFIG_NET_MULTIBUFFER
-  Description: The CONFIG_NET_MULTIBUFFER controls some details in the layout
-               of the network device structure. This is really a unnecessary
-               complexity and should be removed.  The cost for those network
-               drivers that currently do not support CONFIG_NET_MULTIBUFFER
-               is the size of one pointer.
-  Status:      Open
-  Priority:    Low
-
   Title:       ETHERNET WITH MULTIPLE LPWORK THREADS
   Description: Recently, Ethernet drivers were modified to support multiple
                work queue structures.  The question was raised: "My only
-               reservation would be, how would this interact in the case of having CONFIG_STM32_ETHMAC_LPWORK and CONFIG_SCHED_LPNTHREADS
+               reservation would be, how would this interact in the case of
+               having CONFIG_STM32_ETHMAC_LPWORK and CONFIG_SCHED_LPNTHREADS
                > 1? Can it be guaranteed that one work item won't be
                interrupted and execution switched to another? I think so but
                am not 100% confident."
@@ -1064,6 +1142,34 @@ o Network (net/, drivers/net)
 
   Status:      Open
   Priority:    High if you happen to be using Ethernet in this configuration.
+
+  Title:       REPARTITION DRIVER FUNCTIONALITY
+  Description: Every network driver performs the first level of packet decoding.
+               It examines the packet header and calls ipv4_input(), ipv6_input().
+               icmp_input(), etc. as appropriate.  This is a maintenance problem
+               because it means that any changes to the network input interfaces
+               affects all drivers.
+
+               A better, more maintainable solution would use a single net_input()
+               function that would receive all incoming packets.  This function
+               would then perform that common packet decoding logic that is
+               currently implemented in every network driver.
+  Status:      Open
+  Priority:    Low.  Really just as aesthetic maintainability issue.
+
+  Title:       BROADCAST WITH MULTIPLE NETWORK INTERFACES
+  Description: There is currently no mechanism to send a broadcast packet
+               out through several network interfaces.   Currently packets
+               can be sent to only one device.  Logic in netdev_findby_ipvXaddr()
+               currently just selects the first device in the list of
+               devices; only that device will receive broadcast packets.
+  Status:      Open
+  Priority:    High if you require broadcast on multiple networks.  There is
+               no simple solution known at this time, however.  Perhaps
+               netdev_findby_ipvXaddr() should return a list of devices rather
+               than a single device?  All upstream logic would then have to
+               deal with a list of devices.  That would be a huge effect and
+               certainly doesn't dount as a "simple solution".
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1753,6 +1859,73 @@ o Build system
   Priority:    Low, since I am not aware of anyone using the Windows Native build.
                But, of course, very high if you want to use it.
 
+  Title:       CONTROL-C CAN BREAK DEPENDENCIES
+  Description: If you control C out of a make, then there are things that can go
+               wrong.  For one, you can break the dependencies in this scenario:
+
+               - The build in a given directory begins with all of the compilations.
+                 On terminal, this the long phase with CC: on each line.  As each
+                 .o file is created, it is timestamped with the current time.
+
+               - The dependencies on each .o are such that the C file will be re-
+                 compile if the .o file is OLDER that the corresponding .a archive
+                 file.
+
+               - The compilation phase is followed by a single, relatively short
+                 AR: phase that adds each of the file to the .a archive file.  As
+                 each file is added to archive, the timestamp of the of archive is
+                 updated to the current time.  After the first .o file has been
+                 added, then archive file will have a newly timestamp than any of
+                 the newly compiled .o file.
+
+               - If the user aborts with control-C during this AR: phase, then we
+                 are left with:  (1) not all of the files have bee added to the
+                 archive, and (2) the archive file has a newer timestamp than any
+                 of the .o file.
+
+               So when the make is restarted after a control, the dependencies will
+               see that the .a archive file has the newer time stamp and those .o
+               file will never be added to the archive until the directory is cleaned
+               or some other dependency changes.
+   Status      Open
+   Priority:   Medium-High.  It is a rare event that control-C happens at just the
+               point in time.  However, when it does occur the resulting code may
+               have binary incompatiblies in the code taken from the out-of-sync
+               archives and cost a lot of debug time before you realize the issue.
+
+               A work-around is to do 'make clean' if you ever decide to control-C
+               out of a make.  A couple of solutions have been considered:
+
+               - Currently, there is a sequence of compilations ins a directory
+                 with messages like CC:, CC:, CC: etc. This is followed by one big
+                 archival AR:
+
+                 The window in which the control-C problem can occur could be
+                 minimized (but not eliminated) by performing a archival for each
+                 compiliation like CC: AR:, CC: AR:, etc.
+
+               - Introduce a spurious dependency that has the correct time stamp.
+                 For example given Make like like (from nuttx/sched/Makefile):
+
+                   $(BIN): $(OBJS)
+                       $(call ARCHIVE, $@, $(OBJS))
+
+                 Could be changed like:
+
+                  .archive: $(OBJS)
+                       $(call ARCHIVE, $@, $(OBJS))
+                       @touch .archive
+
+                   $(BIN): .archive
+
+                 .archive would be a totally spurious file that is touched only AFTER
+                 ALL .o files have been archived. Thus is the user control-C's out of
+                 the make during the archival, the timestamp on .archive is not
+                 updated.
+
+                 The .archive file would have to be removed on 'make clean' and would
+                 also need to appear in .gitignore files.
+
 o Other drivers (drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1993,7 +2166,7 @@ o Pascal Add-On (pcode/)
   Priority:    Medium
 
   Title:       PDBG
-  Description: Move the the pascal p-code debugger into the NuttX apps/ tree
+  Description: Move the pascal p-code debugger into the NuttX apps/ tree
                where it can be used from the NSH command line.
   Status:      Open
   Priority:    Low
@@ -2039,4 +2212,3 @@ o Other Applications & Tests (apps/examples/)
                the artifact is larger.
   Status:      Open
   Priority:    Medium.
-

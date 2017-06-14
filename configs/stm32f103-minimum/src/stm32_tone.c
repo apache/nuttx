@@ -2,7 +2,7 @@
  * configs/stm32f103minimum/src/stm32_tone.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Alan Carvalho de Assis <acassis@gmail.com> 
+ *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

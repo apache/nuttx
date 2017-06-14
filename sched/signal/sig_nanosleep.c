@@ -170,7 +170,7 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
     {
       systime_t elapsed;
       systime_t remaining;
-      int ticks;
+      ssystime_t ticks;
 
       /* REVISIT: The conversion from time to ticks and back could
        * be avoided.  clock_timespec_subtract() would be used instead
@@ -192,16 +192,16 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
        * amount of time that we failed to wait.
        */
 
-      if (elapsed >= (uint32_t)ticks)
+      if (elapsed >= (systime_t)ticks)
         {
           remaining = 0;
         }
       else
         {
-          remaining = (uint32_t)ticks - elapsed;
+          remaining = (systime_t)ticks - elapsed;
         }
 
-      (void)clock_ticks2time((int)remaining, rmtp);
+      (void)clock_ticks2time((ssystime_t)remaining, rmtp);
     }
 
   leave_critical_section(flags);

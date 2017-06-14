@@ -186,6 +186,13 @@ Ubuntu Bash under Windows 10
   With these differences (perhaps a few other Windows quirks) the Ubuntu
   install works just like Ubuntu running natively on your PC.
 
+  A good tip for file sharing is to use symbolic links within your Ubuntu
+  home directory.  For example, suppose you have your "projects" directory
+  at C:\Documents\projects.  Then you can set up a link to the projects/
+  directory in your Ubuntu directory like:
+
+    $ ln -s /mnt/c/Documents/projects projects
+
   Accessing Ubuntu Files From Windows
   -----------------------------------
   In Ubuntu Userspace for Windows, the Ubuntu file system root directory is
@@ -197,7 +204,29 @@ Ubuntu Bash under Windows 10
 
     C:\Users\Username\AppData\Local\lxss\rootfs
 
-  Install Linux Software.
+  However, I am unable to see my files under the rootfs\home directory.
+  After some looking around, I find the home directory
+  %localappdata%\lxss\home.
+
+  With that trick access to the /home directory, you should actually be
+  able to use Windows tools outside of the Ubuntu sandbox with versions of
+  NuttX built within the sandbox using that path.
+
+  Executing Windows Tools from Ubuntu
+  -----------------------------------
+  You can also execute Windows tools from within the Ubuntu sandbox:
+
+    $ /mnt/c/Program\ Files\ \(x86\)/Microchip/xc32/v1.43/bin/xc32-gcc.exe --version
+    Unable to translate current working directory. Using C:\WINDOWS\System32
+    xc32-gcc.exe (Microchip Technology) 4.8.3 MPLAB XC32 Compiler v1.43 Build date: Mar  1 2017
+    ...
+
+  The error message indicates that there are more issues:  You cannot mix
+  Windows tools that use Windows style paths in an environment that uses
+  POSIX paths.  I think you would have to use Linux tools only from within
+  the Ubuntu sandbox.
+
+  Install Ubuntu Software
   -----------------------
   Use "sudo apt-get install <package name>".  As examples, this is how
   you would get GIT:
@@ -461,9 +490,9 @@ Notes about Header Files
 
     Certain header files, such as setjmp.h, stdarg.h, and math.h, may still
     be needed from your toolchain and your compiler may not, however, be able
-    to find these if you compile NuttX without using standard header file.
-    If that is the case, one solution is to copy those header file from
-    your toolchain into the NuttX include directory.
+    to find these if you compile NuttX without using standard header files
+    (ie., with -nostdinc).  If that is the case, one solution is to copy
+    those header file from your toolchain into the NuttX include directory.
 
   Duplicated Header Files.
 
@@ -546,13 +575,6 @@ Instantiating "Canned" Configurations
       Make.defs describes the rules needed by you tool chain to compile
       and link code.  You may need to modify this file to match the
       specific needs of your toolchain.
-
-    Copy configs/<board-name>/<config-dir>/setenv.sh to ${TOPDIR}/setenv.sh
-
-      setenv.sh is an optional convenience file that I use to set
-      the PATH variable to the toolchain binaries.  You may chose to
-      use setenv.sh or not.  If you use it, then it may need to be
-      modified to include the path to your toolchain binaries.
 
     Copy configs/<board-name>/<config-dir>/defconfig to ${TOPDIR}/.config
 
@@ -925,10 +947,8 @@ Cross-Development Toolchains
   That README file contains suggestions and information about appropriate
   tools and development environments for use with your board.
 
-  In any case, the script, setenv.sh that was deposited in the top-
-  level directory when NuttX was configured should be edited to set
-  the path to where you installed the toolchain.  The use of setenv.sh
-  is optional but can save a lot of confusion in the future.
+  In any case, the PATH environment variable will need to be updated to
+  include the loction where the build can find the toolchain binaries.
 
 NuttX Buildroot Toolchain
 -------------------------
@@ -1006,12 +1026,11 @@ Building
 
   NuttX builds in-place in the source tree.  You do not need to create
   any special build directories.  Assuming that your Make.defs is setup
-  properly for your tool chain and that setenv.sh contains the path to where
-  your cross-development tools are installed, the following steps are all that
-  are required to build NuttX:
+  properly for your tool chain and that PATH environment variable contains
+  the path to where your cross-development tools are installed, the
+  following steps are all that are required to build NuttX:
 
     cd ${TOPDIR}
-    . ./setenv.sh
     make
 
   At least one configuration (eagle100) requires additional command line
@@ -1182,10 +1201,6 @@ Native Windows Build
     (1) It has not been verified on all targets and tools, and
     (2) it still lacks some of the creature-comforts of the more mature
         environments.
-
-  There is an alternative to the setenv.sh script available for the Windows
-  native environment: tools/configure.bat.  See tools/README.txt for additional
-  information.
 
 Installing GNUWin32
 -------------------
@@ -1447,11 +1462,15 @@ nuttx/
  |   |   `- README.txt
  |   |- avr32dev1/
  |   |   `- README.txt
+ |   |- b-l475e-iot01a/
+ |   |   `- README.txt
  |   |- bambino-200e/
  |   |   `- README.txt
  |   |- c5471evm/
  |   |   `- README.txt
  |   |- cc3200-launchpad/
+ |   |   `- README.txt
+ |   |- clicker2-stm32
  |   |   `- README.txt
  |   |- cloudctrl
  |   |   `- README.txt
@@ -1543,7 +1562,23 @@ nuttx/
  |   |   `- README.txt
  |   |- nucleo-144/
  |   |   `- README.txt
+ |   |- nucleo-f072rb/
+ |   |   `- README.txt
+ |   |- nucleo-f091rc/
+ |   |   `- README.txt
+ |   |- nucleo-f303re/
+ |   |   `- README.txt
+ |   |- nucleo-f334r8/
+ |   |   `- README.txt
  |   |- nucleo-f4x1re/
+ |   |   `- README.txt
+ |   |- nucleo-l432kc/
+ |   |   `- README.txt
+ |   |- nucleo-l452re/
+ |   |   `- README.txt
+ |   |- nucleo-l476rg/
+ |   |   `- README.txt
+ |   |- nucleo-l496zg/
  |   |   `- README.txt
  |   |- nutiny-nuc120/
  |   |   `- README.txt
@@ -1580,6 +1615,8 @@ nuttx/
  |   |- pic32mx7mmb/
  |   |   `- README.txt
  |   |- pic32mz-starterkit/
+ |   |   `- README.txt
+ |   |- photon/
  |   |   `- README.txt
  |   |- qemu-i486/
  |   |   `- README.txt
@@ -1681,6 +1718,8 @@ nuttx/
  |   |   `- README.txt
  |   |- viewtool-stm32f107/
  |   |   `- README.txt
+ |   |- xmc5400-relax/
+ |   |   `- README.txt
  |   |- xtrs/
  |   |   `- README.txt
  |   |- z16f2800100zcog/
@@ -1743,6 +1782,8 @@ nuttx/
  |   |   `- README.txt
  |   `- README.txt
  |- net/
+ |   |- sixlowpan
+ |   |   `- README.txt
  |   `- README.txt
  |- syscall/
  |   `- README.txt

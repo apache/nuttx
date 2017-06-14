@@ -6,9 +6,9 @@ NucleoL476RG board from ST Micro.  See
 
   http://www.st.com/nucleo-l476rg
 
-NucleoF476RG:
+NucleoL476RG:
 
-  Microprocessor: 32-bit ARM Cortex M4 at 80MHz STM32F476RGT6
+  Microprocessor: 32-bit ARM Cortex M4 at 80MHz STM32L476RGT6
   Memory:         1024 KB Flash and 96+32 KB SRAM
   ADC:            2×12-bit, 2.4 MSPS A/D converter: up to 24 channels
   DMA:            16-stream DMA controllers with FIFOs and burst support
@@ -41,6 +41,7 @@ Board features:
 Contents
 ========
 
+  - Nucleo-64 Boards
   - Development Environment
   - GNU Toolchain Options
   - IDEs
@@ -54,6 +55,33 @@ Contents
   - mbed
   - Shields
   - Configurations
+
+Nucleo-64 Boards
+================
+
+The Nucleo-L476RG is a member of the Nucleo-64 board family.  The Nucleo-64
+is a standard board for use with several STM32 parts in the LQFP64 package.
+Variants include
+
+  Order code    Targeted STM32
+  ------------- --------------
+  NUCLEO-F030R8 STM32F030R8T6
+  NUCLEO-F070RB STM32F070RBT6
+  NUCLEO-F072RB STM32F072RBT6
+  NUCLEO-F091RC STM32F091RCT6
+  NUCLEO-F103RB STM32F103RBT6
+  NUCLEO-F302R8 STM32F302R8T6
+  NUCLEO-F303RE STM32F303RET6
+  NUCLEO-F334R8 STM32F334R8T6
+  NUCLEO-F401RE STM32F401RET6
+  NUCLEO-F410RB STM32F410RBT6
+  NUCLEO-F411RE STM32F411RET6
+  NUCLEO-F446RE STM32F446RET6
+  NUCLEO-L053R8 STM32L053R8T6
+  NUCLEO-L073RZ STM32L073RZT6
+  NUCLEO-L152RE STM32L152RET6
+  NUCLEO-L452RE STM32L452RET6
+  NUCLEO-L476RG STM32L476RGT6
 
 Development Environment
 =======================
@@ -88,8 +116,8 @@ GNU Toolchain Options
     CONFIG_ARMV7M_TOOLCHAIN_RAISONANCE=y     : Raisonance RIDE7 under Windows
     CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=n      : NuttX buildroot under Linux or Cygwin (default)
 
-  If you change the default toolchain, then you may also have to modify the PATH in
-  the setenv.h file if your make cannot find the tools.
+  If you change the default toolchain, then you may also have to modify the
+  PATH environment variable to include the path to the toolchain binaries.
 
   NOTE: There are several limitations to using a Windows based toolchain in a
   Cygwin environment.  The three biggest are:
@@ -204,7 +232,7 @@ IDEs
 NuttX EABI "buildroot" Toolchain
 ================================
 
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  A GNU GCC-based toolchain is assumed.  The PATH environment variable should
   be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
   different from the default in your PATH variable).
 
@@ -234,8 +262,8 @@ NuttX EABI "buildroot" Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   details PLUS some special instructions that you will need to follow if you are
@@ -276,8 +304,8 @@ NXFLAT Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly builtNXFLAT binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     NXFLAT binaries.
 
 mbed
 ====

@@ -48,6 +48,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/lis331dl.h>
+#include <nuttx/random.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_LIS331DL)
 
@@ -413,6 +414,11 @@ lis331dl_getreadings(FAR struct lis331dl_dev_s * dev)
           errno = EAGAIN;
           return NULL;
         }
+
+      /* Feed sensor data to entropy pool */
+
+      add_sensor_randomness((retval[2] << 16) ^ (retval[4] << 8) ^
+                            (retval[6] << 0));
 
       dev->a.x = retval[2];
       dev->a.y = retval[4];

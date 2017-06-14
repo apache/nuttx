@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/same70-xplained/include/sam_autoleds.c
+ * configs/same70-xplained/src/sam_autoleds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

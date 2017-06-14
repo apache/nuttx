@@ -114,7 +114,7 @@ struct sendto_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: send_timeout
+ * Name: send_timeout
  *
  * Description:
  *   Check for send timeout.
@@ -154,7 +154,7 @@ static inline int send_timeout(FAR struct sendto_s *pstate)
 #endif /* CONFIG_NET_SENDTO_TIMEOUT */
 
 /****************************************************************************
- * Function: sendto_ipselect
+ * Name: sendto_ipselect
  *
  * Description:
  *   If both IPv4 and IPv6 support are enabled, then we will need to select
@@ -181,7 +181,7 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
   FAR struct socket *psock = pstate->st_sock;
   DEBUGASSERT(psock);
 
-  /* Which domain the the socket support */
+  /* Which domain the socket support */
 
   if (psock->s_domain == PF_INET)
     {
@@ -200,7 +200,7 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
 #endif
 
 /****************************************************************************
- * Function: sendto_interrupt
+ * Name: sendto_interrupt
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -309,7 +309,7 @@ static uint16_t sendto_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_udp_sendto
+ * Name: psock_udp_sendto
  *
  * Description:
  *   This function implements the UDP-specific logic of the standard

@@ -304,7 +304,7 @@ static void tun_pollnotify(FAR struct tun_device_s *priv, pollevent_t eventset)
 #endif
 
 /****************************************************************************
- * Function: tun_transmit
+ * Name: tun_transmit
  *
  * Description:
  *   Start hardware transmission.  Called either from the txdone interrupt
@@ -343,7 +343,7 @@ static int tun_fd_transmit(FAR struct tun_device_s *priv)
 }
 
 /****************************************************************************
- * Function: tun_txpoll
+ * Name: tun_txpoll
  *
  * Description:
  *   The transmitter is available, check if the network has any outgoing packets
@@ -393,7 +393,7 @@ static int tun_txpoll(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: tun_receive
+ * Name: tun_receive
  *
  * Description:
  *   An interrupt was received indicating the availability of a new RX packet
@@ -495,7 +495,7 @@ static void tun_net_receive(FAR struct tun_device_s *priv)
 }
 
 /****************************************************************************
- * Function: tun_txdone
+ * Name: tun_txdone
  *
  * Description:
  *   An interrupt was received indicating that the last TX packet(s) is done
@@ -524,7 +524,7 @@ static void tun_txdone(FAR struct tun_device_s *priv)
 }
 
 /****************************************************************************
- * Function: tun_poll_work
+ * Name: tun_poll_work
  *
  * Description:
  *   Perform periodic polling from the worker thread
@@ -570,7 +570,7 @@ static void tun_poll_work(FAR void *arg)
 }
 
 /****************************************************************************
- * Function: tun_poll_expiry
+ * Name: tun_poll_expiry
  *
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
@@ -597,7 +597,7 @@ static void tun_poll_expiry(int argc, wdparm_t arg, ...)
 }
 
 /****************************************************************************
- * Function: tun_ifup
+ * Name: tun_ifup
  *
  * Description:
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
@@ -631,7 +631,7 @@ static int tun_ifup(struct net_driver_s *dev)
 
   /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
 
-  /* Instantiate the MAC address from priv->dev.d_mac.ether_addr_octet */
+  /* Instantiate the MAC address from priv->dev.d_mac.ether.ether_addr_octet */
 
 #ifdef CONFIG_NET_ICMPv6
   /* Set up IPv6 multicast address filtering */
@@ -649,7 +649,7 @@ static int tun_ifup(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: tun_ifdown
+ * Name: tun_ifdown
  *
  * Description:
  *   NuttX Callback: Stop the interface.
@@ -682,7 +682,7 @@ static int tun_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: tun_txavail
+ * Name: tun_txavail
  *
  * Description:
  *   Driver callback invoked when new TX data is available.  This is a
@@ -731,7 +731,7 @@ static int tun_txavail(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: tun_addmac
+ * Name: tun_addmac
  *
  * Description:
  *   NuttX Callback: Add the specified MAC address to the hardware multicast
@@ -758,7 +758,7 @@ static int tun_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
- * Function: tun_rmmac
+ * Name: tun_rmmac
  *
  * Description:
  *   NuttX Callback: Remove the specified MAC address from the hardware multicast
@@ -785,7 +785,7 @@ static int tun_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
- * Function: tun_ipv6multicast
+ * Name: tun_ipv6multicast
  *
  * Description:
  *   Configure the IPv6 multicast MAC address.
@@ -807,7 +807,7 @@ static void tun_ipv6multicast(FAR struct tun_device_s *priv)
 #endif /* CONFIG_NET_ICMPv6 */
 
 /****************************************************************************
- * Function: tun_dev_init
+ * Name: tun_dev_init
  *
  * Description:
  *   Initialize the TUN device
@@ -1159,7 +1159,12 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       int intf;
       FAR struct ifreq *ifr = (FAR struct ifreq *)arg;
 
+#ifdef CONFIG_NET_MULTILINK
+      if (!ifr || ((ifr->ifr_flags & IFF_MASK) != IFF_TUN &&
+                   (ifr->ifr_flags & IFF_MASK) != IFF_TAP))
+#else
       if (!ifr || (ifr->ifr_flags & IFF_MASK) != IFF_TUN)
+#endif
         {
           return -EINVAL;
         }
@@ -1191,6 +1196,25 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       priv = filep->f_priv;
       strncpy(ifr->ifr_name, priv->dev.d_ifname, IFNAMSIZ);
 
+#ifdef CONFIG_NET_MULTILINK
+      if ((ifr->ifr_flags & IFF_MASK) == IFF_TAP)
+        {
+          /* TAP device -> handling raw Ethernet packets
+           * -> set appropriate Ethernet header length
+           */
+
+          priv->dev.d_llhdrlen = ETH_HDRLEN;
+        }
+      else if ((ifr->ifr_flags & IFF_MASK) == IFF_TUN)
+        {
+          /* TUN device -> handling an application data stream
+           * -> no header
+           */
+
+          priv->dev.d_llhdrlen = 0;
+        }
+#endif
+
       tundev_unlock(tun);
 
       return OK;
@@ -1204,7 +1228,7 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: tun_initialize
+ * Name: tun_initialize
  *
  * Description:
  *   Instantiate a SLIP network interface.

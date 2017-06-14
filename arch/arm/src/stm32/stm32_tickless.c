@@ -2,7 +2,9 @@
  * arch/arm/src/stm32/stm32_tickless.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Ansync Labs. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Konstantin Berezenko <kpberezenko@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -55,24 +57,19 @@
  *
  ****************************************************************************/
 /****************************************************************************
- * SAM34 Timer Usage
+ * STM32 Timer Usage
  *
- * This current implementation uses two timers:  A one-shot timer to provide
- * the timed events and a free running timer to provide the current time.
- * Since timers are a limited resource, that could be an issue on some
- * systems.
- *
- * We could do the job with a single timer if we were to keep the single
- * timer in a free-running at all times.  The STM32 timer/counters have
- * 16-bit/32-bit counters with the capability to generate a compare interrupt
- * when the timer matches a compare value but also to continue counting
- * without stopping (giving another, different interrupt when the timer
- * rolls over from 0xffffffff to zero).  So we could potentially just set
- * the compare at the number of ticks you want PLUS the current value of
- * timer.  Then you could have both with a single timer:  An interval timer
- * and a free-running counter with the same timer!
- *
- * Patches are welcome!
+ * This implementation uses one timer:  A free running timer to provide
+ * the current time and a capture/compare channel for timed-events.
+ * The STM32 has both 16-bit and 32-bit timers so to keep things consistent
+ * we limit the timer counters to a 16-bit range.  BASIC timers that
+ * are found on some STM32 chips (timers 6 and 7) are incompatible with this
+ * implementation because they don't have capture/compare channels.  There
+ * are two interrupts generated from our timer, the overflow interrupt which
+ * drives the timing handler and the capture/compare interrupt which drives
+ * the interval handler.  There are some low level timer control functions
+ * implemented here because the API of stm32_tim.c does not provide adequate
+ * control over capture/compare interrupts.
  *
  ****************************************************************************/
 
@@ -84,12 +81,15 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <errno.h>
+#include <assert.h>
 
 #include <nuttx/arch.h>
 #include <debug.h>
 
-#include "stm32_oneshot.h"
-#include "stm32_freerun.h"
+#include "up_arch.h"
+
+#include "stm32_tim.h"
 
 #ifdef CONFIG_SCHED_TICKLESS
 
@@ -97,30 +97,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_STM32_ONESHOT
-#  error CONFIG_STM32_ONESHOT must be selected for the Tickless OS option
-#endif
-
-#ifndef CONFIG_STM32_FREERUN
-#  error CONFIG_STM32_FREERUN must be selected for the Tickless OS option
-#endif
-
-#ifndef CONFIG_STM32_TICKLESS_FREERUN
-#  error CONFIG_STM32_TICKLESS_FREERUN must be selected for the Tickless OS option
-#endif
-
-#ifndef CONFIG_STM32_TICKLESS_ONESHOT
-#  error CONFIG_STM32_TICKLESS_ONESHOT must be selected for the Tickless OS option
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 struct stm32_tickless_s
 {
-  struct stm32_oneshot_s oneshot;
-  struct stm32_freerun_s freerun;
+  uint8_t timer;                   /* The timer/counter in use */
+  uint8_t channel;                 /* The timer channel to use for intervals */
+  FAR struct stm32_tim_dev_s *tch; /* Handle returned by stm32_tim_init() */
+  uint32_t frequency;
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+  uint64_t counter_mask;
+#else
+  uint32_t overflow;               /* Timer counter overflow */
+#endif
+  volatile bool pending;           /* True: pending task */
+  uint32_t period;                 /* Interval period */
+  uint32_t base;
 };
 
 /****************************************************************************
@@ -133,11 +127,159 @@ static struct stm32_tickless_s g_tickless;
  * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: stm32_oneshot_handler
+/************************************************************************************
+ * Name: stm32_getreg16
  *
  * Description:
- *   Called when the one shot timer expires
+ *   Get a 16-bit register value by offset
+ *
+ ************************************************************************************/
+
+static inline uint16_t stm32_getreg16(uint8_t offset)
+{
+  return getreg16(g_tickless.base + offset);
+}
+
+/************************************************************************************
+ * Name: stm32_putreg16
+ *
+ * Description:
+ *   Put a 16-bit register value by offset
+ *
+ ************************************************************************************/
+
+static inline void stm32_putreg16(uint8_t offset, uint16_t value)
+{
+  putreg16(value, g_tickless.base + offset);
+}
+
+/************************************************************************************
+ * Name: stm32_modifyreg16
+ *
+ * Description:
+ *   Modify a 16-bit register value by offset
+ *
+ ************************************************************************************/
+
+static inline void stm32_modifyreg16(uint8_t offset, uint16_t clearbits,
+                                     uint16_t setbits)
+{
+  modifyreg16(g_tickless.base + offset, clearbits, setbits);
+}
+
+/************************************************************************************
+ * Name: stm32_tickless_enableint
+ ************************************************************************************/
+
+static inline void stm32_tickless_enableint(int channel)
+{
+  stm32_modifyreg16(STM32_BTIM_DIER_OFFSET, 0, 1 << channel);
+}
+
+/************************************************************************************
+ * Name: stm32_tickless_disableint
+ ************************************************************************************/
+
+static inline void stm32_tickless_disableint(int channel)
+{
+  stm32_modifyreg16(STM32_BTIM_DIER_OFFSET, 1 << channel, 0);
+}
+
+/************************************************************************************
+ * Name: stm32_tickless_ackint
+ ************************************************************************************/
+
+static inline void stm32_tickless_ackint(int channel)
+{
+  stm32_putreg16(STM32_BTIM_SR_OFFSET, ~(1 << channel));
+}
+
+/************************************************************************************
+ * Name: stm32_tickless_getint
+ ************************************************************************************/
+
+static inline uint16_t stm32_tickless_getint(void)
+{
+  return stm32_getreg16(STM32_BTIM_SR_OFFSET);
+}
+
+/************************************************************************************
+ * Name: stm32_tickless_setchannel
+ ************************************************************************************/
+
+static int stm32_tickless_setchannel(uint8_t channel)
+{
+  uint16_t ccmr_orig   = 0;
+  uint16_t ccmr_val    = 0;
+  uint16_t ccmr_mask   = 0xff;
+  uint16_t ccer_val    = stm32_getreg16(STM32_GTIM_CCER_OFFSET);
+  uint8_t  ccmr_offset = STM32_GTIM_CCMR1_OFFSET;
+
+  /* Further we use range as 0..3; if channel=0 it will also overflow here */
+
+  if (--channel > 4)
+    {
+      return -EINVAL;
+    }
+
+  /* Assume that channel is disabled and polarity is active high */
+
+  ccer_val &= ~(3 << (channel << 2));
+
+  /* This function is not supported on basic timers. To enable or
+   * disable it, simply set its clock to valid frequency or zero.
+   */
+
+#if STM32_NBTIM > 0
+  if (g_tickless.base == STM32_TIM6_BASE
+#endif
+#if STM32_NBTIM > 1
+      || g_tickless.base == STM32_TIM7_BASE
+#endif
+#if STM32_NBTIM > 0
+     )
+    {
+      return -EINVAL;
+    }
+#endif
+
+  /* Frozen mode because we don't want to change the GPIO, preload register
+   * disabled.
+   */
+
+  ccmr_val = (ATIM_CCMR_MODE_FRZN << ATIM_CCMR1_OC1M_SHIFT);
+        
+  /* Set polarity */
+
+  ccer_val |= ATIM_CCER_CC1P << (channel << 2);
+
+  /* Define its position (shift) and get register offset */
+
+  if ((channel & 1) != 0)
+    {
+      ccmr_val  <<= 8;
+      ccmr_mask <<= 8;
+    }
+
+  if (channel > 1)
+    {
+      ccmr_offset = STM32_GTIM_CCMR2_OFFSET;
+    }
+
+  ccmr_orig  = stm32_getreg16(ccmr_offset);
+  ccmr_orig &= ~ccmr_mask;
+  ccmr_orig |= ccmr_val;
+  stm32_putreg16(ccmr_offset, ccmr_orig);
+  stm32_putreg16(STM32_GTIM_CCER_OFFSET, ccer_val);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: stm32_interval_handler
+ *
+ * Description:
+ *   Called when the timer counter matches the compare register
  *
  * Input Parameters:
  *   None
@@ -151,10 +293,76 @@ static struct stm32_tickless_s g_tickless;
  *
  ****************************************************************************/
 
-static void stm32_oneshot_handler(void *arg)
+static void stm32_interval_handler(void)
 {
   tmrinfo("Expired...\n");
+
+  /* Disable the compare interrupt now. */
+
+  stm32_tickless_disableint(g_tickless.channel);
+  stm32_tickless_ackint(g_tickless.channel);
+
+  g_tickless.pending = false;
+
   sched_timer_expiration();
+}
+
+/****************************************************************************
+ * Name: stm32_timing_handler
+ *
+ * Description:
+ *   Timer interrupt callback.  When the freerun timer counter overflows,
+ *   this interrupt will occur.  We will just increment an overflow count.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_CLOCK_TIMEKEEPING
+static void stm32_timing_handler(void)
+{
+  g_tickless.overflow++;
+
+  STM32_TIM_ACKINT(g_tickless.tch, 0);
+}
+#endif /* CONFIG_CLOCK_TIMEKEEPING */
+
+/****************************************************************************
+ * Name: stm32_tickless_handler
+ *
+ * Description:
+ *   Generic interrupt handler for this timer.  It checks the source of the
+ *   interrupt and fires the appropriate handler.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static int stm32_tickless_handler(int irq, void *context, void *arg)
+{
+  int interrupt_flags = stm32_tickless_getint();
+
+#ifndef CONFIG_CLOCK_TIMEKEEPING
+  if (interrupt_flags & ATIM_SR_UIF)
+    {
+      stm32_timing_handler();
+    }
+#endif /* CONFIG_CLOCK_TIMEKEEPING */
+
+  if (interrupt_flags & (1 << g_tickless.channel))
+    {
+      stm32_interval_handler();
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -188,55 +396,172 @@ static void stm32_oneshot_handler(void *arg)
 
 void arm_timer_initialize(void)
 {
-#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
-  uint64_t max_delay;
-#endif
-  int ret;
-
-  /* Initialize the one-shot timer */
-
-  ret = stm32_oneshot_initialize(&g_tickless.oneshot,
-                                 CONFIG_STM32_TICKLESS_ONESHOT,
-                                 CONFIG_USEC_PER_TICK);
-  if (ret < 0)
+  switch (CONFIG_STM32_TICKLESS_TIMER)
     {
-      tmrerr("ERROR: stm32_oneshot_initialize failed\n");
-      PANIC();
-    }
-
-#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
-  /* Get the maximum delay of the one-shot timer in microseconds */
-
-  ret = stm32_oneshot_max_delay(&g_tickless.oneshot, &max_delay);
-  if (ret < 0)
-    {
-      tmrerr("ERROR: stm32_oneshot_max_delay failed\n");
-      PANIC();
-    }
-
-  /* Convert this to configured clock ticks for use by the OS timer logic */
-
-  max_delay /= CONFIG_USEC_PER_TICK;
-  if (max_delay > UINT32_MAX)
-    {
-      g_oneshot_maxticks = UINT32_MAX;
-    }
-  else
-    {
-      g_oneshot_maxticks = max_delay;
-    }
+#ifdef CONFIG_STM32_TIM1
+      case 1:
+        g_tickless.base = STM32_TIM1_BASE;
+        break;
 #endif
 
-  /* Initialize the free-running timer */
+#ifdef CONFIG_STM32_TIM2
+      case 2:
+        g_tickless.base = STM32_TIM2_BASE;
+        break;
+#endif
 
-  ret = stm32_freerun_initialize(&g_tickless.freerun,
-                                 CONFIG_STM32_TICKLESS_FREERUN,
-                                 CONFIG_USEC_PER_TICK);
-  if (ret < 0)
-    {
-      tmrerr("ERROR: stm32_freerun_initialize failed\n");
-      PANIC();
+#ifdef CONFIG_STM32_TIM3
+      case 3:
+        g_tickless.base = STM32_TIM3_BASE;
+        break;
+#endif
+
+#ifdef CONFIG_STM32_TIM4
+      case 4:
+        g_tickless.base = STM32_TIM4_BASE;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM5
+      case 5:
+        g_tickless.base = STM32_TIM5_BASE;
+        break;
+#endif
+
+#ifdef CONFIG_STM32_TIM6
+      case 6:
+
+        /* Basic timers not supported by this implementation */
+
+        ASSERT(0);
+        break;
+#endif
+
+#ifdef CONFIG_STM32_TIM7
+      case 7:
+
+        /* Basic timers not supported by this implementation */
+
+        ASSERT(0);
+        break;
+#endif
+
+#ifdef CONFIG_STM32_TIM8
+      case 8:
+        g_tickless.base = STM32_TIM8_BASE;
+        break;
+#endif
+
+#ifdef CONFIG_STM32_TIM9
+      case 9:
+        g_tickless.base = STM32_TIM9_BASE;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM10
+      case 10:
+        g_tickless.base = STM32_TIM10_BASE;
+        break;
+#endif
+
+#ifdef CONFIG_STM32_TIM11
+      case 11:
+        g_tickless.base = STM32_TIM11_BASE;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM12
+      case 12:
+        g_tickless.base = STM32_TIM12_BASE;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM13
+      case 13:
+        g_tickless.base = STM32_TIM13_BASE;
+        break;
+#endif
+
+#ifdef CONFIG_STM32_TIM14
+      case 14:
+        g_tickless.base = STM32_TIM14_BASE;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM15
+      case 15:
+        g_tickless.base = STM32_TIM15_BASE;
+        break;
+#endif
+
+#ifdef CONFIG_STM32_TIM16
+      case 16:
+        g_tickless.base = STM32_TIM16_BASE;
+        break;
+#endif
+
+#ifdef CONFIG_STM32_TIM17
+      case 17:
+        g_tickless.base = STM32_TIM17_BASE;
+        break;
+#endif
+
+      default:
+        ASSERT(0);
     }
+
+  /* Get the TC frequency that corresponds to the requested resolution */
+
+  g_tickless.frequency = USEC_PER_SEC / (uint32_t)CONFIG_USEC_PER_TICK;
+  g_tickless.timer     = CONFIG_STM32_TICKLESS_TIMER;
+  g_tickless.channel   = CONFIG_STM32_TICKLESS_CHANNEL;
+  g_tickless.pending   = false;
+  g_tickless.period    = 0;
+
+  tmrinfo("timer=%d channel=%d frequency=%d Hz\n",
+           g_tickless.timer, g_tickless.channel, g_tickless.frequency);
+
+  g_tickless.tch = stm32_tim_init(g_tickless.timer);
+  if (!g_tickless.tch)
+    {
+      tmrerr("ERROR: Failed to allocate TIM%d\n", g_tickless.timer);
+      ASSERT(0);
+    }
+
+  STM32_TIM_SETCLOCK(g_tickless.tch, g_tickless.frequency);
+
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+
+  /* Should this be changed to 0xffff because we use 16 bit timers? */
+
+  g_tickless.counter_mask = 0xffffffffull;
+#else
+  g_tickless.overflow     = 0;
+
+  /* Set up to receive the callback when the counter overflow occurs */
+
+  STM32_TIM_SETISR(g_tickless.tch, stm32_tickless_handler, NULL, 0);
+#endif
+
+  /* Initialize interval to zero */
+
+  STM32_TIM_SETCOMPARE(g_tickless.tch, g_tickless.channel, 0);
+
+  /* Setup compare channel for the interval timing */
+
+  stm32_tickless_setchannel(g_tickless.channel);
+
+  /* Set timer period */
+
+  STM32_TIM_SETPERIOD(g_tickless.tch, UINT16_MAX);
+
+  /* Initialize the counter */
+
+  STM32_TIM_SETMODE(g_tickless.tch, STM32_TIM_MODE_UP);
+
+#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
+  g_oneshot_maxticks = UINT16_MAX;
+#endif
+
+  /* Start the timer */
+
+  STM32_TIM_ACKINT(g_tickless.tch, 0);
+  STM32_TIM_ENABLEINT(g_tickless.tch, 0);
 }
 
 /****************************************************************************
@@ -265,7 +590,7 @@ void arm_timer_initialize(void)
  *   any failure.
  *
  * Assumptions:
- *   Called from the the normal tasking context.  The implementation must
+ *   Called from the normal tasking context.  The implementation must
  *   provide whatever mutual exclusion is necessary for correct operation.
  *   This can include disabling interrupts in order to assure atomic register
  *   operations.
@@ -276,14 +601,84 @@ void arm_timer_initialize(void)
 
 int up_timer_gettime(FAR struct timespec *ts)
 {
-  return stm32_freerun_counter(&g_tickless.freerun, ts);
+  uint64_t usec;
+  uint32_t counter;
+  uint32_t verify;
+  uint32_t overflow;
+  uint32_t sec;
+  int pending;
+  irqstate_t flags;
+
+  DEBUGASSERT(g_tickless.tch && ts);
+
+  /* Temporarily disable the overflow counter.  NOTE that we have to be
+   * careful here because  stm32_tc_getpending() will reset the pending
+   * interrupt status.  If we do not handle the overflow here then, it will
+   * be lost.
+   */
+
+  flags    = enter_critical_section();
+
+  overflow = g_tickless.overflow;
+  counter  = STM32_TIM_GETCOUNTER(g_tickless.tch);
+  pending  = STM32_TIM_CHECKINT(g_tickless.tch, 0);
+  verify   = STM32_TIM_GETCOUNTER(g_tickless.tch);
+
+  /* If an interrupt was pending before we re-enabled interrupts,
+   * then the overflow needs to be incremented.
+   */
+
+  if (pending)
+    {
+      STM32_TIM_ACKINT(g_tickless.tch, 0);
+
+      /* Increment the overflow count and use the value of the
+       * guaranteed to be AFTER the overflow occurred.
+       */
+
+      overflow++;
+      counter = verify;
+
+      /* Update tickless overflow counter. */
+
+      g_tickless.overflow = overflow;
+    }
+
+  leave_critical_section(flags);
+
+  tmrinfo("counter=%lu (%lu) overflow=%lu, pending=%i\n",
+         (unsigned long)counter,  (unsigned long)verify,
+         (unsigned long)overflow, pending);
+  tmrinfo("frequency=%u\n", g_tickless.frequency);
+
+  /* Convert the whole thing to units of microseconds.
+   *
+   *   frequency = ticks / second
+   *   seconds   = ticks * frequency
+   *   usecs     = (ticks * USEC_PER_SEC) / frequency;
+   */
+
+  usec = ((((uint64_t)overflow << 16) + (uint64_t)counter) * USEC_PER_SEC) /
+         g_tickless.frequency;
+
+  /* And return the value of the timer */
+
+  sec         = (uint32_t)(usec / USEC_PER_SEC);
+  ts->tv_sec  = sec;
+  ts->tv_nsec = (usec - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
+
+  tmrinfo("usec=%llu ts=(%u, %lu)\n",
+          usec, (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
+
+  return OK;
 }
 
 #else
 
 int up_timer_getcounter(FAR uint64_t *cycles)
 {
-  return stm32_freerun_counter(&g_tickless.freerun, cycles);
+  *cycles = (uint64_t)STM32_TIM_GETCOUNTER(g_tickless.tch);
+  return OK;
 }
 
 #endif /* CONFIG_CLOCK_TIMEKEEPING */
@@ -306,7 +701,7 @@ int up_timer_getcounter(FAR uint64_t *cycles)
 void up_timer_getmask(FAR uint64_t *mask)
 {
   DEBUGASSERT(mask != NULL);
-  *mask = g_tickless.freerun.counter_mask;
+  *mask = g_tickless.counter_mask;
 }
 #endif /* CONFIG_CLOCK_TIMEKEEPING */
 
@@ -348,7 +743,101 @@ void up_timer_getmask(FAR uint64_t *mask)
 
 int up_timer_cancel(FAR struct timespec *ts)
 {
-  return stm32_oneshot_cancel(&g_tickless.oneshot, ts);
+  irqstate_t flags;
+  uint64_t usec;
+  uint64_t sec;
+  uint64_t nsec;
+  uint32_t count;
+  uint32_t period;
+
+  /* Was the timer running? */
+
+  flags = enter_critical_section();
+  if (!g_tickless.pending)
+    {
+      /* No.. Just return zero timer remaining and successful cancellation.
+       * This function may execute at a high rate with no timer running
+       * (as when pre-emption is enabled and disabled).
+       */
+
+      if (ts)
+        {
+          ts->tv_sec  = 0;
+          ts->tv_nsec = 0;
+        }
+
+      leave_critical_section(flags);
+      return OK;
+    }
+
+  /* Yes.. Get the timer counter and period registers and disable the compare interrupt.
+   *
+   */
+
+  tmrinfo("Cancelling...\n");
+
+  /* Disable the interrupt. */
+
+  stm32_tickless_disableint(g_tickless.channel);
+
+  count  = STM32_TIM_GETCOUNTER(g_tickless.tch);
+  period = g_tickless.period;
+
+  g_tickless.pending = false;
+  leave_critical_section(flags);
+
+  /* Did the caller provide us with a location to return the time
+   * remaining?
+   */
+
+  if (ts != NULL)
+    {
+      /* Yes.. then calculate and return the time remaining on the
+       * oneshot timer.
+       */
+
+      tmrinfo("period=%lu count=%lu\n",
+             (unsigned long)period, (unsigned long)count);
+
+      if (count > period)
+        {
+          /* Handle rollover */
+
+          period += UINT16_MAX;
+        }
+      else if (count == period)
+        {
+          /* No time remaining */
+
+          ts->tv_sec  = 0;
+          ts->tv_nsec = 0;
+          return OK;
+        }
+
+      /* The total time remaining is the difference.  Convert that
+       * to units of microseconds.
+       *
+       *   frequency = ticks / second
+       *   seconds   = ticks * frequency
+       *   usecs     = (ticks * USEC_PER_SEC) / frequency;
+       */
+
+      usec        = (((uint64_t)(period - count)) * USEC_PER_SEC) /
+                    g_tickless.frequency;
+
+      /* Return the time remaining in the correct form */
+
+      sec         = usec / USEC_PER_SEC;
+      nsec        = ((usec) - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
+
+      ts->tv_sec  = (time_t)sec;
+      ts->tv_nsec = (unsigned long)nsec;
+
+      tmrinfo("remaining (%lu, %lu)\n",
+             (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -378,6 +867,65 @@ int up_timer_cancel(FAR struct timespec *ts)
 
 int up_timer_start(FAR const struct timespec *ts)
 {
-  return stm32_oneshot_start(&g_tickless.oneshot, stm32_oneshot_handler, NULL, ts);
+  uint64_t usec;
+  uint64_t period;
+  uint32_t count;
+  irqstate_t flags;
+
+  tmrinfo("handler=%p arg=%p, ts=(%lu, %lu)\n",
+         handler, arg, (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
+  DEBUGASSERT(ts);
+  DEBUGASSERT(g_tickless.tch);
+
+  /* Was an interval already running? */
+
+  flags = enter_critical_section();
+  if (g_tickless.pending)
+    {
+      /* Yes.. then cancel it */
+
+      tmrinfo("Already running... cancelling\n");
+      (void)up_timer_cancel(NULL);
+    }
+
+  /* Express the delay in microseconds */
+
+  usec = (uint64_t)ts->tv_sec * USEC_PER_SEC +
+         (uint64_t)(ts->tv_nsec / NSEC_PER_USEC);
+
+  /* Get the timer counter frequency and determine the number of counts need
+   * to achieve the requested delay.
+   *
+   *   frequency = ticks / second
+   *   ticks     = seconds * frequency
+   *             = (usecs * frequency) / USEC_PER_SEC;
+   */
+
+  period = (usec * (uint64_t)g_tickless.frequency) / USEC_PER_SEC;
+  count  = STM32_TIM_GETCOUNTER(g_tickless.tch);
+
+  tmrinfo("usec=%llu period=%08llx\n", usec, period);
+  DEBUGASSERT(period <= UINT16_MAX);
+
+  /* Set interval compare value. Rollover is fine,
+   * channel will trigger on the next period.  (uint16_t) cast
+   * handles the overflow.
+   */
+
+  g_tickless.period = (uint16_t)(period + count);
+ 
+  STM32_TIM_SETCOMPARE(g_tickless.tch, g_tickless.channel,
+                       g_tickless.period);
+
+  /* Enable interrupts.  We should get the callback when the interrupt
+   * occurs.
+   */
+
+  stm32_tickless_ackint(g_tickless.channel);
+  stm32_tickless_enableint(g_tickless.channel);
+
+  g_tickless.pending = true;
+  leave_critical_section(flags);
+  return OK;
 }
 #endif /* CONFIG_SCHED_TICKLESS */

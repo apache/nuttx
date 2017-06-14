@@ -93,7 +93,7 @@ static int esp32_fromcpu_interrupt(int fromcpu)
                              DPORT_CPU_INTR_FROM_CPU_1_REG;
   putreg32(0, regaddr);
 
-  /* Get the the inter-CPU interrupt code */
+  /* Get the inter-CPU interrupt code */
 
   tocpu            = up_cpu_index();
   intcode          = g_intcode[tocpu];

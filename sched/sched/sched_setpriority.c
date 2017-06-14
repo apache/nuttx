@@ -215,7 +215,7 @@ static void sched_readytorun_setpriority(FAR struct tcb_s *tcb,
       cpu = tcb->cpu;
     }
 
-  /* The running task is the the task at the head of the g_assignedtasks[]
+  /* The running task is the task at the head of the g_assignedtasks[]
    * associated with the selected CPU.
    */
 

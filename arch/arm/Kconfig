@@ -76,6 +76,7 @@ config ARCH_CHIP_KINETIS
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_RAMFUNCS
 	select ARCH_HAVE_CMNVECTOR
+	select ARCH_HAVE_I2CRESET
 	---help---
 		Freescale Kinetis Architectures (ARM Cortex-M4)
 
@@ -151,12 +152,20 @@ config ARCH_CHIP_LPC43XX
 	---help---
 		NPX LPC43XX architectures (ARM Cortex-M4).
 
+config ARCH_CHIP_MOXART
+	bool "MoxART"
+	select ARCH_ARM7TDMI
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		MoxART family
+
 config ARCH_CHIP_NUC1XX
 	bool "Nuvoton NUC100/120"
 	select ARCH_CORTEXM0
 	select ARCH_HAVE_CMNVECTOR
 	---help---
-		NPX LPC43XX architectures (ARM Cortex-M4).
+		Nuvoton NUC100/120 architectures (ARM Cortex-M0).
 
 config ARCH_CHIP_SAMA5
 	bool "Atmel SAMA5"
@@ -224,6 +233,13 @@ config ARCH_CHIP_STM32
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M3/4).
 
+config ARCH_CHIP_STM32F0
+	bool "STMicro STM32 F0"
+	select ARCH_CORTEXM0
+	select ARCH_HAVE_CMNVECTOR
+	---help---
+		STMicro STM32 architectures (ARM Cortex-M0).
+
 config ARCH_CHIP_STM32F7
 	bool "STMicro STM32 F7"
 	select ARCH_HAVE_CMNVECTOR
@@ -270,13 +286,18 @@ config ARCH_CHIP_TMS570
 	---help---
 		TI TMS570 family
 
-config ARCH_CHIP_MOXART
-	bool "MoxART"
-	select ARCH_ARM7TDMI
-	select ARCH_HAVE_RESET
-	select ARCH_HAVE_SERIAL_TERMIOS
+config ARCH_CHIP_XMC4
+	bool "Infineon XMC4xxx"
+	select ARCH_HAVE_CMNVECTOR
+	select ARCH_CORTEXM4
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_RAMFUNCS
+	select ARCH_HAVE_I2CRESET
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_CMNVECTOR
+	select ARMV7M_HAVE_STACKCHECK
 	---help---
-		MoxART family
+		Infineon XMC4xxx(ARM Cortex-M4) architectures
 
 endchoice
 
@@ -421,25 +442,19 @@ config ARCH_CHIP
 	default "lpc2378"	if ARCH_CHIP_LPC2378
 	default "lpc31xx"	if ARCH_CHIP_LPC31XX
 	default "lpc43xx"	if ARCH_CHIP_LPC43XX
+	default "moxart"	if ARCH_CHIP_MOXART
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
 	default "sama5"		if ARCH_CHIP_SAMA5
 	default "samdl"		if ARCH_CHIP_SAMD || ARCH_CHIP_SAML
 	default "sam34"		if ARCH_CHIP_SAM34
 	default "samv7"		if ARCH_CHIP_SAMV7
 	default "stm32"		if ARCH_CHIP_STM32
+	default "stm32f0"	if ARCH_CHIP_STM32F0
 	default "stm32f7"	if ARCH_CHIP_STM32F7
 	default "stm32l4"	if ARCH_CHIP_STM32L4
 	default "str71x"	if ARCH_CHIP_STR71X
 	default "tms570"	if ARCH_CHIP_TMS570
-	default "moxart"	if ARCH_CHIP_MOXART
-
-config ARM_TOOLCHAIN_IAR
-	bool
-	default n
-
-config ARM_TOOLCHAIN_GNU
-	bool
-	default n
+	default "xmc4"		if ARCH_CHIP_XMC4
 
 config ARMV7M_USEBASEPRI
 	bool "Use BASEPRI Register"
@@ -596,7 +611,7 @@ config ARCH_ROMPGTABLE
 config DEBUG_HARDFAULT
 	bool "Verbose Hard-Fault Debug"
 	default n
-	depends on DEBUG_FEATURES && (ARCH_CORTEXM3 || ARCH_CORTEXM4 || ARCH_CORTEXM7)
+	depends on DEBUG_FEATURES && (ARCH_CORTEXM0 || ARCH_CORTEXM3 || ARCH_CORTEXM4 || ARCH_CORTEXM7)
 	---help---
 		Enables verbose debug output when a hard fault is occurs.  This verbose
 		output is sometimes helpful when debugging difficult hard fault problems,
@@ -662,6 +677,9 @@ endif
 if ARCH_CHIP_LPC43XX
 source arch/arm/src/lpc43xx/Kconfig
 endif
+if ARCH_CHIP_MOXART
+source arch/arm/src/moxart/Kconfig
+endif
 if ARCH_CHIP_NUC1XX
 source arch/arm/src/nuc1xx/Kconfig
 endif
@@ -680,6 +698,9 @@ endif
 if ARCH_CHIP_STM32
 source arch/arm/src/stm32/Kconfig
 endif
+if ARCH_CHIP_STM32F0
+source arch/arm/src/stm32f0/Kconfig
+endif
 if ARCH_CHIP_STM32F7
 source arch/arm/src/stm32f7/Kconfig
 endif
@@ -692,8 +713,8 @@ endif
 if ARCH_CHIP_TMS570
 source arch/arm/src/tms570/Kconfig
 endif
-if ARCH_CHIP_MOXART
-source arch/arm/src/moxart/Kconfig
+if ARCH_CHIP_XMC4
+source arch/arm/src/xmc4/Kconfig
 endif
 
 endif # ARCH_ARM

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_mutexinit.c
  *
- *   Copyright (C) 2007-2009, 2011, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,11 +72,18 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
                        FAR const pthread_mutexattr_t *attr)
 {
   int pshared = 0;
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
   uint8_t type = PTHREAD_MUTEX_DEFAULT;
 #endif
 #ifdef CONFIG_PRIORITY_INHERITANCE
   uint8_t proto = PTHREAD_PRIO_INHERIT;
+#endif
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+#ifdef CONFIG_PTHREAD_MUTEX_DEFAULT_UNSAFE
+  uint8_t robust = PTHREAD_MUTEX_STALLED;
+#else
+  uint8_t robust = PTHREAD_MUTEX_ROBUST;
+#endif
 #endif
   int ret = OK;
   int status;
@@ -97,8 +104,11 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
 #ifdef CONFIG_PRIORITY_INHERITANCE
           proto   = attr->proto;
 #endif
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
           type    = attr->type;
+#endif
+#ifdef CONFIG_PTHREAD_MUTEX_BOTH
+          robust  = attr->robust;
 #endif
         }
 
@@ -124,9 +134,16 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
         }
 #endif
 
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+      /* Initial internal fields of the mutex */
+
+      mutex->flink  = NULL;
+      mutex->flags  = (robust == PTHREAD_MUTEX_ROBUST ? _PTHREAD_MFLAGS_ROBUST : 0);
+#endif
+
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
       /* Set up attributes unique to the mutex type */
 
-#ifdef CONFIG_MUTEX_TYPES
       mutex->type   = type;
       mutex->nlocks = 0;
 #endif

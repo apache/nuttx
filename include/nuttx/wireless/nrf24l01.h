@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/irq.h>
-#include <nuttx/wireless/wireless.h>
+#include <nuttx/wireless/ioctl.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -64,41 +64,27 @@
 #define NRF24L01_DYN_LENGTH      33     /* Specific length value to use to enable dynamic packet length */
 #define NRF24L01_XMIT_MAXRT      255    /* Specific value returned by Number of available pipes */
 
-/* #define NRF24L01_DEBUG        1 */
-
 /* IOCTL commands */
 
-#define NRF24L01IOC_SETRETRCFG       _WLIOC(NRF24L01_FIRST+0)   /* arg: Pointer to nrf24l01_retrcfg_t structure */
-#define NRF24L01IOC_GETRETRCFG       _WLIOC(NRF24L01_FIRST+1)   /* arg: Pointer to nrf24l01_retrcfg_t structure */
-#define NRF24L01IOC_SETPIPESCFG      _WLIOC(NRF24L01_FIRST+2)   /* arg: Pointer to an array of nrf24l01_pipecfg_t pointers */
-#define NRF24L01IOC_GETPIPESCFG      _WLIOC(NRF24L01_FIRST+3)   /* arg: Pointer to an array of nrf24l01_pipecfg_t pointers */
-#define NRF24L01IOC_SETPIPESENABLED  _WLIOC(NRF24L01_FIRST+4)   /* arg: Pointer to a uint8_t value, bit field of enabled / disabled pipes */
-#define NRF24L01IOC_GETPIPESENABLED  _WLIOC(NRF24L01_FIRST+5)   /* arg: Pointer to a uint8_t value, bit field of enabled / disabled pipes */
-#define NRF24L01IOC_SETDATARATE      _WLIOC(NRF24L01_FIRST+6)   /* arg: Pointer to a nrf24l01_datarate_t value */
-#define NRF24L01IOC_GETDATARATE      _WLIOC(NRF24L01_FIRST+7)   /* arg: Pointer to a nrf24l01_datarate_t value */
-#define NRF24L01IOC_SETADDRWIDTH     _WLIOC(NRF24L01_FIRST+8)   /* arg: Pointer to an uint32_t value, width of the address */
-#define NRF24L01IOC_GETADDRWIDTH     _WLIOC(NRF24L01_FIRST+9)   /* arg: Pointer to an uint32_t value, width of the address */
-#define NRF24L01IOC_SETSTATE         _WLIOC(NRF24L01_FIRST+10)  /* arg: Pointer to a nrf24l01_state_t value */
-#define NRF24L01IOC_GETSTATE         _WLIOC(NRF24L01_FIRST+11)  /* arg: Pointer to a nrf24l01_state_t value */
-#define NRF24L01IOC_GETLASTXMITCOUNT _WLIOC(NRF24L01_FIRST+12)  /* arg: Pointer to an uint32_t value, retransmission count of the last send operation (NRF24L01_XMIT_MAXRT if no ACK received)*/
-#define NRF24L01IOC_GETLASTPIPENO    _WLIOC(NRF24L01_FIRST+13)  /* arg: Pointer to an uint32_t value, pipe # of the last received packet */
+#define NRF24L01IOC_SETRETRCFG       _WLCIOC(NRF24L01_FIRST+0)  /* arg: Pointer to nrf24l01_retrcfg_t structure */
+#define NRF24L01IOC_GETRETRCFG       _WLCIOC(NRF24L01_FIRST+1)  /* arg: Pointer to nrf24l01_retrcfg_t structure */
+#define NRF24L01IOC_SETPIPESCFG      _WLCIOC(NRF24L01_FIRST+2)  /* arg: Pointer to an array of nrf24l01_pipecfg_t pointers */
+#define NRF24L01IOC_GETPIPESCFG      _WLCIOC(NRF24L01_FIRST+3)  /* arg: Pointer to an array of nrf24l01_pipecfg_t pointers */
+#define NRF24L01IOC_SETPIPESENABLED  _WLCIOC(NRF24L01_FIRST+4)  /* arg: Pointer to a uint8_t value, bit field of enabled / disabled pipes */
+#define NRF24L01IOC_GETPIPESENABLED  _WLCIOC(NRF24L01_FIRST+5)  /* arg: Pointer to a uint8_t value, bit field of enabled / disabled pipes */
+#define NRF24L01IOC_SETDATARATE      _WLCIOC(NRF24L01_FIRST+6)  /* arg: Pointer to a nrf24l01_datarate_t value */
+#define NRF24L01IOC_GETDATARATE      _WLCIOC(NRF24L01_FIRST+7)  /* arg: Pointer to a nrf24l01_datarate_t value */
+#define NRF24L01IOC_SETADDRWIDTH     _WLCIOC(NRF24L01_FIRST+8)  /* arg: Pointer to an uint32_t value, width of the address */
+#define NRF24L01IOC_GETADDRWIDTH     _WLCIOC(NRF24L01_FIRST+9)  /* arg: Pointer to an uint32_t value, width of the address */
+#define NRF24L01IOC_SETSTATE         _WLCIOC(NRF24L01_FIRST+10) /* arg: Pointer to a nrf24l01_state_t value */
+#define NRF24L01IOC_GETSTATE         _WLCIOC(NRF24L01_FIRST+11) /* arg: Pointer to a nrf24l01_state_t value */
+#define NRF24L01IOC_GETLASTXMITCOUNT _WLCIOC(NRF24L01_FIRST+12) /* arg: Pointer to an uint32_t value, retransmission count of the last send operation (NRF24L01_XMIT_MAXRT if no ACK received)*/
+#define NRF24L01IOC_GETLASTPIPENO    _WLCIOC(NRF24L01_FIRST+13) /* arg: Pointer to an uint32_t value, pipe # of the last received packet */
 
 /* Aliased name for these commands */
 
 #define NRF24L01IOC_SETTXADDR        WLIOC_SETADDR
 #define NRF24L01IOC_GETTXADDR        WLIOC_GETADDR
-
-/* NRF24L01 debug */
-
-#ifdef NRF24L01_DEBUG
-# define werr(format, ...)           _err(format, ##__VA_ARGS__)
-# define werr(format, ...)           _err(format, ##__VA_ARGS__)
-# define winfo(format, ...)          _info(format, ##__VA_ARGS__)
-#else
-# define werr(x...)
-# define werr(x...)
-# define winfo(x...)
-#endif
 
 /****************************************************************************
  * Public Data Types
@@ -507,12 +493,9 @@ ssize_t nrf24l01_recv(struct nrf24l01_dev_s *dev, uint8_t *buffer,
 
 #endif
 
-#ifdef NRF24L01_DEBUG
-
+#ifdef CONFIG_DEBUG_WIRELESS
 void nrf24l01_dumpregs(FAR struct nrf24l01_dev_s *dev);
-
 void nrf24l01_dumprxfifo(FAR struct nrf24l01_dev_s *dev);
-
 #endif
 
 #undef EXTERN

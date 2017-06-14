@@ -71,19 +71,21 @@
 #include "sam_gpio.h"
 #include "sam_twi.h"
 
-#if defined(CONFIG_SAM34_TWI0) || defined(CONFIG_SAM34_TWI1)
+/* REVISIT: Missing support for TWI2 master */
+
+#if defined(CONFIG_SAM34_TWIM0) || defined(CONFIG_SAM34_TWIM1)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ***************************************************************/
 
-#ifndef CONFIG_SAM34_TWI0_FREQUENCY
-#  define CONFIG_SAM34_TWI0_FREQUENCY 100000
+#ifndef CONFIG_SAM34_TWIM0_FREQUENCY
+#  define CONFIG_SAM34_TWIM0_FREQUENCY 100000
 #endif
 
-#ifndef CONFIG_SAM34_TWI1_FREQUENCY
-#  define CONFIG_SAM34_TWI1_FREQUENCY 100000
+#ifndef CONFIG_SAM34_TWIM1_FREQUENCY
+#  define CONFIG_SAM34_TWIM1_FREQUENCY 100000
 #endif
 
 #ifndef CONFIG_DEBUG_I2C_INFO
@@ -187,11 +189,11 @@ static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_SAM34_TWI0
+#ifdef CONFIG_SAM34_TWIM0
 static struct twi_dev_s g_twi0;
 #endif
 
-#ifdef CONFIG_SAM34_TWI1
+#ifdef CONFIG_SAM34_TWIM1
 static struct twi_dev_s g_twi1;
 #endif
 
@@ -430,7 +432,7 @@ static void twi_wakeup(struct twi_dev_s *priv, int result)
  *
  ****************************************************************************/
 
-static int twi_interrupt(int irq, FAR void *context, FAR void *arg);
+static int twi_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)arg;
   struct i2c_msg_s *msg;
@@ -901,7 +903,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 
   flags = enter_critical_section();
 
-#ifdef CONFIG_SAM34_TWI0
+#ifdef CONFIG_SAM34_TWIM0
   if (bus == 0)
     {
       /* Set up TWI0 register base address and IRQ number */
@@ -922,18 +924,18 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 
       /* Select the TWI frequency, and peripheral ID */
 
-      frequency  = CONFIG_SAM34_TWI0_FREQUENCY;
+      frequency  = CONFIG_SAM34_TWIM0_FREQUENCY;
       pid        = SAM_PID_TWI0;
     }
   else
 #endif
-#ifdef CONFIG_SAM34_TWI1
+#ifdef CONFIG_SAM34_TWIM1
   if (bus == 1)
     {
       /* Set up TWI1 register base address and IRQ number */
 
       priv       = &g_twi1;
-      priv->base = SAM_TWI0_BASE;
+      priv->base = SAM_TWI1_BASE;
       priv->irq  = SAM_IRQ_TWI1;
       priv->twi  = 1;
 
@@ -948,7 +950,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 
       /* Select the TWI frequency, and peripheral ID */
 
-      frequency  = CONFIG_SAMA5_TWI1_FREQUENCY;
+      frequency  = CONFIG_SAM34_TWIM1_FREQUENCY;
       pid        = SAM_PID_TWI1;
     }
   else
@@ -1029,4 +1031,4 @@ int sam_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
   return OK;
 }
 
-#endif /* CONFIG_SAM34_TWI0 || CONFIG_SAM34_TWI1 */
+#endif /* CONFIG_SAM34_TWIM0 || CONFIG_SAM34_TWIM1 */

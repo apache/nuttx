@@ -1,0 +1,54 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if DRIVERS_IEEE80211
+
+config IEEE80211_BROADCOM_FULLMAC
+	bool
+
+config IEEE80211_BROADCOM_BCM43362
+    bool "Broadcom 43362 chip support"
+    depends on IEEE80211_BROADCOM_FULLMAC
+	default n
+
+config IEEE80211_BROADCOM_FULLMAC_SDIO
+	bool "Broadcom FullMAC driver on SDIO bus"
+	depends on ARCH_HAVE_SDIO
+	select IEEE80211_BROADCOM_FULLMAC
+	default n
+	---help---
+		This selection enables support for broadcom
+		FullMAC-compliant devices using SDIO bus.
+
+if IEEE80211_BROADCOM_FULLMAC
+
+choice
+	prompt "Broadcom FullMAC driver work queue"
+	default IEEE80211_BROADCOM_LPWORK if SCHED_LPWORK
+	default IEEE80211_BROADCOM_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the loopback driver.  If the
+		low priority work queue is available, then it should be used by the
+		loopback driver.
+
+config IEEE80211_BROADCOM_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config IEEE80211_BROADCOM_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
+
+config IEEE80211_BROADCOM_NINTERFACES
+	int "Number of Broadcom FullMAC interfaces"
+	default 1
+	depends on EXPERIMENTAL
+
+endif # IEEE80211_BROADCOM_FULLMAC
+
+endif # DRIVERS_IEEE80211

@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/pic32mx7mmb/src/pic32mx7mmb.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -144,6 +144,22 @@ void weak_function pic32mx_spidev_initialize(void);
 #ifdef CONFIG_ARCH_LEDS
 void pic32mx_led_initialize(void);
 #endif
+
+/************************************************************************************
+ * Name: pic32mx_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
+ *
+ *   CONFIG_BOARD_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
+ *
+ ************************************************************************************/
+
+int pic32mx_bringup(void);
 
 /****************************************************************************
  * Name: pic32mx_lcdinitialize

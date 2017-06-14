@@ -44,6 +44,7 @@
 
 #include <string.h>
 #include <errno.h>
+#include <assert.h>
 
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -54,6 +55,7 @@
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "socket/socket.h"
+#include "usrsock/usrsock.h"
 
 #ifdef CONFIG_NET
 
@@ -62,7 +64,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: get_ipv4_sockname
+ * Name: get_ipv4_sockname
  *
  * Description:
  *   The getsockname() function retrieves the locally-bound name of the
@@ -92,7 +94,7 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
                      FAR socklen_t *addrlen)
 {
   FAR struct net_driver_s *dev;
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
+#if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
   FAR struct sockaddr_in *outaddr = (FAR struct sockaddr_in *)addr;
 #endif
 #ifdef CONFIG_NETDEV_MULTINIC
@@ -116,7 +118,7 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   switch (psock->s_type)
     {
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
       case SOCK_STREAM:
         {
           FAR struct tcp_conn_s *tcp_conn = (FAR struct tcp_conn_s *)psock->s_conn;
@@ -129,7 +131,7 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
         break;
 #endif
 
-#ifdef CONFIG_NET_UDP
+#ifdef NET_UDP_HAVE_STACK
       case SOCK_DGRAM:
         {
           FAR struct udp_conn_s *udp_conn = (FAR struct udp_conn_s *)psock->s_conn;
@@ -171,7 +173,7 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   /* Set the address family and the IP address */
 
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
+#if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
   outaddr->sin_family = AF_INET;
   outaddr->sin_addr.s_addr = dev->d_ipaddr;
   *addrlen = sizeof(struct sockaddr_in);
@@ -185,7 +187,7 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 #endif
 
 /****************************************************************************
- * Function: ipv6_getsockname
+ * Name: ipv6_getsockname
  *
  * Description:
  *   The getsockname() function retrieves the locally-bound name of the
@@ -215,7 +217,7 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
                      FAR socklen_t *addrlen)
 {
   FAR struct net_driver_s *dev;
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
+#if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
   FAR struct sockaddr_in6 *outaddr = (FAR struct sockaddr_in6 *)addr;
 #endif
 #ifdef CONFIG_NETDEV_MULTINIC
@@ -239,7 +241,7 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   switch (psock->s_type)
     {
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
       case SOCK_STREAM:
         {
           FAR struct tcp_conn_s *tcp_conn = (FAR struct tcp_conn_s *)psock->s_conn;
@@ -252,7 +254,7 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
         break;
 #endif
 
-#ifdef CONFIG_NET_UDP
+#ifdef NET_UDP_HAVE_STACK
       case SOCK_DGRAM:
         {
           FAR struct udp_conn_s *udp_conn = (FAR struct udp_conn_s *)psock->s_conn;
@@ -294,7 +296,7 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   /* Set the address family and the IP address */
 
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
+#if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
   outaddr->sin6_family = AF_INET6;
   memcpy(outaddr->sin6_addr.in6_u.u6_addr8, dev->d_ipv6addr, 16);
   *addrlen = sizeof(struct sockaddr_in6);
@@ -312,7 +314,7 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: getsockname
+ * Name: getsockname
  *
  * Description:
  *   The getsockname() function retrieves the locally-bound name of the
@@ -368,6 +370,26 @@ int getsockname(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
     {
       errcode = EINVAL;
       goto errout;
+    }
+#endif
+
+#ifdef CONFIG_NET_USRSOCK
+  if (psock->s_type == SOCK_USRSOCK_TYPE)
+    {
+      FAR struct usrsock_conn_s *conn = psock->s_conn;
+
+      DEBUGASSERT(conn);
+
+      /* Handle usrsock getsockname */
+
+      ret = usrsock_getsockname(conn, addr, addrlen);
+      if (ret < 0)
+        {
+          errcode = -ret;
+          goto errout;
+        }
+
+      return OK;
     }
 #endif
 

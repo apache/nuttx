@@ -332,9 +332,7 @@ static inline void rcc_enableapb2(void)
 #ifdef CONFIG_STM32_HRTIM1
   /* HRTIM1 Timer clock enable */
 
-#ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB2ENR_HRTIM1EN;
-#endif
 #endif
 
   putreg32(regval, STM32_RCC_APB2ENR);

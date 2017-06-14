@@ -72,18 +72,18 @@ void stm32_boardinitialize(void)
   board_autoled_initialize();
 #endif
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
-  /* Configure SPI chip selects if 1) SP2 is not disabled, and 2) the weak function
-   * stm32_spidev_initialize() has been brought into the link.
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || \
+    defined(CONFIG_STM32_SPI3)
+  /* Configure SPI chip selects if 1) SP2 is not disabled, and 2) the
+   * weak function stm32_spidev_initialize() has been brought into the link.
    */
 
   stm32_spidev_initialize();
 #endif
 
-#if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
-  /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
-   * disabled, and 3) the weak function stm32_usbinitialize() has been brought
-   * into the build.
+#ifdef CONFIG_STM32_OTGFS
+  /* Initialize USB if the OTG FS controller is in the configuration.
+   * Presumably either CONFIG_USBDEV or CONFIG_USBHOST is also selected.
    */
 
   stm32_usbinitialize();
@@ -106,14 +106,8 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_INITIALIZE
 void board_initialize(void)
 {
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
-  /* Perform NSH initialization here instead of from the NSH.  This
-   * alternative NSH initialization is necessary when NSH is ran in user-space
-   * but the initialization function must run in kernel space.
-   */
+  /* Perform board-specific initialization */
 
-  board_app_initialize(0);
-#endif
-
+  (void)stm32_bringup();
 }
 #endif

@@ -2,7 +2,7 @@
  * drivers/mtd/w25.c
  * Driver for SPI-based W25x16, x32, and x64 and W25q16, q32, q64, and q128 FLASH
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -224,6 +224,7 @@ struct w25_dev_s
   struct mtd_dev_s      mtd;         /* MTD interface */
   FAR struct spi_dev_s *spi;         /* Saved SPI interface instance */
   uint16_t              nsectors;    /* Number of erase sectors */
+  uint8_t               prev_instr;  /* Previous instruction given to W25 device */
 
 #if defined(CONFIG_W25_SECTOR512) && !defined(CONFIG_W25_READONLY)
   uint8_t               flags;       /* Buffered sector flags */
@@ -247,6 +248,7 @@ static void w25_unprotect(FAR struct w25_dev_s *priv);
 static uint8_t w25_waitwritecomplete(FAR struct w25_dev_s *priv);
 static inline void w25_wren(FAR struct w25_dev_s *priv);
 static inline void w25_wrdi(FAR struct w25_dev_s *priv);
+static bool w25_is_erased(struct w25_dev_s *priv, off_t address, off_t size);
 static void w25_sectorerase(FAR struct w25_dev_s *priv, off_t offset);
 static inline int w25_chiperase(FAR struct w25_dev_s *priv);
 static void w25_byteread(FAR struct w25_dev_s *priv, FAR uint8_t *buffer,
@@ -335,10 +337,17 @@ static inline int w25_readid(struct w25_dev_s *priv)
 
   finfo("priv: %p\n", priv);
 
-  /* Lock the SPI bus, configure the bus, and select this FLASH part. */
+  /* Lock and configure the SPI bus */
 
   w25_lock(priv->spi);
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+
+  /* Wait for any preceding write or erase operation to complete. */
+
+  (void)w25_waitwritecomplete(priv);
+
+  /* Select this FLASH part. */
+
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
 
   /* Send the "Read ID (RDID)" command and read the first three ID bytes */
 
@@ -349,7 +358,7 @@ static inline int w25_readid(struct w25_dev_s *priv)
 
   /* Deselect the FLASH and unlock the bus */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
   w25_unlock(priv->spi);
 
   finfo("manufacturer: %02x memory: %02x capacity: %02x\n",
@@ -438,20 +447,21 @@ static inline int w25_readid(struct w25_dev_s *priv)
 #ifndef CONFIG_W25_READONLY
 static void w25_unprotect(FAR struct w25_dev_s *priv)
 {
-  /* Select this FLASH part */
+  /* Lock and configure the SPI bus */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+  w25_lock(priv->spi);
+
+  /* Wait for any preceding write or erase operation to complete. */
+
+  (void)w25_waitwritecomplete(priv);
 
   /* Send "Write enable (WREN)" */
 
   w25_wren(priv);
 
-  /* Re-select this FLASH part (This might not be necessary... but is it shown in
-   * the SST25 timing diagrams from which this code was leveraged.)
-   */
+  /* Select this FLASH part */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
 
   /* Send "Write enable status (EWSR)" */
 
@@ -461,6 +471,11 @@ static void w25_unprotect(FAR struct w25_dev_s *priv)
 
   SPI_SEND(priv->spi, 0);
   SPI_SEND(priv->spi, 0);
+
+  /* Deselect the FLASH and unlock the bus */
+
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
+  w25_unlock(priv->spi);
 }
 #endif
 
@@ -472,13 +487,17 @@ static uint8_t w25_waitwritecomplete(struct w25_dev_s *priv)
 {
   uint8_t status;
 
-  /* Loop as long as the memory is busy with a write cycle */
+  /* Loop as long as the memory is busy with a write cycle. Device sets BUSY
+   * flag to a 1 state whhen previous write or erase command is still executing
+   * and during this time, device will ignore further instructions except for
+   * "Read Status Register" and "Erase/Program Suspend" instructions.
+   */
 
   do
     {
       /* Select this FLASH part */
 
-      SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+      SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
 
       /* Send "Read Status Register (RDSR)" command */
 
@@ -490,21 +509,21 @@ static uint8_t w25_waitwritecomplete(struct w25_dev_s *priv)
 
       /* Deselect the FLASH */
 
-      SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
+      SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
 
       /* Given that writing could take up to few tens of milliseconds, and erasing
        * could take more.  The following short delay in the "busy" case will allow
-       * other peripherals to access the SPI bus.
+       * other peripherals to access the SPI bus.  Delay would slow down writing
+       * too much, so go to sleep only if previous operation was not a page program
+       * operation.
        */
 
-#if 0 /* Makes writes too slow */
-      if ((status & W25_SR_BUSY) != 0)
+      if (priv->prev_instr != W25_PP && (status & W25_SR_BUSY) != 0)
         {
           w25_unlock(priv->spi);
           usleep(1000);
           w25_lock(priv->spi);
         }
-#endif
     }
   while ((status & W25_SR_BUSY) != 0);
 
@@ -519,7 +538,7 @@ static inline void w25_wren(struct w25_dev_s *priv)
 {
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
 
   /* Send "Write Enable (WREN)" command */
 
@@ -527,7 +546,7 @@ static inline void w25_wren(struct w25_dev_s *priv)
 
   /* Deselect the FLASH */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
 }
 
 /************************************************************************************
@@ -538,7 +557,7 @@ static inline void w25_wrdi(struct w25_dev_s *priv)
 {
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
 
   /* Send "Write Disable (WRDI)" command */
 
@@ -546,7 +565,56 @@ static inline void w25_wrdi(struct w25_dev_s *priv)
 
   /* Deselect the FLASH */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
+}
+
+/************************************************************************************
+ * Name:  w25_is_erased
+ ************************************************************************************/
+
+static bool w25_is_erased(struct w25_dev_s *priv, off_t address, off_t size)
+{
+  size_t npages = size >> W25_PAGE_SHIFT;
+  uint32_t erased_32;
+  unsigned int i;
+  uint32_t *buf;
+
+  DEBUGASSERT((address % W25_PAGE_SIZE) == 0);
+  DEBUGASSERT((size % W25_PAGE_SIZE) == 0);
+
+  buf = kmm_malloc(W25_PAGE_SIZE);
+  if (!buf)
+    {
+      return false;
+    }
+
+  memset(&erased_32, W25_ERASED_STATE, sizeof(erased_32));
+
+  /* Walk all pages in given area. */
+
+  while (npages)
+    {
+      /* Check if all bytes of page is in erased state. */
+
+      w25_byteread(priv, (unsigned char *)buf, address, W25_PAGE_SIZE);
+
+      for (i = 0; i < W25_PAGE_SIZE / sizeof(uint32_t); i++)
+        {
+          if (buf[i] != erased_32)
+            {
+              /* Page not in erased state! */
+
+              kmm_free(buf);
+              return false;
+            }
+        }
+
+      address += W25_PAGE_SIZE;
+      npages--;
+    }
+
+  kmm_free(buf);
+  return true;
 }
 
 /************************************************************************************
@@ -559,6 +627,15 @@ static void w25_sectorerase(struct w25_dev_s *priv, off_t sector)
 
   finfo("sector: %08lx\n", (long)sector);
 
+  /* Check if sector is already erased. */
+
+  if (w25_is_erased(priv, address, W25_SECTOR_SIZE))
+    {
+      /* Sector already in erased state, so skip erase. */
+
+      return;
+    }
+
   /* Wait for any preceding write or erase operation to complete. */
 
   (void)w25_waitwritecomplete(priv);
@@ -569,11 +646,12 @@ static void w25_sectorerase(struct w25_dev_s *priv, off_t sector)
 
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
 
   /* Send the "Sector Erase (SE)" instruction */
 
   (void)SPI_SEND(priv->spi, W25_SE);
+  priv->prev_instr = W25_SE;
 
   /* Send the sector address high byte first. Only the most significant bits (those
    * corresponding to the sector) have any meaning.
@@ -585,7 +663,7 @@ static void w25_sectorerase(struct w25_dev_s *priv, off_t sector)
 
   /* Deselect the FLASH */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
 }
 
 /************************************************************************************
@@ -606,15 +684,16 @@ static inline int w25_chiperase(struct w25_dev_s *priv)
 
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
 
   /* Send the "Chip Erase (CE)" instruction */
 
   (void)SPI_SEND(priv->spi, W25_CE);
+  priv->prev_instr = W25_CE;
 
   /* Deselect the FLASH */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
   finfo("Return: OK\n");
   return OK;
 }
@@ -641,14 +720,16 @@ static void w25_byteread(FAR struct w25_dev_s *priv, FAR uint8_t *buffer,
 
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
 
   /* Send "Read from Memory " instruction */
 
 #ifdef CONFIG_W25_SLOWREAD
   (void)SPI_SEND(priv->spi, W25_RDDATA);
+  priv->prev_instr = W25_RDDATA;
 #else
   (void)SPI_SEND(priv->spi, W25_FRD);
+  priv->prev_instr = W25_FRD;
 #endif
 
   /* Send the address high byte first. */
@@ -669,7 +750,7 @@ static void w25_byteread(FAR struct w25_dev_s *priv, FAR uint8_t *buffer,
 
   /* Deselect the FLASH */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
 }
 
 /************************************************************************************
@@ -699,11 +780,12 @@ static void w25_pagewrite(struct w25_dev_s *priv, FAR const uint8_t *buffer,
 
       /* Select this FLASH part */
 
-      SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+      SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
 
       /* Send the "Page Program (W25_PP)" Command */
 
       SPI_SEND(priv->spi, W25_PP);
+      priv->prev_instr = W25_PP;
 
       /* Send the address high byte first. */
 
@@ -717,7 +799,7 @@ static void w25_pagewrite(struct w25_dev_s *priv, FAR const uint8_t *buffer,
 
       /* Deselect the FLASH and setup for the next pass through the loop */
 
-      SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
+      SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
 
       /* Update addresses */
 
@@ -737,7 +819,7 @@ static void w25_pagewrite(struct w25_dev_s *priv, FAR const uint8_t *buffer,
 
 #if defined(CONFIG_MTD_BYTE_WRITE) && !defined(CONFIG_W25_READONLY)
 static inline void w25_bytewrite(struct w25_dev_s *priv, FAR const uint8_t *buffer,
-                                  off_t offset, uint16_t count)
+                                 off_t offset, uint16_t count)
 {
   finfo("offset: %08lx  count:%d\n", (long)offset, count);
 
@@ -755,11 +837,12 @@ static inline void w25_bytewrite(struct w25_dev_s *priv, FAR const uint8_t *buff
 
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
 
   /* Send "Page Program (PP)" command */
 
   (void)SPI_SEND(priv->spi, W25_PP);
+  priv->prev_instr = W25_PP;
 
   /* Send the page offset high byte first. */
 
@@ -773,7 +856,7 @@ static inline void w25_bytewrite(struct w25_dev_s *priv, FAR const uint8_t *buff
 
   /* Deselect the FLASH: Chip Select high */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
   finfo("Written\n");
 }
 #endif /* defined(CONFIG_MTD_BYTE_WRITE) && !defined(CONFIG_W25_READONLY) */
@@ -1004,6 +1087,7 @@ static ssize_t w25_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbl
     {
       nbytes >>= W25_SECTOR512_SHIFT;
     }
+
 #else
   nbytes = w25_read(dev, startblock << W25_PAGE_SHIFT, nblocks << W25_PAGE_SHIFT, buffer);
   if (nbytes > 0)
@@ -1091,6 +1175,7 @@ static ssize_t w25_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
   startpage = offset / W25_PAGE_SIZE;
   endpage = (offset + nbytes) / W25_PAGE_SIZE;
 
+  w25_lock(priv->spi);
   if (startpage == endpage)
     {
       /* All bytes within one programmable page.  Just do the write. */
@@ -1132,6 +1217,7 @@ static ssize_t w25_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
         }
     }
 
+  w25_unlock(priv->spi);
   return nbytes;
 }
 #endif /* defined(CONFIG_MTD_BYTE_WRITE) && !defined(CONFIG_W25_READONLY) */
@@ -1224,7 +1310,7 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
   /* Allocate a state structure (we allocate the structure instead of using
    * a fixed, static allocation so that we can handle multiple FLASH devices.
    * The current implementation would handle only one FLASH part per SPI
-   * device (only because of the SPIDEV_FLASH definition) and so would have
+   * device (only because of the SPIDEV_FLASH(0) definition) and so would have
    * to be extended to handle multiple FLASH parts on the same SPI bus.
    */
 
@@ -1247,7 +1333,7 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
 
       /* Deselect the FLASH */
 
-      SPI_SELECT(spi, SPIDEV_FLASH, false);
+      SPI_SELECT(spi, SPIDEV_FLASH(0), false);
 
       /* Identify the FLASH chip and get its capacity */
 

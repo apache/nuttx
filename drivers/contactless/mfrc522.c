@@ -173,12 +173,12 @@ static inline void mfrc522_configspi(FAR struct spi_dev_s *spi)
 
 static inline void mfrc522_select(struct mfrc522_dev_s *dev)
 {
-  SPI_SELECT(dev->spi, SPIDEV_CONTACTLESS, true);
+  SPI_SELECT(dev->spi, SPIDEV_CONTACTLESS(0), true);
 }
 
 static inline void mfrc522_deselect(struct mfrc522_dev_s *dev)
 {
-  SPI_SELECT(dev->spi, SPIDEV_CONTACTLESS, false);
+  SPI_SELECT(dev->spi, SPIDEV_CONTACTLESS(0), false);
 }
 
 /****************************************************************************

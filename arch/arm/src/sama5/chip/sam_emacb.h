@@ -1,6 +1,6 @@
 /************************************************************************************
  * arch/arm/src/sama5/chip/sam_emacb.h
- * This is the form of the EMAC interface used the the SAMA5D4 (and also the SAM43).
+ * This is the form of the EMAC interface used the SAMA5D4 (and also the SAM43).
  * This is referred as GMAC in the documentation even though it does not support
  * Gibabit Ethernet.
  *

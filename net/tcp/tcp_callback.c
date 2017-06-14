@@ -45,12 +45,12 @@
 #include <string.h>
 #include <debug.h>
 
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
 
 #include "devif/devif.h"
-#include "iob/iob.h"
 #include "tcp/tcp.h"
 
 /****************************************************************************
@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: tcp_data_event
+ * Name: tcp_data_event
  *
  * Description:
  *   Handle data that is not accepted by the application because there is no
@@ -133,7 +133,7 @@ tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: tcp_callback
+ * Name: tcp_callback
  *
  * Description:
  *   Inform the application holding the TCP socket of a change in state.
@@ -205,7 +205,7 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
- * Function: tcp_datahandler
+ * Name: tcp_datahandler
  *
  * Description:
  *   Handle data that is not accepted by the application.  This may be called

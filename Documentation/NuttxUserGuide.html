@@ -5769,15 +5769,6 @@ be sent.
   <li><code>pthread_mutex_timedlock</code>. lock a mutex.</li>
   <li><code>pthread_mutexattr_getprioceiling</code>. get and set the prioceiling attribute of the mutex attributes object.</li>
   <li><code>pthread_mutexattr_setprioceiling</code>. get and set the prioceiling attribute of the mutex attributes object.</li>
-  <li><code>pthread_rwlock_destroy</code>. destroy and initialize a read-write lock object.</li>
-  <li><code>pthread_rwlock_init</code>. destroy and initialize a read-write lock object.</li>
-  <li><code>pthread_rwlock_rdlock</code>. lock a read-write lock object for reading.</li>
-  <li><code>pthread_rwlock_timedrdlock</code>. lock a read-write lock for reading.</li>
-  <li><code>pthread_rwlock_timedwrlock</code>. lock a read-write lock for writing.</li>
-  <li><code>pthread_rwlock_tryrdlock</code>. lock a read-write lock object for reading.</li>
-  <li><code>pthread_rwlock_trywrlock</code>. lock a read-write lock object for writing.</li>
-  <li><code>pthread_rwlock_unlock</code>. unlock a read-write lock object.</li>
-  <li><code>pthread_rwlock_wrlock</code>. lock a read-write lock object for writing.</li>
   <li><code>pthread_rwlockattr_destroy</code>. destroy and initialize the read-write lock attributes object.</li>
   <li><code>pthread_rwlockattr_getpshared</code>. get and set the process-shared attribute of the read-write lock attributes object.</li>
   <li><code>pthread_rwlockattr_init</code>. destroy and initialize the read-write lock attributes object.</li>
@@ -6433,7 +6424,7 @@ The cancellation cleanup handler will be popped from the cancellation cleanup st
 <b>Input Parameters:</b>
 <p>
 <ul>
-  <li><code>routine</code>.  The cleanup routine to be pushed on the the cleanup stack.</li>
+  <li><code>routine</code>.  The cleanup routine to be pushed on the cleanup stack.</li>
   <li><code>arg</code>.  An argument that will accompany the callback.</li>
 </ul>
 <p>
@@ -7037,7 +7028,7 @@ interface of the same name.
 <p>
 <pre>
     #include &lt;pthread.h&gt;
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
     int pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int *type);
 #endif
 </pre>
@@ -7072,7 +7063,7 @@ returned to indicate the error:
 <p>
 <pre>
     #include &lt;pthread.h&gt;
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
     int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type);
 #endif
 </pre>
@@ -10115,7 +10106,7 @@ int shmctl(int shmid, int cmd, FAR struct shmid_ds *buf);
 <ul>
   <li>
     <code>IPC_SET</code>.
-    Does not set the the <code>shm_perm.uid</code> or <code>shm_perm.gid</code>members of the <code>shmid_ds</code> data structure associated with <code>shmid</code> because user and group IDs are not yet supported by NuttX
+    Does not set the <code>shm_perm.uid</code> or <code>shm_perm.gid</code>members of the <code>shmid_ds</code> data structure associated with <code>shmid</code> because user and group IDs are not yet supported by NuttX
   </li>
   <li>
     <code>IPC_SET</code>.

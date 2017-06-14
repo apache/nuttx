@@ -53,6 +53,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/ms58xx.h>
+#include <nuttx/random.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_MS58XX)
 
@@ -724,6 +725,8 @@ static int ms58xx_measure(FAR struct ms58xx_dev_s *priv)
       snerr("ERROR: ms58xx_convert failed: %d\n", ret);
       return ret;
     }
+
+  add_sensor_randomness(rawpress ^ rawtemp);
 
   diff = (int32_t)rawtemp - (int32_t)priv->c5 * ((int32_t)1 << 8);
   temp = (int32_t)((int64_t)2000 +

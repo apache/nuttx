@@ -91,7 +91,7 @@ GNU Toolchain Options
     CONFIG_ARMV6M_TOOLCHAIN_CODEREDW=n        : Code Red toolchain under Windows
     CONFIG_ARMV6M_TOOLCHAIN_CODEREDL=y        : Code Red toolchain under Linux
 
-  You may also have to modify the PATH in the setenv.h file if your make cannot
+  You may also have to modify the PATH environment variable if your make cannot
   find the tools.
 
   NOTE: the CodeSourcery (for Windows), devkitARM, and Code Red (for Windoes)
@@ -159,7 +159,7 @@ Code Red IDE
   ------------------------------------
 
   Under Cygwin, the Code Red command line tools (e.g., arm-non-eabi-gcc) cannot
-  be executed because the they only have execut privileges for Administrators.  I
+  be executed because they only have execute privileges for Administrators.  I
   worked around this by:
 
   Opening a native Cygwin RXVT as Administrator (Right click, "Run as administrator"),
@@ -234,7 +234,7 @@ Code Red IDE
 NuttX EABI "buildroot" Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  A GNU GCC-based toolchain is assumed.  The PATH environment variable should
   be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
   different from the default in your PATH variable).
 
@@ -261,8 +261,8 @@ NuttX EABI "buildroot" Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   details PLUS some special instructions that you will need to follow if you
@@ -323,8 +323,8 @@ NXFLAT Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly builtNXFLAT binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     NXFLAT binaries.
 
 Using OpenOCD
 ^^^^^^^^^^^^^
@@ -676,7 +676,6 @@ selected as follow:
     cd tools
     ./configure.sh lpcxpresso-lpc1115/<subdir>
     cd -
-    . ./setenv.sh
 
 Where <subdir> is one of the following:
 

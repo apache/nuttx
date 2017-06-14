@@ -7,7 +7,7 @@ if ARCH_BOARD_NUCLEO_144
 
 choice
 	prompt "Select Console wiring."
-	default NUCLEO_ARDUINO
+	default NUCLEO_CONSOLE_ARDUINO
 	---help---
 		Select where you will connect the console.
 

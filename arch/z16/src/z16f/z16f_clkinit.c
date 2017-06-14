@@ -221,7 +221,7 @@ static void z16f_sysclkinit(int clockid, uint32_t frequency)
   int count;
 
   /* In this configuration, we support only the external oscillator/clock
-   * the the source of the system clock (__DEFCLK is ignored).
+   * the source of the system clock (__DEFCLK is ignored).
    */
 
   if ((getreg8(Z16F_OSC_CTL) & 0x03) != 1)

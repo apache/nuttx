@@ -167,7 +167,8 @@ int stm32_usbhost_initialize(void)
 {
   int pid;
 #if defined(CONFIG_USBHOST_HUB)    || defined(CONFIG_USBHOST_MSC) || \
-    defined(CONFIG_USBHOST_HIDKBD) || defined(CONFIG_USBHOST_HIDMOUSE)
+    defined(CONFIG_USBHOST_HIDKBD) || defined(CONFIG_USBHOST_HIDMOUSE) || \
+    defined(CONFIG_USBHOST_XBOXCONTROLLER)
   int ret;
 #endif
 
@@ -224,6 +225,16 @@ int stm32_usbhost_initialize(void)
   if (ret != OK)
     {
       uerr("ERROR: Failed to register the HID mouse class\n");
+    }
+#endif
+
+#ifdef CONFIG_USBHOST_XBOXCONTROLLER
+  /* Initialize the HID mouse class */
+
+  ret = usbhost_xboxcontroller_init();
+  if (ret != OK)
+    {
+      uerr("ERROR: Failed to register the XBox Controller class\n");
     }
 #endif
 

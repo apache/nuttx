@@ -60,6 +60,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/input/ajoystick.h>
+#include <nuttx/random.h>
 
 #include <nuttx/irq.h>
 
@@ -200,7 +201,7 @@ static inline int ajoy_takesem(sem_t *sem)
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
 static void ajoy_enable(FAR struct ajoy_upperhalf_s *priv)
 {
-  FAR const struct ajoy_lowerhalf_s *lower = priv->au_lower;
+  FAR const struct ajoy_lowerhalf_s *lower;
   FAR struct ajoy_open_s *opriv;
   ajoy_buttonset_t press;
   ajoy_buttonset_t release;
@@ -209,8 +210,9 @@ static void ajoy_enable(FAR struct ajoy_upperhalf_s *priv)
   int i;
 #endif
 
-  DEBUGASSERT(priv && priv->au_lower);
+  DEBUGASSERT(priv);
   lower = priv->au_lower;
+  DEBUGASSERT(lower);
 
   /* This routine is called both task level and interrupt level, so
    * interrupts must be disabled.
@@ -294,7 +296,7 @@ static void ajoy_interrupt(FAR const struct ajoy_lowerhalf_s *lower,
 
 static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
 {
-  FAR const struct ajoy_lowerhalf_s *lower = priv->au_lower;
+  FAR const struct ajoy_lowerhalf_s *lower;
   FAR struct ajoy_open_s *opriv;
   ajoy_buttonset_t sample;
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
@@ -307,8 +309,9 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
   int i;
 #endif
 
-  DEBUGASSERT(priv && priv->au_lower);
+  DEBUGASSERT(priv);
   lower = priv->au_lower;
+  DEBUGASSERT(lower);
 
   /* This routine is called both task level and interrupt level, so
    * interrupts must be disabled.
@@ -320,6 +323,8 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
 
   DEBUGASSERT(lower->al_buttons);
   sample = lower->al_buttons(lower);
+
+  add_ui_randomness(sample);
 
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
   /* Determine which buttons have been newly pressed and which have been
@@ -829,7 +834,7 @@ errout_with_dusem:
  *
  * Input Parameters:
  *   devname - The name of the analog joystick device to be registers.
- *     This should be a string of the form "/priv/ajoyN" where N is the the
+ *     This should be a string of the form "/priv/ajoyN" where N is the
  *     minor device number.
  *   lower - An instance of the platform-specific analog joystick lower
  *     half driver.

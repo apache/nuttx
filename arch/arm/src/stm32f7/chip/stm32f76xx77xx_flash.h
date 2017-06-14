@@ -56,15 +56,13 @@
 #define _K(x) ((x)*1024)
 
 #if !defined(CONFIG_STM32F7_FLASH_OVERRIDE_DEFAULT) && \
-    !defined(CONFIG_STM32_FLASH_OVERRIDE_E) && \
-    !defined(CONFIG_STM32_FLASH_OVERRIDE_F) && \
-    !defined(CONFIG_STM32_FLASH_OVERRIDE_G) && \
-    !defined(CONFIG_STM32_FLASH_OVERRIDE_I) && \
-    !defined(CONFIG_STM32_FLASH_CONFIG_E) && \
-    !defined(CONFIG_STM32_FLASH_CONFIG_F) && \
-    !defined(CONFIG_STM32_FLASH_CONFIG_G) && \
-    !defined(CONFIG_STM32_FLASH_CONFIG_I)
-#  define CONFIG_STM32_FLASH_OVERRIDE_E
+    !defined(CONFIG_STM32F7_FLASH_OVERRIDE_E) && \
+    !defined(CONFIG_STM32F7_FLASH_OVERRIDE_G) && \
+    !defined(CONFIG_STM32F7_FLASH_OVERRIDE_I) && \
+    !defined(CONFIG_STM32F7_FLASH_CONFIG_E) && \
+    !defined(CONFIG_STM32F7_FLASH_CONFIG_G) && \
+    !defined(CONFIG_STM32F7_FLASH_CONFIG_I)
+#  define CONFIG_STM32F7_FLASH_OVERRIDE_E
 #  warning "Flash size not defined defaulting to 512KiB (E)"
 #endif
 
@@ -89,21 +87,21 @@
 #  endif
 #endif
 
-#if defined(CONFIG_STM32_FLASH_CONFIG_E)
+#if defined(CONFIG_STM32F7_FLASH_CONFIG_E)
 
 #  define STM32_FLASH_NPAGES      6
 #  define STM32_FLASH_SIZE        _K((4 * 32) + (1 * 128) + (1 * 256))
 #  define STM32_FLASH_SIZES       {_K(32), _K(32), _K(32), _K(32),  \
                                    _K(128), _K(256)}
 
-#elif defined(CONFIG_STM32_FLASH_CONFIG_G)
+#elif defined(CONFIG_STM32F7_FLASH_CONFIG_G)
 
 #  define STM32_FLASH_NPAGES      8
 #  define STM32_FLASH_SIZE        _K((4 * 32) + (1 * 128) + (3 * 256))
 #  define STM32_FLASH_SIZES       {_K(32), _K(32), _K(32), _K(32),  \
                                   _K(128), _K(256), _K(256), _K(256)}
 
-#elif defined(CONFIG_STM32_FLASH_CONFIG_I)
+#elif defined(CONFIG_STM32F7_FLASH_CONFIG_I)
 
 #  define STM32_FLASH_NPAGES      12
 #  define STM32_FLASH_SIZE        _K((4 * 32) + (1 * 128) + (7 * 256))

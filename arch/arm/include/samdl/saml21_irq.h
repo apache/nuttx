@@ -90,22 +90,22 @@
 /* GPIO interrupts.  Up to 16 pins may be configured to support interrupts */
 
 #ifdef CONFIG_SAMDL_GPIOIRQ
-#  define SAM_IRQ_EXTINT0  (SAM_IRQ_NIRQS+0)    /* External interrupt 0 */
-#  define SAM_IRQ_EXTINT1  (SAM_IRQ_NIRQS+1)    /* External interrupt 1 */
-#  define SAM_IRQ_EXTINT2  (SAM_IRQ_NIRQS+2)    /* External interrupt 2 */
-#  define SAM_IRQ_EXTINT3  (SAM_IRQ_NIRQS+3)    /* External interrupt 3 */
-#  define SAM_IRQ_EXTINT4  (SAM_IRQ_NIRQS+4)    /* External interrupt 4 */
-#  define SAM_IRQ_EXTINT5  (SAM_IRQ_NIRQS+5)    /* External interrupt 5 */
-#  define SAM_IRQ_EXTINT6  (SAM_IRQ_NIRQS+6)    /* External interrupt 6 */
-#  define SAM_IRQ_EXTINT7  (SAM_IRQ_NIRQS+7)    /* External interrupt 7 */
-#  define SAM_IRQ_EXTINT8  (SAM_IRQ_NIRQS+8)    /* External interrupt 8 */
-#  define SAM_IRQ_EXTINT9  (SAM_IRQ_NIRQS+9)    /* External interrupt 9 */
-#  define SAM_IRQ_EXTINT10 (SAM_IRQ_NIRQS+10)   /* External interrupt 10 */
-#  define SAM_IRQ_EXTINT11 (SAM_IRQ_NIRQS+11)   /* External interrupt 11 */
-#  define SAM_IRQ_EXTINT12 (SAM_IRQ_NIRQS+12)   /* External interrupt 12 */
-#  define SAM_IRQ_EXTINT13 (SAM_IRQ_NIRQS+13)   /* External interrupt 13 */
-#  define SAM_IRQ_EXTINT14 (SAM_IRQ_NIRQS+14)   /* External interrupt 14 */
-#  define SAM_IRQ_EXTINT15 (SAM_IRQ_NIRQS+15)   /* External interrupt 15 */
+#  define SAM_IRQ_EXTINT0  (SAM_IRQ_NIRQS+0)       /* External interrupt 0 */
+#  define SAM_IRQ_EXTINT1  (SAM_IRQ_NIRQS+1)       /* External interrupt 1 */
+#  define SAM_IRQ_EXTINT2  (SAM_IRQ_NIRQS+2)       /* External interrupt 2 */
+#  define SAM_IRQ_EXTINT3  (SAM_IRQ_NIRQS+3)       /* External interrupt 3 */
+#  define SAM_IRQ_EXTINT4  (SAM_IRQ_NIRQS+4)       /* External interrupt 4 */
+#  define SAM_IRQ_EXTINT5  (SAM_IRQ_NIRQS+5)       /* External interrupt 5 */
+#  define SAM_IRQ_EXTINT6  (SAM_IRQ_NIRQS+6)       /* External interrupt 6 */
+#  define SAM_IRQ_EXTINT7  (SAM_IRQ_NIRQS+7)       /* External interrupt 7 */
+#  define SAM_IRQ_EXTINT8  (SAM_IRQ_NIRQS+8)       /* External interrupt 8 */
+#  define SAM_IRQ_EXTINT9  (SAM_IRQ_NIRQS+9)       /* External interrupt 9 */
+#  define SAM_IRQ_EXTINT10 (SAM_IRQ_NIRQS+10)      /* External interrupt 10 */
+#  define SAM_IRQ_EXTINT11 (SAM_IRQ_NIRQS+11)      /* External interrupt 11 */
+#  define SAM_IRQ_EXTINT12 (SAM_IRQ_NIRQS+12)      /* External interrupt 12 */
+#  define SAM_IRQ_EXTINT13 (SAM_IRQ_NIRQS+13)      /* External interrupt 13 */
+#  define SAM_IRQ_EXTINT14 (SAM_IRQ_NIRQS+14)      /* External interrupt 14 */
+#  define SAM_IRQ_EXTINT15 (SAM_IRQ_NIRQS+15)      /* External interrupt 15 */
 #  define SAM_IRQ_NEXTINTS 16
 #else
 #  define SAM_IRQ_NEXTINTS 0

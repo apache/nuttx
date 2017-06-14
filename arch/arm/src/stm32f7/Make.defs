@@ -149,6 +149,10 @@ ifeq ($(filter y,$(CONFIG_STM32F7_IWDG) $(CONFIG_STM32F7_RTC_LSICLOCK)),y)
 CHIP_CSRCS += stm32_lsi.c
 endif
 
+ifeq ($(CONFIG_STM32F7_RTC_LSECLOCK),y)
+CHIP_CSRCS += stm32_lse.c
+endif
+
 ifeq ($(CONFIG_STM32F7_I2C),y)
 CHIP_CSRCS += stm32_i2c.c
 endif
@@ -193,4 +197,8 @@ endif
 
 ifeq ($(CONFIG_STM32F7_BBSRAM),y)
 CHIP_CSRCS += stm32_bbsram.c
+endif
+
+ifeq ($(CONFIG_STM32F7_RNG),y)
+CHIP_CSRCS += stm32_rng.c
 endif

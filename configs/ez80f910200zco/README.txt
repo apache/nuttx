@@ -49,9 +49,9 @@ Version 5.1.1
 
   Paths were also updated that are specific to a 32-bit toolchain running on
   a 64 bit windows platform.  Change to a different toolchain, you will need
-  to modify the versioning in Make.defs and setenv.sh; if you want to build
-  on a different platform, you will need to change the path in the ZDS binaries
-  in those same files.
+  to modify the versioning in Make.defs; if you want to build on a different
+  platform, you will need to change the path the ZDS binaries in that
+  files as well as in your PATH environment variable.
 
 Version 5.2.1
 
@@ -63,8 +63,9 @@ Version 5.2.1
 Other Versions
   If you use any version of ZDS-II other than 5.1.1 or 5.2.1 or if you install
   ZDS-II at any location other than the default location, you will have to
-  modify one or more of three files:  (1) configs/ez80f910200zco/*/setenv.sh,
-  (2) configs/ez80f910200zco/*/Make.defs, and arch/z80/src/ez80/Toolchain.defs.
+  modify one or two files:  (2) configs/ez80f910200zco/*/Make.defs and (2)
+  arch/z80/src/ez80/Toolchain.defs.  You may also have to modify you PATH
+  environment variable.
 
 Configurations
 ^^^^^^^^^^^^^^

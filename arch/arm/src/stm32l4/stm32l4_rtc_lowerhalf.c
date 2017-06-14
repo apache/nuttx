@@ -107,6 +107,7 @@ static int stm32l4_rdtime(FAR struct rtc_lowerhalf_s *lower,
                           FAR struct rtc_time *rtctime);
 static int stm32l4_settime(FAR struct rtc_lowerhalf_s *lower,
                            FAR const struct rtc_time *rtctime);
+static bool stm32l4_havesettime(FAR struct rtc_lowerhalf_s *lower);
 
 #ifdef CONFIG_RTC_ALARM
 static int stm32l4_setalarm(FAR struct rtc_lowerhalf_s *lower,
@@ -127,6 +128,7 @@ static const struct rtc_ops_s g_rtc_ops =
 {
   .rdtime      = stm32l4_rdtime,
   .settime     = stm32l4_settime,
+  .havesettime = stm32l4_havesettime,
 #ifdef CONFIG_RTC_ALARM
   .setalarm    = stm32l4_setalarm,
   .setrelative = stm32l4_setrelative,
@@ -174,7 +176,7 @@ static void stm32l4_alarm_callback(FAR void *arg, unsigned int alarmid)
   rtc_alarm_callback_t cb;
   FAR void *priv;
 
-  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT(arg != NULL);
   DEBUGASSERT(alarmid == RTC_ALARMA || alarmid == RTC_ALARMB);
 
   lower        = (struct stm32l4_lowerhalf_s *)arg;
@@ -235,7 +237,7 @@ static int stm32l4_rdtime(FAR struct rtc_lowerhalf_s *lower,
   ret = up_rtc_getdatetime((FAR struct tm *)rtctime);
 
   sem_post(&priv->devsem);
-  
+
   return ret;
 }
 
@@ -273,10 +275,29 @@ static int stm32l4_settime(FAR struct rtc_lowerhalf_s *lower,
    */
 
   ret = stm32l4_rtc_setdatetime((FAR const struct tm *)rtctime);
-  
+
   sem_post(&priv->devsem);
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: stm32l4_havesettime
+ *
+ * Description:
+ *   Implements the havesettime() method of the RTC driver interface
+ *
+ * Input Parameters:
+ *   lower   - A reference to RTC lower half driver state structure
+ *
+ * Returned Value:
+ *   Returns true if RTC date-time have been previously set.
+ *
+ ****************************************************************************/
+
+static bool stm32l4_havesettime(FAR struct rtc_lowerhalf_s *lower)
+{
+  return stm32l4_rtc_havesettime();
 }
 
 /****************************************************************************

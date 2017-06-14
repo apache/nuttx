@@ -370,7 +370,7 @@ some other debuggers that you might want to consider.
 
 These instructions all assume that you have built NuttX with debug symbols
 enabled.  When debugging the nuttx.bin file on the SD card, it is also
-assumed the the nuttx ELF file with the debug symbol addresses is from the
+assumed the nuttx ELF file with the debug symbol addresses is from the
 same build so that the symbols match up.
 
 Debugging the NuttX image on the SD card
@@ -582,11 +582,9 @@ can be selected as follow:
   cd tools
   ./configure.sh sabre-6quad/<subdir>
   cd -
-  . ./setenv.sh
 
-Before sourcing the setenv.sh file above, you should examine it and perform
-edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
-than holds your toolchain binaries.
+Before building, make sure the PATH environment variable includes the
+correct path to the directory than holds your toolchain binaries.
 
 And then build NuttX by simply typing the following.  At the conclusion of
 the make, the nuttx binary will reside in an ELF file called, simply, nuttx.

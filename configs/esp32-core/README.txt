@@ -585,11 +585,9 @@ Configurations
     ./configure.sh esp32-core/<subdir>
     cd -
     make oldconfig
-    . ./setenv.sh
 
-  Before sourcing the setenv.sh file above, you should examine it and
-  perform edits as necessary so that TOOLCHAIN_BIN is the correct path to
-  the directory than holds your toolchain binaries.
+  Before building, make sure the PATH environment variable includes the
+  correct path to the directory than holds your toolchain binaries.
 
   If this is a Windows native build, then configure.bat should be used
   instead of configure.sh:
@@ -733,7 +731,7 @@ Things to Do
   4. Currently the Xtensa port copies register state save information from
      the stack into the TCB.  A more efficient alternative would be to just
      save a pointer to a register state save area in the TCB.  This would
-     add some complexity to signal handling and also also the the
+     add some complexity to signal handling and also also the
      up_initialstate().  But the performance improvement might be worth
      the effort.
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/procfs/netdev_statistics.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <netinet/ether.h>
 
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/sixlowpan.h>
 
 #include "netdev/netdev.h"
 #include "utils/utils.h"
@@ -60,8 +61,13 @@
  ****************************************************************************/
 
 static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile);
-static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile);
-
+#ifdef CONFIG_NET_IPv4
+static int netprocfs_inet4addresses(FAR struct netprocfs_file_s *netfile);
+#endif
+#ifdef CONFIG_NET_IPv6
+static int netprocfs_inet6address(FAR struct netprocfs_file_s *netfile);
+static int netprocfs_inet6draddress(FAR struct netprocfs_file_s *netfile);
+#endif
 #ifdef CONFIG_NETDEV_STATISTICS
 static int netprocfs_rxstatistics_header(FAR struct netprocfs_file_s *netfile);
 static int netprocfs_rxstatistics(FAR struct netprocfs_file_s *netfile);
@@ -80,8 +86,14 @@ static int netprocfs_errors(FAR struct netprocfs_file_s *netfile);
 
 static const linegen_t g_linegen[] =
 {
-  netprocfs_linklayer,
-  netprocfs_ipaddresses
+  netprocfs_linklayer
+#ifdef CONFIG_NET_IPv4
+  , netprocfs_inet4addresses
+#endif
+#ifdef CONFIG_NET_IPv6
+  , netprocfs_inet6address
+  , netprocfs_inet6draddress
+#endif
 #ifdef CONFIG_NETDEV_STATISTICS
   , netprocfs_rxstatistics_header,
   netprocfs_rxstatistics,
@@ -138,7 +150,29 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
       case NET_LL_ETHERNET:
         len += snprintf(&netfile->line[len], NET_LINELEN - len,
                         "%s\tLink encap:Ethernet HWaddr %s",
-                        dev->d_ifname, ether_ntoa(&dev->d_mac));
+                        dev->d_ifname, ether_ntoa(&dev->d_mac.ether));
+        break;
+#endif
+
+#ifdef CONFIG_NET_6LOWPAN
+      case NET_LL_IEEE802154:
+        {
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+          len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                          "%s\tLink encap:6loWPAN HWaddr "
+                          "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
+                          dev->d_ifname,
+                          dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
+                          dev->d_mac.ieee802154.u8[2], dev->d_mac.ieee802154.u8[3],
+                          dev->d_mac.ieee802154.u8[4], dev->d_mac.ieee802154.u8[5],
+                          dev->d_mac.ieee802154.u8[6], dev->d_mac.ieee802154.u8[7]);
+#else
+          len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                          "%s\tLink encap:6loWPAN HWaddr %02x:%02x",
+                          dev->d_ifname,
+                          dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1]);
+#endif
+        }
         break;
 #endif
 
@@ -182,8 +216,26 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
 #elif defined(CONFIG_NET_ETHERNET)
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   "%s\tLink encap:Ethernet HWaddr %s at %s\n",
-                  dev->d_ifname, ether_ntoa(&dev->d_mac), status);
+                  dev->d_ifname, ether_ntoa(&dev->d_mac.ether), status);
 
+#elif defined(CONFIG_NET_6LOWPAN)
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+  len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                  "%s\tLink encap:6loWPAN HWaddr "
+                  "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x at %s\n",
+                  dev->d_ifname,
+                  dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
+                  dev->d_mac.ieee802154.u8[2], dev->d_mac.ieee802154.u8[3],
+                  dev->d_mac.ieee802154.u8[4], dev->d_mac.ieee802154.u8[5],
+                  dev->d_mac.ieee802154.u8[6], dev->d_mac.ieee802154.u8[7],
+                  status);
+#else
+  len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                  "%s\tLink encap:6loWPAN HWaddr %02x:%02x at %s\n",
+                  dev->d_ifname,
+                  dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
+                  status);
+#endif
 #elif defined(CONFIG_NET_LOOPBACK)
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   "%s\tLink encap:Local Loopback at %s\n",
@@ -209,25 +261,19 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
 }
 
 /****************************************************************************
- * Name: netprocfs_ipaddresses
+ * Name: netprocfs_inet4addresses
  ****************************************************************************/
 
-static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile)
+#ifdef CONFIG_NET_IPv4
+static int netprocfs_inet4addresses(FAR struct netprocfs_file_s *netfile)
 {
   FAR struct net_driver_s *dev;
-#ifdef CONFIG_NET_IPv4
   struct in_addr addr;
-#endif
-#ifdef CONFIG_NET_IPv6
-  char addrstr[INET6_ADDRSTRLEN];
-  uint8_t preflen;
-#endif
   int len = 0;
 
   DEBUGASSERT(netfile != NULL && netfile->dev != NULL);
   dev = netfile->dev;
 
-#ifdef CONFIG_NET_IPv4
   /* Show the IPv4 address */
 
   addr.s_addr = dev->d_ipaddr;
@@ -244,10 +290,26 @@ static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile)
 
   addr.s_addr = dev->d_netmask;
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                  "Mask:%s\n", inet_ntoa(addr));
+                  "Mask:%s\n\n", inet_ntoa(addr));
+  return len;
+}
 #endif
 
+/****************************************************************************
+ * Name: netprocfs_inet6address
+ ****************************************************************************/
+
 #ifdef CONFIG_NET_IPv6
+static int netprocfs_inet6address(FAR struct netprocfs_file_s *netfile)
+{
+  FAR struct net_driver_s *dev;
+  char addrstr[INET6_ADDRSTRLEN];
+  uint8_t preflen;
+  int len = 0;
+
+  DEBUGASSERT(netfile != NULL && netfile->dev != NULL);
+  dev = netfile->dev;
+
   /* Convert the 128 network mask to a human friendly prefix length */
 
   preflen = net_ipv6_mask2pref(dev->d_ipv6netmask);
@@ -260,18 +322,41 @@ static int netprocfs_ipaddresses(FAR struct netprocfs_file_s *netfile)
                       "\tinet6 addr:%s/%d\n", addrstr, preflen);
     }
 
-  /* REVISIT: Show the IPv6 default router address */
+  return len;
+}
+#endif
+
+/****************************************************************************
+ * Name: netprocfs_inet6draddress
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+static int netprocfs_inet6draddress(FAR struct netprocfs_file_s *netfile)
+{
+  FAR struct net_driver_s *dev;
+  char addrstr[INET6_ADDRSTRLEN];
+  uint8_t preflen;
+  int len = 0;
+
+  DEBUGASSERT(netfile != NULL && netfile->dev != NULL);
+  dev = netfile->dev;
+
+  /* Convert the 128 network mask to a human friendly prefix length */
+
+  preflen = net_ipv6_mask2pref(dev->d_ipv6netmask);
+
+
+  /* Show the IPv6 default router address */
 
   if (inet_ntop(AF_INET6, dev->d_ipv6draddr, addrstr, INET6_ADDRSTRLEN))
     {
       len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                      "\tinet6 DRaddr:%s/%d\n", addrstr, preflen);
+                      "\tinet6 DRaddr:%s/%d\n\n", addrstr, preflen);
     }
-#endif
 
-  len += snprintf(&netfile->line[len], NET_LINELEN - len, "\n");
   return len;
 }
+#endif
 
 /****************************************************************************
  * Name: netprocfs_rxstatistics_header
@@ -395,7 +480,7 @@ static int netprocfs_txstatistics_header(FAR struct netprocfs_file_s *netfile)
   DEBUGASSERT(netfile != NULL);
 
   return snprintf(netfile->line, NET_LINELEN, "\tTX: %-8s %-8s %-8s %-8s\n",
-                 "Queued", "Sent", "Erorts", "Timeouts");
+                 "Queued", "Sent", "Errors", "Timeouts");
 }
 #endif /* CONFIG_NETDEV_STATISTICS */
 

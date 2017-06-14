@@ -275,7 +275,7 @@ static int phy_handler(int irq, FAR void *context, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: phy_notify_subscribe
+ * Name: phy_notify_subscribe
  *
  * Description:
  *   Setup up to deliver signals to the task identified by 'pid' when
@@ -362,7 +362,7 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
 }
 
 /****************************************************************************
- * Function: phy_notify_unsubscribe
+ * Name: phy_notify_unsubscribe
  *
  * Description:
  *   Stop the deliver of signals for events from the PHY associated with

@@ -53,6 +53,10 @@ else
 CSRCS += stm32_userleds.c
 endif
 
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += stm32_gpio.c
+endif
+
 ifeq ($(CONFIG_PWM),y)
 CSRCS += stm32_pwm.c
 endif
@@ -69,12 +73,20 @@ ifeq ($(CONFIG_AUDIO_TONE),y)
 CSRCS += stm32_tone.c
 endif
 
+ifeq ($(CONFIG_CAN_MCP2515),y)
+CSRCS += stm32_mcp2515.c
+endif
+
 ifeq ($(CONFIG_CL_MFRC522),y)
 CSRCS += stm32_mfrc522.c
 endif
 
 ifeq ($(CONFIG_LCD_ST7567),y)
 CSRCS += stm32_lcd.c
+endif
+
+ifeq ($(CONFIG_LCD_PCD8544),y)
+CSRCS += stm32_pcd8544.c
 endif
 
 ifeq ($(CONFIG_QENCODER),y)
@@ -86,7 +98,7 @@ CSRCS += stm32_veml6070.c
 endif
 
 ifeq ($(CONFIG_WL_NRF24L01),y)
-CSRCS += stm32_wireless.c
+CSRCS += stm32_nrf24l01.c
 endif
 
 ifeq ($(CONFIG_USBDEV),y)

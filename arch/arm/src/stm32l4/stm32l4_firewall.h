@@ -47,7 +47,11 @@
 
 /* Include the correct firewall register definitions for this STM32L4 family */
 
-#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX)
+#if defined(CONFIG_STM32L4_STM32L4X3)
+#  include "chip/stm32l4x3xx_firewall.h"
+#elif defined(CONFIG_STM32L4_STM32L4X5)
+#  include "chip/stm32l4x5xx_firewall.h"
+#elif defined(CONFIG_STM32L4_STM32L4X6)
 #  include "chip/stm32l4x6xx_firewall.h"
 #else
 #  error "Unsupported STM32L4 chip"
@@ -59,11 +63,11 @@
 
 struct stm32l4_firewall_t
   {
-  uintptr_t *codestart;
+  uintptr_t   codestart;
   size_t      codelen;
-  uintptr_t  *nvdatastart;
+  uintptr_t   nvdatastart;
   size_t      nvdatalen;
-  uintptr_t  *datastart;
+  uintptr_t   datastart;
   size_t      datalen;
   uint8_t     datashared:1;
   uint8_t     dataexec  :1;

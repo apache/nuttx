@@ -237,7 +237,7 @@ static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
        * the SA_NOCLDWAIT flag with sigaction().
        */
 
-      if ((rtcb->group->tg_flags && GROUP_FLAG_NOCLDWAIT) == 0)
+      if ((rtcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0)
         {
           FAR struct child_status_s *child;
 

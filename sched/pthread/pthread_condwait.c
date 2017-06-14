@@ -71,6 +71,7 @@
 
 int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 {
+  int status;
   int ret;
 
   sinfo("cond=0x%p mutex=0x%p\n", cond, mutex);
@@ -94,27 +95,50 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
     }
   else
     {
+      uint16_t oldstate;
+
       /* Give up the mutex */
 
       sinfo("Give up mutex / take cond\n");
 
       sched_lock();
       mutex->pid = -1;
-      ret = pthread_givesemaphore((FAR sem_t *)&mutex->sem);
+      ret = pthread_mutex_give(mutex);
 
       /* Take the semaphore */
 
-      ret |= pthread_takesemaphore((FAR sem_t *)&cond->sem);
+      status = pthread_sem_take((FAR sem_t *)&cond->sem, false);
+      if (ret == OK)
+        {
+          /* Report the first failure that occurs */
+
+          ret = status;
+        }
+
       sched_unlock();
 
       /* Reacquire the mutex.
        *
-       * REVISIT: When cancellation points are enabled, we will almost
-       * certainly hold the mutex when the pthread is canceled.
+       * When cancellation points are enabled, we need to
+       * hold the mutex when the pthread is canceled and
+       * cleanup handlers, if any, are entered.
        */
 
       sinfo("Reacquire mutex...\n");
-      ret |= pthread_takesemaphore((FAR sem_t *)&mutex->sem);
+
+      oldstate = pthread_disable_cancel();
+      status = pthread_mutex_take(mutex, false);
+      pthread_enable_cancel(oldstate);
+
+      if (ret == OK)
+        {
+          /* Report the first failure that occurs */
+
+          ret = status;
+        }
+
+      /* Was all of the above successful? */
+
       if (ret == OK)
         {
           mutex->pid = getpid();

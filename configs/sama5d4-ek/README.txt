@@ -195,7 +195,7 @@ IDEs
 NuttX EABI "buildroot" Toolchain
 ================================
 
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  A GNU GCC-based toolchain is assumed.  The PATH environment variable should
   be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
   different from the default in your PATH variable).
 
@@ -236,8 +236,8 @@ NuttX EABI "buildroot" Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   details PLUS some special instructions that you will need to follow if you are
@@ -273,8 +273,8 @@ NXFLAT Toolchain
 
   7. make
 
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly built NXFLAT binaries.
+  8. Make sure that the PATH variable includes the path to the newly built
+     NXFLAT binaries.
 
   NOTE:  There are some known incompatibilities with 4.6.3 EABI toolchain
   and the NXFLAT tools.  See the top-level TODO file (under "Binary
@@ -359,11 +359,9 @@ Creating and Using DRAMBOOT
        cd tools
        ./configure.sh sama5d4-ek/dramboot
        cd -
-       . ./setenv.sh
-
-     Before sourcing the setenv.sh file above, you should examine it and
-     perform edits as necessary so that TOOLCHAIN_BIN is the correct path
-     to the directory than holds your toolchain binaries.
+ 
+     Before building, make sure that the PATH environment variable includes
+     the correct path  to the directory than holds your toolchain binaries.
 
      NOTE:  Be aware that the default dramboot also disables the watchdog.
      Since you will not be able to re-enable the watchdog later, you may
@@ -466,11 +464,9 @@ Creating and Using AT25BOOT
        cd tools
        ./configure.sh sama5d4-ek/at25boot
        cd -
-       . ./setenv.sh
 
-     Before sourcing the setenv.sh file above, you should examine it and
-     perform edits as necessary so that TOOLCHAIN_BIN is the correct path
-     to the directory than holds your toolchain binaries.
+     Before building, make sure that the PATH environment variable includes
+     the correct path  to the directory than holds your toolchain binaries.
 
      Then make AT25BOOT:
 
@@ -1280,7 +1276,7 @@ Networking
 
   The ETH1 signals go through line drivers that are enabled via the board
   LCD_ETH1_CONFIG signal.  Jumper JP2 selects either the EMAC1 or the LCD by
-  controlling the the LCD_ETH1_CONFIG signal on the board.
+  controlling the LCD_ETH1_CONFIG signal on the board.
 
     - JP2 open, LCD_ETH1_CONFIG pulled high:
 
@@ -3247,7 +3243,7 @@ TM7000 LCD/Touchscreen
   J9 pin 8 LCD_TWD0_PA30   J4 pin 8 SDA_0
   ------------------------ -----------------
 
-  The schematic indicates the the MXT468E address is 0x4c/0x4d.
+  The schematic indicates the MXT468E address is 0x4c/0x4d.
 
   Here are the configuration settings the configuration settings that will
   enable the maXTouch touchscreen controller:
@@ -3592,11 +3588,9 @@ Configurations
     cd tools
     ./configure.sh sama5d4-ek/<subdir>
     cd -
-    . ./setenv.sh
 
-  Before sourcing the setenv.sh file above, you should examine it and perform
-  edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
-  than holds your toolchain binaries.
+  Before building, make sure that the PATH environment variable includes
+  the correct path  to the directory than holds your toolchain binaries.
 
   And then build NuttX by simply typing the following.  At the conclusion of
   the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
@@ -3637,10 +3631,6 @@ Configurations
      variable so that those tools are selected instead of the CodeSourcery
      tools.  Try 'which arm-none-eabi-gcc' to make sure that you are
      selecting the right tool.
-
-     The setenv.sh file is available for you to use to set the PATH
-     variable.  The path in the that file may not, however, be correct
-     for your installation.
 
      See also the "NOTE about Windows native toolchains" in the section call
      "GNU Toolchain Options" above.
@@ -3730,7 +3720,7 @@ Configurations
 
     NOTES:
 
-    1. This configuration uses the the USART3 for the serial console
+    1. This configuration uses the USART3 for the serial console
        which is available at the "DBGU" RS-232 connector (J24).  That
        is easily changed by reconfiguring to (1) enable a different
        serial peripheral, and (2) selecting that serial peripheral as
@@ -3757,7 +3747,7 @@ Configurations
 
         The ETH1 signals go through line drivers that are enabled via the
         board LCD_ETH1_CONFIG signal.  Jumper JP2 selects either the EMAC1
-        or the LCD by controlling the the LCD_ETH1_CONFIG signal on the
+        or the LCD by controlling the LCD_ETH1_CONFIG signal on the
         board.
 
         - JP2 open, LCD_ETH1_CONFIG pulled high:
@@ -3799,7 +3789,7 @@ Configurations
 
     NOTES:
 
-    1. This configuration uses the the USART3 for the serial console
+    1. This configuration uses the USART3 for the serial console
        which is available at the "DBGU" RS-232 connector (J24).  That
        is easily changed by reconfiguring to (1) enable a different
        serial peripheral, and (2) selecting that serial peripheral as
@@ -3878,7 +3868,7 @@ Configurations
 
     NOTES:
 
-    1. This configuration uses the the USART3 for the serial console
+    1. This configuration uses the USART3 for the serial console
        which is available at the "DBGU" RS-232 connector (J24).  That
        is easily changed by reconfiguring to (1) enable a different
        serial peripheral, and (2) selecting that serial peripheral as
@@ -4031,7 +4021,7 @@ Configurations
 
     NOTES:
 
-    1. This configuration uses the the USART3 for the serial console
+    1. This configuration uses the USART3 for the serial console
        which is available at the "DBGU" RS-232 connector (J24).  That
        is easily changed by reconfiguring to (1) enable a different
        serial peripheral, and (2) selecting that serial peripheral as
@@ -4119,7 +4109,7 @@ Configurations
        Then you will need to follow some special build instructions below
        in order to build and install the ROMFS file system image.
 
-       UPDATE: The ROMFS configuration is pre-configured in the the
+       UPDATE: The ROMFS configuration is pre-configured in the
        file nuttx/configs/sama5d4-ek/knsh/defconfig.ROMFS
 
     5. Board initialization is performed performed before the application
@@ -4165,8 +4155,7 @@ Configurations
         $ cd nuttx/tools                    : Go to the tools sub-directory
         $ ./configure.sh sama5d4-ek/kernel  : Establish this configuration
         $ cd ..                             : Back to the NuttX build directory
-                                            : Edit setenv.sh to use the correct path
-        $ . ./setenv.sh                     : Set up the PATH variable
+        $ export PATH=???:$PATH             : Set up the PATH variable
         $ make                              : Build the kerne with a dummy ROMFS image
                                             : This should create the nuttx ELF
         $ make export                       : Create the kernel export package
@@ -4177,15 +4166,14 @@ Configurations
         $ make import                       : This will build the file system.
 
       You will then need to copy the files from apps/bin to an SD card to
-      create the the bootable SD card.
+      create the bootable SD card.
 
     6b. General build directions (boot from ROMFS image):
 
         $ cd nuttx/tools                    : Go to the tools sub-directory
         $ ./configure.sh sama5d4-ek/kernel  : Establish this configuration
         $ cd ..                             : Back to the NuttX build directory
-                                            : Edit setenv.sh to use the correct path
-        $ . ./setenv.sh                     : Set up the PATH variable
+        $ export PATH=???:$PATH             : Set up the PATH variable
         $ touch configs/sama5d4-ek/include/boot_romfsimg.h
         $ make                              : Build the kernel with a dummy ROMFS image
                                             : This should create the nuttx ELF
@@ -4237,7 +4225,7 @@ Configurations
 
     NOTES:
 
-    1. This configuration uses the the USART3 for the serial console
+    1. This configuration uses the USART3 for the serial console
        which is available at the "DBGU" RS-232 connector (J24).  That
        is easily changed by reconfiguring to (1) enable a different
        serial peripheral, and (2) selecting that serial peripheral as
@@ -4770,15 +4758,8 @@ Configurations
         b. Make the build context (only)
 
            $ cd ..
-           $ . ./setenv.sh
            $ make context
            ...
-
-           NOTE: the use of the setenv.sh file is optional.  All that it
-           will do is to adjust your PATH variable so that the build system
-           can find your tools.  If you use it, you will most likely need to
-           modify the script so that it has the correct path to your tool
-           binary directory.
 
         c. Install the nxwm unit test
 
@@ -4952,7 +4933,7 @@ Configurations
 
     NOTES:
 
-    1. This configuration uses the the USART3 for the serial console
+    1. This configuration uses the USART3 for the serial console
        which is available at the "DBGU" RS-232 connector (J24).  That
        is easily changed by reconfiguring to (1) enable a different
        serial peripheral, and (2) selecting that serial peripheral as

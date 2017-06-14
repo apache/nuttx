@@ -96,7 +96,7 @@
  * from the button driver.
  */
 
-typedef uint8_t btn_buttonset_t;
+typedef uint32_t btn_buttonset_t;
 
 /* A reference to this structure is provided with the BTNIOC_POLLEVENTS IOCTL
  * command and describes the conditions under which the client would like
@@ -187,7 +187,7 @@ extern "C"
  *
  * Input Parameters:
  *   devname - The name of the button device to be registered.
- *     This should be a string of the form "/dev/btnN" where N is the the
+ *     This should be a string of the form "/dev/btnN" where N is the
  *     minor device number.
  *   lower - An instance of the platform-specific button lower half driver.
  *

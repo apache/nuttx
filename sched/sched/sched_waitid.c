@@ -204,7 +204,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 #ifdef CONFIG_SCHED_CHILD_STATUS
   /* Does this task retain child status? */
 
-  retains = ((rtcb->group->tg_flags && GROUP_FLAG_NOCLDWAIT) == 0);
+  retains = ((rtcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0);
 
   if (rtcb->group->tg_children == NULL && retains)
     {

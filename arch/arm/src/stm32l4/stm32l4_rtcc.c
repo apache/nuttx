@@ -87,9 +87,17 @@
 # define CONFIG_RTC_MAGIC (0xfacefeee)
 #endif
 
+#if !defined(CONFIG_RTC_MAGIC_TIME_SET)
+#  define CONFIG_RTC_MAGIC_TIME_SET (CONFIG_RTC_MAGIC + 1)
+#endif
+
 #if !defined(CONFIG_RTC_MAGIC_REG)
 # define CONFIG_RTC_MAGIC_REG (0)
 #endif
+
+#define RTC_MAGIC            CONFIG_RTC_MAGIC
+#define RTC_MAGIC_TIME_SET   CONFIG_RTC_MAGIC_TIME_SET
+#define RTC_MAGIC_REG        STM32L4_RTC_BKR(CONFIG_RTC_MAGIC_REG)
 
 /* Constants ************************************************************************/
 
@@ -185,7 +193,7 @@ static void rtc_dumpregs(FAR const char *msg)
   rtcinfo("     ISR: %08x\n", getreg32(STM32L4_RTC_ISR));
   rtcinfo("    PRER: %08x\n", getreg32(STM32L4_RTC_PRER));
   rtcinfo("    WUTR: %08x\n", getreg32(STM32L4_RTC_WUTR));
-  
+
   rtcinfo("  ALRMAR: %08x\n", getreg32(STM32L4_RTC_ALRMAR));
   rtcinfo("  ALRMBR: %08x\n", getreg32(STM32L4_RTC_ALRMBR));
   rtcinfo("  SHIFTR: %08x\n", getreg32(STM32L4_RTC_SHIFTR));
@@ -693,12 +701,12 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
   modifyreg32(STM32L4_RTC_CR, (RTC_CR_ALRAE | RTC_CR_ALRAIE), 0);
 
   /* Ensure Alarm A flag reset; this is edge triggered */
-  
+
   isr  = getreg32(STM32L4_RTC_ISR) & ~RTC_ISR_ALRAF;
   putreg32(isr, STM32L4_RTC_ISR);
 
   /* Wait for Alarm A to be writable */
-  
+
   ret = rtchw_check_alrawf();
   if (ret != OK)
     {
@@ -739,12 +747,12 @@ static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg)
   modifyreg32(STM32L4_RTC_CR, (RTC_CR_ALRBE | RTC_CR_ALRBIE), 0);
 
   /* Ensure Alarm B flag reset; this is edge triggered */
-  
+
   isr  = getreg32(STM32L4_RTC_ISR) & ~RTC_ISR_ALRBF;
   putreg32(isr, STM32L4_RTC_ISR);
 
   /* Wait for Alarm B to be writable */
-  
+
   ret = rtchw_check_alrbwf();
   if (ret != OK)
     {
@@ -812,7 +820,7 @@ static inline void rtc_enable_alarm(void)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: rtc_is_inits
+ * Name: stm32l4_rtc_is_initialized
  *
  * Description:
  *    Returns 'true' if the RTC has been initialized (according to the RTC itself).
@@ -827,7 +835,7 @@ static inline void rtc_enable_alarm(void)
  *
  ************************************************************************************/
 
-bool rtc_is_inits(void)
+bool stm32l4_rtc_is_initialized(void)
 {
   uint32_t regval;
 
@@ -863,9 +871,8 @@ int up_rtc_initialize(void)
    * backed, we don't need or want to re-initialize on each reset.
    */
 
-  init_stat = rtc_is_inits();
-
-  if(!init_stat)
+  init_stat = stm32l4_rtc_is_initialized();
+  if (!init_stat)
     {
       /* Enable write access to the backup domain (RTC registers, RTC
        * backup data registers and backup SRAM).
@@ -951,11 +958,11 @@ int up_rtc_initialize(void)
           (void)ret;
 
           /* Exit Initialization mode */
-          
+
           rtc_exitinit();
 
           /* Enable the write protection for RTC registers */
-          
+
           rtc_wprlock();
 
           /* Disable write access to the backup domain (RTC registers, RTC backup
@@ -978,11 +985,11 @@ int up_rtc_initialize(void)
       //rtc_wprunlock();
 
       rtc_resume();
-      
+
       /* Enable the write protection for RTC registers */
-      
+
       //rtc_wprlock();
-      
+
       /* Disable write access to the backup domain (RTC registers, RTC backup
        * data registers and backup SRAM).
        */
@@ -1160,7 +1167,7 @@ int stm32l4_rtc_setdatetime(FAR const struct tm *tp)
 
   /* Then write the broken out values to the RTC */
 
-  /* Convert the struct tm format to RTC time register fields.  All of the STM32
+  /* Convert the struct tm format to RTC time register fields.
    * All of the ranges of values correspond between struct tm and the time
    * register.
    */
@@ -1210,11 +1217,36 @@ int stm32l4_rtc_setdatetime(FAR const struct tm *tp)
       ret = rtc_synchwait();
     }
 
+  /* Remember that the RTC is initialized and had its time set. */
+
+  if (getreg32(RTC_MAGIC_REG) != RTC_MAGIC_TIME_SET)
+    {
+      stm32l4_pwr_enablebkp(true);
+      putreg32(RTC_MAGIC_TIME_SET, RTC_MAGIC_REG);
+      stm32l4_pwr_enablebkp(false);
+    }
+
   /* Re-enable the write protection for RTC registers */
 
   rtc_wprlock();
   rtc_dumpregs("New time setting");
   return ret;
+}
+
+/************************************************************************************
+ * Name: stm32l4_rtc_setdatetime
+ *
+ * Description:
+ *   Check if RTC time has been set.
+ *
+ * Returned Value:
+ *   Returns true if RTC date-time have been previously set.
+ *
+ ************************************************************************************/
+
+bool stm32l4_rtc_havesettime(void)
+{
+  return getreg32(RTC_MAGIC_REG) == RTC_MAGIC_TIME_SET;
 }
 
 /************************************************************************************
@@ -1266,7 +1298,7 @@ int stm32l4_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
   ASSERT(alminfo != NULL);
   DEBUGASSERT(RTC_ALARM_LAST > alminfo->as_id);
 
-  /* Make sure the the alarm interrupt is enabled at the NVIC */
+  /* Make sure the alarm interrupt is enabled at the NVIC */
 
   rtc_enable_alarm();
 

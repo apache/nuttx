@@ -64,6 +64,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
+#include <nuttx/random.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/input/touchscreen.h>
@@ -158,7 +159,7 @@ static struct max11802_dev_s *g_max11802list;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: max11802_lock
+ * Name: max11802_lock
  *
  * Description:
  *   Lock the SPI bus and re-configure as necessary.  This function must be
@@ -195,7 +196,7 @@ static void max11802_lock(FAR struct spi_dev_s *spi)
 }
 
 /****************************************************************************
- * Function: max11802_unlock
+ * Name: max11802_unlock
  *
  * Description:
  *   Un-lock the SPI bus after each transfer, possibly losing the current
@@ -230,7 +231,7 @@ static uint16_t max11802_sendcmd(FAR struct max11802_dev_s *priv,
 
   /* Select the MAX11802 */
 
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, true);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
 
   /* Send the command */
 
@@ -239,7 +240,7 @@ static uint16_t max11802_sendcmd(FAR struct max11802_dev_s *priv,
   /* Read the data */
 
   SPI_RECVBLOCK(priv->spi, buffer, 2);
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
   result = ((uint16_t)buffer[0] << 8) | (uint16_t)buffer[1];
   *tags = result & 0xF;
@@ -627,6 +628,8 @@ static void max11802_worker(FAR void *arg)
             }
         }
       while (readycount < 2);
+
+      add_ui_randomness((x << 16) | y);
 
       /* Continue to sample the position while the pen is down */
 
@@ -1222,32 +1225,32 @@ int max11802_register(FAR struct spi_dev_s *spi,
 
   /* Configure MAX11802 registers */
 
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, true);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
   (void)SPI_SEND(priv->spi, MAX11802_CMD_MODE_WR);
   (void)SPI_SEND(priv->spi, MAX11802_MODE);
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, true);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
   (void)SPI_SEND(priv->spi, MAX11802_CMD_AVG_WR);
   (void)SPI_SEND(priv->spi, MAX11802_AVG);
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, true);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
   (void)SPI_SEND(priv->spi, MAX11802_CMD_TIMING_WR);
   (void)SPI_SEND(priv->spi, MAX11802_TIMING);
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, true);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
   (void)SPI_SEND(priv->spi, MAX11802_CMD_DELAY_WR);
   (void)SPI_SEND(priv->spi, MAX11802_DELAY);
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
   /* Test that the device access was successful. */
 
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, true);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
   (void)SPI_SEND(priv->spi, MAX11802_CMD_MODE_RD);
   ret = SPI_SEND(priv->spi, 0);
-  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);
+  SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
   /* Unlock the bus */
 

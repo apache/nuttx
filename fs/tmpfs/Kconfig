@@ -22,7 +22,7 @@ config FS_TMPFS_BLOCKSIZE
 		of blocks.  There are, of course, no blocks with the TMPFS.  This
 		options is available to control how sizes are reported.  For very
 		small TMPFS systems, you might want to set this to something smaller
-		the the usual 512 bytes.
+		the usual 512 bytes.
 
 config FS_TMPFS_DIRECTORY_ALLOCGUARD
 	int "Directory object over-allocation"

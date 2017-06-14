@@ -181,7 +181,7 @@ struct sam_spics_s
 
 /* Type of board-specific SPI status function */
 
-typedef void (*select_t)(enum spi_dev_e devid, bool selected);
+typedef void (*select_t)(uint32_t devid, bool selected);
 
 /* Chip select register offsets */
 
@@ -263,7 +263,7 @@ static inline uintptr_t spi_regaddr(struct sam_spics_s *spics,
 /* SPI master methods */
 
 static int      spi_lock(struct spi_dev_s *dev, bool lock);
-static void     spi_select(struct spi_dev_s *dev, enum spi_dev_e devid,
+static void     spi_select(struct spi_dev_s *dev, uint32_t devid,
                   bool selected);
 static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency);
 #ifdef CONFIG_SPI_CS_DELAY_CONTROL
@@ -943,7 +943,7 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static void spi_select(struct spi_dev_s *dev, enum spi_dev_e devid,
+static void spi_select(struct spi_dev_s *dev, uint32_t devid,
                        bool selected)
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)dev;

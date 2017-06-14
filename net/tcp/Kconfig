@@ -9,9 +9,16 @@ config NET_TCP
 	bool "TCP/IP Networking"
 	default n
 	---help---
-		TCP support on or off
+		Enable or disable TCP networking support.
 
-if NET_TCP
+config NET_TCP_NO_STACK
+	bool "Disable TCP/IP Stack"
+	default n
+	select NET_TCP
+	---help---
+		Build without TCP/IP stack even if TCP networking support enabled.
+
+if NET_TCP && !NET_TCP_NO_STACK
 
 config NET_TCPURGDATA
 	bool "Urgent data"
@@ -63,7 +70,7 @@ config NET_MAX_LISTENPORTS
 config NET_TCP_READAHEAD
 	bool "Enable TCP/IP read-ahead buffering"
 	default y
-	select NET_IOB
+	select MM_IOB
 	---help---
 		Read-ahead buffers allows buffering of TCP/IP packets when there is no
 		receive in place to catch the TCP packet.  In that case, the packet
@@ -84,7 +91,7 @@ endif # NET_TCP_READAHEAD
 config NET_TCP_WRITE_BUFFERS
 	bool "Enable TCP/IP write buffering"
 	default n
-	select NET_IOB
+	select MM_IOB
 	---help---
 		Write buffers allows buffering of ongoing TCP/IP packets, providing
 		for higher performance, streamed output.
@@ -184,5 +191,5 @@ config NET_SENDFILE
 		Support larger, higher performance sendfile() for transferring
 		files out a TCP connection.
 
-endif # NET_TCP
+endif # NET_TCP && !NET_TCP_NO_STACK
 endmenu # TCP/IP Networking

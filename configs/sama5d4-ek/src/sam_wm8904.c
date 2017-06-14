@@ -331,7 +331,7 @@ int sam_wm8904_initialize(int minor)
         }
 
       /* No we can embed the WM8904/I2C/I2S conglomerate into a PCM decoder
-       * instance so that we will have a PCM front end for the the WM8904
+       * instance so that we will have a PCM front end for the WM8904
        * driver.
        */
 

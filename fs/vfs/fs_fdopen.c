@@ -221,11 +221,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
         {
           /* Zero the structure */
 
-#ifndef CONFIG_STDIO_DISABLE_BUFFERING
           memset(stream, 0, sizeof(FILE));
-#elif CONFIG_NUNGET_CHARS > 0
-          stream->fs_nungotten = 0;
-#endif
 
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
           /* Initialize the semaphore the manages access to the buffer */

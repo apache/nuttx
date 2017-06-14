@@ -45,6 +45,7 @@
 #include "udp/udp.h"
 #include "local/local.h"
 #include "socket/socket.h"
+#include "usrsock/usrsock.h"
 
 #if defined(CONFIG_NET) && !defined(CONFIG_DISABLE_POLL)
 
@@ -57,7 +58,8 @@
  */
 
 #undef HAVE_NET_POLL
-#if defined(HAVE_TCP_POLL) || defined(HAVE_UDP_POLL) || defined(HAVE_LOCAL_POLL)
+#if defined(HAVE_TCP_POLL) || defined(HAVE_UDP_POLL) || \
+    defined(HAVE_LOCAL_POLL) || defined(CONFIG_NET_USRSOCK)
 #  define HAVE_NET_POLL 1
 #endif
 
@@ -68,7 +70,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_pollsetup
+ * Name: net_pollsetup
  *
  * Description:
  *   Setup to monitor events on one socket
@@ -136,7 +138,7 @@ static inline int net_pollsetup(FAR struct socket *psock,
 }
 
 /****************************************************************************
- * Function: net_pollteardown
+ * Name: net_pollteardown
  *
  * Description:
  *   Teardown monitoring of events on an socket
@@ -209,7 +211,7 @@ static inline int net_pollteardown(FAR struct socket *psock,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_poll
+ * Name: psock_poll
  *
  * Description:
  *   The standard poll() operation redirects operations on socket descriptors
@@ -233,6 +235,15 @@ int psock_poll(FAR struct socket *psock, FAR struct pollfd *fds, bool setup)
 #else
   int ret;
 
+#ifdef CONFIG_NET_USRSOCK
+  if (psock->s_type == SOCK_USRSOCK_TYPE)
+    {
+      /* Perform usrsock setup/teardown. */
+
+      return usrsock_poll(psock, fds, setup);
+    }
+#endif
+
   /* Check if we are setting up or tearing down the poll */
 
   if (setup)
@@ -253,7 +264,7 @@ int psock_poll(FAR struct socket *psock, FAR struct pollfd *fds, bool setup)
 }
 
 /****************************************************************************
- * Function: net_poll
+ * Name: net_poll
  *
  * Description:
  *   The standard poll() operation redirects operations on socket descriptors

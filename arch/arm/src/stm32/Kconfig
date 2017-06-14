@@ -16,7 +16,7 @@ config ARCH_CHIP_STM32L151C6
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 48-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPRROM
+		STM32L 48-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPROM
 
 config ARCH_CHIP_STM32L151C8
 	bool "STM32L151C8"
@@ -24,7 +24,7 @@ config ARCH_CHIP_STM32L151C8
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 48-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPRROM
+		STM32L 48-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPROM
 
 config ARCH_CHIP_STM32L151CB
 	bool "STM32L151CB"
@@ -32,7 +32,7 @@ config ARCH_CHIP_STM32L151CB
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 48-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPRROM
+		STM32L 48-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPROM
 
 config ARCH_CHIP_STM32L151R6
 	bool "STM32L151R6"
@@ -40,7 +40,7 @@ config ARCH_CHIP_STM32L151R6
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 64-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPRROM
+		STM32L 64-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPROM
 
 config ARCH_CHIP_STM32L151R8
 	bool "STM32L151R8"
@@ -48,7 +48,7 @@ config ARCH_CHIP_STM32L151R8
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 64-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPRROM
+		STM32L 64-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPROM
 
 config ARCH_CHIP_STM32L151RB
 	bool "STM32L151RB"
@@ -56,7 +56,7 @@ config ARCH_CHIP_STM32L151RB
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 64-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPRROM
+		STM32L 64-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPROM
 
 config ARCH_CHIP_STM32L151V6
 	bool "STM32L151V6"
@@ -64,7 +64,7 @@ config ARCH_CHIP_STM32L151V6
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 100-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPRROM
+		STM32L 100-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPROM
 
 config ARCH_CHIP_STM32L151V8
 	bool "STM32L151V8"
@@ -72,7 +72,7 @@ config ARCH_CHIP_STM32L151V8
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 100-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPRROM
+		STM32L 100-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPROM
 
 config ARCH_CHIP_STM32L151VB
 	bool "STM32L151VB"
@@ -80,7 +80,7 @@ config ARCH_CHIP_STM32L151VB
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 100-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPRROM
+		STM32L 100-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPROM
 
 config ARCH_CHIP_STM32L152C6
 	bool "STM32L152C6"
@@ -88,8 +88,8 @@ config ARCH_CHIP_STM32L152C6
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 48-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPRROM with
-		4x16 LCD interface
+		STM32L 48-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPROM with
+		4x18 LCD interface
 
 config ARCH_CHIP_STM32L152C8
 	bool "STM32L152C8"
@@ -97,8 +97,8 @@ config ARCH_CHIP_STM32L152C8
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 48-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPRROM with
-		4x16 LCD interface
+		STM32L 48-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPROM with
+		4x18 LCD interface
 
 config ARCH_CHIP_STM32L152CB
 	bool "STM32L152CB"
@@ -106,8 +106,8 @@ config ARCH_CHIP_STM32L152CB
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 48-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPRROM with
-		4x16 LCD interface
+		STM32L 48-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPROM with
+		4x18 LCD interface
 
 config ARCH_CHIP_STM32L152R6
 	bool "STM32L152R6"
@@ -115,7 +115,7 @@ config ARCH_CHIP_STM32L152R6
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 64-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPRROM with
+		STM32L 64-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPROM with
 		4x32/8x28 LCD interface
 
 config ARCH_CHIP_STM32L152R8
@@ -124,7 +124,7 @@ config ARCH_CHIP_STM32L152R8
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 64-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPRROM with
+		STM32L 64-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPROM with
 		4x32/8x28 LCD interface
 
 config ARCH_CHIP_STM32L152RB
@@ -133,7 +133,7 @@ config ARCH_CHIP_STM32L152RB
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 64-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPRROM with
+		STM32L 64-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPROM with
 		4x32/8x28 LCD interface
 
 config ARCH_CHIP_STM32L152V6
@@ -142,7 +142,7 @@ config ARCH_CHIP_STM32L152V6
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 100-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPRROM with
+		STM32L 100-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPROM with
 		4x44/8x40 LCD interface
 
 config ARCH_CHIP_STM32L152V8
@@ -151,7 +151,7 @@ config ARCH_CHIP_STM32L152V8
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 100-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPRROM with
+		STM32L 100-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPROM with
 		4x44/8x40 LCD interface
 
 config ARCH_CHIP_STM32L152VB
@@ -160,7 +160,37 @@ config ARCH_CHIP_STM32L152VB
 	select STM32_STM32L15XX
 	select STM32_ENERGYLITE
 	---help---
-		STM32L 100-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPRROM with
+		STM32L 100-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPROM with
+		4x44/8x40 LCD interface
+
+config ARCH_CHIP_STM32L152CC
+	bool "STM32L152CC"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	select STM32_MEDIUMPLUSDENSITY
+	---help---
+		STM32L 48-pin EnergyLite, 256KB FLASH, 32KB SRAM, 8KB EEPROM with
+		4x18 LCD interface
+
+config ARCH_CHIP_STM32L152RC
+	bool "STM32L152RC"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	select STM32_MEDIUMPLUSDENSITY
+	---help---
+		STM32L 64-pin EnergyLite, 256KB FLASH, 32KB SRAM, 8KB EEPROM with
+		4x32/8x28 LCD interface
+
+config ARCH_CHIP_STM32L152VC
+	bool "STM32L152VC"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	select STM32_MEDIUMPLUSDENSITY
+	---help---
+		STM32L 100-pin EnergyLite, 256KB FLASH, 32KB SRAM, 8KB EEPROM with
 		4x44/8x40 LCD interface
 
 config ARCH_CHIP_STM32L162ZD
@@ -171,8 +201,8 @@ config ARCH_CHIP_STM32L162ZD
 	select STM32_HIGHDENSITY
 	select STM32_HAVE_AES
 	---help---
-		STM32L 144-pin EnergyLite, 384KB FLASH, 48KB SRAM, 12KB EEPRROM with
-		8x40 LCD interface
+		STM32L 144-pin EnergyLite, 384KB FLASH, 48KB SRAM, 12KB EEPROM with
+		4x44/8x40 LCD interface
 
 config ARCH_CHIP_STM32L162VE
 	bool "STM32L162VE"
@@ -182,8 +212,8 @@ config ARCH_CHIP_STM32L162VE
 	select STM32_HIGHDENSITY
 	select STM32_HAVE_AES
 	---help---
-		STM32L 100-pin EnergyLite, 512KB FLASH, 80KB SRAM, 16KB EEPRROM with
-		8x40 LCD interface
+		STM32L 100-pin EnergyLite, 512KB FLASH, 80KB SRAM, 16KB EEPROM with
+		4x44/8x40 LCD interface
 
 config ARCH_CHIP_STM32F100C8
 	bool "STM32F100C8"
@@ -942,6 +972,13 @@ config ARCH_CHIP_STM32F401RE
 	select STM32_STM32F401
 	select ARCH_HAVE_FPU
 
+config ARCH_CHIP_STM32F410RB
+	bool "STM32F410RB"
+	select ARCH_CORTEXM4
+	select STM32_STM32F40XX
+	select STM32_STM32F410
+	select ARCH_HAVE_FPU
+
 config ARCH_CHIP_STM32F411RE
 	bool "STM32F411RE"
 	select ARCH_CORTEXM4
@@ -1445,12 +1482,12 @@ config STM32_STM32F303
 
 config STM32_STM32F33XX
 	bool
-       	default n
+	default n
 	select STM32_HAVE_HRTIM1
 	select STM32_HAVE_COMP2
 	select STM32_HAVE_COMP4
 	select STM32_HAVE_COMP6
-	select STM32_HAVE_OPAMP
+	select STM32_HAVE_OPAMP2
 	select STM32_HAVE_CCM
 	select STM32_HAVE_TIM1
 	select STM32_HAVE_TIM15
@@ -1493,6 +1530,7 @@ config STM32_STM32F40XX
 	select STM32_HAVE_TIM4
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
+	select STM32_HAVE_I2S3
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_I2C3
 
@@ -1505,6 +1543,20 @@ config STM32_STM32F401
 	select STM32_HAVE_TIM9
 	select STM32_HAVE_TIM10
 	select STM32_HAVE_TIM11
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_I2S3
+
+config STM32_STM32F410
+	bool
+	default n
+	select STM32_HAVE_USART6
+	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM5
+	select STM32_HAVE_TIM6
+	select STM32_HAVE_TIM9
+	select STM32_HAVE_TIM11
+	select STM32_HAVE_SPI5
 
 config STM32_STM32F411
 	bool
@@ -1515,6 +1567,9 @@ config STM32_STM32F411
 	select STM32_HAVE_TIM9
 	select STM32_HAVE_TIM10
 	select STM32_HAVE_TIM11
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_I2S3
 	select STM32_HAVE_SPI4
 	select STM32_HAVE_SPI5
 
@@ -1607,6 +1662,9 @@ config STM32_STM32F427
 	select STM32_HAVE_DAC2
 	select STM32_HAVE_RNG
 	select STM32_HAVE_ETHMAC
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_I2S3
 	select STM32_HAVE_SPI4
 	select STM32_HAVE_SPI5
 	select STM32_HAVE_SPI6
@@ -1625,6 +1683,7 @@ config STM32_STM32F429
 	select STM32_HAVE_UART7
 	select STM32_HAVE_UART8
 	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM5
 	select STM32_HAVE_TIM6
 	select STM32_HAVE_TIM7
 	select STM32_HAVE_TIM8
@@ -1642,6 +1701,9 @@ config STM32_STM32F429
 	select STM32_HAVE_DAC2
 	select STM32_HAVE_RNG
 	select STM32_HAVE_ETHMAC
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_I2S3
 	select STM32_HAVE_SPI4
 	select STM32_HAVE_SPI5
 	select STM32_HAVE_SPI6
@@ -1714,8 +1776,8 @@ config STM32_STM32F469
 	select STM32_HAVE_SPI4
 	select STM32_HAVE_SPI5
 	select STM32_HAVE_SPI6
-        select STM32_HAVE_SAIPLL
-        select STM32_HAVE_I2SPLL
+	select STM32_HAVE_SAIPLL
+	select STM32_HAVE_I2SPLL
 
 
 config STM32_DFU
@@ -1907,17 +1969,33 @@ config STM32_HAVE_CAN2
 	bool
 	default n
 
+config STM32_HAVE_COMP1
+	bool
+	default n
+
 config STM32_HAVE_COMP2
-       bool
-       default n
+	bool
+	default n
+
+config STM32_HAVE_COMP3
+	bool
+	default n
 
 config STM32_HAVE_COMP4
-       bool
-       default n
+	bool
+	default n
+
+config STM32_HAVE_COMP5
+	bool
+	default n
 
 config STM32_HAVE_COMP6
-       bool
-       default n
+	bool
+	default n
+
+config STM32_HAVE_COMP7
+	bool
+	default n
 
 config STM32_HAVE_DAC1
 	bool
@@ -1951,6 +2029,10 @@ config STM32_HAVE_SPI3
 	bool
 	default n
 
+config STM32_HAVE_I2S3
+	bool
+	default n
+
 config STM32_HAVE_SPI4
 	bool
 	default n
@@ -1971,9 +2053,21 @@ config STM32_HAVE_I2SPLL
 	bool
 	default n
 
-config STM32_HAVE_OPAMP
-       bool
-       default n
+config STM32_HAVE_OPAMP1
+	bool
+	default n
+
+config STM32_HAVE_OPAMP2
+	bool
+	default n
+
+config STM32_HAVE_OPAMP3
+	bool
+	default n
+
+config STM32_HAVE_OPAMP4
+	bool
+	default n
 
 # These are the peripheral selections proper
 
@@ -2032,18 +2126,38 @@ config STM32_COMP
 	default n
 	depends on STM32_STM32L15XX
 
+config STM32_COMP1
+	bool "COMP1"
+	default n
+	depends on STM32_HAVE_COMP1
+
 config STM32_COMP2
 	bool "COMP2"
 	default n
 	depends on STM32_HAVE_COMP2
+
+config STM32_COMP3
+	bool "COMP3"
+	default n
+	depends on STM32_HAVE_COMP3
 
 config STM32_COMP4
 	bool "COMP4"
 	default n
 	depends on STM32_HAVE_COMP4
 
+config STM32_COMP5
+	bool "COMP5"
+	default n
+	depends on STM32_HAVE_COMP5
+
 config STM32_COMP6
 	bool "COMP6"
+	default n
+	depends on STM32_HAVE_COMP6
+
+config STM32_COMP7
+	bool "COMP7"
 	default n
 	depends on STM32_HAVE_COMP6
 
@@ -2185,7 +2299,26 @@ config STM32_DMA2D
 config STM32_OPAMP
 	bool "OPAMP"
 	default n
-	depends on STM32_HAVE_OPAMP
+
+config STM32_OPAMP1
+	bool "OPAMP1"
+	default n
+	depends on STM32_HAVE_OPAMP1
+
+config STM32_OPAMP2
+	bool "OPAMP2"
+	default n
+	depends on STM32_HAVE_OPAMP2
+
+config STM32_OPAMP3
+	bool "OPAMP3"
+	default n
+	depends on STM32_HAVE_OPAMP3
+
+config STM32_OPAMP4
+	bool "OPAMP4"
+	default n
+	depends on STM32_HAVE_OPAMP4
 
 config STM32_OTGFS
 	bool "OTG FS"
@@ -2236,6 +2369,13 @@ config STM32_SPI3
 	depends on STM32_HAVE_SPI3
 	select SPI
 	select STM32_SPI
+
+config STM32_I2S3
+	bool "I2S3"
+	default n
+	depends on STM32_HAVE_I2S3
+	select I2S
+	select STM32_I2S
 
 config STM32_SPI4
 	bool "SPI4"
@@ -2494,6 +2634,11 @@ config STM32_SPI3_REMAP
 	default n
 	depends on STM32_STM32F10XX && STM32_SPI3 && !STM32_VALUELINE
 
+config STM32_I2S3_REMAP
+	bool "I2S3 Alternate Pin Mapping"
+	default n
+	depends on STM32_STM32F10XX && STM32_I2S3 && !STM32_VALUELINE
+
 choice
 	prompt "TIM1 Alternate Pin Mappings"
 	depends on STM32_STM32F10XX && STM32_TIM1
@@ -2629,9 +2774,17 @@ config STM32_FLASH_PREFETCH
 	default y if STM32_STM32F427 || STM32_STM32F429 || STM32_STM32F446
 	default n
 	---help---
-	Enable FLASH prefetch and F2 and F4 parts (FLASH pre-fetch is always enabled
-	on F1 parts).  Some early revisions of F4 parts do not support FLASH pre-fetch
-	properly and enabling this option may interfere with ADC accuracy.
+		Enable FLASH prefetch and F2 and F4 parts (FLASH pre-fetch is always enabled
+		on F1 parts).  Some early revisions of F4 parts do not support FLASH pre-fetch
+		properly and enabling this option may interfere with ADC accuracy.
+
+config STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW
+	bool "Workaround for FLASH data cache corruption"
+	default n
+	---help---
+		Enable the workaround to fix flash data cache corruption when reading
+		from one flash bank while writing on other flash bank.  See your STM32
+		errata to check if your STM32 is affected by this problem.
 
 choice
 	prompt "JTAG Configuration"
@@ -2735,35 +2888,24 @@ menu "Timer Configuration"
 
 if SCHED_TICKLESS
 
-config STM32_ONESHOT
-	bool
-	default y
-
-config STM32_FREERUN
-	bool
-	default y
-
-config STM32_TICKLESS_ONESHOT
-	int "Tickless one-shot timer channel"
+config STM32_TICKLESS_TIMER
+	int "Tickless hardware timer"
 	default 2
 	range 1 14
-	depends on STM32_ONESHOT
 	---help---
-		If the Tickless OS feature is enabled, the one clock must be
-		assigned to provided the one-shot timer needed by the OS.
+		If the Tickless OS feature is enabled, then one clock must be
+		assigned to provided the timer needed by the OS.
 
-config STM32_TICKLESS_FREERUN
-	int "Tickless free-running timer channel"
-	default 5
-	range 1 14
-	depends on STM32_FREERUN
+config STM32_TICKLESS_CHANNEL
+	int "Tickless timer channel"
+	default 1
+	range 1 4
 	---help---
 		If the Tickless OS feature is enabled, the one clock must be
-		assigned to provided the free-running timer needed by the OS.
+		assigned to provided the free-running timer needed by the OS
+		and one channel on that clock is needed to handle intervals.
 
 endif # SCHED_TICKLESS
-
-if !SCHED_TICKLESS
 
 config STM32_ONESHOT
 	bool "TIM one-shot wrapper"
@@ -2778,8 +2920,6 @@ config STM32_FREERUN
 	---help---
 		Enable a wrapper around the low level timer/counter functions to
 		support a free-running timer.
-
-endif # !SCHED_TICKLESS
 
 config STM32_ONESHOT_MAXTIMERS
 	int "Maximum number of oneshot timers"
@@ -5564,6 +5704,12 @@ endmenu # Timer Configuration
 menu "ADC Configuration"
 	depends on STM32_ADC
 
+config STM32_ADC_NO_STARTUP_CONV
+	bool "Do not start conversion when opening ADC device"
+	default n
+	---help---
+		Do not start conversion when opening ADC device.
+
 config STM32_ADC1_DMA
 	bool "ADC1 DMA"
 	depends on STM32_ADC1 && STM32_HAVE_ADC1_DMA
@@ -6066,6 +6212,19 @@ if STM32_SERIALDRIVER
 
 comment "Serial Driver Configuration"
 
+config STM32_SERIAL_RXDMA_BUFFER_SIZE
+	int "Rx DMA buffer size"
+	default 32
+	range 32 4096
+	depends on USART1_RXDMA || USART2_RXDMA || USART3_RXDMA || UART4_RXDMA || UART5_RXDMA || USART6_RXDMA || UART7_RXDMA || UART8_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half or this number of bytes.
+
+		Value given here will be rounded up to next multiple of 4 bytes.
+
 config SERIAL_DISABLE_REORDERING
 	bool "Disable reordering of ttySx devices."
 	depends on STM32_USART1 || STM32_USART2 || STM32_USART3 || STM32_UART4 || STM32_UART5 || STM32_USART6 || STM32_UART7 || STM32_UART8
@@ -6140,6 +6299,66 @@ config STM32_SPI_DMA
 
 endmenu
 
+menu "I2S Configuration"
+	depends on STM32_I2S3
+
+config STM32_I2S_MCK
+	bool "I2S_MCK"
+	default n
+	---help---
+		TBD.
+
+config STM32_I2S_MAXINFLIGHT
+	int "I2S queue size"
+	default 16
+	---help---
+		This is the total number of transfers, both RX and TX, that can be
+		enqueue before the caller is required to wait.  This setting
+		determines the number certain queue data structures that will be
+		pre-allocated.
+
+comment "I2S3 Configuration"
+
+config STM32_I2S3_DATALEN
+	int "Data width (bits)"
+	default 16
+	---help---
+		Data width in bits.  This is a default value and may be change
+		via the I2S interface
+
+#if STM32_I2S
+config STM32_I2S3_RX
+	bool "Enable I2C receiver"
+	default n
+	---help---
+		Enable I2S receipt logic
+
+config STM32_I2S3_TX
+	bool "Enable I2C transmitter"
+	default n
+	---help---
+		Enable I2S transmission logic
+
+config STM32_I2S_DMADEBUG
+	bool "I2S DMA transfer debug"
+	depends on DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation analyze I2S DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+config STM32_I2S_REGDEBUG
+	bool "SSC Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level SSC device debug information.
+		Very invasive! Requires also DEBUG.
+
+endmenu # I2S Configuration
+
 menu "I2C Configuration"
 	depends on STM32_I2C
 
@@ -6189,6 +6408,15 @@ config STM32_I2C_DUTY16_9
 	bool "Frequency with Tlow/Thigh = 16/9 "
 	default n
 	depends on STM32_I2C
+
+config STM32_I2C_DMA
+	bool "I2C DMA Support"
+	default n
+	depends on STM32_I2C && STM32_STM32F40XX && STM32_DMA1 && !I2C_POLLED
+	---help---
+		This option enables the DMA for I2C transfers.
+		Note: The user can define CONFIG_I2C_DMAPRIO: a custom priority value for the
+		I2C dma streams, else the default priority level is set to medium.
 
 endmenu
 
@@ -6254,6 +6482,7 @@ config STM32_HAVE_RTC_COUNTER
 
 config STM32_HAVE_RTC_SUBSECONDS
 	bool
+	select ARCH_HAVE_RTC_SUBSECONDS
 	default n
 
 config RTC_MAGIC_REG
@@ -6263,8 +6492,13 @@ config RTC_MAGIC_REG
 	depends on RTC && !STM32_HAVE_RTC_COUNTER
 
 config RTC_MAGIC
-	hex "Value used as Magic to determine if RTC is set already"
+	hex "Value used as Magic to determine if RTC is already setup"
 	default 0xfacefeee
+	depends on RTC && !STM32_HAVE_RTC_COUNTER
+
+config RTC_MAGIC_TIME_SET
+	hex "Value used as Magic to determine if RTC is setup and have time set"
+	default 0xfacefeef
 	depends on RTC && !STM32_HAVE_RTC_COUNTER
 
 choice
@@ -6728,7 +6962,7 @@ config STM32_LTDC_DITHER_BLUE
 config STM32_LTDC_FB_BASE
 	hex "Framebuffer memory start address"
 	---help---
-		If you are using the the LTDC, then you must provide the address
+		If you are using the LTDC, then you must provide the address
 		of the start of the framebuffer.  This address will typically
 		be in the SRAM or SDRAM memory region of the FSMC.
 

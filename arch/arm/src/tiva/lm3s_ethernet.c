@@ -1389,14 +1389,14 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   /* Program the hardware with it's MAC address (for filtering) */
 
-  regval = (uint32_t)priv->ld_dev.d_mac.ether_addr_octet[3] << 24 |
-           (uint32_t)priv->ld_dev.d_mac.ether_addr_octet[2] << 16 |
-           (uint32_t)priv->ld_dev.d_mac.ether_addr_octet[1] << 8 |
-           (uint32_t)priv->ld_dev.d_mac.ether_addr_octet[0];
+  regval = (uint32_t)priv->ld_dev.d_mac.ether.ether_addr_octet[3] << 24 |
+           (uint32_t)priv->ld_dev.d_mac.ether.ether_addr_octet[2] << 16 |
+           (uint32_t)priv->ld_dev.d_mac.ether.ether_addr_octet[1] << 8 |
+           (uint32_t)priv->ld_dev.d_mac.ether.ether_addr_octet[0];
   tiva_ethout(priv, TIVA_MAC_IA0_OFFSET, regval);
 
-  regval = (uint32_t)priv->ld_dev.d_mac.ether_addr_octet[5] << 8 |
-           (uint32_t)priv->ld_dev.d_mac.ether_addr_octet[4];
+  regval = (uint32_t)priv->ld_dev.d_mac.ether.ether_addr_octet[5] << 8 |
+           (uint32_t)priv->ld_dev.d_mac.ether.ether_addr_octet[4];
   tiva_ethout(priv, TIVA_MAC_IA1_OFFSET, regval);
 
   /* Set and activate a timer process */
@@ -1696,13 +1696,13 @@ static inline int tiva_ethinitialize(int intf)
   priv->ld_txpoll        = wd_create(); /* Create periodic poll timer */
   priv->ld_txtimeout     = wd_create(); /* Create TX timeout timer */
 
+#ifdef CONFIG_TIVA_BOARDMAC
   /* If the board can provide us with a MAC address, get the address
    * from the board now.  The MAC will not be applied until tiva_ifup()
    * is called (and the MAC can be overwritten with a netdev ioctl call).
    */
 
-#ifdef CONFIG_TIVA_BOARDMAC
-   tiva_ethernetmac(&priv->ld_dev.d_mac);
+   tiva_ethernetmac(&priv->ld_dev.d_mac.ether);
 #endif
 
   /* Perform minimal, one-time initialization -- just reset the controller and

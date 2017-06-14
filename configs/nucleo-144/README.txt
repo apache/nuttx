@@ -32,14 +32,17 @@ Nucleo-144 Boards:
 The Nucleo-144 is a standard board for use with several STM32 parts in the
 LQFP144 package.  Variants include
 
-  STM32 Part    Board Variant Name
-  ------------- ------------------
-  STM32F207ZGT6 NUCLEO-F207ZG
-  STM32F303ZET6 NUCLEO-F303ZE
-  STM32F429ZIT6 NUCLEO-F429ZI
-  STM32F446ZET6 NUCLEO-F446ZE
-  STM32F746ZGT6 NUCLEO-F746ZG
-  STM32F767ZIT6 NUCLEO-F767ZI
+  STM32 Part     Board Variant Name
+  -------------  ------------------
+  STM32F207ZGT6  NUCLEO-F207ZG
+  STM32F303ZET6  NUCLEO-F303ZE
+  STM32F429ZIT6  NUCLEO-F429ZI
+  STM32F446ZET6  NUCLEO-F446ZE
+  STM32F746ZGT6  NUCLEO-F746ZG
+  STM32F767ZIT6  NUCLEO-F767ZI
+  STM32L496ZGT6  NUCLEO-L496ZG
+  STM32L496ZGT6P NUCLEO-L496ZG-P
+
   ------------- ------------------
 
 This directory is intended to support all Nucleo-144 variants since the
@@ -48,9 +51,10 @@ board design provides uniformity in the documentation from ST and should
 allow us to quickly change configurations by just cloning a configuration
 and changing the CPU choice and board initialization.  Unfortunately for
 the developer, the CPU specific information must be extracted from the
-common information in the documentation.
+common information in the documentation. The exception are the STM32L496ZG
+boards, which are supported by configs/nucleo-l496zg
 
-Please read the User Manaul UM1727: Getting started with STM32 Nucleo board
+Please read the User Manual UM1727: Getting started with STM32 Nucleo board
 software development tools and take note of the Powering options for the
 board (6.3 Power supply and power selection) and the Solder bridges based
 hardware configuration changes that are configurable (6.11 Solder bridges).
@@ -173,8 +177,8 @@ Development Environment
   All testing has been conducted using the GNU toolchain from ARM for Linux.
   found here https://launchpad.net/gcc-arm-embedded/4.9/4.9-2015-q3-update/+download/gcc-arm-none-eabi-4_9-2015q3-20150921-linux.tar.bz2
 
-  If you change the default toolchain, then you may also have to modify the PATH in
-  the setenv.h file if your make cannot find the tools.
+  If you change the default toolchain, then you may also have to modify the
+  PATH environment variable to include the path to the toolchain binaries.
 
 IDEs
 ====
@@ -193,7 +197,7 @@ IDEs
 Basic configuration & build steps
 ==================================
 
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  A GNU GCC-based toolchain is assumed.  The PATH environment variable should
   be modified to point to the correct path to the Cortex-M7 GCC toolchain (if
   different from the default in your PATH variable).
 

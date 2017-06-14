@@ -343,7 +343,7 @@ static struct st7567_dev_s g_st7567dev =
  **************************************************************************************/
 
 /**************************************************************************************
- * Function: st7567_select
+ * Name: st7567_select
  *
  * Description:
  *   Select the SPI, locking and  re-configuring if necessary
@@ -365,7 +365,7 @@ static void st7567_select(FAR struct spi_dev_s *spi)
    */
 
   SPI_LOCK(spi, true);
-  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
+  SPI_SELECT(spi, SPIDEV_DISPLAY(0), true);
 
   /* Now make sure that the SPI bus is configured for the ST7567 (it
    * might have gotten configured for a different device while unlocked)
@@ -380,7 +380,7 @@ static void st7567_select(FAR struct spi_dev_s *spi)
 }
 
 /**************************************************************************************
- * Function: st7567_deselect
+ * Name: st7567_deselect
  *
  * Description:
  *   De-select the SPI
@@ -399,7 +399,7 @@ static void st7567_deselect(FAR struct spi_dev_s *spi)
 {
   /* De-select ST7567 chip and relinquish the SPI bus. */
 
-  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
+  SPI_SELECT(spi, SPIDEV_DISPLAY(0), false);
   SPI_LOCK(spi, false);
 }
 
@@ -530,7 +530,7 @@ static int st7567_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buff
 
   /* Select command transfer */
 
-  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, true);
+  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY(0), true);
 
   /* Set the starting position for the run */
 
@@ -540,7 +540,7 @@ static int st7567_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buff
 
   /* Select data transfer */
 
-  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, false);
+  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY(0), false);
 
   /* Then transfer all of the data */
 
@@ -812,7 +812,7 @@ static int st7567_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 
   /* Select command transfer */
 
-  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, true);
+  SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY(0), true);
 
   /* Set the contrast */
 
@@ -854,7 +854,7 @@ static inline void up_clear(FAR struct st7567_dev_s  *priv)
     {
       /* Select command transfer */
 
-      SPI_CMDDATA(spi, SPIDEV_DISPLAY, true);
+      SPI_CMDDATA(spi, SPIDEV_DISPLAY(0), true);
 
       /* Set the starting position for the run */
 
@@ -864,7 +864,7 @@ static inline void up_clear(FAR struct st7567_dev_s  *priv)
 
       /* Select data transfer */
 
-      SPI_CMDDATA(spi, SPIDEV_DISPLAY, false);
+      SPI_CMDDATA(spi, SPIDEV_DISPLAY(0), false);
 
        /* Then transfer all 96 columns of data */
 
@@ -924,7 +924,7 @@ FAR struct lcd_dev_s *st7567_initialize(FAR struct spi_dev_s *spi, unsigned int 
 
   /* Select command transfer */
 
-  SPI_CMDDATA(spi, SPIDEV_DISPLAY, true);
+  SPI_CMDDATA(spi, SPIDEV_DISPLAY(0), true);
 
   /* Set the starting position for the run */
 

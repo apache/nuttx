@@ -2364,7 +2364,7 @@ static void c5471_reset(struct c5471_driver_s *priv)
 static void c5471_macassign(struct c5471_driver_s *priv)
 {
   struct net_driver_s *dev = &priv->c_dev;
-  uint8_t *mptr = dev->d_mac.ether_addr_octet;
+  uint8_t *mptr = dev->d_mac.ether.ether_addr_octet;
   register uint32_t tmp;
 
   ninfo("MAC: %0x:%0x:%0x:%0x:%0x:%0x\n",

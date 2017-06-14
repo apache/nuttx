@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_findbyindex
+ * Name: netdev_findbyindex
  *
  * Description:
  *   Find a previously registered network device by its position in the

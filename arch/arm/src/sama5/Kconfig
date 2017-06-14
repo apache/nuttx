@@ -953,7 +953,7 @@ config SAMA5_LCDC_BACKCOLOR
 config SAMA5_LCDC_FB_VBASE
 	hex "Framebuffer memory start address (virtual)"
 	---help---
-		If you are using the the LCDC, then you must provide the virtual
+		If you are using the LCDC, then you must provide the virtual
 		address of the start of the framebuffer.  This address must be
 		aligned to a 1MB bounder (i.e., the last five "digits" of the
 		hexadecimal address must be zero).
@@ -961,7 +961,7 @@ config SAMA5_LCDC_FB_VBASE
 config SAMA5_LCDC_FB_PBASE
 	hex "Framebuffer memory start address (virtual)"
 	---help---
-		If you are using the the LCDC, then you must provide the physical
+		If you are using the LCDC, then you must provide the physical
 		address of the start of the framebuffer.  This address must be
 		aligned to a 1MB bounder (i.e., the last five "digits" of the
 		hexadecimal address must be zero).
@@ -4953,7 +4953,7 @@ config SAMA5_DDRCS_PGHEAP_OFFSET
 		If you are executing from DRAM, then you must have already reserved
 		this region with SAMA5_DDRCS_RESERVE, setting SAMA5_DDRCS_HEAP_END
 		so that this page cache region defined by SAMA5_DDRCS_PGHEAP_OFFSET
-		and SAMA5_DDRCS_PGHEAP_SIZE does not overlap the the region of DRAM
+		and SAMA5_DDRCS_PGHEAP_SIZE does not overlap the region of DRAM
 		that is added to the heap.  If you are not executing from DRAM, then
 		you must have excluding this page cache region from the heap ether
 		by (1) not selecting SAMA5_DDRCS_HEAP, or (2) selecting
@@ -4971,7 +4971,7 @@ config SAMA5_DDRCS_PGHEAP_SIZE
 		If you are executing from DRAM, then you must have already reserved
 		this region with SAMA5_DDRCS_RESERVE, setting SAMA5_DDRCS_HEAP_END
 		so that this page cache region defined by SAMA5_DDRCS_PGHEAP_OFFSET
-		and SAMA5_DDRCS_PGHEAP_SIZE does not overlap the the region of DRAM
+		and SAMA5_DDRCS_PGHEAP_SIZE does not overlap the region of DRAM
 		that is added to the heap.  If you are not executing from DRAM, then
 		you must have excluding this page cache region from the heap ether
 		by (1) not selecting SAMA5_DDRCS_HEAP, or (2) selecting

@@ -86,6 +86,9 @@
 #define STM32_LCD_CS      (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
 
+#define GPIO_MCP2515_CS   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
+
 #define GPIO_NRF24L01_CS  (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
 
@@ -96,6 +99,9 @@
                            GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN3)
 
 #define STM32_LCD_RS      (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN2)
+
+#define STM32_LCD_CD      (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN2)
 
 /* PWN Configuration */
@@ -114,10 +120,26 @@
 
 #define GPIO_NRF24L01_IRQ (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN0)
 
+/* MCP2515 IRQ line: PB.0 */
+
+#define GPIO_MCP2515_IRQ (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTB|GPIO_PIN0)
+
 /* USB Soft Connect Pullup: PC.13 */
 
 #define GPIO_USB_PULLUP   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN13)
+
+/* GPIO pins used by the GPIO Subsystem */
+
+#define BOARD_NGPIOIN     1 /* Amount of GPIO Input pins */
+#define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
+
+#define GPIO_IN1          (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN0)
+#define GPIO_OUT1         (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN1)
+
+#define GPIO_INT1         (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN2)
 
 /************************************************************************************
  * Public Functions
@@ -144,6 +166,18 @@
  ****************************************************************************/
 
 int stm32_bringup(void);
+
+/****************************************************************************
+ * Name: stm32_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO drivers for use with /apps/examples/gpio
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_GPIO
+int stm32_gpio_initialize(void);
+#endif
 
 /************************************************************************************
  * Name: stm32_spidev_initialize
@@ -185,6 +219,18 @@ int stm32_qencoder_initialize(FAR const char *devpath, int timer);
 
 #ifdef CONFIG_RGBLED
 int stm32_rgbled_setup(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_mcp2515initialize
+ *
+ * Description:
+ *   Initialize and register the MCP2515 CAN driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_CAN_MCP2515
+int stm32_mcp2515initialize(FAR const char *devpath);
 #endif
 
 /************************************************************************************

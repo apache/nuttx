@@ -143,7 +143,7 @@ Debugging
 
   And, at this point, I don't know how to debug the board.  There is no
   way to connect a JTAG SWD debuggger, at least not without cutting leads
-  to the the MINI54TAN device:
+  to the MINI54TAN device:
 
     See: http://mcuoneclipse.com/2014/08/09/hacking-the-teensy-v3-1-for-swd-debugging/
 
@@ -228,11 +228,9 @@ Configurations
     ./configure.sh teensy-3.x/<subdir>
     cd -
     make oldconfig
-    . ./setenv.sh
 
-  Before sourcing the setenv.sh file above, you should examine it and
-  perform edits as necessary so that TOOLCHAIN_BIN is the correct path to
-  the directory than holds your toolchain binaries.
+  Before building, make sure that your PATH environment variable includes
+  the correct path to the directory than holds your toolchain binaries.
 
   If this is a Windows native build, then configure.bat should be used
   instead of configure.sh:

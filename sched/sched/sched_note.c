@@ -447,7 +447,8 @@ void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
 
   /* Format the note */
 
-  note_common(tcb, &note.ncs_cmn, sizeof(struct note_cpu_start_s), NOTE_CPU_START);
+  note_common(tcb, &note.ncs_cmn, sizeof(struct note_cpu_start_s),
+              NOTE_CPU_START);
   note.ncs_target = (uint8_t)cpu;
 
   /* Add the note to circular buffer */
@@ -461,7 +462,8 @@ void sched_note_cpu_started(FAR struct tcb_s *tcb)
 
   /* Format the note */
 
-  note_common(tcb, &note.ncs_cmn, sizeof(struct note_cpu_started_s), NOTE_CPU_STARTED);
+  note_common(tcb, &note.ncs_cmn, sizeof(struct note_cpu_started_s),
+              NOTE_CPU_STARTED);
 
   /* Add the note to circular buffer */
 
@@ -474,7 +476,8 @@ void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
 
   /* Format the note */
 
-  note_common(tcb, &note.ncp_cmn, sizeof(struct note_cpu_pause_s), NOTE_CPU_PAUSE);
+  note_common(tcb, &note.ncp_cmn, sizeof(struct note_cpu_pause_s),
+              NOTE_CPU_PAUSE);
   note.ncp_target = (uint8_t)cpu;
 
   /* Add the note to circular buffer */
@@ -488,7 +491,8 @@ void sched_note_cpu_paused(FAR struct tcb_s *tcb)
 
   /* Format the note */
 
-  note_common(tcb, &note.ncp_cmn, sizeof(struct note_cpu_paused_s), NOTE_CPU_PAUSED);
+  note_common(tcb, &note.ncp_cmn, sizeof(struct note_cpu_paused_s),
+              NOTE_CPU_PAUSED);
 
   /* Add the note to circular buffer */
 
@@ -501,7 +505,8 @@ void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu)
 
   /* Format the note */
 
-  note_common(tcb, &note.ncr_cmn, sizeof(struct note_cpu_resume_s), NOTE_CPU_RESUME);
+  note_common(tcb, &note.ncr_cmn, sizeof(struct note_cpu_resume_s),
+              NOTE_CPU_RESUME);
   note.ncr_target = (uint8_t)cpu;
 
   /* Add the note to circular buffer */
@@ -515,7 +520,8 @@ void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
 
   /* Format the note */
 
-  note_common(tcb, &note.ncr_cmn, sizeof(struct note_cpu_resumed_s), NOTE_CPU_RESUMED);
+  note_common(tcb, &note.ncr_cmn, sizeof(struct note_cpu_resumed_s),
+              NOTE_CPU_RESUMED);
 
   /* Add the note to circular buffer */
 

@@ -1153,7 +1153,7 @@ int sched_sporadic_suspend(FAR struct tcb_s *tcb)
  *
  * Returned Value:
  *   The number if ticks remaining until the budget interval expires.
- *   Zero is returned if we are in the low-priority phase of the the
+ *   Zero is returned if we are in the low-priority phase of the
  *   replenishment interval.
  *
  * Assumptions:
@@ -1182,7 +1182,7 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
       return 0;
     }
 
-  /* Check if the the budget interval has elapse  If 'ticks' is greater
+  /* Check if the budget interval has elapse  If 'ticks' is greater
    * than the timeslice value, then we ignore any excess amount.
    *
    * 'ticks' should never be greater than the remaining timeslice.  We try
@@ -1231,7 +1231,7 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
           return 1;
         }
 
-      /* Another possibility is the the budget interval is equal to the
+      /* Another possibility is the budget interval is equal to the
        * entire replenishment interval.  This would not seem like such a
        * good thing to do, but is certainly permitted.
        */

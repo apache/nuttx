@@ -148,7 +148,7 @@ static const struct file_operations mtdconfig_fops =
 /****************************************************************************
  * Name: mtdconfig_readbytes
  *
- *    Reads bytes from the contained MTD device.  This will either usee
+ *    Reads bytes from the contained MTD device.  This will either use
  *    the read function or if that is not available, the bread with a copy.
  *
  ****************************************************************************/
@@ -162,9 +162,9 @@ static int  mtdconfig_readbytes(FAR struct mtdconfig_struct_s *dev, int offset,
   int    ret = OK;
   size_t bytes;
 
-  /* Test if read interface supported.  If it is, use it directly */
+  /* Test if read interface supported.  If it is, use it directly. */
 
-  if ((dev->mtd->read == NULL) && (readlen < dev->blocksize))
+  if ((dev->mtd->read != NULL) && (readlen < dev->blocksize))
     {
       /* Read interface available.  Read directly to buffer */
 
@@ -245,7 +245,7 @@ errout:
 /****************************************************************************
  * Name: mtdconfig_writebytes
  *
- *    Writes bytes to the contained MTD device.  This will either usee
+ *    Writes bytes to the contained MTD device.  This will either use
  *    the byte write function or if that is not available, the bwrite.
  *
  ****************************************************************************/
@@ -276,7 +276,7 @@ static int  mtdconfig_writebytes(FAR struct mtdconfig_struct_s *dev, int offset,
 
       while (writelen)
         {
-          /* Read existing data from the the block into the buffer */
+          /* Read existing data from the block into the buffer */
 
           block = offset / dev->blocksize;
           ret = MTD_BREAD(dev->mtd, block, 1, dev->buffer);
@@ -285,6 +285,17 @@ static int  mtdconfig_writebytes(FAR struct mtdconfig_struct_s *dev, int offset,
               ret = -EIO;
               goto errout;
             }
+
+          /* Now erase the block */
+
+          ret = MTD_ERASE(dev->mtd, block, 1);
+          if (ret < 0)
+            {
+              /* Error erasing the block */
+
+              ret = -EIO;
+              goto errout;
+          }
 
           index = offset - block * dev->blocksize;
           bytes_this_block = dev->blocksize - index;
@@ -341,7 +352,14 @@ static int  mtdconfig_findfirstentry(FAR struct mtdconfig_struct_s *dev,
   off_t     bytes_left_in_block;
   uint16_t  endblock;
 
-  mtdconfig_readbytes(dev, 0, sig, sizeof(sig));  /* Read the signature bytes */
+  /* Read the signature bytes */
+
+  ret = mtdconfig_readbytes(dev, 0, sig, sizeof(sig));
+  if (ret != OK)
+    {
+      return 0;
+    }
+
   if (sig[0] != 'C' || sig[1] != 'D' || sig[2] != CONFIGDATA_FORMAT_VERSION)
     {
       /* Config Data partition not formatted. */
@@ -777,7 +795,14 @@ static off_t  mtdconfig_consolidate(FAR struct mtdconfig_struct_s *dev)
       /* Scan all headers and move them to the src_offset */
 
 retry_relocate:
-      MTD_READ(dev->mtd, src_offset, sizeof(hdr), (uint8_t *) &hdr);
+      bytes = MTD_READ(dev->mtd, src_offset, sizeof(hdr), (uint8_t *) &hdr);
+      if (bytes != sizeof(hdr))
+        {
+          /* I/O Error! */
+
+          goto errout;
+        }
+
       if (hdr.flags == MTD_ERASED_FLAGS)
         {
           /* Test if the source entry is active or if we are at the end
@@ -956,6 +981,11 @@ static ssize_t mtdconfig_read(FAR struct file *filep, FAR char *buffer,
   /* Read data from the file */
 
   bytes = MTD_READ(dev->mtd, dev->readoff, len, (uint8_t *) buffer);
+  if (bytes != len)
+    {
+      return -EIO;
+    }
+
   dev->readoff += bytes;
   return bytes;
 }
@@ -970,6 +1000,7 @@ static int mtdconfig_findentry(FAR struct mtdconfig_struct_s *dev,
                                FAR struct mtdconfig_header_s *phdr)
 {
   uint16_t  endblock;
+  int       ret;
 
 #ifdef CONFIG_MTD_CONFIG_RAM_CONSOLIDATE
   endblock = dev->neraseblocks;
@@ -1002,7 +1033,15 @@ static int mtdconfig_findentry(FAR struct mtdconfig_struct_s *dev,
 
           /* Read the 1st header from the next block */
 
-          mtdconfig_readbytes(dev, offset, (uint8_t *) phdr, sizeof(*phdr));
+          ret = mtdconfig_readbytes(dev, offset, (uint8_t *) phdr, sizeof(*phdr));
+          if (ret != OK)
+            {
+              /* Error reading the data */
+
+              offset = 0;
+              break;
+            }
+
           if (phdr->flags == MTD_ERASED_FLAGS)
             {
               continue;
@@ -1035,8 +1074,12 @@ static int mtdconfig_setconfig(FAR struct mtdconfig_struct_s *dev,
   /* Allocate a temp block buffer */
 
   dev->buffer = (FAR uint8_t *) kmm_malloc(dev->blocksize);
+  if (dev->buffer == NULL)
+    {
+      return -ENOMEM;
+    }
 
-  /* Read and vaidate the signature bytes */
+  /* Read and validate the signature bytes */
 
 retry:
   offset = mtdconfig_findfirstentry(dev, &hdr);
@@ -1180,7 +1223,15 @@ retry_find:
       hdr.len = pdata->len;
       hdr.flags = MTD_ERASED_FLAGS;
 
-      mtdconfig_writebytes(dev, offset, (uint8_t *)&hdr, sizeof(hdr));
+      ret = mtdconfig_writebytes(dev, offset, (uint8_t *)&hdr, sizeof(hdr));
+      if (ret < 0)
+        {
+          /* Cannot write even header! */
+
+          ret = -EIO;
+          goto errout;
+        }
+
       bytes = mtdconfig_writebytes(dev, offset + sizeof(hdr), pdata->configdata,
                                    pdata->len);
       if (bytes != pdata->len)

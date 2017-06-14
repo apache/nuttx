@@ -41,11 +41,13 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/serial/serial.h>
 
 #include "chip.h"
 
-#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX)
-#  include "chip/stm32l4x6xx_uart.h"
+#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
+    defined(CONFIG_STM32L4_STM32L4X6)
+#  include "chip/stm32l4_uart.h"
 #else
 #  error "Unsupported STM32L4 chip"
 #endif
@@ -235,6 +237,16 @@ extern "C"
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+/************************************************************************************
+ * Name: stm32l4_serial_get_uart
+ *
+ * Description:
+ *   Get serial driver structure for STM32 USART
+ *
+ ************************************************************************************/
+
+FAR uart_dev_t *stm32l4_serial_get_uart(int uart_num);
 
 /************************************************************************************
  * Name: stm32l4_serial_dma_poll

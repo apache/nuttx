@@ -67,7 +67,7 @@ static FAR struct tcp_conn_s *tcp_listenports[CONFIG_NET_MAX_LISTENPORTS];
  ****************************************************************************/
 
 /****************************************************************************
- * Function: tcp_findlistener
+ * Name: tcp_findlistener
  *
  * Description:
  *   Return the connection listener for connections on this port (if any)
@@ -77,7 +77,11 @@ static FAR struct tcp_conn_s *tcp_listenports[CONFIG_NET_MAX_LISTENPORTS];
  *
  ****************************************************************************/
 
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+FAR struct tcp_conn_s *tcp_findlistener(uint16_t portno, uint8_t domain)
+#else
 FAR struct tcp_conn_s *tcp_findlistener(uint16_t portno)
+#endif
 {
   int ndx;
 
@@ -90,7 +94,11 @@ FAR struct tcp_conn_s *tcp_findlistener(uint16_t portno)
        */
 
       FAR struct tcp_conn_s *conn = tcp_listenports[ndx];
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+      if (conn && conn->lport == portno && conn->domain == domain)
+#else
       if (conn && conn->lport == portno)
+#endif
         {
           /* Yes.. we found a listener on this port */
 
@@ -108,7 +116,7 @@ FAR struct tcp_conn_s *tcp_findlistener(uint16_t portno)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: tcp_listen_initialize
+ * Name: tcp_listen_initialize
  *
  * Description:
  *   Setup the listening data structures
@@ -129,7 +137,7 @@ void tcp_listen_initialize(void)
 }
 
 /****************************************************************************
- * Function: tcp_unlisten
+ * Name: tcp_unlisten
  *
  * Description:
  *   Stop listening to the port bound to the specified TCP connection
@@ -160,7 +168,7 @@ int tcp_unlisten(FAR struct tcp_conn_s *conn)
 }
 
 /****************************************************************************
- * Function: tcp_listen
+ * Name: tcp_listen
  *
  * Description:
  *   Start listening to the port bound to the specified TCP connection
@@ -183,7 +191,11 @@ int tcp_listen(FAR struct tcp_conn_s *conn)
 
   /* First, check if there is already a socket listening on this port */
 
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+  if (tcp_islistener(conn->lport, conn->domain))
+#else
   if (tcp_islistener(conn->lport))
+#endif
     {
       /* Yes, then we must refuse this request */
 
@@ -219,7 +231,7 @@ int tcp_listen(FAR struct tcp_conn_s *conn)
 }
 
 /****************************************************************************
- * Function: tcp_islistener
+ * Name: tcp_islistener
  *
  * Description:
  *   Return true is there is a listener for the specified port
@@ -229,13 +241,20 @@ int tcp_listen(FAR struct tcp_conn_s *conn)
  *
  ****************************************************************************/
 
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+bool tcp_islistener(uint16_t portno, uint8_t domain)
+{
+  return tcp_findlistener(portno, domain) != NULL;
+}
+#else
 bool tcp_islistener(uint16_t portno)
 {
   return tcp_findlistener(portno) != NULL;
 }
+#endif
 
 /****************************************************************************
- * Function: tcp_accept_connection
+ * Name: tcp_accept_connection
  *
  * Description:
  *   Accept the new connection for the specified listening port.
@@ -256,8 +275,12 @@ int tcp_accept_connection(FAR struct net_driver_s *dev,
    * connection.
    */
 
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+  listener = tcp_findlistener(portno, conn->domain);
+#else
   listener = tcp_findlistener(portno);
-  if (listener)
+#endif
+  if (listener != NULL)
     {
       /* Yes, there is a listener.  Is it accepting connections now? */
 

@@ -125,9 +125,9 @@
 
 /* Pending register */
 
-#define EXTI_IMR_BIT(n)          STM32_EXTI_BIT(n)  /* 1=Selected trigger request occurred */
-#define EXTI_IMR_SHIFT           (0)                /* Bits 0-X: Pending bit for all lines */
-#define EXTI_IMR_MASK            STM32_EXTI_MASK
+#define EXTI_PR_BIT(n)           STM32_EXTI_BIT(n)  /* 1=Selected trigger request occurred */
+#define EXTI_PR_SHIFT            (0)                /* Bits 0-X: Pending bit for all lines */
+#define EXTI_PR_MASK             STM32_EXTI_MASK
 
 #endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX || CONFIG_STM32F7_STM32F76XX || CONFIG_STM32F7_STM32F77XX */
 #endif /* __ARCH_ARM_SRC_STM32F7_CHIP_STM32_EXTI_H */

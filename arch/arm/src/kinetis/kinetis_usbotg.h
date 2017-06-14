@@ -66,6 +66,4 @@ struct usbotg_bdtentry_s
 struct usbdev_s;
 int kinetis_usbpullup(FAR struct usbdev_s *dev,  bool enable);
 void kinetis_usbsuspend(FAR struct usbdev_s *dev, bool resume);
-void khci_usbattach(void);
-
 #endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_USBOTG_H */

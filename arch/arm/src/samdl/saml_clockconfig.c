@@ -1131,7 +1131,7 @@ static inline void sam_fdpll96m_config(void)
 static inline void sam_fdpll96m_refclk(void)
 {
 #ifdef BOARD_FDPLL96M_LOCKTIME_ENABLE
-  /* Enable the GCLK that is configured to the the FDPLL lock timer */
+  /* Enable the GCLK that is configured to the FDPLL lock timer */
 
   sam_gclk_chan_enable(GCLK_CHAN_DPLL_32K, BOARD_FDPLL96M_LOCKTIME_CLKGEN);
 #endif

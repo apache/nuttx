@@ -298,7 +298,7 @@ void arm_gic_initialize(void)
 #endif
 
 #if !defined(CONFIG_ARCH_HAVE_TRUSTZONE)
-  /* Enable the distributor by setting the the Enable bit in the enable
+  /* Enable the distributor by setting the Enable bit in the enable
    * register (no security extensions).
    */
 

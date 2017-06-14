@@ -600,7 +600,7 @@ uint32_t tiva_timer32_remaining(TIMER_HANDLE handle);
  * Description:
  *   This function may be called at any time to change the timer interval
  *   match value of a 32-bit timer.  This function sets the match register
- *   the the absolute value specified.
+ *   the absolute value specified.
  *
  * Input Parameters:
  *   handle   - The handle value returned  by tiva_gptm_configure()
@@ -625,7 +625,7 @@ static inline void tiva_timer32_absmatch(TIMER_HANDLE handle,
  * Description:
  *   This function may be called at any time to change the timer interval
  *   match value of a 16-bit timer.  This function sets the match register
- *   the the absolute value specified.
+ *   the absolute value specified.
  *
  * Input Parameters:
  *   handle   - The handle value returned  by tiva_gptm_configure()

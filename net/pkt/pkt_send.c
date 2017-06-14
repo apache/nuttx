@@ -86,7 +86,7 @@ struct send_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_send_interrupt
+ * Name: psock_send_interrupt
  ****************************************************************************/
 
 static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
@@ -152,7 +152,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_pkt_send
+ * Name: psock_pkt_send
  *
  * Description:
  *   The psock_pkt_send() call may be used only when the packet socket is in a

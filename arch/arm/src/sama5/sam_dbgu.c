@@ -287,7 +287,7 @@ static int dbgu_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(SAM_IRQ_DBGU, dbgu_interrupt, NULL);
+  ret = irq_attach(SAM_IRQ_DBGU, dbgu_interrupt, dev);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -330,12 +330,15 @@ static void dbgu_detach(struct uart_dev_s *dev)
 
 static int dbgu_interrupt(int irq, void *context, FAR void *arg)
 {
-  struct uart_dev_s *dev = &g_dbgu_port;
-  struct dbgu_dev_s *priv = (struct dbgu_dev_s *)dev->priv;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+  struct dbgu_dev_s *priv;
   uint32_t           pending;
   uint32_t           imr;
   int                passes;
   bool               handled;
+
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
+  priv = (struct dbgu_dev_s *)dev->priv;
 
   /* Loop until there are no characters to be transferred or, until we have
    * been looping for a long time.
@@ -580,7 +583,7 @@ void sam_dbgu_devinitialize(void)
   putreg32(DBGU_INT_ALLINTS, SAM_DBGU_IDR);
 
 #ifdef CONFIG_SAMA5_DBGU_CONSOLE
-  /* Configuration the DBGU as the the console */
+  /* Configuration the DBGU as the console */
 
   g_dbgu_port.isconsole = true;
   dbgu_configure();

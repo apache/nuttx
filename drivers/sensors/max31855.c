@@ -54,6 +54,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/sensors/max31855.h>
+#include <nuttx/random.h>
 
 #if defined(CONFIG_SPI) && defined(CONFIG_MAX31855)
 
@@ -202,7 +203,7 @@ static ssize_t max31855_read(FAR struct file *filep, FAR char *buffer, size_t bu
   /* Enable MAX31855's chip select */
 
   max31855_lock(priv->spi);
-  SPI_SELECT(priv->spi, SPIDEV_TEMPERATURE, true);
+  SPI_SELECT(priv->spi, SPIDEV_TEMPERATURE(0), true);
 
   /* Read temperature */
 
@@ -210,7 +211,7 @@ static ssize_t max31855_read(FAR struct file *filep, FAR char *buffer, size_t bu
 
   /* Disable MAX31855's chip select */
 
-  SPI_SELECT(priv->spi, SPIDEV_TEMPERATURE, false);
+  SPI_SELECT(priv->spi, SPIDEV_TEMPERATURE(0), false);
   max31855_unlock(priv->spi);
 
   regval  = (regmsb & 0xFF000000) >> 24;
@@ -219,6 +220,10 @@ static ssize_t max31855_read(FAR struct file *filep, FAR char *buffer, size_t bu
   regval |= (regmsb & 0xFF) << 24;
 
   sninfo("Read from MAX31855 = 0x%08X\n", regval);
+
+  /* Feed sensor data to entropy pool */
+
+  add_sensor_randomness(regval);
 
   /* If negative, fix signal bits */
 

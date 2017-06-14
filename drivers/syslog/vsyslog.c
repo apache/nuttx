@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/syslog/vsyslog.c
  *
- *   Copyright (C) 2007-2009, 2011-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <stdio.h>
 #include <syslog.h>
+#include <errno.h>
 
 #include <nuttx/init.h>
 #include <nuttx/arch.h>
@@ -67,7 +68,9 @@
 
 int _vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 {
-  struct lib_outstream_s stream;
+  struct lib_syslogstream_s stream;
+  int ret;
+
 #ifdef CONFIG_SYSLOG_TIMESTAMP
   struct timespec ts;
 
@@ -76,9 +79,23 @@ int _vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
    * available.
    */
 
-  if (!OSINIT_HW_READY() || clock_systimespec(&ts) < 0)
+  ret = -EAGAIN;
+  if (OSINIT_HW_READY())
     {
-      /* Timer hardware is not available, or clock_systimespec failed */
+      /* Prefer monotonic when enabled, as it can be synchronized to
+       * RTC with clock_resynchronize.
+       */
+
+#ifdef CONFIG_CLOCK_MONOTONIC
+      ret = clock_gettime(CLOCK_MONOTONIC, &ts);
+#else
+      ret = clock_systimespec(&ts);
+#endif
+    }
+
+  if (ret < 0)
+    {
+      /* Timer hardware is not available, or clock function failed */
 
       ts.tv_sec  = 0;
       ts.tv_nsec = 0;
@@ -94,21 +111,34 @@ int _vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
     {
       /* Use the SYSLOG emergency stream */
 
-      emergstream((FAR struct lib_outstream_s *)&stream);
+      emergstream(&stream.public);
     }
   else
     {
       /* Use the normal SYSLOG stream */
 
-      syslogstream((FAR struct lib_outstream_s *)&stream);
+      syslogstream_create(&stream);
     }
 
 #if defined(CONFIG_SYSLOG_TIMESTAMP)
   /* Pre-pend the message with the current time, if available */
 
-  (void)lib_sprintf((FAR struct lib_outstream_s *)&stream,
-                    "[%6d.%06d]", ts.tv_sec, ts.tv_nsec/1000);
+  (void)lib_sprintf(&stream.public, "[%6d.%06d]",
+                    ts.tv_sec, ts.tv_nsec/1000);
 #endif
 
-  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, *ap);
+  /* Generate the output */
+
+  ret = lib_vsprintf(&stream.public, fmt, *ap);
+
+#ifdef CONFIG_SYSLOG_BUFFER
+  /* Flush and destroy the syslog stream buffer */
+
+  if (priority != LOG_EMERG)
+    {
+      syslogstream_destroy(&stream);
+    }
+#endif
+
+  return ret;
 }

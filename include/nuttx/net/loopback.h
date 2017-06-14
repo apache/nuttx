@@ -91,7 +91,7 @@ EXTERN const net_ipv6addr_t g_lo_ipv6addr;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: localhost_initialize
+ * Name: localhost_initialize
  *
  * Description:
  *   Initialize the Ethernet controller and driver

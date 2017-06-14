@@ -1,8 +1,9 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_serial.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -158,15 +159,30 @@
 
 /* The DMA buffer size when using RX DMA to emulate a FIFO.
  *
- * When streaming data, the generic serial layer will be called
- * every time the FIFO receives half this number of bytes.
+ * When streaming data, the generic serial layer will be called every time
+ * the FIFO receives half this number of bytes.
  *
- * This buffer size should be an even multiple of the Cortex-M7
- * D-Cache line size so that it can be individually invalidated.
+ * This buffer size should be an even multiple of the Cortex-M7 D-Cache line
+ * size, ARMV7M_DCACHE_LINESIZE, so that it can be individually invalidated.
+ *
+ * Should there be a Cortex-M7 without a D-Cache, ARMV7M_DCACHE_LINESIZE
+ * would be zero!
  */
 
+#  if !defined(ARMV7M_DCACHE_LINESIZE) || ARMV7M_DCACHE_LINESIZE == 0
+#    undef ARMV7M_DCACHE_LINESIZE
+#    define ARMV7M_DCACHE_LINESIZE 32
+#  endif
+
+#  if !defined(CONFIG_STM32F7_SERIAL_RXDMA_BUFFER_SIZE) || \
+      (CONFIG_STM32F7_SERIAL_RXDMA_BUFFER_SIZE < ARMV7M_DCACHE_LINESIZE)
+#    undef CONFIG_STM32F7_SERIAL_RXDMA_BUFFER_SIZE
+#    define CONFIG_STM32F7_SERIAL_RXDMA_BUFFER_SIZE ARMV7M_DCACHE_LINESIZE
+#  endif
+
 #  define RXDMA_BUFFER_MASK   (ARMV7M_DCACHE_LINESIZE - 1)
-#  define RXDMA_BUFFER_SIZE   ((32 + RXDMA_BUFFER_MASK) & ~RXDMA_BUFFER_MASK)
+#  define RXDMA_BUFFER_SIZE   ((CONFIG_STM32F7_SERIAL_RXDMA_BUFFER_SIZE \
+                                + RXDMA_BUFFER_MASK) & ~RXDMA_BUFFER_MASK)
 
 /* DMA priority */
 
@@ -189,16 +205,6 @@
                CONFIG_USART_DMAPRIO  | \
                DMA_SCR_PBURST_SINGLE | \
                DMA_SCR_MBURST_SINGLE)
-#  ifdef CONFIG_SERIAL_IFLOWCONTROL
-#    define SERIAL_DMA_IFLOW_CONTROL_WORD \
-              (DMA_SCR_DIR_P2M       | \
-               DMA_SCR_MINC          | \
-               DMA_SCR_PSIZE_8BITS   | \
-               DMA_SCR_MSIZE_8BITS   | \
-               CONFIG_USART_DMAPRIO  | \
-               DMA_SCR_PBURST_SINGLE | \
-               DMA_SCR_MBURST_SINGLE)
-#  endif
 #endif /* SERIAL_HAVE_DMA */
 
 /* Power management definitions */
@@ -227,6 +233,59 @@
 #ifdef USE_SERIALDRIVER
 #ifdef HAVE_UART
 
+/* Warnings for potentially unsafe configuration combinations. */
+
+#if defined(CONFIG_STM32F7_FLOWCONTROL_BROKEN) && \
+    !defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS)
+#  error "CONFIG_STM32F7_FLOWCONTROL_BROKEN requires \
+          CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS to be enabled."
+#endif
+
+#ifndef CONFIG_STM32F7_FLOWCONTROL_BROKEN
+/* Combination of RXDMA + IFLOWCONTROL does not work as one might expect.
+ * Since RXDMA uses circular DMA-buffer, DMA will always keep reading new
+ * data from USART peripheral even if DMA buffer underruns. Thus this
+ * combination only does following: RTS is asserted on USART setup and
+ * deasserted on shutdown and does not perform actual RTS flow-control.
+ *
+ * With SW flow-control, RTS is asserted before UART receive buffer fully
+ * fills, thus preventing data loss if application is slow to process data
+ * from serial device node. However, if RxDMA interrupt is blocked for too
+ * long, data loss is still possible as SW flow-control would also be
+ * blocked.
+ */
+
+# if defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_IFLOWCONTROL)
+#    warning "RXDMA and IFLOWCONTROL both enabled for USART1. \
+              This combination can lead to data loss."
+#  endif
+
+#  if defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_IFLOWCONTROL)
+#    warning "RXDMA and IFLOWCONTROL both enabled for USART2. \
+              This combination can lead to data loss."
+#  endif
+
+#  if defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_IFLOWCONTROL)
+#    warning "RXDMA and IFLOWCONTROL both enabled for USART3. \
+              This combination can lead to data loss."
+#  endif
+
+#  if defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_IFLOWCONTROL)
+#    warning "RXDMA and IFLOWCONTROL both enabled for USART6. \
+              This combination can lead to data loss."
+#  endif
+
+#  if defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_IFLOWCONTROL)
+#    warning "RXDMA and IFLOWCONTROL both enabled for UART7. \
+              This combination can lead to data loss."
+#  endif
+
+#  if defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_IFLOWCONTROL)
+#    warning "RXDMA and IFLOWCONTROL both enabled for UART8. \
+              This combination can lead to data loss."
+#  endif
+#endif /* CONFIG_STM32F7_FLOWCONTROL_BROKEN */
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -236,6 +295,10 @@ struct up_dev_s
   struct uart_dev_s dev;       /* Generic UART device */
   uint16_t          ie;        /* Saved interrupt mask bits value */
   uint16_t          sr;        /* Saved status bits */
+
+  /* Has been initialized and HW is setup. */
+
+  bool              initialized;
 
   /* If termios are supported, then the following fields may vary at
    * runtime.
@@ -286,8 +349,7 @@ struct up_dev_s
 #ifdef SERIAL_HAVE_DMA
   DMA_HANDLE        rxdma;     /* currently-open receive DMA stream */
   bool              rxenable;  /* DMA-based reception en/disable */
-  uint16_t          rxdmain;   /* Next byte in the DMA where hardware will write */
-  uint16_t          rxdmaout;  /* Next byte in the DMA buffer to be read */
+  uint32_t          rxdmanext; /* Next byte in the DMA buffer to be read */
   char      *const  rxfifo;    /* Receive DMA buffer */
 #endif
 
@@ -389,8 +451,7 @@ static const struct uart_ops_s g_uart_dma_ops =
  * 1. Be a multiple of the D-Cache line size.  This requirement is assured
  *    by the definition of RXDMA buffer size above.
  * 2. Be aligned a D-Cache line boundaries, and
- * 3. Be positioned in DMA-able memory (*NOT* DTCM memory).  This must
- *    be managed by logic in the linker script file.
+ * 3. Be positioned in DMA-able memory.
  *
  * These DMA buffers are defined sequentially here to best assure optimal
  * packing of the buffers.
@@ -889,11 +950,11 @@ static struct up_dev_s g_uart7priv =
   .usartbase      = STM32_UART7_BASE,
   .tx_gpio        = GPIO_UART7_TX,
   .rx_gpio        = GPIO_UART7_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART7_OFLOWCONTROL)
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART7_OFLOWCONTROL)
   .oflow          = true,
   .cts_gpio       = GPIO_UART7_CTS,
 #endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART7_IFLOWCONTROL)
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART7_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = GPIO_UART7_RTS,
 #endif
@@ -950,11 +1011,11 @@ static struct up_dev_s g_uart8priv =
   .usartbase      = STM32_UART8_BASE,
   .tx_gpio        = GPIO_UART8_TX,
   .rx_gpio        = GPIO_UART8_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART8_OFLOWCONTROL)
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART8_OFLOWCONTROL)
   .oflow          = true,
   .cts_gpio       = GPIO_UART8_CTS,
 #endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART8_IFLOWCONTROL)
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART8_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = GPIO_UART8_RTS,
 #endif
@@ -1035,10 +1096,10 @@ static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t valu
 }
 
 /****************************************************************************
- * Name: up_restoreusartint
+ * Name: up_setusartint
  ****************************************************************************/
 
-static void up_restoreusartint(struct up_dev_s *priv, uint16_t ie)
+static inline void up_setusartint(struct up_dev_s *priv, uint16_t ie)
 {
   uint32_t cr;
 
@@ -1060,11 +1121,30 @@ static void up_restoreusartint(struct up_dev_s *priv, uint16_t ie)
 }
 
 /****************************************************************************
+ * Name: up_restoreusartint
+ ****************************************************************************/
+
+static void up_restoreusartint(struct up_dev_s *priv, uint16_t ie)
+{
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  up_setusartint(priv, ie);
+
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
  * Name: up_disableusartint
  ****************************************************************************/
 
-static inline void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
+static void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
 {
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
   if (ie)
     {
       uint32_t cr1;
@@ -1101,7 +1181,9 @@ static inline void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
 
   /* Disable all interrupts */
 
-  up_restoreusartint(priv, 0);
+  up_setusartint(priv, 0);
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1139,7 +1221,22 @@ static void up_set_format(struct uart_dev_s *dev)
   uint32_t regval;
   uint32_t usartdiv8;
   uint32_t cr1;
+  uint32_t cr1_ue;
   uint32_t brr;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  /* Get the original state of UE */
+
+  cr1  = up_serialin(priv, STM32_USART_CR1_OFFSET);
+  cr1_ue = cr1 & USART_CR1_UE;
+  cr1 &= ~USART_CR1_UE;
+
+  /* Disable UE as the format bits and baud rate registers can not be
+   * updated while UE = 1 */
+
+  up_serialout(priv, STM32_USART_CR1_OFFSET, cr1);
 
   /* In case of oversampling by 8, the equation is:
    *
@@ -1159,7 +1256,6 @@ static void up_set_format(struct uart_dev_s *dev)
 
   /* Use oversamply by 8 only if the divisor is small.  But what is small? */
 
-  cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET);
   if (usartdiv8 > 100)
     {
       /* Use usartdiv16 */
@@ -1188,30 +1284,44 @@ static void up_set_format(struct uart_dev_s *dev)
 
   /* Configure parity mode */
 
-  regval  = up_serialin(priv, STM32_USART_CR1_OFFSET);
-  regval &= ~(USART_CR1_PCE | USART_CR1_PS | USART_CR1_M0);
+  cr1 &= ~(USART_CR1_PCE | USART_CR1_PS | USART_CR1_M0 | USART_CR1_M1);
 
   if (priv->parity == 1)       /* Odd parity */
     {
-      regval |= (USART_CR1_PCE | USART_CR1_PS);
+      cr1 |= (USART_CR1_PCE | USART_CR1_PS);
     }
   else if (priv->parity == 2)  /* Even parity */
     {
-      regval |= USART_CR1_PCE;
+      cr1 |= USART_CR1_PCE;
     }
 
-  /* Configure word length (Default: 8-bits) */
+  /* Configure word length (parity uses one of configured bits)
+   *
+   * Default: 1 start, 8 data (no parity), n stop, OR
+   *          1 start, 7 data + parity, n stop
+   */
 
-  if (priv->bits == 7)
+  if (priv->bits == 9 || (priv->bits == 8 && priv->parity != 0))
     {
-      regval |= USART_CR1_M1;
+      /* Select: 1 start, 8 data + parity, n stop, OR
+       *         1 start, 9 data (no parity), n stop.
+       */
+
+      cr1 |= USART_CR1_M0;
     }
-  else if (priv->bits == 9)
+  else if (priv->bits == 7 && priv->parity == 0)
     {
-      regval |= USART_CR1_M0;
+      /* Select: 1 start, 7 data (no parity), n stop, OR
+       */
+
+      cr1 |= USART_CR1_M1;
     }
 
-  up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
+  /* Else Select: 1 start, 7 data + parity, n stop, OR
+   *              1 start, 8 data (no parity), n stop.
+   */
+
+  up_serialout(priv, STM32_USART_CR1_OFFSET, cr1);
 
   /* Configure STOP bits */
 
@@ -1230,7 +1340,8 @@ static void up_set_format(struct uart_dev_s *dev)
   regval  = up_serialin(priv, STM32_USART_CR3_OFFSET);
   regval &= ~(USART_CR3_CTSE | USART_CR3_RTSE);
 
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && !defined(CONFIG_STM32F7_FLOWCONTROL_BROKEN)
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && \
+   !defined(CONFIG_STM32F7_FLOWCONTROL_BROKEN)
   if (priv->iflow && (priv->rts_gpio != 0))
     {
       regval |= USART_CR3_RTSE;
@@ -1245,6 +1356,8 @@ static void up_set_format(struct uart_dev_s *dev)
 #endif
 
   up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
+  up_serialout(priv, STM32_USART_CR1_OFFSET, cr1 | cr1_ue);
+  leave_critical_section(flags);
 }
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 
@@ -1439,6 +1552,11 @@ static int up_setup(struct uart_dev_s *dev)
   /* Set up the cached interrupt enables value */
 
   priv->ie    = 0;
+
+  /* Mark device as initialized. */
+
+  priv->initialized = true;
+
   return OK;
 }
 
@@ -1473,35 +1591,19 @@ static int up_dma_setup(struct uart_dev_s *dev)
 
   priv->rxdma = stm32_dmachannel(priv->rxdma_channel);
 
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-  if (priv->iflow)
-    {
-      /* Configure for non-circular DMA reception into the RX FIFO */
+    /* Configure for circular DMA reception into the RX FIFO */
 
-      stm32_dmasetup(priv->rxdma,
-                     priv->usartbase + STM32_USART_RDR_OFFSET,
-                     (uint32_t)priv->rxfifo,
-                     RXDMA_BUFFER_SIZE,
-                     SERIAL_DMA_IFLOW_CONTROL_WORD);
-    }
-  else
-#endif
-    {
-      /* Configure for circular DMA reception into the RX FIFO */
-
-      stm32_dmasetup(priv->rxdma,
-                     priv->usartbase + STM32_USART_RDR_OFFSET,
-                     (uint32_t)priv->rxfifo,
-                     RXDMA_BUFFER_SIZE,
-                     SERIAL_DMA_CONTROL_WORD);
-    }
+    stm32_dmasetup(priv->rxdma,
+                   priv->usartbase + STM32_USART_RDR_OFFSET,
+                   (uint32_t)priv->rxfifo,
+                   RXDMA_BUFFER_SIZE,
+                   SERIAL_DMA_CONTROL_WORD);
 
   /* Reset our DMA shadow pointer to match the address just
    * programmed above.
    */
 
-  priv->rxdmaout = 0;
-  priv->rxdmain  = 0;
+  priv->rxdmanext = 0;
 
   /* Enable receive DMA for the UART */
 
@@ -1509,26 +1611,12 @@ static int up_dma_setup(struct uart_dev_s *dev)
   regval |= USART_CR3_DMAR;
   up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
 
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-  if (priv->iflow)
-    {
-      /* Start the DMA channel, and arrange for callbacks at the full point
-       * in the FIFO. After buffer gets full, hardware flow-control kicks
-       * in and DMA transfer is stopped.
-       */
+    /* Start the DMA channel, and arrange for callbacks at the half and
+     * full points in the FIFO.  This ensures that we have half a FIFO
+     * worth of time to claim bytes before they are overwritten.
+     */
 
-      stm32_dmastart(priv->rxdma, up_dma_rxcallback, (void *)priv, false);
-    }
-  else
-#endif
-    {
-      /* Start the DMA channel, and arrange for callbacks at the half and
-       * full points in the FIFO.  This ensures that we have half a FIFO
-       * worth of time to claim bytes before they are overwritten.
-       */
-
-      stm32_dmastart(priv->rxdma, up_dma_rxcallback, (void *)priv, true);
-    }
+    stm32_dmastart(priv->rxdma, up_dma_rxcallback, (void *)priv, true);
 
   return OK;
 }
@@ -1547,6 +1635,10 @@ static void up_shutdown(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint32_t regval;
+
+  /* Mark device as uninitialized. */
+
+  priv->initialized = false;
 
   /* Disable all interrupts */
 
@@ -2168,6 +2260,22 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
       /* Assert/de-assert nRTS set it high resume/stop sending */
 
       stm32_gpiowrite(priv->rts_gpio, upper);
+
+      if (upper)
+        {
+          /* With heavy Rx traffic, RXNE might be set and data pending.
+           * Returning 'true' in such case would cause RXNE left unhandled
+           * and causing interrupt storm. Sending end might be also be slow
+           * to react on nRTS, and returning 'true' here would prevent
+           * processing that data.
+           *
+           * Therefore, return 'false' so input data is still being processed
+           * until sending end reacts on nRTS signal and stops sending more.
+           */
+
+          return false;
+        }
+
       return upper;
     }
 
@@ -2226,88 +2334,31 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
 static int up_dma_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-  uint32_t rxdmain;
   int c = 0;
 
   /* If additional bytes have been added to the DMA buffer, then we will need
    * to invalidate the DMA buffer before reading the byte.
    */
 
-  rxdmain = up_dma_nextrx(priv);
-  if (rxdmain != priv->rxdmain)
+  if (up_dma_nextrx(priv) != priv->rxdmanext)
     {
       /* Invalidate the DMA buffer */
 
       arch_invalidate_dcache((uintptr_t)priv->rxfifo,
                              (uintptr_t)priv->rxfifo + RXDMA_BUFFER_SIZE - 1);
 
-      /* Since DMA is ongoing, there are lots of race conditions here.  We
-       * just have to hope that the rxdmaout stays well ahead of rxdmain.
-       */
+      /* Now read from the DMA buffer */
 
-      priv->rxdmain = rxdmain;
-    }
+      c = priv->rxfifo[priv->rxdmanext];
 
-  /* Now check if there are any bytes to read from the DMA buffer */
-
-  if (rxdmain != priv->rxdmaout)
-    {
-      c = priv->rxfifo[priv->rxdmaout];
-
-      priv->rxdmaout++;
-      if (priv->rxdmaout == RXDMA_BUFFER_SIZE)
+      priv->rxdmanext++;
+      if (priv->rxdmanext == RXDMA_BUFFER_SIZE)
         {
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-          if (priv->iflow)
-            {
-              /* RX DMA buffer full. RX paused, RTS line pulled up to prevent
-               * more input data from other end.
-               */
-            }
-          else
-#endif
-            {
-              priv->rxdmaout = 0;
-            }
+          priv->rxdmanext = 0;
         }
     }
 
   return c;
-}
-#endif
-
-/****************************************************************************
- * Name: up_dma_reenable
- *
- * Description:
- *   Call to re-enable RX DMA.
- *
- ****************************************************************************/
-
-#if defined(SERIAL_HAVE_DMA) && defined(CONFIG_SERIAL_IFLOWCONTROL)
-static void up_dma_reenable(struct up_dev_s *priv)
-{
-  /* Configure for non-circular DMA reception into the RX FIFO */
-
-  stm32_dmasetup(priv->rxdma,
-                 priv->usartbase + STM32_USART_RDR_OFFSET,
-                 (uint32_t)priv->rxfifo,
-                 RXDMA_BUFFER_SIZE,
-                 SERIAL_DMA_IFLOW_CONTROL_WORD);
-
-  /* Reset our DMA shadow pointer to match the address just programmed
-   * above.
-   */
-
-  priv->rxdmaout = 0;
-  priv->rxdmain  = 0;
-
-  /* Start the DMA channel, and arrange for callbacks at the full point in
-   * the FIFO. After buffer gets full, hardware flow-control kicks in and
-   * DMA transfer is stopped.
-   */
-
-  stm32_dmastart(priv->rxdma, up_dma_rxcallback, (void *)priv, false);
 }
 #endif
 
@@ -2333,15 +2384,6 @@ static void up_dma_rxint(struct uart_dev_s *dev, bool enable)
    */
 
   priv->rxenable = enable;
-
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-  if (priv->iflow && priv->rxenable && (priv->rxdmaout == RXDMA_BUFFER_SIZE))
-    {
-      /* Re-enable RX DMA. */
-
-      up_dma_reenable(priv);
-    }
-#endif
 }
 #endif
 
@@ -2362,7 +2404,7 @@ static bool up_dma_rxavailable(struct uart_dev_s *dev)
    * do not match, then there are bytes to be received.
    */
 
-  return (up_dma_nextrx(priv) != priv->rxdmaout);
+  return (up_dma_nextrx(priv) != priv->rxdmanext);
 }
 #endif
 
@@ -2486,16 +2528,6 @@ static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
   if (priv->rxenable && up_dma_rxavailable(&priv->dev))
     {
       uart_recvchars(&priv->dev);
-
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-      if (priv->iflow && priv->rxenable &&
-          (priv->rxdmaout == RXDMA_BUFFER_SIZE))
-        {
-          /* Re-enable RX DMA. */
-
-          up_dma_reenable(priv);
-        }
-#endif
     }
 }
 #endif
@@ -2613,6 +2645,31 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
  ****************************************************************************/
 
 #ifdef USE_SERIALDRIVER
+
+/****************************************************************************
+ * Name: stm32_serial_get_uart
+ *
+ * Description:
+ *   Get serial driver structure for STM32 USART
+ *
+ ****************************************************************************/
+
+FAR uart_dev_t *stm32_serial_get_uart(int uart_num)
+{
+  int uart_idx = uart_num - 1;
+
+  if (uart_idx < 0 || uart_idx >= STM32_NSERIAL || !uart_devs[uart_idx])
+    {
+      return NULL;
+    }
+
+  if (!uart_devs[uart_idx]->initialized)
+    {
+      return NULL;
+    }
+
+  return &uart_devs[uart_idx]->dev;
+}
 
 /****************************************************************************
  * Name: up_earlyserialinit
@@ -2832,6 +2889,7 @@ int up_putc(int ch)
 
   up_lowputc(ch);
   up_restoreusartint(priv, ie);
+
 #endif
   return ch;
 }

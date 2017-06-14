@@ -147,7 +147,7 @@
 
 #  define SAMA5_PRIMARY_HEAP_END CONFIG_SAMA5_DDRCS_HEAP_END
 #else
-  /* Otherwise, add the RAM all the way to the the end of the primary memory
+  /* Otherwise, add the RAM all the way to the end of the primary memory
    * region to the heap.
    */
 

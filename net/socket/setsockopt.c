@@ -45,11 +45,14 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <errno.h>
+#include <debug.h>
+#include <assert.h>
 #include <arch/irq.h>
 
 #include <nuttx/net/net.h>
 
 #include "socket/socket.h"
+#include "usrsock/usrsock.h"
 #include "utils/utils.h"
 
 /****************************************************************************
@@ -57,7 +60,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_setsockopt
+ * Name: psock_setsockopt
  *
  * Description:
  *   psock_setsockopt() sets the option specified by the 'option' argument,
@@ -114,6 +117,39 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
       errcode = EINVAL;
       goto errout;
     }
+
+#ifdef CONFIG_NET_USRSOCK
+  if (psock->s_type == SOCK_USRSOCK_TYPE)
+    {
+      FAR struct usrsock_conn_s *conn = psock->s_conn;
+      int ret;
+
+      DEBUGASSERT(conn);
+
+      /* Some of the socket options are handled from this function. */
+
+      switch (option)
+        {
+          case SO_RCVTIMEO: /* Rx timeouts can be handled at NuttX side, thus
+                             * simplify daemon implementation. */
+          case SO_SNDTIMEO: /* Rx timeouts can be handled at NuttX side, thus
+                             * simplify daemon implementation. */
+            break;
+
+          default:          /* Other options are passed to usrsock daemon. */
+            {
+              ret = usrsock_setsockopt(conn, level, option, value, value_len);
+              if (ret < 0)
+                {
+                  errcode = -ret;
+                  goto errout;
+              }
+
+              return OK;
+            }
+        }
+    }
+#endif
 
   /* Process the option */
 
@@ -279,7 +315,7 @@ errout:
 }
 
 /****************************************************************************
- * Function: setsockopt
+ * Name: setsockopt
  *
  * Description:
  *   setsockopt() sets the option specified by the 'option' argument,

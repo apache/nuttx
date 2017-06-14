@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/nucleo-144/src/stm32_appinitilaize.c
+ * config/nucleo-144/src/stm32_appinitialize.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -42,6 +42,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/mount.h>
 #include <debug.h>
 #include <syslog.h>
 
@@ -64,7 +65,7 @@
  *   arg - The boardctl() argument is passed to the board_app_initialize()
  *         implementation without modification.  The argument has no
  *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the the
+ *         between the board-specific initalization logic and the
  *         matching application logic.  The value cold be such things as a
  *         mode enumeration value, a set of DIP switch switch settings, a
  *         pointer to configuration data read from a file or serial FLASH,

@@ -150,7 +150,7 @@ The general idea to fix both of these problems is as follows:
    program is stored in the filesystem.
 
 3. Modify the logic so that the P-Code execution program runs (instead of
-   the requested program) an it received the full path the the P-Code file
+   the requested program) an it received the full path the P-Code file
    on the command line.  This might be accomplished by simply modifying the
    argv[] structure in the struct binary_s instance.
 

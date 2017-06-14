@@ -237,14 +237,20 @@
 #define GPIO_USART1_RX GPIO_USART1_RX_1 /* PA10 */
 #define GPIO_USART1_TX GPIO_USART1_TX_1 /* PA9 */
 
-/* HRTIM */
+/* COMP */
 
+/* OPAMP */
+
+#define OPAMP2_VMSEL OPAMP2_VMSEL_PC5
+#define OPAMP2_VPSEL OPAMP2_VPSEL_PB14
+
+/* HRTIM */
 
 /* DMA channels *************************************************************/
 /* ADC */
 
-#define ADC1_DMA_CHAN DMACHAN_ADC1
-#define ADC2_DMA_CHAN DMACHAN_ADC2_
+#define ADC1_DMA_CHAN DMACHAN_ADC1     /* DMA1_CH1 */
+#define ADC2_DMA_CHAN DMACHAN_ADC2_1   /* DMA1_CH2 */
 
 /****************************************************************************
  * Public Data

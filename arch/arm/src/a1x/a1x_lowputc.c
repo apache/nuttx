@@ -228,7 +228,7 @@ void a1x_lowsetup(void)
 #warning Missing logic
 
   /* Configure UART pins for the selected CONSOLE.  If there are multiple
-   * pin options for a given UART, the the applicable option must be
+   * pin options for a given UART, the applicable option must be
    * disambiguated in the board.h header file.
    */
 

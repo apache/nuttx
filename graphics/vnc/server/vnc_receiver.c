@@ -497,7 +497,7 @@ int vnc_client_encodings(FAR struct vnc_session_s *session,
 }
 
 /****************************************************************************
- * Function: vnc_mouse
+ * Name: vnc_mouse
  *
  * Description:
  *   This is the default keyboard/mouse callout function.  This is simply a

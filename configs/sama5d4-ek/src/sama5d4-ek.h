@@ -563,7 +563,7 @@
  * J9 pin 8 LCD_TWD0_PA30   J4 pin 8 SDA_0
  * ------------------------ -----------------
  *
- * The schematic indicates the the MXT468E address is 0x4c/0x4d.
+ * The schematic indicates the MXT468E address is 0x4c/0x4d.
  */
 
 #define PIO_CHG_MXT  (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \

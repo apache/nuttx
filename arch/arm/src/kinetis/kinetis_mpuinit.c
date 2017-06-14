@@ -45,6 +45,7 @@
 
 #include "mpu.h"
 #include "kinetis_mpuinit.h"
+#include "chip/kinetis_mpu.h"
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_ARM_MPU)
 
@@ -118,6 +119,25 @@ void kinetis_mpuinitialize(void)
 void kinetis_mpu_uheap(uintptr_t start, size_t size)
 {
   mpu_user_intsram(start, size);
+}
+
+#elif defined(KINETIS_MPU)
+
+/****************************************************************************
+ * Name: kinetis_mpudisable
+ *
+ * Description:
+ *   Configure the MPU to permit All buss masters access to all resources.
+ *
+ ****************************************************************************/
+
+void kinetis_mpudisable(void)
+{
+  uint32_t regval;
+
+  regval = getreg32(KINETIS_MPU_CESR);
+  regval &= ~MPU_CESR_VLD;
+  putreg32(regval, KINETIS_MPU_CESR);
 }
 
 #endif /* CONFIG_BUILD_PROTECTED && CONFIG_ARM_MPU */

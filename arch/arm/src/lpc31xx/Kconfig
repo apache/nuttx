@@ -263,7 +263,7 @@ config LPC31_EHCI_SDIS
 		Selecting this option ensures that overruns/underruns of the latency
 		FIFO are eliminated for low bandwidth systems where the RX and TX
 		buffers are sufficient to contain the entire packet. Enabling stream
-		disable also has the effect of ensuring the the TX latency is filled
+		disable also has the effect of ensuring the TX latency is filled
 		to capacity before the packet is launched onto the USB.
 
 		Note: Time duration to pre-fill the FIFO becomes significant when stream disable is active.

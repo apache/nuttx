@@ -75,7 +75,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: arp_send_terminate
+ * Name: arp_send_terminate
  ****************************************************************************/
 
 static void arp_send_terminate(FAR struct arp_send_s *state, int result)
@@ -94,7 +94,7 @@ static void arp_send_terminate(FAR struct arp_send_s *state, int result)
 }
 
 /****************************************************************************
- * Function: arp_send_interrupt
+ * Name: arp_send_interrupt
  ****************************************************************************/
 
 static uint16_t arp_send_interrupt(FAR struct net_driver_s *dev,
@@ -158,7 +158,7 @@ static uint16_t arp_send_interrupt(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: arp_send
+ * Name: arp_send
  *
  * Description:
  *   The arp_send() call may be to send an ARP request to resolve an IP

@@ -36,6 +36,7 @@
 # TCP/IP source files
 
 ifeq ($(CONFIG_NET_TCP),y)
+ifneq ($(CONFIG_NET_TCP_NO_STACK),y)
 
 # Socket layer
 
@@ -73,4 +74,5 @@ endif
 DEPPATH += --dep-path tcp
 VPATH += :tcp
 
+endif # !CONFIG_NET_TCP_NO_STACK
 endif # CONFIG_NET_TCP

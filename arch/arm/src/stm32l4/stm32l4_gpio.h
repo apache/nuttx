@@ -54,8 +54,9 @@
 
 #include "chip.h"
 
-#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX)
-#  include "chip/stm32l4x6xx_gpio.h"
+#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
+    defined(CONFIG_STM32L4_STM32L4X6)
+#  include "chip/stm32l4_gpio.h"
 #else
 #  error "Unsupported STM32L4 chip"
 #endif
@@ -211,6 +212,7 @@
 #  define GPIO_PORTF                  (5 << GPIO_PORT_SHIFT)     /*   GPIOF */
 #  define GPIO_PORTG                  (6 << GPIO_PORT_SHIFT)     /*   GPIOG */
 #  define GPIO_PORTH                  (7 << GPIO_PORT_SHIFT)     /*   GPIOH */
+#  define GPIO_PORTI                  (8 << GPIO_PORT_SHIFT)     /*   GPIOI */
 
 /* This identifies the bit in the port:
  *

@@ -217,6 +217,7 @@ struct stm32_chan_s
   uint8_t           eptype;    /* See OTGHS_EPTYPE_* definitions */
   uint8_t           funcaddr;  /* Device function address */
   uint8_t           speed;     /* Device speed */
+  uint8_t           interval;  /* Interrupt/isochronous EP polling interval */
   uint8_t           pid;       /* Data PID */
   uint8_t           npackets;  /* Number of packets (for data toggle) */
   bool              inuse;     /* True: This channel is "in use" */
@@ -1215,6 +1216,7 @@ static int stm32_ctrlchan_alloc(FAR struct stm32_usbhost_s *priv,
   chan->eptype    = OTGHS_EPTYPE_CTRL;
   chan->funcaddr  = funcaddr;
   chan->speed     = speed;
+  chan->interval  = 0;
   chan->maxpacket = STM32_EP0_DEF_PACKET_SIZE;
   chan->indata1   = false;
   chan->outdata1  = false;
@@ -1239,6 +1241,7 @@ static int stm32_ctrlchan_alloc(FAR struct stm32_usbhost_s *priv,
   chan->eptype    = OTGHS_EPTYPE_CTRL;
   chan->funcaddr  = funcaddr;
   chan->speed     = speed;
+  chan->interval  = 0;
   chan->maxpacket = STM32_EP0_DEF_PACKET_SIZE;
   chan->indata1   = false;
   chan->outdata1  = false;
@@ -1368,6 +1371,7 @@ static int stm32_xfrep_alloc(FAR struct stm32_usbhost_s *priv,
   chan->eptype    = epdesc->xfrtype;
   chan->funcaddr  = hport->funcaddr;
   chan->speed     = hport->speed;
+  chan->interval  = epdesc->interval;
   chan->maxpacket = epdesc->mxpacketsize;
   chan->indata1   = false;
   chan->outdata1  = false;
@@ -1898,6 +1902,8 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
                 }
               else
                 {
+                  useconds_t delay;
+
                   /* Get the elapsed time.  Has the timeout elapsed?
                    * if not then try again.
                    */
@@ -1912,13 +1918,64 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
                       return (ssize_t)ret;
                     }
 
-                  /* Wait a bit before retrying after a NAK.
+                  /* Wait a bit before retrying after a NAK. */
+
+                  if (chan->eptype == OTGFS_HCCHAR_EPTYP_INTR)
+                    {
+                      /* For interrupt (and isochronous) endpoints, the
+                       * polling rate is determined by the bInterval field
+                       * of the endpoint descriptor (in units of frames
+                       * which we treat as milliseconds here).
+                       */
+
+                      if (chan->interval > 0)
+                        {
+                          /* Convert the delay to units of microseconds */
+
+                          delay = (useconds_t)chan->interval * 1000;
+                        }
+                      else
+                        {
+                          /* Out of range! For interrupt endpoints, the valid
+                           * range is 1-255 frames.  Assume one frame.
+                           */
+
+                          delay = 1000;
+                        }
+                    }
+                  else
+                    {
+                      /* For Isochronous endpoints, bInterval must be 1.  Bulk
+                       * endpoints do not have a polling interval.  Rather,
+                       * the should wait until data is received.
+                       *
+                       * REVISIT:  For bulk endpoints this 1 msec delay is only
+                       * intended to give the CPU a break from the bulk EP tight
+                       * polling loop.  But are there performance issues?
+                       */
+
+                      delay = 1000;
+                    }
+
+                  /* Wait for the next polling interval.  For interrupt and
+                   * isochronous endpoints, this is necessaryto assure the
+                   * polling interval.  It is used in other cases only to
+                   * prevent the polling from consuming too much CPU bandwith.
                    *
-                   * REVISIT:  This is intended to give the CPU a break from
-                   * the tight polling loop.  But are there performance issues?
+                   * Small delays could require more resolution than is provided
+                   * by the system timer.  For example, if the system timer
+                   * resolution is 10MS, then usleep(1000) will actually request
+                   * a delay 20MS (due to both quantization and rounding).
+                   *
+                   * REVISIT: So which is better?  To ignore tiny delays and
+                   * hog the system bandwidth?  Or to wait for an excessive
+                   * amount and destroy system throughput?
                    */
 
-                  usleep(1000);
+                  if (delay > CONFIG_USEC_PER_TICK)
+                    {
+                      usleep(delay - CONFIG_USEC_PER_TICK);
+                    }
                 }
             }
           else
@@ -1937,7 +1994,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
         {
           /* Successfully received another chunk of data... add that to the
            * runing total.  Then continue reading until we read 'buflen'
-           * bytes of data or until the the devices NAKs (implying a short
+           * bytes of data or until the devices NAKs (implying a short
            * packet).
            */
 
@@ -2194,8 +2251,8 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
           /* Check for a special case:  If (1) the transfer was NAKed and (2)
            * no Tx FIFO empty or Rx FIFO not-empty event occurred, then we
            * should be able to just flush the Rx and Tx FIFOs and try again.
-           * We can detect this latter case because the then the transfer
-           * buffer pointer and buffer size will be unaltered.
+           * We can detect this latter case because then the transfer buffer
+           * pointer and buffer size will be unaltered.
            */
 
           elapsed = clock_systimer() - start;
@@ -4589,7 +4646,7 @@ static ssize_t stm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
  *   enqueue the transfer request and return immediately.  When the transfer
- *   completes, the the callback will be invoked with the provided transfer.
+ *   completes, the callback will be invoked with the provided transfer.
  *   This method is useful for receiving interrupt transfers which may come
  *   infrequently.
  *

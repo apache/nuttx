@@ -637,7 +637,7 @@ static const uint8_t g_setcon[] =
  **************************************************************************************/
 
 /**************************************************************************************
- * Function: nokia_select
+ * Name: nokia_select
  *
  * Description:
  *   Select the SPI, locking and  re-configuring if necessary
@@ -661,7 +661,7 @@ static void nokia_select(FAR struct spi_dev_s *spi)
   lcdinfo("SELECTED\n");
 
   SPI_LOCK(spi, true);
-  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
+  SPI_SELECT(spi, SPIDEV_DISPLAY(0), true);
 
   /* Now make sure that the SPI bus is configured for the Nokia 6100 (it
    * might have gotten configured for a different device while unlocked)
@@ -674,7 +674,7 @@ static void nokia_select(FAR struct spi_dev_s *spi)
 }
 
 /**************************************************************************************
- * Function: nokia_deselect
+ * Name: nokia_deselect
  *
  * Description:
  *   De-select the SPI
@@ -695,7 +695,7 @@ static void nokia_deselect(FAR struct spi_dev_s *spi)
 
   lcdinfo("DE-SELECTED\n");
 
-  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
+  SPI_SELECT(spi, SPIDEV_DISPLAY(0), false);
   SPI_LOCK(spi, false);
 }
 

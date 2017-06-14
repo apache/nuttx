@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/net_sockets.c
+ * net/net_initialize.c
  *
- *   Copyright (C) 2007-2009, 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,13 +42,13 @@
 
 #include <debug.h>
 
-#include <nuttx/net/iob.h>
 #include <nuttx/net/net.h>
 
 #include "socket/socket.h"
 #include "devif/devif.h"
 #include "netdev/netdev.h"
 #include "arp/arp.h"
+#include "sixlowpan/sixlowpan.h"
 #include "neighbor/neighbor.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
@@ -56,27 +56,8 @@
 #include "local/local.h"
 #include "igmp/igmp.h"
 #include "route/route.h"
+#include "usrsock/usrsock.h"
 #include "utils/utils.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -119,13 +100,13 @@ void net_setup(void)
   /* Initialize the Neighbor Table data structures */
 
   neighbor_initialize();
-#endif
 
-#ifdef CONFIG_NET_IOB
-  /* Initialize I/O buffering */
+#ifdef CONFIG_NET_6LOWPAN
+  /* Initialize 6loWPAN data structures */
 
-  iob_initialize();
+  sixlowpan_initialize();
 #endif
+#endif /* CONFIG_NET_IPv6 */
 
   /* Initialize the device interface layer */
 
@@ -143,7 +124,7 @@ void net_setup(void)
   local_initialize();
 #endif
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
   /* Initialize the listening port structures */
 
   tcp_listen_initialize();
@@ -159,7 +140,7 @@ void net_setup(void)
 #endif
 #endif /* CONFIG_NET_TCP */
 
-#ifdef CONFIG_NET_UDP
+#ifdef NET_UDP_HAVE_STACK
   /* Initialize the UDP connection structures */
 
   udp_initialize();
@@ -175,6 +156,12 @@ void net_setup(void)
   /* Initialize the routing table */
 
   net_initroute();
+#endif
+
+#ifdef CONFIG_NET_USRSOCK
+  /* Initialize the user-space socket API */
+
+  usrsock_initialize();
 #endif
 }
 

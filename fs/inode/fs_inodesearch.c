@@ -352,8 +352,8 @@ static int _inode_search(FAR struct inode_search_s *desc)
                   status = _inode_linktarget(node, desc);
                   if (status < 0)
                     {
-                      /* Probably means that the the target of the symbolic
-                       * link does not exist.
+                      /* Probably means that the target of the symbolic link
+                       * does not exist.
                        */
 
                       ret = status;
@@ -366,8 +366,8 @@ static int _inode_search(FAR struct inode_search_s *desc)
                       if (newnode != node)
                         {
                           /* The node was a valid symbolic link and we have
-                           * jumped to a different, spot in the the pseudo
-                           * file system tree.
+                           * jumped to a different, spot in the pseudo file
+                           * system tree.
                            */
 
                           /* Check if this took us to a mountpoint. */
@@ -539,11 +539,10 @@ int inode_search(FAR struct inode_search_s *desc)
 
           /* There would be no problem in this case if the link was to
            * either to the root directory of the MOUNTPOINT or to a
-           * regular file within the the mounted volume.  However,
-           * there is a problem if the symbolic link is to a directory
-           * within the mounted volume.  In that case, the 'relpath'
-           * will be relative to the symbolic link and not to the
-           * MOUNTPOINT.
+           * regular file within the mounted volume.  However, there
+           * is a problem if the symbolic link is to a directory within
+           * the mounted volume.  In that case, the 'relpath' will be
+           * relative to the symbolic link and not to the MOUNTPOINT.
            *
            * We will handle the worst case by creating the full path
            * excluding the symbolic link and performing the look-up

@@ -150,7 +150,7 @@ void sim_timer_initialize(void)
  *   any failure.
  *
  * Assumptions:
- *   Called from the the normal tasking context.  The implementation must
+ *   Called from the normal tasking context.  The implementation must
  *   provide whatever mutual exclusion is necessary for correct operation.
  *   This can include disabling interrupts in order to assure atomic register
  *   operations.

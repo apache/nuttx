@@ -43,10 +43,10 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/net/iob.h>
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/netdev.h>
 
-#ifdef CONFIG_NET_IOB
+#ifdef CONFIG_MM_IOB
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -113,5 +113,5 @@ void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
 #endif
 }
 
-#endif /* CONFIG_NET_IOB */
+#endif /* CONFIG_MM_IOB */
 

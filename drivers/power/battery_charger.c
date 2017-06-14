@@ -227,6 +227,18 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
         }
         break;
 
+      case BATIOC_INPUT_CURRENT:
+        {
+          int amps;
+          FAR int *ampsp = (FAR int *)((uintptr_t)arg);
+          if (ampsp)
+            {
+              amps = *ampsp;
+              ret = dev->ops->input_current(dev, amps);
+            }
+        }
+        break;
+
       default:
         _err("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;

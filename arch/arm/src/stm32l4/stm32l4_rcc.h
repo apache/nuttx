@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_RRC_H
-#define __ARCH_ARM_SRC_STM32L4_STM32L4_RRC_H
+#ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_RCC_H
+#define __ARCH_ARM_SRC_STM32L4_STM32L4_RCC_H
 
 /************************************************************************************
  * Included Files
@@ -45,7 +45,11 @@
 #include "up_arch.h"
 #include "chip.h"
 
-#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX)
+#if defined(CONFIG_STM32L4_STM32L4X3)
+#  include "chip/stm32l4x3xx_rcc.h"
+#elif defined(CONFIG_STM32L4_STM32L4X5)
+#  include "chip/stm32l4x5xx_rcc.h"
+#elif defined(CONFIG_STM32L4_STM32L4X6)
 #  include "chip/stm32l4x6xx_rcc.h"
 #else
 #  error "Unsupported STM32L4 chip"
@@ -62,7 +66,7 @@
 #define EXTERN extern "C"
 extern "C"
 {
-#else
+#elseO
 #define EXTERN extern
 #endif
 
@@ -186,11 +190,7 @@ void stm32l4_clockenable(void);
  * Name: stm32l4_rcc_enablelse
  *
  * Description:
- *   Enable the External Low-Speed (LSE) Oscillator and, if the RTC is
- *   configured, setup the LSE as the RTC clock source, and enable the RTC.
- *
- *   For the STM32L15X family, this will also select the LSE as the clock source of
- *   the LCD.
+ *   Enable the External Low-Speed (LSE) Oscillator.
  *
  * Input Parameters:
  *   None

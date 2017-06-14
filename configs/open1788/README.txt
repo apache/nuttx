@@ -164,14 +164,13 @@ Using OpenOCD with the Olimex ARM-USB-OCD
   Starting OpenOCD
 
     Then you should be able to start the OpenOCD daemon as follows.  This
-    assumes that you have already CD'ed to the NuttX build directory:
+    assumes that you have already CD'ed to the NuttX build directory and
+    that you have set the full path to the onfigs/open1788/tools in your
+    PATH environment variable:
 
-      . ./setenv.sh
       oocd.sh $PWD
 
-    The setenv.sh script is a convenience script that you may choose to
-    use or not.  It simply sets up the PATH variable so that you can
-    automatically find oocd.sh.  You could also do:
+    or, if the PATH variable is not so configured:
 
       configs/open1788/tools/oocd.sh $PWD
 

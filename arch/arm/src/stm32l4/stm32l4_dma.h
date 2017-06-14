@@ -49,7 +49,11 @@
 
 /* Include the correct DMA register definitions for this STM32 family */
 
-#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX)
+#if defined(CONFIG_STM32L4_STM32L4X3)
+#  include "chip/stm32l4x3xx_dma.h"
+#elif defined(CONFIG_STM32L4_STM32L4X5)
+#  include "chip/stm32l4x5xx_dma.h"
+#elif defined(CONFIG_STM32L4_STM32L4X6)
 #  include "chip/stm32l4x6xx_dma.h"
 #else
 #  error "Unsupported STM32L4 chip"
@@ -77,7 +81,7 @@
 typedef FAR void *DMA_HANDLE;
 
 /* Description:
- *   This is the type of the callback that is used to inform the user of the the
+ *   This is the type of the callback that is used to inform the user of the
  *   completion of the DMA.
  *
  * Input Parameters:

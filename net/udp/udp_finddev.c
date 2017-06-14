@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: udp_find_ipv4_device
+ * Name: udp_find_ipv4_device
  *
  * Description:
  *   Select the network driver to use with the IPv4 UDP transaction.
@@ -102,7 +102,7 @@ FAR struct net_driver_s *udp_find_ipv4_device(FAR struct udp_conn_s *conn,
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Function: udp_find_ipv6_device
+ * Name: udp_find_ipv6_device
  *
  * Description:
  *   Select the network driver to use with the IPv6 UDP transaction.
@@ -151,7 +151,7 @@ FAR struct net_driver_s *udp_find_ipv6_device(FAR struct udp_conn_s *conn,
 #endif /* CONFIG_NET_IPv6 */
 
 /****************************************************************************
- * Function: udp_find_laddr_device
+ * Name: udp_find_laddr_device
  *
  * Description:
  *   Select the network driver to use with the UDP transaction using the
@@ -200,7 +200,7 @@ FAR struct net_driver_s *udp_find_laddr_device(FAR struct udp_conn_s *conn)
 }
 
 /****************************************************************************
- * Function: udp_find_raddr_device
+ * Name: udp_find_raddr_device
  *
  * Description:
  *   Select the network driver to use with the UDP transaction using the

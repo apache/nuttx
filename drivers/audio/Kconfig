@@ -95,6 +95,67 @@ endif # AUDIO_DRIVER_SPECIFIC_BUFFERS
 
 endif # VS1053
 
+config AUDIO_CS43L22
+	bool "CS43L22 audio chip"
+	default n
+	depends on AUDIO
+	---help---
+		Select to enable support for the CS43L22 Audio codec by Cirrus Logic.
+		This chip is a lower level audio chip.. basically
+		an exotic D-to-A.  It includes no built-in support for audio CODECS
+		The CS43L22 provides:
+
+			- Low power consumption
+			- High SNR
+			- Stereo digital microphone input
+			- Digital Dynamic Range Controller (compressor / limiter)
+			- Digital sidetone mixing
+			- Ground-referenced headphone driver
+			- Ground-referenced line outputs
+
+		NOTE: This driver also depends on both I2C and I2S support although
+		that dependency is not explicit here.
+
+if AUDIO_CS43L22
+
+config CS43L22_INITVOLUME
+	int "CS43L22 initial volume setting"
+	default 250
+
+config CS43L22_INFLIGHT
+	int "CS43L22 maximum in-flight audio buffers"
+	default 2
+
+config CS43L22_MSG_PRIO
+	int "CS43L22 message priority"
+	default 1
+
+config CS43L22_BUFFER_SIZE
+	int "CS43L22 preferred buffer size"
+	default 8192
+
+config CS43L22_NUM_BUFFERS
+	int "CS43L22 preferred number of buffers"
+	default 4
+
+config CS43L22_WORKER_STACKSIZE
+	int "CS43L22 worker thread stack size"
+	default 768
+
+config CS43L22_REGDUMP
+	bool "CS43L22 register dump"
+	default n
+	---help---
+		Enable logic to dump the contents of all CS43L22 registers.
+
+config CS43L22_CLKDEBUG
+	bool "CS43L22 clock analysis"
+	default n
+	---help---
+		Enable logic to analyze CS43L22 clock configuation.
+
+endif # AUDIO_CS43L22
+
 config AUDIO_WM8904
 	bool "WM8904 audio chip"
 	default n

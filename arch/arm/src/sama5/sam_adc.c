@@ -736,7 +736,7 @@ static void sam_adc_dmacallback(DMA_HANDLE handle, void *arg, int result)
   /* Check of the bottom half is keeping up with us.
    *
    * ready == false:  Would mean that the worker thready has not ran since
-   *   the the last DMA callback.
+   *   the last DMA callback.
    * enabled == false: Means that the upper half has asked us nicely to stop
    *   transferring DMA data.
    */
@@ -1294,7 +1294,7 @@ static int sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
       return ret;
     }
 
-  /* Set the timer/counter waveform mode the the clock input slected by
+  /* Set the timer/counter waveform mode the clock input slected by
    * sam_tc_divisor()
    */
 
@@ -1448,7 +1448,7 @@ static int sam_adc_trigger(struct sam_adc_s *priv)
   /* Configure to trigger using Timer/counter 0, channel 1, 2, or 3.
    * NOTE: This trigger option depends on having properly configuer
    * timer/counter 0 to provide this output.  That is done independently
-   * the the timer/counter driver.
+   * the timer/counter driver.
    */
 
   /* Set TIOAn trigger where n=0, 1, or 2 */

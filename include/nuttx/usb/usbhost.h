@@ -516,7 +516,7 @@
  *   will enqueue the transfer request and return immediately.  Only one
  *   transfer may be queued on a given endpoint/
  *
- *   When the transfer completes, the the callback will be invoked with the
+ *   When the transfer completes, the callback will be invoked with the
  *   provided argument.
  *
  *   This method is useful for receiving interrupt transfers which may come
@@ -638,7 +638,7 @@ struct usbhost_id_s
   uint16_t pid;      /* Product ID (for vendor/product specific devices) */
 };
 
-/* The struct usbhost_registry_s type describes information that is kept in the the
+/* The struct usbhost_registry_s type describes information that is kept in the
  * USB host registry.  USB host class implementations register this information so
  * that USB host drivers can later find the class that matches the device that is
  * connected to the USB port.
@@ -880,7 +880,7 @@ struct usbhost_driver_s
    * will enqueue the transfer request and return immediately.  Only one
    * transfer may be queued on a given endpoint/
    *
-   * When the transfer completes, the the callback will be invoked with the
+   * When the transfer completes, the callback will be invoked with the
    * provided argument.
    *
    * This method is useful for receiving interrupt transfers which may come
@@ -1082,6 +1082,27 @@ int usbhost_kbdinit(void);
  ****************************************************************************/
 
 int usbhost_mouse_init(void);
+#endif
+
+#ifdef CONFIG_USBHOST_XBOXCONTROLLER
+/****************************************************************************
+ * Name: usbhost_xboxcontroller_init
+ *
+ * Description:
+ *   Initialize the USB XBox controller driver.  This function
+ *   should be called be platform-specific code in order to initialize and
+ *   register support for the USB XBox controller.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Values:
+ *   On success this function will return zero (OK);  A negated errno value
+ *   will be returned on failure.
+ *
+ ****************************************************************************/
+
+int usbhost_xboxcontroller_init(void);
 #endif
 
 /****************************************************************************

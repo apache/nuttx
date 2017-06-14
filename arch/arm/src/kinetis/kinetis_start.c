@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_start.c
- * arch/arm/src/chip/kinetis_start.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,6 +51,7 @@
 
 #include "kinetis.h"
 #include "chip/kinetis_smc.h"
+#include "kinetis_mpuinit.h"
 #include "kinetis_userspace.h"
 
 #ifdef CONFIG_ARCH_FPU
@@ -327,6 +327,7 @@ void __start(void)
    * can get debug output as soon as possible (This depends on clock
    * configuration).
    */
+
   kinetis_fpuconfig();
   kinetis_lowsetup();
 #ifdef USE_EARLYSERIALINIT
@@ -341,6 +342,12 @@ void __start(void)
 
 #ifdef CONFIG_BUILD_PROTECTED
   kinetis_userspace();
+#else
+#  ifdef KINETIS_MPU
+  /* Disable the MPU so that all master may access all buses */
+
+  kinetis_mpudisable();
+#  endif
 #endif
 
   /* Initialize other on-board resources */

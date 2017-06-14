@@ -196,7 +196,7 @@ static void rtc_dumpregs(FAR const char *msg)
   rtcinfo("    TSDR: %08x\n", getreg32(STM32_RTC_TSDR));
   rtcinfo("   TSSSR: %08x\n", getreg32(STM32_RTC_TSSSR));
   rtcinfo("    CALR: %08x\n", getreg32(STM32_RTC_CALR));
-  rtcinfo("   TAFCR: %08x\n", getreg32(STM32_RTC_TAFCR));
+  rtcinfo("  TAMPCR: %08x\n", getreg32(STM32_RTC_TAMPCR));
   rtcinfo("ALRMASSR: %08x\n", getreg32(STM32_RTC_ALRMASSR));
   rtcinfo("ALRMBSSR: %08x\n", getreg32(STM32_RTC_ALRMBSSR));
   rtcinfo("MAGICREG: %08x\n", getreg32(RTC_MAGIC_REG));
@@ -227,7 +227,8 @@ static void rtc_dumpregs(FAR const char *msg)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC_INFO
-static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg)
+static void rtc_dumptime(FAR const struct tm *tp, FAR const uint32_t *usecs,
+                         FAR const char *msg)
 {
   rtcinfo("%s:\n", msg);
   rtcinfo("  tm_sec: %08x\n", tp->tm_sec);
@@ -236,9 +237,14 @@ static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg)
   rtcinfo(" tm_mday: %08x\n", tp->tm_mday);
   rtcinfo("  tm_mon: %08x\n", tp->tm_mon);
   rtcinfo(" tm_year: %08x\n", tp->tm_year);
+
+  if (usecs != NULL)
+    {
+      rtcinfo("   usecs: %08x\n", (unsigned int)*usecs);
+    }
 }
 #else
-#  define rtc_dumptime(tp, msg)
+#  define rtc_dumptime(tp, usecs, msg)
 #endif
 
 /****************************************************************************
@@ -850,9 +856,13 @@ int up_rtc_initialize(void)
 
   regval = getreg32(RTC_MAGIC_REG);
 
+  /* Enable write access to the backup domain (RTC registers, RTC
+   * backup data registers and backup SRAM).
+   */
+
   stm32_pwr_enablebkp(true);
 
-  if (regval != RTC_MAGIC)
+  if (regval != RTC_MAGIC && regval != RTC_MAGIC_TIME_SET)
     {
       /* Issue the Backup domain Reset Per Section 5.3.20 DocID028270 Rev 2
        * The LSEON, LSEBYP, RTCSEL and RTCEN bits in the RCC backup domain
@@ -943,8 +953,6 @@ int up_rtc_initialize(void)
         }
     }
 
-  stm32_pwr_enablebkp(false);
-
   /* Loop, attempting to initialize/resume the RTC.  This loop is necessary
    * because it seems that occasionally it takes longer to initialize the
    * RTC (the actual failure is in rtc_synchwait()).
@@ -982,19 +990,13 @@ int up_rtc_initialize(void)
    * has been writing to to back-up date register DR0.
    */
 
-  if (regval != RTC_MAGIC)
+  if (regval != RTC_MAGIC && regval != RTC_MAGIC_TIME_SET)
     {
       rtcinfo("Do setup\n");
 
       /* Perform the one-time setup of the LSE clocking to the RTC */
 
       ret = rtc_setup();
-
-      /* Enable write access to the backup domain (RTC registers, RTC
-       * backup data registers and backup SRAM).
-       */
-
-      stm32_pwr_enablebkp(true);
 
       /* Remember that the RTC is initialized */
 
@@ -1069,34 +1071,48 @@ int up_rtc_initialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
+#ifdef CONFIG_STM32F7_HAVE_RTC_SUBSECONDS
 int stm32_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec)
 #else
 int up_rtc_getdatetime(FAR struct tm *tp)
 #endif
 {
-#ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
-  uint32_t ssr;
-#endif
   uint32_t dr;
   uint32_t tr;
   uint32_t tmp;
+#ifdef CONFIG_STM32F7_HAVE_RTC_SUBSECONDS
+  uint32_t ssr;
+  uint32_t prediv_s;
+  uint32_t usecs;
+#endif
 
   /* Sample the data time registers.  There is a race condition here... If
    * we sample the time just before midnight on December 31, the date could
-   * be wrong because the day rolled over while were sampling.
+   * be wrong because the day rolled over while were sampling. Thus loop for
+   * checking overflow here is needed.  There is a race condition with
+   * subseconds too. If we sample TR register just before second rolling
+   * and subseconds are read at wrong second, we get wrong time.
    */
 
   do
     {
       dr  = getreg32(STM32_RTC_DR);
       tr  = getreg32(STM32_RTC_TR);
-#ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
+#ifdef CONFIG_STM32F7_HAVE_RTC_SUBSECONDS
       ssr = getreg32(STM32_RTC_SSR);
+      tmp = getreg32(STM32_RTC_TR);
+      if (tmp != tr)
+        {
+          continue;
+        }
 #endif
       tmp = getreg32(STM32_RTC_DR);
+      if (tmp == dr)
+        {
+          break;
+        }
     }
-  while (tmp != dr);
+  while (1);
 
   rtc_dumpregs("Reading Time");
 
@@ -1141,31 +1157,31 @@ int up_rtc_getdatetime(FAR struct tm *tp)
   tp->tm_isdst = 0
 #endif
 
-#ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
+#ifdef CONFIG_STM32F7_HAVE_RTC_SUBSECONDS
   /* Return RTC sub-seconds if no configured and if a non-NULL value
    * of nsec has been provided to receive the sub-second value.
    */
 
-  if (nsec)
+  prediv_s   = getreg32(STM32_RTC_PRER) & RTC_PRER_PREDIV_S_MASK;
+  prediv_s >>= RTC_PRER_PREDIV_S_SHIFT;
+
+  ssr &= RTC_SSR_MASK;
+
+  /* Maximum prediv_s is 0x7fff, thus we can multiply by 100000 and
+   * still fit 32-bit unsigned integer.
+   */
+
+  usecs = (((prediv_s - ssr) * 100000) / (prediv_s + 1)) * 10;
+  if (nsec != NULL)
     {
-      uint32_t prediv_s;
-      uint32_t usecs;
-
-      prediv_s   = getreg32(STM32_RTC_PRER) & RTC_PRER_PREDIV_S_MASK;
-      prediv_s >>= RTC_PRER_PREDIV_S_SHIFT;
-
-      ssr &= RTC_SSR_MASK;
-
-      /* Maximum prediv_s is 0x7fff, thus we can multiply by 100000 and
-       * still fit 32-bit unsigned integer.
-       */
-
-      usecs = (((prediv_s - ssr) * 100000) / (prediv_s + 1)) * 10;
       *nsec = usecs * 1000;
     }
-#endif /* CONFIG_STM32_HAVE_RTC_SUBSECONDS */
 
-  rtc_dumptime((FAR const struct tm *)tp, "Returning");
+  rtc_dumptime((FAR const struct tm *)tp, &usecs, "Returning");
+#else /* CONFIG_STM32F7_HAVE_RTC_SUBSECONDS */
+  rtc_dumptime((FAR const struct tm *)tp, NULL, "Returning");
+#endif
+
   return OK;
 }
 
@@ -1192,10 +1208,44 @@ int up_rtc_getdatetime(FAR struct tm *tp)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
+#ifdef CONFIG_STM32F7_HAVE_RTC_SUBSECONDS
 int up_rtc_getdatetime(FAR struct tm *tp)
 {
   return stm32_rtc_getdatetime_with_subseconds(tp, NULL);
+}
+#endif
+
+/************************************************************************************
+ * Name: up_rtc_getdatetime_with_subseconds
+ *
+ * Description:
+ *   Get the current date and time from the date/time RTC.  This interface
+ *   is only supported by the date/time RTC hardware implementation.
+ *   It is used to replace the system timer.  It is only used by the RTOS during
+ *   initialization to set up the system time when CONFIG_RTC and CONFIG_RTC_DATETIME
+ *   are selected (and CONFIG_RTC_HIRES is not).
+ *
+ *   NOTE: This interface exposes sub-second accuracy capability of RTC hardware.
+ *   This interface allow maintaining timing accuracy when system time needs constant
+ *   resynchronization with RTC, for example with board level power-save mode utilizing
+ *   deep-sleep modes such as STOP on STM32 MCUs.
+ *
+ * Input Parameters:
+ *   tp - The location to return the high resolution time value.
+ *   nsec - The location to return the subsecond time value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_RTC_SUBSECONDS
+#  ifndef CONFIG_STM32F7_HAVE_RTC_SUBSECONDS
+#    error "Invalid config, enable CONFIG_STM32F7_HAVE_RTC_SUBSECONDS."
+#  endif
+int up_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec)
+{
+  return stm32_rtc_getdatetime_with_subseconds(tp, nsec);
 }
 #endif
 
@@ -1221,7 +1271,7 @@ int stm32_rtc_setdatetime(FAR const struct tm *tp)
   uint32_t dr;
   int ret;
 
-  rtc_dumptime(tp, "Setting time");
+  rtc_dumptime(tp, NULL, "Setting time");
 
   /* Then write the broken out values to the RTC */
 
@@ -1275,6 +1325,15 @@ int stm32_rtc_setdatetime(FAR const struct tm *tp)
 
       rtc_exitinit();
       ret = rtc_synchwait();
+    }
+
+  /* Remember that the RTC is initialized and had its time set. */
+
+  if (getreg32(RTC_MAGIC_REG) != RTC_MAGIC_TIME_SET)
+    {
+      stm32_pwr_enablebkp(true);
+      putreg32(RTC_MAGIC_TIME_SET, RTC_MAGIC_REG);
+      stm32_pwr_enablebkp(false);
     }
 
   /* Re-enable the write protection for RTC registers */
@@ -1337,7 +1396,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
 
   /* REVISIT:  Should test that the time is in the future */
 
-  rtc_dumptime(&alminfo->as_time, "New alarm time");
+  rtc_dumptime(&alminfo->as_time, NULL, "New alarm time");
 
   /* Break out the values to the HW alarm register format.  The values in
    * all STM32 fields match the fields of struct tm in this case.  Notice

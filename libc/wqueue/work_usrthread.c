@@ -188,7 +188,7 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
 
               work->worker = NULL;
 
-              /* Do the work.  Unlock the the work queue while the work is being
+              /* Do the work.  Unlock the work queue while the work is being
                * performed... we don't have any idea how long this will take!
                */
 
@@ -223,7 +223,7 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
         {
           /* This one is not ready.
            *
-           * NOTE that elapsed is relative to the the current time,
+           * NOTE that elapsed is relative to the current time,
            * not the time of beginning of this queue processing pass.
            * So it may need an adjustment.
            */

@@ -285,7 +285,7 @@ static void memlcd_select(FAR struct spi_dev_s *spi)
    */
 
   SPI_LOCK(spi, true);
-  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
+  SPI_SELECT(spi, SPIDEV_DISPLAY(0), true);
 
   /* Now make sure that the SPI bus is configured for the memlcd (it
    * might have gotten configured for a different device while unlocked)
@@ -327,7 +327,7 @@ static void memlcd_deselect(FAR struct spi_dev_s *spi)
 {
   /* De-select memlcd and relinquish the spi bus. */
 
-  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
+  SPI_SELECT(spi, SPIDEV_DISPLAY(0), false);
   SPI_LOCK(spi, false);
 }
 

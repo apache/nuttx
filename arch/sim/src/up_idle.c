@@ -142,7 +142,7 @@ void up_idle(void)
     }
 #endif
 
-#ifdef CONFIG_NET_ETHERNET
+#if defined(CONFIG_NET_ETHERNET) && defined(CONFIG_SIM_NETDEV)
   /* Run the network if enabled */
 
   netdriver_loop();

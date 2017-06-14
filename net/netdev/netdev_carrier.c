@@ -59,7 +59,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_carrier_on
+ * Name: netdev_carrier_on
  *
  * Description:
  *   Notifies the networking layer about an available carrier.
@@ -85,7 +85,7 @@ int netdev_carrier_on(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: netdev_carrier_off
+ * Name: netdev_carrier_off
  *
  * Description:
  *   Notifies the networking layer about an disappeared carrier.

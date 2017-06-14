@@ -49,6 +49,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/sensors/xen1210.h>
+#include <nuttx/random.h>
 
 #include "xen1210.h"
 
@@ -418,7 +419,7 @@ void xen1210_getdata(FAR struct xen1210_dev_s *priv)
 
   /* Select the XEN1210 */
 
-  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER, true);
+  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER(0), true);
 
   /* Read three times 3 bytes = 24 bits * 3 */
 
@@ -433,7 +434,7 @@ void xen1210_getdata(FAR struct xen1210_dev_s *priv)
 
   /* Deselect the XEN1210 */
 
-  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER, false);
+  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER(0), false);
 
   /* Unlock bus */
 
@@ -442,6 +443,12 @@ void xen1210_getdata(FAR struct xen1210_dev_s *priv)
 #ifdef CONFIG_XEN1210_REGDEBUG
   _err("%02x->%02x\n", regaddr, regval);
 #endif
+
+  /* Feed sensor data to entropy pool */
+
+  add_sensor_randomness((priv->sample.data_x << 8) ^
+                        (priv->sample.data_y << 4) ^
+                        (priv->sample.data_z << 4));
 }
 
 /****************************************************************************
@@ -465,7 +472,7 @@ void xen1210_putdata(FAR struct xen1210_dev_s *priv, uint32_t regval)
 
   /* Select the XEN1210 */
 
-  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER, true);
+  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER(0), true);
 
   /* We need to write to 3 sensors in the daisy-chain */
   /* Write three times 3 bytes */
@@ -476,7 +483,7 @@ void xen1210_putdata(FAR struct xen1210_dev_s *priv, uint32_t regval)
 
   /* Deselect the XEN1210 */
 
-  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER, false);
+  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER(0), false);
 
   /* Unlock bus */
 

@@ -149,7 +149,7 @@
  * Name: up_addrenv_initdata
  *
  * Description:
- *   Initialize the region of memory at the the beginning of the .bss/.data
+ *   Initialize the region of memory at the beginning of the .bss/.data
  *   region that is shared between the user process and the kernel.
  *
  ****************************************************************************/

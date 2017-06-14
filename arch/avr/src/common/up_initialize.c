@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/common/up_initialize.c
  *
- *   Copyright (C) 2010, 2012-2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012-2013, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched_note.h>
+#include <nuttx/mm/iob.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/net/loopback.h>
@@ -231,9 +232,14 @@ void up_initialize(void)
   avr_timer_initialize();
 #endif
 
-  /* Register devices */
+#ifdef CONFIG_MM_IOB
+  /* Initialize IO buffering */
+
+  iob_initialize();
+#endif
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
+  /* Register devices */
 
 #if defined(CONFIG_DEV_NULL)
   devnull_register();   /* Standard /dev/null */

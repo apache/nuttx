@@ -47,7 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/drivers/can.h>
+#include <nuttx/can/can.h>
 #include <arch/board/board.h>
 
 #include "chip.h"

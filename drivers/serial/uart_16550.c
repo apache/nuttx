@@ -90,7 +90,7 @@ struct u16550_s
 static int  u16550_setup(FAR struct uart_dev_s *dev);
 static void u16550_shutdown(FAR struct uart_dev_s *dev);
 static int  u16550_attach(FAR struct uart_dev_s *dev);
-static void u16550_detachFAR struct uart_dev_s *dev);
+static void u16550_detach(FAR struct uart_dev_s *dev);
 static int  u16550_interrupt(int irq, FAR void *context, FAR void *arg);
 static int  u16550_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static int  u16550_receive(FAR struct uart_dev_s *dev, uint32_t *status);

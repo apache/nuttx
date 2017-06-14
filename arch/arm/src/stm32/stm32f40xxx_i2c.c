@@ -63,7 +63,6 @@
  *      - 1 x 10 bit addresses + 1 x 7 bit address (?)
  *      - plus the broadcast address (general call)
  *  - Multi-master support
- *  - DMA (to get rid of too many CPU wake-ups and interventions)
  *  - Be ready for IPMI
  */
 
@@ -95,6 +94,7 @@
 #include "stm32_rcc.h"
 #include "stm32_i2c.h"
 #include "stm32_waste.h"
+#include "stm32_dma.h"
 
 /* At least one I2C peripheral must be enabled */
 
@@ -161,6 +161,21 @@
 #endif
 
 #define MKI2C_OUTPUT(p) (((p) & (GPIO_PORT_MASK | GPIO_PIN_MASK)) | I2C_OUTPUT)
+
+/* I2C DMA priority */
+
+#ifdef CONFIG_STM32_I2C_DMA
+
+# if defined(CONFIG_I2C_DMAPRIO)
+#   if (CONFIG_I2C_DMAPRIO & ~DMA_SCR_PL_MASK) != 0
+#     error "Illegal value for CONFIG_I2C_DMAPRIO"
+#   endif
+#   define I2C_DMA_PRIO     CONFIG_I2C_DMAPRIO
+# else
+#   define I2C_DMA_PRIO     DMA_SCR_PRIMED
+# endif
+
+#endif
 
 /* Debug ****************************************************************************/
 
@@ -230,7 +245,6 @@ struct stm32_i2c_config_s
   uint32_t scl_pin;           /* GPIO configuration for SCL as SCL */
   uint32_t sda_pin;           /* GPIO configuration for SDA as SDA */
 #ifndef CONFIG_I2C_POLLED
-  int (*isr)(int, void *, void *);    /* Interrupt handler */
   uint32_t ev_irq;            /* Event IRQ */
   uint32_t er_irq;            /* Error IRQ */
 #endif
@@ -253,7 +267,7 @@ struct stm32_i2c_priv_s
   struct i2c_msg_s *msgv;      /* Message list */
   uint8_t *ptr;                /* Current message buffer */
   uint32_t frequency;          /* Current I2C frequency */
-  int dcnt;                    /* Current message length */
+  volatile int dcnt;           /* Current message length */
   uint16_t flags;              /* Current message flags */
   bool check_addr_ACK;         /* Flag to signal if on next interrupt address has ACKed */
   uint8_t total_msg_len;       /* Flag to signal a short read sequence */
@@ -270,6 +284,15 @@ struct stm32_i2c_priv_s
 #endif
 
   uint32_t status;             /* End of transfer SR2|SR1 status */
+
+  /* I2C DMA support */
+
+#ifdef CONFIG_STM32_I2C_DMA
+  DMA_HANDLE      txdma;       /* TX DMA handle */
+  DMA_HANDLE      rxdma;       /* RX DMA handle */
+  uint8_t         txch;        /* TX DMA channel */
+  uint8_t         rxch;        /* RX DMA channel */
+#endif
 };
 
 /************************************************************************************
@@ -315,18 +338,10 @@ static inline uint32_t stm32_i2c_disablefsmc(FAR struct stm32_i2c_priv_s *priv);
 static inline void stm32_i2c_enablefsmc(uint32_t ahbenr);
 #endif /* I2C1_FSMC_CONFLICT */
 
-static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv);
+static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv);
 
 #ifndef CONFIG_I2C_POLLED
-#ifdef CONFIG_STM32_I2C1
-static int stm32_i2c1_isr(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_STM32_I2C2
-static int stm32_i2c2_isr(int irq, void *context, FAR void *arg);
-#endif
-#ifdef CONFIG_STM32_I2C3
-static int stm32_i2c3_isr(int irq, void *context, FAR void *arg);
-#endif
+static int stm32_i2c_isr(int irq, void *context, FAR void *arg);
 #endif /* !CONFIG_I2C_POLLED */
 
 static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv);
@@ -335,6 +350,13 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s
                               int count);
 #ifdef CONFIG_I2C_RESET
 static int stm32_i2c_reset(FAR struct i2c_master_s *dev);
+#endif
+
+/* DMA support */
+
+#ifdef CONFIG_STM32_I2C_DMA
+static void stm32_i2c_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *arg);
+static void stm32_i2c_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg);
 #endif
 
 /************************************************************************************
@@ -381,7 +403,6 @@ static const struct stm32_i2c_config_s stm32_i2c1_config =
   .scl_pin    = GPIO_I2C1_SCL,
   .sda_pin    = GPIO_I2C1_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .isr        = stm32_i2c1_isr,
   .ev_irq     = STM32_IRQ_I2C1EV,
   .er_irq     = STM32_IRQ_I2C1ER
 #endif
@@ -398,7 +419,16 @@ static struct stm32_i2c_priv_s stm32_i2c1_priv =
   .ptr        = NULL,
   .dcnt       = 0,
   .flags      = 0,
-  .status     = 0
+  .status     = 0,
+#ifdef CONFIG_STM32_I2C_DMA
+#  ifndef CONFIG_STM32_DMA1
+#     error "I2C1 enabled with DMA but corresponding DMA controller 1 is not enabled!"
+#  endif
+  /* TODO: ch for i2c 1 and 2 could be *X_2 based on stream priority */
+
+  .rxch       = DMAMAP_I2C1_RX,
+  .txch       = DMAMAP_I2C1_TX,
+#endif
 };
 #endif
 
@@ -411,7 +441,6 @@ static const struct stm32_i2c_config_s stm32_i2c2_config =
   .scl_pin    = GPIO_I2C2_SCL,
   .sda_pin    = GPIO_I2C2_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .isr        = stm32_i2c2_isr,
   .ev_irq     = STM32_IRQ_I2C2EV,
   .er_irq     = STM32_IRQ_I2C2ER
 #endif
@@ -428,7 +457,14 @@ static struct stm32_i2c_priv_s stm32_i2c2_priv =
   .ptr        = NULL,
   .dcnt       = 0,
   .flags      = 0,
-  .status     = 0
+  .status     = 0,
+#ifdef CONFIG_STM32_I2C_DMA
+# ifndef CONFIG_STM32_DMA1
+#   error "I2C2 enabled with DMA but corresponding DMA controller 1 is not enabled!"
+# endif
+  .rxch       = DMAMAP_I2C2_RX,
+  .txch       = DMAMAP_I2C2_TX,
+#endif
 };
 #endif
 
@@ -441,7 +477,6 @@ static const struct stm32_i2c_config_s stm32_i2c3_config =
   .scl_pin    = GPIO_I2C3_SCL,
   .sda_pin    = GPIO_I2C3_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .isr        = stm32_i2c3_isr,
   .ev_irq     = STM32_IRQ_I2C3EV,
   .er_irq     = STM32_IRQ_I2C3ER
 #endif
@@ -458,7 +493,14 @@ static struct stm32_i2c_priv_s stm32_i2c3_priv =
   .ptr        = NULL,
   .dcnt       = 0,
   .flags      = 0,
-  .status     = 0
+  .status     = 0,
+#ifdef CONFIG_STM32_I2C_DMA
+# ifndef CONFIG_STM32_DMA1
+#   error "I2C3 enabled with DMA but corresponding DMA controller 1 is not enabled!"
+# endif
+  .rxch       = DMAMAP_I2C3_RX,
+  .txch       = DMAMAP_I2C3_TX,
+#endif
 };
 #endif
 
@@ -521,7 +563,7 @@ static inline void stm32_i2c_sem_wait(FAR struct stm32_i2c_priv_s *priv)
 {
   while (sem_wait(&priv->sem_excl) != 0)
     {
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(errno == EINTR);
     }
 }
 
@@ -680,7 +722,7 @@ static inline int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
        * reports that it is done.
        */
 
-      stm32_i2c_isr(priv);
+      stm32_i2c_isr_process(priv);
     }
 
   /* Loop until the transfer is complete. */
@@ -1175,16 +1217,22 @@ static inline void stm32_i2c_enablefsmc(uint32_t ahbenr)
 #endif /* I2C1_FSMC_CONFLICT */
 
 /************************************************************************************
- * Name: stm32_i2c_isr
+ * Name: stm32_i2c_isr_process
  *
  * Description:
  *  Common Interrupt Service Routine
  *
  ************************************************************************************/
 
-static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
+static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 {
   uint32_t status;
+#ifndef CONFIG_I2C_POLLED
+  uint32_t regval;
+#endif
+#ifdef CONFIG_STM32_I2C_DMA
+  uint16_t cr2;
+#endif
 
   i2cinfo("I2C ISR called\n");
 
@@ -1200,6 +1248,15 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
   /* Update private version of the state */
 
   priv->status = status;
+
+  /* Any new message should begin with "Start" condition
+   * Situation priv->msgc == 0 came from DMA RX handler and should be managed
+   */
+
+  if (priv->dcnt == -1 && priv->msgc != 0 && (status & I2C_SR1_SB) == 0)
+    {
+      return OK;
+    }
 
   /* Check if this is a new transmission so to set up the
    * trace table accordingly.
@@ -1227,6 +1284,23 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
    * This can seen in stm32_i2c_process() before entering the
    * stm32_i2c_sem_waitdone() waiting process.
    */
+
+#ifdef CONFIG_STM32_I2C_DMA
+  /* If ISR gets called (ex. polling mode) while DMA is still in
+   * progress, we should just return and let the DMA finish.
+   */
+
+  cr2 = stm32_i2c_getreg(priv, STM32_I2C_CR2_OFFSET);
+  if ((cr2 & I2C_CR2_DMAEN) != 0)
+    {
+#ifdef CONFIG_DEBUG_I2C_INFO
+      size_t left = stm32_dmaresidual(priv->rxdma);
+
+      i2cinfo("DMA in progress: %ld [bytes] remainining. Returning.\n", left);
+#endif
+      return OK;
+    }
+#endif
 
   if (priv->dcnt == -1 && priv->msgc > 0)
     {
@@ -1439,9 +1513,16 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
           status |= (stm32_i2c_getreg(priv, STM32_I2C_SR2_OFFSET) << 16);
 
-          /* Send Stop */
+          /* Send Stop/Restart */
 
-          stm32_i2c_sendstop(priv);
+          if (priv->msgc > 0)
+            {
+              stm32_i2c_sendstart(priv);
+            }
+          else
+            {
+              stm32_i2c_sendstop(priv);
+            }
 
           i2cinfo("Address ACKed beginning data reception\n");
           i2cinfo("short read N=1: programming stop bit\n");
@@ -1484,6 +1565,46 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
           /* Trace */
 
           stm32_i2c_traceevent(priv, I2CEVENT_ADDRESS_ACKED, 0);
+
+#ifdef CONFIG_STM32_I2C_DMA
+          /* DMA only when not doing a short read */
+
+          i2cinfo("Starting dma transfer and disabling interrupts\n");
+
+          /* The DMA must be initialized and enabled before the I2C data transfer.
+           * The DMAEN bit must be set in the I2C_CR2 register before the ADDR event.
+           */
+
+          stm32_dmasetup(priv->rxdma, priv->config->base+STM32_I2C_DR_OFFSET,
+            (uint32_t) priv->ptr, priv->dcnt,
+            DMA_SCR_DIR_P2M |
+            DMA_SCR_MSIZE_8BITS |
+            DMA_SCR_PSIZE_8BITS |
+            DMA_SCR_MINC |
+            I2C_DMA_PRIO);
+
+          /* Do not enable the ITBUFEN bit in the I2C_CR2 register if DMA is
+           * used.
+           */
+
+          stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_ITBUFEN, 0);
+
+#ifndef CONFIG_I2C_POLLED
+          /* Now let DMA do all the work, disable i2c interrupts */
+
+          regval  = stm32_i2c_getreg(priv, STM32_I2C_CR2_OFFSET);
+          regval &= ~I2C_CR2_ALLINTS;
+          stm32_i2c_putreg(priv, STM32_I2C_CR2_OFFSET, regval);
+#endif
+
+          /* The user can generate a Stop condition in the DMA Transfer Complete
+           * interrupt routine if enabled. This will be done in the dma rx callback
+           * Start DMA.
+           */
+
+          stm32_dmastart(priv->rxdma, stm32_i2c_dmarxcallback, priv, false);
+          stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, 0, I2C_CR2_DMAEN);
+#endif
         }
     }
 
@@ -1520,19 +1641,67 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
       if (priv->dcnt >= 1)
         {
-          /* Transmitting message. Send byte == write data into write register */
+#ifdef CONFIG_STM32_I2C_DMA
+          /* if DMA is enabled, only makes sense to make use of it for longer
+             than 1 B transfers.. */
 
-          stm32_i2c_putreg(priv, STM32_I2C_DR_OFFSET, *priv->ptr++);
+          if (priv->dcnt > 1)
+            {
+              i2cinfo("Starting dma transfer and disabling interrupts\n");
 
-          /* Decrease current message length */
+              /* The DMA must be initialized and enabled before the I2C data transfer.
+               * The DMAEN bit must be set in the I2C_CR2 register before the ADDR event.
+               */
 
-          stm32_i2c_traceevent(priv, I2CEVENT_WRITE_TO_DR, priv->dcnt);
-          priv->dcnt--;
+              stm32_dmasetup(priv->txdma, priv->config->base+STM32_I2C_DR_OFFSET,
+                (uint32_t) priv->ptr, priv->dcnt,
+                DMA_SCR_DIR_M2P |
+                DMA_SCR_MSIZE_8BITS |
+                DMA_SCR_PSIZE_8BITS |
+                DMA_SCR_MINC |
+                I2C_DMA_PRIO );
 
+              /* Do not enable the ITBUFEN bit in the I2C_CR2 register if DMA is
+               * used.
+               */
+
+              stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_ITBUFEN, 0);
+
+#ifndef CONFIG_I2C_POLLED
+              /* Now let DMA do all the work, disable i2c interrupts */
+
+              regval  = stm32_i2c_getreg(priv, STM32_I2C_CR2_OFFSET);
+              regval &= ~I2C_CR2_ALLINTS;
+              stm32_i2c_putreg(priv, STM32_I2C_CR2_OFFSET, regval);
+#endif
+
+              /* In the interrupt routine after the EOT interrupt, disable DMA
+               * requests then wait for a BTF event before programming the Stop
+               * condition. To do this, we'll just call the ISR again in
+               * dma tx callback, in which point we fall into the msgc==0 case
+               * which ultimately sends the stop..TODO: but we don't explicitly
+               * wait for BTF bit being set...
+               * Start DMA.
+               */
+
+              stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, 0, I2C_CR2_DMAEN);
+              stm32_dmastart(priv->txdma, stm32_i2c_dmatxcallback, priv, false);
+            }
+          else
+#endif /* CONFIG_STM32_I2C_DMA */
+            {
+              /* Transmitting message. Send byte == write data into write register */
+
+              stm32_i2c_putreg(priv, STM32_I2C_DR_OFFSET, *priv->ptr++);
+
+              /* Decrease current message length */
+
+              stm32_i2c_traceevent(priv, I2CEVENT_WRITE_TO_DR, priv->dcnt);
+              priv->dcnt--;
+            }
         }
       else if (priv->dcnt == 0)
         {
-
           /* After last byte, check what to do based on next message flags */
 
           if (priv->msgc == 0)
@@ -1663,7 +1832,17 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
         {
           i2cinfo("short read N=2: DR and SR full setting stop bit and reading twice\n");
 
-          stm32_i2c_sendstop(priv);
+          /* Send Stop/Restart */
+
+          if (priv->msgc > 0)
+            {
+              stm32_i2c_sendstart(priv);
+            }
+          else
+            {
+              stm32_i2c_sendstop(priv);
+            }
+
           *priv->ptr++ = stm32_i2c_getreg(priv, STM32_I2C_DR_OFFSET);
           priv->dcnt--;
           *priv->ptr++ = stm32_i2c_getreg(priv, STM32_I2C_DR_OFFSET);
@@ -1678,6 +1857,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
           stm32_i2c_traceevent(priv, I2CEVENT_READ_2, 0);
         }
 
+#ifndef CONFIG_STM32_I2C_DMA
       /* Case total message length >= 3 */
 
       else if (priv->dcnt >= 4 && priv->total_msg_len >= 3)
@@ -1739,9 +1919,16 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
           stm32_i2c_traceevent(priv, I2CEVENT_READ_3, priv->dcnt);
 
-          /* Program stop */
+          /* Program Stop/Restart */
 
-          stm32_i2c_sendstop(priv);
+          if (priv->msgc > 0)
+            {
+              stm32_i2c_sendstart(priv);
+            }
+          else
+            {
+              stm32_i2c_sendstop(priv);
+            }
 
           /* read dcnt = 2 */
 
@@ -1757,6 +1944,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
           priv->dcnt = -1;
         }
+#endif /* CONFIG_STM32_I2C_DMA */
 
       /* Error handling for read mode */
 
@@ -1765,7 +1953,8 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
           i2cinfo("I2C read mode no correct state detected\n");
           i2cinfo(" state %i, dcnt=%i\n", status, priv->dcnt);
 
-          /* set condition to terminate ISR and wake waiting thread */
+          /* Set condition to terminate ISR and wake waiting thread */
+
           priv->dcnt = -1;
           priv->msgc = 0;
           stm32_i2c_traceevent(priv, I2CEVENT_READ_ERROR, 0);
@@ -1804,9 +1993,9 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
    else
     {
-    #ifdef CONFIG_I2C_POLLED
+#ifdef CONFIG_I2C_POLLED
       stm32_i2c_traceevent(priv, I2CEVENT_POLL_DEV_NOT_RDY, 0);
-    #else
+#else
       /* Read rest of the state */
 
       status |= (stm32_i2c_getreg(priv, STM32_I2C_SR2_OFFSET) << 16);
@@ -1814,12 +2003,12 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
       i2cinfo(" No correct state detected(start bit, read or write) \n");
       i2cinfo(" state %i\n", status);
 
-      /* set condition to terminate ISR and wake waiting thread */
+      /* Set condition to terminate ISR and wake waiting thread */
 
       priv->dcnt = -1;
       priv->msgc = 0;
       stm32_i2c_traceevent(priv, I2CEVENT_STATE_ERROR, 0);
-    #endif
+#endif
     }
 
   /* Messages handling(2/2)
@@ -1842,12 +2031,11 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
 
       priv->msgv = NULL;
 
-    #ifdef CONFIG_I2C_POLLED
+#ifdef CONFIG_I2C_POLLED
       priv->intstate = INTSTATE_DONE;
-    #else
+#else
       /* Clear all interrupts */
 
-      uint32_t regval;
       regval  = stm32_i2c_getreg(priv, STM32_I2C_CR2_OFFSET);
       regval &= ~I2C_CR2_ALLINTS;
       stm32_i2c_putreg(priv, STM32_I2C_CR2_OFFSET, regval);
@@ -1863,62 +2051,118 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
           sem_post(&priv->sem_isr);
           priv->intstate = INTSTATE_DONE;
         }
-    #endif
+#endif
     }
 
   return OK;
 }
 
 /************************************************************************************
- * Name: stm32_i2c1_isr
+ * Name: stm32_i2c_isr
  *
  * Description:
- *   I2C1 interrupt service routine
+ *   Common I2C interrupt service routine
  *
  ************************************************************************************/
 
 #ifndef CONFIG_I2C_POLLED
-#ifdef CONFIG_STM32_I2C1
-static int stm32_i2c1_isr(int irq, void *context, FAR void *arg)
+static int stm32_i2c_isr(int irq, void *context, FAR void *arg)
 {
-  return stm32_i2c_isr(&stm32_i2c1_priv);
+  struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s *)arg;
+
+  DEBUGASSERT(priv != NULL);
+  return stm32_i2c_isr_process(priv);
 }
 #endif
 
-/************************************************************************************
- * Name: stm32_i2c2_isr
+/*****************************************************************************
+ * Name: stm32_i2c_dmarxcallback
  *
  * Description:
- *   I2C2 interrupt service routine
+ *   Called when the RX DMA completes
  *
- ************************************************************************************/
+ *****************************************************************************/
 
-#ifdef CONFIG_STM32_I2C2
-static int stm32_i2c2_isr(int irq, void *context, FAR void *arg)
+#ifdef CONFIG_STM32_I2C_DMA
+static void stm32_i2c_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 {
-  return stm32_i2c_isr(&stm32_i2c2_priv);
-}
+#ifndef CONFIG_I2C_POLLED
+  uint32_t regval;
 #endif
 
-/************************************************************************************
- * Name: stm32_i2c3_isr
+  i2cinfo("DMA rx callback, status = %d \n", status);
+
+  FAR struct stm32_i2c_priv_s *priv = (FAR struct stm32_i2c_priv_s *)arg;
+
+  priv->dcnt = -1;
+
+  /* The user can generate a Stop condition in the DMA Transfer Complete
+   * interrupt routine if enabled.
+   */
+
+  if (priv->msgc > 0)
+    {
+      stm32_i2c_sendstart(priv);
+    }
+  else
+    {
+      stm32_i2c_sendstop(priv);
+    }
+
+  /* Let the I2C periph know to stop DMA transfers, also is used by ISR to check
+   * if DMA is done.
+   */
+
+  stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_DMAEN, 0);
+
+#ifndef CONFIG_I2C_POLLED
+  /* Re-enable interrupts */
+
+  regval  = stm32_i2c_getreg(priv, STM32_I2C_CR2_OFFSET);
+  regval |= (I2C_CR2_ITERREN | I2C_CR2_ITEVFEN);
+  stm32_i2c_putreg(priv, STM32_I2C_CR2_OFFSET, regval);
+#endif
+
+  /* let the ISR routine take care of shutting down or switching to next msg */
+
+  stm32_i2c_isr_process(priv);
+}
+#endif /* ifdef CONFIG_STM32_I2C_DMA */
+
+/*****************************************************************************
+ * Name: stm32_i2c_dmarxcallback
  *
  * Description:
- *   I2C2 interrupt service routine
+ *   Called when the RX DMA completes
  *
- ************************************************************************************/
+ *****************************************************************************/
 
-#ifdef CONFIG_STM32_I2C3
-static int stm32_i2c3_isr(int irq, void *context, FAR void *arg)
+#ifdef CONFIG_STM32_I2C_DMA
+static void stm32_i2c_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 {
-  return stm32_i2c_isr(&stm32_i2c3_priv);
-}
-#endif
+#ifndef CONFIG_I2C_POLLED
+  uint32_t regval;
 #endif
 
-/************************************************************************************
- * Private Initialization and Deinitialization
- ************************************************************************************/
+  i2cinfo("DMA tx callback, status = %d \n", status);
+
+  FAR struct stm32_i2c_priv_s *priv = (FAR struct stm32_i2c_priv_s *)arg;
+
+  priv->dcnt = 0;
+
+  /* In the interrupt routine after the EOT interrupt, disable DMA requests */
+
+  stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_DMAEN, 0);
+
+#ifndef CONFIG_I2C_POLLED
+  /* re-enable interrupts */
+
+  regval  = stm32_i2c_getreg(priv, STM32_I2C_CR2_OFFSET);
+  regval |= (I2C_CR2_ITERREN | I2C_CR2_ITEVFEN);
+  stm32_i2c_putreg(priv, STM32_I2C_CR2_OFFSET, regval);
+#endif
+}
+#endif /* ifdef CONFIG_STM32_I2C_DMA */
 
 /************************************************************************************
  * Name: stm32_i2c_init
@@ -1954,8 +2198,8 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
   /* Attach ISRs */
 
 #ifndef CONFIG_I2C_POLLED
-  irq_attach(priv->config->ev_irq, priv->config->isr, NULL);
-  irq_attach(priv->config->er_irq, priv->config->isr, NULL);
+  irq_attach(priv->config->ev_irq, stm32_i2c_isr, priv);
+  irq_attach(priv->config->er_irq, stm32_i2c_isr, priv);
   up_enable_irq(priv->config->ev_irq);
   up_enable_irq(priv->config->er_irq);
 #endif
@@ -1971,6 +2215,15 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
   priv->frequency = 0;
 
   stm32_i2c_setclock(priv, 100000);
+
+#ifdef CONFIG_STM32_I2C_DMA
+  /* If, in the I2C_CR2 register, the LAST bit is set, I2C automatically
+   * sends a NACK after the next byte following EOT_1.
+   * Clear DMA en just in case.
+   */
+
+  stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_DMAEN, I2C_CR2_LAST);
+#endif
 
   /* Enable I2C */
 
@@ -1991,6 +2244,7 @@ static int stm32_i2c_deinit(FAR struct stm32_i2c_priv_s *priv)
   /* Disable I2C */
 
   stm32_i2c_putreg(priv, STM32_I2C_CR1_OFFSET, 0);
+  stm32_i2c_putreg(priv, STM32_I2C_CR2_OFFSET, 0);
 
   /* Unconfigure GPIO pins */
 
@@ -2004,6 +2258,13 @@ static int stm32_i2c_deinit(FAR struct stm32_i2c_priv_s *priv)
   up_disable_irq(priv->config->er_irq);
   irq_detach(priv->config->ev_irq);
   irq_detach(priv->config->er_irq);
+#endif
+
+#ifdef CONFIG_STM32_I2C_DMA
+  /* Disable DMA */
+
+  stm32_dmastop(priv->txdma);
+  stm32_dmastop(priv->rxdma);
 #endif
 
   /* Disable clocking */
@@ -2035,7 +2296,15 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s
 #endif
   int ret = 0;
 
-  ASSERT(count);
+  DEBUGASSERT(count);
+
+#ifdef CONFIG_STM32_I2C_DMA
+  /* stop DMA just in case */
+
+  stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_DMAEN, 0);
+  stm32_dmastop(priv->rxdma);
+  stm32_dmastop(priv->txdma);
+#endif
 
 #ifdef I2C1_FSMC_CONFLICT
   /* Disable FSMC that shares a pin with I2C1 (LBAR) */
@@ -2246,11 +2515,11 @@ static int stm32_i2c_reset(FAR struct i2c_master_s *dev)
   uint32_t frequency;
   int ret = ERROR;
 
-  ASSERT(dev);
+  DEBUGASSERT(dev);
 
   /* Our caller must own a ref */
 
-  ASSERT(priv->refs > 0);
+  DEBUGASSERT(priv->refs > 0);
 
   /* Lock out other clients */
 
@@ -2412,6 +2681,19 @@ FAR struct i2c_master_s *stm32_i2cbus_initialize(int port)
     {
       stm32_i2c_sem_init(priv);
       stm32_i2c_init(priv);
+
+#ifdef CONFIG_STM32_I2C_DMA
+  /* Get DMA channels.  NOTE: stm32_dmachannel() will always assign the DMA channel.
+   * if the channel is not available, then stm32_dmachannel() will block and wait
+   * until the channel becomes available.  WARNING: If you have another device sharing
+   * a DMA channel with SPI and the code never releases that channel, then the call
+   * to stm32_dmachannel()  will hang forever in this function!  Don't let your
+   * design do that!
+   */
+      priv->rxdma = stm32_dmachannel(priv->rxch);
+      priv->txdma = stm32_dmachannel(priv->txch);
+      DEBUGASSERT(priv->rxdma && priv->txdma);
+#endif /* #ifdef CONFIG_STM32_I2C_DMA */
     }
 
   leave_critical_section(flags);
@@ -2431,7 +2713,7 @@ int stm32_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
   FAR struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s *)dev;
   irqstate_t flags;
 
-  ASSERT(dev);
+  DEBUGASSERT(dev);
 
   /* Decrement reference count and check for underflow */
 
@@ -2453,6 +2735,11 @@ int stm32_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
   /* Disable power and other HW resource (GPIO's) */
 
   stm32_i2c_deinit(priv);
+
+#ifdef CONFIG_STM32_I2C_DMA
+  stm32_dmafree(priv->rxdma);
+  stm32_dmafree(priv->txdma);
+#endif
 
   /* Release unused resources */
 

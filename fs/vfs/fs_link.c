@@ -82,7 +82,7 @@
  *
  * Returned Value:
  *   On success, zero (OK) is returned.  Otherwise, -1 (ERROR) is returned
- *   the the errno variable is set appropriately.
+ *   the errno variable is set appropriately.
  *
  ****************************************************************************/
 

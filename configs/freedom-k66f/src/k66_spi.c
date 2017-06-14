@@ -53,7 +53,7 @@
 #include "freedom-k66f.h"
 
 #if defined(CONFIG_KINETIS_SPI0) || defined(CONFIG_KINETIS_SPI1) || \
-	defined(CONFIG_KINETIS_SPI2)
+    defined(CONFIG_KINETIS_SPI2)
 
 /************************************************************************************
  * Public Functions
@@ -69,7 +69,10 @@
 
 void weak_function k66_spidev_initialize(void)
 {
-# warning "Missing logic"
+  /* Initialize the CE CS pins on J6 RF/WIFI connector */
+
+  kinetis_pinconfig(PIN_CE);
+  kinetis_pinconfig(PIN_SPI1_PCS0);
 }
 
 /************************************************************************************
@@ -101,13 +104,13 @@ void weak_function k66_spidev_initialize(void)
  ************************************************************************************/
 
 #ifdef CONFIG_KINETIS_SPI0
-void kinetis_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void kinetis_spi0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 # warning "Missing logic"
 }
 
-uint8_t kinetis_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t kinetis_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
 # warning "Missing logic"
   return SPI_STATUS_PRESENT;
@@ -115,13 +118,13 @@ uint8_t kinetis_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #endif
 
 #ifdef CONFIG_KINETIS_SPI1
-void kinetis_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void kinetis_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-# warning "Missing logic"
+  kinetis_gpiowrite(PIN_SPI1_PCS0, !selected);
 }
 
-uint8_t kinetis_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t kinetis_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
 # warning "Missing logic"
   return SPI_STATUS_PRESENT;
@@ -129,13 +132,13 @@ uint8_t kinetis_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #endif
 
 #ifdef CONFIG_KINETIS_SPI2
-void kinetis_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void kinetis_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 # warning "Missing logic"
 }
 
-uint8_t kinetis_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t kinetis_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
 # warning "Missing logic"
   return SPI_STATUS_PRESENT;

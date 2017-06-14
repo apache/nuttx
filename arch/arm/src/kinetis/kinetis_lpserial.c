@@ -53,15 +53,19 @@
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
 
+#ifdef CONFIG_SERIAL_TERMIOS
+#  include <termios.h>
+#endif
+
+#include <arch/serial.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "kinetis_config.h"
-#include "chip.h"
-#include "chip/kinetis_lpuart.h"
 #include "kinetis.h"
+#include "chip/kinetis_lpuart.h"
+#include "chip/kinetis_pinmux.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -153,6 +157,18 @@ struct kinetis_dev_s
   uint8_t   parity;    /* 0=none, 1=odd, 2=even */
   uint8_t   bits;      /* Number of bits (8 or 9) */
   uint8_t   stop2;     /* Use 2 stop bits */
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  bool      iflow;     /* input flow control (RTS) enabled */
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  bool      oflow;     /* output flow control (CTS) enabled */
+#endif
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  uint32_t  rts_gpio;  /* UART RTS GPIO pin configuration */
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  uint32_t  cts_gpio;  /* UART CTS GPIO pin configuration */
+#endif
 };
 
 /****************************************************************************
@@ -168,6 +184,10 @@ static int  kinetis_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  kinetis_receive(struct uart_dev_s *dev, uint32_t *status);
 static void kinetis_rxint(struct uart_dev_s *dev, bool enable);
 static bool kinetis_rxavailable(struct uart_dev_s *dev);
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+static bool kinetis_rxflowcontrol(struct uart_dev_s *dev, unsigned int nbuffered,
+                             bool upper);
+#endif
 static void kinetis_send(struct uart_dev_s *dev, int ch);
 static void kinetis_txint(struct uart_dev_s *dev, bool enable);
 static bool kinetis_txready(struct uart_dev_s *dev);
@@ -187,7 +207,7 @@ static const struct uart_ops_s g_lpuart_ops =
   .rxint          = kinetis_rxint,
   .rxavailable    = kinetis_rxavailable,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  .rxflowcontrol  = NULL,
+  .rxflowcontrol  = kinetis_rxflowcontrol,
 #endif
   .send           = kinetis_send,
   .txint          = kinetis_txint,
@@ -219,6 +239,14 @@ static struct kinetis_dev_s g_lpuart0priv =
   .parity         = CONFIG_LPUART0_PARITY,
   .bits           = CONFIG_LPUART0_BITS,
   .stop2          = CONFIG_LPUART0_2STOP,
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART0_OFLOWCONTROL)
+  .oflow         = true,
+  .cts_gpio      = PIN_LPUART0_CTS,
+#endif
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART0_IFLOWCONTROL)
+  .iflow         = true,
+  .rts_gpio      = PIN_LPUART0_RTS,
+#endif
 };
 
 static uart_dev_t g_lpuart0port =
@@ -251,6 +279,14 @@ static struct kinetis_dev_s g_lpuart1priv =
   .parity         = CONFIG_LPUART1_PARITY,
   .bits           = CONFIG_LPUART1_BITS,
   .stop2          = CONFIG_LPUART1_2STOP,
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART1_OFLOWCONTROL)
+  .oflow         = true,
+  .cts_gpio      = PIN_LPUART1_CTS,
+#endif
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART1_IFLOWCONTROL)
+  .iflow         = true,
+  .rts_gpio      = PIN_LPUART1_RTS,
+#endif
 };
 
 static uart_dev_t g_lpuart1port =
@@ -360,11 +396,22 @@ static int kinetis_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_LPUART_CONFIG
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev->priv;
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  bool iflow = priv->iflow;
+#else
+  bool iflow = false;
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  bool oflow = priv->oflow;
+#else
+  bool oflow = false;
+#endif
 
   /* Configure the LPUART as an RS-232 UART */
 
   kinetis_lpuartconfigure(priv->uartbase, priv->baud, priv->clock,
-                        priv->parity, priv->bits, priv->stop2);
+                        priv->parity, priv->bits, priv->stop2,
+                        iflow, oflow);
 #endif
 
   /* Make sure that all interrupts are disabled */
@@ -408,7 +455,7 @@ static void kinetis_shutdown(struct uart_dev_s *dev)
  * Description:
  *   Configure the LPUART to operation in interrupt driven mode.  This
  *   method is called when the serial port is opened.  Normally, this is
- *   just after the the setup() method is called, however, the serial
+ *   just after the setup() method is called, however, the serial
  *   console may operate in a non-interrupt driven mode during the boot phase.
  *
  *   RX and TX interrupts are not enabled when by the attach method (unless
@@ -564,23 +611,239 @@ static int kinetis_interrupt(int irq, void *context, void *arg)
 
 static int kinetis_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-#if 0 /* Reserved for future growth */
-  struct inode      *inode;
-  struct uart_dev_s *dev;
+#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_SERIAL_TIOCSERGSTRUCT) || \
+    defined(CONFIG_KINETIS_SERIALBRK_BSDCOMPAT)
+  struct inode           *inode;
+  struct uart_dev_s      *dev;
+  uint8_t regval;
+#endif
+#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_KINETIS_SERIALBRK_BSDCOMPAT)
   struct kinetis_dev_s   *priv;
-  int ret = OK;
+  bool                   iflow = false;
+  bool                   oflow = false;
+#endif
+  int                    ret = OK;
 
-  DEBUGASSERT(filep, filep->f_inode);
+#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_SERIAL_TIOCSERGSTRUCT) || \
+    defined(CONFIG_KINETIS_SERIALBRK_BSDCOMPAT)
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   dev   = inode->i_private;
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
+#endif
 
-  DEBUGASSERT(dev, dev->priv);
-  priv = (struct kinetis_dev_s *)dev->priv;
+#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_KINETIS_SERIALBRK_BSDCOMPAT)
+  priv  = (struct kinetis_dev_s *)dev->priv;
+#endif
 
   switch (cmd)
     {
-    case xxx: /* Add commands here */
+#ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
+    case TIOCSERGSTRUCT:
+      {
+        struct kinetis_dev_s *user = (struct kinetis_dev_s *)arg;
+        if (!user)
+          {
+            ret = -EINVAL;
+          }
+        else
+          {
+            memcpy(user, dev, sizeof(struct kinetis_dev_s));
+          }
+      }
       break;
+#endif
+
+#ifdef CONFIG_KINETIS_UART_SINGLEWIRE
+    case TIOCSSINGLEWIRE:
+      {
+        /* Change to single-wire operation. the RXD pin is disconnected from
+         * the UART and the UART implements a half-duplex serial connection.
+         * The UART uses the TXD pin for both receiving and transmitting
+         */
+
+        regval = kinetis_serialin(priv, KINETIS_LPUART_CTRL_OFFSET);
+
+        if (arg == SER_SINGLEWIRE_ENABLED)
+          {
+            regval |= (LPUART_CTRL_LOOPS | LPUART_CTRL_RSRC);
+          }
+        else
+          {
+            regval &= ~(LPUART_CTRL_LOOPS | LPUART_CTRL_RSRC);
+          }
+
+        kinetis_serialout(priv, KINETIS_LPUART_CTRL_OFFSET, regval);
+      }
+     break;
+#endif
+
+#ifdef CONFIG_SERIAL_TERMIOS
+    case TCGETS:
+      {
+        struct termios *termiosp = (struct termios *)arg;
+
+        if (!termiosp)
+          {
+            ret = -EINVAL;
+            break;
+          }
+
+        cfsetispeed(termiosp, priv->baud);
+
+        /* Note: CSIZE only supports 5-8 bits. The driver only support 8/9 bit
+         * modes and therefore is no way to report 9-bit mode, we always claim
+         * 8 bit mode.
+         */
+
+        termiosp->c_cflag =
+          ((priv->parity != 0) ? PARENB : 0) |
+          ((priv->parity == 1) ? PARODD : 0) |
+          ((priv->stop2) ? CSTOPB : 0) |
+#  ifdef CONFIG_SERIAL_OFLOWCONTROL
+          ((priv->oflow) ? CCTS_OFLOW : 0) |
+#  endif
+#  ifdef CONFIG_SERIAL_IFLOWCONTROL
+          ((priv->iflow) ? CRTS_IFLOW : 0) |
+#  endif
+          CS8;
+
+        /* TODO: CCTS_IFLOW, CCTS_OFLOW */
+      }
+      break;
+
+    case TCSETS:
+      {
+        struct termios *termiosp = (struct termios *)arg;
+
+        if (!termiosp)
+          {
+            ret = -EINVAL;
+            break;
+          }
+
+        /* Perform some sanity checks before accepting any changes */
+
+        if (((termiosp->c_cflag & CSIZE) != CS8)
+#  ifdef CONFIG_SERIAL_IFLOWCONTROL
+            || ((termiosp->c_cflag & CCTS_OFLOW) && (priv->cts_gpio == 0))
+#  endif
+#  ifdef CONFIG_SERIAL_IFLOWCONTROL
+            || ((termiosp->c_cflag & CRTS_IFLOW) && (priv->rts_gpio == 0))
+#  endif
+           )
+          {
+            ret = -EINVAL;
+            break;
+          }
+
+        if (termiosp->c_cflag & PARENB)
+          {
+            priv->parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+          }
+        else
+          {
+            priv->parity = 0;
+          }
+
+        priv->stop2 = (termiosp->c_cflag & CSTOPB) != 0;
+#  ifdef CONFIG_SERIAL_OFLOWCONTROL
+        priv->oflow = (termiosp->c_cflag & CCTS_OFLOW) != 0;
+        oflow = priv->oflow;
+#  endif
+#  ifdef CONFIG_SERIAL_IFLOWCONTROL
+        priv->iflow = (termiosp->c_cflag & CRTS_IFLOW) != 0;
+        iflow = priv->iflow;
+#  endif
+
+        /* Note that since there is no way to request 9-bit mode
+         * and no way to support 5/6/7-bit modes, we ignore them
+         * all here.
+         */
+
+        /* Note that only cfgetispeed is used because we have knowledge
+         * that only one speed is supported.
+         */
+
+        priv->baud = cfgetispeed(termiosp);
+
+        /* Effect the changes immediately - note that we do not implement
+         * TCSADRAIN / TCSAFLUSH
+         */
+
+        kinetis_uartconfigure(priv->uartbase, priv->baud, priv->clock,
+                                priv->parity, priv->bits, priv->stop2,
+                                iflow, oflow);
+      }
+      break;
+#endif /* CONFIG_SERIAL_TERMIOS */
+
+#ifdef CONFIG_KINETIS_UART_BREAKS
+    case TIOCSBRK:
+      {
+        irqstate_t flags;
+
+        flags = enter_critical_section();
+
+        /* Send a longer break signal */
+
+        regval = kinetis_serialin(priv, KINETIS_LPUART_STAT_OFFSET);
+        regval &= ~LPUART_STAT_BRK13;
+# ifdef CONFIG_KINETIS_UART_EXTEDED_BREAK
+        regval |= LPUART_STAT_BRK13;
+#  endif
+        kinetis_serialout(priv, LPUART_STAT_BRK13, regval);
+
+        /* Send a break signal */
+
+        regval = kinetis_serialin(priv, KINETIS_LPUART_CTRL_OFFSET);
+        regval |= LPUART_CTRL_SBK;
+        kinetis_serialout(priv, KINETIS_LPUART_CTRL_OFFSET, regval);
+
+#  ifdef CONFIG_KINETIS_SERIALBRK_BSDCOMPAT
+        /* BSD compatibility: Turn break on, and leave it on */
+
+        kinetis_txint(dev, false);
+#  else
+        /* Send a single break character
+         * Toggling SBK sends one break character. Per the manual
+         * Toggling implies clearing the SBK field before the break
+         * character has finished transmitting.
+         */
+
+        regval &= ~LPUART_CTRL_SBK;
+        kinetis_serialout(priv, KINETIS_LPUART_CTRL_OFFSET, regval);
+#endif
+
+        leave_critical_section(flags);
+      }
+      break;
+
+    case TIOCCBRK:
+      {
+        irqstate_t flags;
+
+        flags = enter_critical_section();
+
+        /* Configure TX back to UART
+         * If non BSD compatible: This code has no effect, the SBRK
+         * was already cleared.
+         * but for BSD compatibility: Turn break off
+         */
+
+        regval = kinetis_serialin(priv, KINETIS_LPUART_CTRL_OFFSET);
+        regval &= ~LPUART_CTRL_SBK;
+        kinetis_serialout(priv, KINETIS_LPUART_CTRL_OFFSET, regval);
+
+#  ifdef CONFIG_KINETIS_SERIALBRK_BSDCOMPAT
+        /* Enable further tx activity */
+
+        kinetis_txint(dev, true);
+#  endif
+        leave_critical_section(flags);
+      }
+      break;
+#endif /* CONFIG_KINETIS_UART_BREAKS */
 
     default:
       ret = -ENOTTY;
@@ -588,9 +851,6 @@ static int kinetis_ioctl(struct file *filep, int cmd, unsigned long arg)
     }
 
   return ret;
-#else
-  return -ENOTTY;
-#endif
 }
 
 /****************************************************************************
@@ -695,6 +955,79 @@ static bool kinetis_rxavailable(struct uart_dev_s *dev)
 
   return (kinetis_serialin(priv, KINETIS_LPUART_STAT_OFFSET) & LPUART_STAT_RDRF) != 0;
 }
+
+/****************************************************************************
+ * Name: kinetis_rxflowcontrol
+ *
+ * Description:
+ *   Called when Rx buffer is full (or exceeds configured watermark levels
+ *   if CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS is defined).
+ *   Return true if UART activated RX flow control to block more incoming
+ *   data
+ *
+ * Input parameters:
+ *   dev       - UART device instance
+ *   nbuffered - the number of characters currently buffered
+ *               (if CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS is
+ *               not defined the value will be 0 for an empty buffer or the
+ *               defined buffer size for a full buffer)
+ *   upper     - true indicates the upper watermark was crossed where
+ *               false indicates the lower watermark has been crossed
+ *
+ * Returned Value:
+ *   true if RX flow control activated.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+static bool kinetis_rxflowcontrol(struct uart_dev_s *dev,
+                             unsigned int nbuffered, bool upper)
+{
+#if defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS)
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev->priv;
+  uint16_t ie;
+
+  if (priv->iflow)
+    {
+      /* Is the RX buffer full? */
+
+      if (upper)
+        {
+          /* Disable Rx interrupt to prevent more data being from
+           * peripheral.  When hardware RTS is enabled, this will
+           * prevent more data from coming in.
+           *
+           * This function is only called when UART recv buffer is full,
+           * that is: "dev->recv.head + 1 == dev->recv.tail".
+           *
+           * Logic in "uart_read" will automatically toggle Rx interrupts
+           * when buffer is read empty and thus we do not have to re-
+           * enable Rx interrupts.
+           */
+
+          ie = priv->ie;
+          ie &= ~LPUART_CTRL_RX_INTS;
+          kinetis_restoreuartint(priv, ie);
+          return true;
+        }
+
+      /* No.. The RX buffer is empty */
+
+      else
+        {
+          /* We might leave Rx interrupt disabled if full recv buffer was
+           * read empty.  Enable Rx interrupt to make sure that more input is
+           * received.
+           */
+
+          kinetis_rxint(dev, true);
+        }
+    }
+#endif
+
+  return false;
+}
+#endif
 
 /****************************************************************************
  * Name: kinetis_send

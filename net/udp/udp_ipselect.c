@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: udp_ipv4_select
+ * Name: udp_ipv4_select
  *
  * Description:
  *   Configure to send or receive an UDP IPv4 packet
@@ -76,7 +76,7 @@ void udp_ipv4_select(FAR struct net_driver_s *dev)
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Function: udp_ipv6_select
+ * Name: udp_ipv6_select
  *
  * Description:
  *   Configure to send or receive an UDP IPv6 packet

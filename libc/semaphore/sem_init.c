@@ -49,7 +49,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sem_init
+ * Name: sem_init
  *
  * Description:
  *   This function initializes the UNAMED semaphore sem. Following a

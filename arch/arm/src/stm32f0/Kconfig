@@ -1,0 +1,1482 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "STM32F0xx Configuration Options"
+
+choice
+	prompt "ST STM32F0XX Chip Selection"
+	default ARCH_CHIP_STM32F051R8
+	depends on ARCH_CHIP_STM32F0
+
+config ARCH_CHIP_STM32F030C6
+	bool "STM32F030C6"
+	select STM32F0_STM32F03X
+	select STM32F0_VALUELINE
+
+config ARCH_CHIP_STM32F030C8
+	bool "STM32F030C8"
+	select STM32F0_STM32F03X
+	select STM32F0_VALUELINE
+
+config ARCH_CHIP_STM32F030CC
+	bool "STM32F030CC"
+	select STM32F0_STM32F03X
+	select STM32F0_VALUELINE
+
+config ARCH_CHIP_STM32F030F4
+	bool "STM32F030F4"
+	select STM32F0_STM32F03X
+	select STM32F0_VALUELINE
+
+config ARCH_CHIP_STM32F030K6
+	bool "STM32F030K6"
+	select STM32F0_STM32F03X
+	select STM32F0_VALUELINE
+
+config ARCH_CHIP_STM32F030R8
+	bool "STM32F030R8"
+	select STM32F0_STM32F03X
+	select STM32F0_VALUELINE
+
+config ARCH_CHIP_STM32F030RC
+	bool "STM32F030RC"
+	select STM32F0_STM32F03X
+	select STM32F0_VALUELINE
+
+config ARCH_CHIP_STM32F031C4
+	bool "STM32F031C4"
+	select STM32F0_STM32F03X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F031C6
+	bool "STM32F031C6"
+	select STM32F0_STM32F03X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F031E6
+	bool "STM32F031E6"
+	select STM32F0_STM32F03X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F031F4
+	bool "STM32F031F4"
+	select STM32F0_STM32F03X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F031F6
+	bool "STM32F031F6"
+	select STM32F0_STM32F03X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F031G4
+	bool "STM32F031G4"
+	select STM32F0_STM32F03X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F031G6
+	bool "STM32F031G6"
+	select STM32F0_STM32F03X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F031K4
+	bool "STM32F031K4"
+	select STM32F0_STM32F03X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F031K6
+	bool "STM32F031K6"
+	select STM32F0_STM32F03X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F038C6
+	bool "STM32F038C6"
+	select STM32F0_STM32F03X
+	select STM32F0_LOWVOLTLINE
+
+config ARCH_CHIP_STM32F038E6
+	bool "STM32F038E6"
+	select STM32F0_STM32F03X
+	select STM32F0_LOWVOLTLINE
+
+config ARCH_CHIP_STM32F038F6
+	bool "STM32F038F6"
+	select STM32F0_STM32F03X
+	select STM32F0_LOWVOLTLINE
+
+config ARCH_CHIP_STM32F038G6
+	bool "STM32F038G6"
+	select STM32F0_STM32F03X
+	select STM32F0_LOWVOLTLINE
+
+config ARCH_CHIP_STM32F038K6
+	bool "STM32F038K6"
+	select STM32F0_STM32F03X
+	select STM32F0_LOWVOLTLINE
+
+config ARCH_CHIP_STM32F042C4
+	bool "STM32F042C4"
+	select STM32F0_STM32F04X
+	select STM32F0_USBLINE
+
+config ARCH_CHIP_STM32F042C6
+	bool "STM32F042C6"
+	select STM32F0_STM32F04X
+	select STM32F0_USBLINE
+
+config ARCH_CHIP_STM32F042F4
+	bool "STM32F042F4"
+	select STM32F0_STM32F04X
+	select STM32F0_USBLINE
+
+config ARCH_CHIP_STM32F042F6
+	bool "STM32F042F6"
+	select STM32F0_STM32F04X
+	select STM32F0_USBLINE
+
+config ARCH_CHIP_STM32F042G4
+	bool "STM32F042G4"
+	select STM32F0_STM32F04X
+	select STM32F0_USBLINE
+
+config ARCH_CHIP_STM32F042G6
+	bool "STM32F042G6"
+	select STM32F0_STM32F04X
+	select STM32F0_USBLINE
+
+config ARCH_CHIP_STM32F042K4
+	bool "STM32F042K4"
+	select STM32F0_STM32F04X
+	select STM32F0_USBLINE
+
+config ARCH_CHIP_STM32F042K6
+	bool "STM32F042K6"
+	select STM32F0_STM32F04X
+	select STM32F0_USBLINE
+
+config ARCH_CHIP_STM32F042T6
+	bool "STM32F042T6"
+	select STM32F0_STM32F04X
+	select STM32F0_USBLINE
+
+config ARCH_CHIP_STM32F048C6
+	bool "STM32F048C6"
+	select STM32F0_STM32F04X
+	select STM32F0_LOWVOLTLINE
+
+config ARCH_CHIP_STM32F048G6
+	bool "STM32F048G6"
+	select STM32F0_STM32F04X
+	select STM32F0_LOWVOLTLINE
+
+config ARCH_CHIP_STM32F048T6
+	bool "STM32F048T6"
+	select STM32F0_STM32F04X
+	select STM32F0_LOWVOLTLINE
+
+config ARCH_CHIP_STM32F051C4
+	bool "STM32F051C4"
+	select STM32F0_STM32F05X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F051C6
+	bool "STM32F051C6"
+	select STM32F0_STM32F05X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F051C8
+	bool "STM32F051C8"
+	select STM32F0_STM32F05X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F051K4
+	bool "STM32F051K4"
+	select STM32F0_STM32F05X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F051K6
+	bool "STM32F051K6"
+	select STM32F0_STM32F05X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F051K8
+	bool "STM32F051K8"
+	select STM32F0_STM32F05X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F051R4
+	bool "STM32F051R4"
+	select STM32F0_STM32F05X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F051R6
+	bool "STM32F051R6"
+	select STM32F0_STM32F05X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F051R8
+	bool "STM32F051R8"
+	select STM32F0_STM32F05X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F051T8
+	bool "STM32F051T8"
+	select STM32F0_STM32F05X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F058C8
+	bool "STM32F058C8"
+	select STM32F0_STM32F05X
+	select STM32F0_LOWVOLTLINE
+
+config ARCH_CHIP_STM32F058R8
+	bool "STM32F058R8"
+	select STM32F0_STM32F05X
+	select STM32F0_LOWVOLTLINE
+
+config ARCH_CHIP_STM32F058T8
+	bool "STM32F058T8"
+	select STM32F0_STM32F05X
+	select STM32F0_LOWVOLTLINE
+
+config ARCH_CHIP_STM32F070C6
+	bool "STM32F070C6"
+	select STM32F0_STM32F07X
+	select STM32F0_VALUELINE
+
+config ARCH_CHIP_STM32F070CB
+	bool "STM32F070CB"
+	select STM32F0_STM32F07X
+	select STM32F0_VALUELINE
+
+config ARCH_CHIP_STM32F070F6
+	bool "STM32F070F6"
+	select STM32F0_STM32F07X
+	select STM32F0_VALUELINE
+
+config ARCH_CHIP_STM32F070RB
+	bool "STM32F070RB"
+	select STM32F0_STM32F07X
+	select STM32F0_VALUELINE
+
+config ARCH_CHIP_STM32F071C8
+	bool "STM32F071C8"
+	select STM32F0_STM32F07X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F071CB
+	bool "STM32F071CB"
+	select STM32F0_STM32F07X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F071RB
+	bool "STM32F071RB"
+	select STM32F0_STM32F07X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F071V8
+	bool "STM32F071V8"
+	select STM32F0_STM32F07X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F071VB
+	bool "STM32F071VB"
+	select STM32F0_STM32F07X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F072C8
+	bool "STM32F072C8"
+	select STM32F0_STM32F07X
+	select STM32F0_USBLINE
+
+config ARCH_CHIP_STM32F072CB
+	bool "STM32F072CB"
+	select STM32F0_STM32F07X
+	select STM32F0_USBLINE
+
+config ARCH_CHIP_STM32F072R8
+	bool "STM32F072R8"
+	select STM32F0_STM32F07X
+	select STM32F0_USBLINE
+
+config ARCH_CHIP_STM32F072RB
+	bool "STM32F072RB"
+	select STM32F0_STM32F07X
+	select STM32F0_USBLINE
+
+config ARCH_CHIP_STM32F072V8
+	bool "STM32F072V8"
+	select STM32F0_STM32F07X
+	select STM32F0_USBLINE
+
+config ARCH_CHIP_STM32F072VB
+	bool "STM32F072VB"
+	select STM32F0_STM32F07X
+	select STM32F0_USBLINE
+
+config ARCH_CHIP_STM32F078CB
+	bool "STM32F078CB"
+	select STM32F0_STM32F07X
+	select STM32F0_LOWVOLTLINE
+
+config ARCH_CHIP_STM32F078RB
+	bool "STM32F078RB"
+	select STM32F0_STM32F07X
+	select STM32F0_LOWVOLTLINE
+
+config ARCH_CHIP_STM32F078VB
+	bool "STM32F078VB"
+	select STM32F0_STM32F07X
+	select STM32F0_LOWVOLTLINE
+
+config ARCH_CHIP_STM32F091CB
+	bool "STM32F091CB"
+	select STM32F0_STM32F09X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F091CC
+	bool "STM32F091CC"
+	select STM32F0_STM32F09X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F091RB
+	bool "STM32F091RB"
+	select STM32F0_STM32F09X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F091RC
+	bool "STM32F091RC"
+	select STM32F0_STM32F09X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F091VB
+	bool "STM32F091VB"
+	select STM32F0_STM32F09X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F091VC
+	bool "STM32F091VC"
+	select STM32F0_STM32F09X
+	select STM32F0_ACCESSLINE
+
+config ARCH_CHIP_STM32F098CC
+	bool "STM32F098CC"
+	select STM32F0_STM32F09X
+	select STM32F0_LOWVOLTLINE
+
+config ARCH_CHIP_STM32F098RC
+	bool "STM32F098RC"
+	select STM32F0_STM32F09X
+	select STM32F0_LOWVOLTLINE
+
+config ARCH_CHIP_STM32F098VC
+	bool "STM32F098VC"
+	select STM32F0_STM32F09X
+	select STM32F0_LOWVOLTLINE
+
+endchoice
+
+config ARCH_FAMILY_STM32F0XX
+	bool
+
+choice
+	prompt "Override Flash Size Designator"
+	default STM32F0_FLASH_CONFIG_DEFAULT
+	depends on ARCH_CHIP_STM32
+	---help---
+		STM32F series parts numbering (sans the package type) ends with a number or letter
+		that designates the FLASH size.
+
+		   Designator  Size in KiB
+		          4    16
+		          6    32
+		          8    64
+		          B    128
+		          C    256
+		          D    384
+		          E    512
+		          F    768
+		          G    1024
+		          I    2048
+
+		This configuration option defaults to using the configuration based on that designator
+		or the default smaller size if there is no last character designator is present in the
+		STM32 Chip Selection.
+
+		Examples:
+		   If the STM32F407VE is chosen, the Flash configuration would be 'E', if a variant of
+		   the part with a  2048 KiB Flash is released in the future one could simply select
+		   the 'I' designator here.
+
+		   If an STM32F42xxx or  Series parts is chosen the default Flash configuration will be 'G'
+		   and can be set herein to 'I' to choose the larger FLASH part.
+
+config STM32F0_FLASH_CONFIG_DEFAULT
+		        bool "Default"
+
+config STM32F0_FLASH_CONFIG_4
+		        bool "4 16KiB"
+
+config STM32F0_FLASH_CONFIG_6
+		        bool "6 32KiB"
+
+config STM32F0_FLASH_CONFIG_8
+		        bool "8 64KiB"
+
+config STM32F0_FLASH_CONFIG_B
+		        bool "B 128KiB"
+
+config STM32F0_FLASH_CONFIG_C
+		        bool "C 256KiB"
+
+config STM32F0_FLASH_CONFIG_D
+		        bool "D 384KiB"
+
+config STM32F0_FLASH_CONFIG_E
+		        bool "E 512KiB"
+
+config STM32F0_FLASH_CONFIG_F
+		        bool "F 768KiB"
+
+config STM32F0_FLASH_CONFIG_G
+		        bool "G 1024KiB"
+
+config STM32F0_FLASH_CONFIG_I
+		        bool "I 2048KiB"
+
+endchoice
+
+config STM32F0_STM32F03X
+	bool
+	default n
+
+config STM32F0_STM32F04X
+	bool
+	default n
+
+config STM32F0_STM32F05X
+	bool
+	default n
+
+config STM32F0_STM32F07X
+	bool
+	default n
+
+config STM32F0_STM32F09X
+	bool
+	default n
+	select STM32F0_HAVE_HSI48
+
+config STM32F0_VALUELINE
+	bool
+	default n
+	select STM32F0_HAVE_USART3
+	select STM32F0_HAVE_USART4
+	select STM32F0_HAVE_USART5
+	select STM32F0_HAVE_TIM1
+	select STM32F0_HAVE_TIM2
+	select STM32F0_HAVE_TIM3
+	select STM32F0_HAVE_TIM6
+	select STM32F0_HAVE_TIM7
+	select STM32F0_HAVE_TIM14
+	select STM32F0_HAVE_TIM15
+	select STM32F0_HAVE_TIM16
+	select STM32F0_HAVE_TIM17
+	select STM32F0_HAVE_SPI2 if STM32F0_HIGHDENSITY
+	select STM32F0_HAVE_SPI3 if STM32F0_HIGHDENSITY
+
+config STM32F0_ACCESSLINE
+	bool
+	default n
+	select STM32F0_HAVE_USART3
+	select STM32F0_HAVE_USART4
+	select STM32F0_HAVE_USART5
+	select STM32F0_HAVE_TIM1
+	select STM32F0_HAVE_TIM2
+	select STM32F0_HAVE_TIM3
+	select STM32F0_HAVE_TIM6
+	select STM32F0_HAVE_TIM7
+	select STM32F0_HAVE_TIM14
+	select STM32F0_HAVE_TIM15
+	select STM32F0_HAVE_TIM16
+	select STM32F0_HAVE_TIM17
+	select STM32F0_HAVE_ADC2
+	select STM32F0_HAVE_CAN1
+	select STM32F0_HAVE_SPI2
+	select STM32F0_HAVE_SPI3
+
+config STM32F0_LOWVOLTLINE
+	bool
+	default n
+	select STM32F0_HAVE_USART3
+	select STM32F0_HAVE_USART4
+	select STM32F0_HAVE_USART5
+	select STM32F0_HAVE_TIM1
+	select STM32F0_HAVE_TIM2
+	select STM32F0_HAVE_TIM3
+	select STM32F0_HAVE_TIM6
+	select STM32F0_HAVE_TIM7
+	select STM32F0_HAVE_TIM14
+	select STM32F0_HAVE_TIM15
+	select STM32F0_HAVE_TIM16
+	select STM32F0_HAVE_TIM17
+	select STM32F0_HAVE_ADC2
+	select STM32F0_HAVE_CAN1
+	select STM32F0_HAVE_SPI2
+	select STM32F0_HAVE_SPI3
+
+config STM32F0_USBLINE
+	bool
+	default n
+	select STM32F0_HAVE_HSI48
+	select STM32F0_HAVE_USART3
+	select STM32F0_HAVE_USART4
+	select STM32F0_HAVE_TIM1
+	select STM32F0_HAVE_TIM2
+	select STM32F0_HAVE_TIM3
+	select STM32F0_HAVE_TIM6
+	select STM32F0_HAVE_TIM7
+	select STM32F0_HAVE_TIM14
+	select STM32F0_HAVE_TIM15
+	select STM32F0_HAVE_TIM16
+	select STM32F0_HAVE_TIM17
+	select STM32F0_HAVE_ADC2
+	select STM32F0_HAVE_CAN1
+	select STM32F0_HAVE_SPI2
+	select STM32F0_HAVE_SPI3
+	select STM32F0_HAVE_USBDEV
+
+config STM32F0_DFU
+	bool "DFU bootloader"
+	default n
+	depends on !STM32F0_VALUELINE
+	---help---
+		Configure and position code for use with the STMicro DFU bootloader.  Do
+		not select this option if you will load code using JTAG/SWM.
+
+
+choice
+	prompt "SysTick clock source"
+	default STM32F0_SYSTICK_CORECLK
+
+config STM32F0_SYSTICK_CORECLK
+	bool "Cortex-M0 core clock"
+
+config STM32F0_SYSTICK_CORECLK_DIV16
+	bool "Cortex-M0 core clock divided by 16"
+
+endchoice
+
+
+menu "STM32 Peripheral Support"
+
+# These "hidden" settings determine is a peripheral option is available for the
+# selection MCU
+
+config STM32F0_HAVE_CCM
+	bool
+	default n
+
+config STM32F0_HAVE_HSI48
+	bool
+	default n
+
+config STM32F0_HAVE_USBDEV
+	bool
+	default n
+
+config STM32F0_HAVE_FSMC
+	bool
+	default n
+
+config STM32F0_HAVE_HRTIM1
+	bool
+	default n
+
+config STM32F0_HAVE_USART3
+	bool
+	default n
+
+config STM32F0_HAVE_USART4
+	bool
+	default n
+
+config STM32F0_HAVE_USART5
+	bool
+	default n
+
+config STM32F0_HAVE_USART6
+	bool
+	default n
+
+config STM32F0_HAVE_USART7
+	bool
+	default n
+
+config STM32F0_HAVE_USART8
+	bool
+	default n
+
+config STM32F0_HAVE_TIM1
+	bool
+	default n
+
+config STM32F0_HAVE_TIM2
+	bool
+	default n
+
+config STM32F0_HAVE_TIM3
+	bool
+	default n
+
+config STM32F0_HAVE_TIM6
+	bool
+	default n
+
+config STM32F0_HAVE_TIM7
+	bool
+	default n
+
+config STM32F0_HAVE_TIM14
+	bool
+	default n
+
+config STM32F0_HAVE_TIM15
+	bool
+	default n
+
+config STM32F0_HAVE_TIM16
+	bool
+	default n
+
+config STM32F0_HAVE_TIM17
+	bool
+	default n
+
+config STM32F0_HAVE_TSC
+	bool
+	default n
+
+config STM32F0_HAVE_ADC2
+	bool
+	default n
+
+config STM32F0_HAVE_ADC3
+	bool
+	default n
+
+config STM32F0_HAVE_ADC4
+	bool
+	default n
+
+config STM32F0_HAVE_ADC1_DMA
+	bool
+	default n
+
+config STM32F0_HAVE_ADC2_DMA
+	bool
+	default n
+
+config STM32F0_HAVE_ADC3_DMA
+	bool
+	default n
+
+config STM32F0_HAVE_ADC4_DMA
+	bool
+	default n
+
+config STM32F0_HAVE_SDADC1
+	bool
+	default n
+
+config STM32F0_HAVE_SDADC2
+	bool
+	default n
+
+config STM32F0_HAVE_SDADC3
+	bool
+	default n
+
+config STM32F0_HAVE_SDADC1_DMA
+	bool
+	default n
+
+config STM32F0_HAVE_SDADC2_DMA
+	bool
+	default n
+
+config STM32F0_HAVE_SDADC3_DMA
+	bool
+	default n
+
+config STM32F0_HAVE_CAN1
+	bool
+	default n
+
+config STM32F0_HAVE_COMP1
+       bool
+       default n
+
+config STM32F0_HAVE_COMP2
+       bool
+       default n
+
+config STM32F0_HAVE_COMP3
+       bool
+       default n
+
+config STM32F0_HAVE_COMP4
+       bool
+       default n
+
+config STM32F0_HAVE_COMP5
+       bool
+       default n
+
+config STM32F0_HAVE_COMP6
+       bool
+       default n
+
+config STM32F0_HAVE_COMP7
+       bool
+       default n
+
+config STM32F0_HAVE_DAC1
+	bool
+	default n
+
+config STM32F0_HAVE_DAC2
+	bool
+	default n
+
+config STM32F0_HAVE_RNG
+	bool
+	default n
+
+config STM32F0_HAVE_I2C2
+	bool
+	default n
+
+config STM32F0_HAVE_I2C3
+	bool
+	default n
+
+config STM32F0_HAVE_SPI2
+	bool
+	default n
+
+config STM32F0_HAVE_SPI3
+	bool
+	default n
+
+config STM32F0_HAVE_SPI4
+	bool
+	default n
+
+config STM32F0_HAVE_SPI5
+	bool
+	default n
+
+config STM32F0_HAVE_SPI6
+	bool
+	default n
+
+config STM32F0_HAVE_SAIPLL
+	bool
+	default n
+
+config STM32F0_HAVE_I2SPLL
+	bool
+	default n
+
+config STM32F0_HAVE_OPAMP1
+       bool
+       default n
+
+config STM32F0_HAVE_OPAMP2
+       bool
+       default n
+
+config STM32F0_HAVE_OPAMP3
+       bool
+       default n
+
+config STM32F0_HAVE_OPAMP4
+       bool
+       default n
+
+# These are the peripheral selections proper
+
+config STM32F0_ADC1
+	bool "ADC1"
+	default n
+	select STM32F0_ADC
+
+config STM32F0_ADC2
+	bool "ADC2"
+	default n
+	select STM32F0_ADC
+	depends on STM32F0_HAVE_ADC2
+
+config STM32F0_ADC3
+	bool "ADC3"
+	default n
+	select STM32F0_ADC
+	depends on STM32F0_HAVE_ADC3
+
+config STM32F0_ADC4
+	bool "ADC4"
+	default n
+	select STM32F0_ADC
+	depends on STM32F0_HAVE_ADC4
+
+config STM32F0_SDADC1
+	bool "SDADC1"
+	default n
+	select STM32F0_SDADC
+	depends on STM32F0_HAVE_SDADC1
+
+config STM32F0_SDADC2
+	bool "SDADC2"
+	default n
+	select STM32F0_SDADC
+	depends on STM32F0_HAVE_SDADC2
+
+config STM32F0_SDADC3
+	bool "SDADC3"
+	default n
+	select STM32F0_SDADC
+	depends on STM32F0_HAVE_SDADC3
+
+config STM32F0_COMP
+	bool "COMP"
+	default n
+
+config STM32F0_COMP1
+	bool "COMP1"
+	default n
+	depends on STM32F0_HAVE_COMP1
+
+config STM32F0_COMP2
+	bool "COMP2"
+	default n
+	depends on STM32F0_HAVE_COMP2
+
+config STM32F0_COMP3
+	bool "COMP3"
+	default n
+	depends on STM32F0_HAVE_COMP3
+
+config STM32F0_COMP4
+	bool "COMP4"
+	default n
+	depends on STM32F0_HAVE_COMP4
+
+config STM32F0_COMP5
+	bool "COMP5"
+	default n
+	depends on STM32F0_HAVE_COMP5
+
+config STM32F0_COMP6
+	bool "COMP6"
+	default n
+	depends on STM32F0_HAVE_COMP6
+
+config STM32F0_COMP7
+	bool "COMP7"
+	default n
+	depends on STM32F0_HAVE_COMP6
+
+config STM32F0_BKP
+	bool "BKP"
+	default n
+
+config STM32F0_BKPSRAM
+	bool "Enable BKP RAM Domain"
+	default n
+
+config STM32F0_CAN1
+	bool "CAN1"
+	default n
+	select CAN
+	select STM32F0_CAN
+	depends on STM32F0_HAVE_CAN1
+
+config STM32F0_CEC
+	bool "CEC"
+	default n
+	depends on STM32F0_VALUELINE
+
+config STM32F0_CRC
+	bool "CRC"
+	default n
+
+config STM32F0_CRYP
+	bool "CRYP"
+	default n
+	depends on STM32F0_STM32F207 || STM32F0_STM32F40XX
+
+config STM32F0_DMA1
+	bool "DMA1"
+	default n
+	select ARCH_DMA
+
+config STM32F0_DMA2
+	bool "DMA2"
+	default n
+	select ARCH_DMA
+	depends on !STM32F0_VALUELINE || (STM32F0_VALUELINE && STM32F0_HIGHDENSITY)
+
+config STM32F0_DAC1
+	bool "DAC1"
+	default n
+	depends on STM32F0_HAVE_DAC1
+	select STM32F0_DAC
+
+config STM32F0_DAC2
+	bool "DAC2"
+	default n
+	depends on STM32F0_HAVE_DAC2
+	select STM32F0_DAC
+
+config STM32F0_FSMC
+	bool "FSMC"
+	default n
+	depends on STM32F0_HAVE_FSMC
+
+config STM32F0_HASH
+	bool "HASH"
+	default n
+	depends on STM32F0_STM32F207 || STM32F0_STM32F40XX
+
+config STM32F0_HRTIM1
+	bool "HRTIM1"
+	default n
+	depends on STM32F0_HAVE_HRTIM1
+
+config STM32F0_I2C1
+	bool "I2C1"
+	default n
+	select STM32F0_I2C
+
+config STM32F0_I2C2
+	bool "I2C2"
+	default n
+	depends on STM32F0_HAVE_I2C2
+	select STM32F0_I2C
+
+config STM32F0_I2C3
+	bool "I2C3"
+	default n
+	depends on STM32F0_HAVE_I2C3
+	select STM32F0_I2C
+
+config STM32F0_PWR
+	bool "PWR"
+	default n
+
+config STM32F0_RNG
+	bool "RNG"
+	default n
+	depends on STM32F0_HAVE_RNG
+	select ARCH_HAVE_RNG
+
+config STM32F0_SDIO
+	bool "SDIO"
+	default n
+	depends on !STM32F0_CONNECTIVITYLINE && !STM32F0_VALUELINE
+	select ARCH_HAVE_SDIO
+	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE
+	select SDIO_PREFLIGHT
+
+config STM32F0_SPI1
+	bool "SPI1"
+	default n
+	select SPI
+	select STM32F0_SPI
+
+config STM32F0_SPI2
+	bool "SPI2"
+	default n
+	depends on STM32F0_HAVE_SPI2
+	select SPI
+	select STM32F0_SPI
+
+config STM32F0_SPI3
+	bool "SPI3"
+	default n
+	depends on STM32F0_HAVE_SPI3
+	select SPI
+	select STM32F0_SPI
+
+config STM32F0_SPI4
+	bool "SPI4"
+	default n
+	depends on STM32F0_HAVE_SPI4
+	select SPI
+	select STM32F0_SPI
+
+config STM32F0_SPI5
+	bool "SPI5"
+	default n
+	depends on STM32F0_HAVE_SPI5
+	select SPI
+	select STM32F0_SPI
+
+config STM32F0_SPI6
+	bool "SPI6"
+	default n
+	depends on STM32F0_HAVE_SPI6
+	select SPI
+	select STM32F0_SPI
+
+config STM32F0_SYSCFG
+	bool "SYSCFG"
+	default y
+
+config STM32F0_TIM1
+	bool "TIM1"
+	default n
+	depends on STM32F0_HAVE_TIM1
+
+config STM32F0_TIM2
+	bool "TIM2"
+	default n
+
+config STM32F0_TIM3
+	bool "TIM3"
+	default n
+	depends on STM32F0_HAVE_TIM3
+
+config STM32F0_TIM6
+	bool "TIM6"
+	default n
+	depends on STM32F0_HAVE_TIM6
+
+config STM32F0_TIM7
+	bool "TIM7"
+	default n
+	depends on STM32F0_HAVE_TIM7
+
+config STM32F0_TIM14
+	bool "TIM14"
+	default n
+	depends on STM32F0_HAVE_TIM14
+
+config STM32F0_TIM15
+	bool "TIM15"
+	default n
+	depends on STM32F0_HAVE_TIM15
+
+config STM32F0_TIM16
+	bool "TIM16"
+	default n
+	depends on STM32F0_HAVE_TIM16
+
+config STM32F0_TIM17
+	bool "TIM17"
+	default n
+	depends on STM32F0_HAVE_TIM17
+
+config STM32F0_TSC
+	bool "TSC"
+	default n
+	depends on STM32F0_HAVE_TSC
+
+config STM32F0_USART1
+	bool "USART1"
+	default n
+	select STM32F0_USART
+
+config STM32F0_USART2
+	bool "USART2"
+	default n
+	select STM32F0_USART
+
+config STM32F0_USART3
+	bool "USART3"
+	default n
+	depends on STM32F0_HAVE_USART3
+	select STM32F0_USART
+
+config STM32F0_USART4
+	bool "USART4"
+	default n
+	depends on STM32F0_HAVE_USART4
+	select STM32F0_USART
+
+config STM32F0_USART5
+	bool "USART5"
+	default n
+	depends on STM32F0_HAVE_USART5
+	select STM32F0_USART
+
+config STM32F0_USART6
+	bool "USART6"
+	default n
+	depends on STM32F0_HAVE_USART6
+	select STM32F0_USART
+
+config STM32F0_USART7
+	bool "USART7"
+	default n
+	depends on STM32F0_HAVE_USART7
+	select STM32F0_USART
+
+config STM32F0_USART8
+	bool "USART8"
+	default n
+	depends on STM32F0_HAVE_USART8
+	select STM32F0_USART
+
+config STM32F0_USB
+	bool "USB Device"
+	default n
+	depends on STM32F0_HAVE_USBDEV
+	select USBDEV
+
+config STM32F0_IWDG
+	bool "IWDG"
+	default n
+	select WATCHDOG
+
+config STM32F0_WWDG
+	bool "WWDG"
+	default n
+	select WATCHDOG
+
+endmenu
+
+config STM32F0_ADC
+	bool
+
+config STM32F0_SDADC
+	bool
+
+config STM32F0_DAC
+	bool
+
+config STM32F0_SPI
+	bool
+
+config STM32F0_I2C
+	bool
+
+config STM32F0_CAN
+	bool
+
+config STM32F0_USART
+	bool
+
+config STM32F0_SERIALDRIVER
+	bool
+
+config STM32F0_1WIREDRIVER
+	bool
+
+menu "U[S]ART Configuration"
+	depends on STM32F0_USART
+
+comment "U[S]ART Device Configuration"
+
+choice
+	prompt "USART1 Driver Configuration"
+	default STM32F0_USART1_SERIALDRIVER
+	depends on STM32F0_USART1
+
+config STM32F0_USART1_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32F0_SERIALDRIVER
+
+config STM32F0_USART1_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32F0_1WIREDRIVER
+
+endchoice # USART1 Driver Configuration
+
+if STM32F0_USART1_SERIALDRIVER
+
+config USART1_RS485
+	bool "RS-485 on USART1"
+	default n
+	---help---
+		Enable RS-485 interface on USART1. Your board config will have to
+		provide GPIO_USART1_RS485_DIR pin definition.
+
+config USART1_RS485_DIR_POLARITY
+	int "USART1 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART1_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART1. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # STM32F0_USART1_SERIALDRIVER
+
+choice
+	prompt "USART2 Driver Configuration"
+	default STM32F0_USART2_SERIALDRIVER
+	depends on STM32F0_USART2
+
+config STM32F0_USART2_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32F0_SERIALDRIVER
+
+config STM32F0_USART2_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32F0_1WIREDRIVER
+
+endchoice # USART2 Driver Configuration
+
+if STM32F0_USART2_SERIALDRIVER
+
+config USART2_RS485
+	bool "RS-485 on USART2"
+	default n
+	---help---
+		Enable RS-485 interface on USART2. Your board config will have to
+		provide GPIO_USART2_RS485_DIR pin definition.
+
+config USART2_RS485_DIR_POLARITY
+	int "USART2 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART2_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART2. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # STM32F0_USART2_SERIALDRIVER
+
+choice
+	prompt "USART3 Driver Configuration"
+	default STM32F0_USART3_SERIALDRIVER
+	depends on STM32F0_USART3
+
+config STM32F0_USART3_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART3_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32F0_SERIALDRIVER
+
+config STM32F0_USART3_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32F0_1WIREDRIVER
+
+endchoice # USART3 Driver Configuration
+
+if STM32F0_USART3_SERIALDRIVER
+
+config USART3_RS485
+	bool "RS-485 on USART3"
+	default n
+	---help---
+		Enable RS-485 interface on USART3. Your board config will have to
+		provide GPIO_USART3_RS485_DIR pin definition.
+
+config USART3_RS485_DIR_POLARITY
+	int "USART3 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART3_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART3. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # STM32F0_USART3_SERIALDRIVER
+
+
+choice
+	prompt "USART4 Driver Configuration"
+	default STM32F0_USART4_SERIALDRIVER
+	depends on STM32F0_USART4
+
+config STM32F0_USART4_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART4_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32F0_SERIALDRIVER
+
+config STM32F0_USART4_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32F0_1WIREDRIVER
+
+endchoice # USART4 Driver Configuration
+
+if STM32F0_USART4_SERIALDRIVER
+
+config USART4_RS485
+	bool "RS-485 on USART4"
+	default n
+	---help---
+		Enable RS-485 interface on USART4. Your board config will have to
+		provide GPIO_USART4_RS485_DIR pin definition.
+
+config USART4_RS485_DIR_POLARITY
+	int "USART4 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART4_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART4. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # STM32F0_USART4_SERIALDRIVER
+
+
+choice
+	prompt "USART5 Driver Configuration"
+	default STM32F0_USART5_SERIALDRIVER
+	depends on STM32F0_USART5
+
+config STM32F0_USART5_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART5_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32F0_SERIALDRIVER
+
+config STM32F0_USART5_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32F0_1WIREDRIVER
+
+endchoice # USART5 Driver Configuration
+
+if STM32F0_USART5_SERIALDRIVER
+
+config USART5_RS485
+	bool "RS-485 on USART5"
+	default n
+	---help---
+		Enable RS-485 interface on USART5. Your board config will have to
+		provide GPIO_USART5_RS485_DIR pin definition.
+
+config USART5_RS485_DIR_POLARITY
+	int "USART5 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART5_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART5. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # STM32F0_USART5_SERIALDRIVER
+
+
+choice
+	prompt "USART6 Driver Configuration"
+	default STM32F0_USART6_SERIALDRIVER
+	depends on STM32F0_USART6
+
+config STM32F0_USART6_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART6_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32F0_SERIALDRIVER
+
+config STM32F0_USART6_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32F0_1WIREDRIVER
+
+endchoice # USART6 Driver Configuration
+
+if STM32F0_USART6_SERIALDRIVER
+
+config USART6_RS485
+	bool "RS-485 on USART6"
+	default n
+	---help---
+		Enable RS-485 interface on USART6. Your board config will have to
+		provide GPIO_USART6_RS485_DIR pin definition.
+
+config USART6_RS485_DIR_POLARITY
+	int "USART6 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART6_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART6. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # STM32F0_USART6_SERIALDRIVER
+
+choice
+	prompt "USART7 Driver Configuration"
+	default STM32F0_USART7_SERIALDRIVER
+	depends on STM32F0_USART7
+
+config STM32F0_USART7_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART7_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32F0_SERIALDRIVER
+
+config STM32F0_USART7_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32F0_1WIREDRIVER
+
+endchoice # USART7 Driver Configuration
+
+if STM32F0_USART7_SERIALDRIVER
+
+config USART7_RS485
+	bool "RS-485 on USART7"
+	default n
+	---help---
+		Enable RS-485 interface on USART7. Your board config will have to
+		provide GPIO_USART7_RS485_DIR pin definition.
+
+config USART7_RS485_DIR_POLARITY
+	int "USART7 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART7_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART7. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # STM32F0_USART7_SERIALDRIVER
+
+choice
+	prompt "USART8 Driver Configuration"
+	default STM32F0_USART8_SERIALDRIVER
+	depends on STM32F0_USART8
+
+config STM32F0_USART8_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART8_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32F0_SERIALDRIVER
+
+config STM32F0_USART8_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32F0_1WIREDRIVER
+
+endchoice # USART8 Driver Configuration
+
+if STM32F0_USART8_SERIALDRIVER
+
+config USART8_RS485
+	bool "RS-485 on USART8"
+	default n
+	---help---
+		Enable RS-485 interface on USART8. Your board config will have to
+		provide GPIO_USART8_RS485_DIR pin definition.
+
+config USART8_RS485_DIR_POLARITY
+	int "USART8 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART8_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART8. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # STM32F0_USART8_SERIALDRIVER
+
+endmenu

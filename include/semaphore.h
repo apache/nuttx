@@ -105,14 +105,14 @@ typedef struct sem_s sem_t;
 #ifdef CONFIG_PRIORITY_INHERITANCE
 # if CONFIG_SEM_PREALLOCHOLDERS > 0
 #  define SEM_INITIALIZER(c) \
-    {(c), 0, NULL}                 /* semcount, flags, hhead */
+    {(c), 0, NULL}               /* semcount, flags, hhead */
 # else
 #  define SEM_INITIALIZER(c) \
     {(c), 0, {SEMHOLDER_INITIALIZER, SEMHOLDER_INITIALIZER}} /* semcount, flags, holder[2] */
 # endif
 #else
 #  define SEM_INITIALIZER(c) \
-    {(c)}                         /* semcount */
+    {(c)}                        /* semcount */
 #endif
 
 /****************************************************************************

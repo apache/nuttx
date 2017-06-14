@@ -62,6 +62,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/random.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/input/touchscreen.h>
@@ -533,6 +534,8 @@ static ssize_t stmpe811_read(FAR struct file *filep, FAR char *buffer, size_t le
   report->point[0].x         = sample.x;
   report->point[0].y         = sample.y;
   report->point[0].pressure  = sample.z;
+
+  add_ui_randomness((sample.x << 16) ^ (sample.y << 8) ^ sample.z);
 
   /* Report the appropriate flags */
 

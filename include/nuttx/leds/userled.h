@@ -166,7 +166,7 @@ extern "C"
  *
  * Input Parameters:
  *   devname - The name of the LED device to be registered.
- *     This should be a string of the form "/dev/ledN" where N is the the
+ *     This should be a string of the form "/dev/ledN" where N is the
  *     minor device number.
  *   lower - An instance of the platform-specific LED lower half driver.
  *

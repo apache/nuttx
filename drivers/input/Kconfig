@@ -322,6 +322,30 @@ config STMPE811_REGDEBUG
 
 endif # INPUT_STMPE811
 
+config INPUT_CYPRESS_MBR3108
+	bool "Enable Cypress MBR3108 CapSense driver"
+	default n
+	---help---
+		Enable support for Cypress MBR3108 CapSense touch button & proximity
+		input sensor.
+
+if INPUT_CYPRESS_MBR3108
+
+config INPUT_CYPRESS_MBR3108_DEBUG
+	bool "Enable debug support for Cypress sensor"
+	default n
+	depends on DEBUG_FEATURES
+	---help---
+		Enable debugging traces for MBR3108 driver
+
+config INPUT_CYPRESS_MBR3108_NPOLLWAITERS
+	int "Number of waiters to poll"
+	default 1
+	---help---
+		Maximum number of threads that can be waiting on poll()
+
+endif # INPUT_CYPRESS_MBR3108
+
 config BUTTONS
 	bool "Button Inputs"
 	default n

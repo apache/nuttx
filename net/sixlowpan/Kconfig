@@ -1,0 +1,196 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "6LoWPAN Configuration"
+	depends on NET_6LOWPAN
+
+config NET_6LOWPAN_FRAG
+	bool "6loWPAN Fragmentation"
+	default y
+	---help---
+		CONFIG_NET_6LOWPAN_FRAG specifies if 6lowpan fragmentation should be
+		used or not. Fragmentation is on by default.
+
+config NET_6LOWPAN_FRAMELEN
+	int "IEEE802.15.4 MAC Frame Length"
+	default 127
+	range 127 999999
+	---help---
+		Some wireless devices may use non-standard frame lengths.  This
+		setting should never be smaller than 127.
+
+choice
+	prompt "6loWPAN Compression"
+	default NET_6LOWPAN_COMPRESSION_HC06
+
+config NET_6LOWPAN_COMPRESSION_IPv6
+	bool "IPv6 Dispatch"
+	---help---
+		Packets compression when only IPv6 dispatch is used.  There is no
+		compression in this case, all fields are sent inline. We just add
+		the IPv6 dispatch byte before the packet.
+
+config NET_6LOWPAN_COMPRESSION_HC1
+	bool "6loWPAN HC1"
+	---help---
+		Compress IP/UDP header using HC1 and HC_UDP
+
+config NET_6LOWPAN_COMPRESSION_HC06
+	bool "6loWPAN HC06"
+	---help---
+		Compress IP/UDP header using HC06 compression
+
+endchoice # 6loWPAN Compression
+
+config NET_6LOWPAN_COMPRESSION_THRESHOLD
+	int "Lower compression threshold"
+	default 63
+	depends on !NET_6LOWPAN_COMPRESSION_IPv6
+	---help---
+		CONFIG_NET_6LOWPAN_COMPRESSION_THRESHOLD sets a lower threshold for
+		when packets should not be compressed.
+
+config NET_6LOWPAN_MINPORT
+	hex "Minimum port nubmer"
+	default 0xf0b0
+	depends on NET_6LOWPAN_COMPRESSION_HC1
+	---help---
+		HC1 compression of UDP headersis feasible only if both src and dest
+		ports are between CONFIG_NET_6LOWPAN_MINPORT and
+		CONFIG_NET_6LOWPAN_MINPORT + 15, inclusive.
+
+		All nodes must agree on the value of CONFIG_NET_6LOWPAN_MINPORT
+
+if NET_6LOWPAN_COMPRESSION_HC06
+
+config NET_6LOWPAN_MAXADDRCONTEXT
+	int "Maximum address contexts"
+	default 1
+	---help---
+		If we use IPHC compression, how many address contexts do we support?
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_0_0
+	hex "Address context 0 Prefix 0"
+	default 0xaa
+	---help---
+		Prefix 0 for address context ze0ro (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 0)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_0_1
+	hex "Address context 0 Prefix 1"
+	default 0xaa
+	---help---
+		Prefix 1 for address context 0 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 0)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_1
+	bool "Pre-initialize address context 1"
+	default n
+	---help---
+		Preinitialize address context 1 for better header compression
+		(Saves up to 13 bytes per 6lowpan packet).   Assumes
+		CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 1)
+
+if NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_1
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_0
+	hex "Address context 1 Prefix 0"
+	default 0xaa
+	---help---
+		Prefix 0 for address context 1 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 1)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_1
+	hex "Address context 1 Prefix 1"
+	default 0xaa
+	---help---
+		Prefix 1 for address context 1 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 1)
+
+endif # NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_1
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_2
+	bool "Pre-initialize address context 2"
+	default n
+	depends on NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_1
+	---help---
+		Preinitialize any address contexts for better header compression
+		(Saves up to 13 bytes per 6lowpan packet).   Assumes
+		CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 2)
+
+if NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_2
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_0
+	hex "Address context 2 Prefix 0"
+	default 0xaa
+	---help---
+		Prefix 0 for address context 2 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 2)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_1
+	hex "Address context 2 Prefix 1"
+	default 0xaa
+	---help---
+		Prefix 1 for address context 2 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 2)
+
+endif # NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_0
+endif # NET_6LOWPAN_COMPRESSION_HC06
+
+config NET_6LOWPAN_EXTENDEDADDR
+	bool "Extended IEEE 802.15.4 address"
+	default n
+	---help---
+		By default, a 2-byte short address is used for the IEEE802.15.4 MAC
+		device's link layer address.  If this option is selected, then an
+		8-byte extended address will be used.
+
+config NET_6LOWPAN_MAXAGE
+	int "Packet reassembly timeout"
+	default 20
+	---help---
+		Timeout for packet reassembly at the 6lowpan layer in units of
+		seconds (should be < 60s)
+
+config NET_6LOWPAN_MAX_MACTRANSMITS
+	int "Max MAC transmissions"
+	default 4
+	range 1 255
+	---help---
+		CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS specifies how many times the MAC
+		layer should resend packets if no link-layer ACK wasreceived. This
+		only makes sense with the csma_driver.
+
+config NET_6LOWPAN_MTU
+	int "6LoWPAN packet buffer size"
+	default 1294
+	range 590 1518
+	depends on NET_6LOWPAN_FRAG
+	---help---
+		Packet buffer size.  This size includes the TCP/UDP payload plus the
+		size of TCP/UDP header, the IP header, and the Ethernet header.
+		This value is normally referred to as the MTU (Maximum Transmission
+		Unit); the payload is the MSS (Maximum Segment Size).
+
+		NOTE that this option depends on fragmentation support.  By
+		supporting fragmentation, we can handle quite large "logical" packet
+		sizes.  Without fragmentation support, the MTU is equal to the frame
+		size and that has already been selected.
+
+config NET_6LOWPAN_TCP_RECVWNDO
+	int "6LoWPAN TCP receive window size"
+	default 1220 if NET_6LOWPAN_FRAG
+	default 102 if !NET_6LOWPAN_FRAG
+	depends on NET_TCP
+	---help---
+		The size of the advertised receiver's window.   Should be set low
+		(i.e., to the size of the IEEE802.15.4 MTU or frame payload) if
+		the application is slow to process incoming data, or high (32768
+		bytes) if the application processes data quickly.
+
+config NET_6LOWPAN_DUMPBUFFER
+	bool "Enable dumping of buffer data"
+	default n
+	depends on DEBUG_NET_INFO
+	---help---
+		Enable dumping of all packet and frame buffers coming into and out
+		of the 6loWPAN logic.  This will generate a large volume of data if
+		selected.
+
+endmenu # 6LoWPAN Configuration

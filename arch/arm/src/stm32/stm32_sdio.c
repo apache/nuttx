@@ -300,6 +300,8 @@
 #  endif
 #endif
 
+#define STM32_SDIO_USE_DEFAULT_BLOCKSIZE ((uint8_t)-1)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -332,6 +334,12 @@ struct stm32_dev_s
   uint32_t          *buffer;     /* Address of current R/W buffer */
   size_t             remaining;  /* Number of bytes remaining in the transfer */
   uint32_t           xfrmask;    /* Interrupt enables for data transfer */
+
+  /* Fixed transfer block size support */
+
+#ifdef CONFIG_SDIO_BLOCKSETUP
+  uint8_t            block_size;
+#endif
 
   /* DMA data transfer support */
 
@@ -443,6 +451,10 @@ static int  stm32_attach(FAR struct sdio_dev_s *dev);
 
 static int  stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t arg);
+#ifdef CONFIG_SDIO_BLOCKSETUP
+static void stm32_blocksetup(FAR struct sdio_dev_s *dev,
+              unsigned int blocklen, unsigned int nblocks);
+#endif
 static int  stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
               size_t nbytes);
 static int  stm32_sendsetup(FAR struct sdio_dev_s *dev,
@@ -456,8 +468,6 @@ static int  stm32_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t rlong[4]);
 static int  stm32_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t *rshort);
-static int  stm32_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd,
-              uint32_t *rnotimpl);
 
 /* EVENT handler */
 
@@ -507,7 +517,7 @@ struct stm32_dev_s g_sdiodev =
     .attach           = stm32_attach,
     .sendcmd          = stm32_sendcmd,
 #ifdef CONFIG_SDIO_BLOCKSETUP
-    .blocksetup       = stm32_blocksetup, /* Not implemented yet */
+    .blocksetup       = stm32_blocksetup,
 #endif
     .recvsetup        = stm32_recvsetup,
     .sendsetup        = stm32_sendsetup,
@@ -516,8 +526,8 @@ struct stm32_dev_s g_sdiodev =
     .recvR1           = stm32_recvshortcrc,
     .recvR2           = stm32_recvlong,
     .recvR3           = stm32_recvshort,
-    .recvR4           = stm32_recvnotimpl,
-    .recvR5           = stm32_recvnotimpl,
+    .recvR4           = stm32_recvshort,
+    .recvR5           = stm32_recvshortcrc,
     .recvR6           = stm32_recvshortcrc,
     .recvR7           = stm32_recvshort,
     .waitenable       = stm32_waitenable,
@@ -1015,7 +1025,7 @@ static void stm32_dataconfig(uint32_t timeout, uint32_t dlen, uint32_t dctrl)
   regval  =  getreg32(STM32_SDIO_DCTRL);
   regval &= ~(SDIO_DCTRL_DTDIR | SDIO_DCTRL_DTMODE | SDIO_DCTRL_DBLOCKSIZE_MASK);
   dctrl  &=  (SDIO_DCTRL_DTDIR | SDIO_DCTRL_DTMODE | SDIO_DCTRL_DBLOCKSIZE_MASK);
-  regval |=  (dctrl | SDIO_DCTRL_DTEN);
+  regval |=  (dctrl | SDIO_DCTRL_DTEN | SDIO_DCTRL_SDIOEN);
   putreg32(regval, STM32_SDIO_DCTRL);
 }
 
@@ -1866,6 +1876,34 @@ static int stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
 }
 
 /****************************************************************************
+ * Name: stm32_blocksetup
+ *
+ * Description:
+ *   Configure block size and the number of blocks for next transfer
+ *
+ * Input Parameters:
+ *   dev       - An instance of the SDIO device interface
+ *   blocklen  - The selected block size.
+ *   nblocklen - The number of blocks to transfer
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SDIO_BLOCKSETUP
+static void stm32_blocksetup(FAR struct sdio_dev_s *dev,
+                             unsigned int blocklen, unsigned int nblocks)
+{
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+
+  /* Configure block size for next transfer */
+
+  priv->block_size = stm32_log2(blocklen);
+}
+#endif
+
+/****************************************************************************
  * Name: stm32_recvsetup
  *
  * Description:
@@ -1911,7 +1949,17 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Then set up the SDIO data path */
 
-  dblocksize = stm32_log2(nbytes) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+#ifdef CONFIG_SDIO_BLOCKSETUP
+  if (priv->block_size != STM32_SDIO_USE_DEFAULT_BLOCKSIZE)
+    {
+      dblocksize = priv->block_size << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+    }
+  else
+#endif
+    {
+      dblocksize = stm32_log2(nbytes) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+    }
+
   stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, nbytes, dblocksize | SDIO_DCTRL_DTDIR);
 
   /* And enable interrupts */
@@ -1965,7 +2013,17 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
 
   /* Then set up the SDIO data path */
 
-  dblocksize = stm32_log2(nbytes) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+#ifdef CONFIG_SDIO_BLOCKSETUP
+  if (priv->block_size != STM32_SDIO_USE_DEFAULT_BLOCKSIZE)
+    {
+      dblocksize = priv->block_size << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+    }
+  else
+#endif
+    {
+      dblocksize = stm32_log2(nbytes) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+    }
+
   stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, nbytes, dblocksize);
 
   /* Enable TX interrupts */
@@ -2061,14 +2119,12 @@ static int stm32_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
     case MMCSD_R1_RESPONSE:
     case MMCSD_R1B_RESPONSE:
     case MMCSD_R2_RESPONSE:
+    case MMCSD_R4_RESPONSE:
+    case MMCSD_R5_RESPONSE:
     case MMCSD_R6_RESPONSE:
       events  = SDIO_RESPDONE_STA;
       timeout = SDIO_LONGTIMEOUT;
       break;
-
-    case MMCSD_R4_RESPONSE:
-    case MMCSD_R5_RESPONSE:
-      return -ENOSYS;
 
     case MMCSD_R3_RESPONSE:
     case MMCSD_R7_RESPONSE:
@@ -2161,6 +2217,7 @@ static int stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t
 
   else if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R1_RESPONSE &&
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R1B_RESPONSE &&
+           (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R5_RESPONSE &&
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R6_RESPONSE)
     {
       mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
@@ -2276,6 +2333,7 @@ static int stm32_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *r
 
 #ifdef CONFIG_DEBUG_MEMCARD_INFO
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R3_RESPONSE &&
+      (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R4_RESPONSE &&
       (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R7_RESPONSE)
     {
       mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
@@ -2301,15 +2359,8 @@ static int stm32_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *r
     {
       *rshort = getreg32(STM32_SDIO_RESP1);
     }
+
   return ret;
-}
-
-/* MMC responses not supported */
-
-static int stm32_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rnotimpl)
-{
-  putreg32(SDIO_RESPDONE_ICR | SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
-  return -ENOSYS;
 }
 
 /****************************************************************************
@@ -2670,7 +2721,17 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Then set up the SDIO data path */
 
-  dblocksize = stm32_log2(buflen) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+#ifdef CONFIG_SDIO_BLOCKSETUP
+  if (priv->block_size != STM32_SDIO_USE_DEFAULT_BLOCKSIZE)
+    {
+      dblocksize = priv->block_size << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+    }
+  else
+#endif
+    {
+      dblocksize = stm32_log2(buflen) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+    }
+
   stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, buflen, dblocksize | SDIO_DCTRL_DTDIR);
 
   /* Configure the RX DMA */
@@ -2739,7 +2800,17 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Then set up the SDIO data path */
 
-  dblocksize = stm32_log2(buflen) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+#ifdef CONFIG_SDIO_BLOCKSETUP
+  if (priv->block_size != STM32_SDIO_USE_DEFAULT_BLOCKSIZE)
+    {
+      dblocksize = priv->block_size << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+    }
+  else
+#endif
+    {
+      dblocksize = stm32_log2(buflen) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+    }
+
   stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, buflen, dblocksize);
 
   /* Configure the TX DMA */

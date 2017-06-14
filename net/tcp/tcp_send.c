@@ -121,7 +121,7 @@ static inline FAR struct tcp_hdr_s *tcp_header(FAR struct net_driver_s *dev)
  *   None
  *
  * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
+ *   Called with the network locked.
  *
  ****************************************************************************/
 
@@ -189,7 +189,7 @@ static inline void tcp_ipv4_sendcomplete(FAR struct net_driver_s *dev,
  *   None
  *
  * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
+ *   Called with the network locked.
  *
  ****************************************************************************/
 
@@ -252,7 +252,7 @@ static inline void tcp_ipv6_sendcomplete(FAR struct net_driver_s *dev,
  *   None
  *
  * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
+ *   Called with the network locked.
  *
  ****************************************************************************/
 
@@ -300,7 +300,7 @@ static void tcp_sendcomplete(FAR struct net_driver_s *dev,
  *   None
  *
  * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
+ *   Called with the network locked.
  *
  ****************************************************************************/
 
@@ -383,7 +383,7 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
  *   None
  *
  * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
+ *   Called with the network locked.
  *
  ****************************************************************************/
 
@@ -411,7 +411,7 @@ void tcp_send(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
  *   None
  *
  * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
+ *   Called with the network locked.
  *
  ****************************************************************************/
 
@@ -528,7 +528,7 @@ void tcp_reset(FAR struct net_driver_s *dev)
  *   None
  *
  * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
+ *   Called with the network locked.
  *
  ****************************************************************************/
 
@@ -550,7 +550,7 @@ void tcp_ack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
       tcp     = TCPIPv6BUF;
       tcp_mss = TCP_IPv6_MSS(dev);
 
-      /* Set the the packet length for the TCP Maximum Segment Size */
+      /* Set the packet length for the TCP Maximum Segment Size */
 
       dev->d_len  = IPv6TCP_HDRLEN + TCP_OPT_MSS_LEN;
     }
@@ -566,7 +566,7 @@ void tcp_ack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
       tcp     = TCPIPv4BUF;
       tcp_mss = TCP_IPv4_MSS(dev);
 
-      /* Set the the packet length for the TCP Maximum Segment Size */
+      /* Set the packet length for the TCP Maximum Segment Size */
 
       dev->d_len  = IPv4TCP_HDRLEN + TCP_OPT_MSS_LEN;
     }

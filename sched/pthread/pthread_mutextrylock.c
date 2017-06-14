@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_mutextrylock.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <sched.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -83,15 +84,13 @@
 
 int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
 {
-  int ret = OK;
+  int status;
+  int ret = EINVAL;
 
   sinfo("mutex=0x%p\n", mutex);
+  DEBUGASSERT(mutex != NULL);
 
-  if (!mutex)
-    {
-      ret = EINVAL;
-    }
-  else
+  if (mutex != NULL)
     {
       int mypid = (int)getpid();
 
@@ -103,7 +102,8 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
 
       /* Try to get the semaphore. */
 
-      if (sem_trywait((FAR sem_t *)&mutex->sem) == OK)
+      status = pthread_mutex_trytake(mutex);
+      if (status == OK)
         {
           /* If we successfully obtained the semaphore, then indicate
            * that we own it.
@@ -111,39 +111,98 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
 
           mutex->pid = mypid;
 
-#ifdef CONFIG_MUTEX_TYPES
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
           if (mutex->type == PTHREAD_MUTEX_RECURSIVE)
             {
               mutex->nlocks = 1;
             }
 #endif
+          ret = OK;
         }
 
-      /* Was it not available? */
+       /* pthread_mutex_trytake failed.  Did it fail because the semaphore
+        * was not avaialable?
+        */
 
-      else if (get_errno() == EAGAIN)
+      else if (status == EAGAIN)
         {
-#ifdef CONFIG_MUTEX_TYPES
-
-          /* Check if recursive mutex was locked by ourself. */
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
+          /* Check if recursive mutex was locked by the calling thread. */
 
           if (mutex->type == PTHREAD_MUTEX_RECURSIVE && mutex->pid == mypid)
             {
               /* Increment the number of locks held and return successfully. */
 
-              mutex->nlocks++;
+              if (mutex->nlocks < INT16_MAX)
+                {
+                  mutex->nlocks++;
+                  ret = OK;
+                }
+              else
+                {
+                  ret = EOVERFLOW;
+                }
             }
           else
+#endif
+
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+          /* The calling thread does not hold the semaphore.  The correct
+           * behavior for the 'robust' mutex is to verify that the holder of
+           * the mutex is still valid.  This is protection from the case
+           * where the holder of the mutex has exitted without unlocking it.
+           */
+
+#ifdef CONFIG_PTHREAD_MUTEX_BOTH
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
+          /* Check if this NORMAL mutex is robust */
+
+          if (mutex->pid > 0 &&
+              ((mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 ||
+                mutex->type != PTHREAD_MUTEX_NORMAL) &&
+              sched_gettcb(mutex->pid) == NULL)
+
+#else /* CONFIG_PTHREAD_MUTEX_TYPES */
+          /* Check if this NORMAL mutex is robust */
+
+          if (mutex->pid > 0 &&
+              (mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 &&
+              sched_gettcb(mutex->pid) == NULL)
+
+#endif /* CONFIG_PTHREAD_MUTEX_TYPES */
+#else /* CONFIG_PTHREAD_MUTEX_ROBUST */
+          /* This mutex is always robust, whatever type it is. */
+
+          if (mutex->pid > 0 && sched_gettcb(mutex->pid) == NULL)
+#endif
+            {
+              DEBUGASSERT(mutex->pid != 0); /* < 0: available, >0 owned, ==0 error */
+              DEBUGASSERT((mutex->flags & _PTHREAD_MFLAGS_INCONSISTENT) != 0);
+
+              /* A thread holds the mutex, but there is no such thread. 
+               * POSIX requires that the 'robust' mutex return EOWNERDEAD
+               * in this case. It is then the caller's responsibility to
+               * call pthread_mutx_consistent() fo fix the mutex.
+               */
+
+              mutex->flags |= _PTHREAD_MFLAGS_INCONSISTENT;
+              ret           = EOWNERDEAD;
+            }
+
+          /* The mutex is locked by another, active thread */
+
+          else
+#endif /* CONFIG_PTHREAD_MUTEX_UNSAFE */
             {
               ret = EBUSY;
             }
-#else
-          ret = EBUSY;
-#endif
         }
+
+      /* Some other, unhandled error occurred */
+
       else
         {
-          ret = EINVAL;
+          ret = status;
         }
 
       sched_unlock();

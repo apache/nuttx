@@ -73,7 +73,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
 
-#include <nuttx/wireless/wireless.h>
+#include <nuttx/wireless/ioctl.h>
 #include <nuttx/wireless/cc3000.h>
 #include <nuttx/wireless/cc3000/include/cc3000_upif.h>
 #include <nuttx/wireless/cc3000/cc3000_common.h>
@@ -231,7 +231,7 @@ static inline void cc3000_devgive(FAR struct cc3000_dev_s *priv)
 }
 
 /****************************************************************************
- * Function: cc3000_configspi
+ * Name: cc3000_configspi
  *
  * Description:
  *   Configure the SPI for use with the CC3000.  This function should be
@@ -260,7 +260,7 @@ static inline void cc3000_configspi(FAR struct spi_dev_s *spi)
 }
 
 /****************************************************************************
- * Function: cc3000_lock
+ * Name: cc3000_lock
  *
  * Description:
  *   Lock the SPI bus and re-configure as necessary.  This function must be
@@ -289,11 +289,11 @@ static void cc3000_lock_and_select(FAR struct spi_dev_s *spi)
    */
 
   cc3000_configspi(spi);
-  SPI_SELECT(spi, SPIDEV_WIRELESS, true);
+  SPI_SELECT(spi, SPIDEV_WIRELESS(0), true);
 }
 
 /****************************************************************************
- * Function: cc3000_unlock
+ * Name: cc3000_unlock
  *
  * Description:
  *   Un-lock the SPI bus after each transfer, possibly losing the current
@@ -313,7 +313,7 @@ static void cc3000_deselect_and_unlock(FAR struct spi_dev_s *spi)
 {
    /* De select */
 
-  SPI_SELECT(spi, SPIDEV_WIRELESS, false);
+  SPI_SELECT(spi, SPIDEV_WIRELESS(0), false);
 
   /* Relinquish the SPI bus. */
 
@@ -321,7 +321,7 @@ static void cc3000_deselect_and_unlock(FAR struct spi_dev_s *spi)
 }
 
 /****************************************************************************
- * Function: cc3000_wait
+ * Name: cc3000_wait
  *
  * Description:
  *  Helper function to wait on the semaphore signaled by the
@@ -363,7 +363,7 @@ static int cc3000_wait(FAR struct cc3000_dev_s *priv, sem_t *psem)
 }
 
 /****************************************************************************
- * Function: cc3000_wait_irq
+ * Name: cc3000_wait_irq
  *
  * Description:
  *  Helper function to wait on the irqsem signaled by the interrupt
@@ -385,7 +385,7 @@ static inline int cc3000_wait_irq(FAR struct cc3000_dev_s *priv)
 }
 
 /****************************************************************************
- * Function: cc3000_wait_ready
+ * Name: cc3000_wait_ready
  *
  * Description:
  *  Helper function to wait on the readysem signaled by the interrupt

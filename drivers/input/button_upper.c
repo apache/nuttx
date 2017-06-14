@@ -56,6 +56,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/input/buttons.h>
+#include <nuttx/random.h>
 
 #include <nuttx/irq.h>
 
@@ -157,8 +158,8 @@ static const struct file_operations btn_fops =
   btn_open,  /* open */
   btn_close, /* close */
   btn_read,  /* read */
-  0,          /* write */
-  0,          /* seek */
+  NULL,      /* write */
+  NULL,      /* seek */
   btn_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   , btn_poll /* poll */
@@ -201,9 +202,6 @@ static void btn_enable(FAR struct btn_upperhalf_s *priv)
   btn_buttonset_t press;
   btn_buttonset_t release;
   irqstate_t flags;
-#ifndef CONFIG_DISABLE_POLL
-  int i;
-#endif
 
   DEBUGASSERT(priv && priv->bu_lower);
   lower = priv->bu_lower;
@@ -222,19 +220,10 @@ static void btn_enable(FAR struct btn_upperhalf_s *priv)
   for (opriv = priv->bu_open; opriv; opriv = opriv->bo_flink)
     {
 #ifndef CONFIG_DISABLE_POLL
-      /* Are there any poll waiters? */
+      /* OR in the poll event buttons */
 
-      for (i = 0; i < CONFIG_BUTTONS_NPOLLWAITERS; i++)
-        {
-          if (opriv->bo_fds[i])
-            {
-              /* Yes.. OR in the poll event buttons */
-
-              press   |= opriv->bo_pollevents.bp_press;
-              release |= opriv->bo_pollevents.bp_release;
-              break;
-            }
-        }
+      press   |= opriv->bo_pollevents.bp_press;
+      release |= opriv->bo_pollevents.bp_release;
 #endif
 
 #ifndef CONFIG_DISABLE_SIGNALS
@@ -316,6 +305,8 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
 
   DEBUGASSERT(lower->bl_buttons);
   sample = lower->bl_buttons(lower);
+
+  add_ui_randomness(sample);
 
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
   /* Determine which buttons have been newly pressed and which have been
@@ -444,6 +435,10 @@ static int btn_open(FAR struct file *filep)
 
   filep->f_priv = (FAR void *)opriv;
   ret = OK;
+
+  /* Enable/disable interrupt handling */
+
+  btn_enable(priv);
 
 errout_with_sem:
   btn_givesem(&priv->bu_exclsem);
@@ -821,7 +816,7 @@ errout_with_dusem:
  *
  * Input Parameters:
  *   devname - The name of the button device to be registered.
- *     This should be a string of the form "/dev/btnN" where N is the the
+ *     This should be a string of the form "/dev/btnN" where N is the
  *     minor device number.
  *   lower - An instance of the platform-specific button lower half driver.
  *

@@ -1,7 +1,7 @@
 ############################################################################
 # configs/stm32f411e-disco/src/Makefile
 #
-#   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,10 +36,14 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = stm32_boot.c
+CSRCS = stm32_boot.c stm32_bringup.c
 
 ifeq ($(CONFIG_NSH_LIBRARY),y)
 CSRCS += stm32_appinit.c
+endif
+
+ifeq ($(CONFIG_STM32_OTGFS),y)
+CSRCS += stm32_usb.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <arch/irq.h>
 #include <arch/board/board.h>
@@ -59,6 +60,58 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Default hardware flow control */
+
+#if !defined(CONFIG_UART0_IFLOWCONTROL)
+#  define CONFIG_UART0_IFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_UART0_OFLOWCONTROL)
+#  define CONFIG_UART0_OFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_UART1_IFLOWCONTROL)
+#  define CONFIG_UART1_IFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_UART1_OFLOWCONTROL)
+#  define CONFIG_UART1_OFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_UART2_IFLOWCONTROL)
+#  define CONFIG_UART2_IFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_UART2_OFLOWCONTROL)
+#  define CONFIG_UART2_OFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_UART3_IFLOWCONTROL)
+#  define CONFIG_UART3_IFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_UART3_OFLOWCONTROL)
+#  define CONFIG_UART3_OFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_UART4_IFLOWCONTROL)
+#  define CONFIG_UART4_IFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_UART4_OFLOWCONTROL)
+#  define CONFIG_UART4_OFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_UART5_IFLOWCONTROL)
+#  define CONFIG_UART5_IFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_UART5_OFLOWCONTROL)
+#  define CONFIG_UART5_OFLOWCONTROL 0
+#endif
+
+#if !defined(CONFIG_LPUART0_IFLOWCONTROL)
+#  define CONFIG_LPUART0_IFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_LPUART0_OFLOWCONTROL)
+#  define CONFIG_LPUART0_OFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_LPUART1_IFLOWCONTROL)
+#  define CONFIG_LPUART1_IFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_LPUART1_OFLOWCONTROL)
+#  define CONFIG_LPUART1_OFLOWCONTROL 0
+#endif
+
 /* Select UART parameters for the selected console */
 
 #if defined(HAVE_UART_CONSOLE)
@@ -69,6 +122,8 @@
 #    define CONSOLE_BITS     CONFIG_UART0_BITS
 #    define CONSOLE_2STOP    CONFIG_UART0_2STOP
 #    define CONSOLE_PARITY   CONFIG_UART0_PARITY
+#    define CONSOLE_IFLOW    CONFIG_UART0_IFLOWCONTROL
+#    define CONSOLE_OFLOW    CONFIG_UART0_OFLOWCONTROL
 #  elif defined(CONFIG_UART1_SERIAL_CONSOLE)
 #    define CONSOLE_BASE     KINETIS_UART1_BASE
 #    define CONSOLE_FREQ     BOARD_CORECLK_FREQ
@@ -76,6 +131,8 @@
 #    define CONSOLE_BITS     CONFIG_UART1_BITS
 #    define CONSOLE_2STOP    CONFIG_UART1_2STOP
 #    define CONSOLE_PARITY   CONFIG_UART1_PARITY
+#    define CONSOLE_IFLOW    CONFIG_UART1_IFLOWCONTROL
+#    define CONSOLE_OFLOW    CONFIG_UART1_OFLOWCONTROL
 #  elif defined(CONFIG_UART2_SERIAL_CONSOLE)
 #    define CONSOLE_BASE     KINETIS_UART2_BASE
 #    define CONSOLE_FREQ     BOARD_BUS_FREQ
@@ -83,6 +140,8 @@
 #    define CONSOLE_BITS     CONFIG_UART2_BITS
 #    define CONSOLE_2STOP    CONFIG_UART2_2STOP
 #    define CONSOLE_PARITY   CONFIG_UART2_PARITY
+#    define CONSOLE_IFLOW    CONFIG_UART2_IFLOWCONTROL
+#    define CONSOLE_OFLOW    CONFIG_UART2_OFLOWCONTROL
 #  elif defined(CONFIG_UART3_SERIAL_CONSOLE)
 #    define CONSOLE_BASE     KINETIS_UART3_BASE
 #    define CONSOLE_FREQ     BOARD_BUS_FREQ
@@ -90,6 +149,8 @@
 #    define CONSOLE_BITS     CONFIG_UART3_BITS
 #    define CONSOLE_2STOP    CONFIG_UART3_2STOP
 #    define CONSOLE_PARITY   CONFIG_UART3_PARITY
+#    define CONSOLE_IFLOW    CONFIG_UART3_IFLOWCONTROL
+#    define CONSOLE_OFLOW    CONFIG_UART3_OFLOWCONTROL
 #  elif defined(CONFIG_UART4_SERIAL_CONSOLE)
 #    define CONSOLE_BASE     KINETIS_UART4_BASE
 #    define CONSOLE_FREQ     BOARD_BUS_FREQ
@@ -97,6 +158,8 @@
 #    define CONSOLE_BITS     CONFIG_UART4_BITS
 #    define CONSOLE_2STOP    CONFIG_UART4_2STOP
 #    define CONSOLE_PARITY   CONFIG_UART4_PARITY
+#    define CONSOLE_IFLOW    CONFIG_UART4_IFLOWCONTROL
+#    define CONSOLE_OFLOW    CONFIG_UART4_OFLOWCONTROL
 #  elif defined(CONFIG_UART5_SERIAL_CONSOLE)
 #    define CONSOLE_BASE     KINETIS_UART5_BASE
 #    define CONSOLE_FREQ     BOARD_BUS_FREQ
@@ -104,6 +167,8 @@
 #    define CONSOLE_BITS     CONFIG_UART5_BITS
 #    define CONSOLE_2STOP    CONFIG_UART5_2STOP
 #    define CONSOLE_PARITY   CONFIG_UART5_PARITY
+#    define CONSOLE_IFLOW    CONFIG_UART5_IFLOWCONTROL
+#    define CONSOLE_OFLOW    CONFIG_UART5_OFLOWCONTROL
 #  elif defined(HAVE_UART_CONSOLE)
 #    error "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
 #  endif
@@ -115,6 +180,8 @@
 #    define CONSOLE_PARITY CONFIG_LPUART0_PARITY
 #    define CONSOLE_BITS   CONFIG_LPUART0_BITS
 #    define CONSOLE_2STOP  CONFIG_LPUART0_2STOP
+#    define CONSOLE_IFLOW  CONFIG_LPUART0_IFLOWCONTROL
+#    define CONSOLE_OFLOW  CONFIG_LPUART0_OFLOWCONTROL
 #  elif defined(CONFIG_LPUART1_SERIAL_CONSOLE)
 #    define CONSOLE_BASE   KINETIS_LPUART1_BASE
 #    define CONSOLE_FREQ   BOARD_LPUART1_FREQ
@@ -122,6 +189,8 @@
 #    define CONSOLE_PARITY CONFIG_LPUART1_PARITY
 #    define CONSOLE_BITS   CONFIG_LPUART1_BITS
 #    define CONSOLE_2STOP  CONFIG_LPUART1_2STOP
+#    define CONSOLE_IFLOW  CONFIG_LPUART1_IFLOWCONTROL
+#    define CONSOLE_OFLOW  CONFIG_LPUART1_OFLOWCONTROL
 #  else
 #    error "No LPUART console is selected"
 #  endif
@@ -271,26 +340,62 @@ void kinetis_lowsetup(void)
 #  ifdef CONFIG_KINETIS_UART0
   kinetis_pinconfig(PIN_UART0_TX);
   kinetis_pinconfig(PIN_UART0_RX);
+#    if CONFIG_UART0_IFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_UART0_RTS);
+#    endif
+#    if CONFIG_UART0_OFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_UART0_CTS);
+#    endif
 #  endif
 #  ifdef CONFIG_KINETIS_UART1
   kinetis_pinconfig(PIN_UART1_TX);
   kinetis_pinconfig(PIN_UART1_RX);
+#    if CONFIG_UART1_IFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_UART1_RTS);
+#    endif
+#    if CONFIG_UART1_OFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_UART1_CTS);
+#    endif
 #  endif
 #  ifdef CONFIG_KINETIS_UART2
   kinetis_pinconfig(PIN_UART2_TX);
   kinetis_pinconfig(PIN_UART2_RX);
+#    if CONFIG_UART2_IFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_UART2_RTS);
+#    endif
+#    if CONFIG_UART2_OFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_UART2_CTS);
+#    endif
 #  endif
 #  ifdef CONFIG_KINETIS_UART3
   kinetis_pinconfig(PIN_UART3_TX);
   kinetis_pinconfig(PIN_UART3_RX);
+#    if CONFIG_UART3_IFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_UART3_RTS);
+#    endif
+#    if CONFIG_UART3_OFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_UART3_CTS);
+#    endif
 #  endif
 #  ifdef CONFIG_KINETIS_UART4
   kinetis_pinconfig(PIN_UART4_TX);
   kinetis_pinconfig(PIN_UART4_RX);
+#    if CONFIG_UART4_IFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_UART4_RTS);
+#    endif
+#    if CONFIG_UART4_OFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_UART4_CTS);
+#    endif
 #  endif
 #  ifdef CONFIG_KINETIS_UART5
   kinetis_pinconfig(PIN_UART5_TX);
   kinetis_pinconfig(PIN_UART5_RX);
+#    if CONFIG_UART5_IFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_UART5_RTS);
+#    endif
+#    if CONFIG_UART5_OFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_UART5_CTS);
+#    endif
 #  endif
 
   /* Configure the console (only) now.  Other UARTs will be configured
@@ -300,7 +405,8 @@ void kinetis_lowsetup(void)
 #  if defined(HAVE_UART_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
 
   kinetis_uartconfigure(CONSOLE_BASE, CONSOLE_BAUD, CONSOLE_FREQ, \
-                        CONSOLE_PARITY, CONSOLE_BITS, CONSOLE_2STOP);
+                        CONSOLE_PARITY, CONSOLE_BITS, CONSOLE_2STOP, \
+                        CONSOLE_IFLOW, CONSOLE_OFLOW);
 #  endif
 #endif /* HAVE_UART_DEVICE */
 
@@ -327,17 +433,30 @@ void kinetis_lowsetup(void)
 #  ifdef CONFIG_KINETIS_LPUART0
    kinetis_pinconfig(PIN_LPUART0_TX);
    kinetis_pinconfig(PIN_LPUART0_RX);
+#    if CONFIG_LPUART0_IFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_LPUART0_RTS);
+#    endif
+#    if CONFIG_LPUART0_OFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_LOUART0_CTS);
+#    endif
 #  endif
 
 #  ifdef CONFIG_KINETIS_LPUART1
    kinetis_pinconfig(PIN_LPUART1_TX);
    kinetis_pinconfig(PIN_LPUART1_RX);
+#    if CONFIG_LPUART1_IFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_LPUART1_RTS);
+#    endif
+#    if CONFIG_LPUART1_OFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_LOUART1_CTS);
+#    endif
 #  endif
 
 #  if defined(HAVE_LPUART_CONSOLE) && !defined(CONFIG_SUPPRESS_LPUART_CONFIG)
 
    kinetis_lpuartconfigure(CONSOLE_BASE, CONSOLE_BAUD, CONSOLE_FREQ, \
-                           CONSOLE_PARITY, CONSOLE_BITS, CONSOLE_2STOP);
+                           CONSOLE_PARITY, CONSOLE_BITS, CONSOLE_2STOP, \
+                           CONSOLE_IFLOW, CONSOLE_OFLOW);
 #  endif
 #endif /* HAVE_LPUART_DEVICE */
 }
@@ -395,7 +514,8 @@ void kinetis_lpuartreset(uintptr_t uart_base)
 #ifdef HAVE_UART_DEVICE
 void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
                            uint32_t clock, unsigned int parity,
-                           unsigned int nbits, unsigned int stop2)
+                           unsigned int nbits, unsigned int stop2,
+                           bool iflow, bool oflow)
 {
   uint32_t     sbr;
   uint32_t     brfa;
@@ -542,6 +662,27 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
   putreg8(0, uart_base+KINETIS_UART_PFIFO_OFFSET);
 #endif
 
+  /* Hardware flow control */
+
+  regval  = getreg8(uart_base+KINETIS_UART_MODEM_OFFSET);
+  regval &= ~(UART_MODEM_TXCTSE | UART_MODEM_RXRTSE);
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  if (iflow)
+    {
+      regval |= UART_MODEM_RXRTSE;
+    }
+#endif
+
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  if (oflow)
+    {
+      regval |= UART_MODEM_TXCTSE;
+    }
+#endif
+
+  putreg8(regval, uart_base+KINETIS_UART_MODEM_OFFSET);
+
   /* Now we can (re-)enable the transmitter and receiver */
 
   regval  = getreg8(uart_base+KINETIS_UART_C2_OFFSET);
@@ -561,7 +702,8 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
 #ifdef HAVE_LPUART_DEVICE
 void kinetis_lpuartconfigure(uintptr_t uart_base, uint32_t baud,
                            uint32_t clock, unsigned int parity,
-                           unsigned int nbits, unsigned int stop2)
+                           unsigned int nbits, unsigned int stop2,
+                           bool iflow, bool oflow)
 {
   uint32_t     sbrreg;
   uint32_t     osrreg;
@@ -710,6 +852,25 @@ void kinetis_lpuartconfigure(uintptr_t uart_base, uint32_t baud,
     {
       DEBUGASSERT(nbits == 8);
     }
+
+  /* Hardware flow control */
+
+  regval  = getreg32(uart_base+KINETIS_LPUART_MODIR_OFFSET);
+  regval &= ~(UART_MODEM_TXCTSE | UART_MODEM_RXRTSE);
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  if (iflow)
+    {
+      regval |= LPUART_MODIR_RXRTSE;
+    }
+#endif
+  #ifdef CONFIG_SERIAL_OFLOWCONTROL
+  if (oflow)
+    {
+      regval |= LPUART_MODIR_TXCTSE;
+    }
+#endif
+  putreg32(regval, uart_base+KINETIS_LPUART_MODIR_OFFSET);
 
   /* Now we can (re-)enable the transmitter and receiver */
 

@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <queue.h>
 
 #ifdef CONFIG_NET_PKT
 
@@ -94,9 +95,9 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-struct eth_hdr_s; /* Forward reference */
+struct net_driver_s; /* Forward reference */
+struct eth_hdr_s;    /* Forward reference */
 
-/* Defined in pkt_conn.c ****************************************************/
 /****************************************************************************
  * Name: pkt_initialize()
  *
@@ -158,9 +159,8 @@ struct pkt_conn_s *pkt_active(FAR struct eth_hdr_s *buf);
 
 struct pkt_conn_s *pkt_nextconn(FAR struct pkt_conn_s *conn);
 
-/* Defined in pkt_callback.c ************************************************/
 /****************************************************************************
- * Function: pkt_callback
+ * Name: pkt_callback
  *
  * Description:
  *   Inform the application holding the packet socket of a change in state.
@@ -176,7 +176,6 @@ struct pkt_conn_s *pkt_nextconn(FAR struct pkt_conn_s *conn);
 uint16_t pkt_callback(FAR struct net_driver_s *dev,
                       FAR struct pkt_conn_s *conn, uint16_t flags);
 
-/* Defined in pkt_input.c ***************************************************/
 /****************************************************************************
  * Name: pkt_input
  *
@@ -199,7 +198,7 @@ uint16_t pkt_callback(FAR struct net_driver_s *dev,
 /* pkt_input() is prototyped in include/nuttx/net/pkt.h */
 
 /****************************************************************************
- * Function: pkt_find_device
+ * Name: pkt_find_device
  *
  * Description:
  *   Select the network driver to use with the PKT transaction.
@@ -235,7 +234,7 @@ FAR struct net_driver_s *pkt_find_device(FAR struct pkt_conn_s *conn);
 void pkt_poll(FAR struct net_driver_s *dev, FAR struct pkt_conn_s *conn);
 
 /****************************************************************************
- * Function: psock_pkt_send
+ * Name: psock_pkt_send
  *
  * Description:
  *   The psock_pkt_send() call may be used only when the packet socket is in a

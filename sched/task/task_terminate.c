@@ -146,7 +146,7 @@ int task_terminate(pid_t pid, bool nonblocking)
 
   cpu = sched_cpu_pause(dtcb);
 
-  /* Get the task list associated with the the thread's state and CPU */
+  /* Get the task list associated with the thread's state and CPU */
 
   tasklist = TLIST_HEAD(dtcb->task_state, cpu);
 #else

@@ -52,10 +52,10 @@
 
 #define NUC_IRQ_BOD    (16) /* Brown-out low voltage detected */
 #define NUC_IRQ_WDT    (17) /* Watchdog Timer */
-#define NUC_IRQ_EINT0  (18) /* Eternal interrupt from PB.14 */
-#define NUC_IRQ_EINT1  (19) /* Eternal interrupt from PB.15 */
-#define NUC_IRQ_GPAB   (20) /* Eternal interrupt from PA[15:0]/PB[13:0] */
-#define NUC_IRQ_GPCDE  (21) /* Eternal interrupt from PC[15:0]/PD[15:0]/PE[15:0] */
+#define NUC_IRQ_EINT0  (18) /* External interrupt from PB.14 */
+#define NUC_IRQ_EINT1  (19) /* External interrupt from PB.15 */
+#define NUC_IRQ_GPAB   (20) /* External interrupt from PA[15:0]/PB[13:0] */
+#define NUC_IRQ_GPCDE  (21) /* External interrupt from PC[15:0]/PD[15:0]/PE[15:0] */
 #define NUC_IRQ_PWMA   (22) /* PWM0-3 */
 #define NUC_IRQ_PWMB   (23) /* PWM4-7 */
 #define NUC_IRQ_TMR0   (24) /* Timer 0 */

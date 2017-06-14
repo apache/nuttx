@@ -118,7 +118,7 @@ EXTERN sq_queue_t g_routes_ipv6;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_initroute
+ * Name: net_initroute
  *
  * Description:
  *   Initialize to the routing table
@@ -134,7 +134,7 @@ EXTERN sq_queue_t g_routes_ipv6;
 void net_initroute(void);
 
 /****************************************************************************
- * Function: net_allocroute
+ * Name: net_allocroute
  *
  * Description:
  *   Allocate one route by removing it from the free list
@@ -157,7 +157,7 @@ FAR struct net_route_ipv6_s *net_allocroute_ipv6(void);
 #endif
 
 /****************************************************************************
- * Function: net_allocroute
+ * Name: net_allocroute
  *
  * Description:
  *   Free one route by adding it from the free list
@@ -179,7 +179,7 @@ void net_freeroute_ipv6(FAR struct net_route_ipv6_s *route);
 #endif
 
 /****************************************************************************
- * Function: net_addroute
+ * Name: net_addroute
  *
  * Description:
  *   Add a new route to the routing table
@@ -206,7 +206,7 @@ int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask,
 #endif
 
 /****************************************************************************
- * Function: net_delroute
+ * Name: net_delroute
  *
  * Description:
  *   Remove an existing route from the routing table
@@ -227,7 +227,7 @@ int net_delroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask);
 #endif
 
 /****************************************************************************
- * Function: net_ipv4_router
+ * Name: net_ipv4_router
  *
  * Description:
  *   Given an IPv4 address on a external network, return the address of the
@@ -248,7 +248,7 @@ int net_ipv4_router(in_addr_t target, FAR in_addr_t *router);
 #endif
 
 /****************************************************************************
- * Function: net_ipv6_router
+ * Name: net_ipv6_router
  *
  * Description:
  *   Given an IPv6 address on a external network, return the address of the
@@ -269,7 +269,7 @@ int net_ipv6_router(net_ipv6addr_t target, net_ipv6addr_t router);
 #endif
 
 /****************************************************************************
- * Function: netdev_ipv4_router
+ * Name: netdev_ipv4_router
  *
  * Description:
  *   Given an IPv4 address on a external network, return the address of the
@@ -296,7 +296,7 @@ void netdev_ipv4_router(FAR struct net_driver_s *dev, in_addr_t target,
 #endif
 
 /****************************************************************************
- * Function: netdev_ipv6_router
+ * Name: netdev_ipv6_router
  *
  * Description:
  *   Given an IPv6 address on a external network, return the address of the
@@ -324,7 +324,7 @@ void netdev_ipv6_router(FAR struct net_driver_s *dev,
 #endif
 
 /****************************************************************************
- * Function: net_foreachroute
+ * Name: net_foreachroute
  *
  * Description:
  *   Traverse the route table
