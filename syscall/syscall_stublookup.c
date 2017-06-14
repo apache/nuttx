@@ -281,8 +281,6 @@ uintptr_t STUB_pthread_barrier_init(int nbr, uintptr_t parm1,
 uintptr_t STUB_pthread_barrier_wait(int nbr, uintptr_t parm1);
 uintptr_t STUB_pthread_cancel(int nbr, uintptr_t parm1);
 uintptr_t STUB_pthread_cond_broadcast(int nbr, uintptr_t parm1);
-uintptr_t STUB_pthread_cond_destroy(int nbr, uintptr_t parm1);
-uintptr_t STUB_pthread_cond_init(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_pthread_cond_signal(int nbr, uintptr_t parm1);
 uintptr_t STUB_pthread_cond_wait(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_pthread_create(int nbr, uintptr_t parm1, uintptr_t parm2,

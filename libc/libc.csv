@@ -111,6 +111,8 @@
 "pthread_barrierattr_setpshared","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_barrierattr_t *","int"
 "pthread_condattr_destroy","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_condattr_t *"
 "pthread_condattr_init","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_condattr_t *"
+"pthread_cond_destroy","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_cond_t*"
+"pthread_cond_init","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_cond_t*","FAR const pthread_condattr_t*"
 "pthread_mutexattr_destroy","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_mutexattr_t *"
 "pthread_mutexattr_getpshared","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_mutexattr_t *","FAR int *"
 "pthread_mutexattr_gettype","pthread.h","!defined(CONFIG_DISABLE_PTHREAD) && defined(CONFIG_PTHREAD_MUTEX_TYPES)","int","FAR const pthread_mutexattr_t *","int *"

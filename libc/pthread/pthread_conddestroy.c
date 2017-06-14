@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread/pthread_conddestroy.c
+ * libc/pthread/pthread_conddestroy.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,6 @@
 #include <pthread.h>
 #include <debug.h>
 #include <errno.h>
-#include "pthread/pthread.h"
 
 /****************************************************************************
  * Public Functions
