@@ -64,14 +64,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Common definitions *******************************************************/
-
-/* General Configuration ****************************************************/
-
-#ifndef CONFIG_CAN_TXREADY
-#  warning WARNING!!! CONFIG_CAN_TXREADY is required by this driver
-#endif
-
 /* MCP2515 Configuration ****************************************************/
 
 /* Bit timing */
