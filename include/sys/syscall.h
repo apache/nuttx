@@ -430,8 +430,7 @@
 #  define SYS_pthread_setschedparam    (__SYS_pthread_once+1)
 #  define SYS_pthread_setschedprio     (__SYS_pthread_once+2)
 #  define SYS_pthread_setspecific      (__SYS_pthread_once+3)
-#  define SYS_pthread_yield            (__SYS_pthread_once+4)
-#  define __SYS_pthread_smp            (__SYS_pthread_once+5)
+#  define __SYS_pthread_smp            (__SYS_pthread_once+4)
 
 #  ifdef CONFIG_SMP
 #    define SYS_pthread_setaffinity_np (__SYS_pthread_smp+0)

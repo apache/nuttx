@@ -310,7 +310,6 @@ uintptr_t STUB_pthread_setschedprio(int nbr, uintptr_t parm1,
             uintptr_t parm2);
 uintptr_t STUB_pthread_setspecific(int nbr, uintptr_t parm1,
             uintptr_t parm2);
-uintptr_t STUB_pthread_yield(int nbr);
 
 uintptr_t STUB_pthread_setaffinity(int nbr, uintptr_t parm1,
             uintptr_t parm2, uintptr_t parm3);

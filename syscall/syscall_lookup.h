@@ -310,7 +310,6 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
   SYSCALL_LOOKUP(pthread_setschedparam,    3, STUB_pthread_setschedparam)
   SYSCALL_LOOKUP(pthread_setschedprio,     2, STUB_pthread_setschedprio)
   SYSCALL_LOOKUP(pthread_setspecific,      2, STUB_pthread_setspecific)
-  SYSCALL_LOOKUP(pthread_yield,            0, STUB_pthread_yield)
 #  ifdef CONFIG_SMP
   SYSCALL_LOOKUP(pthread_setaffinity,      3, STUB_pthread_setaffinity)
   SYSCALL_LOOKUP(pthread_getaffinity,      3, STUB_pthread_getaffinity)

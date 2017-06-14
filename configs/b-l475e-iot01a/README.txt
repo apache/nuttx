@@ -27,6 +27,9 @@ STATUS
     NuttX.  But no work has yet been done for this board port other
     than writing this README file.
 
+  o 2017-06-13:  I just learned that development boards will not be
+    available for another month.
+
 Board Features
 ==============
 
