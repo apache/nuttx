@@ -1075,7 +1075,8 @@ int up_rtc_initialize(void)
 
 int stm32_rtc_irqinitialize(void)
 {
-  /* nothing to do */
+  /* Nothing to do */
+
   return OK;
 }
 

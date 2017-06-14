@@ -6,7 +6,7 @@
  *
  * With extensions, modifications by:
  *
- *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregroy Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -384,21 +384,22 @@ int up_rtc_initialize(void)
   stm32_pwr_enablebkp(true);
 
   regval = getreg32(RTC_MAGIC_REG);
-
   if (regval != RTC_MAGIC && regval != RTC_MAGIC_TIME_SET)
     {
-      /* reset backup domain if bad magic */
+      /* Reset backup domain if bad magic */
+
       modifyreg32(STM32_RCC_BDCR, 0, RCC_BDCR_BDRST);
       modifyreg32(STM32_RCC_BDCR, RCC_BDCR_BDRST, 0);
       putreg16(RTC_MAGIC, RTC_MAGIC_REG);
     }
   
   /* Select the lower power external 32,768Hz (Low-Speed External, LSE) oscillator
-   * as RTC Clock Source and enable the Clock */
+   * as RTC Clock Source and enable the Clock.
+   */
   
   modifyreg16(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
 
-  /* enable RTC and wait for RSF */
+  /* Enable RTC and wait for RSF */
 
   modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);
 
@@ -416,7 +417,10 @@ int up_rtc_initialize(void)
   stm32_rtc_wait4rsf();
 
 #ifdef CONFIG_RTC_HIRES
-  /* enable overflow interrupt - alarm interrupt is enabled in stm32_rtc_setalarm */
+  /* Enable overflow interrupt - alarm interrupt is enabled in
+   * stm32_rtc_setalarm.
+   */
+
   modifyreg16(STM32_RTC_CRH, 0, RTC_CRH_OWIE);
 #endif
 
@@ -457,9 +461,9 @@ int up_rtc_initialize(void)
 
 int stm32_rtc_irqinitialize(void)
 {
+#if defined(CONFIG_RTC_HIRES) || defined(CONFIG_RTC_ALARM)
   /* Configure RTC interrupt to catch overflow and alarm interrupts. */
 
-#if defined(CONFIG_RTC_HIRES) || defined(CONFIG_RTC_ALARM)
   irq_attach(STM32_IRQ_RTC, stm32_rtc_interrupt, NULL);
   up_enable_irq(STM32_IRQ_RTC);
 #endif

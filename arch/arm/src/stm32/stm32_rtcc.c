@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_rtcc.c
  *
- *   Copyright (C) 2012-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -788,7 +788,7 @@ int stm32_rtc_irqinitialize(void)
 #ifdef CONFIG_RTC_ALARM
 #  warning "Missing EXTI setup logic"
 
-  /* then attach the ALARM interrupt handler */
+  /* Attach the ALARM interrupt handler */
 
   irq_attach(STM32_IRQ_RTC_WKUP, rtc_interrupt, NULL);
   up_enable_irq(STM32_IRQ_RTC_WKUP);

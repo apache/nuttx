@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32l4/stm32l4_rtcc.c
  *
- *   Copyright (C) 2012-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           dev@ziggurat29.com (adaptations to stm32l4)
  *
@@ -1020,7 +1020,8 @@ int up_rtc_initialize(void)
 
 int stm32_rtc_irqinitialize(void)
 {
-  /* nothing to do */
+  /* Nothing to do */
+
   return OK;
 }
 

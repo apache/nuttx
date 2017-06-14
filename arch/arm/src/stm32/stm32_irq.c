@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_irq.c
  *
- *   Copyright (C) 2009-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -389,6 +389,7 @@ void up_irqinitialize(void)
 
 #ifdef CONFIG_RTC
   /* RTC was initialized earlier but IRQs weren't ready at that time */
+
   stm32_rtc_irqinitialize();
 #endif
 
