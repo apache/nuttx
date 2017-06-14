@@ -79,21 +79,35 @@
 #define STM32_RTC_PRESCALER_SECOND  32767  /* Default prescaler to get a second base */
 #define STM32_RTC_PRESCALER_MIN         1  /* Maximum speed of 16384 Hz */
 
+#if defined(CONFIG_STM32_STM32F10XX)
+/* RTC is only a counter, store RTC data in backup domain register DR1 (if CONFIG_RTC_HIRES) and DR2 (state) */
+
 #if !defined(CONFIG_RTC_MAGIC)
-# define CONFIG_RTC_MAGIC           (0xfacefeee)
+# define CONFIG_RTC_MAGIC           (0xface) /* only 16 bit */
 #endif
 
-#if !defined(CONFIG_RTC_MAGIC_TIME_SET)
-#  define CONFIG_RTC_MAGIC_TIME_SET  (CONFIG_RTC_MAGIC + 1)
+#define RTC_MAGIC_REG               STM32_BKP_DR2
+
+#else /* !CONFIG_STM32_STM32F10XX */
+
+#if !defined(CONFIG_RTC_MAGIC)
+# define CONFIG_RTC_MAGIC           (0xfacefeee)
 #endif
 
 #if !defined(CONFIG_RTC_MAGIC_REG)
 # define CONFIG_RTC_MAGIC_REG       (0)
 #endif
 
+#define RTC_MAGIC_REG               STM32_RTC_BKR(CONFIG_RTC_MAGIC_REG)
+
+#endif /* CONFIG_STM32_STM32F10XX */
+
 #define RTC_MAGIC                   CONFIG_RTC_MAGIC
 #define RTC_MAGIC_TIME_SET          CONFIG_RTC_MAGIC_TIME_SET
-#define RTC_MAGIC_REG               STM32_RTC_BKR(CONFIG_RTC_MAGIC_REG)
+
+#if !defined(CONFIG_RTC_MAGIC_TIME_SET)
+#  define CONFIG_RTC_MAGIC_TIME_SET  (CONFIG_RTC_MAGIC + 1)
+#endif
 
 /****************************************************************************
  * Public Types
@@ -117,6 +131,23 @@ extern "C"
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/************************************************************************************
+ * Name: stm32_rtc_irqinitialize
+ *
+ * Description:
+ *   Initialize IRQs for RTC, not possible during up_rtc_initialize because
+ *   up_irqinitialize is called later.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+int stm32_rtc_irqinitialize(void);
 
 /****************************************************************************
  * Name: stm32_rtc_getdatetime_with_subseconds

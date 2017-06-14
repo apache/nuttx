@@ -387,6 +387,11 @@ void up_irqinitialize(void)
   up_enable_irq(STM32_IRQ_MEMFAULT);
 #endif
 
+#ifdef CONFIG_RTC
+  /* RTC was initialized earlier but IRQs weren't ready at that time */
+  stm32_rtc_irqinitialize();
+#endif
+
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG_FEATURES

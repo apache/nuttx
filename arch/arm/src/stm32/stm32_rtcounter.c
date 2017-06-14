@@ -331,7 +331,9 @@ static int stm32_rtc_interrupt(int irq, void *context, FAR void *arg)
 #ifdef CONFIG_RTC_HIRES
   if ((source & RTC_CRL_OWF) != 0)
     {
+      stm32_pwr_enablebkp(true);
       putreg16(getreg16(RTC_TIMEMSB_REG) + 1, RTC_TIMEMSB_REG);
+      stm32_pwr_enablebkp(false);
     }
 #endif
 
@@ -373,24 +375,32 @@ static int stm32_rtc_interrupt(int irq, void *context, FAR void *arg)
 
 int up_rtc_initialize(void)
 {
+  uint32_t regval;
+
   /* Enable write access to the backup domain (RTC registers, RTC backup data
    * registers and backup SRAM).
    */
 
   stm32_pwr_enablebkp(true);
+
+  regval = getreg32(RTC_MAGIC_REG);
+
+  if (regval != RTC_MAGIC && regval != RTC_MAGIC_TIME_SET)
+    {
+      /* reset backup domain if bad magic */
+      modifyreg32(STM32_RCC_BDCR, 0, RCC_BDCR_BDRST);
+      modifyreg32(STM32_RCC_BDCR, RCC_BDCR_BDRST, 0);
+      putreg16(RTC_MAGIC, RTC_MAGIC_REG);
+    }
   
   /* Select the lower power external 32,768Hz (Low-Speed External, LSE) oscillator
    * as RTC Clock Source and enable the Clock */
   
   modifyreg16(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
+
+  /* enable RTC and wait for RSF */
+
   modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);
-
-  /* TODO: Get state from this function, if everything is
-   *   okay and whether it is already enabled (if it was disabled
-   *   reset upper time register)
-   */
-
-  g_rtc_enabled = true;
 
   /* TODO: Possible stall? should we set the timeout period? and return with -1 */
 
@@ -403,21 +413,19 @@ int up_rtc_initialize(void)
   putreg16(STM32_RTC_PRESCALAR_VALUE & 0xffff, STM32_RTC_PRLL);
   stm32_rtc_endwr();
 
-  /* Configure RTC interrupt to catch overflow and alarm interrupts. */
+  stm32_rtc_wait4rsf();
 
-#if defined(CONFIG_RTC_HIRES) || defined(CONFIG_RTC_ALARM)
-  irq_attach(STM32_IRQ_RTC, stm32_rtc_interrupt, NULL);
-  up_enable_irq(STM32_IRQ_RTC);
+#ifdef CONFIG_RTC_HIRES
+  /* enable overflow interrupt - alarm interrupt is enabled in stm32_rtc_setalarm */
+  modifyreg16(STM32_RTC_CRH, 0, RTC_CRH_OWIE);
 #endif
 
-  /* Previous write is done? This is required prior writing into CRH */
+  /* TODO: Get state from this function, if everything is
+   *   okay and whether it is already enabled (if it was disabled
+   *   reset upper time register)
+   */
 
-  while ((getreg16(STM32_RTC_CRL) & RTC_CRL_RTOFF) == 0)
-    {
-      up_waste();
-    }
-
-  modifyreg16(STM32_RTC_CRH, 0, RTC_CRH_OWIE);
+  g_rtc_enabled = true;
 
   /* Alarm Int via EXTI Line */
 
@@ -428,6 +436,33 @@ int up_rtc_initialize(void)
    */
 
   stm32_pwr_enablebkp(false);
+
+  return OK;
+}
+
+/************************************************************************************
+ * Name: stm32_rtc_irqinitialize
+ *
+ * Description:
+ *   Initialize IRQs for RTC, not possible during up_rtc_initialize because
+ *   up_irqinitialize is called later.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+int stm32_rtc_irqinitialize(void)
+{
+  /* Configure RTC interrupt to catch overflow and alarm interrupts. */
+
+#if defined(CONFIG_RTC_HIRES) || defined(CONFIG_RTC_ALARM)
+  irq_attach(STM32_IRQ_RTC, stm32_rtc_interrupt, NULL);
+  up_enable_irq(STM32_IRQ_RTC);
+#endif
 
   return OK;
 }
@@ -613,6 +648,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   do
     {
       stm32_rtc_beginwr();
+      putreg16(RTC_MAGIC, RTC_MAGIC_TIME_SET);
       putreg16(regvals.cnth, STM32_RTC_CNTH);
       putreg16(regvals.cntl, STM32_RTC_CNTL);
       cntl = getreg16(STM32_RTC_CNTL);
@@ -652,6 +688,8 @@ int stm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
   uint16_t cr;
   int ret = -EBUSY;
 
+  flags = enter_critical_section();
+
   /* Is there already something waiting on the ALARM? */
 
   if (g_alarmcb == NULL)
@@ -664,6 +702,8 @@ int stm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 
       stm32_rtc_breakout(tp, &regvals);
 
+      stm32_pwr_enablebkp(true);
+
       /* Enable RTC alarm */
 
       cr  = getreg16(STM32_RTC_CRH);
@@ -672,15 +712,17 @@ int stm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 
       /* The set the alarm */
 
-      flags = enter_critical_section();
       stm32_rtc_beginwr();
       putreg16(regvals.cnth, STM32_RTC_ALRH);
       putreg16(regvals.cntl, STM32_RTC_ALRL);
       stm32_rtc_endwr();
-      leave_critical_section(flags);
+
+      stm32_pwr_enablebkp(false);
 
       ret = OK;
     }
+
+  leave_critical_section(flags);
 
   return ret;
 }
@@ -706,6 +748,8 @@ int stm32_rtc_cancelalarm(void)
   irqstate_t flags;
   int ret = -ENODATA;
 
+  flags = enter_critical_section();
+
   if (g_alarmcb != NULL)
     {
       /* Cancel the global callback function */
@@ -714,15 +758,17 @@ int stm32_rtc_cancelalarm(void)
 
       /* Unset the alarm */
 
-      flags = enter_critical_section();
+      stm32_pwr_enablebkp(true);
       stm32_rtc_beginwr();
       putreg16(0xffff, STM32_RTC_ALRH);
       putreg16(0xffff, STM32_RTC_ALRL);
       stm32_rtc_endwr();
-      leave_critical_section(flags);
+      stm32_pwr_enablebkp(false);
 
       ret = OK;
     }
+
+  leave_critical_section(flags);
 
   return ret;
 }
