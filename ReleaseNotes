@@ -13839,7 +13839,7 @@ Additional new features and extended functionality:
         Juha Niskanen.
       - STM32 Ethernet:  Add support for KSZ8081 PHY interrupts.  From
         Sebastien Lorquet.
-      - STM32 F4:  Add i2s driver.  From Taras Drozdovsky.
+      - STM32 F4:  Add I2S driver.  From Taras Drozdovsky.
       - STM32 L4:  Add IWDG peripheral.  This is the same as for STM32
         except that prescale and reload can be changed after watchdog has
         been started, as this seems to work on L4.  From Juha Niskanen.

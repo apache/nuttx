@@ -49,7 +49,8 @@
  * TODO: do we need separate implementation for STM32L4X3?
  */
 
-#if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
+    defined(CONFIG_STM32L4_STM32L4X6)
 #include "stm32l4x6xx_dma.c"
 #else
 #  error "Unsupported STM32L4 chip"

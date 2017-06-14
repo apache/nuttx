@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_serial.c
  *
- *   Copyright (C) 2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -444,7 +444,7 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(LPC31_IRQ_UART, up_interrupt, NULL);
+  ret = irq_attach(LPC31_IRQ_UART, up_interrupt, dev);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -453,6 +453,7 @@ static int up_attach(struct uart_dev_s *dev)
 
       up_enable_irq(LPC31_IRQ_UART);
     }
+
   return ret;
 }
 
@@ -484,9 +485,9 @@ static void up_detach(struct uart_dev_s *dev)
 
 static int up_interrupt(int irq, void *context, FAR void *arg)
 {
-  struct uart_dev_s *dev   = &g_uartport;
-  uint8_t            status;
-  int                passes;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+  uint8_t status;
+  int passes;
 
   /* Loop until there are no characters to be transferred or,
    * until we have been looping for a long time.

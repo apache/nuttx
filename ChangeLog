@@ -7917,7 +7917,7 @@
 	  command line NxPlayer (2014-7-31).
 	* audio/audio.c: More debug output (2014-7-31).
 	* configs/sama5d3x-ek/README.txt: REAME update (2014-7-31).
-	* drivers/audio/wm8904.c: Was not saving i2s interface instance
+	* drivers/audio/wm8904.c:  Was not saving I2S interface instance
 	  (2014-7-31).
 	* sched/sem_wait.c: Use set_errno() and get_errno().  Direct access
 	  inside the OS may not be supported in the future (2014-7-31).
@@ -15307,7 +15307,7 @@
 	  change the link state.  From Sebastien Lorquet (2017-05-19).
 	* drivers/wireless/ieee80211: Add support for AP scanning.  From Simon
 	  Piriou (2017-05-21).
-	* drivers/audio:  Add cs43l22 audio driver  STM32F4: Add i2s driver.
+	* drivers/audio:  Add cs43l22 audio driver  STM32F4: Add I2S driver.
 	  From Taras Drozdovsky (2017-05-21).
 	* This is based on a patch by Taras Drozdovsky.  Basically, the delay
 	  that was added during the integration of the CDC/ACM host driver was

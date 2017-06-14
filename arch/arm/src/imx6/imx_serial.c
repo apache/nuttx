@@ -595,7 +595,7 @@ static int imx_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, imx_interrupt, priv);
+  ret = irq_attach(priv->irq, imx_interrupt, dev);
   if (ret == OK)
     {
       /* Configure as a (high) level interrupt */

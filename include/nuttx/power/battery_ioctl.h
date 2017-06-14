@@ -48,11 +48,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BATIOC_STATE    _BATIOC(0x0001)
-#define BATIOC_HEALTH   _BATIOC(0x0002)
-#define BATIOC_ONLINE   _BATIOC(0x0003)
-#define BATIOC_VOLTAGE  _BATIOC(0x0004)
-#define BATIOC_CURRENT  _BATIOC(0x0005)
-#define BATIOC_CAPACITY _BATIOC(0x0006)
+#define BATIOC_STATE         _BATIOC(0x0001)
+#define BATIOC_HEALTH        _BATIOC(0x0002)
+#define BATIOC_ONLINE        _BATIOC(0x0003)
+#define BATIOC_VOLTAGE       _BATIOC(0x0004)
+#define BATIOC_CURRENT       _BATIOC(0x0005)
+#define BATIOC_INPUT_CURRENT _BATIOC(0x0006)
+#define BATIOC_CAPACITY      _BATIOC(0x0007)
 
 #endif /* __INCLUDE_NUTTX_POWER_BATTERY_IOCTL_H */

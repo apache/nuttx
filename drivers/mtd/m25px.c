@@ -3,7 +3,7 @@
  * Driver for SPI-based M25P1 (128Kbit),  M25P64 (32Mbit), M25P64 (64Mbit), and
  * M25P128 (128Mbit) FLASH (and compatible).
  *
- *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -798,6 +798,12 @@ static ssize_t m25p_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
 
   finfo("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
 
+  /* Lock the SPI bus NOW because the following call must be executed with
+   * the bus locked.
+   */
+
+  m25p_lock(priv->dev);
+
   /* Wait for any preceding write to complete.  We could simplify things by
    * perform this wait at the end of each write operation (rather than at
    * the beginning of ALL operations), but have the wait first will slightly
@@ -806,12 +812,11 @@ static ssize_t m25p_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
 
   m25p_waitwritecomplete(priv);
 
-  /* Lock the SPI bus and select this FLASH part */
+  /* Select this FLASH part */
 
-  m25p_lock(priv->dev);
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
-  /* Send "Read from Memory " instruction */
+  /* Send "Read from Memory" instruction */
 
   (void)SPI_SEND(priv->dev, M25P_READ);
 
@@ -829,6 +834,7 @@ static ssize_t m25p_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
   m25p_unlock(priv->dev);
+
   finfo("return nbytes: %d\n", (int)nbytes);
   return nbytes;
 }
@@ -859,6 +865,7 @@ static ssize_t m25p_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
   startpage = offset / (1 << priv->pageshift);
   endpage = (offset + nbytes) / (1 << priv->pageshift);
 
+  m25p_lock(priv->dev);
   if (startpage == endpage)
     {
       /* All bytes within one programmable page.  Just do the write. */
@@ -901,6 +908,7 @@ static ssize_t m25p_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
         }
     }
 
+  m25p_unlock(priv->dev);
   return nbytes;
 }
 #endif /* CONFIG_MTD_BYTE_WRITE */

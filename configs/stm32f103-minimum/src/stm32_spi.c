@@ -136,7 +136,7 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
 #endif
 
 #if defined(CONFIG_CL_MFRC522)
-  if (devid == SPIDEV_WIRELESS(0))
+  if (devid == SPIDEV_CONTACTLESS(0))
     {
       stm32_gpiowrite(GPIO_CS_MFRC522, !selected);
     }

@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX C Coding Standard</i>
       </font></big></h1>
-      <p>Last Updated: May 6, 2017</p>
+      <p>Last Updated: June 11, 2017</p>
     </td>
   </tr>
 </table>
@@ -736,11 +736,24 @@ void some_function(void)
 <ul>
   <li>
     <b>Always on Separate Lines</b>.
-    Braces always appear on a separate line containing nothing else other that white space.
+    Braces always appear on a separate line containing nothing else other than white space.
   </li>
   <li>
     <b>Never Comments on Braces</b>.
     Do not put comments on the same line as braces.
+  </li>
+  <li>
+    <b>Compound Statements</b>.
+    Within this document, an opening left brace followed by a sequence of statments, and ending with a closing right brace is refered to as a <i>compound statement</i>.
+  </li>
+  <li>
+    <b>Nested Compound Statements</b>.
+    In the case where there are nested compound statements that end with several consecutive right braces, each closing right brace must lie on a separate line and must be indented to match the corresponding opening brace.
+  </li>
+  <li>
+    <b>Final brace followed by a single blank line</b>.
+    The <i>final</i> right brace must be followed by a blank line as per standard rules.
+    In the case where there are nested several consecutive right braces, no blank lines should be inserted except for after the <i>final</i> right brace.
   </li>
   <li>
     <b>Special Indentation Rules</b>.
@@ -763,6 +776,19 @@ while (true)
       ...
       } /* not valid */
   } /* end forever */
+if (a < b) {
+  if (a < 0) {
+      c = -a;
+  } else {
+      c = a;
+  }
+} else {
+  if (b < 0) {
+      c = -b;
+  } else {
+      c = b;
+  }
+}
 </ul></pre></font>
 </td></tr>
 <tr><td bgcolor="white">
@@ -779,12 +805,36 @@ while (true)
       ...
       }
   }
+
+if (a < b)
+  {
+    if (a < 0)
+      {
+        c = -a;
+      }
+    else
+      {
+        c = a;
+      }
+  }
+else
+  {
+    if (b < 0)
+      {
+        c = -b;
+      }
+    else
+      {
+        c = b;
+      }
+  }
+
 </ul></pre></font>
 </td></tr>
 </table></center>
 
 <p>
-  <b>Exceptions</b>.
+  <b>Exception to Indentation Rule for Braces</b>.
   The exception is braces that following structure, enumeration, union, and function declarations.
   There is no additional indentation for those braces;
   those braces align with the beginning of the definition
@@ -854,6 +904,7 @@ int animals(int animal)
 {
   ...
 }
+
 </ul></pre></font>
 </td></tr>
 </table></center>
@@ -2100,11 +2151,23 @@ x++;
 </table></center>
 
 <p>
+  <b>Forbidden Multicharacter Forms</b>.
+  Many operators are expressed as a character in combination with <code>=</code> such as <code>+=</code>, <code>>=</code>, <code>>>=</code>, etc.
+  Some compilers will accept the <code>=</code> at the beginning or the end of the sequence.
+  This standard, however, requires that the <code>=</code> always appear last in order to avoid amiguities that may arise if the <code>=</code> were to appear first.  For example, <code>a =++ b;</code> could also be interpreted as <code>a =+ +b;</code> or <code>a = ++b</code> all of which are very different.
+</p>
+
+<p>
 <h2>4.4 <a name="ifthenelse"></a><code>if then else</code> Statement</h2>
 
 <p><b>Coding Standard:</b></p>
 <ul>
   <li>
+    <b><code>if</code> separated from <code>&lt;condition&gt;</code></b>.
+    The <code>if</code> keyword and the <code>&lt;condition&gt;</code> must appear on the same line.
+    The <code>if</code> keyword and the <code>&lt;condition&gt;</code> must be separated by a single space.
+  </li>
+  </li>
     <b>Keywords on separate lines</b>.
     <code>if &lt;condition&gt;</code> and <code>else</code> must lie on separate lines with nothing else present on the line.
   </li>
@@ -2118,16 +2181,24 @@ x++;
   </li>
   <li>
     <b>Statement(s) always enclosed in braces</b>.
-    Statement(s) following the <code>if &lt;condition&gt;</code> and <code>else</code> lines must always be enclosed in braces.
-    Braces must follow the <code>if &lt;condition&gt;</code> and <code>else</code> lines even in the case where these is no contained statement!
+    Statement(s) following the <code>if &lt;condition&gt;</code> and <code>else</code> keywords must always be enclosed in braces.
+    Braces must follow the <code>if &lt;condition&gt;</code> and <code>else</code> lines even in the cases where (a) there is no contained statement or (b) there is only a single statement!
   </li>
   <li>
     <b>Braces and indentation</b>.
-    The placement of braces and statements must follow the standard rules for braces and indentation.
+    The placement of braces and statements must follow the standard rules for <a href="#braces">braces and indentation</a>.
   </li>
   <li>
-    <b>Followed by a single blank line</b>.
-    The final right brace must be followed by a blank line.
+    <b>Final brace followed by a single blank line</b>.
+    The <i>final</i> right brace of the <code>if</code>-<code>else</code> must be followed by a blank line in most cases (the exception given below).
+    This may be the final brace of the <code>if</code> compound statement if the <code>else</code> keyword is not present.
+    Or it may be the the final brace of the <code>else</code> compound statement if present.
+    A blank line never follows the right brace closing the <code>if</code> compound statement if the <code>else</code> keyword is present.
+    Use of braces must follow all other standard rules for <a href="#braces">braces and spacing</a>.
+  </li>
+  <li>
+    <b>Exception</b>.
+    That blank line must also be omitted for certain cases where the <code>if &lt;condition&gt;</code>-<code>else</code> statement is nested within another compound statement; there should be no blank lines between consecutive right braces as discussed in the standard rules for use of <a href="#braces">braces</a>.
   </li>
 </ul>
 <p>
@@ -2222,6 +2293,11 @@ x++;
 <p><b>Coding Standard:</b></p>
 <ul>
   <li>
+    <b><code>switch</code> separated from <code>&lt;value&gt;</code></b>.
+    The <code>switch</code> keyword and the switch <code>&lt;value&gt;</code> must appear on the same line.
+    The <code>if</code> keyword and the <code>&lt;value&gt;</code> must be separated by a single space.
+  </li>
+  <li>
     <b>Falling through</b>.
     Falling through a case statement into the next case statement is be permitted as long as a comment is included.
   </li>
@@ -2238,6 +2314,14 @@ x++;
     <b><code>break</code> outside of braces</b>.
     <code>break</code> statements are normally indented by two spaces.
     When used conditionally with case logic, the placement of the break statement follows normal indentation rules.
+  </li>
+  <li>
+    <b>Followed by a single blank line</b>.
+    The final right brace that closes the <code>switch &lt;value&gt;</code> statement must be followed by a single blank line.
+  </li>
+  <li>
+    <b>Exception</b>.
+    That blank line must be omitted for certain cases where the <code>switch &lt;value&gt;</code> statement is nested within another compound statement; there should be no blank lines between consecutive right braces as discussed in the standard rules for use of <a href="#braces">braces</a>.
   </li>
 </ul>
 <p>
@@ -2275,6 +2359,11 @@ x++;
 <p><b>Coding Standard:</b></p>
 <ul>
   <li>
+    <b><code>while</code> separated from <code>&lt;condition&gt;</code></b>.
+    The <code>while</code> keyword and the <code>&lt;condition&gt;</code> must appear on the same line.
+    The <code>while</code> keyword and the <code>&lt;condition&gt;</code> must be separated by a single space.
+  </li>
+  <li>
     <b>Keywords on separate lines</b>.
     <code>while &lt;condition&gt;</code> must lie on a separate line with nothing else present on the line.
   </li>
@@ -2297,7 +2386,11 @@ x++;
   </li>
   <li>
     <b>Followed by a single blank line</b>.
-    The final right brace must be followed by a blank line.
+    The final right brace that closes the <code>while &lt;condition&gt;</code> statment must be followed by a single blank line.
+  </li>
+  <li>
+    <b>Exception</b>.
+    That blank line must be omitted for certain cases where the <code>while &lt;condition&gt;</code> statement is nested within another compound statement; there should be no blank lines between consecutive right braces as discussed in the standard rules for use of <a href="#braces">braces</a>.
   </li>
 </ul>
 <p>
@@ -2345,15 +2438,20 @@ x++;
   </li>
   <li>
     <b>Statements enclosed in braces</b>
-    Statement(s) following the <code>do</code> must always be enclosed in braces, even if only a single statement follows.
+    Statement(s) following the <code>do</code> must always be enclosed in braces, even if only a single statement (or no statement) follows.
   </li>
   <li>
     <b>Braces and indentation</b>.
     The placement of braces and statements must follow the standard rules for braces and indentation.
   </li>
   <li>
+    <b><code>while</code> separated from <code>&lt;condition&gt;</code></b>.
+    The <code>while</code> keyword and the <code>&lt;condition&gt;</code> must appear on the same line.
+    The <code>while</code> keyword and the <code>&lt;condition&gt;</code> must be separated by a single space.
+  </li>
+  <li>
     <b>Followed by a single blank line</b>.
-    The final right brace must be followed by a blank line.
+    The concluding <code>while &lt;condition&gt;</code> must be followed by a single blank line.
   </li>
 </ul>
 <p>
@@ -2388,6 +2486,7 @@ x++;
       ptr++;
     }
   while (*ptr != '\0');
+
 </ul></pre></font>
 </td></tr>
 </table></center>

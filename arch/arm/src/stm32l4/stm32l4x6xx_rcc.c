@@ -129,7 +129,7 @@ static inline void rcc_enableahb1(void)
 {
   uint32_t regval;
 
-  /* Set the appropriate bits in the AHB1ENR register to enabled the
+  /* Set the appropriate bits in the AHB1ENR register to enable the
    * selected AHB1 peripherals.
    */
 

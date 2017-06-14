@@ -67,6 +67,7 @@
 #include "stm32_flash.h"
 #include "stm32_fsmc.h"
 #include "stm32_gpio.h"
+#include "stm32_hrtim.h"
 #include "stm32_i2c.h"
 #include "stm32_ltdc.h"
 #include "stm32_opamp.h"

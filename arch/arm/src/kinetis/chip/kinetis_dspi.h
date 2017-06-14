@@ -140,7 +140,7 @@
 #define SPI_MCR_PCSIS_SHIFT        (16)      /* Bits 16-21: Peripheral Chip Select x Inactive State */
 #define SPI_MCR_PCSIS_MASK         (0x3f << SPI_MCR_PCSIS_SHIFT)
 #  define SPI_MCR_PCSIS_CS(n)      ((1 << (n)) << SPI_MCR_PCSIS_SHIFT)
-                                             /* Bits 22–23: Reserved */
+                                             /* Bits 22-23: Reserved */
 #define SPI_MCR_ROOE               (1 << 24) /* Bit 24: Receive FIFO Overflow Overwrite Enable */
 #define SPI_MCR_PCSSE              (1 << 25) /* Bit 25: Peripheral Chip Select Strobe Enable */
 #define SPI_MCR_MTFE               (1 << 26) /* Bit 26: Modified Timing Format Enable */
@@ -165,6 +165,7 @@
 
 #define SPI_CTARM_BR_SHIFT         (0)       /* Bits 0-3: Baud Rate Scaler */
 #define SPI_CTARM_BR_MASK          (15 << SPI_CTARM_BR_SHIFT)
+#  define SPI_CTARM_BR(n)          ((((n) & 0xf)) << SPI_CTARM_BR_SHIFT)
 #  define SPI_CTARM_BR_2           (0 << SPI_CTARM_BR_SHIFT)
 #  define SPI_CTARM_BR_4           (1 << SPI_CTARM_BR_SHIFT)
 #  define SPI_CTARM_BR_6           (2 << SPI_CTARM_BR_SHIFT)
@@ -205,6 +206,7 @@
 #  define SPI_CTARM_CSSCK_65536    (15 << SPI_CTARM_CSSCK_SHIFT)
 #define SPI_CTARM_PBR_SHIFT        (16)      /* Bits 16-17: Baud Rate Prescaler */
 #define SPI_CTARM_PBR_MASK         (3 << SPI_CTARM_PBR_SHIFT)
+#  define SPI_CTARM_PBR(n)         (((n) & 0x3) << SPI_CTARM_PBR_SHIFT)
 #  define SPI_CTARM_PBR_2          (0 << SPI_CTARM_PBR_SHIFT)
 #  define SPI_CTARM_PBR_3          (1 << SPI_CTARM_PBR_SHIFT)
 #  define SPI_CTARM_PBR_5          (2 << SPI_CTARM_PBR_SHIFT)
@@ -231,6 +233,7 @@
                                              /* Bits 25-26:  See common bits above */
 #define SPI_CTARM_FMSZ_SHIFT       (27)      /* Bits 27-30: Frame Size */
 #define SPI_CTARM_FMSZ_MASK        (15 << SPI_CTARM_FMSZ_SHIFT)
+#define SPI_CTARM_FMSZ(n)          ((((n) & 0xf)) << SPI_CTARM_FMSZ_SHIFT)
 #define SPI_CTARM_DBR              (1 << 31) /* Bit 31:  Double Baud Rate */
 
 /* DSPI Clock and Transfer Attributes Register (Slave Mode) */
@@ -281,6 +284,7 @@
 
 #define SPI_PUSHR_TXDATA_SHIFT     (0)       /* Bits 0-15: Transmit Data */
 #define SPI_PUSHR_TXDATA_MASK      (0xffff << SPI_PUSHR_TXDATA_SHIFT)
+#  define SPI_PUSHR_TXDATA(d)      (((d) & 0xffff) << SPI_PUSHR_TXDATA_SHIFT)
 #define SPI_PUSHR_PCS_SHIFT        (16)      /* Bits 16-21: Select PCS signals to assert */
 #define SPI_PUSHR_PCS_MASK         (0x3f << SPI_PUSHR_PCS_SHIFT)
 #  define SPI_PUSHR_PCS(n)         ((1 << (n)) << SPI_PUSHR_PCS_SHIFT)

@@ -112,6 +112,15 @@ int stm32_bringup(void)
 #endif
   int ret = OK;
 
+#ifdef CONFIG_DEV_GPIO
+  ret = stm32_gpio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_MMCSD
   ret = stm32_mmcsd_initialize(MMCSD_MINOR);
   if (ret < 0)

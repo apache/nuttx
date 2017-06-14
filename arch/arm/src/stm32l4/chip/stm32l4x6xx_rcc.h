@@ -127,7 +127,7 @@
 #define RCC_CR_MSION                (1 << 0)  /* Bit 0: Internal Multi Speed clock enable */
 #define RCC_CR_MSIRDY               (1 << 1)  /* Bit 1: Internal Multi Speed clock ready flag */
 #define RCC_CR_MSIPLLEN             (1 << 2)  /* Bit 2: MSI clock PLL enable */
-#define RCC_CR_MSIRGSEL             (1 << 3)  /* Bit 2: MSI clock range selection */
+#define RCC_CR_MSIRGSEL             (1 << 3)  /* Bit 3: MSI clock range selection */
 #define RCC_CR_MSIRANGE_SHIFT       (4)       /* Bits 7-4: MSI clock range */
 #define RCC_CR_MSIRANGE_MASK        (0x0f << RCC_CR_MSIRANGE_SHIFT)
 #  define RCC_CR_MSIRANGE_100K      (0  << RCC_CR_MSIRANGE_SHIFT) /* 0000: around 100 kHz */
