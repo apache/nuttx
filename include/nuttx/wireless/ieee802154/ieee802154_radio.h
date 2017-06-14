@@ -66,6 +66,10 @@ struct ieee802154_txdesc_s
 
   FAR struct ieee802154_txdesc_s *flink;
 
+  /* Destination Address */
+
+  struct ieee802154_addr_s destaddr; /* Only used for indirect transactions */
+
   /* Pointer to the frame IOB */
 
   FAR struct iob_s *frame;
@@ -80,6 +84,7 @@ struct ieee802154_txdesc_s
                                           * control how tx done is handled */
   bool framepending;                     /* Did the ACK have the frame pending bit
                                           * bit set */
+  uint32_t purge_time;                   /* Time to purge transaction */
 
   /* TODO: Add slotting information for GTS transactions */
 };
@@ -104,11 +109,12 @@ struct ieee802154_radio_s
   CODE int (*txdelayed)(FAR struct ieee802154_radio_s *radio,
              FAR struct ieee802154_txdesc_s *txdesc,
              uint32_t symboldelay);
+  CODE int (*reset_attrs) (FAR struct ieee802154_radio_s *radio);
   CODE int (*get_attr) (FAR struct ieee802154_radio_s *radio,
-             enum ieee802154_pib_attr_e pib_attr,
+             enum ieee802154_attr_e ,
              FAR union ieee802154_attr_u *attrval);
   CODE int (*set_attr) (FAR struct ieee802154_radio_s *radio,
-             enum ieee802154_pib_attr_e pib_attr,
+             enum ieee802154_attr_e ,
              FAR const union ieee802154_attr_u *attrval);
   CODE int (*rxenable) (FAR struct ieee802154_radio_s *radio, bool enable);
   CODE int (*req_rxenable)(FAR struct ieee802154_radio_s *radio,
