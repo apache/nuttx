@@ -128,11 +128,7 @@ ifeq ($(CONFIG_ARCH_CORTEXM4),y)
   TOOLCHAIN_MTUNE    := -mtune=cortex-m4
   TOOLCHAIN_MARCH    := -march=armv7e-m
   ifeq ($(CONFIG_ARCH_FPU),y)
-  ifeq ($(CONFIG_ARCH_DPFPU),y)
-    TOOLCHAIN_MFLOAT := -mfpu=fpv4-sp -mfloat-abi=hard
-  else
     TOOLCHAIN_MFLOAT := -mfpu=fpv4-sp-d16 -mfloat-abi=hard
-  endif
   else
     TOOLCHAIN_MFLOAT := -mfloat-abi=soft
   endif
