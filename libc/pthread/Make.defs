@@ -53,7 +53,7 @@ CSRCS += pthread_mutexattr_setrobust.c pthread_mutexattr_getrobust.c
 CSRCS += pthread_setcancelstate.c pthread_setcanceltype.c
 CSRCS += pthread_testcancel.c
 CSRCS += pthread_rwlock.c pthread_rwlock_rdlock.c pthread_rwlock_wrlock.c
-CSRCS += pthread_yield.c
+CSRCS += pthread_once.c pthread_yield.c
 
 ifeq ($(CONFIG_SMP),y)
 CSRCS += pthread_attr_getaffinity.c pthread_attr_setaffinity.c

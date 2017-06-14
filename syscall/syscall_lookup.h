@@ -306,7 +306,6 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
   SYSCALL_LOOKUP(pthread_mutex_consistent, 1, STUB_pthread_mutex_consistent)
 #endif
-  SYSCALL_LOOKUP(pthread_once,             2, STUB_pthread_once)
   SYSCALL_LOOKUP(pthread_setschedparam,    3, STUB_pthread_setschedparam)
   SYSCALL_LOOKUP(pthread_setschedprio,     2, STUB_pthread_setschedprio)
   SYSCALL_LOOKUP(pthread_setspecific,      2, STUB_pthread_setspecific)
