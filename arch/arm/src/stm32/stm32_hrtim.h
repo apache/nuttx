@@ -64,21 +64,21 @@
 
 enum stm32_hrtim_tim_e
 {
-  HRTIM_TIMER_MASTER,
+  HRTIM_TIMER_MASTER = 0,
 #ifdef CONFIG_STM32_HRTIM_TIMA
-  HRTIM_TIMER_TIMA,
+  HRTIM_TIMER_TIMA   = 1,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMB
-  HRTIM_TIMER_TIMB,
+  HRTIM_TIMER_TIMB   = 2,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMC
-  HRTIM_TIMER_TIMC,
+  HRTIM_TIMER_TIMC   = 3,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMD
-  HRTIM_TIMER_TIMD,
+  HRTIM_TIMER_TIMD   = 4,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIME
-  HRTIM_TIMER_TIME,
+  HRTIM_TIMER_TIME   = 5,
 #endif
 };
 
@@ -241,6 +241,34 @@ enum stm32_hrtim_eev_src_e
   HRTIM_EEV_SRC_TRGO,
   HRTIM_EEV_SRC_ADC
 };
+
+/* Compare register index */
+
+enum stm32_hrtim_cmp_index_e
+{
+  HRTIM_CMP1,
+  HRTIM_CMP2,
+  HRTIM_CMP3,
+  HRTIM_CMP4
+};
+
+/* HRTIM Slave Timer Outputs */
+
+enum stm32_outputs_e
+{
+  HRTIM_OUT_TIMA_CH1 = (1 << 0),
+  HRTIM_OUT_TIMA_CH2 = (1 << 1),
+  HRTIM_OUT_TIMB_CH1 = (1 << 2),
+  HRTIM_OUT_TIMB_CH2 = (1 << 3),
+  HRTIM_OUT_TIMC_CH1 = (1 << 4),
+  HRTIM_OUT_TIMC_CH2 = (1 << 5),
+  HRTIM_OUT_TIMD_CH1 = (1 << 6),
+  HRTIM_OUT_TIMD_CH2 = (1 << 7),
+  HRTIM_OUT_TIME_CH1 = (1 << 8),
+  HRTIM_OUT_TIME_CH2 = (1 << 9),
+};
+
+/*  */
 
 struct hrtim_dev_s
 {

@@ -222,9 +222,7 @@ struct stm32_hrtim_capture_s
 
 struct stm32_hrtim_timcmn_s
 {
-  uint16_t cmp[4];              /* Compare registers */
   uint32_t base;                /* The base adress of the timer */
-  uint32_t frequency;           /* Current frequency setting */
   uint32_t pclk;                /* The frequency of the peripheral clock
                                  * that drives the timer module */
 #ifdef CONFIG_STM32_HRTIM_DMA
@@ -408,6 +406,7 @@ static uint32_t hrtim_tim_getreg(FAR struct stm32_hrtim_s *priv, uint8_t timer,
                                  int offset);
 static FAR struct stm32_hrtim_tim_s *hrtim_tim_get(FAR struct stm32_hrtim_s *priv,
                                                      uint8_t timer);
+static uint32_t hrtim_base_get(FAR struct stm32_hrtim_s* priv, uint8_t timer);
 
 /* Configuration */
 
@@ -440,6 +439,14 @@ static int hrtim_eev_config(FAR struct stm32_hrtim_s *priv);
 #ifdef HRTIM_HAVE_INTERRUPTS
 static int hrtim_irq_config(FAR struct stm32_hrtim_s *priv);
 #endif
+static int hrtim_cmp_update(FAR struct stm32_hrtim_s *priv, uint8_t timer,
+                            uint8_t index, uint16_t cmp);
+static int hrtim_per_update(FAR struct stm32_hrtim_s *priv, uint8_t timer,
+                            uint16_t per);
+static uint16_t hrtim_per_get(FAR struct stm32_hrtim_s *priv, uint8_t timer);
+static uint16_t hrtim_cmp_get(FAR struct stm32_hrtim_s *priv, uint8_t timer,
+                         uint8_t index);
+
 
 /* Initialization */
 
@@ -941,7 +948,7 @@ static void hrtim_tim_modifyreg(FAR struct stm32_hrtim_s *priv, uint8_t timer,
 }
 
 /****************************************************************************
- * Name: stm32_dll_cal
+ * Name: hrtim_dll_cal
  *
  * Description:
  *   Calibrate HRTIM DLL
@@ -984,7 +991,7 @@ static int hrtim_dll_cal(FAR struct stm32_hrtim_s *priv)
 }
 
 /****************************************************************************
- * Name: stm32_tim_clock_config
+ * Name: hrtim_tim_clock_config
  *
  * Description:
  *   Configure HRTIM Timer clock
@@ -1061,7 +1068,7 @@ errout:
 }
 
 /****************************************************************************
- * Name: stm32_tim_clocks_config
+ * Name: hrtim_tim_clocks_config
  *
  * Description:
  *   Configure HRTIM Timers Clocks
@@ -1141,7 +1148,7 @@ errout:
 }
 
 /****************************************************************************
- * Name: stm32_gpios_config
+ * Name: hrtim_gpios_config
  *
  * Description:
  *   Configure HRTIM GPIO
@@ -1339,7 +1346,7 @@ static int hrtim_gpios_config(FAR struct stm32_hrtim_s *priv)
 #endif
 
 /****************************************************************************
- * Name: stm32_inputs_config
+ * Name: hrtim_inputs_config
  *
  * Description:
  *   Configure HRTIM Inputs
@@ -1369,7 +1376,7 @@ static int hrtim_inputs_config(FAR struct stm32_hrtim_s *priv)
 
 
 /****************************************************************************
- * Name: stm32_synch_config
+ * Name: hrtim_synch_config
  *
  * Description:
  *   Configure HRTIM Synchronization Input/Output
@@ -1391,7 +1398,7 @@ static int hrtim_synch_config(FAR struct stm32_hrtim_s *priv)
 #endif
 
 /****************************************************************************
- * Name: stm32_tim_outputs_config
+ * Name: hrtim_tim_outputs_config
  *
  * Description:
  *   Configure HRTIM Slave Timer Outputs (CH1 and CH2)
@@ -1458,7 +1465,7 @@ errout:
 #endif
 
 /****************************************************************************
- * Name: stm32_outputs_config
+ * Name: hrtim_outputs_config
  *
  * Description:
  *   Configure HRTIM Outputs
@@ -1529,10 +1536,50 @@ static int hrtim_outputs_config(FAR struct stm32_hrtim_s *priv)
 errout:
   return ret;
 }
+
+/****************************************************************************
+ * Name: hrtim_outputs_enable
+ *
+ * Description:
+ *   Enable/disable HRTIM outputs (bulk operation)
+ *
+ * Input Parameters:
+ *   priv    - A reference to the HRTIM structure
+ *   outputs - outputs to set
+ *   state   - Enable/disable operation
+ *
+ * Returned Value:
+ *  0 on success, a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int hrtim_outputs_enable(FAR struct stm32_hrtim_s *priv, uint16_t outputs,
+                                bool state)
+{
+  uint32_t reg = 0;
+
+  /* Get register offset */
+
+  if (state == true)
+    {
+      reg = STM32_HRTIM_CMN_OENR_OFFSET;
+    }
+  else
+    {
+      reg = STM32_HRTIM_CMN_ODISR_OFFSET;
+    }
+
+  /* Write register */
+
+  hrtim_putreg(priv, reg, outputs);
+
+  return OK;
+}
+
 #endif
 
 /****************************************************************************
- * Name: stm32_adc_config
+ * Name: hrtim_adc_config
  *
  * Description:
  *   Configure HRTIM ADC triggers
@@ -1554,7 +1601,7 @@ static int hrtim_adc_config(FAR struct stm32_hrtim_s *priv)
 #endif
 
 /****************************************************************************
- * Name: stm32_faults_config
+ * Name: hrtim_faults_config
  *
  * Description:
  *   Configure HRTIM Faults
@@ -1576,7 +1623,7 @@ static int hrtim_faults_config(FAR struct stm32_hrtim_s *priv)
 #endif
 
 /****************************************************************************
- * Name: stm32_eev_config
+ * Name: hrtim_eev_config
  *
  * Description:
  *   Configure HRTIM External Events
@@ -1598,7 +1645,7 @@ static int hrtim_eev_config(FAR struct stm32_hrtim_s *priv)
 #endif
 
 /****************************************************************************
- * Name: stm32_irq_config
+ * Name: hrtim_irq_config
  *
  * Description:
  *   Configure HRTIM interrupts
@@ -1620,7 +1667,7 @@ static int hrtim_irq_config(FAR struct stm32_hrtim_s *priv)
 #endif
 
 /****************************************************************************
- * Name: stm32_preload_config
+ * Name: hrtim_preload_config
  *
  * Description:
  *   Configure HRTIM preload registers
@@ -1666,6 +1713,165 @@ static void hrtim_preload_config(FAR struct stm32_hrtim_s *priv)
                       0, HRTIM_CMNCR_PREEN);
 #endif
 
+}
+
+/****************************************************************************
+ * Name: hrtim_cmp_update
+ *
+ * Description:
+ *  Try update HRTIM Timer compare register.
+ *
+ * Input parameters:
+ *   priv   - A reference to the HRTIM block
+ *   timer  - HRTIM Timer timer
+ *   index  - Compare register timer
+ *   cmp    - New compare register value
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int hrtim_cmp_update(FAR struct stm32_hrtim_s *priv, uint8_t timer,
+                            uint8_t index, uint16_t cmp)
+{
+  int ret = OK;
+  uint32_t offset = 0;
+
+  switch (cmp)
+    {
+      case HRTIM_CMP1:
+        {
+          offset = STM32_HRTIM_TIM_CMP1R_OFFSET;
+          break;
+        }
+      case HRTIM_CMP2:
+        {
+          offset = STM32_HRTIM_TIM_CMP2R_OFFSET;
+          break;
+        }
+      case HRTIM_CMP3:
+        {
+          offset = STM32_HRTIM_TIM_CMP3R_OFFSET;
+          break;
+        }
+      case HRTIM_CMP4:
+        {
+          offset = STM32_HRTIM_TIM_CMP4R_OFFSET;
+          break;
+        }
+      default:
+        {
+          ret = -EINVAL;
+          goto errout;
+        }
+    }
+
+  hrtim_tim_putreg(priv, timer, offset, cmp);
+
+errout:
+  return ret;
+}
+
+/****************************************************************************
+ * Name: hrtim_per_update
+ *
+ * Description:
+ *  Try update HRTIM Timer period register.
+ *
+ * Input parameters:
+ *   priv   - A reference to the HRTIM block
+ *   timer  - HRTIM Timer timer
+ *   per    - New period register value
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int hrtim_per_update(FAR struct stm32_hrtim_s *priv, uint8_t timer,
+                            uint16_t per)
+{
+  hrtim_tim_putreg(priv, timer, STM32_HRTIM_TIM_PER_OFFSET, per);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: hrtim_per_get
+ *
+ * Description:
+ *  Get HRTIM Timer period value
+ *
+ * Input parameters:
+ *   priv   - A reference to the HRTIM block
+ *   timer  - HRTIM Timer timer
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static uint16_t hrtim_per_get(FAR struct stm32_hrtim_s *priv, uint8_t timer)
+{
+  return (uint16_t)hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_PER_OFFSET);
+}
+
+/****************************************************************************
+ * Name: hrtim_cmp_update
+ *
+ * Description:
+ *  Get HRTIM Timer compare register
+ *
+ * Input parameters:
+ *   priv   - A reference to the HRTIM block
+ *   timer  - HRTIM Timer timer
+ *   index  - Compare register timer
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static uint16_t hrtim_cmp_get(FAR struct stm32_hrtim_s *priv, uint8_t timer,
+                         uint8_t index)
+{
+  uint16_t cmpx = 0;
+  uint32_t offset = 0;
+
+  switch (index)
+    {
+      case HRTIM_CMP1:
+        {
+          offset = STM32_HRTIM_TIM_CMP1R_OFFSET;
+          break;
+        }
+      case HRTIM_CMP2:
+        {
+          offset = STM32_HRTIM_TIM_CMP2R_OFFSET;
+          break;
+        }
+      case HRTIM_CMP3:
+        {
+          offset = STM32_HRTIM_TIM_CMP3R_OFFSET;
+          break;
+        }
+      case HRTIM_CMP4:
+        {
+          offset = STM32_HRTIM_TIM_CMP4R_OFFSET;
+          break;
+        }
+      default:
+        {
+          cmpx = 0;
+          goto errout;
+        }
+    }
+
+  cmpx = (uint16_t)hrtim_tim_getreg(priv, timer, offset);
+
+errout:
+  return cmpx;
 }
 
 /****************************************************************************
@@ -1855,6 +2061,7 @@ errout:
  *   2. Board-specific logic has already configured
  *
  ****************************************************************************/
+
 
 FAR struct hrtim_dev_s* stm32_hrtiminitialize(void)
 {
