@@ -583,13 +583,18 @@ Instantiating "Canned" Configurations
       included in the build and what is not.  This file is also used
       to generate a C configuration header at include/nuttx/config.h.
 
+   Copy other, environment-specic files to ${TOPDIR
+
+      This might include files like .gdbinit or IDE configuration files
+      like .project or .cproject.
+
    General information about configuring NuttX can be found in:
 
       ${TOPDIR}/configs/README.txt
       ${TOPDIR}/configs/<board-name>/README.txt
 
-    There is a configuration script in the tools/ directory that makes this
-    easier.  It is used as follows:
+    There is a configuration script in the tools/ directory that makes does
+    all of the above steps for you.  It is used as follows:
 
       cd ${TOPDIR}/tools
       ./configure.sh <board-name>/<config-dir>
@@ -599,6 +604,10 @@ Instantiating "Canned" Configurations
 
       cd ${TOPDIR}\tools
       configure.bat <board-name>\<config-dir>
+
+    And, to make sure that other platform is supported, there is also a
+    C program at tools/configure.c that can be compiled to establish the
+    board configuration.
 
     See tools/README.txt for more information about these scripts.
 
