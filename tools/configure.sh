@@ -48,7 +48,9 @@ Where:
 # A list of optional files that may be installed
 
 OPTFILES="\
-  .gdbinit
+  .gdbinit\
+  .cproject\
+  .project\
 "
 
 # Parse command arguments

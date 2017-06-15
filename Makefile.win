@@ -538,6 +538,9 @@ clean: subdir_clean
 	$(call DELFILE, _SAVED_APPS_config)
 	$(call DELFILE, nuttx-export*)
 	$(call DELFILE, nuttx_user*)
+	$(call DELFILE, .gdbinit)
+	$(call DELFILE, .cproject)
+	$(call DELFILE, .project)
 	$(call CLEAN)
 
 subdir_distclean:

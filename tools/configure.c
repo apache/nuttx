@@ -100,7 +100,9 @@ static struct variable_s *g_versionvars = NULL;
 
 static const char *g_optfiles[] =
 {
-  ".gdbinit"
+  ".gdbinit",
+  ".cproject",
+  ".project"
 };
 
 #define N_OPTFILES (sizeof(g_optfiles) / sizeof(const char *))
