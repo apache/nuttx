@@ -352,6 +352,35 @@ Configurations
 
          CONFIG_NSH_ARCHINIT=y
 
+  mrf24j40-6lowpan
+
+    This is another version of nsh that is very similar to the mrf24j40-mac
+    configuration but is focused on testing the IEEE 802.15.4 MAC integration
+    with the 6loWPAN network stack.  I derives directly from the mrf24j40-mac
+    and all NOTES provided there apply.  Additional differences are summarized
+    below:
+
+    NOTES:
+
+    1. This is another NSH example.  If differs from the mrf24j40
+       configuration in that this configuration, like the usbnsh
+       configuration, it uses a USB serial device for console I/O.
+       Such a configuration is useful on the Clicker2 STM32 which
+       has no builtin RS-232 drivers and tangle of cables and jumpers
+       needed to debug multi-board setups.
+
+       Other NOTES for the usbnsh configuration should appy.
+
+    2. This configuration does have USART3 output enabled and set up as
+       the system logging device:
+
+       CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
+       CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : USART3 will be /dev/ttyS0
+
+       However, there is nothing to generate SYLOG output in the default
+       configuration so nothing should appear on USART3 unless you enable
+       some debug output or enable the USB monitor.
+
   nsh:
 
     Configures the NuttShell (nsh) located at examples/nsh.  This
