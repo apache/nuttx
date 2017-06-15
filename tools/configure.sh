@@ -32,7 +32,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-WD=`pwd`
+WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
 USAGE="
 
@@ -87,17 +87,21 @@ fi
 
 configpath=${TOPDIR}/configs/${boardconfig}
 if [ ! -d "${configpath}" ]; then
-  echo "Directory ${configpath} does not exist.  Options are:"
-  echo ""
-  echo "Select one of the following options for <board-name>:"
-  configlist=`find ${TOPDIR}/configs -name defconfig`
-  for defconfig in $configlist; do
-    config=`dirname $defconfig | sed -e "s,${TOPDIR}/configs/,,g"`
-    echo "  $config"
-  done
-  echo ""
-  echo "$USAGE"
-  exit 3
+  # Try direct path for convenience.
+  configpath=${TOPDIR}/${boardconfig}
+  if [ ! -d "${configpath}" ]; then
+    echo "Directory ${configpath} does not exist.  Options are:"
+    echo ""
+    echo "Select one of the following options for <board-name>:"
+    configlist=`find ${TOPDIR}/configs -name defconfig`
+    for defconfig in ${configlist}; do
+      config=`dirname ${defconfig} | sed -e "s,${TOPDIR}/configs/,,g"`
+      echo "  ${config}"
+    done
+    echo ""
+    echo "$USAGE"
+    exit 3
+  fi
 fi
 
 src_makedefs="${configpath}/Make.defs"
@@ -176,6 +180,7 @@ install -m 644 "${src_makedefs}" "${dest_makedefs}" || \
   { echo "Failed to copy \"${src_makedefs}\"" ; exit 7 ; }
 install -m 644 "${src_config}" "${dest_config}" || \
   { echo "Failed to copy \"${src_config}\"" ; exit 9 ; }
+test -f "${configpath}/.gdbinit" && install "${configpath}/.gdbinit" "${TOPDIR}/"
 
 # If we did not use the CONFIG_APPS_DIR that was in the defconfig config file,
 # then append the correct application information to the tail of the .config
