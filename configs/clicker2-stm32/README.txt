@@ -362,16 +362,24 @@ Configurations
 
     NOTES:
 
-    1. This is another NSH example.  If differs from the mrf24j40
-       configuration in that this configuration, like the usbnsh
-       configuration, it uses a USB serial device for console I/O.
-       Such a configuration is useful on the Clicker2 STM32 which
-       has no builtin RS-232 drivers and tangle of cables and jumpers
-       needed to debug multi-board setups.
+    1. This configuration differs from the mrf24j40-mac configuration in
+       that this configuration, like the usbnsh configuration, uses a USB
+       serial device for console I/O.  Such a configuration is useful on the
+       Clicker2 STM32 which has no builtin RS-232 drivers and eliminates the
+       tangle of cables and jumpers needed to debug multi-board setups.
 
-       Other NOTES for the usbnsh configuration should appy.
+       Most other NOTES for the usbnsh configuration should apply.  Specific
+       differences between the usbnsh or mrf24j40-mac configurations and this
+       configuration are listed in these NOTES.
 
-    2. This configuration does have USART3 output enabled and set up as
+    2. One most serial terminal programs that I have used, the USB
+       connection will be lost when the target board is reset.  When that
+       happens, you may have to reset your serial terminal program to adapt
+       to the new USB connection.  Using TeraTerm, I actually have to exit
+       the serial program and restart it in order to detect and select the
+       re-established USB serial connection.
+
+    3. This configuration does have USART3 output enabled and set up as
        the system logging device:
 
        CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
@@ -414,7 +422,14 @@ Configurations
 
     NOTES:
 
-    1. This configuration does have USART3 output enabled and set up as
+    1. One most serial terminal programs that I have used, the USB
+       connection will be lost when the target board is reset.  When that
+       happens, you may have to reset your serial terminal program to adapt
+       to the new USB connection.  Using TeraTerm, I actually have to exit
+       the serial program and restart it in order to detect and select the
+       re-established USB serial connection.
+
+    2. This configuration does have USART3 output enabled and set up as
        the system logging device:
 
        CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
@@ -424,7 +439,7 @@ Configurations
        configuration so nothing should appear on USART3 unless you enable
        some debug output or enable the USB monitor.
 
-    2. Enabling USB monitor SYSLOG output.  If tracing is enabled, the USB
+    3. Enabling USB monitor SYSLOG output.  If tracing is enabled, the USB
        device will save encoded trace output in in-memory buffer; if the
        USB monitor is enabled, that trace buffer will be periodically
        emptied and dumped to the system logging device (USART3 in this
