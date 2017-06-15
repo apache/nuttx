@@ -58,8 +58,6 @@
  * Public Data Types
  ****************************************************************************/
 
-
-
 /* Callback operations to notify the next highest layer of various asynchronous
  * events, usually triggered by some previous request or response invoked by the
  * upper layer.
@@ -273,7 +271,7 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req);
  *
  ****************************************************************************/
 
-int mac802154_req_get(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
+int mac802154_req_get(MACHANDLE mac, enum ieee802154_attr_e ,
                       FAR union ieee802154_attr_u *attrval);
 
 /****************************************************************************
@@ -291,7 +289,7 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
  *
  ****************************************************************************/
 
-int mac802154_req_set(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
+int mac802154_req_set(MACHANDLE mac, enum ieee802154_attr_e ,
                       FAR const union ieee802154_attr_u *attrval);
 
 /****************************************************************************
