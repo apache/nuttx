@@ -151,7 +151,7 @@ struct twi_dev_s
   struct i2c_msg_s    *msg;       /* Message list */
   uint32_t            twiclk;     /* TWIHS input clock frequency */
   uint32_t            frequency;  /* TWIHS transfer clock frequency */
-  bool                initd;      /* True :device has been initialized */
+  int                 refs;       /* Reference count */
   uint8_t             msgc;       /* Number of message in the message list */
 
   sem_t               exclsem;    /* Only one thread can access at a time */
@@ -1118,6 +1118,10 @@ static int twi_reset(FAR struct i2c_master_s *dev)
 
   DEBUGASSERT(priv != NULL);
 
+  /* Our caller must own a ref */
+
+  DEBUGASSERT(priv->refs > 0);
+
   /* Get exclusive access to the TWIHS device */
 
   twi_takesem(&priv->exclsem);
@@ -1342,6 +1346,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 {
   struct twi_dev_s *priv;
   uint32_t frequency;
+  const struct twi_attr_s *attr = 0;
   irqstate_t flags;
   int ret;
 
@@ -1352,8 +1357,8 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
     {
       /* Select up TWIHS0 and setup invariant attributes */
 
-      priv       = &g_twi0;
-      priv->attr = &g_twi0attr;
+      priv = &g_twi0;
+      attr = &g_twi0attr;
 
       /* Select the (initial) TWIHS frequency */
 
@@ -1366,8 +1371,8 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
     {
       /* Select up TWIHS1 and setup invariant attributes */
 
-      priv       = &g_twi1;
-      priv->attr = &g_twi1attr;
+      priv = &g_twi1;
+      attr = &g_twi1attr;
 
       /* Select the (initial) TWIHS frequency */
 
@@ -1380,8 +1385,8 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
     {
       /* Select up TWIHS2 and setup invariant attributes */
 
-      priv       = &g_twi2;
-      priv->attr = &g_twi2attr;
+      priv = &g_twi2;
+      attr = &g_twi2attr;
 
       /* Select the (initial) TWIHS frequency */
 
@@ -1394,14 +1399,16 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
       return NULL;
     }
 
-  /* Perform one-time TWIHS initialization */
-
   flags = enter_critical_section();
 
   /* Has the device already been initialized? */
 
-  if (!priv->initd)
+  if ((volatile int)priv->refs++ == 0)
     {
+      /* Perform one-time TWIHS initialization */
+
+      priv->attr = attr;
+
       /* Allocate a watchdog timer */
 
       priv->timeout = wd_create();
@@ -1438,10 +1445,6 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
       /* Perform repeatable TWIHS hardware initialization */
 
       twi_hw_initialize(priv, frequency);
-
-      /* Now it has been initialized */
-
-      priv->initd = true;
     }
 
   leave_critical_section(flags);
@@ -1452,6 +1455,7 @@ errout_with_wdog:
   priv->timeout = NULL;
 
 errout_with_irq:
+  priv->refs--;
   leave_critical_section(flags);
   return NULL;
 }
@@ -1469,28 +1473,40 @@ int sam_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
   struct twi_dev_s *priv = (struct twi_dev_s *) dev;
   irqstate_t flags;
 
-  i2cinfo("TWIHS%d Un-initializing\n", priv->attr->twi);
+  DEBUGASSERT(priv);
+
+  /* Decrement reference count and check for underflow */
+
+  if (priv->refs == 0)
+    {
+      return ERROR;
+    }
+
+  i2cinfo("TWIHS%d Un-initializing refs:%d\n", priv->attr->twi, priv->refs);
 
   /* Disable TWIHS interrupts */
 
   flags = enter_critical_section();
-  up_disable_irq(priv->attr->irq);
 
-  /* Reset data structures */
+  if (--priv->refs == 0)
+    {
+      up_disable_irq(priv->attr->irq);
 
-  sem_destroy(&priv->exclsem);
-  sem_destroy(&priv->waitsem);
+      /* Reset data structures */
 
-  /* Free the watchdog timer */
+      sem_destroy(&priv->exclsem);
+      sem_destroy(&priv->waitsem);
 
-  wd_delete(priv->timeout);
-  priv->timeout = NULL;
+      /* Free the watchdog timer */
 
-  /* Detach Interrupt Handler */
+      wd_delete(priv->timeout);
+      priv->timeout = NULL;
 
-  (void)irq_detach(priv->attr->irq);
+      /* Detach Interrupt Handler */
 
-  priv->initd = false;
+      (void)irq_detach(priv->attr->irq);
+    }
+
   leave_critical_section(flags);
   return OK;
 }
