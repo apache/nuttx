@@ -304,10 +304,10 @@ Configurations
        If you do this a lot, you will probably want to invest a little time
        to develop a tool to automate these steps.
 
-  mrf24j40-radio
+  mrf24j40-mac
 
-    This is a version of nsh that was used for testing the MRF24J40 be as a
-    character device.  The most important configuration differences are
+    This is a version of nsh that was used for testing the MRF24J40 MAC be
+    as a character device.  The most important configuration differences are
     summarized below:
 
     1. Support for the BEE click and SPI are in enabled in the mikroBUS1 slot:
@@ -327,7 +327,11 @@ Configurations
 
          CONFIG_WIRELESS=y
          CONFIG_WIRELESS_IEEE802154=y
-         CONFIG_IEEE802154_DEV=y
+         CONFIG_IEEE802154_MAC_DEV=y
+         CONFIG_IEEE802154_NTXDESC=3
+         CONFIG_IEEE802154_IND_PREALLOC=20
+         CONFIG_IEEE802154_IND_IRQRESERVE=10
+         CONFIG_IEEE802154_DEFAULT_EADDR=0x00fade00deadbeef
 
     5. Support for the lower half MRF24J40 character driver is enabled
 
@@ -335,11 +339,13 @@ Configurations
          CONFIG_DRIVERS_IEEE802154=y
          CONFIG_IEEE802154_MRF24J40=y
 
-    6. Support for the test program at apps/ieee802154 is enabled:
+    6. Support for the i8sak test program at apps/ieee802154 is enabled:
 
-         CONFIG_IEEE802154_COMMON=y
-         CONFIG_IEEE802154_COORD=y
+         CONFIG_IEEE802154_LIBMAC=y
+         CONFIG_IEEE802154_LIBUTILS=y
          CONFIG_IEEE802154_I8SAK=y
+         CONFIG_IEEE802154_I8SAK_PRIORITY=100
+         CONFIG_IEEE802154_I8SAK_STACKSIZE=2048
 
     7. Initialization hooks are provided to enable the MRF24J40 and to
        register the radio character driver.
@@ -371,7 +377,6 @@ Configurations
       CONFIG_EXAMPLES_NSH_CXXINITIALIZE=y
 
   usbnsh:
-  -------
 
     This is another NSH example.  If differs from other 'nsh' configurations
     in that this configurations uses a USB serial device for console I/O.

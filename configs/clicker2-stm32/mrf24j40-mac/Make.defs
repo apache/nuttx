@@ -1,5 +1,5 @@
 ############################################################################
-# configs/clicker2-stm32/mrf24j40-radio/Make.defs
+# configs/clicker2-stm32/mrf24j40-mac/Make.defs
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
