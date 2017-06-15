@@ -96,7 +96,7 @@ static void mac802154_purge_worker(FAR void *arg);
 /* Watchdog Timeout Functions */
 
 static void mac802154_timeout_expiry(int argc, uint32_t arg, ...);
-                              
+
 static uint32_t mac802154_symtoticks(FAR struct ieee802154_privmac_s *priv,
                               uint32_t symbols);
 
@@ -133,7 +133,7 @@ static void mac802154_resetqueues(FAR struct ieee802154_privmac_s *priv)
   sem_init(&priv->txdesc_sem, 0, CONFIG_MAC802154_NTXDESC);
 
   /* Initialize the notifcation allocation pool */
-  
+
   mac802154_notifpool_init(priv);
 }
 
@@ -169,7 +169,7 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
    */
 
   ret = sem_trywait(&priv->txdesc_sem);
- 
+
   if (ret == OK)
     {
       *txdesc = (FAR struct ieee802154_txdesc_s *)sq_remfirst(&priv->txdesc_queue);
@@ -195,8 +195,8 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
       /* If we've taken a count from the semaphore, we have "reserved" the struct
        * but now we need to pop it off of the free list. We need to re-lock the
        * MAC in order to ensure this happens correctly.
-       */ 
-      
+       */
+
       ret = mac802154_takesem(&priv->exclsem, allow_interrupt);
       if (ret < 0)
         {
@@ -205,10 +205,10 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
         }
 
       /* We can now safely unlink the next free structure from the free list */
-      
+
       *txdesc = (FAR struct ieee802154_txdesc_s *)sq_remfirst(&priv->txdesc_queue);
     }
-  
+
   /* We have now successfully allocated the tx descriptor.  Now we need to allocate
    * the notification for the data confirmation that gets passed along with the
    * tx descriptor. These are allocated together, but not freed together.
@@ -220,7 +220,7 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
       /* The mac802154_notif_alloc function follows the same rules as this
        * function.  If it returns -EINTR, the MAC layer is already released
        */
-       
+
       /* We need to free the txdesc */
 
       mac802154_txdesc_free(priv, *txdesc);
@@ -228,7 +228,7 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
     }
 
   (*txdesc)->conf = &notif->u.dataconf;
- 
+
   return OK;
 }
 
@@ -242,7 +242,7 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
  *    time.
  *
  * Assumptions:
- *    Called with the MAC locked 
+ *    Called with the MAC locked
  *
  ****************************************************************************/
 
@@ -267,7 +267,7 @@ void mac802154_setupindirect(FAR struct ieee802154_privmac_s *priv,
 
   if (priv->beaconorder < 15)
     {
-      symbols = priv->trans_persisttime * 
+      symbols = priv->trans_persisttime *
         (IEEE802154_BASE_SUPERFRAME_DURATION * (1 << priv->beaconorder));
     }
   else
@@ -406,7 +406,7 @@ static int mac802154_poll(FAR const struct ieee802154_radiocb_s *radiocb,
     {
       return (*txdesc)->frame->io_len;
     }
-  
+
   return 0;
 }
 
@@ -554,9 +554,9 @@ static void mac802154_txdone_worker(FAR void *arg)
                   default:
                     /* We can deallocate the data conf notification as it is no
                      * longer needed. We can't use the public function here
-                     * since we already have the MAC locked. 
-                     */ 
-                    
+                     * since we already have the MAC locked.
+                     */
+
                     privnotif->flink = priv->notif_free;
                     priv->notif_free = privnotif;
                     break;
@@ -567,9 +567,9 @@ static void mac802154_txdone_worker(FAR void *arg)
             {
               /* We can deallocate the data conf notification as it is no longer
                * needed. We can't use the public function here since we already
-               * have the MAC locked. 
-               */ 
-              
+               * have the MAC locked.
+               */
+
               privnotif->flink = priv->notif_free;
               priv->notif_free = privnotif;
             }
@@ -678,7 +678,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
 
       frame = ind->frame;
 
-      /* Set a local pointer to the frame control then move the offset past 
+      /* Set a local pointer to the frame control then move the offset past
        * the frame control field
        */
 
@@ -716,7 +716,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
             }
           else if (ind->dest.mode == IEEE802154_ADDRMODE_EXTENDED)
             {
-              memcpy(&ind->dest.eaddr[0], &frame->io_data[frame->io_offset], 
+              memcpy(&ind->dest.eaddr[0], &frame->io_data[frame->io_offset],
                      IEEE802154_EADDR_LEN);
               frame->io_offset += IEEE802154_EADDR_LEN;
             }
@@ -739,7 +739,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
               memcpy(&ind->src.panid, &frame->io_data[frame->io_offset], 2);
               frame->io_offset += 2;
             }
-          
+
           if (ind->src.mode == IEEE802154_ADDRMODE_SHORT)
             {
               memcpy(&ind->src.saddr, &frame->io_data[frame->io_offset], 2);
@@ -747,7 +747,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
             }
           else if (ind->src.mode == IEEE802154_ADDRMODE_EXTENDED)
             {
-              memcpy(&ind->src.eaddr[0], &frame->io_data[frame->io_offset], 
+              memcpy(&ind->src.eaddr[0], &frame->io_data[frame->io_offset],
                      IEEE802154_EADDR_LEN);
               frame->io_offset += 8;
             }
@@ -755,7 +755,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
 
       ftype = (*frame_ctrl & IEEE802154_FRAMECTRL_FTYPE) >>
               IEEE802154_FRAMECTRL_SHIFT_FTYPE;
-      
+
       switch (ftype)
         {
           case IEEE802154_FRAME_DATA:
@@ -770,9 +770,9 @@ static void mac802154_rxframe_worker(FAR void *arg)
                * field after the MHR. Consu;me the byte by increasing offset so that
                * subsequent functions can start from the byte after the command ID.
                */
-    
+
               uint8_t cmdtype = frame->io_data[frame->io_offset++];
-    
+
               switch (cmdtype)
                 {
                   case IEEE802154_CMD_ASSOC_REQ:
@@ -797,7 +797,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
                   case IEEE802154_CMD_GTS_REQ:
                     break;
                 }
-          
+
               /* Free the data indication struct from the pool */
 
               ieee802154_ind_free(ind);
@@ -818,7 +818,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
 
           case IEEE802154_FRAME_ACK:
             {
-              /* The radio layer is responsible for handling all ACKs and retries. 
+              /* The radio layer is responsible for handling all ACKs and retries.
                * If for some reason an ACK gets here, just throw it out.
                */
 
@@ -834,7 +834,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
  * Name: mac802154_rx_dataframe
  *
  * Description:
- *   Function called from the generic RX Frame worker to parse and handle the 
+ *   Function called from the generic RX Frame worker to parse and handle the
  *   reception of a data frame.
  *
  ****************************************************************************/
@@ -860,14 +860,14 @@ static void mac802154_rx_dataframe(FAR struct ieee802154_privmac_s *priv,
     * wouldn't be performing a POLL operation. Meaning:
     *
     * If the current operation is POLL, we aren't the PAN coordinator
-    * so the incoming frame CAN'T 
+    * so the incoming frame CAN'T
     *
     * FIXME: Fix documentation
     */
 
   if (priv->curr_op == MAC802154_OP_POLL || priv->curr_op == MAC802154_OP_ASSOC)
     {
-      /* If we are in promiscuous mode, we need to check if the 
+      /* If we are in promiscuous mode, we need to check if the
        * frame is even for us first. If the address is not ours,
        * then handle the frame like a normal transaction.
        */
@@ -922,7 +922,7 @@ static void mac802154_rx_dataframe(FAR struct ieee802154_privmac_s *priv,
 
       /* If we've gotten this far, the frame is our extracted data. Cancel the
        * timeout */
-      
+
       mac802154_timercancel(priv);
 
       /* If a frame is received from the coordinator with a zero length payload
@@ -931,7 +931,7 @@ static void mac802154_rx_dataframe(FAR struct ieee802154_privmac_s *priv,
        */
 
       mac802154_notif_alloc(priv, &notif, false);
-      
+
       if (priv->curr_op == MAC802154_OP_POLL)
         {
           notif->notiftype = IEEE802154_NOTIFY_CONF_POLL;
@@ -941,7 +941,7 @@ static void mac802154_rx_dataframe(FAR struct ieee802154_privmac_s *priv,
               ieee802154_ind_free(ind);
               notif->u.pollconf.status = IEEE802154_STATUS_NO_DATA;
             }
-          else 
+          else
             {
               notif->u.pollconf.status = IEEE802154_STATUS_SUCCESS;
             }
@@ -951,7 +951,7 @@ static void mac802154_rx_dataframe(FAR struct ieee802154_privmac_s *priv,
           /* If we ever receive a data frame back as a response to the
            * association request, we assume it means there wasn't any data.
            */
-          
+
           notif->notiftype = IEEE802154_NOTIFY_CONF_ASSOC;
           notif->u.assocconf.status = IEEE802154_STATUS_NO_DATA;
         }
@@ -961,11 +961,11 @@ static void mac802154_rx_dataframe(FAR struct ieee802154_privmac_s *priv,
       priv->curr_op = MAC802154_OP_NONE;
       priv->cmd_desc = NULL;
       mac802154_givesem(&priv->op_sem);
-          
+
       /* Release the MAC */
 
       mac802154_givesem(&priv->exclsem);
-     
+
       priv->cb->notify(priv->cb, notif);
 
       /* If there was data, pass it along */
@@ -1004,7 +1004,7 @@ notify_without_lock:
  * Name: mac802154_rx_datareq
  *
  * Description:
- *   Function called from the generic RX Frame worker to parse and handle the 
+ *   Function called from the generic RX Frame worker to parse and handle the
  *   reception of an Data Request MAC command frame.
  *
  ****************************************************************************/
@@ -1031,7 +1031,7 @@ static void mac802154_rx_datareq(FAR struct ieee802154_privmac_s *priv,
    */
 
   txdesc = (FAR struct ieee802154_txdesc_s *)sq_peek(&priv->indirect_queue);
-      
+
   if (txdesc == NULL)
     {
       goto no_data;
@@ -1097,10 +1097,10 @@ no_data:
    */
 
   /* Allocate an IOB to put the frame in */
-  
+
   iob = iob_alloc(false);
   DEBUGASSERT(iob != NULL);
-  
+
   iob->io_flink  = NULL;
   iob->io_len    = 0;
   iob->io_offset = 0;
@@ -1127,7 +1127,7 @@ no_data:
 
   iob->io_data[iob->io_len++] = priv->dsn++;
 
-  /* Use the source address information from the received data request to 
+  /* Use the source address information from the received data request to
    * respond.
    */
 
@@ -1221,7 +1221,7 @@ static uint32_t mac802154_symtoticks(FAR struct ieee802154_privmac_s *priv,
                         &attrval);
 
   /* After this step, ret represents microseconds */
-  
+
   ret = ((uint64_t)attrval.phy.symdur_picosec * symbols) / (1000 * 1000);
 
   /* This method should only be used for things that can be late. For instance,
@@ -1238,7 +1238,7 @@ static uint32_t mac802154_symtoticks(FAR struct ieee802154_privmac_s *priv,
       ret = ret/USEC_PER_TICK;
       ret++;
     }
-  
+
   return ret;
 }
 
@@ -1403,6 +1403,6 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
   memcpy(&mac->addr.eaddr, &eaddr[0], IEEE802154_EADDR_LEN);
   mac->radio->set_attr(mac->radio, IEEE802154_ATTR_MAC_EXTENDED_ADDR,
                       (union ieee802154_attr_u *)&eaddr[0]);
-  
+
   return (MACHANDLE)mac;
 }

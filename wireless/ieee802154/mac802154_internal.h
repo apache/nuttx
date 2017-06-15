@@ -88,12 +88,12 @@
 
 #if !defined(CONFIG_MAC802154_NNOTIF) || CONFIG_MAC802154_NNOTIF <= 0
 #  undef CONFIG_MAC802154_NNOTIF
-#  define CONFIG_MAC802154_NNOTIF 6 
+#  define CONFIG_MAC802154_NNOTIF 6
 #endif
 
 #if !defined(CONFIG_MAC802154_NTXDESC) || CONFIG_MAC802154_NTXDESC <= 0
 #  undef CONFIG_MAC802154_NTXDESC
-#  define CONFIG_MAC802154_NTXDESC 3 
+#  define CONFIG_MAC802154_NTXDESC 3
 #endif
 
 #if CONFIG_MAC802154_NTXDESC > CONFIG_MAC802154_NNOTIF
@@ -154,7 +154,7 @@ struct ieee802154_privmac_s
 
   /* Only support a single command at any given time. As of now I see no
    * condition where you need to have more than one command frame simultaneously
-   */ 
+   */
 
   sem_t                       op_sem;       /* Exclusive operations */
   enum mac802154_operation_e  curr_op;      /* The current overall operation */
@@ -192,7 +192,7 @@ struct ieee802154_privmac_s
    * list should also be used to populate the address list of the outgoing
    * beacon frame.
    */
-  
+
   sq_queue_t indirect_queue;
 
   /* Support a singly linked list of frames received */
@@ -320,7 +320,7 @@ struct ieee802154_privmac_s
   /* What type of device is this node acting as */
 
   enum ieee802154_devmode_e devmode : 2;
- 
+
   uint32_t max_csmabackoffs   : 3;  /* Max num backoffs for CSMA algorithm
                                      * before declaring ch access failure */
 
@@ -332,7 +332,7 @@ struct ieee802154_privmac_s
 };
 
 /****************************************************************************
- * Inline Functions 
+ * Inline Functions
  ****************************************************************************/
 
 #define mac802154_givesem(s) sem_post(s);
@@ -373,7 +373,7 @@ static inline void mac802154_txdesc_free(FAR struct ieee802154_privmac_s *priv,
  * Name: mac802154_timercancel
  *
  * Description:
- *   Cancel timer and remove reference to callback function 
+ *   Cancel timer and remove reference to callback function
  *
  * Assumptions:
  *   priv MAC struct is locked when calling.

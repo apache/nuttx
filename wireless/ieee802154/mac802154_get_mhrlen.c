@@ -83,7 +83,7 @@ int mac802154_get_mhrlen(MACHANDLE mac,
 
   /* The source address can only be set to NONE if the device is the PAN coord */
 
-  if (meta->srcaddr_mode == IEEE802154_ADDRMODE_NONE && 
+  if (meta->srcaddr_mode == IEEE802154_ADDRMODE_NONE &&
       priv->devmode != IEEE802154_DEVMODE_PANCOORD)
     {
       return -EINVAL;

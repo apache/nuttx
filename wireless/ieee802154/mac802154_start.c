@@ -71,7 +71,7 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
   int ret;
 
   /* Get exclusive access to the MAC */
-  
+
   ret = mac802154_takesem(&priv->exclsem, true);
   if (ret < 0)
     {
@@ -94,7 +94,7 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
 
       return -ENOTTY;
     }
-  
+
   /* Set the PANID attribute */
 
   priv->addr.panid = req->panid;
@@ -107,7 +107,7 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
 
   priv->radio->set_attr(priv->radio, IEEE802154_ATTR_PHY_CURRENT_PAGE,
                         (FAR const union ieee802154_attr_u *)&req->chpage);
-  
+
 
   /* Set the beacon order */
 
@@ -120,7 +120,7 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
   priv->beaconorder = req->beaconorder;
 
   /* The value of macSuperframeOrder shall be ignored if macBeaconOrder = 15. pg. 19 */
-  
+
   if (priv->beaconorder < 15)
     {
       /* Set the superframe order */
@@ -145,7 +145,7 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
 
  /* If the BeaconOrder parameter is less than 15, the MLME sets macBattLifeExt to
   * the value of the BatteryLifeExtension parameter. If the BeaconOrder parameter
-  * equals 15, the value of the BatteryLifeExtension parameter is ignored. 
+  * equals 15, the value of the BatteryLifeExtension parameter is ignored.
   * [1] pg. 106
   */
 

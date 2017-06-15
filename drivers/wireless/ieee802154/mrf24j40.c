@@ -103,12 +103,11 @@
 
 #define MRF24J40_GTS_SLOTS 2
 
-/* 
- * Formula for calculating default macMaxFrameWaitTime is on pg. 130
- * 
+/* Formula for calculating default macMaxFrameWaitTime is on pg. 130
+ *
  * For PHYs other than CSS and UWB, the attribute phyMaxFrameDuration is given by:
  *
- * phyMaxFrameDuration = phySHRDuration + 
+ * phyMaxFrameDuration = phySHRDuration +
  *                       ceiling([aMaxPHYPacketSize + 1] x phySymbolsPerOctet)
  *
  * where ceiling() is a function that returns the smallest integer value greater
@@ -335,7 +334,7 @@ static int mrf24j40_txnotify(FAR struct ieee802154_radio_s *radio, bool gts)
  *
  * Description:
  *   Transmit a packet without regard to supeframe structure after a certain
- *   number of symbols.  This function is used to send Data Request responses. 
+ *   number of symbols.  This function is used to send Data Request responses.
  *   It can also be used to send data immediately if the delay is set to 0.
  *
  * Parameters:
@@ -354,7 +353,7 @@ static int mrf24j40_txdelayed(FAR struct ieee802154_radio_s *radio,
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
   uint8_t reg;
-  
+
   /* Get exclusive access to the radio device */
 
   if (sem_wait(&dev->exclsem) != 0)
@@ -439,21 +438,25 @@ static int mrf24j40_get_attr(FAR struct ieee802154_radio_s *radio,
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
+
      case IEEE802154_ATTR_MAC_MAX_FRAME_WAITTIME:
         {
           attrval->mac.max_frame_waittime = dev->max_frame_waittime;
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
+
       case IEEE802154_ATTR_PHY_SYMBOL_DURATION:
         {
           attrval->phy.symdur_picosec = MRF24J40_SYMBOL_DURATION_PS;
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
+
       default:
         ret = IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE;
     }
+
   return ret;
 }
 
@@ -472,32 +475,36 @@ static int mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
+
       case IEEE802154_ATTR_MAC_SHORT_ADDRESS:
         {
           mrf24j40_setsaddr(dev, attrval->mac.saddr);
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
+
       case IEEE802154_ATTR_MAC_EXTENDED_ADDR:
         {
           mrf24j40_seteaddr(dev, &attrval->mac.eaddr[0]);
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
+
       case IEEE802154_ATTR_MAC_PROMISCUOUS_MODE:
         {
           if (attrval->mac.promisc_mode)
             {
-              mrf24j40_setrxmode(dev, MRF24J40_RXMODE_PROMISC); 
+              mrf24j40_setrxmode(dev, MRF24J40_RXMODE_PROMISC);
             }
           else
             {
-              mrf24j40_setrxmode(dev, MRF24J40_RXMODE_NORMAL); 
+              mrf24j40_setrxmode(dev, MRF24J40_RXMODE_NORMAL);
             }
 
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
+
       case IEEE802154_ATTR_MAC_RX_ON_WHEN_IDLE:
         {
           dev->rxonidle = attrval->mac.rxonidle;
@@ -505,6 +512,7 @@ static int mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
+
       default:
         ret = IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE;
         break;
@@ -587,7 +595,7 @@ static void mrf24j40_dopoll_csma(FAR void *arg)
   if (!dev->csma_busy)
     {
       len = dev->radiocb->poll(dev->radiocb, false, &dev->csma_desc);
-                                    
+
       if (len > 0)
         {
           /* Now the txdesc is in use */
@@ -1594,7 +1602,7 @@ static void mrf24j40_irqwork_txnorm(FAR struct mrf24j40_radio_s *dev)
        * indicates if the failed transmission was due to the channel busy
        * (CSMA-CA timed out).
        */
-      
+
       if (reg & MRF24J40_TXSTAT_CCAFAIL)
         {
           status = IEEE802154_STATUS_CHANNEL_ACCESS_FAILURE;
@@ -1608,7 +1616,7 @@ static void mrf24j40_irqwork_txnorm(FAR struct mrf24j40_radio_s *dev)
     {
       status = IEEE802154_STATUS_SUCCESS;
     }
-  
+
   framepending = (mrf24j40_getreg(dev->spi, MRF24J40_TXNCON) &
                   MRF24J40_TXNCON_FPSTAT);
 
@@ -1853,7 +1861,7 @@ static void mrf24j40_irqworker(FAR void *arg)
       /* As of now the only use for the MAC timer is for delayed transactions.
        * Therefore, all we do here is trigger the TX norm FIFO
        */
-      
+
       mrf24j40_norm_trigger(dev);
 
       /* Timers are one-shot, so disable the interrupt */
@@ -1890,7 +1898,7 @@ static void mrf24j40_irqworker(FAR void *arg)
 
       mrf24j40_irqwork_txgts(dev, 1);
     }
-  
+
   /* Unlock the radio device */
 
   sem_post(&dev->exclsem);
@@ -2014,8 +2022,8 @@ FAR struct ieee802154_radio_s *mrf24j40_init(FAR struct spi_dev_s *spi,
   /* For now, we want to always just have the frame pending bit set when
    * acknowledging a Data Request command. The standard says that the coordinator
    * can do this if it needs time to figure out whether it has data or not
-   */ 
-  
+   */
+
   mrf24j40_setreg(dev->spi, MRF24J40_ACKTMOUT, 0x39 | MRF24J40_ACKTMOUT_DRPACK);
 
   dev->lower->enable(dev->lower, true);

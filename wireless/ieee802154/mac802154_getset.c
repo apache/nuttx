@@ -103,7 +103,7 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_attr_e attr,
         ret = priv->radio->set_attr(priv->radio, attr, attrval);
         break;
     }
-  
+
   return ret;
 }
 
@@ -112,9 +112,9 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_attr_e attr,
  *
  * Description:
  *   The MLME-SET.request primitive attempts to write the given value to the
- *   indicated MAC PIB attribute. 
+ *   indicated MAC PIB attribute.
  *
- *   NOTE: The standard specifies that confirmation should be indicated via 
+ *   NOTE: The standard specifies that confirmation should be indicated via
  *   the asynchronous MLME-SET.confirm primitve.  However, in our implementation
  *   we synchronously return the status from the request. Therefore, we do merge
  *   the functionality of the MLME-SET.request and MLME-SET.confirm primitives
@@ -138,7 +138,7 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_attr_e attr,
           /* Tell the radio about the attribute */
 
           priv->radio->set_attr(priv->radio, attr, attrval);
-                         
+
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
@@ -149,7 +149,7 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_attr_e attr,
           /* Tell the radio about the attribute */
 
           priv->radio->set_attr(priv->radio, attr, attrval);
-                         
+
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
@@ -163,7 +163,7 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_attr_e attr,
           /* Tell the radio about the attribute */
 
           priv->radio->set_attr(priv->radio, attr, attrval);
-                         
+
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;

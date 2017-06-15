@@ -66,10 +66,10 @@
  *   an MSDU from the transaction queue. Confirmation is returned via
  *   the struct mac802154_maccb_s->conf_purge callback.
  *
- *   NOTE: The standard specifies that confirmation should be indicated via 
+ *   NOTE: The standard specifies that confirmation should be indicated via
  *   the asynchronous MLME-PURGE.confirm primitve.  However, in our
  *   implementation we synchronously return the status from the request.
- *   Therefore, we merge the functionality of the MLME-PURGE.request and 
+ *   Therefore, we merge the functionality of the MLME-PURGE.request and
  *   MLME-PURGE.confirm primitives together.
  *
  ****************************************************************************/

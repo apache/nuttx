@@ -77,9 +77,9 @@ int mac802154_notif_free(MACHANDLE mac,
   FAR struct mac802154_notif_s *privnotif = (FAR struct mac802154_notif_s *)notif;
 
   /* Get exclusive access to the MAC */
-  
+
   mac802154_takesem(&priv->exclsem, false);
-  
+
   privnotif->flink = priv->notif_free;
   priv->notif_free = privnotif;
   mac802154_givesem(&priv->notif_sem);
@@ -160,7 +160,7 @@ int mac802154_notif_alloc(FAR struct ieee802154_privmac_s *priv,
    */
 
   ret = sem_trywait(&priv->notif_sem);
- 
+
   if (ret == OK)
     {
       privnotif        = priv->notif_free;
@@ -187,21 +187,21 @@ int mac802154_notif_alloc(FAR struct ieee802154_privmac_s *priv,
       /* If we've taken a count from the semaphore, we have "reserved" the struct
        * but now we need to pop it off of the free list. We need to re-lock the
        * MAC in order to ensure this happens correctly.
-       */ 
-      
+       */
+
       ret = mac802154_takesem(&priv->exclsem, allow_interrupt);
       if (ret < 0)
         {
           mac802154_givesem(&priv->notif_sem);
           return -EINTR;
         }
-      
+
       /* We can now safely unlink the next free structure from the free list */
-      
+
       privnotif        = priv->notif_free;
       priv->notif_free = privnotif->flink;
     }
-  
+
   *notif = (FAR struct ieee802154_notif_s *)privnotif;
 
   return OK;

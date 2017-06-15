@@ -112,7 +112,7 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
   priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
 
   /* Get exclusive access to the MAC */
-   
+
    ret = mac802154_takesem(&priv->exclsem, true);
    if (ret < 0)
      {
@@ -121,10 +121,10 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
      }
 
   /* Allocate an IOB to put the frame in */
-  
+
   iob = iob_alloc(false);
   DEBUGASSERT(iob != NULL);
-  
+
   iob->io_flink  = NULL;
   iob->io_len    = 0;
   iob->io_offset = 0;
@@ -142,10 +142,10 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
     }
 
   /* Get a uin16_t reference to the first two bytes. ie frame control field */
-  
+
   frame_ctrl = (FAR uint16_t *)&iob->io_data[0];
   iob->io_len = 2;
-  
+
   *frame_ctrl = (IEEE802154_FRAME_COMMAND << IEEE802154_FRAMECTRL_SHIFT_FTYPE);
   *frame_ctrl |= IEEE802154_FRAMECTRL_ACKREQ;
 
@@ -153,7 +153,7 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
    * shall copy the value of macDSN into the Sequence Number field of the
    * MHR of the outgoing frame and then increment it by one. [1] pg. 40.
    */
-  
+
   iob->io_data[iob->io_len++] = priv->dsn++;
 
   /* If the destination address is present, copy the PAN ID and one of the
@@ -192,7 +192,7 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
     {
       *frame_ctrl |= IEEE802154_FRAMECTRL_PANIDCOMP;
     }
-  else 
+  else
     {
       memcpy(&iob->io_data[iob->io_len], &priv->addr.panid, 2);
       iob->io_len += 2;
@@ -215,7 +215,7 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
       memcpy(&iob->io_data[iob->io_len], &priv->addr.saddr, 2);
       iob->io_len += 2;
     }
-  
+
   /* Copy in the Command Frame Identifier */
 
   iob->io_data[iob->io_len++] = IEEE802154_CMD_DATA_REQ;
@@ -273,7 +273,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
   enum ieee802154_status_e status;
   FAR struct mac802154_notif_s *privnotif =
     (FAR struct mac802154_notif_s *)txdesc->conf;
-  FAR struct ieee802154_notif_s *notif = &privnotif->pub; 
+  FAR struct ieee802154_notif_s *notif = &privnotif->pub;
 
   /* If the data request failed to be sent, notify the next layer
    * that the poll has failed.
@@ -324,14 +324,14 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
        * the timer, otherwise it will expire and we will notify the
        * next highest layer of the failure.
        */
-       
+
       mac802154_timerstart(priv, priv->max_frame_waittime,
                            mac802154_timeout_poll);
 
       /* We can deallocate the data conf notification as it is no longer
        * needed. We can't use the public function here since we already
-       * have the MAC locked. 
-       */ 
+       * have the MAC locked.
+       */
 
       privnotif->flink = priv->notif_free;
       priv->notif_free = privnotif;
@@ -371,6 +371,6 @@ static void mac802154_timeout_poll(FAR struct ieee802154_privmac_s *priv)
 
   notif->notiftype = IEEE802154_NOTIFY_CONF_POLL;
   notif->u.pollconf.status = IEEE802154_STATUS_NO_DATA;
-          
+
   priv->cb->notify(priv->cb, notif);
 }

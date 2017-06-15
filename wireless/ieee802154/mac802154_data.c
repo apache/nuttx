@@ -71,7 +71,7 @@
  *
  ****************************************************************************/
 
-int mac802154_req_data(MACHANDLE mac, 
+int mac802154_req_data(MACHANDLE mac,
                        FAR const struct ieee802154_frame_meta_s *meta,
                        FAR struct iob_s *frame)
 {
@@ -289,7 +289,7 @@ int mac802154_req_data(MACHANDLE mac,
            * error, since this really shouldn't be happening.
            */
 
-          if (priv->devmode >= IEEE802154_DEVMODE_COORD && 
+          if (priv->devmode >= IEEE802154_DEVMODE_COORD &&
               meta->destaddr.mode != IEEE802154_ADDRMODE_NONE)
             {
               /* Copy in a reference to the destination address to assist in

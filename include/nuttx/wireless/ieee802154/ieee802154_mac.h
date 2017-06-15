@@ -202,7 +202,7 @@ enum ieee802154_status_e
 {
   IEEE802154_STATUS_SUCCESS = 0,
   IEEE802154_STATUS_FAILURE, /* This value is not outlined in the standard. It
-                              * is a catch-all for any failures that are not 
+                              * is a catch-all for any failures that are not
                               * outlined in the standard
                               */
   IEEE802154_STATUS_BEACON_LOSS,
@@ -228,7 +228,7 @@ enum ieee802154_status_e
   IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE,
 };
 
-static const char *IEEE802154_STATUS_STRING[] = 
+static const char *IEEE802154_STATUS_STRING[] =
 {
   "Success",
   "Failure",
@@ -414,7 +414,7 @@ struct ieee802154_addr_s
 
   enum ieee802154_addrmode_e mode;
 
-  uint16_t panid;                        /* PAN identifier, can be 
+  uint16_t panid;                        /* PAN identifier, can be
                                           * IEEE802154_PAN_UNSPEC */
   uint16_t saddr;                        /* short address */
   uint8_t  eaddr[IEEE802154_EADDR_LEN];  /* extended address */
@@ -679,13 +679,13 @@ struct ieee802154_data_conf_s
    * the beginning of the ranging exchange
    */
 
-  uint32_t rng_counter_start; 
+  uint32_t rng_counter_start;
 
   /* A count of the time units corresponding to an RMARKER at the antenna at
    * end of the ranging exchange
    */
 
-  uint32_t rng_counter_stop; 
+  uint32_t rng_counter_stop;
 
   /* A count of the time units in a message exchange over which the tracking
    * offset was measured
@@ -698,10 +698,10 @@ struct ieee802154_data_conf_s
    */
 
   uint32_t rng_offset;
-  
-  /* The Figure of Merit (FoM) characterizing the ranging measurement */ 
 
-  uint8_t rng_fom; 
+  /* The Figure of Merit (FoM) characterizing the ranging measurement */
+
+  uint8_t rng_fom;
 #endif
 };
 
@@ -1250,12 +1250,12 @@ struct ieee802154_get_req_s
  * Description:
  *    Attempts to write the given value to the indicated PIB attribute.
  *
- *  NOTE: The standard specifies that confirmation should be indicated via 
+ *  NOTE: The standard specifies that confirmation should be indicated via
  *  the asynchronous MLME-SET.confirm primitve.  However, in our implementation
  *  there is no reason not to synchronously return the status immediately.
- *  Therefore, we do merge the functionality of the MLME-SET.request and 
+ *  Therefore, we do merge the functionality of the MLME-SET.request and
  *  MLME-SET.confirm primitives together.
- * 
+ *
  *****************************************************************************/
 
 struct ieee802154_set_req_s
