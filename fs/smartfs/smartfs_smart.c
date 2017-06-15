@@ -383,6 +383,9 @@ errout_with_buffer:
       sf->entry.name = NULL;
     }
 
+#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+  kmm_free(sf->buffer);
+#endif  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
   kmm_free(sf);
 
 errout_with_semaphore:
