@@ -1,7 +1,7 @@
 #!/bin/bash
 # configure.sh
 #
-#   Copyright (C) 2007, 2008, 2011, 2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2008, 2011, 2015, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,12 @@ Where:
   <config-name> is the name of the board configuration sub-directory
   <app-dir> is the path to the apps/ directory, relative to the nuttx directory
 
+"
+
+# A list of optional files that may be installed
+
+OPTFILES="\
+  .gdbinit
 "
 
 # Parse command arguments
@@ -88,6 +94,7 @@ fi
 configpath=${TOPDIR}/configs/${boardconfig}
 if [ ! -d "${configpath}" ]; then
   # Try direct path for convenience.
+
   configpath=${TOPDIR}/${boardconfig}
   if [ ! -d "${configpath}" ]; then
     echo "Directory ${configpath} does not exist.  Options are:"
@@ -180,7 +187,12 @@ install -m 644 "${src_makedefs}" "${dest_makedefs}" || \
   { echo "Failed to copy \"${src_makedefs}\"" ; exit 7 ; }
 install -m 644 "${src_config}" "${dest_config}" || \
   { echo "Failed to copy \"${src_config}\"" ; exit 9 ; }
-test -f "${configpath}/.gdbinit" && install "${configpath}/.gdbinit" "${TOPDIR}/"
+
+# Install any optional files
+
+for opt in ${OPTFILES}; do
+  test -f "${configpath}/${opt}" && install "${configpath}/${opt}" "${TOPDIR}/"
+done
 
 # If we did not use the CONFIG_APPS_DIR that was in the defconfig config file,
 # then append the correct application information to the tail of the .config
