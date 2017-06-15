@@ -168,7 +168,7 @@
 
 #ifdef HRTIM_HAVE_PWM
 
-/* HRTIM TimerX Single Output Set/Reset Configuration */
+/* HRTIM Slave Timer Single Output Set/Reset Configuration */
 
 struct stm32_hrtim_timout_s
 {
@@ -176,7 +176,7 @@ struct stm32_hrtim_timout_s
   uint32_t rst;                 /* Reset events*/
 };
 
-/* HRTIM TimerX Output Chopper Configuration */
+/* HRTIM Slave Timer Chopper Configuration */
 
 #ifdef HRTIM_HAVE_CHOPPER
 struct stm32_hrtim_chopper_s
@@ -185,7 +185,7 @@ struct stm32_hrtim_chopper_s
 };
 #endif
 
-/* HRTIM TimerX Output Deadtime Configuration*/
+/* HRTIM Slave Timer Deadtime Configuration */
 
 #ifdef HRTIM_HAVE_DEADTIME
 struct stm32_hrtim_deadtime_s
@@ -251,6 +251,7 @@ struct stm32_hrtim_master_priv_s
 
 struct stm32_hrtim_slave_priv_s
 {
+  uint16_t update;                   /* Update configuration */
   uint32_t reset;                   /* Timer reset events */
 #ifdef HRTIM_HAVE_PWM
   struct stm32_hrtim_pwm_s pwm;     /* PWM configuration */
@@ -396,22 +397,22 @@ static void hrtim_putreg(FAR struct stm32_hrtim_s *priv, int offset,
                              uint32_t value);
 static void hrtim_modifyreg(FAR struct stm32_hrtim_s *priv, int offset,
                                 uint32_t clrbits, uint32_t setbits);
-static void hrtim_tim_putreg(FAR struct stm32_hrtim_s *priv, uint8_t index,
+static void hrtim_tim_putreg(FAR struct stm32_hrtim_s *priv, uint8_t timer,
                              int offset, uint32_t value);
-static void hrtim_tim_modifyreg(FAR struct stm32_hrtim_s *priv, uint8_t index,
+static void hrtim_tim_modifyreg(FAR struct stm32_hrtim_s *priv, uint8_t timer,
                                 int offset, uint32_t clrbits, uint32_t setbits);
 
 /* HRTIM helper */
 
-static uint32_t hrtim_tim_getreg(FAR struct stm32_hrtim_s *priv, uint8_t index,
+static uint32_t hrtim_tim_getreg(FAR struct stm32_hrtim_s *priv, uint8_t timer,
                                  int offset);
 static FAR struct stm32_hrtim_tim_s *hrtim_tim_get(FAR struct stm32_hrtim_s *priv,
-                                                     uint8_t index);
+                                                     uint8_t timer);
 
 /* Configuration */
 
 static int hrtim_dll_cal(FAR struct stm32_hrtim_s *priv);
-static int hrtim_tim_clock_config(FAR struct stm32_hrtim_s *priv, uint8_t index,
+static int hrtim_tim_clock_config(FAR struct stm32_hrtim_s *priv, uint8_t timer,
                                   uint8_t pre);
 static int hrtim_tim_clocks_config(FAR struct stm32_hrtim_s *priv);
 #if defined(HRTIM_HAVE_CAPTURE) || defined(HRTIM_HAVE_PWM) || defined(HRTIM_HAVE_SYNC)
@@ -753,18 +754,18 @@ static void hrtim_modifyreg(FAR struct stm32_hrtim_s *priv, int offset,
  *
  * Input Parameters:
  *   priv    - A reference to the HRTIM block
- *   index   - An HRTIM Timer index to get
+ *   timer   - An HRTIM Timer index to get
  *
  * Returned Value:
- *   Base adress offset for given timer index
+ *   Base adress offset for given Timer index
  *
  ****************************************************************************/
 
-static FAR struct stm32_hrtim_tim_s *hrtim_tim_get(FAR struct stm32_hrtim_s *priv, uint8_t index)
+static FAR struct stm32_hrtim_tim_s *hrtim_tim_get(FAR struct stm32_hrtim_s *priv, uint8_t timer)
 {
   FAR struct stm32_hrtim_tim_s *tim;
 
-  switch (index)
+  switch (timer)
     {
       case HRTIM_TIMER_MASTER:
         {
@@ -814,7 +815,7 @@ static FAR struct stm32_hrtim_tim_s *hrtim_tim_get(FAR struct stm32_hrtim_s *pri
 
       default:
         {
-          tmrerr("ERROR: No such timerx index: %d\n", index);
+          tmrerr("ERROR: No such timer index: %d\n", timer);
           tim = NULL;
         }
     }
@@ -830,19 +831,19 @@ static FAR struct stm32_hrtim_tim_s *hrtim_tim_get(FAR struct stm32_hrtim_s *pri
  *
  * Input Parameters:
  *   priv    - A reference to the HRTIM block
- *   index   - An HRTIM Timer index to get
+ *   timer   - An HRTIM Timer index to get
  *
  * Returned Value:
- *   Base adress offset for given timer index
+ *   Base adress offset for given Timer index
  *
  ****************************************************************************/
 
-static uint32_t hrtim_base_get(FAR struct stm32_hrtim_s* priv, uint8_t index)
+static uint32_t hrtim_base_get(FAR struct stm32_hrtim_s* priv, uint8_t timer)
 {
   FAR struct stm32_hrtim_tim_s* tim;
   uint32_t base;
 
-  tim = hrtim_tim_get(priv,index);
+  tim = hrtim_tim_get(priv,timer);
   if (tim == NULL)
     {
       base = 0;
@@ -871,12 +872,12 @@ errout:
  *
  ****************************************************************************/
 
-static uint32_t hrtim_tim_getreg(FAR struct stm32_hrtim_s *priv, uint8_t index,
+static uint32_t hrtim_tim_getreg(FAR struct stm32_hrtim_s *priv, uint8_t timer,
                                  int offset)
 {
   uint32_t base;
 
-  base = hrtim_base_get(priv, index);
+  base = hrtim_base_get(priv, timer);
   if (base < 0)
     {
       return 0;
@@ -893,7 +894,7 @@ static uint32_t hrtim_tim_getreg(FAR struct stm32_hrtim_s *priv, uint8_t index,
  *
  * Input Parameters:
  *   priv   - A reference to the HRTIM block
- *   index    - An HRTIM timer index
+ *   timer  - An HRTIM Timer index
  *   offset - The offset to the register to write to
  *   value  - The value to write to the register
  *
@@ -902,12 +903,12 @@ static uint32_t hrtim_tim_getreg(FAR struct stm32_hrtim_s *priv, uint8_t index,
  *
  ****************************************************************************/
 
-static void hrtim_tim_putreg(FAR struct stm32_hrtim_s *priv, uint8_t index,
+static void hrtim_tim_putreg(FAR struct stm32_hrtim_s *priv, uint8_t timer,
                              int offset, uint32_t value)
 {
   uint32_t base;
 
-  base = hrtim_base_get(priv, index);
+  base = hrtim_base_get(priv, timer);
   if (base > 0)
     {
       putreg32(value, base + offset);
@@ -922,7 +923,7 @@ static void hrtim_tim_putreg(FAR struct stm32_hrtim_s *priv, uint8_t index,
  *
  * Input Parameters:
  *   priv    - A reference to the HRTIM block
- *   index    - An HRTIM timer index
+ *   timer   - An HRTIM Timer index
  *   offset  - The offset to the register to modify
  *   clrbits - The bits to clear
  *   setbits - The bits to set
@@ -932,11 +933,11 @@ static void hrtim_tim_putreg(FAR struct stm32_hrtim_s *priv, uint8_t index,
  *
  ****************************************************************************/
 
-static void hrtim_tim_modifyreg(FAR struct stm32_hrtim_s *priv, uint8_t index,
+static void hrtim_tim_modifyreg(FAR struct stm32_hrtim_s *priv, uint8_t timer,
                                 int offset, uint32_t clrbits, uint32_t setbits)
 {
-  hrtim_tim_putreg(priv, index, offset,
-                   (hrtim_tim_getreg(priv, index, offset) & ~clrbits) | setbits);
+  hrtim_tim_putreg(priv, timer, offset,
+                   (hrtim_tim_getreg(priv, timer, offset) & ~clrbits) | setbits);
 }
 
 /****************************************************************************
@@ -990,19 +991,19 @@ static int hrtim_dll_cal(FAR struct stm32_hrtim_s *priv)
  *
  * Input Parameters:
  *   priv   - A reference to the HRTIM structure
- *   index  - An HRTIM timer index
+ *   timer  - An HRTIM Timer index
  *
  * Returned Value:
  *  0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
-static int hrtim_tim_clock_config(FAR struct stm32_hrtim_s *priv, uint8_t index, uint8_t pre)
+static int hrtim_tim_clock_config(FAR struct stm32_hrtim_s *priv, uint8_t timer, uint8_t pre)
 {
   int ret = OK;
   uint32_t regval = 0;
 
-  regval = hrtim_tim_getreg(priv, index, STM32_HRTIM_TIM_CR_OFFSET);
+  regval = hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_CR_OFFSET);
 
   switch (pre)
     {
@@ -1048,7 +1049,7 @@ static int hrtim_tim_clock_config(FAR struct stm32_hrtim_s *priv, uint8_t index,
         }
       default:
         {
-          tmrerr("ERROR: invalid prescaler value %d for timer %d\n", index,
+          tmrerr("ERROR: invalid prescaler value %d for timer %d\n", timer,
                    pre);
           ret = -EINVAL;
           goto errout;
@@ -1404,7 +1405,7 @@ static int hrtim_synch_config(FAR struct stm32_hrtim_s *priv)
  ****************************************************************************/
 
 #if defined(HRTIM_HAVE_PWM)
-static int hrtim_tim_outputs_config(FAR struct stm32_hrtim_s *priv, uint8_t index)
+static int hrtim_tim_outputs_config(FAR struct stm32_hrtim_s *priv, uint8_t timer)
 {
   FAR struct stm32_hrtim_tim_s* tim;
   FAR struct stm32_hrtim_slave_priv_s* slave;
@@ -1414,7 +1415,7 @@ static int hrtim_tim_outputs_config(FAR struct stm32_hrtim_s *priv, uint8_t inde
 
   /* Master Timer has no outputs */
 
-  if (index == HRTIM_TIMER_MASTER)
+  if (timer == HRTIM_TIMER_MASTER)
     {
       ret = -EINVAL;
       goto errout;
@@ -1422,7 +1423,7 @@ static int hrtim_tim_outputs_config(FAR struct stm32_hrtim_s *priv, uint8_t inde
 
   /* Get Timer data strucutre */
 
-  tim = hrtim_tim_get(priv, index);
+  tim = hrtim_tim_get(priv, timer);
   if (tim == NULL)
     {
       ret = -EINVAL;
@@ -1434,22 +1435,22 @@ static int hrtim_tim_outputs_config(FAR struct stm32_hrtim_s *priv, uint8_t inde
   /* Configure CH1 SET events */
 
   regval = slave->pwm.ch1.set;
-  hrtim_tim_putreg(priv, index, STM32_HRTIM_TIM_SET1R_OFFSET, regval);
+  hrtim_tim_putreg(priv, timer, STM32_HRTIM_TIM_SET1R_OFFSET, regval);
 
   /* Configure CH1 RESET events */
 
   regval = slave->pwm.ch1.rst;
-  hrtim_tim_putreg(priv, index, STM32_HRTIM_TIM_RST1R_OFFSET, regval);
+  hrtim_tim_putreg(priv, timer, STM32_HRTIM_TIM_RST1R_OFFSET, regval);
 
   /* Configure CH2 SET events */
 
   regval = slave->pwm.ch2.set;
-  hrtim_tim_putreg(priv, index, STM32_HRTIM_TIM_SET2R_OFFSET, regval);
+  hrtim_tim_putreg(priv, timer, STM32_HRTIM_TIM_SET2R_OFFSET, regval);
 
   /* Configure CH2 RESET events */
 
   regval = slave->pwm.ch2.rst;
-  hrtim_tim_putreg(priv, index, STM32_HRTIM_TIM_RST2R_OFFSET, regval);
+  hrtim_tim_putreg(priv, timer, STM32_HRTIM_TIM_RST2R_OFFSET, regval);
 
 errout:
   return ret;
