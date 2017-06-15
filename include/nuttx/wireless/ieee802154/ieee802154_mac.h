@@ -200,14 +200,25 @@
 
 enum ieee802154_status_e
 {
+  /* This first section of enums is defined in the standard. [1] pg. 70
+   * They must be in this order
+   */
+   
   IEEE802154_STATUS_SUCCESS = 0,
+  IEEE802154_STATUS_OUT_OF_CAPACITY,
+  IEEE802154_STATUS_DENIED,
+
+  /* As of now, all values below do not have a specific value defined in the
+   * standard
+   */
+
   IEEE802154_STATUS_FAILURE, /* This value is not outlined in the standard. It
                               * is a catch-all for any failures that are not
                               * outlined in the standard
                               */
+
   IEEE802154_STATUS_BEACON_LOSS,
   IEEE802154_STATUS_CHANNEL_ACCESS_FAILURE,
-  IEEE802154_STATUS_DENIED,
   IEEE802154_STATUS_DISABLE_TRX_FAILURE,
   IEEE802154_STATUS_FAILED_SECURITY_CHECK,
   IEEE802154_STATUS_FRAME_TOO_LONG,
@@ -218,7 +229,6 @@ enum ieee802154_status_e
   IEEE802154_STATUS_NO_BEACON,
   IEEE802154_STATUS_NO_DATA,
   IEEE802154_STATUS_NO_SHORT_ADDRESS,
-  IEEE802154_STATUS_OUT_OF_CAP,
   IEEE802154_STATUS_PAN_ID_CONFLICT,
   IEEE802154_STATUS_REALIGNMENT,
   IEEE802154_STATUS_TRANSACTION_EXPIRED,

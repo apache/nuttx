@@ -374,7 +374,15 @@ int mac802154_resp_associate(MACHANDLE mac,
 
   /* Copy in the assigned short address */
 
-  memcpy(&iob->io_data[iob->io_len], &resp->assocsaddr, 2);
+  if (resp->status == IEEE802154_STATUS_SUCCESS)
+    {
+      memcpy(&iob->io_data[iob->io_len], &resp->assocsaddr, 2);
+    }
+  else
+    {
+      u16 = (FAR uint16_t *)&iob->io_data[iob->io_len];
+      *u16 = IEEE802154_SADDR_UNSPEC;
+    }
   iob->io_len += 2;
 
   /* Copy in the association status */
