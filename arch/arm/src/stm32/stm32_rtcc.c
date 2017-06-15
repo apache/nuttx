@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_rtcc.c
  *
- *   Copyright (C) 2012-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -763,17 +763,37 @@ int up_rtc_initialize(void)
    * 3. Configure the RTC to generate RTC alarms (Alarm A or Alarm B).
    */
 
+  g_rtc_enabled = true;
+  rtc_dumpregs("After Initialization");
+  return OK;
+}
+
+/************************************************************************************
+ * Name: stm32_rtc_irqinitialize
+ *
+ * Description:
+ *   Initialize IRQs for RTC, not possible during up_rtc_initialize because
+ *   up_irqinitialize is called later.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+int stm32_rtc_irqinitialize(void)
+{
 #ifdef CONFIG_RTC_ALARM
 #  warning "Missing EXTI setup logic"
 
-  /* Then attach the ALARM interrupt handler */
+  /* Attach the ALARM interrupt handler */
 
   irq_attach(STM32_IRQ_RTC_WKUP, rtc_interrupt, NULL);
   up_enable_irq(STM32_IRQ_RTC_WKUP);
 #endif
 
-  g_rtc_enabled = true;
-  rtc_dumpregs("After Initialization");
   return OK;
 }
 

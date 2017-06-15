@@ -72,22 +72,27 @@
 /* Register Bitfield Definitions ****************************************************/
 
 /* Code Segment Start Address */
+
 #define FIREWALL_CSSADD_SHIFT           8
 #define FIREWALL_CSSADD_MASK            (0xFFFF << FIREWALL_CSSADD_SHIFT)
 
 /* Code Segment Length */
+
 #define FIREWALL_CSSLENG_SHIFT          8
 #define FIREWALL_CSSLENG_MASK           (0x3FFF << FIREWALL_CSSLENG_SHIFT)
 
 /* Non-volatile Data Segment Start Address */
+
 #define FIREWALL_NVDSADD_SHIFT          8
 #define FIREWALL_NVDSADD_MASK           (0xFFFF << FIREWALL_NVDSADD_SHIFT)
 
 /* Non-volatile Data Segment Length */
+
 #define FIREWALL_NVDSLENG_SHIFT         8
 #define FIREWALL_NVDSLENG_MASK          (0x3FFF << FIREWALL_NVDSLENG_SHIFT)
 
 /* Volatile Data Segment Start Address */
+
 #define FIREWALL_VDSADD_SHIFT           6
 #if defined(CONFIG_STM32L4_STM32L496XX)
 #define FIREWALL_VDSADD_MASK            (0x0FFF << FIREWALL_VDSADD_SHIFT)
@@ -96,6 +101,7 @@
 #endif
 
 /* Volatile Data Segment Length */
+
 #define FIREWALL_VDSLENG_SHIFT          6
 #if defined(CONFIG_STM32L4_STM32L496XX)
 #define FIREWALL_VDSLENG_MASK           (0x0FFF << FIREWALL_VDSLENG_SHIFT)
@@ -104,6 +110,7 @@
 #endif
 
 /* Configuration Register */
+
 #define FIREWALL_CR_FPA                 (1 << 0) /* Bit 0: Firewall prearm */
 #define FIREWALL_CR_VDS                 (1 << 1) /* Bit 1: Volatile data shared */
 #define FIREWALL_CR_VDE                 (1 << 2) /* Bit 2: Volatile data execution */

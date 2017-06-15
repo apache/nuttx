@@ -225,6 +225,10 @@ ifeq ($(CONFIG_OPAMP),y)
 CHIP_CSRCS += stm32_opamp.c
 endif
 
+ifeq ($(CONFIG_HRTIM),y)
+CHIP_CSRCS += stm32_hrtim.c
+endif
+
 ifeq ($(CONFIG_STM32_1WIREDRIVER),y)
 CHIP_CSRCS += stm32_1wire.c
 endif

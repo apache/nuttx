@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread/pthread_once.c
+ * libc/pthread/pthread_conddestroy.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,70 +39,49 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
 #include <pthread.h>
-#include <sched.h>
-#include <errno.h>
 #include <debug.h>
+#include <errno.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_once
+ * Name: pthread_cond_destroy
  *
  * Description:
- *   The  first call to pthread_once() by any thread with a given
- *   once_control, will call the init_routine with no arguments. Subsequent
- *   calls to pthread_once() with the same once_control will have no effect.
- *   On return from pthread_once(), init_routine will have completed.
+ *   A thread can delete condition variables.
  *
  * Parameters:
- *   once_control - Determines if init_routine should be called.
- *     once_control should be declared and initializeed as follows:
- *
- *        pthread_once_t once_control = PTHREAD_ONCE_INIT;
- *
- *     PTHREAD_ONCE_INIT is defined in pthread.h
- *   init_routine - The initialization routine that will be called once.
+ *   None
  *
  * Return Value:
- *   0 (OK) on success or EINVAL if either once_control or init_routine are
- *   invalid
+ *   None
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_once(FAR pthread_once_t *once_control,
-                 CODE void (*init_routine)(void))
+int pthread_cond_destroy(FAR pthread_cond_t *cond)
 {
-  /* Sanity checks */
+  int ret = OK;
 
-  if (once_control && init_routine)
+  sinfo("cond=0x%p\n", cond);
+
+  if (!cond)
     {
-      /* Prohibit pre-emption while we test and set the once_control */
-
-      sched_lock();
-      if (!*once_control)
-        {
-          *once_control = true;
-
-          /* Call the init_routine with pre-emption enabled. */
-
-          sched_unlock();
-          init_routine();
-          return OK;
-        }
-
-      /* The init_routine has already been called.  Restore pre-emption and return */
-
-      sched_unlock();
-      return OK;
+      ret = EINVAL;
     }
 
-  /* One of the two arguments is NULL */
+  /* Destroy the semaphore contained in the structure */
 
-  return EINVAL;
+  else if (sem_destroy((FAR sem_t *)&cond->sem) != OK)
+    {
+      ret = EINVAL;
+    }
+
+  sinfo("Returning %d\n", ret);
+  return ret;
 }
+

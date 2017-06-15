@@ -439,7 +439,9 @@
 #  define OTGFS_HNPTXSTS_EPNUM_SHIFT    (27)      /* Bits 27-30: Endpoint number */
 #  define OTGFS_HNPTXSTS_EPNUM_MASK     (15 << OTGFS_HNPTXSTS_EPNUM_SHIFT)
                                                   /* Bit 31 Reserved, must be kept at reset value */
+
 /* General core configuration register */
+
 #define OTGFS_GCCFG_DCDET               (1 << 0) /* Bit 0: Data contact detect */
 #define OTGFS_GCCFG_PDET                (1 << 1) /* Bit 1: Primary detect */
 #define OTGFS_GCCFG_SDET                (1 << 2) /* Bit 2: Secondary detect */
@@ -453,35 +455,48 @@
 #define OTGFS_GCCFG_VBDEN               (1 << 21) /* Bit 21: USB VBUS detection enable */
                                                   /* Bits 22-31: Reserved, must be kept at reset value */
 
-/* Core ID register  (32-bit product ID) */
+/* Core ID register (32-bit product ID) */
 
-//XXX GLPMCFG
-#define OTGFS_GLPMCFG_LPMEN             (1 << 0) /* Bit 0: XXX */
-#define OTGFS_GLPMCFG_LPMACK            (1 << 1) /* Bit 1: XXX */
-//#define OTGFS_GLPMCFG_BESL
-#define OTGFS_GLPMCFG_REMWAKE           (1 << 6) /* Bit 6: XXX */
-#define OTGFS_GLPMCFG_L1SSEN            (1 << 7) /* Bit 7: XXX */
-//#define OTGFS_GLPMCFG_BESLTHRS
+/* LPM configuration register */
+
+#define OTGFS_GLPMCFG_LPMEN             (1 << 0)  /* Bit 0: XXX */
+#define OTGFS_GLPMCFG_LPMACK            (1 << 1)  /* Bit 1: XXX */
+#define OTGFS_GLPMCFG_BESL_SHIFT        (2)       /* Bits 2-5: XXX */
+#define OTGFS_GLPMCFG_BESL_MASK         (15 << OTGFS_GLPMCFG_BESL_SHIFT)
+#define OTGFS_GLPMCFG_REMWAKE           (1 << 6)  /* Bit 6: XXX */
+#define OTGFS_GLPMCFG_L1SSEN            (1 << 7)  /* Bit 7: XXX */
+#define OTGFS_GLPMCFG_BESLTHRS_SHIFT    (8)       /* Bits 8-11: XXX */
+#define OTGFS_GLPMCFG_BESLTHRS_MASK     (15 << OTGFS_GLPMCFG_BESLTHRS_SHIFT)
 #define OTGFS_GLPMCFG_L1DSEN            (1 << 12) /* Bit 12: XXX */
-//#define OTGFS_GLPMCFG_LPMRSP
+#define OTGFS_GLPMCFG_LPMRSP_SHIFT      (13)      /* Bits 13-14: XXXX */
+#define OTGFS_GLPMCFG_LPMRSP_MASK       (3 << OTGFS_GLPMCFG_LPMRSP_SHIFT)
 #define OTGFS_GLPMCFG_SLPSTS            (1 << 15) /* Bit 15: XXX */
 #define OTGFS_GLPMCFG_L1RSMOK           (1 << 16) /* Bit 16: XXX */
-//#define OTGFS_GLPMCFG_LPMCHIDX
-//#define OTGFS_GLPMCFG_LPMRCNT
+#define OTGFS_GLPMCFG_LPMCHIDX_SHIFT    (17)      /* Bits 17-20: XXX */
+#define OTGFS_GLPMCFG_LPMCHIDX_MASK     (15 << OTGFS_GLPMCFG_LPMCHIDX_SHIFT)
+#define OTGFS_GLPMCFG_LPMRCNT_SHIFT     (21)      /* Bits 21-23: XXX */
+#define OTGFS_GLPMCFG_LPMRCNT_MASK      (7 << OTGFS_GLPMCFG_LPMRCNT_SHIFT)
 #define OTGFS_GLPMCFG_SNDLPM            (1 << 24) /* Bit 24: XXX */
-//#define OTGFS_GLPMCFG_LPMRCNTSTS
+#define OTGFS_GLPMCFG_LPMRCNTSTS_SHIFT  (25)      /* Bits 25-27: XXX */
+#define OTGFS_GLPMCFG_LPMRCNTSTS_MASK   (7 << OTGFS_GLPMCFG_LPMRCNTSTS_SHIFT)
 #define OTGFS_GLPMCFG_ENBESL            (1 << 28) /* Bit 28: XXX */
                                                   /* Bits 29-31: Reserved, must be kept at reset value */
 
-//XXX GPWRDN
-#define OTGFS_GPWRDN_ADPMEN             (1 << 0) /* Bit 0: XXX */
+/* Power down register */
+
+#define OTGFS_GPWRDN_ADPMEN             (1 << 0)  /* Bit 0: XXX */
 #define OTGFS_GPWRDN_ADPIF              (1 << 23) /* Bit 23: XXX */
 
-//XXX GADPCTL
-//#define OTGFS_GADPCTL_PRBDSCHG
-//#define OTGFS_GADPCTL_PRBDELTA
-//#define OTGFS_GADPCTL_PRBPER
-//#define OTGFS_GADPCTL_RTIM
+/* ADP timer, control and status register */
+
+#define OTGFS_GADPCTL_PRBDSCHG_SHIFT    (0)       /* Bits 0-1: XXX */
+#define OTGFS_GADPCTL_PRBDSCHG_MASK     (3 << OTGFS_GADPCTL_PRBDSCHG_SHIFT)
+#define OTGFS_GADPCTL_PRBDELTA_SHIFT    (2)       /* Bits 2-3: XXX */
+#define OTGFS_GADPCTL_PRBDELTA_MASK     (3 << OTGFS_GADPCTL_PRBDELTA_SHIFT)
+#define OTGFS_GADPCTL_PRBPER_SHIFT      (4)       /* Bits 4-5: XXX */
+#define OTGFS_GADPCTL_PRBPER_MASK       (15 << OTGFS_GADPCTL_PRBPER_SHIFT)
+#define OTGFS_GADPCTL_RTIM_SHIFT        (6)       /* Bits 6-9: XXX */
+#define OTGFS_GADPCTL_RTIM_SHIFT        (6)       /* Bits 6-9: XXX */
 #define OTGFS_GADPCTL_ENAPRB            (1 << 17) /* Bit 17: XXX */
 #define OTGFS_GADPCTL_ENASNS            (1 << 18) /* Bit 18: XXX */
 #define OTGFS_GADPCTL_ADPRST            (1 << 19) /* Bit 19: XXX */
@@ -492,7 +507,8 @@
 #define OTGFS_GADPCTL_ADPPRBIM          (1 << 24) /* Bit 24: XXX */
 #define OTGFS_GADPCTL_ADPSNSIM          (1 << 25) /* Bit 25: XXX */
 #define OTGFS_GADPCTL_ADPTOIM           (1 << 26) /* Bit 26: XXX */
-//#define OTGFS_GADPCTL_AR
+#define OTGFS_GADPCTL_AR_SHIFT          (27)      /* Bits 27-28: XXX */
+#define OTGFS_GADPCTL_AR_MASK           (3 << OTGFS_GADPCTL_AR_SHIFT)
 
 /* Host periodic transmit FIFO size register */
 
@@ -622,7 +638,6 @@
 #define OTGFS_HCINT_STALL               (1 << 3)  /* Bit 3:  STALL response received interrupt */
 #define OTGFS_HCINT_NAK                 (1 << 4)  /* Bit 4:  NAK response received interrupt */
 #define OTGFS_HCINT_ACK                 (1 << 5)  /* Bit 5:  ACK response received/transmitted interrupt */
-//#define OTGFS_HCINT_NYET                (1 << 6)  /* Bit 6:  Response received interrupt */
 #define OTGFS_HCINT_TXERR               (1 << 7)  /* Bit 7:  Transaction error */
 #define OTGFS_HCINT_BBERR               (1 << 8)  /* Bit 8:  Babble error */
 #define OTGFS_HCINT_FRMOR               (1 << 9)  /* Bit 9:  Frame overrun */
@@ -704,7 +719,6 @@
 #define OTGFS_DSTS_SOFFN_ODD            OTGFS_DSTS_SOFFN0
 #define OTGFS_DSTS_DEVLNSTS_SHIFT       (22)       /* Bits 22-23: XXX */
 #define OTGFS_DSTS_DEVLNSTS_MASK        (0x3 << OTGFS_DSTS_DEVLNSTS_SHIFT)
-//XXX
                                                   /* Bits 24-31: Reserved, must be kept at reset value */
 /* Device IN endpoint common interrupt mask register */
 

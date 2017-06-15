@@ -61,6 +61,9 @@
  * Public Types
  ****************************************************************************/
 
+/* Type of the MCP2515 interrupt handling callback */
+
+struct mcp2515_config_s; /* Forward reference */
 typedef void (*mcp2515_handler_t)(FAR struct mcp2515_config_s *config,
                                   FAR void *arg);
 
@@ -104,8 +107,7 @@ struct mcp2515_config_s
                      mcp2515_handler_t handler, FAR void *arg);
 };
 
-
-typedef FAR void *MCP2515_HANDLE;
+/* Internal representation of the MCP2515 state data */
 
 struct mcp2515_can_s;
 

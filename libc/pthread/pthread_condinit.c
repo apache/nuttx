@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread/pthread_conddestroy.c
+ * libc/pthread/pthread_condinit.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,19 +40,21 @@
 #include <nuttx/config.h>
 
 #include <pthread.h>
+#include <semaphore.h>
 #include <debug.h>
 #include <errno.h>
-#include "pthread/pthread.h"
+
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_cond_destroy
+ * Name: pthread_cond_init
  *
  * Description:
- *   A thread can delete condition variables.
+ *   A thread can create condition variables.
  *
  * Parameters:
  *   None
@@ -64,25 +66,34 @@
  *
  ****************************************************************************/
 
-int pthread_cond_destroy(FAR pthread_cond_t *cond)
+int pthread_cond_init(FAR pthread_cond_t *cond, FAR const pthread_condattr_t *attr)
 {
   int ret = OK;
 
-  sinfo("cond=0x%p\n", cond);
+  sinfo("cond=0x%p attr=0x%p\n", cond, attr);
 
-  if (!cond)
+  if (cond == NULL)
     {
       ret = EINVAL;
     }
 
-  /* Destroy the semaphore contained in the structure */
+  /* Initialize the semaphore contained in the condition structure with
+   * initial count = 0
+   */
 
-  else if (sem_destroy((FAR sem_t *)&cond->sem) != OK)
+  else if (sem_init((FAR sem_t *)&cond->sem, 0, 0) != OK)
     {
       ret = EINVAL;
+    }
+  else
+    {
+      /* The contained semaphore is used for signaling and, hence, should
+       * not have priority inheritance enabled.
+       */
+
+      sem_setprotocol(&cond->sem, SEM_PRIO_NONE);
     }
 
   sinfo("Returning %d\n", ret);
   return ret;
 }
-

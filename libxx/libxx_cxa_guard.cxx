@@ -47,7 +47,20 @@
 // Private Types
 //***************************************************************************
 
+#ifdef __ARM_EABI__
+// The 32-bit ARM C++ ABI specifies that the guard is a 32-bit
+// variable and the least significant bit contains 0 prior to
+// initialization, and 1 after.
+
+typedef int __guard;
+
+#else
+// The "standard" C++ ABI specifies that the guard is a 64-bit
+// variable and the first byte contains 0 prior to initialization, and
+// 1 after.
+
 __extension__ typedef int __guard __attribute__((mode(__DI__)));
+#endif
 
 //***************************************************************************
 // Private Data
@@ -65,7 +78,11 @@ extern "C"
 
   int __cxa_guard_acquire(FAR __guard *g)
   {
-    return !*g;
+#ifdef __ARM_EABI__
+    return !(*g & 1);
+#else
+    return !*(char *)g;
+#endif
   }
 
   //*************************************************************************
@@ -74,7 +91,11 @@ extern "C"
 
   void __cxa_guard_release(FAR __guard *g)
   {
+#ifdef __ARM_EABI__
     *g = 1;
+#else
+    *(char *)g = 1;
+#endif
   }
 
   //*************************************************************************

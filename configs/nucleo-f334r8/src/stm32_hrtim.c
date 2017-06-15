@@ -1,8 +1,8 @@
 /****************************************************************************
- * sched/pthread/pthread_barriedestroy.c
+ * configs/nucleo-f334r8/src/stm32_hrtim.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,53 +39,61 @@
 
 #include <nuttx/config.h>
 
-#include <pthread.h>
-#include <semaphore.h>
+#include <stdbool.h>
 #include <errno.h>
 #include <debug.h>
+
+#include <nuttx/board.h>
+
+#include "stm32.h"
+
+#if defined(CONFIG_HRTIM) && defined(CONFIG_STM32_HRTIM1)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_barrier_destroy
+ * Name: stm32_hrtim_setup
  *
  * Description:
- *   The pthread_barrier_destroy() function destroys the barrier referenced
- *   by 'barrier' and releases any resources used by the barrier. The effect
- *   of subsequent use of the barrier is undefined until the barrier is
- *   reinitialized by another call to pthread_barrier_init(). The result
- *   are undefined if pthread_barrier_destroy() is called when any thread is
- *   blocked on the barrier, or if this function is called with an
- *   uninitialized barrier.
+ *  Initialize HRTIM driver
  *
- * Parameters:
- *   barrier - barrier to be destroyed.
- *
- * Return Value:
- *   0 (OK) on success or on of the following error numbers:
- *
- *   EBUSY  The implementation has detected an attempt to destroy a barrier
- *          while it is in use.
- *   EINVAL The value specified by barrier is invalid.
- *
- * Assumptions:
+ * Returned Value:
+ *  0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
-int pthread_barrier_destroy(FAR pthread_barrier_t *barrier)
+int stm32_hrtim_setup(void)
 {
-  int ret = OK;
+  static bool initialized = false;
+  struct hrtim_dev_s* hrtim = NULL;
+  int ret;
 
-  if (!barrier)
+  if (!initialized)
     {
-      ret = EINVAL;
+      /* Get the HRTIM interface */
+
+      hrtim = stm32_hrtiminitialize();
+      if (hrtim == NULL)
+        {
+          tmrerr("ERROR: Failed to get HRTIM1 interface\n");
+          return -ENODEV;
+        }
+
+      /* Register the HRTIM character driver at /dev/hrtim0 */
+
+      ret = hrtim_register("/dev/hrtim0", hrtim);
+      if (ret < 0)
+        {
+          tmrerr("ERROR: hrtim_register failed: %d\n", ret);
+          return ret;
+        }
+
+      initialized = true;
     }
-  else
-    {
-      sem_destroy(&barrier->sem);
-      barrier->count = 0;
-    }
-  return ret;
+
+  return OK;
 }
+
+#endif /* CONFIG_HRTIM && CONFIG_STM32_HRTIM1 */

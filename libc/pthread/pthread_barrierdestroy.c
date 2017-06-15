@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread/pthread_barrieinit.c
+ * libc/pthread/pthread_barriedestroy.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,54 +49,43 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_barrier_init
+ * Name: pthread_barrier_destroy
  *
  * Description:
- *   The pthread_barrier_init() function allocates any resources required to
- *   use the barrier referenced by 'barrier' and initialized the barrier
- *   with the attributes referenced by attr.  If attr is NULL, the default
- *   barrier attributes will be used. The results are undefined if
- *   pthread_barrier_init() is called when any thread is blocked on the
- *   barrier. The results are undefined if a barrier is used without first
- *   being initialized. The results are undefined if pthread_barrier_init()
- *   is called specifying an already initialized barrier.
+ *   The pthread_barrier_destroy() function destroys the barrier referenced
+ *   by 'barrier' and releases any resources used by the barrier. The effect
+ *   of subsequent use of the barrier is undefined until the barrier is
+ *   reinitialized by another call to pthread_barrier_init(). The result
+ *   are undefined if pthread_barrier_destroy() is called when any thread is
+ *   blocked on the barrier, or if this function is called with an
+ *   uninitialized barrier.
  *
  * Parameters:
- *   barrier - the barrier to be initialized
- *   attr - barrier attributes to be used in the initialization.
- *   count - the count to be associated with the barrier.  The count
- *     argument specifies the number of threads that must call
- *     pthread_barrier_wait() before any of them successfully return from
- *     the call.  The value specified by count must be greater than zero.
+ *   barrier - barrier to be destroyed.
  *
  * Return Value:
  *   0 (OK) on success or on of the following error numbers:
  *
- *   EAGAIN The system lacks the necessary resources to initialize another
- *          barrier.  EINVAL The barrier reference is invalid, or the values
- *          specified by attr are invalid, or the value specified by count
- *          is equal to zero.
- *   ENOMEM Insufficient memory exists to initialize the barrier.
- *   EBUSY  The implementation has detected an attempt to reinitialize a
- *          barrier while it is in use.
+ *   EBUSY  The implementation has detected an attempt to destroy a barrier
+ *          while it is in use.
+ *   EINVAL The value specified by barrier is invalid.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_barrier_init(FAR pthread_barrier_t *barrier,
-                         FAR const pthread_barrierattr_t *attr, unsigned int count)
+int pthread_barrier_destroy(FAR pthread_barrier_t *barrier)
 {
   int ret = OK;
 
-  if (!barrier || count == 0)
+  if (!barrier)
     {
       ret = EINVAL;
     }
   else
     {
-      sem_init(&barrier->sem, 0, 0);
-      barrier->count = count;
+      sem_destroy(&barrier->sem);
+      barrier->count = 0;
     }
 
   return ret;

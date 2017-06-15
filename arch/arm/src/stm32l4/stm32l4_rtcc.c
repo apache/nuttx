@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32l4/stm32l4_rtcc.c
  *
- *   Copyright (C) 2012-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           dev@ziggurat29.com (adaptations to stm32l4)
  *
@@ -999,6 +999,28 @@ int up_rtc_initialize(void)
 
   g_rtc_enabled = true;
   rtc_dumpregs("After Initialization");
+
+  return OK;
+}
+
+/************************************************************************************
+ * Name: stm32_rtc_irqinitialize
+ *
+ * Description:
+ *   Initialize IRQs for RTC, not possible during up_rtc_initialize because
+ *   up_irqinitialize is called later.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+int stm32_rtc_irqinitialize(void)
+{
+  /* Nothing to do */
 
   return OK;
 }

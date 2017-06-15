@@ -233,7 +233,6 @@
 #define GPIO_DFSDM_CKOUT_1     (GPIO_ALT|GPIO_AF6 |GPIO_PORTC|GPIO_PIN2)
 #define GPIO_DFSDM_CKOUT_2     (GPIO_ALT|GPIO_AF6 |GPIO_PORTE|GPIO_PIN9)
 
-
 /* Flexible Static Memory Controller (FSMC) */
 
 #define GPIO_FMC_NL            (GPIO_ALT|GPIO_AF12|GPIO_PORTB|GPIO_PIN7)
@@ -776,7 +775,7 @@
 #define GPIO_LPTIM2_ETR_2      (GPIO_ALT|GPIO_AF14|GPIO_PORTC|GPIO_PIN3)
 #define GPIO_LPTIM2_ETR_3      (GPIO_ALT|GPIO_AF14|GPIO_PORTD|GPIO_PIN11)
 
-/* Touch Screen Controller */
+/* Touch Sensing Controller */
 
 #define GPIO_TSC_SYNC          (GPIO_ALT|GPIO_AF9 |GPIO_PORTD|GPIO_PIN2)
 

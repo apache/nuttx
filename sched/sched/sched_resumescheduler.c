@@ -103,4 +103,5 @@ void sched_resume_scheduler(FAR struct tcb_s *tcb)
 
 }
 
-#endif /* CONFIG_RR_INTERVAL > 0 || CONFIG_SCHED_SPORADIC || CONFIG_SCHED_INSTRUMENTATION */
+#endif /* CONFIG_RR_INTERVAL > 0 || CONFIG_SCHED_SPORADIC || \
+        * CONFIG_SCHED_INSTRUMENTATION */

@@ -47,7 +47,8 @@
 
 #include <errno.h>
 
-#if !(defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X6))
+#if !(defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
+      defined(CONFIG_STM32L4_STM32L4X6))
 #  error "Unrecognized STM32 chip"
 #endif
 
@@ -170,7 +171,7 @@ int stm32l4_compconfig(int cmp, const struct stm32l4_comp_config_s *cfg)
 
   case STM32L4_COMP_INM_PIN_2:
       stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_2 : GPIO_COMP2_INM_2);
-#if defined(CONFIG_STM32L4_STM32L4X6)
+#if defined(CONFIG_STM32L4_STM32L4X5) || defined(CONFIG_STM32L4_STM32L4X6)
       regval |= COMP_CSR_INMSEL_PIN2;
 #else
       regval |= COMP_CSR_INMSEL_INMESEL;

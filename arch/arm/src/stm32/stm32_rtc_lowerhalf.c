@@ -365,7 +365,11 @@ static int stm32_settime(FAR struct rtc_lowerhalf_s *lower,
 
 static bool stm32_havesettime(FAR struct rtc_lowerhalf_s *lower)
 {
+#if defined(CONFIG_STM32_STM32F10XX)
+  return getreg16(RTC_MAGIC_REG) == RTC_MAGIC_TIME_SET;
+#else
   return getreg32(RTC_MAGIC_REG) == RTC_MAGIC_TIME_SET;
+#endif
 }
 
 /****************************************************************************

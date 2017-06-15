@@ -1,7 +1,7 @@
 /****************************************************************************
  * tools/configure.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,6 +95,17 @@ static char        g_buffer[BUFFER_SIZE];   /* Scratch buffer for forming full p
 
 static struct variable_s *g_configvars = NULL;
 static struct variable_s *g_versionvars = NULL;
+
+/* Optional configuration files */
+
+static const char *g_optfiles[] =
+{
+  ".gdbinit",
+  ".cproject",
+  ".project"
+};
+
+#define N_OPTFILES (sizeof(g_optfiles) / sizeof(const char *))
 
 /****************************************************************************
  * Private Functions
@@ -240,6 +251,25 @@ static void parse_args(int argc, char **argv)
     }
 }
 
+static bool check_directory(const char *directory)
+{
+  struct stat buf;
+
+  if (stat(directory, &buf) < 0)
+    {
+      debug("stat of %s failed: %s\n", directory, strerror(errno));
+      return false;
+    }
+
+  if (!S_ISDIR(buf.st_mode))
+    {
+      debug("%s exists but is not a directory\n", directory);
+      return false;
+    }
+
+  return true;
+}
+
 static void verify_directory(const char *directory)
 {
   struct stat buf;
@@ -319,9 +349,14 @@ static bool verify_file(const char *path)
   return true;
 }
 
-static void get_topdir(void)
+static void find_topdir(void)
 {
+  char *currdir;
+
   /* Get and verify the top-level NuttX directory */
+  /* First get the current directory.  We expect this to be either
+   * the nuttx root directory or the tools subdirectory.
+   */
 
    if (getcwd(g_buffer, BUFFER_SIZE) == NULL)
      {
@@ -329,9 +364,38 @@ static void get_topdir(void)
        exit(EXIT_FAILURE);
      }
 
+  /* Assume that we are in the tools sub-directory and the directory above
+   * is the nuttx root directory.
+   */
+
+  currdir  = strdup(g_buffer);
   g_topdir = strdup(dirname(g_buffer));
-  debug("get_topdir: Checking topdir=%s\n", g_topdir);
+
+  debug("get_topdir: Checking parent directory: %s\n", g_topdir);
   verify_directory(g_topdir);
+
+  /* Check if the current directory is the nuttx root directory.
+   * If so, then the tools directory should be a sub-directory.
+   */
+
+  snprintf(g_buffer, BUFFER_SIZE, "%s%ctools", currdir, g_delim);
+  debug("get_topdir: Checking topdir/tools=%s\n", g_buffer);
+  if (check_directory(g_buffer))
+    {
+      /* There is a tools sub-directory under the current directory.
+       * We must have already been in the nuttx root directory.  We
+       * will find out for sure in later tests.
+       */
+
+      free(g_topdir);
+      g_topdir = currdir;
+    }
+  else
+    {
+      /* Yes, we are probably in the tools/ sub-directory */
+
+      free(currdir);
+    }
 }
 
 static void config_search(const char *boarddir)
@@ -714,6 +778,29 @@ static void substitute(char *str, int ch1, int ch2)
     }
 }
 
+static void copy_optional(void)
+{
+  int i;
+
+  for (i = 0; i < N_OPTFILES; i++)
+    {
+      snprintf(g_buffer, BUFFER_SIZE, "%s%c%s",
+               g_configpath, g_delim, g_optfiles[i]);
+
+      if (verify_file(g_buffer))
+        {
+          char *optsrc = strdup(g_buffer);
+
+          snprintf(g_buffer, BUFFER_SIZE, "%s%c.config", g_topdir, g_delim);
+
+          debug("copy_optional: Copying from %s to %s\n", optsrc, g_buffer);
+          copy_file(optsrc, g_buffer, 0644);
+
+          free(optsrc);
+        }
+    }
+}
+
 static void configure(void)
 {
   char *destconfig;
@@ -730,6 +817,10 @@ static void configure(void)
   snprintf(g_buffer, BUFFER_SIZE, "%s%cMake.defs", g_topdir, g_delim);
   debug("configure: Copying from %s to %s\n", g_srcmakedefs, g_buffer);
   copy_file(g_srcmakedefs, g_buffer, 0644);
+
+  /* Copy optional files */
+
+  copy_optional();
 
   /* If we did not use the CONFIG_APPS_DIR that was in the defconfig config file,
    * then append the correct application information to the tail of the .config
@@ -792,7 +883,7 @@ int main(int argc, char **argv, char **envp)
   parse_args(argc, argv);
 
   debug("main: Checking Nuttx Directories\n");
-  get_topdir();
+  find_topdir();
   check_configdir();
 
   debug("main: Reading the configuration/version files\n");

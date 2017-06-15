@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated May 31, 2017)
+NuttX TODO List (Last updated June 14, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -233,6 +233,33 @@ o Task/Scheduler (sched/)
   Priority:    Low.  Things are working OK the way they are.  But the design
                could be improved and made a little more efficient with this
                change.
+
+  Title:       INAPPROPRIATE USE OF sched_lock() BY pthreads
+  Description: In implementation of standard pthread functions, the non-
+               standard, NuttX function sched_lock() is used.  This is very
+               strong sense it disables pre-emption for all threads in all
+               task groups.  I believe it is only really necessary in most
+               cases to lock threads in the task group with a new non-
+               standard interface, say pthread_lock().
+
+               This is because the OS resources used by a thread such as
+               mutexes, condition variable, barriers, etc. are only
+               meaningful from within the task group.  So, in order to
+               performance exclusive operations on these resources, it is
+               only necessary to block other threads executing within the
+               task group.
+
+               This is an easy change:  pthread_lock() and pthread_unlock()
+               would simply operate on a semaphore retained in the task
+               group structure.  I am, however, hesitant to make this change:
+               I the flat build model, there is nothing that prevents people
+               from accessing the inter-thread controls from threads in
+               differnt task groups.  Making this change, while correct,
+               might introduce subtle bugs in code by people who are not
+               using NuttX correctly.
+  Status:      Open
+  Priority:    Low.  This change would improve real-time performance of the
+               OS but is not otherwise required.
 
 o SMP
   ^^^

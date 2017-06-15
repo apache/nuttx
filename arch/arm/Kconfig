@@ -397,7 +397,7 @@ config ARCH_CORTEXR5
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_COHERENT_DCACHE if ELF || MODULE
 
-config ARCH_CORTEX5F
+config ARCH_CORTEXR5F
 	bool
 	default n
 	select ARCH_HAVE_MPU

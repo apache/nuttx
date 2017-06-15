@@ -53,6 +53,10 @@ else
 CSRCS += stm32_userleds.c
 endif
 
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += stm32_gpio.c
+endif
+
 ifeq ($(CONFIG_PWM),y)
 CSRCS += stm32_pwm.c
 endif

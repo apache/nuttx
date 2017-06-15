@@ -1,8 +1,7 @@
 /****************************************************************************
  * arch/arm/src/imx1/imx_serial.c
- * arch/arm/src/chip/imx_serial.c
  *
- *   Copyright (C) 2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -111,7 +110,6 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-static inline struct uart_dev_s *up_mapirq(int irq);
 static int  up_interrupt(int irq, void *context, FAR void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
@@ -753,13 +751,13 @@ static int up_attach(struct uart_dev_s *dev)
   /* Attach and enable the IRQ */
 
 #if defined(CONFIG_ARCH_CHIP_IMX1) || defined(CONFIG_ARCH_CHIP_IMXL)
-  ret = irq_attach(priv->rxirq, up_interrupt, NULL);
+  ret = irq_attach(priv->rxirq, up_interrupt, dev);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = irq_attach(priv->txirq, up_interrupt, NULL);
+  ret = irq_attach(priv->txirq, up_interrupt, dev);
   if (ret < 0)
     {
       irq_detach(priv->rxirq);
@@ -772,7 +770,7 @@ static int up_attach(struct uart_dev_s *dev)
   up_enable_irq(priv->txirq);
 
 #else
-  ret = irq_attach(priv->irq, up_interrupt, NULL);
+  ret = irq_attach(priv->irq, up_interrupt, dev);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -811,60 +809,6 @@ static void up_detach(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: up_mapirq
- *
- * Description:
- *   Map an IRQ number to internal UART state structure
- *
- ****************************************************************************/
-
-static inline struct uart_dev_s *up_mapirq(int irq)
-{
-  struct uart_dev_s *dev;
-
-  switch (irq)
-    {
-#ifdef CONFIG_IMX1_UART1
-#if defined(CONFIG_ARCH_CHIP_IMX1) || defined(CONFIG_ARCH_CHIP_IMXL)
-      case IMX_IRQ_UART1RX:
-      case IMX_IRQ_UART1TX:
-#else
-      case IMX_IRQ_UART1:
-#endif
-        dev = &g_uart1port;
-        break;
-#endif
-
-#ifdef CONFIG_IMX1_UART2
-#if defined(CONFIG_ARCH_CHIP_IMX1) || defined(CONFIG_ARCH_CHIP_IMXL)
-      case IMX_IRQ_UART2RX:
-      case IMX_IRQ_UART2TX:
-#else
-      case IMX_IRQ_UART2:
-#endif
-        dev = &g_uart2port;
-        break;
-#endif
-
-#ifdef CONFIG_IMX1_UART3
-#if defined(CONFIG_ARCH_CHIP_IMX1) || defined(CONFIG_ARCH_CHIP_IMXL)
-      case IMX_IRQ_UART3RX:
-      case IMX_IRQ_UART3TX:
-#else
-      case IMX_IRQ_UART3:
-#endif
-        dev = &g_uart3port;
-        break;
-#endif
-
-      default:
-        PANIC();
-        break;
-    }
-  return dev;
-}
-
-/****************************************************************************
  * Name: up_interrupt (and front-ends)
  *
  * Description:
@@ -879,12 +823,12 @@ static inline struct uart_dev_s *up_mapirq(int irq)
 
 static int up_interrupt(int irq, void *context, FAR void *arg)
 {
-  struct uart_dev_s *dev;
-  struct up_dev_s   *priv;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+  struct up_dev_s *priv;
   uint32_t usr1;
-  int    passes = 0;
+  int passes = 0;
 
-  dev  = up_mapirq(irq);
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct up_dev_s *)dev->priv;
 
   /* Loop until there are no characters to be transferred or,
