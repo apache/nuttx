@@ -201,7 +201,11 @@
 enum ieee802154_status_e
 {
   IEEE802154_STATUS_SUCCESS = 0,
-  IEEE802154_STATUS_BEACON_LOSS = 0xE0,
+  IEEE802154_STATUS_FAILURE, /* This value is not outlined in the standard. It
+                              * is a catch-all for any failures that are not 
+                              * outlined in the standard
+                              */
+  IEEE802154_STATUS_BEACON_LOSS,
   IEEE802154_STATUS_CHANNEL_ACCESS_FAILURE,
   IEEE802154_STATUS_DENIED,
   IEEE802154_STATUS_DISABLE_TRX_FAILURE,
@@ -222,93 +226,119 @@ enum ieee802154_status_e
   IEEE802154_STATUS_TX_ACTIVE,
   IEEE802154_STATUS_UNAVAILABLE_KEY,
   IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE,
-  IEEE802154_STATUS_FAILED /* This value is not outlined in the standard.  It is
-                            * a catch-all for any failures that are not outlined
-                            * in the standard */
+};
+
+static const char *IEEE802154_STATUS_STRING[] = 
+{
+  "Success",
+  "Failure",
+  "Beacon loss",
+  "Channel access failure",
+  "Denied",
+  "Disable TRX failure",
+  "Failed security check",
+  "Frame too long",
+  "Invalid GTS",
+  "Invalid handle",
+  "Invalid parameter",
+  "No ack",
+  "No beacon",
+  "No data",
+  "No short address",
+  "Out of cap",
+  "PAN ID conflict",
+  "Realignment",
+  "Transaction expired",
+  "Transaction overflow",
+  "Tx active",
+  "Unavailable key",
+  "Unsupported attribute",
 };
 
 /* IEEE 802.15.4 PHY/MAC PIB attributes IDs */
 
-enum ieee802154_pib_attr_e
+enum ieee802154_attr_e
 {
   /* PHY PIB Attributes */
 
-  IEEE802154_PIB_PHY_CURRENT_CHANNEL = 0x00,
-  IEEE802154_PIB_PHY_CHANNELS_SUPPORTED,
-  IEEE802154_PIB_PHY_TX_POWER_TOLERANCE,
-  IEEE802154_PIB_PHY_TX_POWER,
-  IEEE802154_PIB_PHY_CCA_MODE,
-  IEEE802154_PIB_PHY_CURRENT_PAGE,
-  IEEE802154_PIB_PHY_MAX_FRAME_DURATION,
-  IEEE802154_PIB_PHY_SHR_DURATION,
-  IEEE802154_PIB_PHY_SYM_PER_OCTET,
-  IEEE802154_PIB_PHY_PREAMBLE_SYM_LEN,
-  IEEE802154_PIB_PHY_UWB_DATARATES_SUP,
-  IEEE802154_PIB_PHY_CSS_LOW_DATARATE_SUP,
-  IEEE802154_PIB_PHY_UWB_COU_PULSES_SUP,
-  IEEE802154_PIB_PHY_UWB_CS_PULSES_SUP,
-  IEEE802154_PIB_PHY_UWB_LCP_PULSES_SUP,
-  IEEE802154_PIB_PHY_UWB_CURR_PULSE_SHAPE,
-  IEEE802154_PIB_PHY_UWB_COU_PULSE,
-  IEEE802154_PIB_PHY_UWB_CS_PULSE,
-  IEEE802154_PIB_PHY_UWB_LCP_WEIGHT1,
-  IEEE802154_PIB_PHY_UWB_LCP_WEIGHT2,
-  IEEE802154_PIB_PHY_UWB_LCP_WEIGHT3,
-  IEEE802154_PIB_PHY_UWB_LCP_WEIGHT4,
-  IEEE802154_PIB_PHY_UWB_LCP_DELAY2,
-  IEEE802154_PIB_PHY_UWB_LCP_DELAY3,
-  IEEE802154_PIB_PHY_UWB_LCP_DELAY4,
-  IEEE802154_PIB_PHY_RANGING,
-  IEEE802154_PIB_PHY_RANGING_CRYSTAL_OFFSET,
-  IEEE802154_PIB_PHY_RANGING_DPS,
-  IEEE802154_PIB_PHY_CURRENT_CODE,
-  IEEE802154_PIB_PHY_NATIVE_PRF,
-  IEEE802154_PIB_PHY_UWB_SCAN_BINS_PER_CHAN,
-  IEEE802154_PIB_PHY_UWB_INS_PREAMBLE_INTERVAL,
-  IEEE802154_PIB_PHY_UWB_TX_RMARKER,
-  IEEE802154_PIB_PHY_UWB_RX_RMARKER,
-  IEEE802154_PIB_PHY_RFRAME_PROC_TIME,
-  IEEE802154_PIB_PHY_CCA_DURATION,
+  IEEE802154_ATTR_PHY_CURRENT_CHANNEL = 0x00,
+  IEEE802154_ATTR_PHY_CHANNELS_SUPPORTED,
+  IEEE802154_ATTR_PHY_TX_POWER_TOLERANCE,
+  IEEE802154_ATTR_PHY_TX_POWER,
+  IEEE802154_ATTR_PHY_CCA_MODE,
+  IEEE802154_ATTR_PHY_CURRENT_PAGE,
+  IEEE802154_ATTR_PHY_MAX_FRAME_DURATION,
+  IEEE802154_ATTR_PHY_SHR_DURATION,
+  IEEE802154_ATTR_PHY_SYM_PER_OCTET,
+  IEEE802154_ATTR_PHY_PREAMBLE_SYM_LEN,
+  IEEE802154_ATTR_PHY_UWB_DATARATES_SUP,
+  IEEE802154_ATTR_PHY_CSS_LOW_DATARATE_SUP,
+  IEEE802154_ATTR_PHY_UWB_COU_PULSES_SUP,
+  IEEE802154_ATTR_PHY_UWB_CS_PULSES_SUP,
+  IEEE802154_ATTR_PHY_UWB_LCP_PULSES_SUP,
+  IEEE802154_ATTR_PHY_UWB_CURR_PULSE_SHAPE,
+  IEEE802154_ATTR_PHY_UWB_COU_PULSE,
+  IEEE802154_ATTR_PHY_UWB_CS_PULSE,
+  IEEE802154_ATTR_PHY_UWB_LCP_WEIGHT1,
+  IEEE802154_ATTR_PHY_UWB_LCP_WEIGHT2,
+  IEEE802154_ATTR_PHY_UWB_LCP_WEIGHT3,
+  IEEE802154_ATTR_PHY_UWB_LCP_WEIGHT4,
+  IEEE802154_ATTR_PHY_UWB_LCP_DELAY2,
+  IEEE802154_ATTR_PHY_UWB_LCP_DELAY3,
+  IEEE802154_ATTR_PHY_UWB_LCP_DELAY4,
+  IEEE802154_ATTR_PHY_RANGING,
+  IEEE802154_ATTR_PHY_RANGING_CRYSTAL_OFFSET,
+  IEEE802154_ATTR_PHY_RANGING_DPS,
+  IEEE802154_ATTR_PHY_CURRENT_CODE,
+  IEEE802154_ATTR_PHY_NATIVE_PRF,
+  IEEE802154_ATTR_PHY_UWB_SCAN_BINS_PER_CHAN,
+  IEEE802154_ATTR_PHY_UWB_INS_PREAMBLE_INTERVAL,
+  IEEE802154_ATTR_PHY_UWB_TX_RMARKER,
+  IEEE802154_ATTR_PHY_UWB_RX_RMARKER,
+  IEEE802154_ATTR_PHY_RFRAME_PROC_TIME,
+  IEEE802154_ATTR_PHY_CCA_DURATION,
+  IEEE802154_ATTR_PHY_SYMBOL_DURATION, /* Non-standard attribute */
 
   /* MAC PIB Attributes */
 
-  IEEE802154_PIB_MAC_EXTENDED_ADDR = 0x40,
-  IEEE802154_PIB_MAC_ACK_WAIT_DUR,
-  IEEE802154_PIB_MAC_ASSOCIATED_PANCOORD,
-  IEEE802154_PIB_MAC_ASSOCIATION_PERMIT,
-  IEEE802154_PIB_MAC_AUTO_REQUEST,
-  IEEE802154_PIB_MAC_BATT_LIFE_EXT,
-  IEEE802154_PIB_MAC_BATT_LIFE_EXT_PERIODS,
-  IEEE802154_PIB_MAC_BEACON_PAYLOAD,
-  IEEE802154_PIB_MAC_BEACON_PAYLOAD_LEN,
-  IEEE802154_PIB_MAC_BEACON_ORDER,
-  IEEE802154_PIB_MAC_BEACON_TX_TIME,
-  IEEE802154_PIB_MAC_BSN,
-  IEEE802154_PIB_MAC_COORD_EXT_ADDR,
-  IEEE802154_PIB_MAC_COORD_SHORT_ADDR,
-  IEEE802154_PIB_MAC_DSN,
-  IEEE802154_PIB_MAC_GTS_PERMIT,
-  IEEE802154_PIB_MAC_MAX_BE,
-  IEEE802154_PIB_MAC_MAX_CSMA_BACKOFFS,
-  IEEE802154_PIB_MAC_FRAME_TOTAL_WAIT_TIME,
-  IEEE802154_PIB_MAC_MAX_FRAME_RETRIES,
-  IEEE802154_PIB_MAC_MIN_BE,
-  IEEE802154_PIB_MAC_LIFS_PERIOD,
-  IEEE802154_PIB_MAC_SIFS_PERIOD,
-  IEEE802154_PIB_MAC_PANID,
-  IEEE802154_PIB_MAC_PROMISCUOUS_MODE,
-  IEEE802154_PIB_MAC_RANGING_SUPPORT,
-  IEEE802154_PIB_MAC_RESPONSE_WAIT_TIME,
-  IEEE802154_PIB_MAC_RX_ON_WHEN_IDLE,
-  IEEE802154_PIB_MAC_SECURITY_ENABLED,
-  IEEE802154_PIB_MAC_SHORT_ADDRESS,
-  IEEE802154_PIB_MAC_SUPERFRAME_ORDER,
-  IEEE802154_PIB_MAC_SYNC_SYMBOL_OFFSET,
+  IEEE802154_ATTR_MAC_EXTENDED_ADDR = 0x40,
+  IEEE802154_ATTR_MAC_ACK_WAIT_DUR,
+  IEEE802154_ATTR_MAC_ASSOCIATED_PANCOORD,
+  IEEE802154_ATTR_MAC_ASSOCIATION_PERMIT,
+  IEEE802154_ATTR_MAC_AUTO_REQUEST,
+  IEEE802154_ATTR_MAC_BATT_LIFE_EXT,
+  IEEE802154_ATTR_MAC_BATT_LIFE_EXT_PERIODS,
+  IEEE802154_ATTR_MAC_BEACON_PAYLOAD,
+  IEEE802154_ATTR_MAC_BEACON_PAYLOAD_LEN,
+  IEEE802154_ATTR_MAC_BEACON_ORDER,
+  IEEE802154_ATTR_MAC_BEACON_TX_TIME,
+  IEEE802154_ATTR_MAC_BSN,
+  IEEE802154_ATTR_MAC_COORD_EXT_ADDR,
+  IEEE802154_ATTR_MAC_COORD_SHORT_ADDR,
+  IEEE802154_ATTR_MAC_DSN,
+  IEEE802154_ATTR_MAC_GTS_PERMIT,
+  IEEE802154_ATTR_MAC_MAX_BE,
+  IEEE802154_ATTR_MAC_MAX_CSMA_BACKOFFS,
+  IEEE802154_ATTR_MAC_MAX_FRAME_WAITTIME,
+  IEEE802154_ATTR_MAC_MAX_FRAME_RETRIES,
+  IEEE802154_ATTR_MAC_MIN_BE,
+  IEEE802154_ATTR_MAC_LIFS_PERIOD,
+  IEEE802154_ATTR_MAC_SIFS_PERIOD,
+  IEEE802154_ATTR_MAC_PANID,
+  IEEE802154_ATTR_MAC_PROMISCUOUS_MODE,
+  IEEE802154_ATTR_MAC_RANGING_SUPPORT,
+  IEEE802154_ATTR_MAC_RESPONSE_WAIT_TIME,
+  IEEE802154_ATTR_MAC_RX_ON_WHEN_IDLE,
+  IEEE802154_ATTR_MAC_SECURITY_ENABLED,
+  IEEE802154_ATTR_MAC_SHORT_ADDRESS,
+  IEEE802154_ATTR_MAC_SUPERFRAME_ORDER,
+  IEEE802154_ATTR_MAC_SYNC_SYMBOL_OFFSET,
   IEEE802154_PIB_MAC_TIMESTAMP_SUPPORT,
   IEEE802154_PIB_MAC_TRANSACTION_PERSIST_TIME,
   IEEE802154_PIB_MAC_TX_CTRL_ACTIVE_DUR,
   IEEE802154_PIB_MAC_TX_CTRL_PAUSE_DUR,
   IEEE802154_PIB_MAC_TX_TOTAL_DUR,
+  IEEE802154_ATTR_MAC_DEVMODE, /* Non-standard */
 
   /* MAC Security Attributes */
 
@@ -336,6 +366,7 @@ enum ieee802154_frametype_e
 };
 
 /* MAC command IDs */
+/* TODO: Change terminology to be "current primitive" */
 
 enum ieee802154_cmdid_e
 {
@@ -352,7 +383,7 @@ enum ieee802154_cmdid_e
 
 enum ieee802154_devmode_e
 {
-  IEEE802154_DEVMODE_ENDPOINT,
+  IEEE802154_DEVMODE_ENDPOINT = 0x00,
   IEEE802154_DEVMODE_COORD,
   IEEE802154_DEVMODE_PANCOORD
 };
@@ -371,6 +402,10 @@ enum ieee802154_addrmode_e
   IEEE802154_ADDRMODE_NONE = 0,
   IEEE802154_ADDRMODE_SHORT = 2,
   IEEE802154_ADDRMODE_EXTENDED
+
+  /* TODO: Add a IEEE802154_ADDRMODE_ANY setting for structs where both the
+   * extended and short addresses are safe to use.
+   */
 };
 
 struct ieee802154_addr_s
@@ -502,6 +537,8 @@ union ieee802154_macattr_u
   uint8_t coord_eaddr[IEEE802154_EADDR_LEN];
   uint16_t coord_saddr;
 
+  enum ieee802154_devmode_e devmode;
+
   bool is_assoc;
   bool assoc_permit;
   bool auto_req;
@@ -509,7 +546,7 @@ union ieee802154_macattr_u
   bool gts_permit;
   bool promisc_mode;
   bool rng_support;
-  bool resp_wait_time;
+  bool resp_waittime;
   bool rxonidle;
   bool sec_enabled;
   bool timestamp_support;
@@ -519,7 +556,7 @@ union ieee802154_macattr_u
   uint8_t max_csma_backoffs : 3;
   uint8_t max_be : 4;
   uint8_t min_be : 4;
-  uint32_t max_frame_wait_time;
+  uint32_t max_frame_waittime;
   uint8_t max_retries;
   uint8_t lifs_period;
   uint8_t sifs_period;
@@ -529,7 +566,7 @@ union ieee802154_macattr_u
   uint32_t tx_ctrl_pause_dur;
   uint32_t tx_total_dur;
 
-  uint8_t beacon_payload[IEEE802154_PIB_MAC_BEACON_PAYLOAD_LEN];
+  uint8_t beacon_payload[IEEE802154_ATTR_MAC_BEACON_PAYLOAD_LEN];
   uint8_t beacon_payload_len;
   uint8_t beacon_order;
   uint32_t beacon_tx_time : 24;
@@ -543,7 +580,8 @@ union ieee802154_macattr_u
 union ieee802154_phyattr_u
 {
   uint8_t channel;
-  int32_t txpwr
+  int32_t txpwr;
+  uint32_t symdur_picosec;
   /* TODO: Fill this out as we implement supported get/set commands */
 };
 
@@ -577,8 +615,8 @@ enum ieee802154_scantype_e
 
 struct ieee802154_frame_meta_s
 {
-  enum ieee802154_addrmode_e src_addrmode;  /* Source Address Mode */
-  struct ieee802154_addr_s dest_addr;         /* Destination Address */
+  enum ieee802154_addrmode_e srcaddr_mode;  /* Source Address Mode */
+  struct ieee802154_addr_s destaddr;        /* Destination Address */
 
   uint8_t msdu_handle;        /* Handle assoc. with MSDU */
 
@@ -797,7 +835,7 @@ struct ieee802154_assoc_ind_s
 {
   /* Address of device requesting association. Always in extended mode */
 
-  struct ieee802154_addr_s dev_addr;
+  uint8_t devaddr[IEEE802154_EADDR_LEN];
 
   /* Capabilities of associating device */
 
@@ -822,7 +860,11 @@ struct ieee802154_assoc_resp_s
 {
   /* Address of device requesting association. Always in extended mode */
 
-  struct ieee802154_addr_s dev_addr;
+  uint8_t devaddr[8];
+
+  /* Address assigned to the device. 0xFFFF if failure */
+
+  uint16_t assocsaddr;
 
   /* Status of association attempt */
 
@@ -851,7 +893,7 @@ struct ieee802154_assoc_conf_s
    * unsuccessful.
    */
 
-  struct ieee802154_addr_s dev_addr;
+  uint16_t saddr;
 
   /* Status of association attempt */
 
@@ -1185,7 +1227,7 @@ struct ieee802154_scan_conf_s
   uint8_t ch_page;
   uint8_t num_channels;
 
-#warning Figure out how to handle missing primitive semantics. See standard.
+  /* TODO: Figure out how to handle missing primitive semantics. See standard. */
 };
 
 /*****************************************************************************
@@ -1198,7 +1240,7 @@ struct ieee802154_scan_conf_s
 
 struct ieee802154_get_req_s
 {
-  enum ieee802154_pib_attr_e pib_attr;
+  enum ieee802154_attr_e attr;
   union ieee802154_attr_u attrval;
 };
 
@@ -1218,7 +1260,7 @@ struct ieee802154_get_req_s
 
 struct ieee802154_set_req_s
 {
-  enum ieee802154_pib_attr_e pib_attr;
+  enum ieee802154_attr_e attr;
   union ieee802154_attr_u attrval;
 };
 
@@ -1318,7 +1360,7 @@ struct ieee802154_syncloss_ind_s
 
 struct ieee802154_poll_req_s
 {
-  struct ieee802154_addr_s coord_addr;
+  struct ieee802154_addr_s coordaddr;
 
 #ifdef CONFIG_IEEE802154_SECURITY
   /* Security information if enabled */
@@ -1396,13 +1438,16 @@ union ieee802154_notif_u
 struct ieee802154_notif_s
 {
   /* Must be first member so that we can interchange between the actual
-   *notification and this extended struct.
+   * notification and this extended struct.
    */
 
   union ieee802154_notif_u u;
   enum ieee802154_notify_e notiftype;
 
-  /* Support a singly linked list */
+  /* Support a singly linked list. For use by receivers. The MAC has it's own
+   * extended struct type with another forward link that the MAC uses internally
+   * to handle allocation and freeing.
+   */
 
   FAR struct ieee802154_notif_s *flink;
 };

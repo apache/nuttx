@@ -66,6 +66,14 @@ struct ieee802154_txdesc_s
 
   FAR struct ieee802154_txdesc_s *flink;
 
+  /* Destination Address */
+
+  struct ieee802154_addr_s destaddr; /* Only used for indirect transactions */
+
+  /* Pointer to the frame IOB */
+
+  FAR struct iob_s *frame;
+
   /* Pointer to the data confirmation structure to be populated upon
    * success/failure of the transmission.
    */
@@ -74,6 +82,9 @@ struct ieee802154_txdesc_s
 
   enum ieee802154_frametype_e frametype; /* Frame type.  Used by MAC layer to
                                           * control how tx done is handled */
+  bool framepending;                     /* Did the ACK have the frame pending bit
+                                          * bit set */
+  uint32_t purge_time;                   /* Time to purge transaction */
 
   /* TODO: Add slotting information for GTS transactions */
 };
@@ -82,37 +93,32 @@ struct ieee802154_txdesc_s
 
 struct ieee802154_radiocb_s
 {
-  CODE int (*poll_csma) (FAR const struct ieee802154_radiocb_s *radiocb,
-             FAR struct ieee802154_txdesc_s **tx_desc,
-             FAR struct iob_s **frame);
-  CODE int (*poll_gts) (FAR const struct ieee802154_radiocb_s *radiocb,
-             FAR struct ieee802154_txdesc_s **tx_desc,
-             FAR struct iob_s **frame);
+  CODE int (*poll) (FAR const struct ieee802154_radiocb_s *radiocb,
+             bool gts, FAR struct ieee802154_txdesc_s **tx_desc);
   CODE void (*txdone) (FAR const struct ieee802154_radiocb_s *radiocb,
-             FAR const struct ieee802154_txdesc_s *tx_desc);
+             FAR struct ieee802154_txdesc_s *tx_desc);
   CODE void (*rxframe) (FAR const struct ieee802154_radiocb_s *radiocb,
              FAR struct ieee802154_data_ind_s *ind);
 };
 
-struct ieee802154_radio_s; /* Forward reference */
-
-struct ieee802154_radioops_s
+struct ieee802154_radio_s
 {
   CODE int (*bind) (FAR struct ieee802154_radio_s *radio,
              FAR struct ieee802154_radiocb_s *radiocb);
-  CODE int (*txnotify_csma)(FAR struct ieee802154_radio_s *radio);
-  CODE int (*txnotify_gts)(FAR struct ieee802154_radio_s *radio);
+  CODE int (*txnotify)(FAR struct ieee802154_radio_s *radio, bool gts);
+  CODE int (*txdelayed)(FAR struct ieee802154_radio_s *radio,
+             FAR struct ieee802154_txdesc_s *txdesc,
+             uint32_t symboldelay);
+  CODE int (*reset_attrs) (FAR struct ieee802154_radio_s *radio);
   CODE int (*get_attr) (FAR struct ieee802154_radio_s *radio,
-             enum ieee802154_pib_attr_e pib_attr,
+             enum ieee802154_attr_e ,
              FAR union ieee802154_attr_u *attrval);
   CODE int (*set_attr) (FAR struct ieee802154_radio_s *radio,
-             enum ieee802154_pib_attr_e pib_attr,
+             enum ieee802154_attr_e ,
              FAR const union ieee802154_attr_u *attrval);
-};
-
-struct ieee802154_radio_s
-{
-  FAR const struct ieee802154_radioops_s *ops;
+  CODE int (*rxenable) (FAR struct ieee802154_radio_s *radio, bool enable);
+  CODE int (*req_rxenable)(FAR struct ieee802154_radio_s *radio,
+             FAR struct ieee802154_rxenable_req_s *req);
 };
 
 #ifdef __cplusplus
