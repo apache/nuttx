@@ -9,6 +9,8 @@ Make.dep
 .*.swp
 core
 .gdbinit
+.project
+.cproject
 cscope.out
 /Make.dep
 /.depend
