@@ -78,7 +78,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP_CHECKSUMS
-static uint16_t sixlowpan_udp_chksum(FAR struct ipv6udp_hdr_s *ipv6udp,
+static uint16_t sixlowpan_udp_chksum(FAR const struct ipv6udp_hdr_s *ipv6udp,
                                      FAR const uint8_t *buf, uint16_t buflen)
 {
   uint16_t upperlen;
@@ -258,7 +258,9 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
   /* Copy the source and destination addresses */
 
   net_ipv6addr_hdrcopy(ipv6udp.ipv6.destipaddr, to6->sin6_addr.in6_u.u6_addr16);
+#ifdef CONFIG_NETDEV_MULTINIC
   net_ipv6addr_hdrcopy(ipv6udp.ipv6.srcipaddr,  conn->u.ipv6.laddr);
+#endif
 
   ninfo("IPv6 length: %d\n",
         ((int)ipv6udp.ipv6.len[0] << 8) + ipv6udp.ipv6.len[1]);
@@ -275,7 +277,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
   ipv6udp.udp.udpchksum   = 0;
 
 #ifdef CONFIG_NET_UDP_CHECKSUMS
-  ipv6udp.udp.udpchksum   = ~sixlowpan_udp_chksum(ipv6udp, buf, buflen);
+  ipv6udp.udp.udpchksum   = ~sixlowpan_udp_chksum(&ipv6udp, buf, buflen);
   if (ipv6udp.udp.udpchksum == 0)
     {
       ipv6udp.udp.udpchksum = 0xffff;

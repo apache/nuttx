@@ -137,7 +137,7 @@ config NET_6LOWPAN
 	select NETDEV_MULTINIC if NET_ETHERNET || NET_LOOPBACK || NET_SLIP || NET_TUN
 	select NET_MULTILINK if NET_ETHERNET || NET_LOOPBACK || NET_SLIP || NET_TUN
 	select NETDEV_IOCTL
-	depends on EXPERIMENTAL && NET_IPv6
+	depends on NET_IPv6
 	---help---
 		Enable support for IEEE 802.15.4 Low power Wireless Personal Area
 		Networking (6LoWPAN).

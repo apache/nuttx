@@ -418,13 +418,23 @@ Configurations
        to support any future debugging needs that you may have.
 
        If you don't plan on using the debug features, then by all means
-       disable this feature and save 16KiB of RAM!
+       disable this feature and save 8KiB of RAM!
 
        NOTE: There is an issue with capturing data in the RAMLOG:  If
        the system crashes, all of the crash dump information will go into
        the RAMLOG and you will be unable to access it!  You can tell that
        the system has crashed because (a) it will be unresponsive and (b)
        the LD2 will be blinking at about 2Hz.
+
+    4. IPv6 networking is enabled with TCP/IP, UDP, 6loWPAN, and NSH
+       Telnet support.
+
+    5. Configuration instructions:  Basic PAN configuration is the same as
+       for the ieee802154-mac configuration with the exception that after
+       the PAN has been configured with the i8sak utility, you must
+       explicity bring the network up:
+
+         nsh> ifup wpan0
 
   nsh:
 
