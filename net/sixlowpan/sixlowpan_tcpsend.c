@@ -263,7 +263,9 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   /* Copy the source and destination addresses */
 
+#ifdef CONFIG_NETDEV_MULTINIC
   net_ipv6addr_hdrcopy(ipv6tcp.ipv6.srcipaddr,  conn->u.ipv6.laddr);
+#endif
   net_ipv6addr_hdrcopy(ipv6tcp.ipv6.destipaddr, conn->u.ipv6.raddr);
 
   ninfo("IPv6 length: %d\n",

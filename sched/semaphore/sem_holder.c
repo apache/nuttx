@@ -439,7 +439,8 @@ static int sem_boostholderprio(FAR struct semholder_s *pholder,
 static int sem_verifyholder(FAR struct semholder_s *pholder, FAR sem_t *sem,
                             FAR void *arg)
 {
-#if 0 // Need to revisit this, but these assumptions seem to be untrue -- OR there is a bug???
+#if 0 /* Need to revisit this, but these assumptions seem to be untrue -- \
+       * OR there is a bug??? */
   FAR struct tcb_s *htcb = (FAR struct tcb_s *)pholder->htcb;
 
   /* Called after a semaphore has been released (incremented), the semaphore

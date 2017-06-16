@@ -106,8 +106,9 @@ void sig_deliver(FAR struct tcb_s *stcb)
        * delivered plus the signal being delivered.
        */
 
-      savesigprocmask = stcb->sigprocmask;
-      stcb->sigprocmask = savesigprocmask | sigq->mask | SIGNO2SET(sigq->info.si_signo);
+      savesigprocmask   = stcb->sigprocmask;
+      stcb->sigprocmask = savesigprocmask | sigq->mask |
+                          SIGNO2SET(sigq->info.si_signo);
 
       /* Deliver the signal.  In the kernel build this has to be handled
        * differently if we are dispatching to a signal handler in a user-
