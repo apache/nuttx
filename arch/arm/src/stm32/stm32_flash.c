@@ -79,6 +79,8 @@
 #else
 #  define FLASH_KEY1      0x45670123
 #  define FLASH_KEY2      0xCDEF89AB
+#  define FLASH_OPTKEY1   0x08192A3B
+#  define FLASH_OPTKEY2   0x4C5D6E7F
 #endif
 
 #if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
@@ -383,6 +385,87 @@ ssize_t stm32_eeprom_erase(size_t addr, size_t eraselen)
 }
 
 #endif /* defined(CONFIG_STM32_STM32L15XX) */
+
+/************************************************************************************
+ * Name: stm32_flash_writeprotect
+ *
+ * Description:
+ *   Enable or disable the write protection of a flash sector.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32_STM32F40XX
+int stm32_flash_writeprotect(size_t page, bool enabled)
+{
+  uint32_t reg;
+  uint32_t val;
+
+#ifdef CONFIG_STM32_STM32F40XX
+  if (page >= STM32_FLASH_NPAGES)
+    {
+      return -EFAULT;
+    }
+#else
+#  warning missing logic in stm32_flash_writeprotect
+#endif
+
+  /* Select the register that contains the bit to be changed */
+
+  if (page < 12)
+    {
+      reg = STM32_FLASH_OPTCR;
+    }
+#if defined(CONFIG_STM32_FLASH_CONFIG_I) && defined(CONFIG_STM32_STM32F40XX)
+  else
+    {
+      reg = STM32_FLASH_OPTCR1;
+      page -= 12;
+    }
+#else
+  else
+    {
+      return -EFAULT;
+    }
+#endif
+
+  /* Read the option status */
+
+  val = getreg32(reg);
+
+  /* Set or clear the protection */
+
+  if (enabled)
+    {
+      val &= ~(1 << (16+page) );
+    }
+  else
+    {
+      val |=  (1 << (16+page) );
+    }
+
+  /* Unlock options */
+
+  putreg32(FLASH_OPTKEY1, STM32_FLASH_OPTKEYR);
+  putreg32(FLASH_OPTKEY2, STM32_FLASH_OPTKEYR);
+
+  /* Write options */
+
+  putreg32(val, reg);
+
+  /* Trigger programmation */
+
+  modifyreg32(STM32_FLASH_OPTCR, 0, FLASH_OPTCR_OPTSTRT);
+
+  /* Wait for completion */
+
+  while(getreg32(STM32_FLASH_SR) & FLASH_SR_BSY) up_waste();
+
+  /* Relock options */
+
+  modifyreg32(STM32_FLASH_OPTCR, 0, FLASH_OPTCR_OPTLOCK);
+  return 0;
+}
+#endif
 
 #if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
 size_t up_progmem_pagesize(size_t page)

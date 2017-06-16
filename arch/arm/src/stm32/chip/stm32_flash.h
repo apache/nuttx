@@ -466,4 +466,8 @@
 void stm32_flash_lock(void);
 void stm32_flash_unlock(void);
 
+#ifdef CONFIG_STM32_STM32F40XX
+int stm32_flash_writeprotect(size_t page, bool enabled);
+#endif
+
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_FLASH_H */
