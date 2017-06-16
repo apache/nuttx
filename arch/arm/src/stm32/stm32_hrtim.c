@@ -61,6 +61,10 @@
 #  error HRTIM ADC Triggering not supported yet
 #endif
 
+#ifdef CONFIG_STM32_HRTIM_DAC
+#  error HRTIM DAC Triggering not supported yet
+#endif
+
 #ifdef CONFIG_STM32_HRTIM_FAULT
 #  error HRTIM Faults not supported yet
 #endif
@@ -181,7 +185,10 @@ struct stm32_hrtim_timout_s
 #ifdef HRTIM_HAVE_CHOPPER
 struct stm32_hrtim_chopper_s
 {
-  uint32_t reserved;             /* reserved for future use */
+  uint16_t start:4;              /* Chopper start pulsewidth */
+  uint16_t duty:3;               /* Chopper duty cycle */
+  uint16_t freq:4;               /* Chopper carrier frequency value */
+  uint16_t _res:5;               /* Reserved */
 };
 #endif
 
@@ -190,7 +197,10 @@ struct stm32_hrtim_chopper_s
 #ifdef HRTIM_HAVE_DEADTIME
 struct stm32_hrtim_deadtime_s
 {
-  uint32_t reserved;             /* reserved for future use */
+  uint8_t falling_lock:2;       /* Deadtime falling value and sign lock */
+  uint8_t rising_lock:2;        /* Deadtime rising value and sign lock */
+  uint8_t prescaler:3;          /* Deadtime Prescaler */
+  uint8_t _res:1;               /* Reserved */
 };
 #endif
 
@@ -447,7 +457,6 @@ static uint16_t hrtim_per_get(FAR struct stm32_hrtim_s *priv, uint8_t timer);
 static uint16_t hrtim_cmp_get(FAR struct stm32_hrtim_s *priv, uint8_t timer,
                          uint8_t index);
 
-
 /* Initialization */
 
 static int stm32_hrtimconfig(FAR struct stm32_hrtim_s *priv);
@@ -508,13 +517,17 @@ static struct stm32_hrtim_slave_priv_s g_tima_priv =
 #ifdef CONFIG_STM32_HRTIM_TIMA_CHOP
     .chp =
     {
-      .reserved = 0
+      .start_pulse = HRTIM_TIMA_CHOP_START,
+      .duty        = HRTIM_TIMA_CHOP_DUTY,
+      .freq        = HRTIM_TIMA_CHOP_FREQ
     },
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMA_DT
     .dt =
     {
-      .reserved = 0
+      .falling_lock = HRTIM_TIMA_DT_FLOCK,
+      .rising_lock  = HRTIM_TIMA_DT_RLOCK,
+      .prescaler    = HRTIM_TIMA_DT_PRESCALER,
     }
 #endif
   },
@@ -590,6 +603,7 @@ static struct stm32_hrtim_s g_hrtim1priv =
 struct hrtim_dev_s g_hrtim1dev =
 {
   .hd_priv  = &g_hrtim1priv,
+  .initialized = false,
 };
 
 /****************************************************************************
@@ -1723,7 +1737,7 @@ static void hrtim_preload_config(FAR struct stm32_hrtim_s *priv)
  *
  * Input parameters:
  *   priv   - A reference to the HRTIM block
- *   timer  - HRTIM Timer timer
+ *   timer  - HRTIM Timer index
  *   index  - Compare register timer
  *   cmp    - New compare register value
  *
@@ -1781,7 +1795,7 @@ errout:
  *
  * Input parameters:
  *   priv   - A reference to the HRTIM block
- *   timer  - HRTIM Timer timer
+ *   timer  - HRTIM Timer index
  *   per    - New period register value
  *
  * Returned Value:
@@ -1805,7 +1819,7 @@ static int hrtim_per_update(FAR struct stm32_hrtim_s *priv, uint8_t timer,
  *
  * Input parameters:
  *   priv   - A reference to the HRTIM block
- *   timer  - HRTIM Timer timer
+ *   timer  - HRTIM Timer index
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure
@@ -1825,7 +1839,7 @@ static uint16_t hrtim_per_get(FAR struct stm32_hrtim_s *priv, uint8_t timer)
  *
  * Input parameters:
  *   priv   - A reference to the HRTIM block
- *   timer  - HRTIM Timer timer
+ *   timer  - HRTIM Timer index
  *   index  - Compare register timer
  *
  * Returned Value:
@@ -2073,12 +2087,19 @@ FAR struct hrtim_dev_s* stm32_hrtiminitialize(void)
 
   hrtim = dev->hd_priv;
 
-  ret = stm32_hrtimconfig(hrtim);
-  if (ret < 0)
+  /* configure HRTIM only once */
+
+  if (dev->initialized)
     {
-      tmrerr("ERROR: Failed to initialize HRTIM1: %d\n", ret);
-      errno = -ret;
-      return NULL;
+      ret = stm32_hrtimconfig(hrtim);
+      if (ret < 0)
+        {
+          tmrerr("ERROR: Failed to initialize HRTIM1: %d\n", ret);
+          errno = -ret;
+          return NULL;
+        }
+
+      dev->initialized = true;
     }
 
   return dev;

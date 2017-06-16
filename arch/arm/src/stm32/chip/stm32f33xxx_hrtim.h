@@ -108,7 +108,7 @@
 #define STM32_HRTIM_CMN_ICR_OFFSET      0x000C /* HRTIM Interrupt Clear Register */
 #define STM32_HRTIM_CMN_IER_OFFSET      0x0010 /* HRTIM Interrupt Enable Register */
 #define STM32_HRTIM_CMN_OENR_OFFSET     0x0014 /* HRTIM Output Enable Register */
-#define STM32_HRTIM_CMN_DISR_OFFSET     0x0018 /* HRTIM Output Disable Register */
+#define STM32_HRTIM_CMN_ODISR_OFFSET    0x0018 /* HRTIM Output Disable Register */
 #define STM32_HRTIM_CMN_ODSR_OFFSET     0x001C /* HRTIM Output Disable Status Register */
 #define STM32_HRTIM_CMN_BMCR_OFFSET     0x0020 /* HRTIM Burst Mode Control Register */
 #define STM32_HRTIM_CMN_BMTRGR_OFFSET   0x0024 /* HRTIM Burst Mode Trigger Register */

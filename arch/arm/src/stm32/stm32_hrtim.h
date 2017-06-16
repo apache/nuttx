@@ -268,6 +268,89 @@ enum stm32_outputs_e
   HRTIM_OUT_TIME_CH2 = (1 << 9),
 };
 
+/* DAC synchronization event */
+
+enum stm32_hrtim_dacsync_e
+{
+  HRTIM_DACSYNC_DIS,
+  HRTIM_DACSYNC_1,
+  HRTIM_DACSYNC_2,
+  HRTIM_DACSYNC_3,
+};
+
+/* HRTIM Deadtime Locks */
+
+enum stm32_deadtime_lock_e
+{
+  HRTIM_DT_VALUE_LOCK = (1 << 0), /* Lock Deadtime value */
+  HRTIM_DT_SIGN_LOCK  = (1 << 1)  /* Lock Deadtime sign */
+};
+
+/* HRTIM Deadtime types  */
+
+enum stm32_deadtime_edge_e
+{
+  HRTIM_DT_RISING = 0,
+  HRTIM_DT_FALLING = 1
+};
+
+/* Chopper start pulsewidth */
+
+enum stm32_chopper_start_e
+{
+  HRTIM_CHP_START_16,
+  HRTIM_CHP_START_32,
+  HRTIM_CHP_START_48,
+  HRTIM_CHP_START_64,
+  HRTIM_CHP_START_80,
+  HRTIM_CHP_START_96,
+  HRTIM_CHP_START_112,
+  HRTIM_CHP_START_128,
+  HRTIM_CHP_START_144,
+  HRTIM_CHP_START_160,
+  HRTIM_CHP_START_176,
+  HRTIM_CHP_START_192,
+  HRTIM_CHP_START_208,
+  HRTIM_CHP_START_224,
+  HRTIM_CHP_START_256
+};
+
+/* Chopper duty cycle */
+
+enum stm32_chopper_duty_e
+{
+  HRTIM_CHP_DUTY_0,
+  HRTIM_CHP_DUTY_1,
+  HRTIM_CHP_DUTY_2,
+  HRTIM_CHP_DUTY_3,
+  HRTIM_CHP_DUTY_4,
+  HRTIM_CHP_DUTY_5,
+  HRTIM_CHP_DUTY_6,
+  HRTIM_CHP_DUTY_7 ,
+};
+
+/* Chopper carrier frequency */
+
+enum stm32_chopper_freq_e
+{
+  HRTIM_CHP_FREQ_d16,
+  HRTIM_CHP_FREQ_d32,
+  HRTIM_CHP_FREQ_d48,
+  HRTIM_CHP_FREQ_d64,
+  HRTIM_CHP_FREQ_d80,
+  HRTIM_CHP_FREQ_d96,
+  HRTIM_CHP_FREQ_d112,
+  HRTIM_CHP_FREQ_d128,
+  HRTIM_CHP_FREQ_d144,
+  HRTIM_CHP_FREQ_d160,
+  HRTIM_CHP_FREQ_d176,
+  HRTIM_CHP_FREQ_d192,
+  HRTIM_CHP_FREQ_d208,
+  HRTIM_CHP_FREQ_d224,
+  HRTIM_CHP_FREQ_d240,
+  HRTIM_CHP_FREQ_d256
+};
+
 /*  */
 
 struct hrtim_dev_s
@@ -275,13 +358,14 @@ struct hrtim_dev_s
 #ifdef CONFIG_HRTIM
   /* Fields managed by common upper half HRTIM logic */
 
-  uint8_t                 hd_ocount;    /* The number of times the device has been opened */
-  sem_t                   hd_closesem;  /* Locks out new opens while close is in progress */
+  uint8_t hd_ocount; /* The number of times the device has been opened */
+  sem_t hd_closesem; /* Locks out new opens while close is in progress */
 #endif
 
   /* Fields provided by lower half HRTIM logic */
 
-  FAR void                     *hd_priv; /* Used by the arch-specific logic */
+  FAR void *hd_priv; /* Used by the arch-specific logic */
+  bool initialized;  /* true: HRTIM driver has been initialized */
 };
 
 /************************************************************************************
