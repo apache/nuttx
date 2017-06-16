@@ -304,10 +304,10 @@ Configurations
        If you do this a lot, you will probably want to invest a little time
        to develop a tool to automate these steps.
 
-  mrf24j40-radio
+  mrf24j40-mac
 
-    This is a version of nsh that was used for testing the MRF24J40 be as a
-    character device.  The most important configuration differences are
+    This is a version of nsh that was used for testing the MRF24J40 MAC be
+    as a character device.  The most important configuration differences are
     summarized below:
 
     1. Support for the BEE click and SPI are in enabled in the mikroBUS1 slot:
@@ -327,7 +327,11 @@ Configurations
 
          CONFIG_WIRELESS=y
          CONFIG_WIRELESS_IEEE802154=y
-         CONFIG_IEEE802154_DEV=y
+         CONFIG_IEEE802154_MAC_DEV=y
+         CONFIG_IEEE802154_NTXDESC=3
+         CONFIG_IEEE802154_IND_PREALLOC=20
+         CONFIG_IEEE802154_IND_IRQRESERVE=10
+         CONFIG_IEEE802154_DEFAULT_EADDR=0x00fade00deadbeef
 
     5. Support for the lower half MRF24J40 character driver is enabled
 
@@ -335,16 +339,92 @@ Configurations
          CONFIG_DRIVERS_IEEE802154=y
          CONFIG_IEEE802154_MRF24J40=y
 
-    6. Support for the test program at apps/ieee802154 is enabled:
+    6. Support for the i8sak test program at apps/ieee802154 is enabled:
 
-         CONFIG_IEEE802154_COMMON=y
-         CONFIG_IEEE802154_COORD=y
+         CONFIG_IEEE802154_LIBMAC=y
+         CONFIG_IEEE802154_LIBUTILS=y
          CONFIG_IEEE802154_I8SAK=y
+         CONFIG_IEEE802154_I8SAK_PRIORITY=100
+         CONFIG_IEEE802154_I8SAK_STACKSIZE=2048
 
     7. Initialization hooks are provided to enable the MRF24J40 and to
        register the radio character driver.
 
          CONFIG_NSH_ARCHINIT=y
+
+    8. Configuration instructions:  WPAN configuration must be performed
+       using the i8sak program.  Detailed instructions are provided in a
+       README.txt file at apps/wireless/ieee802154/i8sak.  You should make
+       sure that you are familiar with the content of that README.txt file.
+
+       Here is a quick "cheat sheet" for associated to setting up a
+       coordinator and associating wth the WPAN:
+
+       1. Configure the Coordinator.  On coordinator device do:
+
+          nsh> i8 /dev/ieee0 startpan
+          nsh> i8 acceptassoc
+
+       2. Assocate and endpoint device with the WPAN.  On the endpoint
+          device:
+
+          nsh> i8 /dev/ieee0 assoc
+
+  mrf24j40-6lowpan
+
+    This is another version of nsh that is very similar to the mrf24j40-mac
+    configuration but is focused on testing the IEEE 802.15.4 MAC
+    integration with the 6loWPAN network stack.  It derives directly from the
+    mrf24j40-mac and all NOTES provided there apply.  Additional differences
+    are summarized below:
+
+    NOTES:
+
+    1. This configuration differs from the mrf24j40-mac configuration in
+       that this configuration, like the usbnsh configuration, uses a USB
+       serial device for console I/O.  Such a configuration is useful on the
+       Clicker2 STM32 which has no builtin RS-232 drivers and eliminates the
+       tangle of cables and jumpers needed to debug multi-board setups.
+
+       Most other NOTES for the usbnsh configuration should apply.  Specific
+       differences between the usbnsh or mrf24j40-mac configurations and this
+       configuration are listed in these NOTES.
+
+    2. On most serial terminal programs that I have used, the USB
+       connection will be lost when the target board is reset.  When that
+       happens, you may have to reset your serial terminal program to adapt
+       to the new USB connection.  Using TeraTerm, I actually have to exit
+       the serial program and restart it in order to detect and select the
+       re-established USB serial connection.
+
+    3. This configuration does NOT have USART3 output enabled.  This
+       configuration supports logging of debug output to a circular
+       buffer in RAM.  This feature is discussed fully in this Wiki page:
+       http://nuttx.org/doku.php?id=wiki:howtos:syslog . Relevant
+       configuration settings are summarized below:
+
+       Device Drivers:
+       CONFIG_RAMLOG=y             : Enable the RAM-based logging feature.
+       CONFIG_RAMLOG_CONSOLE=n     : (We don't use the RAMLOG console)
+       CONFIG_RAMLOG_SYSLOG=y      : This enables the RAM-based logger as the
+                                     system logger.
+       CONFIG_RAMLOG_NONBLOCKING=y : Needs to be non-blocking for dmesg
+       CONFIG_RAMLOG_BUFSIZE=8192  : Buffer size is 8KiB
+
+       NOTE: This RAMLOG feature is really only of value if debug output
+       is enabled.  But, by default, no debug output is disabled in this
+       configuration.  Therefore, there is no logic that will add anything
+       to the RAM buffer.  This feature is configured and in place only
+       to support any future debugging needs that you may have.
+
+       If you don't plan on using the debug features, then by all means
+       disable this feature and save 16KiB of RAM!
+
+       NOTE: There is an issue with capturing data in the RAMLOG:  If
+       the system crashes, all of the crash dump information will go into
+       the RAMLOG and you will be unable to access it!  You can tell that
+       the system has crashed because (a) it will be unresponsive and (b)
+       the LD2 will be blinking at about 2Hz.
 
   nsh:
 
@@ -371,7 +451,6 @@ Configurations
       CONFIG_EXAMPLES_NSH_CXXINITIALIZE=y
 
   usbnsh:
-  -------
 
     This is another NSH example.  If differs from other 'nsh' configurations
     in that this configurations uses a USB serial device for console I/O.
@@ -380,7 +459,14 @@ Configurations
 
     NOTES:
 
-    1. This configuration does have USART3 output enabled and set up as
+    1. One most serial terminal programs that I have used, the USB
+       connection will be lost when the target board is reset.  When that
+       happens, you may have to reset your serial terminal program to adapt
+       to the new USB connection.  Using TeraTerm, I actually have to exit
+       the serial program and restart it in order to detect and select the
+       re-established USB serial connection.
+
+    2. This configuration does have USART3 output enabled and set up as
        the system logging device:
 
        CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
@@ -390,7 +476,7 @@ Configurations
        configuration so nothing should appear on USART3 unless you enable
        some debug output or enable the USB monitor.
 
-    2. Enabling USB monitor SYSLOG output.  If tracing is enabled, the USB
+    3. Enabling USB monitor SYSLOG output.  If tracing is enabled, the USB
        device will save encoded trace output in in-memory buffer; if the
        USB monitor is enabled, that trace buffer will be periodically
        emptied and dumped to the system logging device (USART3 in this
