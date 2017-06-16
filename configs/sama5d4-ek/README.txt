@@ -4259,8 +4259,6 @@ Configurations
        http://nuttx.org/doku.php?id=wiki:howtos:syslog . Relevant
        configuration settings are summarized below:
 
-       File System:
-
        Device Drivers:
        CONFIG_RAMLOG=y             : Enable the RAM-based logging feature.
        CONFIG_RAMLOG_CONSOLE=n     : (We don't use the RAMLOG console)

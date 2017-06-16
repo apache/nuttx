@@ -352,13 +352,31 @@ Configurations
 
          CONFIG_NSH_ARCHINIT=y
 
+    8. Configuration instructions:  WPAN configuration must be performed
+       using the i8sak program.  Detailed instructions are provided in a
+       README.txt file at apps/wireless/ieee802154/i8sak.  You should make
+       sure that you are familiar with the content of that README.txt file.
+
+       Here is a quick "cheat sheet" for associated to setting up a
+       coordinator and associating wth the WPAN:
+
+       1. Configure the Coordinator.  On coordinator device do:
+
+          nsh> i8 /dev/ieee0 startpan
+          nsh> i8 acceptassoc
+
+       2. Assocate and endpoint device with the WPAN.  On the endpoint
+          device:
+
+          nsh> i8 /dev/ieee0 assoc
+
   mrf24j40-6lowpan
 
     This is another version of nsh that is very similar to the mrf24j40-mac
-    configuration but is focused on testing the IEEE 802.15.4 MAC integration
-    with the 6loWPAN network stack.  I derives directly from the mrf24j40-mac
-    and all NOTES provided there apply.  Additional differences are summarized
-    below:
+    configuration but is focused on testing the IEEE 802.15.4 MAC
+    integration with the 6loWPAN network stack.  It derives directly from the
+    mrf24j40-mac and all NOTES provided there apply.  Additional differences
+    are summarized below:
 
     NOTES:
 
@@ -371,15 +389,33 @@ Configurations
 
        Other NOTES for the usbnsh configuration should appy.
 
-    2. This configuration does have USART3 output enabled and set up as
-       the system logging device:
+    2. This configuration does NOT have USART3 output enabled.  This
+       configuration supports logging of debug output to a circular
+       buffer in RAM.  This feature is discussed fully in this Wiki page:  http://nuttx.org/doku.php?id=wiki:howtos:syslog . Relevant
+       configuration settings are summarized below:
 
-       CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
-       CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : USART3 will be /dev/ttyS0
+       Device Drivers:
+       CONFIG_RAMLOG=y             : Enable the RAM-based logging feature.
+       CONFIG_RAMLOG_CONSOLE=n     : (We don't use the RAMLOG console)
+       CONFIG_RAMLOG_SYSLOG=y      : This enables the RAM-based logger as the
+                                     system logger.
+       CONFIG_RAMLOG_NONBLOCKING=y : Needs to be non-blocking for dmesg
+       CONFIG_RAMLOG_BUFSIZE=8192  : Buffer size is 8KiB
 
-       However, there is nothing to generate SYLOG output in the default
-       configuration so nothing should appear on USART3 unless you enable
-       some debug output or enable the USB monitor.
+       NOTE: This RAMLOG feature is really only of value if debug output
+       is enabled.  But, by default, no debug output is disabled in this
+       configuration.  Therefore, there is no logic that will add anything
+       to the RAM buffer.  This feature is configured and in place only
+       to support any future debugging needs that you may have.
+
+       If you don't plan on using the debug features, then by all means
+       disable this feature and save 16KiB of RAM!
+
+       NOTE: There is an issue with capturing data in the RAMLOG:  If
+       the system crashes, all of the crash dump information will go into
+       the RAMLOG and you will be unable to access it!  You can tell that
+       the system has crashed because (a) it will be unresponsive and (b)
+       the LD2 will be blinking at about 2Hz.
 
   nsh:
 
