@@ -141,6 +141,12 @@ config NET_6LOWPAN_EXTENDEDADDR
 		device's link layer address.  If this option is selected, then an
 		8-byte extended address will be used.
 
+		All devices operating on a network have unique, 8-byte addresses,
+		referred to as extended addresses.  A device will use either the
+		extended address for direct communication within the PAN or the
+		short 2-byte address that was allocated by the PAN coordinator when
+		the device associated.
+
 config NET_6LOWPAN_MAXAGE
 	int "Packet reassembly timeout"
 	default 20
