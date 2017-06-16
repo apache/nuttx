@@ -399,7 +399,8 @@ Configurations
 
     3. This configuration does NOT have USART3 output enabled.  This
        configuration supports logging of debug output to a circular
-       buffer in RAM.  This feature is discussed fully in this Wiki page:  http://nuttx.org/doku.php?id=wiki:howtos:syslog . Relevant
+       buffer in RAM.  This feature is discussed fully in this Wiki page:
+       http://nuttx.org/doku.php?id=wiki:howtos:syslog . Relevant
        configuration settings are summarized below:
 
        Device Drivers:
