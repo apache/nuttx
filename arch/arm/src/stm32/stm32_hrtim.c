@@ -223,8 +223,8 @@ struct stm32_hrtim_timout_s
 struct stm32_hrtim_chopper_s
 {
   uint16_t start:4;              /* Chopper start pulsewidth */
-  uint16_t duty:3;               /* Chopper duty cycle */
   uint16_t freq:4;               /* Chopper carrier frequency value */
+  uint16_t duty:3;               /* Chopper duty cycle */
   uint16_t _res:5;               /* Reserved */
 };
 #endif
@@ -271,10 +271,10 @@ struct stm32_hrtim_timcmn_s
 {
   uint32_t base;                /* The base adress of the timer */
   uint32_t pclk;                /* The frequency of the peripheral clock
-                                 * that drives the timer module
+                                 * that drives the timer module.
                                  */
 #ifdef HRTIM_HAVE_INTERRUPTS
-  uint16_t irq;                 /* interrupts configuration */
+  uint16_t irq;                  /* interrupts configuration */
 #endif
 #ifdef CONFIG_STM32_HRTIM_DMA
   uint32_t dmaburst;
@@ -303,7 +303,7 @@ struct stm32_hrtim_slave_priv_s
 #ifdef HRTIM_HAVE_FAULTS
   uint8_t flt;                      /* Faults configuration.
                                      * First five bits are fault sources,
-                                     * last bit is lock configuration
+                                     * last bit is lock configuration.
                                      */
 #endif
   uint16_t update;                  /* Update configuration */
@@ -326,6 +326,7 @@ struct stm32_hrtim_fault_cfg_s
   uint8_t src:1;                /* Fault source */
   uint8_t filter:4;             /* Fault filter */
   uint8_t lock:1;               /* Fault lock */
+  uint8_t _res:1;               /* Reserved */
 };
 
 /* Structure describes HRTIM Faults configuration */
@@ -2255,8 +2256,6 @@ static int hrtim_eev_cfg(FAR struct stm32_hrtim_s *priv, uint8_t index)
         }
     }
 
-
-
 errout:
   return ret;
 }
@@ -2810,7 +2809,6 @@ errout:
  *   2. Board-specific logic has already configured
  *
  ****************************************************************************/
-
 
 FAR struct hrtim_dev_s* stm32_hrtiminitialize(void)
 {

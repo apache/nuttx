@@ -118,7 +118,7 @@ enum stm32_hrtim_out_rst_e
   HRTIM_OUT_RST_CMP1      = (1 << 28),
   HRTIM_OUT_RST_PER       = (1 << 29),
   HRTIM_OUT_RST_RESYNC    = (1 << 30),
-  HRTIM_OUT_RST_SOFT      = (1 << 31),
+  HRTIM_OUT_RST_SOFT      = (1 << 31)
 };
 
 /* Source which can force the Tx1/Tx2 output to its active state  */
@@ -156,7 +156,7 @@ enum stm32_hrtim_out_set_e
   HRTIM_OUT_SET_CMP1      = (1 << 28),
   HRTIM_OUT_SET_PER       = (1 << 29),
   HRTIM_OUT_SET_RESYNC    = (1 << 30),
-  HRTIM_OUT_SET_SOFT      = (1 << 31),
+  HRTIM_OUT_SET_SOFT      = (1 << 31)
 };
 
 /* Events that can reset TimerX Counter */
@@ -206,7 +206,7 @@ enum stm32_hrtim_tim_rst_e
   HRTIM_RST_EXTEVNT4,
   HRTIM_RST_EXTEVNT3,
   HRTIM_RST_EXTEVNT2,
-  HRTIM_RST_EXTEVNT1,
+  HRTIM_RST_EXTEVNT1
 };
 
 /* HRTIM Timer X prescaler */
@@ -220,7 +220,7 @@ enum stm32_hrtim_tim_prescaler_e
   HRTIM_PRESCALER_16,
   HRTIM_PRESCALER_32,
   HRTIM_PRESCALER_64,
-  HRTIM_PRESCALER_128,
+  HRTIM_PRESCALER_128
 };
 
 /* HRTIM Slave Timer fault sources Lock */
@@ -228,7 +228,7 @@ enum stm32_hrtim_tim_prescaler_e
 enum stm32_hrtim_tim_fault_lock_e
 {
   HRTIM_TIM_FAULT_RW   = 0,         /* Slave Timer fault source are read/write */
-  HRTIM_TIM_FAULT_LOCK = (1 << 7),  /* Slave Timer fault source are read only */
+  HRTIM_TIM_FAULT_LOCK = (1 << 7)   /* Slave Timer fault source are read only */
 };
 
 /* HRTIM Slave Timer Fault configuration */
@@ -239,7 +239,7 @@ enum stm32_hrtim_tim_fault_src_e
   HRTIM_TIM_FAULT2 = (1 << 2),
   HRTIM_TIM_FAULT3 = (1 << 3),
   HRTIM_TIM_FAULT4 = (1 << 4),
-  HRTIM_TIM_FAULT5 = (1 << 5),
+  HRTIM_TIM_FAULT5 = (1 << 5)
 };
 
 /* HRTIM Fault Source */
@@ -251,7 +251,7 @@ enum stm32_hrtim_fault_src_e
 };
 
 /* HRTIM External Event Source
- * NOTE: according to Table 82 from STM32F334XX Manual
+ * NOTE: according to Table 82 from STM32F334XX Manual.
  */
 
 enum stm32_hrtim_eev_src_e
@@ -270,12 +270,12 @@ enum stm32_hrtim_fault_pol_e
   HRTIM_FAULT_POL_HIGH = 1
 };
 
-/* HRTIM External Event Polarity  */
+/* HRTIM External Event Polarity */
 
 enum stm32_hrtim_eev_pol_e
 {
-  HRTIM_EEV_POL_HIGH = 0,               /* External Event is active high */
-  HRTIM_EEV_POL_LOW  = 1                 /* External Event is active low */
+  HRTIM_EEV_POL_HIGH = 0,       /* External Event is active high */
+  HRTIM_EEV_POL_LOW  = 1        /* External Event is active low */
 };
 
 /* HRTIM External Event sensitivity */
@@ -299,18 +299,18 @@ enum stm32_hrtim_eev_sampling_e
 };
 
 /* HRTIM External Event Mode.
- * NOTE: supported only for EEV1-5
+ * NOTE: supported only for EEV1-5.
  */
 
 enum stm32_hrtim_eev_mode_e
 {
-  HRTIM_EEV_MODE_NORMAL,
-  HRTIM_EEV_MODE_FAST           /* low latency mode */
+  HRTIM_EEV_MODE_NORMAL = 0,
+  HRTIM_EEV_MODE_FAST   = 1     /* low latency mode */
 };
 
 
 /* External Event filter.
- * NOTE: supported only for EEV6-10
+ * NOTE: supported only for EEV6-10.
  */
 
 enum stm32_hrtim_eev_filter_e
@@ -330,7 +330,7 @@ enum stm32_hrtim_eev_filter_e
   HRTIM_EEV_EEVSd16_N8 = 12,
   HRTIM_EEV_EEVSd32_N5 = 13,
   HRTIM_EEV_EEVSd32_N6 = 14,
-  HRTIM_EEV_EEVSd32_N8 = 15,
+  HRTIM_EEV_EEVSd32_N8 = 15
 };
 
 /* Compare register index */
@@ -356,7 +356,7 @@ enum stm32_outputs_e
   HRTIM_OUT_TIMD_CH1 = (1 << 6),
   HRTIM_OUT_TIMD_CH2 = (1 << 7),
   HRTIM_OUT_TIME_CH1 = (1 << 8),
-  HRTIM_OUT_TIME_CH2 = (1 << 9),
+  HRTIM_OUT_TIME_CH2 = (1 << 9)
 };
 
 /* DAC synchronization event */
@@ -366,7 +366,7 @@ enum stm32_hrtim_dacsync_e
   HRTIM_DACSYNC_DIS,
   HRTIM_DACSYNC_1,
   HRTIM_DACSYNC_2,
-  HRTIM_DACSYNC_3,
+  HRTIM_DACSYNC_3
 };
 
 /* HRTIM Deadtime Locks */
@@ -417,7 +417,7 @@ enum stm32_chopper_duty_e
   HRTIM_CHP_DUTY_4,
   HRTIM_CHP_DUTY_5,
   HRTIM_CHP_DUTY_6,
-  HRTIM_CHP_DUTY_7 ,
+  HRTIM_CHP_DUTY_7
 };
 
 /* Chopper carrier frequency */
