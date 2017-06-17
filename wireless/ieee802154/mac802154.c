@@ -95,7 +95,7 @@ static void mac802154_purge_worker(FAR void *arg);
 
 /* Watchdog Timeout Functions */
 
-static void mac802154_timeout_expiry(int argc, uint32_t arg, ...);
+static void mac802154_timeout_expiry(int argc, wdparm_t arg, ...);
 
 static uint32_t mac802154_symtoticks(FAR struct ieee802154_privmac_s *priv,
                               uint32_t symbols);
@@ -1271,7 +1271,8 @@ int mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
 
   /* Start the watchdog */
 
-  wd_start(priv->timeout, (int32_t)ticks, mac802154_timeout_expiry, 1, (uint32_t)priv);
+  wd_start(priv->timeout, (int32_t)ticks, mac802154_timeout_expiry,
+           1, (wdparm_t)priv);
 
   return OK;
 }
@@ -1294,7 +1295,7 @@ int mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
  *
  ****************************************************************************/
 
-static void mac802154_timeout_expiry(int argc, uint32_t arg, ...)
+static void mac802154_timeout_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)arg;
 
