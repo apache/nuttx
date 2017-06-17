@@ -85,7 +85,6 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
     (FAR struct ieee802154_privmac_s *)mac;
   FAR struct iob_s *iob;
   FAR struct ieee802154_txdesc_s *txdesc;
-  FAR uint16_t *frame_ctrl;
   int ret;
 
   /* On receipt of the MLME-POLL.request primitive, the MLME requests data from
@@ -108,9 +107,6 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
       return ret;
     }
 
-  priv->curr_op = MAC802154_OP_POLL;
-  priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
-
   /* Get exclusive access to the MAC */
 
    ret = mac802154_takesem(&priv->exclsem, true);
@@ -120,82 +116,17 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
        return ret;
      }
 
-  /* Allocate an IOB to put the frame in */
-
-  iob = iob_alloc(false);
-  DEBUGASSERT(iob != NULL);
-
-  iob->io_flink  = NULL;
-  iob->io_len    = 0;
-  iob->io_offset = 0;
-  iob->io_pktlen = 0;
+  priv->curr_op = MAC802154_OP_POLL;
+  priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
 
   /* Allocate the txdesc, waiting if necessary */
 
   ret = mac802154_txdesc_alloc(priv, &txdesc, true);
   if (ret < 0)
     {
-      iob_free(iob);
       mac802154_givesem(&priv->exclsem);
       mac802154_givesem(&priv->op_sem);
       return ret;
-    }
-
-  /* Get a uin16_t reference to the first two bytes. ie frame control field */
-
-  frame_ctrl = (FAR uint16_t *)&iob->io_data[0];
-  iob->io_len = 2;
-
-  *frame_ctrl = (IEEE802154_FRAME_COMMAND << IEEE802154_FRAMECTRL_SHIFT_FTYPE);
-  *frame_ctrl |= IEEE802154_FRAMECTRL_ACKREQ;
-
-  /* Each time a data or a MAC command frame is generated, the MAC sublayer
-   * shall copy the value of macDSN into the Sequence Number field of the
-   * MHR of the outgoing frame and then increment it by one. [1] pg. 40.
-   */
-
-  iob->io_data[iob->io_len++] = priv->dsn++;
-
-  /* If the destination address is present, copy the PAN ID and one of the
-   * addresses, depending on mode, into the MHR.
-   */
-
-  if (req->coordaddr.mode != IEEE802154_ADDRMODE_NONE)
-    {
-      memcpy(&iob->io_data[iob->io_len], &req->coordaddr.panid, 2);
-      iob->io_len += 2;
-
-      if (req->coordaddr.mode == IEEE802154_ADDRMODE_SHORT)
-        {
-          memcpy(&iob->io_data[iob->io_len], &req->coordaddr.saddr, 2);
-          iob->io_len += 2;
-        }
-      else if (req->coordaddr.mode == IEEE802154_ADDRMODE_EXTENDED)
-        {
-          memcpy(&iob->io_data[iob->io_len], &req->coordaddr.eaddr,
-                 IEEE802154_EADDR_LEN);
-          iob->io_len += IEEE802154_EADDR_LEN;
-        }
-    }
-
-  *frame_ctrl |= (req->coordaddr.mode << IEEE802154_FRAMECTRL_SHIFT_DADDR);
-
-
-
-  /* If the PAN identifiers are identical, the PAN ID Compression field
-   * shall be set to one, and the source PAN identifier shall be omitted
-   * from the transmitted frame. [1] pg. 41.
-   */
-
-  if (req->coordaddr.mode  != IEEE802154_ADDRMODE_NONE &&
-      req->coordaddr.panid == priv->addr.panid)
-    {
-      *frame_ctrl |= IEEE802154_FRAMECTRL_PANIDCOMP;
-    }
-  else
-    {
-      memcpy(&iob->io_data[iob->io_len], &priv->addr.panid, 2);
-      iob->io_len += 2;
     }
 
   /* The Source Addressing Mode field shall be set according to the value of
@@ -205,32 +136,15 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
 
   if (priv->addr.saddr == IEEE802154_SADDR_BCAST)
     {
-      *frame_ctrl |= (IEEE802154_ADDRMODE_EXTENDED << IEEE802154_FRAMECTRL_SHIFT_SADDR);
-      memcpy(&iob->io_data[iob->io_len], &priv->addr.eaddr[0], IEEE802154_EADDR_LEN);
-      iob->io_len += IEEE802154_EADDR_LEN;
+      mac802154_create_datareq(priv, &req->coordaddr, IEEE802154_ADDRMODE_EXTENDED,
+                               txdesc);
     }
   else
     {
-      *frame_ctrl |= (IEEE802154_ADDRMODE_SHORT << IEEE802154_FRAMECTRL_SHIFT_SADDR);
-      memcpy(&iob->io_data[iob->io_len], &priv->addr.saddr, 2);
-      iob->io_len += 2;
+      mac802154_create_datareq(priv, &req->coordaddr, IEEE802154_ADDRMODE_SHORT,
+                               txdesc);
     }
-
-  /* Copy in the Command Frame Identifier */
-
-  iob->io_data[iob->io_len++] = IEEE802154_CMD_DATA_REQ;
-
-  /* Copy the IOB reference to the descriptor */
-
-  txdesc->frame = iob;
-  txdesc->frametype = IEEE802154_FRAME_COMMAND;
-
-  /* Save a copy of the destination addressing infromation into the tx descriptor.
-   * We only do this for commands to help with handling their progession.
-   */
-
-  memcpy(&txdesc->destaddr, &req->coordaddr, sizeof(struct ieee802154_addr_s));
-
+    
   /* Save a reference of the tx descriptor */
 
   priv->cmd_desc = txdesc;

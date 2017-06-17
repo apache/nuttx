@@ -241,10 +241,11 @@ enum ieee802154_status_e
 static const char *IEEE802154_STATUS_STRING[] =
 {
   "Success",
+  "Out of capacity",
+  "Denied",
   "Failure",
   "Beacon loss",
   "Channel access failure",
-  "Denied",
   "Disable TRX failure",
   "Failed security check",
   "Frame too long",
@@ -255,7 +256,6 @@ static const char *IEEE802154_STATUS_STRING[] =
   "No beacon",
   "No data",
   "No short address",
-  "Out of cap",
   "PAN ID conflict",
   "Realignment",
   "Transaction expired",
