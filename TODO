@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated June 14, 2017)
+NuttX TODO List (Last updated June 17, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -9,22 +9,22 @@ issues related to each board port.
 
 nuttx/:
 
- (11)  Task/Scheduler (sched/)
+ (12)  Task/Scheduler (sched/)
   (1)  SMP
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
-  (3)  pthreads (sched/pthread)
+  (4)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
   (8)  Kernel/Protected Build
   (3)  C++ Support
   (6)  Binary loaders (binfmt/)
- (14)  Network (net/, drivers/net)
+ (16)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
- (12)  Libraries (libc/, libm/)
+ (13)  Libraries (libc/, libm/)
  (10)  File system/Generic drivers (fs/, drivers/)
-  (9)  Graphics Subsystem (graphics/)
+ (10)  Graphics Subsystem (graphics/)
   (3)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
@@ -34,6 +34,7 @@ apps/ and other Add-Ons:
   (2)  Network Utilities (apps/netutils/)
   (1)  NuttShell (NSH) (apps/nshlib)
   (1)  System libraries apps/system (apps/system)
+  (1)  Modbus (apps/modbus)
   (1)  Pascal add-on (pcode/)
   (4)  Other Applications & Tests (apps/examples/)
 
@@ -234,32 +235,65 @@ o Task/Scheduler (sched/)
                could be improved and made a little more efficient with this
                change.
 
-  Title:       INAPPROPRIATE USE OF sched_lock() BY pthreads
-  Description: In implementation of standard pthread functions, the non-
-               standard, NuttX function sched_lock() is used.  This is very
-               strong sense it disables pre-emption for all threads in all
-               task groups.  I believe it is only really necessary in most
-               cases to lock threads in the task group with a new non-
-               standard interface, say pthread_lock().
+  Task:        IDLE THREAD TCB SETUP
+  Description: There are issues with setting IDLE thread stacks:
 
-               This is because the OS resources used by a thread such as
-               mutexes, condition variable, barriers, etc. are only
-               meaningful from within the task group.  So, in order to
-               performance exclusive operations on these resources, it is
-               only necessary to block other threads executing within the
-               task group.
+               1. One problem is stack-related data in the IDLE threads TCB.
+                  A solution might be to standardize the use of g_idle_topstack.
+                  That you could add initialization like this in os_start:
 
-               This is an easy change:  pthread_lock() and pthread_unlock()
-               would simply operate on a semaphore retained in the task
-               group structure.  I am, however, hesitant to make this change:
-               I the flat build model, there is nothing that prevents people
-               from accessing the inter-thread controls from threads in
-               differnt task groups.  Making this change, while correct,
-               might introduce subtle bugs in code by people who are not
-               using NuttX correctly.
-  Status:      Open
-  Priority:    Low.  This change would improve real-time performance of the
-               OS but is not otherwise required.
+                  @@ -344,6 +347,11 @@ void os_start(void)
+                     g_idleargv[1]  = NULL;
+                     g_idletcb.argv = g_idleargv;
+
+                  +  /* Set the IDLE task stack size */
+                  +
+                  +  g_idletcb.cmn.adj_stack_size = CONFIG_IDLETHREAD_STACKSIZE;
+                  +  g_idletcb.cmn.stack_alloc_ptr = (void *)(g_idle_topstack - CONFIG_IDLETHREAD_STACKSIZE);
+                  +
+                     /* Then add the idle task's TCB to the head of the ready to run list */
+
+                     dq_addfirst((FAR dq_entry_t *)&g_idletcb, (FAR dq_queue_t *)&g_readytorun);
+
+                  The g_idle_topstack variable is available for almost all architectures:
+
+                  $ find . -name *.h | xargs grep g_idle_top
+                  ./arm/src/common/up_internal.h:EXTERN const uint32_t g_idle_topstack;
+                  ./avr/src/avr/avr.h:extern uint16_t g_idle_topstack;
+                  ./avr/src/avr32/avr32.h:extern uint32_t g_idle_topstack;
+                  ./hc/src/common/up_internal.h:extern uint16_t g_idle_topstack;
+                  ./mips/src/common/up_internal.h:extern uint32_t g_idle_topstack;
+                  ./misoc/src/lm32/lm32.h:extern uint32_t g_idle_topstack;
+                  ./renesas/src/common/up_internal.h:extern uint32_t g_idle_topstack;
+                  ./renesas/src/m16c/chip.h:extern uint32_t g_idle_topstack; /* Start of the heap */
+                  ./risc-v/src/common/up_internal.h:EXTERN uint32_t g_idle_topstack;
+                  ./x86/src/common/up_internal.h:extern uint32_t g_idle_topstack;
+
+                  That omits there architectures: sh1, sim, xtensa, z16, z80,
+                  ez80, and z8.  All would have to support this common
+                  globlal variable.
+
+                  Also, the stack itself may be 8-, 16-, or 32-bits wide,
+                  depending upon the architecture.
+
+               2. Another problem is colorizing that stack to use with
+                 stack usage monitoring logic.  There is logic in some
+                 start functions to do this in a function called go_os_start.
+                 It is available in these architectures:
+
+                 ./arm/src/efm32/efm32_start.c:static void go_os_start(void *pv, unsigned int nbytes)
+                 ./arm/src/kinetis/kinetis_start.c:static void go_os_start(void *pv, unsigned int nbytes)
+                 ./arm/src/sam34/sam_start.c:static void go_os_start(void *pv, unsigned int nbytes)
+                 ./arm/src/samv7/sam_start.c:static void go_os_start(void *pv, unsigned int nbytes)
+                 ./arm/src/stm32/stm32_start.c:static void go_os_start(void *pv, unsigned int nbytes)
+                 ./arm/src/stm32f7/stm32_start.c:static void go_os_start(void *pv, unsigned int nbytes)
+                 ./arm/src/stm32l4/stm32l4_start.c:static void go_os_start(void *pv, unsigned int nbytes)
+                 ./arm/src/tms570/tms570_boot.c:static void go_os_start(void *pv, unsigned int nbytes)
+                 ./arm/src/xmc4/xmc4_start.c:static void go_os_start(void *pv, unsigned int nbytes)
+
+                 But no others.
+  Status:     Open
+  Priority:   Low, only needed for more complete debug.
 
 o SMP
   ^^^
@@ -533,6 +567,33 @@ o pthreads (sched/pthreads)
   Status:      Open
   Priority:    Medium-low. Priority may be higher if system call overheade becomes
                an issue.
+
+  Title:       INAPPROPRIATE USE OF sched_lock() BY pthreads
+  Description: In implementation of standard pthread functions, the non-
+               standard, NuttX function sched_lock() is used.  This is very
+               strong sense it disables pre-emption for all threads in all
+               task groups.  I believe it is only really necessary in most
+               cases to lock threads in the task group with a new non-
+               standard interface, say pthread_lock().
+
+               This is because the OS resources used by a thread such as
+               mutexes, condition variable, barriers, etc. are only
+               meaningful from within the task group.  So, in order to
+               performance exclusive operations on these resources, it is
+               only necessary to block other threads executing within the
+               task group.
+
+               This is an easy change:  pthread_lock() and pthread_unlock()
+               would simply operate on a semaphore retained in the task
+               group structure.  I am, however, hesitant to make this change:
+               I the flat build model, there is nothing that prevents people
+               from accessing the inter-thread controls from threads in
+               differnt task groups.  Making this change, while correct,
+               might introduce subtle bugs in code by people who are not
+               using NuttX correctly.
+  Status:      Open
+  Priority:    Low.  This change would improve real-time performance of the
+               OS but is not otherwise required.
 
 o Message Queues (sched/mqueue)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1171,6 +1232,30 @@ o Network (net/, drivers/net)
                deal with a list of devices.  That would be a huge effect and
                certainly doesn't dount as a "simple solution".
 
+  Title:       ICMPv6 FOR 6loWPAN
+  Description: The current ICMPv6 and neighbor-related logic only works with
+               Ethernet MAC.  For 6loWPAN, a new more conservative ICMPv6
+               definitions is provided by RFC 6775.  This RFC needs to be
+               supported in order to support ping6 on a 6loWPAN network.
+  Status:      Open
+  Priority:    Low for now.
+
+  Title:       ETHERNET LOCAL BROADCAST DOES NOT WORK
+
+  Description: In case of "local broadcast" the system still send ARP
+               request to the destination, but it shouldn't, it should
+               broadcast.  For Example, the system has network with IP
+               10.0.0.88, netmask of 255.255.255.0, it should send
+               messages for 10.0.0.255 as broadcast, and not send ARP
+               for 10.0.0.255
+
+               For more easier networking, the next line should have give
+               me the broadcast address of the network, but it doesn't:
+
+               ioctl(_socket_fd, SIOCGIFBRDADDR, &bc_addr);
+  Status:      Open
+  Priority:    Medium
+
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1532,6 +1617,64 @@ o Libraries (libc/, libm/)
   Status:      Open
   Priority:    Low
 
+  Title:       FORMATTING FIXED WIDTH INTEGERS
+  Description: Formats like this: lib_vsprintf(_, "%6.6u", 0) do not work.
+               There is no support for the precision/width option with
+               integer types.  The format is simply is ignored and so can
+               even cause crashes.
+
+               For example:
+
+               int hello_main(int argc, char *argv[])
+               {
+                 printf("Hello, World!!\n");
+                 printf("%3.3u %3.3u %3.3u %3.3u %3.3u\n", 9, 99, 999, 9999, 99999);
+                 return 0;
+               }
+
+               Generates this incorrect output:
+
+
+               NuttShell (NSH) NuttX-7.20
+               nsh> hello
+               Hello, World!!
+                 9  99 999 9999 99999
+               nsh>
+
+               That output, of course, should have been:
+
+                 9  99 999 999 999
+
+               The period and the precision value were being ignored (if
+               floating point was disabled).  In that case, parsing of the
+               variable arguments could get out of sync.  But a side
+               effect of the referenced change is that precision value is
+               now always parsed (but still incorrectly ignored for the
+               case of integer formats).
+
+               The fix would not be too difficult but would involve change
+               several functions.  It would involve clipping the size of the
+               number string.  For example:
+
+               /* Get the width of the output */
+
+               uwidth = getusize(FMT_CHAR, flags, n);
+               if (trunc > 0 && uwidth > trunc)
+                 {
+                   uwidth = trunc;
+                 }
+
+               Then limiting the length of the output string to uwidth.
+               This would probably mean passing an additional parameter to
+               the many *toascii() functions like:
+
+               /* Output the number */
+
+               utoascii(obj, FMT_CHAR, flags, (unsigned int)n, uwidth);
+
+  Status:      Open
+  Priority:    Low
+
 o File system / Generic drivers (fs/, drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1830,6 +1973,16 @@ o Graphics Subsystem (graphics/)
                the single user mode, it will be yanked out from under your
                feet in the not-so-distant future.
 
+  Title:       WIDE-FOUNT SUPPORT
+  Description: Wide fonts are not currently supported by the NuttX graphics sub-
+               system.  There is some discussion here:
+
+                 https://groups.yahoo.com/neo/groups/nuttx/conversations/topics/3507
+                 http://www.nuttx.org/doku.php?id=wiki:graphics:wide-fonts
+
+  Status:      Open
+  Priority:    Low for many, but I imagine higher in countries that use wide fonts
+
 o Build system
   ^^^^^^^^^^^^
 
@@ -1925,6 +2078,7 @@ o Build system
 
                  The .archive file would have to be removed on 'make clean' and would
                  also need to appear in .gitignore files.
+
 
 o Other drivers (drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2150,6 +2304,30 @@ o System libraries apps/system (apps/system)
   Status:      Open
   Priority:    Low (unless you are using mixed C-buffered I/O with readline and
                fgetc, for example).
+
+o Modbus (apps/modbus)
+  ^^^^^^^^^^^^^^^^^^^^
+
+  Title:       MODBUS NOT USABLE WITH USB SERIAL
+  Description: Modbus can be used with USB serial, however, if the USB
+               serial connectiont is lost, Modbus will hang in an infinite
+               loop.
+
+               This is a problem in the handling of select() and read()
+               and could probabaly resolved by studying the Modbus error
+               handling.
+
+               A more USB-friendly solution would be to: (1) Re-connect and
+               (2) re-open the serial drviers.  That is what is done is NSH.
+               When the serial USB device is removed, this terminates the
+               session and NSH will then try to re-open the USB device.  See
+               the function nsh_waitusbready() in the file
+               apps/nshlib/nsh_usbconsole.c. When the USB serial is
+               reconnected the open() in the function will succeed and a new
+               session will be started.
+  Status:      Open
+  Priority:    Low.  This is really an enhancement request:  Modbus was never
+               designed to work with removable serial devices.
 
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
