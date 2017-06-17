@@ -683,7 +683,7 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
       else if (cmd == MAC802154IOC_MLME_GET_REQUEST)
         {
           FAR struct ieee802154_get_req_s *getreq = &netmac->u.getreq;
-          
+
           switch (getreq->attr)
             {
               case IEEE802154_ATTR_MAC_PANID:
