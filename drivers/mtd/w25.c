@@ -337,9 +337,16 @@ static inline int w25_readid(struct w25_dev_s *priv)
 
   finfo("priv: %p\n", priv);
 
-  /* Lock the SPI bus, configure the bus, and select this FLASH part. */
+  /* Lock and configure the SPI bus */
 
   w25_lock(priv->spi);
+
+  /* Wait for any preceding write or erase operation to complete. */
+
+  (void)w25_waitwritecomplete(priv);
+
+  /* Select this FLASH part. */
+
   SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
 
   /* Send the "Read ID (RDID)" command and read the first three ID bytes */
@@ -440,19 +447,20 @@ static inline int w25_readid(struct w25_dev_s *priv)
 #ifndef CONFIG_W25_READONLY
 static void w25_unprotect(FAR struct w25_dev_s *priv)
 {
-  /* Select this FLASH part */
+  /* Lock and configure the SPI bus */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
+  w25_lock(priv->spi);
+
+  /* Wait for any preceding write or erase operation to complete. */
+
+  (void)w25_waitwritecomplete(priv);
 
   /* Send "Write enable (WREN)" */
 
   w25_wren(priv);
 
-  /* Re-select this FLASH part (This might not be necessary... but is it shown in
-   * the SST25 timing diagrams from which this code was leveraged.)
-   */
+  /* Select this FLASH part */
 
-  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
   SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
 
   /* Send "Write enable status (EWSR)" */
@@ -463,6 +471,11 @@ static void w25_unprotect(FAR struct w25_dev_s *priv)
 
   SPI_SEND(priv->spi, 0);
   SPI_SEND(priv->spi, 0);
+
+  /* Deselect the FLASH and unlock the bus */
+
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
+  w25_unlock(priv->spi);
 }
 #endif
 
@@ -474,7 +487,11 @@ static uint8_t w25_waitwritecomplete(struct w25_dev_s *priv)
 {
   uint8_t status;
 
-  /* Loop as long as the memory is busy with a write cycle */
+  /* Loop as long as the memory is busy with a write cycle. Device sets BUSY
+   * flag to a 1 state whhen previous write or erase command is still executing
+   * and during this time, device will ignore further instructions except for
+   * "Read Status Register" and "Erase/Program Suspend" instructions.
+   */
 
   do
     {
@@ -1070,6 +1087,7 @@ static ssize_t w25_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbl
     {
       nbytes >>= W25_SECTOR512_SHIFT;
     }
+
 #else
   nbytes = w25_read(dev, startblock << W25_PAGE_SHIFT, nblocks << W25_PAGE_SHIFT, buffer);
   if (nbytes > 0)

@@ -254,7 +254,8 @@
 #  endif
 #endif
 
-#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
+    defined(CONFIG_STM32_STM32F469)
 #  define STM32_FLASH_OPTCR1_OFFSET 0x0018
 #endif
 
@@ -287,7 +288,8 @@
 #  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 #    define STM32_FLASH_OPTCR        (STM32_FLASHIF_BASE+STM32_FLASH_OPTCR_OFFSET)
 #  endif
-#  if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
+#  if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
+      defined(CONFIG_STM32_STM32F469)
 #    define STM32_FLASH_OPTCR1       (STM32_FLASHIF_BASE+STM32_FLASH_OPTCR1_OFFSET)
 #  endif
 #endif
@@ -465,5 +467,9 @@
 
 void stm32_flash_lock(void);
 void stm32_flash_unlock(void);
+
+#ifdef CONFIG_STM32_STM32F40XX
+int stm32_flash_writeprotect(size_t page, bool enabled);
+#endif
 
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_FLASH_H */

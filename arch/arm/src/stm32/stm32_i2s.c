@@ -2333,7 +2333,7 @@ static int i2s_dma_allocate(struct stm32_i2s_s *priv)
     {
       /* Allocate an RX DMA channel */
 
-      priv->rx.dma = stm32_dmachannel(DMAMAP_SPI3_RX_2);
+      priv->rx.dma = stm32_dmachannel(DMACHAN_I2S3_RX);
       if (!priv->rx.dma)
         {
           i2serr("ERROR: Failed to allocate the RX DMA channel\n");
@@ -2356,7 +2356,7 @@ static int i2s_dma_allocate(struct stm32_i2s_s *priv)
     {
       /* Allocate a TX DMA channel */
 
-      priv->tx.dma = stm32_dmachannel(DMAMAP_SPI3_TX_2);
+      priv->tx.dma = stm32_dmachannel(DMACHAN_I2S3_TX);
       if (!priv->tx.dma)
         {
           i2serr("ERROR: Failed to allocate the TX DMA channel\n");

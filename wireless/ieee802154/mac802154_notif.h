@@ -1,8 +1,14 @@
 /****************************************************************************
- * sched/pthread/pthread_barriedestroy.c
+ * wireless/ieee802154/mac802154_notif.h
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Verge Inc. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *
+ *   Author: Anthony Merlino <anthony@vergeaero.com>
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ *   The naming and comments for various fields are taken directly
+ *   from the IEEE 802.15.4 2011 standard.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,59 +39,44 @@
  *
  ****************************************************************************/
 
+#ifndef __WIRELESS_IEEE802154__MAC802154_NOTIF_H
+#define __WIRELESS_IEEE802154__MAC802154_NOTIF_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <pthread.h>
-#include <semaphore.h>
-#include <errno.h>
-#include <debug.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+#include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 /****************************************************************************
- * Public Functions
+ * Private Types
  ****************************************************************************/
 
-/****************************************************************************
- * Name: pthread_barrier_destroy
- *
- * Description:
- *   The pthread_barrier_destroy() function destroys the barrier referenced
- *   by 'barrier' and releases any resources used by the barrier. The effect
- *   of subsequent use of the barrier is undefined until the barrier is
- *   reinitialized by another call to pthread_barrier_init(). The result
- *   are undefined if pthread_barrier_destroy() is called when any thread is
- *   blocked on the barrier, or if this function is called with an
- *   uninitialized barrier.
- *
- * Parameters:
- *   barrier - barrier to be destroyed.
- *
- * Return Value:
- *   0 (OK) on success or on of the following error numbers:
- *
- *   EBUSY  The implementation has detected an attempt to destroy a barrier
- *          while it is in use.
- *   EINVAL The value specified by barrier is invalid.
- *
- * Assumptions:
- *
- ****************************************************************************/
+/* Extend the public ieee802154_notif_s to include a private forward link to
+ * support a list to handle allocation
+ */
 
-int pthread_barrier_destroy(FAR pthread_barrier_t *barrier)
+struct mac802154_notif_s
 {
-  int ret = OK;
+  struct ieee802154_notif_s pub;
+  FAR struct mac802154_notif_s *flink;
+};
 
-  if (!barrier)
-    {
-      ret = EINVAL;
-    }
-  else
-    {
-      sem_destroy(&barrier->sem);
-      barrier->count = 0;
-    }
-  return ret;
-}
+/****************************************************************************
+ * Function Prototypes
+ ****************************************************************************/
+
+struct ieee802154_privmac_s; /* Forward Reference */
+
+void mac802154_notifpool_init(FAR struct ieee802154_privmac_s *priv);
+
+int mac802154_notif_alloc(FAR struct ieee802154_privmac_s *priv,
+                          FAR struct ieee802154_notif_s **notif,
+                          bool allow_interrupt);
+
+#endif /* __WIRELESS_IEEE802154__MAC802154_NOTIF_H */

@@ -115,7 +115,7 @@ struct mac802154_chardevice_s
 
   bool readpending;                     /* Is there a read using the semaphore? */
   sem_t readsem;                        /* Signaling semaphore for waiting read */
-  sq_queue_t dataind_queue; 
+  sq_queue_t dataind_queue;
 
 #ifndef CONFIG_DISABLE_SIGNALS
   /* MAC Service notification information */
@@ -254,7 +254,7 @@ static inline FAR struct ieee802154_notif_s *
         {
           dev->event_head = NULL;
         }
-      
+
       notif->flink = NULL;
     }
 
@@ -406,7 +406,7 @@ static int mac802154dev_close(FAR struct file *filep)
   /* If there are now no open instances of the driver and a signal handler is
    * not registered, purge the list of events.
    */
-  
+
   if (dev->md_open)
     {
       FAR struct ieee802154_notif_s *notif;
@@ -474,7 +474,7 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
       /* Try popping a data indication off the list */
 
       ind = (FAR struct ieee802154_data_ind_s *)sq_remfirst(&dev->dataind_queue);
-      
+
       /* If the indication is not null, we can exit the loop and copy the data */
 
       if (ind != NULL)
@@ -483,8 +483,8 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
           break;
         }
 
-      /* If this is a non-blocking call, or if there is another read operation 
-       * already pending, don't block. This driver returns EAGAIN even when 
+      /* If this is a non-blocking call, or if there is another read operation
+       * already pending, don't block. This driver returns EAGAIN even when
        * configured as non-blocking if another read operation is already pending
        * This situation should be rare. It will only occur when there are 2 calls
        * to read from separate threads and there was no data in the rx list.
@@ -500,7 +500,7 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
       mac802154dev_givesem(&dev->md_exclsem);
 
       /* Wait to be signaled when a frame is added to the list */
-      
+
       if (sem_wait(&dev->readsem) < 0)
         {
           DEBUGASSERT(errno == EINTR);
@@ -512,18 +512,18 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
        * time, it should have a data indication
        */
     }
-          
+
  rx->length = (ind->frame->io_len - ind->frame->io_offset);
 
  /* Copy the data from the IOB to the user supplied struct */
 
  memcpy(&rx->payload[0], &ind->frame->io_data[ind->frame->io_offset],
-        rx->length); 
+        rx->length);
 
  memcpy(&rx->meta, ind, sizeof(struct ieee802154_data_ind_s));
 
  /* Zero out the forward link and IOB reference */
- 
+
  rx->meta.flink = NULL;
  rx->meta.frame = NULL;
 
@@ -600,6 +600,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
   ret = mac802154_req_data(dev->md_mac, &tx->meta, iob);
   if (ret < 0)
     {
+      iob_free(iob);
       wlerr("ERROR: req_data failed %d\n", ret);
       return ret;
     }
@@ -616,7 +617,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
  ****************************************************************************/
 
 static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
-                                   unsigned long arg)
+                              unsigned long arg)
 {
   FAR struct inode *inode;
   FAR struct mac802154_chardevice_s *dev;
@@ -697,11 +698,10 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
                   /* Free the notification */
 
                   mac802154_notif_free(dev->md_mac, notif);
-
                   ret = OK;
                   break;
                 }
-              
+
               /* If this is a non-blocking call, or if there is another getevent
                * operation already pending, don't block. This driver returns
                * EAGAIN even when configured as non-blocking if another getevent
@@ -741,7 +741,7 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
             }
         }
         break;
-      
+
       case MAC802154IOC_ENABLE_EVENTS:
         {
           dev->enableevents = (bool)arg;
@@ -752,7 +752,7 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
       default:
         {
           /* Forward any unrecognized commands to the MAC layer */
-          
+
           ret = mac802154_ioctl(dev->md_mac, cmd, arg);
         }
         break;
@@ -783,7 +783,7 @@ static void mac802154dev_notify(FAR const struct mac802154_maccb_s *maccb,
    * notifications.
    */
 
-  if (dev->enableevents && (dev->md_open != NULL || dev->notify_registered)) 
+  if (dev->enableevents && (dev->md_open != NULL || dev->notify_registered))
     {
       mac802154dev_pushevent(dev, notif);
 
@@ -797,7 +797,7 @@ static void mac802154dev_notify(FAR const struct mac802154_maccb_s *maccb,
           sem_post(&dev->geteventsem);
         }
 
-#ifndef CONFIG_DISABLE_SIGNALS 
+#ifndef CONFIG_DISABLE_SIGNALS
       if (dev->notify_registered)
         {
 
@@ -810,7 +810,7 @@ static void mac802154dev_notify(FAR const struct mac802154_maccb_s *maccb,
                          (FAR void *)notif->notiftype);
 #endif
         }
-#endif 
+#endif
     }
   else
     {
@@ -854,7 +854,7 @@ static void mac802154dev_rxframe(FAR const struct mac802154_maccb_s *maccb,
       dev->readpending = false;
       sem_post(&dev->readsem);
     }
- 
+
   /* Release the driver */
 
   mac802154dev_givesem(&dev->md_exclsem);
@@ -901,7 +901,7 @@ int mac802154dev_register(MACHANDLE mac, int minor)
   dev->md_mac = mac;
   sem_init(&dev->md_exclsem, 0, 1); /* Allow the device to be opened once
                                      * before blocking */
-                                     
+
   sem_init(&dev->readsem, 0, 0);
   sem_setprotocol(&dev->readsem, SEM_PRIO_NONE);
   dev->readpending = false;

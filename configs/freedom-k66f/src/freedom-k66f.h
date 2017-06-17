@@ -57,6 +57,7 @@
 #define HAVE_PROC        1
 #define HAVE_MMCSD       1
 #define HAVE_AUTOMOUNTER 1
+#define HAVE_SPI         1
 #define HAVE_USBDEV      1
 
 #if defined(CONFIG_KINETIS_RTC)
@@ -173,6 +174,11 @@
 #  undef CONFIG_KINETIS_SPI2
 #endif
 
+#if !defined(CONFIG_KINETIS_SPI0) && !defined(CONFIG_KINETIS_SPI1) && \
+	!defined(CONFIG_KINETIS_SPI3)
+#  undef HAVE_SPI
+#endif
+
 /* FREEDOM-K66F GPIOs ****************************************************************/
 /* A micro Secure Digital (SD) card slot is available on the FRDM-K66F connected to
  * the SD Host Controller (SDHC) signals of the MCU. This slot will accept micro
@@ -222,6 +228,11 @@
 #define GPIO_LED_R         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTC | PIN9)
 #define GPIO_LED_G         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTE | PIN6)
 #define GPIO_LED_B         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTA | PIN11)
+
+/* SPI1 on J6 */
+
+#define PIN_CE           (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTB | PIN20)
+#define PIN_SPI1_PCS0    (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTD | PIN4)
 
 /************************************************************************************
  * Public data

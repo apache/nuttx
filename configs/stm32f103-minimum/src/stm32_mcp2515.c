@@ -70,9 +70,9 @@ struct stm32_mcp2515config_s
 
   /* Additional private definitions only known to this driver */
 
-  MCP2515_HANDLE handle;      /* The MCP2515 driver handle */
-  mcp2515_handler_t handler;  /* The MCP2515 interrupt handler */
-  FAR void *arg;              /* Argument to pass to the interrupt handler */
+  FAR struct mcp2515_can_s *handle; /* The MCP2515 driver handle */
+  mcp2515_handler_t handler;        /* The MCP2515 interrupt handler */
+  FAR void *arg;                    /* Argument to pass to the interrupt handler */
 };
 
 /****************************************************************************
@@ -146,7 +146,7 @@ static int mcp2515_attach(FAR struct mcp2515_config_s *state,
              (FAR struct stm32_mcp2515config_s *)state;
   irqstate_t flags;
 
-  caninfo("Saving handle %p\n", handler);
+  caninfo("Saving handler %p\n", handler);
 
   flags = enter_critical_section();
 
@@ -220,7 +220,7 @@ int stm32_mcp2515initialize(FAR const char *devpath)
 
       /* Save the opaque structure */
 
-      g_mcp2515config.handle = (MCP2515_HANDLE) mcp2515;
+      g_mcp2515config.handle = mcp2515;
 
       /* Initialize the CAN Device with the MCP2515 operations */
 

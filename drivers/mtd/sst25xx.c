@@ -680,7 +680,8 @@ static ssize_t sst25xx_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t
 
   /* On this device, we can handle the block read just like the byte-oriented read */
 
-  nbytes = sst25xx_read(dev, startblock << priv->pageshift, nblocks << priv->pageshift, buffer);
+  nbytes = sst25xx_read(dev, startblock << priv->pageshift,
+                        nblocks << priv->pageshift, buffer);
   if (nbytes > 0)
     {
         return nbytes >> priv->pageshift;
@@ -727,6 +728,12 @@ static ssize_t sst25xx_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
 
   finfo("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
 
+  /* Lock the SPI bus NOW because the following conditional call to
+   * sst25xx_waitwritecomplete must be executed with the bus locked.
+   */
+
+  sst25xx_lock(priv->dev);
+
   /* Wait for any preceding write to complete.  We could simplify things by
    * perform this wait at the end of each write operation (rather than at
    * the beginning of ALL operations), but have the wait first will slightly
@@ -738,9 +745,8 @@ static ssize_t sst25xx_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
       sst25xx_waitwritecomplete(priv);
     }
 
-  /* Lock the SPI bus and select this FLASH part */
+  /* Select this FLASH part */
 
-  sst25xx_lock(priv->dev);
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
   /* Send "Read from Memory " instruction */

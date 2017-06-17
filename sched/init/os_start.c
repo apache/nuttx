@@ -543,7 +543,8 @@ void os_start(void)
 
   sem_initialize();
 
-#if defined(MM_KERNEL_USRHEAP_INIT) || defined(CONFIG_MM_KERNEL_HEAP) || defined(CONFIG_MM_PGALLOC)
+#if defined(MM_KERNEL_USRHEAP_INIT) || defined(CONFIG_MM_KERNEL_HEAP) || \
+    defined(CONFIG_MM_PGALLOC)
   /* Initialize the memory manager */
 
   {

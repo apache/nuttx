@@ -1,8 +1,13 @@
 /****************************************************************************
- * sched/pthread/pthread_once.c
+ * wireless/ieee802154/mac802154_rxenable.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Sebastien Lorquet. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Verge Inc. All rights reserved.
+ *
+ *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Anthony Merlino <anthony@vergeaero.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,70 +44,35 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-#include <pthread.h>
-#include <sched.h>
+#include <stdlib.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <string.h>
+
+#include "mac802154.h"
+
+#include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 /****************************************************************************
- * Public Functions
+ * Public MAC Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_once
+ * Name: mac802154_req_rxenable
  *
  * Description:
- *   The  first call to pthread_once() by any thread with a given
- *   once_control, will call the init_routine with no arguments. Subsequent
- *   calls to pthread_once() with the same once_control will have no effect.
- *   On return from pthread_once(), init_routine will have completed.
- *
- * Parameters:
- *   once_control - Determines if init_routine should be called.
- *     once_control should be declared and initializeed as follows:
- *
- *        pthread_once_t once_control = PTHREAD_ONCE_INIT;
- *
- *     PTHREAD_ONCE_INIT is defined in pthread.h
- *   init_routine - The initialization routine that will be called once.
- *
- * Return Value:
- *   0 (OK) on success or EINVAL if either once_control or init_routine are
- *   invalid
- *
- * Assumptions:
+ *   The MLME-RX-ENABLE.request primitive allows the next higher layer to
+ *   request that the receiver is enable for a finite period of time.
+ *   Confirmation is returned via the
+ *   struct mac802154_maccb_s->conf_rxenable callback.
  *
  ****************************************************************************/
 
-int pthread_once(FAR pthread_once_t *once_control,
-                 CODE void (*init_routine)(void))
+int mac802154_req_rxenable(MACHANDLE mac,
+                           FAR struct ieee802154_rxenable_req_s *req)
 {
-  /* Sanity checks */
-
-  if (once_control && init_routine)
-    {
-      /* Prohibit pre-emption while we test and set the once_control */
-
-      sched_lock();
-      if (!*once_control)
-        {
-          *once_control = true;
-
-          /* Call the init_routine with pre-emption enabled. */
-
-          sched_unlock();
-          init_routine();
-          return OK;
-        }
-
-      /* The init_routine has already been called.  Restore pre-emption and return */
-
-      sched_unlock();
-      return OK;
-    }
-
-  /* One of the two arguments is NULL */
-
-  return EINVAL;
+  FAR struct ieee802154_privmac_s * priv =
+    (FAR struct ieee802154_privmac_s *)mac;
+  return -ENOTTY;
 }

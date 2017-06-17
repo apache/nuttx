@@ -1058,6 +1058,28 @@ int up_rtc_initialize(void)
   return OK;
 }
 
+/************************************************************************************
+ * Name: stm32_rtc_irqinitialize
+ *
+ * Description:
+ *   Initialize IRQs for RTC, not possible during up_rtc_initialize because
+ *   up_irqinitialize is called later.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+int stm32_rtc_irqinitialize(void)
+{
+  /* Nothing to do */
+
+  return OK;
+}
+
 /****************************************************************************
  * Name: stm32_rtc_getdatetime_with_subseconds
  *

@@ -1,8 +1,13 @@
 /****************************************************************************
- * sched/pthread/pthread_yield.c
+ * wireless/ieee802154/mac80215_scan.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Sebastien Lorquet. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Verge Inc. All rights reserved.
+ *
+ *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Anthony Merlino <anthony@vergeaero.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,31 +42,41 @@
  * Included Files
  ****************************************************************************/
 
-#include <pthread.h>
-#include <sched.h>
+#include <nuttx/config.h>
+
+#include <stdlib.h>
+#include <assert.h>
+#include <errno.h>
+#include <debug.h>
+#include <string.h>
+
+#include "mac802154.h"
+
+#include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 /****************************************************************************
- * Public Functions
+ * Public MAC Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_yield
+ * Name: mac802154_req_scan
  *
  * Description:
- *   A thread may tell the scheduler that its processor can be
- *   made available.
- *
- * Parameters:
- *   None
- *
- * Return Value:
- *   None
- *
- * Assumptions:
+ *   The MLME-SCAN.request primitive is used to initiate a channel scan over a
+ *   given list of channels. A device can use a channel scan to measure the
+ *   energy on the channel, search for the coordinator with which it associated,
+ *   or search for all coordinators transmitting beacon frames within the POS of
+ *   the scanning device. Scan results are returned
+ *   via MULTIPLE calls to the struct mac802154_maccb_s->conf_scan callback.
+ *   This is a difference with the official 802.15.4 specification, implemented
+ *   here to save memory.
  *
  ****************************************************************************/
 
-void pthread_yield(void)
+int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
 {
-  (void)sched_yield();
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
+  return -ENOTTY;
 }
+

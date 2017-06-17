@@ -163,7 +163,7 @@ int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
 
   /* Source address mode */
 
-  meta->src_addrmode = pktmeta->sextended != 0?
+  meta->srcaddr_mode = pktmeta->sextended != 0?
                         IEEE802154_ADDRMODE_EXTENDED :
                         IEEE802154_ADDRMODE_SHORT;
 
@@ -197,25 +197,25 @@ int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
     {
       /* Broadcast requires short address mode. */
 
-      meta->dest_addr.mode  = IEEE802154_ADDRMODE_SHORT;
-      meta->dest_addr.saddr = 0;
+      meta->destaddr.mode  = IEEE802154_ADDRMODE_SHORT;
+      meta->destaddr.saddr = 0;
     }
   else if (pktmeta->dextended != 0)
     {
       /* Extended destination address mode */
 
-      meta->dest_addr.mode = IEEE802154_ADDRMODE_EXTENDED;
-      sixlowpan_eaddrcopy(&meta->dest_addr.eaddr, pktmeta->dest.eaddr.u8);
+      meta->destaddr.mode = IEEE802154_ADDRMODE_EXTENDED;
+      sixlowpan_eaddrcopy(&meta->destaddr.eaddr, pktmeta->dest.eaddr.u8);
     }
   else
     {
       /* Short destination address mode */
 
-      meta->dest_addr.mode = IEEE802154_ADDRMODE_SHORT;
-      sixlowpan_saddrcopy(&meta->dest_addr.saddr, pktmeta->dest.saddr.u8);
+      meta->destaddr.mode = IEEE802154_ADDRMODE_SHORT;
+      sixlowpan_saddrcopy(&meta->destaddr.saddr, pktmeta->dest.saddr.u8);
     }
 
-  meta->dest_addr.panid = pktmeta->dpanid;
+  meta->destaddr.panid = pktmeta->dpanid;
 
   /* Handle associated with MSDU.  Will increment once per packet, not
    * necesarily per frame:  The same MSDU handle will be used for each

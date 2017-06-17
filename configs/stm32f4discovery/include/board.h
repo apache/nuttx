@@ -310,21 +310,14 @@
 #define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1
 #define GPIO_SPI2_SCK    GPIO_SPI2_SCK_1
 
-/* SPI3 - Onboard devices use SPI3 */
-
-#define GPIO_SPI3_MISO   GPIO_SPI3_MISO_2
-#define GPIO_SPI3_MOSI   GPIO_SPI3_MOSI_2
-#define GPIO_SPI3_SCK    GPIO_SPI3_SCK_2
-#define GPIO_SPI3_NSS    GPIO_SPI3_NSS_2
-
-/* I2S3 - Onboard devices use I2S3 */
+/* I2S3 - CS43L22 configuration uses I2S3 */
 
 #define GPIO_I2S3_SD     GPIO_I2S3_SD_2
 #define GPIO_I2S3_CK     GPIO_I2S3_CK_2
 #define GPIO_I2S3_WS     GPIO_I2S3_WS_1
 
-#define DMACHAN_SPI3_RX  DMAMAP_SPI3_RX_2
-#define DMACHAN_SPI3_TX  DMAMAP_SPI3_TX_2
+#define DMACHAN_I2S3_RX  DMAMAP_SPI3_RX_2
+#define DMACHAN_I2S3_TX  DMAMAP_SPI3_TX_2
 
 /* I2C config to use with Nunchuk PB7 (SDA) and PB8 (SCL) */
 

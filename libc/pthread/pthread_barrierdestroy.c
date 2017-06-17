@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread/pthread_condinit.c
+ * libc/pthread/pthread_barriedestroy.c
  *
- *   Copyright (C) 2007-2009, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,61 +41,52 @@
 
 #include <pthread.h>
 #include <semaphore.h>
-#include <debug.h>
 #include <errno.h>
-
-#include <nuttx/semaphore.h>
-
-#include "pthread/pthread.h"
+#include <debug.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_cond_init
+ * Name: pthread_barrier_destroy
  *
  * Description:
- *   A thread can create condition variables.
+ *   The pthread_barrier_destroy() function destroys the barrier referenced
+ *   by 'barrier' and releases any resources used by the barrier. The effect
+ *   of subsequent use of the barrier is undefined until the barrier is
+ *   reinitialized by another call to pthread_barrier_init(). The result
+ *   are undefined if pthread_barrier_destroy() is called when any thread is
+ *   blocked on the barrier, or if this function is called with an
+ *   uninitialized barrier.
  *
  * Parameters:
- *   None
+ *   barrier - barrier to be destroyed.
  *
  * Return Value:
- *   None
+ *   0 (OK) on success or on of the following error numbers:
+ *
+ *   EBUSY  The implementation has detected an attempt to destroy a barrier
+ *          while it is in use.
+ *   EINVAL The value specified by barrier is invalid.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_cond_init(FAR pthread_cond_t *cond, FAR const pthread_condattr_t *attr)
+int pthread_barrier_destroy(FAR pthread_barrier_t *barrier)
 {
   int ret = OK;
 
-  sinfo("cond=0x%p attr=0x%p\n", cond, attr);
-
-  if (cond == NULL)
-    {
-      ret = EINVAL;
-    }
-
-  /* Initialize the semaphore contained in the condition structure with
-   * initial count = 0
-   */
-
-  else if (sem_init((FAR sem_t *)&cond->sem, 0, 0) != OK)
+  if (!barrier)
     {
       ret = EINVAL;
     }
   else
     {
-      /* The contained semaphore is used for signaling and, hence, should
-       * not have priority inheritance enabled.
-       */
-
-      sem_setprotocol(&cond->sem, SEM_PRIO_NONE);
+      sem_destroy(&barrier->sem);
+      barrier->count = 0;
     }
 
-  sinfo("Returning %d\n", ret);
   return ret;
 }

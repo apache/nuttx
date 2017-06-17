@@ -281,13 +281,8 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
 /* The following are defined if pthreads are enabled */
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  SYSCALL_LOOKUP(pthread_barrier_destroy,  1, STUB_pthread_barrier_destroy)
-  SYSCALL_LOOKUP(pthread_barrier_init,     3, STUB_pthread_barrier_init)
-  SYSCALL_LOOKUP(pthread_barrier_wait,     1, STUB_pthread_barrier_wait)
   SYSCALL_LOOKUP(pthread_cancel,           1, STUB_pthread_cancel)
   SYSCALL_LOOKUP(pthread_cond_broadcast,   1, STUB_pthread_cond_broadcast)
-  SYSCALL_LOOKUP(pthread_cond_destroy,     1, STUB_pthread_cond_destroy)
-  SYSCALL_LOOKUP(pthread_cond_init,        2, STUB_pthread_cond_init)
   SYSCALL_LOOKUP(pthread_cond_signal,      1, STUB_pthread_cond_signal)
   SYSCALL_LOOKUP(pthread_cond_wait,        2, STUB_pthread_cond_wait)
   SYSCALL_LOOKUP(pthread_create,           4, STUB_pthread_create)
@@ -306,11 +301,9 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
   SYSCALL_LOOKUP(pthread_mutex_consistent, 1, STUB_pthread_mutex_consistent)
 #endif
-  SYSCALL_LOOKUP(pthread_once,             2, STUB_pthread_once)
   SYSCALL_LOOKUP(pthread_setschedparam,    3, STUB_pthread_setschedparam)
   SYSCALL_LOOKUP(pthread_setschedprio,     2, STUB_pthread_setschedprio)
   SYSCALL_LOOKUP(pthread_setspecific,      2, STUB_pthread_setspecific)
-  SYSCALL_LOOKUP(pthread_yield,            0, STUB_pthread_yield)
 #  ifdef CONFIG_SMP
   SYSCALL_LOOKUP(pthread_setaffinity,      3, STUB_pthread_setaffinity)
   SYSCALL_LOOKUP(pthread_getaffinity,      3, STUB_pthread_getaffinity)

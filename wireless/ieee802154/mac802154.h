@@ -58,8 +58,6 @@
  * Public Data Types
  ****************************************************************************/
 
-
-
 /* Callback operations to notify the next highest layer of various asynchronous
  * events, usually triggered by some previous request or response invoked by the
  * upper layer.
@@ -141,7 +139,7 @@ int mac802154_get_mhrlen(MACHANDLE mac,
  *
  ****************************************************************************/
 
-int mac802154_req_data(MACHANDLE mac, 
+int mac802154_req_data(MACHANDLE mac,
                        FAR const struct ieee802154_frame_meta_s *meta,
                        FAR struct iob_s *frame);
 
@@ -153,10 +151,10 @@ int mac802154_req_data(MACHANDLE mac,
  *   an MSDU from the transaction queue. Confirmation is returned via
  *   the struct mac802154_maccb_s->conf_purge callback.
  *
- *   NOTE: The standard specifies that confirmation should be indicated via 
+ *   NOTE: The standard specifies that confirmation should be indicated via
  *   the asynchronous MLME-PURGE.confirm primitve.  However, in our
  *   implementation we synchronously return the status from the request.
- *   Therefore, we merge the functionality of the MLME-PURGE.request and 
+ *   Therefore, we merge the functionality of the MLME-PURGE.request and
  *   MLME-PURGE.confirm primitives together.
  *
  ****************************************************************************/
@@ -273,7 +271,7 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req);
  *
  ****************************************************************************/
 
-int mac802154_req_get(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
+int mac802154_req_get(MACHANDLE mac, enum ieee802154_attr_e ,
                       FAR union ieee802154_attr_u *attrval);
 
 /****************************************************************************
@@ -281,9 +279,9 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
  *
  * Description:
  *   The MLME-SET.request primitive attempts to write the given value to the
- *   indicated MAC PIB attribute. 
+ *   indicated MAC PIB attribute.
  *
- *   NOTE: The standard specifies that confirmation should be indicated via 
+ *   NOTE: The standard specifies that confirmation should be indicated via
  *   the asynchronous MLME-SET.confirm primitve.  However, in our implementation
  *   we synchronously return the status from the request. Therefore, we do merge
  *   the functionality of the MLME-SET.request and MLME-SET.confirm primitives
@@ -291,7 +289,7 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
  *
  ****************************************************************************/
 
-int mac802154_req_set(MACHANDLE mac, enum ieee802154_pib_attr_e pib_attr,
+int mac802154_req_set(MACHANDLE mac, enum ieee802154_attr_e ,
                       FAR const union ieee802154_attr_u *attrval);
 
 /****************************************************************************

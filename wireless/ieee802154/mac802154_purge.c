@@ -1,8 +1,13 @@
 /****************************************************************************
- * sched/pthread/pthread_conddestroy.c
+ * wireless/ieee802154/mac802154_purge.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Sebastien Lorquet. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Verge Inc. All rights reserved.
+ *
+ *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Anthony Merlino <anthony@vergeaero.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,50 +44,40 @@
 
 #include <nuttx/config.h>
 
-#include <pthread.h>
-#include <debug.h>
+#include <stdlib.h>
+#include <assert.h>
 #include <errno.h>
-#include "pthread/pthread.h"
+#include <debug.h>
+#include <string.h>
+
+#include "mac802154.h"
+
+#include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 /****************************************************************************
- * Public Functions
+ * Public MAC Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_cond_destroy
+ * Name: mac802154_req_purge
  *
  * Description:
- *   A thread can delete condition variables.
+ *   The MCPS-PURGE.request primitive allows the next higher layer to purge
+ *   an MSDU from the transaction queue. Confirmation is returned via
+ *   the struct mac802154_maccb_s->conf_purge callback.
  *
- * Parameters:
- *   None
- *
- * Return Value:
- *   None
- *
- * Assumptions:
+ *   NOTE: The standard specifies that confirmation should be indicated via
+ *   the asynchronous MLME-PURGE.confirm primitve.  However, in our
+ *   implementation we synchronously return the status from the request.
+ *   Therefore, we merge the functionality of the MLME-PURGE.request and
+ *   MLME-PURGE.confirm primitives together.
  *
  ****************************************************************************/
 
-int pthread_cond_destroy(FAR pthread_cond_t *cond)
+int mac802154_req_purge(MACHANDLE mac, uint8_t msdu_handle)
 {
-  int ret = OK;
-
-  sinfo("cond=0x%p\n", cond);
-
-  if (!cond)
-    {
-      ret = EINVAL;
-    }
-
-  /* Destroy the semaphore contained in the structure */
-
-  else if (sem_destroy((FAR sem_t *)&cond->sem) != OK)
-    {
-      ret = EINVAL;
-    }
-
-  sinfo("Returning %d\n", ret);
-  return ret;
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)mac;
+  return -ENOTTY;
 }
 

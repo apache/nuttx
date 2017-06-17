@@ -842,13 +842,17 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
   timclk = priv->pclk / prescaler;
 
   reload = timclk / info->frequency;
-  if (reload < 1)
+  if (reload < 2)
     {
       reload = 1;
     }
   else if (reload > 65535)
     {
       reload = 65535;
+    }
+  else
+    {
+      reload--;
     }
 
   pwminfo("TIM%u PCLK: %u frequency: %u TIMCLK: %u prescaler: %u reload: %u\n",

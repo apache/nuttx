@@ -8,7 +8,7 @@ Make.dep
 .swp
 .*.swp
 core
-.gdbinit
+/.gdbinit
 /cscope.*
 /.config
 /.config.old
@@ -24,5 +24,7 @@ core
 /*.bin
 /*.ihx
 /*.hex
+/.cproject
+/.project
 /pcode
 /tags
