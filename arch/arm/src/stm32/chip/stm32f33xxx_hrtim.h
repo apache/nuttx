@@ -1136,11 +1136,12 @@
 
 /* Timer X Fault Register */
 
-#define HRTIM_TIMFLT_FLT1EN           (1 << 0) /* Bit 0 */
-#define HRTIM_TIMFLT_FLT2EN           (1 << 1) /* Bit 1 */
-#define HRTIM_TIMFLT_FLT3EN           (1 << 2) /* Bit 2 */
-#define HRTIM_TIMFLT_FLT4EN           (1 << 3) /* Bit 3 */
-#define HRTIM_TIMFLT_FLT5EN           (1 << 4) /* Bit 4 */
+#define HRTIM_TIMFLT_FLT1EN           (1 << 0)  /* Bit 0: Fault1 enable */
+#define HRTIM_TIMFLT_FLT2EN           (1 << 1)  /* Bit 1: Fault 2 enable */
+#define HRTIM_TIMFLT_FLT3EN           (1 << 2)  /* Bit 2: Fault 3 enable*/
+#define HRTIM_TIMFLT_FLT4EN           (1 << 3)  /* Bit 3: Fault 4 enable */
+#define HRTIM_TIMFLT_FLT5EN           (1 << 4)  /* Bit 4: Fault 5 enable */
+#define HRTIM_TIMFLT_FLTLCK           (1 << 31) /* Bit 31: Fault sources lock*/
 
 /* Common Control Register 1 */
 

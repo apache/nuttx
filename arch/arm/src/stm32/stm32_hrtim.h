@@ -80,6 +80,7 @@ enum stm32_hrtim_tim_e
 #ifdef CONFIG_STM32_HRTIM_TIME
   HRTIM_TIMER_TIME   = 5,
 #endif
+  HRTIM_TIMER_COMMON = 6
 };
 
 /* Source which can force the Tx1/Tx2 output to its inactive state */
@@ -222,12 +223,31 @@ enum stm32_hrtim_tim_prescaler_e
   HRTIM_PRESCALER_128,
 };
 
+/* HRTIM Slave Timer fault sources Lock */
+
+enum stm32_hrtim_tim_fault_lock_e
+{
+  HRTIM_TIM_FAULT_RW   = 0,         /* Slave Timer fault source are read/write */
+  HRTIM_TIM_FAULT_LOCK = (1 << 7),  /* Slave Timer fault source are read only */
+};
+
+/* HRTIM Slave Timer Fault configuration */
+
+enum stm32_hrtim_tim_fault_src_e
+{
+  HRTIM_TIM_FAULT1 = (1 << 0),
+  HRTIM_TIM_FAULT2 = (1 << 2),
+  HRTIM_TIM_FAULT3 = (1 << 3),
+  HRTIM_TIM_FAULT4 = (1 << 4),
+  HRTIM_TIM_FAULT5 = (1 << 5),
+};
+
 /* HRTIM Fault Source */
 
 enum stm32_hrtim_fault_src_e
 {
-  HRTIM_FAULT_SRC_PIN,
-  HRTIM_FAULT_SRC_INTERNAL
+  HRTIM_FAULT_SRC_PIN      = 0,
+  HRTIM_FAULT_SRC_INTERNAL = 1
 };
 
 /* HRTIM External Event Source
@@ -236,10 +256,81 @@ enum stm32_hrtim_fault_src_e
 
 enum stm32_hrtim_eev_src_e
 {
-  HRTIM_EEV_SRC_PIN,
-  HRTIM_EEV_SRC_ANALOG,
-  HRTIM_EEV_SRC_TRGO,
-  HRTIM_EEV_SRC_ADC
+  HRTIM_EEV_SRC_PIN    = 0,
+  HRTIM_EEV_SRC_ANALOG = 1,
+  HRTIM_EEV_SRC_TRGO   = 2,
+  HRTIM_EEV_SRC_ADC    = 3
+};
+
+/* HRTIM Fault Polarity */
+
+enum stm32_hrtim_fault_pol_e
+{
+  HRTIM_FAULT_POL_LOW  = 0,
+  HRTIM_FAULT_POL_HIGH = 1
+};
+
+/* HRTIM External Event Polarity  */
+
+enum stm32_hrtim_eev_pol_e
+{
+  HRTIM_EEV_POL_HIGH = 0,               /* External Event is active high */
+  HRTIM_EEV_POL_LOW  = 1                 /* External Event is active low */
+};
+
+/* HRTIM External Event sensitivity */
+
+enum stm32_hrtim_eev_sen_e
+{
+  HRTIM_EEV_SEN_LEVEL   = 0,    /* On active level defined by polarity  */
+  HRTIM_EEV_SEN_RISING  = 1,    /* Rising edgne */
+  HRTIM_EEV_SEN_FALLING = 2,    /* Falling edge */
+  HRTIM_EEV_SEN_BOTH    = 3     /* Both edges */
+};
+
+/* External Event Sampling clock division */
+
+enum stm32_hrtim_eev_sampling_e
+{
+  HRTIM_EEV_SAMPLING_d1 = 0,
+  HRTIM_EEV_SAMPLING_d2 = 1,
+  HRTIM_EEV_SAMPLING_d4 = 2,
+  HRTIM_EEV_SAMPLING_d8 = 3
+};
+
+/* HRTIM External Event Mode.
+ * NOTE: supported only for EEV1-5
+ */
+
+enum stm32_hrtim_eev_mode_e
+{
+  HRTIM_EEV_MODE_NORMAL,
+  HRTIM_EEV_MODE_FAST           /* low latency mode */
+};
+
+
+/* External Event filter.
+ * NOTE: supported only for EEV6-10
+ */
+
+enum stm32_hrtim_eev_filter_e
+{
+  HRTIM_EEV_DISABLE    = 0,
+  HRTIM_EEV_HRT_N2     = 1,
+  HRTIM_EEV_HRT_N4     = 2,
+  HRTIM_EEV_HRT_N8     = 3,
+  HRTIM_EEV_EEVSd2_N6  = 4,
+  HRTIM_EEV_EEVSd2_N8  = 5,
+  HRTIM_EEV_EEVSd4_N6  = 6,
+  HRTIM_EEV_EEVSd4_N8  = 7,
+  HRTIM_EEV_EEVSd8_N6  = 8,
+  HRTIM_EEV_EEVSd8_N8  = 9,
+  HRTIM_EEV_EEVSd16_N5 = 10,
+  HRTIM_EEV_EEVSd16_N6 = 11,
+  HRTIM_EEV_EEVSd16_N8 = 12,
+  HRTIM_EEV_EEVSd32_N5 = 13,
+  HRTIM_EEV_EEVSd32_N6 = 14,
+  HRTIM_EEV_EEVSd32_N8 = 15,
 };
 
 /* Compare register index */
