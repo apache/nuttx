@@ -59,8 +59,6 @@
  ****************************************************************************/
 
 static void mac802154_timeout_assoc(FAR struct ieee802154_privmac_s *priv);
-static FAR struct ieee802154_txdesc_s *
-  mac802154_assoc_getresp(FAR struct ieee802154_privmac_s *priv);
 
 /****************************************************************************
  * Public MAC Functions
@@ -509,17 +507,30 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
            * due to NO_DATA.
            */
 
-          mac802154_timerstart(priv,
-            priv->resp_waittime*IEEE802154_BASE_SUPERFRAME_DURATION,
-            mac802154_timeout_assoc);
+          mac802154_timerstart(priv, (priv->resp_waittime *
+                               IEEE802154_BASE_SUPERFRAME_DURATION),
+                               mac802154_timeout_assoc);
         }
       else
         {
+          /* Make sure the coordinator address mode is not set to none. This shouldn't
+           * happen since the association request should have set the mode to short or
+           * extended
+           */
+
+          DEBUGASSERT(priv->coordaddr.mode != IEEE802154_ADDRMODE_NONE);
+
           /* Send the Data Request MAC command after macResponseWaitTime to
            * extract the data from the coordinator.
            */
 
-          respdesc = mac802154_assoc_getresp(priv);
+          mac802154_txdesc_alloc(priv, &respdesc, false);
+
+          mac802154_create_datareq(priv, &priv->coordaddr,
+                                   IEEE802154_ADDRMODE_EXTENDED, respdesc);
+
+          priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
+
           priv->radio->txdelayed(priv->radio, respdesc,
             (priv->resp_waittime*IEEE802154_BASE_SUPERFRAME_DURATION));
         }
@@ -843,115 +854,4 @@ static void mac802154_timeout_assoc(FAR struct ieee802154_privmac_s *priv)
   notif->u.assocconf.saddr = IEEE802154_SADDR_UNSPEC;
 
   priv->cb->notify(priv->cb, notif);
-}
-
-/****************************************************************************
- * Name: mac802154_assoc_getresp
- *
- * Description:
- *   Send a data request to the coordinator to extract the association response.
- *
- * Assumptions:
- *   MAC is locked when called.
- *
- * TODO: Can this be used for general data extraction?
- *
- ****************************************************************************/
-
-static FAR struct ieee802154_txdesc_s *
-  mac802154_assoc_getresp(FAR struct ieee802154_privmac_s *priv)
-{
-  FAR struct iob_s *iob;
-  FAR struct ieee802154_txdesc_s *txdesc;
-  FAR uint16_t *u16;
-
-  /* Allocate an IOB to put the frame in */
-
-  iob = iob_alloc(false);
-  DEBUGASSERT(iob != NULL);
-
-  iob->io_flink  = NULL;
-  iob->io_len    = 0;
-  iob->io_offset = 0;
-  iob->io_pktlen = 0;
-
-  /* Allocate a tx descriptor */
-
-  mac802154_txdesc_alloc(priv, &txdesc, false);
-
-  priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
-
-  /* Get a uin16_t reference to the first two bytes. ie frame control field */
-
-  u16 = (FAR uint16_t *)&iob->io_data[0];
-
-  *u16 = (IEEE802154_FRAME_COMMAND << IEEE802154_FRAMECTRL_SHIFT_FTYPE);
-  *u16 |= IEEE802154_FRAMECTRL_ACKREQ;
-  *u16 |= (priv->coordaddr.mode << IEEE802154_FRAMECTRL_SHIFT_DADDR);
-  *u16 |= (IEEE802154_ADDRMODE_EXTENDED << IEEE802154_FRAMECTRL_SHIFT_SADDR);
-
-  /* If the Destination Addressing Mode field is set to indicate that
-   * destination addressing information is not present, the PAN ID Compression
-   * field shall be set to zero and the source PAN identifier shall contain the
-   * value of macPANId. Otherwise, the PAN ID Compression field shall be set to
-   * one. In this case and in accordance with the PAN ID Compression field, the
-   * Destination PAN Identifier field shall contain the value of macPANId, while
-   * the Source PAN Identifier field shall be omitted. [1] pg. 72
-   *
-   * The destination address for a data request to extract an assoication request
-   * should never be set to none.  So we always set the PAN ID compression field
-   */
-
-  DEBUGASSERT(priv->coordaddr.mode != IEEE802154_ADDRMODE_NONE);
-
-  *u16 |= IEEE802154_FRAMECTRL_PANIDCOMP;
-
-  iob->io_len = 2;
-
-  /* Each time a data or a MAC command frame is generated, the MAC sublayer
-   * shall copy the value of macDSN into the Sequence Number field of the
-   * MHR of the outgoing frame and then increment it by one. [1] pg. 40.
-   */
-
-  iob->io_data[iob->io_len++] = priv->dsn++;
-
-  /* The Destination PAN Identifier field shall contain the identifier of
-   * the PAN to which to associate. [1] pg. 68
-   */
-
-  memcpy(&iob->io_data[iob->io_len], &priv->coordaddr.panid, 2);
-  iob->io_len += 2;
-
-  /* The Destination Address field shall contain the address from the
-   * beacon frame that was transmitted by the coordinator to which the
-   * association request command is being sent. [1] pg. 68
-   */
-
-  if (priv->coordaddr.mode == IEEE802154_ADDRMODE_SHORT)
-    {
-      memcpy(&iob->io_data[iob->io_len], &priv->coordaddr.saddr, 2);
-      iob->io_len += 2;
-    }
-  else if (priv->coordaddr.mode == IEEE802154_ADDRMODE_EXTENDED)
-    {
-      memcpy(&iob->io_data[iob->io_len], &priv->coordaddr.eaddr[0],
-             IEEE802154_EADDR_LEN);
-      iob->io_len += IEEE802154_EADDR_LEN;
-    }
-
-  /* The Source Address field shall contain the value of macExtendedAddress. */
-
-  memcpy(&iob->io_data[iob->io_len], &priv->addr.eaddr[0],
-        IEEE802154_EADDR_LEN);
-  iob->io_len += IEEE802154_EADDR_LEN;
-
-  /* Copy in the Command Frame Identifier */
-
-  iob->io_data[iob->io_len++] = IEEE802154_CMD_DATA_REQ;
-
-  /* Copy the IOB reference to the descriptor */
-
-  txdesc->frame = iob;
-
-  return txdesc;
 }

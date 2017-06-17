@@ -233,6 +233,135 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
 }
 
 /****************************************************************************
+ * Name: mac802154_create_datareq
+ *
+ * Description:
+ *    Internal function used by various parts of the MAC layer. This function
+ *    allocates an IOB, populates the frame according to input args, and links
+ *    the IOB into the provided tx descriptor.
+ *
+ * Assumptions:
+ *    Called with the MAC locked
+ *
+ ****************************************************************************/
+
+void mac802154_create_datareq(FAR struct ieee802154_privmac_s *priv,
+                              FAR struct ieee802154_addr_s *coordaddr,
+                              enum ieee802154_addrmode_e srcmode,
+                              FAR struct ieee802154_txdesc_s *txdesc)
+{
+  FAR struct iob_s *iob;
+  FAR uint16_t *u16;
+
+  /* The only node allowed to use a source address of none is the PAN Coordinator.
+   * PAN coordinators should not be sending data request commans.
+   */
+
+  DEBUGASSERT(srcmode != IEEE802154_ADDRMODE_NONE);
+
+  /* Allocate an IOB to put the frame in */
+
+  iob = iob_alloc(false);
+  DEBUGASSERT(iob != NULL);
+
+  iob->io_flink  = NULL;
+  iob->io_len    = 0;
+  iob->io_offset = 0;
+  iob->io_pktlen = 0;
+
+  /* Get a uin16_t reference to the first two bytes. ie frame control field */
+
+  u16 = (FAR uint16_t *)&iob->io_data[iob->io_len];
+  iob->io_len = 2;
+
+  *u16 = (IEEE802154_FRAME_COMMAND << IEEE802154_FRAMECTRL_SHIFT_FTYPE);
+  *u16 |= IEEE802154_FRAMECTRL_ACKREQ;
+  *u16 |= (coordaddr->mode << IEEE802154_FRAMECTRL_SHIFT_DADDR);
+  *u16 |= (srcmode << IEEE802154_FRAMECTRL_SHIFT_SADDR);
+
+  /* Each time a data or a MAC command frame is generated, the MAC sublayer
+   * shall copy the value of macDSN into the Sequence Number field of the
+   * MHR of the outgoing frame and then increment it by one. [1] pg. 40.
+   */
+
+  iob->io_data[iob->io_len++] = priv->dsn++;
+
+  /* If the destination address is present, copy the PAN ID and one of the
+   * addresses, depending on mode, into the MHR.
+   */
+
+  if (coordaddr->mode != IEEE802154_ADDRMODE_NONE)
+    {
+      memcpy(&iob->io_data[iob->io_len], &coordaddr->panid, 2);
+      iob->io_len += 2;
+
+      if (coordaddr->mode == IEEE802154_ADDRMODE_SHORT)
+        {
+          memcpy(&iob->io_data[iob->io_len], &coordaddr->saddr, 2);
+          iob->io_len += 2;
+        }
+      else if (coordaddr->mode == IEEE802154_ADDRMODE_EXTENDED)
+        {
+          memcpy(&iob->io_data[iob->io_len], &coordaddr->eaddr,
+                 IEEE802154_EADDR_LEN);
+          iob->io_len += IEEE802154_EADDR_LEN;
+        }
+    }
+
+  *u16 |= (coordaddr->mode << IEEE802154_FRAMECTRL_SHIFT_DADDR);
+
+  /* If the Destination Addressing Mode field is set to indicate that
+   * destination addressing information is not present, the PAN ID Compression
+   * field shall be set to zero and the source PAN identifier shall contain the
+   * value of macPANId. Otherwise, the PAN ID Compression field shall be set to
+   * one. In this case and in accordance with the PAN ID Compression field, the
+   * Destination PAN Identifier field shall contain the value of macPANId, while
+   * the Source PAN Identifier field shall be omitted. [1] pg. 72
+   */
+
+  if (coordaddr->mode  != IEEE802154_ADDRMODE_NONE &&
+      coordaddr->panid == priv->addr.panid)
+    {
+      *u16 |= IEEE802154_FRAMECTRL_PANIDCOMP;
+    }
+  else
+    {
+      memcpy(&iob->io_data[iob->io_len], &priv->addr.panid, 2);
+      iob->io_len += 2;
+    }
+  
+  if (srcmode == IEEE802154_ADDRMODE_SHORT)
+    {
+      memcpy(&iob->io_data[iob->io_len], &priv->addr.saddr, 2);
+      iob->io_len += 2;
+    }
+  else if (srcmode == IEEE802154_ADDRMODE_EXTENDED)
+    {
+      memcpy(&iob->io_data[iob->io_len], &priv->addr.eaddr, IEEE802154_EADDR_LEN);
+      iob->io_len += IEEE802154_EADDR_LEN;
+    }
+
+  /* Copy in the Command Frame Identifier */
+
+  iob->io_data[iob->io_len++] = IEEE802154_CMD_DATA_REQ;
+
+  /* Copy the IOB reference to the descriptor */
+
+  txdesc->frame = iob;
+  txdesc->frametype = IEEE802154_FRAME_COMMAND;
+
+  /* Save a copy of the destination addressing infromation into the tx descriptor.
+   * We only do this for commands to help with handling their progession.
+   */
+
+  memcpy(&txdesc->destaddr, &coordaddr, sizeof(struct ieee802154_addr_s));
+
+  /* Copy the IOB reference to the descriptor */
+
+  txdesc->frame = iob;
+}
+
+/****************************************************************************
  * Name: mac802154_setupindirect
  *
  * Description:
@@ -810,8 +939,10 @@ static void mac802154_rxframe_worker(FAR void *arg)
                * coordinator if beacon tracking was enabled during the Association
                * operation.
                *
-               * txdesc = mac802154_assoc_getresp(priv);
-               * sq_addlast((FAR sq_entry_t *)txdesc, &priv->csma_queue);
+               *  mac802154_txdesc_alloc(priv, &respdec, false);
+               *  mac802154_create_datareq(priv, &req->coordaddr,
+               *                           IEEE802154_ADDRMODE_EXTENDED, respdesc);
+               *  sq_addlast((FAR sq_entry_t *)respdesc, &priv->csma_queue);
                */
             }
             break;
