@@ -75,8 +75,8 @@ static void mac802154_resetqueues(FAR struct ieee802154_privmac_s *priv);
 
 /* IEEE 802.15.4 PHY Interface OPs */
 
-static int mac802154_poll(FAR const struct ieee802154_radiocb_s *radiocb,
-                          bool gts, FAR struct ieee802154_txdesc_s **tx_desc);
+static int mac802154_radiopoll(FAR const struct ieee802154_radiocb_s *radiocb,
+                               bool gts, FAR struct ieee802154_txdesc_s **tx_desc);
 
 static void mac802154_txdone(FAR const struct ieee802154_radiocb_s *radiocb,
                              FAR struct ieee802154_txdesc_s *tx_desc);
@@ -363,7 +363,7 @@ static void mac802154_purge_worker(FAR void *arg)
 }
 
 /****************************************************************************
- * Name: mac802154_poll
+ * Name: mac802154_radiopoll
  *
  * Description:
  *   Called from the radio driver through the callback struct.  This function is
@@ -373,8 +373,8 @@ static void mac802154_purge_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-static int mac802154_poll(FAR const struct ieee802154_radiocb_s *radiocb,
-                          bool gts, FAR struct ieee802154_txdesc_s **txdesc)
+static int mac802154_radiopoll(FAR const struct ieee802154_radiocb_s *radiocb,
+                               bool gts, FAR struct ieee802154_txdesc_s **txdesc)
 {
   FAR struct mac802154_radiocb_s *cb =
     (FAR struct mac802154_radiocb_s *)radiocb;
@@ -1381,7 +1381,7 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
   mac->radiocb.priv = mac;
 
   radiocb            = &mac->radiocb.cb;
-  radiocb->poll      = mac802154_poll;
+  radiocb->poll      = mac802154_radiopoll;
   radiocb->txdone    = mac802154_txdone;
   radiocb->rxframe   = mac802154_rxframe;
 
