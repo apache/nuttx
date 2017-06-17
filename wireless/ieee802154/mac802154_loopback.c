@@ -116,9 +116,21 @@ struct lo_driver_s
 static struct lo_driver_s g_loopback;
 static uint8_t g_iobuffer[CONFIG_NET_6LOWPAN_MTU + CONFIG_NET_GUARDSIZE];
 
+static uint8_t g_eaddr[8] =
+{
+  0x00, 0xfa, 0xde, 0x00, 0xde, 0xad, 0xbe, 0xef
+};
+
+static uint16_t g_saddr = 0xabcd;
+static uint16_t g_panid = 0xcafe;
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+/* IP address conversion */
+
+static void lo_addr2ip(FAR struct net_driver_s *dev);
 
 /* Polling logic */
 
@@ -152,6 +164,48 @@ static int lo_req_data(FAR struct ieee802154_driver_s *netdev,
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: lo_addr2ip
+ *
+ * Description:
+ *   Create a MAC-based IP address from the IEEE 802.15.14 short or extended
+ *   address of the MAC.
+ *
+ *    128  112  96   80    64   48   32   16
+ *    ---- ---- ---- ----  ---- ---- ---- ----
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+static void lo_addr2ip(FAR struct net_driver_s *dev)
+{
+  dev->d_ipv6addr[0]  = HTONS(0xfe80);
+  dev->d_ipv6addr[1]  = 0;
+  dev->d_ipv6addr[2]  = 0;
+  dev->d_ipv6addr[3]  = 0;
+  dev->d_ipv6addr[4]  = (uint16_t)g_eaddr[0] << 8 |  (uint16_t)g_eaddr[1];
+  dev->d_ipv6addr[5]  = (uint16_t)g_eaddr[2] << 8 |  (uint16_t)g_eaddr[3];
+  dev->d_ipv6addr[6]  = (uint16_t)g_eaddr[4] << 8 |  (uint16_t)g_eaddr[5];
+  dev->d_ipv6addr[6]  = (uint16_t)g_eaddr[6] << 8 |  (uint16_t)g_eaddr[6];
+  dev->d_ipv6addr[6] ^= 0x200;
+}
+#else
+static void lo_addr2ip(FAR struct net_driver_s *dev)
+{
+  dev->d_ipv6addr[0]  = HTONS(0xfe80);
+  dev->d_ipv6addr[1]  = 0;
+  dev->d_ipv6addr[2]  = 0;
+  dev->d_ipv6addr[3]  = 0;
+  dev->d_ipv6addr[4]  = 0;
+  dev->d_ipv6addr[5]  = HTONS(0x00ff);
+  dev->d_ipv6addr[0]  = HTONS(0xfe00);
+  dev->d_ipv6addr[0]  = htons(g_saddr) ^ 0x0200;
+  dev->d_ipv6addr[6] ^= 0x200;
+}
+#endif
 
 /****************************************************************************
  * Name: lo_loopback
@@ -580,8 +634,12 @@ static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
                     unsigned long arg)
 {
-#if 0
-  FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
+  FAR struct lo_driver_s *priv;
+
+  DEBUGASSERT(dev != NULL && dev->d_private != NULL);
+  priv = (FAR struct lo_driver_s *)dev->d_private;
+
+  UNUSED(priv);
 
   /* Check for IOCTLs aimed at the IEEE802.15.4 MAC layer */
 
@@ -589,9 +647,71 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
     {
       FAR struct ieee802154_netmac_s *netmac =
         (FAR struct ieee802154_netmac_s *)arg;
+
+      DEBUGASSERT(netmac != NULL);
+
+      if (cmd == MAC802154IOC_MLME_SET_REQUEST)
+        {
+          FAR struct ieee802154_set_req_s *setreq = &netmac->u.setreq;
+
+          switch (setreq->attr)
+            {
+              case IEEE802154_ATTR_MAC_PANID:
+                g_panid = setreq->attrval.mac.panid;
+                break;
+
+              case IEEE802154_ATTR_MAC_EXTENDED_ADDR:
+                memcpy(setreq->attrval.mac.eaddr, g_eaddr, 8);
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+                lo_addr2ip(dev);
+#endif
+                break;
+
+              case IEEE802154_ATTR_MAC_SHORT_ADDRESS:
+                g_saddr = setreq->attrval.mac.saddr;
+#ifndef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+                lo_addr2ip(dev);
+#endif
+                break;
+
+              default:
+                return -ENOTTY;
+            }
+
+          return OK;
+        }
+      else if (cmd == MAC802154IOC_MLME_GET_REQUEST)
+        {
+          FAR struct ieee802154_get_req_s *getreq = &netmac->u.getreq;
+          
+          switch (getreq->attr)
+            {
+              case IEEE802154_ATTR_MAC_PANID:
+                getreq->attrval.mac.panid = g_panid;
+                break;
+
+              case IEEE802154_ATTR_MAC_EXTENDED_ADDR:
+                memcpy(g_eaddr, getreq->attrval.mac.eaddr, 8);
+                break;
+
+              case IEEE802154_ATTR_MAC_SHORT_ADDRESS:
+                getreq->attrval.mac.saddr = g_saddr;
+                break;
+
+              default:
+                return -ENOTTY;
+            }
+
+          return OK;
+        }
+      else
+        {
+          /* Not a supported IEEE 802.15.4 MAC IOCTL command */
+
+          return -ENOTTY;
+        }
     }
   else
-#endif
     {
       /* Not a valid IEEE 802.15.4 MAC IOCTL command */
 
@@ -740,6 +860,10 @@ int ieee8021514_loopback(void)
 #endif
   dev->d_buf         = g_iobuffer;       /* Attach the IO buffer */
   dev->d_private     = (FAR void *)priv; /* Used to recover private state from dev */
+
+  /* Advertise our MAC-based IP address */
+
+  lo_addr2ip(dev);
 
   /* Initialize the Network frame-related callbacks */
 
