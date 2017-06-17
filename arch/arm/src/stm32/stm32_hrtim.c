@@ -620,6 +620,7 @@ static struct stm32_hrtim_tim_s g_tima =
 #endif
 
 /* Faults data */
+
 #ifdef HRTIM_HAVE_FAULTS
 struct stm32_hrtim_faults_s g_flt =
 {
@@ -877,7 +878,6 @@ static int stm32_hrtim_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-
       default:
         {
           ret = -ENOSYS;
@@ -993,7 +993,8 @@ static void hrtim_modifyreg(FAR struct stm32_hrtim_s *priv, int offset,
  *
  ****************************************************************************/
 
-static FAR struct stm32_hrtim_tim_s *hrtim_tim_get(FAR struct stm32_hrtim_s *priv, uint8_t timer)
+static FAR struct stm32_hrtim_tim_s *hrtim_tim_get(FAR struct stm32_hrtim_s *priv,
+                                                   uint8_t timer)
 {
   FAR struct stm32_hrtim_tim_s *tim;
 
@@ -1075,7 +1076,7 @@ static uint32_t hrtim_base_get(FAR struct stm32_hrtim_s* priv, uint8_t timer)
   FAR struct stm32_hrtim_tim_s* tim;
   uint32_t base;
 
-  tim = hrtim_tim_get(priv,timer);
+  tim = hrtim_tim_get(priv, imer);
   if (tim == NULL)
     {
       base = 0;
@@ -1800,7 +1801,6 @@ static int hrtim_outputs_enable(FAR struct stm32_hrtim_s *priv, uint16_t outputs
 
   return OK;
 }
-
 #endif
 
 /****************************************************************************
@@ -2398,7 +2398,6 @@ static void hrtim_preload_config(FAR struct stm32_hrtim_s *priv)
   hrtim_tim_modifyreg(priv, HRTIM_TIMER_TIME, STM32_HRTIM_TIM_CR_OFFSET,
                       0, HRTIM_CMNCR_PREEN);
 #endif
-
 }
 
 /****************************************************************************
@@ -2431,21 +2430,25 @@ static int hrtim_cmp_update(FAR struct stm32_hrtim_s *priv, uint8_t timer,
           offset = STM32_HRTIM_TIM_CMP1R_OFFSET;
           break;
         }
+
       case HRTIM_CMP2:
         {
           offset = STM32_HRTIM_TIM_CMP2R_OFFSET;
           break;
         }
+
       case HRTIM_CMP3:
         {
           offset = STM32_HRTIM_TIM_CMP3R_OFFSET;
           break;
         }
+
       case HRTIM_CMP4:
         {
           offset = STM32_HRTIM_TIM_CMP4R_OFFSET;
           break;
         }
+
       default:
         {
           ret = -EINVAL;
@@ -2532,21 +2535,25 @@ static uint16_t hrtim_cmp_get(FAR struct stm32_hrtim_s *priv, uint8_t timer,
           offset = STM32_HRTIM_TIM_CMP1R_OFFSET;
           break;
         }
+
       case HRTIM_CMP2:
         {
           offset = STM32_HRTIM_TIM_CMP2R_OFFSET;
           break;
         }
+
       case HRTIM_CMP3:
         {
           offset = STM32_HRTIM_TIM_CMP3R_OFFSET;
           break;
         }
+
       case HRTIM_CMP4:
         {
           offset = STM32_HRTIM_TIM_CMP4R_OFFSET;
           break;
         }
+
       default:
         {
           cmpx = 0;
@@ -2866,5 +2873,4 @@ int hrtim_register(FAR const char *path, FAR struct hrtim_dev_s *dev)
 }
 
 #endif  /* CONFIG_STM32_STM32F33XX */
-
 #endif  /* CONFIG_STM32_HRTIM1 */
