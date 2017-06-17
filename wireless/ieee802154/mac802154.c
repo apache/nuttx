@@ -329,7 +329,7 @@ void mac802154_create_datareq(FAR struct ieee802154_privmac_s *priv,
       memcpy(&iob->io_data[iob->io_len], &priv->addr.panid, 2);
       iob->io_len += 2;
     }
-  
+
   if (srcmode == IEEE802154_ADDRMODE_SHORT)
     {
       memcpy(&iob->io_data[iob->io_len], &priv->addr.saddr, 2);

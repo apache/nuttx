@@ -144,7 +144,7 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
       mac802154_create_datareq(priv, &req->coordaddr, IEEE802154_ADDRMODE_SHORT,
                                txdesc);
     }
-    
+
   /* Save a reference of the tx descriptor */
 
   priv->cmd_desc = txdesc;
