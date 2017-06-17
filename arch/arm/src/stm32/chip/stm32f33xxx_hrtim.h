@@ -108,7 +108,7 @@
 #define STM32_HRTIM_CMN_ICR_OFFSET      0x000C /* HRTIM Interrupt Clear Register */
 #define STM32_HRTIM_CMN_IER_OFFSET      0x0010 /* HRTIM Interrupt Enable Register */
 #define STM32_HRTIM_CMN_OENR_OFFSET     0x0014 /* HRTIM Output Enable Register */
-#define STM32_HRTIM_CMN_DISR_OFFSET     0x0018 /* HRTIM Output Disable Register */
+#define STM32_HRTIM_CMN_ODISR_OFFSET    0x0018 /* HRTIM Output Disable Register */
 #define STM32_HRTIM_CMN_ODSR_OFFSET     0x001C /* HRTIM Output Disable Status Register */
 #define STM32_HRTIM_CMN_BMCR_OFFSET     0x0020 /* HRTIM Burst Mode Control Register */
 #define STM32_HRTIM_CMN_BMTRGR_OFFSET   0x0024 /* HRTIM Burst Mode Trigger Register */
@@ -1136,11 +1136,12 @@
 
 /* Timer X Fault Register */
 
-#define HRTIM_TIMFLT_FLT1EN           (1 << 0) /* Bit 0 */
-#define HRTIM_TIMFLT_FLT2EN           (1 << 1) /* Bit 1 */
-#define HRTIM_TIMFLT_FLT3EN           (1 << 2) /* Bit 2 */
-#define HRTIM_TIMFLT_FLT4EN           (1 << 3) /* Bit 3 */
-#define HRTIM_TIMFLT_FLT5EN           (1 << 4) /* Bit 4 */
+#define HRTIM_TIMFLT_FLT1EN           (1 << 0)  /* Bit 0: Fault1 enable */
+#define HRTIM_TIMFLT_FLT2EN           (1 << 1)  /* Bit 1: Fault 2 enable */
+#define HRTIM_TIMFLT_FLT3EN           (1 << 2)  /* Bit 2: Fault 3 enable*/
+#define HRTIM_TIMFLT_FLT4EN           (1 << 3)  /* Bit 3: Fault 4 enable */
+#define HRTIM_TIMFLT_FLT5EN           (1 << 4)  /* Bit 4: Fault 5 enable */
+#define HRTIM_TIMFLT_FLTLCK           (1 << 31) /* Bit 31: Fault sources lock*/
 
 /* Common Control Register 1 */
 
