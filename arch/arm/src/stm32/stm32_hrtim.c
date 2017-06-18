@@ -441,8 +441,8 @@ static int stm32_hrtim_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 static void stm32_modifyreg32(unsigned int addr, uint32_t clrbits,
                               uint32_t setbits);
 #endif
-static uint32_t hrtim_getreg(FAR struct stm32_hrtim_s *priv, int offset);
-static void hrtim_putreg(FAR struct stm32_hrtim_s *priv, int offset,
+static uint32_t hrtim_cmn_getreg(FAR struct stm32_hrtim_s *priv, int offset);
+static void hrtim_cmn_putreg(FAR struct stm32_hrtim_s *priv, int offset,
                              uint32_t value);
 static void hrtim_modifyreg(FAR struct stm32_hrtim_s *priv, int offset,
                                 uint32_t clrbits, uint32_t setbits);
@@ -963,7 +963,7 @@ static void stm32_modifyreg32(unsigned int addr, uint32_t clrbits,
 #endif
 
 /****************************************************************************
- * Name: hrtim_getreg
+ * Name: hrtim_cmn_getreg
  *
  * Description:
  *   Read the value of an HRTIM register.
@@ -977,13 +977,13 @@ static void stm32_modifyreg32(unsigned int addr, uint32_t clrbits,
  *
  ****************************************************************************/
 
-static uint32_t hrtim_getreg(FAR struct stm32_hrtim_s *priv, int offset)
+static uint32_t hrtim_cmn_getreg(FAR struct stm32_hrtim_s *priv, int offset)
 {
-  return getreg32(priv->base + offset);
+  return getreg32(priv->base + STM32_HRTIM_CMN_OFFSET + offset);
 }
 
 /****************************************************************************
- * Name: hrtim_putreg
+ * Name: hrtim_cmn_putreg
  *
  * Description:
  *   Write a value to an HRTIM register.
@@ -998,10 +998,10 @@ static uint32_t hrtim_getreg(FAR struct stm32_hrtim_s *priv, int offset)
  *
  ****************************************************************************/
 
-static void hrtim_putreg(FAR struct stm32_hrtim_s *priv, int offset,
+static void hrtim_cmn_putreg(FAR struct stm32_hrtim_s *priv, int offset,
                              uint32_t value)
 {
-  putreg32(value, priv->base + offset);
+  putreg32(value, priv->base + STM32_HRTIM_CMN_OFFSET + offset);
 }
 
 /****************************************************************************
@@ -1024,7 +1024,7 @@ static void hrtim_putreg(FAR struct stm32_hrtim_s *priv, int offset,
 static void hrtim_modifyreg(FAR struct stm32_hrtim_s *priv, int offset,
                                 uint32_t clrbits, uint32_t setbits)
 {
-  hrtim_putreg(priv, offset, (hrtim_getreg(priv, offset) & ~clrbits) | setbits);
+  hrtim_cmn_putreg(priv, offset, (hrtim_cmn_getreg(priv, offset) & ~clrbits) | setbits);
 }
 
 /****************************************************************************
@@ -1250,17 +1250,19 @@ static int hrtim_dll_cal(FAR struct stm32_hrtim_s *priv)
 
   regval |= HRTIM_DLLCR_CALEN;
 
+  /* CALEN must not be set simultaneously with CAL bit */
+
+  hrtim_cmn_putreg(priv, STM32_HRTIM_CMN_DLLCR_OFFSET, regval);
+
 #endif
 
   /* DLL Calibration Start */
 
   regval |= HRTIM_DLLCR_CAL;
 
-  hrtim_putreg(priv, STM32_HRTIM_CMN_DLLCR, regval);
+  hrtim_cmn_putreg(priv, STM32_HRTIM_CMN_DLLCR_OFFSET, regval);
 
-  /* Wait for HRTIM ready flag */
-
-  while(!(hrtim_getreg(priv, STM32_HRTIM_CMN_ISR) & HRTIM_ISR_DLLRDY));
+  while(!(hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_ISR_OFFSET) & HRTIM_ISR_DLLRDY));
 
   return OK;
 }
@@ -1846,7 +1848,7 @@ static int hrtim_outputs_enable(FAR struct hrtim_dev_s *dev, uint16_t outputs,
 
   /* Write register */
 
-  hrtim_putreg(priv, reg, outputs);
+  hrtim_cmn_putreg(priv, reg, outputs);
 
   return OK;
 }
@@ -1871,16 +1873,16 @@ static int hrtim_adc_config(FAR struct stm32_hrtim_s *priv)
 {
 
 #ifdef CONFIG_STM32_HRTIM_ADC_TRG1
-  hrtim_putreg(priv, STM32_HRTIM_CMN_ADC1R_OFFSET, priv->adc->trg1);
+  hrtim_cmn_putreg(priv, STM32_HRTIM_CMN_ADC1R_OFFSET, priv->adc->trg1);
 #endif
 #ifdef CONFIG_STM32_HRTIM_ADC_TRG2
-  hrtim_putreg(priv, STM32_HRTIM_CMN_ADC2R_OFFSET, priv->adc->trg2);
+  hrtim_cmn_putreg(priv, STM32_HRTIM_CMN_ADC2R_OFFSET, priv->adc->trg2);
 #endif
 #ifdef CONFIG_STM32_HRTIM_ADC_TRG3
-  hrtim_putreg(priv, STM32_HRTIM_CMN_ADC3R_OFFSET, priv->adc->trg3);
+  hrtim_cmn_putreg(priv, STM32_HRTIM_CMN_ADC3R_OFFSET, priv->adc->trg3);
 #endif
 #ifdef CONFIG_STM32_HRTIM_ADC_TRG4
-  hrtim_putreg(priv, STM32_HRTIM_CMN_ADC4R_OFFSET, priv->adc->trg4);
+  hrtim_cmn_putreg(priv, STM32_HRTIM_CMN_ADC4R_OFFSET, priv->adc->trg4);
 #endif
 
   return OK;
@@ -2094,7 +2096,7 @@ static int hrtim_flt_cfg(FAR struct stm32_hrtim_s *priv, uint8_t index)
       case 3:
       case 4:
         {
-          regval = hrtim_getreg(priv, STM32_HRTIM_CMN_FLTINR1_OFFSET);
+          regval = hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_FLTINR1_OFFSET);
 
           /* Configure polarity */
 
@@ -2114,7 +2116,7 @@ static int hrtim_flt_cfg(FAR struct stm32_hrtim_s *priv, uint8_t index)
 
           /* Write register */
 
-          hrtim_putreg(priv, STM32_HRTIM_CMN_FLTINR1_OFFSET, regval);
+          hrtim_cmn_putreg(priv, STM32_HRTIM_CMN_FLTINR1_OFFSET, regval);
 
           break;
         }
@@ -2123,7 +2125,7 @@ static int hrtim_flt_cfg(FAR struct stm32_hrtim_s *priv, uint8_t index)
 
       case 5:
         {
-          regval = hrtim_getreg(priv, STM32_HRTIM_CMN_FLTINR2_OFFSET);
+          regval = hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_FLTINR2_OFFSET);
 
           /* Configure polarity */
 
@@ -2143,7 +2145,7 @@ static int hrtim_flt_cfg(FAR struct stm32_hrtim_s *priv, uint8_t index)
 
           /* Write register */
 
-          hrtim_putreg(priv, STM32_HRTIM_CMN_FLTINR2_OFFSET, regval);
+          hrtim_cmn_putreg(priv, STM32_HRTIM_CMN_FLTINR2_OFFSET, regval);
 
           break;
         }
@@ -2223,9 +2225,9 @@ static int hrtim_faults_config(FAR struct stm32_hrtim_s *priv)
 
   /* Configure fault sampling clock division */
 
-  regval = hrtim_getreg(priv, STM32_HRTIM_CMN_FLTINR2_OFFSET);
+  regval = hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_FLTINR2_OFFSET);
   regval |= HRTIM_FAULT_SAMPLING << HRTIM_FLTINR1_FLT1F_SHIFT;
-  hrtim_putreg(priv, STM32_HRTIM_CMN_FLTINR2_OFFSET, regval);
+  hrtim_cmn_putreg(priv, STM32_HRTIM_CMN_FLTINR2_OFFSET, regval);
 
   return OK;
 }
@@ -2344,7 +2346,7 @@ static int hrtim_eev_cfg(FAR struct stm32_hrtim_s *priv, uint8_t index)
       case 5:
       case 6:
         {
-          regval = hrtim_getreg(priv, STM32_HRTIM_CMN_EECR1_OFFSET);
+          regval = hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_EECR1_OFFSET);
 
           /* Configure source */
 
@@ -2364,7 +2366,7 @@ static int hrtim_eev_cfg(FAR struct stm32_hrtim_s *priv, uint8_t index)
 
           /* Write register */
 
-          hrtim_putreg(priv, STM32_HRTIM_CMN_EECR1_OFFSET, regval);
+          hrtim_cmn_putreg(priv, STM32_HRTIM_CMN_EECR1_OFFSET, regval);
 
           break;
         }
@@ -2373,7 +2375,7 @@ static int hrtim_eev_cfg(FAR struct stm32_hrtim_s *priv, uint8_t index)
       case 9:
       case 10:
         {
-          regval = hrtim_getreg(priv, STM32_HRTIM_CMN_EECR2_OFFSET);
+          regval = hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_EECR2_OFFSET);
 
           /* Configure source */
 
@@ -2393,7 +2395,7 @@ static int hrtim_eev_cfg(FAR struct stm32_hrtim_s *priv, uint8_t index)
 
           /* Write register */
 
-          hrtim_putreg(priv, STM32_HRTIM_CMN_EECR2_OFFSET, regval);
+          hrtim_cmn_putreg(priv, STM32_HRTIM_CMN_EECR2_OFFSET, regval);
 
           break;
         }
@@ -2471,9 +2473,9 @@ static int hrtim_events_config(FAR struct stm32_hrtim_s *priv)
 
   /* External Event Sampling clock */
 
-  regval = hrtim_getreg(priv, STM32_HRTIM_CMN_EECR3_OFFSET);
+  regval = hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_EECR3_OFFSET);
   regval |= (HRTIM_EEV_SAMPLING << HRTIM_EECR3_EEVSD_SHIFT);
-  hrtim_putreg(priv, STM32_HRTIM_CMN_EECR3_OFFSET, regval);
+  hrtim_cmn_putreg(priv, STM32_HRTIM_CMN_EECR3_OFFSET, regval);
 
   return OK;
 }
@@ -3125,7 +3127,7 @@ FAR struct hrtim_dev_s* stm32_hrtiminitialize(void)
 
   /* configure HRTIM only once */
 
-  if (dev->initialized)
+  if (!dev->initialized)
     {
       ret = stm32_hrtimconfig(hrtim);
       if (ret < 0)

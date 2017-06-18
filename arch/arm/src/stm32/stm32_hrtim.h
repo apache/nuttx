@@ -633,7 +633,6 @@ enum stm32_hrtim_dac_e
   HRTIM_DAC_SYNC_3   = 3
 };
 
-
 /* HRTIM Master Timer interrupts  */
 
 enum stm32_irq_master_e
@@ -682,6 +681,7 @@ enum stm32_irq_cmn_e
 };
 
 /* HRTIM vtable */
+
 struct hrtim_dev_s;
 struct stm32_hrtim_ops_s
 {
