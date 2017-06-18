@@ -128,9 +128,10 @@ static uint16_t g_panid = 0xcafe;
  * Private Function Prototypes
  ****************************************************************************/
 
-/* IP address conversion */
+/* Utility functions */
 
 static void lo_addr2ip(FAR struct net_driver_s *dev);
+static inline void lo_netmask(FAR struct net_driver_s *dev);
 
 /* Polling logic */
 
@@ -170,7 +171,7 @@ static int lo_req_data(FAR struct ieee802154_driver_s *netdev,
  *
  * Description:
  *   Create a MAC-based IP address from the IEEE 802.15.14 short or extended
- *   address of the MAC.
+ *   address assigned to the node.
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
@@ -189,8 +190,8 @@ static void lo_addr2ip(FAR struct net_driver_s *dev)
   dev->d_ipv6addr[4]  = (uint16_t)g_eaddr[0] << 8 |  (uint16_t)g_eaddr[1];
   dev->d_ipv6addr[5]  = (uint16_t)g_eaddr[2] << 8 |  (uint16_t)g_eaddr[3];
   dev->d_ipv6addr[6]  = (uint16_t)g_eaddr[4] << 8 |  (uint16_t)g_eaddr[5];
-  dev->d_ipv6addr[6]  = (uint16_t)g_eaddr[6] << 8 |  (uint16_t)g_eaddr[6];
-  dev->d_ipv6addr[6] ^= 0x200;
+  dev->d_ipv6addr[7]  = (uint16_t)g_eaddr[6] << 8 |  (uint16_t)g_eaddr[6];
+  dev->d_ipv6addr[4] ^= 0x200;
 }
 #else
 static void lo_addr2ip(FAR struct net_driver_s *dev)
@@ -201,11 +202,44 @@ static void lo_addr2ip(FAR struct net_driver_s *dev)
   dev->d_ipv6addr[3]  = 0;
   dev->d_ipv6addr[4]  = 0;
   dev->d_ipv6addr[5]  = HTONS(0x00ff);
-  dev->d_ipv6addr[0]  = HTONS(0xfe00);
-  dev->d_ipv6addr[0]  = htons(g_saddr) ^ 0x0200;
-  dev->d_ipv6addr[6] ^= 0x200;
+  dev->d_ipv6addr[6]  = HTONS(0xfe00);
+  dev->d_ipv6addr[7]  = htons(g_saddr);
+  dev->d_ipv6addr[7] ^= 0x200;
 }
 #endif
+
+/****************************************************************************
+ * Name: lo_netmask
+ *
+ * Description:
+ *   Create a netmask of a MAC-based IP address which may be based on either
+ *   the IEEE 802.15.14 short or extended address of the MAC.
+ *
+ *    128  112  96   80    64   48   32   16
+ *    ---- ---- ---- ----  ---- ---- ---- ----
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
+ *
+ ****************************************************************************/
+
+static inline void lo_netmask(FAR struct net_driver_s *dev)
+{
+  dev->d_ipv6netmask[0]  = 0xffff;
+  dev->d_ipv6netmask[1]  = 0xffff;
+  dev->d_ipv6netmask[2]  = 0xffff;
+  dev->d_ipv6netmask[3]  = 0xffff;
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+  dev->d_ipv6netmask[4]  = 0;
+  dev->d_ipv6netmask[5]  = 0;
+  dev->d_ipv6netmask[6]  = 0;
+  dev->d_ipv6netmask[7]  = 0;
+#else
+  dev->d_ipv6netmask[4]  = 0xffff;
+  dev->d_ipv6netmask[5]  = 0xffff;
+  dev->d_ipv6netmask[6]  = 0xffff;
+  dev->d_ipv6netmask[7]  = 0;
+#endif
+}
 
 /****************************************************************************
  * Name: lo_loopback
@@ -861,8 +895,9 @@ int ieee8021514_loopback(void)
   dev->d_buf         = g_iobuffer;       /* Attach the IO buffer */
   dev->d_private     = (FAR void *)priv; /* Used to recover private state from dev */
 
-  /* Advertise our MAC-based IP address */
+  /* Set the network mask and advertise our MAC-based IP address */
 
+  lo_netmask(dev);
   lo_addr2ip(dev);
 
   /* Initialize the Network frame-related callbacks */

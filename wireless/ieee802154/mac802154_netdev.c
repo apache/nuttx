@@ -136,6 +136,11 @@ struct macnet_driver_s
  * Private Function Prototypes
  ****************************************************************************/
 
+/* Utility functions ********************************************************/
+
+static int macnet_advertise(FAR struct net_driver_s *dev);
+static inline void macnet_netmask(FAR struct net_driver_s *dev);
+
 /* IEE802.15.4 MAC callback functions ***************************************/
 
 static void macnet_notify(FAR struct mac802154_maccb_s *maccb,
@@ -162,7 +167,7 @@ static void macnet_conf_start(FAR struct macnet_driver_s *priv,
 static void macnet_conf_poll(FAR struct macnet_driver_s *priv,
              FAR struct ieee802154_poll_conf_s *conf);
 
-  /* Asynchronous event indications, replied to synchronously with responses */
+/* Asynchronous event indications, replied to synchronously with responses */
 
 static void macnet_ind_associate(FAR struct macnet_driver_s *priv,
              FAR struct ieee802154_assoc_ind_s *conf);
@@ -215,6 +220,133 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: macnet_advertise
+ *
+ * Description:
+ *   Advertise the MAC and IPv6 address for this node.
+ *
+ *   Creates a MAC-based IP address from the IEEE 802.15.14 short or extended
+ *   address assigned to the node.
+ *
+ *    128  112  96   80    64   48   32   16
+ *    ---- ---- ---- ----  ---- ---- ---- ----
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
+ *
+ ****************************************************************************/
+
+static int macnet_advertise(FAR struct net_driver_s *dev)
+{
+  struct ieee802154_netmac_s arg;
+  int ret;
+
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+  uint8_t *eaddr;
+
+  /* Get the eaddr from the MAC */
+
+  memcpy(arg.ifr_name, dev->d_ifname, IFNAMSIZ);
+  arg.u.getreq.attr = IEEE802154_ATTR_MAC_EXTENDED_ADDR;
+  ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
+                     (unsigned long)((uintptr_t)&arg));
+  if (ret < 0)
+    {
+      wlerr("ERROR: MAC802154IOC_MLME_GET_REQUEST failed: %d\n", ret);
+      return ret;
+    }
+  else
+    {
+      /* Set the IP address based on the eaddr */
+
+      eaddr = arg.u.getreq.attrval.mac.eaddr;
+      memcpy(dev->d_mac.ieee802154.u8, eaddr, 8);
+
+      dev->d_ipv6addr[0]  = HTONS(0xfe80);
+      dev->d_ipv6addr[1]  = 0;
+      dev->d_ipv6addr[2]  = 0;
+      dev->d_ipv6addr[3]  = 0;
+      dev->d_ipv6addr[4]  = (uint16_t)eaddr[0] << 8 |  (uint16_t)eaddr[1];
+      dev->d_ipv6addr[5]  = (uint16_t)eaddr[2] << 8 |  (uint16_t)eaddr[3];
+      dev->d_ipv6addr[6]  = (uint16_t)eaddr[4] << 8 |  (uint16_t)eaddr[5];
+      dev->d_ipv6addr[7]  = (uint16_t)eaddr[6] << 8 |  (uint16_t)eaddr[6];
+      dev->d_ipv6addr[4] ^= 0x200;
+      return OK;
+    }
+
+#else
+  /* Get the saddr from the MAC */
+
+  memcpy(arg.ifr_name, dev->d_ifname, IFNAMSIZ);
+  arg.u.getreq.attr = IEEE802154_ATTR_MAC_SHORT_ADDRESS;
+  ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
+                     (unsigned long)((uintptr_t)&arg));
+  if (ret < 0)
+    {
+      wlerr("ERROR: MAC802154IOC_MLME_GET_REQUEST failed: %d\n", ret);
+      return ret;
+    }
+  else
+    {
+      union
+      {
+        uint16_t u16;
+        uint8_t  u8[2];
+      } u;
+
+      u.u16 = arg.u.getreq.attrval.mac.saddr;
+      dev->d_mac.ieee802154.u8[0] = u.u8[0];
+      dev->d_mac.ieee802154.u8[1] = u.u8[1];
+
+      /* Set the IP address based on the saddr */
+
+      dev->d_ipv6addr[0]  = HTONS(0xfe80);
+      dev->d_ipv6addr[1]  = 0;
+      dev->d_ipv6addr[2]  = 0;
+      dev->d_ipv6addr[3]  = 0;
+      dev->d_ipv6addr[4]  = 0;
+      dev->d_ipv6addr[5]  = HTONS(0x00ff);
+      dev->d_ipv6addr[6]  = HTONS(0xfe00);
+      dev->d_ipv6addr[7]  = u.u16;
+      dev->d_ipv6addr[7] ^= 0x200;
+      return OK;
+    }
+#endif
+}
+
+/****************************************************************************
+ * Name: macnet_netmask
+ *
+ * Description:
+ *   Create a netmask of a MAC-based IP address which may be based on either
+ *   the IEEE 802.15.14 short or extended address of the MAC.
+ *
+ *    128  112  96   80    64   48   32   16
+ *    ---- ---- ---- ----  ---- ---- ---- ----
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
+ *
+ ****************************************************************************/
+
+static inline void macnet_netmask(FAR struct net_driver_s *dev)
+{
+  dev->d_ipv6netmask[0]  = 0xffff;
+  dev->d_ipv6netmask[1]  = 0xffff;
+  dev->d_ipv6netmask[2]  = 0xffff;
+  dev->d_ipv6netmask[3]  = 0xffff;
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+  dev->d_ipv6netmask[4]  = 0;
+  dev->d_ipv6netmask[5]  = 0;
+  dev->d_ipv6netmask[6]  = 0;
+  dev->d_ipv6netmask[7]  = 0;
+#else
+  dev->d_ipv6netmask[4]  = 0xffff;
+  dev->d_ipv6netmask[5]  = 0xffff;
+  dev->d_ipv6netmask[6]  = 0xffff;
+  dev->d_ipv6netmask[7]  = 0;
+#endif
+}
 
 /****************************************************************************
  * Name: macnet_notify
@@ -656,34 +788,43 @@ static void macnet_txpoll_expiry(int argc, wdparm_t arg, ...)
 
 static int macnet_ifup(FAR struct net_driver_s *dev)
 {
-  FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)dev->d_private;
+  FAR struct macnet_driver_s *priv =
+    (FAR struct macnet_driver_s *)dev->d_private;
+  int ret;
 
-#ifdef CONFIG_NET_IPv4
-  ninfo("Bringing up: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  /* Set the IP address based on the addressing assigned to the node */
+
+  ret = macnet_advertise(dev);
+  if (ret >= 0)
+    {
+      ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+            dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
+            dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
+            dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+      ninfo("             Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
+            dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
+            dev->d_mac.ieee802154.u8[2], dev->d_mac.ieee802154.u8[3],
+            dev->d_mac.ieee802154.u8[4], dev->d_mac.ieee802154.u8[5],
+            dev->d_mac.ieee802154.u8[6], dev->d_mac.ieee802154.u8[7]);
+#else
+      ninfo("             Node: %02x:%02x\n",
+            dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1]);
 #endif
-#ifdef CONFIG_NET_IPv6
-  ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
-#endif
 
-  /* Initialize PHYs, the IEEE 802.15.4 interface, and setup up IEEE 802.15.4 interrupts */
-#warning Missing logic
+      /* Set and activate a timer process */
 
-  /* Setup up address filtering */
+      (void)wd_start(priv->md_txpoll, TXPOLL_WDDELAY, macnet_txpoll_expiry,
+                     1, (wdparm_t)priv);
 
-  /* Set and activate a timer process */
+      /* The interface is now up */
 
-  (void)wd_start(priv->md_txpoll, TXPOLL_WDDELAY, macnet_txpoll_expiry, 1,
-                 (wdparm_t)priv);
+      priv->md_bifup = true;
+      ret = OK;
+    }
 
-  /* Enable the IEEE 802.15.4 radio */
-
-  priv->md_bifup = true;
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -1093,6 +1234,10 @@ int mac802154netdev_register(MACHANDLE mac)
   priv->md_txpoll     = wd_create();       /* Create periodic poll timer */
 
   DEBUGASSERT(priv->md_txpoll != NULL);
+
+  /* Set the network mask. */
+
+  macnet_netmask(dev);
 
   /* Initialize the Network frame-related callbacks */
 
