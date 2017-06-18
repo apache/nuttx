@@ -63,8 +63,8 @@
 
 struct mac802154_notif_s
 {
-  struct ieee802154_notif_s pub;
-  FAR struct mac802154_notif_s *flink;
+  struct ieee802154_notif_s pub;        /* Publically visible structure */
+  FAR struct mac802154_notif_s *flink;  /* Supports a singly linked list */
 };
 
 /****************************************************************************
@@ -78,5 +78,8 @@ void mac802154_notifpool_init(FAR struct ieee802154_privmac_s *priv);
 int mac802154_notif_alloc(FAR struct ieee802154_privmac_s *priv,
                           FAR struct ieee802154_notif_s **notif,
                           bool allow_interrupt);
+
+void mac802154_notify(FAR struct ieee802154_privmac_s *priv,
+                      FAR struct ieee802154_notif_s *notif);
 
 #endif /* __WIRELESS_IEEE802154__MAC802154_NOTIF_H */

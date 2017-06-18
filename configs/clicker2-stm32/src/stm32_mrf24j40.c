@@ -270,7 +270,7 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
     }
 #endif
 
-#ifdef CONFIG_IEEE802154_MAC_DEV
+#ifdef CONFIG_IEEE802154_MACDEV
   /* If want to call these APIs from userspace, you have to wrap the MAC
    * interface in a character device viamac802154dev_register().
    */

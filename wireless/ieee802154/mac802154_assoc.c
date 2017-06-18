@@ -480,7 +480,7 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
       /* Release the MAC, call the callback, get exclusive access again */
 
       mac802154_givesem(&priv->exclsem);
-      priv->cb->notify(priv->cb, notif);
+      mac802154_notify(priv, notif);
       mac802154_takesem(&priv->exclsem, false);
     }
   else
@@ -612,7 +612,7 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
       /* Release the MAC, call the callback, get exclusive access again */
 
       mac802154_givesem(&priv->exclsem);
-      priv->cb->notify(priv->cb, notif);
+      mac802154_notify(priv, notif);
       mac802154_takesem(&priv->exclsem, false);
     }
   else
@@ -708,8 +708,7 @@ void mac802154_rx_assocreq(FAR struct ieee802154_privmac_s *priv,
 
   /* Notify the next highest layer of the association status */
 
-  priv->cb->notify(priv->cb, notif);
-
+  mac802154_notify(priv, notif);
   return;
 
 errout_with_sem:
@@ -804,7 +803,7 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
 
   /* Notify the next highest layer of the association status */
 
-  priv->cb->notify(priv->cb, notif);
+  mac802154_notify(priv, notif);
 }
 
 /****************************************************************************
@@ -853,5 +852,5 @@ static void mac802154_timeout_assoc(FAR struct ieee802154_privmac_s *priv)
   notif->u.assocconf.status = IEEE802154_STATUS_NO_DATA;
   notif->u.assocconf.saddr = IEEE802154_SADDR_UNSPEC;
 
-  priv->cb->notify(priv->cb, notif);
+  mac802154_notify(priv, notif);
 }

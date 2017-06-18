@@ -21,14 +21,6 @@ config IEEE802154_DEFAULT_EADDR
 	---help---
 		Set the default extended address to be used by MAC networks on init
 
-config IEEE802154_MAC_DEV
-	bool "Character driver for IEEE 802.15.4 MAC layer"
-	default n
-	depends on WIRELESS_IEEE802154
-	---help---
-		Enable the device driver to expose the IEEE 802.15.4 MAC layer
-		access to user space as IOCTLs
-
 choice
 	prompt "IEEE 802.15.4 work queue"
 	default MAC802154_LPWORK if SCHED_LPWORK
@@ -83,6 +75,36 @@ config IEEE802154_IND_IRQRESERVE
 		Non-interrupt logic will also first attempt to allocate from the
 		general, pre-allocated structure pool.  If that fails, it will
 		dynamically allocate the meta data structure with an additional cost in performance.
+		
+config IEEE802154_MACDEV
+	bool "Character driver for IEEE 802.15.4 MAC layer"
+	default n
+	depends on WIRELESS_IEEE802154
+	---help---
+		Enable the device driver to expose the IEEE 802.15.4 MAC layer
+		access to user space as IOCTLs
+
+if IEEE802154_MACDEV
+
+config IEEE802154_MACDEV_RECVRPRIO
+	int "Priority of frame receiver registerd with the MAC layer"
+	default 0
+	---help---
+		When the MAC layer receives an incoming data frame, it passes the frame
+		to registered receivers, in order of receiver priority, until one of the
+		receivers claim the frame.
+
+		An example case would be when 6LoWPAN and the MAC character driver are
+		enabled. Both have receivers registered with the MAC. The 6LoWPAN layer
+		should get assigned a higher priority than the character driver. In this
+		case, the 6LoWPAN receiver will receive the frame first. If the frame is
+		a 6LoWPAN frame, it will claim the frame and the MAC will not pass the
+		frame to any additional receivers. If it does not claim the frame, the
+		MAC layer will call the next highest priority receiver, in this case,
+		the MAC character driver (which should always be lowest priority since
+		it is a "catch-all" type receiver).
+
+endif # IEEE802154_MACDEV
 
 config IEEE802154_NETDEV
 	bool "IEEE802154 6loWPAN Network Device"
@@ -94,6 +116,24 @@ config IEEE802154_NETDEV
 		the common IEEE802.15.4 MAC.
 
 if IEEE802154_NETDEV
+
+config IEEE802154_NETDEV_RECVRPRIO
+	int "Priority of frame receiver registerd with the MAC layer"
+	default 1
+	---help---
+		When the MAC layer receives an incoming data frame, it passes the frame
+		to registered receivers, in order of receiver priority, until one of the
+		receivers claim the frame.
+
+		An example case would be when 6LoWPAN and the MAC character driver are
+		enabled. Both have receivers registered with the MAC. The 6LoWPAN layer
+		should get assigned a higher priority than the character driver. In this
+		case, the 6LoWPAN receiver will receive the frame first. If the frame is
+		a 6LoWPAN frame, it will claim the frame and the MAC will not pass the
+		frame to any additional receivers. If it does not claim the frame, the
+		MAC layer will call the next highest priority receiver, in this case,
+		the MAC character driver (which should always be lowest priority since
+		it is a "catch-all" type receiver).
 
 choice
 	prompt "Work queue"

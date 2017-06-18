@@ -365,7 +365,7 @@ Configurations
           nsh> i8 /dev/ieee0 startpan
           nsh> i8 acceptassoc
 
-       2. Assocate and endpoint device with the WPAN.  On the endpoint
+       2. Assocate an endpoint device with the WPAN.  On the endpoint
           device:
 
           nsh> i8 /dev/ieee0 assoc
@@ -432,7 +432,7 @@ Configurations
     5. Configuration instructions:  Basic PAN configuration is the same as
        for the ieee802154-mac configuration with the exception that after
        the PAN has been configured with the i8sak utility, you must
-       explicity bring the network up:
+       explicity bring the network up on each node:
 
          nsh> ifup wpan0
 

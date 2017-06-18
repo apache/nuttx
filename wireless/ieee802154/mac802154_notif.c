@@ -74,18 +74,38 @@ int mac802154_notif_free(MACHANDLE mac,
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
-  FAR struct mac802154_notif_s *privnotif = (FAR struct mac802154_notif_s *)notif;
+  FAR struct mac802154_notif_s *privnotif =
+    (FAR struct mac802154_notif_s *)notif;
 
   /* Get exclusive access to the MAC */
 
   mac802154_takesem(&priv->exclsem, false);
 
-  privnotif->flink = priv->notif_free;
-  priv->notif_free = privnotif;
-  mac802154_givesem(&priv->notif_sem);
+  /* We know how many clients have registered for notifications.  Each must
+   * call mac802154_notif_free() before we can release the notification
+   * resource.
+   */
+
+  if (priv->nnotif < 2)
+    {
+      /* This is the free from the last notification */
+
+      privnotif->flink = priv->notif_free;
+      priv->notif_free = privnotif;
+      priv->nnotif     = 0;
+
+      mac802154_givesem(&priv->notif_sem);
+    }
+  else
+    {
+      /* More calls are expected.  Decrement the count of expected calls
+       * and preserve the notification resources.
+       */
+
+      priv->nnotif--;
+    }
 
   mac802154_givesem(&priv->exclsem);
-
   return -ENOTTY;
 }
 
@@ -125,6 +145,7 @@ void mac802154_notifpool_init(FAR struct ieee802154_privmac_s *priv)
       pool++;
       remaining--;
     }
+
   sem_init(&priv->notif_sem, 0, CONFIG_MAC802154_NNOTIF);
 }
 
@@ -165,6 +186,7 @@ int mac802154_notif_alloc(FAR struct ieee802154_privmac_s *priv,
     {
       privnotif        = priv->notif_free;
       priv->notif_free = privnotif->flink;
+      priv->nnotif     = 0;
     }
   else
     {
@@ -200,9 +222,44 @@ int mac802154_notif_alloc(FAR struct ieee802154_privmac_s *priv,
 
       privnotif        = priv->notif_free;
       priv->notif_free = privnotif->flink;
+      priv->nnotif     = 0;
     }
 
   *notif = (FAR struct ieee802154_notif_s *)privnotif;
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: mac802154_notify
+ *
+ * Description:
+ *   Notify every register MAC client.
+ *
+ ****************************************************************************/
+
+void mac802154_notify(FAR struct ieee802154_privmac_s *priv,
+                      FAR struct ieee802154_notif_s *notif)
+{
+  FAR struct mac802154_maccb_s *cb;
+
+  /* Set the notification count so that the notification resources will be
+   * preserved until the final notification.
+   */
+
+  priv->nnotif = priv->nclients;
+
+  /* Try to notify every registered MAC client */
+
+  for (cb = priv->cb; cb != NULL; cb = cb->flink)
+    {
+      /* Does this client want notifications? */
+
+      if (cb->notify != NULL)
+        {
+          /* Yes.. Notify */
+
+          cb->notify(cb, notif);
+        }
+    }
 }

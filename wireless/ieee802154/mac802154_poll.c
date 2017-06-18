@@ -50,8 +50,6 @@
 #include <debug.h>
 #include <string.h>
 
-#include <nuttx/mm/iob.h>
-
 #include "mac802154.h"
 #include "mac802154_internal.h"
 
@@ -83,7 +81,6 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
-  FAR struct iob_s *iob;
   FAR struct ieee802154_txdesc_s *txdesc;
   int ret;
 
@@ -221,7 +218,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
       /* Release the MAC, call the callback, get exclusive access again */
 
       mac802154_givesem(&priv->exclsem);
-      priv->cb->notify(priv->cb, notif);
+      mac802154_notify(priv, notif);
       mac802154_takesem(&priv->exclsem, false);
     }
   else
@@ -261,7 +258,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
  *
  ****************************************************************************/
 
-static void mac802154_timeout_poll(FAR struct ieee802154_privmac_s *priv)
+void mac802154_timeout_poll(FAR struct ieee802154_privmac_s *priv)
 {
   FAR struct ieee802154_notif_s *notif;
 
@@ -286,5 +283,5 @@ static void mac802154_timeout_poll(FAR struct ieee802154_privmac_s *priv)
   notif->notiftype = IEEE802154_NOTIFY_CONF_POLL;
   notif->u.pollconf.status = IEEE802154_STATUS_NO_DATA;
 
-  priv->cb->notify(priv->cb, notif);
+  mac802154_notify(priv, notif);
 }

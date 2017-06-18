@@ -147,10 +147,12 @@ typedef void (*mac802154_worker_t)(FAR struct ieee802154_privmac_s *priv);
 struct ieee802154_privmac_s
 {
   FAR struct ieee802154_radio_s *radio;     /* Contained IEEE802.15.4 radio dev */
-  FAR const struct mac802154_maccb_s *cb;   /* Contained MAC callbacks */
+  FAR struct mac802154_maccb_s *cb;         /* Head of a list of MAC callbacks */
   FAR struct mac802154_radiocb_s radiocb;   /* Interface to bind to radio */
 
-  sem_t exclsem; /* Support exclusive access */
+  sem_t exclsem;                            /* Support exclusive access */
+  uint8_t nclients;                         /* Number of notification clients */
+  uint8_t nnotif;                           /* Number of remaining notifications */
 
   /* Only support a single command at any given time. As of now I see no
    * condition where you need to have more than one command frame simultaneously

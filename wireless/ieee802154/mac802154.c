@@ -628,11 +628,13 @@ static void mac802154_txdone_worker(FAR void *arg)
               notif->notiftype = IEEE802154_NOTIFY_CONF_DATA;
 
               /* Release the MAC, call the callback, get exclusive access again */
+
               mac802154_givesem(&priv->exclsem);
-              priv->cb->notify(priv->cb, notif);
+              mac802154_notify(priv, notif);
               mac802154_takesem(&priv->exclsem, false);
             }
             break;
+
           case IEEE802154_FRAME_COMMAND:
             {
               switch (priv->curr_cmd)
@@ -640,10 +642,13 @@ static void mac802154_txdone_worker(FAR void *arg)
                   case IEEE802154_CMD_ASSOC_REQ:
                     mac802154_txdone_assocreq(priv, txdesc);
                     break;
+
                   case IEEE802154_CMD_ASSOC_RESP:
                     break;
+
                   case IEEE802154_CMD_DISASSOC_NOT:
                     break;
+
                   case IEEE802154_CMD_DATA_REQ:
                     /* Data requests can be sent for 3 different reasons.
                      *
@@ -663,23 +668,31 @@ static void mac802154_txdone_worker(FAR void *arg)
                         case MAC802154_OP_ASSOC:
                           mac802154_txdone_datareq_assoc(priv, txdesc);
                           break;
+
                         case MAC802154_OP_POLL:
                           mac802154_txdone_datareq_poll(priv, txdesc);
                           break;
+
                         default:
                           break;
                       }
                     break;
+
                   case IEEE802154_CMD_PANID_CONF_NOT:
                     break;
+
                   case IEEE802154_CMD_ORPHAN_NOT:
                     break;
+
                   case IEEE802154_CMD_BEACON_REQ:
                     break;
+
                   case IEEE802154_CMD_COORD_REALIGN:
                     break;
+
                   case IEEE802154_CMD_GTS_REQ:
                     break;
+
                   default:
                     /* We can deallocate the data conf notification as it is no
                      * longer needed. We can't use the public function here
@@ -688,10 +701,12 @@ static void mac802154_txdone_worker(FAR void *arg)
 
                     privnotif->flink = priv->notif_free;
                     priv->notif_free = privnotif;
+                    priv->nnotif     = 0;
                     break;
                 }
             }
             break;
+
           default:
             {
               /* We can deallocate the data conf notification as it is no longer
@@ -907,22 +922,30 @@ static void mac802154_rxframe_worker(FAR void *arg)
                   case IEEE802154_CMD_ASSOC_REQ:
                     mac802154_rx_assocreq(priv, ind);
                     break;
+
                   case IEEE802154_CMD_ASSOC_RESP:
                     mac802154_rx_assocresp(priv, ind);
                     break;
+
                   case IEEE802154_CMD_DISASSOC_NOT:
                     break;
+
                   case IEEE802154_CMD_DATA_REQ:
                     mac802154_rx_datareq(priv, ind);
                     break;
+
                   case IEEE802154_CMD_PANID_CONF_NOT:
                     break;
+
                   case IEEE802154_CMD_ORPHAN_NOT:
                     break;
+
                   case IEEE802154_CMD_BEACON_REQ:
                     break;
+
                   case IEEE802154_CMD_COORD_REALIGN:
                     break;
+
                   case IEEE802154_CMD_GTS_REQ:
                     break;
                 }
@@ -1096,8 +1119,7 @@ static void mac802154_rx_dataframe(FAR struct ieee802154_privmac_s *priv,
       /* Release the MAC */
 
       mac802154_givesem(&priv->exclsem);
-
-      priv->cb->notify(priv->cb, notif);
+      mac802154_notify(priv, notif);
 
       /* If there was data, pass it along */
 
@@ -1108,26 +1130,48 @@ static void mac802154_rx_dataframe(FAR struct ieee802154_privmac_s *priv,
     }
   else
     {
+      FAR struct mac802154_maccb_s *cb;
+
 notify_with_lock:
 
       mac802154_givesem(&priv->exclsem);
 
 notify_without_lock:
 
-      /* If there is a registered MCPS callback receiver registered,
-        * send the frame, otherwise, throw it out.
+      /* If there are registered MCPS callback receivers registered,
+       * then forward the frame in priority order.  If there are no
+       * registered receivers or if none of the receivers accept the
+       * data frame then drop the frame.
         */
 
-      if (priv->cb->rxframe != NULL)
+      for (cb = priv->cb; cb != NULL; cb = cb->flink)
         {
-          priv->cb->rxframe(priv->cb, ind);
-        }
-      else
-        {
-          /* Free the data indication struct from the pool */
+          int ret;
 
-          ieee802154_ind_free(ind);
+          /* Does this MAC client want frames? */
+
+          if (cb->rxframe != NULL)
+            {
+              /* Yes.. Offer this frame to the receiver */
+
+              ret = cb->rxframe(cb, ind);
+              if (ret >= 0)
+                {
+                  /* The receiver accepted and disposed of the frame and
+                   * its metadata.  We are done.
+                   */
+
+                  return;
+                }
+            }
         }
+
+      /* We get here if the there are no registered receivers or if
+       * all of the registered receivers declined the frame.
+       * Free the data indication struct from the pool
+       */
+
+      ieee802154_ind_free(ind);
     }
 }
 

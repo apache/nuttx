@@ -141,10 +141,9 @@ static inline void mac802154dev_pushevent(FAR struct mac802154_chardevice_s *dev
 static inline FAR struct ieee802154_notif_s *
   mac802154dev_popevent(FAR struct mac802154_chardevice_s *dev);
 
-static void mac802154dev_notify(FAR const struct mac802154_maccb_s *maccb,
+static void mac802154dev_notify(FAR struct mac802154_maccb_s *maccb,
                                 FAR struct ieee802154_notif_s *notif);
-
-static void mac802154dev_rxframe(FAR const struct mac802154_maccb_s *maccb,
+static int  mac802154dev_rxframe(FAR struct mac802154_maccb_s *maccb,
                                  FAR struct ieee802154_data_ind_s *ind);
 
 static int  mac802154dev_open(FAR struct file *filep);
@@ -762,7 +761,7 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
   return ret;
 }
 
-static void mac802154dev_notify(FAR const struct mac802154_maccb_s *maccb,
+static void mac802154dev_notify(FAR struct mac802154_maccb_s *maccb,
                                 FAR struct ieee802154_notif_s *notif)
 {
   FAR struct mac802154dev_callback_s *cb =
@@ -826,8 +825,20 @@ static void mac802154dev_notify(FAR const struct mac802154_maccb_s *maccb,
   mac802154dev_givesem(&dev->md_exclsem);
 }
 
-static void mac802154dev_rxframe(FAR const struct mac802154_maccb_s *maccb,
-                                 FAR struct ieee802154_data_ind_s *ind)
+/****************************************************************************
+ * Name: mac802154dev_rxframe
+ *
+ * Description:
+ *   Handle received frames forward by the IEEE 802.15.4 MAC.
+ *
+ * Returned Value:
+ *   any failure.  On success, the ind and its contained iob will be freed.
+ *   The ind will be intact if this function returns a failure.
+ *
+ ****************************************************************************/
+
+static int mac802154dev_rxframe(FAR struct mac802154_maccb_s *maccb,
+                                FAR struct ieee802154_data_ind_s *ind)
 {
   FAR struct mac802154dev_callback_s *cb =
     (FAR struct mac802154dev_callback_s *)maccb;
@@ -858,6 +869,7 @@ static void mac802154dev_rxframe(FAR const struct mac802154_maccb_s *maccb,
   /* Release the driver */
 
   mac802154dev_givesem(&dev->md_exclsem);
+  return OK;
 }
 
 /****************************************************************************
@@ -923,6 +935,8 @@ int mac802154dev_register(MACHANDLE mac, int minor)
   dev->md_cb.mc_priv  = dev;
 
   maccb           = &dev->md_cb.mc_cb;
+  maccb->flink    = NULL;
+  maccb->prio     = CONFIG_IEEE802154_MACDEV_RECVRPRIO;
   maccb->notify   = mac802154dev_notify;
   maccb->rxframe  = mac802154dev_rxframe;
 

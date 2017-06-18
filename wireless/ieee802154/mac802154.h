@@ -58,18 +58,22 @@
  * Public Data Types
  ****************************************************************************/
 
-/* Callback operations to notify the next highest layer of various asynchronous
- * events, usually triggered by some previous request or response invoked by the
- * upper layer.
+/* Callback operations to notify the next highest layer of various
+ * asynchronous events, usually triggered by some previous request or
+ * response invoked by the upper layer.
  */
 
 struct mac802154_maccb_s
 {
-  CODE void (*notify)(FAR const struct mac802154_maccb_s *maccb,
-                      FAR struct ieee802154_notif_s *notif);
+  FAR struct mac802154_maccb_s *flink;  /* Implements a singly linked list */
+  uint8_t prio;                         /* RX frame callback priority */
 
-  CODE void (*rxframe)(FAR const struct mac802154_maccb_s *maccb,
-                       FAR struct ieee802154_data_ind_s *ind);
+  /* Callback methods */
+
+  CODE void (*notify)(FAR struct mac802154_maccb_s *maccb,
+                      FAR struct ieee802154_notif_s *notif);
+  CODE int (*rxframe)(FAR struct mac802154_maccb_s *maccb,
+                      FAR struct ieee802154_data_ind_s *ind);
 };
 
 /****************************************************************************
@@ -93,7 +97,7 @@ struct iob_s;  /* Forward reference */
  *
  ****************************************************************************/
 
-int mac802154_bind(MACHANDLE mac, FAR const struct mac802154_maccb_s *cb);
+int mac802154_bind(MACHANDLE mac, FAR struct mac802154_maccb_s *cb);
 
 /****************************************************************************
  * Name: mac802154_ioctl
