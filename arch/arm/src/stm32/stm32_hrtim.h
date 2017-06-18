@@ -56,6 +56,61 @@
  * Pre-processor definitions
  ************************************************************************************/
 
+#if defined(CONFIG_STM32_HRTIM_TIMA) || defined(CONFIG_STM32_HRTIM_TIMB) || \
+    defined(CONFIG_STM32_HRTIM_TIMC) || defined(CONFIG_STM32_HRTIM_TIMD) || \
+    defined(CONFIG_STM32_HRTIM_TIME)
+#  define HRTIM_HAVE_SLAVE 1
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_TIMA_PWM) || defined(CONFIG_STM32_HRTIM_TIMB_PWM) || \
+    defined(CONFIG_STM32_HRTIM_TIMC_PWM) || defined(CONFIG_STM32_HRTIM_TIMD_PWM) || \
+    defined(CONFIG_STM32_HRTIM_TIME_PWM)
+#  define HRTIM_HAVE_PWM 1
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_TIMA_CAP) || defined(CONFIG_STM32_HRTIM_TIMB_CAP) || \
+    defined(CONFIG_STM32_HRTIM_TIMC_CAP) || defined(CONFIG_STM32_HRTIM_TIMD_CAP) || \
+    defined(CONFIG_STM32_HRTIM_TIME_CAP)
+#  define HRTIM_HAVE_CAPTURE 1
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_TIMA_DT) || defined(CONFIG_STM32_HRTIM_TIMB_DT) || \
+    defined(CONFIG_STM32_HRTIM_TIMC_DT) || defined(CONFIG_STM32_HRTIM_TIMD_DT) || \
+    defined(CONFIG_STM32_HRTIM_TIME_DT)
+#  define HRTIM_HAVE_DEADTIME 1
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_TIMA_CHOP) || defined(CONFIG_STM32_HRTIM_TIMB_CHOP) || \
+    defined(CONFIG_STM32_HRTIM_TIMC_CHOP) || defined(CONFIG_STM32_HRTIM_TIMD_CHOP) || \
+    defined(CONFIG_STM32_HRTIM_TIME_CHOP)
+#  define HRTIM_HAVE_CHOPPER 1
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_SCOUT) || defined(CONFIG_STM32_HRTIM_SCIN)
+#  define HRTIM_HAVE_SYNC 1
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_FAULT1) || defined(CONFIG_STM32_HRTIM_FAULT2) || \
+    defined(CONFIG_STM32_HRTIM_FAULT3) || defined(CONFIG_STM32_HRTIM_FAULT4) || \
+    defined(CONFIG_STM32_HRTIM_FAULT5)
+#  define HRTIM_HAVE_FAULTS 1
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_EEV1) || defined(CONFIG_STM32_HRTIM_EEV2) || \
+    defined(CONFIG_STM32_HRTIM_EEV3) || defined(CONFIG_STM32_HRTIM_EEV4) || \
+    defined(CONFIG_STM32_HRTIM_EEV5) || defined(CONFIG_STM32_HRTIM_EEV6) || \
+    defined(CONFIG_STM32_HRTIM_EEV7) || defined(CONFIG_STM32_HRTIM_EEV8) || \
+    defined(CONFIG_STM32_HRTIM_EEV9) || defined(CONFIG_STM32_HRTIM_EEV10)
+#  define HRTIM_HAVE_EEV 1
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_MASTER_IRQ) || defined(CONFIG_STM32_HRTIM_TIMA_IRQ) || \
+    defined(CONFIG_STM32_HRTIM_TIMB_IRQ) || defined(CONFIG_STM32_HRTIM_TIMC_IRQ) || \
+    defined(CONFIG_STM32_HRTIM_TIMD_IRQ) || defined(CONFIG_STM32_HRTIM_TIME_IRQ) || \
+    defined(CONFIG_STM32_HRTIM_CMN_IRQ)
+#  defined HRTIM_HAVE_INTERRUPTS
+#endif
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -475,7 +530,26 @@ enum stm32_chopper_freq_e
   HRTIM_CHP_FREQ_d256
 };
 
-/*  */
+/* HRTIM vtable */
+struct hrtim_dev_s;
+struct stm32_hrtim_ops_s
+{
+  int (*cmp_update)(FAR struct hrtim_dev_s *dev, uint8_t timer,
+                    uint8_t index, uint16_t cmp);
+  int (*per_update)(FAR struct hrtim_dev_s *dev, uint8_t timer, uint16_t per);
+  uint16_t (*per_get)(FAR struct hrtim_dev_s *dev, uint8_t timer);
+  uint16_t (*cmp_get)(FAR struct hrtim_dev_s *dev, uint8_t timer,
+                      uint8_t index);
+#ifdef HRTIM_HAVE_INTERRUPTS
+  void (*irq_ack)(FAR struct hrtim_dev_s *dev, uint8_t timer, int source);
+#endif
+#ifdef HRTIM_HAVE_PWM
+  int (*outputs_enable)(FAR struct hrtim_dev_s *dev, uint16_t outputs,
+                        bool state);
+#endif
+};
+
+/* HRTIM device structure */
 
 struct hrtim_dev_s
 {
@@ -488,8 +562,9 @@ struct hrtim_dev_s
 
   /* Fields provided by lower half HRTIM logic */
 
-  FAR void *hd_priv; /* Used by the arch-specific logic */
-  bool initialized;  /* true: HRTIM driver has been initialized */
+  FAR const struct stm32_hrtim_ops_s *hd_ops; /* HRTIM operations */
+  FAR void *hd_priv;                          /* Used by the arch-specific logic */
+  bool initialized;                           /* true: HRTIM driver has been initialized */
 };
 
 /************************************************************************************
