@@ -223,6 +223,39 @@ enum stm32_hrtim_tim_prescaler_e
   HRTIM_PRESCALER_128
 };
 
+/* HRTIM Timer Master/Slave mode */
+
+enum stm32_hrtim_mode_e
+{
+  HRTIM_MODE_PRELOAD = (1 << 0),  /* Preload enable */
+  HRTIM_MODE_HALF    = (1 << 1),  /* Half mode */
+  HRTIM_MODE_RETRIG  = (1 << 2),  /* Re-triggerable mode */
+  HRTIM_MODE_CONT    = (1 << 3),  /* Continuous mode */
+
+  /* Only slave Timers */
+
+  HRTIM_MODE_PSHPLL  = (1 << 7),  /* Push-Pull mode */
+};
+
+/* HRTIM Slave Timer auto-delayed mode
+ * NOTE: details in STM32F334 Manual
+ */
+
+enum stm32_hrtim_autodelayed_e
+{
+  /* CMP2 auto-delayed mode */
+
+  HRTIM_AUTODELAYED_CMP2_MODE1 = 1, /* DELCMP2 = 01 */
+  HRTIM_AUTODELAYED_CMP2_MODE2 = 2, /* DELCMP2 = 10 */
+  HRTIM_AUTODELAYED_CMP2_MODE3 = 3, /* DELCMP2 = 11 */
+
+  /* CMP4 auto-delayed mode */
+
+  HRTIM_AUTODELAYED_CMP4_MODE1 = (1 << 2), /* DELCMP4 = 01 */
+  HRTIM_AUTODELAYED_CMP4_MODE2 = (2 << 2), /* DELCMP4 = 10 */
+  HRTIM_AUTODELAYED_CMP4_MODE3 = (3 << 2), /* DELCMP4 = 11 */
+};
+
 /* HRTIM Slave Timer fault sources Lock */
 
 enum stm32_hrtim_tim_fault_lock_e
