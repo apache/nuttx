@@ -1,8 +1,13 @@
 /****************************************************************************
- * include/nuttx/net/enc28j60.h
+ * include/nuttx/net/rfc6775.h
+ * Definitions for 6LoWPAN Neighbor Discovery
  *
- *   Copyright (C) 2010, 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ * Reference: RFC6775, Neighbor Discovery Optimization for IPv6 over Low-
+ *            Power Wireless Personal Area Networks (6LoWPANs), Internet
+ *            Engineering Task Force (IETF), November 2012
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,6 +41,13 @@
 #ifndef __INCLUDE_NUTTX_NET_RFC6775_H
 #define __INCLUDE_NUTTX_NET_RFC6775_H
 
+/* Acronyms (in addition to those defined in context below:
+ *
+ * 6LN  - 6LoWPAN Node
+ * 6LR  - 6LoWPAN Router
+ * 6LBR - 6LoWPAN Border Router
+ */
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -51,24 +63,24 @@
 
 /* 6LBR Constants: */
 
-#define MIN_CONTEXT_CHANGE_DELAY       300      /* Seconds */
+#define MIN_CONTEXT_CHANGE_DELAY      300       /* Seconds */
 
 /* 6LR Constants: */
 
-#define MAX_RTR_ADVERTISEMENTS         3        /* Transmissions */
-#define MIN_DELAY_BETWEEN_RAS          10       /* Seconds */
-#define MAX_RA_DELAY_TIME              2        /* Seconds */
-#define TENTATIVE_NCE_LIFETIME         20       /* Seconds */
+#define MAX_RTR_ADVERTISEMENTS        3         /* Transmissions */
+#define MIN_DELAY_BETWEEN_RAS         10        /* Seconds */
+#define MAX_RA_DELAY_TIME             2         /* Seconds */
+#define TENTATIVE_NCE_LIFETIME        20        /* Seconds */
 
 /* Router Constants: */
 
-#define MULTIHOP_HOPLIMI               64
+#define MULTIHOP_HOPLIMI              64
 
 /* Host Constants: */
 
-#define RTR_SOLICITATION_INTERVAL      10       /* Seconds */
-#define MAX_RTR_SOLICITATIONS          3        /* Transmissions */
-#define MAX_RTR_SOLICITATION_INTERVAL  60       /* Seconds */
+#define RTR_SOLICITATION_INTERVAL     10        /* Seconds */
+#define MAX_RTR_SOLICITATIONS         3         /* Transmissions */
+#define MAX_RTR_SOLICITATION_INTERVAL 60        /* Seconds */ 
 
 /****************************************************************************
  * Public Types
@@ -76,21 +88,21 @@
 
 /* Table 1. alues for status field */
 
-enum icmpv6_status_e
+enum sixlowpan_status_e
 {
-  ICMPV6_SUCCESS   = 0, /* Success */
-  ICMPV6_DUPLICATE = 1, /* Duplicate address */
-  ICMPV6_FULL      = 2, /* Neighbor cache full */
-  ICMPV6_ALLOCATED = 3  /* 3-255: Allocated using standard action (RFC5226 */
+  SIXLOWPAN_SUCCESS   = 0,  /* Success */
+  SIXLOWPAN_DUPLICATE = 1,  /* Duplicate address */
+  SIXLOWPAN_FULL      = 2,  /* Neighbor cache full */
+  SIXLOWPAN_ALLOCATED = 3   /* 3-255: Allocated using standard action (RFC5226 */
 };
 
 /* 4.1 Source Link-Layer Address Option (SLLAO) */
 
-struct icmpv6_sllao_s
+struct sixlowpan_sllao_s
 {
   uint8_t type;        /* Byte 0:      Type = 33 */
   uint8_t length;      /* Byte 1:      Length in units of 8 bytes = 2 */
-  uint8_t status;      /* Byte 2:      Status of NS message.  See enum icmpv6_status_e */
+  uint8_t status;      /* Byte 2:      Status of NS message.  See enum sixlowpan_status_e */
   uint8_t reserved[3]; /* Bytes 3-5:   Reserved */
   uint8_t lifetime[2]; /* Bytes 6-7:   Registration lifetime */
   uint8_t eui64[8];    /* Bytes 8-15:  EUI-64 identifier assigned to interface */
@@ -98,7 +110,7 @@ struct icmpv6_sllao_s
 
 /* 4.2 6loWPAN Context Option (6CO) */
 
-struct icmpv6_6co_s
+struct sixlowpan_6co_s
 {
   uint8_t type;        /* Byte 0:      Type = 34 */
   uint8_t length;      /* Byte 1:      Length in units of 8 bytes = 2 or 3 */
@@ -109,12 +121,12 @@ struct icmpv6_6co_s
   uint8_t prefix[1];   /* Bytes 8-15 or 8-23: Context Prefix */
 };
 
-#define ICMPV6_6CO_LEN(b)      ((b > 64) ? 16 : 8)
-#define SIZEOF_ICMPV6_6CO_S(b) (sizeof(struct icmpv6_6co_s) + CMPV6_6CO_LEN(b) - 1)
+#define SIXLOWPAN_6CO_LEN(b)      ((b > 64) ? 16 : 8)
+#define SIZEOF_SIXLOWPAN_6CO_S(b) (sizeof(struct sixlowpan_6co_s) + CMPV6_6CO_LEN(b) - 1)
 
 /* 4.3 Authoritative Border Router Option (ABRO) */
 
-struct icmpv6_abro_s
+struct sixlowpan_abro_s
 {
   uint8_t type;        /* Byte 0:      Type = 35 */
   uint8_t length;      /* Byte 1:      Length in units of 8 bytes = 3 */
@@ -126,12 +138,12 @@ struct icmpv6_abro_s
 
 /* 4.4 Duplicate Address Messages (DAD for both DAR and DAC) */
 
-struct icmpv6_dad_s
+struct sixlowpan_dad_s
 {
   uint8_t type;        /* Byte 0:      Type = 157 (DAR) or 158 (DAC) */
   uint8_t code;        /* Byte 1:      Code */
   uint8_t chksum[2];   /* Bytes 2-3:   Checksum */
-  uint8_t status;      /* Byte 4:      Status of DAR.  See enum icmpv6_status_e */
+  uint8_t status;      /* Byte 4:      Status of DAR.  See enum sixlowpan_status_e */
   uint8_t reserved;    /* Byte 5:      Reserved */
   uint8_t lifetime[2]; /* Bytes 6-7:   Registration lifetime */
   uint8_t eui64[8];    /* Bytes 8-15:  EUI-64 identifier registered address */
