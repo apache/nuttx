@@ -244,6 +244,10 @@ static void macnet_notify(FAR struct mac802154_maccb_s *maccb,
       default:
         break;
     }
+
+  /* Free the event notification */
+
+  mac802154_notif_free(priv->md_mac, notif);
 }
 
 /****************************************************************************

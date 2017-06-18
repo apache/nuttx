@@ -105,5 +105,12 @@ int mac802154_bind(MACHANDLE mac, FAR struct mac802154_maccb_s *cb)
       prev->flink = cb;
     }
 
+  /* Keep track of the number of clients requesting notification */
+
+  if (cb->notify != NULL)
+    {
+      priv->nclients++;
+    }
+
   return OK;
 }

@@ -73,11 +73,6 @@
 
 static void mac802154_resetqueues(FAR struct ieee802154_privmac_s *priv);
 
-/* MAC client notification */
-
-static void mac802154_notify(FAR struct ieee802154_privmac_s *priv,
-                             FAR struct ieee802154_notif_s *notif);
-
 /* IEEE 802.15.4 PHY Interface OPs */
 
 static int mac802154_radiopoll(FAR const struct ieee802154_radiocb_s *radiocb,
@@ -497,34 +492,6 @@ static void mac802154_purge_worker(FAR void *arg)
 }
 
 /****************************************************************************
- * Name: mac802154_notify
- *
- * Description:
- *   Notify every register MAC client.
- *
- ****************************************************************************/
-
-static void mac802154_notify(FAR struct ieee802154_privmac_s *priv,
-                             FAR struct ieee802154_notif_s *notif)
-{
-  FAR struct mac802154_maccb_s *cb;
-
-  /* Try to notify every registered MAC client */
-
-  for (cb = priv->cb; cb != NULL; cb = cb->flink)
-    {
-      /* Does this client want notifications? */
-
-      if (cb->notify != NULL)
-        {
-          /* Yes.. Notify */
-
-          cb->notify(cb, notif);
-        }
-    }
-}
-
-/****************************************************************************
  * Name: mac802154_radiopoll
  *
  * Description:
@@ -667,6 +634,7 @@ static void mac802154_txdone_worker(FAR void *arg)
               mac802154_takesem(&priv->exclsem, false);
             }
             break;
+
           case IEEE802154_FRAME_COMMAND:
             {
               switch (priv->curr_cmd)
@@ -674,10 +642,13 @@ static void mac802154_txdone_worker(FAR void *arg)
                   case IEEE802154_CMD_ASSOC_REQ:
                     mac802154_txdone_assocreq(priv, txdesc);
                     break;
+
                   case IEEE802154_CMD_ASSOC_RESP:
                     break;
+
                   case IEEE802154_CMD_DISASSOC_NOT:
                     break;
+
                   case IEEE802154_CMD_DATA_REQ:
                     /* Data requests can be sent for 3 different reasons.
                      *
@@ -697,23 +668,31 @@ static void mac802154_txdone_worker(FAR void *arg)
                         case MAC802154_OP_ASSOC:
                           mac802154_txdone_datareq_assoc(priv, txdesc);
                           break;
+
                         case MAC802154_OP_POLL:
                           mac802154_txdone_datareq_poll(priv, txdesc);
                           break;
+
                         default:
                           break;
                       }
                     break;
+
                   case IEEE802154_CMD_PANID_CONF_NOT:
                     break;
+
                   case IEEE802154_CMD_ORPHAN_NOT:
                     break;
+
                   case IEEE802154_CMD_BEACON_REQ:
                     break;
+
                   case IEEE802154_CMD_COORD_REALIGN:
                     break;
+
                   case IEEE802154_CMD_GTS_REQ:
                     break;
+
                   default:
                     /* We can deallocate the data conf notification as it is no
                      * longer needed. We can't use the public function here
@@ -722,10 +701,12 @@ static void mac802154_txdone_worker(FAR void *arg)
 
                     privnotif->flink = priv->notif_free;
                     priv->notif_free = privnotif;
+                    priv->nnotif     = 0;
                     break;
                 }
             }
             break;
+
           default:
             {
               /* We can deallocate the data conf notification as it is no longer
@@ -941,22 +922,30 @@ static void mac802154_rxframe_worker(FAR void *arg)
                   case IEEE802154_CMD_ASSOC_REQ:
                     mac802154_rx_assocreq(priv, ind);
                     break;
+
                   case IEEE802154_CMD_ASSOC_RESP:
                     mac802154_rx_assocresp(priv, ind);
                     break;
+
                   case IEEE802154_CMD_DISASSOC_NOT:
                     break;
+
                   case IEEE802154_CMD_DATA_REQ:
                     mac802154_rx_datareq(priv, ind);
                     break;
+
                   case IEEE802154_CMD_PANID_CONF_NOT:
                     break;
+
                   case IEEE802154_CMD_ORPHAN_NOT:
                     break;
+
                   case IEEE802154_CMD_BEACON_REQ:
                     break;
+
                   case IEEE802154_CMD_COORD_REALIGN:
                     break;
+
                   case IEEE802154_CMD_GTS_REQ:
                     break;
                 }
