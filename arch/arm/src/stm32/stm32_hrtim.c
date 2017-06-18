@@ -1076,7 +1076,7 @@ static uint32_t hrtim_base_get(FAR struct stm32_hrtim_s* priv, uint8_t timer)
   FAR struct stm32_hrtim_tim_s* tim;
   uint32_t base;
 
-  tim = hrtim_tim_get(priv, imer);
+  tim = hrtim_tim_get(priv, timer);
   if (tim == NULL)
     {
       base = 0;
