@@ -169,7 +169,7 @@ struct ipv6icmp_hdr_s
 /* In order to provide a customizable IEEE 802.15.4 MAC header, a structure
  * of meta data is passed to the MAC network driver, struct
  * ieee802154_frame_meta_s.  Many of the settings in this meta data are
- * fixed, deterimined by the 6loWPAN configuration.  Other settings depend
+ * fixed, deterimined by the 6LoWPAN configuration.  Other settings depend
  * on the protocol used in the current packet or on chacteristics of the
  * destination node.
  *
@@ -382,7 +382,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
  *   reset.  It is called from the common sixlowpan_initialize() function.
  *   sixlowpan_hc06_initialize() configures HC06 networking data structures.
  *   It is called prior to platform-specific driver initialization so that
- *   the 6loWPAN networking subsystem is prepared to deal with network
+ *   the 6LoWPAN networking subsystem is prepared to deal with network
  *   driver initialization actions.
  *
  * Input Parameters:

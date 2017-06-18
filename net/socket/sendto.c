@@ -239,7 +239,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 #endif
     {
 #if defined(CONFIG_NET_6LOWPAN)
-      /* Try 6loWPAN UDP packet sendto() */
+      /* Try 6LoWPAN UDP packet sendto() */
 
       nsent = psock_6lowpan_udp_sendto(psock, buf, len, flags, to, tolen);
 

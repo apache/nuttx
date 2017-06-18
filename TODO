@@ -1232,11 +1232,11 @@ o Network (net/, drivers/net)
                deal with a list of devices.  That would be a huge effect and
                certainly doesn't dount as a "simple solution".
 
-  Title:       ICMPv6 FOR 6loWPAN
+  Title:       ICMPv6 FOR 6LoWPAN
   Description: The current ICMPv6 and neighbor-related logic only works with
-               Ethernet MAC.  For 6loWPAN, a new more conservative IPv6
+               Ethernet MAC.  For 6LoWPAN, a new more conservative IPv6
                neigbor discovery is provided by RFC 6775.  This RFC needs to
-               be supported in order to support ping6 on a 6loWPAN network.
+               be supported in order to support ping6 on a 6LoWPAN network.
                If RFC 6775 were implemented, then arbitrary IPv6 addresses,
                including addresses from DHCPv6 could be used.
                can 
@@ -1248,12 +1248,12 @@ o Network (net/, drivers/net)
                a neighbor table that, like the arp table, provides the
                mapping between IP addresses and node addresses.
 
-               The NuttX, Contiki-based 6loWPAN implementation circumvented
+               The NuttX, Contiki-based 6LoWPAN implementation circumvented
                the need for the neighbor discovery logic by using only MAC-
                based addressing, i.e., the lower two or eight bytes of the
                IP address are the node address.
 
-               Most of the 6loWPAN compression algorithms exploit this to
+               Most of the 6LoWPAN compression algorithms exploit this to
                compress the IPv6 address to nothing but a bit indicating
                that the IP address derives from the node address.  So I
                think IPv6 neighbor discover is useless in the current
@@ -1272,7 +1272,7 @@ o Network (net/, drivers/net)
   Status:      Open
   Priority:    Low for now.  I don't plan on implementing this.  It would
                only be relevant if we were to decide to abandon the use of
-               MAC-based addressing in the 6loWPAN implementation.
+               MAC-based addressing in the 6LoWPAN implementation.
 
   Title:       ETHERNET LOCAL BROADCAST DOES NOT WORK
 

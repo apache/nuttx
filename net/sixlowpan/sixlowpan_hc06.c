@@ -366,7 +366,7 @@ static void uncompress_addr(FAR net_ipv6addr_t ipaddr, uint8_t const prefix[],
  *   reset.  It is called from the common sixlowpan_initialize() function.
  *   sixlowpan_hc06_initialize() configures HC06 networking data structures.
  *   It is called prior to platform-specific driver initialization so that
- *   the 6loWPAN networking subsystem is prepared to deal with network
+ *   the 6LoWPAN networking subsystem is prepared to deal with network
  *   driver initialization actions.
  *
  * Input Parameters:

@@ -1571,7 +1571,7 @@ int mac802154dev_register(MACHANDLE mac, int minor);
  *
  * Description:
  *   Register a network driver to access the IEEE 802.15.4 MAC layer from
- *   a socket using 6loWPAN
+ *   a socket using 6LoWPAN
  *
  * Input Parameters:
  *   mac - Pointer to the mac layer struct to be registered.

@@ -218,7 +218,7 @@
    /* There is no link layer header with SLIP */
 
 #  ifndef CONFIG_NET_IPv6
-#    error 6loWPAN requires IPv support
+#    error 6LoWPAN requires IPv support
 #  endif
 
 #  define NET_LL_HDRLEN(d)  0
@@ -620,7 +620,7 @@
 #  define NET_DEV_RCVWNDO(d)  CONFIG_NET_ETH_TCP_RECVWNDO
 
 #elif defined(CONFIG_NET_6LOWPAN)
-   /* Only 6loWPAN.. use the configured 6loWPAN receive window size */
+   /* Only 6LoWPAN.. use the configured 6LoWPAN receive window size */
 
 #  define NET_DEV_RCVWNDO(d)  CONFIG_NET_6LOWPAN_TCP_RECVWNDO
 

@@ -7,7 +7,7 @@ menu "6LoWPAN Configuration"
 	depends on NET_6LOWPAN
 
 config NET_6LOWPAN_FRAG
-	bool "6loWPAN Fragmentation"
+	bool "6LoWPAN Fragmentation"
 	default y
 	---help---
 		CONFIG_NET_6LOWPAN_FRAG specifies if 6lowpan fragmentation should be
@@ -22,7 +22,7 @@ config NET_6LOWPAN_FRAMELEN
 		setting should never be smaller than 127.
 
 choice
-	prompt "6loWPAN Compression"
+	prompt "6LoWPAN Compression"
 	default NET_6LOWPAN_COMPRESSION_HC06
 
 config NET_6LOWPAN_COMPRESSION_IPv6
@@ -33,16 +33,16 @@ config NET_6LOWPAN_COMPRESSION_IPv6
 		the IPv6 dispatch byte before the packet.
 
 config NET_6LOWPAN_COMPRESSION_HC1
-	bool "6loWPAN HC1"
+	bool "6LoWPAN HC1"
 	---help---
 		Compress IP/UDP header using HC1 and HC_UDP
 
 config NET_6LOWPAN_COMPRESSION_HC06
-	bool "6loWPAN HC06"
+	bool "6LoWPAN HC06"
 	---help---
 		Compress IP/UDP header using HC06 compression
 
-endchoice # 6loWPAN Compression
+endchoice # 6LoWPAN Compression
 
 config NET_6LOWPAN_COMPRESSION_THRESHOLD
 	int "Lower compression threshold"
@@ -196,7 +196,7 @@ config NET_6LOWPAN_DUMPBUFFER
 	depends on DEBUG_NET_INFO
 	---help---
 		Enable dumping of all packet and frame buffers coming into and out
-		of the 6loWPAN logic.  This will generate a large volume of data if
+		of the 6LoWPAN logic.  This will generate a large volume of data if
 		selected.
 
 endmenu # 6LoWPAN Configuration

@@ -325,7 +325,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   sixlowpan_addrfromip(conn->u.ipv6.raddr, &destmac);
 
-  /* If routable, then call sixlowpan_send() to format and send the 6loWPAN
+  /* If routable, then call sixlowpan_send() to format and send the 6LoWPAN
    * packet.
    */
 

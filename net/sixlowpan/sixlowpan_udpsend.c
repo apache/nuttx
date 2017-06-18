@@ -300,7 +300,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
 
   sixlowpan_addrfromip(to6->sin6_addr.in6_u.u6_addr16, &destmac);
 
-  /* If routable, then call sixlowpan_send() to format and send the 6loWPAN
+  /* If routable, then call sixlowpan_send() to format and send the 6LoWPAN
    * packet.
    */
 

@@ -108,7 +108,7 @@ struct sixlowpan_sllao_s
   uint8_t eui64[8];    /* Bytes 8-15:  EUI-64 identifier assigned to interface */
 };
 
-/* 4.2 6loWPAN Context Option (6CO) */
+/* 4.2 6LoWPAN Context Option (6CO) */
 
 struct sixlowpan_6co_s
 {

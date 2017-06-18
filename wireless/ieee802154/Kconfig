@@ -107,12 +107,12 @@ config IEEE802154_MACDEV_RECVRPRIO
 endif # IEEE802154_MACDEV
 
 config IEEE802154_NETDEV
-	bool "IEEE802154 6loWPAN Network Device"
+	bool "IEEE802154 6LoWPAN Network Device"
 	default n
 	depends on NET_6LOWPAN && NET_IPv6
 	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
-		Add support for the IEEE802.15.4 6loWPAN network device built on
+		Add support for the IEEE802.15.4 6LoWPAN network device built on
 		the common IEEE802.15.4 MAC.
 
 if IEEE802154_NETDEV
@@ -157,12 +157,12 @@ endchoice # Work queue
 endif # IEEE802154_NETDEV
 
 config IEEE802154_LOOPBACK
-	bool "IEEE802154 6loWPAN Loopback"
+	bool "IEEE802154 6LoWPAN Loopback"
 	default n
 	depends on NET_6LOWPAN && NET_IPv6
 	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
-		Add support for the IEEE802.15.4 6loWPAN Loopback test device.
+		Add support for the IEEE802.15.4 6LoWPAN Loopback test device.
 
 if IEEE802154_LOOPBACK
 

@@ -374,7 +374,7 @@ Configurations
 
     This is another version of nsh that is very similar to the mrf24j40-mac
     configuration but is focused on testing the IEEE 802.15.4 MAC
-    integration with the 6loWPAN network stack.  It derives directly from the
+    integration with the 6LoWPAN network stack.  It derives directly from the
     mrf24j40-mac and all NOTES provided there apply.  Additional differences
     are summarized below:
 
@@ -426,7 +426,7 @@ Configurations
        the system has crashed because (a) it will be unresponsive and (b)
        the LD2 will be blinking at about 2Hz.
 
-    4. IPv6 networking is enabled with TCP/IP, UDP, 6loWPAN, and NSH
+    4. IPv6 networking is enabled with TCP/IP, UDP, 6LoWPAN, and NSH
        Telnet support.
 
     5. Configuration instructions:  Basic PAN configuration is the same as

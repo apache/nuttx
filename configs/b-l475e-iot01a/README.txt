@@ -78,7 +78,7 @@ Board Features
      This cannot integrate cleanly with the NuttX network stack.  A
      USERSOCK option was recently added that would permit implementation
      of the Inventek support in an applications.  But that would then
-     preclude the 6loWPAN integration into IPv6.
+     preclude the 6LoWPAN integration into IPv6.
 
   2. The board uses Bluetooth® V4.1 module (SPBTLE-RF), which has built-in
      BLE stack.  Similar with wifi, you only use simple AT command to talk

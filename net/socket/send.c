@@ -162,7 +162,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 #endif
             {
 #ifdef CONFIG_NET_6LOWPAN
-              /* Try 6loWPAN TCP packet send */
+              /* Try 6LoWPAN TCP packet send */
 
               ret = psock_6lowpan_tcp_send(psock, buf, len);
 
@@ -205,7 +205,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 #endif
             {
 #if defined(CONFIG_NET_6LOWPAN)
-              /* Try 6loWPAN UDP packet send */
+              /* Try 6LoWPAN UDP packet send */
 
               ret = psock_6lowpan_udp_send(psock, buf, len);
 
