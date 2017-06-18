@@ -238,6 +238,8 @@ struct stm32_hrtim_timcmn_s
                                  * that drives the timer module.
                                  */
   uint8_t mode;                 /* Timer mode */
+  uint8_t dac:2;                /* DAC triggering */
+  uint8_t reserved:6;
 #ifdef HRTIM_HAVE_INTERRUPTS
   uint16_t irq;                 /* interrupts configuration */
 #endif
@@ -370,6 +372,24 @@ struct stm32_hrtim_eev_s
 };
 #endif
 
+/* Structure describes HRTIM ADC triggering configuration */
+
+struct stm32_hrtim_adc_s
+{
+#ifdef CONFIG_STM32_HRTIM_ADC_TRG1
+  uint32_t trg1;
+#endif
+#ifdef CONFIG_STM32_HRTIM_ADC_TRG2
+  uint32_t trg2;
+#endif
+#ifdef CONFIG_STM32_HRTIM_ADC_TRG3
+  uint32_t trg3;
+#endif
+#ifdef CONFIG_STM32_HRTIM_ADC_TRG4
+  uint32_t trg4;
+#endif
+};
+
 /* This structure describes the configuration of HRTIM device */
 
 struct stm32_hrtim_s
@@ -392,10 +412,13 @@ struct stm32_hrtim_s
   struct stm32_hrtim_tim_s *time;    /* HRTIM Timer E */
 #endif
 #ifdef HRTIM_HAVE_FAULTS
-  struct stm32_hrtim_faults_s *flt;
+  struct stm32_hrtim_faults_s *flt;  /* Faults configuration */
 #endif
 #ifdef HRTIM_HAVE_EEV
-  struct stm32_hrtim_eev_s *eev;
+  struct stm32_hrtim_eev_s *eev;     /* External Events configuration  */
+#endif
+#ifdef HRTIM_HAVE_ADC
+  struct stm32_hrtim_adc_s *adc;     /* ADC triggering configuration */
 #endif
 #ifdef CONFIG_STM32_HRTIM_CMN_IRQ
   uint32_t irq;                      /* Common interrupts configuration */
@@ -458,6 +481,9 @@ static int hrtim_outputs_enable(FAR struct hrtim_dev_s *dev, uint16_t outputs,
 #endif
 #ifdef HRTIM_HAVE_ADC
 static int hrtim_adc_config(FAR struct stm32_hrtim_s *priv);
+#endif
+#ifdef HRTIM_HAVE_DAC
+static int hrtim_dac_config(FAR struct stm32_hrtim_s *priv);
 #endif
 #ifdef HRTIM_HAVE_FAULTS
 static int hrtim_faults_config(FAR struct stm32_hrtim_s *priv);
@@ -523,6 +549,9 @@ static struct stm32_hrtim_tim_s g_master =
     .base  = STM32_HRTIM1_MASTER_BASE,
     .pclk  = HRTIM_CLOCK/HRTIM_MASTER_PRESCALER,
     .mode  = HRTIM_MASTER_MODE,
+#ifdef CONFIG_STM32_HRTIM_MASTER_DAC
+    .dac   = HRTIM_MASTER_DAC,
+#endif
 #ifdef CONFIG_STM32_HRTIM_MASTER_IRQ
     .irq   = HRTIM_IRQ_MASTER
 #endif
@@ -588,6 +617,9 @@ static struct stm32_hrtim_tim_s g_tima =
     .base  = STM32_HRTIM1_TIMERA_BASE,
     .pclk  = HRTIM_CLOCK/HRTIM_TIMA_PRESCALER,
     .mode  = HRTIM_TIMA_MODE,
+#ifdef CONFIG_STM32_HRTIM_TIMA_DAC
+    .dac   = HRTIM_TIMA_DAC,
+#endif
 #ifdef CONFIG_STM32_HRTIM_MASTER_IRQ
     .irq   = HRTIM_IRQ_TIMA,
 #endif
@@ -758,6 +790,24 @@ struct stm32_hrtim_eev_s g_eev =
 };
 #endif
 
+/* ADC triggering data */
+
+struct stm32_hrtim_adc_s g_adc =
+{
+#ifdef CONFIG_STM32_HRTIM_ADC_TRG1
+  .trg1 = HRTIM_ADC_TRG1,
+#endif
+#ifdef CONFIG_STM32_HRTIM_ADC_TRG2
+  .trg2 = HRTIM_ADC_TRG2,
+#endif
+#ifdef CONFIG_STM32_HRTIM_ADC_TRG3
+  .trg3 = HRTIM_ADC_TRG3,
+#endif
+#ifdef CONFIG_STM32_HRTIM_ADC_TRG4
+  .trg4 = HRTIM_ADC_TRG4
+#endif
+};
+
 /* HRTIM1 private data */
 
 static struct stm32_hrtim_s g_hrtim1priv =
@@ -780,13 +830,16 @@ static struct stm32_hrtim_s g_hrtim1priv =
   .time     = &g_time,
 #endif
 #ifdef HRTIM_HAVE_FAULTS
-  .flt = &g_flt,
+  .flt      = &g_flt,
 #endif
 #ifdef HRTIM_HAVE_EEV
-  .eev = &g_eev,
+  .eev      = &g_eev,
+#endif
+#ifdef HRTIM_HAVE_ADC
+  .adc      = &g_adc,
 #endif
 #ifdef CONFIG_STM32_HRTIM_CMN_IRQ
-  .irq = HRTIM_IRQ_COMMON,
+  .irq      = HRTIM_IRQ_COMMON,
 #endif
 };
 
@@ -1816,7 +1869,107 @@ static int hrtim_outputs_enable(FAR struct hrtim_dev_s *dev, uint16_t outputs,
 #ifdef HRTIM_HAVE_ADC
 static int hrtim_adc_config(FAR struct stm32_hrtim_s *priv)
 {
-#warning "hrtim_adc_config: missing logic"
+
+#ifdef CONFIG_STM32_HRTIM_ADC_TRG1
+  hrtim_putreg(priv, STM32_HRTIM_CMN_ADC1R_OFFSET, priv->adc->trg1);
+#endif
+#ifdef CONFIG_STM32_HRTIM_ADC_TRG2
+  hrtim_putreg(priv, STM32_HRTIM_CMN_ADC2R_OFFSET, priv->adc->trg2);
+#endif
+#ifdef CONFIG_STM32_HRTIM_ADC_TRG3
+  hrtim_putreg(priv, STM32_HRTIM_CMN_ADC3R_OFFSET, priv->adc->trg3);
+#endif
+#ifdef CONFIG_STM32_HRTIM_ADC_TRG4
+  hrtim_putreg(priv, STM32_HRTIM_CMN_ADC4R_OFFSET, priv->adc->trg4);
+#endif
+
+  return OK;
+}
+#endif
+
+#ifdef HRTIM_HAVE_DAC
+
+/****************************************************************************
+ * Name: hrtim_tim_dac_cfg
+ *
+ * Description:
+ *   Configure single HRTIM Timer DAC synchronization event
+ *
+ * Input Parameters:
+ *   priv   - A reference to the HRTIM structure
+ *   timer  - Timer index
+ *   dac    - DAC synchronisation event configuration
+ *
+ * Returned Value:
+ *  0 on success, a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int hrtim_tim_dac_cfg(FAS struct stm32_hrtim_s *priv, uint8_t timer,
+                             uint8_t dac)
+{
+  FAR struct stm32_hrtim_tim_s *tim;
+  uint32_t regval = 0;
+
+  tim = hrtim_tim_get(priv, timer);
+
+  regval = hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_CR_OFFSET);
+
+  regval |= (dac << HRTIM_CMNCR_DACSYNC_SHIFT);
+
+  hrtim_tim_putreg(priv, timer, STM32_HRTIM_TIM_CR_OFFSET, regval);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: hrtim_dac_config
+ *
+ * Description:
+ *   Configure HRTIM DAC triggers
+ *
+ * Input Parameters:
+ *   priv   - A reference to the HRTIM structure
+ *
+ * Returned Value:
+ *  0 on success, a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int hrtim_dac_config(FAR struct stm32_hrtim_s *priv)
+{
+  FAR struct stm32_hrtim_slave_priv_s *slave_priv;
+
+#ifdef CONFIG_STM32_HRTIM_MASTER_DAC
+  slave_priv = (struct stm32_hrtim_slave_priv_s*)priv->master->priv;
+  hrtim_tim_dac_cfg(priv, HRTIM_TIMER_MASTER, dac);
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_TIMA_DAC
+  slave_priv = (struct stm32_hrtim_slave_priv_s*)priv->tima->priv;
+  hrtim_tim_dac_cfg(priv, HRTIM_TIMER_TIMA, dac);
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_TIMB_DAC
+  slave_priv = (struct stm32_hrtim_slave_priv_s*)priv->timb->priv;
+  hrtim_tim_dac_cfg(priv, HRTIM_TIMER_TIMB, dac);
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_TIMC_DAC
+  slave_priv = (struct stm32_hrtim_slave_priv_s*)priv->timc->priv;
+  hrtim_tim_dac_cfg(priv, HRTIM_TIMER_TIMC, dac);
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_TIMD_DAC
+  slave_priv = (struct stm32_hrtim_slave_priv_s*)priv->timd->priv;
+  hrtim_tim_dac_cfg(priv, HRTIM_TIMER_TIMD, dac);
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_TIME_DAC
+  slave_priv = (struct stm32_hrtim_slave_priv_s*)priv->time->priv;
+  hrtim_tim_dac_cfg(priv, HRTIM_TIMER_TIME, dac);
+#endif
+
   return OK;
 }
 #endif
@@ -2704,7 +2857,13 @@ static int hrtim_tim_update_set(FAR struct stm32_hrtim_s *priv, uint8_t timer,
 
   regval = hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_CR_OFFSET);
 
-  /* TODO: update configuration */
+  /* TODO: Configure update events */
+
+  /* TODO: Configure update gating */
+
+  /* Write register */
+
+  hrtim_tim_putreg(priv, timer, STM32_HRTIM_TIM_CR_OFFSET, regval);
 
   return OK;
 }
@@ -2850,6 +3009,17 @@ static int stm32_hrtimconfig(FAR struct stm32_hrtim_s *priv)
 
 #ifdef HRTIM_HAVE_ADC
   ret = hrtim_adc_config(priv);
+  if (ret != OK)
+    {
+      tmrerr("ERROR: HRTIM ADC configuration failed!\n");
+      goto errout;
+    }
+#endif
+
+  /* Configure DAC synchronization */
+
+#ifdef HRTIM_HAVE_DAC
+  ret = hrtim_dac_config(priv);
   if (ret != OK)
     {
       tmrerr("ERROR: HRTIM ADC configuration failed!\n");
