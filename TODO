@@ -1234,14 +1234,14 @@ o Network (net/, drivers/net)
 
   Title:       ICMPv6 FOR 6loWPAN
   Description: The current ICMPv6 and neighbor-related logic only works with
-               Ethernet MAC.  For 6loWPAN, a new more conservative ICMPv6
-               definitions is provided by RFC 6775.  This RFC needs to be
-               supported in order to support ping6 on a 6loWPAN network.
+               Ethernet MAC.  For 6loWPAN, a new more conservative IPv6
+               neigbor discovery is provided by RFC 6775.  This RFC needs to
+               be supported in order to support ping6 on a 6loWPAN network.
                If RFC 6775 were implemented, then arbitrary IPv6 addresses,
                including addresses from DHCPv6 could be used.
                can 
 
-               UPDATE:  With ICMPv6 neighbor discovery, any IPv6 address may
+               UPDATE:  With IPv6 neighbor discovery, any IPv6 address may
                be associated with any short or extended address.  In fact,
                that is the whole purpose of the neighbor discover logic:  It
                plays the same role as ARP in IPv4; it ultimately just manages
@@ -1256,15 +1256,18 @@ o Network (net/, drivers/net)
                Most of the 6loWPAN compression algorithms exploit this to
                compress the IPv6 address to nothing but a bit indicating
                that the IP address derives from the node address.  So I
-               think ICMPv6 is useless in the current implementation.
+               think IPv6 neighbor discover is useless in the current
+               implementation.
 
-               If we want to use ICMPv6, we could dispense with the all MAC
-               based addressing.  But if we want to retain the more compact
-               MAC-based addressing, then we don't need ICMPv6.
+               If we want to use IPv6 neighbor discovery, we could dispense
+               with the all MAC  based addressing.  But if we want to retain
+               the more compact MAC-based addressing, then we don't need
+               IPv6 neighbor discovery.
 
                So, the full neighbor discovery logic is not currently useful,
                but it would still be nice to have enough in place to support
-               ping6.
+               ping6.  Full neighbor support would probably be necessary if we
+               wanted to route 6LoWPAN frames outside of the WPAN.
 
   Status:      Open
   Priority:    Low for now.  I don't plan on implementing this.  It would
