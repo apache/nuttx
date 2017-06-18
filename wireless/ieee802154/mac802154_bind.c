@@ -69,12 +69,41 @@
  *
  ****************************************************************************/
 
-int mac802154_bind(MACHANDLE mac, FAR const struct mac802154_maccb_s *cb)
+int mac802154_bind(MACHANDLE mac, FAR struct mac802154_maccb_s *cb)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
+  FAR struct mac802154_maccb_s *next;
+  FAR struct mac802154_maccb_s *prev;
 
-  priv->cb = cb;
+  /* Add the MAC client callback structure to the list of MAC callbacks in
+   * priority order.
+   *
+   * Search the list to find the location to insert the new instance.
+   * The list is maintained in descending priority order.
+   */
+
+  for (prev = NULL, next = priv->cb;
+      (next != NULL && cb->prio <= next->prio);
+       prev = next, next = next->flink);
+
+  /* Add the instance to the spot found in the list.  Check if the instance
+   * goes at the head of the list.
+   */
+
+  if (prev == NULL)
+    {
+      cb->flink = priv->cb; /* May be NULL */
+      priv->cb  = cb;
+    }
+
+  /* No.. the instance goes between prev and next */
+
+  else
+    {
+      cb->flink   = next; /* May be NULL */
+      prev->flink = cb;
+    }
+
   return OK;
 }
-

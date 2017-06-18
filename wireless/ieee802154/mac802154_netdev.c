@@ -109,7 +109,7 @@ struct macnet_callback_s
 {
   /* This holds the information visible to the MAC layer */
 
-  struct mac802154_maccb_s mc_cb;        /* Interface understood by the MAC layer */
+  struct mac802154_maccb_s mc_cb;      /* Interface understood by the MAC layer */
   FAR struct macnet_driver_s *mc_priv; /* Our priv data */
 };
 
@@ -138,9 +138,9 @@ struct macnet_driver_s
 
 /* IEE802.15.4 MAC callback functions ***************************************/
 
-static void macnet_notify(FAR const struct mac802154_maccb_s *maccb,
+static void macnet_notify(FAR struct mac802154_maccb_s *maccb,
                           FAR struct ieee802154_notif_s *notif);
-static void macnet_rxframe(FAR const struct mac802154_maccb_s *maccb,
+static int  macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
                            FAR struct ieee802154_data_ind_s *ind);
 
 /* Asynchronous confirmations to requests */
@@ -223,7 +223,7 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
  *
  ****************************************************************************/
 
-static void macnet_notify(FAR const struct mac802154_maccb_s *maccb,
+static void macnet_notify(FAR struct mac802154_maccb_s *maccb,
                           FAR struct ieee802154_notif_s *notif)
 {
   FAR struct macnet_callback_s *cb =
@@ -250,11 +250,17 @@ static void macnet_notify(FAR const struct mac802154_maccb_s *maccb,
  * Name: macnet_rxframe
  *
  * Description:
+ *   Handle received frames forward by the IEEE 802.15.4 MAC.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.  On success, the ind and its contained iob will be freed.
+ *   The ind will be intact if this function returns a failure.
  *
  ****************************************************************************/
 
-static void macnet_rxframe(FAR const struct mac802154_maccb_s *maccb,
-                           FAR struct ieee802154_data_ind_s *ind)
+static int macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
+                          FAR struct ieee802154_data_ind_s *ind)
 {
   FAR struct macnet_callback_s *cb =
     (FAR struct macnet_callback_s *)maccb;
@@ -264,10 +270,31 @@ static void macnet_rxframe(FAR const struct mac802154_maccb_s *maccb,
   DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
   priv = cb->mc_priv;
 
-  /* Extract the IOB containing the frame from the struct ieee802154_data_ind_s */
+  /* Ignore the frame if the network is not up */
+
+  if (!priv->md_bifup)
+    {
+      return -ENETDOWN;
+    }
+
+  /* Peek the IOB contained the frame in the struct ieee802154_data_ind_s */
 
   DEBUGASSERT(priv != NULL && ind != NULL && ind->frame != NULL);
-  iob        = ind->frame;
+  iob = ind->frame;
+
+  /* If the frame is not a 6LoWPAN frame, then return an error.  The first
+   * byte following the MAC head at the io_offset should be a valid IPHC
+   * header.
+   */
+
+  if ((iob->io_data[iob->io_offset] & SIXLOWPAN_DISPATCH_NALP_MASK) ==
+      SIXLOWPAN_DISPATCH_NALP)
+    {
+      return -EINVAL;
+    }
+
+  /* Remove the IOB containing the frame. */
+
   ind->frame = NULL;
 
   /* Transfer the frame to the network logic */
@@ -279,6 +306,7 @@ static void macnet_rxframe(FAR const struct mac802154_maccb_s *maccb,
    */
 
   ieee802154_ind_free(ind);
+  return OK;
 }
 
 /****************************************************************************
@@ -993,7 +1021,7 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
  *
  * Description:
  *   Register a network driver to access the IEEE 802.15.4 MAC layer from
- *   a socket using 6loWPAN
+ *   a socket using 6LoWPAN
  *
  * Input Parameters:
  *   mac - Pointer to the mac layer struct to be registered.
@@ -1072,6 +1100,8 @@ int mac802154netdev_register(MACHANDLE mac)
   priv->md_cb.mc_priv = priv;
 
   maccb           = &priv->md_cb.mc_cb;
+  maccb->flink    = NULL;
+  maccb->prio     = CONFIG_IEEE802154_NETDEV_RECVRPRIO;
   maccb->notify   = macnet_notify;
   maccb->rxframe  = macnet_rxframe;
 

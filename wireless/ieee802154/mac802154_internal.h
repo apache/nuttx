@@ -147,7 +147,7 @@ typedef void (*mac802154_worker_t)(FAR struct ieee802154_privmac_s *priv);
 struct ieee802154_privmac_s
 {
   FAR struct ieee802154_radio_s *radio;     /* Contained IEEE802.15.4 radio dev */
-  FAR const struct mac802154_maccb_s *cb;   /* Contained MAC callbacks */
+  FAR struct mac802154_maccb_s *cb;         /* Head of a list of MAC callbacks */
   FAR struct mac802154_radiocb_s radiocb;   /* Interface to bind to radio */
 
   sem_t exclsem; /* Support exclusive access */

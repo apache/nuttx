@@ -73,6 +73,11 @@
 
 static void mac802154_resetqueues(FAR struct ieee802154_privmac_s *priv);
 
+/* MAC client notification */
+
+static void mac802154_notify(FAR struct ieee802154_privmac_s *priv,
+                             FAR struct ieee802154_notif_s *notif);
+
 /* IEEE 802.15.4 PHY Interface OPs */
 
 static int mac802154_radiopoll(FAR const struct ieee802154_radiocb_s *radiocb,
@@ -492,6 +497,34 @@ static void mac802154_purge_worker(FAR void *arg)
 }
 
 /****************************************************************************
+ * Name: mac802154_notify
+ *
+ * Description:
+ *   Notify every register MAC client.
+ *
+ ****************************************************************************/
+
+static void mac802154_notify(FAR struct ieee802154_privmac_s *priv,
+                             FAR struct ieee802154_notif_s *notif)
+{
+  FAR struct mac802154_maccb_s *cb;
+
+  /* Try to notify every registered MAC client */
+
+  for (cb = priv->cb; cb != NULL; cb = cb->flink)
+    {
+      /* Does this client want notifications? */
+
+      if (cb->notify != NULL)
+        {
+          /* Yes.. Notify */
+
+          cb->notify(cb, notif);
+        }
+    }
+}
+
+/****************************************************************************
  * Name: mac802154_radiopoll
  *
  * Description:
@@ -628,8 +661,9 @@ static void mac802154_txdone_worker(FAR void *arg)
               notif->notiftype = IEEE802154_NOTIFY_CONF_DATA;
 
               /* Release the MAC, call the callback, get exclusive access again */
+
               mac802154_givesem(&priv->exclsem);
-              priv->cb->notify(priv->cb, notif);
+              mac802154_notify(priv, notif);
               mac802154_takesem(&priv->exclsem, false);
             }
             break;
@@ -1096,8 +1130,7 @@ static void mac802154_rx_dataframe(FAR struct ieee802154_privmac_s *priv,
       /* Release the MAC */
 
       mac802154_givesem(&priv->exclsem);
-
-      priv->cb->notify(priv->cb, notif);
+      mac802154_notify(priv, notif);
 
       /* If there was data, pass it along */
 
@@ -1108,26 +1141,48 @@ static void mac802154_rx_dataframe(FAR struct ieee802154_privmac_s *priv,
     }
   else
     {
+      FAR struct mac802154_maccb_s *cb;
+
 notify_with_lock:
 
       mac802154_givesem(&priv->exclsem);
 
 notify_without_lock:
 
-      /* If there is a registered MCPS callback receiver registered,
-        * send the frame, otherwise, throw it out.
+      /* If there are registered MCPS callback receivers registered,
+       * then forward the frame in priority order.  If there are no
+       * registered receivers or if none of the receivers accept the
+       * data frame then drop the frame.
         */
 
-      if (priv->cb->rxframe != NULL)
+      for (cb = priv->cb; cb != NULL; cb = cb->flink)
         {
-          priv->cb->rxframe(priv->cb, ind);
-        }
-      else
-        {
-          /* Free the data indication struct from the pool */
+          int ret;
 
-          ieee802154_ind_free(ind);
+          /* Does this MAC client want frames? */
+
+          if (cb->rxframe != NULL)
+            {
+              /* Yes.. Offer this frame to the receiver */
+
+              ret = cb->rxframe(cb, ind);
+              if (ret >= 0)
+                {
+                  /* The receiver accepted and disposed of the frame and
+                   * its metadata.  We are done.
+                   */
+
+                  return;
+                }
+            }
         }
+
+      /* We get here if the there are no registered receivers or if
+       * all of the registered receivers declined the frame.
+       * Free the data indication struct from the pool
+       */
+
+      ieee802154_ind_free(ind);
     }
 }
 
