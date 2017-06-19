@@ -152,7 +152,6 @@ int psock_listen(FAR struct socket *psock, int backlog)
        */
 
       errcode = tcp_listen(conn);
-
       if (errcode < 0)
         {
           errcode = -errcode;
