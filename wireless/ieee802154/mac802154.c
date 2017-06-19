@@ -251,7 +251,6 @@ void mac802154_create_datareq(FAR struct ieee802154_privmac_s *priv,
                               FAR struct ieee802154_txdesc_s *txdesc)
 {
   FAR struct iob_s *iob;
-  FAR uint16_t *u16;
 
   /* The only node allowed to use a source address of none is the PAN Coordinator.
    * PAN coordinators should not be sending data request commans.
@@ -269,15 +268,15 @@ void mac802154_create_datareq(FAR struct ieee802154_privmac_s *priv,
   iob->io_offset = 0;
   iob->io_pktlen = 0;
 
-  /* Get a uin16_t reference to the first two bytes. ie frame control field */
+  /* Set the frame control fields */
 
-  u16 = (FAR uint16_t *)&iob->io_data[iob->io_len];
+  iob->io_data[0] = 0;
+  iob->io_data[1] = 0;
+  IEEE802154_SETACKREQ(iob->io_data, 0);
+  IEEE802154_SETFTYPE(iob->io_data, 0, IEEE802154_FRAME_COMMAND);
+  IEEE802154_SETDADDRMODE(iob->io_data, 0, coordaddr->mode);
+  IEEE802154_SETSADDRMODE(iob->io_data, 0, srcmode);
   iob->io_len = 2;
-
-  *u16 = (IEEE802154_FRAME_COMMAND << IEEE802154_FRAMECTRL_SHIFT_FTYPE);
-  *u16 |= IEEE802154_FRAMECTRL_ACKREQ;
-  *u16 |= (coordaddr->mode << IEEE802154_FRAMECTRL_SHIFT_DADDR);
-  *u16 |= (srcmode << IEEE802154_FRAMECTRL_SHIFT_SADDR);
 
   /* Each time a data or a MAC command frame is generated, the MAC sublayer
    * shall copy the value of macDSN into the Sequence Number field of the
@@ -304,8 +303,6 @@ void mac802154_create_datareq(FAR struct ieee802154_privmac_s *priv,
         }
     }
 
-  *u16 |= (coordaddr->mode << IEEE802154_FRAMECTRL_SHIFT_DADDR);
-
   /* If the Destination Addressing Mode field is set to indicate that
    * destination addressing information is not present, the PAN ID Compression
    * field shall be set to zero and the source PAN identifier shall contain the
@@ -318,7 +315,7 @@ void mac802154_create_datareq(FAR struct ieee802154_privmac_s *priv,
   if (coordaddr->mode  != IEEE802154_ADDRMODE_NONE &&
       IEEE802154_PANIDCMP(coordaddr->panid, priv->addr.panid))
     {
-      *u16 |= IEEE802154_FRAMECTRL_PANIDCOMP;
+      IEEE802154_SETPANIDCOMP(iob->io_data, 0);
     }
   else
     {
