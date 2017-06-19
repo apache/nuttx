@@ -436,6 +436,23 @@ Configurations
 
          nsh> ifup wpan0
 
+    6. examples/udp is enabled.  This will allow two MRF24J40 nodes to
+       exchange UDP packets.  Basic instructions:
+
+       On the server node:
+
+         nsh> ifconfig wpan0
+         nsh> udpserver &
+
+       The ifconfig command will show the IP address of the server.  Then on
+       the client node use this IP address to start the client:
+
+         nsh> udpserver <server-ip> &
+
+       Where <server-ip> is the IP address of the server that you got above.
+       NOTE: There is no way to stop the UDP test once it has been started
+       other than by resetting the board.
+
   nsh:
 
     Configures the NuttShell (nsh) located at examples/nsh.  This
