@@ -110,7 +110,7 @@ int mac802154_get_mhrlen(MACHANDLE mac,
        * from the transmitted frame. [1] pg. 41.
        */
 
-      if (meta->destaddr.panid == priv->addr.panid)
+      if (IEEE802154_PANIDCMP(meta->destaddr.panid, priv->addr.panid))
         {
           ret += 2; /* 2 bytes for destination PAN ID */
           return ret;

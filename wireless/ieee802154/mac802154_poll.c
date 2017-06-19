@@ -131,7 +131,7 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
    * shall be used. Extended addressing shall be used otherwise.
    */
 
-  if (priv->addr.saddr == IEEE802154_SADDR_BCAST)
+  if (IEEE802154_SADDRCMP(priv->addr.saddr, &IEEE802154_SADDR_BCAST))
     {
       mac802154_create_datareq(priv, &req->coordaddr, IEEE802154_ADDRMODE_EXTENDED,
                                txdesc);
