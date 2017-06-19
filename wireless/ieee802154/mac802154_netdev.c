@@ -261,7 +261,7 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
       /* Set the IP address based on the eaddr */
 
       eaddr = arg.u.getreq.attrval.mac.eaddr;
-      memcpy(dev->d_mac.ieee802154.u8, eaddr, 8);
+      IEEE802154_EADDRCOPY(dev->d_mac.ieee802154.u8, eaddr);
 
       dev->d_ipv6addr[0]  = HTONS(0xfe80);
       dev->d_ipv6addr[1]  = 0;
@@ -276,6 +276,8 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
     }
 
 #else
+  uint8_t *saddr;
+
   /* Get the saddr from the MAC */
 
   memcpy(arg.ifr_name, dev->d_ifname, IFNAMSIZ);
@@ -289,15 +291,8 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
     }
   else
     {
-      union
-      {
-        uint16_t u16;
-        uint8_t  u8[2];
-      } u;
-
-      u.u16 = arg.u.getreq.attrval.mac.saddr;
-      dev->d_mac.ieee802154.u8[0] = u.u8[0];
-      dev->d_mac.ieee802154.u8[1] = u.u8[1];
+      saddr = arg.u.getreq.attrval.mac.saddr;
+      IEEE802154_SADDRCOPY(dev->d_mac.ieee802154.u8, saddr);
 
       /* Set the IP address based on the saddr */
 
@@ -308,7 +303,7 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
       dev->d_ipv6addr[4]  = 0;
       dev->d_ipv6addr[5]  = HTONS(0x00ff);
       dev->d_ipv6addr[6]  = HTONS(0xfe00);
-      dev->d_ipv6addr[7]  = u.u16;
+      dev->d_ipv6addr[7]  = (uint16_t)saddr[0] << 8 |  (uint16_t)saddr[1];
       dev->d_ipv6addr[7] ^= 0x200;
       return OK;
     }

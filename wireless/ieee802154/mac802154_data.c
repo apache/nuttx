@@ -79,7 +79,7 @@ int mac802154_req_data(MACHANDLE mac,
     (FAR struct ieee802154_privmac_s *)mac;
   FAR struct ieee802154_txdesc_s *txdesc;
   uint16_t *frame_ctrl;
-  uint8_t mhr_len = 3; /* Start assuming frame control and seq. num */
+  uint8_t mhr_len = 3;
   int ret;
 
   /* Check the required frame size */
@@ -123,20 +123,18 @@ int mac802154_req_data(MACHANDLE mac,
 
   if (meta->destaddr.mode != IEEE802154_ADDRMODE_NONE)
     {
-      memcpy(&frame->io_data[mhr_len], &meta->destaddr.panid, 2);
+      IEEE802154_PANIDCOPY(&frame->io_data[mhr_len], meta->destaddr.panid);
       mhr_len += 2;
 
       if (meta->destaddr.mode == IEEE802154_ADDRMODE_SHORT)
         {
-          memcpy(&frame->io_data[mhr_len], &meta->destaddr.saddr, 2);
+          IEEE802154_SADDRCOPY(&frame->io_data[mhr_len], meta->destaddr.saddr);
           mhr_len += 2;
         }
       else if (meta->destaddr.mode == IEEE802154_ADDRMODE_EXTENDED)
         {
-          memcpy(&frame->io_data[mhr_len], &meta->destaddr.eaddr,
-                 IEEE802154_EADDR_LEN);
-
-          mhr_len += IEEE802154_EADDR_LEN;
+          IEEE802154_EADDRCOPY(&frame->io_data[mhr_len], meta->destaddr.eaddr);
+          mhr_len += IEEE802154_EADDRSIZE;
         }
     }
 
@@ -165,7 +163,7 @@ int mac802154_req_data(MACHANDLE mac,
        * from the transmitted frame. [1] pg. 41.
        */
 
-      if (meta->destaddr.panid == priv->addr.panid)
+      if (IEEE802154_PANIDCMP(meta->destaddr.panid, priv->addr.panid))
         {
           *frame_ctrl |= IEEE802154_FRAMECTRL_PANIDCOMP;
         }
@@ -180,21 +178,19 @@ int mac802154_req_data(MACHANDLE mac,
       if ((meta->destaddr.mode == IEEE802154_ADDRMODE_NONE) ||
           (!(*frame_ctrl & IEEE802154_FRAMECTRL_PANIDCOMP)))
         {
-          memcpy(&frame->io_data[mhr_len], &priv->addr.panid, 2);
+          IEEE802154_PANIDCOPY(&frame->io_data[mhr_len], priv->addr.panid);
           mhr_len += 2;
         }
 
       if (meta->srcaddr_mode == IEEE802154_ADDRMODE_SHORT)
         {
-          memcpy(&frame->io_data[mhr_len], &priv->addr.saddr, 2);
+          IEEE802154_SADDRCOPY(&frame->io_data[mhr_len], priv->addr.saddr);
           mhr_len += 2;
         }
       else if (meta->srcaddr_mode == IEEE802154_ADDRMODE_EXTENDED)
         {
-          memcpy(&frame->io_data[mhr_len], &priv->addr.eaddr,
-                 IEEE802154_EADDR_LEN);
-
-          mhr_len += IEEE802154_EADDR_LEN;
+          IEEE802154_EADDRCOPY(&frame->io_data[mhr_len], priv->addr.eaddr);
+          mhr_len += IEEE802154_EADDRSIZE;
         }
     }
   else
