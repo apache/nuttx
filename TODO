@@ -1260,7 +1260,7 @@ o Network (net/, drivers/net)
                implementation.
 
                If we want to use IPv6 neighbor discovery, we could dispense
-               with the all MAC  based addressing.  But if we want to retain
+               with the all MAC based addressing.  But if we want to retain
                the more compact MAC-based addressing, then we don't need
                IPv6 neighbor discovery.
 
