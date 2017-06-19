@@ -75,8 +75,8 @@ static void mac802154_resetqueues(FAR struct ieee802154_privmac_s *priv);
 
 /* IEEE 802.15.4 PHY Interface OPs */
 
-static int mac802154_poll(FAR const struct ieee802154_radiocb_s *radiocb,
-                          bool gts, FAR struct ieee802154_txdesc_s **tx_desc);
+static int mac802154_radiopoll(FAR const struct ieee802154_radiocb_s *radiocb,
+                               bool gts, FAR struct ieee802154_txdesc_s **tx_desc);
 
 static void mac802154_txdone(FAR const struct ieee802154_radiocb_s *radiocb,
                              FAR struct ieee802154_txdesc_s *tx_desc);
@@ -95,7 +95,7 @@ static void mac802154_purge_worker(FAR void *arg);
 
 /* Watchdog Timeout Functions */
 
-static void mac802154_timeout_expiry(int argc, uint32_t arg, ...);
+static void mac802154_timeout_expiry(int argc, wdparm_t arg, ...);
 
 static uint32_t mac802154_symtoticks(FAR struct ieee802154_privmac_s *priv,
                               uint32_t symbols);
@@ -233,6 +233,128 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
 }
 
 /****************************************************************************
+ * Name: mac802154_create_datareq
+ *
+ * Description:
+ *    Internal function used by various parts of the MAC layer. This function
+ *    allocates an IOB, populates the frame according to input args, and links
+ *    the IOB into the provided tx descriptor.
+ *
+ * Assumptions:
+ *    Called with the MAC locked
+ *
+ ****************************************************************************/
+
+void mac802154_create_datareq(FAR struct ieee802154_privmac_s *priv,
+                              FAR struct ieee802154_addr_s *coordaddr,
+                              enum ieee802154_addrmode_e srcmode,
+                              FAR struct ieee802154_txdesc_s *txdesc)
+{
+  FAR struct iob_s *iob;
+  FAR uint16_t *u16;
+
+  /* The only node allowed to use a source address of none is the PAN Coordinator.
+   * PAN coordinators should not be sending data request commans.
+   */
+
+  DEBUGASSERT(srcmode != IEEE802154_ADDRMODE_NONE);
+
+  /* Allocate an IOB to put the frame in */
+
+  iob = iob_alloc(false);
+  DEBUGASSERT(iob != NULL);
+
+  iob->io_flink  = NULL;
+  iob->io_len    = 0;
+  iob->io_offset = 0;
+  iob->io_pktlen = 0;
+
+  /* Get a uin16_t reference to the first two bytes. ie frame control field */
+
+  u16 = (FAR uint16_t *)&iob->io_data[iob->io_len];
+  iob->io_len = 2;
+
+  *u16 = (IEEE802154_FRAME_COMMAND << IEEE802154_FRAMECTRL_SHIFT_FTYPE);
+  *u16 |= IEEE802154_FRAMECTRL_ACKREQ;
+  *u16 |= (coordaddr->mode << IEEE802154_FRAMECTRL_SHIFT_DADDR);
+  *u16 |= (srcmode << IEEE802154_FRAMECTRL_SHIFT_SADDR);
+
+  /* Each time a data or a MAC command frame is generated, the MAC sublayer
+   * shall copy the value of macDSN into the Sequence Number field of the
+   * MHR of the outgoing frame and then increment it by one. [1] pg. 40.
+   */
+
+  iob->io_data[iob->io_len++] = priv->dsn++;
+
+  /* If the destination address is present, copy the PAN ID and one of the
+   * addresses, depending on mode, into the MHR.
+   */
+
+  if (coordaddr->mode != IEEE802154_ADDRMODE_NONE)
+    {
+      mac802154_putpanid(iob, coordaddr->panid);
+
+      if (coordaddr->mode == IEEE802154_ADDRMODE_SHORT)
+        {
+          mac802154_putsaddr(iob, coordaddr->saddr);
+        }
+      else if (coordaddr->mode == IEEE802154_ADDRMODE_EXTENDED)
+        {
+          mac802154_puteaddr(iob, coordaddr->eaddr);
+        }
+    }
+
+  *u16 |= (coordaddr->mode << IEEE802154_FRAMECTRL_SHIFT_DADDR);
+
+  /* If the Destination Addressing Mode field is set to indicate that
+   * destination addressing information is not present, the PAN ID Compression
+   * field shall be set to zero and the source PAN identifier shall contain the
+   * value of macPANId. Otherwise, the PAN ID Compression field shall be set to
+   * one. In this case and in accordance with the PAN ID Compression field, the
+   * Destination PAN Identifier field shall contain the value of macPANId, while
+   * the Source PAN Identifier field shall be omitted. [1] pg. 72
+   */
+
+  if (coordaddr->mode  != IEEE802154_ADDRMODE_NONE &&
+      IEEE802154_PANIDCMP(coordaddr->panid, priv->addr.panid))
+    {
+      *u16 |= IEEE802154_FRAMECTRL_PANIDCOMP;
+    }
+  else
+    {
+      mac802154_putpanid(iob, priv->addr.panid);
+    }
+
+  if (srcmode == IEEE802154_ADDRMODE_SHORT)
+    {
+      mac802154_putsaddr(iob, priv->addr.saddr);
+    }
+  else if (srcmode == IEEE802154_ADDRMODE_EXTENDED)
+    {
+      mac802154_puteaddr(iob, priv->addr.eaddr);
+    }
+
+  /* Copy in the Command Frame Identifier */
+
+  iob->io_data[iob->io_len++] = IEEE802154_CMD_DATA_REQ;
+
+  /* Copy the IOB reference to the descriptor */
+
+  txdesc->frame = iob;
+  txdesc->frametype = IEEE802154_FRAME_COMMAND;
+
+  /* Save a copy of the destination addressing infromation into the tx descriptor.
+   * We only do this for commands to help with handling their progession.
+   */
+
+  memcpy(&txdesc->destaddr, &coordaddr, sizeof(struct ieee802154_addr_s));
+
+  /* Copy the IOB reference to the descriptor */
+
+  txdesc->frame = iob;
+}
+
+/****************************************************************************
  * Name: mac802154_setupindirect
  *
  * Description:
@@ -363,7 +485,7 @@ static void mac802154_purge_worker(FAR void *arg)
 }
 
 /****************************************************************************
- * Name: mac802154_poll
+ * Name: mac802154_radiopoll
  *
  * Description:
  *   Called from the radio driver through the callback struct.  This function is
@@ -373,8 +495,8 @@ static void mac802154_purge_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-static int mac802154_poll(FAR const struct ieee802154_radiocb_s *radiocb,
-                          bool gts, FAR struct ieee802154_txdesc_s **txdesc)
+static int mac802154_radiopoll(FAR const struct ieee802154_radiocb_s *radiocb,
+                               bool gts, FAR struct ieee802154_txdesc_s **txdesc)
 {
   FAR struct mac802154_radiocb_s *cb =
     (FAR struct mac802154_radiocb_s *)radiocb;
@@ -499,11 +621,13 @@ static void mac802154_txdone_worker(FAR void *arg)
               notif->notiftype = IEEE802154_NOTIFY_CONF_DATA;
 
               /* Release the MAC, call the callback, get exclusive access again */
+
               mac802154_givesem(&priv->exclsem);
-              priv->cb->notify(priv->cb, notif);
+              mac802154_notify(priv, notif);
               mac802154_takesem(&priv->exclsem, false);
             }
             break;
+
           case IEEE802154_FRAME_COMMAND:
             {
               switch (priv->curr_cmd)
@@ -511,10 +635,13 @@ static void mac802154_txdone_worker(FAR void *arg)
                   case IEEE802154_CMD_ASSOC_REQ:
                     mac802154_txdone_assocreq(priv, txdesc);
                     break;
+
                   case IEEE802154_CMD_ASSOC_RESP:
                     break;
+
                   case IEEE802154_CMD_DISASSOC_NOT:
                     break;
+
                   case IEEE802154_CMD_DATA_REQ:
                     /* Data requests can be sent for 3 different reasons.
                      *
@@ -534,23 +661,31 @@ static void mac802154_txdone_worker(FAR void *arg)
                         case MAC802154_OP_ASSOC:
                           mac802154_txdone_datareq_assoc(priv, txdesc);
                           break;
+
                         case MAC802154_OP_POLL:
                           mac802154_txdone_datareq_poll(priv, txdesc);
                           break;
+
                         default:
                           break;
                       }
                     break;
+
                   case IEEE802154_CMD_PANID_CONF_NOT:
                     break;
+
                   case IEEE802154_CMD_ORPHAN_NOT:
                     break;
+
                   case IEEE802154_CMD_BEACON_REQ:
                     break;
+
                   case IEEE802154_CMD_COORD_REALIGN:
                     break;
+
                   case IEEE802154_CMD_GTS_REQ:
                     break;
+
                   default:
                     /* We can deallocate the data conf notification as it is no
                      * longer needed. We can't use the public function here
@@ -559,10 +694,12 @@ static void mac802154_txdone_worker(FAR void *arg)
 
                     privnotif->flink = priv->notif_free;
                     priv->notif_free = privnotif;
+                    priv->nnotif     = 0;
                     break;
                 }
             }
             break;
+
           default:
             {
               /* We can deallocate the data conf notification as it is no longer
@@ -648,7 +785,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)arg;
   FAR struct ieee802154_data_ind_s *ind;
-  FAR struct iob_s *frame;
+  FAR struct iob_s *iob;
   uint16_t *frame_ctrl;
   bool panid_comp;
   uint8_t ftype;
@@ -676,14 +813,14 @@ static void mac802154_rxframe_worker(FAR void *arg)
 
       /* Get a local copy of the frame to make it easier to access */
 
-      frame = ind->frame;
+      iob = ind->frame;
 
       /* Set a local pointer to the frame control then move the offset past
        * the frame control field
        */
 
-      frame_ctrl = (uint16_t *)&frame->io_data[frame->io_offset];
-      frame->io_offset += 2;
+      frame_ctrl = (uint16_t *)&iob->io_data[iob->io_offset];
+      iob->io_offset += 2;
 
       /* We use the data_ind_s as a container for the frame information even if
        * this isn't a data frame
@@ -698,7 +835,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
       panid_comp = (*frame_ctrl & IEEE802154_FRAMECTRL_PANIDCOMP) >>
                    IEEE802154_FRAMECTRL_SHIFT_PANIDCOMP;
 
-      ind->dsn = frame->io_data[frame->io_offset++];
+      ind->dsn = iob->io_data[iob->io_offset++];
 
       /* If the destination address is included */
 
@@ -706,19 +843,15 @@ static void mac802154_rxframe_worker(FAR void *arg)
         {
           /* Get the destination PAN ID */
 
-          memcpy(&ind->dest.panid, &frame->io_data[frame->io_offset], 2);
-          frame->io_offset += 2;
+          mac802154_takepanid(iob, ind->dest.panid);
 
           if (ind->dest.mode == IEEE802154_ADDRMODE_SHORT)
             {
-              memcpy(&ind->dest.saddr, &frame->io_data[frame->io_offset], 2);
-              frame->io_offset += 2;
+              mac802154_takesaddr(iob, ind->dest.saddr);
             }
           else if (ind->dest.mode == IEEE802154_ADDRMODE_EXTENDED)
             {
-              memcpy(&ind->dest.eaddr[0], &frame->io_data[frame->io_offset],
-                     IEEE802154_EADDR_LEN);
-              frame->io_offset += IEEE802154_EADDR_LEN;
+              mac802154_takeeaddr(iob, ind->dest.eaddr);
             }
         }
 
@@ -732,24 +865,20 @@ static void mac802154_rxframe_worker(FAR void *arg)
             {
               /* The source PAN ID is equal to the destination PAN ID */
 
-              ind->src.panid = ind->dest.panid;
+              IEEE802154_PANIDCOPY(ind->src.panid, ind->dest.panid);              
             }
           else
             {
-              memcpy(&ind->src.panid, &frame->io_data[frame->io_offset], 2);
-              frame->io_offset += 2;
+              mac802154_takepanid(iob, ind->src.panid);
             }
 
           if (ind->src.mode == IEEE802154_ADDRMODE_SHORT)
             {
-              memcpy(&ind->src.saddr, &frame->io_data[frame->io_offset], 2);
-              frame->io_offset += 2;
+              mac802154_takesaddr(iob, ind->src.saddr);
             }
           else if (ind->src.mode == IEEE802154_ADDRMODE_EXTENDED)
             {
-              memcpy(&ind->src.eaddr[0], &frame->io_data[frame->io_offset],
-                     IEEE802154_EADDR_LEN);
-              frame->io_offset += 8;
+              mac802154_takeeaddr(iob, ind->src.eaddr);
             }
         }
 
@@ -771,29 +900,37 @@ static void mac802154_rxframe_worker(FAR void *arg)
                * subsequent functions can start from the byte after the command ID.
                */
 
-              uint8_t cmdtype = frame->io_data[frame->io_offset++];
+              uint8_t cmdtype = iob->io_data[iob->io_offset++];
 
               switch (cmdtype)
                 {
                   case IEEE802154_CMD_ASSOC_REQ:
                     mac802154_rx_assocreq(priv, ind);
                     break;
+
                   case IEEE802154_CMD_ASSOC_RESP:
                     mac802154_rx_assocresp(priv, ind);
                     break;
+
                   case IEEE802154_CMD_DISASSOC_NOT:
                     break;
+
                   case IEEE802154_CMD_DATA_REQ:
                     mac802154_rx_datareq(priv, ind);
                     break;
+
                   case IEEE802154_CMD_PANID_CONF_NOT:
                     break;
+
                   case IEEE802154_CMD_ORPHAN_NOT:
                     break;
+
                   case IEEE802154_CMD_BEACON_REQ:
                     break;
+
                   case IEEE802154_CMD_COORD_REALIGN:
                     break;
+
                   case IEEE802154_CMD_GTS_REQ:
                     break;
                 }
@@ -810,8 +947,10 @@ static void mac802154_rxframe_worker(FAR void *arg)
                * coordinator if beacon tracking was enabled during the Association
                * operation.
                *
-               * txdesc = mac802154_assoc_getresp(priv);
-               * sq_addlast((FAR sq_entry_t *)txdesc, &priv->csma_queue);
+               *  mac802154_txdesc_alloc(priv, &respdec, false);
+               *  mac802154_create_datareq(priv, &req->coordaddr,
+               *                           IEEE802154_ADDRMODE_EXTENDED, respdesc);
+               *  sq_addlast((FAR sq_entry_t *)respdesc, &priv->csma_queue);
                */
             }
             break;
@@ -874,19 +1013,18 @@ static void mac802154_rx_dataframe(FAR struct ieee802154_privmac_s *priv,
 
       if (priv->promisc)
         {
-          if (ind->dest.panid != priv->addr.panid)
+          if (!IEEE802154_PANIDCMP(ind->dest.panid, priv->addr.panid))
             {
               goto notify_with_lock;
             }
 
           if (ind->dest.mode == IEEE802154_ADDRMODE_SHORT &&
-              ind->dest.saddr != priv->addr.saddr)
+              !IEEE802154_SADDRCMP(ind->dest.saddr, priv->addr.saddr))
             {
               goto notify_with_lock;
             }
           else if (ind->dest.mode == IEEE802154_ADDRMODE_EXTENDED &&
-                   (memcmp(&ind->dest.eaddr[0], &priv->addr.eaddr[0],
-                          IEEE802154_EADDR_LEN) != 0))
+                   !IEEE802154_EADDRCMP(ind->dest.eaddr, priv->addr.eaddr))
             {
               goto notify_with_lock;
             }
@@ -909,13 +1047,12 @@ static void mac802154_rx_dataframe(FAR struct ieee802154_privmac_s *priv,
         }
 
       if (ind->src.mode == IEEE802154_ADDRMODE_SHORT &&
-          ind->src.saddr != priv->cmd_desc->destaddr.saddr)
+          !IEEE802154_SADDRCMP(ind->src.saddr, priv->cmd_desc->destaddr.saddr))
         {
           goto notify_with_lock;
         }
       else if (ind->src.mode == IEEE802154_ADDRMODE_EXTENDED &&
-                (memcmp(&ind->src.eaddr[0], &priv->cmd_desc->destaddr.eaddr[0],
-                        IEEE802154_EADDR_LEN) != 0))
+               !IEEE802154_EADDRCMP(ind->src.eaddr, priv->cmd_desc->destaddr.eaddr))
         {
           goto notify_with_lock;
         }
@@ -965,8 +1102,7 @@ static void mac802154_rx_dataframe(FAR struct ieee802154_privmac_s *priv,
       /* Release the MAC */
 
       mac802154_givesem(&priv->exclsem);
-
-      priv->cb->notify(priv->cb, notif);
+      mac802154_notify(priv, notif);
 
       /* If there was data, pass it along */
 
@@ -977,26 +1113,48 @@ static void mac802154_rx_dataframe(FAR struct ieee802154_privmac_s *priv,
     }
   else
     {
+      FAR struct mac802154_maccb_s *cb;
+
 notify_with_lock:
 
       mac802154_givesem(&priv->exclsem);
 
 notify_without_lock:
 
-      /* If there is a registered MCPS callback receiver registered,
-        * send the frame, otherwise, throw it out.
+      /* If there are registered MCPS callback receivers registered,
+       * then forward the frame in priority order.  If there are no
+       * registered receivers or if none of the receivers accept the
+       * data frame then drop the frame.
         */
 
-      if (priv->cb->rxframe != NULL)
+      for (cb = priv->cb; cb != NULL; cb = cb->flink)
         {
-          priv->cb->rxframe(priv->cb, ind);
-        }
-      else
-        {
-          /* Free the data indication struct from the pool */
+          int ret;
 
-          ieee802154_ind_free(ind);
+          /* Does this MAC client want frames? */
+
+          if (cb->rxframe != NULL)
+            {
+              /* Yes.. Offer this frame to the receiver */
+
+              ret = cb->rxframe(cb, ind);
+              if (ret >= 0)
+                {
+                  /* The receiver accepted and disposed of the frame and
+                   * its metadata.  We are done.
+                   */
+
+                  return;
+                }
+            }
         }
+
+      /* We get here if the there are no registered receivers or if
+       * all of the registered receivers declined the frame.
+       * Free the data indication struct from the pool
+       */
+
+      ieee802154_ind_free(ind);
     }
 }
 
@@ -1043,7 +1201,7 @@ static void mac802154_rx_datareq(FAR struct ieee802154_privmac_s *priv,
         {
           if (txdesc->destaddr.mode == IEEE802154_ADDRMODE_SHORT)
             {
-              if (txdesc->destaddr.saddr == ind->src.saddr)
+              if (IEEE802154_SADDRCMP(txdesc->destaddr.saddr, ind->src.saddr))
                 {
                   /* Remove the transaction from the queue */
 
@@ -1058,7 +1216,7 @@ static void mac802154_rx_datareq(FAR struct ieee802154_privmac_s *priv,
           else if (txdesc->destaddr.mode == IEEE802154_ADDRMODE_EXTENDED)
             {
               if (memcmp(&txdesc->destaddr.eaddr[0], &ind->src.eaddr[0],
-                         sizeof(IEEE802154_EADDR_LEN)) == 0)
+                         sizeof(IEEE802154_EADDRSIZE)) == 0)
                 {
                   /* Remove the transaction from the queue */
 
@@ -1131,18 +1289,15 @@ no_data:
    * respond.
    */
 
-  *((uint16_t *)&iob->io_data[iob->io_len]) = ind->src.panid;
-  iob->io_len += 2;
+  mac802154_putpanid(iob, ind->src.panid);
 
   if (ind->src.mode == IEEE802154_ADDRMODE_SHORT)
     {
-       memcpy(&iob->io_data[iob->io_len], &ind->src.saddr, 2);
-       iob->io_len += 2;
+      mac802154_putsaddr(iob, ind->src.saddr);
     }
   else if (ind->src.mode == IEEE802154_ADDRMODE_EXTENDED)
     {
-      memcpy(&iob->io_data[iob->io_len], &ind->src.eaddr, IEEE802154_EADDR_LEN);
-      iob->io_len += IEEE802154_EADDR_LEN;
+      mac802154_puteaddr(iob, ind->src.eaddr);
     }
   else
     {
@@ -1155,7 +1310,7 @@ no_data:
 
   /* Check if the source PAN ID of the incoming request is the same as ours. */
 
-  if (ind->src.panid == priv->addr.panid)
+  if (IEEE802154_PANIDCMP(ind->src.panid, priv->addr.panid))
     {
       *frame_ctrl |= IEEE802154_FRAMECTRL_PANIDCOMP;
     }
@@ -1163,23 +1318,19 @@ no_data:
     {
       /* Copy in our PAN ID */
 
-      memcpy(&iob->io_data[iob->io_len], &priv->addr.panid, 2);
-      iob->io_len += 2;
+      mac802154_putpanid(iob, priv->addr.panid);
     }
 
   /* Copy in our address using the mode that the device used to address us */
 
   if (ind->dest.mode == IEEE802154_ADDRMODE_SHORT)
     {
-      memcpy(&iob->io_data[iob->io_len], &priv->addr.saddr, 2);
-      iob->io_len += 2;
-
+      mac802154_putsaddr(iob, priv->addr.saddr);
       *frame_ctrl |= (IEEE802154_ADDRMODE_SHORT << IEEE802154_FRAMECTRL_SHIFT_SADDR);
     }
   else
     {
-      memcpy(&iob->io_data[iob->io_len], &ind->dest.eaddr, IEEE802154_EADDR_LEN);
-      iob->io_len += IEEE802154_EADDR_LEN;
+      mac802154_puteaddr(iob, priv->addr.eaddr);
       *frame_ctrl |= (IEEE802154_ADDRMODE_EXTENDED << IEEE802154_FRAMECTRL_SHIFT_SADDR);
     }
 
@@ -1271,7 +1422,8 @@ int mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
 
   /* Start the watchdog */
 
-  wd_start(priv->timeout, (int32_t)ticks, mac802154_timeout_expiry, 1, (uint32_t)priv);
+  wd_start(priv->timeout, (int32_t)ticks, mac802154_timeout_expiry,
+           1, (wdparm_t)priv);
 
   return OK;
 }
@@ -1294,7 +1446,7 @@ int mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
  *
  ****************************************************************************/
 
-static void mac802154_timeout_expiry(int argc, uint32_t arg, ...)
+static void mac802154_timeout_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)arg;
 
@@ -1344,7 +1496,7 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
 {
   FAR struct ieee802154_privmac_s *mac;
   FAR struct ieee802154_radiocb_s *radiocb;
-  uint8_t eaddr[IEEE802154_EADDR_LEN];
+  uint8_t eaddr[IEEE802154_EADDRSIZE];
   int i;
 
   /* Allocate object */
@@ -1380,7 +1532,7 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
   mac->radiocb.priv = mac;
 
   radiocb            = &mac->radiocb.cb;
-  radiocb->poll      = mac802154_poll;
+  radiocb->poll      = mac802154_radiopoll;
   radiocb->txdone    = mac802154_txdone;
   radiocb->rxframe   = mac802154_rxframe;
 
@@ -1395,12 +1547,12 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
 
   /* Set the default extended address */
 
-  for (i = 0; i < IEEE802154_EADDR_LEN; i++)
+  for (i = 0; i < IEEE802154_EADDRSIZE; i++)
     {
       eaddr[i] = (CONFIG_IEEE802154_DEFAULT_EADDR >> (8 * i)) & 0xFF;
     }
 
-  memcpy(&mac->addr.eaddr, &eaddr[0], IEEE802154_EADDR_LEN);
+  IEEE802154_EADDRCOPY(mac->addr.eaddr, eaddr);
   mac->radio->set_attr(mac->radio, IEEE802154_ATTR_MAC_EXTENDED_ADDR,
                       (union ieee802154_attr_u *)&eaddr[0]);
 

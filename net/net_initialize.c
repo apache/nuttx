@@ -102,7 +102,7 @@ void net_setup(void)
   neighbor_initialize();
 
 #ifdef CONFIG_NET_6LOWPAN
-  /* Initialize 6loWPAN data structures */
+  /* Initialize 6LoWPAN data structures */
 
   sixlowpan_initialize();
 #endif

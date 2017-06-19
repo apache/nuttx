@@ -481,7 +481,7 @@ struct ieee802154_driver_s
  * Name: sixlowpan_input
  *
  * Description:
- *   Process an incoming 6loWPAN frame.
+ *   Process an incoming 6LoWPAN frame.
  *
  *   This function is called when the device driver has received an
  *   IEEE802.15.4 frame from the network.  The frame from the device

@@ -97,9 +97,9 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
 
   /* Set the PANID attribute */
 
-  priv->addr.panid = req->panid;
+  IEEE802154_PANIDCOPY(priv->addr.panid, req->panid);
   priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_PANID,
-                        (FAR const union ieee802154_attr_u *)&req->panid);
+                        (FAR const union ieee802154_attr_u *)req->panid);
 
   /* Set the radio attributes */
   priv->radio->set_attr(priv->radio, IEEE802154_ATTR_PHY_CURRENT_CHANNEL,

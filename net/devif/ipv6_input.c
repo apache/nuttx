@@ -265,14 +265,14 @@ int ipv6_input(FAR struct net_driver_s *dev)
          *
          *   1. TCP socket output.  For the case of TCP output to an
          *      IEEE802.15.4, the TCP output is caught in the socket
-         *      send()/sendto() logic and and redirected to 6loWPAN logic.
+         *      send()/sendto() logic and and redirected to 6LoWPAN logic.
          *   2. TCP output from the TCP state machine.  That will occur
          *      during TCP packet processing by the TCP state meachine.
          *   3. TCP output resulting from TX or timer polling
          *
          * Cases 2 is handled here.  Logic here detected if (1) an attempt
          * to return with d_len > 0 and (2) that the device is an
-         * IEEE802.15.4 MAC network driver. Under those conditions, 6loWPAN
+         * IEEE802.15.4 MAC network driver. Under those conditions, 6LoWPAN
          * logic will be called to create the IEEE80215.4 frames.
          */
 
@@ -284,7 +284,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
         if (dev->d_len > 0)
 #endif
           {
-            /* Let 6loWPAN handle the TCP output */
+            /* Let 6LoWPAN handle the TCP output */
 
             sixlowpan_tcp_send(dev);
 

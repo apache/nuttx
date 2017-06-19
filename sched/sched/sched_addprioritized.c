@@ -88,12 +88,12 @@ bool sched_addprioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list)
   ASSERT(sched_priority >= SCHED_PRIORITY_MIN);
 
   /* Search the list to find the location to insert the new Tcb.
-   * Each is list is maintained in ascending sched_priority order.
+   * Each is list is maintained in descending sched_priority order.
    */
 
   for (next = (FAR struct tcb_s *)list->head;
       (next && sched_priority <= next->sched_priority);
-      next = next->flink);
+       next = next->flink);
 
   /* Add the tcb to the spot found in the list.  Check if the tcb
    * goes at the end of the list. NOTE:  This could only happen if list

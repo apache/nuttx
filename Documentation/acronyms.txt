@@ -1,4 +1,4 @@
-6loWPAN IPv6 over Low power Wireless Personal Area Networks
+6LoWPAN IPv6 over Low power Wireless Personal Area Networks
 ACM    Abstract Control Model (USB)
 ADC    Analog to Digital Conversion
 AIC    Advanced Interrupt Controller (Atmel SAM)

@@ -56,6 +56,66 @@
  * Pre-processor definitions
  ************************************************************************************/
 
+#if defined(CONFIG_STM32_HRTIM_TIMA) || defined(CONFIG_STM32_HRTIM_TIMB) || \
+    defined(CONFIG_STM32_HRTIM_TIMC) || defined(CONFIG_STM32_HRTIM_TIMD) || \
+    defined(CONFIG_STM32_HRTIM_TIME)
+#  define HRTIM_HAVE_SLAVE 1
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_TIMA_PWM) || defined(CONFIG_STM32_HRTIM_TIMB_PWM) || \
+    defined(CONFIG_STM32_HRTIM_TIMC_PWM) || defined(CONFIG_STM32_HRTIM_TIMD_PWM) || \
+    defined(CONFIG_STM32_HRTIM_TIME_PWM)
+#  define HRTIM_HAVE_PWM 1
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_TIMA_CAP) || defined(CONFIG_STM32_HRTIM_TIMB_CAP) || \
+    defined(CONFIG_STM32_HRTIM_TIMC_CAP) || defined(CONFIG_STM32_HRTIM_TIMD_CAP) || \
+    defined(CONFIG_STM32_HRTIM_TIME_CAP)
+#  define HRTIM_HAVE_CAPTURE 1
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_TIMA_DT) || defined(CONFIG_STM32_HRTIM_TIMB_DT) || \
+    defined(CONFIG_STM32_HRTIM_TIMC_DT) || defined(CONFIG_STM32_HRTIM_TIMD_DT) || \
+    defined(CONFIG_STM32_HRTIM_TIME_DT)
+#  define HRTIM_HAVE_DEADTIME 1
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_TIMA_CHOP) || defined(CONFIG_STM32_HRTIM_TIMB_CHOP) || \
+    defined(CONFIG_STM32_HRTIM_TIMC_CHOP) || defined(CONFIG_STM32_HRTIM_TIMD_CHOP) || \
+    defined(CONFIG_STM32_HRTIM_TIME_CHOP)
+#  define HRTIM_HAVE_CHOPPER 1
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_SCOUT) || defined(CONFIG_STM32_HRTIM_SCIN)
+#  define HRTIM_HAVE_SYNC 1
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_FAULT1) || defined(CONFIG_STM32_HRTIM_FAULT2) || \
+    defined(CONFIG_STM32_HRTIM_FAULT3) || defined(CONFIG_STM32_HRTIM_FAULT4) || \
+    defined(CONFIG_STM32_HRTIM_FAULT5)
+#  define HRTIM_HAVE_FAULTS 1
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_EEV1) || defined(CONFIG_STM32_HRTIM_EEV2) || \
+    defined(CONFIG_STM32_HRTIM_EEV3) || defined(CONFIG_STM32_HRTIM_EEV4) || \
+    defined(CONFIG_STM32_HRTIM_EEV5) || defined(CONFIG_STM32_HRTIM_EEV6) || \
+    defined(CONFIG_STM32_HRTIM_EEV7) || defined(CONFIG_STM32_HRTIM_EEV8) || \
+    defined(CONFIG_STM32_HRTIM_EEV9) || defined(CONFIG_STM32_HRTIM_EEV10)
+#  define HRTIM_HAVE_EEV 1
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_MASTER_IRQ) || defined(CONFIG_STM32_HRTIM_TIMA_IRQ) || \
+    defined(CONFIG_STM32_HRTIM_TIMB_IRQ) || defined(CONFIG_STM32_HRTIM_TIMC_IRQ) || \
+    defined(CONFIG_STM32_HRTIM_TIMD_IRQ) || defined(CONFIG_STM32_HRTIM_TIME_IRQ) || \
+    defined(CONFIG_STM32_HRTIM_CMN_IRQ)
+#  defined HRTIM_HAVE_INTERRUPTS
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_ADC_TRG1) || defined(CONFIG_STM32_HRTIM_ADC_TRG2) || \
+    defined(CONFIG_STM32_HRTIM_ADC_TRG3) || defined(CONFIG_STM32_HRTIM_ADC_TRG4)
+#  define HRTIM_HAVE_ADC
+#endif
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -64,22 +124,23 @@
 
 enum stm32_hrtim_tim_e
 {
-  HRTIM_TIMER_MASTER,
+  HRTIM_TIMER_MASTER = 0,
 #ifdef CONFIG_STM32_HRTIM_TIMA
-  HRTIM_TIMER_TIMA,
+  HRTIM_TIMER_TIMA   = 1,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMB
-  HRTIM_TIMER_TIMB,
+  HRTIM_TIMER_TIMB   = 2,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMC
-  HRTIM_TIMER_TIMC,
+  HRTIM_TIMER_TIMC   = 3,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMD
-  HRTIM_TIMER_TIMD,
+  HRTIM_TIMER_TIMD   = 4,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIME
-  HRTIM_TIMER_TIME,
+  HRTIM_TIMER_TIME   = 5,
 #endif
+  HRTIM_TIMER_COMMON = 6
 };
 
 /* Source which can force the Tx1/Tx2 output to its inactive state */
@@ -117,7 +178,7 @@ enum stm32_hrtim_out_rst_e
   HRTIM_OUT_RST_CMP1      = (1 << 28),
   HRTIM_OUT_RST_PER       = (1 << 29),
   HRTIM_OUT_RST_RESYNC    = (1 << 30),
-  HRTIM_OUT_RST_SOFT      = (1 << 31),
+  HRTIM_OUT_RST_SOFT      = (1 << 31)
 };
 
 /* Source which can force the Tx1/Tx2 output to its active state  */
@@ -155,7 +216,7 @@ enum stm32_hrtim_out_set_e
   HRTIM_OUT_SET_CMP1      = (1 << 28),
   HRTIM_OUT_SET_PER       = (1 << 29),
   HRTIM_OUT_SET_RESYNC    = (1 << 30),
-  HRTIM_OUT_SET_SOFT      = (1 << 31),
+  HRTIM_OUT_SET_SOFT      = (1 << 31)
 };
 
 /* Events that can reset TimerX Counter */
@@ -205,7 +266,7 @@ enum stm32_hrtim_tim_rst_e
   HRTIM_RST_EXTEVNT4,
   HRTIM_RST_EXTEVNT3,
   HRTIM_RST_EXTEVNT2,
-  HRTIM_RST_EXTEVNT1,
+  HRTIM_RST_EXTEVNT1
 };
 
 /* HRTIM Timer X prescaler */
@@ -219,41 +280,442 @@ enum stm32_hrtim_tim_prescaler_e
   HRTIM_PRESCALER_16,
   HRTIM_PRESCALER_32,
   HRTIM_PRESCALER_64,
-  HRTIM_PRESCALER_128,
+  HRTIM_PRESCALER_128
+};
+
+/* HRTIM Timer Master/Slave mode */
+
+enum stm32_hrtim_mode_e
+{
+  HRTIM_MODE_PRELOAD = (1 << 0),  /* Preload enable */
+  HRTIM_MODE_HALF    = (1 << 1),  /* Half mode */
+  HRTIM_MODE_RETRIG  = (1 << 2),  /* Re-triggerable mode */
+  HRTIM_MODE_CONT    = (1 << 3),  /* Continuous mode */
+
+  /* Only slave Timers */
+
+  HRTIM_MODE_PSHPLL  = (1 << 7),  /* Push-Pull mode */
+};
+
+/* HRTIM Slave Timer auto-delayed mode
+ * NOTE: details in STM32F334 Manual
+ */
+
+enum stm32_hrtim_autodelayed_e
+{
+  /* CMP2 auto-delayed mode */
+
+  HRTIM_AUTODELAYED_CMP2_MODE1 = 1, /* DELCMP2 = 01 */
+  HRTIM_AUTODELAYED_CMP2_MODE2 = 2, /* DELCMP2 = 10 */
+  HRTIM_AUTODELAYED_CMP2_MODE3 = 3, /* DELCMP2 = 11 */
+
+  /* CMP4 auto-delayed mode */
+
+  HRTIM_AUTODELAYED_CMP4_MODE1 = (1 << 2), /* DELCMP4 = 01 */
+  HRTIM_AUTODELAYED_CMP4_MODE2 = (2 << 2), /* DELCMP4 = 10 */
+  HRTIM_AUTODELAYED_CMP4_MODE3 = (3 << 2), /* DELCMP4 = 11 */
+};
+
+/* HRTIM Slave Timer fault sources Lock */
+
+enum stm32_hrtim_tim_fault_lock_e
+{
+  HRTIM_TIM_FAULT_RW   = 0,         /* Slave Timer fault source are read/write */
+  HRTIM_TIM_FAULT_LOCK = (1 << 7)   /* Slave Timer fault source are read only */
+};
+
+/* HRTIM Slave Timer Fault configuration */
+
+enum stm32_hrtim_tim_fault_src_e
+{
+  HRTIM_TIM_FAULT1 = (1 << 0),
+  HRTIM_TIM_FAULT2 = (1 << 2),
+  HRTIM_TIM_FAULT3 = (1 << 3),
+  HRTIM_TIM_FAULT4 = (1 << 4),
+  HRTIM_TIM_FAULT5 = (1 << 5)
 };
 
 /* HRTIM Fault Source */
 
 enum stm32_hrtim_fault_src_e
 {
-  HRTIM_FAULT_SRC_PIN,
-  HRTIM_FAULT_SRC_INTERNAL
+  HRTIM_FAULT_SRC_PIN      = 0,
+  HRTIM_FAULT_SRC_INTERNAL = 1
 };
 
 /* HRTIM External Event Source
- * NOTE: according to Table 82 from STM32F334XX Manual
+ * NOTE: according to Table 82 from STM32F334XX Manual.
  */
 
 enum stm32_hrtim_eev_src_e
 {
-  HRTIM_EEV_SRC_PIN,
-  HRTIM_EEV_SRC_ANALOG,
-  HRTIM_EEV_SRC_TRGO,
-  HRTIM_EEV_SRC_ADC
+  HRTIM_EEV_SRC_PIN    = 0,
+  HRTIM_EEV_SRC_ANALOG = 1,
+  HRTIM_EEV_SRC_TRGO   = 2,
+  HRTIM_EEV_SRC_ADC    = 3
 };
+
+/* HRTIM Fault Polarity */
+
+enum stm32_hrtim_fault_pol_e
+{
+  HRTIM_FAULT_POL_LOW  = 0,
+  HRTIM_FAULT_POL_HIGH = 1
+};
+
+/* HRTIM External Event Polarity */
+
+enum stm32_hrtim_eev_pol_e
+{
+  HRTIM_EEV_POL_HIGH = 0,       /* External Event is active high */
+  HRTIM_EEV_POL_LOW  = 1        /* External Event is active low */
+};
+
+/* HRTIM External Event sensitivity */
+
+enum stm32_hrtim_eev_sen_e
+{
+  HRTIM_EEV_SEN_LEVEL   = 0,    /* On active level defined by polarity  */
+  HRTIM_EEV_SEN_RISING  = 1,    /* Rising edgne */
+  HRTIM_EEV_SEN_FALLING = 2,    /* Falling edge */
+  HRTIM_EEV_SEN_BOTH    = 3     /* Both edges */
+};
+
+/* External Event Sampling clock division */
+
+enum stm32_hrtim_eev_sampling_e
+{
+  HRTIM_EEV_SAMPLING_d1 = 0,
+  HRTIM_EEV_SAMPLING_d2 = 1,
+  HRTIM_EEV_SAMPLING_d4 = 2,
+  HRTIM_EEV_SAMPLING_d8 = 3
+};
+
+/* HRTIM External Event Mode.
+ * NOTE: supported only for EEV1-5.
+ */
+
+enum stm32_hrtim_eev_mode_e
+{
+  HRTIM_EEV_MODE_NORMAL = 0,
+  HRTIM_EEV_MODE_FAST   = 1     /* low latency mode */
+};
+
+
+/* External Event filter.
+ * NOTE: supported only for EEV6-10.
+ */
+
+enum stm32_hrtim_eev_filter_e
+{
+  HRTIM_EEV_DISABLE    = 0,
+  HRTIM_EEV_HRT_N2     = 1,
+  HRTIM_EEV_HRT_N4     = 2,
+  HRTIM_EEV_HRT_N8     = 3,
+  HRTIM_EEV_EEVSd2_N6  = 4,
+  HRTIM_EEV_EEVSd2_N8  = 5,
+  HRTIM_EEV_EEVSd4_N6  = 6,
+  HRTIM_EEV_EEVSd4_N8  = 7,
+  HRTIM_EEV_EEVSd8_N6  = 8,
+  HRTIM_EEV_EEVSd8_N8  = 9,
+  HRTIM_EEV_EEVSd16_N5 = 10,
+  HRTIM_EEV_EEVSd16_N6 = 11,
+  HRTIM_EEV_EEVSd16_N8 = 12,
+  HRTIM_EEV_EEVSd32_N5 = 13,
+  HRTIM_EEV_EEVSd32_N6 = 14,
+  HRTIM_EEV_EEVSd32_N8 = 15
+};
+
+/* Compare register index */
+
+enum stm32_hrtim_cmp_index_e
+{
+  HRTIM_CMP1,
+  HRTIM_CMP2,
+  HRTIM_CMP3,
+  HRTIM_CMP4
+};
+
+/* HRTIM Slave Timer Outputs */
+
+enum stm32_outputs_e
+{
+  HRTIM_OUT_TIMA_CH1 = (1 << 0),
+  HRTIM_OUT_TIMA_CH2 = (1 << 1),
+  HRTIM_OUT_TIMB_CH1 = (1 << 2),
+  HRTIM_OUT_TIMB_CH2 = (1 << 3),
+  HRTIM_OUT_TIMC_CH1 = (1 << 4),
+  HRTIM_OUT_TIMC_CH2 = (1 << 5),
+  HRTIM_OUT_TIMD_CH1 = (1 << 6),
+  HRTIM_OUT_TIMD_CH2 = (1 << 7),
+  HRTIM_OUT_TIME_CH1 = (1 << 8),
+  HRTIM_OUT_TIME_CH2 = (1 << 9)
+};
+
+/* DAC synchronization event */
+
+enum stm32_hrtim_dacsync_e
+{
+  HRTIM_DACSYNC_DIS,
+  HRTIM_DACSYNC_1,
+  HRTIM_DACSYNC_2,
+  HRTIM_DACSYNC_3
+};
+
+/* HRTIM Deadtime Locks */
+
+enum stm32_hrtim_deadtime_lock_e
+{
+  HRTIM_DT_VALUE_LOCK = (1 << 0), /* Lock Deadtime value */
+  HRTIM_DT_SIGN_LOCK  = (1 << 1)  /* Lock Deadtime sign */
+};
+
+/* HRTIM Deadtime types  */
+
+enum stm32_hrtim_deadtime_edge_e
+{
+  HRTIM_DT_RISING = 0,
+  HRTIM_DT_FALLING = 1
+};
+
+/* Chopper start pulsewidth */
+
+enum stm32_hrtim_chopper_start_e
+{
+  HRTIM_CHP_START_16,
+  HRTIM_CHP_START_32,
+  HRTIM_CHP_START_48,
+  HRTIM_CHP_START_64,
+  HRTIM_CHP_START_80,
+  HRTIM_CHP_START_96,
+  HRTIM_CHP_START_112,
+  HRTIM_CHP_START_128,
+  HRTIM_CHP_START_144,
+  HRTIM_CHP_START_160,
+  HRTIM_CHP_START_176,
+  HRTIM_CHP_START_192,
+  HRTIM_CHP_START_208,
+  HRTIM_CHP_START_224,
+  HRTIM_CHP_START_256
+};
+
+/* Chopper duty cycle */
+
+enum stm32_hrtim_chopper_duty_e
+{
+  HRTIM_CHP_DUTY_0,
+  HRTIM_CHP_DUTY_1,
+  HRTIM_CHP_DUTY_2,
+  HRTIM_CHP_DUTY_3,
+  HRTIM_CHP_DUTY_4,
+  HRTIM_CHP_DUTY_5,
+  HRTIM_CHP_DUTY_6,
+  HRTIM_CHP_DUTY_7
+};
+
+/* Chopper carrier frequency */
+
+enum stm32_hrtim_chopper_freq_e
+{
+  HRTIM_CHP_FREQ_d16,
+  HRTIM_CHP_FREQ_d32,
+  HRTIM_CHP_FREQ_d48,
+  HRTIM_CHP_FREQ_d64,
+  HRTIM_CHP_FREQ_d80,
+  HRTIM_CHP_FREQ_d96,
+  HRTIM_CHP_FREQ_d112,
+  HRTIM_CHP_FREQ_d128,
+  HRTIM_CHP_FREQ_d144,
+  HRTIM_CHP_FREQ_d160,
+  HRTIM_CHP_FREQ_d176,
+  HRTIM_CHP_FREQ_d192,
+  HRTIM_CHP_FREQ_d208,
+  HRTIM_CHP_FREQ_d224,
+  HRTIM_CHP_FREQ_d240,
+  HRTIM_CHP_FREQ_d256
+};
+
+/* HRTIM ADC Trigger 1/3 */
+
+enum stm32_hrtim_adc_trq13_e
+{
+  HRTIM_ADCTRG13_MC1   = (1 << 0),
+  HRTIM_ADCTRG13_MC2   = (1 << 1),
+  HRTIM_ADCTRG13_MC3   = (1 << 2),
+  HRTIM_ADCTRG13_MC4   = (1 << 3),
+  HRTIM_ADCTRG13_MPER  = (1 << 4),
+
+  HRTIM_ADCTRG13_EEV1  = (1 << 5),
+  HRTIM_ADCTRG13_EEV2  = (1 << 6),
+  HRTIM_ADCTRG13_EEV3  = (1 << 7),
+  HRTIM_ADCTRG13_EEV4  = (1 << 8),
+  HRTIM_ADCTRG13_EEV5  = (1 << 9),
+
+  HRTIM_ADCTRG13_AC2   = (1 << 10),
+  HRTIM_ADCTRG13_AC3   = (1 << 11),
+  HRTIM_ADCTRG13_AC4   = (1 << 12),
+  HRTIM_ADCTRG13_APER  = (1 << 13),
+  HRTIM_ADCTRG13_ARST  = (1 << 14),
+
+  HRTIM_ADCTRG13_BC2   = (1 << 15),
+  HRTIM_ADCTRG13_BC3   = (1 << 16),
+  HRTIM_ADCTRG13_BC4   = (1 << 17),
+  HRTIM_ADCTRG13_BPER  = (1 << 18),
+  HRTIM_ADCTRG13_BRST  = (1 << 19),
+
+  HRTIM_ADCTRG13_CC2   = (1 << 20),
+  HRTIM_ADCTRG13_CC3   = (1 << 21),
+  HRTIM_ADCTRG13_CC4   = (1 << 22),
+  HRTIM_ADCTRG13_CPER  = (1 << 23),
+
+  HRTIM_ADCTRG13_DC2   = (1 << 24),
+  HRTIM_ADCTRG13_DC3   = (1 << 25),
+  HRTIM_ADCTRG13_DC4   = (1 << 26),
+  HRTIM_ADCTRG13_DPER  = (1 << 27),
+
+  HRTIM_ADCTRG13_EC2   = (1 << 28),
+  HRTIM_ADCTRG13_EC3   = (1 << 29),
+  HRTIM_ADCTRG13_EC4   = (1 << 30),
+  HRTIM_ADCTRG13_ERST  = (1 << 31),
+};
+
+/* HRTIM ADC Trigger 2/4 */
+
+enum stm32_hrtim_adc_trq24_e
+{
+  HRTIM_ADCTRG24_MC1   = (1 << 0),
+  HRTIM_ADCTRG24_MC2   = (1 << 1),
+  HRTIM_ADCTRG24_MC3   = (1 << 2),
+  HRTIM_ADCTRG24_MC4   = (1 << 3),
+  HRTIM_ADCTRG24_MPER  = (1 << 4),
+
+  HRTIM_ADCTRG24_EEV6  = (1 << 5),
+  HRTIM_ADCTRG24_EEV7  = (1 << 6),
+  HRTIM_ADCTRG24_EEV8  = (1 << 7),
+  HRTIM_ADCTRG24_EEV9  = (1 << 8),
+  HRTIM_ADCTRG24_EEV10 = (1 << 9),
+
+  HRTIM_ADCTRG24_AC2   = (1 << 10),
+  HRTIM_ADCTRG24_AC3   = (1 << 11),
+  HRTIM_ADCTRG24_AC4   = (1 << 12),
+  HRTIM_ADCTRG24_APER  = (1 << 13),
+
+  HRTIM_ADCTRG24_BC2   = (1 << 14),
+  HRTIM_ADCTRG24_BC3   = (1 << 15),
+  HRTIM_ADCTRG24_BC4   = (1 << 16),
+  HRTIM_ADCTRG24_BPER  = (1 << 17),
+
+  HRTIM_ADCTRG24_CC2   = (1 << 18),
+  HRTIM_ADCTRG24_CC3   = (1 << 19),
+  HRTIM_ADCTRG24_CC4   = (1 << 20),
+  HRTIM_ADCTRG24_CPER  = (1 << 21),
+  HRTIM_ADCTRG24_CRST  = (1 << 22),
+
+  HRTIM_ADCTRG24_DC2   = (1 << 23),
+  HRTIM_ADCTRG24_DC3   = (1 << 24),
+  HRTIM_ADCTRG24_DC4   = (1 << 25),
+  HRTIM_ADCTRG24_DPER  = (1 << 26),
+  HRTIM_ADCTRG24_DRST  = (1 << 27),
+
+  HRTIM_ADCTRG24_EC2   = (1 << 28),
+  HRTIM_ADCTRG24_EC3   = (1 << 29),
+  HRTIM_ADCTRG24_EC4   = (1 << 30),
+  HRTIM_ADCTRG24_ERST  = (1 << 31),
+};
+
+/* HRTIM DAC synchronization */
+
+enum stm32_hrtim_dac_e
+{
+  HRTIM_DAC_SYNC_DIS = 0,
+  HRTIM_DAC_SYNC_1   = 1,
+  HRTIM_DAC_SYNC_2   = 2,
+  HRTIM_DAC_SYNC_3   = 3
+};
+
+/* HRTIM Master Timer interrupts  */
+
+enum stm32_irq_master_e
+{
+  HRTIM_IRQ_MCMP1 = (1 << 0),    /* Master Compare 1 Interrupt */
+  HRTIM_IRQ_MCMP2 = (1 << 1),    /* Master Compare 2 Interrupt */
+  HRTIM_IRQ_MCMP3 = (1 << 2),    /* Master Compare 3 Interrupt */
+  HRTIM_IRQ_MCMP4 = (1 << 3),    /* Master Compare 4 Interrupt */
+  HRTIM_IRQ_MREP  = (1 << 4),    /* Master Repetition Interrupt */
+  HRTIM_IRQ_MSYNC = (1 << 5),    /* Sync Input Interrupt */
+  HRTIM_IRQ_MUPD  = (1 << 6)     /* Master Update Interrupt */
+};
+
+/* HRTIM Slave Timer interrupts  */
+
+enum stm32_irq_slave_e
+{
+  HRTIM_IRQ_CMP1   = (1 << 0),  /* Slave Compare 1 Interrupt */
+  HRTIM_IRQ_CMP2   = (1 << 1),  /* Slave Compare 2 Interrupt */
+  HRTIM_IRQ_CMP3   = (1 << 2),  /* Slave Compare 3 Interrupt */
+  HRTIM_IRQ_CMP4   = (1 << 3),  /* Slave Compare 4 Interrupt */
+  HRTIM_IRQ_REP    = (1 << 4),  /* Slave Repetition Interrupt */
+  HRTIM_IRQ_UPD    = (1 << 6),  /* Slave Update Interrupt */
+  HRTIM_IRQ_CPT1   = (1 << 7),  /* Slave Capture 1 Interrupt */
+  HRTIM_IRQ_CPT2   = (1 << 8),  /* Slave Capture 2 Interrupt */
+  HRTIM_IRQ_SETX1  = (1 << 9),  /* Slave Output 1 Set Interrupt */
+  HRTIM_IRQ_RSTX1  = (1 << 10), /* Slave Output 1 Reset Interrupt */
+  HRTIM_IRQ_SETX2  = (1 << 11), /* Slave Output 2 Set Interrupt */
+  HRTIM_IRQ_RSTX2  = (1 << 12), /* Slave Output 2 Reset Interrupt */
+  HRTIM_IRQ_RST    = (1 << 13), /* Slave Reset/roll-over Interrupt */
+  HRTIM_IRQ_DLYPRT = (1 << 14)  /* Slave Delayed Protection Interrupt */
+};
+
+/* HRTIM Common Interrupts */
+
+enum stm32_irq_cmn_e
+{
+  HRTIM_IRQ_FLT1   = (1 << 0),  /* Fault 1 Interrupt */
+  HRTIM_IRQ_FLT2   = (1 << 1),  /* Fault 2 Interrupt */
+  HRTIM_IRQ_FLT3   = (1 << 2),  /* Fault 3 Interrupt */
+  HRTIM_IRQ_FLT4   = (1 << 3),  /* Fault 4 Interrupt */
+  HRTIM_IRQ_FLT5   = (1 << 4),  /* Fault 5 Interrupt */
+  HRTIM_IRQ_SYSFLT = (1 << 5),  /* System Fault Interrupt */
+  HRTIM_IRQ_DLLRDY = (1 << 16), /* DLL Ready Interrupt */
+  HRTIM_IRQ_BMPER  = (1 << 17)  /* Burst Mode Period Interrupt */
+};
+
+/* HRTIM vtable */
+
+struct hrtim_dev_s;
+struct stm32_hrtim_ops_s
+{
+  int (*cmp_update)(FAR struct hrtim_dev_s *dev, uint8_t timer,
+                    uint8_t index, uint16_t cmp);
+  int (*per_update)(FAR struct hrtim_dev_s *dev, uint8_t timer, uint16_t per);
+  uint16_t (*per_get)(FAR struct hrtim_dev_s *dev, uint8_t timer);
+  uint16_t (*cmp_get)(FAR struct hrtim_dev_s *dev, uint8_t timer,
+                      uint8_t index);
+#ifdef HRTIM_HAVE_INTERRUPTS
+  void (*irq_ack)(FAR struct hrtim_dev_s *dev, uint8_t timer, int source);
+#endif
+#ifdef HRTIM_HAVE_PWM
+  int (*outputs_enable)(FAR struct hrtim_dev_s *dev, uint16_t outputs,
+                        bool state);
+#endif
+};
+
+/* HRTIM device structure */
 
 struct hrtim_dev_s
 {
 #ifdef CONFIG_HRTIM
   /* Fields managed by common upper half HRTIM logic */
 
-  uint8_t                 hd_ocount;    /* The number of times the device has been opened */
-  sem_t                   hd_closesem;  /* Locks out new opens while close is in progress */
+  uint8_t hd_ocount; /* The number of times the device has been opened */
+  sem_t hd_closesem; /* Locks out new opens while close is in progress */
 #endif
 
   /* Fields provided by lower half HRTIM logic */
 
-  FAR void                     *hd_priv; /* Used by the arch-specific logic */
+  FAR const struct stm32_hrtim_ops_s *hd_ops; /* HRTIM operations */
+  FAR void *hd_priv;                          /* Used by the arch-specific logic */
+  bool initialized;                           /* true: HRTIM driver has been initialized */
 };
 
 /************************************************************************************

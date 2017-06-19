@@ -159,7 +159,7 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
         {
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
           len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                          "%s\tLink encap:6loWPAN HWaddr "
+                          "%s\tLink encap:6LoWPAN HWaddr "
                           "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
                           dev->d_ifname,
                           dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
@@ -168,7 +168,7 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
                           dev->d_mac.ieee802154.u8[6], dev->d_mac.ieee802154.u8[7]);
 #else
           len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                          "%s\tLink encap:6loWPAN HWaddr %02x:%02x",
+                          "%s\tLink encap:6LoWPAN HWaddr %02x:%02x",
                           dev->d_ifname,
                           dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1]);
 #endif
@@ -221,7 +221,7 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
 #elif defined(CONFIG_NET_6LOWPAN)
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                  "%s\tLink encap:6loWPAN HWaddr "
+                  "%s\tLink encap:6LoWPAN HWaddr "
                   "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x at %s\n",
                   dev->d_ifname,
                   dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
@@ -231,7 +231,7 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
                   status);
 #else
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                  "%s\tLink encap:6loWPAN HWaddr %02x:%02x at %s\n",
+                  "%s\tLink encap:6LoWPAN HWaddr %02x:%02x at %s\n",
                   dev->d_ifname,
                   dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
                   status);

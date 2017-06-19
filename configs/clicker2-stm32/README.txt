@@ -365,7 +365,7 @@ Configurations
           nsh> i8 /dev/ieee0 startpan
           nsh> i8 acceptassoc
 
-       2. Assocate and endpoint device with the WPAN.  On the endpoint
+       2. Assocate an endpoint device with the WPAN.  On the endpoint
           device:
 
           nsh> i8 /dev/ieee0 assoc
@@ -374,7 +374,7 @@ Configurations
 
     This is another version of nsh that is very similar to the mrf24j40-mac
     configuration but is focused on testing the IEEE 802.15.4 MAC
-    integration with the 6loWPAN network stack.  It derives directly from the
+    integration with the 6LoWPAN network stack.  It derives directly from the
     mrf24j40-mac and all NOTES provided there apply.  Additional differences
     are summarized below:
 
@@ -426,15 +426,32 @@ Configurations
        the system has crashed because (a) it will be unresponsive and (b)
        the LD2 will be blinking at about 2Hz.
 
-    4. IPv6 networking is enabled with TCP/IP, UDP, 6loWPAN, and NSH
+    4. IPv6 networking is enabled with TCP/IP, UDP, 6LoWPAN, and NSH
        Telnet support.
 
     5. Configuration instructions:  Basic PAN configuration is the same as
        for the ieee802154-mac configuration with the exception that after
        the PAN has been configured with the i8sak utility, you must
-       explicity bring the network up:
+       explicity bring the network up on each node:
 
          nsh> ifup wpan0
+
+    6. examples/udp is enabled.  This will allow two MRF24J40 nodes to
+       exchange UDP packets.  Basic instructions:
+
+       On the server node:
+
+         nsh> ifconfig wpan0
+         nsh> udpserver &
+
+       The ifconfig command will show the IP address of the server.  Then on
+       the client node use this IP address to start the client:
+
+         nsh> udpserver <server-ip> &
+
+       Where <server-ip> is the IP address of the server that you got above.
+       NOTE: There is no way to stop the UDP test once it has been started
+       other than by resetting the board.
 
   nsh:
 

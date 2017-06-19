@@ -98,7 +98,7 @@ config USBHOST_MSC
 	default n
 	depends on !BULK_DISABLE
 	---help---
-		Enable support for the keyboard class driver.  This also depends on
+		Enable support for the mass storage class driver.  This also depends on
 		NFILE_DESCRIPTORS > 0 && SCHED_WORKQUEUE=y
 
 config USBHOST_CDCACM

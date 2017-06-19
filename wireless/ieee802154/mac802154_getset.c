@@ -84,13 +84,13 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_attr_e attr,
   switch (attr)
     {
       case IEEE802154_ATTR_MAC_PANID:
-        attrval->mac.panid = priv->addr.panid;
+        IEEE802154_PANIDCOPY(attrval->mac.panid, priv->addr.panid);
         break;
       case IEEE802154_ATTR_MAC_SHORT_ADDRESS:
-        attrval->mac.saddr = priv->addr.saddr;
+        IEEE802154_SADDRCOPY(attrval->mac.saddr, priv->addr.saddr);
         break;
       case IEEE802154_ATTR_MAC_EXTENDED_ADDR:
-        memcpy(&attrval->mac.eaddr[0], &priv->addr.eaddr[0], IEEE802154_EADDR_LEN);
+        IEEE802154_EADDRCOPY(attrval->mac.eaddr, priv->addr.eaddr);
         break;
       case IEEE802154_ATTR_MAC_DEVMODE:
         attrval->mac.devmode = priv->devmode;
@@ -133,7 +133,7 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_attr_e attr,
     {
       case IEEE802154_ATTR_MAC_PANID:
         {
-          priv->addr.panid = attrval->mac.panid;
+          IEEE802154_PANIDCOPY(priv->addr.panid, attrval->mac.panid);
 
           /* Tell the radio about the attribute */
 
@@ -144,7 +144,7 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_attr_e attr,
         break;
       case IEEE802154_ATTR_MAC_SHORT_ADDRESS:
         {
-          priv->addr.saddr = attrval->mac.saddr;
+          IEEE802154_SADDRCOPY(priv->addr.saddr, attrval->mac.saddr);
 
           /* Tell the radio about the attribute */
 
@@ -157,8 +157,7 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_attr_e attr,
         {
           /* Set the MAC copy of the address in the table */
 
-          memcpy(&priv->addr.eaddr[0], &attrval->mac.eaddr[0],
-                 IEEE802154_EADDR_LEN);
+          IEEE802154_EADDRCOPY(priv->addr.eaddr, attrval->mac.eaddr);
 
           /* Tell the radio about the attribute */
 

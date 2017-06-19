@@ -95,14 +95,14 @@ systime_t g_polltime;
  *
  *   1. TCP socket output.  For the case of TCP output to an
  *      IEEE802.15.4, the TCP output is caught in the socket
- *      send()/sendto() logic and and redirected to 6loWPAN logic.
+ *      send()/sendto() logic and and redirected to 6LoWPAN logic.
  *   2. TCP output from the TCP state machine.  That will occur
  *      during TCP packet processing by the TCP state meachine.
  *   3. TCP output resulting from TX or timer polling
  *
  *   Cases 2 is handled here.  Logic here detected if (1) an attempt
  *   to return with d_len > 0 and (2) that the device is an
- *   IEEE802.15.4 MAC network driver. Under those conditions, 6loWPAN
+ *   IEEE802.15.4 MAC network driver. Under those conditions, 6LoWPAN
  *   logic will be called to create the IEEE80215.4 frames.
  *
  * Assumptions:
@@ -127,13 +127,13 @@ static void devif_packet_conversion(FAR struct net_driver_s *dev,
           FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)dev->d_buf;
 
           /* This packet came from a response to TCP polling and is directed
-           * to an IEEE802.15.4 device using 6loWPAN.  Verify that the outgoing
+           * to an IEEE802.15.4 device using 6LoWPAN.  Verify that the outgoing
            * packet is IPv6 with TCP protocol.
            */
 
           if (ipv6->vtc ==  IPv6_VERSION && ipv6->proto == IP_PROTO_TCP)
             {
-              /* Let 6loWPAN convert IPv6 TCP output into IEEE802.15.4 frames. */
+              /* Let 6LoWPAN convert IPv6 TCP output into IEEE802.15.4 frames. */
 
               sixlowpan_tcp_send(dev);
             }

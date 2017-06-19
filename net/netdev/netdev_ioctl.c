@@ -736,7 +736,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
         }
         break;
 
-      /* MAC address operations only make sense if Ethernet or 6loWPAN are
+      /* MAC address operations only make sense if Ethernet or 6LoWPAN are
        * supported.
        */
 

@@ -1,6 +1,6 @@
 /****************************************************************************
  * net/sixlowpan/sixlowpan_input.c
- * 6loWPAN implementation (RFC4944 and draft-ietf-6loWPAN-hc-06)
+ * 6LoWPAN implementation (RFC4944 and draft-ietf-6LoWPAN-hc-06)
  *
  *   Copyright (C) 2017, Gregory Nutt, all rights reserved
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -272,10 +272,10 @@ static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr, FAR uint8_t *bptr)
  * Name: sixlowpan_frame_process
  *
  * Description:
- *   Process an incoming 6loWPAN frame in 'iob'.
+ *   Process an incoming 6LoWPAN frame in 'iob'.
  *
  *   If its a FRAG1 or a non-fragmented frame we first uncompress the IP
- *   header. The 6loWPAN payload and possibly the uncompressed IP header
+ *   header. The 6LoWPAN payload and possibly the uncompressed IP header
  *   are then copied into d_buf.  An indication is returned if the packet
  *   in d_buf is complete (i.e., non-fragmented frame or and the last
  *   FRAGN frame).
@@ -436,7 +436,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
       else if (fragsize == 0)
         {
-          nwarn("WARNING: Dropping zero-length 6loWPAN fragment\n");
+          nwarn("WARNING: Dropping zero-length 6LoWPAN fragment\n");
           return INPUT_PARTIAL;
         }
 
@@ -460,7 +460,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
            * being reassembled or the packet is not a fragment.
            */
 
-          nwarn("WARNING: Dropping 6loWPAN packet that is not a fragment of "
+          nwarn("WARNING: Dropping 6LoWPAN packet that is not a fragment of "
                 "the packet currently being reassembled\n");
           return INPUT_PARTIAL;
         }
@@ -487,7 +487,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
       if (!isfirstfrag)
         {
-          nwarn("WARNING: FRAGN 6loWPAN fragment while not reassembling\n");
+          nwarn("WARNING: FRAGN 6LoWPAN fragment while not reassembling\n");
           return OK;
         }
 
@@ -708,7 +708,7 @@ static int sixlowpan_dispatch(FAR struct ieee802154_driver_s *ieee)
  * Name: sixlowpan_input
  *
  * Description:
- *   Process an incoming 6loWPAN frame.
+ *   Process an incoming 6LoWPAN frame.
  *
  *   This function is called when the device driver has received an
  *   IEEE802.15.4 frame from the network.  The frame from the device

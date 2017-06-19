@@ -1,4 +1,60 @@
-Optimal 6loWPAN Configuration
+6LoWPAN Addressing
+------------------
+
+The current 6LoWPAN implementation uses only link local, MAC-based
+addressing addressing (as discussed in more detail below).  Thus if you know
+the node addressing, then you know the IPv6 address (and vice-versa).
+
+As a configuration option, the 6LoWPAN implementation will use either the
+node's 2-byte short address or 8-byte extended address as the MAC address
+that the IPv6 address is based on.  This is determined by the configuration
+setting CONFIG_NET_6LOWPAN_EXTENDEDADDR.  By default, the 2-byte short
+address is used for the IEEE802.15.4 MAC device's link layer address.  If
+this option is selected, then an 8-byte extended address will be used,
+instead.
+
+All nodes operating on a network have unique, 8-byte extended address,
+that was assigned before the network is configured.  6LoWPAN will use
+either the extended address for direct communication within the PAN or
+the short 2-byte address.  The short 2-byte address, however, is allocated
+by the PAN coordinator when the device associated.  If short addresses are
+used, the network cannot be brought up until is is associated.
+
+Node addressing is modified through IOCTL calls from application logic.
+The network must be in the DOWN state when ever the node addressing is
+modified.  The modified node addresses will have no effect on the reported
+IPv6 address until the network is brought to the UP state.  The new IPv6
+MAC-based addresses are only instantiated when the network transitions
+from the DOWN to UP state.
+
+IPv6 Neighbor Discovery
+-----------------------
+
+IPv6 Neighbor Discovery is not supported.  The current ICMPv6 and neighbor-
+related logic only works with Ethernet MAC.  For 6LoWPAN, a new more
+conservative IPv6 neigbor discovery is provided by RFC 6775 which is not
+currently supported.  With IPv6 neighbor discovery, any IPv6 address may be
+associated with any short or extended address.  In fact, that is the whole
+purpose of the neighbor discover logic:  It plays the same role as ARP in
+IPv4; it ultimately just manages a neighbor table that, like the arp table,
+provides the mapping between IP addresses and node addresses.
+
+The NuttX, Contiki-based 6LoWPAN implementation circumvents  the need for
+the neighbor discovery logic by using only MAC-based addressing, i.e., the
+lower two or eight bytes of the IP address are the node address.
+
+Most of the 6LoWPAN compression algorithms exploit this kind of addressing
+to compress the IPv6 address to nothing but a single bit indicating that the
+IP address derives from the node address.  In this use case, IPv6 neighbor
+discover is not useful:  If we want to use IPv6 neighbor discovery, we could
+dispense with the all MAC  based addressing.  But if we want to retain the
+more compact MAC-based addressing, then we don't need IPv6 neighbor discovery.
+
+However, it would still be nice to have enough in place to support ping6.
+Full neighbor support would be necessary if we wanted to route 6LoWPAN frames
+outside of the WPAN.
+
+Optimal 6LoWPAN Configuration
 -----------------------------
 
 1. Link local IP addresses:

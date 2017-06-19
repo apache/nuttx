@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX C Coding Standard</i>
       </font></big></h1>
-      <p>Last Updated: June 11, 2017</p>
+      <p>Last Updated: June 18, 2017</p>
     </td>
   </tr>
 </table>
@@ -2290,6 +2290,14 @@ x++;
 
 <h2>4.5 <a name="switch"><code>switch</code> Statement</a></h2>
 
+<p><b>Definitions:</b></p>
+<ul>
+  <li>
+    <b><i>Case logic</i></b>.
+    By <i>case logic</i> it is mean the <code>case</code> or <code>default</code> and all of the lines of code following the <code>case</code> or <code>default</code> up to the next <code>case</code>, <code>default</code>, or the right brace indicating the end of the switch statement.
+  </li>
+</ul>
+
 <p><b>Coding Standard:</b></p>
 <ul>
   <li>
@@ -2306,17 +2314,22 @@ x++;
     The <code>default</code> case should always be present and trigger an error if it is reached when it should not be.
   </li>
   <li>
-    <b>Case logic in braces</b>.
-    It is preferable that all case logic (except for the <code>break</code>) be enclosed in braces.
+    <b><i>Case logic</i> in braces</b>.
+    It is preferable that all <i>case logic</i> (except for the <code>break</code>) be enclosed in braces.
     If you need to instantiate local variables in case logic, then that logic must be surrounded with braces.
   </li>
   <li>
     <b><code>break</code> outside of braces</b>.
     <code>break</code> statements are normally indented by two spaces.
-    When used conditionally with case logic, the placement of the break statement follows normal indentation rules.
+    When used conditionally with <i>case logic</i>, the placement of the break statement follows normal indentation rules.
   </li>
   <li>
-    <b>Followed by a single blank line</b>.
+    <b><i>Case logic</i> followed by a single blank line</b>.
+    A single blank line must separate the <i>case logic</i> and any following <code>case</code> or <code>default</code>.
+    The should, however, be no blank lines between the <i>case logic</i> and the closing right brace.
+  </li>
+  <li>
+    <b>Switch followed by a single blank line</b>.
     The final right brace that closes the <code>switch &lt;value&gt;</code> statement must be followed by a single blank line.
   </li>
   <li>

@@ -13652,8 +13652,8 @@ Additional new features and extended functionality:
         incomplete and has not been verified.
       - IEEE 802.15.4 Network Loopback Driver:  A simple IEEE 802.15.4 MAC
         loopback driver was developed.  This driver allowed for parallel
-        development of the IEEE 802.15.4 MAC and 6loWPAN.
-      - 6loWPAN:  The Contiki 6loWPAN stack has been ported so that works
+        development of the IEEE 802.15.4 MAC and 6LoWPAN.
+      - 6LoWPAN:  The Contiki 6LoWPAN stack has been ported so that works
         within the NuttX networking framework and interfaces with the new
         IEEE 802.15.4 MAC via the network driver.  Live testing with
         IEEE 802.15.4 radios has not yet been done; all testing has used
@@ -13721,7 +13721,7 @@ Additional new features and extended functionality:
 
     * Simulation
 
-      - configs/sim/sixlowpan:  Configuration for testing the 6loWPAN with
+      - configs/sim/sixlowpan:  Configuration for testing the 6LoWPAN with
         the IEEE 802.15.4 loopback network driver.
 
     * Infineon XMC4xxx:
@@ -13926,7 +13926,7 @@ Additional new features and extended functionality:
         default is +x. No printing of a trace of script commands as they are
         executed.  From David Sidrane.
       - Print expanded variables if -x.  From David Sidrane.
-      - ifconfig command:  Extend ifconfig to support 6loWPAN.  Adapt to
+      - ifconfig command:  Extend ifconfig to support 6LoWPAN.  Adapt to
         some changes in configuration variable usage.
       - Network initialization:  If IEEE802.11 selected use wlan0 instead of
         eth0 for network device name.
@@ -13949,11 +13949,11 @@ Additional new features and extended functionality:
         cleanup handlers.  From Juha Niskanen.
       - examples/usrsocktest:  Add application for USRSOCK testing.  From
         Jussi Kivilinna.
-      - examples/nettest:  Adapt for use in testing 6loWPAN.
+      - examples/nettest:  Adapt for use in testing 6LoWPAN.
       - examples/nettest:  If doing loopback, but not using the official
         loopback device, then use the server should use the configured client
         IP address.
-      - examples/udpblaster:  Several fixes to work with 6loWPAN.
+      - examples/udpblaster:  Several fixes to work with 6LoWPAN.
       - examples/udpblaster:  Add logic to bind the local UDP socket to a
         well-known address.
       - examples/configdata:  Add stacksize and priority.  From Juha Niskanen.
@@ -13962,7 +13962,7 @@ Additional new features and extended functionality:
 
       - netutils/netlib:  Add IEEE 802.11 wireless IOCTL wrappers.
       - netutils/netlib: Add a helper function to convert a string to a
-        6loWPAN node address.
+        6LoWPAN node address.
       - netlib and NSH: Add logic to get/set the IEEE802.15.4 PAN ID.
       - netutils/dhcpc:  Make the network device name a configuration
         option.  Was hardcoded to eth0 but may, instead, need to be wlan0.

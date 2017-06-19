@@ -56,11 +56,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* IEEE 802.15.4 Radio Character Driver IOCTL commands ******************************/
-/* None defined */
-
 /* IEEE 802.15.4 MAC Character Driver IOCTL commands ********************************/
-
 
 #define MAC802154IOC_NOTIFY_REGISTER    _WLCIOC(IEEE802154_FIRST)
 #define MAC802154IOC_GET_EVENT          _WLCIOC(IEEE802154_FIRST+1)

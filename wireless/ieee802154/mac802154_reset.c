@@ -114,16 +114,16 @@ int mac802154_req_reset(MACHANDLE mac, bool rst_pibattr)
       /* Reset the Coordinator address */
 
       priv->coordaddr.mode = IEEE802154_ADDRMODE_NONE;
-      priv->coordaddr.saddr = IEEE802154_SADDR_UNSPEC;
-      memcpy(&priv->coordaddr.eaddr[0], IEEE802154_EADDR_UNSPEC,
-             IEEE802154_EADDR_LEN);
+      IEEE802154_PANIDCOPY(priv->coordaddr.panid, &IEEE802154_PANID_UNSPEC);
+      IEEE802154_SADDRCOPY(priv->coordaddr.saddr, &IEEE802154_SADDR_UNSPEC);
+      IEEE802154_EADDRCOPY(priv->coordaddr.eaddr, &IEEE802154_EADDR_UNSPEC);
 
       /* Reset the device's address */
 
       priv->addr.mode = IEEE802154_ADDRMODE_NONE;
-      priv->addr.panid = IEEE802154_PAN_UNSPEC;
-      priv->addr.saddr = IEEE802154_SADDR_UNSPEC;
-      memcpy(&priv->addr.eaddr[0], IEEE802154_EADDR_UNSPEC, IEEE802154_EADDR_LEN);
+      IEEE802154_PANIDCOPY(priv->addr.panid, &IEEE802154_PANID_UNSPEC);
+      IEEE802154_SADDRCOPY(priv->addr.saddr, &IEEE802154_SADDR_UNSPEC);
+      IEEE802154_EADDRCOPY(priv->addr.eaddr, &IEEE802154_EADDR_UNSPEC);
 
       priv->radio->reset_attrs(priv->radio);
 

@@ -443,7 +443,7 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
       uint8_t *ie_buffer;
       unsigned int ie_offset;
       unsigned int check_offset;
-      
+
       result_size = BCMF_SCAN_RESULT_SIZE - priv->scan_result_size;
       bss_info_len = bss->length;
 

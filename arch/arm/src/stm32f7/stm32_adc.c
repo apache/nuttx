@@ -67,6 +67,7 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
+#include "cache.h"
 #include "chip.h"
 #include "stm32_rcc.h"
 #include "stm32_tim.h"
@@ -1131,6 +1132,9 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
   int i;
 
+  arch_invalidate_dcache((uintptr_t)priv->dmabuffer,
+                         (uintptr_t)priv->dmabuffer + sizeof(priv->dmabuffer));
+
   /* Verify that the upper-half driver has bound its callback functions */
 
   if (priv->cb != NULL)
@@ -1149,6 +1153,7 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
             }
         }
     }
+
   /* Restart DMA for the next conversion series */
 
   adc_modifyreg(priv, STM32_ADC_DMAREG_OFFSET, ADC_DMAREG_DMA, 0);
@@ -1347,7 +1352,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
         adc_getreg(priv, STM32_ADC_SR_OFFSET),
         adc_getreg(priv, STM32_ADC_CR1_OFFSET),
         adc_getreg(priv, STM32_ADC_CR2_OFFSET));
-  
+
   ainfo("SQR1: 0x%08x SQR2: 0x%08x SQR3: 0x%08x\n",
         adc_getreg(priv, STM32_ADC_SQR1_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR2_OFFSET),

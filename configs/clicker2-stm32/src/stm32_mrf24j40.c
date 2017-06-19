@@ -256,7 +256,7 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
     }
 
 #ifdef CONFIG_IEEE802154_NETDEV
-  /* Use the IEEE802.15.4 MAC interface instance to create a 6loWPAN
+  /* Use the IEEE802.15.4 MAC interface instance to create a 6LoWPAN
    * network interface by wrapping the MAC intrface instance in a
    * network device driver via mac802154dev_register().
    */
@@ -270,7 +270,7 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
     }
 #endif
 
-#ifdef CONFIG_IEEE802154_MAC_DEV
+#ifdef CONFIG_IEEE802154_MACDEV
   /* If want to call these APIs from userspace, you have to wrap the MAC
    * interface in a character device viamac802154dev_register().
    */

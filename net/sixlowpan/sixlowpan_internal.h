@@ -169,7 +169,7 @@ struct ipv6icmp_hdr_s
 /* In order to provide a customizable IEEE 802.15.4 MAC header, a structure
  * of meta data is passed to the MAC network driver, struct
  * ieee802154_frame_meta_s.  Many of the settings in this meta data are
- * fixed, deterimined by the 6loWPAN configuration.  Other settings depend
+ * fixed, deterimined by the 6LoWPAN configuration.  Other settings depend
  * on the protocol used in the current packet or on chacteristics of the
  * destination node.
  *
@@ -180,12 +180,12 @@ struct ipv6icmp_hdr_s
 
 struct packet_metadata_s
 {
-  uint8_t sextended : 1;            /* Extended source address */
-  uint8_t dextended : 1;            /* Extended destination address */
-  uint8_t xmits;                    /* Max MAC transmisstion */
-  uint16_t dpanid;                  /* Destination PAN ID */
-  union sixlowpan_anyaddr_u source; /* Source IEEE 802.15.4 address */
-  union sixlowpan_anyaddr_u dest;   /* Destination IEEE 802.15.4 address */
+  uint8_t sextended : 1;                /* Extended source address */
+  uint8_t dextended : 1;                /* Extended destination address */
+  uint8_t xmits;                        /* Max MAC transmisstion */
+  uint8_t dpanid[IEEE802154_PANIDSIZE]; /* Destination PAN ID */
+  union sixlowpan_anyaddr_u source;     /* Source IEEE 802.15.4 address */
+  union sixlowpan_anyaddr_u dest;       /* Destination IEEE 802.15.4 address */
 };
 
 /****************************************************************************
@@ -382,7 +382,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
  *   reset.  It is called from the common sixlowpan_initialize() function.
  *   sixlowpan_hc06_initialize() configures HC06 networking data structures.
  *   It is called prior to platform-specific driver initialization so that
- *   the 6loWPAN networking subsystem is prepared to deal with network
+ *   the 6LoWPAN networking subsystem is prepared to deal with network
  *   driver initialization actions.
  *
  * Input Parameters:
@@ -592,6 +592,6 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
  ****************************************************************************/
 
 int sixlowpan_src_panid(FAR struct ieee802154_driver_s *ieee,
-                        FAR uint16_t *panid);
+                        FAR uint8_t *panid);
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* _NET_SIXLOWPAN_SIXLOWPAN_INTERNAL_H */

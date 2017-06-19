@@ -66,6 +66,77 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define mac802154_putpanid(iob, panid) \
+  do \
+    { \
+      IEEE802154_PANIDCOPY(&iob->io_data[iob->io_len], panid); \
+      iob->io_len += IEEE802154_PANIDSIZE; \
+    } \
+  while(0)
+
+#define mac802154_putsaddr(iob, saddr) \
+  do \
+    { \
+      IEEE802154_SADDRCOPY(&iob->io_data[iob->io_len], saddr); \
+      iob->io_len += IEEE802154_SADDRSIZE; \
+    } \
+  while(0)
+
+#define mac802154_puteaddr(iob, eaddr) \
+  do \
+    { \
+      IEEE802154_EADDRCOPY(&iob->io_data[iob->io_len], eaddr); \
+      iob->io_len += IEEE802154_EADDRSIZE; \
+    } \
+  while(0)
+
+#define mac802154_takepanid(iob, panid) \
+  do \
+    { \
+      IEEE802154_PANIDCOPY(panid, &iob->io_data[iob->io_offset]); \
+      iob->io_offset += IEEE802154_PANIDSIZE; \
+    } \
+  while(0)
+
+#define mac802154_takesaddr(iob, saddr) \
+  do \
+    { \
+      IEEE802154_SADDRCOPY(saddr, &iob->io_data[iob->io_offset]); \
+      iob->io_offset += IEEE802154_SADDRSIZE; \
+    } \
+  while(0)
+
+#define mac802154_takeeaddr(iob, eaddr) \
+  do \
+    { \
+      IEEE802154_EADDRCOPY(eaddr, &iob->io_data[iob->io_offset]); \
+      iob->io_offset += IEEE802154_EADDRSIZE; \
+    } \
+  while(0)
+
+/* General helper macros ****************************************************/
+
+/* GET 16-bit data:  source in network order, result in host order */
+
+#define GETHOST16(ptr,index) \
+  ((((uint16_t)((ptr)[index])) << 8) | ((uint16_t)(((ptr)[(index) + 1]))))
+
+/* GET 16-bit data:  source in network order, result in network order */
+
+#define GETNET16(ptr,index) \
+  ((((uint16_t)((ptr)[(index) + 1])) << 8) | ((uint16_t)(((ptr)[index]))))
+
+/* PUT 16-bit data:  source in host order, result in newtwork order */
+
+#define PUTHOST16(ptr,index,value) \
+  do \
+    { \
+      (ptr)[index]     = ((uint16_t)(value) >> 8) & 0xff; \
+      (ptr)[index + 1] = (uint16_t)(value) & 0xff; \
+    } \
+  while(0)
+
 /* Configuration ************************************************************/
 /* If processing is not done at the interrupt level, then work queue support
  * is required.
@@ -147,10 +218,12 @@ typedef void (*mac802154_worker_t)(FAR struct ieee802154_privmac_s *priv);
 struct ieee802154_privmac_s
 {
   FAR struct ieee802154_radio_s *radio;     /* Contained IEEE802.15.4 radio dev */
-  FAR const struct mac802154_maccb_s *cb;   /* Contained MAC callbacks */
+  FAR struct mac802154_maccb_s *cb;         /* Head of a list of MAC callbacks */
   FAR struct mac802154_radiocb_s radiocb;   /* Interface to bind to radio */
 
-  sem_t exclsem; /* Support exclusive access */
+  sem_t exclsem;                            /* Support exclusive access */
+  uint8_t nclients;                         /* Number of notification clients */
+  uint8_t nnotif;                           /* Number of remaining notifications */
 
   /* Only support a single command at any given time. As of now I see no
    * condition where you need to have more than one command frame simultaneously
@@ -401,5 +474,10 @@ int mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
 
 void mac802154_setupindirect(FAR struct ieee802154_privmac_s *priv,
                              FAR struct ieee802154_txdesc_s *txdesc);
+
+void mac802154_create_datareq(FAR struct ieee802154_privmac_s *priv,
+                              FAR struct ieee802154_addr_s *coordaddr,
+                              enum ieee802154_addrmode_e srcmode,
+                              FAR struct ieee802154_txdesc_s *txdesc);
 
 #endif /* __WIRELESS_IEEE802154__MAC802154_INTERNAL_H */

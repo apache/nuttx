@@ -208,31 +208,17 @@ static inline void mrf24j40_norm_trigger(FAR struct mrf24j40_radio_s *dev);
 
 static int  mrf24j40_setchannel(FAR struct mrf24j40_radio_s *dev,
               uint8_t chan);
-static int  mrf24j40_getchannel(FAR struct mrf24j40_radio_s *dev,
-              FAR uint8_t *chan);
 static int  mrf24j40_setpanid(FAR struct mrf24j40_radio_s *dev,
-              uint16_t panid);
-static int  mrf24j40_getpanid(FAR struct mrf24j40_radio_s *dev,
-              FAR uint16_t *panid);
+              FAR const uint8_t *panid);
 static int  mrf24j40_setsaddr(FAR struct mrf24j40_radio_s *dev,
-              uint16_t saddr);
-static int  mrf24j40_getsaddr(FAR struct mrf24j40_radio_s *dev,
-              FAR uint16_t *saddr);
+              FAR const uint8_t *saddr);
 static int  mrf24j40_seteaddr(FAR struct mrf24j40_radio_s *dev,
               FAR const uint8_t *eaddr);
-static int  mrf24j40_geteaddr(FAR struct mrf24j40_radio_s *dev,
-              FAR uint8_t *eaddr);
 static int  mrf24j40_setdevmode(FAR struct mrf24j40_radio_s *dev,
               uint8_t mode);
-static int  mrf24j40_getdevmode(FAR struct mrf24j40_radio_s *dev,
-              FAR uint8_t *mode);
 static int  mrf24j40_settxpower(FAR struct mrf24j40_radio_s *dev,
               int32_t txpwr);
-static int  mrf24j40_gettxpower(FAR struct mrf24j40_radio_s *dev,
-              FAR int32_t *txpwr);
 static int  mrf24j40_setcca(FAR struct mrf24j40_radio_s *dev,
-              FAR struct ieee802154_cca_s *cca);
-static int  mrf24j40_getcca(FAR struct mrf24j40_radio_s *dev,
               FAR struct ieee802154_cca_s *cca);
 static int  mrf24j40_energydetect(FAR struct mrf24j40_radio_s *dev,
               FAR uint8_t *energy);
@@ -965,22 +951,6 @@ static int mrf24j40_setchannel(FAR struct mrf24j40_radio_s *dev, uint8_t chan)
 }
 
 /****************************************************************************
- * Name: mrf24j40_getchannel
- *
- * Description:
- *   Get the channel the device is operating on.
- *
- ****************************************************************************/
-
-static int mrf24j40_getchannel(FAR struct mrf24j40_radio_s *dev,
-                               FAR uint8_t *chan)
-{
-  *chan = dev->channel;
-
-  return OK;
-}
-
-/****************************************************************************
  * Name: mrf24j40_setpanid
  *
  * Description:
@@ -989,29 +959,13 @@ static int mrf24j40_getchannel(FAR struct mrf24j40_radio_s *dev,
  ****************************************************************************/
 
 static int mrf24j40_setpanid(FAR struct mrf24j40_radio_s *dev,
-                             uint16_t panid)
+                             FAR const uint8_t *panid)
 {
-  mrf24j40_setreg(dev->spi, MRF24J40_PANIDH, (uint8_t)(panid>>8));
-  mrf24j40_setreg(dev->spi, MRF24J40_PANIDL, (uint8_t)(panid&0xFF));
+  mrf24j40_setreg(dev->spi, MRF24J40_PANIDL, panid[0]);
+  mrf24j40_setreg(dev->spi, MRF24J40_PANIDH, panid[1]);
 
-  dev->addr.panid = panid;
-  wlinfo("%04X\n", (unsigned)panid);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: mrf24j40_getpanid
- *
- * Description:
- *   Define the current PAN ID the device is operating on.
- *
- ****************************************************************************/
-
-static int mrf24j40_getpanid(FAR struct mrf24j40_radio_s *dev,
-                             FAR uint16_t *panid)
-{
-  *panid = dev->addr.panid;
+  IEEE802154_PANIDCOPY(dev->addr.panid, panid);
+  wlinfo("%02X:%02X\n", panid[1], panid[0]);
 
   return OK;
 }
@@ -1027,29 +981,14 @@ static int mrf24j40_getpanid(FAR struct mrf24j40_radio_s *dev,
  ****************************************************************************/
 
 static int mrf24j40_setsaddr(FAR struct mrf24j40_radio_s *dev,
-                             uint16_t saddr)
+                             FAR const uint8_t *saddr)
 {
-  mrf24j40_setreg(dev->spi, MRF24J40_SADRH, (uint8_t)(saddr>>8));
-  mrf24j40_setreg(dev->spi, MRF24J40_SADRL, (uint8_t)(saddr&0xFF));
+  mrf24j40_setreg(dev->spi, MRF24J40_SADRL, saddr[0]);
+  mrf24j40_setreg(dev->spi, MRF24J40_SADRH, saddr[1]);
 
-  dev->addr.saddr = saddr;
-  wlinfo("%04X\n", (unsigned)saddr);
-  return OK;
-}
+  IEEE802154_SADDRCOPY(dev->addr.saddr, saddr);
 
-/****************************************************************************
- * Name: mrf24j40_getsaddr
- *
- * Description:
- *   Define the current short address the device is using.
- *
- ****************************************************************************/
-
-static int mrf24j40_getsaddr(FAR struct mrf24j40_radio_s *dev,
-                             FAR uint16_t *saddr)
-{
-  *saddr = dev->addr.saddr;
-
+  wlinfo("%02X:%02X\n", saddr[1], saddr[0]);
   return OK;
 }
 
@@ -1072,22 +1011,6 @@ static int mrf24j40_seteaddr(FAR struct mrf24j40_radio_s *dev,
       mrf24j40_setreg(dev->spi, MRF24J40_EADR0 + i, eaddr[i]);
       dev->addr.eaddr[i] = eaddr[i];
     }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: mrf24j40_geteaddr
- *
- * Description:
- *   Define the current extended address the device is using.
- *
- ****************************************************************************/
-
-static int mrf24j40_geteaddr(FAR struct mrf24j40_radio_s *dev,
-                             FAR uint8_t *eaddr)
-{
-  memcpy(eaddr, dev->addr.eaddr, 8);
 
   return OK;
 }
@@ -1140,21 +1063,6 @@ static int mrf24j40_setdevmode(FAR struct mrf24j40_radio_s *dev,
   mrf24j40_setreg(dev->spi, MRF24J40_RXMCR, reg);
   dev->devmode = mode;
   return ret;
-}
-
-/****************************************************************************
- * Name: mrf24j40_setdevmode
- *
- * Description:
- *   Return the current device mode
- *
- ****************************************************************************/
-
-static int mrf24j40_getdevmode(FAR struct mrf24j40_radio_s *dev,
-                               FAR uint8_t *mode)
-{
-  *mode = dev->devmode;
-  return OK;
 }
 
 /****************************************************************************
@@ -1242,21 +1150,6 @@ static int mrf24j40_settxpower(FAR struct mrf24j40_radio_s *dev,
 }
 
 /****************************************************************************
- * Name: mrf24j40_gettxpower
- *
- * Description:
- *   Return the actual transmit power, in mBm.
- *
- ****************************************************************************/
-
-static int mrf24j40_gettxpower(FAR struct mrf24j40_radio_s *dev,
-                               FAR int32_t *txpwr)
-{
-  *txpwr = dev->txpower;
-  return OK;
-}
-
-/****************************************************************************
  * Name: mrf24j40_setcca
  *
  * Description:
@@ -1297,21 +1190,6 @@ static int mrf24j40_setcca(FAR struct mrf24j40_radio_s *dev,
   mrf24j40_setreg(dev->spi, MRF24J40_BBREG2, mode);
 
   memcpy(&dev->cca, cca, sizeof(struct ieee802154_cca_s));
-  return OK;
-}
-
-/****************************************************************************
- * Name: mrf24j40_getcca
- *
- * Description:
- *   Return the Clear Channel Assessement method.
- *
- ****************************************************************************/
-
-static int mrf24j40_getcca(FAR struct mrf24j40_radio_s *dev,
-                           FAR struct ieee802154_cca_s *cca)
-{
-  memcpy(cca, &dev->cca, sizeof(struct ieee802154_cca_s));
   return OK;
 }
 

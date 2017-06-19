@@ -63,9 +63,9 @@ struct sockaddr;     /* Forward reference */
  * Description:
  *   sixlowpan_initialize() is called during OS initialization at power-up
  *   reset.  It is called from the common net_setup() function.
- *   sixlowpan_initialize() configures 6loWPAN networking data structures.
+ *   sixlowpan_initialize() configures 6LoWPAN networking data structures.
  *   It is called prior to platform-specific driver initialization so that
- *   the 6loWPAN networking subsystem is prepared to deal with network
+ *   the 6LoWPAN networking subsystem is prepared to deal with network
  *   driver initialization actions.
  *
  * Input Parameters:
