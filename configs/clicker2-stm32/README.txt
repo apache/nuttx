@@ -453,6 +453,16 @@ Configurations
        NOTE: There is no way to stop the UDP test once it has been started
        other than by resetting the board.
 
+    STATUS:
+       2017-06-19:  The Telnet Daemon does not start.  This is simply because
+         the daemon is started too early in the sequence... befor the network
+         has been brought up:
+
+           telnetd_daemon: ERROR: socket failure: 106
+
+         Basic network bring-up sequence works. At least no errors are
+         reported.
+
   nsh:
 
     Configures the NuttShell (nsh) located at examples/nsh.  This
