@@ -123,12 +123,12 @@ static uint8_t g_eaddr[IEEE802154_EADDRSIZE] =
 
 static uint8_t g_saddr[IEEE802154_SADDRSIZE] =
 {
-  0xcd, 0xab
+  0xab, 0xcd
 };
 
 static uint8_t g_panid[IEEE802154_PANIDSIZE] =
 {
-  0xfe, 0xca
+  0xca, 0xfe
 };
 
 /****************************************************************************
@@ -210,7 +210,7 @@ static void lo_addr2ip(FAR struct net_driver_s *dev)
   dev->d_ipv6addr[4]  = 0;
   dev->d_ipv6addr[5]  = HTONS(0x00ff);
   dev->d_ipv6addr[6]  = HTONS(0xfe00);
-  dev->d_ipv6addr[7]  = htons(g_saddr);
+  dev->d_ipv6addr[7]  = (uint16_t)g_saddr[0] << 8 |  (uint16_t)g_saddr[1];
   dev->d_ipv6addr[7] ^= 0x200;
 }
 #endif
