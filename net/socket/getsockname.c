@@ -157,6 +157,10 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 
 #ifdef CONFIG_NETDEV_MULTINIC
   /* Find the device matching the IPv4 address in the connection structure */
+  if (ripaddr == 0)
+    {
+      ripaddr = lipaddr;
+    }
 
   dev = netdev_findby_ipv4addr(lipaddr, ripaddr);
 #else
@@ -280,6 +284,10 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 
 #ifdef CONFIG_NETDEV_MULTINIC
   /* Find the device matching the IPv6 address in the connection structure */
+  if (*ripaddr == 0)
+    {
+      ripaddr = lipaddr;
+    }
 
   dev = netdev_findby_ipv6addr(*lipaddr, *ripaddr);
 #else
