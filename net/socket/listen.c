@@ -151,7 +151,13 @@ int psock_listen(FAR struct socket *psock, int backlog)
        * accept() is called and enables poll()/select() logic.
        */
 
-      tcp_listen(conn);
+      errcode = tcp_listen(conn);
+
+      if (errcode < 0)
+        {
+          errcode = -errcode;
+          goto errout;
+        }
 #else
       errcode = EOPNOTSUPP;
       goto errout;
