@@ -188,7 +188,7 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
  ****************************************************************************/
 
 int sixlowpan_src_panid(FAR struct ieee802154_driver_s *ieee,
-                        FAR uint16_t *panid)
+                        FAR uint8_t *panid)
 {
   FAR struct net_driver_s *dev = &ieee->i_dev;
   struct ieee802154_netmac_s arg;
@@ -204,7 +204,7 @@ int sixlowpan_src_panid(FAR struct ieee802154_driver_s *ieee,
       return ret;
     }
 
-  *panid = arg.u.getreq.attrval.mac.panid;
+  IEEE802154_PANIDCOPY(panid, arg.u.getreq.attrval.mac.panid);
   return OK;
 }
 

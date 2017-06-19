@@ -90,6 +90,11 @@ int mac802154_req_associate(MACHANDLE mac,
   bool rxonidle;
   int ret;
 
+  if (req->coordaddr.mode == IEEE802154_ADDRMODE_NONE)
+    {
+      return -EINVAL;
+    }
+
   /* Get exlusive access to the operation sempaphore. This must happen before
    * getting exclusive access to the MAC struct or else there could be a lockup
    * condition. This would occur if another thread is using the cmdtrans but
@@ -122,34 +127,16 @@ int mac802154_req_associate(MACHANDLE mac,
   priv->radio->set_attr(priv->radio, IEEE802154_ATTR_PHY_CURRENT_PAGE,
                         (FAR const union ieee802154_attr_u *)&req->chpage);
 
-  /* Set the PANID attribute */
-
-  priv->addr.panid = req->coordaddr.panid;
-  priv->coordaddr.panid = req->coordaddr.panid;
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_PANID,
-               (FAR const union ieee802154_attr_u *)&req->coordaddr.panid);
-
   /* Set the coordinator address attributes */
 
-  priv->coordaddr.mode = req->coordaddr.mode;
+  memcpy(&priv->coordaddr, &req->coordaddr, sizeof(struct ieee802154_addr_s));
 
-  if (priv->coordaddr.mode == IEEE802154_ADDRMODE_SHORT)
-    {
-      priv->coordaddr.saddr = req->coordaddr.saddr;
-      memcpy(&priv->coordaddr.eaddr[0], IEEE802154_EADDR_UNSPEC,
-             IEEE802154_EADDR_LEN);
-    }
-  else if (priv->coordaddr.mode == IEEE802154_ADDRMODE_EXTENDED)
-    {
-      priv->coordaddr.saddr = IEEE802154_SADDR_UNSPEC;
-      memcpy(&priv->coordaddr.eaddr[0], &req->coordaddr.eaddr[0],
-             IEEE802154_EADDR_LEN);
-    }
-  else
-  {
-    ret = -EINVAL;
-    goto errout;
-  }
+  /* Copy the coordinator PAN ID to our PAN ID */
+
+  IEEE802154_PANIDCOPY(priv->addr.panid, req->coordaddr.panid);
+
+  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_PANID,
+               (FAR const union ieee802154_attr_u *)req->coordaddr.panid);
 
   /* Copy in the capabilities information bitfield */
 
@@ -210,8 +197,7 @@ int mac802154_req_associate(MACHANDLE mac,
    * PAN to which to associate. [1] pg. 68
    */
 
-  memcpy(&iob->io_data[iob->io_len], &priv->coordaddr.panid, 2);
-  iob->io_len += 2;
+  mac802154_putpanid(iob, priv->coordaddr.panid);
 
   /* The Destination Address field shall contain the address from the beacon
    * frame that was transmitted by the coordinator to which the association
@@ -220,27 +206,20 @@ int mac802154_req_associate(MACHANDLE mac,
 
   if (priv->coordaddr.mode == IEEE802154_ADDRMODE_SHORT)
     {
-      memcpy(&iob->io_data[iob->io_len], &priv->coordaddr.saddr, 2);
-      iob->io_len += 2;
+      mac802154_putsaddr(iob, priv->coordaddr.saddr);
     }
   else if (priv->coordaddr.mode == IEEE802154_ADDRMODE_EXTENDED)
     {
-      memcpy(&iob->io_data[iob->io_len], &priv->coordaddr.eaddr[0],
-             IEEE802154_EADDR_LEN);
-      iob->io_len += IEEE802154_EADDR_LEN;
+      mac802154_puteaddr(iob, priv->coordaddr.eaddr);
     }
 
   /* The Source PAN Identifier field shall contain the broadcast PAN identifier.*/
 
-  u16 = (uint16_t *)&iob->io_data[iob->io_len];
-  *u16 = IEEE802154_SADDR_BCAST;
-  iob->io_len += 2;
+  mac802154_putsaddr(iob, &IEEE802154_SADDR_BCAST);
 
   /* The Source Address field shall contain the value of macExtendedAddress. */
 
-  memcpy(&iob->io_data[iob->io_len], &priv->addr.eaddr[0],
-        IEEE802154_EADDR_LEN);
-  iob->io_len += IEEE802154_EADDR_LEN;
+  mac802154_puteaddr(iob, priv->addr.eaddr);
 
   /* Copy in the Command Frame Identifier */
 
@@ -284,10 +263,6 @@ int mac802154_req_associate(MACHANDLE mac,
   priv->radio->txdelayed(priv->radio, txdesc, 0);
 
   return OK;
-
-errout:
-  mac802154_givesem(&priv->exclsem);
-  return ret;
 }
 
 /****************************************************************************
@@ -351,20 +326,17 @@ int mac802154_resp_associate(MACHANDLE mac,
    * Destination PAN Identifier field shall contain the value of macPANId, while
    * the Source PAN Identifier field shall be omitted. [1] pg. 69
    */
-
-  memcpy(&iob->io_data[iob->io_len], &priv->addr.panid, 2);
-  iob->io_len += 2;
-
+  
+  mac802154_putpanid(iob, priv->addr.panid);
+  
   /* The Destination Address field shall contain the extended address of the
    * device requesting association. [1] pg. 69 */
 
-  memcpy(&iob->io_data[iob->io_len], &resp->devaddr[0], IEEE802154_EADDR_LEN);
-  iob->io_len += IEEE802154_EADDR_LEN;
+  mac802154_puteaddr(iob, resp->devaddr);
 
   /* The Source Address field shall contain the value of macExtendedAddress. */
 
-  memcpy(&iob->io_data[iob->io_len], &priv->addr.eaddr[0], IEEE802154_EADDR_LEN);
-  iob->io_len += IEEE802154_EADDR_LEN;
+  mac802154_puteaddr(iob, priv->addr.eaddr);
 
    /* Copy in the Command Frame Identifier */
 
@@ -374,14 +346,12 @@ int mac802154_resp_associate(MACHANDLE mac,
 
   if (resp->status == IEEE802154_STATUS_SUCCESS)
     {
-      memcpy(&iob->io_data[iob->io_len], &resp->assocsaddr, 2);
+      mac802154_putsaddr(iob, resp->assocsaddr);
     }
   else
     {
-      u16 = (FAR uint16_t *)&iob->io_data[iob->io_len];
-      *u16 = IEEE802154_SADDR_UNSPEC;
+      mac802154_putsaddr(iob, &IEEE802154_SADDR_UNSPEC);
     }
-  iob->io_len += 2;
 
   /* Copy in the association status */
 
@@ -409,9 +379,9 @@ int mac802154_resp_associate(MACHANDLE mac,
   txdesc->frame = iob;
   txdesc->frametype = IEEE802154_FRAME_COMMAND;
 
-  txdesc->destaddr.panid = priv->addr.panid;
   txdesc->destaddr.mode = IEEE802154_ADDRMODE_EXTENDED;
-  memcpy(&txdesc->destaddr.eaddr[0], &resp->devaddr[0], IEEE802154_EADDR_LEN);
+  IEEE802154_PANIDCOPY(txdesc->destaddr.panid, priv->addr.panid);
+  IEEE802154_EADDRCOPY(txdesc->destaddr.eaddr, resp->devaddr);
 
   mac802154_setupindirect(priv, txdesc);
 
@@ -469,7 +439,7 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
        * if the association attempt was unsuccessful. [1] pg. 81
        */
 
-      notif->u.assocconf.saddr = IEEE802154_SADDR_UNSPEC;
+      IEEE802154_SADDRCOPY(notif->u.assocconf.saddr, &IEEE802154_SADDR_UNSPEC);
 
       /* We are now done the operation, unlock the semaphore */
 
@@ -601,7 +571,7 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
        * if the association attempt was unsuccessful. [1] pg. 81
        */
 
-      notif->u.assocconf.saddr = IEEE802154_SADDR_UNSPEC;
+      IEEE802154_SADDRCOPY(notif->u.assocconf.saddr, &IEEE802154_SADDR_UNSPEC);
 
       /* We are now done the operation, and can release the command */
 
@@ -681,8 +651,7 @@ void mac802154_rx_assocreq(FAR struct ieee802154_privmac_s *priv,
 
   /* Copy the extended address of the requesting device */
 
-  memcpy(&notif->u.assocind.devaddr[0], &ind->src.eaddr[0],
-         sizeof(struct ieee802154_addr_s));
+  IEEE802154_EADDRCOPY(notif->u.assocind.devaddr, ind->src.eaddr);
 
   /* Copy in the capability information from the frame to the notification */
 
@@ -728,7 +697,7 @@ errout_with_sem:
 void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
                             FAR struct ieee802154_data_ind_s *ind)
 {
-  FAR struct iob_s *frame = ind->frame;
+  FAR struct iob_s *iob = ind->frame;
   FAR struct ieee802154_notif_s *notif;
 
   /* Check if we are performing an Association operation, if not, we will just
@@ -755,13 +724,12 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
 
   /* Parse the short address from the response */
 
-  priv->addr.saddr = (uint16_t)(frame->io_data[frame->io_offset]);
-  frame->io_offset += 2;
+  mac802154_takesaddr(iob, priv->addr.saddr);
 
   /* Inform the radio of the address change */
 
   priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_SHORT_ADDRESS,
-                        (FAR union ieee802154_attr_u *)&priv->addr.saddr);
+                        (FAR union ieee802154_attr_u *)priv->addr.saddr);
 
   /* A Short Address field value equal to 0xfffe shall indicate that the device
    * has been successfully associated with a PAN but has not been allocated a
@@ -769,7 +737,7 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
    * only its extended address. [1] pg. 70
    */
 
-  if (priv->addr.saddr == IEEE802154_SADDR_BCAST)
+  if (IEEE802154_SADDRCMP(priv->addr.saddr, &IEEE802154_SADDR_BCAST))
     {
       /* TODO: Figure out if this is sufficient */
 
@@ -778,7 +746,7 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
 
   /* Parse the status from the response */
 
-  notif->u.assocconf.status = frame->io_data[frame->io_offset++];
+  notif->u.assocconf.status = iob->io_data[iob->io_offset++];
 
   if (notif->u.assocconf.status == IEEE802154_STATUS_SUCCESS)
     {
@@ -789,7 +757,7 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
       priv->isassoc = false;
     }
 
-  notif->u.assocconf.saddr = priv->addr.saddr;
+  IEEE802154_SADDRCOPY(notif->u.assocconf.saddr, priv->addr.saddr);
 
   /* Unlock the MAC */
 
@@ -850,7 +818,7 @@ static void mac802154_timeout_assoc(FAR struct ieee802154_privmac_s *priv)
 
   notif->notiftype = IEEE802154_NOTIFY_CONF_ASSOC;
   notif->u.assocconf.status = IEEE802154_STATUS_NO_DATA;
-  notif->u.assocconf.saddr = IEEE802154_SADDR_UNSPEC;
+  IEEE802154_SADDRCOPY(notif->u.assocconf.saddr, &IEEE802154_SADDR_UNSPEC);
 
   mac802154_notify(priv, notif);
 }

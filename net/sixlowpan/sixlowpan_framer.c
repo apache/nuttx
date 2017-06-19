@@ -198,7 +198,8 @@ int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
       /* Broadcast requires short address mode. */
 
       meta->destaddr.mode  = IEEE802154_ADDRMODE_SHORT;
-      meta->destaddr.saddr = 0;
+      meta->destaddr.saddr[0] = 0;
+      meta->destaddr.saddr[1] = 0;
     }
   else if (pktmeta->dextended != 0)
     {
@@ -215,7 +216,7 @@ int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
       sixlowpan_saddrcopy(&meta->destaddr.saddr, pktmeta->dest.saddr.u8);
     }
 
-  meta->destaddr.panid = pktmeta->dpanid;
+  IEEE802154_SADDRCOPY(meta->destaddr.panid, pktmeta->dpanid);
 
   /* Handle associated with MSDU.  Will increment once per packet, not
    * necesarily per frame:  The same MSDU handle will be used for each

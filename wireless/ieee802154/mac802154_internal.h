@@ -66,6 +66,77 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define mac802154_putpanid(iob, panid) \
+  do \
+    { \
+      IEEE802154_PANIDCOPY(&iob->io_data[iob->io_len], panid); \
+      iob->io_len += IEEE802154_PANIDSIZE; \
+    } \
+  while(0)
+
+#define mac802154_putsaddr(iob, saddr) \
+  do \
+    { \
+      IEEE802154_SADDRCOPY(&iob->io_data[iob->io_len], saddr); \
+      iob->io_len += IEEE802154_SADDRSIZE; \
+    } \
+  while(0)
+
+#define mac802154_puteaddr(iob, eaddr) \
+  do \
+    { \
+      IEEE802154_EADDRCOPY(&iob->io_data[iob->io_len], eaddr); \
+      iob->io_len += IEEE802154_EADDRSIZE; \
+    } \
+  while(0)
+
+#define mac802154_takepanid(iob, panid) \
+  do \
+    { \
+      IEEE802154_PANIDCOPY(panid, &iob->io_data[iob->io_offset]); \
+      iob->io_offset += IEEE802154_PANIDSIZE; \
+    } \
+  while(0)
+
+#define mac802154_takesaddr(iob, saddr) \
+  do \
+    { \
+      IEEE802154_SADDRCOPY(saddr, &iob->io_data[iob->io_offset]); \
+      iob->io_offset += IEEE802154_SADDRSIZE; \
+    } \
+  while(0)
+
+#define mac802154_takeeaddr(iob, eaddr) \
+  do \
+    { \
+      IEEE802154_EADDRCOPY(eaddr, &iob->io_data[iob->io_offset]); \
+      iob->io_offset += IEEE802154_EADDRSIZE; \
+    } \
+  while(0)
+
+/* General helper macros ****************************************************/
+
+/* GET 16-bit data:  source in network order, result in host order */
+
+#define GETHOST16(ptr,index) \
+  ((((uint16_t)((ptr)[index])) << 8) | ((uint16_t)(((ptr)[(index) + 1]))))
+
+/* GET 16-bit data:  source in network order, result in network order */
+
+#define GETNET16(ptr,index) \
+  ((((uint16_t)((ptr)[(index) + 1])) << 8) | ((uint16_t)(((ptr)[index]))))
+
+/* PUT 16-bit data:  source in host order, result in newtwork order */
+
+#define PUTHOST16(ptr,index,value) \
+  do \
+    { \
+      (ptr)[index]     = ((uint16_t)(value) >> 8) & 0xff; \
+      (ptr)[index + 1] = (uint16_t)(value) & 0xff; \
+    } \
+  while(0)
+
 /* Configuration ************************************************************/
 /* If processing is not done at the interrupt level, then work queue support
  * is required.

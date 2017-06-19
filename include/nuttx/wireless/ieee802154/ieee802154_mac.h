@@ -61,6 +61,42 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
+/* IEEE 802.15.4 address macros */
+/* Copy a an IEEE 802.15.4 address */
+
+#define IEEE802154_ANYADDRCOPY(dest,src,len) \
+  memcpy(dest, src, len)
+
+#define IEEE802154_PANIDCOPY(dest,src) \
+  IEEE802154_ANYADDRCOPY(dest,src,IEEE802154_PANIDSIZE)
+
+#define IEEE802154_SADDRCOPY(dest,src) \
+  IEEE802154_ANYADDRCOPY(dest,src,IEEE802154_SADDRSIZE)
+
+#define IEEE802154_EADDRCOPY(dest,src)  \
+  IEEE802154_ANYADDRCOPY(dest,src,IEEE802154_EADDRSIZE)
+
+/* Compare two IEEE 802.15.4 addresses */
+
+#define IEEE802154_ANYADDRCMP(addr1,addr2,len) \
+  (memcmp(addr1, addr2, len) == 0)
+
+#define IEEE802154_PANIDCMP(addr1,addr2) \
+  IEEE802154_ANYADDRCMP(addr1,addr2,IEEE802154_PANIDSIZE)
+
+#define IEEE802154_SADDRCMP(addr1,addr2) \
+  IEEE802154_ANYADDRCMP(addr1,addr2,IEEE802154_SADDRSIZE)
+
+#define IEEE802154_EADDRCMP(addr1,addr2) \
+  IEEE802154_ANYADDRCMP(addr1,addr2,IEEE802154_EADDRSIZE)
+
+/* Some addresses */
+
+#define IEEE802154_PANID_UNSPEC ((uint8_t[]){0xFF,0xFF})
+#define IEEE802154_SADDR_UNSPEC ((uint8_t[]){0xFF,0xFF})
+#define IEEE802154_SADDR_BCAST  ((uint8_t[]){0xFE,0xFF})
+#define IEEE802154_EADDR_UNSPEC ((uint8_t[]){0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF})
+
 /* Configuration ************************************************************/
 /* None at the moment */
 
@@ -101,13 +137,6 @@
 #define MAC802154IOC_MLME_CALIBRATE_REQUEST    _MAC802154IOC(0x0012)
 
 /* IEEE 802.15.4 MAC Interface **********************************************/
-
-/* Some addresses */
-
-#define IEEE802154_PAN_UNSPEC   (uint16_t)0xFFFF
-#define IEEE802154_SADDR_UNSPEC (uint16_t)0xFFFF
-#define IEEE802154_SADDR_BCAST  (uint16_t)0xFFFE
-#define IEEE802154_EADDR_UNSPEC (uint8_t[]){0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF}
 
 /* Frame control field masks, 2 bytes
  * Seee IEEE 802.15.4/2011 5.2.1.1 page 57
@@ -398,7 +427,9 @@ enum ieee802154_devmode_e
   IEEE802154_DEVMODE_PANCOORD
 };
 
-#define IEEE802154_EADDR_LEN 8
+#define IEEE802154_PANIDSIZE  2
+#define IEEE802154_SADDRSIZE  2
+#define IEEE802154_EADDRSIZE  8
 
 /* IEEE 802.15.4 Device address
  * The addresses in ieee802154 have several formats:
@@ -424,10 +455,9 @@ struct ieee802154_addr_s
 
   enum ieee802154_addrmode_e mode;
 
-  uint16_t panid;                        /* PAN identifier, can be
-                                          * IEEE802154_PAN_UNSPEC */
-  uint16_t saddr;                        /* short address */
-  uint8_t  eaddr[IEEE802154_EADDR_LEN];  /* extended address */
+  uint8_t panid[IEEE802154_PANIDSIZE];  /* PAN identifier */
+  uint8_t saddr[IEEE802154_SADDRSIZE];  /* short address */
+  uint8_t eaddr[IEEE802154_EADDRSIZE];  /* extended address */
 };
 
 #define IEEE802154_ADDRSTRLEN 22 /* (2*2+1+8*2, PPPP/EEEEEEEEEEEEEEEE) */
@@ -540,12 +570,12 @@ struct ieee802154_cca_s
 
 union ieee802154_macattr_u
 {
-  uint8_t eaddr[IEEE802154_EADDR_LEN];
-  uint16_t saddr;
-  uint16_t panid;
+  uint8_t eaddr[IEEE802154_EADDRSIZE];
+  uint8_t saddr[IEEE802154_SADDRSIZE];
+  uint8_t panid[IEEE802154_PANIDSIZE];
 
-  uint8_t coord_eaddr[IEEE802154_EADDR_LEN];
-  uint16_t coord_saddr;
+  uint8_t coord_eaddr[IEEE802154_EADDRSIZE];
+  uint8_t coord_saddr[IEEE802154_SADDRSIZE];
 
   enum ieee802154_devmode_e devmode;
 
@@ -845,7 +875,7 @@ struct ieee802154_assoc_ind_s
 {
   /* Address of device requesting association. Always in extended mode */
 
-  uint8_t devaddr[IEEE802154_EADDR_LEN];
+  uint8_t devaddr[IEEE802154_EADDRSIZE];
 
   /* Capabilities of associating device */
 
@@ -870,11 +900,11 @@ struct ieee802154_assoc_resp_s
 {
   /* Address of device requesting association. Always in extended mode */
 
-  uint8_t devaddr[8];
+  uint8_t devaddr[IEEE802154_EADDRSIZE];
 
   /* Address assigned to the device. 0xFFFF if failure */
 
-  uint16_t assocsaddr;
+  uint8_t assocsaddr[IEEE802154_SADDRSIZE];
 
   /* Status of association attempt */
 
@@ -903,7 +933,7 @@ struct ieee802154_assoc_conf_s
    * unsuccessful.
    */
 
-  uint16_t saddr;
+  uint8_t saddr[IEEE802154_SADDRSIZE];
 
   /* Status of association attempt */
 
@@ -1287,7 +1317,7 @@ struct ieee802154_set_req_s
 
 struct ieee802154_start_req_s
 {
-  uint16_t panid;
+  uint8_t panid[IEEE802154_PANIDSIZE];
   uint8_t chnum;
   uint8_t chpage;
 

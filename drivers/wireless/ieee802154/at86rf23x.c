@@ -110,7 +110,7 @@ struct at86rf23x_dev_s
   FAR struct spi_dev_s               *spi;       /* Saved SPI interface instance */
   struct work_s                       irqwork;   /* Interrupt continuation work queue support */
   FAR const struct at86rf23x_lower_s *lower;     /* Low-level MCU-specific support */
-  uint16_t                            panid;     /* PAN identifier, FFFF = not set */
+  uint8_t                             panid[2];  /* PAN identifier, FFFF = not set */
   uint16_t                            saddr;     /* Short address, FFFF = not set */
   uint8_t                             eaddr[8];  /* Extended address, FFFFFFFFFFFFFFFF = not set */
   uint8_t                             channel;   /* 11 to 26 for the 2.4 GHz band */

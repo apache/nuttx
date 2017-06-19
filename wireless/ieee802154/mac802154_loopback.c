@@ -98,7 +98,7 @@ struct lo_driver_s
 {
   bool lo_bifup;               /* true:ifup false:ifdown */
   bool lo_pending;             /* True: TX poll pending */
-  uint16_t lo_panid;           /* Fake PAN ID for testing */
+  uint8_t lo_panid[2];         /* Fake PAN ID for testing */
   WDOG_ID lo_polldog;          /* TX poll timer */
   struct work_s lo_work;       /* For deferring poll work to the work queue */
   FAR struct iob_s *lo_head;   /* Head of IOBs queued for loopback */
@@ -116,13 +116,20 @@ struct lo_driver_s
 static struct lo_driver_s g_loopback;
 static uint8_t g_iobuffer[CONFIG_NET_6LOWPAN_MTU + CONFIG_NET_GUARDSIZE];
 
-static uint8_t g_eaddr[8] =
+static uint8_t g_eaddr[IEEE802154_EADDRSIZE] =
 {
   0x00, 0xfa, 0xde, 0x00, 0xde, 0xad, 0xbe, 0xef
 };
 
-static uint16_t g_saddr = 0xabcd;
-static uint16_t g_panid = 0xcafe;
+static uint8_t g_saddr[IEEE802154_SADDRSIZE] =
+{
+  0xcd, 0xab
+};
+
+static uint8_t g_panid[IEEE802154_PANIDSIZE] =
+{
+  0xfe, 0xca
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -441,16 +448,16 @@ static int lo_ifup(FAR struct net_driver_s *dev)
         dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  ninfo("             Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x PANID=%04x\n",
+  ninfo("             Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x PANID=%02x:%02x\n",
          dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
          dev->d_mac.ieee802154.u8[2], dev->d_mac.ieee802154.u8[3],
          dev->d_mac.ieee802154.u8[4], dev->d_mac.ieee802154.u8[5],
          dev->d_mac.ieee802154.u8[6], dev->d_mac.ieee802154.u8[7],
-         priv->lo_panid);
+         priv->lo_panid[0], priv->lo_panid[1]);
 #else
-  ninfo("             Node: %02x:%02x PANID=%04x\n",
+  ninfo("             Node: %02x:%02x PANID=%02x:%02x\n",
          dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
-         priv->lo_panid);
+         priv->lo_panid[0], priv->lo_panid[1]);
 #endif
 
   /* Set and activate a timer process */
@@ -691,18 +698,18 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
           switch (setreq->attr)
             {
               case IEEE802154_ATTR_MAC_PANID:
-                g_panid = setreq->attrval.mac.panid;
+                IEEE802154_PANIDCOPY(g_panid, setreq->attrval.mac.panid);
                 break;
 
               case IEEE802154_ATTR_MAC_EXTENDED_ADDR:
-                memcpy(setreq->attrval.mac.eaddr, g_eaddr, 8);
+                IEEE802154_EADDRCOPY(g_eaddr, setreq->attrval.mac.eaddr);
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
                 lo_addr2ip(dev);
 #endif
                 break;
 
               case IEEE802154_ATTR_MAC_SHORT_ADDRESS:
-                g_saddr = setreq->attrval.mac.saddr;
+                IEEE802154_SADDRCOPY(g_saddr, setreq->attrval.mac.saddr);
 #ifndef CONFIG_NET_6LOWPAN_EXTENDEDADDR
                 lo_addr2ip(dev);
 #endif
@@ -721,15 +728,15 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
           switch (getreq->attr)
             {
               case IEEE802154_ATTR_MAC_PANID:
-                getreq->attrval.mac.panid = g_panid;
+                IEEE802154_PANIDCOPY(getreq->attrval.mac.panid, g_panid);
                 break;
 
               case IEEE802154_ATTR_MAC_EXTENDED_ADDR:
-                memcpy(g_eaddr, getreq->attrval.mac.eaddr, 8);
+                IEEE802154_EADDRCOPY(getreq->attrval.mac.eaddr, g_eaddr);
                 break;
 
               case IEEE802154_ATTR_MAC_SHORT_ADDRESS:
-                getreq->attrval.mac.saddr = g_saddr;
+                IEEE802154_SADDRCOPY(getreq->attrval.mac.saddr, g_saddr);
                 break;
 
               default:

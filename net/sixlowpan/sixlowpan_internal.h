@@ -180,12 +180,12 @@ struct ipv6icmp_hdr_s
 
 struct packet_metadata_s
 {
-  uint8_t sextended : 1;            /* Extended source address */
-  uint8_t dextended : 1;            /* Extended destination address */
-  uint8_t xmits;                    /* Max MAC transmisstion */
-  uint16_t dpanid;                  /* Destination PAN ID */
-  union sixlowpan_anyaddr_u source; /* Source IEEE 802.15.4 address */
-  union sixlowpan_anyaddr_u dest;   /* Destination IEEE 802.15.4 address */
+  uint8_t sextended : 1;                /* Extended source address */
+  uint8_t dextended : 1;                /* Extended destination address */
+  uint8_t xmits;                        /* Max MAC transmisstion */
+  uint8_t dpanid[IEEE802154_PANIDSIZE]; /* Destination PAN ID */
+  union sixlowpan_anyaddr_u source;     /* Source IEEE 802.15.4 address */
+  union sixlowpan_anyaddr_u dest;       /* Destination IEEE 802.15.4 address */
 };
 
 /****************************************************************************
@@ -592,6 +592,6 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
  ****************************************************************************/
 
 int sixlowpan_src_panid(FAR struct ieee802154_driver_s *ieee,
-                        FAR uint16_t *panid);
+                        FAR uint8_t *panid);
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* _NET_SIXLOWPAN_SIXLOWPAN_INTERNAL_H */

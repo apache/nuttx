@@ -313,8 +313,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
    * PAN IDs are the same.
    */
 
-  pktmeta.dpanid = 0xffff;
-  (void)sixlowpan_src_panid(ieee, &pktmeta.dpanid);
+  (void)sixlowpan_src_panid(ieee, pktmeta.dpanid);
 
   /* Based on the collected attributes and addresses, construct the MAC meta
    * data structure that we need to interface with the IEEE802.15.4 MAC (we

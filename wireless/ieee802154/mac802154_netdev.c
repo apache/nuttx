@@ -261,7 +261,7 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
       /* Set the IP address based on the eaddr */
 
       eaddr = arg.u.getreq.attrval.mac.eaddr;
-      memcpy(dev->d_mac.ieee802154.u8, eaddr, 8);
+      IEEE802154_EADDRCOPY(dev->d_mac.ieee802154.u8, eaddr);
 
       dev->d_ipv6addr[0]  = HTONS(0xfe80);
       dev->d_ipv6addr[1]  = 0;
