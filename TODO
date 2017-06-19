@@ -2074,6 +2074,19 @@ o Build system
                see that the .a archive file has the newer time stamp and those .o
                file will never be added to the archive until the directory is cleaned
                or some other dependency changes.
+
+               UPDATE: There is another way that Control-C can break dependencies:
+               If you control-c out of the make during the apps/ part of the build,
+               the archive at apps/libapps.a is deleted.  When you rebuild the
+               system, the first file archived will create libapps.a and set the
+               timestamp to the current time.  Then, none of the other object files
+               will be added to the archive because they are all older.
+
+               The typical symptom of such an issue is a link time error like:
+
+                 LD: nuttx libsched.a(os_bringup.o): In function `os_bringup':
+                 os_bringup.c:(.text+0x34): undefined reference to `nsh_main'
+
    Status      Open
    Priority:   Medium-High.  It is a rare event that control-C happens at just the
                point in time.  However, when it does occur the resulting code may
