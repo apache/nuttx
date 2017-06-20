@@ -64,19 +64,20 @@ static uint16_t g_bkp_writable_counter = 0;
  * Private Functions
  ************************************************************************************/
 
-static inline uint16_t stm32_pwr_getreg(uint8_t offset)
+static inline uint32_t stm32_pwr_getreg(uint8_t offset)
 {
-  return (uint16_t)getreg32(STM32_PWR_BASE + (uint32_t)offset);
+  return getreg32(STM32_PWR_BASE + (uint32_t)offset);
 }
 
-static inline void stm32_pwr_putreg(uint8_t offset, uint16_t value)
+static inline void stm32_pwr_putreg(uint8_t offset, uint32_t value)
 {
-  putreg32((uint32_t)value, STM32_PWR_BASE + (uint32_t)offset);
+  putreg32(value, STM32_PWR_BASE + (uint32_t)offset);
 }
 
-static inline void stm32_pwr_modifyreg(uint8_t offset, uint16_t clearbits, uint16_t setbits)
+static inline void stm32_pwr_modifyreg(uint8_t offset, uint32_t clearbits,
+                                       uint32_t setbits)
 {
-  modifyreg32(STM32_PWR_BASE + (uint32_t)offset, (uint32_t)clearbits, (uint32_t)setbits);
+  modifyreg32(STM32_PWR_BASE + (uint32_t)offset, clearbits, setbits);
 }
 
 /************************************************************************************
@@ -371,5 +372,44 @@ void stm32_pwr_disablepvd(void)
 }
 
 #endif /* CONFIG_STM32_ENERGYLITE */
+
+/************************************************************************************
+ * Name: stm32_pwr_enableoverdrive
+ *
+ * Description:
+ *   Enable or disable the overdrive mode, allowing clock rates up to 180 MHz.
+ *   If not enabled, the max allowed frequency is 168 MHz.
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
+    defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
+void stm32_pwr_enableoverdrive(bool state)
+{
+
+  /* Switch overdrive state */
+
+  if (state)
+    {
+      stm32_pwr_modifyreg(STM32_PWR_CR_OFFSET, 0, PWR_CR_ODEN);
+    }
+  else
+    {
+      stm32_pwr_modifyreg(STM32_PWR_CR_OFFSET, PWR_CR_ODEN, 0);
+    }
+
+  /* Wait for overdrive ready */
+
+  while ((stm32_pwr_getreg(STM32_PWR_CSR_OFFSET) & PWR_CSR_ODRDY) == 0);
+
+  /* Set ODSWEN to switch to this new state*/
+
+  stm32_pwr_modifyreg(STM32_PWR_CR_OFFSET, 0, PWR_CR_ODSWEN);
+
+  /* Wait for completion */
+
+  while ((stm32_pwr_getreg(STM32_PWR_CSR_OFFSET) & PWR_CSR_ODSWRDY) == 0);
+}
+#endif
 
 #endif /* CONFIG_STM32_PWR */
