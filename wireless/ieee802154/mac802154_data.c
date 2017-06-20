@@ -149,7 +149,7 @@ int mac802154_req_data(MACHANDLE mac,
     {
       /* Should only fail if interrupted by a signal */
 
-      wlwarn("WARNING: mac802154_takesem failed: %d", ret);
+      wlwarn("WARNING: mac802154_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -239,7 +239,7 @@ int mac802154_req_data(MACHANDLE mac,
        * exclsem.  So the lock is not held if a failure is returned.
        */
 
-      wlwarn("WARNING: mac802154_txdesc_alloc failed: %d", ret);
+      wlwarn("WARNING: mac802154_txdesc_alloc failed: %d\n", ret);
       return ret;
     }
 
