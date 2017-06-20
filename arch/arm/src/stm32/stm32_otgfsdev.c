@@ -299,7 +299,7 @@
 
 #define EP0                          (0)
 
-/* The set of all enpoints available to the class implementation (1-3) */
+/* The set of all endpoints available to the class implementation (1-3) */
 
 #define STM32_EP_AVAILABLE           (0x0e)       /* All available endpoints */
 
