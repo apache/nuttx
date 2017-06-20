@@ -906,7 +906,7 @@ static void usbmsc_lununinitialize(struct usbmsc_lun_s *lun)
       (void)close_blockdriver(lun->inode);
     }
 
-  memset(lun, 0, sizeof(struct usbmsc_lun_s *));
+  memset(lun, 0, sizeof(struct usbmsc_lun_s));
 }
 
 /****************************************************************************
@@ -1492,7 +1492,7 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
 
   /* Initialize the LUN structure */
 
-  memset(lun, 0, sizeof(struct usbmsc_lun_s *));
+  memset(lun, 0, sizeof(struct usbmsc_lun_s));
 
   /* Allocate an I/O buffer big enough to hold one hardware sector.  SCSI commands
    * are processed one at a time so all LUNs may share a single I/O buffer.  The

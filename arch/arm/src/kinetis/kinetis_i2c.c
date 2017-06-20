@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/arm/src/kinetis/kinetis_i2c.c
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
- *   Author:  Matias v01d <phreakuencies@gmail.com>
+ *   Authors:  Matias v01d <phreakuencies@gmail.com>
+ *             David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -68,7 +68,7 @@
 #include "kinetis_i2c.h"
 
 #if defined(CONFIG_KINETIS_I2C0) || defined(CONFIG_KINETIS_I2C1) || \
-    defined(CONFIG_KINETIS_I2C2)
+    defined(CONFIG_KINETIS_I2C2) || defined(CONFIG_KINETIS_I2C3)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -83,6 +83,12 @@
 #define STATE_TIMEOUT           2
 #define STATE_NAK               3
 
+#define MKI2C_OUTPUT(p) (((p) & (_PIN_PORT_MASK | _PIN_MASK)) | \
+        GPIO_OPENDRAIN | GPIO_OUTPUT_ONE)
+
+#define MKI2C_INPUT(p) (((p) & (_PIN_PORT_MASK | _PIN_MASK)) | \
+        PIN_ANALOG)
+
 /* TODO:
  * - revisar tamanio de todos los registros (getreg/putreg)
  */
@@ -91,18 +97,29 @@
  * Private Types
  ****************************************************************************/
 
+/* I2C Device hardware configuration */
+
+struct kinetis_i2c_config_s
+{
+  uint32_t base;              /* I2C base address */
+  uint32_t clk_reg;           /* Clock Register */
+  uint32_t clk_bit;           /* Clock enable bit */
+  uint32_t scl_pin;           /* GPIO configuration for SCL as SCL */
+  uint32_t sda_pin;           /* GPIO configuration for SDA as SDA */
+  uint16_t irqid;             /* IRQ for this device */
+};
+
 /* I2C device state structure */
 
 struct kinetis_i2cdev_s
 {
   struct i2c_master_s dev;    /* Generic I2C device */
-  uintptr_t base;             /* Base address of registers */
-  uint32_t basefreq;          /* Branch frequency */
+  const struct kinetis_i2c_config_s *config; /* Port configuration */
   uint32_t frequency;         /* Current I2C frequency */
-  uint16_t irqid;             /* IRQ for this device */
   uint16_t nmsg;              /* Number of transfer remaining */
   uint16_t wrcnt;             /* number of bytes sent to tx fifo */
   uint16_t rdcnt;             /* number of bytes read from rx fifo */
+  int      refs;              /* Reference count */
   volatile uint8_t state;     /* State of state machine */
   bool restart;               /* Should next transfer restart or not */
   sem_t mutex;                /* Only one thread can access at a time */
@@ -123,7 +140,21 @@ static uint8_t kinetis_i2c_getreg(struct kinetis_i2cdev_s *priv,
 static void kinetis_i2c_putreg(struct kinetis_i2cdev_s *priv,
                                uint8_t value, uint8_t offset);
 
+/* Exclusion Helpers */
+
+static inline void kinetis_i2c_sem_init(FAR struct kinetis_i2cdev_s *priv);
+static inline void kinetis_i2c_sem_destroy(FAR struct kinetis_i2cdev_s *priv);
+static inline void kinetis_i2c_sem_wait(FAR struct kinetis_i2cdev_s *priv);
+static inline void kinetis_i2c_sem_post(struct kinetis_i2cdev_s *priv);
+
+/* Signal Helper */
+
+static inline void kinetis_i2c_endwait(struct kinetis_i2cdev_s *priv);
+
 /* I2C helpers */
+
+static int kinetis_i2c_init(FAR struct kinetis_i2cdev_s *priv);
+static int kinetis_i2c_deinit(FAR struct kinetis_i2cdev_s *priv);
 
 static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
                                      uint32_t frequency);
@@ -148,7 +179,7 @@ static int  kinetis_i2c_reset(struct i2c_master_s *dev);
 
 /* I2C lower half driver operations */
 
-static const struct i2c_ops_s g_i2c_ops =
+static const struct i2c_ops_s kinetis_i2c_ops =
 {
   .transfer = kinetis_i2c_transfer
 #ifdef CONFIG_I2C_RESET
@@ -156,16 +187,90 @@ static const struct i2c_ops_s g_i2c_ops =
 #endif
 };
 
-/* I2C device state instances */
+/* I2C device structures */
 
 #ifdef CONFIG_KINETIS_I2C0
-static struct kinetis_i2cdev_s g_i2c0_dev;
+static const struct kinetis_i2c_config_s kinetis_i2c0_config =
+{
+  .base       = KINETIS_I2C0_BASE,
+  .clk_reg    = KINETIS_SIM_SCGC4,
+  .clk_bit    = SIM_SCGC4_I2C0,
+  .scl_pin    = PIN_I2C0_SCL,
+  .sda_pin    = PIN_I2C0_SDA,
+  .irqid      = KINETIS_IRQ_I2C0,
+};
+
+static struct kinetis_i2cdev_s g_i2c0_dev =
+{
+  .dev.ops    = &kinetis_i2c_ops,
+  .config     = &kinetis_i2c0_config,
+  .refs       = 0,
+  .state      = STATE_OK,
+  .msgs       = NULL,
+};
 #endif
+
 #ifdef CONFIG_KINETIS_I2C1
-static struct kinetis_i2cdev_s g_i2c1_dev;
+static const struct kinetis_i2c_config_s kinetis_i2c1_config =
+{
+  .base       = KINETIS_I2C1_BASE,
+  .clk_reg    = KINETIS_SIM_SCGC4,
+  .clk_bit    = SIM_SCGC4_I2C1,
+  .scl_pin    = PIN_I2C1_SCL,
+  .sda_pin    = PIN_I2C1_SDA,
+  .irqid      = KINETIS_IRQ_I2C1,
+};
+
+static struct kinetis_i2cdev_s g_i2c1_dev =
+{
+  .dev.ops    = &kinetis_i2c_ops,
+  .config     = &kinetis_i2c1_config,
+  .refs       = 0,
+  .state      = STATE_OK,
+  .msgs       = NULL,
+};
 #endif
+
 #ifdef CONFIG_KINETIS_I2C2
-static struct kinetis_i2cdev_s g_i2c2_dev;
+static const struct kinetis_i2c_config_s kinetis_i2c2_config =
+{
+  .base       = KINETIS_I2C2_BASE,
+  .clk_reg    = KINETIS_SIM_SCGC1,
+  .clk_bit    = SIM_SCGC1_I2C2,
+  .scl_pin    = PIN_I2C2_SCL,
+  .sda_pin    = PIN_I2C2_SDA,
+  .irqid      = KINETIS_IRQ_I2C2,
+};
+
+static struct kinetis_i2cdev_s g_i2c2_dev =
+{
+  .dev.ops    = &kinetis_i2c_ops,
+  .config     = &kinetis_i2c2_config,
+  .refs       = 0,
+  .state      = STATE_OK,
+  .msgs       = NULL,
+};
+#endif
+
+#ifdef CONFIG_KINETIS_I2C3
+static const struct kinetis_i2c_config_s kinetis_i2c3_config =
+{
+  .base       = KINETIS_I2C3_BASE,
+  .clk_reg    = KINETIS_SIM_SCGC1,
+  .clk_bit    = SIM_SCGC1_I2C3,
+  .scl_pin    = PIN_I2C3_SCL,
+  .sda_pin    = PIN_I2C3_SDA,
+  .irqid      = KINETIS_IRQ_I2C3,
+};
+
+static struct kinetis_i2cdev_s g_i2c3_dev =
+{
+  .dev.ops    = &kinetis_i2c_ops,
+  .config     = &kinetis_i2c3_config,
+  .refs       = 0,
+  .state      = STATE_OK,
+  .msgs       = NULL,
+};
 #endif
 
 /****************************************************************************
@@ -183,7 +288,7 @@ static struct kinetis_i2cdev_s g_i2c2_dev;
 static uint8_t kinetis_i2c_getreg(struct kinetis_i2cdev_s *priv,
                                   uint8_t offset)
 {
-  return getreg8(priv->base + offset);
+  return getreg8(priv->config->base + offset);
 }
 
 /****************************************************************************
@@ -197,7 +302,174 @@ static uint8_t kinetis_i2c_getreg(struct kinetis_i2cdev_s *priv,
 static void kinetis_i2c_putreg(struct kinetis_i2cdev_s *priv, uint8_t value,
                                uint8_t offset)
 {
-  putreg8(value, priv->base + offset);
+  putreg8(value, priv->config->base + offset);
+}
+
+/************************************************************************************
+ * Name: kinetis_i2c_sem_init
+ *
+ * Description:
+ *   Initialize semaphores
+ *
+ ************************************************************************************/
+
+static inline void kinetis_i2c_sem_init(FAR struct kinetis_i2cdev_s *priv)
+{
+  sem_init(&priv->mutex, 0, 1);
+
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_init(&priv->wait, 0, 0);
+  sem_setprotocol(&priv->wait, SEM_PRIO_NONE);
+}
+
+/************************************************************************************
+ * Name: kinetis_i2c_sem_destroy
+ *
+ * Description:
+ *   Destroy semaphores.
+ *
+ ************************************************************************************/
+
+static inline void kinetis_i2c_sem_destroy(FAR struct kinetis_i2cdev_s *priv)
+{
+  sem_destroy(&priv->mutex);
+  sem_destroy(&priv->wait);
+}
+
+/************************************************************************************
+ * Name: kinetis_i2c_sem_wait
+ *
+ * Description:
+ *   Take the exclusive access, waiting as necessary
+ *
+ ************************************************************************************/
+
+static inline void kinetis_i2c_sem_wait(FAR struct kinetis_i2cdev_s *priv)
+{
+  while (sem_wait(&priv->mutex) != 0)
+    {
+      DEBUGASSERT(errno == EINTR);
+    }
+}
+
+/************************************************************************************
+ * Name: kinetis_i2c_sem_post
+ *
+ * Description:
+ *   Release the mutual exclusion semaphore
+ *
+ ************************************************************************************/
+
+static inline void kinetis_i2c_sem_post(struct kinetis_i2cdev_s *priv)
+{
+  sem_post(&priv->mutex);
+}
+
+/************************************************************************************
+ * Name: kinetis_i2c_endwait
+ *
+ * Description:
+ *   Release the signaling semaphore
+ *
+ ************************************************************************************/
+
+static inline void kinetis_i2c_endwait(struct kinetis_i2cdev_s *priv)
+{
+  sem_post(&priv->wait);
+}
+
+/************************************************************************************
+ * Name: kinetis_i2c_init
+ *
+ * Description:
+ *   Setup the I2C hardware, ready for operation with defaults
+ *
+ ************************************************************************************/
+
+static int kinetis_i2c_init(FAR struct kinetis_i2cdev_s *priv)
+{
+  uint32_t regval;
+
+  /* Enable the clock to peripheral */
+
+  modifyreg32(priv->config->clk_reg, 0, priv->config->clk_bit);
+
+  /* Disable while configuring */
+
+  kinetis_i2c_putreg(priv, 0, KINETIS_I2C_C1_OFFSET);
+
+  /* Configure pins */
+
+  if (kinetis_pinconfig(priv->config->scl_pin) < 0)
+    {
+      return ERROR;
+    }
+
+  if (kinetis_pinconfig(priv->config->sda_pin) < 0)
+    {
+      kinetis_pinconfig(MKI2C_INPUT(priv->config->scl_pin));
+      return ERROR;
+    }
+
+  /* High-drive select */
+
+  regval = kinetis_i2c_getreg(priv, KINETIS_I2C_C2_OFFSET);
+  regval |= I2C_C2_HDRS;
+  kinetis_i2c_putreg(priv, regval, KINETIS_I2C_C2_OFFSET);
+
+  /* Attach Interrupt Handler */
+
+  irq_attach(priv->config->irqid, kinetis_i2c_interrupt, priv);
+
+  /* Enable Interrupt Handler */
+
+  up_enable_irq(priv->config->irqid);
+
+  /* Force a frequency update */
+
+  priv->frequency = 0;
+
+  /* Set the default I2C frequency */
+
+  kinetis_i2c_setfrequency(priv, I2C_DEFAULT_FREQUENCY);
+
+  /* Enable I2C */
+
+  kinetis_i2c_putreg(priv, I2C_C1_IICEN, KINETIS_I2C_C1_OFFSET);
+  return OK;
+}
+
+/************************************************************************************
+ * Name: kinetis_i2c_deinit
+ *
+ * Description:
+ *   Shutdown the I2C hardware
+ *
+ ************************************************************************************/
+
+static int kinetis_i2c_deinit(FAR struct kinetis_i2cdev_s *priv)
+{
+  /* Disable I2C */
+
+  kinetis_i2c_putreg(priv, 0, KINETIS_I2C_C1_OFFSET);
+
+  /* Unconfigure GPIO pins */
+
+  kinetis_pinconfig(MKI2C_INPUT(priv->config->scl_pin));
+  kinetis_pinconfig(MKI2C_INPUT(priv->config->sda_pin));
+
+  /* Disable and detach interrupts */
+
+  up_disable_irq(priv->config->irqid);
+  irq_detach(priv->config->irqid);
+
+  /* Disable clocking */
+
+  modifyreg32(priv->config->clk_reg, priv->config->clk_bit, 0);
+  return OK;
 }
 
 /****************************************************************************
@@ -565,7 +837,7 @@ static void kinetis_i2c_stop(struct kinetis_i2cdev_s *priv)
 
   kinetis_i2c_putreg(priv, I2C_C1_IICEN | I2C_C1_IICIE,
                      KINETIS_I2C_C1_OFFSET);
-  sem_post(&priv->wait);
+  kinetis_i2c_endwait(priv);
 }
 
 /****************************************************************************
@@ -585,7 +857,7 @@ static void kinetis_i2c_timeout(int argc, uint32_t arg, ...)
 
   irqstate_t flags = enter_critical_section();
   priv->state = STATE_TIMEOUT;
-  sem_post(&priv->wait);
+  kinetis_i2c_endwait(priv);
   leave_critical_section(flags);
 }
 
@@ -612,7 +884,7 @@ void kinetis_i2c_nextmsg(struct kinetis_i2cdev_s *priv)
 
       if (priv->restart)
         {
-          sem_post(&priv->wait);
+          kinetis_i2c_endwait(priv);
         }
     }
   else
@@ -695,7 +967,7 @@ static int kinetis_i2c_interrupt(int irq, void *context, void *arg)
                                              KINETIS_I2C_D_OFFSET);
                           priv->wrcnt++;
 
-                          sem_post(&priv->wait);
+                          kinetis_i2c_endwait(priv);
                         }
                     }
                   else
@@ -824,7 +1096,7 @@ static int kinetis_i2c_transfer(struct i2c_master_s *dev,
 
   /* Get exclusive access to the I2C bus */
 
-  sem_wait(&priv->mutex);
+  kinetis_i2c_sem_wait(priv);
 
   /* Set up for the transfer */
 
@@ -888,7 +1160,7 @@ static int kinetis_i2c_transfer(struct i2c_master_s *dev,
 
       wd_start(priv->timeout, I2C_TIMEOUT, kinetis_i2c_timeout, 1,
                (uint32_t) priv);
-      sem_wait(&priv->wait);
+      kinetis_i2c_endwait(priv);
 
       wd_cancel(priv->timeout);
 
@@ -901,7 +1173,7 @@ static int kinetis_i2c_transfer(struct i2c_master_s *dev,
 
   /* Release access to I2C bus */
 
-  sem_post(&priv->mutex);
+  kinetis_i2c_sem_post(priv);
 
   if (priv->state != STATE_OK)
     {
@@ -930,8 +1202,118 @@ static int kinetis_i2c_transfer(struct i2c_master_s *dev,
 #ifdef CONFIG_I2C_RESET
 static int kinetis_i2c_reset(struct i2c_master_s *dev)
 {
-  i2cinfo("No reset...\n");
-  return OK;
+  struct kinetis_i2cdev_s *priv = (struct kinetis_i2cdev_s *)dev;
+  unsigned int clock_count;
+  unsigned int stretch_count;
+  uint32_t scl_gpio;
+  uint32_t sda_gpio;
+  uint32_t frequency;
+  int ret = ERROR;
+
+  DEBUGASSERT(dev);
+
+  /* Our caller must own a ref */
+
+  DEBUGASSERT(priv->refs > 0);
+
+  /* Lock out other clients */
+
+  kinetis_i2c_sem_wait(priv);
+
+  /* Save the current frequency */
+
+  frequency = priv->frequency;
+
+  /* De-init the port */
+
+  kinetis_i2c_deinit(priv);
+
+  /* Use GPIO configuration to un-wedge the bus */
+
+  scl_gpio = MKI2C_OUTPUT(priv->config->scl_pin);
+  sda_gpio = MKI2C_OUTPUT(priv->config->sda_pin);
+
+  kinetis_pinconfig(scl_gpio);
+  kinetis_pinconfig(sda_gpio);
+
+  /* Let SDA go high */
+
+  kinetis_gpiowrite(sda_gpio, 1);
+
+  /* Clock the bus until any slaves currently driving it let it go. */
+
+  clock_count = 0;
+  while (!kinetis_gpioread(sda_gpio))
+    {
+      /* Give up if we have tried too hard */
+
+      if (clock_count++ > 10)
+        {
+          goto out;
+        }
+
+      /* Sniff to make sure that clock stretching has finished.
+       *
+       * If the bus never relaxes, the reset has failed.
+       */
+
+      stretch_count = 0;
+      while (!kinetis_gpioread(scl_gpio))
+        {
+          /* Give up if we have tried too hard */
+
+          if (stretch_count++ > 10)
+            {
+              goto out;
+            }
+
+          up_udelay(10);
+        }
+
+      /* Drive SCL low */
+
+      kinetis_gpiowrite(scl_gpio, 0);
+      up_udelay(10);
+
+      /* Drive SCL high again */
+
+      kinetis_gpiowrite(scl_gpio, 1);
+      up_udelay(10);
+    }
+
+  /* Generate a start followed by a stop to reset slave
+   * state machines.
+   */
+
+  kinetis_gpiowrite(sda_gpio, 0);
+  up_udelay(10);
+  kinetis_gpiowrite(scl_gpio, 0);
+  up_udelay(10);
+  kinetis_gpiowrite(scl_gpio, 1);
+  up_udelay(10);
+  kinetis_gpiowrite(sda_gpio, 1);
+  up_udelay(10);
+
+  /* Revert the GPIO configuration. */
+
+  kinetis_pinconfig(MKI2C_INPUT(sda_gpio));
+  kinetis_pinconfig(MKI2C_INPUT(scl_gpio));
+
+  /* Re-init the port */
+
+  kinetis_i2c_init(priv);
+
+  /* Restore the frequency */
+
+  kinetis_i2c_setfrequency(priv, frequency);
+  ret = OK;
+
+out:
+
+  /* Release the port for re-use by other clients */
+
+  kinetis_i2c_sem_post(priv);
+  return ret;
 }
 #endif  /* CONFIG_I2C_RESET */
 
@@ -950,145 +1332,58 @@ static int kinetis_i2c_reset(struct i2c_master_s *dev)
 struct i2c_master_s *kinetis_i2cbus_initialize(int port)
 {
   struct kinetis_i2cdev_s *priv;
+  irqstate_t flags;
 
   i2cinfo("port=%d\n", port);
 
-  if (port > 1)
+  switch(port)
     {
-      i2cerr("ERROR: Kinetis I2C Only suppors ports 0 and 1\n");
-      return NULL;
-    }
-
-  irqstate_t flags;
-  uint32_t regval;
-
-  flags = enter_critical_section();
-
 #ifdef CONFIG_KINETIS_I2C0
-  if (port == 0)
-    {
-      priv           = &g_i2c0_dev;
-      priv->base     = KINETIS_I2C0_BASE;
-      priv->irqid    = KINETIS_IRQ_I2C0;
-      priv->basefreq = BOARD_BUS_FREQ;
-
-      /* Enable clock */
-
-      regval         = getreg32(KINETIS_SIM_SCGC4);
-      regval        |= SIM_SCGC4_I2C0;
-      putreg32(regval, KINETIS_SIM_SCGC4);
-
-      /* Disable while configuring */
-
-      kinetis_i2c_putreg(priv, 0, KINETIS_I2C_C1_OFFSET);
-
-      /* Configure pins */
-
-      kinetis_pinconfig(PIN_I2C0_SCL);
-      kinetis_pinconfig(PIN_I2C0_SDA);
-    }
-  else
+  case 0:
+    priv           = &g_i2c0_dev;
+    break;
 #endif
 #ifdef CONFIG_KINETIS_I2C1
-  if (port == 1)
-    {
-      priv           = &g_i2c1_dev;
-      priv->base     = KINETIS_I2C1_BASE;
-      priv->irqid    = KINETIS_IRQ_I2C1;
-      priv->basefreq = BOARD_BUS_FREQ;
-
-      /* Enable clock */
-
-      regval         = getreg32(KINETIS_SIM_SCGC4);
-      regval        |= SIM_SCGC4_I2C1;
-      putreg32(regval, KINETIS_SIM_SCGC4);
-
-      /* Disable while configuring */
-
-      kinetis_i2c_putreg(priv, 0, KINETIS_I2C_C1_OFFSET);
-
-      /* Configure pins */
-
-      kinetis_pinconfig(PIN_I2C1_SCL);
-      kinetis_pinconfig(PIN_I2C1_SDA);
-    }
-  else
+  case 1:
+    priv           = &g_i2c1_dev;
+    break;
 #endif
 #ifdef CONFIG_KINETIS_I2C2
-  if (port == 2)
-    {
-      priv           = &g_i2c2_dev;
-      priv->base     = KINETIS_I2C2_BASE;
-      priv->irqid    = KINETIS_IRQ_I2C2;
-      priv->basefreq = BOARD_BUS_FREQ;
-
-      /* Enable clock */
-
-      regval         = getreg32(KINETIS_SIM_SCGC4);
-      regval        |= SIM_SCGC4_I2C2;
-      putreg32(regval, KINETIS_SIM_SCGC4);
-
-      /* Disable while configuring */
-
-      kinetis_i2c_putreg(priv, 0, KINETIS_I2C_C1_OFFSET);
-
-      /* Configure pins */
-
-      kinetis_pinconfig(PIN_I2C2_SCL);
-      kinetis_pinconfig(PIN_I2C2_SDA);
-    }
-  else
+  case 2:
+    priv           = &g_i2c2_dev;
+    break;
 #endif
-    {
-      leave_critical_section(flags);
-      i2cerr("ERROR: Unsupport I2C bus: %d\n", port);
-      return NULL;
+#ifdef CONFIG_KINETIS_I2C3
+  case 3:
+    priv           = &g_i2c3_dev;
+    break;
+#endif
+  default:
+    i2cerr("ERROR: Kinetis I2C Only suppors ports 0 and %d\n", KINETIS_NI2C-1);
+    return NULL;
     }
 
-  /* Set the default I2C frequency */
-
-  kinetis_i2c_setfrequency(priv, I2C_DEFAULT_FREQUENCY);
-
-  /* Enable */
-
-  kinetis_i2c_putreg(priv, I2C_C1_IICEN, KINETIS_I2C_C1_OFFSET);
-
-  /* High-drive select (TODO: why)? */
-
-  regval = kinetis_i2c_getreg(priv, KINETIS_I2C_C2_OFFSET);
-  regval |= I2C_C2_HDRS;
-  kinetis_i2c_putreg(priv, regval, KINETIS_I2C_C2_OFFSET);
-
+  flags = enter_critical_section();
+  if ((volatile int)priv->refs++ == 0)
+    {
+      priv->timeout = wd_create();
+      DEBUGASSERT(priv->timeout != 0);
+      if (priv->timeout == NULL)
+      {
+          priv->refs--;
+          goto errout;
+      }
+      kinetis_i2c_sem_init(priv);
+      kinetis_i2c_init(priv);
+    }
   leave_critical_section(flags);
 
-  /* Initialize semaphores */
-
-  sem_init(&priv->mutex, 0, 1);
-  sem_init(&priv->wait, 0, 0);
-
-  /* The wait semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  sem_setprotocol(&priv->wait, SEM_PRIO_NONE);
-
-  /* Allocate a watchdog timer */
-
-  priv->timeout = wd_create();
-  DEBUGASSERT(priv->timeout != 0);
-
-  /* Attach Interrupt Handler */
-
-  irq_attach(priv->irqid, kinetis_i2c_interrupt, priv);
-
-  /* Enable Interrupt Handler */
-
-  up_enable_irq(priv->irqid);
-
-  /* Install our operations */
-
-  priv->dev.ops = &g_i2c_ops;
   return &priv->dev;
+
+errout:
+  leave_critical_section(flags);
+  return NULL;
+
 }
 
 /****************************************************************************
@@ -1102,13 +1397,32 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
 int kinetis_i2cbus_uninitialize(struct i2c_master_s *dev)
 {
   struct kinetis_i2cdev_s *priv = (struct kinetis_i2cdev_s *)dev;
+  irqstate_t flags;
 
   DEBUGASSERT(priv != NULL);
 
-  kinetis_i2c_putreg(priv, 0, KINETIS_I2C_C1_OFFSET);
+  /* Decrement reference count and check for underflow */
 
-  up_disable_irq(priv->irqid);
-  irq_detach(priv->irqid);
+  if (priv->refs == 0)
+    {
+      return ERROR;
+    }
+
+  flags = enter_critical_section();
+
+  if (--priv->refs)
+    {
+      leave_critical_section(flags);
+      return OK;
+    }
+
+  leave_critical_section(flags);
+
+  /* Disable power and other HW resource (GPIO's) */
+
+  kinetis_i2c_deinit(priv);
+  kinetis_i2c_sem_destroy(priv);
+  wd_delete(priv->timeout);
   return OK;
 }
 
