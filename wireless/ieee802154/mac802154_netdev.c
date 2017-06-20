@@ -677,27 +677,6 @@ static int macnet_txpoll_callback(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Name: macnet_txpoll_process
- *
- * Description:
- *   Perform the periodic poll.  This may be called either from watchdog
- *   timer logic or from the worker thread, depending upon the configuration.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static inline void macnet_txpoll_process(FAR struct macnet_driver_s *priv)
-{
-}
-
-/****************************************************************************
  * Name: macnet_txpoll_work
  *
  * Description:
@@ -792,20 +771,20 @@ static int macnet_ifup(FAR struct net_driver_s *dev)
   ret = macnet_advertise(dev);
   if (ret >= 0)
     {
-      ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-            dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-            dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-            dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+      wlinfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+             dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
+             dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
+             dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-      ninfo("             Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
-            dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
-            dev->d_mac.ieee802154.u8[2], dev->d_mac.ieee802154.u8[3],
-            dev->d_mac.ieee802154.u8[4], dev->d_mac.ieee802154.u8[5],
-            dev->d_mac.ieee802154.u8[6], dev->d_mac.ieee802154.u8[7]);
+      wlinfo("             Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
+             dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
+             dev->d_mac.ieee802154.u8[2], dev->d_mac.ieee802154.u8[3],
+             dev->d_mac.ieee802154.u8[4], dev->d_mac.ieee802154.u8[5],
+             dev->d_mac.ieee802154.u8[6], dev->d_mac.ieee802154.u8[7]);
 #else
-      ninfo("             Node: %02x:%02x\n",
-            dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1]);
+      wlinfo("             Node: %02x:%02x\n",
+             dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1]);
 #endif
 
       /* Set and activate a timer process */
@@ -884,6 +863,8 @@ static void macnet_txavail_work(FAR void *arg)
 {
   FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)arg;
 
+  wlinfo("ifup=%u\n", priv->md_bifup);
+
   /* Lock the network and serialize driver operations if necessary.
    * NOTE: Serialization is only required in the case where the driver work
    * is performed on an LP worker thread and where more than one LP worker
@@ -928,6 +909,8 @@ static void macnet_txavail_work(FAR void *arg)
 static int macnet_txavail(FAR struct net_driver_s *dev)
 {
   FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)dev->d_private;
+
+  wlinfo("Available=%u\n", work_available(&priv->md_pollwork));
 
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
@@ -1110,6 +1093,8 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
   FAR struct macnet_driver_s *priv;
   FAR struct iob_s *iob;
   int ret;
+
+  wlinfo("Received framelist\n");
 
   DEBUGASSERT(netdev != NULL && netdev->i_dev.d_private != NULL);
   priv = (FAR struct macnet_driver_s *)netdev->i_dev.d_private;
