@@ -130,6 +130,7 @@ static void mac802154_resetqueues(FAR struct ieee802154_privmac_s *priv)
     {
       sq_addlast((FAR sq_entry_t *)&priv->txdesc_pool[i], &priv->txdesc_queue);
     }
+
   sem_init(&priv->txdesc_sem, 0, CONFIG_MAC802154_NTXDESC);
 
   /* Initialize the notifcation allocation pool */

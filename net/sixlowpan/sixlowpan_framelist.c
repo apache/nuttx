@@ -550,7 +550,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
           /* And submit the frame to the MAC */
 
-          ninfo("Submitting framelist\n");
+          ninfo("Submitting frame\n");
           ret = sixlowpan_frame_submit(ieee, &meta, iob);
           if (ret < 0)
             {

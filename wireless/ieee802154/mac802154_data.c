@@ -340,7 +340,10 @@ int mac802154_req_data(MACHANDLE mac,
   return OK;
 
 errout_with_txdesc:
-  /* REVISIT: Free TX descriptor, but preserve the IOB. */
+  /* Free TX the descriptor, but preserve the IOB. */
+
+  txdesc->frame = NULL;
+  mac802154_txdesc_free(priv, txdesc);
 
 errout_with_sem:
   mac802154_givesem(&priv->exclsem);
