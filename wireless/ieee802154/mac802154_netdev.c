@@ -405,6 +405,7 @@ static int macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
 
   if (!priv->md_bifup)
     {
+      wlwarn("WARNING: Dropped... Network is down\n");
       return -ENETDOWN;
     }
 
@@ -421,6 +422,8 @@ static int macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
   if ((iob->io_data[iob->io_offset] & SIXLOWPAN_DISPATCH_NALP_MASK) ==
       SIXLOWPAN_DISPATCH_NALP)
     {
+      wlwarn("WARNING: Dropped... Not a 6LoWPAN frame: %02x\n",
+             iob->io_data[iob->io_offset]);
       return -EINVAL;
     }
 
@@ -1114,9 +1117,17 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
       framelist     = iob->io_flink;
       iob->io_flink = NULL;
 
-      /* Transfer the frame to the MAC */
+      /* Transfer the frame to the MAC.  mac802154_req_data will return
+       * -EINTR if a signal is received during certain phases of processing.
+       * In this context we just need to ignore -EINTR errors and try again.
+       */
 
-      ret = mac802154_req_data(priv->md_mac, meta, iob);
+      do
+        {
+          ret = mac802154_req_data(priv->md_mac, meta, iob);
+        }
+      while (ret == -EINTR);
+
       if (ret < 0)
         {
           wlerr("ERROR: mac802154_req_data failed: %d\n", ret);
