@@ -147,10 +147,10 @@ int mac802154_req_data(MACHANDLE mac,
   ret = mac802154_takesem(&priv->exclsem, true);
   if (ret < 0)
     {
-      /* Should only fail it interrupted by a signal */
+      /* Should only fail if interrupted by a signal */
 
       wlwarn("WARNING: mac802154_takesem failed: %d", ret);
-      goto errout_with_sem;
+      return ret;
     }
 
   /* If both destination and source addressing information is present, the MAC
@@ -235,8 +235,12 @@ int mac802154_req_data(MACHANDLE mac,
   ret = mac802154_txdesc_alloc(priv, &txdesc, true);
   if (ret < 0)
     {
+      /* Should only fail if interrupted by a signal while re-acquiring
+       * exclsem.  So the lock is not held if a failure is returned.
+       */
+
       wlwarn("WARNING: mac802154_txdesc_alloc failed: %d", ret);
-      goto errout_with_sem;
+      return ret;
     }
 
   txdesc->conf->handle = meta->msdu_handle;
@@ -301,7 +305,6 @@ int mac802154_req_data(MACHANDLE mac,
             }
           else
             {
-              mac802154_givesem(&priv->exclsem);
               ret = -EINVAL;
               goto errout_with_sem;
             }
