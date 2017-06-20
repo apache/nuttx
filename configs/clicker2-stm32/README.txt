@@ -460,8 +460,7 @@ Configurations
 
            telnetd_daemon: ERROR: socket failure: 106
 
-       2017-06-20:  I am get EINTR errors from the MAC layer when trying the
-         udpclient tries to send messages.  Still under investigation.
+       2017-06-20:  Debug underway.. not yet functional.
 
   nsh:
 
