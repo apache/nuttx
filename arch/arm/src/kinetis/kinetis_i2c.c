@@ -150,6 +150,7 @@ static inline void kinetis_i2c_sem_post(struct kinetis_i2cdev_s *priv);
 /* Signal Helper */
 
 static inline void kinetis_i2c_endwait(struct kinetis_i2cdev_s *priv);
+static inline void kinetis_i2c_wait(struct kinetis_i2cdev_s *priv);
 
 /* I2C helpers */
 
@@ -366,6 +367,19 @@ static inline void kinetis_i2c_sem_wait(FAR struct kinetis_i2cdev_s *priv)
 static inline void kinetis_i2c_sem_post(struct kinetis_i2cdev_s *priv)
 {
   sem_post(&priv->mutex);
+}
+
+/************************************************************************************
+ * Name: kinetis_i2c_wait
+ *
+ * Description:
+ *   Wait on the signaling semaphore
+ *
+ ************************************************************************************/
+
+static inline void kinetis_i2c_wait(struct kinetis_i2cdev_s *priv)
+{
+  sem_wait(&priv->wait);
 }
 
 /************************************************************************************
@@ -1160,7 +1174,7 @@ static int kinetis_i2c_transfer(struct i2c_master_s *dev,
 
       wd_start(priv->timeout, I2C_TIMEOUT, kinetis_i2c_timeout, 1,
                (uint32_t) priv);
-      kinetis_i2c_endwait(priv);
+      kinetis_i2c_wait(priv);
 
       wd_cancel(priv->timeout);
 
