@@ -82,7 +82,8 @@ Optimal 6LoWPAN Configuration
    fe80 0000 0000 0000  0000 00ff fe00 MMMM 2-byte short address IEEE 48-bit MAC
    fe80 0000 0000 0000  NNNN NNNN NNNN NNNN 8-byte extended address IEEE EUI-64
 
-4. Compressable port numbers in the rangs 0xf0b0-0xf0bf
+4. To be compressable, port numbers must be in the range 0xf0b0-0xf0bf,
+   hexadecimal.  That is 61616-61631 decimal.
 
 5. IOBs: Must be big enough to hold one IEEE802.15.4 frame (CONFIG_NET_6LOWPAN_FRAMELEN,
    typically 127).  There must be enough IOBs to decompose the largest IPv6

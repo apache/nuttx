@@ -46,7 +46,14 @@ config IEEE802154_NTXDESC
 	default 3
 	---help---
 		Configured number of Tx descriptors. Default: 3
-		
+
+		When used with 6LoWPAN, the descriptor allocator runs on a work
+		and must avoid blocking if possible.  Each frame will be provided in
+		an IOB and each TX frame will need a TX descriptor.  So the safe
+		thing to do is set CONFIG_IEEE802154_NTXDESC to CONFIG_IOB_NBUFFERS.
+		Then there should be the maximum pre-allocated buffers for each
+		possible TX frame.
+
 config IEEE802154_IND_PREALLOC
 	int "Number of pre-allocated meta-data structures"
 	default 20
@@ -75,7 +82,7 @@ config IEEE802154_IND_IRQRESERVE
 		Non-interrupt logic will also first attempt to allocate from the
 		general, pre-allocated structure pool.  If that fails, it will
 		dynamically allocate the meta data structure with an additional cost in performance.
-		
+
 config IEEE802154_MACDEV
 	bool "Character driver for IEEE 802.15.4 MAC layer"
 	default n

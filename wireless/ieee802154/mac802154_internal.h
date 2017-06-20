@@ -127,15 +127,30 @@
 #define GETNET16(ptr,index) \
   ((((uint16_t)((ptr)[(index) + 1])) << 8) | ((uint16_t)(((ptr)[index]))))
 
-/* PUT 16-bit data:  source in host order, result in newtwork order */
+/* Set 16-bit data:  source in host order, result in network order. */
 
-#define PUTHOST16(ptr,index,value) \
+#define IEEE802154_SETBITS_U16(ptr,index,value) \
   do \
     { \
-      (ptr)[index]     = ((uint16_t)(value) >> 8) & 0xff; \
-      (ptr)[index + 1] = (uint16_t)(value) & 0xff; \
+      (ptr)[index]      |= (uint16_t)(value) & 0xff; \
+      (ptr)[index + 1]  |= ((uint16_t)(value) >> 8) & 0xff; \
     } \
   while(0)
+
+#define IEEE802154_SETFTYPE(ptr, index, ftype) \
+  IEEE802154_SETBITS_U16(ptr, index, (ftype << IEEE802154_FRAMECTRL_SHIFT_FTYPE))
+
+#define IEEE802154_SETACKREQ(ptr, index) \
+  IEEE802154_SETBITS_U16(ptr, index, IEEE802154_FRAMECTRL_ACKREQ)
+
+#define IEEE802154_SETDADDRMODE(ptr, index, mode) \
+  IEEE802154_SETBITS_U16(ptr, index, (mode << IEEE802154_FRAMECTRL_SHIFT_DADDR))
+
+#define IEEE802154_SETSADDRMODE(ptr, index, mode) \
+  IEEE802154_SETBITS_U16(ptr, index, (mode << IEEE802154_FRAMECTRL_SHIFT_SADDR))
+
+#define IEEE802154_SETPANIDCOMP(ptr, index) \
+  IEEE802154_SETBITS_U16(ptr, index, IEEE802154_FRAMECTRL_PANIDCOMP)
 
 /* Configuration ************************************************************/
 /* If processing is not done at the interrupt level, then work queue support

@@ -224,6 +224,8 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 #endif
   int ret;
 
+  ninfo("buflen=%lu", (unsigned long)buflen);
+
   /* Initialize global data.  Locking the network guarantees that we have
    * exclusive use of the global values for intermediate calculations.
    */
@@ -442,6 +444,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
       /* Add the first frame to the IOB queue */
 
+      ninfo("Queuing frame io_len=%u io_offset=%u\n",
+            iob->io_len, iob->io_offset);
+
       qhead          = iob;
       qtail          = iob;
 
@@ -520,6 +525,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
           /* Add the next frame to the tail of the IOB queue */
 
+          ninfo("Queuing frame io_len=%u io_offset=%u\n",
+                iob->io_len, iob->io_offset);
+
           qtail->io_flink = iob;
           qtail           = iob;
 
@@ -542,6 +550,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
           /* And submit the frame to the MAC */
 
+          ninfo("Submitting frame\n");
           ret = sixlowpan_frame_submit(ieee, &meta, iob);
           if (ret < 0)
             {
@@ -577,6 +586,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
                        (FAR const uint8_t *)iob->io_data, iob->io_len);
 
       /* And submit the frame to the MAC */
+
+      ninfo("Submitting frame length=%u io_offset=%u\n",
+            iob->io_len, iob->io_offset);
 
       ret = sixlowpan_frame_submit(ieee, &meta, iob);
       if (ret < 0)

@@ -82,12 +82,15 @@ int mac802154_req_data(MACHANDLE mac,
   uint8_t mhr_len = 3;
   int ret;
 
+  wlinfo("Received frame io_len=%u io_offset=%u\n",
+         frame->io_offset, frame->io_len);
+
   /* Check the required frame size */
 
   if (frame->io_len > IEEE802154_MAX_PHY_PACKET_SIZE)
-  {
-    return -E2BIG;
-  }
+    {
+      return -E2BIG;
+    }
 
   /* Cast the first two bytes of the IOB to a uint16_t frame control field */
 
@@ -147,6 +150,9 @@ int mac802154_req_data(MACHANDLE mac,
   ret = mac802154_takesem(&priv->exclsem, true);
   if (ret < 0)
     {
+      /* Should only fail if interrupted by a signal */
+
+      wlwarn("WARNING: mac802154_takesem failed: %d\n", ret);
       return ret;
     }
 
@@ -201,7 +207,8 @@ int mac802154_req_data(MACHANDLE mac,
 
       if (priv->devmode != IEEE802154_DEVMODE_PANCOORD)
         {
-          return -EINVAL;
+          ret = -EINVAL;
+          goto errout_with_sem;
         }
     }
 
@@ -222,17 +229,31 @@ int mac802154_req_data(MACHANDLE mac,
    * here that created the header
    */
 
+  wlinfo("mhr_len=%u\n", mhr_len);
   DEBUGASSERT(mhr_len == frame->io_offset);
-
-  frame->io_offset = 0; /* Set the offset to 0 to include the header */
 
   /* Allocate the txdesc, waiting if necessary, allow interruptions */
 
   ret = mac802154_txdesc_alloc(priv, &txdesc, true);
   if (ret < 0)
     {
+      /* Should only fail if interrupted by a signal while re-acquiring
+       * exclsem.  So the lock is not held if a failure is returned.
+       */
+
+      wlwarn("WARNING: mac802154_txdesc_alloc failed: %d\n", ret);
       return ret;
     }
+
+   /* Set the offset to 0 to include the header ( we do not want to
+    * modify the frame until AFTER the last place that -EINTR could
+    * be returned and could generate a retry.  Subsequent error returns
+    * are fatal and no retry should occur.
+    */
+
+  frame->io_offset = 0;
+
+  /* Then initialize the TX descriptor */
 
   txdesc->conf->handle = meta->msdu_handle;
   txdesc->frame = frame;
@@ -259,11 +280,8 @@ int mac802154_req_data(MACHANDLE mac,
        * don't have to try and kick-off any transmission here.
        */
 
-      /* We no longer need to have the MAC layer locked. */
-
-      mac802154_givesem(&priv->exclsem);
-
-      return -ENOTSUP;
+      ret = -ENOTSUP;
+      goto errout_with_txdesc;
     }
   else
     {
@@ -299,8 +317,8 @@ int mac802154_req_data(MACHANDLE mac,
             }
           else
             {
-              mac802154_givesem(&priv->exclsem);
-              return -EINVAL;
+              ret = -EINVAL;
+              goto errout_with_txdesc;
             }
         }
       else
@@ -320,6 +338,16 @@ int mac802154_req_data(MACHANDLE mac,
     }
 
   return OK;
+
+errout_with_txdesc:
+  /* Free TX the descriptor, but preserve the IOB. */
+
+  txdesc->frame = NULL;
+  mac802154_txdesc_free(priv, txdesc);
+
+errout_with_sem:
+  mac802154_givesem(&priv->exclsem);
+  return ret;
 }
 
 /****************************************************************************

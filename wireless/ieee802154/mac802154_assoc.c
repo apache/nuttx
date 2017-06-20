@@ -86,7 +86,6 @@ int mac802154_req_associate(MACHANDLE mac,
     (FAR struct ieee802154_privmac_s *)mac;
   FAR struct ieee802154_txdesc_s *txdesc;
   FAR struct iob_s *iob;
-  FAR uint16_t *u16;
   bool rxonidle;
   int ret;
 
@@ -177,12 +176,13 @@ int mac802154_req_associate(MACHANDLE mac,
 
   /* Get a uin16_t reference to the first two bytes. ie frame control field */
 
-  u16 = (FAR uint16_t *)&iob->io_data[0];
+  iob->io_data[0] = 0;
+  iob->io_data[1] = 0;
 
-  *u16 = (IEEE802154_FRAME_COMMAND << IEEE802154_FRAMECTRL_SHIFT_FTYPE);
-  *u16 |= IEEE802154_FRAMECTRL_ACKREQ;
-  *u16 |= (priv->coordaddr.mode << IEEE802154_FRAMECTRL_SHIFT_DADDR);
-  *u16 |= (IEEE802154_ADDRMODE_EXTENDED << IEEE802154_FRAMECTRL_SHIFT_SADDR);
+  IEEE802154_SETACKREQ(iob->io_data, 0);
+  IEEE802154_SETFTYPE(iob->io_data, 0, IEEE802154_FRAME_COMMAND);
+  IEEE802154_SETDADDRMODE(iob->io_data, 0, priv->coordaddr.mode);
+  IEEE802154_SETSADDRMODE(iob->io_data, 0, IEEE802154_ADDRMODE_EXTENDED);
 
   iob->io_len = 2;
 
@@ -281,7 +281,6 @@ int mac802154_resp_associate(MACHANDLE mac,
     (FAR struct ieee802154_privmac_s *)mac;
   FAR struct ieee802154_txdesc_s *txdesc;
   FAR struct iob_s *iob;
-  FAR uint16_t *u16;
   int ret;
 
   /* Allocate an IOB to put the frame in */
@@ -294,10 +293,6 @@ int mac802154_resp_associate(MACHANDLE mac,
   iob->io_offset = 0;
   iob->io_pktlen = 0;
 
-  /* Get a uin16_t reference to the first two bytes. ie frame control field */
-
-  u16 = (FAR uint16_t *)&iob->io_data[0];
-
   /* The Destination Addressing Mode and Source Addressing Mode fields shall
    * each be set to indicate extended addressing.
    *
@@ -307,12 +302,13 @@ int mac802154_resp_associate(MACHANDLE mac,
    * The PAN ID Compression field shall be set to one. [1] pg.  69
    */
 
-  *u16 = (IEEE802154_FRAME_COMMAND << IEEE802154_FRAMECTRL_SHIFT_FTYPE);
-  *u16 |= IEEE802154_FRAMECTRL_ACKREQ;
-  *u16 |= IEEE802154_FRAMECTRL_PANIDCOMP;
-  *u16 |= (IEEE802154_ADDRMODE_EXTENDED << IEEE802154_FRAMECTRL_SHIFT_DADDR);
-  *u16 |= (IEEE802154_ADDRMODE_EXTENDED << IEEE802154_FRAMECTRL_SHIFT_SADDR);
-
+  iob->io_data[0] = 0;
+  iob->io_data[1] = 0;
+  IEEE802154_SETACKREQ(iob->io_data, 0);
+  IEEE802154_SETPANIDCOMP(iob->io_data, 0);
+  IEEE802154_SETFTYPE(iob->io_data, 0, IEEE802154_FRAME_COMMAND);
+  IEEE802154_SETDADDRMODE(iob->io_data, 0, IEEE802154_ADDRMODE_EXTENDED);
+  IEEE802154_SETSADDRMODE(iob->io_data, 0, IEEE802154_ADDRMODE_EXTENDED);
   iob->io_len = 2;
 
   /* Each time a data or a MAC command frame is generated, the MAC sublayer

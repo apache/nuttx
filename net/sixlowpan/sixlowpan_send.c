@@ -182,7 +182,7 @@ static uint16_t send_interrupt(FAR struct net_driver_s *dev,
 
   if ((flags & NETDEV_DOWN) != 0)
     {
-      ninfo("Device is down\n");
+      nwarn("WARNING: Device is down\n");
       sinfo->s_result = -ENOTCONN;
       goto end_wait;
     }
@@ -279,6 +279,8 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
 {
   struct sixlowpan_send_s sinfo;
 
+  ninfo("len=%lu timeout=%u\n", (unsigned long)len, timeout);
+
   /* Initialize the send state structure */
 
   sem_init(&sinfo.s_waitsem, 0, 0);
@@ -301,16 +303,16 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
        * device related events, no connect-related events.
        */
 
-      sinfo.s_cb =  devif_callback_alloc(dev, list);
+      sinfo.s_cb = devif_callback_alloc(dev, list);
       if (sinfo.s_cb != NULL)
         {
           int ret;
 
           /* Set up the callback in the connection */
 
-          sinfo.s_cb->flags   = (NETDEV_DOWN | WPAN_POLL);
-          sinfo.s_cb->priv    = (FAR void *)&sinfo;
-          sinfo.s_cb->event   = send_interrupt;
+          sinfo.s_cb->flags = (NETDEV_DOWN | WPAN_POLL);
+          sinfo.s_cb->priv  = (FAR void *)&sinfo;
+          sinfo.s_cb->event = send_interrupt;
 
           /* Notify the IEEE802.15.4 MAC that we have data to send. */
 
@@ -321,6 +323,8 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
            * may be disabled!  They will be re-enabled while the task sleeps and
            * automatically re-enabled when the task restarts.
            */
+
+          ninfo("Wait for send complete\n");
 
           ret = net_lockedwait(&sinfo.s_waitsem);
           if (ret < 0)
