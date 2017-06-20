@@ -160,6 +160,24 @@
 #define IEEE802154_FRAMECTRL_SHIFT_VERSION    12 /* Source addressing mode, bits 12-13 */
 #define IEEE802154_FRAMECTRL_SHIFT_SADDR      14 /* Source addressing mode, bits 14-15 */
 
+/* Superframe Specification field masks, 2 bytes
+ * Seee IEEE 802.15.4/2011 5.2.2.1.2 page 62
+ */
+
+#define IEEE802154_SFSPEC_BEACONORDER 0x000F  /* Beacon order, bits 0-3 */
+#define IEEE802154_SFSPEC_SFORDER     0x00F0  /* Superframe Order, bit 4-7 */
+#define IEEE802154_SFSPEC_FINCAPSLOT  0x0F00  /* Final CAP Slot, bit 8-11 */
+#define IEEE802154_SFSPEC_BLE         0x1000  /* Battery Life Ext, bit 12 */
+#define IEEE802154_SFSPEC_PANCOORD    0x4000  /* PAN Coordinator, bit 14 */
+#define IEEE802154_SFSPEC_ASSOCPERMIT 0x8000  /* Association Permit, bit 15 */
+
+#define IEEE802154_SFSPEC_SHIFT_BEACONORDER 0  /* Beacon order, bits 0-3 */
+#define IEEE802154_SFSPEC_SHIFT_SFORDER     4  /* Superframe order, bit 4-7 */
+#define IEEE802154_SFSPEC_SHIFT_FINCAPSLOT  8  /* Final CAP Slot, bit 8-11 */
+#define IEEE802154_SFSPEC_SHIFT_BLE         12 /* Battery Life Ext, bit 12 */
+#define IEEE802154_SFSPEC_SHIFT_PANCOORD    14 /* PAN Coordinator, bit 14 */
+#define IEEE802154_SFSPEC_SHIFT_ASSOCPERMIT 15 /* Association Permit, bit 15 */
+
 /* Capability Information Bitfield
  *
  */
@@ -202,7 +220,6 @@
 
 #define IEEE802154_MAX_MPDU_UNSEC_OVERHEAD  \
         (IEEE802154_MAX_UNSEC_MHR_OVERHEAD + IEEE802154_MFR_LENGTH)
-
 
 #define IEEE802154_MAX_SAFE_MAC_PAYLOAD_SIZE \
         (IEEE802154_MAX_PHY_PACKET_SIZE - IEEE802154_MAX_MPDU_UNSEC_OVERHEAD)
@@ -511,15 +528,15 @@ struct ieee802154_capability_info_s
                                    * 0=otherwise */
 };
 
-struct ieee802154_superframe_spec_s
+struct ieee802154_superframespec_s
 {
-  uint16_t beacon_order     : 4;  /* Transmission interval of beacon */
-  uint16_t superframe_order : 4;  /* Length of superframe */
-  uint16_t final_cap_slot   : 4;  /* Last slot utilized by CAP */
-  uint16_t ble              : 1;  /* Battery Life Extension (BLE) */
-  uint16_t reserved         : 1;  /* Reserved bit */
-  uint16_t pan_coordinator  : 1;  /* 1 if beacon sent by pan coordinator */
-  uint16_t assoc_permit     : 1;  /* 1 if coordinator is accepting associaton */
+  uint16_t beaconorder   : 4;  /* Transmission interval of beacon */
+  uint16_t sforder       : 4;  /* Length of active portion of superframe */
+  uint16_t final_capslot  : 4;  /* Last slot utilized by CAP */
+  uint16_t ble            : 1;  /* Battery Life Extension (BLE) */
+  uint16_t reserved       : 1;  /* Reserved bit */
+  uint16_t pancoord       : 1;  /* 1 if beacon sent by pan coordinator */
+  uint16_t assocpermit    : 1;  /* 1 if coordinator is accepting associaton */
 };
 
 struct ieee802154_pan_desc_s
@@ -533,7 +550,7 @@ struct ieee802154_pan_desc_s
 
   /* The superframe specifications received in the beacon frame */
 
-  struct ieee802154_superframe_spec_s superframe_spec;
+  struct ieee802154_superframespec_s superframespec;
 
   uint8_t gts_permit;       /* 0=No GTS requests allowed
                              * 1=GTS request allowed */
@@ -580,7 +597,7 @@ union ieee802154_macattr_u
   enum ieee802154_devmode_e devmode;
 
   bool is_assoc;
-  bool assoc_permit;
+  bool assocpermit;
   bool auto_req;
   bool batt_life_ext;
   bool gts_permit;
@@ -611,7 +628,7 @@ union ieee802154_macattr_u
   uint8_t beacon_order;
   uint32_t beacon_tx_time : 24;
 
-  uint8_t superframe_order;
+  uint8_t superframeorder;
 
   uint8_t bsn;
   uint8_t dsn;

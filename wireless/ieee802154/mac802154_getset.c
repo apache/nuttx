@@ -166,6 +166,13 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_attr_e attr,
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
+      case IEEE802154_ATTR_MAC_ASSOCIATION_PERMIT:
+        {
+          priv->sf_spec.assocpermit = attrval->mac.assocpermit;
+          priv->beaconupdate = true;
+          ret = IEEE802154_STATUS_SUCCESS;
+        }
+        break;
       default:
         {
           /* The attribute may be handled soley in the radio driver, so pass

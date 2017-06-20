@@ -86,15 +86,15 @@ int mac802154_req_reset(MACHANDLE mac, bool rst_pibattr)
 
   if (rst_pibattr)
     {
-      priv->isassoc = false;        /* Not associated with a PAN */
-      priv->trackingbeacon = false; /* Not tracking beacon by default */
-      priv->assocpermit = false;    /* Device (if coord) not accepting ssociation */
-      priv->autoreq = true;         /* Auto send data req if addr. in beacon */
-      priv->battlifeext = false;    /* BLE disabled */
-      priv->beacon_payload_len = 0; /* Beacon payload NULL */
-      priv->beaconorder = 15;       /* Non-beacon enabled network */
-      priv->superframeorder = 15;   /* Length of active portion of outgoing SF */
-      priv->beacon_txtime = 0;      /* Device never sent a beacon */
+      priv->isassoc = false;             /* Not associated with a PAN */
+      priv->trackingbeacon = false;      /* Not tracking beacon by default */
+      priv->sf_spec.assocpermit = false; /* Device (if coord) not accepting ssociation */
+      priv->autoreq = true;              /* Auto send data req if addr. in beacon */
+      priv->sf_spec.ble = false;         /* BLE disabled */
+      priv->beaconpayloadlength = 0;     /* Beacon payload NULL */
+      priv->sf_spec.beaconorder = 15;   /* Non-beacon enabled network */
+      priv->sf_spec.sforder = 15;       /* Length of active portion of outgoing SF */
+      priv->beacon_txtime = 0;           /* Device never sent a beacon */
 #warning Set BSN and DSN to random values!
       priv->bsn = 0;
       priv->dsn = 0;

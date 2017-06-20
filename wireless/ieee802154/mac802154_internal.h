@@ -127,13 +127,23 @@
 #define GETNET16(ptr,index) \
   ((((uint16_t)((ptr)[(index) + 1])) << 8) | ((uint16_t)(((ptr)[index]))))
 
-/* Set 16-bit data:  source in host order, result in network order. */
+/* PUT 16-bit data:  source in host order, result in network order */
+
+#define PUTHOST16(ptr,index,value) \
+  do \
+    { \
+      (ptr)[index]      = (uint16_t)(value) & 0xff; \
+      (ptr)[index + 1]  = ((uint16_t)(value) >> 8) & 0xff; \
+    } \
+  while(0)
+
+/* Set bit in 16-bit value:  source in host order, result in network order. */
 
 #define IEEE802154_SETBITS_U16(ptr,index,value) \
   do \
     { \
-      (ptr)[index]      |= (uint16_t)(value) & 0xff; \
-      (ptr)[index + 1]  |= ((uint16_t)(value) >> 8) & 0xff; \
+      (ptr)[index]     |= (uint16_t)(value) & 0xff; \
+      (ptr)[index + 1] |= ((uint16_t)(value) >> 8) & 0xff; \
     } \
   while(0)
 
@@ -151,6 +161,29 @@
 
 #define IEEE802154_SETPANIDCOMP(ptr, index) \
   IEEE802154_SETBITS_U16(ptr, index, IEEE802154_FRAMECTRL_PANIDCOMP)
+
+#define IEEE802154_SETVERSION(ptr, index, version) \
+  IEEE802154_SETBITS_U16(ptr, index, (version << IEEE802154_FRAMECTRL_SHIFT_VERSION))
+
+/* Helper macros for setting/receiving bits for superframe specification */
+
+#define IEEE802154_SETBEACONORDER(ptr, index, val) \
+  IEEE802154_SETBITS_U16(ptr, index, (val << IEEE802154_SFSPEC_SHIFT_BEACONORDER))
+
+#define IEEE802154_SETSFORDER(ptr, index, val) \
+  IEEE802154_SETBITS_U16(ptr, index, (val << IEEE802154_SFSPEC_SHIFT_SFORDER))
+
+#define IEEE802154_SETFINCAPSLOT(ptr, index, val) \
+  IEEE802154_SETBITS_U16(ptr, index, (val << IEEE802154_SFSPEC_SHIFT_FINCAPSLOT))
+
+#define IEEE802154_SETBLE(ptr, index) \
+  IEEE802154_SETBITS_U16(ptr, index, IEEE802154_SFSPEC_BLE)
+
+#define IEEE802154_SETPANCOORD(ptr, index) \
+  IEEE802154_SETBITS_U16(ptr, index, IEEE802154_SFSPEC_PANCOORD)
+
+#define IEEE802154_SETASSOCPERMIT(ptr, index) \
+  IEEE802154_SETBITS_U16(ptr, index, IEEE802154_SFSPEC_ASSOCPERMIT)
 
 /* Configuration ************************************************************/
 /* If processing is not done at the interrupt level, then work queue support
@@ -263,7 +296,6 @@ struct ieee802154_privmac_s
   sq_queue_t txdesc_queue;
   sq_queue_t txdone_queue;
 
-
   /* Support a singly linked list of transactions that will be sent using the
    * CSMA algorithm.  On a non-beacon enabled PAN, these transactions will be
    * sent whenever. On a beacon-enabled PAN, these transactions will be sent
@@ -308,6 +340,16 @@ struct ieee802154_privmac_s
 
   struct ieee802154_addr_s coordaddr;
 
+  /* Holds attributes pertaining to the superframe specification */ 
+ 
+  struct ieee802154_superframespec_s sf_spec; 
+ 
+  /* We use 2 beacon frame structures so that we can ping-pong between them 
+   * while updating the beacon 
+   */ 
+ 
+  struct ieee802154_beaconframe_s beaconframe[2]; 
+
   /* The maximum number of symbols to wait for an acknowledgement frame to
    * arrive following a transmitted data frame. [1] pg. 126
    *
@@ -335,15 +377,10 @@ struct ieee802154_privmac_s
 
   /* Contents of beacon payload */
 
-  uint8_t beacon_payload[IEEE802154_MAX_BEACON_PAYLOAD_LEN];
-  uint8_t beacon_payload_len;       /* Length of beacon payload */
-
-  uint8_t battlifeext_periods;      /* # of backoff periods during which rx is
-                                     * enabled after the IFS following beacon */
-
+  uint8_t beaconpayload[IEEE802154_MAX_BEACON_PAYLOAD_LEN];
+  uint8_t beaconpayloadlength;      /* Length of beacon payload */
   uint8_t bsn;                      /* Seq. num added to tx beacon frame */
   uint8_t dsn;                      /* Seq. num added to tx data or MAC frame */
-  uint8_t maxretries;               /* Max # of retries alloed after tx failure */
 
   /* The maximum time, in multiples of aBaseSuperframeDuration, a device shall
    * wait for a response command frame to be available following a request
@@ -358,27 +395,22 @@ struct ieee802154_privmac_s
 
   uint32_t tx_totaldur;
 
-  /* Start of 32-bit bitfield */
+  /* Start of 8-bit bitfield */
 
   uint32_t trackingbeacon     : 1;  /* Are we tracking the beacon */
   uint32_t isassoc            : 1;  /* Are we associated to the PAN */
-  uint32_t assocpermit        : 1;  /* Are we allowing assoc. as a coord. */
   uint32_t autoreq            : 1;  /* Automatically send data req. if addr
                                      * addr is in the beacon frame */
 
-  uint32_t battlifeext        : 1;  /* Is BLE enabled */
   uint32_t gtspermit          : 1;  /* Is PAN Coord. accepting GTS reqs. */
   uint32_t promisc            : 1;  /* Is promiscuous mode on? */
   uint32_t rngsupport         : 1;  /* Does MAC sublayer support ranging */
   uint32_t sec_enabled        : 1;  /* Does MAC sublayer have security en. */
   uint32_t timestamp_support  : 1;  /* Does MAC layer supports timestamping */
 
-                                    /* 2 available bits */
+  /* End of 8-bit bitfield */
 
-  uint32_t beaconorder        : 4;  /* Freq. that beacon is transmitted */
-
-  uint32_t superframeorder    : 4;  /* Length of active portion of outgoing
-                                     * superframe, including the beacon */
+  /* Start of 32-bit bitfield */
 
   /* The offset, measured is symbols, between the symbol boundary at which the
    * MLME captures the timestamp of each transmitted and received frame, and
@@ -387,6 +419,15 @@ struct ieee802154_privmac_s
    */
 
   uint32_t sync_symboffset    : 12;
+
+  uint32_t txctrl_activedur   : 17; /* Duration for which tx is permitted to
+                                       * be active */
+  uint32_t txctrl_pausedur    : 1;  /* Duration after tx before another tx is
+                                     * permitted. 0=2000, 1= 10000 */
+
+  /* What type of device is this node acting as */
+
+  enum ieee802154_devmode_e devmode : 2;
 
   /* End of 32-bit bitfield */
 
@@ -398,23 +439,14 @@ struct ieee802154_privmac_s
 
   /* End of 32-bit bitfield */
 
-  /* Start of 32-bit bitfield */
+  /* Start of 8-bit bitfield */
 
-  uint32_t txctrl_activedur   : 17; /* Duration for which tx is permitted to
-                                       * be active */
-  uint32_t txctrl_pausedur    : 1;  /* Duration after tx before another tx is
-                                     * permitted. 0=2000, 1= 10000 */
-
-  /* What type of device is this node acting as */
-
-  enum ieee802154_devmode_e devmode : 2;
-
-  uint32_t max_csmabackoffs   : 3;  /* Max num backoffs for CSMA algorithm
+  uint8_t bf_ind              : 1;  /* Ping-pong index for beacon frame */
+  uint8_t beaconupdate        : 1;  /* Does the beacon frame need to be updated */
+  uint8_t max_csmabackoffs    : 3;  /* Max num backoffs for CSMA algorithm
                                      * before declaring ch access failure */
-
-                                    /* 9-bits remaining */
-
-  /* End of 32-bit bitfield. */
+  uint8_t maxretries          : 3;  /* Max # of retries allowed after tx fail */
+  /* End of 8-bit bitfield. */
 
   /* TODO: Add Security-related MAC PIB attributes */
 };
@@ -495,5 +527,6 @@ void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
                              enum ieee802154_addrmode_e srcmode,
                              FAR struct ieee802154_txdesc_s *txdesc);
 
+void mac802154_updatebeacon(FAR struct ieee802154_privmac_s *priv);
 
 #endif /* __WIRELESS_IEEE802154__MAC802154_INTERNAL_H */

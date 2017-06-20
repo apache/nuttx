@@ -89,6 +89,18 @@ struct ieee802154_txdesc_s
   /* TODO: Add slotting information for GTS transactions */
 };
 
+struct ieee802154_beaconframe_s
+{
+  uint8_t bf_data[IEEE802154_MAX_PHY_PACKET_SIZE];
+  uint8_t bf_len;
+  uint8_t bf_offset; 
+};
+
+enum ieee802154_sfevent_e
+{
+  IEEE802154_SFEVENT_ENDOFACTIVE,
+};
+
 /* IEEE802.15.4 Radio Interface Operations **********************************/
 
 struct ieee802154_radiocb_s
@@ -99,6 +111,8 @@ struct ieee802154_radiocb_s
              FAR struct ieee802154_txdesc_s *tx_desc);
   CODE void (*rxframe) (FAR const struct ieee802154_radiocb_s *radiocb,
              FAR struct ieee802154_data_ind_s *ind);
+  CODE void (*sfevent) (FAR const struct ieee802154_radiocb_s *radiocb,
+             enum ieee802154_sfevent_e sfevent);
 };
 
 struct ieee802154_radio_s
@@ -119,6 +133,12 @@ struct ieee802154_radio_s
   CODE int (*rxenable) (FAR struct ieee802154_radio_s *radio, bool enable);
   CODE int (*req_rxenable)(FAR struct ieee802154_radio_s *radio,
              FAR struct ieee802154_rxenable_req_s *req);
+  CODE int (*beaconstart)(FAR struct ieee802154_radio_s *radio,
+             FAR const struct ieee802154_superframespec_s *sf_spec,
+             FAR struct ieee802154_beaconframe_s *beacon);
+  CODE int (*beaconupdate)(FAR struct ieee802154_radio_s *radio,
+             FAR struct ieee802154_beaconframe_s *beacon);
+  CODE int (*beaconstop)(FAR struct ieee802154_radio_s *radio);
 };
 
 #ifdef __cplusplus

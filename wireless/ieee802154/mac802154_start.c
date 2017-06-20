@@ -101,13 +101,26 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
   priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_PANID,
                         (FAR const union ieee802154_attr_u *)req->panid);
 
-  /* Set the radio attributes */
+  /* Tell the radio layer to set the channel number and channel page */
+
   priv->radio->set_attr(priv->radio, IEEE802154_ATTR_PHY_CURRENT_CHANNEL,
                         (FAR const union ieee802154_attr_u *)&req->chnum);
-
   priv->radio->set_attr(priv->radio, IEEE802154_ATTR_PHY_CURRENT_PAGE,
                         (FAR const union ieee802154_attr_u *)&req->chpage);
 
+  /* The address used in the Source Address field of the beacon frame shall
+   * contain the value of macExtendedAddress if macShortAddress is equal to
+   * 0xfffe or macShortAddress otherwise. [1] pg. 32
+   */
+  
+  if (IEEE802154_SADDRCMP(priv->addr.saddr, &IEEE802154_SADDR_BCAST))
+    {
+      priv->addr.mode = IEEE802154_ADDRMODE_EXTENDED;
+    }
+  else
+    {
+      priv->addr.mode = IEEE802154_ADDRMODE_SHORT;
+    }
 
   /* Set the beacon order */
 
@@ -117,11 +130,11 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
       goto errout;
     }
 
-  priv->beaconorder = req->beaconorder;
+  priv->sf_spec.beaconorder = req->beaconorder;
 
   /* The value of macSuperframeOrder shall be ignored if macBeaconOrder = 15. pg. 19 */
 
-  if (priv->beaconorder < 15)
+  if (priv->sf_spec.beaconorder < 15)
     {
       /* Set the superframe order */
 
@@ -131,7 +144,7 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
           goto errout;
         }
 
-      priv->superframeorder = req->superframeorder;
+      priv->sf_spec.sforder = req->superframeorder;
     }
 
   if (req->pancoord)
@@ -143,18 +156,44 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
       priv->devmode = IEEE802154_DEVMODE_COORD;
     }
 
- /* If the BeaconOrder parameter is less than 15, the MLME sets macBattLifeExt to
-  * the value of the BatteryLifeExtension parameter. If the BeaconOrder parameter
-  * equals 15, the value of the BatteryLifeExtension parameter is ignored.
-  * [1] pg. 106
-  */
+  priv->sf_spec.pancoord = req->pancoord;
 
-  if (priv->beaconorder < 15)
+  if (priv->sf_spec.beaconorder < 15)
     {
-      priv->battlifeext = req->battlifeext;
+      /* If the BeaconOrder parameter is less than 15, the MLME sets macBattLifeExt to
+       * the value of the BatteryLifeExtension parameter. If the BeaconOrder parameter
+       * equals 15, the value of the BatteryLifeExtension parameter is ignored.
+       * [1] pg. 106
+       */
 
-      /* TODO: Finish starting beacon enabled network */
-      return -ENOTTY;
+      priv->sf_spec.ble = req->battlifeext;
+
+      /* For now we just set the CAP Slot to 15 */
+      
+      priv->sf_spec.final_capslot = 15;
+
+      /* If the PAN coordinator parameter is set to TRUE, the MLME ignores the
+       * StartTime parameter and begins beacon transmissions immediately.
+       */
+
+      if (req->pancoord)
+        {
+          /* Update the beacon frame to start sending */
+
+          mac802154_updatebeacon(priv);
+
+          /* Tell the radio to start transmitting beacon frames */
+
+          priv->radio->beaconstart(priv->radio, &priv->sf_spec,
+                                   &priv->beaconframe[priv->bf_ind]);
+        }
+      else
+        {
+          /* TODO: Finish non-PAN coordinator delayed start */
+
+          ret = -ENOTTY;
+          goto errout;
+        }
     }
 
   mac802154_givesem(&priv->exclsem);
