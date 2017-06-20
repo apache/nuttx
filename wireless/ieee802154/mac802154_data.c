@@ -83,7 +83,7 @@ int mac802154_req_data(MACHANDLE mac,
   int ret;
 
   wlinfo("Received frame io_len=%u io_offset=%u\n",
-         frame->io_offset, frame->io_len);
+         frame->io_len, frame->io_offset);
 
   /* Check the required frame size */
 
