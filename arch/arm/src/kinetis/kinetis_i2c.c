@@ -1403,26 +1403,26 @@ int kinetis_i2cbus_uninitialize(struct i2c_master_s *dev)
 
   /* Decrement reference count and check for underflow */
 
-   if (priv->refs == 0)
-     {
-       return ERROR;
-     }
+  if (priv->refs == 0)
+    {
+      return ERROR;
+    }
 
-   flags = enter_critical_section();
+  flags = enter_critical_section();
 
-   if (--priv->refs)
-     {
-       leave_critical_section(flags);
-       return OK;
-     }
+  if (--priv->refs)
+    {
+      leave_critical_section(flags);
+      return OK;
+    }
 
-   leave_critical_section(flags);
+  leave_critical_section(flags);
 
-   /* Disable power and other HW resource (GPIO's) */
+  /* Disable power and other HW resource (GPIO's) */
 
-   kinetis_i2c_deinit(priv);
-   kinetis_i2c_sem_destroy(priv);
-   wd_delete(priv->timeout);
+  kinetis_i2c_deinit(priv);
+  kinetis_i2c_sem_destroy(priv);
+  wd_delete(priv->timeout);
   return OK;
 }
 
