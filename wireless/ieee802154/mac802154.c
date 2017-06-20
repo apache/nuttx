@@ -169,7 +169,6 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
    */
 
   ret = sem_trywait(&priv->txdesc_sem);
-
   if (ret == OK)
     {
       *txdesc = (FAR struct ieee802154_txdesc_s *)sq_remfirst(&priv->txdesc_queue);
@@ -228,7 +227,6 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
     }
 
   (*txdesc)->conf = &notif->u.dataconf;
-
   return OK;
 }
 

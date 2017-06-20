@@ -447,7 +447,7 @@ Configurations
        The ifconfig command will show the IP address of the server.  Then on
        the client node use this IP address to start the client:
 
-         nsh> udpserver <server-ip> &
+         nsh> udpclient <server-ip> &
 
        Where <server-ip> is the IP address of the server that you got above.
        NOTE: There is no way to stop the UDP test once it has been started
@@ -455,13 +455,13 @@ Configurations
 
     STATUS:
        2017-06-19:  The Telnet Daemon does not start.  This is simply because
-         the daemon is started too early in the sequence... befor the network
+         the daemon is started too early in the sequence... before the network
          has been brought up:
 
            telnetd_daemon: ERROR: socket failure: 106
 
-         Basic network bring-up sequence works. At least no errors are
-         reported.
+       2017-06-20:  I am get EINTR errors from the MAC layer when trying the
+         udpclient tries to send messages.  Still under investigation.
 
   nsh:
 

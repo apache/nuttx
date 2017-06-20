@@ -147,7 +147,10 @@ int mac802154_req_data(MACHANDLE mac,
   ret = mac802154_takesem(&priv->exclsem, true);
   if (ret < 0)
     {
-      return ret;
+      /* Should only fail it interrupted by a signal */
+
+      wlwarn("WARNING: mac802154_takesem failed: %d", ret);
+      goto errout_with_sem;
     }
 
   /* If both destination and source addressing information is present, the MAC
@@ -201,7 +204,8 @@ int mac802154_req_data(MACHANDLE mac,
 
       if (priv->devmode != IEEE802154_DEVMODE_PANCOORD)
         {
-          return -EINVAL;
+          ret = -EINVAL;
+          goto errout_with_sem;
         }
     }
 
@@ -231,7 +235,8 @@ int mac802154_req_data(MACHANDLE mac,
   ret = mac802154_txdesc_alloc(priv, &txdesc, true);
   if (ret < 0)
     {
-      return ret;
+      wlwarn("WARNING: mac802154_txdesc_alloc failed: %d", ret);
+      goto errout_with_sem;
     }
 
   txdesc->conf->handle = meta->msdu_handle;
@@ -259,11 +264,8 @@ int mac802154_req_data(MACHANDLE mac,
        * don't have to try and kick-off any transmission here.
        */
 
-      /* We no longer need to have the MAC layer locked. */
-
-      mac802154_givesem(&priv->exclsem);
-
-      return -ENOTSUP;
+      ret = -ENOTSUP;
+      goto errout_with_sem;
     }
   else
     {
@@ -300,7 +302,8 @@ int mac802154_req_data(MACHANDLE mac,
           else
             {
               mac802154_givesem(&priv->exclsem);
-              return -EINVAL;
+              ret = -EINVAL;
+              goto errout_with_sem;
             }
         }
       else
@@ -320,6 +323,10 @@ int mac802154_req_data(MACHANDLE mac,
     }
 
   return OK;
+
+errout_with_sem:
+  mac802154_givesem(&priv->exclsem);
+  return ret;
 }
 
 /****************************************************************************
