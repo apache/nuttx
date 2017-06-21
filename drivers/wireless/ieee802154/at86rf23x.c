@@ -1533,22 +1533,22 @@ FAR struct ieee802154_radio_s *at86rf23x_init(FAR struct spi_dev_s *spi,
 
   /* Configure the Pan id */
 
-  //at86rf23x_setpanid  (&dev->ieee, IEEE802154_PAN_DEFAULT);
+  //at86rf23x_setpanid(&dev->ieee, IEEE802154_PAN_DEFAULT);
 
   /* Configure the Short Addr */
 
-  //at86rf23x_setsaddr  (&dev->ieee, IEEE802154_SADDR_UNSPEC);
+  //at86rf23x_setsaddr(&dev->ieee, IEEE802154_SADDR_UNSPEC);
 
   /* Configure the IEEE Addr */
 
-  //at86rf23x_seteaddr  (&dev->ieee, IEEE802154_EADDR_UNSPEC);
+  //at86rf23x_seteaddr(&dev->ieee, IEEE802154_EADDR_UNSPEC);
 
   /* Default device params at86rf23x defaults to energy detect only */
 
   cca.use_ed = 1;
   cca.use_cs = 0;
-  cca.edth = 0x60; /* CCA mode ED, no carrier sense, recommenced ED
-                    * threshold -69 dBm */
+  cca.edth   = 0x60; /* CCA mode ED, no carrier sense, recommenced ED
+                      * threshold -69 dBm */
   at86rf23x_setcca(&dev->ieee, &cca);
 
   /* Put the Device to RX ON Mode */

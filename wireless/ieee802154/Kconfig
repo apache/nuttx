@@ -34,9 +34,9 @@ choice
 		WARNING!! The IEEE802.15.4 network device must never run on the same
 		work queue as does the IEEE 802.15.4 MAC.  That configuration will
 		cause deadlocks:  The network logic may be blocked on the work queue
-		waiting on resources that can only be free by the MAC logic but the
+		waiting on resources that can only be freed by the MAC logic but the
 		MAC is unable to run because the work queue is blocked.  The
-		recommend configuration is:  Network on the LP work queue; MAC on HP
+		recommended configuration is:  Network on the LP work queue; MAC on HP
 		work queue.  Blocking on the HP work queue is a very bad thing in
 		any case.
 
@@ -174,9 +174,9 @@ choice
 		WARNING!! The IEEE802.15.4 network device must never run on the same
 		work queue as does the IEEE 802.15.4 MAC.  That configuration will
 		cause deadlocks:  The network logic may be blocked on the work queue
-		waiting on resources that can only be free by the MAC logic but the
+		waiting on resources that can only be freed by the MAC logic but the
 		MAC is unable to run because the work queue is blocked.  The
-		recommend configuration is:  Network on the LP work queue; MAC on HP
+		recommended configuration is:  Network on the LP work queue; MAC on HP
 		work queue.  Blocking on the HP work queue is a very bad thing in
 		any case.
 
