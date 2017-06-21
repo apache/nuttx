@@ -177,13 +177,13 @@
 #  define CONFIG_MAC802154_NNOTIF 6
 #endif
 
-#if !defined(CONFIG_IEEE802154_NTXDESC) || CONFIG_IEEE802154_NTXDESC <= 0
-#  undef CONFIG_IEEE802154_NTXDESC
-#  define CONFIG_IEEE802154_NTXDESC 3
+#if !defined(CONFIG_MAC802154_NTXDESC) || CONFIG_MAC802154_NTXDESC <= 0
+#  undef CONFIG_MAC802154_NTXDESC
+#  define CONFIG_MAC802154_NTXDESC 3
 #endif
 
-#if CONFIG_IEEE802154_NTXDESC > CONFIG_MAC802154_NNOTIF
-#  error CONFIG_MAC802154_NNOTIF must be greater than CONFIG_IEEE802154_NTXDESC
+#if CONFIG_MAC802154_NTXDESC > CONFIG_MAC802154_NNOTIF
+#  error CONFIG_MAC802154_NNOTIF must be greater than CONFIG_MAC802154_NTXDESC
 #endif
 
 #if !defined(CONFIG_IEEE802154_DEFAULT_EADDR)
@@ -258,7 +258,7 @@ struct ieee802154_privmac_s
   struct mac802154_notif_s notif_pool[CONFIG_MAC802154_NNOTIF];
   sem_t notif_sem;
 
-  struct ieee802154_txdesc_s txdesc_pool[CONFIG_IEEE802154_NTXDESC];
+  struct ieee802154_txdesc_s txdesc_pool[CONFIG_MAC802154_NTXDESC];
   sem_t txdesc_sem;
   sq_queue_t txdesc_queue;
   sq_queue_t txdone_queue;

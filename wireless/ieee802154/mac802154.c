@@ -126,12 +126,12 @@ static void mac802154_resetqueues(FAR struct ieee802154_privmac_s *priv)
   /* Initialize the tx descriptor allocation pool */
 
   sq_init(&priv->txdesc_queue);
-  for (i = 0; i < CONFIG_IEEE802154_NTXDESC; i++)
+  for (i = 0; i < CONFIG_MAC802154_NTXDESC; i++)
     {
       sq_addlast((FAR sq_entry_t *)&priv->txdesc_pool[i], &priv->txdesc_queue);
     }
 
-  sem_init(&priv->txdesc_sem, 0, CONFIG_IEEE802154_NTXDESC);
+  sem_init(&priv->txdesc_sem, 0, CONFIG_MAC802154_NTXDESC);
 
   /* Initialize the notifcation allocation pool */
 
