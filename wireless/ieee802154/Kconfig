@@ -54,6 +54,17 @@ config MAC802154_NTXDESC
 		Then there should be the maximum pre-allocated buffers for each
 		possible TX frame.
 
+config MAC802154_NNOTIF
+	int "Number or notification structures"
+	default 3
+	---help---
+		Configured number of notification strucures Default: 3
+
+	When various MAC management events occur, the MAC notifies the registered
+	receiver with an allocated notification structure indicating the event. The
+	events are primitives such as Association Indication etc.
+
+
 config IEEE802154_IND_PREALLOC
 	int "Number of pre-allocated meta-data structures"
 	default 20

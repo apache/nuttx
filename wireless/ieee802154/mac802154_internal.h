@@ -481,8 +481,8 @@ static inline int mac802154_timercancel(FAR struct ieee802154_privmac_s *priv)
 
 
 int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
-                                  FAR struct ieee802154_txdesc_s **txdesc,
-                                  bool allow_interrupt);
+                           FAR struct ieee802154_txdesc_s **txdesc,
+                           bool allow_interrupt);
 
 int mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
                          uint32_t numsymbols, mac802154_worker_t);
@@ -490,9 +490,10 @@ int mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
 void mac802154_setupindirect(FAR struct ieee802154_privmac_s *priv,
                              FAR struct ieee802154_txdesc_s *txdesc);
 
-void mac802154_create_datareq(FAR struct ieee802154_privmac_s *priv,
-                              FAR struct ieee802154_addr_s *coordaddr,
-                              enum ieee802154_addrmode_e srcmode,
-                              FAR struct ieee802154_txdesc_s *txdesc);
+void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
+                             FAR struct ieee802154_addr_s *coordaddr,
+                             enum ieee802154_addrmode_e srcmode,
+                             FAR struct ieee802154_txdesc_s *txdesc);
+
 
 #endif /* __WIRELESS_IEEE802154__MAC802154_INTERNAL_H */
