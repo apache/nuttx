@@ -247,6 +247,11 @@ static int  mrf24j40_req_rxenable(FAR struct ieee802154_radio_s *radio,
  * Private Data
  ****************************************************************************/
 
+static const uint8_t g_allones[9] =
+{
+  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+};
+
 /****************************************************************************
  * Radio Interface Functions
  ****************************************************************************/
@@ -1880,15 +1885,15 @@ FAR struct ieee802154_radio_s *mrf24j40_init(FAR struct spi_dev_s *spi,
   mrf24j40_initialize(dev);
 
   mrf24j40_setchannel(dev, 11);
-  mrf24j40_setpanid  (dev, 0xFFFF);
-  mrf24j40_setsaddr  (dev, 0xFFFF);
-  mrf24j40_seteaddr  (dev, (uint8_t*)"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF");
+  mrf24j40_setpanid(dev, g_allones);
+  mrf24j40_setsaddr(dev, g_allones);
+  mrf24j40_seteaddr(dev, g_allones);
 
   /* Default device params */
 
   cca.use_ed = 1;
   cca.use_cs = 0;
-  cca.edth = 0x60; /* CCA mode ED, no carrier sense, recommenced ED threshold -69 dBm */
+  cca.edth   = 0x60; /* CCA mode ED, no carrier sense, recommenced ED threshold -69 dBm */
   mrf24j40_setcca(dev, &cca);
 
   mrf24j40_setrxmode(dev, MRF24J40_RXMODE_NORMAL);
