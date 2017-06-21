@@ -41,12 +41,6 @@ config MAC802154_LPWORK
 
 endchoice # Work queue
 
-config MAC802154_NNOTIF
-	int "Number of Notifers"
-	default 6
-	---help---
-		This value must be larger than CONFIG_IEEE802154_NTDESC.
-
 config MAC802154_NTXDESC
 	int "Number or TX descriptors"
 	default 3
