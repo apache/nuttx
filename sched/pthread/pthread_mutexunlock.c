@@ -131,7 +131,7 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
 
   /* The unlock operation is only performed if the mutex is actually locked.
    * If the mutex is not locked, then SUCCESS will be returned (there is
-   * not error return value specified for this case).
+   * no error return value specified for this case).
    */
 
   if (pthread_mutex_islocked(mutex))
