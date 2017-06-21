@@ -247,7 +247,7 @@ static int  mrf24j40_req_rxenable(FAR struct ieee802154_radio_s *radio,
  * Private Data
  ****************************************************************************/
 
-static const uint8_t g_allones[9] =
+static const uint8_t g_allones[8] =
 {
   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
