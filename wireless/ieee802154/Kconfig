@@ -41,6 +41,12 @@ config MAC802154_LPWORK
 
 endchoice # Work queue
 
+config MAC802154_NNOTIF
+	int "Number of Notifers"
+	default 6
+	---help---
+		This value must be larger than CONFIG_IEEE802154_NTDESC.
+
 config IEEE802154_NTXDESC
 	int "Number or TX descriptors"
 	default 3
@@ -63,7 +69,7 @@ config IEEE802154_IND_PREALLOC
 		from either from tasking logic or from interrupt level logic.
 
 config IEEE802154_IND_IRQRESERVE
-	int "Rserved pre-allocated meta-data structures"
+	int "Reserved pre-allocated meta-data structures"
 	default 10
 	---help---
 		If meta-data structures can be allocated from interrupt handlers,
