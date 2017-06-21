@@ -60,10 +60,9 @@ config MAC802154_NNOTIF
 	---help---
 		Configured number of notification strucures Default: 3
 
-	When various MAC management events occur, the MAC notifies the registered
-	receiver with an allocated notification structure indicating the event. The
-	events are primitives such as Association Indication etc.
-
+		When various MAC management events occur, the MAC notifies the registered
+		receiver with an allocated notification structure indicating the event. The
+		events are primitives such as Association Indication etc.
 
 config IEEE802154_IND_PREALLOC
 	int "Number of pre-allocated meta-data structures"
