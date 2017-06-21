@@ -177,13 +177,13 @@
 #  define CONFIG_MAC802154_NNOTIF 6
 #endif
 
-#if !defined(CONFIG_IEEE802154_NTXDESC) || CONFIG_IEEE802154_NTXDESC <= 0
-#  undef CONFIG_IEEE802154_NTXDESC
-#  define CONFIG_IEEE802154_NTXDESC 3
+#if !defined(CONFIG_MAC802154_NTXDESC) || CONFIG_MAC802154_NTXDESC <= 0
+#  undef CONFIG_MAC802154_NTXDESC
+#  define CONFIG_MAC802154_NTXDESC 3
 #endif
 
-#if CONFIG_IEEE802154_NTXDESC > CONFIG_MAC802154_NNOTIF
-#  error CONFIG_MAC802154_NNOTIF must be greater than CONFIG_IEEE802154_NTXDESC
+#if CONFIG_MAC802154_NTXDESC > CONFIG_MAC802154_NNOTIF
+#  error CONFIG_MAC802154_NNOTIF must be greater than CONFIG_MAC802154_NTXDESC
 #endif
 
 #if !defined(CONFIG_IEEE802154_DEFAULT_EADDR)
@@ -258,7 +258,7 @@ struct ieee802154_privmac_s
   struct mac802154_notif_s notif_pool[CONFIG_MAC802154_NNOTIF];
   sem_t notif_sem;
 
-  struct ieee802154_txdesc_s txdesc_pool[CONFIG_IEEE802154_NTXDESC];
+  struct ieee802154_txdesc_s txdesc_pool[CONFIG_MAC802154_NTXDESC];
   sem_t txdesc_sem;
   sq_queue_t txdesc_queue;
   sq_queue_t txdone_queue;
@@ -481,8 +481,8 @@ static inline int mac802154_timercancel(FAR struct ieee802154_privmac_s *priv)
 
 
 int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
-                                  FAR struct ieee802154_txdesc_s **txdesc,
-                                  bool allow_interrupt);
+                           FAR struct ieee802154_txdesc_s **txdesc,
+                           bool allow_interrupt);
 
 int mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
                          uint32_t numsymbols, mac802154_worker_t);
@@ -490,9 +490,10 @@ int mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
 void mac802154_setupindirect(FAR struct ieee802154_privmac_s *priv,
                              FAR struct ieee802154_txdesc_s *txdesc);
 
-void mac802154_create_datareq(FAR struct ieee802154_privmac_s *priv,
-                              FAR struct ieee802154_addr_s *coordaddr,
-                              enum ieee802154_addrmode_e srcmode,
-                              FAR struct ieee802154_txdesc_s *txdesc);
+void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
+                             FAR struct ieee802154_addr_s *coordaddr,
+                             enum ieee802154_addrmode_e srcmode,
+                             FAR struct ieee802154_txdesc_s *txdesc);
+
 
 #endif /* __WIRELESS_IEEE802154__MAC802154_INTERNAL_H */

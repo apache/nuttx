@@ -69,13 +69,6 @@
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define UDPIPv6BUF(ieee) \
-  ((FAR struct udp_hdr_s *)&((ieee)->i_dev.d_buf[IPv6_HDRLEN]))
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -760,9 +753,12 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
   if (ipv6->proto == IP_PROTO_UDP)
     {
-      FAR struct udp_hdr_s *udp = UDPIPv6BUF(ieee);
+      /* The UDP header will follow the IPv6 header */
 
-      ninfo("Uncompressed UDP ports on send side: %x, %x\n",
+      FAR struct udp_hdr_s *udp =
+        (FAR struct udp_hdr_s *)((FAR uint8_t *)ipv6 + IPv6_HDRLEN);
+
+      ninfo("Uncompressed UDP ports on send side: srcport=%04x destport=%04x\n",
             ntohs(udp->srcport), ntohs(udp->destport));
 
       /* Mask out the last 4 bits can be used as a mask */

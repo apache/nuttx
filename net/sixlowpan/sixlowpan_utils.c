@@ -89,7 +89,8 @@ void sixlowpan_saddrfromip(const net_ipv6addr_t ipaddr,
 {
   DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
 
-  memcpy(saddr, &ipaddr[7], NET_6LOWPAN_SADDRSIZE);
+  saddr->u8[0]  = ipaddr[7] >> 8;
+  saddr->u8[1]  = ipaddr[7] & 0xff;
   saddr->u8[0] ^= 0x02;
 }
 

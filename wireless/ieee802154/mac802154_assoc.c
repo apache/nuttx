@@ -492,8 +492,8 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
 
           mac802154_txdesc_alloc(priv, &respdesc, false);
 
-          mac802154_create_datareq(priv, &priv->coordaddr,
-                                   IEEE802154_ADDRMODE_EXTENDED, respdesc);
+          mac802154_createdatareq(priv, &priv->coordaddr,
+                                  IEEE802154_ADDRMODE_EXTENDED, respdesc);
 
           priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
 

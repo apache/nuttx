@@ -126,12 +126,12 @@ static void mac802154_resetqueues(FAR struct ieee802154_privmac_s *priv)
   /* Initialize the tx descriptor allocation pool */
 
   sq_init(&priv->txdesc_queue);
-  for (i = 0; i < CONFIG_IEEE802154_NTXDESC; i++)
+  for (i = 0; i < CONFIG_MAC802154_NTXDESC; i++)
     {
       sq_addlast((FAR sq_entry_t *)&priv->txdesc_pool[i], &priv->txdesc_queue);
     }
 
-  sem_init(&priv->txdesc_sem, 0, CONFIG_IEEE802154_NTXDESC);
+  sem_init(&priv->txdesc_sem, 0, CONFIG_MAC802154_NTXDESC);
 
   /* Initialize the notifcation allocation pool */
 
@@ -235,7 +235,7 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
 }
 
 /****************************************************************************
- * Name: mac802154_create_datareq
+ * Name: mac802154_createdatareq
  *
  * Description:
  *    Internal function used by various parts of the MAC layer. This function
@@ -247,10 +247,10 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
  *
  ****************************************************************************/
 
-void mac802154_create_datareq(FAR struct ieee802154_privmac_s *priv,
-                              FAR struct ieee802154_addr_s *coordaddr,
-                              enum ieee802154_addrmode_e srcmode,
-                              FAR struct ieee802154_txdesc_s *txdesc)
+void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
+                             FAR struct ieee802154_addr_s *coordaddr,
+                             enum ieee802154_addrmode_e srcmode,
+                             FAR struct ieee802154_txdesc_s *txdesc)
 {
   FAR struct iob_s *iob;
 
@@ -947,8 +947,8 @@ static void mac802154_rxframe_worker(FAR void *arg)
                * operation.
                *
                *  mac802154_txdesc_alloc(priv, &respdec, false);
-               *  mac802154_create_datareq(priv, &req->coordaddr,
-               *                           IEEE802154_ADDRMODE_EXTENDED, respdesc);
+               *  mac802154_createdatareq(priv, &req->coordaddr,
+               *                          IEEE802154_ADDRMODE_EXTENDED, respdesc);
                *  sq_addlast((FAR sq_entry_t *)respdesc, &priv->csma_queue);
                */
             }

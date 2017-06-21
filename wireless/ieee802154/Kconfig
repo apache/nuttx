@@ -23,13 +23,22 @@ config IEEE802154_DEFAULT_EADDR
 
 choice
 	prompt "IEEE 802.15.4 work queue"
-	default MAC802154_LPWORK if SCHED_LPWORK
-	default MAC802154_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	default MAC802154_HPWORK if SCHED_HPWORK
+	default MAC802154_LPWORK if !SCHED_HPWORK && SCHED_LPWORK
 	depends on SCHED_WORKQUEUE
 	---help---
 		Work queue support is required to use the IEEE 802.15.4 MAC layer.
-		If the low priority work queue is available, then it should be used by
+		If the high priority work queue is available, then it should be used by
 		the driver.
+
+		WARNING!! The IEEE802.15.4 network device must never run on the same
+		work queue as does the IEEE 802.15.4 MAC.  That configuration will
+		cause deadlocks:  The network logic may be blocked on the work queue
+		waiting on resources that can only be freed by the MAC logic but the
+		MAC is unable to run because the work queue is blocked.  The
+		recommended configuration is:  Network on the LP work queue; MAC on HP
+		work queue.  Blocking on the HP work queue is a very bad thing in
+		any case.
 
 config MAC802154_HPWORK
 	bool "High priority"
@@ -41,13 +50,7 @@ config MAC802154_LPWORK
 
 endchoice # Work queue
 
-config MAC802154_NNOTIF
-	int "Number of Notifers"
-	default 6
-	---help---
-		This value must be larger than CONFIG_IEEE802154_NTDESC.
-
-config IEEE802154_NTXDESC
+config MAC802154_NTXDESC
 	int "Number or TX descriptors"
 	default 3
 	---help---
@@ -56,9 +59,19 @@ config IEEE802154_NTXDESC
 		When used with 6LoWPAN, the descriptor allocator runs on a work
 		and must avoid blocking if possible.  Each frame will be provided in
 		an IOB and each TX frame will need a TX descriptor.  So the safe
-		thing to do is set CONFIG_IEEE802154_NTXDESC to CONFIG_IOB_NBUFFERS.
+		thing to do is set CONFIG_MAC802154_NTXDESC to CONFIG_IOB_NBUFFERS.
 		Then there should be the maximum pre-allocated buffers for each
 		possible TX frame.
+
+config MAC802154_NNOTIF
+	int "Number or notification structures"
+	default 3
+	---help---
+		Configured number of notification strucures Default: 3
+
+		When various MAC management events occur, the MAC notifies the registered
+		receiver with an allocated notification structure indicating the event. The
+		events are primitives such as Association Indication etc.
 
 config IEEE802154_IND_PREALLOC
 	int "Number of pre-allocated meta-data structures"
@@ -155,8 +168,17 @@ choice
 	depends on SCHED_WORKQUEUE
 	---help---
 		Work queue support is required to use the IEEE802.15.4 network
-		driver.  If the low priority work queue is available, then it shoul
+		driver.  If the low priority work queue is available, then it should
 		be used by the loopback driver.
+
+		WARNING!! The IEEE802.15.4 network device must never run on the same
+		work queue as does the IEEE 802.15.4 MAC.  That configuration will
+		cause deadlocks:  The network logic may be blocked on the work queue
+		waiting on resources that can only be freed by the MAC logic but the
+		MAC is unable to run because the work queue is blocked.  The
+		recommended configuration is:  Network on the LP work queue; MAC on HP
+		work queue.  Blocking on the HP work queue is a very bad thing in
+		any case.
 
 config IEEE802154_NETDEV_HPWORK
 	bool "High priority"

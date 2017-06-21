@@ -73,6 +73,18 @@
 #  error IOBs must be large enough to hold full IEEE802.14.5 frame
 #endif
 
+/* A IOB must also be big enought to hold the maximum MAC header (25 bytes?)
+ * plus the FCS and have some amount of space left for the payload.
+ */
+
+#if CONFIG_NET_6LOWPAN_FRAMELEN < (SIXLOWPAN_MAC_FCSSIZE + 25)
+#  error CONFIG_NET_6LOWPAN_FRAMELEN too small to hold a IEEE802.14.5 frame
+#endif
+
+/* We must reserve space at the end of the frame for a 2-byte FCS */
+
+#define SIXLOWPAN_FRAMELEN (CONFIG_NET_6LOWPAN_FRAMELEN - SIXLOWPAN_MAC_FCSSIZE)
+
 /* There must be at least enough IOBs to hold the full MTU.  Probably still
  * won't work unless there are a few more.
  */
@@ -371,7 +383,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
   /* Check if we need to fragment the packet into several frames */
 
-  if (buflen > (CONFIG_NET_6LOWPAN_FRAMELEN - g_frame_hdrlen))
+  if (buflen > (SIXLOWPAN_FRAMELEN - g_frame_hdrlen))
     {
 #ifdef CONFIG_NET_6LOWPAN_FRAG
       /* qhead will hold the generated frame list; frames will be
@@ -429,7 +441,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
        * bytes.
        */
 
-      paysize = (CONFIG_NET_6LOWPAN_FRAMELEN - g_frame_hdrlen) & ~7;
+      paysize = (SIXLOWPAN_FRAMELEN - g_frame_hdrlen) & ~7;
       memcpy(fptr + g_frame_hdrlen, buf,  paysize);
 
       /* Set outlen to what we already sent from the IP payload */
@@ -501,7 +513,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
           /* Copy payload and enqueue */
           /* Check for the last fragment */
 
-          paysize = (CONFIG_NET_6LOWPAN_FRAMELEN - fragn_hdrlen) &
+          paysize = (SIXLOWPAN_FRAMELEN - fragn_hdrlen) &
                     SIXLOWPAN_DISPATCH_FRAG_MASK;
           if (buflen - outlen < paysize)
             {
