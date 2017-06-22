@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_mutex_unlock
+ * Name: pthread_mutex_islocked
  *
  * Description:
  *   Return true is the mutex is locked.
@@ -114,13 +114,13 @@ static inline bool pthread_mutex_islocked(FAR struct pthread_mutex_s *mutex)
 
 int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
 {
-  int ret = OK;
+  int ret = EPERM;
 
   sinfo("mutex=0x%p\n", mutex);
   DEBUGASSERT(mutex != NULL);
   if (mutex == NULL)
     {
-      return -EINVAL;
+      return EINVAL;
     }
 
   /* Make sure the semaphore is stable while we make the following checks.
@@ -130,8 +130,10 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
   sched_lock();
 
   /* The unlock operation is only performed if the mutex is actually locked.
-   * If the mutex is not locked, then SUCCESS will be returned (there is
-   * no error return value specified for this case).
+   * EPERM *must* be returned if the mutex type is PTHREAD_MUTEX_ERRORCHECK
+   * or PTHREAD_MUTEX_RECURSIVE, or the mutex is a robust mutex, and the
+   * current thread does not own the mutex.  Behavior is undefined for the
+   * remaining case.
    */
 
   if (pthread_mutex_islocked(mutex))
