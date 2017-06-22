@@ -98,7 +98,7 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
    * needs access to the MAC in order to unlock it.
    */
 
-  ret = mac802154_takesem(&priv->op_sem, true);
+  ret = mac802154_takesem(&priv->opsem, true);
   if (ret < 0)
     {
       return ret;
@@ -109,7 +109,7 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
    ret = mac802154_takesem(&priv->exclsem, true);
    if (ret < 0)
      {
-       mac802154_givesem(&priv->op_sem);
+       mac802154_givesem(&priv->opsem);
        return ret;
      }
 
@@ -122,7 +122,7 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
   if (ret < 0)
     {
       mac802154_givesem(&priv->exclsem);
-      mac802154_givesem(&priv->op_sem);
+      mac802154_givesem(&priv->opsem);
       return ret;
     }
 
@@ -219,7 +219,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
 
       priv->curr_op = MAC802154_OP_NONE;
       priv->cmd_desc = NULL;
-      mac802154_givesem(&priv->op_sem);
+      mac802154_givesem(&priv->opsem);
 
       /* Release the MAC, call the callback, get exclusive access again */
 
@@ -280,7 +280,7 @@ void mac802154_timeout_poll(FAR struct ieee802154_privmac_s *priv)
   /* We are no longer performing the association operation */
   priv->curr_op = MAC802154_OP_NONE;
   priv->cmd_desc = NULL;
-  mac802154_givesem(&priv->op_sem);
+  mac802154_givesem(&priv->opsem);
 
   /* Release the MAC */
 

@@ -1096,7 +1096,7 @@ static void mac802154_rx_dataframe(FAR struct ieee802154_privmac_s *priv,
 
       priv->curr_op = MAC802154_OP_NONE;
       priv->cmd_desc = NULL;
-      mac802154_givesem(&priv->op_sem);
+      mac802154_givesem(&priv->opsem);
 
       /* Release the MAC */
 
@@ -1514,7 +1514,7 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
 
   /* Allow exclusive access to the dedicated command transaction */
 
-  sem_init(&mac->op_sem, 0, 1);
+  sem_init(&mac->opsem, 0, 1);
 
   /* Setup watchdog for extraction timeout */
 
