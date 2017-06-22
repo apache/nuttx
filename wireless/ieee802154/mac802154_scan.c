@@ -77,6 +77,71 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
-  return -ENOTTY;
+  int ret;
+
+  if (req->duration > 15)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  /* Need to get access to the ops semaphore since operations are serial. This
+   * must be done before locking the MAC so that we don't hold the MAC
+   */
+
+  ret = mac802154_takesem(&priv->opsem, true);
+  if (ret < 0)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+  
+  ret = mac802154_takesem(&priv->exclsem, true);
+  if (ret < 0)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+
+
+  switch (req->type)
+    {
+      case IEEE802154_SCANTYPE_PASSIVE:
+        {
+
+        }
+        break;
+      case IEEE802154_SCANTYPE_ACTIVE:
+        {
+          ret = -ENOTTY;
+          goto errout_with_sem;
+        }
+        break;
+      case IEEE802154_SCANTYPE_ED:
+        {
+          ret = -ENOTTY;
+          goto errout_with_sem;
+        }
+        break;
+      case IEEE802154_SCANTYPE_ORPHAN:
+        {
+          ret = -ENOTTY;
+          goto errout_with_sem;
+        }
+        break;
+      default:
+        {
+          ret = -EINVAL;
+          goto errout_with_sem;
+        }
+        break;
+    }
+
+return OK;
+
+errout_with_sem;
+  mac802154_givesem(&priv->opsem);
+errout:
+  return ret;
 }
 
