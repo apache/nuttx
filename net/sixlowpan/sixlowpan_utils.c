@@ -156,7 +156,8 @@ bool sixlowpan_issaddrbased(const net_ipv6addr_t ipaddr,
 {
   FAR const uint8_t *byteptr = saddr->u8;
 
-  return (ipaddr[5] == HTONS(0x00ff) && ipaddr[6] == HTONS(0xfe00) &&
+  return (ipaddr[5] == HTONS(0x00ff) &&
+          ipaddr[6] == HTONS(0xfe00) &&
           ipaddr[7] == (GETUINT16(byteptr, 0) ^ 0x0200));
 }
 

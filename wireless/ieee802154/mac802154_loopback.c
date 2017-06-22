@@ -190,6 +190,12 @@ static int lo_req_data(FAR struct ieee802154_driver_s *netdev,
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
 static void lo_addr2ip(FAR struct net_driver_s *dev)
 {
+  /* Set the MAC address as the eaddr */
+
+  IEEE802154_EADDRCOPY(dev->d_mac.ieee802154.u8, g_eaddr);
+
+  /* Set the IP address based on the eaddr */
+
   dev->d_ipv6addr[0]  = HTONS(0xfe80);
   dev->d_ipv6addr[1]  = 0;
   dev->d_ipv6addr[2]  = 0;
@@ -199,10 +205,18 @@ static void lo_addr2ip(FAR struct net_driver_s *dev)
   dev->d_ipv6addr[6]  = (uint16_t)g_eaddr[4] << 8 |  (uint16_t)g_eaddr[5];
   dev->d_ipv6addr[7]  = (uint16_t)g_eaddr[6] << 8 |  (uint16_t)g_eaddr[6];
   dev->d_ipv6addr[4] ^= 0x200;
+
+  memcpy(dev->d_mac.ieee802154, g_eaddr, IEEE802154_EADDRSIZE);
 }
 #else
 static void lo_addr2ip(FAR struct net_driver_s *dev)
 {
+  /* Set the MAC address as the saddr */
+
+  IEEE802154_SADDRCOPY(dev->d_mac.ieee802154.u8, g_saddr);
+
+  /* Set the IP address based on the saddr */
+
   dev->d_ipv6addr[0]  = HTONS(0xfe80);
   dev->d_ipv6addr[1]  = 0;
   dev->d_ipv6addr[2]  = 0;

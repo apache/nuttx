@@ -258,10 +258,12 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
     }
   else
     {
-      /* Set the IP address based on the eaddr */
+      /* Set the MAC address as the eaddr */
 
       eaddr = arg.u.getreq.attrval.mac.eaddr;
       IEEE802154_EADDRCOPY(dev->d_mac.ieee802154.u8, eaddr);
+
+      /* Set the IP address based on the eaddr */
 
       dev->d_ipv6addr[0]  = HTONS(0xfe80);
       dev->d_ipv6addr[1]  = 0;
@@ -291,6 +293,8 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
     }
   else
     {
+      /* Set the MAC address as the saddr */
+
       saddr = arg.u.getreq.attrval.mac.saddr;
       IEEE802154_SADDRCOPY(dev->d_mac.ieee802154.u8, saddr);
 

@@ -303,7 +303,7 @@ static void uncompress_addr(FAR net_ipv6addr_t ipaddr, uint8_t const prefix[],
   uint8_t prefcount = prefpost >> 4;
   uint8_t postcount = prefpost & 0x0f;
 
-  /* Full nibble 15 => 16 */
+  /* The value 16 is encoded as 0xf in the 4 bit-fields. */
 
   prefcount = prefcount == 15 ? 16 : prefcount;
   postcount = postcount == 15 ? 16 : postcount;
@@ -758,7 +758,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
       FAR struct udp_hdr_s *udp =
         (FAR struct udp_hdr_s *)((FAR uint8_t *)ipv6 + IPv6_HDRLEN);
 
-      ninfo("Uncompressed UDP ports on send side: srcport=%04x destport=%04x\n",
+      ninfo("Uncompressed UDP ports: srcport=%04x destport=%04x\n",
             ntohs(udp->srcport), ntohs(udp->destport));
 
       /* Mask out the last 4 bits can be used as a mask */
@@ -770,7 +770,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
           *g_hc06ptr = SIXLOWPAN_NHC_UDP_CS_P_11;
 
-          ninfo("Remove 12b of both source & dest with prefix 0xfob\n");
+          ninfo("Remove 12b of both source & dest with prefix 0xf0b*\n");
 
           *(g_hc06ptr + 1) =
             (uint8_t)((ntohs(udp->srcport) - SIXLOWPAN_UDP_4_BIT_PORT_MIN) << 4) +
