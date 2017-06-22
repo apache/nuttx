@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/getsockname.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -148,6 +148,7 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
         return -EOPNOTSUPP;
     }
 
+#ifdef CONFIG_NETDEV_MULTINIC
   /* The socket/connection does not know its IP address unless
    * CONFIG_NETDEV_MULTINIC is selected.  Otherwise the design supports only
    * a single network device and only the network device knows the IP address.
@@ -160,9 +161,9 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
        outaddr->sin_addr.s_addr = 0;
        *addrlen = sizeof(struct sockaddr_in);
 #endif
-
-      return OK;
+       return OK;
     }
+#endif
 
   net_lock();
 
@@ -290,6 +291,7 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
         return -EOPNOTSUPP;
     }
 
+#ifdef CONFIG_NETDEV_MULTINIC
   /* The socket/connection does not know its IP address unless
    * CONFIG_NETDEV_MULTINIC is selected.  Otherwise the design supports only
    * a single network device and only the network device knows the IP address.
@@ -302,9 +304,9 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
       memcpy(outaddr->sin6_addr.in6_u.u6_addr8, g_ipv6_allzeroaddr, 16);
       *addrlen = sizeof(struct sockaddr_in6);
 #endif
-
       return OK;
     }
+#endif
 
   net_lock();
 
