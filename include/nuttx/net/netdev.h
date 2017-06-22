@@ -3,7 +3,7 @@
  * Defines architecture-specific device driver interfaces to the NuttX
  * network.
  *
- *   Copyright (C) 2007, 2009, 2011-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Derived largely from portions of uIP with has a similar BSD-styple license:

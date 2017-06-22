@@ -102,15 +102,10 @@
 
 /* General helper macros ****************************************************/
 
-/* GET 16-bit data:  source in network order, result in host order */
+/* GET 16-bit data:  source in network order */
 
-#define GETHOST16(ptr,index) \
+#define GETUINT16(ptr,index) \
   ((((uint16_t)((ptr)[index])) << 8) | ((uint16_t)(((ptr)[(index) + 1]))))
-
-/* GET 16-bit data:  source in network order, result in network order */
-
-#define GETNET16(ptr,index) \
-  ((((uint16_t)((ptr)[(index) + 1])) << 8) | ((uint16_t)(((ptr)[index]))))
 
 /* PUT 16-bit data:  source in host order, result in newtwork order */
 
@@ -446,13 +441,14 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  *   appropriate values
  *
  * Input Parmeters:
- *   iplen  - Equal to 0 if the packet is not a fragment (IP length is then
- *            inferred from the L2 length), non 0 if the packet is a first
- *            fragment.
- *   iob    - Pointer to the IOB containing the received frame.
- *   fptr   - Pointer to frame to be compressed.
- *   bptr   - Output goes here.  Normally this is a known offset into d_buf,
- *            may be redirected to a "bitbucket" on the case of FRAGN frames.
+ *   ind   - MAC header meta data including node addressing information.
+ *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
+ *           inferred from the L2 length), non 0 if the packet is a first
+ *           fragment.
+ *   iob   - Pointer to the IOB containing the received frame.
+ *   fptr  - Pointer to frame to be compressed.
+ *   bptr  - Output goes here.  Normally this is a known offset into d_buf,
+ *           may be redirected to a "bitbucket" on the case of FRAGN frames.
  *
  * Returned Value:
  *   None
@@ -460,7 +456,8 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
-void sixlowpan_uncompresshdr_hc06(uint16_t iplen, FAR struct iob_s *iob,
+void sixlowpan_uncompresshdr_hc06(FAR const struct ieee802154_data_ind_s *ind,
+                                  uint16_t iplen, FAR struct iob_s *iob,
                                   FAR uint8_t *fptr, FAR uint8_t *bptr);
 #endif
 

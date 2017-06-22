@@ -553,7 +553,7 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
  * Name: net_is_addr_unspecified
  *
  * Description:
- *   Is Ithe Pv6 address the unspecified address?
+ *   Is Ithe IPv6 address the unspecified address?
  *
  ****************************************************************************/
 

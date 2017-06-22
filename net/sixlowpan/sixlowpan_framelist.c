@@ -236,7 +236,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 #endif
   int ret;
 
-  ninfo("buflen=%lu", (unsigned long)buflen);
+  ninfo("buflen=%lu\n", (unsigned long)buflen);
 
   /* Initialize global data.  Locking the network guarantees that we have
    * exclusive use of the global values for intermediate calculations.

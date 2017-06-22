@@ -343,7 +343,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
    */
 
   fragptr = fptr + hdrsize;
-  switch ((GETHOST16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0xf800) >> 8)
+  switch ((GETUINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0xf800) >> 8)
     {
     /* First fragment of new reassembly */
 
@@ -351,8 +351,8 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       {
         /* Set up for the reassembly */
 
-        fragsize        = GETHOST16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0x07ff;
-        fragtag         = GETHOST16(fragptr, SIXLOWPAN_FRAG_TAG);
+        fragsize        = GETUINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0x07ff;
+        fragtag         = GETUINT16(fragptr, SIXLOWPAN_FRAG_TAG);
         g_frame_hdrlen += SIXLOWPAN_FRAG1_HDR_LEN;
 
         ninfo("FRAG1: fragsize=%d fragtag=%d fragoffset=%d\n",
@@ -370,8 +370,8 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
         /* Set offset, tag, size.  Offset is in units of 8 bytes. */
 
         fragoffset      = fragptr[SIXLOWPAN_FRAG_OFFSET];
-        fragtag         = GETHOST16(fragptr, SIXLOWPAN_FRAG_TAG);
-        fragsize        = GETHOST16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0x07ff;
+        fragtag         = GETUINT16(fragptr, SIXLOWPAN_FRAG_TAG);
+        fragsize        = GETUINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0x07ff;
         g_frame_hdrlen += SIXLOWPAN_FRAGN_HDR_LEN;
 
         ninfo("FRAGN: fragsize=%d fragtag=%d fragoffset=%d\n",
@@ -532,7 +532,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
   if ((hc1[SIXLOWPAN_HC1_DISPATCH] & SIXLOWPAN_DISPATCH_IPHC_MASK) == SIXLOWPAN_DISPATCH_IPHC)
     {
       ninfo("IPHC Dispatch\n");
-      sixlowpan_uncompresshdr_hc06(fragsize, iob, fptr, bptr);
+      sixlowpan_uncompresshdr_hc06(ind, fragsize, iob, fptr, bptr);
     }
   else
 #endif /* CONFIG_NET_6LOWPAN_COMPRESSION_HC06 */
