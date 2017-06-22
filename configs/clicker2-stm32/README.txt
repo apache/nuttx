@@ -480,7 +480,7 @@ Configurations
          COMPRESSION ADDRESSING UDP  TCP
          ----------- ---------- ---- ----
          hc06        short      6/21 ---
-                     extended   ---  ---
+                     extended   6/22 ---
          hc1         short      ---  ---
                      extended   ---  ---
          ipv6        short      ---  ---

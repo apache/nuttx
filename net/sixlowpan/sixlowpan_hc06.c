@@ -110,11 +110,11 @@ static FAR uint8_t *g_hc06ptr;
  *
  *   0 -> 16 bytes from packet
  *   1 -> 2 bytes from prefix - 16 bytes from packet
- *   2 -> 2 bytes from prefix - 0000::00ff:fe00:XXXX from packet
+ *   2 -> 2 bytes from prefix - 0000::00ff:fe00:XXXX and 2 bytes from packet
  *   3 -> 2 bytes from prefix - Infer 2 or 8 bytes from MAC address
  *
- *   NOTE: => the uncompress function does change 0xf to 0x10
- *   NOTE: 0x00 => no-autoconfig => unspecified
+ *   NOTE: ipaddr=the uncompress function does change 0xf to 0x10
+ *   NOTE: 0x00 ipaddr=no-autoconfig ipaddr=unspecified
  */
 
 static const uint16_t g_unc_llconf[] =
@@ -199,7 +199,7 @@ static FAR struct sixlowpan_addrcontext_s *
 }
 
 /****************************************************************************
- * Name: find_addrcontext_bynumber
+ * Name: find_addrcontext_byprefix
  *
  * Description:
  *   Find the address context corresponding to the prefix ipaddr.
@@ -228,7 +228,7 @@ static FAR struct sixlowpan_addrcontext_s *
 }
 
 /****************************************************************************
- * Name: comporess_ipaddr, compress_tagaddr, and compress_laddr
+ * Name: compress_ipaddr, compress_tagaddr, and compress_laddr
  *
  * Description:
  *   Uncompress addresses based on a prefix and a postfix with zeroes in
@@ -236,7 +236,7 @@ static FAR struct sixlowpan_addrcontext_s *
  *   to configure the IP address (autoconf style).
  *
  *   prefpost takes a byte where the first nibble specify prefix count
- *   and the second postfix count (NOTE: 15/0xf => 16 bytes copy).
+ *   and the second postfix count (NOTE: 15/0xf ipaddr=16 bytes copy).
  *
  *   compress_tagaddr() accepts a remote, variable length, taged MAC address;
  *   compress_laddr() accepts a local, fixed length MAC address.
@@ -269,34 +269,71 @@ static uint8_t compress_tagaddr(FAR const net_ipv6addr_t ipaddr,
                                 FAR const struct sixlowpan_tagaddr_s *macaddr,
                                 uint8_t bitpos)
 {
-  ninfo("ipaddr=%p macaddr=%p extended=%u bitpos=%u g_hc06ptr=%p\n",
-         ipaddr, macaddr, macaddr->extended, bitpos, g_hc06ptr);
+  uint8_t tag;
 
-  if (sixlowpan_ismacbased(ipaddr, macaddr))
+  ninfo("Compressing bitpos=%u extended=%u\n", bitpos, macaddr->extended);
+  ninfo("            ipaddr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        ipaddr[0], ipaddr[1], ipaddr[2], ipaddr[3],
+        ipaddr[4], ipaddr[5], ipaddr[6], ipaddr[7]);
+
+  if (macaddr->extended)
     {
-      return 3 << bitpos;       /* 0-bits */
+      ninfo("            eaddr=%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
+            macaddr->u.eaddr.u8[0], macaddr->u.eaddr.u8[1],
+            macaddr->u.eaddr.u8[2], macaddr->u.eaddr.u8[3],
+            macaddr->u.eaddr.u8[4], macaddr->u.eaddr.u8[5],
+            macaddr->u.eaddr.u8[6], macaddr->u.eaddr.u8[7]);
     }
   else
     {
-      return compress_ipaddr(ipaddr, bitpos);
+      ninfo("            saddr=%02x:%02x\n",
+            macaddr->u.saddr.u8[0], macaddr->u.saddr.u8[1]);
     }
+
+  if (sixlowpan_ismacbased(ipaddr, macaddr))
+    {
+      tag = (3 << bitpos);       /* 0-bits */
+    }
+  else
+    {
+      tag = compress_ipaddr(ipaddr, bitpos);
+    }
+
+  ninfo("Tag=%02x\n", tag);
+  return tag;
 }
 
 static uint8_t compress_laddr(FAR const net_ipv6addr_t ipaddr,
                               FAR const struct sixlowpan_addr_s *macaddr,
                               uint8_t bitpos)
 {
-  ninfo("ipaddr=%p macaddr=%p bitpos=%u g_hc06ptr=%p\n",
-         ipaddr, macaddr, bitpos, g_hc06ptr);
+  uint8_t tag;
+
+  ninfo("Compressing bitpos=%u\n", bitpos);
+  ninfo("            ipaddr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        ipaddr[0], ipaddr[1], ipaddr[2], ipaddr[3],
+        ipaddr[4], ipaddr[5], ipaddr[6], ipaddr[7]);
+
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+  ninfo("            eaddr=%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
+        macaddr->u8[0], macaddr->u8[1], macaddr->u8[2], macaddr->u8[3],
+        macaddr->u8[4], macaddr->u8[5], macaddr->u8[6], macaddr->u8[7]);
+#else
+  ninfo("            saddr=%02x:%02x\n",
+        macaddr->u8[0], macaddr->u8[1]);
+#endif
 
   if (sixlowpan_isaddrbased(ipaddr, macaddr))
     {
-      return 3 << bitpos;       /* 0-bits */
+      tag = (3 << bitpos);       /* 0-bits */
     }
   else
     {
-      return compress_ipaddr(ipaddr, bitpos);
+      tag = compress_ipaddr(ipaddr, bitpos);
     }
+
+  ninfo("Tag=%02x\n", tag);
+  return tag;
 }
 
 /****************************************************************************
@@ -308,7 +345,7 @@ static uint8_t compress_laddr(FAR const net_ipv6addr_t ipaddr,
  *   to configure the IP address (autoconf style).
  *
  *   prefpost takes a byte where the first nibble specify prefix count
- *   and the second postfix count (NOTE: 15/0xf => 16 bytes copy).
+ *   and the second postfix count (NOTE: 15/0xf ipaddr=16 bytes copy).
  *
  ****************************************************************************/
 
@@ -377,7 +414,7 @@ static void uncompress_addr(FAR const struct ieee802154_addr_s *addr,
     {
       if (postcount == 2 && prefcount < 11)
         {
-          /* 16 bits uncompression => 0000:00ff:fe00:XXXX */
+          /* 16 bits uncompression ipaddr=0000:00ff:fe00:XXXX */
 
           ipaddr[5] = HTONS(0x00ff);
           ipaddr[6] = HTONS(0xfe00);
@@ -423,12 +460,12 @@ static void uncompress_addr(FAR const struct ieee802154_addr_s *addr,
     }
   else if (prefcount > 0)
     {
-      /* No IID based configuration if no prefix and no data => unspec */
+      /* No IID based configuration if no prefix and no data ipaddr=unspec */
 
       nwarn("WARNING: No IID based configuration\n");
     }
 
-  ninfo("Uncompressing %d + %d => %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04\n",
+  ninfo("Uncompressing %d + %d ipaddr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         prefcount, postcount,
         ipaddr[0], ipaddr[1], ipaddr[2], ipaddr[3],
         ipaddr[4], ipaddr[5], ipaddr[6], ipaddr[7]);
@@ -707,7 +744,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
   if (net_is_addr_unspecified(ipv6->srcipaddr))
     {
-      ninfo("Compressing unspecified.  Setting SAC\n");
+      ninfo("Compressing unspecified srcipaddr.  Setting SAC\n");
 
       iphc1 |= SIXLOWPAN_IPHC_SAC;
       iphc1 |= SIXLOWPAN_IPHC_SAM_128;
@@ -741,7 +778,12 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
     }
   else
     {
-      /* Send the full address => SAC = 0, SAM = 00 */
+      /* Send the full address ipaddr:  SAC = 0, SAM = 00 */
+
+      ninfo("Uncompressable srcipaddr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+            ipv6->srcipaddr[0], ipv6->srcipaddr[1], ipv6->srcipaddr[2],
+            ipv6->srcipaddr[3], ipv6->srcipaddr[4], ipv6->srcipaddr[5],
+            ipv6->srcipaddr[6], ipv6->srcipaddr[7]);
 
       iphc1 |= SIXLOWPAN_IPHC_SAM_128;   /* 128-bits */
       memcpy(g_hc06ptr, ipv6->srcipaddr, 16);
@@ -813,9 +855,10 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
           iphc1 |= compress_tagaddr(ipv6->destipaddr, destmac,
                                     SIXLOWPAN_IPHC_DAM_BIT);
-
-          /* No address context found for this address */
         }
+
+      /* No address context found for this address */
+
       else if (net_is_addr_linklocal(ipv6->destipaddr) &&
                ipv6->destipaddr[1] == 0 && ipv6->destipaddr[2] == 0 &&
                ipv6->destipaddr[3] == 0)
@@ -823,10 +866,11 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
           iphc1 |= compress_tagaddr(ipv6->destipaddr, destmac,
                                     SIXLOWPAN_IPHC_DAM_BIT);
         }
+
+      /* Send the full address */
+
       else
         {
-          /* Send the full address */
-
           iphc1 |= SIXLOWPAN_IPHC_DAM_128;       /* 128-bits */
           memcpy(g_hc06ptr, ipv6->destipaddr, 16);
           g_hc06ptr += 16;
@@ -1179,7 +1223,7 @@ void sixlowpan_uncompresshdr_hc06(FAR const struct ieee802154_data_ind_s *ind,
         }
       else
         {
-          /* Not address context based => link local M = 0, DAC = 0 - same
+          /* Not address context based ipaddr=link local M = 0, DAC = 0 - same
            * as SAC.
            */
 
