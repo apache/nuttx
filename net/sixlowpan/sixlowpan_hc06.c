@@ -1218,7 +1218,7 @@ void sixlowpan_uncompresshdr_hc06(FAR const struct ieee802154_data_ind_s *ind,
               return;
             }
 
-          uncompress_addr(&ind->src, addrcontext->prefix,
+          uncompress_addr(&ind->dest, addrcontext->prefix,
                           g_unc_ctxconf[tmp], ipv6->destipaddr);
         }
       else
@@ -1227,7 +1227,7 @@ void sixlowpan_uncompresshdr_hc06(FAR const struct ieee802154_data_ind_s *ind,
            * as SAC.
            */
 
-          uncompress_addr(&ind->src,g_llprefix, g_unc_llconf[tmp],
+          uncompress_addr(&ind->dest,g_llprefix, g_unc_llconf[tmp],
                           ipv6->destipaddr);
         }
     }
