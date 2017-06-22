@@ -118,7 +118,7 @@ static uint8_t g_iobuffer[CONFIG_NET_6LOWPAN_MTU + CONFIG_NET_GUARDSIZE];
 
 static uint8_t g_eaddr[IEEE802154_EADDRSIZE] =
 {
-  0x00, 0xfa, 0xde, 0x00, 0xde, 0xad, 0xbe, 0xef
+  0x0c, 0xfa, 0xde, 0x00, 0xde, 0xad, 0xbe, 0xef
 };
 
 static uint8_t g_saddr[IEEE802154_SADDRSIZE] =
@@ -129,6 +129,16 @@ static uint8_t g_saddr[IEEE802154_SADDRSIZE] =
 static uint8_t g_panid[IEEE802154_PANIDSIZE] =
 {
   0xca, 0xfe
+};
+
+static const uint8_t g_src_eaddr[IEEE802154_EADDRSIZE] =
+{
+  0x0a, 0xfa, 0xde, 0x00, 0xde, 0xad, 0xbe, 0xef
+};
+
+static const uint8_t g_src_saddr[IEEE802154_SADDRSIZE] =
+{
+  0x12, 0x34
 };
 
 /****************************************************************************
@@ -289,7 +299,25 @@ static int lo_loopback(FAR struct net_driver_s *dev)
   FAR struct iob_s *iob;
   int ret;
 
+  /* Create some fake metadata */
+
   memset(&ind, 0, sizeof(struct ieee802154_data_ind_s));
+
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+  ind.src.mode  = IEEE802154_ADDRMODE_EXTENDED;
+  ind.dest.mode = IEEE802154_ADDRMODE_EXTENDED;
+#else
+  ind.src.mode  = IEEE802154_ADDRMODE_SHORT;
+  ind.dest.mode = IEEE802154_ADDRMODE_SHORT;
+#endif
+
+  IEEE802154_PANIDCOPY(ind.src.panid, g_panid);
+  IEEE802154_SADDRCOPY(ind.src.saddr, g_src_saddr);
+  IEEE802154_EADDRCOPY(ind.src.eaddr, g_src_eaddr);
+
+  IEEE802154_PANIDCOPY(ind.dest.panid, g_panid);
+  IEEE802154_SADDRCOPY(ind.dest.saddr, g_saddr);
+  IEEE802154_EADDRCOPY(ind.dest.eaddr, g_eaddr);
 
   /* Loop while there framelist to be sent, i.e., while the freme list is not
    * emtpy.  Sending, of course, just means relaying back through the network

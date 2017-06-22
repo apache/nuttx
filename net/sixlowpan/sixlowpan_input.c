@@ -532,7 +532,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
   if ((hc1[SIXLOWPAN_HC1_DISPATCH] & SIXLOWPAN_DISPATCH_IPHC_MASK) == SIXLOWPAN_DISPATCH_IPHC)
     {
       ninfo("IPHC Dispatch\n");
-      sixlowpan_uncompresshdr_hc06(fragsize, iob, fptr, bptr);
+      sixlowpan_uncompresshdr_hc06(ind, fragsize, iob, fptr, bptr);
     }
   else
 #endif /* CONFIG_NET_6LOWPAN_COMPRESSION_HC06 */
