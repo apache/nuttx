@@ -453,6 +453,19 @@ Configurations
        NOTE: There is no way to stop the UDP test once it has been started
        other than by resetting the board.
 
+       Cheat Sheet.  Here is a concise summary of all all the steps needed to
+       run the UDP test (C=Coordinator; E=Endpoint):
+
+         C: nsh> i8 /dev/ieee0 startpan
+         C: nsh> 8 acceptassoc
+         E: nsh> i8 assoc
+         C: nsh> ifup wpan0
+         C: nsh> ifconfig          <-- To get the <server-ip>
+         E: nsh> ifup wpan0
+         C: nsh> udpserver &
+         E: nsh> udpclient <server-ip> &
+         E: nsh> dmesg
+
     STATUS:
        2017-06-19:  The Telnet Daemon does not start.  This is simply because
          the daemon is started too early in the sequence... before the network
@@ -460,7 +473,27 @@ Configurations
 
            telnetd_daemon: ERROR: socket failure: 106
 
-       2017-06-20:  Debug underway.. not yet functional.
+       2017-06-21:  Basic functionality has been achieved.  The following
+         configurations have been tested:
+
+                                  DATE
+         COMPRESSION ADDRESSING UDP  TCP
+         ----------- ---------- ---- ----
+         hc06        short      6/21 ---
+                     extended   ---  ---
+         hc1         short      ---  ---
+                     extended   ---  ---
+         ipv6        short      ---  ---
+                     extended   ---  ---
+
+         Other configuration options have not been specifically addressed
+         (such non-compressable ports, non-MAC based IPv6 addresses, etc.)
+
+         One limitation of this test is that it only tests NuttX 6LoWPAN
+         against NuttX 6LoWPAN.  It does not prove that NuttX 6LoWPAN is
+         compatible with other implementations of 6LoWPAN.  The tests could
+         potentially be verifying only that the design is implemented
+         incorrectly in compatible way on both the client and server sides.
 
   nsh:
 
