@@ -766,11 +766,11 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
                                 SIXLOWPAN_IPHC_SAM_BIT);
     }
 
-  /* No address context found for this address */
+  /* No address context found for the source address */
 
   else if (net_is_addr_linklocal(ipv6->srcipaddr) &&
-           ipv6->destipaddr[1] == 0 &&  ipv6->destipaddr[2] == 0 &&
-           ipv6->destipaddr[3] == 0)
+           ipv6->srcipaddr[1] == 0 &&  ipv6->srcipaddr[2] == 0 &&
+           ipv6->srcipaddr[3] == 0)
     {
       iphc1   |= compress_laddr(ipv6->srcipaddr,
                                 &ieee->i_dev.d_mac.ieee802154,
@@ -778,7 +778,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
     }
   else
     {
-      /* Send the full address ipaddr:  SAC = 0, SAM = 00 */
+      /* Send the full source address ipaddr:  SAC = 0, SAM = 00 */
 
       ninfo("Uncompressable srcipaddr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
             ipv6->srcipaddr[0], ipv6->srcipaddr[1], ipv6->srcipaddr[2],

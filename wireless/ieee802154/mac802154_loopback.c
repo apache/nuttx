@@ -311,6 +311,10 @@ static int lo_loopback(FAR struct net_driver_s *dev)
   ind.dest.mode = IEEE802154_ADDRMODE_SHORT;
 #endif
 
+  /* Only loopback the local address is the destination and some (arbitrary)
+   * address is the source.
+   */
+
   IEEE802154_PANIDCOPY(ind.src.panid, g_panid);
   IEEE802154_SADDRCOPY(ind.src.saddr, g_src_saddr);
   IEEE802154_EADDRCOPY(ind.src.eaddr, g_src_eaddr);

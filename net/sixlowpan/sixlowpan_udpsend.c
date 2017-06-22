@@ -223,7 +223,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
   if (dev == NULL)
 #endif
     {
-      nwarn("WARNING: Not routable\n");
+      nwarn("WARNING: Not routable or not IEEE802.15.4 MAC\n");
       return (ssize_t)-ENETUNREACH;
     }
 #endif
@@ -260,6 +260,8 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
   net_ipv6addr_hdrcopy(ipv6udp.ipv6.destipaddr, to6->sin6_addr.in6_u.u6_addr16);
 #ifdef CONFIG_NETDEV_MULTINIC
   net_ipv6addr_hdrcopy(ipv6udp.ipv6.srcipaddr,  conn->u.ipv6.laddr);
+#else
+  net_ipv6addr_hdrcopy(ipv6udp.ipv6.srcipaddr,  dev->d_ipv6addr);
 #endif
 
   ninfo("IPv6 length: %d\n",
