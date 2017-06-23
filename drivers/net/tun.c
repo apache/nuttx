@@ -667,8 +667,9 @@ static int tun_ifup(struct net_driver_s *dev)
 static int tun_ifdown(struct net_driver_s *dev)
 {
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
+  irqstate_t flags;
 
-  tun_lock(priv);
+  flags = enter_critical_section();
 
   /* Cancel the TX poll timer */
 
@@ -677,7 +678,8 @@ static int tun_ifdown(struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->bifup = false;
-  tun_unlock(priv);
+
+  leave_critical_section(flags);
   return OK;
 }
 
