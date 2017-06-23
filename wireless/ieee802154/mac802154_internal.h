@@ -232,8 +232,8 @@ typedef void (*mac802154_worker_t)(FAR struct ieee802154_privmac_s *priv);
 
 struct ieee802154_privmac_s
 {
-  FAR struct ieee802154_radio_s *radio;     /* Contained IEEE802.15.4 radio dev */
-  FAR struct mac802154_maccb_s *cb;         /* Head of a list of MAC callbacks */
+  FAR struct ieee802154_radio_s  *radio;    /* Contained IEEE802.15.4 radio dev */
+  FAR struct mac802154_maccb_s   *cb;       /* Head of a list of MAC callbacks */
   FAR struct mac802154_radiocb_s radiocb;   /* Interface to bind to radio */
 
   sem_t exclsem;                            /* Support exclusive access */
@@ -244,9 +244,9 @@ struct ieee802154_privmac_s
    * condition where you need to have more than one command frame simultaneously
    */
 
-  sem_t                       op_sem;       /* Exclusive operations */
-  enum mac802154_operation_e  curr_op;      /* The current overall operation */
-  enum ieee802154_cmdid_e     curr_cmd;     /* Type of the current cmd */
+  sem_t                          opsem;     /* Exclusive operations */
+  enum mac802154_operation_e     curr_op;   /* The current overall operation */
+  enum ieee802154_cmdid_e        curr_cmd;  /* Type of the current cmd */
   FAR struct ieee802154_txdesc_s *cmd_desc; /* TX descriptor for current cmd */
 
   /* Pre-allocated notifications to be passed to the registered callback.  These
