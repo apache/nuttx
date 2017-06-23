@@ -476,12 +476,12 @@ Configurations
        2017-06-21:  Basic functionality has been achieved.  The following
          configurations have been tested:
 
-                                  DATE
+                                TEST DATE
          COMPRESSION ADDRESSING UDP  TCP
          ----------- ---------- ---- ----
          hc06        short      6/21 ---
                      extended   6/22 ---
-         hc1         short      ---  ---
+         hc1         short      6/23 ---
                      extended   ---  ---
          ipv6        short      ---  ---
                      extended   ---  ---

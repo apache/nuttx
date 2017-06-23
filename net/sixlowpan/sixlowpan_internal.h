@@ -503,6 +503,7 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
  *   are set to the appropriate values
  *
  * Input Parameters:
+ *   ind   - MAC header meta data including node addressing information.
  *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
  *           inferred from the L2 length), non 0 if the packet is a 1st
  *           fragment.
@@ -518,7 +519,8 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
-int sixlowpan_uncompresshdr_hc1(uint16_t iplen, FAR struct iob_s *iob,
+int sixlowpan_uncompresshdr_hc1(FAR const struct ieee802154_data_ind_s *ind,
+                                uint16_t iplen, FAR struct iob_s *iob,
                                 FAR uint8_t *fptr, FAR uint8_t *bptr);
 #endif
 
@@ -527,11 +529,14 @@ int sixlowpan_uncompresshdr_hc1(uint16_t iplen, FAR struct iob_s *iob,
  *       sixlowpan_ismacbased
  *
  * Description:
- *   sixlowpan_addrfromip(): Extract the IEEE 802.15.14 address from a MAC
- *   based IPv6 address.  sixlowpan_addrfromip() is intended to handle a
- *   tagged address or any size; sixlowpan_saddrfromip() and
- *   sixlowpan_eaddrfromip() specifically handle short and extended
- *   addresses.
+ *   sixlowpan_{s|e]addrfromip(): Extract the IEEE 802.15.14 address from a
+ *   MAC-based IPv6 address.  sixlowpan_addrfromip() is intended to handle a
+ *   tagged address; sixlowpan_saddrfromip() and sixlowpan_eaddrfromip()
+ *   specifically handle short and extended addresses, respectively.
+ *
+ *   sixlowpan_ipfrom[s|e]addr():  Create a link-local, MAC-based IPv6
+ *   address from an IEEE802.15.4 short address (saddr) or extended address
+ *   (eaddr).
  *
  *   sixlowpan_islinklocal() and sixlowpan_ismacbased() will return true for
  *   address created in this fashion.  sixlowpan_addrfromip() is intended to
@@ -550,11 +555,16 @@ int sixlowpan_uncompresshdr_hc1(uint16_t iplen, FAR struct iob_s *iob,
 #define sixlowpan_islinklocal(ipaddr) ((ipaddr)[0] == NTOHS(0xfe80))
 
 void sixlowpan_saddrfromip(const net_ipv6addr_t ipaddr,
-                          FAR struct sixlowpan_saddr_s *saddr);
+                           FAR struct sixlowpan_saddr_s *saddr);
 void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr,
-                          FAR struct sixlowpan_eaddr_s *eaddr);
+                           FAR struct sixlowpan_eaddr_s *eaddr);
 void sixlowpan_addrfromip(const net_ipv6addr_t ipaddr,
                           FAR struct sixlowpan_tagaddr_s *addr);
+
+void sixlowpan_ipfromsaddr(FAR const uint8_t *saddr,
+                           FAR net_ipv6addr_t ipaddr);
+void sixlowpan_ipfromeaddr(FAR const uint8_t *eaddr,
+                           FAR net_ipv6addr_t ipaddr);
 
 bool sixlowpan_issaddrbased(const net_ipv6addr_t ipaddr,
                             FAR const struct sixlowpan_saddr_s *saddr);

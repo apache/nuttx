@@ -68,14 +68,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sixlowpan_addrfromip
+ * Name: sixlowpan_{s|e]addrfromip
  *
  * Description:
- *   sixlowpan_addrfromip(): Extract the IEEE 802.15.14 address from a MAC
- *   based IPv6 address.  sixlowpan_addrfromip() is intended to handle a
- *   tagged address or and size; sixlowpan_saddrfromip() and
- *   sixlowpan_eaddrfromip() specifically handler short and extended
- *   addresses.
+ *   sixlowpan_{s|e]addrfromip(): Extract the IEEE 802.15.14 address from a
+ *   MAC-based IPv6 address.  sixlowpan_addrfromip() is intended to handle a
+ *   tagged address; sixlowpan_saddrfromip() and sixlowpan_eaddrfromip()
+ *   specifically handle short and extended addresses, respectively.
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
@@ -130,6 +129,49 @@ void sixlowpan_addrfromip(const net_ipv6addr_t ipaddr,
       sixlowpan_eaddrfromip(ipaddr, &addr->u.eaddr);
       addr->extended = true;
     }
+}
+
+/****************************************************************************
+ * Name: sixlowpan_ipfrom[s|e]addr
+ *
+ * Description:
+ *   sixlowpan_ipfrom[s|e]addr():  Create a link-local, MAC-based IPv6
+ *   address from an IEEE802.15.4 short address (saddr) or extended address
+ *   (eaddr).
+ *
+ *    128  112  96   80    64   48   32   16
+ *    ---- ---- ---- ----  ---- ---- ---- ----
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
+ *
+ ****************************************************************************/
+
+void sixlowpan_ipfromsaddr(FAR const uint8_t *saddr,
+                           FAR net_ipv6addr_t ipaddr)
+{
+  ipaddr[0]  = HTONS(0xfe80);
+  ipaddr[1]  = 0;
+  ipaddr[2]  = 0;
+  ipaddr[3]  = 0;
+  ipaddr[4]  = 0;
+  ipaddr[5]  = HTONS(0x00ff);
+  ipaddr[6]  = HTONS(0xfe00);
+  ipaddr[7]  = (uint16_t)saddr[0] << 8 |  (uint16_t)saddr[1];
+  ipaddr[7] ^= 0x200;
+}
+
+void sixlowpan_ipfromeaddr(FAR const uint8_t *eaddr,
+                           FAR net_ipv6addr_t ipaddr)
+{
+  ipaddr[0]  = HTONS(0xfe80);
+  ipaddr[1]  = 0;
+  ipaddr[2]  = 0;
+  ipaddr[3]  = 0;
+  ipaddr[4]  = (uint16_t)eaddr[0] << 8 | (uint16_t)eaddr[1];
+  ipaddr[5]  = (uint16_t)eaddr[2] << 8 | (uint16_t)eaddr[3];
+  ipaddr[6]  = (uint16_t)eaddr[4] << 8 | (uint16_t)eaddr[5];
+  ipaddr[7]  = (uint16_t)eaddr[6] << 8 | (uint16_t)eaddr[6];
+  ipaddr[4] ^= 0x200;
 }
 
 /****************************************************************************

@@ -541,7 +541,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
   if (hc1[SIXLOWPAN_HC1_DISPATCH] == SIXLOWPAN_DISPATCH_HC1)
     {
       ninfo("HC1 Dispatch\n");
-      sixlowpan_uncompresshdr_hc1(fragsize, iob, fptr, bptr);
+      sixlowpan_uncompresshdr_hc1(ind, fragsize, iob, fptr, bptr);
     }
   else
 #endif /* CONFIG_NET_6LOWPAN_COMPRESSION_HC1 */
@@ -581,9 +581,6 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
       g_uncomp_hdrlen = ieee->i_boffset;
     }
-
-
-
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
   /* Copy "payload" from the frame buffer to the IEEE802.15.4 MAC driver's
@@ -689,7 +686,7 @@ static int sixlowpan_dispatch(FAR struct ieee802154_driver_s *ieee)
 
   /* We only accept IPv6 packets. */
 
-  ninfo("Iv6 packet dispatch\n");
+  ninfo("IPv6 packet dispatch\n");
   NETDEV_RXIPV6(&ieee->i_dev);
 
   /* Give the IPv6 packet to the network layer.  NOTE:  If there is a
