@@ -213,7 +213,7 @@ static void lo_addr2ip(FAR struct net_driver_s *dev)
   dev->d_ipv6addr[4]  = (uint16_t)g_eaddr[0] << 8 | (uint16_t)g_eaddr[1];
   dev->d_ipv6addr[5]  = (uint16_t)g_eaddr[2] << 8 | (uint16_t)g_eaddr[3];
   dev->d_ipv6addr[6]  = (uint16_t)g_eaddr[4] << 8 | (uint16_t)g_eaddr[5];
-  dev->d_ipv6addr[7]  = (uint16_t)g_eaddr[6] << 8 | (uint16_t)g_eaddr[6];
+  dev->d_ipv6addr[7]  = (uint16_t)g_eaddr[6] << 8 | (uint16_t)g_eaddr[7];
   dev->d_ipv6addr[4] ^= 0x200;
 
   memcpy(dev->d_mac.ieee802154, g_eaddr, IEEE802154_EADDRSIZE);

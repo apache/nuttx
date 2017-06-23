@@ -482,7 +482,7 @@ Configurations
          hc06        short      6/21 ---
                      extended   6/22 ---
          hc1         short      6/23 ---
-                     extended   ---  ---
+                     extended   6/23 ---
          ipv6        short      ---  ---
                      extended   ---  ---
 

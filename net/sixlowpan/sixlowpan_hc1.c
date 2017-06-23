@@ -296,11 +296,13 @@ int sixlowpan_uncompresshdr_hc1(FAR const struct ieee802154_data_ind_s *ind,
   ninfo("fptr=%p g_frame_hdrlen=%u\n", fptr, g_frame_hdrlen);
 
   /* Format the IPv6 header in the device d_buf */
-  /* Set version, traffic clase, and flow label */
+  /* Set version, traffic clase, and flow label.  This assumes that Bit 4 is
+   * set in HC1.
+   */
 
-  ipv6->vtc    = 0x60;  /* Bits 0-3: version, bits 4-7: traffic class (MS) */
-  ipv6->tcf    = 0;     /* Bits 0-3: traffic class (LS), 4-bits: flow label (MS) */
-  ipv6->flow   = 0;     /* 16-bit flow label (LS) */
+  ipv6->vtc  = 0x60;  /* Bits 0-3: version, bits 4-7: traffic class (MS) */
+  ipv6->tcf  = 0;     /* Bits 0-3: traffic class (LS), 4-bits: flow label (MS) */
+  ipv6->flow = 0;     /* 16-bit flow label (LS) */
 
   g_uncomp_hdrlen += IPv6_HDRLEN;
 

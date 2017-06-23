@@ -145,7 +145,7 @@
 #  define SIXLOWPAN_HC1_DESTADDR_PIIC     0x10 /*   PI,IC */
 #  define SIXLOWPAN_HC1_DESTADDR_PCII     0x20 /*   PC,II */
 #  define SIXLOWPAN_HC1_DESTADDR_PCIC     0x30 /*   PC,IC */
-#define SIXLOWPAN_HC1_TCFL_C              0x08 /* Traffic class and flow label are zero */
+#define SIXLOWPAN_HC1_TCFL_C              0x08 /* Bit 4: Traffic class and flow label are zero */
 #define SIXLOWPAN_HC1_NH_MASK             0x06 /* Bits 5-6: Next HC1 header type */
 #  define SIXLOWPAN_HC1_NH_NC             0x00 /*   Not compressed */
 #  define SIXLOWPAN_HC1_NH_UDP            0x02 /*   UDP */

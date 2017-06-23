@@ -170,7 +170,7 @@ void sixlowpan_ipfromeaddr(FAR const uint8_t *eaddr,
   ipaddr[4]  = (uint16_t)eaddr[0] << 8 | (uint16_t)eaddr[1];
   ipaddr[5]  = (uint16_t)eaddr[2] << 8 | (uint16_t)eaddr[3];
   ipaddr[6]  = (uint16_t)eaddr[4] << 8 | (uint16_t)eaddr[5];
-  ipaddr[7]  = (uint16_t)eaddr[6] << 8 | (uint16_t)eaddr[6];
+  ipaddr[7]  = (uint16_t)eaddr[6] << 8 | (uint16_t)eaddr[7];
   ipaddr[4] ^= 0x200;
 }
 
