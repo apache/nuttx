@@ -696,10 +696,9 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
     }
 
   /* Note that the payload length is always compressed */
-
   /* Next header. We compress it if UDP */
 
-#if CONFIG_NET_UDP || UIP_CONF_ROUTER
+#ifdef CONFIG_NET_UDP
   if (ipv6->proto == IP_PROTO_UDP)
     {
       iphc0 |= SIXLOWPAN_IPHC_NH;
@@ -879,7 +878,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
   g_uncomp_hdrlen = IPv6_HDRLEN;
 
-#if CONFIG_NET_UDP
+#ifdef CONFIG_NET_UDP
   /* UDP header compression */
 
   if (ipv6->proto == IP_PROTO_UDP)

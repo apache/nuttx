@@ -122,6 +122,7 @@ static void devif_packet_conversion(FAR struct net_driver_s *dev,
   if (dev->d_len > 0)
 #endif
     {
+#ifdef CONFIG_NET_TCP
       if (pkttype == DEVIF_TCP)
         {
           FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)dev->d_buf;
@@ -145,6 +146,7 @@ static void devif_packet_conversion(FAR struct net_driver_s *dev,
             }
         }
       else
+#endif
         {
           nerr("ERROR: Non-TCP packet dropped.  Packet type: %u\n", pkttype);
         }

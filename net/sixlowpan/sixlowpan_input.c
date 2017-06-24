@@ -98,7 +98,7 @@
 #elif defined(CONFIG_NET_UDP)
 /* The UDP header length is always 8 bytes */
 
-#  define UNCOMP_MAXHDR  (IPv6_HDRLEN + TCP_HDRLEN)
+#  define UNCOMP_MAXHDR  (IPv6_HDRLEN + UDP_HDRLEN)
 
 #elif defined(CONFIG_NET_ICMPv6)
 /* The ICMPv6 header length is a mere 4 bytes */
@@ -836,32 +836,44 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
                    * the protocol header.
                    */
 
-                  if (ipv6hdr->proto != IP_PROTO_TCP)
+                  switch (ipv6hdr->proto)
                     {
-                      FAR struct tcp_hdr_s *tcp = TCPBUF(&ieee->i_dev);
-                      uint16_t tcplen;
+#ifdef CONFIG_NET_TCP
+                      case IP_PROTO_TCP:
+                        {
+                          FAR struct tcp_hdr_s *tcp = TCPBUF(&ieee->i_dev);
+                          uint16_t tcplen;
 
-                      /* The TCP header length is encoded in the top 4 bits
-                       * of the tcpoffset field (in units of 32-bit words).
-                       */
+                          /* The TCP header length is encoded in the top 4 bits
+                           * of the tcpoffset field (in units of 32-bit words).
+                           */
 
-                      tcplen = ((uint16_t)tcp->tcpoffset >> 4) << 2;
-                      hdrlen = IPv6_HDRLEN + tcplen;
-                    }
-                  else if (ipv6hdr->proto != IP_PROTO_UDP)
-                    {
-                      hdrlen = IPv6_HDRLEN + UDP_HDRLEN;
-                    }
-                  else if (ipv6hdr->proto != IP_PROTO_ICMP6)
-                    {
-                      hdrlen = IPv6_HDRLEN + ICMPv6_HDRLEN;
-                    }
-                  else
-                    {
-                      nwarn("WARNING: Unsupported protoype: %u\n",
-                            ipv6hdr->proto);
-                      ret = -EPROTO;
-                      goto drop;
+                          tcplen = ((uint16_t)tcp->tcpoffset >> 4) << 2;
+                          hdrlen = IPv6_HDRLEN + tcplen;
+                        }
+                        break;
+#endif
+#ifdef CONFIG_NET_UDP
+                      case IP_PROTO_UDP:
+                        {
+                          hdrlen = IPv6_HDRLEN + UDP_HDRLEN;
+                        }
+                        break;
+#endif
+#ifdef CONFIG_NET_ICMPv6
+                      case IP_PROTO_ICMP6:
+                        {
+                          hdrlen = IPv6_HDRLEN + ICMPv6_HDRLEN;
+                        }
+                        break;
+#endif
+                      default:
+                        {
+                          nwarn("WARNING: Unsupported protoype: %u\n",
+                                ipv6hdr->proto);
+                          ret = -EPROTO;
+                          goto drop;
+                        }
                     }
 
                   if (hdrlen < ieee->i_dev.d_len)
