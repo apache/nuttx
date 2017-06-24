@@ -170,7 +170,7 @@
 #  define SIXLOWPAN_IPHC_TC_00            0x00  /*   ECN+DSCP+4-bit Pad+Flow Label (4 bytes) */
 #  define SIXLOWPAN_IPHC_TC_01            0x08  /*   ECN+2-bit Pad+ Flow Label (3 bytes), DSCP is elided. */
 #  define SIXLOWPAN_IPHC_TC_10            0x10  /*   ECN+DSCP (1 byte), Flow Label is elided */
-#  define SIXLOWPAN_IPHC_TC_11            0x11  /*   Traffic Class and Flow Label are elided */
+#  define SIXLOWPAN_IPHC_TC_11            0x18  /*   Traffic Class and Flow Label are elided */
 #define SIXLOWPAN_IPHC_NH                 0x04  /* Bit 5: Next Header Compressed */
 #define SIXLOWPAN_IPHC_HLIM_MASK          0x03  /* Bits 6-7: Hop Limit */
 #  define SIXLOWPAN_IPHC_HLIM_INLINE      0x00  /*   Carried in-line */

@@ -132,6 +132,149 @@ static uint16_t sixlowpan_tcp_chksum(FAR struct ipv6tcp_hdr_s *ipv6tcp,
 }
 
 /****************************************************************************
+ * Name: sixlowpan_send_packet
+ *
+ * Description:
+ *   sixlowpan_send_packet() will send one TCP packet, respecting the
+ *   configured 6LoWPAN MTU.
+ *
+ * Parameters:
+ *   conn    - An instance of the TCP connection structure.
+ *   dev     - The network device that will route the packet
+ *   buf     - Data to send
+ *   bulen   - Length of data to send
+ *   timeout - Send timeout value
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error, a
+ *   negated errnot value.  Returned error numbers must be consistent with
+ *   definition of errors reported by send() or sendto().
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+static ssize_t sixlowpan_send_packet(FAR struct tcp_conn_s *conn,
+                                     FAR struct net_driver_s *dev,
+                                     FAR const void *buf, size_t buflen,
+                                     uint16_t timeout)
+{
+  struct sixlowpan_tagaddr_s destmac;
+  struct ipv6tcp_hdr_s ipv6tcp;
+  ssize_t pktlen;
+  uint16_t iplen;
+  int ret;
+
+  /* How much of the data can send in this packet? */
+
+  pktlen = buflen;
+  if ((buflen + IPv6_HDRLEN + TCP_HDRLEN) > CONFIG_NET_6LOWPAN_MTU)
+    {
+      pktlen = (CONFIG_NET_6LOWPAN_MTU - IPv6_HDRLEN - TCP_HDRLEN);
+    }
+  else
+    {
+      pktlen = buflen;
+    }
+
+  /* Initialize the IPv6/TCP headers */
+
+  ipv6tcp.ipv6.vtc    = 0x60;
+  ipv6tcp.ipv6.tcf    = 0x00;
+  ipv6tcp.ipv6.flow   = 0x00;
+  ipv6tcp.ipv6.proto  = IP_PROTO_TCP;
+  ipv6tcp.ipv6.ttl    = IP_TTL;
+
+  /* The IPv6 header length field does not include the size of IPv6 IP
+   * header.
+   */
+
+  iplen               = pktlen + TCP_HDRLEN;
+  ipv6tcp.ipv6.len[0] = (iplen >> 8);
+  ipv6tcp.ipv6.len[1] = (iplen & 0xff);
+
+  /* Copy the source and destination addresses */
+
+#ifdef CONFIG_NETDEV_MULTINIC
+  net_ipv6addr_hdrcopy(ipv6tcp.ipv6.srcipaddr,  conn->u.ipv6.laddr);
+#endif
+  net_ipv6addr_hdrcopy(ipv6tcp.ipv6.destipaddr, conn->u.ipv6.raddr);
+
+  ninfo("IPv6 length: %d\n",
+        ((int)ipv6tcp.ipv6.len[0] << 8) + ipv6tcp.ipv6.len[1]);
+
+#ifdef CONFIG_NET_STATISTICS
+  g_netstats.ipv6.sent++;
+#endif
+
+  /* Initialize the TCP header */
+
+  ipv6tcp.tcp.srcport   = conn->lport;           /* Local port */
+  ipv6tcp.tcp.destport  = conn->rport;           /* Connected remote port */
+
+  memcpy(ipv6tcp.tcp.ackno, conn->rcvseq, 4);    /* ACK number */
+  memcpy(ipv6tcp.tcp.seqno, conn->sndseq, 4);    /* Sequence number */
+
+  ipv6tcp.tcp.tcpoffset = (TCP_HDRLEN / 4) << 4; /* No optdata */
+  ipv6tcp.tcp.flags     = 0;                     /* No urgent data */
+  ipv6tcp.tcp.urgp[0]   = 0;                     /* No urgent data */
+  ipv6tcp.tcp.urgp[1]   = 0;
+
+    /* Set the TCP window */
+
+  if (conn->tcpstateflags & TCP_STOPPED)
+    {
+      /* If the connection has issued TCP_STOPPED, we advertise a zero
+       * window so that the remote host will stop sending data.
+       */
+
+      ipv6tcp.tcp.wnd[0] = 0;
+      ipv6tcp.tcp.wnd[1] = 0;
+    }
+  else
+    {
+      ipv6tcp.tcp.wnd[0] = ((NET_DEV_RCVWNDO(dev)) >> 8);
+      ipv6tcp.tcp.wnd[1] = ((NET_DEV_RCVWNDO(dev)) & 0xff);
+    }
+
+  /* Calculate TCP checksum. */
+
+  ipv6tcp.tcp.tcpchksum   = 0;
+  ipv6tcp.tcp.tcpchksum   = ~sixlowpan_tcp_chksum(&ipv6tcp, buf, pktlen);
+
+  ninfo("Outgoing TCP packet length: %d bytes\n", iplen + IPv6_HDRLEN);
+
+#ifdef CONFIG_NET_STATISTICS
+  g_netstats.tcp.sent++;
+#endif
+
+  /* Get the IEEE 802.15.4 MAC address of the destination.  This assumes
+   * an encoding of the MAC address in the IPv6 address.
+   */
+
+  sixlowpan_addrfromip(conn->u.ipv6.raddr, &destmac);
+
+  /* If routable, then call sixlowpan_send() to format and send the 6LoWPAN
+   * packet.
+   */
+
+  ret = sixlowpan_send(dev, &conn->list,
+                       (FAR const struct ipv6_hdr_s *)&ipv6tcp,
+                       buf, pktlen, &destmac, timeout);
+  if (ret < 0)
+    {
+      nerr("ERROR: sixlowpan_send() failed: %d\n", ret);
+    }
+
+  /* Return the amount of data that was sent from the user buffer in this
+   * packet.
+   */
+
+  return pktlen;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -163,11 +306,11 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 {
   FAR struct tcp_conn_s *conn;
   FAR struct net_driver_s *dev;
-  struct ipv6tcp_hdr_s ipv6tcp;
-  struct sixlowpan_tagaddr_s destmac;
+  size_t remaining;
   uint16_t timeout;
-  uint16_t iplen;
+#ifdef CONFIG_NET_ICMPv6_NEIGHBOR
   int ret;
+#endif
 
   ninfo("buflen %lu\n", (unsigned long)buflen);
   sixlowpan_dumpbuffer("Outgoing TCP payload", buf, buflen);
@@ -177,7 +320,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   /* Make sure that this is a valid socket */
 
-  if (psock != NULL || psock->s_crefs <= 0)
+  if (psock == NULL || psock->s_crefs <= 0)
     {
       nerr("ERROR: Invalid socket\n");
       return (ssize_t)-EBADF;
@@ -243,110 +386,55 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
     }
 #endif
 
-  /* Initialize the IPv6/TCP headers */
-
-  /* Initialize the IPv6/UDP headers */
-
-  ipv6tcp.ipv6.vtc    = 0x60;
-  ipv6tcp.ipv6.tcf    = 0x00;
-  ipv6tcp.ipv6.flow   = 0x00;
-  ipv6tcp.ipv6.proto  = IP_PROTO_TCP;
-  ipv6tcp.ipv6.ttl    = IP_TTL;
-
-  /* The IPv6 header length field does not include the size of IPv6 IP
-   * header.
-   */
-
-  iplen               = buflen + TCP_HDRLEN;
-  ipv6tcp.ipv6.len[0] = (iplen >> 8);
-  ipv6tcp.ipv6.len[1] = (iplen & 0xff);
-
-  /* Copy the source and destination addresses */
-
-#ifdef CONFIG_NETDEV_MULTINIC
-  net_ipv6addr_hdrcopy(ipv6tcp.ipv6.srcipaddr,  conn->u.ipv6.laddr);
-#endif
-  net_ipv6addr_hdrcopy(ipv6tcp.ipv6.destipaddr, conn->u.ipv6.raddr);
-
-  ninfo("IPv6 length: %d\n",
-        ((int)ipv6tcp.ipv6.len[0] << 8) + ipv6tcp.ipv6.len[1]);
-
-#ifdef CONFIG_NET_STATISTICS
-  g_netstats.ipv6.sent++;
-#endif
-
-  /* Initialize the TCP header */
-
-  ipv6tcp.tcp.srcport   = conn->lport;           /* Local port */
-  ipv6tcp.tcp.destport  = conn->rport;           /* Connected remote port */
-
-  memcpy(ipv6tcp.tcp.ackno, conn->rcvseq, 4);    /* ACK number */
-  memcpy(ipv6tcp.tcp.seqno, conn->sndseq, 4);    /* Sequence number */
-
-  ipv6tcp.tcp.tcpoffset = (TCP_HDRLEN / 4) << 4; /* No optdata */
-  ipv6tcp.tcp.urgp[0]   = 0;                     /* No urgent data */
-  ipv6tcp.tcp.urgp[1]   = 0;
-
-    /* Set the TCP window */
-
-  if (conn->tcpstateflags & TCP_STOPPED)
-    {
-      /* If the connection has issued TCP_STOPPED, we advertise a zero
-       * window so that the remote host will stop sending data.
-       */
-
-      ipv6tcp.tcp.wnd[0] = 0;
-      ipv6tcp.tcp.wnd[1] = 0;
-    }
-  else
-    {
-      ipv6tcp.tcp.wnd[0] = ((NET_DEV_RCVWNDO(dev)) >> 8);
-      ipv6tcp.tcp.wnd[1] = ((NET_DEV_RCVWNDO(dev)) & 0xff);
-    }
-
-  /* Calculate TCP checksum. */
-
-  ipv6tcp.tcp.tcpchksum   = 0;
-  ipv6tcp.tcp.tcpchksum   = ~sixlowpan_tcp_chksum(&ipv6tcp, buf, buflen);
-
-  ninfo("Outgoing TCP packet length: %d bytes\n", iplen + IPv6_HDRLEN);
-
-#ifdef CONFIG_NET_STATISTICS
-  g_netstats.tcp.sent++;
-#endif
-
   /* Set the socket state to sending */
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
 
-  /* Get the IEEE 802.15.4 MAC address of the destination.  This assumes
-   * an encoding of the MAC address in the IPv6 address.
-   */
-
-  sixlowpan_addrfromip(conn->u.ipv6.raddr, &destmac);
-
-  /* If routable, then call sixlowpan_send() to format and send the 6LoWPAN
-   * packet.
+  /* Send the TCP packets, breaking down the potential large user buffer
+   * into smaller packets that can be reassembled in the allocated MTU
+   * packet buffer.
    */
 
 #ifdef CONFIG_NET_SOCKOPTS
-  timeout = psock->s_sndtimeo;
+  timeout   = psock->s_sndtimeo;
 #else
-  timeout = 0;
+  timeout   = 0;
 #endif
+  remaining = buflen;
 
-  ret = sixlowpan_send(dev, &conn->list,
-                       (FAR const struct ipv6_hdr_s *)&ipv6tcp,
-                       buf, buflen, &destmac, timeout);
-  if (ret < 0)
+  for (; ; )
     {
-      nerr("ERROR: sixlowpan_send() failed: %d\n", ret);
+      /* Send the next packet */
+
+      ssize_t pktlen = sixlowpan_send_packet(conn, dev, buf, remaining,
+                                             timeout);
+      if (pktlen < 0)
+        {
+          psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
+          return (ssize_t)pktlen;
+        }
+
+      /* Check if all data has been sent */
+
+      if (pktlen >= remaining)
+        {
+          /* Yes.. we are done */
+
+          break;
+        }
+
+      /* No.. Update the buffer pointer and bytes remaining and send the next
+       * packet.
+       */
+
+      remaining -= pktlen;
+      buf       += pktlen;
     }
 
   /* Set the socket state to idle */
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
-  return ret;
+  return (ssize_t)buflen;
 }
 
 /****************************************************************************
@@ -356,7 +444,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
  *   TCP output comes through three different mechansims.  Either from:
  *
  *   1. TCP socket output.  For the case of TCP output to an
- *      IEEE802.15.4, the TCP output is caught in the socket
+ *      IEEE802.15.4 device, the TCP output is caught in the socket
  *      send()/sendto() logic and and redirected to psock_6lowpan_tcp_send().
  *   2. TCP output from the TCP state machine.  That will occur
  *      during TCP packet processing by the TCP state meachine.

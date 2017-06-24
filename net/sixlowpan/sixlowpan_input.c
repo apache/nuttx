@@ -289,7 +289,13 @@ static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr, FAR uint8_t *bptr)
  *   iob  - The IOB containing the frame.
  *
  * Returned Value:
- *   Ok is returned on success; Othewise a negated errno value is returned.
+ *   On success, a value greater than equal to zero is returned, either:
+ *
+ *     INPUT_PARTIAL  Frame processed successful, packet incomplete
+ *     INPUT_COMPLETE Frame processed successful, packet complete
+ *
+ *   Othewise a negated errno value is returned to indicate the nature of the
+ *   failure.
  *
  * Assumptions:
  *   Network is locked
@@ -323,11 +329,8 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
   fptr    = iob->io_data;    /* Frame data is in I/O buffer */
   hdrsize = iob->io_offset;  /* Offset past the MAC header */
-  if (hdrsize < 0)
-    {
-      nwarn("Invalid IEEE802.15.2 header: %d\n", hdrsize);
-      return hdrsize;
-    }
+
+  DEBUGASSERT((unsigned)hdrsize < iob->io_len);
 
   /* Initialize global data.  Locking the network guarantees that we have
    * exclusive use of the global values for intermediate calculations.
@@ -462,7 +465,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
           nwarn("WARNING: Dropping 6LoWPAN packet that is not a fragment of "
                 "the packet currently being reassembled\n");
-          return INPUT_PARTIAL;
+          return -EPERM;
         }
       else
         {
@@ -488,7 +491,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       if (!isfirstfrag)
         {
           nwarn("WARNING: FRAGN 6LoWPAN fragment while not reassembling\n");
-          return OK;
+          return -EPERM;
         }
 
       /* Drop the packet if it cannot fit into the d_buf */
@@ -496,7 +499,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       if (fragsize > CONFIG_NET_6LOWPAN_MTU)
         {
           nwarn("WARNING: Reassembled packet size exeeds CONFIG_NET_6LOWPAN_MTU\n");
-          return OK;
+          return -ENOSPC;
         }
 
       ieee->i_pktlen   = fragsize;
@@ -556,7 +559,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       /* Unknown or unsupported header */
 
       nwarn("WARNING: Unknown dispatch: %u\n",  hc1[SIXLOWPAN_HC1_DISPATCH]);
-      return OK;
+      return -ENOSYS;
     }
 
 #ifdef CONFIG_NET_6LOWPAN_FRAG
@@ -594,7 +597,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
     {
       nwarn("WARNING: Packet dropped due to payload (%u) > packet buffer (%u)\n",
             paysize, CONFIG_NET_6LOWPAN_MTU);
-      return OK;
+      return -ENOSPC;
     }
 
   /* Sanity-check size of incoming packet to avoid buffer overflow */
@@ -795,7 +798,7 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
        * reassembled?
        */
 
-      if (ret == INPUT_COMPLETE)
+      if (ret >= 0 && ret == INPUT_COMPLETE)
         {
           /* Inject the uncompressed, reassembled packet into the network */
 
