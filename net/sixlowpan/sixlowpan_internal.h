@@ -226,9 +226,9 @@ struct iob_s;                /* Forward reference */
  * Name: sixlowpan_send
  *
  * Description:
- *   Process an outgoing UDP or TCP packet.  Takes an IP packet and formats
+ *   Process an outgoing UDP or ICMPv6 packet.  Takes an IP packet and formats
  *   it to be sent on an 802.15.4 network using 6lowpan.  Called from common
- *   UDP/TCP send logic.
+ *   UDP/ICMPv6 send logic.
  *
  *   The payload data is in the caller 'buf' and is of length 'buflen'.
  *   Compressed headers will be added and if necessary the packet is
@@ -238,16 +238,16 @@ struct iob_s;                /* Forward reference */
  * Input Parameters:
  *   dev     - The IEEE802.15.4 MAC network driver interface.
  *   list    - Head of callback list for send interrupt
- *   ipv6hdr - IPv6 plus TCP or UDP headers.
+ *   ipv6hdr - IPv6 header followed by UDP or ICMPv6 header.
  *   buf     - Data to send
  *   len     - Length of data to send
- *   raddr   - The MAC address of the destination
+ *   destmac - The IEEE802.15.4 MAC address of the destination
  *   timeout - Send timeout in deciseconds
  *
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.
  *   This function is expected to fail if the driver is not an IEEE802.15.4
- *   MAC network driver.  In that case, the UDP/TCP will fall back to normal
+ *   MAC network driver.  In that case, the logic will fall back to normal
  *   IPv4/IPv6 formatting.
  *
  * Assumptions:

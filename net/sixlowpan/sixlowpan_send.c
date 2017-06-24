@@ -82,7 +82,7 @@ struct sixlowpan_send_s
   int                          s_result;  /* The result of the transfer */
   uint16_t                     s_timeout; /* Send timeout in deciseconds */
   systime_t                    s_time;    /* Last send time for determining timeout */
-  FAR const struct ipv6_hdr_s *s_ipv6hdr; /* IPv6 header, followed by UDP or TCP header. */
+  FAR const struct ipv6_hdr_s *s_ipv6hdr; /* IPv6 header, followed by UDP or ICMP header. */
   FAR const struct sixlowpan_tagaddr_s *s_destmac; /* Destination MAC address */
   FAR const void              *s_buf;     /* Data to send */
   size_t                       s_len;     /* Length of data in buf */
@@ -242,9 +242,9 @@ end_wait:
  * Name: sixlowpan_send
  *
  * Description:
- *   Process an outgoing UDP or TCP packet.  Takes an IP packet and formats
+ *   Process an outgoing UDP or ICMPv6 packet.  Takes an IP packet and formats
  *   it to be sent on an 802.15.4 network using 6lowpan.  Called from common
- *   UDP/TCP send logic.
+ *   UDP/ICMPv6 send logic.
  *
  *   The payload data is in the caller 'buf' and is of length 'buflen'.
  *   Compressed headers will be added and if necessary the packet is
@@ -254,7 +254,7 @@ end_wait:
  * Input Parameters:
  *   dev     - The IEEE802.15.4 MAC network driver interface.
  *   list    - Head of callback list for send interrupt
- *   ipv6hdr - IPv6 header followed by TCP or UDP header.
+ *   ipv6hdr - IPv6 header followed by UDP or ICMPv6 header.
  *   buf     - Data to send
  *   len     - Length of data to send
  *   destmac - The IEEE802.15.4 MAC address of the destination
@@ -263,7 +263,7 @@ end_wait:
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.
  *   This function is expected to fail if the driver is not an IEEE802.15.4
- *   MAC network driver.  In that case, the UDP/TCP will fall back to normal
+ *   MAC network driver.  In that case, the logic will fall back to normal
  *   IPv4/IPv6 formatting.
  *
  * Assumptions:

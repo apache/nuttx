@@ -44,10 +44,12 @@
 #include <errno.h>
 #include <debug.h>
 
+#include "nuttx/semaphore.h"
 #include "nuttx/net/netdev.h"
 #include "nuttx/net/netstats.h"
 
 #include "netdev/netdev.h"
+#include "devif/devif.h"
 #include "socket/socket.h"
 #include "tcp/tcp.h"
 #include "utils/utils.h"
@@ -62,6 +64,43 @@
 /* Buffer access helpers */
 
 #define IPv6BUF(dev)  ((FAR struct ipv6_hdr_s *)((dev)->d_buf))
+#define TCPBUF(dev)   ((FAR struct tcp_hdr_s *)(&(dev)->d_buf[IPv6_HDRLEN]))
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* These are temporary stubs.  Something like this would be needed to
+ * monitor the health of a IPv6 neighbor.
+ */
+
+#define neighbor_reachable(dev)
+#define neighbor_notreachable(dev)
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* This is the state data provided to the send interrupt logic.  No actions
+ * can be taken until the until we receive the TX poll, then we can call
+ * sixlowpan_queue_frames() with this data strurcture.
+ */
+
+struct sixlowpan_send_s
+{
+  FAR struct socket           *s_sock;    /* Internal socket reference */
+  FAR struct devif_callback_s *s_cb;      /* Reference to callback instance */
+  sem_t                        s_waitsem; /* Supports waiting for driver events */
+  int                          s_result;  /* The result of the transfer */
+  uint16_t                     s_timeout; /* Send timeout in deciseconds */
+  systime_t                    s_time;    /* Last send time for determining timeout */
+  FAR const struct sixlowpan_tagaddr_s *s_destmac; /* Destination MAC address */
+  FAR const uint8_t           *s_buf;     /* Data to send */
+  size_t                       s_buflen;  /* Length of data in buf */
+  ssize_t                      s_sent;    /* The number of bytes sent */
+  uint32_t                     s_isn;     /* Initial sequence number */
+  uint32_t                     s_acked;   /* The number of bytes acked */
+};
 
 /****************************************************************************
  * Private Functions
@@ -84,7 +123,7 @@
  *
  ****************************************************************************/
 
-static uint16_t sixlowpan_tcp_chksum(FAR struct ipv6tcp_hdr_s *ipv6tcp,
+static uint16_t sixlowpan_tcp_chksum(FAR const struct ipv6tcp_hdr_s *ipv6tcp,
                                      FAR const uint8_t *buf, uint16_t buflen)
 {
   uint16_t upperlen;
@@ -132,97 +171,66 @@ static uint16_t sixlowpan_tcp_chksum(FAR struct ipv6tcp_hdr_s *ipv6tcp,
 }
 
 /****************************************************************************
- * Name: sixlowpan_send_packet
+ * Name: sixlowpan_tcp_header
  *
  * Description:
- *   sixlowpan_send_packet() will send one TCP packet, respecting the
- *   configured 6LoWPAN MTU.
+ *   sixlowpan_tcp_header() will construct the IPv6 and TCP headers
  *
  * Parameters:
  *   conn    - An instance of the TCP connection structure.
  *   dev     - The network device that will route the packet
  *   buf     - Data to send
  *   bulen   - Length of data to send
- *   timeout - Send timeout value
+ *   ipv6tcp - The location to save the IPv6 + TCP header
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On  error, a
- *   negated errnot value.  Returned error numbers must be consistent with
- *   definition of errors reported by send() or sendto().
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   failure.
  *
  * Assumptions:
  *   Called with the network locked.
  *
  ****************************************************************************/
 
-static ssize_t sixlowpan_send_packet(FAR struct tcp_conn_s *conn,
-                                     FAR struct net_driver_s *dev,
-                                     FAR const void *buf, size_t buflen,
-                                     uint16_t timeout)
+static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
+                                FAR struct net_driver_s *dev,
+                                FAR const void *buf, size_t buflen,
+                                FAR struct ipv6tcp_hdr_s *ipv6tcp)
 {
-  struct sixlowpan_tagaddr_s destmac;
-  struct ipv6tcp_hdr_s ipv6tcp;
-  ssize_t pktlen;
-  uint32_t sndseq;
   uint16_t iplen;
-  int ret;
-
-  /* How much of the data can send in this packet? */
-
-  pktlen = buflen;
-  if ((buflen + IPv6_HDRLEN + TCP_HDRLEN) > CONFIG_NET_6LOWPAN_MTU)
-    {
-      pktlen = (CONFIG_NET_6LOWPAN_MTU - IPv6_HDRLEN - TCP_HDRLEN);
-    }
-  else
-    {
-      pktlen = buflen;
-    }
-
-  /* Check if we have "space" in the window */
-
-  if (pktlen > conn->winsize)
-    {
-      pktlen = conn->winsize;
-    }
-
-  if (pktlen <= 0)
-    {
-      return 0;
-    }
 
   /* Initialize the IPv6/TCP headers */
 
-  ipv6tcp.ipv6.vtc    = 0x60;
-  ipv6tcp.ipv6.tcf    = 0x00;
-  ipv6tcp.ipv6.flow   = 0x00;
-  ipv6tcp.ipv6.proto  = IP_PROTO_TCP;
-  ipv6tcp.ipv6.ttl    = IP_TTL;
+  ipv6tcp->ipv6.vtc    = 0x60;
+  ipv6tcp->ipv6.tcf    = 0x00;
+  ipv6tcp->ipv6.flow   = 0x00;
+  ipv6tcp->ipv6.proto  = IP_PROTO_TCP;
+  ipv6tcp->ipv6.ttl    = IP_TTL;
 
   /* The IPv6 header length field does not include the size of IPv6 IP
    * header.
    */
 
-  iplen               = pktlen + TCP_HDRLEN;
-  ipv6tcp.ipv6.len[0] = (iplen >> 8);
-  ipv6tcp.ipv6.len[1] = (iplen & 0xff);
+  iplen                = buflen + TCP_HDRLEN;
+  ipv6tcp->ipv6.len[0] = (iplen >> 8);
+  ipv6tcp->ipv6.len[1] = (iplen & 0xff);
 
   /* Copy the source and destination addresses */
 
-  net_ipv6addr_hdrcopy(ipv6tcp.ipv6.destipaddr, conn->u.ipv6.raddr);
+  net_ipv6addr_hdrcopy(ipv6tcp->ipv6.destipaddr, conn->u.ipv6.raddr);
 #ifdef CONFIG_NETDEV_MULTINIC
   if (!net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr))
     {
-      net_ipv6addr_hdrcopy(ipv6tcp.ipv6.srcipaddr, conn->u.ipv6.laddr);
+      net_ipv6addr_hdrcopy(ipv6tcp->ipv6.srcipaddr, conn->u.ipv6.laddr);
     }
   else
 #endif
     {
-      net_ipv6addr_hdrcopy(ipv6tcp.ipv6.srcipaddr,  dev->d_ipv6addr);
+      net_ipv6addr_hdrcopy(ipv6tcp->ipv6.srcipaddr, dev->d_ipv6addr);
     }
 
   ninfo("IPv6 length: %d\n",
-        ((int)ipv6tcp.ipv6.len[0] << 8) + ipv6tcp.ipv6.len[1]);
+        ((int)ipv6tcp->ipv6.len[0] << 8) + ipv6tcp->ipv6.len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.ipv6.sent++;
@@ -230,24 +238,21 @@ static ssize_t sixlowpan_send_packet(FAR struct tcp_conn_s *conn,
 
   /* Initialize the TCP header */
 
-  ipv6tcp.tcp.srcport   = conn->lport;           /* Local port */
-  ipv6tcp.tcp.destport  = conn->rport;           /* Connected remote port */
+  ipv6tcp->tcp.srcport   = conn->lport;           /* Local port */
+  ipv6tcp->tcp.destport  = conn->rport;           /* Connected remote port */
 
-  ipv6tcp.tcp.tcpoffset = (TCP_HDRLEN / 4) << 4; /* No optdata */
-  ipv6tcp.tcp.flags     = 0;                     /* No urgent data */
-  ipv6tcp.tcp.urgp[0]   = 0;                     /* No urgent data */
-  ipv6tcp.tcp.urgp[1]   = 0;
+  ipv6tcp->tcp.tcpoffset = (TCP_HDRLEN / 4) << 4; /* No optdata */
+  ipv6tcp->tcp.flags     = 0;                     /* No urgent data */
+  ipv6tcp->tcp.urgp[0]   = 0;                     /* No urgent data */
+  ipv6tcp->tcp.urgp[1]   = 0;
 
   /* Set the sequency number information */
   /* REVISIT:  There is currently no wait for the data to be ACKed and,
    * hence, no mechanism to retransmit the packet.
    */
 
-  memcpy(ipv6tcp.tcp.ackno, conn->rcvseq, 4);    /* ACK number */
-  memcpy(ipv6tcp.tcp.seqno, conn->sndseq, 4);    /* Sequence number */
-
-  sndseq = tcp_getsequence(conn->sndseq);
-  tcp_setsequence(conn->sndseq, sndseq + pktlen);
+  memcpy(ipv6tcp->tcp.ackno, conn->rcvseq, 4);    /* ACK number */
+  memcpy(ipv6tcp->tcp.seqno, conn->sndseq, 4);    /* Sequence number */
 
   /* Set the TCP window */
 
@@ -257,49 +262,444 @@ static ssize_t sixlowpan_send_packet(FAR struct tcp_conn_s *conn,
        * window so that the remote host will stop sending data.
        */
 
-      ipv6tcp.tcp.wnd[0] = 0;
-      ipv6tcp.tcp.wnd[1] = 0;
+      ipv6tcp->tcp.wnd[0] = 0;
+      ipv6tcp->tcp.wnd[1] = 0;
     }
   else
     {
-      ipv6tcp.tcp.wnd[0] = ((NET_DEV_RCVWNDO(dev)) >> 8);
-      ipv6tcp.tcp.wnd[1] = ((NET_DEV_RCVWNDO(dev)) & 0xff);
+      ipv6tcp->tcp.wnd[0] = ((NET_DEV_RCVWNDO(dev)) >> 8);
+      ipv6tcp->tcp.wnd[1] = ((NET_DEV_RCVWNDO(dev)) & 0xff);
     }
 
   /* Calculate TCP checksum. */
 
-  ipv6tcp.tcp.tcpchksum   = 0;
-  ipv6tcp.tcp.tcpchksum   = ~sixlowpan_tcp_chksum(&ipv6tcp, buf, pktlen);
+  ipv6tcp->tcp.tcpchksum   = 0;
+  ipv6tcp->tcp.tcpchksum   = ~sixlowpan_tcp_chksum(ipv6tcp, buf, buflen);
 
   ninfo("Outgoing TCP packet length: %d bytes\n", iplen + IPv6_HDRLEN);
+  return OK;
+}
 
-#ifdef CONFIG_NET_STATISTICS
-  g_netstats.tcp.sent++;
-#endif
+/****************************************************************************
+ * Name: send_timeout
+ *
+ * Description:
+ *   Check for send timeout.
+ *
+ * Input Parameters:
+ *   sinfo - Send state structure reference
+ *
+ * Returned Value:
+ *   TRUE:timeout FALSE:no timeout
+ *
+ * Assumptions:
+ *   The network is locked
+ *
+ ****************************************************************************/
 
-  /* Get the IEEE 802.15.4 MAC address of the destination.  This assumes
-   * an encoding of the MAC address in the IPv6 address.
+static inline bool send_timeout(FAR struct sixlowpan_send_s *sinfo)
+{
+  /* Check for a timeout.  Zero means none and, in that case, we will let
+   * the send wait forever.
    */
 
-  sixlowpan_addrfromip(conn->u.ipv6.raddr, &destmac);
-
-  /* If routable, then call sixlowpan_send() to format and send the 6LoWPAN
-   * packet.
-   */
-
-  ret = sixlowpan_send(dev, &conn->list,
-                       (FAR const struct ipv6_hdr_s *)&ipv6tcp,
-                       buf, pktlen, &destmac, timeout);
-  if (ret < 0)
+  if (sinfo->s_timeout != 0)
     {
-      nerr("ERROR: sixlowpan_send() failed: %d\n", ret);
+      /* Check if the configured timeout has elapsed */
+
+      systime_t timeo_ticks =  DSEC2TICK(sinfo->s_timeout);
+      systime_t elapsed     =  clock_systimer() - sinfo->s_time;
+
+      if (elapsed >= timeo_ticks)
+        {
+          return true;
+        }
     }
 
-  /* Return the amount of data that was sent from the user buffer in this
-   * packet.
+  /* No timeout */
+
+  return false;
+}
+
+/****************************************************************************
+ * Name: tcp_send_interrupt
+ *
+ * Description:
+ *   This function is called from the interrupt level to perform the actual
+ *   TCP send operation when polled by the lower, device interfacing layer.
+ *
+ * Parameters:
+ *   dev    - The structure of the network driver that caused the interrupt
+ *   pvconn - The connection structure associated with the socket
+ *   pvpriv - The interrupt handler's private data argument
+ *   flags  - Set of events describing why the callback was invoked
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static uint16_t tcp_send_interrupt(FAR struct net_driver_s *dev,
+                                   FAR void *pvconn,
+                                   FAR void *pvpriv, uint16_t flags)
+{
+  FAR struct sixlowpan_send_s *sinfo = (FAR struct sixlowpan_send_s *)pvpriv;
+  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
+  struct ipv6tcp_hdr_s ipv6tcp;
+  int ret;
+
+#ifdef CONFIG_NET_MULTILINK
+  /* Verify that this is an IEEE802.15.4 network driver. */
+
+  if (dev->d_lltype != NET_LL_IEEE802154)
+    {
+      ninfo("Not a NET_LL_IEEE802154 device\n");
+      return flags;
+    }
+#endif
+
+#ifdef CONFIG_NETDEV_MULTINIC
+  /* The TCP socket is connected and, hence, should be bound to a device.
+   * Make sure that the polling device is the one that we are bound to.
    */
 
-  return pktlen;
+  DEBUGASSERT(conn->dev != NULL);
+  if (dev != conn->dev)
+    {
+      ninfo("Not the connecte device\n");
+      return flags;
+    }
+#endif
+
+  /* Check if the IEEE802.15.4 network driver went down */
+
+  if ((flags & NETDEV_DOWN) != 0)
+    {
+      nwarn("WARNING: Device is down\n");
+      sinfo->s_result = -ENOTCONN;
+      goto end_wait;
+    }
+
+  ninfo("flags: %04x acked: %u sent: %u\n",
+        flags, sinfo->s_acked, sinfo->s_sent);
+
+  /* If this packet contains an acknowledgement, then update the count of
+   * acknowledged bytes.
+   */
+
+  if ((flags & TCP_ACKDATA) != 0)
+    {
+      FAR struct tcp_hdr_s *tcp = TCPBUF(dev);
+
+#ifdef CONFIG_NET_SOCKOPTS
+      /* Update the timeout */
+
+      sinfo->s_time = clock_systimer();
+#endif
+
+      /* The current acknowledgement number number is the (relative) offset
+       * of the of the next byte needed by the receiver.  The s_isn is the
+       * offset of the first byte to send to the receiver.  The difference
+       * is the number of bytes to be acknowledged.
+       */
+
+      sinfo->s_acked = tcp_getsequence(tcp->ackno) - sinfo->s_isn;
+      ninfo("ACK: acked=%d sent=%d buflen=%d\n",
+            sinfo->s_acked, sinfo->s_sent, sinfo->s_buflen);
+
+      /* Have all of the bytes in the buffer been sent and acknowledged? */
+
+      if (sinfo->s_acked >= sinfo->s_buflen)
+        {
+          /* Yes.  Then sinfo->s_buflen should hold the number of bytes
+           * actually sent.
+           */
+
+          goto end_wait;
+        }
+
+      /* No.. fall through to send more data if necessary */
+    }
+
+  /* Check if we are being asked to retransmit data */
+
+  else if ((flags & TCP_REXMIT) != 0)
+    {
+      /* Yes.. in this case, reset the number of bytes that have been sent
+       * to the number of bytes that have been ACKed.
+       */
+
+      sinfo->s_sent = sinfo->s_acked;
+
+      /* Fall through to re-send data from the last that was ACKed */
+    }
+
+  /* Check for a loss of connection */
+
+  else if ((flags & TCP_DISCONN_EVENTS) != 0)
+    {
+      /* Report not connected */
+
+      ninfo("Lost connection\n");
+
+      net_lostconnection(sinfo->s_sock, flags);
+      sinfo->s_result = -ENOTCONN;
+      goto end_wait;
+    }
+
+  /* Check if the outgoing packet is available (it may have been claimed
+   * by a sendto interrupt serving a different thread).
+   */
+
+#if 0 /* We can't really support multiple senders on the same TCP socket */
+  else if (dev->d_sndlen > 0)
+    {
+      /* Another thread has beat us sending data, wait for the next poll */
+
+      return flags;
+    }
+#endif
+
+  /* We get here if (1) not all of the data has been ACKed, (2) we have been
+   * asked to retransmit data, (3) the connection is still healthy, and (4)
+   * the outgoing packet is available for our use.  In this case, we are
+   * now free to send more data to receiver -- UNLESS the buffer contains
+   * unprocessed incoming data.  In that event, we will have to wait for the
+   * next polling cycle.
+   */
+
+  if ((flags & WPAN_NEWDATA) == 0 && sinfo->s_sent < sinfo->s_buflen)
+    {
+      uint32_t seqno;
+      uint16_t winleft;
+
+      DEBUGASSERT((flags & WPAN_POLL) != 0);
+
+      /* Get the amount of data that we can send in the next packet */
+
+      uint32_t sndlen = sinfo->s_buflen - sinfo->s_sent;
+
+      if (sndlen > conn->mss)
+        {
+          sndlen = conn->mss;
+        }
+
+      winleft = conn->winsize - sinfo->s_sent + sinfo->s_acked;
+      if (sndlen > winleft)
+        {
+          sndlen = winleft;
+        }
+
+      ninfo("s_buflen=%u s_sent=%u mss=%u winsize=%u\n",
+            sinfo->s_buflen, sinfo->s_sent, conn->mss, conn->winsize);
+
+      if (sndlen > 0)
+        {
+          /* Set the sequence number for this packet.  NOTE:  The network updates
+           * sndseq on receipt of ACK *before* this function is called.  In that
+           * case sndseq will point to the next unacknowledged byte (which might
+           * have already been sent).  We will overwrite the value of sndseq
+           * here before the packet is sent.
+           */
+
+          seqno = sinfo->s_sent + sinfo->s_isn;
+          ninfo("SEND: sndseq %08x->%08x\n", conn->sndseq, seqno);
+          tcp_setsequence(conn->sndseq, seqno);
+
+          /* Create the IPv6 + TCP header */
+
+          ret = sixlowpan_tcp_header(conn, dev, &sinfo->s_buf[sinfo->s_sent],
+                                     sndlen, &ipv6tcp);
+          if (ret < 0)
+            {
+              nerr("ERROR: sixlowpan_tcp_header failed: %d\n", ret);
+              sinfo->s_result = ret;
+              goto end_wait;
+            }
+
+          /* Transfer the frame list to the IEEE802.15.4 MAC device */
+
+          ret = sixlowpan_queue_frames((FAR struct ieee802154_driver_s *)dev,
+                                       &ipv6tcp.ipv6,
+                                       &sinfo->s_buf[sinfo->s_sent], sndlen,
+                                       sinfo->s_destmac);
+          if (ret < 0)
+            {
+              nerr("ERROR: sixlowpan_queue_frames failed: %d\n", ret);
+              sinfo->s_result = ret;
+              goto end_wait;
+            }
+
+          /* Increment the count of bytes sent and count of packets sent */
+
+          sinfo->s_sent += sndlen;
+#ifdef CONFIG_NET_STATISTICS
+          g_netstats.tcp.sent++;
+#endif
+
+          ninfo("Sent: acked=%d sent=%d buflen=%d\n",
+                sinfo->s_acked, sinfo->s_sent, sinfo->s_buflen);
+        }
+    }
+
+#ifdef CONFIG_NET_SOCKOPTS
+  /* All data has been sent and we are just waiting for ACK or re-transmit
+   * indications to complete the send.  Check for a timeout.
+   */
+
+  if (send_timeout(sinfo))
+    {
+      /* Yes.. report the timeout */
+
+      nwarn("WARNING: SEND timeout\n");
+      sinfo->s_sent = -ETIMEDOUT;
+      goto end_wait;
+    }
+#endif /* CONFIG_NET_SOCKOPTS */
+
+  /* Continue waiting */
+
+  return flags;
+
+end_wait:
+  /* Do not allow any further callbacks */
+
+  sinfo->s_cb->flags   = 0;
+  sinfo->s_cb->priv    = NULL;
+  sinfo->s_cb->event   = NULL;
+
+  /* There are no outstanding, unacknowledged bytes */
+
+  conn->unacked        = 0;
+
+  /* Wake up the waiting thread */
+
+  sem_post(&sinfo->s_waitsem);
+  return flags;
+}
+
+/****************************************************************************
+ * Name: sixlowpan_send_packet
+ *
+ * Description:
+ *   Process an outgoing TCP packet.  Takes an IP packet and formats it to
+ *   be sent on an 802.15.4 network using 6lowpan.  Called from common TCP
+ *   send logic.
+ *
+ *   The payload data is in the caller 'buf' and is of length 'buflen'.
+ *   Compressed headers will be added and if necessary the packet is
+ *   fragmented. The resulting packet/fragments are submitted to the MAC
+ *   via the network driver i_req_data method.
+ *
+ * Input Parameters:
+ *   psock   - An instance of the internal socket structure.
+ *   dev     - The IEEE802.15.4 MAC network driver interface.
+ *   conn    - TCP connection structure
+ *   buf     - Data to send
+ *   len     - Length of data to send
+ *   destmac - The IEEE802.15.4 MAC address of the destination
+ *   timeout - Send timeout in deciseconds
+ *
+ * Returned Value:
+ *   Ok is returned on success; Othewise a negated errno value is returned.
+ *   This function is expected to fail if the driver is not an IEEE802.15.4
+ *   MAC network driver.  In that case, the logic will fall back to normal
+ *   IPv4/IPv6 formatting.
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+static int sixlowpan_send_packet(FAR struct socket *psock,
+                                 FAR struct net_driver_s *dev,
+                                 FAR struct tcp_conn_s *conn,
+                                 FAR const uint8_t *buf, size_t len,
+                                 FAR const struct sixlowpan_tagaddr_s *destmac,
+                                 uint16_t timeout)
+{
+  struct sixlowpan_send_s sinfo;
+
+  ninfo("len=%lu timeout=%u\n", (unsigned long)len, timeout);
+  DEBUGASSERT(psock != NULL && dev != NULL && conn != NULL && buf != NULL &&
+              destmac != NULL);
+
+  memset(&sinfo, 0, sizeof(struct sixlowpan_send_s));
+
+  net_lock();
+  if (len > 0)
+    {
+      /* Allocate resources to receive a callback.
+       *
+       * The second parameter is NULL meaning that we can get only
+       * device related events, no connect-related events.
+       */
+
+      sinfo.s_cb = devif_callback_alloc(dev, &conn->list);
+      if (sinfo.s_cb != NULL)
+        {
+          int ret;
+
+          /* Initialize the send state structure */
+
+          sem_init(&sinfo.s_waitsem, 0, 0);
+          (void)sem_setprotocol(&sinfo.s_waitsem, SEM_PRIO_NONE);
+
+          sinfo.s_sock      = psock;
+          sinfo.s_result    = -EBUSY;
+          sinfo.s_timeout   = timeout;
+          sinfo.s_time      = clock_systimer();
+          sinfo.s_destmac   = destmac;
+          sinfo.s_buf       = buf;
+          sinfo.s_buflen    = len;
+
+          /* Set up the initial sequence number */
+
+          sinfo.s_isn       = tcp_getsequence(conn->sndseq);
+
+          /* Set up the callback in the connection */
+
+          sinfo.s_cb->flags = (NETDEV_DOWN | WPAN_POLL);
+          sinfo.s_cb->priv  = (FAR void *)&sinfo;
+          sinfo.s_cb->event = tcp_send_interrupt;
+
+          /* There is no outstanding, unacknowledged data after this
+           * initial sequence number.
+           */
+
+          conn->unacked     = 0;
+
+          /* Notify the IEEE802.15.4 MAC that we have data to send. */
+
+          netdev_txnotify_dev(dev);
+
+          /* Wait for the send to complete or an error to occur:  NOTES: (1)
+           * net_lockedwait will also terminate if a signal is received, (2)
+           * interrupts may be disabled!  They will be re-enabled while the
+           * task sleeps and automatically re-enabled when the task restarts.
+           */
+
+          ninfo("Wait for send complete\n");
+
+          ret = net_lockedwait(&sinfo.s_waitsem);
+          if (ret < 0)
+            {
+              sinfo.s_result = -get_errno();
+            }
+
+          /* Make sure that no further interrupts are processed */
+
+           devif_conn_callback_free(dev, sinfo.s_cb, &conn->list);
+        }
+    }
+
+  sem_destroy(&sinfo.s_waitsem);
+  net_unlock();
+
+  return (sinfo.s_result < 0 ? sinfo.s_result : len);
 }
 
 /****************************************************************************
@@ -334,11 +734,9 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 {
   FAR struct tcp_conn_s *conn;
   FAR struct net_driver_s *dev;
-  size_t remaining;
+  struct sixlowpan_tagaddr_s destmac;
   uint16_t timeout;
-#ifdef CONFIG_NET_ICMPv6_NEIGHBOR
   int ret;
-#endif
 
   ninfo("buflen %lu\n", (unsigned long)buflen);
   sixlowpan_dumpbuffer("Outgoing TCP payload", buf, buflen);
@@ -414,6 +812,12 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
     }
 #endif
 
+  /* Get the IEEE 802.15.4 MAC address of the destination.  This assumes
+   * an encoding of the MAC address in the IPv6 address.
+   */
+
+  sixlowpan_addrfromip(conn->u.ipv6.raddr, &destmac);
+
   /* Set the socket state to sending */
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
@@ -424,39 +828,19 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
    */
 
 #ifdef CONFIG_NET_SOCKOPTS
-  timeout   = psock->s_sndtimeo;
+  timeout = psock->s_sndtimeo;
 #else
-  timeout   = 0;
+  timeout = 0;
 #endif
-  remaining = buflen;
 
-  for (; ; )
+  ret = sixlowpan_send_packet(psock, dev, conn, buf, buflen, &destmac,
+                              timeout);
+  if (ret < 0)
     {
-      /* Send the next packet */
+      nerr("ERROR: sixlowpan_send_packet() failed: %d\n", ret);
 
-      ssize_t pktlen = sixlowpan_send_packet(conn, dev, buf, remaining,
-                                             timeout);
-      if (pktlen <= 0)
-        {
-          psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
-          return (ssize_t)pktlen;
-        }
-
-      /* Check if all data has been sent */
-
-      if (pktlen >= remaining)
-        {
-          /* Yes.. we are done */
-
-          break;
-        }
-
-      /* No.. Update the buffer pointer and bytes remaining and send the next
-       * packet.
-       */
-
-      remaining -= pktlen;
-      buf       += pktlen;
+      psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
+      return (ssize_t)buflen;
     }
 
   /* Set the socket state to idle */
