@@ -163,6 +163,7 @@ static ssize_t sixlowpan_send_packet(FAR struct tcp_conn_s *conn,
   struct sixlowpan_tagaddr_s destmac;
   struct ipv6tcp_hdr_s ipv6tcp;
   ssize_t pktlen;
+  uint32_t sndseq;
   uint16_t iplen;
   int ret;
 
@@ -176,6 +177,18 @@ static ssize_t sixlowpan_send_packet(FAR struct tcp_conn_s *conn,
   else
     {
       pktlen = buflen;
+    }
+
+  /* Check if we have "space" in the window */
+
+  if (pktlen > conn->winsize)
+    {
+      pktlen = conn->winsize;
+    }
+
+  if (pktlen <= 0)
+    {
+      return 0;
     }
 
   /* Initialize the IPv6/TCP headers */
@@ -196,10 +209,17 @@ static ssize_t sixlowpan_send_packet(FAR struct tcp_conn_s *conn,
 
   /* Copy the source and destination addresses */
 
-#ifdef CONFIG_NETDEV_MULTINIC
-  net_ipv6addr_hdrcopy(ipv6tcp.ipv6.srcipaddr,  conn->u.ipv6.laddr);
-#endif
   net_ipv6addr_hdrcopy(ipv6tcp.ipv6.destipaddr, conn->u.ipv6.raddr);
+#ifdef CONFIG_NETDEV_MULTINIC
+  if (!net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr))
+    {
+      net_ipv6addr_hdrcopy(ipv6tcp.ipv6.srcipaddr, conn->u.ipv6.laddr);
+    }
+  else
+#endif
+    {
+      net_ipv6addr_hdrcopy(ipv6tcp.ipv6.srcipaddr,  dev->d_ipv6addr);
+    }
 
   ninfo("IPv6 length: %d\n",
         ((int)ipv6tcp.ipv6.len[0] << 8) + ipv6tcp.ipv6.len[1]);
@@ -213,15 +233,23 @@ static ssize_t sixlowpan_send_packet(FAR struct tcp_conn_s *conn,
   ipv6tcp.tcp.srcport   = conn->lport;           /* Local port */
   ipv6tcp.tcp.destport  = conn->rport;           /* Connected remote port */
 
-  memcpy(ipv6tcp.tcp.ackno, conn->rcvseq, 4);    /* ACK number */
-  memcpy(ipv6tcp.tcp.seqno, conn->sndseq, 4);    /* Sequence number */
-
   ipv6tcp.tcp.tcpoffset = (TCP_HDRLEN / 4) << 4; /* No optdata */
   ipv6tcp.tcp.flags     = 0;                     /* No urgent data */
   ipv6tcp.tcp.urgp[0]   = 0;                     /* No urgent data */
   ipv6tcp.tcp.urgp[1]   = 0;
 
-    /* Set the TCP window */
+  /* Set the sequency number information */
+  /* REVISIT:  There is currently no wait for the data to be ACKed and,
+   * hence, no mechanism to retransmit the packet.
+   */
+
+  memcpy(ipv6tcp.tcp.ackno, conn->rcvseq, 4);    /* ACK number */
+  memcpy(ipv6tcp.tcp.seqno, conn->sndseq, 4);    /* Sequence number */
+
+  sndseq = tcp_getsequence(conn->sndseq);
+  tcp_setsequence(conn->sndseq, sndseq + pktlen);
+
+  /* Set the TCP window */
 
   if (conn->tcpstateflags & TCP_STOPPED)
     {
@@ -408,7 +436,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
       ssize_t pktlen = sixlowpan_send_packet(conn, dev, buf, remaining,
                                              timeout);
-      if (pktlen < 0)
+      if (pktlen <= 0)
         {
           psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
           return (ssize_t)pktlen;

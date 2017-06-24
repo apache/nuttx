@@ -227,7 +227,8 @@ static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr, FAR uint8_t *bptr)
 #ifdef CONFIG_NET_TCP
      case IP_PROTO_TCP:
        {
-         FAR struct tcp_hdr_s *tcp = &((FAR struct ipv6tcp_hdr_s *)ipv6)->tcp;
+         FAR struct tcp_hdr_s *tcp =
+           (FAR struct tcp_hdr_s *)(fptr + g_frame_hdrlen);
 
          /* The TCP header length is encoded in the top 4 bits of the
           * tcpoffset field (in units of 32-bit words).
@@ -798,7 +799,7 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
        * reassembled?
        */
 
-      if (ret >= 0 && ret == INPUT_COMPLETE)
+      if (ret == INPUT_COMPLETE)
         {
           /* Inject the uncompressed, reassembled packet into the network */
 

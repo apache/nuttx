@@ -259,10 +259,15 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
 
   net_ipv6addr_hdrcopy(ipv6udp.ipv6.destipaddr, to6->sin6_addr.in6_u.u6_addr16);
 #ifdef CONFIG_NETDEV_MULTINIC
-  net_ipv6addr_hdrcopy(ipv6udp.ipv6.srcipaddr,  conn->u.ipv6.laddr);
-#else
-  net_ipv6addr_hdrcopy(ipv6udp.ipv6.srcipaddr,  dev->d_ipv6addr);
+  if (!net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr))
+    {
+      net_ipv6addr_hdrcopy(ipv6udp.ipv6.srcipaddr, conn->u.ipv6.laddr);
+    }
+  else
 #endif
+    {
+      net_ipv6addr_hdrcopy(ipv6udp.ipv6.srcipaddr, dev->d_ipv6addr);
+    }
 
   ninfo("IPv6 length: %d\n",
         ((int)ipv6udp.ipv6.len[0] << 8) + ipv6udp.ipv6.len[1]);

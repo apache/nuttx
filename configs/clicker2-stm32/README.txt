@@ -508,6 +508,10 @@ Configurations
          other configurations (see text matrix below).
 
        2017-06-23:  Added test for TCP functionality.  As of yet unverified.
+       2017-06-24:  There are significant problems with the 6LoWPAN TCP send
+          logic.  The problems are due to the fact that the current design
+          bypasses the normal TCP sending logic and does not correctly support
+          ACKs and retransmisions.
 
      Test Matrix:
        The following configurations have been tested:
