@@ -466,6 +466,36 @@ Configurations
          E: nsh> udpclient <server-ip> &
          E: nsh> dmesg
 
+    6. examples/nettest is enabled.  This will allow two MRF24J40 nodes to
+       exchange TCP packets.  Basic instructions:
+
+       On the server node:
+
+         nsh> ifconfig wpan0
+         nsh> tcpserver &
+
+       The ifconfig command will show the IP address of the server.  Then on
+       the client node use this IP address to start the client:
+
+         nsh> tcpclient <server-ip> &
+
+       Where <server-ip> is the IP address of the server that you got above.
+       NOTE: There is no way to stop the UDP test once it has been started
+       other than by resetting the board.
+
+       Cheat Sheet.  Here is a concise summary of all all the steps needed to
+       run the UDP test (C=Coordinator; E=Endpoint):
+
+         C: nsh> i8 /dev/ieee0 startpan
+         C: nsh> 8 acceptassoc
+         E: nsh> i8 assoc
+         C: nsh> ifup wpan0
+         C: nsh> ifconfig          <-- To get the <server-ip>
+         E: nsh> ifup wpan0
+         C: nsh> tcpserver &
+         E: nsh> tcpclient <server-ip> &
+         E: nsh> dmesg
+
     STATUS:
        2017-06-19:  The Telnet Daemon does not start.  This is simply because
          the daemon is started too early in the sequence... before the network
@@ -473,8 +503,14 @@ Configurations
 
            telnetd_daemon: ERROR: socket failure: 106
 
-       2017-06-21:  Basic functionality has been achieved.  The following
-         configurations have been tested:
+       2017-06-21:  Basic UDP functionality has been achieved with HC06
+         compression and short address.  Additional testing is required for
+         other configurations (see text matrix below).
+
+       2017-06-23:  Added test for TCP functionality.  As of yet unverified.
+
+     Test Matrix:
+       The following configurations have been tested:
 
                                 TEST DATE
          COMPRESSION ADDRESSING UDP  TCP
