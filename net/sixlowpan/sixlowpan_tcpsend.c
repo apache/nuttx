@@ -475,13 +475,15 @@ static uint16_t tcp_send_interrupt(FAR struct net_driver_s *dev,
     {
       uint32_t seqno;
       uint16_t winleft;
+      uint16_t sndlen;
 
       DEBUGASSERT((flags & WPAN_POLL) != 0);
 
-      /* Get the amount of data that we can send in the next packet */
+      /* Get the amount of TCP payload data that we can send in the next
+       * packet.
+       */
 
-      uint32_t sndlen = sinfo->s_buflen - sinfo->s_sent;
-
+      sndlen = sinfo->s_buflen - sinfo->s_sent;
       if (sndlen > conn->mss)
         {
           sndlen = conn->mss;
@@ -493,8 +495,8 @@ static uint16_t tcp_send_interrupt(FAR struct net_driver_s *dev,
           sndlen = winleft;
         }
 
-      ninfo("s_buflen=%u s_sent=%u mss=%u winsize=%u\n",
-            sinfo->s_buflen, sinfo->s_sent, conn->mss, conn->winsize);
+      ninfo("s_buflen=%u s_sent=%u mss=%u winsize=%u sndlen=%d\n",
+            sinfo->s_buflen, sinfo->s_sent, conn->mss, conn->winsize, sndlen);
 
       if (sndlen > 0)
         {
@@ -506,7 +508,9 @@ static uint16_t tcp_send_interrupt(FAR struct net_driver_s *dev,
            */
 
           seqno = sinfo->s_sent + sinfo->s_isn;
-          ninfo("SEND: sndseq %08x->%08x\n", conn->sndseq, seqno);
+          ninfo("Sending: sndseq %08lx->%08x\n",
+                (unsigned long)tcp_getsequence(conn->sndseq), seqno);
+
           tcp_setsequence(conn->sndseq, seqno);
 
           /* Create the IPv6 + TCP header */
