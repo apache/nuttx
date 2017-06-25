@@ -119,6 +119,13 @@
     } \
   while(0)
 
+/* Return values ************************************************************/
+
+/* Sucessful return values from header compression logic */
+
+#define COMPRESS_HDR_INLINE 0 /* L2 header not compressed */
+#define COMPRESS_HDR_ELIDED 1 /* L2 header compressed */
+
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_DUMPBUFFER
@@ -208,10 +215,6 @@ extern uint8_t g_uncomp_hdrlen;
  */
 
 extern uint8_t g_frame_hdrlen;
-
-/* g_have_protohdr: true=Protocal header copied. */
-
-extern bool g_have_protohdr;
 
 /****************************************************************************
  * Public Types
@@ -422,15 +425,16 @@ void sixlowpan_hc06_initialize(void);
  *   fptr     - Pointer to frame to be compressed.
  *
  * Returned Value:
- *   None
+ *   On success the indications of the defines COMPRESS_HDR_* are returned.
+ *   A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
-void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
-                                FAR const struct ipv6_hdr_s *ipv6,
-                                FAR const struct sixlowpan_tagaddr_s *destmac,
-                                FAR uint8_t *fptr);
+int sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
+                               FAR const struct ipv6_hdr_s *ipv6,
+                               FAR const struct sixlowpan_tagaddr_s *destmac,
+                               FAR uint8_t *fptr);
 #endif
 
 /****************************************************************************
@@ -485,15 +489,16 @@ void sixlowpan_uncompresshdr_hc06(FAR const struct ieee802154_data_ind_s *ind,
  *   fptr    - Pointer to frame to be compressed.
  *
  * Returned Value:
- *   None
+ *   On success the indications of the defines COMPRESS_HDR_* are returned.
+ *   A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
-void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
-                               FAR const struct ipv6_hdr_s *ipv6,
-                               FAR const struct sixlowpan_tagaddr_s *destmac,
-                               FAR uint8_t *fptr);
+int sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
+                              FAR const struct ipv6_hdr_s *ipv6,
+                              FAR const struct sixlowpan_tagaddr_s *destmac,
+                              FAR uint8_t *fptr);
 #endif
 
 /****************************************************************************
