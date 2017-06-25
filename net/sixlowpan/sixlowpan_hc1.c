@@ -140,16 +140,18 @@ static void sixlowpan_uncompress_addr(FAR const struct ieee802154_addr_s *addr,
  *   fptr    - Pointer to frame to be compressed.
  *
  * Returned Value:
- *   None
+ *   On success the indications of the defines COMPRESS_HDR_* are returned.
+ *   A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
-                               FAR const struct ipv6_hdr_s *ipv6,
-                               FAR const struct sixlowpan_tagaddr_s *destmac,
-                               FAR uint8_t *fptr)
+int sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
+                              FAR const struct ipv6_hdr_s *ipv6,
+                              FAR const struct sixlowpan_tagaddr_s *destmac,
+                              FAR uint8_t *fptr)
 {
   FAR uint8_t *hc1 = fptr + g_frame_hdrlen;
+  int ret = COMPRESS_HDR_INLINE;
 
   /* Check if all the assumptions for full compression are valid */
 
@@ -266,7 +268,7 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
                 g_frame_hdrlen             += SIXLOWPAN_HC1_HDR_LEN;
               }
 
-            g_have_protohdr = true;
+            ret = COMPRESS_HDR_ELIDED;
           }
           break;
 #endif /* CONFIG_NET_UDP */
@@ -281,6 +283,8 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
           break;
         }
     }
+
+  return ret;
 }
 
 /****************************************************************************

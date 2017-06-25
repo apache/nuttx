@@ -122,8 +122,8 @@
  *
  ****************************************************************************/
 
-static void sixlowpan_compress_ipv6hdr(FAR const struct ipv6_hdr_s *ipv6hdr,
-                                       FAR uint8_t *fptr)
+static int sixlowpan_compress_ipv6hdr(FAR const struct ipv6_hdr_s *ipv6hdr,
+                                      FAR uint8_t *fptr)
 {
   /* Indicate the IPv6 dispatch and length */
 
@@ -135,6 +135,8 @@ static void sixlowpan_compress_ipv6hdr(FAR const struct ipv6_hdr_s *ipv6hdr,
   memcpy(&fptr[g_frame_hdrlen], ipv6hdr, IPv6_HDRLEN);
   g_frame_hdrlen      += IPv6_HDRLEN;
   g_uncomp_hdrlen     += IPv6_HDRLEN;
+
+  return COMPRESS_HDR_INLINE;
 }
 
 /****************************************************************************
@@ -151,48 +153,42 @@ static uint16_t sixlowpan_protosize(FAR const struct ipv6_hdr_s *ipv6hdr,
 {
   uint16_t protosize;
 
-  /* Do we already have an encoded protocol header?  If not, it needs to
-   * coped as raw data in the fist packet of a fragement.
-   */
+  /* Copy the following protocol header, */
 
-  if (!g_have_protohdr)
-    {
-      /* Copy the following protocol header, */
-
-       switch (ipv6hdr->proto)
-         {
+   switch (ipv6hdr->proto)
+     {
 #ifdef CONFIG_NET_TCP
-         case IP_PROTO_TCP:
-           {
-             FAR struct tcp_hdr_s *tcp =
-               &((FAR struct ipv6tcp_hdr_s *)ipv6hdr)->tcp;
+       case IP_PROTO_TCP:
+         {
+           FAR struct tcp_hdr_s *tcp =
+             &((FAR struct ipv6tcp_hdr_s *)ipv6hdr)->tcp;
 
-             /* The TCP header length is encoded in the top 4 bits of the
-              * tcpoffset field (in units of 32-bit words).
-              */
+           /* The TCP header length is encoded in the top 4 bits of the
+            * tcpoffset field (in units of 32-bit words).
+            */
 
-             protosize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
-           }
-           break;
+           protosize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
+         }
+         break;
 #endif
 
 #ifdef CONFIG_NET_UDP
-         case IP_PROTO_UDP:
-           protosize = UDP_HDRLEN;
-           break;
+       case IP_PROTO_UDP:
+         protosize = UDP_HDRLEN;
+         break;
 #endif
 
 #ifdef CONFIG_NET_ICMPv6
-         case IP_PROTO_ICMP6:
-           protosize = ICMPv6_HDRLEN;
-           break;
+       case IP_PROTO_ICMP6:
+         protosize = ICMPv6_HDRLEN;
+         break;
 #endif
 
-         default:
-           nwarn("WARNING: Unrecognized proto: %u\n", ipv6hdr->proto);
-           return 0;
-         }
-    }
+       default:
+         nwarn("WARNING: Unrecognized proto: %u\n", ipv6hdr->proto);
+         protosize = 0;
+         break;
+     }
 
   return protosize;
 }
@@ -260,7 +256,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
   g_uncomp_hdrlen = 0;
   g_frame_hdrlen  = 0;
-  g_have_protohdr = false;
+  protosize       = 0;
 
   /* Reset frame meta data */
 
@@ -381,9 +377,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
       /* Try to compress the headers */
 
 #if defined(CONFIG_NET_6LOWPAN_COMPRESSION_HC1)
-      sixlowpan_compresshdr_hc1(ieee, destip, destmac, fptr);
+      ret = sixlowpan_compresshdr_hc1(ieee, destip, destmac, fptr);
 #elif defined(CONFIG_NET_6LOWPAN_COMPRESSION_HC06)
-      sixlowpan_compresshdr_hc06(ieee, destip, destmac, fptr);
+      ret = sixlowpan_compresshdr_hc06(ieee, destip, destmac, fptr);
 #else
 #  error No compression specified
 #endif
@@ -393,14 +389,17 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
     {
       /* Small.. use IPv6 dispatch (no compression) */
 
-      sixlowpan_compress_ipv6hdr(destip, fptr);
+      ret = sixlowpan_compress_ipv6hdr(destip, fptr);
     }
-
-  ninfo("Header of length %d\n", g_frame_hdrlen);
 
   /* Get the size of any uncompressed protocol headers */
 
-  protosize = sixlowpan_protosize(destip, fptr);
+  if (ret == COMPRESS_HDR_INLINE)
+    {
+      protosize = sixlowpan_protosize(destip, fptr);
+    }
+
+  ninfo("Header of length=%u protosize=%u\n", g_frame_hdrlen, protosize);
 
   /* Check if we need to fragment the packet into several frames */
 
