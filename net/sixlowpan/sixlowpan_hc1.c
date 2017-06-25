@@ -265,6 +265,8 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
                 hc1[SIXLOWPAN_HC1_TTL]      = ipv6->ttl;
                 g_frame_hdrlen             += SIXLOWPAN_HC1_HDR_LEN;
               }
+
+            g_have_protohdr = true;
           }
           break;
 #endif /* CONFIG_NET_UDP */

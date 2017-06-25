@@ -878,132 +878,87 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
 
   g_uncomp_hdrlen = IPv6_HDRLEN;
 
-  /* Add protocol header */
-
-  switch (ipv6->proto)
-    {
 #ifdef CONFIG_NET_UDP
-      /* UDP header compression */
+  /* UDP header compression */
 
-      case IP_PROTO_UDP:
+  if (ipv6->proto == IP_PROTO_UDP)
+    {
+      /* The UDP header will follow the IPv6 header */
+
+      FAR struct udp_hdr_s *udp =
+        (FAR struct udp_hdr_s *)((FAR uint8_t *)ipv6 + IPv6_HDRLEN);
+
+      ninfo("Uncompressed UDP ports: srcport=%04x destport=%04x\n",
+            ntohs(udp->srcport), ntohs(udp->destport));
+
+      /* Mask out the last 4 bits can be used as a mask */
+
+      if (((ntohs(udp->srcport) & 0xfff0) == SIXLOWPAN_UDP_4_BIT_PORT_MIN) &&
+          ((ntohs(udp->destport) & 0xfff0) == SIXLOWPAN_UDP_4_BIT_PORT_MIN))
         {
-          /* The UDP header will follow the IPv6 header */
+          /* We can compress 12 bits of both source and dest */
 
-          FAR struct udp_hdr_s *udp =
-            (FAR struct udp_hdr_s *)((FAR uint8_t *)ipv6 + IPv6_HDRLEN);
+          *g_hc06ptr = SIXLOWPAN_NHC_UDP_CS_P_11;
 
-          ninfo("Uncompressed UDP ports: srcport=%04x destport=%04x\n",
-                ntohs(udp->srcport), ntohs(udp->destport));
+          ninfo("Remove 12b of both source & dest with prefix 0xf0b*\n");
 
-          /* Mask out the last 4 bits can be used as a mask */
+          *(g_hc06ptr + 1) =
+            (uint8_t)((ntohs(udp->srcport) - SIXLOWPAN_UDP_4_BIT_PORT_MIN) << 4) +
+            (uint8_t)((ntohs(udp->destport) - SIXLOWPAN_UDP_4_BIT_PORT_MIN));
 
-          if (((ntohs(udp->srcport) & 0xfff0) == SIXLOWPAN_UDP_4_BIT_PORT_MIN) &&
-              ((ntohs(udp->destport) & 0xfff0) == SIXLOWPAN_UDP_4_BIT_PORT_MIN))
-            {
-              /* We can compress 12 bits of both source and dest */
-
-              *g_hc06ptr = SIXLOWPAN_NHC_UDP_CS_P_11;
-
-              ninfo("Remove 12b of both source & dest with prefix 0xf0b*\n");
-
-              *(g_hc06ptr + 1) =
-                (uint8_t)((ntohs(udp->srcport) - SIXLOWPAN_UDP_4_BIT_PORT_MIN) << 4) +
-                (uint8_t)((ntohs(udp->destport) - SIXLOWPAN_UDP_4_BIT_PORT_MIN));
-
-              g_hc06ptr += 2;
-            }
-          else if ((ntohs(udp->destport) & 0xff00) ==
-                   SIXLOWPAN_UDP_8_BIT_PORT_MIN)
-            {
-              /* We can compress 8 bits of dest, leave source. */
-
-              *g_hc06ptr = SIXLOWPAN_NHC_UDP_CS_P_01;
-
-              ninfo("Leave source, remove 8 bits of dest with prefix 0xF0\n");
-
-              memcpy(g_hc06ptr + 1, &udp->srcport, 2);
-              *(g_hc06ptr + 3) =
-                (uint8_t) ((ntohs(udp->destport) -
-                            SIXLOWPAN_UDP_8_BIT_PORT_MIN));
-              g_hc06ptr += 4;
-            }
-          else if ((ntohs(udp->srcport) & 0xff00) ==
-                   SIXLOWPAN_UDP_8_BIT_PORT_MIN)
-            {
-              /* We can compress 8 bits of src, leave dest. Copy compressed port */
-
-              *g_hc06ptr = SIXLOWPAN_NHC_UDP_CS_P_10;
-
-              ninfo("Remove 8 bits of source with prefix 0xF0, leave dest. hch: %u\n",
-                    *g_hc06ptr);
-
-              *(g_hc06ptr + 1) =
-                (uint8_t)((ntohs(udp->srcport) - SIXLOWPAN_UDP_8_BIT_PORT_MIN));
-
-              memcpy(g_hc06ptr + 2, &udp->destport, 2);
-              g_hc06ptr += 4;
-            }
-          else
-            {
-              /* we cannot compress. Copy uncompressed ports, full checksum */
-
-              *g_hc06ptr = SIXLOWPAN_NHC_UDP_CS_P_00;
-
-              nwarn("WARNING: Cannot compress headers\n");
-
-              memcpy(g_hc06ptr + 1, &udp->srcport, 4);
-              g_hc06ptr += 5;
-            }
-
-          /* Always inline the checksum */
-
-          if (1)
-            {
-              memcpy(g_hc06ptr, &udp->udpchksum, 2);
-              g_hc06ptr += 2;
-            }
-
-          g_uncomp_hdrlen += UDP_HDRLEN;
+          g_hc06ptr += 2;
         }
-        break;
-#endif /* CONFIG_NET_UDP */
-
-#ifdef CONFIG_NET_TCP
-      /* TCP header -- not compressed */
-
-      case IP_PROTO_TCP:
+      else if ((ntohs(udp->destport) & 0xff00) ==
+               SIXLOWPAN_UDP_8_BIT_PORT_MIN)
         {
-          FAR struct tcp_hdr_s *tcp =
-            (FAR struct tcp_hdr_s *)((FAR uint8_t *)ipv6 + IPv6_HDRLEN);
-          unsigned int hdrsize;
+          /* We can compress 8 bits of dest, leave source. */
 
-          hdrsize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
-          memcpy(g_hc06ptr, tcp, hdrsize);
+          *g_hc06ptr = SIXLOWPAN_NHC_UDP_CS_P_01;
 
-          g_uncomp_hdrlen += hdrsize;
-          g_hc06ptr       += hdrsize;
+          ninfo("Leave source, remove 8 bits of dest with prefix 0xF0\n");
+
+          memcpy(g_hc06ptr + 1, &udp->srcport, 2);
+          *(g_hc06ptr + 3) =
+            (uint8_t) ((ntohs(udp->destport) -
+                        SIXLOWPAN_UDP_8_BIT_PORT_MIN));
+          g_hc06ptr += 4;
         }
-        break;
-#endif
-
-#ifdef CONFIG_NET_ICMPv6
-      /* TCP header -- not compressed */
-
-      case IP_PROTO_ICMP:
+      else if ((ntohs(udp->srcport) & 0xff00) ==
+               SIXLOWPAN_UDP_8_BIT_PORT_MIN)
         {
-          FAR const uint8_t *src = (FAR const uint8_t *)ipv6 + IPv6_HDRLEN;
+          /* We can compress 8 bits of src, leave dest. Copy compressed port */
 
-          memcpy(g_hc06ptr, src, ICMPv6_HDRLEN)
-          g_uncomp_hdrlen += ICMPv6_HDRLEN;
-          g_hc06ptr       += ICMPv6_HDRLEN;
+          *g_hc06ptr = SIXLOWPAN_NHC_UDP_CS_P_10;
+
+          ninfo("Remove 8 bits of source with prefix 0xF0, leave dest. hch: %u\n",
+                *g_hc06ptr);
+
+          *(g_hc06ptr + 1) =
+            (uint8_t)((ntohs(udp->srcport) - SIXLOWPAN_UDP_8_BIT_PORT_MIN));
+
+          memcpy(g_hc06ptr + 2, &udp->destport, 2);
+          g_hc06ptr += 4;
         }
-        break;
-#endif
+      else
+        {
+          /* we cannot compress. Copy uncompressed ports, full checksum */
 
-      default:
-        nerr("ERROR: Unsupported protocol: %02x\n", ipv6->proto);
-        break;
+          *g_hc06ptr = SIXLOWPAN_NHC_UDP_CS_P_00;
+
+          nwarn("WARNING: Cannot compress headers\n");
+
+          memcpy(g_hc06ptr + 1, &udp->srcport, 4);
+          g_hc06ptr += 5;
+        }
+
+      /* Always inline the checksum */
+
+      memcpy(g_hc06ptr, &udp->udpchksum, 2);
+      g_hc06ptr       += 2;
+      g_uncomp_hdrlen += UDP_HDRLEN;
+      g_have_protohdr  = true;
     }
+#endif /* CONFIG_NET_UDP */
 
   /* Before the g_frame_hdrlen operation */
 

@@ -58,7 +58,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdbool.h>
 
 #include <nuttx/net/tcp.h>
 #include <nuttx/net/udp.h>
@@ -206,6 +208,10 @@ extern uint8_t g_uncomp_hdrlen;
  */
 
 extern uint8_t g_frame_hdrlen;
+
+/* g_have_protohdr: true=Protocal header copied. */
+
+extern bool g_have_protohdr;
 
 /****************************************************************************
  * Public Types
