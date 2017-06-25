@@ -477,8 +477,6 @@ static uint16_t tcp_send_interrupt(FAR struct net_driver_s *dev,
       uint16_t winleft;
       uint16_t sndlen;
 
-      DEBUGASSERT((flags & WPAN_POLL) != 0);
-
       /* Get the amount of TCP payload data that we can send in the next
        * packet.
        */
@@ -537,15 +535,32 @@ static uint16_t tcp_send_interrupt(FAR struct net_driver_s *dev,
               goto end_wait;
             }
 
-          /* Increment the count of bytes sent and count of packets sent */
+          /* Increment the count of bytes sent, the number of unacked bytes,
+           * and the total count of TCP packets sent.
+           *
+           * NOTE: tcp_appsend() normally increments conn->unacked based on
+           * the value of dev->d_sndlen.  However, dev->d_len is always
+           * zero for 6LoWPAN since it does no send via the dev->d_bufuse
+           * but, rather, uses a backdoor frame interface with the IEEE
+           * 802.15.4 MAC.
+           */
 
-          sinfo->s_sent += sndlen;
+          sinfo->s_sent   += sndlen;
+          conn->unacked   += sndlen;
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+          /* For compability with buffered send logic */
+
+          conn->sndseq_max = tcp_addsequence(conn->sndseq, conn->unacked);
+#endif
+
 #ifdef CONFIG_NET_STATISTICS
           g_netstats.tcp.sent++;
 #endif
 
-          ninfo("Sent: acked=%d sent=%d buflen=%d\n",
-                sinfo->s_acked, sinfo->s_sent, sinfo->s_buflen);
+          ninfo("Sent: acked=%d sent=%d buflen=%d unacked=%d\n",
+                sinfo->s_acked, sinfo->s_sent, sinfo->s_buflen,
+                conn->unacked);
         }
     }
 
@@ -642,7 +657,7 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
        * device related events, no connect-related events.
        */
 
-      sinfo.s_cb = devif_callback_alloc(dev, &conn->list);
+      sinfo.s_cb = tcp_callback_alloc(conn);
       if (sinfo.s_cb != NULL)
         {
           int ret;
@@ -666,7 +681,8 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
 
           /* Set up the callback in the connection */
 
-          sinfo.s_cb->flags = (NETDEV_DOWN | WPAN_POLL);
+          sinfo.s_cb->flags = (NETDEV_DOWN | TCP_ACKDATA | TCP_REXMIT |
+                               TCP_DISCONN_EVENTS | WPAN_POLL);
           sinfo.s_cb->priv  = (FAR void *)&sinfo;
           sinfo.s_cb->event = tcp_send_interrupt;
 
@@ -696,7 +712,7 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
 
           /* Make sure that no further interrupts are processed */
 
-           devif_conn_callback_free(dev, sinfo.s_cb, &conn->list);
+          tcp_callback_free(conn, sinfo.s_cb);
         }
     }
 

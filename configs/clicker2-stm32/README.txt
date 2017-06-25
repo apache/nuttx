@@ -513,11 +513,8 @@ Configurations
           logic.  A major redesign was done to better handle ACKs and
           retransmissions, and to work with TCP dynamic windowing.
 
-       2017-05-25:  TCP w/HC06 currently sends on packet than hangs.  That
-          one packet is 1220 bytes long (of 4096 byte total message length).
-          It is received by the server application correctly.  The hang is
-          probably due to remaining ACK-related problems. One retransmission
-          is recorded in network stastics.
+       2017-05-25:  After some rather extensive debug, the TCP test was made
+          to with (HC06 and short addressing).
 
      Test Matrix:
        The following configurations have been tested:
@@ -525,7 +522,7 @@ Configurations
                                 TEST DATE
          COMPRESSION ADDRESSING UDP  TCP
          ----------- ---------- ---- ----
-         hc06        short      6/21 ---
+         hc06        short      6/21 6/25
                      extended   6/22 ---
          hc1         short      6/23 ---
                      extended   6/23 ---
@@ -597,10 +594,10 @@ Configurations
        emptied and dumped to the system logging device (USART3 in this
        configuration):
 
-       CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
-       CONFIG_USBDEV_TRACE_NRECORDS=128        : Buffer 128 records in memory
-       CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
-       CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
+       CONFIG_USBDEV_TRACE=y            : Enable USB trace feature
+       CONFIG_USBDEV_TRACE_NRECORDS=128 : Buffer 128 records in memory
+       CONFIG_NSH_USBDEV_TRACE=n        : No builtin tracing from NSH
+       CONFIG_NSH_ARCHINIT=y            : Automatically start the USB monitor
        CONFIG_USBMONITOR=y              : Enable the USB monitor daemon
        CONFIG_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
        CONFIG_USBMONITOR_PRIORITY=50    : USB monitor daemon priority

@@ -451,8 +451,10 @@ found:
 
           if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED)
             {
-              nwarn("WARNING: conn->sndseq %d, conn->unacked %d\n",
-                    tcp_getsequence(conn->sndseq), conn->unacked);
+              nwarn("WARNING: ackseq > unackseq\n");
+              nwarn("         sndseq=%u unacked=%u unackseq=%u ackseq=%u\n",
+                    tcp_getsequence(conn->sndseq), conn->unacked, unackseq,
+                    ackseq);
               goto reset;
             }
         }
