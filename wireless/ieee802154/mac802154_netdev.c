@@ -248,7 +248,7 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
   /* Get the eaddr from the MAC */
 
   memcpy(arg.ifr_name, dev->d_ifname, IFNAMSIZ);
-  arg.u.getreq.attr = IEEE802154_ATTR_MAC_EXTENDED_ADDR;
+  arg.u.getreq.attr = IEEE802154_ATTR_MAC_EADDR;
   ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
                      (unsigned long)((uintptr_t)&arg));
   if (ret < 0)
@@ -283,7 +283,7 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
   /* Get the saddr from the MAC */
 
   memcpy(arg.ifr_name, dev->d_ifname, IFNAMSIZ);
-  arg.u.getreq.attr = IEEE802154_ATTR_MAC_SHORT_ADDRESS;
+  arg.u.getreq.attr = IEEE802154_ATTR_MAC_SADDR;
   ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
                      (unsigned long)((uintptr_t)&arg));
   if (ret < 0)

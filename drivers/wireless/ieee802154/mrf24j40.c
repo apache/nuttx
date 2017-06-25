@@ -164,7 +164,7 @@ struct mrf24j40_radio_s
 
   struct ieee802154_addr_s addr;
 
-  uint8_t         channel;     /* 11 to 26 for the 2.4 GHz band */
+  uint8_t         chan;       /* 11 to 26 for the 2.4 GHz band */
   uint8_t         devmode;     /* device mode: device, coord, pancoord */
   uint8_t         paenabled;   /* enable usage of PA */
   uint8_t         rxmode;      /* Reception mode: Main, no CRC, promiscuous */
@@ -180,6 +180,8 @@ struct mrf24j40_radio_s
   bool txdelayed_busy : 1;
   bool csma_busy : 1;
   bool reschedule_csma : 1;
+
+  bool rxenabled : 1;
 
   struct ieee802154_txdesc_s *gts_desc[MRF24J40_GTS_SLOTS];
   bool gts_busy[MRF24J40_GTS_SLOTS];
@@ -232,6 +234,10 @@ static int  mrf24j40_setsaddr(FAR struct mrf24j40_radio_s *dev,
               FAR const uint8_t *saddr);
 static int  mrf24j40_seteaddr(FAR struct mrf24j40_radio_s *dev,
               FAR const uint8_t *eaddr);
+static int mrf24j40_setcoordsaddr(FAR struct mrf24j40_radio_s *dev,
+              FAR const uint8_t *saddr);
+static int mrf24j40_setcoordeaddr(FAR struct mrf24j40_radio_s *dev,
+              FAR const uint8_t *eaddr);
 static int  mrf24j40_setdevmode(FAR struct mrf24j40_radio_s *dev,
               uint8_t mode);
 static int  mrf24j40_settxpower(FAR struct mrf24j40_radio_s *dev,
@@ -261,11 +267,13 @@ static int  mrf24j40_rxenable(FAR struct ieee802154_radio_s *dev, bool enable);
 static int  mrf24j40_req_rxenable(FAR struct ieee802154_radio_s *radio,
               FAR struct ieee802154_rxenable_req_s *req);
 static int  mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
-               FAR const struct ieee802154_superframespec_s *sf_spec,
+               FAR const struct ieee802154_superframespec_s *sfspec,
                FAR struct ieee802154_beaconframe_s *beacon);
 static int  mrf24j40_beaconupdate(FAR struct ieee802154_radio_s *radio,
                FAR struct ieee802154_beaconframe_s *beacon);
 static int  mrf24j40_beaconstop(FAR struct ieee802154_radio_s *radio);
+static int  mrf24j40_sfupdate(FAR struct ieee802154_radio_s *radio,
+               FAR const struct ieee802154_superframespec_s *sfspec);
 
 /****************************************************************************
  * Private Data
@@ -447,7 +455,7 @@ static int mrf24j40_get_attr(FAR struct ieee802154_radio_s *radio,
 
   switch (attr)
     {
-      case IEEE802154_ATTR_MAC_EXTENDED_ADDR:
+      case IEEE802154_ATTR_MAC_EADDR:
         {
           memcpy(&attrval->mac.eaddr[0], &dev->addr.eaddr[0], 8);
           ret = IEEE802154_STATUS_SUCCESS;
@@ -467,6 +475,12 @@ static int mrf24j40_get_attr(FAR struct ieee802154_radio_s *radio,
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
+      
+      case IEEE802154_ATTR_PHY_CHAN:
+        {
+          attrval->phy.chan = dev->chan;
+          ret = IEEE802154_STATUS_SUCCESS;
+        }
 
       default:
         ret = IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE;
@@ -491,16 +505,30 @@ static int mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
         }
         break;
 
-      case IEEE802154_ATTR_MAC_SHORT_ADDRESS:
+      case IEEE802154_ATTR_MAC_SADDR:
         {
           mrf24j40_setsaddr(dev, attrval->mac.saddr);
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
 
-      case IEEE802154_ATTR_MAC_EXTENDED_ADDR:
+      case IEEE802154_ATTR_MAC_EADDR:
         {
-          mrf24j40_seteaddr(dev, &attrval->mac.eaddr[0]);
+          mrf24j40_seteaddr(dev, attrval->mac.eaddr);
+          ret = IEEE802154_STATUS_SUCCESS;
+        }
+        break;
+      
+      case IEEE802154_ATTR_MAC_COORD_SADDR:
+        {
+          mrf24j40_setcoordsaddr(dev, attrval->mac.coordsaddr);
+          ret = IEEE802154_STATUS_SUCCESS;
+        }
+        break;
+
+      case IEEE802154_ATTR_MAC_COORD_EADDR:
+        {
+          mrf24j40_setcoordeaddr(dev, attrval->mac.coordeaddr);
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
@@ -527,6 +555,13 @@ static int mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
+      
+      case IEEE802154_ATTR_PHY_CHAN:
+        {
+          mrf24j40_setchannel(dev, attrval->phy.chan);
+          ret = IEEE802154_STATUS_SUCCESS;
+        }
+        break;
 
       default:
         ret = IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE;
@@ -543,7 +578,7 @@ static int  mrf24j40_req_rxenable(FAR struct ieee802154_radio_s *radio,
 }
 
 static int  mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
-               FAR const struct ieee802154_superframespec_s *sf_spec,
+               FAR const struct ieee802154_superframespec_s *sfspec,
                FAR struct ieee802154_beaconframe_s *beacon)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
@@ -551,7 +586,7 @@ static int  mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
   uint32_t slpcal = 0;
   int reg;
 
-  if (sf_spec->pancoord)
+  if (sfspec->pancoord)
     {
       /* Set the PANCOORD (RXMCR 0x00<3>) bit = 1to configure as PAN coordinator */
 
@@ -588,7 +623,7 @@ static int  mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
 
       reg = mrf24j40_getreg(dev->spi, MRF24J40_ESLOTG1);
       reg &= ~MRF24J40_ESLOTG1_CAP;
-      reg |= sf_spec->final_capslot & MRF24J40_ESLOTG1_CAP;
+      reg |= sfspec->final_capslot & MRF24J40_ESLOTG1_CAP;
       mrf24j40_setreg(dev->spi, MRF24J40_ESLOTG1, reg);
 
       /* TODO: Add GTS related code. See pg 100 of datasheet */
@@ -643,7 +678,7 @@ static int  mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
       mrf24j40_setreg(dev->spi, MRF24J40_REMCNTL, (MRF24J40_REMCNT & 0xFF));
       mrf24j40_setreg(dev->spi, MRF24J40_REMCNTH, ((MRF24J40_REMCNT >> 8) & 0xFF));
 
-      maincnt = MRF24J40_MAINCNT(sf_spec->beaconorder, (slpcal * 50 / 16));
+      maincnt = MRF24J40_MAINCNT(sfspec->beaconorder, (slpcal * 50 / 16));
 
       mrf24j40_setreg(dev->spi, MRF24J40_MAINCNT0, (maincnt & 0xFF));
       mrf24j40_setreg(dev->spi, MRF24J40_MAINCNT1, ((maincnt >> 8)  & 0xFF));
@@ -661,7 +696,7 @@ static int  mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
        */
 
       mrf24j40_setreg(dev->spi, MRF24J40_ORDER,
-        ((sf_spec->beaconorder << 4) & 0xF0) | (sf_spec->sforder & 0x0F));
+        ((sfspec->beaconorder << 4) & 0xF0) | (sfspec->sforder & 0x0F));
     }
   else
     {
@@ -684,6 +719,41 @@ static int  mrf24j40_beaconupdate(FAR struct ieee802154_radio_s *radio,
 static int  mrf24j40_beaconstop(FAR struct ieee802154_radio_s *radio)
 {
   return -ENOTTY;
+}
+
+static int mrf24j40_sfupdate(FAR struct ieee802154_radio_s *radio,
+             FAR const struct ieee802154_superframespec_s *sfspec)
+{
+  FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
+  int reg;
+
+  reg = mrf24j40_getreg(dev->spi, MRF24J40_RXMCR);
+
+  if (sfspec->pancoord)
+    {
+      reg |= MRF24J40_RXMCR_PANCOORD;
+    }
+  else
+    {
+      reg &= ~MRF24J40_RXMCR_PANCOORD;
+    }
+  mrf24j40_setreg(dev->spi, MRF24J40_RXMCR, reg);
+
+  /* Program the CAP end slot (ESLOTG1 0x13<3:0>) value. */ 
+
+  reg = mrf24j40_getreg(dev->spi, MRF24J40_ESLOTG1);
+  reg &= ~MRF24J40_ESLOTG1_CAP;
+  reg |= sfspec->final_capslot & MRF24J40_ESLOTG1_CAP;
+  mrf24j40_setreg(dev->spi, MRF24J40_ESLOTG1, reg);
+
+  /* Configure the BO (ORDER 0x10<7:4>) and SO (ORDER 0x10<3:0>) values.
+    * After configuring BO and SO, the beacon frame will be sent immediately.
+    */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_ORDER,
+    ((sfspec->beaconorder << 4) & 0xF0) | (sfspec->sforder & 0x0F));
+
+  return OK;
 }
 
 /****************************************************************************
@@ -899,7 +969,7 @@ static void mrf24j40_setreg(FAR struct spi_dev_s *spi, uint32_t addr,
  * Name: mrf24j40_getreg
  *
  * Description:
- *   Return the value of an MRF24J40 device register
+ *   Return the value of an MRF24J40 device register*
  *
  ****************************************************************************/
 
@@ -1117,8 +1187,8 @@ static int mrf24j40_setchannel(FAR struct mrf24j40_radio_s *dev, uint8_t chan)
 
   mrf24j40_resetrfsm(dev);
 
-  dev->channel = chan;
-  //wlinfo("%u\n", (unsigned)chan);
+  dev->chan = chan;
+  wlinfo("%u\n", (unsigned)chan);
 
   return OK;
 }
@@ -1182,6 +1252,51 @@ static int mrf24j40_seteaddr(FAR struct mrf24j40_radio_s *dev,
   for (i = 0; i < 8; i++)
     {
       mrf24j40_setreg(dev->spi, MRF24J40_EADR0 + i, eaddr[i]);
+      dev->addr.eaddr[i] = eaddr[i];
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: mrf24j40_setcoordsaddr
+ *
+ * Description:
+ *   Define the coordinator short address. The following addresses are special:
+ *   FFFEh : Broadcast
+ *   FFFFh : Unspecified
+ *
+ ****************************************************************************/
+
+static int mrf24j40_setcoordsaddr(FAR struct mrf24j40_radio_s *dev,
+                                  FAR const uint8_t *saddr)
+{
+  mrf24j40_setreg(dev->spi, MRF24J40_ASSOSADR0, saddr[0]);
+  mrf24j40_setreg(dev->spi, MRF24J40_ASSOSADR1, saddr[1]);
+
+  IEEE802154_SADDRCOPY(dev->addr.saddr, saddr);
+
+  wlinfo("%02X:%02X\n", saddr[1], saddr[0]);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: mrf24j40_setcoordeaddr
+ *
+ * Description:
+ *   Define the coordinator extended address. The following addresses are special:
+ *   FFFFFFFFFFFFFFFFh : Unspecified
+ *
+ ****************************************************************************/
+
+static int mrf24j40_setcoordeaddr(FAR struct mrf24j40_radio_s *dev,
+                                  FAR const uint8_t *eaddr)
+{
+  int i;
+
+  for (i = 0; i < 8; i++)
+    {
+      mrf24j40_setreg(dev->spi, MRF24J40_ASSOEADR0 + i, eaddr[i]);
       dev->addr.eaddr[i] = eaddr[i];
     }
 
@@ -1763,13 +1878,30 @@ static int mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio, bool enable)
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
   uint8_t reg;
 
+  dev->rxenabled = enable;
+
+
   if (enable)
     {
+      /* Disable packet reception. See pg. 109 of datasheet */
+
+      mrf24j40_setreg(dev->spi, MRF24J40_BBREG1, MRF24J40_BBREG1_RXDECINV);
+
       /* Enable rx int */
 
       reg = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
       reg &= ~MRF24J40_INTCON_RXIE;
       mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
+
+      /* Purge the RX buffer */
+
+      reg = mrf24j40_getreg(dev->spi, MRF24J40_RXFLUSH);
+      reg |= MRF24J40_RXFLUSH_RXFLUSH;
+      mrf24j40_setreg(dev->spi, MRF24J40_RXFLUSH, reg);
+
+      /* Re-enable packet reception. See pg. 109 of datasheet */
+
+      mrf24j40_setreg(dev->spi, MRF24J40_BBREG1, 0);
     }
   else
     {
@@ -1853,14 +1985,14 @@ done:
 
   mrf24j40_setreg(dev->spi, MRF24J40_RXFLUSH, 1);
 
-  /* Enable packet reception */
-
-  mrf24j40_setreg(dev->spi, MRF24J40_BBREG1, 0);
-
   /* Only enable RX interrupt if we are to be listening when IDLE */
 
-  if (dev->rxonidle)
+  if (dev->rxenabled)
     {
+      /* Enable packet reception */
+
+      mrf24j40_setreg(dev->spi, MRF24J40_BBREG1, 0);
+
       reg = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
       reg &= ~MRF24J40_INTCON_RXIE;
       mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
@@ -1900,7 +2032,6 @@ static void mrf24j40_irqworker(FAR void *arg)
   /* Read and store INTSTAT - this clears the register. */
 
   intstat = mrf24j40_getreg(dev->spi, MRF24J40_INTSTAT);
-  wlinfo("INT%02X\n", intstat);
 
   /* Do work according to the pending interrupts */
 
@@ -1919,7 +2050,7 @@ static void mrf24j40_irqworker(FAR void *arg)
       mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
     }
 
-  if ((intstat & MRF24J40_INTSTAT_RXIF))
+  if ((intstat & MRF24J40_INTSTAT_RXIF) && dev->rxenabled)
     {
       /* A packet was received, retrieve it */
 
@@ -2057,10 +2188,13 @@ FAR struct ieee802154_radio_s *mrf24j40_init(FAR struct spi_dev_s *spi,
   dev->radio.beaconstart  = mrf24j40_beaconstart;
   dev->radio.beaconupdate = mrf24j40_beaconupdate;
   dev->radio.beaconstop   = mrf24j40_beaconstop;
+  dev->radio.sfupdate     = mrf24j40_sfupdate;
 
   dev->lower    = lower;
   dev->spi      = spi;
 
+
+  dev->rxenabled = false;
   mrf24j40_initialize(dev);
 
   mrf24j40_setchannel(dev, 11);

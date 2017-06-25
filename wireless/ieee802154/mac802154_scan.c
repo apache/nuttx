@@ -51,8 +51,16 @@
 #include <string.h>
 
 #include "mac802154.h"
+#include "mac802154_internal.h"
+#include "mac802154_scan.h"
 
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static void mac802154_scantimeout(FAR struct ieee802154_privmac_s *priv);
 
 /****************************************************************************
  * Public MAC Functions
@@ -79,7 +87,7 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
     (FAR struct ieee802154_privmac_s *)mac;
   int ret;
 
-  if (req->duration > 15)
+  if (req->duration > 15 || req->numchan < 0 || req->numchan > 15)
     {
       ret = -EINVAL;
       goto errout;
@@ -92,23 +100,60 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
   ret = mac802154_takesem(&priv->opsem, true);
   if (ret < 0)
     {
-      ret = -EINVAL;
+      ret = -EINTR;
       goto errout;
     }
+
+  priv->curr_op = MAC802154_OP_SCAN;
+  
+  /* Get exclusive access to the MAC */
   
   ret = mac802154_takesem(&priv->exclsem, true);
   if (ret < 0)
     {
-      ret = -EINVAL;
+      mac802154_givesem(&priv->opsem);
+      ret = -EINTR;
       goto errout;
     }
+  
+  /* Copy the request so we have a reference */
 
+  memcpy(&priv->currscan, req, sizeof(struct ieee802154_scan_req_s));
+  priv->scanindex = 0;
+  priv->npandesc = 0;
 
   switch (req->type)
     {
       case IEEE802154_SCANTYPE_PASSIVE:
         {
+          /* Set the channel to the first channel in the list */
 
+          mac802154_setchannel(priv, req->channels[priv->scanindex]);
+          mac802154_setchpage(priv, req->chpage);
+
+          /* Before commencing an active or passive scan, the MAC sublayer shall
+           * store the value of macPANId and then set it to 0xffff for the
+           * duration of the scan. This enables the receive filter to accept all
+           * beacons rather than just the beacons from its current PAN, as
+           * described in 5.1.6.2. On completion of the scan, the MAC sublayer
+           * shall restore the value of macPANId to the value stored before the
+           * scan began. [1] pg. 24
+           */
+          
+          IEEE802154_PANIDCOPY(priv->panidbeforescan, priv->addr.panid);
+          mac802154_setpanid(priv, (const uint8_t *)&IEEE802154_PANID_UNSPEC);
+
+          /* ...after switching to the channel for a passive scan, the device
+           * shall enable its receiver for at most
+           * [aBaseSuperframeDuration × (2 * n + 1)],
+           * where n is the value of the ScanDuration parameter. [1] pg. 25
+           */
+          
+          mac802154_rxenable(priv);
+
+          priv->scansymdur = IEEE802154_BASE_SUPERFRAME_DURATION *
+                                     ((1 << req->duration) + 1);
+          mac802154_timerstart(priv, priv->scansymdur, mac802154_scantimeout);
         }
         break;
       case IEEE802154_SCANTYPE_ACTIVE:
@@ -137,11 +182,103 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
         break;
     }
 
+  mac802154_givesem(&priv->exclsem);
 return OK;
 
-errout_with_sem;
+errout_with_sem:
+  mac802154_givesem(&priv->exclsem);
   mac802154_givesem(&priv->opsem);
 errout:
   return ret;
 }
 
+/****************************************************************************
+ * Internal MAC Functions
+ ****************************************************************************/
+
+void mac802154_scanfinish(FAR struct ieee802154_privmac_s *priv,
+                          enum ieee802154_status_e status)
+{
+  FAR struct ieee802154_notif_s * notif;
+
+  mac802154_takesem(&priv->exclsem, false);
+  mac802154_notif_alloc(priv, &notif, false);
+
+  priv->curr_op = MAC802154_OP_NONE;
+  mac802154_givesem(&priv->opsem);
+
+  notif->notiftype = IEEE802154_NOTIFY_CONF_SCAN;
+  notif->u.scanconf.type = priv->currscan.type;
+  notif->u.scanconf.chpage = priv->currscan.chpage;
+
+  /* Copy in the channels that did not get scanned */
+
+  if (priv->scanindex != priv->currscan.numchan)
+    {
+      notif->u.scanconf.numunscanned = priv->currscan.numchan - priv->scanindex;
+      memcpy(notif->u.scanconf.unscanned, &priv->currscan.channels[priv->scanindex],
+             notif->u.scanconf.numunscanned);
+    }
+  
+  notif->u.scanconf.numdesc = priv->npandesc;
+  memcpy(notif->u.scanconf.pandescs, priv->pandescs,
+         sizeof(struct ieee802154_pandesc_s) * priv->npandesc);
+  notif->u.scanconf.status = status;
+
+  /* Reset the PAN ID to the setting before the scan started */
+
+  mac802154_setpanid(priv, priv->panidbeforescan);
+
+  mac802154_givesem(&priv->exclsem);
+
+  mac802154_notify(priv, notif);
+}
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: mac802154_scantimeout
+ *
+ * Description:
+ *   Function registered with MAC timer that gets called via the work queue to
+ *   handle a timeout for performing a scan operation.
+ *
+ ****************************************************************************/
+
+static void mac802154_scantimeout(FAR struct ieee802154_privmac_s *priv)
+{
+  DEBUGASSERT(priv->curr_op == MAC802154_OP_SCAN);
+
+  /* If we got here it means we are done scanning that channel */
+
+  mac802154_rxdisable(priv);
+  priv->scanindex++;
+
+  /* Check to see if this was the last channel to scan */
+
+  if (priv->scanindex == priv->currscan.numchan)
+    {
+      if (priv->npandesc > 0)
+        {
+          mac802154_scanfinish(priv, IEEE802154_STATUS_SUCCESS);
+        }
+      else
+        {
+          mac802154_scanfinish(priv, IEEE802154_STATUS_NO_BEACON);
+        }
+      return;
+    }
+  
+  mac802154_setchannel(priv, priv->currscan.channels[priv->scanindex]);
+
+  /* ...after switching to the channel for a passive scan, the device
+   * shall enable its receiver for at most
+   * [aBaseSuperframeDuration × (2 * n + 1)],
+   * where n is the value of the ScanDuration parameter. [1] pg. 25
+   */
+          
+  mac802154_rxenable(priv);
+  mac802154_timerstart(priv, priv->scansymdur, mac802154_scantimeout);
+}

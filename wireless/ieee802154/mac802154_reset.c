@@ -88,12 +88,12 @@ int mac802154_req_reset(MACHANDLE mac, bool rst_pibattr)
     {
       priv->isassoc = false;             /* Not associated with a PAN */
       priv->trackingbeacon = false;      /* Not tracking beacon by default */
-      priv->sf_spec.assocpermit = false; /* Device (if coord) not accepting ssociation */
+      priv->sfspec.assocpermit = false; /* Device (if coord) not accepting ssociation */
       priv->autoreq = true;              /* Auto send data req if addr. in beacon */
-      priv->sf_spec.ble = false;         /* BLE disabled */
+      priv->sfspec.ble = false;         /* BLE disabled */
       priv->beaconpayloadlength = 0;     /* Beacon payload NULL */
-      priv->sf_spec.beaconorder = 15;   /* Non-beacon enabled network */
-      priv->sf_spec.sforder = 15;       /* Length of active portion of outgoing SF */
+      priv->sfspec.beaconorder = 15;   /* Non-beacon enabled network */
+      priv->sfspec.sforder = 15;       /* Length of active portion of outgoing SF */
       priv->beacon_txtime = 0;           /* Device never sent a beacon */
 #warning Set BSN and DSN to random values!
       priv->bsn = 0;
@@ -113,10 +113,10 @@ int mac802154_req_reset(MACHANDLE mac, bool rst_pibattr)
 
       /* Reset the Coordinator address */
 
-      priv->coordaddr.mode = IEEE802154_ADDRMODE_NONE;
-      IEEE802154_PANIDCOPY(priv->coordaddr.panid, &IEEE802154_PANID_UNSPEC);
-      IEEE802154_SADDRCOPY(priv->coordaddr.saddr, &IEEE802154_SADDR_UNSPEC);
-      IEEE802154_EADDRCOPY(priv->coordaddr.eaddr, &IEEE802154_EADDR_UNSPEC);
+      priv->pandesc.coordaddr.mode = IEEE802154_ADDRMODE_NONE;
+      IEEE802154_PANIDCOPY(priv->pandesc.coordaddr.panid, &IEEE802154_PANID_UNSPEC);
+      IEEE802154_SADDRCOPY(priv->pandesc.coordaddr.saddr, &IEEE802154_SADDR_UNSPEC);
+      IEEE802154_EADDRCOPY(priv->pandesc.coordaddr.eaddr, &IEEE802154_EADDR_UNSPEC);
 
       /* Reset the device's address */
 

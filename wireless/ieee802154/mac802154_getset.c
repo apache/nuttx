@@ -86,10 +86,10 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_attr_e attr,
       case IEEE802154_ATTR_MAC_PANID:
         IEEE802154_PANIDCOPY(attrval->mac.panid, priv->addr.panid);
         break;
-      case IEEE802154_ATTR_MAC_SHORT_ADDRESS:
+      case IEEE802154_ATTR_MAC_SADDR:
         IEEE802154_SADDRCOPY(attrval->mac.saddr, priv->addr.saddr);
         break;
-      case IEEE802154_ATTR_MAC_EXTENDED_ADDR:
+      case IEEE802154_ATTR_MAC_EADDR:
         IEEE802154_EADDRCOPY(attrval->mac.eaddr, priv->addr.eaddr);
         break;
       case IEEE802154_ATTR_MAC_DEVMODE:
@@ -100,7 +100,7 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_attr_e attr,
          * it along.
          */
 
-        ret = priv->radio->set_attr(priv->radio, attr, attrval);
+        ret = priv->radio->get_attr(priv->radio, attr, attrval);
         break;
     }
 
@@ -133,42 +133,37 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_attr_e attr,
     {
       case IEEE802154_ATTR_MAC_PANID:
         {
-          IEEE802154_PANIDCOPY(priv->addr.panid, attrval->mac.panid);
-
-          /* Tell the radio about the attribute */
-
-          priv->radio->set_attr(priv->radio, attr, attrval);
-
+          mac802154_setpanid(priv, attrval->mac.panid);
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
-      case IEEE802154_ATTR_MAC_SHORT_ADDRESS:
+      case IEEE802154_ATTR_MAC_SADDR:
         {
-          IEEE802154_SADDRCOPY(priv->addr.saddr, attrval->mac.saddr);
-
-          /* Tell the radio about the attribute */
-
-          priv->radio->set_attr(priv->radio, attr, attrval);
-
+          mac802154_setsaddr(priv, attrval->mac.saddr);
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
-      case IEEE802154_ATTR_MAC_EXTENDED_ADDR:
+      case IEEE802154_ATTR_MAC_EADDR:
         {
-          /* Set the MAC copy of the address in the table */
-
-          IEEE802154_EADDRCOPY(priv->addr.eaddr, attrval->mac.eaddr);
-
-          /* Tell the radio about the attribute */
-
-          priv->radio->set_attr(priv->radio, attr, attrval);
-
+          mac802154_seteaddr(priv, attrval->mac.eaddr);
+          ret = IEEE802154_STATUS_SUCCESS;
+        }
+        break;
+      case IEEE802154_ATTR_MAC_COORD_SADDR:
+        {
+          mac802154_setcoordsaddr(priv, attrval->mac.coordsaddr);
+          ret = IEEE802154_STATUS_SUCCESS;
+        }
+        break;
+      case IEEE802154_ATTR_MAC_COORD_EADDR:
+        {
+          mac802154_setcoordeaddr(priv, attrval->mac.coordeaddr);
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
       case IEEE802154_ATTR_MAC_ASSOCIATION_PERMIT:
         {
-          priv->sf_spec.assocpermit = attrval->mac.assocpermit;
+          priv->sfspec.assocpermit = attrval->mac.assocpermit;
           priv->beaconupdate = true;
           ret = IEEE802154_STATUS_SUCCESS;
         }
