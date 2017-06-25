@@ -431,6 +431,11 @@ static int macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
       return -EINVAL;
     }
 
+  /* Increment statistics */
+
+  NETDEV_RXPACKETS(&priv->md_dev.i_dev);
+  NETDEV_RXIPV6(&priv->md_dev.i_dev);
+
   /* Remove the IOB containing the frame. */
 
   ind->frame = NULL;
@@ -1145,8 +1150,11 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
               iob_free(iob);
             }
 
+          NETDEV_TXERRORS(&priv->md_dev.i_dev);
           return ret;
         }
+
+      NETDEV_TXDONE(&priv->md_dev.i_dev);
     }
 
   return OK;

@@ -508,10 +508,16 @@ Configurations
          other configurations (see text matrix below).
 
        2017-06-23:  Added test for TCP functionality.  As of yet unverified.
+
        2017-06-24:  There are significant problems with the 6LoWPAN TCP send
           logic.  A major redesign was done to better handle ACKs and
-          retransmissions, and to work with TCP dynamic windowing.  Current
-          hangs because ACKs are not received.
+          retransmissions, and to work with TCP dynamic windowing.
+
+       2017-05-25:  TCP w/HC06 currently sends on packet than hangs.  That
+          one packet is 1220 bytes long (of 4096 byte total message length).
+          It is received by the server application correctly.  The hang is
+          probably due to remaining ACK-related problems. One retransmission
+          is recorded in network stastics.
 
      Test Matrix:
        The following configurations have been tested:
