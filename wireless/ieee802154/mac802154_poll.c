@@ -60,7 +60,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void mac802154_timeout_poll(FAR struct ieee802154_privmac_s *priv);
+static void mac802154_polltimeout(FAR struct ieee802154_privmac_s *priv);
 
 /****************************************************************************
  * Public MAC Functions
@@ -235,7 +235,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
        * the corresponding data frame from the coordinator. [1] pg.43
        */
 
-      priv->radio->rxenable(priv->radio, true);
+      mac802154_rxenable(priv);       
 
       /* Start a timer, if we receive the data frame, we will cancel
        * the timer, otherwise it will expire and we will notify the
@@ -243,7 +243,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
        */
 
       mac802154_timerstart(priv, priv->max_frame_waittime,
-                           mac802154_timeout_poll);
+                           mac802154_polltimeout);
 
       /* We can deallocate the data conf notification as it is no longer
        * needed. We can't use the public function here since we already
@@ -256,7 +256,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
 }
 
 /****************************************************************************
- * Name: mac802154_timeout_poll
+ * Name: mac802154_polltimeout
  *
  * Description:
  *   Function registered with MAC timer that gets called via the work queue to
@@ -264,7 +264,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
  *
  ****************************************************************************/
 
-void mac802154_timeout_poll(FAR struct ieee802154_privmac_s *priv)
+void mac802154_polltimeout(FAR struct ieee802154_privmac_s *priv)
 {
   FAR struct ieee802154_notif_s *notif;
 

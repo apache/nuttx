@@ -58,7 +58,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void mac802154_timeout_assoc(FAR struct ieee802154_privmac_s *priv);
+static void mac802154_assoctimeout(FAR struct ieee802154_privmac_s *priv);
 
 /****************************************************************************
  * Public MAC Functions
@@ -120,22 +120,18 @@ int mac802154_req_associate(MACHANDLE mac,
 
   /* Set the channel and channel page of the PHY layer */
 
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_PHY_CURRENT_CHANNEL,
-                        (FAR const union ieee802154_attr_u *)&req->chnum);
-
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_PHY_CURRENT_PAGE,
-                        (FAR const union ieee802154_attr_u *)&req->chpage);
+  mac802154_setchannel(priv, req->chan);
+  mac802154_setchpage(priv, req->chpage);
 
   /* Set the coordinator address attributes */
 
-  memcpy(&priv->coordaddr, &req->coordaddr, sizeof(struct ieee802154_addr_s));
+  mac802154_setcoordaddr(priv, &req->coordaddr);
+
+  /* TODO: Need to send coordinator address to radio layer */
 
   /* Copy the coordinator PAN ID to our PAN ID */
 
-  IEEE802154_PANIDCOPY(priv->addr.panid, req->coordaddr.panid);
-
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_PANID,
-               (FAR const union ieee802154_attr_u *)req->coordaddr.panid);
+  mac802154_setpanid(priv, req->coordaddr.panid);
 
   /* Copy in the capabilities information bitfield */
 
@@ -181,7 +177,7 @@ int mac802154_req_associate(MACHANDLE mac,
 
   IEEE802154_SETACKREQ(iob->io_data, 0);
   IEEE802154_SETFTYPE(iob->io_data, 0, IEEE802154_FRAME_COMMAND);
-  IEEE802154_SETDADDRMODE(iob->io_data, 0, priv->coordaddr.mode);
+  IEEE802154_SETDADDRMODE(iob->io_data, 0, priv->pandesc.coordaddr.mode);
   IEEE802154_SETSADDRMODE(iob->io_data, 0, IEEE802154_ADDRMODE_EXTENDED);
 
   iob->io_len = 2;
@@ -197,20 +193,20 @@ int mac802154_req_associate(MACHANDLE mac,
    * PAN to which to associate. [1] pg. 68
    */
 
-  mac802154_putpanid(iob, priv->coordaddr.panid);
+  mac802154_putpanid(iob, priv->pandesc.coordaddr.panid);
 
   /* The Destination Address field shall contain the address from the beacon
    * frame that was transmitted by the coordinator to which the association
    * request command is being sent. [1] pg. 68
    */
 
-  if (priv->coordaddr.mode == IEEE802154_ADDRMODE_SHORT)
+  if (priv->pandesc.coordaddr.mode == IEEE802154_ADDRMODE_SHORT)
     {
-      mac802154_putsaddr(iob, priv->coordaddr.saddr);
+      mac802154_putsaddr(iob, priv->pandesc.coordaddr.saddr);
     }
-  else if (priv->coordaddr.mode == IEEE802154_ADDRMODE_EXTENDED)
+  else if (priv->pandesc.coordaddr.mode == IEEE802154_ADDRMODE_EXTENDED)
     {
-      mac802154_puteaddr(iob, priv->coordaddr.eaddr);
+      mac802154_puteaddr(iob, priv->pandesc.coordaddr.eaddr);
     }
 
   /* The Source PAN Identifier field shall contain the broadcast PAN identifier.*/
@@ -258,7 +254,7 @@ int mac802154_req_associate(MACHANDLE mac,
 
   mac802154_givesem(&priv->exclsem);
 
-  /* Association Request commands get sent out immediately */
+  /* Association Request command gets sent out immediately */
 
   priv->radio->txdelayed(priv->radio, txdesc, 0);
 
@@ -464,7 +460,7 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
        * the coordinator after macResponseWaitTime. [1] pg. 34
        */
 
-      if (priv->trackingbeacon)
+      if (priv->sfspec.beaconorder < 15)
         {
           /* We are tracking the beacon, so we should see our address in the
            * beacon frame within macResponseWaitTime if the coordinator is going
@@ -475,7 +471,7 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
 
           mac802154_timerstart(priv, (priv->resp_waittime *
                                IEEE802154_BASE_SUPERFRAME_DURATION),
-                               mac802154_timeout_assoc);
+                               mac802154_assoctimeout);
         }
       else
         {
@@ -484,7 +480,7 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
            * extended
            */
 
-          DEBUGASSERT(priv->coordaddr.mode != IEEE802154_ADDRMODE_NONE);
+          DEBUGASSERT(priv->pandesc.coordaddr.mode != IEEE802154_ADDRMODE_NONE);
 
           /* Send the Data Request MAC command after macResponseWaitTime to
            * extract the data from the coordinator.
@@ -492,7 +488,7 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
 
           mac802154_txdesc_alloc(priv, &respdesc, false);
 
-          mac802154_createdatareq(priv, &priv->coordaddr,
+          mac802154_createdatareq(priv, &priv->pandesc.coordaddr,
                                   IEEE802154_ADDRMODE_EXTENDED, respdesc);
 
           priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
@@ -589,7 +585,7 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
        * the corresponding data frame from the coordinator. [1] pg.43
        */
 
-      priv->radio->rxenable(priv->radio, true);
+      mac802154_rxenable(priv);
 
       /* Start a timer, if we receive the data frame, we will cancel
        * the timer, otherwise it will expire and we will notify the
@@ -597,7 +593,7 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
        */
 
       mac802154_timerstart(priv, priv->max_frame_waittime,
-                           mac802154_timeout_assoc);
+                           mac802154_assoctimeout);
 
       /* We can deallocate the data conf notification as it is no longer
        * needed. We can't use the public function here since we already
@@ -724,7 +720,7 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
 
   /* Inform the radio of the address change */
 
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_SHORT_ADDRESS,
+  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_SADDR,
                         (FAR union ieee802154_attr_u *)priv->addr.saddr);
 
   /* A Short Address field value equal to 0xfffe shall indicate that the device
@@ -775,7 +771,7 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mac802154_timeout_assoc
+ * Name: mac802154_assoctimeout
  *
  * Description:
  *   Function registered with MAC timer that gets called via the work queue to
@@ -783,7 +779,7 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
  *
  ****************************************************************************/
 
-static void mac802154_timeout_assoc(FAR struct ieee802154_privmac_s *priv)
+static void mac802154_assoctimeout(FAR struct ieee802154_privmac_s *priv)
 {
   FAR struct ieee802154_notif_s *notif;
 
@@ -805,7 +801,7 @@ static void mac802154_timeout_assoc(FAR struct ieee802154_privmac_s *priv)
 
   /* We are no longer performing the association operation */
   priv->curr_op = MAC802154_OP_NONE;
-      priv->cmd_desc = NULL;
+  priv->cmd_desc = NULL;
   mac802154_givesem(&priv->opsem);
 
   /* Release the MAC */

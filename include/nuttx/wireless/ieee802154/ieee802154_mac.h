@@ -60,6 +60,14 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+#if !defined(CONFIG_MAC802154_NPANDESC) || CONFIG_MAC802154_NPANDESC <= 0
+#  undef CONFIG_MAC802154_NPANDESC
+#  define CONFIG_MAC802154_NPANDESC 5
+#endif
+
+#define MAC802154_NPANDESC CONFIG_MAC802154_NPANDESC
 
 /* IEEE 802.15.4 address macros */
 /* Copy a an IEEE 802.15.4 address */
@@ -97,8 +105,6 @@
 #define IEEE802154_SADDR_BCAST  ((uint8_t[]){0xFE,0xFF})
 #define IEEE802154_EADDR_UNSPEC ((uint8_t[]){0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF})
 
-/* Configuration ************************************************************/
-/* None at the moment */
 
 /* IEEE 802.15.4 MAC Character Driver IOCTL Commands ************************/
 
@@ -111,9 +117,9 @@
  *   - Response
  *   - Confirm
  *
- * Of these, Request and Response primitives are sent from the next highest layer
- * to the MLME.  Indication and Confirm primitives are used to notify the next
- * highest layer of changes or actions that have taken place.
+ * Of these, Request and Response primitives are sent from the next highest
+ * layer to the MLME. Indication and Confirm primitives are used to notify the
+ * next highest layer of changes or actions that have taken place.
  *
  * The MAC802154 character driver exposed here provides IOCTL hooks for all
  * Request and Response primitives.
@@ -160,8 +166,53 @@
 #define IEEE802154_FRAMECTRL_SHIFT_VERSION    12 /* Source addressing mode, bits 12-13 */
 #define IEEE802154_FRAMECTRL_SHIFT_SADDR      14 /* Source addressing mode, bits 14-15 */
 
+/* Superframe Specification field masks, 2 bytes
+ * Seee IEEE 802.15.4/2011 5.2.2.1.2 page 62
+ */
+
+#define IEEE802154_SFSPEC_BEACONORDER 0x000F  /* Beacon order, bits 0-3 */
+#define IEEE802154_SFSPEC_SFORDER     0x00F0  /* Superframe Order, bit 4-7 */
+#define IEEE802154_SFSPEC_FINCAPSLOT  0x0F00  /* Final CAP Slot, bit 8-11 */
+#define IEEE802154_SFSPEC_BLE         0x1000  /* Battery Life Ext, bit 12 */
+#define IEEE802154_SFSPEC_PANCOORD    0x4000  /* PAN Coordinator, bit 14 */
+#define IEEE802154_SFSPEC_ASSOCPERMIT 0x8000  /* Association Permit, bit 15 */
+
+#define IEEE802154_SFSPEC_SHIFT_BEACONORDER 0  /* Beacon order, bits 0-3 */
+#define IEEE802154_SFSPEC_SHIFT_SFORDER     4  /* Superframe order, bit 4-7 */
+#define IEEE802154_SFSPEC_SHIFT_FINCAPSLOT  8  /* Final CAP Slot, bit 8-11 */
+#define IEEE802154_SFSPEC_SHIFT_BLE         12 /* Battery Life Ext, bit 12 */
+#define IEEE802154_SFSPEC_SHIFT_PANCOORD    14 /* PAN Coordinator, bit 14 */
+#define IEEE802154_SFSPEC_SHIFT_ASSOCPERMIT 15 /* Association Permit, bit 15 */
+
+/* GTS Specification field masks, 1 byte
+ * Seee IEEE 802.15.4/2011 5.2.2.1.3 page 63
+ */
+
+#define IEEE802154_GTSSPEC_DESCCOUNT 0x07  /* GTS Desc. count, bits 0-2 */
+#define IEEE802154_GTSSPEC_PERMIT    0x80  /* GTS Desc. count, bit 7 */
+
+#define IEEE802154_GTSSPEC_SHIFT_DESCCOUNT  0  /* GTS Desc. count, bits 0-2 */
+#define IEEE802154_GTSSPEC_SHIFT_PERMIT     7  /* GTS Desc. count, bit 7 */
+
+/* GTS Directions field masks, 1 byte
+ * Seee IEEE 802.15.4/2011 5.2.2.1.3 page 63
+ */
+
+#define IEEE802154_GTSDIR_MASK  0x7F /* GTS Directions Mask, bits 0-6 */
+
+#define IEEE802154_GTSDIR_SHIFT_MASK  0 /* GTS Directions Mask, bits 0-6 */
+
+/* Pending address specifications field masks, 1 byte
+ * See IEEE 802.15.4/2011 5.2.2.1.6 page 64
+ */
+
+#define IEEE802154_PENDADDR_NSADDR 0x07 /* # of short addresses, bits 0-2 */
+#define IEEE802154_PENDADDR_NEADDR 0x70 /* # of extended addresses, bits 4-6 */
+
+#define IEEE802154_PENDADDR_SHIFT_NSADDR 0 /* # of short addresses, bits 0-2 */
+#define IEEE802154_PENDADDR_SHIFT_NEADDR 4 /* # of extended addresses, bits 4-6 */
+
 /* Capability Information Bitfield
- *
  */
 
 #define IEEE802154_CAPABILITY_DEVTYPE         0x02
@@ -203,7 +254,6 @@
 #define IEEE802154_MAX_MPDU_UNSEC_OVERHEAD  \
         (IEEE802154_MAX_UNSEC_MHR_OVERHEAD + IEEE802154_MFR_LENGTH)
 
-
 #define IEEE802154_MAX_SAFE_MAC_PAYLOAD_SIZE \
         (IEEE802154_MAX_PHY_PACKET_SIZE - IEEE802154_MAX_MPDU_UNSEC_OVERHEAD)
 
@@ -219,7 +269,6 @@
 /* Definitions used by IOCTL calls */
 
 #define MAX_ORPHAN_ADDR   32  /* REVISIT */
-
 
 /****************************************************************************
  * Public Types
@@ -265,6 +314,7 @@ enum ieee802154_status_e
   IEEE802154_STATUS_TX_ACTIVE,
   IEEE802154_STATUS_UNAVAILABLE_KEY,
   IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE,
+  IEEE802154_STATUS_LIMITREACHED,
 };
 
 static const char *IEEE802154_STATUS_STRING[] =
@@ -292,6 +342,7 @@ static const char *IEEE802154_STATUS_STRING[] =
   "Tx active",
   "Unavailable key",
   "Unsupported attribute",
+  "Limit reached",
 };
 
 /* IEEE 802.15.4 PHY/MAC PIB attributes IDs */
@@ -300,7 +351,7 @@ enum ieee802154_attr_e
 {
   /* PHY PIB Attributes */
 
-  IEEE802154_ATTR_PHY_CURRENT_CHANNEL = 0x00,
+  IEEE802154_ATTR_PHY_CHAN = 0x00,
   IEEE802154_ATTR_PHY_CHANNELS_SUPPORTED,
   IEEE802154_ATTR_PHY_TX_POWER_TOLERANCE,
   IEEE802154_ATTR_PHY_TX_POWER,
@@ -340,7 +391,7 @@ enum ieee802154_attr_e
 
   /* MAC PIB Attributes */
 
-  IEEE802154_ATTR_MAC_EXTENDED_ADDR = 0x40,
+  IEEE802154_ATTR_MAC_EADDR = 0x40,
   IEEE802154_ATTR_MAC_ACK_WAIT_DUR,
   IEEE802154_ATTR_MAC_ASSOCIATED_PANCOORD,
   IEEE802154_ATTR_MAC_ASSOCIATION_PERMIT,
@@ -352,8 +403,8 @@ enum ieee802154_attr_e
   IEEE802154_ATTR_MAC_BEACON_ORDER,
   IEEE802154_ATTR_MAC_BEACON_TX_TIME,
   IEEE802154_ATTR_MAC_BSN,
-  IEEE802154_ATTR_MAC_COORD_EXT_ADDR,
-  IEEE802154_ATTR_MAC_COORD_SHORT_ADDR,
+  IEEE802154_ATTR_MAC_COORD_EADDR,
+  IEEE802154_ATTR_MAC_COORD_SADDR,
   IEEE802154_ATTR_MAC_DSN,
   IEEE802154_ATTR_MAC_GTS_PERMIT,
   IEEE802154_ATTR_MAC_MAX_BE,
@@ -369,7 +420,7 @@ enum ieee802154_attr_e
   IEEE802154_ATTR_MAC_RESPONSE_WAIT_TIME,
   IEEE802154_ATTR_MAC_RX_ON_WHEN_IDLE,
   IEEE802154_ATTR_MAC_SECURITY_ENABLED,
-  IEEE802154_ATTR_MAC_SHORT_ADDRESS,
+  IEEE802154_ATTR_MAC_SADDR,
   IEEE802154_ATTR_MAC_SUPERFRAME_ORDER,
   IEEE802154_ATTR_MAC_SYNC_SYMBOL_OFFSET,
   IEEE802154_PIB_MAC_TIMESTAMP_SUPPORT,
@@ -511,31 +562,31 @@ struct ieee802154_capability_info_s
                                    * 0=otherwise */
 };
 
-struct ieee802154_superframe_spec_s
+struct ieee802154_superframespec_s
 {
-  uint16_t beacon_order     : 4;  /* Transmission interval of beacon */
-  uint16_t superframe_order : 4;  /* Length of superframe */
-  uint16_t final_cap_slot   : 4;  /* Last slot utilized by CAP */
-  uint16_t ble              : 1;  /* Battery Life Extension (BLE) */
-  uint16_t reserved         : 1;  /* Reserved bit */
-  uint16_t pan_coordinator  : 1;  /* 1 if beacon sent by pan coordinator */
-  uint16_t assoc_permit     : 1;  /* 1 if coordinator is accepting associaton */
+  uint16_t beaconorder   : 4;  /* Transmission interval of beacon */
+  uint16_t sforder       : 4;  /* Length of active portion of superframe */
+  uint16_t final_capslot  : 4;  /* Last slot utilized by CAP */
+  uint16_t ble            : 1;  /* Battery Life Extension (BLE) */
+  uint16_t reserved       : 1;  /* Reserved bit */
+  uint16_t pancoord       : 1;  /* 1 if beacon sent by pan coordinator */
+  uint16_t assocpermit    : 1;  /* 1 if coordinator is accepting associaton */
 };
 
-struct ieee802154_pan_desc_s
+struct ieee802154_pandesc_s
 {
   /* The coordinator address of the received beacon frame */
 
-  struct ieee802154_addr_s coord_addr;
+  struct ieee802154_addr_s coordaddr;
 
-  uint8_t channel;          /* current channel occupied by the network */
-  uint8_t channel_page;     /* current channel page occupied by the network */
+  uint8_t chan;  /* current channel occupied by the network */
+  uint8_t chpage; /* current channel page occupied by the network */
 
   /* The superframe specifications received in the beacon frame */
 
-  struct ieee802154_superframe_spec_s superframe_spec;
+  struct ieee802154_superframespec_s sfspec;
 
-  uint8_t gts_permit;       /* 0=No GTS requests allowed
+  uint8_t gtspermit;       /* 0=No GTS requests allowed
                              * 1=GTS request allowed */
   uint8_t lqi;              /* Link Quality Indication of the beacon */
   uint32_t timestamp;       /* Time at which the beacon frame was received
@@ -574,13 +625,13 @@ union ieee802154_macattr_u
   uint8_t saddr[IEEE802154_SADDRSIZE];
   uint8_t panid[IEEE802154_PANIDSIZE];
 
-  uint8_t coord_eaddr[IEEE802154_EADDRSIZE];
-  uint8_t coord_saddr[IEEE802154_SADDRSIZE];
+  uint8_t coordeaddr[IEEE802154_EADDRSIZE];
+  uint8_t coordsaddr[IEEE802154_SADDRSIZE];
 
   enum ieee802154_devmode_e devmode;
 
   bool is_assoc;
-  bool assoc_permit;
+  bool assocpermit;
   bool auto_req;
   bool batt_life_ext;
   bool gts_permit;
@@ -611,7 +662,7 @@ union ieee802154_macattr_u
   uint8_t beacon_order;
   uint32_t beacon_tx_time : 24;
 
-  uint8_t superframe_order;
+  uint8_t superframeorder;
 
   uint8_t bsn;
   uint8_t dsn;
@@ -619,7 +670,7 @@ union ieee802154_macattr_u
 
 union ieee802154_phyattr_u
 {
-  uint8_t channel;
+  uint8_t chan;
   int32_t txpwr;
   uint32_t symdur_picosec;
   /* TODO: Fill this out as we implement supported get/set commands */
@@ -845,8 +896,38 @@ struct ieee802154_purge_req_s
 
 struct ieee802154_assoc_req_s
 {
-  uint8_t chnum;   /* Channel number to attempt association */
-  uint8_t chpage;  /* Channel page to attempt association */
+  uint8_t chan;  /* Channel number to attempt association */
+  uint8_t chpage; /* Channel page to attempt association */
+
+  /* TODO:
+   * This is a non-standard field. I believe there is a catch 22 in the
+   * standard and until I can figure it out, I'm adding this boolean to let the
+   * application tell the MAC whether it is trying to assocaite with a beacon
+   * enabled PAN or non-beacon enabled PAN. If it is beacon-enabled, the MAC
+   * will track the beacon first before transmitting the association. This can
+   * take some time depending on the beacon interval. If the PAN is non-beacon
+   * enabled, the association request is sent immediately via CSMA. 
+   *
+   * The catch 22: The standard outlines the procedure for associating: reset
+   * the MAC, scan to find PAN's and pass coordinator address info to
+   * application, application calls associate passing address info of
+   * coordinator. Which sounds good. The problem is that the primitive has no
+   * field for determining if the PAN we are trying to join is beacon enabled
+   * or not. Which means we don't know whether to tranmsit immediately or try
+   * to track the beacon. The standard does say that ALL command frames should
+   * be sent during the Contention Access Period (CAP), but how could you send
+   * it at the rigth tiem, if you are not tracking the beacon. What's worse is
+   * in the association section, it says if you are tracking the beacon, to
+   * send the association request during the CAP. But how can you track the
+   * beacon if you are not associated. Normally tracking the beacon would be
+   * triggered by the SYNC.request primitive. But from my understanding that
+   * primitive is intended to be used AFTER association since it requires the
+   * MAC to already have a coordinator address and PAN ID so that it can track
+   * the beacon frames properly. Which, of course, how could the MAC have that
+   * info if it is not associated.
+   */
+
+  bool    beacon; 
 
   /* Coordinator Address with which to associate */
 
@@ -1037,7 +1118,7 @@ struct ieee802154_beaconnotify_ind_s
 
   /* PAN descriptor for the received beacon */
 
-  struct ieee802154_pan_desc_s pan_desc;
+  struct ieee802154_pandesc_s pandesc;
 
   /* Beacon pending addresses */
 
@@ -1238,19 +1319,16 @@ struct ieee802154_scan_req_s
 {
   enum ieee802154_scantype_e type;
   uint8_t duration;
-  uint8_t ch_page;
+  uint8_t chpage;
+  uint8_t channels[15];
+  uint8_t numchan;
 
 #ifdef CONFIG_IEEE802154_SECURITY
   /* Security information if enabled */
 
   struct ieee802154_security_s security;
 #endif
-
-  uint8_t channels[1];
 };
-
-#define SIZEOF_IEEE802154_SCAN_REQ_S(n) \
-  (sizeof(struct ieee802154_scan_req_s) + (n) - 1)
 
 /*****************************************************************************
  * Primitive: MLME-SCAN.confirm
@@ -1264,10 +1342,12 @@ struct ieee802154_scan_conf_s
 {
   enum ieee802154_status_e status;
   enum ieee802154_scantype_e type;
-  uint8_t ch_page;
-  uint8_t num_channels;
-
-  /* TODO: Figure out how to handle missing primitive semantics. See standard. */
+  uint8_t chpage;
+  uint8_t unscanned[15];
+  uint8_t numunscanned;
+  uint8_t numdesc;
+  struct ieee802154_pandesc_s pandescs[MAC802154_NPANDESC];
+  uint8_t edlist[MAC802154_NPANDESC];
 };
 
 /*****************************************************************************
@@ -1318,7 +1398,7 @@ struct ieee802154_set_req_s
 struct ieee802154_start_req_s
 {
   uint8_t panid[IEEE802154_PANIDSIZE];
-  uint8_t chnum;
+  uint8_t chan;
   uint8_t chpage;
 
   uint32_t starttime   : 24;

@@ -735,14 +735,14 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
                 IEEE802154_PANIDCOPY(g_panid, setreq->attrval.mac.panid);
                 break;
 
-              case IEEE802154_ATTR_MAC_EXTENDED_ADDR:
+              case IEEE802154_ATTR_MAC_EADDR:
                 IEEE802154_EADDRCOPY(g_eaddr, setreq->attrval.mac.eaddr);
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
                 lo_addr2ip(dev);
 #endif
                 break;
 
-              case IEEE802154_ATTR_MAC_SHORT_ADDRESS:
+              case IEEE802154_ATTR_MAC_SADDR:
                 IEEE802154_SADDRCOPY(g_saddr, setreq->attrval.mac.saddr);
 #ifndef CONFIG_NET_6LOWPAN_EXTENDEDADDR
                 lo_addr2ip(dev);
@@ -765,11 +765,11 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
                 IEEE802154_PANIDCOPY(getreq->attrval.mac.panid, g_panid);
                 break;
 
-              case IEEE802154_ATTR_MAC_EXTENDED_ADDR:
+              case IEEE802154_ATTR_MAC_EADDR:
                 IEEE802154_EADDRCOPY(getreq->attrval.mac.eaddr, g_eaddr);
                 break;
 
-              case IEEE802154_ATTR_MAC_SHORT_ADDRESS:
+              case IEEE802154_ATTR_MAC_SADDR:
                 IEEE802154_SADDRCOPY(getreq->attrval.mac.saddr, g_saddr);
                 break;
 

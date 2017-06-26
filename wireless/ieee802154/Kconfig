@@ -73,6 +73,16 @@ config MAC802154_NNOTIF
 		receiver with an allocated notification structure indicating the event. The
 		events are primitives such as Association Indication etc.
 
+config MAC802154_NPANDESC
+	int "Number of PAN descriptors"
+	default 5
+	---help---
+		Configured number of PAN descriptors Default: 5
+
+		When performing a scan to find a suitable PAN, the MAC must store
+		information for all unique beacons received. This is the number of unique
+		descriptors that can be held before the scan cancels with LIMIT_REACHED.
+
 config IEEE802154_IND_PREALLOC
 	int "Number of pre-allocated meta-data structures"
 	default 20
