@@ -58,7 +58,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdbool.h>
 
 #include <nuttx/net/tcp.h>
 #include <nuttx/net/udp.h>
@@ -102,15 +104,10 @@
 
 /* General helper macros ****************************************************/
 
-/* GET 16-bit data:  source in network order, result in host order */
+/* GET 16-bit data:  source in network order */
 
-#define GETHOST16(ptr,index) \
+#define GETUINT16(ptr,index) \
   ((((uint16_t)((ptr)[index])) << 8) | ((uint16_t)(((ptr)[(index) + 1]))))
-
-/* GET 16-bit data:  source in network order, result in network order */
-
-#define GETNET16(ptr,index) \
-  ((((uint16_t)((ptr)[(index) + 1])) << 8) | ((uint16_t)(((ptr)[index]))))
 
 /* PUT 16-bit data:  source in host order, result in newtwork order */
 
@@ -121,6 +118,13 @@
       (ptr)[index + 1] = (uint16_t)(value) & 0xff; \
     } \
   while(0)
+
+/* Return values ************************************************************/
+
+/* Sucessful return values from header compression logic */
+
+#define COMPRESS_HDR_INLINE 0 /* L2 header not compressed */
+#define COMPRESS_HDR_ELIDED 1 /* L2 header compressed */
 
 /* Debug ********************************************************************/
 
@@ -231,9 +235,9 @@ struct iob_s;                /* Forward reference */
  * Name: sixlowpan_send
  *
  * Description:
- *   Process an outgoing UDP or TCP packet.  Takes an IP packet and formats
+ *   Process an outgoing UDP or ICMPv6 packet.  Takes an IP packet and formats
  *   it to be sent on an 802.15.4 network using 6lowpan.  Called from common
- *   UDP/TCP send logic.
+ *   UDP/ICMPv6 send logic.
  *
  *   The payload data is in the caller 'buf' and is of length 'buflen'.
  *   Compressed headers will be added and if necessary the packet is
@@ -243,16 +247,16 @@ struct iob_s;                /* Forward reference */
  * Input Parameters:
  *   dev     - The IEEE802.15.4 MAC network driver interface.
  *   list    - Head of callback list for send interrupt
- *   ipv6hdr - IPv6 plus TCP or UDP headers.
+ *   ipv6hdr - IPv6 header followed by UDP or ICMPv6 header.
  *   buf     - Data to send
  *   len     - Length of data to send
- *   raddr   - The MAC address of the destination
+ *   destmac - The IEEE802.15.4 MAC address of the destination
  *   timeout - Send timeout in deciseconds
  *
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.
  *   This function is expected to fail if the driver is not an IEEE802.15.4
- *   MAC network driver.  In that case, the UDP/TCP will fall back to normal
+ *   MAC network driver.  In that case, the logic will fall back to normal
  *   IPv4/IPv6 formatting.
  *
  * Assumptions:
@@ -421,15 +425,16 @@ void sixlowpan_hc06_initialize(void);
  *   fptr     - Pointer to frame to be compressed.
  *
  * Returned Value:
- *   None
+ *   On success the indications of the defines COMPRESS_HDR_* are returned.
+ *   A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
-void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
-                                FAR const struct ipv6_hdr_s *ipv6,
-                                FAR const struct sixlowpan_tagaddr_s *destmac,
-                                FAR uint8_t *fptr);
+int sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
+                               FAR const struct ipv6_hdr_s *ipv6,
+                               FAR const struct sixlowpan_tagaddr_s *destmac,
+                               FAR uint8_t *fptr);
 #endif
 
 /****************************************************************************
@@ -446,13 +451,14 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  *   appropriate values
  *
  * Input Parmeters:
- *   iplen  - Equal to 0 if the packet is not a fragment (IP length is then
- *            inferred from the L2 length), non 0 if the packet is a first
- *            fragment.
- *   iob    - Pointer to the IOB containing the received frame.
- *   fptr   - Pointer to frame to be compressed.
- *   bptr   - Output goes here.  Normally this is a known offset into d_buf,
- *            may be redirected to a "bitbucket" on the case of FRAGN frames.
+ *   ind   - MAC header meta data including node addressing information.
+ *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
+ *           inferred from the L2 length), non 0 if the packet is a first
+ *           fragment.
+ *   iob   - Pointer to the IOB containing the received frame.
+ *   fptr  - Pointer to frame to be compressed.
+ *   bptr  - Output goes here.  Normally this is a known offset into d_buf,
+ *           may be redirected to a "bitbucket" on the case of FRAGN frames.
  *
  * Returned Value:
  *   None
@@ -460,7 +466,8 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
-void sixlowpan_uncompresshdr_hc06(uint16_t iplen, FAR struct iob_s *iob,
+void sixlowpan_uncompresshdr_hc06(FAR const struct ieee802154_data_ind_s *ind,
+                                  uint16_t iplen, FAR struct iob_s *iob,
                                   FAR uint8_t *fptr, FAR uint8_t *bptr);
 #endif
 
@@ -482,15 +489,16 @@ void sixlowpan_uncompresshdr_hc06(uint16_t iplen, FAR struct iob_s *iob,
  *   fptr    - Pointer to frame to be compressed.
  *
  * Returned Value:
- *   None
+ *   On success the indications of the defines COMPRESS_HDR_* are returned.
+ *   A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
-void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
-                               FAR const struct ipv6_hdr_s *ipv6,
-                               FAR const struct sixlowpan_tagaddr_s *destmac,
-                               FAR uint8_t *fptr);
+int sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
+                              FAR const struct ipv6_hdr_s *ipv6,
+                              FAR const struct sixlowpan_tagaddr_s *destmac,
+                              FAR uint8_t *fptr);
 #endif
 
 /****************************************************************************
@@ -506,6 +514,7 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
  *   are set to the appropriate values
  *
  * Input Parameters:
+ *   ind   - MAC header meta data including node addressing information.
  *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
  *           inferred from the L2 length), non 0 if the packet is a 1st
  *           fragment.
@@ -521,7 +530,8 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
-int sixlowpan_uncompresshdr_hc1(uint16_t iplen, FAR struct iob_s *iob,
+int sixlowpan_uncompresshdr_hc1(FAR const struct ieee802154_data_ind_s *ind,
+                                uint16_t iplen, FAR struct iob_s *iob,
                                 FAR uint8_t *fptr, FAR uint8_t *bptr);
 #endif
 
@@ -530,11 +540,14 @@ int sixlowpan_uncompresshdr_hc1(uint16_t iplen, FAR struct iob_s *iob,
  *       sixlowpan_ismacbased
  *
  * Description:
- *   sixlowpan_addrfromip(): Extract the IEEE 802.15.14 address from a MAC
- *   based IPv6 address.  sixlowpan_addrfromip() is intended to handle a
- *   tagged address or any size; sixlowpan_saddrfromip() and
- *   sixlowpan_eaddrfromip() specifically handle short and extended
- *   addresses.
+ *   sixlowpan_{s|e]addrfromip(): Extract the IEEE 802.15.14 address from a
+ *   MAC-based IPv6 address.  sixlowpan_addrfromip() is intended to handle a
+ *   tagged address; sixlowpan_saddrfromip() and sixlowpan_eaddrfromip()
+ *   specifically handle short and extended addresses, respectively.
+ *
+ *   sixlowpan_ipfrom[s|e]addr():  Create a link-local, MAC-based IPv6
+ *   address from an IEEE802.15.4 short address (saddr) or extended address
+ *   (eaddr).
  *
  *   sixlowpan_islinklocal() and sixlowpan_ismacbased() will return true for
  *   address created in this fashion.  sixlowpan_addrfromip() is intended to
@@ -553,11 +566,16 @@ int sixlowpan_uncompresshdr_hc1(uint16_t iplen, FAR struct iob_s *iob,
 #define sixlowpan_islinklocal(ipaddr) ((ipaddr)[0] == NTOHS(0xfe80))
 
 void sixlowpan_saddrfromip(const net_ipv6addr_t ipaddr,
-                          FAR struct sixlowpan_saddr_s *saddr);
+                           FAR struct sixlowpan_saddr_s *saddr);
 void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr,
-                          FAR struct sixlowpan_eaddr_s *eaddr);
+                           FAR struct sixlowpan_eaddr_s *eaddr);
 void sixlowpan_addrfromip(const net_ipv6addr_t ipaddr,
                           FAR struct sixlowpan_tagaddr_s *addr);
+
+void sixlowpan_ipfromsaddr(FAR const uint8_t *saddr,
+                           FAR net_ipv6addr_t ipaddr);
+void sixlowpan_ipfromeaddr(FAR const uint8_t *eaddr,
+                           FAR net_ipv6addr_t ipaddr);
 
 bool sixlowpan_issaddrbased(const net_ipv6addr_t ipaddr,
                             FAR const struct sixlowpan_saddr_s *saddr);

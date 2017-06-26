@@ -78,6 +78,10 @@
 
 #define SIXLOWPAN_MAC_STDFRAME 127
 
+/* Space for a two byte FCS must be reserved at the end of the frame */
+
+#define SIXLOWPAN_MAC_FCSSIZE  2
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

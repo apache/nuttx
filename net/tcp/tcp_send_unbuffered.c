@@ -340,10 +340,10 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      /* The current acknowledgement number number is the (relative) offset
-       * of the of the next byte needed by the receiver.  The snd_isn is the
-       * offset of the first byte to send to the receiver.  The difference
-       * is the number of bytes to be acknowledged.
+      /* The current acknowledgement number is the (relative) offset of the
+       * next byte needed by the receiver.  The snd_isn is the offset of the
+       * first byte to send to the receiver.  The difference is the number
+       * of bytes to be acknowledged.
        */
 
       pstate->snd_acked = tcp_getsequence(tcp->ackno) - pstate->snd_isn;

@@ -60,7 +60,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void mac802154_timeout_poll(FAR struct ieee802154_privmac_s *priv);
+static void mac802154_polltimeout(FAR struct ieee802154_privmac_s *priv);
 
 /****************************************************************************
  * Public MAC Functions
@@ -98,7 +98,7 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
    * needs access to the MAC in order to unlock it.
    */
 
-  ret = mac802154_takesem(&priv->op_sem, true);
+  ret = mac802154_takesem(&priv->opsem, true);
   if (ret < 0)
     {
       return ret;
@@ -109,7 +109,7 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
    ret = mac802154_takesem(&priv->exclsem, true);
    if (ret < 0)
      {
-       mac802154_givesem(&priv->op_sem);
+       mac802154_givesem(&priv->opsem);
        return ret;
      }
 
@@ -122,7 +122,7 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
   if (ret < 0)
     {
       mac802154_givesem(&priv->exclsem);
-      mac802154_givesem(&priv->op_sem);
+      mac802154_givesem(&priv->opsem);
       return ret;
     }
 
@@ -133,14 +133,20 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
 
   if (IEEE802154_SADDRCMP(priv->addr.saddr, &IEEE802154_SADDR_BCAST))
     {
-      mac802154_create_datareq(priv, &req->coordaddr, IEEE802154_ADDRMODE_EXTENDED,
-                               txdesc);
+      mac802154_createdatareq(priv, &req->coordaddr, IEEE802154_ADDRMODE_EXTENDED,
+                              txdesc);
     }
   else
     {
-      mac802154_create_datareq(priv, &req->coordaddr, IEEE802154_ADDRMODE_SHORT,
-                               txdesc);
+      mac802154_createdatareq(priv, &req->coordaddr, IEEE802154_ADDRMODE_SHORT,
+                              txdesc);
     }
+
+  /* Save a copy of the destination addressing infromation into the tx descriptor.
+   * We only do this for commands to help with handling their progession.
+   */
+
+  memcpy(&txdesc->destaddr, &req->coordaddr, sizeof(struct ieee802154_addr_s));
 
   /* Save a reference of the tx descriptor */
 
@@ -213,7 +219,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
 
       priv->curr_op = MAC802154_OP_NONE;
       priv->cmd_desc = NULL;
-      mac802154_givesem(&priv->op_sem);
+      mac802154_givesem(&priv->opsem);
 
       /* Release the MAC, call the callback, get exclusive access again */
 
@@ -229,7 +235,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
        * the corresponding data frame from the coordinator. [1] pg.43
        */
 
-      priv->radio->rxenable(priv->radio, true);
+      mac802154_rxenable(priv);
 
       /* Start a timer, if we receive the data frame, we will cancel
        * the timer, otherwise it will expire and we will notify the
@@ -237,7 +243,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
        */
 
       mac802154_timerstart(priv, priv->max_frame_waittime,
-                           mac802154_timeout_poll);
+                           mac802154_polltimeout);
 
       /* We can deallocate the data conf notification as it is no longer
        * needed. We can't use the public function here since we already
@@ -250,7 +256,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
 }
 
 /****************************************************************************
- * Name: mac802154_timeout_poll
+ * Name: mac802154_polltimeout
  *
  * Description:
  *   Function registered with MAC timer that gets called via the work queue to
@@ -258,7 +264,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
  *
  ****************************************************************************/
 
-void mac802154_timeout_poll(FAR struct ieee802154_privmac_s *priv)
+void mac802154_polltimeout(FAR struct ieee802154_privmac_s *priv)
 {
   FAR struct ieee802154_notif_s *notif;
 
@@ -274,7 +280,7 @@ void mac802154_timeout_poll(FAR struct ieee802154_privmac_s *priv)
   /* We are no longer performing the association operation */
   priv->curr_op = MAC802154_OP_NONE;
   priv->cmd_desc = NULL;
-  mac802154_givesem(&priv->op_sem);
+  mac802154_givesem(&priv->opsem);
 
   /* Release the MAC */
 

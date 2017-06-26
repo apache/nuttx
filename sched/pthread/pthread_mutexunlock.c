@@ -42,10 +42,44 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <sched.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
 #include "pthread/pthread.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: pthread_mutex_islocked
+ *
+ * Description:
+ *   Return true is the mutex is locked.
+ *
+ * Parameters:
+ *   None
+ *
+ * Return Value:
+ *   Returns true if the mutex is locked
+ *
+ ****************************************************************************/
+
+static inline bool pthread_mutex_islocked(FAR struct pthread_mutex_s *mutex)
+{
+  int semcount = mutex->sem.semcount;
+
+  /* The underlying semaphore should have a count less than 2:
+   *
+   *  1 == mutex is unlocked.
+   *  0 == mutex is locked with no waiters
+   * -n == mutex is locked with 'n' waiters.
+   */
+
+  DEBUGASSERT(semcount < 2);
+  return semcount < 1;
+}
 
 /****************************************************************************
  * Public Functions
@@ -80,17 +114,29 @@
 
 int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
 {
-  int ret = EINVAL;
+  int ret = EPERM;
 
   sinfo("mutex=0x%p\n", mutex);
   DEBUGASSERT(mutex != NULL);
+  if (mutex == NULL)
+    {
+      return EINVAL;
+    }
 
   /* Make sure the semaphore is stable while we make the following checks.
    * This all needs to be one atomic action.
    */
 
   sched_lock();
-  if (mutex != NULL)
+
+  /* The unlock operation is only performed if the mutex is actually locked.
+   * EPERM *must* be returned if the mutex type is PTHREAD_MUTEX_ERRORCHECK
+   * or PTHREAD_MUTEX_RECURSIVE, or the mutex is a robust mutex, and the
+   * current thread does not own the mutex.  Behavior is undefined for the
+   * remaining case.
+   */
+
+  if (pthread_mutex_islocked(mutex))
     {
 #if !defined(CONFIG_PTHREAD_MUTEX_UNSAFE) || defined(CONFIG_PTHREAD_MUTEX_TYPES)
       /* Does the calling thread own the semaphore?  If no, should we return

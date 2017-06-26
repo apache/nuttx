@@ -67,6 +67,327 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
+/* If processing is not done at the interrupt level, then work queue support
+ * is required.
+ */
+
+#if !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
+#else
+
+  /* Use the low priority work queue if possible */
+
+#  if defined(CONFIG_MAC802154_HPWORK)
+#    define MAC802154_WORK HPWORK
+#  elif defined(CONFIG_MAC802154_LPWORK)
+#    define MAC802154_WORK LPWORK
+#  else
+#    error Neither CONFIG_MAC802154_HPWORK nor CONFIG_MAC802154_LPWORK defined
+#  endif
+#endif
+
+#if !defined(CONFIG_MAC802154_NNOTIF) || CONFIG_MAC802154_NNOTIF <= 0
+#  undef CONFIG_MAC802154_NNOTIF
+#  define CONFIG_MAC802154_NNOTIF 6
+#endif
+
+#if !defined(CONFIG_MAC802154_NTXDESC) || CONFIG_MAC802154_NTXDESC <= 0
+#  undef CONFIG_MAC802154_NTXDESC
+#  define CONFIG_MAC802154_NTXDESC 3
+#endif
+
+#if CONFIG_MAC802154_NTXDESC > CONFIG_MAC802154_NNOTIF
+#  error CONFIG_MAC802154_NNOTIF must be greater than CONFIG_MAC802154_NTXDESC
+#endif
+
+#if !defined(CONFIG_IEEE802154_DEFAULT_EADDR)
+#  define CONFIG_IEEE802154_DEFAULT_EADDR 0xFFFFFFFFFFFFFFFF
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Map between ieee802154_addrmode_e enum and actual address length */
+
+static const uint8_t mac802154_addr_length[4] = {0, 0, 2, 8};
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct mac802154_radiocb_s
+{
+  struct ieee802154_radiocb_s cb;
+  FAR struct ieee802154_privmac_s *priv;
+};
+
+/* Enumeration for representing what operation the MAC layer is currently doing.
+ * There can only be one command being handled at any given time, but certain
+ * operations such as association requires more than one command to be sent.
+ * Therefore, the need to track not only what command is currently active, but
+ * also, what overall operation the command is apart of is necessary.
+ */
+
+enum mac802154_operation_e
+{
+  MAC802154_OP_NONE,
+  MAC802154_OP_ASSOC,
+  MAC802154_OP_POLL,
+  MAC802154_OP_SCAN
+};
+
+struct ieee802154_privmac_s; /* Forward Reference */
+typedef void (*mac802154_worker_t)(FAR struct ieee802154_privmac_s *priv);
+
+/* The privmac structure holds the internal state of the MAC and is the
+ * underlying represention of the opaque MACHANDLE.  It contains storage for
+ * the IEEE802.15.4 MIB attributes.
+ */
+
+struct ieee802154_privmac_s
+{
+  /*************************** General Fields *********************************/
+
+  FAR struct ieee802154_radio_s  *radio;    /* Contained IEEE802.15.4 radio dev */
+  FAR struct mac802154_maccb_s   *cb;       /* Head of a list of MAC callbacks */
+  FAR struct mac802154_radiocb_s radiocb;   /* Interface to bind to radio */
+
+  sem_t exclsem;                            /* Support exclusive access */
+  uint8_t nclients;                         /* Number of notification clients */
+  uint8_t nnotif;                           /* Number of remaining notifications */
+
+  /* Only support a single command at any given time. As of now I see no
+   * condition where you need to have more than one command frame simultaneously
+   */
+
+  sem_t                          opsem;     /* Exclusive operations */
+
+  /******************* Fields related to MAC operations ***********************/
+
+  enum mac802154_operation_e     curr_op;   /* The current overall operation */
+  enum ieee802154_cmdid_e        curr_cmd;  /* Type of the current cmd */
+  FAR struct ieee802154_txdesc_s *cmd_desc; /* TX descriptor for current cmd */
+  uint8_t                        nrxusers;
+
+  /******************* Fields related to SCAN operation ***********************/
+
+  /* List of PAN descriptors to track during scan procedures */
+
+  uint8_t scanindex;
+  uint8_t npandesc;
+  struct ieee802154_pandesc_s pandescs[MAC802154_NPANDESC];
+  uint8_t panidbeforescan[IEEE802154_PANIDSIZE];
+  struct ieee802154_scan_req_s currscan; 
+  uint32_t scansymdur;
+
+  /******************* Fields related to notifications ************************/
+
+  /* Pre-allocated notifications to be passed to the registered callback.  These
+   * need to be freed by the application using mac802154_xxxxnotif_free when
+   * the callee layer is finished with it's use.
+   */
+
+  FAR struct mac802154_notif_s *notif_free;
+  struct mac802154_notif_s notif_pool[CONFIG_MAC802154_NNOTIF];
+  sem_t notif_sem;
+
+  /******************* Tx descriptor queues and pools *************************/
+
+  struct ieee802154_txdesc_s txdesc_pool[CONFIG_MAC802154_NTXDESC];
+  sem_t txdesc_sem;
+  sq_queue_t txdesc_queue;
+  sq_queue_t txdone_queue;
+
+  /* Support a singly linked list of transactions that will be sent using the
+   * CSMA algorithm.  On a non-beacon enabled PAN, these transactions will be
+   * sent whenever. On a beacon-enabled PAN, these transactions will be sent
+   * during the CAP of the Coordinator's superframe.
+   */
+
+  sq_queue_t csma_queue;
+  sq_queue_t gts_queue;
+
+  /* Support a singly linked list of transactions that will be sent indirectly.
+   * This list should only be used by a MAC acting as a coordinator.  These
+   * transactions will stay here until the data is extracted by the destination
+   * device sending a Data Request MAC command or if too much time passes. This
+   * list should also be used to populate the address list of the outgoing
+   * beacon frame.
+   */
+
+  sq_queue_t indirect_queue;
+
+  /* Support a singly linked list of frames received */
+
+  sq_queue_t dataind_queue;
+
+  /************* Fields related to addressing and coordinator *****************/
+
+  /* Holds all address information (Extended, Short, and PAN ID) for the MAC. */
+
+  struct ieee802154_addr_s addr;
+
+  struct ieee802154_pandesc_s pandesc;
+
+  /*************** Fields related to beacon-enabled networks ******************/
+
+  uint8_t bsn; /* Seq. num added to tx beacon frame */
+
+  /* Holds attributes pertaining to the superframe specification */ 
+ 
+  struct ieee802154_superframespec_s sfspec; 
+ 
+  /* We use 2 beacon frame structures so that we can ping-pong between them 
+   * while updating the beacon 
+   */ 
+ 
+  struct ieee802154_beaconframe_s beaconframe[2]; 
+
+  /* Contents of beacon payload */
+
+  uint8_t beaconpayload[IEEE802154_MAX_BEACON_PAYLOAD_LEN];
+  uint8_t beaconpayloadlength;
+
+  /****************** Fields related to offloading work ***********************/
+
+  /* Work structures for offloading aynchronous work */
+
+  struct work_s tx_work;
+  struct work_s rx_work;
+
+  struct work_s timeout_work;
+  WDOG_ID       timeout;  /* Timeout watchdog */
+  mac802154_worker_t timeout_worker;
+
+  struct work_s purge_work;
+
+  /****************** Uncategorized MAC PIB attributes ***********************/
+
+  /* The maximum number of symbols to wait for an acknowledgement frame to
+   * arrive following a transmitted data frame. [1] pg. 126
+   *
+   * NOTE: This may be able to be a 16-bit or even an 8-bit number.  I wasn't
+   * sure at the time what the range of reasonable values was.
+   */
+
+  uint32_t ack_waitdur;
+
+  /* The maximum time to wait either for a frame intended as a response to a
+   * data request frame or for a broadcast frame following a beacon with the
+   * Frame Pending field set to one. [1] pg. 127
+   *
+   * NOTE: This may be able to be a 16-bit or even an 8-bit number.  I wasn't
+   * sure at the time what the range of reasonable values was.
+   */
+
+  uint32_t max_frame_waittime;
+
+  /* The maximum time (in unit periods) that a transaction is stored by a
+   * coordinator and indicated in its beacon.
+   */
+
+  uint16_t trans_persisttime;
+
+  uint8_t dsn;                      /* Seq. num added to tx data or MAC frame */
+
+  /* The maximum time, in multiples of aBaseSuperframeDuration, a device shall
+   * wait for a response command frame to be available following a request
+   * command frame. [1] 128.
+   */
+
+  uint8_t resp_waittime;
+
+  /* The total transmit duration (including PHY header and FCS) specified in
+   * symbols. [1] pg. 129.
+   */
+
+  uint32_t tx_totaldur;
+
+  /* Start of 8-bit bitfield */
+
+  uint32_t trackingbeacon     : 1;  /* Are we tracking the beacon */
+  uint32_t isassoc            : 1;  /* Are we associated to the PAN */
+  uint32_t autoreq            : 1;  /* Automatically send data req. if addr
+                                     * addr is in the beacon frame */
+
+  uint32_t gtspermit          : 1;  /* Is PAN Coord. accepting GTS reqs. */
+  uint32_t promisc            : 1;  /* Is promiscuous mode on? */
+  uint32_t rngsupport         : 1;  /* Does MAC sublayer support ranging */
+  uint32_t sec_enabled        : 1;  /* Does MAC sublayer have security en. */
+  uint32_t timestamp_support  : 1;  /* Does MAC layer supports timestamping */
+
+  /* End of 8-bit bitfield */
+
+  /* Start of 32-bit bitfield */
+
+  /* The offset, measured is symbols, between the symbol boundary at which the
+   * MLME captures the timestamp of each transmitted and received frame, and
+   * the onset of the first symbol past the SFD, namely the first symbol of
+   * the frames [1] pg. 129.
+   */
+
+  uint32_t sync_symboffset    : 12;
+
+  uint32_t txctrl_activedur   : 17; /* Duration for which tx is permitted to
+                                       * be active */
+  uint32_t txctrl_pausedur    : 1;  /* Duration after tx before another tx is
+                                     * permitted. 0=2000, 1= 10000 */
+
+  /* What type of device is this node acting as */
+
+  enum ieee802154_devmode_e devmode : 2;
+
+  /* End of 32-bit bitfield */
+
+  /* Start of 32-bit bitfield */
+
+  uint32_t beacon_txtime      : 24; /* Time of last beacon transmit */
+  uint32_t minbe              : 4;  /* Min value of backoff exponent (BE) */
+  uint32_t maxbe              : 4;  /* Max value of backoff exponent (BE) */
+
+  /* End of 32-bit bitfield */
+
+  /* Start of 8-bit bitfield */
+
+  uint8_t bf_ind              : 1;  /* Ping-pong index for beacon frame */
+  uint8_t beaconupdate        : 1;  /* Does the beacon frame need to be updated */
+  uint8_t max_csmabackoffs    : 3;  /* Max num backoffs for CSMA algorithm
+                                     * before declaring ch access failure */
+  uint8_t maxretries          : 3;  /* Max # of retries allowed after tx fail */
+  /* End of 8-bit bitfield. */
+
+  /* TODO: Add Security-related MAC PIB attributes */
+};
+
+/****************************************************************************
+ * Function Prototypes
+ ****************************************************************************/
+
+int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
+                           FAR struct ieee802154_txdesc_s **txdesc,
+                           bool allow_interrupt);
+
+int mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
+                         uint32_t numsymbols, mac802154_worker_t);
+
+void mac802154_setupindirect(FAR struct ieee802154_privmac_s *priv,
+                             FAR struct ieee802154_txdesc_s *txdesc);
+
+void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
+                             FAR struct ieee802154_addr_s *coordaddr,
+                             enum ieee802154_addrmode_e srcmode,
+                             FAR struct ieee802154_txdesc_s *txdesc);
+
+void mac802154_updatebeacon(FAR struct ieee802154_privmac_s *priv);
+
+
+
+/****************************************************************************
+ * Helper Macros/Inline Functions
+ ****************************************************************************/
+
 #define mac802154_putpanid(iob, panid) \
   do \
     { \
@@ -120,293 +441,124 @@
 /* GET 16-bit data:  source in network order, result in host order */
 
 #define GETHOST16(ptr,index) \
-  ((((uint16_t)((ptr)[index])) << 8) | ((uint16_t)(((ptr)[(index) + 1]))))
+  ((((uint16_t)((ptr)[(index) + 1])) << 8) | ((uint16_t)(((ptr)[index]))))
 
 /* GET 16-bit data:  source in network order, result in network order */
 
 #define GETNET16(ptr,index) \
-  ((((uint16_t)((ptr)[(index) + 1])) << 8) | ((uint16_t)(((ptr)[index]))))
+  ((((uint16_t)((ptr)[index])) << 8) | ((uint16_t)(((ptr)[(index) + 1]))))
 
-/* PUT 16-bit data:  source in host order, result in newtwork order */
+/* PUT 16-bit data:  source in host order, result in network order */
 
 #define PUTHOST16(ptr,index,value) \
   do \
     { \
-      (ptr)[index]     = ((uint16_t)(value) >> 8) & 0xff; \
-      (ptr)[index + 1] = (uint16_t)(value) & 0xff; \
+      (ptr)[index]      = (uint16_t)(value) & 0xff; \
+      (ptr)[index + 1]  = ((uint16_t)(value) >> 8) & 0xff; \
     } \
   while(0)
 
-/* Configuration ************************************************************/
-/* If processing is not done at the interrupt level, then work queue support
- * is required.
- */
-
-#if !defined(CONFIG_SCHED_WORKQUEUE)
-#  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
-#else
-
-  /* Use the low priority work queue if possible */
-
-#  if defined(CONFIG_MAC802154_HPWORK)
-#    define MAC802154_WORK HPWORK
-#  elif defined(CONFIG_MAC802154_LPWORK)
-#    define MAC802154_WORK LPWORK
-#  else
-#    error Neither CONFIG_MAC802154_HPWORK nor CONFIG_MAC802154_LPWORK defined
-#  endif
-#endif
-
-#if !defined(CONFIG_MAC802154_NNOTIF) || CONFIG_MAC802154_NNOTIF <= 0
-#  undef CONFIG_MAC802154_NNOTIF
-#  define CONFIG_MAC802154_NNOTIF 6
-#endif
-
-#if !defined(CONFIG_MAC802154_NTXDESC) || CONFIG_MAC802154_NTXDESC <= 0
-#  undef CONFIG_MAC802154_NTXDESC
-#  define CONFIG_MAC802154_NTXDESC 3
-#endif
-
-#if CONFIG_MAC802154_NTXDESC > CONFIG_MAC802154_NNOTIF
-#error CONFIG_MAC802154_NNOTIF must be greater than CONFIG_MAC802154_NTXDESC
-#endif
-
-#if !defined(CONFIG_IEEE802154_DEFAULT_EADDR)
-#define CONFIG_IEEE802154_DEFAULT_EADDR 0xFFFFFFFFFFFFFFFF
-#endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* Map between ieee802154_addrmode_e enum and actual address length */
-
-static const uint8_t mac802154_addr_length[4] = {0, 0, 2, 8};
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-struct mac802154_radiocb_s
-{
-  struct ieee802154_radiocb_s cb;
-  FAR struct ieee802154_privmac_s *priv;
-};
+/* Set bit in 16-bit value:  source in host order, result in network order. */
 
-/* Enumeration for representing what operation the MAC layer is currently doing.
- * There can only be one command being handled at any given time, but certain
- * operations such as association requires more than one command to be sent.
- * Therefore, the need to track not only what command is currently active, but
- * also, what overall operation the command is apart of is necessary.
- */
-
-enum mac802154_operation_e
-{
-  MAC802154_OP_NONE,
-  MAC802154_OP_ASSOC,
-  MAC802154_OP_POLL
-};
-
-struct ieee802154_privmac_s; /* Forward Reference */
-typedef void (*mac802154_worker_t)(FAR struct ieee802154_privmac_s *priv);
-
-/* The privmac structure holds the internal state of the MAC and is the
- * underlying represention of the opaque MACHANDLE.  It contains storage for
- * the IEEE802.15.4 MIB attributes.
- */
-
-struct ieee802154_privmac_s
-{
-  FAR struct ieee802154_radio_s *radio;     /* Contained IEEE802.15.4 radio dev */
-  FAR struct mac802154_maccb_s *cb;         /* Head of a list of MAC callbacks */
-  FAR struct mac802154_radiocb_s radiocb;   /* Interface to bind to radio */
+#define IEEE802154_SETBITS_U16(ptr,index,value) \
+  do \
+    { \
+      (ptr)[index]     |= (uint16_t)(value) & 0xff; \
+      (ptr)[index + 1] |= ((uint16_t)(value) >> 8) & 0xff; \
+    } \
+  while(0)
 
-  sem_t exclsem;                            /* Support exclusive access */
-  uint8_t nclients;                         /* Number of notification clients */
-  uint8_t nnotif;                           /* Number of remaining notifications */
+/* Helper macros for setting/receiving bits for frame control field */
 
-  /* Only support a single command at any given time. As of now I see no
-   * condition where you need to have more than one command frame simultaneously
-   */
+#define IEEE802154_SETFTYPE(ptr, index, ftype) \
+  IEEE802154_SETBITS_U16(ptr, index, (ftype << IEEE802154_FRAMECTRL_SHIFT_FTYPE))
 
-  sem_t                       op_sem;       /* Exclusive operations */
-  enum mac802154_operation_e  curr_op;      /* The current overall operation */
-  enum ieee802154_cmdid_e     curr_cmd;     /* Type of the current cmd */
-  FAR struct ieee802154_txdesc_s *cmd_desc; /* TX descriptor for current cmd */
+#define IEEE802154_SETACKREQ(ptr, index) \
+  IEEE802154_SETBITS_U16(ptr, index, IEEE802154_FRAMECTRL_ACKREQ)
 
-  /* Pre-allocated notifications to be passed to the registered callback.  These
-   * need to be freed by the application using mac802154_xxxxnotif_free when
-   * the callee layer is finished with it's use.
-   */
+#define IEEE802154_SETDADDRMODE(ptr, index, mode) \
+  IEEE802154_SETBITS_U16(ptr, index, (mode << IEEE802154_FRAMECTRL_SHIFT_DADDR))
 
-  FAR struct mac802154_notif_s *notif_free;
-  struct mac802154_notif_s notif_pool[CONFIG_MAC802154_NNOTIF];
-  sem_t notif_sem;
+#define IEEE802154_SETSADDRMODE(ptr, index, mode) \
+  IEEE802154_SETBITS_U16(ptr, index, (mode << IEEE802154_FRAMECTRL_SHIFT_SADDR))
 
-  struct ieee802154_txdesc_s txdesc_pool[CONFIG_IEEE802154_NTXDESC];
-  sem_t txdesc_sem;
-  sq_queue_t txdesc_queue;
-  sq_queue_t txdone_queue;
+#define IEEE802154_SETPANIDCOMP(ptr, index) \
+  IEEE802154_SETBITS_U16(ptr, index, IEEE802154_FRAMECTRL_PANIDCOMP)
 
+#define IEEE802154_SETVERSION(ptr, index, version) \
+  IEEE802154_SETBITS_U16(ptr, index, (version << IEEE802154_FRAMECTRL_SHIFT_VERSION))
 
-  /* Support a singly linked list of transactions that will be sent using the
-   * CSMA algorithm.  On a non-beacon enabled PAN, these transactions will be
-   * sent whenever. On a beacon-enabled PAN, these transactions will be sent
-   * during the CAP of the Coordinator's superframe.
-   */
+/* Helper macros for setting/receiving bits for superframe specification */
 
-  sq_queue_t csma_queue;
-  sq_queue_t gts_queue;
+#define IEEE802154_SETBEACONORDER(ptr, index, val) \
+  IEEE802154_SETBITS_U16(ptr, index, (val << IEEE802154_SFSPEC_SHIFT_BEACONORDER))
 
-  /* Support a singly linked list of transactions that will be sent indirectly.
-   * This list should only be used by a MAC acting as a coordinator.  These
-   * transactions will stay here until the data is extracted by the destination
-   * device sending a Data Request MAC command or if too much time passes. This
-   * list should also be used to populate the address list of the outgoing
-   * beacon frame.
-   */
+#define IEEE802154_SETSFORDER(ptr, index, val) \
+  IEEE802154_SETBITS_U16(ptr, index, (val << IEEE802154_SFSPEC_SHIFT_SFORDER))
 
-  sq_queue_t indirect_queue;
+#define IEEE802154_SETFINCAPSLOT(ptr, index, val) \
+  IEEE802154_SETBITS_U16(ptr, index, (val << IEEE802154_SFSPEC_SHIFT_FINCAPSLOT))
 
-  /* Support a singly linked list of frames received */
+#define IEEE802154_SETBLE(ptr, index) \
+  IEEE802154_SETBITS_U16(ptr, index, IEEE802154_SFSPEC_BLE)
 
-  sq_queue_t dataind_queue;
+#define IEEE802154_SETPANCOORD(ptr, index) \
+  IEEE802154_SETBITS_U16(ptr, index, IEEE802154_SFSPEC_PANCOORD)
 
-  /* Work structures for offloading aynchronous work */
+#define IEEE802154_SETASSOCPERMIT(ptr, index) \
+  IEEE802154_SETBITS_U16(ptr, index, IEEE802154_SFSPEC_ASSOCPERMIT)
 
-  struct work_s tx_work;
-  struct work_s rx_work;
+#define IEEE802154_GETBEACONORDER(ptr, index) \
+  ((GETHOST16(ptr, index) & IEEE802154_SFSPEC_BEACONORDER) >> \
+  IEEE802154_SFSPEC_SHIFT_BEACONORDER)
 
-  struct work_s timeout_work;
-  WDOG_ID       timeout;  /* Timeout watchdog */
-  mac802154_worker_t timeout_worker;
+#define IEEE802154_GETSFORDER(ptr, index) \
+  ((GETHOST16(ptr, index) & IEEE802154_SFSPEC_SFORDER) >> \
+  IEEE802154_SFSPEC_SHIFT_SFORDER)
 
-  struct work_s purge_work;
+#define IEEE802154_GETFINCAPSLOT(ptr, index) \
+  ((GETHOST16(ptr, index) & IEEE802154_SFSPEC_FINCAPSLOT) >> \
+  IEEE802154_SFSPEC_SHIFT_FINCAPSLOT)
 
-  /* MAC PIB attributes, grouped to save memory */
+#define IEEE802154_GETBLE(ptr, index) \
+  ((GETHOST16(ptr, index) & IEEE802154_SFSPEC_BLE) >> \
+  IEEE802154_SFSPEC_SHIFT_BLE)
 
-  /* Holds all address information (Extended, Short, and PAN ID) for the MAC. */
+#define IEEE802154_GETPANCOORD(ptr, index) \
+  ((GETHOST16(ptr, index) & IEEE802154_SFSPEC_PANCOORD) >> \
+  IEEE802154_SFSPEC_SHIFT_PANCOORD)
 
-  struct ieee802154_addr_s addr;
+#define IEEE802154_GETASSOCPERMIT(ptr, index) \
+  ((GETHOST16(ptr, index) & IEEE802154_SFSPEC_ASSOCPERMIT) >> \
+  IEEE802154_SFSPEC_SHIFT_ASSOCPERMIT)
 
-  /* Holds all address information (Extended, Short) for Coordinator */
+/* Helper macros for setting/receiving bits for GTS specification */
 
-  struct ieee802154_addr_s coordaddr;
+#define IEEE802154_GETGTSDESCCOUNT(ptr, index) \
+  ((GETHOST16(ptr, index) & IEEE802154_GTSSPEC_DESCCOUNT) >> \
+  IEEE802154_GTSSPEC_SHIFT_DESCCOUNT)
 
-  /* The maximum number of symbols to wait for an acknowledgement frame to
-   * arrive following a transmitted data frame. [1] pg. 126
-   *
-   * NOTE: This may be able to be a 16-bit or even an 8-bit number.  I wasn't
-   * sure at the time what the range of reasonable values was.
-   */
+#define IEEE802154_GETGTSPERMIT(ptr, index) \
+  ((GETHOST16(ptr, index) & IEEE802154_GTSSPEC_PERMIT) >> \
+  IEEE802154_GTSSPEC_SHIFT_PERMIT)
 
-  uint32_t ack_waitdur;
+/* Helper macros for setting/receiving bits for GTS Directions */
 
-  /* The maximum time to wait either for a frame intended as a response to a
-   * data request frame or for a broadcast frame following a beacon with the
-   * Frame Pending field set to one. [1] pg. 127
-   *
-   * NOTE: This may be able to be a 16-bit or even an 8-bit number.  I wasn't
-   * sure at the time what the range of reasonable values was.
-   */
+#define IEEE802154_GETGTSDIRMASK(ptr, index) \
+  ((GETHOST16(ptr, index) & IEEE802154_GTSDIR_MASK) >> \
+  IEEE802154_GTSDIR_SHIFT_MASK)
 
-  uint32_t max_frame_waittime;
+/* Helper macros for setting/receiving bits for Pending Address Specification */
 
-  /* The maximum time (in unit periods) that a transaction is stored by a
-   * coordinator and indicated in its beacon.
-   */
+#define IEEE802154_GETNPENDSADDR(ptr, index) \
+  ((GETHOST16(ptr, index) & IEEE802154_PENDADDR_NSADDR) >> \
+  IEEE802154_PENDADDR_SHIFT_NSADDR)
 
-  uint16_t trans_persisttime;
+#define IEEE802154_GETNPENDEADDR(ptr, index) \
+  ((GETHOST16(ptr, index) & IEEE802154_PENDADDR_NEADDR) >> \
+  IEEE802154_PENDADDR_SHIFT_NEADDR)
 
-  /* Contents of beacon payload */
-
-  uint8_t beacon_payload[IEEE802154_MAX_BEACON_PAYLOAD_LEN];
-  uint8_t beacon_payload_len;       /* Length of beacon payload */
-
-  uint8_t battlifeext_periods;      /* # of backoff periods during which rx is
-                                     * enabled after the IFS following beacon */
-
-  uint8_t bsn;                      /* Seq. num added to tx beacon frame */
-  uint8_t dsn;                      /* Seq. num added to tx data or MAC frame */
-  uint8_t maxretries;               /* Max # of retries alloed after tx failure */
-
-  /* The maximum time, in multiples of aBaseSuperframeDuration, a device shall
-   * wait for a response command frame to be available following a request
-   * command frame. [1] 128.
-   */
-
-  uint8_t resp_waittime;
-
-  /* The total transmit duration (including PHY header and FCS) specified in
-   * symbols. [1] pg. 129.
-   */
-
-  uint32_t tx_totaldur;
-
-  /* Start of 32-bit bitfield */
-
-  uint32_t trackingbeacon     : 1;  /* Are we tracking the beacon */
-  uint32_t isassoc            : 1;  /* Are we associated to the PAN */
-  uint32_t assocpermit        : 1;  /* Are we allowing assoc. as a coord. */
-  uint32_t autoreq            : 1;  /* Automatically send data req. if addr
-                                     * addr is in the beacon frame */
-
-  uint32_t battlifeext        : 1;  /* Is BLE enabled */
-  uint32_t gtspermit          : 1;  /* Is PAN Coord. accepting GTS reqs. */
-  uint32_t promisc            : 1;  /* Is promiscuous mode on? */
-  uint32_t rngsupport         : 1;  /* Does MAC sublayer support ranging */
-  uint32_t sec_enabled        : 1;  /* Does MAC sublayer have security en. */
-  uint32_t timestamp_support  : 1;  /* Does MAC layer supports timestamping */
-
-                                    /* 2 available bits */
-
-  uint32_t beaconorder        : 4;  /* Freq. that beacon is transmitted */
-
-  uint32_t superframeorder    : 4;  /* Length of active portion of outgoing
-                                     * superframe, including the beacon */
-
-  /* The offset, measured is symbols, between the symbol boundary at which the
-   * MLME captures the timestamp of each transmitted and received frame, and
-   * the onset of the first symbol past the SFD, namely the first symbol of
-   * the frames [1] pg. 129.
-   */
-
-  uint32_t sync_symboffset    : 12;
-
-  /* End of 32-bit bitfield */
-
-  /* Start of 32-bit bitfield */
-
-  uint32_t beacon_txtime      : 24; /* Time of last beacon transmit */
-  uint32_t minbe              : 4;  /* Min value of backoff exponent (BE) */
-  uint32_t maxbe              : 4;  /* Max value of backoff exponent (BE) */
-
-  /* End of 32-bit bitfield */
-
-  /* Start of 32-bit bitfield */
-
-  uint32_t txctrl_activedur   : 17; /* Duration for which tx is permitted to
-                                       * be active */
-  uint32_t txctrl_pausedur    : 1;  /* Duration after tx before another tx is
-                                     * permitted. 0=2000, 1= 10000 */
-
-  /* What type of device is this node acting as */
-
-  enum ieee802154_devmode_e devmode : 2;
-
-  uint32_t max_csmabackoffs   : 3;  /* Max num backoffs for CSMA algorithm
-                                     * before declaring ch access failure */
-
-                                    /* 9-bits remaining */
-
-  /* End of 32-bit bitfield. */
-
-  /* TODO: Add Security-related MAC PIB attributes */
-};
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
+/* General helper macros ****************************************************/
 
 #define mac802154_givesem(s) sem_post(s);
 
@@ -460,24 +612,95 @@ static inline int mac802154_timercancel(FAR struct ieee802154_privmac_s *priv)
   return OK;
 }
 
-/****************************************************************************
- * Function Prototypes
- ****************************************************************************/
+static inline void mac802154_rxenable(FAR struct ieee802154_privmac_s *priv)
+{
+  priv->nrxusers++;
 
+  /* If this is the first user, actually enable the receiver */
+  
+  if (priv->nrxusers == 1)
+    {
+      wlinfo("receiver enabled\n");
+      priv->radio->rxenable(priv->radio, true);
+    }
+}
 
-int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
-                                  FAR struct ieee802154_txdesc_s **txdesc,
-                                  bool allow_interrupt);
+static inline void mac802154_rxdisable(FAR struct ieee802154_privmac_s *priv)
+{
+  priv->nrxusers--;
 
-int mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
-                         uint32_t numsymbols, mac802154_worker_t);
+  /* If this is the first user, actually enable the receiver */
+  
+  if (priv->nrxusers == 0)
+    {
+      wlinfo("receiver disabled\n");
+      priv->radio->rxenable(priv->radio, true);
+      priv->radio->rxenable(priv->radio, false);
+    }
+}
 
-void mac802154_setupindirect(FAR struct ieee802154_privmac_s *priv,
-                             FAR struct ieee802154_txdesc_s *txdesc);
+static inline void mac802154_setchannel(FAR struct ieee802154_privmac_s *priv,
+                                        uint8_t channel)
+{
+  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_PHY_CHAN,
+                        (FAR const union ieee802154_attr_u *)&channel);
+}
 
-void mac802154_create_datareq(FAR struct ieee802154_privmac_s *priv,
-                              FAR struct ieee802154_addr_s *coordaddr,
-                              enum ieee802154_addrmode_e srcmode,
-                              FAR struct ieee802154_txdesc_s *txdesc);
+static inline void mac802154_setchpage(FAR struct ieee802154_privmac_s *priv,
+                                       uint8_t chpage)
+{
+  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_PHY_CURRENT_PAGE,
+                        (FAR const union ieee802154_attr_u *)&chpage);
+}
+
+static inline void mac802154_setpanid(FAR struct ieee802154_privmac_s *priv,
+                                      const uint8_t *panid)
+{
+  IEEE802154_PANIDCOPY(priv->addr.panid, panid);
+  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_PANID,
+                        (FAR const union ieee802154_attr_u *)panid);
+}
+
+static inline void mac802154_setsaddr(FAR struct ieee802154_privmac_s *priv,
+                                      const uint8_t *saddr)
+{
+  IEEE802154_SADDRCOPY(priv->addr.saddr, saddr);
+  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_SADDR,
+                        (FAR const union ieee802154_attr_u *)saddr);
+}
+
+static inline void mac802154_seteaddr(FAR struct ieee802154_privmac_s *priv,
+                                      const uint8_t *eaddr)
+{
+  IEEE802154_EADDRCOPY(priv->addr.eaddr, eaddr);
+  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_EADDR,
+                        (FAR const union ieee802154_attr_u *)eaddr);
+}
+
+static inline void mac802154_setcoordsaddr(FAR struct ieee802154_privmac_s *priv,
+                                          const uint8_t *saddr)
+{
+  IEEE802154_SADDRCOPY(priv->pandesc.coordaddr.saddr, saddr);
+  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_COORD_SADDR,
+                        (FAR const union ieee802154_attr_u *)saddr);
+}
+
+static inline void mac802154_setcoordeaddr(FAR struct ieee802154_privmac_s *priv,
+                                           const uint8_t *eaddr)
+{
+  IEEE802154_EADDRCOPY(priv->pandesc.coordaddr.eaddr, eaddr);
+  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_COORD_EADDR,
+                        (FAR const union ieee802154_attr_u *)eaddr);
+}
+
+static inline void mac802154_setcoordaddr(FAR struct ieee802154_privmac_s *priv,
+                                          FAR const struct ieee802154_addr_s *addr)
+{
+  memcpy(&priv->pandesc.coordaddr, addr, sizeof(struct ieee802154_addr_s));
+  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_COORD_EADDR,
+                        (FAR const union ieee802154_attr_u *)addr->eaddr);
+  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_COORD_SADDR,
+                        (FAR const union ieee802154_attr_u *)addr->saddr);
+}                                    
 
 #endif /* __WIRELESS_IEEE802154__MAC802154_INTERNAL_H */

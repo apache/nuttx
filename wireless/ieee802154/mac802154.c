@@ -59,6 +59,7 @@
 #include "mac802154_notif.h"
 #include "mac802154_internal.h"
 #include "mac802154_assoc.h"
+#include "mac802154_scan.h"
 #include "mac802154_data.h"
 #include "mac802154_poll.h"
 
@@ -86,10 +87,8 @@ static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
                               FAR struct ieee802154_data_ind_s *ind);
 static void mac802154_rxframe_worker(FAR void *arg);
 
-static void mac802154_rx_datareq(FAR struct ieee802154_privmac_s *priv,
-                                 FAR struct ieee802154_data_ind_s *ind);
-static void mac802154_rx_dataframe(FAR struct ieee802154_privmac_s *priv,
-                                   FAR struct ieee802154_data_ind_s *ind);
+static void mac802154_sfevent(FAR const struct ieee802154_radiocb_s *radiocb,
+                              enum ieee802154_sfevent_e sfevent);
 
 static void mac802154_purge_worker(FAR void *arg);
 
@@ -99,6 +98,13 @@ static void mac802154_timeout_expiry(int argc, wdparm_t arg, ...);
 
 static uint32_t mac802154_symtoticks(FAR struct ieee802154_privmac_s *priv,
                               uint32_t symbols);
+
+static void mac802154_rxdatareq(FAR struct ieee802154_privmac_s *priv,
+                                FAR struct ieee802154_data_ind_s *ind);
+static void mac802154_rxdataframe(FAR struct ieee802154_privmac_s *priv,
+                                  FAR struct ieee802154_data_ind_s *ind);
+static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
+                                    FAR struct ieee802154_data_ind_s *ind);
 
 /****************************************************************************
  * Private Functions
@@ -130,6 +136,7 @@ static void mac802154_resetqueues(FAR struct ieee802154_privmac_s *priv)
     {
       sq_addlast((FAR sq_entry_t *)&priv->txdesc_pool[i], &priv->txdesc_queue);
     }
+
   sem_init(&priv->txdesc_sem, 0, CONFIG_MAC802154_NTXDESC);
 
   /* Initialize the notifcation allocation pool */
@@ -169,7 +176,6 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
    */
 
   ret = sem_trywait(&priv->txdesc_sem);
-
   if (ret == OK)
     {
       *txdesc = (FAR struct ieee802154_txdesc_s *)sq_remfirst(&priv->txdesc_queue);
@@ -189,6 +195,7 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
         {
           /* MAC is already released */
 
+          wlwarn("WARNING: mac802154_takesem failed: %d\n", ret);
           return -EINTR;
         }
 
@@ -200,6 +207,8 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
       ret = mac802154_takesem(&priv->exclsem, allow_interrupt);
       if (ret < 0)
         {
+          wlwarn("WARNING: mac802154_takesem failed: %d\n", ret);
+
           mac802154_givesem(&priv->txdesc_sem);
           return -EINTR;
         }
@@ -228,12 +237,11 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
     }
 
   (*txdesc)->conf = &notif->u.dataconf;
-
   return OK;
 }
 
 /****************************************************************************
- * Name: mac802154_create_datareq
+ * Name: mac802154_createdatareq
  *
  * Description:
  *    Internal function used by various parts of the MAC layer. This function
@@ -245,13 +253,12 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
  *
  ****************************************************************************/
 
-void mac802154_create_datareq(FAR struct ieee802154_privmac_s *priv,
-                              FAR struct ieee802154_addr_s *coordaddr,
-                              enum ieee802154_addrmode_e srcmode,
-                              FAR struct ieee802154_txdesc_s *txdesc)
+void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
+                             FAR struct ieee802154_addr_s *coordaddr,
+                             enum ieee802154_addrmode_e srcmode,
+                             FAR struct ieee802154_txdesc_s *txdesc)
 {
   FAR struct iob_s *iob;
-  FAR uint16_t *u16;
 
   /* The only node allowed to use a source address of none is the PAN Coordinator.
    * PAN coordinators should not be sending data request commans.
@@ -269,15 +276,15 @@ void mac802154_create_datareq(FAR struct ieee802154_privmac_s *priv,
   iob->io_offset = 0;
   iob->io_pktlen = 0;
 
-  /* Get a uin16_t reference to the first two bytes. ie frame control field */
+  /* Set the frame control fields */
 
-  u16 = (FAR uint16_t *)&iob->io_data[iob->io_len];
+  iob->io_data[0] = 0;
+  iob->io_data[1] = 0;
+  IEEE802154_SETACKREQ(iob->io_data, 0);
+  IEEE802154_SETFTYPE(iob->io_data, 0, IEEE802154_FRAME_COMMAND);
+  IEEE802154_SETDADDRMODE(iob->io_data, 0, coordaddr->mode);
+  IEEE802154_SETSADDRMODE(iob->io_data, 0, srcmode);
   iob->io_len = 2;
-
-  *u16 = (IEEE802154_FRAME_COMMAND << IEEE802154_FRAMECTRL_SHIFT_FTYPE);
-  *u16 |= IEEE802154_FRAMECTRL_ACKREQ;
-  *u16 |= (coordaddr->mode << IEEE802154_FRAMECTRL_SHIFT_DADDR);
-  *u16 |= (srcmode << IEEE802154_FRAMECTRL_SHIFT_SADDR);
 
   /* Each time a data or a MAC command frame is generated, the MAC sublayer
    * shall copy the value of macDSN into the Sequence Number field of the
@@ -304,8 +311,6 @@ void mac802154_create_datareq(FAR struct ieee802154_privmac_s *priv,
         }
     }
 
-  *u16 |= (coordaddr->mode << IEEE802154_FRAMECTRL_SHIFT_DADDR);
-
   /* If the Destination Addressing Mode field is set to indicate that
    * destination addressing information is not present, the PAN ID Compression
    * field shall be set to zero and the source PAN identifier shall contain the
@@ -318,7 +323,7 @@ void mac802154_create_datareq(FAR struct ieee802154_privmac_s *priv,
   if (coordaddr->mode  != IEEE802154_ADDRMODE_NONE &&
       IEEE802154_PANIDCMP(coordaddr->panid, priv->addr.panid))
     {
-      *u16 |= IEEE802154_FRAMECTRL_PANIDCOMP;
+      IEEE802154_SETPANIDCOMP(iob->io_data, 0);
     }
   else
     {
@@ -355,6 +360,163 @@ void mac802154_create_datareq(FAR struct ieee802154_privmac_s *priv,
 }
 
 /****************************************************************************
+ * Name: mac802154_updatebeacon
+ *
+ * Description:
+ *    This function is called in the following scenarios:
+ *        - The MAC receives a START.request primitive
+ *        - Upon receiving the IEEE802154_SFEVENT_ENDOFACTIVE event from the
+ *          radio layer, the MAC checks the bf_update flag and if set calls this
+ *          function. The bf_update flag is set when various attributes that
+ *          effect the beacon are updated.
+ *
+ *    Internal function used by various parts of the MAC layer. This function
+ *    uses the various MAC attributes to update the beacon frame. It loads the
+ *    inactive beacon frame structure and then notifies the radio layer of the
+ *    new frame.  the provided tx descriptor in the indirect list and manages the
+ *    scheduling for purging the transaction if it does not get extracted in
+ *    time.
+ *
+ * Assumptions:
+ *    Called with the MAC locked
+ *
+ ****************************************************************************/
+
+void mac802154_updatebeacon(FAR struct ieee802154_privmac_s *priv)
+{
+  FAR struct ieee802154_txdesc_s *txdesc;
+  uint8_t pendaddrspec_ind;
+  uint8_t pendeaddr = 0;
+  uint8_t pendsaddr = 0;
+
+  /* Switch the buffer */
+
+  priv->bf_ind = !priv->bf_ind;
+
+  /* Get a local reference to the beacon frame */
+
+  FAR struct ieee802154_beaconframe_s *beacon = &priv->beaconframe[priv->bf_ind];
+
+  /* Clear the frame control fields */
+
+  beacon->bf_data[0] = 0;
+  beacon->bf_data[1] = 0;
+  beacon->bf_len = 2;
+
+  IEEE802154_SETFTYPE(beacon->bf_data, 0, IEEE802154_FRAME_BEACON);
+
+  /* Check if there is a broadcast message pending, if there is, we must set
+   * the frame pending bit to 1.
+   */
+
+  /* TODO: handle broadcast frame */
+
+  DEBUGASSERT(priv->addr.mode != IEEE802154_ADDRMODE_NONE);
+
+  IEEE802154_SETDADDRMODE(beacon->bf_data, 0, IEEE802154_ADDRMODE_NONE);
+  IEEE802154_SETSADDRMODE(beacon->bf_data, 0, priv->addr.mode);
+  IEEE802154_SETVERSION(beacon->bf_data, 0, 1);
+
+  /* Copy in and increment the beacon sequence number */
+
+  beacon->bf_data[beacon->bf_len++] = priv->bsn++;
+
+  IEEE802154_PANIDCOPY(&beacon->bf_data[beacon->bf_len], priv->addr.panid);
+  beacon->bf_len += IEEE802154_PANIDSIZE;
+
+  if (priv->addr.mode == IEEE802154_ADDRMODE_SHORT)
+    {
+      IEEE802154_SADDRCOPY(&beacon->bf_data[beacon->bf_len], priv->addr.saddr);
+      beacon->bf_len += IEEE802154_SADDRSIZE;
+    }
+  else
+    {
+      IEEE802154_EADDRCOPY(&beacon->bf_data[beacon->bf_len], priv->addr.eaddr);
+      beacon->bf_len += IEEE802154_EADDRSIZE;
+    }
+
+  /* Clear the superframe specification, then set the appropriate bits */
+
+  beacon->bf_data[beacon->bf_len] = 0;
+  beacon->bf_data[beacon->bf_len + 1] = 0;
+
+  IEEE802154_SETBEACONORDER(beacon->bf_data, beacon->bf_len,
+                            priv->sfspec.beaconorder);
+  IEEE802154_SETSFORDER(beacon->bf_data, beacon->bf_len,
+                        priv->sfspec.sforder);
+  IEEE802154_SETFINCAPSLOT(beacon->bf_data, beacon->bf_len,
+                           priv->sfspec.final_capslot);
+  if (priv->sfspec.ble)
+    {
+      IEEE802154_SETBLE(beacon->bf_data, beacon->bf_len);
+    }
+  if (priv->sfspec.pancoord)
+    {
+      IEEE802154_SETPANCOORD(beacon->bf_data, beacon->bf_len);
+    }
+  if (priv->sfspec.assocpermit)
+    {
+      IEEE802154_SETASSOCPERMIT(beacon->bf_data, beacon->bf_len);
+    }
+
+  beacon->bf_len += 2;
+
+  /* TODO: Handle GTS properly, for now, we just set the descriptor count to
+   * zero and specify that we do not permit GTS requests */
+
+  beacon->bf_data[beacon->bf_len++] = 0;
+
+  /* TODO: Add GTS List here */
+
+  /* Skip the pending address specification field for now  */
+
+  pendaddrspec_ind = beacon->bf_len++;
+
+  txdesc = (FAR struct ieee802154_txdesc_s *)sq_peek(&priv->indirect_queue);
+
+  while(txdesc != NULL)
+    {
+      if (txdesc->destaddr.mode == IEEE802154_ADDRMODE_SHORT)
+        {
+          pendsaddr++;
+          IEEE802154_SADDRCOPY(&beacon->bf_data[beacon->bf_len], txdesc->destaddr.saddr);
+          beacon->bf_len += IEEE802154_SADDRSIZE;
+        }
+      else if (txdesc->destaddr.mode == IEEE802154_ADDRMODE_EXTENDED)
+        {
+          pendeaddr++;
+          IEEE802154_EADDRCOPY(&beacon->bf_data[beacon->bf_len], txdesc->destaddr.eaddr);
+          beacon->bf_len += IEEE802154_EADDRSIZE;
+        }
+
+      /* Check if we are up to 7 addresses yet */
+
+      if ((pendsaddr + pendeaddr) == 7)
+        {
+          break;
+        }
+
+      /* Get the next pending indirect transation */
+
+      txdesc = (FAR struct ieee802154_txdesc_s *)sq_next((FAR sq_entry_t *)txdesc);
+    }
+
+  /* At this point, we know how many of each transaction we have, we can setup
+   * the Pending Address Specification field
+   */
+
+  beacon->bf_data[pendaddrspec_ind] = (pendsaddr & 0x07) | ((pendeaddr << 4) & 0x70);
+
+  /* Copy in the beacon payload */
+
+  memcpy(&beacon->bf_data[beacon->bf_len], priv->beaconpayload,
+         priv->beaconpayloadlength);
+  beacon->bf_len += priv->beaconpayloadlength;
+
+  priv->beaconupdate = false;
+}
+
+/****************************************************************************
  * Name: mac802154_setupindirect
  *
  * Description:
@@ -387,10 +549,10 @@ void mac802154_setupindirect(FAR struct ieee802154_privmac_s *priv,
    * aBaseSuperframeDuration. [1] pg. 129
    */
 
-  if (priv->beaconorder < 15)
+  if (priv->sfspec.beaconorder < 15)
     {
       symbols = priv->trans_persisttime *
-        (IEEE802154_BASE_SUPERFRAME_DURATION * (1 << priv->beaconorder));
+        (IEEE802154_BASE_SUPERFRAME_DURATION * (1 << priv->sfspec.beaconorder));
     }
   else
     {
@@ -400,6 +562,13 @@ void mac802154_setupindirect(FAR struct ieee802154_privmac_s *priv,
   ticks = mac802154_symtoticks(priv, symbols);
 
   txdesc->purge_time = clock_systimer() + ticks;
+
+  /* Make sure the beacon gets updated */
+
+  if (priv->sfspec.beaconorder < 15)
+    {
+      priv->beaconupdate = true;
+    }
 
   /* Check to see if the purge indirect timer is scheduled. If it is, when the
    * timer fires, it will schedule the next purge timer event. Inherently, the
@@ -470,6 +639,7 @@ static void mac802154_purge_worker(FAR void *arg)
         ((FAR struct mac802154_notif_s *)txdesc->conf)->flink = priv->notif_free;
         priv->notif_free = ((FAR struct mac802154_notif_s *)txdesc->conf);
         mac802154_txdesc_free(priv, txdesc);
+        priv->beaconupdate = true;
 
         wlinfo("Indirect TX purged");
       }
@@ -865,7 +1035,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
             {
               /* The source PAN ID is equal to the destination PAN ID */
 
-              IEEE802154_PANIDCOPY(ind->src.panid, ind->dest.panid);              
+              IEEE802154_PANIDCOPY(ind->src.panid, ind->dest.panid);
             }
           else
             {
@@ -889,7 +1059,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
         {
           case IEEE802154_FRAME_DATA:
             {
-              mac802154_rx_dataframe(priv, ind);
+              mac802154_rxdataframe(priv, ind);
             }
             break;
 
@@ -905,33 +1075,43 @@ static void mac802154_rxframe_worker(FAR void *arg)
               switch (cmdtype)
                 {
                   case IEEE802154_CMD_ASSOC_REQ:
+                    wlinfo("Assoc request received\n");
                     mac802154_rx_assocreq(priv, ind);
                     break;
 
                   case IEEE802154_CMD_ASSOC_RESP:
+                    wlinfo("Assoc response received\n");
                     mac802154_rx_assocresp(priv, ind);
                     break;
 
                   case IEEE802154_CMD_DISASSOC_NOT:
+                    wlinfo("Disassoc notif received\n");
                     break;
 
                   case IEEE802154_CMD_DATA_REQ:
-                    mac802154_rx_datareq(priv, ind);
+                    wlinfo("Data request received\n");
+                    mac802154_rxdatareq(priv, ind);
                     break;
 
                   case IEEE802154_CMD_PANID_CONF_NOT:
+                    wlinfo("PAN ID Conflict notif received\n");
                     break;
 
                   case IEEE802154_CMD_ORPHAN_NOT:
+                    wlinfo("Orphan notif received\n");
+                    break;
                     break;
 
                   case IEEE802154_CMD_BEACON_REQ:
+                    wlinfo("Beacon request received\n");
                     break;
 
                   case IEEE802154_CMD_COORD_REALIGN:
+                    wlinfo("Coord realign received\n");
                     break;
 
                   case IEEE802154_CMD_GTS_REQ:
+                    wlinfo("GTS request received\n");
                     break;
                 }
 
@@ -943,15 +1123,9 @@ static void mac802154_rxframe_worker(FAR void *arg)
 
           case IEEE802154_FRAME_BEACON:
             {
-              /* TODO: Add logic here to handle extracting association response from
-               * coordinator if beacon tracking was enabled during the Association
-               * operation.
-               *
-               *  mac802154_txdesc_alloc(priv, &respdec, false);
-               *  mac802154_create_datareq(priv, &req->coordaddr,
-               *                           IEEE802154_ADDRMODE_EXTENDED, respdesc);
-               *  sq_addlast((FAR sq_entry_t *)respdesc, &priv->csma_queue);
-               */
+              wlinfo("Beacon frame received\n");
+              mac802154_rxbeaconframe(priv, ind);
+              ieee802154_ind_free(ind);
             }
             break;
 
@@ -970,7 +1144,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
 }
 
 /****************************************************************************
- * Name: mac802154_rx_dataframe
+ * Name: mac802154_rxdataframe
  *
  * Description:
  *   Function called from the generic RX Frame worker to parse and handle the
@@ -978,8 +1152,8 @@ static void mac802154_rxframe_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-static void mac802154_rx_dataframe(FAR struct ieee802154_privmac_s *priv,
-                                   FAR struct ieee802154_data_ind_s *ind)
+static void mac802154_rxdataframe(FAR struct ieee802154_privmac_s *priv,
+                                  FAR struct ieee802154_data_ind_s *ind)
 {
   FAR struct ieee802154_notif_s *notif;
 
@@ -1097,7 +1271,7 @@ static void mac802154_rx_dataframe(FAR struct ieee802154_privmac_s *priv,
 
       priv->curr_op = MAC802154_OP_NONE;
       priv->cmd_desc = NULL;
-      mac802154_givesem(&priv->op_sem);
+      mac802154_givesem(&priv->opsem);
 
       /* Release the MAC */
 
@@ -1159,7 +1333,7 @@ notify_without_lock:
 }
 
 /****************************************************************************
- * Name: mac802154_rx_datareq
+ * Name: mac802154_rxdatareq
  *
  * Description:
  *   Function called from the generic RX Frame worker to parse and handle the
@@ -1167,7 +1341,7 @@ notify_without_lock:
  *
  ****************************************************************************/
 
-static void mac802154_rx_datareq(FAR struct ieee802154_privmac_s *priv,
+static void mac802154_rxdatareq(FAR struct ieee802154_privmac_s *priv,
                                  FAR struct ieee802154_data_ind_s *ind)
 {
   FAR struct ieee802154_txdesc_s *txdesc;
@@ -1190,12 +1364,7 @@ static void mac802154_rx_datareq(FAR struct ieee802154_privmac_s *priv,
 
   txdesc = (FAR struct ieee802154_txdesc_s *)sq_peek(&priv->indirect_queue);
 
-  if (txdesc == NULL)
-    {
-      goto no_data;
-    }
-
-  do
+  while(txdesc != NULL)
     {
       if (txdesc->destaddr.mode == ind->src.mode)
         {
@@ -1210,7 +1379,9 @@ static void mac802154_rx_datareq(FAR struct ieee802154_privmac_s *priv,
                   /* The addresses match, send the transaction immediately */
 
                   priv->radio->txdelayed(priv->radio, txdesc, 0);
-                  break;
+                  priv->beaconupdate = true;
+                  mac802154_givesem(&priv->exclsem);
+                  return;
                 }
             }
           else if (txdesc->destaddr.mode == IEEE802154_ADDRMODE_EXTENDED)
@@ -1225,7 +1396,9 @@ static void mac802154_rx_datareq(FAR struct ieee802154_privmac_s *priv,
                   /* The addresses match, send the transaction immediately */
 
                   priv->radio->txdelayed(priv->radio, txdesc, 0);
-                  break;
+                  priv->beaconupdate = true;
+                  mac802154_givesem(&priv->exclsem);
+                  return;
                 }
             }
           else
@@ -1235,18 +1408,7 @@ static void mac802154_rx_datareq(FAR struct ieee802154_privmac_s *priv,
         }
 
       txdesc = (FAR struct ieee802154_txdesc_s *)sq_next((FAR sq_entry_t *)txdesc);
-
-      if (txdesc == NULL)
-        {
-          goto no_data;
-        }
     }
-  while (1);
-
-  mac802154_givesem(&priv->exclsem);
-  return;
-
-no_data:
 
   /* If there is no data frame pending for the requesting device, the coordinator
    * shall send a data frame without requesting acknowledgment to the device
@@ -1344,6 +1506,217 @@ no_data:
   mac802154_givesem(&priv->exclsem);
 
   priv->radio->txdelayed(priv->radio, txdesc, 0);
+}
+
+static void mac802154_sfevent(FAR const struct ieee802154_radiocb_s *radiocb,
+                              enum ieee802154_sfevent_e sfevent)
+{
+  FAR struct mac802154_radiocb_s *cb =
+    (FAR struct mac802154_radiocb_s *)radiocb;
+  FAR struct ieee802154_privmac_s *priv;
+
+  DEBUGASSERT(cb != NULL && cb->priv != NULL);
+  priv = cb->priv;
+
+  /* Get exclusive access to the driver structure.  We don't care about any
+   * signals so if we see one, just go back to trying to get access again.
+   */
+
+  mac802154_takesem(&priv->exclsem, false);
+
+  /* Check if there is any reason to update the beacon */
+
+  if (priv->beaconupdate)
+    {
+      mac802154_updatebeacon(priv);
+
+      priv->radio->beaconupdate(priv->radio, &priv->beaconframe[priv->bf_ind]);
+    }
+
+  mac802154_givesem(&priv->exclsem);
+}
+
+/****************************************************************************
+ * Name: mac802154_rxbeaconframe
+ *
+ * Description:
+ *   Function called from the generic RX Frame worker to parse and handle the
+ *   reception of a beacon frame.
+ *
+ ****************************************************************************/
+
+static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
+                                    FAR struct ieee802154_data_ind_s *ind)
+{
+  FAR struct iob_s *iob = ind->frame;
+  struct ieee802154_pandesc_s pandesc;
+  FAR struct ieee802154_txdesc_s *respdesc;
+  uint8_t numgtsdesc;
+  uint8_t gtsdirmask;
+  uint8_t npendsaddr;
+  uint8_t npendeaddr;
+  int i;
+
+  /* Copy the coordinator address and channel info into the pan descriptor */
+
+  memcpy(&pandesc.coordaddr, &ind->src, sizeof(struct ieee802154_addr_s));
+  pandesc.chan = priv->currscan.channels[priv->scanindex];
+  pandesc.chpage = priv->currscan.chpage;
+  pandesc.lqi = ind->lqi;
+  pandesc.timestamp = ind->timestamp;
+
+  /* Parse the superframe specification field */
+
+  pandesc.sfspec.beaconorder = IEEE802154_GETBEACONORDER(iob->io_data,
+                                                         iob->io_offset);
+
+  pandesc.sfspec.sforder = IEEE802154_GETSFORDER(iob->io_data, iob->io_offset);
+  pandesc.sfspec.final_capslot = IEEE802154_GETFINCAPSLOT(iob->io_data,
+                                                          iob->io_offset);
+  pandesc.sfspec.ble = IEEE802154_GETBLE(iob->io_data, iob->io_offset);
+  pandesc.sfspec.pancoord = IEEE802154_GETPANCOORD(iob->io_data, iob->io_offset);
+  pandesc.sfspec.assocpermit = IEEE802154_GETASSOCPERMIT(iob->io_data,
+                                                         iob->io_offset);
+  iob->io_offset += 2;
+
+  /* Parse the GTS Specification field */
+
+  numgtsdesc = IEEE802154_GETGTSDESCCOUNT(iob->io_data, iob->io_offset);
+  pandesc.gtspermit = IEEE802154_GETGTSPERMIT(iob->io_data, iob->io_offset);
+  iob->io_offset++;
+
+  /* We only need to parse the rest of the frame if we are not performing a
+   * scan
+   */
+
+  if (priv->curr_op == MAC802154_OP_SCAN)
+    {
+      /* Check to see if we already have a frame from this coordinator */
+
+      for (i = 0; i < priv->npandesc; i++)
+        {
+          if (priv->currscan.channels[priv->scanindex] != priv->pandescs[i].chan)
+            {
+              continue;
+            }
+
+          if (memcmp(&ind->src, &priv->pandescs[i].coordaddr,
+              sizeof(struct ieee802154_addr_s)))
+            {
+              continue;
+            }
+
+          /* The beacon is the same as another, so discard it */
+
+          return;
+        }
+
+      /* Copy the pan desc to the list of pan desc */
+
+      memcpy(&priv->pandescs[priv->npandesc], &pandesc,
+             sizeof(struct ieee802154_pandesc_s));
+      priv->npandesc++;
+
+      if (priv->npandesc == MAC802154_NPANDESC)
+        {
+          mac802154_scanfinish(priv, IEEE802154_STATUS_LIMITREACHED);
+        }
+    }
+  else
+    {
+      /* If there are any GTS descriptors, handle the GTS Directions and
+       * GTS List fields
+       */
+
+      if (numgtsdesc > 0)
+        {
+          gtsdirmask = IEEE802154_GETGTSDIRMASK(iob->io_data, iob->io_offset);
+          iob->io_offset++;
+
+          for (i = 0; i < numgtsdesc; i++)
+            {
+              /* For now we just discard the data by skipping over it */
+
+              iob->io_offset += 3;
+            }
+        }
+
+      /* Pending address fields. Min 1 byte, the Pending Address Specification */
+
+      npendsaddr = IEEE802154_GETNPENDSADDR(iob->io_data, iob->io_offset);
+      npendeaddr = IEEE802154_GETNPENDEADDR(iob->io_data, iob->io_offset);
+      iob->io_offset++;
+
+      /* The pending address field tells us whether or not there is any data
+       * pending for us.
+       */
+
+      for (i = 0; i < npendsaddr; i++)
+        {
+          /* If the short address matches our short address */
+
+          if (IEEE802154_SADDRCMP(&iob->io_data[iob->io_offset], priv->addr.saddr))
+            {
+              /* TODO: Handle data pending in coordinator for us */
+            }
+          iob->io_offset += IEEE802154_SADDRSIZE;
+        }
+
+      for (i = 0; i < npendeaddr; i++)
+        {
+          /* If the extended address matches our extended address */
+
+          if (IEEE802154_EADDRCMP(&iob->io_data[iob->io_offset], priv->addr.eaddr))
+            {
+              /* If we are associating, polling, or if macAutoRequest is TRUE,
+               * extract the data.
+               */
+
+              if ((priv->autoreq) || (priv->curr_op == MAC802154_OP_ASSOC) ||
+                  (priv->curr_op == MAC802154_OP_POLL))
+                {
+                  mac802154_txdesc_alloc(priv, &respdesc, false);
+
+                  mac802154_createdatareq(priv, &priv->pandesc.coordaddr,
+                                          IEEE802154_ADDRMODE_EXTENDED, respdesc);
+
+                  if (priv->curr_op == MAC802154_OP_ASSOC ||
+                      priv->curr_op == MAC802154_OP_POLL)
+                    {
+                      priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
+                    }
+
+                  /* Link the transaction into the CSMA transaction list */
+
+                  sq_addlast((FAR sq_entry_t *)respdesc, &priv->csma_queue);
+
+                  /* Notify the radio driver that there is data available */
+
+                  priv->radio->txnotify(priv->radio, false);
+                }
+            }
+          iob->io_offset += IEEE802154_EADDRSIZE;
+        }
+
+      /* TODO: Process incoming beacon payload
+       * If there is anything left in the frame, process it as the beacon payload
+       */
+
+      /* Check the superframe structure and update the appropriate attributes. */
+
+      if (memcmp(&priv->sfspec, &pandesc.sfspec,
+                 sizeof(struct ieee802154_superframespec_s)) != 0)
+        {
+          /* Copy in the new superframe spec */
+
+          memcpy(&priv->sfspec, &pandesc.sfspec,
+                 sizeof(struct ieee802154_superframespec_s));
+
+          /* Tell the radio layer about the superframe spec update */
+
+          priv->radio->sfupdate(priv->radio, &pandesc.sfspec);
+        }
+    }
 }
 
 /****************************************************************************
@@ -1515,7 +1888,7 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
 
   /* Allow exclusive access to the dedicated command transaction */
 
-  sem_init(&mac->op_sem, 0, 1);
+  sem_init(&mac->opsem, 0, 1);
 
   /* Setup watchdog for extraction timeout */
 
@@ -1535,6 +1908,7 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
   radiocb->poll      = mac802154_radiopoll;
   radiocb->txdone    = mac802154_txdone;
   radiocb->rxframe   = mac802154_rxframe;
+  radiocb->sfevent   = mac802154_sfevent;
 
   /* Bind our callback structure */
 
@@ -1553,7 +1927,7 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
     }
 
   IEEE802154_EADDRCOPY(mac->addr.eaddr, eaddr);
-  mac->radio->set_attr(mac->radio, IEEE802154_ATTR_MAC_EXTENDED_ADDR,
+  mac->radio->set_attr(mac->radio, IEEE802154_ATTR_MAC_EADDR,
                       (union ieee802154_attr_u *)&eaddr[0]);
 
   return (MACHANDLE)mac;

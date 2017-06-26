@@ -248,7 +248,7 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
   /* Get the eaddr from the MAC */
 
   memcpy(arg.ifr_name, dev->d_ifname, IFNAMSIZ);
-  arg.u.getreq.attr = IEEE802154_ATTR_MAC_EXTENDED_ADDR;
+  arg.u.getreq.attr = IEEE802154_ATTR_MAC_EADDR;
   ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
                      (unsigned long)((uintptr_t)&arg));
   if (ret < 0)
@@ -258,10 +258,12 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
     }
   else
     {
-      /* Set the IP address based on the eaddr */
+      /* Set the MAC address as the eaddr */
 
       eaddr = arg.u.getreq.attrval.mac.eaddr;
       IEEE802154_EADDRCOPY(dev->d_mac.ieee802154.u8, eaddr);
+
+      /* Set the IP address based on the eaddr */
 
       dev->d_ipv6addr[0]  = HTONS(0xfe80);
       dev->d_ipv6addr[1]  = 0;
@@ -270,7 +272,7 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
       dev->d_ipv6addr[4]  = (uint16_t)eaddr[0] << 8 |  (uint16_t)eaddr[1];
       dev->d_ipv6addr[5]  = (uint16_t)eaddr[2] << 8 |  (uint16_t)eaddr[3];
       dev->d_ipv6addr[6]  = (uint16_t)eaddr[4] << 8 |  (uint16_t)eaddr[5];
-      dev->d_ipv6addr[7]  = (uint16_t)eaddr[6] << 8 |  (uint16_t)eaddr[6];
+      dev->d_ipv6addr[7]  = (uint16_t)eaddr[6] << 8 |  (uint16_t)eaddr[7];
       dev->d_ipv6addr[4] ^= 0x200;
       return OK;
     }
@@ -281,7 +283,7 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
   /* Get the saddr from the MAC */
 
   memcpy(arg.ifr_name, dev->d_ifname, IFNAMSIZ);
-  arg.u.getreq.attr = IEEE802154_ATTR_MAC_SHORT_ADDRESS;
+  arg.u.getreq.attr = IEEE802154_ATTR_MAC_SADDR;
   ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
                      (unsigned long)((uintptr_t)&arg));
   if (ret < 0)
@@ -291,6 +293,8 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
     }
   else
     {
+      /* Set the MAC address as the saddr */
+
       saddr = arg.u.getreq.attrval.mac.saddr;
       IEEE802154_SADDRCOPY(dev->d_mac.ieee802154.u8, saddr);
 
@@ -405,6 +409,7 @@ static int macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
 
   if (!priv->md_bifup)
     {
+      wlwarn("WARNING: Dropped... Network is down\n");
       return -ENETDOWN;
     }
 
@@ -421,8 +426,15 @@ static int macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
   if ((iob->io_data[iob->io_offset] & SIXLOWPAN_DISPATCH_NALP_MASK) ==
       SIXLOWPAN_DISPATCH_NALP)
     {
+      wlwarn("WARNING: Dropped... Not a 6LoWPAN frame: %02x\n",
+             iob->io_data[iob->io_offset]);
       return -EINVAL;
     }
+
+  /* Increment statistics */
+
+  NETDEV_RXPACKETS(&priv->md_dev.i_dev);
+  NETDEV_RXIPV6(&priv->md_dev.i_dev);
 
   /* Remove the IOB containing the frame. */
 
@@ -677,27 +689,6 @@ static int macnet_txpoll_callback(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Name: macnet_txpoll_process
- *
- * Description:
- *   Perform the periodic poll.  This may be called either from watchdog
- *   timer logic or from the worker thread, depending upon the configuration.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static inline void macnet_txpoll_process(FAR struct macnet_driver_s *priv)
-{
-}
-
-/****************************************************************************
  * Name: macnet_txpoll_work
  *
  * Description:
@@ -792,20 +783,20 @@ static int macnet_ifup(FAR struct net_driver_s *dev)
   ret = macnet_advertise(dev);
   if (ret >= 0)
     {
-      ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-            dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-            dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-            dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+      wlinfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+             dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
+             dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
+             dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-      ninfo("             Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
-            dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
-            dev->d_mac.ieee802154.u8[2], dev->d_mac.ieee802154.u8[3],
-            dev->d_mac.ieee802154.u8[4], dev->d_mac.ieee802154.u8[5],
-            dev->d_mac.ieee802154.u8[6], dev->d_mac.ieee802154.u8[7]);
+      wlinfo("             Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
+             dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
+             dev->d_mac.ieee802154.u8[2], dev->d_mac.ieee802154.u8[3],
+             dev->d_mac.ieee802154.u8[4], dev->d_mac.ieee802154.u8[5],
+             dev->d_mac.ieee802154.u8[6], dev->d_mac.ieee802154.u8[7]);
 #else
-      ninfo("             Node: %02x:%02x\n",
-            dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1]);
+      wlinfo("             Node: %02x:%02x\n",
+             dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1]);
 #endif
 
       /* Set and activate a timer process */
@@ -884,6 +875,8 @@ static void macnet_txavail_work(FAR void *arg)
 {
   FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)arg;
 
+  wlinfo("ifup=%u\n", priv->md_bifup);
+
   /* Lock the network and serialize driver operations if necessary.
    * NOTE: Serialization is only required in the case where the driver work
    * is performed on an LP worker thread and where more than one LP worker
@@ -928,6 +921,8 @@ static void macnet_txavail_work(FAR void *arg)
 static int macnet_txavail(FAR struct net_driver_s *dev)
 {
   FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)dev->d_private;
+
+  wlinfo("Available=%u\n", work_available(&priv->md_pollwork));
 
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
@@ -1111,6 +1106,8 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
   FAR struct iob_s *iob;
   int ret;
 
+  wlinfo("Received framelist\n");
+
   DEBUGASSERT(netdev != NULL && netdev->i_dev.d_private != NULL);
   priv = (FAR struct macnet_driver_s *)netdev->i_dev.d_private;
 
@@ -1129,9 +1126,17 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
       framelist     = iob->io_flink;
       iob->io_flink = NULL;
 
-      /* Transfer the frame to the MAC */
+      /* Transfer the frame to the MAC.  mac802154_req_data will return
+       * -EINTR if a signal is received during certain phases of processing.
+       * In this context we just need to ignore -EINTR errors and try again.
+       */
 
-      ret = mac802154_req_data(priv->md_mac, meta, iob);
+      do
+        {
+          ret = mac802154_req_data(priv->md_mac, meta, iob);
+        }
+      while (ret == -EINTR);
+
       if (ret < 0)
         {
           wlerr("ERROR: mac802154_req_data failed: %d\n", ret);
@@ -1145,8 +1150,11 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
               iob_free(iob);
             }
 
+          NETDEV_TXERRORS(&priv->md_dev.i_dev);
           return ret;
         }
+
+      NETDEV_TXDONE(&priv->md_dev.i_dev);
     }
 
   return OK;

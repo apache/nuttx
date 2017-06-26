@@ -810,7 +810,7 @@ sixlowpan
   This configuration includes apps/examples/nettest and apps/examples/udpblaster.
   Neither are truly functional.  The only intent of this configuration
   is to verify that the 6LoWPAN stack correctly encodes IEEE802.15.4
-  packets on output to the loopback device and correct decodes the
+  packets on output to the loopback device and correctly decodes the
   returned packet.
 
 touchscreen

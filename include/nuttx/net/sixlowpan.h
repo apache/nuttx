@@ -126,15 +126,39 @@
 #define SIXLOWPAN_DISPATCH_FRAGN          0xe0 /* 11100xxx Fragmentation header (subsequent) */
 #define SIXLOWPAN_DISPATCH_FRAG_MASK      0xf8 /* 11111000 */
 
-/* HC1 encoding */
+/* HC1 encoding (RFC4944)
+ *
+ *   PI:  Prefix carried in-line
+ *   PC:  Prefix compressed (link-local prefix assumed)
+ *   II:  Interface identifier carried in-line
+ *   IC:  Interface identifier elided (derivable from the corresponding
+ *        link-layer address).
+ */
 
-#define SIXLOWPAN_HC1_NH_UDP              0x02
-#define SIXLOWPAN_HC1_NH_TCP              0x06
-#define SIXLOWPAN_HC1_NH_ICMP6            0x04
+#define SIXLOWPAN_HC1_SRCADDR_MASK        0xc0 /* Bits 0-1: IPv6 source address */
+#  define SIXLOWPAN_HC1_SRCADDR_PIII      0x00 /*   PI,II */
+#  define SIXLOWPAN_HC1_SRCADDR_PIIC      0x40 /*   PI,IC */
+#  define SIXLOWPAN_HC1_SRCADDR_PCII      0x80 /*   PC,II */
+#  define SIXLOWPAN_HC1_SRCADDR_PCIC      0xc0 /*   PC,IC */
+#define SIXLOWPAN_HC1_DESTADDR_MASK       0x30 /* Bits 2-3: IPv6 destination address */
+#  define SIXLOWPAN_HC1_DESTADDR_PIII     0x00 /*   PI,II */
+#  define SIXLOWPAN_HC1_DESTADDR_PIIC     0x10 /*   PI,IC */
+#  define SIXLOWPAN_HC1_DESTADDR_PCII     0x20 /*   PC,II */
+#  define SIXLOWPAN_HC1_DESTADDR_PCIC     0x30 /*   PC,IC */
+#define SIXLOWPAN_HC1_TCFL_C              0x08 /* Bit 4: Traffic class and flow label are zero */
+#define SIXLOWPAN_HC1_NH_MASK             0x06 /* Bits 5-6: Next HC1 header type */
+#  define SIXLOWPAN_HC1_NH_NC             0x00 /*   Not compressed */
+#  define SIXLOWPAN_HC1_NH_UDP            0x02 /*   UDP */
+#  define SIXLOWPAN_HC1_NH_ICMPv6         0x04 /*   ICMPv6 */
+#  define SIXLOWPAN_HC1_NH_TCP            0x06 /*   TCP */
+#define SIXLOWPAN_HC1_H2ENCODE            0x01 /* Bit 0: HC2 encoding follows */
 
 /* HC_UDP encoding (works together with HC1) */
 
-#define SIXLOWPAN_HC_UDP_ALL_C            0xe0
+#define SIXLOWPAN_HC_UDP_SRCPORT_C        0x80 /* Source port compressed to 4 bits */
+#define SIXLOWPAN_HC_UDP_DESTPORT_C       0x40 /* Destination port compressed to 4 bits */
+#define SIXLOWPAN_HC_UDP_LENGTH  _C       0x20 /* Elided, compute from IPv6 length */
+#define SIXLOWPAN_HC_UDP_ALL_C            0xe0 /* All commpressed */
 
 /* IPHC encoding
  *
@@ -146,7 +170,7 @@
 #  define SIXLOWPAN_IPHC_TC_00            0x00  /*   ECN+DSCP+4-bit Pad+Flow Label (4 bytes) */
 #  define SIXLOWPAN_IPHC_TC_01            0x08  /*   ECN+2-bit Pad+ Flow Label (3 bytes), DSCP is elided. */
 #  define SIXLOWPAN_IPHC_TC_10            0x10  /*   ECN+DSCP (1 byte), Flow Label is elided */
-#  define SIXLOWPAN_IPHC_TC_11            0x11  /*   Traffic Class and Flow Label are elided */
+#  define SIXLOWPAN_IPHC_TC_11            0x18  /*   Traffic Class and Flow Label are elided */
 #define SIXLOWPAN_IPHC_NH                 0x04  /* Bit 5: Next Header Compressed */
 #define SIXLOWPAN_IPHC_HLIM_MASK          0x03  /* Bits 6-7: Hop Limit */
 #  define SIXLOWPAN_IPHC_HLIM_INLINE      0x00  /*   Carried in-line */

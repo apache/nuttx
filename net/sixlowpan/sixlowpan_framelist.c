@@ -73,6 +73,18 @@
 #  error IOBs must be large enough to hold full IEEE802.14.5 frame
 #endif
 
+/* A IOB must also be big enought to hold the maximum MAC header (25 bytes?)
+ * plus the FCS and have some amount of space left for the payload.
+ */
+
+#if CONFIG_NET_6LOWPAN_FRAMELEN < (SIXLOWPAN_MAC_FCSSIZE + 25)
+#  error CONFIG_NET_6LOWPAN_FRAMELEN too small to hold a IEEE802.14.5 frame
+#endif
+
+/* We must reserve space at the end of the frame for a 2-byte FCS */
+
+#define SIXLOWPAN_FRAMELEN (CONFIG_NET_6LOWPAN_FRAMELEN - SIXLOWPAN_MAC_FCSSIZE)
+
 /* There must be at least enough IOBs to hold the full MTU.  Probably still
  * won't work unless there are a few more.
  */
@@ -110,11 +122,9 @@
  *
  ****************************************************************************/
 
-static void sixlowpan_compress_ipv6hdr(FAR const struct ipv6_hdr_s *ipv6hdr,
-                                       FAR uint8_t *fptr)
+static int sixlowpan_compress_ipv6hdr(FAR const struct ipv6_hdr_s *ipv6hdr,
+                                      FAR uint8_t *fptr)
 {
-  uint16_t protosize;
-
   /* Indicate the IPv6 dispatch and length */
 
   fptr[g_frame_hdrlen] = SIXLOWPAN_DISPATCH_IPV6;
@@ -122,52 +132,65 @@ static void sixlowpan_compress_ipv6hdr(FAR const struct ipv6_hdr_s *ipv6hdr,
 
   /* Copy the IPv6 header and adjust pointers */
 
-  memcpy(&fptr[g_frame_hdrlen] , ipv6hdr, IPv6_HDRLEN);
+  memcpy(&fptr[g_frame_hdrlen], ipv6hdr, IPv6_HDRLEN);
   g_frame_hdrlen      += IPv6_HDRLEN;
   g_uncomp_hdrlen     += IPv6_HDRLEN;
+
+  return COMPRESS_HDR_INLINE;
+}
+
+/****************************************************************************
+ * Name: sixlowpan_protosize
+ *
+ * Description:
+ *   Get the size of any uncompresssed protocol header that follows the
+ *   IPv6 header.
+ *
+ ****************************************************************************/
+
+static uint16_t sixlowpan_protosize(FAR const struct ipv6_hdr_s *ipv6hdr,
+                                    FAR uint8_t *fptr)
+{
+  uint16_t protosize;
 
   /* Copy the following protocol header, */
 
    switch (ipv6hdr->proto)
      {
 #ifdef CONFIG_NET_TCP
-     case IP_PROTO_TCP:
-       {
-         FAR struct tcp_hdr_s *tcp = &((FAR struct ipv6tcp_hdr_s *)ipv6hdr)->tcp;
+       case IP_PROTO_TCP:
+         {
+           FAR struct tcp_hdr_s *tcp =
+             &((FAR struct ipv6tcp_hdr_s *)ipv6hdr)->tcp;
 
-         /* The TCP header length is encoded in the top 4 bits of the
-          * tcpoffset field (in units of 32-bit words).
-          */
+           /* The TCP header length is encoded in the top 4 bits of the
+            * tcpoffset field (in units of 32-bit words).
+            */
 
-         protosize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
-       }
-       break;
+           protosize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
+         }
+         break;
 #endif
 
 #ifdef CONFIG_NET_UDP
-     case IP_PROTO_UDP:
-       protosize = sizeof(struct udp_hdr_s);
-       break;
+       case IP_PROTO_UDP:
+         protosize = UDP_HDRLEN;
+         break;
 #endif
 
 #ifdef CONFIG_NET_ICMPv6
-     case IP_PROTO_ICMP6:
-       protosize = sizeof(struct icmpv6_hdr_s);
-       break;
+       case IP_PROTO_ICMP6:
+         protosize = ICMPv6_HDRLEN;
+         break;
 #endif
 
-     default:
-       nwarn("WARNING: Unrecognized proto: %u\n", ipv6hdr->proto);
-       return;
+       default:
+         nwarn("WARNING: Unrecognized proto: %u\n", ipv6hdr->proto);
+         protosize = 0;
+         break;
      }
 
-  /* Copy the protocol header. */
-
-  memcpy(fptr + g_frame_hdrlen, (FAR uint8_t *)ipv6hdr + g_uncomp_hdrlen,
-         protosize);
-
-  g_frame_hdrlen  += protosize;
-  g_uncomp_hdrlen += protosize;
+  return protosize;
 }
 
 /****************************************************************************
@@ -222,7 +245,10 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 #ifdef CONFIG_NET_6LOWPAN_FRAG
   uint16_t outlen = 0;
 #endif
+  uint8_t protosize;
   int ret;
+
+  ninfo("buflen=%lu\n", (unsigned long)buflen);
 
   /* Initialize global data.  Locking the network guarantees that we have
    * exclusive use of the global values for intermediate calculations.
@@ -230,6 +256,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
   g_uncomp_hdrlen = 0;
   g_frame_hdrlen  = 0;
+  protosize       = 0;
 
   /* Reset frame meta data */
 
@@ -350,9 +377,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
       /* Try to compress the headers */
 
 #if defined(CONFIG_NET_6LOWPAN_COMPRESSION_HC1)
-      sixlowpan_compresshdr_hc1(ieee, destip, destmac, fptr);
+      ret = sixlowpan_compresshdr_hc1(ieee, destip, destmac, fptr);
 #elif defined(CONFIG_NET_6LOWPAN_COMPRESSION_HC06)
-      sixlowpan_compresshdr_hc06(ieee, destip, destmac, fptr);
+      ret = sixlowpan_compresshdr_hc06(ieee, destip, destmac, fptr);
 #else
 #  error No compression specified
 #endif
@@ -362,14 +389,21 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
     {
       /* Small.. use IPv6 dispatch (no compression) */
 
-      sixlowpan_compress_ipv6hdr(destip, fptr);
+      ret = sixlowpan_compress_ipv6hdr(destip, fptr);
     }
 
-  ninfo("Header of length %d\n", g_frame_hdrlen);
+  /* Get the size of any uncompressed protocol headers */
+
+  if (ret == COMPRESS_HDR_INLINE)
+    {
+      protosize = sixlowpan_protosize(destip, fptr);
+    }
+
+  ninfo("Header of length=%u protosize=%u\n", g_frame_hdrlen, protosize);
 
   /* Check if we need to fragment the packet into several frames */
 
-  if (buflen > (CONFIG_NET_6LOWPAN_FRAMELEN - g_frame_hdrlen))
+  if (buflen > (SIXLOWPAN_FRAMELEN - g_frame_hdrlen - protosize))
     {
 #ifdef CONFIG_NET_6LOWPAN_FRAG
       /* qhead will hold the generated frame list; frames will be
@@ -406,29 +440,39 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
        * The fragment header contains three fields:  Datagram size, datagram
        * tag and datagram offset:
        *
-       * 1. Datagram size describes the total (un-fragmented) payload.
-       * 2. Datagram tag identifies the set of fragments and is used to
-       *    match fragments of the same payload.
-       * 3. Datagram offset identifies the fragment’s offset within the un-
-       *    fragmented payload.
+       *   1. Datagram size describes the total (un-fragmented) payload.
+       *   2. Datagram tag identifies the set of fragments and is used to
+       *      match fragments of the same payload.
+       *   3. Datagram offset identifies the fragment’s offset within the un-
+       *      fragmented payload.
        *
        * The fragment header length is 4 bytes for the first header and 5
        * bytes for all subsequent headers.
        */
 
-      pktlen = buflen + g_uncomp_hdrlen;
+      pktlen = buflen + g_uncomp_hdrlen + protosize;
       PUTHOST16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE,
                 ((SIXLOWPAN_DISPATCH_FRAG1 << 8) | pktlen));
       PUTHOST16(fragptr, SIXLOWPAN_FRAG_TAG, ieee->i_dgramtag);
 
       g_frame_hdrlen += SIXLOWPAN_FRAG1_HDR_LEN;
 
+      /* Copy any uncompressed protocol headers that must appear only in th
+       * first fragment.
+       */
+
+      if (protosize > 0)
+        {
+          FAR uint8_t *src = (FAR uint8_t *)destip + IPv6_HDRLEN;
+          memcpy(fptr + g_frame_hdrlen, src, protosize);
+        }
+
       /* Copy payload and enqueue.  NOTE that the size is a multiple of eight
        * bytes.
        */
 
-      paysize = (CONFIG_NET_6LOWPAN_FRAMELEN - g_frame_hdrlen) & ~7;
-      memcpy(fptr + g_frame_hdrlen, buf,  paysize);
+      paysize = (SIXLOWPAN_FRAMELEN - g_frame_hdrlen) & ~7;
+      memcpy(fptr + g_frame_hdrlen + protosize, buf, paysize - protosize);
 
       /* Set outlen to what we already sent from the IP payload */
 
@@ -442,6 +486,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
       /* Add the first frame to the IOB queue */
 
+      ninfo("Queuing frame io_len=%u io_offset=%u\n",
+            iob->io_len, iob->io_offset);
+
       qhead          = iob;
       qtail          = iob;
 
@@ -454,7 +501,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
       frame1         = iob->io_data;
       frag1_hdrlen   = g_frame_hdrlen;
 
-      while (outlen < buflen)
+      while (outlen < (buflen + protosize))
         {
           uint16_t fragn_hdrlen;
 
@@ -496,16 +543,16 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
           /* Copy payload and enqueue */
           /* Check for the last fragment */
 
-          paysize = (CONFIG_NET_6LOWPAN_FRAMELEN - fragn_hdrlen) &
+          paysize = (SIXLOWPAN_FRAMELEN - fragn_hdrlen) &
                     SIXLOWPAN_DISPATCH_FRAG_MASK;
-          if (buflen - outlen < paysize)
+          if (paysize > buflen - outlen + protosize)
             {
               /* Last fragment, truncate to the correct length */
 
-              paysize = buflen - outlen;
+              paysize = buflen - outlen + protosize;
             }
 
-          memcpy(fptr + fragn_hdrlen, buf + outlen, paysize);
+          memcpy(fptr + fragn_hdrlen, buf + outlen - protosize, paysize);
 
           /* Set outlen to what we already sent from the IP payload */
 
@@ -519,6 +566,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
                                iob->io_len);
 
           /* Add the next frame to the tail of the IOB queue */
+
+          ninfo("Queuing frame io_len=%u io_offset=%u\n",
+                iob->io_len, iob->io_offset);
 
           qtail->io_flink = iob;
           qtail           = iob;
@@ -542,6 +592,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
           /* And submit the frame to the MAC */
 
+          ninfo("Submitting frame\n");
           ret = sixlowpan_frame_submit(ieee, &meta, iob);
           if (ret < 0)
             {
@@ -566,10 +617,20 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
        * and send in one frame.
        */
 
+      /* Copy any uncompressed protocol headers that must appear only in th
+       * first fragment.
+       */
+
+      if (protosize > 0)
+        {
+          FAR uint8_t *src = (FAR uint8_t *)destip + IPv6_HDRLEN;
+          memcpy(fptr + g_frame_hdrlen, src, protosize);
+        }
+
       /* Copy the payload into the frame. */
 
-      memcpy(fptr + g_frame_hdrlen, buf, buflen);
-      iob->io_len    = buflen + g_frame_hdrlen;
+      memcpy(fptr + g_frame_hdrlen + protosize, buf, buflen);
+      iob->io_len    = buflen + g_frame_hdrlen + protosize;
       iob->io_pktlen = iob->io_len;
 
       ninfo("Non-fragmented: length %d\n", iob->io_len);
@@ -577,6 +638,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
                        (FAR const uint8_t *)iob->io_data, iob->io_len);
 
       /* And submit the frame to the MAC */
+
+      ninfo("Submitting frame length=%u io_offset=%u\n",
+            iob->io_len, iob->io_offset);
 
       ret = sixlowpan_frame_submit(ieee, &meta, iob);
       if (ret < 0)

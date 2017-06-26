@@ -50,12 +50,38 @@
 
 #include <string.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/net/netdev.h>
 #include "sixlowpan/sixlowpan_internal.h"
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sixlowpan_uncompress_addr
+ *
+ * Description:
+ *   Uncompress a link-local, MAC-based IPv6 address.
+ *
+ ****************************************************************************/
+
+static void sixlowpan_uncompress_addr(FAR const struct ieee802154_addr_s *addr,
+                                      FAR net_ipv6addr_t ipaddr)
+{
+  if (addr->mode == IEEE802154_ADDRMODE_SHORT)
+    {
+      sixlowpan_ipfromsaddr(addr->saddr, ipaddr);
+    }
+  else
+    {
+      sixlowpan_ipfromeaddr(addr->eaddr, ipaddr);
+    }
+}
 
 /****************************************************************************
  * Public Functions
@@ -82,21 +108,21 @@
  *     - Next header is either ICMP, UDP or TCP
  *
  *   Moreover, if next header is UDP, we try to compress it using HC_UDP.
- *   This is feasible is both ports are between F0B0 and F0B0 + 15\n\n
+ *   This is feasible is both ports are between F0B0 and F0B0 + 15
  *
  *   Resulting header structure:
  *   - For ICMP, TCP, non compressed UDP\n
- *     HC1 encoding = 11111010 (UDP) 11111110 (TCP) 11111100 (ICMP)\n
+ *     HC1 encoding = 11111010 (UDP) 11111110 (TCP) 11111100 (ICMP)
  *                      1                   2                   3
  *   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *   | LoWPAN HC1 Dsp | HC1 encoding  | IPv6 Hop limit| L4 hdr + data|
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *   | ...
- * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *
  *   - For compressed UDP
- *     HC1 encoding = 11111011, HC_UDP encoding = 11100000\n
+ *     HC1 encoding = 11111011, HC_UDP encoding = 11100000
  *                      1                   2                   3
  *   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -114,16 +140,18 @@
  *   fptr    - Pointer to frame to be compressed.
  *
  * Returned Value:
- *   None
+ *   On success the indications of the defines COMPRESS_HDR_* are returned.
+ *   A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
-                               FAR const struct ipv6_hdr_s *ipv6,
-                               FAR const struct sixlowpan_tagaddr_s *destmac,
-                               FAR uint8_t *fptr)
+int sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
+                              FAR const struct ipv6_hdr_s *ipv6,
+                              FAR const struct sixlowpan_tagaddr_s *destmac,
+                              FAR uint8_t *fptr)
 {
   FAR uint8_t *hc1 = fptr + g_frame_hdrlen;
+  int ret = COMPRESS_HDR_INLINE;
 
   /* Check if all the assumptions for full compression are valid */
 
@@ -132,13 +160,24 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
       !sixlowpan_isaddrbased(ipv6->srcipaddr, &ieee->i_dev.d_mac.ieee802154) ||
       !sixlowpan_islinklocal(ipv6->destipaddr) ||
       !sixlowpan_ismacbased(ipv6->destipaddr, destmac) ||
-      (ipv6->proto != IP_PROTO_ICMP6 && ipv6->proto != IP_PROTO_UDP &&
-       ipv6->proto != IP_PROTO_TCP))
+      ( 1
+#ifdef CONFIG_NET_TCP
+        && ipv6->proto != IP_PROTO_TCP
+#endif
+#ifdef CONFIG_NET_UDP
+        && ipv6->proto != IP_PROTO_UDP
+#endif
+#ifdef CONFIG_NET_ICMPv6
+        && ipv6->proto != IP_PROTO_ICMP6
+#endif
+      ))
     {
       /* IPV6 DISPATCH
        * Something cannot be compressed, use IPV6 DISPATCH, compress
        * nothing, copy IPv6 header into the frame buffer
        */
+
+      nwarn("WARNING: Fall back to IPv6 dispatch\n");
 
       /* IPv6 dispatch header (1 byte) */
 
@@ -160,25 +199,29 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
       g_uncomp_hdrlen += IPv6_HDRLEN;
       switch (ipv6->proto)
         {
+#ifdef CONFIG_NET_ICMPv6
         case IP_PROTO_ICMP6:
-          /* HC1 encoding and ttl */
+          {
+            /* HC1 encoding and ttl */
 
-          hc1[SIXLOWPAN_HC1_ENCODING] = 0xfc;
-          hc1[SIXLOWPAN_HC1_TTL]  = ipv6->ttl;
-          g_frame_hdrlen    += SIXLOWPAN_HC1_HDR_LEN;
+            hc1[SIXLOWPAN_HC1_ENCODING] = 0xfc;
+            hc1[SIXLOWPAN_HC1_TTL]      = ipv6->ttl;
+            g_frame_hdrlen             += SIXLOWPAN_HC1_HDR_LEN;
+          }
           break;
-
-#if CONFIG_NET_TCP
+#endif
+#ifdef CONFIG_NET_TCP
         case IP_PROTO_TCP:
-          /* HC1 encoding and ttl */
+          {
+            /* HC1 encoding and ttl */
 
-          hc1[SIXLOWPAN_HC1_ENCODING] = 0xfe;
-          hc1[SIXLOWPAN_HC1_TTL]  = ipv6->ttl;
-          g_frame_hdrlen    += SIXLOWPAN_HC1_HDR_LEN;
+            hc1[SIXLOWPAN_HC1_ENCODING] = 0xfe;
+            hc1[SIXLOWPAN_HC1_TTL]      = ipv6->ttl;
+            g_frame_hdrlen             += SIXLOWPAN_HC1_HDR_LEN;
+          }
           break;
-#endif /* CONFIG_NET_TCP */
-
-#if CONFIG_NET_UDP
+#endif
+#ifdef CONFIG_NET_UDP
         case IP_PROTO_UDP:
           {
             FAR struct udp_hdr_s *udp =
@@ -190,7 +233,7 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
              * 15
              */
 
-            ninfo("local/remote port %u/%u\n", udp->srcport, udp->destport);
+            ninfo("local/remote port %04x/%04x\n", udp->srcport, udp->destport);
 
             if (ntohs(udp->srcport)  >=  CONFIG_NET_6LOWPAN_MINPORT &&
                 ntohs(udp->srcport)  <  (CONFIG_NET_6LOWPAN_MINPORT + 16) &&
@@ -213,8 +256,8 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
 
                 memcpy(&hcudp[SIXLOWPAN_HC1_HC_UDP_CHKSUM], &udp->udpchksum, 2);
 
-                g_frame_hdrlen        += SIXLOWPAN_HC1_HC_UDP_HDR_LEN;
-                g_uncomp_hdrlen       += UDP_HDRLEN;
+                g_frame_hdrlen  += SIXLOWPAN_HC1_HC_UDP_HDR_LEN;
+                g_uncomp_hdrlen += UDP_HDRLEN;
               }
             else
               {
@@ -222,13 +265,26 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
 
                 hc1[SIXLOWPAN_HC1_ENCODING] = 0xfa;
                 hc1[SIXLOWPAN_HC1_TTL]      = ipv6->ttl;
-                g_frame_hdrlen        += SIXLOWPAN_HC1_HDR_LEN;
+                g_frame_hdrlen             += SIXLOWPAN_HC1_HDR_LEN;
               }
+
+            ret = COMPRESS_HDR_ELIDED;
           }
           break;
 #endif /* CONFIG_NET_UDP */
+
+        default:
+          {
+            /* Test above assures that this will never happen */
+
+            nerr("ERROR: Unhandled protocol\n");
+            DEBUGPANIC();
+          }
+          break;
         }
     }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -244,6 +300,7 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
  *   are set to the appropriate values
  *
  * Input Parameters:
+ *   ind   - MAC header meta data including node addressing information.
  *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
  *           inferred from the L2 length), non 0 if the packet is a 1st
  *           fragment.
@@ -258,18 +315,23 @@ void sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
  *
  ****************************************************************************/
 
-int sixlowpan_uncompresshdr_hc1(uint16_t iplen, FAR struct iob_s *iob,
+int sixlowpan_uncompresshdr_hc1(FAR const struct ieee802154_data_ind_s *ind,
+                                uint16_t iplen, FAR struct iob_s *iob,
                                 FAR uint8_t *fptr, FAR uint8_t *bptr)
 {
   FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)bptr;
   FAR uint8_t *hc1 = fptr + g_frame_hdrlen;
 
-  /* Format the IPv6 header in the device d_buf */
-  /* Set version, traffic clase, and flow label */
+  ninfo("fptr=%p g_frame_hdrlen=%u\n", fptr, g_frame_hdrlen);
 
-  ipv6->vtc    = 0x60;  /* Bits 0-3: version, bits 4-7: traffic class (MS) */
-  ipv6->tcf    = 0;     /* Bits 0-3: traffic class (LS), 4-bits: flow label (MS) */
-  ipv6->flow   = 0;     /* 16-bit flow label (LS) */
+  /* Format the IPv6 header in the device d_buf */
+  /* Set version, traffic clase, and flow label.  This assumes that Bit 4 is
+   * set in HC1.
+   */
+
+  ipv6->vtc  = 0x60;  /* Bits 0-3: version, bits 4-7: traffic class (MS) */
+  ipv6->tcf  = 0;     /* Bits 0-3: traffic class (LS), 4-bits: flow label (MS) */
+  ipv6->flow = 0;     /* 16-bit flow label (LS) */
 
   g_uncomp_hdrlen += IPv6_HDRLEN;
 
@@ -277,27 +339,30 @@ int sixlowpan_uncompresshdr_hc1(uint16_t iplen, FAR struct iob_s *iob,
 
   switch (hc1[SIXLOWPAN_HC1_ENCODING] & 0x06)
     {
-    case SIXLOWPAN_HC1_NH_ICMP6:
+#ifdef CONFIG_NET_ICMPv6
+    case SIXLOWPAN_HC1_NH_ICMPv6:
       ipv6->proto     = IP_PROTO_ICMP6;
       ipv6->ttl       = hc1[SIXLOWPAN_HC1_TTL];
       g_frame_hdrlen += SIXLOWPAN_HC1_HDR_LEN;
       break;
-
-#if CONFIG_NET_TCP
+#endif
+#ifdef CONFIG_NET_TCP
     case SIXLOWPAN_HC1_NH_TCP:
       ipv6->proto     = IP_PROTO_TCP;
       ipv6->ttl       = hc1[SIXLOWPAN_HC1_TTL];
       g_frame_hdrlen += SIXLOWPAN_HC1_HDR_LEN;
       break;
-#endif /* CONFIG_NET_TCP */
-
-#if CONFIG_NET_UDP
+#endif
+#ifdef CONFIG_NET_UDP
     case SIXLOWPAN_HC1_NH_UDP:
       {
         FAR struct udp_hdr_s *udp = (FAR struct udp_hdr_s *)(bptr + IPv6_HDRLEN);
         FAR uint8_t *hcudp = fptr + g_frame_hdrlen;
 
         ipv6->proto = IP_PROTO_UDP;
+
+        /* Check for HC_UDP encoding */
+
         if ((hcudp[SIXLOWPAN_HC1_HC_UDP_HC1_ENCODING] & 0x01) != 0)
           {
             /* UDP header is compressed with HC_UDP */
@@ -320,6 +385,8 @@ int sixlowpan_uncompresshdr_hc1(uint16_t iplen, FAR struct iob_s *iob,
             udp->destport =
               htons(CONFIG_NET_6LOWPAN_MINPORT + (hcudp[SIXLOWPAN_HC1_HC_UDP_PORTS] & 0x0F));
 
+            ninfo("UDP srcport=%04x destport=%04x\n", udp->srcport, udp->destport);
+
             memcpy(&udp->udpchksum, &hcudp[SIXLOWPAN_HC1_HC_UDP_CHKSUM], 2);
 
             g_uncomp_hdrlen += UDP_HDRLEN;
@@ -336,6 +403,46 @@ int sixlowpan_uncompresshdr_hc1(uint16_t iplen, FAR struct iob_s *iob,
     default:
       return -EPROTONOSUPPORT;
     }
+
+  /* Re-create the link-local, mac-based IP address from src/dest node
+   * addresses.
+   *
+   *   PC:  Prefix compressed (link-local prefix assumed)
+   *   IC:  Interface identifier elided (derivable from the corresponding
+   *        link-layer address).
+   */
+
+  if ((hc1[SIXLOWPAN_HC1_ENCODING] & SIXLOWPAN_HC1_SRCADDR_MASK) ==
+      SIXLOWPAN_HC1_SRCADDR_PCIC)
+    {
+      sixlowpan_uncompress_addr(&ind->src, ipv6->srcipaddr);
+    }
+  else
+    {
+      nwarn("HC1 srcipaddr encoding not supported: %02x\n",
+            hc1[SIXLOWPAN_HC1_ENCODING]);
+    }
+
+  ninfo("srcipaddr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        ipv6->srcipaddr[0], ipv6->srcipaddr[1], ipv6->srcipaddr[2],
+        ipv6->srcipaddr[3], ipv6->srcipaddr[4], ipv6->srcipaddr[5],
+        ipv6->srcipaddr[6], ipv6->srcipaddr[7]);
+
+  if ((hc1[SIXLOWPAN_HC1_ENCODING] & SIXLOWPAN_HC1_DESTADDR_MASK) ==
+      SIXLOWPAN_HC1_DESTADDR_PCIC)
+    {
+      sixlowpan_uncompress_addr(&ind->dest, ipv6->destipaddr);
+    }
+  else
+    {
+      nwarn("HC1 destipaddr encoding not supported: %02x\n",
+            hc1[SIXLOWPAN_HC1_ENCODING]);
+    }
+
+  ninfo("destipaddr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        ipv6->destipaddr[0], ipv6->destipaddr[1], ipv6->destipaddr[2],
+        ipv6->destipaddr[3], ipv6->destipaddr[4], ipv6->destipaddr[5],
+        ipv6->destipaddr[6], ipv6->destipaddr[7]);
 
   /* IP length field. */
 
@@ -355,13 +462,17 @@ int sixlowpan_uncompresshdr_hc1(uint16_t iplen, FAR struct iob_s *iob,
       ipv6->len[1] = (iplen - IPv6_HDRLEN) & 0x00FF;
     }
 
-#if CONFIG_NET_UDP
+  ninfo("IPv6 len=%02x:%02x\n", ipv6->len[0], ipv6->len[1]);
+
+#ifdef CONFIG_NET_UDP
   /* Length field in UDP header */
 
   if (ipv6->proto == IP_PROTO_UDP)
     {
       FAR struct udp_hdr_s *udp = (FAR struct udp_hdr_s *)(bptr + IPv6_HDRLEN);
       memcpy(&udp->udplen, &ipv6->len[0], 2);
+
+      ninfo("IPv6 len=%04x\n", udp->udplen);
     }
 #endif
 

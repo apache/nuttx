@@ -447,11 +447,99 @@ Configurations
        The ifconfig command will show the IP address of the server.  Then on
        the client node use this IP address to start the client:
 
-         nsh> udpserver <server-ip> &
+         nsh> udpclient <server-ip> &
 
        Where <server-ip> is the IP address of the server that you got above.
        NOTE: There is no way to stop the UDP test once it has been started
        other than by resetting the board.
+
+       Cheat Sheet.  Here is a concise summary of all all the steps needed to
+       run the UDP test (C=Coordinator; E=Endpoint):
+
+         C: nsh> i8 /dev/ieee0 startpan
+         C: nsh> 8 acceptassoc
+         E: nsh> i8 assoc
+         C: nsh> ifup wpan0
+         C: nsh> ifconfig          <-- To get the <server-ip>
+         E: nsh> ifup wpan0
+         C: nsh> udpserver &
+         E: nsh> udpclient <server-ip> &
+         E: nsh> dmesg
+
+    6. examples/nettest is enabled.  This will allow two MRF24J40 nodes to
+       exchange TCP packets.  Basic instructions:
+
+       On the server node:
+
+         nsh> ifconfig wpan0
+         nsh> tcpserver &
+
+       The ifconfig command will show the IP address of the server.  Then on
+       the client node use this IP address to start the client:
+
+         nsh> tcpclient <server-ip> &
+
+       Where <server-ip> is the IP address of the server that you got above.
+       NOTE: There is no way to stop the UDP test once it has been started
+       other than by resetting the board.
+
+       Cheat Sheet.  Here is a concise summary of all all the steps needed to
+       run the UDP test (C=Coordinator; E=Endpoint):
+
+         C: nsh> i8 /dev/ieee0 startpan
+         C: nsh> 8 acceptassoc
+         E: nsh> i8 assoc
+         C: nsh> ifup wpan0
+         C: nsh> ifconfig          <-- To get the <server-ip>
+         E: nsh> ifup wpan0
+         C: nsh> tcpserver &
+         E: nsh> tcpclient <server-ip> &
+         E: nsh> dmesg
+
+    STATUS:
+       2017-06-19:  The Telnet Daemon does not start.  This is simply because
+         the daemon is started too early in the sequence... before the network
+         has been brought up:
+
+           telnetd_daemon: ERROR: socket failure: 106
+
+       2017-06-21:  Basic UDP functionality has been achieved with HC06
+         compression and short address.  Additional testing is required for
+         other configurations (see text matrix below).
+
+       2017-06-23:  Added test for TCP functionality.  As of yet unverified.
+
+       2017-06-24:  There are significant problems with the 6LoWPAN TCP send
+          logic.  A major redesign was done to better handle ACKs and
+          retransmissions, and to work with TCP dynamic windowing.
+
+       2017-05-25:  After some rather extensive debug, the TCP test was made
+          to with (HC06 and short addressing).
+
+       2017-06-26:  Verified with HC06 and extended addressing and HC1 with
+          both addressing modes.
+
+     Test Matrix:
+       The following configurations have been tested:
+
+                                TEST DATE
+         COMPRESSION ADDRESSING UDP  TCP
+         ----------- ---------- ---- ----
+         hc06        short      6/21 6/25
+                     extended   6/22 6/26
+         hc1         short      6/23 6/26
+                     extended   6/23 6/26
+         ipv6        short      ---  ---
+                     extended   ---  ---
+
+         Other configuration options have not been specifically addressed
+         (such non-compressable ports, non-MAC based IPv6 addresses, etc.)
+
+         One limitation of this test is that it only tests NuttX 6LoWPAN
+         against NuttX 6LoWPAN.  It does not prove that NuttX 6LoWPAN is
+         compatible with other implementations of 6LoWPAN.  The tests could
+         potentially be verifying only that the design is implemented
+         incorrectly in compatible way on both the client and server sides.
 
   nsh:
 
@@ -509,10 +597,10 @@ Configurations
        emptied and dumped to the system logging device (USART3 in this
        configuration):
 
-       CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
-       CONFIG_USBDEV_TRACE_NRECORDS=128        : Buffer 128 records in memory
-       CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
-       CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
+       CONFIG_USBDEV_TRACE=y            : Enable USB trace feature
+       CONFIG_USBDEV_TRACE_NRECORDS=128 : Buffer 128 records in memory
+       CONFIG_NSH_USBDEV_TRACE=n        : No builtin tracing from NSH
+       CONFIG_NSH_ARCHINIT=y            : Automatically start the USB monitor
        CONFIG_USBMONITOR=y              : Enable the USB monitor daemon
        CONFIG_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
        CONFIG_USBMONITOR_PRIORITY=50    : USB monitor daemon priority

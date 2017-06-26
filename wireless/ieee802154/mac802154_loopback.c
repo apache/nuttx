@@ -118,7 +118,7 @@ static uint8_t g_iobuffer[CONFIG_NET_6LOWPAN_MTU + CONFIG_NET_GUARDSIZE];
 
 static uint8_t g_eaddr[IEEE802154_EADDRSIZE] =
 {
-  0x00, 0xfa, 0xde, 0x00, 0xde, 0xad, 0xbe, 0xef
+  0x0c, 0xfa, 0xde, 0x00, 0xde, 0xad, 0xbe, 0xef
 };
 
 static uint8_t g_saddr[IEEE802154_SADDRSIZE] =
@@ -190,19 +190,31 @@ static int lo_req_data(FAR struct ieee802154_driver_s *netdev,
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
 static void lo_addr2ip(FAR struct net_driver_s *dev)
 {
+  /* Set the MAC address as the eaddr */
+
+  IEEE802154_EADDRCOPY(dev->d_mac.ieee802154.u8, g_eaddr);
+
+  /* Set the IP address based on the eaddr */
+
   dev->d_ipv6addr[0]  = HTONS(0xfe80);
   dev->d_ipv6addr[1]  = 0;
   dev->d_ipv6addr[2]  = 0;
   dev->d_ipv6addr[3]  = 0;
-  dev->d_ipv6addr[4]  = (uint16_t)g_eaddr[0] << 8 |  (uint16_t)g_eaddr[1];
-  dev->d_ipv6addr[5]  = (uint16_t)g_eaddr[2] << 8 |  (uint16_t)g_eaddr[3];
-  dev->d_ipv6addr[6]  = (uint16_t)g_eaddr[4] << 8 |  (uint16_t)g_eaddr[5];
-  dev->d_ipv6addr[7]  = (uint16_t)g_eaddr[6] << 8 |  (uint16_t)g_eaddr[6];
+  dev->d_ipv6addr[4]  = (uint16_t)g_eaddr[0] << 8 | (uint16_t)g_eaddr[1];
+  dev->d_ipv6addr[5]  = (uint16_t)g_eaddr[2] << 8 | (uint16_t)g_eaddr[3];
+  dev->d_ipv6addr[6]  = (uint16_t)g_eaddr[4] << 8 | (uint16_t)g_eaddr[5];
+  dev->d_ipv6addr[7]  = (uint16_t)g_eaddr[6] << 8 | (uint16_t)g_eaddr[7];
   dev->d_ipv6addr[4] ^= 0x200;
 }
 #else
 static void lo_addr2ip(FAR struct net_driver_s *dev)
 {
+  /* Set the MAC address as the saddr */
+
+  IEEE802154_SADDRCOPY(dev->d_mac.ieee802154.u8, g_saddr);
+
+  /* Set the IP address based on the saddr */
+
   dev->d_ipv6addr[0]  = HTONS(0xfe80);
   dev->d_ipv6addr[1]  = 0;
   dev->d_ipv6addr[2]  = 0;
@@ -210,7 +222,7 @@ static void lo_addr2ip(FAR struct net_driver_s *dev)
   dev->d_ipv6addr[4]  = 0;
   dev->d_ipv6addr[5]  = HTONS(0x00ff);
   dev->d_ipv6addr[6]  = HTONS(0xfe00);
-  dev->d_ipv6addr[7]  = (uint16_t)g_saddr[0] << 8 |  (uint16_t)g_saddr[1];
+  dev->d_ipv6addr[7]  = (uint16_t)g_saddr[0] << 8 | (uint16_t)g_saddr[1];
   dev->d_ipv6addr[7] ^= 0x200;
 }
 #endif
@@ -275,7 +287,27 @@ static int lo_loopback(FAR struct net_driver_s *dev)
   FAR struct iob_s *iob;
   int ret;
 
+  /* Create some fake metadata */
+
   memset(&ind, 0, sizeof(struct ieee802154_data_ind_s));
+
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+  ind.src.mode  = IEEE802154_ADDRMODE_EXTENDED;
+  ind.dest.mode = IEEE802154_ADDRMODE_EXTENDED;
+#else
+  ind.src.mode  = IEEE802154_ADDRMODE_SHORT;
+  ind.dest.mode = IEEE802154_ADDRMODE_SHORT;
+#endif
+
+  /* On loopback the local address is both the source and destination. */
+
+  IEEE802154_PANIDCOPY(ind.src.panid, g_panid);
+  IEEE802154_SADDRCOPY(ind.src.saddr, g_saddr);
+  IEEE802154_EADDRCOPY(ind.src.eaddr, g_eaddr);
+
+  IEEE802154_PANIDCOPY(ind.dest.panid, g_panid);
+  IEEE802154_SADDRCOPY(ind.dest.saddr, g_saddr);
+  IEEE802154_EADDRCOPY(ind.dest.eaddr, g_eaddr);
 
   /* Loop while there framelist to be sent, i.e., while the freme list is not
    * emtpy.  Sending, of course, just means relaying back through the network
@@ -701,14 +733,14 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
                 IEEE802154_PANIDCOPY(g_panid, setreq->attrval.mac.panid);
                 break;
 
-              case IEEE802154_ATTR_MAC_EXTENDED_ADDR:
+              case IEEE802154_ATTR_MAC_EADDR:
                 IEEE802154_EADDRCOPY(g_eaddr, setreq->attrval.mac.eaddr);
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
                 lo_addr2ip(dev);
 #endif
                 break;
 
-              case IEEE802154_ATTR_MAC_SHORT_ADDRESS:
+              case IEEE802154_ATTR_MAC_SADDR:
                 IEEE802154_SADDRCOPY(g_saddr, setreq->attrval.mac.saddr);
 #ifndef CONFIG_NET_6LOWPAN_EXTENDEDADDR
                 lo_addr2ip(dev);
@@ -731,11 +763,11 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
                 IEEE802154_PANIDCOPY(getreq->attrval.mac.panid, g_panid);
                 break;
 
-              case IEEE802154_ATTR_MAC_EXTENDED_ADDR:
+              case IEEE802154_ATTR_MAC_EADDR:
                 IEEE802154_EADDRCOPY(getreq->attrval.mac.eaddr, g_eaddr);
                 break;
 
-              case IEEE802154_ATTR_MAC_SHORT_ADDRESS:
+              case IEEE802154_ATTR_MAC_SADDR:
                 IEEE802154_SADDRCOPY(getreq->attrval.mac.saddr, g_saddr);
                 break;
 

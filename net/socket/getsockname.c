@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/getsockname.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -148,10 +148,22 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
         return -EOPNOTSUPP;
     }
 
+#ifdef CONFIG_NETDEV_MULTINIC
   /* The socket/connection does not know its IP address unless
    * CONFIG_NETDEV_MULTINIC is selected.  Otherwise the design supports only
    * a single network device and only the network device knows the IP address.
    */
+
+  if (lipaddr == 0)
+    {
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
+       outaddr->sin_family = AF_INET;
+       outaddr->sin_addr.s_addr = 0;
+       *addrlen = sizeof(struct sockaddr_in);
+#endif
+       return OK;
+    }
+#endif
 
   net_lock();
 
@@ -160,7 +172,7 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
    * NOTE: listening sockets have no ripaddr.  Work around is to use the
    * lipaddr when ripaddr is not available.
    */
-`
+
   if (ripaddr == 0)
     {
       ripaddr = lipaddr;
@@ -279,10 +291,22 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
         return -EOPNOTSUPP;
     }
 
+#ifdef CONFIG_NETDEV_MULTINIC
   /* The socket/connection does not know its IP address unless
    * CONFIG_NETDEV_MULTINIC is selected.  Otherwise the design supports only
    * a single network device and only the network device knows the IP address.
    */
+
+  if (net_ipv6addr_cmp(lipaddr, g_ipv6_allzeroaddr))
+    {
+#if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
+      outaddr->sin6_family = AF_INET6;
+      memcpy(outaddr->sin6_addr.in6_u.u6_addr8, g_ipv6_allzeroaddr, 16);
+      *addrlen = sizeof(struct sockaddr_in6);
+#endif
+      return OK;
+    }
+#endif
 
   net_lock();
 

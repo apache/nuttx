@@ -98,7 +98,7 @@
 #elif defined(CONFIG_NET_UDP)
 /* The UDP header length is always 8 bytes */
 
-#  define UNCOMP_MAXHDR  (IPv6_HDRLEN + TCP_HDRLEN)
+#  define UNCOMP_MAXHDR  (IPv6_HDRLEN + UDP_HDRLEN)
 
 #elif defined(CONFIG_NET_ICMPv6)
 /* The ICMPv6 header length is a mere 4 bytes */
@@ -227,7 +227,8 @@ static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr, FAR uint8_t *bptr)
 #ifdef CONFIG_NET_TCP
      case IP_PROTO_TCP:
        {
-         FAR struct tcp_hdr_s *tcp = &((FAR struct ipv6tcp_hdr_s *)ipv6)->tcp;
+         FAR struct tcp_hdr_s *tcp =
+           (FAR struct tcp_hdr_s *)(fptr + g_frame_hdrlen);
 
          /* The TCP header length is encoded in the top 4 bits of the
           * tcpoffset field (in units of 32-bit words).
@@ -289,7 +290,13 @@ static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr, FAR uint8_t *bptr)
  *   iob  - The IOB containing the frame.
  *
  * Returned Value:
- *   Ok is returned on success; Othewise a negated errno value is returned.
+ *   On success, a value greater than equal to zero is returned, either:
+ *
+ *     INPUT_PARTIAL  Frame processed successful, packet incomplete
+ *     INPUT_COMPLETE Frame processed successful, packet complete
+ *
+ *   Othewise a negated errno value is returned to indicate the nature of the
+ *   failure.
  *
  * Assumptions:
  *   Network is locked
@@ -323,11 +330,8 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
   fptr    = iob->io_data;    /* Frame data is in I/O buffer */
   hdrsize = iob->io_offset;  /* Offset past the MAC header */
-  if (hdrsize < 0)
-    {
-      nwarn("Invalid IEEE802.15.2 header: %d\n", hdrsize);
-      return hdrsize;
-    }
+
+  DEBUGASSERT((unsigned)hdrsize < iob->io_len);
 
   /* Initialize global data.  Locking the network guarantees that we have
    * exclusive use of the global values for intermediate calculations.
@@ -343,7 +347,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
    */
 
   fragptr = fptr + hdrsize;
-  switch ((GETHOST16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0xf800) >> 8)
+  switch ((GETUINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0xf800) >> 8)
     {
     /* First fragment of new reassembly */
 
@@ -351,8 +355,8 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       {
         /* Set up for the reassembly */
 
-        fragsize        = GETHOST16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0x07ff;
-        fragtag         = GETHOST16(fragptr, SIXLOWPAN_FRAG_TAG);
+        fragsize        = GETUINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0x07ff;
+        fragtag         = GETUINT16(fragptr, SIXLOWPAN_FRAG_TAG);
         g_frame_hdrlen += SIXLOWPAN_FRAG1_HDR_LEN;
 
         ninfo("FRAG1: fragsize=%d fragtag=%d fragoffset=%d\n",
@@ -370,8 +374,8 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
         /* Set offset, tag, size.  Offset is in units of 8 bytes. */
 
         fragoffset      = fragptr[SIXLOWPAN_FRAG_OFFSET];
-        fragtag         = GETHOST16(fragptr, SIXLOWPAN_FRAG_TAG);
-        fragsize        = GETHOST16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0x07ff;
+        fragtag         = GETUINT16(fragptr, SIXLOWPAN_FRAG_TAG);
+        fragsize        = GETUINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0x07ff;
         g_frame_hdrlen += SIXLOWPAN_FRAGN_HDR_LEN;
 
         ninfo("FRAGN: fragsize=%d fragtag=%d fragoffset=%d\n",
@@ -462,7 +466,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
           nwarn("WARNING: Dropping 6LoWPAN packet that is not a fragment of "
                 "the packet currently being reassembled\n");
-          return INPUT_PARTIAL;
+          return -EPERM;
         }
       else
         {
@@ -488,7 +492,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       if (!isfirstfrag)
         {
           nwarn("WARNING: FRAGN 6LoWPAN fragment while not reassembling\n");
-          return OK;
+          return -EPERM;
         }
 
       /* Drop the packet if it cannot fit into the d_buf */
@@ -496,7 +500,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       if (fragsize > CONFIG_NET_6LOWPAN_MTU)
         {
           nwarn("WARNING: Reassembled packet size exeeds CONFIG_NET_6LOWPAN_MTU\n");
-          return OK;
+          return -ENOSPC;
         }
 
       ieee->i_pktlen   = fragsize;
@@ -532,7 +536,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
   if ((hc1[SIXLOWPAN_HC1_DISPATCH] & SIXLOWPAN_DISPATCH_IPHC_MASK) == SIXLOWPAN_DISPATCH_IPHC)
     {
       ninfo("IPHC Dispatch\n");
-      sixlowpan_uncompresshdr_hc06(fragsize, iob, fptr, bptr);
+      sixlowpan_uncompresshdr_hc06(ind, fragsize, iob, fptr, bptr);
     }
   else
 #endif /* CONFIG_NET_6LOWPAN_COMPRESSION_HC06 */
@@ -541,7 +545,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
   if (hc1[SIXLOWPAN_HC1_DISPATCH] == SIXLOWPAN_DISPATCH_HC1)
     {
       ninfo("HC1 Dispatch\n");
-      sixlowpan_uncompresshdr_hc1(fragsize, iob, fptr, bptr);
+      sixlowpan_uncompresshdr_hc1(ind, fragsize, iob, fptr, bptr);
     }
   else
 #endif /* CONFIG_NET_6LOWPAN_COMPRESSION_HC1 */
@@ -556,7 +560,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       /* Unknown or unsupported header */
 
       nwarn("WARNING: Unknown dispatch: %u\n",  hc1[SIXLOWPAN_HC1_DISPATCH]);
-      return OK;
+      return -ENOSYS;
     }
 
 #ifdef CONFIG_NET_6LOWPAN_FRAG
@@ -581,9 +585,6 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
       g_uncomp_hdrlen = ieee->i_boffset;
     }
-
-
-
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
   /* Copy "payload" from the frame buffer to the IEEE802.15.4 MAC driver's
@@ -597,7 +598,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
     {
       nwarn("WARNING: Packet dropped due to payload (%u) > packet buffer (%u)\n",
             paysize, CONFIG_NET_6LOWPAN_MTU);
-      return OK;
+      return -ENOSPC;
     }
 
   /* Sanity-check size of incoming packet to avoid buffer overflow */
@@ -689,7 +690,7 @@ static int sixlowpan_dispatch(FAR struct ieee802154_driver_s *ieee)
 
   /* We only accept IPv6 packets. */
 
-  ninfo("Iv6 packet dispatch\n");
+  ninfo("IPv6 packet dispatch\n");
   NETDEV_RXIPV6(&ieee->i_dev);
 
   /* Give the IPv6 packet to the network layer.  NOTE:  If there is a
@@ -835,32 +836,44 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
                    * the protocol header.
                    */
 
-                  if (ipv6hdr->proto != IP_PROTO_TCP)
+                  switch (ipv6hdr->proto)
                     {
-                      FAR struct tcp_hdr_s *tcp = TCPBUF(&ieee->i_dev);
-                      uint16_t tcplen;
+#ifdef CONFIG_NET_TCP
+                      case IP_PROTO_TCP:
+                        {
+                          FAR struct tcp_hdr_s *tcp = TCPBUF(&ieee->i_dev);
+                          uint16_t tcplen;
 
-                      /* The TCP header length is encoded in the top 4 bits
-                       * of the tcpoffset field (in units of 32-bit words).
-                       */
+                          /* The TCP header length is encoded in the top 4 bits
+                           * of the tcpoffset field (in units of 32-bit words).
+                           */
 
-                      tcplen = ((uint16_t)tcp->tcpoffset >> 4) << 2;
-                      hdrlen = IPv6_HDRLEN + tcplen;
-                    }
-                  else if (ipv6hdr->proto != IP_PROTO_UDP)
-                    {
-                      hdrlen = IPv6_HDRLEN + UDP_HDRLEN;
-                    }
-                  else if (ipv6hdr->proto != IP_PROTO_ICMP6)
-                    {
-                      hdrlen = IPv6_HDRLEN + ICMPv6_HDRLEN;
-                    }
-                  else
-                    {
-                      nwarn("WARNING: Unsupported protoype: %u\n",
-                            ipv6hdr->proto);
-                      ret = -EPROTO;
-                      goto drop;
+                          tcplen = ((uint16_t)tcp->tcpoffset >> 4) << 2;
+                          hdrlen = IPv6_HDRLEN + tcplen;
+                        }
+                        break;
+#endif
+#ifdef CONFIG_NET_UDP
+                      case IP_PROTO_UDP:
+                        {
+                          hdrlen = IPv6_HDRLEN + UDP_HDRLEN;
+                        }
+                        break;
+#endif
+#ifdef CONFIG_NET_ICMPv6
+                      case IP_PROTO_ICMP6:
+                        {
+                          hdrlen = IPv6_HDRLEN + ICMPv6_HDRLEN;
+                        }
+                        break;
+#endif
+                      default:
+                        {
+                          nwarn("WARNING: Unsupported protoype: %u\n",
+                                ipv6hdr->proto);
+                          ret = -EPROTO;
+                          goto drop;
+                        }
                     }
 
                   if (hdrlen < ieee->i_dev.d_len)

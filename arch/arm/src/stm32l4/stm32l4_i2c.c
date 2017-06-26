@@ -1273,7 +1273,7 @@ static inline void stm32l4_i2c_sendstop(FAR struct stm32l4_i2c_priv_s *priv)
  * Name: stm32l4_i2c_getstatus
  *
  * Description:
- *   Get 32-bit status (SR1 and SR2 combined)
+ *   Get 32-bit status (ISR register)
  *
  ************************************************************************************/
 
@@ -1556,9 +1556,20 @@ static int stm32l4_i2c_init(FAR struct stm32l4_i2c_priv_s *priv)
 
   /* Enable power and reset the peripheral */
 
-  modifyreg32(STM32L4_RCC_APB1ENR1, 0, priv->config->clk_bit);
-  modifyreg32(STM32L4_RCC_APB1RSTR1, 0, priv->config->reset_bit);
-  modifyreg32(STM32L4_RCC_APB1RSTR1, priv->config->reset_bit, 0);
+#ifdef CONFIG_STM32L4_I2C4
+  if (priv->config->base == STM32L4_I2C4_BASE)
+    {
+      modifyreg32(STM32L4_RCC_APB1ENR2, 0, priv->config->clk_bit);
+      modifyreg32(STM32L4_RCC_APB1RSTR2, 0, priv->config->reset_bit);
+      modifyreg32(STM32L4_RCC_APB1RSTR2, priv->config->reset_bit, 0);
+    }
+  else
+#endif
+    {
+      modifyreg32(STM32L4_RCC_APB1ENR1, 0, priv->config->clk_bit);
+      modifyreg32(STM32L4_RCC_APB1RSTR1, 0, priv->config->reset_bit);
+      modifyreg32(STM32L4_RCC_APB1RSTR1, priv->config->reset_bit, 0);
+    }
 
   /* Configure pins */
 
@@ -1631,7 +1642,16 @@ static int stm32l4_i2c_deinit(FAR struct stm32l4_i2c_priv_s *priv)
 
   /* Disable clocking */
 
-  modifyreg32(STM32L4_RCC_APB1ENR1, priv->config->clk_bit, 0);
+#ifdef CONFIG_STM32L4_I2C4
+  if (priv->config->base == STM32L4_I2C4_BASE)
+    {
+      modifyreg32(STM32L4_RCC_APB1ENR2, priv->config->clk_bit, 0);
+    }
+  else
+#endif
+    {
+      modifyreg32(STM32L4_RCC_APB1ENR1, priv->config->clk_bit, 0);
+    }
   return OK;
 }
 

@@ -68,14 +68,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sixlowpan_addrfromip
+ * Name: sixlowpan_{s|e]addrfromip
  *
  * Description:
- *   sixlowpan_addrfromip(): Extract the IEEE 802.15.14 address from a MAC
- *   based IPv6 address.  sixlowpan_addrfromip() is intended to handle a
- *   tagged address or and size; sixlowpan_saddrfromip() and
- *   sixlowpan_eaddrfromip() specifically handler short and extended
- *   addresses.
+ *   sixlowpan_{s|e]addrfromip(): Extract the IEEE 802.15.14 address from a
+ *   MAC-based IPv6 address.  sixlowpan_addrfromip() is intended to handle a
+ *   tagged address; sixlowpan_saddrfromip() and sixlowpan_eaddrfromip()
+ *   specifically handle short and extended addresses, respectively.
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
@@ -89,16 +88,29 @@ void sixlowpan_saddrfromip(const net_ipv6addr_t ipaddr,
 {
   DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
 
-  memcpy(saddr, &ipaddr[7], NET_6LOWPAN_SADDRSIZE);
+  /* Big-endian uint16_t to byte order */
+
+  saddr->u8[0]  = ipaddr[7] >> 8;
+  saddr->u8[1]  = ipaddr[7] & 0xff;
   saddr->u8[0] ^= 0x02;
 }
 
 void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr,
                           FAR struct sixlowpan_eaddr_s *eaddr)
 {
+  FAR uint8_t *eptr = eaddr->u8;
+  int i;
+
   DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
 
-  memcpy(eaddr, &ipaddr[4], NET_6LOWPAN_EADDRSIZE);
+  for (i = 4; i < 8; i++)
+    {
+      /* Big-endian uint16_t to byte order */
+
+      *eptr++ = ipaddr[i] >> 8;
+      *eptr++ = ipaddr[i] & 0xff;
+    }
+
   eaddr->u8[0] ^= 0x02;
 }
 
@@ -117,6 +129,49 @@ void sixlowpan_addrfromip(const net_ipv6addr_t ipaddr,
       sixlowpan_eaddrfromip(ipaddr, &addr->u.eaddr);
       addr->extended = true;
     }
+}
+
+/****************************************************************************
+ * Name: sixlowpan_ipfrom[s|e]addr
+ *
+ * Description:
+ *   sixlowpan_ipfrom[s|e]addr():  Create a link-local, MAC-based IPv6
+ *   address from an IEEE802.15.4 short address (saddr) or extended address
+ *   (eaddr).
+ *
+ *    128  112  96   80    64   48   32   16
+ *    ---- ---- ---- ----  ---- ---- ---- ----
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
+ *
+ ****************************************************************************/
+
+void sixlowpan_ipfromsaddr(FAR const uint8_t *saddr,
+                           FAR net_ipv6addr_t ipaddr)
+{
+  ipaddr[0]  = HTONS(0xfe80);
+  ipaddr[1]  = 0;
+  ipaddr[2]  = 0;
+  ipaddr[3]  = 0;
+  ipaddr[4]  = 0;
+  ipaddr[5]  = HTONS(0x00ff);
+  ipaddr[6]  = HTONS(0xfe00);
+  ipaddr[7]  = (uint16_t)saddr[0] << 8 |  (uint16_t)saddr[1];
+  ipaddr[7] ^= 0x200;
+}
+
+void sixlowpan_ipfromeaddr(FAR const uint8_t *eaddr,
+                           FAR net_ipv6addr_t ipaddr)
+{
+  ipaddr[0]  = HTONS(0xfe80);
+  ipaddr[1]  = 0;
+  ipaddr[2]  = 0;
+  ipaddr[3]  = 0;
+  ipaddr[4]  = (uint16_t)eaddr[0] << 8 | (uint16_t)eaddr[1];
+  ipaddr[5]  = (uint16_t)eaddr[2] << 8 | (uint16_t)eaddr[3];
+  ipaddr[6]  = (uint16_t)eaddr[4] << 8 | (uint16_t)eaddr[5];
+  ipaddr[7]  = (uint16_t)eaddr[6] << 8 | (uint16_t)eaddr[7];
+  ipaddr[4] ^= 0x200;
 }
 
 /****************************************************************************
@@ -143,8 +198,9 @@ bool sixlowpan_issaddrbased(const net_ipv6addr_t ipaddr,
 {
   FAR const uint8_t *byteptr = saddr->u8;
 
-  return (ipaddr[5] == HTONS(0x00ff) && ipaddr[6] == HTONS(0xfe00) &&
-          ipaddr[7] == (GETNET16(byteptr, 0) ^ HTONS(0x0200)));
+  return (ipaddr[5] == HTONS(0x00ff) &&
+          ipaddr[6] == HTONS(0xfe00) &&
+          ipaddr[7] == (GETUINT16(byteptr, 0) ^ 0x0200));
 }
 
 bool sixlowpan_iseaddrbased(const net_ipv6addr_t ipaddr,
@@ -152,10 +208,10 @@ bool sixlowpan_iseaddrbased(const net_ipv6addr_t ipaddr,
 {
   FAR const uint8_t *byteptr = eaddr->u8;
 
-  return (ipaddr[4] == (GETNET16(byteptr, 0) ^ HTONS(0x0200)) &&
-          ipaddr[5] == GETNET16(byteptr, 2) &&
-          ipaddr[6] == GETNET16(byteptr, 4) &&
-          ipaddr[7] == GETNET16(byteptr, 6));
+  return (ipaddr[4] == (GETUINT16(byteptr, 0) ^ 0x0200) &&
+          ipaddr[5] == GETUINT16(byteptr, 2) &&
+          ipaddr[6] == GETUINT16(byteptr, 4) &&
+          ipaddr[7] == GETUINT16(byteptr, 6));
 }
 
 bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,

@@ -145,6 +145,7 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
       if ((conn->tcpstateflags & TCP_STATE_MASK) != TCP_SYN_RCVD &&
           (tcp->flags & TCP_CTL) == TCP_SYN)
         {
+          nwarn("WARNING: SYN in TCP_SYN_RCVD\n");
           goto reset;
         }
       else
@@ -155,7 +156,7 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
 
   /* If we didn't find an active connection that expected the packet,
    * either (1) this packet is an old duplicate, or (2) this is a SYN packet
-   * destined for a connection in LISTEN. If the SYN flag isn't set,
+   * destined for a connection in LISTEN.  If the SYN flag isn't set,
    * it is an old packet and we send a RST.
    */
 
@@ -283,6 +284,8 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
           return;
         }
     }
+
+  nwarn("WARNING: Old packet .. reset\n");
 
   /* This is (1) an old duplicate packet or (2) a SYN packet but with
    * no matching listener found.  Send RST packet in either case.
@@ -448,8 +451,10 @@ found:
 
           if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED)
             {
-              nwarn("WARNING: conn->sndseq %d, conn->unacked %d\n",
-                    tcp_getsequence(conn->sndseq), conn->unacked);
+              nwarn("WARNING: ackseq > unackseq\n");
+              nwarn("         sndseq=%u unacked=%u unackseq=%u ackseq=%u\n",
+                    tcp_getsequence(conn->sndseq), conn->unacked, unackseq,
+                    ackseq);
               goto reset;
             }
         }
@@ -527,8 +532,8 @@ found:
                  * handshake is not complete
                  */
 
-                nerr("Listen canceled while waiting for ACK on port %d\n",
-                     tcp->destport);
+                nwarn("WARNING: Listen canceled while waiting for ACK on port %d\n",
+                      tcp->destport);
 
                 /* Free the connection structure */
 
