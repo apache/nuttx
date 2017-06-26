@@ -65,7 +65,9 @@
 int mac802154_resp_orphan(MACHANDLE mac,
                           FAR struct ieee802154_orphan_resp_s *resp)
 {
+#if 0
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
+#endif
   return -ENOTTY;
 }
