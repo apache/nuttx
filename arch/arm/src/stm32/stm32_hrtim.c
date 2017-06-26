@@ -437,10 +437,8 @@ static int stm32_hrtim_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 /* HRTIM Register access */
 
-#ifdef HRTIM_HAVE_CLK_FROM_PLL
 static void stm32_modifyreg32(unsigned int addr, uint32_t clrbits,
                               uint32_t setbits);
-#endif
 static uint32_t hrtim_cmn_getreg(FAR struct stm32_hrtim_s *priv, int offset);
 static void hrtim_cmn_putreg(FAR struct stm32_hrtim_s *priv, int offset,
                              uint32_t value);
@@ -954,13 +952,11 @@ static int stm32_hrtim_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-#ifdef HRTIM_HAVE_CLK_FROM_PLL
 static void stm32_modifyreg32(unsigned int addr, uint32_t clrbits,
                               uint32_t setbits)
 {
   putreg32((getreg32(addr) & ~clrbits) | setbits, addr);
 }
-#endif
 
 /****************************************************************************
  * Name: hrtim_cmn_getreg
@@ -2920,12 +2916,6 @@ static int stm32_hrtimconfig(FAR struct stm32_hrtim_s *priv)
 {
   int ret;
   uint32_t regval = 0;
-
-  /* Configure PLL VCO output as HRTIM clock source */
-
-#ifdef HRTIM_HAVE_CLK_FROM_PLL
-  stm32_modifyreg32(STM32_RCC_CFGR3, 0, RCC_CFGR3_HRTIM1SW);
-#endif
 
   /* HRTIM DLL calibration */
 
