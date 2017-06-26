@@ -67,8 +67,4 @@ uint8_t g_uncomp_hdrlen;
 
 uint8_t g_frame_hdrlen;
 
-/* g_have_protohdr: true=Protocal header copied. */
-
-bool g_have_protohdr;
-
 #endif /* CONFIG_NET_6LOWPAN */

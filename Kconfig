@@ -1098,15 +1098,6 @@ config DEBUG_ANALOG_INFO
 
 endif # DEBUG_ANALOG
 
-config DEBUG_WIRELESS
-	bool "Wireless Device Debug Output"
-	default n
-	depends on WIRELESS
-	---help---
-		Enable low level debug SYSLOG output from the wireless subsystem and
-		device drivers. (disabled by default).  Support for this debug option
-		is architecture-specific and may not be available for some MCUs.
-
 config DEBUG_CAN
 	bool "CAN Debug Features"
 	default n

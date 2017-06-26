@@ -516,6 +516,8 @@ Configurations
        2017-05-25:  After some rather extensive debug, the TCP test was made
           to with (HC06 and short addressing).
 
+       2017-06-26:  Verified with HC06 and extended addressing.
+
      Test Matrix:
        The following configurations have been tested:
 
@@ -523,7 +525,7 @@ Configurations
          COMPRESSION ADDRESSING UDP  TCP
          ----------- ---------- ---- ----
          hc06        short      6/21 6/25
-                     extended   6/22 ---
+                     extended   6/22 6/26
          hc1         short      6/23 ---
                      extended   6/23 ---
          ipv6        short      ---  ---

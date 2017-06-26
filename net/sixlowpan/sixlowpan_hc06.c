@@ -587,20 +587,22 @@ void sixlowpan_hc06_initialize(void)
  *   fptr    - Pointer to frame to be compressed.
  *
  * Returned Value:
- *   None
+ *   On success the indications of the defines COMPRESS_HDR_* are returned.
+ *   A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
-                                FAR const struct ipv6_hdr_s *ipv6,
-                                FAR const struct sixlowpan_tagaddr_s *destmac,
-                                FAR uint8_t *fptr)
+int sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
+                               FAR const struct ipv6_hdr_s *ipv6,
+                               FAR const struct sixlowpan_tagaddr_s *destmac,
+                               FAR uint8_t *fptr)
 {
   FAR uint8_t *iphc = fptr + g_frame_hdrlen;
   FAR struct sixlowpan_addrcontext_s *addrcontext;
   uint8_t iphc0;
   uint8_t iphc1;
   uint8_t tmp;
+  int ret = COMPRESS_HDR_INLINE;
 
   ninfo("fptr=%p g_frame_hdrlen=%u iphc=%p\n", fptr, g_frame_hdrlen, iphc);
 
@@ -956,7 +958,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
       memcpy(g_hc06ptr, &udp->udpchksum, 2);
       g_hc06ptr       += 2;
       g_uncomp_hdrlen += UDP_HDRLEN;
-      g_have_protohdr  = true;
+      ret              = COMPRESS_HDR_ELIDED;
     }
 #endif /* CONFIG_NET_UDP */
 
@@ -970,7 +972,7 @@ void sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
   ninfo("fptr=%p g_frame_hdrlen=%u iphc=%02x:%02x:%02x g_hc06ptr=%p\n",
          fptr, g_frame_hdrlen, iphc[0], iphc[1], iphc[2], g_hc06ptr);
 
-  return;
+  return ret;
 }
 
 /****************************************************************************
