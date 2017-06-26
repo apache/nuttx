@@ -514,13 +514,9 @@ Configurations
           retransmissions, and to work with TCP dynamic windowing.
 
        2017-05-25:  After some rather extensive debug, the TCP test was made
-          to with (HC06 and short addressing).  Initial testing with HC06
-          and extended addressing failed.  Server reports
+          to with (HC06 and short addressing).
 
-            Binding to IPv6 Address: 0000:0000:0000:0000:0000:0000:0000:0000
-            server: Accepting connections on port 61616
-
-          But the client fails to connect.
+       2017-06-26:  Verified with HC06 and extended addressing.
 
      Test Matrix:
        The following configurations have been tested:
@@ -529,7 +525,7 @@ Configurations
          COMPRESSION ADDRESSING UDP  TCP
          ----------- ---------- ---- ----
          hc06        short      6/21 6/25
-                     extended   6/22 ---
+                     extended   6/22 6/26
          hc1         short      6/23 ---
                      extended   6/23 ---
          ipv6        short      ---  ---
