@@ -368,7 +368,7 @@ int mac802154_resp_orphan(MACHANDLE mac,
  *
  ****************************************************************************/
 
-int mac802154_notif_free(MACHANDLE mac,
+void mac802154_notif_free(MACHANDLE mac,
                           FAR struct ieee802154_notif_s *notif);
 
 #undef EXTERN

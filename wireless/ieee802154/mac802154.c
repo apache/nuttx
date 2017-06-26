@@ -636,8 +636,8 @@ static void mac802154_purge_worker(FAR void *arg)
         /* Free the IOB, the notification, and the tx descriptor */
 
         iob_free(txdesc->frame);
-        ((FAR struct mac802154_notif_s *)txdesc->conf)->flink = priv->notif_free;
-        priv->notif_free = ((FAR struct mac802154_notif_s *)txdesc->conf);
+        mac802154_notif_free_locked(priv,
+          (FAR struct ieee802154_notif_s *)txdesc->conf);
         mac802154_txdesc_free(priv, txdesc);
         priv->beaconupdate = true;
 
@@ -760,7 +760,6 @@ static void mac802154_txdone_worker(FAR void *arg)
     (FAR struct ieee802154_privmac_s *)arg;
   FAR struct ieee802154_txdesc_s *txdesc;
   FAR struct ieee802154_notif_s *notif;
-  FAR struct mac802154_notif_s *privnotif;
 
   /* Get exclusive access to the driver structure.  We don't care about any
    * signals so don't allow interruptions
@@ -781,8 +780,7 @@ static void mac802154_txdone_worker(FAR void *arg)
        * notification structure to make it easier to use.
        */
 
-      privnotif = (FAR struct mac802154_notif_s *)txdesc->conf;
-      notif = &privnotif->pub;
+      notif =(FAR struct ieee802154_notif_s *)txdesc->conf;
 
       switch(txdesc->frametype)
         {
@@ -857,14 +855,7 @@ static void mac802154_txdone_worker(FAR void *arg)
                     break;
 
                   default:
-                    /* We can deallocate the data conf notification as it is no
-                     * longer needed. We can't use the public function here
-                     * since we already have the MAC locked.
-                     */
-
-                    privnotif->flink = priv->notif_free;
-                    priv->notif_free = privnotif;
-                    priv->nnotif     = 0;
+                    mac802154_notif_free_locked(priv, notif);
                     break;
                 }
             }
@@ -872,13 +863,7 @@ static void mac802154_txdone_worker(FAR void *arg)
 
           default:
             {
-              /* We can deallocate the data conf notification as it is no longer
-               * needed. We can't use the public function here since we already
-               * have the MAC locked.
-               */
-
-              privnotif->flink = priv->notif_free;
-              priv->notif_free = privnotif;
+              mac802154_notif_free_locked(priv, notif);
             }
             break;
         }
