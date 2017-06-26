@@ -72,7 +72,9 @@
 int mac802154_req_rxenable(MACHANDLE mac,
                            FAR struct ieee802154_rxenable_req_s *req)
 {
+#if 0
   FAR struct ieee802154_privmac_s * priv =
     (FAR struct ieee802154_privmac_s *)mac;
+#endif
   return -ENOTTY;
 }
