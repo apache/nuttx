@@ -344,7 +344,7 @@
 #  define RCC_CFGR3_USART1SW_HSI    (0 << RCC_CFGR3_USART1SW_SHIFT) /* HSI clock */
 #define RCC_CFGR3_I2C1SW            (1 << 4)  /* Bit 4: I2C1 clock source selection */
 #define RCC_CFGR3_TIM1SW            (1 << 8)  /* Bit 8: TIM1 clock source selection */
-#define RCC_CFGR3_HRTIM1SW          (1 << 9)  /* Bit 9: HRTIM clock source selection */
+#define RCC_CFGR3_HRTIM1SW          (1 << 12)  /* Bit 12: HRTIM clock source selection */
 #define RCC_CFGR3_USART2SW_SHIFT    (16)      /* Bits 16-17: USART2 clock source selection */
 #define RCC_CFGR3_USART2SW_MASK     (3 << RCC_CFGR3_USART2SW_SHIFT)
 #  define RCC_CFGR3_USART2SW_PCLK   (0 << RCC_CFGR3_USART2SW_SHIFT) /* PCLK */
