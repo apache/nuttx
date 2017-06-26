@@ -318,9 +318,9 @@ int mac802154_resp_associate(MACHANDLE mac,
    * Destination PAN Identifier field shall contain the value of macPANId, while
    * the Source PAN Identifier field shall be omitted. [1] pg. 69
    */
-  
+
   mac802154_putpanid(iob, priv->addr.panid);
-  
+
   /* The Destination Address field shall contain the extended address of the
    * device requesting association. [1] pg. 69 */
 

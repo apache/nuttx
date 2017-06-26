@@ -93,7 +93,7 @@ struct ieee802154_beaconframe_s
 {
   uint8_t bf_data[IEEE802154_MAX_PHY_PACKET_SIZE];
   uint8_t bf_len;
-  uint8_t bf_offset; 
+  uint8_t bf_offset;
 };
 
 enum ieee802154_sfevent_e

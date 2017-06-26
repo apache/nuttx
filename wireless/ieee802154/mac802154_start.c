@@ -110,7 +110,7 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
    * contain the value of macExtendedAddress if macShortAddress is equal to
    * 0xfffe or macShortAddress otherwise. [1] pg. 32
    */
-  
+
   if (IEEE802154_SADDRCMP(priv->addr.saddr, &IEEE802154_SADDR_BCAST))
     {
       priv->addr.mode = IEEE802154_ADDRMODE_EXTENDED;
@@ -167,7 +167,7 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
       priv->sfspec.ble = req->battlifeext;
 
       /* For now we just set the CAP Slot to 15 */
-      
+
       priv->sfspec.final_capslot = 15;
 
       /* If the PAN coordinator parameter is set to TRUE, the MLME ignores the

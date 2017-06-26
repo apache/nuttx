@@ -235,7 +235,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
        * the corresponding data frame from the coordinator. [1] pg.43
        */
 
-      mac802154_rxenable(priv);       
+      mac802154_rxenable(priv);
 
       /* Start a timer, if we receive the data frame, we will cancel
        * the timer, otherwise it will expire and we will notify the
