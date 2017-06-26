@@ -1726,7 +1726,7 @@ static uint32_t mac802154_symtoticks(FAR struct ieee802154_privmac_s *priv,
    * get overall times.
    */
 
-  priv->radio->get_attr(priv->radio, IEEE802154_ATTR_PHY_SYMBOL_DURATION,
+  priv->radio->getattr(priv->radio, IEEE802154_ATTR_PHY_SYMBOL_DURATION,
                         &attrval);
 
   /* After this step, ret represents microseconds */
@@ -1912,7 +1912,7 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
     }
 
   IEEE802154_EADDRCOPY(mac->addr.eaddr, eaddr);
-  mac->radio->set_attr(mac->radio, IEEE802154_ATTR_MAC_EADDR,
+  mac->radio->setattr(mac->radio, IEEE802154_ATTR_MAC_EADDR,
                       (union ieee802154_attr_u *)&eaddr[0]);
 
   return (MACHANDLE)mac;

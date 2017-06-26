@@ -125,14 +125,14 @@ int mac802154_req_reset(MACHANDLE mac, bool rst_pibattr)
       IEEE802154_SADDRCOPY(priv->addr.saddr, &IEEE802154_SADDR_UNSPEC);
       IEEE802154_EADDRCOPY(priv->addr.eaddr, &IEEE802154_EADDR_UNSPEC);
 
-      priv->radio->reset_attrs(priv->radio);
+      priv->radio->reset(priv->radio);
 
       /* The radio is in control of certain attributes, but we keep a mirror
        * for easy access.  Copy in the radio's values now that they've been
        * reset.
        */
 
-      priv->radio->get_attr(priv->radio, IEEE802154_ATTR_MAC_MAX_FRAME_WAITTIME,
+      priv->radio->getattr(priv->radio, IEEE802154_ATTR_MAC_MAX_FRAME_WAITTIME,
                             &attr);
       priv->max_frame_waittime = attr.mac.max_frame_waittime;
 

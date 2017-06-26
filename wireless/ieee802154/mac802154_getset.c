@@ -106,7 +106,7 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_attr_e attr,
          * it along.
          */
 
-        ret = priv->radio->get_attr(priv->radio, attr, attrval);
+        ret = priv->radio->getattr(priv->radio, attr, attrval);
         break;
     }
 
@@ -180,7 +180,7 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_attr_e attr,
            * it along.
            */
 
-          ret = priv->radio->set_attr(priv->radio, attr, attrval);
+          ret = priv->radio->setattr(priv->radio, attr, attrval);
         }
         break;
     }

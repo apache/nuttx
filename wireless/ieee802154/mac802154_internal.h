@@ -156,7 +156,6 @@ struct ieee802154_privmac_s
 
   sem_t exclsem;                            /* Support exclusive access */
   uint8_t nclients;                         /* Number of notification clients */
-  uint8_t nnotif;                           /* Number of remaining notifications */
 
   /* Only support a single command at any given time. As of now I see no
    * condition where you need to have more than one command frame simultaneously
@@ -642,14 +641,14 @@ static inline void mac802154_rxdisable(FAR struct ieee802154_privmac_s *priv)
 static inline void mac802154_setchannel(FAR struct ieee802154_privmac_s *priv,
                                         uint8_t channel)
 {
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_PHY_CHAN,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_PHY_CHAN,
                         (FAR const union ieee802154_attr_u *)&channel);
 }
 
 static inline void mac802154_setchpage(FAR struct ieee802154_privmac_s *priv,
                                        uint8_t chpage)
 {
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_PHY_CURRENT_PAGE,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_PHY_CURRENT_PAGE,
                         (FAR const union ieee802154_attr_u *)&chpage);
 }
 
@@ -657,7 +656,7 @@ static inline void mac802154_setpanid(FAR struct ieee802154_privmac_s *priv,
                                       const uint8_t *panid)
 {
   IEEE802154_PANIDCOPY(priv->addr.panid, panid);
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_PANID,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_PANID,
                         (FAR const union ieee802154_attr_u *)panid);
 }
 
@@ -665,7 +664,7 @@ static inline void mac802154_setsaddr(FAR struct ieee802154_privmac_s *priv,
                                       const uint8_t *saddr)
 {
   IEEE802154_SADDRCOPY(priv->addr.saddr, saddr);
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_SADDR,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_SADDR,
                         (FAR const union ieee802154_attr_u *)saddr);
 }
 
@@ -673,7 +672,7 @@ static inline void mac802154_seteaddr(FAR struct ieee802154_privmac_s *priv,
                                       const uint8_t *eaddr)
 {
   IEEE802154_EADDRCOPY(priv->addr.eaddr, eaddr);
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_EADDR,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_EADDR,
                         (FAR const union ieee802154_attr_u *)eaddr);
 }
 
@@ -681,7 +680,7 @@ static inline void mac802154_setcoordsaddr(FAR struct ieee802154_privmac_s *priv
                                           const uint8_t *saddr)
 {
   IEEE802154_SADDRCOPY(priv->pandesc.coordaddr.saddr, saddr);
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_COORD_SADDR,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_COORD_SADDR,
                         (FAR const union ieee802154_attr_u *)saddr);
 }
 
@@ -689,7 +688,7 @@ static inline void mac802154_setcoordeaddr(FAR struct ieee802154_privmac_s *priv
                                            const uint8_t *eaddr)
 {
   IEEE802154_EADDRCOPY(priv->pandesc.coordaddr.eaddr, eaddr);
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_COORD_EADDR,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_COORD_EADDR,
                         (FAR const union ieee802154_attr_u *)eaddr);
 }
 
@@ -697,9 +696,9 @@ static inline void mac802154_setcoordaddr(FAR struct ieee802154_privmac_s *priv,
                                           FAR const struct ieee802154_addr_s *addr)
 {
   memcpy(&priv->pandesc.coordaddr, addr, sizeof(struct ieee802154_addr_s));
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_COORD_EADDR,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_COORD_EADDR,
                         (FAR const union ieee802154_attr_u *)addr->eaddr);
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_COORD_SADDR,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_COORD_SADDR,
                         (FAR const union ieee802154_attr_u *)addr->saddr);
 }                                    
 

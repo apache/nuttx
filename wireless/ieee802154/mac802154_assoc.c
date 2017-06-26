@@ -127,8 +127,6 @@ int mac802154_req_associate(MACHANDLE mac,
 
   mac802154_setcoordaddr(priv, &req->coordaddr);
 
-  /* TODO: Need to send coordinator address to radio layer */
-
   /* Copy the coordinator PAN ID to our PAN ID */
 
   mac802154_setpanid(priv, req->coordaddr.panid);
@@ -146,7 +144,7 @@ int mac802154_req_associate(MACHANDLE mac,
    */
 
   rxonidle = req->capabilities.rxonidle;
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_RX_ON_WHEN_IDLE,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_RX_ON_WHEN_IDLE,
                         (FAR const union ieee802154_attr_u *)&rxonidle);
 
   /* Allocate an IOB to put the frame in */
@@ -709,7 +707,7 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
 
   /* Inform the radio of the address change */
 
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_SADDR,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_SADDR,
                         (FAR union ieee802154_attr_u *)priv->addr.saddr);
 
   /* A Short Address field value equal to 0xfffe shall indicate that the device

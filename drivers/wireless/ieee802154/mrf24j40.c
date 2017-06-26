@@ -201,7 +201,6 @@ static uint8_t mrf24j40_getreg(FAR struct spi_dev_s *spi, uint32_t addr);
 
 static int  mrf24j40_resetrfsm(FAR struct mrf24j40_radio_s *dev);
 static int  mrf24j40_pacontrol(FAR struct mrf24j40_radio_s *dev, int mode);
-static int  mrf24j40_initialize(FAR struct mrf24j40_radio_s *dev);
 
 static int  mrf24j40_setrxmode(FAR struct mrf24j40_radio_s *dev, int mode);
 static int  mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev);
@@ -252,20 +251,18 @@ static void mrf24j40_mactimer(FAR struct mrf24j40_radio_s *dev, int numsymbols);
 
 static int  mrf24j40_bind(FAR struct ieee802154_radio_s *radio,
               FAR struct ieee802154_radiocb_s *radiocb);
-static int  mrf24j40_txnotify(FAR struct ieee802154_radio_s *radio, bool gts);
-static int  mrf24j40_txdelayed(FAR struct ieee802154_radio_s *radio,
-                               FAR struct ieee802154_txdesc_s *txdesc,
-                               uint32_t symboldelay);
-static int  mrf24j40_reset_attrs(FAR struct ieee802154_radio_s *radio);
-static int  mrf24j40_get_attr(FAR struct ieee802154_radio_s *radio,
+static int  mrf24j40_reset(FAR struct ieee802154_radio_s *radio);
+static int  mrf24j40_getattr(FAR struct ieee802154_radio_s *radio,
               enum ieee802154_attr_e attr,
               FAR union ieee802154_attr_u *attrval);
-static int  mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
+static int  mrf24j40_setattr(FAR struct ieee802154_radio_s *radio,
               enum ieee802154_attr_e attr,
               FAR const union ieee802154_attr_u *attrval);
+static int  mrf24j40_txnotify(FAR struct ieee802154_radio_s *radio, bool gts);
+static int  mrf24j40_txdelayed(FAR struct ieee802154_radio_s *radio,
+              FAR struct ieee802154_txdesc_s *txdesc,
+              uint32_t symboldelay);
 static int  mrf24j40_rxenable(FAR struct ieee802154_radio_s *dev, bool enable);
-static int  mrf24j40_req_rxenable(FAR struct ieee802154_radio_s *radio,
-              FAR struct ieee802154_rxenable_req_s *req);
 static int  mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
                FAR const struct ieee802154_superframespec_s *sfspec,
                FAR struct ieee802154_beaconframe_s *beacon);
@@ -437,18 +434,69 @@ static int mrf24j40_txdelayed(FAR struct ieee802154_radio_s *radio,
   return OK;
 }
 
-static int  mrf24j40_reset_attrs(FAR struct ieee802154_radio_s *radio)
+static int  mrf24j40_reset(FAR struct ieee802154_radio_s *radio)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
+  struct ieee802154_cca_s   cca;
+
+  /* Software reset */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_SOFTRST  , 0x07); /* 00000111 Reset */
+  while(mrf24j40_getreg(dev->spi, MRF24J40_SOFTRST) & 0x07);
+
+  /* Apply recommended settings */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_PACON2 , 0x98); /* 10011000 Enable FIFO (default), TXONTS=6 (recommended), TXONT<8:7>=0 */
+  mrf24j40_setreg(dev->spi, MRF24J40_TXSTBL , 0x95); /* 10010101 set the SIFS period. RFSTBL=9, MSIFS=5, aMinSIFSPeriod=14 (min 12) */
+  mrf24j40_setreg(dev->spi, MRF24J40_TXPEND , 0x7C); /* 01111100 set the LIFS period, MLIFS=1Fh=31 aMinLIFSPeriod=40 (min 40) */
+  mrf24j40_setreg(dev->spi, MRF24J40_TXTIME , 0x30); /* 00110000 set the turnaround time, TURNTIME=3 aTurnAroundTime=12 */
+  mrf24j40_setreg(dev->spi, MRF24J40_RFCON1 , 0x02); /* 00000010 VCO optimization, recommended value */
+  mrf24j40_setreg(dev->spi, MRF24J40_RFCON2 , 0x80); /* 10000000 Enable PLL */
+  mrf24j40_setreg(dev->spi, MRF24J40_RFCON6 , 0x90); /* 10010000 TX filter enable, fast 20M recovery, No bat monitor*/
+  mrf24j40_setreg(dev->spi, MRF24J40_RFCON7 , 0x80); /* 10000000 Sleep clock on internal 100 kHz */
+  mrf24j40_setreg(dev->spi, MRF24J40_RFCON8 , 0x10); /* 00010000 VCO control bit, as recommended */
+  mrf24j40_setreg(dev->spi, MRF24J40_SLPCON1, 0x01); /* 00000001 no CLKOUT, default divisor */
+  mrf24j40_setreg(dev->spi, MRF24J40_BBREG6 , 0x40); /* 01000000 Append RSSI to rx packets */
+
+  /* Set this in reset since it can exist for all device modes. See pg 101 */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_FRMOFFSET, 0x15);
+
+  mrf24j40_setchannel(dev, 11);
+  mrf24j40_setpanid(dev, g_allones);
+  mrf24j40_setsaddr(dev, g_allones);
+  mrf24j40_seteaddr(dev, g_allones);
 
   dev->max_frame_waittime = MRF24J40_DEFAULT_MAX_FRAME_WAITTIME;
+
+  /* Default device params */
+
+  cca.use_ed = 1;
+  cca.use_cs = 0;
+  cca.edth   = 0x60; /* CCA mode ED, no carrier sense, recommenced ED threshold -69 dBm */
+  mrf24j40_setcca(dev, &cca);
+
+  mrf24j40_setrxmode(dev, MRF24J40_RXMODE_NORMAL);
+
+  mrf24j40_settxpower(dev, 0); /*16. Set transmitter power .*/
+
+  mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
+
+  dev->rxenabled = false;
+
+  /* For now, we want to always just have the frame pending bit set when
+   * acknowledging a Data Request command. The standard says that the coordinator
+   * can do this if it needs time to figure out whether it has data or not
+   */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_ACKTMOUT, 0x39 | MRF24J40_ACKTMOUT_DRPACK);
 
   return OK;
 }
 
-static int mrf24j40_get_attr(FAR struct ieee802154_radio_s *radio,
-                             enum ieee802154_attr_e attr,
-                             FAR union ieee802154_attr_u *attrval)
+static int mrf24j40_getattr(FAR struct ieee802154_radio_s *radio,
+                            enum ieee802154_attr_e attr,
+                            FAR union ieee802154_attr_u *attrval)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
   int ret;
@@ -489,9 +537,9 @@ static int mrf24j40_get_attr(FAR struct ieee802154_radio_s *radio,
   return ret;
 }
 
-static int mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
-                             enum ieee802154_attr_e attr,
-                             FAR const union ieee802154_attr_u *attrval)
+static int mrf24j40_setattr(FAR struct ieee802154_radio_s *radio,
+                            enum ieee802154_attr_e attr,
+                            FAR const union ieee802154_attr_u *attrval)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
   int ret;
@@ -567,14 +615,7 @@ static int mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
         ret = IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE;
         break;
     }
-
   return ret;
-}
-
-static int  mrf24j40_req_rxenable(FAR struct ieee802154_radio_s *radio,
-                                  FAR struct ieee802154_rxenable_req_s *req)
-{
-  return -ENOTTY;
 }
 
 static int  mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
@@ -726,6 +767,21 @@ static int mrf24j40_sfupdate(FAR struct ieee802154_radio_s *radio,
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
   int reg;
+
+  /* If we are operating on a beacon-enabled network, use slotted CSMA */
+
+  if (sfspec->beaconorder < 15)
+    {
+      reg = mrf24j40_getreg(dev->spi, MRF24J40_TXMCR);
+      reg |= MRF24J40_TXMCR_SLOTTED;
+      mrf24j40_setreg(dev->spi, MRF24J40_TXMCR, reg);
+    }
+  else
+    {
+      reg = mrf24j40_getreg(dev->spi, MRF24J40_TXMCR);
+      reg &= ~MRF24J40_TXMCR_SLOTTED;
+      mrf24j40_setreg(dev->spi, MRF24J40_TXMCR, reg);
+    }
 
   reg = mrf24j40_getreg(dev->spi, MRF24J40_RXMCR);
 
@@ -1077,38 +1133,6 @@ static int mrf24j40_pacontrol(FAR struct mrf24j40_radio_s *dev, int mode)
     }
 
   mrf24j40_resetrfsm(dev);
-  return OK;
-}
-
-/****************************************************************************
- * Name: mrf24j40_initialize
- *
- * Description:
- *   Reset the device and put in in order of operation
- *
- ****************************************************************************/
-
-static int mrf24j40_initialize(FAR struct mrf24j40_radio_s *dev)
-{
-  /* Software reset */
-
-  mrf24j40_setreg(dev->spi, MRF24J40_SOFTRST  , 0x07); /* 00000111 Reset */
-  while(mrf24j40_getreg(dev->spi, MRF24J40_SOFTRST) & 0x07);
-
-  /* Apply recommended settings */
-
-  mrf24j40_setreg(dev->spi, MRF24J40_PACON2 , 0x98); /* 10011000 Enable FIFO (default), TXONTS=6 (recommended), TXONT<8:7>=0 */
-  mrf24j40_setreg(dev->spi, MRF24J40_TXSTBL , 0x95); /* 10010101 set the SIFS period. RFSTBL=9, MSIFS=5, aMinSIFSPeriod=14 (min 12) */
-  mrf24j40_setreg(dev->spi, MRF24J40_TXPEND , 0x7C); /* 01111100 set the LIFS period, MLIFS=1Fh=31 aMinLIFSPeriod=40 (min 40) */
-  mrf24j40_setreg(dev->spi, MRF24J40_TXTIME , 0x30); /* 00110000 set the turnaround time, TURNTIME=3 aTurnAroundTime=12 */
-  mrf24j40_setreg(dev->spi, MRF24J40_RFCON1 , 0x02); /* 00000010 VCO optimization, recommended value */
-  mrf24j40_setreg(dev->spi, MRF24J40_RFCON2 , 0x80); /* 10000000 Enable PLL */
-  mrf24j40_setreg(dev->spi, MRF24J40_RFCON6 , 0x90); /* 10010000 TX filter enable, fast 20M recovery, No bat monitor*/
-  mrf24j40_setreg(dev->spi, MRF24J40_RFCON7 , 0x80); /* 10000000 Sleep clock on internal 100 kHz */
-  mrf24j40_setreg(dev->spi, MRF24J40_RFCON8 , 0x10); /* 00010000 VCO control bit, as recommended */
-  mrf24j40_setreg(dev->spi, MRF24J40_SLPCON1, 0x01); /* 00000001 no CLKOUT, default divisor */
-  mrf24j40_setreg(dev->spi, MRF24J40_BBREG6 , 0x40); /* 01000000 Append RSSI to rx packets */
-
   return OK;
 }
 
@@ -2155,7 +2179,6 @@ FAR struct ieee802154_radio_s *mrf24j40_init(FAR struct spi_dev_s *spi,
                                       FAR const struct mrf24j40_lower_s *lower)
 {
   FAR struct mrf24j40_radio_s *dev;
-  struct ieee802154_cca_s   cca;
 
   dev = kmm_zalloc(sizeof(struct mrf24j40_radio_s));
   if (dev == NULL)
@@ -2178,13 +2201,12 @@ FAR struct ieee802154_radio_s *mrf24j40_init(FAR struct spi_dev_s *spi,
   sem_init(&dev->exclsem, 0, 1);
 
   dev->radio.bind         = mrf24j40_bind;
+  dev->radio.reset        = mrf24j40_reset;
+  dev->radio.getattr      = mrf24j40_getattr;
+  dev->radio.setattr      = mrf24j40_setattr;
   dev->radio.txnotify     = mrf24j40_txnotify;
   dev->radio.txdelayed    = mrf24j40_txdelayed;
-  dev->radio.reset_attrs  = mrf24j40_reset_attrs;
-  dev->radio.get_attr     = mrf24j40_get_attr;
-  dev->radio.set_attr     = mrf24j40_set_attr;
   dev->radio.rxenable     = mrf24j40_rxenable;
-  dev->radio.req_rxenable = mrf24j40_req_rxenable;
   dev->radio.beaconstart  = mrf24j40_beaconstart;
   dev->radio.beaconupdate = mrf24j40_beaconupdate;
   dev->radio.beaconstop   = mrf24j40_beaconstop;
@@ -2193,34 +2215,7 @@ FAR struct ieee802154_radio_s *mrf24j40_init(FAR struct spi_dev_s *spi,
   dev->lower    = lower;
   dev->spi      = spi;
 
-
-  dev->rxenabled = false;
-  mrf24j40_initialize(dev);
-
-  mrf24j40_setchannel(dev, 11);
-  mrf24j40_setpanid(dev, g_allones);
-  mrf24j40_setsaddr(dev, g_allones);
-  mrf24j40_seteaddr(dev, g_allones);
-
-  /* Default device params */
-
-  cca.use_ed = 1;
-  cca.use_cs = 0;
-  cca.edth   = 0x60; /* CCA mode ED, no carrier sense, recommenced ED threshold -69 dBm */
-  mrf24j40_setcca(dev, &cca);
-
-  mrf24j40_setrxmode(dev, MRF24J40_RXMODE_NORMAL);
-
-  mrf24j40_settxpower(dev, 0); /*16. Set transmitter power .*/
-
-  mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
-
-  /* For now, we want to always just have the frame pending bit set when
-   * acknowledging a Data Request command. The standard says that the coordinator
-   * can do this if it needs time to figure out whether it has data or not
-   */
-
-  mrf24j40_setreg(dev->spi, MRF24J40_ACKTMOUT, 0x39 | MRF24J40_ACKTMOUT_DRPACK);
+  mrf24j40_reset(&dev->radio);
 
   dev->lower->enable(dev->lower, true);
   return &dev->radio;

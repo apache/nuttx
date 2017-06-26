@@ -93,6 +93,8 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
       goto errout;
     }
 
+  wlinfo("MLME: SCAN.request received\n");
+
   /* Need to get access to the ops semaphore since operations are serial. This
    * must be done before locking the MAC so that we don't hold the MAC
    */
@@ -126,6 +128,8 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
     {
       case IEEE802154_SCANTYPE_PASSIVE:
         {
+          wlinfo("MLME: Starting Passive scan\n");
+
           /* Set the channel to the first channel in the list */
 
           mac802154_setchannel(priv, req->channels[priv->scanindex]);
