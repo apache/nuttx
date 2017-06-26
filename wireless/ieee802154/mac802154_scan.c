@@ -105,9 +105,9 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
     }
 
   priv->curr_op = MAC802154_OP_SCAN;
-  
+
   /* Get exclusive access to the MAC */
-  
+
   ret = mac802154_takesem(&priv->exclsem, true);
   if (ret < 0)
     {
@@ -115,7 +115,7 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
       ret = -EINTR;
       goto errout;
     }
-  
+
   /* Copy the request so we have a reference */
 
   memcpy(&priv->currscan, req, sizeof(struct ieee802154_scan_req_s));
@@ -139,7 +139,7 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
            * shall restore the value of macPANId to the value stored before the
            * scan began. [1] pg. 24
            */
-          
+
           IEEE802154_PANIDCOPY(priv->panidbeforescan, priv->addr.panid);
           mac802154_setpanid(priv, (const uint8_t *)&IEEE802154_PANID_UNSPEC);
 
@@ -148,7 +148,7 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
            * [aBaseSuperframeDuration × (2 * n + 1)],
            * where n is the value of the ScanDuration parameter. [1] pg. 25
            */
-          
+
           mac802154_rxenable(priv);
 
           priv->scansymdur = IEEE802154_BASE_SUPERFRAME_DURATION *
@@ -219,7 +219,7 @@ void mac802154_scanfinish(FAR struct ieee802154_privmac_s *priv,
       memcpy(notif->u.scanconf.unscanned, &priv->currscan.channels[priv->scanindex],
              notif->u.scanconf.numunscanned);
     }
-  
+
   notif->u.scanconf.numdesc = priv->npandesc;
   memcpy(notif->u.scanconf.pandescs, priv->pandescs,
          sizeof(struct ieee802154_pandesc_s) * priv->npandesc);
@@ -270,7 +270,7 @@ static void mac802154_scantimeout(FAR struct ieee802154_privmac_s *priv)
         }
       return;
     }
-  
+
   mac802154_setchannel(priv, priv->currscan.channels[priv->scanindex]);
 
   /* ...after switching to the channel for a passive scan, the device
@@ -278,7 +278,7 @@ static void mac802154_scantimeout(FAR struct ieee802154_privmac_s *priv)
    * [aBaseSuperframeDuration × (2 * n + 1)],
    * where n is the value of the ScanDuration parameter. [1] pg. 25
    */
-          
+
   mac802154_rxenable(priv);
   mac802154_timerstart(priv, priv->scansymdur, mac802154_scantimeout);
 }

@@ -399,7 +399,7 @@ void mac802154_updatebeacon(FAR struct ieee802154_privmac_s *priv)
 
   /* Clear the frame control fields */
 
-  beacon->bf_data[0] = 0; 
+  beacon->bf_data[0] = 0;
   beacon->bf_data[1] = 0;
   beacon->bf_len = 2;
 
@@ -410,7 +410,7 @@ void mac802154_updatebeacon(FAR struct ieee802154_privmac_s *priv)
    */
 
   /* TODO: handle broadcast frame */
-  
+
   DEBUGASSERT(priv->addr.mode != IEEE802154_ADDRMODE_NONE);
 
   IEEE802154_SETDADDRMODE(beacon->bf_data, 0, IEEE802154_ADDRMODE_NONE);
@@ -471,7 +471,7 @@ void mac802154_updatebeacon(FAR struct ieee802154_privmac_s *priv)
   /* Skip the pending address specification field for now  */
 
   pendaddrspec_ind = beacon->bf_len++;
- 
+
   txdesc = (FAR struct ieee802154_txdesc_s *)sq_peek(&priv->indirect_queue);
 
   while(txdesc != NULL)
@@ -488,7 +488,7 @@ void mac802154_updatebeacon(FAR struct ieee802154_privmac_s *priv)
           IEEE802154_EADDRCOPY(&beacon->bf_data[beacon->bf_len], txdesc->destaddr.eaddr);
           beacon->bf_len += IEEE802154_EADDRSIZE;
         }
-      
+
       /* Check if we are up to 7 addresses yet */
 
       if ((pendsaddr + pendeaddr) == 7)
@@ -500,11 +500,11 @@ void mac802154_updatebeacon(FAR struct ieee802154_privmac_s *priv)
 
       txdesc = (FAR struct ieee802154_txdesc_s *)sq_next((FAR sq_entry_t *)txdesc);
     }
-  
+
   /* At this point, we know how many of each transaction we have, we can setup
    * the Pending Address Specification field
    */
-  
+
   beacon->bf_data[pendaddrspec_ind] = (pendsaddr & 0x07) | ((pendeaddr << 4) & 0x70);
 
   /* Copy in the beacon payload */
@@ -1035,7 +1035,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
             {
               /* The source PAN ID is equal to the destination PAN ID */
 
-              IEEE802154_PANIDCOPY(ind->src.panid, ind->dest.panid);              
+              IEEE802154_PANIDCOPY(ind->src.panid, ind->dest.panid);
             }
           else
             {
@@ -1570,7 +1570,7 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
   pandesc.sfspec.beaconorder = IEEE802154_GETBEACONORDER(iob->io_data,
                                                          iob->io_offset);
 
-  pandesc.sfspec.sforder = IEEE802154_GETSFORDER(iob->io_data, iob->io_offset); 
+  pandesc.sfspec.sforder = IEEE802154_GETSFORDER(iob->io_data, iob->io_offset);
   pandesc.sfspec.final_capslot = IEEE802154_GETFINCAPSLOT(iob->io_data,
                                                           iob->io_offset);
   pandesc.sfspec.ble = IEEE802154_GETBLE(iob->io_data, iob->io_offset);
@@ -1595,11 +1595,11 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
 
       for (i = 0; i < priv->npandesc; i++)
         {
-          if (priv->currscan.channels[priv->scanindex] != priv->pandescs[i].chan)  
+          if (priv->currscan.channels[priv->scanindex] != priv->pandescs[i].chan)
             {
               continue;
             }
-          
+
           if (memcmp(&ind->src, &priv->pandescs[i].coordaddr,
               sizeof(struct ieee802154_addr_s)))
             {
@@ -1607,10 +1607,10 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
             }
 
           /* The beacon is the same as another, so discard it */
-          
+
           return;
         }
-  
+
       /* Copy the pan desc to the list of pan desc */
 
       memcpy(&priv->pandescs[priv->npandesc], &pandesc,
@@ -1703,12 +1703,12 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
        */
 
       /* Check the superframe structure and update the appropriate attributes. */
-                  
+
       if (memcmp(&priv->sfspec, &pandesc.sfspec,
                  sizeof(struct ieee802154_superframespec_s)) != 0)
         {
           /* Copy in the new superframe spec */
-          
+
           memcpy(&priv->sfspec, &pandesc.sfspec,
                  sizeof(struct ieee802154_superframespec_s));
 

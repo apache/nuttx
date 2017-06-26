@@ -281,7 +281,7 @@ enum ieee802154_status_e
   /* This first section of enums is defined in the standard. [1] pg. 70
    * They must be in this order
    */
-   
+
   IEEE802154_STATUS_SUCCESS = 0,
   IEEE802154_STATUS_OUT_OF_CAPACITY,
   IEEE802154_STATUS_DENIED,
@@ -906,7 +906,7 @@ struct ieee802154_assoc_req_s
    * enabled PAN or non-beacon enabled PAN. If it is beacon-enabled, the MAC
    * will track the beacon first before transmitting the association. This can
    * take some time depending on the beacon interval. If the PAN is non-beacon
-   * enabled, the association request is sent immediately via CSMA. 
+   * enabled, the association request is sent immediately via CSMA.
    *
    * The catch 22: The standard outlines the procedure for associating: reset
    * the MAC, scan to find PAN's and pass coordinator address info to
@@ -927,7 +927,7 @@ struct ieee802154_assoc_req_s
    * info if it is not associated.
    */
 
-  bool    beacon; 
+  bool    beacon;
 
   /* Coordinator Address with which to associate */
 
