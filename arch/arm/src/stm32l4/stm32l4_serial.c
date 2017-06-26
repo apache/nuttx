@@ -133,9 +133,18 @@
  *
  * When streaming data, the generic serial layer will be called
  * every time the FIFO receives half this number of bytes.
+ *
+ * If there ever is a STM32L4 with D-cache, the buffer size
+ * should be an even multiple of ARMV7M_DCACHE_LINESIZE, so that it
+ * can be individually invalidated.
  */
 
-#  define RXDMA_BUFFER_SIZE   32
+#  if !defined(CONFIG_STM32L4_SERIAL_RXDMA_BUFFER_SIZE) || \
+      CONFIG_STM32L4_SERIAL_RXDMA_BUFFER_SIZE == 0
+#    define RXDMA_BUFFER_SIZE 32
+#  else
+#    define RXDMA_BUFFER_SIZE ((CONFIG_STM32L4_SERIAL_RXDMA_BUFFER_SIZE + 31) & ~31)
+#  endif
 
 /* DMA priority */
 
