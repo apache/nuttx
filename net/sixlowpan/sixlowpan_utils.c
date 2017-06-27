@@ -256,7 +256,7 @@ int sixlowpan_src_panid(FAR struct ieee802154_driver_s *ieee,
                      (unsigned long)((uintptr_t)&arg));
   if (ret < 0)
     {
-      wlerr("ERROR: MAC802154IOC_MLME_GET_REQUEST failed: %d\n", ret);
+      nerr("ERROR: MAC802154IOC_MLME_GET_REQUEST failed: %d\n", ret);
       return ret;
     }
 
