@@ -552,8 +552,9 @@ Configurations
           both addressing modes.
 
        2017-06-27:  Added the Telnet client application to the configuration.
-          First testing reveal a problem that will require some re-design
-          before continuing:  The Telnet daemon does not yet support IPv6!
+          Initial testing reveal a problem that required re-design of the
+          Telnet daemon:  It did not yet support IPv6! But after adding this
+          support, Telnet worked just fine.
 
      Test Matrix:
        The following configurations have been tested:
@@ -567,7 +568,7 @@ Configurations
                      extended   6/23 6/26
          ipv6        short      ---  ---
                      extended   ---  ---
-         telnet      short      N/A  ---
+         telnet      short      N/A  6/27 (hc06)
                      extended   N/A  ---
 
          Other configuration options have not been specifically addressed
