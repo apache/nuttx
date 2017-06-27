@@ -441,7 +441,7 @@ Configurations
 
        On the server node:
 
-         nsh> ifconfig wpan0
+         nsh> ifconfig
          nsh> udpserver &
 
        The ifconfig command will show the IP address of the server.  Then on
@@ -471,7 +471,7 @@ Configurations
 
        On the server node:
 
-         nsh> ifconfig wpan0
+         nsh> ifconfig
          nsh> tcpserver &
 
        The ifconfig command will show the IP address of the server.  Then on
@@ -480,11 +480,11 @@ Configurations
          nsh> tcpclient <server-ip> &
 
        Where <server-ip> is the IP address of the server that you got above.
-       NOTE: There is no way to stop the UDP test once it has been started
-       other than by resetting the board.
+       NOTE:  Unlike the UDP test, there the TCP test will terminate
+       automatically when the packet exchange is complete.
 
        Cheat Sheet.  Here is a concise summary of all all the steps needed to
-       run the UDP test (C=Coordinator; E=Endpoint):
+       run the TCP test (C=Coordinator; E=Endpoint):
 
          C: nsh> i8 /dev/ieee0 startpan
          C: nsh> 8 acceptassoc
@@ -496,12 +496,44 @@ Configurations
          E: nsh> tcpclient <server-ip> &
          E: nsh> dmesg
 
-    STATUS:
-       2017-06-19:  The Telnet Daemon does not start.  This is simply because
-         the daemon is started too early in the sequence... before the network
-         has been brought up:
+    7. The NSH Telnet deamon (server) is enabled.  However, it cannot be
+       started automatically.  Rather, it must be started AFTER the network
+       has been brought up using the NSH 'telnetd' command.  You would want
+       to start the Telent daemon only if you want the node to serve Telent
+       connections to an NSH shell on the node.
 
-           telnetd_daemon: ERROR: socket failure: 106
+         nsh> ifconfig
+         nsh> telnetd
+
+       Note the 'ifconfig' is executed to get the IP address of the node.
+       This is necessary because the IP address is assigned by the the
+       Coordinator and may not be known a priori.
+
+    8. This configuration also includes the Telnet client program.  This
+       will allow you to execute a NSH one a node from the command line on
+       a different node. Like:
+
+         nsh> telnet <server-ip>
+
+       Where <server-ip> is the IP address of the server that you got for
+       the ifconfig commna on the remote node.  Once the telnet session
+       has been started, you can end the session with:
+
+         nsh> exit
+
+       Cheat Sheet.  Here is a concise summary of all all the steps needed to
+       run the TCP test (C=Coordinator; E=Endpoint):
+
+         C: nsh> i8 /dev/ieee0 startpan
+         C: nsh> 8 acceptassoc
+         E: nsh> i8 assoc
+         C: nsh> ifup wpan0
+         C: nsh> ifconfig           <-- To get the <server-ip>
+         E: nsh> ifup wpan0
+         C: nsh> telnetd            <-- Starts the Telnet daemon
+         E: nsh> telnet <server-ip> <-- Runs the Telnet client
+
+    STATUS:
 
        2017-06-21:  Basic UDP functionality has been achieved with HC06
          compression and short address.  Additional testing is required for
@@ -519,6 +551,10 @@ Configurations
        2017-06-26:  Verified with HC06 and extended addressing and HC1 with
           both addressing modes.
 
+       2017-06-27:  Added the Telnet client application to the configuration.
+          First testing reveal a problem that will require some re-design
+          before continuing:  The Telnet daemon does not yet support IPv6!
+
      Test Matrix:
        The following configurations have been tested:
 
@@ -531,6 +567,8 @@ Configurations
                      extended   6/23 6/26
          ipv6        short      ---  ---
                      extended   ---  ---
+         telnet      short      N/A  ---
+                     extended   N/A  ---
 
          Other configuration options have not been specifically addressed
          (such non-compressable ports, non-MAC based IPv6 addresses, etc.)
