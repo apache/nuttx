@@ -92,6 +92,12 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_attr_e attr,
       case IEEE802154_ATTR_MAC_EADDR:
         IEEE802154_EADDRCOPY(attrval->mac.eaddr, priv->addr.eaddr);
         break;
+      case IEEE802154_ATTR_MAC_COORD_SADDR:
+        IEEE802154_SADDRCOPY(attrval->mac.coordsaddr, priv->pandesc.coordaddr.saddr);
+        break;
+      case IEEE802154_ATTR_MAC_COORD_EADDR:
+        IEEE802154_EADDRCOPY(attrval->mac.coordeaddr, priv->pandesc.coordaddr.eaddr);
+        break;
       case IEEE802154_ATTR_MAC_DEVMODE:
         attrval->mac.devmode = priv->devmode;
         break;
