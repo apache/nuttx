@@ -154,7 +154,7 @@ static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
 
   if (reqprio > wtcb->sched_priority)
     {
-      /* Raise the priority of the worker thread.  This cannot cause 
+      /* Raise the priority of the worker thread.  This cannot cause
        * context switch because we have preemption disabled.  The task
        * will be marked "pending" and the switch will occur during
        * sched_unlock() processing.
