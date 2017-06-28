@@ -113,8 +113,10 @@ double strtod(FAR const char *str, FAR char **endptr)
     {
     case '-':
       negative = 1; /* Fall through to increment position */
+      /* FALLTHROUGH */
     case '+':
       p++;
+      /* FALLTHROUGH */
     default:
       break;
     }
@@ -175,8 +177,10 @@ double strtod(FAR const char *str, FAR char **endptr)
         {
         case '-':
           negative = 1;   /* Fall through to increment pos */
+          /* FALLTHROUGH */
         case '+':
           p++;
+          /* FALLTHROUGH */          
         default:
           break;
         }

@@ -115,8 +115,10 @@ float strtof(FAR const char *str, FAR char **endptr)
     {
     case '-':
       negative = 1; /* Fall through to increment position */
+      /* FALLTHROUGH */
     case '+':
       p++;
+      /* FALLTHROUGH */
     default:
       break;
     }
@@ -177,8 +179,10 @@ float strtof(FAR const char *str, FAR char **endptr)
         {
         case '-':
           negative = 1;   /* Fall through to increment pos */
+          /* FALLTHROUGH */          
         case '+':
           p++;
+          /* FALLTHROUGH */
         default:
           break;
         }
