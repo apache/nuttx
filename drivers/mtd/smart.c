@@ -139,6 +139,7 @@
 
 #ifndef CONFIG_MTD_SMART_ALLOC_DEBUG
 #define smart_malloc(d, b, n)   kmm_malloc(b)
+#define smart_zalloc(d, b, n)   kmm_zalloc(b)
 #define smart_free(d, p)        kmm_free(p)
 #endif
 
@@ -507,6 +508,30 @@ FAR static void *smart_malloc(FAR struct smart_struct_s *dev,
 
   finfo("SMART alloc: %ld\n", dev->bytesalloc);
   return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: smart_zalloc
+ *
+ * Description:  Perform allocations and keep track of amount of allocated
+ *               memory for this context.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_SMART_ALLOC_DEBUG
+FAR static void *smart_zalloc(FAR struct smart_struct_s *dev,
+                    size_t bytes, const char *name)
+{
+  void *mem;
+
+  mem = smart_malloc(dev, bytes, name);
+  if (mem != NULL)
+    {
+      memset(mem, 0, bytes);
+    }
+
+  return mem;
 }
 #endif
 
@@ -1241,17 +1266,20 @@ errexit:
   if (dev->sMap)
     {
       smart_free(dev, dev->sMap);
+      dev->sMap = NULL;
     }
 
 #else
   if (dev->sBitMap)
     {
       smart_free(dev, dev->sBitMap);
+      dev->sBitMap = NULL;
     }
 
   if (dev->sCache)
     {
       smart_free(dev, dev->sCache);
+      dev->sCache = NULL;
     }
 #endif
 
@@ -1259,6 +1287,7 @@ errexit:
   if (dev->wearstatus)
     {
       smart_free(dev, dev->wearstatus);
+      dev->wearstatus = NULL;
     }
 #endif
 
@@ -1266,10 +1295,10 @@ errexit:
   if (dev->erasecounts)
     {
       smart_free(dev, dev->erasecounts);
+      dev->erasecounts = NULL;
     }
 #endif
 
-  kmm_free(dev);
   return -ENOMEM;
 }
 
@@ -2870,7 +2899,11 @@ static inline int smart_llformat(FAR struct smart_struct_s *dev, unsigned long a
 
   /* Set the sector size for the device */
 
-  smart_setsectorsize(dev, sectorsize);
+  ret = smart_setsectorsize(dev, sectorsize);
+  if (ret != OK)
+    {
+      return ret;
+    }
 
   /* Check for invalid format */
 
@@ -5312,7 +5345,7 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd, FAR const char *partn
 
   /* Allocate a SMART device structure */
 
-  dev = (FAR struct smart_struct_s *)smart_malloc(NULL, sizeof(struct smart_struct_s),
+  dev = (FAR struct smart_struct_s *)smart_zalloc(NULL, sizeof(struct smart_struct_s),
           "Dev struct");
   if (dev)
     {
@@ -5336,22 +5369,6 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd, FAR const char *partn
 
       /* Set the sector size to the default for now */
 
-#ifndef CONFIG_MTD_SMART_MINIMIZE_RAM
-      dev->sMap = NULL;
-#else
-      dev->sCache = NULL;
-      dev->sBitMap = NULL;
-#endif
-      dev->rwbuffer = NULL;
-#ifdef CONFIG_MTD_SMART_SECTOR_ERASE_DEBUG
-      dev->erasecounts = NULL;
-#endif
-#ifdef CONFIG_MTD_SMART_WEAR_LEVEL
-      dev->wearstatus = NULL;
-#endif
-#ifdef CONFIG_MTD_SMART_ENABLE_CRC
-      dev->allocsector = NULL;
-#endif
       dev->sectorsize = 0;
       ret = smart_setsectorsize(dev, CONFIG_MTD_SMART_SECTOR_SIZE);
       if (ret != OK)
