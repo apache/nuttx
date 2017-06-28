@@ -104,7 +104,7 @@ the following icons will be visible:
    pause, fast forward, rewind, and adjust the volume.
 
    Unfortunately in this version, the WM8904 audio CODEC is stubbed out so
-   you will not actually be able to heard any of the .WAV files that you 
+   you will not actually be able to heard any of the .WAV files that you
 
 Telnet access:
 ==============

@@ -229,7 +229,7 @@ Configurations
          reconfiguration process.
 
     2. Unless stated otherwise, all configurations generate console
-       output on USART2, as described above under "Serial Console".  The 
+       output on USART2, as described above under "Serial Console".  The
        elevant configuration settings are listed below:
 
          CONFIG_STM32_USART2=y

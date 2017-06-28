@@ -19,7 +19,7 @@ Serial Console
 
   Be default, UART0 (aka, USIC0, channel 0) is used as the serial console.
   The RX and TX pins is available:
-  
+
     RX     - P1.4, Connector X2, pin 17
     TX     - P1.5, Connector X2, pin 16
     GND    -       Available on pins 1-4 of either connector X1 or X2
@@ -47,7 +47,7 @@ LEDs
   defined.  In that case, the usage by the board port is defined in
   include/board.h and src/sam_autoleds.c. The LEDs are used to encode
   OS-related events as follows:
- 
+
     SYMBOL              Meaning                  LED state
                                                 LED1   LED2
     ------------------ ------------------------ ------ ------

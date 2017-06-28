@@ -76,7 +76,7 @@ NUCLEO-L496ZG Features:
   Microprocessor: STM32L496ZGT6 Core: ARM 32-bit Cortex®-M4 CPU with FPU,
                   80 MHz, MPU, and DSP instructions.
   Memory:         1024 KB Flash 320KB of SRAM (including 64KB of SRAM2)
-  ADC:            3×12-bit: up to 24 channels 
+  ADC:            3×12-bit: up to 24 channels
   DMA:            2 X 7-stream DMA controllers with FIFOs and burst support
   Timers:         Up to 13 timers: (2x 16-bit lowpower), two 32-bit timers,
                   2x watchdogs, SysTick

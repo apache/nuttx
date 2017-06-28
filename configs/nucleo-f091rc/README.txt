@@ -223,7 +223,7 @@ Configurations
          reconfiguration process.
 
     2. Unless stated otherwise, all configurations generate console
-       output on USART2, as described above under "Serial Console".  The 
+       output on USART2, as described above under "Serial Console".  The
        elevant configuration settings are listed below:
 
          CONFIG_STM32_USART2=y
@@ -305,7 +305,7 @@ Configurations
          CONFIG_NSH_ARCHINIT=y
          CONFIG_NSH_BUILTIN_APPS=y
 
-       Support for NSH built-in applications is enabled for future use. 
+       Support for NSH built-in applications is enabled for future use.
        However, no built applications are enabled in this base configuration.
 
     2. C++ support for applications is NOT enabled.  That could be enabled

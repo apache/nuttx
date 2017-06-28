@@ -88,7 +88,7 @@ AT24 Serial EEPROM
   ----------------
 
   A AT24C512 Serial EEPPROM was used for tested I2C.  There are no I2C
-  devices on-board the Launchpad, but an external serial EEPROM module 
+  devices on-board the Launchpad, but an external serial EEPROM module
   module was used.
 
   The Serial EEPROM was mounted on an external adaptor board and connected

@@ -24,7 +24,7 @@ Procedure:
 5. NSH shouls start
 
     NuttShell (NSH) NuttX-7.3
-    nsh> 
+    nsh>
 
 6. Mount the SD card at /music
 

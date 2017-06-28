@@ -2369,7 +2369,7 @@ Configuration sub-directories
      2106-04-23:  The NxImage test was selected because it is a very simple
         graphics test.  Continued testing, however, requires a more complex
         configuration.  Hence, the vnxwm configuration was created.
-        
+
         A memory clobber error was fixed and this probably corrects some of
         the reliability problems noted on 2016-04-21.
 
