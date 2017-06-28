@@ -74,7 +74,7 @@ static void nxbe_clipfill(FAR struct nxbe_clipops_s *cops,
   struct nxbe_setpixel_s *fillinfo = (struct nxbe_setpixel_s *)cops;
 
   /* Set the pixel */
-  
+
   plane->setpixel(&plane->pinfo, &rect->pt1, fillinfo->color);
 
 #ifdef CONFIG_NX_UPDATE
