@@ -2545,7 +2545,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
 
           if (byct > 0 || nbusybk > 0)
             {
-              /* Not all of the data has been sent to the host.  A NBUSYBKE 
+              /* Not all of the data has been sent to the host.  A NBUSYBKE
                * interrupt will be generated later.  It has already been enabled.
                * Now wait for the transfer to complete.
                */

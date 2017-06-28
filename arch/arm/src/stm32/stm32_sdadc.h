@@ -114,8 +114,8 @@
 
 /* SDADC Channels/DMA ******************************************************
  * The maximum number of channels that can be sampled at each scan.
- * If DMA support is not enabled, then only a single channel 
- * ought to be sampled. 
+ * If DMA support is not enabled, then only a single channel
+ * ought to be sampled.
  * Otherwise, unless sampling frequency is reduced,
  * data overruns would occur.
  */

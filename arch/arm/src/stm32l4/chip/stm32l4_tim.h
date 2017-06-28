@@ -651,7 +651,7 @@
 #define ATIM_CCMR3_OC6M_MASK      (7 << ATIM_CCMR3_OC6M_SHIFT)
                                             /* (See common (unshifted) bit field definitions below) */
 #define ATIM_CCMR3_OC6CE          (1 << 15) /* Bit 15: Output Compare 7 Clear Enable */
-                               
+
 #define ATIM_CCMR3_OC5M           (1 << 16) /* Bit 16: Output Compare 5 mode - bit 3 */
 #define ATIM_CCMR3_OC6M           (1 << 24) /* Bit 24: Output Compare 6 mode - bit 3 */
 

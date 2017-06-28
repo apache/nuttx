@@ -55,7 +55,7 @@
  *  - L486 has AES
  *  - L496, L4A6 has 320 Kib SRAM, 2xCAN and CameraIF. Most (all?) of these have I2C4.
  *  - L4A6 has AES and HASH
- * 
+ *
  *   ----------- ---------------- ----- ------ ------ ---- ---- -----
  *   PART        PACKAGE          GPIOs LCD    Tamper FSMC CapS AdcCh
  *   ----------- ---------------- ----- ------ ------ ---- ---- -----

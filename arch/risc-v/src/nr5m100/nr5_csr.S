@@ -269,7 +269,7 @@ up_setq2:
     ret
 
 /****************************************************************************
- * Calls the  NR5M100 specific LSBENC opcode.  This opcode will find the 
+ * Calls the  NR5M100 specific LSBENC opcode.  This opcode will find the
  * first least significant non-zero bit in a0 and return it's ordinal value.
  ****************************************************************************/
 

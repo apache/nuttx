@@ -1651,7 +1651,7 @@ static int khci_rdsetup(struct khci_ep_s *privep, uint8_t *dest, int readlen)
 
   /* Then give the BDT to the USB */
 
-  bdtinfo("EP%d BDT OUT [%p] {%08x, %08x}\n", 
+  bdtinfo("EP%d BDT OUT [%p] {%08x, %08x}\n",
           epno, bdtout, status, bdtout->addr);
 
   bdtout->status = status;

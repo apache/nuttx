@@ -66,7 +66,7 @@
 #if defined(CONFIG_EFM32_TIMER0_PWM)  || \
     defined(CONFIG_EFM32_TIMER1_PWM)  || \
     defined(CONFIG_EFM32_TIMER2_PWM)  || \
-    defined(CONFIG_EFM32_TIMER3_PWM)  
+    defined(CONFIG_EFM32_TIMER3_PWM)
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -2886,7 +2886,7 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   /* Configure the RX DMA */
 
   stm32_configxfrints(priv, STM32_SDMMC_DMARECV_MASK);
-  
+
   sdmmc_modifyreg32(priv, STM32_SDMMC_DCTRL_OFFSET, 0, STM32_SDMMC_DCTRL_DMAEN);
   stm32_dmasetup(priv->dma, priv->base + STM32_SDMMC_FIFO_OFFSET,
                  (uint32_t)buffer, (buflen + 3) >> 2,
@@ -3312,7 +3312,7 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
     {
       priv->cdstatus &= ~SDIO_STATUS_WRPROTECTED;
     }
-    
+
   mcinfo("cdstatus: %02x\n", priv->cdstatus);
   leave_critical_section(flags);
 }

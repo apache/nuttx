@@ -3,7 +3,7 @@
  * 10/100 Base-T Ethernet driver for the SAMA5D4.
  *
  * The SAMA5D3 and SAMA5D4 EMAC implementations differ in register naming
- * and in register layout but are functionally equivalent.  Here they are 
+ * and in register layout but are functionally equivalent.  Here they are
  * distinguished as 'A' and 'B'.  For now, the 'A' and 'B' drivers are kept
  * separate (mostly because the 'B' driver needs to support two EMAC blocks.
  * But the 'B' driver should replace the 'A' driver someday.

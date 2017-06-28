@@ -3,7 +3,7 @@
 #
 #   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
-# 
+#
 #   modified for RISC-V:
 #
 #   Copyright (C) 2016 Ken Pettit. All rights reserved.
@@ -89,9 +89,9 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVGW)
     WINTOOL = y
   endif
 ifeq ($(CONFIG_RV32IM_HW_MULDIV),y)
-  ARCHCPUFLAGS = -march=RV32IMXcustom -m32 
+  ARCHCPUFLAGS = -march=RV32IMXcustom -m32
 else
-  ARCHCPUFLAGS = -march=RV32IXcustom -m32 
+  ARCHCPUFLAGS = -march=RV32IXcustom -m32
 endif
 endif
 

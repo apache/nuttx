@@ -248,7 +248,7 @@ static int stm32_tickless_setchannel(uint8_t channel)
    */
 
   ccmr_val = (ATIM_CCMR_MODE_FRZN << ATIM_CCMR1_OC1M_SHIFT);
-        
+
   /* Set polarity */
 
   ccer_val |= ATIM_CCER_CC1P << (channel << 2);
@@ -913,7 +913,7 @@ int up_timer_start(FAR const struct timespec *ts)
    */
 
   g_tickless.period = (uint16_t)(period + count);
- 
+
   STM32_TIM_SETCOMPARE(g_tickless.tch, g_tickless.channel,
                        g_tickless.period);
 

@@ -109,6 +109,6 @@ struct efm32_romtable_s
   const uint32_t pid2; /* Chip minor rev MSB, JEP_106_PRESENT, JEP_106_NO */
   const uint32_t pid3; /* Chip minor rev LSB */
   const uint32_t cid0; /* Unused */
-};  
+};
 
 #endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_ROMTABLE_H */

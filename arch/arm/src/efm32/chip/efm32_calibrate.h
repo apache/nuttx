@@ -88,6 +88,6 @@ struct efm32_calibrate_s
 {
   const uint32_t address; /* Address of calibration register */
   const uint32_t value;   /* Default value for calibration register */
-};    
+};
 
 #endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_CALIBRATE_H */

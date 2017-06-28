@@ -167,7 +167,7 @@ void up_irqinitialize(void)
         csrw %0, 0(zero) \
         csrw %1, 0(zero) \
         csrw %2, 0(zero) " ::
-        "i"(NR5_EPIC_PRI1_REG), "i"(NR5_EPIC_PRI2_REG), 
+        "i"(NR5_EPIC_PRI1_REG), "i"(NR5_EPIC_PRI2_REG),
         "i"(NR5_EPIC_PRI3_REG) );
 #endif
 
@@ -300,7 +300,7 @@ irqstate_t up_irq_save(void)
    * continue to fire, but no general purpose ints.
    */
 
-  __asm__ volatile("csrrw %0, %1, %2" : "=r"(oldIrqPri) : 
+  __asm__ volatile("csrrw %0, %1, %2" : "=r"(oldIrqPri) :
                "i"(NR5_EPIC_PRIMASK), "r"(newIrqPri));
 
   return oldIrqPri;

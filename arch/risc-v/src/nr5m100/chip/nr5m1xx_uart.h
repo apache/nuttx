@@ -41,7 +41,7 @@
  *   No parity.
  *
  *   It has a programmable baud rate and RX / TX interrupt capability
- *   and that's about it.  The primary goal for the UART is to provide a 
+ *   and that's about it.  The primary goal for the UART is to provide a
  *   debug console to the part.
  */
 

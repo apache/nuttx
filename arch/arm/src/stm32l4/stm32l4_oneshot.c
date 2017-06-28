@@ -238,7 +238,7 @@ int stm32l4_oneshot_initialize(FAR struct stm32l4_oneshot_s *oneshot,
  *
  ****************************************************************************/
 
-int stm32l4_oneshot_max_delay(FAR struct stm32l4_oneshot_s *oneshot, 
+int stm32l4_oneshot_max_delay(FAR struct stm32l4_oneshot_s *oneshot,
                               FAR uint64_t *usec)
 {
   DEBUGASSERT(oneshot != NULL && usec != NULL);

@@ -81,7 +81,7 @@ static inline void stm32l4_pwr_modifyreg(uint8_t offset, uint16_t clearbits, uin
  *   Enable/disable the clock to the power control peripheral.  Enabling must be done
  *   after the APB1 clock is validly configured, and prior to using any functionality
  *   controlled by the PWR block (i.e. much of anything else provided by this module).
- * 
+ *
  * Input Parameters:
  *   enable - True: enable the clock to the Power control (PWR) block.
  *
@@ -94,7 +94,7 @@ bool stm32l4_pwr_enableclk(bool enable)
 {
   uint32_t regval;
   bool wasenabled;
-  
+
   regval = getreg32(STM32L4_RCC_APB1ENR1);
   wasenabled = ((regval & RCC_APB1ENR1_PWREN) != 0);
 
@@ -114,7 +114,7 @@ bool stm32l4_pwr_enableclk(bool enable)
       regval |= RCC_APB1ENR1_PWREN;
       putreg32(regval, STM32L4_RCC_APB1ENR1);
     }
-  
+
   return wasenabled;
 }
 

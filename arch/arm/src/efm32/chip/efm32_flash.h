@@ -52,6 +52,6 @@
 #   define EFM32_FLASH_PAGESIZE    512
 #elif defined(CONFIG_EFM32_EFM32TG)
 #   define EFM32_FLASH_PAGESIZE    512
-#endif 
+#endif
 
 #endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_FLASH_H */

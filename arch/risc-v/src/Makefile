@@ -42,7 +42,7 @@ ifeq ($(CONFIG_ARCH_RV32I),y)           # Base Integer support
 ARCH_SUBDIR = rv32i
 else ifeq ($(CONFIG_ARCH_RV32IM),y)     # Integer + math support
 ARCH_SUBDIR = rv32im
-else                                    
+else
 ARCH_SUBDIR = rv32i                     # Default to base RV32I core
 endif
 
@@ -152,7 +152,7 @@ VPATH += $(CHIP_DIR)
 
 all: $(HEAD_OBJ) $(BIN)
 
-.PHONY: board/libboard$(LIBEXT) 
+.PHONY: board/libboard$(LIBEXT)
 
 $(AOBJS) $(UAOBJS) $(HEAD_OBJ): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -162,7 +162,7 @@ $(COBJS) $(UCOBJS): %$(OBJEXT): %.c
 
 $(BIN) $(KBIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
-	@$(MAKE) depend 
+	@$(MAKE) depend
 
 $(UBIN): $(UOBJS)
 	$(call ARCHIVE, $@, $(UOBJS))

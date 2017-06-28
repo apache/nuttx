@@ -364,7 +364,7 @@ int xmc4_uart_configure(enum usic_channel_e channel,
    *   - DPTR = 16
    *   - LIMIT = 1
    *   - STBTEN = 0, the trigger of the standard transmit buffer event is
-   *     based on the transition of the fill level from equal to below the 
+   *     based on the transition of the fill level from equal to below the
    *     limit, not the fact being below
    *   - SIZE = 16
    *   - LOF = 0, A standard transmit buffer event occurs when the filling

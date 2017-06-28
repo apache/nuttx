@@ -73,7 +73,7 @@ extern "C"
  *   Enable/disable the clock to the power control peripheral.  Enabling must be done
  *   after the APB1 clock is validly configured, and prior to using any functionality
  *   controlled by the PWR block (i.e. much of anything else provided by this module).
- * 
+ *
  * Input Parameters:
  *   enable - True: enable the clock to the Power control (PWR) block.
  *

@@ -78,7 +78,7 @@ static inline void irq_setmask(unsigned int mask)
 
 static inline unsigned int irq_pending(void)
 {
-  
+
   unsigned int pending;
   __asm__ __volatile__("rcsr %0, IP" : "=r" (pending));
   return pending;

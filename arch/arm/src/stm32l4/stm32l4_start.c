@@ -299,7 +299,7 @@ void __start(void)
    * under application-specific circumstances.  On the other hand, if we're
    * using this memory for, say, additional heap space, then this is handy.
    */
-  
+
   for (dest = (uint32_t *)SRAM2_START; dest < (uint32_t *)SRAM2_END; )
     {
       *dest++ = 0;

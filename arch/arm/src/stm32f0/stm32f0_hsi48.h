@@ -53,7 +53,7 @@ enum syncsrc_e
 {
   SYNCSRC_GPIO = 0, /* GPIO selected as SYNC signal source */
   SYNCSRC_LSE,      /* LSE selected as SYNC signal source */
-  SYNCSRC_USB,      /* USB SOF selected as SYNC signal source */   
+  SYNCSRC_USB,      /* USB SOF selected as SYNC signal source */
 };
 
 /************************************************************************************

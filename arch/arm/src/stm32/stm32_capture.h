@@ -91,7 +91,7 @@ typedef enum
   STM32_CAP_MAPPED_TI1          = (1<<GTIM_CCMR1_CC1S_SHIFT),
   STM32_CAP_MAPPED_TI2          = (2<<GTIM_CCMR1_CC1S_SHIFT),
 /*TODO STM32_CAP_MAPPED_TRC     = (3<<GTIM_CCMR1_CC1S_SHIFT),*/
-                                
+
   /* Event prescaler */
 
   STM32_CAP_INPSC_MASK          = (GTIM_CCMR1_IC1PSC_MASK),
@@ -144,7 +144,7 @@ typedef enum
   STM32_CAP_CLK_EXT,
 
   /* TODO: Add other clock */
-  
+
 } stm32_cap_clk_t;
 
 /* Capture flags */
@@ -170,7 +170,7 @@ typedef enum
 #define STM32_CAP_FLAG_IRQ_CH(ch)   (GTIM_SR_CC1IF<<((ch)-1))
 #define STM32_CAP_FLAG_OF_CH(ch)    (GTIM_SR_CC1OF<<((ch)-1))
 #define STM32_CAP_CHANNEL_COUNTER   0
-        
+
 /* Capture Operations */
 
 struct stm32_cap_ops_s

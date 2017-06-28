@@ -335,7 +335,7 @@
  *   Device Endpoint Mask Register
  *   Device Endpoint Enable Register
  *
- * (1) Control, Bulk, Interrupt endpoints 
+ * (1) Control, Bulk, Interrupt endpoints
  * (2) Isochronous endpoints only
  */
 
@@ -464,7 +464,7 @@
  * (1) Not clear or set registers
  * (2) Not clear register
  */
- 
+
 #define USBHS_HSTINT_DCONNI                (1 << 0)          /* Bit 0:  Device Connection Interrupt */
 #define USBHS_HSTINT_DDISCI                (1 << 1)          /* Bit 1:  Device Disconnection Interrupt */
 #define USBHS_HSTINT_RSTI                  (1 << 2)          /* Bit 2:  USB Reset Sent Interrupt */
@@ -644,7 +644,7 @@
  */
 
  /* All registers */
- 
+
 #define USBHS_HSTPIPINT_RXINI              (1 << 0)          /* Bit 0:  Received IN Data Interrupt */
 #define USBHS_HSTPIPINT_TXOUTI             (1 << 1)          /* Bit 1:  Transmitted OUT Data Interrupt */
 #define USBHS_HSTPIPINT_TXSTPI             (1 << 2)          /* Bit 2:  Transmitted SETUP Interrupt (1) */

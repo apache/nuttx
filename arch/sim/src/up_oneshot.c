@@ -213,7 +213,7 @@ static int sim_start(FAR struct oneshot_lowerhalf_s *lower,
   nsec = (int64_t)ts->tv_sec * NSEC_PER_SEC +
          (int64_t)ts->tv_nsec;
   ticks = (systime_t)((nsec + NSEC_PER_TICK - 1) / NSEC_PER_TICK);
- 
+
   /* Save the callback information and start the timer */
 
   priv->callback = callback;
