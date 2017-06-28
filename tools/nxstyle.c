@@ -230,7 +230,7 @@ int main(int argc, char **argv, char **envp)
 
       else if (strncmp(&line[indent], "for ", 4) == 0)
         {
-          bfor   = true;         
+          bfor   = true;
           bstatm = true;
         }
       else if (strncmp(&line[indent], "switch ", 7) == 0)
@@ -250,7 +250,7 @@ int main(int argc, char **argv, char **envp)
       else if (strncmp(&line[indent], "for(", 4) == 0)
         {
           fprintf(stderr, "Missing whitespace after keyword at line %d:%d\n", lineno, n);
-          bfor   = true;         
+          bfor   = true;
           bstatm = true;
         }
       else if (strncmp(&line[indent], "switch(", 7) == 0)
@@ -325,7 +325,7 @@ int main(int argc, char **argv, char **envp)
                       ncomment = 0;
                       fprintf(stderr,
                               "Closing without opening comment at line %d:%d\n",
-                              lineno, n);                        
+                              lineno, n);
                     }
                 }
 
