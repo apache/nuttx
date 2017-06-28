@@ -128,7 +128,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_MULTINIC
-static int check_dev_destipaddr(FAR struct net_driver_s *dev, FAR void *arg);
+static int check_dev_destipaddr(FAR struct net_driver_s *dev, FAR void *arg)
 {
   FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)arg;
 
