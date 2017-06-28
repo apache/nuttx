@@ -335,8 +335,10 @@ int ipv6_input(FAR struct net_driver_s *dev)
     {
       /* Check if the packet is destined for us. */
 
-      if (check_destipaddr(dev, ipv6))
+      if (!check_destipaddr(dev, ipv6))
         {
+          /* No.. the packet is not destined for us.. drop it */
+
 #ifdef CONFIG_NET_STATISTICS
           g_netstats.ipv6.drop++;
 #endif
