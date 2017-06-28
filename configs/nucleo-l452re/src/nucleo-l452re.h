@@ -56,7 +56,7 @@
 #define HAVE_PROC             1
 #define HAVE_RTC_DRIVER       1
 #define HAVE_MMCSD 1
- 
+
 #if !defined(CONFIG_FS_PROCFS)
 #  undef HAVE_PROC
 #endif

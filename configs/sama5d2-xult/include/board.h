@@ -181,8 +181,8 @@
 #define BUTTON_USER_BIT   (1 << BUTTON_USER)
 
 /* Pin disambiguation ***************************************************************/
-/* Alternative pin selections are provided with a numeric suffix like _1, _2, etc. 
- * Drivers, however, will use the pin selection without the numeric suffix. 
+/* Alternative pin selections are provided with a numeric suffix like _1, _2, etc.
+ * Drivers, however, will use the pin selection without the numeric suffix.
  * Additional definitions are required in this board.h file.  For example, if we
  * wanted the PCK0on PB26, then the following definition should appear in the
  * board.h header file for that board:

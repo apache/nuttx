@@ -287,7 +287,7 @@
 #define LED_PANIC                   3  /* Flashing */
 
 /* UART Pins ****************************************************************/
-/* 
+/*
  * The following definitions must be provided so that the LPC43 serial
  * driver can set up the U[S]ART for the serial console properly (see the
  * file arch/arc/src/lpc43xx/lpc43*_pinconf.h for more info).

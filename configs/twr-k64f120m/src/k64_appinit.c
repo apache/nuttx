@@ -102,7 +102,7 @@ int board_app_initialize(uintptr_t arg)
       return ret;
     }
 #endif
- 
+
 #ifdef HAVE_MMCSD
   /* Initialize the MMC/SD driver and possible automount */
 

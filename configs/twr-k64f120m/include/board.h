@@ -130,10 +130,10 @@
 /* LED definitions ******************************************************************/
 /* The TWR-K64F120M has four LEDs:
  *
- * 1. D5 / Green LED    PTE6 
- * 2. D6 / Yellow LED   PTE7 
- * 3. D7 / Orange LED   PTE8 
- * 4  D9 / Blue LED     PTE9 
+ * 1. D5 / Green LED    PTE6
+ * 2. D6 / Yellow LED   PTE7
+ * 3. D7 / Orange LED   PTE8
+ * 4  D9 / Blue LED     PTE9
  *
  * LED4 is reservered for user.
  * The 3 first LEDs are encoded as follows:

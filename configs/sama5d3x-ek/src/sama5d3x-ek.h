@@ -811,7 +811,7 @@ void weak_function sam_usbinitialize(void);
  * Name: stm32_usbhost_initialize
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality. 
+ *   Called at application startup time to initialize the USB host functionality.
  *   This function will start a thread that will monitor for device connection/
  *   disconnection events.
  *

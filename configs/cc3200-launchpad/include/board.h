@@ -145,7 +145,7 @@
  *   briefly while the assertion is handled.  You will probably never see this.
  *
  * Flashing RED:
- * - In the event of a fatal crash, 
+ * - In the event of a fatal crash,
  *   extinguished and the RED component will FLASH at a 2Hz rate.
  */
                                 /* RED  GREEN BLUE               */

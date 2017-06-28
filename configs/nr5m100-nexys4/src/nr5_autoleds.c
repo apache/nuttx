@@ -67,5 +67,5 @@
 
 void board_autoled_on(int led)
 {
- 
+
 }
