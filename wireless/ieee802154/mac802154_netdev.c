@@ -173,8 +173,8 @@ static void macnet_ind_associate(FAR struct macnet_driver_s *priv,
              FAR struct ieee802154_assoc_ind_s *conf);
 static void macnet_ind_disassociate(FAR struct macnet_driver_s *priv,
              FAR struct ieee802154_disassoc_ind_s *conf);
-static void macnet_ind_beaconnotify(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_beaconnotify_ind_s *conf);
+static void macnet_ind_beacon(FAR struct macnet_driver_s *priv,
+             FAR struct ieee802154_beacon_ind_s *conf);
 static void macnet_ind_gts(FAR struct macnet_driver_s *priv,
              FAR struct ieee802154_gts_ind_s *conf);
 static void macnet_ind_orphan(FAR struct macnet_driver_s *priv,
@@ -589,15 +589,15 @@ static void macnet_ind_disassociate(FAR struct macnet_driver_s *priv,
 }
 
 /****************************************************************************
- * Name: macnet_ind_beaconnotify
+ * Name: macnet_ind_beacon
  *
  * Description:
  *    Beacon notification
  *
  ****************************************************************************/
 
-static void macnet_ind_beaconnotify(FAR struct macnet_driver_s *priv,
-                                    FAR struct ieee802154_beaconnotify_ind_s *ind)
+static void macnet_ind_beacon(FAR struct macnet_driver_s *priv,
+                                    FAR struct ieee802154_beacon_ind_s *ind)
 {
 
 }

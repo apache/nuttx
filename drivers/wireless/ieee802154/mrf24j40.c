@@ -200,6 +200,8 @@ static void mrf24j40_setreg(FAR struct spi_dev_s *spi, uint32_t addr,
 static uint8_t mrf24j40_getreg(FAR struct spi_dev_s *spi, uint32_t addr);
 
 static int  mrf24j40_resetrfsm(FAR struct mrf24j40_radio_s *dev);
+static void mrf24j40_setorder(FAR struct mrf24j40_radio_s *dev, uint8_t bo,
+                             uint8_t so);
 static int  mrf24j40_pacontrol(FAR struct mrf24j40_radio_s *dev, int mode);
 
 static int  mrf24j40_setrxmode(FAR struct mrf24j40_radio_s *dev, int mode);
@@ -438,6 +440,7 @@ static int  mrf24j40_reset(FAR struct ieee802154_radio_s *radio)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
   struct ieee802154_cca_s   cca;
+  int reg;
 
   /* Software reset */
 
@@ -461,6 +464,27 @@ static int  mrf24j40_reset(FAR struct ieee802154_radio_s *radio)
   /* Set this in reset since it can exist for all device modes. See pg 101 */
 
   mrf24j40_setreg(dev->spi, MRF24J40_FRMOFFSET, 0x15);
+  
+  /* For now, we want to always just have the frame pending bit set when
+   * acknowledging a Data Request command. The standard says that the coordinator
+   * can do this if it needs time to figure out whether it has data or not
+   */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_ACKTMOUT, 0x39 | MRF24J40_ACKTMOUT_DRPACK);
+
+  /* Set WAKECNT (SLPACK 0x35<6:0>) value = 0x5F to set the main oscillator
+   * (20 MHz) start-up timer value.
+   */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_SLPACK, 0x5F);
+
+  /* Enable the SLPIF and WAKEIF flags */
+
+  reg = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
+  reg &= ~(MRF24J40_INTCON_SLPIE | MRF24J40_INTCON_WAKEIE);
+  mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
+
+  dev->rxenabled = false;
 
   mrf24j40_setchannel(dev, 11);
   mrf24j40_setpanid(dev, g_allones);
@@ -481,15 +505,6 @@ static int  mrf24j40_reset(FAR struct ieee802154_radio_s *radio)
   mrf24j40_settxpower(dev, 0); /*16. Set transmitter power .*/
 
   mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
-
-  dev->rxenabled = false;
-
-  /* For now, we want to always just have the frame pending bit set when
-   * acknowledging a Data Request command. The standard says that the coordinator
-   * can do this if it needs time to figure out whether it has data or not
-   */
-
-  mrf24j40_setreg(dev->spi, MRF24J40_ACKTMOUT, 0x39 | MRF24J40_ACKTMOUT_DRPACK);
 
   return OK;
 }
@@ -623,8 +638,6 @@ static int  mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
                FAR struct ieee802154_beaconframe_s *beacon)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
-  uint32_t maincnt = 0;
-  uint32_t slpcal = 0;
   int reg;
 
   if (sfspec->pancoord)
@@ -669,75 +682,8 @@ static int  mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
 
       /* TODO: Add GTS related code. See pg 100 of datasheet */
 
-      /* Calibrate the Sleep Clock (SLPCLK) frequency. Refer to Section 3.15.1.2
-       * “Sleep Clock Calibration”.
-       */
 
-      /* If the Sleep Clock Selection, SLPCLKSEL (0x207<7:6), is the internal
-       * oscillator (100 kHz), set SLPCLKDIV to a minimum value of 0x01.
-       */
-
-      mrf24j40_setreg(dev->spi, MRF24J40_SLPCON1, 0x01);
-
-      /* Select the source of SLPCLK (internal 100kHz) */
-
-      mrf24j40_setreg(dev->spi, MRF24J40_RFCON7, MRF24J40_RFCON7_SEL_100KHZ);
-
-      /* Begin calibration by setting the SLPCALEN bit (SLPCAL2 0x20B<4>) to
-       * ‘1’. Sixteen samples of the SLPCLK are counted and stored in the
-       * SLPCAL register. No need to mask, this is the only writable bit
-       */
-
-      mrf24j40_setreg(dev->spi, MRF24J40_SLPCAL2, MRF24J40_SLPCAL2_SLPCALEN);
-
-      /* Calibration is complete when the SLPCALRDY bit (SLPCAL2 0x20B<7>) is
-       * set to ‘1’.
-       */
-
-      while (!(mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL2) &
-             MRF24J40_SLPCAL2_SLPCALRDY))
-        {
-          usleep(1);
-        }
-
-      slpcal  = mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL0);
-      slpcal |= (mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL1) << 8);
-      slpcal |= ((mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL2) << 16) & 0x0F);
-
-      /* Set WAKECNT (SLPACK 0x35<6:0>) value = 0x5F to set the main oscillator
-       * (20 MHz) start-up timer value.
-       */
-
-      mrf24j40_setreg(dev->spi, MRF24J40_SLPACK, 0x5F);
-
-      /* Program the Beacon Interval into the Main Counter, MAINCNT (0x229<1:0>,
-       * 0x228, 0x227, 0x226), and Remain Counter, REMCNT (0x225, 0x224),
-       * according to BO and SO values. Refer to Section 3.15.1.3 “Sleep Mode
-       * Counters”
-       */
-
-      mrf24j40_setreg(dev->spi, MRF24J40_REMCNTL, (MRF24J40_REMCNT & 0xFF));
-      mrf24j40_setreg(dev->spi, MRF24J40_REMCNTH, ((MRF24J40_REMCNT >> 8) & 0xFF));
-
-      maincnt = MRF24J40_MAINCNT(sfspec->beaconorder, (slpcal * 50 / 16));
-
-      mrf24j40_setreg(dev->spi, MRF24J40_MAINCNT0, (maincnt & 0xFF));
-      mrf24j40_setreg(dev->spi, MRF24J40_MAINCNT1, ((maincnt >> 8)  & 0xFF));
-      mrf24j40_setreg(dev->spi, MRF24J40_MAINCNT2, ((maincnt >> 16) & 0xFF));
-      mrf24j40_setreg(dev->spi, MRF24J40_MAINCNT3, ((maincnt >> 24) & 0x03));
-
-      /* Enable the SLPIF and WAKEIF flags */
-
-      reg  = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
-      reg &= ~(MRF24J40_INTCON_SLPIE | MRF24J40_INTCON_WAKEIE);
-      mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
-
-      /* Configure the BO (ORDER 0x10<7:4>) and SO (ORDER 0x10<3:0>) values.
-       * After configuring BO and SO, the beacon frame will be sent immediately.
-       */
-
-      mrf24j40_setreg(dev->spi, MRF24J40_ORDER,
-        ((sfspec->beaconorder << 4) & 0xF0) | (sfspec->sforder & 0x0F));
+      mrf24j40_setorder(dev, sfspec->beaconorder, sfspec->sforder);
     }
   else
     {
@@ -770,44 +716,25 @@ static int mrf24j40_sfupdate(FAR struct ieee802154_radio_s *radio,
 
   /* If we are operating on a beacon-enabled network, use slotted CSMA */
 
+  reg = mrf24j40_getreg(dev->spi, MRF24J40_TXMCR);
   if (sfspec->beaconorder < 15)
     {
-      reg = mrf24j40_getreg(dev->spi, MRF24J40_TXMCR);
       reg |= MRF24J40_TXMCR_SLOTTED;
-      mrf24j40_setreg(dev->spi, MRF24J40_TXMCR, reg);
     }
   else
     {
-      reg = mrf24j40_getreg(dev->spi, MRF24J40_TXMCR);
       reg &= ~MRF24J40_TXMCR_SLOTTED;
-      mrf24j40_setreg(dev->spi, MRF24J40_TXMCR, reg);
     }
+  mrf24j40_setreg(dev->spi, MRF24J40_TXMCR, reg);
 
-  reg = mrf24j40_getreg(dev->spi, MRF24J40_RXMCR);
+  mrf24j40_setorder(dev, sfspec->beaconorder, sfspec->sforder);
 
-  if (sfspec->pancoord)
-    {
-      reg |= MRF24J40_RXMCR_PANCOORD;
-    }
-  else
-    {
-      reg &= ~MRF24J40_RXMCR_PANCOORD;
-    }
-  mrf24j40_setreg(dev->spi, MRF24J40_RXMCR, reg);
-
-  /* Program the CAP end slot (ESLOTG1 0x13<3:0>) value. */
+  /* Program the CAP end slot (ESLOTG1 0x13<3:0>) value. */ 
 
   reg = mrf24j40_getreg(dev->spi, MRF24J40_ESLOTG1);
   reg &= ~MRF24J40_ESLOTG1_CAP;
   reg |= sfspec->final_capslot & MRF24J40_ESLOTG1_CAP;
   mrf24j40_setreg(dev->spi, MRF24J40_ESLOTG1, reg);
-
-  /* Configure the BO (ORDER 0x10<7:4>) and SO (ORDER 0x10<3:0>) values.
-    * After configuring BO and SO, the beacon frame will be sent immediately.
-    */
-
-  mrf24j40_setreg(dev->spi, MRF24J40_ORDER,
-    ((sfspec->beaconorder << 4) & 0xF0) | (sfspec->sforder & 0x0F));
 
   return OK;
 }
@@ -879,10 +806,13 @@ static void mrf24j40_dopoll_csma(FAR void *arg)
 
   if (!dev->csma_busy)
     {
+      wlinfo("polling for frame\n");
       len = dev->radiocb->poll(dev->radiocb, false, &dev->csma_desc);
 
       if (len > 0)
         {
+          wlinfo("frame received. frame length: %d\n", len);
+
           /* Now the txdesc is in use */
 
           dev->csma_busy = 1;
@@ -891,6 +821,10 @@ static void mrf24j40_dopoll_csma(FAR void *arg)
 
           mrf24j40_norm_setup(dev, dev->csma_desc->frame, true);
           mrf24j40_norm_trigger(dev);
+        }
+      else
+        {
+          wlinfo("no frames\n");
         }
     }
 
@@ -1093,6 +1027,78 @@ static int mrf24j40_resetrfsm(FAR struct mrf24j40_radio_s *dev)
 }
 
 /****************************************************************************
+ * Name: mrf24j40_setorder
+ *
+ * Description:
+ *   Configures the timers and sets the ORDER register
+ ****************************************************************************/
+
+static void mrf24j40_setorder(FAR struct mrf24j40_radio_s *dev, uint8_t bo,
+                             uint8_t so)
+{
+  uint32_t maincnt = 0;
+  uint32_t slpcal = 0;
+
+  /* Calibrate the Sleep Clock (SLPCLK) frequency. Refer to Section 3.15.1.2
+    * “Sleep Clock Calibration”.
+    */
+
+  /* If the Sleep Clock Selection, SLPCLKSEL (0x207<7:6), is the internal
+    * oscillator (100 kHz), set SLPCLKDIV to a minimum value of 0x01.
+    */
+      
+  mrf24j40_setreg(dev->spi, MRF24J40_SLPCON1, 0x01);
+
+  /* Select the source of SLPCLK (internal 100kHz) */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_RFCON7, MRF24J40_RFCON7_SEL_100KHZ);
+
+  /* Begin calibration by setting the SLPCALEN bit (SLPCAL2 0x20B<4>) to
+    * ‘1’. Sixteen samples of the SLPCLK are counted and stored in the
+    * SLPCAL register. No need to mask, this is the only writable bit
+    */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_SLPCAL2, MRF24J40_SLPCAL2_SLPCALEN);
+
+  /* Calibration is complete when the SLPCALRDY bit (SLPCAL2 0x20B<7>) is
+    * set to ‘1’.
+    */
+      
+  while (!(mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL2) & 
+          MRF24J40_SLPCAL2_SLPCALRDY))
+    {
+      usleep(1);
+    }
+
+  slpcal  = mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL0);
+  slpcal |= (mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL1) << 8);
+  slpcal |= ((mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL2) << 16) & 0x0F);
+
+  /* Program the Beacon Interval into the Main Counter, MAINCNT (0x229<1:0>,
+    * 0x228, 0x227, 0x226), and Remain Counter, REMCNT (0x225, 0x224),
+    * according to BO and SO values. Refer to Section 3.15.1.3 “Sleep Mode
+    * Counters” 
+    */
+
+
+  mrf24j40_setreg(dev->spi, MRF24J40_REMCNTL, (MRF24J40_REMCNT & 0xFF));
+  mrf24j40_setreg(dev->spi, MRF24J40_REMCNTH, ((MRF24J40_REMCNT >> 8) & 0xFF));
+
+  maincnt = MRF24J40_MAINCNT(bo, (slpcal * 50 / 16));
+
+  mrf24j40_setreg(dev->spi, MRF24J40_MAINCNT0, (maincnt & 0xFF));
+  mrf24j40_setreg(dev->spi, MRF24J40_MAINCNT1, ((maincnt >> 8)  & 0xFF));
+  mrf24j40_setreg(dev->spi, MRF24J40_MAINCNT2, ((maincnt >> 16) & 0xFF));
+  mrf24j40_setreg(dev->spi, MRF24J40_MAINCNT3, ((maincnt >> 24) & 0x03));
+
+  /* Configure the BO (ORDER 0x10<7:4>) and SO (ORDER 0x10<3:0>) values.
+    * After configuring BO and SO, the beacon frame will be sent immediately.
+    */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_ORDER, ((bo << 4) & 0xF0) | (so & 0x0F));
+}
+
+/****************************************************************************
  * Name: mrf24j40_pacontrol
  *
  * Description:
@@ -1232,7 +1238,7 @@ static int mrf24j40_setpanid(FAR struct mrf24j40_radio_s *dev,
   mrf24j40_setreg(dev->spi, MRF24J40_PANIDH, panid[1]);
 
   IEEE802154_PANIDCOPY(dev->addr.panid, panid);
-  wlinfo("%02X:%02X\n", panid[1], panid[0]);
+  wlinfo("%02X:%02X\n", panid[0], panid[1]);
 
   return OK;
 }
@@ -1255,7 +1261,7 @@ static int mrf24j40_setsaddr(FAR struct mrf24j40_radio_s *dev,
 
   IEEE802154_SADDRCOPY(dev->addr.saddr, saddr);
 
-  wlinfo("%02X:%02X\n", saddr[1], saddr[0]);
+  wlinfo("%02X:%02X\n", saddr[0], saddr[1]);
   return OK;
 }
 
@@ -1278,6 +1284,8 @@ static int mrf24j40_seteaddr(FAR struct mrf24j40_radio_s *dev,
       mrf24j40_setreg(dev->spi, MRF24J40_EADR0 + i, eaddr[i]);
       dev->addr.eaddr[i] = eaddr[i];
     }
+  wlinfo("%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\n", eaddr[0], eaddr[1],
+         eaddr[2], eaddr[3], eaddr[4], eaddr[5], eaddr[6], eaddr[7]);
 
   return OK;
 }
@@ -1300,7 +1308,7 @@ static int mrf24j40_setcoordsaddr(FAR struct mrf24j40_radio_s *dev,
 
   IEEE802154_SADDRCOPY(dev->addr.saddr, saddr);
 
-  wlinfo("%02X:%02X\n", saddr[1], saddr[0]);
+  wlinfo("%02X:%02X\n", saddr[0], saddr[1]);
   return OK;
 }
 
@@ -1324,6 +1332,8 @@ static int mrf24j40_setcoordeaddr(FAR struct mrf24j40_radio_s *dev,
       dev->addr.eaddr[i] = eaddr[i];
     }
 
+  wlinfo("%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\n", eaddr[0], eaddr[1],
+         eaddr[2], eaddr[3], eaddr[4], eaddr[5], eaddr[6], eaddr[7]);
   return OK;
 }
 

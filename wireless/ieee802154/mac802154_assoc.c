@@ -88,6 +88,7 @@ int mac802154_req_associate(MACHANDLE mac,
   FAR struct iob_s *iob;
   bool rxonidle;
   int ret;
+  int i;
 
   if (req->coordaddr.mode == IEEE802154_ADDRMODE_NONE)
     {
@@ -248,13 +249,67 @@ int mac802154_req_associate(MACHANDLE mac,
 
   priv->cmd_desc = txdesc;
 
+  /* Search the list of PAN descriptors, that would have been populated by the
+   * latest scan procedure. If we have seen a beacon from the coordinator that
+   * we are about to associate with, we can check the beacon order to determine
+   * whether we can send the command during the CAP.  If we haven't received
+   * a beacon frame from the desired coordinator address, we have to just
+   * send the frame out immediately.
+   */
+  
+  for (i = 0; i < priv->npandesc; i++)
+    {
+      /* Check to make sure the beacon is from the same channel as the request */
+
+      if (req->chan != priv->pandescs[i].chan)
+        {
+          continue;
+        }
+
+      if (memcmp(&req->coordaddr, &priv->pandescs[i].coordaddr,
+          sizeof(struct ieee802154_addr_s)) == 0)
+        {
+          wlinfo("Found matching beacon to use for settings\n");
+
+          /* We have a beacon frame from this coordinator, we can set the
+           * sfspec and send accordingly.
+           */
+          
+          /* Copy in the new superframe spec */
+
+          memcpy(&priv->sfspec, &priv->pandescs[i].sfspec,
+                 sizeof(struct ieee802154_superframespec_s));
+
+          /* Tell the radio layer about the superframe spec update */
+
+          priv->radio->sfupdate(priv->radio, &priv->pandescs[i].sfspec);
+        }
+    }
+
+  if (priv->sfspec.beaconorder == 15)
+    {
+      wlinfo("Transmitting assoc request\n");
+
+      /* Association Request command gets sent out immediately */
+
+      priv->radio->txdelayed(priv->radio, txdesc, 0);
+    }
+  else
+    {
+      wlinfo("Queuing assoc request for CAP\n");
+
+      /* Link the transaction into the CSMA transaction list */
+
+      sq_addlast((FAR sq_entry_t *)txdesc, &priv->csma_queue);
+
+      /* Notify the radio driver that there is data available */
+
+      priv->radio->txnotify(priv->radio, false);
+    }
+
   /* We no longer need to have the MAC layer locked. */
 
   mac802154_givesem(&priv->exclsem);
-
-  /* Association Request command gets sent out immediately */
-
-  priv->radio->txdelayed(priv->radio, txdesc, 0);
 
   return OK;
 }
