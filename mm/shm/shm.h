@@ -81,7 +81,7 @@ struct shm_region_s
 };
 
 /* This structure represents the set of all shared memory regions.
- * Access to the region 
+ * Access to the region
  */
 
 struct shm_info_s

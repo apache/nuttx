@@ -59,7 +59,7 @@
  *    The sbrk() function adds 'incr' bytes to the break value and changes
  *    the allocated space accordingly. If incr is negative, the amount of
  *    allocated space is decreased by incr bytes. The current value of the
- *    program break is returned by sbrk(0). 
+ *    program break is returned by sbrk(0).
  *
  * Input Parameters:
  *    incr - Specifies the number of bytes to add or to remove from the
