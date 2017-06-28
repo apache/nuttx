@@ -140,7 +140,7 @@ SECTIONS
 	.data			:
 	{
 		_sdata = ABSOLUTE(.);
-		*(.rodata .rodata.*)                
+		*(.rodata .rodata.*)
 		*(.data .data.*)
 		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS

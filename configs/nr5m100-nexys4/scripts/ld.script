@@ -129,7 +129,7 @@ SECTIONS
   _vectors = .;
 
   /* vectors: Program code section */
-  .vectors : 
+  .vectors :
   {
     *(.text.vec)
     *(.text.vec.*)
@@ -147,7 +147,7 @@ SECTIONS
   PROVIDE( eprol = . );
 
   /* text: Program code section */
-  .text : 
+  .text :
   {
     _stext = ABSOLUTE(.);
     *(.text)
@@ -156,20 +156,20 @@ SECTIONS
   }
 
   /* init: Code to execute before main (called by crt0.S) */
-  .init : 
+  .init :
   {
     KEEP( *(.init) )
   }
 
   /* fini: Code to execute after main (called by crt0.S) */
-  .fini : 
+  .fini :
   {
     KEEP( *(.fini) )
   }
 
   /* rodata: Read-only data */
   _rodata = .;
-  .rodata : 
+  .rodata :
   {
     *(.rdata)
     *(.rodata)
@@ -218,7 +218,7 @@ SECTIONS
   .eh_frame_hdr     : { *(.eh_frame_hdr)     }
   .eh_frame         : { KEEP( *(.eh_frame) ) }
   .gcc_except_table : { *(.gcc_except_table) }
-  .jcr              : { KEEP (*(.jcr))       } 
+  .jcr              : { KEEP (*(.jcr))       }
 
   /*--------------------------------------------------------------------*/
   /* Initialized data segment                                           */
@@ -230,7 +230,7 @@ SECTIONS
 
   /* data: Writable data */
   _sdata = .;
-  .data : 
+  .data :
   {
     *(.data)
     *(.data.*)
@@ -246,7 +246,7 @@ SECTIONS
   _gp = . + 0x7FF0;
 
   /* Writable small data segment */
-  .sdata : 
+  .sdata :
   {
     *(.sdata)
     *(.sdata.*)
@@ -264,7 +264,7 @@ SECTIONS
   _fbss = .;
 
   /* Writable uninitialized small data segment */
-  .sbss : 
+  .sbss :
   {
     *(.sbss)
     *(.sbss.*)
@@ -274,7 +274,7 @@ SECTIONS
   /* bss: Uninitialized writeable data section */
   . = .;
   _bss_start = .;
-  .bss : 
+  .bss :
   {
     *(.bss)
     *(.bss.*)

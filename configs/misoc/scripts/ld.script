@@ -70,7 +70,7 @@ SECTIONS
 		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
-	} > main_ram 
+	} > main_ram
 
 	.bss : {			/* BSS				*/
 		_sbss = ABSOLUTE(.);
