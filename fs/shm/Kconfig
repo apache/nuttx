@@ -18,5 +18,5 @@ config FS_SHMPATH
 	---help---
 		The path to where shared memory objects will exist in the VFS
 		namespace.
-    
+
 endif # FS_SHM

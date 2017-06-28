@@ -206,7 +206,7 @@ static void hostfs_mkpath(FAR struct hostfs_mountpt_s  *fs,
 
   strncpy(path, fs->fs_root, pathlen);
 
-  /* Be sure we aren't trying to use ".." to display outside of our 
+  /* Be sure we aren't trying to use ".." to display outside of our
    * mounted path.
    */
 
@@ -849,7 +849,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
     }
 
   /* The only options we suppor are "-o fs=whatever", so search
-   * for the 'dir=' portion 
+   * for the 'dir=' portion
    */
 
   options = (const char *) data;
@@ -874,7 +874,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
     {
       /* Initialize the semaphore that controls access */
 
-      sem_init(&g_sem, 0, 0);   
+      sem_init(&g_sem, 0, 0);
       g_seminitialized = TRUE;
     }
   else
