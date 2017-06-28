@@ -68,7 +68,7 @@
  *   asynchronous I/O request via aio_read(), aio_write(), or lio_listio().
  *   This array may contain NULL pointers, which are ignored. If this
  *   array contains pointers that refer to aiocb structures that have not
- *   been used in submitting asynchronous I/O, the effect is undefined. 
+ *   been used in submitting asynchronous I/O, the effect is undefined.
  *
  * Input Parameters:
  *   list    - An array of pointers to asynchronous I/O control blocks.
@@ -78,7 +78,7 @@
  *             structure that determines a timeout on the operation.  If
  *             the time referred to timeout passes before any of the I/O
  *             operations referenced by list are completed, then
- *             aio_suspend() returns with an error. 
+ *             aio_suspend() returns with an error.
  *
  * Returned Value:
  *   If the aio_suspend() function returns after one or more asynchronous
@@ -86,7 +86,7 @@
  *   the function returns a value of -1 and sets errno to indicate the
  *   error.  The application may determine which asynchronous I/O completed
  *   by scanning the associated error and return status using aio_error()
- *   and aio_return(), respectively. 
+ *   and aio_return(), respectively.
  *
  *   The aio_suspend() function will fail if:
  *

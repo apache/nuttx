@@ -53,15 +53,15 @@
  *
  * Description:
  *   The unlockpt() function unlocks the slave pseudoterminal device
- *   corresponding to the master pseudoterminal referred to by fd. 
+ *   corresponding to the master pseudoterminal referred to by fd.
  *   unlockpt() must be called before opening the slave side of a
- *   pseudoterminal. 
+ *   pseudoterminal.
  *
  * Returned Values:
  *   When successful, unlockpt() returns 0. Otherwise, it returns -1 and
  *   sets errno appropriately.
  *
- *     EBADF - The fd argument is not a file descriptor open for writing. 
+ *     EBADF - The fd argument is not a file descriptor open for writing.
  *     EINVAL - The fd argument is not associated with a master
  *       pseudoterminal
  *

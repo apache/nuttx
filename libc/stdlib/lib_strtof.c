@@ -179,7 +179,7 @@ float strtof(FAR const char *str, FAR char **endptr)
         {
         case '-':
           negative = 1;   /* Fall through to increment pos */
-          /* FALLTHROUGH */          
+          /* FALLTHROUGH */
         case '+':
           p++;
           /* FALLTHROUGH */

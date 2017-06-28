@@ -1,6 +1,6 @@
 /****************************************************************************
  * libc/net/lib_shutdown.c
- * 
+ *
  *   Copyright (c) 2015, Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -62,7 +62,7 @@
  *
  * Input Paramteers:
  *   sockfd - Specifies the file descriptor of the socket.
- *   how    - Specifies the type of shutdown. The values are as follows: 
+ *   how    - Specifies the type of shutdown. The values are as follows:
  *
  *     SHUT_RD   - Disables further receive operations.
  *     SHUT_WR   - Disables further send operations.

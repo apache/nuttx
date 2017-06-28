@@ -257,7 +257,7 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
   elapsed = clock_systimer() - stick;
   if (elapsed < wqueue->delay && next > 0)
     {
-      /* How must time would we need to delay to get to the end of the 
+      /* How must time would we need to delay to get to the end of the
        * sampling period?  The amount of time we delay should be the smaller
        * of the time to the end of the sampling period and the time to the
        * next work expiry.

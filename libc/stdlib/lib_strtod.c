@@ -180,7 +180,7 @@ double strtod(FAR const char *str, FAR char **endptr)
           /* FALLTHROUGH */
         case '+':
           p++;
-          /* FALLTHROUGH */          
+          /* FALLTHROUGH */
         default:
           break;
         }
