@@ -138,7 +138,7 @@ static int filemtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
  * Name: filemtd_write
  ****************************************************************************/
 
-static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset, 
+static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
                              FAR const void *src, size_t len)
 {
   FAR const uint8_t *pin  = (FAR const uint8_t *)src;
@@ -197,16 +197,16 @@ static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
       *pout++ = newvalue;
       buflen--;
 
-      /* If our buffer is full, then seek back to beginning of 
-       * the file and write the buffer contents 
+      /* If our buffer is full, then seek back to beginning of
+       * the file and write the buffer contents
        */
 
       if (buflen == 0)
-        { 
+        {
           lseek(priv->fd, seekpos, SEEK_SET);
           write(priv->fd, buf, sizeof(buf));
           seekpos += sizeof(buf);
-        } 
+        }
     }
 
   /* Write remaining bytes */
@@ -282,7 +282,7 @@ static int filemtd_erase(FAR struct mtd_dev_s *dev, off_t startblock,
   while (nbytes)
     {
       write(priv->fd, buffer, sizeof(buffer));
-      nbytes -= sizeof(buffer); 
+      nbytes -= sizeof(buffer);
     }
 
   return OK;

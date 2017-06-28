@@ -289,10 +289,10 @@
 
 #define MFRC522_INV_MOD             (1 << 3) /* modulation of transmitted data is inverted */
 #define MFRC522_TX_SPEED_MASK       (7 << 4) /* defines the bit rate during data transmission */
-#define MFRC522_TX_106KBD           (0 << 4) /* 106 kBd */ 
-#define MFRC522_TX_212KBD           (1 << 4) /* 212 kBd */ 
-#define MFRC522_TX_424KBD           (2 << 4) /* 424 kBd */ 
-#define MFRC522_TX_848KBD           (3 << 4) /* 848 kBd */ 
+#define MFRC522_TX_106KBD           (0 << 4) /* 106 kBd */
+#define MFRC522_TX_212KBD           (1 << 4) /* 212 kBd */
+#define MFRC522_TX_424KBD           (2 << 4) /* 424 kBd */
+#define MFRC522_TX_848KBD           (3 << 4) /* 848 kBd */
                                              /* 4-7 << 4 - reserved */
 #define MFRC522_TX_CRC_EN           (1 << 7) /* enables CRC generation during data transmission */
 
@@ -301,10 +301,10 @@
 #define MFRC522_RX_MULTIPLE         (1 << 2) /* enable to receive more than one data frame, only at 106kBd */
 #define MFRC522_RX_NO_ERR           (1 << 3) /* ignore invalid data stream error (less than 4 bits received) */
 #define MFRC522_RX_SPEED_MASK       (7 << 4) /* defines the bit rate during data reception */
-#define MFRC522_RX_106KBD           (0 << 4) /* 106 kBd */ 
-#define MFRC522_RX_212KBD           (1 << 4) /* 212 kBd */ 
-#define MFRC522_RX_424KBD           (2 << 4) /* 424 kBd */ 
-#define MFRC522_RX_848KBD           (3 << 4) /* 848 kBd */ 
+#define MFRC522_RX_106KBD           (0 << 4) /* 106 kBd */
+#define MFRC522_RX_212KBD           (1 << 4) /* 212 kBd */
+#define MFRC522_RX_424KBD           (2 << 4) /* 424 kBd */
+#define MFRC522_RX_848KBD           (3 << 4) /* 848 kBd */
                                              /* 4-7 << 4 - reserved */
 #define MFRC522_RX_CRC_EN           (1 << 7) /* enables CRC generation during data reception */
 

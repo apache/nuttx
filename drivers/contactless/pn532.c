@@ -462,7 +462,7 @@ int pn532_read_ack(struct pn532_dev_s *dev)
  *
  *   Construct frame with
  *      pn532_frame_init(), pn532_frame_finish()
- * 
+ *
  * Input Parameters:
  *   dev - Device instance
  *   f   - Pointer to start frame

@@ -181,7 +181,7 @@
 #define SST26_LBPR      0x8d    /* 14 Lock down Block-Prot. reg       0   0   0     */
 #define SST26_NVWLDR    0xe8    /* 14 non-Volatile Write L-D reg      0   0   1-18  */
 #define SST26_ULBPR     0x98    /* 14 Global Block Protection unlock  0   0   0     */
-#define SST26_RSID      0x88    /* 14 Read Security ID                2   1   1-2048*/ 
+#define SST26_RSID      0x88    /* 14 Read Security ID                2   1   1-2048*/
                                 /*  4 Read Security ID                2   3   1-2048*/
 #define SST26_PSID      0xa5    /* 14 Program User Security ID area   2   0   1-256 */
 #define SST26_LSID      0x85    /* 14 Lockout Security ID programming 0   0   0     */

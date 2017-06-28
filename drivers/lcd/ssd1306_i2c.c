@@ -124,7 +124,7 @@ void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
    */
 
   /* Send the SSD1306 register address (with no STOP) */
-  
+
   transfer_mode    = 0x40;                    /* Select data transfer */
 
   msg[0].frequency = CONFIG_SSD1306_I2CFREQ;  /* I2C frequency */

@@ -92,7 +92,7 @@ int spi_transfer(FAR struct spi_dev_s *spi, FAR struct spi_sequence_s *seq)
     {
       spierr("ERROR: SPI_SETDELAY failed: %d\n", ret);
       SPI_LOCK(spi, false);
-      return ret;  
+      return ret;
     }
 #endif
 
@@ -154,7 +154,7 @@ int spi_transfer(FAR struct spi_dev_s *spi, FAR struct spi_sequence_s *seq)
 
   SPI_SELECT(spi, seq->dev, false);
   SPI_LOCK(spi, false);
-  return ret;  
+  return ret;
 }
 
 #endif /* CONFIG_SPI_EXCHANGE */

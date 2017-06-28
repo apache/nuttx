@@ -170,7 +170,7 @@ int syslog_file_channel(FAR const char *devpath)
       (void)syslog_channel(saved_channel);
       goto errout_with_lock;
     }
-  
+
   /* Then initialize the file interface */
 
   ret = syslog_dev_initialize(devpath, OPEN_FLAGS, OPEN_MODE);

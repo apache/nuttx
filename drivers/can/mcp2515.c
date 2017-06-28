@@ -330,13 +330,13 @@ static void mcp2515_readregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
 
   (void)SPI_SEND(config->spi, regaddr);
   SPI_RECVBLOCK(config->spi, buffer, len);
-  
+
   /* Deselect the MCP2515 */
-  
+
   SPI_SELECT(config->spi, SPIDEV_CANBUS(0), false);
-  
+
   /* Unlock bus */
-  
+
   (void)SPI_LOCK(config->spi, false);
 
 #ifdef CONFIG_CANBUS_REGDEBUG
@@ -390,13 +390,13 @@ static void mcp2515_writeregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
 
   (void)SPI_SEND(config->spi, regaddr);
   SPI_SNDBLOCK(config->spi, buffer, len);
-  
+
   /* Deselect the MCP2515 */
-  
+
   SPI_SELECT(config->spi, SPIDEV_CANBUS(0), false);
-  
+
   /* Unlock bus */
-  
+
   (void)SPI_LOCK(config->spi, false);
 }
 
@@ -434,21 +434,21 @@ static void mcp2515_modifyreg(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
   /* Send the register address */
 
   (void)SPI_SEND(config->spi, regaddr);
- 
+
   /* Send the mask */
 
   (void)SPI_SEND(config->spi, mask);
- 
+
   /* Send the value */
 
   (void)SPI_SEND(config->spi, value);
- 
+
   /* Deselect the MCP2515 */
-  
+
   SPI_SELECT(config->spi, SPIDEV_CANBUS(0), false);
-  
+
   /* Unlock bus */
-  
+
   (void)SPI_LOCK(config->spi, false);
 }
 
@@ -564,7 +564,7 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
            * filterN = RXF0reg + offset + ((priv->nalloc - 1) * 4) ;
            * maskN   = RXM0reg + offset
            */
-          
+
           if (priv->nalloc <= 3)
             {
               offset = 0;
@@ -622,13 +622,13 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
               /* EID0 - EID7 */
 
               regval = (uint8_t) (extconfig->xf_id1 & 0xff);
-              mcp2515_writeregs(priv, MCP2515_RXF0EID0 + offset + 
+              mcp2515_writeregs(priv, MCP2515_RXF0EID0 + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
 
               /* EID8 - EID15 */
 
               regval = (uint8_t) ((extconfig->xf_id1 & 0xff00) >> 8);
-              mcp2515_writeregs(priv, MCP2515_RXF0EID8 + offset + 
+              mcp2515_writeregs(priv, MCP2515_RXF0EID8 + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
 
               /* EID16 - EID17 */
@@ -638,14 +638,14 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
               /* STD0 - STD2*/
 
               regval = (regval) | (uint8_t) (((extconfig->xf_id1 & 0x1C0000) >> 16) << 3);
-              mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset + 
+              mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
 
               /* STD3 - STD10 */
 
               regval = (uint8_t) ((extconfig->xf_id1 & 0x1fe00000 ) >> 21);
               regval |= RXFSIDL_EXIDE;
-              mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset + 
+              mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
 
               /* Setup the Mask */
@@ -683,14 +683,14 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
               /* EID0 - EID7 */
 
               regval = (uint8_t) (extconfig->xf_id1 & 0xff);
-              mcp2515_writeregs(priv, MCP2515_RXF0EID0 + offset + 
+              mcp2515_writeregs(priv, MCP2515_RXF0EID0 + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
               mcp2515_writeregs(priv, MCP2515_RXM0EID0 + offset, &regval, 1);
 
               /* EID8 - EID15 */
 
               regval = (uint8_t) ((extconfig->xf_id1 & 0xff00) >> 8);
-              mcp2515_writeregs(priv, MCP2515_RXF0EID8 + offset + 
+              mcp2515_writeregs(priv, MCP2515_RXF0EID8 + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
               mcp2515_writeregs(priv, MCP2515_RXM0EID8 + offset, &regval, 1);
 
@@ -700,16 +700,16 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
 
               /* STD0 - STD2 */
 
-              regval = (regval) | (uint8_t) (((extconfig->xf_id1 & 
+              regval = (regval) | (uint8_t) (((extconfig->xf_id1 &
                                 0x1c0000) >> 16) << 3) | RXFSIDL_EXIDE;
-              mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset + 
+              mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
               mcp2515_writeregs(priv, MCP2515_RXM0SIDL + offset, &regval, 1);
 
               /* STD3 - STD10 */
 
               regval = (uint8_t) ((extconfig->xf_id1 & 0x1fe00000 ) >> 21);
-              mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset + 
+              mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
               mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset, &regval, 1);
             }
@@ -888,7 +888,7 @@ static int mcp2515_add_stdfilter(FAR struct mcp2515_can_s *priv,
            * filterN = RXF0reg + offset + ((priv->nalloc - 1) * 4) ;
            * maskN   = RXM0reg + offset
            */
-          
+
           if (priv->nalloc <= 3)
             {
               offset = 0;
@@ -944,11 +944,11 @@ static int mcp2515_add_stdfilter(FAR struct mcp2515_can_s *priv,
               /* Setup the Filter */
 
               regval = (uint8_t) (((stdconfig->sf_id1) & 0x7f8) >> 3);
-              mcp2515_writeregs(priv, MCP2515_RXF0SIDH + offset + 
+              mcp2515_writeregs(priv, MCP2515_RXF0SIDH + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
 
               regval = (uint8_t) ((stdconfig->sf_id1 & 0x07 ) << 5);
-              mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset + 
+              mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
 
               /* Setup the Mask */
@@ -966,12 +966,12 @@ static int mcp2515_add_stdfilter(FAR struct mcp2515_can_s *priv,
               /* Setup the Filter */
 
               regval = (uint8_t) (((stdconfig->sf_id1) & 0x7f8) >> 3);
-              mcp2515_writeregs(priv, MCP2515_RXF0SIDH + offset + 
+              mcp2515_writeregs(priv, MCP2515_RXF0SIDH + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
               mcp2515_writeregs(priv, MCP2515_RXM0SIDH + offset, &regval, 1);
 
               regval = (uint8_t) ((stdconfig->sf_id1 & 0x07 ) << 5);
-              mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset + 
+              mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
               mcp2515_writeregs(priv, MCP2515_RXM0SIDL + offset, &regval, 1);
             }
@@ -979,9 +979,9 @@ static int mcp2515_add_stdfilter(FAR struct mcp2515_can_s *priv,
           /* We need to clear the extended ID bits */
 
           regval = 0;
-          mcp2515_writeregs(priv, MCP2515_RXF0EID0 + offset + 
+          mcp2515_writeregs(priv, MCP2515_RXF0EID0 + offset +
                             ((priv->nalloc - 1) * 4), &regval, 1);
-          mcp2515_writeregs(priv, MCP2515_RXF0EID8 + offset + 
+          mcp2515_writeregs(priv, MCP2515_RXF0EID8 + offset +
                             ((priv->nalloc - 1) * 4), &regval, 1);
           mcp2515_writeregs(priv, MCP2515_RXM0EID0 + offset, &regval, 1);
           mcp2515_writeregs(priv, MCP2515_RXM0EID8 + offset, &regval, 1);
@@ -1467,7 +1467,7 @@ static int mcp2515_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
            * PHSEG1 == PHSEG2 (PHSEG2 = TSEG2)
            *
            * See more at:
-           * 
+           *
            * http://www.analog.com/en/analog-dialogue/articles/configure-can-bit-timing.html
            */
 

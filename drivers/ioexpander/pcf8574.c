@@ -685,7 +685,7 @@ static int pcf8574_multireadpin(FAR struct ioexpander_dev_s *dev,
 
       gpioinfo("%d. pin=%u value=%u\n", pin, values[i]);
     }
- 
+
   ret = OK;
 
 errout_with_lock:

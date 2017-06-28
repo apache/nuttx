@@ -475,7 +475,7 @@ static int mrf24j40_get_attr(FAR struct ieee802154_radio_s *radio,
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
-      
+
       case IEEE802154_ATTR_PHY_CHAN:
         {
           attrval->phy.chan = dev->chan;
@@ -518,7 +518,7 @@ static int mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
-      
+
       case IEEE802154_ATTR_MAC_COORD_SADDR:
         {
           mrf24j40_setcoordsaddr(dev, attrval->mac.coordsaddr);
@@ -555,7 +555,7 @@ static int mrf24j40_set_attr(FAR struct ieee802154_radio_s *radio,
           ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
-      
+
       case IEEE802154_ATTR_PHY_CHAN:
         {
           mrf24j40_setchannel(dev, attrval->phy.chan);
@@ -595,7 +595,7 @@ static int  mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
       mrf24j40_setreg(dev->spi, MRF24J40_RXMCR, reg);
 
       /* Set the SLOTTED (TXMCR 0x11<5>) bit = 1 to use Slotted CSMA-CA mode */
-      
+
       reg = mrf24j40_getreg(dev->spi, MRF24J40_TXMCR);
       reg |= MRF24J40_TXMCR_SLOTTED;
       mrf24j40_setreg(dev->spi, MRF24J40_TXMCR, reg);
@@ -619,7 +619,7 @@ static int  mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
       reg |= 0x03 & MRF24J40_WAKECON_INTL;
       mrf24j40_setreg(dev->spi, MRF24J40_WAKECON, reg);
 
-      /* Program the CAP end slot (ESLOTG1 0x13<3:0>) value. */ 
+      /* Program the CAP end slot (ESLOTG1 0x13<3:0>) value. */
 
       reg = mrf24j40_getreg(dev->spi, MRF24J40_ESLOTG1);
       reg &= ~MRF24J40_ESLOTG1_CAP;
@@ -635,7 +635,7 @@ static int  mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
       /* If the Sleep Clock Selection, SLPCLKSEL (0x207<7:6), is the internal
        * oscillator (100 kHz), set SLPCLKDIV to a minimum value of 0x01.
        */
-      
+
       mrf24j40_setreg(dev->spi, MRF24J40_SLPCON1, 0x01);
 
       /* Select the source of SLPCLK (internal 100kHz) */
@@ -652,8 +652,8 @@ static int  mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
       /* Calibration is complete when the SLPCALRDY bit (SLPCAL2 0x20B<7>) is
        * set to ‘1’.
        */
-      
-      while (!(mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL2) & 
+
+      while (!(mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL2) &
              MRF24J40_SLPCAL2_SLPCALRDY))
         {
           usleep(1);
@@ -672,7 +672,7 @@ static int  mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
       /* Program the Beacon Interval into the Main Counter, MAINCNT (0x229<1:0>,
        * 0x228, 0x227, 0x226), and Remain Counter, REMCNT (0x225, 0x224),
        * according to BO and SO values. Refer to Section 3.15.1.3 “Sleep Mode
-       * Counters” 
+       * Counters”
        */
 
       mrf24j40_setreg(dev->spi, MRF24J40_REMCNTL, (MRF24J40_REMCNT & 0xFF));
@@ -739,7 +739,7 @@ static int mrf24j40_sfupdate(FAR struct ieee802154_radio_s *radio,
     }
   mrf24j40_setreg(dev->spi, MRF24J40_RXMCR, reg);
 
-  /* Program the CAP end slot (ESLOTG1 0x13<3:0>) value. */ 
+  /* Program the CAP end slot (ESLOTG1 0x13<3:0>) value. */
 
   reg = mrf24j40_getreg(dev->spi, MRF24J40_ESLOTG1);
   reg &= ~MRF24J40_ESLOTG1_CAP;
@@ -1675,7 +1675,7 @@ static void mrf24j40_gts_setup(FAR struct mrf24j40_radio_s *dev, uint8_t fifo,
  ****************************************************************************/
 
 static void mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
-                               FAR const uint8_t *buf, uint8_t length, 
+                               FAR const uint8_t *buf, uint8_t length,
                                uint32_t fifo_addr)
 {
   int hlen = 3; /* Include frame control and seq number */

@@ -1016,19 +1016,19 @@ static void lcd_fpos_to_curpos(FAR struct pcf8574_lcd_dev_s *priv,
                               off_t fpos, uint8_t *row, uint8_t *col, bool* onlf)
 {
   int virtcols;
-  
+
   virtcols = (priv->cfg.cols + 1);
-  
+
   /* Determine if this is a 'virtual' position (on the synthetic LF) */
 
   *onlf = (priv->cfg.cols == fpos % virtcols);
 
   /* Adjust off any preceding synthetic LF's to get linear position */
-  
+
   fpos -= fpos / virtcols;
-  
+
   /* Compute row/col from linear position */
-  
+
   *row = fpos / priv->cfg.cols;
   *col = fpos % priv->cfg.cols;
 }
@@ -1046,7 +1046,7 @@ static void lcd_curpos_to_fpos(FAR struct pcf8574_lcd_dev_s *priv,
                               uint8_t row, uint8_t col, off_t* fpos)
 {
   /* the logical file position is the linear position plus any synthetic LF */
-  
+
   *fpos = (row * priv->cfg.cols) + col + row;
 }
 
@@ -1108,7 +1108,7 @@ static int pcf8574_lcd_close(FAR struct file *filep)
       /* If we had previously unlinked, but there were open references at the
        * time, we need to do the final teardown now.
        */
-      
+
       if (priv->refs == 0 && priv->unlinked)
         {
           /* We have no real teardown at present */
@@ -1158,11 +1158,11 @@ static ssize_t pcf8574_lcd_read(FAR struct file *filep, FAR char *buffer,
   while (nIdx < buflen && row < priv->cfg.rows)
   {
     /* Synthesize end-of-line LF and advance to start of next row */
-    
+
     if (onlf)
       {
         /* Synthesize LF for all but last row */
-        
+
         if ( row < priv->cfg.rows-1)
           {
             buffer[nIdx] = '\x0a';
