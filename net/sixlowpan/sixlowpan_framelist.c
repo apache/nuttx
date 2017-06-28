@@ -324,6 +324,23 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
                       &ieee->i_dev.d_mac.ieee802154);
 #endif
 
+#ifdef CONFIG_NET_STARPOINT
+  /* If this node is a "point" in a star topology, then the destination
+   * MAC address is the address of the hub/PAN coordinator.
+   */
+
+  if (destmac->extended)
+    {
+      pktmeta.dextended = TRUE;
+      ret = sixlowpan_coord_eaddr(ieee, pktmeta.dest.eaddr.u8);
+    }
+  else
+    {
+      ret = sixlowpan_coord_saddr(ieee, pktmeta.dest.saddr.u8);
+    }
+#else
+  /* Otherwise, it is the actual destination node address */
+
   if (destmac->extended)
     {
       pktmeta.dextended = TRUE;
@@ -333,6 +350,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
     {
       sixlowpan_saddrcopy(pktmeta.dest.saddr.u8, destmac->u.saddr.u8);
     }
+#endif
 
   /* Get the destination PAN ID.
    *

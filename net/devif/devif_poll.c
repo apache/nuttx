@@ -89,7 +89,8 @@ systime_t g_polltime;
  *
  * Description:
  *   Generic output conversion hook.  Only needed for IEEE802.15.4 for now
- *   is a point where support for other conversions may be provided.
+ *   but this is a point where support for other conversions may be
+ *   provided.
  *
  *   TCP output comes through three different mechansims.  Either from:
  *
@@ -136,7 +137,7 @@ static void devif_packet_conversion(FAR struct net_driver_s *dev,
             {
               /* Let 6LoWPAN convert IPv6 TCP output into IEEE802.15.4 frames. */
 
-              sixlowpan_tcp_send(dev);
+              sixlowpan_tcp_send(dev, dev, ipv6);
             }
           else
             {

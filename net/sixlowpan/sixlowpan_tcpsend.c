@@ -63,7 +63,6 @@
 
 /* Buffer access helpers */
 
-#define IPv6BUF(dev)  ((FAR struct ipv6_hdr_s *)((dev)->d_buf))
 #define TCPBUF(dev)   ((FAR struct tcp_hdr_s *)(&(dev)->d_buf[IPv6_HDRLEN]))
 
 /****************************************************************************
@@ -540,7 +539,7 @@ static uint16_t tcp_send_interrupt(FAR struct net_driver_s *dev,
            *
            * NOTE: tcp_appsend() normally increments conn->unacked based on
            * the value of dev->d_sndlen.  However, dev->d_len is always
-           * zero for 6LoWPAN since it does no send via the dev->d_bufuse
+           * zero for 6LoWPAN since it does not send via the dev->d_buf
            * but, rather, uses a backdoor frame interface with the IEEE
            * 802.15.4 MAC.
            */
@@ -876,7 +875,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
  *   TCP output comes through three different mechansims.  Either from:
  *
  *   1. TCP socket output.  For the case of TCP output to an
- *      IEEE802.15.4 device, the TCP output is caught in the socket
+ *      IEEE802.15.4, the TCP output is caught in the socket
  *      send()/sendto() logic and and redirected to psock_6lowpan_tcp_send().
  *   2. TCP output from the TCP state machine.  That will occur
  *      during TCP packet processing by the TCP state meachine.
@@ -889,7 +888,13 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
  *   the IEEE80215.4 frames.
  *
  * Parameters:
- *   dev - An instance of nework device state structure
+ *   dev    - The network device containing the packet to be sent.
+ *   fwddev - The network device used to send the data.  This will be the
+ *            same device except for the IP forwarding case where packets
+ *            are sent across devices.
+ *   ipv6   - A pointer to the IPv6 header in dev->d_buf which lies AFTER
+ *            the L1 header.  NOTE: dev->d_len must have been decremented
+ *            by the size of any preceding MAC header.
  *
  * Returned Value:
  *   None
@@ -899,15 +904,17 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
  *
  ****************************************************************************/
 
-void sixlowpan_tcp_send(FAR struct net_driver_s *dev)
+void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
+                        FAR struct net_driver_s *fwddev,
+                        FAR struct ipv6_hdr_s *ipv6)
 {
-  DEBUGASSERT(dev != NULL && dev->d_len > 0);
+  DEBUGASSERT(dev != NULL && dev->d_len > 0 && fwddev != NULL);
 
   /* Double check */
 
   ninfo("d_len %u\n", dev->d_len);
   sixlowpan_dumpbuffer("Outgoing TCP packet",
-                       (FAR const uint8_t *)IPv6BUF(dev), dev->d_len);
+                       (FAR const uint8_t *)ipv6, dev->d_len);
 
   if (dev != NULL && dev->d_len > 0)
     {
@@ -918,7 +925,7 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev)
        * and the TCP state machine should only response with TCP packets.
        */
 
-      ipv6hdr = (FAR struct ipv6tcp_hdr_s *)(dev->d_buf);
+      ipv6hdr = (FAR struct ipv6tcp_hdr_s *)ipv6;
 
       /* The TCP data payload should follow the IPv6 header plus the
        * protocol header.
@@ -960,12 +967,12 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev)
             {
               /* Convert the outgoing packet into a frame list. */
 
-              buf    = dev->d_buf + hdrlen;
+              buf    = (FAR uint8_t *)ipv6 + hdrlen;
               buflen = dev->d_len - hdrlen;
 
               (void)sixlowpan_queue_frames(
-                      (FAR struct ieee802154_driver_s *)dev, &ipv6hdr->ipv6,
-                      buf, buflen, &destmac);
+                      (FAR struct ieee802154_driver_s *)fwddev,
+                      &ipv6hdr->ipv6, buf, buflen, &destmac);
             }
         }
     }

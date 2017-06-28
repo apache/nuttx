@@ -87,6 +87,7 @@
 
 #include <net/if.h>
 
+#include <nuttx/net/net.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
@@ -155,6 +156,12 @@ static int check_dev_destipaddr(FAR struct net_driver_s *dev, FAR void *arg)
  *   is typically just a comparison the of the IPv6 destination address in
  *   the IPv6 packet with the IPv6 address assigned to the receiving device.
  *
+ * Input Parameters:
+ *   dev   - The device on which the packet was received and which contains
+ *           the IPv6 packet.
+ *   ipv6  - A convenience pointer to the IPv6 header in within the IPv6
+ *           packet
+ *
  * Returned Value:
  *   true  - This packet is destined for us
  *   false - This packet is NOT destined for us and may need to be forwarded.
@@ -221,11 +228,14 @@ static bool check_destipaddr(FAR struct net_driver_s *dev,
  *   Receive an IPv6 packet from the network device.  Verify and forward to
  *   L3 packet handling logic if the packet is destined for us.
  *
+ * Input Parameters:
+ *   dev   - The device on which the packet was received and which contains
+ *           the IPv6 packet.
  * Returned Value:
- *   OK    The packet was processed (or dropped) and can be discarded.
- *   ERROR There is a matching connection, but could not dispatch the packet
- *         yet.  Currently useful for UDP when a packet arrives before a recv
- *         call is in place.
+ *   OK    - The packet was processed (or dropped) and can be discarded.
+ *   ERROR - There is a matching connection, but could not dispatch the
+ *           packet yet.  Currently useful for UDP when a packet arrives
+ *           before a recv call is in place.
  *
  *   If this function returns to the network driver with dev->d_len > 0,
  *   that is an indication to the driver that there is an outgoing response
@@ -337,12 +347,31 @@ int ipv6_input(FAR struct net_driver_s *dev)
 
       if (!check_destipaddr(dev, ipv6))
         {
-          /* No.. the packet is not destined for us.. drop it */
+#ifdef CONFIG_NET_IPFORWARD
+          /* Not destined for us, try to forward the packet */
+
+          ret = ipv6forward(dev, ipv6);
+          if (ret >= 0)
+            {
+              /* The packet was forwarded.  Return success; d_len will
+               * be set appropriately by the forwarding logic:  Cleared
+               * if the packet is forward via anoother device or non-
+               * zero if it will be forwarded by the same device that
+               * it was received on.
+               */
+
+              return OK;
+            }
+          else
+#endif
+            {
+              /* Not destined for us and not forwardable... drop the packet. */
 
 #ifdef CONFIG_NET_STATISTICS
-          g_netstats.ipv6.drop++;
+              g_netstats.ipv6.drop++;
 #endif
-          goto drop;
+              goto drop;
+            }
         }
     }
 
@@ -388,7 +417,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
           {
             /* Let 6LoWPAN handle the TCP output */
 
-            sixlowpan_tcp_send(dev);
+            sixlowpan_tcp_send(dev, dev, ipv6);
 
             /* Drop the packet in the d_buf */
 

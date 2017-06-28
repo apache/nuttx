@@ -228,6 +228,82 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
 }
 
 /****************************************************************************
+ * Name: sixlowpan_coord_eaddr
+ *
+ * Description:
+ *   Get the extended address of the PAN coordinator.
+ *
+ * Input parameters:
+ *   ieee  - A reference IEEE802.15.4 MAC network device structure.
+ *   eaddr - The location in which to return the extended address.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_STARPOINT
+int sixlowpan_coord_eaddr(FAR struct ieee802154_driver_s *ieee,
+                          FAR uint8_t *eaddr)
+{
+  FAR struct net_driver_s *dev = &ieee->i_dev;
+  struct ieee802154_netmac_s arg;
+  int ret;
+
+  memcpy(arg.ifr_name, ieee->i_dev.d_ifname, IFNAMSIZ);
+  arg.u.getreq.attr = IEEE802154_ATTR_MAC_COORD_EADDR ;
+  ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
+                     (unsigned long)((uintptr_t)&arg));
+  if (ret < 0)
+    {
+      nerr("ERROR: MAC802154IOC_MLME_GET_REQUEST failed: %d\n", ret);
+      return ret;
+    }
+
+  IEEE802154_EADDRCOPY(eaddr, arg.u.getreq.attrval.mac.eaddr);
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: sixlowpan_coord_saddr
+ *
+ * Description:
+ *   Get the short address of the PAN coordinator.
+ *
+ * Input parameters:
+ *   ieee  - A reference IEEE802.15.4 MAC network device structure.
+ *   saddr - The location in which to return the short address.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_STARPOINT
+int sixlowpan_coord_saddr(FAR struct ieee802154_driver_s *ieee,
+                          FAR uint8_t *saddr)
+{
+  FAR struct net_driver_s *dev = &ieee->i_dev;
+  struct ieee802154_netmac_s arg;
+  int ret;
+
+  memcpy(arg.ifr_name, ieee->i_dev.d_ifname, IFNAMSIZ);
+  arg.u.getreq.attr = IEEE802154_ATTR_MAC_COORD_SADDR ;
+  ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
+                     (unsigned long)((uintptr_t)&arg));
+  if (ret < 0)
+    {
+      nerr("ERROR: MAC802154IOC_MLME_GET_REQUEST failed: %d\n", ret);
+      return ret;
+    }
+
+  IEEE802154_SADDRCOPY(saddr, arg.u.getreq.attrval.mac.saddr);
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: sixlowpan_src_panid
  *
  * Description:
