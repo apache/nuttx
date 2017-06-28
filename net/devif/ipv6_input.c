@@ -99,6 +99,7 @@
 #include "pkt/pkt.h"
 #include "icmpv6/icmpv6.h"
 
+#include "netdev/netdev.h"
 #include "devif/devif.h"
 
 /****************************************************************************
@@ -110,6 +111,106 @@
 #define IPv6BUF  ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: check_dev_destipaddr
+ *
+ * Description:
+ *   Check if the destination address in the IPv6 is destined for the
+ *   provided network device.
+ *
+ * Returned Value:
+ *   1 - This packet is destined for this network device
+ *   0 - This packet is NOT destined for this network device
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_MULTINIC
+static int check_dev_destipaddr(FAR struct net_driver_s *dev, FAR void *arg);
+{
+  FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)arg;
+
+  /* Check if the IPv6 destination address matches the IPv6 address assigned
+   * to this device.
+   */
+
+  if (net_ipv6addr_cmp(ipv6->destipaddr, dev->d_ipv6addr))
+    {
+      return 1;
+    }
+
+  /* No match, return 0 to keep searching */
+
+  return 0;
+}
+#endif
+
+/****************************************************************************
+ * Name: check_destipaddr
+ *
+ * Description:
+ *   Check if the destination address in the IPv6 is destined for us.  This
+ *   is typically just a comparison the of the IPv6 destination address in
+ *   the IPv6 packet with the IPv6 address assigned to the receiving device.
+ *
+ * Returned Value:
+ *   true  - This packet is destined for us
+ *   false - This packet is NOT destined for us and may need to be forwarded.
+ *
+ ****************************************************************************/
+
+static bool check_destipaddr(FAR struct net_driver_s *dev,
+                             FAR struct ipv6_hdr_s *ipv6)
+{
+#ifdef CONFIG_NETDEV_MULTINIC
+  int ret;
+#endif
+
+  /* For IPv6, packet reception is a little trickier as we need to make sure
+   * that we listen to certain multicast addresses (all hosts multicast
+   * address, and the solicited-node multicast address) as well.  However,
+   * we will cheat here and accept all multicast packets that are sent to
+   * the ff02::/16 addresses.
+   */
+
+  if (ipv6->destipaddr[0] == HTONS(0xff02))
+    {
+      return true;
+    }
+
+#ifdef CONFIG_NETDEV_MULTINIC
+  /* We will also allow for a perverse case where we receive a packet
+   * addressed to us, but on a different device.  Can that really happen?
+   */
+
+  ret = netdev_foreach(check_dev_destipaddr, ipv6);
+  if (ret == 1)
+    {
+      /* The traversal of the network devices will return 0 if there is
+       * no network device with that address or 1 if there is a network
+       * device with such an address.
+       */
+
+      return true;
+    }
+#else
+  /* There is only one network device.  If this packet is addressed to us,
+   * then the IPv6 destination address must be the address of assigned to
+   * this device.
+   */
+
+  if (net_ipv6addr_cmp(ipv6->destipaddr, dev->d_ipv6addr))
+    {
+      return true;
+    }
+#endif
+
+  return false;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -117,12 +218,18 @@
  * Name: ipv6_input
  *
  * Description:
+ *   Receive an IPv6 packet from the network device.  Verify and forward to
+ *   L3 packet handling logic if the packet is destined for us.
  *
  * Returned Value:
  *   OK    The packet was processed (or dropped) and can be discarded.
  *   ERROR There is a matching connection, but could not dispatch the packet
  *         yet.  Currently useful for UDP when a packet arrives before a recv
  *         call is in place.
+ *
+ *   If this function returns to the network driver with dev->d_len > 0,
+ *   that is an indication to the driver that there is an outgoing response
+ *   to this input.
  *
  * Assumptions:
  *
@@ -222,20 +329,13 @@ int ipv6_input(FAR struct net_driver_s *dev)
     }
 
   /* Check if the packet is destined for out IP address */
+
   else
 #endif
     {
-      /* Check if the packet is destined for our IP address.
-       *
-       * For IPv6, packet reception is a little trickier as we need to
-       * make sure that we listen to certain multicast addresses (all
-       * hosts multicast address, and the solicited-node multicast
-       * address) as well. However, we will cheat here and accept all
-       * multicast packets that are sent to the ff02::/16 addresses.
-       */
+      /* Check if the packet is destined for us. */
 
-      if (!net_ipv6addr_cmp(ipv6->destipaddr, dev->d_ipv6addr) &&
-          ipv6->destipaddr[0] != HTONS(0xff02))
+      if (check_destipaddr(dev, ipv6))
         {
 #ifdef CONFIG_NET_STATISTICS
           g_netstats.ipv6.drop++;
