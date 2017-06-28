@@ -50,7 +50,7 @@
  * Private Data
  ****************************************************************************/
 
-static const uint8_t g_nibblemap[16] = 
+static const uint8_t g_nibblemap[16] =
 {
   0, 0, 0, 0, 0, 0, 0, 0, /* 0: No bits, 1-7: Should not happen */
   1, 1, 1, 1,             /* 8: 1 bit, 9-b: Should not happen */
