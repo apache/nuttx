@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 /* The sys/un.> header defines the type sa_family_t as described in
- * sys/socket.h. 
+ * sys/socket.h.
  */
 
 #include <sys/socket.h>

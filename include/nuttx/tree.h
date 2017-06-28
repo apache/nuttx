@@ -100,7 +100,7 @@
       (head)->sph_root = tmp; \
     } \
   while (0)
-    
+
 #define SPLAY_ROTATE_LEFT(head, tmp, field) \
   do \
     { \

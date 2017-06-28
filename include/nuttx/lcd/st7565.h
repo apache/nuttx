@@ -142,7 +142,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd, 
+FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
                                         unsigned int devno);
 
 #ifdef __cplusplus

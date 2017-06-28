@@ -198,7 +198,7 @@ void vnc_mouseout(FAR void *arg, nxgl_coord_t x, nxgl_coord_t y,
   vnc_fbinitialize((d), NULL, vnc_mouseout, (FAR void *)(h))
 
 #else
-    
+
 #define vnc_default_fbinitialize(d,h) \
   vnc_fbinitialize((d), NULL, NULL, NULL)
 

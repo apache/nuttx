@@ -137,7 +137,7 @@
 /* Four byte offsets; Pointers may be 4 or 8 bytes
  * sizeof(struct mm_freenode_s) is 16 or 24 bytes.
  */
-  
+
 #  if UINTPTR_MAX <= UINT32_MAX
 #    define MM_MIN_SHIFT  4  /* 16 bytes */
 #  elif UINTPTR_MAX <= UINT64_MAX

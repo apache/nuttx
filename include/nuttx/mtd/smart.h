@@ -91,7 +91,7 @@ struct mtd_smart_procfs_data_s
   size_t              neraseblocks;     /* Number of erase blocks */
 #endif
 #ifdef CONFIG_MTD_SMART_ALLOC_DEBUG
-  FAR const struct smart_alloc_s  *allocs; /* Array of allocations */ 
+  FAR const struct smart_alloc_s  *allocs; /* Array of allocations */
   uint16_t            alloccount;       /* Number of items in the array */
 #endif
 #ifdef CONFIG_MTD_SMART_WEAR_LEVEL

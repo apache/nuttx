@@ -148,7 +148,7 @@
 
 /* Hub max ports */
 
-#define USBHUB_MAX_PORTS               (7)   
+#define USBHUB_MAX_PORTS               (7)
 
 /************************************************************************************
  * Public Types
@@ -192,7 +192,7 @@ struct usb_portstatus_s
 struct usb_hubtt_s
 {
   /* Hub class that is the transaction translator for device */
-  
+
   FAR struct usbhost_class_s *class;
 
   /* Transaction translator think time */

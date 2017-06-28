@@ -447,7 +447,7 @@ struct spi_sdev_s;   /* Forward reference */
 
 struct spi_sctrlrops_s
 {
-  CODE void     (*bind)(FAR struct spi_sctrlr_s *sctrlr, 
+  CODE void     (*bind)(FAR struct spi_sctrlr_s *sctrlr,
                    FAR struct spi_sdev_s *sdev, enum spi_smode_e mode,
                    int nbits);
   CODE void     (*unbind)(FAR struct spi_sctrlr_s *sctrlr);

@@ -350,7 +350,7 @@
 /* Organizationally Unique Identifiers.
  * See http://standards.ieee.org/regauth/oui/oui.txt for a list.
  */
- 
+
 #define ATHEROS_OUI                        ((const uint8_t[]){ 0x00, 0x03, 0x7f })
 #define BROADCOM_OUI                       ((const uint8_t[]){ 0x00, 0x90, 0x4c })
 #define IEEE80211_OUI                      ((const uint8_t[]){ 0x00, 0x0f, 0xac })
