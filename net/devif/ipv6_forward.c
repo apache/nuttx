@@ -39,8 +39,13 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
 #include <errno.h>
 
+#include <nuttx/net/netdev.h>
+#include <nuttx/net/netstats.h>
+
+#include "netdev/netdev.h"
 #include "sixlowpan/sixlowpan.h"
 #include "devif/devif.h"
 
@@ -85,8 +90,6 @@ static int ipv6_packet_conversion(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_UDP
       if (ipv6->proto == IP_PROTO_UDP)
         {
-          FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)dev->d_buf;
-
           /* Let 6LoWPAN convert IPv6 UDP output into IEEE802.15.4 frames. */
 
           sixlowpan_udp_send(dev, fwddev, ipv6);

@@ -250,6 +250,9 @@ int ipv6_input(FAR struct net_driver_s *dev)
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
   uint16_t hdrlen;
   uint16_t pktlen;
+#ifdef CONFIG_NET_IPFORWARD
+  int ret;
+#endif
 
   /* This is where the input processing starts. */
 
@@ -350,7 +353,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPFORWARD
           /* Not destined for us, try to forward the packet */
 
-          ret = ipv6forward(dev, ipv6);
+          ret = ipv6_forward(dev, ipv6);
           if (ret >= 0)
             {
               /* The packet was forwarded.  Return success; d_len will

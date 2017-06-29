@@ -380,7 +380,10 @@ Configurations
 
     NOTES:
 
-    1. This configuration differs from the mrf24j40-mac configuration in
+    1. You must must have two clicker2-stm32 boards each with an MRF24J40
+       click board in order to run these tests.
+
+    2. This configuration differs from the mrf24j40-mac configuration in
        that this configuration, like the usbnsh configuration, uses a USB
        serial device for console I/O.  Such a configuration is useful on the
        Clicker2 STM32 which has no builtin RS-232 drivers and eliminates the
@@ -390,14 +393,14 @@ Configurations
        differences between the usbnsh or mrf24j40-mac configurations and this
        configuration are listed in these NOTES.
 
-    2. On most serial terminal programs that I have used, the USB
+    3. On most serial terminal programs that I have used, the USB
        connection will be lost when the target board is reset.  When that
        happens, you may have to reset your serial terminal program to adapt
        to the new USB connection.  Using TeraTerm, I actually have to exit
        the serial program and restart it in order to detect and select the
        re-established USB serial connection.
 
-    3. This configuration does NOT have USART3 output enabled.  This
+    4. This configuration does NOT have USART3 output enabled.  This
        configuration supports logging of debug output to a circular
        buffer in RAM.  This feature is discussed fully in this Wiki page:
        http://nuttx.org/doku.php?id=wiki:howtos:syslog . Relevant
@@ -426,17 +429,17 @@ Configurations
        the system has crashed because (a) it will be unresponsive and (b)
        the LD2 will be blinking at about 2Hz.
 
-    4. IPv6 networking is enabled with TCP/IP, UDP, 6LoWPAN, and NSH
+    5. IPv6 networking is enabled with TCP/IP, UDP, 6LoWPAN, and NSH
        Telnet support.
 
-    5. Configuration instructions:  Basic PAN configuration is the same as
+    6. Configuration instructions:  Basic PAN configuration is the same as
        for the ieee802154-mac configuration with the exception that after
        the PAN has been configured with the i8sak utility, you must
        explicity bring the network up on each node:
 
          nsh> ifup wpan0
 
-    6. examples/udp is enabled.  This will allow two MRF24J40 nodes to
+    7. examples/udp is enabled.  This will allow two MRF24J40 nodes to
        exchange UDP packets.  Basic instructions:
 
        On the server node:
@@ -464,9 +467,11 @@ Configurations
          E: nsh> ifup wpan0
          C: nsh> udpserver &
          E: nsh> udpclient <server-ip> &
-         E: nsh> dmesg
 
-    6. examples/nettest is enabled.  This will allow two MRF24J40 nodes to
+       The nsh> dmesg command can be use at any time on any node to see
+       any debug output that you have selected.
+
+    8. examples/nettest is enabled.  This will allow two MRF24J40 nodes to
        exchange TCP packets.  Basic instructions:
 
        On the server node:
@@ -494,9 +499,11 @@ Configurations
          E: nsh> ifup wpan0
          C: nsh> tcpserver &
          E: nsh> tcpclient <server-ip> &
-         E: nsh> dmesg
 
-    7. The NSH Telnet deamon (server) is enabled.  However, it cannot be
+       The nsh> dmesg command can be use at any time on any node to see
+       any debug output that you have selected.
+
+    9. The NSH Telnet deamon (server) is enabled.  However, it cannot be
        started automatically.  Rather, it must be started AFTER the network
        has been brought up using the NSH 'telnetd' command.  You would want
        to start the Telent daemon only if you want the node to serve Telent
@@ -509,7 +516,7 @@ Configurations
        This is necessary because the IP address is assigned by the the
        Coordinator and may not be known a priori.
 
-    8. This configuration also includes the Telnet client program.  This
+   10. This configuration also includes the Telnet client program.  This
        will allow you to execute a NSH one a node from the command line on
        a different node. Like:
 
@@ -579,6 +586,80 @@ Configurations
          compatible with other implementations of 6LoWPAN.  The tests could
          potentially be verifying only that the design is implemented
          incorrectly in compatible way on both the client and server sides.
+
+  mrf24j40-starhub and mrf24j40-starpoint
+
+    These two configurations implement hub and and star endpoint in a
+    star topology.  Both configurations derive from the mrf24j40-6lowpan
+    configuration and most of the notes there apply here as well.
+
+    1. You must must have three clicker2-stm32 boards each with an MRF24J40
+       click board in order to run these tests:  One that servers as the
+       star hub and at least two star endpoints.
+
+    2. The star point configuration differs from the primarily in the
+       mrf24j40-6lowpan in following is also set:
+
+         CONFIG_NET_STAR=y
+         CONFIG_NET_STARPOINT=y
+
+       The CONFIG_NET_STARPOINT selection informs the endpoint that is
+       must send all frames to the hub of the star, rather than directly
+       to the recipient.
+
+       The star hub configuration, on the other hand, differs from the
+       mrf24j40-6lowpan in these fundamental ways:
+
+         CONFIG_NET_STAR=y
+         CONFIG_NET_STARHUB=y
+         CONFIG_NET_IPFORWARD=y
+
+       The CONFIG_NET_IPFORWARD selection informs the hub that if it
+       receives any packets that are not destined for the hub, it should
+       forward those packets appropriately.
+
+    3. Telnet:  The star point configuration supports the Telnet daemon,
+       but not the Telnet client; the star hub configuration supports
+       the Telnet client, but not the Telnet daemon.  Therefore, the
+       star hub can Telnet to any point in the star, the star endpoints
+       cannot initiate telnet sessions.
+
+    4. TCP and UDP Tests:  The same TCP and UDP tests as described for
+       the mrf24j40-6lowpan coniguration are supported on the star
+       endpoints, but NOT on the star hub.  Therefore, all network testing
+       is between endpoints with the hub acting, well, only like a hub.
+
+       The modified usage of the TCP test is show below with E1 E2
+       representing the two star endpoints and C: representing the
+       coordinator/hub.
+
+         C:  nsh> i8 /dev/ieee0 startpan
+         C:  nsh> 8 acceptassoc
+         E1: nsh> i8 assoc
+         E2: nsh> i8 assoc
+         C:  nsh> ifup wpan0
+         E1: nsh> ifup wpan0
+         E1: nsh> ifconfig           <-- To get the IP address of E1 endpoint
+         E1: nsh> telnetd            <-- Starts the Telnet daemon
+         E2: nsh> ifup wpan0
+         E2: nsh> ifconfig           <-- To get the IP address of E2 endpoint
+         E2: nsh> telnetd            <-- Starts the Telnet daemon
+         E1: nsh> tcpserver &
+         E2: nsh> tcpclient <server-ip> &
+
+       Where <server-ip> is the IP address of the E1 endpoint.
+
+       The nsh> dmesg command can be use at any time on any node to see
+       any debug output that you have selected.
+
+       Telenet sessions may be initiated from the hub:
+
+         C: nsh> telnet <server-ip> <-- Runs the Telnet client
+
+       Where <server-ip> is the IP address of either the E1 or I2 endpoints.
+
+    STATUS:
+      2017-06-29:  Configurations added but not yet tested.
 
   nsh:
 

@@ -472,12 +472,9 @@ void sixlowpan_udp_send(FAR struct net_driver_s *dev,
 
           sixlowpan_addrfromip(ipv6udp->ipv6.destipaddr, &destmac);
 
-          /* Get the IPv6 + UDP combined header length.  The size of the UDP
-           * header is encoded in the top 4 bits of the udpoffset field (in
-           * units of 32-bit words).
-           */
+          /* Get the IPv6 + UDP combined header length. */
 
-          hdrlen = IPv6_HDRLEN + (((uint16_t)ipv6udp->udp.udpoffset >> 4) << 2);
+          hdrlen = IPv6_HDRLEN + UDP_HDRLEN;
 
           /* Drop the packet if the buffer length is less than this. */
 

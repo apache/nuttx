@@ -285,15 +285,6 @@ menuconfig NET_IPv6
 source "net/neighbor/Kconfig"
 source "net/sixlowpan/Kconfig"
 
-endmenu # Internet Protocol Selection
-
-config NET_HAVE_STAR
-	bool
-	default n
-	---help---
-		Automatically enabled if at least one selected L2 protocol supports
-		a STAR topology.
-
 config NET_IPFORWARD
 	bool "Enable L2 forwarding"
 	default n
@@ -308,38 +299,7 @@ config NET_IPFORWARD
 		reason why IPv4 forwarding has not been implemented, it just has
 		not yet been done.
 
-config NET_STAR
-	bool "Enable star topology"
-	default n
-	depends on NET_HAVE_STAR && NET_IPv6
-	---help---
-		Enable support for a star network topology.
-
-		NOTE: Currently only supported by 6LoWPAN.
-		NOTE: L2 forwarding only supported for IPv6.
-
-choice
-	prompt "Node role"
-	depends on NET_STARTOPOLOGY
-	default NET_STARTPOINT
-	---help---
-		Specifies the role of this not in the star configuration.
-
-config NET_STARPOINT
-	bool "Point node in star"
-	---help---
-		The node is a "point" in the star configuration and must send all
-		packets to the star hub node.
-
-config NET_STARHUB
-	bool "Hub node of star"
-	select NET_IPFORWARD
-	---help---
-		This is the "hub" node in the star configurations.  It will receive
-		packets packets from all "point" nodes and perform L2 forwarding of
-		the packets that are not destined for this node.
-
-endchoice # Node role
+endmenu # Internet Protocol Selection
 
 source "net/socket/Kconfig"
 source "net/pkt/Kconfig"
@@ -361,10 +321,54 @@ config NET_STATISTICS
 	---help---
 		Network layer statistics on or off
 
+config NET_HAVE_STAR
+	bool
+	default n
+	---help---
+		Automatically enabled if at least one selected L2 protocol supports
+		a STAR topology.  In order to support the star topology, the L2
+		protocol must support relaying all packets to a well-known hub node.
+
+menu "Network Topologies"
+
+config NET_STAR
+	bool "Enable star topology"
+	default n
+	depends on NET_HAVE_STAR && NET_IPv6
+	---help---
+		Enable support for a star network topology.
+
+		NOTE: Currently only supported by 6LoWPAN.
+		NOTE: L2 forwarding only supported for IPv6.
+
+choice
+	prompt "Node role"
+	depends on NET_STAR
+	default NET_STARPOINT
+	---help---
+		Specifies the role of this not in the star configuration.
+
+config NET_STARPOINT
+	bool "Point node in star"
+	---help---
+		The node is a "point" in the star configuration and must send all
+		packets to the star hub node.
+
+config NET_STARHUB
+	bool "Hub node of star"
+	select NET_IPFORWARD
+	---help---
+		This is the "hub" node in the star configurations.  It will receive
+		packets packets from all "point" nodes and perform L2 forwarding of
+		the packets that are not destined for this node.
+
+endchoice # Node role
+endmenu # Network Topologies
+
 source "net/route/Kconfig"
 
 config NET_HOSTNAME
-	string "Host name for current machine"
+	string "Host name for this device"
 	default ""
 	---help---
 		A unique name to identify device on the network
