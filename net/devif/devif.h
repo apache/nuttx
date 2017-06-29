@@ -426,6 +426,33 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, void *pvconn,
                          uint16_t flags);
 
 /****************************************************************************
+ * Name: ipv6_forward
+ *
+ * Description:
+ *   This function is called from ipv6_input when a packet is received that
+ *   is not destined for us.  In this case, the packet may need to be
+ *   forwarded to another device (or sent back out the same device)
+ *   depending configuration, routing table information, and the IPv6
+ *   networks served by various network devices.
+ *
+ * Input Parameters:
+ *   dev   - The device on which the packet was received and which contains
+ *           the IPv6 packet.
+ *   ipv6  - A convenience pointer to the IPv6 header in within the IPv6
+ *           packet
+ *
+ * Returned Value:
+ *   Zero is returned if the packet was successfully forward;  A negated
+ *   errno value is returned if the packet is not forwardable.  In that
+ *   latter case, the caller (ipv6_input()) should drop the packet.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_IPv6)
+int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6);
+#endif
+
+/****************************************************************************
  * Send data on the current connection.
  *
  * This function is used to send out a single segment of TCP data.  Only

@@ -3,7 +3,7 @@
  *
  *   Copyright (C) 2014 Droidifi LLC. All rights reserved.
  *   Author: Jim Ewing <jim@droidifi.com>
- * 
+ *
  *   Adapted from code Copyright (C) 2014 Texas Instruments Incorporated
  *
  * Redistribution and use in source and binary forms, with or without

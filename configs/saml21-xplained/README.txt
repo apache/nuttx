@@ -478,7 +478,7 @@ Serial Consoles
 Atmel Studio 6.1
 ================
 
-  NOTE: These instructions are old. The SAML21 requires Atmel Studio 6.2. 
+  NOTE: These instructions are old. The SAML21 requires Atmel Studio 6.2.
   They may still prove useful to you, however.
 
   Loading Code into FLASH:

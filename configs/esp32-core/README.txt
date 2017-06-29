@@ -572,7 +572,7 @@ OpenOCD for the ESP32
     esp32.cpu0: Target halted, pc=0x400835BF
     187 g_tick_divisor = divisor;
     (gdb) ...
-  
+
 Configurations
 ==============
 

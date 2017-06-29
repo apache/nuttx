@@ -53,17 +53,17 @@
 /* The option argument to openlog() is an OR of any of these:
  *
  *   LOG_CONS     - Write directly to system console if there is an error
- *                  while sending to system logger. 
+ *                  while sending to system logger.
  *   LOG_NDELAY   - Open the connection immediately (normally, the connection
- *                  is opened when the first message is logged). 
+ *                  is opened when the first message is logged).
  *   LOG_NOWAIT   - Don't wait for child processes that may have been created
  *                  while logging the message.
  *   LOG_ODELAY   - The converse of LOG_NDELAY; opening of the connection is
  *                  delayed until syslog() is called. (This is the default,
- *                  and need not be specified.) 
+ *                  and need not be specified.)
  *   LOG_PERROR   - (Not in POSIX.1-2001 or POSIX.1-2008.) Print to stderr
  *                  as well (Linux).
- *   LOG_PID      - Include PID with each message. 
+ *   LOG_PID      - Include PID with each message.
  */
 
 /* Note: openlog() is not currently supported */
@@ -72,20 +72,20 @@
  * the message. This lets the configuration file specify that messages from
  * different facilities will be handled differently.
  *
- *   LOG_AUTH     - Security/authorization messages 
- *   LOG_AUTHPRIV - Security/authorization messages (private) 
- *   LOG_CRON     - Clock daemon (cron and at) 
- *   LOG_DAEMON   - System daemons without separate facility value 
- *   LOG_FTP      - Ftp daemon 
+ *   LOG_AUTH     - Security/authorization messages
+ *   LOG_AUTHPRIV - Security/authorization messages (private)
+ *   LOG_CRON     - Clock daemon (cron and at)
+ *   LOG_DAEMON   - System daemons without separate facility value
+ *   LOG_FTP      - Ftp daemon
  *   LOG_KERN     - Lernel messages (these can't be generated from user
- *                  processes) 
- *   LOG_LOCAL0 through LOG_LOCAL7 - Reserved for local use 
- *   LOG_LPR      - Line printer subsystem 
- *   LOG_MAIL     - Mail subsystem 
- *   LOG_NEWS     - USENET news subsystem 
- *   LOG_SYSLOG   - Messages generated internally by syslogd(8) 
- *   LOG_USER     - Generic user-level messages (default) 
- *   LOG_UUCP     - UUCP subsystem 
+ *                  processes)
+ *   LOG_LOCAL0 through LOG_LOCAL7 - Reserved for local use
+ *   LOG_LPR      - Line printer subsystem
+ *   LOG_MAIL     - Mail subsystem
+ *   LOG_NEWS     - USENET news subsystem
+ *   LOG_SYSLOG   - Messages generated internally by syslogd(8)
+ *   LOG_USER     - Generic user-level messages (default)
+ *   LOG_UUCP     - UUCP subsystem
  */
 
 #define LOG_AUTH      0

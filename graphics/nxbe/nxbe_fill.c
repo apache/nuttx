@@ -74,7 +74,7 @@ static void nxbe_clipfill(FAR struct nxbe_clipops_s *cops,
   struct nxbe_fill_s *fillinfo = (struct nxbe_fill_s *)cops;
 
   /* Draw the rectangle */
-    
+
   plane->fillrectangle(&plane->pinfo, rect, fillinfo->color);
 
 #ifdef CONFIG_NX_UPDATE

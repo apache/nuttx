@@ -416,10 +416,10 @@ https://github.com/texane/stlink
 --------------------------------
 This is an open source server for the ST-Link that I have never used.
 
-It is also possible to use an external debugger such as the Segger JLink 
+It is also possible to use an external debugger such as the Segger JLink
 (EDU or commercial models) provided:
 
-1) The CN4 jumpers are removed to disconnect the on-board STLinkV2 from 
+1) The CN4 jumpers are removed to disconnect the on-board STLinkV2 from
    the STM32F3.
 
 2) The appropriate (20 pin connector to flying wire) adapter is used to connect
@@ -433,7 +433,7 @@ It is also possible to use an external debugger such as the Segger JLink
 
 The signals used with external (SWD) debugging are:
 
-   VREF (3V) 
+   VREF (3V)
    GROUND (GND)
    SWCLK (PA14)
    SWIO (PA13)

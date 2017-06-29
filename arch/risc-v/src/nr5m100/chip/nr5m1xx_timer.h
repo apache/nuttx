@@ -54,7 +54,7 @@
 
 /* Timer 1 address definitions */
 
-#ifdef CONFIG_NR5_TIMER1 
+#ifdef CONFIG_NR5_TIMER1
 #define NR5_TIMER1_TACTL_OFFSET           (NR5_TIMER1_BASE+NR5_TIMERA_TACTL_OFFSET)
 #define NR5_TIMER1_TAR_OFFSET             (NR5_TIMER1_BASE+NR5_TIMERA_TAR_OFFSET)
 #define NR5_TIMER1_TACCTL0_OFFSET         (NR5_TIMER1_BASE+NR5_TIMERA_TACCTL0_OFFSET)
@@ -68,7 +68,7 @@
 
 /* Timer 2 address definitions */
 
-#ifdef CONFIG_NR5_TIMER2 
+#ifdef CONFIG_NR5_TIMER2
 #define NR5_TIMER2_TACTL_OFFSET           (NR5_TIMER2_BASE+NR5_TIMERA_TACTL_OFFSET)
 #define NR5_TIMER2_TAR_OFFSET             (NR5_TIMER2_BASE+NR5_TIMERA_TAR_OFFSET)
 #define NR5_TIMER2_TACCTL0_OFFSET         (NR5_TIMER2_BASE+NR5_TIMERA_TACCTL0_OFFSET)
@@ -82,7 +82,7 @@
 
 /* Timer 3 address definitions */
 
-#ifdef CONFIG_NR5_TIMER3 
+#ifdef CONFIG_NR5_TIMER3
 #define NR5_TIMER3_TACTL_OFFSET           (NR5_TIMER3_BASE+NR5_TIMERA_TACTL_OFFSET)
 #define NR5_TIMER3_TAR_OFFSET             (NR5_TIMER3_BASE+NR5_TIMERA_TAR_OFFSET)
 #define NR5_TIMER3_TACCTL0_OFFSET         (NR5_TIMER3_BASE+NR5_TIMERA_TACCTL0_OFFSET)
@@ -96,7 +96,7 @@
 
 /* Timer 4 address definitions */
 
-#ifdef CONFIG_NR5_TIMER4 
+#ifdef CONFIG_NR5_TIMER4
 #define NR5_TIMER4_TACTL_OFFSET           (NR5_TIMER4_BASE+NR5_TIMERA_TACTL_OFFSET)
 #define NR5_TIMER4_TAR_OFFSET             (NR5_TIMER4_BASE+NR5_TIMERA_TAR_OFFSET)
 #define NR5_TIMER4_TACCTL0_OFFSET         (NR5_TIMER4_BASE+NR5_TIMERA_TACCTL0_OFFSET)
@@ -110,7 +110,7 @@
 
 /* Timer 5 address definitions */
 
-#ifdef CONFIG_NR5_TIMER5 
+#ifdef CONFIG_NR5_TIMER5
 #define NR5_TIMER5_TACTL_OFFSET           (NR5_TIMER5_BASE+NR5_TIMERA_TACTL_OFFSET)
 #define NR5_TIMER5_TAR_OFFSET             (NR5_TIMER5_BASE+NR5_TIMERA_TAR_OFFSET)
 #define NR5_TIMER5_TACCTL0_OFFSET         (NR5_TIMER5_BASE+NR5_TIMERA_TACCTL0_OFFSET)
@@ -126,7 +126,7 @@
 
 /* Control register TACTL Bit definitions */
 
-#define TIMERA_TACTL_TAIFG                (1 << 0)    /* Bit 0: Interrupt Pending Flag */       
+#define TIMERA_TACTL_TAIFG                (1 << 0)    /* Bit 0: Interrupt Pending Flag */
 #define TIMERA_TACTL_TAIE                 (1 << 1)    /* Bit 1: Interrupt Enable */
 #define TIMERA_TACTL_TACLR                (1 << 2)    /* Bit 2: TAR counter clear */
 #define TIMERA_TACTL_MC_SHIFT             4           /* Bits 4-5: Mode Control */
@@ -146,14 +146,14 @@
 #  define TIMERA_TACTL_SYS_CLOCK          (2 << TIMERA_TACTL_TASSEL_SHIFT)
 #  define TIMERA_TACTL_EXT_CLOCK          (3 << TIMERA_TACTL_TASSEL_SHIFT)
 #define TIMERA_TACTL_TAPRE_SHIFT          10          /* Bits 10-15: Clock Prescaler */
-#define TIMERA_TACTL_TAPRE_MASK           0x3F  
+#define TIMERA_TACTL_TAPRE_MASK           0x3F
 #  define TIMERA_TACTL_TAPRE(x)           (((x) & TIMERA_TACTL_TAPRE_MASK) << TIMERA_TACTL_TAPRE_SHIFT)
 
 /* Capture / Compare register bit definitions */
 
-#define TIMERA_TACCTL_CCIFG               (1 << 0)    /* Bit 0: Capture/compare interrupt Flag */       
-#define TIMERA_TACCTL_COV                 (1 << 1)    /* Bit 1: Capture overflow */       
-#define TIMERA_TACCTL_OUTVAL              (1 << 2)    /* Bit 2: Output value */       
+#define TIMERA_TACCTL_CCIFG               (1 << 0)    /* Bit 0: Capture/compare interrupt Flag */
+#define TIMERA_TACCTL_COV                 (1 << 1)    /* Bit 1: Capture overflow */
+#define TIMERA_TACCTL_OUTVAL              (1 << 2)    /* Bit 2: Output value */
 #define TIMERA_TACCTL_CCI                 (1 << 3)    /* Bit 3: Capture/compare input value */
 #define TIMERA_TACCTL_CCIE                (1 << 4)    /* Bit 4: Capture/Compare interrupt Enable */
 #define TIMERA_TACCTL_OUTMOD_SHIFT        5           /* Bits 5-7: Output Mode */
@@ -165,9 +165,9 @@
 #  define TIMERA_TACCTL_RESET             (5 << TIMERA_TACCTL_OUTMOD_SHIFT)
 #  define TIMERA_TACCTL_TOGGLE_SET        (6 << TIMERA_TACCTL_OUTMOD_SHIFT)
 #  define TIMERA_TACCTL_RESET_SET         (7 << TIMERA_TACCTL_OUTMOD_SHIFT)
-#define TIMERA_TACCTL_CAP                 (1 << 8)    /* Bit 8: Capture mode select  */       
-#define TIMERA_TACCTL_SCCI                (1 << 10)   /* Bit 10: Synchronized capture input */       
-#define TIMERA_TACCTL_SCS                 (1 << 11)   /* Bit 11: Syncronize capture source */       
+#define TIMERA_TACCTL_CAP                 (1 << 8)    /* Bit 8: Capture mode select  */
+#define TIMERA_TACCTL_SCCI                (1 << 10)   /* Bit 10: Synchronized capture input */
+#define TIMERA_TACCTL_SCS                 (1 << 11)   /* Bit 11: Syncronize capture source */
 #define TIMERA_TACCTL_CCIS_SHIFT          12          /* Bits 12-13: Capture Input Select */
 #  define TIMERA_TACCTL_CCIS_CCIA         (0 << TIMERA_TACCTL_CCIS_SHIFT)
 #  define TIMERA_TACCTL_CCIS_CCIB         (1 << TIMERA_TACCTL_CCIS_SHIFT)

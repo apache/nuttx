@@ -188,8 +188,8 @@ struct hostent
                             * host names, terminated by a null pointer. */
   int        h_addrtype;   /* Address type. */
   int        h_length;     /* The length, in bytes, of the address. */
-  FAR char **h_addr_list;  /* A pointer to an array of pointers to network 
-                            * addresses (in network byte order) for the host, 
+  FAR char **h_addr_list;  /* A pointer to an array of pointers to network
+                            * addresses (in network byte order) for the host,
                             * terminated by a null pointer. */
 };
 
@@ -205,7 +205,7 @@ struct netent
   uint32_t   n_net;        /* The network number, in host byte order. */
 };
 
-struct protoent 
+struct protoent
 {
   FAR char  *p_name;       /* Official name of the protocol. */
   FAR char **p_aliases;    /* A pointer to an array of pointers to
@@ -214,7 +214,7 @@ struct protoent
   int        p_proto;      /* The protocol number. */
 };
 
-struct servent  
+struct servent
 {
   FAR char  *s_name;       /* Official name of the service. */
   FAR char **s_aliases;    /* A pointer to an array of pointers to
@@ -226,7 +226,7 @@ struct servent
                             * contacting the service. */
 };
 
-struct addrinfo  
+struct addrinfo
 {
   int        ai_flags;     /* Input flags.  */
   int        ai_family;    /* Address family of socket.  */

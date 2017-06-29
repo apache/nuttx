@@ -243,7 +243,7 @@ struct efm32_usart_s
  ****************************************************************************/
 
 static inline uint32_t efm32_serialin(struct efm32_usart_s *priv, int offset);
-static inline void efm32_serialout(struct efm32_usart_s *priv, int offset, 
+static inline void efm32_serialout(struct efm32_usart_s *priv, int offset,
                                    uint32_t value);
 static inline void efm32_setuartint(struct efm32_usart_s *priv);
 
@@ -897,7 +897,7 @@ static int efm32_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
         priv->iflow = (termiosp->c_cflag & CRTS_IFLOW) != 0;
 #endif
-#endif 
+#endif
 
         /* Note that only cfgetispeed is used because we have knowledge
          * that only one speed is supported.

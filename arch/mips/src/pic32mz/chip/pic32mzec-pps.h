@@ -373,7 +373,7 @@
 #define IC3R_RPC14                       7
 #define IC3R_RPD2                        0
 #define IC3R_RPD6                        14
-#define IC3R_RPD10                       3 
+#define IC3R_RPD10                       3
 #define IC3R_RPD14                       11
 #define IC3R_RPF1                        4
 #define IC3R_RPF4                        2
@@ -430,7 +430,7 @@
 #define IC7R_RPC14                       7
 #define IC7R_RPD2                        0
 #define IC7R_RPD6                        14
-#define IC7R_RPD10                       3 
+#define IC7R_RPD10                       3
 #define IC7R_RPD14                       11
 #define IC7R_RPF1                        4
 #define IC7R_RPF4                        2
@@ -501,7 +501,7 @@
 #define INT3R_RPC14                      7
 #define INT3R_RPD2                       0
 #define INT3R_RPD6                       14
-#define INT3R_RPD10                      3 
+#define INT3R_RPD10                      3
 #define INT3R_RPD14                      11
 #define INT3R_RPF1                       4
 #define INT3R_RPF4                       2
@@ -544,7 +544,7 @@
 #define REFCLKI1R_RPC14                  7
 #define REFCLKI1R_RPD2                   0
 #define REFCLKI1R_RPD6                   14
-#define REFCLKI1R_RPD10                  3 
+#define REFCLKI1R_RPD10                  3
 #define REFCLKI1R_RPD14                  11
 #define REFCLKI1R_RPF1                   4
 #define REFCLKI1R_RPF4                   2
@@ -587,7 +587,7 @@
 #define SDI1R_RPC14                      7
 #define SDI1R_RPD2                       0
 #define SDI1R_RPD6                       14
-#define SDI1R_RPD10                      3 
+#define SDI1R_RPD10                      3
 #define SDI1R_RPD14                      11
 #define SDI1R_RPF1                       4
 #define SDI1R_RPF4                       2
@@ -616,7 +616,7 @@
 #define SDI3R_RPC1                       10
 #define SDI3R_RPC14                      7
 #define SDI3R_RPD2                       0
-#define SDI3R_RPD10                      3 
+#define SDI3R_RPD10                      3
 #define SDI3R_RPD14                      11
 #define SDI3R_RPD6                       14
 #define SDI3R_RPF1                       4
@@ -647,7 +647,7 @@
 #define SDI5R_RPC14                      7
 #define SDI5R_RPD2                       0
 #define SDI5R_RPD6                       14
-#define SDI5R_RPD10                      3 
+#define SDI5R_RPD10                      3
 #define SDI5R_RPD14                      11
 #define SDI5R_RPF1                       4
 #define SDI5R_RPF4                       2
@@ -744,7 +744,7 @@
 #define SS6R_RPC14                       7
 #define SS6R_RPD2                        0
 #define SS6R_RPD6                        14
-#define SS6R_RPD10                       3 
+#define SS6R_RPD10                       3
 #define SS6R_RPD14                       11
 #define SS6R_RPF1                        4
 #define SS6R_RPF4                        2
@@ -759,7 +759,7 @@
 #define T2CKR_RPC14                      7
 #define T2CKR_RPD2                       0
 #define T2CKR_RPD6                       14
-#define T2CKR_RPD10                      3 
+#define T2CKR_RPD10                      3
 #define T2CKR_RPD14                      11
 #define T2CKR_RPF1                       4
 #define T2CKR_RPF4                       2
@@ -816,7 +816,7 @@
 #define T6CKR_RPC14                      7
 #define T6CKR_RPD2                       0
 #define T6CKR_RPD6                       14
-#define T6CKR_RPD10                      3 
+#define T6CKR_RPD10                      3
 #define T6CKR_RPD14                      11
 #define T6CKR_RPF1                       4
 #define T6CKR_RPF4                       2
@@ -887,7 +887,7 @@
 #define U1RXR_RPC14                      7
 #define U1RXR_RPD2                       0
 #define U1RXR_RPD6                       14
-#define U1RXR_RPD10                      3 
+#define U1RXR_RPD10                      3
 #define U1RXR_RPD14                      11
 #define U1RXR_RPF1                       4
 #define U1RXR_RPF4                       2
@@ -902,7 +902,7 @@
 #define U2CTSR_RPC14                     7
 #define U2CTSR_RPD2                      0
 #define U2CTSR_RPD6                      14
-#define U2CTSR_RPD10                     3 
+#define U2CTSR_RPD10                     3
 #define U2CTSR_RPD14                     11
 #define U2CTSR_RPF1                      4
 #define U2CTSR_RPF4                      2
@@ -1001,7 +1001,7 @@
 #define U5RXR_RPC14                      7
 #define U5RXR_RPD2                       0
 #define U5RXR_RPD6                       14
-#define U5RXR_RPD10                      3 
+#define U5RXR_RPD10                      3
 #define U5RXR_RPD14                      11
 #define U5RXR_RPF1                       4
 #define U5RXR_RPF4                       2
@@ -1016,7 +1016,7 @@
 #define U6CTSR_RPC14                     7
 #define U6CTSR_RPD2                      0
 #define U6CTSR_RPD6                      14
-#define U6CTSR_RPD10                     3 
+#define U6CTSR_RPD10                     3
 #define U6CTSR_RPD14                     11
 #define U6CTSR_RPF1                      4
 #define U6CTSR_RPF4                      2

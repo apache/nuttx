@@ -119,7 +119,7 @@ struct xcptcontext
   uint8_t saved_pc0;
 # if defined(REG_PC2)
   uint8_t saved_pc2;
-# endif   
+# endif
   uint8_t saved_sreg;
 #endif
 

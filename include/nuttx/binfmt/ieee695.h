@@ -155,7 +155,7 @@
 #define IEEE695_OMFEXT_PROTECTED     0x04  /* Protected memory library */
 #define IEEE695_OMFEXT_LNKDIR        0x05  /* Microsoft C++ linker directives record */
 #define IEEE695_OMFEXT_BIGENDIAN     0x06  /* Big-endian */
-#define IEEE695_OMFEXT_PRECOMP       0x07 
+#define IEEE695_OMFEXT_PRECOMP       0x07
                                            /* 0x08-0xff Reserved */
 
 /* Link pass separator.  This record conveys information to the linker about the

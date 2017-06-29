@@ -176,7 +176,7 @@ void stm32f0_disable_hsi48(void)
   regval = getreg32(STM32F0_CRS_CFGR);
   regval &= ~CRS_CFGR_SYNCSRC_MASK;
   putreg32(regval, STM32F0_CRS_CFGR);
-  
+
   regval  = getreg32(STM32F0_CRS_CR);
   regval &= ~CRS_CR_AUTOTRIMEN;
   putreg32(regval, STM32F0_CRS_CR);

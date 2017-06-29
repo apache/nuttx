@@ -1239,7 +1239,6 @@ o Network (net/, drivers/net)
                be supported in order to support ping6 on a 6LoWPAN network.
                If RFC 6775 were implemented, then arbitrary IPv6 addresses,
                including addresses from DHCPv6 could be used.
-               can 
 
                UPDATE:  With IPv6 neighbor discovery, any IPv6 address may
                be associated with any short or extended address.  In fact,

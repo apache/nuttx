@@ -6,7 +6,7 @@
  *   Copyright (C) 2012, 2014 Max Nekludov. All rights reserved.
  *   Author: Max Nekludov <macscomp@gmail.com>
  *
- * Ongoing support and major revision to support the TM4C129 family 
+ * Ongoing support and major revision to support the TM4C129 family
  * (essentially a full file replacement):
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.

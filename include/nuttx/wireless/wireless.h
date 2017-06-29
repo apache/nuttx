@@ -384,7 +384,7 @@ struct iw_param
 /* Large data reference.  For all data larger than 16 octets, we need to use a
  * pointer to memory allocated in user space.
  */
- 
+
 struct iw_point
 {
   FAR void *pointer;        /* Pointer to the data  (in user space) */
@@ -436,14 +436,14 @@ union iwreq_data
   struct iw_param frag;     /* Fragmentation threshold */
   uint32_t mode;            /* Operation mode */
   struct iw_param retry;    /* Retry limits & lifetime */
- 
+
   struct iw_point encoding; /* Encoding stuff : tokens */
   struct iw_param power;    /* PM duration/timeout */
   struct iw_quality qual;   /* Quality part of statistics */
- 
+
   struct sockaddr ap_addr;  /* Access point address */
   struct sockaddr addr;     /* Destination address (hw/mac) */
- 
+
   struct iw_param param;    /* Other small parameters */
   struct iw_point data;     /* Other large parameters */
 };

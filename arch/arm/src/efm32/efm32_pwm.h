@@ -36,9 +36,9 @@
 #ifndef __ARCH_ARM_SRC_EFM32_EFM32_PWM_H
 #define __ARCH_ARM_SRC_EFM32_EFM32_PWM_H
 
-/* The EFM32 does not have dedicated PWM hardware.  Rather, pulsed output 
- * control is a capability of the EFM32 timers.  The logic in this file 
- * implements the lower half of the standard, NuttX PWM interface using the 
+/* The EFM32 does not have dedicated PWM hardware.  Rather, pulsed output
+ * control is a capability of the EFM32 timers.  The logic in this file
+ * implements the lower half of the standard, NuttX PWM interface using the
  * EFM32 timers. That interface is described in include/nuttx/drivers/pwm.h.
  */
 
@@ -55,9 +55,9 @@
  ****************************************************************************/
 /* Configuration **************************************************************/
 /* Timer devices may be used for different purposes.  One special purpose is
- * to generate modulated outputs for such things as motor control.  
- * If CONFIG_EFM32_TIMERn is defined then the CONFIG_EFM32_TIMERn_PWM must also 
- * be defined to indicate that timer "n" is intended to be used for pulsed 
+ * to generate modulated outputs for such things as motor control.
+ * If CONFIG_EFM32_TIMERn is defined then the CONFIG_EFM32_TIMERn_PWM must also
+ * be defined to indicate that timer "n" is intended to be used for pulsed
  * output signal generation.
  */
 

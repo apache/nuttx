@@ -83,7 +83,7 @@ extern "C"
  * Name: syslog_console_init
  *
  * Description:
- *   Create the console logging device and register it at the '/dev/console' 
+ *   Create the console logging device and register it at the '/dev/console'
  *   path.
  *
  ****************************************************************************/

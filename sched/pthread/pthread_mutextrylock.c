@@ -179,7 +179,7 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
               DEBUGASSERT(mutex->pid != 0); /* < 0: available, >0 owned, ==0 error */
               DEBUGASSERT((mutex->flags & _PTHREAD_MFLAGS_INCONSISTENT) != 0);
 
-              /* A thread holds the mutex, but there is no such thread. 
+              /* A thread holds the mutex, but there is no such thread.
                * POSIX requires that the 'robust' mutex return EOWNERDEAD
                * in this case. It is then the caller's responsibility to
                * call pthread_mutx_consistent() fo fix the mutex.

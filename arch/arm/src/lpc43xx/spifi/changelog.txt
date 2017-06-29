@@ -24,7 +24,7 @@ renamed from lib_llpcspifi_Mx.a to lib_lpcspifi_Mx.a]
 LPCSpifilib version <1.01>
 ==========================
 Release date <12/11/2014>
-1. Changed reported device string on S25FL512S from "S25FL512S 256kSec" to "S25FL512S". 
+1. Changed reported device string on S25FL512S from "S25FL512S 256kSec" to "S25FL512S".
 2. Changelog update: Added support for MX25L1635E, MX25L6435E, MX25L8035E, S25FL016K, S25FL064P, S25FL128S, S25FL256S,
     S25FL512S, W25Q16DV, and W25Q64FV devices.
 3. Changelog update: Changed maxRead to 16128 (was 32768).
@@ -66,9 +66,9 @@ Change Log:
 2. Added support for Winbond W25Q80BV.
 3. Added API's to return max speed for specific functions:
    Read, QuadRead, Program, Quad Program.
-4. Added prvGetStatus, prvSetStatus and prvSetQuadMode Functions to device definition structure. 
+4. Added prvGetStatus, prvSetStatus and prvSetQuadMode Functions to device definition structure.
 5. Added spifiDevGetCount function.
-6. Consolidated MX25L3235E and S25FL164K support into spifilib_fam_standard_cmd module 
+6. Consolidated MX25L3235E and S25FL164K support into spifilib_fam_standard_cmd module
    (removed SPIFI_REG_FAMILY_xxx registration functions and replaced with
    spifi_REG_FAMILY_StandardCommandSet function).
 7. Fixed bug in spifiRegisterFamily where NULL was being returned instead of the

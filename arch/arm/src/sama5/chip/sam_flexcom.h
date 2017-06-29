@@ -123,5 +123,5 @@
 /* Flexcom TWI Register Definitions *************************************************/
 
 #include "chip/sam_flexcom_twi.h"
- 
+
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_FLEXCOM_H */

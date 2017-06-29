@@ -10,5 +10,5 @@ config FS_MQUEUE_MPATH
     default "/var/mqueue"
     ---help---
         The path to where POSIX message queues will exist in the VFS namespace.
-    
+
 endif # !DISABLE_MQUEUE

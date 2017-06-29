@@ -51,11 +51,11 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t syslog_console_read(FAR struct file *filep, FAR char *buffer, 
+static ssize_t syslog_console_read(FAR struct file *filep, FAR char *buffer,
                                    size_t buflen);
 static ssize_t syslog_console_write(FAR struct file *filep,
                                     FAR const char *buffer, size_t buflen);
-static int     syslog_console_ioctl(FAR struct file *filep, int cmd, 
+static int     syslog_console_ioctl(FAR struct file *filep, int cmd,
                                     unsigned long arg);
 
 /****************************************************************************
@@ -93,7 +93,7 @@ static int syslog_console_ioctl(FAR struct file *filep, int cmd,
  * Name: syslog_console_read
  ****************************************************************************/
 
-static ssize_t syslog_console_read(FAR struct file *filep, FAR char *buffer, 
+static ssize_t syslog_console_read(FAR struct file *filep, FAR char *buffer,
                                    size_t buflen)
 {
   return 0;

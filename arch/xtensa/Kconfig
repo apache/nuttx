@@ -51,7 +51,7 @@ config XTENSA_CP_LAZY
 		processor was never used, and (2) tasks must explicitly enable and
 		disable co-processors.
 
-		An alternative, "lazy" co-processor state restore is enabled with 
+		An alternative, "lazy" co-processor state restore is enabled with
 		this option.  That logic works like as follows:
 
 		a. CPENABLE is set to zero on each context switch, disabling all co-

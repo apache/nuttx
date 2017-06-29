@@ -231,7 +231,7 @@ int up_cpu_start(int cpu)
   putreg32(0x1, SAM_IPC0_IECR); /* enable : write-only */
   irq_attach(SAM_IRQ_IPC0, arm_pause_handler, NULL);
   up_enable_irq(SAM_IRQ_IPC0);
-  
+
   spin_lock(&g_cpu1_boot);
 
   /* CPU1 boot done */

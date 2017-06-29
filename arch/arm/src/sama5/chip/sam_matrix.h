@@ -814,7 +814,7 @@
 
 #if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 /* Master Error Interrupt Enable Register, Master Error Interrupt Disable Register,
- * Master Error Interrupt Mask Register, and Master Error Status Register 
+ * Master Error Interrupt Mask Register, and Master Error Status Register
  */
 
 #  define MATRIX_MEINT_MERR(n)           (1 << (n)) /* Master x Access Error, n=0..9 */

@@ -230,7 +230,7 @@ struct stm32l4_tim_priv_s
 
 static inline uint16_t stm32l4_getreg16(FAR struct stm32l4_tim_dev_s *dev,
                                         uint8_t offset);
-static inline void stm32l4_putreg16(FAR struct stm32l4_tim_dev_s *dev, 
+static inline void stm32l4_putreg16(FAR struct stm32l4_tim_dev_s *dev,
                                     uint8_t offset, uint16_t value);
 static inline void stm32l4_modifyreg16(FAR struct stm32l4_tim_dev_s *dev,
                                        uint8_t offset, uint16_t clearbits,
@@ -261,9 +261,9 @@ static int stm32l4_tim_setclock(FAR struct stm32l4_tim_dev_s *dev,
 static void stm32l4_tim_setperiod(FAR struct stm32l4_tim_dev_s *dev,
                                   uint32_t period);
 static uint32_t stm32l4_tim_getcounter(FAR struct stm32l4_tim_dev_s *dev);
-static int stm32l4_tim_setchannel(FAR struct stm32l4_tim_dev_s *dev, 
+static int stm32l4_tim_setchannel(FAR struct stm32l4_tim_dev_s *dev,
                                   uint8_t channel, stm32l4_tim_channel_t mode);
-static int stm32l4_tim_setcompare(FAR struct stm32l4_tim_dev_s *dev, 
+static int stm32l4_tim_setcompare(FAR struct stm32l4_tim_dev_s *dev,
                                   uint8_t channel, uint32_t compare);
 static int stm32l4_tim_getcapture(FAR struct stm32l4_tim_dev_s *dev,
                                   uint8_t channel);

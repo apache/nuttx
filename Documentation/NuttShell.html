@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: June 13, 2017</p>
+      <p>Last Updated: June 26, 2017</p>
     </td>
   </tr>
 </table>
@@ -431,67 +431,73 @@
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdtime">2.58 Time execution of another command (time)</a>
+    <a href="#cmdtelnetd">2.58 Start the Telnet Daemon (telnetd)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunmount">2.59 Unmount a File System (umount)</a>
+    <a href="#cmdtime">2.59 Time execution of another command (time)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmduname">2.60 Print system information (uname)</a>
+    <a href="#cmdunmount">2.60 Unmount a File System (umount)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunset">2.61 Unset an Environment Variable (unset)</a>
+    <a href="#cmduname">2.61 Print system information (uname)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurldec">2.62 URL Decode (urldecode)</a>
+    <a href="#cmdunset">2.62 Unset an Environment Variable (unset)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurlencode">2.63 URL Encode (urlencode)</a>
+    <a href="#cmdurldec">2.63 URL Decode (urldecode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmduseradd">2.64 Add a New User (useradd)</a>
+    <a href="#cmdurlencode">2.64 URL Encode (urlencode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmduserdel">2.65 Delete a user (userdel)</a>
+    <a href="#cmduseradd">2.65 Add a New User (useradd)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdusleep">2.66 Wait for Microseconds (usleep)</a>
+    <a href="#cmduserdel">2.66 Delete a user (userdel)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdwget">2.67 Get File Via HTTP (wget)</a>
+    <a href="#cmdusleep">2.67 Wait for Microseconds (usleep)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdxd">2.68 Hexadecimal Dump of Memory (xd)</a>
+    <a href="#cmdwget">2.68 Get File Via HTTP (wget)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdxd">2.69 Hexadecimal Dump of Memory (xd)</a>
   </td>
 </tr>
 <tr>
@@ -2823,7 +2829,6 @@ sh &lt;script-path&gt;
   to by <code>&lt;script-path&gt;</code>.
 </p>
 
-
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
@@ -2865,7 +2870,33 @@ sleep &lt;sec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdtime"><h2>2.58 Time execution of another command (time)</h2></a>
+    <a name="cmdtelnetd"><h2>2.58 Time Start the Telnet Daemon (telnetd)</h2></a>
+  </td>
+</tr>
+</table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+telnetd
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Start the Telnet daemon if it is not already running.
+</p>
+<p>
+  The Telnet daemon may be started either programmatically by calling <code>nsh_telnetstart()</code> or it may be started from the NSH command line using this <code>telnetd</code> command.
+</p>
+<p>
+  Normally this command would be suppressed with <code>CONFIG_NSH_DISABLE_TELNETD</code>because the Telnet daemon is automatically started in <code>nsh_main.c</code>.  The exception is when <code>CONFIG_NSH_NETLOCAL</code> is selected.  In that case, the network is not enabled at initialization but rather must be enabled from the NSH command line or via other applications.
+</p>
+<p>
+  In that case, when <code>nsh_telnetstart()</code> is called before the the network is initialized, it will fail.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdtime"><h2>2.59 Time execution of another command (time)</h2></a>
   </td>
 </tr>
 </table>
@@ -2923,7 +2954,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunmount"><h2>2.59 Unmount a File System (umount)</h2></a>
+    <a name="cmdunmount"><h2>2.60 Unmount a File System (umount)</h2></a>
   </td>
 </tr>
 </table>
@@ -2953,7 +2984,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmduname"><h2>2.60 Print system information (uname)</h2></a>
+    <a name="cmduname"><h2>2.61 Print system information (uname)</h2></a>
   </td>
   </tr>
 </table>
@@ -3020,7 +3051,7 @@ uname [-a | -imnoprsv]
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunset"><h2>2.61 Unset an Environment Variable (unset)</h2></a>
+    <a name="cmdunset"><h2>2.62 Unset an Environment Variable (unset)</h2></a>
   </td>
   </tr>
 </table>
@@ -3046,7 +3077,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurldec"><h2>2.62 URL Decode (urldecode)</h2></a>
+    <a name="cmdurldec"><h2>2.63 URL Decode (urldecode)</h2></a>
   </td>
   </tr>
 </table>
@@ -3063,7 +3094,7 @@ urldecode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurlencode"><h2>2.63 URL Encode (urlencode)</h2></a>
+    <a name="cmdurlencode"><h2>2.64 URL Encode (urlencode)</h2></a>
   </td>
   </tr>
 </table>
@@ -3080,7 +3111,7 @@ urlencode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmduseradd"><h2>2.64 Add a New User (useradd)</h2></a>
+    <a name="cmduseradd"><h2>2.65 Add a New User (useradd)</h2></a>
   </td>
   </tr>
 </table>
@@ -3097,7 +3128,7 @@ useradd &lt;username&gt; &lt;password&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmduserdel"><h2>2.65 Delete a user (userdel)</h2></a>
+    <a name="cmduserdel"><h2>2.66 Delete a user (userdel)</h2></a>
   </td>
   </tr>
 </table>
@@ -3114,7 +3145,7 @@ userdel &lt;username&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdusleep"><h2>2.66 Wait for Microseconds (usleep)</h2></a>
+    <a name="cmdusleep"><h2>2.67 Wait for Microseconds (usleep)</h2></a>
   </td>
   </tr>
 </table>
@@ -3131,7 +3162,7 @@ usleep &lt;usec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdwget"><h2>2.67 Get File Via HTTP (wget)</h2></a>
+    <a name="cmdwget"><h2>2.68 Get File Via HTTP (wget)</h2></a>
   </td>
   </tr>
 </table>
@@ -3158,7 +3189,7 @@ wget [-o &lt;local-path&gt;] &lt;url&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdxd"><h2>2.68 Hexadecimal Dump of Memory (xd)</h2></a>
+    <a name="cmdxd"><h2>2.69 Hexadecimal Dump of Memory (xd)</h2></a>
   </td>
   </tr>
 </table>
@@ -3518,6 +3549,11 @@ nsh&gt;
     <td><b><code>sleep</code></b></td>
     <td>!<code>CONFIG_DISABLE_SIGNALS</code></td>
     <td><code>CONFIG_NSH_DISABLE_SLEEP</code></td>
+  </tr>
+  <tr>
+    <td><b><code>telnetd</code></b></td>
+    <td><code>CONFIG_NSH_TELNET</code></td>
+    <td><code>CONFIG_NSH_DISABLE_TELNETD</code></td>
   </tr>
   <tr>
     <td><b><code>test</code></b></td>
@@ -4974,7 +5010,7 @@ CONFIG_NSH_LOGIN_FAILCOUNT=3
 CONFIG_NSH_LOGIN_FIXED=y
 </pre></ul>
     <p>
-      The fixed login credentials are selected via: 
+      The fixed login credentials are selected via:
     </p>
 <ul><pre>
 CONFIG_NSH_LOGIN_USERNAME=admin
@@ -5420,6 +5456,7 @@ xxd -i romfs_img >nsh_romfsimg.h
   <li><a href="#custinit">Start-up script</a></li>
   <li><a href="#custinit"><code>stm32_appinit.c</code></a></li>
   <li><a href="#custapps">Synchronous built-in applications</a></li>
+  <li><a href="#cmdtelnetd"><code>telnetd</code></a></li>
   <li><a href="#cmdtest"><code>test</code></a></li>
   <li><a href="#cmdtime"><code>time</code></a></li>
   <li><a href="#cmdunmount"><code>umount</code></a></li>

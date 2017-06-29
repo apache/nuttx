@@ -74,7 +74,7 @@
  * This restriction is introduced to reduce the overhead of saving and
  * restoring co-processor state (which can be quite large) and in particular
  * remove that overhead from interrupt handlers.
- * 
+ *
  * The co-processor state save area may be in any convenient per-thread
  * location such as in the thread control block or above the thread stack
  * area. It need not be in the interrupt stack frame since interrupts don't

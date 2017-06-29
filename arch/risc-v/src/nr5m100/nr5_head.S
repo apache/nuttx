@@ -64,7 +64,7 @@
 
 	.global irq_handler
 
-#ifdef CONFIG_RV32IM_HW_MULDIV 
+#ifdef CONFIG_RV32IM_HW_MULDIV
 	.global time_hard_mul
 	.global hard_mul
 	.global hard_mulh
@@ -183,7 +183,7 @@ __start:
 
 	la		t0, __nr5_init
 	jr		t0
-   
+
 	/* We shouldn't return from __nr5_init */
 
 	.global _init
@@ -403,7 +403,7 @@ irq_handler:
 	lw		x31, 31*4(x1)
 
 	/* Restore return PC to q0.  This will cause the
-	 * processor to enter a critical state where 
+	 * processor to enter a critical state where
 	 * higher priority IRQs won't happen until after
 	 * the mret, thus protecting our shared QREGS.
 	 */
@@ -515,7 +515,7 @@ irq_regs:
 irq_stack:
 
 irq_regs_addr:
-   .fill	4,4 
+   .fill	4,4
 irq_stack_addr:
    .fill	4,4
 
@@ -525,7 +525,7 @@ irq_stack_addr:
  * the MUL / DIV opcodes for performing HARD vs SOFT testing.
  ****************************************************************************/
 
-#ifdef CONFIG_RV32IM_HW_MULDIV 
+#ifdef CONFIG_RV32IM_HW_MULDIV
 
 /* Multiply, return lower 32 bits */
 

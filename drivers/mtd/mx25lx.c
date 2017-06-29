@@ -92,7 +92,7 @@
 #define MX25L_MX25L6433F_SECTOR_SHIFT  12    /* Sector size 1 << 12 = 4Kb */
 #define MX25L_MX25L6433F_NSECTORS      2048
 #define MX25L_MX25L6433F_PAGE_SHIFT    8     /* Page size 1 << 8 = 256 */
-   
+
 #ifdef CONFIG_MX25L_SECTOR512                /* Simulate a 512 byte sector */
 #  define MX25L_SECTOR512_SHIFT        9     /* Sector size 1 << 9 = 512 bytes */
 #endif
@@ -124,37 +124,37 @@
 #define MX25L_DREAD                 0x3b    /* 1I / 2O read command     3   1   >=1   */
 #define MX25L_4READ                 0xeb    /* 4 x I/O read command     */
 #define MX25L_QREAD                 0x6b    /* 1I / 4O read command     3   1   >=1   */
-#define MX25L_WREN                  0x06    /* Write Enable             0   0   0     */ 
-#define MX25L_WRDI                  0x04    /* Write Disable            0   0   0     */ 
-#define MX25L_RDSR                  0x05    /* Read status register     0   0   >=1   */ 
-#define MX25L_RDCR                  0x15    /* Read config register     0   0   >=1   */ 
-#define MX25L_WRSR                  0x01    /* Write stat/conf register 0   0   2     */ 
+#define MX25L_WREN                  0x06    /* Write Enable             0   0   0     */
+#define MX25L_WRDI                  0x04    /* Write Disable            0   0   0     */
+#define MX25L_RDSR                  0x05    /* Read status register     0   0   >=1   */
+#define MX25L_RDCR                  0x15    /* Read config register     0   0   >=1   */
+#define MX25L_WRSR                  0x01    /* Write stat/conf register 0   0   2     */
 #define MX25L_4PP                   0x38    /* Quad page program        3   0   1-256 */
 #define MX25L_SE                    0x20    /* 4Kb Sector erase         3   0   0     */
 #define MX25L_BE32                  0x52    /* 32Kbit block Erase       3   0   0     */
 #define MX25L_BE64                  0xd8    /* 64Kbit block Erase       3   0   0     */
-#define MX25L_CE                    0xc7    /* Chip erase               0   0   0     */ 
-#define MX25L_CE_ALT                0x60    /* Chip erase (alternate)   0   0   0     */ 
+#define MX25L_CE                    0xc7    /* Chip erase               0   0   0     */
+#define MX25L_CE_ALT                0x60    /* Chip erase (alternate)   0   0   0     */
 #define MX25L_PP                    0x02    /* Page program             3   0   1-256 */
-#define MX25L_DP                    0xb9    /* Deep power down          0   0   0     */ 
-#define MX25L_RDP                   0xab    /* Release deep power down  0   0   0     */ 
-#define MX25L_PGM_SUSPEND           0x75    /* Suspends program         0   0   0     */ 
-#define MX25L_ERS_SUSPEND           0xb0    /* Suspends erase           0   0   0     */ 
-#define MX25L_PGM_RESUME            0x7A    /* Resume program           0   0   0     */ 
-#define MX25L_ERS_RESUME            0x30    /* Resume erase             0   0   0     */ 
-#define MX25L_RDID                  0x9f    /* Read identification      0   0   3     */ 
+#define MX25L_DP                    0xb9    /* Deep power down          0   0   0     */
+#define MX25L_RDP                   0xab    /* Release deep power down  0   0   0     */
+#define MX25L_PGM_SUSPEND           0x75    /* Suspends program         0   0   0     */
+#define MX25L_ERS_SUSPEND           0xb0    /* Suspends erase           0   0   0     */
+#define MX25L_PGM_RESUME            0x7A    /* Resume program           0   0   0     */
+#define MX25L_ERS_RESUME            0x30    /* Resume erase             0   0   0     */
+#define MX25L_RDID                  0x9f    /* Read identification      0   0   3     */
 #define MX25L_RES                   0xab    /* Read electronic ID       0   3   1     */
 #define MX25L_REMS                  0x90    /* Read manufacture and ID  1   2   >=2   */
-#define MX25L_ENSO                  0xb1    /* Enter secured OTP        0   0   0     */ 
-#define MX25L_EXSO                  0xc1    /* Exit secured OTP         0   0   0     */ 
-#define MX25L_RDSCUR                0x2b    /* Read security register   0   0   0     */ 
-#define MX25L_WRSCUR                0x2f    /* Write security register  0   0   0     */ 
-#define MX25L_RSTEN                 0x66    /* Reset Enable             0   0   0     */ 
-#define MX25L_RST                   0x99    /* Reset Memory             0   0   0     */ 
+#define MX25L_ENSO                  0xb1    /* Enter secured OTP        0   0   0     */
+#define MX25L_EXSO                  0xc1    /* Exit secured OTP         0   0   0     */
+#define MX25L_RDSCUR                0x2b    /* Read security register   0   0   0     */
+#define MX25L_WRSCUR                0x2f    /* Write security register  0   0   0     */
+#define MX25L_RSTEN                 0x66    /* Reset Enable             0   0   0     */
+#define MX25L_RST                   0x99    /* Reset Memory             0   0   0     */
 #define MX25L_RDSFDP                0x5a    /* read out until CS# high  */
 #define MX25L_SBL                   0xc0    /* Set Burst Length         */
 #define MX25L_SBL_ALT               0x77    /* Set Burst Length         */
-#define MX25L_NOP                   0x00    /* No Operation             0   0   0     */ 
+#define MX25L_NOP                   0x00    /* No Operation             0   0   0     */
 
 /* MX25L Registers ******************************************************************/
 /* Read ID (RDID) register values */
@@ -578,9 +578,9 @@ static inline void mx25l_pagewrite(FAR struct mx25l_dev_s *priv,
   for (; nbytes > 0; nbytes -= (1 << priv->pageshift))
     {
       /* Enable the write access to the FLASH */
-      
+
       mx25l_writeenable(priv);
-      
+
       /* Select this FLASH part */
 
       SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
@@ -602,10 +602,10 @@ static inline void mx25l_pagewrite(FAR struct mx25l_dev_s *priv,
       /* Deselect the FLASH and setup for the next pass through the loop */
 
       SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
-      
+
       /* Wait for any preceding write or erase operation to complete. */
 
-      mx25l_waitwritecomplete(priv);      
+      mx25l_waitwritecomplete(priv);
 
       /* Update addresses */
 
@@ -796,7 +796,7 @@ static int mx25l_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbloc
   /* Lock access to the SPI bus until we complete the erase */
 
   mx25l_lock(priv->dev);
-  
+
   while (blocksleft-- > 0)
     {
       /* MX25LVF parts have complex block overlay structure for the moment
@@ -815,8 +815,8 @@ static int mx25l_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbloc
   /* Flush the last erase block left in the cache */
 
   mx25l_cacheflush(priv);
-#endif  
-  
+#endif
+
   mx25l_unlock(priv->dev);
   return (int)nblocks;
 }
@@ -828,7 +828,7 @@ static int mx25l_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbloc
 static ssize_t mx25l_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                            size_t nblocks, FAR uint8_t *buffer)
 {
-  FAR struct mx25l_dev_s *priv = (FAR struct mx25l_dev_s *)dev;  
+  FAR struct mx25l_dev_s *priv = (FAR struct mx25l_dev_s *)dev;
   ssize_t nbytes;
 
   mxlinfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
@@ -841,7 +841,7 @@ static ssize_t mx25l_bread(FAR struct mtd_dev_s *dev, off_t startblock,
   if (nbytes > 0)
     {
       return nbytes >> MX25L_SECTOR512_SHIFT;
-    }  
+    }
 #else
   nbytes = mx25l_read(dev, startblock << priv->pageshift, nblocks << priv->pageshift,
                       buffer);
@@ -849,7 +849,7 @@ static ssize_t mx25l_bread(FAR struct mtd_dev_s *dev, off_t startblock,
     {
       return nbytes >> priv->pageshift;
     }
-#endif  
+#endif
 
   return (int)nbytes;
 }
@@ -877,7 +877,7 @@ static ssize_t mx25l_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 #endif
   mx25l_unlock(priv->dev);
 
-  return nblocks;  
+  return nblocks;
 }
 
 /************************************************************************************
@@ -931,11 +931,11 @@ static int mx25l_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
               geo->blocksize    = (1 << MX25L_SECTOR512_SHIFT);
               geo->erasesize    = (1 << MX25L_SECTOR512_SHIFT);
               geo->neraseblocks = priv->nsectors << (priv->sectorshift - MX25L_SECTOR512_SHIFT);
-#else                
+#else
               geo->blocksize    = (1 << priv->pageshift);
               geo->erasesize    = (1 << priv->sectorshift);
               geo->neraseblocks = priv->nsectors;
-#endif              
+#endif
               ret = OK;
 
               mxlinfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
@@ -1035,8 +1035,8 @@ FAR struct mtd_dev_s *mx25l_initialize_spi(FAR struct spi_dev_s *dev)
               kmm_free(priv);
               return NULL;
             }
-#endif          
-          
+#endif
+
 #ifdef CONFIG_MTD_REGISTRATION
           /* Register the MTD with the procfs system if enabled */
 

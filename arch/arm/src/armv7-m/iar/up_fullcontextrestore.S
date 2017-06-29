@@ -78,7 +78,7 @@
  ************************************************************************************/
 
 	THUMB
-  
+
 up_fullcontextrestore:
 
 	/* Perform the System call with R0=1 and R1=regs */
@@ -90,5 +90,5 @@ up_fullcontextrestore:
 	/* This call should not return */
 
 	bx		lr							/* Unnecessary ... will not return */
-  
+
 	END

@@ -121,7 +121,7 @@ int tms570_esm_initialize(void)
   putreg32(0xffffffff, TMS570_ESM_ILCR4);
 
   /* Set interrupt level (Writing zero does nothing) */
- 
+
   putreg32(0, TMS570_ESM_ILSR1);
   putreg32(0, TMS570_ESM_ILSR4);
 

@@ -49,7 +49,7 @@ Configuring NuttX to use your Wireless Router (aka Access Point)
 
   Browser the menus this way:
 
-  Application Configuration  ---> 
+  Application Configuration  --->
       NSH Library  --->
           Networking Configuration  --->
               WAPI Configuration  --->

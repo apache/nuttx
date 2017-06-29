@@ -170,7 +170,7 @@
 #define BOARD_PHY_100BASET(s) (((s) & (2 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
 #define BOARD_PHY_ISDUPLEX(s) (((s) & (4 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
 
-/* Estimate the MII_SPEED in order to get an MDC close to 2.5MHz, 
+/* Estimate the MII_SPEED in order to get an MDC close to 2.5MHz,
    based on the internal module (ENET) clock:
  *
  *   MII_SPEED = ENET_FREQ/5000000 -1
@@ -1761,7 +1761,7 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
       usleep(LINK_WAITUS);
     }
 
-  if (phydata & MII_MSR_ANEGCOMPLETE) 
+  if (phydata & MII_MSR_ANEGCOMPLETE)
     {
       ninfo("%s: Autonegotiation complete\n",  BOARD_PHY_NAME);
       ninfo("%s: MII_MSR: %04x\n", BOARD_PHY_NAME, phydata);
@@ -1769,14 +1769,14 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
   else
     {
       /* TODO: Autonegotitation has right now failed. Maybe the Eth cable is not connected.
-         PHY chip have mechanisms to configure link OK. We should leave autconf on, 
+         PHY chip have mechanisms to configure link OK. We should leave autconf on,
          and find a way to re-configure MCU whenever the link is ready. */
 
       ninfo("%s: Autonegotiation failed [%d] (is cable plugged-in ?), default to 10Mbs mode\n", \
             BOARD_PHY_NAME, retries);
 
       /* Stop auto negotiation */
-      
+
       kinetis_writemii(priv, phyaddr, MII_MCR, 0);
     }
 

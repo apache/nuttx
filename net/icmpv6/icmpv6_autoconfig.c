@@ -499,7 +499,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
       ninfo("Timed out... retrying %d\n", retries + 1);
     }
 
-  /* Check for failures.  Note:  On successful return, the network will be 
+  /* Check for failures.  Note:  On successful return, the network will be
    * in the down state, but not in the event of failures.
    */
 

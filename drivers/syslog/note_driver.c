@@ -74,7 +74,7 @@ static const struct file_operations note_fops =
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , 0            /* unlink */
-#endif 
+#endif
 };
 
 /****************************************************************************

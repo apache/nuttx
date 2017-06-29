@@ -392,11 +392,11 @@ int up_rtc_initialize(void)
       modifyreg32(STM32_RCC_BDCR, RCC_BDCR_BDRST, 0);
       putreg16(RTC_MAGIC, RTC_MAGIC_REG);
     }
-  
+
   /* Select the lower power external 32,768Hz (Low-Speed External, LSE) oscillator
    * as RTC Clock Source and enable the Clock.
    */
-  
+
   modifyreg16(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
 
   /* Enable RTC and wait for RSF */

@@ -65,8 +65,8 @@
 #define PCD8544_DISP_NORMAL         0x04     /* normal mode */
 #define PCD8544_DISP_INVERT         0x05     /* inverse video mode */
 
-#define PCD8544_SET_Y_ADDR          (1 << 6) /* Set the Y bank 0-5 */ 
-#define PCD8544_SET_X_ADDR          (1 << 7) /* Set the X bank 0-83 */ 
+#define PCD8544_SET_Y_ADDR          (1 << 6) /* Set the Y bank 0-5 */
+#define PCD8544_SET_X_ADDR          (1 << 7) /* Set the X bank 0-83 */
 
 /* Command with Instructon Set H = 1 */
 

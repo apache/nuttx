@@ -54,6 +54,7 @@
  ****************************************************************************/
 
 struct net_driver_s; /* Forward reference */
+struct ipv6_hdr_s;   /* Forward reference */
 struct socket;       /* Forward reference */
 struct sockaddr;     /* Forward reference */
 
@@ -126,7 +127,13 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
  *   the IEEE80215.4 frames.
  *
  * Parameters:
- *   dev - An instance of nework device state structure
+ *   dev    - The network device containing the packet to be sent.
+ *   fwddev - The network device used to send the data.  This will be the
+ *            same device except for the IP forwarding case where packets
+ *            are sent across devices.
+ *   ipv6   - A pointer to the IPv6 header in dev->d_buf which lies AFTER
+ *            the L1 header.  NOTE: dev->d_len must have been decremented
+ *            by the size of any preceding MAC header.
  *
  * Returned Value:
  *   None
@@ -136,7 +143,9 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
  *
  ****************************************************************************/
 
-void sixlowpan_tcp_send(FAR struct net_driver_s *dev);
+void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
+                        FAR struct net_driver_s *fwddev,
+                        FAR struct ipv6_hdr_s *ipv6);
 
 /****************************************************************************
  * Name: psock_6lowpan_udp_send
@@ -199,6 +208,36 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
                                  size_t len, int flags,
                                  FAR const struct sockaddr *to,
                                  socklen_t tolen);
+
+/****************************************************************************
+ * Name: sixlowpan_udp_send
+ *
+ * Description:
+ *   Handles forwarding a UDP packet via 6LoWPAN.  This is currently only
+ *   used by the IPv6 forwarding logic.
+ *
+ * Parameters:
+ *   dev    - An instance of nework device state structure
+ *   fwddev - The network device used to send the data.  This will be the
+ *            same device except for the IP forwarding case where packets
+ *            are sent across devices.
+ *   ipv6   - A pointer to the IPv6 header in dev->d_buf which lies AFTER
+ *            the L1 header.  NOTE: dev->d_len must have been decremented
+ *            by the size of any preceding MAC header.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPFORWARD
+void sixlowpan_udp_send(FAR struct net_driver_s *dev,
+                        FAR struct net_driver_s *fwddev,
+                        FAR struct ipv6_hdr_s *ipv6);
+#endif
 
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* _NET_SIXLOWPAN_SIXLOWPAN_H */

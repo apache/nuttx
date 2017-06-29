@@ -407,4 +407,98 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
                                   sizeof(struct sockaddr_in6));
 }
 
+/****************************************************************************
+ * Name: sixlowpan_udp_send
+ *
+ * Description:
+ *   Handles forwarding a UDP packet via 6LoWPAN.  This is currently only
+ *   used by the IPv6 forwarding logic.
+ *
+ * Parameters:
+ *   dev    - An instance of nework device state structure
+ *   fwddev - The network device used to send the data.  This will be the
+ *            same device except for the IP forwarding case where packets
+ *            are sent across devices.
+ *   ipv6   - A pointer to the IPv6 header in dev->d_buf which lies AFTER
+ *            the L1 header.  NOTE: dev->d_len must have been decremented
+ *            by the size of any preceding MAC header.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPFORWARD
+void sixlowpan_udp_send(FAR struct net_driver_s *dev,
+                        FAR struct net_driver_s *fwddev,
+                        FAR struct ipv6_hdr_s *ipv6)
+{
+  FAR struct ipv6udp_hdr_s *ipv6udp = (FAR struct ipv6udp_hdr_s *)ipv6;
+
+  /* Double check */
+
+  DEBUGASSERT(dev != NULL && dev->d_len > 0);
+
+  ninfo("d_len %u\n", dev->d_len);
+
+  if (dev != NULL && dev->d_len > 0)
+    {
+
+      sixlowpan_dumpbuffer("Outgoing UDP packet",
+                           (FAR const uint8_t *)ipv6udp, dev->d_len);
+
+      /* The UDP data payload should follow the IPv6 header plus the
+       * protocol header.
+       */
+
+      if (ipv6udp->ipv6.proto != IP_PROTO_UDP)
+        {
+          nwarn("WARNING: Expected UDP protoype: %u vs %s\n",
+                ipv6udp->ipv6.proto, IP_PROTO_UDP);
+        }
+      else
+        {
+          struct sixlowpan_tagaddr_s destmac;
+          FAR uint8_t *buf;
+          uint16_t hdrlen;
+          uint16_t buflen;
+
+          /* Get the IEEE 802.15.4 MAC address of the destination.  This
+           * assumes an encoding of the MAC address in the IPv6 address.
+           */
+
+          sixlowpan_addrfromip(ipv6udp->ipv6.destipaddr, &destmac);
+
+          /* Get the IPv6 + UDP combined header length. */
+
+          hdrlen = IPv6_HDRLEN + UDP_HDRLEN;
+
+          /* Drop the packet if the buffer length is less than this. */
+
+          if (hdrlen > dev->d_len)
+            {
+              nwarn("WARNING:  Dropping small UDP packet: %u < %u\n",
+                    buflen, hdrlen);
+            }
+          else
+            {
+              /* Convert the outgoing packet into a frame list. */
+
+              buf    = (FAR uint8_t *)ipv6 + hdrlen;
+              buflen = dev->d_len - hdrlen;
+
+              (void)sixlowpan_queue_frames(
+                      (FAR struct ieee802154_driver_s *)fwddev,
+                      &ipv6udp->ipv6, buf, buflen, &destmac);
+            }
+        }
+    }
+
+  dev->d_len = 0;
+}
+#endif
+
 #endif /* CONFIG_NET_6LOWPAN && CONFIG_NET_UDP */

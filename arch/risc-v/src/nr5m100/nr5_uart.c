@@ -101,7 +101,7 @@ static volatile struct nr5_uart_regs_s g_nr5_uart1_regs =
   .tx_irq   = NR5_IRQ_UART1_TX,
 };
 
-static struct nr5_uart_s g_nr5_uart1 = 
+static struct nr5_uart_s g_nr5_uart1 =
 {
   .regs = &g_nr5_uart1_regs,
   .rx_buf = &g_nr5_uart1_rx_buf,
@@ -172,7 +172,7 @@ void nr5_uart_init(int uart)
       //up_enable_irq(dev->regs->rx_irq);
 
       // Set the baud rate
- 
+
       if (up_getimpid() == cmpval)
         {
           *dev->regs->pBaud = 0x0d;
@@ -200,7 +200,7 @@ uint8_t nr5_uart_get_rx()
 
       rxdata = pBuf->buffer[pBuf->tail++];
       if (pBuf->tail == pBuf->size)
-        pBuf->tail = 0;    
+        pBuf->tail = 0;
     }
   up_enableints();
   return rxdata;

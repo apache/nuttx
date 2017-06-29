@@ -119,7 +119,7 @@ void up_initial_state(struct tcb_s *tcb)
 #  warning "Missing logic"
 #endif
 
-  /* Set the initial value of the interrupt context register.  
+  /* Set the initial value of the interrupt context register.
    *
    * Since various RISC-V platforms use different interrupt
    * methodologies, the value of the interrupt context is

@@ -643,7 +643,7 @@ static uint16_t stm32l4pwm_getreg(struct stm32l4_pwmtimer_s *priv, int offset)
  *
  ****************************************************************************/
 
-static void stm32l4pwm_putreg(struct stm32l4_pwmtimer_s *priv, int offset, 
+static void stm32l4pwm_putreg(struct stm32l4_pwmtimer_s *priv, int offset,
                               uint16_t value)
 {
   if (priv->timtype == TIMTYPE_GENERAL32 &&
@@ -2027,7 +2027,7 @@ static int stm32l4pwm_stop(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int stm32l4pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, 
+static int stm32l4pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
                             unsigned long arg)
 {
 #ifdef CONFIG_DEBUG_PWM_INFO

@@ -46,6 +46,9 @@ endif
 
 ifeq ($(CONFIG_NET_IPv6),y)
 NET_CSRCS += ipv6_input.c
+ifeq ($(CONFIG_NET_IPFORWARD),y)
+NET_CSRCS += ipv6_forward.c
+endif
 endif
 
 # I/O buffer chain support required?

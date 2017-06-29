@@ -16,5 +16,5 @@ config FS_NAMED_SEMPATH
 	default "/var/lock"
 	---help---
 		The path to where named semaphores will exist in the VFS namespace.
-    
+
 endif # FS_NAMED_SEMAPHORES

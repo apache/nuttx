@@ -646,6 +646,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                     default:
                     case 'd':
                       sign = true;
+                      /* FALLTHROUGH */
                     case 'u':
                       base = 10;
                       break;

@@ -156,7 +156,7 @@
  *   SAI1PLL output R (ADC1) clock frequency = SAI1VCO frequency / PLLSAI1R,   PLLR = 2, 4, 6, or 8, or 0 to disable
  *
  * We will configure like this
- * 
+ *
  * PLLSAI1 disabled
  *
  * ----------------------------------------
@@ -173,7 +173,7 @@
  *   SAI2PLL output R (ADC2) clock frequency = SAI2VCO frequency / PLLSAI2R,   PLLR = 2, 4, 6, or 8, or 0 to disable
  *
  * We will configure like this
- * 
+ *
  * PLLSAI2 disabled
  *
  * ----------------------------------------

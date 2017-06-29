@@ -136,7 +136,7 @@
  ****************************************************************************/
 
  /* Per SPI callouts to board-specific logic */
- 
+
 typedef CODE void (*imx_select_t)(FAR struct spi_dev_s *dev,
                                   uint32_t devid, bool selected);
 typedef CODE uint8_t (*imx_status_t)(FAR struct spi_dev_s *dev,

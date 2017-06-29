@@ -152,7 +152,7 @@ struct efm32_leuart_s
  ****************************************************************************/
 
 static inline uint32_t efm32_serialin(struct efm32_leuart_s *priv, int offset);
-static inline void efm32_serialout(struct efm32_leuart_s *priv, int offset, 
+static inline void efm32_serialout(struct efm32_leuart_s *priv, int offset,
                                    uint32_t value);
 static inline void efm32_setuartint(struct efm32_leuart_s *priv);
 

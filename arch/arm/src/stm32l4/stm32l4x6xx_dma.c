@@ -476,7 +476,7 @@ void stm32l4_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
 
   DEBUGASSERT(handle != NULL);
   DEBUGASSERT(ntransfers<65536);
-  
+
   /* Then DMA_CNDTRx register can only be modified if the DMA channel is
    * disabled.
    */

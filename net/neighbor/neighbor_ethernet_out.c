@@ -121,7 +121,7 @@ static const uint8_t g_multicast_ethaddr[3] =
  *
  *   If no Neighbor Table entry is found for the destination IPv6 address,
  *   the packet in the d_buf is replaced by an ICMPv6 Neighbor Solicit
- *   request packet for the IPv6 address. The IPv6 packet is dropped and 
+ *   request packet for the IPv6 address. The IPv6 packet is dropped and
  *   it is assumed that the higher level protocols (e.g., TCP) eventually
  *   will retransmit the dropped packet.
  *
@@ -161,7 +161,7 @@ void neighbor_out(FAR struct net_driver_s *dev)
 
   /* First check if destination is a IPv6 multicast address.  IPv6
    * multicast addresses in IPv6 have the prefix ff00::/8
-   * 
+   *
    *   Bits 120-127: Prefix
    *   Bits 116-119: Flags (1, 2, or 3 defined)
    *   Bits 112-115: Scope

@@ -127,7 +127,7 @@
  * POSIX_TYPED_MEM_MAP_ALLOCATABLE
  *    Map on mmap(), without affecting allocatability.
  */
- 
+
 #define POSIX_TYPED_MEM_ALLOCATE         (0)
 #define POSIX_TYPED_MEM_ALLOCATE_CONTIG  (1)
 #define POSIX_TYPED_MEM_MAP_ALLOCATABLE  (2)

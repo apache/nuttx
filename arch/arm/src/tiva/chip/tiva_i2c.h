@@ -1040,13 +1040,13 @@
 /* I2C Peripheral Properties */
 
 #if defined(CONFIG_ARCH_CHIP_TM4C)
-#  define I2CSC_PP_HS                  (1 << 0)  /* Bit 0:  High-Speed Capable */ 
+#  define I2CSC_PP_HS                  (1 << 0)  /* Bit 0:  High-Speed Capable */
 #endif
 
 /* I2C Peripheral Configuration */
 
 #if defined(CONFIG_ARCH_CHIP_TM4C)
-#  define I2CSC_PC_HS                  (1 << 0)  /* Bit 0:  High-Speed Capable */ 
+#  define I2CSC_PC_HS                  (1 << 0)  /* Bit 0:  High-Speed Capable */
 #endif
 
 /************************************************************************************

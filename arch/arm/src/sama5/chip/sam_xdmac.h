@@ -283,7 +283,7 @@
 #define XDMAC_CHINT_DI              (1 << 2)  /* Bit 2:  End of Disable Interrupt  */
 #define XDMAC_CHINT_FI              (1 << 3)  /* Bit 3:  End of Flush Interrupt  */
 #define XDMAC_CHINT_RBI             (1 << 4)  /* Bit 4:  Read Bus Error Interrupt  */
-#define XDMAC_CHINT_WBI             (1 << 5)  /* Bit 5:  Write Bus Error Interrupt */ 
+#define XDMAC_CHINT_WBI             (1 << 5)  /* Bit 5:  Write Bus Error Interrupt */
 #define XDMAC_CHINT_ROI             (1 << 6)  /* Bit 6:  Request Overflow Error Interrupt Disable Bit */
 
 #define XDMAC_CHINT_ERRORS          (0x00000070)

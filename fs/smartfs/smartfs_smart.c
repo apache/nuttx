@@ -791,7 +791,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
           ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
           if (ret < 0)
             {
-              ferr("ERROR: Error %d writing sector %d data\n", 
+              ferr("ERROR: Error %d writing sector %d data\n",
                    ret, sf->currsector);
               goto errout_with_semaphore;
             }
@@ -1587,8 +1587,8 @@ static int smartfs_bind(FAR struct inode *blkdriver, const void *data,
   ret = smartfs_mount(fs, true);
   if (ret != 0)
     {
-      kmm_free(fs);
       smartfs_semgive(fs);
+      kmm_free(fs);
       return ret;
     }
 

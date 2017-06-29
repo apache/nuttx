@@ -68,19 +68,19 @@ Micro-USB            K64_MICRO_USB_DN          USB0_DN
 Pushbuttons          SW1 (LLWU_P10)            PTC6     PTC6
                      SW2 (RSTIN_B_R)           RSTIN    RESET
                      SW3 (NMI B)               PTA4     PTA4
-LEDs                 D5 / Green LED            PTE6     PTE6 
-                     D6 / Yellow LED           PTE7     PTE7 
-                     D7 / Orange LED           PTE8     PTE8 
-                     D9 / Blue LED             PTE9     PTE9 
+LEDs                 D5 / Green LED            PTE6     PTE6
+                     D6 / Yellow LED           PTE7     PTE7
+                     D7 / Orange LED           PTE8     PTE8
+                     D9 / Blue LED             PTE9     PTE9
 Potentiometer        Potentiometer (R526)      ?        ADC1_SE18
 Accelerometer        I2C SDA                   PTC11    I2C1_SDA
                      I2C SCL                   PTC10    I2C1_SCL
                      INT1                      PTA6     PTA6
                      INT2                      PTA8     PTA8
-                     
+
 SDHC important notice: on TWR-K64F120M, R521 (close to the SD card holder) is not placed,
 hence WRPROTEC is always ON. Either place a 4.7KOhm resistor or change PIN config
-to PULLDOWN, loosing Write Protect function. See twrk64.h.                     
+to PULLDOWN, loosing Write Protect function. See twrk64.h.
 
 Connections via the General Purpose Tower Plug-in (TWRPI) Socket
 -------------------- ------------------------- -------- -------------------
@@ -265,7 +265,7 @@ Networking Support
 
   From the target side, you may should also be able to ping the host
   (assuming it's IP is 192.168.0.1):
-  
+
     nsh> ping 192.168.0.1
     PING 192.168.0.1 56 bytes of data
     56 bytes from 192.168.0.1: icmp_seq=1 time=0 ms
@@ -279,7 +279,7 @@ Networking Support
     56 bytes from 192.168.0.1: icmp_seq=9 time=0 ms
     56 bytes from 192.168.0.1: icmp_seq=10 time=0 ms
     10 packets transmitted, 10 received, 0% packet loss, time 10100 ms
-    nsh> 
+    nsh>
 
   You can also log into the NSH from the host PC like this:
 
@@ -409,7 +409,7 @@ as follows:
   * If LED1, LED2, LED3 are statically on, then NuttX probably failed to boot
     and these LEDs will give you some indication of where the failure was
  ** The normal state is LED1 ON and LED2 faintly glowing.  This faint glow
-    is because of timer interrupts and signal that result in the LED being 
+    is because of timer interrupts and signal that result in the LED being
     illuminated on a small proportion of the time.
 *** LED3 may even glow faintlier then LED2 while signals are processed.
 
@@ -798,18 +798,18 @@ Where <subdir> is one of the following:
       CONFIG_SCHED_WORKQUEUE=y             : Enable the NuttX workqueue
 
       CONFIG_NSH_ARCHINIT=y                : Provide NSH initializeation logic
-    
+
   netnsh:
   ------
     This is the same config then nsh, but it adds Ethernet support with the
     TWR-SER card. It includes telnetd in order to access nsh from Ethernet.
     IP address defaults to 192.168.0.233/24.
- 
+
     NOTES:
 
     1. See networking support for application and especially for jumper setting.
        In this config, this is TWR-SER that clocks the MCU.
-    
+
     2. The PHY link negotiation is done at boot time only. If no link is then
        available, a fallback mode is used at 10Mbs/half-duplex. Please make sure
        your ethernet cable and switches are on before booting.

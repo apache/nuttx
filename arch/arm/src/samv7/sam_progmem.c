@@ -709,7 +709,7 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
 
       for (i = 0; i < (SAMV7_PAGE_SIZE / sizeof(uint32_t)); i++)
         {
-          *dest++ = *src++; 
+          *dest++ = *src++;
            ARM_DMB();
         }
 

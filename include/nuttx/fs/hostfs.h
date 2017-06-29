@@ -65,7 +65,7 @@
 
 /* These must exactly match the definitions from include/sys/stat.h: */
 
-#define NUTTX_S_IFIFO           0010000 
+#define NUTTX_S_IFIFO           0010000
 #define NUTTX_S_IFCHR           0020000
 #define NUTTX_S_IFDIR           0040000
 #define NUTTX_S_IFBLK           0060000

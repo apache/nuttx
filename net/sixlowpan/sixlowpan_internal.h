@@ -594,6 +594,46 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
                           FAR const struct sixlowpan_tagaddr_s *addr);
 
 /****************************************************************************
+ * Name: sixlowpan_coord_eaddr
+ *
+ * Description:
+ *   Get the extended address of the PAN coordinator.
+ *
+ * Input parameters:
+ *   ieee  - A reference IEEE802.15.4 MAC network device structure.
+ *   eaddr - The location in which to return the extended address.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_STARPOINT
+int sixlowpan_coord_eaddr(FAR struct ieee802154_driver_s *ieee,
+                          FAR uint8_t *eaddr);
+#endif
+
+/****************************************************************************
+ * Name: sixlowpan_coord_saddr
+ *
+ * Description:
+ *   Get the short address of the PAN coordinator.
+ *
+ * Input parameters:
+ *   ieee  - A reference IEEE802.15.4 MAC network device structure.
+ *   saddr - The location in which to return the short address.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_STARPOINT
+int sixlowpan_coord_saddr(FAR struct ieee802154_driver_s *ieee,
+                          FAR uint8_t *saddr);
+#endif
+
+/****************************************************************************
  * Name: sixlowpan_src_panid
  *
  * Description:

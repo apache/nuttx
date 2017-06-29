@@ -124,7 +124,7 @@ static inline void up_registerdump(void)
             g_current_regs[REG_S11]);
 #ifdef RISCV_SAVE_GP
       _alert("GP:%08x SP:%08x FP:%08x TP:%08x RA:%08x\n",
-            g_current_regs[REG_GP], g_current_regs[REG_SP], g_current_regs[REG_FP], 
+            g_current_regs[REG_GP], g_current_regs[REG_SP], g_current_regs[REG_FP],
             g_current_regs[REG_TP], g_current_regs[REG_RA]);
 #else
       _alert("SP:%08x FP:%08x TP:%08x RA:%08x\n",

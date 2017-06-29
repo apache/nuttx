@@ -83,7 +83,7 @@
 #  error "This chip is not yet supported"
 #endif
 
-/* TODO: At the moment there is no implementation 
+/* TODO: At the moment there is no implementation
    for timer and external triggers */
 
 #if defined(SDADC_HAVE_TIMER)
@@ -641,7 +641,7 @@ static void sdadc_rccreset(FAR struct stm32_dev_s *priv, bool reset)
  *
  ****************************************************************************/
 
-#if 0 
+#if 0
 static void sdadc_power_down_idle(FAR struct stm32_dev_s *priv, bool pdi_high)
 {
   uint32_t regval;
@@ -785,7 +785,7 @@ static int sdadc_bind(FAR struct adc_dev_s *dev,
  *   sdadc_register()
  *   Does mostly the SDAC register setting.
  *   Leave the device in power down mode.
- *   Note that SDACx clock is already enable (for all SDADC) by the 
+ *   Note that SDACx clock is already enable (for all SDADC) by the
  *   rcc_enableapb2()
  *
  * Input Parameters:
@@ -867,7 +867,7 @@ static void sdadc_reset(FAR struct adc_dev_s *dev)
   /* TODO: JEXTEN / JEXTSEL */
 
   /* Number of calibrations is for 3 configurations */
-  
+
   setbits |= (2 << SDADC_CR2_CALIBCNT_SHIFT);
 
   /* Set CR2 configuration */
@@ -929,10 +929,10 @@ static void sdadc_reset(FAR struct adc_dev_s *dev)
  *
  * Description:
  *   Configure the ADC. This method is called the first time that the SDADC
- *   device is opened. 
+ *   device is opened.
  *   This is called by the upper half driver sdadc_open().
  *   This will occur when the port is first
- *   opened in the application code (/dev/sdadcN). 
+ *   opened in the application code (/dev/sdadcN).
  *   It would be called again after closing all references to this file and
  *   reopening it.
  *   This function wakes up the device and setup the DMA / IRQ
@@ -1008,7 +1008,7 @@ static int sdadc_setup(FAR struct adc_dev_s *dev)
  * Name: sdadc_shutdown
  *
  * Description:
- *   Disable the ADC.  This method is called when the last instance 
+ *   Disable the ADC.  This method is called when the last instance
  *   of the SDADC device is closed by the user application.
  *   This method reverses the operation the setup method.
  *
@@ -1085,12 +1085,12 @@ static void sdadc_rxint(FAR struct adc_dev_s *dev, bool enable)
     }
   else
     {
-      /* Interrupt enable for injected channel group overrun 
+      /* Interrupt enable for injected channel group overrun
           and end of conversion */
-      setbits = SDADC_CR1_JOVRIE | SDADC_CR1_JEOCIE; 
+      setbits = SDADC_CR1_JOVRIE | SDADC_CR1_JEOCIE;
     }
 #else
-  setbits = SDADC_CR1_JOVRIE | SDADC_CR1_JEOCIE; 
+  setbits = SDADC_CR1_JOVRIE | SDADC_CR1_JEOCIE;
 #endif
 
   if (enable)
@@ -1273,7 +1273,7 @@ static int sdadc_interrupt(int irq, FAR void *context, FAR void *arg)
         }
 
       /* do no clear this interrupt (cleared by reading data) */
- 
+
       pending &= ~SDADC_ISR_JEOCF;
     }
 
@@ -1300,14 +1300,14 @@ static int sdadc_interrupt(int irq, FAR void *context, FAR void *arg)
  *   The logic is, save and initialize the channel list in the private driver
  *   structure and return the corresponding adc device structure.
  *
- *   Each SDADC will convert the channels indicated each 
+ *   Each SDADC will convert the channels indicated each
  *   time a conversion is triggered either by sofware, timer or external event.
  *   Channels are numbered from 0 - 8 and must be given in order (contrarily
  *   to what says ST RM0313 doc !!!).
  *
  * Input Parameters:
  *   intf      - Could be {1,2,3} for SDADC1, SDADC2, or SDADC3
- *   chanlist  - The list of channels eg. { 0, 3, 7, 8 } 
+ *   chanlist  - The list of channels eg. { 0, 3, 7, 8 }
  *   cchannels - Number of channels
  *
  * Returned Value:
@@ -1350,7 +1350,7 @@ struct adc_dev_s *stm32_sdadcinitialize(int intf, FAR const uint8_t *chanlist,
     }
 
   /* Check channel list in order */
-  
+
   DEBUGASSERT((cchannels <= SDADC_MAX_SAMPLES) && (cchannels > 0));
   for (i = 0; i < cchannels - 1; i ++)
     {

@@ -61,7 +61,7 @@
 #  define iobinfo(format, ...)   _info(format, ##__VA_ARGS__)
 
 #else
-    
+
 #  define ioberr                 _err
 #  define iobwarn                _warn
 #  define iobinfo                _info
@@ -75,7 +75,7 @@
 #  define iobinfo(format, ...)
 
 #else
-    
+
 #  define ioberr                 (void)
 #  define iobwarn                (void)
 #  define iobinfo                (void)

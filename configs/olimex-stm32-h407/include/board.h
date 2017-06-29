@@ -2,7 +2,7 @@
  * configs/olimex-stm32-h407/include/board.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org> 
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Modified for H407 Neil Hancock
  *
  * Redistribution and use in source and binary forms, with or without

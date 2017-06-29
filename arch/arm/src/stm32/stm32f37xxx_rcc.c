@@ -598,7 +598,7 @@ static void stm32_stdclockconfig(void)
 #endif
 
 #if defined(CONFIG_RTC_LSECLOCK)
-  /* Low speed external clock source LSE 
+  /* Low speed external clock source LSE
    *
    * TODO: There is another case where the LSE needs to
    * be enabled: if the MCO pin selects LSE as source.

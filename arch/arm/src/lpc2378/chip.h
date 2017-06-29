@@ -101,7 +101,7 @@
 #define LPC23XX_EMAC_BASE           0xFFE00000  /* Ethernet MAC base address */
 #define LPC23XX_USB_BASE            0xFFE0C200  /* USB base address */
 #define LPC23XX_SCB_BASE            0xE01FC000  /* System Control Block (SBC) base address */
-#define LPC23XX_EXT_BASE            0xe01fc140  /* External Interrupt base address */   
+#define LPC23XX_EXT_BASE            0xe01fc140  /* External Interrupt base address */
 
 /* AHB Register block base addresses */
 
@@ -367,7 +367,7 @@
 #define CAN1RID_OFFSET              0x24
 #define CAN1RDA_OFFSET              0x28
 #define CAN1RDB_OFFSET              0x2C
-    
+
 #define CAN1TFI1_OFFSET             0x30
 #define CAN1TID1_OFFSET             0x34
 #define CAN1TDA1_OFFSET             0x38
@@ -394,7 +394,7 @@
 #define CAN2RID_OFFSET              0x24
 #define CAN2RDA_OFFSET              0x28
 #define CAN2RDB_OFFSET              0x2C
-    
+
 #define CAN2TFI1_OFFSET             0x30
 #define CAN2TID1_OFFSET             0x34
 #define CAN2TDA1_OFFSET             0x38

@@ -30,7 +30,7 @@ on the FPGA board. Those peripherals include:
   - 3-Axis accelerometer
   - Temperature sensor
 
-See http://store.digilentinc.com/nexys-4-ddr-artix-7-fpga-trainer-board-recommended-for-ece-curriculum/ 
+See http://store.digilentinc.com/nexys-4-ddr-artix-7-fpga-trainer-board-recommended-for-ece-curriculum/
 or http://store.digilentinc.com/nexys-4-artix-7-fpga-trainer-board-limited-time-see-nexys4-ddr/
 for more information about these boards.
 
@@ -53,25 +53,25 @@ Contents
 
 Development Environment
 =======================
-  The NR5M100 RISC-V core was designed as a low gate count / low performance micro controller 
+  The NR5M100 RISC-V core was designed as a low gate count / low performance micro controller
   for inclusion in an ASIC.  It is based on a Verilog RISC-V called picorv32, but has many
-  additions beyond that baseline.  The design running on the Digilent Nexys4 FPGA is a 
+  additions beyond that baseline.  The design running on the Digilent Nexys4 FPGA is a
   validation platform for the core and is presented as an open source project.
 
   The reason NR5M100 is "low performance" is that it is a state machine based core (like the
   picorv32) and not a multi-stage pipeline core.  This means that it requires an average of
   4.5 clock cycles to execute each instruction.  On a multi-stage pipeline architecure, this
-  average would be closer to 1 clock cycle per instruction (though a bit higher due to 
+  average would be closer to 1 clock cycle per instruction (though a bit higher due to
   pipeline branch misses).  The tradeoff for lower performance is a simpler design.  There
   is a single memory bus interface for both instructions and data.  Multi-stage pipeline
   cores require a separate I and D bus with cache SRAM and an external memory cache controller,
   etc.  This in addition to the pipeline registers adds additional gate count.
 
   The nr5m100-nexys4 core runs at 83.333 Mhz which provides about 18 Mhz effective operating
-  speed with the multi-clock per instruction architecture.  If you are looking for a higher 
-  performance platform, you should check out the PULP Platform ( http://www.pulp-platform.org ).  
-  That is an FPGA design with a 4-stage pipeline RISC-V core, though not currently supported 
-  by NuttX.  The NR5M100 project will likely pull in the RISC-V core from that design next, 
+  speed with the multi-clock per instruction architecture.  If you are looking for a higher
+  performance platform, you should check out the PULP Platform ( http://www.pulp-platform.org ).
+  That is an FPGA design with a 4-stage pipeline RISC-V core, though not currently supported
+  by NuttX.  The NR5M100 project will likely pull in the RISC-V core from that design next,
   though this will probably not be available soon.  With a bit of work, it is possible to
   run the nr5m100-nexys4 core at 170 Mhz with a 6.5 clocks-per-instruction state machine.
   This would give an effective performance of about 26Mhz.
@@ -87,8 +87,8 @@ RISC-V GNU Toolchain
 ====================
 
   To compile the code, you must first build a RISC-V GNU Toolchain from the sources at
-  https://github.com/riscv/riscv-gnu-toolchain.  I don't know of any sources for pre-compiled 
-  toolchains (though there may be some out there). 
+  https://github.com/riscv/riscv-gnu-toolchain.  I don't know of any sources for pre-compiled
+  toolchains (though there may be some out there).
 
   To build this toolchain, follow these instructions (tested on Ubuntu 12.04):
 
@@ -118,16 +118,16 @@ RISC-V GNU Toolchain
 
   Windows based toolchain
   -----------------------
-  May be possible to compile the GNU toolchain described above using Cygwin, but havne't tried it.  
+  May be possible to compile the GNU toolchain described above using Cygwin, but havne't tried it.
 
 Debugger
 ========
-  The Debug Module within the NR5M100 RISC-V has been designed to work with the RISC-V gdb 
+  The Debug Module within the NR5M100 RISC-V has been designed to work with the RISC-V gdb
   debugger interfaced with the SiFive implementation of OpenOCD.  The interface has been tested
-  with a J-LINK JTAG probe connected to PMOD header B on the FPGA using an adapter board 
+  with a J-LINK JTAG probe connected to PMOD header B on the FPGA using an adapter board
   that I designed and fabbed at OSHPark.  I will update this README.txt file soon with a link
   to the shared project for anyone who wishes to build one.
-  
+
   To build OpenOCD, perform the following:
 
   1. Ensure the proper packages are installed:
@@ -139,7 +139,7 @@ Debugger
      cd ~/riscv
      git clone --recursive https://github.com/sifive/openocd.git
 
-  3. Configure and build OpenOCD.  The x86_64 GCC compilers will give errors because of 
+  3. Configure and build OpenOCD.  The x86_64 GCC compilers will give errors because of
      shadowed variable warnings, so diable the -Werror flag also:
 
      cd openocd

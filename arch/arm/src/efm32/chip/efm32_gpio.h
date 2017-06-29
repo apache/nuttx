@@ -284,7 +284,7 @@
 #endif
 
 /* GPIO Register Bit Field Definitions *****************************************************************************************/
- 
+
 /* Bit fields for GPIO P_CTRL */
 
 #define _GPIO_P_CTRL_RESETVALUE                           0x00000000UL                           /* Default value for GPIO_P_CTRL */

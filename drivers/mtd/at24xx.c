@@ -278,7 +278,7 @@ static int at24c_eraseall(FAR struct at24c_dev_s *priv)
       while (at24c_i2c_write(priv, at24addr, buf, AT24XX_ADDRSIZE) < 0)
         {
           finfo("wait\n");
-          if (!wait--) 
+          if (!wait--)
             {
               return -ETIMEDOUT;
             }
@@ -344,7 +344,7 @@ static ssize_t at24c_read_internal(FAR struct at24c_dev_s *priv, off_t offset,
   while (at24c_i2c_write(priv, at24addr, buf, AT24XX_ADDRSIZE) < 0)
     {
       finfo("wait\n");
-      if (!wait--) 
+      if (!wait--)
         {
           return -ETIMEDOUT;
         }
@@ -467,7 +467,7 @@ static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
       while (at24c_i2c_write(priv, at24addr, buf, AT24XX_ADDRSIZE) < 0)
         {
           finfo("wait\n");
-          if (!wait--) 
+          if (!wait--)
             {
               return -ETIMEDOUT;
             }

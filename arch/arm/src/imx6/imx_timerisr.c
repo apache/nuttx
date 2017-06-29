@@ -230,7 +230,7 @@ void arm_timer_initialize(void)
   putreg32(GPT_OCR3_VALUE, IMX_GPT_OCR3);
 
   putreg32(GPT_PR_VALUE - 1, IMX_GPT_PR);
-  
+
   /* Configure restart mode.  Interrupts will be received on OC3, then OC2,
    * then OC1 when the counter will be reset to zero and the whole sequence
    * starts again.

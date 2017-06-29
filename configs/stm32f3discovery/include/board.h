@@ -224,11 +224,11 @@
 /* Alternate function pin selections ************************************************/
 
 /* USART
- * 
+ *
  *  USART1: Hardwired to embedded STLinkV2 hardware debugger
  *    RX (PC5)
  *    TX (PC4)
- * 
+ *
  *  USART2: Connect to an external UART<->RS232 transceiver for use as console.
  *    RX (PA3)
  *    TX (PA2)
@@ -237,30 +237,30 @@
 #define GPIO_USART2_RX GPIO_USART2_RX_2
 #define GPIO_USART2_TX GPIO_USART2_TX_2
 
-/* SPI 
- * 
- *  SPI1: Hardwired to ST L3GD20 MEMS device 
+/* SPI
+ *
+ *  SPI1: Hardwired to ST L3GD20 MEMS device
  *    MISO (PA6)
  *    MSOI (PA7)
- *    SCK (PA5) 
- */ 
+ *    SCK (PA5)
+ */
 
 #define GPIO_SPI1_MISO GPIO_SPI1_MISO_1
 #define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1
 #define GPIO_SPI1_SCK  GPIO_SPI1_SCK_1
 
 /* I2C
- * 
+ *
  * I2C1: Accessible via expansion headers
  *   SCL (PA15)
  *   SDA (PA14)
- *   SMBA (PB5) 
- * 
- * I2C2: Accessible via expansion headers 
+ *   SMBA (PB5)
+ *
+ * I2C2: Accessible via expansion headers
  *   SCL (PA9)
  *   SDA (PA10)
  *   SMBA (PB12)
- */ 
+ */
 
 #ifdef CONFIG_STM32_I2C1
 #define GPIO_I2C1_SCL  GPIO_I2C1_SCL_1

@@ -65,9 +65,9 @@
 static inline uint32_t up_getsp(void)
 {
   register uint32_t sp;
- 
+
   __asm__ __volatile__("addi %0, sp, 0" : "=r" (sp));
- 
+
   return sp;
 }
 

@@ -119,7 +119,7 @@ void arch_clean_dcache(uintptr_t start, uintptr_t end)
       int32_t tmpways = ways;
 
       /* Isolate the cache line associated with this address.  For example
-       * if the cache line size is 32 bytes and the cache size is 16KB, then 
+       * if the cache line size is 32 bytes and the cache size is 16KB, then
        *
        *   sshift = 5      : Offset to the beginning of the set field
        *   smask  = 0x007f : Mask of the set field

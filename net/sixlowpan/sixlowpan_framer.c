@@ -228,7 +228,7 @@ int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
 #ifdef CONFIG_IEEE802154_SECURITY
 #  warning CONFIG_IEEE802154_SECURITY not yet supported
 #endif
-  
+
 #ifdef CONFIG_IEEE802154_UWB
 #  warning CONFIG_IEEE802154_UWB not yet supported
 #endif

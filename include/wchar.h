@@ -53,7 +53,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* <wchar.h> defines the following macro names: 
+/* <wchar.h> defines the following macro names:
  *
  * WCHAR_MAX
  *   The maximum value representable by an object of type wchar_t.
@@ -66,7 +66,7 @@
  *   functions to indicate end-of-file.
  *
  * NULL
- *   As described in <stddef.h>. 
+ *   As described in <stddef.h>.
  *
  * Reference: Opengroup.org
  */

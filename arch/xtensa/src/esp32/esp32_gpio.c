@@ -287,7 +287,7 @@ void esp32_gpiowrite(int pin, bool value)
 bool esp32_gpioread(int pin)
 {
   uint32_t regval;
- 
+
   DEBUGASSERT(pin >=0 && pin <= ESP32_NIRQ_GPIO);
 
   if (pin < 32)

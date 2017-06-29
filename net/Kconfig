@@ -137,6 +137,7 @@ config NET_6LOWPAN
 	select NETDEV_MULTINIC if NET_ETHERNET || NET_LOOPBACK || NET_SLIP || NET_TUN
 	select NET_MULTILINK if NET_ETHERNET || NET_LOOPBACK || NET_SLIP || NET_TUN
 	select NETDEV_IOCTL
+	select NET_HAVE_STAR
 	depends on NET_IPv6
 	---help---
 		Enable support for IEEE 802.15.4 Low power Wireless Personal Area
@@ -284,6 +285,20 @@ menuconfig NET_IPv6
 source "net/neighbor/Kconfig"
 source "net/sixlowpan/Kconfig"
 
+config NET_IPFORWARD
+	bool "Enable L2 forwarding"
+	default n
+	depends on NET_IPv6
+	---help---
+		Enable forwarding of IPv6 packets.  Packets received with IPv6
+		addresses which are not supported by this platform will be forwarded
+		to the appropriate network device.  Routing table support may be
+		required.
+
+		NOTE: L2 forwarding only supported for IPv6.  There is no technical
+		reason why IPv4 forwarding has not been implemented, it just has
+		not yet been done.
+
 endmenu # Internet Protocol Selection
 
 source "net/socket/Kconfig"
@@ -306,10 +321,54 @@ config NET_STATISTICS
 	---help---
 		Network layer statistics on or off
 
+config NET_HAVE_STAR
+	bool
+	default n
+	---help---
+		Automatically enabled if at least one selected L2 protocol supports
+		a STAR topology.  In order to support the star topology, the L2
+		protocol must support relaying all packets to a well-known hub node.
+
+menu "Network Topologies"
+
+config NET_STAR
+	bool "Enable star topology"
+	default n
+	depends on NET_HAVE_STAR && NET_IPv6
+	---help---
+		Enable support for a star network topology.
+
+		NOTE: Currently only supported by 6LoWPAN.
+		NOTE: L2 forwarding only supported for IPv6.
+
+choice
+	prompt "Node role"
+	depends on NET_STAR
+	default NET_STARPOINT
+	---help---
+		Specifies the role of this not in the star configuration.
+
+config NET_STARPOINT
+	bool "Point node in star"
+	---help---
+		The node is a "point" in the star configuration and must send all
+		packets to the star hub node.
+
+config NET_STARHUB
+	bool "Hub node of star"
+	select NET_IPFORWARD
+	---help---
+		This is the "hub" node in the star configurations.  It will receive
+		packets packets from all "point" nodes and perform L2 forwarding of
+		the packets that are not destined for this node.
+
+endchoice # Node role
+endmenu # Network Topologies
+
 source "net/route/Kconfig"
 
 config NET_HOSTNAME
-	string "Host name for current machine"
+	string "Host name for this device"
 	default ""
 	---help---
 		A unique name to identify device on the network

@@ -60,7 +60,7 @@
  *   address types are AF_INET and AF_INET6. The host address argument is a
  *   pointer to a struct of a type depending on the address type, for example
  *   a struct in_addr *  for address type AF_INET.
- * 
+ *
  * Input Parameters:
  *   addr - The address of the host to find.
  *   len - The length of the address

@@ -108,7 +108,7 @@ static const struct gpio_operations_s gpint_ops =
 
 static struct simgpio_dev_s g_gpin =
 {
-  .gpio = 
+  .gpio =
   {
     .gp_pintype = GPIO_INPUT_PIN,
     .gp_ops     = &gpin_ops,
@@ -117,7 +117,7 @@ static struct simgpio_dev_s g_gpin =
 
 static struct simgpio_dev_s g_gpout =
 {
-  .gpio = 
+  .gpio =
   {
     .gp_pintype = GPIO_OUTPUT_PIN,
     .gp_ops     = &gpout_ops,
@@ -128,7 +128,7 @@ static struct simgpint_dev_s g_gpint =
 {
   .simgpio =
   {
-    .gpio = 
+    .gpio =
     {
       .gp_pintype = GPIO_INTERRUPT_PIN,
       .gp_ops     = &gpint_ops,
@@ -171,14 +171,14 @@ static int gpout_write(FAR struct gpio_dev_s *dev, bool value)
   gpioinfo("Writing %d\n", (int)value);
 
   simgpio->value = value;
-  return OK;    
+  return OK;
 }
 
 static int gpint_attach(FAR struct gpio_dev_s *dev,
                         pin_interrupt_t callback)
 {
   FAR struct simgpint_dev_s *simgpint = (FAR struct simgpint_dev_s *)dev;
- 
+
   gpioinfo("Cancel 1 second timer\n");
   wd_cancel(simgpint->wdog);
 

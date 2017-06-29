@@ -60,7 +60,7 @@ struct gplh_dev_s
   /* Publically visible lower-half state */
 
   struct gpio_dev_s gpio;
- 
+
   /* Private lower half data follows */
 
   uint8_t pin;                      /* I/O expander pin ID */

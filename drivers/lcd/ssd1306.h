@@ -282,7 +282,7 @@ void ssd1306_configspi(FAR struct spi_dev_s *spi);
 #  define ssd1306_select(priv, cs)
 #  define ssd1306_cmddata(priv, cmd)
 #  define ssd1306_configspi(spi)
-#endif 
+#endif
 
 #endif /* __DRIVERS_LCD_SSD1306_H */
 

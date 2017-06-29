@@ -136,7 +136,7 @@ int lm32_swint(int irq, FAR void *context, FAR void *arg)
 
   DEBUGASSERT(g_current_regs == NULL);
   g_current_regs = regs;
- 
+
   /* Software interrupt 0 is invoked with REG_A0 (REG_X10) = system call
    * command and REG_A1-6 = variable number of
    * arguments depending on the system call.

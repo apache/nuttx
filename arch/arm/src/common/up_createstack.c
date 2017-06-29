@@ -223,7 +223,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
 
       /* The ARM stack must be aligned to 8-byte alignment for EABI.
-       * If necessary top_of_stack must be rounded down to the next 
+       * If necessary top_of_stack must be rounded down to the next
        * boundary
        */
 

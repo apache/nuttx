@@ -87,7 +87,7 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
   if (ehdr->e_machine != EM_ARM)
     {
       berr("ERROR: Not for ARM: e_machine=%04x\n", ehdr->e_machine);
-      return -ENOEXEC;
+      return false;
     }
 
   /* Make sure that 32-bit objects are supported */
@@ -95,7 +95,7 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
   if (ehdr->e_ident[EI_CLASS] != ELFCLASS32)
     {
       berr("ERROR: Need 32-bit objects: e_ident[EI_CLASS]=%02x\n", ehdr->e_ident[EI_CLASS]);
-      return -ENOEXEC;
+      return false;
     }
 
   /* Verify endian-ness */
@@ -107,7 +107,7 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
 #endif
     {
       berr("ERROR: Wrong endian-ness: e_ident[EI_DATA]=%02x\n", ehdr->e_ident[EI_DATA]);
-      return -ENOEXEC;
+      return false;
     }
 
   /* Make sure the entry point address is properly aligned */
@@ -115,11 +115,11 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
   if ((ehdr->e_entry & 3) != 0)
     {
       berr("ERROR: Entry point is not properly aligned: %08x\n", ehdr->e_entry);
-      return -ENOEXEC;
+      return false;
     }
 
   /* TODO:  Check ABI here. */
-  return OK;
+  return true;
 }
 
 /****************************************************************************

@@ -485,7 +485,7 @@
 
 #define XCHAL_HAVE_OLD_EXC_ARCH         XCHAL_HAVE_XEA1 /* (DEPRECATED) 1 if
                                                          * old exception
-                                                         * architecture (XEA1), 
+                                                         * architecture (XEA1),
                                                          * 0 otherwise (eg.
                                                          * XEA2) */
 #define XCHAL_HAVE_EXCM                 XCHAL_HAVE_XEA2 /* (DEPRECATED) 1 if
@@ -876,7 +876,7 @@
 #  define XCHAL_KSEG_CACHED_PADDR       0x00000000 /* phys.addr of
                                                     * kseg_cached */
 #  define XCHAL_KSEG_CACHED_SIZE        0x08000000 /* size in bytes of
-                                                    * kseg_cached (assumed 
+                                                    * kseg_cached (assumed
                                                     * power of 2!!!) */
 #  define XCHAL_KSEG_BYPASS_VADDR       0xD8000000 /* virt.addr of kernel
                                                     * RAM bypass
@@ -885,7 +885,7 @@
 #  define XCHAL_KSEG_BYPASS_PADDR       0x00000000 /* phys.addr of
                                                     * kseg_bypass */
 #  define XCHAL_KSEG_BYPASS_SIZE        0x08000000 /* size in bytes of
-                                                    * kseg_bypass (assumed 
+                                                    * kseg_bypass (assumed
                                                     * power of 2!!!) */
 #  define XCHAL_KIO_CACHED_VADDR        0xE0000000 /* virt.addr of kernel
                                                     * I/O cached static
@@ -956,7 +956,7 @@
 	.endif
 	.endm
 
-/* Align portion of save area and bring ptr in range if necessary.  Used by 
+/* Align portion of save area and bring ptr in range if necessary.  Used by
  * save area load/store sequences.  Not usually invoked directly.  Allows
  * combining multiple (sub-)sequences arbitrarily.  ptr pointer to save
  * area (may be off, see .Lxchal_pofs_) minofs,maxofs range of offset from

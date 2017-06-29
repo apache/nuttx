@@ -3587,7 +3587,7 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
   /* Enable pulse-per-second (PPS) output signal */
 
   tiva_configgpio(GPIO_EN0_PPS);
-#endif 
+#endif
 }
 
 /****************************************************************************

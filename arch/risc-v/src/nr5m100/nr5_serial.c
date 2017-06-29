@@ -432,7 +432,7 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
   for (passes = 0; passes < 256 && handled; passes++)
     {
       handled = false;
-      
+
       status = up_serialin(priv, NR5_UART_STATUS_REG_OFFSET);
 
       /* Handle incoming, received bytes.  The RX FIFO is configured to

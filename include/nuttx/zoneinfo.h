@@ -61,7 +61,7 @@ extern "C"
 #endif
 
 /* If the TZ database is built as a ROMFS file system, then these variables
- * provide (1) the address of the array in FLASH/ROM that contains the 
+ * provide (1) the address of the array in FLASH/ROM that contains the
  * ROMFS file system image, and (2) the size of the ROMFS file system image
  * in bytes.  This is sufficient information to permit external logic to
  * mount the ROMF file system.

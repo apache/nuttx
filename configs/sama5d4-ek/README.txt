@@ -359,7 +359,7 @@ Creating and Using DRAMBOOT
        cd tools
        ./configure.sh sama5d4-ek/dramboot
        cd -
- 
+
      Before building, make sure that the PATH environment variable includes
      the correct path  to the directory than holds your toolchain binaries.
 

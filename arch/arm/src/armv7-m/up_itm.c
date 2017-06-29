@@ -111,7 +111,7 @@ uint32_t itm_sendchar(uint32_t ch)
 
 /****************************************************************************
  * Name: itm_receivechar
- *  
+ *
  * Description:
  *
  * Input Parameters:
@@ -122,7 +122,7 @@ uint32_t itm_sendchar(uint32_t ch)
  *
  ****************************************************************************/
 
-int32_t itm_receivechar(void) 
+int32_t itm_receivechar(void)
 {
   int32_t ch = -1;  /* Assume no character available */
 
@@ -150,7 +150,7 @@ int32_t itm_receivechar(void)
  *
  ****************************************************************************/
 
-int32_t itm_checkchar (void) 
+int32_t itm_checkchar (void)
 {
   return (g_itm_rxbuffer != ITM_RXBUFFER_EMPTY);
 }

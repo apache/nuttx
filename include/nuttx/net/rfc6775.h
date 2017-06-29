@@ -80,7 +80,7 @@
 
 #define RTR_SOLICITATION_INTERVAL     10        /* Seconds */
 #define MAX_RTR_SOLICITATIONS         3         /* Transmissions */
-#define MAX_RTR_SOLICITATION_INTERVAL 60        /* Seconds */ 
+#define MAX_RTR_SOLICITATION_INTERVAL 60        /* Seconds */
 
 /****************************************************************************
  * Public Types

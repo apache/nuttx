@@ -3,7 +3,7 @@
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com> 
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,7 +35,7 @@
  ****************************************************************************/
 
 /* The MK66FN2M0VMD18 has 2M of FLASH beginning at address 0x0000:0000 and
- * 256Kb of SRAM beginning at address 0x1fff:0000 (SRAM_L)(64Kb) and 
+ * 256Kb of SRAM beginning at address 0x1fff:0000 (SRAM_L)(64Kb) and
  * 0x2000:0000 (SRAM_U) (192Kb).
  *
  * NOTE: that the first part of the K66 FLASH region is reserved for

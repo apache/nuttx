@@ -729,7 +729,7 @@ struct note_common_s
 };
 
 #define NTYPES 18
-static char *noteid[NTYPES] = 
+static char *noteid[NTYPES] =
 {
   "NOTE_START",           /* type = 0 */
   "NOTE_STOP",            /* type = 1 */
@@ -774,7 +774,7 @@ int main(int argc, char **argv)
   unsigned int remainder;
   unsigned int value;
   char buffer[64];
-  
+
   notndx = ni_tail;
   while (notndx != ni_head)
     {

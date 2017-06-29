@@ -432,7 +432,7 @@ static void tms570_clocksrc_configure(void)
   /* Work Around for Errata SYS#46: Errata Description: Clock Source
    * Switching Not Qualified with Clock Source Enable And Clock Source Valid
    * Workaround: Always check the CSDIS register to make sure the clock source
-   * is turned on and check the CSVSTAT register to make sure the clock source 
+   * is turned on and check the CSVSTAT register to make sure the clock source
    * is valid. Then write to GHVSRC to switch the clock.
    */
 

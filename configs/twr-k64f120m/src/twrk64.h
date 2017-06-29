@@ -222,7 +222,7 @@ TODO See README
  */
 #endif
 
-/* SDHC 
+/* SDHC
    important notice: on TWR-K64F120M, R521 (close to the SD card holder) is not placed,
    hence WRPROTEC is always ON. Either place a 4.7KOhm resistor or change PIN config
    to PULLDOWN, loosing Write Protect function */
