@@ -649,17 +649,25 @@ Configurations
 
        Where <server-ip> is the IP address of the E1 endpoint.
 
+       Similarly for the UDP test:
+
+         E1: nsh> udpserver &
+         E2: nsh> udpclient <server-ip> &
+
        The nsh> dmesg command can be use at any time on any node to see
        any debug output that you have selected.
 
-       Telenet sessions may be initiated from the hub:
+       Telenet sessions may be initiated only from the hub to a star
+       endpoint:
 
          C: nsh> telnet <server-ip> <-- Runs the Telnet client
 
        Where <server-ip> is the IP address of either the E1 or I2 endpoints.
 
     STATUS:
-      2017-06-29:  Configurations added but not yet tested.
+      2017-06-29:  Configurations added.  Initial testing was not very
+        fruitful:  There is error in the i8sak acceptaccept logic that
+        currently will not support multiple endpoints.
 
   nsh:
 
