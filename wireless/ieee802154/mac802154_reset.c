@@ -95,8 +95,6 @@ int mac802154_req_reset(MACHANDLE mac, bool rst_pibattr)
       priv->sfspec.beaconorder = 15;   /* Non-beacon enabled network */
       priv->sfspec.sforder = 15;       /* Length of active portion of outgoing SF */
       priv->beacon_txtime = 0;           /* Device never sent a beacon */
-#warning Set BSN and DSN to random values!
-      priv->bsn = 0;
       priv->dsn = 0;
       priv->gtspermit = true;       /* PAN Coord accepting GTS requests */
       priv->minbe = 3;              /* Min value of backoff exponent (BE) */

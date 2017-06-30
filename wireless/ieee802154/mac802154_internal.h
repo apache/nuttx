@@ -135,7 +135,8 @@ enum mac802154_operation_e
   MAC802154_OP_NONE,
   MAC802154_OP_ASSOC,
   MAC802154_OP_POLL,
-  MAC802154_OP_SCAN
+  MAC802154_OP_SCAN,
+  MAC802154_OP_AUTOEXTRACT,
 };
 
 struct ieee802154_privmac_s; /* Forward Reference */
@@ -231,8 +232,6 @@ struct ieee802154_privmac_s
   struct ieee802154_pandesc_s pandesc;
 
   /*************** Fields related to beacon-enabled networks ******************/
-
-  uint8_t bsn; /* Seq. num added to tx beacon frame */
 
   /* Holds attributes pertaining to the superframe specification */ 
  
@@ -356,6 +355,14 @@ struct ieee802154_privmac_s
                                      * before declaring ch access failure */
   uint8_t maxretries          : 3;  /* Max # of retries allowed after tx fail */
   /* End of 8-bit bitfield. */
+
+  /* Start of 8-bit bitfield */
+
+  uint8_t rxonidle            : 1;  /* Receiver on when idle? */
+
+  /* End of 8-bit bitfield. */
+
+
 
   /* TODO: Add Security-related MAC PIB attributes */
 };
@@ -608,6 +615,7 @@ static inline int mac802154_timercancel(FAR struct ieee802154_privmac_s *priv)
 {
   wd_cancel(priv->timeout);
   priv->timeout_worker = NULL;
+  wlinfo("timer cancelled\n");
   return OK;
 }
 
@@ -701,5 +709,29 @@ static inline void mac802154_setcoordaddr(FAR struct ieee802154_privmac_s *priv,
   priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_COORD_SADDR,
                         (FAR const union ieee802154_attr_u *)addr->saddr);
 }                                    
+
+static inline void mac802154_setrxonidle(FAR struct ieee802154_privmac_s *priv,
+                                         bool rxonidle)
+{
+  priv->rxonidle = true;
+  if (priv->rxonidle)
+    {
+      mac802154_rxenable(priv);
+    }
+  else
+    {
+      mac802154_rxdisable(priv);
+    }
+
+  /* Unlike other attributes, we can't simply cast this one since it is a bit
+   * in a bitfield.  Casting it will give us unpredicatble results.  Instead
+   * of creating a ieee802154_attr_u, we use a local bool.  Allocating the
+   * ieee802154_attr_u value would take up more room on the stack since it is
+   * as large as the largest attribute type.
+   */
+
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_RX_ON_WHEN_IDLE,
+                        (FAR const union ieee802154_attr_u *)&rxonidle);
+}
 
 #endif /* __WIRELESS_IEEE802154__MAC802154_INTERNAL_H */

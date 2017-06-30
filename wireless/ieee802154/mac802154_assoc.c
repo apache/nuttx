@@ -86,7 +86,6 @@ int mac802154_req_associate(MACHANDLE mac,
     (FAR struct ieee802154_privmac_s *)mac;
   FAR struct ieee802154_txdesc_s *txdesc;
   FAR struct iob_s *iob;
-  bool rxonidle;
   int ret;
   int i;
 
@@ -137,16 +136,7 @@ int mac802154_req_associate(MACHANDLE mac,
   priv->devmode = (req->capabilities.devtype) ?
                   IEEE802154_DEVMODE_COORD : IEEE802154_DEVMODE_ENDPOINT;
 
-  /* Unlike other attributes, we can't simply cast this one since it is a bit
-   * in a bitfield.  Casting it will give us unpredicatble results.  Instead
-   * of creating a ieee802154_attr_u, we use a local bool.  Allocating the
-   * ieee802154_attr_u value would take up more room on the stack since it is
-   * as large as the largest attribute type.
-   */
-
-  rxonidle = req->capabilities.rxonidle;
-  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_RX_ON_WHEN_IDLE,
-                        (FAR const union ieee802154_attr_u *)&rxonidle);
+  mac802154_setrxonidle(priv, req->capabilities.rxonidle);
 
   /* Allocate an IOB to put the frame in */
 
@@ -485,6 +475,7 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
 
       IEEE802154_SADDRCOPY(notif->u.assocconf.saddr, &IEEE802154_SADDR_UNSPEC);
 
+
       /* We are now done the operation, unlock the semaphore */
 
       priv->curr_op = MAC802154_OP_NONE;
@@ -519,17 +510,33 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
            * to respond. Setup a timeout for macResponseWaitTime so that we
            * can inform the next highest layer if the association attempt fails
            * due to NO_DATA.
+           *
+           * TODO: The standard defines macResponseWaitTime as:
+           * The maximum time, in multiples of aBaseSuperframeDuration, a device
+           * shall wait for a response command frame to be available following a
+           * request command frame.
+           *
+           * However, on beacon-enabled networks, it seems the maximum value
+           * isn't really that large of a value, AKA: assoc always fails from
+           * timeout even though everything is working as expected. The definition
+           * does say after we've sent a data request, which we, haven't sent
+           * yet, but we do need a timeout for association in general. Not sure
+           * what the correct answer is. For now, I am going to change the
+           * way macResponseWaitTime is used with beacon-enabled networks and
+           * make the timeout (BI * macResponseWaitTime) where BI is Beacon
+           * Interval = aBaseSuperframeDuration * 2^macBeaconOrder
            */
 
+          wlinfo("starting timeout timer\n");
           mac802154_timerstart(priv, (priv->resp_waittime *
-                               IEEE802154_BASE_SUPERFRAME_DURATION),
-                               mac802154_assoctimeout);
+            (IEEE802154_BASE_SUPERFRAME_DURATION * (1 << priv->sfspec.beaconorder))),
+            mac802154_assoctimeout);
         }
       else
         {
-          /* Make sure the coordinator address mode is not set to none. This shouldn't
-           * happen since the association request should have set the mode to short or
-           * extended
+          /* Make sure the coordinator address mode is not set to none. This
+           * shouldn't happen since the association request should have set
+           * the mode to short or extended
            */
 
           DEBUGASSERT(priv->pandesc.coordaddr.mode != IEEE802154_ADDRMODE_NONE);
@@ -634,17 +641,33 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
 
       mac802154_rxenable(priv);
 
-      /* Start a timer, if we receive the data frame, we will cancel
-       * the timer, otherwise it will expire and we will notify the
-       * next highest layer of the failure.
+      /* If we are on a beacon-enabled network, we already have the association
+       * timeout timer scheduled. So we only need to start the timeout timer
+       * if we are operating on a non-beacon enabled network.
+       *
+       * NOTE: This may create a bad side-effect where the receiver is on
+       * for longer than it needs to be during association. Revisit if power
+       * is ever an issue.
        */
 
-      mac802154_timerstart(priv, priv->max_frame_waittime,
-                           mac802154_assoctimeout);
+      if (priv->sfspec.beaconorder == 15)
+        {
+
+          /* Start a timer, if we receive the data frame, we will cancel
+           * the timer, otherwise it will expire and we will notify the
+           * next highest layer of the failure.
+           */
+
+          wlinfo("starting timeout timer\n");
+          mac802154_timerstart(priv, priv->max_frame_waittime,
+                               mac802154_assoctimeout);
+
+        }
 
       /* Deallocate the data conf notification as it is no longer needed. */
 
       mac802154_notif_free_locked(priv, notif);
+
     }
 }
 
@@ -740,6 +763,19 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
 
   if (priv->curr_op != MAC802154_OP_ASSOC)
     {
+      /* This situation can occur in a beacon-enabled network if the association
+       * request has timed out, but the Coordinator has already queued the
+       * response. Which means the beacon would contain our address, causing us
+       * to extract the response.
+       *
+       * TODO: What is supposed to happen in this situation. Are we supposed to
+       * accept the request? Are we supposed to Disassociate with the network
+       * as a convienience to the PAN Coordinator. So that it does not need
+       * to waste space holding our information?
+       */
+
+      wlinfo("ignoring association response frame\n");
+
       return;
     }
 
@@ -793,15 +829,16 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
 
   IEEE802154_SADDRCOPY(notif->u.assocconf.saddr, priv->addr.saddr);
 
-  /* Unlock the MAC */
-
-  mac802154_givesem(&priv->exclsem);
-
   /* We are no longer performing the association operation */
 
   priv->curr_op = MAC802154_OP_NONE;
   priv->cmd_desc = NULL;
   mac802154_givesem(&priv->opsem);
+  mac802154_rxdisable(priv);
+
+  /* Unlock the MAC */
+
+  mac802154_givesem(&priv->exclsem);
 
   /* Notify the next highest layer of the association status */
 
@@ -842,9 +879,11 @@ static void mac802154_assoctimeout(FAR struct ieee802154_privmac_s *priv)
   mac802154_notif_alloc(priv, &notif, false);
 
   /* We are no longer performing the association operation */
+
   priv->curr_op = MAC802154_OP_NONE;
   priv->cmd_desc = NULL;
   mac802154_givesem(&priv->opsem);
+  mac802154_rxdisable(priv);
 
   /* Release the MAC */
 

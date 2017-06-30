@@ -354,9 +354,9 @@ void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
 
   memcpy(&txdesc->destaddr, &coordaddr, sizeof(struct ieee802154_addr_s));
 
-  /* Copy the IOB reference to the descriptor */
+  /* Save a reference of the tx descriptor */
 
-  txdesc->frame = iob;
+  priv->cmd_desc = txdesc;
 }
 
 /****************************************************************************
@@ -417,9 +417,11 @@ void mac802154_updatebeacon(FAR struct ieee802154_privmac_s *priv)
   IEEE802154_SETSADDRMODE(beacon->bf_data, 0, priv->addr.mode);
   IEEE802154_SETVERSION(beacon->bf_data, 0, 1);
 
-  /* Copy in and increment the beacon sequence number */
+  /* The beacon sequence number has to be taken care of by the radio layer, since
+   * we only want to update the whole frame when more changes than just the bsn.
+   */
 
-  beacon->bf_data[beacon->bf_len++] = priv->bsn++;
+  beacon->bf_len++;
 
   IEEE802154_PANIDCOPY(&beacon->bf_data[beacon->bf_len], priv->addr.panid);
   beacon->bf_len += IEEE802154_PANIDSIZE;
@@ -580,8 +582,8 @@ void mac802154_setupindirect(FAR struct ieee802154_privmac_s *priv,
 
   if (work_available(&priv->purge_work))
     {
-      //work_queue(MAC802154_WORK, &priv->purge_work, mac802154_purge_worker,
-       //          (FAR void *)priv, ticks);
+      work_queue(MAC802154_WORK, &priv->purge_work, mac802154_purge_worker,
+                (FAR void *)priv, ticks);
     }
 }
 
@@ -781,6 +783,8 @@ static void mac802154_txdone_worker(FAR void *arg)
        */
 
       notif =(FAR struct ieee802154_notif_s *)txdesc->conf;
+
+      wlinfo("tx status: %s\n", IEEE802154_STATUS_STRING[txdesc->conf->status]);
 
       switch(txdesc->frametype)
         {
@@ -1085,7 +1089,6 @@ static void mac802154_rxframe_worker(FAR void *arg)
                   case IEEE802154_CMD_ORPHAN_NOT:
                     wlinfo("Orphan notif received\n");
                     break;
-                    break;
 
                   case IEEE802154_CMD_BEACON_REQ:
                     wlinfo("Beacon request received\n");
@@ -1163,7 +1166,9 @@ static void mac802154_rxdataframe(FAR struct ieee802154_privmac_s *priv,
     * FIXME: Fix documentation
     */
 
-  if (priv->curr_op == MAC802154_OP_POLL || priv->curr_op == MAC802154_OP_ASSOC)
+  if (priv->curr_op == MAC802154_OP_POLL  ||
+      priv->curr_op == MAC802154_OP_ASSOC ||
+      priv->curr_op == MAC802154_OP_AUTOEXTRACT)
     {
       /* If we are in promiscuous mode, we need to check if the
        * frame is even for us first. If the address is not ours,
@@ -1217,7 +1222,8 @@ static void mac802154_rxdataframe(FAR struct ieee802154_privmac_s *priv,
         }
 
       /* If we've gotten this far, the frame is our extracted data. Cancel the
-       * timeout */
+       * timeout
+       */
 
       mac802154_timercancel(priv);
 
@@ -1617,6 +1623,7 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
         }
 
       gtsdirmask = IEEE802154_GETGTSDIRMASK(iob->io_data, iob->io_offset);
+      UNUSED(gtsdirmask);
       iob->io_offset++;
 
       /* Make sure there are enough bytes left to represent the GTS List */
@@ -1723,7 +1730,8 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
 
           /* The beacon is the same as another, so discard it */
 
-          goto done;
+          mac802154_notif_free_locked(priv, notif);
+          return;
         }
       
       /* TODO: There is supposed to be different logic for the scanning procedure
@@ -1789,29 +1797,82 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
 
           priv->radio->txnotify(priv->radio, false);
         }
-      else if (!priv->autoreq)
-        {
-          /* If a valid beacon frame is received and macAutoRequest is set to FALSE,
-           * the MLME shall indicate the beacon parameters to the next higher layer
-           * by issuing the MLME-BEACON-NOTIFY.indication primitive. [1] pg. 38
-           */
-
-          /* Unlock the MAC, notify, then lock again */
-
-          mac802154_givesem(&priv->exclsem);
-          mac802154_notify(priv, notif);
-          mac802154_takesem(&priv->exclsem, false);
-          return; /* Return so that we don't free the notificaiton */
-        }
       else
         {
-          /* If a beacon frame is received and macAutoRequest is set to TRUE, the
-           * MLME shall first issue the MLME- BEACON-NOTIFY.indication primitive if
-           * the beacon contains any payload. 
-           */
-          
-          if (beacon->payloadlength > 0)
+          if (priv->autoreq || priv->curr_op == MAC802154_OP_POLL)
             {
+              /* If a beacon frame is received and macAutoRequest is set to
+               * TRUE, the MLME shall first issue the MLME-
+               * BEACON-NOTIFY.indication primitive if the beacon contains any
+               * payload.
+               */
+          
+              if (beacon->payloadlength > 0)
+                {
+                  /* Unlock the MAC, notify, then lock again */
+
+                  mac802154_givesem(&priv->exclsem);
+                  mac802154_notify(priv, notif);
+                  mac802154_takesem(&priv->exclsem, false);
+                }
+
+              /* If we have data pending for us, attempt to extract it. If for some
+               * reason we have data pending under our short address and our
+               * extended address, let the short address arbitrarily take precedence
+               */
+
+              if (pending_saddr | pending_eaddr)
+                {
+                  mac802154_txdesc_alloc(priv, &respdesc, false);
+
+                  if (priv->curr_op == MAC802154_OP_POLL)
+                    {
+                      priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
+                    }
+                  else if (priv->curr_op == MAC802154_OP_NONE)
+                    {
+                      DEBUGASSERT(priv->opsem.semcount == 1);
+                      mac802154_takesem(&priv->opsem, false);
+                      priv->curr_op = MAC802154_OP_AUTOEXTRACT;
+                      priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
+                    }
+
+                  if (pending_saddr)
+                    {
+                      mac802154_createdatareq(priv, &priv->pandesc.coordaddr,
+                                              IEEE802154_ADDRMODE_SHORT, respdesc);
+                    }
+                  else
+                    {
+                      mac802154_createdatareq(priv, &priv->pandesc.coordaddr,
+                                             IEEE802154_ADDRMODE_EXTENDED, respdesc);
+                    }
+
+                  /* Link the transaction into the CSMA transaction list */
+
+                  sq_addlast((FAR sq_entry_t *)respdesc, &priv->csma_queue);
+
+                  /* Notify the radio driver that there is data available */
+
+                  priv->radio->txnotify(priv->radio, false);
+                }
+
+                /* If there was a beacon payload, we used the notification, so
+                 * return here to make sure we don't free the notification.
+                 */
+                 
+                if (beacon->payloadlength > 0)
+                  {
+                    return;
+                  }
+            }
+          else
+            {
+              /* If a valid beacon frame is received and macAutoRequest is set to FALSE,
+               * the MLME shall indicate the beacon parameters to the next higher layer
+               * by issuing the MLME-BEACON-NOTIFY.indication primitive. [1] pg. 38
+               */
+
               /* Unlock the MAC, notify, then lock again */
 
               mac802154_givesem(&priv->exclsem);
@@ -1819,39 +1880,9 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
               mac802154_takesem(&priv->exclsem, false);
               return; /* Return so that we don't free the notificaiton */
             }
-          
-          /* If we have data pending for us, attempt to extract it. If for some
-           * reason we have data pending under our short address and our
-           * extended address, let the short address arbitrarily take precedence
-           */
-
-          if (pending_saddr | pending_eaddr)
-            {
-              mac802154_txdesc_alloc(priv, &respdesc, false);
-
-              if (pending_saddr)
-                {
-                  mac802154_createdatareq(priv, &priv->pandesc.coordaddr,
-                                          IEEE802154_ADDRMODE_SHORT, respdesc);
-                }
-              else
-                {
-                  mac802154_createdatareq(priv, &priv->pandesc.coordaddr,
-                                         IEEE802154_ADDRMODE_EXTENDED, respdesc);
-                }
-
-              /* Link the transaction into the CSMA transaction list */
-
-              sq_addlast((FAR sq_entry_t *)respdesc, &priv->csma_queue);
-
-              /* Notify the radio driver that there is data available */
-
-              priv->radio->txnotify(priv->radio, false);
-            }
         }
     }
 
-done:
   mac802154_notif_free_locked(priv, notif);
   return;
 
@@ -1972,6 +2003,8 @@ static void mac802154_timeout_expiry(int argc, wdparm_t arg, ...)
   /* Check to make sure the function pointer is still valid */
 
   DEBUGASSERT(priv->timeout_worker != NULL);
+
+  wlinfo("timer expired\n");
 
   work_queue(MAC802154_WORK, &priv->timeout_work, (worker_t)priv->timeout_worker,
              priv, 0);

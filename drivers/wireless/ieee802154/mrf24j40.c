@@ -147,10 +147,6 @@ struct mrf24j40_radio_s
   struct ieee802154_radio_s radio;  /* The public device instance */
   FAR struct ieee802154_radiocb_s *radiocb; /* Registered callbacks */
 
-  /* MAC Attributes */
-
-  bool rxonidle : 1;
-
   /* Low-level MCU-specific support */
 
   FAR const struct mrf24j40_lower_s *lower;
@@ -161,6 +157,8 @@ struct mrf24j40_radio_s
   struct work_s gts_pollwork;  /* For deferring poll work to the work queue */
 
   sem_t         exclsem;       /* Exclusive access to this struct */
+
+  /* MAC Attributes */
 
   struct ieee802154_addr_s addr;
 
@@ -182,6 +180,8 @@ struct mrf24j40_radio_s
   bool reschedule_csma : 1;
 
   bool rxenabled : 1;
+
+  uint8_t bsn;
 
   struct ieee802154_txdesc_s *gts_desc[MRF24J40_GTS_SLOTS];
   bool gts_busy[MRF24J40_GTS_SLOTS];
@@ -226,6 +226,7 @@ static void mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
               FAR const uint8_t *buf, uint8_t length, uint32_t fifo_addr);
 
 static inline void mrf24j40_norm_trigger(FAR struct mrf24j40_radio_s *dev);
+static inline void mrf24j40_beacon_trigger(FAR struct mrf24j40_radio_s *dev);
 
 static int  mrf24j40_setchannel(FAR struct mrf24j40_radio_s *dev,
               uint8_t chan);
@@ -492,6 +493,7 @@ static int  mrf24j40_reset(FAR struct ieee802154_radio_s *radio)
   mrf24j40_seteaddr(dev, g_allones);
 
   dev->max_frame_waittime = MRF24J40_DEFAULT_MAX_FRAME_WAITTIME;
+  dev->bsn = 0;
 
   /* Default device params */
 
@@ -611,14 +613,7 @@ static int mrf24j40_setattr(FAR struct ieee802154_radio_s *radio,
         }
         break;
 
-      case IEEE802154_ATTR_MAC_RX_ON_WHEN_IDLE:
-        {
-          dev->rxonidle = attrval->mac.rxonidle;
-          mrf24j40_rxenable(radio, dev->rxonidle);
-          ret = IEEE802154_STATUS_SUCCESS;
-        }
-        break;
-
+      
       case IEEE802154_ATTR_PHY_CHAN:
         {
           mrf24j40_setchannel(dev, attrval->phy.chan);
@@ -658,6 +653,11 @@ static int  mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
 
       mrf24j40_setup_fifo(dev, beacon->bf_data, beacon->bf_len, MRF24J40_BEACON_FIFO);
 
+      /* The radio layer is responsible for setting the BSN. */
+
+      dev->bsn = 0;
+      mrf24j40_setreg(dev->spi, MRF24J40_BEACON_FIFO + 4, dev->bsn++);
+
       /* Set the TXBMSK (TXBCON1 0x25<7>) bit = 1 to mask the beacon interrupt
        * mask
        */
@@ -682,7 +682,6 @@ static int  mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
 
       /* TODO: Add GTS related code. See pg 100 of datasheet */
 
-
       mrf24j40_setorder(dev, sfspec->beaconorder, sfspec->sforder);
     }
   else
@@ -699,6 +698,7 @@ static int  mrf24j40_beaconupdate(FAR struct ieee802154_radio_s *radio,
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
 
   mrf24j40_setup_fifo(dev, beacon->bf_data, beacon->bf_len, MRF24J40_BEACON_FIFO);
+  mrf24j40_beacon_trigger(dev);
 
   return OK;
 }
@@ -1688,6 +1688,25 @@ static inline void mrf24j40_norm_trigger(FAR struct mrf24j40_radio_s *dev)
 }
 
 /****************************************************************************
+ * Name: mrf24j40_beacon_trigger
+ *
+ * Description:
+ *   Trigger the beacon TX FIFO
+ *
+ ****************************************************************************/
+
+static inline void mrf24j40_beacon_trigger(FAR struct mrf24j40_radio_s *dev)
+{
+  uint8_t reg;
+
+  reg  = mrf24j40_getreg(dev->spi, MRF24J40_TXBCON0);
+
+  reg |= MRF24J40_TXBCON0_TXBTRIG;
+
+  mrf24j40_setreg(dev->spi, MRF24J40_TXBCON0, reg);
+}
+
+/****************************************************************************
  * Name: mrf24j40_gts_setup
  *
  * Description:
@@ -1991,9 +2010,6 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
 
   ind->frame->io_len = mrf24j40_getreg(dev->spi, addr++);
 
-  /* TODO: This needs to be changed.  It is inefficient to do the SPI read byte
-   * by byte */
-
   for (index = 0; index < ind->frame->io_len; index++)
     {
       ind->frame->io_data[index] = mrf24j40_getreg(dev->spi, addr++);
@@ -2121,6 +2137,18 @@ static void mrf24j40_irqworker(FAR void *arg)
       reg = mrf24j40_getreg(dev->spi, MRF24J40_SLPACK);
       reg |= MRF24J40_SLPACK_SLPACK;
       mrf24j40_setreg(dev->spi, MRF24J40_SLPACK, reg);
+    }
+  
+  if ((intstat & MRF24J40_INTSTAT_WAKEIF))
+    {
+      /* This is right before the beacon, we set the bsn here, since the MAC
+       * uses the SLPIF (end of active portion of superframe). to make any
+       * changes to the beacon.  This assumes that any changes to the beacon
+       * be in by the time that this interrupt fires. 
+       */
+
+      mrf24j40_setreg(dev->spi, MRF24J40_BEACON_FIFO + 4, dev->bsn++);
+      mrf24j40_beacon_trigger(dev);
     }
 
   /* Unlock the radio device */
