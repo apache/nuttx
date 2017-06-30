@@ -536,25 +536,28 @@ int sixlowpan_uncompresshdr_hc1(FAR const struct ieee802154_data_ind_s *ind,
 #endif
 
 /****************************************************************************
- * Name: sixlowpan_islinklocal, sixlowpan_addrfromip, and
+ * Name: sixlowpan_islinklocal, sixlowpan_destaddrfromip, and
  *       sixlowpan_ismacbased
  *
  * Description:
- *   sixlowpan_{s|e]addrfromip(): Extract the IEEE 802.15.14 address from a
- *   MAC-based IPv6 address.  sixlowpan_addrfromip() is intended to handle a
- *   tagged address; sixlowpan_saddrfromip() and sixlowpan_eaddrfromip()
- *   specifically handle short and extended addresses, respectively.
+ *   sixlowpan_destaddrfromip(): Extract the IEEE 802.15.14 destination
+ *   address from a MAC-based destination IPv6 address.  This function
+ *   handles a tagged address union which may either a short or and
+ *   extended destination address.
+ *
+ *   In the case there the IEEE 802.15.4 node functions as an endpoint in a
+ *   start topology, the destination address will, instead, be the address
+ *   of the star hub (which is assumed to be the address of the cooordinator).
  *
  *   sixlowpan_ipfrom[s|e]addr():  Create a link-local, MAC-based IPv6
  *   address from an IEEE802.15.4 short address (saddr) or extended address
  *   (eaddr).
  *
  *   sixlowpan_islinklocal() and sixlowpan_ismacbased() will return true for
- *   address created in this fashion.  sixlowpan_addrfromip() is intended to
- *   handle a tagged address or any size; sixlowpan_issaddrbased() and
- *   sixlowpan_iseaddrbased() specifically handle short and extended
- *   addresses.  Local addresses are of a fixed but configurable size and
- *   sixlowpan_isaddrbased() is for use with such local addresses.
+ *   address created in this fashion.  sixlowpan_destaddrfromip() is intended to
+ *   handle a tagged address or any size.  Local addresses are of a fixed but
+ *   configurable size and sixlowpan_isaddrbased() is for use with such local
+ *   addresses.
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
@@ -565,12 +568,9 @@ int sixlowpan_uncompresshdr_hc1(FAR const struct ieee802154_data_ind_s *ind,
 
 #define sixlowpan_islinklocal(ipaddr) ((ipaddr)[0] == NTOHS(0xfe80))
 
-void sixlowpan_saddrfromip(const net_ipv6addr_t ipaddr,
-                           FAR struct sixlowpan_saddr_s *saddr);
-void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr,
-                           FAR struct sixlowpan_eaddr_s *eaddr);
-void sixlowpan_addrfromip(const net_ipv6addr_t ipaddr,
-                          FAR struct sixlowpan_tagaddr_s *addr);
+int sixlowpan_destaddrfromip(FAR struct ieee802154_driver_s *ieee,
+                             const net_ipv6addr_t ipaddr,
+                             FAR struct sixlowpan_tagaddr_s *addr);
 
 void sixlowpan_ipfromsaddr(FAR const uint8_t *saddr,
                            FAR net_ipv6addr_t ipaddr);
@@ -592,46 +592,6 @@ bool sixlowpan_iseaddrbased(const net_ipv6addr_t ipaddr,
 
 bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
                           FAR const struct sixlowpan_tagaddr_s *addr);
-
-/****************************************************************************
- * Name: sixlowpan_coord_eaddr
- *
- * Description:
- *   Get the extended address of the PAN coordinator.
- *
- * Input parameters:
- *   ieee  - A reference IEEE802.15.4 MAC network device structure.
- *   eaddr - The location in which to return the extended address.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_STARPOINT
-int sixlowpan_coord_eaddr(FAR struct ieee802154_driver_s *ieee,
-                          FAR uint8_t *eaddr);
-#endif
-
-/****************************************************************************
- * Name: sixlowpan_coord_saddr
- *
- * Description:
- *   Get the short address of the PAN coordinator.
- *
- * Input parameters:
- *   ieee  - A reference IEEE802.15.4 MAC network device structure.
- *   saddr - The location in which to return the short address.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_STARPOINT
-int sixlowpan_coord_saddr(FAR struct ieee802154_driver_s *ieee,
-                          FAR uint8_t *saddr);
-#endif
 
 /****************************************************************************
  * Name: sixlowpan_src_panid

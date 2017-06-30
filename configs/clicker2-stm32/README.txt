@@ -603,7 +603,7 @@ Configurations
          CONFIG_NET_STAR=y
          CONFIG_NET_STARPOINT=y
 
-       The CONFIG_NET_STARPOINT selection informs the endpoint that is
+       The CONFIG_NET_STARPOINT selection informs the endpoint that it
        must send all frames to the hub of the star, rather than directly
        to the recipient.
 
@@ -665,9 +665,24 @@ Configurations
        Where <server-ip> is the IP address of either the E1 or I2 endpoints.
 
     STATUS:
-      2017-06-29:  Configurations added.  Initial testing was not very
-        fruitful:  There is error in the i8sak acceptaccept logic that
-        currently will not support multiple endpoints.
+      2017-06-29:  Configurations added.  Initial testing indicates that
+        the TCP Telnet client can successfully establish sessions with
+        the two star endpoints.  When testing communications between the
+        two star endpoints via the hub, the frames are correctly directed
+        to the hub.  However, they are not being forwarded to the other
+        endpoint.
+      2017-06-30: The failure to forward is understood:  When the star
+        endpoint sent the IPv6 destination address, the HC06 compression
+        logic elided the address -- meaning that it could be reconstructed
+        based on the receiver's assigned short address.  However, when
+        intercepted by the hub, the uncompressed address does not know
+        the short address of the recipient and instead uses the short
+        address of the hub.  This means two things:  (1) it looks like
+        the hub address is the destination address, and (2) the
+        uncompressed UDP packet has a bad checksum.
+
+        This required a change to assure that the destination IPv6 address
+        is not elided in the case of the star endpoint configuration.
 
   nsh:
 

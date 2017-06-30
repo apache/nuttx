@@ -297,15 +297,21 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
   g_netstats.udp.sent++;
 #endif
 
-  /* Set the socket state to sending */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
-
   /* Get the IEEE 802.15.4 MAC address of the destination  This assumes an
    * encoding of the MAC address in the IPv6 address.
    */
 
-  sixlowpan_addrfromip(to6->sin6_addr.in6_u.u6_addr16, &destmac);
+  ret = sixlowpan_destaddrfromip((FAR struct ieee802154_driver_s *)dev,
+                                 to6->sin6_addr.in6_u.u6_addr16, &destmac);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to dest MAC address: %d\n", ret);
+      return (ssize_t)ret;
+    }
+
+  /* Set the socket state to sending */
+
+  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
 
   /* If routable, then call sixlowpan_send() to format and send the 6LoWPAN
    * packet.
@@ -328,7 +334,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
   /* Set the socket state to idle */
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
-  return ret;
+  return (ssize_t)ret;
 }
 
 /****************************************************************************
@@ -470,7 +476,13 @@ void sixlowpan_udp_send(FAR struct net_driver_s *dev,
            * assumes an encoding of the MAC address in the IPv6 address.
            */
 
-          sixlowpan_addrfromip(ipv6udp->ipv6.destipaddr, &destmac);
+          ret = sixlowpan_destaddrfromip((FAR struct ieee802154_driver_s *)dev,
+                                         ipv6udp->ipv6.destipaddr, &destmac);
+          if (ret < 0)
+            {
+              nerr("ERROR: Failed to dest MAC address: %d\n", ret);
+              goto drop;
+            }
 
           /* Get the IPv6 + UDP combined header length. */
 
@@ -497,6 +509,7 @@ void sixlowpan_udp_send(FAR struct net_driver_s *dev,
         }
     }
 
+drop:
   dev->d_len = 0;
 }
 #endif
