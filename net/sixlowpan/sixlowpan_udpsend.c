@@ -471,6 +471,7 @@ void sixlowpan_udp_send(FAR struct net_driver_s *dev,
           FAR uint8_t *buf;
           uint16_t hdrlen;
           uint16_t buflen;
+          int ret;
 
           /* Get the IEEE 802.15.4 MAC address of the destination.  This
            * assumes an encoding of the MAC address in the IPv6 address.
