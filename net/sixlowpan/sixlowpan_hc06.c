@@ -354,7 +354,6 @@ static void uncompress_addr(FAR const struct ieee802154_addr_s *addr,
                             FAR net_ipv6addr_t ipaddr)
 {
   FAR const uint8_t *srcptr;
-  bool fullmac      = false;
   bool usemac       = (prefpost & 0x0100) != 0;
   uint8_t prefcount = (prefpost >> 4) & 0xf;
   uint8_t postcount =  prefpost & 0x0f;
@@ -384,12 +383,6 @@ static void uncompress_addr(FAR const struct ieee802154_addr_s *addr,
         {
           postcount = addrsize;
         }
-
-      /* If we are converting the entire MAC address, then we need to some some
-       * special bit operations.
-       */
-
-      fullmac = (postcount == addrsize);
     }
 
   /* Copy any prefix */
@@ -412,6 +405,9 @@ static void uncompress_addr(FAR const struct ieee802154_addr_s *addr,
 
   if (postcount > 0)
     {
+      FAR uint8_t *destptr = (FAR uint8_t *)&ipaddr[0];
+      int offset = 16 - postcount;
+
       if (postcount == 2 && prefcount < 11)
         {
           /* 16 bits uncompression ipaddr=0000:00ff:fe00:XXXX */
@@ -420,36 +416,7 @@ static void uncompress_addr(FAR const struct ieee802154_addr_s *addr,
           ipaddr[6] = HTONS(0xfe00);
         }
 
-      /* If the postcount is even then take extra care with endian-ness */
-
-      if ((postcount & 1) == 0)
-        {
-          int destndx = 8 - (postcount >> 1);
-          int i;
-
-          for (i = destndx; i < 8; i++)
-            {
-              ipaddr[i] = (uint16_t)srcptr[0] << 8 | (uint16_t)srcptr[1];
-              srcptr += 2;
-            }
-
-          /* If the was a standard MAC based address then toggle */
-
-          if (fullmac)
-            {
-              ipaddr[destndx] ^= 0x200;
-            }
-        }
-
-      /* postcount is odd... */
-
-      else
-        {
-          FAR uint8_t *destptr = (FAR uint8_t *)&ipaddr[0];
-          int offset = 16 - postcount;
-
-          memcpy(&destptr[offset], srcptr, postcount);
-        }
+      memcpy(&destptr[offset], srcptr, postcount);
 
       /* If we took the data from packet, then update the packet pointer */
 
@@ -849,13 +816,13 @@ int sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
         {
           /* Elide the prefix */
 
-          iphc1 |= SIXLOWPAN_IPHC_DAC;
+          iphc1   |= SIXLOWPAN_IPHC_DAC;
           iphc[2] |= addrcontext->number;
 
           /* Compession compare with link adress (destination) */
 
-          iphc1 |= compress_tagaddr(ipv6->destipaddr, destmac,
-                                    SIXLOWPAN_IPHC_DAM_BIT);
+          iphc1   |= compress_tagaddr(ipv6->destipaddr, destmac,
+                                      SIXLOWPAN_IPHC_DAM_BIT);
         }
 
       /* No address context found for this address */
