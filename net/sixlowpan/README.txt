@@ -1,3 +1,11 @@
+6LoWPAN Contents
+----------------
+
+  o 6LoWPAN Addressing
+  o IPv6 Neighbor Discovery
+  o Optimal 6LoWPAN Configuration
+  o Star Configuration
+
 6LoWPAN Addressing
 ------------------
 
@@ -142,3 +150,28 @@ The payload length is encoded in the LS 11-bits of the first 16-bit value:
 In this example the payload size is 0x050e or 1,294.  The tag is 0x000b.  In
 the second frame, the fifth byte contains the offset 0x0d which is 13 << 3 =
 104 bytes, the size of the payload on the first packet.
+
+Star Configuration
+------------------
+
+The 6LoWPAN stack can be specially configured as member in a star topology;
+either as a endpoint on the star os the star hub.  The endpoint is
+created with the following settings in the configuration file:
+
+  CONFIG_NET_STAR=y
+  CONFIG_NET_STARPOINT=y
+
+The CONFIG_NET_STARPOINT selection informs the endpoint 6LoWPAN stack that
+it must send all frames to the hub of the star, rather than directly to the
+recipient.  The star hub is assumed to be the cooordinator.
+
+The star hub configuration, on the other hand, uses these setting:
+
+  CONFIG_NET_STAR=y
+  CONFIG_NET_STARHUB=y
+  CONFIG_NET_IPFORWARD=y
+
+The CONFIG_NET_IPFORWARD selection informs the hub that if it receives any
+packets that are not destined for the hub, it should forward those packets
+appropriately.  This affects the behavior of IPv6 packet reception logic but
+does not change the behavior of the 6LoWPAN stack.

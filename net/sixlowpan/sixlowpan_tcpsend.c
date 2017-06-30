@@ -417,6 +417,7 @@ static uint16_t tcp_send_interrupt(FAR struct net_driver_s *dev,
            * actually sent.
            */
 
+          sinfo->s_result = sinfo->s_sent;
           goto end_wait;
         }
 
@@ -835,7 +836,13 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
    * an encoding of the MAC address in the IPv6 address.
    */
 
-  sixlowpan_addrfromip(conn->u.ipv6.raddr, &destmac);
+  ret = sixlowpan_destaddrfromip((FAR struct ieee802154_driver_s *)dev,
+                                 conn->u.ipv6.raddr, &destmac);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to dest MAC address: %d\n", ret);
+      return (ssize_t)ret;
+    }
 
   /* Set the socket state to sending */
 
@@ -859,7 +866,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
       nerr("ERROR: sixlowpan_send_packet() failed: %d\n", ret);
 
       psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
-      return (ssize_t)buflen;
+      return (ssize_t)ret;
     }
 
   /* Set the socket state to idle */
@@ -942,12 +949,19 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
           FAR uint8_t *buf;
           uint16_t hdrlen;
           uint16_t buflen;
+          int ret;
 
           /* Get the IEEE 802.15.4 MAC address of the destination.  This
            * assumes an encoding of the MAC address in the IPv6 address.
            */
 
-          sixlowpan_addrfromip(ipv6hdr->ipv6.destipaddr, &destmac);
+          ret = sixlowpan_destaddrfromip((FAR struct ieee802154_driver_s *)dev,
+                                         ipv6hdr->ipv6.destipaddr, &destmac);
+          if (ret < 0)
+            {
+              nerr("ERROR: Failed to dest MAC address: %d\n", ret);
+              goto drop;
+            }
 
           /* Get the IPv6 + TCP combined header length.  The size of the TCP
            * header is encoded in the top 4 bits of the tcpoffset field (in
@@ -977,6 +991,7 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
         }
     }
 
+drop:
   dev->d_len = 0;
 }
 

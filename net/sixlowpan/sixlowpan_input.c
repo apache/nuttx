@@ -830,7 +830,13 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
                    * address.
                    */
 
-                  sixlowpan_addrfromip(ipv6hdr->destipaddr, &destmac);
+                  ret = sixlowpan_destaddrfromip(ieee, ipv6hdr->destipaddr,
+                                                 &destmac);
+                  if (ret < 0)
+                    {
+                      nerr("ERROR: Failed to dest MAC address: %d\n", ret);
+                      goto drop;
+                    }
 
                   /* The data payload should follow the IPv6 header plus
                    * the protocol header.

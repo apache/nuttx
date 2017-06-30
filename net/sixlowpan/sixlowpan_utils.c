@@ -64,17 +64,17 @@
 #ifdef CONFIG_NET_6LOWPAN
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sixlowpan_{s|e]addrfromip
+ * Name: sixlowpan_[s|e]addrfromip
  *
  * Description:
- *   sixlowpan_{s|e]addrfromip(): Extract the IEEE 802.15.14 address from a
- *   MAC-based IPv6 address.  sixlowpan_addrfromip() is intended to handle a
- *   tagged address; sixlowpan_saddrfromip() and sixlowpan_eaddrfromip()
- *   specifically handle short and extended addresses, respectively.
+ *   sixlowpan_[s|e]addrfromip(): Extract the IEEE 802.15.14 address from a
+ *   MAC-based IPv6 address.  sixlowpan_saddrfromip() and
+ *   sixlowpan_eaddrfromip() handle short and extended addresses,
+ *   respectively.
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
@@ -83,8 +83,9 @@
  *
  ****************************************************************************/
 
-void sixlowpan_saddrfromip(const net_ipv6addr_t ipaddr,
-                          FAR struct sixlowpan_saddr_s *saddr)
+#ifndef CONFIG_NET_STARPOINT
+static void sixlowpan_saddrfromip(const net_ipv6addr_t ipaddr,
+                                  FAR struct sixlowpan_saddr_s *saddr)
 {
   DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
 
@@ -95,8 +96,8 @@ void sixlowpan_saddrfromip(const net_ipv6addr_t ipaddr,
   saddr->u8[0] ^= 0x02;
 }
 
-void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr,
-                          FAR struct sixlowpan_eaddr_s *eaddr)
+static void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr,
+                                  FAR struct sixlowpan_eaddr_s *eaddr)
 {
   FAR uint8_t *eptr = eaddr->u8;
   int i;
@@ -113,22 +114,147 @@ void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr,
 
   eaddr->u8[0] ^= 0x02;
 }
+#endif /* !CONFIG_NET_STARPOINT */
 
-void sixlowpan_addrfromip(const net_ipv6addr_t ipaddr,
-                          FAR struct sixlowpan_tagaddr_s *addr)
+/****************************************************************************
+ * Name: sixlowpan_coord_eaddr
+ *
+ * Description:
+ *   Get the extended address of the PAN coordinator.
+ *
+ * Input parameters:
+ *   ieee  - A reference IEEE802.15.4 MAC network device structure.
+ *   eaddr - The location in which to return the extended address.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_STARPOINT) && defined(CONFIG_NET_6LOWPAN_EXTENDEDADDR)
+static int sixlowpan_coord_eaddr(FAR struct ieee802154_driver_s *ieee,
+                                 FAR struct sixlowpan_eaddr_s *eaddr)
 {
+  FAR struct net_driver_s *dev = &ieee->i_dev;
+  struct ieee802154_netmac_s arg;
+  int ret;
+
+  memcpy(arg.ifr_name, ieee->i_dev.d_ifname, IFNAMSIZ);
+  arg.u.getreq.attr = IEEE802154_ATTR_MAC_COORD_EADDR ;
+  ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
+                     (unsigned long)((uintptr_t)&arg));
+  if (ret < 0)
+    {
+      nerr("ERROR: MAC802154IOC_MLME_GET_REQUEST failed: %d\n", ret);
+      return ret;
+    }
+
+  IEEE802154_EADDRCOPY(eaddr->u8, arg.u.getreq.attrval.mac.eaddr);
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: sixlowpan_coord_saddr
+ *
+ * Description:
+ *   Get the short address of the PAN coordinator.
+ *
+ * Input parameters:
+ *   ieee  - A reference IEEE802.15.4 MAC network device structure.
+ *   saddr - The location in which to return the short address.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_STARPOINT) && !defined(CONFIG_NET_6LOWPAN_EXTENDEDADDR)
+static int sixlowpan_coord_saddr(FAR struct ieee802154_driver_s *ieee,
+                                 FAR struct sixlowpan_saddr_s *saddr)
+{
+  FAR struct net_driver_s *dev = &ieee->i_dev;
+  struct ieee802154_netmac_s arg;
+  int ret;
+
+  memcpy(arg.ifr_name, ieee->i_dev.d_ifname, IFNAMSIZ);
+  arg.u.getreq.attr = IEEE802154_ATTR_MAC_COORD_SADDR ;
+  ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
+                     (unsigned long)((uintptr_t)&arg));
+  if (ret < 0)
+    {
+      nerr("ERROR: MAC802154IOC_MLME_GET_REQUEST failed: %d\n", ret);
+      return ret;
+    }
+
+  IEEE802154_SADDRCOPY(saddr->u8, arg.u.getreq.attrval.mac.saddr);
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sixlowpan_destaddrfromip
+ *
+ * Description:
+ *   sixlowpan_destaddrfromip(): Extract the IEEE 802.15.14 destination
+ *   address from a MAC-based destination IPv6 address.  This function
+ *   handles a tagged address union which may either a short or and
+ *   extended destination address.
+ *
+ *    128  112  96   80    64   48   32   16
+ *    ---- ---- ---- ----  ---- ---- ---- ----
+ *    xxxx 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
+ *    xxxx 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
+ *
+ *   In the case there the IEEE 802.15.4 node functions as an endpoint in a
+ *   start topology, the destination address will, instead, be the address
+ *   of the star hub (which is assumed to be the address of the cooordinator).
+ *
+ ****************************************************************************/
+
+int sixlowpan_destaddrfromip(FAR struct ieee802154_driver_s *ieee,
+                             const net_ipv6addr_t ipaddr,
+                             FAR struct sixlowpan_tagaddr_s *destaddr)
+{
+#ifdef CONFIG_NET_STARPOINT
+  int ret;
+
+  /* If this node is a "point" in a star topology, then the destination
+   * MAC address is the address of the hub/PAN coordinator.
+   */
+
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+  ret = sixlowpan_coord_eaddr(ieee, &destaddr->u.eaddr);
+  destaddr->extended = true;
+#else
+  memset(destaddr, 0, sizeof(struct sixlowpan_tagaddr_s));
+  ret = sixlowpan_coord_saddr(ieee, &destaddr->u.saddr);
+#endif
+
+  return ret;
+
+#else
   DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
+
+  /* Otherwise, the destination MAC address is encoded in the IP address */
 
   if (SIXLOWPAN_IS_IID_16BIT_COMPRESSABLE(ipaddr))
     {
-      memset(addr, 0, sizeof(struct sixlowpan_tagaddr_s));
-      sixlowpan_saddrfromip(ipaddr, &addr->u.saddr);
+      memset(destaddr, 0, sizeof(struct sixlowpan_tagaddr_s));
+      sixlowpan_saddrfromip(ipaddr, &destaddr->u.saddr);
     }
   else
     {
-      sixlowpan_eaddrfromip(ipaddr, &addr->u.eaddr);
-      addr->extended = true;
+      sixlowpan_eaddrfromip(ipaddr, &destaddr->u.eaddr);
+      destaddr->extended = true;
     }
+
+  return OK;
+#endif
 }
 
 /****************************************************************************
@@ -179,11 +305,10 @@ void sixlowpan_ipfromeaddr(FAR const uint8_t *eaddr,
  *
  * Description:
  *   sixlowpan_ismacbased() will return true for IP addresses formed from
- *   IEEE802.15.4 MAC addresses.  sixlowpan_addrfromip() is intended to
- *   handle a tagged address or any size; sixlowpan_issaddrbased() and
- *   sixlowpan_iseaddrbased() specifically handle short and extended
- *   addresses.  Local addresses are of a fixed but configurable size and
- *   sixlowpan_isaddrbased() is for use with such local addresses.
+ *   IEEE802.15.4 MAC addresses.  sixlowpan_destaddrfromip() is intended to
+ *   handle a tagged address or any size.  Local addresses are of a fixed
+ *   but configurable size and sixlowpan_isaddrbased() is for use with such
+ *   local addresses.
  *
  *
  *    128  112  96   80    64   48   32   16
@@ -226,82 +351,6 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
       return sixlowpan_issaddrbased(ipaddr, &addr->u.saddr);
     }
 }
-
-/****************************************************************************
- * Name: sixlowpan_coord_eaddr
- *
- * Description:
- *   Get the extended address of the PAN coordinator.
- *
- * Input parameters:
- *   ieee  - A reference IEEE802.15.4 MAC network device structure.
- *   eaddr - The location in which to return the extended address.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_STARPOINT
-int sixlowpan_coord_eaddr(FAR struct ieee802154_driver_s *ieee,
-                          FAR uint8_t *eaddr)
-{
-  FAR struct net_driver_s *dev = &ieee->i_dev;
-  struct ieee802154_netmac_s arg;
-  int ret;
-
-  memcpy(arg.ifr_name, ieee->i_dev.d_ifname, IFNAMSIZ);
-  arg.u.getreq.attr = IEEE802154_ATTR_MAC_COORD_EADDR ;
-  ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
-                     (unsigned long)((uintptr_t)&arg));
-  if (ret < 0)
-    {
-      nerr("ERROR: MAC802154IOC_MLME_GET_REQUEST failed: %d\n", ret);
-      return ret;
-    }
-
-  IEEE802154_EADDRCOPY(eaddr, arg.u.getreq.attrval.mac.eaddr);
-  return OK;
-}
-#endif
-
-/****************************************************************************
- * Name: sixlowpan_coord_saddr
- *
- * Description:
- *   Get the short address of the PAN coordinator.
- *
- * Input parameters:
- *   ieee  - A reference IEEE802.15.4 MAC network device structure.
- *   saddr - The location in which to return the short address.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_STARPOINT
-int sixlowpan_coord_saddr(FAR struct ieee802154_driver_s *ieee,
-                          FAR uint8_t *saddr)
-{
-  FAR struct net_driver_s *dev = &ieee->i_dev;
-  struct ieee802154_netmac_s arg;
-  int ret;
-
-  memcpy(arg.ifr_name, ieee->i_dev.d_ifname, IFNAMSIZ);
-  arg.u.getreq.attr = IEEE802154_ATTR_MAC_COORD_SADDR ;
-  ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
-                     (unsigned long)((uintptr_t)&arg));
-  if (ret < 0)
-    {
-      nerr("ERROR: MAC802154IOC_MLME_GET_REQUEST failed: %d\n", ret);
-      return ret;
-    }
-
-  IEEE802154_SADDRCOPY(saddr, arg.u.getreq.attrval.mac.saddr);
-  return OK;
-}
-#endif
 
 /****************************************************************************
  * Name: sixlowpan_src_panid

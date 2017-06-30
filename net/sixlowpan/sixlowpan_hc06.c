@@ -251,16 +251,23 @@ static uint8_t compress_ipaddr(FAR const net_ipv6addr_t ipaddr, uint8_t bitpos)
     {
       /* Compress IID to 16 bits: xxxx:xxxx:xxxx:xxxx:0000:00ff:fe00:XXXX */
 
-      memcpy(g_hc06ptr, &ipaddr[7], 2);
-      g_hc06ptr += 2;
+      *g_hc06ptr++ = ipaddr[7] >> 8;      /* Big-endian, network order */
+      *g_hc06ptr++ = ipaddr[7] & 0xff;
+
       return 2 << bitpos;       /* 16-bits */
     }
   else
     {
+      int i;
+
       /* Do not compress IID: xxxx:xxxx:xxxx:xxxx:IID:IID:IID:IID */
 
-      memcpy(g_hc06ptr, &ipaddr[4], 8);
-      g_hc06ptr += 8;
+      for (i = 4; i < 8; i++)
+        {
+          *g_hc06ptr++ = ipaddr[i] >> 8;  /* Big-endian, network order */
+          *g_hc06ptr++ = ipaddr[i] & 0xff;
+        }
+
       return 1 << bitpos;       /* 64-bits */
     }
 }
@@ -429,6 +436,8 @@ static void uncompress_addr(FAR const struct ieee802154_addr_s *addr,
 
           for (i = destndx; i < 8; i++)
             {
+              /* Big-endian, network order */
+
               ipaddr[i] = (uint16_t)srcptr[0] << 8 | (uint16_t)srcptr[1];
               srcptr += 2;
             }
@@ -437,11 +446,11 @@ static void uncompress_addr(FAR const struct ieee802154_addr_s *addr,
 
           if (fullmac)
             {
-              ipaddr[destndx] ^= 0x200;
+              ipaddr[destndx] ^= 0x0200;
             }
         }
 
-      /* postcount is odd... */
+      /* postcount is odd... REVISIT:  I am not sure about bye ordering. */
 
       else
         {
@@ -849,13 +858,13 @@ int sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
         {
           /* Elide the prefix */
 
-          iphc1 |= SIXLOWPAN_IPHC_DAC;
+          iphc1   |= SIXLOWPAN_IPHC_DAC;
           iphc[2] |= addrcontext->number;
 
           /* Compession compare with link adress (destination) */
 
-          iphc1 |= compress_tagaddr(ipv6->destipaddr, destmac,
-                                    SIXLOWPAN_IPHC_DAM_BIT);
+          iphc1   |= compress_tagaddr(ipv6->destipaddr, destmac,
+                                      SIXLOWPAN_IPHC_DAM_BIT);
         }
 
       /* No address context found for this address */
