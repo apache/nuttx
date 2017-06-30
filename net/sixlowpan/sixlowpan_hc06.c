@@ -251,16 +251,23 @@ static uint8_t compress_ipaddr(FAR const net_ipv6addr_t ipaddr, uint8_t bitpos)
     {
       /* Compress IID to 16 bits: xxxx:xxxx:xxxx:xxxx:0000:00ff:fe00:XXXX */
 
-      memcpy(g_hc06ptr, &ipaddr[7], 2);
-      g_hc06ptr += 2;
+      *g_hc06ptr++ = ipaddr[7] >> 8;      /* Big-endian, network order */
+      *g_hc06ptr++ = ipaddr[7] & 0xff;
+
       return 2 << bitpos;       /* 16-bits */
     }
   else
     {
+      int i;
+
       /* Do not compress IID: xxxx:xxxx:xxxx:xxxx:IID:IID:IID:IID */
 
-      memcpy(g_hc06ptr, &ipaddr[4], 8);
-      g_hc06ptr += 8;
+      for (i = 4; i < 8; i++)
+        {
+          *g_hc06ptr++ = ipaddr[i] >> 8;  /* Big-endian, network order */
+          *g_hc06ptr++ = ipaddr[i] & 0xff;
+        }
+
       return 1 << bitpos;       /* 64-bits */
     }
 }
@@ -354,6 +361,7 @@ static void uncompress_addr(FAR const struct ieee802154_addr_s *addr,
                             FAR net_ipv6addr_t ipaddr)
 {
   FAR const uint8_t *srcptr;
+  bool fullmac      = false;
   bool usemac       = (prefpost & 0x0100) != 0;
   uint8_t prefcount = (prefpost >> 4) & 0xf;
   uint8_t postcount =  prefpost & 0x0f;
@@ -383,6 +391,12 @@ static void uncompress_addr(FAR const struct ieee802154_addr_s *addr,
         {
           postcount = addrsize;
         }
+
+      /* If we are converting the entire MAC address, then we need to some some
+       * special bit operations.
+       */
+
+      fullmac = (postcount == addrsize);
     }
 
   /* Copy any prefix */
@@ -405,9 +419,6 @@ static void uncompress_addr(FAR const struct ieee802154_addr_s *addr,
 
   if (postcount > 0)
     {
-      FAR uint8_t *destptr = (FAR uint8_t *)&ipaddr[0];
-      int offset = 16 - postcount;
-
       if (postcount == 2 && prefcount < 11)
         {
           /* 16 bits uncompression ipaddr=0000:00ff:fe00:XXXX */
@@ -416,7 +427,38 @@ static void uncompress_addr(FAR const struct ieee802154_addr_s *addr,
           ipaddr[6] = HTONS(0xfe00);
         }
 
-      memcpy(&destptr[offset], srcptr, postcount);
+      /* If the postcount is even then take extra care with endian-ness */
+
+      if ((postcount & 1) == 0)
+        {
+          int destndx = 8 - (postcount >> 1);
+          int i;
+
+          for (i = destndx; i < 8; i++)
+            {
+              /* Big-endian, network order */
+
+              ipaddr[i] = (uint16_t)srcptr[0] << 8 | (uint16_t)srcptr[1];
+              srcptr += 2;
+            }
+
+          /* If the was a standard MAC based address then toggle */
+
+          if (fullmac)
+            {
+              ipaddr[destndx] ^= 0x0200;
+            }
+        }
+
+      /* postcount is odd... REVISIT:  I am not sure about bye ordering. */
+
+      else
+        {
+          FAR uint8_t *destptr = (FAR uint8_t *)&ipaddr[0];
+          int offset = 16 - postcount;
+
+          memcpy(&destptr[offset], srcptr, postcount);
+        }
 
       /* If we took the data from packet, then update the packet pointer */
 
