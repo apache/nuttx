@@ -417,6 +417,7 @@ static uint16_t tcp_send_interrupt(FAR struct net_driver_s *dev,
            * actually sent.
            */
 
+          sinfo->s_result = sinfo->s_sent;
           goto end_wait;
         }
 

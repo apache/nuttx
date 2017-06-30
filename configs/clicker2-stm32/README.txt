@@ -682,7 +682,10 @@ Configurations
         uncompressed UDP packet has a bad checksum.
 
         This required a change to assure that the destination IPv6 address
-        is not elided in the case of the star endpoint configuration.
+        is not elided in the case of the star endpoint configuration.  After
+        some additional fixes for byte ordering in 16-bit and 64-bit
+        compressed IPv6 addresses, the all tests are working as expectedd:
+        TCP, UDP, Telnet.
 
   nsh:
 
