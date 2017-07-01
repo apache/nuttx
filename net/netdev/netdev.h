@@ -71,6 +71,15 @@ EXTERN struct net_driver_s *g_netdevices;
 #endif
 
 /****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* Callback from netdev_foreach() */
+
+struct net_driver_s; /* Forward reference */
+typedef int (*netdev_callback_t)(FAR struct net_driver_s *dev, FAR void *arg);
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -119,6 +128,28 @@ bool netdev_verify(FAR struct net_driver_s *dev);
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
 FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname);
 #endif
+
+/****************************************************************************
+ * Name: netdev_foreach
+ *
+ * Description:
+ *   Enumerate each registered network device.
+ *
+ *   NOTE: netdev semaphore held throughout enumeration.
+ *
+ * Parameters:
+ *   callback - Will be called for each registered device
+ *   arg      - User argument passed to callback()
+ *
+ * Returned Value:
+ *  0:Enumeration completed 1:Enumeration terminated early by callback
+ *
+ * Assumptions:
+ *  Called from normal user mode
+ *
+ ****************************************************************************/
+
+int netdev_foreach(netdev_callback_t callback, FAR void *arg);
 
 /****************************************************************************
  * Name: netdev_findby_ipv4addr
