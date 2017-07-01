@@ -628,7 +628,6 @@ union ieee802154_macattr_u
   bool gts_permit;
   bool promisc_mode;
   bool rng_support;
-  bool resp_waittime;
   bool rxonidle;
   bool sec_enabled;
   bool timestamp_support;
@@ -647,6 +646,7 @@ union ieee802154_macattr_u
   uint32_t tx_ctrl_active_dur;
   uint32_t tx_ctrl_pause_dur;
   uint32_t tx_total_dur;
+  uint8_t resp_waittime;
 
   uint8_t beacon_payload[IEEE802154_ATTR_MAC_BEACON_PAYLOAD_LEN];
   uint8_t beacon_payload_len;
