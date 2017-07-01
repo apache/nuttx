@@ -74,17 +74,17 @@
  *
  * Input Parameters:
  *   mac          - Handle to the MAC layer instance
- *   rst_pibattr  - Whether or not to reset the MAC PIB attributes to defaults
+ *   resetattr    - Whether or not to reset the MAC PIB attributes to defaults
  *
  ****************************************************************************/
 
-int mac802154_req_reset(MACHANDLE mac, bool rst_pibattr)
+int mac802154_req_reset(MACHANDLE mac, bool resetattr)
 {
   FAR struct ieee802154_privmac_s * priv =
     (FAR struct ieee802154_privmac_s *) mac;
   union ieee802154_attr_u attr;
 
-  if (rst_pibattr)
+  if (resetattr)
     {
       priv->isassoc = false;             /* Not associated with a PAN */
       priv->trackingbeacon = false;      /* Not tracking beacon by default */
@@ -95,8 +95,6 @@ int mac802154_req_reset(MACHANDLE mac, bool rst_pibattr)
       priv->sfspec.beaconorder = 15;   /* Non-beacon enabled network */
       priv->sfspec.sforder = 15;       /* Length of active portion of outgoing SF */
       priv->beacon_txtime = 0;           /* Device never sent a beacon */
-#warning Set BSN and DSN to random values!
-      priv->bsn = 0;
       priv->dsn = 0;
       priv->gtspermit = true;       /* PAN Coord accepting GTS requests */
       priv->minbe = 3;              /* Min value of backoff exponent (BE) */
@@ -125,14 +123,14 @@ int mac802154_req_reset(MACHANDLE mac, bool rst_pibattr)
       IEEE802154_SADDRCOPY(priv->addr.saddr, &IEEE802154_SADDR_UNSPEC);
       IEEE802154_EADDRCOPY(priv->addr.eaddr, &IEEE802154_EADDR_UNSPEC);
 
-      priv->radio->reset_attrs(priv->radio);
+      priv->radio->reset(priv->radio);
 
       /* The radio is in control of certain attributes, but we keep a mirror
        * for easy access.  Copy in the radio's values now that they've been
        * reset.
        */
 
-      priv->radio->get_attr(priv->radio, IEEE802154_ATTR_MAC_MAX_FRAME_WAITTIME,
+      priv->radio->getattr(priv->radio, IEEE802154_ATTR_MAC_MAX_FRAME_WAITTIME,
                             &attr);
       priv->max_frame_waittime = attr.mac.max_frame_waittime;
 

@@ -124,7 +124,7 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg)
             break;
           case MAC802154IOC_MLME_RESET_REQUEST:
             {
-              ret = mac802154_req_reset(mac, macarg->resetreq.rst_pibattr);
+              ret = mac802154_req_reset(mac, macarg->resetreq.resetattr);
             }
             break;
           case MAC802154IOC_MLME_RXENABLE_REQUEST:

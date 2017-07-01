@@ -37,7 +37,7 @@ ifeq ($(CONFIG_WIRELESS_IEEE802154),y)
 
 # Include IEEE 802.15.4 support
 
-CSRCS += mac802154.c mac802154_indalloc.c mac802154_assoc.c mac802154_disassoc.c
+CSRCS += ieee802154_indalloc.c mac802154.c  mac802154_assoc.c mac802154_disassoc.c
 CSRCS += mac802154_bind.c mac802154_data.c mac802154_get_mhrlen.c
 CSRCS += mac802154_getset.c mac802154_gts.c mac802154_ioctl.c
 CSRCS += mac802154_notif.c mac802154_orphan.c mac802154_poll.c mac802154_purge.c

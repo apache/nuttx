@@ -76,8 +76,10 @@
 
 int mac802154_req_purge(MACHANDLE mac, uint8_t msdu_handle)
 {
+#if 0
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
+#endif
   return -ENOTTY;
 }
 
