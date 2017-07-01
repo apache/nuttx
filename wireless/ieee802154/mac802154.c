@@ -1515,14 +1515,26 @@ static void mac802154_sfevent(FAR const struct ieee802154_radiocb_s *radiocb,
 
   mac802154_takesem(&priv->exclsem, false);
 
-  /* Check if there is any reason to update the beacon */
-
-  if (priv->beaconupdate)
+  switch (sfevent)
     {
-      mac802154_updatebeacon(priv);
+      case IEEE802154_SFEVENT_ENDOFACTIVE:
+        {
+          wlinfo("End of superframe\n");
 
-      priv->radio->beaconupdate(priv->radio, &priv->beaconframe[priv->bf_ind]);
+          /* Check if there is any reason to update the beacon */
+
+          if (priv->beaconupdate)
+            {
+              mac802154_updatebeacon(priv);
+
+              priv->radio->beaconupdate(priv->radio, &priv->beaconframe[priv->bf_ind]);
+            }
+        }
+        break;
+      default:
+        break;
     }
+
 
   mac802154_givesem(&priv->exclsem);
 }
