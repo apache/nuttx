@@ -1247,7 +1247,7 @@ struct ieee802154_orphan_resp_s
 
 struct ieee802154_reset_req_s
 {
-  bool rst_pibattr;
+  bool resetattr;
 };
 
 /*****************************************************************************

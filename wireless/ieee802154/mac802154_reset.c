@@ -74,17 +74,17 @@
  *
  * Input Parameters:
  *   mac          - Handle to the MAC layer instance
- *   rst_pibattr  - Whether or not to reset the MAC PIB attributes to defaults
+ *   resetattr    - Whether or not to reset the MAC PIB attributes to defaults
  *
  ****************************************************************************/
 
-int mac802154_req_reset(MACHANDLE mac, bool rst_pibattr)
+int mac802154_req_reset(MACHANDLE mac, bool resetattr)
 {
   FAR struct ieee802154_privmac_s * priv =
     (FAR struct ieee802154_privmac_s *) mac;
   union ieee802154_attr_u attr;
 
-  if (rst_pibattr)
+  if (resetattr)
     {
       priv->isassoc = false;             /* Not associated with a PAN */
       priv->trackingbeacon = false;      /* Not tracking beacon by default */
