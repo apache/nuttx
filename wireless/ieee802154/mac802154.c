@@ -784,7 +784,7 @@ static void mac802154_txdone_worker(FAR void *arg)
 
       notif =(FAR struct ieee802154_notif_s *)txdesc->conf;
 
-      wlinfo("tx status: %s\n", IEEE802154_STATUS_STRING[txdesc->conf->status]);
+      wlinfo("Tx status: %s\n", IEEE802154_STATUS_STRING[txdesc->conf->status]);
 
       switch(txdesc->frametype)
         {
@@ -915,7 +915,7 @@ static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
 
   sq_addlast((FAR sq_entry_t *)ind, &priv->dataind_queue);
 
-  wlinfo("frame received\n");
+  wlinfo("Frame received\n");
 
   mac802154_givesem(&priv->exclsem);
 
@@ -2004,7 +2004,7 @@ static void mac802154_timeout_expiry(int argc, wdparm_t arg, ...)
 
   DEBUGASSERT(priv->timeout_worker != NULL);
 
-  wlinfo("timer expired\n");
+  wlinfo("Timer expired\n");
 
   work_queue(MAC802154_WORK, &priv->timeout_work, (worker_t)priv->timeout_worker,
              priv, 0);

@@ -527,7 +527,7 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
            * Interval = aBaseSuperframeDuration * 2^macBeaconOrder
            */
 
-          wlinfo("starting timeout timer\n");
+          wlinfo("Starting timeout timer\n");
           mac802154_timerstart(priv, (priv->resp_waittime *
             (IEEE802154_BASE_SUPERFRAME_DURATION * (1 << priv->sfspec.beaconorder))),
             mac802154_assoctimeout);
@@ -658,7 +658,7 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
            * next highest layer of the failure.
            */
 
-          wlinfo("starting timeout timer\n");
+          wlinfo("Starting timeout timer\n");
           mac802154_timerstart(priv, priv->max_frame_waittime,
                                mac802154_assoctimeout);
 
@@ -774,7 +774,7 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
        * to waste space holding our information?
        */
 
-      wlinfo("ignoring association response frame\n");
+      wlinfo("Ignoring association response frame\n");
 
       return;
     }

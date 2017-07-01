@@ -806,12 +806,12 @@ static void mrf24j40_dopoll_csma(FAR void *arg)
 
   if (!dev->csma_busy)
     {
-      wlinfo("polling for frame\n");
+      wlinfo("Polling for frame\n");
       len = dev->radiocb->poll(dev->radiocb, false, &dev->csma_desc);
 
       if (len > 0)
         {
-          wlinfo("frame received. frame length: %d\n", len);
+          wlinfo("Frame received. Frame length: %d\n", len);
 
           /* Now the txdesc is in use */
 
@@ -821,10 +821,6 @@ static void mrf24j40_dopoll_csma(FAR void *arg)
 
           mrf24j40_norm_setup(dev, dev->csma_desc->frame, true);
           mrf24j40_norm_trigger(dev);
-        }
-      else
-        {
-          wlinfo("no frames\n");
         }
     }
 
@@ -1427,7 +1423,7 @@ static int mrf24j40_settxpower(FAR struct mrf24j40_radio_s *dev,
       return -EINVAL;
     }
 
-  wlinfo("remaining attenuation: %d mBm\n",txpwr);
+  wlinfo("Remaining attenuation: %d mBm\n",txpwr);
 
   switch(txpwr/100)
     {
@@ -2141,6 +2137,7 @@ static void mrf24j40_irqworker(FAR void *arg)
   
   if ((intstat & MRF24J40_INTSTAT_WAKEIF))
     {
+      wlinfo("Wake Interrupt\n");
       /* This is right before the beacon, we set the bsn here, since the MAC
        * uses the SLPIF (end of active portion of superframe). to make any
        * changes to the beacon.  This assumes that any changes to the beacon

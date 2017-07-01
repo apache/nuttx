@@ -615,7 +615,7 @@ static inline int mac802154_timercancel(FAR struct ieee802154_privmac_s *priv)
 {
   wd_cancel(priv->timeout);
   priv->timeout_worker = NULL;
-  wlinfo("timer cancelled\n");
+  wlinfo("Timer cancelled\n");
   return OK;
 }
 
@@ -627,7 +627,7 @@ static inline void mac802154_rxenable(FAR struct ieee802154_privmac_s *priv)
   
   if (priv->nrxusers == 1)
     {
-      wlinfo("receiver enabled\n");
+      wlinfo("Receiver enabled\n");
       priv->radio->rxenable(priv->radio, true);
     }
 }
@@ -640,7 +640,7 @@ static inline void mac802154_rxdisable(FAR struct ieee802154_privmac_s *priv)
   
   if (priv->nrxusers == 0)
     {
-      wlinfo("receiver disabled\n");
+      wlinfo("Receiver disabled\n");
       priv->radio->rxenable(priv->radio, true);
       priv->radio->rxenable(priv->radio, false);
     }
