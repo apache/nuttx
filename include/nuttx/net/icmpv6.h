@@ -127,7 +127,20 @@
  * Public Type Definitions
  ****************************************************************************/
 
-/* The ICMP and IP headers */
+/* The ICMPv6 header */
+
+struct icmpv6_hdr_s
+{
+  uint8_t  type;             /* Defines the format of the ICMP message */
+  uint8_t  code;             /* Further qualifies the ICMP messages */
+  uint16_t chksum;           /* Checksum of ICMP header and data */
+
+  /* Data following the ICMP header contains the data specific to the
+   * message type indicated by the Type and Code fields.
+   */
+};
+
+/* The ICMPv6 and IPv6 headers */
 
 struct icmpv6_iphdr_s
 {

@@ -66,7 +66,7 @@
 
 void board_userled_initialize(void)
 {
-  /* Configure LED PIOs for output */
+  /* Configure LED GPIOs for output */
 
   sam_configgpio(GPIO_LED0);
   sam_configgpio(GPIO_LED1);

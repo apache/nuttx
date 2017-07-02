@@ -364,9 +364,9 @@ void sam_lowsetup(void)
 #    warning The SYSIO Pin4 must be bound to PB4 to use USART1
 #  endif
 
-  uint32_t sysioreg = getreg32(SAM_MATRIX_CCFG_SYSIO);
-  sysioreg |= MATRIX_CCFG_SYSIO_SYSIO4;
-  putreg32(sysioreg, SAM_MATRIX_CCFG_SYSIO);
+  regval  = getreg32(SAM_MATRIX_CCFG_SYSIO);
+  regval |= MATRIX_CCFG_SYSIO_SYSIO4;
+  putreg32(regval, SAM_MATRIX_CCFG_SYSIO);
 
 #endif
 

@@ -63,13 +63,24 @@
  * Name: sam_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select PIO pins for the SAMV71-XULT board.
+ *   Called to configure SPI chip select GPIO pins for the SAMV71-XULT board.
  *
  ************************************************************************************/
 
 void sam_spidev_initialize(void)
 {
 #ifdef CONFIG_SAMV7_SPI0_MASTER
+
+#ifdef CONFIG_SAMV71XULT_MB1_SPI
+  /* Enable chip select for mikroBUS1 */
+
+  (void)stm32_configgpio(CLICK_MB1_CS);
+#endif
+#ifdef CONFIG_SAMV71XULT_MB2_SPI
+  /* Enable chip select for mikroBUS2 */
+
+  (void)stm32_configgpio(CLICK_MB2_CS);
+
 #endif
 
 #ifdef CONFIG_SAMV7_SPI0_SLAVE
@@ -101,10 +112,10 @@ void sam_spidev_initialize(void)
  *      pins.
  *   2. Provide sam_spi[0|1]select() and sam_spi[0|1]status() functions in your board-
  *      specific logic.  These functions will perform chip selection and
- *      status operations using PIOs in the way your board is configured.
+ *      status operations using GPIOs in the way your board is configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      sam_spi[0|1]cmddata() functions in your board-specific logic.  This
- *      function will perform cmd/data selection operations using PIOs in
+ *      function will perform cmd/data selection operations using GPIOs in
  *      the way your board is configured.
  *   3. Add a call to sam_spibus_initialize() in your low level application
  *      initialization logic
@@ -119,16 +130,16 @@ void sam_spidev_initialize(void)
  * Name: sam_spi[0|1]select
  *
  * Description:
- *   PIO chip select pins may be programmed by the board specific logic in
+ *   GPIO chip select pins may be programmed by the board specific logic in
  *   one of two different ways.  First, the pins may be programmed as SPI
  *   peripherals.  In that case, the pins are completely controlled by the
  *   SPI driver.  This method still needs to be provided, but it may be only
  *   a stub.
  *
- *   An alternative way to program the PIO chip select pins is as a normal
- *   PIO output.  In that case, the automatic control of the CS pins is
+ *   An alternative way to program the GPIO chip select pins is as a normal
+ *   GPIO output.  In that case, the automatic control of the CS pins is
  *   bypassed and this function must provide control of the chip select.
- *   NOTE:  In this case, the PIO output pin does *not* have to be the
+ *   NOTE:  In this case, the GPIO output pin does *not* have to be the
  *   same as the NPCS pin normal associated with the chip select number.
  *
  * Input Parameters:
@@ -143,12 +154,32 @@ void sam_spidev_initialize(void)
 #ifdef CONFIG_SAMV7_SPI0_MASTER
 void sam_spi0select(uint32_t devid, bool selected)
 {
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+
+  switch (devid)
+    {
+#ifdef CONFIG_IEEE802154_MRF24J40
+      case SPIDEV_IEEE802154(0):
+        /* Set the GPIO low to select and high to de-select */
+
+#if defined(CONFIG_SAMV71XULT_MB1_BEE)
+        stm32_gpiowrite(CLICK_MB1_CS, !selected);
+#elif defined(CONFIG_SAMV71XULT_MB2_BEE)
+        stm32_gpiowrite(CLICK_MB2_CS, !selected);
+#endif
+        break;
+#endif
+
+      default:
+        break;
+    }
 }
 #endif
 
 #ifdef CONFIG_SAMV7_SPI1_MASTER
 void sam_spi1select(uint32_t devid, bool selected)
 {
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 }
 #endif
 
