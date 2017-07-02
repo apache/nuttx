@@ -42,6 +42,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
 

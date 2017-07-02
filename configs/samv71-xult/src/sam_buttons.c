@@ -146,7 +146,7 @@ void board_button_initialize(void)
   regval |= MATRIX_CCFG_SYSIO_SYSIO12;
   putreg32(regval, SAM_MATRIX_CCFG_SYSIO);
 
-  /* Configure button PIOs */
+  /* Configure button GPIOs */
 
   (void)sam_configgpio(GPIO_SW0);
   (void)sam_configgpio(GPIO_SW1);

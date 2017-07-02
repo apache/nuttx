@@ -92,15 +92,15 @@ struct sama5d4ek_tscinfo_s
  * Private Function Prototypes
  ****************************************************************************/
 
-/* IRQ/PIO access callbacks.  These operations all hidden behind
- * callbacks to isolate the maXTouch driver from differences in PIO
+/* IRQ/GPIO access callbacks.  These operations all hidden behind
+ * callbacks to isolate the maXTouch driver from differences in GPIO
  * interrupt handling by varying boards and MCUs.  If possible,
  * interrupts should be configured on both rising and falling edges
  * so that contact and loss-of-contact events can be detected.
  *
- *   attach  - Attach the maXTouch interrupt handler to the PIO interrupt
- *   enable  - Enable or disable the PIO interrupt
- *   clear   - Acknowledge/clear any pending PIO interrupt
+ *   attach  - Attach the maXTouch interrupt handler to the GPIO interrupt
+ *   enable  - Enable or disable the GPIO interrupt
+ *   clear   - Acknowledge/clear any pending GPIO interrupt
  */
 
 static int  mxt_attach(FAR const struct mxt_lower_s *lower, mxt_handler_t isr,
@@ -141,15 +141,15 @@ static struct sama5d4ek_tscinfo_s g_mxtinfo =
  ****************************************************************************/
 
 /****************************************************************************
- * IRQ/PIO access callbacks.  These operations all hidden behind
- * callbacks to isolate the maXTouch driver from differences in PIO
+ * IRQ/GPIO access callbacks.  These operations all hidden behind
+ * callbacks to isolate the maXTouch driver from differences in GPIO
  * interrupt handling by varying boards and MCUs.  If possible,
  * interrupts should be configured on both rising and falling edges
  * so that contact and loss-of-contact events can be detected.
  *
- *   attach  - Attach the maXTouch interrupt handler to the PIO interrupt
- *   enable  - Enable or disable the PIO interrupt
- *   clear   - Acknowledge/clear any pending PIO interrupt
+ *   attach  - Attach the maXTouch interrupt handler to the GPIO interrupt
+ *   enable  - Enable or disable the GPIO interrupt
+ *   clear   - Acknowledge/clear any pending GPIO interrupt
  *
  ****************************************************************************/
 

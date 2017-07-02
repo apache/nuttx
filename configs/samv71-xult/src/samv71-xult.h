@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/samv71-xult/src/samv71-xult.h
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,6 +72,7 @@
 #define HAVE_RTC_PCF85263    1
 #define HAVE_I2CTOOL         1
 #define HAVE_LED_DRIVER      1
+#define HAVE_MRF24J40        1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface is not enabled */
@@ -87,10 +88,10 @@
 #  undef HAVE_HSMCI
 #endif
 
-/* We need PIO interrupts on GPIOD to support card detect interrupts */
+/* We need GPIO interrupts on GPIOD to support card detect interrupts */
 
 #if defined(HAVE_HSMCI) && !defined(CONFIG_SAMV7_GPIOD_IRQ)
-#  warning PIOD interrupts not enabled.  No MMC/SD support.
+#  warning GPIOD interrupts not enabled.  No MMC/SD support.
 #  undef HAVE_HSMCI
 #endif
 
@@ -375,6 +376,24 @@
 #  endif
 #endif
 
+/* Check if the MRF24J40 is supported in this configuration */
+
+#ifndef CONFIG_IEEE802154_MRF24J40
+#  undef HAVE_MRF24J40
+#endif
+
+#ifndef CONFIG_SAMV71XULT_CLICKSHIELD
+#  undef HAVE_MRF24J40
+#endif
+
+#ifndef CONFIG_SAMV7_SPI0_MASTER
+#  undef HAVE_MRF24J40
+#endif
+
+#ifndef CONFIG_SAMV7_GPIOA_IRQ
+#  undef HAVE_MRF24J40
+#endif
+
 /* SAMV71-XULT GPIO Pin Definitions *************************************************/
 
 /* Ethernet MAC.
@@ -419,7 +438,7 @@
  *
  *   ------ ----------- ---------------------
  *   SAMV71 Function    Shared functionality
- *   PIO
+ *   GPIO
  *   ------ ----------- ---------------------
  *   PA23   Yellow LED0 EDBG GPIO
  *   PC09   Yellow LED1 LCD, and Shield
@@ -440,7 +459,7 @@
  *
  *   ------ ----------- ---------------------
  *   SAMV71 Function    Shared functionality
- *   PIO
+ *   GPIO
  *   ------ ----------- ---------------------
  *   RESET  RESET       Trace, Shield, and EDBG
  *   PA09   SW0         EDBG GPIO and Camera
@@ -503,7 +522,7 @@
 /* WM8904 Audio Codec ***************************************************************/
 /* SAMV71 Interface        WM8904 Interface
  * ---- ------------ ------- ----------------------------------
- * PIO  Usage        Pin     Function
+ * GPIO Usage        Pin     Function
  * ---- ------------ ------- ----------------------------------
  * PA3  TWD0         SDA     I2C control interface, data line
  * PA4  TWCK0        SCLK    I2C control interface, clock line
@@ -522,8 +541,8 @@
  * interrupt on the high level.
  */
 
-#define GPIO_INT_WM8904    (PIO_INPUT | PIO_CFG_DEFAULT | PIO_CFG_DEGLITCH | \
-                            PIO_INT_HIGHLEVEL | PIO_PORT_PIOD | PIO_PIN11)
+#define GPIO_INT_WM8904    (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
+                            GPIO_INT_HIGHLEVEL | GPIO_PORT_PIOD | GPIO_PIN11)
 #define IRQ_INT_WM8904     SAM_IRQ_PD11
 
 /* The MW8904 communicates on TWI0, I2C address 0x1a for control operations */
@@ -534,6 +553,30 @@
 /* The MW8904 transfers data on SSC0 */
 
 #define WM8904_SSC_BUS     0
+
+/* Click Shield */
+/* Reset (RST#) Pulled-up on the click board */
+
+#define CLICK_MB1_RESET    (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORT_PIOD | GPIO_PIN30)
+#define CLICK_MB2_RESET    (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORT_PIOA | GPIO_PIN19)
+/* Interrupts */
+
+#define CLICK_MB1_INTR     (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
+                            GPIO_INT_HIGHLEVEL | GPIO_PORT_PIOA | GPIO_PIN0)
+#define CLICK_MB2_INTR     (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
+                            GPIO_INT_HIGHLEVEL | GPIO_PORT_PIOA | GPIO_PIN6)
+
+#define IRQ_MB1            SAM_IRQ_PA0
+#define IRQ_MB2            SAM_IRQ_PA6
+
+/* SP chip selects */
+
+#define CLICK_MB1_CS       (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                            GPIO_PORT_PIOD | GPIO_PIN25)
+#define CLICK_MB2_CS       (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                            GPIO_PORT_PIOC | GPIO_PIN9)
 
 /************************************************************************************
  * Public Types
