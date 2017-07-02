@@ -1629,10 +1629,17 @@ Debugging
   orientation of the JTAG connection.
 
   I have been using Atmel Studio to write code to flash then I use the Segger
-  J-Link GDB server to debug.  I have been using the 'Device Programming' I
+  J-Link GDB server to debug.  I have been using the 'Device Programming'
   available under the Atmel Studio 'Tool' menu.  I have to disconnect the
-  SAM-ICE while programming with the EDBG.  I am sure that you could come up
-  with a GDB server-only solution if you wanted.
+  SAM-ICE while programming with the EDBG.
+
+  You can also load code into flash directory with J-Link:
+
+    arm-none-eabi-gdb
+    (gdb) target remote localhost:2331
+    (gdb) mon reset
+    (gdb) mon halt
+    (gdb) load nuttx
 
   I run GDB like this from the directory containing the NuttX ELF file:
 
@@ -1856,22 +1863,26 @@ Configuration sub-directories
     boards are the endpoints in the start.
 
     NOTES:
-    1. This configuration derives from the netnsh configuration, but adds
+    1. The serial console is configured by default for use with and Arduino
+       serial shield (UART3).  You will need to reconfigure if you will
+       to use a different U[S]ART.
+
+    2. This configuration derives from the netnsh configuration, but adds
        support for IPv6, 6LoWPAN, and the MRF24J40 IEEE 802.15.4 radio.
 
-    2. This configuration uses the Mikroe BEE MRF24j40 click boards and
+    3. This configuration uses the Mikroe BEE MRF24j40 click boards and
        connects to the SAMV71-XULT using a click shield as described above.
 
-    3. You must must have also have at least two clicker2-stm32 boards each
+    4. You must must have also have at least two clicker2-stm32 boards each
        with an  MRF24J40 BEE click board in order to run these tests.
 
-    4. Telnet:  The clicker2-stm32 star point configuration supports the
+    5. Telnet:  The clicker2-stm32 star point configuration supports the
        Telnet daemon, but not the Telnet client; the star hub configuration
        supports the Telnet client, but not the Telnet daemon.  Therefore,
        the star hub can Telnet to any point in the star, the star endpoints
        cannot initiate telnet sessions.
 
-    5. TCP and UDP Tests:  The same TCP and UDP tests as described for
+    6. TCP and UDP Tests:  The same TCP and UDP tests as described for
        the clicker2-stm32 mrf24j40-starpoint coniguration are supported on
        the star endpoints, but NOT on the star hub.  Therefore, all network
        testing is between endpoints with the hub acting, well, only like a
