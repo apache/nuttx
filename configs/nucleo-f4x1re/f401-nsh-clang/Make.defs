@@ -61,6 +61,9 @@ else
   ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)
 endif
 
+#CC = $(CROSSDEV)clang
+#CXX = $(CROSSDEV)clang++
+#CPP = $(CROSSDEV)clang -E
 CC = clang
 CXX = clang++
 CPP = clang -E
