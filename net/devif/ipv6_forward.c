@@ -166,7 +166,7 @@ static int ipv6_packet_conversion(FAR struct net_driver_s *dev,
 
 static int ipv6_hdrsize(FAR struct ipv6_hdr_s *ipv6)
 {
-  /* Copy the following protocol header, */
+  /* Size is determined by the following protocol header, */
 
   switch (ipv6->proto)
     {
@@ -211,27 +211,20 @@ static int ipv6_hdrsize(FAR struct ipv6_hdr_s *ipv6)
  * Description:
  *   Set up to forward the UDP or ICMPv6 packet on the specified device.
  *   This function will set up a send "interrupt" handler that will perform
- *   the actual send asynchronously.
+ *   the actual send asynchronously and must return without waiting for the
+ *   send to complete.
  *
  * Input Parameters:
- *   dev   - The device on which the packet was received and which contains
- *           the IPv6 packet.
- *   ipv6  - A convenience pointer to the IPv6 header in within the IPv6
- *           packet.  This is immeidately followed by the L3 header which may
- *           be UDP or ICMPv6.
+ *   dev   - The device on which the packet should be forwarded.
+ *   ipv6  - A pointer to the IPv6 header in within the IPv6 packet.  This
+ *           is immeidately followed by the L3 header which may be UDP or
+ *           ICMPv6.
  *   iob   - A list of IOBs containing the data payload to be sent.
  *
- *
- *   On input:
- *   - dev->d_buf holds the received packet.
- *   - dev->d_len holds the length of the received packet MINUS the
- *     size of the L1 header.  That was subtracted out by ipv6_input.
- *   - ipv6 points to the IPv6 header with dev->d_buf.
- *
  * Returned Value:
- *   Zero is returned if the packet was successfully forward;  A negated
+ *   Zero is returned if the packet was successfully forwarded;  A negated
  *   errno value is returned if the packet is not forwardable.  In that
- *   latter case, the caller (ipv6_input()) should drop the packet.
+ *   latter case, the caller should free the IOB list and drop the packet.
  *
  ****************************************************************************/
 
@@ -242,9 +235,7 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
 {
   /* Notify the forwarding device that TX data is available */
 
-  /* Set up to send the packet when the selected device polls for TX data.
-   * If the packet is TCP, it must obey ACK and windowing rules.
-   */
+  /* Set up to send the packet when the selected device polls for TX data. */
 
 #warning Missing logic
 
@@ -252,12 +243,9 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
    * - source MAC, the MAC of the current device.
    * - dest MAC, the MAC associated with the destination IPv6 adress.
    *   This will involve ICMPv6 and Neighbor Discovery.
-   * - Because of TCP window, the packet may have to be sent in smaller
-   *   pieces.
    */
 
-#  warning Missing logic
-   nwarn("WARNING: UPD/ICMPv6 packet forwarding not yet supported\n");
+  nwarn("WARNING: UPD/ICMPv6 packet forwarding not yet supported\n");
   return -ENOSYS;
 }
 #endif
@@ -280,11 +268,31 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_STATISTICS
 static void ipv6_dropstats(FAR struct ipv6_hdr_s *ipv)
 {
-g_netstats.icmpv6.drop++
-g_netstats.udp.drop++;
-g_netstats.tcp.drop++;
+  switch (ipv6->proto)
+    {
+#ifdef CONFIG_NET_TCP
+    case IP_PROTO_TCP:
+      g_netstats.tcp.drop++;
+      break;
+#endif
 
-g_netstats.ipv6.drop++
+#ifdef CONFIG_NET_UDP
+    case IP_PROTO_UDP:
+      g_netstats.udp.drop++;
+      break;
+#endif
+
+#ifdef CONFIG_NET_ICMPv6
+    case IP_PROTO_ICMP6:
+      g_netstats.icmpv6.drop++
+      break;
+#endif
+
+    default:
+      break;
+    }
+
+  g_netstats.ipv6.drop++
 }
 #else
 #  define ipv6_dropstats(ipv6)
@@ -410,11 +418,11 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
 
           if (ipv6->proto == IP_PROTO_TCP)
             {
-              ret = tcp_ipv6_forward(dev, ipv6, iob);
+              ret = tcp_ipv6_forward(fwddev, ipv6, iob);
             }
           else
             {
-              ret = ipv6_dev_forward(dev, ipv6, iob);
+              ret = ipv6_dev_forward(fwddev, ipv6, iob);
             }
 
           if (ret >= 0)
