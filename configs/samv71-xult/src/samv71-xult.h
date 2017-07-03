@@ -568,9 +568,9 @@
 /* Interrupts */
 
 #define CLICK_MB1_INTR     (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
-                            GPIO_INT_HIGHLEVEL | GPIO_PORT_PIOA | GPIO_PIN0)
+                            GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN0)
 #define CLICK_MB2_INTR     (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
-                            GPIO_INT_HIGHLEVEL | GPIO_PORT_PIOA | GPIO_PIN6)
+                            GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN6)
 
 #define IRQ_MB1            SAM_IRQ_PA0
 #define IRQ_MB2            SAM_IRQ_PA6
