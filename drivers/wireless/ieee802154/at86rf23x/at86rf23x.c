@@ -993,226 +993,116 @@ static int at86rf23x_gettxpower(FAR struct ieee802154_radio_s *ieee,
 
   /* Right now we only get negative values */
 
-
-
-
   reg = at86rf23x_getreg(dev->spi, RF23X_REG_TXPWR);
   switch (reg)
-
     {
-
- 
    case RF23X_TXPWR_POS_4:
 
       *txpwr = 0;
       break;
 
-
-
-  
-  case RF23X_TXPWR_POS_3_7:
-      *txpwr = 
-0;
+   case RF23X_TXPWR_POS_3_7:
+      *txpwr =0;
       break;
 
-
-
-  
-  case RF23X_TXPWR_POS_3_4:
+   case RF23X_TXPWR_POS_3_4:
       *txpwr = 0;
-
-
       break;
 
-
- 
    case RF23X_TXPWR_POS_3:
-      *txpwr =
- 0;
-
+      *txpwr = 0;
       break;
 
-
-   case RF23X_
-TXPWR_POS_2_5:
+   case RF23X_TXPWR_POS_2_5:
      *txpwr = 0;
-
-
       break;
 
-
-    case RF23X_TXPWR_POS_2:
-
+   case RF23X_TXPWR_POS_2:
       *txpwr = 0;
-
-
       break;
 
-
- 
    case RF23X_TXPWR_POS_1:
-
       *txpwr = 0;
       break;
 
-
-
-  
-  case RF23X_TXPWR_0:
-      *txpwr = 
-0;
+   case RF23X_TXPWR_0:
+      *txpwr =0;
       break;
 
-
-
-
-    case RF23X_TXPWR_NEG_1:
+   case RF23X_TXPWR_NEG_1:
       *txpwr = 1000;
-
       break;
 
-
-
-    case RF23X_TXPWR_NE
-G_2:
+   case RF23X_TXPWR_NEG_2:
       *txpwr = 2000;
-
-
       break;
-
 
     case RF23X_TXPWR_NEG_3:
-
-      
-*txpwr = 3000;
-
+      *txpwr = 3000;
       break;
 
-
     case RF23X_TXPWR_NEG_4:
-
-      
-*txpwr = 4000;
-      
-break;
-
-
+      *txpwr = 4000;
+      break;
 
     case RF23X_TXPWR_NEG_6:
       *txpwr = 6000;
-
-
       break;
-
-
 
     case RF23X_TXPWR_NEG_8:
       *txpwr = 8000;
-
       break;
 
-
-
-    ca
-se RF23X_TXPWR_NEG_12:
-
+    case RF23X_TXPWR_NEG_12:
       *txpwr = 12000;
       break;
 
-
-
     case RF23X_TXPWR_NEG_17:
-
-      *txpwr = 17
-000;
-      
-break;
+      *txpwr = 17000;
+      break;
     }
 
-
-
   return OK;
-
 }
 
-
-
-/****
-************************************************************************
-
+/****************************************************************************
  * Name: at86rf23x_setcca
  *
-
  * Description:
-
  *   Configures if energy detection is used or carrier sense.  The base
-
-
  *   measurement is configured here as well
  *
-
- *
-
- *************************************************************************
-***/
-
+ ****************************************************************************/
 
 static
  int at86rf23x_setcca(FAR struct ieee802154_radio_s *ieee,
-
-                            FAR struct ieee802154_cca_s *cca)
-
+                      FAR struct ieee802154_cca_s *cca)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
 
-
-
-
   /* TODO: This doesn't fit the RF233 completely come back to this */
-
-
 
   if (!cca->use_ed && !cca->use_cs)
     {
-
       return -EINVAL;
-
     }
-
-
-
 
   if (cca->use_cs && cca->csth > 0x0f)
     {
-
       return -EINVAL;
-
     }
 
-
-
   if (cca->use_ed)
-
- 
-   {
-
+    {
       at86rf23x_setregbits(dev->spi, RF23X_CCA_BITS_MODE, RF23X_CCA_MODE_ED);
     }
 
-
-
-  
-if (cca->use_cs)
+  if (cca->use_cs)
     {
-
-      at86rf23x_setregbits(dev->spi, RF23X_CCA_BITS_MODE, RF23X_CCA
-_MODE_CS);
+      at86rf23x_setregbits(dev->spi, RF23X_CCA_BITS_MODE, RF23X_CCA_MODE_CS);
     }
 
-
-
-  memcpy(&dev->cca, cca, sizeof(struct ieee802154
-_cca_s));
+  memcpy(&dev->cca, cca, sizeof(struct ieee802154_cca_s));
   return OK;
 }
 

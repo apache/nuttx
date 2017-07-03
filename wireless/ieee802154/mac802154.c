@@ -1569,7 +1569,7 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
    * you would have to copy the data over in the case that you actually need
    * to notify the next highest layer)
    */
-  
+
   mac802154_notif_alloc(priv, &notif, false);
   beacon = &notif->u.beaconind;
 
@@ -1718,9 +1718,9 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
 
   if (beacon->payloadlength > 0)
     {
-      memcpy(beacon->payload, &iob->io_data[iob->io_offset], beacon->payloadlength); 
+      memcpy(beacon->payload, &iob->io_data[iob->io_offset], beacon->payloadlength);
     }
-  
+
   /* At this point, we have extracted all relevant info from the incoming frame */
 
   if (priv->curr_op == MAC802154_OP_SCAN)
@@ -1745,7 +1745,7 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
           mac802154_notif_free_locked(priv, notif);
           return;
         }
-      
+
       /* TODO: There is supposed to be different logic for the scanning procedure
        * based on the macAutoRequest attribute. Currently, we perform scan
        * operations as if macAutoRequest is set to TRUE, without actually checking
@@ -1756,7 +1756,7 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
        * via the BEACON.notify primitive, and pass a NULLed out list of pandesc
        * when SCAN.confirm is sent.
        */
-      
+
       /* Copy the pan desc to the list of pan desc */
 
       memcpy(&priv->pandescs[priv->npandesc], &beacon->pandesc,
@@ -1793,7 +1793,7 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
        * send a BEACON-NOTFIY.indication in this case, not sure if that
        * is the right thing to do, can't find anything definitive in standard.
        */
-      
+
       if (priv->curr_op == MAC802154_OP_ASSOC && pending_eaddr)
         {
           priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
@@ -1818,7 +1818,7 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
                * BEACON-NOTIFY.indication primitive if the beacon contains any
                * payload.
                */
-          
+
               if (beacon->payloadlength > 0)
                 {
                   /* Unlock the MAC, notify, then lock again */
@@ -1872,7 +1872,7 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
                 /* If there was a beacon payload, we used the notification, so
                  * return here to make sure we don't free the notification.
                  */
-                 
+
                 if (beacon->payloadlength > 0)
                   {
                     return;
@@ -2112,7 +2112,7 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
     {
       eaddr[i] = (CONFIG_IEEE802154_DEFAULT_EADDR >> (8 * i)) & 0xFF;
     }
-  
+
   mac802154_seteaddr(mac, eaddr);
 
   return (MACHANDLE)mac;

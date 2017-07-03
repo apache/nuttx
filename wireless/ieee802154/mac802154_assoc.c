@@ -246,7 +246,7 @@ int mac802154_req_associate(MACHANDLE mac,
    * a beacon frame from the desired coordinator address, we have to just
    * send the frame out immediately.
    */
-  
+
   for (i = 0; i < priv->npandesc; i++)
     {
       /* Check to make sure the beacon is from the same channel as the request */
@@ -264,7 +264,7 @@ int mac802154_req_associate(MACHANDLE mac,
           /* We have a beacon frame from this coordinator, we can set the
            * sfspec and send accordingly.
            */
-          
+
           /* Copy in the new superframe spec */
 
           memcpy(&priv->sfspec, &priv->pandescs[i].sfspec,

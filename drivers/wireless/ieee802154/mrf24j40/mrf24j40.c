@@ -465,7 +465,7 @@ static int  mrf24j40_reset(FAR struct ieee802154_radio_s *radio)
   /* Set this in reset since it can exist for all device modes. See pg 101 */
 
   mrf24j40_setreg(dev->spi, MRF24J40_FRMOFFSET, 0x15);
-  
+
   /* For now, we want to always just have the frame pending bit set when
    * acknowledging a Data Request command. The standard says that the coordinator
    * can do this if it needs time to figure out whether it has data or not
@@ -613,7 +613,7 @@ static int mrf24j40_setattr(FAR struct ieee802154_radio_s *radio,
         }
         break;
 
-      
+
       case IEEE802154_ATTR_PHY_CHAN:
         {
           mrf24j40_setchannel(dev, attrval->phy.chan);
@@ -729,7 +729,7 @@ static int mrf24j40_sfupdate(FAR struct ieee802154_radio_s *radio,
 
   mrf24j40_setorder(dev, sfspec->beaconorder, sfspec->sforder);
 
-  /* Program the CAP end slot (ESLOTG1 0x13<3:0>) value. */ 
+  /* Program the CAP end slot (ESLOTG1 0x13<3:0>) value. */
 
   reg = mrf24j40_getreg(dev->spi, MRF24J40_ESLOTG1);
   reg &= ~MRF24J40_ESLOTG1_CAP;
@@ -1042,7 +1042,7 @@ static void mrf24j40_setorder(FAR struct mrf24j40_radio_s *dev, uint8_t bo,
   /* If the Sleep Clock Selection, SLPCLKSEL (0x207<7:6), is the internal
     * oscillator (100 kHz), set SLPCLKDIV to a minimum value of 0x01.
     */
-      
+
   mrf24j40_setreg(dev->spi, MRF24J40_SLPCON1, 0x01);
 
   /* Select the source of SLPCLK (internal 100kHz) */
@@ -1059,8 +1059,8 @@ static void mrf24j40_setorder(FAR struct mrf24j40_radio_s *dev, uint8_t bo,
   /* Calibration is complete when the SLPCALRDY bit (SLPCAL2 0x20B<7>) is
     * set to ‘1’.
     */
-      
-  while (!(mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL2) & 
+
+  while (!(mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL2) &
           MRF24J40_SLPCAL2_SLPCALRDY))
     {
       usleep(1);
@@ -1073,7 +1073,7 @@ static void mrf24j40_setorder(FAR struct mrf24j40_radio_s *dev, uint8_t bo,
   /* Program the Beacon Interval into the Main Counter, MAINCNT (0x229<1:0>,
     * 0x228, 0x227, 0x226), and Remain Counter, REMCNT (0x225, 0x224),
     * according to BO and SO values. Refer to Section 3.15.1.3 “Sleep Mode
-    * Counters” 
+    * Counters”
     */
 
 
@@ -2378,14 +2378,14 @@ static void mrf24j40_irqworker(FAR void *arg)
       reg |= MRF24J40_SLPACK_SLPACK;
       mrf24j40_setreg(dev->spi, MRF24J40_SLPACK, reg);
     }
-  
+
   if ((intstat & MRF24J40_INTSTAT_WAKEIF))
     {
       wlinfo("Wake Interrupt\n");
       /* This is right before the beacon, we set the bsn here, since the MAC
        * uses the SLPIF (end of active portion of superframe). to make any
        * changes to the beacon.  This assumes that any changes to the beacon
-       * be in by the time that this interrupt fires. 
+       * be in by the time that this interrupt fires.
        */
 
       mrf24j40_setreg(dev->spi, MRF24J40_BEACON_FIFO + 4, dev->bsn++);
