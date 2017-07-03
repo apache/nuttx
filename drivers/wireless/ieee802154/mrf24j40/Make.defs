@@ -1,5 +1,5 @@
 ############################################################################
-# drivers/ieee802154/Make.defs
+# drivers/ieee802154/mrf24j40/Make.defs
 #
 #   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,21 +33,16 @@
 #
 ############################################################################
 
-# Include nothing if IEEE 802.15.4 is disabled
+ifeq ($(CONFIG_IEEE802154_MRF24J40),y)
 
-ifeq ($(CONFIG_DRIVERS_IEEE802154),y)
+# Include MRF24J40 files into the build
 
-# Include common IEEE 802.15.4 files into the build
+CSRCS += mrf24j40.c
 
-# Include IEEE 802.15.4 drivers into the build
+# Include MRF24J40 build support
 
-include wireless$(DELIM)ieee802154$(DELIM)mrf24j40$(DELIM)Make.defs
-include wireless$(DELIM)ieee802154$(DELIM)at86rf23x$(DELIM)Make.defs
+DEPPATH += --dep-path wireless$(DELIM)ieee802154$(DELIM)mrf24j40
+VPATH += :wireless$(DELIM)ieee802154$(DELIM)mrf24j40
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)ieee802154$(DELIM)mrf24j40}
 
-# Include common IEEE 802.15.4 build support
-
-DEPPATH += --dep-path wireless$(DELIM)ieee802154
-VPATH += :wireless$(DELIM)ieee802154
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)ieee802154}
-
-endif # CONFIG_DRIVERS_IEEE802154
+endif # CONFIG_IEEE802154_MRF24J40

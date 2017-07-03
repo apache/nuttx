@@ -11,10 +11,14 @@ config IEEE802154_MRF24J40
 	---help---
 		This selection enables support for the Microchip MRF24J40 device.
 
+source drivers/wireless/ieee802154/mrf24j40/Kconfig
+
 config IEEE802154_AT86RF233
 	bool "ATMEL RF233 IEEE 802.15.4 transceiver"
 	default n
 	---help---
 		This selection enables support for the Atmel RF233 device.
+
+source drivers/wireless/ieee802154/at86rf23x/Kconfig
 
 endif # DRIVERS_IEEE802154
