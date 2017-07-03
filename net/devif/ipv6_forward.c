@@ -42,12 +42,14 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
 
 #include "netdev/netdev.h"
 #include "sixlowpan/sixlowpan.h"
+#include "tcp/tcp.h"
 #include "devif/devif.h"
 
 #if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_IPv6)
@@ -56,7 +58,9 @@
  * Private Types
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_ICMPv6)
+#if defined(CONFIG_NETDEV_MULTINIC) && \
+   (defined(CONFIG_NET_UDP) || defined(CONFIG_NET_ICMPv6))
+
 /* IPv6 + UDP or ICMPv6 header */
 
 struct ipv6l3_hdr_s
@@ -66,20 +70,23 @@ struct ipv6l3_hdr_s
   {
 #ifdef CONFIG_NET_UDP
     struct udp_hdr_s      udp;
+#endif
 #ifdef CONFIG_NET_ICMPv6
     struct icmpv6_iphdr_s icmp;
+#endif
   } u;
 };
-#endif
 
 /* This is the send state structure */
 
 struct forward_s
 {
-  FAR net_driver_s      *dev;  /* Forwarding device */
-  struct ipv6l3_hdr_s    hdr;  /* Copy of origin L2+L3 headers */
-  FAR struct iob_queue_s iobq; /* IOBs contained the data payload */
+  FAR struct net_driver_s *dev;  /* Forwarding device */
+  struct ipv6l3_hdr_s      hdr;  /* Copy of origin L2+L3 headers */
+  FAR struct iob_queue_s   iobq; /* IOBs contained the data payload */
 };
+
+#endif /* CONFIG_NETDEV_MULTINIC && (CONFIG_NET_UDP || CONFIG_NET_ICMPv6) */
 
 /****************************************************************************
  * Private Functions
@@ -164,6 +171,7 @@ static int ipv6_packet_conversion(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NETDEV_MULTINIC
 static int ipv6_hdrsize(FAR struct ipv6_hdr_s *ipv6)
 {
   /* Size is determined by the following protocol header, */
@@ -204,6 +212,7 @@ static int ipv6_hdrsize(FAR struct ipv6_hdr_s *ipv6)
       return -EPROTONOSUPPORT;
     }
 }
+#endif
 
 /****************************************************************************
  * Name: ipv6_dev_forward
@@ -269,7 +278,7 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_STATISTICS
-static void ipv6_dropstats(FAR struct ipv6_hdr_s *ipv)
+static void ipv6_dropstats(FAR struct ipv6_hdr_s *ipv6)
 {
   switch (ipv6->proto)
     {
@@ -287,7 +296,7 @@ static void ipv6_dropstats(FAR struct ipv6_hdr_s *ipv)
 
 #ifdef CONFIG_NET_ICMPv6
     case IP_PROTO_ICMP6:
-      g_netstats.icmpv6.drop++
+      g_netstats.icmpv6.drop++;
       break;
 #endif
 
@@ -295,7 +304,7 @@ static void ipv6_dropstats(FAR struct ipv6_hdr_s *ipv)
       break;
     }
 
-  g_netstats.ipv6.drop++
+  g_netstats.ipv6.drop++;
 }
 #else
 #  define ipv6_dropstats(ipv6)
@@ -410,7 +419,7 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
                * available IOBs.
                */
 
-              ret = iob_trycopyin(iob, payload, paysize, 0);
+              ret = iob_trycopyin(iob, payload, paysize, 0, false);
               if (ret < 0)
                 {
                   goto errout_with_iob;
