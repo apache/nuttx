@@ -558,7 +558,34 @@
 
 #define WM8904_SSC_BUS     0
 
-/* Click Shield */
+/* Click Shield
+ *
+ * --- ----- ------------------------------ ---------------------------------
+ * PIN PORT  SHIELD FUNCTION                PIN CONFIGURATION
+ * --- ----- ------------------------------ ---------------------------------
+ * AD0 PD26  microBUS2 Analog TD            PD26 *** Not an AFE pin ***
+ * AD1 PC31  microBUS2 Analog               PC31 AFE1_AD6   GPIO_AFE1_AD6
+ * AD2 PD30  microBUS2 GPIO reset output    PD30
+ * AD3 PA19  microBUS1 GPIO reset output    PA19
+ * AD4 PC13  (both) I2C-SDA                 PC13 *** Does not support I2C SDA ***
+ * AD5 PC30  (both) I2C-SCL                 PC30 *** Does not support I2C SCL ***
+ * AD6 PA17  *** Not used ***
+ * AD7 PC12  *** Not used ***
+ * D0  PD28  (both) HDR_RX                  PD28 URXD3      GPIO_UART3_RXD
+ * D1  PD30  (both) HDR_TX                  PD30 UTXD3      GPIO_UART3_TXD_1
+ * D2  PA5   microBUS1 GPIO interrupt input PA5
+ * D3  PA6   microBUS2 GPIO interrupt input PA6
+ * D4  PD27  *** Not used ***
+ * D5  PD11  microBUS2 PWM                  PD11 PWMC0_H0
+ * D6  PC19  microBUS1 PWN                  PC19 PWMC0_H2
+ * D7  PA2   *** Not used ***
+ * D9  PC9   microBUS2 CS GPIO output       PC9
+ * D10 PD25  microBUS1 CS GPIO output       PD25 SPI0_NPCS1
+ * D11 PD21  (both) SPI-MOSI                PD21 SPI0_MOSI  GPIO_SPI0_MOSI
+ * D12 PD20  (both) SPI-MISO                PD20 SPI0_MISO  GPIO_SPI0_MISO
+ * D13 PD22  (both) SPI-SCK                 PD22 SPI0_SPCK  GPIO_SPI0_SPCK
+ */
+
 /* Reset (RST#) Pulled-up on the click board */
 
 #define CLICK_MB1_RESET    (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
@@ -568,11 +595,11 @@
 /* Interrupts */
 
 #define CLICK_MB1_INTR     (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
-                            GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN0)
+                            GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN5)
 #define CLICK_MB2_INTR     (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
                             GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN6)
 
-#define IRQ_MB1            SAM_IRQ_PA0
+#define IRQ_MB1            SAM_IRQ_PA5
 #define IRQ_MB2            SAM_IRQ_PA6
 
 /* SP chip selects */

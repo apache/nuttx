@@ -167,8 +167,8 @@ static void sam_enable_irq(FAR const struct mrf24j40_lower_s *lower,
    * has not yet been 'attached'
    */
 
-  wlinfo("state:%d\n", (int)state);
   DEBUGASSERT(priv != NULL);
+  wlinfo("state: %d irq: %u\n", (int)state, priv->irq);
 
   /* Has the interrupt state changed */
 
