@@ -1943,6 +1943,11 @@ Configuration sub-directories
 
     STATUS:
       2017-07-02:  Configurations added.  Not yet tested.
+      2017-07-03:  Initial testing, appears to be working, but endpoints
+        fail to associate; sniffer shows that nothing sent fro the star
+        hub.  I am thinking that there is something wrong with the
+        GPIO interrupt configuration so that no MRF24J40 interrupt are
+        being received.
 
   mxtxplnd:
 

@@ -576,8 +576,8 @@
  * D2  PA5   microBUS1 GPIO interrupt input PA5
  * D3  PA6   microBUS2 GPIO interrupt input PA6
  * D4  PD27  *** Not used ***
- * D5  PD11  microBUS2 PWM                  PD11 PWMC0_H0
- * D6  PC19  microBUS1 PWN                  PC19 PWMC0_H2
+ * D5  PD11  microBUS2 PWMB                 PD11 PWMC0_H0
+ * D6  PC19  microBUS1 PWMA                 PC19 PWMC0_H2
  * D7  PA2   *** Not used ***
  * D8  PA17  *** Not used ***
  * D9  PC9   microBUS2 CS GPIO output       PC9
@@ -590,9 +590,9 @@
 /* Reset (RST#) Pulled-up on the click board */
 
 #define CLICK_MB1_RESET    (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
-                            GPIO_PORT_PIOD | GPIO_PIN30)
-#define CLICK_MB2_RESET    (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                             GPIO_PORT_PIOA | GPIO_PIN19)
+#define CLICK_MB2_RESET    (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORT_PIOD | GPIO_PIN30)
 /* Interrupts */
 
 #define CLICK_MB1_INTR     (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
