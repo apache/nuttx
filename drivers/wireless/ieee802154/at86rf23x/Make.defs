@@ -1,5 +1,5 @@
 ############################################################################
-# drivers/ieee802154/Make.defs
+# drivers/ieee802154/at86rf23x/Make.defs
 #
 #   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,21 +33,16 @@
 #
 ############################################################################
 
-# Include nothing if IEEE 802.15.4 is disabled
+# Include AT86RF23x drivers into the build
 
-ifeq ($(CONFIG_DRIVERS_IEEE802154),y)
+ifeq ($(CONFIG_IEEE802154_AT86RF233),y)
 
-# Include common IEEE 802.15.4 files into the build
+CSRCS += at86rf23x.c
 
-# Include IEEE 802.15.4 drivers into the build
+# Include AT86RF23x build support
 
-include wireless$(DELIM)ieee802154$(DELIM)mrf24j40$(DELIM)Make.defs
-include wireless$(DELIM)ieee802154$(DELIM)at86rf23x$(DELIM)Make.defs
+DEPPATH += --dep-path wireless$(DELIM)ieee802154$(DELIM)at86rf23x
+VPATH += :wireless$(DELIM)ieee802154$(DELIM)at86rf23x
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)ieee802154$(DELIM)at86rf23x}
 
-# Include common IEEE 802.15.4 build support
-
-DEPPATH += --dep-path wireless$(DELIM)ieee802154
-VPATH += :wireless$(DELIM)ieee802154
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)ieee802154}
-
-endif # CONFIG_DRIVERS_IEEE802154
+endif # CONFIG_IEEE802154_AT86RF233
