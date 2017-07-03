@@ -1629,10 +1629,17 @@ Debugging
   orientation of the JTAG connection.
 
   I have been using Atmel Studio to write code to flash then I use the Segger
-  J-Link GDB server to debug.  I have been using the 'Device Programming' I
+  J-Link GDB server to debug.  I have been using the 'Device Programming'
   available under the Atmel Studio 'Tool' menu.  I have to disconnect the
-  SAM-ICE while programming with the EDBG.  I am sure that you could come up
-  with a GDB server-only solution if you wanted.
+  SAM-ICE while programming with the EDBG.
+
+  You can also load code into flash directory with J-Link:
+
+    arm-none-eabi-gdb
+    (gdb) target remote localhost:2331
+    (gdb) mon reset
+    (gdb) mon halt
+    (gdb) load nuttx
 
   I run GDB like this from the directory containing the NuttX ELF file:
 
@@ -1856,23 +1863,67 @@ Configuration sub-directories
     boards are the endpoints in the start.
 
     NOTES:
-    1. This configuration derives from the netnsh configuration, but adds
+    1. The serial console is configured by default for use with and Arduino
+       serial shield (UART3).  You will need to reconfigure if you will
+       to use a different U[S]ART.
+
+    2. This configuration derives from the netnsh configuration, but adds
        support for IPv6, 6LoWPAN, and the MRF24J40 IEEE 802.15.4 radio.
 
-    2. This configuration uses the Mikroe BEE MRF24j40 click boards and
+    3. This configuration uses the Mikroe BEE MRF24j40 click boards and
        connects to the SAMV71-XULT using a click shield as described above.
 
-    3. You must must have also have at least two clicker2-stm32 boards each
+    4. You must must have also have at least two clicker2-stm32 boards each
        with an  MRF24J40 BEE click board in order to run these tests.
 
-    4. Telnet:  The clicker2-stm32 star point configuration supports the
+    5. The network initialization thread is NOT enabled.  As a result, the
+       startup will hang if the Ethernet cable is not plugged in.  For more
+       information, see the paragraphs above entitled "Network Initialization
+       Thread" and "Network Monitor".
+
+    6. This configuration supports logging of debug output to a circular
+       buffer in RAM.  This feature is discussed fully in this Wiki page:
+       http://nuttx.org/doku.php?id=wiki:howtos:syslog . Relevant
+       configuration settings are summarized below:
+
+       Device Drivers:
+         CONFIG_RAMLOG=y             : Enable the RAM-based logging feature.
+         CONFIG_RAMLOG_CONSOLE=n     : (We don't use the RAMLOG console)
+         CONFIG_RAMLOG_SYSLOG=y      : This enables the RAM-based logger as the
+                                     system logger.
+         CONFIG_RAMLOG_NONBLOCKING=y : Needs to be non-blocking for dmesg
+         CONFIG_RAMLOG_BUFSIZE=8192  : Buffer size is 8KiB
+
+       NOTE: This RAMLOG feature is really only of value if debug output
+       is enabled.  But, by default, no debug output is disabled in this
+       configuration.  Therefore, there is no logic that will add anything
+       to the RAM buffer.  This feature is configured and in place only
+       to support any future debugging needs that you may have.
+
+       If you don't plan on using the debug features, then by all means
+       disable this feature and save 8KiB of RAM!
+
+       NOTE: There is an issue with capturing data in the RAMLOG:  If
+       the system crashes, all of the crash dump information will go into
+       the RAMLOG and you will be unable to access it!  You can tell that
+       the system has crashed because (a) it will be unresponsive and (b)
+       the LD2 will be blinking at about 2Hz.
+
+       You can also reconfigure to use stdout for debug output be disabling
+       all of the CONFIG_RAMLOG* settings listed above and enabling the
+       following in the .config file:
+
+         CONFIG_SYSLOG_CONSOLE=y
+         CONFIG_SYSLOG_SERIAL_CONSOLE=y
+
+    7. Telnet:  The clicker2-stm32 star point configuration supports the
        Telnet daemon, but not the Telnet client; the star hub configuration
        supports the Telnet client, but not the Telnet daemon.  Therefore,
        the star hub can Telnet to any point in the star, the star endpoints
        cannot initiate telnet sessions.
 
-    5. TCP and UDP Tests:  The same TCP and UDP tests as described for
-       the clicker2-stm32 mrf24j40-starpoint coniguration are supported on
+    8. TCP and UDP Tests:  The same TCP and UDP tests as described for
+       the clicker2-stm32 mrf24j40-starpoint configuration are supported on
        the star endpoints, but NOT on the star hub.  Therefore, all network
        testing is between endpoints with the hub acting, well, only like a
        hub.

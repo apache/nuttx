@@ -74,14 +74,15 @@ void sam_spidev_initialize(void)
 #ifdef CONFIG_SAMV71XULT_MB1_SPI
   /* Enable chip select for mikroBUS1 */
 
-  (void)stm32_configgpio(CLICK_MB1_CS);
+  (void)sam_configgpio(CLICK_MB1_CS);
 #endif
 #ifdef CONFIG_SAMV71XULT_MB2_SPI
   /* Enable chip select for mikroBUS2 */
 
-  (void)stm32_configgpio(CLICK_MB2_CS);
+  (void)sam_configgpio(CLICK_MB2_CS);
 
 #endif
+#endif /* CONFIG_SAMV7_SPI0_MASTER */
 
 #ifdef CONFIG_SAMV7_SPI0_SLAVE
 #endif
@@ -163,9 +164,9 @@ void sam_spi0select(uint32_t devid, bool selected)
         /* Set the GPIO low to select and high to de-select */
 
 #if defined(CONFIG_SAMV71XULT_MB1_BEE)
-        stm32_gpiowrite(CLICK_MB1_CS, !selected);
+        sam_gpiowrite(CLICK_MB1_CS, !selected);
 #elif defined(CONFIG_SAMV71XULT_MB2_BEE)
-        stm32_gpiowrite(CLICK_MB2_CS, !selected);
+        sam_gpiowrite(CLICK_MB2_CS, !selected);
 #endif
         break;
 #endif

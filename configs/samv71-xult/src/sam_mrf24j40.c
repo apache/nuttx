@@ -159,7 +159,7 @@ static int sam_attach_irq(FAR const struct mrf24j40_lower_s *lower,
 static void sam_enable_irq(FAR const struct mrf24j40_lower_s *lower,
                              bool state)
 {
-  FAR struct sam_priv_s *piv = (FAR struct sam_priv_s *)lower;
+  FAR struct sam_priv_s *priv = (FAR struct sam_priv_s *)lower;
   static bool enabled;
   irqstate_t flags;
 

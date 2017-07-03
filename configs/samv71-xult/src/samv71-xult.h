@@ -386,6 +386,10 @@
 #  undef HAVE_MRF24J40
 #endif
 
+#if !defined(CONFIG_SAMV71XULT_MB1_BEE) && !defined(CONFIG_SAMV71XULT_MB2_BEE)
+#  undef HAVE_MRF24J40
+#endif
+
 #ifndef CONFIG_SAMV7_SPI0_MASTER
 #  undef HAVE_MRF24J40
 #endif
@@ -564,9 +568,9 @@
 /* Interrupts */
 
 #define CLICK_MB1_INTR     (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
-                            GPIO_INT_HIGHLEVEL | GPIO_PORT_PIOA | GPIO_PIN0)
+                            GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN0)
 #define CLICK_MB2_INTR     (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
-                            GPIO_INT_HIGHLEVEL | GPIO_PORT_PIOA | GPIO_PIN6)
+                            GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN6)
 
 #define IRQ_MB1            SAM_IRQ_PA0
 #define IRQ_MB2            SAM_IRQ_PA6
@@ -842,6 +846,22 @@ int sam_wm8904_initialize(int minor);
 #ifdef HAVE_AUDIO_NULL
 int sam_audio_null_initialize(int minor);
 #endif /* HAVE_AUDIO_NULL */
+
+/****************************************************************************
+ * Name: stm32_mrf24j40_initialize
+ *
+ * Description:
+ *   Initialize the MRF24J40 device.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_MRF24J40
+int sam_mrf24j40_initialize(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_SAMV71_XULT_SRC_SAMV71_XULT_H */
