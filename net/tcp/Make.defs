@@ -60,6 +60,12 @@ NET_CSRCS += tcp_conn.c tcp_seqno.c tcp_devpoll.c tcp_finddev.c tcp_timer.c
 NET_CSRCS += tcp_send.c tcp_input.c tcp_appsend.c tcp_listen.c
 NET_CSRCS += tcp_callback.c tcp_backlog.c tcp_ipselect.c
 
+# IP forwarding
+
+ifeq ($(CONFIG_NET_IPFORWARD),y)
+NET_CSRCS += tcp_forward.c
+endif
+
 # TCP write buffering
 
 ifeq ($(CONFIG_NET_TCP_WRITE_BUFFERS),y)

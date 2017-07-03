@@ -795,6 +795,34 @@ void tcp_send(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
               uint16_t flags, uint16_t len);
 
 /****************************************************************************
+ * Name: tcp_ipv6_forward
+ *
+ * Description:
+ *   Set up to forward the TCP packet on the specified device.  This
+ *   function will set up a send "interrupt" handler that will perform
+ *   the actual send asynchronously and must return without waiting for the
+ *   send to complete.
+ *
+ * Input Parameters:
+ *   dev   - The device on which the packet should be forwarded.
+ *   ipv6  - A pointer to the IPv6 header in within the IPv6 packet.  This
+ *           is immeidately followed by the TCP header.
+ *   iob   - A list of IOBs containing the data payload to be sent.
+ *
+ * Returned Value:
+ *   Zero is returned if the packet was successfully forwarded;  A negated
+ *   errno value is returned if the packet is not forwardable.  In that
+ *   latter case, the caller should free the IOB list and drop the packet.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_IPv6) && \
+    defined(CONFIG_NETDEV_MULTINIC)
+int tcp_ipv6_forward(FAR struct net_driver_s *dev,
+                     FAR struct ipv6_hdr_s *ipv6, FAR struct iob_s *iob);
+#endif
+
+/****************************************************************************
  * Name: tcp_reset
  *
  * Description:
