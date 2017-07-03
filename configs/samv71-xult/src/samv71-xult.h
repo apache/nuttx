@@ -593,7 +593,8 @@
                             GPIO_PORT_PIOA | GPIO_PIN19)
 #define CLICK_MB2_RESET    (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                             GPIO_PORT_PIOD | GPIO_PIN30)
-/* Interrupts */
+
+/* Interrupts. No pull-ups on the BEE; assumig active low. */
 
 #define CLICK_MB1_INTR     (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
                             GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN5)

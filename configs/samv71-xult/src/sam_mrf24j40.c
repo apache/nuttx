@@ -58,6 +58,12 @@
 #ifdef HAVE_MRF24J40
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#undef BEE_RESET
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -65,6 +71,9 @@ struct sam_priv_s
 {
   struct mrf24j40_lower_s dev;
   uint32_t intcfg;
+#ifdef BEE_RESET
+  uint32_t rstcfg;
+#endif
   uint8_t irq;
   uint8_t spidev;
 };
@@ -108,6 +117,9 @@ static struct sam_priv_s g_mrf24j40_mb1_priv =
   .dev.attach  = sam_attach_irq,
   .dev.enable  = sam_enable_irq,
   .intcfg      = CLICK_MB1_INTR,
+#ifdef BEE_RESET
+  .rstcfg      = CLICK_MB1_RESET,
+#endif
   .irq         = IRQ_MB1,
   .spidev      = 0,
 };
@@ -119,6 +131,9 @@ static struct sam_priv_s g_mrf24j40_mb2_priv =
   .dev.attach  = sam_attach_irq,
   .dev.enable  = sam_enable_irq,
   .intcfg      = CLICK_MB2_INTR,
+#ifdef BEE_RESET
+  .rstcfg      = CLICK_MB2_RESET,
+#endif
   .irq         = IRQ_MB2,
   .spidev      = 0,
 };
@@ -212,6 +227,15 @@ static int sam_mrf24j40_devsetup(FAR struct sam_priv_s *priv)
   MACHANDLE mac;
   FAR struct spi_dev_s *spi;
   int ret;
+
+#ifdef BEE_RESET
+  /* Bring the MRF24J40 out of reset
+   * NOTE: Not necessary.  The RST# input is pulled high on the BEE.
+   */
+
+  (void)sam_configgpio(priv->rstcfg);
+  sam_gpiowrite(priv->rstcfg, true);
+#endif
 
   /* Configure the interrupt pin */
 
