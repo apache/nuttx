@@ -600,6 +600,10 @@ static int stm32_rtc_alarm_handler(int irq, void *context, void *arg)
   uint32_t cr;
   int ret = OK;
 
+  /* Disable the write protection for RTC registers */
+
+  rtc_wprunlock();
+
   isr  = getreg32(STM32_RTC_ISR);
 
   /* Check for EXTI from Alarm A or B and handle according */
@@ -624,7 +628,7 @@ static int stm32_rtc_alarm_handler(int irq, void *context, void *arg)
             }
 
           isr  = getreg32(STM32_RTC_ISR) & ~RTC_ISR_ALRAF;
-          putreg32(isr, STM32_RTC_CR);
+          putreg32(isr, STM32_RTC_ISR);
         }
     }
 
@@ -649,11 +653,14 @@ static int stm32_rtc_alarm_handler(int irq, void *context, void *arg)
             }
 
           isr  = getreg32(STM32_RTC_ISR) & ~RTC_ISR_ALRBF;
-          putreg32(isr, STM32_RTC_CR);
+          putreg32(isr, STM32_RTC_ISR);
         }
     }
 #endif
 
+  /* Re-enable the write protection for RTC registers */
+
+  rtc_wprlock();
   return ret;
 }
 #endif
