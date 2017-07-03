@@ -579,6 +579,7 @@
  * D5  PD11  microBUS2 PWM                  PD11 PWMC0_H0
  * D6  PC19  microBUS1 PWN                  PC19 PWMC0_H2
  * D7  PA2   *** Not used ***
+ * D8  PA17  *** Not used ***
  * D9  PC9   microBUS2 CS GPIO output       PC9
  * D10 PD25  microBUS1 CS GPIO output       PD25 SPI0_NPCS1
  * D11 PD21  (both) SPI-MOSI                PD21 SPI0_MOSI  GPIO_SPI0_MOSI
@@ -594,9 +595,9 @@
                             GPIO_PORT_PIOA | GPIO_PIN19)
 /* Interrupts */
 
-#define CLICK_MB1_INTR     (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
+#define CLICK_MB1_INTR     (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
                             GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN5)
-#define CLICK_MB2_INTR     (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
+#define CLICK_MB2_INTR     (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
                             GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN6)
 
 #define IRQ_MB1            SAM_IRQ_PA5

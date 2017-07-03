@@ -1489,6 +1489,7 @@ Click Shield
   D5  PD11  microBUS2 PWM                  PD11 PWMC0_H0
   D6  PC19  microBUS1 PWN                  PC19 PWMC0_H2
   D7  PA2   *** Not used ***
+  D8  PA17  *** Not used ***
   D9  PC9   microBUS2 CS GPIO output       PC9
   D10 PD25  microBUS1 CS GPIO output       PD25 SPI0_NPCS1
   D11 PD21  (both) SPI-MOSI                PD21 SPI0_MOSI  GPIO_SPI0_MOSI
