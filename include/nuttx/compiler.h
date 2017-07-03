@@ -250,7 +250,9 @@
 
 /* GCC supports both types double and long long */
 
+#ifndef __clang__
 # define CONFIG_HAVE_LONG_LONG 1
+#endif
 # define CONFIG_HAVE_FLOAT 1
 # define CONFIG_HAVE_DOUBLE 1
 # define CONFIG_HAVE_LONG_DOUBLE 1

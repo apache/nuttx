@@ -108,6 +108,16 @@ config ARMV7M_TOOLCHAIN_GNU_EABIW
 	bool "Generic GNU EABI toolchain under Windows"
 	depends on TOOLCHAIN_WINDOWS
 	select ARCH_TOOLCHAIN_GNU
+
+config ARMV7M_TOOLCHAIN_CLANGL
+	bool "Generic Clang toolchain under Linux (or other POSIX environment)"
+	depends on !WINDOWS_NATIVE
+	select ARCH_TOOLCHAIN_GNU
+
+config ARMV7M_TOOLCHAIN_CLANGW
+	bool "Generic Clang toolchain under Windows"
+	depends on TOOLCHAIN_WINDOWS
+	select ARCH_TOOLCHAIN_GNU
 	---help---
 		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
 		configured for arm-none-eabi.
