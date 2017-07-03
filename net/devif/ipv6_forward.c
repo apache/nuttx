@@ -228,7 +228,8 @@ static int ipv6_hdrsize(FAR struct ipv6_hdr_s *ipv6)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NETDEV_MULTINIC)
+#if defined(CONFIG_NETDEV_MULTINIC) && \
+   (defined(CONFIG_NET_UDP) || defined(CONFIG_NET_ICMPv6))
 static int ipv6_dev_forward(FAR struct net_driver_s *dev,
                             FAR struct ipv6_hdr_s *ipv6,
                             FAR struct iob_s *iob)
@@ -248,6 +249,8 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
   nwarn("WARNING: UPD/ICMPv6 packet forwarding not yet supported\n");
   return -ENOSYS;
 }
+#else
+#  define ipv6_dev_forward(dev,ipv6,iob) -EPROTONOSUPPORT
 #endif
 
 /****************************************************************************
@@ -416,12 +419,18 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
 
           /* Then set up to forward the packet */
 
+#ifdef CONFIG_NET_TCP
           if (ipv6->proto == IP_PROTO_TCP)
             {
+              /* Forward a TCP packet, handling ACKs, windowing, etc. */
+
               ret = tcp_ipv6_forward(fwddev, ipv6, iob);
             }
           else
+#endif
             {
+              /* Forward a UDP or ICMPv6 packet */
+
               ret = ipv6_dev_forward(fwddev, ipv6, iob);
             }
 
