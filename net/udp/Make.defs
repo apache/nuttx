@@ -48,6 +48,12 @@ NET_CSRCS += udp_netpoll.c
 endif
 endif
 
+# IP forwarding
+
+ifeq ($(CONFIG_NET_IPFORWARD),y)
+NET_CSRCS += udp_forward.c
+endif
+
 # Transport layer
 
 NET_CSRCS += udp_conn.c udp_devpoll.c udp_send.c udp_input.c udp_finddev.c

@@ -62,6 +62,13 @@ endif
 ifeq ($(CONFIG_NET_ICMPv6_ROUTER),y)
 NET_CSRCS += icmpv6_radvertise.c
 endif
+
+# IP forwarding
+
+ifeq ($(CONFIG_NET_IPFORWARD),y)
+NET_CSRCS += icmpv6_forward.c
+endif
+
 # Include ICMPv6 build support
 
 DEPPATH += --dep-path icmpv6

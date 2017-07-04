@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/tcp/tcp_forward.c
+ * net/udp/udp_forward.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,24 +45,24 @@
 #include <nuttx/net/ip.h>
 
 #include "devif/ip_forward.h"
-#include "tcp/tcp.h"
+#include "udp/udp.h"
 
-#if defined(CONFIG_NET) && defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_TCP)
+#if defined(CONFIG_NET) && defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_UDP)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tcp_ipv6_dev_forward
+ * Name: udp_ipv6_dev_forward
  *
  * Description:
- *   Called by the IP forwarding logic when an TCP packet is received on
+ *   Called by the IP forwarding logic when an UDP packet is received on
  *   one network device, but must be forwarded on another network device.
  *
- *   Set up to forward the TCP packet on the specified device.  This
- *   function will set up a send "interrupt" handler that will perform
- *   the actual send asynchronously and must return without waiting for the
+ *   Set up to forward the UDP packet on the specified device.  This
+ *   function will set up a send "interrupt" handler that will perform the
+ *   actual send asynchronously and must return without waiting for the
  *   send to complete.
  *
  * Input Parameters:
@@ -77,13 +77,11 @@
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IPv6) && defined(CONFIG_NETDEV_MULTINIC)
-int tcp_ipv6_dev_forward(FAR struct forward_s *fwd)
+int udp_ipv6_dev_forward(FAR struct forward_s *fwd)
 {
-  /* Notify the forwarding device that TX data is available */
+  /* Set up to send the packet when the selected device polls for TX data. */
 
-  /* Set up to send the packet when the selected device polls for TX data.
-   * TCP packets must obey ACK and windowing rules.
-   */
+  /* Notify the forwarding device that TX data is available */
 
 #warning Missing logic
 
@@ -91,12 +89,10 @@ int tcp_ipv6_dev_forward(FAR struct forward_s *fwd)
    * - source MAC, the MAC of the current device.
    * - dest MAC, the MAC associated with the destination IPv6 adress.
    *   This will involve ICMPv6 and Neighbor Discovery.
-   * - Because of TCP window, the packet may have to be sent in smaller
-   *   pieces.
    */
 
-  nwarn("WARNING: TCP packet forwarding not yet supported\n");
+  nwarn("WARNING: UPD/ICMPv6 packet forwarding not yet supported\n");
   return -ENOSYS;
 }
 #endif /* CONFIG_NET_IPv6 && CONFIG_NETDEV_MULTINIC */
-#endif /* CONFIG_NET && CONFIG_NET_IPFORWARD && CONFIG_NET_TCP */
+#endif /* CONFIG_NET && CONFIG_NET_IPFORWARD && CONFIG_NET_UDP */

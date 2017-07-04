@@ -95,9 +95,16 @@
 #  define TCP_STOPPED     0x10 /* Bit 4: stopped */
                                /* Bit 5-7: Unused, but not available */
 
-/* TCP header sizes */
+/* TCP header sizes
+ *
+ * The minimum size header is 5 words and the maximum is 15 words thus
+ * giving the minimum size of 20 bytes and maximum of 60 bytes, allowing for
+ * up to 40 bytes of options in the header.
+ */
 
-#define TCP_HDRLEN        20                         /* Size of TCP header */
+#define TCP_HDRLEN        20                         /* Size of TCP header (minimum) */
+#define TCP_OPT_HDRLEN(n) (20 + ((n) << 2))          /* Size of TCP header w/options */
+#define TCP_MAX_HDRLEN    60                         /* Maximum size of TCP header */
 
 #ifdef CONFIG_NET_IPv4
 #  define IPv4TCP_HDRLEN (TCP_HDRLEN + IPv4_HDRLEN) /* Size of IPv4 + TCP header */

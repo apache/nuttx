@@ -51,6 +51,12 @@ NET_CSRCS += ipv6_forward.c
 endif
 endif
 
+ifeq ($(CONFIG_NET_IPFORWARD),y)
+ifeq ($(CONFIG_NETDEV_MULTINIC),y)
+NET_CSRCS += ip_forward.c
+endif
+endif
+
 # I/O buffer chain support required?
 
 ifeq ($(CONFIG_MM_IOB),y)
