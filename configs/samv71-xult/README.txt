@@ -1445,24 +1445,24 @@ Click Shield
   MikroElectronika was used along with a Click "Bee" module.  The click
   shield supports two click shields and the following tables describe the
   relationship between the pins on each click shield, the Arduino
-  connector and the SAME70 pins.
+  connector and the SAMV71 pins.
 
   --------- ---------------------- -------- --------- ------------------ ----------
-  mikroBUS1 Arduino                SAME70   mikroBUS2 Arduino            SAME70
+  mikroBUS1 Arduino                SAMV71   mikroBUS2 Arduino            SAMV71
   --------- ---------------------- -------- --------- ------------------ ----------
   AN        HD1 A0  AN0      Pin 1 AD0 PD26 AN        HD1 A1 AN1  Pin 2  AD1 PC31
-  RST       HD1 A3           Pin 4 AD3 PD30 RST       HD1 A2      Pin 3  AD2 PA19
+  RST       HD1 A3           Pin 4 AD3 PA19 RST       HD1 A2      Pin 3  AD2 PD30
   CS        HD4 D10 SPI-SS   Pin 8 D10 PD25 CS        HD4 D9      Pin 9  D9  PC9
   SCK       HD4 D13 SPI-SCK  Pin 5 D13 PD22 SCK       Same
   MISO      HD4 D12 SPI-MISO Pin 6 D12 PD20 MISO      Same
   MOSI      HD4 D11 SPI-MOSI Pin 7 D11 PD21 MOSI      Same
   3.3V      N/A                             3.3V      N/A
   GND       N/A                             GND       N/A
-  PWM       HD3 D6 PWMA      Pin 2 D6  PA2  PWM       HD3 D5 PWMB Pin 5  D5 PD11
+  PWM       HD3 D6 PWMA      Pin 2 D6  PC19 PWM       HD3 D5 PWMB Pin 5  D5 PD11
   INT       HD3 D2 INT0      Pin 6 D2  PA5  INT       HD3 D3 INT1 Pin 5  D3 PA6
   RX        HD3 D0 HDR-RX*   Pin 8 D0  PD28 RX        Same
-  TX        HD3 D1 HDR-TX*   Pin 7 D1  PD20 TX        Same
-  SCL       HD1 A5 I2C-SCL   Pin 5 AD5 PE0  SDA       Same
+  TX        HD3 D1 HDR-TX*   Pin 7 D1  PD30 TX        Same
+  SCL       HD1 A5 I2C-SCL   Pin 5 AD5 PC30 SDA       Same
   SDA       HD1 A4 I2C-SDA   Pin 6 AD4 PC13 SCL       Same
   5V        N/A                             5V        N/A
   GND       N/A                             GND       N/A
@@ -1471,7 +1471,7 @@ Click Shield
   * Depends upon setting of SW1, UART vs PROG.
 
   --- ----- ------------------------------ ---------------------------------
-  PIN PORT  SHIELD FUNCTION                PIN CONFIGURATION
+  PIN PORT  SHIELD FUNCTION                SAMV71PIN CONFIGURATION
   --- ----- ------------------------------ ---------------------------------
   AD0 PD26  microBUS2 Analog TD            PD26 *** Not an AFE pin ***
   AD1 PC31  microBUS2 Analog               PC31 AFE1_AD6   GPIO_AFE1_AD6

@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/same70-xplained/src/sam_bringup.c
  *
- *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -329,10 +329,19 @@ int sam_bringup(void)
     }
 #endif
 
+#ifdef HAVE_MRF24J40
+  /* Configure MRF24J40 wireless */
+
+  ret = sam_mrf24j40_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_mrf24j40_initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef HAVE_ELF
   /* Initialize the ELF binary loader */
 
-  syslog(LOG_ERR, "Initializing the ELF binary loader\n");
   ret = elf_initialize();
   if (ret < 0)
     {

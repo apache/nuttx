@@ -542,7 +542,6 @@ int sam_bringup(void)
 #ifdef HAVE_ELF
   /* Initialize the ELF binary loader */
 
-  syslog(LOG_ERR, "Initializing the ELF binary loader\n");
   ret = elf_initialize();
   if (ret < 0)
     {

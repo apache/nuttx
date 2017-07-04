@@ -70,12 +70,12 @@
 void sam_spidev_initialize(void)
 {
 #ifdef CONFIG_SAMV7_SPI0_MASTER
-
 #ifdef CONFIG_SAMV71XULT_MB1_SPI
   /* Enable chip select for mikroBUS1 */
 
   (void)sam_configgpio(CLICK_MB1_CS);
 #endif
+
 #ifdef CONFIG_SAMV71XULT_MB2_SPI
   /* Enable chip select for mikroBUS2 */
 

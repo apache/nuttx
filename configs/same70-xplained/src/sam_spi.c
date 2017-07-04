@@ -70,6 +70,18 @@
 void sam_spidev_initialize(void)
 {
 #ifdef CONFIG_SAMV7_SPI0_MASTER
+#ifdef CONFIG_SAME70XPLAINED_MB1_SPI
+  /* Enable chip select for mikroBUS1 */
+
+  (void)sam_configgpio(CLICK_MB1_CS);
+#endif
+
+#ifdef CONFIG_SAME70XPLAINED_MB2_SPI
+  /* Enable chip select for mikroBUS2 */
+
+  (void)sam_configgpio(CLICK_MB2_CS);
+
+#endif
 #endif
 
 #ifdef CONFIG_SAMV7_SPI0_SLAVE
@@ -143,12 +155,32 @@ void sam_spidev_initialize(void)
 #ifdef CONFIG_SAMV7_SPI0_MASTER
 void sam_spi0select(uint32_t devid, bool selected)
 {
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+
+  switch (devid)
+    {
+#ifdef CONFIG_IEEE802154_MRF24J40
+      case SPIDEV_IEEE802154(0):
+        /* Set the GPIO low to select and high to de-select */
+
+#if defined(CONFIG_SAME70XPLAINED_MB1_BEE)
+        sam_gpiowrite(CLICK_MB1_CS, !selected);
+#elif defined(CONFIG_SAME70XPLAINED_MB2_BEE)
+        sam_gpiowrite(CLICK_MB2_CS, !selected);
+#endif
+        break;
+#endif
+
+      default:
+        break;
+    }
 }
 #endif
 
 #ifdef CONFIG_SAMV7_SPI1_MASTER
 void sam_spi1select(uint32_t devid, bool selected)
 {
+  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 }
 #endif
 

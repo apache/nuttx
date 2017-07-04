@@ -1,7 +1,7 @@
 ############################################################################
 # configs/same70-xplained/src/Makefile
 #
-#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -92,6 +92,10 @@ endif
 
 ifneq (,$(findstring y,$(CONFIG_SAMV7_DAC0) $(CONFIG_SAMV7_DAC1)))
 CSRCS += sam_dac.c
+endif
+
+ifeq ($(CONFIG_IEEE802154_MRF24J40),y)
+CSRCS += sam_mrf24j40.c
 endif
 
 include $(TOPDIR)/configs/Board.mk
