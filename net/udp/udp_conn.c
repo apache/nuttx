@@ -457,6 +457,7 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
       conn->domain = domain;
 #endif
       conn->lport  = 0;
+      conn->ttl    = IP_TTL;
 
       /* Enqueue the connection into the active list */
 
@@ -760,7 +761,6 @@ int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
 #endif /* CONFIG_NET_IPv6 */
     }
 
-  conn->ttl = IP_TTL;
   return OK;
 }
 

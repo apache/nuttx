@@ -106,18 +106,20 @@ static int ipv6_packet_conversion(FAR struct net_driver_s *dev,
         {
           /* Otherwise, we will have to drop the packet */
 
-          nwarn("WARNING: Dropping.  Unsupported 6LoWPAN protocol: %d\n",
+          nwarn("WARNING: Dropping. Unsupported 6LoWPAN protocol: %d\n",
                 ipv6->proto);
 
 #ifdef CONFIG_NET_STATISTICS
           g_netstats.ipv6.drop++;
 #endif
+          return -EPROTONOSUPPORT;
         }
 
       dev->d_len = 0;
       return OK;
     }
 
+  nwarn("WARNING:  Dropping. Unsupported link layer\n");
   return -EPFNOSUPPORT;
 }
 #else
@@ -515,6 +517,7 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
   ret = ipv6_decr_ttl(ipv6);
   if (ret < 1)
     {
+      nwarn("WARNING: Hop limit exceeded... Dropping!\n");
       ret = -EMULTIHOP;
       goto drop;
     }
@@ -548,6 +551,7 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
       ret = ipv6_dev_forward(dev, fwddev, ipv6);
       if (ret < 0)
         {
+          nwarn("WARNING: ipv6_dev_forward faield: %d\n", ret);
           goto drop;
         }
     }
