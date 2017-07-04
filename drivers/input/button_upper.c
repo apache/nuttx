@@ -769,7 +769,7 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_BUTTONS_NPOLLWAITERS)
         {
-          ierr("ERROR: Too man poll waiters\n");
+          ierr("ERROR: Too many poll waiters\n");
           fds->priv    = NULL;
           ret          = -EBUSY;
           goto errout_with_dusem;
@@ -797,6 +797,7 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout_with_dusem:
+  btn_enable(priv);
   btn_givesem(&priv->bu_exclsem);
   return ret;
 }
