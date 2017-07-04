@@ -508,11 +508,13 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
               ret = ipv6_dev_forward(fwddev, ipv6, iob);
             }
 
-          if (ret >= 0)
+          if (ret < 0)
             {
-              dev->d_len = 0;
-              return OK;
+              goto drop;
             }
+
+          dev->d_len = 0;
+          return OK;
         }
     }
   else
