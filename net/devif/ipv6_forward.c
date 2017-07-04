@@ -263,6 +263,58 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
 #endif
 
 /****************************************************************************
+ * Name: ipv6_decr_ttl
+ *
+ * Description:
+ *   Decrement the IPv6 TTL (time to live value).  TTL field is set by the
+ *   sender of the packet and reduced by every router on the route to its
+ *   destination. If the TTL field reaches zero before the datagram arrives
+ *   at its destination, then the datagram is discarded and an ICMP error
+ *   packet (11 - Time Exceeded) is sent back to the sender.
+ *
+ *   The purpose of the TTL field is to avoid a situation in which an
+ *   undeliverable datagram keeps circulating on an Internet system, and
+ *   such a system eventually becoming swamped by such "immortals".
+ *
+ * Input Parameters:
+ *   ipv6  - A pointer to the IPv6 header in within the IPv6 packet to be
+ *           forwarded.
+ *
+ * Returned Value:
+ *   The new TTL value is returned.  A value <= 0 means the hop limit has
+ *   expired.
+ *
+ ****************************************************************************/
+
+static int ipv6_decr_ttl(FAR struct ipv6_hdr_s *ipv6)
+{
+  int ttl = (int)ipv6->ttl - 1;
+
+  if (ttl <= 0)
+    {
+#ifdef CONFIG_NET_ICMPv6
+      /* Return an ICMPv6 error packet back to the sender. */
+#warning Missing logic
+#endif
+
+      /* Return zero which must cause the packet to be dropped */
+
+      return 0;
+    }
+
+  /* Save the updated TTL value */
+
+  ipv6->ttl = ttl;
+
+  /* NOTE: We do not have to recalculate the IPv6 checksum because (1) the
+   * IPv6 header does not include a checksum itself and (2) the TTL is not
+   * included in the sum for the TCP and UDP headers.
+   */
+
+  return ttl;
+}
+
+/****************************************************************************
  * Name: ipv6_dropstats
  *
  * Description:
@@ -350,6 +402,15 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
   FAR struct net_driver_s *fwddev;
   int ret;
 
+  /* Decrement the TTL.  If it decrements to zero, then drop the packet */
+
+  ret = ipv6_decr_ttl(ipv6);
+  if (ret < 1)
+    {
+      ret = -EMULTIHOP;
+      goto drop;
+    }
+
   /* Search for a device that can forward this packet.  This is a trivial
    * serch if there is only a single network device (CONFIG_NETDEV_MULTINIC
    * not defined).  But netdev_findby_ipv6addr() will still assure
@@ -394,6 +455,7 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
           hdrsize = ipv6_hdrsize(ipv6);
           if (hdrsize < 0)
             {
+              ret = -EPROTONOSUPPORT;
               goto drop;
             }
 
@@ -411,7 +473,7 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
               if (iob == NULL)
                 {
                   ret = -ENOMEM;
-                  goto errout_with_iob;
+                  goto drop;
                 }
 
               /* Copy the packet data payload into an IOB chain.
@@ -422,7 +484,8 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
               ret = iob_trycopyin(iob, payload, paysize, 0, false);
               if (ret < 0)
                 {
-                  goto errout_with_iob;
+                  iob_free_chain(iob);
+                  goto drop;
                 }
             }
 
@@ -438,7 +501,9 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
           else
 #endif
             {
-              /* Forward a UDP or ICMPv6 packet */
+              /* Forward a UDP or ICMPv6 packet.  Because ipv6_hdrsize() succeeded,
+               * we know that it is a forward-able type.
+               */
 
               ret = ipv6_dev_forward(fwddev, ipv6, iob);
             }
@@ -448,14 +513,6 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
               dev->d_len = 0;
               return OK;
             }
-
-errout_with_iob:
-          iob_free_chain(iob);
-
-drop:
-          ipv6_dropstats(ipv6);
-          dev->d_len = 0;
-          return -ENOSYS;
         }
     }
   else
@@ -507,6 +564,11 @@ drop:
    */
 
   return OK;
+
+drop:
+  ipv6_dropstats(ipv6);
+  dev->d_len = 0;
+  return ret;
 }
 
 #endif /* CONFIG_NET_IPFORWARD && CONFIG_NET_IPv6 */
