@@ -137,11 +137,6 @@ struct socketlist
 };
 #endif
 
-/* Callback from netdev_foreach() */
-
-struct net_driver_s; /* Forward reference. Defined in nuttx/net/netdev.h */
-typedef int (*netdev_callback_t)(FAR struct net_driver_s *dev, FAR void *arg);
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -1177,6 +1172,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap);
  *
  ****************************************************************************/
 
+struct net_driver_s; /* Forward reference */
 int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype);
 
 /****************************************************************************
@@ -1198,28 +1194,6 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype);
  ****************************************************************************/
 
 int netdev_unregister(FAR struct net_driver_s *dev);
-
-/****************************************************************************
- * Name: netdev_foreach
- *
- * Description:
- *   Enumerate each registered network device.
- *
- *   NOTE: netdev semaphore held throughout enumeration.
- *
- * Parameters:
- *   callback - Will be called for each registered device
- *   arg      - User argument passed to callback()
- *
- * Returned Value:
- *  0:Enumeration completed 1:Enumeration terminated early by callback
- *
- * Assumptions:
- *  Called from normal user mode
- *
- ****************************************************************************/
-
-int netdev_foreach(netdev_callback_t callback, FAR void *arg);
 
 #undef EXTERN
 #ifdef __cplusplus

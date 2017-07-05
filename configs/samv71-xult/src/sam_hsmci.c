@@ -84,8 +84,8 @@
 struct sam_hsmci_state_s
 {
   struct sdio_dev_s *hsmci;   /* R/W device handle */
-  gpio_pinset_t cdcfg;        /* Card detect PIO pin configuration */
-  gpio_pinset_t pwrcfg;       /* Power PIO pin configuration */
+  gpio_pinset_t cdcfg;        /* Card detect GPIO pin configuration */
+  gpio_pinset_t pwrcfg;       /* Power GPIO pin configuration */
   uint8_t irq;                /* Interrupt number (same as pid) */
   uint8_t slotno;             /* Slot number */
   bool cd;                    /* TRUE: card is inserted */
@@ -126,7 +126,7 @@ bool sam_cardinserted_internal(struct sam_hsmci_state_s *state)
 {
   bool inserted;
 
-  /* Get the state of the PIO pin */
+  /* Get the state of the GPIO pin */
 
   inserted = sam_gpioread(state->cdcfg);
   mcinfo("Slot %d inserted: %s\n", state->slotno, inserted ? "NO" : "YES");
@@ -189,7 +189,7 @@ static int sam_hsmci0_cardetect(int irq, void *regs, FAR void *arg)
  * Name: sam_hsmci_state
  *
  * Description:
- *   Initialize HSMCI PIOs.
+ *   Initialize HSMCI GPIOs.
  *
  ****************************************************************************/
 
@@ -230,7 +230,7 @@ int sam_hsmci_initialize(int slotno, int minor)
       return -EINVAL;
     }
 
-  /* Initialize card-detect, write-protect, and power enable PIOs */
+  /* Initialize card-detect, write-protect, and power enable GPIOs */
 
   sam_configgpio(state->cdcfg);
   sam_dumpgpio(state->cdcfg, "HSMCI Card Detect");
@@ -297,7 +297,7 @@ bool sam_cardinserted(int slotno)
       return false;
     }
 
-  /* Return the state of the PIO pin */
+  /* Return the state of the GPIO pin */
 
   return sam_cardinserted_internal(state);
 }

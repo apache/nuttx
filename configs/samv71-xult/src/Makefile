@@ -1,7 +1,7 @@
 ############################################################################
 # configs/samv71-xult/src/Makefile
 #
-#   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -113,6 +113,10 @@ endif
 ifeq ($(CONFIG_INPUT_MXT),y)
 CSRCS += sam_maxtouch.c sam_atmxtconfig.c
 endif
+endif
+
+ifeq ($(CONFIG_IEEE802154_MRF24J40),y)
+CSRCS += sam_mrf24j40.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

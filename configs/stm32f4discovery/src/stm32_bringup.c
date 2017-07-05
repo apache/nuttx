@@ -57,6 +57,14 @@
 #  include "stm32_usbhost.h"
 #endif
 
+#ifdef CONFIG_BUTTONS
+#  include <nuttx/input/buttons.h>
+#endif
+
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
+
 #include "stm32f4discovery.h"
 
 /* Conditional logic in stm32f4discover.h will determine if certain features
@@ -179,6 +187,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_BUTTONS
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_QENCODER
   /* Initialize and register the qencoder driver */
 
@@ -189,6 +207,16 @@ int stm32_bringup(void)
              "ERROR: Failed to register the qencoder: %d\n",
              ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
     }
 #endif
 

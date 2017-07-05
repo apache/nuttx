@@ -126,7 +126,7 @@ struct sendto_s
  *   TRUE:timeout FALSE:no timeout
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 
@@ -170,7 +170,7 @@ static inline int send_timeout(FAR struct sendto_s *pstate)
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 
@@ -194,7 +194,7 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
       /* Select the IPv6 domain */
 
       DEBUGASSERT(psock->s_domain == PF_INET6);
-      udp_ipv4_select(dev);
+      udp_ipv6_select(dev);
     }
 }
 #endif
@@ -216,7 +216,7 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
  *   Modified value of the input flags
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 

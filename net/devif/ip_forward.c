@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/samv71-xult/src/sam_userleds.c
+ * net/devif/ip_forward.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,71 +39,101 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <string.h>
 #include <debug.h>
+#include <errno.h>
 
-#include <arch/board/board.h>
+#include "devif/ip_forward.h"
 
-#include "sam_gpio.h"
-#include "samv71-xult.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#if defined(CONFIG_NET_IPFORWARD) &&  defined(CONFIG_NETDEV_MULTINIC)
 
 /****************************************************************************
- * Private Functions
+ * Private Data
  ****************************************************************************/
+
+/* This is an array of pre-allocating forwarding structures */
+
+static struct forward_s g_fwdpool[CONFIG_NET_IPFORWARD_NSTRUCT];
+
+/* This is a list of free forwarding structures */
+
+static FAR struct forward_s *g_fwdfree;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_userled_initialize
+ * Name: ip_forward_initialize
+ *
+ * Description:
+ *   Initialize the struct forward_s allocator.
+ *
+ * Assumptions:
+ *   Called early in system initialization.
+ *
  ****************************************************************************/
 
-void board_userled_initialize(void)
+void ip_forward_initialize(void)
 {
-  /* Configure LED GPIOs for output */
+  FAR struct forward_s *fwd;
+  int i;
 
-  sam_configgpio(GPIO_LED0);
-  sam_configgpio(GPIO_LED1);
+  /* Add all pre-allocated forwarding structures to the free list */
+
+  g_fwdfree = NULL;
+
+  for (i = 0; i < CONFIG_NET_IPFORWARD_NSTRUCT; i++)
+    {
+      fwd          = &g_fwdpool[i];
+      fwd->f_flink = g_fwdfree;
+      g_fwdfree    = fwd;
+    }
 }
 
 /****************************************************************************
- * Name: board_userled
+ * Name: ip_forward_alloc
+ *
+ * Description:
+ *   Allocate a forwarding structure by removing a pre-allocated entry from
+ *   a free list.
+ *
+ * Assumptions:
+ *   Caller holds the network lock.  Mutually excluvive access to the free
+ *   list is assured by this lock.
+ *
  ****************************************************************************/
 
-void board_userled(int led, bool ledon)
+FAR struct forward_s *ip_forward_alloc(void)
 {
-  uint32_t ledcfg;
+  FAR struct forward_s *fwd;
 
-  if (led == BOARD_LED0)
+  fwd = g_fwdfree;
+  if (fwd != NULL)
     {
-      ledcfg = GPIO_LED0;
-    }
-  else if (led == BOARD_LED1)
-    {
-      ledcfg = GPIO_LED1;
-    }
-  else
-    {
-      return;
+      g_fwdfree = fwd->f_flink;
+      memset (fwd, 0, sizeof(struct forward_s));
     }
 
-  sam_gpiowrite(ledcfg, !ledon); /* Low illuminates */
+  return fwd;
 }
 
 /****************************************************************************
- * Name: board_userled_all
+ * Name: ip_forward_free
+ *
+ * Description:
+ *   Free a forwarding structure by adding it to a free list.
+ *
+ * Assumptions:
+ *   Caller holds the network lock.  Mutually excluvive access to the free
+ *   list is assured by this lock.
+ *
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void ip_forward_free(FAR struct forward_s *fwd)
 {
-  /* Low illuminates */
-
-  sam_gpiowrite(GPIO_LED0, (ledset & BOARD_LED0_BIT) == 0);
-  sam_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) == 0);
+  fwd->f_flink = g_fwdfree;
+  g_fwdfree    = fwd;
 }
+
+#endif /* CONFIG_NET_IPFORWARD && CONFIG_NETDEV_MULTINIC */

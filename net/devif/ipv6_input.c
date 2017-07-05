@@ -87,7 +87,6 @@
 
 #include <net/if.h>
 
-#include <nuttx/net/net.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
@@ -242,6 +241,7 @@ static bool check_destipaddr(FAR struct net_driver_s *dev,
  *   to this input.
  *
  * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -370,6 +370,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
             {
               /* Not destined for us and not forwardable... drop the packet. */
 
+              nwarn("WARNING: Not destined for us; not forwardable... Dropping!\n");
 #ifdef CONFIG_NET_STATISTICS
               g_netstats.ipv6.drop++;
 #endif

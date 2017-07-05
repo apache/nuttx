@@ -19,6 +19,7 @@ Contents
   - USBHS Device Controller Driver
   - MCAN1 Loopback Test
   - SPI Slave
+  - Click Shield
   - Tickless OS
   - Debugging
   - Using OpenOCD and GDB to flash via the EDBG chip
@@ -833,6 +834,64 @@ SPI Slave
      is available.  That is not really a good idea.
 
   b) It will hog all of the CPU for the duration of the transfer).
+
+Click Shield
+============
+
+  In the mrf24j40-starhub configuration, a click shield from
+  MikroElectronika was used along with a Click "Bee" module.  The click
+  shield supports two click shields and the following tables describe the
+  relationship between the pins on each click shield, the Arduino
+  connector and the SAME70 pins.
+
+  --------- ---------------------- -------- --------- ------------------ ----------
+  mikroBUS1 Arduino                SAME70   mikroBUS2 Arduino            SAME70
+  --------- ---------------------- -------- --------- ------------------ ----------
+  AN        HD1 A0  AN0      Pin 1 AD0 PD26 AN        HD1 A1 AN1  Pin 2  AD1 PC31
+  RST       HD1 A3           Pin 4 AD3 PA19 RST       HD1 A2      Pin 3  AD2 PD30
+  CS        HD4 D10 SPI-SS   Pin 8 D10 PD25 CS        HD4 D9      Pin 9  D9  PC9
+  SCK       HD4 D13 SPI-SCK  Pin 5 D13 PD22 SCK       Same
+  MISO      HD4 D12 SPI-MISO Pin 6 D12 PD20 MISO      Same
+  MOSI      HD4 D11 SPI-MOSI Pin 7 D11 PD21 MOSI      Same
+  3.3V      N/A                             3.3V      N/A
+  GND       N/A                             GND       N/A
+  PWM       HD3 D6 PWMA      Pin 2 D6  PC19 PWM       HD3 D5 PWMB Pin 5  D5 PD11
+  INT       HD3 D2 INT0      Pin 6 D2  PA5  INT       HD3 D3 INT1 Pin 5  D3 PA6
+  RX        HD3 D0 HDR-RX*   Pin 8 D0  PD28 RX        Same
+  TX        HD3 D1 HDR-TX*   Pin 7 D1  PD30 TX        Same
+  SCL       HD1 A5 I2C-SCL   Pin 5 AD5 PC30 SDA       Same
+  SDA       HD1 A4 I2C-SDA   Pin 6 AD4 PC13 SCL       Same
+  5V        N/A                             5V        N/A
+  GND       N/A                             GND       N/A
+  --------- ---------------------- -------- --------- ------------------ ----------
+
+  * Depends upon setting of SW1, UART vs PROG.
+
+  --- ----- ------------------------------ ---------------------------------
+  PIN PORT  SHIELD FUNCTION                SAME70PIN CONFIGURATION
+  --- ----- ------------------------------ ---------------------------------
+  AD0 PD26  microBUS2 Analog TD            PD26 *** Not an AFE pin ***
+  AD1 PC31  microBUS2 Analog               PC31 AFE1_AD6   GPIO_AFE1_AD6
+  AD2 PD30  microBUS2 GPIO reset output    PD30
+  AD3 PA19  microBUS1 GPIO reset output    PA19
+  AD4 PC13  (both) I2C-SDA                 PC13 *** Does not support I2C SDA ***
+  AD5 PC30  (both) I2C-SCL                 PC30 *** Does not support I2C SCL ***
+  AD6 PA17  *** Not used ***
+  AD7 PC12  *** Not used ***
+  D0  PD28  (both) HDR_RX                  PD28 URXD3      GPIO_UART3_RXD
+  D1  PD30  (both) HDR_TX                  PD30 UTXD3      GPIO_UART3_TXD_1
+  D2  PA5   microBUS1 GPIO interrupt input PA5
+  D3  PA6   microBUS2 GPIO interrupt input PA6
+  D4  PD27  *** Not used ***
+  D5  PD11  microBUS2 PWMB                 PD11 PWMC0_H0
+  D6  PC19  microBUS1 PWMA                 PC19 PWMC0_H2
+  D7  PA2   *** Not used ***
+  D8  PA17  *** Not used ***
+  D9  PC9   microBUS2 CS GPIO output       PC9
+  D10 PD25  microBUS1 CS GPIO output       PD25 SPI0_NPCS1
+  D11 PD21  (both) SPI-MOSI                PD21 SPI0_MOSI  GPIO_SPI0_MOSI
+  D12 PD20  (both) SPI-MISO                PD20 SPI0_MISO  GPIO_SPI0_MISO
+  D13 PD22  (both) SPI-SCK                 PD22 SPI0_SPCK  GPIO_SPI0_SPCK
 
 Tickless OS
 ===========

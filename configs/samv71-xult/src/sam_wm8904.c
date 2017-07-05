@@ -87,14 +87,14 @@ struct samv71xult_mwinfo_s
  * Private Function Prototypes
  ****************************************************************************/
 
-/* IRQ/PIO access callbacks.  These operations all hidden behind
- * callbacks to isolate the WM8904 driver from differences in PIO
+/* IRQ/GPIO access callbacks.  These operations all hidden behind
+ * callbacks to isolate the WM8904 driver from differences in GPIO
  * interrupt handling by varying boards and MCUs.  If possible,
  * interrupts should be configured on both rising and falling edges
  * so that contact and loss-of-contact events can be detected.
  *
- *   attach  - Attach the WM8904 interrupt handler to the PIO interrupt
- *   enable  - Enable or disable the PIO interrupt
+ *   attach  - Attach the WM8904 interrupt handler to the GPIO interrupt
+ *   enable  - Enable or disable the GPIO interrupt
  */
 
 static int  wm8904_attach(FAR const struct wm8904_lower_s *lower,
@@ -136,15 +136,15 @@ static struct samv71xult_mwinfo_s g_wm8904info =
  ****************************************************************************/
 
 /****************************************************************************
- * IRQ/PIO access callbacks.  These operations all hidden behind
- * callbacks to isolate the WM8904 driver from differences in PIO
+ * IRQ/GPIO access callbacks.  These operations all hidden behind
+ * callbacks to isolate the WM8904 driver from differences in GPIO
  * interrupt handling by varying boards and MCUs.  If possible,
  * interrupts should be configured on both rising and falling edges
  * so that contact and loss-of-contact events can be detected.
  *
- *   attach  - Attach the WM8904 interrupt handler to the PIO interrupt
- *   enable  - Enable or disable the PIO interrupt
- *   clear   - Acknowledge/clear any pending PIO interrupt
+ *   attach  - Attach the WM8904 interrupt handler to the GPIO interrupt
+ *   enable  - Enable or disable the GPIO interrupt
+ *   clear   - Acknowledge/clear any pending GPIO interrupt
  *
  ****************************************************************************/
 

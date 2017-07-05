@@ -102,6 +102,18 @@ ifeq ($(filter y, \
   CONFIG_ARMV7M_TOOLCHAIN ?= GNU_EABIW
 endif
 
+ifeq ($(filter y, \
+      $(CONFIG_ARMV7M_TOOLCHAIN_CLANGL) \
+    ),y)
+  CONFIG_ARMV7M_TOOLCHAIN ?= CLANGL
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_ARMV7M_TOOLCHAIN_CLANGW) \
+    ),y)
+  CONFIG_ARMV7M_TOOLCHAIN ?= CLANGW
+endif
+
 #
 # Supported toolchains
 #
@@ -246,6 +258,27 @@ endif
 # Generic GNU EABI toolchain under Windows
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABIW)
+  CROSSDEV ?= arm-none-eabi-
+  ARCROSSDEV ?= arm-none-eabi-
+  MAXOPTIMIZATION ?= -Os
+  ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
+  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+    WINTOOL = y
+  endif
+endif
+
+# Clang toolchain on OS X, Linux or any typical Posix system
+
+ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANGL)
+  CROSSDEV ?= arm-none-eabi-
+  ARCROSSDEV ?= arm-none-eabi-
+  MAXOPTIMIZATION ?= -Os
+  ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
+endif
+
+# Clang toolchain under Windows
+
+ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANGW)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
   MAXOPTIMIZATION ?= -Os

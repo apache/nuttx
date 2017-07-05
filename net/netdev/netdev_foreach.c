@@ -41,7 +41,7 @@
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 #include <debug.h>
-#include <nuttx/net/net.h>
+
 #include <nuttx/net/netdev.h>
 
 #include "netdev/netdev.h"
@@ -66,7 +66,7 @@
  *  0:Enumeration completed 1:Enumeration terminated early by callback
  *
  * Assumptions:
- *  Called from normal user mode
+ *  The network is locked.
  *
  ****************************************************************************/
 
@@ -75,9 +75,8 @@ int netdev_foreach(netdev_callback_t callback, FAR void *arg)
   FAR struct net_driver_s *dev;
   int ret = 0;
 
-  if (callback)
+  if (callback != NULL)
     {
-      net_lock();
       for (dev = g_netdevices; dev; dev = dev->flink)
         {
           if (callback(dev, arg) != 0)
@@ -86,8 +85,6 @@ int netdev_foreach(netdev_callback_t callback, FAR void *arg)
               break;
             }
         }
-
-      net_unlock();
     }
 
   return ret;

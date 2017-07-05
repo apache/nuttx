@@ -71,18 +71,18 @@
  */
 
 #  define tcp_callback_alloc(conn) \
-    devif_callback_alloc(conn->dev, &conn->list)
+    devif_callback_alloc((conn)->dev, &(conn)->list)
 #  define tcp_callback_free(conn,cb) \
-    devif_conn_callback_free(conn->dev, cb, &conn->list)
+    devif_conn_callback_free((conn)->dev, (cb), &(conn)->list)
 
 /* These macros allocate and free callback structures used for receiving
  * notifications of device-related events.
  */
 
 #  define tcp_monitor_callback_alloc(conn) \
-    devif_callback_alloc(conn->dev, NULL)
+    devif_callback_alloc((conn)->dev, NULL)
 #  define tcp_monitor_callback_free(conn,cb) \
-    devif_conn_callback_free(conn->dev, cb, NULL)
+    devif_conn_callback_free((conn)->dev, (cb), NULL)
 
 #else
 /* These macros allocate and free callback structures used for receiving
@@ -90,9 +90,9 @@
  */
 
 #  define tcp_callback_alloc(conn) \
-    devif_callback_alloc(g_netdevices, &conn->list)
+    devif_callback_alloc(g_netdevices, &(conn)->list)
 #  define tcp_callback_free(conn,cb) \
-    devif_conn_callback_free(g_netdevices, cb, &conn->list)
+    devif_conn_callback_free(g_netdevices, (cb), &(conn)->list)
 
 /* These macros allocate and free callback structures used for receiving
  * notifications of device-related events.
@@ -101,7 +101,7 @@
 #  define tcp_monitor_callback_alloc(conn) \
     devif_callback_alloc(g_netdevices, NULL)
 #  define tcp_monitor_callback_free(conn,cb) \
-    devif_conn_callback_free(g_netdevices, cb, NULL)
+    devif_conn_callback_free(g_netdevices, (cb), NULL)
 #endif
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
@@ -793,6 +793,35 @@ int tcp_accept_connection(FAR struct net_driver_s *dev,
 
 void tcp_send(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
               uint16_t flags, uint16_t len);
+
+/****************************************************************************
+ * Name: tcp_forward
+ *
+ * Description:
+ *   Called by the IP forwarding logic when an TCP packet is received on
+ *   one network device, but must be forwarded on another network device.
+ *
+ *   Set up to forward the TCP packet on the specified device.  This
+ *   function will set up a send "interrupt" handler that will perform
+ *   the actual send asynchronously and must return without waiting for the
+ *   send to complete.
+ *
+ * Input Parameters:
+ *   fwd - An initialized instance of the common forwarding structure that
+ *         includes everything needed to perform the forwarding operation.
+ *
+ * Returned Value:
+ *   Zero is returned if the packet was successfully forwarded;  A negated
+ *   errno value is returned if the packet is not forwardable.  In that
+ *   latter case, the caller should free the IOB list and drop the packet.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_IPv6) && \
+    defined(CONFIG_NETDEV_MULTINIC)
+struct forward_s; /* Forward reference */
+int tcp_forward(FAR struct forward_s *fwd);
+#endif
 
 /****************************************************************************
  * Name: tcp_reset

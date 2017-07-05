@@ -41,7 +41,7 @@
  *
  *   ------ ----------- ---------------------
  *   SAMV71 Function    Shared functionality
- *   PIO
+ *   GPIO
  *   ------ ----------- ---------------------
  *   PA23   Yellow LED0 EDBG GPIO
  *   PC09   Yellow LED1 LCD, and Shield
@@ -103,7 +103,7 @@
 
 void board_autoled_initialize(void)
 {
-  /* Configure LED PIOs for output */
+  /* Configure LED GPIOs for output */
 
   sam_configgpio(GPIO_LED0);
   sam_configgpio(GPIO_LED1);

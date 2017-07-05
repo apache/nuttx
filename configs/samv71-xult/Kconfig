@@ -9,6 +9,37 @@ config SAMV71XULT_MXTXPLND
 	bool "MaXTouch Xplained connected"
 	default n
 
+config SAMV71XULT_CLICKSHIELD
+	bool "Mikroe Click Shield"
+	default n
+	---help---
+		In the mrf24j40-starhub configuration, a click shield from
+		MikroElectronika was used along with a Click "Bee" module.  The
+		click shield supports two click shields.
+
+config SAMV71XULT_MB1_SPI
+	bool
+	default n
+
+config SAMV71XULT_MB2_SPI
+	bool
+	default n
+
+choice
+	prompt "Bee mikroBUS"
+	depends on SAMV71XULT_CLICKSHIELD && IEEE802154_MRF24J40
+	default SAMV71XULT_MB1_BEE
+
+config SAMV71XULT_MB1_BEE
+	bool "MRF24J40 Bee in mikroBUS1"
+	select SAMV71XULT_MB1_SPI
+
+config SAMV71XULT_MB2_BEE
+	bool "MRF24J40 Bee in mikroBUS2"
+	select SAMV71XULT_MB2_SPI
+
+endchoice # Bee mikroBUS
+
 if SAMV71XULT_MXTXPLND
 
 choice

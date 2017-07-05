@@ -300,7 +300,6 @@
 
 #define GPIO_UART3_TXD  GPIO_UART3_TXD_1
 
-
 /* - Arduino Communications.  Additional UART/USART connections are available
  *  on the Arduino Communications connection J505:
  *

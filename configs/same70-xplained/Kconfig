@@ -5,6 +5,37 @@
 
 if ARCH_BOARD_SAME70_XPLAINED
 
+config SAME70XPLAINED_CLICKSHIELD
+	bool "Mikroe Click Shield"
+	default n
+	---help---
+		In the mrf24j40-starhub configuration, a click shield from
+		MikroElectronika was used along with a Click "Bee" module.  The
+		click shield supports two click shields.
+
+config SAME70XPLAINED_MB1_SPI
+	bool
+	default n
+
+config SAME70XPLAINED_MB2_SPI
+	bool
+	default n
+
+choice
+	prompt "Bee mikroBUS"
+	depends on SAME70XPLAINED_CLICKSHIELD && IEEE802154_MRF24J40
+	default SAME70XPLAINED_MB1_BEE
+
+config SAME70XPLAINED_MB1_BEE
+	bool "MRF24J40 Bee in mikroBUS1"
+	select SAME70XPLAINED_MB1_SPI
+
+config SAME70XPLAINED_MB2_BEE
+	bool "MRF24J40 Bee in mikroBUS2"
+	select SAME70XPLAINED_MB2_SPI
+
+endchoice # Bee mikroBUS
+
 config SAME70XPLAINED_HSMCI0_AUTOMOUNT
 	bool "HSMCI0 automounter"
 	default n

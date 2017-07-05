@@ -51,6 +51,7 @@
 #include "netdev/netdev.h"
 #include "devif/devif.h"
 #include "socket/socket.h"
+#include "icmpv6/icmpv6.h"
 #include "tcp/tcp.h"
 #include "utils/utils.h"
 #include "sixlowpan/sixlowpan_internal.h"

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/clicker2-stm32/src/stm32_mrf24j40.c
+ * configs/samv71-xult/src/sam_mrf24j40.c
  *
  *   Copyright (C) 2017 Gregory Nutt, All rights reserver
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,49 +50,31 @@
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 #include <nuttx/wireless/ieee802154/mrf24j40.h>
 
-#include "stm32_gpio.h"
-#include "stm32_exti.h"
-#include "stm32_spi.h"
+#include "sam_gpio.h"
+#include "sam_spi.h"
 
-#include "clicker2-stm32.h"
+#include "samv71-xult.h"
 
-#ifdef CONFIG_IEEE802154_MRF24J40
+#ifdef HAVE_MRF24J40
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_DRIVERS_WIRELESS
-#  error Wireless support requires CONFIG_DRIVERS_WIRELESS
-#endif
-
-#if !defined(CONFIG_CLICKER2_STM32_MB1_BEE) && \
-    !defined(CONFIG_CLICKER2_STM32_MB2_BEE)
-#  error Only the Mikroe BEE board is supported
-#endif
-
-#ifdef CONFIG_CLICKER2_STM32_MB1_BEE
-#  ifndef CONFIG_STM32_SPI3
-#    error Mikroe BEE on mikroBUS1 requires CONFIG_STM32_SPI3
-#  endif
-#endif
-
-#ifdef CONFIG_CLICKER2_STM32_MB2_BEE
-#  ifndef CONFIG_STM32_SPI2
-#    error Mikroe BEE on mikroBUS1 requires CONFIG_STM32_SPI2
-#  endif
-#endif
+#undef BEE_RESET
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct stm32_priv_s
+struct sam_priv_s
 {
   struct mrf24j40_lower_s dev;
-  xcpt_t handler;
-  FAR void *arg;
   uint32_t intcfg;
+#ifdef BEE_RESET
+  uint32_t rstcfg;
+#endif
+  uint8_t irq;
   uint8_t spidev;
 };
 
@@ -109,11 +91,11 @@ struct stm32_priv_s
  *   irq_enable - Enable or disable the GPIO interrupt
  */
 
-static int  stm32_attach_irq(FAR const struct mrf24j40_lower_s *lower,
-                             xcpt_t handler, FAR void *arg);
-static void stm32_enable_irq(FAR const struct mrf24j40_lower_s *lower,
-                             bool state);
-static int  stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv);
+static int  sam_attach_irq(FAR const struct mrf24j40_lower_s *lower,
+                           xcpt_t handler, FAR void *arg);
+static void sam_enable_irq(FAR const struct mrf24j40_lower_s *lower,
+                           bool state);
+static int  sam_mrf24j40_devsetup(FAR struct sam_priv_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -129,27 +111,31 @@ static int  stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv);
  * may modify frequency or X plate resistance values.
  */
 
-#ifdef CONFIG_CLICKER2_STM32_MB1_BEE
-static struct stm32_priv_s g_mrf24j40_mb1_priv =
+#ifdef CONFIG_SAMV71XULT_MB1_BEE
+static struct sam_priv_s g_mrf24j40_mb1_priv =
 {
-  .dev.attach  = stm32_attach_irq,
-  .dev.enable  = stm32_enable_irq,
-  .handler     = NULL,
-  .arg         = NULL,
-  .intcfg      = GPIO_MB1_INT,
-  .spidev      = 3,
+  .dev.attach  = sam_attach_irq,
+  .dev.enable  = sam_enable_irq,
+  .intcfg      = CLICK_MB1_INTR,
+#ifdef BEE_RESET
+  .rstcfg      = CLICK_MB1_RESET,
+#endif
+  .irq         = IRQ_MB1,
+  .spidev      = 0,
 };
 #endif
 
-#ifdef CONFIG_CLICKER2_STM32_MB2_BEE
-static struct stm32_priv_s g_mrf24j40_mb2_priv =
+#ifdef CONFIG_SAMV71XULT_MB2_BEE
+static struct sam_priv_s g_mrf24j40_mb2_priv =
 {
-  .dev.attach  = stm32_attach_irq,
-  .dev.enable  = stm32_enable_irq,
-  .handler     = NULL,
-  .arg         = NULL,
-  .intcfg      = GPIO_MB2_INT,
-  .spidev      = 2,
+  .dev.attach  = sam_attach_irq,
+  .dev.enable  = sam_enable_irq,
+  .intcfg      = CLICK_MB2_INTR,
+#ifdef BEE_RESET
+  .rstcfg      = CLICK_MB2_RESET,
+#endif
+  .irq         = IRQ_MB2,
+  .spidev      = 0,
 };
 #endif
 
@@ -168,48 +154,63 @@ static struct stm32_priv_s g_mrf24j40_mb2_priv =
  *   irq_enable       - Enable or disable the GPIO interrupt
  */
 
-static int stm32_attach_irq(FAR const struct mrf24j40_lower_s *lower,
+static int sam_attach_irq(FAR const struct mrf24j40_lower_s *lower,
                             xcpt_t handler, FAR void *arg)
 {
-  FAR struct stm32_priv_s *priv = (FAR struct stm32_priv_s *)lower;
+  FAR struct sam_priv_s *priv = (FAR struct sam_priv_s *)lower;
+  int ret;
 
   DEBUGASSERT(priv != NULL);
 
-  /* Just save the handler for use when the interrupt is enabled */
+  ret = irq_attach(priv->irq, handler, arg);
+  if (ret < 0)
+    {
+      wlerr("ERROR: Failed to attach WM8904 interrupt: %d\n", ret);
+    }
 
-  priv->handler = handler;
-  priv->arg     = arg;
-  return OK;
+  return ret;
 }
 
-static void stm32_enable_irq(FAR const struct mrf24j40_lower_s *lower,
+static void sam_enable_irq(FAR const struct mrf24j40_lower_s *lower,
                              bool state)
 {
-  FAR struct stm32_priv_s *priv = (FAR struct stm32_priv_s *)lower;
+  FAR struct sam_priv_s *priv = (FAR struct sam_priv_s *)lower;
+  static bool enabled;
+  irqstate_t flags;
 
   /* The caller should not attempt to enable interrupts if the handler
    * has not yet been 'attached'
    */
 
-  DEBUGASSERT(priv != NULL && (priv->handler != NULL || !state));
+  DEBUGASSERT(priv != NULL);
+  wlinfo("state: %d irq: %u\n", (int)state, priv->irq);
 
-  /* Attach and enable, or detach and disable */
+  /* Has the interrupt state changed */
 
-  wlinfo("state:%d\n", (int)state);
-  if (state)
+  flags = enter_critical_section();
+  if (state != enabled)
     {
-      (void)stm32_gpiosetevent(priv->intcfg, true, true, true,
-                               priv->handler, priv->arg);
+      /* Enable or disable interrupts */
+
+      if (state)
+        {
+          wlinfo("Enabling\n");
+          sam_gpioirqenable(priv->irq);
+          enabled = true;
+        }
+      else
+        {
+          wlinfo("Disabling\n");
+          sam_gpioirqdisable(priv->irq);
+          enabled = false;
+        }
     }
-  else
-    {
-      (void)stm32_gpiosetevent(priv->intcfg, false, false, false,
-                               NULL, NULL);
-    }
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
- * Name: stm32_mrf24j40_devsetup
+ * Name: sam_mrf24j40_devsetup
  *
  * Description:
  *   Initialize one the MRF24J40 device in one mikroBUS slot
@@ -220,20 +221,30 @@ static void stm32_enable_irq(FAR const struct mrf24j40_lower_s *lower,
  *
  ****************************************************************************/
 
-static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
+static int sam_mrf24j40_devsetup(FAR struct sam_priv_s *priv)
 {
   FAR struct ieee802154_radio_s *radio;
   MACHANDLE mac;
   FAR struct spi_dev_s *spi;
   int ret;
 
+#ifdef BEE_RESET
+  /* Bring the MRF24J40 out of reset
+   * NOTE: Not necessary.  The RST# input is pulled high on the BEE.
+   */
+
+  (void)sam_configgpio(priv->rstcfg);
+  sam_gpiowrite(priv->rstcfg, true);
+#endif
+
   /* Configure the interrupt pin */
 
-   stm32_configgpio(priv->intcfg);
+  (void)sam_configgpio(priv->intcfg);
+  sam_gpioirq(priv->intcfg);
 
   /* Initialize the SPI bus and get an instance of the SPI interface */
 
-  spi = stm32_spibus_initialize(priv->spidev);
+  spi = sam_spibus_initialize(priv->spidev);
   if (spi == NULL)
     {
       wlerr("ERROR: Failed to initialize SPI bus %d\n", priv->spidev);
@@ -295,7 +306,7 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_mrf24j40_initialize
+ * Name: sam_mrf24j40_initialize
  *
  * Description:
  *   Initialize the MRF24J40 device.
@@ -306,24 +317,24 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
  *
  ****************************************************************************/
 
-int stm32_mrf24j40_initialize(void)
+int sam_mrf24j40_initialize(void)
 {
   int ret;
 
-#ifdef CONFIG_CLICKER2_STM32_MB1_BEE
+#ifdef CONFIG_SAMV71XULT_MB1_BEE
   wlinfo("Configuring BEE in mikroBUS1\n");
 
-  ret = stm32_mrf24j40_devsetup(&g_mrf24j40_mb1_priv);
+  ret = sam_mrf24j40_devsetup(&g_mrf24j40_mb1_priv);
   if (ret < 0)
     {
       wlerr("ERROR: Failed to initialize BD in mikroBUS1: %d\n", ret);
     }
 #endif
 
-#ifdef CONFIG_CLICKER2_STM32_MB2_BEE
+#ifdef CONFIG_SAMV71XULT_MB2_BEE
   wlinfo("Configuring BEE in mikroBUS2\n");
 
-  ret = stm32_mrf24j40_devsetup(&g_mrf24j40_mb2_priv);
+  ret = sam_mrf24j40_devsetup(&g_mrf24j40_mb2_priv);
   if (ret < 0)
     {
       wlerr("ERROR: Failed to initialize BD in mikroBUS2: %d\n", ret);
@@ -333,4 +344,4 @@ int stm32_mrf24j40_initialize(void)
   UNUSED(ret);
   return OK;
 }
-#endif /* CONFIG_IEEE802154_MRF24J40 */
+#endif /* HAVE_MRF24J40 */

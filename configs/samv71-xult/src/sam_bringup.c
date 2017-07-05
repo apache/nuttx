@@ -529,10 +529,19 @@ int sam_bringup(void)
     }
 #endif
 
+#ifdef HAVE_MRF24J40
+  /* Configure MRF24J40 wireless */
+
+  ret = sam_mrf24j40_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_mrf24j40_initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef HAVE_ELF
   /* Initialize the ELF binary loader */
 
-  syslog(LOG_ERR, "Initializing the ELF binary loader\n");
   ret = elf_initialize();
   if (ret < 0)
     {

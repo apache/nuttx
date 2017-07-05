@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/same70-xplained/src/same70-xplained.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,6 +63,7 @@
 #define HAVE_MTDCONFIG       1
 #define HAVE_PROGMEM_CHARDEV 1
 #define HAVE_I2CTOOL         1
+#define HAVE_MRF24J40        1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface is not enabled */
@@ -207,6 +208,28 @@
 #  endif
 #endif
 
+/* Check if the MRF24J40 is supported in this configuration */
+
+#ifndef CONFIG_IEEE802154_MRF24J40
+#  undef HAVE_MRF24J40
+#endif
+
+#ifndef CONFIG_SAME70XPLAINED_CLICKSHIELD
+#  undef HAVE_MRF24J40
+#endif
+
+#if !defined(CONFIG_SAME70XPLAINED_MB1_BEE) && !defined(CONFIG_SAME70XPLAINED_MB2_BEE)
+#  undef HAVE_MRF24J40
+#endif
+
+#ifndef CONFIG_SAMV7_SPI0_MASTER
+#  undef HAVE_MRF24J40
+#endif
+
+#ifndef CONFIG_SAMV7_GPIOA_IRQ
+#  undef HAVE_MRF24J40
+#endif
+
 /* SAME70-XPLD GPIO Pin Definitions *************************************************/
 
 /* Ethernet MAC.
@@ -298,6 +321,59 @@
 
 #define GPIO_VBUSON (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
                      GPIO_PORT_PIOC | GPIO_PIN16)
+
+/* Click Shield
+ *
+ * --- ----- ------------------------------ ---------------------------------
+ * PIN PORT  SHIELD FUNCTION                PIN CONFIGURATION
+ * --- ----- ------------------------------ ---------------------------------
+ * AD0 PD26  microBUS2 Analog TD            PD26 *** Not an AFE pin ***
+ * AD1 PC31  microBUS2 Analog               PC31 AFE1_AD6   GPIO_AFE1_AD6
+ * AD2 PD30  microBUS2 GPIO reset output    PD30
+ * AD3 PA19  microBUS1 GPIO reset output    PA19
+ * AD4 PC13  (both) I2C-SDA                 PC13 *** Does not support I2C SDA ***
+ * AD5 PC30  (both) I2C-SCL                 PC30 *** Does not support I2C SCL ***
+ * AD6 PA17  *** Not used ***
+ * AD7 PC12  *** Not used ***
+ * D0  PD28  (both) HDR_RX                  PD28 URXD3      GPIO_UART3_RXD
+ * D1  PD30  (both) HDR_TX                  PD30 UTXD3      GPIO_UART3_TXD_1
+ * D2  PA5   microBUS1 GPIO interrupt input PA5
+ * D3  PA6   microBUS2 GPIO interrupt input PA6
+ * D4  PD27  *** Not used ***
+ * D5  PD11  microBUS2 PWMB                 PD11 PWMC0_H0
+ * D6  PC19  microBUS1 PWMA                 PC19 PWMC0_H2
+ * D7  PA2   *** Not used ***
+ * D8  PA17  *** Not used ***
+ * D9  PC9   microBUS2 CS GPIO output       PC9
+ * D10 PD25  microBUS1 CS GPIO output       PD25 SPI0_NPCS1
+ * D11 PD21  (both) SPI-MOSI                PD21 SPI0_MOSI  GPIO_SPI0_MOSI
+ * D12 PD20  (both) SPI-MISO                PD20 SPI0_MISO  GPIO_SPI0_MISO
+ * D13 PD22  (both) SPI-SCK                 PD22 SPI0_SPCK  GPIO_SPI0_SPCK
+ */
+
+/* Reset (RST#) Pulled-up on the click board */
+
+#define CLICK_MB1_RESET    (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORT_PIOA | GPIO_PIN19)
+#define CLICK_MB2_RESET    (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORT_PIOD | GPIO_PIN30)
+
+/* Interrupts. No pull-ups on the BEE; assumig active low. */
+
+#define CLICK_MB1_INTR     (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
+                            GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN5)
+#define CLICK_MB2_INTR     (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
+                            GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN6)
+
+#define IRQ_MB1            SAM_IRQ_PA5
+#define IRQ_MB2            SAM_IRQ_PA6
+
+/* SP chip selects */
+
+#define CLICK_MB1_CS       (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                            GPIO_PORT_PIOD | GPIO_PIN25)
+#define CLICK_MB2_CS       (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                            GPIO_PORT_PIOC | GPIO_PIN9)
 
 /************************************************************************************
  * Public Types
@@ -534,6 +610,22 @@ bool sam_writeprotected(int slotno);
 
 #ifdef HAVE_MTDCONFIG
 int sam_at24config(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_mrf24j40_initialize
+ *
+ * Description:
+ *   Initialize the MRF24J40 device.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_MRF24J40
+int sam_mrf24j40_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
