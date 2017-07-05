@@ -113,7 +113,7 @@ $(CXXOBJS) $(LINKOBJS): %$(OBJEXT): %.cxx
 	$(call COMPILEXX, $<, $@)
 
 libboard$(LIBEXT): $(OBJS) $(CXXOBJS)
-	$(Q) $(AR) $@ # Create an empty archive
+	$(Q) $(AR) $@
 ifneq ($(OBJS),)
 	$(call ARCHIVE, $@, $(OBJS) $(CXXOBJS))
 endif
