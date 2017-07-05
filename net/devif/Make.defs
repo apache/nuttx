@@ -42,6 +42,9 @@ NET_CSRCS += devif_callback.c
 
 ifeq ($(CONFIG_NET_IPv4),y)
 NET_CSRCS += ipv4_input.c
+ifeq ($(CONFIG_NET_IPFORWARD),y)
+NET_CSRCS += ipv4_forward.c
+endif
 endif
 
 ifeq ($(CONFIG_NET_IPv6),y)

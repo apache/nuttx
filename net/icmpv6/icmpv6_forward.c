@@ -107,7 +107,7 @@ static inline bool icmpv6_forward_addrchck(FAR struct forward_s *fwd)
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-  if (conn->domain == PF_INET)
+  if ((fwd->f_hdr.ipv4.l2.vhl & IP_VERSION_MASK) == IPv4_VERSION)
 #endif
     {
 #if !defined(CONFIG_NET_ARP_IPIN) && !defined(CONFIG_NET_ARP_SEND)

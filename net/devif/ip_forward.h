@@ -47,6 +47,7 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/udp.h>
 #include <nuttx/net/tcp.h>
+#include <nuttx/net/icmp.h>
 #include <nuttx/net/icmpv6.h>
 
 #include "udp/udp.h"
