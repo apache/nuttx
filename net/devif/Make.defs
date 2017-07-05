@@ -53,7 +53,7 @@ endif
 
 ifeq ($(CONFIG_NET_IPFORWARD),y)
 ifeq ($(CONFIG_NETDEV_MULTINIC),y)
-NET_CSRCS += ip_forward.c
+NET_CSRCS += ip_forward.c devif_forward.c
 endif
 endif
 

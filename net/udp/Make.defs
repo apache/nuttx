@@ -51,7 +51,9 @@ endif
 # IP forwarding
 
 ifeq ($(CONFIG_NET_IPFORWARD),y)
+ifeq ($(CONFIG_NETDEV_MULTINIC),y)
 NET_CSRCS += udp_forward.c
+endif
 endif
 
 # Transport layer

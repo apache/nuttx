@@ -181,7 +181,7 @@ static inline int send_timeout(FAR struct send_s *pstate)
 static inline void tcpsend_ipselect(FAR struct net_driver_s *dev,
                                     FAR struct tcp_conn_s *conn)
 {
-  /* Which domain the socket support */
+  /* Which domain does the socket support */
 
   if (conn->domain == PF_INET)
     {

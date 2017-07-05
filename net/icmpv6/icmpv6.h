@@ -55,8 +55,10 @@
 
 /* Allocate a new ICMPv6 data callback */
 
-#define icmpv6_callback_alloc(dev)   devif_callback_alloc(dev, &(dev)->d_conncb)
-#define icmpv6_callback_free(dev,cb) devif_dev_callback_free(dev, cb)
+#define icmpv6_callback_alloc(dev) \
+  devif_callback_alloc((dev), &(dev)->d_conncb)
+#define icmpv6_callback_free(dev,cb) \
+  devif_dev_callback_free((dev), (cb))
 
 /****************************************************************************
  * Public Type Definitions
@@ -177,7 +179,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr);
 #endif
 
 /****************************************************************************
- * Name: icmpv6_dev_forward
+ * Name: icmpv6_forward
  *
  * Description:
  *   Called by the IP forwarding logic when an ICMPv6 packet is received on
@@ -201,7 +203,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr);
 
 #if defined(CONFIG_NETDEV_MULTINIC) && defined(CONFIG_NET_IPFORWARD)
 struct forward_s;
-int icmpv6_dev_forward(FAR struct forward_s *fwd);
+int icmpv6_forward(FAR struct forward_s *fwd);
 #endif
 
 /****************************************************************************

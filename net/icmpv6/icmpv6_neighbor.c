@@ -314,7 +314,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
   (void)sem_init(&state.snd_sem, 0, 0);        /* Doesn't really fail */
   sem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
 
- state.snd_retries = 0;                       /* No retries yet */
+  state.snd_retries = 0;                       /* No retries yet */
   net_ipv6addr_copy(state.snd_ipaddr, lookup); /* IP address to query */
 
 #ifdef CONFIG_NETDEV_MULTINIC

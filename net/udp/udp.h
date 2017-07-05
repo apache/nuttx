@@ -68,10 +68,10 @@
 
 /* Allocate a new UDP data callback */
 
-#define udp_callback_alloc(dev, conn) \
-  devif_callback_alloc(dev, &conn->list)
-#define udp_callback_free(dev, conn,cb) \
-  devif_conn_callback_free(dev, cb, &conn->list)
+#define udp_callback_alloc(dev,conn) \
+  devif_callback_alloc((dev), &(conn)->list)
+#define udp_callback_free(dev,conn,cb) \
+  devif_conn_callback_free((dev), (cb), &(conn)->list)
 
 /****************************************************************************
  * Public Type Definitions
@@ -429,7 +429,7 @@ uint16_t udp_callback(FAR struct net_driver_s *dev,
                       FAR struct udp_conn_s *conn, uint16_t flags);
 
 /****************************************************************************
- * Name: udp_ipv6_dev_forward
+ * Name: udp_forward
  *
  * Description:
  *   Called by the IP forwarding logic when an UDP packet is received on
@@ -454,7 +454,7 @@ uint16_t udp_callback(FAR struct net_driver_s *dev,
 #if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_IPv6) && \
     defined(CONFIG_NETDEV_MULTINIC)
 struct forward_s;  /* Forward reference */
-int udp_ipv6_dev_forward(FAR struct forward_s *fwd);
+int udp_forward(FAR struct forward_s *fwd);
 #endif
 
 /****************************************************************************

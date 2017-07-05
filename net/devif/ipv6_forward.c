@@ -225,6 +225,17 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
       FAR uint8_t *payload;
       unsigned int paysize;
 
+      /* Verify that the full packet will fit within the forwarding devices
+       * MTU.  We provide no support for fragmenting forwarded packets.
+       */
+
+      if (NET_LL_HDRLEN(fwddev) + dev->d_len > NET_DEV_MTU(fwddev))
+        {
+          nwarn("WARNING: Packet > MTU... Dropping\n");
+          ret = -EFBIG;
+          goto errout;
+        }
+
       /* Get a pre-allocated forwarding structure,  This structure will be
        * completely zeroed when we receive it.
        */
@@ -246,6 +257,10 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
        *
        * Remember that the size of the L1 header has already been subtracted
        * from dev->d_len.
+       *
+       * REVISIT: Consider an alternative design that does not require data
+       * copying.  This would require a pool of d_buf's that are managed by
+       * the network rather than the network device.
        */
 
       hdrsize = ipv6_hdrsize(ipv6);
@@ -258,7 +273,7 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
 
       /* Save the entire L2 and L3 headers in the state structure */
 
-      if (hdrsize >  sizeof(union ip_fwdhdr_u))
+      if (hdrsize >  sizeof(union fwd_iphdr_u))
         {
           nwarn("WARNING: Header is too big for pre-allocated structure\n");
           ret = -E2BIG;
@@ -278,7 +293,12 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
       payload = (FAR uint8_t *)ipv6 + hdrsize;
       paysize = dev->d_len - hdrsize;
 
-      /* If there is a payload, then copy it into an IOB chain */
+      /* If there is a payload, then copy it into an IOB chain.
+       *
+       * REVISIT: Consider an alternative design that does not require data
+       * copying.  This would require a pool of d_buf's that are managed by
+       * the network rather than the network device.
+       */
 
       if (paysize > 0)
         {
@@ -308,16 +328,21 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
             }
         }
 
-      /* Then set up to forward the packet according to the protocol */
+      /* Then set up to forward the packet according to the protocol.
+       *
+       * REVISIT: Are these protocol specific forwarders necessary?  I think
+       * that this could be done with a single forwarding function for all
+       * protocols.
+       */
 
       switch (ipv6->proto)
         {
 #ifdef CONFIG_NET_TCP
         case IP_PROTO_TCP:
           {
-            /* Forward a TCP packet, handling ACKs, windowing, etc. */
+            /* Forward a TCP packet. */
 
-            ret = tcp_ipv6_dev_forward(fwd);
+            ret = tcp_forward(fwd);
           }
           break;
 #endif
@@ -327,7 +352,7 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
           {
             /* Forward a UDP packet */
 
-            ret = udp_ipv6_dev_forward(fwd);
+            ret = udp_forward(fwd);
           }
           break;
 #endif
@@ -337,7 +362,7 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
           {
             /* Forward an ICMPv6 packet */
 
-            ret = icmpv6_dev_forward(fwd);
+            ret = icmpv6_forward(fwd);
           }
           break;
 #endif
@@ -428,7 +453,7 @@ static int ipv6_decr_ttl(FAR struct ipv6_hdr_s *ipv6)
  * Name: ipv6_dropstats
  *
  * Description:
- *   Update statistics for a droped packet.
+ *   Update statistics for a dropped packet.
  *
  * Input Parameters:
  *   ipv6  - A convenience pointer to the IPv6 header in within the IPv6

@@ -66,7 +66,9 @@ endif
 # IP forwarding
 
 ifeq ($(CONFIG_NET_IPFORWARD),y)
+ifeq ($(CONFIG_NETDEV_MULTINIC),y)
 NET_CSRCS += icmpv6_forward.c
+endif
 endif
 
 # Include ICMPv6 build support

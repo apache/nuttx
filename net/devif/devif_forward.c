@@ -1,14 +1,8 @@
 /****************************************************************************
- * net/devif/devif_send.c
+ * net/devif/devif_forward.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Based in part on uIP which also has a BSD stylie license:
- *
- *   Author: Adam Dunkels <adam@dunkels.com>
- *   Copyright (c) 2001-2003, Adam Dunkels.
- *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,34 +35,68 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <string.h>
 #include <assert.h>
 #include <debug.h>
 
 #include <nuttx/net/netdev.h>
 
+#include "devif/ip_forward.h"
 #include "devif/devif.h"
+
+#if defined(CONFIG_NET_IPFORWARD) &&  defined(CONFIG_NETDEV_MULTINIC)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: devif_send
+ * Name: devif_forward
  *
  * Description:
- *   Called from socket logic in response to a xmit or poll request from the
- *   the network interface driver.
+ *   Called from protocol-specific IP forwarding logic to re-send a packet.
+ *
+ * Input Parameters:
+ *   fwd - An initialized instance of the common forwarding structure that
+ *         includes everything needed to perform the forwarding operation.
+ *
+ * Returned Value:
+ *   None
  *
  * Assumptions:
  *   The network is locked.
  *
  ****************************************************************************/
 
-void devif_send(struct net_driver_s *dev, const void *buf, int len)
+void devif_forward(FAR struct forward_s *fwd)
 {
-  DEBUGASSERT(dev && len > 0 && len < NET_DEV_MTU(dev));
+  unsigned int offset;
+  int ret;
 
-  memcpy(dev->d_appdata, buf, len);
-  dev->d_sndlen = len;
+  DEBUGASSERT(fwd != NULL && fwd->f_dev != NULL);
+  offset = NET_LL_HDRLEN(fwd->f_dev);
+
+  /* Copy the saved L2 + L3 header */
+
+  DEBUGASSERT(offset + fwd->f_hdrsize <= NET_DEV_MTU(fwd->f_dev));
+  memcpy(&fwd->f_dev->d_buf[offset], &fwd->f_hdr, fwd->f_hdrsize);
+  offset += fwd->f_hdrsize;
+
+  /* Copy the IOB chain that contains the payload */
+
+  if (fwd->f_iob != NULL && fwd->f_iob->io_pktlen > 0)
+    {
+      DEBUGASSERT(offset + fwd->f_iob->io_pktlen <= NET_DEV_MTU(fwd->f_dev));
+      ret = iob_copyout(&fwd->f_dev->d_buf[offset], fwd->f_iob,
+                        fwd->f_iob->io_pktlen, 0);
+
+      DEBUGASSERT(ret == fwd->f_iob->io_pktlen);
+      offset += fwd->f_iob->io_pktlen;
+    }
+
+  fwd->f_dev->d_sndlen = offset;
 }
+
+#endif /* CONFIG_NET_IPFORWARD && CONFIG_NETDEV_MULTINIC */

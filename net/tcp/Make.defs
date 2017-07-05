@@ -1,7 +1,7 @@
 ############################################################################
 # net/tcp/Make.defs
 #
-#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -63,7 +63,9 @@ NET_CSRCS += tcp_callback.c tcp_backlog.c tcp_ipselect.c
 # IP forwarding
 
 ifeq ($(CONFIG_NET_IPFORWARD),y)
+ifeq ($(CONFIG_NETDEV_MULTINIC),y)
 NET_CSRCS += tcp_forward.c
+endif
 endif
 
 # TCP write buffering

@@ -49,6 +49,10 @@
 #include <nuttx/net/tcp.h>
 #include <nuttx/net/icmpv6.h>
 
+#include "udp/udp.h"
+#include "tcp/tcp.h"
+#include "icmpv6/icmpv6.h"
+
 #undef HAVE_FWDALLOC
 #if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NETDEV_MULTINIC)
 
@@ -69,7 +73,7 @@
 /* IPv4 + L2 header */
 
 #ifdef CONFIG_NET_IPv4
-struct ipv6_fwdhdr_s
+struct fwd_ipv4hdr_u
 {
   struct ipv4_hdr_s       l2;
   union
@@ -91,7 +95,7 @@ struct ipv6_fwdhdr_s
 /* IPv6 + L2 header */
 
 #ifdef CONFIG_NET_IPv6
-struct ipv6_fwdhdr_s
+struct fwd_ipv6hdr_u
 {
   struct ipv6_hdr_s       l2;
   union
@@ -112,28 +116,46 @@ struct ipv6_fwdhdr_s
 
 /* IPv4 or IPv6 + L2 header */
 
-union ip_fwdhdr_u
+union fwd_iphdr_u
 {
 #ifdef CONFIG_NET_IPv4
-  struct ipv4_fwdhdr_s  ipv4;
+  struct fwd_ipv4hdr_u  ipv4;
 #endif
 #ifdef CONFIG_NET_IPv6
-  struct ipv6_fwdhdr_s  ipv6;
+  struct fwd_ipv6hdr_u  ipv6;
+#endif
+};
+
+/* Connection structures */
+
+union fwd_conn_u
+{
+#ifdef CONFIG_NET_TCP
+  struct tcp_conn_s    tcp;
+#endif
+#ifdef CONFIG_NET_UDP
+  struct udp_conn_s    udp;
+#endif
+#ifdef CONFIG_NET_ICMPv6
+  struct icmpv6_conn_s icmpv6;
 #endif
 };
 
 /* This is the send state structure */
 
-struct net_driver_s;  /* Forward reference */
-struct iob_s;         /* Forward reference */
+struct devif_callback_s; /* Forward refernce */
+struct net_driver_s;     /* Forward reference */
+struct iob_s;            /* Forward reference */
 
 struct forward_s
 {
-  FAR struct forward_s    *f_flink;   /* Supports a singly linked list */
-  FAR struct net_driver_s *f_dev;     /* Forwarding device */
-  FAR struct iob_s        *f_iob;     /* IOBs containing the data payload */
-  union ip_fwdhdr_u        f_hdr;     /* Copy of original L2+L3 headers */
-  uint8_t                  f_hdrsize; /* The size of the L2+L3 headers */
+  FAR struct forward_s        *f_flink;   /* Supports a singly linked list */
+  FAR struct net_driver_s     *f_dev;     /* Forwarding device */
+  FAR struct iob_s            *f_iob;     /* IOBs containing the data payload */
+  FAR struct devif_callback_s *f_cb;      /* Reference to callback instance */
+  union fwd_iphdr_u            f_hdr;     /* Copy of original L2+L3 headers */
+  union fwd_conn_u             f_conn;    /* Protocol-specific connectin struct */
+  uint8_t                      f_hdrsize; /* The size of the L2+L3 headers */
 };
 
 /****************************************************************************
@@ -181,6 +203,26 @@ FAR struct forward_s *ip_forward_alloc(void);
  ****************************************************************************/
 
 void ip_forward_free(FAR struct forward_s *fwd);
+
+/****************************************************************************
+ * Name: devif_forward
+ *
+ * Description:
+ *   Called from protocol-specific IP forwarding logic to re-send a packet.
+ *
+ * Input Parameters:
+ *   fwd - An initialized instance of the common forwarding structure that
+ *         includes everything needed to perform the forwarding operation.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+void devif_forward(FAR struct forward_s *fwd);
 
 #endif /* CONFIG_NET_IPFORWARD && CONFIG_NETDEV_MULTINIC */
 #endif /* __NET_DEVIF_IP_FORWARD_H */
