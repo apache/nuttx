@@ -93,14 +93,14 @@ static inline void forward_ipselect(FAR struct forward_s *fwd)
     {
       /* Select the IPv4 domain */
 
-      tcp_ipv4_select(dev);
+      tcp_ipv4_select(fwd->f_dev);
     }
   else /* if (conn->domain == PF_INET6) */
     {
       /* Select the IPv6 domain */
 
-      DEBUGASSERT(conn->domain == PF_INET6);
-      tcp_ipv6_select(dev);
+      DEBUGASSERT(fwd->f_conn.tcp.domain == PF_INET6);
+      tcp_ipv6_select(fwd->f_dev);
     }
 }
 #endif
@@ -306,7 +306,7 @@ static uint16_t tcp_forward_interrupt(FAR struct net_driver_s *dev,
            * place and we need do nothing.
            */
 
-          forward_ipselect(dev, fwd);
+          forward_ipselect(fwd);
 #endif
           /* Copy the user data into d_appdata and send it. */
 

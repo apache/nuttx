@@ -303,7 +303,7 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
       if (paysize > 0)
         {
           /* Try to allocate the head of an IOB chain.  If this fails,
-           * the the packet will be dropped; we are not operating in a
+           * the packet will be dropped; we are not operating in a
            * context where waiting for an IOB is a good idea
            */
 
@@ -382,15 +382,15 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
 
 errout_with_iobchain:
   if (fwd != NULL && fwd->f_iob != NULL)
-   {
-     iob_free_chain(fwd->f_iob);
-   }
+    {
+      iob_free_chain(fwd->f_iob);
+    }
 
 errout_with_fwd:
   if (fwd != NULL)
-   {
-     ip_forward_free(fwd);
-   }
+    {
+      ip_forward_free(fwd);
+    }
 
 errout:
   return ret;
@@ -532,8 +532,6 @@ static void ipv6_dropstats(FAR struct ipv6_hdr_s *ipv6)
 
 int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
 {
-  /* Multiple network devices */
-
   FAR struct net_driver_s *fwddev;
   int ret;
 
@@ -548,7 +546,7 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
     }
 
   /* Search for a device that can forward this packet.  This is a trivial
-   * serch if there is only a single network device (CONFIG_NETDEV_MULTINIC
+   * search if there is only a single network device (CONFIG_NETDEV_MULTINIC
    * not defined).  But netdev_findby_ipv6addr() will still assure
    * routability in that case.
    */

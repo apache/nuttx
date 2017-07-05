@@ -426,6 +426,39 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, void *pvconn,
                          uint16_t flags);
 
 /****************************************************************************
+ * Name: ipv4_forward
+ *
+ * Description:
+ *   This function is called from ipv4_input when a packet is received that
+ *   is not destined for us.  In this case, the packet may need to be
+ *   forwarded to another device (or sent back out the same device)
+ *   depending configuration, routing table information, and the IPv4
+ *   networks served by various network devices.
+ *
+ * Input Parameters:
+ *   dev   - The device on which the packet was received and which contains
+ *           the IPv4 packet.
+ *   ipv4  - A convenience pointer to the IPv4 header in within the IPv4
+ *           packet
+ *
+ *   On input:
+ *   - dev->d_buf holds the received packet.
+ *   - dev->d_len holds the length of the received packet MINUS the
+ *     size of the L1 header.  That was subtracted out by ipv4_input.
+ *   - ipv4 points to the IPv4 header with dev->d_buf.
+ *
+ * Returned Value:
+ *   Zero is returned if the packet was successfully forward;  A negated
+ *   errno value is returned if the packet is not forwardable.  In that
+ *   latter case, the caller (ipv4_input()) should drop the packet.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_IPv4)
+int ipv4_forward(FAR struct net_driver_s *dev, FAR struct ipv4_hdr_s *ipv4);
+#endif
+
+/****************************************************************************
  * Name: ipv6_forward
  *
  * Description:
