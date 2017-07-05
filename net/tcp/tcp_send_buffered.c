@@ -270,7 +270,8 @@ static inline void send_ipselect(FAR struct net_driver_s *dev,
  *   conn  - The TCP connection structure
  *
  * Returned Value:
- *   None
+ *   true - The Ethernet MAC address is in the ARP or Neighbor table (OR
+ *          the network device is not Ethernet).
  *
  * Assumptions:
  *   Running at the interrupt level
@@ -280,6 +281,15 @@ static inline void send_ipselect(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_ETHERNET
 static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
 {
+  /* REVISIT: Could the MAC address not also be in a routing table? */
+
+#ifdef CONFIG_NET_MULTILINK
+  if (conn->dev->d_lltype != NET_LL_ETHERNET)
+    {
+      return true;
+    }
+#endif
+
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
   if (conn->domain == PF_INET)

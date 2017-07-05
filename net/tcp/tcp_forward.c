@@ -45,6 +45,7 @@
 #include <net/if.h>
 
 #include <nuttx/mm/iob.h>
+#include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netstats.h>
@@ -52,6 +53,8 @@
 #include "devif/ip_forward.h"
 #include "devif/devif.h"
 #include "netdev/netdev.h"
+#include "arp/arp.h"
+#include "neighbor/neighbor.h"
 #include "tcp/tcp.h"
 
 #if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_TCP) && \
@@ -124,7 +127,8 @@ static inline void forward_ipselect(FAR struct forward_s *fwd)
  *   fwd - The forwarding state structure
  *
  * Returned Value:
- *   None
+ *   true - The Ethernet MAC address is in the ARP or Neighbor table (OR
+ *          the network device is not Ethernet).
  *
  * Assumptions:
  *   The network is locked.
@@ -135,6 +139,15 @@ static inline void forward_ipselect(FAR struct forward_s *fwd)
 static inline bool tcp_forward_addrchck(FAR struct forward_s *fwd)
 {
   FAR struct tcp_conn_s *conn = &fwd->f_conn.tcp;
+
+  /* REVISIT: Could the MAC address not also be in a routing table? */
+
+#ifdef CONFIG_NET_MULTILINK
+  if (fwd->f_dev->d_lltype != NET_LL_ETHERNET)
+    {
+      return true;
+    }
+#endif
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
