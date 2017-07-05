@@ -84,29 +84,55 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_attr_e attr,
   switch (attr)
     {
       case IEEE802154_ATTR_MAC_PANID:
-        IEEE802154_PANIDCOPY(attrval->mac.panid, priv->addr.panid);
+        {
+          IEEE802154_PANIDCOPY(attrval->mac.panid, priv->addr.panid);
+        }
         break;
-      case IEEE802154_ATTR_MAC_SADDR:
-        IEEE802154_SADDRCOPY(attrval->mac.saddr, priv->addr.saddr);
-        break;
-      case IEEE802154_ATTR_MAC_EADDR:
-        IEEE802154_EADDRCOPY(attrval->mac.eaddr, priv->addr.eaddr);
-        break;
-      case IEEE802154_ATTR_MAC_COORD_SADDR:
-        IEEE802154_SADDRCOPY(attrval->mac.coordsaddr, priv->pandesc.coordaddr.saddr);
-        break;
-      case IEEE802154_ATTR_MAC_COORD_EADDR:
-        IEEE802154_EADDRCOPY(attrval->mac.coordeaddr, priv->pandesc.coordaddr.eaddr);
-        break;
-      case IEEE802154_ATTR_MAC_DEVMODE:
-        attrval->mac.devmode = priv->devmode;
-        break;
-      default:
-        /* The attribute may be handled soley in the radio driver, so pass
-         * it along.
-         */
 
-        ret = priv->radio->get_attr(priv->radio, attr, attrval);
+      case IEEE802154_ATTR_MAC_SADDR:
+        {
+          IEEE802154_SADDRCOPY(attrval->mac.saddr, priv->addr.saddr);
+        }
+        break;
+
+      case IEEE802154_ATTR_MAC_EADDR:
+        {
+          IEEE802154_EADDRCOPY(attrval->mac.eaddr, priv->addr.eaddr);
+        }
+        break;
+
+      case IEEE802154_ATTR_MAC_COORD_SADDR:
+        {
+          IEEE802154_SADDRCOPY(attrval->mac.coordsaddr, priv->pandesc.coordaddr.saddr);
+        }
+        break;
+
+      case IEEE802154_ATTR_MAC_COORD_EADDR:
+        {
+          IEEE802154_EADDRCOPY(attrval->mac.coordeaddr, priv->pandesc.coordaddr.eaddr);
+        }
+        break;
+
+      case IEEE802154_ATTR_MAC_DEVMODE:
+        {
+          attrval->mac.devmode = priv->devmode;
+        }
+        break;
+
+      case IEEE802154_ATTR_MAC_RESPONSE_WAIT_TIME:
+        {
+          attrval->mac.resp_waittime = priv->resp_waittime;
+        }
+        break;;
+
+      default:
+        {
+          /* The attribute may be handled soley in the radio driver, so pass
+           * it along.
+           */
+
+          ret = priv->radio->getattr(priv->radio, attr, attrval);
+        }
         break;
     }
 
@@ -133,54 +159,56 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_attr_e attr,
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
-  int ret;
+  int ret = IEEE802154_STATUS_SUCCESS;
 
   switch (attr)
     {
       case IEEE802154_ATTR_MAC_PANID:
         {
           mac802154_setpanid(priv, attrval->mac.panid);
-          ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
       case IEEE802154_ATTR_MAC_SADDR:
         {
           mac802154_setsaddr(priv, attrval->mac.saddr);
-          ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
       case IEEE802154_ATTR_MAC_EADDR:
         {
           mac802154_seteaddr(priv, attrval->mac.eaddr);
-          ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
       case IEEE802154_ATTR_MAC_COORD_SADDR:
         {
           mac802154_setcoordsaddr(priv, attrval->mac.coordsaddr);
-          ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
       case IEEE802154_ATTR_MAC_COORD_EADDR:
         {
           mac802154_setcoordeaddr(priv, attrval->mac.coordeaddr);
-          ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
       case IEEE802154_ATTR_MAC_ASSOCIATION_PERMIT:
         {
           priv->sfspec.assocpermit = attrval->mac.assocpermit;
           priv->beaconupdate = true;
-          ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
+      case IEEE802154_ATTR_MAC_RESPONSE_WAIT_TIME:
+        {
+          priv->resp_waittime = attrval->mac.resp_waittime;
+        }
+      case IEEE802154_ATTR_MAC_RX_ON_WHEN_IDLE:
+        {
+          mac802154_setrxonidle(priv, attrval->mac.rxonidle);
+        }
       default:
         {
           /* The attribute may be handled soley in the radio driver, so pass
            * it along.
            */
 
-          ret = priv->radio->set_attr(priv->radio, attr, attrval);
+          ret = priv->radio->setattr(priv->radio, attr, attrval);
         }
         break;
     }

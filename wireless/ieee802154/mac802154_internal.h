@@ -135,7 +135,8 @@ enum mac802154_operation_e
   MAC802154_OP_NONE,
   MAC802154_OP_ASSOC,
   MAC802154_OP_POLL,
-  MAC802154_OP_SCAN
+  MAC802154_OP_SCAN,
+  MAC802154_OP_AUTOEXTRACT,
 };
 
 struct ieee802154_privmac_s; /* Forward Reference */
@@ -156,7 +157,6 @@ struct ieee802154_privmac_s
 
   sem_t exclsem;                            /* Support exclusive access */
   uint8_t nclients;                         /* Number of notification clients */
-  uint8_t nnotif;                           /* Number of remaining notifications */
 
   /* Only support a single command at any given time. As of now I see no
    * condition where you need to have more than one command frame simultaneously
@@ -232,8 +232,6 @@ struct ieee802154_privmac_s
   struct ieee802154_pandesc_s pandesc;
 
   /*************** Fields related to beacon-enabled networks ******************/
-
-  uint8_t bsn; /* Seq. num added to tx beacon frame */
 
   /* Holds attributes pertaining to the superframe specification */ 
  
@@ -357,6 +355,14 @@ struct ieee802154_privmac_s
                                      * before declaring ch access failure */
   uint8_t maxretries          : 3;  /* Max # of retries allowed after tx fail */
   /* End of 8-bit bitfield. */
+
+  /* Start of 8-bit bitfield */
+
+  uint8_t rxonidle            : 1;  /* Receiver on when idle? */
+
+  /* End of 8-bit bitfield. */
+
+
 
   /* TODO: Add Security-related MAC PIB attributes */
 };
@@ -609,6 +615,7 @@ static inline int mac802154_timercancel(FAR struct ieee802154_privmac_s *priv)
 {
   wd_cancel(priv->timeout);
   priv->timeout_worker = NULL;
+  wlinfo("Timer cancelled\n");
   return OK;
 }
 
@@ -620,7 +627,7 @@ static inline void mac802154_rxenable(FAR struct ieee802154_privmac_s *priv)
   
   if (priv->nrxusers == 1)
     {
-      wlinfo("receiver enabled\n");
+      wlinfo("Receiver enabled\n");
       priv->radio->rxenable(priv->radio, true);
     }
 }
@@ -633,7 +640,7 @@ static inline void mac802154_rxdisable(FAR struct ieee802154_privmac_s *priv)
   
   if (priv->nrxusers == 0)
     {
-      wlinfo("receiver disabled\n");
+      wlinfo("Receiver disabled\n");
       priv->radio->rxenable(priv->radio, true);
       priv->radio->rxenable(priv->radio, false);
     }
@@ -642,14 +649,14 @@ static inline void mac802154_rxdisable(FAR struct ieee802154_privmac_s *priv)
 static inline void mac802154_setchannel(FAR struct ieee802154_privmac_s *priv,
                                         uint8_t channel)
 {
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_PHY_CHAN,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_PHY_CHAN,
                         (FAR const union ieee802154_attr_u *)&channel);
 }
 
 static inline void mac802154_setchpage(FAR struct ieee802154_privmac_s *priv,
                                        uint8_t chpage)
 {
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_PHY_CURRENT_PAGE,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_PHY_CURRENT_PAGE,
                         (FAR const union ieee802154_attr_u *)&chpage);
 }
 
@@ -657,7 +664,7 @@ static inline void mac802154_setpanid(FAR struct ieee802154_privmac_s *priv,
                                       const uint8_t *panid)
 {
   IEEE802154_PANIDCOPY(priv->addr.panid, panid);
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_PANID,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_PANID,
                         (FAR const union ieee802154_attr_u *)panid);
 }
 
@@ -665,7 +672,7 @@ static inline void mac802154_setsaddr(FAR struct ieee802154_privmac_s *priv,
                                       const uint8_t *saddr)
 {
   IEEE802154_SADDRCOPY(priv->addr.saddr, saddr);
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_SADDR,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_SADDR,
                         (FAR const union ieee802154_attr_u *)saddr);
 }
 
@@ -673,7 +680,7 @@ static inline void mac802154_seteaddr(FAR struct ieee802154_privmac_s *priv,
                                       const uint8_t *eaddr)
 {
   IEEE802154_EADDRCOPY(priv->addr.eaddr, eaddr);
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_EADDR,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_EADDR,
                         (FAR const union ieee802154_attr_u *)eaddr);
 }
 
@@ -681,7 +688,7 @@ static inline void mac802154_setcoordsaddr(FAR struct ieee802154_privmac_s *priv
                                           const uint8_t *saddr)
 {
   IEEE802154_SADDRCOPY(priv->pandesc.coordaddr.saddr, saddr);
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_COORD_SADDR,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_COORD_SADDR,
                         (FAR const union ieee802154_attr_u *)saddr);
 }
 
@@ -689,7 +696,7 @@ static inline void mac802154_setcoordeaddr(FAR struct ieee802154_privmac_s *priv
                                            const uint8_t *eaddr)
 {
   IEEE802154_EADDRCOPY(priv->pandesc.coordaddr.eaddr, eaddr);
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_COORD_EADDR,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_COORD_EADDR,
                         (FAR const union ieee802154_attr_u *)eaddr);
 }
 
@@ -697,10 +704,34 @@ static inline void mac802154_setcoordaddr(FAR struct ieee802154_privmac_s *priv,
                                           FAR const struct ieee802154_addr_s *addr)
 {
   memcpy(&priv->pandesc.coordaddr, addr, sizeof(struct ieee802154_addr_s));
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_COORD_EADDR,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_COORD_EADDR,
                         (FAR const union ieee802154_attr_u *)addr->eaddr);
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_COORD_SADDR,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_COORD_SADDR,
                         (FAR const union ieee802154_attr_u *)addr->saddr);
 }                                    
+
+static inline void mac802154_setrxonidle(FAR struct ieee802154_privmac_s *priv,
+                                         bool rxonidle)
+{
+  priv->rxonidle = true;
+  if (priv->rxonidle)
+    {
+      mac802154_rxenable(priv);
+    }
+  else
+    {
+      mac802154_rxdisable(priv);
+    }
+
+  /* Unlike other attributes, we can't simply cast this one since it is a bit
+   * in a bitfield.  Casting it will give us unpredicatble results.  Instead
+   * of creating a ieee802154_attr_u, we use a local bool.  Allocating the
+   * ieee802154_attr_u value would take up more room on the stack since it is
+   * as large as the largest attribute type.
+   */
+
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_RX_ON_WHEN_IDLE,
+                        (FAR const union ieee802154_attr_u *)&rxonidle);
+}
 
 #endif /* __WIRELESS_IEEE802154__MAC802154_INTERNAL_H */

@@ -188,9 +188,8 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
                                    FAR struct ieee802154_txdesc_s *txdesc)
 {
   enum ieee802154_status_e status;
-  FAR struct mac802154_notif_s *privnotif =
-    (FAR struct mac802154_notif_s *)txdesc->conf;
-  FAR struct ieee802154_notif_s *notif = &privnotif->pub;
+  FAR struct ieee802154_notif_s *notif =
+    (FAR struct ieee802154_notif_s *)txdesc->conf;
 
   /* If the data request failed to be sent, notify the next layer
    * that the poll has failed.
@@ -245,13 +244,9 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
       mac802154_timerstart(priv, priv->max_frame_waittime,
                            mac802154_polltimeout);
 
-      /* We can deallocate the data conf notification as it is no longer
-       * needed. We can't use the public function here since we already
-       * have the MAC locked.
-       */
+      /* Deallocate the data conf notification as it is no longer needed. */
 
-      privnotif->flink = priv->notif_free;
-      priv->notif_free = privnotif;
+      mac802154_notif_free_locked(priv, notif);
     }
 }
 

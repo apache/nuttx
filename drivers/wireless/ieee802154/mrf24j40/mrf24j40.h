@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/ieee802154/mrf24j40.h
+ * drivers/wireless/ieee802154/mrf24j40/mrf24j40.h
  *
  *   Copyright (C) 2015-2016 Sebastien Lorquet. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE802154_MRF24J40_H
-#define __DRIVERS_WIRELESS_IEEE802154_MRF24J40_H
+#ifndef __DRIVERS_WIRELESS_IEEE802154_MRF24J40_MRF24J40_H
+#define __DRIVERS_WIRELESS_IEEE802154_MRF24J40_MRF24J40_H
 
 /* MRF24J40 Registers *******************************************************/
 
@@ -226,6 +226,11 @@
 #define MRF24J40_TXSTAT_X_SHIFT    6
 #define MRF24J40_TXSTAT_X_MASK     (3 << MRF24J40_TXSTAT_X_SHIFT)
 
+/* TXBCON0 bits */
+
+#define MRF24J40_TXBCON0_TXBTRIG   0x01
+#define MRF24J40_TXBCON0_TXBSECEN  0x02
+
 /* TXBCON1 bits */
 
 #define MRF24J40_TXBCON1_RSSINUM   0x30
@@ -281,4 +286,5 @@
 #define MRF24J40_RXFLUSH_SHIFT_WAKEPAD   5
 #define MRF24J40_RXFLUSH_SHIFT_WAKEPOL   6
 
-#endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_H */
+#endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_MRF24J40_H */
+

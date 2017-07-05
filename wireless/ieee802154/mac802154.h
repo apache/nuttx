@@ -223,11 +223,11 @@ int mac802154_req_gts(MACHANDLE mac, FAR struct ieee802154_gts_req_s *req);
  *
  * Input Parameters:
  *   mac          - Handle to the MAC layer instance
- *   rst_pibattr  - Whether or not to reset the MAC PIB attributes to defaults
+ *   reset_attr   - Whether or not to reset the MAC PIB attributes to defaults
  *
  ****************************************************************************/
 
-int mac802154_req_reset(MACHANDLE mac, bool rst_pibattr);
+int mac802154_req_reset(MACHANDLE mac, bool restattr);
 
 /****************************************************************************
  * Name: mac802154_req_rxenable
@@ -368,7 +368,7 @@ int mac802154_resp_orphan(MACHANDLE mac,
  *
  ****************************************************************************/
 
-int mac802154_notif_free(MACHANDLE mac,
+void mac802154_notif_free(MACHANDLE mac,
                           FAR struct ieee802154_notif_s *notif);
 
 #undef EXTERN

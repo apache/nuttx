@@ -593,19 +593,10 @@ struct ieee802154_pandesc_s
                              * in symbols */
 };
 
-struct ieee802154_pend_addr_s
+struct ieee802154_pendaddr_s
 {
-  union
-  {
-    uint8_t pa_spec;
-    struct
-    {
-      uint8_t num_short_addr  : 3;  /* Number of short addresses pending */
-      uint8_t reserved_3      : 1;  /* Reserved bit */
-      uint8_t num_ext_addr    : 3;  /* Number of extended addresses pending */
-      uint8_t reserved_7      : 1;  /* Reserved bit */
-    } pa_addr;
-  } u;
+  uint8_t nsaddr : 3;               /* Number of short addresses pending */
+  uint8_t neaddr : 3;               /* Number of extended addresses pending */
   struct ieee802154_addr_s addr[7]; /* Array of at most 7 addresses */
 };
 
@@ -632,12 +623,11 @@ union ieee802154_macattr_u
 
   bool is_assoc;
   bool assocpermit;
-  bool auto_req;
+  bool autoreq;
   bool batt_life_ext;
   bool gts_permit;
   bool promisc_mode;
   bool rng_support;
-  bool resp_waittime;
   bool rxonidle;
   bool sec_enabled;
   bool timestamp_support;
@@ -656,6 +646,7 @@ union ieee802154_macattr_u
   uint32_t tx_ctrl_active_dur;
   uint32_t tx_ctrl_pause_dur;
   uint32_t tx_total_dur;
+  uint8_t resp_waittime;
 
   uint8_t beacon_payload[IEEE802154_ATTR_MAC_BEACON_PAYLOAD_LEN];
   uint8_t beacon_payload_len;
@@ -1112,7 +1103,7 @@ struct ieee802154_disassoc_conf_s
  *
  *****************************************************************************/
 
-struct ieee802154_beaconnotify_ind_s
+struct ieee802154_beacon_ind_s
 {
   uint8_t bsn;        /* Beacon sequence number */
 
@@ -1122,19 +1113,10 @@ struct ieee802154_beaconnotify_ind_s
 
   /* Beacon pending addresses */
 
-  struct ieee802154_pend_addr_s pend_addr;
-
-  uint8_t sdu_length; /* Number of octets contained in the beacon
-                       * payload of the received beacond frame */
-
-  /* Beacon payload */
-
-  uint8_t sdu[IEEE802154_MAX_BEACON_PAYLOAD_LEN];
+  struct ieee802154_pendaddr_s pendaddr;
+  uint8_t payloadlength; /* # of octets contained in the beacon payload */
+  uint8_t payload[IEEE802154_MAX_BEACON_PAYLOAD_LEN];
 };
-
-#define SIZEOF_IEEE802154_BEACONNOTIFY_IND_S(n) \
-  (sizeof(struct ieee802154_beaconnotify_ind_s) \
-  - IEEE802154_MAX_BEACON_PAYLOAD_LEN + (n))
 
 /*****************************************************************************
  * Primitive: MLME-COMM-STATUS.indication
@@ -1265,7 +1247,7 @@ struct ieee802154_orphan_resp_s
 
 struct ieee802154_reset_req_s
 {
-  bool rst_pibattr;
+  bool resetattr;
 };
 
 /*****************************************************************************
@@ -1538,21 +1520,21 @@ union ieee802154_notif_u
 
   /* MLME Notifications */
 
-  struct ieee802154_assoc_conf_s       assocconf;
-  struct ieee802154_disassoc_conf_s    disassocconf;
-  struct ieee802154_gts_conf_s         gtsconf;
-  struct ieee802154_rxenable_conf_s    rxenableconf;
-  struct ieee802154_scan_conf_s        scanconf;
-  struct ieee802154_start_conf_s       startconf;
-  struct ieee802154_poll_conf_s        pollconf;
+  struct ieee802154_assoc_conf_s      assocconf;
+  struct ieee802154_disassoc_conf_s   disassocconf;
+  struct ieee802154_gts_conf_s        gtsconf;
+  struct ieee802154_rxenable_conf_s   rxenableconf;
+  struct ieee802154_scan_conf_s       scanconf;
+  struct ieee802154_start_conf_s      startconf;
+  struct ieee802154_poll_conf_s       pollconf;
 
-  struct ieee802154_assoc_ind_s        assocind;
-  struct ieee802154_disassoc_ind_s     disassocind;
-  struct ieee802154_beaconnotify_ind_s beaconnotifyind;
-  struct ieee802154_gts_ind_s          gtsind;
-  struct ieee802154_orphan_ind_s       orphanind;
-  struct ieee802154_commstatus_ind_s   commstatusind;
-  struct ieee802154_syncloss_ind_s     synclossind;
+  struct ieee802154_assoc_ind_s       assocind;
+  struct ieee802154_disassoc_ind_s    disassocind;
+  struct ieee802154_beacon_ind_s      beaconind;
+  struct ieee802154_gts_ind_s         gtsind;
+  struct ieee802154_orphan_ind_s      orphanind;
+  struct ieee802154_commstatus_ind_s  commstatusind;
+  struct ieee802154_syncloss_ind_s    synclossind;
 };
 
 struct ieee802154_notif_s
