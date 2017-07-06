@@ -240,7 +240,7 @@ void neighbor_out(FAR struct net_driver_s *dev)
 
       /* Build an Ethernet header. */
 
-      memcpy(eth->dest, naddr->na_addr.ether_addr_octet, ETHER_ADDR_LEN);
+      memcpy(eth->dest, naddr->u.na_ethernet.ether_addr_octet, ETHER_ADDR_LEN);
     }
 
   /* Finish populating the Ethernet header */

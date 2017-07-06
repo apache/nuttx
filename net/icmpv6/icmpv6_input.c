@@ -74,6 +74,14 @@
 #define ICMPv6RADVERTISE \
   ((struct icmpv6_router_advertise_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
+#if defined(CONFIG_NET_MULTILINK)
+#  define DEV_LLTYPE(d) ((d)->d_lltype)
+#elif defined(CONFIG_NET_ETHERNET)
+#  define DEV_LLTYPE(d) NET_LL_ETHERNET
+#elif defined(CONFIG_NET_6LOWPAN)
+#  define DEV_LLTYPE(d) NET_LL_IEEE802154
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -167,8 +175,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
               {
                 /* Save the sender's address mapping in our Neighbor Table. */
 
-                neighbor_add(icmp->srcipaddr,
-                             (FAR struct neighbor_addr_s *)adv->tgtlladdr);
+                neighbor_add(icmp->srcipaddr, DEV_LLTYPE(dev), adv->tgtlladdr);
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
                 /* Then notify any logic waiting for the Neighbor Advertisement */
