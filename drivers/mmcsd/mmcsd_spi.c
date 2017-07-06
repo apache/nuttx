@@ -326,7 +326,9 @@ static const struct mmcsd_cmdinfo_s g_cmd0   = {CMD0,   MMCSD_CMDRESP_R1, 0x95};
 static const struct mmcsd_cmdinfo_s g_cmd1   = {CMD1,   MMCSD_CMDRESP_R1, 0xff};
 static const struct mmcsd_cmdinfo_s g_cmd8   = {CMD8,   MMCSD_CMDRESP_R7, 0x87};
 static const struct mmcsd_cmdinfo_s g_cmd9   = {CMD9,   MMCSD_CMDRESP_R1, 0xff};
+#if 0 /* Not used */
 static const struct mmcsd_cmdinfo_s g_cmd10  = {CMD10,  MMCSD_CMDRESP_R1, 0xff};
+#endif
 static const struct mmcsd_cmdinfo_s g_cmd12  = {CMD12,  MMCSD_CMDRESP_R1, 0xff};
 static const struct mmcsd_cmdinfo_s g_cmd16  = {CMD16,  MMCSD_CMDRESP_R1, 0xff};
 static const struct mmcsd_cmdinfo_s g_cmd17  = {CMD17,  MMCSD_CMDRESP_R1, 0xff};
