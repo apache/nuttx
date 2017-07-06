@@ -59,72 +59,15 @@
 #if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_IPv6)
 
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+#define PACKET_FORWARDED     0
+#define PACKET_NOT_FORWARDED 1
 
 /****************************************************************************
- * Name: ipv6_packet_conversion
- *
- * Description:
- *   Generic output conversion hook.  Only needed for IEEE802.15.4 for now
- *   but this is a point where support for other conversions may be
- *   provided.
- *
+ * Private Functions
  ****************************************************************************/
-
-#ifdef CONFIG_NET_6LOWPAN
-static int ipv6_packet_conversion(FAR struct net_driver_s *dev,
-                                  FAR struct net_driver_s *fwddev,
-                                  FAR struct ipv6_hdr_s *ipv6)
-{
-#ifdef CONFIG_NET_MULTILINK
-  /* Handle the case where multiple link layer protocols are supported */
-
-  if (dev->d_len > 0 && fwddev->d_lltype == NET_LL_IEEE802154)
-#else
-  if (dev->d_len > 0)
-#endif
-    {
-#ifdef CONFIG_NET_TCP
-      if (ipv6->proto == IP_PROTO_TCP)
-        {
-          /* Let 6LoWPAN convert IPv6 TCP output into IEEE802.15.4 frames. */
-
-          sixlowpan_tcp_send(dev, fwddev, ipv6);
-        }
-      else
-#endif
-#ifdef CONFIG_NET_UDP
-      if (ipv6->proto == IP_PROTO_UDP)
-        {
-          /* Let 6LoWPAN convert IPv6 UDP output into IEEE802.15.4 frames. */
-
-          sixlowpan_udp_send(dev, fwddev, ipv6);
-        }
-      else
-#endif
-        {
-          /* Otherwise, we will have to drop the packet */
-
-          nwarn("WARNING: Dropping. Unsupported 6LoWPAN protocol: %d\n",
-                ipv6->proto);
-
-#ifdef CONFIG_NET_STATISTICS
-          g_netstats.ipv6.drop++;
-#endif
-          return -EPROTONOSUPPORT;
-        }
-
-      dev->d_len = 0;
-      return OK;
-    }
-
-  nwarn("WARNING:  Dropping. Unsupported link layer\n");
-  return -EPFNOSUPPORT;
-}
-#else
-# define ipv6_packet_conversion(dev, ipv6)
-#endif /* CONFIG_NET_6LOWPAN */
 
 /****************************************************************************
  * Name: ipv6_hdrsize
@@ -210,6 +153,7 @@ static int ipv6_hdrsize(FAR struct ipv6_hdr_s *ipv6)
  *
  ****************************************************************************/
 
+#if defined(CONFIG_NETDEV_MULTINIC) || defined(CONFIG_NET_6LOWPAN)
 static int ipv6_decr_ttl(FAR struct ipv6_hdr_s *ipv6)
 {
   int ttl = (int)ipv6->ttl - 1;
@@ -237,6 +181,7 @@ static int ipv6_decr_ttl(FAR struct ipv6_hdr_s *ipv6)
 
   return ttl;
 }
+#endif
 
 /****************************************************************************
  * Name: ipv6_dropstats
@@ -277,6 +222,7 @@ static void ipv6_dropstats(FAR struct ipv6_hdr_s *ipv6)
 #endif
 
     default:
+      g_netstats.ipv6.protoerr++;
       break;
     }
 
@@ -285,6 +231,114 @@ static void ipv6_dropstats(FAR struct ipv6_hdr_s *ipv6)
 #else
 #  define ipv6_dropstats(ipv6)
 #endif
+
+/****************************************************************************
+ * Name: ipv6_packet_conversion
+ *
+ * Description:
+ *   Generic output conversion hook.  Only needed for IEEE802.15.4 for now
+ *   but this is a point where support for other conversions may be
+ *   provided.
+ *
+ * Returned value:
+ *   PACKET_FORWARDED     - Packet was forwarded
+ *   PACKET_NOT_FORWARDED - Packet was not forwarded
+ *   < 0                  - And error occurred (and packet not fowarded).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_6LOWPAN
+static int ipv6_packet_conversion(FAR struct net_driver_s *dev,
+                                  FAR struct net_driver_s *fwddev,
+                                  FAR struct ipv6_hdr_s *ipv6)
+{
+  int ret = PACKET_NOT_FORWARDED;
+
+  if (dev->d_len > 0)
+    {
+#ifdef CONFIG_NET_MULTILINK
+      /* Handle the case where multiple link layer protocols are supported */
+
+      if (fwddev->d_lltype == NET_LL_IEEE802154)
+        {
+          nwarn("WARNING:  Unsupported link layer... Not forwarded\n");
+        }
+      else
+#endif
+#ifdef CONFIG_NET_TCP
+      if (ipv6->proto == IP_PROTO_TCP)
+        {
+          /* Decrement the TTL in the IPv6 header.  If it decrements to
+           * zero, then drop the packet.
+           */
+
+          ret = ipv6_decr_ttl(ipv6);
+          if (ret < 1)
+            {
+              nwarn("WARNING: Hop limit exceeded... Dropping!\n");
+              ret = -EMULTIHOP;
+            }
+          else
+            {
+              /* Let 6LoWPAN convert IPv6 TCP output into IEEE802.15.4
+               * frames.
+               */
+
+              sixlowpan_tcp_send(dev, fwddev, ipv6);
+
+              /* The packet was forwarded */
+
+              dev->d_len = 0;
+              return PACKET_FORWARDED;
+            }
+        }
+      else
+#endif
+#ifdef CONFIG_NET_UDP
+      if (ipv6->proto == IP_PROTO_UDP)
+        {
+          /* Decrement the TTL in the IPv6 header.  If it decrements to
+           * zero, then drop the packet.
+           */
+
+          ret = ipv6_decr_ttl(ipv6);
+          if (ret < 1)
+            {
+              nwarn("WARNING: Hop limit exceeded... Dropping!\n");
+              ret = -EMULTIHOP;
+            }
+          else
+            {
+              /* Let 6LoWPAN convert IPv6 UDP output into IEEE802.15.4
+               * frames.
+               */
+
+              sixlowpan_udp_send(dev, fwddev, ipv6);
+
+              /* The packet was forwarded */
+
+              dev->d_len = 0;
+              return PACKET_FORWARDED;
+            }
+        }
+      else
+#endif
+        {
+          /* Otherwise, we cannot forward the packet */
+
+          nwarn("WARNING: Dropping. Unsupported 6LoWPAN protocol: %d\n",
+                ipv6->proto);
+        }
+    }
+
+   /* The packet was not forwarded (or the HOP limit was exceeded) */
+
+  ipv6_dropstats(ipv6);
+  return ret;
+}
+#else
+#  define ipv6_packet_conversion(dev, ipv6) (PACKET_NOT_FORWARDED)
+#endif /* CONFIG_NET_6LOWPAN */
 
 /****************************************************************************
  * Name: ipv6_dev_forward
@@ -302,7 +356,7 @@ static void ipv6_dropstats(FAR struct ipv6_hdr_s *ipv6)
  *   ipv6     - A pointer to the IPv6 header in within the IPv6 packet
  *
  * Returned Value:
- *   Zero is returned if the packet was successfully forward;  A negated
+ *   Zero is returned if the packet was successfully forwarded;  A negated
  *   errno value is returned if the packet is not forwardable.  In that
  *   latter case, the caller (ipv6_input()) should drop the packet.
  *
@@ -321,6 +375,11 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
 
   ret = ipv6_packet_conversion(dev, fwddev, ipv6);
   if (ret < 0)
+    {
+      nwarn("WARNING: ipv6_packet_conversion failed: %d\n", ret);
+      goto errout;
+    }
+  else if (ret == PACKET_NOT_FORWARDED)
     {
       FAR uint8_t *payload;
       unsigned int paysize;
@@ -656,6 +715,11 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
 
       ret = ipv6_packet_conversion(dev, dev, ipv6);
       if (ret < 0)
+        {
+          nwarn("WARNING: ipv6_packet_conversion failed: %d\n", ret);
+          goto drop;
+        }
+      else if (ret == PACKET_NOT_FORWARDED)
         {
 #ifdef CONFIG_NET_ETHERNET
           /* REVISIT:  For Ethernet we may have to fix up the Ethernet header:

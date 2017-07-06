@@ -147,6 +147,7 @@ static int ipv4_hdrsize(FAR struct ipv4_hdr_s *ipv4)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NETDEV_MULTINIC
 static int ipv4_decr_ttl(FAR struct ipv4_hdr_s *ipv4)
 {
   uint16_t sum;
@@ -187,6 +188,7 @@ static int ipv4_decr_ttl(FAR struct ipv4_hdr_s *ipv4)
   ipv4->ipchksum = ~sum;
   return ttl;
 }
+#endif
 
 /****************************************************************************
  * Name: ipv4_dropstats
@@ -227,6 +229,7 @@ static void ipv4_dropstats(FAR struct ipv4_hdr_s *ipv4)
 #endif
 
     default:
+      g_netstats.ipv4.protoerr++;
       break;
     }
 
