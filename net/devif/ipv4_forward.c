@@ -80,7 +80,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_MULTINIC
+#if defined(CONFIG_NETDEV_MULTINIC) && defined(CONFIG_DEBUG_NET_WARN)
 static int ipv4_hdrsize(FAR struct ipv4_hdr_s *ipv4)
 {
   /* Size is determined by the following protocol header, */
@@ -267,7 +267,9 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
                             FAR struct ipv4_hdr_s *ipv4)
 {
   FAR struct forward_s *fwd = NULL;
+#ifdef CONFIG_DEBUG_NET_WARN
   int hdrsize;
+#endif
   int ret;
 
   /* Verify that the full packet will fit within the forwarding devices MTU.
@@ -297,16 +299,8 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
 
   fwd->f_dev = fwddev;   /* Forwarding device */
 
-  /* Get the size of the IPv4 + L3 header.  Use this to determine start of
-   * the data payload.
-   *
-   * Remember that the size of the L1 header has already been subtracted
-   * from dev->d_len.
-   *
-   * REVISIT: Consider an alternative design that does not require data
-   * copying.  This would require a pool of d_buf's that are managed by
-   * the network rather than the network device.
-   */
+#ifdef CONFIG_DEBUG_NET_WARN
+  /* Get the size of the IPv4 + L3 header. */
 
   hdrsize = ipv4_hdrsize(ipv4);
   if (hdrsize < IPv4_HDRLEN)
@@ -324,8 +318,7 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
       ret = -E2BIG;
       goto errout_with_fwd;
     }
-
-  fwd->f_hdrsize = hdrsize;
+#endif
 
   /* Try to allocate the head of an IOB chain.  If this fails, the
    * packet will be dropped; we are not operating in a context

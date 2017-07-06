@@ -163,7 +163,6 @@ struct forward_s
   FAR struct iob_s            *f_iob;     /* IOB chain containing the packet */
   FAR struct devif_callback_s *f_cb;      /* Reference to callback instance */
   union fwd_conn_u             f_conn;    /* Protocol-specific connection struct */
-  uint8_t                      f_hdrsize; /* The size of the L2+L3 headers */
 };
 
 /****************************************************************************
