@@ -2,7 +2,7 @@
  * include/nuttx/net/icmpv6.h
  * Header file for the NuttX ICMPv6 stack.
  *
- *   Copyright (C) 2007-2009, 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -123,6 +123,13 @@
 #define ICMPv6_PRFX_FLAG_L    (1 << 7) /* On-link flag */
 #define ICMPv6_PRFX_FLAG_A    (1 << 6) /* Autonomous address-configuration flag
 
+/* Return with size of an option (in full octects) using the size of a link
+ * layer address taking into account a header of the two-bytes.
+ */
+
+#define ICMPv6_OPT_SIZE(a)    (((a) + 2 + 7) & ~7)
+#define ICMPv6_OPT_OCTECTS(a) (((a) + 2 + 7) >> 3)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -178,10 +185,11 @@ struct icmpv6_neighbor_solicit_s
 
   uint8_t  opttype;          /* Option Type: ICMPv6_OPT_SRCLLADDR */
   uint8_t  optlen;           /* Option length: 1 octet */
-#ifdef CONFIG_NET_ETHERNET
   uint8_t  srclladdr[6];     /* Options: Source link layer address */
-#endif
 };
+
+#define SIZEOF_ICMPV6_NEIGHBOR_SOLICIT_S(n) \
+  (sizeof(struct icmpv6_neighbor_solicit_s) + ICMPv6_OPT_SIZE(n) - 8)
 
 /* This the message format for the ICMPv6 Neighbor Advertisement message */
 
@@ -194,11 +202,13 @@ struct icmpv6_neighbor_advertise_s
   net_ipv6addr_t tgtaddr;    /* Target IPv6 address */
 
   uint8_t  opttype;          /* Option Type: ICMPv6_OPT_TGTLLADDR */
-  uint8_t  optlen;           /* Option length: 1 octet */
-#ifdef CONFIG_NET_ETHERNET
+  uint8_t  optlen;           /* Option length in octets */
   uint8_t  tgtlladdr[6];     /* Options: Target link layer address */
-#endif
+                             /* Actual size detemined by optlen */
 };
+
+#define SIZEOF_ICMPV6_NEIGHBOR_ADVERTISE_S(n) \
+  (sizeof(struct icmpv6_neighbor_advertise_s) + ICMPv6_OPT_SIZE(n) - 8)
 
 /* This the message format for the ICMPv6 Router Solicitation message */
 
@@ -210,11 +220,12 @@ struct icmpv6_router_solicit_s
   uint8_t  flags[4];         /* See ICMPv6_RADV_FLAG_ definitions (must be zero) */
 
   uint8_t  opttype;          /* Option Type: ICMPv6_OPT_SRCLLADDR */
-  uint8_t  optlen;           /* Option length: 1 octet */
-#ifdef CONFIG_NET_ETHERNET
+  uint8_t  optlen;           /* Option length in octets */
   uint8_t  srclladdr[6];     /* Options: Source link layer address */
-#endif
 };
+
+#define SIZEOF_ICMPV6_ROUTER_SOLICIT_S(n) \
+  (sizeof(struct icmpv6_router_solicit_s) + ICMPv6_OPT_SIZE(n) - 8)
 
 /* This the message format for the ICMPv6 Router Advertisement message:
  * Options may include: ICMPv6_OPT_SRCLLADDR, ICMPv6_OPT_MTU, and/or
@@ -231,7 +242,7 @@ struct icmpv6_router_advertise_s
   uint16_t lifetime;         /* Router lifetime */
   uint16_t reachable[2];     /* Reachable time */
   uint16_t retrans[2];       /* Retransmission timer */
-  uint8_t  options[1];       /* Options begin here */
+                             /* Options begin here */
 };
 
 #define ICMPv6_RADV_MINLEN    (16)
@@ -280,19 +291,19 @@ struct icmpv6_srclladdr_s
 {
   uint8_t  opttype;          /* Octet 1: Option Type: ICMPv6_OPT_SRCLLADDR */
   uint8_t  optlen;           /* "   " ": Option length: 1 octet */
-#ifdef CONFIG_NET_ETHERNET
   uint8_t  srclladdr[6];     /* "   " ": Options: Source link layer address */
-#endif
 };
+
+#define SIZEOF_ICMPV6_SRCLLADDR_S(n) ICMPv6_OPT_SIZE(n)
 
 struct icmpv6_tgrlladdr_s
 {
   uint8_t  opttype;          /* Octet 1: Option Type: ICMPv6_OPT_TGTLLADDR */
-  uint8_t  optlen;           /* "   " ": Option length: 1 octet */
-#ifdef CONFIG_NET_ETHERNET
+  uint8_t  optlen;           /* "   " ": Option length in octets */
   uint8_t  tgtlladdr[6];     /* "   " ": Options: Target link layer address */
-#endif
 };
+
+#define SIZEOF_ICMPV6_TGRLLADDR_S(n) ICMPv6_OPT_SIZE(n)
 
 struct icmpv6_prefixinfo_s
 {

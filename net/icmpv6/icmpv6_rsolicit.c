@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_rsolicit.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,6 +92,8 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
   FAR struct icmpv6_iphdr_s *icmp;
   FAR struct icmpv6_router_solicit_s *sol;
   FAR struct eth_hdr_s *eth;
+  uint16_t l1size;
+  uint16_t l3size;
 
   /* Set up the IPv6 header (most is probably already in place) */
 
@@ -102,8 +104,10 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
 
   /* Length excludes the IPv6 header */
 
-  icmp->len[0]  = (sizeof(struct icmpv6_router_solicit_s) >> 8);
-  icmp->len[1]  = (sizeof(struct icmpv6_router_solicit_s) & 0xff);
+  l1size       = NET_LL_HDRLEN(dev);
+  l3size       = SIZEOF_ICMPV6_ROUTER_SOLICIT_S(l1size);
+  icmp->len[0] = (l3size >> 8);
+  icmp->len[1] = (l3size & 0xff);
 
   icmp->proto   = IP_PROTO_ICMP6;          /* Next header */
   icmp->ttl     = 255;                     /* Hop limit */
@@ -130,14 +134,14 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
 
   /* Set up the options */
 
-  sol->opttype  = ICMPv6_OPT_SRCLLADDR;    /* Option type */
-  sol->optlen   = 1;                       /* Option length = 1 octet */
+  sol->opttype  = ICMPv6_OPT_SRCLLADDR;       /* Option type */
+  sol->optlen   = ICMPv6_OPT_OCTECTS(l1size); /* Option length in octets */
 
   /* Copy our link layer address into the message
    * REVISIT:  What if the link layer is not Ethernet?
    */
 
-  memcpy(sol->srclladdr, dev->d_mac.ether.ether_addr_octet, sizeof(net_ipv6addr_t));
+  memcpy(sol->srclladdr, &dev->d_mac, l1size);
 
   /* Calculate the checksum over both the ICMP header and payload */
 
@@ -146,7 +150,7 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
 
   /* Set the size to the size of the IPv6 header and the payload size */
 
-  dev->d_len    = IPv6_HDRLEN + sizeof(struct icmpv6_router_solicit_s);
+  dev->d_len    = IPv6_HDRLEN + l3size;
 
 #ifdef CONFIG_NET_ETHERNET
 #ifdef CONFIG_NET_MULTILINK
@@ -182,6 +186,7 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
   /* Add the size of the layer layer header to the total size of the
    * outgoing packet.
    */
+
   dev->d_len += netdev_ipv6_hdrlen(dev);
   ninfo("Outgoing ICMPv6 Router Solicitation length: %d (%d)\n",
           dev->d_len, (icmp->len[0] << 8) | icmp->len[1]);
