@@ -112,7 +112,7 @@
 /* Experimentally enabled for STM32L15XX */
 
 #if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-    defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -162,7 +162,7 @@
 #elif defined(CONFIG_STM32_STM32F10XX)
 #  define I2C_OUTPUT (GPIO_OUTPUT | GPIO_OUTPUT_SET | GPIO_CNF_OUTOD | \
                       GPIO_MODE_50MHz)
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #  define I2C_OUTPUT (GPIO_OUTPUT | GPIO_FLOAT | GPIO_OPENDRAIN |\
                       GPIO_SPEED_50MHz | GPIO_OUTPUT_SET)
 #endif
@@ -2451,5 +2451,5 @@ int stm32_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
   return OK;
 }
 
-#endif /* CONFIG_STM32_STM32F10XX || CONFIG_STM32_STM32F20XX || CONFIG_STM32_STM32F40XX */
+#endif /* CONFIG_STM32_STM32F10XX || CONFIG_STM32_STM32F20XX || CONFIG_STM32_STM32F4XXX */
 #endif /* CONFIG_STM32_I2C1 || CONFIG_STM32_I2C2 || CONFIG_STM32_I2C3 */

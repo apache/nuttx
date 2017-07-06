@@ -348,7 +348,7 @@
  * In addition, external FSMC SRAM may be available.
  */
 
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 
    /* The STM32 F2 and the STM32 F401/F411 have no CCM SRAM */
 
