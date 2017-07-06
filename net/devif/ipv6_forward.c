@@ -218,7 +218,7 @@ static int ipv6_decr_ttl(FAR struct ipv6_hdr_s *ipv6)
     {
 #ifdef CONFIG_NET_ICMPv6
       /* Return an ICMPv6 error packet back to the sender. */
-#warning Missing logic
+#  warning Missing logic
 #endif
 
       /* Return zero which must cause the packet to be dropped */

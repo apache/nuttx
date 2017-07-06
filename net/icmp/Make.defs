@@ -43,6 +43,14 @@ ifeq ($(CONFIG_NET_ICMP_PING),y)
 NET_CSRCS += icmp_ping.c icmp_poll.c icmp_send.c
 endif
 
+# IP forwarding
+
+ifeq ($(CONFIG_NET_IPFORWARD),y)
+ifeq ($(CONFIG_NETDEV_MULTINIC),y)
+NET_CSRCS += icmp_forward.c
+endif
+endif
+
 # Include ICMP build support
 
 DEPPATH += --dep-path icmp

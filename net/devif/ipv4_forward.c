@@ -156,7 +156,7 @@ static int ipv4_decr_ttl(FAR struct ipv4_hdr_s *ipv4)
     {
 #ifdef CONFIG_NET_ICMP
       /* Return an ICMP error packet back to the sender. */
-#warning Missing logic
+#  warning Missing logic
 #endif
 
       /* Return zero which must cause the packet to be dropped */
@@ -413,7 +413,16 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
       break;
 #endif
 
-    case IP_PROTO_ICMP: /* Not yet supported */
+#ifdef CONFIG_NET_ICMP
+    case IP_PROTO_ICMP:
+      {
+        /* Forward an ICMP packet */
+
+        ret = icmp_forward(fwd);
+      }
+      break;
+#endif
+
     default:
       nwarn("WARNING: Unrecognized proto: %u\n", ipv4->proto);
       ret = -EPROTONOSUPPORT;
