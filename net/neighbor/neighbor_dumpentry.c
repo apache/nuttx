@@ -39,6 +39,8 @@
 
 #include <debug.h>
 
+#include <nuttx/net/net.h>
+
 #include "neighbor/neighbor.h"
 
 #ifdef CONFIG_DEBUG_NET_INFO
@@ -74,7 +76,7 @@ void neighbor_dumpentry(FAR const char *msg,
 
 #ifdef CONFIG_NET_ETHERNET
 #ifdef CONFIG_NET_6LOWPAN
-  if (neighbor->ne_addr.na_lltype == NET_LL_ETHERNET)
+  if (neighbor->ne_addr.u.na_lltype == NET_LL_ETHERNET)
 #endif
     {
       ninfo("  at: %02x:%02x:%02x:%02x:%02x:%02x\n",

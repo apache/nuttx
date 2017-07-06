@@ -73,6 +73,8 @@
 #  define CONFIG_NET_IPFORWARD_NSTRUCT 4
 #endif
 
+#define FWD_HEADER(fwd) (FAR union fwd_iphdr_u *)((fwd)->f_iob->io_data)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -158,10 +160,9 @@ struct forward_s
 {
   FAR struct forward_s        *f_flink;   /* Supports a singly linked list */
   FAR struct net_driver_s     *f_dev;     /* Forwarding device */
-  FAR struct iob_s            *f_iob;     /* IOBs containing the data payload */
+  FAR struct iob_s            *f_iob;     /* IOB chain containing the packet */
   FAR struct devif_callback_s *f_cb;      /* Reference to callback instance */
-  union fwd_iphdr_u            f_hdr;     /* Copy of original L2+L3 headers */
-  union fwd_conn_u             f_conn;    /* Protocol-specific connectin struct */
+  union fwd_conn_u             f_conn;    /* Protocol-specific connection struct */
   uint8_t                      f_hdrsize; /* The size of the L2+L3 headers */
 };
 

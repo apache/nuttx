@@ -267,8 +267,6 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
                             FAR struct ipv4_hdr_s *ipv4)
 {
   FAR struct forward_s *fwd = NULL;
-  FAR uint8_t *payload;
-  unsigned int paysize;
   int hdrsize;
   int ret;
 
@@ -318,73 +316,58 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
       goto errout_with_fwd;
     }
 
-  /* Save the entire L2 and L3 headers in the state structure */
+  /* The L2/L3 headers must fit within one, contiguous IOB. */
 
-  if (hdrsize >  sizeof(union fwd_iphdr_u))
+  if (hdrsize > CONFIG_IOB_BUFSIZE)
     {
       nwarn("WARNING: Header is too big for pre-allocated structure\n");
       ret = -E2BIG;
       goto errout_with_fwd;
     }
 
-  memcpy(&fwd->f_hdr.ipv4, ipv4, hdrsize);
   fwd->f_hdrsize = hdrsize;
 
-  /* Decrement the TTL in the copy of the IPv4 header (retaining the
-   * original TTL in the source).  If it decrements to zero, then drop
-   * the packet.
+  /* Try to allocate the head of an IOB chain.  If this fails, the
+   * packet will be dropped; we are not operating in a context
+   * where waiting for an IOB is a good idea
    */
 
-  ret = ipv4_decr_ttl(&fwd->f_hdr.ipv4.l2);
-  if (ret < 1)
+  fwd->f_iob = iob_tryalloc(false);
+  if (fwd->f_iob == NULL)
     {
-      nwarn("WARNING: Hop limit exceeded... Dropping!\n");
-      ret = -EMULTIHOP;
+      nwarn("WARNING: iob_tryalloc() failed\n");
+      ret = -ENOMEM;
       goto errout_with_fwd;
     }
 
-  /* Use the L2 + L3 header size to determine start and size of the data
-   * payload.
-   *
-   * Remember that the size of the L1 header has already been subtracted
-   * from dev->d_len.
-   */
-
-  payload = (FAR uint8_t *)ipv4 + hdrsize;
-  paysize = dev->d_len - hdrsize;
-
-  /* If there is a payload, then copy it into an IOB chain.
+  /* Copy the L2/L3 headers plus any following payload into an IOB chain.
+   * iob_trycopin() will not wait, but will fail there are no available
+   * IOBs.
    *
    * REVISIT: Consider an alternative design that does not require data
    * copying.  This would require a pool of d_buf's that are managed by
    * the network rather than the network device.
    */
 
-  if (paysize > 0)
+  ret = iob_trycopyin(fwd->f_iob, (FAR const uint8_t *)ipv4,
+                      dev->d_len, 0, false);
+  if (ret < 0)
     {
-      /* Try to allocate the head of an IOB chain.  If this fails, the
-       * packet will be dropped; we are not operating in a context
-       * where waiting for an IOB is a good idea
-       */
+      nwarn("WARNING: iob_trycopyin() failed: %d\n", ret);
+      goto errout_with_iobchain;
+    }
 
-      fwd->f_iob = iob_tryalloc(false);
-      if (fwd->f_iob == NULL)
-        {
-          nwarn("WARNING: iob_tryalloc() failed\n");
-          ret = -ENOMEM;
-          goto errout_with_fwd;
-        }
+  /* Decrement the TTL in the copy of the IPv4 header (retaining the
+   * original TTL in the source to handle the broadcast case).  If the
+   * TLL decrements to zero, then do not forward the packet.
+   */
 
-      /* Copy the packet data payload into an IOB chain. iob_trycopin() will
-       * not wait, but will fail there are no available IOBs.
-       */
-
-      ret = iob_trycopyin(fwd->f_iob, payload, paysize, 0, false);
-      if (ret < 0)
-        {
-          nwarn("WARNING: iob_trycopyin() failed: %d\n", ret);
-          goto errout_with_iobchain;
-        }
+  ret = ipv4_decr_ttl((FAR struct ipv4_hdr_s *)fwd->f_iob->io_data);
+  if (ret < 1)
+    {
+      nwarn("WARNING: Hop limit exceeded... Dropping!\n");
+      ret = -EMULTIHOP;
+      goto errout_with_iobchain;
     }
 
   /* Then set up to forward the packet according to the protocol.

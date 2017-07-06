@@ -259,7 +259,7 @@ static uint16_t tcp_forward_interrupt(FAR struct net_driver_s *dev,
   FAR struct forward_s *fwd = (FAR struct forward_s *)pvpriv;
 
   ninfo("flags: %04x\n", flags);
-  DEBUGASSERT(fwd != NULL);
+  DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
 
   /* Make sure that this is from the forwarding device */
 
@@ -375,22 +375,25 @@ static uint16_t tcp_forward_interrupt(FAR struct net_driver_s *dev,
 
 int tcp_forward(FAR struct forward_s *fwd)
 {
-  DEBUGASSERT(fwd != NULL && fwd->f_dev != NULL);
   FAR struct tcp_conn_s *conn = &fwd->f_conn.tcp;
+  FAR union fwd_iphdr_u *iphdr;
+
+  DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
 
   /* Set up some minimal connection structure so that we appear to be a
    * real TCP connection.
    */
 
   conn->dev = fwd->f_dev;
+  iphdr     = FWD_HEADER(fwd);
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-  if ((fwd->f_hdr.ipv4.l2.vhl & IP_VERSION_MASK) == IPv4_VERSION)
+  if ((iphdr->ipv4.l2.vhl & IP_VERSION_MASK) == IPv4_VERSION)
 #endif
     {
-      FAR struct ipv4_hdr_s *ipv4 = &fwd->f_hdr.ipv4.l2;
-      FAR struct tcp_hdr_s  *tcp  = &fwd->f_hdr.ipv4.l3.tcp;
+      FAR struct ipv4_hdr_s *ipv4 = &iphdr->ipv4.l2;
+      FAR struct tcp_hdr_s  *tcp  = &iphdr->ipv4.l3.tcp;
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
       conn->domain = PF_INET;
@@ -406,8 +409,8 @@ int tcp_forward(FAR struct forward_s *fwd)
   else
 #endif
     {
-      FAR struct ipv6_hdr_s *ipv6 = &fwd->f_hdr.ipv6.l2;
-      FAR struct tcp_hdr_s  *tcp  = &fwd->f_hdr.ipv6.l3.tcp;
+      FAR struct ipv6_hdr_s *ipv6 = &iphdr->ipv6.l2;
+      FAR struct tcp_hdr_s  *tcp  = &iphdr->ipv6.l3.tcp;
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
       conn->domain = PF_INET6;

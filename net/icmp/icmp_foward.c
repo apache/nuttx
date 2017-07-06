@@ -96,6 +96,12 @@
 #ifdef CONFIG_NET_ETHERNET
 static inline bool icmp_forward_addrchck(FAR struct forward_s *fwd)
 {
+#if !defined(CONFIG_NET_ARP_IPIN) && !defined(CONFIG_NET_ARP_SEND)
+  FAR union fwd_iphdr_u *iphdr;
+#endif
+
+  DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
+
   /* REVISIT: Could the MAC address not also be in a routing table? */
 
 #ifdef CONFIG_NET_MULTILINK
@@ -106,7 +112,8 @@ static inline bool icmp_forward_addrchck(FAR struct forward_s *fwd)
 #endif
 
 #if !defined(CONFIG_NET_ARP_IPIN) && !defined(CONFIG_NET_ARP_SEND)
-  return (arp_find(fwd->f_hdr.ipv4.l2.destipaddr) != NULL);
+  iphdr = FWD_HEADER(fwd);
+  return (arp_find(iphdr->ipv4.l2.destipaddr) != NULL);
 #else
   return true;
 #endif
@@ -164,13 +171,13 @@ static inline void icmp_dropstats(FAR struct forward_s *fwd)
  ****************************************************************************/
 
 static uint16_t icmp_forward_interrupt(FAR struct net_driver_s *dev,
-                                         FAR void *conn, FAR void *pvpriv,
-                                         uint16_t flags)
+                                       FAR void *conn, FAR void *pvpriv,
+                                       uint16_t flags)
 {
   FAR struct forward_s *fwd = (FAR struct forward_s *)pvpriv;
 
   ninfo("flags: %04x\n", flags);
-  DEBUGASSERT(fwd != NULL);
+  DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
 
   /* Make sure that this is from the forwarding device */
 
@@ -274,7 +281,7 @@ static uint16_t icmp_forward_interrupt(FAR struct net_driver_s *dev,
 
 int icmp_forward(FAR struct forward_s *fwd)
 {
-  DEBUGASSERT(fwd != NULL && fwd->f_dev != NULL);
+  DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
 
   /* Set up the callback in the connection */
 

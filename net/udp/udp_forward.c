@@ -86,9 +86,11 @@
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
 static inline void forward_ipselect(FAR struct forward_s *fwd)
 {
+  FAR union fwd_iphdr_u *iphdr = FWD_HEADER(fwd);
+
   /* Select IPv4 or IPv6 */
 
-  if ((fwd->f_hdr.ipv4.l2.vhl & IP_VERSION_MASK) == IPv4_VERSION)
+  if ((iphdr->ipv4.l2.vhl & IP_VERSION_MASK) == IPv4_VERSION)
     {
       udp_ipv4_select(fwd->f_dev);
     }
@@ -132,6 +134,10 @@ static inline void forward_ipselect(FAR struct forward_s *fwd)
 #ifdef CONFIG_NET_ETHERNET
 static inline bool udp_forward_addrchk(FAR struct forward_s *fwd)
 {
+  FAR union fwd_iphdr_u *iphdr;
+
+  DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
+
   /* REVISIT: Could the MAC address not also be in a routing table? */
 
 #ifdef CONFIG_NET_MULTILINK
@@ -141,13 +147,15 @@ static inline bool udp_forward_addrchk(FAR struct forward_s *fwd)
     }
 #endif
 
+  iphdr = FWD_HEADER(fwd);
+
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-  if ((fwd->f_hdr.ipv4.l2.vhl & IP_VERSION_MASK) == IPv4_VERSION)
+  if ((iphdr->ipv4.l2.vhl & IP_VERSION_MASK) == IPv4_VERSION)
 #endif
     {
 #if !defined(CONFIG_NET_ARP_IPIN) && !defined(CONFIG_NET_ARP_SEND)
-      return (arp_find(fwd->f_hdr.ipv4.l2.destipaddr) != NULL);
+      return (arp_find(iphdr->ipv4.l2.destipaddr) != NULL);
 #else
       return true;
 #endif
@@ -160,7 +168,7 @@ static inline bool udp_forward_addrchk(FAR struct forward_s *fwd)
 #endif
     {
 #if !defined(CONFIG_NET_ICMPv6_NEIGHBOR)
-      return (neighbor_findentry(fwd->f_hdr.ipv6.l2.destipaddr) != NULL);
+      return (neighbor_findentry(iphdr->ipv6.l2.destipaddr) != NULL);
 #else
       return true;
 #endif
@@ -189,6 +197,10 @@ static inline bool udp_forward_addrchk(FAR struct forward_s *fwd)
 #ifdef CONFIG_NET_STATISTICS
 static void udp_dropstats(FAR struct forward_s *fwd)
 {
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+  FAR union fwd_iphdr_u *iphdr = FWD_HEADER(fwd);
+#endif
+
   /* Increment the count of dropped UDP packets */
 
   g_netstats.udp.drop++;
@@ -197,7 +209,7 @@ static void udp_dropstats(FAR struct forward_s *fwd)
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-  if ((fwd->f_hdr.ipv4.l2.vhl & IP_VERSION_MASK) == IPv4_VERSION)
+  if ((iphdr->ipv4.l2.vhl & IP_VERSION_MASK) == IPv4_VERSION)
 #endif
     {
       g_netstats.ipv4.drop++;
@@ -244,7 +256,7 @@ static uint16_t udp_forward_interrupt(FAR struct net_driver_s *dev,
   FAR struct forward_s *fwd = (FAR struct forward_s *)pvpriv;
 
   ninfo("flags: %04x\n", flags);
-  DEBUGASSERT(fwd != NULL);
+  DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
 
   /* Make sure that this is from the forwarding device */
 
@@ -357,7 +369,7 @@ static uint16_t udp_forward_interrupt(FAR struct net_driver_s *dev,
 
 int udp_forward(FAR struct forward_s *fwd)
 {
-  DEBUGASSERT(fwd != NULL && fwd->f_dev != NULL);
+  DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
 
   /* Set up the callback in the connection */
 
