@@ -99,6 +99,7 @@
 #include "icmp/icmp.h"
 #include "igmp/igmp.h"
 
+#include "devif/ip_forward.h"
 #include "devif/devif.h"
 
 /****************************************************************************
@@ -403,6 +404,11 @@ int ipv4_input(FAR struct net_driver_s *dev)
       net_ipv4addr_cmp(net_ip4addr_conv32(ipv4->destipaddr),
                        INADDR_BROADCAST))
     {
+#ifdef CONFIG_NET_IPFORWARD_BROADCAST
+      /* Forward broadcast packets */
+
+      ipv4_forward_broadcast(dev, ipv4);
+#endif
       return udp_ipv4_input(dev);
     }
 
@@ -430,7 +436,15 @@ int ipv4_input(FAR struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_IGMP
           in_addr_t destip = net_ip4addr_conv32(ipv4->destipaddr);
-          if (igmp_grpfind(dev, &destip) == NULL)
+          if (igmp_grpfind(dev, &destip) != NULL)
+            {
+#ifdef CONFIG_NET_IPFORWARD_BROADCAST
+              /* Forward multicast packets */
+
+              ipv4_forward_broadcast(dev, ipv4);
+#endif
+            }
+          else
 #endif
             {
               /* No.. The packet is not destined for us. */

@@ -293,10 +293,18 @@ config NET_IPFORWARD
 		that are not supported by this platform will be forwarded to the
 		appropriate network device.  Routing table support may be required.
 
+config NET_IPFORWARD_BROADCAST
+	bool "Forward broadcast/multicast packets"
+	default n
+	depends on NET_IPFORWARD && NETDEV_MULTINIC
+	---help---
+		If selected, broadcast packets received on one network device will
+		be forwarded though other network devices.
+
 config NET_IPFORWARD_NSTRUCT
 	int "Number of pre-allocated forwarding structures"
 	default 4
-	depends on NET_IPFORWARD && CONFIG_NETDEV_MULTINIC
+	depends on NET_IPFORWARD && NETDEV_MULTINIC
 	---help---
 		When packets are forwarded from on device to another, a structure
 		must be allocated to hold the state of forwarding across several

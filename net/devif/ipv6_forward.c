@@ -187,6 +187,106 @@ static int ipv6_hdrsize(FAR struct ipv6_hdr_s *ipv6)
 #endif
 
 /****************************************************************************
+ * Name: ipv6_decr_ttl
+ *
+ * Description:
+ *   Decrement the IPv6 TTL (time to live value).  TTL field is set by the
+ *   sender of the packet and reduced by every router on the route to its
+ *   destination. If the TTL field reaches zero before the datagram arrives
+ *   at its destination, then the datagram is discarded and an ICMP error
+ *   packet (11 - Time Exceeded) is sent back to the sender.
+ *
+ *   The purpose of the TTL field is to avoid a situation in which an
+ *   undeliverable datagram keeps circulating on an Internet system, and
+ *   such a system eventually becoming swamped by such "immortals".
+ *
+ * Input Parameters:
+ *   ipv6  - A pointer to the IPv6 header in within the IPv6 packet to be
+ *           forwarded.
+ *
+ * Returned Value:
+ *   The new TTL value is returned.  A value <= 0 means the hop limit has
+ *   expired.
+ *
+ ****************************************************************************/
+
+static int ipv6_decr_ttl(FAR struct ipv6_hdr_s *ipv6)
+{
+  int ttl = (int)ipv6->ttl - 1;
+
+  if (ttl <= 0)
+    {
+#ifdef CONFIG_NET_ICMPv6
+      /* Return an ICMPv6 error packet back to the sender. */
+#warning Missing logic
+#endif
+
+      /* Return zero which must cause the packet to be dropped */
+
+      return 0;
+    }
+
+  /* Save the updated TTL value */
+
+  ipv6->ttl = ttl;
+
+  /* NOTE: We do not have to recalculate the IPv6 checksum because (1) the
+   * IPv6 header does not include a checksum itself and (2) the TTL is not
+   * included in the sum for the TCP and UDP headers.
+   */
+
+  return ttl;
+}
+
+/****************************************************************************
+ * Name: ipv6_dropstats
+ *
+ * Description:
+ *   Update statistics for a dropped packet.
+ *
+ * Input Parameters:
+ *   ipv6  - A convenience pointer to the IPv6 header in within the IPv6
+ *           packet to be dropped.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_STATISTICS
+static void ipv6_dropstats(FAR struct ipv6_hdr_s *ipv6)
+{
+  switch (ipv6->proto)
+    {
+#ifdef CONFIG_NET_TCP
+    case IP_PROTO_TCP:
+      g_netstats.tcp.drop++;
+      break;
+#endif
+
+#ifdef CONFIG_NET_UDP
+    case IP_PROTO_UDP:
+      g_netstats.udp.drop++;
+      break;
+#endif
+
+#ifdef CONFIG_NET_ICMPv6
+    case IP_PROTO_ICMP6:
+      g_netstats.icmpv6.drop++;
+      break;
+#endif
+
+    default:
+      break;
+    }
+
+  g_netstats.ipv6.drop++;
+}
+#else
+#  define ipv6_dropstats(ipv6)
+#endif
+
+/****************************************************************************
  * Name: ipv6_dev_forward
  *
  * Description:
@@ -280,8 +380,21 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
           goto errout_with_fwd;
         }
 
-      memcpy(&fwd->f_hdr, ipv6, hdrsize);
+      memcpy(&fwd->f_hdr.ipv6, ipv6, hdrsize);
       fwd->f_hdrsize = hdrsize;
+
+      /* Decrement the TTL in the copy of the IPv6 header (retaining the
+       * original TTL in the source).  If it decrements to zero, then drop
+       * the packet.
+       */
+
+      ret = ipv6_decr_ttl(&fwd->f_hdr.ipv6.l2);
+      if (ret < 1)
+        {
+          nwarn("WARNING: Hop limit exceeded... Dropping!\n");
+          ret = -EMULTIHOP;
+          goto errout_with_fwd;
+        }
 
       /* Use the L2 + L3 header size to determine start and size of the data
        * payload.
@@ -398,103 +511,59 @@ errout:
 #endif /* CONFIG_NETDEV_MULTINIC */
 
 /****************************************************************************
- * Name: ipv6_decr_ttl
+ * Name: ipv6_forward_callback
  *
  * Description:
- *   Decrement the IPv6 TTL (time to live value).  TTL field is set by the
- *   sender of the packet and reduced by every router on the route to its
- *   destination. If the TTL field reaches zero before the datagram arrives
- *   at its destination, then the datagram is discarded and an ICMP error
- *   packet (11 - Time Exceeded) is sent back to the sender.
- *
- *   The purpose of the TTL field is to avoid a situation in which an
- *   undeliverable datagram keeps circulating on an Internet system, and
- *   such a system eventually becoming swamped by such "immortals".
+ *   This function is a callback from netdev_foreach.  It implements the
+ *   the broadcase forwarding action for each network device (other than, of
+ *   course, the device that received the packet).
  *
  * Input Parameters:
- *   ipv6  - A pointer to the IPv6 header in within the IPv6 packet to be
- *           forwarded.
+ *   dev   - The device on which the packet was received and which contains
+ *           the IPv6 packet.
+ *   ipv6  - A convenience pointer to the IPv6 header in within the IPv6
+ *           packet
  *
  * Returned Value:
- *   The new TTL value is returned.  A value <= 0 means the hop limit has
- *   expired.
+ *   Typically returns zero (meaning to continue the enumeration), but will
+ *   return a non-zero to stop the enumeration if an error occurs.
  *
  ****************************************************************************/
 
-static int ipv6_decr_ttl(FAR struct ipv6_hdr_s *ipv6)
+#if defined(CONFIG_NET_IPFORWARD_BROADCAST) && \
+    defined(CONFIG_NETDEV_MULTINIC)
+int ipv6_forward_callback(FAR struct net_driver_s *fwddev, FAR void *arg)
 {
-  int ttl = (int)ipv6->ttl - 1;
+  FAR struct net_driver_s *dev = (FAR struct net_driver_s *)arg;
+  FAR struct ipv6_hdr_s *ipv6;
+  int ret;
 
-  if (ttl <= 0)
-    {
-#ifdef CONFIG_NET_ICMPv6
-      /* Return an ICMPv6 error packet back to the sender. */
-#warning Missing logic
-#endif
+  DEBUGASSERT(fwddev != NULL && dev != NULL && dev->d_buf != NULL);
 
-      /* Return zero which must cause the packet to be dropped */
-
-      return 0;
-    }
-
-  /* Save the updated TTL value */
-
-  ipv6->ttl = ttl;
-
-  /* NOTE: We do not have to recalculate the IPv6 checksum because (1) the
-   * IPv6 header does not include a checksum itself and (2) the TTL is not
-   * included in the sum for the TCP and UDP headers.
+  /* Check if we are forwarding on the same device that we received the
+   * packet from.
    */
 
-  return ttl;
-}
-
-/****************************************************************************
- * Name: ipv6_dropstats
- *
- * Description:
- *   Update statistics for a dropped packet.
- *
- * Input Parameters:
- *   ipv6  - A convenience pointer to the IPv6 header in within the IPv6
- *           packet to be dropped.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_STATISTICS
-static void ipv6_dropstats(FAR struct ipv6_hdr_s *ipv6)
-{
-  switch (ipv6->proto)
+  if (fwddev != dev)
     {
-#ifdef CONFIG_NET_TCP
-    case IP_PROTO_TCP:
-      g_netstats.tcp.drop++;
-      break;
-#endif
+      /* Recover the pointer to the IPv6 header in the receiving device's
+       * d_buf.
+       */
 
-#ifdef CONFIG_NET_UDP
-    case IP_PROTO_UDP:
-      g_netstats.udp.drop++;
-      break;
-#endif
+      ipv6 = (FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)];
 
-#ifdef CONFIG_NET_ICMPv6
-    case IP_PROTO_ICMP6:
-      g_netstats.icmpv6.drop++;
-      break;
-#endif
+      /* Send the packet asynchrously on the forwarding device. */
 
-    default:
-      break;
+      ret = ipv6_dev_forward(dev, fwddev, ipv6);
+      if (ret < 0)
+        {
+          nwarn("WARNING: ipv6_dev_forward failed: %d\n", ret);
+          return ret;
+        }
     }
 
-  g_netstats.ipv6.drop++;
+  return OK;
 }
-#else
-#  define ipv6_dropstats(ipv6)
 #endif
 
 /****************************************************************************
@@ -535,16 +604,6 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
   FAR struct net_driver_s *fwddev;
   int ret;
 
-  /* Decrement the TTL.  If it decrements to zero, then drop the packet */
-
-  ret = ipv6_decr_ttl(ipv6);
-  if (ret < 1)
-    {
-      nwarn("WARNING: Hop limit exceeded... Dropping!\n");
-      ret = -EMULTIHOP;
-      goto drop;
-    }
-
   /* Search for a device that can forward this packet.  This is a trivial
    * search if there is only a single network device (CONFIG_NETDEV_MULTINIC
    * not defined).  But netdev_findby_ipv6addr() will still assure
@@ -574,7 +633,7 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
       ret = ipv6_dev_forward(dev, fwddev, ipv6);
       if (ret < 0)
         {
-          nwarn("WARNING: ipv6_dev_forward faield: %d\n", ret);
+          nwarn("WARNING: ipv6_dev_forward failed: %d\n", ret);
           goto drop;
         }
     }
@@ -640,5 +699,49 @@ drop:
   dev->d_len = 0;
   return ret;
 }
+
+/****************************************************************************
+ * Name: ipv6_forward_broadcast
+ *
+ * Description:
+ *   This function is called from ipv6_input when a broadcast or multicast
+ *   packet is received.  If CONFIG_NET_IPFORWARD_BROADCAST is enabled, this
+ *   function will forward the broadcast packet to other networks through
+ *   other network devices.
+ *
+ * Input Parameters:
+ *   dev   - The device on which the packet was received and which contains
+ *           the IPv6 packet.
+ *   ipv6  - A convenience pointer to the IPv6 header in within the IPv6
+ *           packet
+ *
+ *   On input:
+ *   - dev->d_buf holds the received packet.
+ *   - dev->d_len holds the length of the received packet MINUS the
+ *     size of the L1 header.  That was subtracted out by ipv6_input.
+ *   - ipv6 points to the IPv6 header with dev->d_buf.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPFORWARD_BROADCAST) && \
+    defined(CONFIG_NETDEV_MULTINIC)
+void ipv6_forward_broadcast(FAR struct net_driver_s *dev,
+                            FAR struct ipv6_hdr_s *ipv6)
+{
+  /* Don't bother if the TTL would expire */
+
+  if (ipv6->ttl > 1)
+    {
+      /* Forward the the broadcast/multicast packet to all devices except,
+       * of course, the device that received the packet.
+       */
+
+      (void)netdev_foreach(ipv6_forward_callback, dev);
+    }
+}
+#endif
 
 #endif /* CONFIG_NET_IPFORWARD && CONFIG_NET_IPv6 */
