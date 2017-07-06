@@ -1525,20 +1525,16 @@ config STM32_STM32F37XX
 config STM32_STM32F4XXX
 	bool
 	default n
-	select STM32_HAVE_OTGFS if !STM32_STM32F410
-	select STM32_HAVE_TIM3 if !STM32_STM32F410
-	select STM32_HAVE_TIM4 if !STM32_STM32F410
 	select STM32_HAVE_SPI2
-	select STM32_HAVE_SPI3 if !STM32_STM32F410
-	select STM32_HAVE_I2S3 if !STM32_STM32F410
 	select STM32_HAVE_I2C2
-	select STM32_HAVE_I2C3 if !STM32_STM32F410
 
 config STM32_STM32F401
 	bool
 	default n
 	select STM32_HAVE_USART6
 	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM3
+	select STM32_HAVE_TIM4
 	select STM32_HAVE_TIM5
 	select STM32_HAVE_TIM9
 	select STM32_HAVE_TIM10
@@ -1546,6 +1542,8 @@ config STM32_STM32F401
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
 	select STM32_HAVE_I2S3
+	select STM32_HAVE_I2C3
+	select STM32_HAVE_OTGFS
 
 config STM32_STM32F410
 	bool
@@ -1564,15 +1562,19 @@ config STM32_STM32F411
 	default n
 	select STM32_HAVE_USART6
 	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM3
+	select STM32_HAVE_TIM4
 	select STM32_HAVE_TIM5
 	select STM32_HAVE_TIM9
 	select STM32_HAVE_TIM10
 	select STM32_HAVE_TIM11
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
-	select STM32_HAVE_I2S3
 	select STM32_HAVE_SPI4
 	select STM32_HAVE_SPI5
+	select STM32_HAVE_I2S3
+	select STM32_HAVE_I2C3
+	select STM32_HAVE_OTGFS
 
 config STM32_STM32F405
 	bool
@@ -1584,6 +1586,8 @@ config STM32_STM32F405
 	select STM32_HAVE_UART5
 	select STM32_HAVE_USART6
 	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM3
+	select STM32_HAVE_TIM4
 	select STM32_HAVE_TIM5
 	select STM32_HAVE_TIM6
 	select STM32_HAVE_TIM7
@@ -1600,7 +1604,11 @@ config STM32_STM32F405
 	select STM32_HAVE_CAN2
 	select STM32_HAVE_DAC1
 	select STM32_HAVE_DAC2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_I2S3
+	select STM32_HAVE_I2C3
 	select STM32_HAVE_RNG
+	select STM32_HAVE_OTGFS
 
 config STM32_STM32F407
 	bool
@@ -1613,6 +1621,8 @@ config STM32_STM32F407
 	select STM32_HAVE_USART6
 	select STM32_HAVE_TIM1
 	select STM32_HAVE_TIM2
+	select STM32_HAVE_TIM3
+	select STM32_HAVE_TIM4
 	select STM32_HAVE_TIM5
 	select STM32_HAVE_TIM6
 	select STM32_HAVE_TIM7
@@ -1629,10 +1639,15 @@ config STM32_STM32F407
 	select STM32_HAVE_CAN2
 	select STM32_HAVE_DAC1
 	select STM32_HAVE_DAC2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_I2S3
+	select STM32_HAVE_I2C3
 	select STM32_HAVE_RNG
 	select STM32_HAVE_ETHMAC
+	select STM32_HAVE_OTGFS
 
 # This is really 427/437, but we treat the two the same.
+
 config STM32_STM32F427
 	bool
 	default n
@@ -1645,6 +1660,8 @@ config STM32_STM32F427
 	select STM32_HAVE_UART7
 	select STM32_HAVE_UART8
 	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM3
+	select STM32_HAVE_TIM4
 	select STM32_HAVE_TIM5
 	select STM32_HAVE_TIM6
 	select STM32_HAVE_TIM7
@@ -1665,12 +1682,15 @@ config STM32_STM32F427
 	select STM32_HAVE_ETHMAC
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
-	select STM32_HAVE_I2S3
 	select STM32_HAVE_SPI4
 	select STM32_HAVE_SPI5
+	select STM32_HAVE_I2S3
+	select STM32_HAVE_I2C3
+	select STM32_HAVE_OTGFS
 	select STM32_HAVE_SPI6
 
 # This is really 429/439, but we treat the two the same.
+
 config STM32_STM32F429
 	bool
 	default n
@@ -1684,6 +1704,8 @@ config STM32_STM32F429
 	select STM32_HAVE_UART7
 	select STM32_HAVE_UART8
 	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM3
+	select STM32_HAVE_TIM4
 	select STM32_HAVE_TIM5
 	select STM32_HAVE_TIM6
 	select STM32_HAVE_TIM7
@@ -1708,6 +1730,9 @@ config STM32_STM32F429
 	select STM32_HAVE_SPI4
 	select STM32_HAVE_SPI5
 	select STM32_HAVE_SPI6
+	select STM32_HAVE_I2S3
+	select STM32_HAVE_I2C3
+	select STM32_HAVE_OTGFS
 
 config STM32_STM32F446
 	bool
@@ -1736,11 +1761,16 @@ config STM32_STM32F446
 	select STM32_HAVE_CAN2
 	select STM32_HAVE_DAC1
 	select STM32_HAVE_DAC2
+	select STM32_HAVE_SPI3
 	select STM32_HAVE_SPI4
+	select STM32_HAVE_I2S3
+	select STM32_HAVE_I2C3
+	select STM32_HAVE_OTGFS
 	select STM32_HAVE_SAIPLL
 	select STM32_HAVE_I2SPLL
 
 # This is really 469/479, but we treat the two the same.
+
 config STM32_STM32F469
 	bool
 	default n
@@ -1774,12 +1804,15 @@ config STM32_STM32F469
 	select STM32_HAVE_DAC1
 	select STM32_HAVE_DAC2
 	select STM32_HAVE_RNG
+	select STM32_HAVE_SPI3
 	select STM32_HAVE_SPI4
 	select STM32_HAVE_SPI5
 	select STM32_HAVE_SPI6
+	select STM32_HAVE_OTGFS
 	select STM32_HAVE_SAIPLL
 	select STM32_HAVE_I2SPLL
-
+	select STM32_HAVE_I2S3
+	select STM32_HAVE_I2C3
 
 config STM32_DFU
 	bool "DFU bootloader"
