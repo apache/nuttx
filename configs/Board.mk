@@ -50,6 +50,9 @@ OBJS = $(AOBJS) $(COBJS)
 
 SCHEDSRCDIR = $(TOPDIR)$(DELIM)sched
 ARCHSRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
+ifneq ($(CONFIG_ARCH_FAMILY),)
+  ARCH_FAMILY = $(patsubst "%",%,$(CONFIG_ARCH_FAMILY))
+endif
 
 ifneq ($(ZDSVERSION),)
 ifeq ($(WINTOOL),y)
@@ -67,8 +70,8 @@ ifeq ($(CONFIG_ARCH_SIM),y)
 else
   CFLAGS += -I "${shell cygpath -w $(ARCHSRCDIR)$(DELIM)chip}"
   CFLAGS += -I "${shell cygpath -w $(ARCHSRCDIR)$(DELIM)common}"
-ifneq ($(CONFIG_ARCH_FAMILY),)
-  CFLAGS += -I "${shell cygpath -w $(ARCHSRCDIR)$(DELIM)$(CONFIG_ARCH_FAMILY)}"
+ifneq ($(ARCH_FAMILY),)
+  CFLAGS += -I "${shell cygpath -w $(ARCHSRCDIR)$(DELIM)$(ARCH_FAMILY)}"
 endif
 endif
 else
@@ -78,8 +81,8 @@ ifeq ($(CONFIG_ARCH_SIM),y)
 else
   CFLAGS += -I$(ARCHSRCDIR)$(DELIM)chip
   CFLAGS += -I$(ARCHSRCDIR)$(DELIM)common
-ifneq ($(CONFIG_ARCH_FAMILY),)
-  CFLAGS += -I$(ARCHSRCDIR)$(DELIM)$(CONFIG_ARCH_FAMILY)
+ifneq ($(ARCH_FAMILY),)
+  CFLAGS += -I$(ARCHSRCDIR)$(DELIM)$(ARCH_FAMILY)
 endif
 endif
 endif

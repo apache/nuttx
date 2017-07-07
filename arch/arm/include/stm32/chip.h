@@ -92,7 +92,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    0   /* No advanced timers */
 #  define STM32_NGTIM                    3   /* 16-bit general up/down timers TIM2-4 with DMA */
@@ -133,7 +133,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    0   /* No advanced timers */
 #  define STM32_NGTIM                    3   /* 16-bit general up/down timers TIM2-4 with DMA */
@@ -174,7 +174,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    0   /* No advanced timers */
 #  define STM32_NGTIM                    3   /* 16-bit general up/down timers TIM2-4 with DMA */
@@ -215,7 +215,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    0   /* No advanced timers */
 #  define STM32_NGTIM                    3   /* 16-bit general up/down timers TIM2-4 with DMA */
@@ -256,7 +256,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    0   /* No advanced timers */
 #  define STM32_NGTIM                    3   /* 16-bit general up/down timers TIM2-4 with DMA */
@@ -297,7 +297,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    0   /* No advanced timers */
 #  define STM32_NGTIM                    3   /* 16-bit general up/down timers TIM2-4 with DMA */
@@ -337,7 +337,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    0   /* No advanced timers */
 #  define STM32_NGTIM                    3   /* 16-bit general up/down timers TIM2-4 with DMA */
@@ -377,7 +377,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    0   /* No advanced timers */
 #  define STM32_NGTIM                    3   /* 16-bit general up/down timers TIM2-4 with DMA */
@@ -417,7 +417,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    0   /* No advanced timers */
 #  define STM32_NGTIM                    3   /* 16-bit general up/down timers TIM2-4 with DMA */
@@ -457,7 +457,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    0   /* No advanced timers */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM2-4 with DMA
@@ -498,7 +498,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    0   /* No advanced timers */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM2-4 with DMA
@@ -543,7 +543,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM                    3   /* 16-bit general timers TIM2-4 with DMA */
@@ -582,7 +582,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM                    3   /* 16-bit general timers TIM2-4 with DMA */
@@ -624,7 +624,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM2-5 with DMA */
@@ -664,7 +664,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM2-5 with DMA */
@@ -703,7 +703,7 @@
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    0   /* No advanced timer TIM1 */
 #  define STM32_NGTIM                    3   /* 16-bit general timers TIM2-4 */
@@ -743,7 +743,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM                    2   /* General timers TIM2,3 */
@@ -782,7 +782,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM                    3   /* General timers TIM2-4 */
@@ -821,7 +821,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM                    3   /* General timers TIM2-4 */
@@ -860,7 +860,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM                    3   /* General timers TIM2-4 */
@@ -904,7 +904,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and TIM8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM2-5 with DMA */
@@ -946,7 +946,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and TIM8 */
 #  define STM32_NGTIM                    4   /* General timers TIM2-5 */
@@ -988,7 +988,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM2-5 with DMA */
@@ -1028,7 +1028,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timers TIM1 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM2-5 with DMA */
@@ -1066,7 +1066,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timers TIM1 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM2-5 with DMA */
@@ -1104,7 +1104,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timers TIM1 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM2-5 with DMA */
@@ -1144,7 +1144,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -1183,7 +1183,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -1222,7 +1222,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -1269,7 +1269,7 @@
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
 #  define CONFIG_STM32_STM32F30XX        1   /* STM32F30xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    1   /* (1) Advanced 16-bit timers with DMA: TIM1 (no TIM8) */
 #  define STM32_NGTIM                    6   /* (2) 16-bit general timers with DMA: TIM3 and TIM4
@@ -1310,7 +1310,7 @@
 #  define CONFIG_STM32_STM32F30XX        1   /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    1   /* (1) Advanced 16-bit timers with DMA: TIM1 (no TIM8) */
 #  define STM32_NGTIM                    6   /* (2) 16-bit general timers with DMA: TIM3 and TIM4
@@ -1351,7 +1351,7 @@
 #  define CONFIG_STM32_STM32F30XX        1   /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    1   /* (1) Advanced 16-bit timers with DMA: TIM1 (no TIM8) */
 #  define STM32_NGTIM                    6   /* (2) 16-bit general timers with DMA: TIM3 and TIM4
@@ -1392,7 +1392,7 @@
 #  define CONFIG_STM32_STM32F30XX        1   /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    1   /* (1) Advanced 16-bit timers with DMA: TIM1 (no TIM8) */
 #  define STM32_NGTIM                    6   /* (2) 16-bit general timers with DMA: TIM3 and TIM4
@@ -1433,7 +1433,7 @@
 #  define CONFIG_STM32_STM32F30XX        1   /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 
 #  define STM32_NATIM                    1   /* (1) Advanced 16-bit timers with DMA: TIM1 */
@@ -1474,7 +1474,7 @@
 #  define CONFIG_STM32_STM32F30XX        1   /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 
 #  define STM32_NATIM                    1   /* (1) Advanced 16-bit timers with DMA: TIM1 */
@@ -1515,7 +1515,7 @@
 #  define CONFIG_STM32_STM32F30XX        1   /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 
 #  define STM32_NATIM                    2   /* (2) Advanced 16-bit timers with DMA: TIM1 and TIM8 */
@@ -1556,7 +1556,7 @@
 #  define CONFIG_STM32_STM32F30XX        1   /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 
 #  define STM32_NATIM                    2   /* (2) Advanced 16-bit timers with DMA: TIM1 and TIM8 */
@@ -1597,7 +1597,7 @@
 #  define CONFIG_STM32_STM32F30XX        1   /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 
 #  define STM32_NATIM                    2   /* (2) Advanced 16-bit timers with DMA: TIM1 and TIM8 */
@@ -1638,7 +1638,7 @@
 #  define CONFIG_STM32_STM32F30XX        1   /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 
 #  define STM32_NATIM                    2   /* (2) Advanced 16-bit timers with DMA: TIM1 and TIM8 */
@@ -1679,7 +1679,7 @@
 #  undef CONFIG_STM32_STM32F30XX             /* STM32F30xxx family */
 #  define CONFIG_STM32_STM32F33XX        1   /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 
 #  define STM32_HRTIM                    1   /* (1) High-resolution timer 16-bit, 10 channels: HRTIM1 */
@@ -1723,7 +1723,7 @@
 #  undef CONFIG_STM32_STM32F30XX             /* STM32F30xxx family */
 #  define CONFIG_STM32_STM32F33XX        1   /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 
 #  define STM32_HRTIM                    1   /* (1) High-resolution timer 16-bit, 10 channels: HRTIM1 */
@@ -1767,7 +1767,7 @@
 #  undef CONFIG_STM32_STM32F30XX             /* STM32F30xxx family */
 #  define CONFIG_STM32_STM32F33XX        1   /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 
 #  define STM32_HRTIM                    1   /* (1) High-resolution timer 16-bit, 10 channels: HRTIM1 */
@@ -1810,7 +1810,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  define CONFIG_STM32_STM32F37XX        1   /* STM32F37xxx family */
-#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F4XXX            /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 
 #  define STM32_NATIM                    0   /* (0) Advanced 16-bit timers with DMA: */
@@ -1856,7 +1856,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    1   /* One advanced timers TIM1 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -1894,7 +1894,7 @@
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    1   /* One advanced timers TIM1 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -1933,7 +1933,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    1   /* One advanced timers TIM1 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -1972,7 +1972,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    1   /* One advanced timers TIM1 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2011,7 +2011,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2050,7 +2050,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2089,7 +2089,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2128,7 +2128,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2167,7 +2167,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2206,7 +2206,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2245,7 +2245,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2284,7 +2284,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2323,7 +2323,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2362,7 +2362,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx, STM32407xx and STM32F427/437 */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2401,7 +2401,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx, STM32407xx and STM32F427/437 */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2440,7 +2440,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx, STM32407xx and STM32F427/437 */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2479,7 +2479,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx, STM32407xx and STM32F427/437 */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2518,7 +2518,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx, STM32407xx and STM32F427/437/429/439 */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2557,7 +2557,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx, STM32407xx and STM32F427/437 */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2596,7 +2596,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx, STM32407xx and STM32F427/437 STM32F466 */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2635,7 +2635,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx, STM32407xx and STM32F427/437 STM32F466 */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    0   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2674,7 +2674,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx, STM32407xx and STM32F427/437 STM32F466 */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2713,7 +2713,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx, STM32407xx and STM32F427/437 STM32F466 */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2752,7 +2752,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx, STM32407xx and STM32F427/437 */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -2794,7 +2794,7 @@
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F33XX            /* STM32F33xxx family */
 #  undef  CONFIG_STM32_STM32F37XX            /* STM32F37xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx, STM32407xx and STM32F427/437 */
+#  define CONFIG_STM32_STM32F4XXX        1   /* STM32F4xxxx family */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA

@@ -285,7 +285,7 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
         }
     }
 
-  nwarn("WARNING: Old packet .. reset\n");
+  nwarn("WARNING: SYN with no listener (or old packet) .. reset\n");
 
   /* This is (1) an old duplicate packet or (2) a SYN packet but with
    * no matching listener found.  Send RST packet in either case.

@@ -55,7 +55,13 @@
 #include "icmpv6/icmpv6.h"
 
 #undef HAVE_FWDALLOC
-#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NETDEV_MULTINIC)
+#ifdef CONFIG_NET_IPFORWARD
+
+/* Must of the logic in this header file applies only for configurations
+ * will multiple network devices.
+ */
+
+#ifdef CONFIG_NETDEV_MULTINIC
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -66,6 +72,8 @@
 #ifndef CONFIG_NET_IPFORWARD_NSTRUCT
 #  define CONFIG_NET_IPFORWARD_NSTRUCT 4
 #endif
+
+#define FWD_HEADER(fwd) (FAR union fwd_iphdr_u *)((fwd)->f_iob->io_data)
 
 /****************************************************************************
  * Public Types
@@ -152,11 +160,9 @@ struct forward_s
 {
   FAR struct forward_s        *f_flink;   /* Supports a singly linked list */
   FAR struct net_driver_s     *f_dev;     /* Forwarding device */
-  FAR struct iob_s            *f_iob;     /* IOBs containing the data payload */
+  FAR struct iob_s            *f_iob;     /* IOB chain containing the packet */
   FAR struct devif_callback_s *f_cb;      /* Reference to callback instance */
-  union fwd_iphdr_u            f_hdr;     /* Copy of original L2+L3 headers */
-  union fwd_conn_u             f_conn;    /* Protocol-specific connectin struct */
-  uint8_t                      f_hdrsize; /* The size of the L2+L3 headers */
+  union fwd_conn_u             f_conn;    /* Protocol-specific connection struct */
 };
 
 /****************************************************************************
@@ -206,6 +212,68 @@ FAR struct forward_s *ip_forward_alloc(void);
 void ip_forward_free(FAR struct forward_s *fwd);
 
 /****************************************************************************
+ * Name: ipv4_forward_broadcast
+ *
+ * Description:
+ *   This function is called from ipv4_input when a broadcast or multicast
+ *   packet is received.  If CONFIG_NET_IPFORWARD_BROADCAST is enabled, this
+ *   function will forward the broadcast packet to other networks through
+ *   other network devices.
+ *
+ * Input Parameters:
+ *   dev   - The device on which the packet was received and which contains
+ *           the IPv4 packet.
+ *   ipv4  - A convenience pointer to the IPv4 header in within the IPv4
+ *           packet
+ *
+ *   On input:
+ *   - dev->d_buf holds the received packet.
+ *   - dev->d_len holds the length of the received packet MINUS the
+ *     size of the L1 header.  That was subtracted out by ipv4_input.
+ *   - ipv4 points to the IPv4 header with dev->d_buf.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPFORWARD_BROADCAST
+void ipv4_forward_broadcast(FAR struct net_driver_s *dev,
+                            FAR struct ipv4_hdr_s *ipv4);
+#endif
+
+/****************************************************************************
+ * Name: ipv6_forward_broadcast
+ *
+ * Description:
+ *   This function is called from ipv6_input when a broadcast or multicast
+ *   packet is received.  If CONFIG_NET_IPFORWARD_BROADCAST is enabled, this
+ *   function will forward the broadcast packet to other networks through
+ *   other network devices.
+ *
+ * Input Parameters:
+ *   dev   - The device on which the packet was received and which contains
+ *           the IPv6 packet.
+ *   ipv6  - A convenience pointer to the IPv6 header in within the IPv6
+ *           packet
+ *
+ *   On input:
+ *   - dev->d_buf holds the received packet.
+ *   - dev->d_len holds the length of the received packet MINUS the
+ *     size of the L1 header.  That was subtracted out by ipv6_input.
+ *   - ipv6 points to the IPv6 header with dev->d_buf.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPFORWARD_BROADCAST
+void ipv6_forward_broadcast(FAR struct net_driver_s *dev,
+                            FAR struct ipv6_hdr_s *ipv6);
+#endif
+
+/****************************************************************************
  * Name: devif_forward
  *
  * Description:
@@ -225,5 +293,67 @@ void ip_forward_free(FAR struct forward_s *fwd);
 
 void devif_forward(FAR struct forward_s *fwd);
 
-#endif /* CONFIG_NET_IPFORWARD && CONFIG_NETDEV_MULTINIC */
+#endif /* CONFIG_NETDEV_MULTINIC */
+
+/****************************************************************************
+ * Name: ipv4_forward
+ *
+ * Description:
+ *   This function is called from ipv4_input when a packet is received that
+ *   is not destined for us.  In this case, the packet may need to be
+ *   forwarded to another device (or sent back out the same device)
+ *   depending configuration, routing table information, and the IPv4
+ *   networks served by various network devices.
+ *
+ * Input Parameters:
+ *   dev   - The device on which the packet was received and which contains
+ *           the IPv4 packet.
+ *   ipv4  - A convenience pointer to the IPv4 header in within the IPv4
+ *           packet
+ *
+ *   On input:
+ *   - dev->d_buf holds the received packet.
+ *   - dev->d_len holds the length of the received packet MINUS the
+ *     size of the L1 header.  That was subtracted out by ipv4_input.
+ *   - ipv4 points to the IPv4 header with dev->d_buf.
+ *
+ * Returned Value:
+ *   Zero is returned if the packet was successfully forward;  A negated
+ *   errno value is returned if the packet is not forwardable.  In that
+ *   latter case, the caller (ipv4_input()) should drop the packet.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+int ipv4_forward(FAR struct net_driver_s *dev, FAR struct ipv4_hdr_s *ipv4);
+#endif
+
+/****************************************************************************
+ * Name: ipv6_forward
+ *
+ * Description:
+ *   This function is called from ipv6_input when a packet is received that
+ *   is not destined for us.  In this case, the packet may need to be
+ *   forwarded to another device (or sent back out the same device)
+ *   depending configuration, routing table information, and the IPv6
+ *   networks served by various network devices.
+ *
+ * Input Parameters:
+ *   dev   - The device on which the packet was received and which contains
+ *           the IPv6 packet.
+ *   ipv6  - A convenience pointer to the IPv6 header in within the IPv6
+ *           packet
+ *
+ * Returned Value:
+ *   Zero is returned if the packet was successfully forward;  A negated
+ *   errno value is returned if the packet is not forwardable.  In that
+ *   latter case, the caller (ipv6_input()) should drop the packet.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6);
+#endif
+
+#endif /* CONFIG_NET_IPFORWARD */
 #endif /* __NET_DEVIF_IP_FORWARD_H */

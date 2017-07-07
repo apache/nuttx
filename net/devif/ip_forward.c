@@ -40,8 +40,9 @@
 #include <nuttx/config.h>
 
 #include <string.h>
-#include <debug.h>
+#include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include "devif/ip_forward.h"
 
@@ -78,6 +79,12 @@ void ip_forward_initialize(void)
 {
   FAR struct forward_s *fwd;
   int i;
+
+  /* The IOB size must be such that the maximum L2 and L3 headers fit into
+   * the contiguous memory of the first IOB in the IOB chain.
+   */
+
+  DEBUGASSERT(sizeof(union fwd_iphdr_u) <= CONFIG_IOB_BUFSIZE);
 
   /* Add all pre-allocated forwarding structures to the free list */
 

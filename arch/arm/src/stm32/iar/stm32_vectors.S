@@ -469,7 +469,7 @@ __vector_table:
 #  include "chip/stm32f42xxx_vectors.h"
 #elif defined(CONFIG_STM32_STM32F446)
 #  include "chip/stm32f44xxx_vectors.h"
-#elif defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F4XXX)
 #  include "chip/stm32f40xxx_vectors.h"
 #else
 #  error "No vectors for STM32 chip"
@@ -788,7 +788,7 @@ handlers:
 #  include "chip/stm32f42xxx_vectors.h"
 #elif defined(CONFIG_STM32_STM32F446)
 #  include "chip/stm32f44xxx_vectors.h"
-#elif defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F4XXX)
 #  include "chip/stm32f40xxx_vectors.h"
 #else
 #  error "No handlers for STM32 chip"

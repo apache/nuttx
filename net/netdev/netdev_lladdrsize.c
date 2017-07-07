@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_dma.c
+ * net/netdev/netdev_lladdrsize.c
  *
- *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,29 +39,67 @@
 
 #include <nuttx/config.h>
 
-#include "chip.h"
+#include <string.h>
+#include <errno.h>
+
+#include <net/if.h>
+
+#include <nuttx/net/net.h>
+#include <nuttx/net/netdev.h>
+
+#include "netdev/netdev.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/* This file is only a thin shell that includes the correct DMA implementation
- * for the selected STM32 family.  The correct file cannot be selected by
- * the make system because it needs the intelligence that only exists in
- * chip.h that can associate an STM32 part number with an STM32 family.
+/****************************************************************************
+ * Name: netdev_type_lladdrsize
  *
- * The STM32 F4 DMA differs from the F1 DMA primarily in that it adds the
- * concept of "streams" that are used to associate DMA sources with DMA
- * channels.
- */
+ * Description:
+ *   Returns the size of the MAC address associated with a link layer type.
+ *
+ * Parameters:
+ *   lltype - link layer type code
+ *
+ * Returned Value:
+ *   The size of the MAC address associated with this device
+ *
+ ****************************************************************************/
 
-#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
-#  include "stm32f10xxx_dma.c"
-#elif defined(CONFIG_STM32_STM32F33XX)
-#  include "stm32f33xxx_dma.c"
-#elif defined(CONFIG_STM32_STM32F20XX)
-#  include "stm32f20xxx_dma.c"
-#elif defined(CONFIG_STM32_STM32F4XXX)
-#  include "stm32f40xxx_dma.c"
+int netdev_type_lladdrsize(uint8_t lltype)
+{
+  /* Get the length of the address for this link layer type */
+
+#ifdef CONFIG_NET_ETHERNET
+  if (lltype == NET_LL_ETHERNET)
+    {
+      /* size of the Ethernet MAC address */
+
+      return IFHWADDRLEN;
+    }
+  else
 #endif
+#ifdef CONFIG_NET_6LOWPAN
+  if (lltype == NET_LL_IEEE802154)
+    {
+      /* 6LoWPAN can be configured to use either extended or short
+       * addressing.
+       */
+
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+      return NET_6LOWPAN_EADDRSIZE;
+#else
+      return NET_6LOWPAN_SADDRSIZE;
+#endif
+    }
+  else
+#endif
+    {
+      /* Either the link layer type associated with lltype has no address,
+       * or support for that link layer type is not enabled.
+       */
+
+      return 0;
+    }
+}

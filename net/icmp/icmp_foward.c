@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/icmpv6/icmpv6_forward.c
+ * net/icmp/icmp_forward.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,9 +54,9 @@
 #include "netdev/netdev.h"
 #include "arp/arp.h"
 #include "neighbor/neighbor.h"
-#include "icmpv6/icmpv6.h"
+#include "icmp/icmp.h"
 
-#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_ICMPv6) && \
+#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_ICMP) && \
     defined(CONFIG_NETDEV_MULTINIC)
 
 /****************************************************************************
@@ -64,25 +64,29 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: icmpv6_forward_addrchck
+ * Name: icmp_forward_addrchck
  *
  * Description:
- *   Check if the destination IP address is in the Pv6 Neighbor table.  If
- *   not, then the send won't actually make it out... it will be replaced
- *   with a Neighbor Solicitation.
+ *   Check if the destination IP address is in the IPv4 ARP table.  If not,
+ *   then the send won't actually make it out... it will be replaced with an
+ *   ARP request (IPv4).
  *
  *   NOTE 1: This could be an expensive check if there are a lot of
- *   entries in the Neighbor table.
+ *   entries in the ARP table.
  *
- *   NOTE 2: If CONFIG_NET_ARP_SEND then we can be assured that the IP
+ *   NOTE 2: If we are actually harvesting IP addresses on incoming IP
+ *   packets, then this check should not be necessary; the MAC mapping
+ *   should already be in the ARP table in many cases.
+ *
+ *   NOTE 3: If CONFIG_NET_ARP_SEND then we can be assured that the IP
  *   address mapping is already in the ARP table.
  *
  * Parameters:
  *   fwd - The forwarding state structure
  *
  * Returned Value:
- *   true - The Ethernet MAC address is in the Neighbor table (OR the
- *          network device is not Ethernet).
+ *   true - The Ethernet MAC address is in the ARP table (OR the network
+ *          device is not Ethernet).
  *
  * Assumptions:
  *   The network is locked.
@@ -90,7 +94,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ETHERNET
-static inline bool icmpv6_forward_addrchck(FAR struct forward_s *fwd)
+static inline bool icmp_forward_addrchck(FAR struct forward_s *fwd)
 {
 #if !defined(CONFIG_NET_ARP_IPIN) && !defined(CONFIG_NET_ARP_SEND)
   FAR union fwd_iphdr_u *iphdr;
@@ -107,20 +111,20 @@ static inline bool icmpv6_forward_addrchck(FAR struct forward_s *fwd)
     }
 #endif
 
-#if !defined(CONFIG_NET_ICMPv6_NEIGHBOR)
+#if !defined(CONFIG_NET_ARP_IPIN) && !defined(CONFIG_NET_ARP_SEND)
   iphdr = FWD_HEADER(fwd);
-  return (arp_find(iphdr->ipv6.l2.destipaddr) != NULL);
+  return (arp_find(iphdr->ipv4.l2.destipaddr) != NULL);
 #else
   return true;
 #endif
 }
 
 #else /* CONFIG_NET_ETHERNET */
-#  define icmpv6_forward_addrchck(fwd) (true)
+#  define icmp_forward_addrchck(fwd) (true)
 #endif /* CONFIG_NET_ETHERNET */
 
 /****************************************************************************
- * Name: icmpv6_dropstats
+ * Name: icmp_dropstats
  *
  * Description:
  *   Update statistics for a dropped packet.
@@ -134,19 +138,19 @@ static inline bool icmpv6_forward_addrchck(FAR struct forward_s *fwd)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_STATISTICS
-static inline void icmpv6_dropstats(FAR struct forward_s *fwd)
+static inline void icmp_dropstats(FAR struct forward_s *fwd)
 {
-  /* Increment the count of dropped ICMPv6 packets */
+  /* Increment the count of dropped ICMP packets */
 
-  g_netstats.icmpv6.drop++;
-  g_netstats.ipv6.drop++;
+  g_netstats.icmp.drop++;
+  g_netstats.ipv4.drop++;
 }
 #else
-#  define icmpv6_dropstats(fwd)
+#  define icmp_dropstats(fwd)
 #endif
 
 /****************************************************************************
- * Name: icmpv6_forward_interrupt
+ * Name: icmp_forward_interrupt
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -154,7 +158,7 @@ static inline void icmpv6_dropstats(FAR struct forward_s *fwd)
  *
  * Parameters:
  *   dev        The structure of the network driver that caused the interrupt
- *   conn       An instance of the ICMPv6 connection structure cast to void *
+ *   conn       An instance of the ICMP connection structure cast to void *
  *   pvpriv     An instance of struct forward_s cast to void*
  *   flags      Set of events describing why the callback was invoked
  *
@@ -166,9 +170,9 @@ static inline void icmpv6_dropstats(FAR struct forward_s *fwd)
  *
  ****************************************************************************/
 
-static uint16_t icmpv6_forward_interrupt(FAR struct net_driver_s *dev,
-                                         FAR void *conn, FAR void *pvpriv,
-                                         uint16_t flags)
+static uint16_t icmp_forward_interrupt(FAR struct net_driver_s *dev,
+                                       FAR void *conn, FAR void *pvpriv,
+                                       uint16_t flags)
 {
   FAR struct forward_s *fwd = (FAR struct forward_s *)pvpriv;
 
@@ -188,7 +192,7 @@ static uint16_t icmpv6_forward_interrupt(FAR struct net_driver_s *dev,
           /* Terminate the transfer with an error. */
 
           nwarn("WARNING: Network is down... Dropping\n");
-          icmpv6_dropstats(fwd);
+          icmp_dropstats(fwd);
         }
 
       /* Check if the outgoing packet is available.  It may have been claimed
@@ -197,7 +201,7 @@ static uint16_t icmpv6_forward_interrupt(FAR struct net_driver_s *dev,
        * we will just have to wait for the next polling cycle.
        */
 
-      else if (dev->d_sndlen > 0 || (flags & ICMPv6_NEWDATA) != 0)
+      else if (dev->d_sndlen > 0 || (flags & ICMP_NEWDATA) != 0)
         {
           /* Another thread has beat us sending data or the buffer is busy,
            * Wait for the next polling cycle and check again.
@@ -210,7 +214,7 @@ static uint16_t icmpv6_forward_interrupt(FAR struct net_driver_s *dev,
 
       else
         {
-          /* Copy the ICMPv6 data into driver's packet buffer and send it. */
+          /* Copy the ICMP data into driver's packet buffer and send it. */
 
           devif_forward(fwd);
 
@@ -219,7 +223,7 @@ static uint16_t icmpv6_forward_interrupt(FAR struct net_driver_s *dev,
            * will be replaced with an ARP request or Neighbor Solicitation.
            */
 
-          if (!icmpv6_forward_addrchck(fwd))
+          if (!icmp_forward_addrchck(fwd))
             {
               return flags;
             }
@@ -231,7 +235,7 @@ static uint16_t icmpv6_forward_interrupt(FAR struct net_driver_s *dev,
       fwd->f_cb->priv  = NULL;
       fwd->f_cb->event = NULL;
 
-      icmpv6_callback_free(dev, fwd->f_cb);
+      icmp_callback_free(dev, fwd->f_cb);
 
       /* Free any IOBs */
 
@@ -253,13 +257,13 @@ static uint16_t icmpv6_forward_interrupt(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: icmpv6_forward
+ * Name: icmp_forward
  *
  * Description:
- *   Called by the IP forwarding logic when an ICMPv6 packet is received on
+ *   Called by the IP forwarding logic when an ICMP packet is received on
  *   one network device, but must be forwarded on another network device.
  *
- *   Set up to forward the ICMPv6 packet on the specified device.  This
+ *   Set up to forward the ICMP packet on the specified device.  This
  *   function will set up a send "interrupt" handler that will perform the
  *   actual send asynchronously and must return without waiting for the
  *   send to complete.
@@ -275,18 +279,18 @@ static uint16_t icmpv6_forward_interrupt(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int icmpv6_forward(FAR struct forward_s *fwd)
+int icmp_forward(FAR struct forward_s *fwd)
 {
   DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
 
   /* Set up the callback in the connection */
 
-  fwd->f_cb = icmpv6_callback_alloc(fwd->f_dev);
+  fwd->f_cb = icmp_callback_alloc(fwd->f_dev);
   if (fwd->f_cb != NULL)
     {
-      fwd->f_cb->flags   = (ICMPv6_POLL | NETDEV_DOWN);
+      fwd->f_cb->flags   = (ICMP_POLL | NETDEV_DOWN);
       fwd->f_cb->priv    = (FAR void *)fwd;
-      fwd->f_cb->event   = icmpv6_forward_interrupt;
+      fwd->f_cb->event   = icmp_forward_interrupt;
 
       /* Notify the device driver of the availability of TX data */
 
@@ -297,4 +301,4 @@ int icmpv6_forward(FAR struct forward_s *fwd)
   return -EBUSY;
 }
 
-#endif /* CONFIG_NET_IPFORWARD && CONFIG_NET_ICMPv6 && CONFIG_NETDEV_MULTINIC */
+#endif /* CONFIG_NET_IPFORWARD && CONFIG_NET_ICMP && CONFIG_NETDEV_MULTINIC */

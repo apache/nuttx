@@ -134,7 +134,7 @@
 
 /* STM32 F4 Family ******************************************************************/
 
-#elif defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F4XXX)
 #  include "chip/stm32f40xxx_pinmap.h"
 #else
 #  error "No pinmap file for this STM32 chip"
@@ -157,7 +157,7 @@
 #    include "chip/stm32f33xxx_vectors.h"
 #  elif defined(CONFIG_STM32_STM32F37XX)
 #    include "chip/stm32f37xxx_vectors.h"
-#  elif defined(CONFIG_STM32_STM32F40XX)
+#  elif defined(CONFIG_STM32_STM32F4XXX)
 #    include "chip/stm32f40xxx_vectors.h"
 #  else
 #    error "No vector file for this STM32 family"

@@ -89,7 +89,7 @@
 #else
 #  define TIMTYPE_TIM2     TIMTYPE_GENERAL32
 #endif
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #  define TIMTYPE_TIM3     TIMTYPE_GENERAL32
 #  define TIMTYPE_TIM4     TIMTYPE_GENERAL32
 #else
@@ -1719,7 +1719,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
        */
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX)
       ccer &= ~(ATIM_CCER_CC1NE | ATIM_CCER_CC1NP | ATIM_CCER_CC2NE | ATIM_CCER_CC2NP |
                 ATIM_CCER_CC3NE | ATIM_CCER_CC3NP | ATIM_CCER_CC4NP);
 #else
@@ -1742,12 +1742,12 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
       pwm_putreg(priv, STM32_ATIM_BDTR_OFFSET, bdtr);
     }
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX)
   else
 #endif
 #endif
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX)
     {
       /* CCxNP must be cleared in any case */
 
@@ -2284,7 +2284,7 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
 #elif defined(CONFIG_STM32_STM32F20XX) || \
       defined(CONFIG_STM32_STM32F30XX) || \
       defined(CONFIG_STM32_STM32F37XX) || \
-      defined(CONFIG_STM32_STM32F40XX) || \
+      defined(CONFIG_STM32_STM32F4XXX) || \
       defined(CONFIG_STM32_STM32L15XX)
       pincfg |= GPIO_INPUT | GPIO_FLOAT;
 #else

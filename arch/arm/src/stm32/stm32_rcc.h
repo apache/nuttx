@@ -57,7 +57,7 @@
 #  include "chip/stm32f33xxx_rcc.h"
 #elif defined(CONFIG_STM32_STM32F37XX)
 #  include "chip/stm32f37xxx_rcc.h"
-#elif defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F4XXX)
 #  include "chip/stm32f40xxx_rcc.h"
 #endif
 
@@ -113,7 +113,7 @@ extern uint32_t _vectors[];  /* See stm32_vectors.S */
  *
  ************************************************************************************/
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 static inline void stm32_mco1config(uint32_t source, uint32_t div)
 {
   uint32_t regval;
@@ -214,7 +214,7 @@ static inline void stm32_mcodivconfig(uint32_t source, uint32_t divider)
  *
  ************************************************************************************/
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 static inline void stm32_mco2config(uint32_t source, uint32_t div)
 {
   uint32_t regval;

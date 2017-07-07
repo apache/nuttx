@@ -126,7 +126,7 @@
 #  ifndef CONFIG_STM32_SDIO_DMAPRIO
 #    if defined(CONFIG_STM32_STM32F10XX)
 #      define CONFIG_STM32_SDIO_DMAPRIO  DMA_CCR_PRIMED
-#    elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#    elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #      define CONFIG_STM32_SDIO_DMAPRIO  DMA_SCR_PRIVERYHI
 #    else
 #      error "Unknown STM32 DMA"
@@ -136,7 +136,7 @@
 #    if (CONFIG_STM32_SDIO_DMAPRIO & ~DMA_CCR_PL_MASK) != 0
 #      error "Illegal value for CONFIG_STM32_SDIO_DMAPRIO"
 #    endif
-#  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #    if (CONFIG_STM32_SDIO_DMAPRIO & ~DMA_SCR_PL_MASK) != 0
 #      error "Illegal value for CONFIG_STM32_SDIO_DMAPRIO"
 #    endif
@@ -207,7 +207,7 @@
 
 /* STM32 F4 stream configuration register (SCR) settings. */
 
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #  define SDIO_RXDMA32_CONFIG    (DMA_SCR_PFCTRL | DMA_SCR_DIR_P2M|DMA_SCR_MINC | \
                                   DMA_SCR_PSIZE_32BITS | DMA_SCR_MSIZE_32BITS | \
                                   CONFIG_STM32_SDIO_DMAPRIO | DMA_SCR_PBURST_INCR4 | \
@@ -227,7 +227,7 @@
 
 #if defined(CONFIG_STM32_STM32F10XX)
 #  define SDIO_DMACHAN           DMACHAN_SDIO
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #  define SDIO_DMACHAN           DMAMAP_SDIO
 #else
 #  error "Unknown STM32 DMA"
@@ -2649,7 +2649,7 @@ static int stm32_registercallback(FAR struct sdio_dev_s *dev,
 static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
                               FAR const uint8_t *buffer, size_t buflen)
 {
-#if !defined(CONFIG_STM32_STM32F40XX)
+#if !defined(CONFIG_STM32_STM32F4XXX)
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);

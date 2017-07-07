@@ -80,7 +80,7 @@
 
 #ifdef SERIAL_HAVE_DMA
 
-#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 /* Verify that DMA has been enabled and the DMA channel has been defined.
  */
 
@@ -198,7 +198,7 @@
         defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
         defined(CONFIG_STM32_STM32F37XX)
 #      define CONFIG_USART_DMAPRIO  DMA_CCR_PRIMED
-#    elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#    elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #      define CONFIG_USART_DMAPRIO  DMA_SCR_PRIMED
 #    else
 #      error "Unknown STM32 DMA"
@@ -210,7 +210,7 @@
 #    if (CONFIG_USART_DMAPRIO & ~DMA_CCR_PL_MASK) != 0
 #      error "Illegal value for CONFIG_USART_DMAPRIO"
 #    endif
-#  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #    if (CONFIG_USART_DMAPRIO & ~DMA_SCR_PL_MASK) != 0
 #      error "Illegal value for CONFIG_USART_DMAPRIO"
 #    endif
@@ -220,7 +220,7 @@
 
 /* DMA control word */
 
-#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #    define SERIAL_DMA_CONTROL_WORD      \
                 (DMA_SCR_DIR_P2M       | \
                  DMA_SCR_CIRC          | \
@@ -1265,7 +1265,7 @@ static void up_set_format(struct uart_dev_s *dev)
 
   fraction   = (usartdiv32 - (mantissa << 5) + 1) >> 1;
 
-#if defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32F4XXX)
   /* The F4 supports 8 X in oversampling additional to the
    * standard oversampling by 16.
    *

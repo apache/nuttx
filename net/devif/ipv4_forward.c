@@ -49,6 +49,7 @@
 #include <nuttx/net/netstats.h>
 
 #include "netdev/netdev.h"
+#include "utils/utils.h"
 #include "sixlowpan/sixlowpan.h"
 #include "udp/udp.h"
 #include "tcp/tcp.h"
@@ -79,7 +80,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_MULTINIC
+#if defined(CONFIG_NETDEV_MULTINIC) && defined(CONFIG_DEBUG_NET_WARN)
 static int ipv4_hdrsize(FAR struct ipv4_hdr_s *ipv4)
 {
   /* Size is determined by the following protocol header, */
@@ -123,200 +124,6 @@ static int ipv4_hdrsize(FAR struct ipv4_hdr_s *ipv4)
 #endif
 
 /****************************************************************************
- * Name: ipv4_dev_forward
- *
- * Description:
- *   This function is called from ipv4_forward when it is necessary to
- *   forward a packet from the current device to different device.  In this
- *   case, the forwarding operation must be performed asynchronously when
- *   the TX poll is received from the forwarding device.
- *
- * Input Parameters:
- *   dev      - The device on which the packet was received and which
- *              contains the IPv4 packet.
- *   fwdddev  - The device on which the packet must be forwarded.
- *   ipv4     - A pointer to the IPv4 header in within the IPv4 packet
- *
- * Returned Value:
- *   Zero is returned if the packet was successfully forward;  A negated
- *   errno value is returned if the packet is not forwardable.  In that
- *   latter case, the caller (ipv4_input()) should drop the packet.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NETDEV_MULTINIC
-static int ipv4_dev_forward(FAR struct net_driver_s *dev,
-                            FAR struct net_driver_s *fwddev,
-                            FAR struct ipv4_hdr_s *ipv4)
-{
-  FAR struct forward_s *fwd = NULL;
-  FAR uint8_t *payload;
-  unsigned int paysize;
-  int hdrsize;
-  int ret;
-
-  /* Verify that the full packet will fit within the forwarding devices MTU.
-   * We provide no support for fragmenting forwarded packets.
-   */
-
-  if (NET_LL_HDRLEN(fwddev) + dev->d_len > NET_DEV_MTU(fwddev))
-    {
-      nwarn("WARNING: Packet > MTU... Dropping\n");
-      ret = -EFBIG;
-      goto errout;
-    }
-
-  /* Get a pre-allocated forwarding structure,  This structure will be
-   * completely zeroed when we receive it.
-   */
-
-  fwd = ip_forward_alloc();
-  if (fwd == NULL)
-    {
-      nwarn("WARNING: Failed to allocate forwarding structure\n");
-      ret = -ENOMEM;
-      goto errout;
-    }
-
-  /* Initialize the easy stuff in the forwarding structure */
-
-  fwd->f_dev = fwddev;   /* Forwarding device */
-
-  /* Get the size of the IPv4 + L3 header.  Use this to determine start of
-   * the data payload.
-   *
-   * Remember that the size of the L1 header has already been subtracted
-   * from dev->d_len.
-   *
-   * REVISIT: Consider an alternative design that does not require data
-   * copying.  This would require a pool of d_buf's that are managed by
-   * the network rather than the network device.
-   */
-
-  hdrsize = ipv4_hdrsize(ipv4);
-  if (hdrsize < IPv4_HDRLEN)
-    {
-      nwarn("WARNING: Could not determine L2+L3 header size\n");
-      ret = -EPROTONOSUPPORT;
-      goto errout_with_fwd;
-    }
-
-  /* Save the entire L2 and L3 headers in the state structure */
-
-  if (hdrsize >  sizeof(union fwd_iphdr_u))
-    {
-      nwarn("WARNING: Header is too big for pre-allocated structure\n");
-      ret = -E2BIG;
-      goto errout_with_fwd;
-    }
-
-  memcpy(&fwd->f_hdr, ipv4, hdrsize);
-  fwd->f_hdrsize = hdrsize;
-
-  /* Use the L2 + L3 header size to determine start and size of the data
-   * payload.
-   *
-   * Remember that the size of the L1 header has already been subtracted
-   * from dev->d_len.
-   */
-
-  payload = (FAR uint8_t *)ipv4 + hdrsize;
-  paysize = dev->d_len - hdrsize;
-
-  /* If there is a payload, then copy it into an IOB chain.
-   *
-   * REVISIT: Consider an alternative design that does not require data
-   * copying.  This would require a pool of d_buf's that are managed by
-   * the network rather than the network device.
-   */
-
-  if (paysize > 0)
-    {
-      /* Try to allocate the head of an IOB chain.  If this fails, the
-       * packet will be dropped; we are not operating in a context
-       * where waiting for an IOB is a good idea
-       */
-
-      fwd->f_iob = iob_tryalloc(false);
-      if (fwd->f_iob == NULL)
-        {
-          nwarn("WARNING: iob_tryalloc() failed\n");
-          ret = -ENOMEM;
-          goto errout_with_fwd;
-        }
-
-      /* Copy the packet data payload into an IOB chain. iob_trycopin() will
-       * not wait, but will fail there are no available IOBs.
-       */
-
-      ret = iob_trycopyin(fwd->f_iob, payload, paysize, 0, false);
-      if (ret < 0)
-        {
-          nwarn("WARNING: iob_trycopyin() failed: %d\n", ret);
-          goto errout_with_iobchain;
-        }
-    }
-
-  /* Then set up to forward the packet according to the protocol.
-   *
-   * REVISIT: Are these protocol specific forwarders necessary?  I think
-   * that this could be done with a single forwarding function for all
-   * protocols.
-   */
-
-  switch (ipv4->proto)
-    {
-#ifdef CONFIG_NET_TCP
-    case IP_PROTO_TCP:
-      {
-        /* Forward a TCP packet. */
-
-        ret = tcp_forward(fwd);
-      }
-      break;
-#endif
-
-#ifdef CONFIG_NET_UDP
-    case IP_PROTO_UDP:
-      {
-        /* Forward a UDP packet */
-
-        ret = udp_forward(fwd);
-      }
-      break;
-#endif
-
-    case IP_PROTO_ICMP: /* Not yet supported */
-    default:
-      nwarn("WARNING: Unrecognized proto: %u\n", ipv4->proto);
-      ret = -EPROTONOSUPPORT;
-      break;
-    }
-
-  if (ret >= 0)
-    {
-      dev->d_len = 0;
-      return OK;
-    }
-
-errout_with_iobchain:
-  if (fwd != NULL && fwd->f_iob != NULL)
-    {
-      iob_free_chain(fwd->f_iob);
-    }
-
-errout_with_fwd:
-  if (fwd != NULL)
-    {
-      ip_forward_free(fwd);
-    }
-
-errout:
-  return ret;
-}
-#endif /* CONFIG_NETDEV_MULTINIC */
-
-/****************************************************************************
  * Name: ipv4_decr_ttl
  *
  * Description:
@@ -340,15 +147,17 @@ errout:
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NETDEV_MULTINIC
 static int ipv4_decr_ttl(FAR struct ipv4_hdr_s *ipv4)
 {
+  uint16_t sum;
   int ttl = (int)ipv4->ttl - 1;
 
   if (ttl <= 0)
     {
 #ifdef CONFIG_NET_ICMP
       /* Return an ICMP error packet back to the sender. */
-#warning Missing logic
+#  warning Missing logic
 #endif
 
       /* Return zero which must cause the packet to be dropped */
@@ -360,13 +169,26 @@ static int ipv4_decr_ttl(FAR struct ipv4_hdr_s *ipv4)
 
   ipv4->ttl = ttl;
 
-  /* NOTE: We do not have to recalculate the IPv4 checksum because (1) the
-   * IPv4 header does not include a checksum itself and (2) the TTL is not
-   * included in the sum for the TCP and UDP headers.
+  /* Re-calculate the IPv4 checksum.  This checksum is the Internet checksum
+   * of the 20 bytes of the IPv4 header.  This checksum will be different
+   * because we just modify the IPv4 TTL.
    */
 
+  ipv4->ipchksum = 0;
+  sum            = chksum(0, (FAR const uint8_t *)ipv4, IPv4_HDRLEN);
+  if (sum == 0)
+    {
+      sum = 0xffff;
+    }
+  else
+    {
+      sum = htons(sum);
+    }
+
+  ipv4->ipchksum = ~sum;
   return ttl;
 }
+#endif
 
 /****************************************************************************
  * Name: ipv4_dropstats
@@ -407,6 +229,7 @@ static void ipv4_dropstats(FAR struct ipv4_hdr_s *ipv4)
 #endif
 
     default:
+      g_netstats.ipv4.protoerr++;
       break;
     }
 
@@ -414,6 +237,254 @@ static void ipv4_dropstats(FAR struct ipv4_hdr_s *ipv4)
 }
 #else
 #  define ipv4_dropstats(ipv4)
+#endif
+
+/****************************************************************************
+ * Name: ipv4_dev_forward
+ *
+ * Description:
+ *   This function is called from ipv4_forward when it is necessary to
+ *   forward a packet from the current device to different device.  In this
+ *   case, the forwarding operation must be performed asynchronously when
+ *   the TX poll is received from the forwarding device.
+ *
+ * Input Parameters:
+ *   dev      - The device on which the packet was received and which
+ *              contains the IPv4 packet.
+ *   fwdddev  - The device on which the packet must be forwarded.
+ *   ipv4     - A pointer to the IPv4 header in within the IPv4 packet
+ *
+ * Returned Value:
+ *   Zero is returned if the packet was successfully forward;  A negated
+ *   errno value is returned if the packet is not forwardable.  In that
+ *   latter case, the caller (ipv4_input()) should drop the packet.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_MULTINIC
+static int ipv4_dev_forward(FAR struct net_driver_s *dev,
+                            FAR struct net_driver_s *fwddev,
+                            FAR struct ipv4_hdr_s *ipv4)
+{
+  FAR struct forward_s *fwd = NULL;
+#ifdef CONFIG_DEBUG_NET_WARN
+  int hdrsize;
+#endif
+  int ret;
+
+  /* Verify that the full packet will fit within the forwarding devices MTU.
+   * We provide no support for fragmenting forwarded packets.
+   */
+
+  if (NET_LL_HDRLEN(fwddev) + dev->d_len > NET_DEV_MTU(fwddev))
+    {
+      nwarn("WARNING: Packet > MTU... Dropping\n");
+      ret = -EFBIG;
+      goto errout;
+    }
+
+  /* Get a pre-allocated forwarding structure,  This structure will be
+   * completely zeroed when we receive it.
+   */
+
+  fwd = ip_forward_alloc();
+  if (fwd == NULL)
+    {
+      nwarn("WARNING: Failed to allocate forwarding structure\n");
+      ret = -ENOMEM;
+      goto errout;
+    }
+
+  /* Initialize the easy stuff in the forwarding structure */
+
+  fwd->f_dev = fwddev;   /* Forwarding device */
+
+#ifdef CONFIG_DEBUG_NET_WARN
+  /* Get the size of the IPv4 + L3 header. */
+
+  hdrsize = ipv4_hdrsize(ipv4);
+  if (hdrsize < IPv4_HDRLEN)
+    {
+      nwarn("WARNING: Could not determine L2+L3 header size\n");
+      ret = -EPROTONOSUPPORT;
+      goto errout_with_fwd;
+    }
+
+  /* The L2/L3 headers must fit within one, contiguous IOB. */
+
+  if (hdrsize > CONFIG_IOB_BUFSIZE)
+    {
+      nwarn("WARNING: Header is too big for pre-allocated structure\n");
+      ret = -E2BIG;
+      goto errout_with_fwd;
+    }
+#endif
+
+  /* Try to allocate the head of an IOB chain.  If this fails, the
+   * packet will be dropped; we are not operating in a context
+   * where waiting for an IOB is a good idea
+   */
+
+  fwd->f_iob = iob_tryalloc(false);
+  if (fwd->f_iob == NULL)
+    {
+      nwarn("WARNING: iob_tryalloc() failed\n");
+      ret = -ENOMEM;
+      goto errout_with_fwd;
+    }
+
+  /* Copy the L2/L3 headers plus any following payload into an IOB chain.
+   * iob_trycopin() will not wait, but will fail there are no available
+   * IOBs.
+   *
+   * REVISIT: Consider an alternative design that does not require data
+   * copying.  This would require a pool of d_buf's that are managed by
+   * the network rather than the network device.
+   */
+
+  ret = iob_trycopyin(fwd->f_iob, (FAR const uint8_t *)ipv4,
+                      dev->d_len, 0, false);
+  if (ret < 0)
+    {
+      nwarn("WARNING: iob_trycopyin() failed: %d\n", ret);
+      goto errout_with_iobchain;
+    }
+
+  /* Decrement the TTL in the copy of the IPv4 header (retaining the
+   * original TTL in the source to handle the broadcast case).  If the
+   * TLL decrements to zero, then do not forward the packet.
+   */
+
+  ret = ipv4_decr_ttl((FAR struct ipv4_hdr_s *)fwd->f_iob->io_data);
+  if (ret < 1)
+    {
+      nwarn("WARNING: Hop limit exceeded... Dropping!\n");
+      ret = -EMULTIHOP;
+      goto errout_with_iobchain;
+    }
+
+  /* Then set up to forward the packet according to the protocol.
+   *
+   * REVISIT: Are these protocol specific forwarders necessary?  I think
+   * that this could be done with a single forwarding function for all
+   * protocols.
+   */
+
+  switch (ipv4->proto)
+    {
+#ifdef CONFIG_NET_TCP
+    case IP_PROTO_TCP:
+      {
+        /* Forward a TCP packet. */
+
+        ret = tcp_forward(fwd);
+      }
+      break;
+#endif
+
+#ifdef CONFIG_NET_UDP
+    case IP_PROTO_UDP:
+      {
+        /* Forward a UDP packet */
+
+        ret = udp_forward(fwd);
+      }
+      break;
+#endif
+
+#ifdef CONFIG_NET_ICMP
+    case IP_PROTO_ICMP:
+      {
+        /* Forward an ICMP packet */
+
+        ret = icmp_forward(fwd);
+      }
+      break;
+#endif
+
+    default:
+      nwarn("WARNING: Unrecognized proto: %u\n", ipv4->proto);
+      ret = -EPROTONOSUPPORT;
+      break;
+    }
+
+  if (ret >= 0)
+    {
+      dev->d_len = 0;
+      return OK;
+    }
+
+errout_with_iobchain:
+  if (fwd != NULL && fwd->f_iob != NULL)
+    {
+      iob_free_chain(fwd->f_iob);
+    }
+
+errout_with_fwd:
+  if (fwd != NULL)
+    {
+      ip_forward_free(fwd);
+    }
+
+errout:
+  return ret;
+}
+#endif /* CONFIG_NETDEV_MULTINIC */
+
+/****************************************************************************
+ * Name: ipv4_forward_callback
+ *
+ * Description:
+ *   This function is a callback from netdev_foreach.  It implements the
+ *   the broadcase forwarding action for each network device (other than, of
+ *   course, the device that received the packet).
+ *
+ * Input Parameters:
+ *   dev   - The device on which the packet was received and which contains
+ *           the IPv4 packet.
+ *   ipv4  - A convenience pointer to the IPv4 header in within the IPv4
+ *           packet
+ *
+ * Returned Value:
+ *   Typically returns zero (meaning to continue the enumeration), but will
+ *   return a non-zero to stop the enumeration if an error occurs.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPFORWARD_BROADCAST) && \
+    defined(CONFIG_NETDEV_MULTINIC)
+int ipv4_forward_callback(FAR struct net_driver_s *fwddev, FAR void *arg)
+{
+  FAR struct net_driver_s *dev = (FAR struct net_driver_s *)arg;
+  FAR struct ipv4_hdr_s *ipv4;
+  int ret;
+
+  DEBUGASSERT(fwddev != NULL && dev != NULL && dev->d_buf != NULL);
+
+  /* Check if we are forwarding on the same device that we received the
+   * packet from.
+   */
+
+  if (fwddev != dev)
+    {
+      /* Recover the pointer to the IPv4 header in the receiving device's
+       * d_buf.
+       */
+
+      ipv4 = (FAR struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)];
+
+      /* Send the packet asynchrously on the forwarding device. */
+
+      ret = ipv4_dev_forward(dev, fwddev, ipv4);
+      if (ret < 0)
+        {
+          nwarn("WARNING: ipv4_dev_forward failed: %d\n", ret);
+          return ret;
+        }
+    }
+
+  return OK;
+}
 #endif
 
 /****************************************************************************
@@ -458,24 +529,6 @@ int ipv4_forward(FAR struct net_driver_s *dev, FAR struct ipv4_hdr_s *ipv4)
   FAR struct net_driver_s *fwddev;
   int ret;
 
-  /* Decrement the TTL.  If it decrements to zero, then drop the packet */
-
-  ret = ipv4_decr_ttl(ipv4);
-  if (ret < 1)
-    {
-      nwarn("WARNING: Hop limit exceeded... Dropping!\n");
-      ret = -EMULTIHOP;
-      goto drop;
-    }
-
-  /* Re-calculate the IPv4 checksum.  This checksum is the Internet checksum
-   * of the 20 bytes of the IPv4 header.  This checksum will be different
-   * because we just modify the IPv4 TTL.
-   */
-
-  ipv4->ipchksum = 0;
-  ipv4->ipchksum = ~ipv4_chksum(dev);
-
   /* Search for a device that can forward this packet.  This is a trivial
    * search if there is only a single network device (CONFIG_NETDEV_MULTINIC
    * not defined).  But netdev_findby_ipv4addr() will still assure
@@ -508,7 +561,7 @@ int ipv4_forward(FAR struct net_driver_s *dev, FAR struct ipv4_hdr_s *ipv4)
       ret = ipv4_dev_forward(dev, fwddev, ipv4);
       if (ret < 0)
         {
-          nwarn("WARNING: ipv4_dev_forward faield: %d\n", ret);
+          nwarn("WARNING: ipv4_dev_forward failed: %d\n", ret);
           goto drop;
         }
     }
@@ -549,5 +602,49 @@ drop:
   dev->d_len = 0;
   return ret;
 }
+
+/****************************************************************************
+ * Name: ipv4_forward_broadcast
+ *
+ * Description:
+ *   This function is called from ipv4_input when a broadcast or multicast
+ *   packet is received.  If CONFIG_NET_IPFORWARD_BROADCAST is enabled, this
+ *   function will forward the broadcast packet to other networks through
+ *   other network devices.
+ *
+ * Input Parameters:
+ *   dev   - The device on which the packet was received and which contains
+ *           the IPv4 packet.
+ *   ipv4  - A convenience pointer to the IPv4 header in within the IPv4
+ *           packet
+ *
+ *   On input:
+ *   - dev->d_buf holds the received packet.
+ *   - dev->d_len holds the length of the received packet MINUS the
+ *     size of the L1 header.  That was subtracted out by ipv4_input.
+ *   - ipv4 points to the IPv4 header with dev->d_buf.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPFORWARD_BROADCAST) && \
+    defined(CONFIG_NETDEV_MULTINIC)
+void ipv4_forward_broadcast(FAR struct net_driver_s *dev,
+                            FAR struct ipv4_hdr_s *ipv4)
+{
+  /* Don't bother if the TTL would expire */
+
+  if (ipv4->ttl > 1)
+    {
+      /* Forward the the broadcast/multicast packet to all devices except,
+       * of course, the device that received the packet.
+       */
+
+      (void)netdev_foreach(ipv4_forward_callback, dev);
+    }
+}
+#endif
 
 #endif /* CONFIG_NET_IPFORWARD && CONFIG_NET_IPv4 */

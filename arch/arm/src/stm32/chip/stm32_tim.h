@@ -214,7 +214,7 @@
 #  define STM32_TIM2_CCR4         (STM32_TIM2_BASE+STM32_GTIM_CCR4_OFFSET)
 #  define STM32_TIM2_DCR          (STM32_TIM2_BASE+STM32_GTIM_DCR_OFFSET)
 #  define STM32_TIM2_DMAR         (STM32_TIM2_BASE+STM32_GTIM_DMAR_OFFSET)
-#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #    define STM32_TIM2_OR         (STM32_TIM2_BASE+STM32_GTIM_OR_OFFSET)
 #  endif
 #endif
@@ -280,7 +280,7 @@
 #  define STM32_TIM5_CCR4         (STM32_TIM5_BASE+STM32_GTIM_CCR4_OFFSET)
 #  define STM32_TIM5_DCR          (STM32_TIM5_BASE+STM32_GTIM_DCR_OFFSET)
 #  define STM32_TIM5_DMAR         (STM32_TIM5_BASE+STM32_GTIM_DMAR_OFFSET)
-#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #    define STM32_TIM5_OR         (STM32_TIM5_BASE+STM32_GTIM_OR_OFFSET)
 #  endif
 #endif
@@ -829,7 +829,7 @@
 #define ATIM_CCER_CC4P            (1 << 13) /* Bit 13: Capture/Compare 4 output Polarity */
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX) || \
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX) || \
     defined(CONFIG_STM32_STM32L15XX)
 #  define ATIM_CCER_CC4NP         (1 << 15) /* Bit 15: Capture/Compare 4 Complementary output polarity */
 #elif defined(CONFIG_STM32_STM32F30XX)
@@ -1283,7 +1283,7 @@
 
 /* Timer 2/5 option register */
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #  define TIM2_OR_ITR1_RMP_SHIFT  (10)     /* Bits 10-11: Internal trigger 1 remap */
 #  define TIM2_OR_ITR1_RMP_MASK   (3 << TIM2_OR_ITR1_RMP_SHIFT)
 #    define TIM2_OR_ITR1_TIM8_TRGOUT (0 << TIM2_OR_ITR1_RMP_SHIFT) /* 00: TIM2_ITR1 input connected to TIM8_TRGOUT */
