@@ -1155,7 +1155,7 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct tun_device_s *priv = filep->f_priv;
   int ret = OK;
 
-  if (cmd == TUNSETIFF && !priv)
+  if (cmd == TUNSETIFF && priv == NULL)
     {
       uint8_t free_tuns;
       int intf;
