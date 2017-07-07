@@ -112,7 +112,8 @@ Where <subdir> is one of the following:
        configuration other than using IPv6.  So all of the notes above
        regarding the nsh configuration apply.
 
-       Telnet does not work with IPv6.
+       Telnet does work with IPv6 but is not enabled in this
+       configuration (but could be).
 
     2. This configuration can be modified to that both IPv4 and IPv6
        are support.  Here is a summary of the additional configuration
@@ -143,9 +144,14 @@ Where <subdir> is one of the following:
          ping6 fc00::2   (Linux)
          ping -6 fc00::2 (Windows cmd)
 
-       and Telnet again works from the host:
+       and Telnet is now enabled and works from the host... but only using
+       IPv6 addressing:
 
-         telnet 10.0.0.2
+         telnet fc00::2
+
+       That is because the Telnet daemon will default to IPv6 and there is
+       no Telnet option to let you select which if both IPv4 and IPv6 are
+       enabled.
 
     3. You can enable IPv6 autonomous address configuration with the
        following changes to the configuration:
