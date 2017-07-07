@@ -47,6 +47,7 @@
 #include <nuttx/net/netstats.h>
 
 #include "devif/devif.h"
+#include "netdev/netdev.h"
 #include "utils/utils.h"
 #include "icmpv6/icmpv6.h"
 
@@ -56,8 +57,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ETHBUF    ((struct eth_hdr_s *)&dev->d_buf[0])
-#define ICMPv6BUF ((struct icmpv6_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define ETHBUF   ((struct eth_hdr_s *)&dev->d_buf[0])
+#define IPv6BUF  ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 #define ICMPv6RSOLICIT \
   ((struct icmpv6_router_solicit_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
@@ -89,7 +90,7 @@
 
 void icmpv6_rsolicit(FAR struct net_driver_s *dev)
 {
-  FAR struct icmpv6_iphdr_s *icmp;
+  FAR struct ipv6_hdr_s *ipv6;
   FAR struct icmpv6_router_solicit_s *sol;
   FAR struct eth_hdr_s *eth;
   uint16_t l1size;
@@ -97,30 +98,30 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
 
   /* Set up the IPv6 header (most is probably already in place) */
 
-  icmp          = ICMPv6BUF;
-  icmp->vtc     = 0x60;                    /* Version/traffic class (MS) */
-  icmp->tcf     = 0;                       /* Traffic class (LS)/Flow label (MS) */
-  icmp->flow    = 0;                       /* Flow label (LS) */
+  ipv6          = IPv6BUF;
+  ipv6->vtc     = 0x60;                    /* Version/traffic class (MS) */
+  ipv6->tcf     = 0;                       /* Traffic class (LS)/Flow label (MS) */
+  ipv6->flow    = 0;                       /* Flow label (LS) */
 
   /* Length excludes the IPv6 header */
 
-  l1size       = NET_LL_HDRLEN(dev);
-  l3size       = SIZEOF_ICMPV6_ROUTER_SOLICIT_S(l1size);
-  icmp->len[0] = (l3size >> 8);
-  icmp->len[1] = (l3size & 0xff);
+  l1size        = netdev_dev_l1size(dev);
+  l3size        = SIZEOF_ICMPV6_ROUTER_SOLICIT_S(l1size);
+  ipv6->len[0]  = (l3size >> 8);
+  ipv6->len[1]  = (l3size & 0xff);
 
-  icmp->proto   = IP_PROTO_ICMP6;          /* Next header */
-  icmp->ttl     = 255;                     /* Hop limit */
+  ipv6->proto   = IP_PROTO_ICMP6;          /* Next header */
+  ipv6->ttl     = 255;                     /* Hop limit */
 
   /* Set the multicast destination IP address to the IPv6 all link-
    * loocal routers address: ff02::2
    */
 
-  net_ipv6addr_copy(icmp->destipaddr, g_ipv6_allrouters);
+  net_ipv6addr_copy(ipv6->destipaddr, g_ipv6_allrouters);
 
   /* Add our link local IPv6 address as the source address */
 
-  net_ipv6addr_copy(icmp->srcipaddr, dev->d_ipv6addr);
+  net_ipv6addr_copy(ipv6->srcipaddr, dev->d_ipv6addr);
 
   /* Set up the ICMPv6 Router Solicitation message */
 
@@ -145,8 +146,8 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
 
   /* Calculate the checksum over both the ICMP header and payload */
 
-  icmp->chksum  = 0;
-  icmp->chksum  = ~icmpv6_chksum(dev);
+  sol->chksum   = 0;
+  sol->chksum   = ~icmpv6_chksum(dev);
 
   /* Set the size to the size of the IPv6 header and the payload size */
 
@@ -189,7 +190,7 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
 
   dev->d_len += netdev_ipv6_hdrlen(dev);
   ninfo("Outgoing ICMPv6 Router Solicitation length: %d (%d)\n",
-          dev->d_len, (icmp->len[0] << 8) | icmp->len[1]);
+          dev->d_len, (ipv6->len[0] << 8) | ipv6->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmpv6.sent++;

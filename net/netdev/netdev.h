@@ -437,6 +437,26 @@ void netdev_ipv6_rxnotify(FAR const net_ipv6addr_t ripaddr);
 int netdev_count(void);
 #endif
 
+/****************************************************************************
+ * Name: netdev_dev_l1size and netdev_type_llsize
+ *
+ * Description:
+ *   Size of the MAC address associated with a device or with a link layer
+ *   type.
+ *
+ * Parameters:
+ *   dev    - A reference to the device of interest
+ *   OR
+ *   lltype - link layer type code
+ *
+ * Returned Value:
+ *   The size of the MAC address associated with this device
+ *
+ ****************************************************************************/
+
+int netdev_type_l1size(uint8_t lltype);
+int netdev_dev_l1size(FAR struct net_driver_s *dev);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

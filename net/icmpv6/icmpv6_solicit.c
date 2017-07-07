@@ -48,6 +48,7 @@
 #include <nuttx/net/netstats.h>
 
 #include "devif/devif.h"
+#include "netdev/netdev.h"
 #include "utils/utils.h"
 #include "icmpv6/icmpv6.h"
 
@@ -57,8 +58,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ETHBUF    ((struct eth_hdr_s *)&dev->d_buf[0])
-#define ICMPv6BUF ((struct icmpv6_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define ETHBUF   ((struct eth_hdr_s *)&dev->d_buf[0])
+#define IPv6BUF  ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 #define ICMPv6SOLICIT \
   ((struct icmpv6_neighbor_solicit_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
@@ -100,37 +101,37 @@ static const uint16_t g_icmpv_mcastaddr[6] =
 void icmpv6_solicit(FAR struct net_driver_s *dev,
                     FAR const net_ipv6addr_t ipaddr)
 {
-  FAR struct icmpv6_iphdr_s *icmp;
+  FAR struct ipv6_hdr_s *ipv6;
   FAR struct icmpv6_neighbor_solicit_s *sol;
   uint16_t l1size;
   uint16_t l3size;
 
   /* Set up the IPv6 header (most is probably already in place) */
 
-  icmp          = ICMPv6BUF;
-  icmp->vtc     = 0x60;                    /* Version/traffic class (MS) */
-  icmp->tcf     = 0;                       /* Traffic class (LS)/Flow label (MS) */
-  icmp->flow    = 0;                       /* Flow label (LS) */
+  ipv6          = IPv6BUF;
+  ipv6->vtc     = 0x60;                    /* Version/traffic class (MS) */
+  ipv6->tcf     = 0;                       /* Traffic class (LS)/Flow label (MS) */
+  ipv6->flow    = 0;                       /* Flow label (LS) */
 
   /* Length excludes the IPv6 header */
 
-  l1size        = NET_LL_HDRLEN(dev);
+  l1size        = netdev_dev_l1size(dev);
   l3size        = SIZEOF_ICMPV6_NEIGHBOR_SOLICIT_S(l1size);
-  icmp->len[0]  = (l3size >> 8);
-  icmp->len[1]  = (l3size & 0xff);
+  ipv6->len[0]  = (l3size >> 8);
+  ipv6->len[1]  = (l3size & 0xff);
 
-  icmp->proto   = IP_PROTO_ICMP6;          /* Next header */
-  icmp->ttl     = 255;                     /* Hop limit */
+  ipv6->proto   = IP_PROTO_ICMP6;          /* Next header */
+  ipv6->ttl     = 255;                     /* Hop limit */
 
   /* Set the multicast destination IP address */
 
-  memcpy(icmp->destipaddr, g_icmpv_mcastaddr, 6*sizeof(uint16_t));
-  icmp->destipaddr[6] = ipaddr[6] | HTONS(0xff00);
-  icmp->destipaddr[7] = ipaddr[7];
+  memcpy(ipv6->destipaddr, g_icmpv_mcastaddr, 6*sizeof(uint16_t));
+  ipv6->destipaddr[6] = ipaddr[6] | HTONS(0xff00);
+  ipv6->destipaddr[7] = ipaddr[7];
 
   /* Add out IPv6 address as the source address */
 
-  net_ipv6addr_copy(icmp->srcipaddr, dev->d_ipv6addr);
+  net_ipv6addr_copy(ipv6->srcipaddr, dev->d_ipv6addr);
 
   /* Set up the ICMPv6 Neighbor Solicitation message */
 
@@ -159,8 +160,8 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
 
   /* Calculate the checksum over both the ICMP header and payload */
 
-  icmp->chksum  = 0;
-  icmp->chksum  = ~icmpv6_chksum(dev);
+  sol->chksum   = 0;
+  sol->chksum   = ~icmpv6_chksum(dev);
 
   /* Set the size to the size of the IPv6 header and the payload size */
 
@@ -215,9 +216,11 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
   /* Add the size of the layer layer header to the total size of the
    * outgoing packet.
    */
+
   dev->d_len += netdev_ipv6_hdrlen(dev);
+
   ninfo("Outgoing ICMPv6 Neighbor Solicitation length: %d (%d)\n",
-          dev->d_len, (icmp->len[0] << 8) | icmp->len[1]);
+          dev->d_len, (ipv6->len[0] << 8) | ipv6->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmpv6.sent++;

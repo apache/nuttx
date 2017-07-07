@@ -52,6 +52,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
 
+#include "netdev/netdev.h"
 #include "neighbor/neighbor.h"
 
 /****************************************************************************
@@ -78,33 +79,9 @@
 void neighbor_add(FAR net_ipv6addr_t ipaddr, uint8_t lltype,
                   FAR uint8_t *addr)
 {
-  uint8_t addrlen;
   uint8_t oldest_time;
   int     oldest_ndx;
   int     i;
-
-  /* Get the length of the address for this link layer type */
-
-#ifdef CONFIG_NET_ETHERNET
-#ifdef CONFIG_NET_6LOWPAN
-  if (lltype == NET_LL_ETHERNET)
-#endif
-    {
-      addrlen = IFHWADDRLEN;
-    }
-#endif
-#ifdef CONFIG_NET_6LOWPAN
-#ifdef CONFIG_NET_ETHERNET
-  else
-#endif
-    {
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-      addrlen = NET_6LOWPAN_EADDRSIZE;
-#else
-      addrlen = NET_6LOWPAN_SADDRSIZE;
-#endif
-    }
-#endif
 
   /* Find the first unused entry or the oldest used entry. */
 
@@ -147,7 +124,7 @@ void neighbor_add(FAR net_ipv6addr_t ipaddr, uint8_t lltype,
 #ifdef CONFIG_NET_MULTILINK
   g_neighbors[oldest_ndx].ne_addr.u.na_lltype = lltype;
 #endif
-  memcpy(&g_neighbors[oldest_ndx].ne_addr.u, addr, addrlen);
+  memcpy(&g_neighbors[oldest_ndx].ne_addr.u, addr, netdev_type_l1size(lltype));
 
   /* Dump the contents of the new entry */
 
