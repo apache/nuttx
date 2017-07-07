@@ -124,7 +124,7 @@ void neighbor_add(FAR net_ipv6addr_t ipaddr, uint8_t lltype,
 #ifdef CONFIG_NET_MULTILINK
   g_neighbors[oldest_ndx].ne_addr.u.na_lltype = lltype;
 #endif
-  memcpy(&g_neighbors[oldest_ndx].ne_addr.u, addr, netdev_type_l1size(lltype));
+  memcpy(&g_neighbors[oldest_ndx].ne_addr.u, addr, netdev_type_lladdrsize(lltype));
 
   /* Dump the contents of the new entry */
 

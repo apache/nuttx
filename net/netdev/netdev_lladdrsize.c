@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/netdev/netdev_l1size.c
+ * net/netdev/netdev_lladdrsize.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,15 +54,12 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: netdev_dev_l1size and netdev_type_llsize
+ * Name: netdev_type_lladdrsize
  *
  * Description:
- *   Size of the MAC address associated with a device or with a link layer
- *   type.
+ *   Returns the size of the MAC address associated with a link layer type.
  *
  * Parameters:
- *   dev    - A reference to the device of interest
- *   OR
  *   lltype - link layer type code
  *
  * Returned Value:
@@ -70,13 +67,15 @@
  *
  ****************************************************************************/
 
-int netdev_type_l1size(uint8_t lltype)
+int netdev_type_lladdrsize(uint8_t lltype)
 {
   /* Get the length of the address for this link layer type */
 
 #ifdef CONFIG_NET_ETHERNET
   if (lltype == NET_LL_ETHERNET)
     {
+      /* size of the Ethernet MAC address */
+
       return IFHWADDRLEN;
     }
   else
@@ -84,6 +83,10 @@ int netdev_type_l1size(uint8_t lltype)
 #ifdef CONFIG_NET_6LOWPAN
   if (lltype == NET_LL_IEEE802154)
     {
+      /* 6LoWPAN can be configured to use either extended or short
+       * addressing.
+       */
+
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
       return NET_6LOWPAN_EADDRSIZE;
 #else
@@ -93,25 +96,10 @@ int netdev_type_l1size(uint8_t lltype)
   else
 #endif
     {
+      /* Either the link layer type associated with lltype has no address,
+       * or support for that link layer type is not enabled.
+       */
+
       return 0;
     }
-}
-
-int netdev_dev_l1size(FAR struct net_driver_s *dev)
-{
-  /* Get the length of the address for this device */
-
-#if defined(CONFIG_NET_MULTILINK)
-  return netdev_type_l1size(dev->d_lltype);
-#elif defined(CONFIG_NET_ETHERNET)
-  return IFHWADDRLEN;
-#elif defined(CONFIG_NET_6LOWPAN)
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  return NET_6LOWPAN_EADDRSIZE;
-#else
-  return NET_6LOWPAN_SADDRSIZE;
-#endif
-#else
-  return 0;
-#endif
 }

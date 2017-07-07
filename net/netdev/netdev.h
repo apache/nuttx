@@ -51,6 +51,31 @@
  * Public Data
  ****************************************************************************/
 
+/* If there is only one supported link layer, then the size of the link
+ * layer address is a constant.
+ *
+ * NOTE: Literal constants are used here to avoid bringing in all of the
+ * header files where they are correctly defined.
+ */
+
+#ifndef CONFIG_NET_MULTILINK
+#  if defined(CONFIG_NET_ETHERNET)
+#    define NETDEV_LLADDRSIZE    6   /* IFHWADDRLEN */
+#  elif defined(CONFIG_NET_6LOWPAN)
+#    ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+#      define NETDEV_LLADDRSIZE  10  /* NET_6LOWPAN_EADDRSIZE */
+#    else
+#      define NETDEV_LLADDRSIZE  2   /* NET_6LOWPAN_SADDRSIZE */
+#    endif
+#  else
+#    define NETDEV_LLADDRSIZE    0   /* No link layer address */
+#  endif
+#endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
@@ -438,15 +463,12 @@ int netdev_count(void);
 #endif
 
 /****************************************************************************
- * Name: netdev_dev_l1size and netdev_type_llsize
+ * Name: netdev_type_lladdrsize
  *
  * Description:
- *   Size of the MAC address associated with a device or with a link layer
- *   type.
+ *   Returns the size of the MAC address associated with a link layer type.
  *
  * Parameters:
- *   dev    - A reference to the device of interest
- *   OR
  *   lltype - link layer type code
  *
  * Returned Value:
@@ -454,8 +476,27 @@ int netdev_count(void);
  *
  ****************************************************************************/
 
-int netdev_type_l1size(uint8_t lltype);
-int netdev_dev_l1size(FAR struct net_driver_s *dev);
+int netdev_type_lladdrsize(uint8_t lltype);
+
+/****************************************************************************
+ * Name: netdev_dev_lladdrsize
+ *
+ * Description:
+ *   Returns the size of the MAC address associated with a network device.
+ *
+ * Parameters:
+ *   dev    - A reference to the device of interest
+ *
+ * Returned Value:
+ *   The size of the MAC address associated with this device
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_MULTILINK
+#  define netdev_dev_lladdrsize(dev) netdev_type_lladdrsize((dev)->d_lltype)
+#else
+#  define netdev_dev_lladdrsize(dev) NETDEV_LLADDRSIZE
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

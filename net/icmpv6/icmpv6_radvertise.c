@@ -114,7 +114,7 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   FAR struct icmpv6_srclladdr_s *srcaddr;
   FAR struct icmpv6_mtu_s *mtu;
   FAR struct icmpv6_prefixinfo_s *prefix;
-  uint16_t l1size;
+  uint16_t lladdrsize;
   uint16_t l3size;
 
   /* Set up the IPv6 header */
@@ -125,9 +125,9 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
 
   /* Length excludes the IPv6 header */
 
-  l1size       = netdev_dev_l1size(dev);
+  lladdrsize   = netdev_dev_lladdrsize(dev);
   l3size       = sizeof(icmpv6_router_advertise_s) +
-                 SIZEOF_ICMPV6_SRCLLADDR_S(l1size) +
+                 SIZEOF_ICMPV6_SRCLLADDR_S(lladdrsize) +
                  sizeof(struct icmpv6_mtu_s) +
                  sizeof(icmpv6_prefixinfo_s);
 
@@ -160,13 +160,13 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   srcaddr           = (FAR struct icmpv6_srclladdr_s *)
                       ((FAR uint8_t *)adv + sizeof(icmpv6_router_advertise_s));
   srcaddr->opttype  = ICMPv6_OPT_SRCLLADDR;
-  srcaddr->optlen   = ICMPv6_OPT_OCTECTS(l1size);
-  memcpy(srcaddr->srclladdr, &dev->d_mac, l1size);
+  srcaddr->optlen   = ICMPv6_OPT_OCTECTS(lladdrsize);
+  memcpy(srcaddr->srclladdr, &dev->d_mac, lladdrsize);
 
   /* Set up the MTU option */
 
   mtu               = (FAR struct icmpv6_mtu_s *)
-                      ((FAR uint8_t *)srcaddr + SIZEOF_ICMPV6_SRCLLADDR_S(l1size));
+                      ((FAR uint8_t *)srcaddr + SIZEOF_ICMPV6_SRCLLADDR_S(lladdrsize));
   mtu               = &adv->mtu;
   mtu->opttype      = ICMPv6_OPT_MTU;
   mtu->optlen       = 1;

@@ -97,7 +97,7 @@ void icmpv6_advertise(FAR struct net_driver_s *dev,
 {
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
   FAR struct icmpv6_neighbor_advertise_s *adv;
-  uint16_t l1size;
+  uint16_t lladdrsize;
   uint16_t l3size;
 
   /* Set up the IPv6 header */
@@ -108,8 +108,8 @@ void icmpv6_advertise(FAR struct net_driver_s *dev,
 
   /* Length excludes the IPv6 header */
 
-  l1size       = netdev_dev_l1size(dev);
-  l3size       = SIZEOF_ICMPV6_NEIGHBOR_ADVERTISE_S(l1size);
+  lladdrsize   = netdev_dev_lladdrsize(dev);
+  l3size       = SIZEOF_ICMPV6_NEIGHBOR_ADVERTISE_S(lladdrsize);
   ipv6->len[0] = (l3size >> 8);
   ipv6->len[1] = (l3size & 0xff);
 
@@ -137,14 +137,14 @@ void icmpv6_advertise(FAR struct net_driver_s *dev,
 
   /* Set up the options */
 
-  adv->opttype   = ICMPv6_OPT_TGTLLADDR;       /* Option type */
-  adv->optlen    = ICMPv6_OPT_OCTECTS(l1size); /* Option length in octets */
+  adv->opttype   = ICMPv6_OPT_TGTLLADDR;           /* Option type */
+  adv->optlen    = ICMPv6_OPT_OCTECTS(lladdrsize); /* Option length in octets */
 
   /* Copy our link layer address into the message
    * REVISIT:  What if the link layer is not Ethernet?
    */
 
-  memcpy(adv->tgtlladdr, &dev->d_mac, l1size);
+  memcpy(adv->tgtlladdr, &dev->d_mac, lladdrsize);
 
   /* Calculate the checksum over both the ICMP header and payload */
 
