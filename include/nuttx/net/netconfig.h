@@ -590,7 +590,7 @@
 #    define __LOOP_MIN_TCP_MSS(h)    MIN(LO_TCP_MSS(h),__6LOWPAN_MIN_TCP_MSS(h))
 #    define __LOOP_MAX_TCP_MSS(h)    MAX(LO_TCP_MSS(h),__6LOWPAN_MAX_TCP_MSS(h))
 #  else
-#    define __LOOP_MIN_TCP_MSS(h)    _6LOWPAN_MIN_TCP_MSS(h)
+#    define __LOOP_MIN_TCP_MSS(h)   __6LOWPAN_MIN_TCP_MSS(h)
 #    define __LOOP_MAX_TCP_MSS(h)   __6LOWPAN_MAX_TCP_MSS(h)
 #  endif
 
