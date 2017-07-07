@@ -97,7 +97,7 @@ static int ipv6_hdrsize(FAR struct ipv6_hdr_s *ipv6)
     case IP_PROTO_TCP:
       {
         FAR struct tcp_hdr_s *tcp =
-          (FAR struct tcp_hdr_s *)((FAR uintptr_t *)ipv6 + IPv6_HDRLEN);
+          (FAR struct tcp_hdr_s *)((FAR uint8_t *)ipv6 + IPv6_HDRLEN);
         unsigned int tcpsize;
 
         /* The TCP header length is encoded in the top 4 bits of the
@@ -337,7 +337,7 @@ static int ipv6_packet_conversion(FAR struct net_driver_s *dev,
   return ret;
 }
 #else
-#  define ipv6_packet_conversion(dev, ipv6) (PACKET_NOT_FORWARDED)
+#  define ipv6_packet_conversion(dev, fwddev, ipv6) (PACKET_NOT_FORWARDED)
 #endif /* CONFIG_NET_6LOWPAN */
 
 /****************************************************************************

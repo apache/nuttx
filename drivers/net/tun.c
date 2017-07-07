@@ -684,7 +684,7 @@ static int tun_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Name: tun_txavail
+ * Name: tun_txavail_work
  *
  * Description:
  *   Driver callback invoked when new TX data is available.  This is a
@@ -702,9 +702,9 @@ static int tun_ifdown(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int tun_txavail(struct net_driver_s *dev)
+static void tun_txavail_work(FAR void *arg)
 {
-  FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
+  FAR struct tun_device_s *priv = (FAR struct tun_device_s *)arg;
 
   tun_lock(priv);
 
@@ -713,11 +713,10 @@ static int tun_txavail(struct net_driver_s *dev)
   if (priv->read_d_len != 0 || priv->write_d_len != 0)
     {
       tun_unlock(priv);
-      return OK;
+      return;
     }
 
   net_lock();
-
   if (priv->bifup)
     {
       /* Poll the network for new XMIT data */
@@ -728,6 +727,37 @@ static int tun_txavail(struct net_driver_s *dev)
 
   net_unlock();
   tun_unlock(priv);
+}
+
+/****************************************************************************
+ * Name: tun_txavail
+ *
+ * Description:
+ *   Driver callback invoked when new TX data is available.  This is a
+ *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
+ *   latency.
+ *
+ * Parameters:
+ *   dev - Reference to the NuttX driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called from the network stack with the network locked.
+ *
+ ****************************************************************************/
+
+static int tun_txavail(struct net_driver_s *dev)
+{
+  FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
+
+  /* Schedule to perform the TX poll on the worker thread. */
+
+  if (work_available(&priv->work))
+    {
+      work_queue(TUNWORK, &priv->work, tun_txavail_work, priv, 0);
+    }
 
   return OK;
 }

@@ -91,7 +91,7 @@ static int ipv4_hdrsize(FAR struct ipv4_hdr_s *ipv4)
     case IP_PROTO_TCP:
       {
         FAR struct tcp_hdr_s *tcp =
-          (FAR struct tcp_hdr_s *)((FAR uintptr_t *)ipv4 + IPv4_HDRLEN);
+          (FAR struct tcp_hdr_s *)((FAR uint8_t *)ipv4 + IPv4_HDRLEN);
         unsigned int tcpsize;
 
         /* The TCP header length is encoded in the top 4 bits of the
