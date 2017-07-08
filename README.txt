@@ -900,23 +900,28 @@ Making defconfig Files
 Configuring with "Compressed" defconfig Files
 ---------------------------------------------
 
+  2017-07-08: Currently all defconfig files are in .config form.  However,
+    in the long term I would hope that the defconfig files will eventual
+    all be converted to the "compressed" defconfig format.  This would be
+    a great savings in the total size of the NuttX files.
+
   As described in the previous section, "Making defconfig Files," defconfig
-  files may be "compressed" using 'make savedeconfig'.  This compressed
-  defconfig files are will may not be fully usable and may not build the
-  target binaries that you want because the compression process removed all
-  of the default settings from the defconfig file.  To restore the default
+  files may be "compressed" using 'make savedeconfig'.  These compressed
+  defconfig files may not be fully usable and may not build the target
+  binaries that you want because the compression process removed all of the
+  default settings from the defconfig file.  To restore the default
   settings, you should run the following after configuring:
 
     make olddefconfig
 
-  That will restore the the missing defaulted value.
+  That will restore the the missing defaulted values.
 
   Using this command after configuring is generally a good practice anyway:
-  Even if the defconfig files are not "compressed" in this fashion, there
-  the defconfig file may be old and the only way to assure that the
-  installed .config is via 'make oldconfig' or 'make olddefconfig'.  See the
-  paragraph above entitled ""Refreshing Configurations" for additional
-  information.
+  Even if the defconfig files are not "compressed" in this fashion, the
+  defconfig file may be old and the only way to assure that the installed
+  .config is is uptodate is via 'make oldconfig' or 'make olddefconfig'.
+  See the paragraph above entitled ""Refreshing Configurations" for
+  additional information.
 
 Incompatibilities with Older Configurations
 -------------------------------------------
