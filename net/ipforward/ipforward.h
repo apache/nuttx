@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/ipforward/ip_forward.h
+ * net/ipforward/ipforward.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_IPFORWARD_IP_FORWARD_H
-#define __NET_IPFORWARD_IP_FORWARD_H
+#ifndef __NET_IPFORWARD_IPFORWARD_H
+#define __NET_IPFORWARD_IPFORWARD_H
 
 /****************************************************************************
  * Included Files
@@ -173,7 +173,7 @@ struct forward_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ip_forward_initialize
+ * Name: ipfwd_initialize
  *
  * Description:
  *   Initialize the struct forward_s allocator.
@@ -183,10 +183,10 @@ struct forward_s
  *
  ****************************************************************************/
 
-void ip_forward_initialize(void);
+void ipfwd_initialize(void);
 
 /****************************************************************************
- * Name: ip_forward_alloc
+ * Name: ipfwd_alloc
  *
  * Description:
  *   Allocate a forwarding structure by removing a pre-allocated entry from
@@ -198,10 +198,10 @@ void ip_forward_initialize(void);
  *
  ****************************************************************************/
 
-FAR struct forward_s *ip_forward_alloc(void);
+FAR struct forward_s *ipfwd_alloc(void);
 
 /****************************************************************************
- * Name: ip_forward_free
+ * Name: ipfwd_free
  *
  * Description:
  *   Free a forwarding structure by adding it to a free list.
@@ -212,7 +212,7 @@ FAR struct forward_s *ip_forward_alloc(void);
  *
  ****************************************************************************/
 
-void ip_forward_free(FAR struct forward_s *fwd);
+void ipfwd_free(FAR struct forward_s *fwd);
 
 /****************************************************************************
  * Name: ipv4_forward_broadcast
@@ -359,4 +359,4 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6);
 #endif
 
 #endif /* CONFIG_NET_IPFORWARD */
-#endif /* __NET_IPFORWARD_IP_FORWARD_H */
+#endif /* __NET_IPFORWARD_IPFORWARD_H */

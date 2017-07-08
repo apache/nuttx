@@ -54,7 +54,7 @@
 #include "udp/udp.h"
 #include "tcp/tcp.h"
 #include "icmp/icmp.h"
-#include "ipforward/ip_forward.h"
+#include "ipforward/ipforward.h"
 #include "devif/devif.h"
 
 #if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_IPv4)
@@ -287,7 +287,7 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
    * completely zeroed when we receive it.
    */
 
-  fwd = ip_forward_alloc();
+  fwd = ipfwd_alloc();
   if (fwd == NULL)
     {
       nwarn("WARNING: Failed to allocate forwarding structure\n");
@@ -426,7 +426,7 @@ errout_with_iobchain:
 errout_with_fwd:
   if (fwd != NULL)
     {
-      ip_forward_free(fwd);
+      ipfwd_free(fwd);
     }
 
 errout:

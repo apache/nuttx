@@ -43,7 +43,7 @@
 
 #include <nuttx/net/netdev.h>
 
-#include "ipforward/ip_forward.h"
+#include "ipforward/ipforward.h"
 #include "devif/devif.h"
 
 #if defined(CONFIG_NET_IPFORWARD) &&  defined(CONFIG_NETDEV_MULTINIC)

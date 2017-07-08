@@ -50,7 +50,7 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netstats.h>
 
-#include "ipforward/ip_forward.h"
+#include "ipforward/ipforward.h"
 #include "devif/devif.h"
 #include "netdev/netdev.h"
 #include "arp/arp.h"
@@ -340,7 +340,7 @@ static uint16_t tcp_forward_interrupt(FAR struct net_driver_s *dev,
 
       /* And release the forwarding state structure */
 
-      ip_forward_free(fwd);
+      ipfwd_free(fwd);
     }
 
   return flags;

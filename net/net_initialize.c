@@ -47,7 +47,7 @@
 #include "socket/socket.h"
 #include "devif/devif.h"
 #include "netdev/netdev.h"
-#include "ipforward/ip_forward.h"
+#include "ipforward/ipforward.h"
 #include "arp/arp.h"
 #include "sixlowpan/sixlowpan.h"
 #include "neighbor/neighbor.h"
@@ -116,7 +116,7 @@ void net_setup(void)
 #ifdef HAVE_FWDALLOC
   /* Initialize IP forwarding support */
 
-  ip_forward_initialize();
+  ipfwd_initialize();
 #endif
 
 #ifdef CONFIG_NET_PKT
