@@ -388,8 +388,6 @@ void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
 
 void mac802154_updatebeacon(FAR struct ieee802154_privmac_s *priv);
 
-
-
 /****************************************************************************
  * Helper Macros/Inline Functions
  ****************************************************************************/
@@ -564,9 +562,9 @@ void mac802154_updatebeacon(FAR struct ieee802154_privmac_s *priv);
   ((GETHOST16(ptr, index) & IEEE802154_PENDADDR_NEADDR) >> \
   IEEE802154_PENDADDR_SHIFT_NEADDR)
 
-/* General helper macros ****************************************************/
+/* General helpers ****************************************************/
 
-#define mac802154_givesem(s) sem_post(s);
+#define mac802154_givesem(s) sem_post(s)
 
 static inline int mac802154_takesem(sem_t *sem, bool allowinterrupt)
 {
@@ -591,6 +589,32 @@ static inline int mac802154_takesem(sem_t *sem, bool allowinterrupt)
   while (ret != OK);
 
   return OK;
+}
+
+#define mac802154_unlock(dev) \
+  mac802154_givesem(&dev->exclsem); \
+  wlinfo("MAC unlocked\n");
+
+#define mac802154_lock(dev, allowinterrupt) \
+  mac802154_lockpriv(dev, allowinterrupt, __FUNCTION__)
+
+static inline int mac802154_lockpriv(FAR struct ieee802154_privmac_s *dev,
+                    bool allowinterrupt, FAR const char *funcname)
+{
+  int ret;
+
+  wlinfo("Locking MAC: %s\n", funcname);
+  ret = mac802154_takesem(&dev->exclsem, allowinterrupt);
+  if (ret < 0)
+    {
+      wlinfo("Failed to lock MAC\n");
+    }
+  else
+    {
+      wlinfo("MAC locked\n");
+    }
+
+  return ret;
 }
 
 static inline void mac802154_txdesc_free(FAR struct ieee802154_privmac_s *priv,

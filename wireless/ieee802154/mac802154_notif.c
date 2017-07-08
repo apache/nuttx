@@ -76,7 +76,7 @@ void mac802154_notif_free(MACHANDLE mac, FAR struct ieee802154_notif_s *notif)
 
   /* Lock the MAC */
 
-  mac802154_takesem(&priv->exclsem, false);
+  mac802154_lock(priv, false);
 
   /* Call the internal helper function to free the notification */
 
@@ -84,7 +84,7 @@ void mac802154_notif_free(MACHANDLE mac, FAR struct ieee802154_notif_s *notif)
 
   /* Unlock the MAC */
 
-  mac802154_givesem(&priv->exclsem);
+  mac802154_unlock(priv)
 }
 
 /****************************************************************************
@@ -170,7 +170,7 @@ int mac802154_notif_alloc(FAR struct ieee802154_privmac_s *priv,
     {
       /* Unlock MAC so that other work can be done to free a notification */
 
-      mac802154_givesem(&priv->exclsem);
+      mac802154_unlock(priv)
 
       /* Take a count from the notification semaphore, waiting if necessary. We
        * only return from here with an error if we are allowing interruptions
@@ -189,7 +189,7 @@ int mac802154_notif_alloc(FAR struct ieee802154_privmac_s *priv,
        * MAC in order to ensure this happens correctly.
        */
 
-      ret = mac802154_takesem(&priv->exclsem, allow_interrupt);
+      ret = mac802154_lock(priv, allow_interrupt);
       if (ret < 0)
         {
           mac802154_givesem(&priv->notif_sem);
