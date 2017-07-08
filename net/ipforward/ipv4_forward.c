@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/devif/ipv4_forward.c
+ * net/ipforward/ipv4_forward.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,7 +54,7 @@
 #include "udp/udp.h"
 #include "tcp/tcp.h"
 #include "icmp/icmp.h"
-#include "devif/ip_forward.h"
+#include "ipforward/ip_forward.h"
 #include "devif/devif.h"
 
 #if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_IPv4)
@@ -297,7 +297,10 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
 
   /* Initialize the easy stuff in the forwarding structure */
 
-  fwd->f_dev = fwddev;   /* Forwarding device */
+  fwd->f_dev    = fwddev;  /* Forwarding device */
+#ifdef CONFIG_NET_IPv5
+  fwd->f_domain = PF_INET; /* IPv64 address domain */
+#endif
 
 #ifdef CONFIG_DEBUG_NET_WARN
   /* Get the size of the IPv4 + L3 header. */

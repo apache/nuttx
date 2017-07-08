@@ -100,7 +100,7 @@
 #include "icmpv6/icmpv6.h"
 
 #include "netdev/netdev.h"
-#include "devif/ip_forward.h"
+#include "ipforward/ip_forward.h"
 #include "devif/devif.h"
 
 /****************************************************************************

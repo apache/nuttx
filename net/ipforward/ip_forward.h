@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/devif/ip_forward.h
+ * net/ipforward/ip_forward.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef  __NET_DEVIF_IP_FORWARD_H
-#define  __NET_DEVIF_IP_FORWARD_H
+#ifndef __NET_IPFORWARD_IP_FORWARD_H
+#define __NET_IPFORWARD_IP_FORWARD_H
 
 /****************************************************************************
  * Included Files
@@ -163,6 +163,9 @@ struct forward_s
   FAR struct iob_s            *f_iob;     /* IOB chain containing the packet */
   FAR struct devif_callback_s *f_cb;      /* Reference to callback instance */
   union fwd_conn_u             f_conn;    /* Protocol-specific connection struct */
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+  uint8_t                      f_domain;  /* Domain: PF_INET or PF_INET6 */
+#endif
 };
 
 /****************************************************************************
@@ -356,4 +359,4 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6);
 #endif
 
 #endif /* CONFIG_NET_IPFORWARD */
-#endif /* __NET_DEVIF_IP_FORWARD_H */
+#endif /* __NET_IPFORWARD_IP_FORWARD_H */

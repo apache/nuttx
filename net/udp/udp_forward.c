@@ -49,7 +49,7 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netstats.h>
 
-#include "devif/ip_forward.h"
+#include "ipforward/ip_forward.h"
 #include "devif/devif.h"
 #include "netdev/netdev.h"
 #include "arp/arp.h"
@@ -90,7 +90,7 @@ static inline void forward_ipselect(FAR struct forward_s *fwd)
 
   /* Select IPv4 or IPv6 */
 
-  if ((iphdr->ipv4.l2.vhl & IP_VERSION_MASK) == IPv4_VERSION)
+  if (fwd->f_domain == PF_INET)
     {
       udp_ipv4_select(fwd->f_dev);
     }
@@ -151,7 +151,7 @@ static inline bool udp_forward_addrchk(FAR struct forward_s *fwd)
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-  if ((iphdr->ipv4.l2.vhl & IP_VERSION_MASK) == IPv4_VERSION)
+  if (fwd->f_domain == PF_INET)
 #endif
     {
 #if !defined(CONFIG_NET_ARP_IPIN) && !defined(CONFIG_NET_ARP_SEND)
@@ -209,7 +209,7 @@ static void udp_dropstats(FAR struct forward_s *fwd)
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-  if ((iphdr->ipv4.l2.vhl & IP_VERSION_MASK) == IPv4_VERSION)
+  if (fwd->f_domain == PF_INET)
 #endif
     {
       g_netstats.ipv4.drop++;

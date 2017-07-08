@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/devif/ipv6_forward.c
+ * net/ipforward/ipv6_forward.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,7 +53,7 @@
 #include "udp/udp.h"
 #include "tcp/tcp.h"
 #include "icmpv6/icmpv6.h"
-#include "devif/ip_forward.h"
+#include "ipforward/ip_forward.h"
 #include "devif/devif.h"
 
 #if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_IPv6)
@@ -408,7 +408,10 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
 
       /* Initialize the easy stuff in the forwarding structure */
 
-      fwd->f_dev = fwddev;   /* Forwarding device */
+      fwd->f_dev    = fwddev;   /* Forwarding device */
+#ifdef CONFIG_NET_IPv4
+      fwd->f_domain = PF_INET6; /* IPv6 address domain */
+#endif
 
 #ifdef CONFIG_DEBUG_NET_WARN
       /* Get the size of the IPv6 + L3 header. */

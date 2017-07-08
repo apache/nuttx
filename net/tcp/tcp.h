@@ -807,8 +807,10 @@ void tcp_send(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
  *   send to complete.
  *
  * Input Parameters:
- *   fwd - An initialized instance of the common forwarding structure that
- *         includes everything needed to perform the forwarding operation.
+ *   domain - Either PF_INET or PF_INET6
+ *   fwd    - An initialized instance of the common forwarding structure
+ *            that includes everything needed to perform the forwarding
+ *            operation.
  *
  * Returned Value:
  *   Zero is returned if the packet was successfully forwarded;  A negated

@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/devif/ip_forward.c
+ * net/ipforward/ip_forward.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,7 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include "devif/ip_forward.h"
+#include "ipforward/ip_forward.h"
 
 #if defined(CONFIG_NET_IPFORWARD) &&  defined(CONFIG_NETDEV_MULTINIC)
 

@@ -50,7 +50,6 @@
 #include <nuttx/net/netstats.h>
 #include <nuttx/net/ip.h>
 
-#include "devif/ip_forward.h"
 #include "devif/devif.h"
 
 /****************************************************************************
@@ -168,11 +167,5 @@ void devif_initialize(void)
   /* Initialize callback support */
 
   devif_callback_init();
-
-#ifdef HAVE_FWDALLOC
-  /* Initialize IP forwarding support */
-
-  ip_forward_initialize();
-#endif
 }
 #endif /* CONFIG_NET */

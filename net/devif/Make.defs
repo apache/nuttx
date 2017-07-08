@@ -42,21 +42,17 @@ NET_CSRCS += devif_callback.c
 
 ifeq ($(CONFIG_NET_IPv4),y)
 NET_CSRCS += ipv4_input.c
-ifeq ($(CONFIG_NET_IPFORWARD),y)
-NET_CSRCS += ipv4_forward.c
-endif
 endif
 
 ifeq ($(CONFIG_NET_IPv6),y)
 NET_CSRCS += ipv6_input.c
-ifeq ($(CONFIG_NET_IPFORWARD),y)
-NET_CSRCS += ipv6_forward.c
 endif
-endif
+
+# IP forwarding
 
 ifeq ($(CONFIG_NET_IPFORWARD),y)
 ifeq ($(CONFIG_NETDEV_MULTINIC),y)
-NET_CSRCS += ip_forward.c devif_forward.c
+NET_CSRCS += devif_forward.c
 endif
 endif
 

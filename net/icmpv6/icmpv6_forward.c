@@ -49,7 +49,7 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netstats.h>
 
-#include "devif/ip_forward.h"
+#include "ipforward/ip_forward.h"
 #include "devif/devif.h"
 #include "netdev/netdev.h"
 #include "arp/arp.h"

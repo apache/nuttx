@@ -99,7 +99,7 @@
 #include "icmp/icmp.h"
 #include "igmp/igmp.h"
 
-#include "devif/ip_forward.h"
+#include "ipforward/ip_forward.h"
 #include "devif/devif.h"
 
 /****************************************************************************
