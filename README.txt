@@ -19,6 +19,7 @@ README
     - Reveal Hidden Configuration Options
     - Make Sure that You on on the Right Platform
     - Comparing Two Configurations
+    - Making defconfig Files
     - Incompatibilities with Older Configurations
     - NuttX Configuration Tool under DOS
   o Toolchains
@@ -41,7 +42,7 @@ ENVIRONMENTS
 
   NuttX requires a POSIX development environment such as you would find under
   Linux or OSX.  NuttX may be also be installed and built on Windows system
-  if you also provde such a POSIX development environment.  Options for a
+  if you also provide such a POSIX development environment.  Options for a
   POSIX development environment under Windows include:
 
     - An installation of Linux on a virtual machine (VM) in Windows.  I have
@@ -55,7 +56,7 @@ ENVIRONMENTS
     - The Cygwin environment.  Instructions for installation of Cygwin on a
       Windows system are provided in the following paragraph, "Installing
       Cygwin".  Cygwin is a mature, well-tested, and very convenient
-      environment.  It is especially expecially convenient if you  need to
+      environment.  It is especially especially convenient if you  need to
       integrate with Windows tools and files.  Downsides are that the
       installation time is very long and the compile times are slow.
 
@@ -71,7 +72,7 @@ ENVIRONMENTS
       and that configuration will not be discussed in this README file.
       See http://www.mingw.org/wiki/MSYS if you are interested in
       using MSYS.  People report to me that they have used MSYS
-      successfully.  I suppose that the advantages of the MSYS environemnt
+      successfully.  I suppose that the advantages of the MSYS environment
       is that it is closer to a native Windows environment and uses only a
       minimal of add-on POSIX-land tools.
 
@@ -124,7 +125,7 @@ Installing Cygwin
   instructions assume that you are at a bash command line prompt in
   either Linux or in Cygwin shell.
 
-  UPDATE: The last time I installed EVERTHING, the download was
+  UPDATE: The last time I installed EVERYTHING, the download was
   about 5GiB.  The server I selected was also very slow so it took
   over a day to do the whole install!
 
@@ -179,7 +180,7 @@ Ubuntu Bash under Windows 10
 
   Accessing Windows Files from Ubuntu
   -----------------------------------
-  File sysems will be mounted under "/mnt" so for example "C:\Program Files"
+  File systems will be mounted under "/mnt" so for example "C:\Program Files"
   appears at "/mnt/c/Program Files".  This is as opposed to Cgwin where
   the same directory would appear at "/cygdrive/c/Program Files".
 
@@ -270,7 +271,7 @@ Ubuntu Bash under Windows 10
   The Ubuntu version support by Microsoft is a command-line only version.
   There is no support for Linux graphics utilities.
 
-  This limititation is not a limitation of Ubuntu, however, only in what
+  This limitation is not a limitation of Ubuntu, however, only in what
   Microsoft is willing to support.  If you install a X-Server, then you
   can also use basic graphics utilities.  See for example:
 
@@ -491,7 +492,7 @@ Notes about Header Files
     Certain header files, such as setjmp.h, stdarg.h, and math.h, may still
     be needed from your toolchain and your compiler may not, however, be able
     to find these if you compile NuttX without using standard header files
-    (ie., with -nostdinc).  If that is the case, one solution is to copy
+    (i.e., with -nostdinc).  If that is the case, one solution is to copy
     those header file from your toolchain into the NuttX include directory.
 
   Duplicated Header Files.
@@ -513,7 +514,7 @@ Notes about Header Files
     been tuned for your CPU.  Sometimes such such tuned math libraries are
     bundled with your toolchain.
 
-    The math libary header file, math.h, is a then special case.  If you do
+    The math library header file, math.h, is a then special case.  If you do
     nothing, the standard math.h header file that is provided with your
     toolchain will be used.
 
@@ -583,7 +584,7 @@ Instantiating "Canned" Configurations
       included in the build and what is not.  This file is also used
       to generate a C configuration header at include/nuttx/config.h.
 
-   Copy other, environment-specic files to ${TOPDIR
+   Copy other, environment-specific files to ${TOPDIR
 
       This might include files like .gdbinit or IDE configuration files
       like .project or .cproject.
@@ -652,10 +653,10 @@ Refreshing Configurations
 NuttX Configuration Tool
 ------------------------
 
-  An automated tool has been incorported to support re-configuration
+  An automated tool has been incorporated to support re-configuration
   of NuttX.  This automated tool is based on the kconfig-frontends
   application available at http://ymorin.is-a-geek.org/projects/kconfig-frontends
-  (A snapshot of this tool is also available fromo the tools repository at
+  (A snapshot of this tool is also available from the tools repository at
   https://bitbucket.org/nuttx/tools).  This application provides a tool
   called 'kconfig-mconf' that is used by the NuttX top-level Makefile.
   The following make target is provided:
@@ -731,7 +732,7 @@ NuttX Configuration Tool
 
     make gconfig
 
-  Some keyboard shortcus supported by kconfig-mconf, the tool that runs
+  Some keyboard shortcuts supported by kconfig-mconf, the tool that runs
   when you do 'make menuconfig':
 
     - '?' will bring up the mconfig help display.
@@ -752,7 +753,7 @@ Finding Selections in the Configuration Menus
   narrow things down.
 
   But if you know exactly what configuration setting you want to select,
-  say CONFIG_XYZ, but not where to find it, then the 'make memconfig'
+  say CONFIG_XYZ, but not where to find it, then the 'make menuconfig'
   version of the tool offers some help:  By pressing the '/' key, the
   tool will bring up a menu that will allow you to search for a
   configuration item.  Just enter the string CONFIG_XYZ and press 'ENTER'.
@@ -849,6 +850,52 @@ Comparing Two Configurations
      manual configurations to the current configurations based on the
      kconfig-frontends tools.  See the following paragraph.
 
+Making defconfig Files
+----------------------
+
+  The minimum defconfig file is simply the generated .config file with
+  CONFIG_APPS_DIR setting removed or commented out.  That setting provides
+  the name and location of the apps/ directory relative to the nuttx build
+  directory.  The default is ../apps/, however, the apps directory may be
+  any other location and may have a different name.  For example, the name
+  of versioned NuttX releases are always in the form apps-xx.yy where xx.yy
+  is the version number.
+
+  When the default configuration is installed using on of the scripts or
+  programs in the NuttX tools directory, there will be an option to provide
+  the path to the apps/ directory.  If not provided, then the configure tool
+  will look around and try to make a reasonable decision about where the
+  apps/ directory is located.
+
+  The Makefile also supports an option to generate very small defconfig
+  files.  The .config files are quite large and complex.  But most of the
+  settings in the .config file simply have the default settings from the
+  Kconfig files.  These .config files can be converted into small defconfig
+  file:
+
+    make savedefconfig
+
+  That make target will generate a defconfig file in the top-level
+  directory.  The size reduction is really quite remarkable:
+
+    $ wc -l .config defconfig
+     1085 .config
+       82 defconfig
+     1167 total
+
+   In order to be usable, the .config file installed from the compressed
+   defconfig file must be reconstituted using:
+
+     make olddefconfig
+
+   CAUTION:  There is only one caution.  This size reduction was
+   accomplished by removing all setting from the .config file that were at
+   the default value.  'make olddefconfig' can regenerate the original
+   .config file by simply restoring those default settings.  The underlying
+   assumption here is, of course, that the default settings do not change.
+   If the default settings change, and they often do, then the original
+   .config may not be reproducible.
+
 Incompatibilities with Older Configurations
 -------------------------------------------
 
@@ -924,7 +971,7 @@ NuttX Configuration Tool under DOS
      directly in the Windows console window.  In this case, you do not
      have to modify the .config file, but there are other complexities:
 
-      a. You need to temporarily set the Cgywin directories in the PATH
+      a. You need to temporarily set the Cygwin directories in the PATH
          variable then run kconfig-mconf manually like:
 
           kconfig-mconf Kconfig
@@ -957,7 +1004,7 @@ Cross-Development Toolchains
   tools and development environments for use with your board.
 
   In any case, the PATH environment variable will need to be updated to
-  include the loction where the build can find the toolchain binaries.
+  include the location where the build can find the toolchain binaries.
 
 NuttX Buildroot Toolchain
 -------------------------
@@ -1064,7 +1111,7 @@ Re-building
   build is still using the version of the file in the copied directory, not
   your modified file!
 
-  Older versions of NuttX did not support dependiencies in this
+  Older versions of NuttX did not support dependencies in this
   configuration.  So a simple work around this annoying behavior in this
   case was the following when you re-build:
 
@@ -1075,7 +1122,7 @@ Re-building
 
   However, more recent versions of NuttX do support dependencies for the
   Cygwin build.  As a result, the above command will cause everything to be
-  rebuilt (beause it removes and will cause recreating the
+  rebuilt (because it removes and will cause recreating the
   include/nuttx/config.h header file).  A much less gracefully but still
   effective command in this case is the following for the ARM configuration:
 
@@ -1310,7 +1357,7 @@ Window Native Toolchain Issues
 
   There are many popular Windows native toolchains that may be used with NuttX.
   Examples include CodeSourcery (for Windows), devkitARM, and several vendor-
-  provied toolchains.  There are several limitations with using a and Windows
+  provided toolchains.  There are several limitations with using a and Windows
   based toolchain in a Cygwin environment.  The three biggest are:
 
   1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
@@ -1392,7 +1439,7 @@ Building Original Linux Boards in Cygwin
   be used in each configuration.  It is possible to change the default
   setup.  Here, for example, is what you must do in order to compile a
   default Linux configuration in the Cygwin environment using the
-  CodeSourceery for Windows toolchain.  After instantiating a "canned"
+  CodeSourcery for Windows toolchain.  After instantiating a "canned"
   NuttX configuration, run the target 'menuconfig' and set the following
   items:
 
