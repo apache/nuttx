@@ -84,7 +84,7 @@ int net_addroute(in_addr_t target, in_addr_t netmask, in_addr_t router)
       return -ENOMEM;
     }
 
-  /* Format the new route table entry */
+  /* Format the new routing table entry */
 
   net_ipv4addr_copy(route->target, target);
   net_ipv4addr_copy(route->netmask, netmask);
@@ -116,7 +116,7 @@ int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask, net_ipv6add
       return -ENOMEM;
     }
 
-  /* Format the new route table entry */
+  /* Format the new routing table entry */
 
   net_ipv6addr_copy(route->target, target);
   net_ipv6addr_copy(route->netmask, netmask);

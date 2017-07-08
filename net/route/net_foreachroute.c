@@ -58,9 +58,11 @@
  * Name: net_foreachroute
  *
  * Description:
- *   Traverse the route table
+ *   Traverse the routing table
  *
  * Parameters:
+ *   handler - Will be called for each route in the routing table.
+ *   arg     - An arbitrary value that will be passed tot he handler.
  *
  * Returned Value:
  *   0 if in use; 1 if avaialble and the new entry was added
