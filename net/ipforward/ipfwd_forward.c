@@ -144,8 +144,6 @@ static inline void forward_ipselect(FAR struct forward_s *fwd)
 #ifdef CONFIG_NET_ETHERNET
 static inline bool ipfwd_addrchk(FAR struct forward_s *fwd)
 {
-  FAR union fwd_iphdr_u *iphdr;
-
   DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
 
   /* REVISIT: Could the MAC address not also be in a routing table? */
@@ -157,15 +155,14 @@ static inline bool ipfwd_addrchk(FAR struct forward_s *fwd)
     }
 #endif
 
-  iphdr = FWD_HEADER(fwd);
-
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
   if (fwd->f_domain == PF_INET)
 #endif
     {
 #if !defined(CONFIG_NET_ARP_IPIN) && !defined(CONFIG_NET_ARP_SEND)
-      return (arp_find(iphdr->ipv4.l2.destipaddr) != NULL);
+      FAR stuct ipv4_hdr_s *ipv4 = (FAR stuct ipv4_hdr_s *)fwd->f_iob->io_data;
+      return (arp_find(ipv4->destipaddr) != NULL);
 #else
       return true;
 #endif
@@ -178,7 +175,8 @@ static inline bool ipfwd_addrchk(FAR struct forward_s *fwd)
 #endif
     {
 #if !defined(CONFIG_NET_ICMPv6_NEIGHBOR)
-      return (neighbor_findentry(iphdr->ipv6.l2.destipaddr) != NULL);
+      FAR stuct ipv6_hdr_s *ipv4 = (FAR stuct ipv6_hdr_s *)fwd->f_iob->io_data;
+      return (neighbor_findentry(ipv6->destipaddr) != NULL);
 #else
       return true;
 #endif

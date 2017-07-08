@@ -44,9 +44,36 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/net/tcp.h>
+#include <nuttx/net/udp.h>
+#include <nuttx/net/icmp.h>
+#include <nuttx/net/icmpv6.h>
+
 #include "ipforward/ipforward.h"
 
 #if defined(CONFIG_NET_IPFORWARD) &&  defined(CONFIG_NETDEV_MULTINIC)
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+#  define L2_MAXHDRLEN IPv6_HDRLEN
+#else
+#  define L2_MAXHDRLEN IPv4_HDRLEN
+#endif
+
+#if defined(CONFIG_NET_TCP)
+#  define L3_MAXHDRLEN TCP_MAX_HDRLEN
+#elif defined(CONFIG_NET_UDP)
+#  define L3_MAXHDRLEN UDP_HDRLEN
+#elif defined(CONFIG_NET_ICMPv6)
+#  define L3_MAXHDRLEN ICMPv6_HDRLEN
+#elif defined(CONFIG_NET_ICMP)
+#  define L3_MAXHDRLEN ICMP_HDRLEN
+#endif
+
+#define MAX_HDRLEN (L2_MAXHDRLEN + L3_MAXHDRLEN)
 
 /****************************************************************************
  * Private Data
@@ -84,7 +111,7 @@ void ipfwd_initialize(void)
    * the contiguous memory of the first IOB in the IOB chain.
    */
 
-  DEBUGASSERT(sizeof(union fwd_iphdr_u) <= CONFIG_IOB_BUFSIZE);
+  DEBUGASSERT(MAX_HDRLEN <= CONFIG_IOB_BUFSIZE);
 
   /* Add all pre-allocated forwarding structures to the free list */
 
