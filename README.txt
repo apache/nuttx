@@ -20,6 +20,7 @@ README
     - Make Sure that You on on the Right Platform
     - Comparing Two Configurations
     - Making defconfig Files
+    - Configuring with "Compressed" defconfig Files
     - Incompatibilities with Older Configurations
     - NuttX Configuration Tool under DOS
   o Toolchains
@@ -895,6 +896,27 @@ Making defconfig Files
    assumption here is, of course, that the default settings do not change.
    If the default settings change, and they often do, then the original
    .config may not be reproducible.
+
+Configuring with "Compressed" defconfig Files
+---------------------------------------------
+
+  As described in the previous section, "Making defconfig Files," defconfig
+  files may be "compressed" using 'make savedeconfig'.  This compressed
+  defconfig files are will may not be fully usable and may not build the
+  target binaries that you want because the compression process removed all
+  of the default settings from the defconfig file.  To restore the default
+  settings, you should run the following after configuring:
+
+    make olddefconfig
+
+  That will restore the the missing defaulted value.
+
+  Using this command after configuring is generally a good practice anyway:
+  Even if the defconfig files are not "compressed" in this fashion, there
+  the defconfig file may be old and the only way to assure that the
+  installed .config is via 'make oldconfig' or 'make olddefconfig'.  See the
+  paragraph above entitled ""Refreshing Configurations" for additional
+  information.
 
 Incompatibilities with Older Configurations
 -------------------------------------------
