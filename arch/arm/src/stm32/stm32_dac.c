@@ -100,7 +100,7 @@
 #     undef CONFIG_STM32_DAC1_DMA
 #     undef CONFIG_STM32_DAC2_DMA
 #   endif
-# elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+# elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #   ifndef CONFIG_STM32_DMA1
 #     warning "STM32 F4 DAC DMA support requires CONFIG_STM32_DMA1"
 #     undef CONFIG_STM32_DAC1_DMA
@@ -153,7 +153,7 @@
 #   define DAC_DMA         2
 #   define DAC1_DMA_CHAN   DMACHAN_DAC_CHAN1
 #   define DAC2_DMA_CHAN   DMACHAN_DAC_CHAN2
-# elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX) || \
+# elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX) || \
   defined(CONFIG_STM32_STM32F33XX)
 #   define HAVE_DMA        1
 #   define DAC_DMA         1
@@ -320,7 +320,7 @@
 
 /* DMA stream/channel configuration */
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #  define DAC_DMA_CONTROL_WORD (DMA_SCR_MSIZE_16BITS | \
                                 DMA_SCR_PSIZE_16BITS | \
                                 DMA_SCR_MINC | \
@@ -381,7 +381,7 @@ static void     tim_putreg(FAR struct stm32_chan_s *chan, int offset,
 
 /* Interrupt handler */
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 static int  dac_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 
@@ -620,7 +620,7 @@ static void tim_modifyreg(FAR struct stm32_chan_s *chan, int offset,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 static int dac_interrupt(int irq, FAR void *context, FAR void *arg)
 {
 #warning "Missing logic"

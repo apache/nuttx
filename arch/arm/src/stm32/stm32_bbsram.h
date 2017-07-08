@@ -59,7 +59,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #  define STM32_BBSRAM_SIZE 4096
 #else
 #  error No backup SRAM on this STM32

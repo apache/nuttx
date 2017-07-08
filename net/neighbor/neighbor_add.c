@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/neighbor/neighbor_add.c
  *
- *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * A leverage of logic from uIP which also has a BSD style license
@@ -43,11 +43,16 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <string.h>
 #include <debug.h>
 
+#include <net/if.h>
+
+#include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
 
+#include "netdev/netdev.h"
 #include "neighbor/neighbor.h"
 
 /****************************************************************************
@@ -63,6 +68,7 @@
  *
  * Input Parameters:
  *   ipaddr - The IPv6 address of the mapping.
+ *   lltype - The link layer address type
  *   addr   - The link layer address of the mapping
  *
  * Returned Value:
@@ -70,23 +76,12 @@
  *
  ****************************************************************************/
 
-void neighbor_add(FAR net_ipv6addr_t ipaddr, FAR struct neighbor_addr_s *addr)
+void neighbor_add(FAR net_ipv6addr_t ipaddr, uint8_t lltype,
+                  FAR uint8_t *addr)
 {
   uint8_t oldest_time;
   int     oldest_ndx;
   int     i;
-
-  ninfo("Add neighbor: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        ntohs(ipaddr[0]), ntohs(ipaddr[1]), ntohs(ipaddr[2]),
-        ntohs(ipaddr[3]), ntohs(ipaddr[4]), ntohs(ipaddr[5]),
-        ntohs(ipaddr[6]), ntohs(ipaddr[7]));
-  ninfo("  at: %02x:%02x:%02x:%02x:%02x:%02x\n",
-        addr->na_addr.ether_addr_octet[0],
-        addr->na_addr.ether_addr_octet[1],
-        addr->na_addr.ether_addr_octet[2],
-        addr->na_addr.ether_addr_octet[3],
-        addr->na_addr.ether_addr_octet[4],
-        addr->na_addr.ether_addr_octet[5]);
 
   /* Find the first unused entry or the oldest used entry. */
 
@@ -101,7 +96,12 @@ void neighbor_add(FAR net_ipv6addr_t ipaddr, FAR struct neighbor_addr_s *addr)
           break;
         }
 
+#ifdef CONFIG_NET_MULTILINK
+      if (g_neighbors[i].ne_addr.u.na_lltype == lltype &&
+          net_ipv6addr_cmp(g_neighbors[i].ne_ipaddr, ipaddr))
+#else
       if (net_ipv6addr_cmp(g_neighbors[i].ne_ipaddr, ipaddr))
+#endif
         {
           oldest_ndx = i;
           break;
@@ -120,5 +120,13 @@ void neighbor_add(FAR net_ipv6addr_t ipaddr, FAR struct neighbor_addr_s *addr)
 
   g_neighbors[oldest_ndx].ne_time = 0;
   net_ipv6addr_copy(g_neighbors[oldest_ndx].ne_ipaddr, ipaddr);
-  memcpy(&g_neighbors[oldest_ndx].ne_addr, addr, sizeof(struct neighbor_addr_s));
+
+#ifdef CONFIG_NET_MULTILINK
+  g_neighbors[oldest_ndx].ne_addr.u.na_lltype = lltype;
+#endif
+  memcpy(&g_neighbors[oldest_ndx].ne_addr.u, addr, netdev_type_lladdrsize(lltype));
+
+  /* Dump the contents of the new entry */
+
+  neighbor_dumpentry("Added entry", &g_neighbors[oldest_ndx]);
 }

@@ -52,8 +52,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define TUNSETIFF        _SIOC(0x1001)
-
 /* TUNSETIFF ifr flags */
 
 #define IFF_TUN          0x01
@@ -85,12 +83,12 @@ extern "C"
  * Name: tun_initialize
  *
  * Description:
- *   Instantiate a SLIP network interface.
+ *   Instantiate a TUN network interface.
  *
  * Parameters:
  *
  * Returned Value:
- *   OK on success; Negated errno on failure.
+ *   OK on success; Negated errno value on failure.
  *
  * Assumptions:
  *

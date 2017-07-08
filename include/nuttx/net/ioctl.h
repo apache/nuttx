@@ -119,9 +119,13 @@
 #define SIOCINQ          _SIOC(0x0025)  /* Returns the amount of queued unread
                                          * data in the receive */
 
+/* TUN/TAP driver ***********************************************************/
+
+#define TUNSETIFF        _SIOC(0x0026)  /* Set TUN/TAP interface */
+
 /* Telnet driver ************************************************************/
 
-#define SIOCTELNET       _SIOC(0x0026)  /* Create a Telnet sessions.
+#define SIOCTELNET       _SIOC(0x0027)  /* Create a Telnet sessions.
                                          * See include/nuttx/net/telnet.h */
 
 /****************************************************************************

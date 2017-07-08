@@ -110,6 +110,12 @@
 #  endif
 #endif
 
+#ifdef CONFIG_NET_TUN
+#  ifndef CONFIG_NET_TUN_MTU
+#    define CONFIG_NET_TUN_MTU 296
+#  endif
+#endif
+
 #ifdef CONFIG_NET_ETHERNET
 #  ifndef CONFIG_NET_ETH_MTU
 #    define CONFIG_NET_ETH_MTU 590
@@ -165,12 +171,20 @@
 #    define _MAX_SLIP_MTU  _MAX_LO_MTU
 #  endif
 
-#  ifdef CONFIG_NET_6LOWPAN
-#    define _MIN_6LOWPAN_MTU  MIN(_MIN_SLIP_MTU,CONFIG_NET_6LOWPAN_MTU)
-#    define _MAX_6LOWPAN_MTU  MAX(_MAX_SLIP_MTU,CONFIG_NET_6LOWPAN_MTU)
+#  ifdef CONFIG_NET_TUN
+#    define _MIN_TUN_MTU   MIN(_MIN_SLIP_MTU,CONFIG_NET_TUN_MTU)
+#    define _MAX_TUN_MTU   MAX(_MAX_SLIP_MTU,CONFIG_NET_TUN_MTU)
 #  else
-#    define _MIN_6LOWPAN_MTU  _MIN_SLIP_MTU
-#    define _MAX_6LOWPAN_MTU  _MAX_SLIP_MTU
+#    define _MIN_TUN_MTU   _MIN_SLIP_MTU
+#    define _MAX_TUN_MTU   _MAX_SLIP_MTU
+#  endif
+
+#  ifdef CONFIG_NET_6LOWPAN
+#    define _MIN_6LOWPAN_MTU  MIN(_MIN_TUN_MTU,CONFIG_NET_6LOWPAN_MTU)
+#    define _MAX_6LOWPAN_MTU  MAX(_MAX_TUN_MTU,CONFIG_NET_6LOWPAN_MTU)
+#  else
+#    define _MIN_6LOWPAN_MTU  _MIN_TUN_MTU
+#    define _MAX_6LOWPAN_MTU  _MAX_TUN_MTU
 #  endif
 
 #  define MIN_NET_DEV_MTU  _MIN_6LOWPAN_MTU
@@ -191,6 +205,14 @@
 #  define NET_DEV_MTU(d)    CONFIG_NET_SLIP_MTU
 #  define MIN_NET_DEV_MTU   CONFIG_NET_SLIP_MTU
 #  define MAX_NET_DEV_MTU   CONFIG_NET_SLIP_MTU
+
+#elif defined(CONFIG_NET_TUN)
+   /* There is no link layer header with TUN */
+
+#  define NET_LL_HDRLEN(d)  0
+#  define NET_DEV_MTU(d)    CONFIG_NET_TUN_MTU
+#  define MIN_NET_DEV_MTU   CONFIG_NET_TUN_MTU
+#  define MAX_NET_DEV_MTU   CONFIG_NET_TUN_MTU
 
 #elif defined(CONFIG_NET_ETHERNET)
    /* Assume standard Ethernet link layer header */
@@ -215,10 +237,10 @@
 #  define MAX_NET_DEV_MTU   NET_LO_MTU
 
 #elif defined(CONFIG_NET_6LOWPAN)
-   /* There is no link layer header with SLIP */
+   /* There is no link layer header with 6LoWPAN */
 
 #  ifndef CONFIG_NET_IPv6
-#    error 6LoWPAN requires IPv support
+#    error 6LoWPAN requires IP6v support
 #  endif
 
 #  define NET_LL_HDRLEN(d)  0
@@ -240,7 +262,7 @@
 #  define MIN_NET_DEV_MTU   0
 #  define MAX_NET_DEV_MTU   0
 
-#endif /* MULTILINK or SLIP or ETHERNET */
+#endif /* MULTILINK, SLIP, TUN, LOOPBACK, 6LoWOPAN, or ETHERNET */
 
 /* Layer 3/4 Configuration Options ******************************************/
 
@@ -332,6 +354,14 @@
 #  endif
 #endif
 
+#ifdef CONFIG_NET_TUN
+#  define TUN_UDP_MSS(h)        (CONFIG_NET_TUN_MTU - UDP_HDRLEN - (h))
+#  ifndef CONFIG_NET_MULTILINK
+#    define __MIN_UDP_MSS(h)    TUN_UDP_MSS(h)
+#    define __MAX_UDP_MSS(h)    TUN_UDP_MSS(h)
+#  endif
+#endif
+
 #ifdef CONFIG_NET_MULTILINK
 #  ifdef CONFIG_NET_ETHERNET
 #    define __MIN_UDP_MSS(h)         ETH_UDP_MSS(h)
@@ -378,12 +408,25 @@
 #    define __SLIP_MIN_UDP_MSS(h) __LOOP_MIN_UDP_MSS(h)
 #    define __SLIP_MAX_UDP_MSS(h) __LOOP_MAX_UDP_MSS(h)
 #  endif
+
+#  ifdef CONFIG_NET_TUN
+#    undef  __MIN_UDP_MSS
+#    undef  __MIN_UDP_MSS
+#    define __MIN_UDP_MSS(h)      MIN(TUN_UDP_MSS(h),__SLIP_MIN_UDP_MSS(h))
+#    define __MAX_UDP_MSS(h)      MAX(TUN_UDP_MSS(h),__SLIP_MAX_UDP_MSS(h))
+#    define __TUN_MIN_UDP_MSS(h)  MIN(TUN_UDP_MSS(h),__SLIP_MIN_UDP_MSS(h))
+#    define __TUN_MAX_UDP_MSS(h)  MAX(TUN_UDP_MSS(h),__SLIP_MAX_UDP_MSS(h))
+#  else
+#    define __TUN_MIN_UDP_MSS(h) __SLIP_MIN_UDP_MSS(h)
+#    define __TUN_MAX_UDP_MSS(h) __SLIP_MAX_UDP_MSS(h)
+#  endif
 #endif
 
  #ifdef CONFIG_NET_IPv4
 #  define UDP_IPv4_MSS(d)       UDP_MSS(d,IPv4_HDRLEN)
 #  define ETH_IPv4_UDP_MSS      ETH_UDP_MSS(IPv4_HDRLEN)
 #  define SLIP_IPv4_UDP_MSS     SLIP_UDP_MSS(IPv4_HDRLEN)
+#  define TUN_IPv4_UDP_MSS      TUN_UDP_MSS(IPv4_HDRLEN)
 
 #  define MIN_IPv4_UDP_MSS      __MIN_UDP_MSS(IPv4_HDRLEN)
 #  define MIN_UDP_MSS           __MIN_UDP_MSS(IPv4_HDRLEN)
@@ -507,6 +550,14 @@
 #  endif
 #endif
 
+#ifdef CONFIG_NET_TUN
+#  define TUN_TCP_MSS(h)        (CONFIG_NET_TUN_MTU - TCP_HDRLEN - (h))
+#  ifndef CONFIG_NET_MULTILINK
+#    define __MIN_TCP_MSS(h)    TUN_TCP_MSS(h)
+#    define __MAX_TCP_MSS(h)    TUN_TCP_MSS(h)
+#  endif
+#endif
+
 #ifdef CONFIG_NET_MULTILINK
 
 #  ifdef CONFIG_NET_ETHERNET
@@ -539,7 +590,7 @@
 #    define __LOOP_MIN_TCP_MSS(h)    MIN(LO_TCP_MSS(h),__6LOWPAN_MIN_TCP_MSS(h))
 #    define __LOOP_MAX_TCP_MSS(h)    MAX(LO_TCP_MSS(h),__6LOWPAN_MAX_TCP_MSS(h))
 #  else
-#    define __LOOP_MIN_TCP_MSS(h)    _6LOWPAN_MIN_TCP_MSS(h)
+#    define __LOOP_MIN_TCP_MSS(h)   __6LOWPAN_MIN_TCP_MSS(h)
 #    define __LOOP_MAX_TCP_MSS(h)   __6LOWPAN_MAX_TCP_MSS(h)
 #  endif
 
@@ -554,6 +605,18 @@
 #    define __SLIP_MIN_TCP_MSS(h)   __LOOP_MIN_TCP_MSS(h)
 #    define __SLIP_MAX_TCP_MSS(h)   __LOOP_MAX_TCP_MSS(h)
 #  endif
+
+#  ifdef CONFIG_NET_TUN
+#    undef  __MIN_TCP_MSS
+#    undef  __MAX_TCP_MSS
+#    define __MIN_TCP_MSS(h)        MIN(TUN_TCP_MSS(h),__SLIP_MIN_TCP_MSS(h))
+#    define __MAX_TCP_MSS(h)        MAX(TUN_TCP_MSS(h),__SLIP_MAX_TCP_MSS(h))
+#    define __TUN_MIN_TCP_MSS(h)    MIN(TUN_TCP_MSS(h),__SLIP_MIN_TCP_MSS(h))
+#    define __TUN_MAX_TCP_MSS(h)    MAX(TUN_TCP_MSS(h),__SLIP_MAX_TCP_MSS(h))
+#  else
+#    define __TUN_MIN_TCP_MSS(h)    __SLIP_MIN_TCP_MSS(h)
+#    define __TUN_MAX_TCP_MSS(h)    __SLIP_MAX_TCP_MSS(h)
+#  endif
 #endif
 
 /* If IPv4 is supported, it will have the larger MSS.
@@ -564,6 +627,7 @@
 #  define TCP_IPv6_MSS(d)       TCP_MSS(d,IPv6_HDRLEN)
 #  define ETH_IPv6_TCP_MSS      ETH_TCP_MSS(IPv6_HDRLEN)
 #  define SLIP_IPv6_TCP_MSS     SLIP_TCP_MSS(IPv6_HDRLEN)
+#  define TUN_IPv6_TCP_MSS      TUN_TCP_MSS(IPv6_HDRLEN)
 #  define MAX_TCP_MSS           __MAX_TCP_MSS(IPv6_HDRLEN)
 #endif
 
@@ -571,6 +635,7 @@
 #  define TCP_IPv4_MSS(d)       TCP_MSS(d,IPv4_HDRLEN)
 #  define ETH_IPv4_TCP_MSS      ETH_TCP_MSS(IPv4_HDRLEN)
 #  define SLIP_IPv4_TCP_MSS     SLIP_TCP_MSS(IPv4_HDRLEN)
+#  define TUN_IPv4_TCP_MSS      TUN_TCP_MSS(IPv4_HDRLEN)
 #  define MIN_TCP_MSS           __MIN_TCP_MSS(IPv4_HDRLEN)
 #  undef MAX_TCP_MSS
 #  define MAX_TCP_MSS           __MAX_TCP_MSS(IPv4_HDRLEN)
@@ -600,6 +665,12 @@
 #  endif
 #endif
 
+#ifdef CONFIG_NET_TUN
+#  ifndef CONFIG_NET_TUN_TCP_RECVWNDO
+#    define CONFIG_NET_TUN_TCP_RECVWNDO TUN_TCP_MSS(0)
+#  endif
+#endif
+
 #ifdef CONFIG_NET_ETHERNET
 #  ifndef CONFIG_NET_ETH_TCP_RECVWNDO
 #    define CONFIG_NET_ETH_TCP_RECVWNDO ETH_TCP_MSS(0)
@@ -615,7 +686,7 @@
 #  define NET_DEV_RCVWNDO(d)  ((d)->d_recvwndo)
 
 #elif defined(CONFIG_NET_ETHERNET)
-   /* Only Ethernet.. use the configured SLIP receive window size */
+   /* Only Ethernet.. use the configured Ethernet receive window size */
 
 #  define NET_DEV_RCVWNDO(d)  CONFIG_NET_ETH_TCP_RECVWNDO
 
@@ -629,12 +700,17 @@
 
 #  define NET_DEV_RCVWNDO(d)  CONFIG_NET_SLIP_TCP_RECVWNDO
 
+#elif defined(CONFIG_NET_TUN)
+   /* Only SLIP.. use the configured SLIP receive window size */
+
+#  define NET_DEV_RCVWNDO(d)  CONFIG_NET_TUN_TCP_RECVWNDO
+
 #else /* if defined(CONFIG_NET_LOOPBACK) */
    /* Only loal loopback.. use the fixed loopback receive window size */
 
 #  define NET_DEV_RCVWNDO(d)  NET_LO_TCP_RECVWNDO
 
-#endif /* MULTILINK or SLIP or ETHERNET */
+#endif /* MULTILINK, ETHERNET, 6LoWPAN, SLIP, TUN, or LOOPBACK */
 
 /* How long a connection should stay in the TIME_WAIT state.
  *

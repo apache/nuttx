@@ -43,7 +43,7 @@
 
 #include <nuttx/net/netdev.h>
 
-#include "devif/ip_forward.h"
+#include "ipforward/ipforward.h"
 #include "devif/devif.h"
 
 #if defined(CONFIG_NET_IPFORWARD) &&  defined(CONFIG_NETDEV_MULTINIC)
@@ -75,28 +75,20 @@ void devif_forward(FAR struct forward_s *fwd)
   unsigned int offset;
   int ret;
 
-  DEBUGASSERT(fwd != NULL && fwd->f_dev != NULL);
+  DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
   offset = NET_LL_HDRLEN(fwd->f_dev);
 
-  /* Copy the saved L2 + L3 header */
+  /* Copy the IOB chain that contains the L3L3 headers and any data payload */
 
-  DEBUGASSERT(offset + fwd->f_hdrsize <= NET_DEV_MTU(fwd->f_dev));
-  memcpy(&fwd->f_dev->d_buf[offset], &fwd->f_hdr, fwd->f_hdrsize);
-  offset += fwd->f_hdrsize;
+  DEBUGASSERT(offset + fwd->f_iob->io_pktlen <= NET_DEV_MTU(fwd->f_dev));
+  ret = iob_copyout(&fwd->f_dev->d_buf[offset], fwd->f_iob,
+                    fwd->f_iob->io_pktlen, 0);
 
-  /* Copy the IOB chain that contains the payload */
+  DEBUGASSERT(ret == fwd->f_iob->io_pktlen);
+  offset += fwd->f_iob->io_pktlen;
 
-  if (fwd->f_iob != NULL && fwd->f_iob->io_pktlen > 0)
-    {
-      DEBUGASSERT(offset + fwd->f_iob->io_pktlen <= NET_DEV_MTU(fwd->f_dev));
-      ret = iob_copyout(&fwd->f_dev->d_buf[offset], fwd->f_iob,
-                        fwd->f_iob->io_pktlen, 0);
-
-      DEBUGASSERT(ret == fwd->f_iob->io_pktlen);
-      offset += fwd->f_iob->io_pktlen;
-    }
-
-  fwd->f_dev->d_sndlen = offset;
+  fwd->f_dev->d_sndlen = 0;
+  fwd->f_dev->d_len    = offset;
 }
 
 #endif /* CONFIG_NET_IPFORWARD && CONFIG_NETDEV_MULTINIC */

@@ -60,13 +60,13 @@
  */
 
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
-      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
+      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F4XXX)
 #  include "chip/stm32_rtcc.h"
 #endif
 
 /* Alarm function differs from part to part */
 
-#ifdef CONFIG_STM32_STM32F40XX
+#ifdef CONFIG_STM32_STM32F4XXX
 #  include "stm32f40xxx_alarm.h"
 #else
 #  include "stm32_alarm.h"

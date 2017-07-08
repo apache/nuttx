@@ -167,7 +167,7 @@ void netdev_ipv6_txnotify(FAR const net_ipv6addr_t ripaddr)
 
 void netdev_txnotify_dev(FAR struct net_driver_s *dev)
 {
-  if (dev && dev->d_txavail)
+  if (dev != NULL && dev->d_txavail != NULL)
     {
       /* Notify the device driver that new TX data is available. */
 

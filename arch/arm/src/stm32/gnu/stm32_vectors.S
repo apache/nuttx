@@ -181,7 +181,7 @@ _vectors:
 #  include "chip/stm32f33xxx_vectors.h"
 #elif defined(CONFIG_STM32_STM32F37XX)
 #  include "chip/stm32f37xxx_vectors.h"
-#elif defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F4XXX)
 #  include "chip/stm32f40xxx_vectors.h"
 #else
 #  error "No vectors for STM32 chip"
@@ -228,7 +228,7 @@ handlers:
 #  include "chip/stm32f33xxx_vectors.h"
 #elif defined(CONFIG_STM32_STM32F37XX)
 #  include "chip/stm32f37xxx_vectors.h"
-#elif defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F4XXX)
 #  include "chip/stm32f40xxx_vectors.h"
 #else
 #  error "No handlers for STM32 chip"

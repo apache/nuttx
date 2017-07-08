@@ -115,7 +115,7 @@
 
 /* On the F4 series, TIM2 and TIM5 are 32-bit.  All of the rest are 16-bit */
 
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 
    /* If TIM2 or TIM5 are enabled, then we have 32-bit timers */
 
@@ -212,7 +212,7 @@
                                   GPIO_MODE_INPUT)
 #elif defined(CONFIG_STM32_STM32F20XX) || \
       defined(CONFIG_STM32_STM32F30XX) || \
-      defined(CONFIG_STM32_STM32F40XX)
+      defined(CONFIG_STM32_STM32F4XXX)
 #  define STM32_GPIO_INPUT_FLOAT (GPIO_INPUT | GPIO_FLOAT)
 #else
 #  error "Unrecognized STM32 chip"

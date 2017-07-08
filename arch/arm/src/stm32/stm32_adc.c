@@ -82,7 +82,7 @@
 
 #if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F20XX) || \
     defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX) || \
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX) || \
     defined(CONFIG_STM32_STM32L15XX)
 
 /* At the moment there is no proper implementation for timers external
@@ -125,7 +125,7 @@
 #elif defined(CONFIG_STM32_STM32F37XX)
 #  define STM32_RCC_RSTR   STM32_RCC_APB2RSTR
 #  define RCC_RSTR_ADC1RST RCC_APB2RSTR_ADCRST
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #  define STM32_RCC_RSTR   STM32_RCC_APB2RSTR
 #  define RCC_RSTR_ADC1RST RCC_APB2RSTR_ADCRST
 #  define RCC_RSTR_ADC2RST RCC_APB2RSTR_ADCRST
@@ -205,7 +205,7 @@
 #  endif
 #endif
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #  define ADC_DMA_CONTROL_WORD (DMA_SCR_MSIZE_16BITS | \
                                 DMA_SCR_PSIZE_16BITS | \
                                 DMA_SCR_MINC | \
@@ -266,7 +266,7 @@
                                (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP17_SHIFT) | \
                                (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP18_SHIFT))
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F37XX) || \
-    defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F4XXX)
 #  if defined(CONFIG_STM32_STM32F37XX)
 #    define ADC_SMPR_DEFAULT    ADC_SMPR_239p5 /* TODO choose 1p5? */
 #  else
@@ -353,7 +353,7 @@ struct stm32_dev_s
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
     defined(CONFIG_STM32_STM32F33XX) || defined(CONFIG_STM32_STM32F37XX) || \
-    defined(CONFIG_STM32_STM32F40XX) || defined(CONFIG_STM32_STM32L15XX)
+    defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
 static void stm32_modifyreg32(unsigned int addr, uint32_t clrbits,
                               uint32_t setbits);
 #endif
@@ -621,7 +621,7 @@ static struct adc_dev_s g_adcdev4 =
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
     defined(CONFIG_STM32_STM32F33XX) || defined(CONFIG_STM32_STM32F37XX) || \
-    defined(CONFIG_STM32_STM32F40XX) || defined(CONFIG_STM32_STM32L15XX)
+    defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
 static void stm32_modifyreg32(unsigned int addr, uint32_t clrbits,
                               uint32_t setbits)
 {
@@ -1154,7 +1154,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
 
 #  if defined(CONFIG_STM32_STM32F20XX) || \
       defined(CONFIG_STM32_STM32F30XX) || \
-      defined(CONFIG_STM32_STM32F40XX)
+      defined(CONFIG_STM32_STM32F4XXX)
       ccer &= ~(ATIM_CCER_CC1NE | ATIM_CCER_CC1NP |
                 ATIM_CCER_CC2NE | ATIM_CCER_CC2NP |
                 ATIM_CCER_CC3NE | ATIM_CCER_CC3NP |
@@ -1174,7 +1174,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
     }
 #  if defined(CONFIG_STM32_STM32F20XX) || \
       defined(CONFIG_STM32_STM32F30XX) || \
-      defined(CONFIG_STM32_STM32F40XX)
+      defined(CONFIG_STM32_STM32F4XXX)
   else
     {
       ccer &= ~(GTIM_CCER_CC1NP | GTIM_CCER_CC2NP | GTIM_CCER_CC3NP);
@@ -2000,12 +2000,12 @@ static void adc_reset(FAR struct adc_dev_s *dev)
     }
 #endif
 #elif defined(CONFIG_STM32_STM32F20XX) || \
-      defined(CONFIG_STM32_STM32F40XX) || \
+      defined(CONFIG_STM32_STM32F4XXX) || \
       defined(CONFIG_STM32_STM32L15XX)
   clrbits  = ADC_CCR_ADCPRE_MASK | ADC_CCR_TSVREFE;
   setbits  = ADC_CCR_ADCPRE_DIV2;
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
   clrbits |= ADC_CCR_MULTI_MASK | ADC_CCR_DELAY_MASK | ADC_CCR_DDS |
              ADC_CCR_DMA_MASK | ADC_CCR_VBATE;
   setbits |= ADC_CCR_MULTI_NONE | ADC_CCR_DMA_DISABLED;
@@ -2103,7 +2103,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
     }
 #endif
 #elif defined(CONFIG_STM32_STM32F20XX) || \
-      defined(CONFIG_STM32_STM32F40XX) || \
+      defined(CONFIG_STM32_STM32F4XXX) || \
       defined(CONFIG_STM32_STM32L15XX)
   ainfo("CCR:  0x%08x\n", getreg32(STM32_ADC_CCR));
 #endif
@@ -3104,7 +3104,7 @@ struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
 
 #endif /* CONFIG_STM32_STM32F10XX || CONFIG_STM32_STM32F20XX ||
         * CONFIG_STM32_STM32F30XX || CONFIG_STM32_STM32F33XX ||
-        * CONFIG_STM32_STM32F47XX || CONFIG_STM32_STM32F40XX ||
+        * CONFIG_STM32_STM32F47XX || CONFIG_STM32_STM32F4XXX ||
         * CONFIG_STM32_STM32L15XX
         */
 #endif /* CONFIG_STM32_ADC1 || CONFIG_STM32_ADC2 ||

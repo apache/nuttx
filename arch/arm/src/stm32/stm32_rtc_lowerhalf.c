@@ -60,7 +60,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_STM32F40XX
+#ifdef CONFIG_STM32_STM32F4XXX
 #  define STM32_NALARMS 2
 #else
 #  define STM32_NALARMS 1
@@ -75,7 +75,7 @@ struct stm32_cbinfo_s
 {
   volatile rtc_alarm_callback_t cb;  /* Callback when the alarm expires */
   volatile FAR void *priv;           /* Private argurment to accompany callback */
-#ifdef CONFIG_STM32_STM32F40XX
+#ifdef CONFIG_STM32_STM32F4XXX
   uint8_t id;                        /* Identifies the alarm */
 #endif
 };
@@ -174,7 +174,7 @@ static struct stm32_lowerhalf_s g_rtc_lowerhalf =
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-#ifdef CONFIG_STM32_STM32F40XX
+#ifdef CONFIG_STM32_STM32F4XXX
 static void stm32_alarm_callback(FAR void *arg, unsigned int alarmid)
 {
   FAR struct stm32_lowerhalf_s *lower;
@@ -229,7 +229,7 @@ static void stm32_alarm_callback(void)
     }
 }
 
-#endif /* CONFIG_STM32_STM32F40XX */
+#endif /* CONFIG_STM32_STM32F4XXX */
 #endif /* CONFIG_RTC_ALARM */
 
 /****************************************************************************
@@ -393,7 +393,7 @@ static bool stm32_havesettime(FAR struct rtc_lowerhalf_s *lower)
 static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
                           FAR const struct lower_setalarm_s *alarminfo)
 {
-#ifdef CONFIG_STM32_STM32F40XX
+#ifdef CONFIG_STM32_STM32F4XXX
   FAR struct stm32_lowerhalf_s *priv;
   FAR struct stm32_cbinfo_s *cbinfo;
   struct alm_setalarm_s lowerinfo;
@@ -492,7 +492,7 @@ static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
 static int stm32_setrelative(FAR struct rtc_lowerhalf_s *lower,
                              FAR const struct lower_setrelative_s *alarminfo)
 {
-#ifdef CONFIG_STM32_STM32F40XX
+#ifdef CONFIG_STM32_STM32F4XXX
   struct lower_setalarm_s setalarm;
   struct tm time;
   time_t seconds;
@@ -643,7 +643,7 @@ static int stm32_setrelative(FAR struct rtc_lowerhalf_s *lower,
 #ifdef CONFIG_RTC_ALARM
 static int stm32_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
 {
-#ifdef CONFIG_STM32_STM32F40XX
+#ifdef CONFIG_STM32_STM32F4XXX
   FAR struct stm32_lowerhalf_s *priv;
   FAR struct stm32_cbinfo_s *cbinfo;
   int ret = -EINVAL;

@@ -1,0 +1,39 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config NET_IPFORWARD
+	bool "Enable L2 forwarding"
+	default n
+	---help---
+		Enable forwarding of packets.  Packets received with IP addresses
+		that are not supported by this platform will be forwarded to the
+		appropriate network device.  Routing table support may be required.
+
+config NET_IPFORWARD_BROADCAST
+	bool "Forward broadcast/multicast packets"
+	default n
+	depends on NET_IPFORWARD && NETDEV_MULTINIC
+	---help---
+		If selected, broadcast packets received on one network device will
+		be forwarded though other network devices.
+
+config NET_IPFORWARD_NSTRUCT
+	int "Number of pre-allocated forwarding structures"
+	default 4
+	depends on NET_IPFORWARD && NETDEV_MULTINIC
+	---help---
+		When packets are forwarded from on device to another, a structure
+		must be allocated to hold the state of forwarding across several
+		asynchronous events.  Those structures are pre-allocated for
+		minimal, deterministic performance and to prevent hogging of memory
+		(of course, that means that this value must be carefully selected
+		for your application).  This setting defines the number of such pre-
+		allocated structures.
+
+		NOTE: This setting effectively puts a maximum on the number of
+		packets that may be waiting to be forwarded from one network device
+		to another.  CONFIG_IOB_NBUFFERS also limits the forward because the
+		payload of the packet (up to the MSS) is retain in IOBs.
+

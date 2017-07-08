@@ -171,12 +171,14 @@
 #define UDP_NEWDATA      TCP_NEWDATA
 #define PKT_NEWDATA      TCP_NEWDATA
 #define WPAN_NEWDATA     TCP_NEWDATA
+#define IPFWD_NEWDATA    TCP_NEWDATA
 #define TCP_SNDACK       (1 << 2)
 #define TCP_REXMIT       (1 << 3)
 #define TCP_POLL         (1 << 4)
 #define UDP_POLL         TCP_POLL
 #define PKT_POLL         TCP_POLL
 #define WPAN_POLL        TCP_POLL
+#define IPFWD_POLL       TCP_POLL
 #define TCP_BACKLOG      (1 << 5)
 #define TCP_CLOSE        (1 << 6)
 #define TCP_ABORT        (1 << 7)
@@ -424,33 +426,6 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, FAR void *pvconn,
 
 uint16_t devif_dev_event(FAR struct net_driver_s *dev, void *pvconn,
                          uint16_t flags);
-
-/****************************************************************************
- * Name: ipv6_forward
- *
- * Description:
- *   This function is called from ipv6_input when a packet is received that
- *   is not destined for us.  In this case, the packet may need to be
- *   forwarded to another device (or sent back out the same device)
- *   depending configuration, routing table information, and the IPv6
- *   networks served by various network devices.
- *
- * Input Parameters:
- *   dev   - The device on which the packet was received and which contains
- *           the IPv6 packet.
- *   ipv6  - A convenience pointer to the IPv6 header in within the IPv6
- *           packet
- *
- * Returned Value:
- *   Zero is returned if the packet was successfully forward;  A negated
- *   errno value is returned if the packet is not forwardable.  In that
- *   latter case, the caller (ipv6_input()) should drop the packet.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_IPv6)
-int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6);
-#endif
 
 /****************************************************************************
  * Send data on the current connection.

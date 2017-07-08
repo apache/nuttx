@@ -46,7 +46,7 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#ifdef CONFIG_STM32_STM32F40XX
+#ifdef CONFIG_STM32_STM32F4XXX
 
 /****************************************************************************************************
  * Pre-processor Definitions
@@ -198,5 +198,5 @@
 #  define SYSCFG_CFGR_FMPI2C1_SDA    (1 << 1)  /* Bit 8: Forces FM+ drive capability on SDA */
 #endif
 
-#endif /* CONFIG_STM32_STM32F40XX */
+#endif /* CONFIG_STM32_STM32F4XXX */
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_SYSCFG_H */

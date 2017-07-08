@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/devif/ip_forward.c
+ * net/ipforward/ipfwd_alloc.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,10 +40,11 @@
 #include <nuttx/config.h>
 
 #include <string.h>
-#include <debug.h>
+#include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
-#include "devif/ip_forward.h"
+#include "ipforward/ipforward.h"
 
 #if defined(CONFIG_NET_IPFORWARD) &&  defined(CONFIG_NETDEV_MULTINIC)
 
@@ -64,7 +65,7 @@ static FAR struct forward_s *g_fwdfree;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ip_forward_initialize
+ * Name: ipfwd_initialize
  *
  * Description:
  *   Initialize the struct forward_s allocator.
@@ -74,10 +75,16 @@ static FAR struct forward_s *g_fwdfree;
  *
  ****************************************************************************/
 
-void ip_forward_initialize(void)
+void ipfwd_initialize(void)
 {
   FAR struct forward_s *fwd;
   int i;
+
+  /* The IOB size must be such that the maximum L2 and L3 headers fit into
+   * the contiguous memory of the first IOB in the IOB chain.
+   */
+
+  DEBUGASSERT(sizeof(union fwd_iphdr_u) <= CONFIG_IOB_BUFSIZE);
 
   /* Add all pre-allocated forwarding structures to the free list */
 
@@ -92,7 +99,7 @@ void ip_forward_initialize(void)
 }
 
 /****************************************************************************
- * Name: ip_forward_alloc
+ * Name: ipfwd_alloc
  *
  * Description:
  *   Allocate a forwarding structure by removing a pre-allocated entry from
@@ -104,7 +111,7 @@ void ip_forward_initialize(void)
  *
  ****************************************************************************/
 
-FAR struct forward_s *ip_forward_alloc(void)
+FAR struct forward_s *ipfwd_alloc(void)
 {
   FAR struct forward_s *fwd;
 
@@ -119,7 +126,7 @@ FAR struct forward_s *ip_forward_alloc(void)
 }
 
 /****************************************************************************
- * Name: ip_forward_free
+ * Name: ipfwd_free
  *
  * Description:
  *   Free a forwarding structure by adding it to a free list.
@@ -130,7 +137,7 @@ FAR struct forward_s *ip_forward_alloc(void)
  *
  ****************************************************************************/
 
-void ip_forward_free(FAR struct forward_s *fwd)
+void ipfwd_free(FAR struct forward_s *fwd)
 {
   fwd->f_flink = g_fwdfree;
   g_fwdfree    = fwd;

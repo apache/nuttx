@@ -572,7 +572,7 @@ void stm32_lowsetup(void)
 
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
       defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
+      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX)
 
 void stm32_lowsetup(void)
 {

@@ -429,35 +429,6 @@ uint16_t udp_callback(FAR struct net_driver_s *dev,
                       FAR struct udp_conn_s *conn, uint16_t flags);
 
 /****************************************************************************
- * Name: udp_forward
- *
- * Description:
- *   Called by the IP forwarding logic when an UDP packet is received on
- *   one network device, but must be forwarded on another network device.
- *
- *   Set up to forward the UDP packet on the specified device.  This
- *   function will set up a send "interrupt" handler that will perform the
- *   actual send asynchronously and must return without waiting for the
- *   send to complete.
- *
- * Input Parameters:
- *   fwd - An initialized instance of the common forwarding structure that
- *         includes everything needed to perform the forwarding operation.
- *
- * Returned Value:
- *   Zero is returned if the packet was successfully forwarded;  A negated
- *   errno value is returned if the packet is not forwardable.  In that
- *   latter case, the caller should free the IOB list and drop the packet.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_IPv6) && \
-    defined(CONFIG_NETDEV_MULTINIC)
-struct forward_s;  /* Forward reference */
-int udp_forward(FAR struct forward_s *fwd);
-#endif
-
-/****************************************************************************
  * Name: psock_udp_send
  *
  * Description:

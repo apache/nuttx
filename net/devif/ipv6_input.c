@@ -100,6 +100,7 @@
 #include "icmpv6/icmpv6.h"
 
 #include "netdev/netdev.h"
+#include "ipforward/ipforward.h"
 #include "devif/devif.h"
 
 /****************************************************************************
@@ -183,6 +184,11 @@ static bool check_destipaddr(FAR struct net_driver_s *dev,
 
   if (ipv6->destipaddr[0] == HTONS(0xff02))
     {
+#ifdef CONFIG_NET_IPFORWARD_BROADCAST
+      /* Forward multicast packets */
+
+      ipv6_forward_broadcast(dev, ipv6);
+#endif
       return true;
     }
 
@@ -322,6 +328,11 @@ int ipv6_input(FAR struct net_driver_s *dev)
   if (ipv6->proto == IP_PROTO_UDP &&
       net_ipv6addr_cmp(ipv6->destipaddr, g_ipv6_alloneaddr))
     {
+#ifdef CONFIG_NET_IPFORWARD_BROADCAST
+      /* Forward broadcast packets */
+
+      ipv6_forward_broadcast(dev, ipv6);
+#endif
       return udp_ipv6_input(dev);
     }
 
