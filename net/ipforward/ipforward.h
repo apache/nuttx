@@ -63,6 +63,11 @@
 #  define CONFIG_NET_IPFORWARD_NSTRUCT 4
 #endif
 
+/* Allocate a new IP forwarding data callback */
+
+#define ipfwd_callback_alloc(dev)   devif_callback_alloc(dev, &(dev)->d_conncb)
+#define ipfwd_callback_free(dev,cb) devif_dev_callback_free(dev, cb)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -239,6 +244,20 @@ void devif_forward(FAR struct forward_s *fwd);
  ****************************************************************************/
 
 int ipfwd_forward(FAR struct forward_s *fwd);
+
+/****************************************************************************
+ * Name: ipfwd_poll
+ *
+ * Description:
+ *   Poll all pending transfer for ARP requests to send.
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver indirectly through
+ *   devif_poll() and devif_timer().
+ *
+ ****************************************************************************/
+
+void ipfwd_poll(FAR struct net_driver_s *dev);
 
 #endif /* CONFIG_NETDEV_MULTINIC */
 

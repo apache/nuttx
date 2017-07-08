@@ -56,6 +56,7 @@
 #include "icmp/icmp.h"
 #include "icmpv6/icmpv6.h"
 #include "igmp/igmp.h"
+#include "ipforward/ipforward.h"
 #include "sixlowpan/sixlowpan.h"
 
 /****************************************************************************
@@ -166,8 +167,8 @@ static void devif_packet_conversion(FAR struct net_driver_s *dev,
  *   Poll all packet connections for available packets to send.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called
- *   from the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver with the network
+ *   locked.
  *
  ****************************************************************************/
 
@@ -259,13 +260,18 @@ static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IPFORWARD) || defined(CONFIG_NETDEV_MULTINIC)
+#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NETDEV_MULTINIC)
 static inline int devif_poll_forward(FAR struct net_driver_s *dev,
                                      devif_poll_callback_t callback)
 {
-  /* Perform the ICMPv6 poll */
+  /* Perform the forwarding poll */
 
-  devif_dev_event(dev, NULL, IPFWD_POLL);
+  ipfwd_poll(dev);
+
+  /* NOTE: that 6LoWPAN packet conversions are handled differently for
+   * forwarded packets.  That is because we don't know what the packet
+   * type is at this point; not within peeking into the device's d_buf.
+   */
 
   /* Call back into the driver */
 
@@ -280,8 +286,8 @@ static inline int devif_poll_forward(FAR struct net_driver_s *dev,
  *   Poll all IGMP connections for available packets to send.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called
- *   from the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver with the network
+ *   locked.
  *
  ****************************************************************************/
 
@@ -310,8 +316,8 @@ static inline int devif_poll_igmp(FAR struct net_driver_s *dev,
  *   Poll all UDP connections for available packets to send.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called
- *   from the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver with the network
+ *   locked.
  *
  ****************************************************************************/
 
@@ -350,8 +356,8 @@ static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
  *   Poll all UDP connections for available packets to send.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called
- *   from the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver with the network
+ *   locked.
  *
  ****************************************************************************/
 
@@ -393,8 +399,8 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
  *   TCP connection.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called
- *   from the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver with the network
+ *   locked.
  *
  ****************************************************************************/
 
@@ -453,8 +459,8 @@ static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
  *   out the packet.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called
- *   from the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver with the network
+ *   locked.
  *
  ****************************************************************************/
 
@@ -530,7 +536,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 
   if (!bstop)
 #endif
-#if defined(CONFIG_NET_IPFORWARD) || defined(CONFIG_NETDEV_MULTINIC)
+#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NETDEV_MULTINIC)
     {
       /* Traverse all of the tasks waiting to forward a packet to this device. */
 
@@ -565,8 +571,8 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
  *   out the packet.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called from
- *   the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver with the network
+ *   locked.
  *
  ****************************************************************************/
 

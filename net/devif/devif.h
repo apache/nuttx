@@ -148,6 +148,14 @@
  *                        is set differently
  *                   OUT: Not used
  *
+ *   IPFWD_POLL       IN: Used for polling for forwarded packets layer.  This
+ *                        is provided periodically from the drivers to support
+ *                        to check if there is a packet waiting to be forward
+ *                        on the device.  This is a device oriented event,
+ *                        not associated with a socket.  The appdata pointer
+ *                        The appdata pointer is not used in this case.
+ *                   OUT: Not used
+ *
  *   ICMP_ECHOREPLY   IN: An ICMP Echo Reply has been received.  Used to support
  *                        ICMP ping from the socket layer. (ICMPv4 only)
  *                   OUT: Cleared (only) by the socket layer logic to indicate
@@ -164,7 +172,7 @@
  *                   OUT: Not used
  */
 
-/* Connection specific events */
+/* Bits 0-9: Connection specific event bits */
 
 #define TCP_ACKDATA      (1 << 0)
 #define TCP_NEWDATA      (1 << 1)
@@ -178,23 +186,33 @@
 #define UDP_POLL         TCP_POLL
 #define PKT_POLL         TCP_POLL
 #define WPAN_POLL        TCP_POLL
-#define IPFWD_POLL       TCP_POLL
 #define TCP_BACKLOG      (1 << 5)
 #define TCP_CLOSE        (1 << 6)
 #define TCP_ABORT        (1 << 7)
 #define TCP_CONNECTED    (1 << 8)
 #define TCP_TIMEDOUT     (1 << 9)
 
-/* Device specific events */
+/* Bits 10-12: Device specific event bits */
 
 #define ICMP_NEWDATA     TCP_NEWDATA
 #define ICMPv6_NEWDATA   TCP_NEWDATA
-#define ARP_POLL         (1 << 10)
-#define ICMP_POLL        (1 << 11)
-#define ICMPv6_POLL      (1 << 12)
-#define ICMP_ECHOREPLY   (1 << 13)
-#define ICMPv6_ECHOREPLY (1 << 14)
-#define NETDEV_DOWN      (1 << 15)
+#define ICMP_ECHOREPLY   (1 << 10)
+#define ICMPv6_ECHOREPLY (1 << 11)
+#define NETDEV_DOWN      (1 << 12)
+
+/* Bits 13-15: Encoded device specific poll events.  Unlike connection
+ * oriented poll events, device related poll events must distinguish
+ * between what is being polled for since the callbacks all reside in
+ * the same list in the network device structure.
+ */
+
+#define DEVPOLL_SHIFT    (13)
+#define DEVPOLL_MASK     (7 << DEVPOLL_SHIFT)
+#  define DEVPOLL_NONE   (0 << DEVPOLL_SHIFT)
+#  define ARP_POLL       (1 << DEVPOLL_SHIFT)
+#  define ICMP_POLL      (2 << DEVPOLL_SHIFT)
+#  define ICMPv6_POLL    (3 << DEVPOLL_SHIFT)
+#  define IPFWD_POLL     (4 << DEVPOLL_SHIFT)
 
 /* The set of events that and implications to the TCP connection state */
 

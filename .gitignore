@@ -13,6 +13,7 @@ core
 /.config
 /.config.old
 /.version
+/defconfig
 /Make.defs
 /nuttx
 /nuttx.*

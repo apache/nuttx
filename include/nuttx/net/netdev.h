@@ -318,12 +318,13 @@ struct net_driver_s
    *
    * There are two lists associated with each device:
    *
-   *   1) d_pktcb - For connection/port oriented events for certain
+   *   1) d_conncb - For connection/port oriented events for certain
    *      socket-less packet transfers.  There events include:
    *
-   *        ICMP data receipt: ICMP_NEWDATA, ICMPv6_NEWDATA
-   *        ICMP ECHO replies: ICMP_ECHOREPLY, ICMPv6_ECHOREPLY
+   *        ICMP data receipt:     ICMP_NEWDATA, ICMPv6_NEWDATA
+   *        ICMP ECHO replies:     ICMP_ECHOREPLY, ICMPv6_ECHOREPLY
    *        Driver Tx poll events: ARP_POLL, ICMP_POLL. ICMPv6_POLL
+   *        IP Forwarding:         IPFWD_POLL
    *
    *   2) d_devcb - For non-data, device related events that apply to all
    *      transfers or connections involving this device:

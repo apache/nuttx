@@ -264,6 +264,7 @@ static uint16_t ipfwd_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
           /* Copy the user data into d_appdata and send it. */
 
           devif_forward(fwd);
+          flags &= ~DEVPOLL_MASK;
 
           /* Check if the destination IP address is in the ARP or Neighbor
            * table.  If not, then the send won't actually make it out... it
@@ -282,7 +283,7 @@ static uint16_t ipfwd_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
       fwd->f_cb->priv  = NULL;
       fwd->f_cb->event = NULL;
 
-      devif_conn_callback_free(dev, fwd->f_cb, NULL);
+      ipfwd_callback_free(dev, fwd->f_cb);
 
       /* Free any IOBs */
 
@@ -332,7 +333,7 @@ int ipfwd_forward(FAR struct forward_s *fwd)
 
   /* Set up the callback in the connection */
 
-  fwd->f_cb = devif_callback_alloc(fwd->f_dev, NULL);
+  fwd->f_cb = ipfwd_callback_alloc(fwd->f_dev);
   if (fwd->f_cb != NULL)
     {
       fwd->f_cb->flags   = (IPFWD_POLL | NETDEV_DOWN);
