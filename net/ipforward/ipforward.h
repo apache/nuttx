@@ -135,21 +135,6 @@ union fwd_iphdr_u
 #endif
 };
 
-/* Connection structures */
-
-union fwd_conn_u
-{
-#ifdef CONFIG_NET_TCP
-  struct tcp_conn_s    tcp;
-#endif
-#ifdef CONFIG_NET_UDP
-  struct udp_conn_s    udp;
-#endif
-#ifdef CONFIG_NET_ICMPv6
-  struct icmpv6_conn_s icmpv6;
-#endif
-};
-
 /* This is the send state structure */
 
 struct devif_callback_s; /* Forward refernce */
@@ -162,7 +147,6 @@ struct forward_s
   FAR struct net_driver_s     *f_dev;     /* Forwarding device */
   FAR struct iob_s            *f_iob;     /* IOB chain containing the packet */
   FAR struct devif_callback_s *f_cb;      /* Reference to callback instance */
-  union fwd_conn_u             f_conn;    /* Protocol-specific connection struct */
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
   uint8_t                      f_domain;  /* Domain: PF_INET or PF_INET6 */
 #endif
@@ -296,6 +280,31 @@ void ipv6_forward_broadcast(FAR struct net_driver_s *dev,
 
 void devif_forward(FAR struct forward_s *fwd);
 
+/****************************************************************************
+ * Name: ipfwd_forward
+ *
+ * Description:
+ *   Called by the IP forwarding logic when a packet is received on one
+ *   network device, but must be forwarded on another network device.
+ *
+ *   Set up to forward the packet on the specified device.  This function
+ *   will set up a send "interrupt" handler that will perform the actual
+ *   send asynchronously and must return without waiting for the send to
+ *   complete.
+ *
+ * Input Parameters:
+ *   fwd - An initialized instance of the common forwarding structure that
+ *         includes everything needed to perform the forwarding operation.
+ *
+ * Returned Value:
+ *   Zero is returned if the packet was successfully forwarded;  A negated
+ *   errno value is returned if the packet is not forwardable.  In that
+ *   latter case, the caller should free the IOB list and drop the packet.
+ *
+ ****************************************************************************/
+
+int ipfwd_forward(FAR struct forward_s *fwd);
+
 #endif /* CONFIG_NETDEV_MULTINIC */
 
 /****************************************************************************
@@ -356,6 +365,68 @@ int ipv4_forward(FAR struct net_driver_s *dev, FAR struct ipv4_hdr_s *ipv4);
 
 #ifdef CONFIG_NET_IPv6
 int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6);
+#endif
+
+/****************************************************************************
+ * Name: ipv6_dropstats
+ *
+ * Description:
+ *   Update statistics for a dropped Ipv6 packet.
+ *
+ * Input Parameters:
+ *   ipv6  - A pointer to the IPv6 header in within the IPv6 packet to be
+ *           dropped.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_STATISTICS) && defined(CONFIG_NET_IPv6)
+void ipv6_dropstats(FAR struct ipv6_hdr_s *ipv6);
+#else
+#  define ipv6_dropstats(ipv6)
+#endif
+
+/****************************************************************************
+ * Name: ipv4_dropstats
+ *
+ * Description:
+ *   Update statistics for a dropped Ipv4 packet.
+ *
+ * Input Parameters:
+ *   ipv4  - A pointer to the IPv4 header in within the IPv4 packet to be
+ *           dropped.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_STATISTICS) && defined(CONFIG_NET_IPv4)
+void ipv4_dropstats(FAR struct ipv4_hdr_s *ipv4);
+#else
+#  define ipv4_dropstats(ipv4)
+#endif
+
+/****************************************************************************
+ * Name: ipfwd_dropstats
+ *
+ * Description:
+ *   Update statistics for a dropped packet.
+ *
+ * Input Parameters:
+ *   fwd - The forwarding state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_STATISTICS
+void ipfwd_dropstats(FAR struct forward_s *fwd)
+#else
+#  define ipfwd_dropstats(fwd)
 #endif
 
 #endif /* CONFIG_NET_IPFORWARD */

@@ -50,11 +50,8 @@
 
 #include "netdev/netdev.h"
 #include "sixlowpan/sixlowpan.h"
-#include "udp/udp.h"
-#include "tcp/tcp.h"
-#include "icmpv6/icmpv6.h"
-#include "ipforward/ipforward.h"
 #include "devif/devif.h"
+#include "ipforward/ipforward.h"
 
 #if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_IPv6)
 
@@ -181,55 +178,6 @@ static int ipv6_decr_ttl(FAR struct ipv6_hdr_s *ipv6)
 
   return ttl;
 }
-#endif
-
-/****************************************************************************
- * Name: ipv6_dropstats
- *
- * Description:
- *   Update statistics for a dropped packet.
- *
- * Input Parameters:
- *   ipv6  - A convenience pointer to the IPv6 header in within the IPv6
- *           packet to be dropped.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_STATISTICS
-static void ipv6_dropstats(FAR struct ipv6_hdr_s *ipv6)
-{
-  switch (ipv6->proto)
-    {
-#ifdef CONFIG_NET_TCP
-    case IP_PROTO_TCP:
-      g_netstats.tcp.drop++;
-      break;
-#endif
-
-#ifdef CONFIG_NET_UDP
-    case IP_PROTO_UDP:
-      g_netstats.udp.drop++;
-      break;
-#endif
-
-#ifdef CONFIG_NET_ICMPv6
-    case IP_PROTO_ICMP6:
-      g_netstats.icmpv6.drop++;
-      break;
-#endif
-
-    default:
-      g_netstats.ipv6.protoerr++;
-      break;
-    }
-
-  g_netstats.ipv6.drop++;
-}
-#else
-#  define ipv6_dropstats(ipv6)
 #endif
 
 /****************************************************************************
@@ -477,56 +425,14 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
           goto errout_with_iobchain;
         }
 
-      /* Then set up to forward the packet according to the protocol.
-       *
-       * REVISIT: Are these protocol specific forwarders necessary?  I think
-       * that this could be done with a single forwarding function for all
-       * protocols.
-       */
+      /* Then set up to forward the packet according to the protocol. */
 
-      switch (ipv6->proto)
+      ret = ipfwd_forward(fwd);
+      if (ret >= 0)
         {
-#ifdef CONFIG_NET_TCP
-        case IP_PROTO_TCP:
-          {
-            /* Forward a TCP packet. */
-
-            ret = tcp_forward(fwd);
-          }
-          break;
-#endif
-
-#ifdef CONFIG_NET_UDP
-        case IP_PROTO_UDP:
-          {
-            /* Forward a UDP packet */
-
-            ret = udp_forward(fwd);
-          }
-          break;
-#endif
-
-#ifdef CONFIG_NET_ICMPv6
-        case IP_PROTO_ICMP6:
-          {
-            /* Forward an ICMPv6 packet */
-
-            ret = icmpv6_forward(fwd);
-          }
-          break;
-#endif
-
-        default:
-          nwarn("WARNING: Unrecognized proto: %u\n", ipv6->proto);
-          ret = -EPROTONOSUPPORT;
-          break;
+          dev->d_len = 0;
+          return OK;
         }
-    }
-
-  if (ret >= 0)
-    {
-      dev->d_len = 0;
-      return OK;
     }
 
 errout_with_iobchain:

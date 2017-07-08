@@ -51,9 +51,6 @@
 #include "netdev/netdev.h"
 #include "utils/utils.h"
 #include "sixlowpan/sixlowpan.h"
-#include "udp/udp.h"
-#include "tcp/tcp.h"
-#include "icmp/icmp.h"
 #include "ipforward/ipforward.h"
 #include "devif/devif.h"
 
@@ -191,55 +188,6 @@ static int ipv4_decr_ttl(FAR struct ipv4_hdr_s *ipv4)
 #endif
 
 /****************************************************************************
- * Name: ipv4_dropstats
- *
- * Description:
- *   Update statistics for a dropped packet.
- *
- * Input Parameters:
- *   ipv4  - A convenience pointer to the IPv4 header in within the IPv4
- *           packet to be dropped.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_STATISTICS
-static void ipv4_dropstats(FAR struct ipv4_hdr_s *ipv4)
-{
-  switch (ipv4->proto)
-    {
-#ifdef CONFIG_NET_TCP
-    case IP_PROTO_TCP:
-      g_netstats.tcp.drop++;
-      break;
-#endif
-
-#ifdef CONFIG_NET_UDP
-    case IP_PROTO_UDP:
-      g_netstats.udp.drop++;
-      break;
-#endif
-
-#ifdef CONFIG_NET_ICMP
-    case IP_PROTO_ICMP:
-      g_netstats.icmp.drop++;
-      break;
-#endif
-
-    default:
-      g_netstats.ipv4.protoerr++;
-      break;
-    }
-
-  g_netstats.ipv4.drop++;
-}
-#else
-#  define ipv4_dropstats(ipv4)
-#endif
-
-/****************************************************************************
  * Name: ipv4_dev_forward
  *
  * Description:
@@ -366,51 +314,9 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
       goto errout_with_iobchain;
     }
 
-  /* Then set up to forward the packet according to the protocol.
-   *
-   * REVISIT: Are these protocol specific forwarders necessary?  I think
-   * that this could be done with a single forwarding function for all
-   * protocols.
-   */
+  /* Then set up to forward the packet according to the protocol. */
 
-  switch (ipv4->proto)
-    {
-#ifdef CONFIG_NET_TCP
-    case IP_PROTO_TCP:
-      {
-        /* Forward a TCP packet. */
-
-        ret = tcp_forward(fwd);
-      }
-      break;
-#endif
-
-#ifdef CONFIG_NET_UDP
-    case IP_PROTO_UDP:
-      {
-        /* Forward a UDP packet */
-
-        ret = udp_forward(fwd);
-      }
-      break;
-#endif
-
-#ifdef CONFIG_NET_ICMP
-    case IP_PROTO_ICMP:
-      {
-        /* Forward an ICMP packet */
-
-        ret = icmp_forward(fwd);
-      }
-      break;
-#endif
-
-    default:
-      nwarn("WARNING: Unrecognized proto: %u\n", ipv4->proto);
-      ret = -EPROTONOSUPPORT;
-      break;
-    }
-
+  ret = ipfwd_forward(fwd);
   if (ret >= 0)
     {
       dev->d_len = 0;

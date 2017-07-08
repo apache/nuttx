@@ -171,12 +171,14 @@
 #define UDP_NEWDATA      TCP_NEWDATA
 #define PKT_NEWDATA      TCP_NEWDATA
 #define WPAN_NEWDATA     TCP_NEWDATA
+#define IPFWD_NEWDATA    TCP_NEWDATA
 #define TCP_SNDACK       (1 << 2)
 #define TCP_REXMIT       (1 << 3)
 #define TCP_POLL         (1 << 4)
 #define UDP_POLL         TCP_POLL
 #define PKT_POLL         TCP_POLL
 #define WPAN_POLL        TCP_POLL
+#define IPFWD_POLL       TCP_POLL
 #define TCP_BACKLOG      (1 << 5)
 #define TCP_CLOSE        (1 << 6)
 #define TCP_ABORT        (1 << 7)
