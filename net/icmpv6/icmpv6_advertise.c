@@ -2,7 +2,7 @@
  * net/icmpv6/icmpv6_advertise.c
  * Send an ICMPv6 Neighbor Advertisement
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -54,6 +54,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/icmpv6.h>
 
+#include "netdev/netdev.h"
 #include "utils/utils.h"
 #include "icmpv6/icmpv6.h"
 
@@ -63,8 +64,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ETHBUF    ((struct eth_hdr_s *)&dev->d_buf[0])
-#define ICMPv6BUF ((struct icmpv6_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define ETHBUF   ((struct eth_hdr_s *)&dev->d_buf[0])
+#define IPv6BUF  ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 #define ICMPv6ADVERTISE \
   ((struct icmpv6_neighbor_advertise_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
@@ -94,27 +95,31 @@
 void icmpv6_advertise(FAR struct net_driver_s *dev,
                       const net_ipv6addr_t destipaddr)
 {
-  FAR struct icmpv6_iphdr_s *icmp = ICMPv6BUF;
+  FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
   FAR struct icmpv6_neighbor_advertise_s *adv;
+  uint16_t lladdrsize;
+  uint16_t l3size;
 
   /* Set up the IPv6 header */
 
-  icmp->vtc    = 0x60;                         /* Version/traffic class (MS) */
-  icmp->tcf    = 0;                            /* Traffic class (LS)/Flow label (MS) */
-  icmp->flow   = 0;                            /* Flow label (LS) */
+  ipv6->vtc    = 0x60;                         /* Version/traffic class (MS) */
+  ipv6->tcf    = 0;                            /* Traffic class (LS)/Flow label (MS) */
+  ipv6->flow   = 0;                            /* Flow label (LS) */
 
   /* Length excludes the IPv6 header */
 
-  icmp->len[0] = (sizeof(struct icmpv6_neighbor_advertise_s) >> 8);
-  icmp->len[1] = (sizeof(struct icmpv6_neighbor_advertise_s) & 0xff);
+  lladdrsize   = netdev_dev_lladdrsize(dev);
+  l3size       = SIZEOF_ICMPV6_NEIGHBOR_ADVERTISE_S(lladdrsize);
+  ipv6->len[0] = (l3size >> 8);
+  ipv6->len[1] = (l3size & 0xff);
 
-  icmp->proto  = IP_PROTO_ICMP6;               /* Next header */
-  icmp->ttl    = 255;                          /* Hop limit */
+  ipv6->proto  = IP_PROTO_ICMP6;               /* Next header */
+  ipv6->ttl    = 255;                          /* Hop limit */
 
   /* Swap source for destination IP address, add our source IP address */
 
-  net_ipv6addr_copy(icmp->destipaddr, destipaddr);
-  net_ipv6addr_copy(icmp->srcipaddr, dev->d_ipv6addr);
+  net_ipv6addr_copy(ipv6->destipaddr, destipaddr);
+  net_ipv6addr_copy(ipv6->srcipaddr, dev->d_ipv6addr);
 
   /* Set up the ICMPv6 Neighbor Advertise response */
 
@@ -132,23 +137,23 @@ void icmpv6_advertise(FAR struct net_driver_s *dev,
 
   /* Set up the options */
 
-  adv->opttype   = ICMPv6_OPT_TGTLLADDR;       /* Option type */
-  adv->optlen    = 1;                          /* Option length = 1 octet */
+  adv->opttype   = ICMPv6_OPT_TGTLLADDR;           /* Option type */
+  adv->optlen    = ICMPv6_OPT_OCTECTS(lladdrsize); /* Option length in octets */
 
   /* Copy our link layer address into the message
    * REVISIT:  What if the link layer is not Ethernet?
    */
 
-  memcpy(adv->tgtlladdr, &dev->d_mac.ether, IFHWADDRLEN);
+  memcpy(adv->tgtlladdr, &dev->d_mac, lladdrsize);
 
   /* Calculate the checksum over both the ICMP header and payload */
 
-  icmp->chksum   = 0;
-  icmp->chksum   = ~icmpv6_chksum(dev);
+  adv->chksum    = 0;
+  adv->chksum    = ~icmpv6_chksum(dev);
 
   /* Set the size to the size of the IPv6 header and the payload size */
 
-  dev->d_len     = IPv6_HDRLEN + sizeof(struct icmpv6_neighbor_advertise_s);
+  dev->d_len     = IPv6_HDRLEN + l3size;
 
 #ifdef CONFIG_NET_ETHERNET
   /* Add the size of the Ethernet header */
@@ -181,7 +186,7 @@ void icmpv6_advertise(FAR struct net_driver_s *dev,
   IFF_SET_NOARP(dev->d_flags);
 
   ninfo("Outgoing ICMPv6 Neighbor Advertise length: %d (%d)\n",
-          dev->d_len, (icmp->len[0] << 8) | icmp->len[1]);
+          dev->d_len, (ipv6->len[0] << 8) | ipv6->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmpv6.sent++;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/neighbor/neighbor_findentry.c
  *
- *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * A leverage of logic from uIP which also has a BSD style license
@@ -49,7 +49,7 @@
 #include "neighbor/neighbor.h"
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -72,29 +72,17 @@ FAR struct neighbor_entry *neighbor_findentry(const net_ipv6addr_t ipaddr)
 {
   int i;
 
-  ninfo("Find neighbor: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        ntohs(ipaddr[0]), ntohs(ipaddr[1]), ntohs(ipaddr[2]),
-        ntohs(ipaddr[3]), ntohs(ipaddr[4]), ntohs(ipaddr[5]),
-        ntohs(ipaddr[6]), ntohs(ipaddr[7]));
-
   for (i = 0; i < CONFIG_NET_IPv6_NCONF_ENTRIES; ++i)
     {
       FAR struct neighbor_entry *neighbor = &g_neighbors[i];
 
       if (net_ipv6addr_cmp(neighbor->ne_ipaddr, ipaddr))
         {
-          ninfo("  at: %02x:%02x:%02x:%02x:%02x:%02x\n",
-                neighbor->ne_addr.na_addr.ether_addr_octet[0],
-                neighbor->ne_addr.na_addr.ether_addr_octet[1],
-                neighbor->ne_addr.na_addr.ether_addr_octet[2],
-                neighbor->ne_addr.na_addr.ether_addr_octet[3],
-                neighbor->ne_addr.na_addr.ether_addr_octet[4],
-                neighbor->ne_addr.na_addr.ether_addr_octet[5]);
-
-          return &g_neighbors[i];
+          neighbor_dumpentry("Entry found", neighbor);
+          return neighbor;
         }
     }
 
-  ninfo("  Not found\n");
+  neighbor_dumpipaddr("Not found", ipaddr);
   return NULL;
 }

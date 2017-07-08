@@ -54,7 +54,7 @@
 #  include "chip/stm32f33xxx_dma.h"
 #elif defined(CONFIG_STM32_STM32F20XX)
 #  include "chip/stm32f20xxx_dma.h"
-#elif defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F4XXX)
 #  include "chip/stm32f40xxx_dma.h"
 #else
 #  error "Unknown STM32 DMA"
@@ -72,7 +72,7 @@
 #  define DMA_STATUS_TEIF         DMA_CHAN_TEIF_BIT     /* Channel Transfer Error */
 #  define DMA_STATUS_HTIF         DMA_CHAN_HTIF_BIT     /* Channel Half Transfer */
 #  define DMA_STATUS_TCIF         DMA_CHAN_TCIF_BIT     /* Channel Transfer Complete */
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #  define DMA_STATUS_FEIF         0                    /* Stream FIFO error (ignored) */
 #  define DMA_STATUS_DMEIF        DMA_STREAM_DMEIF_BIT /* Stream direct mode error */
 #  define DMA_STATUS_TEIF         DMA_STREAM_TEIF_BIT  /* Stream Transfer Error */
@@ -119,7 +119,7 @@ struct stm32_dmaregs_s
   uint32_t cpar;
   uint32_t cmar;
 };
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 struct stm32_dmaregs_s
 {
   uint32_t lisr;

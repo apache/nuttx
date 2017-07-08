@@ -62,7 +62,7 @@
 #elif defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
       defined(CONFIG_STM32_STM32F37XX)
 #  include "chip/stm32f30xxx_gpio.h"
-#elif defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F4XXX)
 #  include "chip/stm32f40xxx_gpio.h"
 #else
 #  error "Unrecognized STM32 chip"
@@ -203,7 +203,7 @@
 
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
       defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F40XX)
+      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX)
 
 /* Each port bit of the general-purpose I/O (GPIO) ports can be individually configured
  * by software in several modes:

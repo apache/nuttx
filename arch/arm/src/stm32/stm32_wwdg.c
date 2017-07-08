@@ -790,7 +790,7 @@ void stm32_wwdginitialize(FAR const char *devpath)
     defined(CONFIG_STM32_JTAG_SW_ENABLE)
     {
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F40XX) || defined(CONFIG_STM32_STM32L15XX)
+    defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
       uint32_t cr = getreg32(STM32_DBGMCU_APB1_FZ);
       cr |= DBGMCU_APB1_WWDGSTOP;
       putreg32(cr, STM32_DBGMCU_APB1_FZ);

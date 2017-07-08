@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/tcp/tcp_forward.c
+ * net/ipforward/ipfwd_forward.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,7 +37,6 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -45,17 +44,18 @@
 #include <net/if.h>
 
 #include <nuttx/mm/iob.h>
+#include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netstats.h>
 
-#include "devif/ip_forward.h"
 #include "devif/devif.h"
 #include "netdev/netdev.h"
-#include "tcp/tcp.h"
+#include "arp/arp.h"
+#include "neighbor/neighbor.h"
+#include "ipforward/ipforward.h"
 
-#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_TCP) && \
-    defined(CONFIG_NETDEV_MULTINIC)
+#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NETDEV_MULTINIC)
 
 /****************************************************************************
  * Public Functions
@@ -84,26 +84,35 @@
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
 static inline void forward_ipselect(FAR struct forward_s *fwd)
 {
-  /* Which domain the connection support */
+  FAR struct net_driver_s *dev = fwd->f_dev;
 
-  if (fwd->f_conn.tcp.domain == PF_INET)
+  /* Select IPv4 or IPv6 */
+
+  if (fwd->f_domain == PF_INET)
     {
-      /* Select the IPv4 domain */
+      /* Clear a bit in the d_flags to distinguish this from an IPv6 packet */
 
-      tcp_ipv4_select(dev);
+      IFF_SET_IPv4(dev->d_flags);
+
+      /* Set the offset to the beginning of the UDP data payload */
+
+      dev->d_appdata = &dev->d_buf[IPv4UDP_HDRLEN + NET_LL_HDRLEN(dev)];
     }
-  else /* if (conn->domain == PF_INET6) */
+  else
     {
-      /* Select the IPv6 domain */
+      /* Set a bit in the d_flags to distinguish this from an IPv6 packet */
 
-      DEBUGASSERT(conn->domain == PF_INET6);
-      tcp_ipv6_select(dev);
+      IFF_SET_IPv6(dev->d_flags);
+
+      /* Set the offset to the beginning of the UDP data payload */
+
+      dev->d_appdata = &dev->d_buf[IPv6_HDRLEN + NET_LL_HDRLEN(dev)];
     }
 }
 #endif
 
 /****************************************************************************
- * Name: tcp_forward_addrchck
+ * Name: ipfwd_addrchk
  *
  * Description:
  *   Check if the destination IP address is in the IPv4 ARP or IPv6 Neighbor
@@ -124,7 +133,8 @@ static inline void forward_ipselect(FAR struct forward_s *fwd)
  *   fwd - The forwarding state structure
  *
  * Returned Value:
- *   None
+ *   true - The Ethernet MAC address is in the ARP or Neighbor table (OR
+ *          the network device is not Ethernet).
  *
  * Assumptions:
  *   The network is locked.
@@ -132,17 +142,30 @@ static inline void forward_ipselect(FAR struct forward_s *fwd)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ETHERNET
-static inline bool tcp_forward_addrchck(FAR struct forward_s *fwd)
+static inline bool ipfwd_addrchk(FAR struct forward_s *fwd)
 {
-  FAR struct tcp_conn_s *conn = &fwd->f_conn.tcp;
+  FAR union fwd_iphdr_u *iphdr;
+
+  DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
+
+  /* REVISIT: Could the MAC address not also be in a routing table? */
+
+#ifdef CONFIG_NET_MULTILINK
+  if (fwd->f_dev->d_lltype != NET_LL_ETHERNET)
+    {
+      return true;
+    }
+#endif
+
+  iphdr = FWD_HEADER(fwd);
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-  if (conn->domain == PF_INET)
+  if (fwd->f_domain == PF_INET)
 #endif
     {
 #if !defined(CONFIG_NET_ARP_IPIN) && !defined(CONFIG_NET_ARP_SEND)
-      return (arp_find(conn->u.ipv4.raddr) != NULL);
+      return (arp_find(iphdr->ipv4.l2.destipaddr) != NULL);
 #else
       return true;
 #endif
@@ -155,79 +178,28 @@ static inline bool tcp_forward_addrchck(FAR struct forward_s *fwd)
 #endif
     {
 #if !defined(CONFIG_NET_ICMPv6_NEIGHBOR)
-      return (neighbor_findentry(conn->u.ipv6.raddr) != NULL);
+      return (neighbor_findentry(iphdr->ipv6.l2.destipaddr) != NULL);
 #else
       return true;
 #endif
     }
 #endif /* CONFIG_NET_IPv6 */
-
-  UNUSED(conn);
 }
 
 #else /* CONFIG_NET_ETHERNET */
-#  define tcp_forward_addrchck(r) (true)
+#  define ipfwd_addrchk(r) (true)
 #endif /* CONFIG_NET_ETHERNET */
 
 /****************************************************************************
- * Name: tcp_dropstats
- *
- * Description:
- *   Update statistics for a dropped packet.
- *
- * Input Parameters:
- *   fwd - The forwarding state structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_STATISTICS
-static void tcp_dropstats(FAR struct forward_s *fwd)
-{
-  /* Increment the count of dropped TCP packets */
-
-  g_netstats.tcp.drop++;
-
-  /* Increment the count of dropped IPv4 or IPv6 packets */
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  if (fwd->f_conn.tcp.domain == PF_INET)
-#endif
-    {
-      g_netstats.ipv4.drop++;
-    }
-#endif
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  else
-#endif
-    {
-      g_netstats.ipv6.drop++;
-    }
-#endif
-}
-#else
-#  define tcp_dropstats(ipv6)
-#endif
-
-/****************************************************************************
- * Name: tcp_forward_interrupt
+ * Name: ipfwd_interrupt
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
  *   send operation when polled by the lower, device interfacing layer.
  *
- *   NOTE: Our role here is just data passthrough.  We don't really care
- *   about ACKing, dynamic windows or any of the other TCP complexities.
- *   That is really something between the two endpoints and does not matter
- *   the forwarding hub.
- *
  * Parameters:
  *   dev        The structure of the network driver that caused the interrupt
- *   conn       An instance of the TCP connection structure cast to void *
+ *   conn       An instance of the forwarding structure cast to void *
  *   pvpriv     An instance of struct forward_s cast to void*
  *   flags      Set of events describing why the callback was invoked
  *
@@ -239,14 +211,13 @@ static void tcp_dropstats(FAR struct forward_s *fwd)
  *
  ****************************************************************************/
 
-static uint16_t tcp_forward_interrupt(FAR struct net_driver_s *dev,
-                                      FAR void *conn, FAR void *pvpriv,
-                                      uint16_t flags)
+static uint16_t ipfwd_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
+                                FAR void *pvpriv, uint16_t flags)
 {
   FAR struct forward_s *fwd = (FAR struct forward_s *)pvpriv;
 
   ninfo("flags: %04x\n", flags);
-  DEBUGASSERT(fwd != NULL);
+  DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
 
   /* Make sure that this is from the forwarding device */
 
@@ -254,9 +225,6 @@ static uint16_t tcp_forward_interrupt(FAR struct net_driver_s *dev,
     {
       /* If the network device has gone down, then we will have terminate
        * the wait now with an error.
-       *
-       * REVISIT: TCP disconnection events should should not be recieved here.
-       * Rather the disconnection events will be handled by the TCP endpoints.
        */
 
       if ((flags & NETDEV_DOWN) != 0)
@@ -264,7 +232,7 @@ static uint16_t tcp_forward_interrupt(FAR struct net_driver_s *dev,
           /* Terminate the transfer with an error. */
 
           nwarn("WARNING: Network is down... Dropping\n");
-          tcp_dropstats(fwd);
+          ipfwd_dropstats(fwd);
         }
 
       /* Check if the outgoing packet is available.  It may have been claimed
@@ -273,7 +241,7 @@ static uint16_t tcp_forward_interrupt(FAR struct net_driver_s *dev,
        * we will just have to wait for the next polling cycle.
        */
 
-      else if (dev->d_sndlen > 0 || (flags & TCP_NEWDATA) != 0)
+      else if (dev->d_sndlen > 0 || (flags & IPFWD_NEWDATA) != 0)
         {
           /* Another thread has beat us sending data or the buffer is busy,
            * Wait for the next polling cycle and check again.
@@ -293,7 +261,7 @@ static uint16_t tcp_forward_interrupt(FAR struct net_driver_s *dev,
            * place and we need do nothing.
            */
 
-          forward_ipselect(dev, fwd);
+          forward_ipselect(fwd);
 #endif
           /* Copy the user data into d_appdata and send it. */
 
@@ -304,7 +272,7 @@ static uint16_t tcp_forward_interrupt(FAR struct net_driver_s *dev,
            * will be replaced with an ARP request or Neighbor Solicitation.
            */
 
-          if (!tcp_forward_addrchck(fwd))
+          if (!ipfwd_addrchk(fwd))
             {
               return flags;
             }
@@ -316,7 +284,7 @@ static uint16_t tcp_forward_interrupt(FAR struct net_driver_s *dev,
       fwd->f_cb->priv  = NULL;
       fwd->f_cb->event = NULL;
 
-      tcp_callback_free(&fwd->f_conn.tcp, fwd->f_cb);
+      devif_conn_callback_free(dev, fwd->f_cb, NULL);
 
       /* Free any IOBs */
 
@@ -327,7 +295,7 @@ static uint16_t tcp_forward_interrupt(FAR struct net_driver_s *dev,
 
       /* And release the forwarding state structure */
 
-      ip_forward_free(fwd);
+      ipfwd_free(fwd);
     }
 
   return flags;
@@ -338,16 +306,16 @@ static uint16_t tcp_forward_interrupt(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tcp_forward
+ * Name: ipfwd_forward
  *
  * Description:
- *   Called by the IP forwarding logic when an TCP packet is received on
- *   one network device, but must be forwarded on another network device.
+ *   Called by the IP forwarding logic when a packet is received on one
+ *   network device, but must be forwarded on another network device.
  *
- *   Set up to forward the TCP packet on the specified device.  This
- *   function will set up a send "interrupt" handler that will perform the
- *   actual send asynchronously and must return without waiting for the
- *   send to complete.
+ *   Set up to forward the packet on the specified device.  This function
+ *   will set up a send "interrupt" handler that will perform the actual
+ *   send asynchronously and must return without waiting for the send to
+ *   complete.
  *
  * Input Parameters:
  *   fwd - An initialized instance of the common forwarding structure that
@@ -360,60 +328,18 @@ static uint16_t tcp_forward_interrupt(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int tcp_forward(FAR struct forward_s *fwd)
+int ipfwd_forward(FAR struct forward_s *fwd)
 {
-  DEBUGASSERT(fwd != NULL && fwd->f_dev != NULL);
-  FAR struct tcp_conn_s *conn = &fwd->f_conn.tcp;
-
-  /* Set up some minimal connection structure so that we appear to be a
-   * real TCP connection.
-   */
-
-  conn->dev = fwd->f_dev;
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  if ((fwd->f_hdr.ipv4.l2.vhl & IP_VERSION_MASK) == IPv4_VERSION)
-#endif
-    {
-      FAR struct ipv4_hdr_s *ipv4 = &fwd->f_hdr.ipv4.l2;
-      FAR struct tcp_hdr_s  *tcp  = &fwd->f_hdr.ipv4.l3.tcp;
-
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-      conn->domain = PF_INET;
-#endif
-      conn->lport  = tcp->srcport;
-      conn->rport  = tcp->destport;
-      net_ipv4addr_copy(conn->u.ipv4.laddr, ipv4->srcipaddr);
-      net_ipv4addr_copy(conn->u.ipv4.raddr, ipv4->destipaddr);
-    }
-#endif
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  else
-#endif
-    {
-      FAR struct ipv6_hdr_s *ipv6 = &fwd->f_hdr.ipv6.l2;
-      FAR struct tcp_hdr_s  *tcp  = &fwd->f_hdr.ipv6.l3.tcp;
-
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-      conn->domain = PF_INET6;
-#endif
-      conn->lport  = tcp->srcport;
-      conn->rport  = tcp->destport;
-      net_ipv6addr_copy(conn->u.ipv6.laddr, ipv6->srcipaddr);
-      net_ipv6addr_copy(conn->u.ipv6.raddr, ipv6->destipaddr);
-    }
-#endif
+  DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
 
   /* Set up the callback in the connection */
 
-  fwd->f_cb = tcp_callback_alloc(conn);
+  fwd->f_cb = devif_callback_alloc(fwd->f_dev, NULL);
   if (fwd->f_cb != NULL)
     {
-      fwd->f_cb->flags = (TCP_POLL | NETDEV_DOWN);
-      fwd->f_cb->priv  = (FAR void *)fwd;
-      fwd->f_cb->event = tcp_forward_interrupt;
+      fwd->f_cb->flags   = (IPFWD_POLL | NETDEV_DOWN);
+      fwd->f_cb->priv    = (FAR void *)fwd;
+      fwd->f_cb->event   = ipfwd_interrupt;
 
       /* Notify the device driver of the availability of TX data */
 
@@ -424,4 +350,4 @@ int tcp_forward(FAR struct forward_s *fwd)
   return -EBUSY;
 }
 
-#endif /* CONFIG_NET_IPFORWARD && CONFIG_NET_TCP && CONFIG_NETDEV_MULTINIC */
+#endif /* CONFIG_NET_IPFORWARD && CONFIG_NETDEV_MULTINIC */

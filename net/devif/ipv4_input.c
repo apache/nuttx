@@ -99,6 +99,7 @@
 #include "icmp/icmp.h"
 #include "igmp/igmp.h"
 
+#include "ipforward/ipforward.h"
 #include "devif/devif.h"
 
 /****************************************************************************
@@ -152,8 +153,8 @@ static uint8_t g_reassembly_flags;
 #if defined(CONFIG_NET_TCP_REASSEMBLY) && !defined(CONFIG_NET_IPv6)
 static uint8_t devif_reassembly(void)
 {
-  FAR struct ipv4_hdr_s *pbuf  = BUF;
-  FAR struct ipv4_hdr_s *pfbuf = FBUF;
+  FAR struct ipv4_hdr_s *ipv4  = BUF;
+  FAR struct ipv4_hdr_s *fipv4 = FBUF;
   uint16_t offset;
   uint16_t len;
   uint16_t i;
@@ -165,7 +166,7 @@ static uint8_t devif_reassembly(void)
 
   if (!g_reassembly_timer)
     {
-      memcpy(g_reassembly_buffer, &pbuf->vhl, IPv4_HDRLEN);
+      memcpy(g_reassembly_buffer, &ipv4->vhl, IPv4_HDRLEN);
       g_reassembly_timer = CONFIG_NET_TCP_REASS_MAXAGE;
       g_reassembly_flags = 0;
 
@@ -179,12 +180,12 @@ static uint8_t devif_reassembly(void)
    * fragment into the buffer.
    */
 
-  if (net_ipv4addr_hdrcmp(pbuf->srcipaddr, pfbuf->srcipaddr) &&
-      net_ipv4addr_hdrcmp(pbuf->destipaddr, pfbuf->destipaddr) &&
-      pbuf->g_ipid[0] == pfbuf->g_ipid[0] && pbuf->g_ipid[1] == pfbuf->g_ipid[1])
+  if (net_ipv4addr_hdrcmp(ipv4->srcipaddr, fipv4->srcipaddr) &&
+      net_ipv4addr_hdrcmp(ipv4->destipaddr, fipv4->destipaddr) &&
+      ipv4->g_ipid[0] == fipv4->g_ipid[0] && ipv4->g_ipid[1] == fipv4->g_ipid[1])
     {
-      len = (pbuf->len[0] << 8) + pbuf->len[1] - (pbuf->vhl & 0x0f) * 4;
-      offset = (((pbuf->ipoffset[0] & 0x3f) << 8) + pbuf->ipoffset[1]) * 8;
+      len = (ipv4->len[0] << 8) + ipv4->len[1] - (ipv4->vhl & 0x0f) * 4;
+      offset = (((ipv4->ipoffset[0] & 0x3f) << 8) + ipv4->ipoffset[1]) * 8;
 
       /* If the offset or the offset + fragment length overflows the
        * reassembly buffer, we discard the entire packet.
@@ -198,7 +199,8 @@ static uint8_t devif_reassembly(void)
 
       /* Copy the fragment into the reassembly buffer, at the right offset. */
 
-      memcpy(&g_reassembly_buffer[IPv4_HDRLEN + offset], (char *)pbuf + (int)((pbuf->vhl & 0x0f) * 4), len);
+      memcpy(&g_reassembly_buffer[IPv4_HDRLEN + offset],
+             (FAR char *)ipv4 + (int)((ipv4->vhl & 0x0f) * 4), len);
 
       /* Update the bitmap. */
 
@@ -235,7 +237,7 @@ static uint8_t devif_reassembly(void)
        * we have received the final fragment.
        */
 
-      if ((pbuf->ipoffset[0] & IP_MF) == 0)
+      if ((ipv4->ipoffset[0] & IP_MF) == 0)
         {
           g_reassembly_flags |= TCP_REASS_LASTFRAG;
           g_reassembly_len = offset + len;
@@ -271,22 +273,22 @@ static uint8_t devif_reassembly(void)
             }
 
           /* If we have come this far, we have a full packet in the buffer,
-           * so we allocate a pbuf and copy the packet into it. We also reset
+           * so we allocate a ipv4 and copy the packet into it. We also reset
            * the timer.
            */
 
           g_reassembly_timer = 0;
-          memcpy(pbuf, pfbuf, g_reassembly_len);
+          memcpy(ipv4, fipv4, g_reassembly_len);
 
           /* Pretend to be a "normal" (i.e., not fragmented) IP packet from
            * now on.
            */
 
-          pbuf->ipoffset[0] = pbuf->ipoffset[1] = 0;
-          pbuf->len[0] = g_reassembly_len >> 8;
-          pbuf->len[1] = g_reassembly_len & 0xff;
-          pbuf->ipchksum = 0;
-          pbuf->ipchksum = ~(ipv4_chksum(dev));
+          ipv4->ipoffset[0] = ipv4->ipoffset[1] = 0;
+          ipv4->len[0] = g_reassembly_len >> 8;
+          ipv4->len[1] = g_reassembly_len & 0xff;
+          ipv4->ipchksum = 0;
+          ipv4->ipchksum = ~(ipv4_chksum(dev));
 
           return g_reassembly_len;
         }
@@ -316,7 +318,7 @@ nullreturn:
 
 int ipv4_input(FAR struct net_driver_s *dev)
 {
-  FAR struct ipv4_hdr_s *pbuf = BUF;
+  FAR struct ipv4_hdr_s *ipv4 = BUF;
   uint16_t hdrlen;
   uint16_t iplen;
 
@@ -329,7 +331,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
   /* Start of IP input header processing code. */
   /* Check validity of the IP header. */
 
-  if (pbuf->vhl != 0x45)
+  if (ipv4->vhl != 0x45)
     {
       /* IP version and header length. */
 
@@ -338,7 +340,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
       g_netstats.ipv4.vhlerr++;
 #endif
       nwarn("WARNING: Invalid IP version or header length: %02x\n",
-            pbuf->vhl);
+            ipv4->vhl);
       goto drop;
     }
 
@@ -360,7 +362,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
    * we set d_len to the correct value.
    */
 
-  iplen = (pbuf->len[0] << 8) + pbuf->len[1];
+  iplen = (ipv4->len[0] << 8) + ipv4->len[1];
   if (iplen <= dev->d_len)
     {
       dev->d_len = iplen;
@@ -373,7 +375,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
 
   /* Check the fragment flag. */
 
-  if ((pbuf->ipoffset[0] & 0x3f) != 0 || pbuf->ipoffset[1] != 0)
+  if ((ipv4->ipoffset[0] & 0x3f) != 0 || ipv4->ipoffset[1] != 0)
     {
 #if defined(CONFIG_NET_TCP_REASSEMBLY)
       dev->d_len = devif_reassembly();
@@ -398,10 +400,15 @@ int ipv4_input(FAR struct net_driver_s *dev)
    * negotiating over DHCP for an address).
    */
 
-  if (pbuf->proto == IP_PROTO_UDP &&
-      net_ipv4addr_cmp(net_ip4addr_conv32(pbuf->destipaddr),
+  if (ipv4->proto == IP_PROTO_UDP &&
+      net_ipv4addr_cmp(net_ip4addr_conv32(ipv4->destipaddr),
                        INADDR_BROADCAST))
     {
+#ifdef CONFIG_NET_IPFORWARD_BROADCAST
+      /* Forward broadcast packets */
+
+      ipv4_forward_broadcast(dev, ipv4);
+#endif
       return udp_ipv4_input(dev);
     }
 
@@ -416,23 +423,62 @@ int ipv4_input(FAR struct net_driver_s *dev)
       goto drop;
     }
 
-  /* Check if the packet is destined for out IP address */
+  /* Check if the packet is destined for our IP address */
   else
 #endif
     {
       /* Check if the packet is destined for our IP address. */
 
-      if (!net_ipv4addr_cmp(net_ip4addr_conv32(pbuf->destipaddr), dev->d_ipaddr))
+      if (!net_ipv4addr_cmp(net_ip4addr_conv32(ipv4->destipaddr),
+                            dev->d_ipaddr))
         {
+          /* Check for an IPv4 IGMP group address */
+
 #ifdef CONFIG_NET_IGMP
-          in_addr_t destip = net_ip4addr_conv32(pbuf->destipaddr);
-          if (igmp_grpfind(dev, &destip) == NULL)
+          in_addr_t destip = net_ip4addr_conv32(ipv4->destipaddr);
+          if (igmp_grpfind(dev, &destip) != NULL)
+            {
+#ifdef CONFIG_NET_IPFORWARD_BROADCAST
+              /* Forward multicast packets */
+
+              ipv4_forward_broadcast(dev, ipv4);
+#endif
+            }
+          else
 #endif
             {
-#ifdef CONFIG_NET_STATISTICS
-              g_netstats.ipv4.drop++;
+              /* No.. The packet is not destined for us. */
+
+#ifdef CONFIG_NET_IPFORWARD
+              /* Try to forward the packet */
+
+              int ret = ipv4_forward(dev, ipv4);
+              if (ret >= 0)
+                {
+                  /* The packet was forwarded.  Return success; d_len will
+                   * be set appropriately by the forwarding logic:  Cleared
+                   * if the packet is forward via anoother device or non-
+                   * zero if it will be forwarded by the same device that
+                   * it was received on.
+                   */
+
+                  return OK;
+                }
+              else
 #endif
-              goto drop;
+                {
+                  /* Not destined for us and not forwardable... Drop the
+                   * packet.
+                   */
+
+                  nwarn("WARNING: Not destined for us; not forwardable... "
+                        "Dropping!\n");
+
+#ifdef CONFIG_NET_STATISTICS
+                  g_netstats.ipv4.drop++;
+#endif
+                  goto drop;
+                }
             }
         }
     }
@@ -457,7 +503,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
 
   /* Now process the incoming packet according to the protocol. */
 
-  switch (pbuf->proto)
+  switch (ipv4->proto)
     {
 #ifdef NET_TCP_HAVE_STACK
       case IP_PROTO_TCP:   /* TCP input */

@@ -115,7 +115,7 @@
 #    define STM32_FLASH_NPAGES        128
 #    define STM32_FLASH_PAGESIZE      2048
 
-#  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #      define STM32_FLASH_NPAGES      8
 #      define STM32_FLASH_SIZE        _K((4 * 16) + (1 * 64) + (3 * 128))
 #      define STM32_FLASH_SIZES       {_K(16), _K(16), _K(16), _K(16), \
@@ -133,7 +133,7 @@
 
 /* Define the Valid Configuration the F2 and F4  */
 
-#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 
 #    if defined(CONFIG_STM32_FLASH_CONFIG_B)
 #      define STM32_FLASH_NPAGES      5
@@ -147,7 +147,7 @@
 #      define STM32_FLASH_SIZES       {_K(16), _K(16), _K(16), _K(16), \
                                        _K(64), _K(128)}
 
-#    elif defined(CONFIG_STM32_FLASH_CONFIG_D) && defined(CONFIG_STM32_STM32F40XX)
+#    elif defined(CONFIG_STM32_FLASH_CONFIG_D) && defined(CONFIG_STM32_STM32F4XXX)
 #      define STM32_FLASH_NPAGES      7
 #      define STM32_FLASH_SIZE        _K((4 * 16) + (1 * 64) + (2 * 128))
 #      define STM32_FLASH_SIZES       {_K(16), _K(16), _K(16), _K(16), \
@@ -173,7 +173,7 @@
                                       _K(64), _K(128), _K(128), _K(128),  \
                                       _K(128), _K(128), _K(128), _K(128)}
 
-#    elif defined(CONFIG_STM32_FLASH_CONFIG_I) && defined(CONFIG_STM32_STM32F40XX)
+#    elif defined(CONFIG_STM32_FLASH_CONFIG_I) && defined(CONFIG_STM32_STM32F4XXX)
 #      define STM32_FLASH_NPAGES      24
 #      define STM32_FLASH_SIZE        _K((4 * 16) + (1 * 64) + (7 * 128)) + \
                                       _K((4 * 16) + (1 * 64) + (7 * 128))
@@ -249,7 +249,7 @@
 #    define STM32_FLASH_AR_OFFSET    0x0014
 #    define STM32_FLASH_OBR_OFFSET   0x001c
 #    define STM32_FLASH_WRPR_OFFSET  0x0020
-#  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #    define STM32_FLASH_OPTCR_OFFSET 0x0014
 #  endif
 #endif
@@ -285,7 +285,7 @@
 #    define STM32_FLASH_AR           (STM32_FLASHIF_BASE+STM32_FLASH_AR_OFFSET)
 #    define STM32_FLASH_OBR          (STM32_FLASHIF_BASE+STM32_FLASH_OBR_OFFSET)
 #    define STM32_FLASH_WRPR         (STM32_FLASHIF_BASE+STM32_FLASH_WRPR_OFFSET)
-#  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #    define STM32_FLASH_OPTCR        (STM32_FLASHIF_BASE+STM32_FLASH_OPTCR_OFFSET)
 #  endif
 #  if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
@@ -324,7 +324,7 @@
      defined(CONFIG_STM32_STM32F37XX)
 #      define FLASH_ACR_PRFTBS      (1 << 5)  /* Bit 5: FLASH prefetch buffer status */
 #    endif
-#  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #    define FLASH_ACR_PRFTEN        (1 << 8)  /* FLASH prefetch enable */
 #    define FLASH_ACR_ICEN          (1 << 9)  /* Bit 9: Instruction cache enable */
 #    define FLASH_ACR_DCEN          (1 << 10) /* Bit 10: Data cache enable */
@@ -341,7 +341,7 @@
 #  define FLASH_SR_PGERR            (1 << 2)  /* Programming Error */
 #  define FLASH_SR_WRPRT_ERR        (1 << 4)  /* Write Protection Error */
 #  define FLASH_SR_EOP              (1 << 5)  /* End of Operation */
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #  define FLASH_SR_EOP              (1 << 0)  /* Bit 0: End of operation */
 #  define FLASH_SR_OPERR            (1 << 1)  /* Bit 1: Operation error */
 #  define FLASH_SR_WRPERR           (1 << 4)  /* Bit 4: Write protection error */
@@ -397,7 +397,7 @@
       defined(CONFIG_STM32_STM32F37XX)
 #    define FLASH_CR_OBL_LAUNCH     (1 << 13) /* Bit 13: Force option byte loading */
 #  endif
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #  define FLASH_CR_PG               (1 << 0)               /* Bit 0: Programming */
 #  define FLASH_CR_SER              (1 << 1)               /* Bit 1: Sector Erase */
 #  define FLASH_CR_MER              (1 << 2)               /* Bit 2: Mass Erase sectors 0..11 */
@@ -426,7 +426,7 @@
 
 /* Flash Option Control Register (OPTCR) */
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #  define FLASH_OPTCR_OPTLOCK       (1 << 0)               /* Bit 0: Option lock */
 #  define FLASH_OPTCR_OPTSTRT       (1 << 1)               /* Bit 1: Option start */
 #  define FLASH_OPTCR_BORLEV_SHIFT  (2)                    /* Bits 2-3: BOR reset Level */
@@ -468,7 +468,7 @@
 void stm32_flash_lock(void);
 void stm32_flash_unlock(void);
 
-#ifdef CONFIG_STM32_STM32F40XX
+#ifdef CONFIG_STM32_STM32F4XXX
 int stm32_flash_writeprotect(size_t page, bool enabled);
 #endif
 

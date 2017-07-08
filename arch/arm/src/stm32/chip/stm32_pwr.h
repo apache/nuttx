@@ -90,7 +90,7 @@
 # endif
 #define PWR_CR_DBP             (1 << 8)  /* Bit 8: Disable Backup Domain write protection */
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #  define PWR_CR_FPDS          (1 << 9)  /* Bit 9: Flash power down in Stop mode */
 #  if  defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
        defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
@@ -139,7 +139,7 @@
 #define PWR_CSR_PVDO           (1 << 2)  /* Bit 2:  PVD Output */
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F37XX) || \
-    defined(CONFIG_STM32_STM32F40XX)
+    defined(CONFIG_STM32_STM32F4XXX)
 #  define PWR_CSR_BRR          (1 << 3)  /* Bit 3:  Backup regulator ready */
 #elif defined(CONFIG_STM32_STM32L15XX)
 #  define PWR_CSR_VREFINTRDYF  (1 << 3)  /* Bit 3: Internal voltage reference (VREFINT) ready flag */
@@ -159,7 +159,7 @@
 #  define PWR_CSR_EWUP         (1 << 8)  /* Bit 8:  Enable WKUP pin */
 #endif
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #  define PWR_CSR_BRE          (1 << 9)  /* Bit 9:  Backup regulator enable */
 #  define PWR_CSR_VOSRDY       (1 << 14) /* Bit 14: Regulator voltage scaling output selection ready bite */
 #endif

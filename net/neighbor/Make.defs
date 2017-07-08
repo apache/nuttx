@@ -50,6 +50,10 @@ ifeq ($(CONFIG_NET_6LOWPAN),y)
 # NET_CSRCS += neighbor_6lowpan_out.c
 endif
 
+ifeq ($(CONFIG_DEBUG_NET_INFO),y)
+NET_CSRCS += neighbor_dumpentry.c
+endif
+
 # Include utility build support
 
 DEPPATH += --dep-path neighbor

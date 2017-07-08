@@ -252,6 +252,28 @@ static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
 #endif /* CONFIG_NET_ICMPv6_PING || CONFIG_NET_ICMPv6_NEIGHBOR*/
 
 /****************************************************************************
+ * Name: devif_poll_forward
+ *
+ * Description:
+ *   Poll the device event to see if any task is waiting to forward a packet.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPFORWARD) || defined(CONFIG_NETDEV_MULTINIC)
+static inline int devif_poll_forward(FAR struct net_driver_s *dev,
+                                     devif_poll_callback_t callback)
+{
+  /* Perform the ICMPv6 poll */
+
+  devif_dev_event(dev, NULL, IPFWD_POLL);
+
+  /* Call back into the driver */
+
+  return callback(dev);
+}
+#endif /* CONFIG_NET_ICMPv6_PING || CONFIG_NET_ICMPv6_NEIGHBOR*/
+
+/****************************************************************************
  * Name: devif_poll_igmp
  *
  * Description:
@@ -504,6 +526,15 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
       /* Traverse all of the tasks waiting to send an ICMPv6 ECHO request. */
 
       bstop = devif_poll_icmpv6(dev, callback);
+    }
+
+  if (!bstop)
+#endif
+#if defined(CONFIG_NET_IPFORWARD) || defined(CONFIG_NETDEV_MULTINIC)
+    {
+      /* Traverse all of the tasks waiting to forward a packet to this device. */
+
+      bstop = devif_poll_forward(dev, callback);
     }
 
   if (!bstop)

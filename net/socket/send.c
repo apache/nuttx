@@ -255,6 +255,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
       set_errno(-ret);
       ret = ERROR;
     }
+
   return ret;
 }
 

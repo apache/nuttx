@@ -1349,7 +1349,8 @@ Where <subdir> is one of the following:
        configuration other than using IPv6.  So all of the notes above
        regarding the netnsh configuration apply.
 
-       a. Telnet does not work with IPv6.
+       a. Telnet does work with IPv6 but is not enabled in this
+          configuration (but could be).
        b. The network initialization thread was enabed in the netnsh
           configuration on 2015-09-28, but not in the ipv6 configuration.
 
@@ -1382,9 +1383,14 @@ Where <subdir> is one of the following:
          ping6 fc00::2   (Linux)
          ping -6 fc00::2 (Windows cmd)
 
-       and Telnet again works from the host:
+       and Telnet is now enabled and works from the host... but only using
+       IPv6 addressing:
 
-         telent 10.0.0.2
+         telnet fc00::2
+
+       That is because the Telnet daemon will default to IPv6 and there is
+       no Telnet option to let you select which if both IPv4 and IPv6 are
+       enabled.
 
     3. I have used this configuration to serve up IP address prefixes
        in a local network with these modifications to the configuration:

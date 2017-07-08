@@ -62,6 +62,6 @@
 #  include "stm32f33xxx_dma.c"
 #elif defined(CONFIG_STM32_STM32F20XX)
 #  include "stm32f20xxx_dma.c"
-#elif defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F4XXX)
 #  include "stm32f40xxx_dma.c"
 #endif

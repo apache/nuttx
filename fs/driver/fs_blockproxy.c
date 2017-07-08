@@ -167,7 +167,6 @@ int block_proxy(FAR const char *blkdev, int oflags)
   int fd;
 
   DEBUGASSERT(blkdev);
-  DEBUGASSERT((oflags & (O_CREAT | O_EXCL | O_APPEND | O_TRUNC)) == 0);
 
   /* Create a unique temporary file name for the character device */
 

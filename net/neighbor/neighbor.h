@@ -3,7 +3,7 @@
  * Header file for database of link-local neighbors, used by IPv6 code and
  * to be used by future ARP code.
  *
- *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * A leverage of logic from uIP which also has a BSD style license
@@ -51,6 +51,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/net/ieee802154.h>
 
 #ifdef CONFIG_NET_IPv6
 
@@ -67,15 +68,24 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* Describes the link layer address */
 
 struct neighbor_addr_s
 {
-#ifdef CONFIG_NET_IPv6_NEIGHBOR_ADDRTYPE
-  CONFIG_NET_IPv6_NEIGHBOR_ADDRTYPE na_addr;
-#else
-  struct ether_addr na_addr;
+  union
+  {
+#ifdef CONFIG_NET_MULTILINK
+    uint8_t                 na_lltype;
 #endif
+
+#ifdef CONFIG_NET_ETHERNET
+    struct ether_addr       na_ethernet;
+#endif
+#ifdef CONFIG_NET_6LOWPAN
+    struct sixlowpan_addr_s na_sixlowpan;
+#endif
+  } u;
 };
 
 /* This structure describes on entry in the neighbor table.  This is intended
@@ -149,6 +159,7 @@ FAR struct neighbor_entry *neighbor_findentry(const net_ipv6addr_t ipaddr);
  *
  * Input Parameters:
  *   ipaddr - The IPv6 address of the mapping.
+ *   lltype - The link layer address type
  *   addr   - The link layer address of the mapping
  *
  * Returned Value:
@@ -156,7 +167,8 @@ FAR struct neighbor_entry *neighbor_findentry(const net_ipv6addr_t ipaddr);
  *
  ****************************************************************************/
 
-void neighbor_add(FAR net_ipv6addr_t ipaddr, FAR struct neighbor_addr_s *addr);
+void neighbor_add(FAR net_ipv6addr_t ipaddr, uint8_t lltype,
+                  FAR uint8_t *addr);
 
 /****************************************************************************
  * Name:  neighbor_lookup
@@ -210,6 +222,50 @@ void neighbor_update(const net_ipv6addr_t ipaddr);
  ****************************************************************************/
 
 void neighbor_periodic(int hsec);
+
+/****************************************************************************
+ * Name: neighbor_dumpentry
+ *
+ * Description:
+ *   Dump the conents of an entry Neighbor Table.
+ *
+ * Input Parameters:
+ *   msg      - Message to print with the entry
+ *   neighbor - The table entry to dump
+ *
+ * Returned Value:
+ *  None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_NET_INFO
+void neighbor_dumpentry(FAR const char *msg,
+                        FAR struct neighbor_entry *neighbor);
+#else
+#  define neighbor_dumpentry(msg,neighbor)
+#endif
+
+/****************************************************************************
+ * Name: neighbor_dumpipaddr
+ *
+ * Description:
+ *   Dump an IP address.
+ *
+ * Input Parameters:
+ *   msg    - Message to print with the entry
+ *   ipaddr - The IP address to dump
+ *
+ * Returned Value:
+ *  None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_NET_INFO
+void neighbor_dumpipaddr(FAR const char *msg,
+                         const net_ipv6addr_t ipaddr);
+#else
+#  define neighbor_dumpipaddr(msg,ipaddr)
+#endif
 
 #endif /* CONFIG_NET_IPv6 */
 #endif /* __NET_NEIGHBOR_NEIGHBOR_H */

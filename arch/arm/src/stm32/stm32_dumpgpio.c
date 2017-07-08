@@ -196,7 +196,7 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
         getreg32(base + STM32_GPIO_AFRL_OFFSET),
         getreg32(base + STM32_GPIO_BRR_OFFSET));
 
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
   DEBUGASSERT(port < STM32_NGPIO_PORTS);
 
   _info("GPIO%c pinset: %08x base: %08x -- %s\n",
