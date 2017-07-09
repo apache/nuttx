@@ -105,6 +105,7 @@ extern "C"
 #endif
 
 /* This is the routing table */
+
 #ifdef CONFIG_NET_IPv4
 EXTERN sq_queue_t g_routes;
 #endif
@@ -143,7 +144,7 @@ void net_initroute(void);
  *   None
  *
  * Returned Value:
- *   On success, a pointer to the newly allocated route table entry is
+ *   On success, a pointer to the newly allocated routing table entry is
  *   returned; NULL is returned on failure.
  *
  ****************************************************************************/
@@ -327,7 +328,7 @@ void netdev_ipv6_router(FAR struct net_driver_s *dev,
  * Name: net_foreachroute
  *
  * Description:
- *   Traverse the route table
+ *   Traverse the routing table
  *
  * Parameters:
  *

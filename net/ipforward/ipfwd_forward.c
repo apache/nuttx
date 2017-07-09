@@ -144,8 +144,6 @@ static inline void forward_ipselect(FAR struct forward_s *fwd)
 #ifdef CONFIG_NET_ETHERNET
 static inline bool ipfwd_addrchk(FAR struct forward_s *fwd)
 {
-  FAR union fwd_iphdr_u *iphdr;
-
   DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
 
   /* REVISIT: Could the MAC address not also be in a routing table? */
@@ -157,15 +155,14 @@ static inline bool ipfwd_addrchk(FAR struct forward_s *fwd)
     }
 #endif
 
-  iphdr = FWD_HEADER(fwd);
-
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
   if (fwd->f_domain == PF_INET)
 #endif
     {
 #if !defined(CONFIG_NET_ARP_IPIN) && !defined(CONFIG_NET_ARP_SEND)
-      return (arp_find(iphdr->ipv4.l2.destipaddr) != NULL);
+      FAR stuct ipv4_hdr_s *ipv4 = (FAR stuct ipv4_hdr_s *)fwd->f_iob->io_data;
+      return (arp_find(ipv4->destipaddr) != NULL);
 #else
       return true;
 #endif
@@ -178,7 +175,8 @@ static inline bool ipfwd_addrchk(FAR struct forward_s *fwd)
 #endif
     {
 #if !defined(CONFIG_NET_ICMPv6_NEIGHBOR)
-      return (neighbor_findentry(iphdr->ipv6.l2.destipaddr) != NULL);
+      FAR stuct ipv6_hdr_s *ipv4 = (FAR stuct ipv6_hdr_s *)fwd->f_iob->io_data;
+      return (neighbor_findentry(ipv6->destipaddr) != NULL);
 #else
       return true;
 #endif
@@ -266,6 +264,7 @@ static uint16_t ipfwd_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
           /* Copy the user data into d_appdata and send it. */
 
           devif_forward(fwd);
+          flags &= ~DEVPOLL_MASK;
 
           /* Check if the destination IP address is in the ARP or Neighbor
            * table.  If not, then the send won't actually make it out... it
@@ -284,7 +283,7 @@ static uint16_t ipfwd_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
       fwd->f_cb->priv  = NULL;
       fwd->f_cb->event = NULL;
 
-      devif_conn_callback_free(dev, fwd->f_cb, NULL);
+      ipfwd_callback_free(dev, fwd->f_cb);
 
       /* Free any IOBs */
 
@@ -334,7 +333,7 @@ int ipfwd_forward(FAR struct forward_s *fwd)
 
   /* Set up the callback in the connection */
 
-  fwd->f_cb = devif_callback_alloc(fwd->f_dev, NULL);
+  fwd->f_cb = ipfwd_callback_alloc(fwd->f_dev);
   if (fwd->f_cb != NULL)
     {
       fwd->f_cb->flags   = (IPFWD_POLL | NETDEV_DOWN);

@@ -1,8 +1,8 @@
 /****************************************************************************
- * net/route/net_addroute.c
+ * config/b-l475e-iot01a/src/stm32_bringup.c
  *
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,99 +39,63 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <queue.h>
-#include <errno.h>
-#include <debug.h>
+#include <sys/types.h>
+#include <sys/mount.h>
+#include <syslog.h>
 
-#include <nuttx/net/net.h>
-#include <nuttx/net/ip.h>
+#include <nuttx/input/buttons.h>
+#include <nuttx/leds/userled.h>
+#include <nuttx/board.h>
 
-#include <arch/irq.h>
+#include <arch/board/board.h>
 
-#include "route/route.h"
-
-#if defined(CONFIG_NET) && defined(CONFIG_NET_ROUTE)
+#include "b-l475e-iot01a.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_addroute
+ * Name: stm32l4_bringup
  *
  * Description:
- *   Add a new route to the routing table
- *
- * Parameters:
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
+ *   Called either by board_intialize() if CONFIG_BOARD_INITIALIZE or by
+ *   board_app_initialize if CONFIG_LIB_BOARDCTL is selected.  This function
+ *   initializes and configures all on-board features appropriate for the
+ *   selected configuration.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv4
-int net_addroute(in_addr_t target, in_addr_t netmask, in_addr_t router)
+int stm32l4_bringup(void)
 {
-  FAR struct net_route_s *route;
+  int ret = OK;
 
-  /* Allocate a route entry */
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
 
-  route = net_allocroute();
-  if (!route)
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
     {
-      nerr("ERROR:  Failed to allocate a route\n");
-      return -ENOMEM;
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
     }
-
-  /* Format the new routing table entry */
-
-  net_ipv4addr_copy(route->target, target);
-  net_ipv4addr_copy(route->netmask, netmask);
-  net_ipv4addr_copy(route->router, router);
-
-  /* Get exclusive address to the networking data structures */
-
-  net_lock();
-
-  /* Then add the new entry to the table */
-
-  sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_routes);
-  net_unlock();
-  return OK;
-}
 #endif
 
-#ifdef CONFIG_NET_IPv6
-int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask, net_ipv6addr_t router)
-{
-  FAR struct net_route_ipv6_s *route;
+#if defined(CONFIG_USERLED) && !defined(CONFIG_ARCH_LEDS)
+#ifdef CONFIG_USERLED_LOWER
+  /* Register the LED driver */
 
-  /* Allocate a route entry */
-
-  route = net_allocroute_ipv6();
-  if (!route)
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret != OK)
     {
-      nerr("ERROR:  Failed to allocate a route\n");
-      return -ENOMEM;
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+      return ret;
     }
+#else
+  /* Enable USER LED support for some other purpose */
 
-  /* Format the new routing table entry */
+  board_userled_initialize();
+#endif /* CONFIG_USERLED_LOWER */
+#endif /* CONFIG_USERLED && !CONFIG_ARCH_LEDS */
 
-  net_ipv6addr_copy(route->target, target);
-  net_ipv6addr_copy(route->netmask, netmask);
-  net_ipv6addr_copy(route->router, router);
-
-  /* Get exclusive address to the networking data structures */
-
-  net_lock();
-
-  /* Then add the new entry to the table */
-
-  sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_routes_ipv6);
-  net_unlock();
-  return OK;
+  return ret;
 }
-#endif
-
-#endif /* CONFIG_NET && CONFIG_NET_ROUTE */

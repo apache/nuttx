@@ -145,7 +145,7 @@ static int ioctl_add_ipv4route(FAR struct rtentry *rtentry)
 #endif /* CONFIG_NET_ROUTE && CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Name: ioctl_addipv6route
+ * Name: ioctl_add_ipv6route
  *
  * Description:
  *   Add an IPv6 route to the routing table.
@@ -156,7 +156,7 @@ static int ioctl_add_ipv4route(FAR struct rtentry *rtentry)
  ****************************************************************************/
 
 #if defined(CONFIG_NET_ROUTE) && defined(CONFIG_NET_IPv6)
-static int ioctl_add_ipv4route(FAR struct rtentry *rtentry)
+static int ioctl_add_ipv6route(FAR struct rtentry *rtentry)
 {
   FAR struct sockaddr_in6 *target;
   FAR struct sockaddr_in6 *netmask;
@@ -1145,7 +1145,7 @@ static int netdev_rt_ioctl(FAR struct socket *psock, int cmd,
           else
 #endif
             {
-              ret = ioctl_addipv6route(rtentry);
+              ret = ioctl_add_ipv6route(rtentry);
             }
 #endif /* CONFIG_NET_IPv6 */
         }

@@ -1,8 +1,8 @@
 /****************************************************************************
- * net/route/net_addroute.c
+ * configs/b-l475e-iot01a/src/stm32_userleds.c
  *
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,100 +38,55 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <stdint.h>
-#include <queue.h>
-#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/net/net.h>
-#include <nuttx/net/ip.h>
+#include <arch/board/board.h>
+#include "b-l475e-iot01a.h"
 
-#include <arch/irq.h>
+#include "stm32l4_gpio.h"
 
-#include "route/route.h"
-
-#if defined(CONFIG_NET) && defined(CONFIG_NET_ROUTE)
+#ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_addroute
- *
- * Description:
- *   Add a new route to the routing table
- *
- * Parameters:
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv4
-int net_addroute(in_addr_t target, in_addr_t netmask, in_addr_t router)
+void board_userled_initialize(void)
 {
-  FAR struct net_route_s *route;
+  /* Configure LED gpio as output */
 
-  /* Allocate a route entry */
-
-  route = net_allocroute();
-  if (!route)
-    {
-      nerr("ERROR:  Failed to allocate a route\n");
-      return -ENOMEM;
-    }
-
-  /* Format the new routing table entry */
-
-  net_ipv4addr_copy(route->target, target);
-  net_ipv4addr_copy(route->netmask, netmask);
-  net_ipv4addr_copy(route->router, router);
-
-  /* Get exclusive address to the networking data structures */
-
-  net_lock();
-
-  /* Then add the new entry to the table */
-
-  sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_routes);
-  net_unlock();
-  return OK;
+  stm32l4_configgpio(GPIO_LED1);
+  stm32l4_configgpio(GPIO_LED2);
 }
-#endif
 
-#ifdef CONFIG_NET_IPv6
-int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask, net_ipv6addr_t router)
+/****************************************************************************
+ * Name: board_userled
+ ****************************************************************************/
+
+void board_userled(int led, bool ledon)
 {
-  FAR struct net_route_ipv6_s *route;
-
-  /* Allocate a route entry */
-
-  route = net_allocroute_ipv6();
-  if (!route)
+  if (led == BOARD_LED1)
     {
-      nerr("ERROR:  Failed to allocate a route\n");
-      return -ENOMEM;
+      stm32l4_gpiowrite(GPIO_LED1, ledon);
     }
-
-  /* Format the new routing table entry */
-
-  net_ipv6addr_copy(route->target, target);
-  net_ipv6addr_copy(route->netmask, netmask);
-  net_ipv6addr_copy(route->router, router);
-
-  /* Get exclusive address to the networking data structures */
-
-  net_lock();
-
-  /* Then add the new entry to the table */
-
-  sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_routes_ipv6);
-  net_unlock();
-  return OK;
+   else if (led == BOARD_LED2)
+    {
+      stm32l4_gpiowrite(GPIO_LED2, ledon);
+    }
 }
-#endif
 
-#endif /* CONFIG_NET && CONFIG_NET_ROUTE */
+/****************************************************************************
+ * Name: board_userled_all
+ ****************************************************************************/
+
+void board_userled_all(uint8_t ledset)
+{
+  stm32l4_gpiowrite(GPIO_LED1, !!(ledset & BOARD_LED1_BIT));
+  stm32l4_gpiowrite(GPIO_LED2, !!(ledset & BOARD_LED2_BIT));
+}
+
+#endif /* !CONFIG_ARCH_LEDS */

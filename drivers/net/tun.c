@@ -171,10 +171,8 @@ static void tun_poll_expiry(int argc, wdparm_t arg, ...);
 static int tun_ifup(FAR struct net_driver_s *dev);
 static int tun_ifdown(FAR struct net_driver_s *dev);
 static int tun_txavail(FAR struct net_driver_s *dev);
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
-static int tun_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
-#endif
 #ifdef CONFIG_NET_IGMP
+static int tun_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 static int tun_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NET_ICMPv6
@@ -780,7 +778,7 @@ static int tun_txavail(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#ifdef CONFIG_NET_IGMP
 static int tun_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   /* Add the MAC address to the hardware multicast routing table */

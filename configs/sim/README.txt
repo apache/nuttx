@@ -481,6 +481,34 @@ cxxtest
      postpone running C++ static initializers until NuttX has been
      initialized.
 
+ipforward
+
+  This is an NSH configuration that includes a simple test of the NuttX
+  IP forwarding logic using apps/examples/ipforward.  That example uses
+  two TUN network devices to represent two networks.  The test then sends
+  packets from one network destined for the other network.  The NuttX IP
+  forwarding logic will recognize that the received packets are not destined
+  for it and will forward the logic to the other TUN network.  The
+  application logic then both sends the packets on one network and receives
+  and verifies the forwarded packet recieved on the other network.  The
+  received packets differ from the sent packets only in that the hop limit
+  (TTL) has been decremented.
+
+  Be default, this test will forward TCP packets.  The test can be modified
+  to support forwarding of ICMPv6 multicast packets with these changes to
+  the .config file:
+
+    -CONFIG_EXAMPLES_IPFORWARD_TCP=y
+    +CONFIG_EXAMPLES_IPFORWARD_ICMPv6=y
+
+    +CONFIG_NET_ICMPv6=y
+    +CONFIG_NET_ICMPv6_PING=y
+    +CONFIG_NET_ETHERNET=y
+    +CONFIG_NET_IPFORWARD_BROADCAST=y
+
+  Additional required settings will also be selected when you manually
+  select the above via 'make menuconfig'.
+
 minibasic
 
   This configuration was used to test the Mini Basic port at

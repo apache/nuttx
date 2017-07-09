@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/route/net_addroute.c
+ * config/b-l475e-iot01a/src/stm32_appinit.c
  *
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,99 +39,52 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <queue.h>
-#include <errno.h>
-#include <debug.h>
+#include <sys/types.h>
 
-#include <nuttx/net/net.h>
-#include <nuttx/net/ip.h>
+#include <nuttx/board.h>
 
-#include <arch/irq.h>
+#include "b-l475e-iot01a.h"
 
-#include "route/route.h"
-
-#if defined(CONFIG_NET) && defined(CONFIG_NET_ROUTE)
+#ifdef CONFIG_LIB_BOARDCTL
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_addroute
+ * Name: board_app_initialize
  *
  * Description:
- *   Add a new route to the routing table
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
  *
- * Parameters:
+ * Input Parameters:
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initalization logic and the
+ *         matching application logic.  The value cold be such things as a
+ *         mode enumeration value, a set of DIP switch switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
  *
  * Returned Value:
- *   OK on success; Negated errno on failure.
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv4
-int net_addroute(in_addr_t target, in_addr_t netmask, in_addr_t router)
+int board_app_initialize(uintptr_t arg)
 {
-  FAR struct net_route_s *route;
+#ifndef CONFIG_BOARD_INITIALIZE
+  /* Perform board initialization */
 
-  /* Allocate a route entry */
-
-  route = net_allocroute();
-  if (!route)
-    {
-      nerr("ERROR:  Failed to allocate a route\n");
-      return -ENOMEM;
-    }
-
-  /* Format the new routing table entry */
-
-  net_ipv4addr_copy(route->target, target);
-  net_ipv4addr_copy(route->netmask, netmask);
-  net_ipv4addr_copy(route->router, router);
-
-  /* Get exclusive address to the networking data structures */
-
-  net_lock();
-
-  /* Then add the new entry to the table */
-
-  sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_routes);
-  net_unlock();
+  return stm32l4_bringup();
+#else
   return OK;
-}
 #endif
-
-#ifdef CONFIG_NET_IPv6
-int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask, net_ipv6addr_t router)
-{
-  FAR struct net_route_ipv6_s *route;
-
-  /* Allocate a route entry */
-
-  route = net_allocroute_ipv6();
-  if (!route)
-    {
-      nerr("ERROR:  Failed to allocate a route\n");
-      return -ENOMEM;
-    }
-
-  /* Format the new routing table entry */
-
-  net_ipv6addr_copy(route->target, target);
-  net_ipv6addr_copy(route->netmask, netmask);
-  net_ipv6addr_copy(route->router, router);
-
-  /* Get exclusive address to the networking data structures */
-
-  net_lock();
-
-  /* Then add the new entry to the table */
-
-  sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_routes_ipv6);
-  net_unlock();
-  return OK;
 }
-#endif
 
-#endif /* CONFIG_NET && CONFIG_NET_ROUTE */
+#endif /* CONFIG_LIB_BOARDCTL */

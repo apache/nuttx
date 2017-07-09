@@ -1,8 +1,7 @@
 ############################################################################
-# net/sixlowpan/Make.defs
+# configs/b-l475e-iot01a/src/Makefile
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,44 +32,19 @@
 #
 ############################################################################
 
-# IEEE 802.15.4 support
+-include $(TOPDIR)/Make.defs
 
-ifeq ($(CONFIG_NET_6LOWPAN),y)
+ASRCS =
+CSRCS = stm32_boot.c stm32_bringup.c
 
-# Include IEEE 802.15.4 file in the build
-
-NET_CSRCS += sixlowpan_initialize.c sixlowpan_globals.c sixlowpan_utils.c
-NET_CSRCS += sixlowpan_input.c sixlowpan_framer.c sixlowpan_framelist.c
-
-ifeq ($(CONFIG_NET_TCP),y)
-NET_CSRCS += sixlowpan_tcpsend.c
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += stm32_appinit.c
 endif
 
-ifeq ($(CONFIG_NET_UDP),y)
-NET_CSRCS += sixlowpan_udpsend.c
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += stm32_autoleds.c
+else
+CSRCS += stm32_userleds.c
 endif
 
-ifeq ($(CONFIG_NET_ICMPv6),y)
-NET_CSRCS += sixlowpan_icmpv6send.c
-endif
-
-ifeq ($(CONFIG_NET_UDP),y)
-NET_CSRCS += sixlowpan_send.c
-else ifeq ($(CONFIG_NET_ICMPv6),y)
-NET_CSRCS += sixlowpan_send.c
-endif
-
-ifeq ($(CONFIG_NET_6LOWPAN_COMPRESSION_HC1),y)
-NET_CSRCS += sixlowpan_hc1.c
-endif
-
-ifeq ($(CONFIG_NET_6LOWPAN_COMPRESSION_HC06),y)
-NET_CSRCS += sixlowpan_hc06.c
-endif
-
-# Include the sixlowpan directory in the build
-
-DEPPATH += --dep-path sixlowpan
-VPATH += :sixlowpan
-
-endif # CONFIG_NET_6LOWPAN
+include $(TOPDIR)/configs/Board.mk

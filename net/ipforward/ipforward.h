@@ -44,16 +44,6 @@
 
 #include <stdint.h>
 
-#include <nuttx/net/ip.h>
-#include <nuttx/net/udp.h>
-#include <nuttx/net/tcp.h>
-#include <nuttx/net/icmp.h>
-#include <nuttx/net/icmpv6.h>
-
-#include "udp/udp.h"
-#include "tcp/tcp.h"
-#include "icmpv6/icmpv6.h"
-
 #undef HAVE_FWDALLOC
 #ifdef CONFIG_NET_IPFORWARD
 
@@ -73,67 +63,14 @@
 #  define CONFIG_NET_IPFORWARD_NSTRUCT 4
 #endif
 
-#define FWD_HEADER(fwd) (FAR union fwd_iphdr_u *)((fwd)->f_iob->io_data)
+/* Allocate a new IP forwarding data callback */
+
+#define ipfwd_callback_alloc(dev)   devif_callback_alloc(dev, &(dev)->d_conncb)
+#define ipfwd_callback_free(dev,cb) devif_dev_callback_free(dev, cb)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
-/* IPv4 + L2 header */
-
-#ifdef CONFIG_NET_IPv4
-struct fwd_ipv4hdr_u
-{
-  struct ipv4_hdr_s       l2;
-  union
-  {
-#ifdef CONFIG_NET_TCP
-    uint8_t               pad[TCP_MAX_HDRLEN];
-    struct tcp_hdr_s      tcp;
-#endif
-#ifdef CONFIG_NET_UDP
-    struct udp_hdr_s      udp;
-#endif
-#ifdef CONFIG_NET_ICMPv6
-    struct icmp_hdr_s     icmp;
-#endif
-  } l3;
-};
-#endif
-
-/* IPv6 + L2 header */
-
-#ifdef CONFIG_NET_IPv6
-struct fwd_ipv6hdr_u
-{
-  struct ipv6_hdr_s       l2;
-  union
-  {
-#ifdef CONFIG_NET_TCP
-    uint8_t               pad[TCP_MAX_HDRLEN];
-    struct tcp_hdr_s      tcp;
-#endif
-#ifdef CONFIG_NET_UDP
-    struct udp_hdr_s      udp;
-#endif
-#ifdef CONFIG_NET_ICMPv6
-    struct icmpv6_hdr_s   icmpv6;
-#endif
-  } l3;
-};
-#endif
-
-/* IPv4 or IPv6 + L2 header */
-
-union fwd_iphdr_u
-{
-#ifdef CONFIG_NET_IPv4
-  struct fwd_ipv4hdr_u  ipv4;
-#endif
-#ifdef CONFIG_NET_IPv6
-  struct fwd_ipv6hdr_u  ipv6;
-#endif
-};
 
 /* This is the send state structure */
 
@@ -155,6 +92,9 @@ struct forward_s
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+struct ipv4_hdr_s; /* Forward reference */
+struct ipv6_hdr_s; /* Forward reference */
 
 /****************************************************************************
  * Name: ipfwd_initialize
@@ -304,6 +244,20 @@ void devif_forward(FAR struct forward_s *fwd);
  ****************************************************************************/
 
 int ipfwd_forward(FAR struct forward_s *fwd);
+
+/****************************************************************************
+ * Name: ipfwd_poll
+ *
+ * Description:
+ *   Poll all pending transfer for ARP requests to send.
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver indirectly through
+ *   devif_poll() and devif_timer().
+ *
+ ****************************************************************************/
+
+void ipfwd_poll(FAR struct net_driver_s *dev);
 
 #endif /* CONFIG_NETDEV_MULTINIC */
 

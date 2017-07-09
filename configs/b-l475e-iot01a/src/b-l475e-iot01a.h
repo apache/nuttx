@@ -1,8 +1,8 @@
 /****************************************************************************
- * net/route/net_addroute.c
+ * configs/b-l475e-iot01a/src/b-l475e-iot01a.h
  *
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,105 +33,56 @@
  *
  ****************************************************************************/
 
+#ifndef __CONFIGS_B_L475E_IOT01A_SRC_B_L475E_IOT01A_H
+#define __CONFIGS_B_L475E_IOT01A_SRC_B_L475E_IOT01A_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
+#include <arch/stm32l4/chip.h>
 
-#include <stdint.h>
-#include <queue.h>
-#include <errno.h>
-#include <debug.h>
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
-#include <nuttx/net/net.h>
-#include <nuttx/net/ip.h>
+/* LEDs */
 
-#include <arch/irq.h>
+#define GPIO_LED1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN5)
+#define GPIO_LED2       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN14)
 
-#include "route/route.h"
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
-#if defined(CONFIG_NET) && defined(CONFIG_NET_ROUTE)
+/****************************************************************************
+ * Public data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_addroute
+ * Name: stm32_bringup
  *
  * Description:
- *   Add a new route to the routing table
- *
- * Parameters:
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
+ *   Called either by board_intialize() if CONFIG_BOARD_INITIALIZE or by
+ *   board_app_initialize if CONFIG_LIB_BOARDCTL is selected.  This function
+ *   initializes and configures all on-board features appropriate for the
+ *   selected configuration.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv4
-int net_addroute(in_addr_t target, in_addr_t netmask, in_addr_t router)
-{
-  FAR struct net_route_s *route;
-
-  /* Allocate a route entry */
-
-  route = net_allocroute();
-  if (!route)
-    {
-      nerr("ERROR:  Failed to allocate a route\n");
-      return -ENOMEM;
-    }
-
-  /* Format the new routing table entry */
-
-  net_ipv4addr_copy(route->target, target);
-  net_ipv4addr_copy(route->netmask, netmask);
-  net_ipv4addr_copy(route->router, router);
-
-  /* Get exclusive address to the networking data structures */
-
-  net_lock();
-
-  /* Then add the new entry to the table */
-
-  sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_routes);
-  net_unlock();
-  return OK;
-}
+#if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_INITIALIZE)
+int stm32l4_bringup(void);
 #endif
 
-#ifdef CONFIG_NET_IPv6
-int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask, net_ipv6addr_t router)
-{
-  FAR struct net_route_ipv6_s *route;
-
-  /* Allocate a route entry */
-
-  route = net_allocroute_ipv6();
-  if (!route)
-    {
-      nerr("ERROR:  Failed to allocate a route\n");
-      return -ENOMEM;
-    }
-
-  /* Format the new routing table entry */
-
-  net_ipv6addr_copy(route->target, target);
-  net_ipv6addr_copy(route->netmask, netmask);
-  net_ipv6addr_copy(route->router, router);
-
-  /* Get exclusive address to the networking data structures */
-
-  net_lock();
-
-  /* Then add the new entry to the table */
-
-  sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_routes_ipv6);
-  net_unlock();
-  return OK;
-}
-#endif
-
-#endif /* CONFIG_NET && CONFIG_NET_ROUTE */
+#endif /* __ASSEMBLY__ */
+#endif /* __CONFIGS_B_L475E_IOT01A_SRC_B_L475E_IOT01A_H */

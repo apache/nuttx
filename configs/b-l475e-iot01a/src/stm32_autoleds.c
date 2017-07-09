@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/route/net_addroute.c
+ * configs/b-l475e-iot01a/src/stm32_autoleds.c
  *
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,105 +33,84 @@
  *
  ****************************************************************************/
 
+/* LEDs
+ *
+ * A single LED is available driven by PA13.
+ *
+ * These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+ * defined.  In that case, the usage by the board port is defined in
+ * include/board.h and src/sam_autoleds.c. The LEDs are used to encode
+ * OS-related events as follows:
+ *
+ *   ------------------- ----------------------- ------
+ *   SYMBOL              Meaning                 LED
+ *   ------------------- ----------------------- ------
+ *   LED_STARTED         NuttX has been started  OFF
+ *   LED_HEAPALLOCATE    Heap has been allocated OFF
+ *   LED_IRQSENABLED     Interrupts enabled      OFF
+ *   LED_STACKCREATED    Idle stack created      ON
+ *   LED_INIRQ           In an interrupt         N/C
+ *   LED_SIGNAL          In a signal handler     N/C
+ *   LED_ASSERTION       An assertion failed     N/C
+ *   LED_PANIC           The system has crashed  FLASH
+ *
+ * Thus is LED is statically on, NuttX has successfully  booted and is,
+ * apparently, running normally.  If LED is flashing at approximately
+ * 2Hz, then a fatal error has been detected and the system has halted.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <stdint.h>
-#include <queue.h>
-#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/net/net.h>
-#include <nuttx/net/ip.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
 
-#include <arch/irq.h>
+#include "stm32l4_gpio.h"
+#include "b-l475e-iot01a.h"
 
-#include "route/route.h"
-
-#if defined(CONFIG_NET) && defined(CONFIG_NET_ROUTE)
+#ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_addroute
- *
- * Description:
- *   Add a new route to the routing table
- *
- * Parameters:
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
+ * Name: board_autoled_initialize
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv4
-int net_addroute(in_addr_t target, in_addr_t netmask, in_addr_t router)
+void board_autoled_initialize(void)
 {
-  FAR struct net_route_s *route;
+  /* Configure LED gpio as output */
 
-  /* Allocate a route entry */
-
-  route = net_allocroute();
-  if (!route)
-    {
-      nerr("ERROR:  Failed to allocate a route\n");
-      return -ENOMEM;
-    }
-
-  /* Format the new routing table entry */
-
-  net_ipv4addr_copy(route->target, target);
-  net_ipv4addr_copy(route->netmask, netmask);
-  net_ipv4addr_copy(route->router, router);
-
-  /* Get exclusive address to the networking data structures */
-
-  net_lock();
-
-  /* Then add the new entry to the table */
-
-  sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_routes);
-  net_unlock();
-  return OK;
+  stm32l4_configgpio(GPIO_LED2);
 }
-#endif
 
-#ifdef CONFIG_NET_IPv6
-int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask, net_ipv6addr_t router)
+/****************************************************************************
+ * Name: board_autoled_on
+ ****************************************************************************/
+
+void board_autoled_on(int led)
 {
-  FAR struct net_route_ipv6_s *route;
-
-  /* Allocate a route entry */
-
-  route = net_allocroute_ipv6();
-  if (!route)
+  if (led == 1 || led == 3)
     {
-      nerr("ERROR:  Failed to allocate a route\n");
-      return -ENOMEM;
+      stm32l4_gpiowrite(GPIO_LED2, true);
     }
-
-  /* Format the new routing table entry */
-
-  net_ipv6addr_copy(route->target, target);
-  net_ipv6addr_copy(route->netmask, netmask);
-  net_ipv6addr_copy(route->router, router);
-
-  /* Get exclusive address to the networking data structures */
-
-  net_lock();
-
-  /* Then add the new entry to the table */
-
-  sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_routes_ipv6);
-  net_unlock();
-  return OK;
 }
-#endif
 
-#endif /* CONFIG_NET && CONFIG_NET_ROUTE */
+/****************************************************************************
+ * Name: board_autoled_off
+ ****************************************************************************/
+
+void board_autoled_off(int led)
+{
+  if (led == 3)
+    {
+      stm32l4_gpiowrite(GPIO_LED2, false);
+    }
+}
+
+#endif /* CONFIG_ARCH_LEDS */
