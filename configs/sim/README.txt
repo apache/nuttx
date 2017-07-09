@@ -504,6 +504,7 @@ ipforward
     +CONFIG_NET_ICMPv6=y
     +CONFIG_NET_ICMPv6_PING=y
     +CONFIG_NET_ETHERNET=y
+    +CONFIG_NET_IPFORWARD_BROADCAST=y
 
   Additional required settings will also be selected when you manually
   select the above via 'make menuconfig'.
