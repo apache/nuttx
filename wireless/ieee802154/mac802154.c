@@ -236,6 +236,10 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
       return -EINTR;
     }
 
+  /* Set the purge time to zero */
+
+  (*txdesc)->purge_time = 0;
+
   (*txdesc)->conf = &notif->u.dataconf;
   return OK;
 }
@@ -624,10 +628,10 @@ static void mac802154_purge_worker(FAR void *arg)
         break;
       }
 
-  /* Should probably check a little ahead and remove the transaction if it is within
-   * a certain number of clock ticks away.  There is no since in scheduling the
-   * timer to expire in only a few ticks.
-   */
+    /* Should probably check a little ahead and remove the transaction if it is within
+     * a certain number of clock ticks away.  There is no since in scheduling the
+     * timer to expire in only a few ticks.
+     */
 
     if (clock_systimer() >= txdesc->purge_time)
       {
@@ -654,6 +658,8 @@ static void mac802154_purge_worker(FAR void *arg)
         break;
       }
   }
+
+  mac802154_unlock(priv);
 }
 
 /****************************************************************************
@@ -1366,6 +1372,15 @@ static void mac802154_rxdatareq(FAR struct ieee802154_privmac_s *priv,
                   /* Remove the transaction from the queue */
 
                   sq_rem((FAR sq_entry_t *)txdesc, &priv->indirect_queue);
+
+                  /* NOTE: We don't do anything with the purge timeout, because
+                   * we really don't need to. As of now, I see no disadvantage
+                   * to just letting the timeout expire, which won't purge the
+                   * transaction since it is no longer on the list, and then it
+                   * will reschedule the next timeout appropriately. The logic
+                   * otherwise may get complicated even though it may save a few
+                   * clock cycles.
+                   */
 
                   /* The addresses match, send the transaction immediately */
 
