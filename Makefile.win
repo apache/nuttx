@@ -507,6 +507,7 @@ savedefconfig: do_savedefconfig
 	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf --savedefconfig defconfig Kconfig
 	$(Q) sed -i -e "/CONFIG_APPS_DIR=/d" defconfig
 	$(Q) grep "CONFIG_ARCH=" .config >> defconfig
+	$(Q) grep "^CONFIG_ARCH_CHIP_" .config >> defconfig
 	$(Q) grep "CONFIG_ARCH_BOARD=" .config >> defconfig
 
 # export
