@@ -179,7 +179,7 @@ struct ieee802154_privmac_s
   uint8_t npandesc;
   struct ieee802154_pandesc_s pandescs[MAC802154_NPANDESC];
   uint8_t panidbeforescan[IEEE802154_PANIDSIZE];
-  struct ieee802154_scan_req_s currscan; 
+  struct ieee802154_scan_req_s currscan;
   uint32_t scansymdur;
 
   /******************* Fields related to notifications ************************/
@@ -233,15 +233,15 @@ struct ieee802154_privmac_s
 
   /*************** Fields related to beacon-enabled networks ******************/
 
-  /* Holds attributes pertaining to the superframe specification */ 
- 
-  struct ieee802154_superframespec_s sfspec; 
- 
-  /* We use 2 beacon frame structures so that we can ping-pong between them 
-   * while updating the beacon 
-   */ 
- 
-  struct ieee802154_beaconframe_s beaconframe[2]; 
+  /* Holds attributes pertaining to the superframe specification */
+
+  struct ieee802154_superframespec_s sfspec;
+
+  /* We use 2 beacon frame structures so that we can ping-pong between them
+   * while updating the beacon
+   */
+
+  struct ieee802154_beaconframe_s beaconframe[2];
 
   /* Contents of beacon payload */
 
@@ -562,7 +562,7 @@ void mac802154_updatebeacon(FAR struct ieee802154_privmac_s *priv);
   ((GETHOST16(ptr, index) & IEEE802154_PENDADDR_NEADDR) >> \
   IEEE802154_PENDADDR_SHIFT_NEADDR)
 
-/* General helpers ****************************************************/
+/* General helpers **********************************************************/
 
 #define mac802154_givesem(s) sem_post(s)
 
@@ -648,7 +648,7 @@ static inline void mac802154_rxenable(FAR struct ieee802154_privmac_s *priv)
   priv->nrxusers++;
 
   /* If this is the first user, actually enable the receiver */
-  
+
   if (priv->nrxusers == 1)
     {
       wlinfo("Receiver enabled\n");
@@ -661,7 +661,7 @@ static inline void mac802154_rxdisable(FAR struct ieee802154_privmac_s *priv)
   priv->nrxusers--;
 
   /* If this is the first user, actually enable the receiver */
-  
+
   if (priv->nrxusers == 0)
     {
       wlinfo("Receiver disabled\n");
@@ -732,7 +732,7 @@ static inline void mac802154_setcoordaddr(FAR struct ieee802154_privmac_s *priv,
                         (FAR const union ieee802154_attr_u *)addr->eaddr);
   priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_COORD_SADDR,
                         (FAR const union ieee802154_attr_u *)addr->saddr);
-}                                    
+}
 
 static inline void mac802154_setrxonidle(FAR struct ieee802154_privmac_s *priv,
                                          bool rxonidle)
