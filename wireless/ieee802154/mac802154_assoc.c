@@ -111,7 +111,7 @@ int mac802154_req_associate(MACHANDLE mac,
 
   /* Get exclusive access to the MAC */
 
-   ret = mac802154_takesem(&priv->exclsem, true);
+   ret = mac802154_lock(priv, true);
    if (ret < 0)
      {
        mac802154_givesem(&priv->opsem);
@@ -154,7 +154,7 @@ int mac802154_req_associate(MACHANDLE mac,
   if (ret < 0)
     {
       iob_free(iob);
-      mac802154_givesem(&priv->exclsem);
+      mac802154_unlock(priv)
       mac802154_givesem(&priv->opsem);
       return ret;
     }
@@ -299,7 +299,7 @@ int mac802154_req_associate(MACHANDLE mac,
 
   /* We no longer need to have the MAC layer locked. */
 
-  mac802154_givesem(&priv->exclsem);
+  mac802154_unlock(priv)
 
   return OK;
 }
@@ -394,7 +394,7 @@ int mac802154_resp_associate(MACHANDLE mac,
 
   /* Get exclusive access to the MAC */
 
-   ret = mac802154_takesem(&priv->exclsem, true);
+   ret = mac802154_lock(priv, true);
    if (ret < 0)
      {
        iob_free(iob);
@@ -407,7 +407,7 @@ int mac802154_resp_associate(MACHANDLE mac,
   if (ret < 0)
     {
       iob_free(iob);
-      mac802154_givesem(&priv->exclsem);
+      mac802154_unlock(priv)
       return ret;
     }
 
@@ -420,7 +420,7 @@ int mac802154_resp_associate(MACHANDLE mac,
 
   mac802154_setupindirect(priv, txdesc);
 
-  mac802154_givesem(&priv->exclsem);
+  mac802154_unlock(priv)
 
   return OK;
 }
@@ -484,9 +484,9 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
 
       /* Release the MAC, call the callback, get exclusive access again */
 
-      mac802154_givesem(&priv->exclsem);
+      mac802154_unlock(priv)
       mac802154_notify(priv, notif);
-      mac802154_takesem(&priv->exclsem, false);
+      mac802154_lock(priv, false);
     }
   else
     {
@@ -627,9 +627,9 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
 
       /* Release the MAC, call the callback, get exclusive access again */
 
-      mac802154_givesem(&priv->exclsem);
+      mac802154_unlock(priv)
       mac802154_notify(priv, notif);
-      mac802154_takesem(&priv->exclsem, false);
+      mac802154_lock(priv, false);
     }
   else
     {
@@ -689,7 +689,7 @@ void mac802154_rx_assocreq(FAR struct ieee802154_privmac_s *priv,
 
   /* Get exclusive access to the MAC */
 
-  mac802154_takesem(&priv->exclsem, false);
+  mac802154_lock(priv, false);
 
   /* Allocate a notification to pass to the next highest layer */
 
@@ -730,7 +730,7 @@ void mac802154_rx_assocreq(FAR struct ieee802154_privmac_s *priv,
 
   /* Unlock the MAC */
 
-  mac802154_givesem(&priv->exclsem);
+  mac802154_unlock(priv)
 
   /* Notify the next highest layer of the association status */
 
@@ -738,7 +738,7 @@ void mac802154_rx_assocreq(FAR struct ieee802154_privmac_s *priv,
   return;
 
 errout_with_sem:
-  mac802154_givesem(&priv->exclsem);
+  mac802154_unlock(priv)
   return;
 }
 
@@ -785,7 +785,7 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
 
   /* Get exclusive access to the MAC */
 
-  mac802154_takesem(&priv->exclsem, false);
+  mac802154_lock(priv, false);
 
   /* Allocate a notification to pass to the next highest layer */
 
@@ -838,7 +838,7 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
 
   /* Unlock the MAC */
 
-  mac802154_givesem(&priv->exclsem);
+  mac802154_unlock(priv)
 
   /* Notify the next highest layer of the association status */
 
@@ -875,7 +875,7 @@ static void mac802154_assoctimeout(FAR struct ieee802154_privmac_s *priv)
    * Don't allow EINTR to interrupt.
    */
 
-  mac802154_takesem(&priv->exclsem, false);
+  mac802154_lock(priv, false);
   mac802154_notif_alloc(priv, &notif, false);
 
   /* We are no longer performing the association operation */
@@ -887,7 +887,7 @@ static void mac802154_assoctimeout(FAR struct ieee802154_privmac_s *priv)
 
   /* Release the MAC */
 
-  mac802154_givesem(&priv->exclsem);
+  mac802154_unlock(priv)
 
   notif->notiftype = IEEE802154_NOTIFY_CONF_ASSOC;
   notif->u.assocconf.status = IEEE802154_STATUS_NO_DATA;

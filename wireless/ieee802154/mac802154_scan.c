@@ -110,7 +110,7 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
 
   /* Get exclusive access to the MAC */
 
-  ret = mac802154_takesem(&priv->exclsem, true);
+  ret = mac802154_lock(priv, true);
   if (ret < 0)
     {
       mac802154_givesem(&priv->opsem);
@@ -186,11 +186,11 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
         break;
     }
 
-  mac802154_givesem(&priv->exclsem);
+  mac802154_unlock(priv)
 return OK;
 
 errout_with_sem:
-  mac802154_givesem(&priv->exclsem);
+  mac802154_unlock(priv)
   mac802154_givesem(&priv->opsem);
 errout:
   return ret;
@@ -205,7 +205,7 @@ void mac802154_scanfinish(FAR struct ieee802154_privmac_s *priv,
 {
   FAR struct ieee802154_notif_s * notif;
 
-  mac802154_takesem(&priv->exclsem, false);
+  mac802154_lock(priv, false);
   mac802154_notif_alloc(priv, &notif, false);
 
   priv->curr_op = MAC802154_OP_NONE;
@@ -233,7 +233,7 @@ void mac802154_scanfinish(FAR struct ieee802154_privmac_s *priv,
 
   mac802154_setpanid(priv, priv->panidbeforescan);
 
-  mac802154_givesem(&priv->exclsem);
+  mac802154_unlock(priv)
 
   mac802154_notify(priv, notif);
 }

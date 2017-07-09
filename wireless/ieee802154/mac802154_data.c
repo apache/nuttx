@@ -147,7 +147,7 @@ int mac802154_req_data(MACHANDLE mac,
 
   /* From this point on, we need exclusive access to the privmac struct */
 
-  ret = mac802154_takesem(&priv->exclsem, true);
+  ret = mac802154_lock(priv, true);
   if (ret < 0)
     {
       /* Should only fail if interrupted by a signal */
@@ -313,7 +313,7 @@ int mac802154_req_data(MACHANDLE mac,
               memcpy(&txdesc->destaddr, &meta->destaddr,
                      sizeof(struct ieee802154_addr_s));
               mac802154_setupindirect(priv, txdesc);
-              mac802154_givesem(&priv->exclsem);
+              mac802154_unlock(priv)
             }
           else
             {
@@ -329,7 +329,7 @@ int mac802154_req_data(MACHANDLE mac,
 
           /* We no longer need to have the MAC layer locked. */
 
-          mac802154_givesem(&priv->exclsem);
+          mac802154_unlock(priv)
 
           /* Notify the radio driver that there is data available */
 
@@ -346,7 +346,7 @@ errout_with_txdesc:
   mac802154_txdesc_free(priv, txdesc);
 
 errout_with_sem:
-  mac802154_givesem(&priv->exclsem);
+  mac802154_unlock(priv)
   return ret;
 }
 
