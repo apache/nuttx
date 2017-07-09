@@ -238,7 +238,7 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
 
   /* Set the purge time to zero */
 
-  (*txdesc)->purge_time = 0;
+  (*txdesc)->purgetime = 0;
 
   (*txdesc)->conf = &notif->u.dataconf;
   return OK;
@@ -567,7 +567,7 @@ void mac802154_setupindirect(FAR struct ieee802154_privmac_s *priv,
 
   ticks = mac802154_symtoticks(priv, symbols);
 
-  txdesc->purge_time = clock_systimer() + ticks;
+  txdesc->purgetime = clock_systimer() + ticks;
 
   /* Make sure the beacon gets updated */
 
@@ -633,7 +633,7 @@ static void mac802154_purge_worker(FAR void *arg)
      * timer to expire in only a few ticks.
      */
 
-    if (clock_systimer() >= txdesc->purge_time)
+    if (clock_systimer() >= txdesc->purgetime)
       {
         /* Unlink the transaction */
 
@@ -654,7 +654,7 @@ static void mac802154_purge_worker(FAR void *arg)
         /* Reschedule the transaction for the next timeout */
 
         work_queue(MAC802154_WORK, &priv->purge_work, mac802154_purge_worker,
-                   (FAR void *)priv, txdesc->purge_time - clock_systimer());
+                   (FAR void *)priv, txdesc->purgetime - clock_systimer());
         break;
       }
   }
