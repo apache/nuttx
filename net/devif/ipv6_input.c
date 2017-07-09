@@ -416,7 +416,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
          *      during TCP packet processing by the TCP state meachine.
          *   3. TCP output resulting from TX or timer polling
          *
-         * Cases 2 is handled here.  Logic here detected if (1) an attempt
+         * Case 3 is handled here.  Logic here detects if (1) an attempt
          * to return with d_len > 0 and (2) that the device is an
          * IEEE802.15.4 MAC network driver. Under those conditions, 6LoWPAN
          * logic will be called to create the IEEE80215.4 frames.
@@ -457,8 +457,40 @@ int ipv6_input(FAR struct net_driver_s *dev)
         /* Forward the ICMPv6 packet */
 
         icmpv6_input(dev);
-        break;
+
+#ifdef CONFIG_NET_6LOWPAN
+        /* All outgoing ICMPv6 messages come through one of two mechanisms:
+         *
+         *   1. The output from internal ICMPv6 message passing.  These
+         *      outgoing  messages will use device polling and will be
+         *      handled elsewhere.
+         *   2. ICMPv6 output resulting from TX or timer polling.
+         *
+         * Case 2 is handled here.  Logic here detects if (1) an attempt
+         * to return with d_len > 0 and (2) that the device is an
+         * IEEE802.15.4 MAC network driver. Under those conditions, 6LoWPAN
+         * logic will be called to create the IEEE80215.4 frames.
+         */
+
+#ifdef CONFIG_NET_MULTILINK
+        /* Handle the case where multiple link layer protocols are supported */
+
+        if (dev->d_len > 0 && dev->d_lltype == CONFIG_NET_6LOWPAN)
+#else
+        if (dev->d_len > 0)
 #endif
+          {
+            /* Let 6LoWPAN handle the ICMPv6 output */
+
+            sixlowpan_icmpv6_send(dev, dev, ipv6);
+
+            /* Drop the packet in the d_buf */
+
+            goto drop;
+          }
+#endif /* CONFIG_NET_6LOWPAN */
+        break;
+#endif /* CONFIG_NET_ICMPv6 */
 
       default:              /* Unrecognized/unsupported protocol */
 #ifdef CONFIG_NET_STATISTICS

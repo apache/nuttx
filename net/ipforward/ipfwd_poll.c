@@ -140,7 +140,7 @@ static void ipfwd_packet_conversion(FAR struct net_driver_s *dev, int proto)
         {
           /* Let 6LoWPAN convert IPv6 UDP output into IEEE802.15.4 frames. */
 
-          nwerr("ERROR:  Missing support for ICMPv6 packet forwarding\n");
+          sixlowpan_icmpv6_send(dev, dev, ipv6);
         }
       else
 #endif

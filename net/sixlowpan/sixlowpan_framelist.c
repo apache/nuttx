@@ -212,7 +212,7 @@ static uint16_t sixlowpan_protosize(FAR const struct ipv6_hdr_s *ipv6hdr,
  *
  * Input Parameters:
  *   ieee    - The IEEE802.15.4 MAC driver instance
- *   ipv6hdr - IPv6 header followed by TCP, UDP, or ICMPv6 header.
+ *   ipv6    - IPv6 header followed by TCP, UDP, or ICMPv6 header.
  *   buf     - Beginning of the packet packet to send (with IPv6 + protocol
  *             headers)
  *   buflen  - Length of data to send (include IPv6 and protocol headers)
@@ -230,7 +230,7 @@ static uint16_t sixlowpan_protosize(FAR const struct ipv6_hdr_s *ipv6hdr,
  ****************************************************************************/
 
 int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
-                           FAR const struct ipv6_hdr_s *destip,
+                           FAR const struct ipv6_hdr_s *ipv6,
                            FAR const void *buf, size_t buflen,
                            FAR const struct sixlowpan_tagaddr_s *destmac)
 {
@@ -266,10 +266,10 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
   /* Set stream mode for all TCP packets, except FIN packets. */
 
 #if 0 /* Currently the frame type is always data */
-  if (destip->proto == IP_PROTO_TCP)
+  if (ipv6->proto == IP_PROTO_TCP)
     {
       FAR const struct tcp_hdr_s *tcp =
-        &((FAR const struct ipv6tcp_hdr_s *)destip)->tcp;
+        &((FAR const struct ipv6tcp_hdr_s *)ipv6)->tcp;
 
       if ((tcp->flags & TCP_FIN) == 0 &&
           (tcp->flags & TCP_CTL) != TCP_ACK)
@@ -379,9 +379,9 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
       /* Try to compress the headers */
 
 #if defined(CONFIG_NET_6LOWPAN_COMPRESSION_HC1)
-      ret = sixlowpan_compresshdr_hc1(ieee, destip, destmac, fptr);
+      ret = sixlowpan_compresshdr_hc1(ieee, ipv6, destmac, fptr);
 #elif defined(CONFIG_NET_6LOWPAN_COMPRESSION_HC06)
-      ret = sixlowpan_compresshdr_hc06(ieee, destip, destmac, fptr);
+      ret = sixlowpan_compresshdr_hc06(ieee, ipv6, destmac, fptr);
 #else
 #  error No compression specified
 #endif
@@ -391,14 +391,14 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
     {
       /* Small.. use IPv6 dispatch (no compression) */
 
-      ret = sixlowpan_compress_ipv6hdr(destip, fptr);
+      ret = sixlowpan_compress_ipv6hdr(ipv6, fptr);
     }
 
   /* Get the size of any uncompressed protocol headers */
 
   if (ret == COMPRESS_HDR_INLINE)
     {
-      protosize = sixlowpan_protosize(destip, fptr);
+      protosize = sixlowpan_protosize(ipv6, fptr);
     }
 
   ninfo("Header of length=%u protosize=%u\n", g_frame_hdrlen, protosize);
@@ -465,7 +465,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
       if (protosize > 0)
         {
-          FAR uint8_t *src = (FAR uint8_t *)destip + IPv6_HDRLEN;
+          FAR uint8_t *src = (FAR uint8_t *)ipv6 + IPv6_HDRLEN;
           memcpy(fptr + g_frame_hdrlen, src, protosize);
         }
 
@@ -625,7 +625,7 @@ int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
 
       if (protosize > 0)
         {
-          FAR uint8_t *src = (FAR uint8_t *)destip + IPv6_HDRLEN;
+          FAR uint8_t *src = (FAR uint8_t *)ipv6 + IPv6_HDRLEN;
           memcpy(fptr + g_frame_hdrlen, src, protosize);
         }
 

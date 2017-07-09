@@ -80,6 +80,12 @@
 #  define DEV_LLTYPE(d) NET_LL_ETHERNET
 #elif defined(CONFIG_NET_6LOWPAN)
 #  define DEV_LLTYPE(d) NET_LL_IEEE802154
+#elif defined(CONFIG_NET_SLIP)
+#  define DEV_LLTYPE(d) NET_LL_SLIP
+#elif defined(CONFIG_NET_TUN)
+#  define DEV_LLTYPE(d) NET_LL_TUN
+#else /* if defined(CONFIG_NET_LOOPBACK) */
+#  define DEV_LLTYPE(d) NET_LL_LOOPBACK
 #endif
 
 /****************************************************************************

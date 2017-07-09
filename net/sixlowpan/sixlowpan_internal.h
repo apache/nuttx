@@ -356,7 +356,7 @@ int sixlowpan_frame_submit(FAR struct ieee802154_driver_s *ieee,
  *
  * Input Parameters:
  *   ieee    - The IEEE802.15.4 MAC driver instance
- *   ipv6hdr - IPv6 header followed by TCP or UDP header.
+ *   ipv6    - IPv6 header followed by TCP or UDP header.
  *   buf     - Beginning of the packet packet to send (with IPv6 + protocol
  *             headers)
  *   buflen  - Length of data to send (include IPv6 and protocol headers)
@@ -374,7 +374,7 @@ int sixlowpan_frame_submit(FAR struct ieee802154_driver_s *ieee,
  ****************************************************************************/
 
 int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
-                           FAR const struct ipv6_hdr_s *ipv6hdr,
+                           FAR const struct ipv6_hdr_s *ipv6,
                            FAR const void *buf,  size_t buflen,
                            FAR const struct sixlowpan_tagaddr_s *destmac);
 

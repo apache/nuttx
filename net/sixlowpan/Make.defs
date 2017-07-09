@@ -47,7 +47,17 @@ NET_CSRCS += sixlowpan_tcpsend.c
 endif
 
 ifeq ($(CONFIG_NET_UDP),y)
-NET_CSRCS += sixlowpan_udpsend.c sixlowpan_send.c
+NET_CSRCS += sixlowpan_udpsend.c
+endif
+
+ifeq ($(CONFIG_NET_ICMPv6),y)
+NET_CSRCS += sixlowpan_icmpv6send.c
+endif
+
+ifeq ($(CONFIG_NET_UDP),y)
+NET_CSRCS += sixlowpan_send.c
+else ifeq ($(CONFIG_NET_ICMPv6),y)
+NET_CSRCS += sixlowpan_send.c
 endif
 
 ifeq ($(CONFIG_NET_6LOWPAN_COMPRESSION_HC1),y)
