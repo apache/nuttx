@@ -90,7 +90,7 @@ static int proto_dropstats(int proto)
 #endif
 
     default:
-      retrun -EPROTONOSUPPORT;
+      return -EPROTONOSUPPORT;
     }
 
   return OK;
