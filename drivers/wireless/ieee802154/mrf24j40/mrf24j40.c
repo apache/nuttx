@@ -1452,484 +1452,246 @@ static int mrf24j40_settxpower(FAR struct mrf24j40_radio_s *dev,
 
       case -1:
         reg |= 0x02;
-
         break;
-
-
 
       case  0:
-
         reg |= 0x00;  /* value 0x01 is 0.5 db, not used */
-
         break;
-
-
 
       default:
 
         return -EINVAL;
-
     }
-
-
 
   mrf24j40_setreg(dev->spi, MRF24J40_RFCON3, reg);
 
   dev->txpower = save_txpwr;
 
   return OK;
-
 }
 
-
-
 /****************************************************************************
-
  * Name: mrf24j40_setcca
-
  *
-
  * Description:
-
  *   Define the Clear Channel Assessement method.
-
  *
-
  ****************************************************************************/
 
-
-
 static int mrf24j40_setcca(FAR struct mrf24j40_radio_s *dev,
-
                            FAR struct ieee802154_cca_s *cca)
-
 {
-
   uint8_t mode;
 
-
-
   if (!cca->use_ed && !cca->use_cs)
-
     {
-
       return -EINVAL;
-
     }
-
-
 
   if (cca->use_cs && cca->csth > 0x0f)
-
     {
-
       return -EINVAL;
-
     }
-
-
 
   mode  = mrf24j40_getreg(dev->spi, MRF24J40_BBREG2);
-
   mode &= 0x03;
 
-
-
   if (cca->use_ed)
-
     {
-
       mode |= MRF24J40_BBREG2_CCAMODE_ED;
-
       mrf24j40_setreg(dev->spi, MRF24J40_CCAEDTH, cca->edth);
-
     }
-
-
 
   if (cca->use_cs)
-
     {
-
       mode |= MRF24J40_BBREG2_CCAMODE_CS;
-
       mode |= cca->csth << 2;
-
     }
-
-
 
   mrf24j40_setreg(dev->spi, MRF24J40_BBREG2, mode);
 
-
-
   memcpy(&dev->cca, cca, sizeof(struct ieee802154_cca_s));
-
   return OK;
-
 }
 
-
-
 /****************************************************************************
-
  * Name: mrf24j40_regdump
-
  *
-
  * Description:
-
  *   Display the value of all registers.
-
  *
-
  ****************************************************************************/
 
-
-
 static int mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev)
-
 {
-
   uint32_t i;
-
   char buf[4+16*3+2+1];
-
   int len = 0;
-
-
 
   wlinfo("Short regs:\n");
 
-
-
   for (i = 0; i < 0x40; i++)
-
     {
-
       if ((i & 15) == 0)
-
         {
-
           len=sprintf(buf, "%02x: ",i&0xFF);
-
         }
-
-
 
       len += sprintf(buf+len, "%02x ", mrf24j40_getreg(dev->spi, i));
-
       if ((i & 15) == 15)
-
         {
-
           sprintf(buf+len, "\n");
-
           wlinfo("%s", buf);
-
         }
-
     }
-
-
 
   wlinfo("Long regs:\n");
 
   for (i = 0x80000200; i < 0x80000250; i++)
-
     {
-
       if ((i & 15) == 0)
-
         {
-
           len=sprintf(buf, "%02x: ",i&0xFF);
-
         }
-
-
 
       len += sprintf(buf+len, "%02x ", mrf24j40_getreg(dev->spi, i));
-
       if ((i & 15) == 15)
-
         {
-
           sprintf(buf+len, "\n");
-
           wlinfo("%s", buf);
-
         }
-
     }
 
-
-
   return 0;
-
 }
 
-
-
 /****************************************************************************
-
  * Name: mrf24j40_energydetect
-
  *
-
  * Description:
-
  *   Measure the RSSI level for the current channel.
-
  *
-
  ****************************************************************************/
 
-
-
 static int mrf24j40_energydetect(FAR struct mrf24j40_radio_s *dev,
-
                                  FAR uint8_t *energy)
-
 {
-
   uint8_t reg;
-
-
 
   /* Manually enable the LNA*/
 
-
-
   mrf24j40_pacontrol(dev, MRF24J40_PA_ED);
-
-
 
   /* Set RSSI average duration to 8 symbols */
 
-
-
   reg  = mrf24j40_getreg(dev->spi, MRF24J40_TXBCON1);
-
   reg |= 0x30;
-
   mrf24j40_setreg(dev->spi, MRF24J40_TXBCON1, reg);
-
-
 
   /* 1. Set RSSIMODE1 0x3E<7> – Initiate RSSI calculation. */
 
-
-
   mrf24j40_setreg(dev->spi, MRF24J40_BBREG6, 0x80);
 
-
-
   /* 2. Wait until RSSIRDY 0x3E<0> is set to ‘1’ – RSSI calculation is
-
    *    complete.
-
    */
-
-
 
   while(!(mrf24j40_getreg(dev->spi, MRF24J40_BBREG6) & 0x01));
 
-
-
   /* 3. Read RSSI 0x210<7:0> – The RSSI register contains the averaged RSSI
-
    *    received power level for 8 symbol periods.
-
    */
 
-
-
   *energy = mrf24j40_getreg(dev->spi, MRF24J40_RSSI);
-
-
-
   mrf24j40_setreg(dev->spi, MRF24J40_BBREG6, 0x40);
 
-
-
   /* Back to automatic control */
-
-
 
   mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
 
   return OK;
-
 }
 
-
-
 /****************************************************************************
-
  * Name: mrf24j40_norm_setup
-
  *
-
  * Description:
-
  *   Setup a transaction in the normal TX FIFO
-
  *
-
  ****************************************************************************/
 
-
-
 static void mrf24j40_norm_setup(FAR struct mrf24j40_radio_s *dev,
-
                                 FAR struct iob_s *frame, bool csma)
-
 {
-
   uint8_t reg;
-
-
 
   /* Enable tx int */
 
-
-
   reg  = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
-
   reg &= ~MRF24J40_INTCON_TXNIE;
-
   mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
-
-
 
   /* Enable/Disable CSMA mode */
 
-
-
   reg  = mrf24j40_getreg(dev->spi, MRF24J40_TXMCR);
 
-
-
   if (csma)
-
     {
-
       reg &= ~MRF24J40_TXMCR_NOCSMA;
-
     }
-
   else
-
     {
-
       reg |= MRF24J40_TXMCR_NOCSMA;
-
     }
-
-
 
   mrf24j40_setreg(dev->spi, MRF24J40_TXMCR, reg);
 
-
-
   /* Setup the FIFO */
-
-
 
   mrf24j40_setup_fifo(dev, frame->io_data, frame->io_len, MRF24J40_TXNORM_FIFO);
 
-
-
   /* If the frame control field contains an acknowledgment request, set the
-
    * TXNACKREQ bit. See IEEE 802.15.4/2003 7.2.1.1 page 112 for info.
-
    */
 
-
-
   reg  = mrf24j40_getreg(dev->spi, MRF24J40_TXNCON);
-
-
 
   if (frame->io_data[0] & IEEE802154_FRAMECTRL_ACKREQ)
-
     {
-
       reg |= MRF24J40_TXNCON_TXNACKREQ;
-
     }
-
   else
-
     {
-
       reg &= ~MRF24J40_TXNCON_TXNACKREQ;
-
     }
-
-
 
   mrf24j40_setreg(dev->spi, MRF24J40_TXNCON, reg);
-
 }
 
-
-
 /****************************************************************************
-
  * Name: mrf24j40_norm_trigger
-
  *
-
  * Description:
-
  *   Trigger the normal TX FIFO
-
  *
-
  ****************************************************************************/
-
-
 
 static inline void mrf24j40_norm_trigger(FAR struct mrf24j40_radio_s *dev)
-
 {
-
   uint8_t reg;
 
-
-
   reg  = mrf24j40_getreg(dev->spi, MRF24J40_TXNCON);
-
-
-
   reg |= MRF24J40_TXNCON_TXNTRIG;
-
-
-
   mrf24j40_setreg(dev->spi, MRF24J40_TXNCON, reg);
-
 }
 
-
-
 /****************************************************************************
-
  * Name: mrf24j40_beacon_trigger
-
  *
-
  * Description:
-
  *   Trigger the beacon TX FIFO
-
  *
-
  ****************************************************************************/
-
-
 
 static inline void mrf24j40_beacon_trigger(FAR struct mrf24j40_radio_s *dev)
 {
