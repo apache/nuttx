@@ -754,6 +754,9 @@
 |   |-- Make.defs
 |   `-- defconfig
 |   ...
+|-- scripts/
+|   |-- <i>(linker script files)</i>
+|   `-- Make.defs <i>(optional</i>
 `-- <i>(other board-specific configuration sub-directories)</i>/
 </pre></ul>
 
@@ -788,7 +791,14 @@
   Each board configuration is described by two files:  <code>Make.defs</code> and <code>defconfig</code>.
   Typically, each set of configuration files is retained in a separate configuration sub-directory
   (<i>&lt;config1-dir&gt;</i>, <i>&lt;config2-dir&gt;</i>, .. in the above diagram).
-
+</p>
+<p>
+  NOTE: That the <code>Make.defs</code> file may reside in one of two locations:
+  There may be a unique Make.defs file for each configuration in the configuration directory <i>OR</i>
+  if that file is absent, there may be a common board <code>Make.defs</code> file in the <code>/scripts</code> directory.
+  The <code>Make.defs</code> file in the configuration takes precedence if it is present.
+</p>
+<p>
   The procedure for configuring NuttX is described <a href="#configuringnuttx">below</a>,
   This paragraph will describe the contents of these configuration files.
 </p>

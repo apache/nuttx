@@ -39,6 +39,9 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
+
+#include <nuttx/net/ip.h>
 #include <nuttx/net/netstats.h>
 
 #include "ipforward/ipforward.h"
@@ -87,7 +90,7 @@ static int proto_dropstats(int proto)
 #endif
 
     default:
-      retrun -EPROTONOSUPPORT;
+      return -EPROTONOSUPPORT;
     }
 
   return OK;
@@ -171,6 +174,7 @@ void ipv4_dropstats(FAR struct ipv4_hdr_s *ipv4)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NETDEV_MULTINIC
 void ipfwd_dropstats(FAR struct forward_s *fwd)
 {
 #ifdef CONFIG_NET_IPv4
@@ -190,3 +194,6 @@ void ipfwd_dropstats(FAR struct forward_s *fwd)
     }
 #endif
 }
+#endif
+
+#endif /* CONFIG_NET_IPFORWARD && CONFIG_NET_STATISTICS */

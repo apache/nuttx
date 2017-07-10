@@ -1,8 +1,7 @@
 ############################################################################
-# configs/stm32f103-minimum/jlx12864g/Make.defs
+# configs/b-l475e-iot01a/scripts/Make.defs
 #
-#   Copyright (C) 2016 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <gnutt@nuttx.org>
+#   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -37,7 +36,8 @@ include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
 include ${TOPDIR}/arch/arm/src/armv7-m/Toolchain.defs
 
-LDSCRIPT = ld.script
+# TODO add stm32 bootloader support
+LDSCRIPT = flash.ld
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
@@ -59,10 +59,12 @@ CC = $(CROSSDEV)gcc
 CXX = $(CROSSDEV)g++
 CPP = $(CROSSDEV)gcc -E
 LD = $(CROSSDEV)ld
-AR = $(CROSSDEV)ar rcs
-NM = $(CROSSDEV)nm
+AR = $(ARCROSSDEV)ar rcs
+NM = $(ARCROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
+
+# See http://dfu-util.sourceforge.net/
 
 ARCHCCVERSION = ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q'}
 ARCHCCMAJOR = ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
@@ -76,7 +78,7 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ARCHCFLAGS = -fno-builtin
-ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new
+ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHDEFINES =
@@ -105,9 +107,12 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
 endif
 
-
 HOSTCC = gcc
 HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
 HOSTLDFLAGS =
 
+define DOWNLOAD
+  $(Q) echo "Download firmware $(1).bin"
+  $(Q) st-flash write $(1).bin 0x08000000
+endef

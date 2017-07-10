@@ -140,8 +140,13 @@ src_makedefs="${configpath}/Make.defs"
 dest_makedefs="${TOPDIR}/Make.defs"
 
 if [ ! -r "${src_makedefs}" ]; then
-  echo "File \"${src_makedefs}\" does not exist"
-  exit 4
+  boardpath=`dirname $configpath`
+  src_makedefs="${boardpath}/scripts/Make.defs"
+
+  if [ ! -r "${src_makedefs}" ]; then
+    echo "File Make.defs could not be found"
+    exit 4
+  fi
 fi
 
 src_config="${configpath}/defconfig"
@@ -293,4 +298,5 @@ fi
 # reconstitued before they can be used.
 
 echo "  Refreshing..."
+cd ${TOPDIR} || { echo "Failed to cd to ${TOPDIR}"; exit 1; }
 make olddefconfig 1>/dev/null 2>&1
