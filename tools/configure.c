@@ -92,6 +92,7 @@ static char       *g_topdir        = NULL;  /* Full path to top-level NuttX buil
 static char       *g_apppath       = NULL;  /* Full path to the application directory */
 static char       *g_configtop     = NULL;  /* Full path to the top-level configuration directory */
 static char       *g_configpath    = NULL;  /* Full path to the configuration sub-directory */
+static char       *g_scriptspath   = NULL;  /* Full path to the scripts sub-directory */
 static char       *g_verstring     = "0.0"; /* Version String */
 
 static char       *g_srcdefconfig  = NULL;  /* Source defconfig file */
@@ -555,6 +556,16 @@ static void check_configdir(void)
     }
 
   g_configpath = strdup(g_buffer);
+
+  snprintf(g_buffer, BUFFER_SIZE, "%s%cconfigs%c%s%cscripts",
+           g_topdir, g_delim, g_delim, g_boarddir, g_delim);
+  debug("check_configdir: Checking scriptspath=%s\n", g_buffer);
+
+  g_scriptspath = NULL;
+  if (verify_optiondir(g_buffer))
+    {
+      g_scriptspath = strdup(g_buffer);
+    }
 }
 
 static void read_configfile(void)
@@ -724,14 +735,32 @@ static void check_configuration(void)
 
   g_srcdefconfig = strdup(g_buffer);
 
+  /* Try the Make.defs file */
+
   snprintf(g_buffer, BUFFER_SIZE, "%s%cMake.defs", g_configpath, g_delim);
   debug("check_configuration: Checking %s\n", g_buffer);
   if (!verify_file(g_buffer))
     {
-      fprintf(stderr, "ERROR: Configuration corrupted in %s\n", g_configpath);
-      fprintf(stderr, "       No Make.defs file found.\n");
-      enumerate_configs();
-      exit(EXIT_FAILURE);
+      /* An alternative location is the scripts/ directory */
+
+      if (g_scriptspath != NULL)
+        {
+          snprintf(g_buffer, BUFFER_SIZE, "%s%cMake.defs", g_scriptspath, g_delim);
+          debug("check_configuration: Checking %s\n", g_buffer);
+          if (!verify_file(g_buffer))
+            {
+              fprintf(stderr, "ERROR: No Make.defs file in %s\n", g_configpath);
+              fprintf(stderr, "       No Make.defs file in %s\n", g_scriptspath);
+              enumerate_configs();
+              exit(EXIT_FAILURE);
+            }
+        }
+      else
+        {
+          fprintf(stderr, "ERROR: No Make.defs file in %s\n", g_configpath);
+          enumerate_configs();
+          exit(EXIT_FAILURE);
+        }
     }
 
   g_srcmakedefs = strdup(g_buffer);

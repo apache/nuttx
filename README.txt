@@ -606,10 +606,15 @@ Instantiating "Canned" Configurations
       <config-dir> to the directory where you installed NuttX (TOPDIR):
 
         Copy configs/<board-name>/<config-dir>/Make.def to{TOPDIR}/Make.defs
+        OR
+        Copy configs/<board-name>/scripts/Make.def to{TOPDIR}/Make.defs
 
       Make.defs describes the rules needed by you tool chain to compile
       and link code.  You may need to modify this file to match the
-      specific needs of your toolchain.
+      specific needs of your toolchain.  NOTE that a configuration may
+      have its own unique Make.defs file in its configuration directory or
+      it may use a common Make.defs file for the board in the scripts/
+      directory.  The first takes precedence.
 
         Copy configs/<board-name>/<config-dir>/defconfig to{TOPDIR}/.config
 

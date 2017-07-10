@@ -1,8 +1,7 @@
 ############################################################################
-# configs/same70-xplained/nsh/Make.defs
+# configs/b-l475e-iot01a/scripts/Make.defs
 #
-#   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <gnutt@nuttx.org>
+#   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -37,11 +36,8 @@ include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
 include ${TOPDIR}/arch/arm/src/armv7-m/Toolchain.defs
 
-ifeq ($(CONFIG_ARMV7M_DTCM),y)
-  LDSCRIPT = flash-dtcm.ld
-else
-  LDSCRIPT = flash-sram.ld
-endif
+# TODO add stm32 bootloader support
+LDSCRIPT = flash.ld
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
@@ -63,10 +59,12 @@ CC = $(CROSSDEV)gcc
 CXX = $(CROSSDEV)g++
 CPP = $(CROSSDEV)gcc -E
 LD = $(CROSSDEV)ld
-AR = $(CROSSDEV)ar rcs
-NM = $(CROSSDEV)nm
+AR = $(ARCROSSDEV)ar rcs
+NM = $(ARCROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
+
+# See http://dfu-util.sourceforge.net/
 
 ARCHCCVERSION = ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q'}
 ARCHCCMAJOR = ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
@@ -76,12 +74,12 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION)
+  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
 endif
 
 ARCHCFLAGS = -fno-builtin
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
-ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -fno-strict-aliasing
+ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHDEFINES =
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
@@ -97,17 +95,6 @@ NXFLATLDFLAGS1 = -r -d -warn-common
 NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
 
-# Loadable module definitions
-
-CMODULEFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
-
-LDMODULEFLAGS = -r -e module_initialize
-ifeq ($(WINTOOL),y)
-  LDMODULEFLAGS += -T "${shell cygpath -w $(TOPDIR)/libc/modlib/gnu-elf.ld}"
-else
-  LDMODULEFLAGS += -T $(TOPDIR)/libc/modlib/gnu-elf.ld
-endif
-
 ASMEXT = .S
 OBJEXT = .o
 LIBEXT = .a
@@ -120,9 +107,12 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
 endif
 
-
 HOSTCC = gcc
 HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
 HOSTLDFLAGS =
 
+define DOWNLOAD
+  $(Q) echo "Download firmware $(1).bin"
+  $(Q) st-flash write $(1).bin 0x08000000
+endef
