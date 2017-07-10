@@ -190,3 +190,5 @@ void ipfwd_dropstats(FAR struct forward_s *fwd)
     }
 #endif
 }
+
+#endif /* CONFIG_NET_IPFORWARD && CONFIG_NET_STATISTICS */
