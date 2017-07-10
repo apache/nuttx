@@ -2,7 +2,7 @@
 
 rem tools/configure.bat
 rem
-rem   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+rem   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
 rem   Author: Gregory Nutt <gnutt@nuttx.org>
 rem
 rem Redistribution and use in source and binary forms, with or without
@@ -36,33 +36,38 @@ rem
 rem Parse command line arguments
 
 set debug=
-set fmt=-w
+set fmt=-b
 set posix=
 set help=
 set appdir=
 set config=
+set hostopt=
 
 :ArgLoop
 if "%1"=="" goto :NoConfig
 if "%1"=="-h" goto :ShowUsage
 if "%1"=="-d" goto :SetDebug
-if "%1"=="-w" goto :SetWindows
-if "%1"=="-l" goto :SetPosix
+if "%1"=="-f" goto :SetFormat
+if "%1"=="-b" goto :SetFormat
+if "%1"=="-l" goto :SetHostOption
+if "%1"=="-c" goto :SetHostOption
+if "%1"=="-u" goto :SetHostOption
+if "%1"=="-n" goto :SetHostOption
 if "%1"=="-a" goto :SetAppDir
 
 set config=%1
 goto EndOfLoop
 
 :SetDebug
-set debug=-d
+set debug=%1
 goto :NextArg
 
-:SetWindows
-set fmt=-w
+:SetFormat
+set fmt=%1
 goto :NextArg
 
-:SetWindows
-set fmt=-l
+:SetHostOption
+set hostopt=%1
 goto :NextArg
 
 :SetAppDir
@@ -89,7 +94,7 @@ if errorlevel 1 (
 )
 
 :HaveConfigureExe
-configure.exe %debug% %fmt% %appdir% %config%
+configure.exe %debug% %fmt% %hostopt% %appdir% %config%
 if errorlevel 1 echo configure.exe failed
 goto End
 
@@ -97,8 +102,29 @@ goto End
 echo Missing ^<board-name^>/^<config-name^> argument
 
 :ShowUsage
-echo USAGE: %0  [-d] [-w] [-l] [-h] [-a ^<app-dir^>] ^<board-name^>\^<config-name^>
+echo USAGE: %0 [-d] [-b|f] [-a ^<app-dir^>] ^<board-name^>\^<config-name^>
+echo        %0 [-h]
 echo\nWhere:
+echo  -d:
+echo    Enables debug output
+echo  -b:
+echo    Informs the tool that it should use Windows style paths like C:\\Program Files
+echo    instead of POSIX style paths are used like /usr/local/bin.  Windows
+echo    style paths are used by default.
+echo  -f:
+echo    Informs the tool that it should use POSIX style paths like /usr/local/bin.
+echo    By default, Windows style paths like C:\\Program Files are used.
+echo  -l selects the Linux (l) host environment.  The [-c^|u^|n] options
+echo     select one of the Windows environments.  Default:  Use host setup
+echo     in the defconfig file
+echo  [-c^|u^|n] selects the Windows host and a Windows environment:  Cygwin (c),
+echo     Ubuntu under Windows 10 (u), or Windows native (n).  Default Cygwin
+echo  -a ^<app-dir^>:
+echo    Informs the configuration tool where the application build
+echo    directory.  This is a relative path from the top-level NuttX
+echo    build directory.  But default, this tool will look in the usual
+echo    places to try to locate the application directory:  ../apps or
+echo    ../apps-xx.yy where xx.yy is the NuttX version number.
 echo  ^<board-name^>:
 echo    Identifies the board.  This must correspond to a board directory
 echo    under nuttx/configs/.
@@ -106,22 +132,7 @@ echo  ^<config-name^>:
 echo    Identifies the specific configuratin for the selected ^<board-name^>.
 echo    This must correspond to a sub-directory under the board directory at
 echo    under nuttx/configs/^<board-name^>/.
-echo  ^<-d^>:
-echo    Enables debug output
-echo  ^<-w^>:
-echo    Informs the tool that it should use Windows style paths like C:\\Program Files
-echo    instead of POSIX style paths are used like /usr/local/bin.  Windows
-echo    style paths are used by default.
-echo  ^<-l^>:
-echo    Informs the tool that it should use POSIX style paths like /usr/local/bin.
-echo    By default, Windows style paths like C:\\Program Files are used.
-echo  -a ^<app-dir^>:
-echo    Informs the configuration tool where the application build
-echo    directory.  This is a relative path from the top-level NuttX
-echo    build directory.  But default, this tool will look in the usual
-echo    places to try to locate the application directory:  ../apps or
-echo    ../apps-xx.yy where xx.yy is the NuttX version number.
-echo  ^<-h^>:
+echo  -h:
 echo    Prints this message and exits.
 
 :End

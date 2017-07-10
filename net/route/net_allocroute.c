@@ -152,7 +152,7 @@ void net_initroute(void)
  *   None
  *
  * Returned Value:
- *   On success, a pointer to the newly allocated route table entry is
+ *   On success, a pointer to the newly allocated routing table entry is
  *   returned; NULL is returned on failure.
  *
  ****************************************************************************/

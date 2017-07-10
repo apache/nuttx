@@ -40,8 +40,9 @@
 #include <nuttx/config.h>
 
 #include <string.h>
-#include <debug.h>
+#include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
@@ -262,6 +263,36 @@ static int ipv6_packet_conversion(FAR struct net_driver_s *dev,
                */
 
               sixlowpan_udp_send(dev, fwddev, ipv6);
+
+              /* The packet was forwarded */
+
+              dev->d_len = 0;
+              return PACKET_FORWARDED;
+            }
+        }
+      else
+#endif
+
+#ifdef CONFIG_NET_ICMPv6
+      if (ipv6->proto == IP_PROTO_ICMP6)
+        {
+          /* Decrement the TTL in the IPv6 header.  If it decrements to
+           * zero, then drop the packet.
+           */
+
+          ret = ipv6_decr_ttl(ipv6);
+          if (ret < 1)
+            {
+              nwarn("WARNING: Hop limit exceeded... Dropping!\n");
+              ret = -EMULTIHOP;
+            }
+          else
+            {
+              /* Let 6LoWPAN convert IPv6 ICMPv6 output into IEEE802.15.4
+               * frames.
+               */
+
+              sixlowpan_icmpv6_send(dev, fwddev, ipv6);
 
               /* The packet was forwarded */
 

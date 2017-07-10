@@ -41,6 +41,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/netdev.h>
 
 #include "ipforward/ipforward.h"

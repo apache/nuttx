@@ -41,6 +41,7 @@
 #if defined(CONFIG_NET)
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include <debug.h>
 #include <assert.h>
@@ -160,6 +161,45 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
       g_cbfreelist = cb;
       net_unlock();
     }
+}
+
+/****************************************************************************
+ * Name: devif_event_trigger
+ *
+ * Description:
+ *   Return true if the current set of events should trigger a callback to
+ *   occur.
+ *
+ * Input paramters:
+ *   events   - The set of events that has occurred.
+ *   triggers - The set of events that will trigger a callback.
+ *
+ ****************************************************************************/
+
+static bool devif_event_trigger(uint16_t events, uint16_t triggers)
+{
+  /* The events are divided into a set of individual bits that may be ORed
+   * together PLUS a field that encodes a single poll event.
+   *
+   * First check if any of the individual event bits will trigger the
+   * callback.
+   */
+
+  if ((events & triggers & ~DEVPOLL_MASK) != 0)
+    {
+      return true;
+    }
+
+  /* No... check the encoded device event. */
+
+  if ((events & DEVPOLL_MASK) == (triggers & DEVPOLL_MASK))
+    {
+      return true;
+    }
+
+  /* No.. this event set will not generate the callback */
+
+  return false;
 }
 
 /****************************************************************************
@@ -335,7 +375,7 @@ void devif_dev_callback_free(FAR struct net_driver_s *dev,
    * was allocated and the time when the callback was freed.
    */
 
-  if (dev && netdev_verify(dev))
+  if (dev != NULL && netdev_verify(dev))
     {
       /* The device reference is valid.. the use the list pointer in the
        * device structure as well.
@@ -400,7 +440,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, void *pvconn,
 
       /* Check if this callback handles any of the events in the flag set */
 
-      if (list->event && (flags & list->flags) != 0)
+      if (list->event != NULL && devif_event_trigger(flags, list->flags))
         {
           /* Yes.. perform the callback.  Actions perform by the callback
            * may delete the current list entry or add a new list entry to
@@ -464,7 +504,7 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, void *pvconn,
 
       /* Check if this callback handles any of the events in the flag set */
 
-      if (cb->event && (flags & cb->flags) != 0)
+      if (cb->event != NULL && devif_event_trigger(flags, cb->flags))
         {
           /* Yes.. perform the callback.  Actions perform by the callback
            * may delete the current list entry or add a new list entry to

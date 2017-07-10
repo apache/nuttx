@@ -148,6 +148,41 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
                         FAR struct ipv6_hdr_s *ipv6);
 
 /****************************************************************************
+ * Name: sixlowpan_icmpv6_send
+ *
+ * Description:
+ *   All outgoing ICMPv6 messages come through one of two mechanisms:
+ *
+ *     1. The output from internal ICMPv6 message passing.  These outgoing
+ *        messages will use device polling.
+ *     2. ICMPv6 output resulting from TX or timer polling.
+ *
+ *   Both cases are handled here.
+ *
+ * Parameters:
+ *   dev    - The network device containing the packet to be sent.
+ *   fwddev - The network device used to send the data.  This will be the
+ *            same device except for the IP forwarding case where packets
+ *            are sent across devices.
+ *   ipv6   - A pointer to the IPv6 header in dev->d_buf which lies AFTER
+ *            the L1 header.  NOTE: dev->d_len must have been decremented
+ *            by the size of any preceding MAC header.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ICMPv6
+void sixlowpan_icmpv6_send(FAR struct net_driver_s *dev,
+                           FAR struct net_driver_s *fwddev,
+                           FAR struct ipv6_hdr_s *ipv6);
+#endif
+
+/****************************************************************************
  * Name: psock_6lowpan_udp_send
  *
  * Description:

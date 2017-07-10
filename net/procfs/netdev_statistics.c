@@ -290,7 +290,13 @@ static int netprocfs_inet4addresses(FAR struct netprocfs_file_s *netfile)
 
   addr.s_addr = dev->d_netmask;
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                  "Mask:%s\n\n", inet_ntoa(addr));
+#ifdef CONFIG_NET_IPv6
+                  "Mask:%s\n",    /* IPv6 addresses will follow */
+#else
+                  "Mask:%s\n\n",  /* Double space at end of device description */
+#endif
+                  inet_ntoa(addr));
+
   return len;
 }
 #endif
@@ -319,7 +325,7 @@ static int netprocfs_inet6address(FAR struct netprocfs_file_s *netfile)
   if (inet_ntop(AF_INET6, dev->d_ipv6addr, addrstr, INET6_ADDRSTRLEN))
     {
       len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                      "\tinet6 addr:%s/%d\n", addrstr, preflen);
+                      "\tinet6 addr: %s/%d\n", addrstr, preflen);
     }
 
   return len;
@@ -351,7 +357,7 @@ static int netprocfs_inet6draddress(FAR struct netprocfs_file_s *netfile)
   if (inet_ntop(AF_INET6, dev->d_ipv6draddr, addrstr, INET6_ADDRSTRLEN))
     {
       len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                      "\tinet6 DRaddr:%s/%d\n\n", addrstr, preflen);
+                      "\tinet6 DRaddr: %s/%d\n\n", addrstr, preflen);
     }
 
   return len;

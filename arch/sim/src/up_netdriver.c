@@ -310,7 +310,7 @@ void netdriver_loop(void)
           else
 #endif
            {
-             nwarn("WARNING: Unsupported Ethernet type %u\n", eth->type)
+             nwarn("WARNING: Unsupported Ethernet type %u\n", eth->type);
            }
         }
     }

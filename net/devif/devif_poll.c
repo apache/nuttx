@@ -56,6 +56,7 @@
 #include "icmp/icmp.h"
 #include "icmpv6/icmpv6.h"
 #include "igmp/igmp.h"
+#include "ipforward/ipforward.h"
 #include "sixlowpan/sixlowpan.h"
 
 /****************************************************************************
@@ -106,6 +107,12 @@ systime_t g_polltime;
  *   IEEE802.15.4 MAC network driver. Under those conditions, 6LoWPAN
  *   logic will be called to create the IEEE80215.4 frames.
  *
+ *   All outgoing ICMPv6 messages come through one of two mechanisms:
+ *
+ *   1. The output from internal ICMPv6 message passing.  These outgoing
+ *      messages will use device polling and will be handled here.
+ *   2. ICMPv6 output resulting from TX or timer polling.
+ *
  * Assumptions:
  *   The network is locked.
  *
@@ -123,17 +130,25 @@ static void devif_packet_conversion(FAR struct net_driver_s *dev,
   if (dev->d_len > 0)
 #endif
     {
+      FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)dev->d_buf;
+
+#ifdef CONFIG_NET_IPv4
+      if ((ipv6->vtc & IP_VERSION_MASK) != IPv6_VERSION)
+        {
+           nerr("ERROR: IPv6 version error: %02x...  Packet dropped\n",
+                ipv6->vtc);
+        }
+      else
+#endif
 #ifdef CONFIG_NET_TCP
       if (pkttype == DEVIF_TCP)
         {
-          FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)dev->d_buf;
-
           /* This packet came from a response to TCP polling and is directed
            * to an IEEE802.15.4 device using 6LoWPAN.  Verify that the outgoing
            * packet is IPv6 with TCP protocol.
            */
 
-          if (ipv6->vtc ==  IPv6_VERSION && ipv6->proto == IP_PROTO_TCP)
+          if (ipv6->proto == IP_PROTO_TCP)
             {
               /* Let 6LoWPAN convert IPv6 TCP output into IEEE802.15.4 frames. */
 
@@ -141,17 +156,40 @@ static void devif_packet_conversion(FAR struct net_driver_s *dev,
             }
           else
             {
-              nerr("ERROR: IPv6 version or protocol error.  Packet dropped\n");
-              nerr("       IP version: %02x proocol: %u\n",
-                   ipv6->vtc, ipv6->proto);
+              nerr("ERROR: TCP protocol error: %u...  Packet dropped\n",
+                   ipv6->proto);
+            }
+        }
+      else
+#endif
+#ifdef CONFIG_NET_ICMPv6
+      if (pkttype == DEVIF_ICMP6)
+        {
+          /* This packet came from a response to TCP polling and is directed
+           * to an IEEE802.15.4 device using 6LoWPAN.  Verify that the outgoing
+           * packet is IPv6 with TCP protocol.
+           */
+
+          if (ipv6->proto == IP_PROTO_ICMP6)
+            {
+              /* Let 6LoWPAN convert IPv6 ICMPv6 output into IEEE802.15.4 frames. */
+
+              sixlowpan_icmpv6_send(dev, dev, ipv6);
+            }
+          else
+            {
+              nerr("ERROR: ICMPv6 protocol error: %u...  Packet dropped\n",
+                   ipv6->proto);
             }
         }
       else
 #endif
         {
-          nerr("ERROR: Non-TCP packet dropped.  Packet type: %u\n", pkttype);
+          nerr("ERROR: Unhandled packet dropped.  pkttype=%u protocol=%u\n",
+                pkttype, ipv6->proto);
         }
 
+      UNUSED(ipv6);
       dev->d_len = 0;
     }
 }
@@ -166,8 +204,8 @@ static void devif_packet_conversion(FAR struct net_driver_s *dev,
  *   Poll all packet connections for available packets to send.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called
- *   from the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver with the network
+ *   locked.
  *
  ****************************************************************************/
 
@@ -259,13 +297,18 @@ static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IPFORWARD) || defined(CONFIG_NETDEV_MULTINIC)
+#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NETDEV_MULTINIC)
 static inline int devif_poll_forward(FAR struct net_driver_s *dev,
                                      devif_poll_callback_t callback)
 {
-  /* Perform the ICMPv6 poll */
+  /* Perform the forwarding poll */
 
-  devif_dev_event(dev, NULL, IPFWD_POLL);
+  ipfwd_poll(dev);
+
+  /* NOTE: that 6LoWPAN packet conversions are handled differently for
+   * forwarded packets.  That is because we don't know what the packet
+   * type is at this point; not within peeking into the device's d_buf.
+   */
 
   /* Call back into the driver */
 
@@ -280,8 +323,8 @@ static inline int devif_poll_forward(FAR struct net_driver_s *dev,
  *   Poll all IGMP connections for available packets to send.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called
- *   from the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver with the network
+ *   locked.
  *
  ****************************************************************************/
 
@@ -310,8 +353,8 @@ static inline int devif_poll_igmp(FAR struct net_driver_s *dev,
  *   Poll all UDP connections for available packets to send.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called
- *   from the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver with the network
+ *   locked.
  *
  ****************************************************************************/
 
@@ -350,8 +393,8 @@ static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
  *   Poll all UDP connections for available packets to send.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called
- *   from the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver with the network
+ *   locked.
  *
  ****************************************************************************/
 
@@ -393,8 +436,8 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
  *   TCP connection.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called
- *   from the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver with the network
+ *   locked.
  *
  ****************************************************************************/
 
@@ -453,8 +496,8 @@ static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
  *   out the packet.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called
- *   from the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver with the network
+ *   locked.
  *
  ****************************************************************************/
 
@@ -530,7 +573,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 
   if (!bstop)
 #endif
-#if defined(CONFIG_NET_IPFORWARD) || defined(CONFIG_NETDEV_MULTINIC)
+#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NETDEV_MULTINIC)
     {
       /* Traverse all of the tasks waiting to forward a packet to this device. */
 
@@ -565,8 +608,8 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
  *   out the packet.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called from
- *   the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver with the network
+ *   locked.
  *
  ****************************************************************************/
 

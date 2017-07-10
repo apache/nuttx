@@ -37,8 +37,6 @@
 
 ifeq ($(CONFIG_NET_IPFORWARD),y)
 
-NET_CSRCS += ipfwd_forward.c
-
 ifeq ($(CONFIG_NET_IPv4),y)
 NET_CSRCS += ipv4_forward.c
 endif
@@ -48,7 +46,7 @@ NET_CSRCS += ipv6_forward.c
 endif
 
 ifeq ($(CONFIG_NETDEV_MULTINIC),y)
-NET_CSRCS += ipfwd_alloc.c
+NET_CSRCS += ipfwd_alloc.c ipfwd_forward.c ipfwd_poll.c
 endif
 
 ifeq ($(CONFIG_NET_STATISTICS),y)
