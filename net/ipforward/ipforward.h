@@ -281,6 +281,14 @@ void ipfwd_dropstats(FAR struct forward_s *fwd);
 
 #endif /* CONFIG_NETDEV_MULTINIC */
 
+/* Duplicates some forward references that are only available when
+ * CONFIG_NETDEV_MULTINIC is enabled.
+ */
+
+struct net_driver_s; /* Forward reference */
+struct ipv4_hdr_s;   /* Forward reference */
+struct ipv6_hdr_s;   /* Forward reference */
+
 /****************************************************************************
  * Name: ipv4_forward
  *
