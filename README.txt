@@ -927,9 +927,13 @@ Making defconfig Files
 
        make olddefconfig
 
-     NOTE: Only compressed defconfig files are retained in the NuttX repository.
+     NOTE 1:  Only compressed defconfig files are retained in the NuttX repository.
      All patches and PRs that attempt to add or modify a defconfig file MUST
      use the compressed defconfig format as created by 'make savdefconfig.'
+
+     NOTE 2:  When 'make savedefconfig' runs it will try several things some of
+     which are expected to fail.  In these cases you will see an error message
+     from make followed by "(ignored)."  You should also ignore these messages
 
      CAUTION:  This size reduction was accomplished by removing all setting
      from the .config file that were at the default value.  'make olddefconfig'
