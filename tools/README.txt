@@ -659,6 +659,14 @@ sethost.sh
 refresh.sh
 ----------
 
+  [NOTE: This script with --silent is really obsolete.  refresh with the
+   silent option really adds default values.  However, as of 217-07-09,
+   defconfig files are retained in a compressed format, i.e., with default
+   vaues removed.  So the --silent option will accomplish nothing.
+   Without --silent, you will have the opportunity over override the default
+   value from the command line and, in that case, the script may still have
+   some minimal value.]
+
   This is a bash script that automatics refreshing of board default
   configuration (defconfig) files.  It does not do anything special
   that you cannot do manually, but is useful for me when I have to
