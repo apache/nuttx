@@ -581,9 +581,14 @@ static inline int mac802154_takesem(sem_t *sem, bool allowinterrupt)
   return OK;
 }
 
+#ifdef CONFIG_MAC802154_LOCK_VERBOSE
 #define mac802154_unlock(dev) \
   mac802154_givesem(&dev->exclsem); \
   wlinfo("MAC unlocked\n");
+#else
+#define mac802154_unlock(dev) \
+  mac802154_givesem(&dev->exclsem);
+#endif
 
 #define mac802154_lock(dev, allowinterrupt) \
   mac802154_lockpriv(dev, allowinterrupt, __FUNCTION__)
@@ -593,15 +598,19 @@ static inline int mac802154_lockpriv(FAR struct ieee802154_privmac_s *dev,
 {
   int ret;
 
+#ifdef CONFIG_MAC802154_LOCK_VERBOSE
   wlinfo("Locking MAC: %s\n", funcname);
+#endif
   ret = mac802154_takesem(&dev->exclsem, allowinterrupt);
   if (ret < 0)
     {
-      wlinfo("Failed to lock MAC\n");
+      wlwarn("Failed to lock MAC\n");
     }
   else
     {
+#ifdef CONFIG_MAC802154_LOCK_VERBOSE
       wlinfo("MAC locked\n");
+#endif
     }
 
   return ret;

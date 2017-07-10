@@ -2381,7 +2381,10 @@ static void mrf24j40_irqworker(FAR void *arg)
 
   if ((intstat & MRF24J40_INTSTAT_WAKEIF))
     {
+#ifdef CONFIG_MAC802154_SFEVENT_VERBOSE
       wlinfo("Wake Interrupt\n");
+#endif
+
       /* This is right before the beacon, we set the bsn here, since the MAC
        * uses the SLPIF (end of active portion of superframe). to make any
        * changes to the beacon.  This assumes that any changes to the beacon

@@ -1527,7 +1527,9 @@ static void mac802154_sfevent(FAR const struct ieee802154_radiocb_s *radiocb,
     {
       case IEEE802154_SFEVENT_ENDOFACTIVE:
         {
+#ifdef CONFIG_MAC802154_SFEVENT_VERBOSE
           wlinfo("End of superframe\n");
+#endif
 
           /* Check if there is any reason to update the beacon */
 
