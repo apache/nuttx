@@ -851,6 +851,9 @@ int smartfs_createentry(FAR struct smartfs_mountpt_s *fs,
   uint16_t  entrysize;
   struct    smartfs_entry_header_s *entry;
   struct    smartfs_chain_header_s *chainheader;
+  int       update_chain = 0;
+  struct    smart_read_write_s     update_readwrite;
+  struct    smartfs_chain_header_s update_header;
 
   /* Start at the 1st sector in the parent directory */
 
@@ -943,19 +946,15 @@ int smartfs_createentry(FAR struct smartfs_mountpt_s *fs,
 
           nextsector = (uint16_t) ret;
 
-          /* Chain the next sector into this sector sector */
+          /* Chain the next sector into this sector. */
 
-          *((FAR uint16_t *)chainheader->nextsector) = nextsector;
-          readwrite.offset = offsetof(struct smartfs_chain_header_s,
-              nextsector);
-          readwrite.count = sizeof(uint16_t);
-          readwrite.buffer = chainheader->nextsector;
-          ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
-          if (ret < 0)
-            {
-              ferr("ERROR: Error chaining sector %d\n", nextsector);
-              goto errout;
-            }
+          *((uint16_t *)update_header.nextsector) = nextsector;
+          update_readwrite.logsector = psector;
+          update_readwrite.offset = offsetof(struct smartfs_chain_header_s,
+                                             nextsector);
+          update_readwrite.count = sizeof(uint16_t);
+          update_readwrite.buffer = update_header.nextsector;
+          update_chain = 1;
         }
 
       /* Now update to the next sector */
@@ -1065,6 +1064,19 @@ int smartfs_createentry(FAR struct smartfs_mountpt_s *fs,
   if (ret < 0)
     {
       goto errout;
+    }
+
+  if (update_chain)
+    {
+      /* Update chain header after the next sector was written */
+
+      ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &update_readwrite);
+      if (ret < 0)
+        {
+          ferr("ERROR: Error chaining sector %d\n",
+               update_readwrite.logsector);
+          goto errout;
+        }
     }
 
   /* Now fill in the entry */
