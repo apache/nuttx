@@ -84,7 +84,7 @@ struct ieee802154_txdesc_s
                                           * control how tx done is handled */
   bool framepending;                     /* Did the ACK have the frame pending bit
                                           * bit set */
-  uint32_t purge_time;                   /* Time to purge transaction */
+  uint32_t purgetime;                   /* Time to purge transaction */
 
   /* TODO: Add slotting information for GTS transactions */
 };

@@ -193,9 +193,12 @@ static void stm32_enable_irq(FAR const struct mrf24j40_lower_s *lower,
 
   DEBUGASSERT(priv != NULL && (priv->handler != NULL || !state));
 
+#ifdef CONFIG_CLICKER2_STM32_MRF24J40LH_VERBOSE
+  wlinfo("state:%d\n", (int)state);
+#endif
+
   /* Attach and enable, or detach and disable */
 
-  wlinfo("state:%d\n", (int)state);
   if (state)
     {
       (void)stm32_gpiosetevent(priv->intcfg, true, true, true,
