@@ -73,13 +73,8 @@
 #else
 #  define STM32_TIM2_RES 32
 #endif
-#if defined(CONFIG_STM32_STM32L20XX) || defined(CONFIG_STM32_STM32F4XXX)
-#  define STM32_TIM3_RES 32
-#  define STM32_TIM4_RES 32
-#else
-#  define STM32_TIM3_RES 16
-#  define STM32_TIM4_RES 16
-#endif
+#define STM32_TIM3_RES   16
+#define STM32_TIM4_RES   16
 #if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
 #  define STM32_TIM5_RES 16
 #else
