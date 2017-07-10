@@ -504,11 +504,13 @@ menuconfig: do_menuconfig clean_context
 do_savedefconfig: dirlinks apps_preconfig
 
 savedefconfig: do_savedefconfig
-	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf --savedefconfig defconfig Kconfig
-	$(Q) sed -i -e "/CONFIG_APPS_DIR=/d" defconfig
-	$(Q) grep "CONFIG_ARCH=" .config >> defconfig
-	$(Q) grep "^CONFIG_ARCH_CHIP_" .config >> defconfig
-	$(Q) grep "CONFIG_ARCH_BOARD=" .config >> defconfig
+	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf --savedefconfig defconfig.tmp Kconfig
+	$(Q) sed -i -e "/CONFIG_APPS_DIR=/d" defconfig.tmp
+	$(Q) grep "CONFIG_ARCH=" .config >> defconfig.tmp
+	$(Q) grep "^CONFIG_ARCH_CHIP_" .config >> defconfig.tmp
+	$(Q) grep "CONFIG_ARCH_BOARD=" .config >> defconfig.tmp
+	$(Q) cat defconfig.tmp | sort | uniq > defconfig
+	$(Q) rm -f defconfig.tmp
 
 # export
 #
