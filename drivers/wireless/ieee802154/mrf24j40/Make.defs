@@ -37,7 +37,8 @@ ifeq ($(CONFIG_IEEE802154_MRF24J40),y)
 
 # Include MRF24J40 files into the build
 
-CSRCS += mrf24j40.c
+CSRCS += mrf24j40_getset.c mrf24j40_interrupt.c mrf24j40_radif.c
+CSRCS += mrf24j40_regops.c mrf24j40.c
 
 # Include MRF24J40 build support
 
