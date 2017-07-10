@@ -1,7 +1,7 @@
 #!/bin/bash
 # refresh.sh
 #
-#   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,7 @@ ADVICE="Try '$0 --help' for more information"
 
 unset CONFIG
 silent=n
+defaults=n
 
 while [ ! -z "$1" ]; do
     case $1 in
@@ -45,6 +46,10 @@ while [ ! -z "$1" ]; do
         ;;
     --silent )
         silent=y
+        defaults=y
+        ;;
+    --defaults )
+        defaults=y
         ;;
     --help )
         echo "$0 is a tool for refreshing board configurations"
@@ -56,6 +61,8 @@ while [ ! -z "$1" ]; do
         echo "     Enable script debug"
         echo "  --silent"
         echo "     Update board configuration without interaction"
+        echo "  --defaults"
+        echo "     Do not prompt for new default selections; accept all recommended default values"
         echo "  --help"
         echo "     Show this help message and exit"
         echo "  <board>"
@@ -180,23 +187,27 @@ cp -a $MAKEDEFS Make.defs || \
 
 # Then run oldconfig or oldefconfig
 
-if [ "X${silent}" == "Xy" ]; then
+if [ "X${defaults}" == "Xy" ]; then
   make olddefconfig
 else
   make oldconfig
 fi
 
+# Run savedefconfig to create the new defconfig file
+
+make savedefconfig
+
 # Show differences
 
-sed -i -e "s/^CONFIG_APPS_DIR/# CONFIG_APPS_DIR/g" .config
-$CMPCONFIG $DEFCONFIG .config
+# sed -i -e "s/^CONFIG_APPS_DIR/# CONFIG_APPS_DIR/g" defconfig
+$CMPCONFIG $DEFCONFIG defconfig
 
 # Save the refreshed configuration
 
 if [ "X${silent}" == "Xy" ]; then
   echo "Saving the new configuration file"
-  mv .config $DEFCONFIG || \
-      { echo "ERROR: Failed to move .config to $DEFCONFIG"; exit 1; }
+  mv defconfig $DEFCONFIG || \
+      { echo "ERROR: Failed to move defconfig to $DEFCONFIG"; exit 1; }
   chmod 644 $DEFCONFIG
 else
   read -p "Save the new configuration (y/n)?" -n 1 -r
@@ -204,8 +215,8 @@ else
   if [[ $REPLY =~ ^[Yy]$ ]]
   then
     echo "Saving the new configuration file"
-    mv .config $DEFCONFIG || \
-        { echo "ERROR: Failed to move .config to $DEFCONFIG"; exit 1; }
+    mv defconfig $DEFCONFIG || \
+        { echo "ERROR: Failed to move defconfig to $DEFCONFIG"; exit 1; }
     chmod 644 $DEFCONFIG
   fi
 fi

@@ -39,6 +39,7 @@
 
 #include <sys/stat.h>
 
+#include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,6 +62,14 @@
 #ifdef WIN32
 #  define strndup(x, y) strdup(x)
 #endif
+
+#define HOST_NOCHANGE  0
+#define HOST_LINUX     1
+#define HOST_WINDOWS   2
+
+#define WINDOWS_NATIVE 1
+#define WINDOWS_CYGWIN 2
+#define WINDOWS_UBUNTU 3
 
 /****************************************************************************
  * Private Data
@@ -91,6 +100,9 @@ static char       *g_srcmakedefs   = NULL;  /* Source Make.defs file */
 static bool        g_winnative     = false; /* True: Windows native configuration */
 static bool        g_needapppath   = true;  /* Need to add app path to the .config file */
 
+static uint8_t     g_host          = HOST_NOCHANGE;
+static uint8_t     g_windows       = WINDOWS_CYGWIN;
+
 static char        g_buffer[BUFFER_SIZE];   /* Scratch buffer for forming full paths */
 
 static struct variable_s *g_configvars = NULL;
@@ -113,18 +125,12 @@ static const char *g_optfiles[] =
 
 static void show_usage(const char *progname, int exitcode)
 {
-  fprintf(stderr, "\nUSAGE: %s  [-d] [-w] [-l] [-h] [-a <app-dir>] <board-name>[%c<config-name>]\n", progname, g_delim);
+  fprintf(stderr, "\nUSAGE: %s  [-d] [-b] [-f] [-l|c|u|n] [-a <app-dir>] <board-name>[%c<config-name>]\n", progname, g_delim);
+  fprintf(stderr, "\nUSAGE: %s  [-h]\n\n", progname);
   fprintf(stderr, "\nWhere:\n");
-  fprintf(stderr, "  <board-name>:\n");
-  fprintf(stderr, "    Identifies the board.  This must correspond to a board directory\n");
-  fprintf(stderr, "    under nuttx%cconfigs%c.\n", g_delim, g_delim);
-  fprintf(stderr, "  <config-name>:\n");
-  fprintf(stderr, "    Identifies the specific configuration for the selected <board-name>.\n");
-  fprintf(stderr, "    This must correspond to a sub-directory under the board directory at\n");
-  fprintf(stderr, "    under nuttx%cconfigs%c<board-name>%c.\n", g_delim, g_delim, g_delim);
-  fprintf(stderr, "  <-d>:\n");
+  fprintf(stderr, "  -d:\n");
   fprintf(stderr, "    Enables debug output\n");
-  fprintf(stderr, "  <-w>:\n");
+  fprintf(stderr, "  -b:\n");
 #ifdef CONFIG_WINDOWS_NATIVE
   fprintf(stderr, "    Informs the tool that it should use Windows style paths like C:\\Program Files\n");
   fprintf(stderr, "    instead of POSIX style paths are used like /usr/local/bin.  Windows\n");
@@ -133,7 +139,7 @@ static void show_usage(const char *progname, int exitcode)
   fprintf(stderr, "    Informs the tool that it should use Windows style paths like C:\\Program Files.\n");
   fprintf(stderr, "    By default, POSIX style paths like /usr/local/bin are used.\n");
 #endif
-  fprintf(stderr, "  <-l>:\n");
+  fprintf(stderr, "  -f:\n");
 #ifdef CONFIG_WINDOWS_NATIVE
   fprintf(stderr, "    Informs the tool that it should use POSIX style paths like /usr/local/bin.\n");
   fprintf(stderr, "    By default, Windows style paths like C:\\Program Files are used.\n");
@@ -142,13 +148,27 @@ static void show_usage(const char *progname, int exitcode)
   fprintf(stderr, "    instead of Windows style paths like C:\\Program Files are used.  POSIX\n");
   fprintf(stderr, "    style paths are used by default.\n");
 #endif
+  fprintf(stderr, "  -l:\n");
+  fprintf(stderr, "    Selects the Linux (l) host environment.  The [-c|u|n] options\n");
+  fprintf(stderr, "    select one of the Windows environments.  Default:  Use host setup\n");
+  fprintf(stderr, "    in the defconfig file\n");
+  fprintf(stderr, "  [-c|u|n]\n");
+  fprintf(stderr, "    Selects the Windows host and a Windows host environment:  Cygwin (c),\n");
+  fprintf(stderr, "    Ubuntu under Windows 10 (u), or Windows native (n).  Default Cygwin\n");
   fprintf(stderr, "  -a <app-dir>:\n");
   fprintf(stderr, "    Informs the configuration tool where the application build\n");
   fprintf(stderr, "    directory.  This is a relative path from the top-level NuttX\n");
   fprintf(stderr, "    build directory.  But default, this tool will look in the usual\n");
   fprintf(stderr, "    places to try to locate the application directory:  ..%capps or\n", g_delim);
   fprintf(stderr, "    ..%capps-xx.yy where xx.yy is the NuttX version number.\n", g_delim);
-  fprintf(stderr, "  <-h>:\n");
+  fprintf(stderr, "  <board-name>:\n");
+  fprintf(stderr, "    Identifies the board.  This must correspond to a board directory\n");
+  fprintf(stderr, "    under nuttx%cconfigs%c.\n", g_delim, g_delim);
+  fprintf(stderr, "  <config-name>:\n");
+  fprintf(stderr, "    Identifies the specific configuration for the selected <board-name>.\n");
+  fprintf(stderr, "    This must correspond to a sub-directory under the board directory at\n");
+  fprintf(stderr, "    under nuttx%cconfigs%c<board-name>%c.\n", g_delim, g_delim, g_delim);
+  fprintf(stderr, "  -h:\n");
   fprintf(stderr, "    Prints this message and exits.\n");
   exit(exitcode);
 }
@@ -174,7 +194,7 @@ static void parse_args(int argc, char **argv)
 
   g_debug = false;
 
-  while ((ch = getopt(argc, argv, ":a:dwlh")) > 0)
+  while ((ch = getopt(argc, argv, ":a:bcdfhlnu")) > 0)
     {
       switch (ch)
         {
@@ -182,22 +202,41 @@ static void parse_args(int argc, char **argv)
             g_appdir = optarg;
             break;
 
-          case 'd' :
-            g_debug = true;
-            break;
-
-          case 'w' :
+          case 'b' :
              g_delim = '\\';
              g_winpaths = false;
              break;
 
-          case 'l' :
+          case 'c' :
+            g_host    = HOST_WINDOWS;
+            g_windows = WINDOWS_CYGWIN;
+            break;
+
+          case 'd' :
+            g_debug = true;
+            break;
+
+          case 'f' :
              g_delim = '/';
              g_winpaths = true;
              break;
 
           case 'h' :
             show_usage(argv[0], EXIT_SUCCESS);
+
+          case 'l' :
+            g_host = HOST_LINUX;
+            break;
+
+          case 'n' :
+            g_host    = HOST_WINDOWS;
+            g_windows = WINDOWS_NATIVE;
+            break;
+
+          case 'u' :
+            g_host    = HOST_WINDOWS;
+            g_windows = WINDOWS_UBUNTU;
+            break;
 
           case '?' :
             fprintf(stderr, "ERROR: Unrecognized option: %c\n", optopt);
@@ -801,6 +840,123 @@ static void copy_optional(void)
     }
 }
 
+static void enable_feature(const char *destconfig, const char *varname)
+{
+  int ret;
+
+  snprintf(g_buffer, BUFFER_SIZE,
+           "kconfig-tweak --file %s --disable %s",
+           destconfig, varname);
+
+  ret = system(g_buffer);
+
+#ifdef WEXITSTATUS
+  if (ret < 0 || WEXITSTATUS(ret) != 0)
+#else
+  if (ret < 0)
+#endif
+    {
+      fprintf(stderr, "ERROR: Failed to enable %s\n", varname);
+      fprintf(stderr, "       command: %s\n", g_buffer);
+      exit(EXIT_FAILURE);
+    }
+}
+
+static void disable_feature(const char *destconfig, const char *varname)
+{
+  int ret;
+
+  snprintf(g_buffer, BUFFER_SIZE,
+           "kconfig-tweak --file %s --disable %s",
+           destconfig, varname);
+
+  ret = system(g_buffer);
+
+#ifdef WEXITSTATUS
+  if (ret < 0 || WEXITSTATUS(ret) != 0)
+#else
+  if (ret < 0)
+#endif
+    {
+      fprintf(stderr, "ERROR: Failed to disable %s\n", varname);
+      fprintf(stderr, "       command: %s\n", g_buffer);
+      exit(EXIT_FAILURE);
+    }
+}
+
+/* Select the host build development environment */
+
+static void set_host(const char *destconfig)
+{
+  if (g_host != HOST_NOCHANGE)
+    {
+      if (g_host == HOST_LINUX)
+        {
+          printf("  Select the Linux host\n");
+
+          enable_feature(destconfig, "CONFIG_HOST_LINUX");
+          disable_feature(destconfig, "CONFIG_HOST_WINDOWS");
+
+          disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
+          disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
+          disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
+          disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
+          disable_feature(destconfig, "CONFIG_WINDOWS_OTHER");
+
+          enable_feature(destconfig, "CONFIG_SIM_X8664_SYSTEMV");
+          disable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
+          disable_feature(destconfig, "CONFIG_SIM_M32");
+        }
+      else if (g_host == HOST_WINDOWS)
+        {
+          enable_feature(destconfig, "CONFIG_HOST_WINDOWS");
+          disable_feature(destconfig, "CONFIG_HOST_LINUX");
+
+          disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
+          disable_feature(destconfig, "CONFIG_WINDOWS_OTHER");
+
+          enable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
+          disable_feature(destconfig, "CONFIG_SIM_X8664_SYSTEMV");
+
+          disable_feature(destconfig, "CONFIG_SIM_M32");
+
+          switch (g_windows)
+            {
+              case WINDOWS_CYGWIN:
+                printf("  Select Windows/Cygwin host\n");
+                enable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
+                disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
+                disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
+                break;
+
+              case WINDOWS_UBUNTU:
+                printf("  Select Ubuntu for Windows 10 host\n");
+                disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
+                enable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
+                disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
+                break;
+
+              case WINDOWS_NATIVE:
+                printf("  Select Windows native host\n");
+                disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
+                disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
+                enable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
+                break;
+
+              default:
+               fprintf(stderr, "ERROR: Unrecognized  windows configuration: %d\n",
+                       g_windows);
+               exit(EXIT_FAILURE);
+            }
+        }
+      else
+        {
+          fprintf(stderr, "ERROR: Unrecognized  host configuration: %d\n", g_host);
+          exit(EXIT_FAILURE);
+        }
+    }
+}
+
 static void configure(void)
 {
   char *destconfig;
@@ -821,6 +977,10 @@ static void configure(void)
   /* Copy optional files */
 
   copy_optional();
+
+  /* Select the host build development environment */
+
+  set_host(destconfig);
 
   /* If we did not use the CONFIG_APPS_DIR that was in the defconfig config file,
    * then append the correct application information to the tail of the .config
@@ -873,6 +1033,29 @@ static void configure(void)
   free(destconfig);
 }
 
+static void refresh(void)
+{
+  int ret;
+
+  ret = chdir(g_topdir);
+  if (ret < 0)
+    {
+      fprintf(stderr, "ERROR: Failed to ch to %s\n", g_topdir);
+      exit(EXIT_FAILURE);
+    }
+
+  ret = system("make olddefconfig");
+#ifdef WEXITSTATUS
+  if (ret < 0 || WEXITSTATUS(ret) != 0)
+#else
+  if (ret < 0)
+#endif
+    {
+      fprintf(stderr, "ERROR: Failed to refresh configuations\n");
+      fprintf(stderr, "       kconfig-conf --olddefconfig Kconfig\n");
+    }
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -900,5 +1083,8 @@ int main(int argc, char **argv, char **envp)
 
   debug("main: Configuring\n");
   configure();
+
+  debug("main: Refresh configuration\n");
+  refresh();
   return EXIT_SUCCESS;
 }

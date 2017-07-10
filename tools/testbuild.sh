@@ -221,7 +221,7 @@ function configure {
     if [ "X$toolchain" != "X" ]; then
         setting=`grep TOOLCHAIN $nuttx/.config | grep -v CONFIG_ARCH_TOOLCHAIN_GNU=y | grep =y`
         varname=`echo $setting | cut -d'=' -f1`
-        if [ ! -z "varname" ]; then
+        if [ ! -z "$varname" ]; then
             echo "  Disabling $varname"
             kconfig-tweak --file $nuttx/.config --disable $varname
         fi

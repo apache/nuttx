@@ -40,8 +40,9 @@
 #include <nuttx/config.h>
 
 #include <string.h>
-#include <debug.h>
+#include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
