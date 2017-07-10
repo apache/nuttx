@@ -258,16 +258,6 @@ int mrf24j40_reset(FAR struct ieee802154_radio_s *radio)
 
   mrf24j40_setreg(dev->spi, MRF24J40_ACKTMOUT, 0x39 | MRF24J40_ACKTMOUT_DRPACK);
 
-  /* Set WAKECNT (SLPACK 0x35<6:0>) value = 0xC8 to set the main oscillator
-   * (20 MHz) start-up timer value.
-   */
-
-  mrf24j40_setreg(dev->spi, MRF24J40_SLPACK, 0xC8);
-
-  /* Set WAKETIME to recommended value for 100kHz SLPCLK Source */
-
-  mrf24j40_setreg(dev->spi, MRF24J40_WAKETIMEL, 0xD2);
-  mrf24j40_setreg(dev->spi, MRF24J40_WAKETIMEH, 0x00);
 
   /* Enable the SLPIF and WAKEIF flags */
 
