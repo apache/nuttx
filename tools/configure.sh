@@ -36,12 +36,18 @@ WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
 USAGE="
 
-USAGE: ${0} [-d] [-a <app-dir>] <board-name>/<config-name>
+USAGE: ${0} [-d] [-l|c|u|n] [-a <app-dir>] <board-name>/<config-name>
 
 Where:
+  -l selects the Linux (l) host environment.  The [-c|u|n] options
+     select one of the Windows environments.  Default:  Use host setup
+     in the defconfig file
+  [-c|u|n] selects the Windows host and a Windows environment:  Cygwin (c),
+     Ubuntu under Windows 10 (u), or Windows native (n).  Default Cygwin
   <board-name> is the name of the board in the configs directory
   <config-name> is the name of the board configuration sub-directory
-  <app-dir> is the path to the apps/ directory, relative to the nuttx directory
+  <app-dir> is the path to the apps/ directory, relative to the nuttx
+     directory
 
 "
 
@@ -57,9 +63,19 @@ OPTFILES="\
 
 unset boardconfig
 unset appdir
+unset host
+unset wenv
 
 while [ ! -z "$1" ]; do
   case "$1" in
+    -a )
+      shift
+      appdir=$1
+      ;;
+    -c )
+      host=windows
+      wenv=cygwin
+      ;;
     -d )
       set -x
       ;;
@@ -67,9 +83,16 @@ while [ ! -z "$1" ]; do
       echo "$USAGE"
       exit 0
       ;;
-    -a )
-      shift
-      appdir=$1
+    -l )
+      host=linux
+      ;;
+    -n )
+      host=windows
+      wenv=native
+      ;;
+    -u )
+      host=windows
+      wenv=ubuntu
       ;;
     *)
       if [ ! -z "${boardconfig}" ]; then
@@ -129,6 +152,12 @@ if [ ! -r "${src_config}" ]; then
   exit 6
 fi
 
+if [ -r ${dest_config} ]; then
+  echo "Already configured!"
+  echo "Do 'make distclean' and try again."
+  exit 7
+fi
+
 # Extract values needed from the defconfig file.  We need:
 # (1) The CONFIG_WINDOWS_NATIVE setting to know it this is target for a
 #     native Windows
@@ -185,6 +214,7 @@ fi
 
 # Okay... Everything looks good.  Setup the configuration
 
+echo "  Copy files"
 install -m 644 "${src_makedefs}" "${dest_makedefs}" || \
   { echo "Failed to copy \"${src_makedefs}\"" ; exit 7 ; }
 install -m 644 "${src_config}" "${dest_config}" || \
@@ -206,12 +236,61 @@ if [ "X${defappdir}" = "Xy" ]; then
   sed -e "/^CONFIG_APPS_DIR/d" "${dest_config}" > "${dest_config}-temp"
   mv "${dest_config}-temp" "${dest_config}"
 
-  echo "" >> "${dest_config}"
-  echo "# Application configuration" >> "${dest_config}"
-  echo "" >> "${dest_config}"
   if [ "X${winnative}" = "Xy" ]; then
     echo "CONFIG_APPS_DIR=\"$winappdir\"" >> "${dest_config}"
   else
     echo "CONFIG_APPS_DIR=\"$posappdir\"" >> "${dest_config}"
   fi
 fi
+
+if [ ! -z "$host" ]; then
+  sed -i -e "/CONFIG_HOST_OSX/d" ${dest_config}
+  sed -i -e "/CONFIG_HOST_OTHER/d" ${dest_config}
+
+  if [ "$host" == "linux" ]; then
+    echo "  Select CONFIG_HOST_LINUX=y"
+
+    sed -i -e "/CONFIG_HOST_WINDOWS/d" ${dest_config}
+    sed -i -e "/CONFIG_SIM_X8664_MICROSOFT/d" ${dest_config}
+    sed -i -e "/CONFIG_SIM_M32/d" ${dest_config}
+    echo "CONFIG_HOST_LINUX=y" >> "${dest_config}"
+    echo "CONFIG_SIM_X8664_SYSTEMV=y" >> "${dest_config}"
+
+else
+    echo "  Select CONFIG_HOST_WINDOWS=y"
+
+    sed -i -e "/CONFIG_HOST_LINUX/d" ${dest_config}
+    sed -i -e "/CONFIG_WINDOWS_MSYS/d" ${dest_config}
+    sed -i -e "/CONFIG_WINDOWS_OTHER/d" ${dest_config}
+    sed -i -e "/CONFIG_SIM_X8664_SYSTEMV/d" ${dest_config}
+    echo "CONFIG_HOST_WINDOWS=y" >> "${dest_config}"
+    echo "CONFIG_SIM_X8664_MICROSOFT=y" >> "${dest_config}"
+
+    if [ "X$wenv" == "Xcygwin" ]; then
+      echo "  Select CONFIG_WINDOWS_CYGWIN=y"
+
+      sed -i -e "/CONFIG_WINDOWS_UBUNTU/d" ${dest_config}
+      sed -i -e "/CONFIG_WINDOWS_NATIVE/d" ${dest_config}
+      echo "CONFIG_WINDOWS_CYGWIN=y" >> "${dest_config}"
+    else
+      sed -i -e "/CONFIG_WINDOWS_CYGWIN/d" ${dest_config}
+      if [ "X$wenv" == "Xubuntu" ]; then
+        echo "  Select CONFIG_WINDOWS_UBUNTU=y"
+
+        sed -i -e "/CONFIG_WINDOWS_UBUNTU/d" ${dest_config}
+        echo "CONFIG_WINDOWS_UBUNTU=y" >> "${dest_config}"
+      else
+        echo "  Select CONFIG_WINDOWS_NATIVE=y"
+
+        sed -i -e "/CONFIG_WINDOWS_NATIVE/d" ${dest_config}
+        echo "CONFIG_WINDOWS_NATIVE=y" >> "${dest_config}"
+      fi
+    fi
+  fi
+fi
+
+# The saved defconfig files are all in compressed format and must be
+# reconstitued before they can be used.
+
+echo "  Refreshing..."
+make olddefconfig 1>/dev/null 2>&1
