@@ -270,7 +270,7 @@ void mac802154_polltimeout(FAR void *arg)
    * this work, so that we make sure if the frame we were waiting for was just
    * received, we don't timeout
    */
-  
+
   if (!work_available(&priv->rx_work))
     {
       work_queue(MAC802154_WORK, &priv->timer_work, mac802154_polltimeout, priv, 0);
