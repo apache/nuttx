@@ -298,4 +298,5 @@ fi
 # reconstitued before they can be used.
 
 echo "  Refreshing..."
+cd ${TOPDIR} || { echo "Failed to cd to ${TOPDIR}"; exit 1; }
 make olddefconfig 1>/dev/null 2>&1
