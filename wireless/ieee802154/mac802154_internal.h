@@ -139,9 +139,6 @@ enum mac802154_operation_e
   MAC802154_OP_AUTOEXTRACT,
 };
 
-struct ieee802154_privmac_s; /* Forward Reference */
-typedef void (*mac802154_worker_t)(FAR struct ieee802154_privmac_s *priv);
-
 /* The privmac structure holds the internal state of the MAC and is the
  * underlying represention of the opaque MACHANDLE.  It contains storage for
  * the IEEE802.15.4 MIB attributes.
@@ -254,12 +251,8 @@ struct ieee802154_privmac_s
 
   struct work_s tx_work;
   struct work_s rx_work;
-
-  struct work_s timeout_work;
-  WDOG_ID       timeout;  /* Timeout watchdog */
-  mac802154_worker_t timeout_worker;
-
   struct work_s purge_work;
+  struct work_s timer_work;
 
   /****************** Uncategorized MAC PIB attributes ***********************/
 
@@ -374,9 +367,6 @@ struct ieee802154_privmac_s
 int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
                            FAR struct ieee802154_txdesc_s **txdesc,
                            bool allow_interrupt);
-
-int mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
-                         uint32_t numsymbols, mac802154_worker_t);
 
 void mac802154_setupindirect(FAR struct ieee802154_privmac_s *priv,
                              FAR struct ieee802154_txdesc_s *txdesc);
@@ -625,6 +615,77 @@ static inline void mac802154_txdesc_free(FAR struct ieee802154_privmac_s *priv,
 }
 
 /****************************************************************************
+ * Name: mac802154_symtoticks
+ *
+ * Description:
+ *   Helper function for converting symbols to system clock ticks
+ *
+ * Assumptions:
+ *   priv MAC struct is locked when calling.
+ *
+ ****************************************************************************/
+
+static inline uint32_t mac802154_symtoticks(FAR struct ieee802154_privmac_s *priv,
+                                            uint32_t symbols)
+{
+  union ieee802154_attr_u attrval;
+  uint32_t ret;
+
+  /* First, get the symbol duration from the radio layer.  Symbol duration is
+   * returned in picoseconds to ensure precision is kept when multiplying to
+   * get overall times.
+   */
+
+  priv->radio->getattr(priv->radio, IEEE802154_ATTR_PHY_SYMBOL_DURATION,
+                        &attrval);
+
+  /* After this step, ret represents microseconds */
+
+  ret = ((uint64_t)attrval.phy.symdur_picosec * symbols) / (1000 * 1000);
+
+  /* This method should only be used for things that can be late. For instance,
+   * it's always okay to wait a little longer before disabling your receiver.
+   * Therefore, we force the tick count to round up.
+   */
+
+  if (ret % USEC_PER_TICK == 0)
+    {
+      ret = ret/USEC_PER_TICK;
+    }
+  else
+    {
+      ret = ret/USEC_PER_TICK;
+      ret++;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: mac802154_timerstart
+ *
+ * Description:
+ *   Helper function wrapping the watchdog timer interface. Helps isolate
+ *   different operations from having to worry about work queues and watchdog
+ *   timers.
+ *
+ * Assumptions:
+ *   priv MAC struct is locked when calling.
+ *
+ ****************************************************************************/
+
+static inline void mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
+                     uint32_t numsymbols, worker_t worker)
+{
+  DEBUGASSERT(work_available(&priv->timer_work));
+
+  /* Schedule the work, converting the number of symbols to the number of CPU ticks */
+
+  work_queue(MAC802154_WORK, &priv->timer_work, worker, priv,
+             mac802154_symtoticks(priv, numsymbols));
+}
+
+/****************************************************************************
  * Name: mac802154_timercancel
  *
  * Description:
@@ -637,8 +698,7 @@ static inline void mac802154_txdesc_free(FAR struct ieee802154_privmac_s *priv,
 
 static inline int mac802154_timercancel(FAR struct ieee802154_privmac_s *priv)
 {
-  wd_cancel(priv->timeout);
-  priv->timeout_worker = NULL;
+  work_cancel(MAC802154_WORK, &priv->timer_work);
   wlinfo("Timer cancelled\n");
   return OK;
 }

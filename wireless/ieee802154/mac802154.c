@@ -92,13 +92,6 @@ static void mac802154_sfevent(FAR const struct ieee802154_radiocb_s *radiocb,
 
 static void mac802154_purge_worker(FAR void *arg);
 
-/* Watchdog Timeout Functions */
-
-static void mac802154_timeout_expiry(int argc, wdparm_t arg, ...);
-
-static uint32_t mac802154_symtoticks(FAR struct ieee802154_privmac_s *priv,
-                              uint32_t symbols);
-
 static void mac802154_rxdatareq(FAR struct ieee802154_privmac_s *priv,
                                 FAR struct ieee802154_data_ind_s *ind);
 static void mac802154_rxdataframe(FAR struct ieee802154_privmac_s *priv,
@@ -1919,125 +1912,6 @@ errout:
 }
 
 /****************************************************************************
- * Name: mac802154_symtoticks
- *
- * Description:
- *   Helper function for converting symbols to system clock ticks
- *
- * Assumptions:
- *   priv MAC struct is locked when calling.
- *
- ****************************************************************************/
-
-static uint32_t mac802154_symtoticks(FAR struct ieee802154_privmac_s *priv,
-                                     uint32_t symbols)
-{
-  union ieee802154_attr_u attrval;
-  uint32_t ret;
-
-  /* First, get the symbol duration from the radio layer.  Symbol duration is
-   * returned in picoseconds to ensure precision is kept when multiplying to
-   * get overall times.
-   */
-
-  priv->radio->getattr(priv->radio, IEEE802154_ATTR_PHY_SYMBOL_DURATION,
-                        &attrval);
-
-  /* After this step, ret represents microseconds */
-
-  ret = ((uint64_t)attrval.phy.symdur_picosec * symbols) / (1000 * 1000);
-
-  /* This method should only be used for things that can be late. For instance,
-   * it's always okay to wait a little longer before disabling your receiver.
-   * Therefore, we force the tick count to round up.
-   */
-
-  if (ret % USEC_PER_TICK == 0)
-    {
-      ret = ret/USEC_PER_TICK;
-    }
-  else
-    {
-      ret = ret/USEC_PER_TICK;
-      ret++;
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: mac802154_timerstart
- *
- * Description:
- *   Helper function wrapping the watchdog timer interface. Helps isolate
- *   different operations from having to worry about work queues and watchdog
- *   timers.
- *
- * Assumptions:
- *   priv MAC struct is locked when calling.
- *
- ****************************************************************************/
-
-int mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
-                         uint32_t numsymbols, mac802154_worker_t worker)
-{
-  /* TODO: Add check to make sure timer is not already being used.  I'd like to
-   * design this so that it absolutely never happens */
-
-  /* Convert the number of symbols to the number of CPU ticks */
-
-  uint32_t ticks = mac802154_symtoticks(priv, numsymbols);
-
-  /* Save the function pointer to call if the timeout expires */
-
-  priv->timeout_worker = worker;
-
-  /* Start the watchdog */
-
-  wd_start(priv->timeout, (int32_t)ticks, mac802154_timeout_expiry,
-           1, (wdparm_t)priv);
-
-  return OK;
-}
-
-/****************************************************************************
- * Function: mac802154_timeout_expiry
- *
- * Description:
- *   The watchdog timed out.  Called from the timer interrupt handler.
- *
- * Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static void mac802154_timeout_expiry(int argc, wdparm_t arg, ...)
-{
-  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)arg;
-
-  /* There should never be a case where the timeout is used twice at the same
-   * time. */
-
-  DEBUGASSERT(work_available(&priv->timeout_work));
-
-  /* Check to make sure the function pointer is still valid */
-
-  DEBUGASSERT(priv->timeout_worker != NULL);
-
-  wlinfo("Timer expired\n");
-
-  work_queue(MAC802154_WORK, &priv->timeout_work, (worker_t)priv->timeout_worker,
-             priv, 0);
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -2091,10 +1965,6 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
   /* Allow exclusive access to the dedicated command transaction */
 
   sem_init(&mac->opsem, 0, 1);
-
-  /* Setup watchdog for extraction timeout */
-
-  mac->timeout = wd_create();
 
   /* Initialize fields */
 

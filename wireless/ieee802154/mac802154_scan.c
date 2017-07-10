@@ -60,7 +60,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void mac802154_scantimeout(FAR struct ieee802154_privmac_s *priv);
+static void mac802154_scantimeout(FAR void *arg);
 
 /****************************************************************************
  * Public MAC Functions
@@ -251,8 +251,9 @@ void mac802154_scanfinish(FAR struct ieee802154_privmac_s *priv,
  *
  ****************************************************************************/
 
-static void mac802154_scantimeout(FAR struct ieee802154_privmac_s *priv)
+static void mac802154_scantimeout(FAR void *arg)
 {
+  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)arg;
   DEBUGASSERT(priv->curr_op == MAC802154_OP_SCAN);
 
   /* If we got here it means we are done scanning that channel */

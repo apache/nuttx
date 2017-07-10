@@ -58,7 +58,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void mac802154_assoctimeout(FAR struct ieee802154_privmac_s *priv);
+static void mac802154_assoctimeout(FAR void *arg);
 
 /****************************************************************************
  * Public MAC Functions
@@ -858,9 +858,21 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
  *
  ****************************************************************************/
 
-static void mac802154_assoctimeout(FAR struct ieee802154_privmac_s *priv)
+static void mac802154_assoctimeout(FAR void *arg)
 {
+  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)arg;
   FAR struct ieee802154_notif_s *notif;
+
+  /* If there is work scheduled for the rxframe_worker, we want to reschedule
+   * this work, so that we make sure if the frame we were waiting for was just
+   * received, we don't timeout
+   */
+  
+  if (!work_available(&priv->rx_work))
+    {
+      work_queue(MAC802154_WORK, &priv->timer_work, mac802154_assoctimeout, priv, 0);
+      return;
+    }
 
   DEBUGASSERT(priv->curr_op == MAC802154_OP_ASSOC);
 

@@ -60,7 +60,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void mac802154_polltimeout(FAR struct ieee802154_privmac_s *priv);
+static void mac802154_polltimeout(FAR void *arg);
 
 /****************************************************************************
  * Public MAC Functions
@@ -151,6 +151,8 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
   /* Save a reference of the tx descriptor */
 
   priv->cmd_desc = txdesc;
+
+  wlinfo("Queuing POLL.request in CSMA queue\n");
 
   /* Link the transaction into the CSMA transaction list */
 
@@ -259,9 +261,21 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
  *
  ****************************************************************************/
 
-void mac802154_polltimeout(FAR struct ieee802154_privmac_s *priv)
+void mac802154_polltimeout(FAR void *arg)
 {
+  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)arg;
   FAR struct ieee802154_notif_s *notif;
+
+  /* If there is work scheduled for the rxframe_worker, we want to reschedule
+   * this work, so that we make sure if the frame we were waiting for was just
+   * received, we don't timeout
+   */
+  
+  if (!work_available(&priv->rx_work))
+    {
+      work_queue(MAC802154_WORK, &priv->timer_work, mac802154_polltimeout, priv, 0);
+      return;
+    }
 
   DEBUGASSERT(priv->curr_op == MAC802154_OP_POLL);
 
