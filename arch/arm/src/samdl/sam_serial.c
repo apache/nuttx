@@ -101,7 +101,7 @@
 #    define USART4_ASSIGNED     1
 #elif defined(CONFIG_USART5_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_usart5port /* USART5 is console */
-#    define TTYS5_DEV           g_usart5port /* USART5 is ttyS0 */
+#    define TTYS0_DEV           g_usart5port /* USART5 is ttyS0 */
 #else
 #  undef CONSOLE_DEV                         /* No console */
 #  if defined(SAMDL_HAVE_USART0)
