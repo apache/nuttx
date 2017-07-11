@@ -57,11 +57,11 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
 #include <nuttx/i2c.h>
 
-#include <arch/irq.h>
 #include <arch/board/board.h>
 
 #include "up_internal.h"
@@ -1136,7 +1136,7 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer, int wbuf
    * interrupt level.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   i2c_startwrite(priv, &msg);
 
   /* And wait for the write to complete.  Interrupts will be re-enabled while
@@ -1149,7 +1149,7 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer, int wbuf
       i2cerr("ERROR: Transfer failed: %d\n", ret);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   i2c_givesem(&priv->exclsem);
   return ret;
 }
@@ -1194,7 +1194,7 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *rbuffer, int rbuflen)
    * interrupt level.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   i2c_startread(priv, &msg);
 
   /* And wait for the read to complete.  Interrupts will be re-enabled while
@@ -1207,7 +1207,7 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *rbuffer, int rbuflen)
       i2cerr("ERROR: Transfer failed: %d\n", ret);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   i2c_givesem(&priv->exclsem);
   return ret;
 }
@@ -1270,7 +1270,7 @@ static int i2c_writeread(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer,
    * interrupt level.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   i2c_startwrite(priv, msgv);
 
   /* And wait for the write/read to complete.  Interrupts will be re-enabled
@@ -1283,7 +1283,7 @@ static int i2c_writeread(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer,
       i2cerr("ERROR: Transfer failed: %d\n", ret);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   i2c_givesem(&priv->exclsem);
   return ret;
 }
@@ -1371,7 +1371,7 @@ static int i2c_transfer(FAR struct i2c_dev_s *dev,
    * interrupt level.
    */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   i2c_startmessage(priv, msgs);
 
   /* And wait for the transfers to complete.  Interrupts will be re-enabled
@@ -1384,7 +1384,7 @@ static int i2c_transfer(FAR struct i2c_dev_s *dev,
       i2cerr("ERROR: Transfer failed: %d\n", ret);
     }
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   i2c_givesem(&priv->exclsem);
   return ret;
 }
@@ -1506,7 +1506,7 @@ static void i2c_hw_initialize(struct sam_i2c_dev_s *priv, uint32_t frequency)
 
   /* Enable clocking to the SERCOM module in PM */
 
-  flags = irqsave();
+  flags = enter_critical_section();
   sercom_enable(priv->attr->sercom);
 
   /* Configure the GCLKs for the SERCOM module */
@@ -1622,7 +1622,7 @@ static void i2c_hw_initialize(struct sam_i2c_dev_s *priv, uint32_t frequency)
   /* Enable SERCOM interrupts at the NVIC */
 
   up_enable_irq(priv->attr->irq);
-  irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1773,7 +1773,7 @@ struct i2c_dev_s *up_i2cinitialize(int bus)
 
   /* Perform one-time I2C initialization */
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   /* Allocate a watchdog timer */
 
@@ -1805,7 +1805,7 @@ struct i2c_dev_s *up_i2cinitialize(int bus)
   /* Perform repeatable I2C hardware initialization */
 
   i2c_hw_initialize(priv, frequency);
-  irqrestore(flags);
+  leave_critical_section(flags);
   return &priv->dev;
 
 errout_with_wdog:
@@ -1814,7 +1814,7 @@ errout_with_wdog:
 
 errout_with_irq:
 
-  irqrestore(flags);
+  leave_critical_section(flags);
   return NULL;
 }
 
