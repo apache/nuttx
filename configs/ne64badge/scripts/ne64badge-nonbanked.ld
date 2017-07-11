@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/ne64badge/ostest/ld.script
+ * configs/ne64badge/ostest/ne64badge-nonbanked.ld
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without

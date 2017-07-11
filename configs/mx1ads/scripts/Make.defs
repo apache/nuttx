@@ -1,7 +1,7 @@
 ############################################################################
-# configs/mx1ads/ostest/Make.defs
+# configs/mx1ads/scripts/Make.defs
 #
-#   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -73,7 +73,7 @@ ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include
 ARCHXXINCLUDES		= -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
 
 ARCHPICFLAGS		= -fpic -msingle-pic-base -mpic-register=r10
-ARCHSCRIPT		= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script
+ARCHSCRIPT		= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/mx1ads.ld
 
 CFLAGS			= $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe

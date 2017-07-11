@@ -1,7 +1,7 @@
 ############################################################################
-# configs/ne64badge/ostest/Make.defs
+# configs/ne64badge/scripts/Make.defs
 #
-#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -45,10 +45,10 @@ WINTOOL = n
 
 ifeq ($(CONFIG_HCS12_NONBANKED),y)
   ARCHCPUFLAGS = -m9s12x -mshort -mnolong-calls
-  LDSCRIPT = ld.script.nonbanked
+  LDSCRIPT = ne64badge-nonbanked.ld
 else
   ARCHCPUFLAGS = -m9s12x -mshort -mlong-calls
-  LDSCRIPT = ld.script.banked
+  LDSCRIPT = ne64badge-banked.ld
 endif
 
 ifneq ($(CONFIG_HCS12_MSOFTREGS),0)
@@ -62,14 +62,14 @@ ifeq ($(WINTOOL),y)
   MKDEP = $(TOPDIR)/tools/mkwindeps.sh
   ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
   ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
-  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/$(LDSCRIPT)}"
+  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)}"
   MAXOPTIMIZATION = -O2
 else
   # Linux/Cygwin-native toolchain
   MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
   ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
   ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
-  ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/$(LDSCRIPT)
+  ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)
 endif
 
 CC = $(CROSSDEV)gcc
