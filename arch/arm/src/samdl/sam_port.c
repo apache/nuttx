@@ -134,7 +134,7 @@ static inline void sam_configinput(uintptr_t base, port_pinset_t pinset)
   /* Set the pin configuration */
 
   regval = (PORT_WRCONFIG_WRPINCFG | PORT_WRCONFIG_WRPMUX | PORT_WRCONFIG_INEN);
-  if (pin > 16)
+  if (pin >= 16)
     {
        /* Select the upper half word and adjust the bit setting */
 
@@ -531,7 +531,7 @@ int sam_dumpport(uint32_t pinset, const char *msg)
 
   /* Get the base address associated with the PIO port */
 
-  pin  = (pinset & PORT_PIN_MASK) >> PORT_PIN_SHIFT;
+  pin  = sam_portpin(pinset);
   port = (pinset & PORT_MASK) >> PORT_SHIFT;
   base = SAM_PORTN_BASE(port);
 
