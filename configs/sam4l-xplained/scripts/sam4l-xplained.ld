@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/skp16c26/ostest/ld.script
+ * configs/sam4l-xplained/scripts/sam4l-xplained.ld
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,97 +33,79 @@
  *
  ****************************************************************************/
 
-OUTPUT_ARCH(m32c)
+/* The ATSAM4LC4C has 256KB of FLASH beginning at address 0x0000:0000 and
+ * 32KB of SRAM beginning at address 0x2000:0000
+ */
+
+MEMORY
+{
+    flash (rx)  : ORIGIN = 0x00000000, LENGTH = 256K
+    sram  (rwx) : ORIGIN = 0x20000000, LENGTH = 32K
+}
+
+OUTPUT_ARCH(arm)
 ENTRY(_stext)
 SECTIONS
 {
-	/* "Far" flash memory begins at address 0xf0000 for the M20262F8 part and
-	 * ends at address 0xfffff (all parts).  The program entry point is
-	 * the first address in flash
-	 */
-
-	. = 0xf0000;
 	.text : {
 		_stext = ABSOLUTE(.);
-		*(.text)
+		*(.vectors)
+		*(.text .text.*)
 		*(.fixup)
 		*(.gnu.warning)
-		*(.rodata)
+		*(.rodata .rodata.*)
+		*(.gnu.linkonce.t.*)
 		*(.glue_7)
 		*(.glue_7t)
-		*(.got)			/* Global offset table		*/
+		*(.got)
+		*(.gcc_except_table)
+		*(.gnu.linkonce.r.*)
 		_etext = ABSOLUTE(.);
-	}
+	} > flash
 
-	_enronly = ABSOLUTE(.);		/* End of read-only values      */
-					/* .ndata will be relocated     */
-					/* from this address            */
+	.init_section : {
+		_sinit = ABSOLUTE(.);
+		*(.init_array .init_array.*)
+		_einit = ABSOLUTE(.);
+	} > flash
 
-	/* The "variable" vector table will be fixed at the following address */
+	.ARM.extab : {
+		*(.ARM.extab*)
+	} >flash
 
-	. = 0xffd00;
-	.varvect : {
-		_svarvect = ABSOLUTE(.);
-		*(.varvect)
-		_evarvect = ABSOLUTE(.);
-	}
+	__exidx_start = ABSOLUTE(.);
+	.ARM.exidx : {
+		*(.ARM.exidx*)
+	} >flash
+	__exidx_end = ABSOLUTE(.);
 
-	/* Followed by the special page/fixed vector table. */
-
-	. = 0xffe00;
-	.specpg : {
-		_sspecpg = ABSOLUTE(.);
-		*(.specpg)
-		_especpg = ABSOLUTE(.);
-	}
-
-	. = 0xfffdc;
-	.fixvect : {
-		_sfixvect = ABSOLUTE(.);
-		*(.fixvect)
-		_efixvect = ABSOLUTE(.);
-	}
-
-	/* Internal "near" RAM begins at address 0x00400 (all parts) and ends at
-	 * address 0x00bff (M20262F6 and M20262F8 parts).  With the RAM
-	 * region, used is .data followed by .bss.  The remainder of RAM
-	 * carved up by the start-up code into stacks and heaps.
-	 */
-
-	. = 0x00400;
-
-	.ndata : {
-		_sndata = ABSOLUTE(.);
-		*(.data)
+	.data : {
+		_sdata = ABSOLUTE(.);
+		*(.data .data.*)
+		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS
-		_endata = ABSOLUTE(.);
-	}
+		_edata = ABSOLUTE(.);
+	} > sram AT > flash
 
-	.nbss : {			/* BSS				*/
-		_snbss = ABSOLUTE(.);
-		*(.bss)
+	_eronly = LOADADDR(.data);
+
+	.ramfunc ALIGN(4): {
+		_sramfuncs = ABSOLUTE(.);
+		*(.ramfunc  .ramfunc.*)
+		_eramfuncs = ABSOLUTE(.);
+	} > sram AT > flash
+
+	_framfuncs = LOADADDR(.ramfunc);
+
+	.bss : {
+		_sbss = ABSOLUTE(.);
+		*(.bss .bss.*)
+		*(.gnu.linkonce.b.*)
 		*(COMMON)
-		_enbss = ABSOLUTE(.);
-	}
+		_ebss = ABSOLUTE(.);
+	} > sram
 
-	/* "Far" RAM begins at 0x10000.  The SKP16C26 has no far RAM */
-
-	. = 0x10000;
-
-	.fdata : {
-		_sfdata = ABSOLUTE(.);
-		*(.fdata)
-		CONSTRUCTORS
-		_efdata = ABSOLUTE(.);
-	}
-
-	.fbss : {			/* BSS				*/
-		_sfbss = ABSOLUTE(.);
-		*(.fbss)
-		*(COMMON)
-		_efbss = ABSOLUTE(.);
-	}
-					/* Stabs debugging sections.	*/
+	/* Stabs debugging sections. */
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }

@@ -1,8 +1,8 @@
 /****************************************************************************
- * configs/sam4s-xplained/scripts/ld.script
+ * configs/sam4cmp-db/scripts/sam4cmp-db.ld
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2016 Masayuki Ishikawa. All rights reserved.
+ *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,13 +33,13 @@
  *
  ****************************************************************************/
 
-/* The ATSAM4S16C has 1MB of FLASH beginning at address 0x0040:0000 and
+/* The ATSAM4CM has 1MB of FLASH beginning at address 0x0100:0000 and
  * 128KB of SRAM beginning at address 0x2000:0000
  */
 
 MEMORY
 {
-    flash (rx)  : ORIGIN = 0x00400000, LENGTH = 1024K
+    flash (rx)  : ORIGIN = 0x01000000, LENGTH = 1024K
     sram  (rwx) : ORIGIN = 0x20000000, LENGTH = 128K
 }
 

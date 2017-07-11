@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/sam4s-xplained-pro/scripts/ld.script
+ * configs/sam4s-xplained-pro/scripts/sam4s-xplained-pro.ld
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
