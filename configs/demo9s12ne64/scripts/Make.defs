@@ -1,7 +1,7 @@
 ############################################################################
-# configs/amber/hello/Make.defs
+# configs/demo9s12ne64/scripts/Make.defs
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009,2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,25 @@
 
 include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
-include ${TOPDIR}/arch/avr/src/avr/Toolchain.defs
+
+# Setup for the selected toolchain
+# NuttX buildroot under Linux or Cygwin
+
+CROSSDEV = m9s12x-nuttx-elf-
+MAXOPTIMIZATION = -Os
+WINTOOL = n
+
+ifeq ($(CONFIG_HCS12_NONBANKED),y)
+  ARCHCPUFLAGS = -m9s12x -mshort -mnolong-calls
+  LDSCRIPT = demo9s12ne64-unbanked.ld
+else
+  ARCHCPUFLAGS = -m9s12x -mshort -mlong-calls
+  LDSCRIPT = demo9s12ne64-banked.ld
+endif
+
+ifneq ($(CONFIG_HCS12_MSOFTREGS),0)
+  ARCHCPUFLAGS += -msoft-reg-count=$(CONFIG_HCS12_MSOFTREGS)
+endif
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
@@ -43,14 +61,15 @@ ifeq ($(WINTOOL),y)
   DIRUNLINK = $(TOPDIR)/tools/unlink.sh
   MKDEP = $(TOPDIR)/tools/mkwindeps.sh
   ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
-  ARCHXXINCLUDES = $(ARCHINCLUDES) "${shell cygpath -w $(TOPDIR)/include/cxx}"
-  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/hello/ld.script}"
+  ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
+  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/$(LDSCRIPT)}"
+  MAXOPTIMIZATION = -O2
 else
   # Linux/Cygwin-native toolchain
   MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
-  ARCHINCLUDES = -I. -isystem "$(TOPDIR)/include"
-  ARCHXXINCLUDES =  $(ARCHINCLUDES) -isystem "$(TOPDIR)/include/cxx"
-  ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/hello/ld.script
+  ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
+  ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
+  ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/$(LDSCRIPT)
 endif
 
 CC = $(CROSSDEV)gcc
@@ -61,6 +80,9 @@ AR = $(CROSSDEV)ar rcs
 NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
+
+ARCHCCVERSION = ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q'}
+ARCHCCMAJOR = ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
@@ -75,8 +97,10 @@ ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHDEFINES =
+ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 
 CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
+CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
 CXXFLAGS = $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
 CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
@@ -90,6 +114,11 @@ ASMEXT = .S
 OBJEXT = .o
 LIBEXT = .a
 EXEEXT =
+
+  LDFLAGS += -nostartfiles -nodefaultlibs
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  LDFLAGS += -g
+endif
 
 
 HOSTCC = gcc

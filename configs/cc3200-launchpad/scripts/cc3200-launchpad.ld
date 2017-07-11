@@ -1,8 +1,9 @@
 /****************************************************************************
- * configs/cloudctrl/scripts/ld.script.dfu
+ * configs/cc3200-launchpad/scripts/cc3200-launchpad.ld
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Jim Ewing <jim@droidifi.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,20 +34,15 @@
  *
  ****************************************************************************/
 
-/* The STM32F107VC has 256K of FLASH beginning at address 0x0800:0000 and
- * 64K of SRAM beginning at address 0x2000:0000.  Here we assume that the
- * STMicro DFU bootloader is being used.  In that case, the corrct load .text
- * load address is 0x08003000 (leaving 208K).
- */
-
 MEMORY
 {
-	flash (rx) : ORIGIN = 0x08003000, LENGTH = 208K
-	sram (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
+    flash (rx) : ORIGIN = 0x01000000, LENGTH = 0x00020000
+    sram (rwx) : ORIGIN = 0x20004000, LENGTH = 0x0002C000
 }
 
 OUTPUT_ARCH(arm)
 ENTRY(_stext)
+
 SECTIONS
 {
 	.text : {
@@ -63,27 +59,25 @@ SECTIONS
 		*(.gcc_except_table)
 		*(.gnu.linkonce.r.*)
 		_etext = ABSOLUTE(.);
-	} > flash
+	} > sram
 
 	.init_section : {
 		_sinit = ABSOLUTE(.);
 		*(.init_array .init_array.*)
 		_einit = ABSOLUTE(.);
-	} > flash
+	} > sram
 
 	.ARM.extab : {
 		*(.ARM.extab*)
-	} > flash
+	} > sram
 
 	__exidx_start = ABSOLUTE(.);
 	.ARM.exidx : {
 		*(.ARM.exidx*)
-	} > flash
+	} > sram
 	__exidx_end = ABSOLUTE(.);
 
 	_eronly = ABSOLUTE(.);
-
-	/* The STM32F107VC has 64Kb of SRAM beginning at the following address */
 
 	.data : {
 		_sdata = ABSOLUTE(.);
@@ -91,7 +85,7 @@ SECTIONS
 		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
-	} > sram AT > flash
+	} > sram
 
 	.bss : {
 		_sbss = ABSOLUTE(.);
@@ -102,6 +96,7 @@ SECTIONS
 	} > sram
 
 	/* Stabs debugging sections. */
+
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }

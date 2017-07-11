@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/demo9s12ne64/ostest/ld.script
+ * configs/demo9s12ne64/ostest/demo9s12ne64-banked.ld
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,18 +43,45 @@ MEMORY
    * for the serial monitor stack space.
    */
 
-  sram    (rwx) : ORIGIN = 0x2000, LENGTH = 8K-256
+  sram   (rwx)  : ORIGIN = 0x2000, LENGTH = 8K-256
 
-  /* Three fixed text flash pages (corresponding to page 3e, 3d, and 3f) at
-   * 16Kb each (minus 2Kb at the end of page 3f that is reserved at the top for
-   * the serial boot loader
+  /* Two fixed text flash pages (corresponding to page 3e and 3f) */
+
+  lowtext(rx)   : ORIGIN = 0x4000, LENGTH = 16K			/* Page 3e */
+  hitext (rx)   : ORIGIN = 0xc000, LENGTH = 16K-2k		/* Page 3f */
+
+  /* Flash memory pages:
+   *
+   * The MC9S12NE64 implements 6 bits of the PPAGE register which gives it a
+   * 1 Mbyte program memory address space that is accessed through the PPAGE
+   * window. The lower 768K portion (0x000000-0x0bffff) of the address space
+   * is accessed with PPAGE values 0x00 through 0x2f.  This address range
+   * is reserved for external memory when the part is operated in expanded
+   * mode. The upper 256K of the address space (0x0c0000-0x100000), accessed
+   * with PPAGE values 0x30 through 0x3f, is occupied by on chip flash.
    */
 
-  text    (rx)  : ORIGIN = 0x4000, LENGTH = 48K-2k		/* Page 3e, 3d, and 3f */
+  page30 (rx)   : ORIGIN = 0x0c0000, LENGTH = 16K		/* Page 30 */
+  page31 (rx)   : ORIGIN = 0x0c4000, LENGTH = 16K		/* Page 31 */
+  page32 (rx)   : ORIGIN = 0x0c8000, LENGTH = 16K		/* Page 32 */
+  page33 (rx)   : ORIGIN = 0x0cc000, LENGTH = 16K		/* Page 33 */
+  page34 (rx)   : ORIGIN = 0x0d0000, LENGTH = 16K		/* Page 34 */
+  page35 (rx)   : ORIGIN = 0x0d4000, LENGTH = 16K		/* Page 35 */
+  page36 (rx)   : ORIGIN = 0x0d8000, LENGTH = 16K		/* Page 36 */
+  page37 (rx)   : ORIGIN = 0x0dc000, LENGTH = 16K		/* Page 37 */
+  page38 (rx)   : ORIGIN = 0x0e0000, LENGTH = 16K		/* Page 38 */
+  page39 (rx)   : ORIGIN = 0x0e4000, LENGTH = 16K		/* Page 39 */
+  page3a (rx)   : ORIGIN = 0x0e8000, LENGTH = 16K		/* Page 3a */
+  page3b (rx)   : ORIGIN = 0x0ec000, LENGTH = 16K		/* Page 3b */
+  page3c (rx)   : ORIGIN = 0x0f0000, LENGTH = 16K		/* Page 3c */
+  page3d (rx)   : ORIGIN = 0x0f4000, LENGTH = 16K		/* Page 3d */
+
+  page3e (rx)   : ORIGIN = 0x0f8000, LENGTH = 16K		/* Page 3e */
+  page3f (rx)   : ORIGIN = 0x0fc000, LENGTH = 16K-2K	/* Page 3f */
 
   /* Vectors.  These get relocated to 0xf780-f7ff by the serial loader */
 
-  vectors (rx)  : ORIGIN = 0xff80, LENGTH = 256
+  vectors (rx)  : ORIGIN = 0xff80,   LENGTH = 256
 }
 
 ENTRY(_stext)
@@ -74,7 +101,7 @@ SECTIONS
 		*(.gcc_except_table)
 		*(.gnu.linkonce.r.*)
 		_etext = ABSOLUTE(.);
-	} > text
+	} > hitext
 
 	_eronly = ABSOLUTE(.);		/* See below                    */
 
@@ -84,7 +111,7 @@ SECTIONS
 		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
-	} > sram AT > text
+	} > sram AT > lowtext
 
 	.bss : {			/* BSS				*/
 		_sbss = ABSOLUTE(.);

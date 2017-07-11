@@ -1,9 +1,8 @@
 /****************************************************************************
- * configs/cc3200-launchpad/scripts/ld.script
+ * configs/cloudctrl/scripts/cloudctrl.ld
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Jim Ewing <jim@droidifi.com>
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,15 +33,18 @@
  *
  ****************************************************************************/
 
+/* The STM32F107VC has 256K of FLASH beginning at address 0x0800:0000 and
+ * 64K of SRAM beginning at address 0x2000:0000.
+ */
+
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x01000000, LENGTH = 0x00020000
-    sram (rwx) : ORIGIN = 0x20004000, LENGTH = 0x0002C000
+	flash (rx) : ORIGIN = 0x08000000, LENGTH = 256K
+	sram (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
 }
 
 OUTPUT_ARCH(arm)
 ENTRY(_stext)
-
 SECTIONS
 {
 	.text : {
@@ -59,25 +61,27 @@ SECTIONS
 		*(.gcc_except_table)
 		*(.gnu.linkonce.r.*)
 		_etext = ABSOLUTE(.);
-	} > sram
+	} > flash
 
 	.init_section : {
 		_sinit = ABSOLUTE(.);
 		*(.init_array .init_array.*)
 		_einit = ABSOLUTE(.);
-	} > sram
+	} > flash
 
 	.ARM.extab : {
 		*(.ARM.extab*)
-	} > sram
+	} > flash
 
 	__exidx_start = ABSOLUTE(.);
 	.ARM.exidx : {
 		*(.ARM.exidx*)
-	} > sram
+	} > flash
 	__exidx_end = ABSOLUTE(.);
 
 	_eronly = ABSOLUTE(.);
+
+	/* The STM32F107VC has 64Kb of SRAM beginning at the following address */
 
 	.data : {
 		_sdata = ABSOLUTE(.);
@@ -85,7 +89,7 @@ SECTIONS
 		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
-	} > sram
+	} > sram AT > flash
 
 	.bss : {
 		_sbss = ABSOLUTE(.);
@@ -96,7 +100,6 @@ SECTIONS
 	} > sram
 
 	/* Stabs debugging sections. */
-
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }

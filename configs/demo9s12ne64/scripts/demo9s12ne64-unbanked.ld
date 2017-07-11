@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/cloudctrl/scripts/ld.script
+ * configs/demo9s12ne64/ostest/demo9s12ne64-banked.ld
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,17 +33,30 @@
  *
  ****************************************************************************/
 
-/* The STM32F107VC has 256K of FLASH beginning at address 0x0800:0000 and
- * 64K of SRAM beginning at address 0x2000:0000.
+/* The DEMO9S12NE64 has 64Kb of FLASH and 8Kb of SRAM that are assumed to be
+ * paged and positioned as below:
  */
 
 MEMORY
 {
-	flash (rx) : ORIGIN = 0x08000000, LENGTH = 256K
-	sram (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
+  /* The 8Kb SRAM is mapped to 0x2000-0x2fff.  The top 256 bytes are reserved
+   * for the serial monitor stack space.
+   */
+
+  sram    (rwx) : ORIGIN = 0x2000, LENGTH = 8K-256
+
+  /* Three fixed text flash pages (corresponding to page 3e, 3d, and 3f) at
+   * 16Kb each (minus 2Kb at the end of page 3f that is reserved at the top for
+   * the serial boot loader
+   */
+
+  text    (rx)  : ORIGIN = 0x4000, LENGTH = 48K-2k		/* Page 3e, 3d, and 3f */
+
+  /* Vectors.  These get relocated to 0xf780-f7ff by the serial loader */
+
+  vectors (rx)  : ORIGIN = 0xff80, LENGTH = 256
 }
 
-OUTPUT_ARCH(arm)
 ENTRY(_stext)
 SECTIONS
 {
@@ -61,27 +74,9 @@ SECTIONS
 		*(.gcc_except_table)
 		*(.gnu.linkonce.r.*)
 		_etext = ABSOLUTE(.);
-	} > flash
+	} > text
 
-	.init_section : {
-		_sinit = ABSOLUTE(.);
-		*(.init_array .init_array.*)
-		_einit = ABSOLUTE(.);
-	} > flash
-
-	.ARM.extab : {
-		*(.ARM.extab*)
-	} > flash
-
-	__exidx_start = ABSOLUTE(.);
-	.ARM.exidx : {
-		*(.ARM.exidx*)
-	} > flash
-	__exidx_end = ABSOLUTE(.);
-
-	_eronly = ABSOLUTE(.);
-
-	/* The STM32F107VC has 64Kb of SRAM beginning at the following address */
+	_eronly = ABSOLUTE(.);		/* See below                    */
 
 	.data : {
 		_sdata = ABSOLUTE(.);
@@ -89,9 +84,9 @@ SECTIONS
 		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
-	} > sram AT > flash
+	} > sram AT > text
 
-	.bss : {
+	.bss : {			/* BSS				*/
 		_sbss = ABSOLUTE(.);
 		*(.bss .bss.*)
 		*(.gnu.linkonce.b.*)
@@ -99,7 +94,13 @@ SECTIONS
 		_ebss = ABSOLUTE(.);
 	} > sram
 
-	/* Stabs debugging sections. */
+	.vectors : {
+		_svectors = ABSOLUTE(.);
+		*(.vectors)
+		_evectors = ABSOLUTE(.);
+	} > vectors
+
+	/* Stabs debugging sections.	*/
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }
