@@ -20,7 +20,6 @@ README
     - Make Sure that You on on the Right Platform
     - Comparing Two Configurations
     - Making defconfig Files
-    - Configuring with "Compressed" defconfig Files
     - Incompatibilities with Older Configurations
     - NuttX Configuration Tool under DOS
   o Toolchains
@@ -193,7 +192,7 @@ Ubuntu Bash under Windows 10
   at C:\Documents\projects.  Then you can set up a link to the projects/
   directory in your Ubuntu directory like:
 
-    $ ln -s /mnt/c/Documents/projects projects
+    ln -s /mnt/c/Documents/projects projects
 
   Accessing Ubuntu Files From Windows
   -----------------------------------
@@ -218,7 +217,7 @@ Ubuntu Bash under Windows 10
   -----------------------------------
   You can also execute Windows tools from within the Ubuntu sandbox:
 
-    $ /mnt/c/Program\ Files\ \(x86\)/Microchip/xc32/v1.43/bin/xc32-gcc.exe --version
+    /mnt/c/Program\ Files\ \(x86\)/Microchip/xc32/v1.43/bin/xc32-gcc.exe --version
     Unable to translate current working directory. Using C:\WINDOWS\System32
     xc32-gcc.exe (Microchip Technology) 4.8.3 MPLAB XC32 Compiler v1.43 Build date: Mar  1 2017
     ...
@@ -233,15 +232,15 @@ Ubuntu Bash under Windows 10
   Use "sudo apt-get install <package name>".  As examples, this is how
   you would get GIT:
 
-    $ sudo apt-get install git
+    sudo apt-get install git
 
   This will get you a compiler for your host PC:
 
-    $ sudo apt-get install gcc
+    sudo apt-get install gcc
 
   This will get you an ARM compiler for your target:
 
-    $ sudo apt-get install gcc-arm-none-eabi
+    sudo apt-get install gcc-arm-none-eabi
 
   NOTE: That is just an example.  I am not sure if apt-get will give you a
   current or usable compiler.  You should carefully select your toolchain
@@ -561,57 +560,84 @@ CONFIGURING NUTTX
 Instantiating "Canned" Configurations
 -------------------------------------
 
-  "Canned" NuttX configuration files are retained in:
+  configure.sh and configure.bat:
 
-    configs/<board-name>/<config-dir>
+    "Canned" NuttX configuration files are retained in:
 
-  Where <board-name> is the name of your development board and <config-dir>
-  is the name of the sub-directory containing a specific configuration for
-  that board.  Configuring NuttX requires only copying three files from the
-  <config-dir> to the directory where you installed NuttX (TOPDIR) (and
-  sometimes one additional file to the directory the NuttX application
-  package (APPSDIR)):
+      configs/<board-name>/<config-dir>
 
-    Copy configs/<board-name>/<config-dir>/Make.def to ${TOPDIR}/Make.defs
+    Where <board-name> is the name of your development board and <config-dir>
+    is the name of the sub-directory containing a specific configuration for
+    that board.  Only a few steps required to instantiate a NuttX
+    configuration, but to make the configuration even easier there are
+   scripts available in the tools/ sub-directory combines those simple steps
+    into one command.
+  
+    There is one tool for use with any Bask-like shell that does configuration
+    steps.  It is used as follows:
 
-      Make.defs describes the rules needed by you tool chain to compile
-      and link code.  You may need to modify this file to match the
-      specific needs of your toolchain.
+      tools/configure.sh <board-name>/<config-dir>
 
-    Copy configs/<board-name>/<config-dir>/defconfig to ${TOPDIR}/.config
+    There is an alternative Windows batch file that can be used in the windows
+    native environment like:
 
-      The defconfig file holds the actual build configuration.  This
-      file is included by all other make files to determine what is
-      included in the build and what is not.  This file is also used
-      to generate a C configuration header at include/nuttx/config.h.
-
-   Copy other, environment-specific files to ${TOPDIR
-
-      This might include files like .gdbinit or IDE configuration files
-      like .project or .cproject.
-
-   General information about configuring NuttX can be found in:
-
-      ${TOPDIR}/configs/README.txt
-      ${TOPDIR}/configs/<board-name>/README.txt
-
-    There is a configuration script in the tools/ directory that makes does
-    all of the above steps for you.  It is used as follows:
-
-      cd ${TOPDIR}/tools
-      ./configure.sh <board-name>/<config-dir>
-
-    There is an alternative Windows batch file that can be used in the
-    windows native environment like:
-
-      cd ${TOPDIR}\tools
-      configure.bat <board-name>\<config-dir>
+      tools\configure.bat <board-name>\<config-dir>
 
     And, to make sure that other platform is supported, there is also a
     C program at tools/configure.c that can be compiled to establish the
     board configuration.
 
     See tools/README.txt for more information about these scripts.
+
+    General information about configuring NuttX can be found in:
+
+     {TOPDIR}/configs/README.txt
+     {TOPDIR}/configs/<board-name>/README.txt
+
+  The Hidden Configuration Scripts:
+
+    As mentioned above, there are only a few simple steps to instantiating a
+    NuttX configuration.  Those steps are hidden by the configuration scripts
+    but are summarized below:
+
+    1. Copy Files
+
+      Configuring NuttX requires only copying two files from the
+      <config-dir> to the directory where you installed NuttX (TOPDIR):
+
+        Copy configs/<board-name>/<config-dir>/Make.def to{TOPDIR}/Make.defs
+        OR
+        Copy configs/<board-name>/scripts/Make.def to{TOPDIR}/Make.defs
+
+      Make.defs describes the rules needed by you tool chain to compile
+      and link code.  You may need to modify this file to match the
+      specific needs of your toolchain.  NOTE that a configuration may
+      have its own unique Make.defs file in its configuration directory or
+      it may use a common Make.defs file for the board in the scripts/
+      directory.  The first takes precedence.
+
+        Copy configs/<board-name>/<config-dir>/defconfig to{TOPDIR}/.config
+
+      The defconfig file holds the actual build configuration.  This
+      file is included by all other make files to determine what is
+      included in the build and what is not.  This file is also used
+      to generate a C configuration header at include/nuttx/config.h.
+
+        Copy other, environment-specific files to{TOPDIR
+
+      This might include files like .gdbinit or IDE configuration files
+      like .project or .cproject.
+
+    2. Refresh the Configuration
+
+      New configuration setting may be added or removed.  Existing settings
+      may also change there values or options.  This must be handled by
+      refreshing the configuration as described below.
+
+      NOTE:  NuttX uses only compressed defconfig files.  For the NuttX
+      defconfig files, this refrshing step is *NOT* optional; it is also
+      necessary to uncompress and regenerate the full making file.  This is
+      dicussed further below.
 
 Refreshing Configurations
 -------------------------
@@ -791,24 +817,35 @@ Make Sure that You on on the Right Platform
   configurations.  For example, if you are running on Linux and you
   configure like this:
 
-    $ cd tools
-    $ ./configure.sh board/configuration
-    $ cd ..
+    tools/configure.sh board/configuration
 
   The you can use the following command to both (1) make sure that the
   configuration is up to date, AND (2) the configuration is set up
   correctly for Linux:
 
-    $ tools/sethost.sh -l
+    tools/sethost.sh -l
 
   Or, if you are on a Windows/Cygwin 64-bit platform:
 
-    $ tools/sethost.sh -w
+    tools/sethost.sh -c
 
   Other options are available from the help option built into the
   script.  You can see all options with:
 
-    $ tools/sethost.sh -h
+    tools/sethost.sh -h
+
+  Recently, the options to the configure.sh (and configure.bat) scripts have been extended so that you both setup the configuration, select for the host platform that you use, and uncompress and refresh the defconfig file all in one command like:
+
+    tools/configure.sh -l board/configuration
+
+  For a Linux host or for a Windows/Cygwin host:
+
+    tools/configure.sh -h board/configuration
+
+  Other options are available from the help option built into the
+  script.  You can see all options with:
+
+    tools/configure.sh -h
 
 Comparing Two Configurations
 ----------------------------
@@ -854,88 +891,101 @@ Comparing Two Configurations
 Making defconfig Files
 ----------------------
 
-  The minimum defconfig file is simply the generated .config file with
-  CONFIG_APPS_DIR setting removed or commented out.  That setting provides
-  the name and location of the apps/ directory relative to the nuttx build
-  directory.  The default is ../apps/, however, the apps directory may be
-  any other location and may have a different name.  For example, the name
-  of versioned NuttX releases are always in the form apps-xx.yy where xx.yy
-  is the version number.
+  .config Files as defconfig Files:
 
-  When the default configuration is installed using on of the scripts or
-  programs in the NuttX tools directory, there will be an option to provide
-  the path to the apps/ directory.  If not provided, then the configure tool
-  will look around and try to make a reasonable decision about where the
-  apps/ directory is located.
+    The minimum defconfig file is simply the generated .config file with
+    CONFIG_APPS_DIR setting removed or commented out.  That setting provides
+    the name and location of the apps/ directory relative to the nuttx build
+    directory.  The default is ../apps/, however, the apps directory may be
+    any other location and may have a different name.  For example, the name
+    of versioned NuttX releases are always in the form apps-xx.yy where xx.yy
+    is the version number.
 
-  The Makefile also supports an option to generate very small defconfig
-  files.  The .config files are quite large and complex.  But most of the
-  settings in the .config file simply have the default settings from the
-  Kconfig files.  These .config files can be converted into small defconfig
-  file:
+  Finding the apps/ Directory Path:
 
-    make savedefconfig
+    When the default configuration is installed using one of the scripts or
+    programs in the NuttX tools directory, there will be an option to provide
+    the path to the apps/ directory.  If not provided, then the configure tool
+    will look around and try to make a reasonable decision about where the
+    apps/ directory is located.
 
-  That make target will generate a defconfig file in the top-level
-  directory.  The size reduction is really quite remarkable:
+  Compressed defconfig Files:
 
-    $ wc -l .config defconfig
-     1085 .config
-       82 defconfig
-     1167 total
+    The Makefile also supports an option to generate very small defconfig
+    files.  The .config files are quite large and complex.  But most of the
+    settings in the .config file simply have the default settings from the
+    Kconfig files.  These .config files can be converted into small defconfig
+    file:
 
-   In order to be usable, the .config file installed from the compressed
-   defconfig file must be reconstituted using:
+      make savedefconfig
 
-     make olddefconfig
+    That make target will generate a defconfig file in the top-level
+    directory.  The size reduction is really quite remarkable:
 
-   CAUTION:  There is only one caution.  This size reduction was
-   accomplished by removing all setting from the .config file that were at
-   the default value.  'make olddefconfig' can regenerate the original
-   .config file by simply restoring those default settings.  The underlying
-   assumption here is, of course, that the default settings do not change.
-   If the default settings change, and they often do, then the original
-   .config may not be reproducible.
+      wc -l .config defconfig
+       1085 .config
+         82 defconfig
+       1167 total
 
-Configuring with "Compressed" defconfig Files
----------------------------------------------
+     In order to be usable, the .config file installed from the compressed
+     defconfig file must be reconstituted using:
 
-  2017-07-08: Currently all defconfig files are in .config form.  However,
-    in the long term I would hope that the defconfig files will eventual
-    all be converted to the "compressed" defconfig format.  This would be
-    a great savings in the total size of the NuttX files.
+       make olddefconfig
 
-  As described in the previous section, "Making defconfig Files," defconfig
-  files may be "compressed" using 'make savedeconfig'.  These compressed
-  defconfig files may not be fully usable and may not build the target
-  binaries that you want because the compression process removed all of the
-  default settings from the defconfig file.  To restore the default
-  settings, you should run the following after configuring:
+     NOTE 1:  Only compressed defconfig files are retained in the NuttX repository.
+     All patches and PRs that attempt to add or modify a defconfig file MUST
+     use the compressed defconfig format as created by 'make savdefconfig.'
 
-    make olddefconfig
+     NOTE 2:  When 'make savedefconfig' runs it will try several things some of
+     which are expected to fail.  In these cases you will see an error message
+     from make followed by "(ignored)."  You should also ignore these messages
 
-  That will restore the the missing defaulted values.
+     CAUTION:  This size reduction was accomplished by removing all setting
+     from the .config file that were at the default value.  'make olddefconfig'
+     can regenerate the original .config file by simply restoring those default
+     settings.  The underlying assumption here is, of course, that the default
+     settings do not change.  If the default settings change, and they often
+     do, then the original .config may not be reproducible.
 
-  Using this command after configuring is generally a good practice anyway:
-  Even if the defconfig files are not "compressed" in this fashion, the
-  defconfig file may be old and the only way to assure that the installed
-  .config is is uptodate is via 'make oldconfig' or 'make olddefconfig'.
-  See the paragraph above entitled ""Refreshing Configurations" for
-  additional information.
+     So if your project requires 100% reproducibility over a long period of
+     time, you make want to save the complete .config files vs. the standard,
+     compressed defconfig file.
+
+  Configuring with "Compressed" defconfig Files:
+
+    As described above defconfig, all NuttX defconfig files are compressed
+    using 'make savedeconfig'.  These compressed defconfig files are
+    generally not fully usable as they are and may not build the target
+    binaries that you want because the compression process removed all of
+    the default settings from the defconfig file.  To restore the default
+    settings, you should run the following after configuring:
+
+      make olddefconfig
+
+    That will restore the the missing defaulted values.
+
+    Using this command after configuring is generally a good practice anyway:
+    Even if the defconfig files are not "compressed" in this fashion, the
+    defconfig file may be old and the only way to assure that the installed
+    .config is is uptodate is via 'make oldconfig' or 'make olddefconfig'.
+    See the paragraph above entitled ""Refreshing Configurations" for
+    additional information.
 
 Incompatibilities with Older Configurations
 -------------------------------------------
 
   ***** WARNING *****
 
-  The current NuttX build system supports *only* the new configuration
-  files generated using the kconfig-frontends tools.  Support for the
-  older, legacy, manual configurations was eliminated in NuttX 7.0; all
-  configuration must now be done using the kconfig-frontends tool.  The
-  older manual configurations and the new kconfig-frontends configurations
-  are not compatible.  Old legacy configurations can *not* be used
-  with the kconfig-frontends tool and, hence, cannot be used with releases
-  of NuttX 7.0 and beyond:
+  The current NuttX build system supports *only* the new compressed,
+  defconfig configuration files generated using the kconfig-frontends tools
+  as described in the preceding secition.  Support for the older, legacy,
+  manual configurations was eliminated in NuttX 7.0; suppport for
+  uncompressed .config-files-as-defconfig files was eliminated after
+  NuttX-7.21.  All configurations must now be done using the
+  kconfig-frontends tool.  The older manual configurations and the new
+  kconfig-frontends configurations are not compatible.  Old legacy
+  configurations can *not* be used with the kconfig-frontends tool and,
+  hence, cannot be used with releases of NuttX 7.0 and beyond:
 
   If you run 'make menuconfig' with a legacy configuration the resulting
   configuration will probably not be functional.
@@ -959,10 +1009,18 @@ Incompatibilities with Older Configurations
 
     make oldconfig
 
+  OR
+
+    make olddefconfig
+
   This will make sure that the configuration is up-to-date in the event that
   it has lapsed behind the current NuttX development (see the paragraph
   "Refreshing Configurations" above).  But this only works with *new*
-  configuration files created with the kconfig-frontends tools
+  configuration files created with the kconfig-frontends tools.
+
+  Further, this step is *NOT* optional with the new, compressed defconfig
+  files.  It is a necessary step that will also uncompress the defconfig
+  file, regenerating the .config and making it usable for NuttX builds.
 
   Never do 'make oldconfig' (OR 'make menuconfig') on a  configuration that
   has not been converted to use the kconfig-frontends tools!  This will
@@ -1113,11 +1171,11 @@ Building
   the path to where your cross-development tools are installed, the
   following steps are all that are required to build NuttX:
 
-    cd ${TOPDIR}
+    cd{TOPDIR}
     make
 
   At least one configuration (eagle100) requires additional command line
-  arguments on the make command.  Read ${TOPDIR}/configs/<board-name>/README.txt
+  arguments on the make command.  Read{TOPDIR}/configs/<board-name>/README.txt
   to see if that applies to your target.
 
 Re-building
@@ -1363,7 +1421,7 @@ Strange Path Problems
   the wrong version of a tool.  For example, you may not be using Cygwin's
   'make' program at /usr/bin/make.  Try:
 
-    $ which make
+    which make
     /usr/bin/make
 
   When you install some toolchains (such as Yargarto or CodeSourcery tools),
@@ -1377,7 +1435,7 @@ Strange Path Problems
   1. Edit your PATH to remove the path to the GNUWin32 tools, or
   2. Put /usr/local/bin, /usr/bin, and /bin at the front of your path:
 
-     $ export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
+     export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
 
 Window Native Toolchain Issues
 ------------------------------

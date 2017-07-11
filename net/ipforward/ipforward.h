@@ -259,7 +259,35 @@ int ipfwd_forward(FAR struct forward_s *fwd);
 
 void ipfwd_poll(FAR struct net_driver_s *dev);
 
+/****************************************************************************
+ * Name: ipfwd_dropstats
+ *
+ * Description:
+ *   Update statistics for a dropped packet.
+ *
+ * Input Parameters:
+ *   fwd - The forwarding state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_STATISTICS
+void ipfwd_dropstats(FAR struct forward_s *fwd);
+#else
+#  define ipfwd_dropstats(fwd)
+#endif
+
 #endif /* CONFIG_NETDEV_MULTINIC */
+
+/* Duplicates some forward references that are only available when
+ * CONFIG_NETDEV_MULTINIC is enabled.
+ */
+
+struct net_driver_s; /* Forward reference */
+struct ipv4_hdr_s;   /* Forward reference */
+struct ipv6_hdr_s;   /* Forward reference */
 
 /****************************************************************************
  * Name: ipv4_forward
@@ -361,26 +389,6 @@ void ipv6_dropstats(FAR struct ipv6_hdr_s *ipv6);
 void ipv4_dropstats(FAR struct ipv4_hdr_s *ipv4);
 #else
 #  define ipv4_dropstats(ipv4)
-#endif
-
-/****************************************************************************
- * Name: ipfwd_dropstats
- *
- * Description:
- *   Update statistics for a dropped packet.
- *
- * Input Parameters:
- *   fwd - The forwarding state structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_STATISTICS
-void ipfwd_dropstats(FAR struct forward_s *fwd)
-#else
-#  define ipfwd_dropstats(fwd)
 #endif
 
 #endif /* CONFIG_NET_IPFORWARD */
