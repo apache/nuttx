@@ -1,7 +1,7 @@
 ##############################################################################
-# configs/us7032evb1/ostest/Make.defs
+# configs/us7032evb1/scripts/Make.defs
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,48 +37,48 @@ include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION	= -g
+  ARCHOPTIMIZATION = -g
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION	+= -Os -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
+  ARCHOPTIMIZATION += -Os -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
 endif
 
-ARCHCPUFLAGS		= -m1 -fno-builtin
-ARCHPICFLAGS		= -fpic
-ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHDEFINES		=
-ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include
-ARCHSCRIPT		= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script
+ARCHCPUFLAGS = -m1 -fno-builtin
+ARCHPICFLAGS = -fpic
+ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHDEFINES =
+ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
+ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/sdram.ld
 
-CROSSDEV		= sh-nuttx-elf-
-CC			= $(CROSSDEV)gcc
-CPP			= $(CROSSDEV)gcc -E
-LD			= $(CROSSDEV)ld
-AR			= $(CROSSDEV)ar rcs
-NM			= $(CROSSDEV)nm
-OBJCOPY			= $(CROSSDEV)objcopy
-OBJDUMP			= $(CROSSDEV)objdump
+CROSSDEV = sh-nuttx-elf-
+CC = $(CROSSDEV)gcc
+CPP = $(CROSSDEV)gcc -E
+LD = $(CROSSDEV)ld
+AR = $(CROSSDEV)ar rcs
+NM = $(CROSSDEV)nm
+OBJCOPY = $(CROSSDEV)objcopy
+OBJDUMP = $(CROSSDEV)objdump
 
-CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
-CPPFLAGS		= $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
-AFLAGS			= $(CFLAGS) -D__ASSEMBLY__
+CFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
+   $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
+CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
+AFLAGS = $(CFLAGS) -D__ASSEMBLY__
 
-ASMEXT			= .S
-OBJEXT			= .o
-LIBEXT			= .a
-EXEEXT			=
+ASMEXT = .S
+OBJEXT = .o
+LIBEXT = .a
+EXEEXT =
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  LDFLAGS		+= -g
+  LDFLAGS += -g
 endif
 
 
-MKDEP			= $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
+MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
 
-HOSTCC			= gcc
-HOSTINCLUDES		= -I.
-HOSTCFLAGS		= -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
-HOSTLDFLAGS		=
+HOSTCC = gcc
+HOSTINCLUDES = -I.
+HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
+HOSTLDFLAGS =
 
