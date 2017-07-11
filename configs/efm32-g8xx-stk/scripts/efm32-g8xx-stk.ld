@@ -1,9 +1,7 @@
 /****************************************************************************
- * configs/ekk-lm3s9b96/ostest/ld.script
+ * configs/efm32-g8xx-stk/scripts/efm32-g8xx-stk.ld
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Jose Pablo Rojas V. <jrojas@nx-engineering.com>
+ *   Copyright (C) 2012, 2014, 2017 Gregory Nutt. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,18 +32,16 @@
  *
  ****************************************************************************/
 
-/* The LM3S9B96 has 256Kb of FLASH beginning at address 0x0000:0000 and 96Kb
- * of SRAM beginning at 0x2000:0000.
- */
-
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x00000000, LENGTH = 256K
-    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 96K
+    flash (rx) : ORIGIN = 0x00000000, LENGTH = 131072
+    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 16384
 }
 
 OUTPUT_ARCH(arm)
+EXTERN(_vectors)
 ENTRY(_stext)
+
 SECTIONS
 {
 	.text : {
@@ -98,6 +94,7 @@ SECTIONS
 		_ebss = ABSOLUTE(.);
 	} > sram
 
+	/* Stabs debugging sections. */
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }

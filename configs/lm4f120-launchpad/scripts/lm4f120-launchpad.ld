@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/freedom-kl26z/scripts/ld.script
+ * configs/lm4f120-launchpad/scripts/lm4f120-launchpad.ld
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,36 +33,24 @@
  *
  ****************************************************************************/
 
-/* The MKL26Z128 has 128Kb of FLASH beginning at address 0x00000000 and
- * 16Kb of SRAM at address 0x1ffff000.
+/* The LM4F120H5QR has 256Kb of FLASH beginning at address 0x0000:0000 and
+ * 32Kb of SRAM beginning at 0x2000:0000.
  */
 
 MEMORY
 {
-	vectflash (rx)  : ORIGIN = 0x00000000, LENGTH = 0x00c0
-	cfmprotect (rx) : ORIGIN = 0x00000400, LENGTH = 0x10
-	progflash (rx)  : ORIGIN = 0x00000410, LENGTH = 128K - 0x410
-	datasram (rwx)  : ORIGIN = 0x1ffff000, LENGTH = 16K
+    flash (rx) : ORIGIN = 0x00000000, LENGTH = 256K
+    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 32K
 }
 
 OUTPUT_ARCH(arm)
-EXTERN(_vectors)
-EXTERN(_cfmconfig)
 ENTRY(_stext)
+
 SECTIONS
 {
-	.vectors : {
-		_svectors = ABSOLUTE(.);
-		*(.vectors)
-		_evectors = ABSOLUTE(.);
-	} > vectflash
-
-	.cfmprotect : {
-		*(.cfmconfig)
-	} > cfmprotect
-
 	.text : {
 		_stext = ABSOLUTE(.);
+		*(.vectors)
 		*(.text .text.*)
 		*(.fixup)
 		*(.gnu.warning)
@@ -74,23 +62,25 @@ SECTIONS
 		*(.gcc_except_table)
 		*(.gnu.linkonce.r.*)
 		_etext = ABSOLUTE(.);
-	} > progflash
+	} > flash
 
 	.init_section : {
 		_sinit = ABSOLUTE(.);
 		*(.init_array .init_array.*)
 		_einit = ABSOLUTE(.);
-	} > progflash
+	} > flash
 
 	.ARM.extab : {
 		*(.ARM.extab*)
-	} > progflash
+	} > flash
 
 	__exidx_start = ABSOLUTE(.);
 	.ARM.exidx : {
 		*(.ARM.exidx*)
-	} > progflash
+	} > flash
 	__exidx_end = ABSOLUTE(.);
+
+	_eronly = ABSOLUTE(.);
 
 	.data : {
 		_sdata = ABSOLUTE(.);
@@ -98,17 +88,7 @@ SECTIONS
 		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
-	} > datasram AT > progflash
-
-	_eronly = LOADADDR(.data);
-
-	.ramfunc ALIGN(4): {
-		_sramfuncs = ABSOLUTE(.);
-		*(.ramfunc  .ramfunc.*)
-		_eramfuncs = ABSOLUTE(.);
-	} > datasram AT > progflash
-
-	_framfuncs = LOADADDR(.ramfunc);
+	} > sram AT > flash
 
 	.bss : {
 		_sbss = ABSOLUTE(.);
@@ -116,9 +96,10 @@ SECTIONS
 		*(.gnu.linkonce.b.*)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
-	} > datasram
+	} > sram
 
 	/* Stabs debugging sections. */
+
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }

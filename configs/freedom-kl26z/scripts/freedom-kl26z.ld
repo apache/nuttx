@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/kwikstik-k40/scripts/ld.script
+ * configs/freedom-kl26z/scripts/freedom-kl26z.ld
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  *
  ****************************************************************************/
 
-/* The MKL25Z128 has 128Kb of FLASH beginning at address 0x00000000 and
+/* The MKL26Z128 has 128Kb of FLASH beginning at address 0x00000000 and
  * 16Kb of SRAM at address 0x1ffff000.
  */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/fire-stm32v2/scripts/ld.script
+ * configs/lm3s6432-s2e/scripts/lm3s6432-s2e.ld
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,17 +33,14 @@
  *
  ****************************************************************************/
 
-/* The STM32F103VET6 has 512Kb of FLASH beginning at address 0x0800:0000 and
- * 64Kb of SRAM beginning at address 0x2000:0000.  When booting from FLASH,
- * FLASH memory is aliased to address 0x0000:0000 where the code expects to
- * begin execution by jumping to the entry point in the 0x0800:0000 address
- * range.
+/* The LM3S6432 has 96Kb of FLASH beginning at address 0x0000:0000 and 32Kb
+ * of SRAM beginning at 0x2000:0000.
  */
 
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x08000000, LENGTH = 512K
-    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
+    flash (rx) : ORIGIN = 0x00000000, LENGTH = 96K
+    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 32K
 }
 
 OUTPUT_ARCH(arm)
@@ -84,7 +81,7 @@ SECTIONS
 
 	_eronly = ABSOLUTE(.);
 
-	/* The STM32F103Z has 64Kb of SRAM beginning at the following address */
+	/* The LM3S6432 has 32Kb of SRAM beginning at the following address */
 
 	.data : {
 		_sdata = ABSOLUTE(.);
@@ -94,15 +91,14 @@ SECTIONS
 		_edata = ABSOLUTE(.);
 	} > sram AT > flash
 
-	.bss : {
+	.bss : {			/* BSS				*/
 		_sbss = ABSOLUTE(.);
 		*(.bss .bss.*)
 		*(.gnu.linkonce.b.*)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
 	} > sram
-
-	/* Stabs debugging sections. */
+					/* Stabs debugging sections.	*/
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }

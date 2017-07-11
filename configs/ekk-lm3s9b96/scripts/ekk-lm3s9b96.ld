@@ -1,8 +1,9 @@
 /****************************************************************************
- * configs/lm3s6432-s2e/scripts/ld.script
+ * configs/ekk-lm3s9b96/ostest/ekk-lm3s9b96.ld
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Jose Pablo Rojas V. <jrojas@nx-engineering.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,14 +34,14 @@
  *
  ****************************************************************************/
 
-/* The LM3S6432 has 96Kb of FLASH beginning at address 0x0000:0000 and 32Kb
+/* The LM3S9B96 has 256Kb of FLASH beginning at address 0x0000:0000 and 96Kb
  * of SRAM beginning at 0x2000:0000.
  */
 
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x00000000, LENGTH = 96K
-    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 32K
+    flash (rx) : ORIGIN = 0x00000000, LENGTH = 256K
+    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 96K
 }
 
 OUTPUT_ARCH(arm)
@@ -81,8 +82,6 @@ SECTIONS
 
 	_eronly = ABSOLUTE(.);
 
-	/* The LM3S6432 has 32Kb of SRAM beginning at the following address */
-
 	.data : {
 		_sdata = ABSOLUTE(.);
 		*(.data .data.*)
@@ -91,14 +90,14 @@ SECTIONS
 		_edata = ABSOLUTE(.);
 	} > sram AT > flash
 
-	.bss : {			/* BSS				*/
+	.bss : {
 		_sbss = ABSOLUTE(.);
 		*(.bss .bss.*)
 		*(.gnu.linkonce.b.*)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
 	} > sram
-					/* Stabs debugging sections.	*/
+
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }
