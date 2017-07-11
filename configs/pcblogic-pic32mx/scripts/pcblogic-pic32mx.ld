@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/pcblogic-pic32mx/nsh/ld.script
+ * configs/pcblogic-pic32mx/scripts/pcblogic-pic32mx.ld
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
