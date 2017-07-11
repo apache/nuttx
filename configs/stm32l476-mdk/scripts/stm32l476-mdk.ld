@@ -1,9 +1,10 @@
 /****************************************************************************
- * configs/stm32vldiscovery/scripts/ld.script
+ * configs/stm32l476-mdk/scripts/stm32l476-mdk.ld
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Freddie Chopin <freddie_chopin@op.pl>
+ *           Sebastien Lorquet <sebastien@lorquet.fr>
+ *           dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,22 +35,26 @@
  *
  ****************************************************************************/
 
-/* The STM32F100RC has 256kB of FLASH beginning at address 0x08000000 and 24kB
- * of SRAM beginning at address 0x20000000.  When booting from FLASH, FLASH
- * memory is aliased to address 0x00000000 where the code expects to begin
- * execution by jumping to the entry point in the 0x08000000 address range.
+/* The STM32L476VG has 1024Kb of FLASH beginning at address 0x0800:0000,
+ * 96Kb of SRAM beginning at address 0x2000:0000, and 32Kb of SRAM2 beginning
+ * at address 0x1000:0000.  The SRAM2 has special properties (e.g. parity
+ * check, separate power domain for retention in low power modes, write
+ * protection).  Alas, it is non-contiguous with main SRAM.
+ * When booting from FLASH,
+ * FLASH memory is aliased to address 0x0000:0000 where the code expects to
+ * begin execution by jumping to the entry point in the 0x0800:0000 address
+ * range.
  */
 
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x08000000, LENGTH = 256K
-    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 24K
+    flash (rx) : ORIGIN = 0x08000000, LENGTH = 1024K
+    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 96K
+    sram2 (rwx) : ORIGIN = 0x10000000, LENGTH = 32K
 }
 
 OUTPUT_ARCH(arm)
-EXTERN(_vectors)
 ENTRY(_stext)
-
 SECTIONS
 {
 	.text : {
@@ -85,6 +90,8 @@ SECTIONS
 	__exidx_end = ABSOLUTE(.);
 
 	_eronly = ABSOLUTE(.);
+
+	/* The STM32L476RG has 96Kb of SRAM beginning at the following address */
 
 	.data : {
 		_sdata = ABSOLUTE(.);

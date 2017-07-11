@@ -1,7 +1,7 @@
 ############################################################################
-# configs/teensy-lc/nsh/Make.defs
+# configs/teensy-lc/scripts/Make.defs
 #
-#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@ include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
 include ${TOPDIR}/arch/arm/src/armv6-m/Toolchain.defs
 
-LDSCRIPT = ld.script
+LDSCRIPT = teensy-lc.ld
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains

@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/stm32l476-mdk/scripts/ld.script
+ * configs/stm32l476vg-disco/scripts/stm32l476vg-disco.ld
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Sebastien Lorquet <sebastien@lorquet.fr>
  *           dev@ziggurat29.com
@@ -48,7 +48,7 @@
 
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x08000000, LENGTH = 1024K
+    flash (rx) : ORIGIN = 0x08000000, LENGTH = 512K
     sram (rwx) : ORIGIN = 0x20000000, LENGTH = 96K
     sram2 (rwx) : ORIGIN = 0x10000000, LENGTH = 32K
 }

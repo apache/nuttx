@@ -1,8 +1,9 @@
 /****************************************************************************
- * configs/u-blox-c027/scripts/ld.script
+ * configs/stm32vldiscovery/scripts/stm32vldiscovery.ld
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Freddie Chopin <freddie_chopin@op.pl>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,21 +34,22 @@
  *
  ****************************************************************************/
 
-/* The LPC1768 has 512Kb of FLASH beginning at address 0x0000:0000 and
- * 64Kb of total SRAM: 32Kb of SRAM in the CPU block beginning at address
- * 0x10000000 and 32Kb of AHB SRAM in two banks of 16Kb beginning at addresses
- * 0x20070000 and 0x20080000.  Here we assume that .data and .bss will all fit
- * into the 32Kb CPU SRAM address range.
+/* The STM32F100RC has 256kB of FLASH beginning at address 0x08000000 and 24kB
+ * of SRAM beginning at address 0x20000000.  When booting from FLASH, FLASH
+ * memory is aliased to address 0x00000000 where the code expects to begin
+ * execution by jumping to the entry point in the 0x08000000 address range.
  */
 
 MEMORY
 {
-	flash (rx) : ORIGIN = 0x00000000, LENGTH = 512K
-	sram (rwx) : ORIGIN = 0x10000000, LENGTH = 32K
+    flash (rx) : ORIGIN = 0x08000000, LENGTH = 256K
+    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 24K
 }
 
 OUTPUT_ARCH(arm)
+EXTERN(_vectors)
 ENTRY(_stext)
+
 SECTIONS
 {
 	.text : {
@@ -100,8 +102,7 @@ SECTIONS
 		_ebss = ABSOLUTE(.);
 	} > sram
 
-	/* Stabs debugging sections */
-
+	/* Stabs debugging sections. */
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }

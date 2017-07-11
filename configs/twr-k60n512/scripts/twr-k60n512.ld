@@ -1,10 +1,8 @@
 /****************************************************************************
- * configs/stm32l476vg-disco/scripts/l476rg.ld
+ * configs/twr-k60n512/scripts/twr-k60n512.ld
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Sebastien Lorquet <sebastien@lorquet.fr>
- *           dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,31 +33,44 @@
  *
  ****************************************************************************/
 
-/* The STM32L476VG has 1024Kb of FLASH beginning at address 0x0800:0000,
- * 96Kb of SRAM beginning at address 0x2000:0000, and 32Kb of SRAM2 beginning
- * at address 0x1000:0000.  The SRAM2 has special properties (e.g. parity
- * check, separate power domain for retention in low power modes, write
- * protection).  Alas, it is non-contiguous with main SRAM.
- * When booting from FLASH,
- * FLASH memory is aliased to address 0x0000:0000 where the code expects to
- * begin execution by jumping to the entry point in the 0x0800:0000 address
- * range.
+/* The K60N512VMD100 has 512Kb of FLASH beginning at address 0x0000:0000 and
+ * 128Kb of SRAM beginning at address 0x1800:0000 (SRAM_L) and 0x2000:000
+ * (SRAM_U).
+ *
+ * NOTE: that the first part of the K40 FLASH region is reserved for
+ *       interrupt vectflash and, following that, is a region from 0x0000:0400
+ *       to 0x0000:040f that is reserved for the FLASH control fields (FCF).
+ *
+ * NOTE: The on-chip RAM is split evenly among SRAM_L and SRAM_U. The RAM is
+ *       also implemented such that the SRAM_L and SRAM_U ranges form a
+ *       contiguous block in the memory map.
  */
 
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x08000000, LENGTH = 512K
-    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 96K
-    sram2 (rwx) : ORIGIN = 0x10000000, LENGTH = 32K
+	vectflash (rx)  : ORIGIN = 0x00000000, LENGTH = 1K
+	cfmprotect (rx) : ORIGIN = 0x00000400, LENGTH = 16
+	progflash (rx)  : ORIGIN = 0x00000800, LENGTH = 512K - 2K
+	datasram (rwx)  : ORIGIN = 0x1fff0000, LENGTH = 128K
 }
 
 OUTPUT_ARCH(arm)
 ENTRY(_stext)
+EXTERN(__flashconfigbytes)
 SECTIONS
 {
+	.vectors : {
+		_svectors = ABSOLUTE(.);
+		*(.vectors)
+		_evectors = ABSOLUTE(.);
+	} > vectflash
+
+	.cfmprotect : {
+		KEEP(*(.cfmconfig))
+	} > cfmprotect
+
 	.text : {
 		_stext = ABSOLUTE(.);
-		*(.vectors)
 		*(.text .text.*)
 		*(.fixup)
 		*(.gnu.warning)
@@ -71,27 +82,23 @@ SECTIONS
 		*(.gcc_except_table)
 		*(.gnu.linkonce.r.*)
 		_etext = ABSOLUTE(.);
-	} > flash
+	} > progflash
 
 	.init_section : {
 		_sinit = ABSOLUTE(.);
 		*(.init_array .init_array.*)
 		_einit = ABSOLUTE(.);
-	} > flash
+	} > progflash
 
 	.ARM.extab : {
 		*(.ARM.extab*)
-	} > flash
+	} > progflash
 
 	__exidx_start = ABSOLUTE(.);
 	.ARM.exidx : {
 		*(.ARM.exidx*)
-	} > flash
+	} > progflash
 	__exidx_end = ABSOLUTE(.);
-
-	_eronly = ABSOLUTE(.);
-
-	/* The STM32L476RG has 96Kb of SRAM beginning at the following address */
 
 	.data : {
 		_sdata = ABSOLUTE(.);
@@ -99,7 +106,17 @@ SECTIONS
 		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
-	} > sram AT > flash
+	} > datasram AT > progflash
+
+	_eronly = LOADADDR(.data);
+
+	.ramfunc ALIGN(4): {
+		_sramfuncs = ABSOLUTE(.);
+		*(.ramfunc  .ramfunc.*)
+		_eramfuncs = ABSOLUTE(.);
+	} > datasram AT > progflash
+
+	_framfuncs = LOADADDR(.ramfunc);
 
 	.bss : {
 		_sbss = ABSOLUTE(.);
@@ -107,7 +124,7 @@ SECTIONS
 		*(.gnu.linkonce.b.*)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
-	} > sram
+	} > datasram
 
 	/* Stabs debugging sections. */
 	.stab 0 : { *(.stab) }

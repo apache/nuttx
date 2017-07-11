@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/teensy-lc/scripts/ld.script
+ * configs/u-blox-c027/scripts/u-blox-c027.ld
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,36 +33,26 @@
  *
  ****************************************************************************/
 
-/* The Teensy LC has 64kB of flash and 8 kB of RAM.  2 kB of flash is */
-/* reserved for the bootloader.
+/* The LPC1768 has 512Kb of FLASH beginning at address 0x0000:0000 and
+ * 64Kb of total SRAM: 32Kb of SRAM in the CPU block beginning at address
+ * 0x10000000 and 32Kb of AHB SRAM in two banks of 16Kb beginning at addresses
+ * 0x20070000 and 0x20080000.  Here we assume that .data and .bss will all fit
+ * into the 32Kb CPU SRAM address range.
  */
 
 MEMORY
 {
-	vectflash (rx)  : ORIGIN = 0x00000000, LENGTH = 0x00c0
-	cfmprotect (rx) : ORIGIN = 0x00000400, LENGTH = 0x10
-	progflash (rx)  : ORIGIN = 0x00000410, LENGTH = 64K - 2K - 0x410
-	datasram (rwx)  : ORIGIN = 0x1ffff800, LENGTH = 8K
+	flash (rx) : ORIGIN = 0x00000000, LENGTH = 512K
+	sram (rwx) : ORIGIN = 0x10000000, LENGTH = 32K
 }
 
 OUTPUT_ARCH(arm)
-EXTERN(_vectors)
-EXTERN(_cfmconfig)
 ENTRY(_stext)
 SECTIONS
 {
-	.vectors : {
-		_svectors = ABSOLUTE(.);
-		*(.vectors)
-		_evectors = ABSOLUTE(.);
-	} > vectflash
-
-	.cfmprotect : {
-		*(.cfmconfig)
-	} > cfmprotect
-
 	.text : {
 		_stext = ABSOLUTE(.);
+		*(.vectors)
 		*(.text .text.*)
 		*(.fixup)
 		*(.gnu.warning)
@@ -74,23 +64,25 @@ SECTIONS
 		*(.gcc_except_table)
 		*(.gnu.linkonce.r.*)
 		_etext = ABSOLUTE(.);
-	} > progflash
+	} > flash
 
 	.init_section : {
 		_sinit = ABSOLUTE(.);
 		*(.init_array .init_array.*)
 		_einit = ABSOLUTE(.);
-	} > progflash
+	} > flash
 
 	.ARM.extab : {
 		*(.ARM.extab*)
-	} > progflash
+	} > flash
 
 	__exidx_start = ABSOLUTE(.);
 	.ARM.exidx : {
 		*(.ARM.exidx*)
-	} > progflash
+	} > flash
 	__exidx_end = ABSOLUTE(.);
+
+	_eronly = ABSOLUTE(.);
 
 	.data : {
 		_sdata = ABSOLUTE(.);
@@ -98,17 +90,7 @@ SECTIONS
 		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
-	} > datasram AT > progflash
-
-	_eronly = LOADADDR(.data);
-
-	.ramfunc ALIGN(4): {
-		_sramfuncs = ABSOLUTE(.);
-		*(.ramfunc  .ramfunc.*)
-		_eramfuncs = ABSOLUTE(.);
-	} > datasram AT > progflash
-
-	_framfuncs = LOADADDR(.ramfunc);
+	} > sram AT > flash
 
 	.bss : {
 		_sbss = ABSOLUTE(.);
@@ -116,9 +98,10 @@ SECTIONS
 		*(.gnu.linkonce.b.*)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
-	} > datasram
+	} > sram
 
-	/* Stabs debugging sections. */
+	/* Stabs debugging sections */
+
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }
