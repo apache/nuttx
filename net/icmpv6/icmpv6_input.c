@@ -224,7 +224,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
     case ICMPV6_ROUTER_ADVERTISE:
       {
         FAR struct icmpv6_router_advertise_s *adv;
-        FAR uint8_t uint8_t *options;
+        FAR uint8_t *options;
         uint16_t pktlen;
         uint16_t optlen;
         int ndx;
