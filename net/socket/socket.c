@@ -201,6 +201,78 @@ static int psock_local_alloc(FAR struct socket *psock)
 #endif /* CONFIG_NET_LOCAL */
 
 /****************************************************************************
+ * Name: usrsock_socket_setup
+ *
+ * Description:
+ *   Special socket setup may be required by user sockets.
+ *
+ * Parameters:
+ *   domain   (see sys/socket.h)
+ *   type     (see sys/socket.h)
+ *   protocol (see sys/socket.h)
+ *   psock    A pointer to a user allocated socket structure to be initialized.
+ *
+ * Returned Value:
+ *   0 on success; -1 on error with errno set appropriately
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_USRSOCK
+static int usrsock_socket_setup(int domain, int type, int protocol,
+                                FAR struct socket *psock)
+{
+  int errcode;
+  int ret;
+
+  switch (domain)
+    {
+      default:
+        break;
+
+      case PF_INET:
+      case PF_INET6:
+        {
+#ifndef CONFIG_NET_USRSOCK_UDP
+          if (type == SOCK_DGRAM)
+            {
+              break;
+            }
+#endif
+#ifndef CONFIG_NET_USRSOCK_TCP
+          if (type == SOCK_STREAM)
+            {
+              break;
+            }
+#endif
+          psock->s_type = 0;
+          psock->s_conn = NULL;
+
+          ret = usrsock_socket(domain, type, protocol, psock);
+          if (ret >= 0)
+            {
+              /* Successfully handled and opened by usrsock daemon. */
+
+              return OK;
+            }
+          else if (ret == -ENETDOWN)
+            {
+              /* Net down means that usrsock daemon is not running.
+               * Attempt to open socket with kernel networking stack.
+               */
+            }
+          else
+            {
+              return ret;
+            }
+        }
+    }
+
+  return OK;
+}
+#else
+#endif /* CONFIG_NET_USRSOCK */
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -252,43 +324,11 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
   int errcode;
 
 #ifdef CONFIG_NET_USRSOCK
-  switch (domain)
+  ret = usrsock_socket_setup(domain, type, protocol, psock);
+  if (ret < 0)
     {
-      default:
-        break;
-
-      case PF_INET:
-      case PF_INET6:
-        {
-#ifndef CONFIG_NET_USRSOCK_UDP
-          if (type == SOCK_DGRAM)
-            break;
-#endif
-#ifndef CONFIG_NET_USRSOCK_TCP
-          if (type == SOCK_STREAM)
-            break;
-#endif
-          psock->s_type = 0;
-          psock->s_conn = NULL;
-
-          ret = usrsock_socket(domain, type, protocol, psock);
-          if (ret >= 0)
-            {
-              /* Successfully handled and opened by usrsock daemon. */
-
-              return OK;
-            }
-          else if (ret == -ENETDOWN)
-            {
-              /* Net down means that usrsock daemon is not running.
-               * Attempt to open socket with kernel networking stack. */
-            }
-          else
-            {
-              errcode = -ret;
-              goto errout;
-            }
-        }
+      errcode = -ret;
+      goto errout;
     }
 #endif /* CONFIG_NET_USRSOCK */
 
