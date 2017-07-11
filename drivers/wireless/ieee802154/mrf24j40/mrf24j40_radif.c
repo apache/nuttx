@@ -258,7 +258,6 @@ int mrf24j40_reset(FAR struct ieee802154_radio_s *radio)
 
   mrf24j40_setreg(dev->spi, MRF24J40_ACKTMOUT, 0x39 | MRF24J40_ACKTMOUT_DRPACK);
 
-
   /* Enable the SLPIF and WAKEIF flags */
 
   reg = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
