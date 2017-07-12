@@ -290,18 +290,9 @@ int mrf24j40_setcoordeaddr(FAR struct mrf24j40_radio_s *dev,
  *
  ****************************************************************************/
 
-int mrf24j40_setdevmode(FAR struct mrf24j40_radio_s *dev,
-                        uint8_t mode)
+int mrf24j40_setdevmode(FAR struct mrf24j40_radio_s *dev, uint8_t mode)
 {
-  int ret = OK;
   uint8_t reg;
-
-  /* Disable slotted mode until I decide to implement slotted mode */
-
-  reg = mrf24j40_getreg(dev->spi, MRF24J40_TXMCR);
-  reg &= ~MRF24J40_TXMCR_SLOTTED;
-  mrf24j40_setreg(dev->spi, MRF24J40_TXMCR, reg);
-  mrf24j40_setreg(dev->spi, MRF24J40_ORDER, 0xFF);
 
   /* Define dev mode */
 
@@ -329,7 +320,7 @@ int mrf24j40_setdevmode(FAR struct mrf24j40_radio_s *dev,
 
   mrf24j40_setreg(dev->spi, MRF24J40_RXMCR, reg);
   dev->devmode = mode;
-  return ret;
+  return OK;
 }
 
 /****************************************************************************

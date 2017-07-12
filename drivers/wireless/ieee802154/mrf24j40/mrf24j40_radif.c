@@ -530,42 +530,37 @@ int mrf24j40_setattr(FAR struct ieee802154_radio_s *radio,
                             FAR const union ieee802154_attr_u *attrval)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
-  int ret;
+  int ret = IEEE802154_STATUS_SUCCESS;;
 
   switch (attr)
     {
       case IEEE802154_ATTR_MAC_PANID:
         {
           mrf24j40_setpanid(dev, attrval->mac.panid);
-          ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
 
       case IEEE802154_ATTR_MAC_SADDR:
         {
           mrf24j40_setsaddr(dev, attrval->mac.saddr);
-          ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
 
       case IEEE802154_ATTR_MAC_EADDR:
         {
           mrf24j40_seteaddr(dev, attrval->mac.eaddr);
-          ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
 
       case IEEE802154_ATTR_MAC_COORD_SADDR:
         {
           mrf24j40_setcoordsaddr(dev, attrval->mac.coordsaddr);
-          ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
 
       case IEEE802154_ATTR_MAC_COORD_EADDR:
         {
           mrf24j40_setcoordeaddr(dev, attrval->mac.coordeaddr);
-          ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
 
@@ -579,16 +574,18 @@ int mrf24j40_setattr(FAR struct ieee802154_radio_s *radio,
             {
               mrf24j40_setrxmode(dev, MRF24J40_RXMODE_NORMAL);
             }
-
-          ret = IEEE802154_STATUS_SUCCESS;
         }
         break;
-
 
       case IEEE802154_ATTR_PHY_CHAN:
         {
           mrf24j40_setchannel(dev, attrval->phy.chan);
-          ret = IEEE802154_STATUS_SUCCESS;
+        }
+        break;
+
+      case IEEE802154_ATTR_MAC_DEVMODE:
+        {
+          mrf24j40_setdevmode(dev, attrval->mac.devmode);
         }
         break;
 
@@ -709,4 +706,3 @@ int mrf24j40_sfupdate(FAR struct ieee802154_radio_s *radio,
 
   return OK;
 }
-
