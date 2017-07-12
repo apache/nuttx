@@ -537,7 +537,6 @@ static const struct usb_epdesc_s g_ep0desc =
   .type          = USB_DESC_TYPE_ENDPOINT,
   .addr          = EP0,
   .attr          = USB_EP_ATTR_XFER_CONTROL,
-  // REVISIT:
   .mxpacketsize  = {64, 0},
   .interval      = 0
 };
@@ -581,7 +580,6 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
   TRACE_STR_END
 };
 #endif
-
 
 /* Interrupt event strings that may be enabled for more desciptive USB trace
  * output.
@@ -637,45 +635,9 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
   TRACE_STR(SAM_TRACEINTID_EP0WRSTATUS),
   TRACE_STR(SAM_TRACEINTID_EPTRCPT0_LEN),
 
-  /*
-  TRACE_STR(SAM_TRACEINTID_ADDRESSED),
-  TRACE_STR(SAM_TRACEINTID_CLEARFEATURE),
-  TRACE_STR(SAM_TRACEINTID_RXSUSP),
-  TRACE_STR(SAM_TRACEINTID_DEVGETSTATUS),
-  TRACE_STR(SAM_TRACEINTID_DISPATCH),
-  TRACE_STR(SAM_TRACEINTID_ENDBUSRES),
-  TRACE_STR(SAM_TRACEINTID_EP),
-  TRACE_STR(SAM_TRACEINTID_EP0SETUPIN),
-  TRACE_STR(SAM_TRACEINTID_EP0SETUPOUT),
-  TRACE_STR(SAM_TRACEINTID_EP0SETUPSETADDRESS),
-  TRACE_STR(SAM_TRACEINTID_EPGETSTATUS),
-  TRACE_STR(SAM_TRACEINTID_EPINQEMPTY),
-  TRACE_STR(SAM_TRACEINTID_EPOUTQEMPTY),
-  TRACE_STR(SAM_TRACEINTID_GETCONFIG),
-  TRACE_STR(SAM_TRACEINTID_GETSETDESC),
-  TRACE_STR(SAM_TRACEINTID_GETSETIF),
-  TRACE_STR(SAM_TRACEINTID_GETSTATUS),
-  TRACE_STR(SAM_TRACEINTID_IFGETSTATUS),
-  TRACE_STR(SAM_TRACEINTID_SOF),
-  TRACE_STR(SAM_TRACEINTID_NOSTDREQ),
-  TRACE_STR(SAM_TRACEINTID_RXDATABK0),
-  TRACE_STR(SAM_TRACEINTID_RXDATABK1),
-  TRACE_STR(SAM_TRACEINTID_RXSETUP),
-  TRACE_STR(SAM_TRACEINTID_SETCONFIG),
-  TRACE_STR(SAM_TRACEINTID_SETFEATURE),
-  TRACE_STR(SAM_TRACEINTID_STALLSNT),
-  TRACE_STR(SAM_TRACEINTID_SYNCHFRAME),
-  TRACE_STR(SAM_TRACEINTID_TXCOMP),
-  TRACE_STR(SAM_TRACEINTID_UPSTRRES),
-  TRACE_STR(SAM_TRACEINTID_WAKEUP),
-  */
   TRACE_STR_END
 };
 #endif
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Private Functions
@@ -1213,7 +1175,7 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
 
           /* setup 0 length TX transfer */
 
-          priv->eplist[0].descb[1]->addr = (uint32_t) &priv->ep0out[0];
+          priv->eplist[0].descb[1]->addr     = (uint32_t) &priv->ep0out[0];
           priv->eplist[0].descb[1]->pktsize &= ~USBDEV_PKTSIZE_BCNT_MASK;
           priv->eplist[0].descb[1]->pktsize &= ~USBDEV_PKTSIZE_MPKTSIZE_MASK;
           priv->eplist[0].descb[1]->pktsize |= USBDEV_PKTSIZE_BCNT(0);
@@ -1354,14 +1316,14 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
 
   /* activate new read request from queue */
 
-  privep->rxactive = true;
+  privep->rxactive  = true;
   privreq->req.xfrd = 0;
   privreq->inflight = privreq->req.len;
   priv->eplist[epno].descb[0]->addr = (uint32_t) privreq->req.buf;
-  packetsize = priv->eplist[epno].descb[0]->pktsize;
-  packetsize &= ~USBDEV_PKTSIZE_BCNT_MASK;
-  packetsize &= ~USBDEV_PKTSIZE_MPKTSIZE_MASK;
-  packetsize |=  USBDEV_PKTSIZE_MPKTSIZE(privreq->inflight);
+  packetsize        = priv->eplist[epno].descb[0]->pktsize;
+  packetsize       &= ~USBDEV_PKTSIZE_BCNT_MASK;
+  packetsize       &= ~USBDEV_PKTSIZE_MPKTSIZE_MASK;
+  packetsize       |=  USBDEV_PKTSIZE_MPKTSIZE(privreq->inflight);
   sam_putreg8(USBDEV_EPSTATUS_BK0RDY, SAM_USBDEV_EPSTATUSCLR(epno));
 
   return OK;
@@ -1464,7 +1426,7 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
 
   /* Initialize the endpoint structure */
 
-  privep->ep.eplog     = desc->addr;              /* Includes direction */
+  privep->ep.eplog     = desc->addr;  /* Includes direction */
   privep->ep.maxpacket = maxpacket;
   privep->epstate      = USB_EPSTATE_IDLE;
 
@@ -1472,34 +1434,27 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
 
   epconf = 0x00;
   sam_putreg8(0x00, SAM_USBDEV_EPCFG(epno));
-  //epconf = sam_getreg8(SAM_USBDEV_EPCFG(epno));
-  //uinfo("BEFORE: epconf=0x%X\n", epconf);
 
   if (dirin)
     {
-      /* disable bank1 (IN) */
+      /* Disable bank1 (IN) */
 
-      //epconf &= ~USBDEV_EPCFG_EPTYPE1_MASK;
-      intflags = USBDEV_EPINT_TRCPT1 | /*USBDEV_EPINT_TRFAIL1 |*/ USBDEV_EPINT_STALL1;
+      intflags = USBDEV_EPINT_TRCPT1 | USBDEV_EPINT_STALL1;
     }
   else
     {
-      /* disable bank0 (OUT) */
-      //epconf &= ~USBDEV_EPCFG_EPTYPE0_MASK;
-      intflags = USBDEV_EPINT_TRCPT0 | /*USBDEV_EPINT_TRFAIL0 |*/ USBDEV_EPINT_STALL0;
+      /* Disable bank0 (OUT) */
+
+      intflags = USBDEV_EPINT_TRCPT0 | USBDEV_EPINT_STALL0;
     }
 
   /* write back disabled config */
 
-//sam_putreg8(epconf,   SAM_USBDEV_EPCFG(epno));
   sam_putreg8(0x7e, SAM_USBDEV_EPINTENCLR(epno));
   sam_putreg8(0x7e, SAM_USBDEV_EPINTFLAG(epno));
-//sam_putreg8(intflags, SAM_USBDEV_EPINTENCLR(epno));
-//sam_putreg8(intflags, SAM_USBDEV_EPINTFLAG(epno));
 
-  /* re-configure and enable the endpoint */
+  /* Re-configure and enable the endpoint */
 
-  //epconf = SAM_USBDEV_EPCFG(epno);
   switch (eptype)
     {
     case USB_EP_ATTR_XFER_CONTROL:
@@ -1508,10 +1463,8 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
 
           /* Also enable IN interrupts */
 
-          intflags =  USBDEV_EPINT_TRCPT0 | /* USBDEV_EPINT_TRFAIL1 |*/
-                      USBDEV_EPINT_STALL0;
-          intflags |= USBDEV_EPINT_TRCPT1 | /* USBDEV_EPINT_TRFAIL0 |*/
-                      USBDEV_EPINT_STALL1;
+          intflags =  USBDEV_EPINT_TRCPT0 | USBDEV_EPINT_STALL0;
+          intflags |= USBDEV_EPINT_TRCPT1 | USBDEV_EPINT_STALL1;
           intflags |= USBDEV_EPINT_RXSTP;
           sam_putreg8(USBDEV_EPSTATUS_BK0RDY, SAM_USBDEV_EPSTATUSSET(0));
           sam_putreg8(USBDEV_EPSTATUS_BK1RDY, SAM_USBDEV_EPSTATUSCLR(0));
@@ -1795,7 +1748,7 @@ static void sam_ep_freereq(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   kmm_free(privreq);
 }
 
-#if 0 // FIXME, not required, check...
+#if 0 /* FIXME, not required, check... */
 
 /****************************************************************************
  * Name: sam_ep_allocbuffer
@@ -2247,10 +2200,10 @@ static int sam_selfpowered(struct usbdev_s *dev, bool selfpowered)
   return OK;
 }
 
-
 /****************************************************************************
  * Suspend/Resume Helpers
  ****************************************************************************/
+
 /****************************************************************************
  * Name: sam_suspend
  ****************************************************************************/
@@ -3009,9 +2962,6 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
     }
 }
 
-
-
-
 /****************************************************************************
  * Name: sam_ctrla_write
  *
@@ -3026,7 +2976,6 @@ static void sam_ctrla_write(uint8_t value)
 
   if (value & USB_CTRLA_SWRST)
     {
-
       /* Due to synchronization there is a delay from writing CTRLA.SWRST
        * until the reset is complete. CTRLA.SWRST and SYNCBUSY.SWRST will
        * both be cleared when the reset is complete.
@@ -3041,7 +2990,6 @@ static void sam_ctrla_write(uint8_t value)
 
   if (value & USB_CTRLA_ENABLE)
     {
-
       /* Due to synchronization there is delay from writing CTRLA.ENABLE
        * until the peripheral is enabled/disabled.
        * SYNCBUSY.ENABLE will be cleared when the operation is complete.
@@ -3271,17 +3219,16 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
         }
     }
 
-  // FIXME: Transmit FAIL!
+  /* Transmit FAIL! */
+
   if ((flags & USBDEV_EPINT_TRFAIL0) != 0)
     {
-      //uerr("ERROR: OUT TRFAIL0!\n");
       sam_putreg8(USBDEV_EPINT_TRFAIL0, SAM_USBDEV_EPINTFLAG(epno));
       privep->descb[0]->stausbk &= ~USBDEV_STATUSBK_ERRORFLOW;
       usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EPTRFAIL0), flags);
     }
   if ((flags & USBDEV_EPINT_TRFAIL1) != 0)
     {
-      //uerr("ERROR: IN TRFAIL1!\n");
       sam_putreg8(USBDEV_EPINT_TRFAIL1, SAM_USBDEV_EPINTFLAG(epno));
       privep->descb[1]->stausbk &= ~USBDEV_STATUSBK_ERRORFLOW;
       usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EPTRFAIL1), flags);
@@ -3318,8 +3265,6 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
 
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EP0SETUPOUT), priv->ctrl.req);
           privep->epstate = USB_EPSTATE_EP0DATAOUT;
-
-          //sam_ep0_ctrlread(priv);
 
           /* Clear the RXSTP indication. */
 
@@ -3368,10 +3313,7 @@ static int sam_usb_interrupt(int irq, void *context, void *arg)
 
   /* Get the set of pending device interrupts */
 
-  isr = sam_getreg16(SAM_USBDEV_INTFLAG);
-
-  //usbtrace(TRACE_INTENTRY(SAM_TRACEINTID_INTERRUPT), irq);
-
+  isr     = sam_getreg16(SAM_USBDEV_INTFLAG);
   regval  = sam_getreg16(SAM_USBDEV_INTENSET);
   pending = isr & regval;
 
@@ -3379,119 +3321,98 @@ static int sam_usb_interrupt(int irq, void *context, void *arg)
 
   pendingep = sam_getreg16(SAM_USBDEV_EPINTSMRY);
 
-  /* Handle all pending USB interrupts (and new interrupts that become
-   * pending)
-   */
+  /* Handle all pending USB interrupts */
+  /* Serve Endpoint Interrupts first */
 
-  //while (pending || pendingep)
+  if (pendingep)
     {
-      //usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_PENDING), pending);
+      usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_PENDING_EP), pendingep);
 
-      /* serve Endpoint Interrupts first */
-
-      if (pendingep)
+      for (i = 0; i < SAM_USB_NENDPOINTS; i++)
         {
-          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_PENDING_EP), pendingep);
-
-          for (i = 0; i < SAM_USB_NENDPOINTS; i++)
+          if ((pendingep & USBDEV_EPINTSMRY_EPINT(i)))
             {
-              if ((pendingep & USBDEV_EPINTSMRY_EPINT(i)))
-                {
-                  usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EPNO), (uint16_t)i);
-                  sam_ep_interrupt(priv, i);
-                }
+              usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EPNO), (uint16_t)i);
+              sam_ep_interrupt(priv, i);
             }
         }
+    }
 
-      /* Suspend, treated last */
+  /* Suspend, treated last */
 
-      if (pending == USBDEV_INT_SUSPEND)
-        {
-          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_SUSPEND), pending);
+  if (pending == USBDEV_INT_SUSPEND)
+    {
+      usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_SUSPEND), pending);
 
-          /* Enable wakeup interrupts */
+      /* Enable wakeup interrupts */
 
-          sam_putreg16(USBDEV_INT_SUSPEND, SAM_USBDEV_INTENCLR);
-          // REVISIT: Check USBDEV_INT_UPRSM
-          sam_putreg16(USBDEV_INT_UPRSM | USBDEV_INT_WAKEUP | USBDEV_INT_EORSM,
-                       SAM_USBDEV_INTENSET);
+      sam_putreg16(USBDEV_INT_SUSPEND, SAM_USBDEV_INTENCLR);
+      sam_putreg16(USBDEV_INT_UPRSM | USBDEV_INT_WAKEUP | USBDEV_INT_EORSM,
+                  SAM_USBDEV_INTENSET);
 
-          /* Clear the pending suspend (and any wakeup) interrupts */
+      /* Clear the pending suspend (and any wakeup) interrupts */
 
-          sam_putreg16(USBDEV_INT_SUSPEND | USBDEV_INT_WAKEUP,
-                       SAM_USBDEV_INTFLAG);
+      sam_putreg16(USBDEV_INT_SUSPEND | USBDEV_INT_WAKEUP,
+                   SAM_USBDEV_INTFLAG);
 
-          /* Perform board-specific suspend operations.
-           * REVISIT: is the following true?
-           * The USB device peripheral clocks can be switched off.
-           * Resume event is asynchronously detected. MCK and USBCK can be
-           * switched off in the Power Management controller and
-           * Other board-specific operations could also be performed.
-           */
-
-          // FIXME: fix suspend...
-          //sam_suspend(priv);
-        }
-
-      /* SOF interrupt*/
-
-      else if ((pending & USBDEV_INT_SOF) != 0)
-        {
-          /* Clear the pending SOF interrupt */
-
-          //usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_SOF), pending);
-          sam_putreg16(SAM_TRACEINTID_SOF, SAM_USBDEV_INTFLAG);
-
-          /* TODO: do we need check frame errors FNUM.FNCERR */
-        }
-
-      /* Resume or wakeup.  REVISIT:  Treat the same? */
-
-      else if ((pending & (USBDEV_INT_WAKEUP | USBDEV_INT_EORSM)) != 0)
-        {
-          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_WAKEUP), (uint16_t)pending);
-          sam_resume(priv);
-
-          /* Clear the pending wakeup, resume, (and any suspend) interrupts */
-
-          sam_putreg16(USBDEV_INT_WAKEUP | USBDEV_INT_EORSM |
-                       USBDEV_INT_SUSPEND, SAM_USBDEV_INTFLAG);
-
-          /* Disable wakup and endofresume Enable suspend interrupt */
-
-          sam_putreg16(USBDEV_INT_WAKEUP | USBDEV_INT_EORSM, SAM_USBDEV_INTENCLR);
-          sam_putreg16(USBDEV_INT_SUSPEND, SAM_USBDEV_INTENSET);
-        }
-
-      /* End of Reset. Set by hardware when an End Of Reset has been
-       * detected by the USB controller.
+      /* Perform board-specific suspend operations.
+       *
+       * The USB device peripheral clocks can be switched off.
+       * Resume event is asynchronously detected. MCK and USBCK can be
+       * switched off in the Power Management controller and
+       * Other board-specific operations could also be performed.
        */
+    }
 
-      if ((pending & USBDEV_INT_EORST) != 0)
-        {
-          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EORST), pending);
+  /* SOF interrupt*/
 
-          /* Clear the end-of-reset interrupt */
+  else if ((pending & USBDEV_INT_SOF) != 0)
+    {
+      /* Clear the pending SOF interrupt */
 
-          sam_putreg16(USBDEV_INT_EORST, SAM_USBDEV_INTFLAG);
+      sam_putreg16(SAM_TRACEINTID_SOF, SAM_USBDEV_INTFLAG);
 
-          /* Handle the reset */
+      /* TODO: do we need check frame errors FNUM.FNCERR */
+    }
 
-          sam_reset(priv);
+  /* Resume or wakeup.  REVISIT:  Treat the same? */
 
-          /* REVISIT: Set the device speed Why here ?? */
+  else if ((pending & (USBDEV_INT_WAKEUP | USBDEV_INT_EORSM)) != 0)
+    {
+      usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_WAKEUP), (uint16_t)pending);
+      sam_resume(priv);
 
-          priv->usbdev.speed = USB_SPEED_FULL;
-        }
+      /* Clear the pending wakeup, resume, (and any suspend) interrupts */
 
-      /* Re-sample the set of pending interrupts */
+      sam_putreg16(USBDEV_INT_WAKEUP | USBDEV_INT_EORSM |
+                   USBDEV_INT_SUSPEND, SAM_USBDEV_INTFLAG);
 
-      isr     = sam_getreg16(SAM_USBDEV_INTFLAG);
-      regval  = sam_getreg16(SAM_USBDEV_INTENSET);
-      pending = isr & regval;
-      pendingep = sam_getreg16(SAM_USBDEV_EPINTSMRY);
+      /* Disable wakup and endofresume Enable suspend interrupt */
 
-    } /* while (pending) */
+      sam_putreg16(USBDEV_INT_WAKEUP | USBDEV_INT_EORSM, SAM_USBDEV_INTENCLR);
+      sam_putreg16(USBDEV_INT_SUSPEND, SAM_USBDEV_INTENSET);
+    }
+
+  /* End of Reset. Set by hardware when an End Of Reset has been
+   * detected by the USB controller.
+   */
+
+  if ((pending & USBDEV_INT_EORST) != 0)
+    {
+      usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EORST), pending);
+
+      /* Clear the end-of-reset interrupt */
+
+      sam_putreg16(USBDEV_INT_EORST, SAM_USBDEV_INTFLAG);
+
+      /* Handle the reset */
+
+      sam_reset(priv);
+
+      /* REVISIT: Set the device speed Why here ?? */
+
+      priv->usbdev.speed = USB_SPEED_FULL;
+    }
 
 #if 0
   /* for DEBUG help: check for pending unhandled irq's */
@@ -3508,14 +3429,11 @@ static int sam_usb_interrupt(int irq, void *context, void *arg)
       uwarn("WARNING: Unhandled_EP:0x%X\n", pendingep);
     }
 #endif
-
-  //usbtrace(TRACE_INTEXIT(SAM_TRACEINTID_INTERRUPT), irq);
 }
 
 void up_usbuninitialize(void)
 {
   uinfo("up_usbuninitialize()\n");
-  // FIXME:
 }
 
 void up_usbinitialize(void)
@@ -3996,6 +3914,10 @@ static void sam_sw_shutdown(struct sam_usbdev_s *priv)
 {
   (void)priv;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: usbdev_register
