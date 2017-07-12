@@ -134,24 +134,8 @@ int mac802154_req_reset(MACHANDLE mac, bool resetattr)
                             &attr);
       priv->max_frame_waittime = attr.mac.max_frame_waittime;
 
-      /* These attributes are effected and determined based on the PHY.  Need to
-       * figure out how to "share" attributes between the radio driver and this
-       * MAC layer
-       *
-       *    macAckWaitDuration
-       *    macBattLifeExtPeriods
-       *    macMaxFrameTotalWaitTime
-       *    macLIFSPeriod
-       *    macSIFSPeriod
-       *    macSyncSymbolOffset
-       *    macTimestampSupported
-       *    macTxControlActiveDuration
-       *    macTxControlPauseDuration
-       *    macRxOnWhenIdle
-       */
+      mac802154_setdevmode(priv, IEEE802154_DEVMODE_ENDPOINT);
     }
 
   return OK;
 }
-
-
