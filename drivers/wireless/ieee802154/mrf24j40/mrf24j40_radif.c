@@ -40,9 +40,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <assert.h>
 #include <debug.h>
-
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
