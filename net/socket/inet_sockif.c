@@ -70,9 +70,10 @@ static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
 
 const struct sock_intf_s g_inet_sockif =
 {
-  inet_setup,   /* si_setup */
-  inet_send,    /* si_send */
-  inet_sendto,  /* si_sendto */
+  inet_setup,    /* si_setup */
+  inet_send,     /* si_send */
+  inet_sendto,   /* si_sendto */
+  inet_recvfrom  /* si_recvfrom */
 };
 
 /****************************************************************************
@@ -237,9 +238,9 @@ static int inet_setup(FAR struct socket *psock, int protocol)
  *   flags    Send flags
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On  error, -1 is
- *   returned, and errno is set appropriately (see send() for the list of
- *   appropriate errors values.
+ *   On success, returns the number of characters sent.  On  error, a negated
+ *   errno value is returned (see send() for the list of appropriate error
+ *   values.
  *
  ****************************************************************************/
 
@@ -333,9 +334,9 @@ static ssize_t inet_send(FAR struct socket *psock, FAR const void *buf,
  *   tolen    The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On  error, -1 is
- *   returned, and errno is set appropriately (see send_to() for the list of
- *   appropriate errors values.
+ *   On success, returns the number of characters sent.  On  error, a negated
+ *   errno value is returned (see send_to() for the list of appropriate error
+ *   values.
  *
  ****************************************************************************/
 

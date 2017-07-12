@@ -102,12 +102,15 @@ struct socket;  /* Forward reference */
 
 struct sock_intf_s
 {
-  CODE int (*si_setup)(FAR struct socket *psock, int protocol);
+  CODE int     (*si_setup)(FAR struct socket *psock, int protocol);
   CODE ssize_t (*si_send)(FAR struct socket *psock, FAR const void *buf,
-                 size_t len, int flags);
+                   size_t len, int flags);
   CODE ssize_t (*si_sendto)(FAR struct socket *psock, FAR const void *buf,
-                 size_t len, int flags, FAR const struct sockaddr *to,
-                 socklen_t tolen);
+                   size_t len, int flags, FAR const struct sockaddr *to,
+                   socklen_t tolen);
+  CODE ssize_t (*si_recvfrom)(FAR struct socket *psock, FAR void *buf,
+                   size_t len, int flags, FAR struct sockaddr *from,
+                   FAR socklen_t *fromlen);
 };
 
 /* This is the internal representation of a socket reference by a file

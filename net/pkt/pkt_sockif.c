@@ -43,6 +43,7 @@
 #include <sys/socket.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/net/net.h>
 
@@ -67,9 +68,10 @@ static ssize_t pkt_sendto(FAR struct socket *psock, FAR const void *buf,
 
 const struct sock_intf_s g_pkt_sockif =
 {
-  pkt_setup,   /* si_setup */
-  pkt_send,    /* si_send */
-  pkt_sendto,  /* si_sendto */
+  pkt_setup,    /* si_setup */
+  pkt_send,     /* si_send */
+  pkt_sendto,   /* si_sendto */
+  pkt_recvfrom  /* si_recvfrom */
 };
 
 /****************************************************************************
@@ -162,9 +164,9 @@ static int pkt_setup(FAR struct socket *psock, int protocol)
  *   flags    Send flags
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On  error, -1 is
- *   returned, and errno is set appropriately (see send() for the list of
- *   appropriate errors values.
+ *   On success, returns the number of characters sent.  On  error, a negated
+ *   errno value is returned (see send() for the list of appropriate error
+ *   values.
  *
  ****************************************************************************/
 
@@ -208,9 +210,9 @@ static ssize_t pkt_send(FAR struct socket *psock, FAR const void *buf,
  *   tolen    The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On  error, -1 is
- *   returned, and errno is set appropriately (see send_to() for the list of
- *   appropriate errors values.
+ *   On success, returns the number of characters sent.  On  error, a negated
+ *   errno value is returned (see send_to() for the list of appropriate error
+ *   values.
  *
  ****************************************************************************/
 

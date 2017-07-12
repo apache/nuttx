@@ -428,7 +428,7 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
 int local_send_packet(int fd, FAR const uint8_t *buf, size_t len);
 
 /****************************************************************************
- * Name: psock_recvfrom
+ * Name: local_recvfrom
  *
  * Description:
  *   recvfrom() receives messages from a local socket, and may be used to
@@ -455,9 +455,9 @@ int local_send_packet(int fd, FAR const uint8_t *buf, size_t len);
  *
  ****************************************************************************/
 
-ssize_t psock_local_recvfrom(FAR struct socket *psock, FAR void *buf,
-                             size_t len, int flags, FAR struct sockaddr *from,
-                             FAR socklen_t *fromlen);
+ssize_t local_recvfrom(FAR struct socket *psock, FAR void *buf,
+                       size_t len, int flags, FAR struct sockaddr *from,
+                       FAR socklen_t *fromlen);
 
 /****************************************************************************
  * Name: local_fifo_read
