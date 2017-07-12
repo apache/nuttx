@@ -48,6 +48,8 @@
 #include <string.h>
 #include <semaphore.h>
 
+#include <nuttx/arch.h>
+
 #include <nuttx/wireless/ieee802154/ieee802154_radio.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
@@ -61,6 +63,18 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static void mrf24j40_mactimer(FAR struct mrf24j40_radio_s *dev, int numsymbols);
+static void mrf24j40_setorder(FAR struct mrf24j40_radio_s *dev, uint8_t bo,
+                              uint8_t so);
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -70,8 +84,118 @@ static const uint8_t g_allones[8] =
 };
 
 /****************************************************************************
- * Radio Interface Functions
+ * Public Data
  ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static void mrf24j40_mactimer(FAR struct mrf24j40_radio_s *dev, int numsymbols)
+{
+  uint16_t nhalfsym;
+  uint8_t reg;
+
+  nhalfsym = (numsymbols << 1);
+
+  /* Disable the interrupt, clear the timer count */
+
+  reg = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
+  reg |= MRF24J40_INTCON_HSYMTMRIE;
+  mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
+
+  mrf24j40_setreg(dev->spi, MRF24J40_HSYMTMRL, 0x00);
+  mrf24j40_setreg(dev->spi, MRF24J40_HSYMTMRH, 0x00);
+
+  reg &= ~MRF24J40_INTCON_HSYMTMRIE;
+  mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
+
+  /* Set the timer count and enable interrupts */
+
+  reg = (nhalfsym & 0xFF);
+  mrf24j40_setreg(dev->spi, MRF24J40_HSYMTMRL, reg);
+
+  reg = (nhalfsym >> 8) & 0xFF;
+  mrf24j40_setreg(dev->spi, MRF24J40_HSYMTMRH, reg);
+}
+
+/****************************************************************************
+ * Name: mrf24j40_setorder
+ *
+ * Description:
+ *   Configures the timers and sets the ORDER register
+ ****************************************************************************/
+
+static void mrf24j40_setorder(FAR struct mrf24j40_radio_s *dev, uint8_t bo,
+                              uint8_t so)
+{
+  uint32_t maincnt = 0;
+  uint32_t slpcal = 0;
+
+  wlinfo("bo: %d, so: %d\n", bo, so);
+
+  /* Calibrate the Sleep Clock (SLPCLK) frequency. Refer to Section 3.15.1.2
+    * “Sleep Clock Calibration”.
+    */
+
+  /* If the Sleep Clock Selection, SLPCLKSEL (0x207<7:6), is the internal
+    * oscillator (100 kHz), set SLPCLKDIV to a minimum value of 0x01.
+    */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_SLPCON1, 0x01);
+
+  /* Select the source of SLPCLK (internal 100kHz) */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_RFCON7, MRF24J40_RFCON7_SEL_100KHZ);
+
+  /* Begin calibration by setting the SLPCALEN bit (SLPCAL2 0x20B<4>) to
+    * ‘1’. Sixteen samples of the SLPCLK are counted and stored in the
+    * SLPCAL register. No need to mask, this is the only writable bit
+    */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_SLPCAL2, MRF24J40_SLPCAL2_SLPCALEN);
+
+  /* Calibration is complete when the SLPCALRDY bit (SLPCAL2 0x20B<7>) is
+    * set to ‘1’.
+    */
+
+  while (!(mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL2) &
+          MRF24J40_SLPCAL2_SLPCALRDY))
+    {
+      up_udelay(1);
+    }
+
+  slpcal  = mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL0);
+  slpcal |= (mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL1) << 8);
+  slpcal |= ((mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL2) << 16) & 0x0F);
+
+  /* Program the Beacon Interval into the Main Counter, MAINCNT (0x229<1:0>,
+   * 0x228, 0x227, 0x226), and Remain Counter, REMCNT (0x225, 0x224),
+   * according to BO and SO values. Refer to Section 3.15.1.3 “Sleep Mode
+   * Counters”
+   */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_REMCNTL, (MRF24J40_REMCNT & 0xFF));
+  mrf24j40_setreg(dev->spi, MRF24J40_REMCNTH, ((MRF24J40_REMCNT >> 8) & 0xFF));
+
+  maincnt = MRF24J40_MAINCNT(bo, (slpcal * 50 / 16));
+
+  mrf24j40_setreg(dev->spi, MRF24J40_MAINCNT0, (maincnt & 0xFF));
+  mrf24j40_setreg(dev->spi, MRF24J40_MAINCNT1, ((maincnt >> 8)  & 0xFF));
+  mrf24j40_setreg(dev->spi, MRF24J40_MAINCNT2, ((maincnt >> 16) & 0xFF));
+  mrf24j40_setreg(dev->spi, MRF24J40_MAINCNT3, ((maincnt >> 24) & 0x03));
+
+  /* Configure the BO (ORDER 0x10<7:4>) and SO (ORDER 0x10<3:0>) values.
+    * After configuring BO and SO, the beacon frame will be sent immediately.
+    */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_ORDER, ((bo << 4) & 0xF0) | (so & 0x0F));
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+/* Radio Interface Functions ***********************************************/
 
 int mrf24j40_bind(FAR struct ieee802154_radio_s *radio,
                          FAR struct ieee802154_radiocb_s *radiocb)
@@ -222,6 +346,56 @@ int mrf24j40_txdelayed(FAR struct ieee802154_radio_s *radio,
   return OK;
 }
 
+/****************************************************************************
+ * Name: mrf24j40_rxenable
+ *
+ * Description:
+ *  Enable/Disable receiver.
+ *
+ ****************************************************************************/
+
+int mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio, bool enable)
+{
+  FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
+  uint8_t reg;
+
+  dev->rxenabled = enable;
+
+
+  if (enable)
+    {
+      /* Disable packet reception. See pg. 109 of datasheet */
+
+      mrf24j40_setreg(dev->spi, MRF24J40_BBREG1, MRF24J40_BBREG1_RXDECINV);
+
+      /* Enable rx int */
+
+      reg = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
+      reg &= ~MRF24J40_INTCON_RXIE;
+      mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
+
+      /* Purge the RX buffer */
+
+      reg = mrf24j40_getreg(dev->spi, MRF24J40_RXFLUSH);
+      reg |= MRF24J40_RXFLUSH_RXFLUSH;
+      mrf24j40_setreg(dev->spi, MRF24J40_RXFLUSH, reg);
+
+      /* Re-enable packet reception. See pg. 109 of datasheet */
+
+      mrf24j40_setreg(dev->spi, MRF24J40_BBREG1, 0);
+    }
+  else
+    {
+      /* Disable rx int */
+
+      reg  = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
+      reg |= MRF24J40_INTCON_RXIE;
+      mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
+    }
+
+  return OK;
+}
+
 int mrf24j40_reset(FAR struct ieee802154_radio_s *radio)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
@@ -258,6 +432,23 @@ int mrf24j40_reset(FAR struct ieee802154_radio_s *radio)
 
   mrf24j40_setreg(dev->spi, MRF24J40_ACKTMOUT, 0x39 | MRF24J40_ACKTMOUT_DRPACK);
 
+  /* Set WAKETIME to recommended value for 100kHz SLPCLK Source.
+   *
+   * NOTE!!!: The datasheet specifies that WAKETIME > WAKECNT. It appears that
+   * it is even sensitive to the order in which you set WAKECNT and WAKETIME.
+   * Meaning, if you set WAKECNT first and it goes higher than WAKETIME, and
+   * then raise WAKETIME above WAKECNT, the device will not function correctly.
+   * Therefore, be careful when changing these registers
+   */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_WAKETIMEL, 0xD2);
+  mrf24j40_setreg(dev->spi, MRF24J40_WAKETIMEH, 0x00);
+
+  /* Set WAKECNT (SLPACK 0x35<6:0>) value = 0x5F to set the main oscillator
+   * (20 MHz) start-up timer value.
+   */
+
+  mrf24j40_setreg(dev->spi, MRF24J40_SLPACK, 0x5F);
 
   /* Enable the SLPIF and WAKEIF flags */
 
@@ -286,7 +477,7 @@ int mrf24j40_reset(FAR struct ieee802154_radio_s *radio)
 
   mrf24j40_settxpower(dev, 0); /*16. Set transmitter power .*/
 
-  mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
+  mrf24j40_setpamode(dev, MRF24J40_PA_AUTO);
 
   return OK;
 }
@@ -518,3 +709,4 @@ int mrf24j40_sfupdate(FAR struct ieee802154_radio_s *radio,
 
   return OK;
 }
+

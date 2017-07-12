@@ -43,10 +43,48 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
+
 #include "mrf24j40.h"
 #include "mrf24j40_reg.h"
 #include "mrf24j40_regops.h"
 #include "mrf24j40_getset.h"
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static void mrf24j40_resetrfsm(FAR struct mrf24j40_radio_s *dev);
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: mrf24j40_resetrfsm
+ *
+ * Description:
+ *   Reset the RF state machine. Required at boot, after channel change,
+ *   and probably after PA settings.
+ *
+ ****************************************************************************/
+
+static void mrf24j40_resetrfsm(FAR struct mrf24j40_radio_s *dev)
+{
+  uint8_t reg;
+
+  reg = mrf24j40_getreg(dev->spi, MRF24J40_RFCTL);
+  reg |= 0x04;
+  mrf24j40_setreg(dev->spi, MRF24J40_RFCTL, reg);
+
+  reg &= ~0x04;
+  mrf24j40_setreg(dev->spi, MRF24J40_RFCTL, reg);
+  up_udelay(200);
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: mrf24j40_setrxmode
@@ -421,5 +459,49 @@ int mrf24j40_setcca(FAR struct mrf24j40_radio_s *dev,
   mrf24j40_setreg(dev->spi, MRF24J40_BBREG2, mode);
 
   memcpy(&dev->cca, cca, sizeof(struct ieee802154_cca_s));
+  return OK;
+}
+
+/****************************************************************************
+ * Name: mrf24j40_setpamode
+ *
+ * Description:
+ *   Control the external LNA/PA on the MRF24J40MB/MC/MD/ME modules
+ *   GPIO 1: PA enable
+ *   GPIO 2: LNA enable
+ *   GPIO 3: PA power enable (not required on MB)
+ ****************************************************************************/
+
+int mrf24j40_setpamode(FAR struct mrf24j40_radio_s *dev, int mode)
+{
+  if (!dev->paenabled)
+    {
+      return OK;
+    }
+
+  if (mode == MRF24J40_PA_AUTO)
+    {
+      mrf24j40_setreg(dev->spi, MRF24J40_TRISGPIO, 0x08);
+      mrf24j40_setreg(dev->spi, MRF24J40_GPIO    , 0x08);
+      mrf24j40_setreg(dev->spi, MRF24J40_TESTMODE, 0x0F);
+    }
+  else if (mode == MRF24J40_PA_ED)
+    {
+      mrf24j40_setreg(dev->spi, MRF24J40_TESTMODE, 0x08);
+      mrf24j40_setreg(dev->spi, MRF24J40_TRISGPIO, 0x0F);
+      mrf24j40_setreg(dev->spi, MRF24J40_GPIO    , 0x0C);
+    }
+  else if (mode == MRF24J40_PA_SLEEP)
+    {
+      mrf24j40_setreg(dev->spi, MRF24J40_TESTMODE, 0x08);
+      mrf24j40_setreg(dev->spi, MRF24J40_TRISGPIO, 0x0F);
+      mrf24j40_setreg(dev->spi, MRF24J40_GPIO    , 0x00);
+    }
+  else
+    {
+      return -EINVAL;
+    }
+
+  mrf24j40_resetrfsm(dev);
   return OK;
 }

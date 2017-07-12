@@ -61,4 +61,6 @@ int mrf24j40_settxpower(FAR struct mrf24j40_radio_s *dev, int32_t txpwr);
 int mrf24j40_setcca(FAR struct mrf24j40_radio_s *dev,
                     FAR struct ieee802154_cca_s *cca);
 
+int mrf24j40_setpamode(FAR struct mrf24j40_radio_s *dev, int mode);
+
 #endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_GETSET_H */
