@@ -816,15 +816,16 @@ static inline void mac802154_setrxonidle(FAR struct ieee802154_privmac_s *priv,
       mac802154_rxdisable(priv);
     }
 
-  /* Unlike other attributes, we can't simply cast this one since it is a bit
-   * in a bitfield.  Casting it will give us unpredicatble results.  Instead
-   * of creating a ieee802154_attr_u, we use a local bool.  Allocating the
-   * ieee802154_attr_u value would take up more room on the stack since it is
-   * as large as the largest attribute type.
-   */
-
   priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_RX_ON_WHEN_IDLE,
                         (FAR const union ieee802154_attr_u *)&rxonidle);
+}
+
+static inline void mac802154_setdevmode(FAR struct ieee802154_privmac_s *priv,
+                                        enum ieee802154_devmode_e mode)
+{
+  priv->devmode = mode;
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_RX_ON_WHEN_IDLE,
+                        (FAR const union ieee802154_attr_u *)&mode);
 }
 
 #endif /* __WIRELESS_IEEE802154__MAC802154_INTERNAL_H */
