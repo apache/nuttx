@@ -284,6 +284,8 @@ int mkstemp(FAR char *path_template)
 
           return fd;
         }
+
+      retries--;
     }
 
   /* We could not find an unique filename */
