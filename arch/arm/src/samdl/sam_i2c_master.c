@@ -625,8 +625,9 @@ static int i2c_wait_for_bus(struct sam_i2c_dev_s *priv, unsigned int size)
 
   if (sem_timedwait(&priv->waitsem, (const struct timespec *)&ts) != OK)
     {
-      i2cinfo("timedwait error %d\n", errno);
-      return -errno;
+      int errcode = errno;
+      i2cinfo("timedwait error %d\n", errcode);
+      return -errcode;
     }
 
   return priv->result;
