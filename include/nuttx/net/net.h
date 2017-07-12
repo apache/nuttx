@@ -94,11 +94,27 @@ typedef uint16_t sockopt_t;
 
 typedef uint16_t socktimeo_t;
 
+/* This callbacks are socket operations that may be performed on a socket of
+ * a given address family.
+ */
+
+struct socket;  /* Forward reference */
+
+struct sock_intf_s
+{
+  CODE int (*si_setup)(FAR struct socket *psock, int protocol);
+  CODE ssize_t (*si_send)(FAR struct socket *psock, FAR const void *buf,
+                 size_t len, int flags);
+  CODE ssize_t (*si_sendto)(FAR struct socket *psock, FAR const void *buf,
+                 size_t len, int flags, FAR const struct sockaddr *to,
+                 socklen_t tolen);
+};
+
 /* This is the internal representation of a socket reference by a file
  * descriptor.
  */
 
-struct devif_callback_s;     /* Forward reference */
+struct devif_callback_s;  /* Forward reference */
 
 struct socket
 {
@@ -119,6 +135,10 @@ struct socket
 #endif
 
   FAR void     *s_conn;      /* Connection: struct tcp_conn_s or udp_conn_s */
+
+  /* Socket interface */
+
+  FAR const struct sock_intf_s *s_sockif;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Callback instance for TCP send */

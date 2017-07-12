@@ -51,6 +51,8 @@
 #include <stdint.h>
 #include <poll.h>
 
+#include <nuttx/net/net.h>
+
 #ifdef CONFIG_NET_LOCAL
 
 /****************************************************************************
@@ -77,6 +79,7 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
 /* Local, Unix domain socket types */
 
 enum local_type_e
@@ -203,6 +206,10 @@ extern "C"
 #else
 #  define EXTERN extern
 #endif
+
+/* The local socket interface */
+
+EXTERN const struct sock_intf_s g_local_sockif;
 
 #ifdef CONFIG_NET_LOCAL_STREAM
 /* A list of all SOCK_STREAM listener connections */

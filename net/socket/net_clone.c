@@ -79,6 +79,7 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
 
   psock2->s_domain   = psock1->s_domain;    /* IP domain: PF_INET, PF_INET6, or PF_PACKET */
   psock2->s_type     = psock1->s_type;      /* Protocol type: Only SOCK_STREAM or SOCK_DGRAM */
+  psock2->s_sockif   = psock1->s_sockif;    /* Socket interface */
   psock2->s_flags    = psock1->s_flags;     /* See _SF_* definitions */
 #ifdef CONFIG_NET_SOCKOPTS
   psock2->s_options  = psock1->s_options;   /* Selected socket options */

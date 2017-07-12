@@ -91,6 +91,10 @@ extern "C"
 #  define EXTERN extern
 #endif
 
+/* The packet socket interface */
+
+EXTERN const struct sock_intf_s g_pkt_sockif;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

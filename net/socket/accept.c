@@ -224,6 +224,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   newsock->s_domain = psock->s_domain;
   newsock->s_type   = SOCK_STREAM;
+  newsock->s_sockif = psock->s_sockif;
 
   /* Perform the correct accept operation for this address domain */
 

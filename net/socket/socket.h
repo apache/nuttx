@@ -149,6 +149,10 @@ extern "C"
 #define EXTERN extern
 #endif
 
+#if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
+EXTERN const struct sock_intf_s g_inet_sockif;
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -222,6 +226,23 @@ void sockfd_release(int sockfd);
  ****************************************************************************/
 
 FAR struct socket *sockfd_socket(int sockfd);
+
+/****************************************************************************
+ * Name: net_sockif
+ *
+ * Description:
+ *   Return the socket interface associated with this address family.
+ *
+ * Parameters:
+ *   family - Address family
+ *
+ * Returned Value:
+ *   On success, a non-NULL instance of struct sock_intf_s is returned.  NULL
+ *   is returned only if the address family is not supported.
+ *
+ ****************************************************************************/
+
+FAR const struct sock_intf_s *net_sockif(sa_family_t family);
 
 /****************************************************************************
  * Name: net_startmonitor

@@ -42,6 +42,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <errno.h>
+#include <assert.h>
+#include <debug.h>
 
 #include <nuttx/cancelpt.h>
 
@@ -126,132 +128,32 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 {
   ssize_t ret;
 
+  DEBUGASSERT(psock != NULL && buf != NULL);
+
   /* Treat as a cancellation point */
 
   (void)enter_cancellation_point();
 
-  switch (psock->s_type)
-    {
-#if defined(CONFIG_NET_PKT)
-      case SOCK_RAW:
-        {
-          /* Raw packet send */
-
-          ret = psock_pkt_send(psock, buf, len);
-        }
-        break;
-#endif
-
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_STREAM)
-      case SOCK_STREAM:
-        {
-#ifdef CONFIG_NET_LOCAL_STREAM
-#ifdef CONFIG_NET_TCP
-          if (psock->s_domain == PF_LOCAL)
-#endif
-            {
-              /* Local TCP packet send */
-
-              ret = psock_local_send(psock, buf, len, flags);
-            }
-#endif /* CONFIG_NET_LOCAL_STREAM */
-
-#ifdef CONFIG_NET_TCP
-#ifdef CONFIG_NET_LOCAL_STREAM
-          else
-#endif
-            {
-#ifdef CONFIG_NET_6LOWPAN
-              /* Try 6LoWPAN TCP packet send */
-
-              ret = psock_6lowpan_tcp_send(psock, buf, len);
-
-#if defined(CONFIG_NETDEV_MULTINIC) && defined(NET_TCP_HAVE_STACK)
-              if (ret < 0)
-                {
-                  /* TCP/IP packet send */
-
-                  ret = psock_tcp_send(psock, buf, len);
-                }
-#endif /* CONFIG_NETDEV_MULTINIC && NET_TCP_HAVE_STACK */
-#elif defined(NET_TCP_HAVE_STACK)
-              ret = psock_tcp_send(psock, buf, len);
-#else
-              ret = -ENOSYS;
-#endif /* CONFIG_NET_6LOWPAN */
-            }
-#endif /* CONFIG_NET_TCP */
-        }
-        break;
-#endif /* CONFIG_NET_TCP || CONFIG_NET_LOCAL_STREAM */
-
-#ifdef CONFIG_NET_UDP
-      case SOCK_DGRAM:
-        {
-#ifdef CONFIG_NET_LOCAL_DGRAM
-#ifdef CONFIG_NET_UDP
-          if (psock->s_domain == PF_LOCAL)
-#endif
-            {
-              /* Local UDP packet send */
-#warning Missing logic
-              ret = -ENOSYS;
-            }
-#endif /* CONFIG_NET_LOCAL_DGRAM */
-
-#ifdef CONFIG_NET_UDP
-#ifdef CONFIG_NET_LOCAL_DGRAM
-          else
-#endif
-            {
-#if defined(CONFIG_NET_6LOWPAN)
-              /* Try 6LoWPAN UDP packet send */
-
-              ret = psock_6lowpan_udp_send(psock, buf, len);
-
-#if defined(CONFIG_NETDEV_MULTINIC) && defined(NET_UDP_HAVE_STACK)
-              if (ret < 0)
-                {
-                  /* UDP/IP packet send */
-
-                  ret = psock_udp_send(psock, buf, len);
-                }
-#endif /* CONFIG_NETDEV_MULTINIC && NET_UDP_HAVE_STACK */
-#elif defined(NET_UDP_HAVE_STACK)
-              /* Only UDP/IP packet send */
-
-              ret = psock_udp_send(psock, buf, len);
-#else
-              ret = -ENOSYS;
-#endif /* CONFIG_NET_6LOWPAN */
-            }
-#endif /* CONFIG_NET_UDP */
-        }
-        break;
-#endif /* CONFIG_NET_UDP */
+  /* Special case user sockets */
 
 #ifdef CONFIG_NET_USRSOCK
-      case SOCK_USRSOCK_TYPE:
-        {
-          ret = usrsock_sendto(psock, buf, len, NULL, 0);
-        }
-        break;
+  if (psock->s_type SOCK_USRSOCK_TYPE)
+    {
+      ret = usrsock_sendto(psock, buf, len, NULL, 0);
+    }
+  else
 #endif /*CONFIG_NET_USRSOCK*/
+    {
+      /* Let the address family's send() method handle the operation */
 
-      default:
-        {
-          /* EDESTADDRREQ.  Signifies that the socket is not connection-mode
-           * and no peer address is set.
-           */
-
-          ret = -EDESTADDRREQ;
-        }
-        break;
+      DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_send != NULL);
+      ret = psock->s_sockif->si_send(psock, buf, len, flags);
     }
 
   leave_cancellation_point();
   if (ret < 0)
     {
+      nerr("ERROR: socket si_send() (or usrsock_sendto()) failed: %d\n", ret);
       set_errno(-ret);
       ret = ERROR;
     }
