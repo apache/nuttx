@@ -86,26 +86,26 @@ int mac802154_req_reset(MACHANDLE mac, bool resetattr)
 
   if (resetattr)
     {
-      priv->isassoc = false;             /* Not associated with a PAN */
-      priv->trackingbeacon = false;      /* Not tracking beacon by default */
-      priv->sfspec.assocpermit = false; /* Device (if coord) not accepting ssociation */
-      priv->autoreq = true;              /* Auto send data req if addr. in beacon */
+      priv->isassoc = false;            /* Not associated with a PAN */
+      priv->trackingbeacon = false;     /* Not tracking beacon by default */
+      priv->sfspec.assocpermit = false; /* Dev (if coord) not accepting assoc */
+      priv->autoreq = true;             /* Auto send data req if addr in beacon */
       priv->sfspec.ble = false;         /* BLE disabled */
-      priv->beaconpayloadlength = 0;     /* Beacon payload NULL */
-      priv->sfspec.beaconorder = 15;   /* Non-beacon enabled network */
-      priv->sfspec.sforder = 15;       /* Length of active portion of outgoing SF */
-      priv->beacon_txtime = 0;           /* Device never sent a beacon */
-      priv->dsn = 0;
-      priv->gtspermit = true;       /* PAN Coord accepting GTS requests */
-      priv->minbe = 3;              /* Min value of backoff exponent (BE) */
-      priv->maxbe = 5;              /* Max value of backoff exponent (BE) */
-      priv->max_csmabackoffs = 4;   /* Max # of backoffs before failure */
-      priv->maxretries = 3;         /* Max # of retries allowed after failure */
-      priv->promisc = false;        /* Device not in promiscuous mode */
-      priv->rngsupport = false;     /* Ranging not yet supported */
-      priv->resp_waittime = 32;     /* 32 SF durations */
-      priv->sec_enabled = false;    /* Security disabled by default */
-      priv->tx_totaldur = 0;        /* 0 transmit duration */
+      priv->beaconpayloadlength = 0;    /* Beacon payload NULL */
+      priv->sfspec.beaconorder = 15;    /* Non-beacon enabled network */
+      priv->sfspec.sforder = 15;        /* Length of active portion of outgoing SF */
+      priv->beacon_txtime = 0;          /* Device never sent a beacon */
+      priv->dsn = 0;                    /* Data sequence number */
+      priv->gtspermit = true;           /* PAN Coord accepting GTS requests */
+      priv->minbe = 3;                  /* Min value of backoff exponent (BE) */
+      priv->maxbe = 5;                  /* Max value of backoff exponent (BE) */
+      priv->max_csmabackoffs = 4;       /* Max # of backoffs before failure */
+      priv->maxretries = 3;             /* Max # of retries allowed after failure */
+      priv->promisc = false;            /* Device not in promiscuous mode */
+      priv->rngsupport = false;         /* Ranging not yet supported */
+      priv->resp_waittime = 32;         /* 32 SF durations */
+      priv->sec_enabled = false;        /* Security disabled by default */
+      priv->tx_totaldur = 0;            /* 0 transmit duration */
 
       priv->trans_persisttime = 0x01F4;
 
