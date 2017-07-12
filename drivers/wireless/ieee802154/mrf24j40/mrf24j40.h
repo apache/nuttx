@@ -52,7 +52,9 @@
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 #include <nuttx/wireless/ieee802154/ieee802154_radio.h>
 
-/* NuttX implementation defines **********************************************/
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 #define MRF24J40_GTS_SLOTS 2
 
@@ -87,6 +89,24 @@
 
 #define MRF24J40_SYMBOL_DURATION_PS 16000000
 
+/* Clock configuration macros */
+
+#define MRF24J40_SLPCLKPER_100KHZ ((1000 * 1000 * 1000)/100000) /* 10ns */
+#define MRF24J40_SLPCLKPER_32KHZ  ((1000 * 1000 * 1000)/32000)  /* 31.25ns */
+
+#define MRF24J40_BEACONINTERVAL_NSEC(beaconorder) \
+  (IEEE802154_BASE_SUPERFRAME_DURATION * (1 << beaconorder) * (16 *1000))
+
+/* For now I am just setting the REMCNT to the maximum while staying in multiples
+ * of 10000 (100khz period) */
+
+#define MRF24J40_REMCNT 60000
+#define MRF24J40_REMCNT_NSEC (MRF24J40_REMCNT * 50)
+
+#define MRF24J40_MAINCNT(bo, clkper) \
+  ((MRF24J40_BEACONINTERVAL_NSEC(bo) - MRF24J40_REMCNT_NSEC) / \
+    clkper)
+
 /* Configuration *************************************************************/
 
 #ifndef CONFIG_SCHED_HPWORK
@@ -106,7 +126,7 @@
 #endif
 
 /****************************************************************************
- * Private Types
+ * Public Types
  ****************************************************************************/
 
 /* A MRF24J40 device instance */
@@ -157,38 +177,11 @@ struct mrf24j40_radio_s
 };
 
 /****************************************************************************
- * Internal Function Prototypes
+ * Public Data
  ****************************************************************************/
 
-int mrf24j40_interrupt(int irq, FAR void *context, FAR void *arg);
-void mrf24j40_irqworker(FAR void *arg);
-
-void mrf24j40_dopoll_csma(FAR void *arg);
-void mrf24j40_dopoll_gts(FAR void *arg);
-
-void mrf24j40_resetrfsm(FAR struct mrf24j40_radio_s *dev);
-
-void mrf24j40_setorder(FAR struct mrf24j40_radio_s *dev, uint8_t bo, uint8_t so);
-
-int  mrf24j40_pacontrol(FAR struct mrf24j40_radio_s *dev, int mode);
-int  mrf24j40_energydetect(FAR struct mrf24j40_radio_s *dev, FAR uint8_t *energy);
-
-int  mrf24j40_rxenable(FAR struct ieee802154_radio_s *dev, bool enable);
-
-void mrf24j40_norm_setup(FAR struct mrf24j40_radio_s *dev,
-              FAR struct iob_s *frame, bool csma);
-void  mrf24j40_gts_setup(FAR struct mrf24j40_radio_s *dev, uint8_t gts,
-              FAR struct iob_s *frame);
-void mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
-              FAR const uint8_t *buf, uint8_t length, uint32_t fifo_addr);
-
-void mrf24j40_norm_trigger(FAR struct mrf24j40_radio_s *dev);
-void mrf24j40_beacon_trigger(FAR struct mrf24j40_radio_s *dev);
-
-void mrf24j40_mactimer(FAR struct mrf24j40_radio_s *dev, int numsymbols);
-
 /****************************************************************************
- * Internal Helpers
+ * Inline Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -220,5 +213,24 @@ static inline void mrf24j40_spi_unlock(FAR struct spi_dev_s *spi)
   SPI_LOCK(spi,0);
 }
 
-#endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_H */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
+int  mrf24j40_interrupt(int irq, FAR void *context, FAR void *arg);
+void mrf24j40_irqworker(FAR void *arg);
+
+void mrf24j40_dopoll_csma(FAR void *arg);
+void mrf24j40_dopoll_gts(FAR void *arg);
+
+void mrf24j40_norm_setup(FAR struct mrf24j40_radio_s *dev,
+              FAR struct iob_s *frame, bool csma);
+void  mrf24j40_gts_setup(FAR struct mrf24j40_radio_s *dev, uint8_t gts,
+              FAR struct iob_s *frame);
+void mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
+              FAR const uint8_t *buf, uint8_t length, uint32_t fifo_addr);
+
+void mrf24j40_norm_trigger(FAR struct mrf24j40_radio_s *dev);
+void mrf24j40_beacon_trigger(FAR struct mrf24j40_radio_s *dev);
+
+#endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_H */

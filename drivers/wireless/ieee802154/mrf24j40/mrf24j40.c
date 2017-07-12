@@ -50,7 +50,6 @@
 #include <errno.h>
 #include <semaphore.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/semaphore.h>
@@ -64,61 +63,78 @@
 #include "mrf24j40.h"
 #include "mrf24j40_reg.h"
 #include "mrf24j40_radif.h"
+#include "mrf24j40_getset.h"
 #include "mrf24j40_regops.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clock configuration macros */
-
-#define MRF24J40_SLPCLKPER_100KHZ ((1000 * 1000 * 1000)/100000) /* 10ns */
-#define MRF24J40_SLPCLKPER_32KHZ  ((1000 * 1000 * 1000)/32000)  /* 31.25ns */
-
-#define MRF24J40_BEACONINTERVAL_NSEC(beaconorder) \
-  (IEEE802154_BASE_SUPERFRAME_DURATION * (1 << beaconorder) * (16 *1000))
-
-/* For now I am just setting the REMCNT to the maximum while staying in multiples
- * of 10000 (100khz period) */
-
-#define MRF24J40_REMCNT 60000
-#define MRF24J40_REMCNT_NSEC (MRF24J40_REMCNT * 50)
-
-#define MRF24J40_MAINCNT(bo, clkper) \
-  ((MRF24J40_BEACONINTERVAL_NSEC(bo) - MRF24J40_REMCNT_NSEC) / \
-    clkper)
-
 /****************************************************************************
- * Internal Functions
+ * Private Function Prototypes
  ****************************************************************************/
 
-void mrf24j40_mactimer(FAR struct mrf24j40_radio_s *dev, int numsymbols)
+#if 0
+static int mrf24j40_energydetect(FAR struct mrf24j40_radio_s *dev,
+                                 FAR uint8_t *energy);
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: mrf24j40_energydetect
+ *
+ * Description:
+ *   Measure the RSSI level for the current channel.
+ *
+ ****************************************************************************/
+
+#if 0
+static int mrf24j40_energydetect(FAR struct mrf24j40_radio_s *dev,
+                                 FAR uint8_t *energy)
 {
-  uint16_t nhalfsym;
   uint8_t reg;
 
-  nhalfsym = (numsymbols << 1);
+  /* Manually enable the LNA*/
 
-  /* Disable the interrupt, clear the timer count */
+  mrf24j40_setpamode(dev, MRF24J40_PA_ED);
 
-  reg = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
-  reg |= MRF24J40_INTCON_HSYMTMRIE;
-  mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
+  /* Set RSSI average duration to 8 symbols */
 
-  mrf24j40_setreg(dev->spi, MRF24J40_HSYMTMRL, 0x00);
-  mrf24j40_setreg(dev->spi, MRF24J40_HSYMTMRH, 0x00);
+  reg  = mrf24j40_getreg(dev->spi, MRF24J40_TXBCON1);
+  reg |= 0x30;
+  mrf24j40_setreg(dev->spi, MRF24J40_TXBCON1, reg);
 
-  reg &= ~MRF24J40_INTCON_HSYMTMRIE;
-  mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
+  /* 1. Set RSSIMODE1 0x3E<7> – Initiate RSSI calculation. */
 
-  /* Set the timer count and enable interrupts */
+  mrf24j40_setreg(dev->spi, MRF24J40_BBREG6, 0x80);
 
-  reg = (nhalfsym & 0xFF);
-  mrf24j40_setreg(dev->spi, MRF24J40_HSYMTMRL, reg);
+  /* 2. Wait until RSSIRDY 0x3E<0> is set to ‘1’ – RSSI calculation is
+   *    complete.
+   */
 
-  reg = (nhalfsym >> 8) & 0xFF;
-  mrf24j40_setreg(dev->spi, MRF24J40_HSYMTMRH, reg);
+  while(!(mrf24j40_getreg(dev->spi, MRF24J40_BBREG6) & 0x01));
+
+  /* 3. Read RSSI 0x210<7:0> – The RSSI register contains the averaged RSSI
+   *    received power level for 8 symbol periods.
+   */
+
+  *energy = mrf24j40_getreg(dev->spi, MRF24J40_RSSI);
+  mrf24j40_setreg(dev->spi, MRF24J40_BBREG6, 0x40);
+
+  /* Back to automatic control */
+
+  mrf24j40_setpamode(dev, MRF24J40_PA_AUTO);
+
+  return OK;
 }
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Function: mrf24j40_dopoll_csma
@@ -228,168 +244,6 @@ void mrf24j40_dopoll_gts(FAR void *arg)
     }
 
   sem_post(&dev->exclsem);
-}
-
-/****************************************************************************
- * Name: mrf24j40_setorder
- *
- * Description:
- *   Configures the timers and sets the ORDER register
- ****************************************************************************/
-
-void mrf24j40_setorder(FAR struct mrf24j40_radio_s *dev, uint8_t bo, uint8_t so)
-{
-  uint32_t maincnt = 0;
-  uint32_t slpcal = 0;
-
-  wlinfo("bo: %d, so: %d\n", bo, so);
-
-  /* Calibrate the Sleep Clock (SLPCLK) frequency. Refer to Section 3.15.1.2
-    * “Sleep Clock Calibration”.
-    */
-
-  /* If the Sleep Clock Selection, SLPCLKSEL (0x207<7:6), is the internal
-    * oscillator (100 kHz), set SLPCLKDIV to a minimum value of 0x01.
-    */
-
-  mrf24j40_setreg(dev->spi, MRF24J40_SLPCON1, 0x01);
-
-  /* Select the source of SLPCLK (internal 100kHz) */
-
-  mrf24j40_setreg(dev->spi, MRF24J40_RFCON7, MRF24J40_RFCON7_SEL_100KHZ);
-
-  /* Begin calibration by setting the SLPCALEN bit (SLPCAL2 0x20B<4>) to
-    * ‘1’. Sixteen samples of the SLPCLK are counted and stored in the
-    * SLPCAL register. No need to mask, this is the only writable bit
-    */
-
-  mrf24j40_setreg(dev->spi, MRF24J40_SLPCAL2, MRF24J40_SLPCAL2_SLPCALEN);
-
-  /* Calibration is complete when the SLPCALRDY bit (SLPCAL2 0x20B<7>) is
-    * set to ‘1’.
-    */
-
-  while (!(mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL2) &
-          MRF24J40_SLPCAL2_SLPCALRDY))
-    {
-      usleep(1);
-    }
-
-  slpcal  = mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL0);
-  slpcal |= (mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL1) << 8);
-  slpcal |= ((mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL2) << 16) & 0x0F);
-
-  /* Program the Beacon Interval into the Main Counter, MAINCNT (0x229<1:0>,
-   * 0x228, 0x227, 0x226), and Remain Counter, REMCNT (0x225, 0x224),
-   * according to BO and SO values. Refer to Section 3.15.1.3 “Sleep Mode
-   * Counters”
-   */
-
-  mrf24j40_setreg(dev->spi, MRF24J40_REMCNTL, (MRF24J40_REMCNT & 0xFF));
-  mrf24j40_setreg(dev->spi, MRF24J40_REMCNTH, ((MRF24J40_REMCNT >> 8) & 0xFF));
-
-  maincnt = MRF24J40_MAINCNT(bo, (slpcal * 50 / 16));
-
-  mrf24j40_setreg(dev->spi, MRF24J40_MAINCNT0, (maincnt & 0xFF));
-  mrf24j40_setreg(dev->spi, MRF24J40_MAINCNT1, ((maincnt >> 8)  & 0xFF));
-  mrf24j40_setreg(dev->spi, MRF24J40_MAINCNT2, ((maincnt >> 16) & 0xFF));
-  mrf24j40_setreg(dev->spi, MRF24J40_MAINCNT3, ((maincnt >> 24) & 0x03));
-
-  /* Configure the BO (ORDER 0x10<7:4>) and SO (ORDER 0x10<3:0>) values.
-    * After configuring BO and SO, the beacon frame will be sent immediately.
-    */
-
-  mrf24j40_setreg(dev->spi, MRF24J40_ORDER, ((bo << 4) & 0xF0) | (so & 0x0F));
-}
-
-/****************************************************************************
- * Name: mrf24j40_pacontrol
- *
- * Description:
- *   Control the external LNA/PA on the MRF24J40MB/MC/MD/ME modules
- *   GPIO 1: PA enable
- *   GPIO 2: LNA enable
- *   GPIO 3: PA power enable (not required on MB)
- ****************************************************************************/
-
-int mrf24j40_pacontrol(FAR struct mrf24j40_radio_s *dev, int mode)
-{
-  if (!dev->paenabled)
-    {
-      return OK;
-    }
-
-  if (mode == MRF24J40_PA_AUTO)
-    {
-      mrf24j40_setreg(dev->spi, MRF24J40_TRISGPIO, 0x08);
-      mrf24j40_setreg(dev->spi, MRF24J40_GPIO    , 0x08);
-      mrf24j40_setreg(dev->spi, MRF24J40_TESTMODE, 0x0F);
-    }
-  else if (mode == MRF24J40_PA_ED)
-    {
-      mrf24j40_setreg(dev->spi, MRF24J40_TESTMODE, 0x08);
-      mrf24j40_setreg(dev->spi, MRF24J40_TRISGPIO, 0x0F);
-      mrf24j40_setreg(dev->spi, MRF24J40_GPIO    , 0x0C);
-    }
-  else if (mode == MRF24J40_PA_SLEEP)
-    {
-      mrf24j40_setreg(dev->spi, MRF24J40_TESTMODE, 0x08);
-      mrf24j40_setreg(dev->spi, MRF24J40_TRISGPIO, 0x0F);
-      mrf24j40_setreg(dev->spi, MRF24J40_GPIO    , 0x00);
-    }
-  else
-    {
-      return -EINVAL;
-    }
-
-  mrf24j40_resetrfsm(dev);
-  return OK;
-}
-
-/****************************************************************************
- * Name: mrf24j40_energydetect
- *
- * Description:
- *   Measure the RSSI level for the current channel.
- *
- ****************************************************************************/
-
-int mrf24j40_energydetect(FAR struct mrf24j40_radio_s *dev, FAR uint8_t *energy)
-{
-  uint8_t reg;
-
-  /* Manually enable the LNA*/
-
-  mrf24j40_pacontrol(dev, MRF24J40_PA_ED);
-
-  /* Set RSSI average duration to 8 symbols */
-
-  reg  = mrf24j40_getreg(dev->spi, MRF24J40_TXBCON1);
-  reg |= 0x30;
-  mrf24j40_setreg(dev->spi, MRF24J40_TXBCON1, reg);
-
-  /* 1. Set RSSIMODE1 0x3E<7> – Initiate RSSI calculation. */
-
-  mrf24j40_setreg(dev->spi, MRF24J40_BBREG6, 0x80);
-
-  /* 2. Wait until RSSIRDY 0x3E<0> is set to ‘1’ – RSSI calculation is
-   *    complete.
-   */
-
-  while(!(mrf24j40_getreg(dev->spi, MRF24J40_BBREG6) & 0x01));
-
-  /* 3. Read RSSI 0x210<7:0> – The RSSI register contains the averaged RSSI
-   *    received power level for 8 symbol periods.
-   */
-
-  *energy = mrf24j40_getreg(dev->spi, MRF24J40_RSSI);
-  mrf24j40_setreg(dev->spi, MRF24J40_BBREG6, 0x40);
-
-  /* Back to automatic control */
-
-  mrf24j40_pacontrol(dev, MRF24J40_PA_AUTO);
-
-  return OK;
 }
 
 /****************************************************************************
@@ -558,77 +412,7 @@ void mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev, FAR const uint8_t *bu
     }
 }
 
-/****************************************************************************
- * Name: mrf24j40_rxenable
- *
- * Description:
- *  Enable/Disable receiver.
- *
- ****************************************************************************/
 
-int mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio, bool enable)
-{
-  FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;
-  uint8_t reg;
-
-  dev->rxenabled = enable;
-
-
-  if (enable)
-    {
-      /* Disable packet reception. See pg. 109 of datasheet */
-
-      mrf24j40_setreg(dev->spi, MRF24J40_BBREG1, MRF24J40_BBREG1_RXDECINV);
-
-      /* Enable rx int */
-
-      reg = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
-      reg &= ~MRF24J40_INTCON_RXIE;
-      mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
-
-      /* Purge the RX buffer */
-
-      reg = mrf24j40_getreg(dev->spi, MRF24J40_RXFLUSH);
-      reg |= MRF24J40_RXFLUSH_RXFLUSH;
-      mrf24j40_setreg(dev->spi, MRF24J40_RXFLUSH, reg);
-
-      /* Re-enable packet reception. See pg. 109 of datasheet */
-
-      mrf24j40_setreg(dev->spi, MRF24J40_BBREG1, 0);
-    }
-  else
-    {
-      /* Disable rx int */
-
-      reg  = mrf24j40_getreg(dev->spi, MRF24J40_INTCON);
-      reg |= MRF24J40_INTCON_RXIE;
-      mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: mrf24j40_resetrfsm
- *
- * Description:
- *   Reset the RF state machine. Required at boot, after channel change,
- *   and probably after PA settings.
- *
- ****************************************************************************/
-
-void mrf24j40_resetrfsm(FAR struct mrf24j40_radio_s *dev)
-{
-  uint8_t reg;
-
-  reg = mrf24j40_getreg(dev->spi, MRF24J40_RFCTL);
-  reg |= 0x04;
-  mrf24j40_setreg(dev->spi, MRF24J40_RFCTL, reg);
-
-  reg &= ~0x04;
-  mrf24j40_setreg(dev->spi, MRF24J40_RFCTL, reg);
-  up_udelay(200);
-}
 
 /****************************************************************************
  * Public Functions
