@@ -1,6 +1,6 @@
 /****************************************************************************
  * drivers/wireless/ieee802154/mrf24j40/mrf24j40_regops.c
- 
+ *
  *   Copyright (C) 2015-2016 Sebastien Lorquet. All rights reserved.
  *   Copyright (C) 2017 Verge Inc. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
