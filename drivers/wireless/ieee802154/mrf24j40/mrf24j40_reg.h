@@ -35,6 +35,9 @@
  *
  ****************************************************************************/
 
+#ifndef __DRIVERS_WIRELESS_IEEE802154_MRF24J40_REG_H
+#define __DRIVERS_WIRELESS_IEEE802154_MRF24J40_REG_H
+
 /* MRF24J40 Registers *******************************************************/
 
 #define MRF24J40_RXMCR     0x00
@@ -284,3 +287,5 @@
 #define MRF24J40_RXFLUSH_SHIFT_CMDONLY   3
 #define MRF24J40_RXFLUSH_SHIFT_WAKEPAD   5
 #define MRF24J40_RXFLUSH_SHIFT_WAKEPOL   6
+
+#endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_REG_H */
