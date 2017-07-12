@@ -279,17 +279,6 @@ void mrf24j40_setorder(FAR struct mrf24j40_radio_s *dev, uint8_t bo, uint8_t so)
   slpcal |= (mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL1) << 8);
   slpcal |= ((mrf24j40_getreg(dev->spi, MRF24J40_SLPCAL2) << 16) & 0x0F);
 
-  /* Set WAKECNT (SLPACK 0x35<6:0>) value = 0xC8 to set the main oscillator
-   * (20 MHz) start-up timer value.
-   */
-
-  mrf24j40_setreg(dev->spi, MRF24J40_SLPACK, 0xC8);
-
-  /* Set WAKETIME to recommended value for 100kHz SLPCLK Source */
-
-  mrf24j40_setreg(dev->spi, MRF24J40_WAKETIMEL, 0xD2);
-  mrf24j40_setreg(dev->spi, MRF24J40_WAKETIMEH, 0x00);
-
   /* Program the Beacon Interval into the Main Counter, MAINCNT (0x229<1:0>,
    * 0x228, 0x227, 0x226), and Remain Counter, REMCNT (0x225, 0x224),
    * according to BO and SO values. Refer to Section 3.15.1.3 “Sleep Mode
