@@ -1261,7 +1261,12 @@ static void spi_recvblock(struct spi_dev_s *dev, void *buffer, size_t nwords)
 
 static void spi_wait_synchronization(struct sam_spidev_s *priv)
 {
+
+#if defined(CONFIG_ARCH_FAMILY_SAMD20)
   while ((spi_getreg16(priv, SAM_SPI_STATUS_OFFSET) & SPI_STATUS_SYNCBUSY) != 0);
+#elif defined(CONFIG_ARCH_FAMILY_SAMD21) || defined(CONFIG_ARCH_FAMILY_SAML21)
+  while ((spi_getreg16(priv, SAM_SPI_SYNCBUSY_OFFSET) & SPI_SYNCBUSY_ALL) != 0);
+#endif
 }
 
 /****************************************************************************
