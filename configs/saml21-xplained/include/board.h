@@ -604,6 +604,19 @@
 
 #define BOARD_SERCOM5_FREQUENCY      BOARD_GCLK0_FREQUENCY
 
+/* USB definitions ******************************************************************/
+/* This is the source clock generator for the GCLK_USB clock
+ */
+
+#define BOARD_USB_GCLKGEN            0
+#define BOARD_USB_FREQUENCY          BOARD_GCLK0_FREQUENCY
+
+/* default USB Pad calibration (not used yet by USB driver) */
+
+#define BOARD_USB_PADCAL_P       29
+#define BOARD_USB_PADCAL_N       5
+#define BOARD_USB_PADCAL_TRIM    3
+
 /* LED definitions ******************************************************************/
 /* There are three LEDs on board the SAML21 Xplained Pro board:  The EDBG
  * controls two of the LEDs, a power LED and a status LED.  There is only
