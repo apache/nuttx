@@ -155,5 +155,3 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
 }
 
 #endif /* CONFIG_NET */
-
-

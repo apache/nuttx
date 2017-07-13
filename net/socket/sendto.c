@@ -53,7 +53,6 @@
 #include "sixlowpan/sixlowpan.h"
 #include "local/local.h"
 #include "socket/socket.h"
-#include "usrsock/usrsock.h"
 
 /****************************************************************************
  * Public Functions
@@ -149,30 +148,19 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 #endif
     }
 
-#ifdef CONFIG_NET_USRSOCK
-  if (psock->s_type == SOCK_USRSOCK_TYPE)
+  /* Verify that the psock corresponds to valid, allocated socket */
+
+  if (!psock || psock->s_crefs <= 0)
     {
-      /* Perform the usrsock sendto operation */
-
-      nsent = usrsock_sendto(psock, buf, len, to, tolen);
+      nerr("ERROR: Invalid socket\n");
+      errcode = EBADF;
+      goto errout;
     }
-  else
-#endif
-    {
-      /* Verify that the psock corresponds to valid, allocated socket */
 
-      if (!psock || psock->s_crefs <= 0)
-        {
-          nerr("ERROR: Invalid socket\n");
-          errcode = EBADF;
-          goto errout;
-        }
+  /* Let the address family's send() method handle the operation */
 
-      /* Let the address family's send() method handle the operation */
-
-      DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_send != NULL);
-      nsent = psock->s_sockif->si_send(psock, buf, len, flags);
-    }
+  DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_send != NULL);
+  nsent = psock->s_sockif->si_send(psock, buf, len, flags);
 
   /* Check if the domain-specific sendto() logic failed */
 

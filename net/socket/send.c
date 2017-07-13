@@ -53,7 +53,6 @@
 #include "sixlowpan/sixlowpan.h"
 #include "local/local.h"
 #include "socket/socket.h"
-#include "usrsock/usrsock.h"
 
 /****************************************************************************
  * Public Functions
@@ -134,21 +133,10 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 
   (void)enter_cancellation_point();
 
-  /* Special case user sockets */
+  /* Let the address family's send() method handle the operation */
 
-#ifdef CONFIG_NET_USRSOCK
-  if (psock->s_type SOCK_USRSOCK_TYPE)
-    {
-      ret = usrsock_sendto(psock, buf, len, NULL, 0);
-    }
-  else
-#endif /*CONFIG_NET_USRSOCK*/
-    {
-      /* Let the address family's send() method handle the operation */
-
-      DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_send != NULL);
-      ret = psock->s_sockif->si_send(psock, buf, len, flags);
-    }
+  DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_send != NULL);
+  ret = psock->s_sockif->si_send(psock, buf, len, flags);
 
   leave_cancellation_point();
   if (ret < 0)

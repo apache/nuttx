@@ -57,7 +57,11 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t local_setup(FAR struct socket *psock, int protocol);
+static int     local_setup(FAR struct socket *psock, int protocol);
+static int     local_bind(FAR struct socket *psock,
+                  FAR const struct sockaddr *addr, socklen_t addrlen);
+static int     local_connect(FAR struct socket *psock,
+                  FAR const struct sockaddr *addr, socklen_t addrlen);
 static ssize_t local_send(FAR struct socket *psock, FAR const void *buf,
                  size_t len, int flags);
 static ssize_t local_sendto(FAR struct socket *psock, FAR const void *buf,
@@ -71,6 +75,8 @@ static ssize_t local_sendto(FAR struct socket *psock, FAR const void *buf,
 const struct sock_intf_s g_local_sockif =
 {
   local_setup,    /* si_setup */
+  local_bind,     /* si_bind */
+  local_connect,  /* si_connect */
   local_send,     /* si_send */
   local_sendto,   /* si_sendto */
   local_recvfrom  /* si_recvfrom */
@@ -168,6 +174,154 @@ static int local_setup(FAR struct socket *psock, int protocol)
 
       default:
         return -EPROTONOSUPPORT;
+    }
+}
+
+/****************************************************************************
+ * Name: local_bind
+ *
+ * Description:
+ *   local_bind() gives the socket 'psock' the local address 'addr'.  'addr'
+ *   is 'addrlen' bytes long.  Traditionally, this is called "assigning a
+ *   name to a socket."  When a socket is created with socket(), it exists
+ *   in a name space (address family) but has no name assigned.
+ *
+ * Parameters:
+ *   psock    Socket structure of the socket to bind
+ *   addr     Socket local address
+ *   addrlen  Length of 'addr'
+ *
+ * Returned Value:
+ *   0 on success;  A negated errno value is returned on failure.  See
+ *   bind() for a list a appropriate error values.
+ *
+ ****************************************************************************/
+
+static int local_bind(FAR struct socket *psock,
+                      FAR const struct sockaddr *addr, socklen_t addrlen)
+{
+  int ret;
+
+  /* Verify that a valid address has been provided */
+
+  if (addr->sa_family != AF_LOCAL || addrlen < sizeof(sa_family_t))
+    {
+      nerr("ERROR: Invalid address length: %d < %d\n",
+           addrlen, sizeof(sa_family_t));
+      return -EBADF;
+    }
+
+  /* Perform the binding depending on the protocol type */
+
+  switch (psock->s_type)
+    {
+      /* Bind a local TCP/IP stream or datagram socket  */
+
+#if defined(ONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
+#ifdef CONFIG_NET_TCP
+      case SOCK_STREAM:
+#endif
+#ifdef CONFIG_NET_UDP
+      case SOCK_DGRAM:
+#endif
+        {
+          /* Bind the Unix domain connection structure */
+
+          ret psock_local_bind(psock, addr, addrlen);
+
+          /* Mark the socket bound */
+
+          if (ret >= 0)
+            {
+              psock->s_flags |= _SF_BOUND;
+            }
+        }
+        break;
+#endif /* CONFIG_NET_TCP || CONFIG_NET_UDP*/
+
+      default:
+        ret = -EBADF;
+        break;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: local_connect
+ *
+ * Description:
+ *   local_connect() connects the local socket referred to by the structure
+ *   'psock' to the address specified by 'addr'. The addrlen argument
+ *   specifies the size of 'addr'.  The format of the address in 'addr' is
+ *   determined by the address space of the socket 'psock'.
+ *
+ *   If the socket 'psock' is of type SOCK_DGRAM then 'addr' is the address
+ *   to which datagrams are sent by default, and the only address from which
+ *   datagrams are received. If the socket is of type SOCK_STREAM or
+ *   SOCK_SEQPACKET, this call attempts to make a connection to the socket
+ *   that is bound to the address specified by 'addr'.
+ *
+ *   Generally, connection-based protocol sockets may successfully
+ *   local_connect() only once; connectionless protocol sockets may use
+ *   local_connect() multiple times to change their association.
+ *   Connectionless sockets may dissolve the association by connecting to
+ *   an address with the sa_family member of sockaddr set to AF_UNSPEC.
+ *
+ * Parameters:
+ *   psock     Pointer to a socket structure initialized by psock_socket()
+ *   addr      Server address (form depends on type of socket)
+ *   addrlen   Length of actual 'addr'
+ *
+ * Returned Value:
+ *   0 on success; a negated errno value on failue.  See connect() for the
+ *   list of appropriate errno values to be returned.
+ *
+ ****************************************************************************/
+
+static int local_connect(FAR struct socket *psock,
+                         FAR const struct sockaddr *addr, socklen_t addrlen)
+{
+  /* Verify that a valid address has been provided */
+
+  if (addr->sa_family != AF_LOCAL || addrlen < sizeof(sa_family_t))
+    {
+      return -EBADF;
+    }
+
+  /* Perform the connection depending on the protocol type */
+
+  switch (psock->s_type)
+    {
+#ifdef CONFIG_NET_TCP
+      case SOCK_STREAM:
+        {
+          /* Verify that the socket is not already connected */
+
+          if (_SS_ISCONNECTED(psock->s_flags))
+            {
+              return -EISCONN;
+            }
+
+          /* It's not...  Connect to the local Unix domain server */
+
+          return psock_local_connect(psock, addr);
+        }
+        break;
+#endif /* CONFIG_NET_TCP */
+
+#ifdef CONFIG_NET_UDP
+      case SOCK_DGRAM:
+        {
+          /* Perform the datagram connection logic */
+
+          return psock_local_connect(psock, addr);
+        }
+        break;
+#endif /* CONFIG_NET_UDP */
+
+      default:
+        return -EBADF;
     }
 }
 

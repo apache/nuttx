@@ -46,7 +46,6 @@
 #include <nuttx/net/net.h>
 
 #include "socket/socket.h"
-#include "usrsock/usrsock.h"
 
 #ifdef CONFIG_NET
 
@@ -147,33 +146,14 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_RECV);
 
-#ifdef CONFIG_NET_USRSOCK
-  if (psock->s_type == SOCK_USRSOCK_TYPE)
-    {
-      /* Perform the usrsock recvfrom operation */
+  /* Let logic specific to this address family handle the recvfrom()
+   * operation.
+   */
 
-      ret = usrsock_recvfrom(psock, buf, len, from, fromlen);
-    }
-  else
-#endif
-  {
-    /* Let logic specific to this address family handle the recvfrom()
-     * operation.
-     */
+  DEBUGASSERT(psock->s_sockif != NULL &&
+             psock->s_sockif->si_recvfrom != NULL);
 
-    DEBUGASSERT(psock->s_sockif != NULL &&
-                psock->s_sockif->si_recvfrom != NULL);
-
-    if (psock->s_sockif->si_recvfrom != NULL)
-      {
-        ret = psock->s_sockif->si_recvfrom(psock, buf, len, flags,
-                                           from, fromlen);
-      }
-    else
-      {
-        ret = -ENOSYS;
-      }
-  }
+  ret = psock->s_sockif->si_recvfrom(psock, buf, len, flags, from, fromlen);
 
   /* Set the socket state to idle */
 

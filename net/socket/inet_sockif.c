@@ -49,6 +49,7 @@
 
 #include "tcp/tcp.h"
 #include "udp/udp.h"
+#include "usrsock/usrsock.h"
 #include "socket/socket.h"
 
 #if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
@@ -57,12 +58,14 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int inet_setup(FAR struct socket *psock, int protocol);
+static int     inet_setup(FAR struct socket *psock, int protocol);
+static int     inet_bind(FAR struct socket *psock,
+                 FAR const struct sockaddr *addr, socklen_t addrlen);
 static ssize_t inet_send(FAR struct socket *psock, FAR const void *buf,
-          size_t len, int flags);
+                 size_t len, int flags);
 static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
-          size_t len, int flags, FAR const struct sockaddr *to,
-          socklen_t tolen);
+                 size_t len, int flags, FAR const struct sockaddr *to,
+                 socklen_t tolen);
 
 /****************************************************************************
  * Public Data
@@ -71,6 +74,8 @@ static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
 const struct sock_intf_s g_inet_sockif =
 {
   inet_setup,    /* si_setup */
+  inet_bind,     /* si_bind */
+  inet_connect,  /* si_connect */
   inet_send,     /* si_send */
   inet_sendto,   /* si_sendto */
   inet_recvfrom  /* si_recvfrom */
@@ -153,6 +158,65 @@ static int inet_udp_alloc(FAR struct socket *psock)
 #endif /* NET_UDP_HAVE_STACK */
 
 /****************************************************************************
+ * Name: usrsock_socket_setup
+ *
+ * Description:
+ *   Special socket setup may be required by user sockets.
+ *
+ * Parameters:
+ *   domain   (see sys/socket.h)
+ *   type     (see sys/socket.h)
+ *   protocol (see sys/socket.h)
+ *   psock    A pointer to a user allocated socket structure to be initialized.
+ *
+ * Returned Value:
+ *   0 on success; a negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_USRSOCK
+static int usrsock_socket_setup(int domain, int type, int protocol,
+                                FAR struct socket *psock)
+{
+  switch (domain)
+    {
+      default:
+        return OK;
+
+      case PF_INET:
+      case PF_INET6:
+        {
+#ifndef CONFIG_NET_USRSOCK_UDP
+          if (type == SOCK_DGRAM)
+            {
+              return OK;
+            }
+#endif
+#ifndef CONFIG_NET_USRSOCK_TCP
+          if (type == SOCK_STREAM)
+            {
+              return OK;
+            }
+#endif
+          psock->s_type = PF_UNSPEC;
+          psock->s_conn = NULL;
+
+          /* Let the user socket logic handle the setup...
+           *
+           * A return value of zero means that the operation was
+           * successfully handled by usrsock.  A negative value means that
+           * an error occurred.  The special error value -ENETDOWN means
+           * that usrsock daemon is not running.  The caller should attempt
+           * to open socket with kernel networking stack in this case.
+           */
+
+          return usrsock_socket(domain, type, protocol, psock);
+        }
+    }
+}
+#endif /* CONFIG_NET_USRSOCK */
+
+/****************************************************************************
  * Name: inet_setup
  *
  * Description:
@@ -175,6 +239,27 @@ static int inet_udp_alloc(FAR struct socket *psock)
 
 static int inet_setup(FAR struct socket *psock, int protocol)
 {
+#ifdef CONFIG_NET_USRSOCK
+  /* Handle speical setup for user INET sockets */
+
+  ret = usrsock_socket_setup(domain, type, protocol, psock);
+  if (ret < 0)
+    {
+      if (ret = -ENETDOWN)
+        {
+          /* -ENETDOWN means that usrsock daemon is not running.  Attempt to
+           * open socket with kernel networking stack.
+           */
+
+          warn("WARNING: usrsock daemon is not running\n");
+        }
+      else
+        {
+          return ret;
+        }
+    }
+#endif /* CONFIG_NET_USRSOCK */
+
   /* Allocate the appropriate connection structure.  This reserves the
    * the connection structure is is unallocated at this point.  It will
    * not actually be initialized until the socket is connected.
@@ -197,6 +282,7 @@ static int inet_setup(FAR struct socket *psock, int protocol)
 
         return inet_tcp_alloc(psock);
 #else
+        warning("WARNING:  SOCK_STREAM disabled\n");
         return = -ENETDOWN;
 #endif
 #endif /* CONFIG_NET_TCP */
@@ -214,6 +300,7 @@ static int inet_setup(FAR struct socket *psock, int protocol)
 
         return inet_udp_alloc(psock);
 #else
+        warning("WARNING:  SOCK_DGRAM disabled\n");
         return -ENETDOWN;
 #endif
 #endif /* CONFIG_NET_UDP */
@@ -222,6 +309,130 @@ static int inet_setup(FAR struct socket *psock, int protocol)
         nerr("ERROR: Unsupported type: %d\n", psock->s_type);
         return -EPROTONOSUPPORT;
     }
+}
+
+/****************************************************************************
+ * Name: inet_bind
+ *
+ * Description:
+ *   inet_bind() gives the socket 'psock' the local address 'addr'.  'addr'
+ *   is 'addrlen' bytes long.  Traditionally, this is called "assigning a
+ *   name to a socket."  When a socket is created with socket(), it exists
+ *   in a name space (address family) but has no name assigned.
+ *
+ * Parameters:
+ *   psock    Socket structure of the socket to bind
+ *   addr     Socket local address
+ *   addrlen  Length of 'addr'
+ *
+ * Returned Value:
+ *   0 on success;  A negated errno value is returned on failure.  See
+ *   bind() for a list a appropriate error values.
+ *
+ ****************************************************************************/
+
+static int inet_bind(FAR struct socket *psock,
+                     FAR const struct sockaddr *addr, socklen_t addrlen)
+{
+  int minlen;
+  int ret;
+
+  /* Verify that a valid address has been provided */
+
+  switch (addr->sa_family)
+    {
+#ifdef CONFIG_NET_IPv4
+    case AF_INET:
+      minlen = sizeof(struct sockaddr_in);
+      break;
+#endif
+
+#ifdef CONFIG_NET_IPv6
+    case AF_INET6:
+      minlen = sizeof(struct sockaddr_in6);
+      break;
+#endif
+
+    default:
+      nerr("ERROR: Unrecognized address family: %d\n", addr->sa_family);
+      return -EAFNOSUPPORT;
+    }
+
+  if (addrlen < minlen)
+    {
+      nerr("ERROR: Invalid address length: %d < %d\n", addrlen, minlen);
+      return -EBADF;
+    }
+
+  /* Perform the binding depending on the protocol type */
+
+  switch (psock->s_type)
+    {
+#ifdef CONFIG_NET_USRSOCK
+      case SOCK_USRSOCK_TYPE:
+        {
+          FAR struct usrsock_conn_s *conn = psock->s_conn;
+
+          DEBUGASSERT(conn != NULL);
+
+          /* Perform the usrsock bind operation */
+
+          ret = usrsock_bind(conn, addr, addrlen);
+        }
+        break;
+#endif
+
+#ifdef CONFIG_NET_TCP
+      case SOCK_STREAM:
+        {
+#ifdef NET_TCP_HAVE_STACK
+          /* Bind a TCP/IP stream socket. */
+
+          ret = tcp_bind(psock->s_conn, addr);
+
+          /* Mark the socket bound */
+
+          if (ret >= 0)
+            {
+              psock->s_flags |= _SF_BOUND;
+            }
+#else
+          nwarn("WARNING: TCP/IP stack is not available in this configuration\n");
+          return -ENOSYS;
+#endif
+        }
+        break;
+#endif /* CONFIG_NET_TCP */
+
+#ifdef CONFIG_NET_UDP
+      case SOCK_DGRAM:
+        {
+#ifdef NET_UDP_HAVE_STACK
+          /* Bind a UDP/IP datagram socket */
+
+          ret = udp_bind(psock->s_conn, addr);
+
+          /* Mark the socket bound */
+
+          if (ret >= 0)
+            {
+              psock->s_flags |= _SF_BOUND;
+            }
+#else
+          nwarn("WARNING: UDP stack is not available in this configuration\n");
+          ret = -ENOSYS;
+#endif
+        }
+        break;
+#endif /* CONFIG_NET_UDP */
+
+      default:
+        nerr("ERROR: Unsupported socket type: %d\n", psock->s_type);
+        ret = -EBADF;
+        break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -303,6 +514,16 @@ static ssize_t inet_send(FAR struct socket *psock, FAR const void *buf,
         break;
 #endif /* CONFIG_NET_UDP */
 
+  /* Special case user sockets */
+
+#ifdef CONFIG_NET_USRSOCK
+      case SOCK_USRSOCK_TYPE:
+        {
+          ret = usrsock_sendto(psock, buf, len, NULL, 0);
+        }
+        break;
+#endif /*CONFIG_NET_USRSOCK*/
+
       default:
         {
           /* EDESTADDRREQ.  Signifies that the socket is not connection-mode
@@ -347,71 +568,78 @@ static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
   socklen_t minlen;
   ssize_t nsent;
 
-  /* Verify that a valid address has been provided */
-
-  switch (to->sa_family)
+#ifdef CONFIG_NET_USRSOCK
+  if (psock->s_type == SOCK_USRSOCK_TYPE)
     {
+      /* Perform the usrsock sendto operation */
+
+      nsent = usrsock_sendto(psock, buf, len, to, tolen);
+    }
+  else
+#endif
+    {
+      /* Verify that a valid address has been provided */
+
+      switch (to->sa_family)
+        {
 #ifdef CONFIG_NET_IPv4
-    case AF_INET:
-      minlen = sizeof(struct sockaddr_in);
-      break;
+        case AF_INET:
+          minlen = sizeof(struct sockaddr_in);
+          break;
 #endif
 
 #ifdef CONFIG_NET_IPv6
-    case AF_INET6:
-      minlen = sizeof(struct sockaddr_in6);
-      break;
+        case AF_INET6:
+          minlen = sizeof(struct sockaddr_in6);
+          break;
 #endif
 
-#ifdef CONFIG_NET_LOCAL_DGRAM
-    case AF_LOCAL:
-      minlen = sizeof(sa_family_t);
-      break;
-#endif
+        default:
+          nerr("ERROR: Unrecognized address family: %d\n", to->sa_family);
+          return -EAFNOSUPPORT;
+        }
 
-    default:
-      nerr("ERROR: Unrecognized address family: %d\n", to->sa_family);
-      return -EAFNOSUPPORT;
-    }
-
-  if (tolen < minlen)
-    {
-      nerr("ERROR: Invalid address length: %d < %d\n", tolen, minlen);
-      return -EBADF;
-    }
+      if (tolen < minlen)
+        {
+          nerr("ERROR: Invalid address length: %d < %d\n", tolen, minlen);
+          return -EBADF;
+        }
 
 #ifdef CONFIG_NET_UDP
-  /* If this is a connected socket, then return EISCONN */
+      /* If this is a connected socket, then return EISCONN */
 
-  if (psock->s_type != SOCK_DGRAM)
-    {
-      nerr("ERROR: Connected socket\n");
-      return -EBADF;
-    }
+      if (psock->s_type != SOCK_DGRAM)
+        {
+          nerr("ERROR: Connected socket\n");
+          return -EBADF;
+        }
 
-  /* Now handle the INET sendto() operation */
+      /* Now handle the INET sendto() operation */
 
 #if defined(CONFIG_NET_6LOWPAN)
-  /* Try 6LoWPAN UDP packet sendto() */
+      /* Try 6LoWPAN UDP packet sendto() */
 
-  nsent = psock_6lowpan_udp_sendto(psock, buf, len, flags, to, tolen);
+      nsent = psock_6lowpan_udp_sendto(psock, buf, len, flags, to, tolen);
 
 #if defined(CONFIG_NETDEV_MULTINIC) && defined(NET_UDP_HAVE_STACK)
-  if (nsent < 0)
-    {
-      /* UDP/IP packet sendto */
+      if (nsent < 0)
+        {
+          /* UDP/IP packet sendto */
 
-      nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
-    }
+          nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
+        }
 #endif /* CONFIG_NETDEV_MULTINIC && NET_UDP_HAVE_STACK */
 #elif defined(NET_UDP_HAVE_STACK)
-  nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
+      nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
 #else
-  nsent = -ENOSYS;
+      nwarn("WARNING: UDP not available in this configuiration\n")
+      nsent = -ENOSYS;
 #endif /* CONFIG_NET_6LOWPAN */
 #else
-  nsent = -EISCONN;
+      nwarn("WARNING: UDP not enabled in this configuiration\n")
+      nsent = -EISCONN;
 #endif /* CONFIG_NET_UDP */
+    }
 
   return nsent;
 }
@@ -421,7 +649,7 @@ static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: 
+ * Name:
  *
  * Description:
  *

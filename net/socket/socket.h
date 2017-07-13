@@ -437,6 +437,41 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
                    int flags);
 
 /****************************************************************************
+ * Name: inet_connect
+ *
+ * Description:
+ *   inet_connect() connects the local socket referred to by the structure
+ *   'psock' to the address specified by 'addr'. The addrlen argument
+ *   specifies the size of 'addr'.  The format of the address in 'addr' is
+ *   determined by the address space of the socket 'psock'.
+ *
+ *   If the socket 'psock' is of type SOCK_DGRAM then 'addr' is the address
+ *   to which datagrams are sent by default, and the only address from which
+ *   datagrams are received. If the socket is of type SOCK_STREAM or
+ *   SOCK_SEQPACKET, this call attempts to make a connection to the socket
+ *   that is bound to the address specified by 'addr'.
+ *
+ *   Generally, connection-based protocol sockets may successfully
+ *   inet_connect() only once; connectionless protocol sockets may use
+ *   inet_connect() multiple times to change their association.
+ *   Connectionless sockets may dissolve the association by connecting to
+ *   an address with the sa_family member of sockaddr set to AF_UNSPEC.
+ *
+ * Parameters:
+ *   psock     Pointer to a socket structure initialized by psock_socket()
+ *   addr      Server address (form depends on type of socket)
+ *   addrlen   Length of actual 'addr'
+ *
+ * Returned Value:
+ *   0 on success; a negated errno value on failue.  See connect() for the
+ *   list of appropriate errno values to be returned.
+ *
+ ****************************************************************************/
+
+int inet_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
+                 socklen_t addrlen);
+
+/****************************************************************************
  * Name: inet_recvfrom
  *
  * Description:

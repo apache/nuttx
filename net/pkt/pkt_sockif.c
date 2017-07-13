@@ -55,7 +55,11 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t pkt_setup(FAR struct socket *psock, int protocol);
+static int     pkt_setup(FAR struct socket *psock, int protocol);
+static int     pkt_bind(FAR struct socket *psock,
+                  FAR const struct sockaddr *addr, socklen_t addrlen);
+static int     pkt_connect(FAR struct socket *psock,
+                  FAR const struct sockaddr *addr, socklen_t addrlen);
 static ssize_t pkt_send(FAR struct socket *psock, FAR const void *buf,
                  size_t len, int flags);
 static ssize_t pkt_sendto(FAR struct socket *psock, FAR const void *buf,
@@ -69,6 +73,8 @@ static ssize_t pkt_sendto(FAR struct socket *psock, FAR const void *buf,
 const struct sock_intf_s g_pkt_sockif =
 {
   pkt_setup,    /* si_setup */
+  pkt_bind,     /* si_bind */
+  pkt_connect,  /* si_connect */
   pkt_send,     /* si_send */
   pkt_sendto,   /* si_sendto */
   pkt_recvfrom  /* si_recvfrom */
@@ -148,6 +154,120 @@ static int pkt_setup(FAR struct socket *psock, int protocol)
   else
     {
       return -EPROTONOSUPPORT;
+    }
+}
+
+/****************************************************************************
+ * Name: pkt_connect
+ *
+ * Description:
+ *   pkt_connect() connects the local socket referred to by the structure
+ *   'psock' to the address specified by 'addr'. The addrlen argument
+ *   specifies the size of 'addr'.  The format of the address in 'addr' is
+ *   determined by the address space of the socket 'psock'.
+ *
+ *   If the socket 'psock' is of type SOCK_DGRAM then 'addr' is the address
+ *   to which datagrams are sent by default, and the only address from which
+ *   datagrams are received. If the socket is of type SOCK_STREAM or
+ *   SOCK_SEQPACKET, this call attempts to make a connection to the socket
+ *   that is bound to the address specified by 'addr'.
+ *
+ *   Generally, connection-based protocol sockets may successfully
+ *   pkt_connect() only once; connectionless protocol sockets may use
+ *   pkt_connect() multiple times to change their association.
+ *   Connectionless sockets may dissolve the association by connecting to
+ *   an address with the sa_family member of sockaddr set to AF_UNSPEC.
+ *
+ * Parameters:
+ *   psock     Pointer to a socket structure initialized by psock_socket()
+ *   addr      Server address (form depends on type of socket)
+ *   addrlen   Length of actual 'addr'
+ *
+ * Returned Value:
+ *   0 on success; a negated errno value on failue.  See connect() for the
+ *   list of appropriate errno values to be returned.
+ *
+ ****************************************************************************/
+
+static int pkt_connect(FAR struct socket *psock,
+                       FAR const struct sockaddr *addr, socklen_t addrlen)
+{
+  return -EAFNOSUPPORT;
+}
+
+/****************************************************************************
+ * Name: pkt_bind
+ *
+ * Description:
+ *   pkt_bind() gives the socket 'psock' the local address 'addr'.  'addr'
+ *   is 'addrlen' bytes long.  Traditionally, this is called "assigning a
+ *   name to a socket."  When a socket is created with socket(), it exists
+ *   in a name space (address family) but has no name assigned.
+ *
+ * Parameters:
+ *   psock    Socket structure of the socket to bind
+ *   addr     Socket local address
+ *   addrlen  Length of 'addr'
+ *
+ * Returned Value:
+ *   0 on success;  A negated errno value is returned on failure.  See
+ *   bind() for a list a appropriate error values.
+ *
+ ****************************************************************************/
+
+static int pkt_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
+                    socklen_t addrlen)
+{
+#if 0
+  char hwaddr[6] =  /* our MAC for debugging */
+  {
+    0x00, 0xa1, 0xb1, 0xc1, 0xd1, 0xe1
+  };
+#endif
+  char hwaddr[6] =  /* MAC from ifconfig */
+  {
+    0x00, 0xe0, 0xde, 0xad, 0xbe, 0xef
+  };
+  int ifindex;
+
+  /* Verify that a valid address has been provided */
+
+  if (addr->sa_family != AF_PACKET || addrlen < sizeof(struct sockaddr_ll)
+    {
+      nerr("ERROR: Invalid address length: %d < %d\n",
+           addrlen, sizeof(struct sockaddr_ll);
+      return -EBADF;
+    }
+
+  /* Bind a raw socket to an network device. */
+
+  if (psock->s_type == SOCK_RAW)
+    {
+      FAR struct pkt_conn_s *conn = (FAR struct pkt_conn_s *)psock->s_conn;
+
+      /* Look at the addr and identify network interface */
+
+      ifindex = addr->sll_ifindex;
+
+#if 0
+      /* Get the MAC address of that interface */
+
+      memcpy(hwaddr, g_netdevices->d_mac.ether, 6);
+#endif
+
+      /* Put ifindex and mac address into connection */
+
+      conn->ifindex = ifindex;
+      memcpy(conn->lmac, hwaddr, 6);
+
+      /* Mark the socket bound */
+
+      psock->s_flags |= _SF_BOUND;
+      return OK;
+    }
+  else
+    {
+      return -EBADF;
     }
 }
 
