@@ -147,7 +147,7 @@ static void mrf24j40_setorder(FAR struct mrf24j40_radio_s *dev, uint8_t bo,
       else
         {
           maincnt = bi / dev->slpclkper;
-          remcnt  = bi - (maincnt * dev->slpclkper) / 50;
+          remcnt  = (bi - (maincnt * dev->slpclkper)) / 50;
         }
 
       wlinfo("MAINCNT: %lu, REMCNT: %lu\n", maincnt, remcnt);
