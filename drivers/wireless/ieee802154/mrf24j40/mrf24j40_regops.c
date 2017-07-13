@@ -40,8 +40,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <assert.h>
 #include <debug.h>
+#include <stdio.h>
 
 #include "mrf24j40.h"
 #include "mrf24j40_regops.h"

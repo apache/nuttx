@@ -40,15 +40,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <assert.h>
 #include <debug.h>
-
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <semaphore.h>
+
+#include <sys/types.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>

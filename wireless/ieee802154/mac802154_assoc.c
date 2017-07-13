@@ -133,8 +133,14 @@ int mac802154_req_associate(MACHANDLE mac,
 
   /* Copy in the capabilities information bitfield */
 
-  priv->devmode = (req->capabilities.devtype) ?
-                  IEEE802154_DEVMODE_COORD : IEEE802154_DEVMODE_ENDPOINT;
+  if (req->capabilities.devtype)
+    {
+      mac802154_setdevmode(priv, IEEE802154_DEVMODE_COORD);
+    }
+  else
+    {
+      mac802154_setdevmode(priv, IEEE802154_DEVMODE_ENDPOINT);
+    }
 
   mac802154_setrxonidle(priv, req->capabilities.rxonidle);
 

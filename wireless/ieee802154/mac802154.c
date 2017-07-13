@@ -1545,7 +1545,6 @@ static void mac802154_sfevent(FAR const struct ieee802154_radiocb_s *radiocb,
         break;
     }
 
-
   mac802154_unlock(priv)
 }
 

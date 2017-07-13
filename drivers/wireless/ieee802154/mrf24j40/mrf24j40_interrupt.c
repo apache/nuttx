@@ -378,14 +378,17 @@ void mrf24j40_irqworker(FAR void *arg)
       wlinfo("Wake Interrupt\n");
 #endif
 
-      /* This is right before the beacon, we set the bsn here, since the MAC
-       * uses the SLPIF (end of active portion of superframe). to make any
-       * changes to the beacon.  This assumes that any changes to the beacon
-       * be in by the time that this interrupt fires.
-       */
+      if (dev->devmode != IEEE802154_DEVMODE_ENDPOINT)
+        {
+          /* This is right before the beacon, we set the bsn here, since the MAC
+           * uses the SLPIF (end of active portion of superframe). to make any
+           * changes to the beacon.  This assumes that any changes to the beacon
+           * be in by the time that this interrupt fires.
+           */
 
-      mrf24j40_setreg(dev->spi, MRF24J40_BEACON_FIFO + 4, dev->bsn++);
-      mrf24j40_beacon_trigger(dev);
+          mrf24j40_setreg(dev->spi, MRF24J40_BEACON_FIFO + 4, dev->bsn++);
+          mrf24j40_beacon_trigger(dev);
+        }
     }
 
   /* Unlock the radio device */
