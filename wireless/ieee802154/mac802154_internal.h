@@ -824,7 +824,7 @@ static inline void mac802154_setdevmode(FAR struct ieee802154_privmac_s *priv,
                                         enum ieee802154_devmode_e mode)
 {
   priv->devmode = mode;
-  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_RX_ON_WHEN_IDLE,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_DEVMODE,
                         (FAR const union ieee802154_attr_u *)&mode);
 }
 

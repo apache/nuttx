@@ -147,11 +147,11 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
 
   if (req->pancoord)
     {
-      priv->devmode = IEEE802154_DEVMODE_PANCOORD;
+      mac802154_setdevmode(priv, IEEE802154_DEVMODE_PANCOORD);
     }
   else
     {
-      priv->devmode = IEEE802154_DEVMODE_COORD;
+      mac802154_setdevmode(priv, IEEE802154_DEVMODE_COORD);
     }
 
   priv->sfspec.pancoord = req->pancoord;
