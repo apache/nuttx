@@ -301,7 +301,7 @@ static inline void sam_xosc_config(void)
 
   /* Configure the XOSC clock */
 
-  regval = BOARD_XOSC_STARTUPTIME
+  regval = BOARD_XOSC_STARTUPTIME;
 
 #ifdef BOARD_XOSC_ISCRYSTAL
   /* XOSC is a crystal */
@@ -383,7 +383,7 @@ static inline void sam_xosc32k_config(void)
 
   /* Configure XOSC32K */
 
-  regval = BOARD_XOSC32K_STARTUPTIME
+  regval = BOARD_XOSC32K_STARTUPTIME;
 
 #ifdef BOARD_XOSC32K_ISCRYSTAL
   regval |= SYSCTRL_XOSC32K_XTALEN;

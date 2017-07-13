@@ -466,6 +466,10 @@ config SAMDL_HAVE_TC7
 	bool
 	default n
 
+config SAMDL_HAVE_USB
+	bool
+	default n
+
 config SAMDL_AC
 	bool "Analog Comparator"
 	default n
@@ -737,3 +741,25 @@ config SAMDL_I2C_REGDEBUG
 		Enable very low-level register access debug.  Depends on DEBUG_I2C.
 
 endif # SAMDL_HAVE_I2C
+
+if SAMDL_HAVE_USB
+
+config SAMDL_USB_ENABLE_PPEP
+	bool "Enable Ping-Pong Endpoints"
+	default n
+	---help---
+		To maximize throughput, an endpoint can be configured for ping-pong
+		operation.  When this is done the input and output endpoint with the same
+		address are used in the same direction.  The CPU or DMA Controller can
+		then read/write one data buffer while the USB module writes/reads from
+		the other buffer.  This gives double buffered communication.
+
+config SAMDL_USB_REGDEBUG
+	bool "USB register-Level Debug"
+	default n
+	depends on DEBUG_USB_INFO
+	---help---
+		Enable very low-level register access debug.  Depends on
+		CONFIG_DEBUG_USB_INFO.
+
+endif # SAMDL_HAVE_USB

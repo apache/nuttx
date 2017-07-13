@@ -387,11 +387,11 @@ errout_with_halfduplex:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: psock_local_recvfrom
+ * Name: local_recvfrom
  *
  * Description:
- *   psock_local_recvfrom() receives messages from a local socket and may be
- *   used to receive data on a socket whether or not it is connection-oriented.
+ *   local_recvfrom() receives messages from a local socket and may be used
+ *   to receive data on a socket whether or not it is connection-oriented.
  *
  *   If from is not NULL, and the underlying protocol provides the source
  *   address, this source address is filled in. The argument fromlen
@@ -409,14 +409,15 @@ errout_with_halfduplex:
  * Returned Value:
  *   On success, returns the number of characters received.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on errors, -1 is returned, and errno
- *   is set appropriately (see receive from for the complete list).
+ *   recv() will return 0.  Otherwise, on errors, a negated errno value is
+ *   returned (see recv_from() for the complete list of appropriate error
+ *   values).
  *
  ****************************************************************************/
 
-ssize_t psock_local_recvfrom(FAR struct socket *psock, FAR void *buf,
-                             size_t len, int flags, FAR struct sockaddr *from,
-                             FAR socklen_t *fromlen)
+ssize_t local_recvfrom(FAR struct socket *psock, FAR void *buf,
+                       size_t len, int flags, FAR struct sockaddr *from,
+                       FAR socklen_t *fromlen)
 {
   DEBUGASSERT(psock && psock->s_conn && buf);
 

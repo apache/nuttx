@@ -79,6 +79,7 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
 
   psock2->s_domain   = psock1->s_domain;    /* IP domain: PF_INET, PF_INET6, or PF_PACKET */
   psock2->s_type     = psock1->s_type;      /* Protocol type: Only SOCK_STREAM or SOCK_DGRAM */
+  psock2->s_sockif   = psock1->s_sockif;    /* Socket interface */
   psock2->s_flags    = psock1->s_flags;     /* See _SF_* definitions */
 #ifdef CONFIG_NET_SOCKOPTS
   psock2->s_options  = psock1->s_options;   /* Selected socket options */
@@ -94,65 +95,19 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
                                              * instance for TCP send */
 #endif
 
-  /* Increment the reference count on the connection */
+  /* Increment the reference count on the socket */
 
-  DEBUGASSERT(psock2->s_conn);
   psock2->s_crefs    = 1;                   /* One reference on the new socket itself */
 
-#ifdef CONFIG_NET_LOCAL
-  if (psock2->s_domain == PF_LOCAL)
-    {
-      FAR struct local_conn_s *conn = psock2->s_conn;
-      DEBUGASSERT(conn->lc_crefs > 0 && conn->lc_crefs < 255);
-      conn->lc_crefs++;
-    }
-  else
-#endif
-#ifdef CONFIG_NET_PKT
-  if (psock2->s_type == SOCK_RAW)
-    {
-      FAR struct pkt_conn_s *conn = psock2->s_conn;
-      DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
-      conn->crefs++;
-    }
-  else
-#endif
-#ifdef NET_TCP_HAVE_STACK
-  if (psock2->s_type == SOCK_STREAM)
-    {
-      FAR struct tcp_conn_s *conn = psock2->s_conn;
-      DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
-      conn->crefs++;
-    }
-  else
-#endif
-#ifdef NET_UDP_HAVE_STACK
-  if (psock2->s_type == SOCK_DGRAM)
-    {
-      FAR struct udp_conn_s *conn = psock2->s_conn;
-      DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
-      conn->crefs++;
-    }
-  else
-#endif
-#ifdef CONFIG_NET_USRSOCK
-  if (psock2->s_type == SOCK_USRSOCK_TYPE)
-    {
-      FAR struct usrsock_conn_s *conn = psock2->s_conn;
-      DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
-      conn->crefs++;
-    }
-  else
-#endif
-    {
-      nerr("ERROR: Unsupported type: %d\n", psock2->s_type);
-      ret = -EBADF;
-    }
+  /* Increment the reference count on the underlying connection structure
+   * for this address family type.
+   */
+
+  DEBUGASSERT(psock2->s_sockif != NULL && psock2->s_sockif->si_addref != NULL);
+  psock2->s_sockif->si_addref(psock2);
 
   net_unlock();
   return ret;
 }
 
 #endif /* CONFIG_NET */
-
-

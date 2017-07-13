@@ -51,6 +51,8 @@
 #include <stdint.h>
 #include <poll.h>
 
+#include <nuttx/net/net.h>
+
 #ifdef CONFIG_NET_LOCAL
 
 /****************************************************************************
@@ -77,6 +79,7 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
 /* Local, Unix domain socket types */
 
 enum local_type_e
@@ -204,6 +207,10 @@ extern "C"
 #  define EXTERN extern
 #endif
 
+/* The local socket interface */
+
+EXTERN const struct sock_intf_s g_local_sockif;
+
 #ifdef CONFIG_NET_LOCAL_STREAM
 /* A list of all SOCK_STREAM listener connections */
 
@@ -302,26 +309,31 @@ int local_release(FAR struct local_conn_s *conn);
  * Name: local_listen
  *
  * Description:
- *   Listen for a new connection of a SOCK_STREAM Unix domain socket.
+ *   To accept connections, a socket is first created with psock_socket(), a
+ *   willingness to accept incoming connections and a queue limit for
+ *   incoming connections are specified with psock_listen(), and then the
+ *   connections are accepted with psock_accept().  For the case of local
+ *   Unix sockets, psock_listen() calls this function.  The psock_listen()
+ *   call applies only to sockets of type SOCK_STREAM or SOCK_SEQPACKET.
  *
- *   This function is called as part of the implementation of listen();
- *
- * Input Parameters:
- *   server  - A reference to the server-side local connection structure
- *   backlog - Maximum number of pending connections.
+ * Parameters:
+ *   psock    Reference to an internal, boound socket structure.
+ *   backlog  The maximum length the queue of pending connections may grow.
+ *            If a connection request arrives with the queue full, the client
+ *            may receive an error with an indication of ECONNREFUSED or,
+ *            if the underlying protocol supports retransmission, the request
+ *            may be ignored so that retries succeed.
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- * Assumptions:
- *   The network is NOT locked
+ *   On success, zero is returned. On error, a negated errno value is
+ *   returned.  See list() for the set of appropriate error values.
  *
  ****************************************************************************/
 
-int local_listen(FAR struct local_conn_s *server, int backlog);
+int local_listen(FAR struct socket *psock, int backlog);
 
 /****************************************************************************
- * Name: psock_local_accept
+ * Name: local_accept
  *
  * Description:
  *   This function implements accept() for Unix domain sockets.  See the
@@ -343,8 +355,8 @@ int local_listen(FAR struct local_conn_s *server, int backlog);
  *
  ****************************************************************************/
 
-int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-                       FAR socklen_t *addrlen, FAR void **newconn);
+int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
+                 FAR socklen_t *addrlen, FAR void **newconn);
 
 /****************************************************************************
  * Name: psock_local_send
@@ -421,7 +433,7 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
 int local_send_packet(int fd, FAR const uint8_t *buf, size_t len);
 
 /****************************************************************************
- * Name: psock_recvfrom
+ * Name: local_recvfrom
  *
  * Description:
  *   recvfrom() receives messages from a local socket, and may be used to
@@ -448,9 +460,9 @@ int local_send_packet(int fd, FAR const uint8_t *buf, size_t len);
  *
  ****************************************************************************/
 
-ssize_t psock_local_recvfrom(FAR struct socket *psock, FAR void *buf,
-                             size_t len, int flags, FAR struct sockaddr *from,
-                             FAR socklen_t *fromlen);
+ssize_t local_recvfrom(FAR struct socket *psock, FAR void *buf,
+                       size_t len, int flags, FAR struct sockaddr *from,
+                       FAR socklen_t *fromlen);
 
 /****************************************************************************
  * Name: local_fifo_read

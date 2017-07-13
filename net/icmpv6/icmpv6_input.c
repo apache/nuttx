@@ -224,6 +224,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
     case ICMPV6_ROUTER_ADVERTISE:
       {
         FAR struct icmpv6_router_advertise_s *adv;
+        FAR uint8_t *options;
         uint16_t pktlen;
         uint16_t optlen;
         int ndx;
@@ -241,14 +242,17 @@ void icmpv6_input(FAR struct net_driver_s *dev)
         optlen = ICMPv6_RADV_OPTLEN(pktlen);
 
         /* We need to have a valid router advertisement with a Prefix and
-         * with the "A" bit set in the flags.
+         * with the "A" bit set in the flags.  Options immediately follow
+         * the ICMPv6 router advertisement.
          */
 
-        adv = ICMPv6RADVERTISE;
+        adv     = ICMPv6RADVERTISE;
+        options = (FAR uint8_t *)adv + sizeof(struct icmpv6_router_advertise_s);
+
         for (ndx = 0; ndx + sizeof(struct icmpv6_prefixinfo_s) <= optlen; )
           {
             FAR struct icmpv6_prefixinfo_s *opt =
-              (FAR struct icmpv6_prefixinfo_s *)&adv->options[ndx];
+              (FAR struct icmpv6_prefixinfo_s *)&options[ndx];
 
             /* Is this the sought for prefix? Is it the correct size? Is
              * the "A" flag set?

@@ -38,167 +38,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
 
 #include <sys/socket.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/net/udp.h>
-
 #include "socket/socket.h"
-#include "tcp/tcp.h"
-#include "udp/udp.h"
-#include "pkt/pkt.h"
-#include "local/local.h"
-#include "usrsock/usrsock.h"
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: psock_tcp_alloc
- *
- * Description:
- *   Allocate and attach a TCP connection structure.
- *
- ****************************************************************************/
-
-#ifdef NET_TCP_HAVE_STACK
-static int psock_tcp_alloc(FAR struct socket *psock)
-{
-  /* Allocate the TCP connection structure */
-
-  FAR struct tcp_conn_s *conn = tcp_alloc(psock->s_domain);
-  if (!conn)
-    {
-      /* Failed to reserve a connection structure */
-
-      return -ENOMEM;
-    }
-
-  /* Set the reference count on the connection structure.  This reference
-   * count will be incremented only if the socket is dup'ed
-   */
-
-  DEBUGASSERT(conn->crefs == 0);
-  conn->crefs = 1;
-
-  /* Save the pre-allocated connection in the socket structure */
-
-  psock->s_conn = conn;
-  return OK;
-}
-#endif /* NET_TCP_HAVE_STACK */
-
-/****************************************************************************
- * Name: psock_udp_alloc
- *
- * Description:
- *   Allocate and attach a UDP connection structure.
- *
- ****************************************************************************/
-
-#ifdef NET_UDP_HAVE_STACK
-static int psock_udp_alloc(FAR struct socket *psock)
-{
-  /* Allocate the UDP connection structure */
-
-  FAR struct udp_conn_s *conn = udp_alloc(psock->s_domain);
-  if (!conn)
-    {
-      /* Failed to reserve a connection structure */
-
-      return -ENOMEM;
-    }
-
-  /* Set the reference count on the connection structure.  This reference
-   * count will be incremented only if the socket is dup'ed
-   */
-
-  DEBUGASSERT(conn->crefs == 0);
-  conn->crefs = 1;
-
-  /* Save the pre-allocated connection in the socket structure */
-
-  psock->s_conn = conn;
-  return OK;
-}
-#endif /* NET_UDP_HAVE_STACK */
-
-/****************************************************************************
- * Name: psock_pkt_alloc
- *
- * Description:
- *   Allocate and attach a raw packet connection structure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_PKT
-static int psock_pkt_alloc(FAR struct socket *psock)
-{
-  /* Allocate the packet socket connection structure and save in the new
-   * socket instance.
-   */
-
-  FAR struct pkt_conn_s *conn = pkt_alloc();
-  if (!conn)
-    {
-      /* Failed to reserve a connection structure */
-
-      return -ENOMEM;
-    }
-
-  /* Set the reference count on the connection structure.  This reference
-   * count will be incremented only if the socket is dup'ed
-   */
-
-  DEBUGASSERT(conn->crefs == 0);
-  conn->crefs = 1;
-
-  /* Save the pre-allocated connection in the socket structure */
-
-  psock->s_conn = conn;
-  return OK;
-}
-#endif /* CONFIG_NET_PKT */
-
-/****************************************************************************
- * Name: psock_local_alloc
- *
- * Description:
- *   Allocate and attach a local, Unix domain connection structure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_LOCAL
-static int psock_local_alloc(FAR struct socket *psock)
-{
-  /* Allocate the local connection structure */
-
-  FAR struct local_conn_s *conn = local_alloc();
-  if (!conn)
-    {
-      /* Failed to reserve a connection structure */
-
-      return -ENOMEM;
-    }
-
-  /* Set the reference count on the connection structure.  This reference
-   * count will be incremented only if the socket is dup'ed
-   */
-
-  DEBUGASSERT(conn->lc_crefs == 0);
-  conn->lc_crefs = 1;
-
-  /* Save the pre-allocated connection in the socket structure */
-
-  psock->s_conn = conn;
-  return OK;
-}
-#endif /* CONFIG_NET_LOCAL */
+#ifdef CONFIG_NET
 
 /****************************************************************************
  * Public Functions
@@ -244,180 +92,11 @@ static int psock_local_alloc(FAR struct socket *psock)
 
 int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 {
-#ifdef CONFIG_NET_LOCAL
-  bool ipdomain = false;
-#endif
-  bool dgramok  = false;
-  int ret;
+  FAR const struct sock_intf_s *sockif = NULL;
   int errcode;
-
-#ifdef CONFIG_NET_USRSOCK
-  switch (domain)
-    {
-      default:
-        break;
-
-      case PF_INET:
-      case PF_INET6:
-        {
-#ifndef CONFIG_NET_USRSOCK_UDP
-          if (type == SOCK_DGRAM)
-            break;
-#endif
-#ifndef CONFIG_NET_USRSOCK_TCP
-          if (type == SOCK_STREAM)
-            break;
-#endif
-          psock->s_type = 0;
-          psock->s_conn = NULL;
-
-          ret = usrsock_socket(domain, type, protocol, psock);
-          if (ret >= 0)
-            {
-              /* Successfully handled and opened by usrsock daemon. */
-
-              return OK;
-            }
-          else if (ret == -ENETDOWN)
-            {
-              /* Net down means that usrsock daemon is not running.
-               * Attempt to open socket with kernel networking stack. */
-            }
-          else
-            {
-              errcode = -ret;
-              goto errout;
-            }
-        }
-    }
-#endif /* CONFIG_NET_USRSOCK */
-
-  /* Only PF_INET, PF_INET6 or PF_PACKET domains supported */
-
-  switch (domain)
-    {
-#ifdef CONFIG_NET_IPv4
-    case PF_INET:
-#ifdef CONFIG_NET_LOCAL
-      ipdomain = true;
-#endif
-      dgramok  = true;
-      break;
-#endif
-
-#ifdef CONFIG_NET_IPv6
-    case PF_INET6:
-#ifdef CONFIG_NET_LOCAL
-      ipdomain = true;
-#endif
-      dgramok  = true;
-      break;
-#endif
-
-#ifdef CONFIG_NET_LOCAL
-    case PF_LOCAL:
-      dgramok = true;
-      break;
-#endif
-
-#ifdef CONFIG_NET_PKT
-    case PF_PACKET:
-      break;
-#endif
-
-    default:
-      errcode = EAFNOSUPPORT;
-      goto errout;
-    }
-
-#if defined(CONFIG_NET_LOCAL) && !defined(CONFIG_NET_LOCAL_STREAM) && !defined(CONFIG_NET_LOCAL_DGRAM)
-  UNUSED(ipdomain);
-#endif
-
-  /* Only SOCK_STREAM, SOCK_DGRAM and possible SOCK_RAW are supported */
-
-  switch (type)
-    {
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_STREAM)
-      case SOCK_STREAM:
-#ifdef CONFIG_NET_TCP
-#ifdef CONFIG_NET_LOCAL_STREAM
-        if (ipdomain)
-#endif
-          {
-            if ((protocol != 0 && protocol != IPPROTO_TCP) || !dgramok)
-              {
-                errcode = EPROTONOSUPPORT;
-                goto errout;
-              }
-          }
-#endif /* CONFIG_NET_TCP */
-
-#ifdef CONFIG_NET_LOCAL_STREAM
-#ifdef CONFIG_NET_TCP
-        else
-#endif
-          {
-            if (protocol != 0 || !dgramok)
-              {
-                errcode = EPROTONOSUPPORT;
-                goto errout;
-              }
-          }
-#endif /* CONFIG_NET_LOCAL_STREAM */
-
-        break;
-#endif /* CONFIG_NET_TCP || CONFIG_NET_LOCAL_STREAM */
-
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL_DGRAM)
-      case SOCK_DGRAM:
-#ifdef CONFIG_NET_UDP
-#ifdef CONFIG_NET_LOCAL_DGRAM
-        if (ipdomain)
-#endif
-          {
-            if ((protocol != 0 && protocol != IPPROTO_UDP) || !dgramok)
-              {
-                errcode = EPROTONOSUPPORT;
-                goto errout;
-              }
-          }
-#endif /* CONFIG_NET_UDP */
-
-#ifdef CONFIG_NET_LOCAL_DGRAM
-#ifdef CONFIG_NET_UDP
-        else
-#endif
-          {
-            if (protocol != 0 || !dgramok)
-              {
-                errcode = EPROTONOSUPPORT;
-                goto errout;
-              }
-          }
-#endif /* CONFIG_NET_LOCAL_DGRAM */
-
-        break;
-#endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL_DGRAM */
-
-#ifdef CONFIG_NET_PKT
-      case SOCK_RAW:
-        if (dgramok)
-          {
-            errcode = EPROTONOSUPPORT;
-            goto errout;
-          }
-
-        break;
-#endif
-
-      default:
-        errcode = EPROTONOSUPPORT;
-        goto errout;
-    }
-
-  /* Everything looks good.  Initialize the socket structure */
-  /* Save the protocol type */
+  int ret;
+ 
+  /* Initialize the socket structure */
 
   psock->s_domain = domain;
   psock->s_type   = type;
@@ -426,115 +105,29 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
   psock->s_sndcb  = NULL;
 #endif
 
-  /* Allocate the appropriate connection structure.  This reserves the
-   * the connection structure is is unallocated at this point.  It will
-   * not actually be initialized until the socket is connected.
+  /* Get the socket interface */
+
+  sockif = net_sockif(domain);
+  if (sockif == NULL)
+    {
+      nerr("ERROR: socket address family unsupported: %d\n", domain);
+      errcode = EAFNOSUPPORT;
+      goto errout;
+    }
+
+  /* The remaining of the socket initialization depends on the address
+   * family.
    */
 
-  errcode = ENOMEM; /* Assume failure to allocate connection instance */
-  switch (type)
+  DEBUGASSERT(sockif->si_setup != NULL);
+  psock->s_sockif = sockif;
+
+  ret = sockif->si_setup(psock, protocol);
+  if (ret < 0)
     {
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_STREAM)
-      case SOCK_STREAM:
-        {
-#ifdef CONFIG_NET_TCP
-#ifdef CONFIG_NET_LOCAL_STREAM
-          if (ipdomain)
-#endif
-            {
-#ifdef NET_TCP_HAVE_STACK
-              /* Allocate and attach the TCP connection structure */
-
-              ret = psock_tcp_alloc(psock);
-#else
-              ret = -ENETDOWN;
-#endif
-            }
-#endif /* CONFIG_NET_TCP */
-
-#ifdef CONFIG_NET_LOCAL_STREAM
-#ifdef CONFIG_NET_TCP
-         else
-#endif
-            {
-              /* Allocate and attach the local connection structure */
-
-              ret = psock_local_alloc(psock);
-            }
-#endif /* CONFIG_NET_LOCAL_STREAM */
-
-          /* Check for failures to allocate the connection structure. */
-
-          if (ret < 0)
-            {
-              /* Failed to reserve a connection structure */
-
-              errcode = -ret;
-              goto errout;
-            }
-        }
-        break;
-#endif
-
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL_DGRAM)
-      case SOCK_DGRAM:
-        {
-#ifdef CONFIG_NET_UDP
-#ifdef CONFIG_NET_LOCAL_DGRAM
-          if (ipdomain)
-#endif
-            {
-#ifdef NET_UDP_HAVE_STACK
-              /* Allocate and attach the UDP connection structure */
-
-              ret = psock_udp_alloc(psock);
-#else
-              ret = -ENETDOWN;
-#endif
-            }
-#endif /* CONFIG_NET_UDP */
-
-#ifdef CONFIG_NET_LOCAL_DGRAM
-#ifdef CONFIG_NET_UDP
-         else
-#endif
-            {
-              /* Allocate and attach the local connection structure */
-
-              ret = psock_local_alloc(psock);
-            }
-#endif /* CONFIG_NET_LOCAL_DGRAM */
-
-          /* Check for failures to allocate the connection structure. */
-
-          if (ret < 0)
-            {
-              /* Failed to reserve a connection structure */
-
-              errcode = -ret;
-              goto errout;
-            }
-        }
-        break;
-#endif
-
-#ifdef CONFIG_NET_PKT
-      case SOCK_RAW:
-        {
-          ret = psock_pkt_alloc(psock);
-          if (ret < 0)
-            {
-              /* Failed to reserve a connection structure */
-
-              errcode = -ret;
-              goto errout;
-            }
-        }
-        break;
-#endif
-
-      default:
-        break;
+      nerr("ERROR: socket si_setup() failed: %d\n", ret);
+      errcode = -ret;
+      goto errout;
     }
 
   return OK;
@@ -592,6 +185,7 @@ int socket(int domain, int type, int protocol)
   sockfd = sockfd_allocate(0);
   if (sockfd < 0)
     {
+      nerr("ERROR: Failed to allodate a socket descriptor\n");
       set_errno(ENFILE);
       return ERROR;
     }
@@ -610,8 +204,9 @@ int socket(int domain, int type, int protocol)
   ret = psock_socket(domain, type, protocol, psock);
   if (ret < 0)
     {
-      /* Error already set by psock_socket() */
+      /* errno already set by psock_socket() */
 
+      nerr("ERROR: psock_socket() failed: %d\n", ret);
       goto errout;
     }
 

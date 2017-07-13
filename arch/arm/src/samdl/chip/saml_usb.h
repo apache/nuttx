@@ -37,6 +37,7 @@
  *
  ********************************************************************************************/
 
+
 #ifndef __ARCH_ARM_SRC_SAMDL_CHIP_SAML_USB_H
 #define __ARCH_ARM_SRC_SAMDL_CHIP_SAML_USB_H
 
@@ -53,6 +54,29 @@
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
+
+/* Capabilities and characteristics of endpoints ********************************************/
+
+/*   EP  EP BANKS  EP SIZE   EP TYPE
+ *   --- --------- --------- ---------
+ *    0      2      64/1023     Control/Bulk/Iso/Interrupt
+ *    1      2      64/1023     Control/Bulk/Iso/Interrupt
+ *    2      2      64/1023     Control/Bulk/Iso/Interrupt
+ *    3      2      64/1023     Control/Bulk/Iso/Interrupt
+ *    4      2      64/1023     Control/Bulk/Iso/Interrupt
+ *    5      2      64/1023     Control/Bulk/Iso/Interrupt
+ *    6      2      64/1023     Control/Bulk/Iso/Interrupt
+ *    7      2      64/1023     Control/Bulk/Iso/Interrupt
+ */
+
+#define SAM_USB_NENDPOINTS             (8)
+#define SAM_USB_MAXPACKETSIZE(ep)      (64)
+#define SAM_USB_NBANKS(ep)             (2)
+#define SAM_USB_CONTROL(ep)            (true)
+#define SAM_USB_BULK(ep)               (true)
+#define SAM_USB_ISOCHRONOUS(ep)        (true)
+#define SAM_USB_INTERRUPT(ep)          (true)
+
 /* USB register offsets ********************************************************************/
 
 /* Common USB Device/Host Register Offsets */

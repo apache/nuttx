@@ -84,7 +84,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
-  if (!psock || psock->s_crefs <= 0)
+  if (psock == NULL || psock->s_crefs <= 0)
     {
       errcode = EBADF;
       goto errout;
@@ -140,38 +140,25 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
          */
 
         {
+          sockcaps_t sockcaps;
+
           /* This summarizes the behavior of all NuttX sockets */
 
           ret = O_RDWR | O_SYNC | O_RSYNC;
 
-#if defined(CONFIG_NET_LOCAL) || defined(CONFIG_NET_TCP_READAHEAD) || \
-    defined(CONFIG_NET_UDP_READAHEAD)
           /* Unix domain sockets may be non-blocking.  TCP/IP and UDP/IP
            * sockets may also be non-blocking if read-ahead is enabled
            */
 
-          if ((0
-#ifdef CONFIG_NET_LOCAL
-              || psock->s_domain == PF_LOCAL  /* Unix domain stream or datagram */
-#endif
-#ifdef CONFIG_NET_TCP_READAHEAD
-              || psock->s_type == SOCK_STREAM /* IP or Unix domain stream */
-#endif
-#ifdef CONFIG_NET_UDP_READAHEAD
-              || psock->s_type == SOCK_DGRAM  /* IP or Unix domain datagram */
-#endif
-              ) && _SS_ISNONBLOCK(psock->s_flags))
-            {
-              ret |= O_NONBLOCK;
-            }
-#endif /* CONFIG_NET_LOCAL || CONFIG_NET_TCP_READAHEAD || CONFIG_NET_UDP_READAHEAD */
+          DEBUGASSERT(psock->s_sockif != NULL &&
+                      psock->s_sockif->si_sockcaps != NULL);
+          sockcaps = psock->s_sockif->si_sockcaps(psock);
 
-#ifdef CONFIG_NET_USRSOCK
-          if (psock->s_type == SOCK_USRSOCK_TYPE && _SS_ISNONBLOCK(psock->s_flags))
+          if ((sockcaps & SOCKCAP_NONBLOCKING) != 0 &&
+              _SS_ISNONBLOCK(psock->s_flags))
             {
               ret |= O_NONBLOCK;
             }
-#endif
         }
         break;
 
@@ -185,16 +172,19 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
          */
 
         {
-#if defined(CONFIG_NET_LOCAL) || defined(CONFIG_NET_TCP_READAHEAD) || \
-    defined(CONFIG_NET_UDP_READAHEAD) || defined(CONFIG_NET_USRSOCK)
            /* Non-blocking is the only configurable option.  And it applies
             * only Unix domain sockets and to read operations on TCP/IP
             * and UDP/IP sockets when read-ahead is enabled.
             */
 
           int mode =  va_arg(ap, int);
-#if defined(CONFIG_NET_LOCAL_STREAM) || defined(CONFIG_NET_TCP_READAHEAD)
-          if (psock->s_type == SOCK_STREAM) /* IP or Unix domain stream */
+          sockcaps_t sockcaps;
+
+          DEBUGASSERT(psock->s_sockif != NULL &&
+                      psock->s_sockif->si_sockcaps != NULL);
+          sockcaps = psock->s_sockif->si_sockcaps(psock);
+
+          if ((sockcaps & SOCKCAP_NONBLOCKING) != 0)
             {
                if ((mode & O_NONBLOCK) != 0)
                  {
@@ -206,37 +196,6 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
                  }
             }
           else
-#endif
-#if defined(CONFIG_NET_LOCAL_DGRAM) || defined(CONFIG_NET_UDP_READAHEAD)
-          if (psock->s_type == SOCK_DGRAM)  /* IP or Unix domain datagram */
-            {
-               if ((mode & O_NONBLOCK) != 0)
-                 {
-                   psock->s_flags |= _SF_NONBLOCK;
-                 }
-               else
-                 {
-                   psock->s_flags &= ~_SF_NONBLOCK;
-                 }
-            }
-          else
-#endif
-#if defined(CONFIG_NET_USRSOCK)
-          if (psock->s_type == SOCK_USRSOCK_TYPE)  /* usrsock socket */
-            {
-               if ((mode & O_NONBLOCK) != 0)
-                 {
-                   psock->s_flags |= _SF_NONBLOCK;
-                 }
-               else
-                 {
-                   psock->s_flags &= ~_SF_NONBLOCK;
-                 }
-            }
-          else
-#endif
-#endif /* CONFIG_NET_LOCAL || CONFIG_NET_TCP_READAHEAD ||
-          CONFIG_NET_UDP_READAHEAD || CONFIG_NET_USRSOCK */
             {
               nerr("ERROR: Non-blocking not supported for this socket\n");
             }
