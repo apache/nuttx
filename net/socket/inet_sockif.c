@@ -83,7 +83,8 @@ const struct sock_intf_s g_inet_sockif =
   inet_accept,   /* si_accept */
   inet_send,     /* si_send */
   inet_sendto,   /* si_sendto */
-  inet_recvfrom  /* si_recvfrom */
+  inet_recvfrom, /* si_recvfrom */
+  inet_close     /* si_close */
 };
 
 /****************************************************************************

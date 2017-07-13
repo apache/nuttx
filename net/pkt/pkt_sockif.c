@@ -68,6 +68,7 @@ static ssize_t pkt_send(FAR struct socket *psock, FAR const void *buf,
 static ssize_t pkt_sendto(FAR struct socket *psock, FAR const void *buf,
                  size_t len, int flags, FAR const struct sockaddr *to,
                  socklen_t tolen);
+static int     pkt_close(FAR struct socket *psock);
 
 /****************************************************************************
  * Public Data
@@ -82,7 +83,8 @@ const struct sock_intf_s g_pkt_sockif =
   pkt_accept,   /* si_accept */
   pkt_send,     /* si_send */
   pkt_sendto,   /* si_sendto */
-  pkt_recvfrom  /* si_recvfrom */
+  pkt_recvfrom, /* si_recvfrom */
+  pkt_close     /* si_close */
 };
 
 /****************************************************************************
@@ -423,6 +425,59 @@ static ssize_t pkt_sendto(FAR struct socket *psock, FAR const void *buf,
 {
   nerr("ERROR: sendto() not supported for raw packet sockets\n");
   return -EAFNOSUPPORT;
+}
+
+/****************************************************************************
+ * Name: pkt_close
+ *
+ * Description:
+ *   Performs the close operation on a raw packet socket instance
+ *
+ * Parameters:
+ *   psock   Socket instance
+ *
+ * Returned Value:
+ *   0 on success; a negated errno value is returned on any failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int pkt_close(FAR struct socket *psock)
+{
+  /* Perform some pre-close operations for the raw packet address type */
+
+  switch (psock->s_type)
+    {
+      case SOCK_RAW:
+        {
+          FAR struct pkt_conn_s *conn = psock->s_conn;
+
+          /* Is this the last reference to the connection structure (there
+           * could be more if the socket was dup'ed).
+           */
+
+          if (conn->crefs <= 1)
+            {
+              /* Yes... free the connection structure */
+
+              conn->crefs = 0;          /* No more references on the connection */
+              pkt_free(psock->s_conn);  /* Free network resources */
+            }
+          else
+            {
+              /* No.. Just decrement the reference count */
+
+              conn->crefs--;
+            }
+
+          return OK;
+        }
+#endif
+
+      default:
+        return -EBADF;
+    }
 }
 
 /****************************************************************************

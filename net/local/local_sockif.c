@@ -69,6 +69,7 @@ static ssize_t local_send(FAR struct socket *psock, FAR const void *buf,
 static ssize_t local_sendto(FAR struct socket *psock, FAR const void *buf,
                  size_t len, int flags, FAR const struct sockaddr *to,
                  socklen_t tolen);
+static int     local_close(FAR struct socket *psock);
 
 /****************************************************************************
  * Public Data
@@ -83,7 +84,8 @@ const struct sock_intf_s g_local_sockif =
   local_accept,   /* si_accept */
   local_send,     /* si_send */
   local_sendto,   /* si_sendto */
-  local_recvfrom  /* si_recvfrom */
+  local_recvfrom, /* si_recvfrom */
+  local_close     /* si_close */
 };
 
 /****************************************************************************
@@ -442,6 +444,63 @@ ssize_t local_sendto(FAR struct socket *psock, FAR const void *buf,
 #endif /* CONFIG_NET_LOCAL_DGRAM */
 
   return nsent;
+}
+
+/****************************************************************************
+ * Name: local_close
+ *
+ * Description:
+ *   Performs the close operation on a local, Unix socket instance
+ *
+ * Parameters:
+ *   psock   Socket instance
+ *
+ * Returned Value:
+ *   0 on success; a negated errno value is returned on any failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int local_close(FAR struct socket *psock)
+{
+  /* Perform some pre-close operations for the local address type */
+
+  switch (psock->s_type)
+    {
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
+#ifdef CONFIG_NET_TCP
+      case SOCK_STREAM:
+#endif
+#ifdef CONFIG_NET_UDP
+      case SOCK_DGRAM:
+#endif
+        {
+          FAR struct local_conn_s *conn = psock->s_conn;
+
+          /* Is this the last reference to the connection structure (there
+           * could be more if the socket was dup'ed).
+           */
+
+          if (conn->lc_crefs <= 1)
+            {
+              conn->lc_crefs = 0;
+              local_release(conn);
+            }
+          else
+           {
+             /* No.. Just decrement the reference count */
+
+             conn->lc_crefs--;
+           }
+
+          return OK;
+        }
+#endif /* CONFIG_NET_TCP ||  CONFIG_NET_UDP*/
+
+      default:
+        return -EBADF;
+    }
 }
 
 /****************************************************************************

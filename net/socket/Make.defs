@@ -44,9 +44,9 @@ SOCK_CSRCS += net_dupsd2.c net_clone.c net_poll.c net_vfcntl.c
 SOCK_CSRCS += net_sockif.c
 
 ifeq ($(CONFIG_NET_IPv4),y)
-SOCK_CSRCS += inet_sockif.c inet_recvfrom.c inet_connect.c
+SOCK_CSRCS += inet_sockif.c inet_recvfrom.c inet_connect.c inet_close.c
 else ifeq ($(CONFIG_NET_IPv6),y)
-SOCK_CSRCS += inet_sockif.c inet_recvfrom.c inet_connect.c
+SOCK_CSRCS += inet_sockif.c inet_recvfrom.c inet_connect.c inet_close.c
 endif
 
 # TCP/IP support
