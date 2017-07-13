@@ -1850,6 +1850,10 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
                     {
                       priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
                     }
+                  else if (priv->curr_op == MAC802154_OP_ASSOC)
+                    {
+                      priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
+                    }
                   else if (priv->curr_op == MAC802154_OP_NONE)
                     {
                       DEBUGASSERT(priv->opsem.semcount == 1);
