@@ -388,6 +388,7 @@ void mrf24j40_irqworker(FAR void *arg)
 
           mrf24j40_setreg(dev->spi, MRF24J40_BEACON_FIFO + 4, dev->bsn++);
           mrf24j40_beacon_trigger(dev);
+          wlinfo("Beacon triggered. BSN: 0x%02X\n", dev->bsn-1);
         }
     }
 

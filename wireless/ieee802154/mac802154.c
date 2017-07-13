@@ -1110,7 +1110,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
 
           case IEEE802154_FRAME_BEACON:
             {
-              wlinfo("Beacon frame received\n");
+              wlinfo("Beacon frame received. BSN: 0x%02X\n", ind->dsn);
               mac802154_rxbeaconframe(priv, ind);
               ieee802154_ind_free(ind);
             }
