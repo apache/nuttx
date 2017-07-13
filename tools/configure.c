@@ -874,7 +874,7 @@ static void enable_feature(const char *destconfig, const char *varname)
   int ret;
 
   snprintf(g_buffer, BUFFER_SIZE,
-           "kconfig-tweak --file %s --disable %s",
+           "kconfig-tweak --file %s --enable %s",
            destconfig, varname);
 
   ret = system(g_buffer);

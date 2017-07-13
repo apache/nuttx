@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/socket/net_close.c
+ * net/socket/net_sockif.c
  *
- *   Copyright (C) 2007-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,15 +40,13 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <stdint.h>
-#include <stdbool.h>
 #include <errno.h>
 #include <debug.h>
-#include <assert.h>
 
 #include <nuttx/net/net.h>
 
+#include "local/local.h"
+#include "pkt/pkt.h"
 #include "socket/socket.h"
 
 #ifdef CONFIG_NET
@@ -58,87 +56,56 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: psock_close
+ * Name: net_sockif
  *
  * Description:
- *   Performs the close operation on a socket instance
+ *   Return the socket interface associated with this address family.
  *
  * Parameters:
- *   psock   Socket instance
+ *   family - Address family
  *
  * Returned Value:
- *   0 on success; -1 on error with errno set appropriately.
- *
- * Assumptions:
+ *   On success, a non-NULL instance of struct sock_intf_s is returned.  NULL
+ *   is returned only if the address family is not supported.
  *
  ****************************************************************************/
 
-int psock_close(FAR struct socket *psock)
+FAR const struct sock_intf_s *net_sockif(sa_family_t family)
 {
-  int errcode;
-  int ret;
+  FAR const struct sock_intf_s *sockif = NULL;
 
-  /* Verify that the sockfd corresponds to valid, allocated socket */
+  /* Get the socket interface */
 
-  if (!psock || psock->s_crefs <= 0)
+  switch (family)
     {
-      errcode = EBADF;
-      goto errout;
+#if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
+#ifdef CONFIG_NET_IPv4
+    case PF_INET:
+#endif
+#ifdef CONFIG_NET_IPv6
+    case PF_INET6:
+#endif
+      sockif = &g_inet_sockif;
+      break;
+#endif
+
+#ifdef CONFIG_NET_LOCAL
+    case PF_LOCAL:
+      sockif = &g_local_sockif;
+      break;
+#endif
+
+#ifdef CONFIG_NET_PKT
+    case PF_PACKET:
+      sockif = &g_pkt_sockif;
+      break;
+#endif
+
+    default:
+      nerr("ERROR: Address family unsupported: %d\n", family);
     }
 
-  /* We perform the close operation only if this is the last count on
-   * the socket. (actually, I think the socket crefs only takes the values
-   * 0 and 1 right now).
-   *
-   * It is possible for a psock to have no connection, e.g. a TCP socket
-   * waiting in accept.
-   */
-
-  if (psock->s_crefs <= 1 && psock->s_conn != NULL)
-    {
-      /* Let the address family's close() method handle the operation */
-
-      DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_close != NULL);
-      ret = psock->s_sockif->si_close(psock);
-
-      /* Was the close successful */
-
-      if (ret < 0)
-        {
-          errcode = -ret;
-          goto errout;
-        }
-    }
-
-  /* Then release our reference on the socket structure containing the connection */
-
-  sock_release(psock);
-  return OK;
-
-errout:
-  set_errno(errcode);
-  return ERROR;
-}
-
-/****************************************************************************
- * Name: net_close
- *
- * Description:
- *   Performs the close operation on socket descriptors
- *
- * Parameters:
- *   sockfd   Socket descriptor of socket
- *
- * Returned Value:
- *   0 on success; -1 on error with errno set appropriately.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-int net_close(int sockfd)
-{
-  return psock_close(sockfd_socket(sockfd));
+  return sockif;
 }
 
 #endif /* CONFIG_NET */

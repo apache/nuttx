@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/listen.c
  *
- *   Copyright (C) 2007-2009, 201-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 201-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,17 +38,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 #include <sys/socket.h>
-#include <errno.h>
 #include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
-#include "tcp/tcp.h"
-#include "local/local.h"
 #include "socket/socket.h"
-#include "usrsock/usrsock.h"
+
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
  * Public Functions
@@ -86,83 +84,29 @@
 int psock_listen(FAR struct socket *psock, int backlog)
 {
   int errcode;
+  int ret;
 
   DEBUGASSERT(psock != NULL);
 
   /* Verify that the sockfd corresponds to a connected SOCK_STREAM */
 
-  if (psock->s_type != SOCK_STREAM || !psock->s_conn)
+  if (psock == NULL || psock->s_conn == NULL)
     {
-#ifdef CONFIG_NET_USRSOCK
-      if (psock->s_type == SOCK_USRSOCK_TYPE)
-        {
-#warning "Missing logic"
-        }
-#endif
-
-      errcode = EOPNOTSUPP;
+      nerr("ERROR: Invalid or unconnected socket\n");
+      errcode = EINVAL;
       goto errout;
     }
 
-#ifdef CONFIG_NET_LOCAL
-#ifdef CONFIG_NET_TCP
-  if (psock->s_domain == PF_LOCAL)
-#endif
+  /* Let the address family's listen() method handle the operation */
+
+  DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_listen != NULL);
+  ret = psock->s_sockif->si_listen(psock, backlog);
+  if (ret < 0)
     {
-      FAR struct local_conn_s *conn =
-        (FAR struct local_conn_s *)psock->s_conn;
-
-      errcode = local_listen(conn, backlog);
-      if (errcode < 0)
-        {
-          errcode = -errcode;
-          goto errout;
-        }
-    }
-#endif /* CONFIG_NET_LOCAL */
-
-#ifdef CONFIG_NET_TCP
-#ifdef CONFIG_NET_LOCAL
-  else
-#endif
-    {
-#ifdef NET_TCP_HAVE_STACK
-      FAR struct tcp_conn_s *conn =
-        (FAR struct tcp_conn_s *)psock->s_conn;
-
-      if (conn->lport <= 0)
-        {
-          errcode = EOPNOTSUPP;
-          goto errout;
-        }
-
-      /* Set up the backlog for this connection */
-
-#ifdef CONFIG_NET_TCPBACKLOG
-      errcode = tcp_backlogcreate(conn, backlog);
-      if (errcode < 0)
-        {
-          errcode = -errcode;
-          goto errout;
-        }
-#endif
-
-      /* Start listening to the bound port.  This enables callbacks when
-       * accept() is called and enables poll()/select() logic.
-       */
-
-      errcode = tcp_listen(conn);
-      if (errcode < 0)
-        {
-          errcode = -errcode;
-          goto errout;
-        }
-#else
-      errcode = EOPNOTSUPP;
+      nerr("ERROR: si_listen failed: %d\n", ret);
+      errcode = -ret;
       goto errout;
-#endif /* NET_TCP_HAVE_STACK */
     }
-#endif /* CONFIG_NET_TCP */
 
   psock->s_flags |= _SF_LISTENING;
   return OK;

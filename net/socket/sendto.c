@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdint.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -52,7 +53,6 @@
 #include "sixlowpan/sixlowpan.h"
 #include "local/local.h"
 #include "socket/socket.h"
-#include "usrsock/usrsock.h"
 
 /****************************************************************************
  * Public Functions
@@ -127,18 +127,16 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
                      size_t len, int flags, FAR const struct sockaddr *to,
                      socklen_t tolen)
 {
-  socklen_t minlen;
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL_DGRAM) || \
-    defined(CONFIG_NET_USRSOCK)
   ssize_t nsent;
-#endif
   int errcode;
+
+  DEBUGASSERT(psock != NULL && buf != NULL);
 
   /* If to is NULL or tolen is zero, then this function is same as send (for
    * connected socket types)
    */
 
-  if (!to || !tolen)
+  if (to == NULL || tolen <= 0)
     {
 #if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_STREAM) || \
     defined(CONFIG_NET_USRSOCK)
@@ -150,57 +148,6 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 #endif
     }
 
-#ifdef CONFIG_NET_USRSOCK
-  if (psock->s_type == SOCK_USRSOCK_TYPE)
-    {
-      /* Perform the usrsock sendto operation */
-
-      nsent = usrsock_sendto(psock, buf, len, to, tolen);
-      if (nsent < 0)
-        {
-          errcode = -nsent;
-          goto errout;
-        }
-
-      return nsent;
-    }
-#endif
-
-  /* Verify that a valid address has been provided */
-
-  switch (to->sa_family)
-    {
-#ifdef CONFIG_NET_IPv4
-    case AF_INET:
-      minlen = sizeof(struct sockaddr_in);
-      break;
-#endif
-
-#ifdef CONFIG_NET_IPv6
-    case AF_INET6:
-      minlen = sizeof(struct sockaddr_in6);
-      break;
-#endif
-
-#ifdef CONFIG_NET_LOCAL_DGRAM
-    case AF_LOCAL:
-      minlen = sizeof(sa_family_t);
-      break;
-#endif
-
-    default:
-      nerr("ERROR: Unrecognized address family: %d\n", to->sa_family);
-      errcode = EAFNOSUPPORT;
-      goto errout;
-    }
-
-  if (tolen < minlen)
-    {
-      nerr("ERROR: Invalid address length: %d < %d\n", tolen, minlen);
-      errcode = EBADF;
-      goto errout;
-    }
-
   /* Verify that the psock corresponds to valid, allocated socket */
 
   if (!psock || psock->s_crefs <= 0)
@@ -210,68 +157,21 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
       goto errout;
     }
 
-  /* If this is a connected socket, then return EISCONN */
+  /* Let the address family's send() method handle the operation */
 
-  if (psock->s_type != SOCK_DGRAM)
-    {
-      nerr("ERROR: Connected socket\n");
-      errcode = EISCONN;
-      goto errout;
-    }
-
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_LOCAL_DGRAM)
-  /* Now handle the sendto() operation according to the socket domain,
-   * currently either IP or Unix domains.
-   */
-
-#ifdef CONFIG_NET_LOCAL_DGRAM
-#ifdef CONFIG_NET_UDP
-  if (psock->s_domain == PF_LOCAL)
-#endif
-    {
-      nsent = psock_local_sendto(psock, buf, len, flags, to, tolen);
-    }
-#endif /* CONFIG_NET_LOCAL_DGRAM */
-
-#ifdef CONFIG_NET_UDP
-#ifdef CONFIG_NET_LOCAL_DGRAM
-  else
-#endif
-    {
-#if defined(CONFIG_NET_6LOWPAN)
-      /* Try 6LoWPAN UDP packet sendto() */
-
-      nsent = psock_6lowpan_udp_sendto(psock, buf, len, flags, to, tolen);
-
-#if defined(CONFIG_NETDEV_MULTINIC) && defined(NET_UDP_HAVE_STACK)
-      if (nsent < 0)
-        {
-          /* UDP/IP packet sendto */
-
-          nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
-        }
-#endif /* CONFIG_NETDEV_MULTINIC && NET_UDP_HAVE_STACK */
-#elif defined(NET_UDP_HAVE_STACK)
-      nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
-#else
-      nsent = -ENOSYS;
-#endif /* CONFIG_NET_6LOWPAN */
-    }
-#endif /* CONFIG_NET_UDP */
+  DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_send != NULL);
+  nsent = psock->s_sockif->si_send(psock, buf, len, flags);
 
   /* Check if the domain-specific sendto() logic failed */
 
   if (nsent < 0)
     {
-      nerr("ERROR: UDP or Unix domain sendto() failed: %ld\n", (long)nsent);
+      nerr("ERROR:  Family-specific send failed: %ld\n", (long)nsent);
       errcode = -nsent;
       goto errout;
     }
 
   return nsent;
-#else
-  errcode = ENOSYS;
-#endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL_DGRAM */
 
 errout:
   set_errno(errcode);

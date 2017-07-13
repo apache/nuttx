@@ -98,3 +98,7 @@ endif
 ifeq ($(CONFIG_SAMDL_HAVE_I2C),y)
 CHIP_CSRCS += sam_i2c_master.c
 endif
+
+ifeq ($(CONFIG_SAMDL_USB),y)
+CHIP_CSRCS += sam_usb.c
+endif
