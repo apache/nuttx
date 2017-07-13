@@ -398,7 +398,7 @@ ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       return -EINVAL;
     }
 
-  if (psock->s_type != -SOCK_RAW)
+  if (psock->s_type != SOCK_RAW)
     {
       nerr("ERROR: Unsupported socket type: %d\n", psock->s_type);
       ret = -ENOSYS;
@@ -426,7 +426,7 @@ ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   /* TODO pkt_recvfrom_initialize() expects from to be of type sockaddr_in, but
    * in our case is sockaddr_ll
    */
-
+)
 #if 0
   ret = pkt_connect(conn, NULL);
   if (ret < 0)
