@@ -91,21 +91,11 @@
 
 /* Clock configuration macros */
 
-#define MRF24J40_SLPCLKPER_100KHZ ((1000 * 1000 * 1000)/100000) /* 10ns */
-#define MRF24J40_SLPCLKPER_32KHZ  ((1000 * 1000 * 1000)/32000)  /* 31.25ns */
-
 #define MRF24J40_BEACONINTERVAL_NSEC(beaconorder) \
-  (IEEE802154_BASE_SUPERFRAME_DURATION * (1 << beaconorder) * (16 *1000))
+  (IEEE802154_BASE_SUPERFRAME_DURATION * (1 << beaconorder) * (16 * 1000))
 
-/* For now I am just setting the REMCNT to the maximum while staying in multiples
- * of 10000 (100khz period) */
-
-#define MRF24J40_REMCNT 60000
-#define MRF24J40_REMCNT_NSEC (MRF24J40_REMCNT * 50)
-
-#define MRF24J40_MAINCNT(bo, clkper) \
-  ((MRF24J40_BEACONINTERVAL_NSEC(bo) - MRF24J40_REMCNT_NSEC) / \
-    clkper)
+#define MRF24J40_SUPERFRAMEDURATION_NSEC(sforder) \
+  (IEEE802154_BASE_SUPERFRAME_DURATION * (1 << sforder) * (16 * 1000))
 
 /* Configuration *************************************************************/
 
@@ -151,12 +141,13 @@ struct mrf24j40_radio_s
 
   struct ieee802154_addr_s addr;
 
-  uint8_t         chan;       /* 11 to 26 for the 2.4 GHz band */
-  uint8_t         devmode;     /* device mode: device, coord, pancoord */
-  uint8_t         paenabled;   /* enable usage of PA */
-  uint8_t         rxmode;      /* Reception mode: Main, no CRC, promiscuous */
-  int32_t         txpower;     /* TX power in mBm = dBm/100 */
+  uint8_t chan;                /* 11 to 26 for the 2.4 GHz band */
+  uint8_t devmode;             /* device mode: device, coord, pancoord */
+  uint8_t paenabled;           /* enable usage of PA */
+  uint8_t rxmode;              /* Reception mode: Main, no CRC, promiscuous */
+  int32_t txpower;             /* TX power in mBm = dBm/100 */
   struct ieee802154_cca_s cca; /* Clear channel assessement method */
+  uint32_t slpclkper;          /* Sleep clock period (nanoseconds) */
 
   /* MAC PIB attributes */
 
