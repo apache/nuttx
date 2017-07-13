@@ -57,19 +57,21 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     local_setup(FAR struct socket *psock, int protocol);
-static int     local_bind(FAR struct socket *psock,
-                 FAR const struct sockaddr *addr, socklen_t addrlen);
-static int     local_connect(FAR struct socket *psock,
-                 FAR const struct sockaddr *addr, socklen_t addrlen);
-static int     local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-                 FAR socklen_t *addrlen, FAR struct socket *newsock);
-static ssize_t local_send(FAR struct socket *psock, FAR const void *buf,
-                 size_t len, int flags);
-static ssize_t local_sendto(FAR struct socket *psock, FAR const void *buf,
-                 size_t len, int flags, FAR const struct sockaddr *to,
-                 socklen_t tolen);
-static int     local_close(FAR struct socket *psock);
+static int        local_setup(FAR struct socket *psock, int protocol);
+static sockcaps_t local_sockcaps(FAR struct socket *psock);
+static void       local_addref(FAR struct socket *psock);
+static int        local_bind(FAR struct socket *psock,
+                    FAR const struct sockaddr *addr, socklen_t addrlen);
+static int        local_connect(FAR struct socket *psock,
+                    FAR const struct sockaddr *addr, socklen_t addrlen);
+static int        local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
+                    FAR socklen_t *addrlen, FAR struct socket *newsock);
+static ssize_t    local_send(FAR struct socket *psock, FAR const void *buf,
+                    size_t len, int flags);
+static ssize_t    local_sendto(FAR struct socket *psock, FAR const void *buf,
+                    size_t len, int flags, FAR const struct sockaddr *to,
+                    socklen_t tolen);
+static int        local_close(FAR struct socket *psock);
 
 /****************************************************************************
  * Public Data
@@ -78,6 +80,8 @@ static int     local_close(FAR struct socket *psock);
 const struct sock_intf_s g_local_sockif =
 {
   local_setup,    /* si_setup */
+  local_sockcaps, /* si_sockcaps */
+  local_addref,   /* si_addref */
   local_bind,     /* si_bind */
   local_listen,   /* si_listen */
   local_connect,  /* si_connect */
@@ -181,6 +185,53 @@ static int local_setup(FAR struct socket *psock, int protocol)
       default:
         return -EPROTONOSUPPORT;
     }
+}
+
+/****************************************************************************
+ * Name: local_sockcaps
+ *
+ * Description:
+ *   Return the bit encoded capabilities of this socket.
+ *
+ * Parameters:
+ *   psock - Socket structure of the socket whose capabilities are being
+ *           queried.
+ *
+ * Returned Value:
+ *   The set of socket cababilities is returned.
+ *
+ ****************************************************************************/
+
+static sockcaps_t local_sockcaps(FAR struct socket *psock)
+{
+  return SOCKCAP_NONBLOCKING;
+}
+
+/****************************************************************************
+ * Name: local_addref
+ *
+ * Description:
+ *   Increment the refernce count on the underlying connection structure.
+ *
+ * Parameters:
+ *   psock - Socket structure of the socket whose reference count will be
+ *           incremented.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void local_addref(FAR struct socket *psock)
+{
+  FAR struct local_conn_s *conn;
+
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
+              psock->s_domain == PF_LOCAL);
+
+  conn = psock->s_conn;
+  DEBUGASSERT(conn->lc_crefs > 0 && conn->lc_crefs < 255);
+  conn->lc_crefs++;
 }
 
 /****************************************************************************

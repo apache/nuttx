@@ -1648,7 +1648,7 @@ ssize_t inet_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 #endif
       }
       break;
-#endif /* CONFIG_NET_UDP || CONFIG_NET_LOCAL_DGRAM */
+#endif /* CONFIG_NET_UDP */
 
 #ifdef CONFIG_NET_USRSOCK
     case SOCK_USRSOCK_TYPE:

@@ -58,17 +58,20 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     inet_setup(FAR struct socket *psock, int protocol);
-static int     inet_bind(FAR struct socket *psock,
-                 FAR const struct sockaddr *addr, socklen_t addrlen);
-static int     inet_listen(FAR struct socket *psock, int backlog);
-static int     inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-                 FAR socklen_t *addrlen, FAR struct socket *newsock);
-static ssize_t inet_send(FAR struct socket *psock, FAR const void *buf,
-                 size_t len, int flags);
-static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
-                 size_t len, int flags, FAR const struct sockaddr *to,
-                 socklen_t tolen);
+static int        inet_setup(FAR struct socket *psock, int protocol);
+static sockcaps_t inet_sockcaps(FAR struct socket *psock);
+static void       inet_addref(FAR struct socket *psock);
+static int        inet_bind(FAR struct socket *psock,
+                    FAR const struct sockaddr *addr, socklen_t addrlen);
+static int        inet_listen(FAR struct socket *psock, int backlog);
+static int        inet_accept(FAR struct socket *psock,
+                    FAR struct sockaddr *addr, FAR socklen_t *addrlen,
+                    FAR struct socket *newsock);
+static ssize_t    inet_send(FAR struct socket *psock, FAR const void *buf,
+                    size_t len, int flags);
+static ssize_t    inet_sendto(FAR struct socket *psock, FAR const void *buf,
+                    size_t len, int flags, FAR const struct sockaddr *to,
+                    socklen_t tolen);
 
 /****************************************************************************
  * Public Data
@@ -77,6 +80,8 @@ static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
 const struct sock_intf_s g_inet_sockif =
 {
   inet_setup,    /* si_setup */
+  inet_sockcaps, /* si_sockcaps */
+  inet_addref,   /* si_addref */
   inet_bind,     /* si_bind */
   inet_listen,   /* si_listen */
   inet_connect,  /* si_connect */
@@ -314,6 +319,104 @@ static int inet_setup(FAR struct socket *psock, int protocol)
       default:
         nerr("ERROR: Unsupported type: %d\n", psock->s_type);
         return -EPROTONOSUPPORT;
+    }
+}
+
+/****************************************************************************
+ * Name: inet_sockcaps
+ *
+ * Description:
+ *   Return the bit encoded capabilities of this socket.
+ *
+ * Parameters:
+ *   psock - Socket structure of the socket whose capabilities are being
+ *           queried.
+ *
+ * Returned Value:
+ *   The non-negative set of socket cababilities is returned.
+ *
+ ****************************************************************************/
+
+static sockcaps_t inet_sockcaps(FAR struct socket *psock)
+{
+  switch (psock->s_type)
+    {
+#ifdef NET_TCP_HAVE_STACK
+      case SOCK_STREAM:
+#ifdef CONFIG_NET_TCP_READAHEAD
+        return SOCKCAP_NONBLOCKING;
+#else
+        return 0;
+#endif
+#endif
+
+#ifdef NET_UDP_HAVE_STACK
+      case SOCK_DGRAM:
+#ifdef CONFIG_NET_UDP_READAHEAD
+        return SOCKCAP_NONBLOCKING;
+#else
+        return 0;
+#endif
+#endif
+
+#ifdef CONFIG_NET_USRSOCK
+      case SOCK_USRSOCK_TYPE:
+        return SOCKCAP_NONBLOCKING;
+#endif
+
+      default:
+        return 0;
+    }
+}
+
+/****************************************************************************
+ * Name: inet_addref
+ *
+ * Description:
+ *   Increment the refernce count on the underlying connection structure.
+ *
+ * Parameters:
+ *   psock - Socket structure of the socket whose reference count will be
+ *           incremented.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void inet_addref(FAR struct socket *psock)
+{
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
+
+#ifdef NET_TCP_HAVE_STACK
+  if (psock->s_type == SOCK_STREAM)
+    {
+      FAR struct tcp_conn_s *conn = psock->s_conn;
+      DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
+      conn->crefs++;
+    }
+  else
+#endif
+#ifdef NET_UDP_HAVE_STACK
+  if (psock->s_type == SOCK_DGRAM)
+    {
+      FAR struct udp_conn_s *conn = psock->s_conn;
+      DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
+      conn->crefs++;
+    }
+  else
+#endif
+#ifdef CONFIG_NET_USRSOCK
+  if (psock->s_type == SOCK_USRSOCK_TYPE)
+    {
+      FAR struct usrsock_conn_s *conn = psock->s_conn;
+      DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
+      conn->crefs++;
+    }
+  else
+#endif
+    {
+      nerr("ERROR: Unsupported type: %d\n", psock->s_type);
     }
 }
 

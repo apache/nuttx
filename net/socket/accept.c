@@ -38,8 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0 && \
-    (defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_STREAM))
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -55,6 +53,8 @@
 #include "local/local.h"
 #include "socket/socket.h"
 #include "usrsock/usrsock.h"
+
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
  * Public Functions
@@ -129,9 +129,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                  FAR socklen_t *addrlen, FAR struct socket *newsock)
 {
   int errcode;
-#if defined(NET_TCP_HAVE_STACK) || defined(CONFIG_NET_LOCAL_STREAM)
   int ret;
-#endif
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL && newsock != NULL);
 
@@ -323,4 +321,4 @@ errout:
   return ERROR;
 }
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS && (CONFIG_NET_TCP || CONFIG_NET_LOCAL_STREAM) */
+#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

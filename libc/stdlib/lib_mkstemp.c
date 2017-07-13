@@ -209,9 +209,8 @@ static void copy_base62(FAR char *dest, int len)
  *     that full path.
  *
  * Returned Value:
- *
- * Upon successful completion, mkstemp() returns an open file descriptor.
- * Otherwise, -1 is returned if no suitable file could be created.
+ *   Upon successful completion, mkstemp() returns an open file descriptor.
+ *   Otherwise, -1 is returned if no suitable file could be created.
  *
  ****************************************************************************/
 

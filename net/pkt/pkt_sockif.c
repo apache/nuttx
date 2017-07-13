@@ -55,20 +55,22 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     pkt_setup(FAR struct socket *psock, int protocol);
-static int     pkt_bind(FAR struct socket *psock,
-                  FAR const struct sockaddr *addr, socklen_t addrlen);
-static int     pkt_listen(FAR struct socket *psock, int backlog);
-static int     pkt_connect(FAR struct socket *psock,
-                  FAR const struct sockaddr *addr, socklen_t addrlen);
-static int     pkt_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-                 FAR socklen_t *addrlen, FAR struct socket *newsock);
-static ssize_t pkt_send(FAR struct socket *psock, FAR const void *buf,
-                 size_t len, int flags);
-static ssize_t pkt_sendto(FAR struct socket *psock, FAR const void *buf,
-                 size_t len, int flags, FAR const struct sockaddr *to,
-                 socklen_t tolen);
-static int     pkt_close(FAR struct socket *psock);
+static int        pkt_setup(FAR struct socket *psock, int protocol);
+static sockcaps_t pkt_sockcaps(FAR struct socket *psock);
+static void       pkt_addref(FAR struct socket *psock);
+static int        pkt_bind(FAR struct socket *psock,
+                    FAR const struct sockaddr *addr, socklen_t addrlen);
+static int        pkt_listen(FAR struct socket *psock, int backlog);
+static int        pkt_connect(FAR struct socket *psock,
+                    FAR const struct sockaddr *addr, socklen_t addrlen);
+static int        pkt_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
+                   FAR socklen_t *addrlen, FAR struct socket *newsock);
+static ssize_t    pkt_send(FAR struct socket *psock, FAR const void *buf,
+                   size_t len, int flags);
+static ssize_t    pkt_sendto(FAR struct socket *psock, FAR const void *buf,
+                   size_t len, int flags, FAR const struct sockaddr *to,
+                   socklen_t tolen);
+static int        pkt_close(FAR struct socket *psock);
 
 /****************************************************************************
  * Public Data
@@ -77,6 +79,8 @@ static int     pkt_close(FAR struct socket *psock);
 const struct sock_intf_s g_pkt_sockif =
 {
   pkt_setup,    /* si_setup */
+  pkt_sockcaps, /* si_sockcaps */
+  pkt_addref,   /* si_addref */
   pkt_bind,     /* si_bind */
   pkt_listen,   /* si_listen */
   pkt_connect,  /* si_connect */
@@ -162,6 +166,53 @@ static int pkt_setup(FAR struct socket *psock, int protocol)
     {
       return -EPROTONOSUPPORT;
     }
+}
+
+/****************************************************************************
+ * Name: pkt_sockcaps
+ *
+ * Description:
+ *   Return the bit encoded capabilities of this socket.
+ *
+ * Parameters:
+ *   psock - Socket structure of the socket whose capabilities are being
+ *           queried.
+ *
+ * Returned Value:
+ *   The set of socket cababilities is returned.
+ *
+ ****************************************************************************/
+
+static sockcaps_t pkt_sockcaps(FAR struct socket *psock)
+{
+  return 0;
+}
+
+/****************************************************************************
+ * Name: pkt_addref
+ *
+ * Description:
+ *   Increment the refernce count on the underlying connection structure.
+ *
+ * Parameters:
+ *   psock - Socket structure of the socket whose reference count will be
+ *           incremented.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void pkt_addref(FAR struct socket *psock)
+{
+  FAR struct pkt_conn_s *conn;
+
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
+              psock->s_type == SOCK_RAW);
+
+  conn = psock->s_conn;
+  DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
+  conn->crefs++;
 }
 
 /****************************************************************************
