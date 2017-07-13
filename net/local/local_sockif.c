@@ -59,9 +59,11 @@
 
 static int     local_setup(FAR struct socket *psock, int protocol);
 static int     local_bind(FAR struct socket *psock,
-                  FAR const struct sockaddr *addr, socklen_t addrlen);
+                 FAR const struct sockaddr *addr, socklen_t addrlen);
 static int     local_connect(FAR struct socket *psock,
-                  FAR const struct sockaddr *addr, socklen_t addrlen);
+                 FAR const struct sockaddr *addr, socklen_t addrlen);
+static int     local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
+                 FAR socklen_t *addrlen, FAR struct socket *newsock);
 static ssize_t local_send(FAR struct socket *psock, FAR const void *buf,
                  size_t len, int flags);
 static ssize_t local_sendto(FAR struct socket *psock, FAR const void *buf,
@@ -76,7 +78,9 @@ const struct sock_intf_s g_local_sockif =
 {
   local_setup,    /* si_setup */
   local_bind,     /* si_bind */
+  local_listen,   /* si_listen */
   local_connect,  /* si_connect */
+  local_accept,   /* si_accept */
   local_send,     /* si_send */
   local_sendto,   /* si_sendto */
   local_recvfrom  /* si_recvfrom */
@@ -445,7 +449,7 @@ ssize_t local_sendto(FAR struct socket *psock, FAR const void *buf,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: 
+ * Name:
  *
  * Description:
  *

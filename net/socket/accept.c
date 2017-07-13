@@ -115,8 +115,7 @@
  * ENFILE
  *   The system maximum for file descriptors has been reached.
  * EFAULT
- *   The addr parameter is not in a writable part of the user address
- *   space.
+ *   The addr parameter is not in a writable part of the user address space.
  * ENOBUFS or ENOMEM
  *   Not enough free memory.
  * EPROTO
@@ -134,25 +133,18 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   int ret;
 #endif
 
-  DEBUGASSERT(psock != NULL);
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && newsock != NULL);
 
   /* Treat as a cancellation point */
 
   (void)enter_cancellation_point();
 
-  /* Is the socket a stream? */
+  /* May sure that the socket has been opened with socket() */
 
-  if (psock->s_type != SOCK_STREAM)
+  if (psock == NULL || psock->s_conn == NULL)
     {
-#ifdef CONFIG_NET_USRSOCK
-      if (psock->s_type == SOCK_USRSOCK_TYPE)
-        {
-#warning "Missing logic"
-        }
-#endif
-
-      errcode = EOPNOTSUPP;
-      goto errout;
+      nerr("ERROR: Socket invalid or not opened\n");
+      return -EINVAL;
     }
 
   /* Is the socket listening for a connection? */
@@ -163,128 +155,16 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       goto errout;
     }
 
-  /* Verify that a valid memory block has been provided to receive the
-   * address
-   */
+  /* Let the address family's accept() method handle the operation */
 
-  if (addr)
+  DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_accept != NULL);
+  ret = psock->s_sockif->si_accept(psock, addr, addrlen, newsock);
+  if (ret < 0)
     {
-      /* If an address is provided, then the length must also be provided. */
-
-      DEBUGASSERT(addrlen);
-
-      /* A valid length depends on the address domain */
-
-      switch (psock->s_domain)
-        {
-#ifdef CONFIG_NET_IPv4
-        case PF_INET:
-          {
-            if (*addrlen < sizeof(struct sockaddr_in))
-              {
-                errcode = EBADF;
-                goto errout;
-              }
-          }
-          break;
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-        case PF_INET6:
-          {
-            if (*addrlen < sizeof(struct sockaddr_in6))
-              {
-                errcode = EBADF;
-                goto errout;
-              }
-          }
-          break;
-#endif /* CONFIG_NET_IPv6 */
-
-#ifdef CONFIG_NET_LOCAL_STREAM
-        case PF_LOCAL:
-          {
-            if (*addrlen < sizeof(sa_family_t))
-              {
-                errcode = EBADF;
-                goto errout;
-              }
-          }
-          break;
-#endif /* CONFIG_NET_IPv6 */
-
-        default:
-          DEBUGPANIC();
-          errcode = EINVAL;
-          goto errout;
-        }
-    }
-
-  /* Initialize the socket structure. */
-
-  newsock->s_domain = psock->s_domain;
-  newsock->s_type   = SOCK_STREAM;
-  newsock->s_sockif = psock->s_sockif;
-
-  /* Perform the correct accept operation for this address domain */
-
-#ifdef CONFIG_NET_LOCAL_STREAM
-#ifdef CONFIG_NET_TCP
-  if (psock->s_domain == PF_LOCAL)
-#endif
-    {
-      /* Perform the local accept operation (with the network unlocked) */
-
-      ret = psock_local_accept(psock, addr, addrlen, &newsock->s_conn);
-      if (ret < 0)
-        {
-          errcode = -ret;
-          goto errout;
-        }
-    }
-#endif /* CONFIG_NET_LOCAL_STREAM */
-
-#ifdef CONFIG_NET_TCP
-#ifdef CONFIG_NET_LOCAL_STREAM
-  else
-#endif
-    {
-#ifdef NET_TCP_HAVE_STACK
-      /* Perform the local accept operation (with the network locked) */
-
-      net_lock();
-      ret = psock_tcp_accept(psock, addr, addrlen, &newsock->s_conn);
-      if (ret < 0)
-        {
-          net_unlock();
-          errcode = -ret;
-          goto errout;
-        }
-
-      /* Begin monitoring for TCP connection events on the newly connected
-       * socket
-       */
-
-      ret = net_startmonitor(newsock);
-      if (ret < 0)
-        {
-          /* net_startmonitor() can only fail on certain race conditions
-           * where the connection was lost just before this function was
-           * called.  Undo everything we have done and return a failure.
-           */
-
-          net_unlock();
-          errcode = -ret;
-          goto errout_after_accept;
-        }
-
-      net_unlock();
-#else
-      errcode = EOPNOTSUPP;
+      nerr("ERROR: si_accept failed: %d\n", ret);
+      errcode = -ret;
       goto errout;
-#endif /* NET_TCP_HAVE_STACK */
     }
-#endif /* CONFIG_NET_TCP */
 
   /* Mark the new socket as connected. */
 
@@ -293,11 +173,6 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   leave_cancellation_point();
   return OK;
-
-#ifdef NET_TCP_HAVE_STACK
-errout_after_accept:
-  psock_close(newsock);
-#endif
 
 errout:
   set_errno(errcode);

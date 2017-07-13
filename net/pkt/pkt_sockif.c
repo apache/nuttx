@@ -58,8 +58,11 @@
 static int     pkt_setup(FAR struct socket *psock, int protocol);
 static int     pkt_bind(FAR struct socket *psock,
                   FAR const struct sockaddr *addr, socklen_t addrlen);
+static int     pkt_listen(FAR struct socket *psock, int backlog);
 static int     pkt_connect(FAR struct socket *psock,
                   FAR const struct sockaddr *addr, socklen_t addrlen);
+static int     pkt_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
+                 FAR socklen_t *addrlen, FAR struct socket *newsock);
 static ssize_t pkt_send(FAR struct socket *psock, FAR const void *buf,
                  size_t len, int flags);
 static ssize_t pkt_sendto(FAR struct socket *psock, FAR const void *buf,
@@ -74,7 +77,9 @@ const struct sock_intf_s g_pkt_sockif =
 {
   pkt_setup,    /* si_setup */
   pkt_bind,     /* si_bind */
+  pkt_listen,   /* si_listen */
   pkt_connect,  /* si_connect */
+  pkt_accept,   /* si_accept */
   pkt_send,     /* si_send */
   pkt_sendto,   /* si_sendto */
   pkt_recvfrom  /* si_recvfrom */
@@ -196,6 +201,52 @@ static int pkt_connect(FAR struct socket *psock,
 }
 
 /****************************************************************************
+ * Name: pkt_accept
+ *
+ * Description:
+ *   The pkt_accept function is used with connection-based socket types
+ *   (SOCK_STREAM, SOCK_SEQPACKET and SOCK_RDM). It extracts the first
+ *   connection request on the queue of pending connections, creates a new
+ *   connected socket with mostly the same properties as 'sockfd', and
+ *   allocates a new socket descriptor for the socket, which is returned. The
+ *   newly created socket is no longer in the listening state. The original
+ *   socket 'sockfd' is unaffected by this call.  Per file descriptor flags
+ *   are not inherited across an pkt_accept.
+ *
+ *   The 'sockfd' argument is a socket descriptor that has been created with
+ *   socket(), bound to a local address with bind(), and is listening for
+ *   connections after a call to listen().
+ *
+ *   On return, the 'addr' structure is filled in with the address of the
+ *   connecting entity. The 'addrlen' argument initially contains the size
+ *   of the structure pointed to by 'addr'; on return it will contain the
+ *   actual length of the address returned.
+ *
+ *   If no pending connections are present on the queue, and the socket is
+ *   not marked as non-blocking, pkt_accept blocks the caller until a
+ *   connection is present. If the socket is marked non-blocking and no
+ *   pending connections are present on the queue, pkt_accept returns
+ *   EAGAIN.
+ *
+ * Parameters:
+ *   psock    Reference to the listening socket structure
+ *   addr     Receives the address of the connecting client
+ *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   newsock  Location to return the accepted socket information.
+ *
+ * Returned Value:
+ *   Returns 0 (OK) on success.  On failure, it returns a negated errno
+ *   value.  See accept() for a desrciption of the approriate error value.
+ *
+ ****************************************************************************/
+
+static int pkt_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
+                        FAR socklen_t *addrlen, FAR struct socket *newsock)
+{
+  return -EAFNOSUPPORT;
+}
+
+/****************************************************************************
  * Name: pkt_bind
  *
  * Description:
@@ -269,6 +320,36 @@ static int pkt_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
     {
       return -EBADF;
     }
+}
+
+/****************************************************************************
+ * Name: pkt_listen
+ *
+ * Description:
+ *   To accept connections, a socket is first created with psock_socket(), a
+ *   willingness to accept incoming connections and a queue limit for
+ *   incoming connections are specified with psock_listen(), and then the
+ *   connections are accepted with psock_accept().  For the case of raw
+ *   packet sockets, psock_listen() calls this function.  The psock_listen()
+ *   call applies only to sockets of type SOCK_STREAM or SOCK_SEQPACKET.
+ *
+ * Parameters:
+ *   psock    Reference to an internal, boound socket structure.
+ *   backlog  The maximum length the queue of pending connections may grow.
+ *            If a connection request arrives with the queue full, the client
+ *            may receive an error with an indication of ECONNREFUSED or,
+ *            if the underlying protocol supports retransmission, the request
+ *            may be ignored so that retries succeed.
+ *
+ * Returned Value:
+ *   On success, zero is returned. On error, a negated errno value is
+ *   returned.  See list() for the set of appropriate error values.
+ *
+ ****************************************************************************/
+
+int pkt_listen(FAR struct socket *psock, int backlog)
+{
+  return -EOPNOTSUPP;
 }
 
 /****************************************************************************
@@ -349,7 +430,7 @@ static ssize_t pkt_sendto(FAR struct socket *psock, FAR const void *buf,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: 
+ * Name:
  *
  * Description:
  *

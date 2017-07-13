@@ -66,28 +66,45 @@ dq_queue_t g_local_listeners;
  * Name: local_listen
  *
  * Description:
- *   Listen for a new connection of a SOCK_STREAM Unix domain socket.
+ *   To accept connections, a socket is first created with psock_socket(), a
+ *   willingness to accept incoming connections and a queue limit for
+ *   incoming connections are specified with psock_listen(), and then the
+ *   connections are accepted with psock_accept().  For the case of local
+ *   Unix sockets, psock_listen() calls this function.  The psock_listen()
+ *   call applies only to sockets of type SOCK_STREAM or SOCK_SEQPACKET.
  *
- *   This function is called as part of the implementation of listen();
- *
- * Input Parameters:
- *   server  - A reference to the server-side local connection structure
- *   backlog - Maximum number of pending connections.
+ * Parameters:
+ *   psock    Reference to an internal, boound socket structure.
+ *   backlog  The maximum length the queue of pending connections may grow.
+ *            If a connection request arrives with the queue full, the client
+ *            may receive an error with an indication of ECONNREFUSED or,
+ *            if the underlying protocol supports retransmission, the request
+ *            may be ignored so that retries succeed.
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- * Assumptions:
- *   The network is NOT locked
+ *   On success, zero is returned. On error, a negated errno value is
+ *   returned.  See list() for the set of appropriate error values.
  *
  ****************************************************************************/
 
-int local_listen(FAR struct local_conn_s *server, int backlog)
+int local_listen(FAR struct socket *psock, int backlog)
 {
+  FAR struct local_conn_s *server;
+
+  /* Verify that the sockfd corresponds to a connected SOCK_STREAM in this
+   * address family.
+   */
+
+  if (psock->s_domain != PF_LOCAL || psock->s_type != SOCK_STREAM)
+    {
+      nerr("ERROR: Unsupported socket family=%d or socket type=%d\n",
+           psocl->s_domain, psock->s_type);
+      return -EOPNOTSUPP;
+    }
+
+  server = (FAR struct local_conn_s *)psock->s_conn;
 
   /* Some sanity checks */
-
-  DEBUGASSERT(server);
 
   if (server->lc_proto != SOCK_STREAM ||
       server->lc_state == LOCAL_STATE_UNBOUND ||

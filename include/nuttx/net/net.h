@@ -105,8 +105,11 @@ struct sock_intf_s
   CODE int     (*si_setup)(FAR struct socket *psock, int protocol);
   CODE int     (*si_bind)(FAR struct socket *psock,
                    FAR const struct sockaddr *addr, socklen_t addrlen);
+  CODE int     (*si_listen)(FAR struct socket *psock, int backlog);
   CODE int     (*si_connect)(FAR struct socket *psock,
                    FAR const struct sockaddr *addr, socklen_t addrlen);
+  CODE int     (*si_accept)(FAR struct socket *psock, FAR struct sockaddr *addr,
+                   FAR socklen_t *addrlen, FAR struct socket *newsock);
   CODE ssize_t (*si_send)(FAR struct socket *psock, FAR const void *buf,
                    size_t len, int flags);
   CODE ssize_t (*si_sendto)(FAR struct socket *psock, FAR const void *buf,

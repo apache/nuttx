@@ -88,7 +88,7 @@ static int local_waitlisten(FAR struct local_conn_s *server)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: psock_local_accept
+ * Name: local_accept
  *
  * Description:
  *   This function implements accept() for Unix domain sockets.  See the
@@ -110,8 +110,8 @@ static int local_waitlisten(FAR struct local_conn_s *server)
  *
  ****************************************************************************/
 
-int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-                       FAR socklen_t *addrlen, FAR void **newconn)
+int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
+                 FAR socklen_t *addrlen, FAR void **newconn)
 
 {
   FAR struct local_conn_s *server;
@@ -122,6 +122,18 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   /* Some sanity checks */
 
   DEBUGASSERT(psock && psock->s_conn);
+
+  /* Is the socket a stream? */
+
+  if (psock->s_domain != PF_LOCAL || psock->s_type != SOCK_STREAM)
+    {
+      return -EOPNOTSUPP;
+    }
+
+  /* Verify that a valid memory block has been provided to receive the
+   * address
+   */
+
   server = (FAR struct local_conn_s *)psock->s_conn;
 
   if (server->lc_proto != SOCK_STREAM ||
@@ -213,7 +225,7 @@ int psock_local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
               /* Return the address family */
 
-              if (addr)
+              if (addr != NULL)
                 {
                   ret = local_getaddr(client, addr, addrlen);
                 }

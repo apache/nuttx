@@ -61,6 +61,9 @@
 static int     inet_setup(FAR struct socket *psock, int protocol);
 static int     inet_bind(FAR struct socket *psock,
                  FAR const struct sockaddr *addr, socklen_t addrlen);
+static int     inet_listen(FAR struct socket *psock, int backlog);
+static int     inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
+                 FAR socklen_t *addrlen, FAR struct socket *newsock);
 static ssize_t inet_send(FAR struct socket *psock, FAR const void *buf,
                  size_t len, int flags);
 static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
@@ -75,7 +78,9 @@ const struct sock_intf_s g_inet_sockif =
 {
   inet_setup,    /* si_setup */
   inet_bind,     /* si_bind */
+  inet_listen,   /* si_listen */
   inet_connect,  /* si_connect */
+  inet_accept,   /* si_accept */
   inet_send,     /* si_send */
   inet_sendto,   /* si_sendto */
   inet_recvfrom  /* si_recvfrom */
@@ -433,6 +438,255 @@ static int inet_bind(FAR struct socket *psock,
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: inet_listen
+ *
+ * Description:
+ *   To accept connections, a socket is first created with psock_socket(), a
+ *   willingness to accept incoming connections and a queue limit for
+ *   incoming connections are specified with psock_listen(), and then the
+ *   connections are accepted with psock_accept().  For the case of AFINET
+ *   and AFINET6 sockets, psock_listen() calls this function.  The
+ *   psock_listen() call applies only to sockets of type SOCK_STREAM or
+ *   SOCK_SEQPACKET.
+ *
+ * Parameters:
+ *   psock    Reference to an internal, boound socket structure.
+ *   backlog  The maximum length the queue of pending connections may grow.
+ *            If a connection request arrives with the queue full, the client
+ *            may receive an error with an indication of ECONNREFUSED or,
+ *            if the underlying protocol supports retransmission, the request
+ *            may be ignored so that retries succeed.
+ *
+ * Returned Value:
+ *   On success, zero is returned. On error, a negated errno value is
+ *   returned.  See list() for the set of appropriate error values.
+ *
+ ****************************************************************************/
+
+int inet_listen(FAR struct socket *psock, int backlog)
+{
+#if defined(CONFIG_NET_TCP) && defined(NET_TCP_HAVE_STACK)
+  FAR struct tcp_conn_s *conn;
+  int ret;
+#endif
+
+  /* Verify that the sockfd corresponds to a connected SOCK_STREAM */
+
+  if (psock->s_type != SOCK_STREAM)
+    {
+#ifdef CONFIG_NET_USRSOCK
+      if (psock->s_type == SOCK_USRSOCK_TYPE)
+        {
+#warning "Missing logic"
+        }
+#endif
+
+      nerr("ERROR:  Unsupported socket type: %d\n",
+           psock->s_type);
+      return -EOPNOTSUPP;
+    }
+
+#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
+  conn = (FAR struct tcp_conn_s *)psock->s_conn;
+
+  if (conn->lport <= 0)
+    {
+      return -EOPNOTSUPP;
+    }
+
+#ifdef CONFIG_NET_TCPBACKLOG
+  /* Set up the backlog for this connection */
+
+  ret = tcp_backlogcreate(conn, backlog);
+  if (ret < 0)
+    {
+      nerr("ERROR: tcp_backlogcreate failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
+  /* Start listening to the bound port.  This enables callbacks when
+   * accept() is called and enables poll()/select() logic.
+   */
+
+  ret = tcp_listen(conn);
+  if (ret < 0)
+    {
+      nerr("ERROR: tcp_listen failed: %d\n", ret);
+    }
+
+  return ret;
+#else
+  nwarn("WARNING:  Stream socket support not available\n");
+  return -EOPNOTSUPP;
+#endif /* NET_TCP_HAVE_STACK */
+#else
+  nwarn("WARNING:  Stream socket support not enabled\n");
+  return -EOPNOTSUPP;
+#endif /* CONFIG_NET_TCP */
+}
+
+/****************************************************************************
+ * Name: inet_accept
+ *
+ * Description:
+ *   The inet_accept function is used with connection-based socket types
+ *   (SOCK_STREAM, SOCK_SEQPACKET and SOCK_RDM). It extracts the first
+ *   connection request on the queue of pending connections, creates a new
+ *   connected socket with mostly the same properties as 'sockfd', and
+ *   allocates a new socket descriptor for the socket, which is returned. The
+ *   newly created socket is no longer in the listening state. The original
+ *   socket 'sockfd' is unaffected by this call.  Per file descriptor flags
+ *   are not inherited across an inet_accept.
+ *
+ *   The 'sockfd' argument is a socket descriptor that has been created with
+ *   socket(), bound to a local address with bind(), and is listening for
+ *   connections after a call to listen().
+ *
+ *   On return, the 'addr' structure is filled in with the address of the
+ *   connecting entity. The 'addrlen' argument initially contains the size
+ *   of the structure pointed to by 'addr'; on return it will contain the
+ *   actual length of the address returned.
+ *
+ *   If no pending connections are present on the queue, and the socket is
+ *   not marked as non-blocking, inet_accept blocks the caller until a
+ *   connection is present. If the socket is marked non-blocking and no
+ *   pending connections are present on the queue, inet_accept returns
+ *   EAGAIN.
+ *
+ * Parameters:
+ *   psock    Reference to the listening socket structure
+ *   addr     Receives the address of the connecting client
+ *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   newsock  Location to return the accepted socket information.
+ *
+ * Returned Value:
+ *   Returns 0 (OK) on success.  On failure, it returns a negated errno
+ *   value.  See accept() for a desrciption of the approriate error value.
+ *
+ ****************************************************************************/
+
+static int inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
+                       FAR socklen_t *addrlen, FAR struct socket *newsock)
+{
+#if defined(CONFIG_NET_TCP) && defined(NET_TCP_HAVE_STACK)
+  int ret;
+#endif
+
+  /* Is the socket a stream? */
+
+  if (psock->s_type != SOCK_STREAM)
+    {
+#ifdef CONFIG_NET_USRSOCK
+      if (psock->s_type == SOCK_USRSOCK_TYPE)
+        {
+#warning "Missing logic"
+        }
+#endif
+
+      nerr("ERROR:  Inappropreat socket type: %d\n", psock->s_type);
+      return -EOPNOTSUPP;
+    }
+
+  /* Verify that a valid memory block has been provided to receive the
+   * address
+   */
+
+  if (addr != NULL)
+    {
+      /* If an address is provided, then the length must also be provided. */
+
+      DEBUGASSERT(addrlen > 0);
+
+      /* A valid length depends on the address domain */
+
+      switch (psock->s_domain)
+        {
+#ifdef CONFIG_NET_IPv4
+        case PF_INET:
+          {
+            if (*addrlen < sizeof(struct sockaddr_in))
+              {
+                return -EBADF;
+              }
+          }
+          break;
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+        case PF_INET6:
+          {
+            if (*addrlen < sizeof(struct sockaddr_in6))
+              {
+                return -EBADF;
+              }
+          }
+          break;
+#endif /* CONFIG_NET_IPv6 */
+
+        default:
+          DEBUGPANIC();
+          return -EINVAL;
+        }
+    }
+
+  /* Initialize the socket structure. */
+
+  newsock->s_domain = psock->s_domain;
+  newsock->s_type   = SOCK_STREAM;
+  newsock->s_sockif = psock->s_sockif;
+
+  /* Perform the correct accept operation for this address domain */
+
+#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
+  /* Perform the local accept operation (with the network locked) */
+
+  net_lock();
+  ret = psock_tcp_accept(psock, addr, addrlen, &newsock->s_conn);
+  if (ret < 0)
+    {
+      nerr("ERROR: psock_tcp_accept failed: %d\n", ret);
+      goto errout_with_lock;
+    }
+
+   /* Begin monitoring for TCP connection events on the newly connected
+    * socket
+    */
+
+  ret = net_startmonitor(newsock);
+  if (ret < 0)
+    {
+      /* net_startmonitor() can only fail on certain race conditions where
+       * the connection was lost just before this function was called.  Undo
+       * everything we have done and return a failure.
+       */
+
+      goto errout_after_accept;
+    }
+
+  net_unlock();
+  return OK;
+
+errout_after_accept:
+  psock_close(newsock);
+
+errout_with_lock:
+  net_unlock();
+  return ret;
+
+#else
+  nwarn("WARNING: SOCK_STREAM not supported in this configuration\n");
+  return -EOPNOTSUPP;
+#endif /* NET_TCP_HAVE_STACK */
+#else
+  nwarn("WARNING: TCP/IP not supported in this configuration\n");
+  return -EOPNOTSUPP;
+#endif /* CONFIG_NET_TCP */
 }
 
 /****************************************************************************
