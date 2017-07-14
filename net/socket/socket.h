@@ -54,6 +54,25 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Configuration */
+
+#undef HAVE_INET_SOCKETS
+#undef HAVE_PFINET_SOCKETS
+#undef HAVE_PFINET6_SOCKETS
+
+#if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6) || \
+    defined(CONFIG_NET_USRSOCK)
+#  define HAVE_INET_SOCKETS
+
+#  if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_USRSOCK)
+#    define HAVE_PFINET_SOCKETS
+#  endif
+
+#  if defined(CONFIG_NET_IPv6) || defined(CONFIG_NET_USRSOCK)
+#    define HAVE_PFINET6_SOCKETS
+#  endif
+#endif
+
 /* Definitions of 8-bit socket flags */
 
                                   /* Bits 0-2: Socket state */
@@ -148,7 +167,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
+#ifdef HAVE_INET_SOCKETS
 EXTERN const struct sock_intf_s g_inet_sockif;
 #endif
 

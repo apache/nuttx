@@ -49,8 +49,6 @@
 #include "pkt/pkt.h"
 #include "socket/socket.h"
 
-#ifdef CONFIG_NET
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -78,11 +76,11 @@ FAR const struct sock_intf_s *net_sockif(sa_family_t family)
 
   switch (family)
     {
-#if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
-#ifdef CONFIG_NET_IPv4
+#ifdef HAVE_INET_SOCKETS
+#ifdef HAVE_PFINET_SOCKETS
     case PF_INET:
 #endif
-#ifdef CONFIG_NET_IPv6
+#ifdef HAVE_PFINET6_SOCKETS
     case PF_INET6:
 #endif
       sockif = &g_inet_sockif;
@@ -107,5 +105,3 @@ FAR const struct sock_intf_s *net_sockif(sa_family_t family)
 
   return sockif;
 }
-
-#endif /* CONFIG_NET */

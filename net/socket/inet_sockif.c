@@ -53,7 +53,7 @@
 #include "usrsock/usrsock.h"
 #include "socket/socket.h"
 
-#if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
+#ifdef HAVE_INET_SOCKETS
 
 /****************************************************************************
  * Private Function Prototypes
@@ -269,18 +269,20 @@ static int usrsock_socket_setup(int domain, int type, int protocol,
 static int inet_setup(FAR struct socket *psock, int protocol)
 {
 #ifdef CONFIG_NET_USRSOCK
+  int ret;
+
   /* Handle special setup for user INET sockets */
 
-  ret = usrsock_socket_setup(domain, type, protocol, psock);
+  ret = usrsock_socket_setup(psock->s_domain, psock->s_type, protocol, psock);
   if (ret < 0)
     {
-      if (ret = -ENETDOWN)
+      if (ret == -ENETDOWN)
         {
           /* -ENETDOWN means that usrsock daemon is not running.  Attempt to
            * open socket with kernel networking stack.
            */
 
-          warn("WARNING: usrsock daemon is not running\n");
+          nwarn("WARNING: usrsock daemon is not running\n");
         }
       else
         {
@@ -311,8 +313,8 @@ static int inet_setup(FAR struct socket *psock, int protocol)
 
         return inet_tcp_alloc(psock);
 #else
-        warning("WARNING:  SOCK_STREAM disabled\n");
-        return = -ENETDOWN;
+        nwarn("WARNING:  SOCK_STREAM disabled\n");
+        return -ENETDOWN;
 #endif
 #endif /* CONFIG_NET_TCP */
 
@@ -329,7 +331,7 @@ static int inet_setup(FAR struct socket *psock, int protocol)
 
         return inet_udp_alloc(psock);
 #else
-        warning("WARNING:  SOCK_DGRAM disabled\n");
+        nwarn("WARNING:  SOCK_DGRAM disabled\n");
         return -ENETDOWN;
 #endif
 #endif /* CONFIG_NET_UDP */
@@ -1209,11 +1211,11 @@ static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
 #elif defined(NET_UDP_HAVE_STACK)
       nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
 #else
-      nwarn("WARNING: UDP not available in this configuiration\n")
+      nwarn("WARNING: UDP not available in this configuiration\n");
       nsent = -ENOSYS;
 #endif /* CONFIG_NET_6LOWPAN */
 #else
-      nwarn("WARNING: UDP not enabled in this configuiration\n")
+      nwarn("WARNING: UDP not enabled in this configuiration\n");
       nsent = -EISCONN;
 #endif /* CONFIG_NET_UDP */
     }
@@ -1238,4 +1240,4 @@ static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
  *
  ****************************************************************************/
 
-#endif /* CONFIG_NET_IPv4 || CONFIG_NET_IPv6 */
+#endif /* HAVE_INET_SOCKETS */
