@@ -40,11 +40,125 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include <nuttx/usb/usbdev.h>
+#include <nuttx/usb/cdcacm.h>
+#include <nuttx/usb/usbmsc.h>
 #include <nuttx/usb/composite.h>
 
 #include "samv71-xult.h"
 
 #if defined(CONFIG_BOARDCTL_USBDEVCTRL) && defined(CONFIG_USBDEV_COMPOSITE)
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_cdcclassobject
+ *
+ * Description:
+ *   If the CDC serial class driver is part of composite device, then
+ *   board-specific logic must provide board_cdcclassobject().  In the
+ *   simplest case, board_cdcclassobject() is simply a wrapper around
+ *   cdcacm_classobject() that provides the correct device minor number.
+ *
+ * Input Parameters:
+ *   classdev - The location to return the CDC serial class' device
+ *     instance.
+ *
+ * Returned Value:
+ *   0 on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int board_cdcclassobject(int minor,
+                                FAR struct usbdev_description_s *devdesc,
+                                FAR struct usbdevclass_driver_s **classdev)
+{
+  return cdcacm_classobject(0, devdesc, classdev);
+}
+
+/****************************************************************************
+ * Name: board_cdcuninitialize
+ *
+ * Description:
+ *   Un-initialize the USB serial class driver.  This is just an application-
+ *   specific wrapper around cdcadm_unitialize() that is called form the
+ *   composite device logic.
+ *
+ * Input Parameters:
+ *   classdev - The class driver instance previously given to the composite
+ *     driver by board_cdcclassobject().
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void board_cdcuninitialize(FAR struct usbdevclass_driver_s *classdev)
+{
+  cdcacm_initialize(classdev);
+}
+
+/************************************************************************************
+ * Name: board_mscclassobject
+ *
+ * Description:
+ *   If the mass storage class driver is part of composite device, then
+ *   its instantiation and configuration is a multi-step, board-specific,
+ *   process (See comments for usbmsc_configure below).  In this case,
+ *   board-specific logic must provide board_mscclassobject().
+ *
+ *   board_mscclassobject() is called from the composite driver.  It must
+ *   encapsulate the instantiation and configuration of the mass storage
+ *   class and the return the mass storage device's class driver instance
+ *   to the composite dirver.
+ *
+ * Input Parameters:
+ *   classdev - The location to return the mass storage class' device
+ *     instance.
+ *
+ * Returned Value:
+ *   0 on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+static int board_mscclassobject(int minor, FAR struct usbdev_description_s *devdesc,
+                                FAR struct usbdevclass_driver_s **classdev)
+{
+  FAR void *handle;
+  int ret;
+
+  ret = usbmsc_configure(1, &handle);
+  if (ret >= 0)
+    {
+      retr = usbmsc_classobject(handle, devdesc, classdev);
+    }
+
+  return ret;
+}
+
+ /************************************************************************************
+ * Name: board_mscuninitialize
+ *
+ * Description:
+ *   Un-initialize the USB storage class driver.  This is just an application-
+ *   specific wrapper aboutn usbmsc_unitialize() that is called form the composite
+ *   device logic.
+ *
+ * Input Parameters:
+ *   classdev - The class driver instrance previously give to the composite
+ *     driver by board_mscclassobject().
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev)
+{
+  usbmsc_uninitialize(classdev);
+}
 
 /****************************************************************************
  * Public Functions

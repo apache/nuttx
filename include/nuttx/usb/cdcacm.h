@@ -330,53 +330,6 @@ typedef FAR void (*cdcacm_callback_t)(enum cdcacm_event_e event);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_cdcclassobject
- *
- * Description:
- *   If the CDC serial class driver is part of composite device, then
- *   board-specific logic must provide board_cdcclassobject().  In the
- *   simplest case, board_cdcclassobject() is simply a wrapper around
- *   cdcacm_classobject() that provides the correct device minor number.
- *
- * Input Parameters:
- *   classdev - The location to return the CDC serial class' device
- *     instance.
- *
- * Returned Value:
- *   0 on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_CDCACM_COMPOSITE)
-struct usbdevclass_driver_s;
-struct usbdev_description_s;
-int board_cdcclassobject(int minor, FAR struct usbdev_description_s *devdesc,
-                         FAR struct usbdevclass_driver_s **classdev);
-#endif
-
-/****************************************************************************
- * Name: board_cdcuninitialize
- *
- * Description:
- *   Un-initialize the USB serial class driver.  This is just an application-
- *   specific wrapper around cdcadm_unitialize() that is called form the
- *   composite device logic.
- *
- * Input Parameters:
- *   classdev - The class driver instance previously give to the composite
- *     driver by board_cdcclassobject().
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_CDCACM_COMPOSITE)
-struct usbdevclass_driver_s;
-void board_cdcuninitialize(FAR struct usbdevclass_driver_s *classdev);
-#endif
-
-/****************************************************************************
  * Name: cdcacm_classobject
  *
  * Description:
@@ -436,8 +389,7 @@ int cdcacm_initialize(int minor, FAR void **handle);
  *   CDC/ACM driver is an internal part of a composite device, or a
  *   standalone USB driver:
  *
- *     classdev - The class object returned by board_cdcclassobject() or
- *       cdcacm_classobject()
+ *     classdev - The class object returned by cdcacm_classobject()
  *     handle - The opaque handle representing the class object returned by
  *       a previous call to cdcacm_initialize().
  *

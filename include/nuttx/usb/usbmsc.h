@@ -89,57 +89,6 @@ extern "C"
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_mscclassobject
- *
- * Description:
- *   If the mass storage class driver is part of composite device, then
- *   its instantiation and configuration is a multi-step, board-specific,
- *   process (See comments for usbmsc_configure below).  In this case,
- *   board-specific logic must provide board_mscclassobject().
- *
- *   board_mscclassobject() is called from the composite driver.  It must
- *   encapsulate the instantiation and configuration of the mass storage
- *   class and the return the mass storage device's class driver instance
- *   to the composite dirver.
- *
- * Input Parameters:
- *   classdev - The location to return the mass storage class' device
- *     instance.
- *
- * Returned Value:
- *   0 on success; a negated errno on failure
- *
- ************************************************************************************/
-
-#if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
-struct usbdevclass_driver_s;
-int board_mscclassobject(int minor, FAR struct usbdev_description_s *devdesc,
-                         FAR struct usbdevclass_driver_s **classdev);
-#endif
-
- /************************************************************************************
- * Name: board_mscuninitialize
- *
- * Description:
- *   Un-initialize the USB storage class driver.  This is just an application-
- *   specific wrapper aboutn usbmsc_unitialize() that is called form the composite
- *   device logic.
- *
- * Input Parameters:
- *   classdev - The class driver instrance previously give to the composite
- *     driver by board_mscclassobject().
- *
- * Returned Value:
- *   None
- *
- ************************************************************************************/
-
-#if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
-struct usbdevclass_driver_s;
-void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev);
-#endif
-
-/************************************************************************************
  * Name: usbmsc_configure
  *
  * Description:
@@ -157,7 +106,7 @@ void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev);
  *
  * Returned Value:
  *   0 on success; a negated errno on failure.  The returned handle value is
- *   an untyped equivalent to the usbmsc_classobject() or board_mscclassobject().
+ *   an untyped equivalent to the usbmsc_classobject().
  *
  ************************************************************************************/
 

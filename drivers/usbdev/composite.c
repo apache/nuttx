@@ -783,8 +783,7 @@ static void composite_resume(FAR struct usbdevclass_driver_s *driver,
  * Description:
  *   Register USB composite device as configured.  This function will call
  *   board-specific implementations in order to obtain the class objects for
- *   each of the members of the composite (see board_mscclassobject(),
- *   board_cdcclassobjec(), ...)
+ *   each of the members of the composite.
  *
  * Input Parameter:
  *   None
@@ -887,8 +886,7 @@ errout_with_alloc:
  *   Un-initialize the USB composite driver.  The handle is the USB composite
  *   class' device object as was returned by composite_initialize().  This
  *   function will call  board-specific implementations in order to free the
- *   class objects for each of the members of the composite (see
- *   board_mscuninitialize(), board_cdcuninitialize(), ...)
+ *   class objects for each of the members of the composite.
  *
  * Input Parameters:
  *   handle - The handle returned by a previous call to composite_initialize().
