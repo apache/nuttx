@@ -8,6 +8,7 @@ menu "Raw Socket Support"
 config NET_PKT
 	bool "Socket packet socket support"
 	default n
+	depends on NET_ETHERNET || EXPERIMENTAL
 	---help---
 		Enable or disable support for packet sockets.
 
@@ -16,6 +17,8 @@ config NET_PKT
 		a packet socket tap before they enter the network. Data written into
 		a packet socket will bypass the network altogether and be placed in
 		the transmission buffer of the network interface driver.
+
+		REVISIT: Currently only implemented for Ethernet.
 
 if NET_PKT
 
