@@ -45,6 +45,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <debug.h>
+#include <assert.h>
 
 #include <arch/irq.h>
 #include <nuttx/net/net.h>

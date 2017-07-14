@@ -69,8 +69,8 @@ int psock_local_bind(FAR struct socket *psock,
     (FAR const struct sockaddr_un *)addr;
   int namelen;
 
-  DEBUGASSERT(psock && psock->s_conn && unaddr &&
-              unaddr->sun_family == AF_LOCAL &&
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
+              unaddr != NULL && unaddr->sun_family == AF_LOCAL &&
               addrlen >= sizeof(sa_family_t));
 
   conn = (FAR struct local_conn_s *)psock->s_conn;
@@ -79,7 +79,7 @@ int psock_local_bind(FAR struct socket *psock,
 
   conn->lc_proto = psock->s_type;
 
-  /* No determine the type of the Unix domain socket by comparing the size
+  /* Now determine the type of the Unix domain socket by comparing the size
    * of the address description.
    */
 

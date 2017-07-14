@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/sendto.c
  *
- *   Copyright (C) 2007-2009, 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,9 +49,6 @@
 #include <nuttx/cancelpt.h>
 #include <nuttx/net/net.h>
 
-#include "udp/udp.h"
-#include "sixlowpan/sixlowpan.h"
-#include "local/local.h"
 #include "socket/socket.h"
 
 /****************************************************************************
@@ -150,17 +147,17 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Verify that the psock corresponds to valid, allocated socket */
 
-  if (!psock || psock->s_crefs <= 0)
+  if (psock == NULL || psock->s_crefs <= 0)
     {
       nerr("ERROR: Invalid socket\n");
       errcode = EBADF;
       goto errout;
     }
 
-  /* Let the address family's send() method handle the operation */
+  /* Let the address family's sendto() method handle the operation */
 
-  DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_send != NULL);
-  nsent = psock->s_sockif->si_send(psock, buf, len, flags);
+  DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_sendto != NULL);
+  nsent = psock->s_sockif->si_sendto(psock, buf, len, flags, to, tolen);
 
   /* Check if the domain-specific sendto() logic failed */
 

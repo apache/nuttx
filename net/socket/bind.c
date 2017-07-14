@@ -92,9 +92,6 @@
 int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
                socklen_t addrlen)
 {
-#ifdef CONFIG_NET_PKT
-  FAR const struct sockaddr_ll *lladdr = (const struct sockaddr_ll *)addr;
-#endif
   int errcode;
   int ret = OK;
 

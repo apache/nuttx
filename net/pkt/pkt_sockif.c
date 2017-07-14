@@ -41,11 +41,15 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <stdbool.h>
+#include <string.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/net/net.h>
+#include <netpacket/packet.h>
+#include <socket/socket.h>
 
 #include "pkt/pkt.h"
 
@@ -60,11 +64,17 @@ static sockcaps_t pkt_sockcaps(FAR struct socket *psock);
 static void       pkt_addref(FAR struct socket *psock);
 static int        pkt_bind(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
+static int        pkt_getsockname(FAR struct socket *psock,
+                    FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 static int        pkt_listen(FAR struct socket *psock, int backlog);
 static int        pkt_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
 static int        pkt_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                    FAR socklen_t *addrlen, FAR struct socket *newsock);
+#ifndef CONFIG_DISABLE_POLL
+static int        pkt_poll(FAR struct socket *psock,
+                    FAR struct pollfd *fds, bool setup);
+#endif
 static ssize_t    pkt_send(FAR struct socket *psock, FAR const void *buf,
                    size_t len, int flags);
 static ssize_t    pkt_sendto(FAR struct socket *psock, FAR const void *buf,
@@ -78,17 +88,24 @@ static int        pkt_close(FAR struct socket *psock);
 
 const struct sock_intf_s g_pkt_sockif =
 {
-  pkt_setup,    /* si_setup */
-  pkt_sockcaps, /* si_sockcaps */
-  pkt_addref,   /* si_addref */
-  pkt_bind,     /* si_bind */
-  pkt_listen,   /* si_listen */
-  pkt_connect,  /* si_connect */
-  pkt_accept,   /* si_accept */
-  pkt_send,     /* si_send */
-  pkt_sendto,   /* si_sendto */
-  pkt_recvfrom, /* si_recvfrom */
-  pkt_close     /* si_close */
+  pkt_setup,       /* si_setup */
+  pkt_sockcaps,    /* si_sockcaps */
+  pkt_addref,      /* si_addref */
+  pkt_bind,        /* si_bind */
+  pkt_getsockname, /* si_getsockname */
+  pkt_listen,      /* si_listen */
+  pkt_connect,     /* si_connect */
+  pkt_accept,      /* si_accept */
+#ifndef CONFIG_DISABLE_POLL
+  pkt_poll,        /* si_poll */
+#endif
+  pkt_send,        /* si_send */
+  pkt_sendto,      /* si_sendto */
+#ifdef CONFIG_NET_SENDFILE
+  NULL,            /* si_sendfile */
+#endif
+  pkt_recvfrom,    /* si_recvfrom */
+  pkt_close        /* si_close */
 };
 
 /****************************************************************************
@@ -294,7 +311,7 @@ static int pkt_connect(FAR struct socket *psock,
  ****************************************************************************/
 
 static int pkt_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-                        FAR socklen_t *addrlen, FAR struct socket *newsock)
+                      FAR socklen_t *addrlen, FAR struct socket *newsock)
 {
   return -EAFNOSUPPORT;
 }
@@ -336,10 +353,10 @@ static int pkt_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
   /* Verify that a valid address has been provided */
 
-  if (addr->sa_family != AF_PACKET || addrlen < sizeof(struct sockaddr_ll)
+  if (addr->sa_family != AF_PACKET || addrlen < sizeof(struct sockaddr_ll))
     {
       nerr("ERROR: Invalid address length: %d < %d\n",
-           addrlen, sizeof(struct sockaddr_ll);
+           addrlen, sizeof(struct sockaddr_ll));
       return -EBADF;
     }
 
@@ -351,7 +368,7 @@ static int pkt_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
       /* Look at the addr and identify network interface */
 
-      ifindex = addr->sll_ifindex;
+      ifindex = ((struct sockaddr_ll*)addr)->sll_ifindex;
 
 #if 0
       /* Get the MAC address of that interface */
@@ -373,6 +390,40 @@ static int pkt_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
     {
       return -EBADF;
     }
+}
+
+/****************************************************************************
+ * Name: pkt_getsockname
+ *
+ * Description:
+ *   The pkt_getsockname() function retrieves the locally-bound name of the
+ *   specified packet socket, stores this address in the sockaddr structure
+ *   pointed to by the 'addr' argument, and stores the length of this
+ *   address in the object pointed to by the 'addrlen' argument.
+ *
+ *   If the actual length of the address is greater than the length of the
+ *   supplied sockaddr structure, the stored address will be truncated.
+ *
+ *   If the socket has not been bound to a local name, the value stored in
+ *   the object pointed to by address is unspecified.
+ *
+ * Parameters:
+ *   psock    Socket structure of the socket to be queried
+ *   addr     sockaddr structure to receive data [out]
+ *   addrlen  Length of sockaddr structure [in/out]
+ *
+ * Returned Value:
+ *   On success, 0 is returned, the 'addr' argument points to the address
+ *   of the socket, and the 'addrlen' argument points to the length of the
+ *   address.  Otherwise, a negated errno value is returned.  See
+ *   getsockname() for the list of appropriate error numbers.
+ *
+ ****************************************************************************/
+
+static int pkt_getsockname(FAR struct socket *psock,
+                           FAR struct sockaddr *addr, FAR socklen_t *addrlen)
+{
+  return -EAFNOSUPPORT;
 }
 
 /****************************************************************************
@@ -404,6 +455,32 @@ int pkt_listen(FAR struct socket *psock, int backlog)
 {
   return -EOPNOTSUPP;
 }
+
+/****************************************************************************
+ * Name: pkt_poll
+ *
+ * Description:
+ *   The standard poll() operation redirects operations on socket descriptors
+ *   to net_poll which, indiectly, calls to function.
+ *
+ * Input Parameters:
+ *   psock - An instance of the internal socket structure.
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *   setup - true: Setup up the poll; false: Teardown the poll
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+static int pkt_poll(FAR struct socket *psock, FAR struct pollfd *fds,
+                    bool setup)
+{
+  return -ENOSYS;
+}
+#endif /* !CONFIG_DISABLE_POLL */
 
 /****************************************************************************
  * Name: pkt_send
@@ -524,7 +601,6 @@ static int pkt_close(FAR struct socket *psock)
 
           return OK;
         }
-#endif
 
       default:
         return -EBADF;

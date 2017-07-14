@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL_STREAM)
 
 #include <string.h>
 #include <unistd.h>
@@ -54,6 +53,8 @@
 #include "utils/utils.h"
 #include "socket/socket.h"
 #include "local/local.h"
+
+#ifdef CONFIG_NET_LOCAL_STREAM
 
 /****************************************************************************
  * Private Functions
@@ -343,4 +344,4 @@ int psock_local_connect(FAR struct socket *psock,
   return -EADDRNOTAVAIL;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_LOCAL_STREAM */
+#endif /* CONFIG_NET_LOCAL_STREAM */
