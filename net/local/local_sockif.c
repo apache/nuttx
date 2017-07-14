@@ -48,6 +48,7 @@
 #include <netinet/in.h>
 
 #include <nuttx/net/net.h>
+#include <socket/socket.h>
 
 #include "local/local.h"
 
@@ -64,8 +65,6 @@ static int        local_bind(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
 static int        local_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
-static int        local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-                    FAR socklen_t *addrlen, FAR struct socket *newsock);
 static ssize_t    local_send(FAR struct socket *psock, FAR const void *buf,
                     size_t len, int flags);
 static ssize_t    local_sendto(FAR struct socket *psock, FAR const void *buf,
@@ -284,7 +283,7 @@ static int local_bind(FAR struct socket *psock,
         {
           /* Bind the Unix domain connection structure */
 
-          ret psock_local_bind(psock, addr, addrlen);
+          ret = psock_local_bind(psock, addr, addrlen);
 
           /* Mark the socket bound */
 

@@ -41,11 +41,14 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <string.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/net/net.h>
+#include <netpacket/packet.h>
+#include <socket/socket.h>
 
 #include "pkt/pkt.h"
 
@@ -336,10 +339,10 @@ static int pkt_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
   /* Verify that a valid address has been provided */
 
-  if (addr->sa_family != AF_PACKET || addrlen < sizeof(struct sockaddr_ll)
+  if (addr->sa_family != AF_PACKET || addrlen < sizeof(struct sockaddr_ll))
     {
       nerr("ERROR: Invalid address length: %d < %d\n",
-           addrlen, sizeof(struct sockaddr_ll);
+           addrlen, sizeof(struct sockaddr_ll));
       return -EBADF;
     }
 
@@ -351,7 +354,7 @@ static int pkt_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
       /* Look at the addr and identify network interface */
 
-      ifindex = addr->sll_ifindex;
+      ifindex = ((struct sockaddr_ll*)addr)->sll_ifindex;
 
 #if 0
       /* Get the MAC address of that interface */
@@ -524,7 +527,6 @@ static int pkt_close(FAR struct socket *psock)
 
           return OK;
         }
-#endif
 
       default:
         return -EBADF;
