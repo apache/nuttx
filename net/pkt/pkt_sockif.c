@@ -311,7 +311,7 @@ static int pkt_connect(FAR struct socket *psock,
  ****************************************************************************/
 
 static int pkt_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-                        FAR socklen_t *addrlen, FAR struct socket *newsock)
+                      FAR socklen_t *addrlen, FAR struct socket *newsock)
 {
   return -EAFNOSUPPORT;
 }

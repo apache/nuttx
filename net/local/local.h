@@ -330,7 +330,9 @@ int local_release(FAR struct local_conn_s *conn);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_LOCAL_STREAM
 int local_listen(FAR struct socket *psock, int backlog);
+#endif
 
 /****************************************************************************
  * Name: local_accept
@@ -355,8 +357,10 @@ int local_listen(FAR struct socket *psock, int backlog);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_LOCAL_STREAM
 int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                  FAR socklen_t *addrlen, FAR void **newconn);
+#endif
 
 /****************************************************************************
  * Name: psock_local_send

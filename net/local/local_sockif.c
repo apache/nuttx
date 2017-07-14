@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdbool.h>
+#include <string.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -66,8 +67,16 @@ static int        local_bind(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
 static int        local_getsockname(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen);
+#ifndef CONFIG_NET_LOCAL_STREAM
+static int        local_listen(FAR struct socket *psock, int backlog);
+#endif
 static int        local_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
+#ifndef CONFIG_NET_LOCAL_STREAM
+static int        local_accept(FAR struct socket *psock,
+                    FAR struct sockaddr *addr, FAR socklen_t *addrlen,
+                    FAR struct socket *newsock);
+#endif
 #ifndef CONFIG_DISABLE_POLL
 static int        local_poll(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
@@ -117,6 +126,7 @@ const struct sock_intf_s g_local_sockif =
  *
  ****************************************************************************/
 
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
 static int local_sockif_alloc(FAR struct socket *psock)
 {
   /* Allocate the local connection structure */
@@ -141,6 +151,7 @@ static int local_sockif_alloc(FAR struct socket *psock)
   psock->s_conn = conn;
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: local_setup
@@ -349,8 +360,7 @@ static int local_getsockname(FAR struct socket *psock,
                              FAR struct sockaddr *addr,
                              FAR socklen_t *addrlen)
 {
-  FAR const struct sockaddr_un *unaddr =
-    (FAR const struct sockaddr_un *)addr;
+  FAR struct sockaddr_un *unaddr = (FAR struct sockaddr_un *)addr;
   FAR struct local_conn_s *conn;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
@@ -382,13 +392,24 @@ static int local_getsockname(FAR struct socket *psock,
         }
       else /* conn->lctype = LOCAL_TYPE_PATHNAME */
         {
+          /* Get the full length of the socket name (including null terminator) */
+
+          int namelen = strlen(conn->lc_path) + 1;
+
           /* Get the available length in the user-provided buffer. */
 
           int pathlen = *addrlen - sizeof(sa_family_t);
 
+          /* Clip the socket name size so that if fits in the user buffer */
+
+          if (pathlen < namelen)
+            {
+              namelen = pathlen;
+            }
+
           /* Copy the path into the user address structure */
 
-          (void)strncpy(unaddr->sun_path, conn->lc_path, pathlen);
+          (void)strncpy(unaddr->sun_path, conn->lc_path, namelen);
           unaddr->sun_path[pathlen - 1] = '\0';
 
           *addrlen = sizeof(sa_family_t) + namelen;
@@ -397,6 +418,38 @@ static int local_getsockname(FAR struct socket *psock,
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: local_listen
+ *
+ * Description:
+ *   To accept connections, a socket is first created with psock_socket(), a
+ *   willingness to accept incoming connections and a queue limit for
+ *   incoming connections are specified with psock_listen(), and then the
+ *   connections are accepted with psock_accept().  For the case of local
+ *   unix sockets, psock_listen() calls this function.  The psock_listen()
+ *   call applies only to sockets of type SOCK_STREAM or SOCK_SEQPACKET.
+ *
+ * Parameters:
+ *   psock    Reference to an internal, boound socket structure.
+ *   backlog  The maximum length the queue of pending connections may grow.
+ *            If a connection request arrives with the queue full, the client
+ *            may receive an error with an indication of ECONNREFUSED or,
+ *            if the underlying protocol supports retransmission, the request
+ *            may be ignored so that retries succeed.
+ *
+ * Returned Value:
+ *   On success, zero is returned. On error, a negated errno value is
+ *   returned.  See list() for the set of appropriate error values.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_NET_LOCAL_STREAM
+int local_listen(FAR struct socket *psock, int backlog)
+{
+  return -EOPNOTSUPP;
+}
+#endif
 
 /****************************************************************************
  * Name: local_connect
@@ -475,6 +528,54 @@ static int local_connect(FAR struct socket *psock,
         return -EBADF;
     }
 }
+
+/****************************************************************************
+ * Name: pkt_accept
+ *
+ * Description:
+ *   The pkt_accept function is used with connection-based socket types
+ *   (SOCK_STREAM, SOCK_SEQPACKET and SOCK_RDM). It extracts the first
+ *   connection request on the queue of pending connections, creates a new
+ *   connected socket with mostly the same properties as 'sockfd', and
+ *   allocates a new socket descriptor for the socket, which is returned. The
+ *   newly created socket is no longer in the listening state. The original
+ *   socket 'sockfd' is unaffected by this call.  Per file descriptor flags
+ *   are not inherited across an pkt_accept.
+ *
+ *   The 'sockfd' argument is a socket descriptor that has been created with
+ *   socket(), bound to a local address with bind(), and is listening for
+ *   connections after a call to listen().
+ *
+ *   On return, the 'addr' structure is filled in with the address of the
+ *   connecting entity. The 'addrlen' argument initially contains the size
+ *   of the structure pointed to by 'addr'; on return it will contain the
+ *   actual length of the address returned.
+ *
+ *   If no pending connections are present on the queue, and the socket is
+ *   not marked as non-blocking, pkt_accept blocks the caller until a
+ *   connection is present. If the socket is marked non-blocking and no
+ *   pending connections are present on the queue, pkt_accept returns
+ *   EAGAIN.
+ *
+ * Parameters:
+ *   psock    Reference to the listening socket structure
+ *   addr     Receives the address of the connecting client
+ *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   newsock  Location to return the accepted socket information.
+ *
+ * Returned Value:
+ *   Returns 0 (OK) on success.  On failure, it returns a negated errno
+ *   value.  See accept() for a desrciption of the approriate error value.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_NET_LOCAL_STREAM
+static int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
+                        FAR socklen_t *addrlen, FAR struct socket *newsock)
+{
+  return -EAFNOSUPPORT;
+}
+#endif
 
 /****************************************************************************
  * Name: local_poll
