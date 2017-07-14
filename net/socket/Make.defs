@@ -69,6 +69,7 @@ endif
 
 ifeq ($(CONFIG_NET_TCP),y)
 SOCK_CSRCS += listen.c accept.c
+
 ifneq ($(CONFIG_NET_TCP_NO_STACK),y)
 SOCK_CSRCS += net_monitor.c
 endif

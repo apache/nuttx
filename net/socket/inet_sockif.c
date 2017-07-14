@@ -269,7 +269,7 @@ static int usrsock_socket_setup(int domain, int type, int protocol,
 static int inet_setup(FAR struct socket *psock, int protocol)
 {
 #ifdef CONFIG_NET_USRSOCK
-  /* Handle speical setup for user INET sockets */
+  /* Handle special setup for user INET sockets */
 
   ret = usrsock_socket_setup(domain, type, protocol, psock);
   if (ret < 0)

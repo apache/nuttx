@@ -108,6 +108,7 @@ typedef uint8_t sockcaps_t;
  */
 
 struct socket;  /* Forward reference */
+struct pollfd;  /* Forward reference */
 
 struct sock_intf_s
 {

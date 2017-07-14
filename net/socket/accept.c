@@ -49,10 +49,7 @@
 #include <nuttx/cancelpt.h>
 #include <arch/irq.h>
 
-#include "tcp/tcp.h"
-#include "local/local.h"
 #include "socket/socket.h"
-#include "usrsock/usrsock.h"
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/net_clone.c
  *
- *   Copyright (C) 2009, 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,12 +48,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/udp.h>
 
-#include "tcp/tcp.h"
-#include "udp/udp.h"
-#include "pkt/pkt.h"
-#include "local/local.h"
 #include "socket/socket.h"
-#include "usrsock/usrsock.h"
 
 /****************************************************************************
  * Public Functions

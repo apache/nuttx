@@ -47,11 +47,6 @@
 
 #include <nuttx/cancelpt.h>
 
-#include "pkt/pkt.h"
-#include "tcp/tcp.h"
-#include "udp/udp.h"
-#include "sixlowpan/sixlowpan.h"
-#include "local/local.h"
 #include "socket/socket.h"
 
 /****************************************************************************

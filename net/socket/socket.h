@@ -49,7 +49,6 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/net/net.h>
-#include "tcp/tcp.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -176,7 +175,7 @@ struct tcp_conn_s; /* Forward reference */
  *
  ****************************************************************************/
 
-int  sockfd_allocate(int minsd);
+int sockfd_allocate(int minsd);
 
 /****************************************************************************
  * Name: sock_release
