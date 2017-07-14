@@ -48,6 +48,9 @@
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 #include <nuttx/board.h>
+#include <nuttx/usb/usbdev.h>
+#include <nuttx/usb/cdcacm.h>
+#include <nuttx/usb/usbmsc.h>
 #include <nuttx/usb/composite.h>
 
 #include "stm32.h"
@@ -75,6 +78,117 @@
    /* Add configuration for new STM32 boards here */
 #  error "Unrecognized STM32 board"
 #endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_cdcclassobject
+ *
+ * Description:
+ *   If the CDC serial class driver is part of composite device, then
+ *   board-specific logic must provide board_cdcclassobject().  In the
+ *   simplest case, board_cdcclassobject() is simply a wrapper around
+ *   cdcacm_classobject() that provides the correct device minor number.
+ *
+ * Input Parameters:
+ *   classdev - The location to return the CDC serial class' device
+ *     instance.
+ *
+ * Returned Value:
+ *   0 on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int board_cdcclassobject(int minor,
+                                FAR struct usbdev_description_s *devdesc,
+                                FAR struct usbdevclass_driver_s **classdev)
+{
+  return cdcacm_classobject(0, devdesc, classdev);
+}
+
+/****************************************************************************
+ * Name: board_cdcuninitialize
+ *
+ * Description:
+ *   Un-initialize the USB serial class driver.  This is just an application-
+ *   specific wrapper around cdcadm_unitialize() that is called form the
+ *   composite device logic.
+ *
+ * Input Parameters:
+ *   classdev - The class driver instance previously given to the composite
+ *     driver by board_cdcclassobject().
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void board_cdcuninitialize(FAR struct usbdevclass_driver_s *classdev)
+{
+  cdcacm_initialize(classdev);
+}
+
+/************************************************************************************
+ * Name: board_mscclassobject
+ *
+ * Description:
+ *   If the mass storage class driver is part of composite device, then
+ *   its instantiation and configuration is a multi-step, board-specific,
+ *   process (See comments for usbmsc_configure below).  In this case,
+ *   board-specific logic must provide board_mscclassobject().
+ *
+ *   board_mscclassobject() is called from the composite driver.  It must
+ *   encapsulate the instantiation and configuration of the mass storage
+ *   class and the return the mass storage device's class driver instance
+ *   to the composite dirver.
+ *
+ * Input Parameters:
+ *   classdev - The location to return the mass storage class' device
+ *     instance.
+ *
+ * Returned Value:
+ *   0 on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+static int board_mscclassobject(int minor, FAR struct usbdev_description_s *devdesc,
+                                FAR struct usbdevclass_driver_s **classdev)
+{
+  FAR void *handle;
+  int ret;
+
+  ret = usbmsc_configure(1, &handle);
+  if (ret >= 0)
+    {
+      retr = usbmsc_classobject(handle, devdesc, classdev);
+    }
+
+  return ret;
+}
+
+ /************************************************************************************
+ * Name: board_mscuninitialize
+ *
+ * Description:
+ *   Un-initialize the USB storage class driver.  This is just an application-
+ *   specific wrapper aboutn usbmsc_unitialize() that is called form the composite
+ *   device logic.
+ *
+ * Input Parameters:
+ *   classdev - The class driver instrance previously give to the composite
+ *     driver by board_mscclassobject().
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev)
+{
+  usbmsc_uninitialize(classdev);
+}
 
 /****************************************************************************
  * Public Functions
@@ -140,6 +254,104 @@ int board_composite_initialize(int port)
 #endif /* CONFIG_NSH_BUILTIN_APPS */
 
    return OK;
+}
+
+/****************************************************************************
+ * Name:  board_composite_connect
+ *
+ * Description:
+ *   Connect the USB composite device on the specified USB device port using
+ *   the specified configuration.  The interpretation of the configid is
+ *   board specific.
+ *
+ * Input Parameters:
+ *   port     - The USB device port.
+ *   configid - The USB composite configuration
+ *
+ * Returned Value:
+ *   A non-NULL handle value is returned on success.  NULL is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+FAR void *board_composite_connect(int port, int configid)
+{
+  /* Here we are composing the configuration of the usb composite device.
+   *
+   * The standard is to use one CDC/ACM and one USB mass storage device.
+   */
+
+  struct composite_devdesc_s dev[2];
+  int ifnobase = 0;
+  int strbase  = COMPOSITE_NSTRIDS;
+
+  /* Configure the CDC/ACM device */
+
+  /* Ask the cdcacm driver to fill in the constants we didn't
+   * know here.
+   */
+
+  cdcacm_get_composite_devdesc(&dev[0]);
+
+  /* Overwrite and correct some values... */
+  /* The callback functions for the CDC/ACM class */
+
+  dev[0].classobject  = board_cdcclassobject;
+  dev[0].uninitialize = board_cdcuninitialize;
+
+  /* Interfaces */
+
+  dev[0].devdesc.ifnobase = ifnobase;             /* Offset to Interface-IDs */
+  dev[0].minor = CONFIG_SYSTEM_COMPOSITE_TTYUSB;  /* The minor interface number */
+
+  /* Strings */
+
+  dev[0].devdesc.strbase = strbase;               /* Offset to String Numbers */
+
+  /* Endpoints */
+
+  dev[0].devdesc.epno[CDCACM_EP_INTIN_IDX]   = 1;
+  dev[0].devdesc.epno[CDCACM_EP_BULKIN_IDX]  = 2;
+  dev[0].devdesc.epno[CDCACM_EP_BULKOUT_IDX] = 3;
+
+  /* Count up the base numbers */
+
+  ifnobase += dev[0].devdesc.ninterfaces;
+  strbase  += dev[0].devdesc.nstrings;
+
+  /* Configure the mass storage device device */
+  /* Ask the usbmsc driver to fill in the constants we didn't
+   * know here.
+   */
+
+  usbmsc_get_composite_devdesc(&dev[1]);
+
+  /* Overwrite and correct some values... */
+  /* The callback functions for the USBMSC class */
+
+  dev[1].classobject  = board_mscclassobject;
+  dev[1].uninitialize = board_mscuninitialize;
+
+  /* Interfaces */
+
+  dev[1].devdesc.ifnobase = ifnobase;               /* Offset to Interface-IDs */
+  dev[1].minor = CONFIG_SYSTEM_COMPOSITE_DEVMINOR1; /* The minor interface number */
+
+  /* Strings */
+
+  dev[1].devdesc.strbase = strbase;   /* Offset to String Numbers */
+
+  /* Endpoints */
+
+  dev[1].devdesc.epno[USBMSC_EP_BULKIN_IDX]  = 5;
+  dev[1].devdesc.epno[USBMSC_EP_BULKOUT_IDX] = 4;
+
+  /* Count up the base numbers */
+
+  ifnobase += dev[1].devdesc.ninterfaces;
+  strbase  += dev[1].devdesc.nstrings;
+
+  return composite_initialize(2, dev);
 }
 
 #endif /* CONFIG_STM32_SDIO && CONFIG_USBDEV_COMPOSITE */
