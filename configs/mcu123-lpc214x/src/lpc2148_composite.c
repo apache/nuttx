@@ -118,7 +118,7 @@ static int board_cdcclassobject(int minor,
 
 static void board_cdcuninitialize(FAR struct usbdevclass_driver_s *classdev)
 {
-  cdcacm_initialize(classdev);
+  cdcacm_uninitialize(classdev);
 }
 
 /************************************************************************************
