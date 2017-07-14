@@ -75,7 +75,7 @@ static int board_cdcclassobject(int minor,
                                 FAR struct usbdev_description_s *devdesc,
                                 FAR struct usbdevclass_driver_s **classdev)
 {
-  return cdcacm_classobject(0, devdesc, classdev);
+  return cdcacm_classobject(minor, devdesc, classdev);
 }
 
 /****************************************************************************
