@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/stm32f746g-disco/src/stm32_ostest.c
+ * configs/stm32f769i-disco/src/stm32_ostest.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,7 +49,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "stm32f746g-disco.h"
+#include "stm32f769i-disco.h"
 
 /************************************************************************************
  * Pre-processor Definitions

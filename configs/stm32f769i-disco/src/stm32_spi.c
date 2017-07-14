@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/stm32f746g-disco/src/stm32_spi.c
+ * configs/stm32f769i-disco/src/stm32_spi.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +51,7 @@
 #include "chip.h"
 #include "stm32_spi.h"
 
-#include "stm32f746g-disco.h"
+#include "stm32f769i-disco.h"
 
 #if defined(CONFIG_STM32F7_SPI1) || defined(CONFIG_STM32F7_SPI2) || \
     defined(CONFIG_STM32F7_SPI3) || defined(CONFIG_STM32F7_SPI4) || \
@@ -65,7 +65,7 @@
  * Name: stm32_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the stm32f746g-disco board.
+ *   Called to configure SPI chip select GPIO pins for the stm32f769i-disco board.
  *
  ************************************************************************************/
 

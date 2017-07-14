@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/stm32f746g-disco/include/board.h
+ * configs/stm32f769i-disco/include/board.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIG_STM32F746G_DISCO_INCLUDE_BOARD_H
-#define __CONFIG_STM32F746G_DISCO_INCLUDE_BOARD_H
+#ifndef __CONFIG_STM32F769I_DISCO_INCLUDE_BOARD_H
+#define __CONFIG_STM32F769I_DISCO_INCLUDE_BOARD_H
 
 /************************************************************************************
  * Included Files
@@ -59,8 +59,8 @@
 /* The STM32F7 Discovery board provides the following clock sources:
  *
  *   X1:  24 MHz oscillator for USB OTG HS PHY and camera module (daughter board)
- *   X2:  25 MHz oscillator for STM32F746NGH6 microcontroller and Ethernet PHY.
- *   X3:  32.768 KHz crystal for STM32F746NGH6 embedded RTC
+ *   X2:  25 MHz oscillator for STM32F769NIH6 microcontroller and Ethernet PHY.
+ *   X3:  32.768 KHz crystal for STM32F769NIH6 embedded RTC
  *
  * So we have these clock source available within the STM32
  *
@@ -259,7 +259,7 @@
 #define BOARD_FLASH_WAITSTATES 7
 
 /* LED definitions ******************************************************************/
-/* The STM32F746G-DISCO board has numerous LEDs but only one, LD1 located near the
+/* The STM32F769I-DISCO board has numerous LEDs but only one, LD1 located near the
  * reset button, that can be controlled by software (LD2 is a power indicator, LD3-6
  * indicate USB status, LD7 is controlled by the ST-Link).
  *
@@ -400,4 +400,4 @@ void stm32_boardinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __CONFIG_STM32F746G_DISCO_INCLUDE_BOARD_H */
+#endif  /* __CONFIG_STM32F769I_DISCO_INCLUDE_BOARD_H */

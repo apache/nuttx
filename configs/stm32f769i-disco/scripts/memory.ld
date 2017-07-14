@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f746g-disco/scripts/memory.ld
+ * configs/stm32f769i-disco/scripts/memory.ld
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,14 +33,14 @@
  *
  ****************************************************************************/
 
-/* The STM32F746NGH6 has 1024Kb of main FLASH memory.  This FLASH memory can
+/* The STM32F769NIH6 has 1024Kb of main FLASH memory.  This FLASH memory can
  * be accessed from either the AXIM interface at address 0x0800:0000 or from
  * the ITCM interface at address 0x0020:0000.
  *
  * Additional information, including the option bytes, is available at at
  * FLASH at address 0x1ff0:0000 (AXIM) or 0x0010:0000 (ITCM).
  *
- * In the STM32F746NGH6, two different boot spaces can be selected through
+ * In the STM32F769NIH6, two different boot spaces can be selected through
  * the BOOT pin and the boot base address programmed in the BOOT_ADD0 and
  * BOOT_ADD1 option bytes:
  *
@@ -49,11 +49,11 @@
  *   2) BOOT=1: Boot address defined by user option byte BOOT_ADD1[15:0].
  *      ST programmed value: System bootloader at 0x0010:0000
  *
- * NuttX does not modify these option byes.  On the unmodified STM32F746G
+ * NuttX does not modify these option byes.  On the unmodified STM32F769I
  * DISCO board, the BOOT0 pin is at ground so by default, the STM32 will boot
  * to address 0x0020:0000 in ITCM FLASH.
  *
- * The STM32F746NGH6 also has 320Kb of data SRAM (in addition to ITCM SRAM).
+ * The STM32F769NIH6 also has 320Kb of data SRAM (in addition to ITCM SRAM).
  * SRAM is split up into three blocks:
  *
  *   1)  64Kb of DTCM SRM beginning at address 0x2000:0000
@@ -67,7 +67,7 @@
  * For MPU support, the kernel-mode NuttX section is assumed to be 128Kb of
  * FLASH and 4Kb of SRAM.  That is an excessive amount for the kernel which
  * should fit into 64KB and, of course, can be optimized as needed (See
- * also configs/stm32f746g-disco/scripts/kernel-space.ld).  Allowing the
+ * also configs/stm32f769i-disco/scripts/kernel-space.ld).  Allowing the
  * additional does permit addition debug instrumentation to be added to the
  * kernel space without overflowing the partition.
  *

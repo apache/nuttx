@@ -1,5 +1,5 @@
 ############################################################################
-# configs/stm32f746g-disco/kernel/Makefile
+# configs/stm32f769i-disco/kernel/Makefile
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

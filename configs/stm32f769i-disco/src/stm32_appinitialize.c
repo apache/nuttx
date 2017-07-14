@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32f746g-disco/src/stm32_appinitilaize.c
+ * config/stm32f769i-disco/src/stm32_appinitilaize.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 
 #include "stm32_ccm.h"
-#include "stm32f746g-disco.h"
+#include "stm32f769i-disco.h"
 
 /****************************************************************************
  * Public Functions

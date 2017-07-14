@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f746g-disco/kernel/stm32_userspace.c
+ * configs/stm32f769i-disco/kernel/stm32_userspace.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

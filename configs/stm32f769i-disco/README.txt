@@ -2,8 +2,8 @@ README
 ======
 
 This README discusses issues unique to NuttX configurations for the
-STMicro STM32F746G-DISCO development board featuring the STM32F746NGH6
-MCU. The STM32F746NGH6  is a 216MHz Cortex-M7 operation with 1024Kb Flash
+STMicro STM32F769I-DISCO development board featuring the STM32F769NIH6
+MCU. The STM32F769NIH6  is a 216MHz Cortex-M7 operation with 1024Kb Flash
 memory and 300Kb SRAM. The board features:
 
   - On-board ST-LINK/V2 for programming and debugging,
@@ -25,7 +25,7 @@ memory and 300Kb SRAM. The board features:
   - Ethernet connector compliant with IEEE-802.3-2002
 
 Refer to the http://www.st.com website for further information about this
-board (search keyword: stm32f746g-disco)
+board (search keyword: stm32f769i-disco)
 
 Contents
 ========
@@ -36,7 +36,7 @@ Contents
   - Serial Console
   - Porting STM32 F4 Drivers
   - FPU
-  - STM32F746G-DISCO-specific Configuration Options
+  - STM32F769I-DISCO-specific Configuration Options
   - Configurations
 
 STATUS
@@ -52,17 +52,17 @@ STATUS
 Development Environment
 =======================
 
-  The Development environments for the STM32F746G-DISCO board are identical
+  The Development environments for the STM32F769I-DISCO board are identical
   to the environments for other STM32F boards.  For full details on the
   environment options and setup, see the README.txt file in the
-  config/stm32f746g-disco directory.
+  config/stm32f769i-disco directory.
 
 LEDs and Buttons
 ================
 
   LEDs
   ----
-  The STM32F746G-DISCO board has numerous LEDs but only one, LD1 located
+  The STM32F769I-DISCO board has numerous LEDs but only one, LD1 located
   near the reset button, that can be controlled by software (LD2 is a power
   indicator, LD3-6 indicate USB status, LD7 is controlled by the ST-Link).
 
@@ -112,7 +112,7 @@ Serial Console
 Porting STM32 F4 Drivers
 ========================
 
-  The STM32F746 is very similar to the STM32 F429 and many of the drivers
+  The STM32F769 is very similar to the STM32 F429 and many of the drivers
   in the stm32/ directory could be ported here:  ADC, BBSRAM, CAN, DAC,
   DMA2D, FLASH, I2C, IWDG, LSE, LSI, LTDC, OTGFS, OTGHS, PM, Quadrature
   Encoder, RNG, RTCC, SDMMC (was SDIO), Timer/counters, and WWDG.
@@ -178,7 +178,7 @@ There are two version of the FPU support built into the STM32 port.
    +ENTRY(__start)         /* Treat __start as the anchor for dead code stripping */
    +EXTERN(_vectors)       /* Force the vectors to be included in the output */
 
-STM32F746G-DISCO-specific Configuration Options
+STM32F769I-DISCO-specific Configuration Options
 ===============================================
 
     CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
@@ -201,7 +201,7 @@ STM32F746G-DISCO-specific Configuration Options
     CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
        chip:
 
-       CONFIG_ARCH_CHIP_STM32F746=y
+       CONFIG_ARCH_CHIP_STM32F769=y
 
     CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG - Enables special STM32 clock
        configuration features.
@@ -211,11 +211,11 @@ STM32F746G-DISCO-specific Configuration Options
     CONFIG_ARCH_BOARD - Identifies the configs/ subdirectory and,
        hence, the board that supports the particular chip or SoC.
 
-       CONFIG_ARCH_BOARD=stm32f746g-disco (for the STM32F746G-DISCO development board)
+       CONFIG_ARCH_BOARD=stm32f769i-disco (for the STM32F769I-DISCO development board)
 
     CONFIG_ARCH_BOARD_name - For use in C code
 
-       CONFIG_ARCH_BOARD_STM32F746G_DISCO=y
+       CONFIG_ARCH_BOARD_STM32F769I_DISCO=y
 
     CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
        of delay loops
@@ -249,7 +249,7 @@ STM32F746G-DISCO-specific Configuration Options
 
     CONFIG_HEAP2_SIZE - The size of the SRAM in the FSMC address space (decimal)
 
-    CONFIG_ARCH_FPU - The STM32F746G-DISCO supports a floating point unit (FPU)
+    CONFIG_ARCH_FPU - The STM32F769I-DISCO supports a floating point unit (FPU)
 
        CONFIG_ARCH_FPU=y
 
@@ -379,7 +379,7 @@ STM32F746G-DISCO-specific Configuration Options
   each of the four channels with different duty cycles.  That capability is
   not supported by this driver:  Only one output channel per timer.
 
-  STM32F746G-DISCO specific device driver settings
+  STM32F769I-DISCO specific device driver settings
 
     CONFIG_U[S]ARTn_SERIAL_CONSOLE - selects the USARTn (n=1,2,3) or UART
            m (m=4,5) for the console and ttys0 (default is the USART1).
@@ -392,7 +392,7 @@ STM32F746G-DISCO-specific Configuration Options
     CONFIG_U[S]ARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
     CONFIG_U[S]ARTn_2STOP - Two stop bits
 
-  STM32F746G-DISCO CAN Configuration
+  STM32F769I-DISCO CAN Configuration
 
     CONFIG_CAN - Enables CAN support (one or both of CONFIG_STM32F7_CAN1 or
       CONFIG_STM32F7_CAN2 must also be defined)
@@ -411,7 +411,7 @@ STM32F746G-DISCO-specific Configuration Options
     CONFIG_STM32_CAN_REGDEBUG - If CONFIG_DEBUG_FEATURES is set, this will generate an
       dump of all CAN registers.
 
-  STM32F746G-DISCO SPI Configuration
+  STM32F769I-DISCO SPI Configuration
 
     CONFIG_STM32F7_SPI_INTERRUPTS - Select to enable interrupt driven SPI
       support. Non-interrupt-driven, poll-waiting is recommended if the
@@ -419,7 +419,7 @@ STM32F746G-DISCO-specific Configuration Options
     CONFIG_STM32F7_SPI_DMA - Use DMA to improve SPI transfer performance.
       Cannot be used with CONFIG_STM32F7_SPI_INTERRUPT.
 
-  STM32F746G-DISCO DMA Configuration
+  STM32F769I-DISCO DMA Configuration
 
     CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32F7_SDIO
       and CONFIG_STM32F7_DMA2.
@@ -459,11 +459,11 @@ Configurations
 
   Common Configuration Information
   --------------------------------
-  Each STM32F746G-DISCO configuration is maintained in a sub-directory and
+  Each STM32F769I-DISCO configuration is maintained in a sub-directory and
   can be selected as follow:
 
     cd tools
-    ./configure.sh stm32f746g-disco/<subdir>
+    ./configure.sh stm32f769i-disco/<subdir>
     cd -
 
   Where <subdir> is one of the sub-directories listed below.

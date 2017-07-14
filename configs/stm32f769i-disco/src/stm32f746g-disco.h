@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * configs/stm32f746g-disco/src/stm32f746g-disco.h
+ * configs/stm32f769i-disco/src/stm32f769i-disco.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __CONFIGS_STM32F746G_DISCO_SRC_STM32F746G_DISCO__H
-#define __CONFIGS_STM32F746G_DISCO_SRC_STM32F746G_DISCO__H
+#ifndef __CONFIGS_STM32F769I_DISCO_SRC_STM32F769I_DISCO__H
+#define __CONFIGS_STM32F769I_DISCO_SRC_STM32F769I_DISCO__H
 
 /****************************************************************************************************
  * Included Files
@@ -58,7 +58,7 @@
 #endif
 
 /* STM32F736G Discovery GPIOs ***********************************************************************/
-/* The STM32F746G-DISCO board has numerous LEDs but only one, LD1 located near the reset button, that
+/* The STM32F769I-DISCO board has numerous LEDs but only one, LD1 located near the reset button, that
  * can be controlled by software (LD2 is a power indicator, LD3-6 indicate USB status, LD7 is
  * controlled by the ST-Link).
  *
@@ -104,7 +104,7 @@
  * Name: stm32_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the stm32f746g-disco board.
+ *   Called to configure SPI chip select GPIO pins for the stm32f769i-disco board.
  *
  ****************************************************************************************************/
 
@@ -123,5 +123,5 @@ void arch_sporadic_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_STM32F746G_DISCO_SRC_STM32F746G_DISCO_H */
+#endif /* __CONFIGS_STM32F769I_DISCO_SRC_STM32F769I_DISCO_H */
 

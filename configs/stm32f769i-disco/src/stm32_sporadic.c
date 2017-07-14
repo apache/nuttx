@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f746g-disco/src/stm32_sporadic.c
+ * configs/stm32f769i-disco/src/stm32_sporadic.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,7 +44,7 @@
 #include <nuttx/sched.h>
 
 #include "stm32_gpio.h"
-#include "stm32f746g-disco.h"
+#include "stm32f769i-disco.h"
 
 #ifdef CONFIG_SPORADIC_INSTRUMENTATION
 

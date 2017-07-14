@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f746g-disco/src/stm32_userleds.c
+ * configs/stm32f769i-disco/src/stm32_userleds.c
  *
  *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,7 +43,7 @@
 #include <debug.h>
 
 #include "stm32_gpio.h"
-#include "stm32f746g-disco.h"
+#include "stm32f769i-disco.h"
 
 #ifndef CONFIG_ARCH_LEDS
 

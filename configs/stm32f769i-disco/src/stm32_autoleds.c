@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f746g-disco/src/stm32_autoleds.c
+ * configs/stm32f769i-disco/src/stm32_autoleds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,7 +45,7 @@
 #include <nuttx/board.h>
 
 #include "stm32_gpio.h"
-#include "stm32f746g-disco.h"
+#include "stm32f769i-disco.h"
 
 #ifdef CONFIG_ARCH_LEDS
 
