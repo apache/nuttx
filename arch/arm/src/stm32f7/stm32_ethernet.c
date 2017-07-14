@@ -82,6 +82,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Memory synchronization */
+
+#define MEMORY_SYNC() do { ARM_DSB(); ARM_ISB(); } while (0)
+
 /* Configuration ************************************************************/
 /* See configs/stm3240g-eval/README.txt for an explanation of the configuration
  * settings.
@@ -1219,6 +1224,8 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
 
   /* Check if the TX Buffer unavailable flag is set */
 
+  MEMORY_SYNC();
+
   if ((stm32_getreg(STM32_ETH_DMASR) & ETH_DMAINT_TBUI) != 0)
     {
       /* Clear TX Buffer unavailable flag */
@@ -2210,6 +2217,8 @@ static int stm32_interrupt(int irq, void *context, FAR void *arg)
            wd_cancel(priv->txtimeout);
         }
 
+      DEBUGASSERT(work_available(&priv->irqwork));
+
       /* Schedule to perform the interrupt processing on the worker thread. */
 
       work_queue(ETHWORK, &priv->irqwork, stm32_interrupt_work, priv, 0);
@@ -2286,6 +2295,8 @@ static void stm32_txtimeout_expiry(int argc, uint32_t arg, ...)
   up_disable_irq(STM32_IRQ_ETH);
 
   /* Schedule to perform the TX timeout processing on the worker thread. */
+
+  DEBUGASSERT(work_available(&priv->irqwork));
 
   work_queue(ETHWORK, &priv->irqwork, stm32_txtimeout_work, priv, 0);
 }
@@ -2386,7 +2397,14 @@ static void stm32_poll_expiry(int argc, uint32_t arg, ...)
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->pollwork, stm32_poll_work, priv, 0);
+  if (work_available(&priv->pollwork))
+    {
+      work_queue(ETHWORK, &priv->pollwork, stm32_poll_work, priv, 0);
+    }
+  else
+    {
+      (void)wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1, priv);
+    }
 }
 
 /****************************************************************************
