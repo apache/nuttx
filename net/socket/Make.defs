@@ -47,12 +47,31 @@ ifeq ($(CONFIG_NET_IPv4),y)
 SOCK_CSRCS += inet_sockif.c inet_recvfrom.c inet_connect.c inet_close.c
 else ifeq ($(CONFIG_NET_IPv6),y)
 SOCK_CSRCS += inet_sockif.c inet_recvfrom.c inet_connect.c inet_close.c
+else ifeq ($(CONFIG_NET_USRSOCK),y)
+SOCK_CSRCS += inet_sockif.c inet_recvfrom.c inet_connect.c inet_close.c
+endif
+
+ifeq ($(CONFIG_NET_IPv4),y)
+SOCK_CSRCS += ipv4_getsockname.c
+endif
+
+ifeq ($(CONFIG_NET_IPv6),y)
+SOCK_CSRCS += ipv6_getsockname.c
+endif
+
+ifeq ($(CONFIG_NET_SENDFILE),y)
+ifeq ($(CONFIG_NET_TCP),y)
+ifneq ($(CONFIG_NET_TCP_NO_STACK),y)
+SOCK_CSRCS += inet_sendfile.c
+endif
+endif
 endif
 
 # TCP/IP support
 
 ifeq ($(CONFIG_NET_TCP),y)
 SOCK_CSRCS += listen.c accept.c
+
 ifneq ($(CONFIG_NET_TCP_NO_STACK),y)
 SOCK_CSRCS += net_monitor.c
 endif

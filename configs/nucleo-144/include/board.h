@@ -449,7 +449,7 @@
  *   -------- ------------ -------------
  *   PG11     RMII_TX_EN   TXEN
  *   PG13     RMII_TXD0    TXD0
- *   PG14     RMII_TXD1    TXD1
+ *   PB13     RMII_TXD1    TXD1
  *   PC4      RMII_RXD0    RXD0/MODE0
  *   PC5      RMII_RXD1    RXD1/MODE1
  *   PG2      RMII_RXER    RXER/PHYAD0 -- Not used
@@ -466,7 +466,7 @@
 
 #define GPIO_ETH_RMII_TX_EN   GPIO_ETH_RMII_TX_EN_2
 #define GPIO_ETH_RMII_TXD0    GPIO_ETH_RMII_TXD0_2
-#define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_2
+#define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_1
 
 /************************************************************************************
  * Public Data

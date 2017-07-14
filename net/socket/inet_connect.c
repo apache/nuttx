@@ -519,7 +519,7 @@ int inet_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
   switch (psock->s_type)
     {
-#ifdef CONFIG_NET_TCP
+#if defined(CONFIG_NET_TCP) && defined(NET_TCP_HAVE_STACK)
       case SOCK_STREAM:
         {
           /* Verify that the socket is not already connected */
@@ -535,7 +535,7 @@ int inet_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
         }
 #endif /* CONFIG_NET_TCP */
 
-#ifdef CONFIG_NET_UDP
+#if defined(CONFIG_NET_UDP) && defined(NET_UDP_HAVE_STACK)
       case SOCK_DGRAM:
         {
           int ret = udp_connect(psock->s_conn, addr);

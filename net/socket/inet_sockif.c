@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -52,7 +53,7 @@
 #include "usrsock/usrsock.h"
 #include "socket/socket.h"
 
-#if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
+#ifdef HAVE_INET_SOCKETS
 
 /****************************************************************************
  * Private Function Prototypes
@@ -63,10 +64,16 @@ static sockcaps_t inet_sockcaps(FAR struct socket *psock);
 static void       inet_addref(FAR struct socket *psock);
 static int        inet_bind(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
+static int        inet_getsockname(FAR struct socket *psock,
+                    FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 static int        inet_listen(FAR struct socket *psock, int backlog);
 static int        inet_accept(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen,
                     FAR struct socket *newsock);
+#ifndef CONFIG_DISABLE_POLL
+static int        inet_poll(FAR struct socket *psock,
+                    FAR struct pollfd *fds, bool setup);
+#endif
 static ssize_t    inet_send(FAR struct socket *psock, FAR const void *buf,
                     size_t len, int flags);
 static ssize_t    inet_sendto(FAR struct socket *psock, FAR const void *buf,
@@ -79,17 +86,28 @@ static ssize_t    inet_sendto(FAR struct socket *psock, FAR const void *buf,
 
 const struct sock_intf_s g_inet_sockif =
 {
-  inet_setup,    /* si_setup */
-  inet_sockcaps, /* si_sockcaps */
-  inet_addref,   /* si_addref */
-  inet_bind,     /* si_bind */
-  inet_listen,   /* si_listen */
-  inet_connect,  /* si_connect */
-  inet_accept,   /* si_accept */
-  inet_send,     /* si_send */
-  inet_sendto,   /* si_sendto */
-  inet_recvfrom, /* si_recvfrom */
-  inet_close     /* si_close */
+  inet_setup,       /* si_setup */
+  inet_sockcaps,    /* si_sockcaps */
+  inet_addref,      /* si_addref */
+  inet_bind,        /* si_bind */
+  inet_getsockname, /* si_getsockname */
+  inet_listen,      /* si_listen */
+  inet_connect,     /* si_connect */
+  inet_accept,      /* si_accept */
+#ifndef CONFIG_DISABLE_POLL
+  inet_poll,        /* si_poll */
+#endif
+  inet_send,        /* si_send */
+  inet_sendto,      /* si_sendto */
+#ifdef CONFIG_NET_SENDFILE
+#if defined(CONFIG_NET_TCP) && defined(NET_TCP_HAVE_STACK)
+  inet_sendfile,    /* si_sendfile */
+#else
+  NULL,             /* si_sendfile */
+#endif
+#endif
+  inet_recvfrom,    /* si_recvfrom */
+  inet_close        /* si_close */
 };
 
 /****************************************************************************
@@ -251,18 +269,20 @@ static int usrsock_socket_setup(int domain, int type, int protocol,
 static int inet_setup(FAR struct socket *psock, int protocol)
 {
 #ifdef CONFIG_NET_USRSOCK
-  /* Handle speical setup for user INET sockets */
+  int ret;
 
-  ret = usrsock_socket_setup(domain, type, protocol, psock);
+  /* Handle special setup for user INET sockets */
+
+  ret = usrsock_socket_setup(psock->s_domain, psock->s_type, protocol, psock);
   if (ret < 0)
     {
-      if (ret = -ENETDOWN)
+      if (ret == -ENETDOWN)
         {
           /* -ENETDOWN means that usrsock daemon is not running.  Attempt to
            * open socket with kernel networking stack.
            */
 
-          warn("WARNING: usrsock daemon is not running\n");
+          nwarn("WARNING: usrsock daemon is not running\n");
         }
       else
         {
@@ -293,8 +313,8 @@ static int inet_setup(FAR struct socket *psock, int protocol)
 
         return inet_tcp_alloc(psock);
 #else
-        warning("WARNING:  SOCK_STREAM disabled\n");
-        return = -ENETDOWN;
+        nwarn("WARNING:  SOCK_STREAM disabled\n");
+        return -ENETDOWN;
 #endif
 #endif /* CONFIG_NET_TCP */
 
@@ -311,7 +331,7 @@ static int inet_setup(FAR struct socket *psock, int protocol)
 
         return inet_udp_alloc(psock);
 #else
-        warning("WARNING:  SOCK_DGRAM disabled\n");
+        nwarn("WARNING:  SOCK_DGRAM disabled\n");
         return -ENETDOWN;
 #endif
 #endif /* CONFIG_NET_UDP */
@@ -542,6 +562,72 @@ static int inet_bind(FAR struct socket *psock,
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: inet_getsockname
+ *
+ * Description:
+ *   The inet_getsockname() function retrieves the locally-bound name of
+ *   the specified INET socket, stores this address in the sockaddr
+ *   structure pointed to by the 'addr' argument, and stores the length of
+ *   this address in the object pointed to by the 'addrlen' argument.
+ *
+ *   If the actual length of the address is greater than the length of the
+ *   supplied sockaddr structure, the stored address will be truncated.
+ *
+ *   If the socket has not been bound to a local name, the value stored in
+ *   the object pointed to by address is unspecified.
+ *
+ * Parameters:
+ *   psock    Socket structure of the socket to be queried
+ *   addr     sockaddr structure to receive data [out]
+ *   addrlen  Length of sockaddr structure [in/out]
+ *
+ * Returned Value:
+ *   On success, 0 is returned, the 'addr' argument points to the address
+ *   of the socket, and the 'addrlen' argument points to the length of the
+ *   address.  Otherwise, a negated errno value is returned.  See
+ *   getsockname() for the list of appropriate error numbers.
+ *
+ ****************************************************************************/
+
+static int inet_getsockname(FAR struct socket *psock,
+                            FAR struct sockaddr *addr,
+                            FAR socklen_t *addrlen)
+{
+#ifdef CONFIG_NET_USRSOCK
+  if (psock->s_type == SOCK_USRSOCK_TYPE)
+    {
+      FAR struct usrsock_conn_s *conn = psock->s_conn;
+
+      DEBUGASSERT(conn != NULL);
+
+      /* Handle usrsock getsockname */
+
+      return usrsock_getsockname(conn, addr, addrlen);
+    }
+#endif
+
+  /* Handle by address domain */
+
+  switch (psock->s_domain)
+    {
+#ifdef CONFIG_NET_IPv4
+    case PF_INET:
+      return ipv4_getsockname(psock, addr, addrlen);
+      break;
+#endif
+
+#ifdef CONFIG_NET_IPv6
+    case PF_INET6:
+      return ipv6_getsockname(psock, addr, addrlen);
+      break;
+#endif
+
+    default:
+      return -EAFNOSUPPORT;
+    }
 }
 
 /****************************************************************************
@@ -794,6 +880,141 @@ errout_with_lock:
 }
 
 /****************************************************************************
+ * Name: inet_pollsetup
+ *
+ * Description:
+ *   Setup to monitor events on one socket
+ *
+ * Input Parameters:
+ *   psock - The socket of interest
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+#if defined(HAVE_TCP_POLL) || defined(HAVE_UDP_POLL)
+static inline int inet_pollsetup(FAR struct socket *psock,
+                                 FAR struct pollfd *fds)
+{
+#ifdef HAVE_TCP_POLL
+  if (psock->s_type == SOCK_STREAM)
+    {
+      return tcp_pollsetup(psock, fds);
+    }
+  else
+#endif /* HAVE_TCP_POLL */
+#ifdef HAVE_UDP_POLL
+  if (psock->s_type != SOCK_STREAM)
+    {
+      return udp_pollsetup(psock, fds);
+    }
+  else
+#endif /* HAVE_UDP_POLL */
+    {
+      return -ENOSYS;
+    }
+}
+#endif /* HAVE_TCP_POLL || HAVE_UDP_POLL */
+
+/****************************************************************************
+ * Name: inet_pollteardown
+ *
+ * Description:
+ *   Teardown monitoring of events on an socket
+ *
+ * Input Parameters:
+ *   psock - The TCP/IP socket of interest
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+#if defined(HAVE_TCP_POLL) || defined(HAVE_UDP_POLL)
+static inline int inet_pollteardown(FAR struct socket *psock,
+                                    FAR struct pollfd *fds)
+{
+#ifdef HAVE_TCP_POLL
+  if (psock->s_type == SOCK_STREAM)
+    {
+      return tcp_pollteardown(psock, fds);
+    }
+  else
+#endif /* HAVE_TCP_POLL */
+#ifdef HAVE_UDP_POLL
+  if (psock->s_type == SOCK_DGRAM)
+    {
+      return udp_pollteardown(psock, fds);
+    }
+  else
+#endif /* HAVE_UDP_POLL */
+    {
+      return -ENOSYS;
+    }
+}
+#endif /* HAVE_TCP_POLL || HAVE_UDP_POLL */
+
+/****************************************************************************
+ * Name: inet_poll
+ *
+ * Description:
+ *   The standard poll() operation redirects operations on socket descriptors
+ *   to net_poll which, indiectly, calls to function.
+ *
+ * Input Parameters:
+ *   psock - An instance of the internal socket structure.
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *   setup - true: Setup up the poll; false: Teardown the poll
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+static int inet_poll(FAR struct socket *psock, FAR struct pollfd *fds,
+                     bool setup)
+{
+#ifdef CONFIG_NET_USRSOCK
+  if (psock->s_type == SOCK_USRSOCK_TYPE)
+    {
+      /* Perform usrsock setup/teardown. */
+
+      return usrsock_poll(psock, fds, setup);
+    }
+  else
+#endif
+#if defined(HAVE_TCP_POLL) || defined(HAVE_UDP_POLL)
+
+  /* Check if we are setting up or tearing down the poll */
+
+  if (setup)
+    {
+      /* Perform the TCP/IP poll() setup */
+
+      return inet_pollsetup(psock, fds);
+    }
+  else
+    {
+      /* Perform the TCP/IP poll() teardown */
+
+      return inet_pollteardown(psock, fds);
+    }
+#else
+    {
+      return -ENOSYS;
+    }
+#endif /* HAVE_TCP_POLL || !HAVE_UDP_POLL */
+}
+#endif /* !CONFIG_DISABLE_POLL */
+
+/****************************************************************************
  * Name: inet_send
  *
  * Description:
@@ -990,11 +1211,11 @@ static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
 #elif defined(NET_UDP_HAVE_STACK)
       nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
 #else
-      nwarn("WARNING: UDP not available in this configuiration\n")
+      nwarn("WARNING: UDP not available in this configuiration\n");
       nsent = -ENOSYS;
 #endif /* CONFIG_NET_6LOWPAN */
 #else
-      nwarn("WARNING: UDP not enabled in this configuiration\n")
+      nwarn("WARNING: UDP not enabled in this configuiration\n");
       nsent = -EISCONN;
 #endif /* CONFIG_NET_UDP */
     }
@@ -1019,4 +1240,4 @@ static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
  *
  ****************************************************************************/
 
-#endif /* CONFIG_NET_IPv4 || CONFIG_NET_IPv6 */
+#endif /* HAVE_INET_SOCKETS */

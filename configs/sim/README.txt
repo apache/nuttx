@@ -909,6 +909,9 @@ udgram
     nsh> server &
     nsh> client
 
+  For the sake of sanity, binfs and logins are disabled in this
+  configuration.
+
 unionfs
 
   This is a version of NSH dedicated to performing the simple test

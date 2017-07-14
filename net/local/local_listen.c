@@ -43,6 +43,7 @@
 #include <assert.h>
 #include <queue.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/net/net.h>
 
@@ -98,7 +99,7 @@ int local_listen(FAR struct socket *psock, int backlog)
   if (psock->s_domain != PF_LOCAL || psock->s_type != SOCK_STREAM)
     {
       nerr("ERROR: Unsupported socket family=%d or socket type=%d\n",
-           psocl->s_domain, psock->s_type);
+           psock->s_domain, psock->s_type);
       return -EOPNOTSUPP;
     }
 
