@@ -49,6 +49,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 
+#include "netdev/netdev.h"
 #include "socket/socket.h"
 
 #ifdef CONFIG_NET_IPv4
@@ -80,9 +81,7 @@
 int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
                      FAR socklen_t *addrlen)
 {
-#if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
   FAR struct sockaddr_in *outaddr = (FAR struct sockaddr_in *)addr;
-#endif
   FAR struct net_driver_s *dev;
 #ifdef CONFIG_NETDEV_MULTINIC
   in_addr_t lipaddr;

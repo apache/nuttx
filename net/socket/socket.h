@@ -175,7 +175,7 @@ EXTERN const struct sock_intf_s g_inet_sockif;
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef NET_TCP_HAVE_STACK
+#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
 struct tcp_conn_s; /* Forward reference */
 #endif
 
@@ -283,7 +283,7 @@ FAR const struct sock_intf_s *net_sockif(sa_family_t family);
  *
  ****************************************************************************/
 
-#ifdef NET_TCP_HAVE_STACK
+#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
 int net_startmonitor(FAR struct socket *psock);
 #endif
 
@@ -305,7 +305,7 @@ int net_startmonitor(FAR struct socket *psock);
  *
  ****************************************************************************/
 
-#ifdef NET_TCP_HAVE_STACK
+#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
 void net_stopmonitor(FAR struct tcp_conn_s *conn);
 #endif
 
@@ -327,7 +327,7 @@ void net_stopmonitor(FAR struct tcp_conn_s *conn);
  *
  ****************************************************************************/
 
-#ifdef NET_TCP_HAVE_STACK
+#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
 void net_lostconnection(FAR struct socket *psock, uint16_t flags);
 #endif
 
@@ -539,7 +539,7 @@ int inet_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_SENDFILE) && defined(CONFIG_NET_TCP) && \
-    defined(NET_TCP_HAVE_STACK)
+    !defined(CONFIG_NET_TCP_NO_STACK)
 ssize_t inet_sendfile(FAR struct socket *psock, FAR struct file *infile,
                       FAR off_t *offset, size_t count);
 #endif

@@ -49,6 +49,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 
+#include "netdev/netdev.h"
 #include "socket/socket.h"
 
 #ifdef CONFIG_NET_IPv6
@@ -80,9 +81,7 @@
 int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
                      FAR socklen_t *addrlen)
 {
- #if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
   FAR struct sockaddr_in6 *outaddr = (FAR struct sockaddr_in6 *)addr;
-#endif
   FAR struct net_driver_s *dev;
 #ifdef CONFIG_NETDEV_MULTINIC
   net_ipv6addr_t *lipaddr;
@@ -145,11 +144,10 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   if (net_ipv6addr_cmp(lipaddr, g_ipv6_allzeroaddr))
     {
-#if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
       outaddr->sin6_family = AF_INET6;
       memcpy(outaddr->sin6_addr.in6_u.u6_addr8, g_ipv6_allzeroaddr, 16);
       *addrlen = sizeof(struct sockaddr_in6);
-#endif
+
       return OK;
     }
 #endif
@@ -182,11 +180,10 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   /* Set the address family and the IP address */
 
-#if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
   outaddr->sin6_family = AF_INET6;
   memcpy(outaddr->sin6_addr.in6_u.u6_addr8, dev->d_ipv6addr, 16);
   *addrlen = sizeof(struct sockaddr_in6);
-#endif
+
   net_unlock();
 
   /* Return success */
