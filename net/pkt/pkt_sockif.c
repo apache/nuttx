@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <stdbool.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -70,6 +71,10 @@ static int        pkt_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
 static int        pkt_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                    FAR socklen_t *addrlen, FAR struct socket *newsock);
+#ifndef CONFIG_DISABLE_POLL
+static int        pkt_poll(FAR struct socket *psock,
+                    FAR struct pollfd *fds, bool setup);
+#endif
 static ssize_t    pkt_send(FAR struct socket *psock, FAR const void *buf,
                    size_t len, int flags);
 static ssize_t    pkt_sendto(FAR struct socket *psock, FAR const void *buf,
@@ -91,8 +96,14 @@ const struct sock_intf_s g_pkt_sockif =
   pkt_listen,      /* si_listen */
   pkt_connect,     /* si_connect */
   pkt_accept,      /* si_accept */
+#ifndef CONFIG_DISABLE_POLL
+  pkt_poll,        /* si_poll */
+#endif
   pkt_send,        /* si_send */
   pkt_sendto,      /* si_sendto */
+#ifdef CONFIG_NET_SENDFILE
+  NULL,            /* si_sendfile */
+#endif
   pkt_recvfrom,    /* si_recvfrom */
   pkt_close        /* si_close */
 };
@@ -444,6 +455,32 @@ int pkt_listen(FAR struct socket *psock, int backlog)
 {
   return -EOPNOTSUPP;
 }
+
+/****************************************************************************
+ * Name: pkt_poll
+ *
+ * Description:
+ *   The standard poll() operation redirects operations on socket descriptors
+ *   to net_poll which, indiectly, calls to function.
+ *
+ * Input Parameters:
+ *   psock - An instance of the internal socket structure.
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *   setup - true: Setup up the poll; false: Teardown the poll
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+static int pkt_poll(FAR struct socket *psock, FAR struct pollfd *fds,
+                    bool setup)
+{
+  return -ENOSYS;
+}
+#endif /* !CONFIG_DISABLE_POLL */
 
 /****************************************************************************
  * Name: pkt_send

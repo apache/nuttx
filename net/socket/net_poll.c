@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/net_poll.c
  *
- *   Copyright (C) 2008-2009, 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,172 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <errno.h>
 
-#include "tcp/tcp.h"
-#include "udp/udp.h"
-#include "local/local.h"
+#include <nuttx/net/net.h>
+
 #include "socket/socket.h"
-#include "usrsock/usrsock.h"
 
 #if defined(CONFIG_NET) && !defined(CONFIG_DISABLE_POLL)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Network polling can only be supported if poll support is provided by TCP,
- * UDP, or LOCAL sockets.
- */
-
-#undef HAVE_NET_POLL
-#if defined(HAVE_TCP_POLL) || defined(HAVE_UDP_POLL) || \
-    defined(HAVE_LOCAL_POLL) || defined(CONFIG_NET_USRSOCK)
-#  define HAVE_NET_POLL 1
-#endif
-
-#ifdef HAVE_NET_POLL
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: net_pollsetup
- *
- * Description:
- *   Setup to monitor events on one socket
- *
- * Input Parameters:
- *   psock - The socket of interest
- *   fds   - The structure describing the events to be monitored, OR NULL if
- *           this is a request to stop monitoring events.
- *
- * Returned Value:
- *  0: Success; Negated errno on failure
- *
- ****************************************************************************/
-
-static inline int net_pollsetup(FAR struct socket *psock,
-                                FAR struct pollfd *fds)
-{
-#if defined(HAVE_TCP_POLL) || defined(HAVE_LOCAL_POLL)
-  if (psock->s_type == SOCK_STREAM)
-    {
-#ifdef HAVE_LOCAL_POLL
-#ifdef HAVE_TCP_POLL
-      if (psock->s_domain == PF_LOCAL)
-#endif
-        {
-          return local_pollsetup(psock, fds);
-        }
-#endif /* HAVE_LOCAL_POLL */
-
-#ifdef HAVE_TCP_POLL
-#ifdef HAVE_LOCAL_POLL
-      else
-#endif
-        {
-          return tcp_pollsetup(psock, fds);
-        }
-#endif /* HAVE_TCP_POLL */
-    }
-#endif /* HAVE_TCP_POLL || HAVE_LOCAL_POLL */
-
-#if defined(HAVE_UDP_POLL) || defined(HAVE_LOCAL_POLL)
-  if (psock->s_type != SOCK_STREAM)
-    {
-#ifdef HAVE_LOCAL_POLL
-#ifdef HAVE_UDP_POLL
-      if (psock->s_domain == PF_LOCAL)
-#endif
-        {
-          return local_pollsetup(psock, fds);
-        }
-#endif /* HAVE_LOCAL_POLL */
-
-#ifdef HAVE_UDP_POLL
-#ifdef HAVE_LOCAL_POLL
-      else
-#endif
-        {
-          return udp_pollsetup(psock, fds);
-        }
-#endif /* HAVE_UDP_POLL */
-    }
-#endif /* HAVE_UDP_POLL || HAVE_LOCAL_POLL */
-
-  return -ENOSYS;
-}
-
-/****************************************************************************
- * Name: net_pollteardown
- *
- * Description:
- *   Teardown monitoring of events on an socket
- *
- * Input Parameters:
- *   psock - The TCP/IP socket of interest
- *   fds   - The structure describing the events to be monitored, OR NULL if
- *           this is a request to stop monitoring events.
- *
- * Returned Value:
- *  0: Success; Negated errno on failure
- *
- ****************************************************************************/
-
-static inline int net_pollteardown(FAR struct socket *psock,
-                                   FAR struct pollfd *fds)
-{
-#if defined(HAVE_TCP_POLL) || defined(HAVE_LOCAL_POLL)
-  if (psock->s_type == SOCK_STREAM)
-    {
-#ifdef HAVE_LOCAL_POLL
-#ifdef HAVE_TCP_POLL
-      if (psock->s_domain == PF_LOCAL)
-#endif
-        {
-          return local_pollteardown(psock, fds);
-        }
-#endif /* HAVE_LOCAL_POLL */
-
-#ifdef HAVE_TCP_POLL
-#ifdef HAVE_LOCAL_POLL
-      else
-#endif
-        {
-          return tcp_pollteardown(psock, fds);
-        }
-#endif /* HAVE_TCP_POLL */
-    }
-#endif /* HAVE_TCP_POLL || HAVE_LOCAL_POLL */
-
-#if defined(HAVE_UDP_POLL) || defined(HAVE_LOCAL_POLL)
-  if (psock->s_type != SOCK_STREAM)
-    {
-#ifdef HAVE_LOCAL_POLL
-#ifdef HAVE_UDP_POLL
-      if (psock->s_domain == PF_LOCAL)
-#endif
-        {
-          return local_pollteardown(psock, fds);
-        }
-#endif /* HAVE_LOCAL_POLL */
-
-#ifdef HAVE_UDP_POLL
-#ifdef HAVE_LOCAL_POLL
-      else
-#endif
-        {
-          return udp_pollteardown(psock, fds);
-        }
-#endif /* HAVE_UDP_POLL */
-    }
-#endif /* HAVE_UDP_POLL || HAVE_LOCAL_POLL */
-
-  return -ENOSYS;
-}
-#endif /* HAVE_NET_POLL */
 
 /****************************************************************************
  * Public Functions
@@ -230,37 +72,12 @@ static inline int net_pollteardown(FAR struct socket *psock,
 
 int psock_poll(FAR struct socket *psock, FAR struct pollfd *fds, bool setup)
 {
-#ifndef HAVE_NET_POLL
-  return -ENOSYS;
-#else
-  int ret;
+  DEBUGASSERT(psock != NULL && fds != NULL);
 
-#ifdef CONFIG_NET_USRSOCK
-  if (psock->s_type == SOCK_USRSOCK_TYPE)
-    {
-      /* Perform usrsock setup/teardown. */
+  /* Let the address family's poll() method handle the operation */
 
-      return usrsock_poll(psock, fds, setup);
-    }
-#endif
-
-  /* Check if we are setting up or tearing down the poll */
-
-  if (setup)
-    {
-      /* Perform the TCP/IP poll() setup */
-
-      ret = net_pollsetup(psock, fds);
-    }
-  else
-    {
-      /* Perform the TCP/IP poll() teardown */
-
-      ret = net_pollteardown(psock, fds);
-    }
-
-  return ret;
-#endif /* HAVE_NET_POLL */
+  DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_poll != NULL);
+  return psock->s_sockif->si_poll(psock, fds, setup);
 }
 
 /****************************************************************************
@@ -287,6 +104,8 @@ int net_poll(int sockfd, struct pollfd *fds, bool setup)
   return -ENOSYS;
 #else
   FAR struct socket *psock;
+
+  DEBUGASSERT(fds != NULL);
 
   /* Get the underlying socket structure and verify that the sockfd
    * corresponds to valid, allocated socket

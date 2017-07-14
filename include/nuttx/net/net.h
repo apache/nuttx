@@ -123,11 +123,20 @@ struct sock_intf_s
                     FAR const struct sockaddr *addr, socklen_t addrlen);
   CODE int        (*si_accept)(FAR struct socket *psock, FAR struct sockaddr *addr,
                     FAR socklen_t *addrlen, FAR struct socket *newsock);
+#ifndef CONFIG_DISABLE_POLL
+  CODE int        (*si_poll)(FAR struct socket *psock,
+                    FAR struct pollfd *fds, bool setup);
+#endif
   CODE ssize_t    (*si_send)(FAR struct socket *psock, FAR const void *buf,
                     size_t len, int flags);
   CODE ssize_t    (*si_sendto)(FAR struct socket *psock, FAR const void *buf,
                     size_t len, int flags, FAR const struct sockaddr *to,
                     socklen_t tolen);
+#ifdef CONFIG_NET_SENDFILE
+  CODE ssize_t    (*si_sendfile)(FAR struct socket *psock,
+                    FAR struct file *infile, FAR off_t *offset,
+                    size_t count)
+#endif
   CODE ssize_t    (*si_recvfrom)(FAR struct socket *psock, FAR void *buf,
                     size_t len, int flags, FAR struct sockaddr *from,
                     FAR socklen_t *fromlen);

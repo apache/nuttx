@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -67,6 +68,10 @@ static int        local_getsockname(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 static int        local_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
+#ifndef CONFIG_DISABLE_POLL
+static int        local_poll(FAR struct socket *psock,
+                    FAR struct pollfd *fds, bool setup);
+#endif
 static ssize_t    local_send(FAR struct socket *psock, FAR const void *buf,
                     size_t len, int flags);
 static ssize_t    local_sendto(FAR struct socket *psock, FAR const void *buf,
@@ -88,8 +93,14 @@ const struct sock_intf_s g_local_sockif =
   local_listen,      /* si_listen */
   local_connect,     /* si_connect */
   local_accept,      /* si_accept */
+#ifndef CONFIG_DISABLE_POLL
+  local_poll,        /* si_poll */
+#endif
   local_send,        /* si_send */
   local_sendto,      /* si_sendto */
+#ifdef CONFIG_NET_SENDFILE
+  NULL,              /* si_sendfile */
+#endif
   local_recvfrom,    /* si_recvfrom */
   local_close        /* si_close */
 };
@@ -464,6 +475,49 @@ static int local_connect(FAR struct socket *psock,
         return -EBADF;
     }
 }
+
+/****************************************************************************
+ * Name: local_poll
+ *
+ * Description:
+ *   The standard poll() operation redirects operations on socket descriptors
+ *   to local_poll which, indiectly, calls to function.
+ *
+ * Input Parameters:
+ *   psock - An instance of the internal socket structure.
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *   setup - true: Setup up the poll; false: Teardown the poll
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+static int local_poll(FAR struct socket *psock, FAR struct pollfd *fds,
+                      bool setup)
+{
+#ifndef HAVE_LOCAL_POLL
+  return -ENOSYS;
+#else
+  /* Check if we are setting up or tearing down the poll */
+
+  if (setup)
+    {
+      /* Perform the TCP/IP poll() setup */
+
+      return local_pollsetup(psock, fds);
+    }
+  else
+    {
+      /* Perform the TCP/IP poll() teardown */
+
+      return loal_pollteardown(psock, fds);
+    }
+#endif /* HAVE_LOCAL_POLL */
+}
+#endif /* !CONFIG_DISABLE_POLL */
 
 /****************************************************************************
  * Name: local_send

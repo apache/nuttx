@@ -501,6 +501,32 @@ int inet_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
                  socklen_t addrlen);
 
 /****************************************************************************
+ * Name: inet_sendfile
+ *
+ * Description:
+ *   The inet_sendfile() call may be used only when the INET socket is in a
+ *   connected state (so that the intended recipient is known).
+ *
+ * Parameters:
+ *   psock    An instance of the internal socket structure.
+ *   buf      Data to send
+ *   len      Length of data to send
+ *   flags    Send flags
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error,
+ *   a negated errno value is returned.  See sendfile() for a list
+ *   appropriate error return values.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_SENDFILE) && defined(CONFIG_NET_TCP) && \
+    defined(NET_TCP_HAVE_STACK)
+ssize_t inet_sendfile(FAR struct socket *psock, FAR struct file *infile,
+                      FAR off_t *offset, size_t count);
+#endif
+
+/****************************************************************************
  * Name: inet_recvfrom
  *
  * Description:

@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -69,6 +70,10 @@ static int        inet_listen(FAR struct socket *psock, int backlog);
 static int        inet_accept(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen,
                     FAR struct socket *newsock);
+#ifndef CONFIG_DISABLE_POLL
+static int        inet_poll(FAR struct socket *psock,
+                    FAR struct pollfd *fds, bool setup);
+#endif
 static ssize_t    inet_send(FAR struct socket *psock, FAR const void *buf,
                     size_t len, int flags);
 static ssize_t    inet_sendto(FAR struct socket *psock, FAR const void *buf,
@@ -89,8 +94,18 @@ const struct sock_intf_s g_inet_sockif =
   inet_listen,      /* si_listen */
   inet_connect,     /* si_connect */
   inet_accept,      /* si_accept */
+#ifndef CONFIG_DISABLE_POLL
+  inet_poll,        /* si_poll */
+#endif
   inet_send,        /* si_send */
   inet_sendto,      /* si_sendto */
+#ifdef CONFIG_NET_SENDFILE
+#if defined(CONFIG_NET_TCP) && defined(NET_TCP_HAVE_STACK)
+  inet_sendfile,    /* si_sendfile */
+#else
+  NULL,             /* si_sendfile */
+#endif
+#endif
   inet_recvfrom,    /* si_recvfrom */
   inet_close        /* si_close */
 };
@@ -861,6 +876,141 @@ errout_with_lock:
   return -EOPNOTSUPP;
 #endif /* CONFIG_NET_TCP */
 }
+
+/****************************************************************************
+ * Name: inet_pollsetup
+ *
+ * Description:
+ *   Setup to monitor events on one socket
+ *
+ * Input Parameters:
+ *   psock - The socket of interest
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+#if defined(HAVE_TCP_POLL) || defined(HAVE_UDP_POLL)
+static inline int inet_pollsetup(FAR struct socket *psock,
+                                 FAR struct pollfd *fds)
+{
+#ifdef HAVE_TCP_POLL
+  if (psock->s_type == SOCK_STREAM)
+    {
+      return tcp_pollsetup(psock, fds);
+    }
+  else
+#endif /* HAVE_TCP_POLL */
+#ifdef HAVE_UDP_POLL
+  if (psock->s_type != SOCK_STREAM)
+    {
+      return udp_pollsetup(psock, fds);
+    }
+  else
+#endif /* HAVE_UDP_POLL */
+    {
+      return -ENOSYS;
+    }
+}
+#endif /* HAVE_TCP_POLL || HAVE_UDP_POLL */
+
+/****************************************************************************
+ * Name: inet_pollteardown
+ *
+ * Description:
+ *   Teardown monitoring of events on an socket
+ *
+ * Input Parameters:
+ *   psock - The TCP/IP socket of interest
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+#if defined(HAVE_TCP_POLL) || defined(HAVE_UDP_POLL)
+static inline int inet_pollteardown(FAR struct socket *psock,
+                                    FAR struct pollfd *fds)
+{
+#ifdef HAVE_TCP_POLL
+  if (psock->s_type == SOCK_STREAM)
+    {
+      return tcp_pollteardown(psock, fds);
+    }
+  else
+#endif /* HAVE_TCP_POLL */
+#ifdef HAVE_UDP_POLL
+  if (psock->s_type == SOCK_DGRAM)
+    {
+      return udp_pollteardown(psock, fds);
+    }
+  else
+#endif /* HAVE_UDP_POLL */
+    {
+      return -ENOSYS;
+    }
+}
+#endif /* HAVE_TCP_POLL || HAVE_UDP_POLL */
+
+/****************************************************************************
+ * Name: inet_poll
+ *
+ * Description:
+ *   The standard poll() operation redirects operations on socket descriptors
+ *   to net_poll which, indiectly, calls to function.
+ *
+ * Input Parameters:
+ *   psock - An instance of the internal socket structure.
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *   setup - true: Setup up the poll; false: Teardown the poll
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+static int inet_poll(FAR struct socket *psock, FAR struct pollfd *fds,
+                     bool setup)
+{
+#ifdef CONFIG_NET_USRSOCK
+  if (psock->s_type == SOCK_USRSOCK_TYPE)
+    {
+      /* Perform usrsock setup/teardown. */
+
+      return usrsock_poll(psock, fds, setup);
+    }
+  else
+#endif
+#if defined(HAVE_TCP_POLL) || defined(HAVE_UDP_POLL)
+
+  /* Check if we are setting up or tearing down the poll */
+
+  if (setup)
+    {
+      /* Perform the TCP/IP poll() setup */
+
+      return inet_pollsetup(psock, fds);
+    }
+  else
+    {
+      /* Perform the TCP/IP poll() teardown */
+
+      return inet_pollteardown(psock, fds);
+    }
+#else
+    {
+      return -ENOSYS;
+    }
+#endif /* HAVE_TCP_POLL || !HAVE_UDP_POLL */
+}
+#endif /* !CONFIG_DISABLE_POLL */
 
 /****************************************************************************
  * Name: inet_send
