@@ -132,7 +132,7 @@ static int board_mscclassobject(int minor, FAR struct usbdev_description_s *devd
   ret = usbmsc_configure(1, &handle);
   if (ret >= 0)
     {
-      retr = usbmsc_classobject(handle, devdesc, classdev);
+      ret = usbmsc_classobject(handle, devdesc, classdev);
     }
 
   return ret;
