@@ -126,7 +126,7 @@ const struct sock_intf_s g_local_sockif =
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
+#if defined(CONFIG_NET_LOCAL_STREAM) || defined(CONFIG_NET_LOCAL_DGRAM)
 static int local_sockif_alloc(FAR struct socket *psock)
 {
   /* Allocate the local connection structure */
@@ -182,7 +182,7 @@ static int local_setup(FAR struct socket *psock, int protocol)
 
   switch (psock->s_type)
     {
-#ifdef CONFIG_NET_TCP
+#ifdef CONFIG_NET_LOCAL_STREAM
       case SOCK_STREAM:
         if (protocol != 0 && protocol != IPPROTO_TCP)
           {
@@ -192,9 +192,9 @@ static int local_setup(FAR struct socket *psock, int protocol)
         /* Allocate and attach the local connection structure */
 
         return local_sockif_alloc(psock);
-#endif /* CONFIG_NET_TCP */
+#endif /* CONFIG_NET_LOCAL_STREAM */
 
-#ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_LOCAL_DGRAM
       case SOCK_DGRAM:
         if (protocol != 0 && protocol != IPPROTO_UDP)
           {
@@ -204,7 +204,7 @@ static int local_setup(FAR struct socket *psock, int protocol)
         /* Allocate and attach the local connection structure */
 
         return local_sockif_alloc(psock);
-#endif /* CONFIG_NET_UDP */
+#endif /* CONFIG_NET_LOCAL_DGRAM */
 
       default:
         return -EPROTONOSUPPORT;
@@ -298,11 +298,11 @@ static int local_bind(FAR struct socket *psock,
     {
       /* Bind a local TCP/IP stream or datagram socket  */
 
-#if defined(ONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
-#ifdef CONFIG_NET_TCP
+#if defined(ONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_DGRAM)
+#ifdef CONFIG_NET_LOCAL_STREAM
       case SOCK_STREAM:
 #endif
-#ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_LOCAL_DGRAM
       case SOCK_DGRAM:
 #endif
         {
@@ -318,7 +318,7 @@ static int local_bind(FAR struct socket *psock,
             }
         }
         break;
-#endif /* CONFIG_NET_TCP || CONFIG_NET_UDP*/
+#endif /* CONFIG_NET_LOCAL_STREAM || CONFIG_NET_LOCAL_DGRAM*/
 
       default:
         ret = -EBADF;
@@ -497,7 +497,7 @@ static int local_connect(FAR struct socket *psock,
 
   switch (psock->s_type)
     {
-#ifdef CONFIG_NET_TCP
+#ifdef CONFIG_NET_LOCAL_STREAM
       case SOCK_STREAM:
         {
           /* Verify that the socket is not already connected */
@@ -512,17 +512,17 @@ static int local_connect(FAR struct socket *psock,
           return psock_local_connect(psock, addr);
         }
         break;
-#endif /* CONFIG_NET_TCP */
+#endif /* CONFIG_NET_LOCAL_STREAM */
 
-#ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_LOCAL_DGRAM
       case SOCK_DGRAM:
         {
           /* Perform the datagram connection logic */
-
-          return psock_local_connect(psock, addr);
+#warning Missing logic
+          return -ENOSYS;
         }
         break;
-#endif /* CONFIG_NET_UDP */
+#endif /* CONFIG_NET_LOCAL_DGRAM */
 
       default:
         return -EBADF;
@@ -646,7 +646,7 @@ static ssize_t local_send(FAR struct socket *psock, FAR const void *buf,
 
   switch (psock->s_type)
     {
-#ifdef CONFIG_NET_TCP
+#ifdef CONFIG_NET_LOCAL_STREAM
       case SOCK_STREAM:
         {
           /* Local TCP packet send */
@@ -654,9 +654,9 @@ static ssize_t local_send(FAR struct socket *psock, FAR const void *buf,
           ret = psock_local_send(psock, buf, len, flags);
         }
         break;
-#endif /* CONFIG_NET_TCP */
+#endif /* CONFIG_NET_LOCAL_STREAM */
 
-#ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_LOCAL_DGRAM
       case SOCK_DGRAM:
         {
           /* Local UDP packet send */
@@ -664,7 +664,7 @@ static ssize_t local_send(FAR struct socket *psock, FAR const void *buf,
           ret = -ENOSYS;
         }
         break;
-#endif /* CONFIG_NET_UDP */
+#endif /* CONFIG_NET_LOCAL_DGRAM */
 
       default:
         {
@@ -716,7 +716,7 @@ ssize_t local_sendto(FAR struct socket *psock, FAR const void *buf,
       return -EAFNOSUPPORT;
     }
 
-#ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_LOCAL_DGRAM
   /* If this is a connected socket, then return EISCONN */
 
   if (psock->s_type != SOCK_DGRAM)
@@ -757,11 +757,11 @@ static int local_close(FAR struct socket *psock)
 
   switch (psock->s_type)
     {
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
-#ifdef CONFIG_NET_TCP
+#if defined(CONFIG_NET_LOCAL_STREAM) || defined(CONFIG_NET_LOCAL_DGRAM)
+#ifdef CONFIG_NET_LOCAL_STREAM
       case SOCK_STREAM:
 #endif
-#ifdef CONFIG_NET_UDP
+#ifdef CONFIG_NET_LOCAL_DGRAM
       case SOCK_DGRAM:
 #endif
         {
@@ -785,7 +785,7 @@ static int local_close(FAR struct socket *psock)
 
           return OK;
         }
-#endif /* CONFIG_NET_TCP ||  CONFIG_NET_UDP*/
+#endif /* CONFIG_NET_LOCAL_STREAM ||  CONFIG_NET_LOCAL_DGRAM*/
 
       default:
         return -EBADF;
