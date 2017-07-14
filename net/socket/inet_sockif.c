@@ -63,6 +63,8 @@ static sockcaps_t inet_sockcaps(FAR struct socket *psock);
 static void       inet_addref(FAR struct socket *psock);
 static int        inet_bind(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
+static int        inet_getsockname(FAR struct socket *psock,
+                    FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 static int        inet_listen(FAR struct socket *psock, int backlog);
 static int        inet_accept(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen,
@@ -79,17 +81,18 @@ static ssize_t    inet_sendto(FAR struct socket *psock, FAR const void *buf,
 
 const struct sock_intf_s g_inet_sockif =
 {
-  inet_setup,    /* si_setup */
-  inet_sockcaps, /* si_sockcaps */
-  inet_addref,   /* si_addref */
-  inet_bind,     /* si_bind */
-  inet_listen,   /* si_listen */
-  inet_connect,  /* si_connect */
-  inet_accept,   /* si_accept */
-  inet_send,     /* si_send */
-  inet_sendto,   /* si_sendto */
-  inet_recvfrom, /* si_recvfrom */
-  inet_close     /* si_close */
+  inet_setup,       /* si_setup */
+  inet_sockcaps,    /* si_sockcaps */
+  inet_addref,      /* si_addref */
+  inet_bind,        /* si_bind */
+  inet_getsockname, /* si_getsockname */
+  inet_listen,      /* si_listen */
+  inet_connect,     /* si_connect */
+  inet_accept,      /* si_accept */
+  inet_send,        /* si_send */
+  inet_sendto,      /* si_sendto */
+  inet_recvfrom,    /* si_recvfrom */
+  inet_close        /* si_close */
 };
 
 /****************************************************************************
@@ -542,6 +545,72 @@ static int inet_bind(FAR struct socket *psock,
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: inet_getsockname
+ *
+ * Description:
+ *   The inet_getsockname() function retrieves the locally-bound name of
+ *   the specified INET socket, stores this address in the sockaddr
+ *   structure pointed to by the 'addr' argument, and stores the length of
+ *   this address in the object pointed to by the 'addrlen' argument.
+ *
+ *   If the actual length of the address is greater than the length of the
+ *   supplied sockaddr structure, the stored address will be truncated.
+ *
+ *   If the socket has not been bound to a local name, the value stored in
+ *   the object pointed to by address is unspecified.
+ *
+ * Parameters:
+ *   psock    Socket structure of the socket to be queried
+ *   addr     sockaddr structure to receive data [out]
+ *   addrlen  Length of sockaddr structure [in/out]
+ *
+ * Returned Value:
+ *   On success, 0 is returned, the 'addr' argument points to the address
+ *   of the socket, and the 'addrlen' argument points to the length of the
+ *   address.  Otherwise, a negated errno value is returned.  See
+ *   getsockname() for the list of appropriate error numbers.
+ *
+ ****************************************************************************/
+
+static int inet_getsockname(FAR struct socket *psock,
+                            FAR struct sockaddr *addr,
+                            FAR socklen_t *addrlen)
+{
+#ifdef CONFIG_NET_USRSOCK
+  if (psock->s_type == SOCK_USRSOCK_TYPE)
+    {
+      FAR struct usrsock_conn_s *conn = psock->s_conn;
+
+      DEBUGASSERT(conn != NULL);
+
+      /* Handle usrsock getsockname */
+
+      return usrsock_getsockname(conn, addr, addrlen);
+    }
+#endif
+
+  /* Handle by address domain */
+
+  switch (psock->s_domain)
+    {
+#ifdef CONFIG_NET_IPv4
+    case PF_INET:
+      return ipv4_getsockname(psock, addr, addrlen);
+      break;
+#endif
+
+#ifdef CONFIG_NET_IPv6
+    case PF_INET6:
+      return ipv6_getsockname(psock, addr, addrlen);
+      break;
+#endif
+
+    default:
+      return -EAFNOSUPPORT;
+    }
 }
 
 /****************************************************************************

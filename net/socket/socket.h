@@ -437,6 +437,35 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
                    int flags);
 
 /****************************************************************************
+ * Name: ipv4_getsockname and ipv6_sockname
+ *
+ * Description:
+ *   The ipv4_getsockname() and ipv6_getsocknam() function retrieve the
+ *   locally-bound name of the specified INET socket.
+ *
+ * Parameters:
+ *   psock    Point to the socket structure instance [in]
+ *   addr     sockaddr structure to receive data [out]
+ *   addrlen  Length of sockaddr structure [in/out]
+ *
+ * Returned Value:
+ *   On success, 0 is returned, the 'addr' argument points to the address
+ *   of the socket, and the 'addrlen' argument points to the length of the
+ *   address.  Otherwise, a negated errno value is returned.  See
+ *   getsockname() for the list of returned error values.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
+                     FAR socklen_t *addrlen);
+#endif
+#ifdef CONFIG_NET_IPv6
+int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
+                     FAR socklen_t *addrlen);
+#endif
+
+/****************************************************************************
  * Name: inet_connect
  *
  * Description:

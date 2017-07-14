@@ -63,6 +63,8 @@ static sockcaps_t pkt_sockcaps(FAR struct socket *psock);
 static void       pkt_addref(FAR struct socket *psock);
 static int        pkt_bind(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
+static int        pkt_getsockname(FAR struct socket *psock,
+                    FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 static int        pkt_listen(FAR struct socket *psock, int backlog);
 static int        pkt_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
@@ -81,17 +83,18 @@ static int        pkt_close(FAR struct socket *psock);
 
 const struct sock_intf_s g_pkt_sockif =
 {
-  pkt_setup,    /* si_setup */
-  pkt_sockcaps, /* si_sockcaps */
-  pkt_addref,   /* si_addref */
-  pkt_bind,     /* si_bind */
-  pkt_listen,   /* si_listen */
-  pkt_connect,  /* si_connect */
-  pkt_accept,   /* si_accept */
-  pkt_send,     /* si_send */
-  pkt_sendto,   /* si_sendto */
-  pkt_recvfrom, /* si_recvfrom */
-  pkt_close     /* si_close */
+  pkt_setup,       /* si_setup */
+  pkt_sockcaps,    /* si_sockcaps */
+  pkt_addref,      /* si_addref */
+  pkt_bind,        /* si_bind */
+  pkt_getsockname, /* si_getsockname */
+  pkt_listen,      /* si_listen */
+  pkt_connect,     /* si_connect */
+  pkt_accept,      /* si_accept */
+  pkt_send,        /* si_send */
+  pkt_sendto,      /* si_sendto */
+  pkt_recvfrom,    /* si_recvfrom */
+  pkt_close        /* si_close */
 };
 
 /****************************************************************************
@@ -376,6 +379,40 @@ static int pkt_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
     {
       return -EBADF;
     }
+}
+
+/****************************************************************************
+ * Name: pkt_getsockname
+ *
+ * Description:
+ *   The pkt_getsockname() function retrieves the locally-bound name of the
+ *   specified packet socket, stores this address in the sockaddr structure
+ *   pointed to by the 'addr' argument, and stores the length of this
+ *   address in the object pointed to by the 'addrlen' argument.
+ *
+ *   If the actual length of the address is greater than the length of the
+ *   supplied sockaddr structure, the stored address will be truncated.
+ *
+ *   If the socket has not been bound to a local name, the value stored in
+ *   the object pointed to by address is unspecified.
+ *
+ * Parameters:
+ *   psock    Socket structure of the socket to be queried
+ *   addr     sockaddr structure to receive data [out]
+ *   addrlen  Length of sockaddr structure [in/out]
+ *
+ * Returned Value:
+ *   On success, 0 is returned, the 'addr' argument points to the address
+ *   of the socket, and the 'addrlen' argument points to the length of the
+ *   address.  Otherwise, a negated errno value is returned.  See
+ *   getsockname() for the list of appropriate error numbers.
+ *
+ ****************************************************************************/
+
+static int pkt_getsockname(FAR struct socket *psock,
+                           FAR struct sockaddr *addr, FAR socklen_t *addrlen)
+{
+  return -EAFNOSUPPORT;
 }
 
 /****************************************************************************

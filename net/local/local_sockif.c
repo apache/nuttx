@@ -63,6 +63,8 @@ static sockcaps_t local_sockcaps(FAR struct socket *psock);
 static void       local_addref(FAR struct socket *psock);
 static int        local_bind(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
+static int        local_getsockname(FAR struct socket *psock,
+                    FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 static int        local_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
 static ssize_t    local_send(FAR struct socket *psock, FAR const void *buf,
@@ -78,17 +80,18 @@ static int        local_close(FAR struct socket *psock);
 
 const struct sock_intf_s g_local_sockif =
 {
-  local_setup,    /* si_setup */
-  local_sockcaps, /* si_sockcaps */
-  local_addref,   /* si_addref */
-  local_bind,     /* si_bind */
-  local_listen,   /* si_listen */
-  local_connect,  /* si_connect */
-  local_accept,   /* si_accept */
-  local_send,     /* si_send */
-  local_sendto,   /* si_sendto */
-  local_recvfrom, /* si_recvfrom */
-  local_close     /* si_close */
+  local_setup,       /* si_setup */
+  local_sockcaps,    /* si_sockcaps */
+  local_addref,      /* si_addref */
+  local_bind,        /* si_bind */
+  local_getsockname, /* si_getsockname */
+  local_listen,      /* si_listen */
+  local_connect,     /* si_connect */
+  local_accept,      /* si_accept */
+  local_send,        /* si_send */
+  local_sendto,      /* si_sendto */
+  local_recvfrom,    /* si_recvfrom */
+  local_close        /* si_close */
 };
 
 /****************************************************************************
@@ -301,6 +304,87 @@ static int local_bind(FAR struct socket *psock,
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: local_getsockname
+ *
+ * Description:
+ *   The local_getsockname() function retrieves the locally-bound name of
+ *   the specified local socket, stores this address in the sockaddr
+ *   structure pointed to by the 'addr' argument, and stores the length of
+ *   this address in the object pointed to by the 'addrlen' argument.
+ *
+ *   If the actual length of the address is greater than the length of the
+ *   supplied sockaddr structure, the stored address will be truncated.
+ *
+ *   If the socket has not been bound to a local name, the value stored in
+ *   the object pointed to by address is unspecified.
+ *
+ * Parameters:
+ *   psock    Socket structure of the socket to be queried
+ *   addr     sockaddr structure to receive data [out]
+ *   addrlen  Length of sockaddr structure [in/out]
+ *
+ * Returned Value:
+ *   On success, 0 is returned, the 'addr' argument points to the address
+ *   of the socket, and the 'addrlen' argument points to the length of the
+ *   address.  Otherwise, a negated errno value is returned.  See
+ *   getsockname() for the list of appropriate error numbers.
+ *
+ ****************************************************************************/
+
+static int local_getsockname(FAR struct socket *psock,
+                             FAR struct sockaddr *addr,
+                             FAR socklen_t *addrlen)
+{
+  FAR const struct sockaddr_un *unaddr =
+    (FAR const struct sockaddr_un *)addr;
+  FAR struct local_conn_s *conn;
+
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
+              unaddr != NULL && addrlen != NULL &&
+              *addrlen >= sizeof(sa_family_t));
+
+  if (*addrlen < sizeof(sa_family_t))
+    {
+      /* This is apparently not an error */
+
+      *addrlen = 0;
+      return OK;
+    }
+
+  conn = (FAR struct local_conn_s *)psock->s_conn;
+
+  /* Save the address family */
+
+  unaddr->sun_family = AF_LOCAL;
+  if (*addrlen > sizeof(sa_family_t))
+    {
+      /* Now copy the address description.  */
+
+      if (conn->lc_type == LOCAL_TYPE_UNNAMED)
+        {
+          /* Zero-length sun_path... This is an abstract Unix domain socket */
+
+          *addrlen = sizeof(sa_family_t);
+        }
+      else /* conn->lctype = LOCAL_TYPE_PATHNAME */
+        {
+          /* Get the available length in the user-provided buffer. */
+
+          int pathlen = *addrlen - sizeof(sa_family_t);
+
+          /* Copy the path into the user address structure */
+
+          (void)strncpy(unaddr->sun_path, conn->lc_path, pathlen);
+          unaddr->sun_path[pathlen - 1] = '\0';
+
+          *addrlen = sizeof(sa_family_t) + namelen;
+        }
+    }
+
+  return OK;
 }
 
 /****************************************************************************

@@ -116,6 +116,8 @@ struct sock_intf_s
   CODE void       (*si_addref)(FAR struct socket *psock);
   CODE int        (*si_bind)(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
+  CODE int        (*si_getsockname)(FAR struct socket *psock,
+                    FAR struct sockaddr *addr, FAR socklen_t *addrlen);
   CODE int        (*si_listen)(FAR struct socket *psock, int backlog);
   CODE int        (*si_connect)(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
