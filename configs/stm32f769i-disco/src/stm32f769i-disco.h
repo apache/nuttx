@@ -57,23 +57,21 @@
 #  endif
 #endif
 
-/* STM32F736G Discovery GPIOs ***********************************************************************/
-/* The STM32F769I-DISCO board has numerous LEDs but only one, LD1 located near the reset button, that
- * can be controlled by software (LD2 is a power indicator, LD3-6 indicate USB status, LD7 is
- * controlled by the ST-Link).
+/* STM32F769 Discovery GPIOs ***********************************************************************/
+/* The STM32F769I-DISCO has one user controllable LED: LD3.
  *
- * LD1 is controlled by PI1 which is also the SPI2_SCK at the Arduino interface. One end of LD1 is
- * grounded so a high output on PI1 will illuminate the LED.
+ * LD3 is controlled by PA12 which is also the SPI2_SCK at the Arduino interface.
+ * LD3 is on when PA12 is high.
  */
 
 #define GPIO_LD1           (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
-                            GPIO_PORTI | GPIO_PIN1)
+                            GPIO_PORTA | GPIO_PIN12)
 
-/* Pushbutton B1, labelled "User", is connected to GPIO PI11.  A high value will be sensed when the
+/* Pushbutton B1, labelled "User", is connected to GPIO PA0.  A high value will be sensed when the
  * button is depressed. Note that the EXTI interrupt is configured.
  */
 
-#define GPIO_BTN_USER      (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTI | GPIO_PIN11)
+#define GPIO_BTN_USER      (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTA | GPIO_PIN0)
 
 /* Sporadic scheduler instrumentation. This configuration has been used for evaluating the NuttX
  * sporadic scheduler.  In this evaluation, two GPIO outputs are used.  One indicating the priority
@@ -81,14 +79,14 @@
  *
  * There is nothing special about the pin selections:
  *
- *   Arduino D2 PG6 - Indicates priority
- *   Arduino D4 PG7 - Indicates that the thread is running
+ *   Arduino D2 PJ1 - Indicates priority1
+ *   Arduino D4 PJ0 - Indicates that the thread is running
  */
 
 #define GPIO_SCHED_HIGHPRI (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
-                            GPIO_PORTG | GPIO_PIN6)
+                            GPIO_PORTJ | GPIO_PIN1)
 #define GPIO_SCHED_RUNNING (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
-                            GPIO_PORTG | GPIO_PIN7)
+                            GPIO_PORTJ | GPIO_PIN0)
 
 /****************************************************************************************************
  * Public data

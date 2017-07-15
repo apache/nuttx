@@ -16,12 +16,11 @@ memory and 300Kb SRAM. The board features:
   - Two ST MEMS microphones
   - SPDIF RCA input connector
   - Two pushbuttons (user and reset)
-  - 128-Mbit Quad-SPI Flash memory
+  - 512-Mbit Quad-SPI Flash memory
   - 128-Mbit SDRAM (64 Mbits accessible)
   - Connector for microSD card
   - RF-EEPROM daughterboard connector
   - USB OTG HS with Micro-AB connectors
-  - USB OTG FS with Micro-AB connectors
   - Ethernet connector compliant with IEEE-802.3-2002
 
 Refer to the http://www.st.com website for further information about this
@@ -340,11 +339,11 @@ STM32F769I-DISCO-specific Configuration Options
     CONFIG_STM32F7_DMA2           DMA2
     CONFIG_STM32F7_ETHMAC         Ethernet MAC
     CONFIG_STM32F7_DMA2D          Chrom-ART (DMA2D)
-    CONFIG_STM32F7_USBOTGHS       USB OTG HS
+    CONFIG_STM32F7_OTGHS          USB OTG HS
 
     AHB2
     ----
-    CONFIG_STM32F7_USBOTGFS       USB OTG FS
+    CONFIG_STM32F7_OTGFS          USB OTG FS
     CONFIG_STM32F7_DCMI           DCMI
     CONFIG_STM32F7_CRYP           CRYP
     CONFIG_STM32F7_HASH           HASH

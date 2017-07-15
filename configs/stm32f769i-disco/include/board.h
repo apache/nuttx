@@ -58,9 +58,8 @@
 /* Clocking *************************************************************************/
 /* The STM32F7 Discovery board provides the following clock sources:
  *
- *   X1:  24 MHz oscillator for USB OTG HS PHY and camera module (daughter board)
  *   X2:  25 MHz oscillator for STM32F769NIH6 microcontroller and Ethernet PHY.
- *   X3:  32.768 KHz crystal for STM32F769NIH6 embedded RTC
+ *   X1:  32.768 KHz crystal for STM32F769NIH6 embedded RTC
  *
  * So we have these clock source available within the STM32
  *
@@ -103,51 +102,58 @@
  * 2 <= PLLQ <= 15
  */
 
-#if defined(CONFIG_STM32F7_USBOTHFS)
-/* Highest SYSCLK with USB OTG FS clock = 48 MHz
+#if defined(CONFIG_STM32F7_OTGFS)
+/* USB OTG FS clock (= SDMMCCLK = RNGCLK) must be 48 MHz
  *
  * PLL_VCO = (25,000,000 / 25) * 384 = 384 MHz
  * SYSCLK  = 384 MHz / 2 = 192 MHz
  * USB OTG FS, SDMMC and RNG Clock = 384 MHz / 8 = 48MHz
+ * DSI CLK = PLL_VCO / PLLR = 384 / 7 = 54,86 MHz
  */
 
 #define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(25)
 #define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(384)
 #define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
 #define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(8)
+#define STM32_PLLCFG_PLLR       RCC_PLLCFG_PLLR(7)
 
 #define STM32_VCO_FREQUENCY     ((STM32_HSE_FREQUENCY / 25) * 384)
 #define STM32_SYSCLK_FREQUENCY  (STM32_VCO_FREQUENCY / 2)
 #define STM32_OTGFS_FREQUENCY   (STM32_VCO_FREQUENCY / 8)
 
 #elif defined(CONFIG_STM32F7_SDMMC1) || defined(CONFIG_STM32F7_RNG)
-/* Highest SYSCLK with USB OTG FS clock <= 48MHz
+/* SDMMCCLK (= USB OTG FS clock = RNGCLK) should be <= 48MHz
  *
  * PLL_VCO = (25,000,000 / 25) * 432 = 432 MHz
  * SYSCLK  = 432 MHz / 2 = 216 MHz
  * USB OTG FS, SDMMC and RNG Clock = 432 MHz / 10 = 43.2 MHz
+ * DSI CLK = PLL_VCO / PLLR = 432 / 8 = 54 MHz
  */
 
 #define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(25)
 #define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(432)
 #define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
 #define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(10)
+#define STM32_PLLCFG_PLLR       RCC_PLLCFG_PLLR(8)
 
 #define STM32_VCO_FREQUENCY     ((STM32_HSE_FREQUENCY / 25) * 432)
 #define STM32_SYSCLK_FREQUENCY  (STM32_VCO_FREQUENCY / 2)
 #define STM32_OTGFS_FREQUENCY   (STM32_VCO_FREQUENCY / 10)
 
 #else
-/* Highest SYSCLK
+/* No restrictions by OTGFS
  *
  * PLL_VCO = (25,000,000 / 25) * 432 = 432 MHz
  * SYSCLK  = 432 MHz / 2 = 216 MHz
+ * USB OTG FS, SDMMC and RNG Clock = 432 MHz / 10 = 43.2 MHz
+ * DSI CLK = PLL_VCO / PLLR = 432 / 8 = 54 MHz
  */
 
 #define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(25)
 #define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(432)
 #define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
 #define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(10)
+#define STM32_PLLCFG_PLLR       RCC_PLLCFG_PLLR(8)
 
 #define STM32_VCO_FREQUENCY     ((STM32_HSE_FREQUENCY / 25) * 432)
 #define STM32_SYSCLK_FREQUENCY  (STM32_VCO_FREQUENCY / 2)
@@ -312,7 +318,7 @@
 
 /* Button definitions ***************************************************************/
 /* The STM32F7 Discovery supports one button:  Pushbutton B1, labelled "User", is
- * connected to GPIO PI11.  A high value will be sensed when the button is depressed.
+ * connected to GPIO PA0.  A high value will be sensed when the button is depressed.
  */
 
 #define BUTTON_USER        0
@@ -328,7 +334,7 @@
  *
  *   -------- ---------------
  *               STM32F7
- *   ARDUIONO FUNCTION  GPIO
+ *   ARDUINO  FUNCTION  GPIO
  *   -- ----- --------- -----
  *   DO RX    USART6_RX PC7
  *   D1 TX    USART6_TX PC6
@@ -337,6 +343,22 @@
 
 #define GPIO_USART6_RX GPIO_USART6_RX_1
 #define GPIO_USART6_TX GPIO_USART6_TX_1
+
+/* USART1:
+ * USART1 is connected to the "Virtual Com Port" lines
+ * of the ST-LINK controller.
+ *
+ *   -------- ---------------
+ *               STM32F7
+ *   SIGNAME  FUNCTION  GPIO
+ *   -- ----- --------- -----
+ *   VCP_RX   USART1_RX PA10
+ *   VCP_TX   USART1_TX PA9
+ *   -- ----- --------- -----
+ */
+
+#define GPIO_USART1_RX GPIO_USART1_RX_1
+#define GPIO_USART1_TX GPIO_USART1_TX_1
 
 /* The STM32 F7 connects to a SMSC LAN8742A PHY using these pins:
  *
@@ -348,7 +370,7 @@
  *   PG14     RMII_TXD1    TXD1
  *   PC4      RMII_RXD0    RXD0/MODE0
  *   PC5      RMII_RXD1    RXD1/MODE1
- *   PG2      RMII_RXER    RXER/PHYAD0 -- Not used
+ *   PD5      RMII_RXER    RXER/PHYAD0
  *   PA7      RMII_CRS_DV  CRS_DV/MODE2
  *   PC1      RMII_MDC     MDC
  *   PA2      RMII_MDIO    MDIO
@@ -356,8 +378,9 @@
  *   PA1      RMII_REF_CLK nINT/REFCLK0
  *   N/A      OSC_25M      XTAL1/CLKIN
  *
- * The PHY address is either 0 or 1, depending on the state of PG2 on reset.
- * PG2 is not controlled but appears to result in a PHY address of 0.
+ * The PHY address is 0, since RMII_RXER/PHYAD0 features a pull down.
+ * After reset, RMII_RXER/PHYAD0 switches to the RXER function,
+ * receive errors can be detected using GPIO pin PD5
  */
 
 #define GPIO_ETH_RMII_TX_EN   GPIO_ETH_RMII_TX_EN_2
