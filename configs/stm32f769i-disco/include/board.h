@@ -387,6 +387,16 @@
 #define GPIO_ETH_RMII_TXD0    GPIO_ETH_RMII_TXD0_2
 #define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_2
 
+/* I2C Mapping
+ * I2C #4 is connected to the LCD daughter board
+ * and the WM8994 audio codec.
+ *
+ * SCL - PD12
+ * SDA - PB7
+ */
+#define GPIO_I2C4_SCL        GPIO_I2C4_SCL_1
+#define GPIO_I2C4_SDA        GPIO_I2C4_SDA_5
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
