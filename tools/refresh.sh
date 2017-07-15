@@ -109,9 +109,12 @@ fi
 WD=${PWD}
 
 BOARDDIR=configs/$BOARDSUBDIR
+SCRIPTSDIR=$BOARDDIR/scripts
+MAKEDEFS1=$SCRIPTSDIR/Make.defs
+
 CONFIGDIR=$BOARDDIR/$CONFIGSUBDIR
 DEFCONFIG=$CONFIGDIR/defconfig
-MAKEDEFS=$CONFIGDIR/Make.defs
+MAKEDEFS2=$CONFIGDIR/Make.defs
 
 CMPCONFIG_TARGET=cmpconfig
 CMPCONFIG1=tools/cmpconfig
@@ -136,9 +139,15 @@ if [ ! -r "$DEFCONFIG" ]; then
   exit 1
 fi
 
-if [ ! -r "$MAKEDEFS" ]; then
-  echo "No readable Make.defs file at $MAKEDEFS"
-  exit 1
+if [ -r "$MAKEDEFS1" ]; then
+  MAKEDEFS=$MAKEDEFS1
+else
+  if [ -r "$MAKEDEFS2" ]; then
+    MAKEDEFS=$MAKEDEFS2
+  else
+    echo "No readable Make.defs file at $MAKEDEFS1 or $MAKEDEFS2"
+    exit 1
+  fi
 fi
 
 # If the cmpconfig executable does not exist, then build it
