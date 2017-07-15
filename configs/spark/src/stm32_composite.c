@@ -318,6 +318,7 @@ static int stm32_composite_initialize(void)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_USBMSC_COMPOSITE
 static int board_mscclassobject(int minor,
                                 FAR struct usbdev_description_s *devdesc,
                                 FAR struct usbdevclass_driver_s **classdev)
@@ -363,6 +364,7 @@ static int board_mscclassobject(int minor,
 
   return ret;
 }
+#endif
 
  /****************************************************************************
  * Name: board_mscuninitialize
@@ -381,12 +383,14 @@ static int board_mscclassobject(int minor,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_USBMSC_COMPOSITE
 void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev)
 {
   DEBUGASSERT(g_mschandle != NULL);
   usbmsc_uninitialize(g_mschandle);
   g_mschandle = NULL;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
