@@ -167,76 +167,13 @@ static int board_mscclassobject(int minor,
  ****************************************************************************/
 
 #ifdef CONFIG_USBMSC_COMPOSITE
-void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev)
+static void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev)
 {
   DEBUGASSERT(g_mschandle != NULL);
   usbmsc_uninitialize(g_mschandle);
   g_mschandle = NULL;
 }
 #endif
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: board_composite_initialize
- *
- * Description:
- *   Perform architecture specific initialization of a composite USB device.
- *
- ****************************************************************************/
-
-int board_composite_initialize(int port)
-{
-  /* If system/composite is built as an NSH command, then SD slot should
-   * already have been initialized in board_app_initialize() (see lpc2148_appinit.c).
-   * In this case, there is nothing further to be done here.
-   *
-   * NOTE: CONFIG_NSH_BUILTIN_APPS is not a fool-proof indication that NSH
-   * was built.
-   */
-
-#ifndef CONFIG_NSH_BUILTIN_APPS
-  FAR struct spi_dev_s *spi;
-  int ret;
-
-  /* Get the SPI port */
-
-  syslog(LOG_INFO, "Initializing SPI port %d\n", LPC214X_MMCSDSPIPORTNO);
-
-  spi = lpc214x_spibus_initialize(LPC214X_MMCSDSPIPORTNO);
-  if (!spi)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",
-             LPC214X_MMCSDSPIPORTNO);
-      return -ENODEV;
-    }
-
-  syslog(LOG_INFO, "Successfully initialized SPI port %d\n",
-         LPC214X_MMCSDSPIPORTNO);
-
-  /* Bind the SPI port to the slot */
-
-  syslog(LOG_INFO, "Binding SPI port %d to MMC/SD slot %d\n",
-         LPC214X_MMCSDSPIPORTNO, LPC214X_MMCSDSLOTNO);
-
-  ret = mmcsd_spislotinitialize(0, LPC214X_MMCSDSLOTNO, spi);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
-             LPC214X_MMCSDSPIPORTNO, LPC214X_MMCSDSLOTNO, ret);
-      return ret;
-    }
-
-  syslog(LOG_INFO, "Successfully bound SPI port %d to MMC/SD slot %d\n",
-         LPC214X_MMCSDSPIPORTNO, LPC214X_MMCSDSLOTNO);
-
-#endif /* CONFIG_NSH_BUILTIN_APPS */
-
-  return OK;
-}
 
 /****************************************************************************
  * Name:  board_composite0_connect
@@ -255,7 +192,7 @@ int board_composite_initialize(int port)
  ****************************************************************************/
 
 #ifdef CONFIG_USBMSC_COMPOSITE
-FAR void *board_composite0_connect(int port)
+static FAR void *board_composite0_connect(int port)
 {
   /* Here we are composing the configuration of the usb composite device.
    *
@@ -352,7 +289,7 @@ FAR void *board_composite0_connect(int port)
  *
  ****************************************************************************/
 
-FAR void *board_composite1_connect(int port)
+static FAR void *board_composite1_connect(int port)
 {
   struct composite_devdesc_s dev[2];
   int strbase = COMPOSITE_NSTRIDS;
@@ -393,6 +330,69 @@ FAR void *board_composite1_connect(int port)
     }
 
   return composite_initialize(2, dev);
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_composite_initialize
+ *
+ * Description:
+ *   Perform architecture specific initialization of a composite USB device.
+ *
+ ****************************************************************************/
+
+int board_composite_initialize(int port)
+{
+  /* If system/composite is built as an NSH command, then SD slot should
+   * already have been initialized in board_app_initialize() (see lpc2148_appinit.c).
+   * In this case, there is nothing further to be done here.
+   *
+   * NOTE: CONFIG_NSH_BUILTIN_APPS is not a fool-proof indication that NSH
+   * was built.
+   */
+
+#ifndef CONFIG_NSH_BUILTIN_APPS
+  FAR struct spi_dev_s *spi;
+  int ret;
+
+  /* Get the SPI port */
+
+  syslog(LOG_INFO, "Initializing SPI port %d\n", LPC214X_MMCSDSPIPORTNO);
+
+  spi = lpc214x_spibus_initialize(LPC214X_MMCSDSPIPORTNO);
+  if (!spi)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",
+             LPC214X_MMCSDSPIPORTNO);
+      return -ENODEV;
+    }
+
+  syslog(LOG_INFO, "Successfully initialized SPI port %d\n",
+         LPC214X_MMCSDSPIPORTNO);
+
+  /* Bind the SPI port to the slot */
+
+  syslog(LOG_INFO, "Binding SPI port %d to MMC/SD slot %d\n",
+         LPC214X_MMCSDSPIPORTNO, LPC214X_MMCSDSLOTNO);
+
+  ret = mmcsd_spislotinitialize(0, LPC214X_MMCSDSLOTNO, spi);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
+             LPC214X_MMCSDSPIPORTNO, LPC214X_MMCSDSLOTNO, ret);
+      return ret;
+    }
+
+  syslog(LOG_INFO, "Successfully bound SPI port %d to MMC/SD slot %d\n",
+         LPC214X_MMCSDSPIPORTNO, LPC214X_MMCSDSLOTNO);
+
+#endif /* CONFIG_NSH_BUILTIN_APPS */
+
+  return OK;
 }
 
 /****************************************************************************

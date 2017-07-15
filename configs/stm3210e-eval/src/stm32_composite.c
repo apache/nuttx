@@ -178,78 +178,13 @@ static int board_mscclassobject(int minor,
  ****************************************************************************/
 
 #ifdef CONFIG_USBMSC_COMPOSITE
-void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev)
+static void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev)
 {
   DEBUGASSERT(g_mschandle != NULL);
   usbmsc_uninitialize(g_mschandle);
   g_mschandle = NULL;
 }
 #endif
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: board_composite_initialize
- *
- * Description:
- *   Perform architecture specific initialization of a composite USB device.
- *
- ****************************************************************************/
-
-int board_composite_initialize(int port)
-{
-  /* If system/composite is built as an NSH command, then SD slot should
-   * already have been initialized in board_app_initialize() (see
-   * stm32_appinit.c).  In this case, there is nothing further to be done here.
-   *
-   * NOTE: CONFIG_NSH_BUILTIN_APPS is not a fool-proof indication that NSH
-   * was built.
-   */
-
-#ifndef CONFIG_NSH_BUILTIN_APPS
-  FAR struct sdio_dev_s *sdio;
-  int ret;
-
-  /* First, get an instance of the SDIO interface */
-
-  syslog(LOG_INFO, "Initializing SDIO slot %d\n", STM32_MMCSDSLOTNO);
-
-  sdio = sdio_initialize(STM32_MMCSDSLOTNO);
-  if (!sdio)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SDIO slot %d\n",
-             STM32_MMCSDSLOTNO);
-      return -ENODEV;
-    }
-
-  /* Now bind the SDIO interface to the MMC/SD driver */
-
-  syslog(LOG_INFO, "Bind SDIO to the MMC/SD driver, minor=0\n");
-
-  ret = mmcsd_slotinitialize(0, sdio);
-  if (ret != OK)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
-             ret);
-      return ret;
-    }
-
-  syslog(LOG_INFO, "Successfully bound SDIO to the MMC/SD driver\n");
-
-  /* Then let's guess and say that there is a card in the slot.  I need to check to
-   * see if the STM3210E-EVAL board supports a GPIO to detect if there is a card in
-   * the slot.
-   */
-
-   sdio_mediachange(sdio, true);
-
-#endif /* CONFIG_NSH_BUILTIN_APPS */
-
-   return OK;
-}
 
 /****************************************************************************
  * Name:  board_composite0_connect
@@ -268,7 +203,7 @@ int board_composite_initialize(int port)
  ****************************************************************************/
 
 #ifdef CONFIG_USBMSC_COMPOSITE
-FAR void *board_composite0_connect(int port)
+static FAR void *board_composite0_connect(int port)
 {
   /* Here we are composing the configuration of the usb composite device.
    *
@@ -365,19 +300,20 @@ FAR void *board_composite0_connect(int port)
  *
  ****************************************************************************/
 
-FAR void *board_composite1_connect(int port)
+static FAR void *board_composite1_connect(int port)
 {
-  struct composite_devdesc_s dev[2];
-  int strbase = COMPOSITE_NSTRIDS;
-  int ifnobase = 0;
-  int epno;
-  int i;
-
   /* REVISIT:  This configuration currently fails.  stm32_epallocpma() fails
    * allocate a buffer for the 6th endpoint.  Currenlty it supports 7x64 byte
    * buffers, two required for EP0, leaving only buffers for 5 additional
    * endpoints.
    */
+
+#if 0
+  struct composite_devdesc_s dev[2];
+  int strbase = COMPOSITE_NSTRIDS;
+  int ifnobase = 0;
+  int epno;
+  int i;
 
   for (i = 0, epno = 1; i < 2; i++)
     {
@@ -412,6 +348,74 @@ FAR void *board_composite1_connect(int port)
     }
 
   return composite_initialize(2, dev);
+#else
+  return NULL;
+#endif
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_composite_initialize
+ *
+ * Description:
+ *   Perform architecture specific initialization of a composite USB device.
+ *
+ ****************************************************************************/
+
+int board_composite_initialize(int port)
+{
+  /* If system/composite is built as an NSH command, then SD slot should
+   * already have been initialized in board_app_initialize() (see
+   * stm32_appinit.c).  In this case, there is nothing further to be done here.
+   *
+   * NOTE: CONFIG_NSH_BUILTIN_APPS is not a fool-proof indication that NSH
+   * was built.
+   */
+
+#ifndef CONFIG_NSH_BUILTIN_APPS
+  FAR struct sdio_dev_s *sdio;
+  int ret;
+
+  /* First, get an instance of the SDIO interface */
+
+  syslog(LOG_INFO, "Initializing SDIO slot %d\n", STM32_MMCSDSLOTNO);
+
+  sdio = sdio_initialize(STM32_MMCSDSLOTNO);
+  if (!sdio)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDIO slot %d\n",
+             STM32_MMCSDSLOTNO);
+      return -ENODEV;
+    }
+
+  /* Now bind the SDIO interface to the MMC/SD driver */
+
+  syslog(LOG_INFO, "Bind SDIO to the MMC/SD driver, minor=0\n");
+
+  ret = mmcsd_slotinitialize(0, sdio);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
+             ret);
+      return ret;
+    }
+
+  syslog(LOG_INFO, "Successfully bound SDIO to the MMC/SD driver\n");
+
+  /* Then let's guess and say that there is a card in the slot.  I need to check to
+   * see if the STM3210E-EVAL board supports a GPIO to detect if there is a card in
+   * the slot.
+   */
+
+   sdio_mediachange(sdio, true);
+
+#endif /* CONFIG_NSH_BUILTIN_APPS */
+
+   return OK;
 }
 
 /****************************************************************************

@@ -182,71 +182,13 @@ static int board_mscclassobject(int minor,
  ****************************************************************************/
 
 #ifdef CONFIG_USBMSC_COMPOSITE
-void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev)
+static void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev)
 {
   DEBUGASSERT(g_mschandle != NULL);
   usbmsc_uninitialize(g_mschandle);
   g_mschandle = NULL;
 }
 #endif
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: board_composite_initialize
- *
- * Description:
- *   Perform architecture specific initialization of a composite USB device.
- *
- ****************************************************************************/
-
-int board_composite_initialize(int port)
-{
-  /* If system/composite is built as an NSH command, then SD slot should
-   * already have been initialized in board_app_initialize() (see stm32_appinit.c).
-   * In this case, there is nothing further to be done here.
-   */
-
-  FAR struct spi_dev_s *spi;
-  int ret;
-
-  /* First, get an instance of the SPI interface */
-
-  syslog(LOG_INFO, "Initializing SPI port %d\n",
-         OLIMEXINO_STM32_MMCSDSPIPORTNO);
-
-  spi = stm32_spibus_initialize(OLIMEXINO_STM32_MMCSDSPIPORTNO);
-  if (!spi)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",
-          OLIMEXINO_STM32_MMCSDSPIPORTNO);
-      return -ENODEV;
-    }
-
-  syslog(LOG_INFO, "Successfully initialized SPI port %d\n",
-      OLIMEXINO_STM32_MMCSDSPIPORTNO);
-
-  /* Now bind the SPI interface to the MMC/SD driver */
-
-  syslog(LOG_INFO, "Bind SPI to the MMC/SD driver, minor=0 slot=%d\n",
-         OLIMEXINO_STM32_MMCSDSLOTNO);
-
-  ret = mmcsd_spislotinitialize(0, OLIMEXINO_STM32_MMCSDSLOTNO, spi);
-  if (ret != OK)
-    {
-      syslog(LOG_ERR,
-            "ERROR: Failed to bind SPI port %d to MMC/SD minor=0 slot=%d %d\n",
-             OLIMEXINO_STM32_MMCSDSPIPORTNO, OLIMEXINO_STM32_MMCSDSLOTNO,
-             ret);
-      return ret;
-    }
-
-  syslog(LOG_INFO, "Successfully bound SPI to the MMC/SD driver\n");
-
-   return OK;
-}
 
 /****************************************************************************
  * Name:  board_composite0_connect
@@ -265,7 +207,7 @@ int board_composite_initialize(int port)
  ****************************************************************************/
 
 #ifdef CONFIG_USBMSC_COMPOSITE
-FAR void *board_composite0_connect(int port)
+static FAR void *board_composite0_connect(int port)
 {
   /* Here we are composing the configuration of the usb composite device.
    *
@@ -362,19 +304,20 @@ FAR void *board_composite0_connect(int port)
  *
  ****************************************************************************/
 
-FAR void *board_composite1_connect(int port)
+static FAR void *board_composite1_connect(int port)
 {
-  struct composite_devdesc_s dev[2];
-  int strbase = COMPOSITE_NSTRIDS;
-  int ifnobase = 0;
-  int epno;
-  int i;
-
   /* REVISIT:  This configuration currently fails.  stm32_epallocpma() fails
    * allocate a buffer for the 6th endpoint.  Currenlty it supports 7x64 byte
    * buffers, two required for EP0, leaving only buffers for 5 additional
    * endpoints.
    */
+
+#if 0
+  struct composite_devdesc_s dev[2];
+  int strbase = COMPOSITE_NSTRIDS;
+  int ifnobase = 0;
+  int epno;
+  int i;
 
   for (i = 0, epno = 1; i < 2; i++)
     {
@@ -409,6 +352,67 @@ FAR void *board_composite1_connect(int port)
     }
 
   return composite_initialize(2, dev);
+#else
+  return NULL;
+#endif
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_composite_initialize
+ *
+ * Description:
+ *   Perform architecture specific initialization of a composite USB device.
+ *
+ ****************************************************************************/
+
+int board_composite_initialize(int port)
+{
+  /* If system/composite is built as an NSH command, then SD slot should
+   * already have been initialized in board_app_initialize() (see stm32_appinit.c).
+   * In this case, there is nothing further to be done here.
+   */
+
+  FAR struct spi_dev_s *spi;
+  int ret;
+
+  /* First, get an instance of the SPI interface */
+
+  syslog(LOG_INFO, "Initializing SPI port %d\n",
+         OLIMEXINO_STM32_MMCSDSPIPORTNO);
+
+  spi = stm32_spibus_initialize(OLIMEXINO_STM32_MMCSDSPIPORTNO);
+  if (!spi)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",
+          OLIMEXINO_STM32_MMCSDSPIPORTNO);
+      return -ENODEV;
+    }
+
+  syslog(LOG_INFO, "Successfully initialized SPI port %d\n",
+      OLIMEXINO_STM32_MMCSDSPIPORTNO);
+
+  /* Now bind the SPI interface to the MMC/SD driver */
+
+  syslog(LOG_INFO, "Bind SPI to the MMC/SD driver, minor=0 slot=%d\n",
+         OLIMEXINO_STM32_MMCSDSLOTNO);
+
+  ret = mmcsd_spislotinitialize(0, OLIMEXINO_STM32_MMCSDSLOTNO, spi);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+            "ERROR: Failed to bind SPI port %d to MMC/SD minor=0 slot=%d %d\n",
+             OLIMEXINO_STM32_MMCSDSPIPORTNO, OLIMEXINO_STM32_MMCSDSLOTNO,
+             ret);
+      return ret;
+    }
+
+  syslog(LOG_INFO, "Successfully bound SPI to the MMC/SD driver\n");
+
+   return OK;
 }
 
 /****************************************************************************

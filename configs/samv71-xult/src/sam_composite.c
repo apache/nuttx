@@ -150,7 +150,7 @@ static int board_mscclassobject(int minor,
  ****************************************************************************/
 
 #ifdef CONFIG_USBMSC_COMPOSITE
-void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev)
+static void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev)
 {
   DEBUGASSERT(g_mschandle != NULL);
   usbmsc_uninitialize(g_mschandle);
