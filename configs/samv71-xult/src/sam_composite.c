@@ -53,53 +53,6 @@
  * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: board_cdcclassobject
- *
- * Description:
- *   If the CDC serial class driver is part of composite device, then
- *   board-specific logic must provide board_cdcclassobject().  In the
- *   simplest case, board_cdcclassobject() is simply a wrapper around
- *   cdcacm_classobject() that provides the correct device minor number.
- *
- * Input Parameters:
- *   classdev - The location to return the CDC serial class' device
- *     instance.
- *
- * Returned Value:
- *   0 on success; a negated errno on failure
- *
- ****************************************************************************/
-
-static int board_cdcclassobject(int minor,
-                                FAR struct usbdev_description_s *devdesc,
-                                FAR struct usbdevclass_driver_s **classdev)
-{
-  return cdcacm_classobject(minor, devdesc, classdev);
-}
-
-/****************************************************************************
- * Name: board_cdcuninitialize
- *
- * Description:
- *   Un-initialize the USB serial class driver.  This is just an application-
- *   specific wrapper around cdcadm_unitialize() that is called form the
- *   composite device logic.
- *
- * Input Parameters:
- *   classdev - The class driver instance previously given to the composite
- *     driver by board_cdcclassobject().
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void board_cdcuninitialize(FAR struct usbdevclass_driver_s *classdev)
-{
-  cdcacm_uninitialize(classdev);
-}
-
 /************************************************************************************
  * Name: board_mscclassobject
  *
@@ -112,7 +65,7 @@ static void board_cdcuninitialize(FAR struct usbdevclass_driver_s *classdev)
  *   board_mscclassobject() is called from the composite driver.  It must
  *   encapsulate the instantiation and configuration of the mass storage
  *   class and the return the mass storage device's class driver instance
- *   to the composite dirver.
+ *   to the composite driver.
  *
  * Input Parameters:
  *   classdev - The location to return the mass storage class' device
@@ -219,8 +172,8 @@ FAR void *board_composite_connect(int port, int configid)
       /* Overwrite and correct some values... */
       /* The callback functions for the CDC/ACM class */
 
-      dev[0].classobject  = board_cdcclassobject;
-      dev[0].uninitialize = board_cdcuninitialize;
+      dev[0].classobject  = cdcacm_classobject;
+      dev[0].uninitialize = cdcacm_uninitialize;
 
       /* Interfaces */
 
