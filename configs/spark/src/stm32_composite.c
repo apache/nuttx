@@ -293,7 +293,7 @@ static int stm32_composite_initialize(void)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: board_mscclassobject
  *
  * Description:
@@ -314,9 +314,10 @@ static int stm32_composite_initialize(void)
  * Returned Value:
  *   0 on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static int board_mscclassobject(int minor, FAR struct usbdev_description_s *devdesc,
+static int board_mscclassobject(int minor,
+                                FAR struct usbdev_description_s *devdesc,
                                 FAR struct usbdevclass_driver_s **classdev)
 {
   int ret;
@@ -392,13 +393,13 @@ static int board_mscclassobject(int minor, FAR struct usbdev_description_s *devd
   return ret;
 }
 
- /************************************************************************************
+ /****************************************************************************
  * Name: board_mscuninitialize
  *
  * Description:
  *   Un-initialize the USB storage class driver.  This is just an application-
- *   specific wrapper aboutn usbmsc_unitialize() that is called form the composite
- *   device logic.
+ *   specific wrapper aboutn usbmsc_unitialize() that is called form the
+ *   composite device logic.
  *
  * Input Parameters:
  *   classdev - The class driver instrance previously give to the composite
@@ -407,7 +408,7 @@ static int board_mscclassobject(int minor, FAR struct usbdev_description_s *devd
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev)
 {
@@ -438,16 +439,14 @@ int board_composite_initialize(int port)
 }
 
 /****************************************************************************
- * Name:  board_composite_connect
+ * Name:  board_composite0_connect
  *
  * Description:
- *   Connect the USB composite device on the specified USB device port using
- *   the specified configuration.  The interpretation of the configid is
- *   board specific.
+ *   Connect the USB composite device on the specified USB device port for
+ *   configuration 0.
  *
  * Input Parameters:
  *   port     - The USB device port.
- *   configid - The USB composite configuration
  *
  * Returned Value:
  *   A non-NULL handle value is returned on success.  NULL is returned on
@@ -455,7 +454,8 @@ int board_composite_initialize(int port)
  *
  ****************************************************************************/
 
-FAR void *board_composite_connect(int port, int configid)
+#ifdef CONFIG_USBMSC_COMPOSITE
+FAR void *board_composite0_connect(int port)
 {
   /* Here we are composing the configuration of the usb composite device.
    *
@@ -533,4 +533,102 @@ FAR void *board_composite_connect(int port, int configid)
   strbase  += dev[1].devdesc.nstrings;
 
   return composite_initialize(2, dev);
+}
+#endif
+
+/****************************************************************************
+ * Name:  board_composite1_connect
+ *
+ * Description:
+ *   Connect the USB composite device on the specified USB device port for
+ *   configuration 1.
+ *
+ * Input Parameters:
+ *   port     - The USB device port.
+ *
+ * Returned Value:
+ *   A non-NULL handle value is returned on success.  NULL is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+FAR void *board_composite1_connect(int port)
+{
+  struct composite_devdesc_s dev[2];
+  int strbase = COMPOSITE_NSTRIDS;
+  int ifnobase = 0;
+  int epno;
+  int i;
+
+  for (i = 0, epno = 1; i < 2; i++)
+    {
+      /* Ask the cdcacm driver to fill in the constants we didn't know here */
+
+      cdcacm_get_composite_devdesc(&dev[i]);
+
+      /* Overwrite and correct some values... */
+      /* The callback functions for the CDC/ACM class */
+
+      dev[i].classobject = cdcacm_classobject;
+      dev[i].uninitialize = cdcacm_uninitialize;
+
+      dev[i].minor = i;                         /* The minor interface number */
+
+      /* Interfaces */
+
+      dev[i].devdesc.ifnobase = ifnobase;        /* Offset to Interface-IDs */
+
+      /* Strings */
+
+      dev[i].devdesc.strbase = strbase;          /* Offset to String Numbers */
+
+      /* Endpoints */
+
+      dev[i].devdesc.epno[CDCACM_EP_INTIN_IDX]   = epno++;
+      dev[i].devdesc.epno[CDCACM_EP_BULKIN_IDX]  = epno++;
+      dev[i].devdesc.epno[CDCACM_EP_BULKOUT_IDX] = epno++;
+
+      ifnobase += dev[i].devdesc.ninterfaces;
+      strbase  += dev[i].devdesc.nstrings;
+    }
+
+  return composite_initialize(2, dev);
+}
+
+/****************************************************************************
+ * Name:  board_composite_connect
+ *
+ * Description:
+ *   Connect the USB composite device on the specified USB device port using
+ *   the specified configuration.  The interpretation of the configid is
+ *   board specific.
+ *
+ * Input Parameters:
+ *   port     - The USB device port.
+ *   configid - The USB composite configuration
+ *
+ * Returned Value:
+ *   A non-NULL handle value is returned on success.  NULL is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+FAR void *board_composite_connect(int port, int configid)
+{
+  if (configid == 0)
+    {
+#ifdef CONFIG_USBMSC_COMPOSITE
+      return board_composite0_connect(port);
+#else
+      return NULL;
+#endif
+    }
+  else if (configid == 1)
+    {
+      return board_composite1_connect(port);
+    }
+  else
+    {
+      return NULL;
+    }
 }

@@ -61,7 +61,7 @@ static FAR void *g_mschandle;
  * Private Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: board_mscclassobject
  *
  * Description:
@@ -82,10 +82,11 @@ static FAR void *g_mschandle;
  * Returned Value:
  *   0 on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBMSC_COMPOSITE
-static int board_mscclassobject(int minor, FAR struct usbdev_description_s *devdesc,
+static int board_mscclassobject(int minor,
+                                FAR struct usbdev_description_s *devdesc,
                                 FAR struct usbdevclass_driver_s **classdev)
 {
   int ret;
@@ -162,13 +163,13 @@ static int board_mscclassobject(int minor, FAR struct usbdev_description_s *devd
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: board_mscuninitialize
  *
  * Description:
  *   Un-initialize the USB storage class driver.  This is just an application-
- *   specific wrapper aboutn usbmsc_unitialize() that is called form the composite
- *   device logic.
+ *   specific wrapper aboutn usbmsc_unitialize() that is called form the
+ *   composite device logic.
  *
  * Input Parameters:
  *   classdev - The class driver instrance previously give to the composite
@@ -177,7 +178,7 @@ static int board_mscclassobject(int minor, FAR struct usbdev_description_s *devd
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBMSC_COMPOSITE
 void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev)
@@ -232,6 +233,7 @@ FAR void *board_composite_connect(int port, int configid)
 
   if (configid == 0)
     {
+#ifdef CONFIG_USBMSC_COMPOSITE
       struct composite_devdesc_s dev[2];
       int ifnobase = 0;
       int strbase  = COMPOSITE_NSTRIDS;
@@ -303,6 +305,9 @@ FAR void *board_composite_connect(int port, int configid)
       strbase  += dev[1].devdesc.nstrings;
 
       return composite_initialize(2, dev);
+#else
+      return NULL;
+#endif
     }
 
   /* Configuration with three CDC/ACMs
