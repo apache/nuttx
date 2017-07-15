@@ -55,18 +55,16 @@
 
 #include "stm32.h"
 
-/* There is nothing to do here if SDIO support is not selected. */
-
-#if defined(CONFIG_STM32_SDIO) && defined(CONFIG_USBDEV_COMPOSITE)
+#if defined(CONFIG_BOARDCTL_USBDEVCTRL) && defined(CONFIG_USBDEV_COMPOSITE)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
+/* No SDIO?  Then no USB MSC device in composite */
 
-#ifndef CONFIG_SYSTEM_COMPOSITE_DEVMINOR1
-#  define CONFIG_SYSTEM_COMPOSITE_DEVMINOR1 0
+#ifndef CONFIG_STM32_SDIO
+#  undef CONFIG_USBMSC_COMPOSITE
 #endif
 
 /* SLOT number(s) could depend on the board configuration */
@@ -125,8 +123,8 @@ static int board_mscclassobject(int minor,
 
   /* Configure the mass storage device */
 
-  uinfo("Configuring with NLUNS=%d\n", CONFIG_SYSTEM_COMPOSITE_NLUNS);
-  ret = usbmsc_configure(CONFIG_SYSTEM_COMPOSITE_NLUNS, &g_mschandle);
+  uinfo("Configuring with NLUNS=1\n");
+  ret = usbmsc_configure(1, &g_mschandle);
   if (ret < 0)
     {
       uerr("ERROR: usbmsc_configure failed: %d\n", -ret);
@@ -137,47 +135,16 @@ static int board_mscclassobject(int minor,
 
   /* Bind the LUN(s) */
 
-  uinfo("Bind LUN=0 to %s\n", CONFIG_SYSTEM_COMPOSITE_DEVPATH1);
-  ret = usbmsc_bindlun(g_mschandle, CONFIG_SYSTEM_COMPOSITE_DEVPATH1,
-                       0, 0, 0, false);
+  uinfo("Bind LUN=0 to /dev/mmcsd0\n");
+  ret = usbmsc_bindlun(g_mschandle, "/dev/mmcsd0", 0, 0, 0, false);
   if (ret < 0)
     {
-      uerr("ERROR: usbmsc_bindlun failed for LUN 1 using %s: %d\n",
-            CONFIG_SYSTEM_COMPOSITE_DEVPATH1, -ret);
+      uerr("ERROR: usbmsc_bindlun failed for LUN 1 at /dev/mmcsd0: %d\n",
+           ret);
       usbmsc_uninitialize(g_mschandle);
       g_mschandle = NULL;
       return ret;
     }
-
-#if CONFIG_SYSTEM_COMPOSITE_NLUNS > 1
-
-  uinfo("Bind LUN=1 to %s\n", CONFIG_SYSTEM_COMPOSITE_DEVPATH2);
-  ret = usbmsc_bindlun(g_mschandle, CONFIG_SYSTEM_COMPOSITE_DEVPATH2,
-                       1, 0, 0, false);
-  if (ret < 0)
-    {
-      uerr("ERROR: usbmsc_bindlun failed for LUN 2 using %s: %d\n",
-               CONFIG_SYSTEM_COMPOSITE_DEVPATH2, -ret);
-      usbmsc_uninitialize(g_mschandle);
-      g_mschandle = NULL;
-      return ret;
-    }
-
-#if CONFIG_SYSTEM_COMPOSITE_NLUNS > 2
-
-  uinfo("Bind LUN=2 to %s\n", CONFIG_SYSTEM_COMPOSITE_DEVPATH3);
-  ret = usbmsc_bindlun(g_mschandle, CONFIG_SYSTEM_COMPOSITE_DEVPATH3,
-                       2, 0, 0, false);
-  if (ret < 0)
-    {
-      uerr("ERROR: usbmsc_bindlun failed for LUN 3 using %s: %d\n",
-               CONFIG_SYSTEM_COMPOSITE_DEVPATH3, -ret);
-      usbmsc_uninitialize(g_mschandle);
-      g_mschandle = NULL;
-      return ret;
-    }
-#endif
-#endif
 
   /* Get the mass storage device's class object */
 
@@ -259,10 +226,9 @@ int board_composite_initialize(int port)
 
   /* Now bind the SDIO interface to the MMC/SD driver */
 
-  syslog(LOG_INFO, "Bind SDIO to the MMC/SD driver, minor=%d\n",
-         CONFIG_SYSTEM_COMPOSITE_DEVMINOR1);
+  syslog(LOG_INFO, "Bind SDIO to the MMC/SD driver, minor=0\n");
 
-  ret = mmcsd_slotinitialize(CONFIG_SYSTEM_COMPOSITE_DEVMINOR1, sdio);
+  ret = mmcsd_slotinitialize(0, sdio);
   if (ret != OK)
     {
       syslog(LOG_ERR,
@@ -330,7 +296,7 @@ FAR void *board_composite0_connect(int port)
   /* Interfaces */
 
   dev[0].devdesc.ifnobase = ifnobase;             /* Offset to Interface-IDs */
-  dev[0].minor = CONFIG_SYSTEM_COMPOSITE_TTYUSB;  /* The minor interface number */
+  dev[0].minor = 0;                               /* The minor interface number */
 
   /* Strings */
 
@@ -363,7 +329,7 @@ FAR void *board_composite0_connect(int port)
   /* Interfaces */
 
   dev[1].devdesc.ifnobase = ifnobase;               /* Offset to Interface-IDs */
-  dev[1].minor = CONFIG_SYSTEM_COMPOSITE_DEVMINOR1; /* The minor interface number */
+  dev[1].minor = 0;                                 /* The minor interface number */
 
   /* Strings */
 
@@ -480,4 +446,4 @@ FAR void *board_composite_connect(int port, int configid)
     }
 }
 
-#endif /* CONFIG_STM32_SDIO && CONFIG_USBDEV_COMPOSITE */
+#endif /* CONFIG_BOARDCTL_USBDEVCTRL && CONFIG_USBDEV_COMPOSITE */
