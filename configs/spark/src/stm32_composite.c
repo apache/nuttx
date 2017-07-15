@@ -122,6 +122,14 @@
 #endif
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_USBMSC_COMPOSITE
+static FAR void *g_mschandle;
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -311,13 +319,74 @@ static int stm32_composite_initialize(void)
 static int board_mscclassobject(int minor, FAR struct usbdev_description_s *devdesc,
                                 FAR struct usbdevclass_driver_s **classdev)
 {
-  FAR void *handle;
   int ret;
 
-  ret = usbmsc_configure(1, &handle);
-  if (ret >= 0)
+  DEBUGASSERT(g_mschandle == NULL);
+
+  /* Configure the mass storage device */
+
+  uinfo("Configuring with NLUNS=%d\n", CONFIG_SYSTEM_COMPOSITE_NLUNS);
+  ret = usbmsc_configure(CONFIG_SYSTEM_COMPOSITE_NLUNS, &g_mschandle);
+  if (ret < 0)
     {
-      ret = usbmsc_classobject(handle, devdesc, classdev);
+      uerr("ERROR: usbmsc_configure failed: %d\n", -ret);
+      return ret;
+    }
+
+  uinfo("MSC handle=%p\n", g_mschandle);
+
+  /* Bind the LUN(s) */
+
+  uinfo("Bind LUN=0 to %s\n", CONFIG_SYSTEM_COMPOSITE_DEVPATH1);
+  ret = usbmsc_bindlun(g_mschandle, CONFIG_SYSTEM_COMPOSITE_DEVPATH1,
+                       0, 0, 0, false);
+  if (ret < 0)
+    {
+      uerr("ERROR: usbmsc_bindlun failed for LUN 1 using %s: %d\n",
+            CONFIG_SYSTEM_COMPOSITE_DEVPATH1, -ret);
+      usbmsc_uninitialize(g_mschandle);
+      g_mschandle = NULL;
+      return ret;
+    }
+
+#if CONFIG_SYSTEM_COMPOSITE_NLUNS > 1
+
+  uinfo("Bind LUN=1 to %s\n", CONFIG_SYSTEM_COMPOSITE_DEVPATH2);
+  ret = usbmsc_bindlun(g_mschandle, CONFIG_SYSTEM_COMPOSITE_DEVPATH2,
+                       1, 0, 0, false);
+  if (ret < 0)
+    {
+      uerr("ERROR: usbmsc_bindlun failed for LUN 2 using %s: %d\n",
+               CONFIG_SYSTEM_COMPOSITE_DEVPATH2, -ret);
+      usbmsc_uninitialize(g_mschandle);
+      g_mschandle = NULL;
+      return ret;
+    }
+
+#if CONFIG_SYSTEM_COMPOSITE_NLUNS > 2
+
+  uinfo("Bind LUN=2 to %s\n", CONFIG_SYSTEM_COMPOSITE_DEVPATH3);
+  ret = usbmsc_bindlun(g_mschandle, CONFIG_SYSTEM_COMPOSITE_DEVPATH3,
+                       2, 0, 0, false);
+  if (ret < 0)
+    {
+      uerr("ERROR: usbmsc_bindlun failed for LUN 3 using %s: %d\n",
+               CONFIG_SYSTEM_COMPOSITE_DEVPATH3, -ret);
+      usbmsc_uninitialize(g_mschandle);
+      g_mschandle = NULL;
+      return ret;
+    }
+#endif
+#endif
+
+  /* Get the mass storage device's class object */
+
+  ret = usbmsc_classobject(g_mschandle, devdesc, classdev);
+  if (ret < 0)
+    {
+      uerr("ERROR: usbmsc_classobject failed: %d\n", -ret);
+      usbmsc_uninitialize(g_mschandle);
+      g_mschandle = NULL;
     }
 
   return ret;
@@ -342,7 +411,9 @@ static int board_mscclassobject(int minor, FAR struct usbdev_description_s *devd
 
 void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev)
 {
-  usbmsc_uninitialize(classdev);
+  DEBUGASSERT(g_mschandle != NULL);
+  usbmsc_uninitialize(g_mschandle);
+  g_mschandle = NULL;
 }
 
 /****************************************************************************
