@@ -97,6 +97,7 @@
  *
  ************************************************************************************/
 
+#ifdef CONFIG_USBMSC_COMPOSITE
 static int board_mscclassobject(int minor, FAR struct usbdev_description_s *devdesc,
                                 FAR struct usbdevclass_driver_s **classdev)
 {
@@ -111,6 +112,7 @@ static int board_mscclassobject(int minor, FAR struct usbdev_description_s *devd
 
   return ret;
 }
+#endif
 
 /************************************************************************************
  * Name: board_mscuninitialize
@@ -129,10 +131,12 @@ static int board_mscclassobject(int minor, FAR struct usbdev_description_s *devd
  *
  ************************************************************************************/
 
+#ifdef CONFIG_USBMSC_COMPOSITE
 void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev)
 {
   usbmsc_uninitialize(classdev);
 }
+#endif
 
 /****************************************************************************
  * Public Functions
