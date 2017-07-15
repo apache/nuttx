@@ -535,6 +535,12 @@ FAR void *board_composite1_connect(int port)
   int epno;
   int i;
 
+  /* REVISIT:  This configuration currently fails.  stm32_epallocpma() fails
+   * allocate a buffer for the 6th endpoint.  Currenlty it supports 7x64 byte
+   * buffers, two required for EP0, leaving only buffers for 5 additional
+   * endpoints.
+   */
+
   for (i = 0, epno = 1; i < 2; i++)
     {
       /* Ask the cdcacm driver to fill in the constants we didn't know here */
