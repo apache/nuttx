@@ -116,7 +116,7 @@
 #  define COMPOSITE_REMOTEWAKEUP (0)
 #endif
 
-#define NUM_DEVICES_TO_HANDLE (4)
+#define NUM_DEVICES_TO_HANDLE         (4)
 
 /* Descriptors **************************************************************/
 /* These settings are not modifiable via the NuttX configuration */

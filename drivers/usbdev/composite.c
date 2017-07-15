@@ -807,6 +807,8 @@ FAR void *composite_initialize(uint8_t ndevices,
   int ret;
   int i;
 
+  DEBUGASSERT(pdevices != NULL && ndevices <= NUM_DEVICES_TO_HANDLE);
+
   /* Allocate the structures needed */
 
   alloc = (FAR struct composite_alloc_s *)
@@ -866,9 +868,10 @@ FAR void *composite_initialize(uint8_t ndevices,
   /* Register the USB composite class driver */
 
   ret = usbdev_register(&drvr->drvr);
-  if (ret)
+  if (ret < 0)
     {
-      usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_DEVREGISTER), (uint16_t)-ret);
+      usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_DEVREGISTER),
+                             (uint16_t)-ret);
       goto errout_with_alloc;
     }
 
