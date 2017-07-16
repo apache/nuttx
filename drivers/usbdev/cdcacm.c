@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/cdcacm.c
  *
- *   Copyright (C) 2011-2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,7 +64,7 @@
 
 #include "cdcacm.h"
 
-#ifdef CONFIG_USBMSC_COMPOSITE
+#ifdef CONFIG_CDCACM_COMPOSITE
 #  include <nuttx/usb/composite.h>
 #  include "composite.h"
 #endif
@@ -104,6 +104,8 @@ struct cdcacm_dev_s
   FAR struct usbdev_ep_s  *epbulkout;  /* Bulk OUT endpoint structure */
   FAR struct usbdev_req_s *ctrlreq;    /* Allocated control request */
   struct sq_queue_s        reqlist;    /* List of write request containers */
+
+  struct usbdev_description_s devdesc;
 
   /* Pre-allocated write request containers.  The write requests will
    * be linked in a free list (reqlist), and used to send requests to
@@ -157,10 +159,10 @@ static void    cdcacm_freereq(FAR struct usbdev_ep_s *ep,
 /* Configuration ***********************************************************/
 
 static void    cdcacm_resetconfig(FAR struct cdcacm_dev_s *priv);
-#ifdef CONFIG_USBDEV_DUALSPEED
 static int     cdcacm_epconfigure(FAR struct usbdev_ep_s *ep,
-                 enum cdcacm_epdesc_e epid, uint16_t mxpacket, bool last);
-#endif
+                 enum cdcacm_epdesc_e epid, bool last,
+                 FAR struct usbdev_description_s *devdesc,
+                 bool hispeed);
 static int     cdcacm_setconfig(FAR struct cdcacm_dev_s *priv,
                  uint8_t config);
 
@@ -211,6 +213,7 @@ static bool    cdcuart_txempty(FAR struct uart_dev_s *dev);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* USB class device *********************************************************/
 
 static const struct usbdevclass_driverops_s g_driverops =
@@ -275,7 +278,8 @@ static const struct uart_ops_s g_uartops =
  *
  ****************************************************************************/
 
-static uint16_t cdcacm_fillrequest(FAR struct cdcacm_dev_s *priv, uint8_t *reqbuf,
+static uint16_t cdcacm_fillrequest(FAR struct cdcacm_dev_s *priv,
+                                   FAR uint8_t *reqbuf,
                                    uint16_t reqlen)
 {
   FAR uart_dev_t *serdev = &priv->serdev;
@@ -287,7 +291,9 @@ static uint16_t cdcacm_fillrequest(FAR struct cdcacm_dev_s *priv, uint8_t *reqbu
 
   flags = enter_critical_section();
 
-  /* Transfer bytes while we have bytes available and there is room in the request */
+  /* Transfer bytes while we have bytes available and there is room in the
+   * request.
+   */
 
   while (xmit->head != xmit->tail && nbytes < reqlen)
     {
@@ -302,8 +308,8 @@ static uint16_t cdcacm_fillrequest(FAR struct cdcacm_dev_s *priv, uint8_t *reqbu
         }
     }
 
-  /* When all of the characters have been sent from the buffer
-   * disable the "TX interrupt".
+  /* When all of the characters have been sent from the buffer disable the
+   * "TX interrupt".
    */
 
   if (xmit->head == xmit->tail)
@@ -311,8 +317,8 @@ static uint16_t cdcacm_fillrequest(FAR struct cdcacm_dev_s *priv, uint8_t *reqbu
       uart_disabletxint(serdev);
     }
 
-  /* If any bytes were removed from the buffer, inform any waiters
-   * there there is space available.
+  /* If any bytes were removed from the buffer, inform any waiters that
+   * there is space available.
    */
 
   if (nbytes)
@@ -329,9 +335,9 @@ static uint16_t cdcacm_fillrequest(FAR struct cdcacm_dev_s *priv, uint8_t *reqbu
  *
  * Description:
  *   This function obtains write requests, transfers the TX data into the
- *   request, and submits the requests to the USB controller.  This continues
- *   until either (1) there are no further packets available, or (2) there is
- *   no further data to send.
+ *   request, and submits the requests to the USB controller.  This
+ *   continues until either (1) there are no further packets available, or
+ *   (2) there is no further data to send.
  *
  ****************************************************************************/
 
@@ -359,9 +365,9 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
 
   ep = priv->epbulkin;
 
-  /* Loop until either (1) we run out or write requests, or (2) cdcacm_fillrequest()
-   * is unable to fill the request with data (i.e., until there is no more data
-   * to be sent).
+  /* Loop until either (1) we run out or write requests, or (2)
+   * cdcacm_fillrequest() is unable to fill the request with data (i.e.,
+   * until there is no more data to be sent).
    */
 
   uinfo("head=%d tail=%d nwrq=%d empty=%d\n",
@@ -425,7 +431,7 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
  ****************************************************************************/
 
 static inline int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
-                                    uint8_t *reqbuf, uint16_t reqlen)
+                                    FAR uint8_t *reqbuf, uint16_t reqlen)
 {
   FAR uart_dev_t *serdev = &priv->serdev;
   FAR struct uart_buffer_s *recv = &serdev->recv;
@@ -436,11 +442,12 @@ static inline int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
   uinfo("head=%d tail=%d nrdq=%d reqlen=%d\n",
         priv->serdev.recv.head, priv->serdev.recv.tail, priv->nrdq, reqlen);
 
-  /* Get the next head index. During the time that RX interrupts are disabled, the
-   * the serial driver will be extracting data from the circular buffer and modifying
-   * recv.tail.  During this time, we should avoid modifying recv.head; Instead we will
-   * use a shadow copy of the index.  When interrupts are restored, the real recv.head
-   * will be updated with this index.
+  /* Get the next head index. During the time that RX interrupts are
+   * disabled, the the serial driver will be extracting data from the
+   * circular buffer and modifying recv.tail.  During this time, we should
+   * avoid modifying recv.head; Instead we will use a shadow copy of the
+   * index.  When interrupts are restored, the real recv.head will be
+   * updated with this index.
    */
 
   if (priv->rxenabled)
@@ -452,9 +459,9 @@ static inline int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
       currhead = priv->rxhead;
     }
 
-  /* Pre-calculate the head index and check for wrap around.  We need to do this
-   * so that we can determine if the circular buffer will overrun BEFORE we
-   * overrun the buffer!
+  /* Pre-calculate the head index and check for wrap around.  We need to do
+   * this so that we can determine if the circular buffer will overrun
+   * BEFORE we overrun the buffer!
    */
 
   nexthead = currhead + 1;
@@ -463,17 +470,17 @@ static inline int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
       nexthead = 0;
     }
 
-  /* Then copy data into the RX buffer until either: (1) all of the data has been
-   * copied, or (2) the RX buffer is full.
+  /* Then copy data into the RX buffer until either: (1) all of the data has
+   * been copied, or (2) the RX buffer is full.
    *
-   * NOTE:  If the RX buffer becomes full, then we have overrun the serial driver
-   * and data will be lost.  This is the correct behavior for a proper emulation
-   * of a serial link.  It should not NAK, it should drop data like a physical
-   * serial port.
+   * NOTE:  If the RX buffer becomes full, then we have overrun the serial
+   * driver and data will be lost.  This is the correct behavior for a
+   * proper emulation of a serial link.  It should not NAK, it should drop
+   * data like a physical serial port.
    *
-   * If you don't like that behavior.  DO NOT change it here.  Instead, you should
-   * finish the implementation of RX flow control which is the only proper way
-   * to throttle a serial device.
+   * If you don't like that behavior.  DO NOT change it here.  Instead, you
+   * should finish the implementation of RX flow control which is the only
+   * proper way to throttle a serial device.
    */
 
   while (nexthead != recv->tail && nbytes < reqlen)
@@ -527,6 +534,7 @@ static inline int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RXOVERRUN), 0);
       return -ENOSPC;
     }
+
   return OK;
 }
 
@@ -575,6 +583,7 @@ static void cdcacm_freereq(FAR struct usbdev_ep_s *ep,
         {
           EP_FREEBUFFER(ep, req->buf);
         }
+
       EP_FREEREQ(ep, req);
     }
 }
@@ -623,16 +632,15 @@ static void cdcacm_resetconfig(FAR struct cdcacm_dev_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_USBDEV_DUALSPEED
 static int cdcacm_epconfigure(FAR struct usbdev_ep_s *ep,
-                              enum cdcacm_epdesc_e epid, uint16_t mxpacket,
-                              bool last)
+                              enum cdcacm_epdesc_e epid, bool last,
+                              FAR struct usbdev_description_s *devdesc,
+                              bool hispeed)
 {
   struct usb_epdesc_s epdesc;
-  cdcacm_mkepdesc(epid, mxpacket, &epdesc);
+  cdcacm_copy_epdesc(epid, &epdesc, devdesc, hispeed);
   return EP_CONFIGURE(ep, &epdesc, last);
 }
-#endif
 
 /****************************************************************************
  * Name: cdcacm_setconfig
@@ -690,14 +698,14 @@ static int cdcacm_setconfig(FAR struct cdcacm_dev_s *priv, uint8_t config)
 #ifdef CONFIG_USBDEV_DUALSPEED
   if (priv->usbdev->speed == USB_SPEED_HIGH)
     {
-      ret = cdcacm_epconfigure(priv->epintin, CDCACM_EPINTIN,
-                               CONFIG_CDCACM_EPINTIN_HSSIZE, false);
+      ret = cdcacm_epconfigure(priv->epintin, CDCACM_EPINTIN, false,
+                               &priv->devdesc, true);
     }
   else
 #endif
     {
-      ret = EP_CONFIGURE(priv->epintin,
-                         cdcacm_getepdesc(CDCACM_EPINTIN), false);
+        ret = cdcacm_epconfigure(priv->epintin, CDCACM_EPINTIN, false,
+                                 &priv->devdesc, false);
     }
 
   if (ret < 0)
@@ -713,14 +721,14 @@ static int cdcacm_setconfig(FAR struct cdcacm_dev_s *priv, uint8_t config)
 #ifdef CONFIG_USBDEV_DUALSPEED
   if (priv->usbdev->speed == USB_SPEED_HIGH)
     {
-      ret = cdcacm_epconfigure(priv->epbulkin, CDCACM_EPBULKIN,
-                               CONFIG_CDCACM_EPBULKIN_HSSIZE, false);
+      ret = cdcacm_epconfigure(priv->epbulkin, CDCACM_EPBULKIN, false,
+                               &priv->devdesc, true);
     }
   else
 #endif
     {
-      ret = EP_CONFIGURE(priv->epbulkin,
-                         cdcacm_getepdesc(CDCACM_EPBULKIN), false);
+        ret = cdcacm_epconfigure(priv->epbulkin, CDCACM_EPBULKIN, false,
+                                 &priv->devdesc, false);
     }
 
   if (ret < 0)
@@ -736,14 +744,14 @@ static int cdcacm_setconfig(FAR struct cdcacm_dev_s *priv, uint8_t config)
 #ifdef CONFIG_USBDEV_DUALSPEED
   if (priv->usbdev->speed == USB_SPEED_HIGH)
     {
-      ret = cdcacm_epconfigure(priv->epbulkout, CDCACM_EPBULKOUT,
-                               CONFIG_CDCACM_EPBULKOUT_HSSIZE, true);
+      ret = cdcacm_epconfigure(priv->epbulkout, CDCACM_EPBULKOUT, true,
+                               &priv->devdesc, true);
     }
   else
 #endif
     {
-      ret = EP_CONFIGURE(priv->epbulkout,
-                         cdcacm_getepdesc(CDCACM_EPBULKOUT), true);
+        ret = cdcacm_epconfigure(priv->epbulkout, CDCACM_EPBULKOUT, true,
+                                 &priv->devdesc, false);
     }
 
   if (ret < 0)
@@ -764,7 +772,8 @@ static int cdcacm_setconfig(FAR struct cdcacm_dev_s *priv, uint8_t config)
       ret           = EP_SUBMIT(priv->epbulkout, req);
       if (ret != OK)
         {
-          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSUBMIT), (uint16_t)-ret);
+          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSUBMIT),
+                   (uint16_t)-ret);
           goto errout;
         }
 
@@ -852,7 +861,8 @@ static void cdcacm_rdcomplete(FAR struct usbdev_ep_s *ep,
       return;
 
     default: /* Some other error occurred */
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDUNEXPECTED), (uint16_t)-req->result);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDUNEXPECTED),
+                              (uint16_t)-req->result);
       break;
     };
 
@@ -862,7 +872,8 @@ static void cdcacm_rdcomplete(FAR struct usbdev_ep_s *ep,
   ret      = EP_SUBMIT(ep, req);
   if (ret != OK)
     {
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSUBMIT), (uint16_t)-req->result);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSUBMIT),
+                              (uint16_t)-req->result);
     }
 
   leave_critical_section(flags);
@@ -927,7 +938,8 @@ static void cdcacm_wrcomplete(FAR struct usbdev_ep_s *ep,
 
     default: /* Some other error occurred */
       {
-        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRUNEXPECTED), (uint16_t)-req->result);
+        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRUNEXPECTED),
+                 (uint16_t)-req->result);
       }
       break;
     }
@@ -967,7 +979,7 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
    * EP0).
    */
 
-#ifndef CONFIG_USBMSC_COMPOSITE
+#ifndef CONFIG_CDCACM_COMPOSITE
   dev->ep0->priv = priv;
 #endif
 
@@ -992,7 +1004,8 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate the IN interrupt endpoint */
 
-  priv->epintin = DEV_ALLOCEP(dev, CDCACM_EPINTIN_ADDR, true, USB_EP_ATTR_XFER_INT);
+  priv->epintin = DEV_ALLOCEP(dev, CDCACM_MKEPINTIN(&priv->devdesc),
+                              true, USB_EP_ATTR_XFER_INT);
   if (!priv->epintin)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPINTINALLOCFAIL), 0);
@@ -1004,7 +1017,8 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate the IN bulk endpoint */
 
-  priv->epbulkin = DEV_ALLOCEP(dev, CDCACM_EPINBULK_ADDR, true, USB_EP_ATTR_XFER_BULK);
+  priv->epbulkin = DEV_ALLOCEP(dev, CDCACM_MKEPBULKIN(&priv->devdesc),
+                               true, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkin)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKINALLOCFAIL), 0);
@@ -1016,7 +1030,8 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate the OUT bulk endpoint */
 
-  priv->epbulkout = DEV_ALLOCEP(dev, CDCACM_EPOUTBULK_ADDR, false, USB_EP_ATTR_XFER_BULK);
+  priv->epbulkout = DEV_ALLOCEP(dev, CDCACM_MKEPBULKOUT(&priv->devdesc),
+                                false, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkout)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKOUTALLOCFAIL), 0);
@@ -1205,6 +1220,7 @@ static void cdcacm_unbind(FAR struct usbdevclass_driver_s *driver,
 
       flags = enter_critical_section();
       DEBUGASSERT(priv->nwrq == CONFIG_CDCACM_NWRREQS);
+
       while (!sq_empty(&priv->reqlist))
         {
           reqcontainer = (struct cdcacm_req_s *)sq_remfirst(&priv->reqlist);
@@ -1274,6 +1290,7 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
       return -ENODEV;
     }
 #endif
+
   ctrlreq = priv->ctrlreq;
 
   /* Extract the little-endian 16-bit values to host order */
@@ -1287,23 +1304,24 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
 
   if ((ctrl->type & USB_REQ_TYPE_MASK) == USB_REQ_TYPE_STANDARD)
     {
-      /***********************************************************************
+      /**********************************************************************
        * Standard Requests
-       ***********************************************************************/
+       **********************************************************************/
 
       switch (ctrl->req)
         {
         case USB_REQ_GETDESCRIPTOR:
           {
-            /* The value field specifies the descriptor type in the MS byte and the
-             * descriptor index in the LS byte (order is little endian)
+            /* The value field specifies the descriptor type in the MS byte
+             * and the descriptor index in the LS byte (order is little
+             * endian)
              */
 
             switch (ctrl->value[1])
               {
-              /* If the serial device is used in as part of a composite device,
-               * then the device descriptor is provided by logic in the composite
-               * device implementation.
+              /* If the serial device is used in as part of a composite
+               * device, then the device descriptor is provided by logic in
+               * the composite device implementation.
                */
 
 #ifndef CONFIG_CDCACM_COMPOSITE
@@ -1315,9 +1333,9 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
                 break;
 #endif
 
-              /* If the serial device is used in as part of a composite device,
-               * then the device qualifier descriptor is provided by logic in the
-               * composite device implementation.
+              /* If the serial device is used in as part of a composite
+               * device, then the device qualifier descriptor is provided by
+               * logic in the composite device implementation.
                */
 
 #if !defined(CONFIG_CDCACM_COMPOSITE) && defined(CONFIG_USBDEV_DUALSPEED)
@@ -1331,26 +1349,27 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
               case USB_DESC_TYPE_OTHERSPEEDCONFIG:
 #endif
 
-              /* If the serial device is used in as part of a composite device,
-               * then the configuration descriptor is provided by logic in the
-               * composite device implementation.
+              /* If the serial device is used in as part of a composite
+               * device, then the configuration descriptor is provided by
+               * logic in the composite device implementation.
                */
 
 #ifndef CONFIG_CDCACM_COMPOSITE
               case USB_DESC_TYPE_CONFIG:
                 {
 #ifdef CONFIG_USBDEV_DUALSPEED
-                  ret = cdcacm_mkcfgdesc(ctrlreq->buf, dev->speed, ctrl->req);
+                  ret = cdcacm_mkcfgdesc(ctrlreq->buf, dev->speed,
+                                         ctrl->req);
 #else
-                  ret = cdcacm_mkcfgdesc(ctrlreq->buf);
+                  ret = cdcacm_mkcfgdesc(ctrlreq->buf, 0);
 #endif
                 }
                 break;
 #endif
 
-              /* If the serial device is used in as part of a composite device,
-               * then the language string descriptor is provided by logic in the
-               * composite device implementation.
+              /* If the serial device is used in as part of a composite
+               * device, then the language string descriptor is provided by
+               * logic in the composite device implementation.
                */
 
 #ifndef CONFIG_CDCACM_COMPOSITE
@@ -1358,7 +1377,10 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
                 {
                   /* index == language code. */
 
-                  ret = cdcacm_mkstrdesc(ctrl->value[0], (struct usb_strdesc_s *)ctrlreq->buf);
+                  ret =
+                  cdcacm_mkstrdesc(ctrl->value[0],
+                                  (FAR struct usb_strdesc_s *)
+                                    ctrlreq->buf);
                 }
                 break;
 #endif
@@ -1403,8 +1425,10 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
             if (ctrl->type == USB_REQ_RECIPIENT_INTERFACE &&
                 priv->config == CDCACM_CONFIGID)
               {
-                if ((index == CDCACM_NOTIFID && value == CDCACM_NOTALTIFID) ||
-                    (index == CDCACM_DATAIFID && value == CDCACM_DATAALTIFID))
+                  if ((index == priv->devdesc.ifnobase &&
+                       value == CDCACM_NOTALTIFID) ||
+                      (index == (priv->devdesc.ifnobase + 1) &&
+                       value == CDCACM_DATAALTIFID))
                   {
                     cdcacm_resetconfig(priv);
                     cdcacm_setconfig(priv, priv->config);
@@ -1419,8 +1443,10 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
             if (ctrl->type == (USB_DIR_IN | USB_REQ_RECIPIENT_INTERFACE) &&
                 priv->config == CDCACM_CONFIGIDNONE)
               {
-                if ((index == CDCACM_NOTIFID && value == CDCACM_NOTALTIFID) ||
-                    (index == CDCACM_DATAIFID && value == CDCACM_DATAALTIFID))
+                  if ((index == priv->devdesc.ifnobase &&
+                       value == CDCACM_NOTALTIFID) ||
+                      (index == (priv->devdesc.ifnobase + 1) &&
+                       value == CDCACM_DATAALTIFID))
                    {
                     *(FAR uint8_t *) ctrlreq->buf = value;
                     ret = 1;
@@ -1441,29 +1467,33 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
 
   else if ((ctrl->type & USB_REQ_TYPE_MASK) == USB_REQ_TYPE_CLASS)
     {
-      /***********************************************************************
+      /**********************************************************************
        * CDC ACM-Specific Requests
-       ***********************************************************************/
+       **********************************************************************/
 
       switch (ctrl->req)
         {
-        /* ACM_GET_LINE_CODING requests current DTE rate, stop-bits, parity, and
-         * number-of-character bits. (Optional)
+        /* ACM_GET_LINE_CODING requests current DTE rate, stop-bits, parity,
+         * and number-of-character bits. (Optional)
          */
 
         case ACM_GET_LINE_CODING:
           {
             if (ctrl->type == (USB_DIR_IN | USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE) &&
-            index == CDCACM_NOTIFID)
+                index == priv->devdesc.ifnobase)
               {
-                /* Return the current line status from the private data structure */
+                /* Return the current line status from the private data
+                 * structure.
+                 */
 
-                memcpy(ctrlreq->buf, &priv->linecoding, SIZEOF_CDC_LINECODING);
+                memcpy(ctrlreq->buf, &priv->linecoding,
+                       SIZEOF_CDC_LINECODING);
                 ret = SIZEOF_CDC_LINECODING;
               }
             else
               {
-                usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDCLASSREQ), ctrl->type);
+                usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDCLASSREQ),
+                        ctrl->type);
               }
           }
           break;
@@ -1476,12 +1506,12 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
           {
             if (ctrl->type == (USB_DIR_OUT | USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE) &&
                 len == SIZEOF_CDC_LINECODING && /* dataout && len == outlen && */
-                index == CDCACM_NOTIFID)
+                index == priv->devdesc.ifnobase)
               {
-                /* Save the new line coding in the private data structure.  NOTE:
-                 * that this is conditional now because not all device controller
-                 * drivers supported provision of EP0 OUT data with the setup
-                 * command.
+                /* Save the new line coding in the private data structure.
+                 * NOTE: that this is conditional now because not all device
+                 * controller drivers supported provision of EP0 OUT data
+                 * with the setup command.
                  */
 
                 if (dataout && len <= SIZEOF_CDC_LINECODING) /* REVISIT */
@@ -1493,8 +1523,8 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
 
                 ret = 0;
 
-                /* If there is a registered callback to receive line status info, then
-                 * callout now.
+                /* If there is a registered callback to receive line status
+                 * info, then callout now.
                  */
 
                 if (priv->callback)
@@ -1509,24 +1539,25 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
           }
           break;
 
-        /* ACM_SET_CTRL_LINE_STATE: RS-232 signal used to tell the DCE device the
-         * DTE device is now present. (Optional)
+        /* ACM_SET_CTRL_LINE_STATE: RS-232 signal used to tell the DCE
+         * device the DTE device is now present. (Optional)
          */
 
         case ACM_SET_CTRL_LINE_STATE:
           {
             if (ctrl->type == (USB_DIR_OUT | USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE) &&
-                index == CDCACM_NOTIFID)
+                index == priv->devdesc.ifnobase)
               {
-                /* Save the control line state in the private data structure. Only bits
-                 * 0 and 1 have meaning.  Respond with a zero length packet.
+                /* Save the control line state in the private data
+                 * structure. Only bits 0 and 1 have meaning.  Respond with
+                 * a zero length packet.
                  */
 
                 priv->ctrlline = value & 3;
                 ret = 0;
 
-                /* If there is a registered callback to receive control line status info,
-                 * then callout now.
+                /* If there is a registered callback to receive control line
+                 * status info, then callout now.
                  */
 
                 if (priv->callback)
@@ -1546,10 +1577,11 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
         case ACM_SEND_BREAK:
           {
             if (ctrl->type == (USB_DIR_OUT | USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE) &&
-                index == CDCACM_NOTIFID)
+                index == priv->devdesc.ifnobase)
               {
-                /* If there is a registered callback to handle the SendBreak request,
-                 * then callout now.  Respond with a zero length packet.
+                /* If there is a registered callback to handle the SendBreak
+                 * request, then callout now.  Respond with a zero length
+                 * packet.
                  */
 
                 ret = 0;
@@ -1922,9 +1954,9 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     /* CAIOC_NOTIFY
      *   Send a serial state to the host via the Interrupt IN endpoint.
-     *   Argument: int.  This includes the current state of the carrier detect,
-     *   DSR, break, and ring signal.  See "Table 69: UART State Bitmap Values"
-     *   and CDC_UART_definitions in include/nuttx/usb/cdc.h.
+     *   Argument: int.  This includes the current state of the carrier
+     *   detect, DSR, break, and ring signal.  See "Table 69: UART State
+     *   Bitmap Values" and CDC_UART_definitions in include/nuttx/usb/cdc.h.
      */
 
     case CAIOC_NOTIFY:
@@ -1937,7 +1969,8 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
          * 1. Format and send a request header with:
          *
          *   bmRequestType:
-         *    USB_REQ_DIR_IN | USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE
+         *    USB_REQ_DIR_IN | USB_REQ_TYPE_CLASS |
+         *    USB_REQ_RECIPIENT_INTERFACE
          *   bRequest: ACM_SERIAL_STATE
          *   wValue: 0
          *   wIndex: 0
@@ -2166,6 +2199,7 @@ static void cdcuart_rxint(FAR struct uart_dev_s *dev, bool enable)
       priv->rxhead    = serdev->recv.head;
       priv->rxenabled = false;
     }
+
   leave_critical_section(flags);
 }
 
@@ -2312,7 +2346,8 @@ static bool cdcuart_txempty(FAR struct uart_dev_s *dev)
 #ifndef CONFIG_CDCACM_COMPOSITE
 static
 #endif
-int cdcacm_classobject(int minor, FAR struct usbdevclass_driver_s **classdev)
+int cdcacm_classobject(int minor, FAR struct usbdev_description_s *devdesc,
+                       FAR struct usbdevclass_driver_s **classdev)
 {
   FAR struct cdcacm_alloc_s *alloc;
   FAR struct cdcacm_dev_s *priv;
@@ -2322,7 +2357,9 @@ int cdcacm_classobject(int minor, FAR struct usbdevclass_driver_s **classdev)
 
   /* Allocate the structures needed */
 
-  alloc = (FAR struct cdcacm_alloc_s *)kmm_malloc(sizeof(struct cdcacm_alloc_s));
+  alloc = (FAR struct cdcacm_alloc_s *)
+    kmm_malloc(sizeof(struct cdcacm_alloc_s));
+
   if (!alloc)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_ALLOCDEVSTRUCT), 0);
@@ -2340,6 +2377,8 @@ int cdcacm_classobject(int minor, FAR struct usbdevclass_driver_s **classdev)
   sq_init(&priv->reqlist);
 
   priv->minor              = minor;
+  memcpy(&priv->devdesc, devdesc,
+         sizeof(struct usbdev_description_s));
 
   /* Fake line status */
 
@@ -2368,12 +2407,12 @@ int cdcacm_classobject(int minor, FAR struct usbdevclass_driver_s **classdev)
   /* Initialize the USB class driver structure */
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-  drvr->drvr.speed         = USB_SPEED_HIGH;
+  drvr->drvr.speed          = USB_SPEED_HIGH;
 #else
-  drvr->drvr.speed         = USB_SPEED_FULL;
+  drvr->drvr.speed          = USB_SPEED_FULL;
 #endif
-  drvr->drvr.ops           = &g_driverops;
-  drvr->dev                = priv;
+  drvr->drvr.ops            = &g_driverops;
+  drvr->dev                 = priv;
 
   /* Register the USB serial console */
 
@@ -2427,11 +2466,35 @@ errout_with_class:
 int cdcacm_initialize(int minor, FAR void **handle)
 {
   FAR struct usbdevclass_driver_s *drvr = NULL;
+  struct usbdev_description_s devdesc;
   int ret;
+
+  memset(&devdesc, 0, sizeof(struct usbdev_description_s));
+
+  /* Interfaces.
+   *
+   * ifnobase must be provided by board-specific logic
+   */
+
+  devdesc.ninterfaces = CDCACM_NINTERFACES; /* Number of interfaces in the configuration */
+
+  /* Strings.
+   *
+   * strbase must be provided by board-specific logic
+   */
+
+  devdesc.nstrings    = CDCACM_NSTRIDS;     /* Number of Strings */
+
+  /* Endpoints.
+   *
+   * Endpoint numbers must be provided by board-specific logic.
+   */
+
+  devdesc.nendpoints  = CDCACM_NUM_EPS;
 
   /* Get an instance of the serial driver class object */
 
-  ret = cdcacm_classobject(minor, &drvr);
+  ret = cdcacm_classobject(minor, &devdesc, &drvr);
   if (ret == OK)
     {
       /* Register the USB serial class driver */
@@ -2439,7 +2502,8 @@ int cdcacm_initialize(int minor, FAR void **handle)
       ret = usbdev_register(drvr);
       if (ret < 0)
         {
-          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_DEVREGISTER), (uint16_t)-ret);
+          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_DEVREGISTER),
+                   (uint16_t)-ret);
         }
     }
 
@@ -2470,8 +2534,7 @@ int cdcacm_initialize(int minor, FAR void **handle)
  *   CDC/ACM driver is an internal part of a composite device, or a standalone
  *   USB driver:
  *
- *     classdev - The class object returned by board_cdcclassobject() or
- *       cdcacm_classobject()
+ *     classdev - The class object returned by cdcacm_classobject()
  *     handle - The opaque handle representing the class object returned by
  *       a previous call to cdcacm_initialize().
  *
@@ -2549,3 +2612,68 @@ void cdcacm_uninitialize(FAR void *handle)
   priv->minor = (uint8_t)-1;
 #endif
 }
+
+/****************************************************************************
+ * Name: cdcacm_get_composite_devdesc
+ *
+ * Description:
+ *   Helper function to fill in some constants into the composite
+ *   configuration struct.
+ *
+ * Input Parameters:
+ *     dev - Pointer to the configuration struct we should fill
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_CDCACM_COMPOSITE)
+void cdcacm_get_composite_devdesc(struct composite_devdesc_s *dev)
+{
+  memset(dev, 0, sizeof(struct composite_devdesc_s));
+
+  /* The callback functions for the CDC/ACM class.
+   *
+   * classobject() and uninitialize() must be provided by board-specific
+   * logic
+   */
+
+  dev->mkconfdesc   = cdcacm_mkcfgdesc;
+  dev->mkstrdesc    = cdcacm_mkstrdesc;
+
+  dev->nconfigs     = CDCACM_NCONFIGS;           /* Number of configurations supported */
+  dev->configid     = CDCACM_CONFIGID;           /* The only supported configuration ID */
+
+  /* Let the construction function calculate the size of the config descriptor */
+
+#ifdef CONFIG_USBDEV_DUALSPEED
+  dev->cfgdescsize  = cdcacm_mkcfgdesc(NULL, NULL, USB_SPEED_UNKNOWN, 0);
+#else
+  dev->cfgdescsize  = cdcacm_mkcfgdesc(NULL, NULL);
+#endif
+
+  /* Board-specific logic must provide the device minor */
+
+  /* Interfaces.
+   *
+   * ifnobase must be provided by board-specific logic
+   */
+
+  dev->devdesc.ninterfaces = CDCACM_NINTERFACES; /* Number of interfaces in the configuration */
+
+  /* Strings.
+   *
+   * strbase must be provided by board-specific logic
+   */
+
+  dev->devdesc.nstrings    = CDCACM_NSTRIDS;     /* Number of Strings */
+
+  /* Endpoints.
+   *
+   * Endpoint numbers must be provided by board-specific logic.
+   */
+
+  dev->devdesc.nendpoints  = CDCACM_NUM_EPS;
+}
+#endif

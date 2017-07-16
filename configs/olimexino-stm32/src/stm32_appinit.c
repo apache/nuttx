@@ -99,10 +99,8 @@ int board_app_initialize(uintptr_t arg)
 #endif
 #endif
 
-#ifdef CONFIG_USBDEV_COMPOSITE
-#if !defined(CONFIG_NSH_BUILTIN_APPS) && !defined(CONFIG_SYSTEM_COMPOSITE)
+#if !defined(CONFIG_NSH_BUILTIN_APPS) && defined(CONFIG_USBDEV_COMPOSITE)
   ret = board_composite_initialize(0);
-#endif
 #endif
 
 #ifdef CONFIG_CAN

@@ -1,7 +1,7 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/usb/usbmsc.h
  *
- *   Copyright (C) 2008-2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * NOTE:  This interface was inspired by the Linux gadget interface by
@@ -37,14 +37,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_USB_USBMSC_H
 #define __INCLUDE_NUTTX_USB_USBMSC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -52,17 +52,28 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/* Informations about the device needed in usbdev_description_s */
+
+#define USBMSC_CONFIGID        (1) /* The only supported configuration ID */
+#define USBMSC_NENDPOINTS      (2) /* Number of endpoints in the interface  */
+
+#define USBMSC_EP_BULKIN_IDX   (0)
+#define USBMSC_EP_BULKOUT_IDX  (1)
+
+#define USBMSC_NCONFIGS        (1) /* Number of configurations supported */
+#define USBMSC_NINTERFACES     (1) /* Number of interfaces in the configuration */
+
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -73,61 +84,11 @@ extern "C"
 #  define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
-
-/************************************************************************************
- * Name: board_mscclassobject
- *
- * Description:
- *   If the mass storage class driver is part of composite device, then
- *   its instantiation and configuration is a multi-step, board-specific,
- *   process (See comments for usbmsc_configure below).  In this case,
- *   board-specific logic must provide board_mscclassobject().
- *
- *   board_mscclassobject() is called from the composite driver.  It must
- *   encapsulate the instantiation and configuration of the mass storage
- *   class and the return the mass storage device's class driver instance
- *   to the composite dirver.
- *
- * Input Parameters:
- *   classdev - The location to return the mass storage class' device
- *     instance.
- *
- * Returned Value:
- *   0 on success; a negated errno on failure
- *
- ************************************************************************************/
-
-#if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
-struct usbdevclass_driver_s;
-int board_mscclassobject(FAR struct usbdevclass_driver_s **classdev);
-#endif
-
 /****************************************************************************
- * Name: board_mscuninitialize
- *
- * Description:
- *   Un-initialize the USB storage class driver.  This is just an application-
- *   specific wrapper aboutn usbmsc_unitialize() that is called form the composite
- *   device logic.
- *
- * Input Parameters:
- *   classdev - The class driver instrance previously give to the composite
- *     driver by board_mscclassobject().
- *
- * Returned Value:
- *   None
- *
+ * Public Functions
  ****************************************************************************/
 
-#if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
-struct usbdevclass_driver_s;
-void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev);
-#endif
-
-/************************************************************************************
+/****************************************************************************
  * Name: usbmsc_configure
  *
  * Description:
@@ -145,20 +106,21 @@ void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev);
  *
  * Returned Value:
  *   0 on success; a negated errno on failure.  The returned handle value is
- *   an untyped equivalent to the usbmsc_classobject() or board_mscclassobject().
+ *   an untyped equivalent to the usbmsc_classobject().
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-int usbmsc_configure(unsigned int nluns, void **handle);
+int usbmsc_configure(unsigned int nluns, FAR void **handle);
 
-/************************************************************************************
+/****************************************************************************
  * Name: usbmsc_bindlun
  *
  * Description:
  *   Bind the block driver specified by drvrpath to a USB storage LUN.
  *
  * Input Parameters:
- *   handle      - The handle returned by a previous call to usbmsc_configure().
+ *   handle      - The handle returned by a previous call to
+ *                 usbmsc_configure().
  *   drvrpath    - the full path to the block driver
  *   startsector - A sector offset into the block driver to the start of the
  *                 partition on drvrpath (0 if no partitions)
@@ -169,12 +131,12 @@ int usbmsc_configure(unsigned int nluns, void **handle);
  * Returned Value:
  *  0 on success; a negated errno on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath, unsigned int lunno,
                    off_t startsector, size_t nsectors, bool readonly);
 
-/************************************************************************************
+/****************************************************************************
  * Name: usbmsc_unbindlun
  *
  * Description:
@@ -187,16 +149,16 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath, unsigned int lunn
  * Returned Value:
  *  0 on success; a negated errno on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int usbmsc_unbindlun(FAR void *handle, unsigned int lunno);
 
-/************************************************************************************
+/****************************************************************************
  * Name: usbmsc_exportluns
  *
  * Description:
- *   After all of the LUNs have been bound, this function may be called in order to
- *   export those LUNs in the USB storage device.
+ *   After all of the LUNs have been bound, this function may be called in
+ *   order to export those LUNs in the USB storage device.
  *
  * Input Parameters:
  *   handle - The handle returned by a previous call to usbmsc_configure().
@@ -204,13 +166,13 @@ int usbmsc_unbindlun(FAR void *handle, unsigned int lunno);
  * Returned Value:
  *   0 on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if !defined(CONFIG_USBDEV_COMPOSITE) || !defined(CONFIG_USBMSC_COMPOSITE)
 int usbmsc_exportluns(FAR void *handle);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: usbmsc_classobject
  *
  * Description:
@@ -222,22 +184,22 @@ int usbmsc_exportluns(FAR void *handle);
  *
  * Returned Value:
  *   0 on success; a negated errno on failure
-
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
 struct usbdevclass_driver_s;
-int usbmsc_classobject(FAR void *handle, FAR struct usbdevclass_driver_s **classdev);
+int usbmsc_classobject(FAR void *handle, FAR struct usbdev_description_s *devdesc,
+                       FAR struct usbdevclass_driver_s **classdev);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: usbmsc_uninitialize
  *
  * Description:
  *   Un-initialize the USB storage class driver.  The handle is the USB MSC
- *   class' device object.  This is the same value as returned by usbmsc_classobject
- *   (typed) or by usbmsc_configure (untyped).
+ *   class' device object.  This is the same value as returned by
+ *    usbmsc_classobject (typed) or by usbmsc_configure (untyped).
  *
  * Input Parameters:
  *   handle - The handle returned by a previous call to usbmsc_configure()
@@ -246,9 +208,29 @@ int usbmsc_classobject(FAR void *handle, FAR struct usbdevclass_driver_s **class
  * Returned Value:
  *   None
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 void usbmsc_uninitialize(FAR void *handle);
+
+/****************************************************************************
+ * Name: usbmsc_get_composite_devdesc
+ *
+ * Description:
+ *   Helper function to fill in some constants into the composite configuration
+ *   structure.
+ *
+ * Input Parameters:
+ *     dev - Pointer to the configuration struct we should fill
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
+struct composite_devdesc_s;
+void usbmsc_get_composite_devdesc(FAR struct composite_devdesc_s *dev);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

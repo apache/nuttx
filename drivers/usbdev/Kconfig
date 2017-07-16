@@ -322,33 +322,10 @@ menuconfig CDCACM_COMPOSITE
 		Configure the CDC serial driver as part of a composite driver
 		(only if USBDEV_COMPOSITE is also defined)
 
-if CDCACM_COMPOSITE
+if !CDCACM_COMPOSITE
 
-config CDCACM_IFNOBASE
-	int "Offset the CDC/ACM interface numbers"
-	default 0
-	---help---
-		If the CDC driver is part of a composite device, then this may need to
-		be defined to offset the CDC/ACM interface numbers so that they are
-		unique and contiguous.  When used with the Mass Storage driver, the
-		correct value for this offset is zero.
-
-config CDCACM_STRBASE
-	int "Offset the CDC/ACM string numbers"
-	default 4
-	---help---
-		If the CDC driver is part of a composite device, then this may need to
-		be defined to offset the CDC/ACM string numbers so that they are
-		unique and contiguous.  When used with the Mass Storage driver, the
-		correct value for this offset is four (this value actuallly only needs
-		to be defined if names are provided for the Notification interface,
-		config CDCACM_NOTIFSTR, or the data interface, CDCACM_DATAIFSTR).
-
-		The default of four accounts for strings IDs 0-3 used by the composite
-		descriptors.  Any additional CDC/ACM string descripts must then begin
-		with string index four.
-
-endif
+# In a composite device the EP0 config comes from the composite device
+# and the EP-Number is configured dynamically via composite_initialize
 
 config CDCACM_EP0MAXPACKET
 	int "Endpoint 0 max packet size"
@@ -362,6 +339,8 @@ config CDCACM_EPINTIN
 	---help---
 		The logical 7-bit address of a hardware endpoint that supports
 		interrupt IN operation.  Default 1.
+
+endif
 
 config CDCACM_EPINTIN_FSSIZE
 	int "Interupt IN full speed MAXPACKET size"
@@ -377,12 +356,19 @@ config CDCACM_EPINTIN_HSSIZE
 		Max package size for the interrupt IN endpoint if high speed mode.
 		Default 64.
 
+if !CDCACM_COMPOSITE
+
+# In a composite device the EP-Number is configured dynamically via
+# composite_initialize
+
 config CDCACM_EPBULKOUT
 	int "Bulk OUT endpoint number"
 	default 3
 	---help---
 		The logical 7-bit address of a hardware endpoint that supports
 		bulk OUT operation.  Default: 3
+
+endif
 
 config CDCACM_EPBULKOUT_FSSIZE
 	int "Bulk OUT full speed  MAXPACKET size"
@@ -398,12 +384,19 @@ config CDCACM_EPBULKOUT_HSSIZE
 		Max package size for the bulk OUT endpoint if high speed mode.
 		Default 512.
 
+if !CDCACM_COMPOSITE
+
+# In a composite device the EP-Number is configured dynamically via
+# composite_initialize
+
 config CDCACM_EPBULKIN
 	int "Bulk IN endpoint number"
 	default 2
 	---help---
 		The logical 7-bit address of a hardware endpoint that supports
 		bulk IN operation.  Default: 2
+
+endif
 
 config CDCACM_EPBULKIN_FSSIZE
 	int "Bulk IN full speed  MAXPACKET size"
@@ -468,6 +461,11 @@ config CDCACM_TXBUFSIZE
 		will hold one request of size 768; a buffer size of 193 will hold
 		two requests of size 96 bytes.
 
+if !CDCACM_COMPOSITE
+
+# In a composite device the Vendor- and Product-ID is given by the composite
+# device
+
 config CDCACM_VENDORID
 	hex "Vendor ID"
 	default 0x0525
@@ -493,6 +491,7 @@ config CDCACM_PRODUCTSTR
 	string "Product string"
 	default "CDC/ACM Serial"
 
+endif # !CDCACM_COMPOSITE
 endif # CDCACM
 
 menuconfig USBMSC
@@ -530,37 +529,16 @@ config USBMSC_COMPOSITE
 		Configure the mass storage driver as part of a composite driver
 		(only if USBDEV_COMPOSITE is also defined)
 
-config USBMSC_IFNOBASE
-	int "Offset the mass storage interface number"
-	default 2
-	depends on USBMSC_COMPOSITE
-	---help---
-		If the CDC driver is part of a composite device, then this may need to
-		be defined to offset the mass storage interface number so that it is
-		unique and contiguous.  When used with the CDC/ACM driver, the
-		correct value for this offset is two (because of the two CDC/ACM
-		interfaces that will precede it).
-
-config USBMSC_STRBASE
-	int "Offset the mass storage string numbers"
-	default 4
-	depends on USBMSC_COMPOSITE
-	---help---
-		If the CDC driver is part of a composite device, then this may need to
-		be defined to offset the mass storage string numbers so that they are
-		unique and contiguous.  When used with the CDC/ACM driver, the
-		correct value for this offset is four (or perhaps 5 or 6, depending
-		on if CDCACM_NOTIFSTR or CDCACM_DATAIFSTR are defined).
-
-		String IDS 0-3 are used by the composite descriptors.  This amount
-		may need to be incremented to account for string IDs used by other
-		members of the composite.
-
 config USBMSC_EP0MAXPACKET
 	int "Max packet size for endpoint 0"
 	default 64
 	---help---
 		Max packet size for endpoint 0
+
+if !USBMSC_COMPOSITE
+
+# In a composite device the EP-Number and STR-Number is configured
+# dynamically via composite_initialize
 
 config USBMSC_EPBULKOUT
 	int "Bulk OUT endpoint number"
@@ -575,6 +553,8 @@ config USBMSC_EPBULKIN
 	---help---
 		The logical 7-bit address of a hardware endpoints that support
 		bulk OUT and IN operations
+
+endif
 
 config USBMSC_NWRREQS
 	int "The number of write requests that can be in flight"
@@ -613,6 +593,11 @@ config USBMSC_BULKOUTREQLEN
 		beyond the maximum size of one packet.  Default:  512 or 64 bytes
 		(depending upon if dual speed operation is supported or not).
 
+if !USBMSC_COMPOSITE
+
+# In a composite device the Vendor- and Product-IDs are handled by the
+# composite device
+
 config USBMSC_VENDORID
 	hex "Mass storage Vendor ID"
 	default 0x584e
@@ -637,6 +622,8 @@ config USBMSC_PRODUCTID
 config USBMSC_PRODUCTSTR
 	string "Mass storage product string"
 	default "Mass Storage"
+
+endif # !USBMSC_COMPOSITE
 
 config USBMSC_VERSIONNO
 	hex "USB MSC Version Number"
