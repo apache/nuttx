@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/composite.h
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 #include <stdint.h>
 
 #include <nuttx/usb/usb.h>
+#include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
 
 #ifdef CONFIG_USBDEV_COMPOSITE
@@ -62,6 +63,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 /* Packet sizes */
 
@@ -106,136 +108,21 @@
 #ifdef CONFIG_USBDEV_SELFPOWERED
 #  define COMPOSITE_SELFPOWERED USB_CONFIG_ATTR_SELFPOWER
 #else
-#  define COMPOSITE_SELFPOWERED (0)
+#  define COMPOSITE_SELFPOWERED       (0)
 #endif
 
 #ifdef CONFIG_USBDEV_REMOTEWAKEUP
 #  define COMPOSITE_REMOTEWAKEUP USB_CONFIG_ATTR_WAKEUP
 #else
-#  define COMPOSITE_REMOTEWAKEUP (0)
+#  define COMPOSITE_REMOTEWAKEUP      (0)
 #endif
 
-/* Constituent devices ******************************************************/
-
-#undef DEV1_IS_CDCACM
-#undef DEV1_IS_USBMSC
-
-#undef DEV2_IS_CDCACM
-#undef DEV2_IS_USBMSC
-
-/* Pick the first device in the composite.  At present, this may only be
- * the CDC serial device or the mass storage device.
- */
-
-#if defined(CONFIG_CDCACM_COMPOSITE)
-#  define DEV1_IS_CDCACM   1
-#  define DEV1_MKCFGDESC      cdcacm_mkcfgdesc
-#  define DEV1_MKSTRDESC      cdcacm_mkstrdesc
-#  define DEV1_CLASSOBJECT    board_cdcclassobject
-#  define DEV1_UNINITIALIZE   board_cdcuninitialize
-#  define DEV1_NCONFIGS       CDCACM_NCONFIGS
-#  define DEV1_CONFIGID       CDCACM_CONFIGID
-#  define DEV1_FIRSTINTERFACE CONFIG_CDCACM_IFNOBASE
-#  define DEV1_NINTERFACES    CDCACM_NINTERFACES
-#  define DEV1_STRIDBASE      CONFIG_CDCACM_STRBASE
-#  define DEV1_NSTRIDS        CDCACM_NSTRIDS
-#  define DEV1_CFGDESCSIZE    SIZEOF_CDCACM_CFGDESC
-#elif defined(CONFIG_USBMSC_COMPOSITE)
-#  define DEV1_IS_USBMSC     1
-#  define DEV1_MKCFGDESC      usbmsc_mkcfgdesc
-#  define DEV1_MKSTRDESC      usbmsc_mkstrdesc
-#  define DEV1_CLASSOBJECT    board_mscclassobject
-#  define DEV1_UNINITIALIZE   board_mscuninitialize
-#  define DEV1_NCONFIGS       USBMSC_NCONFIGS
-#  define DEV1_CONFIGID       USBMSC_CONFIGID
-#  define DEV1_FIRSTINTERFACE CONFIG_USBMSC_IFNOBASE
-#  define DEV1_NINTERFACES    USBMSC_NINTERFACES
-#  define DEV1_STRIDBASE      CONFIG_USBMSC_IFNOBASE
-#  define DEV1_NSTRIDS        USBMSC_NSTRIDS
-#  define DEV1_CFGDESCSIZE    SIZEOF_USBMSC_CFGDESC
-#else
-#  error "No members of the composite defined"
-#endif
-
-/* Pick the second device in the composite.  At present, this may only be
- * the CDC serial device or the mass storage device.
- */
-
-#if defined(CONFIG_CDCACM_COMPOSITE) && !defined(DEV1_IS_CDCACM)
-#  define DEV2_IS_CDCACM 1
-#  define DEV2_MKCFGDESC      cdcacm_mkcfgdesc
-#  define DEV2_MKSTRDESC      cdcacm_mkstrdesc
-#  define DEV2_CLASSOBJECT    board_cdcclassobject
-#  define DEV2_UNINITIALIZE   board_cdcuninitialize
-#  define DEV2_NCONFIGS       CDCACM_NCONFIGS
-#  define DEV2_CONFIGID       CDCACM_CONFIGID
-#  define DEV2_FIRSTINTERFACE CONFIG_CDCACM_IFNOBASE
-#  define DEV2_NINTERFACES    CDCACM_NINTERFACES
-#  define DEV2_STRIDBASE      CONFIG_CDCACM_STRBASE
-#  define DEV2_NSTRIDS        CDCACM_NSTRIDS
-#  define DEV2_CFGDESCSIZE    SIZEOF_CDCACM_CFGDESC
-#elif defined(CONFIG_USBMSC_COMPOSITE) && !defined(DEV1_IS_USBMSC)
-#  define DEV2_IS_USBMSC     1
-#  define DEV2_MKCFGDESC      usbmsc_mkcfgdesc
-#  define DEV2_MKSTRDESC      usbmsc_mkstrdesc
-#  define DEV2_UNINITIALIZE   board_mscuninitialize
-#  define DEV2_CLASSOBJECT    board_mscclassobject
-#  define DEV2_NCONFIGS       USBMSC_NCONFIGS
-#  define DEV2_CONFIGID       USBMSC_CONFIGID
-#  define DEV2_FIRSTINTERFACE CONFIG_USBMSC_IFNOBASE
-#  define DEV2_NINTERFACES    USBMSC_NINTERFACES
-#  define DEV2_STRIDBASE      CONFIG_USBMSC_STRBASE
-#  define DEV2_NSTRIDS        USBMSC_NSTRIDS
-#  define DEV2_CFGDESCSIZE    SIZEOF_USBMSC_CFGDESC
-#else
-#  error "Insufficient members of the composite defined"
-#endif
-
-/* Verify interface configuration */
-
-#if DEV1_FIRSTINTERFACE != 0
-#  warning "The first interface number should be zero"
-#endif
-
-#if (DEV1_FIRSTINTERFACE + DEV1_NINTERFACES) != DEV2_FIRSTINTERFACE
-#  warning "Interface numbers are not contiguous"
-#endif
-
-/* Check if an IAD is needed */
-
-#ifdef CONFIG_COMPOSITE_IAD
-#  if DEV1_NINTERFACES == 1 && DEV2_NINTERFACES == 1
-#    warning "CONFIG_COMPOSITE_IAD not needed"
-#  endif
-#endif
-
-#if !defined(CONFIG_COMPOSITE_IAD) && DEV1_NINTERFACES > 1 && DEV2_NINTERFACES > 1
-#  warning "CONFIG_COMPOSITE_IAD may be needed"
-#endif
-
-/* Total size of the configuration descriptor: */
-
-#define COMPOSITE_CFGDESCSIZE (USB_SIZEOF_CFGDESC + DEV1_CFGDESCSIZE + DEV2_CFGDESCSIZE)
-
-/* The total number of interfaces */
-
-#define COMPOSITE_NINTERFACES (DEV1_NINTERFACES + DEV2_NINTERFACES)
-
-/* Composite configuration ID value */
-
-#if DEV1_NCONFIGS != 1 || DEV1_CONFIGID != 1
-#  error "DEV1:  Only a single configuration is supported"
-#endif
-
-#if DEV2_NCONFIGS != 1 || DEV2_CONFIGID != 1
-#  error "DEV2:  Only a single configuration is supported"
-#endif
+#define NUM_DEVICES_TO_HANDLE         (4)
 
 /* Descriptors **************************************************************/
 /* These settings are not modifiable via the NuttX configuration */
 
 #define COMPOSITE_CONFIGIDNONE        (0)  /* Config ID = 0 means to return to address mode */
-#define COMPOSITE_NCONFIGS            (1)  /* The number of configurations supported */
 #define COMPOSITE_CONFIGID            (1)  /* The only supported configuration ID */
 
 /* String language */
@@ -248,17 +135,6 @@
 #define COMPOSITE_PRODUCTSTRID        (2)
 #define COMPOSITE_SERIALSTRID         (3)
 #define COMPOSITE_CONFIGSTRID         (4)
-#define COMPOSITE_NSTRIDS             (4)
-
-/* Verify string configuration */
-
-#if COMPOSITE_NSTRIDS != DEV1_STRIDBASE
-#  warning "The DEV1 string base should be COMPOSITE_NSTRIDS"
-#endif
-
-#if (DEV1_STRIDBASE + DEV1_NSTRIDS) != DEV2_STRIDBASE
-#  warning "String IDs are not contiguous"
-#endif
 
 /* Everpresent MIN/MAX macros ***********************************************/
 
@@ -273,6 +149,33 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+struct composite_devobj_s
+{
+  /* Device description given by the user code in the dynamic
+   * configuration.
+   */
+
+  struct composite_devdesc_s compdesc;
+
+  /* Pointer to device class */
+
+  FAR struct usbdevclass_driver_s *dev;
+};
+
+/* This structure describes the internal state of the driver */
+
+struct composite_dev_s
+{
+  FAR struct usbdev_s      *usbdev;      /* usbdev driver pointer */
+  uint8_t                   config;      /* Configuration number */
+  FAR struct usbdev_req_s  *ctrlreq;     /* Allocated control request */
+  uint8_t                   ndevices;    /* Num devices in this composite device */
+  int                       cfgdescsize; /* Total size of the configuration descriptor: */
+  int                       ninterfaces; /* The total number of interfaces in this composite device */
+
+  struct composite_devobj_s device[NUM_DEVICES_TO_HANDLE]; /* Device class object */
+};
 
 /****************************************************************************
  * Public Data
@@ -317,9 +220,11 @@ FAR const struct usb_devdesc_s *composite_getdevdesc(void);
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-int16_t composite_mkcfgdesc(uint8_t *buf, uint8_t speed, uint8_t type);
+int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv,
+                            FAR uint8_t *buf, uint8_t speed, uint8_t type);
 #else
-int16_t composite_mkcfgdesc(uint8_t *buf);
+int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv,
+                            FAR uint8_t *buf);
 #endif
 
 /****************************************************************************

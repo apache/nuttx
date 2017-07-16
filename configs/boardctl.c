@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/boardctl.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -182,7 +182,10 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
             case BOARDIOC_USBDEV_CONNECT:    /* Connect the Composite device */
               {
                 DEBUGASSERT(ctrl->handle != NULL);
-                *ctrl->handle = composite_initialize();
+
+                *ctrl->handle =
+                  board_composite_connect(ctrl->instance, ctrl->config);
+
                 if (*ctrl->handle == NULL)
                   {
                     ret = -EIO;
@@ -190,7 +193,8 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
               }
               break;
 
-            case BOARDIOC_USBDEV_DISCONNECT: /* Disconnect the Composite device */
+            case BOARDIOC_USBDEV_DISCONNECT: /* Disconnect the Composite
+                                              * device */
               {
                 DEBUGASSERT(ctrl->handle != NULL && *ctrl->handle != NULL);
                 composite_uninitialize(*ctrl->handle);

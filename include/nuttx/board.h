@@ -264,6 +264,28 @@ int board_composite_initialize(int port);
 #endif
 
 /****************************************************************************
+ * Name:  board_composite_connect
+ *
+ * Description:
+ *   Connect the USB composite device on the specified USB device port using
+ *   the specified configuration.  The interpretation of the configid is
+ *   board specific.
+ *
+ * Input Parameters:
+ *   port     - The USB device port.
+ *   configid - The USB composite configuration
+ *
+ * Returned Value:
+ *   A non-NULL handle value is returned on success.  NULL is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_BOARDCTL_USBDEVCTRL) && defined(CONFIG_USBDEV_COMPOSITE)
+FAR void *board_composite_connect(int port, int configid);
+#endif
+
+/****************************************************************************
  * Name: board_tsc_setup
  *
  * Description:
