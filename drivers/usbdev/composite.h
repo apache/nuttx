@@ -63,6 +63,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 /* Packet sizes */
 
@@ -107,13 +108,13 @@
 #ifdef CONFIG_USBDEV_SELFPOWERED
 #  define COMPOSITE_SELFPOWERED USB_CONFIG_ATTR_SELFPOWER
 #else
-#  define COMPOSITE_SELFPOWERED (0)
+#  define COMPOSITE_SELFPOWERED       (0)
 #endif
 
 #ifdef CONFIG_USBDEV_REMOTEWAKEUP
 #  define COMPOSITE_REMOTEWAKEUP USB_CONFIG_ATTR_WAKEUP
 #else
-#  define COMPOSITE_REMOTEWAKEUP (0)
+#  define COMPOSITE_REMOTEWAKEUP      (0)
 #endif
 
 #define NUM_DEVICES_TO_HANDLE         (4)
@@ -162,7 +163,6 @@ struct composite_devobj_s
   FAR struct usbdevclass_driver_s *dev;
 };
 
-
 /* This structure describes the internal state of the driver */
 
 struct composite_dev_s
@@ -170,7 +170,7 @@ struct composite_dev_s
   FAR struct usbdev_s      *usbdev;      /* usbdev driver pointer */
   uint8_t                   config;      /* Configuration number */
   FAR struct usbdev_req_s  *ctrlreq;     /* Allocated control request */
-  uint8_t                   ndevices;    /* num devices in this composite device */
+  uint8_t                   ndevices;    /* Num devices in this composite device */
   int                       cfgdescsize; /* Total size of the configuration descriptor: */
   int                       ninterfaces; /* The total number of interfaces in this composite device */
 
@@ -220,10 +220,11 @@ FAR const struct usb_devdesc_s *composite_getdevdesc(void);
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv, uint8_t *buf,
-                            uint8_t speed, uint8_t type);
+int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv,
+                            FAR uint8_t *buf, uint8_t speed, uint8_t type);
 #else
-int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv, uint8_t *buf);
+int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv,
+                            FAR uint8_t *buf);
 #endif
 
 /****************************************************************************

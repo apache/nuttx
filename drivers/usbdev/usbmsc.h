@@ -57,6 +57,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 /* If the USB mass storage device is configured as part of a composite device
  * then both CONFIG_USBDEV_COMPOSITE and CONFIG_USBMSC_COMPOSITE must be
@@ -339,9 +340,12 @@
 
 /* Block driver helpers *****************************************************/
 
-#define USBMSC_DRVR_READ(l,b,s,n) ((l)->inode->u.i_bops->read((l)->inode,b,s,n))
-#define USBMSC_DRVR_WRITE(l,b,s,n) ((l)->inode->u.i_bops->write((l)->inode,b,s,n))
-#define USBMSC_DRVR_GEOMETRY(l,g) ((l)->inode->u.i_bops->geometry((l)->inode,g))
+#define USBMSC_DRVR_READ(l,b,s,n) \
+  ((l)->inode->u.i_bops->read((l)->inode,b,s,n))
+#define USBMSC_DRVR_WRITE(l,b,s,n) \
+  ((l)->inode->u.i_bops->write((l)->inode,b,s,n))
+#define USBMSC_DRVR_GEOMETRY(l,g) \
+  ((l)->inode->u.i_bops->geometry((l)->inode,g))
 
 /* Everpresent MIN/MAX macros ***********************************************/
 
@@ -376,7 +380,7 @@ struct usbmsc_req_s
 
 struct usbmsc_lun_s
 {
-  struct inode    *inode;             /* Inode structure of open'ed block driver */
+  FAR struct inode    *inode;         /* Inode structure of open'ed block driver */
   uint8_t          readonly:1;        /* Media is read-only */
   uint8_t          locked:1;          /* Media removal is prevented */
   uint16_t         sectorsize;        /* The size of one sector */
@@ -495,11 +499,11 @@ EXTERN const char g_compserialstr[];
 
 EXTERN FAR struct usbmsc_dev_s *g_usbmsc_handoff;
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: usbmsc_scsi_lock
  *
  * Description:
@@ -509,54 +513,54 @@ EXTERN FAR struct usbmsc_dev_s *g_usbmsc_handoff;
 
 void usbmsc_scsi_lock(FAR struct usbmsc_dev_s *priv);
 
-/************************************************************************************
+/****************************************************************************
  * Name: usbmsc_scsi_unlock
  *
  * Description:
  *   Relinquish exclusive access to SCSI state data.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #define usbmsc_scsi_unlock(priv) sem_post(&priv->thlock)
 
-/************************************************************************************
+/*****************************************************************************
  * Name: usbmsc_scsi_signal
  *
  * Description:
  *   Signal the SCSI worker thread that SCSI events need service.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void usbmsc_scsi_signal(FAR struct usbmsc_dev_s *priv);
 
-/************************************************************************************
+/****************************************************************************
  * Name: usbmsc_synch_signal
  *
  * Description:
  *   ACK controlling tasks request for synchronization.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #define usbmsc_synch_signal(priv) sem_post(&priv->thsynch)
 
-/************************************************************************************
+/****************************************************************************
  * Name: usbmsc_mkstrdesc
  *
  * Description:
  *   Construct a string descriptor
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 struct usb_strdesc_s;
 int usbmsc_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc);
 
-/************************************************************************************
+/****************************************************************************
  * Name: usbmsc_getdevdesc
  *
  * Description:
  *   Return a pointer to the raw device descriptor
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_USBMSC_COMPOSITE
 FAR const struct usb_devdesc_s *usbmsc_getdevdesc(void);
@@ -576,13 +580,13 @@ int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
                        FAR struct usbdev_description_s *devdesc,
                        bool hispeed);
 
-/************************************************************************************
+/****************************************************************************
  * Name: usbmsc_mkcfgdesc
  *
  * Description:
  *   Construct the configuration descriptor
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
 int16_t usbmsc_mkcfgdesc(FAR uint8_t *buf, FAR struct usbdev_description_s *devdesc,
@@ -591,13 +595,13 @@ int16_t usbmsc_mkcfgdesc(FAR uint8_t *buf, FAR struct usbdev_description_s *devd
 int16_t usbmsc_mkcfgdesc(FAR uint8_t *buf, FAR struct usbdev_description_s *devdesc);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: usbmsc_getqualdesc
  *
  * Description:
  *   Return a pointer to the raw qual descriptor
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if !defined(CONFIG_USBMSC_COMPOSITE) && defined(CONFIG_USBDEV_DUALSPEED)
 FAR const struct usb_qualdesc_s *usbmsc_getqualdesc(void);

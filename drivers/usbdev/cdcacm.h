@@ -267,10 +267,12 @@ int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf, struct usbdev_description_s *devdesc,
-    uint8_t speed, uint8_t type);
+int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
+                         FAR struct usbdev_description_s *devdesc,
+                         uint8_t speed, uint8_t type);
 #else
-int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf, struct usbdev_description_s *devdesc);
+int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
+                         FAR struct usbdev_description_s *devdesc);
 #endif
 
 /****************************************************************************

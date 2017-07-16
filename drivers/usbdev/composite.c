@@ -60,7 +60,6 @@
  * Private Types
  ****************************************************************************/
 
-
 /* The internal version of the class driver */
 
 struct composite_driver_s
@@ -113,6 +112,7 @@ static void    composite_resume(FAR struct usbdevclass_driver_s *driver,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* USB class device *********************************************************/
 
 static const struct usbdevclass_driverops_s g_driverops =
@@ -257,7 +257,9 @@ static void composite_freereq(FAR struct usbdev_ep_s *ep,
 static int composite_bind(FAR struct usbdevclass_driver_s *driver,
                           FAR struct usbdev_s *dev)
 {
-  FAR struct composite_dev_s *priv = ((FAR struct composite_driver_s *)driver)->dev;
+  FAR struct composite_dev_s *priv =
+    ((FAR struct composite_driver_s *)driver)->dev;
+
   int ret;
   int i;
 
@@ -591,10 +593,9 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
          }
     }
 
-
-  /* Respond to the setup command if (1) data was returned, and (2) the request was
-   * NOT successfully dispatched to the component class driver.  On an error return
-   * value (ret < 0), the USB driver will stall EP0.
+  /* Respond to the setup command if (1) data was returned, and (2) the
+   * request was NOT successfully dispatched to the component class driver.
+   * On an error return value (ret < 0), the USB driver will stall EP0.
    */
 
   if (ret >= 0 && !dispatched)
@@ -839,9 +840,10 @@ FAR void *composite_initialize(uint8_t ndevices,
       memcpy(&priv->device[i].compdesc, &pdevices[i],
              sizeof(struct composite_devdesc_s));
 
-      ret = priv->device[i].compdesc.classobject(priv->device[i].compdesc.minor,
-                                                 &priv->device[i].compdesc.devdesc,
-                                                 &priv->device[i].dev);
+      ret =
+        priv->device[i].compdesc.classobject(priv->device[i].compdesc.minor,
+                                             &priv->device[i].compdesc.devdesc,
+                                             &priv->device[i].dev);
       if (ret < 0)
         {
           usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_CLASSOBJECT),
