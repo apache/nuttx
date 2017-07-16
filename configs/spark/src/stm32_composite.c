@@ -554,10 +554,10 @@ static FAR void *board_composite1_connect(int port)
     }
 
   return composite_initialize(2, dev);
-}
 #else
   return NULL;
 #endif
+}
 
 /****************************************************************************
  * Public Functions
@@ -598,7 +598,7 @@ int board_composite_initialize(int port)
  *
  ****************************************************************************/
 
-static FAR void *board_composite_connect(int port, int configid)
+FAR void *board_composite_connect(int port, int configid)
 {
   if (configid == 0)
     {
