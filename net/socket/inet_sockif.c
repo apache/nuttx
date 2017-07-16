@@ -50,6 +50,7 @@
 
 #include "tcp/tcp.h"
 #include "udp/udp.h"
+#include "sixlowpan/sixlowpan.h"
 #include "usrsock/usrsock.h"
 #include "socket/socket.h"
 
