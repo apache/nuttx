@@ -93,7 +93,8 @@ config IEEE802154_IND_PREALLOC
 
 config IEEE802154_IND_IRQRESERVE
 	int "Reserved pre-allocated meta-data structures"
-	default 10
+	default 0
+	depends on EXPERIMENTAL
 	---help---
 		If meta-data structures can be allocated from interrupt handlers,
 		then this specifies the number of pre-allocatd meta-data structures
@@ -110,7 +111,12 @@ config IEEE802154_IND_IRQRESERVE
 
 		Non-interrupt logic will also first attempt to allocate from the
 		general, pre-allocated structure pool.  If that fails, it will
-		dynamically allocate the meta data structure with an additional cost in performance.
+		dynamically allocate the meta data structure with an additional cost
+		in performance.
+
+		NOTE: Currently marked as experimental and with a default 0 zero
+		because there are no interrupt level allocations performed by the
+		current IEEE 802.15.4 MAC code.
 
 config IEEE802154_MACDEV
 	bool "Character driver for IEEE 802.15.4 MAC layer"

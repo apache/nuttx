@@ -54,14 +54,21 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if !defined(CONFIG_IEEE802154_IND_PREALLOC) || CONFIG_IEEE802154_IND_PREALLOC < 0
+/* NOTE:  The CONFIG_IEEE802154_IND_IRQRESERVE options is marked as marked
+ * 'experimental' and with the default 0 zero because there are no interrupt
+ * level allocations performed by the current IEEE 802.15.4 MAC code.
+ */
+
+#if !defined(CONFIG_IEEE802154_IND_PREALLOC) || \
+    CONFIG_IEEE802154_IND_PREALLOC < 0
 #  undef CONFIG_IEEE802154_IND_PREALLOC
 #  define CONFIG_IEEE802154_IND_PREALLOC 20
 #endif
 
-#if !defined(CONFIG_IEEE802154_IND_IRQRESERVE) || CONFIG_IEEE802154_IND_IRQRESERVE < 0
+#if !defined(CONFIG_IEEE802154_IND_IRQRESERVE) || \
+    CONFIG_IEEE802154_IND_IRQRESERVE < 0
 #  undef CONFIG_IEEE802154_IND_IRQRESERVE
-#  define CONFIG_IEEE802154_IND_IRQRESERVE 10
+#  define CONFIG_IEEE802154_IND_IRQRESERVE 0
 #endif
 
 #if CONFIG_IEEE802154_IND_IRQRESERVE > CONFIG_IEEE802154_IND_PREALLOC
