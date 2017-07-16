@@ -1719,13 +1719,18 @@ errout_with_lock:
  ****************************************************************************/
 
 #ifdef CONFIG_USBMSC_COMPOSITE
-int usbmsc_classobject(FAR void *handle, FAR struct usbdev_description_s *devdesc,
+int usbmsc_classobject(FAR void *handle,
+                      FAR struct usbdev_description_s *devdesc,
                        FAR struct usbdevclass_driver_s **classdev)
 {
   FAR struct usbmsc_alloc_s *alloc = (FAR struct usbmsc_alloc_s *)handle;
   int ret;
 
-  DEBUGASSERT(handle && classdev);
+  DEBUGASSERT(handle != NULL && classdev != NULL);
+
+  /* Save the device description */
+
+  memcpy(&alloc->dev.devdesc, devdesc, sizeof(struct usbdev_description_s));
 
   /* Export the LUNs as with the "standalone" USB mass storage driver, but
    * don't register the class instance with the USB device infrastructure.
