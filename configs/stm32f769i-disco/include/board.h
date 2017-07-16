@@ -47,7 +47,7 @@
 #endif
 
 #include "stm32_rcc.h"
-#ifdef CONFIG_STM32F7_SDMMC1
+#if defined(CONFIG_STM32F7_SDMMC1) || defined(CONFIG_STM32F7_SDMMC2)
 #  include "stm32_sdmmc.h"
 #endif
 
@@ -121,7 +121,7 @@
 #define STM32_SYSCLK_FREQUENCY  (STM32_VCO_FREQUENCY / 2)
 #define STM32_OTGFS_FREQUENCY   (STM32_VCO_FREQUENCY / 8)
 
-#elif defined(CONFIG_STM32F7_SDMMC1) || defined(CONFIG_STM32F7_RNG)
+#elif defined(CONFIG_STM32F7_SDMMC1) || defined(CONFIG_STM32F7_SDMMC2) || defined(CONFIG_STM32F7_RNG)
 /* SDMMCCLK (= USB OTG FS clock = RNGCLK) should be <= 48MHz
  *
  * PLL_VCO = (25,000,000 / 25) * 432 = 432 MHz
@@ -391,11 +391,70 @@
  * I2C #4 is connected to the LCD daughter board
  * and the WM8994 audio codec.
  *
- * SCL - PD12
- * SDA - PB7
+ * I2C4_SCL - PD12
+ * I2C4_SDA - PB7
  */
 #define GPIO_I2C4_SCL        GPIO_I2C4_SCL_1
 #define GPIO_I2C4_SDA        GPIO_I2C4_SDA_5
+
+/* SDMMC */
+
+/* Stream selections are arbitrary for now but might become important in the future
+ * if we set aside more DMA channels/streams.
+ *
+ * SDIO DMA
+ *   DMAMAP_SDMMC1_1 = Channel 4, Stream 3
+ *   DMAMAP_SDMMC1_2 = Channel 4, Stream 6
+ *
+ *   DMAMAP_SDMMC2_1 = Channel 11, Stream 0
+ *   DMAMAP_SDMMC2_2 = Channel 11, Stream 5
+ */
+
+// #define DMAMAP_SDMMC1  DMAMAP_SDMMC1_1
+#define DMAMAP_SDMMC2  DMAMAP_SDMMC2_1
+
+/* SDIO dividers.  Note that slower clocking is required when DMA is disabled
+ * in order to avoid RX overrun/TX underrun errors due to delayed responses
+ * to service FIFOs in interrupt driven mode.  These values have not been
+ * tuned!!!
+ *
+ * SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(118+2)=400 KHz
+ */
+
+#define STM32_SDMMC_INIT_CLKDIV      (118 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+
+/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
+ * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+ */
+
+#ifdef CONFIG_SDIO_DMA
+#  define STM32_SDMMC_MMCXFR_CLKDIV  (1 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#else
+#  define STM32_SDMMC_MMCXFR_CLKDIV  (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#endif
+
+/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
+ * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+ */
+
+#ifdef CONFIG_SDIO_DMA
+#  define STM32_SDMMC_SDXFR_CLKDIV   (1 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#else
+#  define STM32_SDMMC_SDXFR_CLKDIV   (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#endif
+
+/* SDMMC2 Pin mapping
+ *
+ * D0 - PG9
+ * D1 - PG10
+ * D2 - PB3
+ * D3 - PB4
+ */
+#define GPIO_SDMMC2_D0  GPIO_SDMMC2_D0_2
+#define GPIO_SDMMC2_D1  GPIO_SDMMC2_D1_2
+#define GPIO_SDMMC2_D2  GPIO_SDMMC2_D2_1
+#define GPIO_SDMMC2_D3  GPIO_SDMMC2_D3_1
+
 
 /************************************************************************************
  * Public Data
