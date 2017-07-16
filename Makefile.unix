@@ -438,7 +438,7 @@ ifeq ($(CONFIG_RAW_BINARY),y)
 endif
 ifeq ($(CONFIG_UBOOT_UIMAGE),y)
 	@echo "MKIMAGE: uImage"
-	$(Q) mkimage -A arm -O linux -C none -T kernel -a $(CONFIG_UIMAGE_LOAD_ADDRESS) \
+	$(Q) mkimage -A $(CONFIG_ARCH) -O linux -C none -T kernel -a $(CONFIG_UIMAGE_LOAD_ADDRESS) \
 		-e $(CONFIG_UIMAGE_ENTRY_POINT) -n $(BIN) -d $(NUTTXNAME).bin uImage
 	$(Q) if [ -w /tftpboot ] ; then \
 		cp -f uImage /tftpboot/uImage; \
