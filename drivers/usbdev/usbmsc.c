@@ -1884,32 +1884,42 @@ void usbmsc_uninitialize(FAR void *handle)
 #if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
 void usbmsc_get_composite_devdesc(FAR struct composite_devdesc_s *dev)
 {
-  /* The callback functions for the CDC/ACM class */
+  memset(dev, 0, sizeof(struct composite_devdesc_s));
+
+  /* The callback functions for the CDC/ACM class.
+   *
+   * classobject() and uninitializ() must be provided by board-specific
+   * logic
+   */
 
   dev->mkconfdesc          = usbmsc_mkcfgdesc;
   dev->mkstrdesc           = usbmsc_mkstrdesc;
-  dev->classobject         = 0;
-  dev->uninitialize        = 0;
 
   dev->nconfigs            = USBMSC_NCONFIGS;        /* Number of configurations supported */
   dev->configid            = USBMSC_CONFIGID;        /* The only supported configuration ID */
   dev->cfgdescsize         = SIZEOF_USBMSC_CFGDESC;  /* The size of the config descriptor */
-  dev->minor               = 0;                      /* The minor interface number */
 
-  /* Interfaces */
+  /* Board-specific logic must provide the device minor */
+
+  /* Interfaces.
+   *
+   * ifnobase must be provided by board-specific logic
+   */
 
   dev->devdesc.ninterfaces = USBMSC_NINTERFACES;     /* Number of interfaces in the configuration */
-  dev->devdesc.ifnobase    = 0;                      /* Offset to Interface-IDs */
 
-  /* Strings */
+  /* Strings.
+   *
+   * strbase must be provided by board-specific logic
+   */
 
   dev->devdesc.nstrings    = USBMSC_NSTRIDS;         /* Number of Strings */
-  dev->devdesc.strbase     = 0;                      /* Offset to String Numbers */
 
-  /* Endpoints */
+  /* Endpoints.
+   *
+   * Endpoint numbers must be provided by board-specific logic.
+   */
 
-  dev->devdesc.nendpoints                  = USBMSC_NENDPOINTS;
-  dev->devdesc.epno[USBMSC_EP_BULKIN_IDX]  = 0;      /* Must be provided by board logic */
-  dev->devdesc.epno[USBMSC_EP_BULKOUT_IDX] = 0;
+  dev->devdesc.nendpoints  = USBMSC_NENDPOINTS;
 }
 #endif

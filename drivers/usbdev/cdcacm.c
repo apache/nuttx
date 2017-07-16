@@ -2444,22 +2444,26 @@ int cdcacm_initialize(int minor, FAR void **handle)
 
   memset(&devdesc, 0, sizeof(struct usbdev_description_s));
 
-  /* Interfaces */
+  /* Interfaces.
+   *
+   * ifnobase must be provided by board-specific logic
+   */
 
   devdesc.ninterfaces = CDCACM_NINTERFACES; /* Number of interfaces in the configuration */
-  devdesc.ifnobase    = 0;                  /* Offset to Interface-IDs */
 
-  /* Strings */
+  /* Strings.
+   *
+   * strbase must be provided by board-specific logic
+   */
 
   devdesc.nstrings    = CDCACM_NSTRIDS;     /* Number of Strings */
-  devdesc.strbase     = 0;                  /* Offset to String Numbers */
 
-  /* Endpoints */
+  /* Endpoints.
+   *
+   * Endpoint numbers must be provided by board-specific logic.
+   */
 
-  devdesc.nendpoints                  = CDCACM_NUM_EPS;
-  devdesc.epno[CDCACM_EP_INTIN_IDX]   = 1;  /* Must be provided by board logic */
-  devdesc.epno[CDCACM_EP_BULKIN_IDX]  = 2;
-  devdesc.epno[CDCACM_EP_BULKOUT_IDX] = 3;
+  devdesc.nendpoints  = CDCACM_NUM_EPS;
 
   /* Get an instance of the serial driver class object */
 
@@ -2600,15 +2604,19 @@ void cdcacm_uninitialize(FAR void *handle)
 #if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_CDCACM_COMPOSITE)
 void cdcacm_get_composite_devdesc(struct composite_devdesc_s *dev)
 {
-  /* The callback functions for the CDC/ACM class */
+  memset(dev, 0, sizeof(struct composite_devdesc_s));
+
+  /* The callback functions for the CDC/ACM class.
+   *
+   * classobject() and uninitialize() must be provided by board-specific
+   * logic
+   */
 
   dev->mkconfdesc   = cdcacm_mkcfgdesc;
   dev->mkstrdesc    = cdcacm_mkstrdesc;
-  dev->classobject  = 0;
-  dev->uninitialize = 0;
 
-  dev->nconfigs     = CDCACM_NCONFIGS;               /* Number of configurations supported */
-  dev->configid     = CDCACM_CONFIGID;               /* The only supported configuration ID */
+  dev->nconfigs     = CDCACM_NCONFIGS;           /* Number of configurations supported */
+  dev->configid     = CDCACM_CONFIGID;           /* The only supported configuration ID */
 
   /* Let the construction function calculate the size of the config descriptor */
 
@@ -2618,23 +2626,27 @@ void cdcacm_get_composite_devdesc(struct composite_devdesc_s *dev)
   dev->cfgdescsize  = cdcacm_mkcfgdesc(NULL, NULL);
 #endif
 
-  dev->minor = 0;                                /* The minor interface number */
+  /* Board-specific logic must provide the device minor */
 
-  /* Interfaces */
+  /* Interfaces.
+   *
+   * ifnobase must be provided by board-specific logic
+   */
 
   dev->devdesc.ninterfaces = CDCACM_NINTERFACES; /* Number of interfaces in the configuration */
-  dev->devdesc.ifnobase    = 0;                  /* Offset to Interface-IDs */
 
-  /* Strings */
+  /* Strings.
+   *
+   * strbase must be provided by board-specific logic
+   */
 
-  dev->devdesc.nstrings = CDCACM_NSTRIDS;        /* Number of Strings */
-  dev->devdesc.strbase  = 0;                     /* Offset to String Numbers */
+  dev->devdesc.nstrings    = CDCACM_NSTRIDS;     /* Number of Strings */
 
-  /* Endpoints */
+  /* Endpoints.
+   *
+   * Endpoint numbers must be provided by board-specific logic.
+   */
 
-  dev->devdesc.nendpoints                  = CDCACM_NUM_EPS;
-  dev->devdesc.epno[CDCACM_EP_INTIN_IDX]   = 0;
-  dev->devdesc.epno[CDCACM_EP_BULKIN_IDX]  = 0;
-  dev->devdesc.epno[CDCACM_EP_BULKOUT_IDX] = 0;
+  dev->devdesc.nendpoints  = CDCACM_NUM_EPS;
 }
 #endif
