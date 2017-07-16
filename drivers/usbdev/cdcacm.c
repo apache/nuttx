@@ -2447,19 +2447,19 @@ int cdcacm_initialize(int minor, FAR void **handle)
   /* Interfaces */
 
   devdesc.ninterfaces = CDCACM_NINTERFACES; /* Number of interfaces in the configuration */
-  devdesc.ifnobase    = 0; /* Offset to Interface-IDs */
+  devdesc.ifnobase    = 0;                  /* Offset to Interface-IDs */
 
   /* Strings */
 
-  devdesc.nstrings    = CDCACM_NSTRIDS; /* Number of Strings */
-  devdesc.strbase     = 0; /* Offset to String Numbers */
+  devdesc.nstrings    = CDCACM_NSTRIDS;     /* Number of Strings */
+  devdesc.strbase     = 0;                  /* Offset to String Numbers */
 
   /* Endpoints */
 
   devdesc.nendpoints                  = CDCACM_NUM_EPS;
-  devdesc.epno[CDCACM_EP_INTIN_IDX]   = 0;
-  devdesc.epno[CDCACM_EP_BULKIN_IDX]  = 1;
-  devdesc.epno[CDCACM_EP_BULKOUT_IDX] = 2;
+  devdesc.epno[CDCACM_EP_INTIN_IDX]   = 1;  /* Must be provided by board logic */
+  devdesc.epno[CDCACM_EP_BULKIN_IDX]  = 2;
+  devdesc.epno[CDCACM_EP_BULKOUT_IDX] = 3;
 
   /* Get an instance of the serial driver class object */
 
@@ -2471,7 +2471,8 @@ int cdcacm_initialize(int minor, FAR void **handle)
       ret = usbdev_register(drvr);
       if (ret < 0)
         {
-          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_DEVREGISTER), (uint16_t)-ret);
+          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_DEVREGISTER),
+                   (uint16_t)-ret);
         }
     }
 

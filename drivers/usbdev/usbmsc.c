@@ -1891,25 +1891,25 @@ void usbmsc_get_composite_devdesc(FAR struct composite_devdesc_s *dev)
   dev->classobject         = 0;
   dev->uninitialize        = 0;
 
-  dev->nconfigs            = USBMSC_NCONFIGS;          /* Number of configurations supported */
-  dev->configid            = USBMSC_CONFIGID;          /* The only supported configuration ID */
-  dev->cfgdescsize         = SIZEOF_USBMSC_CFGDESC;    /* The size of the config descriptor */
-  dev->minor               = 0;                        /* The minor interface number */
+  dev->nconfigs            = USBMSC_NCONFIGS;        /* Number of configurations supported */
+  dev->configid            = USBMSC_CONFIGID;        /* The only supported configuration ID */
+  dev->cfgdescsize         = SIZEOF_USBMSC_CFGDESC;  /* The size of the config descriptor */
+  dev->minor               = 0;                      /* The minor interface number */
 
   /* Interfaces */
 
-  dev->devdesc.ninterfaces = USBMSC_NINTERFACES; /* Number of interfaces in the configuration */
-  dev->devdesc.ifnobase    = 0;                  /* Offset to Interface-IDs */
+  dev->devdesc.ninterfaces = USBMSC_NINTERFACES;     /* Number of interfaces in the configuration */
+  dev->devdesc.ifnobase    = 0;                      /* Offset to Interface-IDs */
 
   /* Strings */
 
-  dev->devdesc.nstrings    = USBMSC_NSTRIDS;        /* Number of Strings */
-  dev->devdesc.strbase     = 0;                     /* Offset to String Numbers */
+  dev->devdesc.nstrings    = USBMSC_NSTRIDS;         /* Number of Strings */
+  dev->devdesc.strbase     = 0;                      /* Offset to String Numbers */
 
   /* Endpoints */
 
   dev->devdesc.nendpoints                  = USBMSC_NENDPOINTS;
-  dev->devdesc.epno[USBMSC_EP_BULKIN_IDX]  = 0;
+  dev->devdesc.epno[USBMSC_EP_BULKIN_IDX]  = 0;      /* Must be provided by board logic */
   dev->devdesc.epno[USBMSC_EP_BULKOUT_IDX] = 0;
 }
 #endif
