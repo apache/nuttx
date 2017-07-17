@@ -632,7 +632,7 @@ union ieee802154_macattr_u
   bool sec_enabled;
   bool timestamp_support;
 
-  uint32_t ack_wait_dur;
+  uint32_t ack_waitdur;
   uint8_t batt_life_ext_periods;
   uint8_t max_csma_backoffs : 3;
   uint8_t max_be : 4;

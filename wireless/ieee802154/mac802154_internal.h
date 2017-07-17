@@ -256,15 +256,6 @@ struct ieee802154_privmac_s
 
   /****************** Uncategorized MAC PIB attributes ***********************/
 
-  /* The maximum number of symbols to wait for an acknowledgement frame to
-   * arrive following a transmitted data frame. [1] pg. 126
-   *
-   * NOTE: This may be able to be a 16-bit or even an 8-bit number.  I wasn't
-   * sure at the time what the range of reasonable values was.
-   */
-
-  uint32_t ack_waitdur;
-
   /* The maximum time to wait either for a frame intended as a response to a
    * data request frame or for a broadcast frame following a beacon with the
    * Frame Pending field set to one. [1] pg. 127
