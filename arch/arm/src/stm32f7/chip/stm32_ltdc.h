@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_LTDC_H
-#define __ARCH_ARM_SRC_STM32_CHIP_STM32_LTDC_H
+#ifndef __ARCH_ARM_SRC_STM32F7_CHIP_STM32_LTDC_H
+#define __ARCH_ARM_SRC_STM32F7_CHIP_STM32_LTDC_H
 
 /************************************************************************************
  * Included Files
@@ -378,4 +378,4 @@
  * Public Types
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_LTDC_H */
+#endif /* __ARCH_ARM_SRC_STM32F7_CHIP_STM32_LTDC_H */
