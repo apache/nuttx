@@ -58,11 +58,12 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "stm32.h"
+// #include "stm32.h"
 #include "chip/stm32_ltdc.h"
 #include "chip/stm32_dma2d.h"
 #include "chip/stm32_ccm.h"
 #include "stm32_dma2d.h"
+#include "stm32_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -155,7 +156,7 @@
 
 /* check ccm heap allocation */
 
-#ifndef CONFIG_STM32_CCMEXCLUDE
+#if	!defined(CONFIG_STM32_CCMEXCLUDE) && !defined(CONFIG_ARCH_CHIP_STM32F7)
 # error "Enable CONFIG_STM32_CCMEXCLUDE from the heap allocation"
 #endif
 
