@@ -72,9 +72,11 @@
  *   iplen - Length of the IP and UDP headers
  *
  * Return:
- *   OK  The packet has been processed  and can be deleted
- *   ERROR Hold the packet and try again later. There is a listening socket
- *         but no receive in place to catch the packet yet.
+ *   OK    - The packet has been processed  and can be deleted
+ *   ERROR - Hold the packet and try again later.  There is a listening
+ *           socket but no receive in place to catch the packet yet.  The
+ *           device's d_len will be set to zero in this case as there is
+ *           no outgoing data.
  *
  * Assumptions:
  *   Called from the interrupt level or with interrupts disabled.
@@ -185,16 +187,27 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 
           flags = udp_callback(dev, conn, UDP_NEWDATA);
 
-          /* If the operation was successful, the UDP_NEWDATA flag is removed
-           * and thus the packet can be deleted (OK will be returned).
+          /* If the operation was successful and the UDP data was "consumed,"
+           * then the UDP_NEWDATA flag will be cleared by logic in
+           * udp_callback().  The packet memory can then be freed by the
+           * network driver.  OK will be returned to the network driver to
+           * indicate this case.
+           *
+           * "Consumed" here means that either the received data was (1)
+           * accepted by a socket waiting for data on the port or was (2)
+           * buffered in the UDP socket's read-ahead buffer.
            */
 
           if ((flags & UDP_NEWDATA) != 0)
             {
               /* No.. the packet was not processed now.  Return ERROR so
-               * that the driver may retry again later.
+               * that the driver may retry again later.  We still need to
+               * set d_len to zero so that the driver is aware that there
+               * is nothing to be sent.
                */
 
+              nwarn("WARNING: Packet not processed\n");
+              dev->d_len = 0;
               ret = ERROR;
             }
 
