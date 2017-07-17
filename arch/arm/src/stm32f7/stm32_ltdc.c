@@ -59,10 +59,11 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "stm32.h"
+// #include "stm32.h"
 #include "chip/stm32_ltdc.h"
 #include "stm32_ltdc.h"
 #include "stm32_dma2d.h"
+#include "stm32_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -141,8 +142,8 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_STM32_LTDC_DEFBACKLIGHT
-#  define CONFIG_STM32_LTDC_DEFBACKLIGHT 0xf0
+#ifndef CONFIG_STM32F7_LTDC_DEFBACKLIGHT
+#  define CONFIG_STM32F7_LTDC_DEFBACKLIGHT 0xf0
 #endif
 #define STM32_LTDC_BACKLIGHT_OFF 0x00
 
@@ -150,36 +151,36 @@
 
 /* Layer 1 format */
 
-#if defined(CONFIG_STM32_LTDC_L1_L8)
+#if defined(CONFIG_STM32F7_LTDC_L1_L8)
 #  define STM32_LTDC_L1_BPP         8
 #  define STM32_LTDC_L1_COLOR_FMT   FB_FMT_RGB8
 #  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_L8)
 #  define STM32_LTDC_L1CMAP
-#elif defined(CONFIG_STM32_LTDC_L1_AL44)
+#elif defined(CONFIG_STM32F7_LTDC_L1_AL44)
 #  define STM32_LTDC_L1_BPP         8
 #  define STM32_LTDC_L1_COLOR_FMT   ???
 #  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_AL44)
-#elif defined(CONFIG_STM32_LTDC_L1_AL88)
+#elif defined(CONFIG_STM32F7_LTDC_L1_AL88)
 #  define STM32_LTDC_L1_BPP         16
 #  define STM32_LTDC_L1_COLOR_FMT   ???
 #  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_AL88)
-#elif defined(CONFIG_STM32_LTDC_L1_ARGB4444)
+#elif defined(CONFIG_STM32F7_LTDC_L1_ARGB4444)
 #  define STM32_LTDC_L1_BPP         16
 #  define STM32_LTDC_L1_COLOR_FMT   ???
 #  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_ARGB4444)
-#elif defined(CONFIG_STM32_LTDC_L1_RGB565)
+#elif defined(CONFIG_STM32F7_LTDC_L1_RGB565)
 #  define STM32_LTDC_L1_BPP         16
 #  define STM32_LTDC_L1_COLOR_FMT   FB_FMT_RGB16_565
 #  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_RGB565)
-#elif defined(CONFIG_STM32_LTDC_L1_ARGB1555)
+#elif defined(CONFIG_STM32F7_LTDC_L1_ARGB1555)
 #  define STM32_LTDC_L1_BPP         16
 #  define STM32_LTDC_L1_COLOR_FMT   ???
 #  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_ARGB1555)
-#elif defined(CONFIG_STM32_LTDC_L1_RGB888)
+#elif defined(CONFIG_STM32F7_LTDC_L1_RGB888)
 #  define STM32_LTDC_L1_BPP         24
 #  define STM32_LTDC_L1_COLOR_FMT   FB_FMT_RGB24
 #  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_RGB888)
-#elif defined(CONFIG_STM32_LTDC_L1_ARGB8888)
+#elif defined(CONFIG_STM32F7_LTDC_L1_ARGB8888)
 #  define STM32_LTDC_L1_BPP         32
 #  define STM32_LTDC_L1_COLOR_FMT   ???
 #  define STM32_LTDC_L1PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_ARGB8888)
@@ -187,36 +188,36 @@
 
 /* Layer 2 format */
 
-#if defined(CONFIG_STM32_LTDC_L2_L8)
+#if defined(CONFIG_STM32F7_LTDC_L2_L8)
 #  define STM32_LTDC_L2_BPP         8
 #  define STM32_LTDC_L2_COLOR_FMT   FB_FMT_RGB8
 #  define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_L8)
 #  define STM32_LTDC_L2CMAP
-#elif defined(CONFIG_STM32_LTDC_L2_AL44)
+#elif defined(CONFIG_STM32F7_LTDC_L2_AL44)
 #  define STM32_LTDC_L2_BPP         8
 #  define STM32_LTDC_L2_COLOR_FMT   ???
 #  define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_AL44)
-#elif defined(CONFIG_STM32_LTDC_L2_AL88)
+#elif defined(CONFIG_STM32F7_LTDC_L2_AL88)
 #  define STM32_LTDC_L2_BPP         16
 #  define STM32_LTDC_L2_COLOR_FMT   ???
 #  define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_AL88)
-#elif defined(CONFIG_STM32_LTDC_L2_ARGB4444)
+#elif defined(CONFIG_STM32F7_LTDC_L2_ARGB4444)
 #  define STM32_LTDC_L2_BPP         16
 #  define STM32_LTDC_L2_COLOR_FMT   ???
 #  define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_ARGB4444)
-#elif defined(CONFIG_STM32_LTDC_L2_RGB565)
+#elif defined(CONFIG_STM32F7_LTDC_L2_RGB565)
 #  define STM32_LTDC_L2_BPP         16
 #  define STM32_LTDC_L2_COLOR_FMT   FB_FMT_RGB16_565
 #  define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_RGB565)
-#elif defined(CONFIG_STM32_LTDC_L2_ARGB1555)
+#elif defined(CONFIG_STM32F7_LTDC_L2_ARGB1555)
 #  define STM32_LTDC_L2_BPP         16
 #  define STM32_LTDC_L2_COLOR_FMT   ???
 #  define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_ARGB1555)
-#elif defined(CONFIG_STM32_LTDC_L2_RGB888)
+#elif defined(CONFIG_STM32F7_LTDC_L2_RGB888)
 #  define STM32_LTDC_L2_BPP         24
 #  define STM32_LTDC_L2_COLOR_FMT   FB_FMT_RGB24
 #  define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_RGB888)
-#elif defined(CONFIG_STM32_LTDC_L2_ARGB8888)
+#elif defined(CONFIG_STM32F7_LTDC_L2_ARGB8888)
 #  define STM32_LTDC_L2_BPP         32
 #  define STM32_LTDC_L2_COLOR_FMT   ???
 #  define STM32_LTDC_L2PFCR_PF      LTDC_LxPFCR_PF(LTDC_PF_ARGB8888)
@@ -242,36 +243,36 @@
 
 #define STM32_L1_FBSIZE (STM32_L1_STRIDE * STM32_LTDC_HEIGHT)
 
-#ifdef CONFIG_STM32_LTDC_L2
-#  ifndef CONFIG_STM32_LTDC_L2_WIDTH
-#    define CONFIG_STM32_LTDC_L2_WIDTH STM32_LTDC_WIDTH
+#ifdef CONFIG_STM32F7_LTDC_L2
+#  ifndef CONFIG_STM32F7_LTDC_L2_WIDTH
+#    define CONFIG_STM32F7_LTDC_L2_WIDTH STM32_LTDC_WIDTH
 #  endif
 
-#  if CONFIG_STM32_LTDC_L2_WIDTH > STM32_LTDC_WIDTH
+#  if CONFIG_STM32F7_LTDC_L2_WIDTH > STM32_LTDC_WIDTH
 #    error Width of Layer 2 exceeds the width of the display
 #  endif
 
-#  ifndef CONFIG_STM32_LTDC_L2_HEIGHT
-#    define CONFIG_STM32_LTDC_L2_HEIGHT STM32_LTDC_HEIGHT
+#  ifndef CONFIG_STM32F7_LTDC_L2_HEIGHT
+#    define CONFIG_STM32F7_LTDC_L2_HEIGHT STM32_LTDC_HEIGHT
 #  endif
 
-#  if CONFIG_STM32_LTDC_L2_HEIGHT > STM32_LTDC_HEIGHT
+#  if CONFIG_STM32F7_LTDC_L2_HEIGHT > STM32_LTDC_HEIGHT
 #    error Height of Layer 2 exceeds the height of the display
 #  endif
 
 #  if STM32_LTDC_L2_BPP == 8
-#    define STM32_L2_STRIDE (CONFIG_STM32_LTDC_L2_WIDTH)
+#    define STM32_L2_STRIDE (CONFIG_STM32F7_LTDC_L2_WIDTH)
 #  elif STM32_LTDC_L2_BPP == 16
-#    define STM32_L2_STRIDE ((CONFIG_STM32_LTDC_L2_WIDTH * 16 + 7) / 8)
+#    define STM32_L2_STRIDE ((CONFIG_STM32F7_LTDC_L2_WIDTH * 16 + 7) / 8)
 #  elif STM32_LTDC_L2_BPP == 24
-#    define STM32_L2_STRIDE ((CONFIG_STM32_LTDC_L2_WIDTH * 24 + 7) / 8)
+#    define STM32_L2_STRIDE ((CONFIG_STM32F7_LTDC_L2_WIDTH * 24 + 7) / 8)
 #  elif STM32_LTDC_L2_BPP == 32
-#    define STM32_L2_STRIDE ((CONFIG_STM32_LTDC_L2_WIDTH * 32 + 7) / 8)
+#    define STM32_L2_STRIDE ((CONFIG_STM32F7_LTDC_L2_WIDTH * 32 + 7) / 8)
 #  else
 #    error Undefined or unrecognized base resolution
 #  endif
 
-#  define STM32_L2_FBSIZE (STM32_L2_STRIDE * CONFIG_STM32_LTDC_L2_HEIGHT)
+#  define STM32_L2_FBSIZE (STM32_L2_STRIDE * CONFIG_STM32F7_LTDC_L2_HEIGHT)
 
 #else
 #  define STM32_L2_FBSIZE (0)
@@ -283,7 +284,7 @@
 
 /* Debug option */
 
-#ifdef CONFIG_STM32_LTDC_REGDEBUG
+#ifdef CONFIG_STM32F7_LTDC_REGDEBUG
 #  define regerr       lcderr
 #  define reginfo      lcdinfo
 #else
@@ -298,9 +299,9 @@
  * wild framebuffer writes.
  */
 
-#define STM32_LTDC_BUFFER_SIZE  CONFIG_STM32_LTDC_FB_SIZE
+#define STM32_LTDC_BUFFER_SIZE  CONFIG_STM32F7_LTDC_FB_SIZE
 #define STM32_LTDC_BUFFER_FREE  (STM32_LTDC_BUFFER_SIZE - STM32_TOTAL_FBSIZE)
-#define STM32_LTDC_BUFFER_START (CONFIG_STM32_LTDC_FB_BASE + \
+#define STM32_LTDC_BUFFER_START (CONFIG_STM32F7_LTDC_FB_BASE + \
                                 STM32_LTDC_BUFFER_FREE/2)
 
 #if STM32_LTDC_BUFFER_FREE < 0
@@ -312,7 +313,7 @@
 #define STM32_LTDC_BUFFER_L1     STM32_LTDC_BUFFER_START
 #define STM32_LTDC_ENDBUF_L1     (STM32_LTDC_BUFFER_L1 + STM32_L1_FBSIZE)
 
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
 #  define STM32_LTDC_BUFFER_L2   STM32_LTDC_ENDBUF_L1
 #  define STM32_LTDC_ENDBUF_L2   (STM32_LTDC_BUFFER_L2 + STM32_L2_FBSIZE)
 #else
@@ -321,7 +322,7 @@
 
 /* Layer helpers */
 
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
 #  define LTDC_NLAYERS 2
 #else
 #  define LTDC_NLAYERS 1
@@ -333,28 +334,28 @@
 
 /* Dithering */
 
-#ifndef CONFIG_STM32_LTDC_DITHER_RED
+#ifndef CONFIG_STM32F7_LTDC_DITHER_RED
 # define STM32_LTDC_DITHER_RED      0
 #else
-# define STM32_LTDC_DITHER_RED      CONFIG_STM32_LTDC_DITHER_RED
+# define STM32_LTDC_DITHER_RED      CONFIG_STM32F7_LTDC_DITHER_RED
 #endif
-#ifndef CONFIG_STM32_LTDC_DITHER_GREEN
+#ifndef CONFIG_STM32F7_LTDC_DITHER_GREEN
 # define STM32_LTDC_DITHER_GREEN    0
 #else
-# define STM32_LTDC_DITHER_GREEN    CONFIG_STM32_LTDC_DITHER_GREEN
+# define STM32_LTDC_DITHER_GREEN    CONFIG_STM32F7_LTDC_DITHER_GREEN
 #endif
-#ifndef CONFIG_STM32_LTDC_DITHER_BLUE
+#ifndef CONFIG_STM32F7_LTDC_DITHER_BLUE
 # define STM32_LTDC_DITHER_BLUE     0
 #else
-# define STM32_LTDC_DITHER_BLUE     CONFIG_STM32_LTDC_DITHER_BLUE
+# define STM32_LTDC_DITHER_BLUE     CONFIG_STM32F7_LTDC_DITHER_BLUE
 #endif
 
 /* Background color */
 
-#ifndef CONFIG_STM32_LTDC_BACKCOLOR
+#ifndef CONFIG_STM32F7_LTDC_BACKCOLOR
 # define STM32_LTDC_BACKCOLOR       0
 #else
-# define STM32_LTDC_BACKCOLOR       CONFIG_STM32_LTDC_BACKCOLOR
+# define STM32_LTDC_BACKCOLOR       CONFIG_STM32F7_LTDC_BACKCOLOR
 #endif
 
 /* Internal operation flags */
@@ -385,22 +386,22 @@
 
 /* Check pixel format support by DMA2D driver */
 
-#ifdef CONFIG_STM32_DMA2D
-# if defined(CONFIG_STM32_LTDC_L1_L8) || \
-        defined(CONFIG_STM32_LTDC_L2_L8)
-#  if !defined(CONFIG_STM32_DMA2D_L8)
+#ifdef CONFIG_STM32F7_DMA2D
+# if defined(CONFIG_STM32F7_LTDC_L1_L8) || \
+        defined(CONFIG_STM32F7_LTDC_L2_L8)
+#  if !defined(CONFIG_STM32F7_DMA2D_L8)
 #   error "DMA2D must support FB_FMT_RGB8 pixel format"
 #  endif
 # endif
-# if defined(CONFIG_STM32_LTDC_L1_RGB565) || \
-        defined(CONFIG_STM32_LTDC_L2_RGB565)
-#  if !defined(CONFIG_STM32_DMA2D_RGB565)
+# if defined(CONFIG_STM32F7_LTDC_L1_RGB565) || \
+        defined(CONFIG_STM32F7_LTDC_L2_RGB565)
+#  if !defined(CONFIG_STM32F7_DMA2D_RGB565)
 #   error "DMA2D must support FB_FMT_RGB16_565 pixel format"
 #  endif
 # endif
-# if defined(CONFIG_STM32_LTDC_L1_RGB888) || \
-        defined(CONFIG_STM32_LTDC_L2_RGB888)
-#  if !defined(CONFIG_STM32_DMA2D_RGB888)
+# if defined(CONFIG_STM32F7_LTDC_L1_RGB888) || \
+        defined(CONFIG_STM32F7_LTDC_L2_RGB888)
+#  if !defined(CONFIG_STM32F7_DMA2D_RGB888)
 #   error "DMA2D must support FB_FMT_RGB24 pixel format"
 #  endif
 # endif
@@ -409,7 +410,7 @@
 /* Calculate the size of the layers clut table */
 
 #ifdef CONFIG_FB_CMAP
-# if defined(CONFIG_STM32_DMA2D) && !defined(CONFIG_STM32_DMA2D_L8)
+# if defined(CONFIG_STM32F7_DMA2D) && !defined(CONFIG_STM32F7_DMA2D_L8)
 #  error "DMA2D must also support L8 CLUT pixel format if supported by LTDC"
 # endif
 # ifdef STM32_LTDC_L1CMAP
@@ -478,7 +479,7 @@ enum stm32_layer_e
 
 struct stm32_layer_s
 {
-#ifdef CONFIG_STM32_LTDC_INTERFACE
+#ifdef CONFIG_STM32F7_LTDC_INTERFACE
   /* LTDC interface */
 
   struct ltdc_layer_s ltdc;     /* Layer control structure */
@@ -495,7 +496,7 @@ struct stm32_layer_s
   /* Operation */
 
   uint8_t operation;        /* Operation flags */
-#ifdef CONFIG_STM32_DMA2D
+#ifdef CONFIG_STM32F7_DMA2D
   FAR struct dma2d_layer_s *dma2d; /* dma2d interface */
 #endif
 };
@@ -560,7 +561,7 @@ static inline void stm32_ltdc_lsetopac(FAR struct stm32_layer_s *layer);
 static inline void stm32_ltdc_lunsetopac(FAR struct stm32_layer_s *layer);
 static inline uint8_t stm32_ltdc_lgetopac(FAR struct stm32_layer_s *layer);
 static inline bool stm32_ltdc_lvalidate(FAR const struct stm32_layer_s *layer);
-#ifdef CONFIG_STM32_LTDC_INTERFACE
+#ifdef CONFIG_STM32F7_LTDC_INTERFACE
 static int stm32_ltdc_lvalidatearea(FAR struct stm32_layer_s *layer,
                                     fb_coord_t xpos, fb_coord_t ypos,
                                     fb_coord_t xres, fb_coord_t yres,
@@ -619,7 +620,7 @@ static int stm32_lgetvideoinfo(struct ltdc_layer_s *layer,
 static int stm32_lgetplaneinfo(struct ltdc_layer_s *layer, int planeno,
                                  struct fb_planeinfo_s *pinfo);
 
-#ifdef CONFIG_STM32_LTDC_INTERFACE
+#ifdef CONFIG_STM32F7_LTDC_INTERFACE
 static int stm32_getlid(FAR struct ltdc_layer_s *layer,
                         int *lid, uint32_t flag);
 static int stm32_setcolor(FAR struct ltdc_layer_s *layer, uint32_t argb);
@@ -638,7 +639,7 @@ static int stm32_getarea(FAR struct ltdc_layer_s *layer,
                          fb_coord_t *srcxpos, fb_coord_t *srcypos);
 static int stm32_update(FAR struct ltdc_layer_s *layer, uint32_t mode);
 
-#ifdef CONFIG_STM32_DMA2D
+#ifdef CONFIG_STM32F7_DMA2D
 static int stm32_blit(FAR struct ltdc_layer_s *dest,
                       fb_coord_t destxpos, fb_coord_t destypos,
                       FAR const struct dma2d_layer_s *src,
@@ -653,7 +654,7 @@ static int stm32_fillarea(FAR struct ltdc_layer_s *layer,
                             FAR const struct ltdc_area_s *area,
                             uint32_t color);
 #endif
-#endif /* CONFIG_STM32_LTDC_INTERFACE */
+#endif /* CONFIG_STM32F7_LTDC_INTERFACE */
 
 /****************************************************************************
  * Private Data
@@ -751,7 +752,7 @@ static struct stm32_ltdcdev_s g_ltdc =
 #endif
         }
     }
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   ,
   .layer[LTDC_LAYER_L2] =
     {
@@ -786,7 +787,7 @@ static struct stm32_ltdcdev_s g_ltdc =
 static const uint32_t stm32_fmt_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1PFCR_PF
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   , STM32_LTDC_L2PFCR_PF
 #endif
 };
@@ -798,7 +799,7 @@ static const uint32_t stm32_fmt_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_cr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1CR
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   , STM32_LTDC_L2CR
 #endif
 };
@@ -808,7 +809,7 @@ static const uintptr_t stm32_cr_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_whpcr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1WHPCR
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   , STM32_LTDC_L2WHPCR
 #endif
 };
@@ -818,7 +819,7 @@ static const uintptr_t stm32_whpcr_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_wvpcr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1WVPCR
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   , STM32_LTDC_L2WVPCR
 #endif
 };
@@ -828,7 +829,7 @@ static const uintptr_t stm32_wvpcr_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_pfcr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1PFCR
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   , STM32_LTDC_L2PFCR
 #endif
 };
@@ -838,7 +839,7 @@ static const uintptr_t stm32_pfcr_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_dccr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1DCCR
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   , STM32_LTDC_L2DCCR
 #endif
 };
@@ -848,7 +849,7 @@ static const uintptr_t stm32_dccr_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_ckcr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1CKCR
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   , STM32_LTDC_L2CKCR
 #endif
 };
@@ -858,7 +859,7 @@ static const uintptr_t stm32_ckcr_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_cacr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1CACR
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   , STM32_LTDC_L2CACR
 #endif
 };
@@ -868,7 +869,7 @@ static const uintptr_t stm32_cacr_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_bfcr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1BFCR
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   , STM32_LTDC_L2BFCR
 #endif
 };
@@ -878,7 +879,7 @@ static const uintptr_t stm32_bfcr_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_cfbar_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1CFBAR
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   , STM32_LTDC_L2CFBAR
 #endif
 };
@@ -888,7 +889,7 @@ static const uintptr_t stm32_cfbar_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_cfblr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1CFBLR
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   , STM32_LTDC_L2CFBLR
 #endif
 };
@@ -898,7 +899,7 @@ static const uintptr_t stm32_cfblr_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_cfblnr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1CFBLNR
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   , STM32_LTDC_L2CFBLNR
 #endif
 };
@@ -909,7 +910,7 @@ static const uintptr_t stm32_cfblnr_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_clutwr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1CLUTWR
-# ifdef CONFIG_STM32_LTDC_L2
+# ifdef CONFIG_STM32F7_LTDC_L2
   , STM32_LTDC_L2CLUTWR
 # endif
 };
@@ -1314,7 +1315,7 @@ static void stm32_global_configure(void)
 
   /* Set the default active layer */
 
-#ifndef CONFIG_STM32_LTDC_L2
+#ifndef CONFIG_STM32F7_LTDC_L2
   g_lactive = LTDC_LAYER_L1;
 #else
   g_lactive = LTDC_LAYER_L2;
@@ -1329,7 +1330,7 @@ static void stm32_global_configure(void)
   /* Configure dither */
 
   stm32_ltdc_dither(
-#ifdef CONFIG_STM32_LTDC_DITHER
+#ifdef CONFIG_STM32F7_LTDC_DITHER
                     true,
 #else
                     false,
@@ -1480,7 +1481,7 @@ static inline uint8_t stm32_ltdc_lgetopac(FAR struct stm32_layer_s *layer)
 
 static inline bool stm32_ltdc_lvalidate(FAR const struct stm32_layer_s *layer)
 {
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   return layer == &LAYER_L1 || layer == &LAYER_L2;
 #else
   return layer == &LAYER_L1;
@@ -1508,7 +1509,7 @@ static inline bool stm32_ltdc_lvalidate(FAR const struct stm32_layer_s *layer)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_LTDC_INTERFACE
+#ifdef CONFIG_STM32F7_LTDC_INTERFACE
 static int stm32_ltdc_lvalidatearea(FAR struct stm32_layer_s *layer,
                                     fb_coord_t xpos, fb_coord_t ypos,
                                     fb_coord_t xres, fb_coord_t yres,
@@ -2093,7 +2094,7 @@ static void stm32_ltdc_linit(int lid)
 
   FAR struct stm32_layer_s *layer = &LAYER(lid);
   FAR struct stm32_ltdc_s *state = &layer->state;
-#ifdef CONFIG_STM32_LTDC_INTERFACE
+#ifdef CONFIG_STM32F7_LTDC_INTERFACE
   FAR struct ltdc_layer_s *ltdc = &layer->ltdc;
 
   /* Initialize the ltdc interface */
@@ -2116,7 +2117,7 @@ static void stm32_ltdc_linit(int lid)
   ltdc->setarea      = stm32_setarea;
   ltdc->getarea      = stm32_getarea;
   ltdc->update       = stm32_update;
-#ifdef CONFIG_STM32_DMA2D
+#ifdef CONFIG_STM32F7_DMA2D
   ltdc->blit         = stm32_blit;
   ltdc->blend        = stm32_blend;
   ltdc->fillarea     = stm32_fillarea;
@@ -2165,7 +2166,7 @@ static void stm32_ltdc_linit(int lid)
     }
 #endif
 
-#ifdef CONFIG_STM32_DMA2D
+#if	defined(CONFIG_STM32F7_DMA2D) && defined(CONFIG_STM32F7_LTDC_INTERFACE)
   /* Bind the dma2d interface */
 
   layer->dma2d = stm32_dma2dinitltdc(state);
@@ -2200,7 +2201,7 @@ static int stm32_getvideoinfo(struct fb_vtable_s *vtable,
   if (vtable)
     {
       FAR struct ltdc_layer_s *ltdc;
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
       ltdc = (FAR struct ltdc_layer_s *)&LAYER_L2;
 #else
       ltdc = (FAR struct ltdc_layer_s *)&LAYER_L1;
@@ -2235,7 +2236,7 @@ static int stm32_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
   if (vtable)
     {
       FAR struct ltdc_layer_s *ltdc;
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
       ltdc = (FAR struct ltdc_layer_s *)&LAYER_L2;
 #else
       ltdc = (FAR struct ltdc_layer_s *)&LAYER_L1;
@@ -2267,7 +2268,7 @@ static int stm32_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
 static int stm32_getcmap(struct fb_vtable_s *vtable,
                             struct fb_cmap_s *cmap)
 {
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   return stm32_getclut((FAR struct ltdc_layer_s *)&LAYER_L2, cmap);
 #else
   return stm32_getclut((FAR struct ltdc_layer_s *)&LAYER_L1, cmap);
@@ -2293,7 +2294,7 @@ static int stm32_getcmap(struct fb_vtable_s *vtable,
 static int stm32_putcmap(struct fb_vtable_s *vtable,
                             const struct fb_cmap_s *cmap)
 {
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   return stm32_setclut((FAR struct ltdc_layer_s *)&LAYER_L2, cmap);
 #else
   return stm32_setclut((FAR struct ltdc_layer_s *)&LAYER_L1, cmap);
@@ -2456,7 +2457,7 @@ static int stm32_getclut(struct ltdc_layer_s *layer,
   if (priv == &LAYER_L1 || priv == &LAYER_L2)
     {
       sem_wait(priv->state.lock);
-#ifdef CONFIG_STM32_DMA2D
+#ifdef CONFIG_STM32F7_DMA2D
       /* Note! We share the same color lookup table with the dma2d driver and
        * the getclut implementation works in the same way.
        * To prevent redundant code we simply call the getclut function of the
@@ -2524,7 +2525,7 @@ static int stm32_getclut(struct ltdc_layer_s *layer,
 }
 #endif /* STM32_LAYER_CLUT_SIZE */
 
-#ifdef CONFIG_STM32_LTDC_INTERFACE
+#ifdef CONFIG_STM32F7_LTDC_INTERFACE
 /****************************************************************************
  * Name: getlid
  *
@@ -2562,7 +2563,7 @@ static int stm32_getlid(FAR struct ltdc_layer_s *layer, int *lid,
           case LTDC_LAYER_OWN:
             *lid = priv->state.lid;
             break;
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
           case LTDC_LAYER_ACTIVE:
             *lid = g_lactive;
             break;
@@ -2583,7 +2584,7 @@ static int stm32_getlid(FAR struct ltdc_layer_s *layer, int *lid,
             *lid = LTDC_LAYER_L1;
             break;
 #endif
-#ifdef CONFIG_STM32_DMA2D
+#ifdef CONFIG_STM32F7_DMA2D
           case LTDC_LAYER_DMA2D:
             ret = priv->dma2d->getlid(priv->dma2d, lid);
             break;
@@ -3143,7 +3144,7 @@ static int stm32_getarea(FAR struct ltdc_layer_s *layer,
 static int stm32_update(FAR struct ltdc_layer_s *layer, uint32_t mode)
 {
   FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   FAR struct stm32_layer_s *active = &LAYER(g_lactive);
   FAR struct stm32_layer_s *inactive = &LAYER(!g_lactive);
 #endif
@@ -3181,7 +3182,7 @@ static int stm32_update(FAR struct ltdc_layer_s *layer, uint32_t mode)
 
       stm32_ltdc_lupdate(priv);
 
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
       /* The following operation only useful if layer 2 is supported.
        * Otherwise ignore it.
        */
@@ -3259,7 +3260,7 @@ static int stm32_update(FAR struct ltdc_layer_s *layer, uint32_t mode)
   return -EINVAL;
 }
 
-#ifdef CONFIG_STM32_DMA2D
+#ifdef CONFIG_STM32F7_DMA2D
 /****************************************************************************
  * Name: stm32_blit
  *
@@ -3436,7 +3437,7 @@ FAR struct ltdc_layer_s *stm32_ltdcgetlayer(int lid)
   errno = EINVAL;
   return NULL;
 }
-#endif /* CONFIG_STM32_LTDC_INTERFACE */
+#endif /* CONFIG_STM32F7_LTDC_INTERFACE */
 
 /****************************************************************************
  * Name: stm32_ltdcinitialize
@@ -3451,7 +3452,7 @@ FAR struct ltdc_layer_s *stm32_ltdcgetlayer(int lid)
 
 int stm32_ltdcinitialize(void)
 {
-#ifdef CONFIG_STM32_DMA2D
+#ifdef CONFIG_STM32F7_DMA2D
   int   ret;
 #endif
 
@@ -3478,7 +3479,7 @@ int stm32_ltdcinitialize(void)
   lcdinfo("Configure global register\n");
   stm32_global_configure();
 
-#ifdef CONFIG_STM32_DMA2D
+#ifdef CONFIG_STM32F7_DMA2D
   /* Initialize the dma2d controller */
 
   ret = up_dma2dinitialize();
@@ -3493,20 +3494,20 @@ int stm32_ltdcinitialize(void)
 
   lcdinfo("Initialize ltdc layer\n");
   stm32_ltdc_linit(LTDC_LAYER_L1);
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   stm32_ltdc_linit(LTDC_LAYER_L2);
 #endif
 
   /* Display layer 1 and 2 */
 
   stm32_ltdc_lenable(&LAYER_L1);
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   stm32_ltdc_lenable(&LAYER_L2);
 #endif
 
   /* Enable the backlight */
 
-#ifdef CONFIG_STM32_LCD_BACKLIGHT
+#ifdef CONFIG_STM32F7_LCD_BACKLIGHT
   stm32_backlight(true);
 #endif
 
@@ -3597,7 +3598,7 @@ void stm32_ltdcuninitialize(void)
 
 void stm32_lcdclear(nxgl_mxpixel_t color)
 {
-#ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_L2
   stm32_ltdc_lclear(&LAYER(LTDC_LAYER_L2), color);
 #endif
   stm32_ltdc_lclear(&LAYER(LTDC_LAYER_L1), color);
@@ -3614,10 +3615,10 @@ void stm32_lcdclear(nxgl_mxpixel_t color)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_LCD_BACKLIGHT
+#ifdef CONFIG_STM32F7_LCD_BACKLIGHT
 void stm32_backlight(bool blon)
 {
-  /* Set default backlight level CONFIG_STM32_LTDC_DEFBACKLIGHT */
+  /* Set default backlight level CONFIG_STM32F7_LTDC_DEFBACKLIGHT */
 
   lcderr("ERROR: Not supported\n");
 }

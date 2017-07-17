@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_DMA2D_H
-#define __ARCH_ARM_SRC_STM32_STM32_DMA2D_H
+#ifndef __ARCH_ARM_SRC_STM32F7_STM32_DMA2D_H
+#define __ARCH_ARM_SRC_STM32F7_STM32_DMA2D_H
 
 /****************************************************************************
  * Included Files
@@ -44,7 +44,7 @@
 #include <nuttx/video/fb.h>
 #include <arch/chip/ltdc.h>
 
-#ifdef CONFIG_STM32_DMA2D
+#ifdef CONFIG_STM32F7_DMA2D
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -61,7 +61,7 @@
  * Public Functions
  ****************************************************************************/
 
-# ifdef CONFIG_STM32_LTDC_INTERFACE
+# ifdef CONFIG_STM32F7_LTDC_INTERFACE
 /****************************************************************************
  * Name: stm32_dma2dinitltdc
  *
@@ -84,7 +84,7 @@
  ****************************************************************************/
 
 FAR struct dma2d_layer_s *stm32_dma2dinitltdc(FAR struct stm32_ltdc_s *layer);
-# endif /* CONFIG_STM32_LTDC_INTERFACE */
+# endif /* CONFIG_STM32F7_LTDC_INTERFACE */
 
-#endif /* CONFIG_STM32_DMA2D */
-#endif /* __ARCH_ARM_SRC_STM32_STM32_DMA2D_H */
+#endif /* CONFIG_STM32F7_DMA2D */
+#endif /* __ARCH_ARM_SRC_STM32F7_STM32_DMA2D_H */

@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_LTDC_H
-#define __ARCH_ARM_SRC_STM32_STM32_LTDC_H
+#ifndef __ARCH_ARM_SRC_STM32F7_STM32_LTDC_H
+#define __ARCH_ARM_SRC_STM32F7_STM32_LTDC_H
 
 /************************************************************************************
  * Included Files
@@ -51,7 +51,7 @@
 
 #include <arch/chip/ltdc.h>
 
-#ifdef CONFIG_STM32_LTDC
+#ifdef CONFIG_STM32F7_LTDC
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -144,14 +144,14 @@ void stm32_lcdclear(nxgl_mxpixel_t color);
  * Name: stm32_lcd_backlight
  *
  * Description:
- *   If CONFIG_STM32_LCD_BACKLIGHT is defined, then the board-specific logic must
+ *   If CONFIG_STM32F7_LCD_BACKLIGHT is defined, then the board-specific logic must
  *   provide this interface to turn the backlight on and off.
  *
  ************************************************************************************/
 
-#ifdef CONFIG_STM32_LCD_BACKLIGHT
+#ifdef CONFIG_STM32F7_LCD_BACKLIGHT
 void stm32_backlight(bool blon);
 #endif
 
-#endif /* CONFIG_STM32_LTDC */
-#endif /* __ARCH_ARM_SRC_STM32_STM32_LTDC_H */
+#endif /* CONFIG_STM32F7_LTDC */
+#endif /* __ARCH_ARM_SRC_STM32F7_STM32_LTDC_H */
