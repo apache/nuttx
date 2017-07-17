@@ -1110,7 +1110,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
 
           case IEEE802154_FRAME_BEACON:
             {
-              wlinfo("Beacon frame received\n");
+              wlinfo("Beacon frame received. BSN: 0x%02X\n", ind->dsn);
               mac802154_rxbeaconframe(priv, ind);
               ieee802154_ind_free(ind);
             }
@@ -1847,6 +1847,10 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
                   mac802154_txdesc_alloc(priv, &respdesc, false);
 
                   if (priv->curr_op == MAC802154_OP_POLL)
+                    {
+                      priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
+                    }
+                  else if (priv->curr_op == MAC802154_OP_ASSOC)
                     {
                       priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
                     }

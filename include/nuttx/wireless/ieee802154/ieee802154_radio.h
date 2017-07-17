@@ -80,11 +80,15 @@ struct ieee802154_txdesc_s
 
   FAR struct ieee802154_data_conf_s *conf;
 
-  enum ieee802154_frametype_e frametype; /* Frame type.  Used by MAC layer to
-                                          * control how tx done is handled */
-  bool framepending;                     /* Did the ACK have the frame pending bit
-                                          * bit set */
-  uint32_t purgetime;                   /* Time to purge transaction */
+  /* Frame type.  Used by MAC layer to control how tx done is handled */
+
+  enum ieee802154_frametype_e frametype;
+
+  bool framepending;    /* Did the ACK have the frame pending bit set */
+  uint32_t purgetime;   /* Time to purge transaction */
+  uint8_t  retrycount;  /* Number of remaining retries. Set to macMaxFrameRetries
+                         * when txdescriptor is allocated
+                         */
 
   /* TODO: Add slotting information for GTS transactions */
 };

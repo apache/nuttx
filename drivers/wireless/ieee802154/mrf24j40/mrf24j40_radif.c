@@ -141,13 +141,15 @@ static void mrf24j40_setorder(FAR struct mrf24j40_radio_s *dev, uint8_t bo,
     {
       if (dev->devmode == IEEE802154_DEVMODE_ENDPOINT)
         {
+          wlinfo("Configuring sleep for inactive period\n");
           maincnt = (bi - sfduration) / dev->slpclkper;
           remcnt  = ((bi - sfduration) - (maincnt * dev->slpclkper)) / 50;
         }
       else
         {
+          wlinfo("Configuring sleep for beacon interval\n");
           maincnt = bi / dev->slpclkper;
-          remcnt  = bi - (maincnt * dev->slpclkper) / 50;
+          remcnt  = (bi - (maincnt * dev->slpclkper)) / 50;
         }
 
       wlinfo("MAINCNT: %lu, REMCNT: %lu\n", maincnt, remcnt);
