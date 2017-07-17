@@ -74,9 +74,10 @@
  *   dev - The device driver structure containing the received packet
  *
  * Return:
- *   OK  The packet has been processed  and can be deleted
- *   ERROR Hold the packet and try again later. There is a listening socket
- *         but no recv in place to catch the packet yet.
+ *   OK    The packet has been processed  and can be deleted
+ *   ERROR There is a matching connection, but could not dispatch the packet
+ *         yet.  Currently useful for UDP when a packet arrives before a recv
+ *         call is in place.
  *
  * Assumptions:
  *   Called from the interrupt level or with interrupts disabled.
@@ -110,10 +111,14 @@ int pkt_input(struct net_driver_s *dev)
       if ((flags & PKT_NEWDATA) != 0)
         {
           /* No.. the packet was not processed now.  Return ERROR so
-           * that the driver may retry again later.
+           * that the driver may retry again later.  We still need to
+           * set d_len to zero so that the driver is aware that there
+           * is nothing to be sent.
            */
 
-          ret = ERROR;
+           nwarn("WARNING: Packet not processed\n");
+           //dev->d_len = 0; REVISIT
+           ret = ERROR;
         }
     }
   else

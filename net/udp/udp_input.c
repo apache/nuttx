@@ -72,11 +72,11 @@
  *   iplen - Length of the IP and UDP headers
  *
  * Return:
- *   OK    The packet has been processed  and can be deleted
- *   ERROR Hold the packet and try again later.  There is a listening socket
- *         but no receive in place to catch the packet yet.  The device's
- *         d_len will be set to zero in this case as there is no outgoing
- *         data.
+ *   OK    - The packet has been processed  and can be deleted
+ *   ERROR - Hold the packet and try again later.  There is a listening
+ *           socket but no receive in place to catch the packet yet.  The
+ *           device's d_len will be set to zero in this case as there is
+ *           no outgoing data.
  *
  * Assumptions:
  *   Called from the interrupt level or with interrupts disabled.

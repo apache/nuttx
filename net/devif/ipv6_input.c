@@ -238,9 +238,10 @@ static bool check_destipaddr(FAR struct net_driver_s *dev,
  *           the IPv6 packet.
  * Returned Value:
  *   OK    - The packet was processed (or dropped) and can be discarded.
- *   ERROR - There is a matching connection, but could not dispatch the
- *           packet yet.  Currently useful for UDP when a packet arrives
- *           before a recv call is in place.
+ *   ERROR - Hold the packet and try again later.  There is a listening
+ *           socket but no receive in place to catch the packet yet.  The
+ *           device's d_len will be set to zero in this case as there is
+ *           no outgoing data.
  *
  *   If this function returns to the network driver with dev->d_len > 0,
  *   that is an indication to the driver that there is an outgoing response
