@@ -697,17 +697,17 @@ enum ieee802154_scantype_e
 
 struct ieee802154_frame_meta_s
 {
-  enum ieee802154_addrmode_e srcaddr_mode;  /* Source Address Mode */
-  struct ieee802154_addr_s destaddr;        /* Destination Address */
+  enum ieee802154_addrmode_e srcmode;  /* Source Address Mode */
+  struct ieee802154_addr_s   destaddr; /* Destination Address */
 
-  uint8_t msdu_handle;        /* Handle assoc. with MSDU */
+  uint8_t handle;                      /* User-specified handle identifier */
 
   struct
   {
-    uint8_t ack_tx      : 1;  /* Acknowledge TX? */
-    uint8_t gts_tx      : 1;  /* 1=GTS used for TX, 0=CAP used for TX */
-    uint8_t indirect_tx : 1;  /* Should indirect transmission be used? */
-  } msdu_flags;
+    uint8_t ackreq   : 1;
+    uint8_t usegts   : 1;
+    uint8_t indirect : 1;
+  } flags;
 
 #ifdef CONFIG_IEEE802154_SECURITY
   /* Security information if enabled */
@@ -718,7 +718,7 @@ struct ieee802154_frame_meta_s
 #ifdef CONFIG_IEEE802154_UWB
   /* The UWB Pulse Repetition Frequency to be used for the transmission */
 
-  enum ieee802154_uwbprf_e uwb_prf;
+  enum ieee802154_uwbprf_e uwbprf;
 
   /* The UWB preamble symbol repititions
    *  Should be one of:
@@ -729,7 +729,7 @@ struct ieee802154_frame_meta_s
 
   /* The UWB Data Rate to be used for the transmission */
 
-  enum ieee802154_uwb_datarate_e data_rate;
+  enum ieee802154_uwb_datarate_e datarate;
 #endif
 
   enum ieee802154_ranging_e ranging;

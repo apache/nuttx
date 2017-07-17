@@ -163,9 +163,9 @@ int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
 
   /* Source address mode */
 
-  meta->srcaddr_mode = pktmeta->sextended != 0?
-                        IEEE802154_ADDRMODE_EXTENDED :
-                        IEEE802154_ADDRMODE_SHORT;
+  meta->srcmode = pktmeta->sextended != 0?
+                    IEEE802154_ADDRMODE_EXTENDED :
+                    IEEE802154_ADDRMODE_SHORT;
 
   /* Check for a broadcast destination address (all zero) */
 
@@ -184,7 +184,7 @@ int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
 
   if (rcvrnull)
     {
-      meta->msdu_flags.ack_tx = TRUE;
+      meta->flags.ackreq = TRUE;
     }
 
   /* Destination address */
@@ -223,7 +223,7 @@ int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
    * fragment of a disassembled packet.
    */
 
-  meta->msdu_handle = ieee->i_msdu_handle++;
+  meta->handle = ieee->i_msdu_handle++;
 
 #ifdef CONFIG_IEEE802154_SECURITY
 #  warning CONFIG_IEEE802154_SECURITY not yet supported
