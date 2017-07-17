@@ -455,6 +455,30 @@
 #define GPIO_SDMMC2_D2  GPIO_SDMMC2_D2_1
 #define GPIO_SDMMC2_D3  GPIO_SDMMC2_D3_1
 
+/* LCD DISPLAY
+ *
+ */
+#define	BOARD_LTDC_WIDTH        800
+#define	BOARD_LTDC_HEIGHT       472
+
+#define	BOARD_LTDC_HSYNC        10
+#define	BOARD_LTDC_HFP          10
+#define	BOARD_LTDC_HBP          20
+#define	BOARD_LTDC_VSYNC        2
+#define	BOARD_LTDC_VFP          4
+#define	BOARD_LTDC_VBP          2
+
+#define	BOARD_LTDC_GCR_PCPOL    0
+#define	BOARD_LTDC_GCR_DEPOL    0
+#define	BOARD_LTDC_GCR_VSPOL    0
+#define	BOARD_LTDC_GCR_HSPOL    0
+
+// #define	BOARD_LTDC_OUTPUT_BPP   16
+
+//#define	BOARD_LTDC_GCR_DEN
+//#define	BOARD_LTDC_GCR_DBW
+//#define	BOARD_LTDC_GCR_DGW
+//#define	BOARD_LTDC_GCR_DRW
 
 /************************************************************************************
  * Public Data
