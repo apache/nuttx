@@ -202,3 +202,11 @@ endif
 ifeq ($(CONFIG_STM32F7_RNG),y)
 CHIP_CSRCS += stm32_rng.c
 endif
+
+ifeq ($(CONFIG_STM32F7_LTDC),y)
+CHIP_CSRCS += stm32_ltdc.c
+endif
+
+ifeq ($(CONFIG_STM32F7_DMA2D),y)
+CHIP_CSRCS += stm32_dma2d.c
+endif
