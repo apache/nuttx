@@ -564,11 +564,10 @@ struct ieee802154_capability_info_s
 
 struct ieee802154_superframespec_s
 {
-  uint16_t beaconorder   : 4;  /* Transmission interval of beacon */
-  uint16_t sforder       : 4;  /* Length of active portion of superframe */
+  uint16_t beaconorder    : 4;  /* Transmission interval of beacon */
+  uint16_t sforder        : 4;  /* Length of active portion of superframe */
   uint16_t final_capslot  : 4;  /* Last slot utilized by CAP */
   uint16_t ble            : 1;  /* Battery Life Extension (BLE) */
-  uint16_t reserved       : 1;  /* Reserved bit */
   uint16_t pancoord       : 1;  /* 1 if beacon sent by pan coordinator */
   uint16_t assocpermit    : 1;  /* 1 if coordinator is accepting associaton */
 };
