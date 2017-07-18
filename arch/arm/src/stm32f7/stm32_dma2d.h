@@ -83,6 +83,8 @@
  *
  ****************************************************************************/
 
+struct stm32_ltdc_s; // fwd decl
+
 FAR struct dma2d_layer_s *stm32_dma2dinitltdc(FAR struct stm32_ltdc_s *layer);
 # endif /* CONFIG_STM32F7_LTDC_INTERFACE */
 

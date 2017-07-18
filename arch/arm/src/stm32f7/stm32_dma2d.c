@@ -63,6 +63,7 @@
 #include "chip/stm32_dma2d.h"
 #include "chip/stm32_ccm.h"
 #include "stm32_dma2d.h"
+#include "stm32_ltdc.h"
 #include "stm32_gpio.h"
 
 /****************************************************************************
@@ -121,8 +122,8 @@
 
 /* Define shadow layer for ltdc interface */
 
-#ifdef CONFIG_STM32_LTDC_INTERFACE
-# ifdef CONFIG_STM32_LTDC_L2
+#ifdef CONFIG_STM32F7_LTDC_INTERFACE
+# ifdef CONFIG_STM32F7_LTDC_L2
 #  define DMA2D_SHADOW_LAYER    2
 #  define DMA2D_SHADOW_LAYER_L1 0
 #  define DMA2D_SHADOW_LAYER_L2 1
@@ -130,15 +131,15 @@
 #  define DMA2D_SHADOW_LAYER    1
 #  define DMA2D_SHADOW_LAYER_L1 0
 # endif
-# define DMA2D_LAYER_NSIZE      CONFIG_STM32_DMA2D_NLAYERS + DMA2D_SHADOW_LAYER
+# define DMA2D_LAYER_NSIZE      CONFIG_STM32F7_DMA2D_NLAYERS + DMA2D_SHADOW_LAYER
 #else
-# define DMA2D_LAYER_NSIZE      CONFIG_STM32_DMA2D_NLAYERS
+# define DMA2D_LAYER_NSIZE      CONFIG_STM32F7_DMA2D_NLAYERS
 # define DMA2D_SHADOW_LAYER     0
 #endif
 
 /* Debug option */
 
-#ifdef CONFIG_STM32_DMA2D_REGDEBUG
+#ifdef CONFIG_STM32F7_DMA2D_REGDEBUG
 #  define regerr       lcderr
 #  define reginfo      lcdinfo
 #else
@@ -148,7 +149,7 @@
 
 /* check clut support */
 
-#ifdef CONFIG_STM32_DMA2D_L8
+#ifdef CONFIG_STM32F7_DMA2D_L8
 # ifndef CONFIG_FB_CMAP
 #  error "Enable cmap to support the configured layer formats!"
 # endif
@@ -156,8 +157,8 @@
 
 /* check ccm heap allocation */
 
-#if	!defined(CONFIG_STM32_CCMEXCLUDE) && !defined(CONFIG_ARCH_CHIP_STM32F7)
-# error "Enable CONFIG_STM32_CCMEXCLUDE from the heap allocation"
+#if	!defined(CONFIG_STM32F7_CCMEXCLUDE) && !defined(CONFIG_ARCH_CHIP_STM32F7)
+# error "Enable CONFIG_STM32F7_CCMEXCLUDE from the heap allocation"
 #endif
 
 /****************************************************************************
@@ -183,7 +184,7 @@ struct stm32_dma2d_s
 
   /* Coloring */
 
-#ifdef CONFIG_STM32_DMA2D_L8
+#ifdef CONFIG_STM32F7_DMA2D_L8
   uint32_t *clut;               /* Color lookup table */
 #endif
 
@@ -192,14 +193,14 @@ struct stm32_dma2d_s
   sem_t    *lock;               /* Ensure mutually exclusive access */
 };
 
-#ifdef CONFIG_STM32_LTDC_INTERFACE
+#ifdef CONFIG_STM32F7_LTDC_INTERFACE
 
 /* This structures provides the DMA2D layer for each LTDC layer */
 
 struct stm32_ltdc_dma2d_s
 {
   struct stm32_dma2d_s dma2ddev;
-#ifdef CONFIG_STM32_DMA2D_L8
+#ifdef CONFIG_STM32F7_DMA2D_L8
   FAR struct ltdc_layer_s *ltdc;
 #endif
 };
@@ -270,12 +271,13 @@ static const uintptr_t stm32_color_layer_t[DMA2D_NLAYERS] =
 };
 
 /* DMA2D clut memory address register */
-
+#if defined(CONFIG_STM32F7_DMA2D_L8)
 static const uintptr_t stm32_cmar_layer_t[DMA2D_NLAYERS - 1] =
 {
   STM32_DMA2D_FGCMAR,
   STM32_DMA2D_BGCMAR
 };
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -289,7 +291,7 @@ static void stm32_dma2d_control(uint32_t setbits, uint32_t clrbits);
 static int stm32_dma2dirq(int irq, void *context, FAR void *arg);
 static int stm32_dma2d_waitforirq(void);
 static int stm32_dma2d_start(void);
-#ifdef CONFIG_STM32_DMA2D_L8
+#ifdef CONFIG_STM32F7_DMA2D_L8
 static int stm32_dma2d_loadclut(uintptr_t reg);
 #endif
 static uint32_t stm32_dma2d_memaddress(FAR const struct stm32_dma2d_s *layer,
@@ -325,7 +327,7 @@ static int stm32_dma2dgetvideoinfo(FAR struct dma2d_layer_s *layer,
 static int stm32_dma2dgetplaneinfo(FAR struct dma2d_layer_s *layer, int planeno,
                                   FAR struct fb_planeinfo_s *pinfo);
 static int stm32_dma2dgetlid(FAR struct dma2d_layer_s *layer, int *lid);
-#ifdef CONFIG_STM32_DMA2D_L8
+#ifdef CONFIG_STM32F7_DMA2D_L8
 static int stm32_dma2dsetclut(FAR struct dma2d_layer_s *layer,
                             const FAR struct fb_cmap_s *cmap);
 static int stm32_dma2dgetclut(FAR struct dma2d_layer_s *layer,
@@ -362,7 +364,7 @@ static struct stm32_dma2d_s *g_layers[DMA2D_LAYER_NSIZE];
 
 static sem_t g_lock;
 
-#ifdef CONFIG_STM32_LTDC_INTERFACE
+#ifdef CONFIG_STM32F7_LTDC_INTERFACE
 /* This structure provides the DMA2D layer for each LTDC layer */
 
 static struct stm32_ltdc_layer_s g_ltdc_layer;
@@ -441,7 +443,7 @@ static int stm32_dma2dirq(int irq, void *context, FAR void *arg)
 
       putreg32(DMA2D_IFCR_CTCIF, STM32_DMA2D_IFCR);
     }
-#ifdef CONFIG_STM32_DMA2D_L8
+#ifdef CONFIG_STM32F7_DMA2D_L8
   else if (regval & DMA2D_ISR_CTCIF)
     {
       /* CLUT transfer complete interrupt */
@@ -523,7 +525,7 @@ static int stm32_dma2d_waitforirq(void)
 }
 
 
-#ifdef CONFIG_STM32_DMA2D_L8
+#ifdef CONFIG_STM32F7_DMA2D_L8
 /****************************************************************************
  * Name: stm32_dma2d_loadclut
  *
@@ -697,17 +699,17 @@ static int stm32_dma2d_pixelformat(uint8_t fmt, uint8_t *fmtmap)
 
   switch (fmt)
     {
-#ifdef CONFIG_STM32_DMA2D_RGB565
+#ifdef CONFIG_STM32F7_DMA2D_RGB565
       case FB_FMT_RGB16_565:
         *fmtmap = DMA2D_PF_RGB565;
         break;
 #endif
-#ifdef CONFIG_STM32_DMA2D_RGB888
+#ifdef CONFIG_STM32F7_DMA2D_RGB888
       case FB_FMT_RGB24:
         *fmtmap = DMA2D_PF_RGB888;
         break;
 #endif
-#ifdef CONFIG_STM32_DMA2D_L8
+#ifdef CONFIG_STM32F7_DMA2D_L8
       case FB_FMT_RGB8:
         *fmtmap = DMA2D_PF_L8;
         break;
@@ -742,17 +744,17 @@ static int stm32_dma2d_bpp(uint8_t fmt, uint8_t *bpp)
 
   switch (fmt)
     {
-#ifdef CONFIG_STM32_DMA2D_RGB565
+#ifdef CONFIG_STM32F7_DMA2D_RGB565
       case FB_FMT_RGB16_565:
         *bpp = 16;
         break;
 #endif
-#ifdef CONFIG_STM32_DMA2D_RGB888
+#ifdef CONFIG_STM32F7_DMA2D_RGB888
       case FB_FMT_RGB24:
         *bpp = 24;
         break;
 #endif
-#ifdef CONFIG_STM32_DMA2D_L8
+#ifdef CONFIG_STM32F7_DMA2D_L8
       case FB_FMT_RGB8:
         *bpp = 8;
         break;
@@ -946,7 +948,7 @@ static void stm32_dma2d_linit(FAR struct stm32_dma2d_s *layer,
   priv->getvideoinfo = stm32_dma2dgetvideoinfo;
   priv->getplaneinfo = stm32_dma2dgetplaneinfo;
   priv->getlid       = stm32_dma2dgetlid;
-#ifdef CONFIG_STM32_DMA2D_L8
+#ifdef CONFIG_STM32F7_DMA2D_L8
   priv->setclut      = stm32_dma2dsetclut;
   priv->getclut      = stm32_dma2dgetclut;
 #endif
@@ -961,7 +963,7 @@ static void stm32_dma2d_linit(FAR struct stm32_dma2d_s *layer,
   /* Initialize the layer structure */
 
   layer->lid          = lid;
-#ifdef CONFIG_STM32_DMA2D_L8
+#ifdef CONFIG_STM32F7_DMA2D_L8
   layer->clut         = 0;
 #endif
   layer->blendmode    = DMA2D_BLEND_NONE;
@@ -1091,7 +1093,7 @@ static void stm32_dma2d_lpfc(FAR const struct stm32_dma2d_s *layer,
 
   pfccrreg = DMA2D_xGPFCCR_CM(layer->fmt);
 
-#ifdef CONFIG_STM32_DMA2D_L8
+#ifdef CONFIG_STM32F7_DMA2D_L8
   if (layer->fmt == DMA2D_PF_L8)
     {
       /* Load CLUT automatically */
@@ -1260,7 +1262,7 @@ static int stm32_dma2dgetlid(FAR struct dma2d_layer_s *layer, int *lid)
   return -EINVAL;
 }
 
-#ifdef CONFIG_STM32_DMA2D_L8
+#ifdef CONFIG_STM32F7_DMA2D_L8
 /****************************************************************************
  * Name: stm32_dma2dsetclut
  *
@@ -1290,7 +1292,7 @@ static int stm32_dma2dsetclut(FAR struct dma2d_layer_s *layer,
     {
       sem_wait(priv->lock);
 
-#ifdef CONFIG_STM32_LTDC_INTERFACE
+#ifdef CONFIG_STM32F7_LTDC_INTERFACE
       if (priv->lid < DMA2D_SHADOW_LAYER)
         {
           /* Update the shared color lookup table.
@@ -1977,7 +1979,7 @@ FAR struct dma2d_layer_s * up_dma2dgetlayer(int lid)
  *   On error   - NULL and errno is set to
  *                -EINVAL if one of the parameter is invalid
  *                -ENOMEM if no memory available or exceeds
- *                 CONFIG_STM32_DMA2D_NLAYERS
+ *                 CONFIG_STM32F7_DMA2D_NLAYERS
  *
  ****************************************************************************/
 
@@ -2033,7 +2035,7 @@ FAR struct dma2d_layer_s *up_dma2dcreatelayer(fb_coord_t width,
            * mm_memalign 8-byte alignment is guaranteed by normal malloc calls.
            * We have also ensure memory is allocated from the SRAM1/2/3 block.
            * The CCM block is only accessible through the D-BUS but not by
-           * the AHB-BUS. Ensure that CONFIG_STM32_CCMEXCLUDE is set!
+           * the AHB-BUS. Ensure that CONFIG_STM32F7_CCMEXCLUDE is set!
            */
 
           fbmem = kmm_zalloc(fblen);
@@ -2177,7 +2179,7 @@ int up_dma2dinitialize(void)
       sem_init(g_interrupt.sem, 0, 0);
       sem_setprotocol(g_interrupt.sem, SEM_PRIO_NONE);
 
-#ifdef CONFIG_STM32_DMA2D_L8
+#ifdef CONFIG_STM32F7_DMA2D_L8
       /* Enable dma2d transfer and clut loading interrupts only */
 
       stm32_dma2d_control(DMA2D_CR_TCIE | DMA2D_CR_CTCIE, DMA2D_CR_TEIE |
@@ -2243,7 +2245,7 @@ void up_dma2duninitialize(void)
   g_initialized = false;
 }
 
-#ifdef CONFIG_STM32_LTDC_INTERFACE
+#ifdef CONFIG_STM32F7_LTDC_INTERFACE
 /****************************************************************************
  * Name: stm32_dma2dinitltdc
  *
@@ -2292,7 +2294,7 @@ FAR struct dma2d_layer_s * stm32_dma2dinitltdc(FAR struct stm32_ltdc_s *layer)
   memcpy(&priv->dma2ddev.vinfo, &layer->vinfo, sizeof(struct fb_videoinfo_s));
   memcpy(&priv->dma2ddev.pinfo, &layer->pinfo, sizeof(struct fb_planeinfo_s));
 
-#ifdef CONFIG_STM32_DMA2D_L8
+#ifdef CONFIG_STM32F7_DMA2D_L8
   /* Verifies that the ltdc layer has a clut. This ensures that DMA2D driver can
    * support clut format but the LTDC driver does not and vice versa.
    */
@@ -2307,4 +2309,4 @@ FAR struct dma2d_layer_s * stm32_dma2dinitltdc(FAR struct stm32_ltdc_s *layer)
 
   return &priv->dma2ddev.dma2d;
 }
-#endif /* CONFIG_STM32_LTDC_INTERFACE */
+#endif /* CONFIG_STM32F7_LTDC_INTERFACE */

@@ -546,7 +546,9 @@ struct stm32_interrupt_s
 /* Global register operation */
 
 static void stm32_lcd_enable(bool enable);
+#if !defined(CONFIG_STM32F7_LTDC_USE_DSI)
 static void stm32_ltdc_gpioconfig(void);
+#endif
 static void stm32_ltdc_periphconfig(void);
 static void stm32_ltdc_bgcolor(uint32_t rgb);
 static void stm32_ltdc_dither(bool enable, uint8_t red,
@@ -660,6 +662,9 @@ static int stm32_fillarea(FAR struct ltdc_layer_s *layer,
  * Private Data
  ****************************************************************************/
 
+#if defined(CONFIG_STM32F7_LTDC_USE_DSI)
+
+#else
 /* PIO pin configurations */
 
 static const uint32_t g_ltdcpins[] =
@@ -681,6 +686,7 @@ static const uint32_t g_ltdcpins[] =
 };
 
 #define STM32_LTDC_NPINCONFIGS (sizeof(g_ltdcpins) / sizeof(uint32_t))
+#endif /* CONFIG_STM32F7_LTDC_USE_DSI */
 
 /* This structure provides the base layer interface */
 
@@ -940,6 +946,7 @@ static bool g_initialized;
  *
  ****************************************************************************/
 
+#if !defined(CONFIG_STM32F7_LTDC_USE_DSI)
 static void stm32_ltdc_gpioconfig(void)
 {
   int i;
@@ -954,6 +961,7 @@ static void stm32_ltdc_gpioconfig(void)
       stm32_configgpio(g_ltdcpins[i]);
     }
 }
+#endif
 
 /****************************************************************************
  * Name: stm32_ltdc_periphconfig
@@ -968,9 +976,11 @@ static void stm32_ltdc_periphconfig(void)
 {
   uint32_t regval;
 
+#if defined(CONFIG_STM32F7_LTDC_USE_DSI)
+#else
   /* Configure GPIO's */
-
   stm32_ltdc_gpioconfig();
+#endif
 
   /* Configure APB2 LTDC clock external */
 
@@ -3298,7 +3308,7 @@ static int stm32_blit(FAR struct ltdc_layer_s *dest,
       int   ret;
 
       sem_wait(priv->state.lock);
-      priv->dma2d->blit(priv->dma2d, destxpos, destypos, src, srcarea);
+      ret = priv->dma2d->blit(priv->dma2d, destxpos, destypos, src, srcarea);
       sem_post(priv->state.lock);
 
       return ret;
@@ -3353,8 +3363,8 @@ static int stm32_blend(FAR struct ltdc_layer_s *dest,
       int   ret;
 
       sem_wait(priv->state.lock);
-      priv->dma2d->blend(priv->dma2d, destxpos, destypos,
-                        fore, forexpos, foreypos, back, backarea);
+      ret = priv->dma2d->blend(priv->dma2d, destxpos, destypos,
+                               fore, forexpos, foreypos, back, backarea);
       sem_post(priv->state.lock);
 
       return ret;
@@ -3396,7 +3406,7 @@ static int stm32_fillarea(FAR struct ltdc_layer_s *layer,
       int   ret;
 
       sem_wait(priv->state.lock);
-      priv->dma2d->fillarea(priv->dma2d, area, color);
+      ret = priv->dma2d->fillarea(priv->dma2d, area, color);
       sem_post(priv->state.lock);
 
       return ret;
