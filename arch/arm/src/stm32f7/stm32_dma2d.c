@@ -58,10 +58,9 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-// #include "stm32.h"
 #include "chip/stm32_ltdc.h"
 #include "chip/stm32_dma2d.h"
-#include "chip/stm32_ccm.h"
+#include "chip/stm32_dtcm.h"
 #include "stm32_dma2d.h"
 #include "stm32_ltdc.h"
 #include "stm32_gpio.h"
@@ -153,12 +152,6 @@
 # ifndef CONFIG_FB_CMAP
 #  error "Enable cmap to support the configured layer formats!"
 # endif
-#endif
-
-/* check ccm heap allocation */
-
-#if	!defined(CONFIG_STM32F7_CCMEXCLUDE) && !defined(CONFIG_ARCH_CHIP_STM32F7)
-# error "Enable CONFIG_STM32F7_CCMEXCLUDE from the heap allocation"
 #endif
 
 /****************************************************************************
@@ -809,10 +802,10 @@ static FAR struct stm32_dma2d_s * stm32_dma2d_lalloc(void)
 {
   FAR struct stm32_dma2d_s *layer;
 
-#ifdef HAVE_CCM_HEAP
-  /* First try to allocate from the ccm heap */
+#ifdef HAVE_DTCM_HEAP
+  /* First try to allocate from the dtcm heap */
 
-  layer = ccm_malloc(sizeof(struct stm32_dma2d_s));
+  layer = dtcm_malloc(sizeof(struct stm32_dma2d_s));
 
   if (!layer)
     {
@@ -842,10 +835,10 @@ static void stm32_dma2d_lfree(FAR struct stm32_dma2d_s *layer)
 {
   if (layer)
     {
-#ifdef HAVE_CCM_HEAP
-      if (((uint32_t)layer & 0xf0000000) == 0x10000000)
+#ifdef HAVE_DTCM_HEAP
+      if ( (void*)(DTCM_START) <= layer && layer <= (void*)(DTCM_END) )
         {
-          ccm_free(layer);
+          dtcm_free(layer);
         }
       else
         {
@@ -2034,11 +2027,9 @@ FAR struct dma2d_layer_s *up_dma2dcreatelayer(fb_coord_t width,
           /* Allocate 32-bit aligned memory for the layer buffer. As reported in
            * mm_memalign 8-byte alignment is guaranteed by normal malloc calls.
            * We have also ensure memory is allocated from the SRAM1/2/3 block.
-           * The CCM block is only accessible through the D-BUS but not by
-           * the AHB-BUS. Ensure that CONFIG_STM32F7_CCMEXCLUDE is set!
            */
 
-          fbmem = kmm_zalloc(fblen);
+          fbmem = kmm_zalloc(fblen);	/* STM32F7: Should use DTCM ? */
 
           if (fbmem)
             {
