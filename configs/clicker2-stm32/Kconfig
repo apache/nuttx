@@ -38,7 +38,7 @@ config CLICKER2_STM32_MB2_BEE
 config CLICKER2_STM32_MRF24J40LH_VERBOSE
 	bool "Verbose MRF24J40 lowerhalf"
 	default n
-	depends on DEBUG_WIRELESS_INFO
+	depends on IEEE802154_MRF24J40 && DEBUG_WIRELESS_INFO
 	---help---
 		Enable verbose syslog for MRF24J40 lowerhalf
 
