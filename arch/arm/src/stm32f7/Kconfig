@@ -4666,6 +4666,14 @@ config STM32F7_LTDC_INTERFACE
 	---help---
 		Enable the ltdc interface to support ltdc layer control.
 
+config STM32F7_LTDC_USE_DSI
+	bool "Use DSI as display connection"
+	default n
+	depends on STM32F7_DSIHOST
+	---help---
+		Select this if your display is connected via DSI.
+		Deselect option if your display is connected via digital RGB+HSYNC+VSYNC
+
 config STM32F7_LTDC_BACKLIGHT
 	bool "Backlight support"
 	default y
