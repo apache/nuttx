@@ -103,7 +103,7 @@
  * 2 <= PLLQ <= 15
  */
 
-#if defined(CONFIG_STM32F7_USBOTHFS)
+#if defined(CONFIG_STM32F7_OTGFS)
 /* Highest SYSCLK with USB OTG FS clock = 48 MHz
  *
  * PLL_VCO = (25,000,000 / 25) * 384 = 384 MHz
