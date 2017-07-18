@@ -229,9 +229,8 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
       return -EINTR;
     }
 
-  /* Set the purge time to zero */
-
   (*txdesc)->purgetime = 0;
+  (*txdesc)->retrycount = priv->maxretries;
 
   (*txdesc)->conf = &notif->u.dataconf;
   return OK;
