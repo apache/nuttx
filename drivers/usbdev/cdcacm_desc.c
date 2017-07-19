@@ -95,7 +95,6 @@ static const struct usb_devdesc_s g_devdesc =
 };
 #endif
 
-
 #if !defined(CONFIG_CDCACM_COMPOSITE) && defined(CONFIG_USBDEV_DUALSPEED)
 static const struct usb_qualdesc_s g_qualdesc =
 {
@@ -113,10 +112,6 @@ static const struct usb_qualdesc_s g_qualdesc =
   0,                                            /* reserved */
 };
 #endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -249,89 +244,89 @@ int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
     {
     case CDCACM_EPINTIN:  /* Interrupt IN endpoint */
         {
-            epdesc->len = USB_SIZEOF_EPDESC;             /* Descriptor length */
-            epdesc->type = USB_DESC_TYPE_ENDPOINT;       /* Descriptor type */
-            epdesc->addr = CDCACM_MKEPINTIN(devdesc);    /* Endpoint address */
-            epdesc->attr = CDCACM_EPINTIN_ATTR;          /* Endpoint attributes */
+          epdesc->len  = USB_SIZEOF_EPDESC;            /* Descriptor length */
+          epdesc->type = USB_DESC_TYPE_ENDPOINT;       /* Descriptor type */
+          epdesc->addr = CDCACM_MKEPINTIN(devdesc);    /* Endpoint address */
+          epdesc->attr = CDCACM_EPINTIN_ATTR;          /* Endpoint attributes */
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-            if (hispeed)
-              {
-                /* Maximum packet size (high speed) */
+          if (hispeed)
+            {
+              /* Maximum packet size (high speed) */
 
-                epdesc->mxpacketsize[0] = LSBYTE(CONFIG_CDCACM_EPINTIN_HSSIZE);
-                epdesc->mxpacketsize[1] = MSBYTE(CONFIG_CDCACM_EPINTIN_HSSIZE);
-              }
-            else
+              epdesc->mxpacketsize[0] = LSBYTE(CONFIG_CDCACM_EPINTIN_HSSIZE);
+               epdesc->mxpacketsize[1] = MSBYTE(CONFIG_CDCACM_EPINTIN_HSSIZE);
+            }
+          else
 #endif
-              {
-                /* Maximum packet size (full speed) */
+            {
+              /* Maximum packet size (full speed) */
 
-                epdesc->mxpacketsize[0] = LSBYTE(CONFIG_CDCACM_EPINTIN_FSSIZE);
-                epdesc->mxpacketsize[1] = MSBYTE(CONFIG_CDCACM_EPINTIN_FSSIZE);
-              }
+              epdesc->mxpacketsize[0] = LSBYTE(CONFIG_CDCACM_EPINTIN_FSSIZE);
+              epdesc->mxpacketsize[1] = MSBYTE(CONFIG_CDCACM_EPINTIN_FSSIZE);
+            }
 
-            epdesc->interval = 10;                       /* Interval */
-        }
-        break;
+          epdesc->interval = 10;                       /* Interval */
+      }
+      break;
 
     case CDCACM_EPBULKOUT:  /* Bulk OUT endpoint */
-        {
-            epdesc->len = USB_SIZEOF_EPDESC;             /* Descriptor length */
-            epdesc->type = USB_DESC_TYPE_ENDPOINT;       /* Descriptor type */
-            epdesc->addr = CDCACM_MKEPBULKOUT(devdesc);  /* Endpoint address */
-            epdesc->attr = CDCACM_EPOUTBULK_ATTR;        /* Endpoint attributes */
+      {
+        epdesc->len = USB_SIZEOF_EPDESC;             /* Descriptor length */
+        epdesc->type = USB_DESC_TYPE_ENDPOINT;       /* Descriptor type */
+        epdesc->addr = CDCACM_MKEPBULKOUT(devdesc);  /* Endpoint address */
+        epdesc->attr = CDCACM_EPOUTBULK_ATTR;        /* Endpoint attributes */
 #ifdef CONFIG_USBDEV_DUALSPEED
-            if (hispeed)
-              {
-                /* Maximum packet size (high speed) */
+        if (hispeed)
+          {
+            /* Maximum packet size (high speed) */
 
-                epdesc->mxpacketsize[0] = LSBYTE(CONFIG_CDCACM_EPBULKOUT_HSSIZE);
-                epdesc->mxpacketsize[1] = MSBYTE(CONFIG_CDCACM_EPBULKOUT_HSSIZE);
-              }
-            else
+            epdesc->mxpacketsize[0] = LSBYTE(CONFIG_CDCACM_EPBULKOUT_HSSIZE);
+            epdesc->mxpacketsize[1] = MSBYTE(CONFIG_CDCACM_EPBULKOUT_HSSIZE);
+          }
+        else
 #endif
-              {
-                /* Maximum packet size (full speed) */
+          {
+            /* Maximum packet size (full speed) */
 
-                epdesc->mxpacketsize[0] = LSBYTE(CONFIG_CDCACM_EPBULKOUT_FSSIZE);
-                epdesc->mxpacketsize[1] = MSBYTE(CONFIG_CDCACM_EPBULKOUT_FSSIZE);
-              }
+            epdesc->mxpacketsize[0] = LSBYTE(CONFIG_CDCACM_EPBULKOUT_FSSIZE);
+            epdesc->mxpacketsize[1] = MSBYTE(CONFIG_CDCACM_EPBULKOUT_FSSIZE);
+          }
 
-            epdesc->interval = 1;                        /* Interval */
-        }
-        break;
+        epdesc->interval = 1;                        /* Interval */
+      }
+      break;
 
     case CDCACM_EPBULKIN:  /* Bulk IN endpoint */
-        {
-            epdesc->len = USB_SIZEOF_EPDESC;             /* Descriptor length */
-            epdesc->type = USB_DESC_TYPE_ENDPOINT;       /* Descriptor type */
-            epdesc->addr = CDCACM_MKEPBULKIN(devdesc);   /* Endpoint address */
-            epdesc->attr = CDCACM_EPINBULK_ATTR;         /* Endpoint attributes */
+      {
+        epdesc->len  = USB_SIZEOF_EPDESC;            /* Descriptor length */
+        epdesc->type = USB_DESC_TYPE_ENDPOINT;       /* Descriptor type */
+        epdesc->addr = CDCACM_MKEPBULKIN(devdesc);   /* Endpoint address */
+        epdesc->attr = CDCACM_EPINBULK_ATTR;         /* Endpoint attributes */
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-            if (hispeed)
-              {
-                /* Maximum packet size (high speed) */
+        if (hispeed)
+          {
+            /* Maximum packet size (high speed) */
 
-                epdesc->mxpacketsize[0] = LSBYTE(CONFIG_CDCACM_EPBULKIN_HSSIZE);
-                epdesc->mxpacketsize[1] = MSBYTE(CONFIG_CDCACM_EPBULKIN_HSSIZE);
-              }
-            else
+            epdesc->mxpacketsize[0] = LSBYTE(CONFIG_CDCACM_EPBULKIN_HSSIZE);
+            epdesc->mxpacketsize[1] = MSBYTE(CONFIG_CDCACM_EPBULKIN_HSSIZE);
+          }
+        else
 #endif
-              {
-                /* Maximum packet size (full speed) */
+          {
+            /* Maximum packet size (full speed) */
 
-                epdesc->mxpacketsize[0] = LSBYTE(CONFIG_CDCACM_EPBULKIN_FSSIZE);
-                epdesc->mxpacketsize[1] = MSBYTE(CONFIG_CDCACM_EPBULKIN_FSSIZE);
-              }
+            epdesc->mxpacketsize[0] = LSBYTE(CONFIG_CDCACM_EPBULKIN_FSSIZE);
+            epdesc->mxpacketsize[1] = MSBYTE(CONFIG_CDCACM_EPBULKIN_FSSIZE);
+          }
 
-            epdesc->interval = 1;                        /* Interval */
-        }
-        break;
+        epdesc->interval = 1;                        /* Interval */
+      }
+      break;
 
     default:
-        return 0;
+      return 0;
     }
 
   return sizeof(struct usb_epdesc_s);
@@ -368,7 +363,7 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
     }
 #endif
 
-  /* fill in all descriptors directly to the buf */
+  /* Fill in all descriptors directly to the buf */
 
   /* Configuration Descriptor.  If the serial device is used in as part
    * or a composite device, then the configuration descriptor is
@@ -478,7 +473,6 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
     }
 
   length += sizeof(struct cdc_hdr_funcdesc_s);
-
 
   /* ACM functional descriptor */
 
@@ -604,5 +598,3 @@ FAR const struct usb_qualdesc_s *cdcacm_getqualdesc(void)
   return &g_qualdesc;
 }
 #endif
-
-
