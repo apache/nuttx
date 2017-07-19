@@ -2378,12 +2378,10 @@ int cdcacm_classobject(int minor, FAR struct usbdev_description_s *devdesc,
 
   priv->minor              = minor;
 
-#ifdef CONFIG_CDCACM_COMPOSITE
   /* Save the caller provided device description (composite only) */
 
   memcpy(&priv->devdesc, devdesc,
          sizeof(struct usbdev_description_s));
-#endif
 
   /* Fake line status */
 
