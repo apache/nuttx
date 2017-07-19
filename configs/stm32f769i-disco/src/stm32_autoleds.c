@@ -61,7 +61,7 @@ void board_autoled_initialize(void)
 {
   /* Configure the LD1 GPIO for output. Initial state is OFF */
 
-  stm32_configgpio(GPIO_LD1);
+  stm32_configgpio(GPIO_LD3);
 }
 
 /****************************************************************************
@@ -91,7 +91,7 @@ void board_autoled_on(int led)
       break;
     }
 
-   stm32_gpiowrite(GPIO_LD1, ledstate);
+   stm32_gpiowrite(GPIO_LD3, ledstate);
 }
 
 /****************************************************************************
@@ -120,7 +120,7 @@ void board_autoled_off(int led)
     /* Turn STATUS LED off set driving the output high */
 
     case 3:                   /* LED_PANIC:        The system has crashed  STATUS LED=FLASH */
-      stm32_gpiowrite(GPIO_LD1, false);
+      stm32_gpiowrite(GPIO_LD3, false);
       break;
     }
 }

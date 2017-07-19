@@ -64,7 +64,7 @@
  * LD3 is on when PA12 is high.
  */
 
-#define GPIO_LD1           (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
+#define GPIO_LD3           (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
                             GPIO_PORTA | GPIO_PIN12)
 
 /* Pushbutton B1, labelled "User", is connected to GPIO PA0.  A high value will be sensed when the
