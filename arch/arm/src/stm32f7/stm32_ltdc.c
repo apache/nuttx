@@ -662,9 +662,7 @@ static int stm32_fillarea(FAR struct ltdc_layer_s *layer,
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F7_LTDC_USE_DSI)
-
-#else
+#if !defined(CONFIG_STM32F7_LTDC_USE_DSI)
 /* PIO pin configurations */
 
 static const uint32_t g_ltdcpins[] =
@@ -686,7 +684,7 @@ static const uint32_t g_ltdcpins[] =
 };
 
 #define STM32_LTDC_NPINCONFIGS (sizeof(g_ltdcpins) / sizeof(uint32_t))
-#endif /* CONFIG_STM32F7_LTDC_USE_DSI */
+#endif /* !CONFIG_STM32F7_LTDC_USE_DSI */
 
 /* This structure provides the base layer interface */
 
@@ -977,6 +975,8 @@ static void stm32_ltdc_periphconfig(void)
   uint32_t regval;
 
 #if defined(CONFIG_STM32F7_LTDC_USE_DSI)
+   /* work in progress; maybe move to lcdinfo when everything is OK. */
+   lcdwarn("LTDC: Expecting preconfigured DSI; not configuring pins for LCD interface\n");
 #else
   /* Configure GPIO's */
   stm32_ltdc_gpioconfig();
