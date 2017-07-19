@@ -1358,10 +1358,10 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
               case USB_DESC_TYPE_CONFIG:
                 {
 #ifdef CONFIG_USBDEV_DUALSPEED
-                  ret = cdcacm_mkcfgdesc(ctrlreq->buf, dev->speed,
-                                         ctrl->req);
+                  ret = cdcacm_mkcfgdesc(ctrlreq->buf, &priv->devdesc,
+                                         dev->speed, ctrl->req);
 #else
-                  ret = cdcacm_mkcfgdesc(ctrlreq->buf, 0);
+                  ret = cdcacm_mkcfgdesc(ctrlreq->buf, &priv->devdesc);
 #endif
                 }
                 break;
@@ -2377,8 +2377,13 @@ int cdcacm_classobject(int minor, FAR struct usbdev_description_s *devdesc,
   sq_init(&priv->reqlist);
 
   priv->minor              = minor;
+
+#ifdef CONFIG_CDCACM_COMPOSITE
+  /* Save the caller provided device description (composite only) */
+
   memcpy(&priv->devdesc, devdesc,
          sizeof(struct usbdev_description_s));
+#endif
 
   /* Fake line status */
 
@@ -2487,10 +2492,16 @@ int cdcacm_initialize(int minor, FAR void **handle)
 
   /* Endpoints.
    *
-   * Endpoint numbers must be provided by board-specific logic.
+   * Endpoint numbers must be provided by board-specific logic when
+   * CDC/ACM is used in a composite device.
    */
 
   devdesc.nendpoints  = CDCACM_NUM_EPS;
+#ifndef CONFIG_CDCACM_COMPOSITE
+  devdesc.epno[CDCACM_EP_INTIN_IDX]   = CONFIG_CDCACM_EPINTIN;
+  devdesc.epno[CDCACM_EP_BULKIN_IDX]  = CONFIG_CDCACM_EPBULKIN;
+  devdesc.epno[CDCACM_EP_BULKOUT_IDX] = CONFIG_CDCACM_EPBULKOUT;
+#endif
 
   /* Get an instance of the serial driver class object */
 
