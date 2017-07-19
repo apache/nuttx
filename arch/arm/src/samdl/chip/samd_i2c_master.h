@@ -235,10 +235,10 @@
 
 #define I2C_BAUD_SHIFT             (0)       /* Bits 0-7: Master baud rate */
 #define I2C_BAUD_MASK              (0xff << I2C_BAUD_SHIFT)
-#  define I2C_BAUD(n)              ((uint16)(n) << I2C_BAUD_SHIFT)
+#  define I2C_BAUD(n)              ((uint16_t)(n) << I2C_BAUD_SHIFT)
 #define I2C_BAUDLOW_SHIFT          (8)       /* Bits 8-15: Master baud rate low */
 #define I2C_BAUDLOW_MASK           (0xff << I2C_BAUDLOW_SHIFT)
-#  define I2C_BAUDLOW(n)           (uint16)(n) << I2C_BAUDLOW_SHIFT)
+#  define I2C_BAUDLOW(n)           (uint16_t)(n) << I2C_BAUDLOW_SHIFT
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD21
 #  define I2C_HSBAUD_SHIFT         (16)      /* Bits 16-23: High speed master baud rate */
@@ -246,7 +246,7 @@
 #    define I2C_HSBAUD(n)          ((uint16)(n) << I2C_HSBAUD_SHIFT)
 #  define I2C_HSBAUDLOW_SHIFT      (24)      /* Bits 24-31: High speed master baud rate low */
 #  define I2C_HSBAUDLOW_MASK       (0xff << I2C_HSBAUDLOW_SHIFT)
-#    define I2C_HSBAUDLOW(n)       (uint16)(n) << I2C_HSBAUDLOW_SHIFT)
+#    define I2C_HSBAUDLOW(n)       (uint16)(n) << I2C_HSBAUDLOW_SHIFT
 #endif
 
 /* Interrupt enable clear, interrupt enable set, interrupt enable set, interrupt flag and

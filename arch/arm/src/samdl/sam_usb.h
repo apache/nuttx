@@ -88,7 +88,7 @@ extern "C"
  *
  *****************************************************************************/
 
-void sam_udp_suspend(FAR struct usbdev_s *dev, bool resume);
+void sam_usb_suspend(FAR struct usbdev_s *dev, bool resume);
 
 #undef EXTERN
 #if defined(__cplusplus)
