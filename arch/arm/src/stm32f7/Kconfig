@@ -1176,9 +1176,12 @@ config STM32F7_LTDC
 	depends on STM32F7_HAVE_LTDC
 	---help---
 		The STM32 LTDC is an LCD-TFT Display Controller available on
-		the STM32F429 and STM32F439 devices.  It is a standard parallel
-		video interface (HSYNC, VSYNC, etc.) for controlling TFT
-		LCD displays.
+		the STM32F7x6, STM32F7x7, STM32F7x8 and STM32F7x9 devices.
+		It features a standard RGB888 parallel video interface (along with HSYNC, VSYNC, etc.)
+		for controlling TFT LCD displays.
+		With the STM32F7x8/9, the graphics signals can optionally
+		be output via DSI instead of the parallel interface:
+		See config options STM32F7_DSIHOST and STM32F7_LTDC_USE_DSI.
 
 config STM32F7_OTGFS
 	bool "OTG FS"
