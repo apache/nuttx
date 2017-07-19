@@ -456,7 +456,7 @@
 #define GPIO_SDMMC2_D3  GPIO_SDMMC2_D3_1
 
 /* LCD DISPLAY
- *
+ * (work in progress as of 2017 07 19)
  */
 #define	BOARD_LTDC_WIDTH        800
 #define	BOARD_LTDC_HEIGHT       472
