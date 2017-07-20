@@ -122,18 +122,18 @@
 /* Define shadow layer for ltdc interface */
 
 #ifdef CONFIG_STM32F7_LTDC_INTERFACE
-# ifdef CONFIG_STM32F7_LTDC_L2
-#  define DMA2D_SHADOW_LAYER    2
-#  define DMA2D_SHADOW_LAYER_L1 0
-#  define DMA2D_SHADOW_LAYER_L2 1
-# else
-#  define DMA2D_SHADOW_LAYER    1
-#  define DMA2D_SHADOW_LAYER_L1 0
-# endif
-# define DMA2D_LAYER_NSIZE      CONFIG_STM32F7_DMA2D_NLAYERS + DMA2D_SHADOW_LAYER
+#  ifdef CONFIG_STM32F7_LTDC_L2
+#    define DMA2D_SHADOW_LAYER    2
+#    define DMA2D_SHADOW_LAYER_L1 0
+#    define DMA2D_SHADOW_LAYER_L2 1
+#  else
+#    define DMA2D_SHADOW_LAYER    1
+#    define DMA2D_SHADOW_LAYER_L1 0
+#  endif
+#  define DMA2D_LAYER_NSIZE    CONFIG_STM32F7_DMA2D_NLAYERS + DMA2D_SHADOW_LAYER
 #else
-# define DMA2D_LAYER_NSIZE      CONFIG_STM32F7_DMA2D_NLAYERS
-# define DMA2D_SHADOW_LAYER     0
+#  define DMA2D_LAYER_NSIZE    CONFIG_STM32F7_DMA2D_NLAYERS
+#  define DMA2D_SHADOW_LAYER   0
 #endif
 
 /* Debug option */
@@ -149,9 +149,9 @@
 /* check clut support */
 
 #ifdef CONFIG_STM32F7_DMA2D_L8
-# ifndef CONFIG_FB_CMAP
-#  error "Enable cmap to support the configured layer formats!"
-# endif
+#  ifndef CONFIG_FB_CMAP
+#    error "Enable cmap to support the configured layer formats!"
+#  endif
 #endif
 
 /****************************************************************************
@@ -516,7 +516,6 @@ static int stm32_dma2d_waitforirq(void)
 
   return OK;
 }
-
 
 #ifdef CONFIG_STM32F7_DMA2D_L8
 /****************************************************************************

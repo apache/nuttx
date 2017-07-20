@@ -114,9 +114,7 @@ struct ltdc_area_s
 
 struct ltdc_layer_s
 {
-
-  /*
-   * Name: getvideoinfo
+  /* Name: getvideoinfo
    *
    * Description:
    *   Get video information about the layer
@@ -128,13 +126,12 @@ struct ltdc_layer_s
    * Return:
    *   On success - OK
    *   On error   - -EINVAL
-   *
    */
+
   int (*getvideoinfo)(FAR struct ltdc_layer_s *layer,
                     FAR struct fb_videoinfo_s *vinfo);
 
-  /*
-   * Name: getplaneinfo
+  /* Name: getplaneinfo
    *
    * Description:
    *   Get plane information about the layer
@@ -147,13 +144,12 @@ struct ltdc_layer_s
    * Return:
    *   On success - OK
    *   On error   - -EINVAL
-   *
    */
+
   int (*getplaneinfo)(FAR struct ltdc_layer_s *layer, int planeno,
                       FAR struct fb_planeinfo_s *pinfo);
 
-  /*
-   * Name: getlid
+  /* Name: getlid
    *
    * Description:
    *   Get a specific layer identifier.
@@ -168,13 +164,12 @@ struct ltdc_layer_s
    * Return:
    *   On success - OK
    *   On error   - -EINVAL
-   *
    */
+
   int (*getlid)(FAR struct ltdc_layer_s *layer, int *lid, uint32_t flag);
 
 #ifdef CONFIG_FB_CMAP
-  /*
-   * Name: setclut
+  /* Name: setclut
    *
    * Description:
    *   Configure layer clut (color lookup table).
@@ -190,13 +185,12 @@ struct ltdc_layer_s
    * Return:
    *   On success - OK
    *   On error   - -EINVAL
-   *
    */
+
   int (*setclut)(FAR struct ltdc_layer_s *layer,
                     const FAR struct fb_cmap_s *cmap);
 
-  /*
-   * Name: getclut
+  /* Name: getclut
    *
    * Description:
    *   Get configured layer clut (color lookup table).
@@ -209,13 +203,12 @@ struct ltdc_layer_s
    * Return:
    *   On success - OK
    *   On error   - -EINVAL
-   *
    */
+
   int (*getclut)(FAR struct ltdc_layer_s *layer, FAR struct fb_cmap_s *cmap);
 #endif
 
-  /*
-   * Name: setcolor
+  /* Name: setcolor
    *
    * Description:
    *   Configure layer color for the non active layer area.
@@ -229,12 +222,11 @@ struct ltdc_layer_s
    * Return:
    *   On success - OK
    *   On error   - -EINVAL
-   *
    */
+
   int (*setcolor)(FAR struct ltdc_layer_s *layer, uint32_t argb);
 
-  /*
-   * Name: getcolor
+  /* Name: getcolor
    *
    * Description:
    *   Get configured layer color for the non active layer area.
@@ -246,12 +238,11 @@ struct ltdc_layer_s
    * Return:
    *   On success - OK
    *   On error   - -EINVAL
-   *
    */
+
   int (*getcolor)(FAR struct ltdc_layer_s *layer, uint32_t *argb);
 
-  /*
-   * Name: setcolorkey
+  /* Name: setcolorkey
    *
    * Description:
    *   Configure the layer color key (chromakey) for transparence.
@@ -265,12 +256,11 @@ struct ltdc_layer_s
    * Return:
    *   On success - OK
    *   On error   - -EINVAL
-   *
    */
+
   int (*setcolorkey)(FAR struct ltdc_layer_s *layer, uint32_t rgb);
 
-  /*
-   * Name: getcolorkey
+  /* Name: getcolorkey
    *
    * Description:
    *   Get the configured layer color key (chromakey) for transparence.
@@ -282,12 +272,11 @@ struct ltdc_layer_s
    * Return:
    *   On success - OK
    *   On error   - -EINVAL
-   *
    */
+
   int (*getcolorkey)(FAR struct ltdc_layer_s *layer, uint32_t *rgb);
 
-  /*
-   * Name: setalpha
+  /* Name: setalpha
    *
    * Description:
    *   Configure layer alpha value factor into blend operation.
@@ -305,12 +294,11 @@ struct ltdc_layer_s
    * Return:
    *   On success - OK
    *   On error - -EINVAL
-   *
    */
+
   int (*setalpha)(FAR struct ltdc_layer_s *layer, uint8_t alpha);
 
-  /*
-   * Name: getalpha
+  /* Name: getalpha
    *
    * Description:
    *   Get configured layer alpha value factor for blend operation.
@@ -322,12 +310,11 @@ struct ltdc_layer_s
    * Return:
    *   On success - OK
    *   On error - -EINVAL
-   *
    */
+
   int (*getalpha)(FAR struct ltdc_layer_s *layer, uint8_t *alpha);
 
-  /*
-   * Name: setblendmode
+  /* Name: setblendmode
    *
    * Description:
    *   Configure blend mode of the layer.
@@ -363,12 +350,11 @@ struct ltdc_layer_s
    *     Informs the driver to use the pixel alpha value of the subjacent layer
    *     instead the constant alpha value. This is only useful for ARGB8888
    *     color format.
-   *
    */
+
   int (*setblendmode)(FAR struct ltdc_layer_s *layer, uint32_t mode);
 
-  /*
-   * Name: getblendmode
+  /* Name: getblendmode
    *
    * Description:
    *   Get configured blend mode of the layer.
@@ -380,12 +366,11 @@ struct ltdc_layer_s
    * Return:
    *   On success - OK
    *   On error - -EINVAL
-   *
    */
+
   int (*getblendmode)(FAR struct ltdc_layer_s *layer, uint32_t *mode);
 
-  /*
-   * Name: setarea
+  /* Name: setarea
    *
    * Description:
    *    Configure visible layer area and the reference position of the first
@@ -413,15 +398,14 @@ struct ltdc_layer_s
    *   If the srcxpos and srcypos unequal the xpos and ypos of the coord
    *   structure this acts like moving the visible area to another position on
    *   the screen during the next update operation.
-   *
    */
+
   int (*setarea)(FAR struct ltdc_layer_s *layer,
                   FAR const struct ltdc_area_s *area,
                   fb_coord_t srcxpos,
                   fb_coord_t srcypos);
 
-  /*
-   * Name: getarea
+  /* Name: getarea
    *
    * Description:
    *    Get configured visible layer area.
@@ -435,15 +419,14 @@ struct ltdc_layer_s
    * Return:
    *   On success - OK
    *   On error - -EINVAL
-   *
    */
+
   int (*getarea)(FAR struct ltdc_layer_s *layer,
                   FAR struct ltdc_area_s *area,
                   fb_coord_t *srcxpos,
                   fb_coord_t *srcypos);
 
-  /*
-   * Name: update
+  /* Name: update
    *
    * Description:
    *   Update current layer settings and make changes visible.
@@ -478,13 +461,12 @@ struct ltdc_layer_s
    *   LTDC_SYNC_VBLANK:
    *     Informs the driver to update the layer upon vertical blank. Otherwise
    *     immediately.
-   *
    */
+
   int (*update)(FAR struct ltdc_layer_s *layer, uint32_t mode);
 
 #ifdef CONFIG_STM32F7_DMA2D
-  /*
-   * Name: blit
+  /* Name: blit
    *
    * Description:
    *   Copy selected area from a source layer to selected position of the
@@ -502,15 +484,14 @@ struct ltdc_layer_s
    *   -EINVAL  - If one of the parameter invalid or if the size of the selected
    *              source area outside the visible area of the destination layer.
    *              (The visible area usually represents the display size)
-   *
    */
+
    int (*blit)(FAR struct ltdc_layer_s *dest,
                 fb_coord_t destxpos, fb_coord_t destypos,
                 FAR const struct dma2d_layer_s *src,
                 FAR const struct ltdc_area_s *srcarea);
-  /*
-   *
-   * Name: blend
+
+  /* Name: blend
    *
    * Description:
    *   Blends the selected area from a foreground layer with selected position
@@ -532,8 +513,8 @@ struct ltdc_layer_s
    *   -EINVAL  - If one of the parameter invalid or if the size of the selected
    *              source area outside the visible area of the destination layer.
    *              (The visible area usually represents the display size)
-   *
    */
+
    int (*blend)(FAR struct ltdc_layer_s *dest,
                 fb_coord_t destxpos, fb_coord_t destypos,
                 FAR const struct dma2d_layer_s *fore,
@@ -541,8 +522,7 @@ struct ltdc_layer_s
                 FAR const struct dma2d_layer_s *back,
                 FAR const struct ltdc_area_s *backarea);
 
-  /*
-   * Name: fillarea
+  /* Name: fillarea
    *
    * Description:
    *   Fill the selected area of the whole layer with a specific color.
@@ -557,8 +537,8 @@ struct ltdc_layer_s
    *    OK      - On success
    *   -EINVAL  - If one of the parameter invalid or if the size of the selected
    *              area outside the visible area of the layer.
-   *
    */
+
    int (*fillarea)(FAR struct ltdc_layer_s *layer,
                     FAR const struct ltdc_area_s *area,
                     uint32_t color);
@@ -587,6 +567,9 @@ struct ltdc_layer_s
  *   invalid.
  *
  ****************************************************************************/
+
 FAR struct ltdc_layer_s *up_ltdcgetlayer(int lid);
+
 #endif /* CONFIG_STM32F7_LTDC */
 #endif /* __ARCH_ARM_INCLUDE_STM32F7_LTDC_H */
+

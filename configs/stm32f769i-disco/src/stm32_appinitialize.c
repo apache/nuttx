@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32f769i-disco/src/stm32_appinitilaize.c
+ * config/stm32f769i-disco/src/stm32_appinitialize.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

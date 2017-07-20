@@ -3,7 +3,7 @@ README
 
 This README discusses issues unique to NuttX configurations for the
 STMicro STM32F769I-DISCO development board featuring the STM32F769NIH6
-MCU. The STM32F769NIH6  is a 216MHz Cortex-M7 operation with 2048K Flash
+MCU. The STM32F769NIH6 is a 216MHz Cortex-M7 operating with 2048K Flash
 memory and 512Kb SRAM. The board features:
 
   - On-board ST-LINK/V2 for programming and debugging,
@@ -42,7 +42,7 @@ STATUS
 
   2017-07:  STM32 F7 Ethernet appears to be functional, but has had
     only light testing.
-  
+
   Work in progress: Use LCD over DSI interface, rest of board.
 
 Development Environment
@@ -95,7 +95,6 @@ Serial Console
 
   Use the serial interface the ST/LINK provides to the USB host.
 
-
 Configurations
 ==============
 
@@ -109,7 +108,6 @@ Configurations
     cd -
 
   Where <subdir> is one of the sub-directories listed below.
-
 
 Configuration Directories
 -------------------------

@@ -685,6 +685,11 @@ configs/stm32l476-mdk
   The STM32L476ME  is a Cortex-M4 optimised for low-power operation
   at up to 80MHz operation with 1024Kb Flash memory and 96+32Kb SRAM.
 
+configs/stm32f769i-disco
+  NuttX configurations for the STMicro STM32F769I-DISCO development board
+  featuring the STM32F769NIH6 MCU. The STM32F769NIH6 is a 216MHz Cortex-M7
+  operating with 2048K Flash memory and 512Kb SRAM.
+
 configs/stm32l476vg-disco
   STMicro STM32L476VG_DISCO development board featuring the STM32L476VG
   MCU. The STM32L476VG  is a Cortex-M4 optimised for low-power operation

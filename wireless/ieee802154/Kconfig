@@ -114,7 +114,7 @@ config IEEE802154_IND_IRQRESERVE
 		dynamically allocate the meta data structure with an additional cost
 		in performance.
 
-		NOTE: Currently marked as experimental and with a default 0 zero
+		NOTE: Currently marked as experimental and with a default of zero
 		because there are no interrupt level allocations performed by the
 		current IEEE 802.15.4 MAC code.
 

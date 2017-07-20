@@ -59,7 +59,6 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-// #include "stm32.h"
 #include "chip/stm32_ltdc.h"
 #include "stm32_ltdc.h"
 #include "stm32_dma2d.h"
@@ -335,27 +334,27 @@
 /* Dithering */
 
 #ifndef CONFIG_STM32F7_LTDC_DITHER_RED
-# define STM32_LTDC_DITHER_RED      0
+#  define STM32_LTDC_DITHER_RED     0
 #else
-# define STM32_LTDC_DITHER_RED      CONFIG_STM32F7_LTDC_DITHER_RED
+#  define STM32_LTDC_DITHER_RED     CONFIG_STM32F7_LTDC_DITHER_RED
 #endif
 #ifndef CONFIG_STM32F7_LTDC_DITHER_GREEN
-# define STM32_LTDC_DITHER_GREEN    0
+#  define STM32_LTDC_DITHER_GREEN   0
 #else
-# define STM32_LTDC_DITHER_GREEN    CONFIG_STM32F7_LTDC_DITHER_GREEN
+#  define STM32_LTDC_DITHER_GREEN   CONFIG_STM32F7_LTDC_DITHER_GREEN
 #endif
 #ifndef CONFIG_STM32F7_LTDC_DITHER_BLUE
-# define STM32_LTDC_DITHER_BLUE     0
+#  define STM32_LTDC_DITHER_BLUE    0
 #else
-# define STM32_LTDC_DITHER_BLUE     CONFIG_STM32F7_LTDC_DITHER_BLUE
+#  define STM32_LTDC_DITHER_BLUE    CONFIG_STM32F7_LTDC_DITHER_BLUE
 #endif
 
 /* Background color */
 
 #ifndef CONFIG_STM32F7_LTDC_BACKCOLOR
-# define STM32_LTDC_BACKCOLOR       0
+#  define STM32_LTDC_BACKCOLOR      0
 #else
-# define STM32_LTDC_BACKCOLOR       CONFIG_STM32F7_LTDC_BACKCOLOR
+#  define STM32_LTDC_BACKCOLOR      CONFIG_STM32F7_LTDC_BACKCOLOR
 #endif
 
 /* Internal operation flags */
@@ -387,55 +386,55 @@
 /* Check pixel format support by DMA2D driver */
 
 #ifdef CONFIG_STM32F7_DMA2D
-# if defined(CONFIG_STM32F7_LTDC_L1_L8) || \
-        defined(CONFIG_STM32F7_LTDC_L2_L8)
-#  if !defined(CONFIG_STM32F7_DMA2D_L8)
-#   error "DMA2D must support FB_FMT_RGB8 pixel format"
+#  if defined(CONFIG_STM32F7_LTDC_L1_L8) || \
+      defined(CONFIG_STM32F7_LTDC_L2_L8)
+#    if !defined(CONFIG_STM32F7_DMA2D_L8)
+#       error "DMA2D must support FB_FMT_RGB8 pixel format"
+#    endif
 #  endif
-# endif
-# if defined(CONFIG_STM32F7_LTDC_L1_RGB565) || \
-        defined(CONFIG_STM32F7_LTDC_L2_RGB565)
-#  if !defined(CONFIG_STM32F7_DMA2D_RGB565)
-#   error "DMA2D must support FB_FMT_RGB16_565 pixel format"
+#  if defined(CONFIG_STM32F7_LTDC_L1_RGB565) || \
+      defined(CONFIG_STM32F7_LTDC_L2_RGB565)
+#    if !defined(CONFIG_STM32F7_DMA2D_RGB565)
+#       error "DMA2D must support FB_FMT_RGB16_565 pixel format"
+#    endif
 #  endif
-# endif
-# if defined(CONFIG_STM32F7_LTDC_L1_RGB888) || \
-        defined(CONFIG_STM32F7_LTDC_L2_RGB888)
-#  if !defined(CONFIG_STM32F7_DMA2D_RGB888)
-#   error "DMA2D must support FB_FMT_RGB24 pixel format"
+#  if defined(CONFIG_STM32F7_LTDC_L1_RGB888) || \
+      defined(CONFIG_STM32F7_LTDC_L2_RGB888)
+#    if !defined(CONFIG_STM32F7_DMA2D_RGB888)
+#      error "DMA2D must support FB_FMT_RGB24 pixel format"
+#    endif
 #  endif
-# endif
 #endif
 
 /* Calculate the size of the layers clut table */
 
 #ifdef CONFIG_FB_CMAP
-# if defined(CONFIG_STM32F7_DMA2D) && !defined(CONFIG_STM32F7_DMA2D_L8)
-#  error "DMA2D must also support L8 CLUT pixel format if supported by LTDC"
-# endif
-# ifdef STM32_LTDC_L1CMAP
-#  ifdef CONFIG_FB_TRANSPARENCY
-#   define STM32_LAYER_CLUT_SIZE     STM32_LTDC_NCLUT * sizeof(uint32_t)
-#  else
-#   define STM32_LAYER_CLUT_SIZE     STM32_LTDC_NCLUT * 3 * sizeof(uint8_t)
+#  if defined(CONFIG_STM32F7_DMA2D) && !defined(CONFIG_STM32F7_DMA2D_L8)
+#    error "DMA2D must also support L8 CLUT pixel format if supported by LTDC"
 #  endif
-# endif
-# ifdef STM32_LTDC_L2CMAP
-#  undef  STM32_LAYER_CLUT_SIZE
-#  ifdef CONFIG_FB_TRANSPARENCY
-#   define STM32_LAYER_CLUT_SIZE     STM32_LTDC_NCLUT * sizeof(uint32_t) * 2
-#  else
-#   define STM32_LAYER_CLUT_SIZE     STM32_LTDC_NCLUT * 3 * sizeof(uint8_t) * 2
+#  ifdef STM32_LTDC_L1CMAP
+#    ifdef CONFIG_FB_TRANSPARENCY
+#      define STM32_LAYER_CLUT_SIZE  STM32_LTDC_NCLUT * sizeof(uint32_t)
+#    else
+#      define STM32_LAYER_CLUT_SIZE  STM32_LTDC_NCLUT * 3 * sizeof(uint8_t)
+#    endif
 #  endif
-# endif
+#  ifdef STM32_LTDC_L2CMAP
+#    undef  STM32_LAYER_CLUT_SIZE
+#    ifdef CONFIG_FB_TRANSPARENCY
+#      define STM32_LAYER_CLUT_SIZE  STM32_LTDC_NCLUT * sizeof(uint32_t) * 2
+#    else
+#      define STM32_LAYER_CLUT_SIZE  STM32_LTDC_NCLUT * 3 * sizeof(uint8_t) * 2
+#    endif
+#  endif
 #endif
 
 #ifndef CONFIG_FB_CMAP
-# if defined(STM32_LTDC_L1CMAP) || defined(STM32_LTDC_L2CMAP)
-#  undef STM32_LTDC_L1CMAP
-#  undef STM32_LTDC_L2CMAP
-#  error "Enable cmap to support the configured layer format!"
-# endif
+#  if defined(STM32_LTDC_L1CMAP) || defined(STM32_LTDC_L2CMAP)
+#    undef STM32_LTDC_L1CMAP
+#    undef STM32_LTDC_L2CMAP
+#    error "Enable cmap to support the configured layer format!"
+#  endif
 #endif
 
 /* Layer clut rgb value positioning */
@@ -924,16 +923,9 @@ static const uintptr_t stm32_clutwr_layer_t[LTDC_NLAYERS] =
 
 static bool g_initialized;
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Configure global register
  ****************************************************************************/
 
 /****************************************************************************

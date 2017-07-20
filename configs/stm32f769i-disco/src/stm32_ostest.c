@@ -82,6 +82,7 @@ static uint32_t g_saveregs[XCPTCONTEXT_REGS];
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
 /* Given an array of size CONFIG_EXAMPLES_OSTEST_FPUSIZE, this function will return
  * the current FPU registers.
  */

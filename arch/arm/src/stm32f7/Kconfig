@@ -1177,8 +1177,8 @@ config STM32F7_LTDC
 	---help---
 		The STM32 LTDC is an LCD-TFT Display Controller available on
 		the STM32F7x6, STM32F7x7, STM32F7x8 and STM32F7x9 devices.
-		It features a standard RGB888 parallel video interface (along with HSYNC, VSYNC, etc.)
-		for controlling TFT LCD displays.
+		It features a standard RGB888 parallel video interface (along
+		with HSYNC, VSYNC, etc.) for controlling TFT LCD displays.
 		With the STM32F7x8/9, the graphics signals can optionally
 		be output via DSI instead of the parallel interface:
 		See config options STM32F7_DSIHOST and STM32F7_LTDC_USE_DSI.
@@ -4655,7 +4655,8 @@ config STM32F7_ETHMAC_REGDEBUG
 	default n
 	depends on DEBUG_NET_INFO
 	---help---
-		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES.
+		Enable very low-level register access debug.  Depends on
+		CONFIG_DEBUG_FEATURES.
 
 endmenu # Ethernet MAC configuration
 
@@ -4675,7 +4676,8 @@ config STM32F7_LTDC_USE_DSI
 	depends on STM32F7_DSIHOST
 	---help---
 		Select this if your display is connected via DSI.
-		Deselect option if your display is connected via digital RGB+HSYNC+VSYNC
+		Deselect option if your display is connected via digital
+		RGB+HSYNC+VSYNC
 
 config STM32F7_LTDC_BACKLIGHT
 	bool "Backlight support"
@@ -4811,7 +4813,8 @@ config FB_TRANSPARENCY
 	bool "Enable transparency color map support"
 	default y
 	---help---
-		Enabling transparency color map support is neccessary for ltdc L8 format.
+		Enabling transparency color map support is neccessary for
+		ltdc L8 format.
 
 endif
 endmenu
