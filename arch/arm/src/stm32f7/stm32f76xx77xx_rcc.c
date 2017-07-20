@@ -909,7 +909,7 @@ static void stm32_stdclockconfig(void)
                   | RCC_DCKCFGR2_CK48MSEL_MASK
                   | RCC_DCKCFGR2_SDMMCSEL_MASK
                   | RCC_DCKCFGR2_SDMMC2SEL_MASK
-                  | RCC_DCKCFGR2_DSISELL_MASK);
+                  | RCC_DCKCFGR2_DSISEL_MASK);
 
       regval |= (  STM32_RCC_DCKCFGR2_USART1SRC
                  | STM32_RCC_DCKCFGR2_USART2SRC

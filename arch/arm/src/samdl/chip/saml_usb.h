@@ -49,7 +49,7 @@
 
 #include "chip.h"
 
-#ifdef CONFIG_ARCH_FAMILY_SAML21
+#if defined(CONFIG_ARCH_FAMILY_SAML21) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 
 /********************************************************************************************
  * Pre-processor Definitions

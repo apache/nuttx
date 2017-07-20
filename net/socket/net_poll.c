@@ -100,9 +100,6 @@ int psock_poll(FAR struct socket *psock, FAR struct pollfd *fds, bool setup)
 
 int net_poll(int sockfd, struct pollfd *fds, bool setup)
 {
-#ifndef HAVE_NET_POLL
-  return -ENOSYS;
-#else
   FAR struct socket *psock;
 
   DEBUGASSERT(fds != NULL);
@@ -120,7 +117,6 @@ int net_poll(int sockfd, struct pollfd *fds, bool setup)
   /* Then let psock_poll() do the heavy lifting */
 
   return psock_poll(psock, fds, setup);
-#endif /* HAVE_NET_POLL */
 }
 
 #endif /* CONFIG_NET && !CONFIG_DISABLE_POLL */

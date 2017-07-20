@@ -103,7 +103,7 @@
  * 2 <= PLLQ <= 15
  */
 
-#if defined(CONFIG_STM32F7_USBOTHFS)
+#if defined(CONFIG_STM32F7_OTGFS)
 /* Highest SYSCLK with USB OTG FS clock = 48 MHz
  *
  * PLL_VCO = (25,000,000 / 25) * 384 = 384 MHz
@@ -199,7 +199,6 @@
 #define STM32_RCC_DCKCFGR2_CK48MSRC   RCC_DCKCFGR2_CK48MSEL_PLLSAI
 #define STM32_RCC_DCKCFGR2_SDMMCSRC   RCC_DCKCFGR2_SDMMCSEL_48MHZ
 #define STM32_RCC_DCKCFGR2_SDMMC2SRC  RCC_DCKCFGR2_SDMMC2SEL_48MHZ
-#define STM32_RCC_DCKCFGR2_DSISRC     RCC_DCKCFGR2_DSISEL_48MHZ
 
 /* Several prescalers allow the configuration of the two AHB buses, the
  * high-speed APB (APB2) and the low-speed APB (APB1) domains. The maximum

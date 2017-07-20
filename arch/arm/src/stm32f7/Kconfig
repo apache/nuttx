@@ -1176,9 +1176,12 @@ config STM32F7_LTDC
 	depends on STM32F7_HAVE_LTDC
 	---help---
 		The STM32 LTDC is an LCD-TFT Display Controller available on
-		the STM32F429 and STM32F439 devices.  It is a standard parallel
-		video interface (HSYNC, VSYNC, etc.) for controlling TFT
-		LCD displays.
+		the STM32F7x6, STM32F7x7, STM32F7x8 and STM32F7x9 devices.
+		It features a standard RGB888 parallel video interface (along
+		with HSYNC, VSYNC, etc.) for controlling TFT LCD displays.
+		With the STM32F7x8/9, the graphics signals can optionally
+		be output via DSI instead of the parallel interface:
+		See config options STM32F7_DSIHOST and STM32F7_LTDC_USE_DSI.
 
 config STM32F7_OTGFS
 	bool "OTG FS"
@@ -4652,7 +4655,221 @@ config STM32F7_ETHMAC_REGDEBUG
 	default n
 	depends on DEBUG_NET_INFO
 	---help---
-		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES.
+		Enable very low-level register access debug.  Depends on
+		CONFIG_DEBUG_FEATURES.
 
 endmenu # Ethernet MAC configuration
+
+if STM32F7_LTDC
+
+menu "LTDC Configuration"
+
+config STM32F7_LTDC_INTERFACE
+	bool "LTDC interface support"
+	default n
+	---help---
+		Enable the ltdc interface to support ltdc layer control.
+
+config STM32F7_LTDC_USE_DSI
+	bool "Use DSI as display connection"
+	default n
+	depends on STM32F7_DSIHOST
+	---help---
+		Select this if your display is connected via DSI.
+		Deselect option if your display is connected via digital
+		RGB+HSYNC+VSYNC
+
+config STM32F7_LTDC_BACKLIGHT
+	bool "Backlight support"
+	default y
+
+config STM32F7_LTDC_DEFBACKLIGHT
+	hex "Default backlight level"
+	default 0xf0
+
+config STM32F7_LTDC_BACKCOLOR
+	hex "Background color"
+	default 0x0
+	---help---
+		This is the background color that will be used as the LTDC
+		background layer color.  It is an RGB888 format value.
+
+config STM32F7_LTDC_DITHER
+	bool "Dither support"
+	default n
+
+config STM32F7_LTDC_DITHER_RED
+	depends on STM32F7_LTDC_DITHER
+	int "Dither red width"
+	range 0 7
+	default 2
+	---help---
+		This is the dither red width.
+
+config STM32F7_LTDC_DITHER_GREEN
+	depends on STM32F7_LTDC_DITHER
+	int "Dither green width"
+	range 0 7
+	default 2
+	---help---
+		This is the dither green width.
+
+config STM32F7_LTDC_DITHER_BLUE
+	depends on STM32F7_LTDC_DITHER
+	int "Dither blue width"
+	range 0 7
+	default 2
+	---help---
+		This is the dither blue width.
+
+config STM32F7_LTDC_FB_BASE
+	hex "Framebuffer memory start address"
+	---help---
+		If you are using the LTDC, then you must provide the address
+		of the start of the framebuffer.  This address will typically
+		be in the SRAM or SDRAM memory region of the FSMC.
+
+config STM32F7_LTDC_FB_SIZE
+	int "Framebuffer memory size (bytes)"
+	default 0
+
+choice
+	prompt "Layer 1 color format"
+	default STM32F7_LTDC_L1_RGB565
+
+config STM32F7_LTDC_L1_L8
+	bool "8 bpp L8 (8-bit CLUT)"
+
+config STM32F7_LTDC_L1_AL44
+	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
+
+config STM32F7_LTDC_L1_AL88
+	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
+
+config STM32F7_LTDC_L1_RGB565
+	bool "16 bpp RGB 565"
+
+config STM32F7_LTDC_L1_ARGB4444
+	bool "16 bpp ARGB 4444"
+
+config STM32F7_LTDC_L1_ARGB1555
+	bool "16 bpp ARGB 1555"
+
+config STM32F7_LTDC_L1_RGB888
+	bool "24 bpp RGB 888"
+
+config STM32F7_LTDC_L1_ARGB8888
+	bool "32 bpp ARGB 8888"
+
+endchoice # Layer 1 color format
+
+config STM32F7_LTDC_L2
+	bool "Enable Layer 2 support"
+	default y
+
+if STM32F7_LTDC_L2
+
+choice
+	prompt "Layer 2 (top layer) color format"
+	default STM32F7_LTDC_L2_RGB565
+
+config STM32F7_LTDC_L2_L8
+	bool "8 bpp L8 (8-bit CLUT)"
+
+config STM32F7_LTDC_L2_AL44
+	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
+
+config STM32F7_LTDC_L2_AL88
+	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
+
+config STM32F7_LTDC_L2_RGB565
+	bool "16 bpp RGB 565"
+
+config STM32F7_LTDC_L2_ARGB4444
+	bool "16 bpp ARGB 4444"
+
+config STM32F7_LTDC_L2_ARGB1555
+	bool "16 bpp ARGB 1555"
+
+config STM32F7_LTDC_L2_RGB888
+	bool "24 bpp RGB 888"
+
+config STM32F7_LTDC_L2_ARGB8888
+	bool "32 bpp ARGB 8888"
+
+endchoice # Layer 2 color format
+
+endif # STM32F7_LTDC_L2
+
+if STM32F7_LTDC_L1_L8 || STM32F7_LTDC_L2_L8
+
+config FB_CMAP
+	bool "Enable color map support"
+	default y
+	---help---
+		Enabling color map support is neccessary for ltdc L8 format.
+
+config FB_TRANSPARENCY
+	bool "Enable transparency color map support"
+	default y
+	---help---
+		Enabling transparency color map support is neccessary for
+		ltdc L8 format.
+
+endif
+endmenu
+
+endif # STM32F7_LTDC
+
+if STM32F7_DMA2D
+
+menu "DMA2D Configuration"
+
+config STM32F7_DMA2D_NLAYERS
+	int "Number DMA2D layers"
+	default 2
+	---help---
+		Number of allocatable DMA2D layers except the LTDC layer.
+
+menu "Supported pixel format"
+
+config STM32F7_DMA2D_L8
+	depends on FB_CMAP
+	bool "8 bpp L8 (8-bit CLUT)"
+	default y
+
+config STM32F7_DMA2D_AL44
+	depends on FB_CMAP
+	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
+	default n
+
+config STM32F7_DMA2D_AL88
+	depends on FB_CMAP
+	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
+	default n
+
+config STM32F7_DMA2D_RGB565
+	bool "16 bpp RGB 565"
+	default y
+
+config STM32F7_DMA2D_ARGB4444
+	bool "16 bpp ARGB 4444"
+	default n
+
+config STM32F7_DMA2D_ARGB1555
+	bool "16 bpp ARGB 1555"
+	default n
+
+config STM32F7_DMA2D_RGB888
+	bool "24 bpp RGB 888"
+	default y
+
+config STM32F7_DMA2D_ARGB8888
+	bool "32 bpp ARGB 8888"
+	default n
+
+endmenu
+endmenu
+endif # STM32F7_DMA2D
+
 endif # ARCH_CHIP_STM32F7

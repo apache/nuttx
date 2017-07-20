@@ -106,7 +106,13 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "saml_periphclks.h"
+
+#if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
+  #include "samd_periphclks.h"
+#elif defined(CONFIG_ARCH_FAMILY_SAML21)
+  #include "saml_periphclks.h"
+#endif
+
 #include "sam_gclk.h"
 #include "chip.h"
 #include "sam_port.h"
@@ -133,7 +139,7 @@
  * enabled.
  */
 
-#ifndef CONFIG_DEBUG
+#ifndef CONFIG_DEBUG_USB
 #  undef CONFIG_SAMDL_USB_REGDEBUG
 #endif
 
@@ -891,7 +897,7 @@ static inline void sam_putreg8(uint8_t regval, uint32_t regaddr)
  * Name: sam_dumpep
  ****************************************************************************/
 
-#if defined(CONFIG_SAMDL_USB_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_SAMDL_USB_REGDEBUG) && defined(CONFIG_DEBUG_USB)
 static void sam_dumpep(struct sam_usbdev_s *priv, uint8_t epno)
 {
   /* Global Registers */
@@ -1620,7 +1626,7 @@ static int sam_ep_configure(struct usbdev_ep_s *ep,
 
   /* Verify parameters.  Endpoint 0 is not available at this interface */
 
-#if defined(CONFIG_DEBUG) || defined(CONFIG_USBDEV_TRACE)
+#if defined(CONFIG_DEBUG_USB) || defined(CONFIG_USBDEV_TRACE)
   uint8_t epno = USB_EPNO(desc->addr);
   usbtrace(TRACE_EPCONFIGURE, (uint16_t)epno);
 
@@ -1666,7 +1672,7 @@ static int sam_ep_disable(struct usbdev_ep_s *ep)
   irqstate_t flags;
   uint8_t epno;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -1703,7 +1709,7 @@ static struct usbdev_req_s *sam_ep_allocreq(struct usbdev_ep_s *ep)
 {
   struct sam_req_s *privreq;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -1736,7 +1742,7 @@ static void sam_ep_freereq(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
   struct sam_req_s *privreq = (struct sam_req_s*)req;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -1803,7 +1809,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   uint8_t epno;
   int ret = OK;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -1816,7 +1822,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   usbtrace(TRACE_EPSUBMIT, USB_EPNO(ep->eplog));
   priv = privep->dev;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!priv->driver)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
@@ -1914,7 +1920,7 @@ static int sam_ep_cancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   struct sam_ep_s *privep = (struct sam_ep_s *)ep;
   irqstate_t flags;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!ep || !req)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -1940,7 +1946,7 @@ static int sam_ep_stallresume(struct usbdev_ep_s *ep, bool resume)
   irqstate_t flags;
   int ret;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -2015,7 +2021,7 @@ static struct usbdev_ep_s *sam_allocep(struct usbdev_s *dev, uint8_t epno,
   uint16_t epset = SAM_EPSET_NOTEP0;
 
   usbtrace(TRACE_DEVALLOCEP, (uint16_t)epno);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -2077,7 +2083,7 @@ static void sam_freeep(struct usbdev_s *dev, struct usbdev_ep_s *ep)
   struct sam_usbdev_s *priv;
   struct sam_ep_s *privep;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!dev || !ep)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -2109,7 +2115,7 @@ static int sam_getframe(struct usbdev_s *dev)
   uint32_t regval;
   uint16_t frameno;
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -2141,7 +2147,7 @@ static int sam_wakeup(struct usbdev_s *dev)
   uint16_t regval;
 
   usbtrace(TRACE_DEVWAKEUP, 0);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -2188,7 +2194,7 @@ static int sam_selfpowered(struct usbdev_s *dev, bool selfpowered)
 
   usbtrace(TRACE_DEVSELFPOWERED, (uint16_t)selfpowered);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!dev)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
@@ -3720,7 +3726,36 @@ static int sam_pullup(struct usbdev_s *dev, bool enable)
 static void sam_enableclks(void)
 {
   sam_usb_enableperiph();
+
+#if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
+  uint16_t regval;
+
+  /* Enable GCLK specified by BOARD_USB_GCLKGEN */
+
+  regval = GCLK_CLKCTRL_ID_USB;
+  putreg16(regval, SAM_GCLK_CLKCTRL);
+
+  /* Wait for clock to become disabled */
+
+  while ((getreg16(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) != 0);
+
+  /* Select the USB source clock generator */
+
+  regval |= (uint16_t)BOARD_USB_GCLKGEN << GCLK_CLKCTRL_GEN_SHIFT;
+
+  /* Write the new configuration */
+
+  putreg16(regval, SAM_GCLK_CLKCTRL);
+
+  regval |= GCLK_CLKCTRL_CLKEN;
+  putreg16(regval, SAM_GCLK_CLKCTRL);
+
+  while ((getreg16(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) == 0);
+
+#elif defined(CONFIG_ARCH_FAMILY_SAML21)
   sam_gclk_chan_enable(GCLK_CHAN_USB, BOARD_USB_GCLKGEN);
+
+#endif
 }
 
 /****************************************************************************
@@ -3729,9 +3764,12 @@ static void sam_enableclks(void)
 
 static void sam_disableclks(void)
 {
-  sam_gclk_chan_disable(GCLK_CHAN_USB);
-  sam_usb_disableperiph();
+#if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 
+#elif defined(CONFIG_ARCH_FAMILY_SAML21)
+  sam_gclk_chan_disable(GCLK_CHAN_USB);
+#endif
+  sam_usb_disableperiph();
 }
 
 /****************************************************************************
@@ -3901,7 +3939,8 @@ static void sam_sw_setup(struct sam_usbdev_s *priv)
 
   /* Select a smaller endpoint size for EP0 */
 
-#if SAM_EP0_MAXPACKET < SAM_USB_MAXPACKETSIZE(0)
+//#if SAM_EP0_MAXPACKET < SAM_USB_MAXPACKETSIZE(0)
+#if SAM_EP0_MAXPACKET < 64
   priv->eplist[EP0].ep.maxpacket = SAM_EP0_MAXPACKET;
 #endif
 }
@@ -3940,7 +3979,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (!driver || !driver->ops->bind || !driver->ops->unbind ||
       !driver->ops->disconnect || !driver->ops->setup)
     {
@@ -4013,7 +4052,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVUNREGISTER, 0);
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_USB
   if (driver != priv->driver)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
