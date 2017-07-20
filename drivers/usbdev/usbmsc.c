@@ -617,10 +617,10 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
               case USB_DESC_TYPE_CONFIG:
                 {
 #ifdef CONFIG_USBDEV_DUALSPEED
-                  ret = usbmsc_mkcfgdesc(ctrlreq->buf, dev->speed,
-                                         ctrl->value[1]);
+                  ret = usbmsc_mkcfgdesc(ctrlreq->buf, &priv->devinfo,
+                                         dev->speed, ctrl->value[1]);
 #else
-                  ret = usbmsc_mkcfgdesc(ctrlreq->buf);
+                  ret = usbmsc_mkcfgdesc(ctrlreq->buf, &priv->devinfo);
 #endif
                 }
                 break;
@@ -1396,6 +1396,29 @@ int usbmsc_configure(unsigned int nluns, void **handle)
   drvr->drvr.ops   = &g_driverops;
   drvr->dev        = priv;
 
+  /* Initialize the device information if we are not part of a composite.
+   * If we are part of a composite, the device information will be
+   * initialized through coordinated actions of usbmsc_get_composite_devdesc()
+   * and board-specific logic.
+   */
+
+#ifndef CONFIG_USBMSC_COMPOSITE
+  /* minor - not used */
+  /* Interfaces (ifnobase == 0) */
+
+  priv->devinfo.ninterfaces = USBMSC_NINTERFACES; /* Number of interfaces in the configuration */
+
+  /* Strings (strbase == 0) */
+
+  priv->devinfo.nstrings    = USBMSC_NSTRIDS;     /* Number of Strings */
+
+  /* Endpoints */
+
+  priv->devinfo.nendpoints = USBMSC_NENDPOINTS;
+  priv->devinfo.epno[USBMSC_EP_BULKIN_IDX]  = CONFIG_USBMSC_EPBULKIN;
+  priv->devinfo.epno[USBMSC_EP_BULKOUT_IDX] = CONFIG_USBMSC_EPBULKOUT;
+#endif
+
   /* Return the handle and success */
 
   *handle = (FAR void *)alloc;
@@ -1903,7 +1926,7 @@ void usbmsc_get_composite_devdesc(FAR struct composite_devdesc_s *dev)
 
   /* The callback functions for the CDC/ACM class.
    *
-   * classobject() and uninitializ() must be provided by board-specific
+   * classobject() and uninitialize() must be provided by board-specific
    * logic
    */
 
