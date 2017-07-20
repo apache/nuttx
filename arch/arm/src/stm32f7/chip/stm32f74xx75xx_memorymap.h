@@ -160,7 +160,7 @@
 #define STM32_SPI6_BASE      0x40015400     /* 0x40015400-0x400157ff: SPI6 */
 #define STM32_SAI1_BASE      0x40015800     /* 0x40015800-0x40015bff: SAI1 */
 #define STM32_SAI2_BASE      0x40015c00     /* 0x40015c00-0x40015fff: SAI2 */
-#define STM32_LCDTFT_BASE    0x40016800     /* 0x40016800-0x40016bff: LCD-TFT */
+#define STM32_LTDC_BASE      0x40016800     /* 0x40016800-0x40016bff: LCD-TFT */
 
 /* AHB1 Base Addresses **************************************************************/
 

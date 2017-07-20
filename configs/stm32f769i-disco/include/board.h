@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/stm32f746g-disco/include/board.h
+ * configs/stm32f769i-disco/include/board.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIG_STM32F746G_DISCO_INCLUDE_BOARD_H
-#define __CONFIG_STM32F746G_DISCO_INCLUDE_BOARD_H
+#ifndef __CONFIG_STM32F769I_DISCO_INCLUDE_BOARD_H
+#define __CONFIG_STM32F769I_DISCO_INCLUDE_BOARD_H
 
 /************************************************************************************
  * Included Files
@@ -47,7 +47,7 @@
 #endif
 
 #include "stm32_rcc.h"
-#ifdef CONFIG_STM32F7_SDMMC1
+#if defined(CONFIG_STM32F7_SDMMC1) || defined(CONFIG_STM32F7_SDMMC2)
 #  include "stm32_sdmmc.h"
 #endif
 
@@ -58,9 +58,8 @@
 /* Clocking *************************************************************************/
 /* The STM32F7 Discovery board provides the following clock sources:
  *
- *   X1:  24 MHz oscillator for USB OTG HS PHY and camera module (daughter board)
- *   X2:  25 MHz oscillator for STM32F746NGH6 microcontroller and Ethernet PHY.
- *   X3:  32.768 KHz crystal for STM32F746NGH6 embedded RTC
+ *   X2:  25 MHz oscillator for STM32F769NIH6 microcontroller and Ethernet PHY.
+ *   X1:  32.768 KHz crystal for STM32F769NIH6 embedded RTC
  *
  * So we have these clock source available within the STM32
  *
@@ -104,50 +103,57 @@
  */
 
 #if defined(CONFIG_STM32F7_OTGFS)
-/* Highest SYSCLK with USB OTG FS clock = 48 MHz
+/* USB OTG FS clock (= SDMMCCLK = RNGCLK) must be 48 MHz
  *
  * PLL_VCO = (25,000,000 / 25) * 384 = 384 MHz
  * SYSCLK  = 384 MHz / 2 = 192 MHz
  * USB OTG FS, SDMMC and RNG Clock = 384 MHz / 8 = 48MHz
+ * DSI CLK = PLL_VCO / PLLR = 384 / 7 = 54,86 MHz
  */
 
 #define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(25)
 #define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(384)
 #define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
 #define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(8)
+#define STM32_PLLCFG_PLLR       RCC_PLLCFG_PLLR(7)
 
 #define STM32_VCO_FREQUENCY     ((STM32_HSE_FREQUENCY / 25) * 384)
 #define STM32_SYSCLK_FREQUENCY  (STM32_VCO_FREQUENCY / 2)
 #define STM32_OTGFS_FREQUENCY   (STM32_VCO_FREQUENCY / 8)
 
-#elif defined(CONFIG_STM32F7_SDMMC1) || defined(CONFIG_STM32F7_RNG)
-/* Highest SYSCLK with USB OTG FS clock <= 48MHz
+#elif defined(CONFIG_STM32F7_SDMMC1) || defined(CONFIG_STM32F7_SDMMC2) || defined(CONFIG_STM32F7_RNG)
+/* SDMMCCLK (= USB OTG FS clock = RNGCLK) should be <= 48MHz
  *
  * PLL_VCO = (25,000,000 / 25) * 432 = 432 MHz
  * SYSCLK  = 432 MHz / 2 = 216 MHz
  * USB OTG FS, SDMMC and RNG Clock = 432 MHz / 10 = 43.2 MHz
+ * DSI CLK = PLL_VCO / PLLR = 432 / 8 = 54 MHz
  */
 
 #define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(25)
 #define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(432)
 #define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
 #define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(10)
+#define STM32_PLLCFG_PLLR       RCC_PLLCFG_PLLR(8)
 
 #define STM32_VCO_FREQUENCY     ((STM32_HSE_FREQUENCY / 25) * 432)
 #define STM32_SYSCLK_FREQUENCY  (STM32_VCO_FREQUENCY / 2)
 #define STM32_OTGFS_FREQUENCY   (STM32_VCO_FREQUENCY / 10)
 
 #else
-/* Highest SYSCLK
+/* No restrictions by OTGFS
  *
  * PLL_VCO = (25,000,000 / 25) * 432 = 432 MHz
  * SYSCLK  = 432 MHz / 2 = 216 MHz
+ * USB OTG FS, SDMMC and RNG Clock = 432 MHz / 10 = 43.2 MHz
+ * DSI CLK = PLL_VCO / PLLR = 432 / 8 = 54 MHz
  */
 
 #define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(25)
 #define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(432)
 #define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
 #define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(10)
+#define STM32_PLLCFG_PLLR       RCC_PLLCFG_PLLR(8)
 
 #define STM32_VCO_FREQUENCY     ((STM32_HSE_FREQUENCY / 25) * 432)
 #define STM32_SYSCLK_FREQUENCY  (STM32_VCO_FREQUENCY / 2)
@@ -199,6 +205,7 @@
 #define STM32_RCC_DCKCFGR2_CK48MSRC   RCC_DCKCFGR2_CK48MSEL_PLLSAI
 #define STM32_RCC_DCKCFGR2_SDMMCSRC   RCC_DCKCFGR2_SDMMCSEL_48MHZ
 #define STM32_RCC_DCKCFGR2_SDMMC2SRC  RCC_DCKCFGR2_SDMMC2SEL_48MHZ
+#define STM32_RCC_DCKCFGR2_DSISRC     RCC_DCKCFGR2_DSISEL_PHY
 
 /* Several prescalers allow the configuration of the two AHB buses, the
  * high-speed APB (APB2) and the low-speed APB (APB1) domains. The maximum
@@ -258,7 +265,7 @@
 #define BOARD_FLASH_WAITSTATES 7
 
 /* LED definitions ******************************************************************/
-/* The STM32F746G-DISCO board has numerous LEDs but only one, LD1 located near the
+/* The STM32F769I-DISCO board has numerous LEDs but only one, LD1 located near the
  * reset button, that can be controlled by software (LD2 is a power indicator, LD3-6
  * indicate USB status, LD7 is controlled by the ST-Link).
  *
@@ -311,7 +318,7 @@
 
 /* Button definitions ***************************************************************/
 /* The STM32F7 Discovery supports one button:  Pushbutton B1, labelled "User", is
- * connected to GPIO PI11.  A high value will be sensed when the button is depressed.
+ * connected to GPIO PA0.  A high value will be sensed when the button is depressed.
  */
 
 #define BUTTON_USER        0
@@ -327,7 +334,7 @@
  *
  *   -------- ---------------
  *               STM32F7
- *   ARDUIONO FUNCTION  GPIO
+ *   ARDUINO  FUNCTION  GPIO
  *   -- ----- --------- -----
  *   DO RX    USART6_RX PC7
  *   D1 TX    USART6_TX PC6
@@ -336,6 +343,22 @@
 
 #define GPIO_USART6_RX GPIO_USART6_RX_1
 #define GPIO_USART6_TX GPIO_USART6_TX_1
+
+/* USART1:
+ * USART1 is connected to the "Virtual Com Port" lines
+ * of the ST-LINK controller.
+ *
+ *   -------- ---------------
+ *               STM32F7
+ *   SIGNAME  FUNCTION  GPIO
+ *   -- ----- --------- -----
+ *   VCP_RX   USART1_RX PA10
+ *   VCP_TX   USART1_TX PA9
+ *   -- ----- --------- -----
+ */
+
+#define GPIO_USART1_RX GPIO_USART1_RX_1
+#define GPIO_USART1_TX GPIO_USART1_TX_1
 
 /* The STM32 F7 connects to a SMSC LAN8742A PHY using these pins:
  *
@@ -347,7 +370,7 @@
  *   PG14     RMII_TXD1    TXD1
  *   PC4      RMII_RXD0    RXD0/MODE0
  *   PC5      RMII_RXD1    RXD1/MODE1
- *   PG2      RMII_RXER    RXER/PHYAD0 -- Not used
+ *   PD5      RMII_RXER    RXER/PHYAD0
  *   PA7      RMII_CRS_DV  CRS_DV/MODE2
  *   PC1      RMII_MDC     MDC
  *   PA2      RMII_MDIO    MDIO
@@ -355,13 +378,107 @@
  *   PA1      RMII_REF_CLK nINT/REFCLK0
  *   N/A      OSC_25M      XTAL1/CLKIN
  *
- * The PHY address is either 0 or 1, depending on the state of PG2 on reset.
- * PG2 is not controlled but appears to result in a PHY address of 0.
+ * The PHY address is 0, since RMII_RXER/PHYAD0 features a pull down.
+ * After reset, RMII_RXER/PHYAD0 switches to the RXER function,
+ * receive errors can be detected using GPIO pin PD5
  */
 
 #define GPIO_ETH_RMII_TX_EN   GPIO_ETH_RMII_TX_EN_2
 #define GPIO_ETH_RMII_TXD0    GPIO_ETH_RMII_TXD0_2
 #define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_2
+
+/* I2C Mapping
+ * I2C #4 is connected to the LCD daughter board
+ * and the WM8994 audio codec.
+ *
+ * I2C4_SCL - PD12
+ * I2C4_SDA - PB7
+ */
+#define GPIO_I2C4_SCL        GPIO_I2C4_SCL_1
+#define GPIO_I2C4_SDA        GPIO_I2C4_SDA_5
+
+/* SDMMC */
+
+/* Stream selections are arbitrary for now but might become important in the future
+ * if we set aside more DMA channels/streams.
+ *
+ * SDIO DMA
+ *   DMAMAP_SDMMC1_1 = Channel 4, Stream 3
+ *   DMAMAP_SDMMC1_2 = Channel 4, Stream 6
+ *
+ *   DMAMAP_SDMMC2_1 = Channel 11, Stream 0
+ *   DMAMAP_SDMMC2_2 = Channel 11, Stream 5
+ */
+
+// #define DMAMAP_SDMMC1  DMAMAP_SDMMC1_1
+#define DMAMAP_SDMMC2  DMAMAP_SDMMC2_1
+
+/* SDIO dividers.  Note that slower clocking is required when DMA is disabled
+ * in order to avoid RX overrun/TX underrun errors due to delayed responses
+ * to service FIFOs in interrupt driven mode.  These values have not been
+ * tuned!!!
+ *
+ * SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(118+2)=400 KHz
+ */
+
+#define STM32_SDMMC_INIT_CLKDIV      (118 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+
+/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
+ * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+ */
+
+#ifdef CONFIG_SDIO_DMA
+#  define STM32_SDMMC_MMCXFR_CLKDIV  (1 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#else
+#  define STM32_SDMMC_MMCXFR_CLKDIV  (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#endif
+
+/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
+ * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+ */
+
+#ifdef CONFIG_SDIO_DMA
+#  define STM32_SDMMC_SDXFR_CLKDIV   (1 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#else
+#  define STM32_SDMMC_SDXFR_CLKDIV   (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#endif
+
+/* SDMMC2 Pin mapping
+ *
+ * D0 - PG9
+ * D1 - PG10
+ * D2 - PB3
+ * D3 - PB4
+ */
+#define GPIO_SDMMC2_D0  GPIO_SDMMC2_D0_2
+#define GPIO_SDMMC2_D1  GPIO_SDMMC2_D1_2
+#define GPIO_SDMMC2_D2  GPIO_SDMMC2_D2_1
+#define GPIO_SDMMC2_D3  GPIO_SDMMC2_D3_1
+
+/* LCD DISPLAY
+ * (work in progress as of 2017 07 19)
+ */
+#define	BOARD_LTDC_WIDTH        800
+#define	BOARD_LTDC_HEIGHT       472
+
+#define	BOARD_LTDC_HSYNC        10
+#define	BOARD_LTDC_HFP          10
+#define	BOARD_LTDC_HBP          20
+#define	BOARD_LTDC_VSYNC        2
+#define	BOARD_LTDC_VFP          4
+#define	BOARD_LTDC_VBP          2
+
+#define	BOARD_LTDC_GCR_PCPOL    0
+#define	BOARD_LTDC_GCR_DEPOL    0
+#define	BOARD_LTDC_GCR_VSPOL    0
+#define	BOARD_LTDC_GCR_HSPOL    0
+
+// #define	BOARD_LTDC_OUTPUT_BPP   16
+
+//#define	BOARD_LTDC_GCR_DEN
+//#define	BOARD_LTDC_GCR_DBW
+//#define	BOARD_LTDC_GCR_DGW
+//#define	BOARD_LTDC_GCR_DRW
 
 /************************************************************************************
  * Public Data
@@ -399,4 +516,4 @@ void stm32_boardinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __CONFIG_STM32F746G_DISCO_INCLUDE_BOARD_H */
+#endif  /* __CONFIG_STM32F769I_DISCO_INCLUDE_BOARD_H */

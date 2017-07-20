@@ -729,9 +729,9 @@
 #  define RCC_DCKCFGR2_SDMMC2SEL_48MHZ  (0 << RCC_DCKCFGR2_SDMMC2SEL_SHIFT)  /* 48 MHz clock is selected as SDMMC 2 clock */
 #  define RCC_DCKCFGR2_SDMMC2SEL_SYSCLK (1 << RCC_DCKCFGR2_SDMMC2SEL_SHIFT)  /* System clock is selected as SDMMC 2 clock */
 #define RCC_DCKCFGR2_DSISEL_SHIFT       (30)   /* Bit 30: DSI clock source selection */
-#define RCC_DCKCFGR2_DSISELL_MASK      (1 << RCC_DCKCFGR2_DSISEL_SHIFT)
-#  define RCC_DCKCFGR2_DSISEL_48MHZ      (0 << RCC_DCKCFGR2_DSISEL_SHIFT)  /* 48 MHz clock is selected as DSI clock */
-#  define RCC_DCKCFGR2_DSISEL_SYSCLK     (1 << RCC_DCKCFGR2_DSISEL_SHIFT)  /* System clock is selected as DSI clock */
+#define RCC_DCKCFGR2_DSISEL_MASK        (1 << RCC_DCKCFGR2_DSISEL_SHIFT)
+#  define RCC_DCKCFGR2_DSISEL_PHY       (0 << RCC_DCKCFGR2_DSISEL_SHIFT)  /* DSI PHY sources DSI clock */
+#  define RCC_DCKCFGR2_DSISEL_SYSCLK    (1 << RCC_DCKCFGR2_DSISEL_SHIFT)  /* System clock is selected as DSI clock */
 
 #endif /* CONFIG_STM32F7_STM32F76XX || CONFIG_STM32F7_STM32F77XX */
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F76XX77XX_RCC_H */
