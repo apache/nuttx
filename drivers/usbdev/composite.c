@@ -180,9 +180,9 @@ static int composite_classsetup(FAR struct composite_dev_s *priv,
 
   for (i = 0; i < priv->ndevices; i++)
     {
-      if (interface >= priv->device[i].compdesc.devdesc.ifnobase &&
-          interface < (priv->device[i].compdesc.devdesc.ifnobase +
-                       priv->device[i].compdesc.devdesc.ninterfaces))
+      if (interface >= priv->device[i].compdesc.devinfo.ifnobase &&
+          interface < (priv->device[i].compdesc.devinfo.ifnobase +
+                       priv->device[i].compdesc.devinfo.ninterfaces))
         {
           ret = CLASS_SETUP(priv->device[i].dev, dev, ctrl, dataout, outlen);
           break;
@@ -496,11 +496,11 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
                       for (i = 0; i < priv->ndevices; i++)
                         {
-                          if (strid >= priv->device[i].compdesc.devdesc.strbase &&
-                              strid <  priv->device[i].compdesc.devdesc.strbase +
-                                       priv->device[i].compdesc.devdesc.nstrings)
+                          if (strid >= priv->device[i].compdesc.devinfo.strbase &&
+                              strid <  priv->device[i].compdesc.devinfo.strbase +
+                                       priv->device[i].compdesc.devinfo.nstrings)
                             {
-                              ret = priv->device[i].compdesc.mkstrdesc(strid - priv->device[i].compdesc.devdesc.strbase, buf);
+                              ret = priv->device[i].compdesc.mkstrdesc(strid - priv->device[i].compdesc.devinfo.strbase, buf);
                               break;
                             }
                         }
@@ -842,7 +842,7 @@ FAR void *composite_initialize(uint8_t ndevices,
 
       ret =
         priv->device[i].compdesc.classobject(priv->device[i].compdesc.minor,
-                                             &priv->device[i].compdesc.devdesc,
+                                             &priv->device[i].compdesc.devinfo,
                                              &priv->device[i].dev);
       if (ret < 0)
         {
@@ -852,7 +852,7 @@ FAR void *composite_initialize(uint8_t ndevices,
         }
 
       priv->cfgdescsize += priv->device[i].compdesc.cfgdescsize;
-      priv->ninterfaces += priv->device[i].compdesc.devdesc.ninterfaces;
+      priv->ninterfaces += priv->device[i].compdesc.devinfo.ninterfaces;
     }
 
   priv->ndevices = ndevices;

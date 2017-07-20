@@ -308,7 +308,7 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate the IN bulk endpoint */
 
-  priv->epbulkin = DEV_ALLOCEP(dev, USBMSC_MKEPBULKIN(&priv->devdesc),
+  priv->epbulkin = DEV_ALLOCEP(dev, USBMSC_MKEPBULKIN(&priv->devinfo),
                                true, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkin)
     {
@@ -321,7 +321,7 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate the OUT bulk endpoint */
 
-  priv->epbulkout = DEV_ALLOCEP(dev, USBMSC_MKEPBULKOUT(&priv->devdesc),
+  priv->epbulkout = DEV_ALLOCEP(dev, USBMSC_MKEPBULKOUT(&priv->devinfo),
                                 false, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkout)
     {
@@ -993,7 +993,7 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
 
   /* Configure the IN bulk endpoint */
 
-  usbmsc_copy_epdesc(USBMSC_EPBULKIN, &epdesc, &priv->devdesc,
+  usbmsc_copy_epdesc(USBMSC_EPBULKIN, &epdesc, &priv->devinfo,
                      hispeed);
   ret = EP_CONFIGURE(priv->epbulkin, &epdesc, false);
   if (ret < 0)
@@ -1006,7 +1006,7 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
 
   /* Configure the OUT bulk endpoint */
 
-  usbmsc_copy_epdesc(USBMSC_EPBULKOUT, &epdesc, &priv->devdesc,
+  usbmsc_copy_epdesc(USBMSC_EPBULKOUT, &epdesc, &priv->devinfo,
                      hispeed);
   ret = EP_CONFIGURE(priv->epbulkout, &epdesc, true);
   if (ret < 0)
@@ -1738,7 +1738,7 @@ errout_with_lock:
 
 #ifdef CONFIG_USBMSC_COMPOSITE
 int usbmsc_classobject(FAR void *handle,
-                       FAR struct usbdev_description_s *devdesc,
+                       FAR struct usbdev_devinfo_s *devinfo,
                        FAR struct usbdevclass_driver_s **classdev)
 {
   FAR struct usbmsc_alloc_s *alloc = (FAR struct usbmsc_alloc_s *)handle;
@@ -1748,7 +1748,7 @@ int usbmsc_classobject(FAR void *handle,
 
   /* Save the device description */
 
-  memcpy(&alloc->dev.devdesc, devdesc, sizeof(struct usbdev_description_s));
+  memcpy(&alloc->dev.devinfo, devinfo, sizeof(struct usbdev_devinfo_s));
 
   /* Export the LUNs as with the "standalone" USB mass storage driver, but
    * don't register the class instance with the USB device infrastructure.
@@ -1921,20 +1921,20 @@ void usbmsc_get_composite_devdesc(FAR struct composite_devdesc_s *dev)
    * ifnobase must be provided by board-specific logic
    */
 
-  dev->devdesc.ninterfaces = USBMSC_NINTERFACES;     /* Number of interfaces in the configuration */
+  dev->devinfo.ninterfaces = USBMSC_NINTERFACES;     /* Number of interfaces in the configuration */
 
   /* Strings.
    *
    * strbase must be provided by board-specific logic
    */
 
-  dev->devdesc.nstrings    = USBMSC_NSTRIDS;         /* Number of Strings */
+  dev->devinfo.nstrings    = USBMSC_NSTRIDS;         /* Number of Strings */
 
   /* Endpoints.
    *
    * Endpoint numbers must be provided by board-specific logic.
    */
 
-  dev->devdesc.nendpoints  = USBMSC_NENDPOINTS;
+  dev->devinfo.nendpoints  = USBMSC_NENDPOINTS;
 }
 #endif

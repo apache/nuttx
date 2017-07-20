@@ -97,7 +97,7 @@
  *   Size of the serial receive/transmit buffers. Default 256.
  */
 
-/* Informations needed in usbdev_description_s */
+/* Informations needed in usbdev_devinfo_s */
 
 #define CDCACM_NUM_EPS             (3)
 
@@ -348,9 +348,9 @@ typedef FAR void (*cdcacm_callback_t)(enum cdcacm_event_e event);
  ****************************************************************************/
 
 #if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_CDCACM_COMPOSITE)
-struct usbdev_description_s;
+struct usbdev_devinfo_s;
 struct usbdevclass_driver_s;
-int cdcacm_classobject(int minor, FAR struct usbdev_description_s *devdesc,
+int cdcacm_classobject(int minor, FAR struct usbdev_devinfo_s *devdesc,
                        FAR struct usbdevclass_driver_s **classdev);
 #endif
 

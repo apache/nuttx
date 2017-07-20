@@ -448,7 +448,7 @@ struct usbmsc_dev_s
   struct sq_queue_s wrreqlist;        /* List of empty write request containers */
   struct sq_queue_s rdreqlist;        /* List of filled read request containers */
 
-  struct usbdev_description_s devdesc;
+  struct usbdev_devinfo_s devinfo;
 
   /* Pre-allocated write request containers.  The write requests will
    * be linked in a free list (wrreqlist), and used to send requests to
@@ -577,7 +577,7 @@ FAR const struct usb_devdesc_s *usbmsc_getdevdesc(void);
 
 int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
                        FAR struct usb_epdesc_s *epdesc,
-                       FAR struct usbdev_description_s *devdesc,
+                       FAR struct usbdev_devinfo_s *devinfo,
                        bool hispeed);
 
 /****************************************************************************
@@ -589,10 +589,10 @@ int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-int16_t usbmsc_mkcfgdesc(FAR uint8_t *buf, FAR struct usbdev_description_s *devdesc,
+int16_t usbmsc_mkcfgdesc(FAR uint8_t *buf, FAR struct usbdev_devinfo_s *devinfo,
                          uint8_t speed, uint8_t type);
 #else
-int16_t usbmsc_mkcfgdesc(FAR uint8_t *buf, FAR struct usbdev_description_s *devdesc);
+int16_t usbmsc_mkcfgdesc(FAR uint8_t *buf, FAR struct usbdev_devinfo_s *devinfo);
 #endif
 
 /****************************************************************************

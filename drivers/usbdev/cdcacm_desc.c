@@ -232,7 +232,7 @@ FAR const struct usb_devdesc_s *cdcacm_getdevdesc(void)
 
 int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
                        FAR struct usb_epdesc_s *epdesc,
-                       FAR struct usbdev_description_s *devdesc,
+                       FAR struct usbdev_devinfo_s *devinfo,
                        bool hispeed)
 {
 #ifndef CONFIG_USBDEV_DUALSPEED
@@ -246,7 +246,7 @@ int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
         {
           epdesc->len  = USB_SIZEOF_EPDESC;            /* Descriptor length */
           epdesc->type = USB_DESC_TYPE_ENDPOINT;       /* Descriptor type */
-          epdesc->addr = CDCACM_MKEPINTIN(devdesc);    /* Endpoint address */
+          epdesc->addr = CDCACM_MKEPINTIN(devinfo);    /* Endpoint address */
           epdesc->attr = CDCACM_EPINTIN_ATTR;          /* Endpoint attributes */
 
 #ifdef CONFIG_USBDEV_DUALSPEED
@@ -274,7 +274,7 @@ int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
       {
         epdesc->len = USB_SIZEOF_EPDESC;             /* Descriptor length */
         epdesc->type = USB_DESC_TYPE_ENDPOINT;       /* Descriptor type */
-        epdesc->addr = CDCACM_MKEPBULKOUT(devdesc);  /* Endpoint address */
+        epdesc->addr = CDCACM_MKEPBULKOUT(devinfo);  /* Endpoint address */
         epdesc->attr = CDCACM_EPOUTBULK_ATTR;        /* Endpoint attributes */
 #ifdef CONFIG_USBDEV_DUALSPEED
         if (hispeed)
@@ -301,7 +301,7 @@ int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
       {
         epdesc->len  = USB_SIZEOF_EPDESC;            /* Descriptor length */
         epdesc->type = USB_DESC_TYPE_ENDPOINT;       /* Descriptor type */
-        epdesc->addr = CDCACM_MKEPBULKIN(devdesc);   /* Endpoint address */
+        epdesc->addr = CDCACM_MKEPBULKIN(devinfo);   /* Endpoint address */
         epdesc->attr = CDCACM_EPINBULK_ATTR;         /* Endpoint attributes */
 
 #ifdef CONFIG_USBDEV_DUALSPEED
@@ -342,11 +342,11 @@ int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
 
 #ifdef CONFIG_USBDEV_DUALSPEED
 int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
-                         FAR struct usbdev_description_s *devdesc,
+                         FAR struct usbdev_devinfo_s *devinfo,
                          uint8_t speed, uint8_t type)
 #else
 int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
-                         FAR struct usbdev_description_s *devdesc)
+                         FAR struct usbdev_devinfo_s *devinfo)
 #endif
 {
   int length = 0;
@@ -420,8 +420,8 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 
       dest->len       = USB_SIZEOF_IADDESC;                  /* Descriptor length */
       dest->type      = USB_DESC_TYPE_INTERFACEASSOCIATION;  /* Descriptor type */
-      dest->firstif   = devdesc->ifnobase;                   /* Number of first interface of the function */
-      dest->nifs      = devdesc->ninterfaces;                /* Number of interfaces associated with the function */
+      dest->firstif   = devinfo->ifnobase;                   /* Number of first interface of the function */
+      dest->nifs      = devinfo->ninterfaces;                /* Number of interfaces associated with the function */
       dest->classid   = USB_CLASS_CDC;                       /* Class code */
       dest->subclass  = CDC_SUBCLASS_ACM;                    /* Sub-class code */
       dest->protocol  = CDC_PROTO_NONE;                      /* Protocol code */
@@ -440,14 +440,14 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 
       dest->len      = USB_SIZEOF_IFDESC;                    /* Descriptor length */
       dest->type     = USB_DESC_TYPE_INTERFACE;              /* Descriptor type */
-      dest->ifno     = devdesc->ifnobase;                    /* Interface number */
+      dest->ifno     = devinfo->ifnobase;                    /* Interface number */
       dest->alt      = CDCACM_NOTALTIFID;                    /* Alternate setting */
       dest->neps     = 1;                                    /* Number of endpoints */
       dest->classid  = USB_CLASS_CDC;                        /* Interface class */
       dest->subclass = CDC_SUBCLASS_ACM;                     /* Interface sub-class */
       dest->protocol = CDC_PROTO_ATM;                        /* Interface protocol */
 #ifdef CONFIG_CDCACM_NOTIFSTR
-      dest->iif      = devdesc->strbase + CDCACM_NOTIFSTRID; /* iInterface */
+      dest->iif      = devinfo->strbase + CDCACM_NOTIFSTRID; /* iInterface */
 #else
       dest->iif      = 0;                                    /* iInterface */
 #endif
@@ -501,8 +501,8 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
       dest->size     = SIZEOF_UNION_FUNCDESC(1);              /* Descriptor length */
       dest->type     = USB_DESC_TYPE_CSINTERFACE;             /* Descriptor type */
       dest->subtype  = CDC_DSUBTYPE_UNION;                    /* Descriptor sub-type */
-      dest->master   = devdesc->ifnobase;                     /* Master interface number */
-      dest->slave[0] = devdesc->ifnobase + 1;                 /* Slave[0] interface number */
+      dest->master   = devinfo->ifnobase;                     /* Master interface number */
+      dest->slave[0] = devinfo->ifnobase + 1;                 /* Slave[0] interface number */
 
       buf += sizeof(struct cdc_union_funcdesc_s);
     }
@@ -520,7 +520,7 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
       dest->type    = USB_DESC_TYPE_CSINTERFACE;              /* Descriptor type */
       dest->subtype = CDC_DSUBTYPE_CALLMGMT;                  /* Descriptor sub-type */
       dest->caps    = 3;                                      /* Bit encoded capabilities */
-      dest->ifno    = devdesc->ifnobase + 1;                  /* Interface number of Data Class interface */
+      dest->ifno    = devinfo->ifnobase + 1;                  /* Interface number of Data Class interface */
 
       buf += sizeof(struct cdc_callmgmt_funcdesc_s);
     }
@@ -531,7 +531,7 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 
   if (buf != NULL)
     {
-      cdcacm_copy_epdesc(CDCACM_EPINTIN, (struct usb_epdesc_s *)buf, devdesc, hispeed);
+      cdcacm_copy_epdesc(CDCACM_EPINTIN, (struct usb_epdesc_s *)buf, devinfo, hispeed);
 
       buf += USB_SIZEOF_EPDESC;
     }
@@ -545,14 +545,14 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 
       dest->len      = USB_SIZEOF_IFDESC;                     /* Descriptor length */
       dest->type     = USB_DESC_TYPE_INTERFACE;               /* Descriptor type */
-      dest->ifno     = devdesc->ifnobase + 1;                 /* Interface number */
+      dest->ifno     = devinfo->ifnobase + 1;                 /* Interface number */
       dest->alt      = CDCACM_DATAALTIFID;                    /* Alternate setting */
       dest->neps     = 2;                                     /* Number of endpoints */
       dest->classid  = USB_CLASS_CDC_DATA;                    /* Interface class */
       dest->subclass = CDC_DATA_SUBCLASS_NONE;                /* Interface sub-class */
       dest->protocol = CDC_DATA_PROTO_NONE;                   /* Interface protocol */
 #ifdef CONFIG_CDCACM_DATAIFSTR
-      dest->iif      = devdesc->strbase + CDCACM_DATAIFSTRID; /* iInterface */
+      dest->iif      = devinfo->strbase + CDCACM_DATAIFSTRID; /* iInterface */
 #else
       dest->iif      = 0;                                     /* iInterface */
 #endif
@@ -566,7 +566,7 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 
   if (buf != NULL)
     {
-      cdcacm_copy_epdesc(CDCACM_EPBULKOUT, (struct usb_epdesc_s *)buf, devdesc, hispeed);
+      cdcacm_copy_epdesc(CDCACM_EPBULKOUT, (struct usb_epdesc_s *)buf, devinfo, hispeed);
       buf += USB_SIZEOF_EPDESC;
     }
 
@@ -576,7 +576,7 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 
   if (buf != NULL)
     {
-      cdcacm_copy_epdesc(CDCACM_EPBULKIN, (struct usb_epdesc_s *)buf, devdesc, hispeed);
+      cdcacm_copy_epdesc(CDCACM_EPBULKIN, (struct usb_epdesc_s *)buf, devinfo, hispeed);
       buf += USB_SIZEOF_EPDESC;
     }
 

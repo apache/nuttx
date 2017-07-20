@@ -244,13 +244,13 @@ int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv, FAR uint8_t *buf)
     {
 #ifdef CONFIG_USBDEV_DUALSPEED
       len = priv->device[i].compdesc.mkconfdesc(buf,
-                                                &priv->device[i].compdesc.devdesc,
+                                                &priv->device[i].compdesc.devinfo,
                                                 speed, type);
       total += len;
       buf += len;
 #else
       len = priv->device[i].compdesc.mkconfdesc(buf,
-                                                &priv->device[i].compdesc.devdesc);
+                                                &priv->device[i].compdesc.devinfo);
       total += len;
       buf += len;
 #endif

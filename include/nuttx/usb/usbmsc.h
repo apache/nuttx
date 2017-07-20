@@ -56,7 +56,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Informations about the device needed in usbdev_description_s */
+/* Informations about the device needed in usbdev_devinfo_s */
 
 #define USBMSC_CONFIGID        (1) /* The only supported configuration ID */
 #define USBMSC_NENDPOINTS      (2) /* Number of endpoints in the interface  */
@@ -189,7 +189,7 @@ int usbmsc_exportluns(FAR void *handle);
 
 #if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
 struct usbdevclass_driver_s;
-int usbmsc_classobject(FAR void *handle, FAR struct usbdev_description_s *devdesc,
+int usbmsc_classobject(FAR void *handle, FAR struct usbdev_devinfo_s *devdesc,
                        FAR struct usbdevclass_driver_s **classdev);
 #endif
 

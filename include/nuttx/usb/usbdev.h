@@ -196,9 +196,9 @@
 
 /* USB Controller Structures ********************************************************/
 
-/* usbdev_description_s - describes the low level bindings of an usb device */
+/* usbdev_devinfo_s - describes the low level bindings of an usb device */
 
-struct usbdev_description_s
+struct usbdev_devinfo_s
 {
   int ninterfaces; /* Number of interfaces in the configuration */
   int ifnobase;    /* Offset to Interface-IDs */
@@ -215,16 +215,16 @@ struct composite_devdesc_s
 {
 #ifdef CONFIG_USBDEV_DUALSPEED
   CODE int16_t (*mkconfdesc)(FAR uint8_t *buf,
-                             FAR struct usbdev_description_s *devdesc,
+                             FAR struct usbdev_devinfo_s *devdesc,
                              uint8_t speed, uint8_t type);
 #else
   CODE int16_t (*mkconfdesc)(FAR uint8_t *buf,
-                             FAR struct usbdev_description_s *devdesc);
+                             FAR struct usbdev_devinfo_s *devdesc);
 #endif
 
   CODE int (*mkstrdesc)(uint8_t id, FAR struct usb_strdesc_s *strdesc);
   CODE int (*classobject)(int minor,
-                          FAR struct usbdev_description_s *devdesc,
+                          FAR struct usbdev_devinfo_s *devdesc,
                           FAR struct usbdevclass_driver_s **classdev);
   CODE void (*uninitialize)(FAR struct usbdevclass_driver_s *classdev);
 
@@ -234,7 +234,7 @@ struct composite_devdesc_s
   int cfgdescsize; /* The size of the config descriptor */
   int minor;
 
-  struct usbdev_description_s devdesc;
+  struct usbdev_devinfo_s devdesc;
 };
 #endif
 

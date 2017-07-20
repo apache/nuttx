@@ -226,7 +226,7 @@ FAR const struct usb_devdesc_s *usbmsc_getdevdesc(void)
 
 int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
                        FAR struct usb_epdesc_s *epdesc,
-                       FAR struct usbdev_description_s *devdesc,
+                       FAR struct usbdev_devinfo_s *devinfo,
                        bool hispeed)
 {
 #ifndef CONFIG_USBDEV_DUALSPEED
@@ -241,7 +241,7 @@ int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
       {
         epdesc->len = USB_SIZEOF_EPDESC;            /* Descriptor length */
         epdesc->type = USB_DESC_TYPE_ENDPOINT;      /* Descriptor type */
-        epdesc->addr = USBMSC_MKEPBULKOUT(devdesc); /* Endpoint address */
+        epdesc->addr = USBMSC_MKEPBULKOUT(devinfo); /* Endpoint address */
         epdesc->attr = USBMSC_EPOUTBULK_ATTR;       /* Endpoint attributes */
 
 #ifdef CONFIG_USBDEV_DUALSPEED
@@ -269,7 +269,7 @@ int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
       {
         epdesc->len = USB_SIZEOF_EPDESC;            /* Descriptor length */
         epdesc->type = USB_DESC_TYPE_ENDPOINT;      /* Descriptor type */
-        epdesc->addr = USBMSC_MKEPBULKIN(devdesc);  /* Endpoint address */
+        epdesc->addr = USBMSC_MKEPBULKIN(devinfo);  /* Endpoint address */
         epdesc->attr = USBMSC_EPINBULK_ATTR;        /* Endpoint attributes */
 
 #ifdef CONFIG_USBDEV_DUALSPEED
@@ -310,11 +310,11 @@ int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
 
 #ifdef CONFIG_USBDEV_DUALSPEED
 int16_t usbmsc_mkcfgdesc(uint8_t *buf,
-                         FAR struct usbdev_description_s *devdesc,
+                         FAR struct usbdev_devinfo_s *devinfo,
                          uint8_t speed, uint8_t type)
 #else
 int16_t usbmsc_mkcfgdesc(uint8_t *buf,
-                        FAR struct usbdev_description_s *devdesc)
+                        FAR struct usbdev_devinfo_s *devinfo)
 #endif
 {
   int length = 0;
@@ -373,13 +373,13 @@ int16_t usbmsc_mkcfgdesc(uint8_t *buf,
 
     dest->len      = USB_SIZEOF_IFDESC;                        /* Descriptor length */
     dest->type     = USB_DESC_TYPE_INTERFACE;                  /* Descriptor type */
-    dest->ifno     = devdesc->ifnobase;                        /* Interface number */
+    dest->ifno     = devinfo->ifnobase;                        /* Interface number */
     dest->alt      = USBMSC_ALTINTERFACEID;                    /* Alternate setting */
     dest->neps     = USBMSC_NENDPOINTS;                        /* Number of endpoints */
     dest->classid  = USB_CLASS_MASS_STORAGE;                   /* Interface class */
     dest->subclass = USBMSC_SUBCLASS_SCSI;                     /* Interface sub-class */
     dest->protocol = USBMSC_PROTO_BULKONLY;                    /* Interface protocol */
-    dest->iif      = devdesc->strbase + USBMSC_INTERFACESTRID; /* iInterface */
+    dest->iif      = devinfo->strbase + USBMSC_INTERFACESTRID; /* iInterface */
 
     buf    += sizeof(struct usb_ifdesc_s);
     length += sizeof(struct usb_ifdesc_s);
@@ -391,7 +391,7 @@ int16_t usbmsc_mkcfgdesc(uint8_t *buf,
 
   {
     int len = usbmsc_copy_epdesc(USBMSC_EPBULKIN, (FAR struct usb_epdesc_s *)buf,
-                                 devdesc, hispeed);
+                                 devinfo, hispeed);
 
     buf += len;
     length += len;
@@ -401,7 +401,7 @@ int16_t usbmsc_mkcfgdesc(uint8_t *buf,
 
   {
     int len = usbmsc_copy_epdesc(USBMSC_EPBULKOUT,
-                                 (FAR struct usb_epdesc_s *)buf, devdesc,
+                                 (FAR struct usb_epdesc_s *)buf, devinfo,
                                  hispeed);
 
     buf += len;

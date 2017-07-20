@@ -86,7 +86,7 @@ static FAR void *g_mschandle;
 
 #ifdef CONFIG_USBMSC_COMPOSITE
 static int board_mscclassobject(int minor,
-                                FAR struct usbdev_description_s *devdesc,
+                                FAR struct usbdev_devinfo_s *devinfo,
                                 FAR struct usbdevclass_driver_s **classdev)
 {
   int ret;
@@ -120,7 +120,7 @@ static int board_mscclassobject(int minor,
 
   /* Get the mass storage device's class object */
 
-  ret = usbmsc_classobject(g_mschandle, devdesc, classdev);
+  ret = usbmsc_classobject(g_mschandle, devinfo, classdev);
   if (ret < 0)
     {
       uerr("ERROR: usbmsc_classobject failed: %d\n", -ret);
@@ -223,23 +223,23 @@ FAR void *board_composite_connect(int port, int configid)
 
       /* Interfaces */
 
-      dev[0].devdesc.ifnobase = ifnobase;             /* Offset to Interface-IDs */
+      dev[0].devinfo.ifnobase = ifnobase;             /* Offset to Interface-IDs */
       dev[0].minor = 0;                               /* The minor interface number */
 
       /* Strings */
 
-      dev[0].devdesc.strbase = strbase;               /* Offset to String Numbers */
+      dev[0].devinfo.strbase = strbase;               /* Offset to String Numbers */
 
       /* Endpoints */
 
-      dev[0].devdesc.epno[CDCACM_EP_INTIN_IDX]   = 3;
-      dev[0].devdesc.epno[CDCACM_EP_BULKIN_IDX]  = 4;
-      dev[0].devdesc.epno[CDCACM_EP_BULKOUT_IDX] = 5;
+      dev[0].devinfo.epno[CDCACM_EP_INTIN_IDX]   = 3;
+      dev[0].devinfo.epno[CDCACM_EP_BULKIN_IDX]  = 4;
+      dev[0].devinfo.epno[CDCACM_EP_BULKOUT_IDX] = 5;
 
       /* Count up the base numbers */
 
-      ifnobase += dev[0].devdesc.ninterfaces;
-      strbase  += dev[0].devdesc.nstrings;
+      ifnobase += dev[0].devinfo.ninterfaces;
+      strbase  += dev[0].devinfo.nstrings;
 
       /* Configure the mass storage device device */
       /* Ask the usbmsc driver to fill in the constants we didn't
@@ -256,22 +256,22 @@ FAR void *board_composite_connect(int port, int configid)
 
       /* Interfaces */
 
-      dev[1].devdesc.ifnobase = ifnobase;               /* Offset to Interface-IDs */
+      dev[1].devinfo.ifnobase = ifnobase;               /* Offset to Interface-IDs */
       dev[1].minor = 0;                                 /* The minor interface number */
 
       /* Strings */
 
-      dev[1].devdesc.strbase = strbase;                 /* Offset to String Numbers */
+      dev[1].devinfo.strbase = strbase;                 /* Offset to String Numbers */
 
       /* Endpoints */
 
-      dev[1].devdesc.epno[USBMSC_EP_BULKIN_IDX]  = 1;
-      dev[1].devdesc.epno[USBMSC_EP_BULKOUT_IDX] = 2;
+      dev[1].devinfo.epno[USBMSC_EP_BULKIN_IDX]  = 1;
+      dev[1].devinfo.epno[USBMSC_EP_BULKOUT_IDX] = 2;
 
       /* Count up the base numbers */
 
-      ifnobase += dev[1].devdesc.ninterfaces;
-      strbase  += dev[1].devdesc.nstrings;
+      ifnobase += dev[1].devinfo.ninterfaces;
+      strbase  += dev[1].devinfo.nstrings;
 
       return composite_initialize(2, dev);
 #else
@@ -323,20 +323,20 @@ FAR void *board_composite_connect(int port, int configid)
 
           /* Interfaces */
 
-          dev[ia].devdesc.ifnobase = ifnobase;        /* Offset to Interface-IDs */
+          dev[ia].devinfo.ifnobase = ifnobase;        /* Offset to Interface-IDs */
 
           /* Strings */
 
-          dev[ia].devdesc.strbase = strbase;          /* Offset to String Numbers */
+          dev[ia].devinfo.strbase = strbase;          /* Offset to String Numbers */
 
           /* Endpoints */
 
-          dev[ia].devdesc.epno[CDCACM_EP_INTIN_IDX]   = 7 + ia;
-          dev[ia].devdesc.epno[CDCACM_EP_BULKIN_IDX]  = 1 + ia * 2;
-          dev[ia].devdesc.epno[CDCACM_EP_BULKOUT_IDX] = 2 + ia * 2;
+          dev[ia].devinfo.epno[CDCACM_EP_INTIN_IDX]   = 7 + ia;
+          dev[ia].devinfo.epno[CDCACM_EP_BULKIN_IDX]  = 1 + ia * 2;
+          dev[ia].devinfo.epno[CDCACM_EP_BULKOUT_IDX] = 2 + ia * 2;
 
-          ifnobase += dev[ia].devdesc.ninterfaces;
-          strbase  += dev[ia].devdesc.nstrings;
+          ifnobase += dev[ia].devinfo.ninterfaces;
+          strbase  += dev[ia].devinfo.nstrings;
         }
 
       return composite_initialize(3, dev);
