@@ -41,8 +41,10 @@
 #ifdef CONFIG_HAVE_LONG_DOUBLE
 long double ceill(long double x)
 {
+  long double x1 = x;
+
   modfl(x, &x);
-  if (x > 0.0)
+  if (x1 > 0.0 && fabsl(x1 - x) > 0.0)
     {
       x += 1.0;
     }
