@@ -135,11 +135,9 @@ enum mac802154_operation_e
   MAC802154_OP_NONE,
   MAC802154_OP_ASSOC,
   MAC802154_OP_POLL,
-  MAC802154_OP_SCAN
+  MAC802154_OP_SCAN,
+  MAC802154_OP_AUTOEXTRACT,
 };
-
-struct ieee802154_privmac_s; /* Forward Reference */
-typedef void (*mac802154_worker_t)(FAR struct ieee802154_privmac_s *priv);
 
 /* The privmac structure holds the internal state of the MAC and is the
  * underlying represention of the opaque MACHANDLE.  It contains storage for
@@ -156,7 +154,6 @@ struct ieee802154_privmac_s
 
   sem_t exclsem;                            /* Support exclusive access */
   uint8_t nclients;                         /* Number of notification clients */
-  uint8_t nnotif;                           /* Number of remaining notifications */
 
   /* Only support a single command at any given time. As of now I see no
    * condition where you need to have more than one command frame simultaneously
@@ -179,7 +176,7 @@ struct ieee802154_privmac_s
   uint8_t npandesc;
   struct ieee802154_pandesc_s pandescs[MAC802154_NPANDESC];
   uint8_t panidbeforescan[IEEE802154_PANIDSIZE];
-  struct ieee802154_scan_req_s currscan; 
+  struct ieee802154_scan_req_s currscan;
   uint32_t scansymdur;
 
   /******************* Fields related to notifications ************************/
@@ -233,17 +230,15 @@ struct ieee802154_privmac_s
 
   /*************** Fields related to beacon-enabled networks ******************/
 
-  uint8_t bsn; /* Seq. num added to tx beacon frame */
+  /* Holds attributes pertaining to the superframe specification */
 
-  /* Holds attributes pertaining to the superframe specification */ 
- 
-  struct ieee802154_superframespec_s sfspec; 
- 
-  /* We use 2 beacon frame structures so that we can ping-pong between them 
-   * while updating the beacon 
-   */ 
- 
-  struct ieee802154_beaconframe_s beaconframe[2]; 
+  struct ieee802154_superframespec_s sfspec;
+
+  /* We use 2 beacon frame structures so that we can ping-pong between them
+   * while updating the beacon
+   */
+
+  struct ieee802154_beaconframe_s beaconframe[2];
 
   /* Contents of beacon payload */
 
@@ -256,23 +251,10 @@ struct ieee802154_privmac_s
 
   struct work_s tx_work;
   struct work_s rx_work;
-
-  struct work_s timeout_work;
-  WDOG_ID       timeout;  /* Timeout watchdog */
-  mac802154_worker_t timeout_worker;
-
   struct work_s purge_work;
+  struct work_s timer_work;
 
   /****************** Uncategorized MAC PIB attributes ***********************/
-
-  /* The maximum number of symbols to wait for an acknowledgement frame to
-   * arrive following a transmitted data frame. [1] pg. 126
-   *
-   * NOTE: This may be able to be a 16-bit or even an 8-bit number.  I wasn't
-   * sure at the time what the range of reasonable values was.
-   */
-
-  uint32_t ack_waitdur;
 
   /* The maximum time to wait either for a frame intended as a response to a
    * data request frame or for a broadcast frame following a beacon with the
@@ -358,6 +340,14 @@ struct ieee802154_privmac_s
   uint8_t maxretries          : 3;  /* Max # of retries allowed after tx fail */
   /* End of 8-bit bitfield. */
 
+  /* Start of 8-bit bitfield */
+
+  uint8_t rxonidle            : 1;  /* Receiver on when idle? */
+
+  /* End of 8-bit bitfield. */
+
+
+
   /* TODO: Add Security-related MAC PIB attributes */
 };
 
@@ -369,9 +359,6 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
                            FAR struct ieee802154_txdesc_s **txdesc,
                            bool allow_interrupt);
 
-int mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
-                         uint32_t numsymbols, mac802154_worker_t);
-
 void mac802154_setupindirect(FAR struct ieee802154_privmac_s *priv,
                              FAR struct ieee802154_txdesc_s *txdesc);
 
@@ -381,8 +368,6 @@ void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
                              FAR struct ieee802154_txdesc_s *txdesc);
 
 void mac802154_updatebeacon(FAR struct ieee802154_privmac_s *priv);
-
-
 
 /****************************************************************************
  * Helper Macros/Inline Functions
@@ -558,9 +543,9 @@ void mac802154_updatebeacon(FAR struct ieee802154_privmac_s *priv);
   ((GETHOST16(ptr, index) & IEEE802154_PENDADDR_NEADDR) >> \
   IEEE802154_PENDADDR_SHIFT_NEADDR)
 
-/* General helper macros ****************************************************/
+/* General helpers **********************************************************/
 
-#define mac802154_givesem(s) sem_post(s);
+#define mac802154_givesem(s) sem_post(s)
 
 static inline int mac802154_takesem(sem_t *sem, bool allowinterrupt)
 {
@@ -587,11 +572,117 @@ static inline int mac802154_takesem(sem_t *sem, bool allowinterrupt)
   return OK;
 }
 
+#ifdef CONFIG_MAC802154_LOCK_VERBOSE
+#define mac802154_unlock(dev) \
+  mac802154_givesem(&dev->exclsem); \
+  wlinfo("MAC unlocked\n");
+#else
+#define mac802154_unlock(dev) \
+  mac802154_givesem(&dev->exclsem);
+#endif
+
+#define mac802154_lock(dev, allowinterrupt) \
+  mac802154_lockpriv(dev, allowinterrupt, __FUNCTION__)
+
+static inline int mac802154_lockpriv(FAR struct ieee802154_privmac_s *dev,
+                    bool allowinterrupt, FAR const char *funcname)
+{
+  int ret;
+
+#ifdef CONFIG_MAC802154_LOCK_VERBOSE
+  wlinfo("Locking MAC: %s\n", funcname);
+#endif
+  ret = mac802154_takesem(&dev->exclsem, allowinterrupt);
+  if (ret < 0)
+    {
+      wlwarn("Failed to lock MAC\n");
+    }
+  else
+    {
+#ifdef CONFIG_MAC802154_LOCK_VERBOSE
+      wlinfo("MAC locked\n");
+#endif
+    }
+
+  return ret;
+}
+
 static inline void mac802154_txdesc_free(FAR struct ieee802154_privmac_s *priv,
                                          FAR struct ieee802154_txdesc_s *txdesc)
 {
   sq_addlast((FAR sq_entry_t *)txdesc, &priv->txdesc_queue);
   mac802154_givesem(&priv->txdesc_sem);
+}
+
+/****************************************************************************
+ * Name: mac802154_symtoticks
+ *
+ * Description:
+ *   Helper function for converting symbols to system clock ticks
+ *
+ * Assumptions:
+ *   priv MAC struct is locked when calling.
+ *
+ ****************************************************************************/
+
+static inline uint32_t mac802154_symtoticks(FAR struct ieee802154_privmac_s *priv,
+                                            uint32_t symbols)
+{
+  union ieee802154_attr_u attrval;
+  uint32_t ret;
+
+  /* First, get the symbol duration from the radio layer.  Symbol duration is
+   * returned in picoseconds to ensure precision is kept when multiplying to
+   * get overall times.
+   */
+
+  priv->radio->getattr(priv->radio, IEEE802154_ATTR_PHY_SYMBOL_DURATION,
+                        &attrval);
+
+  /* After this step, ret represents microseconds */
+
+  ret = ((uint64_t)attrval.phy.symdur_picosec * symbols) / (1000 * 1000);
+
+  /* This method should only be used for things that can be late. For instance,
+   * it's always okay to wait a little longer before disabling your receiver.
+   * Therefore, we force the tick count to round up.
+   */
+
+  if (ret % USEC_PER_TICK == 0)
+    {
+      ret = ret/USEC_PER_TICK;
+    }
+  else
+    {
+      ret = ret/USEC_PER_TICK;
+      ret++;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: mac802154_timerstart
+ *
+ * Description:
+ *   Helper function wrapping the watchdog timer interface. Helps isolate
+ *   different operations from having to worry about work queues and watchdog
+ *   timers.
+ *
+ * Assumptions:
+ *   priv MAC struct is locked when calling.
+ *
+ ****************************************************************************/
+
+static inline void mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
+                     uint32_t numsymbols, worker_t worker)
+{
+  DEBUGASSERT(work_available(&priv->timer_work));
+
+  /* Schedule the work, converting the number of symbols to the number of CPU ticks */
+
+  work_queue(MAC802154_WORK, &priv->timer_work, worker, priv,
+             mac802154_symtoticks(priv, numsymbols));
 }
 
 /****************************************************************************
@@ -607,8 +698,8 @@ static inline void mac802154_txdesc_free(FAR struct ieee802154_privmac_s *priv,
 
 static inline int mac802154_timercancel(FAR struct ieee802154_privmac_s *priv)
 {
-  wd_cancel(priv->timeout);
-  priv->timeout_worker = NULL;
+  work_cancel(MAC802154_WORK, &priv->timer_work);
+  wlinfo("Timer cancelled\n");
   return OK;
 }
 
@@ -617,10 +708,10 @@ static inline void mac802154_rxenable(FAR struct ieee802154_privmac_s *priv)
   priv->nrxusers++;
 
   /* If this is the first user, actually enable the receiver */
-  
+
   if (priv->nrxusers == 1)
     {
-      wlinfo("receiver enabled\n");
+      wlinfo("Receiver enabled\n");
       priv->radio->rxenable(priv->radio, true);
     }
 }
@@ -630,10 +721,10 @@ static inline void mac802154_rxdisable(FAR struct ieee802154_privmac_s *priv)
   priv->nrxusers--;
 
   /* If this is the first user, actually enable the receiver */
-  
+
   if (priv->nrxusers == 0)
     {
-      wlinfo("receiver disabled\n");
+      wlinfo("Receiver disabled\n");
       priv->radio->rxenable(priv->radio, true);
       priv->radio->rxenable(priv->radio, false);
     }
@@ -642,14 +733,14 @@ static inline void mac802154_rxdisable(FAR struct ieee802154_privmac_s *priv)
 static inline void mac802154_setchannel(FAR struct ieee802154_privmac_s *priv,
                                         uint8_t channel)
 {
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_PHY_CHAN,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_PHY_CHAN,
                         (FAR const union ieee802154_attr_u *)&channel);
 }
 
 static inline void mac802154_setchpage(FAR struct ieee802154_privmac_s *priv,
                                        uint8_t chpage)
 {
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_PHY_CURRENT_PAGE,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_PHY_CURRENT_PAGE,
                         (FAR const union ieee802154_attr_u *)&chpage);
 }
 
@@ -657,7 +748,7 @@ static inline void mac802154_setpanid(FAR struct ieee802154_privmac_s *priv,
                                       const uint8_t *panid)
 {
   IEEE802154_PANIDCOPY(priv->addr.panid, panid);
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_PANID,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_PANID,
                         (FAR const union ieee802154_attr_u *)panid);
 }
 
@@ -665,7 +756,7 @@ static inline void mac802154_setsaddr(FAR struct ieee802154_privmac_s *priv,
                                       const uint8_t *saddr)
 {
   IEEE802154_SADDRCOPY(priv->addr.saddr, saddr);
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_SADDR,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_SADDR,
                         (FAR const union ieee802154_attr_u *)saddr);
 }
 
@@ -673,7 +764,7 @@ static inline void mac802154_seteaddr(FAR struct ieee802154_privmac_s *priv,
                                       const uint8_t *eaddr)
 {
   IEEE802154_EADDRCOPY(priv->addr.eaddr, eaddr);
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_EADDR,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_EADDR,
                         (FAR const union ieee802154_attr_u *)eaddr);
 }
 
@@ -681,7 +772,7 @@ static inline void mac802154_setcoordsaddr(FAR struct ieee802154_privmac_s *priv
                                           const uint8_t *saddr)
 {
   IEEE802154_SADDRCOPY(priv->pandesc.coordaddr.saddr, saddr);
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_COORD_SADDR,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_COORD_SADDR,
                         (FAR const union ieee802154_attr_u *)saddr);
 }
 
@@ -689,7 +780,7 @@ static inline void mac802154_setcoordeaddr(FAR struct ieee802154_privmac_s *priv
                                            const uint8_t *eaddr)
 {
   IEEE802154_EADDRCOPY(priv->pandesc.coordaddr.eaddr, eaddr);
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_COORD_EADDR,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_COORD_EADDR,
                         (FAR const union ieee802154_attr_u *)eaddr);
 }
 
@@ -697,10 +788,35 @@ static inline void mac802154_setcoordaddr(FAR struct ieee802154_privmac_s *priv,
                                           FAR const struct ieee802154_addr_s *addr)
 {
   memcpy(&priv->pandesc.coordaddr, addr, sizeof(struct ieee802154_addr_s));
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_COORD_EADDR,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_COORD_EADDR,
                         (FAR const union ieee802154_attr_u *)addr->eaddr);
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_MAC_COORD_SADDR,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_COORD_SADDR,
                         (FAR const union ieee802154_attr_u *)addr->saddr);
-}                                    
+}
+
+static inline void mac802154_setrxonidle(FAR struct ieee802154_privmac_s *priv,
+                                         bool rxonidle)
+{
+  priv->rxonidle = true;
+  if (priv->rxonidle)
+    {
+      mac802154_rxenable(priv);
+    }
+  else
+    {
+      mac802154_rxdisable(priv);
+    }
+
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_RX_ON_WHEN_IDLE,
+                        (FAR const union ieee802154_attr_u *)&rxonidle);
+}
+
+static inline void mac802154_setdevmode(FAR struct ieee802154_privmac_s *priv,
+                                        enum ieee802154_devmode_e mode)
+{
+  priv->devmode = mode;
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_DEVMODE,
+                        (FAR const union ieee802154_attr_u *)&mode);
+}
 
 #endif /* __WIRELESS_IEEE802154__MAC802154_INTERNAL_H */

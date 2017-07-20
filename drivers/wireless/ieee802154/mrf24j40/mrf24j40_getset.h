@@ -1,12 +1,9 @@
 /****************************************************************************
- * wireless/ieee802154/mac802154_rxenable.c
+ * drivers/wireless/ieee802154/mrf24j40/mrf24j40_getset.h
  *
- *   Copyright (C) 2016 Sebastien Lorquet. All rights reserved.
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Sebastien Lorquet. All rights reserved.
  *   Copyright (C) 2017 Verge Inc. All rights reserved.
- *
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
- *   Author: Gregory Nutt <gnutt@nuttx.org>
  *   Author: Anthony Merlino <anthony@vergeaero.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,43 +35,32 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
+#ifndef __DRIVERS_WIRELESS_IEEE802154_MRF24J40_GETSET_H
+#define __DRIVERS_WIRELESS_IEEE802154_MRF24J40_GETSET_H
 
-#include <nuttx/config.h>
+int mrf24j40_setrxmode(FAR struct mrf24j40_radio_s *dev, int mode);
 
-#include <stdlib.h>
-#include <assert.h>
-#include <errno.h>
-#include <debug.h>
-#include <string.h>
+int mrf24j40_setchannel(FAR struct mrf24j40_radio_s *dev, uint8_t chan);
 
-#include "mac802154.h"
+int mrf24j40_setpanid(FAR struct mrf24j40_radio_s *dev, FAR const uint8_t *panid);
 
-#include <nuttx/wireless/ieee802154/ieee802154_mac.h>
+int mrf24j40_setsaddr(FAR struct mrf24j40_radio_s *dev, FAR const uint8_t *saddr);
 
-/****************************************************************************
- * Public MAC Functions
- ****************************************************************************/
+int mrf24j40_seteaddr(FAR struct mrf24j40_radio_s *dev, FAR const uint8_t *eaddr);
 
-/****************************************************************************
- * Name: mac802154_req_rxenable
- *
- * Description:
- *   The MLME-RX-ENABLE.request primitive allows the next higher layer to
- *   request that the receiver is enable for a finite period of time.
- *   Confirmation is returned via the
- *   struct mac802154_maccb_s->conf_rxenable callback.
- *
- ****************************************************************************/
+int mrf24j40_setcoordsaddr(FAR struct mrf24j40_radio_s *dev,
+                           FAR const uint8_t *saddr);
 
-int mac802154_req_rxenable(MACHANDLE mac,
-                           FAR struct ieee802154_rxenable_req_s *req)
-{
-#if 0
-  FAR struct ieee802154_privmac_s * priv =
-    (FAR struct ieee802154_privmac_s *)mac;
-#endif
-  return -ENOTTY;
-}
+int mrf24j40_setcoordeaddr(FAR struct mrf24j40_radio_s *dev,
+                           FAR const uint8_t *eaddr);
+
+int mrf24j40_setdevmode(FAR struct mrf24j40_radio_s *dev, uint8_t mode);
+
+int mrf24j40_settxpower(FAR struct mrf24j40_radio_s *dev, int32_t txpwr);
+
+int mrf24j40_setcca(FAR struct mrf24j40_radio_s *dev,
+                    FAR struct ieee802154_cca_s *cca);
+
+int mrf24j40_setpamode(FAR struct mrf24j40_radio_s *dev, int mode);
+
+#endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_GETSET_H */

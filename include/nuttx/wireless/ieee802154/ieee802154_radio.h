@@ -80,11 +80,15 @@ struct ieee802154_txdesc_s
 
   FAR struct ieee802154_data_conf_s *conf;
 
-  enum ieee802154_frametype_e frametype; /* Frame type.  Used by MAC layer to
-                                          * control how tx done is handled */
-  bool framepending;                     /* Did the ACK have the frame pending bit
-                                          * bit set */
-  uint32_t purge_time;                   /* Time to purge transaction */
+  /* Frame type.  Used by MAC layer to control how tx done is handled */
+
+  enum ieee802154_frametype_e frametype;
+
+  bool framepending;    /* Did the ACK have the frame pending bit set */
+  uint32_t purgetime;   /* Time to purge transaction */
+  uint8_t  retrycount;  /* Number of remaining retries. Set to macMaxFrameRetries
+                         * when txdescriptor is allocated
+                         */
 
   /* TODO: Add slotting information for GTS transactions */
 };
@@ -119,20 +123,18 @@ struct ieee802154_radio_s
 {
   CODE int (*bind) (FAR struct ieee802154_radio_s *radio,
              FAR struct ieee802154_radiocb_s *radiocb);
+  CODE int (*reset) (FAR struct ieee802154_radio_s *radio);
+  CODE int (*getattr) (FAR struct ieee802154_radio_s *radio,
+             enum ieee802154_attr_e ,
+             FAR union ieee802154_attr_u *attrval);
+  CODE int (*setattr) (FAR struct ieee802154_radio_s *radio,
+             enum ieee802154_attr_e ,
+             FAR const union ieee802154_attr_u *attrval);
   CODE int (*txnotify)(FAR struct ieee802154_radio_s *radio, bool gts);
   CODE int (*txdelayed)(FAR struct ieee802154_radio_s *radio,
              FAR struct ieee802154_txdesc_s *txdesc,
              uint32_t symboldelay);
-  CODE int (*reset_attrs) (FAR struct ieee802154_radio_s *radio);
-  CODE int (*get_attr) (FAR struct ieee802154_radio_s *radio,
-             enum ieee802154_attr_e ,
-             FAR union ieee802154_attr_u *attrval);
-  CODE int (*set_attr) (FAR struct ieee802154_radio_s *radio,
-             enum ieee802154_attr_e ,
-             FAR const union ieee802154_attr_u *attrval);
   CODE int (*rxenable) (FAR struct ieee802154_radio_s *radio, bool enable);
-  CODE int (*req_rxenable)(FAR struct ieee802154_radio_s *radio,
-             FAR struct ieee802154_rxenable_req_s *req);
   CODE int (*beaconstart)(FAR struct ieee802154_radio_s *radio,
              FAR const struct ieee802154_superframespec_s *sfspec,
              FAR struct ieee802154_beaconframe_s *beacon);

@@ -1,5 +1,5 @@
 ############################################################################
-# wireless/ieee802145/Make.defs
+# drivers/ieee802154/mrf24j40/Make.defs
 #
 #   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,33 +33,17 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_WIRELESS_IEEE802154),y)
+ifeq ($(CONFIG_IEEE802154_MRF24J40),y)
 
-# Include IEEE 802.15.4 support
+# Include MRF24J40 files into the build
 
-CSRCS += ieee802154_indalloc.c mac802154.c  mac802154_assoc.c mac802154_disassoc.c
-CSRCS += mac802154_bind.c mac802154_data.c mac802154_get_mhrlen.c
-CSRCS += mac802154_getset.c mac802154_gts.c mac802154_ioctl.c
-CSRCS += mac802154_notif.c mac802154_orphan.c mac802154_poll.c mac802154_purge.c
-CSRCS += mac802154_reset.c mac802154_rxenable.c mac802154_scan.c mac802154_start.c
-CSRCS += mac802154_sync.c
+CSRCS += mrf24j40_getset.c mrf24j40_interrupt.c mrf24j40_radif.c
+CSRCS += mrf24j40_regops.c mrf24j40.c
 
-# Include wireless devices build support
+# Include MRF24J40 build support
 
-ifeq ($(CONFIG_IEEE802154_MACDEV),y)
-CSRCS += mac802154_device.c
-endif
+DEPPATH += --dep-path wireless$(DELIM)ieee802154$(DELIM)mrf24j40
+VPATH += :wireless$(DELIM)ieee802154$(DELIM)mrf24j40
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)ieee802154$(DELIM)mrf24j40}
 
-ifeq ($(CONFIG_IEEE802154_NETDEV),y)
-CSRCS += mac802154_netdev.c
-endif
-
-ifeq ($(CONFIG_IEEE802154_LOOPBACK),y)
-CSRCS += mac802154_loopback.c
-endif
-
-DEPPATH += --dep-path ieee802154
-VPATH += :ieee802154
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)wireless$(DELIM)ieee802154}
-
-endif # CONFIG_WIRELESS_IEEE802154
+endif # CONFIG_IEEE802154_MRF24J40

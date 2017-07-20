@@ -118,7 +118,7 @@ int mac802154_req_data(MACHANDLE mac,
    * 5.1.6.4 [1] pg. 118.
    */
 
-  *frame_ctrl |= (meta->msdu_flags.ack_tx << IEEE802154_FRAMECTRL_SHIFT_ACKREQ);
+  *frame_ctrl |= (meta->flags.ackreq << IEEE802154_FRAMECTRL_SHIFT_ACKREQ);
 
   /* If the destination address is present, copy the PAN ID and one of the
    * addresses, depending on mode, into the MHR.
@@ -147,7 +147,7 @@ int mac802154_req_data(MACHANDLE mac,
 
   /* From this point on, we need exclusive access to the privmac struct */
 
-  ret = mac802154_takesem(&priv->exclsem, true);
+  ret = mac802154_lock(priv, true);
   if (ret < 0)
     {
       /* Should only fail if interrupted by a signal */
@@ -161,7 +161,7 @@ int mac802154_req_data(MACHANDLE mac,
    * [1] pg. 41.
    */
 
-  if (meta->srcaddr_mode  != IEEE802154_ADDRMODE_NONE &&
+  if (meta->srcmode  != IEEE802154_ADDRMODE_NONE &&
       meta->destaddr.mode != IEEE802154_ADDRMODE_NONE)
     {
       /* If the PAN identifiers are identical, the PAN ID Compression field
@@ -175,7 +175,7 @@ int mac802154_req_data(MACHANDLE mac,
         }
     }
 
-  if (meta->srcaddr_mode != IEEE802154_ADDRMODE_NONE)
+  if (meta->srcmode != IEEE802154_ADDRMODE_NONE)
     {
       /* If the destination address is not included, or if PAN ID Compression
        * is off, we need to include the Source PAN ID.
@@ -188,12 +188,12 @@ int mac802154_req_data(MACHANDLE mac,
           mhr_len += 2;
         }
 
-      if (meta->srcaddr_mode == IEEE802154_ADDRMODE_SHORT)
+      if (meta->srcmode == IEEE802154_ADDRMODE_SHORT)
         {
           IEEE802154_SADDRCOPY(&frame->io_data[mhr_len], priv->addr.saddr);
           mhr_len += 2;
         }
-      else if (meta->srcaddr_mode == IEEE802154_ADDRMODE_EXTENDED)
+      else if (meta->srcmode == IEEE802154_ADDRMODE_EXTENDED)
         {
           IEEE802154_EADDRCOPY(&frame->io_data[mhr_len], priv->addr.eaddr);
           mhr_len += IEEE802154_EADDRSIZE;
@@ -214,7 +214,7 @@ int mac802154_req_data(MACHANDLE mac,
 
   /* Set the source addr mode inside the frame control field */
 
-  *frame_ctrl |= (meta->srcaddr_mode << IEEE802154_FRAMECTRL_SHIFT_SADDR);
+  *frame_ctrl |= (meta->srcmode << IEEE802154_FRAMECTRL_SHIFT_SADDR);
 
   /* Each time a data or a MAC command frame is generated, the MAC sublayer
    * shall copy the value of macDSN into the Sequence Number field of the MHR
@@ -255,7 +255,7 @@ int mac802154_req_data(MACHANDLE mac,
 
   /* Then initialize the TX descriptor */
 
-  txdesc->conf->handle = meta->msdu_handle;
+  txdesc->conf->handle = meta->handle;
   txdesc->frame = frame;
   txdesc->frametype = IEEE802154_FRAME_DATA;
 
@@ -271,7 +271,7 @@ int mac802154_req_data(MACHANDLE mac,
    * [1] pg. 118.
    */
 
-  if (meta->msdu_flags.gts_tx)
+  if (meta->flags.usegts)
     {
       /* TODO: Support GTS transmission. This should just change where we link
        * the transaction.  Instead of going in the CSMA transaction list, it
@@ -291,7 +291,7 @@ int mac802154_req_data(MACHANDLE mac,
        * described in 5.1.5 and 5.1.6.3. [1]
        */
 
-      if (meta->msdu_flags.indirect_tx)
+      if (meta->flags.indirect)
         {
           /* If the TxOptions parameter specifies that an indirect transmission
            * is required and if the device receiving this primitive is not a
@@ -313,7 +313,7 @@ int mac802154_req_data(MACHANDLE mac,
               memcpy(&txdesc->destaddr, &meta->destaddr,
                      sizeof(struct ieee802154_addr_s));
               mac802154_setupindirect(priv, txdesc);
-              mac802154_givesem(&priv->exclsem);
+              mac802154_unlock(priv)
             }
           else
             {
@@ -329,7 +329,7 @@ int mac802154_req_data(MACHANDLE mac,
 
           /* We no longer need to have the MAC layer locked. */
 
-          mac802154_givesem(&priv->exclsem);
+          mac802154_unlock(priv)
 
           /* Notify the radio driver that there is data available */
 
@@ -346,7 +346,7 @@ errout_with_txdesc:
   mac802154_txdesc_free(priv, txdesc);
 
 errout_with_sem:
-  mac802154_givesem(&priv->exclsem);
+  mac802154_unlock(priv)
   return ret;
 }
 

@@ -60,7 +60,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void mac802154_polltimeout(FAR struct ieee802154_privmac_s *priv);
+static void mac802154_polltimeout(FAR void *arg);
 
 /****************************************************************************
  * Public MAC Functions
@@ -106,7 +106,7 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
 
   /* Get exclusive access to the MAC */
 
-   ret = mac802154_takesem(&priv->exclsem, true);
+   ret = mac802154_lock(priv, true);
    if (ret < 0)
      {
        mac802154_givesem(&priv->opsem);
@@ -121,7 +121,7 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
   ret = mac802154_txdesc_alloc(priv, &txdesc, true);
   if (ret < 0)
     {
-      mac802154_givesem(&priv->exclsem);
+      mac802154_unlock(priv)
       mac802154_givesem(&priv->opsem);
       return ret;
     }
@@ -152,13 +152,15 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
 
   priv->cmd_desc = txdesc;
 
+  wlinfo("Queuing POLL.request in CSMA queue\n");
+
   /* Link the transaction into the CSMA transaction list */
 
   sq_addlast((FAR sq_entry_t *)txdesc, &priv->csma_queue);
 
   /* We no longer need to have the MAC layer locked. */
 
-  mac802154_givesem(&priv->exclsem);
+  mac802154_unlock(priv)
 
   /* Notify the radio driver that there is data available */
 
@@ -188,9 +190,8 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
                                    FAR struct ieee802154_txdesc_s *txdesc)
 {
   enum ieee802154_status_e status;
-  FAR struct mac802154_notif_s *privnotif =
-    (FAR struct mac802154_notif_s *)txdesc->conf;
-  FAR struct ieee802154_notif_s *notif = &privnotif->pub;
+  FAR struct ieee802154_notif_s *notif =
+    (FAR struct ieee802154_notif_s *)txdesc->conf;
 
   /* If the data request failed to be sent, notify the next layer
    * that the poll has failed.
@@ -223,9 +224,9 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
 
       /* Release the MAC, call the callback, get exclusive access again */
 
-      mac802154_givesem(&priv->exclsem);
+      mac802154_unlock(priv)
       mac802154_notify(priv, notif);
-      mac802154_takesem(&priv->exclsem, false);
+      mac802154_lock(priv, false);
     }
   else
     {
@@ -245,13 +246,9 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
       mac802154_timerstart(priv, priv->max_frame_waittime,
                            mac802154_polltimeout);
 
-      /* We can deallocate the data conf notification as it is no longer
-       * needed. We can't use the public function here since we already
-       * have the MAC locked.
-       */
+      /* Deallocate the data conf notification as it is no longer needed. */
 
-      privnotif->flink = priv->notif_free;
-      priv->notif_free = privnotif;
+      mac802154_notif_free_locked(priv, notif);
     }
 }
 
@@ -264,9 +261,21 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
  *
  ****************************************************************************/
 
-void mac802154_polltimeout(FAR struct ieee802154_privmac_s *priv)
+void mac802154_polltimeout(FAR void *arg)
 {
+  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)arg;
   FAR struct ieee802154_notif_s *notif;
+
+  /* If there is work scheduled for the rxframe_worker, we want to reschedule
+   * this work, so that we make sure if the frame we were waiting for was just
+   * received, we don't timeout
+   */
+
+  if (!work_available(&priv->rx_work))
+    {
+      work_queue(MAC802154_WORK, &priv->timer_work, mac802154_polltimeout, priv, 0);
+      return;
+    }
 
   DEBUGASSERT(priv->curr_op == MAC802154_OP_POLL);
 
@@ -274,7 +283,7 @@ void mac802154_polltimeout(FAR struct ieee802154_privmac_s *priv)
    * Don't allow EINTR to interrupt.
    */
 
-  mac802154_takesem(&priv->exclsem, false);
+  mac802154_lock(priv, false);
   mac802154_notif_alloc(priv, &notif, false);
 
   /* We are no longer performing the association operation */
@@ -284,7 +293,7 @@ void mac802154_polltimeout(FAR struct ieee802154_privmac_s *priv)
 
   /* Release the MAC */
 
-  mac802154_givesem(&priv->exclsem);
+  mac802154_unlock(priv)
 
   notif->notiftype = IEEE802154_NOTIFY_CONF_POLL;
   notif->u.pollconf.status = IEEE802154_STATUS_NO_DATA;

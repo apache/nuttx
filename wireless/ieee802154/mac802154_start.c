@@ -72,7 +72,7 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
 
   /* Get exclusive access to the MAC */
 
-  ret = mac802154_takesem(&priv->exclsem, true);
+  ret = mac802154_lock(priv, true);
   if (ret < 0)
     {
       return ret;
@@ -101,9 +101,9 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
 
   /* Tell the radio layer to set the channel number and channel page */
 
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_PHY_CHAN,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_PHY_CHAN,
                         (FAR const union ieee802154_attr_u *)&req->chan);
-  priv->radio->set_attr(priv->radio, IEEE802154_ATTR_PHY_CURRENT_PAGE,
+  priv->radio->setattr(priv->radio, IEEE802154_ATTR_PHY_CURRENT_PAGE,
                         (FAR const union ieee802154_attr_u *)&req->chpage);
 
   /* The address used in the Source Address field of the beacon frame shall
@@ -147,11 +147,11 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
 
   if (req->pancoord)
     {
-      priv->devmode = IEEE802154_DEVMODE_PANCOORD;
+      mac802154_setdevmode(priv, IEEE802154_DEVMODE_PANCOORD);
     }
   else
     {
-      priv->devmode = IEEE802154_DEVMODE_COORD;
+      mac802154_setdevmode(priv, IEEE802154_DEVMODE_COORD);
     }
 
   priv->sfspec.pancoord = req->pancoord;
@@ -194,11 +194,11 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
         }
     }
 
-  mac802154_givesem(&priv->exclsem);
+  mac802154_unlock(priv)
 
   return OK;
 
 errout:
-  mac802154_givesem(&priv->exclsem);
+  mac802154_unlock(priv)
   return ret;
 }

@@ -1,8 +1,10 @@
 /****************************************************************************
- * drivers/wireless/ieee802154/mrf24j40.h
+ * drivers/wireless/ieee802154/mrf24j40/mrf24j40_reg.h
  *
  *   Copyright (C) 2015-2016 Sebastien Lorquet. All rights reserved.
+ *   Copyright (C) 2017 Verge Inc. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
+ *   Author: Anthony Merlino <anthony@vergeaero.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +35,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE802154_MRF24J40_H
-#define __DRIVERS_WIRELESS_IEEE802154_MRF24J40_H
+#ifndef __DRIVERS_WIRELESS_IEEE802154_MRF24J40_REG_H
+#define __DRIVERS_WIRELESS_IEEE802154_MRF24J40_REG_H
 
 /* MRF24J40 Registers *******************************************************/
 
@@ -226,6 +228,11 @@
 #define MRF24J40_TXSTAT_X_SHIFT    6
 #define MRF24J40_TXSTAT_X_MASK     (3 << MRF24J40_TXSTAT_X_SHIFT)
 
+/* TXBCON0 bits */
+
+#define MRF24J40_TXBCON0_TXBTRIG   0x01
+#define MRF24J40_TXBCON0_TXBSECEN  0x02
+
 /* TXBCON1 bits */
 
 #define MRF24J40_TXBCON1_RSSINUM   0x30
@@ -265,6 +272,13 @@
 #define MRF24J40_SLPACK_WAKECNT0_6 0x7F
 #define MRF24J40_SLPACK_SLPACK     0x80
 
+/* RFCTL bits */
+
+#define MRF24J40_RFCTRL_RFRXMODE   0x01
+#define MRF24J40_RFCTRL_RFTXMODE   0x02
+#define MRF24J40_RFCTRL_RFRST      0x03
+#define MRF24J40_RFCTRL_WAKECNT7_8 0x18
+
 /* RXFLUSH bits */
 
 #define MRF24J40_RXFLUSH_RXFLUSH   0x01
@@ -281,4 +295,8 @@
 #define MRF24J40_RXFLUSH_SHIFT_WAKEPAD   5
 #define MRF24J40_RXFLUSH_SHIFT_WAKEPOL   6
 
-#endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_H */
+/* SLPCON1 bits */
+
+#define MRF24J40_SLPCON1_CLKOUT_DISABLED 0x20
+
+#endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_REG_H */

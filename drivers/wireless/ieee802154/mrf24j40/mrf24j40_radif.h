@@ -1,12 +1,7 @@
 /****************************************************************************
- * wireless/ieee802154/mac802154_rxenable.c
+ * drivers/wireless/ieee802154/mrf24j40/mrf24j40_radif.h
  *
- *   Copyright (C) 2016 Sebastien Lorquet. All rights reserved.
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2017 Verge Inc. All rights reserved.
- *
- *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
- *   Author: Gregory Nutt <gnutt@nuttx.org>
  *   Author: Anthony Merlino <anthony@vergeaero.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,43 +33,40 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
+#ifndef __DRIVERS_WIRELESS_IEEE802154_MRF24J40_RADIF_H
+#define __DRIVERS_WIRELESS_IEEE802154_MRF24J40_RADIF_H
 
-#include <nuttx/config.h>
+int mrf24j40_bind(FAR struct ieee802154_radio_s *radio,
+                  FAR struct ieee802154_radiocb_s *radiocb);
 
-#include <stdlib.h>
-#include <assert.h>
-#include <errno.h>
-#include <debug.h>
-#include <string.h>
+int mrf24j40_reset(FAR struct ieee802154_radio_s *radio);
 
-#include "mac802154.h"
+int mrf24j40_getattr(FAR struct ieee802154_radio_s *radio,
+                     enum ieee802154_attr_e attr,
+                     FAR union ieee802154_attr_u *attrval);
 
-#include <nuttx/wireless/ieee802154/ieee802154_mac.h>
+int mrf24j40_setattr(FAR struct ieee802154_radio_s *radio,
+                     enum ieee802154_attr_e attr,
+                     FAR const union ieee802154_attr_u *attrval);
 
-/****************************************************************************
- * Public MAC Functions
- ****************************************************************************/
+int mrf24j40_txnotify(FAR struct ieee802154_radio_s *radio, bool gts);
 
-/****************************************************************************
- * Name: mac802154_req_rxenable
- *
- * Description:
- *   The MLME-RX-ENABLE.request primitive allows the next higher layer to
- *   request that the receiver is enable for a finite period of time.
- *   Confirmation is returned via the
- *   struct mac802154_maccb_s->conf_rxenable callback.
- *
- ****************************************************************************/
+int mrf24j40_txdelayed(FAR struct ieee802154_radio_s *radio,
+                      FAR struct ieee802154_txdesc_s *txdesc,
+                      uint32_t symboldelay);
 
-int mac802154_req_rxenable(MACHANDLE mac,
-                           FAR struct ieee802154_rxenable_req_s *req)
-{
-#if 0
-  FAR struct ieee802154_privmac_s * priv =
-    (FAR struct ieee802154_privmac_s *)mac;
-#endif
-  return -ENOTTY;
-}
+int mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio, bool enable);
+
+int mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
+                         FAR const struct ieee802154_superframespec_s *sfspec,
+                         FAR struct ieee802154_beaconframe_s *beacon);
+
+int mrf24j40_beaconupdate(FAR struct ieee802154_radio_s *radio,
+                          FAR struct ieee802154_beaconframe_s *beacon);
+
+int mrf24j40_beaconstop(FAR struct ieee802154_radio_s *radio);
+
+int mrf24j40_sfupdate(FAR struct ieee802154_radio_s *radio,
+                      FAR const struct ieee802154_superframespec_s *sfspec);
+
+#endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_RADIF_H */

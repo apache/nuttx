@@ -65,6 +65,7 @@ struct mac802154_notif_s
 {
   struct ieee802154_notif_s pub;        /* Publically visible structure */
   FAR struct mac802154_notif_s *flink;  /* Supports a singly linked list */
+  uint8_t nclients;
 };
 
 /****************************************************************************
@@ -81,5 +82,8 @@ int mac802154_notif_alloc(FAR struct ieee802154_privmac_s *priv,
 
 void mac802154_notify(FAR struct ieee802154_privmac_s *priv,
                       FAR struct ieee802154_notif_s *notif);
+
+void mac802154_notif_free_locked(FAR struct ieee802154_privmac_s * priv,
+                                 FAR struct ieee802154_notif_s *notif);
 
 #endif /* __WIRELESS_IEEE802154__MAC802154_NOTIF_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/ieee802154/at86rf23x.c
+ * drivers/wireless/ieee802154/at86rf23x/at86rf23x.c
  *
  *   Copyright (C) 2016 Matt Poppe. All rights reserved.
  *   Author: Matt Poppe <matt@poppe.me>
@@ -996,19 +996,20 @@ static int at86rf23x_gettxpower(FAR struct ieee802154_radio_s *ieee,
   reg = at86rf23x_getreg(dev->spi, RF23X_REG_TXPWR);
   switch (reg)
     {
-    case RF23X_TXPWR_POS_4:
+   case RF23X_TXPWR_POS_4:
+
       *txpwr = 0;
       break;
 
-    case RF23X_TXPWR_POS_3_7:
+   case RF23X_TXPWR_POS_3_7:
+      *txpwr =0;
+      break;
+
+   case RF23X_TXPWR_POS_3_4:
       *txpwr = 0;
       break;
 
-    case RF23X_TXPWR_POS_3_4:
-      *txpwr = 0;
-      break;
-
-    case RF23X_TXPWR_POS_3:
+   case RF23X_TXPWR_POS_3:
       *txpwr = 0;
       break;
 
@@ -1016,23 +1017,23 @@ static int at86rf23x_gettxpower(FAR struct ieee802154_radio_s *ieee,
      *txpwr = 0;
       break;
 
-    case RF23X_TXPWR_POS_2:
+   case RF23X_TXPWR_POS_2:
       *txpwr = 0;
       break;
 
-    case RF23X_TXPWR_POS_1:
+   case RF23X_TXPWR_POS_1:
       *txpwr = 0;
       break;
 
-    case RF23X_TXPWR_0:
-      *txpwr = 0;
+   case RF23X_TXPWR_0:
+      *txpwr =0;
       break;
 
-    case RF23X_TXPWR_NEG_1:
+   case RF23X_TXPWR_NEG_1:
       *txpwr = 1000;
       break;
 
-    case RF23X_TXPWR_NEG_2:
+   case RF23X_TXPWR_NEG_2:
       *txpwr = 2000;
       break;
 
@@ -1071,11 +1072,11 @@ static int at86rf23x_gettxpower(FAR struct ieee802154_radio_s *ieee,
  *   Configures if energy detection is used or carrier sense.  The base
  *   measurement is configured here as well
  *
- *
  ****************************************************************************/
 
-static int at86rf23x_setcca(FAR struct ieee802154_radio_s *ieee,
-                            FAR struct ieee802154_cca_s *cca)
+static
+ int at86rf23x_setcca(FAR struct ieee802154_radio_s *ieee,
+                      FAR struct ieee802154_cca_s *cca)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
 

@@ -74,40 +74,38 @@
  *
  * Input Parameters:
  *   mac          - Handle to the MAC layer instance
- *   rst_pibattr  - Whether or not to reset the MAC PIB attributes to defaults
+ *   resetattr    - Whether or not to reset the MAC PIB attributes to defaults
  *
  ****************************************************************************/
 
-int mac802154_req_reset(MACHANDLE mac, bool rst_pibattr)
+int mac802154_req_reset(MACHANDLE mac, bool resetattr)
 {
   FAR struct ieee802154_privmac_s * priv =
     (FAR struct ieee802154_privmac_s *) mac;
   union ieee802154_attr_u attr;
 
-  if (rst_pibattr)
+  if (resetattr)
     {
-      priv->isassoc = false;             /* Not associated with a PAN */
-      priv->trackingbeacon = false;      /* Not tracking beacon by default */
-      priv->sfspec.assocpermit = false; /* Device (if coord) not accepting ssociation */
-      priv->autoreq = true;              /* Auto send data req if addr. in beacon */
+      priv->isassoc = false;            /* Not associated with a PAN */
+      priv->trackingbeacon = false;     /* Not tracking beacon by default */
+      priv->sfspec.assocpermit = false; /* Dev (if coord) not accepting assoc */
+      priv->autoreq = true;             /* Auto send data req if addr in beacon */
       priv->sfspec.ble = false;         /* BLE disabled */
-      priv->beaconpayloadlength = 0;     /* Beacon payload NULL */
-      priv->sfspec.beaconorder = 15;   /* Non-beacon enabled network */
-      priv->sfspec.sforder = 15;       /* Length of active portion of outgoing SF */
-      priv->beacon_txtime = 0;           /* Device never sent a beacon */
-#warning Set BSN and DSN to random values!
-      priv->bsn = 0;
-      priv->dsn = 0;
-      priv->gtspermit = true;       /* PAN Coord accepting GTS requests */
-      priv->minbe = 3;              /* Min value of backoff exponent (BE) */
-      priv->maxbe = 5;              /* Max value of backoff exponent (BE) */
-      priv->max_csmabackoffs = 4;   /* Max # of backoffs before failure */
-      priv->maxretries = 3;         /* Max # of retries allowed after failure */
-      priv->promisc = false;        /* Device not in promiscuous mode */
-      priv->rngsupport = false;     /* Ranging not yet supported */
-      priv->resp_waittime = 32;     /* 32 SF durations */
-      priv->sec_enabled = false;    /* Security disabled by default */
-      priv->tx_totaldur = 0;        /* 0 transmit duration */
+      priv->beaconpayloadlength = 0;    /* Beacon payload NULL */
+      priv->sfspec.beaconorder = 15;    /* Non-beacon enabled network */
+      priv->sfspec.sforder = 15;        /* Length of active portion of outgoing SF */
+      priv->beacon_txtime = 0;          /* Device never sent a beacon */
+      priv->dsn = 0;                    /* Data sequence number */
+      priv->gtspermit = true;           /* PAN Coord accepting GTS requests */
+      priv->minbe = 3;                  /* Min value of backoff exponent (BE) */
+      priv->maxbe = 5;                  /* Max value of backoff exponent (BE) */
+      priv->max_csmabackoffs = 4;       /* Max # of backoffs before failure */
+      priv->maxretries = 3;             /* Max # of retries allowed after failure */
+      priv->promisc = false;            /* Device not in promiscuous mode */
+      priv->rngsupport = false;         /* Ranging not yet supported */
+      priv->resp_waittime = 32;         /* 32 SF durations */
+      priv->sec_enabled = false;        /* Security disabled by default */
+      priv->tx_totaldur = 0;            /* 0 transmit duration */
 
       priv->trans_persisttime = 0x01F4;
 
@@ -125,35 +123,19 @@ int mac802154_req_reset(MACHANDLE mac, bool rst_pibattr)
       IEEE802154_SADDRCOPY(priv->addr.saddr, &IEEE802154_SADDR_UNSPEC);
       IEEE802154_EADDRCOPY(priv->addr.eaddr, &IEEE802154_EADDR_UNSPEC);
 
-      priv->radio->reset_attrs(priv->radio);
+      priv->radio->reset(priv->radio);
 
       /* The radio is in control of certain attributes, but we keep a mirror
        * for easy access.  Copy in the radio's values now that they've been
        * reset.
        */
 
-      priv->radio->get_attr(priv->radio, IEEE802154_ATTR_MAC_MAX_FRAME_WAITTIME,
+      priv->radio->getattr(priv->radio, IEEE802154_ATTR_MAC_MAX_FRAME_WAITTIME,
                             &attr);
       priv->max_frame_waittime = attr.mac.max_frame_waittime;
 
-      /* These attributes are effected and determined based on the PHY.  Need to
-       * figure out how to "share" attributes between the radio driver and this
-       * MAC layer
-       *
-       *    macAckWaitDuration
-       *    macBattLifeExtPeriods
-       *    macMaxFrameTotalWaitTime
-       *    macLIFSPeriod
-       *    macSIFSPeriod
-       *    macSyncSymbolOffset
-       *    macTimestampSupported
-       *    macTxControlActiveDuration
-       *    macTxControlPauseDuration
-       *    macRxOnWhenIdle
-       */
+      mac802154_setdevmode(priv, IEEE802154_DEVMODE_ENDPOINT);
     }
 
   return OK;
 }
-
-

@@ -423,26 +423,30 @@ enum ieee802154_attr_e
   IEEE802154_ATTR_MAC_SADDR,
   IEEE802154_ATTR_MAC_SUPERFRAME_ORDER,
   IEEE802154_ATTR_MAC_SYNC_SYMBOL_OFFSET,
-  IEEE802154_PIB_MAC_TIMESTAMP_SUPPORT,
-  IEEE802154_PIB_MAC_TRANSACTION_PERSIST_TIME,
-  IEEE802154_PIB_MAC_TX_CTRL_ACTIVE_DUR,
-  IEEE802154_PIB_MAC_TX_CTRL_PAUSE_DUR,
-  IEEE802154_PIB_MAC_TX_TOTAL_DUR,
+  IEEE802154_ATTR_MAC_TIMESTAMP_SUPPORT,
+  IEEE802154_ATTR_MAC_TRANSACTION_PERSIST_TIME,
+  IEEE802154_ATTR_MAC_TX_CTRL_ACTIVE_DUR,
+  IEEE802154_ATTR_MAC_TX_CTRL_PAUSE_DUR,
+  IEEE802154_ATTR_MAC_TX_TOTAL_DUR,
   IEEE802154_ATTR_MAC_DEVMODE, /* Non-standard */
 
   /* MAC Security Attributes */
 
-  IEEE802154_PIB_MAC_KEY_TABLE = 0x70,
-  IEEE802154_PIB_MAC_DEV_TABLE,
-  IEEE802154_PIB_MAC_SEC_LVL_TABLE,
-  IEEE802154_PIB_MAC_FRAME_COUNTER,
-  IEEE802154_PIB_MAC_AUTOREQ_SEC_LVL,
-  IEEE802154_PIB_MAC_AUTOREQ_KEY_ID_MODE,
-  IEEE802154_PIB_MAC_AUTOREQ_KEY_SOURCE,
-  IEEE802154_PIB_MAC_AUTOREQ_KEY_INDEX,
-  IEEE802154_PIB_MAC_DEFAULT_KEY_SRC,
-  IEEE802154_PIB_MAC_PANCOORD_EXT_ADDR,
-  IEEE802154_PIB_MAC_PANCOORD_SHORT_ADDR,
+  IEEE802154_ATTR_MAC_KEY_TABLE = 0x70,
+  IEEE802154_ATTR_MAC_DEV_TABLE,
+  IEEE802154_ATTR_MAC_SEC_LVL_TABLE,
+  IEEE802154_ATTR_MAC_FRAME_COUNTER,
+  IEEE802154_ATTR_MAC_AUTOREQ_SEC_LVL,
+  IEEE802154_ATTR_MAC_AUTOREQ_KEY_ID_MODE,
+  IEEE802154_ATTR_MAC_AUTOREQ_KEY_SOURCE,
+  IEEE802154_ATTR_MAC_AUTOREQ_KEY_INDEX,
+  IEEE802154_ATTR_MAC_DEFAULT_KEY_SRC,
+  IEEE802154_ATTR_MAC_PANCOORD_EXT_ADDR,
+  IEEE802154_ATTR_MAC_PANCOORD_SHORT_ADDR,
+
+  /* Special Attributes */
+
+  IEEE802154_ATTR_RADIO_REGDUMP = 0xF0,
 };
 
 /* Frame Type */
@@ -564,11 +568,10 @@ struct ieee802154_capability_info_s
 
 struct ieee802154_superframespec_s
 {
-  uint16_t beaconorder   : 4;  /* Transmission interval of beacon */
-  uint16_t sforder       : 4;  /* Length of active portion of superframe */
+  uint16_t beaconorder    : 4;  /* Transmission interval of beacon */
+  uint16_t sforder        : 4;  /* Length of active portion of superframe */
   uint16_t final_capslot  : 4;  /* Last slot utilized by CAP */
   uint16_t ble            : 1;  /* Battery Life Extension (BLE) */
-  uint16_t reserved       : 1;  /* Reserved bit */
   uint16_t pancoord       : 1;  /* 1 if beacon sent by pan coordinator */
   uint16_t assocpermit    : 1;  /* 1 if coordinator is accepting associaton */
 };
@@ -593,19 +596,10 @@ struct ieee802154_pandesc_s
                              * in symbols */
 };
 
-struct ieee802154_pend_addr_s
+struct ieee802154_pendaddr_s
 {
-  union
-  {
-    uint8_t pa_spec;
-    struct
-    {
-      uint8_t num_short_addr  : 3;  /* Number of short addresses pending */
-      uint8_t reserved_3      : 1;  /* Reserved bit */
-      uint8_t num_ext_addr    : 3;  /* Number of extended addresses pending */
-      uint8_t reserved_7      : 1;  /* Reserved bit */
-    } pa_addr;
-  } u;
+  uint8_t nsaddr : 3;               /* Number of short addresses pending */
+  uint8_t neaddr : 3;               /* Number of extended addresses pending */
   struct ieee802154_addr_s addr[7]; /* Array of at most 7 addresses */
 };
 
@@ -632,17 +626,16 @@ union ieee802154_macattr_u
 
   bool is_assoc;
   bool assocpermit;
-  bool auto_req;
+  bool autoreq;
   bool batt_life_ext;
   bool gts_permit;
   bool promisc_mode;
   bool rng_support;
-  bool resp_waittime;
   bool rxonidle;
   bool sec_enabled;
   bool timestamp_support;
 
-  uint32_t ack_wait_dur;
+  uint32_t ack_waitdur;
   uint8_t batt_life_ext_periods;
   uint8_t max_csma_backoffs : 3;
   uint8_t max_be : 4;
@@ -656,6 +649,7 @@ union ieee802154_macattr_u
   uint32_t tx_ctrl_active_dur;
   uint32_t tx_ctrl_pause_dur;
   uint32_t tx_total_dur;
+  uint8_t resp_waittime;
 
   uint8_t beacon_payload[IEEE802154_ATTR_MAC_BEACON_PAYLOAD_LEN];
   uint8_t beacon_payload_len;
@@ -706,17 +700,17 @@ enum ieee802154_scantype_e
 
 struct ieee802154_frame_meta_s
 {
-  enum ieee802154_addrmode_e srcaddr_mode;  /* Source Address Mode */
-  struct ieee802154_addr_s destaddr;        /* Destination Address */
+  enum ieee802154_addrmode_e srcmode;  /* Source Address Mode */
+  struct ieee802154_addr_s   destaddr; /* Destination Address */
 
-  uint8_t msdu_handle;        /* Handle assoc. with MSDU */
+  uint8_t handle;                      /* User-specified handle identifier */
 
   struct
   {
-    uint8_t ack_tx      : 1;  /* Acknowledge TX? */
-    uint8_t gts_tx      : 1;  /* 1=GTS used for TX, 0=CAP used for TX */
-    uint8_t indirect_tx : 1;  /* Should indirect transmission be used? */
-  } msdu_flags;
+    uint8_t ackreq   : 1;
+    uint8_t usegts   : 1;
+    uint8_t indirect : 1;
+  } flags;
 
 #ifdef CONFIG_IEEE802154_SECURITY
   /* Security information if enabled */
@@ -727,7 +721,7 @@ struct ieee802154_frame_meta_s
 #ifdef CONFIG_IEEE802154_UWB
   /* The UWB Pulse Repetition Frequency to be used for the transmission */
 
-  enum ieee802154_uwbprf_e uwb_prf;
+  enum ieee802154_uwbprf_e uwbprf;
 
   /* The UWB preamble symbol repititions
    *  Should be one of:
@@ -738,7 +732,7 @@ struct ieee802154_frame_meta_s
 
   /* The UWB Data Rate to be used for the transmission */
 
-  enum ieee802154_uwb_datarate_e data_rate;
+  enum ieee802154_uwb_datarate_e datarate;
 #endif
 
   enum ieee802154_ranging_e ranging;
@@ -1112,7 +1106,7 @@ struct ieee802154_disassoc_conf_s
  *
  *****************************************************************************/
 
-struct ieee802154_beaconnotify_ind_s
+struct ieee802154_beacon_ind_s
 {
   uint8_t bsn;        /* Beacon sequence number */
 
@@ -1122,19 +1116,10 @@ struct ieee802154_beaconnotify_ind_s
 
   /* Beacon pending addresses */
 
-  struct ieee802154_pend_addr_s pend_addr;
-
-  uint8_t sdu_length; /* Number of octets contained in the beacon
-                       * payload of the received beacond frame */
-
-  /* Beacon payload */
-
-  uint8_t sdu[IEEE802154_MAX_BEACON_PAYLOAD_LEN];
+  struct ieee802154_pendaddr_s pendaddr;
+  uint8_t payloadlength; /* # of octets contained in the beacon payload */
+  uint8_t payload[IEEE802154_MAX_BEACON_PAYLOAD_LEN];
 };
-
-#define SIZEOF_IEEE802154_BEACONNOTIFY_IND_S(n) \
-  (sizeof(struct ieee802154_beaconnotify_ind_s) \
-  - IEEE802154_MAX_BEACON_PAYLOAD_LEN + (n))
 
 /*****************************************************************************
  * Primitive: MLME-COMM-STATUS.indication
@@ -1265,7 +1250,7 @@ struct ieee802154_orphan_resp_s
 
 struct ieee802154_reset_req_s
 {
-  bool rst_pibattr;
+  bool resetattr;
 };
 
 /*****************************************************************************
@@ -1538,21 +1523,21 @@ union ieee802154_notif_u
 
   /* MLME Notifications */
 
-  struct ieee802154_assoc_conf_s       assocconf;
-  struct ieee802154_disassoc_conf_s    disassocconf;
-  struct ieee802154_gts_conf_s         gtsconf;
-  struct ieee802154_rxenable_conf_s    rxenableconf;
-  struct ieee802154_scan_conf_s        scanconf;
-  struct ieee802154_start_conf_s       startconf;
-  struct ieee802154_poll_conf_s        pollconf;
+  struct ieee802154_assoc_conf_s      assocconf;
+  struct ieee802154_disassoc_conf_s   disassocconf;
+  struct ieee802154_gts_conf_s        gtsconf;
+  struct ieee802154_rxenable_conf_s   rxenableconf;
+  struct ieee802154_scan_conf_s       scanconf;
+  struct ieee802154_start_conf_s      startconf;
+  struct ieee802154_poll_conf_s       pollconf;
 
-  struct ieee802154_assoc_ind_s        assocind;
-  struct ieee802154_disassoc_ind_s     disassocind;
-  struct ieee802154_beaconnotify_ind_s beaconnotifyind;
-  struct ieee802154_gts_ind_s          gtsind;
-  struct ieee802154_orphan_ind_s       orphanind;
-  struct ieee802154_commstatus_ind_s   commstatusind;
-  struct ieee802154_syncloss_ind_s     synclossind;
+  struct ieee802154_assoc_ind_s       assocind;
+  struct ieee802154_disassoc_ind_s    disassocind;
+  struct ieee802154_beacon_ind_s      beaconind;
+  struct ieee802154_gts_ind_s         gtsind;
+  struct ieee802154_orphan_ind_s      orphanind;
+  struct ieee802154_commstatus_ind_s  commstatusind;
+  struct ieee802154_syncloss_ind_s    synclossind;
 };
 
 struct ieee802154_notif_s

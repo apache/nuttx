@@ -71,8 +71,10 @@
 
 int mac802154_req_sync(MACHANDLE mac, FAR struct ieee802154_sync_req_s *req)
 {
+#if 0
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
+#endif
   return -ENOTTY;
 }
 

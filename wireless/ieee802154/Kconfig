@@ -83,6 +83,20 @@ config MAC802154_NPANDESC
 		information for all unique beacons received. This is the number of unique
 		descriptors that can be held before the scan cancels with LIMIT_REACHED.
 
+config MAC802154_SFEVENT_VERBOSE
+	bool "Verbose logging related to superframe events"
+	default n
+	depends on DEBUG_WIRELESS_INFO
+	---help---
+		Enable verbose logging of superframe events Default: false
+
+config MAC802154_LOCK_VERBOSE
+	bool "Verbose logging related to MAC lock management"
+	default n
+	depends on DEBUG_WIRELESS_INFO
+	---help---
+		Enable verbose logging of MAC lock management. Default: false
+
 config IEEE802154_IND_PREALLOC
 	int "Number of pre-allocated meta-data structures"
 	default 20

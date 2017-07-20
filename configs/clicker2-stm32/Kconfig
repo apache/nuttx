@@ -35,4 +35,11 @@ config CLICKER2_STM32_MB2_BEE
 	---help---
 		Enable support for MRF24J40 BEE on mikroBUS2
 
+config CLICKER2_STM32_MRF24J40LH_VERBOSE
+	bool "Verbose MRF24J40 lowerhalf"
+	default n
+	depends on IEEE802154_MRF24J40 && DEBUG_WIRELESS_INFO
+	---help---
+		Enable verbose syslog for MRF24J40 lowerhalf
+
 endif # ARCH_BOARD_CLICKER2_STM32

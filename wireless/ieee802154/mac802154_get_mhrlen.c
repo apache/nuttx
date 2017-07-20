@@ -76,14 +76,14 @@ int mac802154_get_mhrlen(MACHANDLE mac,
    * to NONE */
 
   if (meta->destaddr.mode == IEEE802154_ADDRMODE_NONE &&
-      meta->srcaddr_mode == IEEE802154_ADDRMODE_NONE)
+      meta->srcmode == IEEE802154_ADDRMODE_NONE)
     {
       return -EINVAL;
     }
 
   /* The source address can only be set to NONE if the device is the PAN coord */
 
-  if (meta->srcaddr_mode == IEEE802154_ADDRMODE_NONE &&
+  if (meta->srcmode == IEEE802154_ADDRMODE_NONE &&
       priv->devmode != IEEE802154_DEVMODE_PANCOORD)
     {
       return -EINVAL;
@@ -95,14 +95,14 @@ int mac802154_get_mhrlen(MACHANDLE mac,
 
   /* Add the source address length */
 
-  ret += mac802154_addr_length[ meta->srcaddr_mode];
+  ret += mac802154_addr_length[ meta->srcmode];
 
   /* If both destination and source addressing information is present, the MAC
    * sublayer shall compare the destination and source PAN identifiers.
    * [1] pg. 41.
    */
 
-  if (meta->srcaddr_mode  != IEEE802154_ADDRMODE_NONE &&
+  if (meta->srcmode  != IEEE802154_ADDRMODE_NONE &&
       meta->destaddr.mode != IEEE802154_ADDRMODE_NONE)
     {
       /* If the PAN identifiers are identical, the PAN ID Compression field
@@ -121,7 +121,7 @@ int mac802154_get_mhrlen(MACHANDLE mac,
    * PAN ID if the respective address is included
    */
 
-  if (meta->srcaddr_mode != IEEE802154_ADDRMODE_NONE)
+  if (meta->srcmode != IEEE802154_ADDRMODE_NONE)
     {
       ret += 2; /* 2 bytes for source PAN ID */
     }

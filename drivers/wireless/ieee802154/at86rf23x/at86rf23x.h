@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/ieee802154/at86rf23x.c
+ * drivers/wireless/ieee802154/at86rf23x/at86rf23x.h
  *
  *   Copyright (C) 2016 Matt Poppe. All rights reserved.
  *   Author: Matt Poppe <matt@poppe.me>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE802154_AT86RF23X_H
-#define __DRIVERS_WIRELESS_IEEE802154_AT86RF23X_H
+#ifndef __DRIVERS_WIRELESS_IEEE802154_AT86RF23X_AT86RF23X_H
+#define __DRIVERS_WIRELESS_IEEE802154_AT86RF23X_AT86RF23X_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -218,4 +218,4 @@
 
 #define RF23X_IRQ_MASK_DEFAULT             (RF23X_IRQ_MASK_TRX_END)
 
-#endif /* __DRIVERS_WIRELESS_IEEE802154_AT86RF23X_H */
+#endif /* __DRIVERS_WIRELESS_IEEE802154_AT86RF23X_AT86RF23X_H */
