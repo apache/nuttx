@@ -49,7 +49,7 @@ long double modfl(long double x, long double *iptr)
     }
   else if (fabs(x) < 1.0)
     {
-      *iptr = 0.0;
+      *iptr = (x * 0.0);
       return x;
     }
   else
