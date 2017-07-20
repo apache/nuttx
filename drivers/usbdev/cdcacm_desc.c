@@ -429,6 +429,7 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 
       buf += sizeof(struct usb_iaddesc_s);
     }
+
   length += sizeof(struct usb_iaddesc_s);
 #endif
 
@@ -494,6 +495,7 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 
 #ifdef OPTIONAL_UNION_FUNCTIONAL_DESCRIPTOR
   /* Union functional descriptor */
+
   if (buf != NULL)
     {
       FAR struct cdc_union_funcdesc_s *dest = (FAR struct cdc_union_funcdesc_s *)buf;
@@ -535,6 +537,7 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 
       buf += USB_SIZEOF_EPDESC;
     }
+
   length += USB_SIZEOF_EPDESC;
 
   /* Data interface descriptor */
