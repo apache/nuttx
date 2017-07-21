@@ -1121,6 +1121,15 @@ config ARCH_BOARD_STM32F3_DISCOVERY
 	---help---
 		STMicro STM32F3-Discovery board based on the STMicro STM32F303VCT6 MCU.
 
+config ARCH_BOARD_STM32F334_DISCO
+	bool "STMicro STM32F334-Discovery board"
+	depends on ARCH_CHIP_STM32F334C8
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro STM32F334-Discovery board based on the STMicro STM32F334C8T6 MCU.
+
 config ARCH_BOARD_STM32F4_DISCOVERY
 	bool "STMicro STM32F4-Discovery board"
 	depends on ARCH_CHIP_STM32F407VG
@@ -1628,6 +1637,7 @@ config ARCH_BOARD
 	default "stm3220g-eval"            if ARCH_BOARD_STM3220G_EVAL
 	default "stm3240g-eval"            if ARCH_BOARD_STM3240G_EVAL
 	default "stm32f3discovery"         if ARCH_BOARD_STM32F3_DISCOVERY
+	default "stm32f334-disco"          if ARCH_BOARD_STM32F334_DISCO
 	default "stm32f4discovery"         if ARCH_BOARD_STM32F4_DISCOVERY
 	default "stm32f411e-disco"         if ARCH_BOARD_STM32F411E_DISCO
 	default "stm32f429i-disco"         if ARCH_BOARD_STM32F429I_DISCO
@@ -2013,6 +2023,9 @@ source "configs/stm3220g-eval/Kconfig"
 endif
 if ARCH_BOARD_STM3240G_EVAL
 source "configs/stm3240g-eval/Kconfig"
+endif
+if ARCH_BOARD_STM32F334_DISCO
+source "configs/stm32f334-disco/Kconfig"
 endif
 if ARCH_BOARD_STM32F4_DISCOVERY
 source "configs/stm32f4discovery/Kconfig"
