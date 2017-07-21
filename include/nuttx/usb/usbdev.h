@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/usb/usbdev.h
  *
- *   Copyright (C) 2008-2010, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2012-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * NOTE:  This interface was inspired by the Linux gadget interface by
@@ -215,16 +215,16 @@ struct composite_devdesc_s
 {
 #ifdef CONFIG_USBDEV_DUALSPEED
   CODE int16_t (*mkconfdesc)(FAR uint8_t *buf,
-                             FAR struct usbdev_devinfo_s *devdesc,
+                             FAR struct usbdev_devinfo_s *devinfo,
                              uint8_t speed, uint8_t type);
 #else
   CODE int16_t (*mkconfdesc)(FAR uint8_t *buf,
-                             FAR struct usbdev_devinfo_s *devdesc);
+                             FAR struct usbdev_devinfo_s *devinfo);
 #endif
 
   CODE int (*mkstrdesc)(uint8_t id, FAR struct usb_strdesc_s *strdesc);
   CODE int (*classobject)(int minor,
-                          FAR struct usbdev_devinfo_s *devdesc,
+                          FAR struct usbdev_devinfo_s *devinfo,
                           FAR struct usbdevclass_driver_s **classdev);
   CODE void (*uninitialize)(FAR struct usbdevclass_driver_s *classdev);
 
@@ -234,7 +234,7 @@ struct composite_devdesc_s
   int cfgdescsize; /* The size of the config descriptor */
   int minor;
 
-  struct usbdev_devinfo_s devdesc;
+  struct usbdev_devinfo_s devinfo;
 };
 #endif
 
