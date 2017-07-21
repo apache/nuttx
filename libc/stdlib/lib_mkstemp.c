@@ -125,7 +125,7 @@ static void incr_base62(void)
 {
   int i;
 
-  for (i = 0; i < MAX_XS; i++)
+  for (i = MAX_XS - 1; i >= 0; i--)
     {
       if (g_base62[i] < MAX_LOWERCASE)
         {
@@ -168,11 +168,8 @@ static void get_base62(FAR uint8_t *ptr)
  *
  ****************************************************************************/
 
-static void copy_base62(FAR char *dest, int len)
+static void copy_base62(FAR const uint8_t *src, FAR char *dest, int len)
 {
-  FAR const uint8_t *src;
-
-  src = g_base62;
   if (len < MAX_XS)
      {
        src += MAX_XS - len;
@@ -264,11 +261,11 @@ int mkstemp(FAR char *path_template)
     {
       /* Sample and increment the base62 counter */
 
-       get_base62(base62);
+      get_base62(base62);
 
       /* Form the candidate file name */
 
-      copy_base62(xptr, xlen);
+      copy_base62(base62, xptr, xlen);
 
       /* Attempt to open the candidate file -- creating it exclusively
        *
