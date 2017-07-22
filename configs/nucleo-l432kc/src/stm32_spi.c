@@ -114,7 +114,7 @@ void stm32l4_spiinitialize(void)
  *   are provided by common STM32 logic.  To use this common SPI logic on your
  *   board:
  *
- *   1. Provide logic in stm32l4_boardinitialize() to configure SPI chip select
+ *   1. Provide logic in stm32l4_board_initialize() to configure SPI chip select
  *      pins.
  *   2. Provide stm32l4_spi1/2select() and stm32l4_spi1/2status() functions in your
  *      board-specific logic.  These functions will perform chip selection and

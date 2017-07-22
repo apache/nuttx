@@ -358,7 +358,7 @@ void __start(void)
 
   /* Initialize onboard resources */
 
-  stm32l4_boardinitialize();
+  stm32l4_board_initialize();
   showprogress('F');
 
   /* Then start NuttX */
