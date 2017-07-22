@@ -614,7 +614,7 @@ static int local_poll(FAR struct socket *psock, FAR struct pollfd *fds,
     {
       /* Perform the TCP/IP poll() teardown */
 
-      return loal_pollteardown(psock, fds);
+      return local_pollteardown(psock, fds);
     }
 #endif /* HAVE_LOCAL_POLL */
 }
