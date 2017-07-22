@@ -249,7 +249,7 @@ board/libboard$(LIBEXT):
 # Change the names of most symbols that conflict with libc symbols.
 
 GNU:
-	$(Q) mkdir ./GNU
+	$(Q) mkdir -p ./GNU
 
 GNU/Linux-names.dat: GNU nuttx-names.dat
 	$(Q) cp nuttx-names.dat $@
