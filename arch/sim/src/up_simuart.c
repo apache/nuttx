@@ -42,6 +42,7 @@
 #include <string.h>
 #include <termios.h>
 #include <pthread.h>
+#include <errno.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -268,7 +269,7 @@ int simuart_putc(int ch)
  * Name: simuart_getc
  ****************************************************************************/
 
-int simuart_getc(void)
+int simuart_getc(bool block)
 {
   int index;
   int ch;
@@ -281,6 +282,12 @@ int simuart_getc(void)
   for (; ; )
     {
       /* Wait for a byte to become available */
+
+      if (!block && (g_uarthead == g_uarttail))
+        {
+          sched_unlock();
+          return -EAGAIN;
+        }
 
       while (g_uarthead == g_uarttail)
         {

@@ -43,6 +43,7 @@
 #include <stdbool.h>
 #include <sched.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #include <nuttx/fs/fs.h>
 
@@ -97,12 +98,13 @@ static ssize_t devconsole_read(struct file *filep, char *buffer, size_t len)
        * on the first read.
        */
 
-      ch = simuart_getc();
+      ch = simuart_getc(!(filep->f_oflags & O_NONBLOCK));
       if (ch < 0)
         {
-          set_errno(EIO);
+          /*  errno is set in upper layer according to returned value */
+
           sched_unlock();
-          return ERROR;
+          return ch;
         }
 
       *buffer++ = ch;
