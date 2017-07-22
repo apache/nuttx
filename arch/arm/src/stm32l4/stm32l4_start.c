@@ -53,6 +53,7 @@
 #include "stm32l4.h"
 #include "stm32l4_gpio.h"
 #include "stm32l4_userspace.h"
+#include "stm32l4_start.h"
 
 #ifdef CONFIG_ARCH_FPU
 #  include "nvic.h"
