@@ -86,6 +86,12 @@
 #  define HRTIM_HAVE_CHOPPER 1
 #endif
 
+#if defined(CONFIG_STM32_HRTIM_TIMA_BURST) || defined(CONFIG_STM32_HRTIM_TIMB_BURST) || \
+    defined(CONFIG_STM32_HRTIM_TIMC_BURST) || defined(CONFIG_STM32_HRTIM_TIMD_BURST) || \
+    defined(CONFIG_STM32_HRTIM_TIME_BURST)
+#  define HRTIM_HAVE_BURST_MODE 1
+#endif
+
 #if defined(CONFIG_STM32_HRTIM_SCOUT) || defined(CONFIG_STM32_HRTIM_SCIN)
 #  define HRTIM_HAVE_SYNC 1
 #endif
@@ -108,13 +114,47 @@
     defined(CONFIG_STM32_HRTIM_TIMB_IRQ) || defined(CONFIG_STM32_HRTIM_TIMC_IRQ) || \
     defined(CONFIG_STM32_HRTIM_TIMD_IRQ) || defined(CONFIG_STM32_HRTIM_TIME_IRQ) || \
     defined(CONFIG_STM32_HRTIM_CMN_IRQ)
-#  defined HRTIM_HAVE_INTERRUPTS
+#  define HRTIM_HAVE_INTERRUPTS 1
 #endif
 
 #if defined(CONFIG_STM32_HRTIM_ADC_TRG1) || defined(CONFIG_STM32_HRTIM_ADC_TRG2) || \
     defined(CONFIG_STM32_HRTIM_ADC_TRG3) || defined(CONFIG_STM32_HRTIM_ADC_TRG4)
-#  define HRTIM_HAVE_ADC
+#  define HRTIM_HAVE_ADC 1
 #endif
+
+/* TIMX PWM configuration checking */
+
+#ifdef CONFIG_STM32_HRTIM_TIMA_PWM
+#  if !defined(CONFIG_STM32_HRTIM_TIMA_PWM_CH1) && \
+      !defined(CONFIG_STM32_HRTIM_TIMA_PWM_CH2)
+#    error "HRTIM TIMA PWM set but no channel selected"
+#  endif
+#endif
+#ifdef CONFIG_STM32_HRTIM_TIMB_PWM
+#  if !defined(CONFIG_STM32_HRTIM_TIMB_PWM_CH1) &&  \
+      !defined(CONFIG_STM32_HRTIM_TIMB_PWM_CH2)
+#    error "HRTIM TIMB PWM set but no channel selected"
+#  endif
+#endif
+#ifdef CONFIG_STM32_HRTIM_TIMC_PWM
+#  if !defined(CONFIG_STM32_HRTIM_TIMC_PWM_CH1) &&  \
+      !defined(CONFIG_STM32_HRTIM_TIMC_PWM_CH2)
+#    error "HRTIM TIMC PWM set but no channel selected"
+#  endif
+#endif
+#ifdef CONFIG_STM32_HRTIM_TIMD_PWM
+#  if !defined(CONFIG_STM32_HRTIM_TIMD_PWM_CH1) &&  \
+      !defined(CONFIG_STM32_HRTIM_TIMD_PWM_CH2)
+#    error "HRTIM TIMD PWM set but no channel selected"
+#  endif
+#endif
+#ifdef CONFIG_STM32_HRTIM_TIME_PWM
+#  if !defined(CONFIG_STM32_HRTIM_TIME_PWM_CH1) &&  \
+     !defined(CONFIG_STM32_HRTIM_TIME_PWM_CH2)
+#    error "HRTIM TIME PWM set but no channel selected"
+#  endif
+#endif
+
 
 /************************************************************************************
  * Public Types
@@ -147,76 +187,78 @@ enum stm32_hrtim_tim_e
 
 enum stm32_hrtim_out_rst_e
 {
-  HRTIM_OUT_RST_UPDATE    = (1 << 0),
-  HRTIM_OUT_RST_EXTEVNT10 = (1 << 1),
-  HRTIM_OUT_RST_EXTEVNT9  = (1 << 2),
-  HRTIM_OUT_RST_EXTEVNT8  = (1 << 3),
-  HRTIM_OUT_RST_EXTEVNT7  = (1 << 4),
-  HRTIM_OUT_RST_EXTEVNT6  = (1 << 5),
-  HRTIM_OUT_RST_EXTEVNT5  = (1 << 6),
-  HRTIM_OUT_RST_EXTEVNT4  = (1 << 7),
-  HRTIM_OUT_RST_EXTEVNT3  = (1 << 8),
-  HRTIM_OUT_RST_EXTEVNT2  = (1 << 9),
-  HRTIM_OUT_RST_EXTEVNT1  = (1 << 10),
-  HRTIM_OUT_RST_TIMEVNT9  = (1 << 11),
-  HRTIM_OUT_RST_TIMEVNT8  = (1 << 12),
-  HRTIM_OUT_RST_TIMEVNT7  = (1 << 13),
-  HRTIM_OUT_RST_TIMEVNT6  = (1 << 14),
-  HRTIM_OUT_RST_TIMEVNT5  = (1 << 15),
-  HRTIM_OUT_RST_TIMEVNT4  = (1 << 16),
-  HRTIM_OUT_RST_TIMEVNT3  = (1 << 17),
-  HRTIM_OUT_RST_TIMEVNT2  = (1 << 18),
-  HRTIM_OUT_RST_TIMEVNT1  = (1 << 19),
-  HRTIM_OUT_RST_MSTCMP4   = (1 << 20),
-  HRTIM_OUT_RST_MSTCMP3   = (1 << 21),
-  HRTIM_OUT_RST_MSTCMP2   = (1 << 22),
-  HRTIM_OUT_RST_MSTCMP1   = (1 << 23),
-  HRTIM_OUT_RST_MSTPER    = (1 << 24),
-  HRTIM_OUT_RST_CMP4      = (1 << 25),
-  HRTIM_OUT_RST_CMP3      = (1 << 26),
-  HRTIM_OUT_RST_CMP2      = (1 << 27),
-  HRTIM_OUT_RST_CMP1      = (1 << 28),
-  HRTIM_OUT_RST_PER       = (1 << 29),
-  HRTIM_OUT_RST_RESYNC    = (1 << 30),
-  HRTIM_OUT_RST_SOFT      = (1 << 31)
+  HRTIM_OUT_RST_NONE      = 0,
+  HRTIM_OUT_RST_SOFT      = (1 << 0),
+  HRTIM_OUT_RST_RESYNC    = (1 << 1),
+  HRTIM_OUT_RST_PER       = (1 << 2),
+  HRTIM_OUT_RST_CMP1      = (1 << 3),
+  HRTIM_OUT_RST_CMP2      = (1 << 4),
+  HRTIM_OUT_RST_CMP3      = (1 << 5),
+  HRTIM_OUT_RST_CMP4      = (1 << 6),
+  HRTIM_OUT_RST_MSTPER    = (1 << 7),
+  HRTIM_OUT_RST_MSTCMP1   = (1 << 8),
+  HRTIM_OUT_RST_MSTCMP2   = (1 << 9),
+  HRTIM_OUT_RST_MSTCMP3   = (1 << 10),
+  HRTIM_OUT_RST_MSTCMP4   = (1 << 11),
+  HRTIM_OUT_RST_TIMEVNT1  = (1 << 12),
+  HRTIM_OUT_RST_TIMEVNT2  = (1 << 13),
+  HRTIM_OUT_RST_TIMEVNT3  = (1 << 14),
+  HRTIM_OUT_RST_TIMEVNT4  = (1 << 15),
+  HRTIM_OUT_RST_TIMEVNT5  = (1 << 16),
+  HRTIM_OUT_RST_TIMEVNT6  = (1 << 17),
+  HRTIM_OUT_RST_TIMEVNT7  = (1 << 18),
+  HRTIM_OUT_RST_TIMEVNT8  = (1 << 19),
+  HRTIM_OUT_RST_TIMEVNT9  = (1 << 20),
+  HRTIM_OUT_RST_EXTEVNT1  = (1 << 21),
+  HRTIM_OUT_RST_EXTEVNT2  = (1 << 22),
+  HRTIM_OUT_RST_EXTEVNT3  = (1 << 23),
+  HRTIM_OUT_RST_EXTEVNT4  = (1 << 24),
+  HRTIM_OUT_RST_EXTEVNT5  = (1 << 25),
+  HRTIM_OUT_RST_EXTEVNT6  = (1 << 26),
+  HRTIM_OUT_RST_EXTEVNT7  = (1 << 27),
+  HRTIM_OUT_RST_EXTEVNT8  = (1 << 28),
+  HRTIM_OUT_RST_EXTEVNT9  = (1 << 29),
+  HRTIM_OUT_RST_EXTEVNT10 = (1 << 30),
+  HRTIM_OUT_RST_UPDATE    = (1 << 31),
 };
 
 /* Source which can force the Tx1/Tx2 output to its active state  */
 
 enum stm32_hrtim_out_set_e
 {
-  HRTIM_OUT_SET_UPDATE    = (1 << 0),
-  HRTIM_OUT_SET_EXTEVNT10 = (1 << 1),
-  HRTIM_OUT_SET_EXTEVNT9  = (1 << 2),
-  HRTIM_OUT_SET_EXTEVNT8  = (1 << 3),
-  HRTIM_OUT_SET_EXTEVNT7  = (1 << 4),
-  HRTIM_OUT_SET_EXTEVNT6  = (1 << 5),
-  HRTIM_OUT_SET_EXTEVNT5  = (1 << 6),
-  HRTIM_OUT_SET_EXTEVNT4  = (1 << 7),
-  HRTIM_OUT_SET_EXTEVNT3  = (1 << 8),
-  HRTIM_OUT_SET_EXTEVNT2  = (1 << 9),
-  HRTIM_OUT_SET_EXTEVNT1  = (1 << 10),
-  HRTIM_OUT_SET_TIMEVNT9  = (1 << 11),
-  HRTIM_OUT_SET_TIMEVNT8  = (1 << 12),
-  HRTIM_OUT_SET_TIMEVNT7  = (1 << 13),
-  HRTIM_OUT_SET_TIMEVNT6  = (1 << 14),
-  HRTIM_OUT_SET_TIMEVNT5  = (1 << 15),
-  HRTIM_OUT_SET_TIMEVNT4  = (1 << 16),
-  HRTIM_OUT_SET_TIMEVNT3  = (1 << 17),
-  HRTIM_OUT_SET_TIMEVNT2  = (1 << 18),
-  HRTIM_OUT_SET_TIMEVNT1  = (1 << 19),
-  HRTIM_OUT_SET_MSTCMP4   = (1 << 20),
-  HRTIM_OUT_SET_MSTCMP3   = (1 << 21),
-  HRTIM_OUT_SET_MSTCMP2   = (1 << 22),
-  HRTIM_OUT_SET_MSTCMP1   = (1 << 23),
-  HRTIM_OUT_SET_MSTPER    = (1 << 24),
-  HRTIM_OUT_SET_CMP4      = (1 << 25),
-  HRTIM_OUT_SET_CMP3      = (1 << 26),
-  HRTIM_OUT_SET_CMP2      = (1 << 27),
-  HRTIM_OUT_SET_CMP1      = (1 << 28),
-  HRTIM_OUT_SET_PER       = (1 << 29),
-  HRTIM_OUT_SET_RESYNC    = (1 << 30),
-  HRTIM_OUT_SET_SOFT      = (1 << 31)
+  HRTIM_OUT_SET_NONE      = 0,
+  HRTIM_OUT_SET_SOFT      = (1 << 0),
+  HRTIM_OUT_SET_RESYNC    = (1 << 1),
+  HRTIM_OUT_SET_PER       = (1 << 2),
+  HRTIM_OUT_SET_CMP1      = (1 << 3),
+  HRTIM_OUT_SET_CMP2      = (1 << 4),
+  HRTIM_OUT_SET_CMP3      = (1 << 5),
+  HRTIM_OUT_SET_CMP4      = (1 << 6),
+  HRTIM_OUT_SET_MSTPER    = (1 << 7),
+  HRTIM_OUT_SET_MSTCMP1   = (1 << 8),
+  HRTIM_OUT_SET_MSTCMP2   = (1 << 9),
+  HRTIM_OUT_SET_MSTCMP3   = (1 << 10),
+  HRTIM_OUT_SET_MSTCMP4   = (1 << 11),
+  HRTIM_OUT_SET_TIMEVNT1  = (1 << 12),
+  HRTIM_OUT_SET_TIMEVNT2  = (1 << 13),
+  HRTIM_OUT_SET_TIMEVNT3  = (1 << 14),
+  HRTIM_OUT_SET_TIMEVNT4  = (1 << 15),
+  HRTIM_OUT_SET_TIMEVNT5  = (1 << 16),
+  HRTIM_OUT_SET_TIMEVNT6  = (1 << 17),
+  HRTIM_OUT_SET_TIMEVNT7  = (1 << 18),
+  HRTIM_OUT_SET_TIMEVNT8  = (1 << 19),
+  HRTIM_OUT_SET_TIMEVNT9  = (1 << 20),
+  HRTIM_OUT_SET_EXTEVNT1  = (1 << 21),
+  HRTIM_OUT_SET_EXTEVNT2  = (1 << 22),
+  HRTIM_OUT_SET_EXTEVNT3  = (1 << 23),
+  HRTIM_OUT_SET_EXTEVNT4  = (1 << 24),
+  HRTIM_OUT_SET_EXTEVNT5  = (1 << 25),
+  HRTIM_OUT_SET_EXTEVNT6  = (1 << 26),
+  HRTIM_OUT_SET_EXTEVNT7  = (1 << 27),
+  HRTIM_OUT_SET_EXTEVNT8  = (1 << 28),
+  HRTIM_OUT_SET_EXTEVNT9  = (1 << 29),
+  HRTIM_OUT_SET_EXTEVNT10 = (1 << 30),
+  HRTIM_OUT_SET_UPDATE    = (1 << 31),
 };
 
 /* Events that can reset TimerX Counter */
