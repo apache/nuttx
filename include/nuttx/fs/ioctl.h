@@ -89,6 +89,7 @@
 #define _CLIOCBASE      (0x2400) /* Contactless modules ioctl commands */
 #define _USBCBASE       (0x2500) /* USB-C controller ioctl commands */
 #define _MAC802154BASE  (0x2600) /* 802.15.4 MAC ioctl commands */
+#define _PWRBASE        (0x2700) /* Power-related ioctl commands */
 
 /* boardctl() commands share the same number space */
 
@@ -427,6 +428,11 @@
 
 #define _MAC802154IOCVALID(c)  (_IOC_TYPE(c)==_MAC802154BASE)
 #define _MAC802154IOC(nr)      _IOC(_MAC802154BASE,nr)
+
+/* Power-Related IOCTLs *****************************************************/
+
+#define _PWRIOCVALID(c)   (_IOC_TYPE(c)==_SMPS_BASE)
+#define _PWRIOC(nr)       _IOC(_PWRBASE,nr)
 
 /* boardctl() command definitions *******************************************/
 

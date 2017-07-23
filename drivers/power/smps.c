@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/smps.c
+ * drivers/power/smps.c
  * Upper-half, character driver for SMPS (switched-mode power supply)
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
@@ -51,7 +51,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/drivers/smps.h>
+#include <nuttx/power/smps.h>
 
 #include <nuttx/irq.h>
 
@@ -233,7 +233,7 @@ static int smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-      case SMPSIOC_START:
+      case PWRIOC_START:
         {
           /* TODO: sanity checking:
            *        - absolute limits
@@ -244,34 +244,34 @@ static int smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = dev->ops->start(dev);
           if (ret != OK)
             {
-              smpserr("ERROR: SMPSC_START failed %d\n", ret);
+              pwrerr("ERROR: SMPSC_START failed %d\n", ret);
             }
           break;
         }
 
-      case SMPSIOC_STOP:
+      case PWRIOC_STOP:
         {
           ret = dev->ops->stop(dev);
           if (ret != OK)
             {
-              smpserr("ERROR: SMPSC_STOP failed %d\n", ret);
+              pwrerr("ERROR: SMPSC_STOP failed %d\n", ret);
             }
           break;
         }
 
-      case SMPSIOC_SET_MODE:
+      case PWRIOC_SET_MODE:
         {
           uint8_t mode = ((uint8_t)arg);
 
           ret = dev->ops->mode_set(dev, mode);
           if (ret != OK)
             {
-              smpserr("ERROR: SMPSC_SET_MODE failed %d\n", ret);
+              pwrerr("ERROR: SMPSC_SET_MODE failed %d\n", ret);
             }
           break;
         }
 
-      case SMPSIOC_SET_LIMITS:
+      case PWRIOC_SET_LIMITS:
         {
           FAR struct smps_limits_s *limits =
             (FAR struct smps_limits_s *)((uintptr_t)arg);
@@ -281,12 +281,12 @@ static int smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = dev->ops->limits_set(dev, limits);
           if (ret != OK)
             {
-              smpserr("ERROR: SMPSC_SET_LIMITS failed %d\n", ret);
+              pwrerr("ERROR: SMPSC_SET_LIMITS failed %d\n", ret);
             }
           break;
         }
 
-      case SMPSIOC_GET_STATE:
+      case PWRIOC_GET_STATE:
         {
           FAR struct smps_state_s *state =
             (FAR struct smps_state_s *)((uintptr_t)arg);
@@ -294,48 +294,48 @@ static int smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = dev->ops->state_get(dev, state);
           if (ret != OK)
             {
-              smpserr("ERROR: SMPSC_GET_STATE failed %d\n", ret);
+              pwrerr("ERROR: SMPSC_GET_STATE failed %d\n", ret);
             }
           break;
         }
 
-      case SMPSIOC_SET_FAULT:
+      case PWRIOC_SET_FAULT:
         {
           uint8_t fault = ((uint8_t)arg);
 
           ret = dev->ops->fault_set(dev, fault);
           if (ret != OK)
             {
-              smpserr("ERROR: SMPSC_SET_FAULT failed %d\n", ret);
+              pwrerr("ERROR: SMPSC_SET_FAULT failed %d\n", ret);
             }
           break;
         }
 
-      case SMPSIOC_GET_FAULT:
+      case PWRIOC_GET_FAULT:
         {
           uint8_t *fault = ((uint8_t*)arg);
 
           ret = dev->ops->fault_get(dev, fault);
           if (ret != OK)
             {
-              smpserr("ERROR: SMPSC_GET_FAULT failed %d\n", ret);
+              pwrerr("ERROR: SMPSC_GET_FAULT failed %d\n", ret);
             }
           break;
         }
 
-      case SMPSIOC_CLEAN_FAULT:
+      case PWRIOC_CLEAN_FAULT:
         {
           uint8_t fault = ((uint8_t)arg);
 
           ret = dev->ops->fault_clean(dev, fault);
           if (ret != OK)
             {
-              smpserr("ERROR: SMPSC_CLEAN_FAULT failed %d\n", ret);
+              pwrerr("ERROR: SMPSC_CLEAN_FAULT failed %d\n", ret);
             }
           break;
         }
 
-      case SMPSIOC_SET_PARAMS:
+      case PWRIOC_SET_PARAMS:
         {
           FAR struct smps_params_s *params =
             (FAR struct smps_params_s *)((uintptr_t)arg);
@@ -346,14 +346,14 @@ static int smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = dev->ops->params_set(dev, params);
           if (ret != OK)
             {
-              smpserr("ERROR: SMPSC_SET_PARAMS failed %d\n", ret);
+              pwrerr("ERROR: SMPSC_SET_PARAMS failed %d\n", ret);
             }
           break;
         }
 
       default:
         {
-          smpsinfo("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
+          pwrinfo("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
           ret = dev->ops->ioctl(dev, cmd, arg);
           break;
         }

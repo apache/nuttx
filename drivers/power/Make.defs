@@ -52,6 +52,18 @@ POWER_CFLAGS := ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$
 
 endif
 
+# Add switched-mode power supply support
+
+ifeq ($(CONFIG_DRIVERS_SMPS),y)
+
+CSRCS += smps.c
+
+POWER_DEPPATH := --dep-path power
+POWER_VPATH := :power
+POWER_CFLAGS := ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
+
+endif
+
 # Add battery charger drivers
 
 ifeq ($(CONFIG_BATTERY_CHARGER),y)
@@ -70,7 +82,7 @@ endif
 
 endif
 
-# Include battery suport in the build
+# Include power support in the build
 
 POWER_DEPPATH := --dep-path power
 POWER_VPATH := :power

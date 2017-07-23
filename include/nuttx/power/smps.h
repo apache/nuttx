@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/drivers/smps.h
+ * include/nuttx/power/smps.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_DRIVERS_SMPS_H
-#define __INCLUDE_NUTTX_DRIVERS_SMPS_H
+#ifndef __INCLUDE_NUTTX_DRIVERS_POWER_H
+#define __INCLUDE_NUTTX_DRIVERS_POWER_H
 
 /*
  * The SMPS (switched-mode power supply) driver is split into two parts:
@@ -56,54 +56,13 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
-#include <nuttx/fs/ioctl.h>
+#include <nuttx/power/power_ioctl.h>
 
-#ifdef CONFIG_SMPS
+#ifdef CONFIG_DRIVERS_SMPS
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* REVISIT: move to fs/ioctl.h ? */
-
-/* General ioctl definitions ************************************************/
-
-#define _SMPSBASE              (0x2700) /* SMPS ioctl commands */
-
-/* SMPS IOCTLs **************************************************************/
-
-#define _SMPSIOCVALID(c)       (_IOC_TYPE(c)==_SMPS_BASE)
-#define _SMPSIOC(nr)           _IOC(_SMPSBASE,nr)
-
-/* Ioctl Commands ************************************************************/
-
-#define SMPSIOC_START          _SMPSIOC(1)
-#define SMPSIOC_STOP           _SMPSIOC(2)
-#define SMPSIOC_SET_MODE       _SMPSIOC(3)
-#define SMPSIOC_SET_LIMITS     _SMPSIOC(4)
-#define SMPSIOC_GET_STATE     _SMPSIOC(5)
-#define SMPSIOC_GET_FAULT      _SMPSIOC(6)
-#define SMPSIOC_SET_FAULT      _SMPSIOC(7)
-#define SMPSIOC_CLEAN_FAULT    _SMPSIOC(8)
-#define SMPSIOC_SET_PARAMS     _SMPSIOC(9)
-
-#ifdef CONFIG_DEBUG_SMPS_ERROR
-#  define smpserr(format, ...)     _err(format, ##__VA_ARGS__)
-#else
-#  define smpserr(x...)
-#endif
-
-#ifdef CONFIG_DEBUG_SMPS_WARN
-#  define smpswarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#else
-#  define smpswarn(x...)
-#endif
-
-#ifdef CONFIG_DEBUG_SMPS_INFO
-#  define smpsinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#else
-#  define smpsinfo(x...)
-#endif
 
 /****************************************************************************
  * Public Types
@@ -331,5 +290,5 @@ int smps_register(FAR const char *path, FAR struct smps_dev_s *dev,
 }
 #endif
 
-#endif /* CONFIG_SMPS */
-#endif /* __INCLUDE_NUTTX_DRIVERS_SMPS_H */
+#endif /* CONFIG_DRIVERS_SMPS */
+#endif /* __INCLUDE_NUTTX_DRIVERS_POWER_H */

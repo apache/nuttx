@@ -1,8 +1,8 @@
 /****************************************************************************
- * include/nuttx/power/battery_ioctl.h
- * NuttX Battery IOCTLs definition
+ * include/nuttx/power/power_ioctl.h
+ * NuttX Power-Related IOCTLs definitions
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_POWER_BATTERY_IOCTL_H
-#define __INCLUDE_NUTTX_POWER_BATTERY_IOCTL_H
+#ifndef __INCLUDE_NUTTX_POWER_POWER_IOCTL_H
+#define __INCLUDE_NUTTX_POWER_POWER_IOCTL_H
 
 /****************************************************************************
  * Included Files
@@ -48,17 +48,19 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* All battery-related IOCTL commands must be defined in this header file
+/* All power-related IOCTL commands must be defined in this header file
  * in order to assure that every IOCTL command is unique and will not be
  * aliased.
  */
 
-#define BATIOC_STATE         _BATIOC(0x0001)
-#define BATIOC_HEALTH        _BATIOC(0x0002)
-#define BATIOC_ONLINE        _BATIOC(0x0003)
-#define BATIOC_VOLTAGE       _BATIOC(0x0004)
-#define BATIOC_CURRENT       _BATIOC(0x0005)
-#define BATIOC_INPUT_CURRENT _BATIOC(0x0006)
-#define BATIOC_CAPACITY      _BATIOC(0x0007)
+#define PWRIOC_START          _PWRIOC(1)
+#define PWRIOC_STOP           _PWRIOC(2)
+#define PWRIOC_SET_MODE       _PWRIOC(3)
+#define PWRIOC_SET_LIMITS     _PWRIOC(4)
+#define PWRIOC_GET_STATE      _PWRIOC(5)
+#define PWRIOC_GET_FAULT      _PWRIOC(6)
+#define PWRIOC_SET_FAULT      _PWRIOC(7)
+#define PWRIOC_CLEAN_FAULT    _PWRIOC(8)
+#define PWRIOC_SET_PARAMS     _PWRIOC(9)
 
-#endif /* __INCLUDE_NUTTX_POWER_BATTERY_IOCTL_H */
+#endif /* __INCLUDE_NUTTX_POWER_POWER_IOCTL_H */
