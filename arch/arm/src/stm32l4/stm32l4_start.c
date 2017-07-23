@@ -53,6 +53,7 @@
 #include "stm32l4.h"
 #include "stm32l4_gpio.h"
 #include "stm32l4_userspace.h"
+#include "stm32l4_start.h"
 
 #ifdef CONFIG_ARCH_FPU
 #  include "nvic.h"
@@ -358,7 +359,7 @@ void __start(void)
 
   /* Initialize onboard resources */
 
-  stm32l4_boardinitialize();
+  stm32l4_board_initialize();
   showprogress('F');
 
   /* Then start NuttX */

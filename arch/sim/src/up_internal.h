@@ -262,7 +262,7 @@ void up_registerblockdevice(void);
 
 void simuart_start(void);
 int  simuart_putc(int ch);
-int  simuart_getc(void);
+int  simuart_getc(bool block);
 bool simuart_checkc(void);
 void simuart_terminate(void);
 

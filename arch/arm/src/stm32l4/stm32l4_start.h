@@ -1,8 +1,8 @@
 /************************************************************************************
- * configs/b-l475e-iot01a/src/stm32_boot.c
+ * arch/arm/src/stm32l4/stm32l4_start.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Simon Piriou <spiriou31@gmail.com>
+ *   Copyrigth (C) 2017 Gregory Nutt.  All rights reserved.
+ *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,21 +33,15 @@
  *
  ************************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_START_H
+#define __ARCH_ARM_SRC_STM32L4_STM32L4_START_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <nuttx/board.h>
-#include <arch/board/board.h>
-
-#include "up_arch.h"
-#include "stm32l4_start.h"
-#include "b-l475e-iot01a.h"
-
 /************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
 /************************************************************************************
@@ -60,33 +54,6 @@
  *
  ************************************************************************************/
 
-void stm32l4_board_initialize(void)
-{
-#ifdef CONFIG_ARCH_LEDS
-  /* Configure on-board LEDs if LED support has been selected. */
+void stm32l4_board_initialize(void);
 
-  board_autoled_initialize();
-#endif
-}
-
-/****************************************************************************
- * Name: board_initialize
- *
- * Description:
- *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_initialize().  board_initialize() will be
- *   called immediately after up_intitialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARD_INITIALIZE
-void board_initialize(void)
-{
-  /* Perform board initialization */
-
-  (void)stm32_bringup();
-}
-#endif /* CONFIG_BOARD_INITIALIZE */
+#endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_START_H */

@@ -198,6 +198,7 @@ int epoll_wait(int epfd, FAR struct epoll_event *evs, int maxevents,
    */
 
   FAR struct epoll_head *eph = (FAR struct epoll_head *)((intptr_t)epfd);
+  int counter;
   int rc;
   int i;
 
@@ -219,13 +220,19 @@ int epoll_wait(int epfd, FAR struct epoll_event *evs, int maxevents,
       return rc;
     }
 
-  for (i = 0; i < rc; i++)
+  /* Iterate over non NULL event fds */
+
+  for (i = 0, counter = 0; i < rc && counter < eph->size; counter++)
     {
-      evs[i].data.fd = (pollevent_t)eph->evs[i].data.fd;
-      evs[i].events = (pollevent_t)eph->evs[i].revents;
+      if (eph->evs[counter].revents != 0)
+        {
+          evs[i].data.fd = eph->evs[counter].data.fd;
+          evs[i].events  = eph->evs[counter].revents;
+          i += 1;
+        }
     }
 
-  return rc;
+  return i;
 }
 
 #endif /* CONFIG_DISABLE_POLL */

@@ -238,17 +238,27 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
   ainfo("buflen: %d\n", (int)buflen);
 
   if (buflen % 5 == 0)
-    msglen = 5;
+    {
+      msglen = 5;
+    }
   else if (buflen % 4 == 0)
-    msglen = 4;
+    {
+      msglen = 4;
   else if (buflen % 3 == 0)
-    msglen = 3;
+    {
+      msglen = 3;
+    }
   else if (buflen % 2 == 0)
-    msglen = 2;
+    {
+      msglen = 2;
+    }
   else if (buflen == 1)
-    msglen = 1;
+    {
+      msglen = 1;
+    }
   else
-    msglen = 5;
+    {
+      msglen = 5;
 
   if (buflen >= msglen)
     {
@@ -336,6 +346,7 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
               *(int32_t *)&buffer[nread + 1] = msg->am_data;
               buffer[nread] = msg->am_channel;
             }
+
           nread += msglen;
 
           /* Increment the head of the circular message buffer */

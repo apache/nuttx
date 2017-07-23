@@ -97,7 +97,7 @@ FAR struct spi_dev_s *stm32l4_spibus_initialize(int bus);
  *   (including stm32l4_spibus_initialize()) are provided by common STM32 logic.  To use this
  *   common SPI logic on your board:
  *
- *   1. Provide logic in stm32l4_boardinitialize() to configure SPI chip select
+ *   1. Provide logic in stm32l4_board_initialize() to configure SPI chip select
  *      pins.
  *   2. Provide stm32l4_spi1/2/...select() and stm32l4_spi1/2/...status() functions in your
  *      board-specific logic.  These functions will perform chip selection and

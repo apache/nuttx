@@ -171,6 +171,12 @@ void netdriver_loop(void)
 {
   FAR struct eth_hdr_s *eth;
 
+  /* Check for new frames.  If so, then poll the network for new XMIT data */
+
+  net_lock();
+  (void)devif_poll(&g_sim_dev, sim_txpoll);
+  net_unlock();
+
   /* netdev_read will return 0 on a timeout event and >0 on a data received event */
 
   g_sim_dev.d_len = netdev_read((FAR unsigned char *)g_sim_dev.d_buf,
