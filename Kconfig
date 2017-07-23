@@ -751,6 +751,37 @@ config DEBUG_NET_INFO
 
 endif # DEBUG_NET
 
+config DEBUG_POWER
+	bool "Power-related Debug Features"
+	default n
+	---help---
+		Enable power-related debug features.
+
+if DEBUG_POWER
+
+config DEBUG_POWER_ERROR
+	bool "Power-related Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable power-related error output to SYSLOG.
+
+config DEBUG_POWER_WARN
+	bool "Power-related Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable power-related warning output to SYSLOG.
+
+config DEBUG_POWER_INFO
+	bool "Power-related Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable power-related informational output to SYSLOG.
+
+endif # DEBUG_POWER
+
 config DEBUG_WIRELESS
 	bool "Wireless Debug Features"
 	default n
