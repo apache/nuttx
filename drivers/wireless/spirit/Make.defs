@@ -1,7 +1,8 @@
 ############################################################################
-# configs/b-l475e-iot01a/src/Makefile
+# drivers/wireless/spirit/Make.defs
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -32,23 +33,11 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+ifeq ($(CONFIG_WL_SPIRIT),y)
 
-ASRCS =
-CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c
+# Include Spirit library support
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
-CSRCS += stm32_appinit.c
+include wireless$(DELIM)spirit$(DELIM)lib$(DELIM)Make.defs
+include wireless$(DELIM)spirit$(DELIM)include$(DELIM)Make.defs
+
 endif
-
-ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += stm32_autoleds.c
-else
-CSRCS += stm32_userleds.c
-endif
-
-ifeq ($(CONFIG_SPIRIT_NETDEV),y)
-CSRCS += stm32_spirit.c
-endif
-
-include $(TOPDIR)/configs/Board.mk

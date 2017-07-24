@@ -76,13 +76,13 @@
  */
 
 #if 0
-#  define HSI_CLOCK_CONFIG          /* HSI-16 clock configuration */
+#  define HSI_CLOCK_CONFIG             1 /* HSI-16 clock configuration */
 #elif 0
 /* Make sure you actually installed one! */
 
-#  define HSE_CLOCK_CONFIG          /* HSE with 8 MHz xtal */
+#  define HSE_CLOCK_CONFIG             1 /* HSE with 8 MHz xtal */
 #else
-#  define MSI_CLOCK_CONFIG          /* MSI @ 4 MHz autotrimmed via LSE */
+#  define MSI_CLOCK_CONFIG             1 /* MSI @ 4 MHz autotrimmed via LSE */
 #endif
 
 #if defined(HSI_CLOCK_CONFIG)
@@ -287,7 +287,7 @@
 #define STM32L4_PLLCFG_PLLP             0
 #undef  STM32L4_PLLCFG_PLLP_ENABLED
 #define STM32L4_PLLCFG_PLLQ             0
-#undef STM32L4_PLLCFG_PLLQ_ENABLED
+#undef  STM32L4_PLLCFG_PLLQ_ENABLED
 #define STM32L4_PLLCFG_PLLR             RCC_PLLCFG_PLLR_2
 #define STM32L4_PLLCFG_PLLR_ENABLED
 
@@ -324,7 +324,7 @@
 
 #define STM32L4_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK      /* HCLK  = SYSCLK / 1 */
 #define STM32L4_HCLK_FREQUENCY    STM32L4_SYSCLK_FREQUENCY
-#define STM32L4_BOARD_HCLK        STM32L4_HCLK_FREQUENCY      /* Same as above, to satisfy compiler */
+#define STM32L4_BOARD_HCLK        STM32L4_HCLK_FREQUENCY    /* Same as above, to satisfy compiler */
 
 /* Configure the APB1 prescaler */
 

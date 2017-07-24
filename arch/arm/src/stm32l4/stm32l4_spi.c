@@ -79,8 +79,6 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
-#include <arch/board/board.h>
-
 #include "up_internal.h"
 #include "up_arch.h"
 
@@ -89,6 +87,8 @@
 #include "stm32l4_gpio.h"
 #include "stm32l4_dma.h"
 #include "stm32l4_spi.h"
+
+#include <arch/board/board.h>
 
 #if defined(CONFIG_STM32L4_SPI1) || defined(CONFIG_STM32L4_SPI2) || \
     defined(CONFIG_STM32L4_SPI3)

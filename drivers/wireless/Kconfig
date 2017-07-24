@@ -16,6 +16,7 @@ menuconfig WL_CC3000
 	select SPI
 
 source drivers/wireless/cc3000/Kconfig
+source drivers/wireless/spirit/Kconfig
 
 menuconfig DRIVERS_IEEE802154
 	bool "IEEE 802.15.4 Device Support"

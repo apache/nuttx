@@ -53,12 +53,16 @@ ifeq ($(CONFIG_WL_CC1101),y)
 CSRCS += cc1101.c ISM1_868MHzGFSK100kbps.c ISM2_905MHzGFSK250kbps.c
 endif
 
-ifeq ($(CONFIG_WL_NRF24L01),y)
-CSRCS += nrf24l01.c
-endif
-
 ifeq ($(CONFIG_WL_CC3000),y)
 include wireless$(DELIM)cc3000$(DELIM)Make.defs
+endif
+
+ifeq ($(CONFIG_WL_SPIRIT),y)
+include wireless$(DELIM)spirit$(DELIM)Make.defs
+endif
+
+ifeq ($(CONFIG_WL_NRF24L01),y)
+CSRCS += nrf24l01.c
 endif
 
 # Include wireless devices build support

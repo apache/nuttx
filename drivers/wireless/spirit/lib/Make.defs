@@ -1,7 +1,8 @@
 ############################################################################
-# configs/b-l475e-iot01a/src/Makefile
+# drivers/wireless/spirit/lib//Make.defs
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -29,26 +30,15 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
+#-
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+# Include Spirit driver source files in the build
 
-ASRCS =
-CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c
+CSRCS += spirit_radio.c spirit_pktbasic.c spirit_qi.c spirit_management.c
+CSRCS += spirit_irq.c spirit_timer.c spirit_gpio.c spirit_spi.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
-CSRCS += stm32_appinit.c
-endif
+# Include Spirit driver build support
 
-ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += stm32_autoleds.c
-else
-CSRCS += stm32_userleds.c
-endif
-
-ifeq ($(CONFIG_SPIRIT_NETDEV),y)
-CSRCS += stm32_spirit.c
-endif
-
-include $(TOPDIR)/configs/Board.mk
+DEPPATH += --dep-path wireless$(DELIM)spirit$(DELIM)lib
+VPATH += :wireless$(DELIM)spirit$(DELIM)lib

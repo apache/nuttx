@@ -1,8 +1,8 @@
 /****************************************************************************
- * config/b-l475e-iot01a/src/stm32_bringup.c
+ * include/nuttx/wireless/spirit.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Simon Piriou <spiriou31@gmail.com>
+ *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,79 +33,72 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_WIRELESS_SPIRIT_H
+#define __INCLUDE_NUTTX_WIRELESS_SPIRIT_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <sys/mount.h>
-#include <syslog.h>
+#include <stdbool.h>
 
-#include <nuttx/input/buttons.h>
-#include <nuttx/leds/userled.h>
-#include <nuttx/board.h>
-
-#include <arch/board/board.h>
-
-#include "b-l475e-iot01a.h"
+#include <nuttx/irq.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
 
+/* The Spirit provides interrupts to the MCU via a GPIO pin.  The
+ * following structure provides an MCU-independent mechanixm for controlling
+ * the Spirit GPIO interrupt.
+ */
+
+struct spirit_lower_s
+{
+  int  (*reset)(FAR const struct spirit_lower_s *lower);
+  int  (*attach)(FAR const struct spirit_lower_s *lower, xcpt_t handler,
+                 FAR void *arg);
+  void (*enable)(FAR const struct spirit_lower_s *lower, bool state);
+};
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /****************************************************************************
- * Name: stm32l4_bringup
+ * Public Function Prototypes
+ ****************************************************************************/
+
+struct spi_dev_s; /* Forward reference */
+
+/****************************************************************************
+ * Function: spirit_netdev_initialize
  *
  * Description:
- *   Called either by board_intialize() if CONFIG_BOARD_INITIALIZE or by
- *   board_app_initialize if CONFIG_LIB_BOARDCTL is selected.  This function
- *   initializes and configures all on-board features appropriate for the
- *   selected configuration.
+ *   Initialize the IEEE802.15.4 driver and register it as a network device.
+ *
+ * Parameters:
+ *   spi   - A reference to the platform's SPI driver for the spirit
+ *   lower - The MCU-specific interrupt used to control low-level MCU
+ *           functions (i.e., spirit GPIO interrupts).
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
  *
  ****************************************************************************/
 
-int stm32l4_bringup(void)
-{
-  int ret = OK;
+int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
+                             FAR const struct spirit_lower_s *lower);
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
-#endif
-
-#if defined(CONFIG_USERLED) && !defined(CONFIG_ARCH_LEDS)
-#ifdef CONFIG_USERLED_LOWER
-  /* Register the LED driver */
-
-  ret = userled_lower_initialize("/dev/userleds");
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
-      return ret;
-    }
-#else
-  /* Enable USER LED support for some other purpose */
-
-  board_userled_initialize();
-#endif /* CONFIG_USERLED_LOWER */
-#endif /* CONFIG_USERLED && !CONFIG_ARCH_LEDS */
-
-#ifdef HAVE_SPSGRF
-  /* Configure Spirit/SPSGRF wireless */
-
-  ret = stm32l4_spirit_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32l4_spirit_initialize() failed: %d\n", ret);
-    }
-#endif
-
-  return ret;
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* __INCLUDE_NUTTX_IEEE802154__AT86RF23X_H */

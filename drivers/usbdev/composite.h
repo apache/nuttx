@@ -51,15 +51,6 @@
 
 #ifdef CONFIG_USBDEV_COMPOSITE
 
-#ifdef CONFIG_CDCACM_COMPOSITE
-#  include <nuttx/usb/cdcacm.h>
-#  include "cdcacm.h"
-#endif
-
-#ifdef CONFIG_USBMSC_COMPOSITE
-#  include "usbmsc.h"
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
