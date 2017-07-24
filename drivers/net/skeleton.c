@@ -65,9 +65,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* If processing is not done at the interrupt level, then work queue support
- * is required.
- */
+/* Work queue support is required. */
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
@@ -959,9 +957,7 @@ static int skel_txavail(FAR struct net_driver_s *dev)
  *   mac  - The MAC address to be added
  *
  * Returned Value:
- *   None
- *
- * Assumptions:
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
@@ -988,9 +984,7 @@ static int skel_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  *   mac  - The MAC address to be removed
  *
  * Returned Value:
- *   None
- *
- * Assumptions:
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
@@ -1015,9 +1009,7 @@ static int skel_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
