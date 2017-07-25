@@ -205,7 +205,7 @@ struct spirit_irqset_s
 
   uint8_t IRQ_RX_DATA_READY        : 1;  /* IRQ: RX data ready */
   uint8_t IRQ_RX_DATA_DISC         : 1;  /* IRQ: RX data discarded
-                                                 * (upon filtering) */
+                                          * (upon filtering) */
   uint8_t IRQ_TX_DATA_SENT         : 1;  /* IRQ: TX data sent */
   uint8_t IRQ_MAX_RE_TX_REACH      : 1;  /* IRQ: Max re-TX reached */
   uint8_t IRQ_CRC_ERROR            : 1;  /* IRQ: CRC error */

@@ -3,12 +3,12 @@
  * This file provides all the low level API to manage Analog and Digital radio
  * part of SPIRIT.
  *
- *  Copyright(c) 2015 STMicroelectronics
- *  Author: VMA division - AMS
- *  Version 3.2.2 08-July-2015
+ *   Copyright(c) 2015 STMicroelectronics
+ *   Author: VMA division - AMS
+ *   Version 3.2.2 08-July-2015
  *
- *  Adapted for NuttX by:
- *  Author:  Gregory Nutt <gnutt@nuttx.org>
+ *   Adapted for NuttX by:
+ *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -48,6 +48,7 @@
 #include "spirit_config.h"
 #include "spirit_types.h"
 #include "spirit_management.h"
+#include "spirit_calibration.h"
 #include "spirit_radio.h"
 #include "spirit_spi.h"
 
@@ -127,6 +128,14 @@ static const float g_power_factors[5][6] =
   {-3.48, 38.45, -1.89, 27.66, -1.92, 30.23},   /* 433 */
   {-3.27, 35.43, -1.80, 26.31, -1.89, 29.61},   /* 315 */
   {-4.18, 50.66, -1.80, 30.04, -1.86, 32.22},   /* 169 */
+};
+
+/* It represents the available VCO frequencies */
+
+static const uint16_t g_vectn_vcofreq[16] =
+{
+  4644, 4708, 4772, 4836, 4902, 4966, 5030, 5095,
+  5161, 5232, 5303, 5375, 5448, 5519, 5592, 5663
 };
 
 /******************************************************************************
@@ -560,6 +569,87 @@ enum xtal_flag_e spirit_radio_get_xtalflag(FAR struct spirit_library_s *spirit)
 }
 
 /******************************************************************************
+ * Name: spirit_radio_search_wcp
+ *
+ * Description:
+ *   Returns the charge pump word for a given VCO frequency.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *   fc     - Channel center frequency expressed in Hz. This parameter may
+ *            be a value in one of the following ranges:
+ *
+ *              High_Band:     from 779 MHz to 915 MHz
+ *              Middle Band:   from 387 MHz to 470 MHz
+ *              Low Band:      from 300 MHz to 348 MHz
+ *              Very low Band: from 150 MHz to 174 MHz
+ *
+ * Returned Value:
+ *   Charge pump word.
+ *
+ ******************************************************************************/
+
+uint8_t spirit_radio_search_wcp(FAR struct spirit_library_s *spirit,
+                                uint32_t fc)
+{
+  uint32_t vcofreq;
+  uint8_t bfactor;
+  int8_t i;
+
+  /* Check the channel center frequency is in one of the possible range */
+
+  DEBUGASSERT(IS_FREQUENCY_BAND(fc));
+
+  /* Search the operating band */
+
+  if (IS_FREQUENCY_BAND_HIGH(fc))
+    {
+      bfactor = HIGH_BAND_FACTOR;
+    }
+  else if (IS_FREQUENCY_BAND_MIDDLE(fc))
+    {
+      bfactor = MIDDLE_BAND_FACTOR;
+    }
+  else if (IS_FREQUENCY_BAND_LOW(fc))
+    {
+      bfactor = LOW_BAND_FACTOR;
+    }
+  else
+    {
+      bfactor = VERY_LOW_BAND_FACTOR;
+    }
+
+  /* Calculates the VCO frequency VCOFreq = fc*B */
+
+  vcofreq = (fc / 1000000) * bfactor;
+
+  /* Search in the vco frequency array the charge pump word */
+
+  if (vcofreq >= g_vectn_vcofreq[15])
+    {
+      i = 15;
+    }
+  else
+    {
+      /* Search the value */
+
+      for (i = 0; i < 15 && vcofreq > g_vectn_vcofreq[i]; i++);
+
+      /* Be sure that it is the best approssimation */
+
+      if (i != 0 &&
+          g_vectn_vcofreq[i] - vcofreq > vcofreq - g_vectn_vcofreq[i - 1])
+        {
+          i--;
+        }
+    }
+
+  /* Return index */
+
+  return (i & 7);
+}
+
+/******************************************************************************
  * Name: spirit_radio_get_synthword
  *
  * Description:
@@ -687,7 +777,7 @@ int spirit_radio_set_band(FAR struct spirit_library_s *spirit,
  *   Returns the operating band.
  *
  * Input Parameters:
- *   spirit    - Reference to a Spirit library state structure instance
+ *   spirit - Reference to a Spirit library state structure instance
  *
  * Returned Value:
  *   BandSelect Settled band.  This returned value may be one of the
@@ -729,6 +819,160 @@ enum spirit_bandselect_e
 }
 
 /******************************************************************************
+ * Name: spirit_radio_set_chspace
+ *
+ * Description:
+ *   Sets the channel space factor in channel space register.  The channel
+ *   spacing step is computed as F_Xo/32768.
+ *
+ * Input Parameters:
+ *   spirit  - Reference to a Spirit library state structure instance
+ *   chspace - The channel space expressed in Hz.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ******************************************************************************/
+
+int spirit_radio_set_chspace(FAR struct spirit_library_s *spirit,
+                              uint32_t chspace)
+{
+  uint8_t factor;
+
+  /* Round to the nearest integer */
+
+  factor = ((uint32_t)chspace * CHSPACE_DIVIDER) / spirit->xtal_frequency;
+
+  /* Write value into the register */
+
+  return spirit_reg_write(spirit, CHSPACE_BASE, &factor, 1);
+}
+
+/******************************************************************************
+ * Name: spirit_radio_get_chspace
+ *
+ * Description:
+ *   Returns the channel space register.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Channel space. The channel space is:
+ *
+ *     CS = channel_space_factor x XtalFrequency/2^15
+ *
+ *   where channel_space_factor is the CHSPACE register value.
+ *
+ ******************************************************************************/
+
+uint32_t spirit_radio_get_chspace(FAR struct spirit_library_s *spirit)
+{
+  uint8_t factor;
+
+  /* Reads the CHSPACE register, calculate the channel space and return it */
+
+  (void)spirit_reg_read(spirit, CHSPACE_BASE, &factor, 1);
+
+  /* Compute the Hertz value and return it */
+
+  return ((factor * spirit->xtal_frequency) / CHSPACE_DIVIDER);
+}
+
+/******************************************************************************
+ * Name: spirit_radio_set_channel
+ *
+ * Description:
+ *   Sets the channel number.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *   chnum the channel number.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated errno value is returned on
+ *   any failure.
+ *
+ ******************************************************************************/
+
+int spirit_radio_set_channel(FAR struct spirit_library_s *spirit,
+                             uint8_t chnum)
+{
+  /* Writes the CHNUM register */
+
+  return spirit_reg_write(spirit, CHNUM_BASE, &chnum, 1);
+}
+
+/******************************************************************************
+ * Name: spirit_radio_get_channel
+ *
+ * Description:
+ *   Returns the actual channel number.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Actual channel number.
+ *
+ ******************************************************************************/
+
+uint8_t spirit_radio_get_channel(FAR struct spirit_library_s *spirit)
+{
+  uint8_t regval;
+
+  /* Reads the CHNUM register and return the value */
+
+  (void)spirit_reg_read(spirit, CHNUM_BASE, &regval, 1);
+  return regval;
+}
+
+/******************************************************************************
+ * Name: spirit_radio_get_foffset
+ *
+ * Description:
+ *   Returns the actual frequency offset.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Frequency offset expressed in Hz as signed word.
+ *
+ ******************************************************************************/
+
+int32_t spirit_radio_get_foffset(FAR struct spirit_library_s *spirit)
+{
+  uint16_t offtmp;
+  int16_t fcoffset;
+  uint8_t tmp[2];
+
+  /* Reads the FC_OFFSET registers */
+
+  (void)spirit_reg_read(spirit, FC_OFFSET1_BASE, tmp, 2);
+
+  /* Calculates the Offset Factor */
+
+  offtmp = (((uint16_t)tmp[0] << 8) + (uint16_t)tmp[1]);
+
+  if ((offtmp & 0x0800) != 0)
+    {
+      offtmp |= 0xf000;
+    }
+  else
+    {
+      offtmp &= 0x0fff;
+    }
+
+  fcoffset = *((int16_t *)(&offtmp));
+
+  /* Calculates the frequency offset and return it */
+
+  return ((int32_t)(fcoffset * spirit->xtal_frequency) / FBASE_DIVIDER);
+}
+
+/******************************************************************************
  * Name: spirit_radio_set_basefrequency
  *
  * Description:
@@ -749,8 +993,153 @@ enum spirit_bandselect_e
 int spirit_radio_set_basefrequency(FAR struct spirit_library_s *spirit,
                                    uint32_t fbase)
 {
-#warning Missing logic
-  return -ENOSYS;
+  int32_t foffset;
+  uint32_t synthword;
+  uint32_t chspace;
+  uint32_t fc;
+  uint8_t anaregs[4];
+  uint8_t refdiv;
+  uint8_t band;
+  uint8_t wcp;
+  uint8_t chnum;
+  int ret;
+
+  /* Check the parameter */
+
+  DEBUGASSERT(IS_FREQUENCY_BAND(fbase));
+
+  /* Search the operating band */
+
+  if (IS_FREQUENCY_BAND_HIGH(fbase))
+    {
+      band = HIGH_BAND;
+    }
+  else if (IS_FREQUENCY_BAND_MIDDLE(fbase))
+    {
+      band = MIDDLE_BAND;
+    }
+  else if (IS_FREQUENCY_BAND_LOW(fbase))
+    {
+      band = LOW_BAND;
+    }
+  else
+    {
+      band = VERY_LOW_BAND;
+    }
+
+  foffset = spirit_radio_get_foffset(spirit);
+  chspace = spirit_radio_get_chspace(spirit);
+  chnum   = spirit_radio_get_channel(spirit);
+
+  /* Calculates the channel center frequency */
+
+  fc = fbase + foffset + chspace * chnum;
+
+  /* Reads the reference divider */
+
+  refdiv = (uint8_t)spirit_radio_get_refdiv(spirit) + 1;
+
+  /* Selects the VCO */
+
+  switch (band)
+    {
+    case VERY_LOW_BAND:
+      if (fc < 161281250)
+        {
+          spirit_calib_select_vco(spirit, VCO_L);
+        }
+      else
+        {
+          spirit_calib_select_vco(spirit, VCO_H);
+        }
+      break;
+
+    case LOW_BAND:
+      if (fc < 322562500)
+        {
+          spirit_calib_select_vco(spirit, VCO_L);
+        }
+      else
+        {
+          spirit_calib_select_vco(spirit, VCO_H);
+        }
+      break;
+
+    case MIDDLE_BAND:
+      if (fc < 430083334)
+        {
+          spirit_calib_select_vco(spirit, VCO_L);
+        }
+      else
+        {
+          spirit_calib_select_vco(spirit, VCO_H);
+        }
+      break;
+
+    case HIGH_BAND:
+      if (fc < 860166667)
+        {
+          spirit_calib_select_vco(spirit, VCO_L);
+        }
+      else
+        {
+          spirit_calib_select_vco(spirit, VCO_H);
+        }
+    }
+
+  /* Search the VCO charge pump word and set the corresponding register */
+
+  wcp = spirit_radio_search_wcp(spirit, fc);
+
+  synthword = (uint32_t)(fbase * g_vectc_bhalf[band] *
+                         (((double)(FBASE_DIVIDER * refdiv)) /
+                         spirit->xtal_frequency));
+
+  /* Build the array of registers values for the analog part */
+
+  anaregs[0] = (uint8_t)(((synthword >> 21) & 0x0000001f) | (wcp << 5));
+  anaregs[1] = (uint8_t)((synthword >> 13) & 0x000000ff);
+  anaregs[2] = (uint8_t)((synthword >> 5) & 0x000000ff);
+  anaregs[3] = (uint8_t)(((synthword & 0x0000001f) << 3) | g_vectc_bandval[band]);
+
+  /* Configures the needed Analog Radio registers */
+
+  ret = spirit_reg_write(spirit, SYNT3_BASE, anaregs, 4);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Should be perform the VCO calibration WA? */
+
+  if (spirit->vcocalib == S_ENABLE)
+    {
+      return spirit_managment_wavco_calibration(spirit);
+    }
+
+  return ret;
+}
+
+/******************************************************************************
+ * Name: spirit_radio_enable_wavco_calibration
+ *
+ * Description:
+ *   Enable/disabe the VCO calibration WA at the end of
+ *   spirit_radio_set_basefrequency()
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *   S_ENABLE or S_DISABLE the WA procedure.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ******************************************************************************/
+
+void spirit_radio_enable_wavco_calibration(FAR struct spirit_library_s *spirit,
+                                           enum spirit_functional_state_e newstate)
+{
+  spirit->vcocalib = newstate;
 }
 
 /******************************************************************************
@@ -1123,7 +1512,7 @@ uint8_t spirit_radio_dbm2reg(FAR struct spirit_library_s *spirit,
  *              is in the correct range [-PA_LOWER_LIMIT: PA_UPPER_LIMIT] dBm.
  *
  * Returned Value:
- *   None.
+ *   Zero (OK) on success.  A negated errno value is returned on any failure.
  *
  ******************************************************************************/
 
@@ -1151,6 +1540,86 @@ int spirit_radio_set_palevel(FAR struct spirit_library_s *spirit,
   /* Configures the PA_LEVEL register */
 
   return spirit_reg_write(spirit, address, &level, 1);
+}
+
+/******************************************************************************
+ * Name: spirit_radio_set_outputload
+ *
+ * Description:
+ *   Sets the output stage additional load capacitor bank.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *   load one of the possible value of the enum type enum spirit_paload_capacitor_e.
+ *         LOAD_0_PF    No additional PA load capacitor
+ *         LOAD_1_2_PF  1.2pF additional PA load capacitor
+ *         LOAD_2_4_PF  2.4pF additional PA load capacitor
+ *         LOAD_3_6_PF  3.6pF additional PA load capacitor
+ *
+ * Returned Value:
+ *   Zero (OK) on success.  A negated errno value is returned on any failure.
+ *
+ ******************************************************************************/
+
+int spirit_radio_set_outputload(FAR struct spirit_library_s *spirit,
+                                enum spirit_paload_capacitor_e load)
+{
+  uint8_t regval;
+  int ret;
+
+  /* Check the parameters */
+
+  DEBUGASSERT(IS_PA_LOAD_CAP(load));
+
+  /* Reads the PA_POWER_0 register */
+
+  ret = spirit_reg_read(spirit, PA_POWER0_BASE, &regval, 1);
+  if (ret >= 0)
+    {
+      /* Mask the CWC[1:0] field and write the new value */
+
+      regval &= 0x3f;
+      regval |= load;
+
+      /* Configures the PA_POWER_0 register */
+
+      ret = spirit_reg_write(spirit, PA_POWER0_BASE, &regval, 1);
+    }
+
+  return ret;
+}
+
+/******************************************************************************
+ * Name: spirit_radio_get_outputload
+ *
+ * Description:
+ *   Returns the output stage additional load capacitor bank.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Output stage additional load capacitor bank.  This value may be:
+ *
+ *     LOAD_0_PF    No additional PA load capacitor
+ *     LOAD_1_2_PF  1.2pF additional PA load capacitor
+ *     LOAD_2_4_PF  2.4pF additional PA load capacitor
+ *     LOAD_3_6_PF  3.6pF additional PA load capacitor
+ *
+ ******************************************************************************/
+
+enum spirit_paload_capacitor_e
+  spirit_radio_get_outputload(FAR struct spirit_library_s *spirit)
+{
+  uint8_t regval;
+
+  /* Reads the PA_POWER_0 register */
+
+  (void)spirit_reg_read(spirit, PA_POWER0_BASE, &regval, 1);
+
+  /* Mask the CWC[1:0] field and return the value */
+
+  return (enum spirit_paload_capacitor_e) (regval & 0xc0);
 }
 
 /******************************************************************************

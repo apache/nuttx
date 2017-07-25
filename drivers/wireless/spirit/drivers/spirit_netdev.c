@@ -72,6 +72,7 @@
 #include "spirit_pktbasic.h"
 #include "spirit_qi.h"
 #include "spirit_timer.h"
+#include "spirit_csma.h"
 
 #include <arch/board/board.h>
 
@@ -121,6 +122,7 @@ struct spirit_driver_s
   WDOG_ID                           txpoll;    /* TX poll timer */
   WDOG_ID                           txtimeout; /* TX timeout timer */
   bool                              ifup;      /* Spirit is on and interface is up */
+  bool                              receiving; /* Radio is receiving a packet */
   uint8_t                           panid[2];  /* PAN identifier, ffff = not set */
   uint16_t                          saddr;     /* Short address, ffff = not set */
   uint8_t                           eaddr[8];  /* Extended address, ffffffffffffffff = not set */
@@ -229,17 +231,15 @@ static const struct spirit_gpio_init_s g_gpioinit =
   SPIRIT_GPIO_DIG_OUT_IRQ             /* gpioio */
 };
 
-#if 0
-static const struct spririt_csma_init_s g_csma_init =
+static const struct spirit_csma_init_s g_csma_init =
 {
+  1,                /* BU counter seed */
   S_ENABLE,         /* enable persistent mode */
   TBIT_TIME_64,     /* Tcca time */
   TCCA_TIME_3,      /* Lcca length */
   3,                /* max nr of backoffs (<8) */
-  1,                /* BU counter seed */
   8                 /* BU prescaler */
 };
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -325,20 +325,127 @@ static int spirit_txpoll(FAR struct net_driver_s *dev)
 
 static void spirit_interrupt_work(FAR void *arg)
 {
-  FAR struct spirit_driver_s *dev = (FAR struct spirit_driver_s *)arg;
-  uint8_t status = 0;
+  FAR struct spirit_driver_s *priv = (FAR struct spirit_driver_s *)arg;
+  struct spirit_irqset_s irqstatus;
 
-  DEBUGASSERT(dev != NULL);
+  DEBUGASSERT(priv != NULL);
+
+  /* Get the interrupt source from radio */
+
+  DEBUGVERIFY(spirit_irq_get_pending(spirit, &irqstatus));
+  DEBUGVERIFY(spirit_irq_clr_pending(spirit));
 
   /* Process the Spirit1 interrupt */
+  /* First check for errors */
 
-  wlinfo("Status: 0x%02X\n", status);
-  UNUSED(status);
+  if (irqstatus.IRQ_RX_FIFO_ERROR != 0)
+    {
+      wlwarn("WARNING: Rx FIFO Error\n");
+      DEBUGVERIFY(spirit_command(spririt, CMD_FLUSHRXFIFO));
+      priv->receiving = false;
+    }
+
+  if (irqstatus.IRQ_TX_FIFO_ERROR != 0)
+    {
+      wlwarn("WARNING: Tx FIFO Error\n");
+      DEBUGVERIFY(spirit_command(spririt, COMMAND_FLUSHTXFIFO));
+      priv->receiving = false;
+    }
+
+  /* The IRQ_TX_DATA_SENT bit notifies that a packet was sent. */
+
+  if (irqstatus.IRQ_TX_DATA_SENT != 0)
+    {
+      /* Put the Spirit back in the receiving state */
+
+      DEBUGVERIFY(spirit_management_rxstrobe(spirit));
+      DEBUGVERIFY(spirit_command(spirit, CMD_RX));
+
+      /* Check if there are more packets to send */
+#warning Missing logic
+    }
+
+  /* The IRQ_VALID_SYNC bit is used to notify a new packet is coming */
+
+  if (irqstatus.IRQ_VALID_SYNC != 0)
+    {
+      priv->receiving = true;
+    }
+
+  /* The IRQ_RX_DATA_READY notifies that a new packet has been received */
+
+  if (irqstatus.IRQ_RX_DATA_READY != 0)
+    {
+      FAR struct iob_s *iob;
+      uint8_t count;
+
+      /* Check the packet size */
+
+      count = spirit_fifo_get_rxcount(spirit);
+      if (count > CONFIG_IOB_BUFSIZE)
+        {
+          wlwarn("WARNING:  Packet too large... dropping\n");
+        }
+      else
+        {
+          /* Allocate an I/O buffer to hold the received packet.
+           * REVISIT: Not a good place to wait.  Perhaps we should pre-
+           * allocate a few I/O buffers?
+           */
+
+          iob = iob_alloc();
+          if (iob == NULL)
+            {
+              wlerr("ERROR:  Packet too large... dropping\n");
+            }
+
+          /* Read the packet into the I/O buffer */
+
+          DEBUGVERIFY(spirit_fifo_read(count, iob->io_data);
+          iob->io_len = spirit_pktbasic_rxpktlen(spirit);
+
+          DEBUGVERIFY(spirit_command(spririt, CMD_FLUSHRXFIFO));
+          priv->receiving = false;
+
+          /* Create the packet meta data and forward to the network */
+#warning Missing logic
+        }
+    }
+
+  /* IRQ_RX_DATA_DISC indicates that Rx data wasdiscarded */
+
+  if (irqstatus.IRQ_RX_DATA_DISC)
+    {
+      DEBUGVERIFY(spirit_command(spririt, CMD_FLUSHRXFIFO));
+      priv->receiving = false;
+    }
+
+  /* Check the Spirit status.  If it is IDLE, the setup to receive more */
+
+  DEBUGVERIFY(spirit_update_status(spirit));
+
+  if (spirit->u.state.MC_STATE == SPIRIT1_STATE_READY)
+    {
+      int timeout = 1000;
+
+      /* Set up to receive */
+
+      DEBUGVERIFY(spirit_command(spririt, CMD_RX));
+
+      /* Wait for Spirit to enter the Tx state (or timeut) */
+
+      do
+        {
+          DEBUGVERIFY(spirit_update_status(spirit));
+          timeout--;
+        }
+      while (spirit->u.state.MC_STATE != MC_STATE_RX && timeout > 0);
+    }
 
   /* Re-enable the interrupt. */
 
-  DEBUGASSERT(dev->lower != NULL && dev->lower->enable != NULL);
-  dev->lower->enable(dev->lower, true);
+  DEBUGASSERT(priv->lower != NULL && priv->lower->enable != NULL);
+  priv->lower->enable(priv->lower, true);
 }
 
 /****************************************************************************
@@ -978,6 +1085,10 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
 
   priv->ifup = false;
 
+  /* Perform VCO calibration WA when the radio is initialized */
+
+  spirit_radio_enable_wavco_calibration(spirit, S_ENABLE);
+
   /* Configure the Spirit1 radio part */
 
   ret = spirit_radio_initialize(spirit, &g_radio_init);
@@ -1131,15 +1242,13 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
       return ret;
     }
 
-#if 0
   /* Setup CSMA/CA */
 
-  ret = csma_ca_init(&g_csma_init);
+  ret = spirit_csma_initialize(spirit, &g_csma_init);
   if (ret < 0)
     {
       return ret;
     }
-#endif
 
   /* Puts the SPIRIT1 in STANDBY mode (125us -> rx/tx) */
 
@@ -1218,27 +1327,27 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
 
   /* Initialize the IEEE 802.15.4 network device fields */
 
-  ieee                   = &priv->ieee;
-  ieee->i_get_mhrlen     = spirit_get_mhrlen; /* Get MAC header length */
-  ieee->i_req_data       = spirit_req_data;   /* Enqueue frame for transmission */
+  ieee                = &priv->ieee;
+  ieee->i_get_mhrlen  = spirit_get_mhrlen; /* Get MAC header length */
+  ieee->i_req_data    = spirit_req_data;   /* Enqueue frame for transmission */
 
   /* Initialize the common network device fields */
 
-  dev                    = &ieee->i_dev;
+  dev                 = &ieee->i_dev;
 #if 0
-  dev->d_buf             = pktbuf;            /* Single packet buffer */
+  dev->d_buf          = pktbuf;            /* Single packet buffer */
 #endif
-  dev->d_ifup            = spirit_ifup;       /* I/F up (new IP address) callback */
-  dev->d_ifdown          = spirit_ifdown;     /* I/F down callback */
-  dev->d_txavail         = spirit_txavail;    /* New TX data callback */
+  dev->d_ifup         = spirit_ifup;       /* I/F up (new IP address) callback */
+  dev->d_ifdown       = spirit_ifdown;     /* I/F down callback */
+  dev->d_txavail      = spirit_txavail;    /* New TX data callback */
 #ifdef CONFIG_NET_IGMP
-  dev->d_addmac          = spirit_addmac;     /* Add multicast MAC address */
-  dev->d_rmmac           = spirit_rmmac;      /* Remove multicast MAC address */
+  dev->d_addmac       = spirit_addmac;     /* Add multicast MAC address */
+  dev->d_rmmac        = spirit_rmmac;      /* Remove multicast MAC address */
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
-  dev->d_ioctl           = spirit_ioctl;      /* Handle network IOCTL commands */
+  dev->d_ioctl        = spirit_ioctl;      /* Handle network IOCTL commands */
 #endif
-  dev->d_private = (FAR void *)priv;          /* Used to recover private state from dev */
+  dev->d_private      = (FAR void *)priv;  /* Used to recover private state from dev */
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling spirit_ifdown().

@@ -99,6 +99,10 @@
  * Pre-processor Definitions
  ******************************************************************************/
 
+/* PktBasic_Exported_Constants        Pkt Basic Exported Constants */
+
+#define IS_BASIC_LENGTH_WIDTH_BITS                      IS_PKT_LENGTH_WIDTH_BITS
+
 /* Macros used in assertions */
 
 /******************************************************************************
@@ -185,7 +189,7 @@ struct pktbasic_addr_s
  *
  * Input Parameters:
  *   spirit   - Reference to a Spirit library state structure instance
- *   pktpasic - Basic packet init structure.
+ *   pktbasic - Basic packet init structure.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -193,17 +197,61 @@ struct pktbasic_addr_s
  ******************************************************************************/
 
 int spirit_pktbasic_initialize(FAR struct spirit_library_s *spirit,
-                               FAR const struct pktbasic_init_s *pktpasic);
+                               FAR const struct pktbasic_init_s *pktbasic);
 
 /******************************************************************************
- * Name:
+ * Name: spirit_pktbase_get_addrfield
  *
  * Description:
+ *   Specifies if the Address field for SPIRIT Basic packets is enabled or
+ *   disabled.
  *
  * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
  *
  * Returned Value:
+ *   Notifies if the address field is enabled or disabled.
  *
  ******************************************************************************/
+
+enum spirit_functional_state_e
+  spirit_pktbase_get_addrfield(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_pktbasic_set_payloadlen
+ *
+ * Description:
+ *   Sets the payload length for SPIRIT Basic packets. Since the packet length
+ *   depends from the address and the control field size, this function reads
+ *   the correspondent registers in order to determine the correct packet
+ *   length to be written.
+ *
+ * Input Parameters:
+ *   spirit     - Reference to a Spirit library state structure instance
+ *   payloadlen - Payload length in bytes.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ******************************************************************************/
+
+int spirit_pktbasic_set_payloadlen(FAR struct spirit_library_s *spirit,
+                                   uint16_t payloadlen);
+
+/******************************************************************************
+ * Name: spirit_pktbasic_rxpktlen
+ *
+ * Description:
+ *   Returns the packet length field of the received packet.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Rx Packet length.
+ *
+ ******************************************************************************/
+
+uint16_t spirit_pktbasic_rxpktlen(FAR struct spirit_library_s *spirit);
 
 #endif /* __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_PKTBASIC_H*/

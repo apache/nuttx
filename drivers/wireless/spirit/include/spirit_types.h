@@ -135,9 +135,17 @@ struct spirit_status_s
   uint8_t reserved      : 4; /* Reserved and equal to 5 */
 };
 
-/* An instance of this structure represents the overall state of one Spirit
+/* One instance of this structure represents the overall state of one Spirit
  * device from the standpoint of the library.  Multiple spirit devices may be
  * supported by the library with multiple instances of this structure.
+ *
+ * The caller allocates memory for the instance of struct spirit_library_s
+ * and must provide these values:
+ *
+ *   spi            - The SPI instance to use to interface with the spirit chip
+ *   xtal_frequency - The frequency of the crystal driving the spirit chip.
+ *
+ * All other fields should be set to zero.
  */
 
 struct spirit_library_s
@@ -153,6 +161,7 @@ struct spirit_library_s
   } u;
 
   uint8_t commstate;                 /* MANAGEMENT: Communication state */
+  uint8_t vcocalib;                  /* RADIO: Enalbe VCO calibration WA */
 };
 
 #ifdef __cplusplus

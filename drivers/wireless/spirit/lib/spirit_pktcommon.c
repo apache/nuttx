@@ -1,6 +1,6 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/spirit_management.h
- * The management layer for SPIRIT1 library.
+ * drivers/wireless/spirit/spirit_pktcommon.c
+ * Configuration and management of the common features of SPIRIT packets.
  *
  *   Copyright(c) 2015 STMicroelectronics
  *   Author: VMA division - AMS
@@ -34,94 +34,135 @@
  *
  ******************************************************************************/
 
-#ifndef __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_MANAGEMENT_H
-#define __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_MANAGEMENT_H
-
 /******************************************************************************
  * Included Files
  ******************************************************************************/
 
-#include "spirit_config.h"
-#include "spirit_types.h"
+#include <assert.h>
+
+#include "spirit_pktcommon.h"
+#include "spirit_spi.h"
 
 /******************************************************************************
- * Pre-processor Definitions
- ******************************************************************************/
-
-/* Macros used in assertions */
-
-/******************************************************************************
- * Public Types
+ * Public Functions
  ******************************************************************************/
 
 /******************************************************************************
- * Public Function Prototypes
- ******************************************************************************/
-
-/******************************************************************************
- * Name: spirit_managment_wavco_calibration
+ * Name: spirit_pktcommon_set_controllen
  *
  * Description:
- *   Perform VCO calbration WA.
+ *   Sets the CONTROL field length for SPIRIT packets.
+ *
+ * Input Parameters:
+ *   spirit  - Reference to a Spirit library state structure instance
+ *   ctrllen - Length of CONTROL field in bytes.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_pktcommon_set_controllen(FAR struct spirit_library_s *spirit,
+                                    enum pkt_ctrllen_e ctrllen)
+{
+  uint8_t regval;
+  int ret;
+
+  /* Check the parameters */
+
+  DEBUGASSERT(IS_PKT_CONTROL_LENGTH(ctrllen));
+
+  /* Reads the PCKTCTRL4 register value */
+
+  ret = spirit_reg_read(spirit, PCKTCTRL4_BASE, &regval, 1);
+  if (ret >= 0)
+    {
+      /* Set the control length */
+
+      regval &= ~PCKTCTRL4_CONTROL_LEN_MASK;
+      regval |= (uint8_t)ctrllen;
+
+      /* Write the new value on the PCKTCTRL4 register */
+
+      ret = spirit_reg_write(spirit, PCKTCTRL4_BASE, &regval, 1);
+    }
+
+  return ret;
+}
+
+/******************************************************************************
+ * Name: spirit_pktcommon_get_controllen
+ *
+ * Description:
+ *   Returns the CONTROL field length for SPIRIT packets.
  *
  * Input Parameters:
  *   spirit - Reference to a Spirit library state structure instance
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure.
+ *   Control field length.
  *
  ******************************************************************************/
 
-uint8_t spirit_managment_wavco_calibration(FAR struct spirit_library_s *spirit);
+uint8_t spirit_pktcommon_get_controllen(FAR struct spirit_library_s *spirit)
+{
+  uint8_t regval;
+
+  /* Reads the PCKTCTRL4 register value */
+
+  (void)spirit_reg_read(spirit, PCKTCTRL4_BASE, &regval, 1);
+
+  /* Rebuild and return value */
+
+  return (regval & PCKTCTRL4_CONTROL_LEN_MASK);
+}
 
 /******************************************************************************
- * Name: spirit_management_txstrobe
+ * Name: spirit_pktcommon_enable_crcfilter
  *
  * Description:
+ *   Enables or Disables the filtering on CRC.
  *
  * Input Parameters:
- *   spirit    - Reference to a Spirit library state structure instance
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   newstate - New state for CRC_CHECK.  This parameter can be S_ENABLE or
+ *              S_DISABLE.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure.
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ******************************************************************************/
 
-int spirit_management_txstrobe(FAR struct spirit_library_s *spirit);
+int spirit_pktcommon_enable_crcfilter(FAR struct spirit_library_s *spirit,
+                                      enum spirit_functional_state_e newstate)
+{
+  uint8_t regval;
+  int ret;
 
-/******************************************************************************
- * Name: spirit_management_rxstrobe
- *
- * Description:
- *
- * Input Parameters:
- *   spirit - Reference to a Spirit library state structure instance
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure.
- *
- ******************************************************************************/
+  /* Check the parameters */
 
-int spirit_management_rxstrobe(FAR struct spirit_library_s *spirit);
+  DEBUGASSERT(IS_SPIRIT_FUNCTIONAL_STATE(newstate));
 
-/******************************************************************************
- * Name: spirit_management_initcommstate
- *
- * Description:
- *   Initialize communication state
- *
- * Input Parameters:
- *   spirit    - Reference to a Spirit library state structure instance
- *   frequency - Desired communication frequency
- *
- * Returned Value:
- *
- ******************************************************************************/
+  /* Reads the PCKT_FLT_OPTIONS register value */
 
-void spirit_management_initcommstate(FAR struct spirit_library_s *spirit,
-                                     uint32_t frequency);
+  ret = spirit_reg_read(spirit, PCKT_FLT_OPTIONS_BASE, &regval, 1);
+  if (ret >= 0)
+    {
+      /* Modify the register value: enable or disable the CRC filtering */
 
-#endif /* __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_MANAGEMENT_H */
+      if (newstate == S_ENABLE)
+        {
+          regval |= PCKT_FLT_OPTIONS_CRC_CHECK_MASK;
+        }
+      else
+        {
+          regval &= ~PCKT_FLT_OPTIONS_CRC_CHECK_MASK;
+        }
+
+      /* Writes the PCKT_FLT_OPTIONS register value */
+
+      ret = spirit_reg_write(spirit, PCKT_FLT_OPTIONS_BASE, &regval, 1);
+    }
+
+  return ret;
+}

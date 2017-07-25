@@ -219,7 +219,7 @@
 #define IS_CLK_REC_P_GAIN(gain)     ((gain) <= 7)
 #define IS_CLK_REC_I_GAIN(gain)     ((gain) <= 15)
 
-/* Other acros used in assertions */
+/* Other macros used in assertions */
 
 #define IS_XTAL_FLAG(flag) \
   (((flag) == XTAL_FLAG_24_MHz) || ((flag) == XTAL_FLAG_26_MHz))
@@ -230,6 +230,9 @@
   (((mod)  == FSK)              || ((mod)  == GFSK_BT05)        || \
    ((mod)  == GFSK_BT1)         || ((mod)  == ASK_OOK)          || \
    ((mod)  == MSK))
+#define IS_PA_LOAD_CAP(cwc) \
+  (((cwc) == LOAD_0_PF)         || ((cwc) == LOAD_1_2_PF)       || \
+   ((cwc) == LOAD_2_4_PF)       || ((cwc) == LOAD_3_6_PF))
 
 /******************************************************************************
  * Public Types
@@ -263,6 +266,16 @@ enum modulation_select_e
   ASK_OOK          = 0x20,  /* ASK or OOK modulation selected. ASK will
                              * use power ramping */
   MSK              = 0x30   /* MSK modulation selected */
+};
+
+/* SPIRIT PA additional load capacitors bank enumeration */
+
+enum spirit_paload_capacitor_e
+{
+  LOAD_0_PF        = PA_POWER0_CWC_0,    /* No additional PA load capacitor */
+  LOAD_1_2_PF      = PA_POWER0_CWC_1_2P, /* 1.2pF additional PA load capacitor */
+  LOAD_2_4_PF      = PA_POWER0_CWC_2_4P, /* 2.4pF additional PA load capacitor */
+  LOAD_3_6_PF      = PA_POWER0_CWC_3_6P  /* 3.6pF additional PA load capacitor */
 };
 
 /* SPIRIT Radio initialization structure definition */
@@ -360,6 +373,30 @@ int spirit_radio_set_xtalflag(FAR struct spirit_library_s *spirit,
 enum xtal_flag_e spirit_radio_get_xtalflag(FAR struct spirit_library_s *spirit);
 
 /******************************************************************************
+ * Name: spirit_radio_search_wcp
+ *
+ * Description:
+ *   Returns the charge pump word for a given VCO frequency.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *   fc     - Channel center frequency expressed in Hz. This parameter may
+ *            be a value in one of the following ranges:
+ *
+ *              High_Band:     from 779 MHz to 915 MHz
+ *              Middle Band:   from 387 MHz to 470 MHz
+ *              Low Band:      from 300 MHz to 348 MHz
+ *              Very low Band: from 150 MHz to 174 MHz
+ *
+ * Returned Value:
+ *   Charge pump word.
+ *
+ ******************************************************************************/
+
+uint8_t spirit_radio_search_wcp(FAR struct spirit_library_s *spirit,
+                                uint32_t fc);
+
+/******************************************************************************
  * Name: spirit_radio_get_synthword
  *
  * Description:
@@ -438,6 +475,97 @@ enum spirit_bandselect_e
   spirit_radio_get_band(FAR struct spirit_library_s *spirit);
 
 /******************************************************************************
+ * Name: spirit_radio_set_chspace
+ *
+ * Description:
+ *   Sets the channel space factor in channel space register.  The channel
+ *   spacing step is computed as F_Xo/32768.
+ *
+ * Input Parameters:
+ *   spirit  - Reference to a Spirit library state structure instance
+ *   chspace - The channel space expressed in Hz.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ******************************************************************************/
+
+int spirit_radio_set_chspace(FAR struct spirit_library_s *spirit,
+                              uint32_t chspace);
+
+/******************************************************************************
+ * Name: spirit_radio_get_chspace
+ *
+ * Description:
+ *   Returns the channel space register.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Channel space. The channel space is:
+ *
+ *     CS = channel_space_factor x XtalFrequency/2^15
+ *
+ *   where channel_space_factor is the CHSPACE register value.
+ *
+ ******************************************************************************/
+
+uint32_t spirit_radio_get_chspace(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_radio_set_channel
+ *
+ * Description:
+ *   Sets the channel number.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *   chnum the channel number.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated errno value is returned on
+ *   any failure.
+ *
+ ******************************************************************************/
+
+int spirit_radio_set_channel(FAR struct spirit_library_s *spirit,
+                             uint8_t chnum);
+
+/******************************************************************************
+ * Name: spirit_radio_get_channel
+ *
+ * Description:
+ *   Returns the actual channel number.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Actual channel number.
+ *
+ ******************************************************************************/
+
+uint8_t spirit_radio_get_channel(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_radio_get_foffset
+ *
+ * Description:
+ *   Returns the actual frequency offset.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Frequency offset expressed in Hz as signed word.
+ *
+ ******************************************************************************/
+
+int32_t spirit_radio_get_foffset(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
  * Name: spirit_radio_set_basefrequency
  *
  * Description:
@@ -459,7 +587,26 @@ int spirit_radio_set_basefrequency(FAR struct spirit_library_s *spirit,
                                    uint32_t fbase);
 
 /******************************************************************************
- * Name: 
+ * Name: spirit_radio_enable_wavco_calibration
+ *
+ * Description:
+ *   Enable/disabe the VCO calibration WA at the end of
+ *   spirit_radio_set_basefrequency()
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *   S_ENABLE or S_DISABLE the WA procedure.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ******************************************************************************/
+
+void spirit_radio_enable_wavco_calibration(FAR struct spirit_library_s *spirit,
+                                           enum spirit_functional_state_e newstate);
+
+/******************************************************************************
+ * Name: spirit_radio_get_basefrequency
  *
  * Description:
  *   Returns the base carrier frequency.
@@ -590,6 +737,50 @@ uint8_t spirit_radio_dbm2reg(FAR struct spirit_library_s *spirit,
 
 int spirit_radio_set_palevel(FAR struct spirit_library_s *spirit,
                              uint8_t ndx, float powerdbm);
+
+/******************************************************************************
+ * Name: spirit_radio_set_outputload
+ *
+ * Description:
+ *   Sets the output stage additional load capacitor bank.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *   load one of the possible value of the enum type enum spirit_paload_capacitor_e.
+ *         LOAD_0_PF    No additional PA load capacitor
+ *         LOAD_1_2_PF  1.2pF additional PA load capacitor
+ *         LOAD_2_4_PF  2.4pF additional PA load capacitor
+ *         LOAD_3_6_PF  3.6pF additional PA load capacitor
+ *
+ * Returned Value:
+ *   Zero (OK) on success.  A negated errno value is returned on any failure.
+ *
+ ******************************************************************************/
+
+int spirit_radio_set_outputload(FAR struct spirit_library_s *spirit,
+                                enum spirit_paload_capacitor_e load);
+
+/******************************************************************************
+ * Name: spirit_radio_get_outputload
+ *
+ * Description:
+ *   Returns the output stage additional load capacitor bank.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Output stage additional load capacitor bank.  This value may be:
+ *
+ *     LOAD_0_PF    No additional PA load capacitor
+ *     LOAD_1_2_PF  1.2pF additional PA load capacitor
+ *     LOAD_2_4_PF  2.4pF additional PA load capacitor
+ *     LOAD_3_6_PF  3.6pF additional PA load capacitor
+ *
+ ******************************************************************************/
+
+enum spirit_paload_capacitor_e
+  spirit_radio_get_outputload(FAR struct spirit_library_s *spirit);
 
 /******************************************************************************
  * Name: spirit_radio_set_palevel_maxindex

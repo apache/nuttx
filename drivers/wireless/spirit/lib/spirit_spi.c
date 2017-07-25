@@ -290,7 +290,7 @@ int spirit_command(FAR struct spirit_library_s *spirit, uint8_t cmd)
 }
 
 /******************************************************************************
- * Name: spirt_fifo_read
+ * Name: spirit_fifo_read
  *
  * Description:
  *   Read data from RX FIFO
@@ -306,8 +306,8 @@ int spirit_command(FAR struct spirit_library_s *spirit, uint8_t cmd)
  *
  ******************************************************************************/
 
-int spirt_fifo_read(FAR struct spirit_library_s *spirit, FAR uint8_t *buffer,
-                    unsigned int buflen)
+int spirit_fifo_read(FAR struct spirit_library_s *spirit, FAR uint8_t *buffer,
+                     unsigned int buflen)
 {
   uint8_t header[2];
   uint8_t status[2];
@@ -342,7 +342,7 @@ int spirt_fifo_read(FAR struct spirit_library_s *spirit, FAR uint8_t *buffer,
 }
 
 /******************************************************************************
- * Name: spirt_fifo_write
+ * Name: spirit_fifo_write
  *
  * Description:
  *   Write data into TX FIFO.
@@ -358,8 +358,8 @@ int spirt_fifo_read(FAR struct spirit_library_s *spirit, FAR uint8_t *buffer,
  *
  ******************************************************************************/
 
-int spirt_fifo_write(FAR struct spirit_library_s *spirit,
-                     FAR const uint8_t *buffer, unsigned int buflen)
+int spirit_fifo_write(FAR struct spirit_library_s *spirit,
+                      FAR const uint8_t *buffer, unsigned int buflen)
 {
   uint8_t header[2];
   uint8_t status[2];
