@@ -1,5 +1,5 @@
 /******************************************************************************
- * drivers/wireless/spirit/spirit_pktcommon.c
+ * drivers/wireless/spirit/lib/spirit_pktcommon.c
  * Configuration and management of the common features of SPIRIT packets.
  *
  *   Copyright(c) 2015 STMicroelectronics

@@ -1,13 +1,13 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/include/spirit_management.h
- * The management layer for SPIRIT1 library.
+ * drivers/wireless/spirit/lib/spirit_directrf.c
+ * Configuration and management of SPIRIT direct transmission / receive modes.
  *
- *   Copyright(c) 2015 STMicroelectronics
- *   Author: VMA division - AMS
- *   Version 3.2.2 08-July-2015
+ *  Copyright(c) 2015 STMicroelectronics
+ *  Author: VMA division - AMS
+ *  Version 3.2.2 08-July-2015
  *
- *   Adapted for NuttX by:
- *   Author:  Gregory Nutt <gnutt@nuttx.org>
+ *  Adapted for NuttX by:
+ *  Author:  Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -34,100 +34,157 @@
  *
  ******************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_MANAGEMENT_H
-#define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_MANAGEMENT_H
-
 /******************************************************************************
  * Included Files
  ******************************************************************************/
 
-#include "spirit_config.h"
-#include "spirit_types.h"
+#include <assert.h>
+
+#include "spirit_directrf.h"
+#include "spirit_spi.h"
 
 /******************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ******************************************************************************/
 
 /******************************************************************************
- * Name: spirit_managment_wavco_calibration
+ * Name: spirit_directrf_set_rxmode
  *
  * Description:
- *   Perform VCO calbration WA.
+ *   Sets the DirectRF RX mode of SPIRIT.
+ *
+ * Input Parameters:
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   directrx - Code of the desired mode.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; A negated errno value is returned on any failure.
+ *
+ ******************************************************************************/
+
+int spirit_directrf_set_rxmode(FAR struct spirit_library_s *spirit,
+                               enum spirit_directrx_e directrx)
+{
+  uint8_t regval;
+  int ret;
+
+  /* Check the parameters */
+
+  DEBUGASSERT(IS_DIRECT_RX(directrx));
+
+  /* Reads the register value */
+
+  ret = spirit_reg_read(spirit, PCKTCTRL3_BASE, &regval, 1);
+  if (ret >= 0)
+    {
+      /* Build the value to be stored */
+
+      regval &= ~PCKTCTRL3_RX_MODE_MASK;
+      regval |= (uint8_t)directrx;
+
+      /* Write value to register */
+
+      ret = spirit_reg_write(spirit, PCKTCTRL3_BASE, &regval, 1);
+    }
+
+  return ret;
+}
+
+/******************************************************************************
+ * Name: 
+ *
+ * Description:
+ *   Returns the DirectRF RX mode of SPIRIT.
  *
  * Input Parameters:
  *   spirit - Reference to a Spirit library state structure instance
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure.
+ *   Direct Rx mode.
  *
  ******************************************************************************/
 
-uint8_t spirit_managment_wavco_calibration(FAR struct spirit_library_s *spirit);
+enum spirit_directrx_e
+  spirit_directrf_get_rxmode(FAR struct spirit_library_s *spirit)
+{
+  uint8_t regval;
+
+  /* Reads the register value and mask the RX_Mode field */
+
+  (void)spirit_reg_read(spirit, PCKTCTRL3_BASE, &regval, 1);
+
+  /* Rebuild and return value */
+
+  return (enum spirit_directrx_e)(regval & 0x30);
+}
 
 /******************************************************************************
- * Name: spirit_management_txstrobe
+ * Name: 
  *
  * Description:
+ *   Sets the TX mode of SPIRIT.
  *
  * Input Parameters:
- *   spirit    - Reference to a Spirit library state structure instance
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   directtx - Code of the desired source.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure.
+ *   Zero (OK) on success; A negated errno value is returned on any failure.
  *
  ******************************************************************************/
 
-int spirit_management_txstrobe(FAR struct spirit_library_s *spirit);
+int spirit_directrf_set_txmode(FAR struct spirit_library_s *spirit,
+                               enum spirit_directtx_e directtx)
+{
+  uint8_t regval;
+  int ret;
+
+  /* Check the parameters */
+
+  DEBUGASSERT(IS_DIRECT_TX(directtx));
+
+  /* Reads the register value */
+
+  ret = spirit_reg_read(spirit, PCKTCTRL1_BASE, &regval, 1);
+  if (ret >= 0)
+    {
+      /* Build the value to be stored */
+
+      regval &= ~PCKTCTRL1_TX_SOURCE_MASK;
+      regval |= (uint8_t) directtx;
+
+      /* Write value to register */
+
+      ret = spirit_reg_write(spirit, PCKTCTRL1_BASE, &regval, 1);
+    }
+
+  return ret;
+}
 
 /******************************************************************************
- * Name: spirit_management_rxstrobe
+ * Name: 
  *
  * Description:
+ *   Returns the DirectRF TX mode of SPIRIT.
  *
  * Input Parameters:
  *   spirit - Reference to a Spirit library state structure instance
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure.
+ *   Direct Tx mode.
  *
  ******************************************************************************/
 
-int spirit_management_rxstrobe(FAR struct spirit_library_s *spirit);
+enum spirit_directtx_e
+  spirit_directrf_get_txmode(FAR struct spirit_library_s *spirit)
+{
+  uint8_t regval;
 
-/******************************************************************************
- * Name: spirit_management_waextracurrent
- *
- * Description:
- *
- * Input Parameters:
- *   spirit - Reference to a Spirit library state structure instance
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure.
- *
- ******************************************************************************/
+  /* Reads the register value and mask the RX_Mode field */
 
-int spirit_management_waextracurrent(FAR struct spirit_library_s *spirit);
+  (void)spirit_reg_read(spirit, PCKTCTRL1_BASE, &regval, 1);
 
-/******************************************************************************
- * Name: spirit_management_initcommstate
- *
- * Description:
- *   Initialize communication state
- *
- * Input Parameters:
- *   spirit    - Reference to a Spirit library state structure instance
- *   frequency - Desired communication frequency
- *
- * Returned Value:
- *
- ******************************************************************************/
+  /* Returns value */
 
-void spirit_management_initcommstate(FAR struct spirit_library_s *spirit,
-                                     uint32_t frequency);
-
-#endif /* __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_MANAGEMENT_H */
+  return (enum spirit_directtx_e)(regval & 0x0c);
+}

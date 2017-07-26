@@ -1,5 +1,5 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/spirit_pktcommon.h
+ * include/nuttx/wireless/spirit/include/spirit_pktcommon.h
  * Configuration and management of the common features of SPIRIT packets.
  *
  *   Copyright(c) 2015 STMicroelectronics
@@ -34,8 +34,8 @@
  *
  ******************************************************************************/
 
-#ifndef __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_PKTCOMMON_H
-#define __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_PKTCOMMON_H
+#ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_PKTCOMMON_H
+#define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_PKTCOMMON_H
 
 /* This module provides all the common functions and definitions used by the
  * packets modules.  Here are also defined all the generic enumeration types
@@ -118,7 +118,7 @@ extern "C"
 
 /* Preamble length in bytes enumeration. */
 
-enum pkt_premblen_e
+enum pkt_preamblen_e
 {
   PKT_PREAMBLE_LENGTH_01BYTE  = 0x00,        /* Preamble length 1 byte */
   PKT_PREAMBLE_LENGTH_02BYTES = 0x08,       /* Preamble length 2 bytes */
@@ -255,4 +255,4 @@ int spirit_pktcommon_enable_crcfilter(FAR struct spirit_library_s *spirit,
 }
 #endif
 
-#endif /* __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_PKTCOMMON_H */
+#endif /* __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_PKTCOMMON_H */

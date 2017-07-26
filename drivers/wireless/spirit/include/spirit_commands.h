@@ -1,5 +1,5 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/spirit_commands.h
+ * include/nuttx/wireless/spirit/include/spirit_commands.h
  *  Management of SPIRIT Commands.
  *
  *   Copyright(c) 2015 STMicroelectronics
@@ -34,8 +34,8 @@
  *
  ******************************************************************************/
 
-#ifndef __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_COMMANDS_H
-#define __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_COMMANDS_H
+#ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_COMMANDS_H
+#define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_COMMANDS_H
 
 /* In this module can be found all the API used to strobe commands to
  * Spirit.  Every command strobe is an SPI transaction with a specific command
@@ -144,4 +144,4 @@ enum spirit_cmd_e
 }
 #endif
 
-#endif /* __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_COMMANDS_H */
+#endif /* __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_COMMANDS_H */

@@ -1,5 +1,5 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/spirit_timer.h
+ * include/nuttx/wireless/spirit/include/spirit_timer.h
  * Configuration and management of SPIRIT timers.
  *
  *   Copyright(c) 2015 STMicroelectronics
@@ -34,8 +34,8 @@
  *
  ******************************************************************************/
 
-#ifndef __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_TIMER_H
-#define __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_TIMER_H
+#ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_TIMER_H
+#define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_TIMER_H
 
 /******************************************************************************
  * Included Files
@@ -143,4 +143,4 @@ int spirit_timer_set_rxtimeout_stopcondition(FAR struct spirit_library_s *spirit
                                              enum spirit_rxtimeout_stopcondition_e
                                              stopcondition);
 
-#endif /* __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_TIMER_H */
+#endif /* __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_TIMER_H */

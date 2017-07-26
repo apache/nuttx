@@ -1,5 +1,5 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/spirit_csma.h
+ * include/nuttx/wireless/spirit/include/spirit_csma.h
  * Configuration and management of SPIRIT CSMA.
  *
  *   Copyright(c) 2015 STMicroelectronics
@@ -164,6 +164,330 @@ struct spirit_csma_init_s
 /******************************************************************************
  * Public Function Prototypes
  ******************************************************************************/
+
+/******************************************************************************
+ * Name: spirit_csma_initialize
+ *
+ * Description:
+ *   Initializes the SPIRIT CSMA according to the specified parameters in the
+ *   struct spirit_csma_init_s.
+ *
+ * Input Parameters:
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   csmainit - Reference to the Csma init structure.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; A negated errno value is returned on any failure.
+ *
+ ******************************************************************************/
+
+int spirit_csma_initialize(FAR struct spirit_library_s *spirit,
+                           FAR const struct spirit_csma_init_s *csmainit);
+
+/******************************************************************************
+ * Name: spirit_csma_getinfo
+ *
+ * Description:
+ *   Returns the fitted structure struct spirit_csma_init_s starting from the
+ *   registers values.
+ *
+ * Input Parameters:
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   csmainit - Csma structure to be fitted.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; A negated errno value is returned on any failure.
+ *
+ ******************************************************************************/
+
+int spirit_csma_getinfo(FAR struct spirit_library_s *spirit,
+                        FAR struct spirit_csma_init_s *csmainit);
+
+/******************************************************************************
+ * Name: spirit_csma_enable
+ *
+ * Description:
+ *   Enables or Disables the CSMA.
+ *
+ * Input Parameters:
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   newstate - The state of the CSMA mode.  This parameter can be: S_ENABLE
+ *              or S_DISABLE.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; A negated errno value is returned on any failure.
+ *
+ ******************************************************************************/
+
+int spirit_csma_enable(FAR struct spirit_library_s *spirit,
+                       enum spirit_functional_state_e newstate);
+
+/******************************************************************************
+ * Name: spirit_csma_getstate
+ *
+ * Description:
+ *   Gets the CSMA mode. Says if it is enabled or disabled.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   CSMA mode.
+ *
+ ******************************************************************************/
+
+enum spirit_functional_state_e
+  spirit_csma_getstate(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_csma_set_persistentmode
+ *
+ * Description:
+ *   Enables or Disables the persistent CSMA mode.
+ *
+ * Input Parameters:
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   newstate - The state of the persistent CSMA mode.  This parameter can
+ *              be: S_ENABLE or S_DISABLE.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; A negated errno value is returned on any failure.
+ *
+ ******************************************************************************/
+
+int spirit_csma_set_persistentmode(FAR struct spirit_library_s *spirit,
+                                   enum spirit_functional_state_e newstate);
+
+/******************************************************************************
+ * Name: spirit_csma_get_persistentmode
+ *
+ * Description:
+ *   Gets the persistent CSMA mode.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   CSMA persistent mode.
+ *
+ ******************************************************************************/
+
+enum spirit_functional_state_e
+  spirit_csma_get_persistentmode(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_csma_set_seedreload
+ *
+ * Description:
+ *   Enables or Disables the seed reload mode (if enabled it reloads the back-
+ *   off generator seed using the value written in the BU_COUNTER_SEED register).
+ *
+ * Input Parameters:
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   newstate - The state of the seed reload mode.  This parameter can be:
+ *              S_ENABLE or S_DISABLE.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; A negated errno value is returned on any failure.
+ *
+ ******************************************************************************/
+
+int spirit_csma_set_seedreload(FAR struct spirit_library_s *spirit,
+                               enum spirit_functional_state_e newstate);
+
+/******************************************************************************
+ * Name: spirit_csma_get_seedreload
+ *
+ * Description:
+ *   Gets the seed reload state.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   CSMA seed reload mode.
+ *
+ ******************************************************************************/
+
+enum spirit_functional_state_e
+  spirit_csma_get_seedreload(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_csma_set_bucounterseed
+ *
+ * Description:
+ *   Sets the BU counter seed (BU_COUNTER_SEED register). The CSMA back off
+ *   time is given by the formula: BO = rand(2^NB)*BU.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *   seed   - Seed of the random number generator used to apply the BBE
+ *            algorithm.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; A negated errno value is returned on any failure.
+ *
+ ******************************************************************************/
+
+int spirit_csma_set_bucounterseed(FAR struct spirit_library_s *spirit,
+                                  uint16_t seed);
+
+/******************************************************************************
+ * Name: spirit_csma_get_bucounterseed
+ *
+ * Description:
+ *   Returns the BU counter seed (BU_COUNTER_SEED register).
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Seed of the random number generator used to apply the BBE algorithm.
+ *
+ ******************************************************************************/
+
+uint16_t spirit_csma_get_bucounterseed(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_csma_set_buprescaler
+ *
+ * Description:
+ *   Sets the BU prescaler. The CSMA back off time is given by the formula:
+ *   BO = rand(2^NB)*BU.
+ *
+ * Input Parameters:
+ *   spirit    - Reference to a Spirit library state structure instance
+ *   prescaler - Used to program the back-off unit BU.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; A negated errno value is returned on any failure.
+ *
+ ******************************************************************************/
+
+int spirit_csma_set_buprescaler(FAR struct spirit_library_s *spirit,
+                                uint8_t prescaler);
+
+/******************************************************************************
+ * Name: spirit_csma_get_buprescaler
+ *
+ * Description:
+ *   Returns the BU prescaler.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Value back-off unit (BU).
+ *
+ ******************************************************************************/
+
+uint8_t spirit_csma_get_buprescaler(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_csma_set_ccaperiod
+ *
+ * Description:
+ *   Sets the CCA period.
+ *
+ * Input Parameters:
+ *   spirit  - Reference to a Spirit library state structure instance
+ *   multbit - Value of CCA period to store.  This parameter can be a value
+ *             of enum spirit_cca_period_e.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; A negated errno value is returned on any failure.
+ *
+ ******************************************************************************/
+
+int spirit_csma_set_ccaperiod(FAR struct spirit_library_s *spirit,
+                              enum spirit_cca_period_e multbit);
+
+/******************************************************************************
+ * Name: spirit_csma_get_ccaperiod
+ *
+ * Description:
+ *   Returns the CCA period.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   CCA period.
+ *
+ ******************************************************************************/
+
+enum spirit_cca_period_e
+  spirit_csma_get_ccaperiod(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_csma_set_ccalen
+ *
+ * Description:
+ *   Sets the CCA length.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *   ccalen - The CCA length (a value between 1 and 15 that multiplies the
+ *            CCA period).  This parameter can be any value of enum
+ *            spirit_csmalen_e.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; A negated errno value is returned on any failure.
+ *
+ ******************************************************************************/
+
+int spirit_csma_set_ccalen(FAR struct spirit_library_s *spirit,
+                           enum spirit_csmalen_e ccalen);
+
+/******************************************************************************
+ * Name: spirit_csma_get_ccalen
+ *
+ * Description:
+ *   Returns the CCA length.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   CCA length.
+ *
+ ******************************************************************************/
+
+uint8_t spirit_csma_get_ccalen(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_csma_set_maxbackoff
+ *
+ * Description:
+ *   Sets the max number of back-off. If reached Spirit stops the transmission.
+ *
+ * Input Parameters:
+ *   maxnb the max number of back-off.
+ *         This parameter is an uint8_t.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; A negated errno value is returned on any failure.
+ *
+ ******************************************************************************/
+
+int spirit_csma_set_maxbackoff(FAR struct spirit_library_s *spirit,
+                               uint8_t maxnb);
+
+/******************************************************************************
+ * Name: spirit_csma_get_maxbackoff
+ *
+ * Description:
+ *   Returns the max number of back-off.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Max number of back-off.
+ *
+ ******************************************************************************/
+
+uint8_t spirit_csma_get_maxbackoff(FAR struct spirit_library_s *spirit);
 
 #ifdef __cplusplus
 }

@@ -1715,6 +1715,54 @@ int spirit_radio_afcfreezeonsync(FAR struct spirit_library_s *spirit,
 }
 
 /******************************************************************************
+ * Name: spirit_radio_enable_csblanking
+ *
+ * Description:
+ *   Enables or Disables the received data blanking when the CS is under the
+ *   threshold.
+ *
+ * Input Parameters:
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   newstate - New state of this mode.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_radio_enable_csblanking(FAR struct spirit_library_s *spirit,
+                                   enum spirit_functional_state_e newstate)
+{
+  uint8_t regval;
+  int ret;
+
+  /* Check the parameters */
+
+  DEBUGASSERT(IS_SPIRIT_FUNCTIONAL_STATE(newstate));
+
+  /* Reads the ANT_SELECT_CONF_BASE and mask the CS_BLANKING BIT field */
+
+  ret = spirit_reg_read(spirit, ANT_SELECT_CONF_BASE, &regval, 1);
+  if (ret >= 0)
+    {
+      if (newstate == S_ENABLE)
+        {
+          regval |= ANT_SELECT_CS_BLANKING_MASK;
+        }
+      else
+        {
+          regval &= (~ANT_SELECT_CS_BLANKING_MASK);
+        }
+
+      /* Write the new value to the ANT_SELECT_CONF register */
+
+      ret = spirit_reg_write(spirit, ANT_SELECT_CONF_BASE, &regval, 1);
+    }
+
+  return ret;
+}
+
+/******************************************************************************
  * Name: spirit_radio_persistentrx
  *
  * Description:

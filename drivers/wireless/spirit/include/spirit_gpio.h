@@ -1,5 +1,5 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/spirit_gpio.h
+ * include/nuttx/wireless/spirit/include/spirit_gpio.h
  * This file provides all the low level API to manage SPIRIT GPIO.
  *
  *   Copyright(c) 2015 STMicroelectronics
@@ -34,8 +34,8 @@
  *
  ******************************************************************************/
 
-#ifndef __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_GPIO_H
-#define __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_GPIO_H
+#ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_GPIO_H
+#define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_GPIO_H
 
 /******************************************************************************
  * Included Files
@@ -235,4 +235,4 @@ struct spirit_gpio_init_s
 int spirit_gpio_initialize(FAR struct spirit_library_s *spirit,
                            FAR const struct spirit_gpio_init_s *gpioinit);
 
-#endif /* __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_GPIO_H*/
+#endif /* __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_GPIO_H*/

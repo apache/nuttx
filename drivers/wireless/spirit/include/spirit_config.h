@@ -1,5 +1,5 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/spirit_config.h
+ * include/nuttx/wireless/spirit/include/spirit_config.h
  * Spirit Configuration and useful defines
  *
  *   Copyright(c) 2015 STMicroelectronics
@@ -34,8 +34,8 @@
  *
  ******************************************************************************/
 
-#ifndef __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_CONFIG_H
-#define __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_CONFIG_H
+#ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_CONFIG_H
+#define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_CONFIG_H
 
 /******************************************************************************
  * Included Files
@@ -43,4 +43,4 @@
 
 #define DOUBLE_XTAL_THR  30000000
 
-#endif /* __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_CONFIG_H */
+#endif /* __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_CONFIG_H */

@@ -1,5 +1,5 @@
 /******************************************************************************
- * drivers/wireless/spirit/spirit_calibration.c
+ * drivers/wireless/spirit/lib/spirit_calibration.c
  * Configuration and management of SPIRIT VCO-RCO calibration.
  *
  *   Copyright(c) 2015 STMicroelectronics
@@ -143,6 +143,90 @@ int spirit_calib_enable_vco(FAR struct spirit_library_s *spirit,
       /* Writes register to enable or disable the VCO calibration */
 
       ret = spirit_reg_write(spirit, PROTOCOL2_BASE, &regval, 1);
+    }
+
+  return ret;
+}
+
+/******************************************************************************
+ * Name: spirit_calibration_set_rcocal
+ *
+ * Description:
+ *   Sets the RCO calibration words.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *   rwt    - RWT word for RCO calibration.
+ *   rfb    - RFB word for RCO calibration.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on any failure.
+ *
+ ******************************************************************************/
+
+int spirit_calibration_set_rcocal(FAR struct spirit_library_s *spirit,
+                                  uint8_t rwt, uint8_t rfb)
+{
+  uint8_t regval[2];
+  int ret;
+
+  /* Build the value of RWT and the MSbits of the RFB word */
+
+  regval[0] = (rwt << 4) | (rfb >> 1);
+
+  /* Reads the register value to update the LSbit of RFB */
+
+  ret = spirit_reg_read(spirit, RCO_VCO_CALIBR_IN1_BASE, &regval[1], 1);
+  if (ret >= 0)
+    {
+      /* Build new value for the register */
+
+      regval[1] = (regval[1] & 0x7f) | (rfb << 7);
+
+      /* Write the new value for RCO calibration words */
+
+      ret = spirit_reg_write(spirit, RCO_VCO_CALIBR_IN2_BASE, regval, 2);
+    }
+
+  return ret;
+}
+
+/******************************************************************************
+ * Name: spirit_calibration_get_rcocal
+ *
+ * Description:
+ *   Returns the RCO calibration words.
+ *
+ * Input Parameters:
+ *   spirit  - Reference to a Spirit library state structure instance
+ *   rwt     - Pointer to the variable in which the RWT word has to be
+ *             stored.
+ *   rfb     - Pointer to the variable in which the RFB word has to be
+ *             stored.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on any failure.
+ *
+ ******************************************************************************/
+
+int spirit_calibration_get_rcocal(FAR struct spirit_library_s *spirit,
+                                  FAR uint8_t *rwt, FAR uint8_t *rfb)
+{
+  uint8_t regval[2];
+  int ret;
+
+  /* Read the registers values */
+
+  ret = spirit_reg_read(spirit, RCO_VCO_CALIBR_OUT1_BASE, regval, 2);
+  if (ret >= 0)
+    {
+      /* Build the RWT value */
+
+      (*rwt) = regval[0] >> 4;
+
+      /* Build the RFB value */
+
+      (*rfb) = (regval[0] & 0x0F) << 1 | (regval[1] >> 7);
     }
 
   return ret;
@@ -305,6 +389,147 @@ uint8_t spirit_calib_get_vcorxcal(FAR struct spirit_library_s *spirit)
   /* Mask the VCO_CALIBR_RX field and returns the value */
 
   return (regval & 0x7f);
+}
+
+/******************************************************************************
+ * Name: spirit_calibration_set_vcowin
+ *
+ * Description:
+ *   Sets the VCO calibration window.
+ *
+ * Input Parameters:
+ *   spirit  - Reference to a Spirit library state structure instance
+ *   refword - Value of REFWORD corresponding to the Ref_period according to
+ *             the formula:
+ *
+ *               CALIBRATION_WIN = 11*Ref_period/fxo.
+ *
+ *            This parameter can be a value of enum spirit_vcowin_e.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on any failure.
+ *
+ ******************************************************************************/
+
+int spirit_calibration_set_vcowin(FAR struct spirit_library_s *spirit,
+                                  enum spirit_vcowin_e refword)
+{
+  uint8_t regval;
+  int ret;
+
+  /* Check the parameters */
+
+  DEBUGASSERT(IS_VCO_WIN(refword));
+
+  /* Reads the register value */
+
+  ret = spirit_reg_read(spirit, SYNTH_CONFIG1_BASE, &regval, 1);
+  if (ret >= 0)
+    {
+      /* Build the values to be written */
+
+      regval &= 0xfc;
+      regval |= refword;
+
+      /* Write the new value of VCO calibration window */
+
+      ret = spirit_reg_write(spirit, SYNTH_CONFIG1_BASE, &regval, 1);
+    }
+
+  return ret;
+}
+
+/******************************************************************************
+ * Name: spirit_calibration_get_vcowin
+ *
+ * Description:
+ *   Returns the VCO calibration window.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Value of REFWORD corresponding to the Ref_period according to the
+ *   formula:
+ *
+ *     CALIBRATION_WIN = 11*Ref_period/fxo.
+ *
+ *   This parameter can be a value of enum spirit_vcowin_e.
+ *
+ ******************************************************************************/
+
+enum spirit_vcowin_e
+  spirit_calibration_get_vcowin(FAR struct spirit_library_s *spirit)
+{
+  uint8_t regval1, regval2;
+  enum spirit_vcowin_e refword;
+
+  /* Reads the register containing the REFWORD value */
+
+  (void)spirit_reg_read(spirit, SYNTH_CONFIG1_BASE, &regval1, 1);
+
+  /* Reads the Xtal configuration */
+
+  (void)spirit_reg_read(spirit, ANA_FUNC_CONF0_BASE, &regval2, 1);
+
+  /* Mask the REFWORD field */
+
+  regval1 &= 0x03;
+
+  /* Mask the 24_26_MHz_SELECT field */
+
+  regval2 = ((regval2 & 0x40) >> 6);
+
+  /* In case of 26 MHz crystal */
+
+  if (regval2 != 0)
+    {
+      switch (regval1)
+        {
+        case 0:
+          refword = CALIB_TIME_6_77_US_26MHZ;
+          break;
+
+        case 1:
+          refword = CALIB_TIME_13_54_US_26MHZ;
+          break;
+
+        case 2:
+          refword = CALIB_TIME_27_08_US_26MHZ;
+          break;
+
+        case 3:
+          refword = CALIB_TIME_54_15_US_26MHZ;
+          break;
+        }
+    }
+
+  /* In case of 24 MHz crystal */
+
+  else
+    {
+      switch (regval1)
+        {
+        case 0:
+          refword = CALIB_TIME_7_33_US_24MHZ;
+          break;
+
+        case 1:
+          refword = CALIB_TIME_14_67_US_24MHZ;
+          break;
+
+        case 2:
+          refword = CALIB_TIME_29_33_US_24MHZ;
+          break;
+
+        case 3:
+          refword = CALIB_TIME_58_67_US_24MHZ;
+          break;
+
+        }
+    }
+
+  return refword;
 }
 
 /******************************************************************************

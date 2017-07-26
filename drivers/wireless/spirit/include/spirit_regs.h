@@ -1,5 +1,5 @@
 /**********************************************************************************************
- * include/nuttx/wireless/spirit/spirit_regs.h
+ * include/nuttx/wireless/spirit/include/spirit_regs.h
  * This file contains all the SPIRIT registers address and masks.
  *
  *   Copyright(c) 2015 STMicroelectronics
@@ -34,8 +34,8 @@
  *
  **********************************************************************************************/
 
-#ifndef __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_REGS_H
-#define __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_REGS_H
+#ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_REGS_H
+#define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_REGS_H
 
 /**********************************************************************************************
  * Pre-processor Definitions
@@ -2376,4 +2376,4 @@
 #define COMMAND_FLUSHTXFIFO             ((uint8_t)0x72)  /* Clean the TX FIFO; valid from all
                                                           * states */
 
-#endif /* __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_REGS_H */
+#endif /* __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_REGS_H */

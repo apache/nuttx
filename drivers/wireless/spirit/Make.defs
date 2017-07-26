@@ -39,5 +39,6 @@ ifeq ($(CONFIG_WL_SPIRIT),y)
 
 include wireless$(DELIM)spirit$(DELIM)lib$(DELIM)Make.defs
 include wireless$(DELIM)spirit$(DELIM)include$(DELIM)Make.defs
+include wireless$(DELIM)spirit$(DELIM)drivers$(DELIM)Make.defs
 
 endif

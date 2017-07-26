@@ -551,6 +551,52 @@ int spirit_management_rxstrobe(FAR struct spirit_library_s *spirit)
 }
 
 /******************************************************************************
+ * Name: spirit_management_waextracurrent
+ *
+ * Description:
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned on
+ *   any failure.
+ *
+ ******************************************************************************/
+
+int spirit_management_waextracurrent(FAR struct spirit_library_s *spirit)
+{
+  uint8_t tmp;
+  int ret;
+
+  tmp = 0xca;
+  ret = spirit_reg_write(spirit, 0xb2, &tmp, 1);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  tmp = 0x04;
+  ret = spirit_reg_write(spirit, 0xa8, &tmp, 1);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Just a read to lose a few more microseconds */
+
+  ret = spirit_reg_read(spirit, 0xa8, &tmp, 1);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  tmp = 0x00;
+  ret = spirit_reg_write(spirit, 0xa8, &tmp, 1);
+  return ret;
+}
+
+/******************************************************************************
  * Name: spirit_management_initcommstate
  *
  * Description:

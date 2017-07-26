@@ -1,5 +1,5 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/spirit_irq.h
+ * include/nuttx/wireless/spirit/include/spirit_irq.h
  * Configuration and management of SPIRIT IRQs.
  *
  *   Copyright(c) 2015 STMicroelectronics
@@ -34,8 +34,8 @@
  *
  ******************************************************************************/
 
-#ifndef __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_IRQ_H
-#define __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_IRQ_H
+#ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_IRQ_H
+#define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_IRQ_H
 
 /* On the Spirit side specific IRQs can be enabled by setting a specific bitmask.
  * The Spirit libraries allow the user to do this in two different ways:
@@ -452,4 +452,4 @@ bool spirit_irq_is_pending(FAR struct spirit_library_s *spirit,
 }
 #endif
 
-#endif /* __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_IRQ_H */
+#endif /* __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_IRQ_H */

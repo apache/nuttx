@@ -1,5 +1,5 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/spirit_Linearfifo.h
+ * include/nuttx/wireless/spirit/include/spirit_Linearfifo.h
  * Configuration and management of SPIRIT Fifo.
  *
  *   Copyright(c) 2015 STMicroelectronics
@@ -34,8 +34,8 @@
  *
  ******************************************************************************/
 
-#ifndef __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_FIFO_H
-#define __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_FIFO_H
+#ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_FIFO_H
+#define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_FIFO_H
 
 /******************************************************************************
  * Included Files
@@ -257,4 +257,4 @@ uint8_t spirit_fifo_get_txalmostempty(FAR struct spirit_library_s *spirit);
 }
 #endif
 
-#endif /* __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_FIFO_H */
+#endif /* __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_FIFO_H */

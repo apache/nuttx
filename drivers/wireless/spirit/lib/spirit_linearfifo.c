@@ -1,5 +1,5 @@
 /******************************************************************************
- * drivers/wireless/spirit/spirit_Linearfifo.c
+ * drivers/wireless/spirit/lib/spirit_Linearfifo.c
  * Configuration and management of SPIRIT Fifo.
  *
  *  Copyright(c) 2015 STMicroelectronics

@@ -1,5 +1,5 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/spirit_radio.h
+ * include/nuttx/wireless/spirit/include/spirit_radio.h
  * This file provides all the low level API to manage Analog and Digital radio
  * part of SPIRIT.
  *
@@ -35,8 +35,8 @@
  *
  ******************************************************************************/
 
-#ifndef __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_RADIO_H
-#define __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_RADIO_H
+#ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_RADIO_H
+#define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_RADIO_H
 
 /* In order to configure the Radio main parameters, the user can fit struct
  * radio_init_s structure the and call the spirit_radio_initialize()
@@ -222,17 +222,28 @@
 /* Other macros used in assertions */
 
 #define IS_XTAL_FLAG(flag) \
-  (((flag) == XTAL_FLAG_24_MHz) || ((flag) == XTAL_FLAG_26_MHz))
+  (((flag) == XTAL_FLAG_24_MHz)    || ((flag) == XTAL_FLAG_26_MHz))
 #define IS_BAND_SELECTED(band) \
-  (((band) == HIGH_BAND)        || ((band) == MIDDLE_BAND)      || \
-   ((band) == LOW_BAND)         || ((band) == VERY_LOW_BAND))
+  (((band) == HIGH_BAND)           || ((band) == MIDDLE_BAND)      || \
+   ((band) == LOW_BAND)            || ((band) == VERY_LOW_BAND))
 #define IS_MODULATION_SELECTED(mod) \
-  (((mod)  == FSK)              || ((mod)  == GFSK_BT05)        || \
-   ((mod)  == GFSK_BT1)         || ((mod)  == ASK_OOK)          || \
+  (((mod)  == FSK)                 || ((mod)  == GFSK_BT05)        || \
+   ((mod)  == GFSK_BT1)            || ((mod)  == ASK_OOK)          || \
    ((mod)  == MSK))
 #define IS_PA_LOAD_CAP(cwc) \
-  (((cwc) == LOAD_0_PF)         || ((cwc) == LOAD_1_2_PF)       || \
-   ((cwc) == LOAD_2_4_PF)       || ((cwc) == LOAD_3_6_PF))
+  (((cwc) == LOAD_0_PF)            || ((cwc) == LOAD_1_2_PF)       || \
+   ((cwc) == LOAD_2_4_PF)          || ((cwc) == LOAD_3_6_PF))
+#define IS_AFC_MODE(mode) \
+  ((mode) == AFC_SLICER_CORRECTION || (mode) == AFC_2ND_IF_CORRECTION)
+#define IS_AGC_MODE(mode) \
+  ((mode) == AGC_LINEAR_MODE       || (mode) == AGC_BINARY_MODE)
+#define IS_CLK_REC_MODE(mode) \
+  ((mode) == CLK_REC_PLL           || (mode) == CLK_REC_DLL)
+#define IS_PST_FLT_LENGTH(len) \
+  ((len) == PSTFLT_LENGTH_8        || (len) == PSTFLT_LENGTH_16)
+#define IS_OOK_PEAK_DECAY(decay) \
+  (((decay) == FAST_DECAY)         || ((decay) == MEDIUM_FAST_DECAY) ||\
+   ((decay) == MEDIUM_SLOW_DECAY)  || ((decay) == SLOW_DECAY))
 
 /******************************************************************************
  * Public Types
@@ -276,6 +287,49 @@ enum spirit_paload_capacitor_e
   LOAD_1_2_PF      = PA_POWER0_CWC_1_2P, /* 1.2pF additional PA load capacitor */
   LOAD_2_4_PF      = PA_POWER0_CWC_2_4P, /* 2.4pF additional PA load capacitor */
   LOAD_3_6_PF      = PA_POWER0_CWC_3_6P  /* 3.6pF additional PA load capacitor */
+};
+
+/* SPIRIT AFC Mode selection */
+
+enum spirit_afcmode_e
+{
+  AFC_SLICER_CORRECTION = AFC2_AFC_MODE_SLICER, /* AFC loop closed on slicer */
+  AFC_2ND_IF_CORRECTION = AFC2_AFC_MODE_MIXER   /* AFC loop closed on 2nd
+                                                 * conversion stage */
+};
+
+/* SPIRIT AGC Mode selection */
+
+enum spirit_agcmode_e
+{
+  AGC_LINEAR_MODE  = AGCCTRL0_AGC_MODE_LINEAR,   /* AGC works in linear mode */
+  AGC_BINARY_MODE  = AGCCTRL0_AGC_MODE_BINARY    /* AGC works in binary mode */
+};
+
+/* SPIRIT Clock Recovery Mode selection */
+
+enum spirit_clkrecmode_e
+{
+  CLK_REC_PLL      = FDEV0_CLOCK_REG_ALGO_SEL_PLL, /* PLL alogrithm for clock recovery */
+  CLK_REC_DLL      = FDEV0_CLOCK_REG_ALGO_SEL_DLL  /* DLL alogrithm for clock recovery */
+};
+
+/* SPIRIT Postfilter length */
+
+enum spirit_pstfltlen_e
+{
+  PSTFLT_LENGTH_8  = 0x00,  /* Postfilter length is 8 symbols */
+  PSTFLT_LENGTH_16 = 0x10   /* Postfilter length is 16 symbols */
+};
+
+/* SPIRIT OOK Peak Decay */
+
+enum spirit_ookpeakdelay_e
+{
+  FAST_DECAY        = 0x00, /* Peak decay control for OOK: fast decay */
+  MEDIUM_FAST_DECAY = 0x01, /* Peak decay control for OOK: medium_fast decay */
+  MEDIUM_SLOW_DECAY = 0x02, /* Peak decay control for OOK: medium_fast decay */
+  SLOW_DECAY        = 0x03  /* Peak decay control for OOK: slow decay */
 };
 
 /* SPIRIT Radio initialization structure definition */
@@ -821,6 +875,25 @@ int spirit_radio_afcfreezeonsync(FAR struct spirit_library_s *spirit,
                                  enum spirit_functional_state_e newstate);
 
 /******************************************************************************
+ * Name: spirit_radio_enable_csblanking
+ *
+ * Description:
+ *   Enables or Disables the received data blanking when the CS is under the
+ *   threshold.
+ *
+ * Input Parameters:
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   newstate - New state of this mode.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_radio_enable_csblanking(FAR struct spirit_library_s *spirit,
+                                   enum spirit_functional_state_e newstate);
+
+/******************************************************************************
  * Name: spirit_radio_persistentrx
  *
  * Description:
@@ -908,4 +981,4 @@ int spirit_radio_enable_digdivider(FAR struct spirit_library_s *spirit,
 enum spirit_functional_state_e
   spirit_radio_isenabled_digdivider(FAR struct spirit_library_s *spirit);
 
-#endif /* __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_RADIO_H*/
+#endif /* __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_RADIO_H*/

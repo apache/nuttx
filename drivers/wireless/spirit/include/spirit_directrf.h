@@ -1,6 +1,6 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/include/spirit_qi.h
- * Configuration and management of SPIRIT QI.
+ * include/nuttx/wireless/spirit/include/spirit_directrf.h
+ * Configuration and management of SPIRIT direct transmission / receive modes.
  *
  *   Copyright(c) 2015 STMicroelectronics
  *   Author: VMA division - AMS
@@ -34,8 +34,13 @@
  *
  ******************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_QI_H
-#define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_QI_H
+#ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_DIRECTRF_H
+#define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_DIRECTRF_H
+
+/* This module contains functions to manage the direct Tx/Rx mode.
+ * The user can choose the way to send data to Spirit through the
+ * enumerative types DirectTx/DirectRx.
+ */
 
 /******************************************************************************
  * Included Files
@@ -48,24 +53,14 @@
  * Pre-processor Definitions
  ******************************************************************************/
 
-/* Macros used in debug assertions */
+/* Macros used for range-checking in assertions */
 
-#define IS_SQI_THR(value)  \
-  (value == SQI_TH_0 || value == SQI_TH_1 || \
-   value == SQI_TH_2 || value == SQI_TH_3)
-#define IS_RSSI_FILTER_GAIN(value)  \
-  (value==RSSI_FG_0  || value==RSSI_FG_1  ||\
-   value==RSSI_FG_2  || value==RSSI_FG_3  ||\
-   value==RSSI_FG_4  || value==RSSI_FG_5  ||\
-   value==RSSI_FG_6  || value==RSSI_FG_7  ||\
-   value==RSSI_FG_8  || value==RSSI_FG_9  ||\
-   value==RSSI_FG_10 || value==RSSI_FG_11 ||\
-   value==RSSI_FG_12 || value==RSSI_FG_13 ||\
-   value==RSSI_FG_14 || value==RSSI_FG_15)
-
-/* Range for the RSSI Threshold in dBm  */
-
-#define IS_RSSI_THR_DBM(value)  (value >= -130 && value <= -2)
+#define IS_DIRECT_TX(mode) \
+  (((mode) == NORMAL_TX_MODE)      || ((mode) == DIRECT_TX_FIFO_MODE) || \
+   ((mode) == DIRECT_TX_GPIO_MODE) || ((mode) == PN9_TX_MODE))
+#define IS_DIRECT_RX(mode) \
+  (((mode) == NORMAL_RX_MODE)      || ((mode) == DIRECT_RX_FIFO_MODE) || \
+   ((mode) == DIRECT_RX_GPIO_MODE))
 
 /******************************************************************************
  * Public Types
@@ -76,36 +71,34 @@ extern "C"
 {
 #endif
 
-/* SQI threshold value enumeration. */
+/* Direct transmission mode enumeration for SPIRIT. */
 
-enum spirit_sqi_threshold_e
+enum spirit_directtx_e
 {
-  SQI_TH_0 = 0x00,
-  SQI_TH_1 = 0x40,
-  SQI_TH_2 = 0x80,
-  SQI_TH_3 = 0xC0
+  NORMAL_TX_MODE      = 0x00,  /* Normal mode, no direct transmission is
+                                * used */
+  DIRECT_TX_FIFO_MODE = 0x04,  /* Source is FIFO: payload bits are
+                                * continuously read from the TX FIFO */
+  DIRECT_TX_GPIO_MODE = 0x08,  /* Source is GPIO: payload bits are
+                                * continuously read from one of the GPIO
+                                * ports and transmitted without any
+                                * processing */
+  PN9_TX_MODE         = 0x0c   /* A pseudorandom binary sequence is
+                                * generated internally */
 };
 
-/* RSSI filter gain value enumeration. */
 
-enum spirit_rssi_filtergain_e
+/* Direct receive mode enumeration for SPIRIT. */
+
+enum spirit_directrx_e
 {
-  RSSI_FG_0  = 0x00,
-  RSSI_FG_1  = 0x10,
-  RSSI_FG_2  = 0x20,
-  RSSI_FG_3  = 0x30,
-  RSSI_FG_4  = 0x40,
-  RSSI_FG_5  = 0x50,
-  RSSI_FG_6  = 0x60,
-  RSSI_FG_7  = 0x70,
-  RSSI_FG_8  = 0x80,
-  RSSI_FG_9  = 0x90,
-  RSSI_FG_10 = 0xa0,
-  RSSI_FG_11 = 0xb0,
-  RSSI_FG_12 = 0xc0,
-  RSSI_FG_13 = 0xd0,
-  RSSI_FG_14 = 0xe0,        /* Recommended value */
-  RSSI_FG_15 = 0xf0
+  NORMAL_RX_MODE      = 0x00,  /* Normal mode, no direct reception is used */
+  DIRECT_RX_FIFO_MODE = 0x10,  /* Destination is FIFO: payload bits are
+                                * continuously written to the RX FIFO and
+                                * not subjected to any* processing */
+  DIRECT_RX_GPIO_MODE = 0x20   /* Destination is GPIO: payload bits  are
+                                * continuously written to one of the GPIO
+                                * ports and not subjected to any processing */
 };
 
 /******************************************************************************
@@ -113,82 +106,77 @@ enum spirit_rssi_filtergain_e
  ******************************************************************************/
 
 /******************************************************************************
- * Name: spirit_qi_sqicheck
+ * Name: spirit_directrf_set_rxmode
  *
  * Description:
- *   Enables/Disables the Synchronization Quality Indicator check. The
- *   running peak SQI is compared to a threshold value and the sync valid
- *   IRQ is asserted as soon as the threshold is passed.
+ *   Sets the DirectRF RX mode of SPIRIT.
  *
  * Input Parameters:
  *   spirit   - Reference to a Spirit library state structure instance
- *   newstate - new state for SQI check.
+ *   directrx - Code of the desired mode.
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   Zero (OK) on success; A negated errno value is returned on any failure.
  *
  ******************************************************************************/
 
-int spirit_qi_sqicheck(FAR struct spirit_library_s *spirit,
-                       enum spirit_functional_state_e newstate);
+int spirit_directrf_set_rxmode(FAR struct spirit_library_s *spirit,
+                               enum spirit_directrx_e directrx);
 
 /******************************************************************************
- * Name: spirit_qi_set_sqithreshold
+ * Name: 
  *
  * Description:
- *   Sets the SQI threshold. The synchronization quality threshold is equal to
- *   8 * SYNC_LEN - 2 * SQI_TH with SQI_TH = 0..3. When SQI_TH is 0 perfect
- *   match is required; when SQI_TH = 1, 2, 3 then 1, 2, or 3 bit errors are
- *   respectively accepted. It is recommended that the SQI check is always
- *   enabled.
- *
- * Input Parameters:
- *   spirit - Reference to a Spirit library state structure instance
- *   sqithr - parameter of the formula above.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ******************************************************************************/
-
-int spirit_qi_set_sqithreshold(FAR struct spirit_library_s *spirit,
-                               enum spirit_sqi_threshold_e sqithr);
-
-/******************************************************************************
- * Name: spirit_qi_get_sqithreshold
- *
- * Description:
- *   Returns the SQI threshold. The synchronization quality threshold is equal
- *   to 8 * SYNC_LEN - 2 * SQI_TH with SQI_TH = 0..3.
+ *   Returns the DirectRF RX mode of SPIRIT.
  *
  * Input Parameters:
  *   spirit - Reference to a Spirit library state structure instance
  *
  * Returned Value:
- *   SQI threshold (SQI_TH of the formula above).  Errors are not reported.
+ *   Direct Rx mode.
  *
  ******************************************************************************/
 
-enum spirit_sqi_threshold_e
-  spirit_qi_get_sqithreshold(FAR struct spirit_library_s *spirit);
+enum spirit_directrx_e
+  spirit_directrf_get_rxmode(FAR struct spirit_library_s *spirit);
 
 /******************************************************************************
- * Name: spirit_qi_set_rssithreshold
+ * Name: 
  *
  * Description:
- *   Sets the RSSI threshold from its dBm value according to the formula:
- *   (RSSI[Dbm] + 130)/0.5.
+ *   Sets the TX mode of SPIRIT.
  *
  * Input Parameters:
  *   spirit   - Reference to a Spirit library state structure instance
- *   dbmvalue - RSSI threshold reported in dBm.
+ *   directtx - Code of the desired source.
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   Zero (OK) on success; A negated errno value is returned on any failure.
  *
  ******************************************************************************/
 
-int spirit_qi_set_rssithreshold(FAR struct spirit_library_s *spirit,
-                                int dbmvalue);
+int spirit_directrf_set_txmode(FAR struct spirit_library_s *spirit,
+                               enum spirit_directtx_e directtx);
 
-#endif /* __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_GENERAL_H*/
+/******************************************************************************
+ * Name: 
+ *
+ * Description:
+ *   Returns the DirectRF TX mode of SPIRIT.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Direct Tx mode.
+ *
+ ******************************************************************************/
+
+enum spirit_directtx_e
+  spirit_directrf_get_txmode(FAR struct spirit_library_s *spirit);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_DIRECTRF_H */
