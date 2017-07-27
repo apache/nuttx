@@ -70,19 +70,19 @@
  * CONFIG_RAM_END             : End address (+1) of SRAM (F1 family only, the
  *                            : F4 family uses the a priori end of SRAM)
  *
- * In addition to internal SRAM, SRAM may also be available through the FSMC.
- * In order to use FSMC SRAM, the following additional things need to be
+ * In addition to internal SRAM, SRAM may also be available through the FMC.
+ * In order to use FMC SRAM, the following additional things need to be
  * present in the NuttX configuration file:
  *
- * CONFIG_STM32F7_FSMC=y      : Enables the FSMC
- * CONFIG_STM32F7_FSMC_SRAM=y : Indicates that SRAM is available via the
- *                              FSMC (as opposed to an LCD or FLASH).
- * CONFIG_HEAP2_BASE          : The base address of the SRAM in the FSMC
+ * CONFIG_STM32F7_FMC=y      : Enables the FMC
+ * CONFIG_STM32F7_FMC_SRAM=y : Indicates that SRAM is available via the
+ *                              FMC (as opposed to an LCD or FLASH).
+ * CONFIG_HEAP2_BASE          : The base address of the SRAM in the FMC
  *                              address space
- * CONFIG_HEAP2_SIZE          : The size of the SRAM in the FSMC
+ * CONFIG_HEAP2_SIZE          : The size of the SRAM in the FMC
  *                              address space
  * CONFIG_MM_REGIONS          : Must be set to a large enough value to
- *                              include the FSMC SRAM (as determined by
+ *                              include the FMC SRAM (as determined by
  *                              the rules provided below)
  */
 
@@ -108,21 +108,21 @@
 #  undef HAVE_DTCM
 #endif
 
-/* We can't possibly have FSMC SRAM if the FSMC is not enabled */
+/* We can't possibly have FMC SRAM if the FMC is not enabled */
 
-#ifndef CONFIG_STM32F7_FSMC
-#  undef CONFIG_STM32F7_FSMC_SRAM
+#ifndef CONFIG_STM32F7_FMC
+#  undef CONFIG_STM32F7_FMC_SRAM
 #endif
 
-/* If FSMC SRAM is going to be used as heap, then verify that the starting
+/* If FMC SRAM is going to be used as heap, then verify that the starting
  * address and size of the external SRAM region has been provided in the
  * configuration (as CONFIG_HEAP2_BASE and CONFIG_HEAP2_SIZE).
  */
 
-#ifdef CONFIG_STM32F7_FSMC_SRAM
+#ifdef CONFIG_STM32F7_FMC_SRAM
 #  if !defined(CONFIG_HEAP2_BASE) || !defined(CONFIG_HEAP2_SIZE)
 #    error CONFIG_HEAP2_BASE and CONFIG_HEAP2_SIZE must be provided
-#    undef CONFIG_STM32F7_FSMC_SRAM
+#    undef CONFIG_STM32F7_FMC_SRAM
 #  endif
 #endif
 
@@ -130,21 +130,21 @@
  *
  * Configuration 1. System SRAM1 (only)
  *                  CONFIG_MM_REGIONS == 1
- *                  CONFIG_STM32F7_FSMC_SRAM NOT defined
+ *                  CONFIG_STM32F7_FMC_SRAM NOT defined
  * Configuration 2. System SRAM1 and SRAM2
  *                  CONFIG_MM_REGIONS == 2
- *                  CONFIG_STM32F7_FSMC_SRAM NOT defined
+ *                  CONFIG_STM32F7_FMC_SRAM NOT defined
  * Configuration 3. System SRAM1 and SRAM2 and DTCM
  *                  CONFIG_MM_REGIONS == 3
- *                  CONFIG_STM32F7_FSMC_SRAM undefined
+ *                  CONFIG_STM32F7_FMC_SRAM undefined
  *                  HAVE_DTCM defined
- * Configuration 4. System SRAM1 and SRAM2 and FSMC SRAM
+ * Configuration 4. System SRAM1 and SRAM2 and FMC SRAM
  *                  CONFIG_MM_REGIONS == 3
- *                  CONFIG_STM32F7_FSMC_SRAM defined
+ *                  CONFIG_STM32F7_FMC_SRAM defined
  *                  HAVE_DTCM undefined
- * Configuration 5. System SRAM1 and SRAM2 and DTCM and FSMC SRAM
+ * Configuration 5. System SRAM1 and SRAM2 and DTCM and FMC SRAM
  *                  CONFIG_MM_REGIONS == 4
- *                  CONFIG_STM32F7_FSMC_SRAM defined
+ *                  CONFIG_STM32F7_FMC_SRAM defined
  *                  HAVE_DTCM defined
  *
  * Let's make sure that all definitions are consistent before doing
@@ -152,9 +152,9 @@
  */
 
 #if CONFIG_MM_REGIONS < 2
-#  ifdef CONFIG_STM32F7_FSMC_SRAM
-#    warning "FSMC SRAM excluded from the heap"
-#    undef CONFIG_STM32F7_FSMC_SRAM
+#  ifdef CONFIG_STM32F7_FMC_SRAM
+#    warning "FMC SRAM excluded from the heap"
+#    undef CONFIG_STM32F7_FMC_SRAM
 #  endif
 #  ifdef HAVE_DTCM
 #    warning "DTCM excluded from the heap"
@@ -162,29 +162,29 @@
 #  endif
 #  warning "SRAM2 excluded from the heap"
 #elif CONFIG_MM_REGIONS < 3
-#  ifdef CONFIG_STM32F7_FSMC_SRAM
-#    warning "FSMC SRAM excluded from the heap"
-#    undef CONFIG_STM32F7_FSMC_SRAM
+#  ifdef CONFIG_STM32F7_FMC_SRAM
+#    warning "FMC SRAM excluded from the heap"
+#    undef CONFIG_STM32F7_FMC_SRAM
 #  endif
 #  ifdef HAVE_DTCM
 #    warning "DTCM excluded from the heap"
 #    undef HAVE_DTCM
 #  endif
 #elif CONFIG_MM_REGIONS < 4
-#  if defined(CONFIG_STM32F7_FSMC_SRAM) && defined(HAVE_DTCM)
-#    warning "CONFIG_MM_REGIONS == 3 but have both FSMC SRAM and DTCM. DTCM excluded from the heap."
+#  if defined(CONFIG_STM32F7_FMC_SRAM) && defined(HAVE_DTCM)
+#    warning "CONFIG_MM_REGIONS == 3 but have both FMC SRAM and DTCM. DTCM excluded from the heap."
 #    undef  HAVE_DTCM
-#  elif !defined(CONFIG_STM32F7_FSMC_SRAM) && !defined(HAVE_DTCM)
+#  elif !defined(CONFIG_STM32F7_FMC_SRAM) && !defined(HAVE_DTCM)
 #    error  "CONFIG_MM_REGIONS == 3 but I do not know what some of the region(s) are"
 #    undef  CONFIG_MM_REGIONS
 #    define CONFIG_MM_REGIONS 2
 #  endif
 #elif CONFIG_MM_REGIONS < 5
-#  if !defined(CONFIG_STM32F7_FSMC_SRAM) && !defined(HAVE_DTCM)
+#  if !defined(CONFIG_STM32F7_FMC_SRAM) && !defined(HAVE_DTCM)
 #    error  "CONFIG_MM_REGIONS == 4 but I do not know what some of the region(s) are"
 #    undef  CONFIG_MM_REGIONS
 #    define CONFIG_MM_REGIONS 2
-#  elif !defined(CONFIG_STM32F7_FSMC_SRAM) || !defined(HAVE_DTCM)
+#  elif !defined(CONFIG_STM32F7_FMC_SRAM) || !defined(HAVE_DTCM)
 #    error  "CONFIG_MM_REGIONS == 4 but I do not know what some of the region(s) are"
 #    undef  CONFIG_MM_REGIONS
 #    define CONFIG_MM_REGIONS 3
@@ -192,9 +192,9 @@
 #else
 #  error "CONFIG_MM_REGIONS > 4 but I do not know what some of the region(s) are"
 #  undef CONFIG_MM_REGIONS
-#  if defined(CONFIG_STM32F7_FSMC_SRAM) && defined(HAVE_DTCM)
+#  if defined(CONFIG_STM32F7_FMC_SRAM) && defined(HAVE_DTCM)
 #    define CONFIG_MM_REGIONS 4
-#  elif defined(CONFIG_STM32F7_FSMC_SRAM) || defined(HAVE_DTCM)
+#  elif defined(CONFIG_STM32F7_FMC_SRAM) || defined(HAVE_DTCM)
 #    define CONFIG_MM_REGIONS 3
 #  else
 #    define CONFIG_MM_REGIONS 2
@@ -405,10 +405,10 @@ void up_addregion(void)
   kumm_addregion((FAR void *)DTCM_START, DTCM_END-DTCM_START);
 #endif
 
-#ifdef CONFIG_STM32F7_FSMC_SRAM
+#ifdef CONFIG_STM32F7_FMC_SRAM
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 
-  /* Allow user-mode access to the FSMC SRAM user heap memory */
+  /* Allow user-mode access to the FMC SRAM user heap memory */
 
    stm32_mpu_uheap((uintptr_t)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
 
@@ -418,7 +418,7 @@ void up_addregion(void)
 
   up_heap_color((FAR void *)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
 
-  /* Add the external FSMC SRAM user heap region. */
+  /* Add the external FMC SRAM user heap region. */
 
   kumm_addregion((FAR void *)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
 #endif

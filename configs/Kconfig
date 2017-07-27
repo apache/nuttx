@@ -1177,8 +1177,8 @@ config ARCH_BOARD_STM32F769I_DISCO
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		STMicro STM32F769I-DISCO development board featuring the STM32F769NIH6
-		MCU. The STM32F769NIH6 is a 216MHz Cortex-M7 with 1024Kb Flash
-		memory and 320Kb SRAM.
+		MCU. The STM32F769NIH6 is a 216MHz Cortex-M7 with 2048Kb Flash
+		memory and 512Kb SRAM.
 
 config ARCH_BOARD_STM32F746_WS
 	bool "Waveshare STM32F746 board"

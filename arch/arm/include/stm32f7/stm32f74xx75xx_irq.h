@@ -112,7 +112,7 @@
 #define STM32_IRQ_TIM14       (STM32_IRQ_FIRST+45) /* 45: TIM14 global interrupt */
 #define STM32_IRQ_TIM8CC      (STM32_IRQ_FIRST+46) /* 46: TIM8 Capture Compare interrupt */
 #define STM32_IRQ_DMA1S7      (STM32_IRQ_FIRST+47) /* 47: DMA1 Stream 7 global interrupt */
-#define STM32_IRQ_FSMC        (STM32_IRQ_FIRST+48) /* 48: FSMC global interrupt */
+#define STM32_IRQ_FMC         (STM32_IRQ_FIRST+48) /* 48: FMC global interrupt */
 #define STM32_IRQ_SDMMC1      (STM32_IRQ_FIRST+49) /* 49: SDMMC1 global interrupt */
 #define STM32_IRQ_TIM5        (STM32_IRQ_FIRST+50) /* 50: TIM5 global interrupt */
 #define STM32_IRQ_SPI3        (STM32_IRQ_FIRST+51) /* 51: SPI3 global interrupt */

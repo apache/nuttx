@@ -239,15 +239,15 @@ STM32F746G-DISCO-specific Configuration Options
     DMA.  A DTCM allocator is available, however, so that DTCM can be
     managed with dtcm_malloc(), dtcm_free(), etc.
 
-    In order to use FSMC SRAM, the following additional things need to be
+    In order to use FMC SRAM, the following additional things need to be
     present in the NuttX configuration file:
 
-    CONFIG_STM32F7_FSMC_SRAM - Indicates that SRAM is available via the
-      FSMC (as opposed to an LCD or FLASH).
+    CONFIG_STM32F7_FMC_SRAM - Indicates that SRAM is available via the
+      FMC (as opposed to an LCD or FLASH).
 
-    CONFIG_HEAP2_BASE - The base address of the SRAM in the FSMC address space (hex)
+    CONFIG_HEAP2_BASE - The base address of the SRAM in the FMC address space (hex)
 
-    CONFIG_HEAP2_SIZE - The size of the SRAM in the FSMC address space (decimal)
+    CONFIG_HEAP2_SIZE - The size of the SRAM in the FMC address space (decimal)
 
     CONFIG_ARCH_FPU - The STM32F746G-DISCO supports a floating point unit (FPU)
 
@@ -353,7 +353,7 @@ STM32F746G-DISCO-specific Configuration Options
     AHB3
     ----
 
-    CONFIG_STM32F7_FSMC           FSMC control registers
+    CONFIG_STM32F7_FMC           FMC control registers
     CONFIG_STM32F7_QUADSPI        QuadSPI Control
 
   Timer devices may be used for different purposes.  One special purpose is

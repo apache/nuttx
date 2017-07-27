@@ -243,10 +243,10 @@
 
 /* Diversification based on Family and package */
 
-#if defined(CONFIG_STM32F7_HAVE_FSMC)
-#  define STM32F7_NFSMC                    1   /* Have FSMC memory controller */
+#if defined(CONFIG_STM32F7_HAVE_FMC)
+#  define STM32F7_NFMC                     1   /* Have FMC memory controller */
 #else
-#  define STM32F7_NFSMC                    0   /* No FSMC memory controller */
+#  define STM32F7_NFMC                     0   /* No FMC memory controller */
 #endif
 #if defined(CONFIG_STM32F7_HAVE_ETHRNET)
 #  define STM32F7_NETHERNET                1   /* 100/100 Ethernet MAC */

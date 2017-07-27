@@ -960,10 +960,10 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
 
   switch (maddr & STM32_REGION_MASK)
     {
-      case STM32_FSMC_BANK1:
-      case STM32_FSMC_BANK2:
-      case STM32_FSMC_BANK3:
-      case STM32_FSMC_BANK4:
+      case STM32_FMC_BANK1:
+      case STM32_FMC_BANK2:
+      case STM32_FMC_BANK3:
+      case STM32_FMC_BANK4:
       case STM32_SRAM_BASE:
 
         /* All RAM is supported */
