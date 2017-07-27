@@ -48,6 +48,15 @@ config RGBLED
                 This selection enables building of the "upper-half" RGB LED driver.
                 See include/nuttx/rgbled.h for further PWM driver information.
 
+config RGBLED_INVERT
+	bool "Invert RGB LED Output"
+	depends on RGBLED
+	default n
+	---help---
+		If the board has a common anode RGB LED (a LOW output turns ON
+		each LED), this selection inverts the outputs so that the
+		colors are displayed correctly.
+
 config PCA9635PW
 	bool "PCA9635PW I2C LED Driver"
 	default n

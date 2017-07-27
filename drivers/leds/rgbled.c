@@ -304,9 +304,15 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Convert 8bit to 16bits */
 
-  red   <<= 8;
-  green <<= 8;
-  blue  <<= 8;
+  red   = (red   << 8) | red;
+  green = (green << 8) | green;
+  blue  = (blue  << 8) | blue;
+
+#ifdef CONFIG_RGBLED_INVERT
+  red   ^= 0xffff;
+  green ^= 0xffff;
+  blue  ^= 0xffff;
+#endif
 
   /* Setup LED R */
 
