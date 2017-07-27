@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/analog/adc.c
  *
- *   Copyright (C) 2008-2009, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2016-2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
  *           Gregory Nutt <gnutt@nuttx.org>
@@ -237,6 +237,14 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 
   ainfo("buflen: %d\n", (int)buflen);
 
+  /* Determine size of the messages to return.
+   *
+   * REVISIT:  What if buflen is 8 does that mean 4 messages of size 2?  Or
+   * 2 messages of size 4?  What if buflen is 12.  Does that mean 3 at size
+   * 4?  Or 4 at size 3?  The form of the return data should probably really
+   * be specified via IOCTL.
+   */
+
   if (buflen % 5 == 0)
     {
       msglen = 5;
@@ -244,6 +252,7 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
   else if (buflen % 4 == 0)
     {
       msglen = 4;
+    }
   else if (buflen % 3 == 0)
     {
       msglen = 3;
@@ -259,6 +268,7 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
   else
     {
       msglen = 5;
+    }
 
   if (buflen >= msglen)
     {
@@ -315,36 +325,56 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 
           if (msglen == 1)
             {
-              /* Only one channel,read highest 8-bits */
+              /* Only one channel, return MS 8-bits of the sample*/
 
               buffer[nread] = msg->am_data >> 24;
             }
           else if (msglen == 2)
             {
-              /* Only one channel, read highest 16-bits */
+              /* Only one channel, return only the MS 16-bits of the sample.*/
 
-              *(int16_t *)&buffer[nread] = msg->am_data >> 16;
+              int16_t data16 = msg->am_data >> 16;
+              memcpy(&buffer[nread], &data16, 2);
             }
           else if (msglen == 3)
             {
-              /* Read channel highest 16-bits */
+              int16_t data16;
+
+              /* Return the channel and the MS 16-bits of the sample. */
 
               buffer[nread] = msg->am_channel;
-              *(int16_t *)&buffer[nread + 1] = msg->am_data >> 16;
+              data16 = msg->am_data >> 16;
+              memcpy(&buffer[nread + 1], &data16, 2);
             }
           else if (msglen == 4)
             {
-              /* read channel highest 24-bits */
+              int32_t data24;
 
-              *(int32_t *)&buffer[nread] = msg->am_data;
+#ifdef CONFIG_ENDIAN_BIG
+              /* In the big endian case, we simply copy the MS three bytes
+               * which are indices: 0-2.
+               */
+
+              data24 = msg->am_data;
+#else
+              /* In the little endian case, indices 0-2 correspond to the
+               * the three LS bytes.
+               */
+
+              data24 = msg->am_data >> 8;
+#endif
+
+              /* Return the channel and the most significant 24-bits */
+
               buffer[nread] = msg->am_channel;
+              memcpy(&buffer[nread + 1], &data24, 3);
             }
           else
             {
-              /* Read all */
+              /* Return the channel and all four bytes of the sample */
 
-              *(int32_t *)&buffer[nread + 1] = msg->am_data;
               buffer[nread] = msg->am_channel;
+              memcpy(&buffer[nread + 1], &msg->am_data, 4);
             }
 
           nread += msglen;
