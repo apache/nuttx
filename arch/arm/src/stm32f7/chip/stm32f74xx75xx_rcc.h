@@ -279,7 +279,7 @@
 
 /* AHB3 peripheral reset register */
 
-#define RCC_AHB3RSTR_FSMCRST         (1 << 0)  /* Bit 0: Flexible static memory controller module reset */
+#define RCC_AHB3RSTR_FMCRST          (1 << 0)  /* Bit 0: Flexible static memory controller module reset */
 #define RCC_AHB3RSTR_QSPIRST         (1 << 1)  /* Bit 1: Quad SPI memory controller reset */
 
 /* APB1 Peripheral reset register */
@@ -371,7 +371,7 @@
 
 /* AHB3 Peripheral Clock enable register */
 
-#define RCC_AHB3ENR_FSMCEN           (1 << 0) /* Bit 0: Flexible static memory controller module clock enable */
+#define RCC_AHB3ENR_FMCEN            (1 << 0) /* Bit 0: Flexible static memory controller module clock enable */
 #define RCC_AHB3ENR_QSPIEN           (1 << 1) /* Bit 1: Quad SPI memory controller clock enable */
 
 /* APB1 Peripheral Clock enable register */

@@ -54,19 +54,19 @@
 #define STM32_CODE_BASE      0x00000000     /* 0x00000000-0x1fffffff: 512Mb code block */
 #define STM32_SRAM_BASE      0x20000000     /* 0x20000000-0x3fffffff: 512Mb sram block */
 #define STM32_PERIPH_BASE    0x40000000     /* 0x40000000-0x5fffffff: 512Mb AHB1-2 peripheral blocks */
-#define STM32_FSMC_BASE12    0x60000000     /* 0x60000000-0x7fffffff: 512Mb FSMC bank1&2 block */
-#  define STM32_FSMC_BANK1   0x60000000     /* 0x60000000-0x6fffffff:       256Mb NOR/SRAM */
-#  define STM32_FSMC_BANK2   0x70000000     /* 0x70000000-0x7fffffff:       256Mb NAND FLASH */
-#define STM32_FSMC_BASE34    0x80000000     /* 0x80000000-0x8fffffff: 512Mb FSMC bank3&4 block */
-#  define STM32_FSMC_BANK3   0x80000000     /* 0x80000000-0x8fffffff:       256Mb NAND FLASH */
-#  define STM32_FSMC_BANK4   0x90000000     /* 0x90000000-0x9fffffff:       256Mb PC CARD */
-#define STM32_FSMC_BASE5     0xc0000000     /* 0xc0000000-0xcfffffff: 256Mb FSMC */
-#define STM32_FSMC_BASE6     0xd0000000     /* 0xd0000000-0xdfffffff: 256Mb FSMC */
+#define STM32_FMC_BASE12     0x60000000     /* 0x60000000-0x7fffffff: 512Mb FMC bank1&2 block */
+#  define STM32_FMC_BANK1    0x60000000     /* 0x60000000-0x6fffffff:       256Mb NOR/SRAM */
+#  define STM32_FMC_BANK2    0x70000000     /* 0x70000000-0x7fffffff:       256Mb NAND FLASH */
+#define STM32_FMC_BASE34     0x80000000     /* 0x80000000-0x8fffffff: 512Mb FMC bank3&4 block */
+#  define STM32_FMC_BANK3    0x80000000     /* 0x80000000-0x8fffffff:       256Mb NAND FLASH */
+#  define STM32_FMC_BANK4    0x90000000     /* 0x90000000-0x9fffffff:       256Mb PC CARD */
+#define STM32_FMC_BASE5      0xc0000000     /* 0xc0000000-0xcfffffff: 256Mb FMC */
+#define STM32_FMC_BASE6      0xd0000000     /* 0xd0000000-0xdfffffff: 256Mb FMC */
 #define STM32_CORTEX_BASE    0xe0000000     /* 0xe0000000-0xffffffff: 512Mb Cortex-M7 block */
 
 #define STM32_REGION_MASK    0xf0000000
 #define STM32_IS_SRAM(a)     ((((uint32_t)(a)) & STM32_REGION_MASK) == STM32_SRAM_BASE)
-#define STM32_IS_EXTSRAM(a)  ((((uint32_t)(a)) & STM32_REGION_MASK) == STM32_FSMC_BANK1)
+#define STM32_IS_EXTSRAM(a)  ((((uint32_t)(a)) & STM32_REGION_MASK) == STM32_FMC_BANK1)
 
 /* Code Base Addresses **************************************************************/
 
@@ -205,7 +205,7 @@
 #define STM32_FMCBANK2_BASE  0x70000000     /* 0x70000000-0x7fffffff: FMC bank 2 */
 #define STM32_FMCBANK3_BASE  0x80000000     /* 0x80000000-0x8fffffff: FMC bank 3 */
 #define STM32_FMCBANK4_BASE  0x90000000     /* 0x90000000-0x9fffffff: FMC bank 4 */
-#define STM32_FSMC_BASE      0xa0000000     /* 0xa0000000-0xa0000fff: FMC control registers */
+#define STM32_FMC_BASE       0xa0000000     /* 0xa0000000-0xa0000fff: FMC control registers */
 #define STM32_QUADSPI_BASE   0xa0001000     /* 0xa0001000-0xa0001fff: QuadSPI Control */
 #define STM32_FMCBANK5_BASE  0xc0000000     /* 0xc0000000-0xcfffffff: FMC bank 5 */
 #define STM32_FMCBANK6_BASE  0xd0000000     /* 0xd0000000-0xdfffffff: FMC bank 6 */

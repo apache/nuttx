@@ -308,10 +308,10 @@ static inline void rcc_enableahb3(void)
 
   regval = getreg32(STM32_RCC_AHB3ENR);
 
-#ifdef CONFIG_STM32F7_FSMC
+#ifdef CONFIG_STM32F7_FMC
   /* Flexible static memory controller module clock enable */
 
-  regval |= RCC_AHB3ENR_FSMCEN;
+  regval |= RCC_AHB3ENR_FMCEN;
 #endif
 
 #ifdef CONFIG_STM32F7_QUADSPI
