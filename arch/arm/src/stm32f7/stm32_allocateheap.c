@@ -74,8 +74,8 @@
  * In order to use FMC SRAM, the following additional things need to be
  * present in the NuttX configuration file:
  *
- * CONFIG_STM32F7_FMC=y      : Enables the FMC
- * CONFIG_STM32F7_FMC_SRAM=y : Indicates that SRAM is available via the
+ * CONFIG_STM32F7_FMC=y       : Enables the FMC
+ * CONFIG_STM32F7_FMC_SRAM=y  : Indicates that SRAM is available via the
  *                              FMC (as opposed to an LCD or FLASH).
  * CONFIG_HEAP2_BASE          : The base address of the SRAM in the FMC
  *                              address space

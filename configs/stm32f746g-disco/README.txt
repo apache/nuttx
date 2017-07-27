@@ -353,7 +353,7 @@ STM32F746G-DISCO-specific Configuration Options
     AHB3
     ----
 
-    CONFIG_STM32F7_FMC           FMC control registers
+    CONFIG_STM32F7_FMC            FMC control registers
     CONFIG_STM32F7_QUADSPI        QuadSPI Control
 
   Timer devices may be used for different purposes.  One special purpose is
