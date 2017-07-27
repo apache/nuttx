@@ -984,7 +984,8 @@ static void stm32_ltdc_periphconfig(void)
 
   /* Configure dedicated clock external */
 
-  reginfo("configured RCC_DCKCFGR=%08x\n", getreg32(STM32_RCC_DCKCFGR));
+  reginfo("configured RCC_DCKCFGR1=%08x\n", getreg32(STM32_RCC_DCKCFGR1));
+  reginfo("configured RCC_DCKCFGR2=%08x\n", getreg32(STM32_RCC_DCKCFGR2));
 
   /* Configure LTDC_SSCR */
 
