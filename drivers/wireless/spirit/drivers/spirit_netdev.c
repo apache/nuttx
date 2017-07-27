@@ -96,7 +96,7 @@
 #endif
 
 #ifndef CONFIG_SPIRIT_PKTLEN
-#  define CONFIG_SPIRIT_PKTLEN 128
+#  define CONFIG_SPIRIT_PKTLEN 96
 #endif
 
 #ifndef CONFIG_SPIRIT_MTU
@@ -1733,13 +1733,13 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
       return ret;
     }
 
-  ret = spirit_qi_sqicheck(spirit, S_ENABLE);
+  ret = spirit_qi_enable_sqicheck(spirit, S_ENABLE);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = spirit_qi_set_rssithreshold(spirit, SPIRIT_CCA_THRESHOLD);
+  ret = spirit_qi_set_rssithreshold_dbm(spirit, SPIRIT_CCA_THRESHOLD);
   if (ret < 0)
     {
       return ret;

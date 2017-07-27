@@ -66,6 +66,113 @@
  ******************************************************************************/
 
 /******************************************************************************
+ * Name: spirit_dump_buffer
+ *
+ * Description:
+ *   Dump a data buffer to the SYSLOG.
+ *
+ * Parameters:
+ *   buffer - The buffer to be dumped
+ *   buflen - The length of the buffer in bytes.
+ *
+ * Returned Value:
+ *   None
+ *
+ ******************************************************************************/
+
+#if defined(CONFIG_WL_SPIRIT_REGDEBUG) || defined(CONFIG_WL_SPIRIT_FIFODUMP)
+static void spirit_dump_buffer(FAR const uint8_t *buffer, unsigned int buflen)
+{
+  char outbuf[16*3 + 3]; /* 16 hex bytes + 2 space separator + NUL termination */
+  FAR char *ptr;
+  unsigned int i;
+  unsigned int j:
+  unsigned int maxj:
+
+  for (i = 0; i < buflen; i += 16)
+    {
+      maxj = 16;
+      if (i + maxj > buflen)
+        {
+          maxj = buflen - i;
+        }
+
+      ptr = outbuf;
+      for (j = 0; j < maxj; j++)
+        {
+          if (j = 8)
+            {
+              *outbuf++ = ' ';
+              *outbuf++ = ' ';
+            }
+
+          sprintf(outbuf, "%02x ", *buffer++);
+          outbuf += 3;
+        }
+
+      *outbuf = '\0';
+      wlinfo("  %s\n", outbuf)
+    }
+}
+#endif
+
+/******************************************************************************
+ * Name: spirit_regdebug
+ *
+ * Description:
+ *   Dump a register access.
+ *
+ * Parameters:
+ *   msg    - Describes the access
+ *   header - Two byte header before the access
+ *   buffer - The buffer to be dumped
+ *   buflen - The length of the buffer in bytes.
+ *
+ * Returned Value:
+ *   None
+ *
+ ******************************************************************************/
+
+#ifdef CONFIG_WL_SPIRIT_REGDEBUG
+static void spirit_regdebug(FAR const char *msg, FAR uint8_t *header,
+                            FAR const uint8_t *buffer, unsigned int buflen)
+{
+  wlinfo("%-8s: %02x %02x\n", header[0], header[1]);
+  spirit_dump_buffer(buffer, buflen);
+}
+#else
+#  define spirit_regdebug(msg,header,buffer,buflen)
+#endif
+
+/******************************************************************************
+ * Name: spirit_fifodebug
+ *
+ * Description:
+ *   Dump a FIFO access.
+ *
+ * Parameters:
+ *   msg    - Describes the access
+ *   header - Two byte header before the access
+ *   buffer - The buffer to be dumped
+ *   buflen - The length of the buffer in bytes.
+ *
+ * Returned Value:
+ *   None
+ *
+ ******************************************************************************/
+
+#ifdef CONFIG_WL_SPIRIT_FIFODUMP
+static void spirit_fifodebug(FAR const char *msg, FAR uint8_t *header,
+                             FAR const uint8_t *buffer, unsigned int buflen)
+{
+  wlinfo("%-8s: %02x %02x\n", header[0], header[1]);
+  spirit_dump_buffer(buffer, buflen);
+}
+#else
+#  define spirit_fifodebug(msg,header,buffer,buflen)
+#endif
+
+/******************************************************************************
  * Name: spirit_lock
  *
  * Description:
@@ -187,6 +294,8 @@ int spirit_reg_read(FAR struct spirit_library_s *spirit, uint8_t regaddr,
 
   SPI_SELECT(spirit->spi, SPIDEV_WIRELESS(0), false);
   spirit_unlock(spirit->spi);
+
+  spirit_regdebug("READ", header, buffer, buflen);
   return OK;
 }
 
@@ -218,6 +327,7 @@ int spirit_reg_write(FAR struct spirit_library_s *spirit, uint8_t regaddr,
 
   header[0] = WRITE_HEADER;
   header[1] = regaddr;
+  spirit_regdebug("WRITE", header, buffer, buflen);
 
   /* Lock the SPI bus and select the Spirit device */
 
@@ -268,6 +378,7 @@ int spirit_command(FAR struct spirit_library_s *spirit, uint8_t cmd)
 
   header[0] = COMMAND_HEADER;
   header[1] = cmd;
+  spirit_regdebug("CMD", header, NULL, 0);
 
   /* Lock the SPI bus and select the Spirit device */
 
@@ -338,6 +449,8 @@ int spirit_fifo_read(FAR struct spirit_library_s *spirit, FAR uint8_t *buffer,
 
   SPI_SELECT(spirit->spi, SPIDEV_WIRELESS(0), false);
   spirit_unlock(spirit->spi);
+
+  spirit_fifodebug("FIFO IN", header, buffer, buflen);
   return OK;
 }
 
@@ -368,6 +481,7 @@ int spirit_fifo_write(FAR struct spirit_library_s *spirit,
 
   header[0] = WRITE_HEADER;
   header[1] = LINEAR_FIFO_ADDRESS;
+  spirit_fifodebug("FIFO OUT", header, buffer, buflen);
 
   /* Lock the SPI bus and select the Spirit device */
 

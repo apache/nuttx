@@ -47,6 +47,8 @@
  * Pre-processor Definitions
  ******************************************************************************/
 
+#define SPIRIT_GENERAL_LIBVERSION() "Spirit1_Libraries_v.3.2.0"
+
 /* Macros used in debug assertions */
 
 #define IS_MODE_EXT(mode)  (mode  == MODE_EXT_XO   ||  mode == MODE_EXT_XIN)

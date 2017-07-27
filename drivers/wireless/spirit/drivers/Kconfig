@@ -14,4 +14,46 @@ config SPIRIT_NETDEV
 
 if SPIRIT_NETDEV
 
+config SPIRIT_PKTLEN
+	int "Fixed packet length"
+	default 96
+	range 1 96 if !SPIRIT_FIFOS
+	range 1 65535 if SPIRIT_FIFOS
+	---help---
+		Fixed pkt sizes are used.  This setting describes that fixed packet
+		size.
+
+config SPIRIT_FIFOS
+	bool "FIFO Watermarks"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		The Spirit hardware can provided interrupts when indicate when the
+		RX or TX FIFOs are almost full or empty.  This is useful for
+		supporting very large packets, larger than the FIFO size.  The RX/TX
+		FIFO size is 96 bytes.  As long as the packet size is less then or
+		equal 96 bytes, this feature is not needed.
+
+		NOTE:  Marked experimental because this feature is not yet implement
+		(hooks are present).  You should not enable this feature unless you
+		plan to implement the feature.
+
+config SPIRIT_PKTLEN
+	int "Fixed packet length"
+	default 96
+	range 1 96 if !SPIRIT_FIFOS
+	range 1 65535 if SPIRIT_FIFOS
+	---help---
+		Fixed pkt sizes are used.  This setting describes that fixed packet
+		size.
+
+config SPIRIT_MTU
+	int "MTU"
+	default 596
+	---help---
+		6LoWPAN support fragmenting and reassembly of large IPv6 packets.
+		Each fragment will be up CONFIG_SPIRIT_PKTLEN in length.  An single
+		IPv6 packet maybe fragment into several such frames.  This setting
+		provides the MTU which is the largest fully assembled IPv6 packet that can be sent.
+
 endif # SPIRIT_NETDEV
