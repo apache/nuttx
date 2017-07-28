@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/rgbled.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -106,6 +106,9 @@ static const struct file_operations g_rgbledops =
   0             /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   , 0           /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , 0           /* unlink */
 #endif
 };
 
@@ -223,10 +226,64 @@ static ssize_t rgbled_read(FAR struct file *filep, FAR char *buffer,
 }
 
 /****************************************************************************
+ * Name: rgbled_lightness
+ *
+ * Description:
+ *   Convert an 8-bit color level to a 16-bit PWM command, using a
+ *   piecewise linear approximation of the CIE 1931 lightness formula.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RGBLED_LIGHTNESS_CORRECTION
+static unsigned short rgbled_lightness(unsigned char color_level)
+{
+  unsigned int lut_index;
+  unsigned short pwm_cmd = 0;
+
+  static const unsigned char lut_color_in[9] =
+    {
+      0x00, 0x20, 0x40, 0x60, 0x80, 0xa0, 0xc0, 0xe0, 0xff
+    };
+
+  static const unsigned short lut_pwm_out[9] =
+    {
+      0x0000, 0x03d1, 0x0b62, 0x1952, 0x2f93,
+      0x5015, 0x7ccb, 0xb7a7, 0xffff
+    };
+
+  for (lut_index = 0; lut_index < sizeof(lut_color_in); ++lut_index)
+    {
+      if (lut_color_in[lut_index] >= color_level)
+        {
+          break;
+        }
+    }
+
+  if (lut_index < sizeof(lut_color_in))
+    {
+      if (lut_color_in[lut_index] == color_level)
+        {
+          pwm_cmd = lut_pwm_out[lut_index];
+        }
+      else
+        {
+          pwm_cmd =  (unsigned short)(lut_pwm_out[lut_index - 1] +
+            (int)(lut_pwm_out[lut_index] - lut_pwm_out[lut_index - 1]) *
+            (int)(color_level - lut_color_in[lut_index - 1]) /
+            (int)(lut_color_in[lut_index] - lut_color_in[lut_index - 1]));
+        }
+    }
+
+  return pwm_cmd;
+}
+#endif /* CONFIG_RGBLED_LIGHTNESS_CORRECTION */
+
+/****************************************************************************
  * Name: rgbled_write
  *
  * Description:
- *   A dummy write method.  This is provided only to satisfy the VFS layer.
+ *   A write method which parses an HTML-style RGB string like "#FF8833"
+ *   into color values, and sends them to the lower-half PWM drivers.
  *
  ****************************************************************************/
 
@@ -304,9 +361,19 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Convert 8bit to 16bits */
 
+#ifdef CONFIG_RGBLED_LIGHTNESS_CORRECTION
+
+  red   = rgbled_lightness((unsigned char)red);
+  green = rgbled_lightness((unsigned char)green);
+  blue  = rgbled_lightness((unsigned char)blue);
+
+#else
+
   red   = (red   << 8) | red;
   green = (green << 8) | green;
   blue  = (blue  << 8) | blue;
+
+#endif
 
 #ifdef CONFIG_RGBLED_INVERT
   red   ^= 0xffff;
