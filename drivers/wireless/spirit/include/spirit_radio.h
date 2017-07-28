@@ -391,6 +391,27 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
                             FAR const struct radio_init_s *radioinit);
 
 /******************************************************************************
+ * Name: spirit_radio_get_setup
+ *
+ * Description:
+ *   Returns the SPIRIT analog and digital radio structure according to the
+ *   registers value.
+ *
+ * Input Parameters:
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   radioinit pointer to a struct radio_init_s that
+ *         contains the configuration information for the analog radio part of SPIRIT.
+ *
+ * Returned Value:
+ *   Zero (OK) returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ******************************************************************************/
+
+int spirit_radio_get_setup(FAR struct spirit_library_s *spirit,
+                           FAR struct radio_init_s *radioinit);
+
+/******************************************************************************
  * Name: spirit_radio_set_xtalflag
  *
  * Description:
@@ -529,6 +550,41 @@ enum spirit_bandselect_e
   spirit_radio_get_band(FAR struct spirit_library_s *spirit);
 
 /******************************************************************************
+ * Name: spirit_radio_get_channel
+ *
+ * Description:
+ *   Returns the actual channel number.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Actual channel number.
+ *
+ ******************************************************************************/
+
+uint8_t spirit_radio_get_channel(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_radio_set_foffset_ppm
+ *
+ * Description:
+ *   Sets the FC OFFSET register starting from xtal ppm value.
+ *
+ * Input Parameters:
+ *   spirit      - Reference to a Spirit library state structure instance
+ *   xtaloffset - The xtal offset expressed in ppm.
+ *
+ * Returned Value:
+ *   Zero (OK) returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ******************************************************************************/
+
+int spirit_radio_set_foffset_ppm(FAR struct spirit_library_s *spirit,
+                                 int16_t xtaloffset);
+
+/******************************************************************************
  * Name: spirit_radio_set_chspace
  *
  * Description:
@@ -588,20 +644,23 @@ int spirit_radio_set_channel(FAR struct spirit_library_s *spirit,
                              uint8_t chnum);
 
 /******************************************************************************
- * Name: spirit_radio_get_channel
+ * Name: spirit_radio_set_foffset_hz
  *
  * Description:
- *   Returns the actual channel number.
+ *   Sets the FC OFFSET register starting from frequency offset expressed in Hz.
  *
  * Input Parameters:
- *   spirit - Reference to a Spirit library state structure instance
+ *   spirit  - Reference to a Spirit library state structure instance
+ *   foffset - Frequency offset expressed in Hz as signed word.
  *
  * Returned Value:
- *   Actual channel number.
+ *   Zero (OK) returned on success; a negated errno value is returned on any
+ *   failure.
  *
  ******************************************************************************/
 
-uint8_t spirit_radio_get_channel(FAR struct spirit_library_s *spirit);
+int spirit_radio_set_foffset_hz(FAR struct spirit_library_s *spirit,
+                                int32_t foffset);
 
 /******************************************************************************
  * Name: spirit_radio_get_foffset
@@ -676,6 +735,22 @@ void spirit_radio_enable_wavco_calibration(FAR struct spirit_library_s *spirit,
 uint32_t spirit_radio_get_basefrequency(FAR struct spirit_library_s *spirit);
 
 /******************************************************************************
+ * Name: spirit_radio_get_centerfreq
+ *
+ * Description:
+ *   Returns the actual channel center frequency.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Actual channel center frequency expressed in Hz.
+ *
+ ******************************************************************************/
+
+uint32_t spirit_radio_get_centerfreq(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
  * Name: spirit_radio_convert_datarate
  *
  * Description:
@@ -696,6 +771,32 @@ uint32_t spirit_radio_get_basefrequency(FAR struct spirit_library_s *spirit);
 int spirit_radio_convert_datarate(FAR struct spirit_library_s *spirit,
                                   uint32_t datarate, FAR uint8_t *pcm,
                                   FAR uint8_t *pce);
+
+/******************************************************************************
+ * Name: spirit_radio_convert_chbandwidth
+ *
+ * Description:
+ *   Returns the mantissa and exponent for a given bandwidth.  Even if it is
+ *   possible to pass as parameter any value in the below mentioned range, the
+ *   API will search the closer value according to a fixed table of channel
+ *   bandwidth values (@ref s_vectnBandwidth), as defined in the datasheet,
+ *   returning the corresponding mantissa and exponent value.
+ *
+ * Input Parameters:
+ *   spirit    - Reference to a Spirit library state structure instance
+ *   bandwidth - bandwidth expressed in Hz. This parameter ranging between
+ *               1100 and 800100.
+ *   pcm       - pointer to the returned mantissa value.
+ *   pce       - pointer to the returned exponent value.
+ *
+ * Returned Value:
+ *   Error code:  0=no error, <0=error during calibration of VCO.
+ *
+ ******************************************************************************/
+
+int spirit_radio_convert_chbandwidth(FAR struct spirit_library_s *spirit,
+                                     uint32_t bandwidth, FAR uint8_t *pcm,
+                                     FAR uint8_t *pce);
 
 /******************************************************************************
  * Name: spirit_radio_convert_freqdev
@@ -722,33 +823,212 @@ int spirit_radio_convert_freqdev(FAR struct spirit_library_s *spirit,
                                  FAR uint8_t *pce);
 
 /******************************************************************************
- * Name:
+ * Name: spirit_radio_set_datarate
  *
  * Description:
- *   Returns the mantissa and exponent for a given bandwidth.  Even if it is
- *   possible to pass as parameter any value in the below mentioned range, the
- *   API will search the closer value according to a fixed table of channel
- *   bandwidth values (@ref s_vectnBandwidth), as defined in the datasheet,
- *   returning the corresponding mantissa and exponent value.
+ *   Sets the datarate.
  *
  * Input Parameters:
- *   spirit    - Reference to a Spirit library state structure instance
- *   bandwidth - bandwidth expressed in Hz. This parameter ranging between
- *               1100 and 800100.
- *   pcm       - pointer to the returned mantissa value.
- *   pce       - pointer to the returned exponent value.
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   datarate - Datarate expressed in bps. This value must be in the range
+ *              [100 500000].
  *
  * Returned Value:
- *   Error code:  0=no error, <0=error during calibration of VCO.
+ *   Zero (OK) is returned on succes; a negated errnor value is returned on any
+ *   failure.
  *
  ******************************************************************************/
 
-int spirit_radio_convert_chbandwidth(FAR struct spirit_library_s *spirit,
-                                     uint32_t bandwidth, FAR uint8_t *pcm,
-                                     FAR uint8_t *pce);
+int spirit_radio_set_datarate(FAR struct spirit_library_s *spirit,
+                              uint32_t datarate);
 
 /******************************************************************************
- * Name: spirit_radio_dbm2reg
+ * Name: spirit_radio_get_datarate
+ *
+ * Description:
+ *   Returns the datarate.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Settled datarate expressed in bps.
+ *
+ ******************************************************************************/
+
+uint32_t spirit_radio_get_datarate(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_radio_set_freqdev
+ *
+ * Description:
+ *   Sets the frequency deviation.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *   fdev   - Frequency deviation expressed in Hz. Be sure that this value
+ *            is in the correct range [F_Xo*8/2^18, F_Xo*7680/2^18] Hz.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on succes; a negated errnor value is returned on any
+ *   failure.
+ *
+ ******************************************************************************/
+
+int spirit_radio_set_freqdev(FAR struct spirit_library_s *spirit,
+                             uint32_t fdev);
+
+/******************************************************************************
+ * Name: spirit_radio_get_freqdev
+ *
+ * Description:
+ *   Returns the frequency deviation.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Frequency deviation value expressed in Hz.
+ *         This value will be in the range [F_Xo*8/2^18, F_Xo*7680/2^18] Hz.
+ *
+ ******************************************************************************/
+
+uint32_t spirit_radio_get_freqdev(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_radio_set_chfilterbw
+ *
+ * Description:
+ *   Sets the channel filter bandwidth.
+ *
+ * Input Parameters:
+ *   spirit    - Reference to a Spirit library state structure instance
+ *   bandwidth - Channel filter bandwidth expressed in Hz. This parameter
+ *               must be in the range [1100 800100].  The API will search the
+ *               closest value according to a fixed table of channel bandwidth
+ *               values, as defined in the datasheet. To verify the settled
+ *               channel bandwidth it is possible to use the
+ *               spirit_radio_get_chfilterbw() API.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on succes; a negated errnor value is returned on any
+ *   failure.
+ *
+ ******************************************************************************/
+
+int spirit_radio_set_chfilterbw(FAR struct spirit_library_s *spirit,
+                                uint32_t bandwidth);
+
+/******************************************************************************
+ * Name: spirit_radio_get_chfilterbw
+ *
+ * Description:
+ *   Returns the channel filter bandwidth.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Channel filter bandwidth expressed in Hz.
+ *
+ ******************************************************************************/
+
+uint32_t spirit_radio_get_chfilterbw(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_radio_set_modulation
+ *
+ * Description:
+ *   Sets the modulation type.
+ *
+ * Input Parameters:
+ *   spirit     - Reference to a Spirit library state structure instance
+ *   modulation - Modulation to set.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on succes; a negated errnor value is returned on any
+ *   failure.
+ *
+ ******************************************************************************/
+
+int spirit_radio_set_modulation(FAR struct spirit_library_s *spirit,
+                                enum modulation_select_e modulation);
+
+/******************************************************************************
+ * Name: spirit_radio_get_modulation
+ *
+ * Description:
+ *   Returns the modulation type used.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Settled modulation type.
+ *
+ ******************************************************************************/
+
+enum modulation_select_e
+  spirit_radio_get_modulation(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_radio_enable_cwtxmode
+ *
+ * Description:
+ *   Enables or Disables the Continuous Wave transmit mode.
+ *
+ * Input Parameters:
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   newstate - New state for power ramping. This parameter can be: S_ENABLE
+ *              or S_DISABLE .
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on succes; a negated errnor value is returned on any
+ *   failure.
+ *
+ ******************************************************************************/
+
+int spirit_radio_enable_cwtxmode(FAR struct spirit_library_s *spirit,
+                                 enum spirit_functional_state_e newstate);
+
+/******************************************************************************
+ * Name: spirit_radio_set_ookpeackdecay
+ *
+ * Description:
+ *   Sets the OOK Peak Decay.
+ *
+ * Input Parameters:
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   ookdelay - Peak decay control for OOK.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on succes; a negated errnor value is returned on any
+ *   failure.
+ *
+ ******************************************************************************/
+
+int spirit_radio_set_ookpeackdecay(FAR struct spirit_library_s *spirit,
+                                    enum spirit_ookpeakdelay_e ookdelay);
+
+/******************************************************************************
+ * Name: spirit_radio_get_ookpeackdecay
+ *
+ * Description:
+ *   Returns the OOK Peak Decay.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Ook peak decay value.
+ *
+ ******************************************************************************/
+
+enum spirit_ookpeakdelay_e
+  spirit_radio_get_ookpeackdecay(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_radio_convert_power2reg
  *
  * Description:
  *   Returns the PA register value that corresponds to the passed dBm power.
@@ -766,8 +1046,89 @@ int spirit_radio_convert_chbandwidth(FAR struct spirit_library_s *spirit,
  *
  ******************************************************************************/
 
-uint8_t spirit_radio_dbm2reg(FAR struct spirit_library_s *spirit,
-                             uint32_t fbase, float powerdbm);
+uint8_t spirit_radio_convert_power2reg(FAR struct spirit_library_s *spirit,
+                                       uint32_t fbase, float powerdbm);
+
+/******************************************************************************
+ * Name: spirit_radio_convert_reg2power
+ *
+ * Description:
+ *   Returns the dBm power that corresponds to the value of PA register.
+ *
+ *   NOTE: The power interpolation curves used by this function have been
+ *   extracted by measurements done on the divisional evaluation boards.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *   fbase  - Frequency base expressed in Hz.
+ *   regval - Register value of the PA.
+ *
+ * Returned Value:
+ *   Power in dBm as float.
+ *
+ ******************************************************************************/
+
+float spirit_radio_convert_reg2power(FAR struct spirit_library_s *spirit,
+                                     uint32_t fbase, uint8_t regval);
+
+/******************************************************************************
+ * Name: spirit_radio_config_patable
+ *
+ * Description:
+ *   Configures the Power Amplifier Table and registers with value expressed
+ *   in dBm.
+ *
+ * Input Parameters:
+ *   spirit  - Reference to a Spirit library state structure instance
+ *   nlevels - Number of levels to set. This parameter must be in the range
+ *             [0:7].
+ *   width   - Step width expressed in terms of bit period units Tb/8.  This
+ *             parameter must be in the range [1:4].
+ *   load    - The of the possible value of the enum type enum
+ *             pirit_paload_capacitor_e.
+ *
+ *               LOAD_0_PF    No additional PA load capacitor
+ *               LOAD_1_2_PF  1.2pF additional PA load capacitor
+ *               LOAD_2_4_PF  2.4pF additional PA load capacitor
+ *               LOAD_3_6_PF  3.6pF additional PA load capacitor
+ *
+ *   table   - Pointer to an array of PA values in dbm between
+ *             [-PA_LOWER_LIMIT: PA_UPPER_LIMIT] dbm.  The first element must
+ *             be the lower level (PA_LEVEL[0]) value and the last element
+ *             the higher level one (PA_LEVEL[paLevelMaxIndex]).
+ *
+ * Returned Value:
+ *   Zero (OK) on success.  A negated errno value is returned on any failure.
+ *
+ ******************************************************************************/
+
+int spirit_radio_config_patable(FAR struct spirit_library_s *spirit,
+                                uint8_t nlevels, uint8_t width,
+                                enum spirit_paload_capacitor_e load,
+                                FAR float *table);
+
+/******************************************************************************
+ * Name: regaddr
+ *
+ * Description:
+ *   Returns the Power Amplifier Table and registers, returning values in dBm.
+ *
+ * Input Parameters:
+ *   spirit  - Reference to a Spirit library state structure instance
+ *   nlevels - Pointer to the number of levels settled. This parameter must
+ *             be in the range [0:7].
+ *   table   - Pointer to an array of 8 elements containing the PA value in dbm.
+ *             The first element will be the PA_LEVEL_0 and the last element
+ *             will be PA_LEVEL_7. Any value higher than PA_UPPER_LIMIT implies
+ (             no output power (output stage is in high impedance).
+ *
+ * Returned Value:
+ *   Zero (OK) on success.  A negated errno value is returned on any failure.
+ *
+ ******************************************************************************/
+
+int spirit_radio_get_patable(FAR struct spirit_library_s *spirit,
+                             FAR uint8_t *nlevels, FAR float *table);
 
 /******************************************************************************
  * Name: spirit_radio_set_palevel
@@ -775,8 +1136,8 @@ uint8_t spirit_radio_dbm2reg(FAR struct spirit_library_s *spirit,
  * Description:
  *   Sets a specific PA_LEVEL register, with a value given in dBm.
  *
- *   NOTE: This function makes use of the @ref spirit_radio_dbm2reg fcn to
- *   interpolate the power value.
+ *   NOTE: This function makes use of the spirit_radio_convert_power2reg function
+ *   to interpolate the power value.
  *
  * Input Parameters:
  *   spirit   - Reference to a Spirit library state structure instance

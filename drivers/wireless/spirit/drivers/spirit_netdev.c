@@ -512,13 +512,15 @@ static int spirit_transmit(FAR struct spirit_driver_s *priv)
           goto errout_with_iob;
         }
 
-      /* Sets the length of the packet to send */
+      /* Make sure that the TX linear FIFO is completely empty */
 
       ret = spirit_command(spirit, COMMAND_FLUSHTXFIFO);
       if (ret < 0)
         {
           goto errout_with_iob;
         }
+
+      /* Sets the length of the packet to send */
 
       ret = spirit_pktbasic_set_payloadlen(spirit, iob->io_len);
       if (ret < 0)
@@ -555,13 +557,15 @@ static int spirit_transmit(FAR struct spirit_driver_s *priv)
           goto errout_with_iob;
         }
 
-      /* Puts the SPIRIT1 in TX state */
+      /* Put the SPIRIT1 into TX state.  This starts the transmission */
 
-      ret = spirit_command(spirit, COMMAND_TX);  /* Starts transmission */
+      ret = spirit_command(spirit, COMMAND_TX);
       if (ret < 0)
         {
           goto errout_with_iob;
         }
+
+      /* Wait until we have successfully entered the TX state */
 
       ret = spirit_waitstatus(spirit, MC_STATE_TX, 5);
       if (ret < 0)
