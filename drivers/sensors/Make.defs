@@ -113,6 +113,10 @@ ifeq ($(CONFIG_MS58XX),y)
   CSRCS += ms58xx.c
 endif
 
+ifeq ($(CONFIG_LTC4151),y)
+  CSRCS += ltc4151.c
+endif
+
 endif # CONFIG_I2C
 
 # These drivers depend on SPI support
