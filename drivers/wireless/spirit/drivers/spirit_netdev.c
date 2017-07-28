@@ -279,6 +279,36 @@ static const struct spirit_csma_init_s g_csma_init =
   8                 /* BU prescaler */
 };
 
+#ifdef CONFIG_SPIRIT_MULTICAST
+static struct pktbasic_addr_s g_addrinit =
+{
+  S_DISABLE,                         /* Disable filtering on node address */
+  0x34,                              /* Note address (Temporary, until assigned) */
+  S_DISABLE,                         /* Disable filtering on multicast address */
+  0xee,                              /* Multicast address */
+  S_DISABLE,                         /* Disable filtering on broadcast address */
+  0xff                               /* Broadcast address */
+};
+#else
+static struct pktbasic_addr_s g_addrinit =
+{
+  S_ENABLE,                          /* Enable filtering on node address */
+  0x34,                              /* Note address (Temporary, until assigned) */
+#ifdef CONFIG_SPIRIT_MULTICAST
+  S_ENABLE,                          /* Enable filtering on multicast address */
+#else
+  S_DISABLE,                         /* Disable filtering on multicast address */
+#endif
+  0xee,                              /* Multicast address */
+#ifdef CONFIG_SPIRIT_BROADCAST
+  S_ENABLE,                          /* Enable filtering on broadcast address */
+#else
+  S_DISABLE,                         /* Disable filtering on broadcast address */
+#endif
+  0xff                               /* Broadcast address */
+};
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -1171,8 +1201,16 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
           goto error_with_ifalmostup;
         }
 
-      /* Instantiate the MAC address from dev->d_mac.ether.ether_addr_octet */
+      /* Instantiate the assigned node address */
+
 #warning Missing logic
+#if 0
+      ret = spirit_pktcommon_set_nodeaddress(spirit, node_address);
+      if (ret < 0)
+        {
+          goto error_with_ifalmostup;
+        }
+#endif
 
       /* Set and activate a timer process */
 
@@ -1655,6 +1693,14 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
       return ret;
     }
 
+  /* Configure address filtering */
+
+  ret = spirit_pktbasic_addr_initialize(spirit, &g_addrinit);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Enable the following interrupt sources, routed to GPIO */
 
   ret = spirit_irq_disable_all(spirit);
@@ -1752,7 +1798,7 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
       return ret;
     }
 
-  ret = spirit_timer_set_rxtimeout(spirit, 0); /* 0=No timeout */
+  ret = spirit_timer_set_rxtimeout_counter(spirit, 0); /* 0=No timeout */
   if (ret < 0)
     {
       return ret;

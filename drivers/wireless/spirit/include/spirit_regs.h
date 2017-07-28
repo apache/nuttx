@@ -1265,11 +1265,12 @@
  *
  *   Default value: 0x00
  *   Read Write
+ *
  *   7:0    BROADCAST[7:0]:  Address shared for broadcast communication link
  */
 
 #define PCKT_FLT_GOALS_BROADCAST_BASE   ((uint8_t)0x4c) /* Address shared for broadcast
-                                                          * communication  links */
+                                                         * communication  links */
 
 /* PCKT_FLT_GOALS_MULTICAST register
  *
@@ -1285,19 +1286,19 @@
  *
  *   Default value: 0x00
  *   Read Write
+ *
  *   7:0    TX_SOURCE_ADDR[7:0]:  TX packet source / RX packet destination fields
  */
 
 #define PCKT_FLT_GOALS_TX_ADDR_BASE     ((uint8_t)0x4e)  /* Address of the destination (also
-                                                          * device own address)
-*/
+                                                          * device own address) */
 
 /* PCKT_FLT_OPTIONS register
  *
  *   Default value: 0x70
  *   Read Write
- *   7   Reserved.
  *
+ *   7   Reserved.
  *   6   RX_TIMEOUT_AND_OR_SELECT[0]:  1 - ‘OR’ logical function applied to CS/SQI/PQI
  *                                         values (masked by 7:5 bits in PROTOCOL register)
  *   5   CONTROL_FILTERING[0]:         1 - RX packet accepted if its control fields matches

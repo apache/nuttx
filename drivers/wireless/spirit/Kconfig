@@ -23,7 +23,7 @@ config WL_SPIRIT_SPIFREQUENCY
 config WL_SPIRIT_REGDEBUG
 	bool "Enable register level debug"
 	default n
-	depenes ont DEBUG_WIRELESS_INFO
+	depends on DEBUG_WIRELESS_INFO
 	---help---
 		Enable logic to dump each value read from and written to the Sprit
 		registers.
@@ -31,7 +31,7 @@ config WL_SPIRIT_REGDEBUG
 config WL_SPIRIT_FIFODUMP
 	bool "Enable debug FIFO dump"
 	default n
-	depenes ont DEBUG_WIRELESS_INFO
+	depends on DEBUG_WIRELESS_INFO
 	---help---
 		Enable logic to dump data written to and read from the linear FIFO.
 

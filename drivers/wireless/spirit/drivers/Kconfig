@@ -54,6 +54,26 @@ config SPIRIT_MTU
 		6LoWPAN support fragmenting and reassembly of large IPv6 packets.
 		Each fragment will be up CONFIG_SPIRIT_PKTLEN in length.  An single
 		IPv6 packet maybe fragment into several such frames.  This setting
-		provides the MTU which is the largest fully assembled IPv6 packet that can be sent.
+		provides the MTU which is the largest fully assembled IPv6 packet
+		that can be sent.
+
+config SPIRIT_PROMISICUOUS
+	bool "Promiscuous mode"
+	default n
+	---help---
+		Disables all address filtering.  Otherwise, filtering the node
+		address will be supported.
+
+config SPIRIT_MULTICAST
+	bool "Multicast address filter"
+	default n
+	---help---
+		Enables address filtering for the multicast addess 0xee.
+
+config SPIRIT_BROADCAST
+	bool "Broadcast address filter"
+	default n
+	---help---
+		Enables address filtering for the broadcast addess 0xff.
 
 endif # SPIRIT_NETDEV

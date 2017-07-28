@@ -37,13 +37,12 @@
 #ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_PKTBASIC_H
 #define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_PKTBASIC_H
 
-/* This module can be used to manage the configuration of Spirit Basic
- * packets.  The user can obtain a packet configuration filling the
- * structure struct pktbasic_init_s, defining in it some general
- * parameters for the Spirit Basic packet format.  Another structure
- *  the user can fill is struct struct pktbasic_addr_s to define the
- * addresses which will be used during the communication.  Moreover,
- * functions to set the payload length and the destination address
+/* This module can be used to manage the configuration of Spirit Basic packets.
+ * The user can obtain a packet configuration filling the structure struct
+ * pktbasic_init_s, defining in it some general parameters for the Spirit Basic
+ * packet format.  Another structure the user can fill is struct pktbasic_addr_s
+ * to define the addresses which will be used during the communication.  In
+ * addition, functions to set the payload length and the destination address
  * are provided.
  *
  * Example:
@@ -62,25 +61,25 @@
  *   S_ENABLE                           # whitening
  * };
  *
- * struct struct pktbasic_addr_s g_addrinit =
+ * struct pktbasic_addr_s g_pktbasic_addrinit =
  * {
  *   S_ENABLE,                          # enable/disable filtering on my address
  *   0x34,                              # my address (address of the current node)
  *   S_DISABLE,                         # enable/disable filtering on multicast address
- *   0xEE,                              # multicast address
+ *   0xee,                              # multicast address
  *   S_DISABLE,                         # enable/disable filtering on broadcast address
- *   0xFF                               # broadcast address
+ *   0xff                               # broadcast address
  * };
  *
  * ...
  *
  * spirit_pktbasic_initialize(spirit, &g_pkbasic_init);
- * spirit_pktbasic_addrinit(spirit, &g_addrinit);
+ * spirit_pktbasic_addr_initialize(spirit, &g_pktbasic_addrinit);
  *
  * ...
  *
- * SpiritPktBasicSetPayloadLength(spirit, 20);
- * SpiritPktBasicSetDestinationAddress(spirit, 0x44);
+ * spirit_pktbasic_set_payloadlen(spirit, 20);
+ * spirit_pktcommon_set_nodeaddress(spirit, 0x44);
  *
  * ...
  *
@@ -223,7 +222,7 @@ int spirit_pktbasic_get_setup(FAR struct spirit_library_s *spirit,
  *
  * Description:
  *   Initializes the SPIRIT Basic packet addresses according to the specified
- *   parameters in the struct struct pktbasic_init_s struct.
+ *   parameters in the struct pktbasic_init_s struct.
  *
  * Input Parameters:
  *   spirit    - Reference to a Spirit library state structure instance

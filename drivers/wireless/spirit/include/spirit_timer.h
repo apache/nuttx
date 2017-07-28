@@ -37,6 +37,26 @@
 #ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_TIMER_H
 #define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_TIMER_H
 
+/* This module provides API to configure the Spirit timing mechanisms.
+ * This allows the user to set the timer registers using raw values or
+ * compute them since the desired timer value is expressed in milliseconds.
+ * In addition, the management of the Spirit LDCR mode can be done using
+ * these interfaces.
+ *
+ * Example:
+ *   ...
+ *
+ *   spirit_timer_set_rxtimeout(spirit, 50.0);
+ *   spirit_timer_set_wakeuptimer(spirit, 150.0);
+ *
+ *   # IRQ configuration for RX_TIMEOUT and WAKEUP_TIMEOUT
+ *   ...
+ *
+ *   spirit_timer_enable_ldcrmode(spirit, S_ENABLE);
+ *
+ *   ...
+ */
+
 /******************************************************************************
  * Included Files
  ******************************************************************************/
@@ -48,6 +68,34 @@
  * Pre-processor Definitions
  ******************************************************************************/
 
+/* This represents the Time Step for RX_Timeout timer in case of 24 MHz
+ * Crystal, expressed in microseconds.  It is equal to 1210/(24*10^6). With
+ * this time step it is possible to fix the RX_Timeout to a minimum value of
+ * 50.417us to a maximum value of about 3.278 seconds.  Remember that it is
+ * possible to have infinite RX_Timeout writing 0 in the RX_Timeout_Counter
+ * and/or RX_Timeout_Prescaler registers.
+ */
+
+#define RX_TCLK_24MHz    50.417f
+
+/* This represents the Time Step for RX_Timeout timer in case of 26 MHz
+ * Crystal, expressed in microseconds.  It is equal to 1210/(26*10^6). With
+ * this time step it is possible to fix the RX_Timeout to a minimum value of
+ * 46.538us to a maximum value of about 3.026 seconds.  Remember that it is
+ * possible to have infinite RX_Timeout writing 0 in the RX_Timeout_Counter
+ * register.
+ */
+
+#define RX_TCLK_26MHz    46.538f
+
+/* This represents the Time Step for RX_Wakeup timer expressed in
+ * microseconds. This timer is based on RCO (about 34.7 kHZ).  With this
+ * time step it is possible to fix the Wakeup_Timeout to a minimum value of
+ * 28.818us to a maximum value of about 1.888 seconds.
+ */
+
+#define WAKEUP_TCLK      28.818f
+
 /* Macros used in debug assertions */
 
 #define IS_RX_TIMEOUT_STOP_CONDITION(cond)  \
@@ -58,6 +106,9 @@
    cond == ALL_ABOVE_THRESHOLD          || cond == RSSI_OR_SQI_ABOVE_THRESHOLD || \
    cond == RSSI_OR_PQI_ABOVE_THRESHOLD  || cond == SQI_OR_PQI_ABOVE_THRESHOLD || \
    cond == ANY_ABOVE_THRESHOLD)
+#define IS_RX_TIMEOUT_24MHz(timeout)    ((timeout * 1000) >= RX_TCLK_24MHz)
+#define IS_RX_TIMEOUT_26MHz(timeout)    ((timeout * 1000) >= RX_TCLK_26MHz)
+#define IS_WKUP_TIMEOUT(timeout)        ((timeout * 1000) >= WAKEUP_TCLK)
 
 /******************************************************************************
  * Public Types
@@ -106,7 +157,103 @@ enum spirit_rxtimeout_stopcondition_e
  ******************************************************************************/
 
 /******************************************************************************
+ * Name: spirit_timer_enable_ldcrmode
+ *
+ * Description:
+ *   Enables or Disables the LDCR mode.
+ *
+ * Input Parameters:
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   newstate - New state for LDCR mode.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_timer_enable_ldcrmode(FAR struct spirit_library_s *spirit,
+                                 enum spirit_functional_state_e newstate);
+
+/******************************************************************************
+ * Name: spirit_timer_enable_autoreload
+ *
+ * Description:
+ *   Enables or Disables the LDCR timer reloading with the value stored in the
+ *   LDCR_RELOAD registers.
+ *
+ * Input Parameters:
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   newstate - New state for LDCR reloading.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_timer_enable_autoreload(FAR struct spirit_library_s *spirit,
+                                   enum spirit_functional_state_e newstate);
+
+/******************************************************************************
+ * Name: spirit_timer_get_autoreload
+ *
+ * Description:
+ *   Returns the LDCR timer reload bit.
+ *
+ * Input Parameters:
+ *   spirit  - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Value of the reload bit.
+ *
+ ******************************************************************************/
+
+enum spirit_functional_state_e
+  spirit_timer_get_autoreload(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_timer_setup_rxtimeout
+ *
+ * Description:
+ *   Sets the RX timeout timer initialization registers with the values of
+ *   COUNTER and PRESCALER according to the formula: Trx=PRESCALER*COUNTER*Tck.
+ *   Remember that it is possible to have infinite RX_Timeout writing 0 in the
+ *   RX_Timeout_Counter and/or RX_Timeout_Prescaler registers.
+ *
+ * Input Parameters:
+ *   spirit    - Reference to a Spirit library state structure instance
+ *   counter   - Value for the timer counter.
+ *   prescaler - Value for the timer prescaler.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_timer_setup_rxtimeout(FAR struct spirit_library_s *spirit,
+                                 uint8_t counter, uint8_t prescaler);
+
+/******************************************************************************
  * Name: spirit_timer_set_rxtimeout
+ *
+ * Description:
+ *   Sets the RX timeout timer counter and prescaler from the desired value in
+ *   ms. it is possible to fix the RX_Timeout to a minimum value of 50.417us
+ *   to a maximum value of about 3.28 s.
+ *
+ * Input Parameters:
+ *   spirit  - Reference to a Spirit library state structure instance
+ *   desired - Desired timer value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_timer_set_rxtimeout(FAR struct spirit_library_s *spirit,
+                               float desired);
+
+/******************************************************************************
+ * Name: spirit_timer_set_rxtimeout_counter
  *
  * Description:
  *   Sets the RX timeout timer counter.  If 'counter' is equal to 0 the
@@ -121,8 +268,364 @@ enum spirit_rxtimeout_stopcondition_e
  *
  ******************************************************************************/
 
-int spirit_timer_set_rxtimeout(FAR struct spirit_library_s *spirit,
-                               uint8_t counter);
+int spirit_timer_set_rxtimeout_counter(FAR struct spirit_library_s *spirit,
+                                       uint8_t counter);
+
+/******************************************************************************
+ * Name: spirit_timer_set_rxtimeout_prescaler
+ *
+ * Description:
+ *   Sets the RX timeout timer prescaler. If it is equal to 0 the timeout is
+ *   infinite.
+ *
+ * Input Parameters:
+ *   spirit    - Reference to a Spirit library state structure instance
+ *   prescaler - Value for the timer prescaler.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_timer_set_rxtimeout_prescaler(FAR struct spirit_library_s *spirit,
+                                         uint8_t prescaler);
+
+/******************************************************************************
+ * Name: spirit_timer_get_rxtimeout_setup
+ *
+ * Description:
+ *   Returns the RX timeout timer.
+ *
+ * Input Parameters:
+ *   spirit    - Reference to a Spirit library state structure instance
+ *   mstimeout - Pointer to the variable in which the timeout expressed in
+ *               milliseconds has to be stored.  If the returned value is 0,
+ *               it means that the RX_Timeout is infinite.
+ *   counter   - Pointer to the variable in which the timer counter has to
+ *               be stored.
+ *   prescaler - Pointer to the variable in which the timer prescaler has to
+ *               be stored.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_timer_get_rxtimeout_setup(FAR struct spirit_library_s *spirit,
+                                     FAR float *mstimeout,
+                                     FAR uint8_t *counter,
+                                     FAR uint8_t *prescaler);
+
+/******************************************************************************
+ * Name: spirit_timer_setup_wakeuptimer
+ *
+ * Description:
+ *   Sets the LDCR wake up timer initialization registers with the values of
+ *   COUNTER and PRESCALER according to the formula: Twu=(PRESCALER +1)*(COUNTER+1)*Tck,
+ *   where Tck = 28.818 us. The minimum vale of the wakeup timeout is 28.818us
+ *   (PRESCALER and COUNTER equals to 0) and the maximum value is about 1.89 s
+ *   (PRESCALER anc COUNTER equals to 255).
+ *
+ * Input Parameters:
+ *   spirit    - Reference to a Spirit library state structure instance
+ *   counter   - Value for the timer counter.
+ *   prescaler - Value for the timer prescaler.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_timer_setup_wakeuptimer(FAR struct spirit_library_s *spirit,
+                                   uint8_t counter, uint8_t prescaler);
+
+/******************************************************************************
+ * Name: spirit_timer_set_wakeuptimer
+ *
+ * Description:
+ *   Sets the LDCR wake up timer counter and prescaler from the desired value
+ *   in ms, according to the formula: Twu=(PRESCALER +1)*(COUNTER+1)*Tck,
+ *   where Tck = 28.818 us.  The minimum vale of the wakeup timeout is
+ *   28.818us (PRESCALER and COUNTER equals to 0) and the maximum value is
+ *   about 1.89 s (PRESCALER anc COUNTER equals to 255).
+ *
+ * Input Parameters:
+ *   spirit  - Reference to a Spirit library state structure instance
+ *   desired - Desired timer value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_timer_set_wakeuptimer(FAR struct spirit_library_s *spirit,
+                                 float desired);
+
+/******************************************************************************
+ * Name: spirit_timer_set_wakeuptimer_counter
+ *
+ * Description:
+ *   Sets the LDCR wake up timer counter. Remember that this value is
+ *   increased by one in the Twu calculation.
+ *   Twu=(PRESCALER +1)*(COUNTER+1)*Tck, where Tck = 28.818 us
+ *
+ * Input Parameters:
+ *   spirit  - Reference to a Spirit library state structure instance
+ *   counter - Value for the timer counter.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_timer_set_wakeuptimer_counter(FAR struct spirit_library_s *spirit,
+                                          uint8_t counter);
+
+/******************************************************************************
+ * Name: spirit_timer_set_wakeuptimer_prescaler
+ *
+ * Description:
+ *   Sets the LDCR wake up timer prescaler. Remember that this value is
+ *   increased by one in the Twu calculation.
+ *   Twu=(PRESCALER +1)*(COUNTER+1)*Tck, where Tck = 28.818 us
+ *
+ * Input Parameters:
+ *   spirit    - Reference to a Spirit library state structure instance
+ *   prescaler - Value for the timer prescaler.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_timer_set_wakeuptimer_prescaler(FAR struct spirit_library_s *spirit,
+                                           uint8_t prescaler);
+
+/******************************************************************************
+ * Name: spirit_timer_get_wakeuptimer_setup
+ *
+ * Description:
+ *   Returns the LDCR wake up timer, according to the formula:
+ *   Twu=(PRESCALER +1)*(COUNTER+1)*Tck, where Tck = 28.818 us.
+ *
+ * Input Parameters:
+ *   spirit     - Reference to a Spirit library state structure instance
+ *   wakeupmsec - Pointer to the variable in which the wake-up time expressed
+ *                in milliseconds has to be stored.
+ *   counter    - Pointer to the variable in which the timer counter has to
+ *                be stored.
+ *   prescaler  - Pointer to the variable in which the timer prescaler has to
+ *                be stored.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_timer_get_wakeuptimer_setup(FAR struct spirit_library_s *spirit,
+                                       FAR float *wakeupmsec,
+                                       FAR uint8_t *counter,
+                                       FAR uint8_t *prescaler);
+
+/******************************************************************************
+ * Name: spirit_timer_setup_wakeuptimer_reload
+ *
+ * Description:
+ *   Sets the LDCR wake up timer reloading registers with the values of
+ *   COUNTER and PRESCALER according to the formula:
+ *
+ *     Twu=(PRESCALER +1)*(COUNTER+1)*Tck
+ *
+ *   where Tck = 28.818 us. The minimum vale of the wakeup timeout is
+ *   28.818us (PRESCALER and COUNTER equals to 0) and the maximum value is
+ *   about 1.89 s (PRESCALER anc COUNTER equals to 255).
+ *
+ * Input Parameters:
+ *   spirit    - Reference to a Spirit library state structure instance
+ *   counter   - Reload value for the timer counter.
+ *   prescaler - Reload value for the timer prescaler.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_timer_setup_wakeuptimer_reload(FAR struct spirit_library_s *spirit,
+                                          uint8_t counter, uint8_t prescaler);
+
+/******************************************************************************
+ * Name: spirit_timer_wakeuptimer_reload
+ *
+ * Description:
+ *   Sets the LDCR wake up reload timer counter and prescaler from the desired
+ *   value in ms, according to the formula:
+ *
+ *     Twu=(PRESCALER +1)*(COUNTER+1)*Tck
+ *
+ *   where Tck = 28.818 us.  The minimum vale of the wakeup timeout is 28.818us
+ *   (PRESCALER and COUNTER equals to 0) and the maximum value is about 1.89 s
+ *   (PRESCALER anc COUNTER equals to 255).
+ *
+ * Input Parameters:
+ *   spirit  - Reference to a Spirit library state structure instance
+ *   desired - Desired timer value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_timer_wakeuptimer_reload(FAR struct spirit_library_s *spirit,
+                                    float desired);
+
+/******************************************************************************
+ * Name: spirit_timer_set_wakeuptimer_reloadcounter
+ *
+ * Description:
+ *   Sets the LDCR wake up timer reload counter. Remember that this value is
+ *   increasedd by one in the Twu calculation.
+ *
+ *     Twu=(PRESCALER +1)*(COUNTER+1)*Tck
+ *
+ *   where Tck = 28.818 us.
+ *
+ * Input Parameters:
+ *   spirit  - Reference to a Spirit library state structure instance
+ *   counter - Value for the timer counter.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_timer_set_wakeuptimer_reloadcounter(FAR struct spirit_library_s *spirit,
+                                               uint8_t counter);
+
+/******************************************************************************
+ * Name: spirit_timer_set_wakeuptimer_reloadprescaler
+ *
+ * Description:
+ *   Sets the LDCR wake up timer reload prescaler. Remember that this value
+ *   is increasedd by one in the Twu calculation.
+ *
+ *      Twu=(PRESCALER +1)*(COUNTER+1)*Tck
+ *
+ *   where Tck = 28.818 us.
+ *
+ * Input Parameters:
+ *   spirit    - Reference to a Spirit library state structure instance
+ *   prescaler - Value for the timer prescaler.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_timer_set_wakeuptimer_reloadprescaler(FAR struct spirit_library_s *spirit,
+                                                 uint8_t prescaler);
+
+/******************************************************************************
+ * Name: spirit_timer_get_wakeuptimer_reload_setup
+ *
+ * Description:
+ *   Returns the LDCR wake up reload timer, according to the formula:
+ *
+ *     Twu=(PRESCALER +1)*(COUNTER+1)*Tck
+ *
+ *   where Tck = 28.818 us.
+ *
+ * Input Parameters:
+ *   spirit    - Reference to a Spirit library state structure instance
+ *   reload    - Pointer to the variable in which the wake-up reload time
+ *               expressed in milliseconds has to be stored.
+ *   counter   - Pointer to the variable in which the timer counter has to be
+ *               stored.
+ *   prescaler - Pointer to the variable in which the timer prescaler has to
+ *               be stored.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_timer_get_wakeuptimer_reload_setup(FAR struct spirit_library_s *spirit,
+                                              FAR float *reload,
+                                              FAR uint8_t *counter,
+                                              FAR uint8_t *prescaler);
+
+/******************************************************************************
+ * Name: spirit_timer_get_rcofrequency
+ *
+ * Description:
+ *   Computes and returns the RCO frequency. This frequency depends on the
+ *   xtal frequency and the XTAL bit in register 0x01.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   RCO frequency in Hz.
+ *
+ ******************************************************************************/
+
+uint16_t spirit_timer_get_rcofrequency(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_timer_calc_wakeup_values
+ *
+ * Description:
+ *   Computes the values of the wakeup timer counter and prescaler from the
+ *   user time expressed in millisecond.  The prescaler and the counter values
+ *   are computed maintaining the prescaler value as small as possible in
+ *   order to obtain the best resolution, and in the meantime minimizing the error.
+ *
+ * Input Parameters:
+ *   spirit    - Reference to a Spirit library state structure instance
+ *   desired   - Desired wakeup timeout in millisecs.  Since the counter and
+ *               prescaler are 8 bit registers the maximum reachable value is
+ *               maxTime = fTclk x 256 x 256.
+ *   counter   - Pointer to the variable in which the value for the wakeup
+ *               timer counter has to be stored.
+ *   prescaler - Pointer to the variable in which the value for the wakeup
+ *               timer prescaler has to be stored.
+ *
+ * Returned Value:
+ *   None
+ *
+ ******************************************************************************/
+
+void spirit_timer_calc_wakeup_values(FAR struct spirit_library_s *spirit,
+                                     float desired, FAR uint8_t *counter,
+                                     FAR uint8_t *prescaler);
+
+/******************************************************************************
+ * Name: spirit_timer_calc_rxtimeout_values
+ *
+ * Description:
+ *   Computes the values of the rx_timeout timer counter and prescaler from
+ *   the user time expressed in millisecond.  The prescaler and the counter
+ *   values are computed maintaining the prescaler value as small as possible
+ *   in order to obtain the best resolution, and in the meantime minimizing
+ *   the error.
+ *
+ * Input Parameters:
+ *   spirit    - Reference to a Spirit library state structure instance
+ *   desired   - Desired rx_timeout in millisecs.  Since the counter and
+ *               prescaler are 8 bit registers the maximum reachable value
+ *               is maxTime = fTclk x 255 x 255.
+ *   counter   - Pointer to the variable in which the value for the rx_timeout
+ *               counter has to be stored.
+ *   prescaler - Pointer to the variable in which the value for the rx_timeout
+ *               prescaler has to be stored.
+ *
+ * Returned Value:
+ *   None
+ *
+ ******************************************************************************/
+
+void spirit_timer_calc_rxtimeout_values(FAR struct spirit_library_s *spirit,
+                                        float desired, FAR uint8_t *counter,
+                                        FAR uint8_t *prescaler);
 
 /******************************************************************************
  * Name: spirit_timer_set_rxtimeout_stopcondition
@@ -142,5 +645,22 @@ int spirit_timer_set_rxtimeout(FAR struct spirit_library_s *spirit,
 int spirit_timer_set_rxtimeout_stopcondition(FAR struct spirit_library_s *spirit,
                                              enum spirit_rxtimeout_stopcondition_e
                                              stopcondition);
+
+/******************************************************************************
+ * Name: spirit_timer_cmd_reload
+ *
+ * Description:
+ *   Sends the LDC_RELOAD command to SPIRIT. Reload the LDC timer with the
+ *   value stored in the LDC_PRESCALER / COUNTER registers.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_timer_cmd_reload(FAR struct spirit_library_s *spirit);
 
 #endif /* __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_TIMER_H */
