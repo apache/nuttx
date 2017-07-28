@@ -253,7 +253,7 @@ static const struct pktbasic_init_s g_pktbasic_init =
   SPIRIT_SYNC_WORD,                   /* syncwords */
   SPIRIT_PREAMBLE_LENGTH,             /* premblen */
   SPIRIT_SYNC_LENGTH,                 /* synclen */
-  SPIRIT_LENGTH_TYPE,                 /* fixedvarlen */
+  SPIRIT_LENGTH_TYPE,                 /* fixvarlen */
   SPIRIT_LENGTH_WIDTH,                /* pktlenwidth */
   SPIRIT_CRC_MODE,                    /* crcmode */
   SPIRIT_CONTROL_LENGTH,              /* ctrllen */
@@ -525,6 +525,19 @@ static int spirit_transmit(FAR struct spirit_driver_s *priv)
         {
           goto errout_with_iob;
         }
+
+#ifndef CONFIG_SPIRIT_PROMISCOUS
+      /* Set the destination address */
+
+#warning Missing logic
+#if 0
+      ret = spirit_pktcommon_set_txdestaddr(spirit, txdestaddr);
+      if (ret < 0)
+        {
+          goto errout_with_iob;
+        }
+#endif
+#endif
 
       /* Enable CSMA */
 
@@ -848,7 +861,7 @@ static void spirit_interrupt_work(FAR void *arg)
               /* Read the packet into the I/O buffer */
 
               DEBUGVERIFY(spirit_fifo_read(spirit, iob->io_data, count));
-              iob->io_len = spirit_pktbasic_rxpktlen(spirit);
+              iob->io_len = spirit_pktbasic_get_rxpktlen(spirit);
 
               DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
               priv->state = DRIVER_STATE_IDLE;
@@ -1201,6 +1214,7 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
           goto error_with_ifalmostup;
         }
 
+#ifndef CONFIG_SPIRIT_PROMISCOUS
       /* Instantiate the assigned node address */
 
 #warning Missing logic
@@ -1210,6 +1224,7 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
         {
           goto error_with_ifalmostup;
         }
+#endif
 #endif
 
       /* Set and activate a timer process */

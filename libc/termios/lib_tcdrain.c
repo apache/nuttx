@@ -1,8 +1,9 @@
 /****************************************************************************
- * libc/termios/lib_cfgetspeed.c
+ * libc/termios/lib_tcdrain.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Sebastien Lorquet. All rights reserved.
+ *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,41 +38,35 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <sys/ioctl.h>
+
 #include <termios.h>
-#include <assert.h>
+#include <errno.h>
+
+#include <nuttx/serial/tioctl.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: cfgetspeed
+ * Name: tcdrain
  *
  * Descripton:
- *   The cfgetspeed() function is a non-POSIX function will extract the baud
- *   from the termios structure to which the termiosp argument points.
- *
- *   This function will return exactly the value in the termios data
- *   structure, without interpretation.
- *
- *   NOTE 1: NuttX does not control input/output baud independently.  Both
- *   must be the same.  The POSIX standard interfaces, cfisetispeed() and
- *   cfisetospeed() are defined to be cfgetspeed() in termios.h.
- *   NOTE 2.  In Nuttx, the speed_t is defined to be uint32_t and the baud
- *   encodings of termios.h are the actual baud values themselves.  Therefore,
- *   any baud value may be returned here... not just those enumerated in
- *   termios.h
+ *   Function for draining the output buffer of a terminal/serial device
  *
  * Input Parameters:
- *   termiosp - The termiosp argument is a pointer to a termios structure.
+ *   fd  - The 'fd' argument is an open file descriptor associated with a terminal.
  *
  * Returned Value:
- *   Encoded baud value from the termios structure.
+ *   Upon successful completion, 0 is returned. Otherwise, -1 is returned and
+ *   errno is set to indicate the error.
  *
  ****************************************************************************/
 
-speed_t cfgetspeed(FAR const struct termios *termiosp)
+int tcdrain(int fd)
 {
-  DEBUGASSERT(termiosp);
-  return termiosp->c_speed;
+  return ioctl(fd, TCDRN, (unsigned long)0);
 }

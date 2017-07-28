@@ -42,7 +42,7 @@ ifeq ($(CONFIG_SERIAL_TERMIOS),y)
 # Add the termios C files to the build
 
 CSRCS += lib_cfgetspeed.c lib_cfsetspeed.c lib_isatty.c lib_tcflush.c
-CSRCS += lib_tcgetattr.c lib_tcsetattr.c
+CSRCS += lib_tcgetattr.c lib_tcsetattr.c lib_tcdrain.c
 
 # Add the termios directory to the build
 

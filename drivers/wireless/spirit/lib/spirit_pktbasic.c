@@ -81,7 +81,7 @@ int spirit_pktbasic_initialize(FAR struct spirit_library_s *spirit,
   DEBUGASSERT(IS_PKT_SYNC_LENGTH(pktpasic->synclen));
   DEBUGASSERT(IS_PKT_CRC_MODE(pktpasic->crcmode));
   DEBUGASSERT(IS_PKT_LENGTH_WIDTH_BITS(pktpasic->pktlenwidth));
-  DEBUGASSERT(IS_PKT_FIX_VAR_LENGTH(pktpasic->fixedvarlen));
+  DEBUGASSERT(IS_PKT_FIX_VAR_LENGTH(pktpasic->fixvarlen));
   DEBUGASSERT(IS_SPIRIT_FUNCTIONAL_STATE(pktpasic->txdestaddr));
   DEBUGASSERT(IS_SPIRIT_FUNCTIONAL_STATE(pktpasic->fec));
   DEBUGASSERT(IS_SPIRIT_FUNCTIONAL_STATE(pktpasic->datawhite));
@@ -155,7 +155,7 @@ int spirit_pktbasic_initialize(FAR struct spirit_library_s *spirit,
   /* Preamble, sync and fixed or variable length setting */
 
   regval[2] = (uint8_t)pktpasic->preamblen | (uint8_t)pktpasic->synclen |
-              (uint8_t)pktpasic->fixedvarlen;
+              (uint8_t)pktpasic->fixvarlen;
 
   /* CRC length, whitening and FEC setting */
 
@@ -271,7 +271,7 @@ int spirit_pktbasic_get_setup(FAR struct spirit_library_s *spirit,
 
   /* FIX or VAR bit */
 
-  pktbasic->fixedvarlen = (enum pkt_fixvar_len_e)(regval[2] & 0x01);
+  pktbasic->fixvarlen = (enum pkt_fixvar_len_e)(regval[2] & 0x01);
 
   /* Preamble length */
 
@@ -501,22 +501,22 @@ int spirit_pktbasic_set_format(FAR struct spirit_library_s *spirit)
 }
 
 /******************************************************************************
- * Name: spirit_pktbase_set_addrfield
+ * Name: spirit_pkbasic_enable_addrlen
  *
  * Description:
  *   Sets the address length for SPIRIT Basic packets.
  *
  * Input Parameters:
  *   spirit     - Reference to a Spirit library state structure instance
- *   txdestaddr - Length of ADDRESS in bytes.
+ *   txdestaddr - Enable/disable address field
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ******************************************************************************/
 
-int spirit_pktbase_set_addrfield(FAR struct spirit_library_s *spirit,
-                                 enum spirit_functional_state_e txdestaddr)
+int spirit_pkbasic_enable_addrlen(FAR struct spirit_library_s *spirit,
+                                  enum spirit_functional_state_e txdestaddr)
 {
   uint8_t regval;
   int ret;
@@ -550,7 +550,7 @@ int spirit_pktbase_set_addrfield(FAR struct spirit_library_s *spirit,
 }
 
 /******************************************************************************
- * Name: spirit_pktbase_get_addrfield
+ * Name: spirit_pkbasic_isenabled_addrlen
  *
  * Description:
  *   Specifies if the Address field for SPIRIT Basic packets is enabled or
@@ -565,7 +565,7 @@ int spirit_pktbase_set_addrfield(FAR struct spirit_library_s *spirit,
  ******************************************************************************/
 
 enum spirit_functional_state_e
-  spirit_pktbase_get_addrfield(FAR struct spirit_library_s *spirit)
+  spirit_pkbasic_isenabled_addrlen(FAR struct spirit_library_s *spirit)
 {
   uint8_t regval;
 
@@ -611,7 +611,7 @@ int spirit_pktbasic_set_payloadlen(FAR struct spirit_library_s *spirit,
 
   /* Computes the oversize (address + control) size */
 
-  if (spirit_pktbase_get_addrfield(spirit))
+  if (spirit_pkbasic_isenabled_addrlen(spirit))
     {
       oversize = 1;
     }
@@ -655,7 +655,7 @@ uint16_t spirit_pktbase_get_payloadlen(FAR struct spirit_library_s *spirit)
 
   /* Computes the oversize (address + control) size */
 
-  if (spirit_pktbase_get_addrfield(spirit))
+  if (spirit_pkbasic_isenabled_addrlen(spirit))
     {
       oversize = 1;
     }
@@ -672,7 +672,7 @@ uint16_t spirit_pktbase_get_payloadlen(FAR struct spirit_library_s *spirit)
 }
 
 /******************************************************************************
- * Name: spirit_pktbasic_rxpktlen
+ * Name: spirit_pktbasic_get_rxpktlen
  *
  * Description:
  *   Returns the packet length field of the received packet.
@@ -685,14 +685,14 @@ uint16_t spirit_pktbase_get_payloadlen(FAR struct spirit_library_s *spirit)
  *
  ******************************************************************************/
 
-uint16_t spirit_pktbasic_rxpktlen(FAR struct spirit_library_s *spirit)
+uint16_t spirit_pktbasic_get_rxpktlen(FAR struct spirit_library_s *spirit)
 {
   uint8_t regval[2];
   uint16_t oversize = 0;
 
   /* Computes the oversize (address + control) size */
 
-  if (spirit_pktbase_get_addrfield(spirit))
+  if (spirit_pkbasic_isenabled_addrlen(spirit))
     {
       oversize = 1;
     }
@@ -717,7 +717,7 @@ uint16_t spirit_pktbasic_rxpktlen(FAR struct spirit_library_s *spirit)
  * Input Parameters:
  *   spirit     - Reference to a Spirit library state structure instance
  *   payloadlen - Payload length in bytes.
- *   txdestaddr - Enable or Disable Address Field.
+ *   txdestaddr - Enable or disable address field.
  *   ctrllen    - Control length in bytes.
  *
  * Returned Value:

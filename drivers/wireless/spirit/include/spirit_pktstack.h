@@ -106,7 +106,8 @@
  * Included Files
  ******************************************************************************/
 
-#include <stding.h>
+#include "spirit_types.h"
+#include "spirit_pktcommon.h"
 
 /******************************************************************************
  * Public Types
@@ -129,12 +130,12 @@ struct spirit_pktstack_init_s
                          * parameter can be any value from enum pkt_premblen_e */
   uint8_t  synclen;     /* Specifies the sync word length of packet. This
                          * parameter can be any value of enum pkt_premblen_e */
-  uint8_t  fixedvarlen; /* Specifies if a fixed length of packet has to be
+  uint8_t  fixvarlen;  /* Specifies if a fixed length of packet has to be
                          * used. This parameter can be any value of enum
                          * pkt_fixvar_len_e */
   uint8_t  pktlenwidth; /* Specifies the size of the length of packet in
                          * bits. This field is useful only if the field
-                         * fixedvarlen is set to STACK_LENGTH_VAR. For STack
+                         * fixvarlen is set to STACK_LENGTH_VAR. For STack
                          * packets the length width is log2( max payload
                          * length + control length (0 to 4) + address length
                          * (always 2)). This parameter is an FAR uint8_t */
@@ -179,23 +180,302 @@ struct spirit_pktstack_address_s
 
 struct spirit_pktstack_llp_s
 {
-      uint8_t autoack;   /* Specifies if the auto ACK feature 
-                                         * is used or not. This parameter can
-                                         * be a value of
-                                         * enum spirit_functional_state_e */
-      uint8_t piggyback;      /* Specifies if the
-                                                 * piggybacking feature is used 
-                                                 * or not. This parameter can
-                                                 * be a value of
-                                                 * enum spirit_functional_state_e */
-      uint8_t maxretx;  /* Specifies the number of
-                                 * MAX-Retransmissions. This parameter can be a 
-                                 * value of enum spirit_maxretx_e */
+  uint8_t autoack;      /* Specifies if the auto ACK feature is used or not.
+                         * This parameter can be a value from enum
+                         * spirit_functional_state_e */
+  uint8_t piggyback;    /* Specifies if the piggybacking feature is used  or
+                         * not. This parameter can be a value from enum
+                         * spirit_functional_state_e */
+  uint8_t maxretx;      /* Specifies the number of MAX-Retransmissions. This
+                         * parameter can be a value from enum spirit_maxretx_e */
 };
 
 /******************************************************************************
  * Public Function Prototypes
  ******************************************************************************/
+
+/******************************************************************************
+ * Name: spirit_pktstack_initialize
+ *
+ * Description:
+ *   Initializes the SPIRIT STack packet according to the specified parameters
+ *   in the struct spirit_pktstack_init_s.
+ *
+ * Input Parameters:
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   pktstack - STack packet init structure.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_pktstack_initialize(FAR struct spirit_library_s *spirit,
+                               FAR const struct spirit_pktstack_init_s *pktstack);
+
+/******************************************************************************
+ * Name: spirit_pktstack_get_setup
+ * Description:
+ *   Returns the SPIRIT STack packet structure according to the specified
+ *   parameters in the registers.
+ *
+ * Input Parameters:
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   pktstack - STack packet init structure.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_pktstack_get_setup(FAR struct spirit_library_s *spirit,
+                              FAR struct spirit_pktstack_init_s *pktstack);
+
+/******************************************************************************
+ * Name: spirit_pktstack_address_initialize
+ *
+ * Description:
+ *   Initializes the SPIRIT STack packet addresses according to the specified
+ *   parameters in the PktStackAddresses struct.
+ *
+ * Input Parameters:
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   addrinit - STack packet addresses init structure.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_pktstack_address_initialize(FAR struct spirit_library_s *spirit,
+                                       FAR const struct spirit_pktstack_address_s *addrinit);
+
+/******************************************************************************
+ * Name: spirit_pktstack_get_addrsetup
+ *
+ * Description:
+ *   Returns the SPIRIT STack packet addresses structure according to the
+ *   specified parameters in the registers.
+ *
+ * Input Parameters:
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   addrinit - STack packet addresses init structure.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_pktstack_get_addrsetup(FAR struct spirit_library_s *spirit,
+                                  FAR struct spirit_pktstack_address_s *addrinit);
+
+/******************************************************************************
+ * Name: spirit_pktstack_llp_initialize
+ *
+ * Description:
+ *   Initializes the SPIRIT STack packet LLP options according to the specified
+ *   parameters in the struct spirit_pktstack_llp_s struct.
+ *
+ * Input Parameters:
+ *   spirit  - Reference to a Spirit library state structure instance
+ *   llpinit - STack packet LLP init structure.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_pktstack_llp_initialize(FAR struct spirit_library_s *spirit,
+                                   FAR const struct spirit_pktstack_llp_s *llpinit);
+
+/******************************************************************************
+ * Name: spirit_pktstack_get_llpsetup
+ *
+ * Description:
+ *   Returns the SPIRIT STack packet LLP options according to the specified
+ *   values in the registers.
+ *
+ * Input Parameters:
+ *   spirit  - Reference to a Spirit library state structure instance
+ *   llpinit - STack packet LLP structure.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_pktstack_get_llpsetup(FAR struct spirit_library_s *spirit,
+                                 FAR struct spirit_pktstack_llp_s *llpinit);
+
+/******************************************************************************
+ * Name: spirit_pktstack_set_format
+ *
+ * Description:
+ *   Configures the Stack packet format for SPIRIT.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_pktstack_set_format(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_pktstack_enable_addrlen
+ *
+ * Description:
+ *   Sets the address length for SPIRIT STack packets (always 2).
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_pktstack_enable_addrlen(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_pktstack_set_payloadlen
+ *
+ * Description:
+ *   Sets the payload length for SPIRIT STack packets. Since the packet length
+ *   depends from the address (always 2 for this packet format) and the
+ *   control field size, this function reads the control length register
+ *   content in order to determine the correct packet length to be written.
+ *
+ * Input Parameters:
+ *   spirit     - Reference to a Spirit library state structure instance
+ *   payloadlen - Payload length in bytes.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_pktstack_set_payloadlen(FAR struct spirit_library_s *spirit,
+                                   uint16_t payloadlen);
+
+/******************************************************************************
+ * Name: spirit_pktstack_get_payloadlen
+ *
+ * Description:
+ *   Returns the payload length for SPIRIT STack packets. Since the packet
+ *   length depends from the address and the control field size, this function
+ *   reads the correspondent registers in order to determine the correct
+ *   payload length to be returned.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Payload length.
+ *
+ ******************************************************************************/
+
+uint16_t spirit_pktstack_get_payloadlen(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_pktstack_set_varlen
+ *
+ * Description:
+ *   Computes and sets the variable payload length for SPIRIT STack packets.
+ *
+ * Input Parameters:
+ *   spirit     - Reference to a Spirit library state structure instance
+ *   payloadlen - Payload length in bytes.
+ *   ctrllen    - Control length in bytes.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_pktstack_set_varlen(FAR struct spirit_library_s *spirit,
+                               uint16_t payloadlen,
+                               enum pkt_ctrllen_e ctrllen);
+
+/******************************************************************************
+ * Name: spirit_pkstack_set_rxsource_addrmask
+ *
+ * Description:
+ *   Rx packet source mask. Used to mask the address of the accepted packets.
+ *   If 0 -> no filtering.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *   mask   - Rx source mask.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_pkstack_set_rxsource_addrmask(FAR struct spirit_library_s *spirit,
+                                         uint8_t mask);
+
+/******************************************************************************
+ * Name: spirit_pktstack_get_rxsource_addrmask
+ *
+ * Description:
+ *   Returns the Rx packet source mask. Used to mask the address of the
+ *   accepted packets. If 0 -> no filtering.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Rx source mask.
+ *
+ ******************************************************************************/
+
+uint8_t spirit_pktstack_get_rxsource_addrmask(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_pkstack_get_rxpktlen
+ *
+ * Description:
+ *   Returns the packet length field of the received packet.
+ *
+ * Input Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   Packet length.
+ *
+ ******************************************************************************/
+
+uint16_t spirit_pkstack_get_rxpktlen(FAR struct spirit_library_s *spirit);
+
+/******************************************************************************
+ * Name: spirit_pkstack_enable_rxsource_addrfilter
+ *
+ * Description:
+ *   If enabled RX packet is accepted only if the masked source address field
+ *   matches the masked source address field reference (SOURCE_MASK &
+ *   SOURCE_FIELD_REF == SOURCE_MASK & RX_SOURCE_FIELD).
+ *
+ *   NOTE: This filtering control is enabled by default but the source
+ *   address mask is by default set to 0.  As a matter of fact the user has
+ *   to enable the source filtering bit after the packet initialization
+ *   because the packet initialiazation routine disables it.
+ *
+ * Input Parameters:
+ *   spirit   - Reference to a Spirit library state structure instance
+ *   newstate - New state for Source address filtering enable bit.
+ *         This parameter can be S_ENABLE or S_DISABLE.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ******************************************************************************/
+
+int spirit_pkstack_enable_rxsource_addrfilter(FAR struct spirit_library_s *spirit,
+                                              enum spirit_functional_state_e newstate);
 
 #ifdef __cplusplus
 }

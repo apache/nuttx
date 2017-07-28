@@ -125,12 +125,12 @@ struct pktbasic_init_s
                           * number of bytes in synclen has been stored.
                           * This parameter can be any value of enum
                           * pkt_synlen_e */
-  uint8_t fixedvarlen;   /* Specifies if a fixed length of packet has to
+  uint8_t fixvarlen;     /* Specifies if a fixed length of packet has to
                           * be used. This parameter can be any value of
                           * enum pkt_fixvar_len_e */
   uint8_t pktlenwidth;   /* Specifies the size of the length of packet
                           * in bits. This field is useful only if the
-                          * field fixedvarlen is set to BASIC_LENGTH_VAR.
+                          * field fixvarlen is set to BASIC_LENGTH_VAR.
                           * For Basic packets the length width is
                           * log2(max payload length + control length
                           * (0 to 4) + address length (0 or 1)). */
@@ -272,7 +272,7 @@ int spirit_pktbasic_get_addrsetup(FAR struct spirit_library_s *spirit,
 int spirit_pktbasic_set_format(FAR struct spirit_library_s *spirit);
 
 /******************************************************************************
- * Name: spirit_pktbase_set_addrfield
+ * Name: spirit_pkbasic_enable_addrlen
  *
  * Description:
  *   Sets the address length for SPIRIT Basic packets.
@@ -286,11 +286,11 @@ int spirit_pktbasic_set_format(FAR struct spirit_library_s *spirit);
  *
  ******************************************************************************/
 
-int spirit_pktbase_set_addrfield(FAR struct spirit_library_s *spirit,
-                                 enum spirit_functional_state_e txdestaddr);
+int spirit_pkbasic_enable_addrlen(FAR struct spirit_library_s *spirit,
+                                  enum spirit_functional_state_e txdestaddr);
 
 /******************************************************************************
- * Name: spirit_pktbase_get_addrfield
+ * Name: spirit_pkbasic_isenabled_addrlen
  *
  * Description:
  *   Specifies if the Address field for SPIRIT Basic packets is enabled or
@@ -305,7 +305,7 @@ int spirit_pktbase_set_addrfield(FAR struct spirit_library_s *spirit,
  ******************************************************************************/
 
 enum spirit_functional_state_e
-  spirit_pktbase_get_addrfield(FAR struct spirit_library_s *spirit);
+  spirit_pkbasic_isenabled_addrlen(FAR struct spirit_library_s *spirit);
 
 /******************************************************************************
  * Name: spirit_pktbasic_set_payloadlen
@@ -348,7 +348,7 @@ int spirit_pktbasic_set_payloadlen(FAR struct spirit_library_s *spirit,
 uint16_t spirit_pktbase_get_payloadlen(FAR struct spirit_library_s *spirit);
 
 /******************************************************************************
- * Name: spirit_pktbasic_rxpktlen
+ * Name: spirit_pktbasic_get_rxpktlen
  *
  * Description:
  *   Returns the packet length field of the received packet.
@@ -361,7 +361,7 @@ uint16_t spirit_pktbase_get_payloadlen(FAR struct spirit_library_s *spirit);
  *
  ******************************************************************************/
 
-uint16_t spirit_pktbasic_rxpktlen(FAR struct spirit_library_s *spirit);
+uint16_t spirit_pktbasic_get_rxpktlen(FAR struct spirit_library_s *spirit);
 
 /******************************************************************************
  * Name: spirit_pktbasic_set_varlen

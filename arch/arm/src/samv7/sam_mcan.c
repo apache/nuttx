@@ -3454,6 +3454,19 @@ static int mcan_interrupt(int irq, void *context, FAR void *arg)
             {
               canerr("ERROR: RX %08x\n", pending & MCAN_RXERR_INTS);
 
+              /* To prevent Interrupt-Flooding the current active
+               * RX error interupts are disabled. After successfully
+               * receiving at least one CAN packet all RX error interrupts
+               * are turned back on.
+               *
+               * The Interrupt-Flooding can for example occure if the
+               * configured CAN speed does not match the speed of the other
+               * CAN nodes in the network.
+               */
+
+              ie &= ~(pending & MCAN_RXERR_INTS);
+              mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie);
+
               /* Clear the error indications */
 
               mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_RXERR_INTS);
@@ -3617,6 +3630,11 @@ static int mcan_interrupt(int irq, void *context, FAR void *arg)
                            config->msgram.rxfifo1 +
                              (ndx * priv->config->rxfifo1esize),
                            priv->config->rxfifo1esize);
+
+              /* Turning back on all configured RX error interrupts */
+
+              ie |= (priv->rxints & MCAN_RXERR_INTS);
+              mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie);
             }
 
           /* Acknowledge reading the FIFO entry */
@@ -3651,6 +3669,11 @@ static int mcan_interrupt(int irq, void *context, FAR void *arg)
                            config->msgram.rxfifo0 +
                              (ndx * priv->config->rxfifo0esize),
                            priv->config->rxfifo0esize);
+
+              /* Turning back on all configured RX error interrupts */
+
+              ie |= (priv->rxints & MCAN_RXERR_INTS);
+              mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie);
             }
 
           /* Acknowledge reading the FIFO entry */

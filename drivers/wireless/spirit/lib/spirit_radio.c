@@ -1915,7 +1915,7 @@ int spirit_radio_enable_digdivider(FAR struct spirit_library_s *spirit,
   /* Reads the XO_RCO_TEST_BASE and mask the PD_CLKDIV bit field */
 
   ret = spirit_reg_read(spirit, XO_RCO_TEST_BASE, &regval, 1);
-  if (ret > 0)
+  if (ret >= 0)
     {
       if (newstate == S_ENABLE)
         {
