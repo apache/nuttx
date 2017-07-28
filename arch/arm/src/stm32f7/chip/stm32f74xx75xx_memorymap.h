@@ -60,8 +60,8 @@
 #define STM32_FMC_BASE34     0x80000000     /* 0x80000000-0x8fffffff: 512Mb FMC bank3&4 block */
 #  define STM32_FMC_BANK3    0x80000000     /* 0x80000000-0x8fffffff:       256Mb NAND FLASH */
 #  define STM32_FMC_BANK4    0x90000000     /* 0x90000000-0x9fffffff:       256Mb PC CARD */
-#define STM32_FMC_BASE5      0xc0000000     /* 0xc0000000-0xcfffffff: 256Mb FMC */
-#define STM32_FMC_BASE6      0xd0000000     /* 0xd0000000-0xdfffffff: 256Mb FMC */
+#define STM32_FMC_BASE5      0xc0000000     /* 0xc0000000-0xcfffffff: 256Mb FMC SDRAM Bank 1 */
+#define STM32_FMC_BASE6      0xd0000000     /* 0xd0000000-0xdfffffff: 256Mb FMC SDRAM Bank 2 */
 #define STM32_CORTEX_BASE    0xe0000000     /* 0xe0000000-0xffffffff: 512Mb Cortex-M7 block */
 
 #define STM32_REGION_MASK    0xf0000000
