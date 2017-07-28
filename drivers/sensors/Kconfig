@@ -135,7 +135,7 @@ config LIS331DL_I2C_FREQUENCY
 config SN_LSM9DS1
 	bool "STMicro LSM9DS1 support"
 	default n
-	depends on I2C
+	select I2C
 	---help---
 		Enable driver support for the STMicro LSM9DS1.
 

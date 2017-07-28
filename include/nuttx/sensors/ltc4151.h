@@ -51,16 +51,16 @@
  ****************************************************************************/
 
 #define CONFIG_LTC4151_BASEADDR 0x66
-#define CONFIG_LTC4151_ADDR0 (CONFIG_LTC4151_BASEADDR + 0)
-#define CONFIG_LTC4151_ADDR1 (CONFIG_LTC4151_BASEADDR + 1)
-#define CONFIG_LTC4151_ADDR2 (CONFIG_LTC4151_BASEADDR + 2)
-#define CONFIG_LTC4151_ADDR3 (CONFIG_LTC4151_BASEADDR + 3)
-#define CONFIG_LTC4151_ADDR4 (CONFIG_LTC4151_BASEADDR + 4)
-#define CONFIG_LTC4151_ADDR5 (CONFIG_LTC4151_BASEADDR + 5)
-#define CONFIG_LTC4151_ADDR6 (CONFIG_LTC4151_BASEADDR + 6)
-#define CONFIG_LTC4151_ADDR7 (CONFIG_LTC4151_BASEADDR + 7)
-#define CONFIG_LTC4151_ADDR8 (CONFIG_LTC4151_BASEADDR + 8)
-#define CONFIG_LTC4151_ADDR9 (CONFIG_LTC4151_BASEADDR + 9)
+#define CONFIG_LTC4151_ADDR0    (CONFIG_LTC4151_BASEADDR + 0)
+#define CONFIG_LTC4151_ADDR1    (CONFIG_LTC4151_BASEADDR + 1)
+#define CONFIG_LTC4151_ADDR2    (CONFIG_LTC4151_BASEADDR + 2)
+#define CONFIG_LTC4151_ADDR3    (CONFIG_LTC4151_BASEADDR + 3)
+#define CONFIG_LTC4151_ADDR4    (CONFIG_LTC4151_BASEADDR + 4)
+#define CONFIG_LTC4151_ADDR5    (CONFIG_LTC4151_BASEADDR + 5)
+#define CONFIG_LTC4151_ADDR6    (CONFIG_LTC4151_BASEADDR + 6)
+#define CONFIG_LTC4151_ADDR7    (CONFIG_LTC4151_BASEADDR + 7)
+#define CONFIG_LTC4151_ADDR8    (CONFIG_LTC4151_BASEADDR + 8)
+#define CONFIG_LTC4151_ADDR9    (CONFIG_LTC4151_BASEADDR + 9)
 
 /* LTC4151 Register Definitions ***********************************************/
 /* LTC4151 Registers addresses */
@@ -81,10 +81,11 @@
 
 struct i2c_master_s;
 
-typedef struct ltc4151_t {
-  b16_t current;  // [milliampere]
-  b16_t voltage;  // [volt]
-} ltc4151_t;
+struct ltc4151_s
+{
+  b16_t current;  /* [milliampere] */
+  b16_t voltage;  /* [volt] */
+};
 
 /****************************************************************************
  * Public Function Prototypes
@@ -118,7 +119,7 @@ extern "C"
  ****************************************************************************/
 
 int ltc4151_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
-                   uint8_t addr, float shunt_resistor_value);
+                     uint8_t addr, float shunt_resistor_value);
 
 #undef EXTERN
 #ifdef __cplusplus
