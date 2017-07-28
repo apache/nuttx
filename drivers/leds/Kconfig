@@ -57,6 +57,15 @@ config RGBLED_INVERT
 		each LED), this selection inverts the outputs so that the
 		colors are displayed correctly.
 
+config RGBLED_LIGHTNESS_CORRECTION
+	bool "Apply Lightness Correction"
+	depends on RGBLED
+	default n
+	---help---
+		This selection enables an approximate CIE 1931 lightness
+		correction which helps the RGB LED visually fade and blend
+		in a more linear, smooth, and visually appealing fashion.
+
 config PCA9635PW
 	bool "PCA9635PW I2C LED Driver"
 	default n
