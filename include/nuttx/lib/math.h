@@ -159,6 +159,24 @@ double      round (double x);
 long double roundl(long double x);
 #endif
 
+#define lroundf(x) ((long)roundf(x))
+#ifdef CONFIG_HAVE_DOUBLE
+#define lround(x)  ((long)round(x))
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+#define lroundl(x) ((long)roundl(x))
+#endif
+
+#ifdef CONFIG_HAVE_LONG_LONG
+#define llroundf(x) ((long long)roundf(x))
+#ifdef CONFIG_HAVE_DOUBLE
+#define llround(x)  ((long long)round(x))
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+#define llroundl(x) ((long long)roundl(x))
+#endif
+#endif
+
 float       rintf(float x);      /* Not implemented */
 #ifdef CONFIG_HAVE_DOUBLE
 double      rint(double x);

@@ -1692,7 +1692,7 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
       return ret;
     }
 
-  ret = spirit_radio_set_palevel(spirit, 0, SPIRIT_POWER_DBM);
+  ret = spirit_radio_set_palevel_dbm(spirit, 0, SPIRIT_POWER_DBM);
   if (ret < 0)
     {
       return ret;
