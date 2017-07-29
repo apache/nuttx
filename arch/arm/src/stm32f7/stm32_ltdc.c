@@ -119,24 +119,13 @@
                                      BOARD_LTDC_HBP + \
                                      STM32_LTDC_WIDTH + BOARD_LTDC_HFP - 1)
 
-/* Global GCR register */
-
-/* Synchronisation and Polarity */
-
+/* Global GCR register: Synchronisation Polarity */
 #define STM32_LTDC_GCR_PCPOL         BOARD_LTDC_GCR_PCPOL
 #define STM32_LTDC_GCR_DEPOL         BOARD_LTDC_GCR_DEPOL
 #define STM32_LTDC_GCR_VSPOL         BOARD_LTDC_GCR_VSPOL
 #define STM32_LTDC_GCR_HSPOL         BOARD_LTDC_GCR_HSPOL
 
-/* Dither */
-
-#define STM32_LTDC_GCR_DEN           BOARD_LTDC_GCR_DEN
-#define STM32_LTDC_GCR_DBW           LTDC_GCR_GBW(BOARD_LTDC_GCR_DBW)
-#define STM32_LTDC_GCR_DGW           LTDC_GCR_DGW(BOARD_LTDC_GCR_DGW)
-#define STN32_LTDC_GCR_DRW           LTDC_GCR_DBW(BOARD_LTDC_GCR_DRW)
-
 /* LIPCR register */
-
 #define STM32_LTDC_LIPCR_LIPOS       LTDC_LIPCR_LIPOS(STM32_LTDC_TOTALHEIGHT)
 
 /* Configuration ************************************************************/
@@ -1072,8 +1061,7 @@ static void stm32_ltdc_dither(bool enable,
       regval &= ~LTDC_GCR_DEN;
     }
 
-  regval &= ~(!LTDC_GCR_DEN | LTDC_GCR_DRW(0) |
-                LTDC_GCR_DGW(0) | LTDC_GCR_DBW(0));
+  regval &= ~(LTDC_GCR_DBW_MASK | LTDC_GCR_DGW_MASK | LTDC_GCR_DRW_MASK);
   regval |= (LTDC_GCR_DRW(red) | LTDC_GCR_DGW(green) | LTDC_GCR_DBW(blue));
 
   reginfo("set LTDC_GCR=%08x\n", regval);
