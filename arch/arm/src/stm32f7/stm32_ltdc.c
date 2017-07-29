@@ -111,10 +111,10 @@
 #define STM32_LTDC_AWCR_AAW          LTDC_AWCR_AAW(STM32_LTDC_LxWHPCR_WHSPPOS)
 
 /* LTDC_TWCR register */
-
-#define STM32_LTDC_TWCR_TOTALH       LTDC_TWCR_TOTALH(BOARD_LTDC_VSYNC + \
-                                     BOARD_LTDC_VBP + \
-                                     STM32_LTDC_HEIGHT + BOARD_LTDC_VFP - 1)
+#define STM32_LTDC_TOTALHEIGHT       (BOARD_LTDC_VSYNC + \
+                                      BOARD_LTDC_VBP + \
+                                      STM32_LTDC_HEIGHT + BOARD_LTDC_VFP - 1)
+#define STM32_LTDC_TWCR_TOTALH       LTDC_TWCR_TOTALH(STM32_LTDC_TOTALHEIGHT)
 #define STM32_LTDC_TWCR_TOTALW       LTDC_TWCR_TOTALW(BOARD_LTDC_HSYNC + \
                                      BOARD_LTDC_HBP + \
                                      STM32_LTDC_WIDTH + BOARD_LTDC_HFP - 1)
@@ -137,7 +137,7 @@
 
 /* LIPCR register */
 
-#define STM32_LTDC_LIPCR_LIPOS       LTDC_LIPCR_LIPOS(STM32_LTDC_TWCR_TOTALW)
+#define STM32_LTDC_LIPCR_LIPOS       LTDC_LIPCR_LIPOS(STM32_LTDC_TOTALHEIGHT)
 
 /* Configuration ************************************************************/
 
