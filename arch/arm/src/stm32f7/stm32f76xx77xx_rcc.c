@@ -883,7 +883,7 @@ static void stm32_stdclockconfig(void)
         {
         }
 #endif
-#if defined(CONFIG_STM32F7_LTDC) || defined(CONFIG_STM32F7_PLLI2S)
+#if defined(CONFIG_STM32F7_PLLI2S) || (STM32_RCC_DCKCFGR1_SAI1SRC == RCC_DCKCFGR1_SAI1SEL(1)) || (STM32_RCC_DCKCFGR1_SAI2SRC == RCC_DCKCFGR1_SAI2SEL(1))
 
       /* Configure PLLI2S */
 
@@ -897,6 +897,19 @@ static void stm32_stdclockconfig(void)
                  | STM32_RCC_PLLSAICFGR_PLLSAIQ
                  | STM32_RCC_PLLSAICFGR_PLLSAIR);
       putreg32(regval, STM32_RCC_PLLI2SCFGR);
+
+      /* Enable PLLI2S */
+
+      regval = getreg32(STM32_RCC_CR);
+      regval |= RCC_CR_PLLI2SON;
+      putreg32(regval, STM32_RCC_CR);
+
+      /* Wait until the PLLI2S is ready */
+
+      while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLI2SRDY) == 0)
+        {
+        }
+#endif
 
       regval  = getreg32(STM32_RCC_DCKCFGR2);
       regval &= ~(  RCC_DCKCFGR2_USART1SEL_MASK
@@ -936,19 +949,6 @@ static void stm32_stdclockconfig(void)
                  | STM32_RCC_DCKCFGR2_DSISRC);
 
       putreg32(regval, STM32_RCC_DCKCFGR2);
-
-      /* Enable PLLI2S */
-
-      regval = getreg32(STM32_RCC_CR);
-      regval |= RCC_CR_PLLI2SON;
-      putreg32(regval, STM32_RCC_CR);
-
-      /* Wait until the PLLI2S is ready */
-
-      while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLI2SRDY) == 0)
-        {
-        }
-#endif
 
 #if defined(CONFIG_STM32F7_IWDG) || defined(CONFIG_STM32F7_RTC_LSICLOCK)
       /* Low speed internal clock source LSI */
