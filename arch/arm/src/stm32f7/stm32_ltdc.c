@@ -974,16 +974,13 @@ static void stm32_ltdc_periphconfig(void)
   stm32_ltdc_gpioconfig();
 #endif
 
-  /* Configure APB2 LTDC clock external */
-
+  /* APB2 LTDC clock is expected to be externally preconfigured */
   reginfo("configured RCC_APB2ENR=%08x\n", getreg32(STM32_RCC_APB2ENR));
 
-  /* Configure the SAI PLL external to provide the LCD_CLK */
-
+  /* SAI PLL is expected to be externally preconfigured to provide the LCD_CLK */
   reginfo("configured RCC_PLLSAI=%08x\n", getreg32(STM32_RCC_PLLSAICFGR));
 
-  /* Configure dedicated clock external */
-
+  /* Dedicated clocks are expected to be externally preconfigured */
   reginfo("configured RCC_DCKCFGR1=%08x\n", getreg32(STM32_RCC_DCKCFGR1));
   reginfo("configured RCC_DCKCFGR2=%08x\n", getreg32(STM32_RCC_DCKCFGR2));
 
