@@ -1,5 +1,5 @@
 /****************************************************************************
- *  wireless/ieee802154_indalloc.c
+ *  wireless/ieee802154/ieee802154_indalloc.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

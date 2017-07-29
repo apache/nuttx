@@ -137,7 +137,7 @@ static inline bool sixlowpan_eaddrnull(FAR const uint8_t *eaddr)
  *   data structure that we need to interface with the IEEE802.15.4 MAC.
  *
  * Input Parameters:
- *   ieee    - IEEE 802.15.4 MAC driver state reference.
+ *   radio   - Radio network driver state instance.
  *   pktmeta - Meta-data specific to the current outgoing frame
  *   meta    - Location to return the corresponding meta data.
  *   paylen  - The size of the data payload to be sent.
@@ -150,7 +150,7 @@ static inline bool sixlowpan_eaddrnull(FAR const uint8_t *eaddr)
  *
  ****************************************************************************/
 
-int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_meta_data(FAR struct sixlowpan_driver_s *radio,
                         FAR const struct packet_metadata_s *pktmeta,
                         FAR struct ieee802154_frame_meta_s *meta,
                         uint16_t paylen)
@@ -223,7 +223,7 @@ int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
    * fragment of a disassembled packet.
    */
 
-  meta->handle = ieee->i_msdu_handle++;
+  meta->handle = radio->r_msdu_handle++;
 
 #ifdef CONFIG_IEEE802154_SECURITY
 #  warning CONFIG_IEEE802154_SECURITY not yet supported
@@ -247,7 +247,7 @@ int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
  *   buffer is required to make this determination.
  *
  * Input parameters:
- *   ieee - A reference IEEE802.15.4 MAC network device structure.
+ *   radio - A reference IEEE802.15.4 MAC network device structure.
  *   meta - Meta data that describes the MAC header
  *
  * Returned Value:
@@ -256,10 +256,10 @@ int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
  *
  ****************************************************************************/
 
-int sixlowpan_frame_hdrlen(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_frame_hdrlen(FAR struct sixlowpan_driver_s *radio,
                            FAR const struct ieee802154_frame_meta_s *meta)
 {
-  return ieee->i_get_mhrlen(ieee, meta);
+  return radio->r_get_mhrlen(radio, meta);
 }
 
 /****************************************************************************
@@ -272,7 +272,7 @@ int sixlowpan_frame_hdrlen(FAR struct ieee802154_driver_s *ieee,
  *   submits any new outgoing frame to the MAC.
  *
  * Input parameters:
- *   ieee  - A reference IEEE802.15.4 MAC network device structure.
+ *   radio - A reference to a radio network device instance.
  *   meta  - Meta data that describes the MAC header
  *   frame - The IOB containing the frame to be submitted.
  *
@@ -282,11 +282,11 @@ int sixlowpan_frame_hdrlen(FAR struct ieee802154_driver_s *ieee,
  *
  ****************************************************************************/
 
-int sixlowpan_frame_submit(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_frame_submit(FAR struct sixlowpan_driver_s *radio,
                            FAR const struct ieee802154_frame_meta_s *meta,
                            FAR struct iob_s *frame)
 {
-  return ieee->i_req_data(ieee, meta, frame);
+  return radio->r_req_data(radio, meta, frame);
 }
 
 #endif /* CONFIG_NET_6LOWPAN */

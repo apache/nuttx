@@ -47,16 +47,6 @@ config SPIRIT_PKTLEN
 		Fixed pkt sizes are used.  This setting describes that fixed packet
 		size.
 
-config SPIRIT_MTU
-	int "MTU"
-	default 596
-	---help---
-		6LoWPAN support fragmenting and reassembly of large IPv6 packets.
-		Each fragment will be up CONFIG_SPIRIT_PKTLEN in length.  An single
-		IPv6 packet maybe fragment into several such frames.  This setting
-		provides the MTU which is the largest fully assembled IPv6 packet
-		that can be sent.
-
 config SPIRIT_PROMISICUOUS
 	bool "Promiscuous mode"
 	default n

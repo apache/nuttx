@@ -139,15 +139,15 @@ static uint8_t g_bitbucket[UNCOMP_MAXHDR];
  *   the previosly received fragements.
  *
  * Input Parameters:
- *   ieee - IEEE 802.15.4 MAC driver state reference
- *   ind  - Characteristics of the newly received frame
+ *   radio - Radio network device driver state instance
+ *   ind   - Characteristics of the newly received frame
  *
  * Returned Value:
  *   true if the sources are the same.
  *
  ****************************************************************************/
 
-static bool sixlowpan_compare_fragsrc(FAR struct ieee802154_driver_s *ieee,
+static bool sixlowpan_compare_fragsrc(FAR struct sixlowpan_driver_s *radio,
                                       FAR const struct ieee802154_data_ind_s *ind)
 {
   /* Check for an extended source address */
@@ -156,22 +156,22 @@ static bool sixlowpan_compare_fragsrc(FAR struct ieee802154_driver_s *ieee,
     {
       /* Was the first source address also extended? */
 
-      if (ieee->i_fragsrc.extended)
+      if (radio->r_fragsrc.extended)
         {
           /* Yes.. perform the extended address comparison */
 
-          return sixlowpan_eaddrcmp(ieee->i_fragsrc.u.eaddr.u8, ind->src.eaddr);
+          return sixlowpan_eaddrcmp(radio->r_fragsrc.u.eaddr.u8, ind->src.eaddr);
         }
     }
   else
     {
       /* Short source address.  Was the first source address also short? */
 
-      if (!ieee->i_fragsrc.extended)
+      if (!radio->r_fragsrc.extended)
         {
           /* Yes.. perform the extended short comparison */
 
-          return sixlowpan_saddrcmp(ieee->i_fragsrc.u.saddr.u8, &ind->src.saddr);
+          return sixlowpan_saddrcmp(radio->r_fragsrc.u.saddr.u8, &ind->src.saddr);
         }
     }
 
@@ -286,9 +286,9 @@ static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr, FAR uint8_t *bptr)
  *   SHALL in the RFC 4944 and should never happen)
  *
  * Input Parameters:
- *   ieee - The IEEE802.15.4 MAC network driver interface.
- *   ind  - Meta data characterizing the received frame.
- *   iob  - The IOB containing the frame.
+ *   radio - The radio network device driver interface.
+ *   ind   - Meta data characterizing the received frame.
+ *   iob   - The IOB containing the frame.
  *
  * Returned Value:
  *   On success, a value greater than equal to zero is returned, either:
@@ -304,7 +304,7 @@ static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr, FAR uint8_t *bptr)
  *
  ****************************************************************************/
 
-static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
+static int sixlowpan_frame_process(FAR struct sixlowpan_driver_s *radio,
                                    FAR const struct ieee802154_data_ind_s *ind,
                                    FAR struct iob_s *iob)
 {
@@ -381,8 +381,8 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
         ninfo("FRAGN: fragsize=%d fragtag=%d fragoffset=%d\n",
               fragsize, fragtag, fragoffset);
-        ninfo("FRAGN: i_accumlen=%d paysize=%u fragsize=%u\n",
-              ieee->i_accumlen, iob->io_len - g_frame_hdrlen, fragsize);
+        ninfo("FRAGN: r_accumlen=%d paysize=%u fragsize=%u\n",
+              radio->r_accumlen, iob->io_len - g_frame_hdrlen, fragsize);
 
         /* Indicate that this frame is a another fragment for reassembly */
 
@@ -398,17 +398,17 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
   /* Check if we are currently reassembling a packet */
 
-  bptr = ieee->i_dev.d_buf;
-  if (ieee->i_accumlen > 0)
+  bptr = radio->r_dev.d_buf;
+  if (radio->r_accumlen > 0)
     {
       /* If reassembly timed out, cancel it */
 
-      elapsed = clock_systimer() - ieee->i_time;
+      elapsed = clock_systimer() - radio->r_time;
       if (elapsed > NET_6LOWPAN_TIMEOUT)
         {
           nwarn("WARNING: Reassembly timed out\n");
-          ieee->i_pktlen   = 0;
-          ieee->i_accumlen = 0;
+          radio->r_pktlen   = 0;
+          radio->r_accumlen = 0;
         }
 
       /* In this case what we expect is that the next frame will hold the
@@ -433,8 +433,8 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
           /* Discard the partially assembled packet */
 
           nwarn("WARNING: Non-fragment frame received during reassembly\n");
-          ieee->i_pktlen   = 0;
-          ieee->i_accumlen = 0;
+          radio->r_pktlen   = 0;
+          radio->r_accumlen = 0;
         }
 
       /* It is a fragment of some kind.  Drop any zero length fragments */
@@ -452,14 +452,14 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       else if (isfirstfrag)
         {
           nwarn("WARNING: First fragment frame received during reassembly\n");
-          ieee->i_pktlen   = 0;
-          ieee->i_accumlen = 0;
+          radio->r_pktlen   = 0;
+          radio->r_accumlen = 0;
         }
 
       /* Verify that this fragment is part of that reassembly sequence */
 
-      else if (fragsize != ieee->i_pktlen || ieee->i_reasstag != fragtag  ||
-               !sixlowpan_compare_fragsrc(ieee, ind))
+      else if (fragsize != radio->r_pktlen || radio->r_reasstag != fragtag  ||
+               !sixlowpan_compare_fragsrc(radio, ind))
         {
           /* The packet is a fragment that does not belong to the packet
            * being reassembled or the packet is not a fragment.
@@ -504,12 +504,12 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
           return -ENOSPC;
         }
 
-      ieee->i_pktlen   = fragsize;
-      ieee->i_reasstag = fragtag;
-      ieee->i_time     = clock_systimer();
+      radio->r_pktlen   = fragsize;
+      radio->r_reasstag = fragtag;
+      radio->r_time     = clock_systimer();
 
-      ninfo("Starting reassembly: i_pktlen %u, i_reasstag %d\n",
-            ieee->i_pktlen, ieee->i_reasstag);
+      ninfo("Starting reassembly: r_pktlen %u, r_reasstag %d\n",
+            radio->r_pktlen, radio->r_reasstag);
 
       /* Extract the source address from the 'ind' meta data.  NOTE that the
        * size of the source address may be different that our local, destination
@@ -518,13 +518,13 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 
       if (ind->src.mode == IEEE802154_ADDRMODE_EXTENDED)
         {
-          ieee->i_fragsrc.extended = true;
-          sixlowpan_eaddrcopy(ieee->i_fragsrc.u.eaddr.u8, ind->src.eaddr);
+          radio->r_fragsrc.extended = true;
+          sixlowpan_eaddrcopy(radio->r_fragsrc.u.eaddr.u8, ind->src.eaddr);
         }
       else
         {
-          memset(&ieee->i_fragsrc, 0, sizeof(struct sixlowpan_tagaddr_s));
-          sixlowpan_saddrcopy(ieee->i_fragsrc.u.saddr.u8, &ind->src.saddr);
+          memset(&radio->r_fragsrc, 0, sizeof(struct sixlowpan_tagaddr_s));
+          sixlowpan_saddrcopy(radio->r_fragsrc.u.saddr.u8, &ind->src.saddr);
         }
     }
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
@@ -573,7 +573,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
        * begin placing the data payload.
        */
 
-      ieee->i_boffset = g_uncomp_hdrlen;
+      radio->r_boffset = g_uncomp_hdrlen;
     }
 
   /* No.. is this a subsequent fragment in the same sequence? */
@@ -584,7 +584,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
        * we began placing payload data.
        */
 
-      g_uncomp_hdrlen = ieee->i_boffset;
+      g_uncomp_hdrlen = radio->r_boffset;
     }
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
@@ -613,11 +613,11 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
       return -ENOMEM;
     }
 
-  memcpy(ieee->i_dev.d_buf + g_uncomp_hdrlen + (fragoffset << 3),
+  memcpy(radio->r_dev.d_buf + g_uncomp_hdrlen + (fragoffset << 3),
          fptr + g_frame_hdrlen, paysize);
 
 #ifdef CONFIG_NET_6LOWPAN_FRAG
-  /* Update ieee->i_accumlen if the frame is a fragment, ieee->i_pktlen
+  /* Update radio->r_accumlen if the frame is a fragment, radio->r_pktlen
    * otherwise.
    */
 
@@ -629,27 +629,27 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
        * bytes at the end. We must be liberal in what we accept.
        */
 
-      ieee->i_accumlen = g_uncomp_hdrlen + (fragoffset << 3) + paysize;
+      radio->r_accumlen = g_uncomp_hdrlen + (fragoffset << 3) + paysize;
     }
   else
     {
-      ieee->i_pktlen = paysize + g_uncomp_hdrlen;
+      radio->r_pktlen = paysize + g_uncomp_hdrlen;
     }
 
   /* If we have a full IP packet in sixlowpan_buf, deliver it to
    * the IP stack
    */
 
-  ninfo("i_accumlen=%d i_pktlen=%d paysize=%d\n",
-         ieee->i_accumlen, ieee->i_pktlen, paysize);
+  ninfo("r_accumlen=%d r_pktlen=%d paysize=%d\n",
+         radio->r_accumlen, radio->r_pktlen, paysize);
 
-  if (ieee->i_accumlen == 0 || ieee->i_accumlen >= ieee->i_pktlen)
+  if (radio->r_accumlen == 0 || radio->r_accumlen >= radio->r_pktlen)
     {
-      ninfo("IP packet ready (length %d)\n", ieee->i_pktlen);
+      ninfo("IP packet ready (length %d)\n", radio->r_pktlen);
 
-      ieee->i_dev.d_len = ieee->i_pktlen;
-      ieee->i_pktlen    = 0;
-      ieee->i_accumlen  = 0;
+      radio->r_dev.d_len = radio->r_pktlen;
+      radio->r_pktlen    = 0;
+      radio->r_accumlen  = 0;
       return INPUT_COMPLETE;
     }
 
@@ -657,7 +657,7 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
 #else
   /* Deliver the packet to the IP stack */
 
-  ieee->i_dev.d_len = paysize + g_uncomp_hdrlen;
+  radio->r_dev.d_len = paysize + g_uncomp_hdrlen;
   return INPUT_COMPLETE;
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 }
@@ -668,38 +668,38 @@ static int sixlowpan_frame_process(FAR struct ieee802154_driver_s *ieee,
  * Description:
  *   Inject the packet in d_buf into the network for normal packet processing.
  *
- * Parameters:
- *   ieee - The IEEE802.15.4 MAC network driver interface.
+ * Input Parmeters
+ *   radio - The IEEE802.15.4 MAC network driver interface.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static int sixlowpan_dispatch(FAR struct ieee802154_driver_s *ieee)
+static int sixlowpan_dispatch(FAR struct sixlowpan_driver_s *radio)
 {
   sixlowpan_dumpbuffer("Incoming packet",
-                       (FAR const uint8_t *)IPv6BUF(&ieee->i_dev),
-                       ieee->i_dev.d_len);
+                       (FAR const uint8_t *)IPv6BUF(&radio->r_dev),
+                       radio->r_dev.d_len);
 
 #ifdef CONFIG_NET_PKT
   /* When packet sockets are enabled, feed the frame into the packet tap */
 
   ninfo("Packet tap\n");
-  pkt_input(&ieee->i_dev);
+  pkt_input(&radio->r_dev);
 #endif
 
   /* We only accept IPv6 packets. */
 
   ninfo("IPv6 packet dispatch\n");
-  NETDEV_RXIPV6(&ieee->i_dev);
+  NETDEV_RXIPV6(&radio->r_dev);
 
   /* Give the IPv6 packet to the network layer.  NOTE:  If there is a
    * problem with IPv6 header, it will be silently dropped and d_len will
    * be set to zero.  Oddly, ipv6_input() will return OK in this case.
    */
 
-  return ipv6_input(&ieee->i_dev);
+  return ipv6_input(&radio->r_dev);
 }
 
 /****************************************************************************
@@ -712,15 +712,14 @@ static int sixlowpan_dispatch(FAR struct ieee802154_driver_s *ieee)
  * Description:
  *   Process an incoming 6LoWPAN frame.
  *
- *   This function is called when the device driver has received an
- *   IEEE802.15.4 frame from the network.  The frame from the device
- *   driver must be provided in by the IOB frame argument of the
- *   function call:
+ *   This function is called when the radio device driver has received an
+ *   frame from the network.  The frame from the device driver must be
+ *   provided in by the IOB frame argument of the  function call:
  *
  *   - The frame data is in the IOB io_data[] buffer,
  *   - The length of the frame is in the IOB io_len field, and
- *   - The offset past the IEEE802.15.4 MAC header is provided in the
- *     io_offset field.
+ *   - The offset past and radio MAC header is provided in the io_offset
+ *     field.
  *
  *   The frame argument may refer to a single frame (a list of length one)
  *   or may it be the head of a list of multiple frames.
@@ -736,8 +735,8 @@ static int sixlowpan_dispatch(FAR struct ieee802154_driver_s *ieee)
  *
  *   After each frame is processed into d_buf, the IOB is deallocated.  If
  *   reassembly is incomplete, the partially reassembled packet must be
- *   preserved by the IEEE802.15.4 MAC network drvier sand provided again
- *   when the next frame is received.
+ *   preserved by the radio network drvier and provided again when the next
+ *   frame is received.
  *
  *   When the packet in the d_buf is fully reassembled, it will be provided
  *   to the network as with any other received packet.  d_len will be set
@@ -754,11 +753,11 @@ static int sixlowpan_dispatch(FAR struct ieee802154_driver_s *ieee)
  *   network driver via the req_data() method as with other TX operations.
  *
  * Input Parameters:
- *   ieee      - The IEEE802.15.4 MAC network driver interface.
+ *   radio       The radio network driver interface.
  *   framelist - The head of an incoming list of frames.  Normally this
  *               would be a single frame.  A list may be provided if
  *               appropriate, however.
- *   ind       - Meta data characterizing the received frame.  If there are
+ *   ind       - Meta data characterizing the received packet.  If there are
  *               multilple frames in the list, this meta data must apply to
  *               all of the frames!
  *
@@ -767,13 +766,13 @@ static int sixlowpan_dispatch(FAR struct ieee802154_driver_s *ieee)
  *
  ****************************************************************************/
 
-int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_input(FAR struct sixlowpan_driver_s *radio,
                     FAR struct iob_s *framelist,
                     FAR const struct ieee802154_data_ind_s *ind)
 {
   int ret = -EINVAL;
 
-  DEBUGASSERT(ieee != NULL && framelist != NULL);
+  DEBUGASSERT(radio != NULL && framelist != NULL);
 
   /* Verify that an frame has been provided. */
 
@@ -790,7 +789,7 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
 
       /* Process the frame, decompressing it into the packet buffer */
 
-      ret = sixlowpan_frame_process(ieee, ind, iob);
+      ret = sixlowpan_frame_process(radio, ind, iob);
 
       /* Free the IOB the held the consumed frame */
 
@@ -804,14 +803,14 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
         {
           /* Inject the uncompressed, reassembled packet into the network */
 
-          ret = sixlowpan_dispatch(ieee);
+          ret = sixlowpan_dispatch(radio);
           if (ret >= 0)
             {
               /* Check if this resulted in a request to send an outgoing
                * packet.
                */
 
-              if (ieee->i_dev.d_len > 0)
+              if (radio->r_dev.d_len > 0)
                 {
                   FAR struct ipv6_hdr_s *ipv6hdr;
                   FAR uint8_t *buffer;
@@ -824,14 +823,14 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
                    * layer protocol header.
                    */
 
-                  ipv6hdr = IPv6BUF(&ieee->i_dev);
+                  ipv6hdr = IPv6BUF(&radio->r_dev);
 
                   /* Get the IEEE 802.15.4 MAC address of the destination.
                    * This assumes an encoding of the MAC address in the IPv6
                    * address.
                    */
 
-                  ret = sixlowpan_destaddrfromip(ieee, ipv6hdr->destipaddr,
+                  ret = sixlowpan_destaddrfromip(radio, ipv6hdr->destipaddr,
                                                  &destmac);
                   if (ret < 0)
                     {
@@ -848,7 +847,7 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
 #ifdef CONFIG_NET_TCP
                       case IP_PROTO_TCP:
                         {
-                          FAR struct tcp_hdr_s *tcp = TCPBUF(&ieee->i_dev);
+                          FAR struct tcp_hdr_s *tcp = TCPBUF(&radio->r_dev);
                           uint16_t tcplen;
 
                           /* The TCP header length is encoded in the top 4 bits
@@ -883,23 +882,23 @@ int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
                         }
                     }
 
-                  if (hdrlen < ieee->i_dev.d_len)
+                  if (hdrlen < radio->r_dev.d_len)
                     {
                       nwarn("WARNING: Packet to small: Have %u need >%u\n",
-                            ieee->i_dev.d_len, hdrlen);
+                            radio->r_dev.d_len, hdrlen);
                       ret = -ENOBUFS;
                       goto drop;
                     }
 
                   /* Convert the outgoing packet into a frame list. */
 
-                  buffer = ieee->i_dev.d_buf + hdrlen;
-                  buflen = ieee->i_dev.d_len - hdrlen;
+                  buffer = radio->r_dev.d_buf + hdrlen;
+                  buflen = radio->r_dev.d_len - hdrlen;
 
-                  ret = sixlowpan_queue_frames(ieee, ipv6hdr, buffer, buflen,
+                  ret = sixlowpan_queue_frames(radio, ipv6hdr, buffer, buflen,
                                                &destmac);
 drop:
-                  ieee->i_dev.d_len = 0;
+                  radio->r_dev.d_len = 0;
                 }
             }
         }

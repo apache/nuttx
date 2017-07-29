@@ -132,7 +132,7 @@ static void sixlowpan_uncompress_addr(FAR const struct ieee802154_addr_s *addr,
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *
  * Input Parmeters:
- *   ieee    - A reference to the IEE802.15.4 network device state
+ *   radio   - A reference to a radio network device instance
  *   ipv6    - The IPv6 header followd by TCP, UDP, or ICMPv6 header to be
  *             compressed
  *   destmac - L2 destination address, needed to compress the IP
@@ -145,7 +145,7 @@ static void sixlowpan_uncompress_addr(FAR const struct ieee802154_addr_s *addr,
  *
  ****************************************************************************/
 
-int sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_compresshdr_hc1(FAR struct sixlowpan_driver_s *radio,
                               FAR const struct ipv6_hdr_s *ipv6,
                               FAR const struct sixlowpan_tagaddr_s *destmac,
                               FAR uint8_t *fptr)
@@ -157,7 +157,7 @@ int sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
 
   if (ipv6->vtc != 0x60 || ipv6->tcf != 0 || ipv6->flow != 0 ||
       !sixlowpan_islinklocal(ipv6->srcipaddr) ||
-      !sixlowpan_isaddrbased(ipv6->srcipaddr, &ieee->i_dev.d_mac.ieee802154) ||
+      !sixlowpan_isaddrbased(ipv6->srcipaddr, &radio->r_dev.d_mac.ieee802154) ||
       !sixlowpan_islinklocal(ipv6->destipaddr) ||
       !sixlowpan_ismacbased(ipv6->destipaddr, destmac) ||
       ( 1

@@ -69,8 +69,8 @@
 /* Fragment header.
  *
  * The fragment header is used when the payload is too large to fit in a
- * single IEEE 802.15.4 frame. The fragment header contains three fields:
- * Datagram size, datagram tag and datagram offset.
+ * single radio frame. The fragment header contains three fields: Datagram
+ * size, datagram tag and datagram offset.
  *
  * 1. Datagram size describes the total (un-fragmented) payload.
  * 2. Datagram tag identifies the set of fragments and is used to match
@@ -300,22 +300,22 @@
  * Public Types
  ****************************************************************************/
 
-/* The device structure for IEEE802.15.4 MAC network device differs from the
- * standard Ethernet MAC device structure.  The main reason for this
- * difference is that fragmentation must be supported.
+/* The device structure for radio network device differs from the standard
+ * Ethernet MAC device structure.  The main reason for this difference is
+ * that fragmentation must be supported.
  *
- * The IEEE802.15.4 MAC does not use the d_buf packet buffer directly.
+ * The radio network driver does not use the d_buf packet buffer directly.
  * Rather, it uses a list smaller frame buffers.
  *
  *   - The packet fragment data is provided in an IOB in the via the
- *     i_req_data() interface method each time that the IEEE802.15.4 MAC
- *     needs to send more data.  The length of the frame is provided in the
- *      io_len field of the IOB.
+ *     r_req_data() interface method each time that the radio needs to
+ *     send more data.  The length of the frame is provided in the io_len
+ *     field of the IOB.
  *
  *     In this case, the d_buf is not used at all and, if fact, may be
  *     NULL.
  *
- *   - Received frames are provided by IEEE802.15.4 MAC to the network
+ *   - Received frames are provided by radio network driver to the network
  *     via an IOB parameter in the sixlowpan_submit() interface.  The
  *     length of the frawme is io_len and will be uncompressed and possibly
  *     reassembled in the d_buf;  d_len will hold the size of the
@@ -325,15 +325,15 @@
  *
  * This is accomplished by "inheriting" the standard 'struct net_driver_s'
  * and appending the frame buffer as well as other metadata needed to
- * manage the fragmentation.  'struct ieee802154_driver_s' is cast
+ * manage the fragmentation.  'struct sixlowpan_driver_s' is cast
  * compatible with 'struct net_driver_s' when CONFIG_NET_MULTINIC is not
- * defined or when dev->d_lltype == NET_LL_IEEE802154.
+ * defined or when dev->d_lltype == NET_LL_IEEE802154 or dev->d_lltype ==
+ * NET_LL_PKTRADIO.
  *
- * The IEEE802.15.4 MAC network driver has reponsibility for initializing
- * this structure.  In general, all fields must be set to NULL.  In
- * addtion:
+ * The radio network driver has reponsibility for initializing this
+ * structure.  In general, all fields must be set to NULL.  In addition:
  *
- * 1. On a TX poll, the IEEE802.15.4 MAC driver should provide its driver
+ * 1. On a TX poll, the radio network driver should provide its driver
  *    structure.  During the course of the poll, the networking layer may
  *    generate outgoing frames.  These frames will by provided to the MAC
  *    driver via the req_data() method.
@@ -343,9 +343,9 @@
  *
  * 2. When receiving data both buffers must be provided:
  *
- *    The IEEE802.15.4 MAC driver should receive the frame data directly
- *    into the payload area of an IOB frame structure.  That IOB structure
- *    may be obtained using the iob_alloc() function.
+ *    The radio driver should receive the frame data directly into the
+ *    payload area of an IOB frame structure.  That IOB structure may be
+ *    obtained using the iob_alloc() function.
  *
  *    The larger dev.d_buf must have a size of at least the advertised MTU
  *    of the protocol, CONFIG_NET_6LOWPAN_MTU, plus CONFIG_NET_GUARDSIZE.
@@ -369,16 +369,17 @@ struct ieee802154_frame_meta_s; /* Forward reference */
 struct ieee802154_data_ind_s;   /* Forward reference */
 struct iob_s;                   /* Forward reference */
 
-struct ieee802154_driver_s
+struct sixlowpan_driver_s
 {
   /* This definitiona must appear first in the structure definition to
    * assure cast compatibility.
    */
 
-  struct net_driver_s i_dev;
+  struct net_driver_s r_dev;
 
-  /* IEEE802.15.4 MAC-specific definitions follow. */
+  /* Radio network driver-specific definitions follow. */
 
+#ifdef CONFIG_WIRELESS_IEEE802154
   /* The msdu_handle is basically an id for the frame.  The standard just
    * says that the next highest layer should determine it.  It is used in
    * three places
@@ -394,7 +395,8 @@ struct ieee802154_driver_s
    * Here is a simple frame counter.
    */
 
-  uint8_t i_msdu_handle;
+  uint8_t r_msdu_handle;
+#endif
 
 #if CONFIG_NET_6LOWPAN_FRAG
   /* Fragmentation Support *************************************************/
@@ -402,7 +404,7 @@ struct ieee802154_driver_s
    * state information be retained from frame to frame.
    */
 
-  /* i_dgramtag.  Datagram tag to be put in the header of the set of
+  /* r_dgramtag.  Datagram tag to be put in the header of the set of
    * fragments.  It is used by the recipient to match fragments of the
    * same payload.
    *
@@ -410,54 +412,54 @@ struct ieee802154_driver_s
    * fragmented packet is sent so that it will be unique to that
    * sequence fragmentation.  Its value is then persistent, the values of
    * other fragmentatin variables are valid on during a single
-   * fragmentation sequence (while i_accumlen > 0)
+   * fragmentation sequence (while r_accumlen > 0)
    */
 
-  uint16_t i_dgramtag;
+  uint16_t r_dgramtag;
 
-  /* i_reasstag.  Each frame in the reassembly has a tag.  That tag must
+  /* r_reasstag.  Each frame in the reassembly has a tag.  That tag must
    * match the reassembly tag in the fragments being merged.
    *
-   * This is the same tag as i_dgramtag but is saved on the receiving
+   * This is the same tag as r_dgramtag but is saved on the receiving
    * side to match all of the fragments of the packet.
    */
 
-  uint16_t i_reasstag;
+  uint16_t r_reasstag;
 
-  /* i_pktlen. The total length of the IPv6 packet to be re-assembled in
+  /* r_pktlen. The total length of the IPv6 packet to be re-assembled in
    * d_buf.  Used to determine when the re-assembly is complete.
    */
 
-  uint16_t i_pktlen;
+  uint16_t r_pktlen;
 
   /* The current accumulated length of the packet being received in d_buf.
    * Included IPv6 and protocol headers.  Currently used only to determine
    * there is a fragmentation sequence in progress.
    */
 
-  uint16_t i_accumlen;
+  uint16_t r_accumlen;
 
-  /* i_boffset.  Offset to the beginning of data in d_buf.  As each fragment
+  /* r_boffset.  Offset to the beginning of data in d_buf.  As each fragment
    * is received, data is placed at an appriate offset added to this.
    */
 
-  uint16_t i_boffset;
+  uint16_t r_boffset;
 
   /* The source MAC address of the fragments being merged */
 
-  struct sixlowpan_tagaddr_s i_fragsrc;
+  struct sixlowpan_tagaddr_s r_fragsrc;
 
   /* That time at which reassembly was started.  If the elapsed time
    * exceeds CONFIG_NET_6LOWPAN_MAXAGE, then the reassembly will
    * be cancelled.
    */
 
-  systime_t i_time;
+  systime_t r_time;
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
   /* MAC network driver callback functions **********************************/
   /**************************************************************************
-   * Name: mac802154_get_mhrlen
+   * Name: r_get_mhrlen
    *
    * Description:
    *   Calculate the MAC header length given the frame meta-data.
@@ -472,11 +474,11 @@ struct ieee802154_driver_s
    *
    **************************************************************************/
 
-  CODE int (*i_get_mhrlen)(FAR struct ieee802154_driver_s *netdev,
+  CODE int (*r_get_mhrlen)(FAR struct sixlowpan_driver_s *netdev,
                            FAR const struct ieee802154_frame_meta_s *meta);
 
   /**************************************************************************
-   * Name: mac802154_req_data
+   * Name: r_req_data
    *
    * Description:
    *   Requests the transfer of a list of frames to the MAC.
@@ -492,7 +494,7 @@ struct ieee802154_driver_s
    *
    **************************************************************************/
 
-  CODE int (*i_req_data)(FAR struct ieee802154_driver_s *netdev,
+  CODE int (*r_req_data)(FAR struct sixlowpan_driver_s *netdev,
                          FAR const struct ieee802154_frame_meta_s *meta,
                          FAR struct iob_s *framelist);
 };
@@ -507,15 +509,14 @@ struct ieee802154_driver_s
  * Description:
  *   Process an incoming 6LoWPAN frame.
  *
- *   This function is called when the device driver has received an
- *   IEEE802.15.4 frame from the network.  The frame from the device
- *   driver must be provided in by the IOB frame argument of the
- *   function call:
+ *   This function is called when the radio device driver has received an
+ *   frame from the network.  The frame from the device driver must be
+ *   provided in by the IOB frame argument of the  function call:
  *
  *   - The frame data is in the IOB io_data[] buffer,
  *   - The length of the frame is in the IOB io_len field, and
- *   - The offset past the IEEE802.15.4 MAC header is provided in the
- *     io_offset field.
+ *   - The offset past and radio MAC header is provided in the io_offset
+ *     field.
  *
  *   The frame argument may refer to a single frame (a list of length one)
  *   or may it be the head of a list of multiple frames.
@@ -531,8 +532,8 @@ struct ieee802154_driver_s
  *
  *   After each frame is processed into d_buf, the IOB is deallocated.  If
  *   reassembly is incomplete, the partially reassembled packet must be
- *   preserved by the IEEE802.15.4 MAC network drvier sand provided again
- *   when the next frame is received.
+ *   preserved by the radio network drvier and provided again when the next
+ *   frame is received.
  *
  *   When the packet in the d_buf is fully reassembled, it will be provided
  *   to the network as with any other received packet.  d_len will be set
@@ -549,7 +550,7 @@ struct ieee802154_driver_s
  *   network driver via the req_data() method as with other TX operations.
  *
  * Input Parameters:
- *   ieee      - The IEEE802.15.4 MAC network driver interface.
+ *   radio       The radio network driver interface.
  *   framelist - The head of an incoming list of frames.  Normally this
  *               would be a single frame.  A list may be provided if
  *               appropriate, however.
@@ -562,7 +563,7 @@ struct ieee802154_driver_s
  *
  ****************************************************************************/
 
-int sixlowpan_input(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_input(FAR struct sixlowpan_driver_s *radio,
                     FAR struct iob_s *framelist,
                     FAR const struct ieee802154_data_ind_s *ind);
 

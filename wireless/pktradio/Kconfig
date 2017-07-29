@@ -1,0 +1,35 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig WIRELESS_PKTRADIO
+	bool "Packet Radio Support"
+	default n
+	select MM_IOB
+	depends on WIRELESS
+	---help---
+		Enables support for non-standard packet radios.  This option enables
+		special hooks to support interoperability of these non-standard
+		radios to support 6LoWPAN networking.  This option should not be
+		selected for standard IEEE 802.15.4.
+
+if WIRELESS_PKTRADIO
+
+config PKTRADIO_ADDRLEN
+	int "Maximum address size"
+	default 1
+	---help---
+		This value provides the size of the MAC address used by the packet
+		radio.  If there are multiple packet radios in the configuration,
+		then this must be set to the a value greater than or equal to the
+		maximum of address lengths used by the radios.
+
+config PKTRADIO_NRXMETA
+	int "Number of pre-allocated meta-data structures"
+	default 20
+	---help---
+		This specifies the total number of preallocated meta data structures
+		must be allocated with each incoming packet.
+
+endif # WIRELESS_PKTRADIO

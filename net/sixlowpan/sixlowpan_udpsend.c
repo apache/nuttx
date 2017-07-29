@@ -134,7 +134,7 @@ static uint16_t sixlowpan_udp_chksum(FAR const struct ipv6udp_hdr_s *ipv6udp,
  *   may be returned when they are not NULL and 0), and the error ENOTCONN is
  *   returned when the socket was not actually connected.
  *
- * Parameters:
+ * Input Parmeters
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Data to send
  *   buflen   Length of data to send
@@ -205,26 +205,34 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
   /* Route outgoing message to the correct device */
 
 #ifdef CONFIG_NETDEV_MULTINIC
+  /* There are multiple network devices */
+
   dev = netdev_findby_ipv6addr(conn->u.ipv6.laddr,
                                to6->sin6_addr.in6_u.u6_addr16);
-#ifdef CONFIG_NETDEV_MULTILINK
-  if (dev == NULL || dev->d_lltype != NET_LL_IEEE802154)
-#else
   if (dev == NULL)
-#endif
     {
-      nwarn("WARNING: Not routable or not IEEE802.15.4 MAC\n");
+      nwarn("WARNING: Not routable\n");
       return (ssize_t)-ENETUNREACH;
     }
+
+#ifdef CONFIG_NETDEV_MULTILINK
+  /* Some network devices support different link layer protocols.
+   * Check if this device has the hooks to support 6LoWPAN.
+   */
+
+  if (dev->d_lltype != NET_LL_IEEE802154 &&
+      dev->d_lltype != NET_LL_PKTRADIO)
+    {
+      nwarn("WARNING: Not a compatible network device\n");
+      return (ssize_t)-ENONET;
+    }
+#endif
+
 #else
   dev = netdev_findby_ipv6addr(to6->sin6_addr.in6_u.u6_addr16);
-#ifdef CONFIG_NETDEV_MULTILINK
-  if (dev == NULL || dev->d_lltype != NET_LL_IEEE802154)
-#else
   if (dev == NULL)
-#endif
     {
-      nwarn("WARNING: Not routable or not IEEE802.15.4 MAC\n");
+      nwarn("WARNING: Not routable\n");
       return (ssize_t)-ENETUNREACH;
     }
 #endif
@@ -302,7 +310,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
    * encoding of the MAC address in the IPv6 address.
    */
 
-  ret = sixlowpan_destaddrfromip((FAR struct ieee802154_driver_s *)dev,
+  ret = sixlowpan_destaddrfromip((FAR struct sixlowpan_driver_s *)dev,
                                  to6->sin6_addr.in6_u.u6_addr16, &destmac);
   if (ret < 0)
     {
@@ -345,7 +353,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
  *   psock_6lowpan_udp_send() call may be used with connectionlesss UDP
  *   sockets.
  *
- * Parameters:
+ * Input Parmeters
  *   psock  - An instance of the internal socket structure.
  *   buf    - Data to send
  *   buflen - Length of data to send
@@ -421,7 +429,7 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
  *   Handles forwarding a UDP packet via 6LoWPAN.  This is currently only
  *   used by the IPv6 forwarding logic.
  *
- * Parameters:
+ * Input Parmeters
  *   dev    - An instance of nework device state structure
  *   fwddev - The network device used to send the data.  This will be the
  *            same device except for the IP forwarding case where packets
@@ -478,7 +486,7 @@ void sixlowpan_udp_send(FAR struct net_driver_s *dev,
            * assumes an encoding of the MAC address in the IPv6 address.
            */
 
-          ret = sixlowpan_destaddrfromip((FAR struct ieee802154_driver_s *)dev,
+          ret = sixlowpan_destaddrfromip((FAR struct sixlowpan_driver_s *)dev,
                                          ipv6udp->ipv6.destipaddr, &destmac);
           if (ret < 0)
             {
@@ -505,7 +513,7 @@ void sixlowpan_udp_send(FAR struct net_driver_s *dev,
               buflen = dev->d_len - hdrlen;
 
               (void)sixlowpan_queue_frames(
-                      (FAR struct ieee802154_driver_s *)fwddev,
+                      (FAR struct sixlowpan_driver_s *)fwddev,
                       &ipv6udp->ipv6, buf, buflen, &destmac);
             }
         }

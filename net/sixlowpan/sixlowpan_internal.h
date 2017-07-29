@@ -225,7 +225,7 @@ extern uint8_t g_frame_hdrlen;
  ****************************************************************************/
 
 struct net_driver_s;         /* Forward reference */
-struct ieee802154_driver_s;  /* Forward reference */
+struct sixlowpan_driver_s;   /* Forward reference */
 struct devif_callback_s;     /* Forward reference */
 struct ipv6_hdr_s;           /* Forward reference */
 struct sixlowpan_addr_s;     /* Forward reference */
@@ -242,7 +242,7 @@ struct iob_s;                /* Forward reference */
  *   The payload data is in the caller 'buf' and is of length 'buflen'.
  *   Compressed headers will be added and if necessary the packet is
  *   fragmented. The resulting packet/fragments are submitted to the MAC
- *   via the network driver i_req_data method.
+ *   via the network driver r_req_data method.
  *
  * Input Parameters:
  *   dev     - The IEEE802.15.4 MAC network driver interface.
@@ -278,7 +278,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
  *   data structure that we need to interface with the IEEE802.15.4 MAC.
  *
  * Input Parameters:
- *   ieee    - IEEE 802.15.4 MAC driver state reference.
+ *   radio   - Reference to a radio network driver state instance.
  *   pktmeta - Meta-data specific to the current outgoing frame
  *   meta    - Location to return the corresponding meta data.
  *   paylen  - The size of the data payload to be sent.
@@ -291,7 +291,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_meta_data(FAR struct sixlowpan_driver_s *radio,
                         FAR const struct packet_metadata_s *pktmeta,
                         FAR struct ieee802154_frame_meta_s *meta,
                         uint16_t paylen);
@@ -305,8 +305,8 @@ int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
  *   buffer is required to make this determination.
  *
  * Input parameters:
- *   ieee - A reference IEEE802.15.4 MAC network device structure.
- *   meta - Meta data that describes the MAC header
+ *   radio - Reference to a radio network driver state instance.
+ *   meta  - Meta data that describes the MAC header
  *
  * Returned Value:
  *   The frame header length is returnd on success; otherwise, a negated
@@ -314,7 +314,7 @@ int sixlowpan_meta_data(FAR struct ieee802154_driver_s *ieee,
  *
  ****************************************************************************/
 
-int sixlowpan_frame_hdrlen(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_frame_hdrlen(FAR struct sixlowpan_driver_s *radio,
                            FAR const struct ieee802154_frame_meta_s *meta);
 
 /****************************************************************************
@@ -327,7 +327,7 @@ int sixlowpan_frame_hdrlen(FAR struct ieee802154_driver_s *ieee,
  *   submits any new outgoing frame to the MAC.
  *
  * Input parameters:
- *   ieee  - A reference IEEE802.15.4 MAC network device structure.
+ *   radio - Reference to a radio network driver state instance.
  *   meta  - Meta data that describes the MAC header
  *   frame - The IOB containing the frame to be submitted.
  *
@@ -337,7 +337,7 @@ int sixlowpan_frame_hdrlen(FAR struct ieee802154_driver_s *ieee,
  *
  ****************************************************************************/
 
-int sixlowpan_frame_submit(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_frame_submit(FAR struct sixlowpan_driver_s *radio,
                            FAR const struct ieee802154_frame_meta_s *meta,
                            FAR struct iob_s *frame);
 
@@ -352,10 +352,10 @@ int sixlowpan_frame_submit(FAR struct ieee802154_driver_s *ieee,
  *   The payload data is in the caller 'buf' and is of length 'buflen'.
  *   Compressed headers will be added and if necessary the packet is
  *   fragmented. The resulting packet/fragments are submitted to the MAC
- *   via the network driver i_req_data method.
+ *   via the network driver r_req_data method.
  *
  * Input Parameters:
- *   ieee    - The IEEE802.15.4 MAC driver instance
+ *   radio   - Reference to a radio network driver state instance.
  *   ipv6    - IPv6 header followed by TCP or UDP header.
  *   buf     - Beginning of the packet packet to send (with IPv6 + protocol
  *             headers)
@@ -373,7 +373,7 @@ int sixlowpan_frame_submit(FAR struct ieee802154_driver_s *ieee,
  *
  ****************************************************************************/
 
-int sixlowpan_queue_frames(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_queue_frames(FAR struct sixlowpan_driver_s *radio,
                            FAR const struct ipv6_hdr_s *ipv6,
                            FAR const void *buf,  size_t buflen,
                            FAR const struct sixlowpan_tagaddr_s *destmac);
@@ -418,11 +418,11 @@ void sixlowpan_hc06_initialize(void);
  *   compression
  *
  * Input Parameters:
- *   ieee     - A reference to the IEE802.15.4 network device state
- *   ipv6     - The IPv6 header to be compressed
- *   destmac  - L2 destination address, needed to compress the IP
- *              destination field
- *   fptr     - Pointer to frame to be compressed.
+ *   radio   - Reference to a radio network driver state instance.
+ *   ipv6    - The IPv6 header to be compressed
+ *   destmac - L2 destination address, needed to compress the IP
+ *             destination field
+ *   fptr    - Pointer to frame to be compressed.
  *
  * Returned Value:
  *   On success the indications of the defines COMPRESS_HDR_* are returned.
@@ -431,7 +431,7 @@ void sixlowpan_hc06_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
-int sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_compresshdr_hc06(FAR struct sixlowpan_driver_s *radio,
                                FAR const struct ipv6_hdr_s *ipv6,
                                FAR const struct sixlowpan_tagaddr_s *destmac,
                                FAR uint8_t *fptr);
@@ -482,7 +482,7 @@ void sixlowpan_uncompresshdr_hc06(FAR const struct ieee802154_data_ind_s *ind,
  *   uip_buf buffer.
  *
  * Input Parmeters:
- *   ieee    - A reference to the IEE802.15.4 network device state
+ *   radio   - Reference to a radio network driver state instance.
  *   ipv6    - The IPv6 header to be compressed
  *   destmac - L2 destination address, needed to compress the IP
  *             destination field
@@ -495,7 +495,7 @@ void sixlowpan_uncompresshdr_hc06(FAR const struct ieee802154_data_ind_s *ind,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
-int sixlowpan_compresshdr_hc1(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_compresshdr_hc1(FAR struct sixlowpan_driver_s *radio,
                               FAR const struct ipv6_hdr_s *ipv6,
                               FAR const struct sixlowpan_tagaddr_s *destmac,
                               FAR uint8_t *fptr);
@@ -568,7 +568,7 @@ int sixlowpan_uncompresshdr_hc1(FAR const struct ieee802154_data_ind_s *ind,
 
 #define sixlowpan_islinklocal(ipaddr) ((ipaddr)[0] == NTOHS(0xfe80))
 
-int sixlowpan_destaddrfromip(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_destaddrfromip(FAR struct sixlowpan_driver_s *radio,
                              const net_ipv6addr_t ipaddr,
                              FAR struct sixlowpan_tagaddr_s *addr);
 
@@ -600,7 +600,7 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
  *   Get the source PAN ID from the IEEE802.15.4 radio.
  *
  * Input parameters:
- *   ieee  - A reference IEEE802.15.4 MAC network device structure.
+ *   radio - Reference to a radio network driver state instance.
  *   panid - The location in which to return the PAN ID.  0xfff may be
  *           returned if the device is not associated.
  *
@@ -609,7 +609,8 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
  *
  ****************************************************************************/
 
-int sixlowpan_src_panid(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_src_panid(FAR struct sixlowpan_driver_s *radio,
                         FAR uint8_t *panid);
+
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* _NET_SIXLOWPAN_SIXLOWPAN_INTERNAL_H */

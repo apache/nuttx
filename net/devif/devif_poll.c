@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/devif/devif_poll.c
  *
- *   Copyright (C) 2007-2010, 2012, 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2012, 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,23 +89,23 @@ systime_t g_polltime;
  * Name: devif_packet_conversion
  *
  * Description:
- *   Generic output conversion hook.  Only needed for IEEE802.15.4 for now
- *   but this is a point where support for other conversions may be
- *   provided.
+ *   Generic output conversion hook.  Only needed for IEEE802.15.4 (and
+ *   other non-standard packet radios) for now but this is a point where
+ *   support for other conversions may be provided.
  *
  *   TCP output comes through three different mechansims.  Either from:
  *
- *   1. TCP socket output.  For the case of TCP output to an
- *      IEEE802.15.4, the TCP output is caught in the socket
- *      send()/sendto() logic and and redirected to 6LoWPAN logic.
+ *   1. TCP socket output.  For the case of TCP output to a radio,
+ *      the TCP output is caught in the socket send()/sendto() logic and
+ *      redirected to 6LoWPAN logic.
  *   2. TCP output from the TCP state machine.  That will occur
  *      during TCP packet processing by the TCP state meachine.
  *   3. TCP output resulting from TX or timer polling
  *
  *   Cases 2 is handled here.  Logic here detected if (1) an attempt
- *   to return with d_len > 0 and (2) that the device is an
- *   IEEE802.15.4 MAC network driver. Under those conditions, 6LoWPAN
- *   logic will be called to create the IEEE80215.4 frames.
+ *   to return with d_len > 0 and (2) that the device is a radio
+ *   network driver. Under those conditions, 6LoWPAN logic will be called
+ *   to create the radio frames.
  *
  *   All outgoing ICMPv6 messages come through one of two mechanisms:
  *
@@ -122,79 +122,81 @@ systime_t g_polltime;
 static void devif_packet_conversion(FAR struct net_driver_s *dev,
                                     enum devif_packet_type pkttype)
 {
-#ifdef CONFIG_NET_MULTILINK
-  /* Handle the case where multiple link layer protocols are supported */
-
-  if (dev->d_len > 0 && dev->d_lltype == NET_LL_IEEE802154)
-#else
   if (dev->d_len > 0)
-#endif
     {
-      FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)dev->d_buf;
+#ifdef CONFIG_NET_MULTILINK
+      /* Handle the case where multiple link layer protocols are supported */
+
+      if (dev->d_lltype == NET_LL_IEEE802154 ||
+          dev->d_lltype == NET_LL_PKTRADIO)
+#endif
+        {
+          FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)dev->d_buf;
 
 #ifdef CONFIG_NET_IPv4
-      if ((ipv6->vtc & IP_VERSION_MASK) != IPv6_VERSION)
-        {
-           nerr("ERROR: IPv6 version error: %02x...  Packet dropped\n",
-                ipv6->vtc);
-        }
-      else
+          if ((ipv6->vtc & IP_VERSION_MASK) != IPv6_VERSION)
+            {
+               nerr("ERROR: IPv6 version error: %02x...  Packet dropped\n",
+                    ipv6->vtc);
+            }
+          else
 #endif
 #ifdef CONFIG_NET_TCP
-      if (pkttype == DEVIF_TCP)
-        {
-          /* This packet came from a response to TCP polling and is directed
-           * to an IEEE802.15.4 device using 6LoWPAN.  Verify that the outgoing
-           * packet is IPv6 with TCP protocol.
-           */
-
-          if (ipv6->proto == IP_PROTO_TCP)
+          if (pkttype == DEVIF_TCP)
             {
-              /* Let 6LoWPAN convert IPv6 TCP output into IEEE802.15.4 frames. */
+              /* This packet came from a response to TCP polling and is
+               * directed to an radio driver using 6LoWPAN.  Verify that the
+               * outgoing packet is IPv6 with TCP protocol.
+               */
 
-              sixlowpan_tcp_send(dev, dev, ipv6);
+              if (ipv6->proto == IP_PROTO_TCP)
+                {
+                  /* Let 6LoWPAN convert IPv6 TCP output into radio frames. */
+
+                  sixlowpan_tcp_send(dev, dev, ipv6);
+                }
+              else
+                {
+                  nerr("ERROR: TCP protocol error: %u...  Packet dropped\n",
+                       ipv6->proto);
+                }
             }
           else
-            {
-              nerr("ERROR: TCP protocol error: %u...  Packet dropped\n",
-                   ipv6->proto);
-            }
-        }
-      else
 #endif
 #ifdef CONFIG_NET_ICMPv6
-      if (pkttype == DEVIF_ICMP6)
-        {
-          /* This packet came from a response to TCP polling and is directed
-           * to an IEEE802.15.4 device using 6LoWPAN.  Verify that the outgoing
-           * packet is IPv6 with TCP protocol.
-           */
-
-          if (ipv6->proto == IP_PROTO_ICMP6)
+          if (pkttype == DEVIF_ICMP6)
             {
-              /* Let 6LoWPAN convert IPv6 ICMPv6 output into IEEE802.15.4 frames. */
+              /* This packet came from a response to TCP polling and is
+               * directed to a radio using 6LoWPAN.  Verify that the outgoing
+               * packet is IPv6 with TCP protocol.
+               */
 
-              sixlowpan_icmpv6_send(dev, dev, ipv6);
+              if (ipv6->proto == IP_PROTO_ICMP6)
+                {
+                  /* Let 6LoWPAN convert IPv6 ICMPv6 output into radio frames. */
+
+                  sixlowpan_icmpv6_send(dev, dev, ipv6);
+                }
+              else
+                {
+                  nerr("ERROR: ICMPv6 protocol error: %u...  Packet dropped\n",
+                       ipv6->proto);
+                }
             }
           else
-            {
-              nerr("ERROR: ICMPv6 protocol error: %u...  Packet dropped\n",
-                   ipv6->proto);
-            }
-        }
-      else
 #endif
-        {
-          nerr("ERROR: Unhandled packet dropped.  pkttype=%u protocol=%u\n",
-                pkttype, ipv6->proto);
-        }
+            {
+              nerr("ERROR: Unhandled packet dropped.  pkttype=%u protocol=%u\n",
+                    pkttype, ipv6->proto);
+            }
 
-      UNUSED(ipv6);
-      dev->d_len = 0;
+          UNUSED(ipv6);
+          dev->d_len = 0;
+        }
     }
 }
 #else
-# define devif_packet_conversion(dev,pkttype)
+#  define devif_packet_conversion(dev,pkttype)
 #endif /* CONFIG_NET_6LOWPAN */
 
 /****************************************************************************

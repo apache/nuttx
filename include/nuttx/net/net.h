@@ -84,7 +84,8 @@ enum net_lltype_e
   NET_LL_SLIP,         /* Serial Line Internet Protocol (SLIP) */
   NET_LL_TUN,          /* TUN Virtual Network Device */
   NET_LL_IEEE80211,    /* IEEE 802.11 */
-  NET_LL_IEEE802154    /* IEEE 802.15.4 MAC */
+  NET_LL_IEEE802154,   /* IEEE 802.15.4 MAC */
+  NET_LL_PKTRADIO      /* Non-standard packet radio */
 };
 
 /* This defines a bitmap big enough for one bit for each socket option */

@@ -176,7 +176,7 @@ static uint16_t sixlowpan_tcp_chksum(FAR const struct ipv6tcp_hdr_s *ipv6tcp,
  * Description:
  *   sixlowpan_tcp_header() will construct the IPv6 and TCP headers
  *
- * Parameters:
+ * Input Parmeters
  *   conn    - An instance of the TCP connection structure.
  *   dev     - The network device that will route the packet
  *   buf     - Data to send
@@ -328,7 +328,7 @@ static inline bool send_timeout(FAR struct sixlowpan_send_s *sinfo)
  *   This function is called from the interrupt level to perform the actual
  *   TCP send operation when polled by the lower, device interfacing layer.
  *
- * Parameters:
+ * Input Parmeters
  *   dev    - The structure of the network driver that caused the interrupt
  *   pvconn - The connection structure associated with the socket
  *   pvpriv - The interrupt handler's private data argument
@@ -354,9 +354,10 @@ static uint16_t tcp_send_interrupt(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_MULTILINK
   /* Verify that this is an IEEE802.15.4 network driver. */
 
-  if (dev->d_lltype != NET_LL_IEEE802154)
+  if (dev->d_lltype != NET_LL_IEEE802154 &&
+      dev->d_lltype != NET_LL_PKTRADIO)
     {
-      ninfo("Not a NET_LL_IEEE802154 device\n");
+      ninfo("Not a compatible network device\n");
       return flags;
     }
 #endif
@@ -525,7 +526,7 @@ static uint16_t tcp_send_interrupt(FAR struct net_driver_s *dev,
 
           /* Transfer the frame list to the IEEE802.15.4 MAC device */
 
-          ret = sixlowpan_queue_frames((FAR struct ieee802154_driver_s *)dev,
+          ret = sixlowpan_queue_frames((FAR struct sixlowpan_driver_s *)dev,
                                        &ipv6tcp.ipv6,
                                        &sinfo->s_buf[sinfo->s_sent], sndlen,
                                        sinfo->s_destmac);
@@ -612,7 +613,7 @@ end_wait:
  *   The payload data is in the caller 'buf' and is of length 'buflen'.
  *   Compressed headers will be added and if necessary the packet is
  *   fragmented. The resulting packet/fragments are submitted to the MAC
- *   via the network driver i_req_data method.
+ *   via the network driver r_req_data method.
  *
  * Input Parameters:
  *   psock   - An instance of the internal socket structure.
@@ -734,7 +735,7 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
  *   psock_6lowpan_tcp_send() call may be used only when the TCP socket is in a
  *   connected state (so that the intended recipient is known).
  *
- * Parameters:
+ * Input Parmeters
  *   psock - An instance of the internal socket structure.
  *   buf   - Data to send
  *   bulen - Length of data to send
@@ -799,23 +800,33 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
   /* Route outgoing message to the correct device */
 
 #ifdef CONFIG_NETDEV_MULTINIC
+  /* There are multiple network devices */
+
   dev = netdev_findby_ipv6addr(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
-#ifdef CONFIG_NETDEV_MULTILINK
-  if (dev == NULL || dev->d_lltype != NET_LL_IEEE802154)
-#else
   if (dev == NULL)
-#endif
     {
-      nwarn("WARNING: Not routable or not IEEE802.15.4 MAC\n");
+      nwarn("WARNING: Not routable\n");
       return (ssize_t)-ENETUNREACH;
     }
-#else
-  dev = netdev_findby_ipv6addr(conn->u.ipv6.raddr);
+
 #ifdef CONFIG_NETDEV_MULTILINK
-  if (dev == NULL || dev->d_lltype != NET_LL_IEEE802154)
-#else
-  if (dev == NULL)
+  /* Some network devices support different link layer protocols.
+   * Check if this device has the hooks to support 6LoWPAN.
+   */
+
+  if (dev->d_lltype != NET_LL_IEEE802154 &&
+      dev->d_lltype != NET_LL_PKTRADIO)
+    {
+      nwarn("WARNING: Not a compatible network device\n");
+      return (ssize_t)-ENONET;
+    }
 #endif
+
+#else
+  /* There is a single network device */
+
+  dev = netdev_findby_ipv6addr(conn->u.ipv6.raddr);
+  if (dev == NULL)
     {
       nwarn("WARNING: Not routable\n");
       return (ssize_t)-ENETUNREACH;
@@ -837,7 +848,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
    * an encoding of the MAC address in the IPv6 address.
    */
 
-  ret = sixlowpan_destaddrfromip((FAR struct ieee802154_driver_s *)dev,
+  ret = sixlowpan_destaddrfromip((FAR struct sixlowpan_driver_s *)dev,
                                  conn->u.ipv6.raddr, &destmac);
   if (ret < 0)
     {
@@ -895,7 +906,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
  *   driver. Under those conditions, this function will be called to create
  *   the IEEE80215.4 frames.
  *
- * Parameters:
+ * Input Parmeters
  *   dev    - The network device containing the packet to be sent.
  *   fwddev - The network device used to send the data.  This will be the
  *            same device except for the IP forwarding case where packets
@@ -956,7 +967,7 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
            * assumes an encoding of the MAC address in the IPv6 address.
            */
 
-          ret = sixlowpan_destaddrfromip((FAR struct ieee802154_driver_s *)dev,
+          ret = sixlowpan_destaddrfromip((FAR struct sixlowpan_driver_s *)dev,
                                          ipv6hdr->ipv6.destipaddr, &destmac);
           if (ret < 0)
             {
@@ -986,7 +997,7 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
               buflen = dev->d_len - hdrlen;
 
               (void)sixlowpan_queue_frames(
-                      (FAR struct ieee802154_driver_s *)fwddev,
+                      (FAR struct sixlowpan_driver_s *)fwddev,
                       &ipv6hdr->ipv6, buf, buflen, &destmac);
             }
         }

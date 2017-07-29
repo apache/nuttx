@@ -123,7 +123,7 @@ static void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr,
  *   Get the extended address of the PAN coordinator.
  *
  * Input parameters:
- *   ieee  - A reference IEEE802.15.4 MAC network device structure.
+ *   radio - Reference to a radio network driver state instance.
  *   eaddr - The location in which to return the extended address.
  *
  * Returned Value:
@@ -132,14 +132,14 @@ static void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_STARPOINT) && defined(CONFIG_NET_6LOWPAN_EXTENDEDADDR)
-static int sixlowpan_coord_eaddr(FAR struct ieee802154_driver_s *ieee,
+static int sixlowpan_coord_eaddr(FAR struct sixlowpan_driver_s *radio,
                                  FAR struct sixlowpan_eaddr_s *eaddr)
 {
-  FAR struct net_driver_s *dev = &ieee->i_dev;
+  FAR struct net_driver_s *dev = &radio->r_dev;
   struct ieee802154_netmac_s arg;
   int ret;
 
-  memcpy(arg.ifr_name, ieee->i_dev.d_ifname, IFNAMSIZ);
+  memcpy(arg.ifr_name, radio->r_dev.d_ifname, IFNAMSIZ);
   arg.u.getreq.attr = IEEE802154_ATTR_MAC_COORD_EADDR ;
   ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
                      (unsigned long)((uintptr_t)&arg));
@@ -161,7 +161,7 @@ static int sixlowpan_coord_eaddr(FAR struct ieee802154_driver_s *ieee,
  *   Get the short address of the PAN coordinator.
  *
  * Input parameters:
- *   ieee  - A reference IEEE802.15.4 MAC network device structure.
+ *   radio - Reference to a radio network driver state instance.
  *   saddr - The location in which to return the short address.
  *
  * Returned Value:
@@ -170,14 +170,14 @@ static int sixlowpan_coord_eaddr(FAR struct ieee802154_driver_s *ieee,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_STARPOINT) && !defined(CONFIG_NET_6LOWPAN_EXTENDEDADDR)
-static int sixlowpan_coord_saddr(FAR struct ieee802154_driver_s *ieee,
+static int sixlowpan_coord_saddr(FAR struct sixlowpan_driver_s *radio,
                                  FAR struct sixlowpan_saddr_s *saddr)
 {
-  FAR struct net_driver_s *dev = &ieee->i_dev;
+  FAR struct net_driver_s *dev = &radio->r_dev;
   struct ieee802154_netmac_s arg;
   int ret;
 
-  memcpy(arg.ifr_name, ieee->i_dev.d_ifname, IFNAMSIZ);
+  memcpy(arg.ifr_name, radio->r_dev.d_ifname, IFNAMSIZ);
   arg.u.getreq.attr = IEEE802154_ATTR_MAC_COORD_SADDR ;
   ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
                      (unsigned long)((uintptr_t)&arg));
@@ -216,7 +216,7 @@ static int sixlowpan_coord_saddr(FAR struct ieee802154_driver_s *ieee,
  *
  ****************************************************************************/
 
-int sixlowpan_destaddrfromip(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_destaddrfromip(FAR struct sixlowpan_driver_s *radio,
                              const net_ipv6addr_t ipaddr,
                              FAR struct sixlowpan_tagaddr_s *destaddr)
 {
@@ -228,11 +228,11 @@ int sixlowpan_destaddrfromip(FAR struct ieee802154_driver_s *ieee,
    */
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  ret = sixlowpan_coord_eaddr(ieee, &destaddr->u.eaddr);
+  ret = sixlowpan_coord_eaddr(radio, &destaddr->u.eaddr);
   destaddr->extended = true;
 #else
   memset(destaddr, 0, sizeof(struct sixlowpan_tagaddr_s));
-  ret = sixlowpan_coord_saddr(ieee, &destaddr->u.saddr);
+  ret = sixlowpan_coord_saddr(radio, &destaddr->u.saddr);
 #endif
 
   return ret;
@@ -359,7 +359,7 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
  *   Get the source PAN ID from the IEEE802.15.4 MAC layer.
  *
  * Input parameters:
- *   ieee  - A reference IEEE802.15.4 MAC network device structure.
+ *   radio - Reference to a radio network driver state instance.
  *   panid - The location in which to return the PAN ID.  0xfff may be
  *           returned if the device is not associated.
  *
@@ -368,14 +368,14 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
  *
  ****************************************************************************/
 
-int sixlowpan_src_panid(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_src_panid(FAR struct sixlowpan_driver_s *radio,
                         FAR uint8_t *panid)
 {
-  FAR struct net_driver_s *dev = &ieee->i_dev;
+  FAR struct net_driver_s *dev = &radio->r_dev;
   struct ieee802154_netmac_s arg;
   int ret;
 
-  memcpy(arg.ifr_name, ieee->i_dev.d_ifname, IFNAMSIZ);
+  memcpy(arg.ifr_name, radio->r_dev.d_ifname, IFNAMSIZ);
   arg.u.getreq.attr = IEEE802154_ATTR_MAC_PANID;
   ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
                      (unsigned long)((uintptr_t)&arg));

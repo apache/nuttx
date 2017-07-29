@@ -61,7 +61,7 @@
  *   Handles forwarding a ICMPv6 packet via 6LoWPAN.  This is currently only
  *   used by the IPv6 forwarding logic.
  *
- * Parameters:
+ * Input Parmeters
  *   dev    - An instance of nework device state structure
  *   fwddev - The network device used to send the data.  This will be the
  *            same device except for the IP forwarding case where packets
@@ -117,7 +117,7 @@ void sixlowpan_icmpv6_send(FAR struct net_driver_s *dev,
            * assumes an encoding of the MAC address in the IPv6 address.
            */
 
-          ret = sixlowpan_destaddrfromip((FAR struct ieee802154_driver_s *)dev,
+          ret = sixlowpan_destaddrfromip((FAR struct sixlowpan_driver_s *)dev,
                                          ipv6icmpv6->ipv6.destipaddr, &destmac);
           if (ret < 0)
             {
@@ -147,7 +147,7 @@ void sixlowpan_icmpv6_send(FAR struct net_driver_s *dev,
               buflen = dev->d_len - hdrlen;
 
               (void)sixlowpan_queue_frames(
-                      (FAR struct ieee802154_driver_s *)fwddev,
+                      (FAR struct sixlowpan_driver_s *)fwddev,
                       &ipv6icmpv6->ipv6, buf, buflen, &destmac);
             }
         }

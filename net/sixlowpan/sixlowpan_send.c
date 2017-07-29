@@ -140,7 +140,7 @@ static inline bool send_timeout(FAR struct sixlowpan_send_s *sinfo)
  *   This function is called from the interrupt level to perform the actual
  *   send operation when polled by the lower, device interfacing layer.
  *
- * Parameters:
+ * Input Parmeters
  *   dev   - The structure of the network driver that caused the interrupt
  *   conn  - The connection structure associated with the socket
  *   flags - Set of events describing why the callback was invoked
@@ -162,10 +162,12 @@ static uint16_t send_interrupt(FAR struct net_driver_s *dev,
   ninfo("flags: %04x: %d\n", flags);
 
 #ifdef CONFIG_NET_MULTILINK
-  /* Verify that this is an IEEE802.15.4 network driver. */
+  /* Verify that this is a compatible network driver. */
 
-  if (dev->d_lltype != NET_LL_IEEE802154)
+  if (dev->d_lltype != NET_LL_IEEE802154 &&
+      dev->d_lltype != NET_LL_PKTRADIO)
     {
+      ninfo("Not a compatible network device\n");
       return flags;
     }
 #endif
@@ -196,7 +198,7 @@ static uint16_t send_interrupt(FAR struct net_driver_s *dev,
       /* Transfer the frame list to the IEEE802.15.4 MAC device */
 
       sinfo->s_result =
-        sixlowpan_queue_frames((FAR struct ieee802154_driver_s *)dev,
+        sixlowpan_queue_frames((FAR struct sixlowpan_driver_s *)dev,
                                sinfo->s_ipv6hdr, sinfo->s_buf, sinfo->s_len,
                                sinfo->s_destmac);
 
@@ -249,7 +251,7 @@ end_wait:
  *   The payload data is in the caller 'buf' and is of length 'buflen'.
  *   Compressed headers will be added and if necessary the packet is
  *   fragmented. The resulting packet/fragments are submitted to the MAC
- *   via the network driver i_req_data method.
+ *   via the network driver r_req_data method.
  *
  * Input Parameters:
  *   dev     - The IEEE802.15.4 MAC network driver interface.

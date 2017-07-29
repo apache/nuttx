@@ -56,9 +56,9 @@
  * Name: ipfwd_packet_proto
  *
  * Description:
- *   Generic output conversion hook.  Only needed for IEEE802.15.4 for now
- *   but this is a point where support for other conversions may be
- *   provided.
+ *   Generic output conversion hook.  Only needed for IEEE802.15.4 (and
+ *   other, non-standard packet radios) for now but this is a point where 
+ *   support for other conversions may be provided.
  *
  ****************************************************************************/
 
@@ -77,10 +77,11 @@ static int ipfwd_packet_proto(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_MULTILINK
       /* Handle the case where multiple link layer protocols are supported */
 
-      if (dev->d_lltype == NET_LL_IEEE802154)
+      if (dev->d_lltype == NET_LL_IEEE802154 ||
+          dev->d_lltype == NET_LL_PKTRADIO)
 #endif
         {
-          /* There should be an IPv6 packet in the at the beginning of the debugger */
+          /* There should be an IPv6 packet at the beginning of the buffer */
 
           ipv6 = (FAR struct ipv6_hdr_s *)&dev->d_buf[llhdrlen];
           if ((ipv6->vtc & IP_VERSION_MASK) == IPv6_VERSION)
@@ -100,55 +101,57 @@ static int ipfwd_packet_proto(FAR struct net_driver_s *dev)
  * Name: ipfwd_packet_conversion
  *
  * Description:
- *   Generic output conversion hook.  Only needed for IEEE802.15.4 for now
- *   but this is a point where support for other conversions may be
- *   provided.
+ *   Generic output conversion hook.  Only needed for IEEE802.15.4 (and
+ *   other, non-standard packet radios) for now but this is a point where
+ *   support for other conversions may be provided.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN
 static void ipfwd_packet_conversion(FAR struct net_driver_s *dev, int proto)
 {
-#ifdef CONFIG_NET_MULTILINK
-  /* Handle the case where multiple link layer protocols are supported */
-
-  if (dev->d_len > 0 && dev->d_lltype == NET_LL_IEEE802154)
-#else
   if (dev->d_len > 0)
-#endif
     {
-#ifdef CONFIG_NET_TCP
-      if (proto == IP_PROTO_TCP)
-        {
-          /* Let 6LoWPAN convert IPv6 TCP output into IEEE802.15.4 frames. */
+#ifdef CONFIG_NET_MULTILINK
+      /* Handle the case where multiple link layer protocols are supported */
 
-          sixlowpan_tcp_send(dev, dev, ipv6);
-        }
-      else
+      if (dev->d_lltype == NET_LL_IEEE802154 ||
+          dev->d_lltype == NET_LL_PKTRADIO)
+#endif
+        {
+#ifdef CONFIG_NET_TCP
+          if (proto == IP_PROTO_TCP)
+            {
+              /* Let 6LoWPAN convert IPv6 TCP output into radio frames. */
+
+              sixlowpan_tcp_send(dev, dev, ipv6);
+            }
+          else
 #endif
 #ifdef CONFIG_NET_UDP
-      if (proto == IP_PROTO_UDP)
-        {
-          /* Let 6LoWPAN convert IPv6 UDP output into IEEE802.15.4 frames. */
+          if (proto == IP_PROTO_UDP)
+            {
+              /* Let 6LoWPAN convert IPv6 UDP output into radio frames. */
 
-          sixlowpan_udp_send(dev, dev, ipv6);
-        }
-      else
+              sixlowpan_udp_send(dev, dev, ipv6);
+            }
+          else
 #endif
 #ifdef CONFIG_NET_ICMPv6
-      if (proto == IP_PROTO_ICMP6)
-        {
-          /* Let 6LoWPAN convert IPv6 UDP output into IEEE802.15.4 frames. */
+          if (proto == IP_PROTO_ICMP6)
+            {
+              /* Let 6LoWPAN convert IPv6 UDP output into radio frames. */
 
-          sixlowpan_icmpv6_send(dev, dev, ipv6);
-        }
-      else
+              sixlowpan_icmpv6_send(dev, dev, ipv6);
+            }
+          else
 #endif
-        {
-          nwarn("WARNING: Non-TCP packet dropped.  Packet type: %u\n", proto);
-        }
+            {
+              nwarn("WARNING: Unsupported protocol (%u). Packet dropped\n", proto);
+            }
 
-      dev->d_len = 0;
+          dev->d_len = 0;
+        }
     }
 }
 #endif /* CONFIG_NET_6LOWPAN */

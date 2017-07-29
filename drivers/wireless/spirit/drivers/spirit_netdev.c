@@ -61,7 +61,7 @@
 #include <nuttx/net/sixlowpan.h>
 
 #include <nuttx/wireless/spirit.h>
-#include <nuttx/wireless/ieee802154/ieee802154_radio.h>
+#include <nuttx/wireless/pktradio.h>
 
 #include "spirit_types.h"
 #include "spirit_general.h"
@@ -99,10 +99,6 @@
 #  define CONFIG_SPIRIT_PKTLEN 96
 #endif
 
-#ifndef CONFIG_SPIRIT_MTU
-#  define CONFIG_SPIRIT_MTU 596
-#endif
-
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define SPIRIT_WDDELAY   (1*CLK_TCK)
@@ -130,7 +126,7 @@ enum spirit_driver_state_e
 
 struct spirit_driver_s
 {
-  struct ieee802154_driver_s       ieee;      /* Interface understood by the network */
+  struct sixlowpan_driver_s        radio;      /* Interface understood by the network */
   struct spirit_library_s          spirit;    /* Spirit library state */
   FAR const struct spirit_lower_s *lower;     /* Low-level MCU-specific support */
   FAR struct iob_s                *txhead;    /* Head of pending TX transfers */
@@ -144,15 +140,6 @@ struct spirit_driver_s
   sem_t                            exclsem;   /* Mutually exclusive access */
   bool                             ifup;      /* Spirit is on and interface is up */
   uint8_t                          state;     /* See  enum spirit_driver_state_e */
-  uint8_t                          panid[2];  /* PAN identifier, ffff = not set */
-  uint16_t                         saddr;     /* Short address, ffff = not set */
-  uint8_t                          eaddr[8];  /* Extended address, ffffffffffffffff = not set */
-  uint8_t                          channel;   /* 11 to 26 for the 2.4 GHz band */
-  uint8_t                          devmode;   /* Device mode: device, coord, pancoord */
-  uint8_t                          paenabled; /* Enable usage of PA */
-  uint8_t                          rxmode;    /* Reception mode: Main, no CRC, promiscuous */
-  int32_t                          txpower;   /* TX power in mBm = dBm/100 */
-  struct ieee802154_cca_s          cca;       /* Clear channel assessement method */
 };
 
 /****************************************************************************
@@ -217,9 +204,9 @@ static void spirit_ipv6multicast(FAR struct spirit_driver_s *priv);
 static int  spirit_ioctl(FAR struct net_driver_s *dev, int cmd,
             unsigned long arg);
 #endif
-static int spirit_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
+static int spirit_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
             FAR const struct ieee802154_frame_meta_s *meta);
-static int spirit_req_data(FAR struct ieee802154_driver_s *netdev,
+static int spirit_req_data(FAR struct sixlowpan_driver_s *netdev,
             FAR const struct ieee802154_frame_meta_s *meta,
             FAR struct iob_s *framelist);
 
@@ -497,7 +484,7 @@ static int spirit_transmit(FAR struct spirit_driver_s *priv)
 
       if (iob->io_len > CONFIG_SPIRIT_PKTLEN)
         {
-          NETDEV_RXDROPPED(&priv->ieee.i_dev);
+          NETDEV_RXDROPPED(&priv->radio.r_dev);
           iob_free(iob);
           continue;
         }
@@ -584,7 +571,7 @@ static int spirit_transmit(FAR struct spirit_driver_s *priv)
 
 errout_with_iob:
   spirit_unlock(priv);
-  NETDEV_RXDROPPED(&priv->ieee.i_dev);
+  NETDEV_RXDROPPED(&priv->radio.r_dev);
   iob_free(iob);
   return ret;
 }
@@ -759,7 +746,7 @@ static void spirit_interrupt_work(FAR void *arg)
       DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
 
       priv->state = DRIVER_STATE_IDLE;
-      NETDEV_RXERRORS(&priv->ieee.i_dev);
+      NETDEV_RXERRORS(&priv->radio.r_dev);
 
       /* Send any pending packets */
 
@@ -773,7 +760,7 @@ static void spirit_interrupt_work(FAR void *arg)
       DEBUGVERIFY(spirit_command(spirit, COMMAND_FLUSHTXFIFO));
 
       priv->state = DRIVER_STATE_IDLE;
-      NETDEV_TXERRORS(&priv->ieee.i_dev);
+      NETDEV_TXERRORS(&priv->radio.r_dev);
 
       /* Send any pending packets */
 
@@ -790,7 +777,7 @@ static void spirit_interrupt_work(FAR void *arg)
       DEBUGVERIFY(spirit_management_rxstrobe(spirit));
       DEBUGVERIFY(spirit_command(spirit, CMD_RX));
 
-      NETDEV_TXDONE(&priv->ieee.i_dev)
+      NETDEV_TXDONE(&priv->radio.r_dev)
       spirit_csma_enable(spirit, S_DISABLE);
 
       /* Check if there are more packets to send */
@@ -853,7 +840,7 @@ static void spirit_interrupt_work(FAR void *arg)
 
               DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
               priv->state = DRIVER_STATE_IDLE;
-              NETDEV_RXDROPPED(&priv->ieee.i_dev);
+              NETDEV_RXDROPPED(&priv->radio.r_dev);
 
               /* Send any pending packets */
 
@@ -870,7 +857,7 @@ static void spirit_interrupt_work(FAR void *arg)
               DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
               priv->state = DRIVER_STATE_IDLE;
 
-              NETDEV_RXPACKETS(&priv->ieee.i_dev);
+              NETDEV_RXPACKETS(&priv->radio.r_dev);
 
               /* Add the IO buffer to the tail of the completed RX transfers */
 
@@ -917,7 +904,7 @@ static void spirit_interrupt_work(FAR void *arg)
     {
       DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
       priv->state = DRIVER_STATE_IDLE;
-      NETDEV_RXDROPPED(&priv->ieee.i_dev);
+      NETDEV_RXDROPPED(&priv->radio.r_dev);
     }
 
   /* Check the Spirit status.  If it is IDLE, the setup to receive more */
@@ -1012,13 +999,13 @@ static void spirit_txtimeout_work(FAR void *arg)
 
   /* Increment statistics and dump debug info */
 
-  NETDEV_TXTIMEOUTS(&priv->ieee.i_dev);
+  NETDEV_TXTIMEOUTS(&priv->radio.r_dev);
 
   /* Then reset the hardware */
 
   /* Then poll the network for new XMIT data */
 
-  (void)devif_poll(&priv->ieee.i_dev, spirit_txpoll_callback);
+  (void)devif_poll(&priv->radio.r_dev, spirit_txpoll_callback);
   net_unlock();
 }
 
@@ -1113,7 +1100,7 @@ static void spirit_poll_work(FAR void *arg)
 
   /* Perform the periodic poll */
 
-  (void)devif_timer(&priv->ieee.i_dev, spirit_txpoll_callback);
+  (void)devif_timer(&priv->radio.r_dev, spirit_txpoll_callback);
 
   /* Setup the watchdog poll timer again */
 
@@ -1380,7 +1367,7 @@ static void spirit_txavail_work(FAR void *arg)
 
       /* If so, then poll the network for new XMIT data */
 
-      (void)devif_poll(&priv->ieee.i_dev, spirit_txpoll_callback);
+      (void)devif_poll(&priv->radio.r_dev, spirit_txpoll_callback);
     }
 
   net_unlock();
@@ -1556,13 +1543,13 @@ static int spirit_ioctl(FAR struct net_driver_s *dev, int cmd,
  *
  ****************************************************************************/
 
-static int spirit_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
+static int spirit_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
                              FAR const struct ieee802154_frame_meta_s *meta)
 {
   FAR struct spirit_driver_s *priv;
 
-  DEBUGASSERT(netdev != NULL && netdev->i_dev.d_private != NULL && meta != NULL);
-  priv = (FAR struct spirit_driver_s *)netdev->i_dev.d_private;
+  DEBUGASSERT(netdev != NULL && netdev->r_dev.d_private != NULL && meta != NULL);
+  priv = (FAR struct spirit_driver_s *)netdev->r_dev.d_private;
 
   spirit_lock(priv);
 #warning Missing logic
@@ -1590,7 +1577,7 @@ static int spirit_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
  *
  ****************************************************************************/
 
-static int spirit_req_data(FAR struct ieee802154_driver_s *netdev,
+static int spirit_req_data(FAR struct sixlowpan_driver_s *netdev,
                            FAR const struct ieee802154_frame_meta_s *meta,
                            FAR struct iob_s *framelist)
 {
@@ -1599,8 +1586,8 @@ static int spirit_req_data(FAR struct ieee802154_driver_s *netdev,
 
   wlinfo("Received framelist\n");
 
-  DEBUGASSERT(netdev != NULL && netdev->i_dev.d_private != NULL);
-  priv = (FAR struct spirit_driver_s *)netdev->i_dev.d_private;
+  DEBUGASSERT(netdev != NULL && netdev->r_dev.d_private != NULL);
+  priv = (FAR struct spirit_driver_s *)netdev->r_dev.d_private;
 
   DEBUGASSERT(meta != NULL && framelist != NULL);
 
@@ -1611,7 +1598,7 @@ static int spirit_req_data(FAR struct ieee802154_driver_s *netdev,
     {
       /* Increment statistics */
 
-      NETDEV_TXPACKETS(&priv->md_dev.i_dev);
+      NETDEV_TXPACKETS(&priv->md_dev.r_dev);
 
       /* Remove the IOB from the queue */
 
@@ -1889,7 +1876,7 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
                              FAR const struct spirit_lower_s *lower)
 {
   FAR struct spirit_driver_s *priv;
-  FAR struct ieee802154_driver_s *ieee;
+  FAR struct sixlowpan_driver_s *radio;
   FAR struct net_driver_s *dev;
   FAR uint8_t *pktbuf;
   int ret;
@@ -1905,7 +1892,7 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
 
   /* Allocate a packet buffer */
 
-  pktbuf = (uint8_t *)kmm_zalloc(CONFIG_SPIRIT_MTU + CONFIG_NET_GUARDSIZE);
+  pktbuf = (uint8_t *)kmm_zalloc(CONFIG_NET_6LOWPAN_MTU + CONFIG_NET_GUARDSIZE);
   if (priv == NULL)
     {
       wlerr("ERROR: Failed to allocate a packet buffer\n");
@@ -1928,13 +1915,13 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
 
   /* Initialize the IEEE 802.15.4 network device fields */
 
-  ieee                = &priv->ieee;
-  ieee->i_get_mhrlen  = spirit_get_mhrlen; /* Get MAC header length */
-  ieee->i_req_data    = spirit_req_data;   /* Enqueue frame for transmission */
+  radio               = &priv->radio;
+  radio->r_get_mhrlen = spirit_get_mhrlen; /* Get MAC header length */
+  radio->r_req_data   = spirit_req_data;   /* Enqueue frame for transmission */
 
   /* Initialize the common network device fields */
 
-  dev                 = &ieee->i_dev;
+  dev                 = &radio->r_dev;
   dev->d_buf          = pktbuf;            /* Single packet buffer */
   dev->d_ifup         = spirit_ifup;       /* I/F up (new IP address) callback */
   dev->d_ifdown       = spirit_ifdown;     /* I/F down callback */
@@ -1954,11 +1941,9 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
 
   /* Read the MAC address from the hardware into dev->d_mac.ether.ether_addr_octet */
 
-  /* Register the device with the OS so that socket IOCTLs can be performed.
-   * REVISIT:  What kind of a device is this?
-   */
+  /* Register the device with the OS so that socket IOCTLs can be performed. */
 
-  (void)netdev_register(dev, NET_LL_IEEE802154);
+  (void)netdev_register(dev, NET_LL_PKTRADIO);
 
   /* Attach irq */
 
@@ -1977,7 +1962,9 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
       goto errout_with_attach;
     }
 
-  /* Put the Device to RX ON Mode */
+  /* Make sure that the PktRadio common logic has been initialized */
+
+  pktradio_metadata_initialize();
 
   /* Enable Radio IRQ */
 

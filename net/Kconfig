@@ -132,7 +132,7 @@ config NET_ETHERNET
 		Ethernet -- it is the default).
 
 config NET_6LOWPAN
-	bool "IEEE 802.15.4 6LoWPAN support"
+	bool "6LoWPAN support"
 	default n
 	select NETDEV_MULTINIC if NET_ETHERNET || NET_LOOPBACK || NET_SLIP || NET_TUN
 	select NET_MULTILINK if NET_ETHERNET || NET_LOOPBACK || NET_SLIP || NET_TUN
@@ -140,8 +140,8 @@ config NET_6LOWPAN
 	select NET_HAVE_STAR
 	depends on NET_IPv6
 	---help---
-		Enable support for IEEE 802.15.4 Low power Wireless Personal Area
-		Networking (6LoWPAN).
+		Enable support for Low power Wireless Personal Area Networking (6LoWPAN)
+		for IEEE 802.15.4 or other packet radios.
 
 config NET_LOOPBACK
 	bool "Local loopback"

@@ -121,7 +121,7 @@ struct macnet_driver_s
 {
   /* This holds the information visible to the NuttX network */
 
-  struct ieee802154_driver_s md_dev;  /* Interface understood by the network */
+  struct sixlowpan_driver_s md_dev;  /* Interface understood by the network */
 
   /* For internal use by this driver */
 
@@ -211,9 +211,9 @@ static int  macnet_rmmac(FAR struct net_driver_s *dev,
 static int  macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
               unsigned long arg);
 #endif
-static int macnet_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
+static int macnet_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
               FAR const struct ieee802154_frame_meta_s *meta);
-static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
+static int macnet_req_data(FAR struct sixlowpan_driver_s *netdev,
               FAR const struct ieee802154_frame_meta_s *meta,
               FAR struct iob_s *framelist);
 
@@ -433,8 +433,8 @@ static int macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
 
   /* Increment statistics */
 
-  NETDEV_RXPACKETS(&priv->md_dev.i_dev);
-  NETDEV_RXIPV6(&priv->md_dev.i_dev);
+  NETDEV_RXPACKETS(&priv->md_dev.r_dev);
+  NETDEV_RXIPV6(&priv->md_dev.r_dev);
 
   /* Remove the IOB containing the frame. */
 
@@ -719,7 +719,7 @@ static void macnet_txpoll_work(FAR void *arg)
 
   /* Perform the poll */
 
-  (void)devif_timer(&priv->md_dev.i_dev, macnet_txpoll_callback);
+  (void)devif_timer(&priv->md_dev.r_dev, macnet_txpoll_callback);
 
   /* Setup the watchdog poll timer again */
 
@@ -893,7 +893,7 @@ static void macnet_txavail_work(FAR void *arg)
 
       /* If so, then poll the network for new XMIT data */
 
-      (void)devif_poll(&priv->md_dev.i_dev, macnet_txpoll_callback);
+      (void)devif_poll(&priv->md_dev.r_dev, macnet_txpoll_callback);
     }
 
   net_unlock();
@@ -1070,13 +1070,13 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
  *
  ****************************************************************************/
 
-static int macnet_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
+static int macnet_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
                              FAR const struct ieee802154_frame_meta_s *meta)
 {
   FAR struct macnet_driver_s *priv;
 
-  DEBUGASSERT(netdev != NULL && netdev->i_dev.d_private != NULL && meta != NULL);
-  priv = (FAR struct macnet_driver_s *)netdev->i_dev.d_private;
+  DEBUGASSERT(netdev != NULL && netdev->r_dev.d_private != NULL && meta != NULL);
+  priv = (FAR struct macnet_driver_s *)netdev->r_dev.d_private;
 
   return mac802154_get_mhrlen(priv->md_mac, meta);
 }
@@ -1098,7 +1098,7 @@ static int macnet_get_mhrlen(FAR struct ieee802154_driver_s *netdev,
  *
  ****************************************************************************/
 
-static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
+static int macnet_req_data(FAR struct sixlowpan_driver_s *netdev,
                            FAR const struct ieee802154_frame_meta_s *meta,
                            FAR struct iob_s *framelist)
 {
@@ -1108,8 +1108,8 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
 
   wlinfo("Received framelist\n");
 
-  DEBUGASSERT(netdev != NULL && netdev->i_dev.d_private != NULL);
-  priv = (FAR struct macnet_driver_s *)netdev->i_dev.d_private;
+  DEBUGASSERT(netdev != NULL && netdev->r_dev.d_private != NULL);
+  priv = (FAR struct macnet_driver_s *)netdev->r_dev.d_private;
 
   DEBUGASSERT(meta != NULL && framelist != NULL);
 
@@ -1119,7 +1119,7 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
     {
       /* Increment statistics */
 
-      NETDEV_TXPACKETS(&priv->md_dev.i_dev);
+      NETDEV_TXPACKETS(&priv->md_dev.r_dev);
 
       /* Remove the IOB from the queue */
 
@@ -1150,11 +1150,11 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
               iob_free(iob);
             }
 
-          NETDEV_TXERRORS(&priv->md_dev.i_dev);
+          NETDEV_TXERRORS(&priv->md_dev.r_dev);
           return ret;
         }
 
-      NETDEV_TXDONE(&priv->md_dev.i_dev);
+      NETDEV_TXDONE(&priv->md_dev.r_dev);
     }
 
   return OK;
@@ -1183,7 +1183,7 @@ static int macnet_req_data(FAR struct ieee802154_driver_s *netdev,
 int mac802154netdev_register(MACHANDLE mac)
 {
   FAR struct macnet_driver_s *priv;
-  FAR struct ieee802154_driver_s *ieee;
+  FAR struct sixlowpan_driver_s *radio;
   FAR struct net_driver_s  *dev;
   FAR struct mac802154_maccb_s *maccb;
   FAR uint8_t *pktbuf;
@@ -1216,8 +1216,8 @@ int mac802154netdev_register(MACHANDLE mac)
 
   /* Initialize the driver structure */
 
-  ieee                = &priv->md_dev;
-  dev                 = &ieee->i_dev;
+  radio               = &priv->md_dev;
+  dev                 = &radio->r_dev;
   dev->d_buf          = pktbuf;            /* Single packet buffer */
   dev->d_ifup         = macnet_ifup;       /* I/F up (new IP address) callback */
   dev->d_ifdown       = macnet_ifdown;     /* I/F down callback */
@@ -1244,8 +1244,8 @@ int mac802154netdev_register(MACHANDLE mac)
 
   /* Initialize the Network frame-related callbacks */
 
-  ieee->i_get_mhrlen  = macnet_get_mhrlen; /* Get MAC header length */
-  ieee->i_req_data    = macnet_req_data;   /* Enqueue frame for transmission */
+  radio->r_get_mhrlen = macnet_get_mhrlen; /* Get MAC header length */
+  radio->r_req_data   = macnet_req_data;   /* Enqueue frame for transmission */
 
   /* Initialize the MAC callbacks */
 
@@ -1281,7 +1281,7 @@ int mac802154netdev_register(MACHANDLE mac)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->md_dev.i_dev, NET_LL_IEEE802154);
+  (void)netdev_register(&priv->md_dev.r_dev, NET_LL_IEEE802154);
   return OK;
 }
 

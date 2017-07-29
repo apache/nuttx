@@ -589,7 +589,7 @@ void sixlowpan_hc06_initialize(void)
  *   neither compress the IID.
  *
  * Input Parameters:
- *   ieee    - A reference to the IEE802.15.4 network device state
+ *   radio   - A reference to a radio network device instance
  *   ipv6    - The IPv6 header to be compressed
  *   destmac - L2 destination address, needed to compress the IP
  *             destination field
@@ -601,7 +601,7 @@ void sixlowpan_hc06_initialize(void)
  *
  ****************************************************************************/
 
-int sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
+int sixlowpan_compresshdr_hc06(FAR struct sixlowpan_driver_s *radio,
                                FAR const struct ipv6_hdr_s *ipv6,
                                FAR const struct sixlowpan_tagaddr_s *destmac,
                                FAR uint8_t *fptr)
@@ -772,7 +772,7 @@ int sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
       /* Compression compare with this nodes address (source) */
 
       iphc1   |= compress_laddr(ipv6->srcipaddr,
-                                &ieee->i_dev.d_mac.ieee802154,
+                                &radio->r_dev.d_mac.ieee802154,
                                 SIXLOWPAN_IPHC_SAM_BIT);
     }
 
@@ -783,7 +783,7 @@ int sixlowpan_compresshdr_hc06(FAR struct ieee802154_driver_s *ieee,
            ipv6->srcipaddr[3] == 0)
     {
       iphc1   |= compress_laddr(ipv6->srcipaddr,
-                                &ieee->i_dev.d_mac.ieee802154,
+                                &radio->r_dev.d_mac.ieee802154,
                                 SIXLOWPAN_IPHC_SAM_BIT);
     }
   else

@@ -79,7 +79,11 @@
 #elif defined(CONFIG_NET_ETHERNET)
 #  define DEV_LLTYPE(d) NET_LL_ETHERNET
 #elif defined(CONFIG_NET_6LOWPAN)
-#  define DEV_LLTYPE(d) NET_LL_IEEE802154
+#  if defined(CONFIG_WIRELESS_IEEE802154)
+#    define DEV_LLTYPE(d) NET_LL_IEEE802154
+#  elif defined(CONFIG_WIRELESS_PKTRADIO)
+#    define DEV_LLTYPE(d) NET_LL_PKTRADIO
+#  endif
 #elif defined(CONFIG_NET_SLIP)
 #  define DEV_LLTYPE(d) NET_LL_SLIP
 #elif defined(CONFIG_NET_TUN)
