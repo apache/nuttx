@@ -201,14 +201,14 @@ static int do_sendto_request(FAR struct usrsock_conn_s *conn,
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Data to send
  *   len      Length of data to send
- *   flags    Send flags
+ *   flags    Send flags (ignored)
  *   to       Address of recipient
  *   tolen    The length of the address structure
  *
  ****************************************************************************/
 
 ssize_t usrsock_sendto(FAR struct socket *psock, FAR const void *buf,
-                       size_t len, FAR const struct sockaddr *to,
+                       size_t len, int flags, FAR const struct sockaddr *to,
                        socklen_t tolen)
 {
   FAR struct usrsock_conn_s *conn = psock->s_conn;

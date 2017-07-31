@@ -1611,14 +1611,6 @@ ssize_t inet_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 #endif
 
         default:
-#ifdef CONFIG_NET_USRSOCK
-          if (psock->s_type == SOCK_USRSOCK_TYPE)
-            {
-              minlen = 0;
-              break;
-            }
-#endif
-
           DEBUGPANIC();
           return -EINVAL;
         }
@@ -1657,16 +1649,6 @@ ssize_t inet_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       }
       break;
 #endif /* CONFIG_NET_UDP */
-
-#ifdef CONFIG_NET_USRSOCK
-    case SOCK_USRSOCK_TYPE:
-      {
-        /* Perform the usrsock recvfrom operation */
-
-        ret = usrsock_recvfrom(psock, buf, len, from, fromlen);
-      }
-    break;
-#endif
 
     default:
       {

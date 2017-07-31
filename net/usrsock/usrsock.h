@@ -153,6 +153,8 @@ extern "C"
 #  define EXTERN extern
 #endif
 
+EXTERN const struct sock_intf_s g_usrsock_sockif;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -368,7 +370,7 @@ int usrsock_close(FAR struct usrsock_conn_s *conn);
  *
  ****************************************************************************/
 
-int usrsock_bind(FAR struct usrsock_conn_s *conn,
+int usrsock_bind(FAR struct socket *psock,
                  FAR const struct sockaddr *addr,
                  socklen_t addrlen);
 
@@ -427,6 +429,7 @@ int usrsock_poll(FAR struct socket *psock, FAR struct pollfd *fds, bool setup);
  *   psock    A reference to the socket structure of the socket to be connected
  *   buf      Data to send
  *   len      Length of data to send
+ *   flags    Send flags (ignored)
  *   to       Address of recipient
  *   tolen    The length of the address structure
  *
@@ -438,7 +441,7 @@ int usrsock_poll(FAR struct socket *psock, FAR struct pollfd *fds, bool setup);
  ****************************************************************************/
 
 ssize_t usrsock_sendto(FAR struct socket *psock, FAR const void *buf,
-                       size_t len, FAR const struct sockaddr *to,
+                       size_t len, int flags, FAR const struct sockaddr *to,
                        socklen_t tolen);
 
 /****************************************************************************
@@ -457,14 +460,15 @@ ssize_t usrsock_sendto(FAR struct socket *psock, FAR const void *buf,
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Buffer to receive data
  *   len      Length of buffer
- *   flags    Receive flags
+ *   flags    Receive flags (ignored)
  *   from     Address of source (may be NULL)
  *   fromlen  The length of the address structure
  *
  ****************************************************************************/
 
 ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                         FAR struct sockaddr *from, FAR socklen_t *fromlen);
+                         int flags, FAR struct sockaddr *from,
+                         FAR socklen_t *fromlen);
 
 /****************************************************************************
  * Name: usrsock_getsockopt
@@ -542,7 +546,7 @@ int usrsock_setsockopt(FAR struct usrsock_conn_s *conn, int level, int option,
  *
  ****************************************************************************/
 
-int usrsock_getsockname(FAR struct usrsock_conn_s *conn,
+int usrsock_getsockname(FAR struct socket *psock,
                         FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 
 #undef EXTERN

@@ -392,26 +392,6 @@ int inet_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 {
   int ret;
 
-#ifdef CONFIG_NET_USRSOCK
-  if (psock->s_type == SOCK_USRSOCK_TYPE)
-    {
-      FAR struct usrsock_conn_s *conn = psock->s_conn;
-
-      DEBUGASSERT(conn);
-
-      /* Handle usrsock getsockname */
-
-      ret = usrsock_getsockname(conn, addr, addrlen);
-      if (ret < 0)
-        {
-          errcode = -ret;
-          goto errout;
-        }
-
-      return OK;
-    }
-#endif
-
   /* Handle by address domain */
 
   switch (psock->s_domain)

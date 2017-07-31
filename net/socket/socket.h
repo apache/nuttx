@@ -60,15 +60,14 @@
 #undef HAVE_PFINET_SOCKETS
 #undef HAVE_PFINET6_SOCKETS
 
-#if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6) || \
-    defined(CONFIG_NET_USRSOCK)
+#if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
 #  define HAVE_INET_SOCKETS
 
-#  if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_USRSOCK)
+#  if defined(CONFIG_NET_IPv4)
 #    define HAVE_PFINET_SOCKETS
 #  endif
 
-#  if defined(CONFIG_NET_IPv6) || defined(CONFIG_NET_USRSOCK)
+#  if defined(CONFIG_NET_IPv6)
 #    define HAVE_PFINET6_SOCKETS
 #  endif
 #endif

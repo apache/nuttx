@@ -44,6 +44,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include "usrsock/usrsock.h"
 #include "socket/socket.h"
 
 #ifdef CONFIG_NET
@@ -95,7 +96,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
   FAR const struct sock_intf_s *sockif = NULL;
   int errcode;
   int ret;
- 
+
   /* Initialize the socket structure */
 
   psock->s_domain = domain;
@@ -104,6 +105,35 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   psock->s_sndcb  = NULL;
 #endif
+
+#ifdef CONFIG_NET_USRSOCK
+  if (domain != PF_LOCAL && domain != PF_UNSPEC)
+    {
+      /* Handle special setup for USRSOCK sockets (user-space networking
+       * stack).
+       */
+
+      ret = g_usrsock_sockif.si_setup(psock, protocol);
+      if (ret == -ENETDOWN)
+        {
+          /* -ENETDOWN means that USRSOCK daemon is not running.  Attempt to
+           * open socket with kernel networking stack.
+           */
+        }
+      else
+        {
+          psock->s_sockif = &g_usrsock_sockif;
+
+          if (ret < 0)
+            {
+              errcode = -ret;
+              goto errout;
+            }
+
+          return ret;
+        }
+    }
+#endif /* CONFIG_NET_USRSOCK */
 
   /* Get the socket interface */
 

@@ -51,7 +51,6 @@
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "sixlowpan/sixlowpan.h"
-#include "usrsock/usrsock.h"
 #include "socket/socket.h"
 
 #ifdef HAVE_INET_SOCKETS
@@ -188,73 +187,6 @@ static int inet_udp_alloc(FAR struct socket *psock)
 #endif /* NET_UDP_HAVE_STACK */
 
 /****************************************************************************
- * Name: usrsock_socket_setup
- *
- * Description:
- *   Special socket setup may be required by user sockets.
- *
- * Parameters:
- *   domain   (see sys/socket.h)
- *   type     (see sys/socket.h)
- *   protocol (see sys/socket.h)
- *   psock    A pointer to a user allocated socket structure to be initialized.
- *
- * Returned Value:
- *   0 on success; a negated errno value is returned on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_USRSOCK
-static int usrsock_socket_setup(int domain, int type, int protocol,
-                                FAR struct socket *psock)
-{
-  int ret;
-
-  switch (domain)
-    {
-      default:
-        return OK;
-
-      case PF_INET:
-      case PF_INET6:
-        {
-#ifndef CONFIG_NET_USRSOCK_UDP
-          if (type == SOCK_DGRAM)
-            {
-              return -ENETDOWN;
-            }
-#endif
-#ifndef CONFIG_NET_USRSOCK_TCP
-          if (type == SOCK_STREAM)
-            {
-              return -ENETDOWN;
-            }
-#endif
-          psock->s_type = PF_UNSPEC;
-          psock->s_conn = NULL;
-
-          /* Let the user socket logic handle the setup...
-           *
-           * A return value of zero means that the operation was
-           * successfully handled by usrsock.  A negative value means that
-           * an error occurred.  The special error value -ENETDOWN means
-           * that usrsock daemon is not running.  The caller should attempt
-           * to open socket with kernel networking stack in this case.
-           */
-
-          ret = usrsock_socket(domain, type, protocol, psock);
-          if (ret == -ENETDOWN)
-            {
-              nwarn("WARNING: usrsock daemon is not running\n");
-            }
-
-          return ret;
-        }
-    }
-}
-#endif /* CONFIG_NET_USRSOCK */
-
-/****************************************************************************
  * Name: inet_setup
  *
  * Description:
@@ -277,24 +209,6 @@ static int usrsock_socket_setup(int domain, int type, int protocol,
 
 static int inet_setup(FAR struct socket *psock, int protocol)
 {
-#ifdef CONFIG_NET_USRSOCK
-  int ret;
-
-  /* Handle special setup for user INET sockets */
-
-  ret = usrsock_socket_setup(psock->s_domain, psock->s_type, protocol, psock);
-  if (ret == -ENETDOWN)
-    {
-      /* -ENETDOWN means that usrsock daemon is not running.  Attempt to
-       * open socket with kernel networking stack.
-       */
-    }
-  else
-    {
-      return ret;
-    }
-#endif /* CONFIG_NET_USRSOCK */
-
   /* Allocate the appropriate connection structure.  This reserves the
    * the connection structure is is unallocated at this point.  It will
    * not actually be initialized until the socket is connected.
@@ -383,11 +297,6 @@ static sockcaps_t inet_sockcaps(FAR struct socket *psock)
 #endif
 #endif
 
-#ifdef CONFIG_NET_USRSOCK
-      case SOCK_USRSOCK_TYPE:
-        return SOCKCAP_NONBLOCKING;
-#endif
-
       default:
         return 0;
     }
@@ -397,7 +306,7 @@ static sockcaps_t inet_sockcaps(FAR struct socket *psock)
  * Name: inet_addref
  *
  * Description:
- *   Increment the refernce count on the underlying connection structure.
+ *   Increment the reference count on the underlying connection structure.
  *
  * Parameters:
  *   psock - Socket structure of the socket whose reference count will be
@@ -425,15 +334,6 @@ static void inet_addref(FAR struct socket *psock)
   if (psock->s_type == SOCK_DGRAM)
     {
       FAR struct udp_conn_s *conn = psock->s_conn;
-      DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
-      conn->crefs++;
-    }
-  else
-#endif
-#ifdef CONFIG_NET_USRSOCK
-  if (psock->s_type == SOCK_USRSOCK_TYPE)
-    {
-      FAR struct usrsock_conn_s *conn = psock->s_conn;
       DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
       conn->crefs++;
     }
@@ -501,20 +401,6 @@ static int inet_bind(FAR struct socket *psock,
 
   switch (psock->s_type)
     {
-#ifdef CONFIG_NET_USRSOCK
-      case SOCK_USRSOCK_TYPE:
-        {
-          FAR struct usrsock_conn_s *conn = psock->s_conn;
-
-          DEBUGASSERT(conn != NULL);
-
-          /* Perform the usrsock bind operation */
-
-          ret = usrsock_bind(conn, addr, addrlen);
-        }
-        break;
-#endif
-
 #ifdef CONFIG_NET_TCP
       case SOCK_STREAM:
         {
@@ -600,19 +486,6 @@ static int inet_getsockname(FAR struct socket *psock,
                             FAR struct sockaddr *addr,
                             FAR socklen_t *addrlen)
 {
-#ifdef CONFIG_NET_USRSOCK
-  if (psock->s_type == SOCK_USRSOCK_TYPE)
-    {
-      FAR struct usrsock_conn_s *conn = psock->s_conn;
-
-      DEBUGASSERT(conn != NULL);
-
-      /* Handle usrsock getsockname */
-
-      return usrsock_getsockname(conn, addr, addrlen);
-    }
-#endif
-
   /* Handle by address domain */
 
   switch (psock->s_domain)
@@ -671,13 +544,6 @@ int inet_listen(FAR struct socket *psock, int backlog)
 
   if (psock->s_type != SOCK_STREAM)
     {
-#ifdef CONFIG_NET_USRSOCK
-      if (psock->s_type == SOCK_USRSOCK_TYPE)
-        {
-#warning "Missing logic"
-        }
-#endif
-
       nerr("ERROR:  Unsupported socket type: %d\n",
            psock->s_type);
       return -EOPNOTSUPP;
@@ -775,13 +641,6 @@ static int inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   if (psock->s_type != SOCK_STREAM)
     {
-#ifdef CONFIG_NET_USRSOCK
-      if (psock->s_type == SOCK_USRSOCK_TYPE)
-        {
-#warning "Missing logic"
-        }
-#endif
-
       nerr("ERROR:  Inappropreat socket type: %d\n", psock->s_type);
       return -EOPNOTSUPP;
     }
@@ -985,15 +844,6 @@ static inline int inet_pollteardown(FAR struct socket *psock,
 static int inet_poll(FAR struct socket *psock, FAR struct pollfd *fds,
                      bool setup)
 {
-#ifdef CONFIG_NET_USRSOCK
-  if (psock->s_type == SOCK_USRSOCK_TYPE)
-    {
-      /* Perform usrsock setup/teardown. */
-
-      return usrsock_poll(psock, fds, setup);
-    }
-  else
-#endif
 #if defined(HAVE_TCP_POLL) || defined(HAVE_UDP_POLL)
 
   /* Check if we are setting up or tearing down the poll */
@@ -1097,16 +947,6 @@ static ssize_t inet_send(FAR struct socket *psock, FAR const void *buf,
         break;
 #endif /* CONFIG_NET_UDP */
 
-  /* Special case user sockets */
-
-#ifdef CONFIG_NET_USRSOCK
-      case SOCK_USRSOCK_TYPE:
-        {
-          ret = usrsock_sendto(psock, buf, len, NULL, 0);
-        }
-        break;
-#endif /*CONFIG_NET_USRSOCK*/
-
       default:
         {
           /* EDESTADDRREQ.  Signifies that the socket is not connection-mode
@@ -1151,78 +991,67 @@ static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
   socklen_t minlen;
   ssize_t nsent;
 
-#ifdef CONFIG_NET_USRSOCK
-  if (psock->s_type == SOCK_USRSOCK_TYPE)
-    {
-      /* Perform the usrsock sendto operation */
+  /* Verify that a valid address has been provided */
 
-      nsent = usrsock_sendto(psock, buf, len, to, tolen);
-    }
-  else
-#endif
+  switch (to->sa_family)
     {
-      /* Verify that a valid address has been provided */
-
-      switch (to->sa_family)
-        {
 #ifdef CONFIG_NET_IPv4
-        case AF_INET:
-          minlen = sizeof(struct sockaddr_in);
-          break;
+    case AF_INET:
+      minlen = sizeof(struct sockaddr_in);
+      break;
 #endif
 
 #ifdef CONFIG_NET_IPv6
-        case AF_INET6:
-          minlen = sizeof(struct sockaddr_in6);
-          break;
+    case AF_INET6:
+      minlen = sizeof(struct sockaddr_in6);
+      break;
 #endif
 
-        default:
-          nerr("ERROR: Unrecognized address family: %d\n", to->sa_family);
-          return -EAFNOSUPPORT;
-        }
+    default:
+      nerr("ERROR: Unrecognized address family: %d\n", to->sa_family);
+      return -EAFNOSUPPORT;
+    }
 
-      if (tolen < minlen)
-        {
-          nerr("ERROR: Invalid address length: %d < %d\n", tolen, minlen);
-          return -EBADF;
-        }
+  if (tolen < minlen)
+    {
+      nerr("ERROR: Invalid address length: %d < %d\n", tolen, minlen);
+      return -EBADF;
+    }
 
 #ifdef CONFIG_NET_UDP
-      /* If this is a connected socket, then return EISCONN */
+  /* If this is a connected socket, then return EISCONN */
 
-      if (psock->s_type != SOCK_DGRAM)
-        {
-          nerr("ERROR: Connected socket\n");
-          return -EBADF;
-        }
+  if (psock->s_type != SOCK_DGRAM)
+    {
+      nerr("ERROR: Connected socket\n");
+      return -EBADF;
+    }
 
-      /* Now handle the INET sendto() operation */
+  /* Now handle the INET sendto() operation */
 
 #if defined(CONFIG_NET_6LOWPAN)
-      /* Try 6LoWPAN UDP packet sendto() */
+  /* Try 6LoWPAN UDP packet sendto() */
 
-      nsent = psock_6lowpan_udp_sendto(psock, buf, len, flags, to, tolen);
+  nsent = psock_6lowpan_udp_sendto(psock, buf, len, flags, to, tolen);
 
 #if defined(CONFIG_NETDEV_MULTINIC) && defined(NET_UDP_HAVE_STACK)
-      if (nsent < 0)
-        {
-          /* UDP/IP packet sendto */
+  if (nsent < 0)
+    {
+      /* UDP/IP packet sendto */
 
-          nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
-        }
+      nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
+    }
 #endif /* CONFIG_NETDEV_MULTINIC && NET_UDP_HAVE_STACK */
 #elif defined(NET_UDP_HAVE_STACK)
-      nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
+  nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
 #else
-      nwarn("WARNING: UDP not available in this configuiration\n");
-      nsent = -ENOSYS;
+  nwarn("WARNING: UDP not available in this configuiration\n");
+  nsent = -ENOSYS;
 #endif /* CONFIG_NET_6LOWPAN */
 #else
-      nwarn("WARNING: UDP not enabled in this configuiration\n");
-      nsent = -EISCONN;
+  nwarn("WARNING: UDP not enabled in this configuiration\n");
+  nsent = -EISCONN;
 #endif /* CONFIG_NET_UDP */
-    }
 
   return nsent;
 }

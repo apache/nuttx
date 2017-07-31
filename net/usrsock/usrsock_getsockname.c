@@ -189,9 +189,10 @@ static void setup_conn_getsockname(FAR struct usrsock_conn_s *conn,
  *
  ****************************************************************************/
 
-int usrsock_getsockname(FAR struct usrsock_conn_s *conn,
+int usrsock_getsockname(FAR struct socket *psock,
                         FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 {
+  FAR struct usrsock_conn_s *conn = psock->s_conn;
   struct usrsock_data_reqstate_s state = {};
   struct iovec inbufs[1];
   ssize_t ret;

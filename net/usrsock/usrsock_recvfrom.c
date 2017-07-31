@@ -229,13 +229,15 @@ static void setup_conn_recvfrom(FAR struct usrsock_conn_s *conn,
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Buffer to receive data
  *   len      Length of buffer
+ *   flags    Receive flags (ignored)
  *   from     Address of source (may be NULL)
  *   fromlen  The length of the address structure
  *
  ****************************************************************************/
 
 ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                         FAR struct sockaddr *from, FAR socklen_t *fromlen)
+                         int flags, FAR struct sockaddr *from,
+                         FAR socklen_t *fromlen)
 {
   FAR struct usrsock_conn_s *conn = psock->s_conn;
   struct usrsock_data_reqstate_s state = {};

@@ -504,13 +504,6 @@ int inet_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 #endif
 
     default:
-#ifdef CONFIG_NET_USRSOCK
-      if (psock->s_type == SOCK_USRSOCK_TYPE)
-        {
-          break;
-        }
-#endif
-
       DEBUGPANIC();
       return -EAFNOSUPPORT;
     }
@@ -551,13 +544,6 @@ int inet_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
           return ret;
         }
 #endif /* CONFIG_NET_UDP */
-
-#ifdef CONFIG_NET_USRSOCK
-      case SOCK_USRSOCK_TYPE:
-        {
-          return usrsock_connect(psock, addr, addrlen);
-        }
-#endif /* CONFIG_NET_USRSOCK */
 
       default:
         return -EBADF;

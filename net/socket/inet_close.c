@@ -562,45 +562,6 @@ int inet_close(FAR struct socket *psock)
         break;
 #endif /* CONFIG_NET_UDP */
 
-#ifdef CONFIG_NET_USRSOCK
-      case SOCK_USRSOCK_TYPE:
-        {
-          FAR struct usrsock_conn_s *conn = psock->s_conn;
-          int ret;
-
-          /* Is this the last reference to the connection structure (there
-           * could be more if the socket was dup'ed).
-           */
-
-          if (conn->crefs <= 1)
-            {
-              /* Yes... inform user-space daemon of socket close. */
-
-              ret = usrsock_close(conn);
-
-              /* Free the connection structure */
-
-              conn->crefs = 0;
-              usrsock_free(psock->s_conn);
-
-              if (ret < 0)
-                {
-                  /* Return with error code, but free resources. */
-
-                  nerr("ERROR: usrsock_close failed: %d\n", ret);
-                  return ret;
-                }
-            }
-          else
-            {
-              /* No.. Just decrement the reference count */
-
-              conn->crefs--;
-            }
-        }
-        break;
-#endif
-
       default:
         return -EBADF;
     }
