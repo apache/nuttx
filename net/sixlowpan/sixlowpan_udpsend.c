@@ -314,7 +314,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
                                  to6->sin6_addr.in6_u.u6_addr16, &destmac);
   if (ret < 0)
     {
-      nerr("ERROR: Failed to dest MAC address: %d\n", ret);
+      nerr("ERROR: Failed to get dest MAC address: %d\n", ret);
       return (ssize_t)ret;
     }
 
@@ -490,7 +490,7 @@ void sixlowpan_udp_send(FAR struct net_driver_s *dev,
                                          ipv6udp->ipv6.destipaddr, &destmac);
           if (ret < 0)
             {
-              nerr("ERROR: Failed to dest MAC address: %d\n", ret);
+              nerr("ERROR: Failed to get dest MAC address: %d\n", ret);
               goto drop;
             }
 

@@ -264,7 +264,7 @@ static inline void lo_netmask(FAR struct net_driver_s *dev)
   dev->d_ipv6netmask[4]  = 0xffff;
   dev->d_ipv6netmask[5]  = 0xffff;
   dev->d_ipv6netmask[6]  = 0xffff;
-  dev->d_ipv6netmask[7]  = HTONS(0x00ff);
+  dev->d_ipv6netmask[7]  = HTONS(0xff00);
 
 #elif CONFIG_PKTRADIO_ADDRLEN == 2
   dev->d_ipv6netmask[4]  = 0xffff;

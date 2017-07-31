@@ -269,6 +269,26 @@
 
 /* Check whether we can compress the IID in address 'a' to 16 bits.  This is
  * used for unicast addresses only, and is true if the address is on the
+ * format <PREFIX>::0000:00ff:fe00:00xx.
+ *
+ * NOTE: we currently assume 64-bits prefixes.  Big-endian, network order is
+ * assumed.
+ */
+
+/* Check whether we can compress the IID in address 'a' to 8 bits.  This is
+ * used for unicast addresses only, and is true if the address is on the
+ * format <PREFIX>::0000:00ff:fe00:00XX.
+ *
+ * NOTE: we currently assume 64-bits prefixes.  Big-endian, network order is
+ * assumed.
+ */
+
+#define SIXLOWPAN_IS_IID_8BIT_COMPRESSABLE(a) \
+  ((((a)[4]) == 0x0000) && (((a)[5]) == HTONS(0x00ff)) && \
+   (((a)[6]) == HTONS(0xfe00)) && ((((a)[7]) & HTONS(0x00ff)) == 0))
+
+/* Check whether we can compress the IID in address 'a' to 16 bits.  This is
+ * used for unicast addresses only, and is true if the address is on the
  * format <PREFIX>::0000:00ff:fe00:XXXX.
  *
  * NOTE: we currently assume 64-bits prefixes.  Big-endian, network order is

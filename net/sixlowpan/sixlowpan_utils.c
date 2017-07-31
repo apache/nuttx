@@ -65,6 +65,41 @@
 #ifdef CONFIG_NET_6LOWPAN
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* REVISIT: The setting CONFIG_PKTRADIO_ADDRLEN should be the *maximum*
+ * address length.  If there is only a single packet radio then it should be
+ * the exact address length of that radio.  If there are multiple packet
+ * radios with different address lengths, then it will be inexact; it will
+ * be the size of the longest address.
+ */
+
+#undef HAVE_BYTEADDR
+#undef HAVE_SADDR
+#undef HAVE_EADDR
+
+#ifdef CONFIG_WIRELESS_IEEE802154
+#  define HAVE_SADDR 1
+#  define HAVE_EADDR 1
+#endif
+
+#ifdef CONFIG_WIRELESS_PKTRADIO
+#  if CONFIG_PKTRADIO_ADDRLEN == 1
+#    define HAVE_BYTEADDR 1
+#  elif CONFIG_PKTRADIO_ADDRLEN == 2
+#    define HAVE_BYTEADDR 1
+#    define HAVE_SADDR 1
+#  elif CONFIG_PKTRADIO_ADDRLEN == 8
+#    define HAVE_BYTEADDR 1
+#    define HAVE_SADDR 1
+#    define HAVE_EADDR 1
+#  else
+#    error Unsupported value for CONFIG_PKTRADIO_ADDRLEN
+#  endif
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -86,6 +121,18 @@
  ****************************************************************************/
 
 #ifndef CONFIG_NET_STARPOINT
+#ifdef HAVE_BYTEADDR
+static void sixlowpan_baddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *baddr)
+{
+  DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
+
+  /* Big-endian uint16_t to byte order */
+
+  baddr[0] = ipaddr[7] >> 8 ^ 0x02;
+}
+#endif
+
+#ifdef HAVE_SADDR
 static void sixlowpan_saddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *saddr)
 {
   DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
@@ -96,7 +143,9 @@ static void sixlowpan_saddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *sadd
   saddr[1]  = ipaddr[7] & 0xff;
   saddr[0] ^= 0x02;
 }
+#endif
 
+#ifdef HAVE_EADDR
 static void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *eaddr)
 {
   FAR uint8_t *eptr = eaddr;
@@ -114,6 +163,7 @@ static void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *eadd
 
   eaddr[0] ^= 0x02;
 }
+#endif
 #endif /* !CONFIG_NET_STARPOINT */
 
 /****************************************************************************
@@ -221,7 +271,7 @@ int sixlowpan_destaddrfromip(FAR struct sixlowpan_driver_s *radio,
                              const net_ipv6addr_t ipaddr,
                              FAR struct netdev_varaddr_s *destaddr)
 {
-#ifdef CONFIG_NET_STARPOINT
+#ifdef  CONFIG_NET_STARPOINT
   int ret;
 
   /* If this node is a "point" in a star topology, then the destination
@@ -239,25 +289,98 @@ int sixlowpan_destaddrfromip(FAR struct sixlowpan_driver_s *radio,
 
   return ret;
 
-#else
-  DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
+#else /* CONFIG_NET_STARPOINT */
 
-  /* Otherwise, the destination MAC address is encoded in the IP address */
+   /* Otherwise, the destination MAC address is encoded in the IP address */
 
-  if (SIXLOWPAN_IS_IID_16BIT_COMPRESSABLE(ipaddr))
-    {
-      memset(destaddr, 0, sizeof(struct netdev_varaddr_s));
-      sixlowpan_saddrfromip(ipaddr, destaddr->nv_addr);
-      destaddr->nv_addrlen = NET_6LOWPAN_SADDRSIZE;
-    }
-  else
-    {
-      sixlowpan_eaddrfromip(ipaddr, destaddr->nv_addr);
-      destaddr->nv_addrlen = NET_6LOWPAN_EADDRSIZE;
-    }
+#ifdef CONFIG_WIRELESS_PKTRADIO
+  /* If this is a packet radio, then we cannot know the correct size of the
+   * radio's MAC address without asking.  The setting CONFIG_PKTRADIO_ADDRLEN
+   * is inexact if there are multiple packet radios with different address
+   * lengths; it that case it will be the size of the longest address.
+   *
+   * NOTE: This logic assumes that the packet radio's address length is a
+   * constant.
+   */
 
-  return OK;
+#ifdef CONFIG_WIRELESS_IEEE802154
+  if (radio->r_dev.d_lltype == NET_LL_PKTRADIO)
 #endif
+    {
+      struct sixlowpan_properties_s properties;
+      int ret;
+
+      DEBUGASSERT(radio->r_properties != NULL);
+      ret = radio->r_properties(radio, &properties);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
+
+#ifdef HAVE_BYTEADDR
+      if (properties.sp_addrlen == 1 &&
+          SIXLOWPAN_IS_IID_8BIT_COMPRESSABLE(ipaddr))
+        {
+          memset(destaddr, 0, sizeof(struct netdev_varaddr_s));
+          sixlowpan_baddrfromip(ipaddr, destaddr->nv_addr);
+          destaddr->nv_addrlen = 1;
+          return OK;
+        }
+      else
+#endif
+#ifdef HAVE_SADDR
+      if (properties.sp_addrlen == 2 &&
+          SIXLOWPAN_IS_IID_16BIT_COMPRESSABLE(ipaddr))
+        {
+          memset(destaddr, 0, sizeof(struct netdev_varaddr_s));
+          sixlowpan_saddrfromip(ipaddr, destaddr->nv_addr);
+          destaddr->nv_addrlen = 2;
+          return OK;
+        }
+      else
+#endif
+#ifdef HAVE_EADDR
+      if (properties.sp_addrlen == 8)
+        {
+          sixlowpan_eaddrfromip(ipaddr, destaddr->nv_addr);
+          destaddr->nv_addrlen = 8;
+          return OK;
+        }
+      else
+#endif
+        {
+          /* Just to satisfy the last dangling 'else' */
+        }
+
+      return -EADDRNOTAVAIL;
+    }
+
+#endif /* CONFIG_WIRELESS_PKTRADIO */
+
+#ifdef CONFIG_WIRELESS_IEEE802154
+#ifdef CONFIG_WIRELESS_PKTRADIO
+  else
+#endif
+    {
+      if (SIXLOWPAN_IS_IID_16BIT_COMPRESSABLE(ipaddr))
+        {
+          memset(destaddr, 0, sizeof(struct netdev_varaddr_s));
+          sixlowpan_saddrfromip(ipaddr, destaddr->nv_addr);
+          destaddr->nv_addrlen = NET_6LOWPAN_SADDRSIZE;
+        }
+      else
+        {
+          sixlowpan_eaddrfromip(ipaddr, destaddr->nv_addr);
+          destaddr->nv_addrlen = NET_6LOWPAN_EADDRSIZE;
+        }
+
+      return OK;
+    }
+
+#endif /* CONFIG_WIRELESS_IEEE802154 */
+#endif /* CONFIG_NET_STARPOINT */
 }
 
 /****************************************************************************
@@ -276,7 +399,7 @@ int sixlowpan_destaddrfromip(FAR struct sixlowpan_driver_s *radio,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_WIRELESS_PKTRADIO
+#ifdef HAVE_BYTEADDR
 static inline void sixlowpan_ipfrombyte(FAR const uint8_t *byte,
                                         FAR net_ipv6addr_t ipaddr)
 {
@@ -291,6 +414,7 @@ static inline void sixlowpan_ipfrombyte(FAR const uint8_t *byte,
 }
 #endif
 
+#ifdef HAVE_SADDR
 static inline void sixlowpan_ipfromsaddr(FAR const uint8_t *saddr,
                                          FAR net_ipv6addr_t ipaddr)
 {
@@ -304,7 +428,9 @@ static inline void sixlowpan_ipfromsaddr(FAR const uint8_t *saddr,
   ipaddr[7]  = (uint16_t)saddr[0] << 8 |  (uint16_t)saddr[1];
   ipaddr[7] ^= 0x0200;
 }
+#endif
 
+#ifdef HAVE_EADDR
 static inline void sixlowpan_ipfromeaddr(FAR const uint8_t *eaddr,
                                          FAR net_ipv6addr_t ipaddr)
 {
@@ -318,25 +444,30 @@ static inline void sixlowpan_ipfromeaddr(FAR const uint8_t *eaddr,
   ipaddr[7]  = (uint16_t)eaddr[6] << 8 | (uint16_t)eaddr[7];
   ipaddr[4] ^= 0x0200;
 }
+#endif
 
 void sixlowpan_ipfromaddr(FAR const struct netdev_varaddr_s *addr,
                           FAR net_ipv6addr_t ipaddr)
 {
   switch (addr->nv_addrlen)
     {
-#ifdef CONFIG_WIRELESS_PKTRADIO
+#ifdef HAVE_BYTEADDR
       case 1:
         sixlowpan_ipfrombyte(addr->nv_addr, ipaddr);
         break;
 #endif
 
+#ifdef HAVE_SADDR
       case NET_6LOWPAN_SADDRSIZE:
         sixlowpan_ipfromsaddr(addr->nv_addr, ipaddr);
         break;
+#endif
 
+#ifdef HAVE_EADDR
       case NET_6LOWPAN_EADDRSIZE:
         sixlowpan_ipfromeaddr(addr->nv_addr, ipaddr);
         break;
+#endif
 
       default:
         nerr("ERROR: Unsupported address length: %u\n", addr->nv_addrlen);
@@ -360,7 +491,7 @@ void sixlowpan_ipfromaddr(FAR const struct netdev_varaddr_s *addr,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_WIRELESS_PKTRADIO
+#ifdef HAVE_BYTEADDR
 static inline bool sixlowpan_isbytebased(const net_ipv6addr_t ipaddr,
                                          uint8_t byte)
 {
@@ -392,16 +523,20 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
 {
   switch (addr->nv_addrlen)
     {
-#ifdef CONFIG_WIRELESS_PKTRADIO
+#ifdef HAVE_BYTEADDR
       case 1:
         return sixlowpan_isbytebased(ipaddr, addr->nv_addr[0]);
 #endif
 
+#ifdef HAVE_SADDR
       case NET_6LOWPAN_SADDRSIZE:
         return sixlowpan_issaddrbased(ipaddr, addr->nv_addr);
+#endif
 
+#ifdef HAVE_EADDR
       case NET_6LOWPAN_EADDRSIZE:
         return sixlowpan_iseaddrbased(ipaddr, addr->nv_addr);
+#endif
 
       default:
         nerr("ERROR: Unsupported address length: %u\n", addr->nv_addrlen);
