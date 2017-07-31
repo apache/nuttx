@@ -208,6 +208,8 @@ static int inet_udp_alloc(FAR struct socket *psock)
 static int usrsock_socket_setup(int domain, int type, int protocol,
                                 FAR struct socket *psock)
 {
+  int ret;
+
   switch (domain)
     {
       default:
@@ -219,13 +221,13 @@ static int usrsock_socket_setup(int domain, int type, int protocol,
 #ifndef CONFIG_NET_USRSOCK_UDP
           if (type == SOCK_DGRAM)
             {
-              return OK;
+              return -ENETDOWN;
             }
 #endif
 #ifndef CONFIG_NET_USRSOCK_TCP
           if (type == SOCK_STREAM)
             {
-              return OK;
+              return -ENETDOWN;
             }
 #endif
           psock->s_type = PF_UNSPEC;
@@ -240,7 +242,13 @@ static int usrsock_socket_setup(int domain, int type, int protocol,
            * to open socket with kernel networking stack in this case.
            */
 
-          return usrsock_socket(domain, type, protocol, psock);
+          ret = usrsock_socket(domain, type, protocol, psock);
+          if (ret == -ENETDOWN)
+            {
+              nwarn("WARNING: usrsock daemon is not running\n");
+            }
+
+          return ret;
         }
     }
 }
@@ -275,20 +283,15 @@ static int inet_setup(FAR struct socket *psock, int protocol)
   /* Handle special setup for user INET sockets */
 
   ret = usrsock_socket_setup(psock->s_domain, psock->s_type, protocol, psock);
-  if (ret < 0)
+  if (ret == -ENETDOWN)
     {
-      if (ret == -ENETDOWN)
-        {
-          /* -ENETDOWN means that usrsock daemon is not running.  Attempt to
-           * open socket with kernel networking stack.
-           */
-
-          nwarn("WARNING: usrsock daemon is not running\n");
-        }
-      else
-        {
-          return ret;
-        }
+      /* -ENETDOWN means that usrsock daemon is not running.  Attempt to
+       * open socket with kernel networking stack.
+       */
+    }
+  else
+    {
+      return ret;
     }
 #endif /* CONFIG_NET_USRSOCK */
 

@@ -54,10 +54,10 @@
 
 /* Event message flags */
 
-#define USRSOCK_EVENT_ABORT          (1 << 0)
-#define USRSOCK_EVENT_SENDTO_READY   (1 << 1)
-#define USRSOCK_EVENT_RECVFROM_AVAIL (1 << 2)
-#define USRSOCK_EVENT_REMOTE_CLOSED  (1 << 3)
+#define USRSOCK_EVENT_ABORT          (1 << 1)
+#define USRSOCK_EVENT_SENDTO_READY   (1 << 2)
+#define USRSOCK_EVENT_RECVFROM_AVAIL (1 << 3)
+#define USRSOCK_EVENT_REMOTE_CLOSED  (1 << 4)
 
 /* Response message flags */
 

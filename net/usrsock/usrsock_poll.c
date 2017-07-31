@@ -94,7 +94,7 @@ static uint16_t poll_event(FAR struct net_driver_s *dev, FAR void *pvconn,
 
       eventset |= (POLLERR | POLLHUP);
     }
-  else if ((flags & USRSOCK_EVENT_CONNECT_RESP) && !conn->connected)
+  else if ((flags & USRSOCK_EVENT_CONNECT_READY) && !conn->connected)
     {
       ninfo("socket connect failed.\n");
 
@@ -213,7 +213,7 @@ static int usrsock_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
    * callback processing.
    */
 
-  cb->flags    = USRSOCK_EVENT_ABORT | USRSOCK_EVENT_CONNECT_RESP |
+  cb->flags    = USRSOCK_EVENT_ABORT | USRSOCK_EVENT_CONNECT_READY |
                  USRSOCK_EVENT_SENDTO_READY | USRSOCK_EVENT_RECVFROM_AVAIL |
                  USRSOCK_EVENT_REMOTE_CLOSED;
   cb->priv     = (FAR void *)info;

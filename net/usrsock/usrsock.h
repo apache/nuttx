@@ -66,9 +66,10 @@
 
 /* Internal event flags */
 
-#define USRSOCK_EVENT_REQ_COMPLETE  (1 << 14)
-#define USRSOCK_EVENT_CONNECT_RESP  (1 << 15)
-#define USRSOCK_EVENT_INTERNAL_MASK 0xf000U
+#define USRSOCK_EVENT_CONNECT_READY (1 << 0)
+#define USRSOCK_EVENT_REQ_COMPLETE  (1 << 15)
+#define USRSOCK_EVENT_INTERNAL_MASK (USRSOCK_EVENT_CONNECT_READY | \
+                                     USRSOCK_EVENT_REQ_COMPLETE)
 
 /****************************************************************************
  * Public Type Definitions
