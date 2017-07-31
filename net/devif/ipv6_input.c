@@ -383,6 +383,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
               /* Not destined for us and not forwardable... drop the packet. */
 
               nwarn("WARNING: Not destined for us; not forwardable... Dropping!\n");
+
 #ifdef CONFIG_NET_STATISTICS
               g_netstats.ipv6.drop++;
 #endif

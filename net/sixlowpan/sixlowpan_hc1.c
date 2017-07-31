@@ -59,31 +59,6 @@
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: sixlowpan_uncompress_addr
- *
- * Description:
- *   Uncompress a link-local, MAC-based IPv6 address.
- *
- ****************************************************************************/
-
-static void sixlowpan_uncompress_addr(FAR const struct ieee802154_addr_s *addr,
-                                      FAR net_ipv6addr_t ipaddr)
-{
-  if (addr->mode == IEEE802154_ADDRMODE_SHORT)
-    {
-      sixlowpan_ipfromsaddr(addr->saddr, ipaddr);
-    }
-  else
-    {
-      sixlowpan_ipfromeaddr(addr->eaddr, ipaddr);
-    }
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -147,7 +122,7 @@ static void sixlowpan_uncompress_addr(FAR const struct ieee802154_addr_s *addr,
 
 int sixlowpan_compresshdr_hc1(FAR struct sixlowpan_driver_s *radio,
                               FAR const struct ipv6_hdr_s *ipv6,
-                              FAR const struct sixlowpan_tagaddr_s *destmac,
+                              FAR const struct netdev_varaddr_s *destmac,
                               FAR uint8_t *fptr)
 {
   FAR uint8_t *hc1 = fptr + g_frame_hdrlen;
@@ -157,7 +132,7 @@ int sixlowpan_compresshdr_hc1(FAR struct sixlowpan_driver_s *radio,
 
   if (ipv6->vtc != 0x60 || ipv6->tcf != 0 || ipv6->flow != 0 ||
       !sixlowpan_islinklocal(ipv6->srcipaddr) ||
-      !sixlowpan_isaddrbased(ipv6->srcipaddr, &radio->r_dev.d_mac.ieee802154) ||
+      !sixlowpan_ismacbased(ipv6->srcipaddr, &radio->r_dev.d_mac.sixlowpan) ||
       !sixlowpan_islinklocal(ipv6->destipaddr) ||
       !sixlowpan_ismacbased(ipv6->destipaddr, destmac) ||
       ( 1
@@ -300,14 +275,16 @@ int sixlowpan_compresshdr_hc1(FAR struct sixlowpan_driver_s *radio,
  *   are set to the appropriate values
  *
  * Input Parameters:
- *   ind   - MAC header meta data including node addressing information.
- *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
- *           inferred from the L2 length), non 0 if the packet is a 1st
- *           fragment.
- *   iob   - Pointer to the IOB containing the received frame.
- *   fptr  - Pointer to frame to be uncompressed.
- *   bptr  - Output goes here.  Normally this is a known offset into d_buf,
- *           may be redirected to a "bitbucket" on the case of FRAGN frames.
+ *   metadata - Obfuscated MAC metadata including node addressing
+ *              information.
+ *   iplen    - Equal to 0 if the packet is not a fragment (IP length is
+ *              then inferred from the L2 length), non 0 if the packet is
+ *              a 1st fragment.
+ *   iob      - Pointer to the IOB containing the received frame.
+ *   fptr     - Pointer to frame to be uncompressed.
+ *   bptr     - Output goes here.  Normally this is a known offset into
+ *              d_buf, may be redirected to a "bitbucket" on the case of
+ *              FRAGN frames.
  *
  * Returned Value:
  *   Zero (OK) is returned on success, on failure a negater errno value is
@@ -315,12 +292,15 @@ int sixlowpan_compresshdr_hc1(FAR struct sixlowpan_driver_s *radio,
  *
  ****************************************************************************/
 
-int sixlowpan_uncompresshdr_hc1(FAR const struct ieee802154_data_ind_s *ind,
-                                uint16_t iplen, FAR struct iob_s *iob,
-                                FAR uint8_t *fptr, FAR uint8_t *bptr)
+int sixlowpan_uncompresshdr_hc1(FAR struct sixlowpan_driver_s *radio,
+                                FAR const void *metadata, uint16_t iplen,
+                                FAR struct iob_s *iob, FAR uint8_t *fptr,
+                                FAR uint8_t *bptr)
 {
   FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)bptr;
   FAR uint8_t *hc1 = fptr + g_frame_hdrlen;
+  struct netdev_varaddr_s addr;
+  int ret;
 
   ninfo("fptr=%p g_frame_hdrlen=%u\n", fptr, g_frame_hdrlen);
 
@@ -415,7 +395,15 @@ int sixlowpan_uncompresshdr_hc1(FAR const struct ieee802154_data_ind_s *ind,
   if ((hc1[SIXLOWPAN_HC1_ENCODING] & SIXLOWPAN_HC1_SRCADDR_MASK) ==
       SIXLOWPAN_HC1_SRCADDR_PCIC)
     {
-      sixlowpan_uncompress_addr(&ind->src, ipv6->srcipaddr);
+      ret = sixlowpan_extract_srcaddr(radio, metadata, &addr);
+      if (ret < 0)
+        {
+          nerr("ERROR: sixlowpan_extract_srcaddr failed: %d\n", ret);
+        }
+      else
+        {
+          sixlowpan_ipfromaddr(&addr, ipv6->srcipaddr);
+        }
     }
   else
     {
@@ -431,7 +419,15 @@ int sixlowpan_uncompresshdr_hc1(FAR const struct ieee802154_data_ind_s *ind,
   if ((hc1[SIXLOWPAN_HC1_ENCODING] & SIXLOWPAN_HC1_DESTADDR_MASK) ==
       SIXLOWPAN_HC1_DESTADDR_PCIC)
     {
-      sixlowpan_uncompress_addr(&ind->dest, ipv6->destipaddr);
+      ret = sixlowpan_extract_srcaddr(radio, metadata, &addr);
+      if (ret < 0)
+        {
+          nerr("ERROR: sixlowpan_extract_srcaddr failed: %d\n", ret);
+        }
+      else
+        {
+          sixlowpan_ipfromaddr(&addr, ipv6->destipaddr);
+        }
     }
   else
     {

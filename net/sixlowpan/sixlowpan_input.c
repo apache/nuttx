@@ -139,8 +139,8 @@ static uint8_t g_bitbucket[UNCOMP_MAXHDR];
  *   the previosly received fragements.
  *
  * Input Parameters:
- *   radio - Radio network device driver state instance
- *   ind   - Characteristics of the newly received frame
+ *   radio    - Radio network device driver state instance
+ *   metadata - Characteristics of the newly received frame
  *
  * Returned Value:
  *   true if the sources are the same.
@@ -148,34 +148,29 @@ static uint8_t g_bitbucket[UNCOMP_MAXHDR];
  ****************************************************************************/
 
 static bool sixlowpan_compare_fragsrc(FAR struct sixlowpan_driver_s *radio,
-                                      FAR const struct ieee802154_data_ind_s *ind)
+                                      FAR const void *metadata)
 {
-  /* Check for an extended source address */
+  struct netdev_varaddr_s fragsrc;
+  int ret;
 
-  if (ind->src.mode == IEEE802154_ADDRMODE_EXTENDED)
+  /* Extract the source address from the 'metadata' */
+
+  ret = sixlowpan_extract_srcaddr(radio, metadata, &fragsrc);
+  if (ret < 0)
     {
-      /* Was the first source address also extended? */
-
-      if (radio->r_fragsrc.extended)
-        {
-          /* Yes.. perform the extended address comparison */
-
-          return sixlowpan_eaddrcmp(radio->r_fragsrc.u.eaddr.u8, ind->src.eaddr);
-        }
-    }
-  else
-    {
-      /* Short source address.  Was the first source address also short? */
-
-      if (!radio->r_fragsrc.extended)
-        {
-          /* Yes.. perform the extended short comparison */
-
-          return sixlowpan_saddrcmp(radio->r_fragsrc.u.saddr.u8, &ind->src.saddr);
-        }
+      nerr("ERROR: sixlowpan_extract_srcaddr failed: %d\n", ret);
+      return false;
     }
 
-  /* Address are different size and, hence, cannot match */
+  /* The addresses cannot match if they are not the same size */
+
+  if (fragsrc.nv_addrlen == radio->r_fragsrc.nv_addrlen)
+    {
+      /* The are the same sizer, return the address comparisson */
+
+      return (memcmp(fragsrc.nv_addr, radio->r_fragsrc.nv_addr,
+                     fragsrc.nv_addrlen) == 0);
+    }
 
   return false;
 }
@@ -286,9 +281,9 @@ static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr, FAR uint8_t *bptr)
  *   SHALL in the RFC 4944 and should never happen)
  *
  * Input Parameters:
- *   radio - The radio network device driver interface.
- *   ind   - Meta data characterizing the received frame.
- *   iob   - The IOB containing the frame.
+ *   radio    - The radio network device driver interface.
+ *   metadata - Metadata characterizing the received frame.
+ *   iob      - The IOB containing the frame.
  *
  * Returned Value:
  *   On success, a value greater than equal to zero is returned, either:
@@ -305,8 +300,7 @@ static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr, FAR uint8_t *bptr)
  ****************************************************************************/
 
 static int sixlowpan_frame_process(FAR struct sixlowpan_driver_s *radio,
-                                   FAR const struct ieee802154_data_ind_s *ind,
-                                   FAR struct iob_s *iob)
+                                   FAR const void *metadata, FAR struct iob_s *iob)
 {
   FAR uint8_t *fptr;          /* Convenience pointer to beginning of the frame */
   FAR uint8_t *bptr;          /* Used to redirect uncompressed header to the bitbucket */
@@ -323,6 +317,7 @@ static int sixlowpan_frame_process(FAR struct sixlowpan_driver_s *radio,
   bool isfirstfrag   = false;
   uint16_t fragtag   = 0;     /* Tag of the fragment */
   systime_t elapsed;          /* Elapsed time */
+  int ret;
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
   /* Get a pointer to the payload following the IEEE802.15.4 frame header(s).
@@ -459,7 +454,7 @@ static int sixlowpan_frame_process(FAR struct sixlowpan_driver_s *radio,
       /* Verify that this fragment is part of that reassembly sequence */
 
       else if (fragsize != radio->r_pktlen || radio->r_reasstag != fragtag  ||
-               !sixlowpan_compare_fragsrc(radio, ind))
+               !sixlowpan_compare_fragsrc(radio, metadata))
         {
           /* The packet is a fragment that does not belong to the packet
            * being reassembled or the packet is not a fragment.
@@ -511,20 +506,16 @@ static int sixlowpan_frame_process(FAR struct sixlowpan_driver_s *radio,
       ninfo("Starting reassembly: r_pktlen %u, r_reasstag %d\n",
             radio->r_pktlen, radio->r_reasstag);
 
-      /* Extract the source address from the 'ind' meta data.  NOTE that the
-       * size of the source address may be different that our local, destination
+      /* Extract the source address from the 'metadata'.  NOTE that the size
+       * of the source address may be different than our local, destination
        * address.
        */
 
-      if (ind->src.mode == IEEE802154_ADDRMODE_EXTENDED)
+      ret = sixlowpan_extract_srcaddr(radio, metadata, &radio->r_fragsrc);
+      if (ret < 0)
         {
-          radio->r_fragsrc.extended = true;
-          sixlowpan_eaddrcopy(radio->r_fragsrc.u.eaddr.u8, ind->src.eaddr);
-        }
-      else
-        {
-          memset(&radio->r_fragsrc, 0, sizeof(struct sixlowpan_tagaddr_s));
-          sixlowpan_saddrcopy(radio->r_fragsrc.u.saddr.u8, &ind->src.saddr);
+          nerr("ERROR: sixlowpan_extract_srcaddr failed: %d\n", ret);
+          return ret;
         }
     }
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
@@ -537,7 +528,7 @@ static int sixlowpan_frame_process(FAR struct sixlowpan_driver_s *radio,
   if ((hc1[SIXLOWPAN_HC1_DISPATCH] & SIXLOWPAN_DISPATCH_IPHC_MASK) == SIXLOWPAN_DISPATCH_IPHC)
     {
       ninfo("IPHC Dispatch\n");
-      sixlowpan_uncompresshdr_hc06(ind, fragsize, iob, fptr, bptr);
+      sixlowpan_uncompresshdr_hc06(radio, metadata, fragsize, iob, fptr, bptr);
     }
   else
 #endif /* CONFIG_NET_6LOWPAN_COMPRESSION_HC06 */
@@ -546,7 +537,7 @@ static int sixlowpan_frame_process(FAR struct sixlowpan_driver_s *radio,
   if (hc1[SIXLOWPAN_HC1_DISPATCH] == SIXLOWPAN_DISPATCH_HC1)
     {
       ninfo("HC1 Dispatch\n");
-      sixlowpan_uncompresshdr_hc1(ind, fragsize, iob, fptr, bptr);
+      sixlowpan_uncompresshdr_hc1(radio, metadata, fragsize, iob, fptr, bptr);
     }
   else
 #endif /* CONFIG_NET_6LOWPAN_COMPRESSION_HC1 */
@@ -757,9 +748,15 @@ static int sixlowpan_dispatch(FAR struct sixlowpan_driver_s *radio)
  *   framelist - The head of an incoming list of frames.  Normally this
  *               would be a single frame.  A list may be provided if
  *               appropriate, however.
- *   ind       - Meta data characterizing the received packet.  If there are
- *               multilple frames in the list, this meta data must apply to
- *               all of the frames!
+ *   metadata  - Meta data characterizing the received packet.  The specific
+ *               type of this metadata is obfuscated and depends on the
+ *               type of the radio driver.  This could be be either
+ *               (1) struct ieee802154_data_ind_s for an IEEE 802.15.4
+ *               radio, or (2) struct pktradio_metadata_s for a non-standard
+ *               packet radio.
+ *
+ *               If there are multilple frames in the list, this metadata
+ *               must apply to all of the frames in the list.
  *
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.
@@ -767,8 +764,7 @@ static int sixlowpan_dispatch(FAR struct sixlowpan_driver_s *radio)
  ****************************************************************************/
 
 int sixlowpan_input(FAR struct sixlowpan_driver_s *radio,
-                    FAR struct iob_s *framelist,
-                    FAR const struct ieee802154_data_ind_s *ind)
+                    FAR struct iob_s *framelist,  FAR const void *metadata)
 {
   int ret = -EINVAL;
 
@@ -789,7 +785,7 @@ int sixlowpan_input(FAR struct sixlowpan_driver_s *radio,
 
       /* Process the frame, decompressing it into the packet buffer */
 
-      ret = sixlowpan_frame_process(radio, ind, iob);
+      ret = sixlowpan_frame_process(radio, metadata, iob);
 
       /* Free the IOB the held the consumed frame */
 
@@ -814,7 +810,7 @@ int sixlowpan_input(FAR struct sixlowpan_driver_s *radio,
                 {
                   FAR struct ipv6_hdr_s *ipv6hdr;
                   FAR uint8_t *buffer;
-                  struct sixlowpan_tagaddr_s destmac;
+                  struct netdev_varaddr_s destmac;
                   size_t hdrlen;
                   size_t buflen;
 

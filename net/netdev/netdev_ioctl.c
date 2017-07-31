@@ -763,14 +763,17 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 
 #ifdef CONFIG_NET_6LOWPAN
 #ifdef CONFIG_NET_MULTILINK
-              if (dev->d_lltype == NET_LL_IEEE802154)
+              if (dev->d_lltype == NET_LL_IEEE802154 ||
+                  dev->d_lltype == NET_LL_PKTRADIO)
 #else
               if (true)
 #endif
                 {
-                   req->ifr_hwaddr.sa_family = AF_INETX;
-                   memcpy(req->ifr_hwaddr.sa_data,
-                         dev->d_mac.ieee802154.u8, NET_6LOWPAN_ADDRSIZE);
+                  req->ifr_hwaddr.sa_family = AF_INETX;
+                  memcpy(req->ifr_hwaddr.sa_data,
+                         dev->d_mac.sixlowpan.nv_addr,
+                         dev->d_mac.sixlowpan.nv_addrlen);
+                  ret = OK;
                 }
                else
 #endif
@@ -802,14 +805,27 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 
 #ifdef CONFIG_NET_6LOWPAN
 #ifdef CONFIG_NET_MULTILINK
-              if (dev->d_lltype == NET_LL_IEEE802154)
+              if (dev->d_lltype == NET_LL_IEEE802154 ||
+                  dev->d_lltype == NET_LL_PKTRADIO)
 #else
               if (true)
 #endif
                 {
-                  memcpy(dev->d_mac.ieee802154.u8,
-                         req->ifr_hwaddr.sa_data, NET_6LOWPAN_ADDRSIZE);
-                  ret = OK;
+                  FAR struct sixlowpan_driver_s *radio;
+                  struct sixlowpan_properties_s properties;
+
+                  /* Get the radio properties */
+
+                  radio = (FAR struct sixlowpan_driver_s *)dev;
+                  DEBUGASSERT(radio->r_properties != NULL);
+
+                  ret = radio->r_properties(radio, &properties);
+                  if (ret >= 0)
+                    {
+                      dev->d_mac.sixlowpan.nv_addrlen = properties.sp_addrlen;
+                      memcpy(dev->d_mac.sixlowpan.nv_addr,
+                             req->ifr_hwaddr.sa_data, NET_6LOWPAN_ADDRSIZE);
+                    }
                 }
               else
 #endif

@@ -162,15 +162,15 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
                           "%s\tLink encap:6LoWPAN HWaddr "
                           "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
                           dev->d_ifname,
-                          dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
-                          dev->d_mac.ieee802154.u8[2], dev->d_mac.ieee802154.u8[3],
-                          dev->d_mac.ieee802154.u8[4], dev->d_mac.ieee802154.u8[5],
-                          dev->d_mac.ieee802154.u8[6], dev->d_mac.ieee802154.u8[7]);
+                          dev->d_mac.sixlowpan.nv_addr[0], dev->d_mac.sixlowpan.nv_addr[1],
+                          dev->d_mac.sixlowpan.nv_addr[2], dev->d_mac.sixlowpan.nv_addr[3],
+                          dev->d_mac.sixlowpan.nv_addr[4], dev->d_mac.sixlowpan.nv_addr[5],
+                          dev->d_mac.sixlowpan.nv_addr[6], dev->d_mac.sixlowpan.nv_addr[7]);
 #else
           len += snprintf(&netfile->line[len], NET_LINELEN - len,
                           "%s\tLink encap:6LoWPAN HWaddr %02x:%02x",
                           dev->d_ifname,
-                          dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1]);
+                          dev->d_mac.sixlowpan.nv_addr[0], dev->d_mac.sixlowpan.nv_addr[1]);
 #endif
         }
         break;
@@ -224,16 +224,16 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
                   "%s\tLink encap:6LoWPAN HWaddr "
                   "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x at %s\n",
                   dev->d_ifname,
-                  dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
-                  dev->d_mac.ieee802154.u8[2], dev->d_mac.ieee802154.u8[3],
-                  dev->d_mac.ieee802154.u8[4], dev->d_mac.ieee802154.u8[5],
-                  dev->d_mac.ieee802154.u8[6], dev->d_mac.ieee802154.u8[7],
+                  dev->d_mac.sixlowpan.nv_addr[0], dev->d_mac.sixlowpan.nv_addr[1],
+                  dev->d_mac.sixlowpan.nv_addr[2], dev->d_mac.sixlowpan.nv_addr[3],
+                  dev->d_mac.sixlowpan.nv_addr[4], dev->d_mac.sixlowpan.nv_addr[5],
+                  dev->d_mac.sixlowpan.nv_addr[6], dev->d_mac.sixlowpan.nv_addr[7],
                   status);
 #else
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   "%s\tLink encap:6LoWPAN HWaddr %02x:%02x at %s\n",
                   dev->d_ifname,
-                  dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
+                  dev->d_mac.sixlowpan.nv_addr[0], dev->d_mac.sixlowpan.nv_addr[1],
                   status);
 #endif
 #elif defined(CONFIG_NET_LOOPBACK)

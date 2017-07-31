@@ -66,6 +66,7 @@
 #include <nuttx/net/udp.h>
 #include <nuttx/net/icmpv6.h>
 #include <nuttx/net/sixlowpan.h>
+#include <nuttx/wireless/pktradio.h>
 
 #ifdef CONFIG_NET_6LOWPAN
 
@@ -73,11 +74,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* IEEE 802.15.4  addres macros */
-/* Copy a an IEEE 802.15.4 address */
+/* Copy a generic address */
 
 #define sixlowpan_anyaddrcopy(dest,src,len) \
   memcpy(dest, src, len)
+
+#ifdef CONFIG_WIRELESS_IEEE802154
+/* IEEE 802.15.4  address macros */
+/* Copy a an IEEE 802.15.4 address */
 
 #define sixlowpan_saddrcopy(dest,src) \
   sixlowpan_anyaddrcopy(dest,src,NET_6LOWPAN_SADDRSIZE)
@@ -88,19 +92,7 @@
 #define sixlowpan_addrcopy(dest,src)  \
   sixlowpan_anyaddrcopy(dest,src,NET_6LOWPAN_ADDRSIZE)
 
-/* Compare two IEEE 802.15.4 addresses */
-
-#define sixlowpan_anyaddrcmp(addr1,addr2,len) \
-  (memcmp(addr1, addr2, len) == 0)
-
-#define sixlowpan_saddrcmp(addr1,addr2) \
-  sixlowpan_anyaddrcmp(addr1,addr2,NET_6LOWPAN_SADDRSIZE)
-
-#define sixlowpan_eaddrcmp(addr1,addr2) \
-  sixlowpan_anyaddrcmp(addr1,addr2,NET_6LOWPAN_EADDRSIZE)
-
-#define sixlowpan_addrcmp(addr1,addr2) \
-  sixlowpan_anyaddrcmp(addr1,addr2,NET_6LOWPAN_ADDRSIZE)
+#endif
 
 /* General helper macros ****************************************************/
 
@@ -170,26 +162,42 @@ struct ipv6icmp_hdr_s
 };
 #endif
 
+#ifdef CONFIG_WIRELESS_IEEE802154
 /* In order to provide a customizable IEEE 802.15.4 MAC header, a structure
  * of meta data is passed to the MAC network driver, struct
  * ieee802154_frame_meta_s.  Many of the settings in this meta data are
- * fixed, deterimined by the 6LoWPAN configuration.  Other settings depend
+ * fixed, determined by the 6LoWPAN configuration.  Other settings depend
  * on the protocol used in the current packet or on chacteristics of the
  * destination node.
  *
  * The following structure is used to summarize those per-packet
- * customizations and, along, with the fixed configuratin settings,
+ * customizations and, along, with the fixed configuratoin settings,
  * determines the full form of that meta data.
  */
 
-struct packet_metadata_s
+struct ieee802_txmetadata_s
 {
-  uint8_t sextended : 1;                /* Extended source address */
-  uint8_t dextended : 1;                /* Extended destination address */
-  uint8_t xmits;                        /* Max MAC transmisstion */
-  uint8_t dpanid[IEEE802154_PANIDSIZE]; /* Destination PAN ID */
-  union sixlowpan_anyaddr_u source;     /* Source IEEE 802.15.4 address */
-  union sixlowpan_anyaddr_u dest;       /* Destination IEEE 802.15.4 address */
+  uint8_t sextended : 1;                 /* Extended source address */
+  uint8_t dextended : 1;                 /* Extended destination address */
+  uint8_t xmits;                         /* Max MAC transmisstion */
+  uint8_t dpanid[IEEE802154_PANIDSIZE];  /* Destination PAN ID */
+  struct netdev_maxaddr_s source;        /* Source IEEE 802.15.4 address */
+  struct netdev_maxaddr_s dest;          /* Destination IEEE 802.15.4 address */
+};
+#endif
+
+/* This structure holds the packet metadata as a union when multiple different
+ * radio type are supported.
+ */
+
+union sixlowpan_metadata_u
+{
+#ifdef CONFIG_WIRELESS_IEEE802154
+  struct ieee802154_frame_meta_s ieee802154;
+#endif
+#ifdef CONFIG_WIRELESS_PKTRADIO
+  struct pktradio_metadata_s pktradio;
+#endif
 };
 
 /****************************************************************************
@@ -224,12 +232,12 @@ extern uint8_t g_frame_hdrlen;
  * Public Function Prototypes
  ****************************************************************************/
 
-struct net_driver_s;         /* Forward reference */
-struct sixlowpan_driver_s;   /* Forward reference */
-struct devif_callback_s;     /* Forward reference */
-struct ipv6_hdr_s;           /* Forward reference */
-struct sixlowpan_addr_s;     /* Forward reference */
-struct iob_s;                /* Forward reference */
+struct net_driver_s;        /* Forward reference */
+struct sixlowpan_driver_s;  /* Forward reference */
+struct devif_callback_s;    /* Forward reference */
+struct ipv6_hdr_s;          /* Forward reference */
+struct netdev_varaddr_s;    /* Forward reference */
+struct iob_s;               /* Forward reference */
 
 /****************************************************************************
  * Name: sixlowpan_send
@@ -267,7 +275,7 @@ struct iob_s;                /* Forward reference */
 int sixlowpan_send(FAR struct net_driver_s *dev,
                    FAR struct devif_callback_s **list,
                    FAR const struct ipv6_hdr_s *ipv6hdr, FAR const void *buf,
-                   size_t len, FAR const struct sixlowpan_tagaddr_s *destmac,
+                   size_t len, FAR const struct netdev_varaddr_s *destmac,
                    uint16_t timeout);
 
 /****************************************************************************
@@ -280,7 +288,8 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
  * Input Parameters:
  *   radio   - Reference to a radio network driver state instance.
  *   pktmeta - Meta-data specific to the current outgoing frame
- *   meta    - Location to return the corresponding meta data.
+ *   meta    - Location to return the corresponding meta data reference
+ *             (obfuscated).
  *   paylen  - The size of the data payload to be sent.
  *
  * Returned Value:
@@ -291,10 +300,12 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_WIRELESS_IEEE802154
 int sixlowpan_meta_data(FAR struct sixlowpan_driver_s *radio,
-                        FAR const struct packet_metadata_s *pktmeta,
+                        FAR const struct ieee802_txmetadata_s *pktmeta,
                         FAR struct ieee802154_frame_meta_s *meta,
                         uint16_t paylen);
+#endif
 
 /****************************************************************************
  * Name: sixlowpan_frame_hdrlen
@@ -306,7 +317,7 @@ int sixlowpan_meta_data(FAR struct sixlowpan_driver_s *radio,
  *
  * Input parameters:
  *   radio - Reference to a radio network driver state instance.
- *   meta  - Meta data that describes the MAC header
+ *   meta  - obfuscated meta data that describes the MAC header
  *
  * Returned Value:
  *   The frame header length is returnd on success; otherwise, a negated
@@ -315,7 +326,7 @@ int sixlowpan_meta_data(FAR struct sixlowpan_driver_s *radio,
  ****************************************************************************/
 
 int sixlowpan_frame_hdrlen(FAR struct sixlowpan_driver_s *radio,
-                           FAR const struct ieee802154_frame_meta_s *meta);
+                           FAR const void *meta);
 
 /****************************************************************************
  * Name: sixlowpan_frame_submit
@@ -328,7 +339,7 @@ int sixlowpan_frame_hdrlen(FAR struct sixlowpan_driver_s *radio,
  *
  * Input parameters:
  *   radio - Reference to a radio network driver state instance.
- *   meta  - Meta data that describes the MAC header
+ *   meta  - Obfuscated metadata that describes the MAC header
  *   frame - The IOB containing the frame to be submitted.
  *
  * Returned Value:
@@ -338,8 +349,7 @@ int sixlowpan_frame_hdrlen(FAR struct sixlowpan_driver_s *radio,
  ****************************************************************************/
 
 int sixlowpan_frame_submit(FAR struct sixlowpan_driver_s *radio,
-                           FAR const struct ieee802154_frame_meta_s *meta,
-                           FAR struct iob_s *frame);
+                           FAR const void *meta, FAR struct iob_s *frame);
 
 /****************************************************************************
  * Name: sixlowpan_queue_frames
@@ -376,7 +386,7 @@ int sixlowpan_frame_submit(FAR struct sixlowpan_driver_s *radio,
 int sixlowpan_queue_frames(FAR struct sixlowpan_driver_s *radio,
                            FAR const struct ipv6_hdr_s *ipv6,
                            FAR const void *buf,  size_t buflen,
-                           FAR const struct sixlowpan_tagaddr_s *destmac);
+                           FAR const struct netdev_varaddr_s *destmac);
 
 /****************************************************************************
  * Name: sixlowpan_hc06_initialize
@@ -433,7 +443,7 @@ void sixlowpan_hc06_initialize(void);
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
 int sixlowpan_compresshdr_hc06(FAR struct sixlowpan_driver_s *radio,
                                FAR const struct ipv6_hdr_s *ipv6,
-                               FAR const struct sixlowpan_tagaddr_s *destmac,
+                               FAR const struct netdev_varaddr_s *destmac,
                                FAR uint8_t *fptr);
 #endif
 
@@ -451,14 +461,17 @@ int sixlowpan_compresshdr_hc06(FAR struct sixlowpan_driver_s *radio,
  *   appropriate values
  *
  * Input Parmeters:
- *   ind   - MAC header meta data including node addressing information.
- *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
- *           inferred from the L2 length), non 0 if the packet is a first
- *           fragment.
- *   iob   - Pointer to the IOB containing the received frame.
- *   fptr  - Pointer to frame to be compressed.
- *   bptr  - Output goes here.  Normally this is a known offset into d_buf,
- *           may be redirected to a "bitbucket" on the case of FRAGN frames.
+ *   radio    - Reference to a radio network driver state instance.
+ *   metadata - Obfuscated MAC metadata including node addressing
+ *              information.
+ *   iplen    - Equal to 0 if the packet is not a fragment (IP length is
+ *              then inferred from the L2 length), non 0 if the packet is
+ *              a first fragment.
+ *   iob      - Pointer to the IOB containing the received frame.
+ *   fptr     - Pointer to frame to be compressed.
+ *   bptr     - Output goes here.  Normally this is a known offset into
+ *              d_buf, may be redirected to a "bitbucket" on the case of
+ *              FRAGN frames.
  *
  * Returned Value:
  *   None
@@ -466,7 +479,8 @@ int sixlowpan_compresshdr_hc06(FAR struct sixlowpan_driver_s *radio,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
-void sixlowpan_uncompresshdr_hc06(FAR const struct ieee802154_data_ind_s *ind,
+void sixlowpan_uncompresshdr_hc06(FAR struct sixlowpan_driver_s *radio,
+                                  FAR const void *metadata,
                                   uint16_t iplen, FAR struct iob_s *iob,
                                   FAR uint8_t *fptr, FAR uint8_t *bptr);
 #endif
@@ -497,7 +511,7 @@ void sixlowpan_uncompresshdr_hc06(FAR const struct ieee802154_data_ind_s *ind,
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
 int sixlowpan_compresshdr_hc1(FAR struct sixlowpan_driver_s *radio,
                               FAR const struct ipv6_hdr_s *ipv6,
-                              FAR const struct sixlowpan_tagaddr_s *destmac,
+                              FAR const struct netdev_varaddr_s *destmac,
                               FAR uint8_t *fptr);
 #endif
 
@@ -514,14 +528,17 @@ int sixlowpan_compresshdr_hc1(FAR struct sixlowpan_driver_s *radio,
  *   are set to the appropriate values
  *
  * Input Parameters:
- *   ind   - MAC header meta data including node addressing information.
- *   iplen - Equal to 0 if the packet is not a fragment (IP length is then
- *           inferred from the L2 length), non 0 if the packet is a 1st
- *           fragment.
- *   iob   - Pointer to the IOB containing the received frame.
- *   fptr  - Pointer to frame to be uncompressed.
- *   bptr  - Output goes here.  Normally this is a known offset into d_buf,
- *           may be redirected to a "bitbucket" on the case of FRAGN frames.
+ *   radio    - Reference to a radio network driver state instance.
+ *   metadata - Obfuscated MAC metadata including node addressing
+ *              information.
+ *   iplen    - Equal to 0 if the packet is not a fragment (IP length is
+ *              then inferred from the L2 length), non 0 if the packet is
+ *              a 1st fragment.
+ *   iob      - Pointer to the IOB containing the received frame.
+ *   fptr     - Pointer to frame to be uncompressed.
+ *   bptr     - Output goes here.  Normally this is a known offset into
+ *              d_buf, may be redirected to a "bitbucket" on the case of
+ *              FRAGN frames.
  *
  * Returned Value:
  *   Zero (OK) is returned on success, on failure a negater errno value is
@@ -530,9 +547,10 @@ int sixlowpan_compresshdr_hc1(FAR struct sixlowpan_driver_s *radio,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
-int sixlowpan_uncompresshdr_hc1(FAR const struct ieee802154_data_ind_s *ind,
-                                uint16_t iplen, FAR struct iob_s *iob,
-                                FAR uint8_t *fptr, FAR uint8_t *bptr);
+int sixlowpan_uncompresshdr_hc1(FAR struct sixlowpan_driver_s *radio,
+                                FAR const void *metadata, uint16_t iplen,
+                                FAR struct iob_s *iob, FAR uint8_t *fptr,
+                                FAR uint8_t *bptr);
 #endif
 
 /****************************************************************************
@@ -570,28 +588,13 @@ int sixlowpan_uncompresshdr_hc1(FAR const struct ieee802154_data_ind_s *ind,
 
 int sixlowpan_destaddrfromip(FAR struct sixlowpan_driver_s *radio,
                              const net_ipv6addr_t ipaddr,
-                             FAR struct sixlowpan_tagaddr_s *addr);
+                             FAR struct netdev_varaddr_s *addr);
 
-void sixlowpan_ipfromsaddr(FAR const uint8_t *saddr,
-                           FAR net_ipv6addr_t ipaddr);
-void sixlowpan_ipfromeaddr(FAR const uint8_t *eaddr,
-                           FAR net_ipv6addr_t ipaddr);
-
-bool sixlowpan_issaddrbased(const net_ipv6addr_t ipaddr,
-                            FAR const struct sixlowpan_saddr_s *saddr);
-bool sixlowpan_iseaddrbased(const net_ipv6addr_t ipaddr,
-                            FAR const struct sixlowpan_eaddr_s *eaddr);
-
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-#  define sixlowpan_isaddrbased(ipaddr,addr) \
-     sixlowpan_iseaddrbased(ipaddr,(FAR struct sixlowpan_eaddr_s *)addr)
-#else
-#  define sixlowpan_isaddrbased(ipaddr,addr) \
-     sixlowpan_issaddrbased(ipaddr,(FAR struct sixlowpan_saddr_s *)addr)
-#endif
+void sixlowpan_ipfromaddr(FAR const struct netdev_varaddr_s *addr,
+                          FAR net_ipv6addr_t ipaddr);
 
 bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
-                          FAR const struct sixlowpan_tagaddr_s *addr);
+                          FAR const struct netdev_varaddr_s *addr);
 
 /****************************************************************************
  * Name: sixlowpan_src_panid
@@ -609,8 +612,52 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_WIRELESS_IEEE802154
 int sixlowpan_src_panid(FAR struct sixlowpan_driver_s *radio,
                         FAR uint8_t *panid);
+#endif
+
+/****************************************************************************
+ * Name: sixlowpan_extract_srcaddr
+ *
+ * Description:
+ *   Extract the source MAC address from the radio-specific RX metadata, and
+ *   return the source address in a radio-agnostic form.
+ *
+ * Input parameters:
+ *   radio    - Reference to a radio network driver state instance.
+ *   metadata - Opaque reference to the radio-specific RX metadata.
+ *   srcaddr  - The location in which to return the source MAC address.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int sixlowpan_extract_srcaddr(FAR struct sixlowpan_driver_s *radio,
+                              FAR const void *metadata,
+                              FAR struct netdev_varaddr_s *srcaddr);
+
+/****************************************************************************
+ * Name: sixlowpan_extract_destaddr
+ *
+ * Description:
+ *   Extract the destination MAC address from the radio-specific RX metadata,
+ *   and return the destination address in a radio-agnostic form.
+ *
+ * Input parameters:
+ *   radio    - Reference to a radio network driver state instance.
+ *   metadata - Opaque reference to the radio-specific RX metadata.
+ *   destaddr - The location in which to return the destination MAC address.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int sixlowpan_extract_destaddr(FAR struct sixlowpan_driver_s *radio,
+                               FAR const void *metadata,
+                               FAR struct netdev_varaddr_s *destaddr);
 
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* _NET_SIXLOWPAN_SIXLOWPAN_INTERNAL_H */

@@ -150,8 +150,9 @@ static inline bool sixlowpan_eaddrnull(FAR const uint8_t *eaddr)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_WIRELESS_IEEE802154
 int sixlowpan_meta_data(FAR struct sixlowpan_driver_s *radio,
-                        FAR const struct packet_metadata_s *pktmeta,
+                        FAR const struct ieee802_txmetadata_s *pktmeta,
                         FAR struct ieee802154_frame_meta_s *meta,
                         uint16_t paylen)
 {
@@ -173,13 +174,13 @@ int sixlowpan_meta_data(FAR struct sixlowpan_driver_s *radio,
     {
       /* Extended destination address mode */
 
-      rcvrnull = sixlowpan_eaddrnull(pktmeta->dest.eaddr.u8);
+      rcvrnull = sixlowpan_eaddrnull(pktmeta->dest.nm_addr);
     }
   else
     {
       /* Short destination address mode */
 
-      rcvrnull = sixlowpan_saddrnull(pktmeta->dest.saddr.u8);
+      rcvrnull = sixlowpan_saddrnull(pktmeta->dest.nm_addr);
     }
 
   if (rcvrnull)
@@ -206,14 +207,14 @@ int sixlowpan_meta_data(FAR struct sixlowpan_driver_s *radio,
       /* Extended destination address mode */
 
       meta->destaddr.mode = IEEE802154_ADDRMODE_EXTENDED;
-      sixlowpan_eaddrcopy(&meta->destaddr.eaddr, pktmeta->dest.eaddr.u8);
+      sixlowpan_eaddrcopy(&meta->destaddr.eaddr, pktmeta->dest.nm_addr);
     }
   else
     {
       /* Short destination address mode */
 
       meta->destaddr.mode = IEEE802154_ADDRMODE_SHORT;
-      sixlowpan_saddrcopy(&meta->destaddr.saddr, pktmeta->dest.saddr.u8);
+      sixlowpan_saddrcopy(&meta->destaddr.saddr, pktmeta->dest.nm_addr);
     }
 
   IEEE802154_SADDRCOPY(meta->destaddr.panid, pktmeta->dpanid);
@@ -237,6 +238,7 @@ int sixlowpan_meta_data(FAR struct sixlowpan_driver_s *radio,
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: sixlowpan_frame_hdrlen
@@ -257,7 +259,7 @@ int sixlowpan_meta_data(FAR struct sixlowpan_driver_s *radio,
  ****************************************************************************/
 
 int sixlowpan_frame_hdrlen(FAR struct sixlowpan_driver_s *radio,
-                           FAR const struct ieee802154_frame_meta_s *meta)
+                           FAR const void *meta)
 {
   return radio->r_get_mhrlen(radio, meta);
 }
@@ -283,8 +285,7 @@ int sixlowpan_frame_hdrlen(FAR struct sixlowpan_driver_s *radio,
  ****************************************************************************/
 
 int sixlowpan_frame_submit(FAR struct sixlowpan_driver_s *radio,
-                           FAR const struct ieee802154_frame_meta_s *meta,
-                           FAR struct iob_s *frame)
+                           FAR const void *meta, FAR struct iob_s *frame)
 {
   return radio->r_req_data(radio, meta, frame);
 }

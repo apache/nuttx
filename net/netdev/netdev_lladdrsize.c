@@ -46,6 +46,7 @@
 
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/sixlowpan.h>
 
 #include "netdev/netdev.h"
 
@@ -80,7 +81,9 @@ int netdev_type_lladdrsize(uint8_t lltype)
     }
   else
 #endif
+
 #ifdef CONFIG_NET_6LOWPAN
+#ifdef CONFIG_WIRELESS_IEEE802154
   if (lltype == NET_LL_IEEE802154)
     {
       /* 6LoWPAN can be configured to use either extended or short
@@ -94,7 +97,21 @@ int netdev_type_lladdrsize(uint8_t lltype)
 #endif
     }
   else
-#endif
+#endif /* CONFIG_WIRELESS_IEEE802154 */
+
+#ifdef CONFIG_WIRELESS_PKTRADIO
+  if (lltype == NET_LL_PKTRADIO)
+    {
+      /* REVISIT:  This may no be the correct size if there are multiple
+       * packet radios.  In that case, it will be the maxim address size
+       * amongst all of the radios.
+       */
+
+      return CONFIG_PKTRADIO_ADDRLEN;
+    }
+  else
+#endif /* CONFIG_WIRELESS_PKTRADIO */
+#endif /* CONFIG_NET_6LOWPAN */
     {
       /* Either the link layer type associated with lltype has no address,
        * or support for that link layer type is not enabled.

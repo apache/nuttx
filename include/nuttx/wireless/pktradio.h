@@ -45,6 +45,8 @@
 
 #include <nuttx/config.h>
 
+#ifdef CONFIG_WIRELESS_PKTRADIO
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -57,6 +59,8 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+struct iob_s;  /* Forward reference */
 
 /* This describes an address used by the packet radio.  There is no standard
  * size for such an address.  Hence, it is represented simply as a arry of
@@ -78,19 +82,8 @@ struct pktradio_metadata_s
   struct pktradio_metadata_s *pm_flink; /* Supports a singly linked list */
   struct pktradio_addr_s pm_src;        /* Source of the packet */
   struct pktradio_addr_s pm_dest;       /* Destination of the packet */
+  FAR struct iob_s *pm_iob;             /* Contained IOB */
   uint8_t pm_pool;                      /* See PKTRADIO_POOL_* definitions */
-};
-
-/* Different packet radios may have different properties.  If there are
- * multiple packet radios, then those properties have to be queried at
- * run time.  This information is provided to the 6LoWPAN network via the
- * following structure.
- */
-
-struct pktradio_properties_s
-{
-  uint8_t pp_addrlen;                 /* Length of an address */
-  uint8_t pp_pktlen;                  /* Fixed packet/frame size (up to 255) */
 };
 
 /****************************************************************************
@@ -166,4 +159,5 @@ FAR struct pktradio_metadata_s *pktradio_metadata_allocate(void);
 
 void pktradio_metadata_free(FAR struct pktradio_metadata_s *metadata);
 
+#endif /* CONFIG_WIRELESS_PKTRADIO */
 #endif /* __INCLUDE_NUTTX_WIRELESS_PKTRADIO_H */

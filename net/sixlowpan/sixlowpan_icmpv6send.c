@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/net/netdev.h>
@@ -78,7 +79,6 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPFORWARD
 void sixlowpan_icmpv6_send(FAR struct net_driver_s *dev,
                            FAR struct net_driver_s *fwddev,
                            FAR struct ipv6_hdr_s *ipv6)
@@ -100,14 +100,14 @@ void sixlowpan_icmpv6_send(FAR struct net_driver_s *dev,
        * protocol header.
        */
 
-      if (ipv6icmpv6->ipv6.proto != IP_PROTO_ICMPv6)
+      if (ipv6icmpv6->ipv6.proto != IP_PROTO_ICMP6)
         {
           nwarn("WARNING: Expected ICMPv6 protoype: %u vs %s\n",
-                ipv6icmpv6->ipv6.proto, IP_PROTO_ICMPv6);
+                ipv6icmpv6->ipv6.proto, IP_PROTO_ICMP6);
         }
       else
         {
-          struct sixlowpan_tagaddr_s destmac;
+          struct netdev_varaddr_s destmac;
           FAR uint8_t *buf;
           uint16_t hdrlen;
           uint16_t buflen;
@@ -156,6 +156,5 @@ void sixlowpan_icmpv6_send(FAR struct net_driver_s *dev,
 drop:
   dev->d_len = 0;
 }
-#endif
 
 #endif /* CONFIG_NET_6LOWPAN && CONFIG_NET_ICMPv6 */

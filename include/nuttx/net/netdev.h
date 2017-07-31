@@ -63,13 +63,23 @@
 #  include <nuttx/net/igmp.h>
 #endif
 
-#ifdef CONFIG_NET_6LOWPAN
-#  include <nuttx/net/ieee802154.h>
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Determine the largest possible address */
+
+#if defined(CONFIG_WIRELESS_IEEE802154) && defined(CONFIG_WIRELESS_PKTRADIO)
+#  if CONFIG_PKTRADIO_ADDRLEN > 8
+#    define RADIO_MAX_ADDRLEN CONFIG_PKTRADIO_ADDRLEN
+#  else
+#    define RADIO_MAX_ADDRLEN 8
+#  endif
+#elif defined(CONFIG_WIRELESS_IEEE802154)
+#  define RADIO_MAX_ADDRLEN 8
+#else /* if defined(CONFIG_WIRELESS_PKTRADIO) */
+#  define RADIO_MAX_ADDRLEN CONFIG_PKTRADIO_ADDRLEN
+#endif
 
 /* Helper macros for network device statistics */
 
@@ -172,6 +182,23 @@ struct netdev_statistics_s
 };
 #endif
 
+#ifdef CONFIG_NET_6LOWPAN
+/* This structure is used to represent addresses of varying length.  This
+ * structure is used to represent the address assigned to a radio.
+ */
+
+struct netdev_maxaddr_s
+{
+  uint8_t nm_addr[RADIO_MAX_ADDRLEN];
+};
+
+struct netdev_varaddr_s
+{
+  uint8_t nv_addrlen;
+  uint8_t nv_addr[RADIO_MAX_ADDRLEN];
+};
+#endif
+
 /* This structure collects information that is specific to a specific network
  * interface driver.  If the hardware platform supports only a single instance
  * of this structure.
@@ -221,13 +248,14 @@ struct net_driver_s
 
     struct ether_addr ether;    /* Device Ethernet MAC address */
 #endif
-#ifdef CONFIG_NET_6LOWPAN
-  /* The address assigned to an IEEE 802.15.4 radio. */
 
-    struct sixlowpan_addr_s ieee802154; /* IEEE 802.15.4 Radio address */
-#endif
+#ifdef CONFIG_NET_6LOWPAN
+  /* The address assigned to an IEEE 802.15.4 or generic packet radio. */
+
+    struct netdev_varaddr_s sixlowpan;
+#endif /* CONFIG_NET_6LOWPAN */
   } d_mac;
-#endif
+#endif /* CONFIG_NET_ETHERNET || CONFIG_NET_6LOWPAN */
 
   /* Network identity */
 
@@ -438,11 +466,9 @@ int ipv6_input(FAR struct net_driver_s *dev);
 
 #ifdef CONFIG_NET_6LOWPAN
 struct sixlowpan_driver_s;   /* See sixlowpan.h */
-struct ieee802154_data_ind_s; /* See ieee8021454_mac.h */
-struct iob_s;                 /* See iob.h */
+struct iob_s;                /* See iob.h */
 int sixlowpan_input(FAR struct sixlowpan_driver_s *ieee,
-                    FAR struct iob_s *framelist,
-                    FAR const struct ieee802154_data_ind_s *ind);
+                    FAR struct iob_s *framelist, FAR const void *metadata);
 #endif
 
 /****************************************************************************

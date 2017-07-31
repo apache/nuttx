@@ -45,6 +45,7 @@
  * Included Files
  ******************************************************************************/
 
+#include <stdio.h>
 #include <assert.h>
 
 #include <nuttx/spi/spi.h>
@@ -86,8 +87,8 @@ static void spirit_dump_buffer(FAR const uint8_t *buffer, unsigned int buflen)
   char outbuf[16*3 + 3]; /* 16 hex bytes + 2 space separator + NUL termination */
   FAR char *ptr;
   unsigned int i;
-  unsigned int j:
-  unsigned int maxj:
+  unsigned int j;
+  unsigned int maxj;
 
   for (i = 0; i < buflen; i += 16)
     {
@@ -100,18 +101,18 @@ static void spirit_dump_buffer(FAR const uint8_t *buffer, unsigned int buflen)
       ptr = outbuf;
       for (j = 0; j < maxj; j++)
         {
-          if (j = 8)
+          if (j == 8)
             {
-              *outbuf++ = ' ';
-              *outbuf++ = ' ';
+              *ptr++ = ' ';
+              *ptr++ = ' ';
             }
 
-          sprintf(outbuf, "%02x ", *buffer++);
-          outbuf += 3;
+          sprintf(ptr, "%02x ", *buffer++);
+          ptr += 3;
         }
 
-      *outbuf = '\0';
-      wlinfo("  %s\n", outbuf)
+      *ptr = '\0';
+      wlinfo("  %s\n", ptr);
     }
 }
 #endif

@@ -163,7 +163,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
   FAR struct udp_conn_s *conn;
   FAR struct net_driver_s *dev;
   struct ipv6udp_hdr_s ipv6udp;
-  struct sixlowpan_tagaddr_s destmac;
+  struct netdev_varaddr_s destmac;
   uint16_t iplen;
   uint16_t timeout;
   int ret;
@@ -476,7 +476,7 @@ void sixlowpan_udp_send(FAR struct net_driver_s *dev,
         }
       else
         {
-          struct sixlowpan_tagaddr_s destmac;
+          struct netdev_varaddr_s destmac;
           FAR uint8_t *buf;
           uint16_t hdrlen;
           uint16_t buflen;

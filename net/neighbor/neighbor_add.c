@@ -97,7 +97,7 @@ void neighbor_add(FAR net_ipv6addr_t ipaddr, uint8_t lltype,
         }
 
 #ifdef CONFIG_NET_MULTILINK
-      if (g_neighbors[i].ne_addr.u.na_lltype == lltype &&
+      if (g_neighbors[i].ne_addr.na_lltype == lltype &&
           net_ipv6addr_cmp(g_neighbors[i].ne_ipaddr, ipaddr))
 #else
       if (net_ipv6addr_cmp(g_neighbors[i].ne_ipaddr, ipaddr))
@@ -122,9 +122,12 @@ void neighbor_add(FAR net_ipv6addr_t ipaddr, uint8_t lltype,
   net_ipv6addr_copy(g_neighbors[oldest_ndx].ne_ipaddr, ipaddr);
 
 #ifdef CONFIG_NET_MULTILINK
-  g_neighbors[oldest_ndx].ne_addr.u.na_lltype = lltype;
+  g_neighbors[oldest_ndx].ne_addr.na_lltype = lltype;
 #endif
-  memcpy(&g_neighbors[oldest_ndx].ne_addr.u, addr, netdev_type_lladdrsize(lltype));
+  g_neighbors[oldest_ndx].ne_addr.na_llsize = netdev_type_lladdrsize(lltype);
+
+  memcpy(&g_neighbors[oldest_ndx].ne_addr.u, addr,
+         g_neighbors[oldest_ndx].ne_addr.na_llsize);
 
   /* Dump the contents of the new entry */
 

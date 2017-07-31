@@ -164,10 +164,11 @@ static int  lo_ioctl(FAR struct net_driver_s *dev, int cmd,
               unsigned long arg);
 #endif
 static int lo_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
-              FAR const struct ieee802154_frame_meta_s *meta);
+              FAR const void *meta);
 static int lo_req_data(FAR struct sixlowpan_driver_s *netdev,
-              FAR const struct ieee802154_frame_meta_s *meta,
-              FAR struct iob_s *framelist);
+              FAR const void *meta, FAR struct iob_s *framelist);
+static int lo_properties(FAR struct sixlowpan_driver_s *netdev,
+              FAR struct sixlowpan_properties_s *properties);
 
 /****************************************************************************
  * Private Functions
@@ -192,7 +193,8 @@ static void lo_addr2ip(FAR struct net_driver_s *dev)
 {
   /* Set the MAC address as the eaddr */
 
-  IEEE802154_EADDRCOPY(dev->d_mac.ieee802154.u8, g_eaddr);
+  dev->d_mac.sixlowpan.nv_addrlen = NET_6LOWPAN_EADDRSIZE;
+  IEEE802154_EADDRCOPY(dev->d_mac.sixlowpan.nv_addr, g_eaddr);
 
   /* Set the IP address based on the eaddr */
 
@@ -211,7 +213,8 @@ static void lo_addr2ip(FAR struct net_driver_s *dev)
 {
   /* Set the MAC address as the saddr */
 
-  IEEE802154_SADDRCOPY(dev->d_mac.ieee802154.u8, g_saddr);
+  dev->d_mac.sixlowpan.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
+  IEEE802154_SADDRCOPY(dev->d_mac.sixlowpan.nv_addr, g_saddr);
 
   /* Set the IP address based on the saddr */
 
@@ -340,7 +343,7 @@ static int lo_loopback(FAR struct net_driver_s *dev)
       ninfo("Send frame %p to the network:  Offset=%u Length=%u\n",
             iob, iob->io_offset, iob->io_len);
 
-      ret = sixlowpan_input(&priv->lo_ieee, iob, &ind);
+      ret = sixlowpan_input(&priv->lo_ieee, iob, (FAR void *)&ind);
 
       /* Increment statistics */
 
@@ -481,14 +484,14 @@ static int lo_ifup(FAR struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
   ninfo("             Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x PANID=%02x:%02x\n",
-         dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
-         dev->d_mac.ieee802154.u8[2], dev->d_mac.ieee802154.u8[3],
-         dev->d_mac.ieee802154.u8[4], dev->d_mac.ieee802154.u8[5],
-         dev->d_mac.ieee802154.u8[6], dev->d_mac.ieee802154.u8[7],
+         dev->d_mac.sixlowpan.nv_addr[0], dev->d_mac.sixlowpan.nv_addr[1],
+         dev->d_mac.sixlowpan.nv_addr[2], dev->d_mac.sixlowpan.nv_addr[3],
+         dev->d_mac.sixlowpan.nv_addr[4], dev->d_mac.sixlowpan.nv_addr[5],
+         dev->d_mac.sixlowpan.nv_addr[6], dev->d_mac.sixlowpan.nv_addr[7],
          priv->lo_panid[0], priv->lo_panid[1]);
 #else
   ninfo("             Node: %02x:%02x PANID=%02x:%02x\n",
-         dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
+         dev->d_mac.sixlowpan.nv_addr[0], dev->d_mac.sixlowpan.nv_addr[1],
          priv->lo_panid[0], priv->lo_panid[1]);
 #endif
 
@@ -801,7 +804,8 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
  *
  * Input parameters:
  *   netdev    - The networkd device that will mediate the MAC interface
- *   meta      - Meta data needed to recreate the MAC header
+ *   meta      - Obfuscated metadata structure needed to create the radio
+ *               MAC header
  *
  * Returned Value:
  *   A non-negative MAC headeer length is returned on success; a negated
@@ -810,7 +814,7 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
  ****************************************************************************/
 
 static int lo_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
-                         FAR const struct ieee802154_frame_meta_s *meta)
+                         FAR const void *meta)
 {
   return MAC_HDRLEN;
 }
@@ -823,7 +827,8 @@ static int lo_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
  *
  * Input parameters:
  *   netdev    - The networkd device that will mediate the MAC interface
- *   meta      - Meta data needed to recreate the MAC header
+ *   meta      - Obfuscated metadata structure needed to create the radio
+ *               MAC header
  *   framelist - Head of a list of frames to be transferred.
  *
  * Returned Value:
@@ -833,15 +838,15 @@ static int lo_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
  ****************************************************************************/
 
 static int lo_req_data(FAR struct sixlowpan_driver_s *netdev,
-                       FAR const struct ieee802154_frame_meta_s *meta,
-                       FAR struct iob_s *framelist)
+                       FAR const void *meta, FAR struct iob_s *framelist)
 {
   FAR struct lo_driver_s *priv;
   FAR struct iob_s *iob;
 
-  DEBUGASSERT(netdev != NULL && netdev->r_dev.d_private != NULL &&
-              framelist != NULL);
+  DEBUGASSERT(netdev != NULL && netdev->r_dev.d_private != NULL);
   priv = (FAR struct lo_driver_s *)netdev->r_dev.d_private;
+
+  DEBUGASSERT(meta != NULL && framelist != NULL);
 
   /* Add the incoming list of framelist to queue of framelist to loopback */
 
@@ -880,6 +885,35 @@ static int lo_req_data(FAR struct sixlowpan_driver_s *netdev,
   /* Schedule to serialize the poll on the worker thread. */
 
   work_queue(LPBKWORK, &priv->lo_work, lo_loopback_work, priv, 0);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: lo_properties
+ *
+ * Description:
+ *   Different packet radios may have different properties.  If there are
+ *   multiple packet radios, then those properties have to be queried at
+ *   run time.  This information is provided to the 6LoWPAN network via the
+ *   following structure.
+ *
+ * Input parameters:
+ *   netdev     - The network device to be queried
+ *   properties - Location where radio properities will be returned.
+ *
+ * Returned Value:
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+static int lo_properties(FAR struct sixlowpan_driver_s *netdev,
+                         FAR struct sixlowpan_properties_s *properties)
+{
+  DEBUGASSERT(netdev != NULL && properties != NULL);
+
+  properties->sp_addrlen = NET_6LOWPAN_ADDRSIZE;        /* Length of an address */
+  properties->sp_pktlen  = CONFIG_NET_6LOWPAN_FRAMELEN; /* Fixed frame length */
   return OK;
 }
 
@@ -943,6 +977,7 @@ int ieee8021514_loopback(void)
 
   radio->r_get_mhrlen = lo_get_mhrlen;    /* Get MAC header length */
   radio->r_req_data   = lo_req_data;      /* Enqueue frame for transmission */
+  radio->r_properties = lo_properties;    /* Returns radio properties */
 
   /* Create a watchdog for timing polling for and timing of transmissions */
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/net/ieee802154.h
+ * include/nuttx/net/ieee802154_loopback.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

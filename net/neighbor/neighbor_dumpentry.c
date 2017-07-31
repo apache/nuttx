@@ -37,6 +37,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
 #include <debug.h>
 
 #include <nuttx/net/net.h>
@@ -44,6 +45,69 @@
 #include "neighbor/neighbor.h"
 
 #ifdef CONFIG_DEBUG_NET_INFO
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/******************************************************************************
+ * Name: neibhbor_dump_address
+ *
+ * Description:
+ *   Dump a data buffer to the SYSLOG.
+ *
+ * Parameters:
+ *   buffer - The buffer to be dumped
+ *   buflen - The length of the buffer in bytes.
+ *
+ * Returned Value:
+ *   None
+ *
+ ******************************************************************************/
+
+static void neibhbor_dump_address(FAR const uint8_t *buffer, unsigned int buflen)
+{
+  char outbuf[16*3 + 9]; /* 6-byte header header + 16 hex bytes +
+                          * 2 space separator + NUL termination */
+  FAR char *ptr;
+  unsigned int i;
+  unsigned int j;
+  unsigned int maxj;
+
+  for (i = 0; i < buflen; i += 16)
+    {
+      if (i == 0)
+        {
+          ninfo("  at: ");
+        }
+      else
+        {
+          ninfo("      ");
+        }
+
+      maxj = 16;
+      if (i + maxj > buflen)
+        {
+          maxj = buflen - i;
+        }
+
+      ptr = outbuf;
+      for (j = 0; j < maxj; j++)
+        {
+          if (j == 8)
+            {
+              *ptr++ = ' ';
+              *ptr++ = ' ';
+            }
+
+          sprintf(ptr, "%02x ", *buffer++);
+          ptr += 3;
+        }
+
+      *ptr = '\0';
+      wlinfo("  %s\n", ptr);
+    }
+}
 
 /****************************************************************************
  * Public Functions
@@ -79,37 +143,20 @@ void neighbor_dumpentry(FAR const char *msg,
   if (neighbor->ne_addr.u.na_lltype == NET_LL_ETHERNET)
 #endif
     {
-      ninfo("  at: %02x:%02x:%02x:%02x:%02x:%02x\n",
-           neighbor->ne_addr.u.na_ethernet.ether_addr_octet[0],
-           neighbor->ne_addr.u.na_ethernet.ether_addr_octet[1],
-           neighbor->ne_addr.u.na_ethernet.ether_addr_octet[2],
-           neighbor->ne_addr.u.na_ethernet.ether_addr_octet[3],
-           neighbor->ne_addr.u.na_ethernet.ether_addr_octet[4],
-           neighbor->ne_addr.u.na_ethernet.ether_addr_octet[5]);
+      neibhbor_dump_address(neighbor->ne_addr.u.na_ethernet.ether_addr_octet,
+                            neighbor->ne_addr.na_llsize);
     }
 #endif
+
 #ifdef CONFIG_NET_6LOWPAN
 #ifdef CONFIG_NET_ETHERNET
   else
 #endif
     {
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-      ninfo("  at: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
-            neighbor->ne_addr.u.na_sixlowpan.u8[0],
-            neighbor->ne_addr.u.na_sixlowpan.u8[1],
-            neighbor->ne_addr.u.na_sixlowpan.u8[2],
-            neighbor->ne_addr.u.na_sixlowpan.u8[3],
-            neighbor->ne_addr.u.na_sixlowpan.u8[4],
-            neighbor->ne_addr.u.na_sixlowpan.u8[5],
-            neighbor->ne_addr.u.na_sixlowpan.u8[6],
-            neighbor->ne_addr.u.na_sixlowpan.u8[7]);
-#else
-      ninfo("  at: %02x:%02x\n",
-            neighbor->ne_addr.u.na_sixlowpan.u8[0],
-            neighbor->ne_addr.u.na_sixlowpan.u8[1]);
+      neibhbor_dump_address(neighbor->ne_addr.u.na_sixlowpan.nm_addr,
+                            neighbor->ne_addr.na_llsize);
     }
-#endif
-#endif
+#endif /* CONFIG_NET_6LOWPAN */
 }
 
 /****************************************************************************

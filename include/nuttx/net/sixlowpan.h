@@ -57,7 +57,6 @@
 #include <nuttx/clock.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/ieee802154.h>
 
 #ifdef CONFIG_NET_6LOWPAN
 
@@ -233,6 +232,32 @@
 #define SIXLOWPAN_FRAG1_HDR_LEN           4
 #define SIXLOWPAN_FRAGN_HDR_LEN           5
 
+/* IEEE 802.15.4 Definitions ************************************************/
+
+/* By default, a 2-byte short address is used for the IEEE802.15.4 MAC
+ * device's link layer address.  If CONFIG_NET_6LOWPAN_EXTENDEDADDR
+ * is selected, then an 8-byte extended address will be used.
+ */
+
+#define NET_6LOWPAN_SADDRSIZE  2
+#define NET_6LOWPAN_EADDRSIZE  8
+
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+#  define NET_6LOWPAN_ADDRSIZE NET_6LOWPAN_EADDRSIZE
+#else
+#  define NET_6LOWPAN_ADDRSIZE NET_6LOWPAN_SADDRSIZE
+#endif
+
+/* This maximum size of an IEEE802.15.4 frame.  Certain, non-standard
+ * devices may exceed this value, however.
+ */
+
+#define SIXLOWPAN_MAC_STDFRAME 127
+
+/* Space for a two byte FCS must be reserved at the end of the frame */
+
+#define SIXLOWPAN_MAC_FCSSIZE  2
+
 /* Address compressibility test macros **************************************/
 
 /* Check whether we can compress the IID in address 'a' to 16 bits.  This is
@@ -300,6 +325,18 @@
  * Public Types
  ****************************************************************************/
 
+/* Different packet radios may have different properties.  If there are
+ * multiple packet radios, then those properties have to be queried at
+ * run time.  This information is provided to the 6LoWPAN network via the
+ * following structure.
+ */
+
+struct sixlowpan_properties_s
+{
+  uint8_t sp_addrlen;                 /* Length of an address */
+  uint8_t sp_pktlen;                  /* Fixed packet/frame size (up to 255) */
+};
+
 /* The device structure for radio network device differs from the standard
  * Ethernet MAC device structure.  The main reason for this difference is
  * that fragmentation must be supported.
@@ -365,9 +402,7 @@
  *    outgoing frames in the via a nested calle to the req_data() method.
  */
 
-struct ieee802154_frame_meta_s; /* Forward reference */
-struct ieee802154_data_ind_s;   /* Forward reference */
-struct iob_s;                   /* Forward reference */
+struct iob_s;  /* Forward reference */
 
 struct sixlowpan_driver_s
 {
@@ -447,7 +482,7 @@ struct sixlowpan_driver_s
 
   /* The source MAC address of the fragments being merged */
 
-  struct sixlowpan_tagaddr_s r_fragsrc;
+  struct netdev_varaddr_s r_fragsrc;
 
   /* That time at which reassembly was started.  If the elapsed time
    * exceeds CONFIG_NET_6LOWPAN_MAXAGE, then the reassembly will
@@ -466,7 +501,8 @@ struct sixlowpan_driver_s
    *
    * Input parameters:
    *   netdev    - The networkd device that will mediate the MAC interface
-   *   meta      - Meta data needed to recreate the MAC header
+   *   meta      - Obfuscated metadata structure needed to recreate the
+   *               radio MAC header
    *
    * Returned Value:
    *   A non-negative MAC headeer length is returned on success; a negated
@@ -475,7 +511,7 @@ struct sixlowpan_driver_s
    **************************************************************************/
 
   CODE int (*r_get_mhrlen)(FAR struct sixlowpan_driver_s *netdev,
-                           FAR const struct ieee802154_frame_meta_s *meta);
+                           FAR const void *meta);
 
   /**************************************************************************
    * Name: r_req_data
@@ -484,8 +520,9 @@ struct sixlowpan_driver_s
    *   Requests the transfer of a list of frames to the MAC.
    *
    * Input parameters:
-   *   netdev    - The networkd device that will mediate the MAC interface
-   *   meta      - Meta data needed to recreate the MAC header
+   *   netdev    - The network device that will mediate the MAC interface
+   *   meta      - Obfuscated metadata structure needed to create the radio
+   *               MAC header
    *   framelist - Head of a list of frames to be transferred.
    *
    * Returned Value:
@@ -495,8 +532,29 @@ struct sixlowpan_driver_s
    **************************************************************************/
 
   CODE int (*r_req_data)(FAR struct sixlowpan_driver_s *netdev,
-                         FAR const struct ieee802154_frame_meta_s *meta,
-                         FAR struct iob_s *framelist);
+                         FAR const void *meta, FAR struct iob_s *framelist);
+
+  /**************************************************************************
+   * Name: r_properties
+   *
+   * Description:
+   *   Different packet radios may have different properties.  If there are
+   *   multiple packet radios, then those properties have to be queried at
+   *   run time.  This information is provided to the 6LoWPAN network via the
+   *   following structure.
+   *
+   * Input parameters:
+   *   netdev     - The network device to be queried
+   *   properties - Location where radio properities will be returned.
+   *
+   * Returned Value:
+   *   Zero (OK) returned on success; a negated errno value is returned on
+   *   any failure.
+   *
+   **************************************************************************/
+
+  CODE int (*r_properties)(FAR struct sixlowpan_driver_s *netdev,
+                           FAR struct sixlowpan_properties_s *properties);
 };
 
 /****************************************************************************
@@ -554,9 +612,15 @@ struct sixlowpan_driver_s
  *   framelist - The head of an incoming list of frames.  Normally this
  *               would be a single frame.  A list may be provided if
  *               appropriate, however.
- *   ind       - Meta data characterizing the received packet.  If there are
- *               multilple frames in the list, this meta data must apply to
- *               all of the frames!
+ *   metadata  - Meta data characterizing the received packet.  The specific
+ *               type of this metadata is obfuscated and depends on the
+ *               type of the radio driver.  This could be be either
+ *               (1) struct ieee802154_data_ind_s for an IEEE 802.15.4
+ *               radio, or (2) struct pktradio_metadata_s for a non-standard
+ *               packet radio.
+ *
+ *               If there are multilple frames in the list, this metadata
+ *               must apply to all of the frames in the list.
  *
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.
@@ -564,8 +628,7 @@ struct sixlowpan_driver_s
  ****************************************************************************/
 
 int sixlowpan_input(FAR struct sixlowpan_driver_s *radio,
-                    FAR struct iob_s *framelist,
-                    FAR const struct ieee802154_data_ind_s *ind);
+                    FAR struct iob_s *framelist, FAR const void *metadata);
 
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* __INCLUDE_NUTTX_NET_SIXLOWPAN_H */

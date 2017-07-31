@@ -194,6 +194,147 @@ static uint16_t sixlowpan_protosize(FAR const struct ipv6_hdr_s *ipv6hdr,
 }
 
 /****************************************************************************
+ * Name: sixlowpan_ieee802154_metadata
+ *
+ * Description:
+ *   Create the meta data that describes the IEEE 802.15.4 MAC header.
+ *
+ * Input Parameters:
+ *   radio   - The radio network driver instance
+ *   destmac - The IEEE802.15.4 MAC address of the destination
+ *   meta    - Location to return the final metadata.
+ *
+ * Returned value
+ *   OK is returned on success; Othewise a negated errno value is returned.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_WIRELESS_IEEE802154
+static int sixlowpan_ieee802154_metadata(FAR struct sixlowpan_driver_s *radio,
+                                         FAR const struct netdev_varaddr_s *destmac,
+                                         FAR union sixlowpan_metadata_u *meta)
+{
+  struct ieee802_txmetadata_s pktmeta;
+  int ret;
+
+  /* Reset frame meta data */
+
+  memset(&pktmeta, 0, sizeof(struct ieee802_txmetadata_s));
+  pktmeta.xmits = CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS;
+
+  /* Set stream mode for all TCP packets, except FIN packets. */
+
+#if 0 /* Currently the frame type is always data */
+  if (ipv6->proto == IP_PROTO_TCP)
+    {
+      FAR const struct tcp_hdr_s *tcp =
+        &((FAR const struct ipv6tcp_hdr_s *)ipv6)->tcp;
+
+      if ((tcp->flags & TCP_FIN) == 0 &&
+          (tcp->flags & TCP_CTL) != TCP_ACK)
+        {
+          pktmeta.type = FRAME_ATTR_TYPE_STREAM;
+        }
+      else if ((tcp->flags & TCP_FIN) == TCP_FIN)
+        {
+          pktmeta.type = FRAME_ATTR_TYPE_STREAM_END;
+        }
+    }
+#endif
+
+  /* Set the source and destination address.  The source MAC address
+   * is a fixed size, determined by a configuration setting.  The
+   * destination MAC address many be either short or extended.
+   */
+
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+  pktmeta.sextended = TRUE;
+  sixlowpan_eaddrcopy(pktmeta.source.nm_addr,
+                      &radio->r_dev.d_mac.sixlowpan.nv_addr);
+#else
+  sixlowpan_saddrcopy(pktmeta.source.nm_addr,
+                      &radio->r_dev.d_mac.sixlowpan.nv_addr);
+#endif
+
+  /* Copy the destination node address into the meta data */
+
+  if (destmac->nv_addrlen == NET_6LOWPAN_EADDRSIZE)
+    {
+      pktmeta.dextended = TRUE;
+      sixlowpan_eaddrcopy(pktmeta.dest.nm_addr, destmac->nv_addr);
+    }
+  else
+    {
+      DEBUGASSERT(destmac->nv_addrlen == NET_6LOWPAN_SADDRSIZE);
+      sixlowpan_saddrcopy(pktmeta.dest.nm_addr, destmac->nv_addr);
+    }
+
+  /* Get the destination PAN ID.
+   *
+   * REVISIT: For now I am assuming that the source and destination
+   * PAN IDs are the same.
+   */
+
+  (void)sixlowpan_src_panid(radio, pktmeta.dpanid);
+
+  /* Based on the collected attributes and addresses, construct the MAC meta
+   * data structure that we need to interface with the IEEE802.15.4 MAC (we
+   * will update the MSDU payload size when the IOB has been setup).
+   */
+
+  ret = sixlowpan_meta_data(radio, &pktmeta, &meta->ieee802154, 0);
+  if (ret < 0)
+    {
+      nerr("ERROR: sixlowpan_meta_data() failed: %d\n", ret);
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: sixlowpan_pktradio_metadata
+ *
+ * Description:
+ *   Create the meta data that describes the MAC header for a generic radio.
+ *
+ * Input Parameters:
+ *   radio   - The radio network driver instance
+ *   destmac - The radio-specific MAC address of the destination
+ *   meta    - Location to return the final metadata.
+ *
+ * Returned value
+ *   OK is returned on success; Othewise a negated errno value is returned.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_WIRELESS_PKTRADIO
+static int sixlowpan_pktradio_metadata(FAR struct sixlowpan_driver_s *radio,
+                                       FAR const struct netdev_varaddr_s *destmac,
+                                       FAR union sixlowpan_metadata_u *meta)
+{
+  FAR struct pktradio_metadata_s *pktmeta = &meta->pktradio;
+
+  /* Reset the meta data */
+
+  memset(&pktmeta, 0, sizeof(struct pktradio_metadata_s));
+
+  /* Set the source address */
+
+  pktmeta->pm_src.pa_addrlen = radio->r_dev.d_mac.sixlowpan.nv_addrlen;
+  memcpy(pktmeta->pm_src.pa_addr,
+         radio->r_dev.d_mac.sixlowpan.nv_addr,
+         radio->r_dev.d_mac.sixlowpan.nv_addrlen);
+
+  /* Set the destination address */
+
+  pktmeta->pm_dest.pa_addrlen = destmac->nv_addrlen;
+  memcpy(pktmeta->pm_dest.pa_addr, destmac->nv_addr, destmac->nv_addrlen);
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -201,9 +342,9 @@ static uint16_t sixlowpan_protosize(FAR const struct ipv6_hdr_s *ipv6hdr,
  * Name: sixlowpan_queue_frames
  *
  * Description:
- *   Process an outgoing UDP or TCP packet.  This function is called from
- *   send interrupt logic when a TX poll is received.  It formats the
- *   list of frames to be sent by the IEEE802.15.4 MAC driver.
+ *   Process an outgoing UDP, TCP, or ICMPv6 packet.  This function is
+ *   called from send interrupt logic when a TX poll is received.  It
+ *   formats the list of frames to be sent by the IEEE802.15.4 MAC driver.
  *
  *   The payload data is in the caller 'buf' and is of length 'buflen'.
  *   Compressed headers will be added and if necessary the packet is
@@ -232,14 +373,13 @@ static uint16_t sixlowpan_protosize(FAR const struct ipv6_hdr_s *ipv6hdr,
 int sixlowpan_queue_frames(FAR struct sixlowpan_driver_s *radio,
                            FAR const struct ipv6_hdr_s *ipv6,
                            FAR const void *buf, size_t buflen,
-                           FAR const struct sixlowpan_tagaddr_s *destmac)
+                           FAR const struct netdev_varaddr_s *destmac)
 {
-  struct packet_metadata_s pktmeta;
-  struct ieee802154_frame_meta_s meta;
+  union sixlowpan_metadata_u meta;
   FAR struct iob_s *iob;
   FAR uint8_t *fptr;
   int framer_hdrlen;
-  struct sixlowpan_tagaddr_s bcastmac;
+  struct netdev_varaddr_s bcastmac;
   uint16_t pktlen;
   uint16_t paysize;
 #ifdef CONFIG_NET_6LOWPAN_FRAG
@@ -258,38 +398,13 @@ int sixlowpan_queue_frames(FAR struct sixlowpan_driver_s *radio,
   g_frame_hdrlen  = 0;
   protosize       = 0;
 
-  /* Reset frame meta data */
-
-  memset(&pktmeta, 0, sizeof(struct packet_metadata_s));
-  pktmeta.xmits = CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS;
-
-  /* Set stream mode for all TCP packets, except FIN packets. */
-
-#if 0 /* Currently the frame type is always data */
-  if (ipv6->proto == IP_PROTO_TCP)
-    {
-      FAR const struct tcp_hdr_s *tcp =
-        &((FAR const struct ipv6tcp_hdr_s *)ipv6)->tcp;
-
-      if ((tcp->flags & TCP_FIN) == 0 &&
-          (tcp->flags & TCP_CTL) != TCP_ACK)
-        {
-          pktmeta.type = FRAME_ATTR_TYPE_STREAM;
-        }
-      else if ((tcp->flags & TCP_FIN) == TCP_FIN)
-        {
-          pktmeta.type = FRAME_ATTR_TYPE_STREAM_END;
-        }
-    }
-#endif
-
   /* The destination address will be tagged to each outbound packet. If the
    * argument destmac is NULL, we are sending a broadcast packet.
    */
 
   if (destmac == NULL)
     {
-      memset(&bcastmac, 0, sizeof(struct sixlowpan_tagaddr_s));
+      memset(&bcastmac, 0, sizeof(struct netdev_varaddr_s));
       destmac = &bcastmac;
     }
 
@@ -310,50 +425,24 @@ int sixlowpan_queue_frames(FAR struct sixlowpan_driver_s *radio,
 
   ninfo("Sending packet length %d\n", buflen);
 
-  /* Set the source and destination address.  The source MAC address
-   * is a fixed size, determined by a configuration setting.  The
-   * destination MAC address many be either short or extended.
-   */
+  /* Get the metadata that describes the MAC header on the packet */
 
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  pktmeta.sextended = TRUE;
-  sixlowpan_eaddrcopy(pktmeta.source.eaddr.u8,
-                      &radio->r_dev.d_mac.ieee802154);
-#else
-  sixlowpan_saddrcopy(pktmeta.source.saddr.u8,
-                      &radio->r_dev.d_mac.ieee802154);
+#ifdef CONFIG_WIRELESS_IEEE802154
+#ifdef CONFIG_WIRELESS_PKTRADIO
+  if (radio->r_dev.d_lltype == NET_LL_IEEE802154)
 #endif
-
-  /* Copy the destination node address into the meta data */
-
-  if (destmac->extended)
     {
-      pktmeta.dextended = TRUE;
-      sixlowpan_eaddrcopy(pktmeta.dest.eaddr.u8, destmac->u.eaddr.u8);
+      ret = sixlowpan_ieee802154_metadata(radio, destmac, &meta);
     }
+#endif
+#ifdef CONFIG_WIRELESS_PKTRADIO
+#ifdef CONFIG_WIRELESS_IEEE802154
   else
+#endif
     {
-      sixlowpan_saddrcopy(pktmeta.dest.saddr.u8, destmac->u.saddr.u8);
+      ret = sixlowpan_pktradio_metadata(radio, destmac, &meta);
     }
-
-  /* Get the destination PAN ID.
-   *
-   * REVISIT: For now I am assuming that the source and destination
-   * PAN IDs are the same.
-   */
-
-  (void)sixlowpan_src_panid(radio, pktmeta.dpanid);
-
-  /* Based on the collected attributes and addresses, construct the MAC meta
-   * data structure that we need to interface with the IEEE802.15.4 MAC (we
-   * will update the MSDU payload size when the IOB has been setup).
-   */
-
-  ret = sixlowpan_meta_data(radio, &pktmeta, &meta, 0);
-  if (ret < 0)
-    {
-      nerr("ERROR: sixlowpan_meta_data() failed: %d\n", ret);
-    }
+#endif
 
   /* Pre-calculate frame header length. */
 

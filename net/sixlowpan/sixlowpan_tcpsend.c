@@ -94,7 +94,7 @@ struct sixlowpan_send_s
   int                          s_result;  /* The result of the transfer */
   uint16_t                     s_timeout; /* Send timeout in deciseconds */
   systime_t                    s_time;    /* Last send time for determining timeout */
-  FAR const struct sixlowpan_tagaddr_s *s_destmac; /* Destination MAC address */
+  FAR const struct netdev_varaddr_s *s_destmac; /* Destination MAC address */
   FAR const uint8_t           *s_buf;     /* Data to send */
   size_t                       s_buflen;  /* Length of data in buf */
   ssize_t                      s_sent;    /* The number of bytes sent */
@@ -639,7 +639,7 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
                                  FAR struct net_driver_s *dev,
                                  FAR struct tcp_conn_s *conn,
                                  FAR const uint8_t *buf, size_t len,
-                                 FAR const struct sixlowpan_tagaddr_s *destmac,
+                                 FAR const struct netdev_varaddr_s *destmac,
                                  uint16_t timeout)
 {
   struct sixlowpan_send_s sinfo;
@@ -756,7 +756,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 {
   FAR struct tcp_conn_s *conn;
   FAR struct net_driver_s *dev;
-  struct sixlowpan_tagaddr_s destmac;
+  struct netdev_varaddr_s destmac;
   uint16_t timeout;
   int ret;
 
@@ -957,7 +957,7 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
         }
       else
         {
-          struct sixlowpan_tagaddr_s destmac;
+          struct netdev_varaddr_s destmac;
           FAR uint8_t *buf;
           uint16_t hdrlen;
           uint16_t buflen;

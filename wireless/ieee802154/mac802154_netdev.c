@@ -148,41 +148,14 @@ static void macnet_notify(FAR struct mac802154_maccb_s *maccb,
 static int  macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
                            FAR struct ieee802154_data_ind_s *ind);
 
-/* Asynchronous confirmations to requests */
+/* Asynchronous confirmations to requests (most not implemented) */
 
 static void macnet_conf_data(FAR struct macnet_driver_s *priv,
              FAR const struct ieee802154_data_conf_s *conf);
-static void macnet_conf_associate(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_assoc_conf_s *conf);
-static void macnet_conf_disassociate(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_disassoc_conf_s *conf);
-static void macnet_conf_gts(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_gts_conf_s *conf);
-static void macnet_conf_rxenable(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_rxenable_conf_s *conf);
-static void macnet_conf_scan(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_scan_conf_s *conf);
-static void macnet_conf_start(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_start_conf_s *conf);
-static void macnet_conf_poll(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_poll_conf_s *conf);
 
-/* Asynchronous event indications, replied to synchronously with responses */
-
-static void macnet_ind_associate(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_assoc_ind_s *conf);
-static void macnet_ind_disassociate(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_disassoc_ind_s *conf);
-static void macnet_ind_beacon(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_beacon_ind_s *conf);
-static void macnet_ind_gts(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_gts_ind_s *conf);
-static void macnet_ind_orphan(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_orphan_ind_s *conf);
-static void macnet_ind_commstatus(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_commstatus_ind_s *conf);
-static void macnet_ind_syncloss(FAR struct macnet_driver_s *priv,
-             FAR struct ieee802154_syncloss_ind_s *conf);
+/* Asynchronous event indications, replied to synchronously with responses.
+ * (none are implemented).
+ */
 
 /* Network interface support ************************************************/
 /* Common TX logic */
@@ -212,10 +185,11 @@ static int  macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
               unsigned long arg);
 #endif
 static int macnet_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
-              FAR const struct ieee802154_frame_meta_s *meta);
+              FAR const void *meta);
 static int macnet_req_data(FAR struct sixlowpan_driver_s *netdev,
-              FAR const struct ieee802154_frame_meta_s *meta,
-              FAR struct iob_s *framelist);
+              FAR const void *meta, FAR struct iob_s *framelist);
+static int macnet_properties(FAR struct sixlowpan_driver_s *netdev,
+              FAR struct sixlowpan_properties_s *properties);
 
 /****************************************************************************
  * Private Functions
@@ -261,7 +235,8 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
       /* Set the MAC address as the eaddr */
 
       eaddr = arg.u.getreq.attrval.mac.eaddr;
-      IEEE802154_EADDRCOPY(dev->d_mac.ieee802154.u8, eaddr);
+      IEEE802154_EADDRCOPY(dev->d_mac.sixlowpan.nv_addr, eaddr);
+      dev->d_mac.sixlowpan.nv_addrlen = NET_6LOWPAN_EADDRSIZE;
 
       /* Set the IP address based on the eaddr */
 
@@ -296,7 +271,8 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
       /* Set the MAC address as the saddr */
 
       saddr = arg.u.getreq.attrval.mac.saddr;
-      IEEE802154_SADDRCOPY(dev->d_mac.ieee802154.u8, saddr);
+      IEEE802154_SADDRCOPY(dev->d_mac.sixlowpan.nv_addr, saddr);
+      dev->d_mac.sixlowpan.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
 
       /* Set the IP address based on the saddr */
 
@@ -442,7 +418,7 @@ static int macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
 
   /* Transfer the frame to the network logic */
 
-  sixlowpan_input(&priv->md_dev, iob, ind);
+  sixlowpan_input(&priv->md_dev, iob, (FAR void *)ind);
 
   /* sixlowpan_input() will free the IOB, but we must free the struct
    * ieee802154_data_ind_s container here.
@@ -463,197 +439,6 @@ static int macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
 static void macnet_conf_data(FAR struct macnet_driver_s *priv,
                              FAR const struct ieee802154_data_conf_s *conf)
 {
-
-}
-
-/****************************************************************************
- * Name: macnet_conf_associate
- *
- * Description:
- *   Association request completed
- *
- ****************************************************************************/
-
-static void macnet_conf_associate(FAR struct macnet_driver_s *priv,
-                                  FAR struct ieee802154_assoc_conf_s *conf)
-{
-
-}
-
-/****************************************************************************
- * Name: macnet_conf_disassociate
- *
- * Description:
- *   Disassociation request completed
- *
- ****************************************************************************/
-
-static void macnet_conf_disassociate(FAR struct macnet_driver_s *priv,
-                                     FAR struct ieee802154_disassoc_conf_s *conf)
-{
-
-}
-
-/****************************************************************************
- * Name: macnet_conf_gts
- *
- * Description:
- *   GTS management completed
- *
- ****************************************************************************/
-
-static void macnet_conf_gts(FAR struct macnet_driver_s *priv,
-                            FAR struct ieee802154_gts_conf_s *conf)
-{
-
-}
-
-/****************************************************************************
- * Name: macnet_conf_rxenable
- *
- * Description:
- *
- ****************************************************************************/
-
-static void macnet_conf_rxenable(FAR struct macnet_driver_s *priv,
-                                 FAR struct ieee802154_rxenable_conf_s *conf)
-{
-
-}
-
-/****************************************************************************
- * Name: macnet_conf_scan
- *
- * Description:
- *
- ****************************************************************************/
-
-static void macnet_conf_scan(FAR struct macnet_driver_s *priv,
-                             FAR struct ieee802154_scan_conf_s *conf)
-{
-
-}
-
-/****************************************************************************
- * Name: macnet_conf_start
- *
- * Description:
- *
- ****************************************************************************/
-
-static void macnet_conf_start(FAR struct macnet_driver_s *priv,
-                              FAR struct ieee802154_start_conf_s *conf)
-{
-
-}
-
-/****************************************************************************
- * Name: macnet_conf_poll
- *
- * Description:
- *
- ****************************************************************************/
-
-static void macnet_conf_poll(FAR struct macnet_driver_s *priv,
-                             FAR struct ieee802154_poll_conf_s *conf)
-{
-
-}
-
-/****************************************************************************
- * Name: macnet_ind_associate
- *
- * Description:
- *   Association request received
- *
- ****************************************************************************/
-
-static void macnet_ind_associate(FAR struct macnet_driver_s *priv,
-                                 FAR struct ieee802154_assoc_ind_s *ind)
-{
-
-}
-
-/****************************************************************************
- * Name: macnet_ind_disassociate
- *
- * Description:
- *   Disassociation request received
- *
- ****************************************************************************/
-
-static void macnet_ind_disassociate(FAR struct macnet_driver_s *priv,
-                                    FAR struct ieee802154_disassoc_ind_s *ind)
-{
-
-}
-
-/****************************************************************************
- * Name: macnet_ind_beacon
- *
- * Description:
- *    Beacon notification
- *
- ****************************************************************************/
-
-static void macnet_ind_beacon(FAR struct macnet_driver_s *priv,
-                                    FAR struct ieee802154_beacon_ind_s *ind)
-{
-
-}
-
-/****************************************************************************
- * Name: macnet_ind_gts
- *
- * Description:
- *   GTS management request received
- *
- ****************************************************************************/
-
-static void macnet_ind_gts(FAR struct macnet_driver_s *priv,
-                           FAR struct ieee802154_gts_ind_s *ind)
-{
-
-}
-
-/****************************************************************************
- * Name: macnet_ind_orphan
- *
- * Description:
- *   Orphan device detected
- *
- ****************************************************************************/
-
-static void macnet_ind_orphan(FAR struct macnet_driver_s *priv,
-                              FAR struct ieee802154_orphan_ind_s *ind)
-{
-
-}
-
-/****************************************************************************
- * Name: macnet_ind_commstatus
- *
- * Description:
- *
- ****************************************************************************/
-
-static void macnet_ind_commstatus(FAR struct macnet_driver_s *priv,
-                                  FAR struct ieee802154_commstatus_ind_s *ind)
-{
-
-}
-
-/****************************************************************************
- * Name: macnet_ind_syncloss
- *
- * Description:
- *
- ****************************************************************************/
-
-static void macnet_ind_syncloss(FAR struct macnet_driver_s *priv,
-                                FAR struct ieee802154_syncloss_ind_s *ind)
-{
-
 }
 
 /****************************************************************************
@@ -790,13 +575,13 @@ static int macnet_ifup(FAR struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
       wlinfo("             Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
-             dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1],
-             dev->d_mac.ieee802154.u8[2], dev->d_mac.ieee802154.u8[3],
-             dev->d_mac.ieee802154.u8[4], dev->d_mac.ieee802154.u8[5],
-             dev->d_mac.ieee802154.u8[6], dev->d_mac.ieee802154.u8[7]);
+             dev->d_mac.sixlowpan.nv_addr[0], dev->d_mac.sixlowpan.nv_addr[1],
+             dev->d_mac.sixlowpan.nv_addr[2], dev->d_mac.sixlowpan.nv_addr[3],
+             dev->d_mac.sixlowpan.nv_addr[4], dev->d_mac.sixlowpan.nv_addr[5],
+             dev->d_mac.sixlowpan.nv_addr[6], dev->d_mac.sixlowpan.nv_addr[7]);
 #else
       wlinfo("             Node: %02x:%02x\n",
-             dev->d_mac.ieee802154.u8[0], dev->d_mac.ieee802154.u8[1]);
+             dev->d_mac.sixlowpan.nv_addr[0], dev->d_mac.sixlowpan.nv_addr[1]);
 #endif
 
       /* Set and activate a timer process */
@@ -1062,7 +847,8 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
  *
  * Input parameters:
  *   netdev    - The networkd device that will mediate the MAC interface
- *   meta      - Meta data needed to recreate the MAC header
+ *   meta      - Obfuscated metadata structure needed to create the radio
+ *               MAC header
  *
  * Returned Value:
  *   A non-negative MAC headeer length is returned on success; a negated
@@ -1071,14 +857,18 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
  ****************************************************************************/
 
 static int macnet_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
-                             FAR const struct ieee802154_frame_meta_s *meta)
+                             FAR const void *meta)
 {
   FAR struct macnet_driver_s *priv;
+  FAR const struct ieee802154_frame_meta_s *pktmeta;
 
-  DEBUGASSERT(netdev != NULL && netdev->r_dev.d_private != NULL && meta != NULL);
+  DEBUGASSERT(netdev != NULL && netdev->r_dev.d_private != NULL);
   priv = (FAR struct macnet_driver_s *)netdev->r_dev.d_private;
 
-  return mac802154_get_mhrlen(priv->md_mac, meta);
+  DEBUGASSERT(meta != NULL);
+  pktmeta = (FAR const struct ieee802154_frame_meta_s *)meta;
+
+  return mac802154_get_mhrlen(priv->md_mac, pktmeta);
 }
 
 /****************************************************************************
@@ -1089,7 +879,8 @@ static int macnet_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
  *
  * Input parameters:
  *   netdev    - The networkd device that will mediate the MAC interface
- *   meta      - Meta data needed to recreate the MAC header
+ *   meta      - Obfuscated metadata structure needed to create the radio
+ *               MAC header
  *   framelist - Head of a list of frames to be transferred.
  *
  * Returned Value:
@@ -1099,10 +890,10 @@ static int macnet_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
  ****************************************************************************/
 
 static int macnet_req_data(FAR struct sixlowpan_driver_s *netdev,
-                           FAR const struct ieee802154_frame_meta_s *meta,
-                           FAR struct iob_s *framelist)
+                           FAR const void *meta, FAR struct iob_s *framelist)
 {
   FAR struct macnet_driver_s *priv;
+  FAR const struct ieee802154_frame_meta_s *pktmeta;
   FAR struct iob_s *iob;
   int ret;
 
@@ -1112,6 +903,7 @@ static int macnet_req_data(FAR struct sixlowpan_driver_s *netdev,
   priv = (FAR struct macnet_driver_s *)netdev->r_dev.d_private;
 
   DEBUGASSERT(meta != NULL && framelist != NULL);
+  pktmeta = (FAR const struct ieee802154_frame_meta_s *)meta;
 
   /* Add the incoming list of frames to the MAC's outgoing queue */
 
@@ -1133,7 +925,7 @@ static int macnet_req_data(FAR struct sixlowpan_driver_s *netdev,
 
       do
         {
-          ret = mac802154_req_data(priv->md_mac, meta, iob);
+          ret = mac802154_req_data(priv->md_mac, pktmeta, iob);
         }
       while (ret == -EINTR);
 
@@ -1157,6 +949,35 @@ static int macnet_req_data(FAR struct sixlowpan_driver_s *netdev,
       NETDEV_TXDONE(&priv->md_dev.r_dev);
     }
 
+  return OK;
+}
+
+/****************************************************************************
+ * Name: macnet_properties
+ *
+ * Description:
+ *   Different packet radios may have different properties.  If there are
+ *   multiple packet radios, then those properties have to be queried at
+ *   run time.  This information is provided to the 6LoWPAN network via the
+ *   following structure.
+ *
+ * Input parameters:
+ *   netdev     - The network device to be queried
+ *   properties - Location where radio properities will be returned.
+ *
+ * Returned Value:
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+static int macnet_properties(FAR struct sixlowpan_driver_s *netdev,
+                             FAR struct sixlowpan_properties_s *properties)
+{
+  DEBUGASSERT(netdev != NULL && properties != NULL);
+
+  properties->sp_addrlen = NET_6LOWPAN_ADDRSIZE;        /* Length of an address */
+  properties->sp_pktlen  = CONFIG_NET_6LOWPAN_FRAMELEN; /* Fixed frame length */
   return OK;
 }
 
@@ -1244,8 +1065,9 @@ int mac802154netdev_register(MACHANDLE mac)
 
   /* Initialize the Network frame-related callbacks */
 
-  radio->r_get_mhrlen = macnet_get_mhrlen; /* Get MAC header length */
-  radio->r_req_data   = macnet_req_data;   /* Enqueue frame for transmission */
+  radio->r_get_mhrlen = macnet_get_mhrlen;  /* Get MAC header length */
+  radio->r_req_data   = macnet_req_data;    /* Enqueue frame for transmission */
+  radio->r_properties = macnet_properties;  /* Return radio properies */
 
   /* Initialize the MAC callbacks */
 

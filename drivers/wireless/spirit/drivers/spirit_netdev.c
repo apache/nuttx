@@ -129,10 +129,10 @@ struct spirit_driver_s
   struct sixlowpan_driver_s        radio;      /* Interface understood by the network */
   struct spirit_library_s          spirit;    /* Spirit library state */
   FAR const struct spirit_lower_s *lower;     /* Low-level MCU-specific support */
-  FAR struct iob_s                *txhead;    /* Head of pending TX transfers */
-  FAR struct iob_s                *txtail;    /* Tail of pending TX transfers */
-  FAR struct iob_s                *rxhead;    /* Head of completed RX transfers */
-  FAR struct iob_s                *rxtail;    /* Tail of completed RX transfers */
+  FAR struct pktradio_metadata_s  *txhead;    /* Head of pending TX transfers */
+  FAR struct pktradio_metadata_s  *txtail;    /* Tail of pending TX transfers */
+  FAR struct pktradio_metadata_s  *rxhead;    /* Head of completed RX transfers */
+  FAR struct pktradio_metadata_s  *rxtail;    /* Tail of completed RX transfers */
   struct work_s                    hpwork;    /* Interrupt continuation work queue support */
   struct work_s                    lpwork;    /* Net poll work queue support */
   WDOG_ID                          txpoll;    /* TX poll timer */
@@ -189,26 +189,24 @@ static int  spirit_ifdown(FAR struct net_driver_s *dev);
 static void spirit_txavail_work(FAR void *arg);
 static int  spirit_txavail(FAR struct net_driver_s *dev);
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#ifdef CONFIG_NET_IGMP
 static int  spirit_addmac(FAR struct net_driver_s *dev,
               FAR const uint8_t *mac);
-#ifdef CONFIG_NET_IGMP
 static int  spirit_rmmac(FAR struct net_driver_s *dev,
               FAR const uint8_t *mac);
 #endif
-#ifdef CONFIG_NET_ICMPv6
-static void spirit_ipv6multicast(FAR struct spirit_driver_s *priv);
-#endif
-#endif
+
 #ifdef CONFIG_NETDEV_IOCTL
 static int  spirit_ioctl(FAR struct net_driver_s *dev, int cmd,
             unsigned long arg);
 #endif
+
 static int spirit_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
-            FAR const struct ieee802154_frame_meta_s *meta);
+            FAR const void *meta);
 static int spirit_req_data(FAR struct sixlowpan_driver_s *netdev,
-            FAR const struct ieee802154_frame_meta_s *meta,
-            FAR struct iob_s *framelist);
+            FAR const void *meta, FAR struct iob_s *framelist);
+static int spirit_properties(FAR struct sixlowpan_driver_s *netdev,
+            FAR struct sixlowpan_properties_s *properties);
 
 /* Initialization */
 
@@ -458,6 +456,7 @@ errout_with_irqdisable:
 static int spirit_transmit(FAR struct spirit_driver_s *priv)
 {
   FAR struct spirit_library_s *spirit = &priv->spirit;
+  FAR struct pktradio_metadata_s *pktmeta;
   FAR struct iob_s *iob;
   int ret;
 
@@ -468,15 +467,20 @@ static int spirit_transmit(FAR struct spirit_driver_s *priv)
   spirit_lock(priv);
   while (priv->txhead != NULL && priv->state == DRIVER_STATE_IDLE)
     {
-      /* Remove the IOB from the head of the TX queue */
+      /* Remove the contained IOB from the head of the TX queue */
 
-      iob          = priv->txhead;
-      priv->txhead = iob->io_flink;
+      pktmeta      = priv->txhead;
+      priv->txhead = pktmeta->pm_flink;
 
       if (priv->txhead == NULL)
         {
           priv->txtail = NULL;
         }
+
+      /* Remove the IOB from metadata container */
+
+      iob             = pktmeta->pm_iob;
+      pktmeta->pm_iob = NULL;
 
       DEBUGASSERT(iob != NULL);
 
@@ -518,14 +522,13 @@ static int spirit_transmit(FAR struct spirit_driver_s *priv)
 #ifndef CONFIG_SPIRIT_PROMISCOUS
       /* Set the destination address */
 
-#warning Missing logic
-#if 0
-      ret = spirit_pktcommon_set_txdestaddr(spirit, txdestaddr);
+      DEBUGASSERT(pktmeta->pm_dest.pa_addrlen == 1);
+      ret = spirit_pktcommon_set_txdestaddr(spirit,
+              pktmeta->pm_dest.pa_addr[0]);
       if (ret < 0)
         {
           goto errout_with_iob;
         }
-#endif
 #endif
 
       /* Enable CSMA */
@@ -678,13 +681,65 @@ static int spirit_txpoll_callback(FAR struct net_driver_s *dev)
 static void sprit_receive_work(FAR void *arg)
 {
   FAR struct spirit_driver_s *priv = (FAR struct spirit_driver_s *)arg;
+  FAR struct pktradio_metadata_s *pktmeta;
+  FAR struct iob_s *iob;
+  int ret;
 
   DEBUGASSERT(priv != NULL);
 
-  net_lock();
-#warning Missing logic
-  //spirit_receive(priv);
-  net_unlock();
+  /* We need to have exclusive access to the RX queue */
+
+  spirit_lock(priv);
+  while (priv->rxhead != NULL)
+    {
+      /* Remove the contained IOB from the RX queue */
+
+        pktmeta           = priv->rxhead;
+        priv->rxhead      = pktmeta->pm_flink;
+        pktmeta->pm_flink = NULL;
+
+        /* Did the RX queue become empty? */
+
+        if (priv->rxhead == NULL)
+          {
+            priv->rxtail = NULL;
+          }
+
+        spirit_unlock(priv);
+
+       /* Remove the IOB from the container */
+
+       iob             = pktmeta->pm_iob;
+       pktmeta->pm_iob = NULL;
+
+       /* Send the next frame to the network */
+
+        wlinfo("Send frame %p to the network:  Offset=%u Length=%u\n",
+               iob, iob->io_offset, iob->io_len);
+
+        net_lock();
+        ret = sixlowpan_input(&priv->radio, iob, (FAR void *)pktmeta);
+        if (ret < 0)
+          {
+            nerr("ERROR: sixlowpan_input returned %d\n", ret);
+            NETDEV_RXERRORS(&priv->radio.r_dev);
+            NETDEV_ERRORS(&priv->radio.r_dev);
+          }
+
+        net_unlock();
+
+        /* sixlowpan_input() will free the IOB, but we must free the struct
+         * pktradio_metadata_s container here.
+         */
+
+        pktradio_metadata_free(pktmeta);
+
+        /* Get exclusive access as needed at the top of the loop */
+
+       spirit_lock(priv);
+    }
+
+  spirit_unlock(priv);
 }
 
 /****************************************************************************
@@ -747,6 +802,7 @@ static void spirit_interrupt_work(FAR void *arg)
 
       priv->state = DRIVER_STATE_IDLE;
       NETDEV_RXERRORS(&priv->radio.r_dev);
+      NETDEV_ERRORS(&priv->radio.r_dev);
 
       /* Send any pending packets */
 
@@ -761,6 +817,7 @@ static void spirit_interrupt_work(FAR void *arg)
 
       priv->state = DRIVER_STATE_IDLE;
       NETDEV_TXERRORS(&priv->radio.r_dev);
+      NETDEV_ERRORS(&priv->radio.r_dev);
 
       /* Send any pending packets */
 
@@ -810,8 +867,11 @@ static void spirit_interrupt_work(FAR void *arg)
 
   if (irqstatus.IRQ_RX_DATA_READY != 0)
     {
+      FAR struct pktradio_metadata_s *pktmeta;
       FAR struct iob_s *iob;
       uint8_t count;
+
+      NETDEV_RXPACKETS(&priv->radio.r_dev);
 
       /* Check the packet size */
 
@@ -821,10 +881,7 @@ static void spirit_interrupt_work(FAR void *arg)
           wlwarn("WARNING:  Packet too large... dropping\n");
           DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
           priv->state = DRIVER_STATE_IDLE;
-
-          /* Send any pending packets */
-
-          spirit_schedule_transmit_work(priv);
+          NETDEV_RXDROPPED(&priv->radio.r_dev);
         }
       else
         {
@@ -836,7 +893,7 @@ static void spirit_interrupt_work(FAR void *arg)
           iob = iob_alloc(0);
           if (iob == NULL)
             {
-              wlerr("ERROR:  Packet too large... dropping\n");
+              wlerr("ERROR: Failed to allocate IOB... dropping\n");
 
               DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
               priv->state = DRIVER_STATE_IDLE;
@@ -848,42 +905,67 @@ static void spirit_interrupt_work(FAR void *arg)
             }
           else
             {
-
               /* Read the packet into the I/O buffer */
 
               DEBUGVERIFY(spirit_fifo_read(spirit, iob->io_data, count));
-              iob->io_len = spirit_pktbasic_get_rxpktlen(spirit);
+              iob->io_len    = spirit_pktbasic_get_rxpktlen(spirit);
+              iob->io_offset = 0;
+              iob->io_pktlen = iob->io_len;
+              iob->io_flink  = NULL;
 
               DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
               priv->state = DRIVER_STATE_IDLE;
 
-              NETDEV_RXPACKETS(&priv->radio.r_dev);
-
-              /* Add the IO buffer to the tail of the completed RX transfers */
-
-              iob->io_flink = priv->rxtail;
-              priv->rxtail  = iob;
-
-              if (priv->rxhead == NULL)
-                {
-                  priv->rxhead = iob;
-                }
-
               /* Create the packet meta data and forward to the network.  This
                * must be done on the LP work queue with the network lockes.
                */
-#warning Missing logic
 
-              /* Forward the packet to the network.  This must be done on the
-               * LP work queue with the network locked.
-               */
+               pktmeta = pktradio_metadata_allocate();
+               if (pktmeta == NULL)
+                 {
+                   wlerr("ERROR: Failed to allocate metadata... dropping\n");
+                   NETDEV_RXDROPPED(&priv->radio.r_dev);
+                   iob_free(iob);
+                 }
+               else
+                 {
+                   /* Get the packet meta data.  This consists only of the
+                    * source and destination addresses.
+                    */
 
-              spirit_schedule_receive_work(priv);
+                  pktmeta->pm_iob             = iob;
 
-              /* Try sending the next packet */
+                  pktmeta->pm_src.pa_addrlen  = 1;
+                  pktmeta->pm_src.pa_addr[0]  =
+                    spirit_pktcommon_get_rxsrcaddr(spirit);
 
-              spirit_schedule_transmit_work(priv);
+                  pktmeta->pm_dest.pa_addrlen = 1;
+                  pktmeta->pm_dest.pa_addr[0] =
+                    spirit_pktcommon_get_rxsrcaddr(spirit);
+
+                  /* Add the contained IOB to the tail of the completed RX
+                   * transfers.
+                   */
+
+                  pktmeta->pm_flink           = priv->rxtail;
+                  priv->rxtail                = pktmeta;
+
+                  if (priv->rxhead == NULL)
+                    {
+                      priv->rxhead            = pktmeta;
+                    }
+
+                  /* Forward the packet to the network.  This must be done
+                   * on the LP work queue with the network locked.
+                   */
+
+                  spirit_schedule_receive_work(priv);
+                }
             }
+
+          /* Send any pending packets */
+
+          spirit_schedule_transmit_work(priv);
         }
     }
 
@@ -1206,16 +1288,27 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
         }
 
 #ifndef CONFIG_SPIRIT_PROMISCOUS
-      /* Instantiate the assigned node address */
+      /* Has an address been assigned?  If not, we will stick the default
+       * address which probably is not what you want.
+       */
 
-#warning Missing logic
-#if 0
-      ret = spirit_pktcommon_set_nodeaddress(spirit, node_address);
-      if (ret < 0)
+      if (dev->d_mac.sixlowpan.nv_addrlen != 0)
         {
-          goto error_with_ifalmostup;
+          /* Yes.. Instantiate the assigned node address */
+
+          DEBUGASSERT(dev->d_mac.sixlowpan.nv_addrlen == 1);
+
+          ret = spirit_pktcommon_set_nodeaddress(spirit,
+                   dev->d_mac.sixlowpan.nv_addr[0]);
+          if (ret < 0)
+            {
+              goto error_with_ifalmostup;
+            }
         }
-#endif
+      else
+        {
+          nwarn("WARNING: No address assigned\n");
+        }
 #endif
 
       /* Set and activate a timer process */
@@ -1429,7 +1522,7 @@ static int spirit_txavail(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#ifdef CONFIG_NET_IGMP
 static int spirit_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   return -ENOSYS;
@@ -1458,29 +1551,6 @@ static int spirit_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
   return -ENOSYS;
 }
 #endif
-
-/****************************************************************************
- * Name: spirit_ipv6multicast
- *
- * Description:
- *   Configure the IPv6 multicast MAC address.
- *
- * Parameters:
- *   priv - A reference to the private driver state structure
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_ICMPv6
-static void spirit_ipv6multicast(FAR struct spirit_driver_s *priv)
-{
-  return -ENOSYS;
-}
-#endif /* CONFIG_NET_ICMPv6 */
 
 /****************************************************************************
  * Name: spirit_ioctl
@@ -1532,7 +1602,8 @@ static int spirit_ioctl(FAR struct net_driver_s *dev, int cmd,
  *
  * Input parameters:
  *   netdev    - The networkd device that will mediate the MAC interface
- *   meta      - Meta data needed to recreate the MAC header
+ *   meta      - Obfuscated metadata structure needed to create the radio
+ *               MAC header
  *
  * Returned Value:
  *   A non-negative MAC headeer length is returned on success; a negated
@@ -1544,17 +1615,13 @@ static int spirit_ioctl(FAR struct net_driver_s *dev, int cmd,
  ****************************************************************************/
 
 static int spirit_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
-                             FAR const struct ieee802154_frame_meta_s *meta)
+                             FAR const void *meta)
 {
-  FAR struct spirit_driver_s *priv;
-
   DEBUGASSERT(netdev != NULL && netdev->r_dev.d_private != NULL && meta != NULL);
-  priv = (FAR struct spirit_driver_s *)netdev->r_dev.d_private;
 
-  spirit_lock(priv);
-#warning Missing logic
-  spirit_unlock(priv);
-  return -ENOSYS;
+  /* There is no header on the Spirit radio payload */
+
+  return 0;
 }
 
 /****************************************************************************
@@ -1565,7 +1632,8 @@ static int spirit_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
  *
  * Input parameters:
  *   netdev    - The networkd device that will mediate the MAC interface
- *   meta      - Meta data needed to recreate the MAC header
+ *   meta      - Obfuscated metadata structure needed to create the radio
+ *               MAC header
  *   framelist - Head of a list of frames to be transferred.
  *
  * Returned Value:
@@ -1578,10 +1646,11 @@ static int spirit_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
  ****************************************************************************/
 
 static int spirit_req_data(FAR struct sixlowpan_driver_s *netdev,
-                           FAR const struct ieee802154_frame_meta_s *meta,
-                           FAR struct iob_s *framelist)
+                           FAR const void *meta, FAR struct iob_s *framelist)
 {
   FAR struct spirit_driver_s *priv;
+  FAR const struct pktradio_metadata_s *metain;
+  FAR struct pktradio_metadata_s *pktmeta;
   FAR struct iob_s *iob;
 
   wlinfo("Received framelist\n");
@@ -1590,6 +1659,7 @@ static int spirit_req_data(FAR struct sixlowpan_driver_s *netdev,
   priv = (FAR struct spirit_driver_s *)netdev->r_dev.d_private;
 
   DEBUGASSERT(meta != NULL && framelist != NULL);
+  metain = (FAR const struct pktradio_metadata_s *)meta;
 
   /* Add the incoming list of frames to the MAC's outgoing queue */
 
@@ -1605,17 +1675,46 @@ static int spirit_req_data(FAR struct sixlowpan_driver_s *netdev,
       framelist     = iob->io_flink;
       iob->io_flink = NULL;
 
-      /* Apply the Spirit header to the frame */
-# warning Missing logic
+      /* Note that there is no header applied to the outgoing payload */
 
-      /* Add the IOB to the queue of outgoing IOBs. */
+      DEBUGASSERT(iob->io_offset == 0 && iob->io_len > 0);
 
-      iob->io_flink = priv->txtail;
-      priv->txtail  = iob;
+      /* Allocate a metadata container to hold the IOB.  This is just like
+       * the we got from the network, be we will copy it so that we can
+       * control the life of the container.
+       *
+       * REVISIT:  To bad we cound not just simply allocate the structure
+       * on the network side.  But that behavior is incompatible with how
+       * IEEE 802.15.4 works.
+       */
+
+       pktmeta = pktradio_metadata_allocate();
+       if (pktmeta == NULL)
+         {
+           wlerr("ERROR: Failed to allocate metadata... dropping\n");
+           NETDEV_RXDROPPED(&priv->radio.r_dev);
+           iob_free(iob);
+           continue;
+         }
+
+       /* Save the IOB and addressing information in the newly allocated
+        * container.
+        */
+
+       memcpy(&pktmeta->pm_src, &metain->pm_src,
+              sizeof(struct pktradio_addr_s));
+       memcpy(&pktmeta->pm_dest, &metain->pm_dest,
+              sizeof(struct pktradio_addr_s));
+       pktmeta->pm_iob  = iob;
+
+      /* Add the IOB container to the queue of outgoing IOBs. */
+
+      pktmeta->pm_flink = priv->txtail;
+      priv->txtail      = pktmeta;
 
       if (priv->txhead == NULL)
         {
-          priv->txhead = iob;
+          priv->txhead  = pktmeta;
         }
 
       /* If there are no transmissions or receptions in progress, then start
@@ -1626,6 +1725,35 @@ static int spirit_req_data(FAR struct sixlowpan_driver_s *netdev,
     }
 
   spirit_unlock(priv);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: spirit_properties
+ *
+ * Description:
+ *   Different packet radios may have different properties.  If there are
+ *   multiple packet radios, then those properties have to be queried at
+ *   run time.  This information is provided to the 6LoWPAN network via the
+ *   following structure.
+ *
+ * Input parameters:
+ *   netdev     - The network device to be queried
+ *   properties - Location where radio properities will be returned.
+ *
+ * Returned Value:
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+static int spirit_properties(FAR struct sixlowpan_driver_s *netdev,
+                             FAR struct sixlowpan_properties_s *properties)
+{
+  DEBUGASSERT(netdev != NULL && properties != NULL);
+
+  properties->sp_addrlen = 1;                    /* Length of an address */
+  properties->sp_pktlen  = CONFIG_SPIRIT_PKTLEN; /* Fixed packet length */
   return OK;
 }
 
@@ -1918,6 +2046,7 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
   radio               = &priv->radio;
   radio->r_get_mhrlen = spirit_get_mhrlen; /* Get MAC header length */
   radio->r_req_data   = spirit_req_data;   /* Enqueue frame for transmission */
+  radio->r_properties = spirit_properties; /* Return radio properties */
 
   /* Initialize the common network device fields */
 

@@ -51,7 +51,8 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/net/ip.h>
-#include <nuttx/net/ieee802154.h>
+#include <nuttx/net/netdev.h>
+#include <nuttx/net/sixlowpan.h>
 
 #ifdef CONFIG_NET_IPv6
 
@@ -73,17 +74,18 @@
 
 struct neighbor_addr_s
 {
+#ifdef CONFIG_NET_MULTILINK
+  uint8_t                    na_lltype;
+#endif
+  uint8_t                    na_llsize;
+
   union
   {
-#ifdef CONFIG_NET_MULTILINK
-    uint8_t                 na_lltype;
-#endif
-
 #ifdef CONFIG_NET_ETHERNET
-    struct ether_addr       na_ethernet;
+    struct ether_addr        na_ethernet;
 #endif
 #ifdef CONFIG_NET_6LOWPAN
-    struct sixlowpan_addr_s na_sixlowpan;
+    struct netdev_maxaddr_s  na_sixlowpan;
 #endif
   } u;
 };
