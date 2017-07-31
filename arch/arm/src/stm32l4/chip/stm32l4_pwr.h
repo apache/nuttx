@@ -72,6 +72,8 @@
 #define STM32L4_PWR_PDCRG_OFFSET 0x0054  /* Power Port G pull-down control register */
 #define STM32L4_PWR_PUCRH_OFFSET 0x0058  /* Power Port H pull-up control register */
 #define STM32L4_PWR_PDCRH_OFFSET 0x005C  /* Power Port H pull-down control register */
+#define STM32L4_PWR_PUCRI_OFFSET 0x0060  /* Power Port I pull-up control register */
+#define STM32L4_PWR_PDCRI_OFFSET 0x0064  /* Power Port I pull-down control register */
 
 /* Register Addresses ***************************************************************/
 
@@ -98,6 +100,8 @@
 #define STM32L4_PWR_PDCRG        (STM32L4_PWR_BASE+STM32L4_PWR_PDCRG_OFFSET)
 #define STM32L4_PWR_PUCRH        (STM32L4_PWR_BASE+STM32L4_PWR_PUCRH_OFFSET)
 #define STM32L4_PWR_PDCRH        (STM32L4_PWR_BASE+STM32L4_PWR_PDCRH_OFFSET)
+#define STM32L4_PWR_PUCRI        (STM32L4_PWR_BASE+STM32L4_PWR_PUCRI_OFFSET)
+#define STM32L4_PWR_PDCRI        (STM32L4_PWR_BASE+STM32L4_PWR_PDCRI_OFFSET)
 
 /* Register Bitfield Definitions ****************************************************/
 
@@ -107,9 +111,9 @@
 #define PWR_CR1_LPMS_MASK        (7 << PWR_CR1_LPMS_SHIFT) /* Bits 0-2: Low-power mode selection */
 #  define PWR_CR1_LPMS_STOP1MR   (0 << PWR_CR1_LPMS_SHIFT) /* Stop 1 mode with main regulator (MR) */
 #  define PWR_CR1_LPMS_STOP1LPR  (1 << PWR_CR1_LPMS_SHIFT) /* Stop 1 mode with low-power regulator (LPR) */
-#  define PWR_CR1_LPMS_STOP2     (2 << PWR_CR1_LPMS_SHIFT) /* 010: Stop 2 mode*/
+#  define PWR_CR1_LPMS_STOP2     (2 << PWR_CR1_LPMS_SHIFT) /* 010: Stop 2 mode */
 #  define PWR_CR1_LPMS_STANDBY   (3 << PWR_CR1_LPMS_SHIFT) /* 011: Standby mode */
-#  define PWR_CR1_LPMS_SHUTDOWN  (4 << PWR_CR1_LPMS_SHIFT) /* 1xx: Shutdown node */
+#  define PWR_CR1_LPMS_SHUTDOWN  (4 << PWR_CR1_LPMS_SHIFT) /* 1xx: Shutdown mode */
 #define PWR_CR1_DBP              (1 <<  8) /* Bit  8: Disable Backup domain write protection */
 #define PWR_CR1_VOS_SHIFT        9
 #define PWR_CR1_VOS_MASK         (3 << PWR_CR1_VOS_SHIFT) /* Bits 9-10: Voltage scaling range selection */
@@ -131,10 +135,14 @@
 #  define PWR_CR2_PLS_2900mv     (6 << PWR_CR2_PLS_SHIFT) /* 110: VPVD6 around 2.9V */
 #  define PWR_CR2_PLS_EXT        (7 << PWR_CR2_PLS_SHIFT) /* 111: External input analog voltage PVD_IN */
 #define PWR_CR2_PVME1            (1 <<  4) /* Bit  4: Peripheral voltage monitoring 1 enable (VDDUSB vs 1.2V) */
-#define PWR_CR2_PVME2            (1 <<  5) /* Bit  5: Peripheral voltage monitoring 2 enable (VDDIO2 vs 0.9V) */
+#if !defined(CONFIG_STM32L4_STM32L4X3)
+#  define PWR_CR2_PVME2          (1 <<  5) /* Bit  5: Peripheral voltage monitoring 2 enable (VDDIO2 vs 0.9V) */
+#endif
 #define PWR_CR2_PVME3            (1 <<  6) /* Bit  6: Peripheral voltage monitoring 3 enable (VDDA vs 1.62V) */
 #define PWR_CR2_PVME4            (1 <<  7) /* Bit  7: Peripheral voltage monitoring 4 enable (VDDA vs 2.2V) */
-#define PWR_CR2_IOSV             (1 <<  9) /* Bit  9: VDDIO2 Independent I/Os supply valid */
+#if !defined(CONFIG_STM32L4_STM32L4X3)
+#  define PWR_CR2_IOSV           (1 <<  9) /* Bit  9: VDDIO2 Independent I/Os supply valid */
+#endif
 #define PWR_CR2_USV              (1 << 10) /* Bit 10: VDDUSB USB supply valid */
 
 /* Power control register 3 */
@@ -156,7 +164,7 @@
 #define PWR_CR4_WP4              (1 <<  3) /* Bit  3: Wakeup pin WKUP4 polarity */
 #define PWR_CR4_WP5              (1 <<  4) /* Bit  4: Wakeup pin WKUP5 polarity */
 #define PWR_CR4_VBE              (1 <<  8) /* Bit  8: Vbat battery charging enable */
-#define PWR_CR4_VBRS             (1 <<  9) /* Bit  9: Vbat barrery charging resistor selection */
+#define PWR_CR4_VBRS             (1 <<  9) /* Bit  9: Vbat battery charging resistor selection */
 #  define PWR_CR4_VBRS_5k        0            /*     0: 5k  resistor */
 #  define PWR_CR4_VBRS_1k5       PWR_CR4_VBRS /*     1: 1k5 resistor */
 
@@ -172,12 +180,14 @@
 
 /* Power status register 2 */
 
-#define PWR_SR2_REGLPS           (1 <<  0) /* Bit  0: Low power regulator started */
-#define PWR_SR2_REGLPF           (1 <<  1) /* Bit  1: Low power regulator flag */
+#define PWR_SR2_REGLPS           (1 <<  8) /* Bit  8: Low power regulator started */
+#define PWR_SR2_REGLPF           (1 <<  9) /* Bit  9: Low power regulator flag */
 #define PWR_SR2_VOSF             (1 << 10) /* Bit 10: Voltage scaling flag */
 #define PWR_SR2_PVDO             (1 << 11) /* Bit 11: Power voltage detector output */
 #define PWR_SR2_PVMO1            (1 << 12) /* Bit 12: Peripheral voltage monitoring output 1 (VDDUSB vs 1.2V) */
-#define PWR_SR2_PVMO2            (1 << 13) /* Bit 13: Peripheral voltage monitoring output 2 (VDDIO2 vs 0.9V) */
+#if !defined(CONFIG_STM32L4_STM32L4X3)
+#  define PWR_SR2_PVMO2          (1 << 13) /* Bit 13: Peripheral voltage monitoring output 2 (VDDIO2 vs 0.9V) */
+#endif
 #define PWR_SR2_PVMO3            (1 << 14) /* Bit 14: Peripheral voltage monitoring output 3 (VDDA vs 1.62V) */
 #define PWR_SR2_PVMO4            (1 << 15) /* Bit 15: Peripheral voltage monitoring output 4 (VDDA vs 2.2V) */
 
