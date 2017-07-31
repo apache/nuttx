@@ -1,6 +1,7 @@
 _exit          NX_exit
 accept         NXaccept
 asprintf       NXasprintf
+bind           NXbind
 basename       NXbasename
 calloc         NXcalloc
 chdir          NXchdir
@@ -8,6 +9,7 @@ clearenv       NXclearenv
 clock_gettime  NXclock_gettime
 close          NXclose
 closedir       NXclosedir
+connect        NXconnect
 dup            NXdup
 dup2           NXdup2
 exit           NXexit
@@ -30,6 +32,8 @@ getenv         NXgetenv
 getopt         NXgetopt
 getpid         NXgetpid
 gettimeofday   NXgettimeofday
+htons          NXhtons
+ntohs          NXhntohs
 ioctl          NXioctl
 isatty         NXisatty
 kill           NXkill
@@ -54,6 +58,7 @@ pipe           NXpipe
 poll           NXpoll
 printf         NXprintf
 pthread_create NXpthread_create
+pthread_detach NXpthread_detach
 pthread_exit   NXpthread_exit
 pthread_getspecific NXpthread_getspecific
 pthread_key_create NXpthread_key_create
@@ -81,6 +86,7 @@ recvfrom       NXrecvfrom
 rename         NXrename
 rewinddir      NXrewinddir
 rmdir          NXrmdir
+sched_setparam NXsched_setparam
 sched_yield    NXsched_yield
 seekdir        NXseekdir
 select         NXselect
