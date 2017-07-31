@@ -392,6 +392,9 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
   bool usemac       = (prefpost & 0x0100) != 0;
   uint8_t prefcount = (prefpost >> 4) & 0xf;
   uint8_t postcount =  prefpost & 0x0f;
+  int destndx;
+  int endndx;
+  int i;
 
   /* The value 16 is encoded as 0xf in the 4 bit-fields. */
 
@@ -443,7 +446,7 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
 
   if (postcount > 0)
     {
-      if (postcount == 2 && prefcount < 11)
+      if (postcount <= 2 && prefcount < 11)
         {
           /* 16 bits uncompression ipaddr=0000:00ff:fe00:XXXX */
 
@@ -451,37 +454,32 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
           ipaddr[6] = HTONS(0xfe00);
         }
 
+      /* Handle the even bytes in the address */
       /* If the postcount is even then take extra care with endian-ness */
 
-      if ((postcount & 1) == 0)
+      destndx = 8 - (postcount >> 1);
+      endndx  = 8 - (postcount & 1);
+
+      for (i = destndx; i < endndx; i++)
         {
-          int destndx = 8 - (postcount >> 1);
-          int i;
+          /* Big-endian, network order */
 
-          for (i = destndx; i < 8; i++)
-            {
-              /* Big-endian, network order */
-
-              ipaddr[i] = (uint16_t)srcptr[0] << 8 | (uint16_t)srcptr[1];
-              srcptr += 2;
-            }
-
-          /* If the was a standard MAC based address then toggle */
-
-          if (fullmac)
-            {
-              ipaddr[destndx] ^= 0x0200;
-            }
+          ipaddr[i] = (uint16_t)srcptr[0] << 8 | (uint16_t)srcptr[1];
+          srcptr += 2;
         }
 
-      /* postcount is odd... REVISIT:  I am not sure about bye ordering. */
+      /* Handle any remaining odd byte */
 
-      else
+      if ((postcount & 1) != 0)
         {
-          FAR uint8_t *destptr = (FAR uint8_t *)&ipaddr[0];
-          int offset = 16 - postcount;
+          ipaddr[7] = (uint16_t)(*srcptr) << 8;
+        }
 
-          memcpy(&destptr[offset], srcptr, postcount);
+      /* If the was a standard MAC based address then toggle */
+
+      if (fullmac)
+        {
+          ipaddr[7] ^= 0x0200;
         }
 
       /* If we took the data from packet, then update the packet pointer */
