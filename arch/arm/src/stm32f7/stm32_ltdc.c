@@ -3428,6 +3428,21 @@ FAR struct ltdc_layer_s *stm32_ltdcgetlayer(int lid)
 }
 #endif /* CONFIG_STM32F7_LTDC_INTERFACE */
 
+
+/****************************************************************************
+ * Name: stm32_ltdcreset
+ *
+ * Description:
+ *   Reset LTDC via APB2RSTR
+ *
+ *
+ ****************************************************************************/
+void   stm32_ltdcreset(void)
+{
+  *((uint32_t *)(STM32_RCC_APB2RSTR)) |= RCC_APB2RSTR_LTDCRST;
+  *((uint32_t *)(STM32_RCC_APB2RSTR)) &= ~RCC_APB2RSTR_LTDCRST;
+}
+
 /****************************************************************************
  * Name: stm32_ltdcinitialize
  *

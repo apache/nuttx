@@ -106,9 +106,29 @@ struct stm32_ltdc_s
  * include/nuttx/video/fb.h.
  */
 
-int stm32_ltdcinitialize(void);
+/****************************************************************************
+ * Name: stm32_ltdcreset
+ *
+ * Description:
+ *   Reset LTDC via APB2RSTR
+ *
+ *
+ ****************************************************************************/
+void                    stm32_ltdcreset(void);
+
+/****************************************************************************
+ * Name: stm32_ltdcinitialize
+ *
+ * Description:
+ *   Initialize the ltdc controller
+ *
+ * Return:
+ *   OK
+ *
+ ****************************************************************************/
+int                     stm32_ltdcinitialize(void);
 FAR struct fb_vtable_s *stm32_ltdcgetvplane(int vplane);
-void stm32_ltdcuninitialize(void);
+void                    stm32_ltdcuninitialize(void);
 
 /************************************************************************************
  * Name: stm32_ltdcgetlayer
