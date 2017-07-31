@@ -317,7 +317,7 @@ static int sixlowpan_pktradio_metadata(FAR struct sixlowpan_driver_s *radio,
 
   /* Reset the meta data */
 
-  memset(&pktmeta, 0, sizeof(struct pktradio_metadata_s));
+  memset(pktmeta, 0, sizeof(struct pktradio_metadata_s));
 
   /* Set the source address */
 

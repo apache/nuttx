@@ -285,7 +285,7 @@
 
 #define SIXLOWPAN_IS_IID_8BIT_COMPRESSABLE(a) \
   ((((a)[4]) == 0x0000) && (((a)[5]) == HTONS(0x00ff)) && \
-   (((a)[6]) == HTONS(0xfe00)) && ((((a)[7]) & HTONS(0x00ff)) == 0))
+   (((a)[6]) == HTONS(0xfe00)) && ((((a)[7]) & HTONS(0xff00)) == 0))
 
 /* Check whether we can compress the IID in address 'a' to 16 bits.  This is
  * used for unicast addresses only, and is true if the address is on the
