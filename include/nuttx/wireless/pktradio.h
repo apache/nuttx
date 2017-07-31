@@ -159,5 +159,25 @@ FAR struct pktradio_metadata_s *pktradio_metadata_allocate(void);
 
 void pktradio_metadata_free(FAR struct pktradio_metadata_s *metadata);
 
+/****************************************************************************
+ * Name: pktradio_loopback
+ *
+ * Description:
+ *   Initialize and register the Ieee802.15.4 MAC loopback network driver.
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PKTRADIO_LOOPBACK
+int pktradio_loopback(void);
+#endif
+
 #endif /* CONFIG_WIRELESS_PKTRADIO */
 #endif /* __INCLUDE_NUTTX_WIRELESS_PKTRADIO_H */

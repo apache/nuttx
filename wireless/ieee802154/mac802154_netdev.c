@@ -172,13 +172,11 @@ static int  macnet_ifdown(FAR struct net_driver_s *dev);
 static void macnet_txavail_work(FAR void *arg);
 static int  macnet_txavail(FAR struct net_driver_s *dev);
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#ifdef CONFIG_NET_IGMP
 static int  macnet_addmac(FAR struct net_driver_s *dev,
               FAR const uint8_t *mac);
-#ifdef CONFIG_NET_IGMP
 static int  macnet_rmmac(FAR struct net_driver_s *dev,
               FAR const uint8_t *mac);
-#endif
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
 static int  macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
@@ -742,7 +740,7 @@ static int macnet_txavail(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#ifdef CONFIG_NET_IGMP
 static int macnet_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)dev->d_private;

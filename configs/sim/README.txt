@@ -829,6 +829,12 @@ pashello
 
   Configures to use apps/examples/pashello.
 
+pktradio
+
+  This configuration is identical to the 'sixlowpan configuration
+  described below EXCEPT that is uses the genericl packet radio
+  loopback network device.
+
 sixlowpan
 
   This configuration was intended only for unit-level testing of the
@@ -840,6 +846,8 @@ sixlowpan
   is to verify that the 6LoWPAN stack correctly encodes IEEE802.15.4
   packets on output to the loopback device and correctly decodes the
   returned packet.
+
+  See also the 'pktradio' configuration.
 
 touchscreen
 

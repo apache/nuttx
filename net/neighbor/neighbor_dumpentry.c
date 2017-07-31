@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 /******************************************************************************
- * Name: neibhbor_dump_address
+ * Name: neighbor_dump_address
  *
  * Description:
  *   Dump a data buffer to the SYSLOG.
@@ -65,7 +65,7 @@
  *
  ******************************************************************************/
 
-static void neibhbor_dump_address(FAR const uint8_t *buffer, unsigned int buflen)
+static void neighbor_dump_address(FAR const uint8_t *buffer, unsigned int buflen)
 {
   char outbuf[16*3 + 9]; /* 6-byte header header + 16 hex bytes +
                           * 2 space separator + NUL termination */
@@ -143,7 +143,7 @@ void neighbor_dumpentry(FAR const char *msg,
   if (neighbor->ne_addr.u.na_lltype == NET_LL_ETHERNET)
 #endif
     {
-      neibhbor_dump_address(neighbor->ne_addr.u.na_ethernet.ether_addr_octet,
+      neighbor_dump_address(neighbor->ne_addr.u.na_ethernet.ether_addr_octet,
                             neighbor->ne_addr.na_llsize);
     }
 #endif
@@ -153,7 +153,7 @@ void neighbor_dumpentry(FAR const char *msg,
   else
 #endif
     {
-      neibhbor_dump_address(neighbor->ne_addr.u.na_sixlowpan.nm_addr,
+      neighbor_dump_address(neighbor->ne_addr.u.na_sixlowpan.nm_addr,
                             neighbor->ne_addr.na_llsize);
     }
 #endif /* CONFIG_NET_6LOWPAN */

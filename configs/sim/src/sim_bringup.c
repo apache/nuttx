@@ -47,6 +47,7 @@
 #include <nuttx/board.h>
 #include <nuttx/clock.h>
 #include <nuttx/timers/oneshot.h>
+#include <nuttx/wireless/pktradio.h>
 #include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
 
 #include "up_internal.h"
@@ -147,6 +148,16 @@ int sim_bringup(void)
   if (ret < 0)
     {
       _err("ERROR: ieee8021514_loopback() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_PKTRADIO_LOOPBACK
+  /* Initialize and register the IEEE802.15.4 MAC network loop device */
+
+  ret = pktradio_loopback();
+  if (ret < 0)
+    {
+      _err("ERROR: pktradio_loopback() failed: %d\n", ret);
     }
 #endif
 

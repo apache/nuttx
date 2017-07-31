@@ -1,5 +1,5 @@
 /****************************************************************************
- * wireless/iee802154/mac802154_loopback.c
+ * wireless/pktradio/pktradio_loopback.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,11 +54,9 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/sixlowpan.h>
-#include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
+#include <nuttx/wireless/pktradio.h>
 
-#include "mac802154.h"
-
-#ifdef CONFIG_IEEE802154_LOOPBACK
+#ifdef CONFIG_PKTRADIO_LOOPBACK
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -69,13 +67,26 @@
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Worker thread support is required (CONFIG_SCHED_WORKQUEUE)
 #else
-#  if defined(CONFIG_IEEE802154_LOOPBACK_HPWORK)
-#    define LPBKWORK HPWORK
-#  elif defined(CONFIG_IEEE802154_LOOPBACK_LPWORK)
+#  if defined(CONFIG_SCHED_LPWORK)
 #    define LPBKWORK LPWORK
+#  elif defined(CONFIG_SCHED_HPWORK)
+#    define LPBKWORK HPWORK
 #  else
-#    error Neither CONFIG_IEEE802154_LOOPBACK_HPWORK nor CONFIG_IEEE802154_LOOPBACK_LPWORK defined
+#    error Neither CONFIG_SCHED_LPWORK nor CONFIG_SCHED_HPWORK defined
 #  endif
+#endif
+
+#ifndef CONFIG_WIRELESS_PKTRADIO
+#  error CONFIG_WIRELESS_PKTRADIO=y is required.
+#endif
+
+#ifndef CONFIG_NET_6LOWPAN
+#  error CONFIG_NET_6LOWPAN=y is required.
+#endif
+
+#if (CONFIG_PKTRADIO_ADDRLEN != 1) && (CONFIG_PKTRADIO_ADDRLEN != 2) && \
+    (CONFIG_PKTRADIO_ADDRLEN != 8)
+#  error No support for CONFIG_PKTRADIO_ADDRLEN other than {1,2,8}
 #endif
 
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
@@ -84,7 +95,11 @@
 
 /* Fake value for MAC header length */
 
-#define MAC_HDRLEN   9
+#if CONFIG_NET_6LOWPAN_FRAMELEN > 40
+#  define MAC_HDRLEN   4
+#else
+#  define MAC_HDRLEN   0
+#endif
 
 /****************************************************************************
  * Private Types
@@ -116,19 +131,15 @@ struct lo_driver_s
 static struct lo_driver_s g_loopback;
 static uint8_t g_iobuffer[CONFIG_NET_6LOWPAN_MTU + CONFIG_NET_GUARDSIZE];
 
-static uint8_t g_eaddr[IEEE802154_EADDRSIZE] =
+static uint8_t g_mac_addr[CONFIG_PKTRADIO_ADDRLEN] =
 {
-  0x0c, 0xfa, 0xde, 0x00, 0xde, 0xad, 0xbe, 0xef
-};
-
-static uint8_t g_saddr[IEEE802154_SADDRSIZE] =
-{
+#if CONFIG_PKTRADIO_ADDRLEN == 1
+  0xab
+#elif CONFIG_PKTRADIO_ADDRLEN == 2
   0xab, 0xcd
-};
-
-static uint8_t g_panid[IEEE802154_PANIDSIZE] =
-{
-  0xca, 0xfe
+#elif CONFIG_PKTRADIO_ADDRLEN == 8
+  0x0c, 0xfa, 0xde, 0x00, 0xde, 0xad, 0xbe, 0xef
+#endif
 };
 
 /****************************************************************************
@@ -186,47 +197,47 @@ static int lo_properties(FAR struct sixlowpan_driver_s *netdev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-static void lo_addr2ip(FAR struct net_driver_s *dev)
-{
-  /* Set the MAC address as the eaddr */
-
-  dev->d_mac.sixlowpan.nv_addrlen = NET_6LOWPAN_EADDRSIZE;
-  IEEE802154_EADDRCOPY(dev->d_mac.sixlowpan.nv_addr, g_eaddr);
-
-  /* Set the IP address based on the eaddr */
-
-  dev->d_ipv6addr[0]  = HTONS(0xfe80);
-  dev->d_ipv6addr[1]  = 0;
-  dev->d_ipv6addr[2]  = 0;
-  dev->d_ipv6addr[3]  = 0;
-  dev->d_ipv6addr[4]  = (uint16_t)g_eaddr[0] << 8 | (uint16_t)g_eaddr[1];
-  dev->d_ipv6addr[5]  = (uint16_t)g_eaddr[2] << 8 | (uint16_t)g_eaddr[3];
-  dev->d_ipv6addr[6]  = (uint16_t)g_eaddr[4] << 8 | (uint16_t)g_eaddr[5];
-  dev->d_ipv6addr[7]  = (uint16_t)g_eaddr[6] << 8 | (uint16_t)g_eaddr[7];
-  dev->d_ipv6addr[4] ^= 0x200;
-}
-#else
 static void lo_addr2ip(FAR struct net_driver_s *dev)
 {
   /* Set the MAC address as the saddr */
 
-  dev->d_mac.sixlowpan.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
-  IEEE802154_SADDRCOPY(dev->d_mac.sixlowpan.nv_addr, g_saddr);
+  dev->d_mac.sixlowpan.nv_addrlen = CONFIG_PKTRADIO_ADDRLEN;
+  memcpy(dev->d_mac.sixlowpan.nv_addr, g_mac_addr, CONFIG_PKTRADIO_ADDRLEN);
 
-  /* Set the IP address based on the saddr */
+  /* Set the IP address */
 
   dev->d_ipv6addr[0]  = HTONS(0xfe80);
   dev->d_ipv6addr[1]  = 0;
   dev->d_ipv6addr[2]  = 0;
   dev->d_ipv6addr[3]  = 0;
+
+#if CONFIG_PKTRADIO_ADDRLEN == 1
+  /* Set the IP address based on the 1 byte address */
+
   dev->d_ipv6addr[4]  = 0;
   dev->d_ipv6addr[5]  = HTONS(0x00ff);
   dev->d_ipv6addr[6]  = HTONS(0xfe00);
-  dev->d_ipv6addr[7]  = (uint16_t)g_saddr[0] << 8 | (uint16_t)g_saddr[1];
-  dev->d_ipv6addr[7] ^= 0x200;
-}
+  dev->d_ipv6addr[7]  = (uint16_t)g_mac_addr[0] << 8 ^ 0x0200;
+
+#elif CONFIG_PKTRADIO_ADDRLEN == 2
+  /* Set the IP address based on the 2 byte address */
+
+  dev->d_ipv6addr[4]  = 0;
+  dev->d_ipv6addr[5]  = HTONS(0x00ff);
+  dev->d_ipv6addr[6]  = HTONS(0xfe00);
+  dev->d_ipv6addr[7]  = (uint16_t)g_mac_addr[0] << 8 | (uint16_t)g_mac_addr[1];
+  dev->d_ipv6addr[7] ^= 0x0200;
+
+#elif CONFIG_PKTRADIO_ADDRLEN == 8
+  /* Set the IP address based on the 8-byte address */
+
+  dev->d_ipv6addr[4]  = (uint16_t)g_mac_addr[0] << 8 | (uint16_t)g_mac_addr[1];
+  dev->d_ipv6addr[5]  = (uint16_t)g_mac_addr[2] << 8 | (uint16_t)g_mac_addr[3];
+  dev->d_ipv6addr[6]  = (uint16_t)g_mac_addr[4] << 8 | (uint16_t)g_mac_addr[5];
+  dev->d_ipv6addr[7]  = (uint16_t)g_mac_addr[6] << 8 | (uint16_t)g_mac_addr[7];
+  dev->d_ipv6addr[4] ^= 0x0200;
 #endif
+}
 
 /****************************************************************************
  * Name: lo_netmask
@@ -248,15 +259,23 @@ static inline void lo_netmask(FAR struct net_driver_s *dev)
   dev->d_ipv6netmask[1]  = 0xffff;
   dev->d_ipv6netmask[2]  = 0xffff;
   dev->d_ipv6netmask[3]  = 0xffff;
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  dev->d_ipv6netmask[4]  = 0;
-  dev->d_ipv6netmask[5]  = 0;
-  dev->d_ipv6netmask[6]  = 0;
-  dev->d_ipv6netmask[7]  = 0;
-#else
+
+#if CONFIG_PKTRADIO_ADDRLEN == 1
   dev->d_ipv6netmask[4]  = 0xffff;
   dev->d_ipv6netmask[5]  = 0xffff;
   dev->d_ipv6netmask[6]  = 0xffff;
+  dev->d_ipv6netmask[7]  = HTONS(0x00ff);
+
+#elif CONFIG_PKTRADIO_ADDRLEN == 2
+  dev->d_ipv6netmask[4]  = 0xffff;
+  dev->d_ipv6netmask[5]  = 0xffff;
+  dev->d_ipv6netmask[6]  = 0xffff;
+  dev->d_ipv6netmask[7]  = 0;
+
+#elif CONFIG_PKTRADIO_ADDRLEN == 8
+  dev->d_ipv6netmask[4]  = 0;
+  dev->d_ipv6netmask[5]  = 0;
+  dev->d_ipv6netmask[6]  = 0;
   dev->d_ipv6netmask[7]  = 0;
 #endif
 }
@@ -284,31 +303,21 @@ static inline void lo_netmask(FAR struct net_driver_s *dev)
 static int lo_loopback(FAR struct net_driver_s *dev)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
-  struct ieee802154_data_ind_s ind;
+  struct pktradio_metadata_s pktmeta;
   FAR struct iob_s *iob;
   int ret;
 
   /* Create some fake metadata */
 
-  memset(&ind, 0, sizeof(struct ieee802154_data_ind_s));
+  memset(&pktmeta, 0, sizeof(struct pktradio_metadata_s));
 
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  ind.src.mode  = IEEE802154_ADDRMODE_EXTENDED;
-  ind.dest.mode = IEEE802154_ADDRMODE_EXTENDED;
-#else
-  ind.src.mode  = IEEE802154_ADDRMODE_SHORT;
-  ind.dest.mode = IEEE802154_ADDRMODE_SHORT;
-#endif
+  pktmeta.pm_src.pa_addrlen  = CONFIG_PKTRADIO_ADDRLEN;
+  pktmeta.pm_dest.pa_addrlen = CONFIG_PKTRADIO_ADDRLEN;
 
   /* On loopback the local address is both the source and destination. */
 
-  IEEE802154_PANIDCOPY(ind.src.panid, g_panid);
-  IEEE802154_SADDRCOPY(ind.src.saddr, g_saddr);
-  IEEE802154_EADDRCOPY(ind.src.eaddr, g_eaddr);
-
-  IEEE802154_PANIDCOPY(ind.dest.panid, g_panid);
-  IEEE802154_SADDRCOPY(ind.dest.saddr, g_saddr);
-  IEEE802154_EADDRCOPY(ind.dest.eaddr, g_eaddr);
+  memcpy(pktmeta.pm_src.pa_addr, g_mac_addr, CONFIG_PKTRADIO_ADDRLEN);
+  memcpy(pktmeta.pm_dest.pa_addr, g_mac_addr, CONFIG_PKTRADIO_ADDRLEN);
 
   /* Loop while there framelist to be sent, i.e., while the freme list is not
    * emtpy.  Sending, of course, just means relaying back through the network
@@ -341,7 +350,7 @@ static int lo_loopback(FAR struct net_driver_s *dev)
       ninfo("Send frame %p to the network:  Offset=%u Length=%u\n",
             iob, iob->io_offset, iob->io_len);
 
-      ret = sixlowpan_input(&priv->lo_radio, iob, (FAR void *)&ind);
+      ret = sixlowpan_input(&priv->lo_radio, iob, (FAR void *)&pktmeta);
 
       /* Increment statistics */
 
@@ -480,17 +489,20 @@ static int lo_ifup(FAR struct net_driver_s *dev)
         dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
         dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+#if CONFIG_PKTRADIO_ADDRLEN == 1
+  ninfo("             Node: %02x\n",
+         dev->d_mac.sixlowpan.nv_addr[0]);
+
+#elif CONFIG_PKTRADIO_ADDRLEN == 2
+  ninfo("             Node: %02x:%02x\n",
+         dev->d_mac.sixlowpan.nv_addr[0], dev->d_mac.sixlowpan.nv_addr[1]);
+
+#elif CONFIG_PKTRADIO_ADDRLEN == 8
   ninfo("             Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x PANID=%02x:%02x\n",
          dev->d_mac.sixlowpan.nv_addr[0], dev->d_mac.sixlowpan.nv_addr[1],
          dev->d_mac.sixlowpan.nv_addr[2], dev->d_mac.sixlowpan.nv_addr[3],
          dev->d_mac.sixlowpan.nv_addr[4], dev->d_mac.sixlowpan.nv_addr[5],
-         dev->d_mac.sixlowpan.nv_addr[6], dev->d_mac.sixlowpan.nv_addr[7],
-         priv->lo_panid[0], priv->lo_panid[1]);
-#else
-  ninfo("             Node: %02x:%02x PANID=%02x:%02x\n",
-         dev->d_mac.sixlowpan.nv_addr[0], dev->d_mac.sixlowpan.nv_addr[1],
-         priv->lo_panid[0], priv->lo_panid[1]);
+         dev->d_mac.sixlowpan.nv_addr[6], dev->d_mac.sixlowpan.nv_addr[7]);
 #endif
 
   /* Set and activate a timer process */
@@ -637,12 +649,15 @@ static int lo_txavail(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IGMP
 static int lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+#if CONFIG_PKTRADIO_ADDRLEN == 1
+  ninfo("MAC: %02x\n", mac[0]);
+  
+#elif CONFIG_PKTRADIO_ADDRLEN == 2
+  ninfo("MAC: %02x:%02x\n", mac[0], mac[1]);
+
+#elif CONFIG_PKTRADIO_ADDRLEN == 8
   ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], mac[6], mac[7]);
-#else
-  ninfo("MAC: %02x:%02x\n",
-         mac[0], mac[1]);
 #endif
 
   /* There is no multicast support in the loopback driver */
@@ -672,12 +687,15 @@ static int lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 #ifdef CONFIG_NET_IGMP
 static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+#if CONFIG_PKTRADIO_ADDRLEN == 1
+  ninfo("MAC: %02x\n", mac[0]);
+  
+#elif CONFIG_PKTRADIO_ADDRLEN == 2
+  ninfo("MAC: %02x:%02x\n", mac[0], mac[1]);
+
+#elif CONFIG_PKTRADIO_ADDRLEN == 8
   ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], mac[6], mac[7]);
-#else
-  ninfo("MAC: %02x:%02x\n",
-         mac[0], mac[1]);
 #endif
 
   /* There is no multicast support in the loopback driver */
@@ -715,82 +733,9 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
 
   UNUSED(priv);
 
-  /* Check for IOCTLs aimed at the IEEE802.15.4 MAC layer */
+  /* Reserved for future use */
 
-  if (_MAC802154IOCVALID(cmd))
-    {
-      FAR struct ieee802154_netmac_s *netmac =
-        (FAR struct ieee802154_netmac_s *)arg;
-
-      DEBUGASSERT(netmac != NULL);
-
-      if (cmd == MAC802154IOC_MLME_SET_REQUEST)
-        {
-          FAR struct ieee802154_set_req_s *setreq = &netmac->u.setreq;
-
-          switch (setreq->attr)
-            {
-              case IEEE802154_ATTR_MAC_PANID:
-                IEEE802154_PANIDCOPY(g_panid, setreq->attrval.mac.panid);
-                break;
-
-              case IEEE802154_ATTR_MAC_EADDR:
-                IEEE802154_EADDRCOPY(g_eaddr, setreq->attrval.mac.eaddr);
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-                lo_addr2ip(dev);
-#endif
-                break;
-
-              case IEEE802154_ATTR_MAC_SADDR:
-                IEEE802154_SADDRCOPY(g_saddr, setreq->attrval.mac.saddr);
-#ifndef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-                lo_addr2ip(dev);
-#endif
-                break;
-
-              default:
-                return -ENOTTY;
-            }
-
-          return OK;
-        }
-      else if (cmd == MAC802154IOC_MLME_GET_REQUEST)
-        {
-          FAR struct ieee802154_get_req_s *getreq = &netmac->u.getreq;
-
-          switch (getreq->attr)
-            {
-              case IEEE802154_ATTR_MAC_PANID:
-                IEEE802154_PANIDCOPY(getreq->attrval.mac.panid, g_panid);
-                break;
-
-              case IEEE802154_ATTR_MAC_EADDR:
-                IEEE802154_EADDRCOPY(getreq->attrval.mac.eaddr, g_eaddr);
-                break;
-
-              case IEEE802154_ATTR_MAC_SADDR:
-                IEEE802154_SADDRCOPY(getreq->attrval.mac.saddr, g_saddr);
-                break;
-
-              default:
-                return -ENOTTY;
-            }
-
-          return OK;
-        }
-      else
-        {
-          /* Not a supported IEEE 802.15.4 MAC IOCTL command */
-
-          return -ENOTTY;
-        }
-    }
-  else
-    {
-      /* Not a valid IEEE 802.15.4 MAC IOCTL command */
-
-      return -ENOTTY;
-    }
+  return -ENOTTY;
 }
 #endif
 
@@ -910,7 +855,7 @@ static int lo_properties(FAR struct sixlowpan_driver_s *netdev,
 {
   DEBUGASSERT(netdev != NULL && properties != NULL);
 
-  properties->sp_addrlen = NET_6LOWPAN_ADDRSIZE;        /* Length of an address */
+  properties->sp_addrlen = CONFIG_PKTRADIO_ADDRLEN;     /* Length of an address */
   properties->sp_pktlen  = CONFIG_NET_6LOWPAN_FRAMELEN; /* Fixed frame length */
   return OK;
 }
@@ -920,7 +865,7 @@ static int lo_properties(FAR struct sixlowpan_driver_s *netdev,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ieee8021514_loopback
+ * Name: pktradio_loopback
  *
  * Description:
  *   Initialize and register the Ieee802.15.4 MAC loopback network driver.
@@ -935,7 +880,7 @@ static int lo_properties(FAR struct sixlowpan_driver_s *netdev,
  *
  ****************************************************************************/
 
-int ieee8021514_loopback(void)
+int pktradio_loopback(void)
 {
   FAR struct lo_driver_s *priv;
   FAR struct sixlowpan_driver_s *radio;
@@ -985,7 +930,7 @@ int ieee8021514_loopback(void)
    * performed.
    */
 
-  (void)netdev_register(&priv->lo_radio.r_dev, NET_LL_IEEE802154);
+  (void)netdev_register(&priv->lo_radio.r_dev, NET_LL_PKTRADIO);
 
   /* Put the network in the UP state */
 
@@ -993,4 +938,4 @@ int ieee8021514_loopback(void)
   return lo_ifup(&priv->lo_radio.r_dev);
 }
 
-#endif /* CONFIG_IEEE802154_LOOPBACK */
+#endif /* CONFIG_PKTRADIO_LOOPBACK */
