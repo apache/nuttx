@@ -111,8 +111,7 @@ static int local_waitlisten(FAR struct local_conn_s *server)
  ****************************************************************************/
 
 int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-                 FAR socklen_t *addrlen, FAR void **newconn)
-
+                 FAR socklen_t *addrlen, FAR struct socket *newsock)
 {
   FAR struct local_conn_s *server;
   FAR struct local_conn_s *client;
@@ -122,6 +121,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   /* Some sanity checks */
 
   DEBUGASSERT(psock && psock->s_conn);
+  DEBUGASSERT(newsock && !newsock->s_conn);
 
   /* Is the socket a stream? */
 
@@ -233,9 +233,12 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
           if (ret == OK)
             {
-              /* Return the client connection structure */
+              /* Setup the client socket structure */
 
-              *newconn = (FAR void *)conn;
+              newsock->s_domain = psock->s_domain;
+              newsock->s_type   = SOCK_STREAM;
+              newsock->s_sockif = psock->s_sockif;
+              newsock->s_conn   = (FAR void *)conn;
             }
 
           /* Signal the client with the result of the connection */

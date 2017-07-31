@@ -359,7 +359,7 @@ int local_listen(FAR struct socket *psock, int backlog);
 
 #ifdef CONFIG_NET_LOCAL_STREAM
 int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-                 FAR socklen_t *addrlen, FAR void **newconn);
+                 FAR socklen_t *addrlen, FAR struct socket *newsock);
 #endif
 
 /****************************************************************************
