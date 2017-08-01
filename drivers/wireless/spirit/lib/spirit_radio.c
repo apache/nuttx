@@ -44,6 +44,7 @@
 #include <math.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include "spirit_config.h"
 #include "spirit_types.h"
@@ -176,7 +177,6 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
   uint8_t regval;
   uint8_t value;
   int ret;
-  int i;
 
   /* Workaround for Vtune */
 
@@ -203,6 +203,15 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
   DEBUGASSERT(IS_CHANNEL_SPACE(radioinit->chspace, spirit->xtal_frequency));
   DEBUGASSERT(IS_F_DEV(radioinit->freqdev, spirit->xtal_frequency));
 
+  /* Make sure that we are in the READY state */
+
+  ret = spirit_waitstatus(spirit, MC_STATE_READY, 5);
+  if (ret < 0)
+    {
+      wlerr("ERROR: Failed to go to READY state: %d\n", ret);
+      return ret;
+    }
+
   /* Disable the digital, ADC, SMPS reference clock divider if fXO > 24MHz or
    * fXO < 26MHz
    */
@@ -215,13 +224,14 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
 
   /* Delay for state transition */
 
-  for (i = 0; i != 0xff; i++);
+  usleep(100);
 
   /* Wait for the device to enter STANDBY */
 
-  ret = spirit_waitstatus(spirit, MC_STATE_STANDBY, 5000);
+  ret = spirit_waitstatus(spirit, MC_STATE_STANDBY, 5);
   if (ret < 0)
     {
+      wlerr("ERROR: Failed to go to STANDBY state: %d\n", ret);
       return ret;
     }
 
@@ -251,13 +261,14 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
 
   /* Delay for state transition */
 
-  for (i = 0; i != 0xff; i++);
+  usleep(100);
 
   /* Make sure that the device becomes READY */
 
-  ret = spirit_waitstatus(spirit, MC_STATE_READY, 5000);
+  ret = spirit_waitstatus(spirit, MC_STATE_READY, 5);
   if (ret < 0)
     {
+      wlerr("ERROR: Failed to go to READY state: %d\n", ret);
       return ret;
     }
 

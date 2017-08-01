@@ -48,6 +48,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/clock.h>
 #include <nuttx/spi/spi.h>
@@ -565,6 +566,14 @@ int spirit_waitstatus(FAR struct spirit_library_s *spirit,
   systime_t elapsed;
   int ret;
 
+#ifdef CONFIG_DEBUG_SPI_INFO
+  /* If the SPI logic is generating debug output, then a longer timeout is
+   * probably needed.
+   */
+
+  msec <<= 4;
+#endif
+
   /* Convert the MSEC timedelay to clock ticks, making sure that the
    * resulting delay in ticks is greater than or equal to the requested time
    * in MSEC.
@@ -598,5 +607,14 @@ int spirit_waitstatus(FAR struct spirit_library_s *spirit,
     }
   while (spirit->u.state.MC_STATE != state && elapsed <= ticks);
 
-  return (spirit->u.state.MC_STATE == state) ? OK : -ETIMEDOUT;
+  if (spirit->u.state.MC_STATE == state)
+    {
+      return OK;
+    }
+
+  wlwarn("WARNING:  Timed out: %lu > %lu (%u msec)\n",
+         (unsigned long)elapsed, (unsigned long)ticks, msec);
+  wlwarn("          MC status: current=%02x desired=%02x\n",
+         spirit->u.state.MC_STATE, state);
+  return -ETIMEDOUT;
 }

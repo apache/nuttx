@@ -496,6 +496,7 @@ static int spirit_transmit(FAR struct spirit_driver_s *priv)
       ret = spirit_waitstatus(spirit, MC_STATE_TX, 5);
       if (ret < 0)
         {
+          wlerr("ERROR: Failed to go to TX state: %d\n", ret);
           goto errout_with_iob;
         }
 
@@ -1206,6 +1207,7 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
       ret = spirit_waitstatus(spirit, MC_STATE_READY, 5);
       if (ret < 0)
         {
+          wlerr("ERROR: Failed to go to READY state: %d\n", ret);
           goto error_with_ifalmostup;
         }
 
@@ -1220,6 +1222,7 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
       ret = spirit_waitstatus(spirit, MC_STATE_RX, 5);
       if (ret < 0)
         {
+          wlerr("ERROR: Failed to go to RX state: %d\n", ret);
           goto error_with_ifalmostup;
         }
 
@@ -1336,6 +1339,7 @@ static int spirit_ifdown(FAR struct net_driver_s *dev)
       status = spirit_waitstatus(spirit, MC_STATE_READY, 5);
       if (status < 0 && ret == 0)
         {
+          wlerr("ERROR: Failed to go to READY state: %d\n", ret);
           ret = status;
         }
 
@@ -1350,6 +1354,7 @@ static int spirit_ifdown(FAR struct net_driver_s *dev)
       status = spirit_waitstatus(spirit, MC_STATE_STANDBY, 5);
       if (status < 0 && ret == 0)
         {
+          wlerr("ERROR: Failed to go to STANBY state: %d\n", ret);
           ret = status;
         }
 
@@ -1714,6 +1719,8 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
   spirit->spi            = spi;
   spirit->xtal_frequency = SPIRIT_XTAL_FREQUENCY;
 
+  priv->ifup = false;
+
   /* Reset the Spirit1 radio part */
 
   wlinfo("Spirit Reset\n");
@@ -1727,14 +1734,21 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
 
   /* Soft reset of Spirit1 core */
 
+#if 0
   ret = spirit_command(spirit, COMMAND_SRES);
   if (ret < 0)
     {
-      wlerr("ERROR: Soft reset failed} %d\n", ret);
+      wlerr("ERROR: Soft reset failed: %d\n", ret);
       return ret;
     }
+#endif
 
-  priv->ifup = false;
+  ret = spirit_waitstatus(spirit, MC_STATE_READY, 100);
+  if (ret < 0)
+    {
+      wlerr("ERROR: Failed to go to READY state: %d\n", ret);
+      return ret;
+    }
 
   /* Perform VCO calibration WA when the radio is initialized */
 
