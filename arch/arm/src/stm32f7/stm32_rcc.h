@@ -251,6 +251,7 @@ void stm32_rcc_disablelsi(void);
  *   Set DSI clock source to DSI PHY
  *
  ****************************************************************************/
+
 void stm32f7x9_rcc_dsisrcphy(void);
 
 /****************************************************************************
@@ -260,6 +261,7 @@ void stm32f7x9_rcc_dsisrcphy(void);
  *   Set DSI clock source to PLLR
  *
  ****************************************************************************/
+
 void stm32f7x9_rcc_dsisrcpllr(void);
 #endif
 
