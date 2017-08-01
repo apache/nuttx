@@ -194,7 +194,7 @@
 #  define LTDC_GCR_DRW(n)           ((uint32_t)(n) << LTDC_GCR_DRW_SHIFT)
 #define LTDC_GCR_DEN                (1 << 16) /* Bit 16:  Dither Enable */
 #define LTDC_GCR_PCPOL              (1 << 28) /* Bit 28:  Pixel Clock Polarity */
-#define LTDC_GCR_DEPOL              (1 << 29) /* Bit 29:  Data Enable Polarity */
+#define LTDC_GCR_DEPOL              (1 << 29) /* Bit 29:  Not(Data Enable) Polarity */
 #define LTDC_GCR_VSPOL              (1 << 30) /* Bit 30:  Vertical Sync Polarity */
 #define LTDC_GCR_HSPOL              (1 << 31) /* Bit 31:  Horizontal Sync Polarity */
 

@@ -111,33 +111,22 @@
 #define STM32_LTDC_AWCR_AAW          LTDC_AWCR_AAW(STM32_LTDC_LxWHPCR_WHSPPOS)
 
 /* LTDC_TWCR register */
-
-#define STM32_LTDC_TWCR_TOTALH       LTDC_TWCR_TOTALH(BOARD_LTDC_VSYNC + \
-                                     BOARD_LTDC_VBP + \
-                                     STM32_LTDC_HEIGHT + BOARD_LTDC_VFP - 1)
+#define STM32_LTDC_TOTALHEIGHT       (BOARD_LTDC_VSYNC + \
+                                      BOARD_LTDC_VBP + \
+                                      STM32_LTDC_HEIGHT + BOARD_LTDC_VFP - 1)
+#define STM32_LTDC_TWCR_TOTALH       LTDC_TWCR_TOTALH(STM32_LTDC_TOTALHEIGHT)
 #define STM32_LTDC_TWCR_TOTALW       LTDC_TWCR_TOTALW(BOARD_LTDC_HSYNC + \
                                      BOARD_LTDC_HBP + \
                                      STM32_LTDC_WIDTH + BOARD_LTDC_HFP - 1)
 
-/* Global GCR register */
-
-/* Synchronisation and Polarity */
-
+/* Global GCR register: Synchronisation Polarity */
 #define STM32_LTDC_GCR_PCPOL         BOARD_LTDC_GCR_PCPOL
 #define STM32_LTDC_GCR_DEPOL         BOARD_LTDC_GCR_DEPOL
 #define STM32_LTDC_GCR_VSPOL         BOARD_LTDC_GCR_VSPOL
 #define STM32_LTDC_GCR_HSPOL         BOARD_LTDC_GCR_HSPOL
 
-/* Dither */
-
-#define STM32_LTDC_GCR_DEN           BOARD_LTDC_GCR_DEN
-#define STM32_LTDC_GCR_DBW           LTDC_GCR_GBW(BOARD_LTDC_GCR_DBW)
-#define STM32_LTDC_GCR_DGW           LTDC_GCR_DGW(BOARD_LTDC_GCR_DGW)
-#define STN32_LTDC_GCR_DRW           LTDC_GCR_DBW(BOARD_LTDC_GCR_DRW)
-
 /* LIPCR register */
-
-#define STM32_LTDC_LIPCR_LIPOS       LTDC_LIPCR_LIPOS(STM32_LTDC_TWCR_TOTALW)
+#define STM32_LTDC_LIPCR_LIPOS       LTDC_LIPCR_LIPOS(STM32_LTDC_TOTALHEIGHT)
 
 /* Configuration ************************************************************/
 
@@ -974,17 +963,15 @@ static void stm32_ltdc_periphconfig(void)
   stm32_ltdc_gpioconfig();
 #endif
 
-  /* Configure APB2 LTDC clock external */
-
+  /* APB2 LTDC clock is expected to be externally preconfigured */
   reginfo("configured RCC_APB2ENR=%08x\n", getreg32(STM32_RCC_APB2ENR));
 
-  /* Configure the SAI PLL external to provide the LCD_CLK */
-
+  /* SAI PLL is expected to be externally preconfigured to provide the LCD_CLK */
   reginfo("configured RCC_PLLSAI=%08x\n", getreg32(STM32_RCC_PLLSAICFGR));
 
-  /* Configure dedicated clock external */
-
-  reginfo("configured RCC_DCKCFGR=%08x\n", getreg32(STM32_RCC_DCKCFGR));
+  /* Dedicated clocks are expected to be externally preconfigured */
+  reginfo("configured RCC_DCKCFGR1=%08x\n", getreg32(STM32_RCC_DCKCFGR1));
+  reginfo("configured RCC_DCKCFGR2=%08x\n", getreg32(STM32_RCC_DCKCFGR2));
 
   /* Configure LTDC_SSCR */
 
@@ -1014,9 +1001,10 @@ static void stm32_ltdc_periphconfig(void)
   putreg32(regval, STM32_LTDC_TWCR);
   reginfo("configured LTDC_TWCR=%08x\n", getreg32(STM32_LTDC_TWCR));
 
-  /* Configure LTDC_GCR */
-
-  regval = (STM32_LTDC_GCR_PCPOL | STM32_LTDC_GCR_DEPOL
+  /* Configure signal polarities */
+  regval = getreg32(STM32_LTDC_GCR);
+  regval &= ~(LTDC_GCR_PCPOL | LTDC_GCR_DEPOL | LTDC_GCR_VSPOL | LTDC_GCR_HSPOL);
+  regval |= (STM32_LTDC_GCR_PCPOL | STM32_LTDC_GCR_DEPOL
            | STM32_LTDC_GCR_VSPOL | STM32_LTDC_GCR_HSPOL);
   reginfo("set LTDC_GCR=%08x\n", regval);
   putreg32(regval, STM32_LTDC_GCR);
@@ -1073,8 +1061,7 @@ static void stm32_ltdc_dither(bool enable,
       regval &= ~LTDC_GCR_DEN;
     }
 
-  regval &= ~(!LTDC_GCR_DEN | LTDC_GCR_DRW(0) |
-                LTDC_GCR_DGW(0) | LTDC_GCR_DBW(0));
+  regval &= ~(LTDC_GCR_DBW_MASK | LTDC_GCR_DGW_MASK | LTDC_GCR_DRW_MASK);
   regval |= (LTDC_GCR_DRW(red) | LTDC_GCR_DGW(green) | LTDC_GCR_DBW(blue));
 
   reginfo("set LTDC_GCR=%08x\n", regval);
@@ -3440,6 +3427,21 @@ FAR struct ltdc_layer_s *stm32_ltdcgetlayer(int lid)
   return NULL;
 }
 #endif /* CONFIG_STM32F7_LTDC_INTERFACE */
+
+
+/****************************************************************************
+ * Name: stm32_ltdcreset
+ *
+ * Description:
+ *   Reset LTDC via APB2RSTR
+ *
+ *
+ ****************************************************************************/
+void   stm32_ltdcreset(void)
+{
+  *((uint32_t *)(STM32_RCC_APB2RSTR)) |= RCC_APB2RSTR_LTDCRST;
+  *((uint32_t *)(STM32_RCC_APB2RSTR)) &= ~RCC_APB2RSTR_LTDCRST;
+}
 
 /****************************************************************************
  * Name: stm32_ltdcinitialize

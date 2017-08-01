@@ -4692,7 +4692,8 @@ config STM32F7_LTDC_BACKCOLOR
 	default 0x0
 	---help---
 		This is the background color that will be used as the LTDC
-		background layer color.  It is an RGB888 format value.
+		background layer color.  It is an RGB888 format value,
+		which gets written unmodified to register LTDC_BCCR.
 
 config STM32F7_LTDC_DITHER
 	bool "Dither support"
@@ -4817,6 +4818,15 @@ config FB_TRANSPARENCY
 		ltdc L8 format.
 
 endif
+
+config STM32F7_LTDC_REGDEBUG
+	bool "Enable LTDC register value debug messages"
+	default n
+	---help---
+		This gives additional messages for LTDC related register values.
+		Additionally, you have to select "Low-level LCD Debug Features"
+		to enable the debug messages.
+
 endmenu
 
 endif # STM32F7_LTDC
