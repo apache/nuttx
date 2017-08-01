@@ -111,7 +111,64 @@ static const linegen_t g_linegen[] =
  * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
+#ifdef CONFIG_NET_6LOWPAN
+static int netprocfs_6lowpan_linklayer(FAR struct netprocfs_file_s *netfile,
+                                       int len)
+{
+  FAR struct netdev_varaddr_s *addr;
+  FAR struct net_driver_s *dev;
+
+  DEBUGASSERT(netfile != NULL && netfile->dev != NULL);
+  dev  = netfile->dev;
+  addr = &dev->d_mac.sixlowpan;
+
+  len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                  "%s\tLink encap:6LoWPAN HWaddr ",
+                  dev->d_ifname);
+
+  switch (addr->nv_addrlen)
+    {
+      default:
+      case 0:
+        nwarn("WARNING: Bad or undefined node address: %u\n", addr->nv_addrlen);
+        len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                        "--");
+        break;
+
+#ifdef CONFIG_WIRELESS_PKTRADIO
+      case 1:
+        len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                        "%02x", addr->nv_addr[0]);
+        break;
+#endif
+
+#if defined(CONFIG_WIRELESS_PKTRADIO) || \
+    (defined(CONFIG_WIRELESS_IEEE802154) && !defined(CONFIG_NET_6LOWPAN_EXTENDEDADDR))
+      case 2:
+        len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                        "%02x:%02x",
+                        addr->nv_addr[0], addr->nv_addr[1]);
+        break;
+#endif
+
+#if defined(CONFIG_WIRELESS_PKTRADIO) || \
+    (defined(CONFIG_WIRELESS_IEEE802154) && defined(CONFIG_NET_6LOWPAN_EXTENDEDADDR))
+      case 8:
+        len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                        "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
+                         addr->nv_addr[0], addr->nv_addr[1],
+                         addr->nv_addr[2], addr->nv_addr[3],
+                         addr->nv_addr[4], addr->nv_addr[5],
+                         addr->nv_addr[6], addr->nv_addr[7]);
+        break;
+#endif
+    }
+
+  return len;
+}
+#endif
+
+  /****************************************************************************
  * Name: netprocfs_linklayer
  ****************************************************************************/
 
@@ -156,25 +213,12 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
 
 #ifdef CONFIG_NET_6LOWPAN
       case NET_LL_IEEE802154:
+      case NET_LL_PKTRADIO:
         {
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-          len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                          "%s\tLink encap:6LoWPAN HWaddr "
-                          "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
-                          dev->d_ifname,
-                          dev->d_mac.sixlowpan.nv_addr[0], dev->d_mac.sixlowpan.nv_addr[1],
-                          dev->d_mac.sixlowpan.nv_addr[2], dev->d_mac.sixlowpan.nv_addr[3],
-                          dev->d_mac.sixlowpan.nv_addr[4], dev->d_mac.sixlowpan.nv_addr[5],
-                          dev->d_mac.sixlowpan.nv_addr[6], dev->d_mac.sixlowpan.nv_addr[7]);
-#else
-          len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                          "%s\tLink encap:6LoWPAN HWaddr %02x:%02x",
-                          dev->d_ifname,
-                          dev->d_mac.sixlowpan.nv_addr[0], dev->d_mac.sixlowpan.nv_addr[1]);
-#endif
+          len += netprocfs_6lowpan_linklayer(netfile, len);
         }
         break;
-#endif
+#endif /* CONFIG_NET_6LOWPAN */
 
 #ifdef CONFIG_NET_LOOPBACK
       case NET_LL_LOOPBACK:
@@ -219,23 +263,10 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
                   dev->d_ifname, ether_ntoa(&dev->d_mac.ether), status);
 
 #elif defined(CONFIG_NET_6LOWPAN)
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+  len += netprocfs_6lowpan_linklayer(netfile, len);
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                  "%s\tLink encap:6LoWPAN HWaddr "
-                  "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x at %s\n",
-                  dev->d_ifname,
-                  dev->d_mac.sixlowpan.nv_addr[0], dev->d_mac.sixlowpan.nv_addr[1],
-                  dev->d_mac.sixlowpan.nv_addr[2], dev->d_mac.sixlowpan.nv_addr[3],
-                  dev->d_mac.sixlowpan.nv_addr[4], dev->d_mac.sixlowpan.nv_addr[5],
-                  dev->d_mac.sixlowpan.nv_addr[6], dev->d_mac.sixlowpan.nv_addr[7],
-                  status);
-#else
-  len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                  "%s\tLink encap:6LoWPAN HWaddr %02x:%02x at %s\n",
-                  dev->d_ifname,
-                  dev->d_mac.sixlowpan.nv_addr[0], dev->d_mac.sixlowpan.nv_addr[1],
-                  status);
-#endif
+                  " at %s\n", status);
+
 #elif defined(CONFIG_NET_LOOPBACK)
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   "%s\tLink encap:Local Loopback at %s\n",
