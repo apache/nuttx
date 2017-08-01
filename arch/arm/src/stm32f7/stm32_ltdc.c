@@ -111,6 +111,7 @@
 #define STM32_LTDC_AWCR_AAW          LTDC_AWCR_AAW(STM32_LTDC_LxWHPCR_WHSPPOS)
 
 /* LTDC_TWCR register */
+
 #define STM32_LTDC_TOTALHEIGHT       (BOARD_LTDC_VSYNC + \
                                       BOARD_LTDC_VBP + \
                                       STM32_LTDC_HEIGHT + BOARD_LTDC_VFP - 1)
@@ -120,12 +121,14 @@
                                      STM32_LTDC_WIDTH + BOARD_LTDC_HFP - 1)
 
 /* Global GCR register: Synchronisation Polarity */
+
 #define STM32_LTDC_GCR_PCPOL         BOARD_LTDC_GCR_PCPOL
 #define STM32_LTDC_GCR_DEPOL         BOARD_LTDC_GCR_DEPOL
 #define STM32_LTDC_GCR_VSPOL         BOARD_LTDC_GCR_VSPOL
 #define STM32_LTDC_GCR_HSPOL         BOARD_LTDC_GCR_HSPOL
 
 /* LIPCR register */
+
 #define STM32_LTDC_LIPCR_LIPOS       LTDC_LIPCR_LIPOS(STM32_LTDC_TOTALHEIGHT)
 
 /* Configuration ************************************************************/
@@ -957,19 +960,24 @@ static void stm32_ltdc_periphconfig(void)
 
 #if defined(CONFIG_STM32F7_LTDC_USE_DSI)
    /* work in progress; maybe move to lcdinfo when everything is OK. */
+
    lcdwarn("LTDC: Expecting preconfigured DSI; not configuring pins for LCD interface\n");
 #else
   /* Configure GPIO's */
+
   stm32_ltdc_gpioconfig();
 #endif
 
   /* APB2 LTDC clock is expected to be externally preconfigured */
+
   reginfo("configured RCC_APB2ENR=%08x\n", getreg32(STM32_RCC_APB2ENR));
 
   /* SAI PLL is expected to be externally preconfigured to provide the LCD_CLK */
+
   reginfo("configured RCC_PLLSAI=%08x\n", getreg32(STM32_RCC_PLLSAICFGR));
 
   /* Dedicated clocks are expected to be externally preconfigured */
+
   reginfo("configured RCC_DCKCFGR1=%08x\n", getreg32(STM32_RCC_DCKCFGR1));
   reginfo("configured RCC_DCKCFGR2=%08x\n", getreg32(STM32_RCC_DCKCFGR2));
 
@@ -1002,10 +1010,11 @@ static void stm32_ltdc_periphconfig(void)
   reginfo("configured LTDC_TWCR=%08x\n", getreg32(STM32_LTDC_TWCR));
 
   /* Configure signal polarities */
+
   regval = getreg32(STM32_LTDC_GCR);
   regval &= ~(LTDC_GCR_PCPOL | LTDC_GCR_DEPOL | LTDC_GCR_VSPOL | LTDC_GCR_HSPOL);
-  regval |= (STM32_LTDC_GCR_PCPOL | STM32_LTDC_GCR_DEPOL
-           | STM32_LTDC_GCR_VSPOL | STM32_LTDC_GCR_HSPOL);
+  regval |=  (STM32_LTDC_GCR_PCPOL | STM32_LTDC_GCR_DEPOL |
+              STM32_LTDC_GCR_VSPOL | STM32_LTDC_GCR_HSPOL);
   reginfo("set LTDC_GCR=%08x\n", regval);
   putreg32(regval, STM32_LTDC_GCR);
   reginfo("configured LTDC_GCR=%08x\n", getreg32(STM32_LTDC_GCR));
@@ -3428,16 +3437,15 @@ FAR struct ltdc_layer_s *stm32_ltdcgetlayer(int lid)
 }
 #endif /* CONFIG_STM32F7_LTDC_INTERFACE */
 
-
 /****************************************************************************
  * Name: stm32_ltdcreset
  *
  * Description:
  *   Reset LTDC via APB2RSTR
  *
- *
  ****************************************************************************/
-void   stm32_ltdcreset(void)
+
+void stm32_ltdcreset(void)
 {
   *((uint32_t *)(STM32_RCC_APB2RSTR)) |= RCC_APB2RSTR_LTDCRST;
   *((uint32_t *)(STM32_RCC_APB2RSTR)) &= ~RCC_APB2RSTR_LTDCRST;
