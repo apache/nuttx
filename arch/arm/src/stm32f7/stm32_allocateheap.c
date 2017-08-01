@@ -67,12 +67,13 @@
  * following definitions must be provided to specify the size and
  * location of internal(system) SRAM:
  *
- * CONFIG_RAM_END             : End address (+1) of SRAM (F1 family only, the
- *                            : F4 family uses the a priori end of SRAM)
+ * CONFIG_RAM_END               : End address (+1) of SRAM (F1 family only,
+ *                              : the F4 family uses the a priori end of
+ *                              : SRAM)
  *
- * In addition to internal SRAM, external RAM may also be available through the FMC.
- * In order to use FMC RAM, the following additional things need to be
- * present in the NuttX configuration file:
+ * In addition to internal SRAM, external RAM may also be available through
+ * the FMC.  In order to use FMC RAM, the following additional things need
+ * to be present in the NuttX configuration file:
  *
  * CONFIG_STM32F7_FMC=y         : Enables the FMC
  * CONFIG_STM32F7_FMC_S[D]RAM=y : SRAM and/or SDRAM is available via the FMC.
@@ -211,10 +212,6 @@
 #    define CONFIG_MM_REGIONS 2
 #  endif
 #endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
