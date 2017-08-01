@@ -80,6 +80,20 @@
  * Private Function Prototypes
  ************************************************************************************/
 
+static int     uart_takesem(FAR sem_t *sem, bool errout);
+#ifndef CONFIG_DISABLE_POLL
+static void    uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset);
+#endif
+
+/* Write support */
+
+static int     uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock);
+static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev, FAR const char *buffer,
+                                    size_t buflen);
+static int     uart_tcdrain(FAR uart_dev_t *dev);
+
+/* Character driver methods */
+
 static int     uart_open(FAR struct file *filep);
 static int     uart_close(FAR struct file *filep);
 static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
@@ -348,195 +362,304 @@ static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev, FAR const char *buffer,
 }
 
 /************************************************************************************
- * Name: uart_write
+ * Name: uart_tcdrain
+ *
+ * Description:
+ *   Block further TX input.  Wait until all data has been transferred from the TX
+ *   buffer and until the hardware TX FIFOs are empty.
+ *
  ************************************************************************************/
 
-static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
-                          size_t buflen)
+static int uart_tcdrain(FAR uart_dev_t *dev)
 {
-  FAR struct inode *inode    = filep->f_inode;
-  FAR uart_dev_t   *dev      = inode->i_private;
-  ssize_t           nwritten = buflen;
-  bool              oktoblock;
-  int               ret;
-  char              ch;
+  int ret;
 
-  /* We may receive console writes through this path from interrupt handlers and
-   * from debug output in the IDLE task!  In these cases, we will need to do things
-   * a little differently.
+  /* Get exclusive access to the to dev->tmit.  We cannot permit new data to be
+   * written while we are trying to flush the old data.
+   *
+   * A signal received while waiting for access to the xmit.head will abort the
+   * operation with EINTR.
    */
 
-  if (up_interrupt_context() || sched_idletask())
+  ret = (ssize_t)uart_takesem(&dev->xmit.sem, true);
+  if (ret >= 0)
     {
+      irqstate_t flags;
+
+      /* Trigger emission to flush the contents of the tx buffer */
+
+      flags = enter_critical_section();
+
 #ifdef CONFIG_SERIAL_REMOVABLE
-      /* If the removable device is no longer connected, refuse to write to
-       * the device.
+      /* Check if the removable device is no longer connected while we have
+       * interrupts off.  We do not want the transition to occur as a race
+       * condition before we begin the wait.
        */
 
       if (dev->disconnected)
         {
-          return -ENOTCONN;
-        }
-#endif
-
-      /* up_putc() will be used to generate the output in a busy-wait loop.
-       * up_putc() is only available for the console device.
-       */
-
-      if (dev->isconsole)
-        {
-          irqstate_t flags = enter_critical_section();
-          ret = uart_irqwrite(dev, buffer, buflen);
-          leave_critical_section(flags);
-          return ret;
+          dev->xmit.head = 0;  /* Drop the buffered TX data */
+          dev->xmit.tail = 0;
+          ret = -ENOTCONN;
         }
       else
+#endif
         {
-          return -EPERM;
+          /* Continue waiting while the TX buffer is not empty */
+
+          ret = OK;
+          while (ret >= 0 && dev->xmit.head != dev->xmit.tail)
+            {
+              /* Inform the interrupt level logic that we are waiting. */
+
+              dev->xmitwaiting = true;
+
+              /* Wait for some characters to be sent from the buffer with
+               * the TX interrupt enabled.  When the TX interrupt is
+               * enabled, uart_xmitchars() should execute and remove some
+               * of the data from the TX buffer.  We mayhave to wait several
+               * times for the TX buffer to be entirely emptied.
+               *
+               * NOTE that interrupts will be re-enabled while we wait for
+               * the semaphore.
+               */
+
+#ifdef CONFIG_SERIAL_DMA
+              uart_dmatxavail(dev);
+#endif
+              uart_enabletxint(dev);
+              ret = uart_takesem(&dev->xmitsem, true);
+              uart_disabletxint(dev);
+            }
         }
+
+      leave_critical_section(flags);
+
+      /* The TX buffer is empty (or an error occurred).  But there still may
+       * be data in the UART TX FIFO.  We get no asynchronous indication of
+       * this event, so we have to do a busy wait poll.
+       */
+
+      if (ret >= 0)
+        {
+          while (!uart_txempty(dev))
+            {
+#ifndef CONFIG_DISABLE_SIGNALS
+              usleep(HALF_SECOND_USEC);
+#else
+              up_mdelay(HALF_SECOND_MSEC);
+#endif
+            }
+         }
+
+      uart_givesem(&dev->xmit.sem);
     }
 
-  /* Only one user can access dev->xmit.head at a time */
+  return ret;
+}
 
-  ret = (ssize_t)uart_takesem(&dev->xmit.sem, true);
+/************************************************************************************
+ * Name: uart_open
+ *
+ * Description:
+ *   This routine is called whenever a serial port is opened.
+ *
+ ************************************************************************************/
+
+static int uart_open(FAR struct file *filep)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR uart_dev_t   *dev   = inode->i_private;
+  uint8_t           tmp;
+  int               ret;
+
+  /* If the port is the middle of closing, wait until the close is finished.
+   * If a signal is received while we are waiting, then return EINTR.
+   */
+
+  ret = uart_takesem(&dev->closesem, true);
   if (ret < 0)
     {
-      /* A signal received while waiting for access to the xmit.head will
-       * abort the transfer.  After the transfer has started, we are committed
-       * and signals will be ignored.
-       */
+      /* A signal received while waiting for the last close operation. */
 
       return ret;
     }
 
 #ifdef CONFIG_SERIAL_REMOVABLE
-  /* If the removable device is no longer connected, refuse to write to the
-   * device.  This check occurs after taking the xmit.sem because the
-   * disconnection event might have occurred while we were waiting for
-   * access to the transmit buffers.
+  /* If the removable device is no longer connected, refuse to open the
+   * device.  We check this after obtaining the close semaphore because
+   * we might have been waiting when the device was disconnected.
    */
 
   if (dev->disconnected)
     {
-      uart_givesem(&dev->xmit.sem);
-      return -ENOTCONN;
+      ret = -ENOTCONN;
+      goto errout_with_sem;
     }
 #endif
 
-  /* Can the following loop block, waiting for space in the TX
-   * buffer?
-   */
+  /* Start up serial port */
+  /* Increment the count of references to the device. */
 
-  oktoblock = ((filep->f_oflags & O_NONBLOCK) == 0);
-
-  /* Loop while we still have data to copy to the transmit buffer.
-   * we add data to the head of the buffer; uart_xmitchars takes the
-   * data from the end of the buffer.
-   */
-
-  uart_disabletxint(dev);
-  for (; buflen; buflen--)
+  tmp = dev->open_count + 1;
+  if (tmp == 0)
     {
-      ch  = *buffer++;
-      ret = OK;
+      /* More than 255 opens; uint8_t overflows to zero */
 
-#ifdef CONFIG_SERIAL_TERMIOS
-      /* Do output post-processing */
+      ret = -EMFILE;
+      goto errout_with_sem;
+    }
 
-      if ((dev->tc_oflag & OPOST) != 0)
+  /* Check if this is the first time that the driver has been opened. */
+
+  if (tmp == 1)
+    {
+      irqstate_t flags = enter_critical_section();
+
+      /* If this is the console, then the UART has already been initialized. */
+
+      if (!dev->isconsole)
         {
-          /* Mapping CR to NL? */
+          /* Perform one time hardware initialization */
 
-          if ((ch == '\r') && (dev->tc_oflag & OCRNL) != 0)
+          ret = uart_setup(dev);
+          if (ret < 0)
             {
-              ch = '\n';
+              leave_critical_section(flags);
+              goto errout_with_sem;
             }
-
-          /* Are we interested in newline processing? */
-
-          if ((ch == '\n') && (dev->tc_oflag & (ONLCR | ONLRET)) != 0)
-            {
-              ret = uart_putxmitchar(dev, '\r', oktoblock);
-              if (ret < 0)
-                {
-                  nwritten = ret;
-                  break;
-                }
-            }
-
-          /* Specifically not handled:
-           *
-           * OXTABS - primarily a full-screen terminal optimisation
-           * ONOEOT - Unix interoperability hack
-           * OLCUC  - Not specified by POSIX
-           * ONOCR  - low-speed interactive optimisation
-           */
         }
 
-#else /* !CONFIG_SERIAL_TERMIOS */
-      /* If this is the console, convert \n -> \r\n */
-
-      if (dev->isconsole && ch == '\n')
-        {
-          ret = uart_putxmitchar(dev, '\r', oktoblock);
-        }
-#endif
-
-      /* Put the character into the transmit buffer */
-
-      if (ret == OK)
-        {
-          ret = uart_putxmitchar(dev, ch, oktoblock);
-        }
-
-      /* uart_putxmitchar() might return an error under one of two
-       * conditions:  (1) The wait for buffer space might have been
-       * interrupted by a signal (ret should be -EINTR), (2) if
-       * CONFIG_SERIAL_REMOVABLE is defined, then uart_putxmitchar()
-       * might also return if the serial device was disconnected
-       * (with -ENOTCONN), or (3) if O_NONBLOCK is specified, then
-       * then uart_putxmitchar() might return -EAGAIN if the output
-       * TX buffer is full.
+      /* In any event, we do have to configure for interrupt driven mode of
+       * operation.  Attach the hardware IRQ(s). Hmm.. should shutdown() the
+       * the device in the rare case that uart_attach() fails, tmp==1, and
+       * this is not the console.
        */
 
+      ret = uart_attach(dev);
       if (ret < 0)
         {
-          /* POSIX requires that we return -1 and errno set if no data was
-           * transferred.  Otherwise, we return the number of bytes in the
-           * interrupted transfer.
-           */
-
-          if (buflen < (size_t)nwritten)
-            {
-              /* Some data was transferred.  Return the number of bytes that
-               * were successfully transferred.
-               */
-
-              nwritten -= buflen;
-            }
-          else
-            {
-              /* No data was transferred. Return the negated errno value.
-               * The VFS layer will set the errno value appropriately).
-               */
-
-              nwritten = ret;
-            }
-
-          break;
+           uart_shutdown(dev);
+           leave_critical_section(flags);
+           goto errout_with_sem;
         }
-    }
 
-  if (dev->xmit.head != dev->xmit.tail)
-    {
-#ifdef CONFIG_SERIAL_DMA
-      uart_dmatxavail(dev);
+      /* Mark the io buffers empty */
+
+      dev->xmit.head = 0;
+      dev->xmit.tail = 0;
+      dev->recv.head = 0;
+      dev->recv.tail = 0;
+
+      /* Initialize termios state */
+
+#ifdef CONFIG_SERIAL_TERMIOS
+      dev->tc_iflag = 0;
+      if (dev->isconsole)
+        {
+          /* Enable \n -> \r\n translation for the console */
+
+          dev->tc_oflag = OPOST | ONLCR;
+        }
+      else
+        {
+          dev->tc_oflag = 0;
+        }
 #endif
-      uart_enabletxint(dev);
+
+#ifdef CONFIG_SERIAL_DMA
+      /* Notify DMA that there is free space in the RX buffer */
+
+      uart_dmarxfree(dev);
+#endif
+
+      /* Enable the RX interrupt */
+
+      uart_enablerxint(dev);
+      leave_critical_section(flags);
     }
 
-  uart_givesem(&dev->xmit.sem);
-  return nwritten;
+  /* Save the new open count on success */
+
+  dev->open_count = tmp;
+
+errout_with_sem:
+  uart_givesem(&dev->closesem);
+  return ret;
+}
+
+/************************************************************************************
+ * Name: uart_close
+ *
+ * Description:
+ *   This routine is called when the serial port gets closed.
+ *   It waits for the last remaining data to be sent.
+ *
+ ************************************************************************************/
+
+static int uart_close(FAR struct file *filep)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR uart_dev_t   *dev   = inode->i_private;
+  irqstate_t        flags;
+
+  /* Get exclusive access to the close semaphore (to synchronize open/close operations.
+   * NOTE: that we do not let this wait be interrupted by a signal.  Technically, we
+   * should, but almost no one every checks the return value from close() so we avoid
+   * a potential memory leak by ignoring signals in this case.
+   */
+
+  (void)uart_takesem(&dev->closesem, false);
+  if (dev->open_count > 1)
+    {
+      dev->open_count--;
+      uart_givesem(&dev->closesem);
+      return OK;
+    }
+
+  /* There are no more references to the port */
+
+  dev->open_count = 0;
+
+  /* Stop accepting input */
+
+  uart_disablerxint(dev);
+
+  /* Prevent blocking if the device is opened with O_NONBLOCK */
+
+  if ((filep->f_oflags & O_NONBLOCK) == 0)
+    {
+      /* Now we wait for the transmit buffer(s) to clear */
+
+      (void)uart_tcdrain(dev);
+    }
+
+  /* Free the IRQ and disable the UART */
+
+  flags = enter_critical_section();  /* Disable interrupts */
+  uart_detach(dev);                  /* Detach interrupts */
+  if (!dev->isconsole)               /* Check for the serial console UART */
+    {
+      uart_shutdown(dev);            /* Disable the UART */
+    }
+
+  leave_critical_section(flags);
+
+  /* We need to re-initialize the semaphores if this is the last close
+   * of the device, as the close might be caused by pthread_cancel() of
+   * a thread currently blocking on any of them.
+   */
+
+  sem_reset(&dev->xmitsem,  0);
+  sem_reset(&dev->recvsem,  0);
+  sem_reset(&dev->xmit.sem, 1);
+  sem_reset(&dev->recv.sem, 1);
+#ifndef CONFIG_DISABLE_POLL
+  sem_reset(&dev->pollsem,  1);
+#endif
+
+  uart_givesem(&dev->closesem);
+  return OK;
 }
 
 /************************************************************************************
@@ -880,6 +1003,198 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
 }
 
 /************************************************************************************
+ * Name: uart_write
+ ************************************************************************************/
+
+static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
+                          size_t buflen)
+{
+  FAR struct inode *inode    = filep->f_inode;
+  FAR uart_dev_t   *dev      = inode->i_private;
+  ssize_t           nwritten = buflen;
+  bool              oktoblock;
+  int               ret;
+  char              ch;
+
+  /* We may receive console writes through this path from interrupt handlers and
+   * from debug output in the IDLE task!  In these cases, we will need to do things
+   * a little differently.
+   */
+
+  if (up_interrupt_context() || sched_idletask())
+    {
+#ifdef CONFIG_SERIAL_REMOVABLE
+      /* If the removable device is no longer connected, refuse to write to
+       * the device.
+       */
+
+      if (dev->disconnected)
+        {
+          return -ENOTCONN;
+        }
+#endif
+
+      /* up_putc() will be used to generate the output in a busy-wait loop.
+       * up_putc() is only available for the console device.
+       */
+
+      if (dev->isconsole)
+        {
+          irqstate_t flags = enter_critical_section();
+          ret = uart_irqwrite(dev, buffer, buflen);
+          leave_critical_section(flags);
+          return ret;
+        }
+      else
+        {
+          return -EPERM;
+        }
+    }
+
+  /* Only one user can access dev->xmit.head at a time */
+
+  ret = (ssize_t)uart_takesem(&dev->xmit.sem, true);
+  if (ret < 0)
+    {
+      /* A signal received while waiting for access to the xmit.head will
+       * abort the transfer.  After the transfer has started, we are committed
+       * and signals will be ignored.
+       */
+
+      return ret;
+    }
+
+#ifdef CONFIG_SERIAL_REMOVABLE
+  /* If the removable device is no longer connected, refuse to write to the
+   * device.  This check occurs after taking the xmit.sem because the
+   * disconnection event might have occurred while we were waiting for
+   * access to the transmit buffers.
+   */
+
+  if (dev->disconnected)
+    {
+      uart_givesem(&dev->xmit.sem);
+      return -ENOTCONN;
+    }
+#endif
+
+  /* Can the following loop block, waiting for space in the TX
+   * buffer?
+   */
+
+  oktoblock = ((filep->f_oflags & O_NONBLOCK) == 0);
+
+  /* Loop while we still have data to copy to the transmit buffer.
+   * we add data to the head of the buffer; uart_xmitchars takes the
+   * data from the end of the buffer.
+   */
+
+  uart_disabletxint(dev);
+  for (; buflen; buflen--)
+    {
+      ch  = *buffer++;
+      ret = OK;
+
+#ifdef CONFIG_SERIAL_TERMIOS
+      /* Do output post-processing */
+
+      if ((dev->tc_oflag & OPOST) != 0)
+        {
+          /* Mapping CR to NL? */
+
+          if ((ch == '\r') && (dev->tc_oflag & OCRNL) != 0)
+            {
+              ch = '\n';
+            }
+
+          /* Are we interested in newline processing? */
+
+          if ((ch == '\n') && (dev->tc_oflag & (ONLCR | ONLRET)) != 0)
+            {
+              ret = uart_putxmitchar(dev, '\r', oktoblock);
+              if (ret < 0)
+                {
+                  nwritten = ret;
+                  break;
+                }
+            }
+
+          /* Specifically not handled:
+           *
+           * OXTABS - primarily a full-screen terminal optimisation
+           * ONOEOT - Unix interoperability hack
+           * OLCUC  - Not specified by POSIX
+           * ONOCR  - low-speed interactive optimisation
+           */
+        }
+
+#else /* !CONFIG_SERIAL_TERMIOS */
+      /* If this is the console, convert \n -> \r\n */
+
+      if (dev->isconsole && ch == '\n')
+        {
+          ret = uart_putxmitchar(dev, '\r', oktoblock);
+        }
+#endif
+
+      /* Put the character into the transmit buffer */
+
+      if (ret == OK)
+        {
+          ret = uart_putxmitchar(dev, ch, oktoblock);
+        }
+
+      /* uart_putxmitchar() might return an error under one of two
+       * conditions:  (1) The wait for buffer space might have been
+       * interrupted by a signal (ret should be -EINTR), (2) if
+       * CONFIG_SERIAL_REMOVABLE is defined, then uart_putxmitchar()
+       * might also return if the serial device was disconnected
+       * (with -ENOTCONN), or (3) if O_NONBLOCK is specified, then
+       * then uart_putxmitchar() might return -EAGAIN if the output
+       * TX buffer is full.
+       */
+
+      if (ret < 0)
+        {
+          /* POSIX requires that we return -1 and errno set if no data was
+           * transferred.  Otherwise, we return the number of bytes in the
+           * interrupted transfer.
+           */
+
+          if (buflen < (size_t)nwritten)
+            {
+              /* Some data was transferred.  Return the number of bytes that
+               * were successfully transferred.
+               */
+
+              nwritten -= buflen;
+            }
+          else
+            {
+              /* No data was transferred. Return the negated errno value.
+               * The VFS layer will set the errno value appropriately).
+               */
+
+              nwritten = ret;
+            }
+
+          break;
+        }
+    }
+
+  if (dev->xmit.head != dev->xmit.tail)
+    {
+#ifdef CONFIG_SERIAL_DMA
+      uart_dmatxavail(dev);
+#endif
+      uart_enabletxint(dev);
+    }
+
+  uart_givesem(&dev->xmit.sem);
+  return nwritten;
+}
+
+/************************************************************************************
  * Name: uart_ioctl
  ************************************************************************************/
 
@@ -1003,90 +1318,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           case TCDRN:
             {
-              /* Get exclusive access to the to dev->tmit.  We cannot permit
-               * new data to be written while we are trying to flush the old
-               * data.
-               *
-               * A signal received while waiting for access to the xmit.head
-               * will abort the operation with EINTR.
-               */
-
-              ret = (ssize_t)uart_takesem(&dev->xmit.sem, true);
-              if (ret >= 0)
-                {
-                  irqstate_t flags;
-
-                  /* Trigger emission to flush the contents of the tx buffer */
-
-                  flags = enter_critical_section();
-
-#ifdef CONFIG_SERIAL_REMOVABLE
-                  /* Check if the removable device is no longer connected
-                   * while we have interrupts off.  We do not want the
-                   * transition to occur as a race condition before we begin
-                   * the wait.
-                   */
-
-                  if (dev->disconnected)
-                    {
-                      ret = -ENOTCONN;
-                    }
-                  else
-#endif
-                    {
-                      /* Continue waiting while the TX buffer is not empty */
-
-                      ret = OK;
-                      while (ret >= 0 && dev->xmit.head != dev->xmit.tail)
-                        {
-                          /* Inform the interrupt level logic that we are
-                           * waiting.
-                           */
-
-                          dev->xmitwaiting = true;
-
-                          /* Wait for some characters to be sent from the
-                           * buffer with the TX interrupt enabled.  When the
-                           * TX interrupt is enabled, uart_xmitchars()
-                           * should execute and remove some of the data from
-                           * the TX buffer.  We mayhave to wait several
-                           * times for the TX buffer to be entirely emptied.
-                           *
-                           * NOTE that interrupts will be re-enabled while we
-                           * wait for the semaphore.
-                           */
-
-#ifdef CONFIG_SERIAL_DMA
-                          uart_dmatxavail(dev);
-#endif
-                          uart_enabletxint(dev);
-                          ret = uart_takesem(&dev->xmitsem, true);
-                          uart_disabletxint(dev);
-                        }
-                    }
-
-                  leave_critical_section(flags);
-
-                  /* The TX buffer is empty (or an error occurred).  But
-                   * there still may be data in the UART TX FIFO.  We get no
-                   * asynchronous indication of this event, so we have to do
-                   * a busy wait poll.
-                   */
-
-                  if (ret >= 0)
-                    {
-                      while (!uart_txempty(dev))
-                        {
-#ifndef CONFIG_DISABLE_SIGNALS
-                          usleep(HALF_SECOND_USEC);
-#else
-                          up_mdelay(HALF_SECOND_MSEC);
-#endif
-                        }
-                    }
-
-                  uart_givesem(&dev->xmit.sem);
-                }
+              ret = uart_tcdrain(dev);
             }
             break;
 #endif
@@ -1147,7 +1379,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
+static int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR uart_dev_t   *dev   = inode->i_private;
@@ -1283,228 +1515,6 @@ errout:
   return ret;
 }
 #endif
-
-/************************************************************************************
- * Name: uart_close
- *
- * Description:
- *   This routine is called when the serial port gets closed.
- *   It waits for the last remaining data to be sent.
- *
- ************************************************************************************/
-
-static int uart_close(FAR struct file *filep)
-{
-  FAR struct inode *inode = filep->f_inode;
-  FAR uart_dev_t   *dev   = inode->i_private;
-  irqstate_t        flags;
-
-  /* Get exclusive access to the close semaphore (to synchronize open/close operations.
-   * NOTE: that we do not let this wait be interrupted by a signal.  Technically, we
-   * should, but almost no one every checks the return value from close() so we avoid
-   * a potential memory leak by ignoring signals in this case.
-   */
-
-  (void)uart_takesem(&dev->closesem, false);
-  if (dev->open_count > 1)
-    {
-      dev->open_count--;
-      uart_givesem(&dev->closesem);
-      return OK;
-    }
-
-  /* There are no more references to the port */
-
-  dev->open_count = 0;
-
-  /* Stop accepting input */
-
-  uart_disablerxint(dev);
-
-  /* Prevent blocking if the device is opened with O_NONBLOCK */
-
-  if ((filep->f_oflags & O_NONBLOCK) == 0)
-    {
-      /* Now we wait for the transmit buffer to clear */
-
-      while (dev->xmit.head != dev->xmit.tail)
-        {
-#ifndef CONFIG_DISABLE_SIGNALS
-          usleep(HALF_SECOND_USEC);
-#else
-          up_mdelay(HALF_SECOND_MSEC);
-#endif
-        }
-
-     /* And wait for the TX fifo to drain */
-
-      while (!uart_txempty(dev))
-        {
-#ifndef CONFIG_DISABLE_SIGNALS
-          usleep(HALF_SECOND_USEC);
-#else
-          up_mdelay(HALF_SECOND_MSEC);
-#endif
-        }
-    }
-
-  /* Free the IRQ and disable the UART */
-
-  flags = enter_critical_section();       /* Disable interrupts */
-  uart_detach(dev);        /* Detach interrupts */
-  if (!dev->isconsole)     /* Check for the serial console UART */
-    {
-      uart_shutdown(dev);  /* Disable the UART */
-    }
-
-  leave_critical_section(flags);
-
-  /* We need to re-initialize the semaphores if this is the last close
-   * of the device, as the close might be caused by pthread_cancel() of
-   * a thread currently blocking on any of them.
-   */
-
-  sem_reset(&dev->xmitsem,  0);
-  sem_reset(&dev->recvsem,  0);
-  sem_reset(&dev->xmit.sem, 1);
-  sem_reset(&dev->recv.sem, 1);
-#ifndef CONFIG_DISABLE_POLL
-  sem_reset(&dev->pollsem,  1);
-#endif
-
-  uart_givesem(&dev->closesem);
-  return OK;
-}
-
-/************************************************************************************
- * Name: uart_open
- *
- * Description:
- *   This routine is called whenever a serial port is opened.
- *
- ************************************************************************************/
-
-static int uart_open(FAR struct file *filep)
-{
-  FAR struct inode *inode = filep->f_inode;
-  FAR uart_dev_t   *dev   = inode->i_private;
-  uint8_t           tmp;
-  int               ret;
-
-  /* If the port is the middle of closing, wait until the close is finished.
-   * If a signal is received while we are waiting, then return EINTR.
-   */
-
-  ret = uart_takesem(&dev->closesem, true);
-  if (ret < 0)
-    {
-      /* A signal received while waiting for the last close operation. */
-
-      return ret;
-    }
-
-#ifdef CONFIG_SERIAL_REMOVABLE
-  /* If the removable device is no longer connected, refuse to open the
-   * device.  We check this after obtaining the close semaphore because
-   * we might have been waiting when the device was disconnected.
-   */
-
-  if (dev->disconnected)
-    {
-      ret = -ENOTCONN;
-      goto errout_with_sem;
-    }
-#endif
-
-  /* Start up serial port */
-  /* Increment the count of references to the device. */
-
-  tmp = dev->open_count + 1;
-  if (tmp == 0)
-    {
-      /* More than 255 opens; uint8_t overflows to zero */
-
-      ret = -EMFILE;
-      goto errout_with_sem;
-    }
-
-  /* Check if this is the first time that the driver has been opened. */
-
-  if (tmp == 1)
-    {
-      irqstate_t flags = enter_critical_section();
-
-      /* If this is the console, then the UART has already been initialized. */
-
-      if (!dev->isconsole)
-        {
-          /* Perform one time hardware initialization */
-
-          ret = uart_setup(dev);
-          if (ret < 0)
-            {
-              leave_critical_section(flags);
-              goto errout_with_sem;
-            }
-        }
-
-      /* In any event, we do have to configure for interrupt driven mode of
-       * operation.  Attach the hardware IRQ(s). Hmm.. should shutdown() the
-       * the device in the rare case that uart_attach() fails, tmp==1, and
-       * this is not the console.
-       */
-
-      ret = uart_attach(dev);
-      if (ret < 0)
-        {
-           uart_shutdown(dev);
-           leave_critical_section(flags);
-           goto errout_with_sem;
-        }
-
-      /* Mark the io buffers empty */
-
-      dev->xmit.head = 0;
-      dev->xmit.tail = 0;
-      dev->recv.head = 0;
-      dev->recv.tail = 0;
-
-      /* Initialize termios state */
-
-#ifdef CONFIG_SERIAL_TERMIOS
-      dev->tc_iflag = 0;
-      if (dev->isconsole)
-        {
-          /* Enable \n -> \r\n translation for the console */
-
-          dev->tc_oflag = OPOST | ONLCR;
-        }
-      else
-        {
-          dev->tc_oflag = 0;
-        }
-#endif
-
-#ifdef CONFIG_SERIAL_DMA
-      /* Notify DMA that there is free space in the RX buffer */
-
-      uart_dmarxfree(dev);
-#endif
-
-      /* Enable the RX interrupt */
-
-      uart_enablerxint(dev);
-      leave_critical_section(flags);
-    }
-
-  /* Save the new open count on success */
-
-  dev->open_count = tmp;
-
-errout_with_sem:
-  uart_givesem(&dev->closesem);
-  return ret;
-}
 
 /************************************************************************************
  * Public Functions
