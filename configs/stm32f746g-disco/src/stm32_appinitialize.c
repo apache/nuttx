@@ -39,7 +39,11 @@
 
 #include <nuttx/config.h>
 
-#include "stm32_ccm.h"
+#include <sys/types.h>
+#include <sys/mount.h>
+#include <syslog.h>
+#include <errno.h>
+
 #include "stm32f746g-disco.h"
 
 /****************************************************************************
@@ -86,11 +90,14 @@ int board_app_initialize(uintptr_t arg)
 
   /* Mount the procfs file system */
 
-  ret = mount(NULL, SAMV71_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
-      SYSLOG("ERROR: Failed to mount procfs at %s: %d\n",
-             SAMV71_PROCFS_MOUNTPOINT, ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to mount the PROC filesystem: %d (%d)\n",
+             ret, errno);
+      return ret;
+
     }
 #endif
 

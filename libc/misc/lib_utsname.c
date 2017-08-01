@@ -43,6 +43,7 @@
 #include <string.h>
 
 #include <nuttx/version.h>
+#include <unistd.h>
 
 /* In the protected and kernel build modes where kernel and application code
  * are separated, some of these common system property must reside only in
