@@ -182,9 +182,8 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
   DEBUGASSERT(IS_FREQUENCY_BAND(radioinit->base_frequency));
   DEBUGASSERT(IS_MODULATION_SELECTED(radioinit->modselect));
   DEBUGASSERT(IS_DATARATE(radioinit->datarate));
-  DEBUGASSERT(IS_FREQUENCY_OFFSET(offset, spirit->xtal_frequency));
-  DEBUGASSERT(IS_CHANNEL_SPACE
-                 (radioinit->chspace, spirit->xtal_frequency));
+  DEBUGASSERT(IS_FREQUENCY_OFFSET(radioinit->foffset, spirit->xtal_frequency));
+  DEBUGASSERT(IS_CHANNEL_SPACE(radioinit->chspace, spirit->xtal_frequency));
   DEBUGASSERT(IS_F_DEV(radioinit->freqdev, spirit->xtal_frequency));
 
   /* Workaround for Vtune */
@@ -200,8 +199,8 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
    * parameter: (xtal_ppm*FBase)/10^6
    */
 
-  offset = (int32_t)(((float)radioinit->xtal_offset_ppm *
-                     radioinit->base_frequency) / PPM_FACTOR);
+  offset = (int32_t)(((float)radioinit->foffset * radioinit->base_frequency) /
+                     PPM_FACTOR);
 
   /* Disable the digital, ADC, SMPS reference clock divider if fXO > 24MHz or
    * fXO < 26MHz
@@ -343,7 +342,8 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
 
   /* Calculates the channel filter mantissa and exponent */
 
-  ret = spirit_radio_convert_chbandwidth(spirit, radioinit->bandwidth, &bwm, &bwe);
+  ret = spirit_radio_convert_chbandwidth(spirit, radioinit->bandwidth,
+                                         &bwm, &bwe);
   if (ret < 0)
     {
       return ret;
@@ -605,7 +605,7 @@ int spirit_radio_get_setup(FAR struct spirit_library_s *spirit,
 
   /* Calculate the frequency offset in ppm */
 
-  radioinit->xtal_offset_ppm = (int16_t)
+  radioinit->foffset = (int16_t)
     ((uint32_t)fcoffset * spirit->xtal_frequency * PPM_FACTOR) /
     ((uint32_t)FBASE_DIVIDER * radioinit->base_frequency);
 

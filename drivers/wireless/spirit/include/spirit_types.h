@@ -111,11 +111,12 @@ enum spirit_state_e
  *        This field-oriented structure allows user to address in simple way the single
  *        field of the SPIRIT status.
  *        The user shall define a variable of SpiritStatus type to access on SPIRIT status fields.
- * @note  The fields order in the structure depends on used endianness (little or big
+ * NOTE:  The fields order in the structure depends on used endianness (little or big
  *        endian). The actual definition is valid ONLY for LITTLE ENDIAN mode. Be sure to
  *        change opportunely the fields order when use a different endianness.
  */
 
+#ifndef CONFIG_ENDIAN_BIG
 struct spirit_status_s
 {
   uint8_t XO_ON         : 1; /* Notifies if XO is operating (XO_ON is
@@ -134,6 +135,7 @@ struct spirit_status_s
   uint8_t ANT_SELECT    : 1; /* Notifies the currently selected antenna */
   uint8_t reserved      : 4; /* Reserved and equal to 5 */
 };
+#endif
 
 /* One instance of this structure represents the overall state of one Spirit
  * device from the standpoint of the library.  Multiple spirit devices may be

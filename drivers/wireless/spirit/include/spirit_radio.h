@@ -350,7 +350,7 @@ struct radio_init_s
                              * NxFREQUENCY_STEPS, where frequency STEPS is
                              * F_Xo/2^15. This parameter can be in the
                              * range: [0, F_Xo/2^15*255] Hz */
-  int16_t xtal_offset_ppm;  /* Specifies the offset frequency (in ppm)
+  int16_t foffset;          /* Specifies the offset frequency (in ppm)
                              * to compensate crystal inaccuracy expressed
                              * as signed value. */
   uint8_t chnum;            /* Specifies the channel number. This value

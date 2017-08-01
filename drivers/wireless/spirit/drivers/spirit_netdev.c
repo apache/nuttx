@@ -223,7 +223,7 @@ static const struct radio_init_s g_radio_init =
 {
   SPIRIT_BASE_FREQUENCY,              /* base_frequency */
   SPIRIT_CHANNEL_SPACE,               /* chspace */
-  SPIRIT_XTAL_OFFSET_PPM,             /* xtal_offset_ppm */
+  SPIRIT_XTAL_OFFSET_PPM,             /* foffset */
   SPIRIT_CHANNEL_NUMBER,              /* chnum */
   SPIRIT_MODULATION_SELECT,           /* modselect */
   SPIRIT_DATARATE,                    /* datarate */
