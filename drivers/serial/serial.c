@@ -977,6 +977,37 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               ret = 0;
             }
             break;
+
+#ifdef CONFIG_SERIAL_TERMIOS
+          case TCFLSH:
+            {
+              /* Empty the tx/rx buffers */
+
+              irqstate_t flags = enter_critical_section();
+
+              if (arg == TCIFLUSH || arg == TCIOFLUSH)
+                {
+                  dev->recv.head = 0;
+                  dev->recv.tail = 0;
+                }
+
+              if (arg == TCOFLUSH || arg == TCIOFLUSH)
+                {
+                  dev->xmit.head = 0;
+                  dev->xmit.tail = 0;
+                }
+
+              leave_critical_section(flags);
+            }
+            break;
+
+#if 0
+          case TCDRN:
+            {
+            }
+            break;
+#endif
+#endif
         }
     }
 
