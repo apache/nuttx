@@ -1958,7 +1958,7 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
 
   /* Puts the SPIRIT1 in STANDBY mode (125us -> rx/tx) */
 
-  wlinfo("Go to STNDBY\n");
+  wlinfo("Go to STANDBY\n");
   ret = spirit_command(spirit, CMD_STANDBY);
   if (ret < 0)
     {

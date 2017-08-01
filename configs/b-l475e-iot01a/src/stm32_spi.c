@@ -122,7 +122,7 @@ void weak_function stm32l4_spidev_initialize(void)
   /* Configure chip select GPIOs */
 #endif
 
-#ifdef CONFIG_STM32L4_SPI2
+#ifdef CONFIG_STM32L4_SPI3
   /* Configure SPI-based devices */
 
   g_spi3 = stm32l4_spibus_initialize(3);
