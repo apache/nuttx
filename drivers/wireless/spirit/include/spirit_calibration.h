@@ -49,14 +49,12 @@
  * Example:
  *
  *  uint8_t caldata;
+ *  int ret;
  *
  *  spirit_calib_enable_vco(spirit, S_ENABLE);
  *  spirit_command(spirit, CMD_LOCKTX);
  *
- *  while(spirit->state.MC_STATE != MC_STATE_LOCK)
- *    {
- *      (void)spirit_update_status(spirit);
- *    }
+ *  ret = spirit_waitstatus(spirit, MC_STATE_LOCK, 5000);
  *
  *  caldata = spirit_calib_get_vcotxcal(spirit);
  *  spirit_calib_set_vcotxcal(spirit, caldata);

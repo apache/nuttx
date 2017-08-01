@@ -53,7 +53,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/clock.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/spi/spi.h>
@@ -151,8 +150,6 @@ struct spirit_driver_s
 static void spirit_lock(FAR struct spirit_driver_s *priv);
 #define spirit_unlock(priv) sem_post(&priv->exclsem);
 
-static int spirit_waitstatus(FAR struct spirit_library_s *spirit,
-                             enum spirit_state_e state, unsigned int msec);
 static int spirit_set_readystate(FAR struct spirit_driver_s *priv);
 
 /* TX-related logic */
@@ -299,7 +296,7 @@ static struct pktbasic_addr_s g_addrinit =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: spirit_waitstatus
+ * Name: spirit_lock
  *
  * Description:
  *   Get exclusive access to the driver instance and to the spirit library.
@@ -318,67 +315,6 @@ static void spirit_lock(FAR struct spirit_driver_s *priv)
     {
       DEBUGASSERT(errno == EINTR);
     }
-}
-
-/****************************************************************************
- * Name: spirit_waitstatus
- *
- * Description:
- *   Poll until the Spirit status is the requested value or until a timeout
- *   occurs.
- *
- * Parameters:
- *   spirit - Reference to a Spirit library state structure instance
- *   state  - That that we are waiting for.
- *   msec   - Timeout in millisedonds
- *
- * Returned Value:
- *   OK on success; a negated errno on a timeout
- *
- * Assumptions:
- *   We have exclusive access to the driver state and to the spirit library.
- *
- ****************************************************************************/
-
-static int spirit_waitstatus(FAR struct spirit_library_s *spirit,
-                             enum spirit_state_e state, unsigned int msec)
-{
-  systime_t start;
-  unsigned int ticks;
-  unsigned int elapsed;
-  int ret;
-
-  /* MSEC to clock ticks (add one to make sure we wait at least requested
-   * timeout)
-   */
-
-  ticks = MSEC2TICK(msec);
-  if (ticks == 0)
-    {
-      /* The timeout is below the current timer resolution */
-
-      ticks = 1;
-    }
-
-  /* The time that we started the wait */
-
-  start = clock_systimer();
-
-  /* Loop until the status change occurs (or the wait times out) */
-
-  do
-    {
-      ret = spirit_update_status(spirit);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      elapsed = clock_systimer() - start;
-    }
-  while (spirit->u.state.MC_STATE != state && elapsed <= ticks);
-
-  return (spirit->u.state.MC_STATE == state) ? OK : -ETIMEDOUT;
 }
 
 /****************************************************************************

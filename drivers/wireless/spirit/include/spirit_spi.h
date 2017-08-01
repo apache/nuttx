@@ -197,6 +197,29 @@ int spirit_fifo_write(FAR struct spirit_library_s *spirit,
 
 int spirit_update_status(FAR struct spirit_library_s *spirit);
 
+/****************************************************************************
+ * Name: spirit_waitstatus
+ *
+ * Description:
+ *   Poll until the Spirit status is the requested value or until a timeout
+ *   occurs.
+ *
+ * Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *   state  - That that we are waiting for.
+ *   msec   - Timeout in millisedonds
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on a timeout
+ *
+ * Assumptions:
+ *   We have exclusive access to the driver state and to the spirit library.
+ *
+ ****************************************************************************/
+
+int spirit_waitstatus(FAR struct spirit_library_s *spirit,
+                      enum spirit_state_e state, unsigned int msec);
+
 #ifdef __cplusplus
 }
 #endif

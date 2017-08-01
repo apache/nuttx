@@ -339,15 +339,11 @@ uint8_t spirit_managment_wavco_calibration(FAR struct spirit_library_s *spirit)
       return ret;
     }
 
-  do
+  ret = spirit_waitstatus(spirit, MC_STATE_READY, 5000);
+  if (ret < 0)
     {
-      ret = spirit_update_status(spirit);
-      if (ret < 0)
-        {
-          return ret;
-        }
+      return ret;
     }
-  while (spirit->u.state.MC_STATE != MC_STATE_READY);
 
   ret = spirit_command(spirit, CMD_LOCKRX);
   if (ret < 0)

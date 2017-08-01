@@ -176,15 +176,7 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
   uint8_t regval;
   uint8_t value;
   int ret;
-
-  /* Check the parameters */
-
-  DEBUGASSERT(IS_FREQUENCY_BAND(radioinit->base_frequency));
-  DEBUGASSERT(IS_MODULATION_SELECTED(radioinit->modselect));
-  DEBUGASSERT(IS_DATARATE(radioinit->datarate));
-  DEBUGASSERT(IS_FREQUENCY_OFFSET(radioinit->foffset, spirit->xtal_frequency));
-  DEBUGASSERT(IS_CHANNEL_SPACE(radioinit->chspace, spirit->xtal_frequency));
-  DEBUGASSERT(IS_F_DEV(radioinit->freqdev, spirit->xtal_frequency));
+  int i;
 
   /* Workaround for Vtune */
 
@@ -202,6 +194,15 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
   offset = (int32_t)(((float)radioinit->foffset * radioinit->base_frequency) /
                      PPM_FACTOR);
 
+  /* Check the parameters */
+
+  DEBUGASSERT(IS_FREQUENCY_BAND(radioinit->base_frequency));
+  DEBUGASSERT(IS_MODULATION_SELECTED(radioinit->modselect));
+  DEBUGASSERT(IS_DATARATE(radioinit->datarate));
+  DEBUGASSERT(IS_FREQUENCY_OFFSET(offset, spirit->xtal_frequency));
+  DEBUGASSERT(IS_CHANNEL_SPACE(radioinit->chspace, spirit->xtal_frequency));
+  DEBUGASSERT(IS_F_DEV(radioinit->freqdev, spirit->xtal_frequency));
+
   /* Disable the digital, ADC, SMPS reference clock divider if fXO > 24MHz or
    * fXO < 26MHz
    */
@@ -212,23 +213,17 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
       return ret;
     }
 
-  do
+  /* Delay for state transition */
+
+  for (i = 0; i != 0xff; i++);
+
+  /* Wait for the device to enter STANDBY */
+
+  ret = spirit_waitstatus(spirit, MC_STATE_STANDBY, 5000);
+  if (ret < 0)
     {
-      volatile uint8_t i;
-
-      /* Delay for state transition */
-
-      for (i = 0; i != 0xff; i++);
-
-      /* Read the MC_STATUS register */
-
-      ret = spirit_update_status(spirit);
-      if (ret < 0)
-        {
-          return ret;
-        }
+      return ret;
     }
-  while (spirit->u.state.MC_STATE != MC_STATE_STANDBY);
 
   if (spirit->xtal_frequency < DOUBLE_XTAL_THR)
     {
@@ -254,23 +249,17 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
       return ret;
     }
 
-  do
+  /* Delay for state transition */
+
+  for (i = 0; i != 0xff; i++);
+
+  /* Make sure that the device becomes READY */
+
+  ret = spirit_waitstatus(spirit, MC_STATE_READY, 5000);
+  if (ret < 0)
     {
-      volatile uint8_t i;
-
-      /* Delay for state transition */
-
-      for (i = 0; i != 0xff; i++);
-
-      /* Read the MC_STATUS register */
-
-      ret = spirit_update_status(spirit);
-      if (ret < 0)
-        {
-          return ret;
-       }
+      return ret;
     }
-  while (spirit->u.state.MC_STATE != MC_STATE_READY);
 
   /* Calculates the FC_OFFSET parameter and cast as signed int: offset =
    * (Fxtal/2^18)*FC_OFFSET

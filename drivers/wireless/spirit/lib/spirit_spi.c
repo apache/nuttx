@@ -47,7 +47,9 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <errno.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/spi/spi.h>
 
 #include "spirit_regs.h"
@@ -533,4 +535,68 @@ int spirit_update_status(FAR struct spirit_library_s *spirit)
   /* Reads the MC_STATUS register to update the spirit->state */
 
   return spirit_reg_read(spirit, MC_STATE1_BASE, &regval, 1);
+}
+
+/****************************************************************************
+ * Name: spirit_waitstatus
+ *
+ * Description:
+ *   Poll until the Spirit status is the requested value or until a timeout
+ *   occurs.
+ *
+ * Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *   state  - That that we are waiting for.
+ *   msec   - Timeout in millisedonds
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on a timeout
+ *
+ * Assumptions:
+ *   We have exclusive access to the driver state and to the spirit library.
+ *
+ ****************************************************************************/
+
+int spirit_waitstatus(FAR struct spirit_library_s *spirit,
+                      enum spirit_state_e state, unsigned int msec)
+{
+  systime_t start;
+  systime_t ticks;
+  systime_t elapsed;
+  int ret;
+
+  /* Convert the MSEC timedelay to clock ticks, making sure that the
+   * resulting delay in ticks is greater than or equal to the requested time
+   * in MSEC.
+   *
+   * REVIST: If USEC_PER_TICK and 'msec' are large, then the second
+   * computation may overflow!
+   */
+
+#if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
+  ticks = (msec + (MSEC_PER_TICK - 1)) / MSEC_PER_TICK;
+#else
+  ticks = ((systime_t)msec * USEC_PER_MSEC + (USEC_PER_TICK - 1)) /
+           USEC_PER_TICK;
+#endif
+
+  /* The time that we started the wait */
+
+  start = clock_systimer();
+
+  /* Loop until the status change occurs (or the wait times out) */
+
+  do
+    {
+      ret = spirit_update_status(spirit);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      elapsed = clock_systimer() - start;
+    }
+  while (spirit->u.state.MC_STATE != state && elapsed <= ticks);
+
+  return (spirit->u.state.MC_STATE == state) ? OK : -ETIMEDOUT;
 }
