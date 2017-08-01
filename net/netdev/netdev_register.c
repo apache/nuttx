@@ -185,7 +185,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #endif
   int devnum;
 
-  if (dev)
+  if (dev != NULL)
     {
 #ifdef CONFIG_NET_MULTILINK
       /* We are supporting multiple network devices and using different link

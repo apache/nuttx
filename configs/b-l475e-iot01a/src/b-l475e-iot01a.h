@@ -73,7 +73,7 @@
 #  undef HAVE_SPSGRF
 #endif
 
-#if !defined(CONFIG_SCHED_HPWORK) || !defined(CONFIG_SCHED_LPWORK)
+#if !defined(CONFIG_SCHED_HPWORK) && !defined(CONFIG_SCHED_LPWORK)
 #  undef HAVE_SPSGRF
 #endif
 
@@ -119,10 +119,6 @@
 #define GPIO_SPSGRF_SDN  (GPIO_OUTPUT | GPIO_FLOAT | GPIO_PUSHPULL | \
                           GPIO_SPEED_50MHz | GPIO_OUTPUT_SET | \
                           GPIO_PORTB | GPIO_PIN15)
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
 
 /****************************************************************************
  * Public data

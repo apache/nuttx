@@ -16,7 +16,7 @@ config NET_6LOWPAN_FRAG
 config NET_6LOWPAN_FRAMELEN
 	int "IEEE802.15.4 MAC Frame Length"
 	default 127
-	range 127 999999
+	range 1 999999
 	---help---
 		Some wireless devices may use non-standard frame lengths.  This
 		setting should never be smaller than 127.

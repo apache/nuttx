@@ -1771,6 +1771,8 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
   FAR struct spirit_library_s *spirit = &priv->spirit;
   int ret;
 
+  wlinfo("Initialize spirit hardware\n");
+
   /* Configures the Spirit1 radio library */
 
   spirit->spi            = spi;
@@ -1778,10 +1780,12 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
 
   /* Reset the Spirit1 radio part */
 
+  wlinfo("Spirit Reset\n");
   DEBUGASSERT(priv->lower != NULL && priv->lower->reset != NULL);
   ret = priv->lower->reset(priv->lower) ;
   if (ret < 0)
     {
+      wlerr("ERROR: SDN reset failed: %d\n", ret);
       return ret;
     }
 
@@ -1790,6 +1794,7 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
   ret = spirit_command(spirit, COMMAND_SRES);
   if (ret < 0)
     {
+      wlerr("ERROR: Soft reset failed} %d\n", ret);
       return ret;
     }
 
@@ -1797,91 +1802,109 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
 
   /* Perform VCO calibration WA when the radio is initialized */
 
+  wlinfo("Peform VCO calibration\n");
   spirit_radio_enable_wavco_calibration(spirit, S_ENABLE);
 
   /* Configure the Spirit1 radio part */
 
+  wlinfo("Configure the spirit radio\n");
   ret = spirit_radio_initialize(spirit, &g_radio_init);
   if (ret < 0)
     {
+      wlerr("ERROR: pirit_radio_initialize failed: %d\n", ret);
       return ret;
     }
 
   ret = spirit_radio_set_palevel_dbm(spirit, 0, SPIRIT_POWER_DBM);
   if (ret < 0)
     {
+      wlerr("ERROR: spirit_radio_set_palevel_dbm failed: %d\n", ret);
       return ret;
     }
 
   ret =spirit_radio_set_palevel_maxindex(spirit, 0);
   if (ret < 0)
     {
+      wlerr("ERROR: spirit_radio_set_palevel_maxindex failed: %d\n", ret);
       return ret;
     }
 
   /* Configures the SPIRIT1 packet handling logic */
 
+  wlinfo("Configure the basic packets\n");
   ret = spirit_pktbasic_initialize(spirit, &g_pktbasic_init);
   if (ret < 0)
     {
+      wlerr("ERROR: spirit_radio_set_palevel_maxindex failed: %d\n", ret);
       return ret;
     }
 
   /* Configure address filtering */
 
+  wlinfo("Configure address filtering\n");
   ret = spirit_pktbasic_addr_initialize(spirit, &g_addrinit);
   if (ret < 0)
     {
+      wlerr("ERROR: spirit_pktbasic_addr_initialize failed: %d\n", ret);
       return ret;
     }
 
   /* Enable the following interrupt sources, routed to GPIO */
 
+  wlinfo("Configure Interrupts\n");
   ret = spirit_irq_disable_all(spirit);
   if (ret < 0)
     {
+      wlerr("ERROR: spirit_irq_disable_all failed: %d\n", ret);
       return ret;
     }
 
   ret = spirit_irq_clr_pending(spirit);
   if (ret < 0)
     {
+      wlerr("ERROR: spirit_irq_clr_pending failed: %d\n", ret);
       return ret;
     }
 
   ret = spirit_irq_enable(spirit, TX_DATA_SENT, S_ENABLE);
    if (ret < 0)
     {
+      wlerr("ERROR: Enable TX_DATA_SENT failed: %d\n", ret);
       return ret;
     }
 
   ret = spirit_irq_enable(spirit, RX_DATA_READY, S_ENABLE);
   if (ret < 0)
     {
+      wlerr("ERROR: Enable RX_DATA_READY failed: %d\n", ret);
       return ret;
     }
 
   ret = spirit_irq_enable(spirit, VALID_SYNC, S_ENABLE);
   if (ret < 0)
     {
+      wlerr("ERROR: Enable VALID_SYNC failed: %d\n", ret);
       return ret;
     }
 
   ret = spirit_irq_enable(spirit, RX_DATA_DISC, S_ENABLE);
   if (ret < 0)
     {
+      wlerr("ERROR: Enable RX_DATA_DISC failed: %d\n", ret);
       return ret;
     }
 
   ret = spirit_irq_enable(spirit, TX_FIFO_ERROR, S_ENABLE);
   if (ret < 0)
     {
+      wlerr("ERROR: Enable TX_FIFO_ERROR failed: %d\n", ret);
       return ret;
     }
 
   ret = spirit_irq_enable(spirit, RX_FIFO_ERROR, S_ENABLE);
   if (ret < 0)
     {
+      wlerr("ERROR: Enable RX_FIFO_ERROR failed: %d\n", ret);
       return ret;
     }
 
@@ -1889,39 +1912,46 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
   ret = spirit_irq_enable(spirit, TX_FIFO_ALMOST_EMPTY, S_ENABLE);
   if (ret < 0)
     {
+      wlerr("ERROR: Enable TX_FIFO_ALMOST_EMPTY failed: %d\n", ret);
       return ret;
     }
 
   ret = spirit_irq_enable(spirit, RX_FIFO_ALMOST_FULL, S_ENABLE);
   if (ret < 0)
     {
+      wlerr("ERROR: Enable RX_FIFO_ALMOST_FULL failed: %d\n", ret);
       return ret;
     }
 #endif
 
   /* Configure Spirit1 */
 
+  wlinfo("Configure Spriti1\n");
   ret = spirit_radio_persistentrx(spirit, S_ENABLE);
   if (ret < 0)
     {
+      wlerr("ERROR: spirit_radio_persistentrx failed: %d\n", ret);
       return ret;
     }
 
   ret = spirit_qi_set_sqithreshold(spirit, SQI_TH_0);
   if (ret < 0)
     {
+      wlerr("ERROR: spirit_qi_set_sqithreshold failed: %d\n", ret);
       return ret;
     }
 
   ret = spirit_qi_enable_sqicheck(spirit, S_ENABLE);
   if (ret < 0)
     {
+      wlerr("ERROR: spirit_qi_enable_sqicheck failed: %d\n", ret);
       return ret;
     }
 
   ret = spirit_qi_set_rssithreshold_dbm(spirit, SPIRIT_CCA_THRESHOLD);
   if (ret < 0)
     {
+      wlerr("ERROR: spirit_qi_set_rssithreshold_dbm failed: %d\n", ret);
       return ret;
     }
 
@@ -1929,18 +1959,21 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
                                                  SQI_ABOVE_THRESHOLD);
   if (ret < 0)
     {
+      wlerr("ERROR: spirit_timer_set_rxtimeout_stopcondition failed: %d\n", ret);
       return ret;
     }
 
   ret = spirit_timer_set_rxtimeout_counter(spirit, 0); /* 0=No timeout */
   if (ret < 0)
     {
+      wlerr("ERROR: spirit_timer_set_rxtimeout_counter failed: %d\n", ret);
       return ret;
     }
 
   ret = spirit_radio_afcfreezeonsync(spirit, S_ENABLE);
   if (ret < 0)
     {
+      wlerr("ERROR: spirit_radio_afcfreezeonsync failed: %d\n", ret);
       return ret;
     }
 
@@ -1948,31 +1981,38 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
   ret = spirit_calibration_rco(spirit, S_ENABLE);
   if (ret < 0)
     {
+      wlerr("ERROR: spirit_calibration_rco failed: %d\n", ret);
       return ret;
     }
 #endif
 
   /* Configure the radio to route the IRQ signal to its GPIO 3 */
 
+  wlinfo("Configure Spirt GPIOs\n");
   ret = spirit_gpio_initialize(spirit, &g_gpioinit);
   if (ret < 0)
     {
+      wlerr("ERROR: spirit_gpio_initialize failed: %d\n", ret);
       return ret;
     }
 
   /* Setup CSMA/CA */
 
+  wlinfo("Configure Spirt CSMA\n");
   ret = spirit_csma_initialize(spirit, &g_csma_init);
   if (ret < 0)
     {
+      wlerr("ERROR: spirit_csma_initialize failed: %d\n", ret);
       return ret;
     }
 
   /* Puts the SPIRIT1 in STANDBY mode (125us -> rx/tx) */
 
+  wlinfo("Go to STNDBY\n");
   ret = spirit_command(spirit, CMD_STANDBY);
   if (ret < 0)
     {
+      wlerr("ERROR: Failed to go to STANDBY: %d\n", ret);
       return ret;
     }
 
@@ -2064,23 +2104,9 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
 #endif
   dev->d_private      = (FAR void *)priv;  /* Used to recover private state from dev */
 
-  /* Put the interface in the down state.  This usually amounts to resetting
-   * the device and/or calling spirit_ifdown().
-   */
+  /* Make sure that the PktRadio common logic has been initialized */
 
-  /* Read the MAC address from the hardware into dev->d_mac.ether.ether_addr_octet */
-
-  /* Register the device with the OS so that socket IOCTLs can be performed. */
-
-  (void)netdev_register(dev, NET_LL_PKTRADIO);
-
-  /* Attach irq */
-
-  ret = lower->attach(lower, spirit_interrupt, priv);
-  if (ret < 0)
-    {
-      goto errout_with_pktbuf;
-    }
+  pktradio_metadata_initialize();
 
   /* Initialize device */
 
@@ -2091,9 +2117,23 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
       goto errout_with_attach;
     }
 
-  /* Make sure that the PktRadio common logic has been initialized */
+  /* Register the device with the OS so that socket IOCTLs can be performed. */
 
-  pktradio_metadata_initialize();
+  ret = netdev_register(dev, NET_LL_PKTRADIO);
+  if (ret < 0)
+    {
+      wlerr("ERROR: netdev_register failed: %d\n", ret);
+      goto errout_with_attach;
+    }
+
+  /* Attach irq */
+
+  ret = lower->attach(lower, spirit_interrupt, priv);
+  if (ret < 0)
+    {
+      wlerr("ERROR: Failed to attach interrupt: %d\n", ret);
+      goto errout_with_pktbuf;
+    }
 
   /* Enable Radio IRQ */
 
