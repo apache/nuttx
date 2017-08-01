@@ -190,9 +190,14 @@ Configurations
   Each  B-L475E-IOT01A configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    cd tools
-    ./configure.sh  b-l475e-iot01a/<subdir>
-    cd -
+    tools/configure.sh [-l|c|u|n] /b-l475e-iot01a/<subdir>
+
+  Where:
+   -l selects the Linux (l) host environment.  The [-c|u|n] options
+       select one of the Windows environments.  Default:  Use host setup
+       in the defconfig file
+   [-c|u|n] selects the Windows host and a Windows environment:  Cygwin (c),
+       Ubuntu under Windows 10 (u), or Windows native (n).  Default Cygwin
 
   Before building, make sure that:
 
@@ -209,11 +214,7 @@ Configurations
   the make, the nuttx binary will reside in an ELF file called, simply,
   nuttx.
 
-    make oldconfig
     make
-
-  Where 'make oldconfig' brings the configuration up to data with the current configuration data and 'make' will compile all of the source
-  files and generate the final binary.
 
   NOTES:
 
@@ -227,7 +228,22 @@ Configurations
        reconfiguration process.
 
   2. Unless stated otherwise, all configurations generate console
-     output on USART1 (i.e., for ST-Link Virtual COM port).
+     output on USART1 (i.e., for ST-Link Virtual COM port).  The
+     relevant configuration settings are listed below:
+
+       CONFIG_STM32_USART1=y
+       CONFIG_STM32_USART1_SERIALDRIVER=y
+       CONFIG_STM32_USART=y
+
+       CONFIG_USART1_SERIALDRIVER=y
+       CONFIG_USART1_SERIAL_CONSOLE=y
+
+       CONFIG_USART1_RXBUFSIZE=256
+       CONFIG_USART1_TXBUFSIZE=256
+       CONFIG_USART1_BAUD=115200
+       CONFIG_USART1_BITS=8
+       CONFIG_USART1_PARITY=0
+       CONFIG_USART1_2STOP=0
 
   3. All of these configurations are set up to build under Windows using the
      "GNU Tools for ARM Embedded Processors" that is maintained by ARM
@@ -247,3 +263,14 @@ Configurations
 
 Configuration sub-directories
 -----------------------------
+
+  nsh:
+
+    Configures the NuttShell (nsh) located at examples/nsh.  This
+    configuration is focused on low level, command-line driver testing.
+
+  spirit-6lowpan
+
+    This is another NSH configuration that differs from the 'nsh'
+    configuration in that it has 6LoWPAN networking enabled for the
+    on-board Spirit1 SPSGRF-915 part.

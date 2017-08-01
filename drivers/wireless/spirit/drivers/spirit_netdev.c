@@ -98,6 +98,10 @@
 #  define CONFIG_SPIRIT_PKTLEN 96
 #endif
 
+/* Default node address */
+
+#define SPIRIT_NODE_ADDR 0x34
+
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define SPIRIT_WDDELAY   (1*CLK_TCK)
@@ -150,7 +154,8 @@ struct spirit_driver_s
 static void spirit_lock(FAR struct spirit_driver_s *priv);
 #define spirit_unlock(priv) sem_post(&priv->exclsem);
 
-static int spirit_set_readystate(FAR struct spirit_driver_s *priv);
+static void spirit_set_ipaddress(FAR struct net_driver_s *dev);
+static int  spirit_set_readystate(FAR struct spirit_driver_s *priv);
 
 /* TX-related logic */
 
@@ -265,7 +270,7 @@ static const struct spirit_csma_init_s g_csma_init =
 static struct pktbasic_addr_s g_addrinit =
 {
   S_DISABLE,                         /* Disable filtering on node address */
-  0x34,                              /* Note address (Temporary, until assigned) */
+  SPIRIT_NODE_ADDR                   /* Note address (Temporary, until assigned) */
   S_DISABLE,                         /* Disable filtering on multicast address */
   0xee,                              /* Multicast address */
   S_DISABLE,                         /* Disable filtering on broadcast address */
@@ -275,7 +280,7 @@ static struct pktbasic_addr_s g_addrinit =
 static struct pktbasic_addr_s g_addrinit =
 {
   S_ENABLE,                          /* Enable filtering on node address */
-  0x34,                              /* Note address (Temporary, until assigned) */
+  SPIRIT_NODE_ADDR,                  /* Note address (Temporary, until assigned) */
 #ifdef CONFIG_SPIRIT_MULTICAST
   S_ENABLE,                          /* Enable filtering on multicast address */
 #else
@@ -315,6 +320,55 @@ static void spirit_lock(FAR struct spirit_driver_s *priv)
     {
       DEBUGASSERT(errno == EINTR);
     }
+}
+
+/****************************************************************************
+ * Name: spirit_set_ipaddress
+ *
+ * Description:
+ *   Set the advertised node addressing.  External logic must set a unique
+ *   8-bit node-address for the radio.  We will then derive the IPv6
+ *   address for that.
+ *
+ * Parameters:
+ *   spirit - Reference to a Spirit library state structure instance
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on a timeout
+ *
+ ****************************************************************************/
+
+static void spirit_set_ipaddress(FAR struct net_driver_s *dev)
+{
+  FAR struct netdev_varaddr_s *addr;
+
+  /* Get a convenient pointer to the PktRadio variable length address struct */
+
+  addr = (FAR struct netdev_varaddr_s *)&dev->d_mac.sixlowpan;
+
+  /* Has a node address been assigned? */
+
+  if (addr->nv_addrlen == 0)
+    {
+      /* No.. Use the default address */
+
+      wlwarn("WARNING: No address assigned.  Using %02x\n",
+             SPIRIT_NODE_ADDR);
+
+      addr->nv_addrlen = 1;
+      addr->nv_addr[0] = SPIRIT_NODE_ADDR;
+    }
+
+  /* Then set the IP address derived from the node address */
+
+  dev->d_ipv6addr[0]  = HTONS(0xfe80);
+  dev->d_ipv6addr[1]  = 0;
+  dev->d_ipv6addr[2]  = 0;
+  dev->d_ipv6addr[3]  = 0;
+  dev->d_ipv6addr[4]  = 0;
+  dev->d_ipv6addr[5]  = HTONS(0x00ff);
+  dev->d_ipv6addr[6]  = HTONS(0xfe00);
+  dev->d_ipv6addr[7]  = (uint16_t)addr->nv_addr[0] << 8 ^ 0x0200;
 }
 
 /****************************************************************************
@@ -658,7 +712,7 @@ static void sprit_receive_work(FAR void *arg)
         ret = sixlowpan_input(&priv->radio, iob, (FAR void *)pktmeta);
         if (ret < 0)
           {
-            nerr("ERROR: sixlowpan_input returned %d\n", ret);
+            wlerr("ERROR: sixlowpan_input returned %d\n", ret);
             NETDEV_RXERRORS(&priv->radio.r_dev);
             NETDEV_ERRORS(&priv->radio.r_dev);
           }
@@ -1183,10 +1237,14 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
 
   if (!priv->ifup)
     {
-      ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-            dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-            dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-            dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+      /* Set the node IP address based on the assigned 8-bit node address */
+
+      spirit_set_ipaddress(dev);
+
+      wlinfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+             dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
+             dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
+             dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 
       /* Disable spirit interrupts */
 
@@ -1198,6 +1256,7 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
        * about mutual exclusion.
        */
 
+      wlinfo("Go to the RX state\n");
       ret = spirit_command(spirit, CMD_READY);
       if (ret < 0)
         {
@@ -1227,26 +1286,18 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
         }
 
 #ifndef CONFIG_SPIRIT_PROMISCOUS
-      /* Has an address been assigned?  If not, we will stick the default
-       * address which probably is not what you want.
-       */
+      /* Instantiate the assigned node address in harsware*/
 
-      if (dev->d_mac.sixlowpan.nv_addrlen != 0)
+      DEBUGASSERT(dev->d_mac.sixlowpan.nv_addrlen == 1);
+      wlinfo("Set node address to %02x\n",
+              dev->d_mac.sixlowpan.nv_addr[0]);
+
+      ret = spirit_pktcommon_set_nodeaddress(spirit,
+               dev->d_mac.sixlowpan.nv_addr[0]);
+      if (ret < 0)
         {
-          /* Yes.. Instantiate the assigned node address */
-
-          DEBUGASSERT(dev->d_mac.sixlowpan.nv_addrlen == 1);
-
-          ret = spirit_pktcommon_set_nodeaddress(spirit,
-                   dev->d_mac.sixlowpan.nv_addr[0]);
-          if (ret < 0)
-            {
-              goto error_with_ifalmostup;
-            }
-        }
-      else
-        {
-          nwarn("WARNING: No address assigned\n");
+          wlerr("ERROR: Failed to set node address: %d\n", ret);
+          goto error_with_ifalmostup;
         }
 #endif
 
@@ -1526,7 +1577,7 @@ static int spirit_ioctl(FAR struct net_driver_s *dev, int cmd,
       /* Add cases here to support the IOCTL commands */
 
       default:
-        nerr("ERROR: Unrecognized IOCTL command: %d\n", command);
+        wlerr("ERROR: Unrecognized IOCTL command: %02x\n", cmd);
         ret = -ENOTTY;  /* Special return value for this case */
     }
 
@@ -1781,7 +1832,7 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
 
   /* Configures the SPIRIT1 packet handling logic */
 
-  wlinfo("Configure the basic packets\n");
+  wlinfo("Configure basic packets\n");
   ret = spirit_pktbasic_initialize(spirit, &g_pktbasic_init);
   if (ret < 0)
     {
