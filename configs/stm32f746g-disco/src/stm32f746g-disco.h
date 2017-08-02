@@ -73,6 +73,10 @@
  * button is depressed. Note that the EXTI interrupt is configured.
  */
 
+#define MIN_IRQBUTTON   BUTTON_USER
+#define MAX_IRQBUTTON   BUTTON_USER
+#define NUM_IRQBUTTONS  1
+
 #define GPIO_BTN_USER      (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTI | GPIO_PIN11)
 
 /* Sporadic scheduler instrumentation. This configuration has been used for evaluating the NuttX

@@ -44,9 +44,11 @@
 #include <syslog.h>
 #include <errno.h>
 
-#include "stm32.h"
-
 #include "stm32f746g-disco.h"
+
+#ifdef CONFIG_BUTTONS
+#  include <nuttx/input/buttons.h>
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -89,6 +91,26 @@ int stm32_bringup(void)
              ret, errno);
       return ret;
 
+    }
+#endif
+
+#ifdef CONFIG_BUTTONS
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = stm32_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
     }
 #endif
 

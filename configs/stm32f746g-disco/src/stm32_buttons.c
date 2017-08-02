@@ -47,11 +47,26 @@
 #include "stm32_gpio.h"
 #include "stm32f746g-disco.h"
 
+#include <arch/board/board.h> /* Should always be included last */
+
 #ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+ /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Pin configuration for each STM32F746G Discovery button.  This array is indexed by
+ * the BUTTON_* definitions in board.h
+ */
+
+static const uint32_t g_buttons[NUM_BUTTONS] =
+{
+  GPIO_BTN_USER
+};
 
 /****************************************************************************
  * Public Functions
@@ -107,8 +122,16 @@ uint32_t board_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-#warning Missing logic
-  return -ENOSYS;
+  int ret = -EINVAL;
+
+  /* The following should be atomic */
+
+  if (id >= MIN_IRQBUTTON && id <= MAX_IRQBUTTON)
+    {
+      ret = stm32_gpiosetevent(g_buttons[id], true, true, true, irqhandler, arg);
+    }
+
+  return ret;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */
