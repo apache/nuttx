@@ -1,0 +1,174 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+comment "LC823450 Configuration Options"
+
+menu "LC823450 Peripheral Support"
+
+config SERIAL_TERMIOS
+        bool "Serial driver TERMIOS supported"
+        default n
+        ---help---
+                Serial driver supports termios.h interfaces (tcsetattr, tcflush, etc.).
+                If this is not defined, then the terminal settings (baud, parity, etc).
+                are not configurable at runtime; serial streams cannot be flushed, etc..
+
+config LC823450_UART0
+	bool "UART0"
+	select UART0_SERIALDRIVER
+	default n
+
+config LC823450_UART1
+	bool "UART1"
+	select UART1_SERIALDRIVER
+	default n
+
+config LC823450_UART2
+	bool "UART2"
+	select UART2_SERIALDRIVER
+	default n
+
+config LC823450_WDT
+	bool "Watchdog"
+	default n
+	select WATCHDOG
+
+config LC823450_SPIFI
+	bool "SPI Flash Interface (SPIFI)"
+	default n
+	depends on MTD
+
+if LC823450_SPIFI
+
+config LC823450_SPIFI_DEVNO
+	int "number in /dev/mtdblk?"
+	default 0
+
+config LC823450_SPIFI_SIZE
+	int "SPI FLASH size (byte)"
+	default 4194304
+
+config LC823450_SPIFI_QUADIO
+	bool "SPIFI 4bit access"
+	default n
+
+config LC823450_SPIFI_RAMFAT
+	bool "SPIFI with SRAM FAT"
+	default n
+
+config LC823450_SPIFI_RAMFAT_VOLUMELABEL
+	string "volume label for SRAM FAT"
+	depends on LC823450_SPIFI_RAMFAT
+
+config LC823450_SPIFI_BACKUP
+	bool "power dwon tolerance I/O"
+	default n
+
+config LC823450_SPIFI_BACKUP_HEAD_OFFSET
+	hex "backup header offset"
+	depends on LC823450_SPIFI_BACKUP
+
+config LC823450_SPIFI_BACKUP_VAL_OFFSET
+	hex "backup area offset"
+	depends on LC823450_SPIFI_BACKUP
+
+endif
+
+config LC823450_SDIF
+	bool "SD/eMMC driver"
+	default y
+
+if LC823450_SDIF
+
+config LC823450_SDIF_SDC
+	bool "SD card support"
+	default n
+
+config LC823450_SDC_DMA
+	bool "DMA support for eMMC/SD"
+	default y
+	select ARCH_DMA
+
+endif
+
+config LC823450_I2C_TIMEOSEC
+	int "I2C timeout (sec)"
+	default 1
+	range 0 2
+	depends on I2C
+
+config LC823450_I2C_TIMEOMS
+	int "I2C timeout (msec)"
+	default 500
+	range 0 999
+	depends on I2C
+
+config LC823450_I2C0
+	bool "I2C0"
+	default n
+	depends on I2C
+
+config LC823450_I2C1
+	bool "I2C1"
+	default n
+	depends on I2C
+
+config LC823450_SPI_DMA
+	bool "DMA for SPI"
+	default n
+	select ARCH_DMA
+
+if PWM
+
+config LC823450_PWM0_CH0
+	bool "MTM0-Ch0 PWM device"
+	default n
+
+config LC823450_PWM0_CH1
+	bool "MTM0-Ch1 PWM device"
+	default n
+
+config LC823450_PWM1_CH0
+	bool "MTM1-Ch0 PWM device"
+	default y
+
+config LC823450_PWM1_CH1
+	bool "MTM1-Ch1 PWM device"
+	default n
+
+endif
+
+choice
+	prompt "HS driver current boost"
+
+config LC823450_USBDEV_CUSTOM_HSDSEL_0
+	bool "normal"
+
+config LC823450_USBDEV_CUSTOM_HSDSEL_5
+	bool "5% boost"
+
+config LC823450_USBDEV_CUSTOM_HSDSEL_10
+	bool "10% boost"
+
+endchoice
+
+config LC823450_LSISTBY
+	bool "LIS Standby"
+	default n
+
+config LC823450_MTM0_TICK
+	bool "use MTM0 for tick"
+	default n
+
+config LC823450_SLEEP_MODE
+	bool "sleep mode"
+	default n
+
+
+config HRT_TIMER
+	bool "High resolution timer"
+	default n
+
+endmenu

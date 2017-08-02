@@ -244,6 +244,12 @@ config ARCH_BOARD_HYMINI_STM32V
 		A configuration for the HY-Mini STM32v board.  This board is based on the
 		STM32F103VCT6 chip.
 
+config ARCH_BOARD_LC823450_XGEVK
+	bool "ON Semiconductor LC823450-XGEVK development board"
+	depends on ARCH_CHIP_LC823450
+	---help---
+		This port uses the ON Semiconductor LC823450-XGEVK development board.
+
 config ARCH_BOARD_LINCOLN60
 	bool "Micromint Lincoln 60 board"
 	depends on ARCH_CHIP_LPC1769
@@ -1557,6 +1563,7 @@ config ARCH_BOARD
 	default "hymini-stm32v"            if ARCH_BOARD_HYMINI_STM32V
 	default "kwikstik-k40"             if ARCH_BOARD_KWIKSTIK_K40
 	default "launchxl-tms57004"        if ARCH_BOARD_LAUNCHXL_TMS57004
+	default "lc823450-xgevk"           if ARCH_BOARD_LC823450_XGEVK
 	default "lincoln60"                if ARCH_BOARD_LINCOLN60
 	default "lm3s6432-s2e"             if ARCH_BOARD_LM3S6432S2E
 	default "lm3s6965-ek"              if ARCH_BOARD_LM3S6965EK
@@ -1789,6 +1796,9 @@ source "configs/kwikstik-k40/Kconfig"
 endif
 if ARCH_BOARD_LAUNCHXL_TMS57004
 source "configs/launchxl-tms57004/Kconfig"
+endif
+if ARCH_BOARD_LC823450_XGEVK
+source "configs/lc823450-xgevk/Kconfig"
 endif
 if ARCH_BOARD_LINCOLN60
 source "configs/lincoln60/Kconfig"
