@@ -37,7 +37,6 @@
  * Included Files
  ****************************************************************************/
 
-
 #include <nuttx/config.h>
 
 #include <sys/types.h>
@@ -57,7 +56,6 @@
 #include "lc823450_spi.h"
 #include "lc823450-xgevk.h"
 
-
 #ifdef CONFIG_NX_LCDDRIVER
 
 /****************************************************************************
@@ -73,7 +71,6 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
 
 static void lc823450_st7565_reset(FAR struct st7565_lcd_s *lcd, bool on);
 static void lc823450_st7565_select(FAR struct st7565_lcd_s *lcd);
@@ -96,7 +93,6 @@ static struct st7565_lcd_s g_st7565_dev =
   .senddata  = lc823450_st7565_senddata,
   .backlight = lc823450_st7565_backlight,
 };
-
 
 /****************************************************************************
  * Private Functions
@@ -166,8 +162,6 @@ static int lc823450_st7565_backlight(FAR struct st7565_lcd_s *lcd, int level)
   return 0;
 }
 
-
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -187,7 +181,6 @@ int board_lcd_initialize(void)
 
   return 0;
 }
-
 
 /****************************************************************************
  * Name: board_lcd_getdev

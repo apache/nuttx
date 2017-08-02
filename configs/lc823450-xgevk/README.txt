@@ -14,7 +14,6 @@ LC823450 related documents are available at
 This port is intended to test LC823450 features including SMP.
 Supported peripherals are UART, TIMER, RTC, GPIO, DMA, I2C, SPI, LCD.
 
-
 Settings
 ^^^^^^^^
 
@@ -25,7 +24,6 @@ Settings
 5. Serial console can be used via external USB-UART (115200/8/N/1).
 6. Interrupt handlers except for inter-cpu are handled on CPU0.
 
-
 SMP related Status
 ^^^^^^^^^^^^^^^^^^
 
@@ -35,7 +33,6 @@ output into the console because UART operates in FIFO mode.
 
 1. "nsh> smp" works but the result will be corrupted.
 2. "nsh> ostest" works but might cause a deadlock or assertion.
-
 
 Other Status
 ^^^^^^^^^^^^
@@ -75,7 +72,6 @@ nxhello_main: Set background color=0
 nxhello_main: Screen resolution (128,48)
 nxhello_hello: Position (31,20)
 nxhello_main: Close NX
-
 
 TODO
 ^^^^

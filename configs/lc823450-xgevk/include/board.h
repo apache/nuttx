@@ -33,7 +33,6 @@
  *
  ****************************************************************************/
 
-
 #ifndef __CONFIGS_LC823450_XGEVK_INCLUDE_BOARD_H
 #define __CONFIGS_LC823450_XGEVK_INCLUDE_BOARD_H
 
@@ -46,7 +45,8 @@
 
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -58,7 +58,6 @@ extern unsigned int XT1OSC_CLK;
  ************************************************************************************/
 
 void up_init_default_mux(void);
-
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
+#include <syslog.h>
 
 #include <nuttx/board.h>
 #include <nuttx/i2c/i2c_master.h>
@@ -48,10 +49,6 @@
 #include "lc823450-xgevk.h"
 
 #ifdef CONFIG_LIB_BOARDCTL
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -74,14 +71,15 @@ static void lc823450_i2c_register(int bus)
   i2c = lc823450_i2cbus_initialize(bus);
   if (i2c == NULL)
     {
-      _err("ERROR: Failed to get I2C%d interface\n", bus);
+      syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", bus);
     }
   else
     {
       ret = i2c_register(i2c, bus);
       if (ret < 0)
         {
-          _err("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
+                 bus, ret);
           lc823450_i2cbus_uninitialize(i2c);
         }
     }
@@ -113,7 +111,6 @@ static void lc823450_i2ctool(void)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
 
 /****************************************************************************
  * Name: board_app_initialize
@@ -152,7 +149,7 @@ int board_app_initialize(uintptr_t arg)
   int ret = lc823450_mtd_initialize(CONFIG_MTD_DEVNO_EMMC);
   if (ret != OK)
     {
-      _err("Failed to initialize eMMC: ret=%d\n", ret);
+      syslog(LOG_ERR, "Failed to initialize eMMC: ret=%d\n", ret);
     }
 
 #ifdef CONFIG_LC823450_SDIF_SDC
@@ -161,7 +158,7 @@ int board_app_initialize(uintptr_t arg)
   ret = lc823450_mtd_initialize(CONFIG_MTD_DEVNO_SDC);
   if (ret != OK)
     {
-      _err("Failed to initialize uSD: ret=%d\n", ret);
+      syslog(LOG_ERR, "Failed to initialize uSD: ret=%d\n", ret);
     }
 #endif /* CONFIG_LC823450_SDIF_SDC */
 
