@@ -74,19 +74,19 @@
  ****************************************************************************/
 
 #ifndef CONFIG_LC823450_I2C_TIMEOSEC
-# define CONFIG_LC823450_I2C_TIMEOSEC 0
+#  define CONFIG_LC823450_I2C_TIMEOSEC 0
 #endif
 
 #ifndef CONFIG_LC823450_I2C_TIMEOMS
-# define CONFIG_LC823450_I2C_TIMEOMS  500
+#  define CONFIG_LC823450_I2C_TIMEOMS  500
 #endif
 
 #ifdef CONFIG_I2C_SLAVE
-# error "I2C driver cannot support CONFIG_I2C_SLAVE."
+#  error "I2C driver cannot support CONFIG_I2C_SLAVE."
 #endif
 
 #if CONFIG_LC823450_I2C_TIMEOMS >= 1000
-# error "Unsupported value of CONFIG_LC823450_I2C_TIMEOMS"
+#  error "Unsupported value of CONFIG_LC823450_I2C_TIMEOMS"
 #endif
 
 #define GPIO_I2C0_SCL   (GPIO_PORT0 | GPIO_PIN7 | GPIO_MODE_OUTPUT | GPIO_VALUE_ZERO)
@@ -173,7 +173,8 @@ static int lc823450_i2c_isr(int irq, FAR void *context, FAR void *arg);
 static int lc823450_i2c_init(FAR struct lc823450_i2c_priv_s *priv, int port);
 static int lc823450_i2c_deinit(FAR struct lc823450_i2c_priv_s *priv, int port);
 
-static int lc823450_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs, int count);
+static int lc823450_i2c_transfer(FAR struct i2c_master_s *dev,
+                                 FAR struct i2c_msg_s *msgs, int count);
 
 #ifdef CONFIG_I2C_RESET
 static int lc823450_i2c_reset(FAR struct i2c_master_s *priv);
@@ -808,7 +809,7 @@ static int lc823450_i2c_poll(FAR struct lc823450_i2c_priv_s *priv)
  ****************************************************************************/
 
 #ifndef CONFIG_I2C_POLLED
-static int lc823450_i2c0_isr(int irq, FAR void *context, FAR void *arg)
+static int lc823450_i2c_isr(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct lc823450_i2c_priv_s *priv =
     (FAR struct lc823450_i2c_priv_s *)arg;
@@ -816,7 +817,6 @@ static int lc823450_i2c0_isr(int irq, FAR void *context, FAR void *arg)
   DEBUGASSERT(priv != NULL);
   return lc823450_i2c_poll(priv);
 }
-#endif
 #endif
 
 /****************************************************************************

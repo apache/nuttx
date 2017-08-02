@@ -503,9 +503,11 @@ static int up_setup(struct uart_dev_s *dev)
       case 7:
         ctl &= ~UART_UMD_CL;
         break;
+
       case 8:
         ctl |= UART_UMD_CL;
         break;
+
       default:
         serr("ERROR: bits = %d\n", priv->bits);
         return -EINVAL;
@@ -516,12 +518,15 @@ static int up_setup(struct uart_dev_s *dev)
     {
       case 0: /* non */
         break;
+
       case 1: /* odd */
         ctl |= UART_UMD_PS0;
         break;
+
       case 2: /* even */
         ctl |= UART_UMD_PS1;
         break;
+
       default:
         serr("ERROR: bits = %d\n", priv->bits);
         return -EINVAL;
@@ -547,6 +552,7 @@ static int up_setup(struct uart_dev_s *dev)
       ctl |= UART_UMD_RTSEN;
     }
   else
+    {
       ctl &= ~UART_UMD_RTSEN;
     }
 
@@ -556,7 +562,7 @@ static int up_setup(struct uart_dev_s *dev)
    * any character is received.
    */
 
-  ctl = up_serialin(priv, UART_UIEN);
+  ctl  = up_serialin(priv, UART_UIEN);
   ctl |= UART_UIEN_UARTRF_IEN
       | UART_UIEN_UARTTF_IEN
       | UART_UIEN_ROWE_IEN

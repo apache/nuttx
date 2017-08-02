@@ -35,7 +35,6 @@
  *
  ****************************************************************************/
 
-
 #ifndef __ARCH_ARM_SRC_LC823450_LC823450_SYSCONTROL_H
 #define __ARCH_ARM_SRC_LC823450_LC823450_SYSCONTROL_H
 
@@ -47,12 +46,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-
 #define LC823450_SYSCONTROL_REGBASE 0x40080000
 
 #define CORECNT (LC823450_SYSCONTROL_REGBASE + 0x0000)
-#define 	CORECNT_C1CLKEN	(1 << 0)
-#define 	CORECNT_C1RSTN	(1 << 1)
+#define CORECNT_C1CLKEN  (1 << 0)
+#define CORECNT_C1RSTN   (1 << 1)
 
 #define REMAP (LC823450_SYSCONTROL_REGBASE + 0x0008)
 
@@ -208,7 +206,6 @@
 #define   SDCTL_ACSMODE0_MMCDDR (4 << 1)
 #define   SDCTL_SDMMC0_MMC      (1 << 0)
 
-
 #define DREQ0_3  (LC823450_SYSCONTROL_REGBASE + 0x808)
 #define DREQ4_7  (LC823450_SYSCONTROL_REGBASE + 0x80c)
 #define DREQ8_C (LC823450_SYSCONTROL_REGBASE + 0x810)
@@ -245,6 +242,7 @@
 #define   I2CMODE1 (1 << 1)
 
 /* GPIO */
+
 #define PORT0_BASE  0x40081000
 #define rP0DT  (PORT0_BASE + 0x0000 + 0x04)
 #define rP1DT  (PORT0_BASE + 0x1000 + 0x04)
@@ -266,27 +264,21 @@
 
 #ifndef __ASSEMBLY__
 
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
 /****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
 
 uint32_t get_cpu_ver(void);
 void init_default_mux(void);
@@ -299,7 +291,6 @@ void lc823450_mod_stby_regs(uint32_t clearbits, uint32_t setbits);
 # define mod_stby_regs(...)
 # define lc823450_mod_stby_regs(...)
 #endif
-
 
 #if defined(__cplusplus)
 }
