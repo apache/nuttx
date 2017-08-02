@@ -37,6 +37,10 @@
 #ifndef __ARCH_ARM_SRC_LC823450_LC823450_SERIAL_H
 #define __ARCH_ARM_SRC_LC823450_LC823450_SERIAL_H
 
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
 #define LC823450_UART0_REGBASE  0x4008b000
 #define LC823450_UART1_REGBASE  0x4008c000
 #define LC823450_UART2_REGBASE  0x4008d000
@@ -90,9 +94,20 @@
 #define UART_USFS_TXFF_LV(v)    (((v) >> 8 ) & 0x1f)
 #define UART_USFS_RXFF_LV(v)    (((v) >> 0 ) & 0x1f)
 
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
+#ifdef CONFIG_DEV_CONSOLE_SWITCH
+extern int g_console_disable;
+#endif
+
+/************************************************************************************
+ * Public Function Prototypes
+ ************************************************************************************/
+
 #ifdef CONFIG_DEV_CONSOLE_SWITCH
 void up_console_disable(int disable);
-extern int g_console_disable;
 #endif
 
 #ifdef CONFIG_HSUART

@@ -34,22 +34,19 @@
  *
  ****************************************************************************/
 
-
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
 
-
-/* This file is included by lc823450_vectors.S.  It provides the macro VECTOR that
- * supplies a LC823450 vector in terms of a (lower-case) ISR label and an
- * (upper-case) IRQ number as defined in arch/arm/include/lc823450/irq.h.
- * lc823450_vectors.S will defined the VECTOR in different ways in order to generate
- * the interrupt vectors and handlers in their final form.
+/* This file is included by lc823450_vectors.S.  It provides the macro VECTOR
+ * that supplies a LC823450 vector in terms of a (lower-case) ISR label and 
+ * an (upper-case) IRQ number as defined in arch/arm/include/lc823450/irq.h.
+ * lc823450_vectors.S will defined the VECTOR in different ways in order to
+ * generate the interrupt vectors and handlers in their final form.
  */
 
-
-/* If the common ARMv7-M vector handling is used, then all it needs is the following
- * definition that provides the number of supported vectors.
+/* If the common ARMv7-M vector handling is used, then all it needs is the
+ * following definition that provides the number of supported vectors.
  */
 
 #ifdef CONFIG_ARMV7M_CMNVECTOR

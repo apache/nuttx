@@ -44,11 +44,9 @@
 
 #include <nuttx/config.h>
 
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
 
 /* Max number of GPIO ports and the maximum number of pins per port */
 
@@ -60,7 +58,6 @@
 #endif
 
 #define NUM_GPIO_PINS                  16
-
 
 /* Input/Output mode
  *
@@ -124,7 +121,6 @@
 #  define GPIO_PULLUP              (1 << GPIO_PUPD_SHIFT)     /* Pull-up */
 #  define GPIO_PULLDOWN            (2 << GPIO_PUPD_SHIFT)     /* Pull-down */
 #  define GPIO_FLOAT               (3 << GPIO_PUPD_SHIFT)     /* No pull-up, pull-down */
-
 
 /* GPIO Port Number:
  *

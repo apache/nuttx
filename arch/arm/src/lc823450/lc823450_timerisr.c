@@ -42,6 +42,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stddef.h>
 #include <time.h>
 #include <debug.h>
 #include <nuttx/arch.h>
@@ -68,8 +69,8 @@
 
 #define SYSTICK_RELOAD ((lc823450_get_systemfreq() / CLK_TCK) - 1)
 
-
 /* TIMER_PIN will be used to check the interval */
+
 #define TIMER_PIN (GPIO_PORT5|GPIO_PIN7)
 
 /* #define CHECK_INTERVAL */
@@ -108,6 +109,30 @@
 #  define rMT30CNT  (LC823450_MTM3_REGBASE + LC823450_MTM_0CNT)
 #endif /* CONFIG_PROFILE */
 
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+#ifdef CONFIG_HRT_TIMER
+struct hrt_s
+{
+  dq_entry_t ent;
+  sem_t sem;
+  int usec;
+};
+#endif
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_HRT_TIMER
+static dq_queue_t hrt_timer_queue;
+static void hrt_queue_refresh(void);
+static void hrt_usleep_setup(void);
+static int hrt_interrupt(int irq, FAR void *context, FAR void *arg);
+static void hrt_usleep_add(struct hrt_s *phrt);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -115,6 +140,9 @@
 
 #ifdef CHECK_INTERVAL
 static bool _timer_val = true;
+#endif
+#ifdef CONFIG_PROFILE
+static int dbg;
 #endif
 
 /****************************************************************************
@@ -127,101 +155,19 @@ int profile_ptr;
 int profile_en;
 #endif /* CONFIG_PROFILE */
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+#ifdef CONFIG_HRT_TIMER
+extern int g_taskid_init;
+#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Name: hrt_queue_refresh
  ****************************************************************************/
-
-
-/****************************************************************************
- * Name:  up_proftimerisr
- ****************************************************************************/
-
-#ifdef CONFIG_PROFILE
-static int dbg;
-int up_proftimerisr(int irq, uint32_t *regs, FAR void *arg)
-{
-  putreg32(1 << 1, rMT30STS);
-  if (profile_en)
-    {
-      if (profile_ptr != CONFIG_PROFILE_SAMPLES)
-        {
-          ASSERT(current_regs);
-          profile_data[profile_ptr++] = current_regs[REG_R15];
-        }
-      else
-        {
-          profile_en = 0;
-          _info("PROFILING DONE\n");
-        }
-
-    }
-  return 0;
-}
-#endif /* CONFIG_PROFILE */
-
-
-/****************************************************************************
- * Name:  up_timerisr
- ****************************************************************************/
-
-int up_timerisr(int irq, uint32_t *regs, FAR void *arg)
-{
-   /* Process timer interrupt */
-
-#ifdef CONFIG_DVFS
-    extern void lc823450_dvfs_tick_callback(void);
-    lc823450_dvfs_tick_callback();
-#endif
-
-#ifdef CONFIG_LC823450_MTM0_TICK
-   /* Clear the interrupt (BEVT) */
-   putreg32(1 << 1, rMT00STS);
-#endif
-
-   sched_process_timer();
-
-#ifdef CONFIG_LCA_SOUNDSKIP_CHECK
-   extern void lca_check_soundskip(void);
-   lca_check_soundskip();
-#endif
-
-#ifdef CHECK_INTERVAL
-  _timer_val = !_timer_val;
-  lc823450_gpio_write(TIMER_PIN, _timer_val);
-#endif
-#ifdef CONFIG_HSUART
-  hsuart_wdtimer();
-#endif /* CONFIG_HSUART */
-
-   return 0;
-}
-
 
 #ifdef CONFIG_HRT_TIMER
-
-#include <stddef.h>
-
-struct hrt_s
-{
-  dq_entry_t ent;
-  sem_t sem;
-  int usec;
-};
-
-static dq_queue_t hrt_timer_queue;
-static void hrt_queue_refresh(void);
-static void hrt_usleep_setup(void);
-static int hrt_interrupt(int irq, FAR void *context, FAR void *arg);
-static void hrt_usleep_add(struct hrt_s *phrt);
-
 static void hrt_queue_refresh(void)
 {
   int elapsed;
@@ -240,6 +186,7 @@ static void hrt_queue_refresh(void)
 
 cont:
   /* serch for expired */
+
   for (pent = hrt_timer_queue.head; pent; pent = dq_next(pent))
     {
       tmp = container_of(pent, struct hrt_s, ent);
@@ -257,7 +204,13 @@ cont:
 
   leave_critical_section(flags);
 }
+#endif
 
+/****************************************************************************
+ * Name: hrt_queue_refresh
+ ****************************************************************************/
+
+#ifdef CONFIG_HRT_TIMER
 static void hrt_usleep_setup(void)
 {
   uint32_t count;
@@ -298,7 +251,13 @@ static void hrt_usleep_setup(void)
   putreg32(1, rMT2OPR);
   leave_critical_section(flags);
 }
+#endif
 
+/****************************************************************************
+ * Name: hrt_interrupt
+ ****************************************************************************/
+
+#ifdef CONFIG_HRT_TIMER
 static int hrt_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   /* Disable MTM2-Ch0 */
@@ -350,10 +309,80 @@ static void hrt_usleep_add(struct hrt_s *phrt)
 
   hrt_usleep_setup();
 }
+#endif
 
-extern int g_taskid_init;
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
+/****************************************************************************
+ * Name:  up_proftimerisr
+ ****************************************************************************/
 
+#ifdef CONFIG_PROFILE
+int up_proftimerisr(int irq, uint32_t *regs, FAR void *arg)
+{
+  putreg32(1 << 1, rMT30STS);
+  if (profile_en)
+    {
+      if (profile_ptr != CONFIG_PROFILE_SAMPLES)
+        {
+          ASSERT(current_regs);
+          profile_data[profile_ptr++] = current_regs[REG_R15];
+        }
+      else
+        {
+          profile_en = 0;
+          tmrinfo("PROFILING DONE\n");
+        }
+
+    }
+  return 0;
+}
+#endif /* CONFIG_PROFILE */
+
+/****************************************************************************
+ * Name:  up_timerisr
+ ****************************************************************************/
+
+int up_timerisr(int irq, uint32_t *regs, FAR void *arg)
+{
+   /* Process timer interrupt */
+
+#ifdef CONFIG_DVFS
+    extern void lc823450_dvfs_tick_callback(void);
+    lc823450_dvfs_tick_callback();
+#endif
+
+#ifdef CONFIG_LC823450_MTM0_TICK
+   /* Clear the interrupt (BEVT) */
+
+   putreg32(1 << 1, rMT00STS);
+#endif
+
+   sched_process_timer();
+
+#ifdef CONFIG_LCA_SOUNDSKIP_CHECK
+   extern void lca_check_soundskip(void);
+   lca_check_soundskip();
+#endif
+
+#ifdef CHECK_INTERVAL
+  _timer_val = !_timer_val;
+  lc823450_gpio_write(TIMER_PIN, _timer_val);
+#endif
+#ifdef CONFIG_HSUART
+  hsuart_wdtimer();
+#endif /* CONFIG_HSUART */
+
+   return 0;
+}
+
+/****************************************************************************
+ * Name: up_hrttimer_usleep
+ ****************************************************************************/
+
+#ifdef CONFIG_HRT_TIMER
 int up_hrttimer_usleep(unsigned int usec)
 {
   struct hrt_s hrt;
@@ -366,9 +395,52 @@ int up_hrttimer_usleep(unsigned int usec)
 
   return 0;
 }
-
-
 #endif /* CONFIG_HRT_TIMER */
+
+/****************************************************************************
+ * Name: up_get_timer_fraction
+ ****************************************************************************/
+
+static uint64_t up_get_timer_fraction(void)
+{
+#ifdef CONFIG_LC823450_MTM0_TICK
+  uint32_t regval;
+  uint64_t nsec;
+
+  /* read the counter */
+
+  regval  = getreg32(rMT00CNT);
+
+  /* check if the timer interrupt is underway */
+
+  if (getreg32(rMT00STS) & 0x2 && regval < (MTM_RELOAD/10))
+    {
+      return NSEC_PER_TICK;
+    }
+
+  nsec = ((uint64_t)regval * NSEC_PER_TICK / MTM_RELOAD);
+  return nsec;
+#else
+  uint32_t cur;
+  uint64_t nsec;
+
+  /* read the counter */
+
+  cur  = getreg32(NVIC_SYSTICK_CURRENT);
+
+  /* check if the systick interrupt is pending or active */
+
+  if ((getreg32(0xE000ED04) & (1 << 26) ||
+       getreg32(0xE000ED24) & (1 << 11))
+      && (SYSTICK_RELOAD - cur) < (SYSTICK_RELOAD/10))
+    {
+      return NSEC_PER_TICK;
+    }
+
+  nsec = ((uint64_t)(SYSTICK_RELOAD - cur) * NSEC_PER_TICK / SYSTICK_RELOAD);
+  return nsec;
+#endif
+}
 
 /****************************************************************************
  * Name: arm_timer_initialize
@@ -531,54 +603,12 @@ void arm_timer_initialize(void)
 #endif
 }
 
-
-static uint64_t up_get_timer_fraction(void)
-{
-#ifdef CONFIG_LC823450_MTM0_TICK
-  uint32_t regval;
-  uint64_t nsec;
-
-  /* read the counter */
-
-  regval  = getreg32(rMT00CNT);
-
-  /* check if the timer interrupt is underway */
-
-  if (getreg32(rMT00STS) & 0x2 && regval < (MTM_RELOAD/10))
-    {
-      return NSEC_PER_TICK;
-    }
-
-  nsec = ((uint64_t)regval * NSEC_PER_TICK / MTM_RELOAD);
-  return nsec;
-#else
-  uint32_t cur;
-  uint64_t nsec;
-
-  /* read the counter */
-
-  cur  = getreg32(NVIC_SYSTICK_CURRENT);
-
-  /* check if the systick interrupt is pending or active */
-
-  if ((getreg32(0xE000ED04) & (1 << 26) ||
-       getreg32(0xE000ED24) & (1 << 11))
-      && (SYSTICK_RELOAD - cur) < (SYSTICK_RELOAD/10))
-    {
-      return NSEC_PER_TICK;
-    }
-
-  nsec = ((uint64_t)(SYSTICK_RELOAD - cur) * NSEC_PER_TICK / SYSTICK_RELOAD);
-  return nsec;
-#endif
-}
-
-
 /****************************************************************************
  * Name: up_hr_gettime
  *
  * Description:
  *   This function is used in clock_gettime() to obtain high resolution time.
+ *
  ****************************************************************************/
 
 int up_hr_gettime(FAR struct timespec *tp)
@@ -602,7 +632,7 @@ int up_hr_gettime(FAR struct timespec *tp)
 
   leave_critical_section(flags);
 
-  _info("elapsed = %lld \n", elapsed);
+  tmrinfo("elapsed = %lld \n", elapsed);
 
   /* Convert the elapsed time in seconds and nanoseconds. */
 
@@ -614,6 +644,6 @@ int up_hr_gettime(FAR struct timespec *tp)
   tp->tv_sec  = (time_t)secs;
   tp->tv_nsec = (long)nsecs;
 
-  _info("Returning tp=(%d,%d)\n", (int)tp->tv_sec, (int)tp->tv_nsec);
+  tmrinfo("Returning tp=(%d,%d)\n", (int)tp->tv_sec, (int)tp->tv_nsec);
   return OK;
 }

@@ -56,7 +56,6 @@
 #include "lc823450_syscontrol.h"
 #include <arch/chip/clk.h>
 
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -119,7 +118,6 @@ struct lc823450_dmach_s
   uint32_t llist;
 };
 
-
 struct lc823450_dma_s
 {
   sem_t exclsem;           /* For exclusive access to the DMA channel list */
@@ -131,10 +129,6 @@ struct lc823450_dma_s
 };
 
 static int phydmastart(struct lc823450_phydmach_s *pdmach);
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
 
 /****************************************************************************
  * Private Data
@@ -171,6 +165,7 @@ static int dma_interrupt_core(void *context)
       if (dmach->callback)
         dmach->callback((DMA_HANDLE)dmach, dmach->arg, 0);
     }
+
   up_disable_clk(LC823450_CLOCK_DMA);
   phydmastart(pdmach);
 
@@ -202,7 +197,7 @@ static int dma_interrupt(int irq, FAR void *context, FAR void *arg)
         }
       if (err & (1 << i))
         {
-          _err("ERR %d\n", i);
+          dmaerr("ERROR %d\n", i);
         }
     }
 
@@ -233,13 +228,16 @@ static int phydmastart(struct lc823450_phydmach_s *pdmach)
       leave_critical_section(flags);
       return 0;
     }
+
   dmach = (struct lc823450_dmach_s *)q_ent;
 
   trnum = MIN(dmach->nxfrs, LC823450_DMA_MAX_TRANSSIZE);
 
   pdmach->inprogress = 1;
   up_enable_clk(LC823450_CLOCK_DMA);
+
   /* start DMA */
+
   putreg32(dmach->srcaddr, DMACSRCADDR(dmach->chn));
   putreg32(dmach->destaddr, DMACDSTADDR(dmach->chn));
 
@@ -294,7 +292,6 @@ static int phydmastart(struct lc823450_phydmach_s *pdmach)
   return 0;
 }
 
-
 #ifdef DMA_TEST
 int test_buf1[4096];
 int test_buf2[4096];
@@ -316,6 +313,7 @@ void lc823450_dma_test()
       test_buf1[i] = i;
       test_buf2[i] = 0;
     }
+
   DMA_HANDLE hdma;
   hdma = lc823450_dmachannel(DMA_CHANNEL_VIRTUAL);
   lc823450_dmasetup(hdma, LC823450_DMA_SRCWIDTH_WORD |
@@ -355,10 +353,12 @@ void up_dmainitialize(void)
   up_enable_irq(LC823450_IRQ_DMAC);
 
   /* Clock & Reset */
+
   modifyreg32(MCLKCNTBASIC, 0, MCLKCNTBASIC_DMAC_CLKEN);
   modifyreg32(MRSTCNTBASIC, 0, MRSTCNTBASIC_DMAC_RSTB);
 
   /* DMAC enable */
+
   modifyreg32(DMACCONFIG, 0, DMACCONFIG_EN);
 
 #ifdef DMA_TEST
@@ -366,6 +366,7 @@ void up_dmainitialize(void)
 #endif
 
   /* clock disable */
+
   modifyreg32(MCLKCNTBASIC, MCLKCNTBASIC_DMAC_CLKEN, 0);
 }
 
@@ -403,6 +404,7 @@ void lc823450_dmarequest(DMA_HANDLE handle, uint8_t dmarequest)
   int req_line;
 
   /* search for free request line */
+
   for (req_line = 0; req_line < 16; req_line++)
     {
       if ((g_dma.reqline_use & (1 << req_line)) == 0)
@@ -414,13 +416,16 @@ void lc823450_dmarequest(DMA_HANDLE handle, uint8_t dmarequest)
   DEBUGASSERT(req_line != 16);
 
   up_enable_clk(LC823450_CLOCK_DMA);
+
   /* DREQ Select */
+
   val = getreg32(DREQ0_3 + (req_line / 4) * 4);
   val &= ~(0xff << ((req_line % 4) * 8));
   val |= dmarequest << ((req_line % 4) * 8);
   putreg32(val, (DREQ0_3 + (req_line / 4) * 4));
 
   /* source or dest peri request ? */
+
   val = getreg32(DMACCFG(dmach->chn));
   switch (dmarequest)
     {
@@ -447,9 +452,10 @@ void lc823450_dmarequest(DMA_HANDLE handle, uint8_t dmarequest)
         val |= DMACCFG_FLOWCTRL_M2P_DMA;
         break;
       default:
-        _err("NOT IMP\n");
+        dmaerr("ERROR: Not implemetned\n");
         DEBUGASSERT(0);
     }
+
   putreg32(val, DMACCFG(dmach->chn));
   up_disable_clk(LC823450_CLOCK_DMA);
 
@@ -595,7 +601,6 @@ int lc823450_dmaremain(DMA_HANDLE handle)
   return getreg32(DMACCTL(dmach->chn)) & 0xfff;
 }
 
-
 /****************************************************************************
  * Name: lc823450_dmastart
  ****************************************************************************/
@@ -607,8 +612,8 @@ int lc823450_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
   DEBUGASSERT(dmach);
 
-
   /* select physical channel */
+
   flags = enter_critical_section();
 
   sq_addfirst(&dmach->q_ent, &g_dma.phydmach[dmach->chn].req_q);
@@ -617,6 +622,7 @@ int lc823450_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
   dmach->arg = arg;
 
   /* Kick DMAC, if not active */
+
   if (!g_dma.phydmach[dmach->chn].inprogress)
     {
       phydmastart(&g_dma.phydmach[dmach->chn]);

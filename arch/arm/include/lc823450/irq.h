@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather,
- * only indirectly through nuttx/irq.h
+/* This file should never be included directed but, rather, only indirectly
+ * through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_LC823450_IRQ_H
@@ -49,9 +49,8 @@
 #include <nuttx/irq.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
-
 
 /* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to
  * bits in the NVIC.  This does, however, waste several words of memory in the IRQ
@@ -61,8 +60,8 @@
 /* Processor Exceptions (vectors 0-15) */
 
 #define LC823450_IRQ_RESERVED       (0) /* Reserved vector (only used with CONFIG_DEBUG) */
-                                     /* Vector  0: Reset stack pointer value */
-                                     /* Vector  1: Reset (not handler as an IRQ) */
+                                        /* Vector  0: Reset stack pointer value */
+                                        /* Vector  1: Reset (not handler as an IRQ) */
 #define LC823450_IRQ_NMI            (2) /* Vector  2: Non-Maskable Interrupt (NMI) */
 #define LC823450_IRQ_HARDFAULT      (3) /* Vector  3: Hard fault */
 #define LC823450_IRQ_MEMFAULT       (4) /* Vector  4: Memory management (MPU) */
@@ -70,7 +69,7 @@
 #define LC823450_IRQ_USAGEFAULT     (6) /* Vector  6: Usage fault */
 #define LC823450_IRQ_SVCALL        (11) /* Vector 11: SVC call */
 #define LC823450_IRQ_DBGMONITOR    (12) /* Vector 12: Debug Monitor */
-                                     /* Vector 13: Reserved */
+                                        /* Vector 13: Reserved */
 #define LC823450_IRQ_PENDSV        (14) /* Vector 14: Pendable system service request */
 #define LC823450_IRQ_SYSTICK       (15) /* Vector 15: System tick */
 
@@ -88,6 +87,7 @@
  *
  * External interrupts (vectors >= 16)
  */
+
 #define LC823450_IRQ_CTXM3_00       (LC823450_IRQ_INTERRUPTS+0)   /* 16: CortexM3_00 interrupt */
 #define LC823450_IRQ_CTXM3_01       (LC823450_IRQ_INTERRUPTS+1)   /* 17: CortexM3_01 interrupt */
 #define LC823450_IRQ_CTXM3_02       (LC823450_IRQ_INTERRUPTS+2)   /* 18: CortexM3_02 interrupt */

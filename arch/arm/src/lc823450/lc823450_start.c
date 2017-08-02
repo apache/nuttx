@@ -49,11 +49,12 @@
 #include <stdio.h>
 
 #include <nuttx/init.h>
+#include <nuttx/arch.h>
+#include <nuttx/mtd/mtd.h>
+
 #ifdef CONFIG_LASTKMSG
 #  include <nuttx/lastkmsg.h>
 #endif /* CONFIG_LASTKMSG */
-#include <nuttx/arch.h>
-#include <nuttx/mtd/mtd.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -82,18 +83,12 @@
 #endif
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
 int icx_boot_reason;
+
+extern uint32_t _stext_sram, _etext_sram, _ftext, _svect;
 
 /****************************************************************************
  * Private Function prototypes
@@ -215,6 +210,7 @@ void __start(void)
     }
 
   /* run as interrupt context, before scheduler running */
+
   CURRENT_REGS = (uint32_t *)1;
 
 #ifdef CONFIG_LASTKMSG_LOWOUTS
@@ -236,12 +232,10 @@ void __start(void)
 #ifdef CONFIG_SPIFLASH_BOOT
 
   /* Copy any necessary code sections from FLASH to RAM.  The correct
-   * destination in SRAM is geive by _sramfuncs and _eramfuncs.  The
+   * destination in SRAM is given by _sramfuncs and _eramfuncs.  The
    * temporary location is in flash after the data initalization code
    * at _framfuncs.
    */
-
-  extern uint32_t _stext_sram, _etext_sram, _ftext, _svect;
 
   /* copt text & vectors */
 
@@ -266,13 +260,12 @@ void __start(void)
 #endif /* CONFIG_SPIFLASH_BOOT */
 
   /* Mutex enable */
-  modifyreg32(MRSTCNTBASIC, 0, MRSTCNTBASIC_MUTEX_RSTB);
 
+  modifyreg32(MRSTCNTBASIC, 0, MRSTCNTBASIC_MUTEX_RSTB);
 
   /* Configure the uart so that we can get debug output as soon as possible */
 
   lc823450_clockconfig();
-
 
   lc823450_lowsetup();
 
@@ -334,29 +327,31 @@ void __start(void)
   showprogress('F');
 
 #ifndef CONFIG_IPL2
-  _info("icx_boot_reason = 0x%x\n", icx_boot_reason);
+  sinfo("icx_boot_reason = 0x%x\n", icx_boot_reason);
 #endif /* CONFIG_IPL2 */
 
 #ifdef CONFIG_POWERBUTTON_LDOWN
   if (icx_boot_reason & ICX_BOOT_REASON_POWERBUTTON)
     {
       int t = 1000;
+
       while (--t && up_board_powerkey())
         {
           up_udelay(10 * 1000);
         }
 
-      _info("t = %d\n", t);
+      sinfo("t = %d\n", t);
 
       if (t)
         {
           up_board_poweren(0);
           up_udelay(1000 * 1000);
-          _info("VBUS connected ?\n");
+          sinfo("VBUS connected ?\n");
 
           /* VBUS is connected after powerup by key.
            * Resume PowerOn sequence. (cancel shutdown)
            */
+
           up_board_poweren(1);
         }
     }
@@ -370,6 +365,7 @@ void __start(void)
   (void)get_cpu_ver();
 
   /* run as interrupt context, before scheduler running */
+
   CURRENT_REGS = NULL;
 
 #ifdef CONFIG_DEBUG_STACK

@@ -56,11 +56,6 @@
 #include <arch/chip/clk.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -71,10 +66,6 @@ static struct clk_st lc823450_clocks[] = LC823450_CLOCKS;
  ****************************************************************************/
 
 uint8_t cpu_ver;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -92,22 +83,21 @@ uint32_t get_cpu_ver(void)
   switch (reg)
     {
       case MODEM_MAV_ES1:
-        _info("ES1 \n");
+        sinfo("ES1 \n");
         break;
 
       case MODEM_MAV_ES2:
-        _info("ES2 \n");
+        sinfo("ES2 \n");
         ret = 1;
         break;
 
       default:
-        _info("??? \n");
+        sinfo("??? \n");
         break;
     }
   cpu_ver = ret;
   return ret;
 }
-
 
 /****************************************************************************
  * Name: mod_stby_regs
@@ -143,10 +133,9 @@ void mod_stby_regs(uint32_t enabits, uint32_t disbits)
       modifyreg32(ISOCNT, 0, enabits);
     }
 
-  /* _info("ISOCNT=0x%x, LSISTBY=0x%x \n", getreg32(ISOCNT), getreg32(LSISTBY)); */
+  /* sinfo("ISOCNT=0x%x, LSISTBY=0x%x \n", getreg32(ISOCNT), getreg32(LSISTBY)); */
 }
 #endif /* CONFIG_LC823450_LSISTBY */
-
 
 /****************************************************************************
  * Name: up_enable_clk
@@ -171,7 +160,6 @@ void up_enable_clk(enum clock_e clk)
 /****************************************************************************
  * Name: up_disable_clk
  ****************************************************************************/
-
 
 void up_disable_clk(enum clock_e clk)
 {
@@ -203,9 +191,10 @@ void up_disable_clk(enum clock_e clk)
 void lc823450_clock_dump(void)
 {
   int i;
+
   for (i = 0; i < LC823450_CLOCK_NUM; i++)
     {
-      _info("%s:%d\n", lc823450_clocks[i].name,
+      sinfo("%s:%d\n", lc823450_clocks[i].name,
             lc823450_clocks[i].count);
     }
 }

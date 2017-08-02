@@ -164,7 +164,6 @@ int g_console_disable;
 #define MIN(a, b) ((a) > (b) ? b : a)
 #endif
 
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -276,11 +275,13 @@ static struct up_dev_s g_uart0priv =
 
 static uart_dev_t g_uart0port =
 {
-  .recv     = {
+  .recv     =
+  {
     .size   = CONFIG_UART0_RXBUFSIZE,
     .buffer = g_uart0rxbuffer,
   },
-  .xmit     = {
+  .xmit     = 
+  {
     .size   = CONFIG_UART0_TXBUFSIZE,
     .buffer = g_uart0txbuffer,
   },
@@ -304,11 +305,13 @@ static struct up_dev_s g_uart1priv =
 
 static uart_dev_t g_uart1port =
 {
-  .recv     = {
+  .recv     =
+  {
     .size   = CONFIG_UART1_RXBUFSIZE,
     .buffer = g_uart1rxbuffer,
   },
-  .xmit     = {
+  .xmit     =
+  {
     .size   = CONFIG_UART1_TXBUFSIZE,
     .buffer = g_uart1txbuffer,
    },
@@ -332,11 +335,13 @@ static struct up_dev_s g_uart2priv =
 
 static uart_dev_t g_uart2port =
 {
-  .recv     = {
+  .recv     =
+  {
     .size   = CONFIG_UART2_RXBUFSIZE,
     .buffer = g_uart2rxbuffer,
   },
-  .xmit     = {
+  .xmit     =
+  {
     .size   = CONFIG_UART2_TXBUFSIZE,
     .buffer = g_uart2txbuffer,
    },
@@ -380,8 +385,10 @@ static inline void up_disableuartint(struct up_dev_s *priv, uint32_t *im)
 {
   /* Return the current interrupt mask value */
 
-  if (im)
-    *im = priv->im;
+  if (im != NULL)
+    {
+      *im = priv->im;
+    }
 
   /* Disable all interrupts */
 
@@ -419,6 +426,7 @@ static inline void up_waittxnotfull(struct up_dev_s *priv)
 
           break;
         }
+
       up_udelay(1);
     }
 
@@ -457,13 +465,16 @@ static int up_setup(struct uart_dev_s *dev)
    * REGVAL = 65536 - (ControllerCLK / (UDIV(7~15) + 1) * baudrate)
    */
 
-
   /* search best divider setting */
+
   for (i = 7; i <= 15; i++)
     {
       tmp_reg = 65536 - (CTL_CLK / ((i + 1)  * priv->baud));
       if (tmp_reg >= 65536)
-        continue;
+        {
+          continue;
+        }
+
       real_baud = CTL_CLK / ((i + 1)  * (65536 - tmp_reg));
       if (min_diff > abs(real_baud - priv->baud))
         {
@@ -471,9 +482,10 @@ static int up_setup(struct uart_dev_s *dev)
           udiv = i;
         }
     }
+
   if (udiv < 0)
     {
-      _err("ERR: baud = %d\n", priv->baud);
+      serr("ERROR: baud = %d\n", priv->baud);
       return -EINVAL;
     }
 
@@ -495,10 +507,9 @@ static int up_setup(struct uart_dev_s *dev)
         ctl |= UART_UMD_CL;
         break;
       default:
-        _err("ERR: bits = %d\n", priv->bits);
+        serr("ERROR: bits = %d\n", priv->bits);
         return -EINVAL;
     }
-
 
   ctl &= ~(UART_UMD_PS0 | UART_UMD_PS1);
   switch (priv->parity)
@@ -512,23 +523,32 @@ static int up_setup(struct uart_dev_s *dev)
         ctl |= UART_UMD_PS1;
         break;
       default:
-        _err("ERR: bits = %d\n", priv->bits);
+        serr("ERROR: bits = %d\n", priv->bits);
         return -EINVAL;
     }
 
   ctl &= ~UART_UMD_STL;
   if (priv->stopbits2)
-    ctl |= UART_UMD_STL;
+    {
+      ctl |= UART_UMD_STL;
+    }
 
   if (priv->cts)
-    ctl |= UART_UMD_CTSEN;
+    {
+      ctl |= UART_UMD_CTSEN;
+    }
   else
-    ctl &= ~UART_UMD_CTSEN;
+    {
+      ctl &= ~UART_UMD_CTSEN;
+    }
 
   if (priv->rts)
-    ctl |= UART_UMD_RTSEN;
+    {
+      ctl |= UART_UMD_RTSEN;
+    }
   else
-    ctl &= ~UART_UMD_RTSEN;
+      ctl &= ~UART_UMD_RTSEN;
+    }
 
   up_serialout(priv, UART_UMD, ctl);
 
@@ -597,7 +617,7 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, up_interrupt, NULL);
+  ret = irq_attach(priv->irq, up_interrupt, dev);
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -606,6 +626,7 @@ static int up_attach(struct uart_dev_s *dev)
 
       up_enable_irq(priv->irq);
     }
+
   return ret;
 }
 
@@ -641,37 +662,13 @@ static void up_detach(struct uart_dev_s *dev)
 
 static int up_interrupt(int irq, void *context, FAR void *arg)
 {
-  struct uart_dev_s *dev = NULL;
+  struct uart_dev_s *dev;
   struct up_dev_s   *priv;
   uint32_t           mis;
 
-#ifdef CONFIG_LC823450_UART0
-  if (g_uart0priv.irq == irq)
-    {
-      dev = &g_uart0port;
-    }
-  else
-#endif
-#ifdef CONFIG_LC823450_UART1
-  if (g_uart1priv.irq == irq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_LC823450_UART2
-  if (g_uart2priv.irq == irq)
-    {
-      dev = &g_uart2port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
-
+  dev = (struct uart_dev_s *)arg;
+  DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct up_dev_s *)dev->priv;
-
 
   /* Get the masked UART status and clear the pending interrupts. */
 
@@ -681,25 +678,38 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
 
   /* Rx buffer not empty ... process incoming bytes */
   if (mis & UART_UISR_UARTRF)
-    uart_recvchars(dev);
+    {
+      uart_recvchars(dev);
+    }
 
   if (mis & UART_UISR_ROWE)
-    priv->rowe++;
+    {
+      priv->rowe++;
+    }
 
   if (mis & UART_UISR_PE)
-    priv->pe++;
+    {
+      priv->pe++;
+    }
 
   if (mis & UART_UISR_FE)
-    priv->fe++;
+    {
+      priv->fe++;
+    }
 
   if (mis & UART_UISR_RXOWE)
-    priv->rxowe++;
+    {
+      priv->rxowe++;
+    }
 
   /* Handle outgoing, transmit bytes */
 
   /* Tx FIFO not full ... process outgoing bytes */
+
   if (mis & UART_UISR_UARTTF)
-    uart_xmitchars(dev);
+    {
+      uart_xmitchars(dev);
+    }
 
   up_serialout(priv, UART_UISR, mis);
 
@@ -728,9 +738,13 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         {
           struct up_dev_s *user = (struct up_dev_s *)arg;
           if (!user)
-            ret = -EINVAL;
+            {
+              ret = -EINVAL;
+            }
           else
-            memcpy(user, dev, sizeof(struct up_dev_s));
+            {
+              memcpy(user, dev, sizeof(struct up_dev_s));
+            }
         }
         break;
 #endif
@@ -779,9 +793,13 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
           /* Perform some sanity checks before accepting any changes */
 
           if (termiosp->c_cflag & PARENB)
-            priv->parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+            {
+              priv->parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+            }
           else
-            priv->parity = 0;
+            {
+              priv->parity = 0;
+            }
 
           priv->stopbits2 = (termiosp->c_cflag & CSTOPB) != 0;
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
@@ -803,7 +821,6 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
           priv->baud = cfgetispeed(termiosp);
 
           up_setup(dev);
-
         }
         break;
 
@@ -821,8 +838,6 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
   return -ENOTTY;
 }
 #endif
-
-
 
 /****************************************************************************
  * Name: up_receive
@@ -871,7 +886,9 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 #endif
     }
   else
-    priv->im &= ~UART_UIEN_UARTRF_IEN;
+    {
+      priv->im &= ~UART_UIEN_UARTRF_IEN;
+    }
 
   up_serialout(priv, UART_UIEN, priv->im);
 }
@@ -890,7 +907,9 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 
 #ifdef CONFIG_DEV_CONSOLE_SWITCH
   if (g_console_disable && dev == &CONSOLE_DEV)
-    return false;
+    {
+      return false;
+    }
 #endif /* CONFIG_DEV_CONSOLE_SWITCH */
 
   return ((up_serialin(priv, UART_USR) & UART_USR_RXEMP) == 0);
@@ -910,7 +929,9 @@ static void up_send(struct uart_dev_s *dev, int ch)
 
 #ifdef CONFIG_DEV_CONSOLE_SWITCH
   if (g_console_disable && dev == &CONSOLE_DEV)
-    return;
+    {
+      return;
+    }
 #endif /* CONFIG_DEV_CONSOLE_SWITCH */
 
   up_serialout(priv, UART_USTF, (uint32_t)ch);
@@ -954,6 +975,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   else
     {
       /* Disable the TX interrupt */
+
       priv->im &= ~UART_UIEN_UARTTF_IEN;
       up_serialout(priv, UART_UIEN, priv->im);
     }
@@ -974,7 +996,9 @@ static bool up_txready(struct uart_dev_s *dev)
 
 #ifdef CONFIG_DEV_CONSOLE_SWITCH
   if (g_console_disable && dev == &CONSOLE_DEV)
-    return true;
+    {
+      return true;
+    }
 #endif /* CONFIG_DEV_CONSOLE_SWITCH */
 
   return ((up_serialin(priv, UART_USR) & UART_USR_TXFULL) == 0);
@@ -994,7 +1018,9 @@ static bool up_txempty(struct uart_dev_s *dev)
 
 #ifdef CONFIG_DEV_CONSOLE_SWITCH
   if (g_console_disable && dev == &CONSOLE_DEV)
-    return 0;
+    {
+      return 0;
+    }
 #endif /* CONFIG_DEV_CONSOLE_SWITCH */
 
   return ((up_serialin(priv, UART_USR) & UART_USR_TXEMP) != 0);
@@ -1005,6 +1031,7 @@ static bool up_txempty(struct uart_dev_s *dev)
 /****************************************************************************
  * Name: up_hs_attach
  ****************************************************************************/
+
 static int  up_hs_attach(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
@@ -1023,6 +1050,7 @@ static int  up_hs_attach(struct uart_dev_s *dev)
 /****************************************************************************
  * Name: up_hs_detach
  ****************************************************************************/
+
 static void  up_hs_detach(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
@@ -1038,6 +1066,7 @@ static void  up_hs_detach(struct uart_dev_s *dev)
 /****************************************************************************
  * Name: uart_dma_callback
  ****************************************************************************/
+
 static void uart_dma_callback(DMA_HANDLE hdma, void *arg, int result)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
@@ -1050,12 +1079,17 @@ static void uart_dma_callback(DMA_HANDLE hdma, void *arg, int result)
 /****************************************************************************
  * Name: uart_rxdma_callback
  ****************************************************************************/
-static void uart_rxdma_callback(DMA_HANDLE hdma, void *arg, int result)
+
+ static void uart_rxdma_callback(DMA_HANDLE hdma, void *arg, int result)
 {
   if (hs_dmaact == HS_DMAACT_ACT1)
-    hs_dmaact = HS_DMAACT_STOP2;
+    {
+      hs_dmaact = HS_DMAACT_STOP2;
+    }
   else
-    hs_dmaact = HS_DMAACT_STOP1;
+    {
+      hs_dmaact = HS_DMAACT_STOP1;
+    }
 
   hsuart_wdtimer();
   up_hs_dmasetup();
@@ -1064,21 +1098,25 @@ static void uart_rxdma_callback(DMA_HANDLE hdma, void *arg, int result)
 /****************************************************************************
  * Name: up_hs_dmasetup
  ****************************************************************************/
+
 static void  up_hs_dmasetup()
 {
   irqstate_t flags;
 
-  flags = irqsave();
+  flags = enter_critical_section();
 
   switch (hs_dmaact)
     {
       case HS_DMAACT_ACT1:
       case HS_DMAACT_ACT2:
         break;
+
       case HS_DMAACT_STOP1:
         if (g_uart1port.recv.tail > 0 &&
             g_uart1port.recv.tail < CONFIG_UART1_RXBUFSIZE / 2)
-          break;
+          {
+            break;
+          }
 
         lc823450_dmasetup(g_uart1priv.hrxdma,
                           LC823450_DMA_SRCWIDTH_BYTE |
@@ -1090,11 +1128,14 @@ static void  up_hs_dmasetup()
 
         lc823450_dmastart(g_uart1priv.hrxdma, uart_rxdma_callback, NULL);
         hs_dmaact = HS_DMAACT_ACT1;
-          break;
+        break;
 
       case HS_DMAACT_STOP2:
         if (g_uart1port.recv.tail > CONFIG_UART1_RXBUFSIZE / 2)
-          break;
+          {
+            break;
+          }
+
         lc823450_dmasetup(g_uart1priv.hrxdma,
                           LC823450_DMA_SRCWIDTH_BYTE |
                           LC823450_DMA_DSTWIDTH_BYTE |
@@ -1107,12 +1148,14 @@ static void  up_hs_dmasetup()
         hs_dmaact = HS_DMAACT_ACT2;
         break;
     };
-  irqrestore(flags);
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
  * Name: up_hs_receive
  ****************************************************************************/
+
 static int up_hs_receive(struct uart_dev_s *dev, char *buf, int buflen)
 {
   int len = 0;
@@ -1123,10 +1166,11 @@ static int up_hs_receive(struct uart_dev_s *dev, char *buf, int buflen)
     ;
   len = MIN(dmalen, buflen);
 
-  flags = irqsave();
+  flags = enter_critical_section();
   if (len + dev->recv.tail > dev->recv.size)
     {
       int len2;
+
       len2 = dev->recv.size - dev->recv.tail;
       memcpy(buf, dev->recv.buffer + dev->recv.tail, len2);
       memcpy(buf + len2, dev->recv.buffer, len - len2);
@@ -1137,14 +1181,16 @@ static int up_hs_receive(struct uart_dev_s *dev, char *buf, int buflen)
       memcpy(buf, dev->recv.buffer + dev->recv.tail, len);
       dev->recv.tail += len;
     }
-    up_hs_dmasetup();
-    irqrestore(flags);
+
+  up_hs_dmasetup();
+  leave_critical_section(flags);
   return len;
 }
 
 /****************************************************************************
  * Name: up_hs_send
  ****************************************************************************/
+
 static int up_hs_send(struct uart_dev_s *dev, const char *buf, int buflen)
 {
   int len;
@@ -1155,6 +1201,7 @@ retry:
   sem_wait(&priv->txdma_wait);
 
   /* If buflen <= FIFO space, write it by PIO. */
+
   if (buflen <=
     UART_FIFO_SIZE - UART_USFS_TXFF_LV(up_serialin(priv, UART_USFS)))
     {
@@ -1164,6 +1211,7 @@ retry:
       sem_post(&priv->txdma_wait);
       return buflen;
     }
+
   len = MIN(buflen, LC823450_DMA_MAX_TRANSSIZE);
   len = MIN(len, dev->xmit.size);
 
@@ -1177,6 +1225,7 @@ retry:
   lc823450_dmastart(priv->htxdma, uart_dma_callback, dev);
 
   /* BT stack may not handle to short write */
+
   if (len != buflen)
     {
       buflen -= len;
@@ -1209,6 +1258,7 @@ void up_earlyserialinit(void)
    */
 
   /* workaround: force clock enable */
+
 #if defined(CONFIG_LC823450_UART0)
   modifyreg32(MCLKCNTAPB, 0, MCLKCNTAPB_UART0_CLKEN | MCLKCNTAPB_UART0IF_CLKEN);
   modifyreg32(MRSTCNTAPB, 0, MRSTCNTAPB_UART0_RSTB);
@@ -1364,6 +1414,7 @@ void up_console_disable(int disable)
       modifyreg32(MCLKCNTAPB, clkmask, 0);
 
       /* remux to gpio */
+
       lc823450_gpio_mux(GPIO_PORT5 | GPIO_PIN6 | GPIO_PULLDOWN | GPIO_MUX0);
       lc823450_gpio_mux(GPIO_PORT5 | GPIO_PIN7 | GPIO_PULLDOWN | GPIO_MUX0);
     }
@@ -1372,6 +1423,7 @@ void up_console_disable(int disable)
       llinfo("enable console\n");
 
       /* remux to uart */
+
       lc823450_gpio_mux(GPIO_PORT5 | GPIO_PIN6 | GPIO_PULLDOWN | GPIO_MUX3);
       lc823450_gpio_mux(GPIO_PORT5 | GPIO_PIN7 | GPIO_PULLDOWN | GPIO_MUX3);
 
@@ -1386,12 +1438,15 @@ void up_console_disable(int disable)
 /****************************************************************************
  * Name: hsuart_wdtimer
  ****************************************************************************/
+
 void hsuart_wdtimer(void)
 {
   int newhead = 0;
 
   if (!hs_recstart)
-    return;
+    {
+      return;
+    }
 
   switch (hs_dmaact)
     {
@@ -1412,10 +1467,14 @@ void hsuart_wdtimer(void)
   if (g_uart1port.recv.head != newhead)
     {
       if (newhead == CONFIG_UART1_RXBUFSIZE)
-        newhead = 0;
+        {
+          newhead = 0;
+        }
 
       if (g_uart1port.recv.tail == CONFIG_UART1_RXBUFSIZE)
-        g_uart1port.recv.tail = 0;
+        {
+          g_uart1port.recv.tail = 0;
+        }
 
       g_uart1port.recv.head = newhead;
       uart_datareceived(&g_uart1port);
@@ -1425,6 +1484,7 @@ void hsuart_wdtimer(void)
 /****************************************************************************
  * Name: up_hs_get_rbufsize
  ****************************************************************************/
+
 int up_hsuart_get_rbufsize(struct uart_dev_s *dev)
 {
   irqstate_t flags;
@@ -1432,9 +1492,14 @@ int up_hsuart_get_rbufsize(struct uart_dev_s *dev)
 
   flags = enter_critical_section();
   if (dev->recv.tail <= dev->recv.head)
-    ret = dev->recv.head - dev->recv.tail;
+    {
+      ret = dev->recv.head - dev->recv.tail;
+    }
   else
-    ret = dev->recv.size - dev->recv.tail + dev->recv.head;
+    {
+      ret = dev->recv.size - dev->recv.tail + dev->recv.head;
+    }
+
   leave_critical_section(flags);
   return ret;
 }

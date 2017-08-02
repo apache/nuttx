@@ -34,7 +34,6 @@
  *
  ****************************************************************************/
 
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -109,7 +108,6 @@
 #define RTC_VDET_VDET       0x01
 #define RTC_RTCINTCNT       (RTC_REGBASE + 0x070)
 
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -123,7 +121,6 @@ struct rtc_default
 };
 #endif
 
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -131,7 +128,6 @@ struct rtc_default
 #ifdef CONFIG_RTC_SAVE_DEFAULT
 static void rtc_pmnotify(struct pm_callback_s *cb, enum pm_state_e pmstate);
 #endif /* CONFIG_RTC_SAVE_DEFAULT */
-
 
 /****************************************************************************
  * Private Data
@@ -158,7 +154,6 @@ static int cboot = 1;
 
 volatile bool g_rtc_enabled = false;
 
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -176,7 +171,6 @@ static void tm_divider(struct tm *tm, int divn, int divm)
   gmtime_r(&tt, tm);
 }
 #endif /* CONFIG_RTC_DIV */
-
 
 /****************************************************************************
  * Name: rtc_pmnotify
@@ -201,6 +195,7 @@ static void rtc_pmnotify(struct pm_callback_s *cb, enum pm_state_e pmstate)
           {
             break;
           }
+
         (void)up_rtc_getdatetime(&tm);
         up_rtc_set_default_datetime(&tm);
         break;
@@ -211,7 +206,6 @@ static void rtc_pmnotify(struct pm_callback_s *cb, enum pm_state_e pmstate)
   return;
 }
 #endif /* CONFIG_RTC_SAVE_DEFAULT */
-
 
 /****************************************************************************
  * Name: rtc_interrupt
@@ -234,14 +228,14 @@ static int rtc_interrupt(int irq, void *context, FAR void *arg)
   struct tm tm;
   up_rtc_getdatetime(&tm);
 
-  _info("RTCSTAT = 0x%02x (%04d/%02d/%02d %02d:%02d:%02d)\n",
-    getreg8(RTC_RTCSTAT),
-    tm.tm_year + 1900,
-    tm.tm_mon + 1,
-    tm.tm_mday,
-    tm.tm_hour,
-    tm.tm_min,
-    tm.tm_sec);
+  rtcinfo("RTCSTAT = 0x%02x (%04d/%02d/%02d %02d:%02d:%02d)\n",
+          getreg8(RTC_RTCSTAT),
+          tm.tm_year + 1900,
+          tm.tm_mon + 1,
+          tm.tm_mday,
+          tm.tm_hour,
+          tm.tm_min,
+          tm.tm_sec);
 
   /* Disable IRQ */
 
@@ -283,7 +277,6 @@ static int rtc_interrupt(int irq, void *context, FAR void *arg)
  *   Zero (OK) on success; a negated errno on failure
  *
  ****************************************************************************/
-
 
 static int up_rtc_getdatetime_main(FAR struct tm *tp)
 {
@@ -331,18 +324,16 @@ static int up_rtc_getdatetime_main(FAR struct tm *tp)
   return OK;
 }
 
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
 
 /****************************************************************************
  * Name: up_rtcinitialize
  *
  * Description:
- *   Initialize the hardware RTC per the selected configuration.  This function is
- *   called once during the OS initialization sequence
+ *   Initialize the hardware RTC per the selected configuration.  This
+ *   function is called once during the OS initialization sequence
  *
  * Input Parameters:
  *   None
@@ -351,7 +342,6 @@ static int up_rtc_getdatetime_main(FAR struct tm *tp)
  *   Zero (OK) on success; a negated errno on failure
  *
  ****************************************************************************/
-
 
 int up_rtc_initialize(void)
 {
@@ -393,7 +383,7 @@ int up_rtc_initialize(void)
 
   if (!(getreg8(RTC_VDET) & RTC_VDET_VDET))
     {
-      _info("VDET Detect\n");
+      rtcinfo("VDET Detect\n");
       putreg8(0, RTC_PTN32BIT0);
       putreg8(0, RTC_PTN32BIT1);
       putreg8(0, RTC_PTN32BIT2);
@@ -415,7 +405,6 @@ int up_rtc_initialize(void)
       up_udelay(62);
       putreg32(0, RTC_VDET);
     }
-
 
   if (getreg8(RTC_PTN32BIT0) != RTC_PTN32BIT0_VAL ||
       getreg8(RTC_PTN32BIT1) != RTC_PTN32BIT1_VAL ||
@@ -458,7 +447,6 @@ int up_rtc_initialize(void)
 
   return OK;
 }
-
 
 int up_rtc_getdatetime(FAR struct tm *tp)
 {
@@ -677,7 +665,6 @@ int up_rtc_getrawtime(FAR struct timespec *ts)
   return 0;
 }
 
-
 #ifdef CONFIG_RTC_SAVE_DEFAULT
 
 /****************************************************************************
@@ -721,6 +708,7 @@ int up_rtc_get_default_datetime(struct tm *tp)
       llerr("error: %d\n");
       return -1;
     }
+
   (void)bchlib_read(handle, (void *)&rtc_def,
                     CONFIG_RTC_SAVE_SECTOR_OFFSET * 512, sizeof(rtc_def));
   bchlib_teardown(handle);
@@ -728,6 +716,7 @@ int up_rtc_get_default_datetime(struct tm *tp)
     {
       return -ENOENT;
     }
+
   *tp = rtc_def.tm;
   return 0;
 }
@@ -748,6 +737,7 @@ void up_rtc_clear_default(void)
       llerr("error: %d\n");
       return;
     }
+
   memset(&rtc_def, 0, sizeof(rtc_def));
   (void)bchlib_write(handle, (void *)&rtc_def,
                      CONFIG_RTC_SAVE_SECTOR_OFFSET * 512, sizeof(rtc_def));

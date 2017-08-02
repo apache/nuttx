@@ -40,7 +40,6 @@
  * Included Files
  ****************************************************************************/
 
-
 #include <nuttx/config.h>
 #include <nuttx/spi/spi.h>
 
@@ -161,7 +160,8 @@
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -170,13 +170,13 @@ extern "C" {
  * Public Functions
  ****************************************************************************/
 
-EXTERN FAR struct spi_dev_s *lc823450_spibus_initialize(int bus);
-EXTERN void lc823450_spiinitialize(void);
-EXTERN void lc823450_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
-EXTERN uint8_t lc823450_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
+FAR struct spi_dev_s *lc823450_spibus_initialize(int bus);
+void lc823450_spiinitialize(void);
+void lc823450_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t lc823450_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
 
 #ifdef CONFIG_SPI_CMDDATA
-EXTERN int lc823450_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int lc823450_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #undef EXTERN

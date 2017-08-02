@@ -42,11 +42,9 @@
  * Included Files
  ****************************************************************************/
 
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
 
 #define LC823450_OSCSYS_REGBASE 0x40040000
 
@@ -89,14 +87,14 @@
 
 #ifndef __ASSEMBLY__
 
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -105,15 +103,14 @@ extern "C" {
  * Public Functions
  ****************************************************************************/
 
-EXTERN uint32_t lc823450_get_systemfreq(void);
+uint32_t lc823450_get_systemfreq(void);
 
 #ifndef CONFIG_DVFS
-EXTERN uint32_t lc823450_get_apb(void);
+uint32_t lc823450_get_apb(void);
 #endif
 
-EXTERN uint32_t lc823450_get_ahb(void);
-EXTERN void lc823450_clockconfig(void);
-
+uint32_t lc823450_get_ahb(void);
+void lc823450_clockconfig(void);
 
 #if defined(__cplusplus)
 }

@@ -35,7 +35,6 @@
  *
  ****************************************************************************/
 
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -59,11 +58,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-
 #define  PORTX_OFFSET      0x00001000
 #define  PORTX_DRC_OFFSET  0x0
 #define  PORTX_DAT_OFFSET  0x4
-
 
 /****************************************************************************
  * Private Data
@@ -77,10 +74,6 @@ static FAR struct ioex_dev_s *g_ioex_dev;
 #define GPIO_VIRTUAL_NUM 32
 static FAR struct vgpio_ops_s *vgpio_ops[GPIO_VIRTUAL_NUM];
 #endif /* CONFIG_LC823450_VGPIO */
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -126,7 +119,6 @@ static uintptr_t lc823450_get_gpio_pull(unsigned int port)
   return regaddr;
 }
 
-
 /****************************************************************************
  * Name: lc823450_configinput
  *
@@ -164,9 +156,7 @@ static inline void lc823450_configpull(uint16_t gpiocfg,
     }
 
   putreg32(regval, regaddr);
-
 }
-
 
 /****************************************************************************
  * Name: lc823450_configinput
@@ -206,7 +196,8 @@ static inline void lc823450_configinput(uint32_t port, uint32_t pin)
  *
  ****************************************************************************/
 
-static inline void lc823450_configoutput(uint16_t gpiocfg, uint32_t port, uint32_t pin)
+static inline void lc823450_configoutput(uint16_t gpiocfg, uint32_t port,
+                                         uint32_t pin)
 {
   uintptr_t regaddr;
   uint32_t  regval;
@@ -229,7 +220,6 @@ static inline void lc823450_configoutput(uint16_t gpiocfg, uint32_t port, uint32
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
 
 /****************************************************************************
  * Name: lc823450_gpio_mux
@@ -260,10 +250,9 @@ int lc823450_gpio_mux(uint16_t gpiocfg)
     {
       ret = -1;
     }
+
   return ret;
 }
-
-
 
 /****************************************************************************
  * Name: lc823450_gpio_config
@@ -301,6 +290,7 @@ int lc823450_gpio_config(uint16_t gpiocfg)
       flags = enter_critical_section();
 
       /* pull up/down specified */
+
       if (gpiocfg & GPIO_PUPD_MASK)
         {
           lc823450_configpull(gpiocfg, port, pin);
@@ -317,7 +307,7 @@ int lc823450_gpio_config(uint16_t gpiocfg)
             break;
 
           default :
-            _err("ERROR: Unrecognized pin mode: %04x\n", gpiocfg);
+            gpioerr("ERROR: Unrecognized pin mode: %04x\n", gpiocfg);
             ret = -EINVAL;
             break;
         }
@@ -360,7 +350,7 @@ int lc823450_gpio_config(uint16_t gpiocfg)
       ret = g_ioex_dev->ops->config(g_ioex_dev, pin, dir, pupd);
       if (ret != 0)
         {
-          dbg("Failed to configure I/O expanded port\n");
+          gpioerr("ERROR: Failed to configure I/O expanded port\n");
         }
 
       g_ioex_dev->ops->write(g_ioex_dev, pin, GPIO_IS_ONE(gpiocfg));
@@ -399,6 +389,7 @@ void lc823450_gpio_write(uint16_t gpiocfg, bool value)
         {
           vgpio_ops[pin]->write(pin, value);
         }
+
       return;
     }
 #endif /* CONFIG_LC823450_VGPIO */
@@ -423,6 +414,7 @@ void lc823450_gpio_write(uint16_t gpiocfg, bool value)
       {
         regval &= ~(1 << pin);
       }
+
     putreg32(regval, regaddr);
 
     leave_critical_section(flags);
@@ -462,6 +454,7 @@ bool lc823450_gpio_read(uint16_t gpiocfg)
         {
           return vgpio_ops[pin]->read(pin);
         }
+
       return 0;
     }
 #endif /* CONFIG_LC823450_VGPIO */
@@ -505,9 +498,10 @@ int lc823450_gpio_initialize(void)
   g_ioex_dev = up_ioexinitialize(1);
   if (!g_ioex_dev)
     {
-      dbg("%s: Failed to initialize ioex driver\n", __func__);
+      gpioerr("ERROR: Failed to initialize ioex driver\n");
       return -EIO;
     }
+
   return OK;
 }
 #endif /* CONFIG_IOEX */

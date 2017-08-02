@@ -61,11 +61,15 @@
 #include "lc823450_spi.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_EXCHANGE
 # error "SPI_EXCHANGE is not supported"
+#endif
+
+#ifndef MIN
+#  define MIN(a, b) ((a) > (b) ? b : a)
 #endif
 
 /****************************************************************************
@@ -138,10 +142,6 @@ static struct lc823450_spidev_s g_spidev =
 };
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -208,7 +208,8 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
           break;
         }
     }
-  _info("Frequency %d -> %d\n", frequency, sysclk / (4 * (256 - div)));
+
+  spiinfo("Frequency %d -> %d\n", frequency, sysclk / (4 * (256 - div)));
 
   actual = sysclk / (4 * (256 - div));
   putreg32(div, LC823450_SPI_BRG);
@@ -310,11 +311,12 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 #endif
 }
 
-#ifdef CONFIG_LC823450_SPI_DMA
 /****************************************************************************
  * Name: spi_dma_callback
  *
  ****************************************************************************/
+
+#ifdef CONFIG_LC823450_SPI_DMA
 static void spi_dma_callback(DMA_HANDLE hdma, void *arg, int result)
 {
   sem_t *waitsem = (sem_t *)arg;
@@ -337,6 +339,7 @@ static void spi_dma_callback(DMA_HANDLE hdma, void *arg, int result)
  *   response
  *
  ****************************************************************************/
+
 #ifdef CONFIG_LC823450_SPI_DMA
 static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 {
@@ -382,15 +385,12 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
+static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
+                         size_t nwords)
 {
   FAR struct lc823450_spidev_s *priv = (FAR struct lc823450_spidev_s *)dev;
 
 #ifdef CONFIG_LC823450_SPI_DMA
-#ifndef MIN
-#define MIN(a, b) ((a) > (b) ? b : a)
-#endif
-
   /* TODO: 16bit */
 
   while (nwords)
@@ -424,6 +424,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 
   while ((getreg32(LC823450_SPI_SSR) & SPI_SSR_TFF) != 0)
     ;
+
   /* Wait for Shift reg empty */
 
   while ((getreg32(LC823450_SPI_SSR) & SPI_SSR_SHRF) != 0)
@@ -525,7 +526,6 @@ FAR struct spi_dev_s *lc823450_spibus_initialize(int port)
 
   if ((getreg32(MCLKCNTAPB) & MCLKCNTAPB_SPI_CLKEN) == 0)
     {
-
       /* SPI: clock / reset */
 
       modifyreg32(MCLKCNTAPB, 0, MCLKCNTAPB_SPI_CLKEN);

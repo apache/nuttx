@@ -51,11 +51,11 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
-
 
 /************************************************************************************
  * Name: lc823450_lowsetup
@@ -65,7 +65,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN void lc823450_lowsetup(void);
+void lc823450_lowsetup(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

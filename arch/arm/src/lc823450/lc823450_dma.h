@@ -73,8 +73,8 @@
 #define LC823450_DMA_TRANSSIZE_MASK     (0xfff << 0)
 #define LC823450_DMA_MAX_TRANSSIZE      0xff0
 
-
 /* HighPriority */
+
 #define DMA_CHANNEL_SIOTX               0
 #define DMA_CHANNEL_UART1RX             1
 #define DMA_CHANNEL_UART1TX             2
@@ -127,7 +127,8 @@ typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -136,22 +137,22 @@ extern "C" {
  * Public Functions
  ****************************************************************************/
 
-EXTERN void lc823450_dmaconfigure(uint8_t dmarequest, bool alternate);
-EXTERN DMA_HANDLE lc823450_dmachannel(int ch);
-EXTERN void lc823450_dmafree(DMA_HANDLE handle);
-EXTERN void lc823450_dmarequest(DMA_HANDLE handle, uint8_t dmarequest);
-EXTERN int lc823450_dmasetup(DMA_HANDLE handle, uint32_t control,
-                             uint32_t srcaddr, uint32_t destaddr, size_t nxfrs);
-EXTERN int lc823450_dmallsetup(DMA_HANDLE handle, uint32_t control,
-                               uint32_t srcaddr, uint32_t destaddr,
-                               size_t nxfrs, uint32_t llist);
-EXTERN void lc823450_dmareauest_dir(DMA_HANDLE handle, uint8_t dmarequest,
-                                    int m2p);
+void lc823450_dmaconfigure(uint8_t dmarequest, bool alternate);
+DMA_HANDLE lc823450_dmachannel(int ch);
+void lc823450_dmafree(DMA_HANDLE handle);
+void lc823450_dmarequest(DMA_HANDLE handle, uint8_t dmarequest);
+int lc823450_dmasetup(DMA_HANDLE handle, uint32_t control,
+                      uint32_t srcaddr, uint32_t destaddr, size_t nxfrs);
+int lc823450_dmallsetup(DMA_HANDLE handle, uint32_t control,
+                        uint32_t srcaddr, uint32_t destaddr,
+                        size_t nxfrs, uint32_t llist);
+void lc823450_dmareauest_dir(DMA_HANDLE handle, uint8_t dmarequest,
+                             int m2p);
 
-EXTERN int lc823450_dmastart(DMA_HANDLE handle, dma_callback_t callback,
-                             void *arg);
-EXTERN void lc823450_dmastop(DMA_HANDLE handle);
-EXTERN int lc823450_dmaremain(DMA_HANDLE handle);
+int lc823450_dmastart(DMA_HANDLE handle, dma_callback_t callback,
+                      void *arg);
+void lc823450_dmastop(DMA_HANDLE handle);
+int lc823450_dmaremain(DMA_HANDLE handle);
 
 
 #undef EXTERN
