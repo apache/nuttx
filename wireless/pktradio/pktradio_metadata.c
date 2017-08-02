@@ -190,7 +190,7 @@ FAR struct pktradio_metadata_s *pktradio_metadata_allocate(void)
     {
        /* Zero and tag the alloated meta-data structure. */
 
-       memset(&metadata, 0, sizeof(struct pktradio_metadata_s));
+       memset(metadata, 0, sizeof(struct pktradio_metadata_s));
        metadata->pm_pool = pool;
     }
 

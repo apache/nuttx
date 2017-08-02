@@ -44,12 +44,43 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/wireless/wireless.h>
 
 #ifdef CONFIG_WIRELESS_PKTRADIO
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Packet radio network device IOCTL commands. */
+
+#ifndef WL_NPKTRADIOCMDS != 3
+#  error Incorrect setting for number of PktRadio IOCTL commands
+#endif
+
+/* SIOCPKTRADIOGGPROPS
+ *   Description:   Get the radio properties
+ *   Input:         Pointer to read-write instance of struct pktradio_ifreq_s
+ *   Output:        Properties returned in struct pktradio_ifreq_s instance
+ */
+
+#define SIOCPKTRADIOGGPROPS  _WLIOC(WL_PKTRADIOFIRST)
+
+/* SIOCPKTRADIOGSNODE
+ *   Description:   Set the radio node address
+ *   Input:         Pointer to read-only instance of struct pktradio_ifreq_s
+ *   Output:        None
+ */
+
+#define SIOCPKTRADIOSNODE    _WLIOC(WL_PKTRADIOFIRST + 1)
+
+/* SIOCPKTRADIOGGNODE
+ *   Description:   Get the radio node address
+ *   Input:         Pointer to read-write instance of struct pktradio_ifreq_s
+ *   Output:        Node address return in struct pktradio_ifreq_s instance
+ */
+
+#define SIOCPKTRADIOGNODE    _WLIOC(WL_PKTRADIOFIRST + 2)
 
 /* Memory Pools */
 
@@ -59,8 +90,6 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
-struct iob_s;  /* Forward reference */
 
 /* This describes an address used by the packet radio.  There is no standard
  * size for such an address.  Hence, it is represented simply as a arry of
@@ -73,9 +102,44 @@ struct pktradio_addr_s
   uint8_t pa_addr[CONFIG_PKTRADIO_ADDRLEN];
 };
 
+/* Different packet radios may have different properties.  If there are
+ * multiple packet radios, then those properties have to be queried at
+ * run time.  This information is provided to the 6LoWPAN network via the
+ * following structure.
+ *
+ * NOTE: This MUST be the same as the struct sixlowpan_properties_s as
+ * defined in sixlowpan.h.  It is duplicated here with a different name in
+ * order to avoid circular header file inclusion.
+ */
+
+struct pktradio_properties_s
+{
+  uint8_t pp_addrlen;                 /* Length of an address */
+  uint8_t pp_pktlen;                  /* Fixed packet/frame size (up to 255) */
+};
+
+/* This is the structure passed with all packet radio IOCTL commands.
+ * NOTE: This is merely a placeholder for now.
+ */
+
+struct pktradio_ifreq_s
+{
+  char                           pifr_name[IFNAMSIZ];  /* Network device name (e.g. "wpan0") */
+  union
+  {
+    struct pktradio_addr_s       pifru_hwaddr;         /* Radio node address */
+    struct pktradio_properties_s pifru_props;          /* Radio properties */
+  } pifr_u;
+};
+
+#define pifr_hwaddr              pifr_u.pifru_hwaddr   /* Radio node address */
+#define pifr_props               pifr_u.pifru_props    /* Radio properties */
+
 /* This is the form of the meta data that provides the radio-specific
  * information necessary to send and receive packets to and from the radio.
  */
+
+struct iob_s;  /* Forward reference */
 
 struct pktradio_metadata_s
 {

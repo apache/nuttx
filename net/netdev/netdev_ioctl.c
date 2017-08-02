@@ -73,7 +73,13 @@
 #endif
 
 #if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN)
-#  include <nuttx/wireless/ieee802154/ieee802154_mac.h>
+#  ifdef CONFIG_WIRELESS_IEEE802154
+#    include <nuttx/wireless/ieee802154/ieee802154_mac.h>
+#  endif
+
+#  ifdef CONFIG_WIRELESS_PKTRADIO
+#    include <nuttx/wireless/pktradio.h>
+#  endif
 #endif
 
 #include "arp/arp.h"
@@ -342,7 +348,8 @@ static void ioctl_set_ipv6addr(FAR net_ipv6addr_t outaddr,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN)
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN) && \
+    defined(CONFIG_WIRELESS_IEEE802154)
 static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
                                   unsigned long arg)
 {
@@ -355,7 +362,7 @@ static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
       if (_MAC802154IOCVALID(cmd))
         {
           /* Get the IEEE802.15.4 MAC device to receive the radio IOCTL
-           * commdand
+           * command
            */
 
           FAR struct ieee802154_netmac_s *netmac =
@@ -365,7 +372,7 @@ static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
         }
       else
         {
-          /* The IOCTL command is neither */
+          /* Not an EEE802.15.4 MAC IOCTL command */
 
           return -ENOTTY;
         }
@@ -373,7 +380,77 @@ static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
       /* Find the device with this name */
 
       dev = netdev_findbyname(ifname);
+#ifdef CONFIG_NET_MULTILINK
+      if (dev != NULL && dev->d_lltype == NET_LL_IEEE802154)
+#else
       if (dev != NULL)
+#endif
+        {
+          /* Perform the device IOCTL */
+
+          ret = dev->d_ioctl(dev, cmd, arg);
+        }
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: netdev_pktradio_ioctl
+ *
+ * Description:
+ *   Perform non-IEEE802.15.4 packet radio network device specific operations.
+ *
+ * Parameters:
+ *   psock    Socket structure
+ *   dev      Ethernet driver device structure
+ *   cmd      The ioctl command
+ *   req      The argument of the ioctl cmd
+ *
+ * Return:
+ *   >=0 on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN) && \
+    defined(CONFIG_WIRELESS_PKTRADIO)
+static int netdev_pktradio_ioctl(FAR struct socket *psock, int cmd,
+                                 unsigned long arg)
+{
+  FAR struct net_driver_s *dev;
+  FAR char *ifname;
+  int ret = -ENOTTY;
+
+  if (arg != 0ul)
+    {
+      if (WL_ISPKTRADIOCMD(cmd))
+        {
+          /* Get the packet radio device to receive the radio IOCTL
+           * command
+           */
+
+          FAR struct pktradio_ifreq_s *cmddata =
+            (FAR struct pktradio_ifreq_s *)((uintptr_t)arg);
+
+          ifname = cmddata->pifr_name;
+        }
+      else
+        {
+          /* Not a packet radio IOCTL command */
+
+          return -ENOTTY;
+        }
+
+      /* Find the device with this name */
+
+      dev = netdev_findbyname(ifname);
+#ifdef CONFIG_NET_MULTILINK
+      if (dev != NULL && dev->d_lltype == NET_LL_PKTRADIO)
+#else
+      if (dev != NULL)
+#endif
         {
           /* Perform the device IOCTL */
 
@@ -1269,12 +1346,22 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
 #endif
 
 #if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN)
+#ifdef CONFIG_WIRELESS_IEEE802154
   /* Check for a IEEE802.15.4 network device command */
 
   if (ret == -ENOTTY)
     {
       ret = netdev_iee802154_ioctl(psock, cmd, arg);
     }
+#endif
+#ifdef CONFIG_WIRELESS_PKTRADIO
+  /* Check for a non-IEEE802.15.4 packet radio network device command */
+
+  if (ret == -ENOTTY)
+    {
+      ret = netdev_pktradio_ioctl(psock, cmd, arg);
+    }
+#endif
 #endif
 
 #ifdef CONFIG_NET_IGMP

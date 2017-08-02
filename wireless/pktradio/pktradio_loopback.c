@@ -726,16 +726,94 @@ static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
                     unsigned long arg)
 {
+  FAR struct pktradio_ifreq_s *cmddata;
   FAR struct lo_driver_s *priv;
+  int ret = -ENOTTY;
 
-  DEBUGASSERT(dev != NULL && dev->d_private != NULL);
-  priv = (FAR struct lo_driver_s *)dev->d_private;
+  DEBUGASSERT(dev != NULL && dev->d_private != NULL && arg != 0ul);
+  priv    = (FAR struct lo_driver_s *)dev->d_private;
+  cmddata = (FAR struct pktradio_ifreq_s *)((uintptr_t)arg);
 
-  UNUSED(priv);
+  switch (cmd)
+    {
+      /* SIOCPKTRADIOGGPROPS
+       *   Description:   Get the radio properties
+       *   Input:         Pointer to read-write instance of struct
+       *                  pktradio_ifreq_s
+       *   Output:        Properties returned in struct pktradio_ifreq_s
+       *                  instance
+       */
 
-  /* Reserved for future use */
+      case SIOCPKTRADIOGGPROPS:
+        {
+          FAR struct sixlowpan_driver_s *radio =
+            (FAR struct sixlowpan_driver_s *)dev;
+          FAR struct sixlowpan_properties_s *props =
+            (FAR struct sixlowpan_properties_s *)&cmddata->pifr_props;
 
-  return -ENOTTY;
+          ret = spirit_properties(radio, props);
+        }
+        break;
+
+      /* SIOCPKTRADIOSNODE
+       *   Description:   Set the radio node address
+       *   Input:         Pointer to read-only instance of struct
+       *                  pktradio_ifreq_s
+       *   Output:        None
+       */
+
+      case SIOCPKTRADIOSNODE:
+        {
+          FAR const struct pktradio_addr_s *newaddr =
+            (FAR const struct pktradio_addr_s *)&cmddata->pifr_hwaddr;
+
+          if (newaddr->pa_addrlen != 1)
+            {
+              ret = -EINVAL;
+            }
+          else
+           {
+              FAR const struct netdev_varaddr_s *devaddr = &dev->d_mac.sixlowpan;
+
+              devaddr->nv_addrlen = 1;
+              devaddr->nv_addr[0] = newaddr->pa_addr[0];
+#if CONFIG_PKTRADIO_ADDRLEN > 1
+              memset(&devaddr->pa_addr[1], 0, CONFIG_PKTRADIO_ADDRLEN - 1);
+#endif
+              ret = OK;
+            }
+        }
+        break;
+
+      /* SIOCPKTRADIOGNODE
+       *   Description:   Get the radio node address
+       *   Input:         Pointer to read-write instance of
+       *                  struct pktradio_ifreq_s
+       *   Output:        Node address return in struct pktradio_ifreq_s
+       *                  instance
+       */
+
+      case SIOCPKTRADIOGNODE:
+        {
+          FAR struct pktradio_addr_s *retaddr =
+            (FAR struct pktradio_addr_s *)&cmddata->pifr_hwaddr;
+          FAR const struct netdev_varaddr_s *devaddr = &dev->d_mac.sixlowpan;
+
+          retaddr->pa_addrlen = devaddr->nv_addrlen;
+          retaddr->pa_addr[0] = devaddr->nv_addr[0];
+#if CONFIG_PKTRADIO_ADDRLEN > 1
+          memset(&addr->pa_addr[1], 0, CONFIG_PKTRADIO_ADDRLEN - 1);
+#endif
+          ret = OK;
+        }
+        break;
+
+      default:
+        wlwarn("WARNING: Unrecognized IOCTL command: %02x\n", cmd);
+        break;
+    }
+
+  return ret;
 }
 #endif
 

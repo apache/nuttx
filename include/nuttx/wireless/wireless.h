@@ -158,9 +158,25 @@
 
 #define WL_NETFIRST         0x0001          /* First network command */
 #define WL_NNETCMDS         0x0032          /* Number of network commands */
-#define WL_USERFIRST        (WL_NETFIRST + WL_NNETCMDS)
 
-/* ----------------------- WIRELESS EVENTS ----------------------- */
+/* Reserved for IEEE802.15.4 wireless network devices
+ * NOTE:  Not used.  Currently logic uses IOCTL commands from the IEEE802.15.4
+ * character driver space.
+ */
+
+#define WL_802154FIRST        (WL_NETFIRST + WL_NNETCMDS)
+#define WL_N802154CMDS        (3)
+#define WL_ISPKTRADIOCMD(cmd) ((cmd) >= WL_802154FIRST && \
+                               (cmd) < (WL_802154FIRST + WL_N802154CMDS))
+
+/* Reserved for network packet radio network devices  */
+
+#define WL_PKTRADIOFIRST      (WL_802154FIRST + WL_N802154CMDS)
+#define WL_NPKTRADIOCMDS      (3)
+#define WL_ISPKTRADIOCMD(cmd) ((cmd) >= WL_PKTRADIOFIRST && \
+                               (cmd) < (WL_PKTRADIOFIRST + WL_NPKTRADIOCMDS))
+
+/* ------------------------------- WIRELESS EVENTS ------------------------------- */
 /* Those are *NOT* ioctls, do not issue request on them !!! */
 /* Most events use the same identifier as ioctl requests */
 
