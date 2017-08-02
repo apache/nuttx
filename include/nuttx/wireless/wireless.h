@@ -166,15 +166,17 @@
 
 #define WL_802154FIRST        (WL_NETFIRST + WL_NNETCMDS)
 #define WL_N802154CMDS        (3)
-#define WL_ISPKTRADIOCMD(cmd) ((cmd) >= WL_802154FIRST && \
-                               (cmd) < (WL_802154FIRST + WL_N802154CMDS))
+#define WL_IS802154CMD(cmd)   (_WLIOCVALID(cmd) && \
+                               _IOC_NR(cmd) >= WL_802154FIRST && \
+                               _IOC_NR(cmd) < (WL_802154FIRST + WL_N802154CMDS))
 
 /* Reserved for network packet radio network devices  */
 
 #define WL_PKTRADIOFIRST      (WL_802154FIRST + WL_N802154CMDS)
 #define WL_NPKTRADIOCMDS      (3)
-#define WL_ISPKTRADIOCMD(cmd) ((cmd) >= WL_PKTRADIOFIRST && \
-                               (cmd) < (WL_PKTRADIOFIRST + WL_NPKTRADIOCMDS))
+#define WL_ISPKTRADIOCMD(cmd) (_WLIOCVALID(cmd) && \
+                               _IOC_NR(cmd) >= WL_PKTRADIOFIRST && \
+                               _IOC_NR(cmd) < (WL_PKTRADIOFIRST + WL_NPKTRADIOCMDS))
 
 /* ------------------------------- WIRELESS EVENTS ------------------------------- */
 /* Those are *NOT* ioctls, do not issue request on them !!! */

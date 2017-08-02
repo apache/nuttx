@@ -440,6 +440,7 @@ static int netdev_pktradio_ioctl(FAR struct socket *psock, int cmd,
         {
           /* Not a packet radio IOCTL command */
 
+          nwarn("WARNING: Not a packet radio IOCTL command: %d\n", cmd);
           return -ENOTTY;
         }
 
