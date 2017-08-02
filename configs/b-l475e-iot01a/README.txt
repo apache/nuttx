@@ -287,11 +287,18 @@ Configuration sub-directories
        bring up the network.  Currently that must be done manually.
        The configurations steps are:
 
-         a) Assign a unique 8-bit node address to the Spirit1
+         a) Assign a unique 8-bit node address to the Spirit1 board in the
+            WPAN:
 
-         b) Bring the network up:
+            nsh> ifconfig wpan0 hw 37
 
-           nsh> ifup wpan0
+            Where 37 is address as an example.  It should be different in the
+            the range 1..ed and ef..fe (ee and ff are the reseerd multicast
+            and broadcast addresses.  Zero is valid but not a good idea).
+
+         b) Bring each the network up on each board in the WPAN:
+
+            nsh> ifup wpan0
 
     4. examples/udp is enabled.  This will allow two Spirit1 nodes to
        exchange UDP packets.  Basic instructions:
