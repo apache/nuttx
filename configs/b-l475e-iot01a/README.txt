@@ -271,6 +271,109 @@ Configuration sub-directories
 
   spirit-6lowpan
 
-    This is another NSH configuration that differs from the 'nsh'
-    configuration in that it has 6LoWPAN networking enabled for the
-    on-board Spirit1 SPSGRF-915 part.
+    This is another version of nsh that is similar to the above 'nsh'
+    configuration but is focused on testing the Spirit1 integration with
+    the 6LoWPAN network stack.    Additional differences
+    are summarized below:
+
+    NOTES:
+
+    1. You must must have two b-l475e-iot01a boards.
+
+    2. IPv6 networking is enabled with TCP/IP, UDP, 6LoWPAN, and NSH
+       Telnet support.
+
+    3. Configuration instructions:  NSH does not configuration or
+       bring up the network.  Currently that must be done manually.
+       The configurations steps are:
+
+         a) Assign a unique 8-bit node address to the Spirit1
+
+         b) Bring the network up:
+
+           nsh> ifup wpan0
+
+    4. examples/udp is enabled.  This will allow two Spirit1 nodes to
+       exchange UDP packets.  Basic instructions:
+
+       On the server node:
+
+         nsh> ifconfig
+         nsh> udpserver &
+
+       The ifconfig command will show the IP address of the server.  Then on
+       the client node use this IP address to start the client:
+
+         nsh> udpclient <server-ip> &
+
+       Where <server-ip> is the IP address of the server that you got above.
+       NOTE: There is no way to stop the UDP test once it has been started
+       other than by resetting the board.
+
+    5. examples/nettest is enabled.  This will allow two Spirit1 nodes to
+       exchange TCP packets.  Basic instructions:
+
+       On the server node:
+
+         nsh> ifconfig
+         nsh> tcpserver &
+
+       The ifconfig command will show the IP address of the server.  Then on
+       the client node use this IP address to start the client:
+
+         nsh> tcpclient <server-ip> &
+
+       Where <server-ip> is the IP address of the server that you got above.
+       NOTE:  Unlike the UDP test, there the TCP test will terminate
+       automatically when the packet exchange is complete.
+
+    6. The NSH Telnet deamon (server) is enabled.  However, it cannot be
+       started automatically.  Rather, it must be started AFTER the network
+       has been brought up using the NSH 'telnetd' command.  You would want
+       to start the Telent daemon only if you want the node to serve Telent
+       connections to an NSH shell on the node.
+
+         nsh> ifconfig
+         nsh> telnetd
+
+       Note the 'ifconfig' is executed to get the IP address of the node.
+       This address derives from the 8-bit node address that was assigned
+       when the node was configured.
+
+    7. This configuration also includes the Telnet client program.  This
+       will allow you to execute a NSH one a node from the command line on
+       a different node. Like:
+
+         nsh> telnet <server-ip>
+
+       Where <server-ip> is the IP address of the server that you got for
+       the ifconfig commna on the remote node.  Once the telnet session
+       has been started, you can end the session with:
+
+         nsh> exit
+
+    STATUS:
+
+       2017-08-01:  Testing began.  The Spirit1 no configurations with no
+         errors, but there are no tests yet in place to exercise it.
+
+       2017-08-02:  The nettest, udp, telnet test programs were added.
+
+
+     Test Matrix:
+       The following configurations have been tested:
+
+                                TEST DATE
+         COMPRESSION ADDRESSING UDP  TCP
+         ----------- ---------- ---- ----
+         hc06        short      ---  ---
+                     extended   ---  ---
+         hc1         short      ---  ---
+                     extended   ---  ---
+         ipv6        short      ---  ---
+                     extended   ---  ---
+         telnet      short      N/A  --- (hc06)
+                     extended   N/A  ---
+
+         Other configuration options have not been specifically addressed
+         (such non-compressable ports, non-MAC based IPv6 addresses, etc.)

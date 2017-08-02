@@ -825,7 +825,7 @@ static void spirit_interrupt_work(FAR void *arg)
       DEBUGVERIFY(spirit_management_rxstrobe(spirit));
       DEBUGVERIFY(spirit_command(spirit, CMD_RX));
 
-      NETDEV_TXDONE(&priv->radio.r_dev)
+      NETDEV_TXDONE(&priv->radio.r_dev);
       spirit_csma_enable(spirit, S_DISABLE);
 
       /* Check if there are more packets to send */
@@ -1660,7 +1660,7 @@ static int spirit_req_data(FAR struct sixlowpan_driver_s *netdev,
     {
       /* Increment statistics */
 
-      NETDEV_TXPACKETS(&priv->md_dev.r_dev);
+      NETDEV_TXPACKETS(&priv->radio.r_dev);
 
       /* Remove the IOB from the queue */
 

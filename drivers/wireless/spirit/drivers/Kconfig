@@ -7,6 +7,7 @@ config SPIRIT_NETDEV
 	bool "STMicro Spirit1-based Network Driver"
 	default n
 	select WL_SPIRIT
+	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
 		This selection enables support for the TMicro Spirit1-based device.
 		This configuration generates an IEEE802.15.4 work-alike radio device that
