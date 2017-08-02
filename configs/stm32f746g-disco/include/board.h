@@ -46,11 +46,6 @@
 # include <stdint.h>
 #endif
 
-#include "stm32_rcc.h"
-#ifdef CONFIG_STM32F7_SDMMC1
-#  include "stm32_sdmmc.h"
-#endif
-
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
