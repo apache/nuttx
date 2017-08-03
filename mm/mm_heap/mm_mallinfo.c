@@ -109,10 +109,12 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
             }
         }
 
+      minfo("region=%d node=%p heapend=%p\n",
+            region, node, heap->mm_heapend[region]);
+      DEBUGASSERT(node == heap->mm_heapend[region]);
+
       mm_givesemaphore(heap);
 
-      minfo("region=%d node=%p heapend=%p\n", region, node, heap->mm_heapend[region]);
-      DEBUGASSERT(node == heap->mm_heapend[region]);
       uordblks += SIZEOF_MM_ALLOCNODE; /* account for the tail node */
     }
 #undef region
