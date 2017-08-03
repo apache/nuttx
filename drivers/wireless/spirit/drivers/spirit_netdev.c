@@ -159,7 +159,7 @@ struct spirit_driver_s
 /* Helpers */
 
 static void spirit_lock(FAR struct spirit_driver_s *priv);
-#define spirit_unlock(priv) sem_post(&priv->exclsem);
+static inline void spirit_unlock(FAR struct spirit_driver_s *priv);
 
 static void spirit_set_ipaddress(FAR struct net_driver_s *dev);
 static int  spirit_set_readystate(FAR struct spirit_driver_s *priv);
@@ -325,6 +325,26 @@ static void spirit_lock(FAR struct spirit_driver_s *priv)
     {
       DEBUGASSERT(errno == EINTR);
     }
+}
+
+/****************************************************************************
+ * Name: spirit_unlock
+ *
+ * Description:
+ *   Relinquish exclusive access to the driver instance and to the spirit
+ *   library.
+ *
+ * Parameters:
+ *   priv - Reference to a driver state structure instance
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void spirit_unlock(FAR struct spirit_driver_s *priv)
+{
+  sem_post(&priv->exclsem);
 }
 
 /****************************************************************************
@@ -666,7 +686,7 @@ static void spirit_transmit_work(FAR void *arg)
 
 static void spirit_schedule_transmit_work(FAR struct spirit_driver_s *priv)
 {
-  if(priv->txhead != NULL && priv->state == DRIVER_STATE_IDLE)
+  if (priv->txhead != NULL && priv->state == DRIVER_STATE_IDLE)
     {
       /* Schedule to perform the TX processing on the worker thread. */
 
@@ -793,7 +813,6 @@ static void spirit_receive_work(FAR void *arg)
       /* Get exclusive access as needed at the top of the loop */
 
       spirit_lock(priv);
-wlerr("End of loop\n");
     }
 
   spirit_unlock(priv);
@@ -1006,8 +1025,8 @@ static void spirit_interrupt_work(FAR void *arg)
                   pktmeta->pm_dest.pa_addr[0] =
                     spirit_pktcommon_get_nodeaddress(spirit);
 
-                  /* Add the contained IOB to the tail of the completed RX
-                   * transfers.
+                  /* Add the contained IOB to the tail of the queue of
+                   * completed RX transfers.
                    */
 
                   pktmeta->pm_flink           = priv->rxtail;

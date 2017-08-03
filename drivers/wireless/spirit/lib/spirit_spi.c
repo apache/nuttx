@@ -412,6 +412,11 @@ int spirit_reg_modify(FAR struct spirit_library_s *spirit, uint8_t regaddr,
   header[1] = regaddr;
   spirit_regdebug("WRITE", header, &regval, 1);
 
+  /* Toggle Chip select so that we get the correct status */
+
+  SPI_SELECT(spirit->spi, SPIDEV_WIRELESS(0), false);
+  SPI_SELECT(spirit->spi, SPIDEV_WIRELESS(0), true);
+
   /* Write the header bytes and read the SPIRIT1 status bytes */
 
   SPI_EXCHANGE(spirit->spi, header, status, 2);
