@@ -273,8 +273,9 @@ Configuration sub-directories
 
     This is another version of nsh that is similar to the above 'nsh'
     configuration but is focused on testing the Spirit1 integration with
-    the 6LoWPAN network stack.    Additional differences
-    are summarized below:
+    the 6LoWPAN network stack.  It supports point-to-point, 6LoWPAN
+    communications between two b-l47e-iot01a boards.  Additional differences
+    from the 'nsh" configuration are summarized below:
 
     NOTES:
 
@@ -292,13 +293,18 @@ Configuration sub-directories
 
             nsh> ifconfig wpan0 hw 37
 
-            Where 37 is address as an example.  It should be different in the
-            the range 1..ed and ef..fe (ee and ff are the reseerd multicast
-            and broadcast addresses.  Zero is valid but not a good idea).
+            Where 37 the address is an example.  It should be different for
+            each radio, but in the the range 1..ed and ef..fe (ee and ff are
+            the reserved for multicast and broadcast addresses, respectively.
+            Zero is a valid address but not recommeded).
 
          b) Bring each the network up on each board in the WPAN:
 
             nsh> ifup wpan0
+
+            You can entry nsh> ifconfig to see if the node address and
+            derived IPv4 are set correctly (the IPv6 address will not be
+            determined until the network is UP).
 
     4. examples/udp is enabled.  This will allow two Spirit1 nodes to
        exchange UDP packets.  Basic instructions:

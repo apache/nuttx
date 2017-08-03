@@ -416,7 +416,7 @@ int spirit_irq_get_pending(FAR struct spirit_library_s *spirit,
  * Name: spirit_irq_clr_pending
  *
  * Description:
- *   Clear the IRQ status registers.
+ *   Clear all IRQ status registers.
  *
  * Input Parameters:
  *   spirit - Reference to a Spirit library state structure instance

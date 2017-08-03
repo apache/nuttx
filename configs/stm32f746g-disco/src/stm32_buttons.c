@@ -124,8 +124,6 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
   int ret = -EINVAL;
 
-  /* The following should be atomic */
-
   if (id >= MIN_IRQBUTTON && id <= MAX_IRQBUTTON)
     {
       ret = stm32_gpiosetevent(g_buttons[id], true, true, true, irqhandler, arg);
