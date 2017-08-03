@@ -167,14 +167,14 @@ static int  spirit_set_readystate(FAR struct spirit_driver_s *priv);
 /* TX-related logic */
 
 static int  spirit_transmit(FAR struct spirit_driver_s *priv);
-static void sprit_transmit_work(FAR void *arg);
+static void spirit_transmit_work(FAR void *arg);
 static void spirit_schedule_transmit_work(FAR struct spirit_driver_s *priv);
 
 static int  spirit_txpoll_callback(FAR struct net_driver_s *dev);
 
 /* RX-related logic */
 
-static void sprit_receive_work(FAR void *arg);
+static void spirit_receive_work(FAR void *arg);
 static void spirit_schedule_receive_work(FAR struct spirit_driver_s *priv);
 
 /* Interrupt handling */
@@ -605,7 +605,7 @@ errout_with_lock:
 }
 
 /****************************************************************************
- * Name: sprit_transmit_work
+ * Name: spirit_transmit_work
  *
  * Description:
  *   Send data on the LP work queue.  This function scheduled by interrupt
@@ -620,7 +620,7 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-static void sprit_transmit_work(FAR void *arg)
+static void spirit_transmit_work(FAR void *arg)
 {
   FAR struct spirit_driver_s *priv = (FAR struct spirit_driver_s *)arg;
   int ret;
@@ -638,7 +638,10 @@ static void sprit_transmit_work(FAR void *arg)
     }
   else if (ret == SPIRIT_TX_IDLE)
     {
-      /* Nothing was sent.  Try, instead, to poll for new TX data */
+      /* Nothing was sent.  Try, instead, to poll for new TX data,  We do
+       * this here because TX and TX poll share the sam work structure so
+       * the receipt of TX data could caue the loss of polls.
+       */
 
       spirit_txpoll_work(arg);
     }
@@ -667,7 +670,7 @@ static void spirit_schedule_transmit_work(FAR struct spirit_driver_s *priv)
     {
       /* Schedule to perform the TX processing on the worker thread. */
 
-      work_queue(LPWORK, &priv->txwork, sprit_transmit_work, priv, 0);
+      work_queue(LPWORK, &priv->txwork, spirit_transmit_work, priv, 0);
     }
 }
 
@@ -718,7 +721,7 @@ static int spirit_txpoll_callback(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Name: sprit_receive_work
+ * Name: spirit_receive_work
  *
  * Description:
  *   Pass received packets to the network on the LP work queue.
@@ -731,7 +734,7 @@ static int spirit_txpoll_callback(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void sprit_receive_work(FAR void *arg)
+static void spirit_receive_work(FAR void *arg)
 {
   FAR struct spirit_driver_s *priv = (FAR struct spirit_driver_s *)arg;
   FAR struct pktradio_metadata_s *pktmeta;
@@ -790,6 +793,7 @@ static void sprit_receive_work(FAR void *arg)
       /* Get exclusive access as needed at the top of the loop */
 
       spirit_lock(priv);
+wlerr("End of loop\n");
     }
 
   spirit_unlock(priv);
@@ -816,7 +820,7 @@ static inline void spirit_schedule_receive_work(FAR struct spirit_driver_s *priv
 {
   /* Schedule to perform the RX processing on the worker thread. */
 
-  work_queue(LPWORK, &priv->rxwork, sprit_receive_work, priv, 0);
+  work_queue(LPWORK, &priv->rxwork, spirit_receive_work, priv, 0);
 }
 
 /****************************************************************************
@@ -1053,7 +1057,7 @@ static void spirit_interrupt_work(FAR void *arg)
       NETDEV_RXDROPPED(&priv->radio.r_dev);
     }
 
-  /* Check the Spirit status.  If it is IDLE, the setup to receive more */
+  /* Check the Spirit status.  If it is READY, the setup the RX state */
 
   DEBUGVERIFY(spirit_update_status(spirit));
   wlinfo("MC_STATE=%02x\n", spirit->u.state.MC_STATE);
@@ -1197,7 +1201,7 @@ static void spirit_txtimeout_expiry(int argc, wdparm_t arg, ...)
 
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(LPWORK, &priv->irqwork, spirit_txtimeout_work, priv, 0);
+  work_queue(HPWORK, &priv->irqwork, spirit_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
@@ -1339,12 +1343,12 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
       DEBUGASSERT(priv->lower->enable != NULL);
       priv->lower->enable(priv->lower, false);
 
-      /* Ensure we are in READY state as we go from there to Rx.
+      /* Ensure we are in READY state before we go from there to Rx.
        * Since spirit interrupts are disabled, we don't need to be concerned
        * about mutual exclusion.
        */
 
-      wlinfo("Go to the RX state\n");
+      wlinfo("Go to the ready state\n");
       ret = spirit_command(spirit, CMD_READY);
       if (ret < 0)
         {
