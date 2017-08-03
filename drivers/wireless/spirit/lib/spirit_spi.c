@@ -358,6 +358,80 @@ int spirit_reg_write(FAR struct spirit_library_s *spirit, uint8_t regaddr,
 }
 
 /******************************************************************************
+ * Name: spirit_reg_modify
+ *
+ * Description:
+ *   Perform atomic read/modify/write on a single SPIRIT1 register.
+ *
+ * Input parameters:
+ *   spirit  - Reference to an instance of the driver state stucture.
+ *   regaddr - Base register's address to write
+ *   clrbits - Bits to clear in the register
+ *   setbits - Bits to set in the regiser
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated errno value is returned on
+ *   any failure.  On success, spirit->state is updated.
+ *
+ ******************************************************************************/
+
+int spirit_reg_modify(FAR struct spirit_library_s *spirit, uint8_t regaddr,
+                      uint8_t setbits, uint8_t clrbits)
+{
+  uint8_t header[2];
+  uint8_t status[2];
+  uint8_t regval;
+
+  /* Setup the header byte to read the register */
+
+  header[0] = READ_HEADER;
+  header[1] = regaddr;
+
+  /* Lock the SPI bus and select the Spirit device */
+
+  spirit_lock(spirit->spi);
+  SPI_SELECT(spirit->spi, SPIDEV_WIRELESS(0), true);
+
+  /* Write the header bytes (ignoring the returned SPIRIT1 status bytes) */
+
+  SPI_SNDBLOCK(spirit->spi, header, 2);
+
+  /* Read the register value */
+
+  regval = SPI_SEND(spirit->spi, 0xff);
+  spirit_regdebug("READ", header, &regval, 1);
+
+  /* Modify the register value */
+
+  regval &= ~clrbits;
+  regval |= ~setbits;
+
+  /* Setup the header byte for the write operation */
+
+  header[0] = WRITE_HEADER;
+  header[1] = regaddr;
+  spirit_regdebug("WRITE", header, &regval, 1);
+
+  /* Write the header bytes and read the SPIRIT1 status bytes */
+
+  SPI_EXCHANGE(spirit->spi, header, status, 2);
+
+  /* Update Spirit status. 16-bit status is returned MS bit first */
+
+  spirit->u.u16 = ((uint16_t)status[0] << 8) | (uint16_t)status[1];
+
+  /* Write the register value */
+
+  (void)SPI_SEND(spirit->spi, regval);
+
+  /* Deselect the Spirit device and return the result */
+
+  SPI_SELECT(spirit->spi, SPIDEV_WIRELESS(0), false);
+  spirit_unlock(spirit->spi);
+  return OK;
+}
+
+/******************************************************************************
  * Name: spirit_command
  *
  * Description:

@@ -122,6 +122,29 @@ int spirit_reg_write(FAR struct spirit_library_s *spirit, uint8_t regaddr,
                      FAR const uint8_t *buffer, unsigned int buflen);
 
 /******************************************************************************
+ * Name: spirit_reg_modify
+ *
+ * Description:
+ *   Perform atomic read/modify/write on a single SPIRIT1 register.  This is
+ *   atomic only in the sense that other accesses to the SPI bus are
+ *   prohibited throughout the operation.
+ *
+ * Input parameters:
+ *   spirit  - Reference to an instance of the driver state stucture.
+ *   regaddr - Base register's address to write
+ *   clrbits - Bits to clear in the register
+ *   setbits - Bits to set in the regiser
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated errno value is returned on
+ *   any failure.  On success, spirit->state is updated.
+ *
+ ******************************************************************************/
+
+int spirit_reg_modify(FAR struct spirit_library_s *spirit, uint8_t regaddr,
+                      uint8_t setbits, uint8_t clrbits);
+
+/******************************************************************************
  * Name: spirit_command
  *
  * Description:

@@ -271,11 +271,11 @@ static const struct spirit_csma_init_s g_csma_init =
   8                 /* BU prescaler */
 };
 
-#ifdef CONFIG_SPIRIT_MULTICAST
+#ifdef CONFIG_SPIRIT_PROMISICUOUS
 static struct pktbasic_addr_s g_addrinit =
 {
   S_DISABLE,                         /* Disable filtering on node address */
-  SPIRIT_NODE_ADDR                   /* Note address (Temporary, until assigned) */
+  SPIRIT_NODE_ADDR                   /* Node address (Temporary, until assigned) */
   S_DISABLE,                         /* Disable filtering on multicast address */
   0xee,                              /* Multicast address */
   S_DISABLE,                         /* Disable filtering on broadcast address */
@@ -285,7 +285,7 @@ static struct pktbasic_addr_s g_addrinit =
 static struct pktbasic_addr_s g_addrinit =
 {
   S_ENABLE,                          /* Enable filtering on node address */
-  SPIRIT_NODE_ADDR,                  /* Note address (Temporary, until assigned) */
+  SPIRIT_NODE_ADDR,                  /* Node address (Temporary, until assigned) */
 #ifdef CONFIG_SPIRIT_MULTICAST
   S_ENABLE,                          /* Enable filtering on multicast address */
 #else
@@ -523,7 +523,7 @@ static int spirit_transmit(FAR struct spirit_driver_s *priv)
           goto errout_with_iob;
         }
 
-#ifndef CONFIG_SPIRIT_PROMISCOUS
+#ifndef CONFIG_SPIRIT_PROMISICUOUS
       /* Set the destination address */
 
       DEBUGASSERT(pktmeta->pm_dest.pa_addrlen == 1);
@@ -839,11 +839,14 @@ static void spirit_interrupt_work(FAR void *arg)
   DEBUGASSERT(priv != NULL);
   spirit = &priv->spirit;
 
-  /* Get the interrupt source from radio */
+  /* Get the set of pending ineterrupts from the radio.
+   * NOTE: The pending interrupts are cleared as a side-effect of reading
+   * the IRQ status register.
+   */
 
   spirit_lock(priv);
   DEBUGVERIFY(spirit_irq_get_pending(spirit, &irqstatus));
-  DEBUGVERIFY(spirit_irq_clr_pending(spirit));
+  wlinfo("Pending: %08lx\n", *(FAR unsigned long *)&irqstatus);
 
   /* Process the Spirit1 interrupt */
   /* First check for errors */
@@ -1040,8 +1043,12 @@ static void spirit_interrupt_work(FAR void *arg)
 
   /* IRQ_RX_DATA_DISC indicates that Rx data was discarded */
 
-  if (irqstatus.IRQ_RX_DATA_DISC)
+  if (irqstatus.IRQ_RX_DATA_DISC != 0)
     {
+      wlinfo("Data discarded: Node addr=%02x RX dest addr=%02x\n",
+             spirit_pktcommon_get_nodeaddress(spirit),
+             spirit_pktcommon_get_rxdestaddr(spirit));
+
       DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
       priv->state = DRIVER_STATE_IDLE;
       NETDEV_RXDROPPED(&priv->radio.r_dev);
@@ -1057,7 +1064,7 @@ static void spirit_interrupt_work(FAR void *arg)
 
       DEBUGVERIFY(spirit_command(spirit, CMD_RX));
 
-      /* Wait for Spirit to enter the Tx state (or timeut) */
+      /* Wait for Spirit to enter the Rx state (or timeut) */
 
       DEBUGVERIFY(spirit_waitstatus(spirit, MC_STATE_RX, 1));
     }
@@ -1364,7 +1371,7 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
           goto error_with_ifalmostup;
         }
 
-#ifndef CONFIG_SPIRIT_PROMISCOUS
+#ifndef CONFIG_SPIRIT_PROMISICUOUS
       /* Instantiate the assigned node address in harsware*/
 
       DEBUGASSERT(dev->d_mac.sixlowpan.nv_addrlen == 1);

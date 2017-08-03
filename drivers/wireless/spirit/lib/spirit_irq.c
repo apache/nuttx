@@ -219,7 +219,8 @@ int spirit_irt_get_mask(FAR struct spirit_library_s *spirit,
  *
  * Description:
  *   Fills a pointer to a structure of struct spirit_irqset_s type with the
- *   content of the IRQ_STATUS registers.
+ *   content of the IRQ_STATUS registers.  NOTE:  Status bits will be cleared
+ *   after they are read.
  *
  * Input Parameters:
  *   spirit     - Reference to a Spirit library state structure instance
