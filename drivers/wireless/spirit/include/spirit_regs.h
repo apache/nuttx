@@ -1276,6 +1276,7 @@
  *
  *   Default value: 0x00
  *   Read Write
+ *
  *   7:0    MULTICAST[7:0]:  Address shared for multicast communication links
  */
 

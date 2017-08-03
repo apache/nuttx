@@ -116,7 +116,8 @@ int spirit_pktbasic_initialize(FAR struct spirit_library_s *spirit,
     }
 
   /* Always reset the control and source filtering (also if it is not present
-   * in basic) */
+   * in basic).
+   */
 
   regval[0] &= ~(PCKT_FLT_OPTIONS_SOURCE_FILTERING_MASK |
                  PCKT_FLT_OPTIONS_CONTROL_FILTERING_MASK);

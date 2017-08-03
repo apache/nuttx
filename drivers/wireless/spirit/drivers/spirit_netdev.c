@@ -275,7 +275,7 @@ static const struct spirit_csma_init_s g_csma_init =
 static struct pktbasic_addr_s g_addrinit =
 {
   S_DISABLE,                         /* Disable filtering on node address */
-  SPIRIT_NODE_ADDR                   /* Node address (Temporary, until assigned) */
+  SPIRIT_NODE_ADDR,                  /* Node address (Temporary, until assigned) */
   S_DISABLE,                         /* Disable filtering on multicast address */
   0xee,                              /* Multicast address */
   S_DISABLE,                         /* Disable filtering on broadcast address */
@@ -747,49 +747,49 @@ static void sprit_receive_work(FAR void *arg)
     {
       /* Remove the contained IOB from the RX queue */
 
-        pktmeta           = priv->rxhead;
-        priv->rxhead      = pktmeta->pm_flink;
-        pktmeta->pm_flink = NULL;
+      pktmeta           = priv->rxhead;
+      priv->rxhead      = pktmeta->pm_flink;
+      pktmeta->pm_flink = NULL;
 
-        /* Did the RX queue become empty? */
+      /* Did the RX queue become empty? */
 
-        if (priv->rxhead == NULL)
-          {
-            priv->rxtail = NULL;
-          }
+      if (priv->rxhead == NULL)
+        {
+          priv->rxtail = NULL;
+        }
 
-        spirit_unlock(priv);
+      spirit_unlock(priv);
 
-       /* Remove the IOB from the container */
+      /* Remove the IOB from the container */
 
-       iob             = pktmeta->pm_iob;
-       pktmeta->pm_iob = NULL;
+      iob             = pktmeta->pm_iob;
+      pktmeta->pm_iob = NULL;
 
-       /* Send the next frame to the network */
+      /* Send the next frame to the network */
 
-        wlinfo("Send frame %p to the network:  Offset=%u Length=%u\n",
-               iob, iob->io_offset, iob->io_len);
+      wlinfo("Send frame %p to the network:  Offset=%u Length=%u\n",
+             iob, iob->io_offset, iob->io_len);
 
-        net_lock();
-        ret = sixlowpan_input(&priv->radio, iob, (FAR void *)pktmeta);
-        if (ret < 0)
-          {
-            wlerr("ERROR: sixlowpan_input returned %d\n", ret);
-            NETDEV_RXERRORS(&priv->radio.r_dev);
-            NETDEV_ERRORS(&priv->radio.r_dev);
-          }
+      net_lock();
+      ret = sixlowpan_input(&priv->radio, iob, (FAR void *)pktmeta);
+      if (ret < 0)
+        {
+          wlerr("ERROR: sixlowpan_input returned %d\n", ret);
+          NETDEV_RXERRORS(&priv->radio.r_dev);
+          NETDEV_ERRORS(&priv->radio.r_dev);
+        }
 
-        net_unlock();
+      net_unlock();
 
-        /* sixlowpan_input() will free the IOB, but we must free the struct
-         * pktradio_metadata_s container here.
-         */
+      /* sixlowpan_input() will free the IOB, but we must free the struct
+       * pktradio_metadata_s container here.
+       */
 
-        pktradio_metadata_free(pktmeta);
+      pktradio_metadata_free(pktmeta);
 
-        /* Get exclusive access as needed at the top of the loop */
+      /* Get exclusive access as needed at the top of the loop */
 
-       spirit_lock(priv);
+      spirit_lock(priv);
     }
 
   spirit_unlock(priv);
@@ -812,14 +812,11 @@ static void sprit_receive_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void spirit_schedule_receive_work(FAR struct spirit_driver_s *priv)
+static inline void spirit_schedule_receive_work(FAR struct spirit_driver_s *priv)
 {
-  if(priv->txhead != NULL && priv->state == DRIVER_STATE_IDLE)
-    {
-      /* Schedule to perform the TX processing on the worker thread. */
+  /* Schedule to perform the RX processing on the worker thread. */
 
-      work_queue(LPWORK, &priv->rxwork, sprit_receive_work, priv, 0);
-    }
+  work_queue(LPWORK, &priv->rxwork, sprit_receive_work, priv, 0);
 }
 
 /****************************************************************************
@@ -945,6 +942,8 @@ static void spirit_interrupt_work(FAR void *arg)
         }
       else
         {
+          wlinfo("Receiving %u bytes\n", count);
+
           /* Allocate an I/O buffer to hold the received packet.
            * REVISIT: Not a good place to wait.  Perhaps we should pre-
            * allocate a few I/O buffers?
@@ -1001,7 +1000,7 @@ static void spirit_interrupt_work(FAR void *arg)
 
                   pktmeta->pm_dest.pa_addrlen = 1;
                   pktmeta->pm_dest.pa_addr[0] =
-                    spirit_pktcommon_get_rxsrcaddr(spirit);
+                    spirit_pktcommon_get_nodeaddress(spirit);
 
                   /* Add the contained IOB to the tail of the completed RX
                    * transfers.
@@ -1057,9 +1056,12 @@ static void spirit_interrupt_work(FAR void *arg)
   /* Check the Spirit status.  If it is IDLE, the setup to receive more */
 
   DEBUGVERIFY(spirit_update_status(spirit));
+  wlinfo("MC_STATE=%02x\n", spirit->u.state.MC_STATE);
 
   if (spirit->u.state.MC_STATE == MC_STATE_READY)
     {
+      wlinfo("Go to RX state (%02x)\n", MC_STATE_RX);
+
       /* Set up to receive */
 
       DEBUGVERIFY(spirit_command(spirit, CMD_RX));
@@ -1357,6 +1359,8 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
         }
 
       /* Now we go to Rx */
+
+      wlinfo("Go to RX state (%02x)\n", MC_STATE_RX);
 
       ret = spirit_command(spirit, CMD_RX);
       if (ret < 0)
@@ -1736,7 +1740,9 @@ static int spirit_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
  * Name: spirit_req_data
  *
  * Description:
- *   Requests the transfer of a list of frames to the MAC.
+ *   Requests the transfer of a list of frames to the MAC.  We get here
+ *   indirectly as a consequence of a TX poll that generates a series of
+ *   6LoWPAN radio packets.
  *
  * Input parameters:
  *   netdev    - The networkd device that will mediate the MAC interface
@@ -1801,6 +1807,7 @@ static int spirit_req_data(FAR struct sixlowpan_driver_s *netdev,
          {
            wlerr("ERROR: Failed to allocate metadata... dropping\n");
            NETDEV_RXDROPPED(&priv->radio.r_dev);
+           spirit_unlock(priv);
            iob_free(iob);
            continue;
          }

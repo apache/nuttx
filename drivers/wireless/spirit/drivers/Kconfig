@@ -58,12 +58,14 @@ config SPIRIT_PROMISICUOUS
 config SPIRIT_MULTICAST
 	bool "Multicast address filter"
 	default n
+	depends on !SPIRIT_PROMISICUOUS
 	---help---
 		Enables address filtering for the multicast addess 0xee.
 
 config SPIRIT_BROADCAST
 	bool "Broadcast address filter"
 	default n
+	depends on !SPIRIT_PROMISICUOUS
 	---help---
 		Enables address filtering for the broadcast addess 0xff.
 
