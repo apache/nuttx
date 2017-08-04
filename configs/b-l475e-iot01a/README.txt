@@ -390,9 +390,13 @@ Configuration sub-directories
          correctly gets the source node address and uncompresses the source
          IP address.
 
-         With these changes, the UDP test is now fully functional.  There are
-         issues with the TCP test.  This appears to be data loss:  The TCP
-         client sends 18 packets, but the server only receives 5.
+         With these changes, the UDP test is now fully functional.
+
+         There are issues with the TCP test.  This appears to be data loss:
+         The TCP client sends 18 packets, but the server only receives 5.  I
+         assume that this because of data overrun.  I enabled the AutoAck,
+         TX retries, the RX timeout options.  This seems to reduce the packet
+         loss but the TCP test still does not fun perfectly.
 
      Test Matrix:
        The following configurations have been tested successfully (with

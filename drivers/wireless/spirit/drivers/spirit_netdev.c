@@ -148,15 +148,19 @@
 
 /* Default node address */
 
-#define SPIRIT_NODE_ADDR 0x34
+#define SPIRIT_NODE_ADDR    0x34
 
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
-#define SPIRIT_WDDELAY   (1*CLK_TCK)
+#define SPIRIT_WDDELAY      (1*CLK_TCK)
 
-/* TX timeout = 1 minute */
+/* TX timeout = 5 seconds */
 
-#define SPIRIT_TXTIMEOUT (60*CLK_TCK)
+#define SPIRIT_TXTIMEOUT    (5*CLK_TCK)
+
+/* RX timeout = 1.5 seconds */
+
+#define SPIRIT_RXTIMEOUT    1500.0
 
 /* Return values from spirit_transmit() */
 
@@ -198,6 +202,8 @@ struct spirit_driver_s
   bool                             ifup;      /* Spirit is on and interface is up */
   bool                             needpoll;  /* Timer poll needed */
   uint8_t                          state;     /* See  enum spirit_driver_state_e */
+  uint8_t                          counter;   /* Count used with TX timeout */
+  uint8_t                          prescaler; /* Prescaler used with TX timeout */
 };
 
 /****************************************************************************
@@ -309,7 +315,7 @@ static const struct spirit_pktstack_init_s g_pktstack_init =
 
 static const struct spirit_pktstack_llp_s g_llp_init =
 {
-  S_DISABLE,                          /* autoack */
+  S_ENABLE,                           /* autoack */
   S_DISABLE,                          /* piggyback */
   PKT_N_RETX_3                        /* maxretx */
 };
@@ -648,6 +654,16 @@ static int spirit_transmit(FAR struct spirit_driver_s *priv)
 
       iob_free(iob);
 
+      /* Start the RX timeout */
+
+       ret = spirit_timer_setup_rxtimeout(spirit, priv->counter,
+                                          priv->prescaler);
+      if (ret < 0)
+        {
+          wlerr("ERROR: spirit_timer_setup_rxtimeout failed: %d\n", ret);
+          goto errout_with_iob;
+        }
+
       /* Put the SPIRIT1 into TX state.  This starts the transmission */
 
       ret = spirit_command(spirit, COMMAND_TX);
@@ -947,7 +963,8 @@ static void spirit_interrupt_work(FAR void *arg)
 
       /* Send any pending packets */
 
-      spirit_csma_enable(spirit, S_DISABLE);
+      DEBUGVERIFY(spirit_timer_set_rxtimeout_counter(spirit, 0));
+      DEBUGVERIFY(spirit_csma_enable(spirit, S_DISABLE));
       spirit_schedule_transmit_work(priv);
     }
 
@@ -962,7 +979,8 @@ static void spirit_interrupt_work(FAR void *arg)
 
       /* Send any pending packets */
 
-      spirit_csma_enable(spirit, S_DISABLE);
+      DEBUGVERIFY(spirit_timer_set_rxtimeout_counter(spirit, 0));
+      DEBUGVERIFY(spirit_csma_enable(spirit, S_DISABLE));
       spirit_schedule_transmit_work(priv);
     }
 
@@ -977,7 +995,12 @@ static void spirit_interrupt_work(FAR void *arg)
       DEBUGVERIFY(spirit_command(spirit, CMD_RX));
 
       NETDEV_TXDONE(&priv->radio.r_dev);
-      spirit_csma_enable(spirit, S_DISABLE);
+      DEBUGVERIFY(spirit_timer_set_rxtimeout_counter(spirit, 0));
+      DEBUGVERIFY(spirit_csma_enable(spirit, S_DISABLE));
+
+      /* Disable the RX timeout */
+
+      DEBUGVERIFY(spirit_timer_set_rxtimeout_counter(spirit, 0));
 
       /* Check if there are more packets to send */
 
@@ -2180,6 +2203,13 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
       return ret;
     }
 
+  /* Initialize counter and prescaler values that will be used with
+   * with RX timeouts for ACKs.
+   */
+
+  spirit_timer_calc_rxtimeout_values(spirit, SPIRIT_RXTIMEOUT,
+                                     &priv->counter, &priv->prescaler);
+
   ret = spirit_timer_set_rxtimeout_stopcondition(spirit,
                                                  SQI_ABOVE_THRESHOLD);
   if (ret < 0)
@@ -2188,7 +2218,7 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
       return ret;
     }
 
-  ret = spirit_timer_set_rxtimeout_counter(spirit, 0); /* 0=No timeout */
+  ret = spirit_timer_set_rxtimeout_counter(spirit, 0); /* 0=Disables timeout */
   if (ret < 0)
     {
       wlerr("ERROR: spirit_timer_set_rxtimeout_counter failed: %d\n", ret);
