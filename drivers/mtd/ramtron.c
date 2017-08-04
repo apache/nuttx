@@ -75,10 +75,6 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#if 0
-#  define RAMTRON_WRITE_BUFFER_SIZE      256
-#endif
-
 /* Used to abort the write wait */
 
 #ifndef CONFIG_MTD_RAMTRON_WRITEWAIT_COUNT
@@ -91,11 +87,12 @@
 
 #define RAMTRON_EMULATE_SECTOR_SHIFT  9
 #define RAMTRON_EMULATE_PAGE_SHIFT    9
+#define RAMTRON_EMULATE_PAGE_SIZE     (1 << RAMTRON_EMULATE_PAGE_SHIFT)
 
 /* RAMTRON Identification register values */
 
-#define RAMTRON_MANUFACTURER         0x7F
-#define RAMTRON_MEMORY_TYPE          0xC2
+#define RAMTRON_MANUFACTURER         0x7f
+#define RAMTRON_MEMORY_TYPE          0xc2
 
 /* Instructions:
  *      Command          Value       N Description             Addr Dummy Data */
@@ -129,18 +126,28 @@
 
 #define RAMTRON_DUMMY     0xa5
 
+/* Defines the initial speed compatible with all devices. In case of RAMTRON
+ * the defined devices within the part list have all the same speed.
+ */
+
+#define RAMTRON_INIT_CLK_MAX    40000000UL
+
 /************************************************************************************
  * Private Types
  ************************************************************************************/
 
 struct ramtron_parts_s
 {
-  const char *name;
-  uint8_t     id1;
-  uint8_t     id2;
-  uint32_t    size;
-  uint8_t     addr_len;
-  uint32_t    speed;
+  FAR const char *name;
+  uint8_t id1;
+  uint8_t id2;
+  uint32_t size;
+  uint8_t addr_len;
+  uint32_t speed;
+#ifdef CONFIG_RAMTRON_CHUNKING
+  bool chunked;                            /* True: write buffer size limitations */
+  uint16_t chunksize;                      /* Write chunk Size */
+#endif
 };
 
 /* This type represents the state of the MTD device.  The struct mtd_dev_s
@@ -157,19 +164,12 @@ struct ramtron_dev_s
   uint16_t nsectors;
   uint32_t npages;
   uint32_t speed;                          /* Overridable via ioctl */
-  uint32_t wbsiz;                          /* Write Buffer Size */
   FAR const struct ramtron_parts_s *part;  /* Part instance */
 };
 
 /************************************************************************************
  * Supported Part Lists
  ************************************************************************************/
-
-/* Defines the initial speed compatible with all devices. In case of RAMTRON
- * the defined devices within the part list have all the same speed.
- */
-
-#define RAMTRON_INIT_CLK_MAX    40000000UL
 
 static const struct ramtron_parts_s g_ramtron_parts[] =
 {
@@ -180,6 +180,10 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     16L*1024L,                    /* size */
     2,                            /* addr_len */
     RAMTRON_INIT_CLK_MAX          /* speed */
+#ifdef CONFIG_RAMTRON_CHUNKING
+    , false,                      /* chunked */
+    RAMTRON_EMULATE_PAGE_SIZE     /* chunksize */
+#endif
   },
   {
     "FM25V01A",                   /* name */
@@ -188,6 +192,10 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     16L*1024L,                    /* size */
     2,                            /* addr_len */
     RAMTRON_INIT_CLK_MAX          /* speed */
+#ifdef CONFIG_RAMTRON_CHUNKING
+    , false,                      /* chunked */
+    RAMTRON_EMULATE_PAGE_SIZE     /* chunksize */
+#endif
   },
   {
     "FM25V02",                    /* name */
@@ -196,6 +204,10 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     32L*1024L,                    /* size */
     2,                            /* addr_len */
     RAMTRON_INIT_CLK_MAX          /* speed */
+#ifdef CONFIG_RAMTRON_CHUNKING
+    , false,                      /* chunked */
+    RAMTRON_EMULATE_PAGE_SIZE     /* chunksize */
+#endif
   },
   {
     "FM25V02A",                   /* name */
@@ -204,6 +216,10 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     32L*1024L,                    /* size */
     2,                            /* addr_len */
     RAMTRON_INIT_CLK_MAX          /* speed */
+#ifdef CONFIG_RAMTRON_CHUNKING
+    , false,                      /* chunked */
+    RAMTRON_EMULATE_PAGE_SIZE     /* chunksize */
+#endif
   },
   {
     "FM25VN02",                   /* name */
@@ -212,6 +228,10 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     32L*1024L,                    /* size */
     2,                            /* addr_len */
     RAMTRON_INIT_CLK_MAX          /* speed */
+#ifdef CONFIG_RAMTRON_CHUNKING
+    , false,                      /* chunked */
+    RAMTRON_EMULATE_PAGE_SIZE     /* chunksize */
+#endif
   },
   {
     "FM25V05",                    /* name */
@@ -220,6 +240,10 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     64L*1024L,                    /* size */
     2,                            /* addr_len */
     RAMTRON_INIT_CLK_MAX          /* speed */
+#ifdef CONFIG_RAMTRON_CHUNKING
+    , false,                      /* chunked */
+    RAMTRON_EMULATE_PAGE_SIZE     /* chunksize */
+#endif
   },
   {
     "FM25VN05",                   /* name */
@@ -228,6 +252,10 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     64L*1024L,                    /* size */
     2,                            /* addr_len */
     RAMTRON_INIT_CLK_MAX          /* speed */
+#ifdef CONFIG_RAMTRON_CHUNKING
+    , false,                      /* chunked */
+    RAMTRON_EMULATE_PAGE_SIZE     /* chunksize */
+#endif
   },
   {
     "FM25V10",                    /* name */
@@ -236,6 +264,10 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     128L*1024L,                   /* size */
     3,                            /* addr_len */
     RAMTRON_INIT_CLK_MAX          /* speed */
+#ifdef CONFIG_RAMTRON_CHUNKING
+    , false,                      /* chunked */
+    RAMTRON_EMULATE_PAGE_SIZE     /* chunksize */
+#endif
   },
   {
     "FM25VN10",                   /* name */
@@ -244,6 +276,10 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     128L*1024L,                   /* size */
     3,                            /* addr_len */
     RAMTRON_INIT_CLK_MAX          /* speed */
+#ifdef CONFIG_RAMTRON_CHUNKING
+    , false,                      /* chunked */
+    RAMTRON_EMULATE_PAGE_SIZE     /* chunksize */
+#endif
   },
   {
     "FM25V20A",                   /* name */
@@ -252,6 +288,10 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     256L*1024L,                   /* size */
     3,                            /* addr_len */
     RAMTRON_INIT_CLK_MAX          /* speed */
+#ifdef CONFIG_RAMTRON_CHUNKING
+    , false,                      /* chunked */
+    RAMTRON_EMULATE_PAGE_SIZE     /* chunksize */
+#endif
   },
   {
     "CY15B104Q",                  /* name */
@@ -260,6 +300,10 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     512L*1024L,                   /* size */
     3,                            /* addr_len */
     RAMTRON_INIT_CLK_MAX          /* speed */
+#ifdef CONFIG_RAMTRON_CHUNKING
+    , false,                      /* chunked */
+    RAMTRON_EMULATE_PAGE_SIZE     /* chunksize */
+#endif
   },
   {
     "MB85RS1MT",                  /* name */
@@ -268,6 +312,10 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     128L*1024L,                   /* size */
     3,                            /* addr_len */
     25000000                      /* speed */
+#ifdef CONFIG_RAMTRON_CHUNKING
+    , false,                      /* chunked */
+    RAMTRON_EMULATE_PAGE_SIZE     /* chunksize */
+#endif
   },
   {
     "MB85RS256B",                 /* name */
@@ -276,15 +324,23 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     32L*1024L,                    /* size */
     3,                            /* addr_len */
     25000000                      /* speed */
+#ifdef CONFIG_RAMTRON_CHUNKING
+    , false,                      /* chunked */
+    RAMTRON_EMULATE_PAGE_SIZE     /* chunksize */
+#endif
   },
+#ifdef CONFIG_RAMTRON_CHUNKING
   {
     "MB85AS4MT",                  /* name */
     0xc9,                         /* id1 */
     0x03,                         /* id2 */
     512L*1024L,                   /* size */
     3,                            /* addr_len */
-    RAMTRON_INIT_CLK_MAX          /* speed */
+    RAMTRON_INIT_CLK_MAX,         /* speed */
+    true,                         /* chunked */
+    256                           /* chunksize */
   },
+#endif
 #ifdef CONFIG_RAMTRON_FRAM_NON_JEDEC
   {
     "FM25H20",                    /* name */
@@ -293,6 +349,10 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     256L*1024L,                   /* size */
     3,                            /* addr_len */
     RAMTRON_INIT_CLK_MAX          /* speed */
+#ifdef CONFIG_RAMTRON_CHUNKING
+    , false,                      /* chunked */
+    RAMTRON_EMULATE_PAGE_SIZE     /* chunksize */
+#endif
   },
 #endif
   {
@@ -302,6 +362,10 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     0,                            /* size */
     0,                            /* addr_len */
     0                             /* speed */
+#ifdef CONFIG_RAMTRON_CHUNKING
+    , false,                      /* chunked */
+    0,                            /* chunksize */
+#endif
   }
 };
 
@@ -325,20 +389,17 @@ static inline int ramtron_pagewrite(struct ramtron_dev_s *priv,
 static int ramtron_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);
 static ssize_t ramtron_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                              size_t nblocks, FAR uint8_t *buf);
-#ifndef RAMTRON_WRITE_BUFFER_SIZE
+#ifdef CONFIG_RAMTRON_CHUNKING
+static ssize_t ramtron_bwrite_nonchunked(FAR struct mtd_dev_s *dev, off_t startblock,
+                                         size_t nblocks, FAR const uint8_t *buffer);
+static ssize_t ramtron_bwrite_chunked(FAR struct mtd_dev_s *dev, off_t startblock,
+                                      size_t nblocks, FAR const uint8_t *buf);
+#endif
 static ssize_t ramtron_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                               size_t nblocks, FAR const uint8_t *buf);
-#else
-static ssize_t ramtron_bwrite_wbsiz(FAR struct mtd_dev_s *dev, off_t startblock,
-                                    size_t nblocks, FAR const uint8_t *buf);
-#endif
 static ssize_t ramtron_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
                             FAR uint8_t *buffer);
 static int ramtron_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
-
-/************************************************************************************
- * Private Data
- ************************************************************************************/
 
 /************************************************************************************
  * Private Functions
@@ -440,7 +501,7 @@ static inline int ramtron_readid(struct ramtron_dev_s *priv)
          !(priv->part->id1 == capacity && priv->part->id2 == part);
        priv->part++);
 
-  if (priv->part->name)
+  if (priv->part->name != NULL)
     {
       UNUSED(manufacturer); /* Eliminate warnings when debug is off */
       UNUSED(memory);       /* Eliminate warnings when debug is off */
@@ -453,11 +514,6 @@ static inline int ramtron_readid(struct ramtron_dev_s *priv)
       priv->pageshift   = RAMTRON_EMULATE_PAGE_SHIFT;
       priv->npages      = priv->part->size / (1 << RAMTRON_EMULATE_PAGE_SHIFT);
       priv->speed       = priv->part->speed;
-#ifndef RAMTRON_WRITE_BUFFER_SIZE
-      priv->wbsiz       = 1 << priv->pageshift;
-#else
-      priv->wbsiz       = RAMTRON_WRITE_BUFFER_SIZE;
-#endif
       return OK;
     }
 
@@ -646,17 +702,22 @@ static ssize_t ramtron_bread(FAR struct mtd_dev_s *dev, off_t startblock,
 }
 
 /************************************************************************************
- * Name: ramtron_bwrite
+ * Name: ramtron_bwrite/ramtron_bwrite_nonchunked
  ************************************************************************************/
 
-#ifndef RAMTRON_WRITE_BUFFER_SIZE
+#ifdef CONFIG_RAMTRON_CHUNKING
+static ssize_t ramtron_bwrite_nonchunked(FAR struct mtd_dev_s *dev, off_t startblock,
+                                         size_t nblocks, FAR const uint8_t *buffer)
+#else
 static ssize_t ramtron_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                               size_t nblocks, FAR const uint8_t *buffer)
+#endif
 {
   FAR struct ramtron_dev_s *priv = (FAR struct ramtron_dev_s *)dev;
   size_t blocksleft = nblocks;
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+  DEBUGASSERT(priv != NULL && buffer != NULL);
 
   /* Lock the SPI bus and write each page to FLASH */
 
@@ -671,27 +732,31 @@ static ssize_t ramtron_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 
       startblock++;
     }
+
   ramtron_unlock(priv->dev);
   return nblocks;
 }
-#endif
 
 /************************************************************************************
- * Name: ramtron_bwrite_wbsiz
+ * Name: ramtron_bwrite_chunked
  ************************************************************************************/
 
-#ifdef RAMTRON_WRITE_BUFFER_SIZE
-static ssize_t ramtron_bwrite_wbsiz(FAR struct mtd_dev_s *dev, off_t startblock,
-                                    size_t nblocks, FAR const uint8_t *buffer)
+#ifdef CONFIG_RAMTRON_CHUNKING
+static ssize_t ramtron_bwrite_chunked(FAR struct mtd_dev_s *dev, off_t startblock,
+                                      size_t nblocks, FAR const uint8_t *buffer)
 {
   FAR struct ramtron_dev_s *priv = (FAR struct ramtron_dev_s *)dev;
+  FAR const struct ramtron_parts_s *part;
   size_t blocksleft = nblocks;
   uint32_t p, writesplits;
   off_t newstartblock;
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
-  writesplits   = (1 << priv->pageshift) / priv->wbsiz;
+  DEBUGASSERT(priv != NULL && priv->part != NULL && buffer != NULL);
+  part = priv->part;
+
+  writesplits   = (1 << priv->pageshift) / part->chunksize;
   newstartblock = startblock * writesplits;
 
   /* Lock the SPI bus and write each page to FLASH */
@@ -699,12 +764,12 @@ static ssize_t ramtron_bwrite_wbsiz(FAR struct mtd_dev_s *dev, off_t startblock,
   ramtron_lock(priv);
   while (blocksleft-- > 0)
     {
-      /* Split writes in wbsiz chunks */
+      /* Split writes in chunksize chunks */
 
       for (p = 0; p < writesplits; p++)
        {
-         if (ramtron_pagewrite(priv, buffer + p * priv->wbsiz, newstartblock,
-                               priv->wbsiz))
+         if (ramtron_pagewrite(priv, buffer + p * part->chunksize, newstartblock,
+                               part->chunksize))
            {
              nblocks = 0;
              goto out;
@@ -717,6 +782,33 @@ static ssize_t ramtron_bwrite_wbsiz(FAR struct mtd_dev_s *dev, off_t startblock,
 out:
   ramtron_unlock(priv->dev);
   return nblocks;
+}
+#endif
+
+/************************************************************************************
+ * Name: ramtron_bwrite
+ ************************************************************************************/
+
+#ifdef CONFIG_RAMTRON_CHUNKING
+static ssize_t ramtron_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
+                              size_t nblocks, FAR const uint8_t *buffer)
+{
+  FAR struct ramtron_dev_s *priv = (FAR struct ramtron_dev_s *)dev;
+  FAR const struct ramtron_parts_s *part;
+
+  DEBUGASSERT(priv != NULL && priv->part != NULL && buffer != NULL);
+  part = priv->part;
+
+  /* Handle parts that require chunked output differently */
+
+  if (part->chunked)
+    {
+      return ramtron_bwrite_chunked(dev, startblock, nblocks, buffer);
+    }
+  else
+    {
+      return ramtron_bwrite_nonchunked(dev, startblock, nblocks, buffer);
+    }
 }
 #endif
 
@@ -894,11 +986,7 @@ FAR struct mtd_dev_s *ramtron_initialize(FAR struct spi_dev_s *dev)
 
       priv->mtd.erase  = ramtron_erase;
       priv->mtd.bread  = ramtron_bread;
-#ifndef RAMTRON_WRITE_BUFFER_SIZE
       priv->mtd.bwrite = ramtron_bwrite;
-#else
-      priv->mtd.bwrite = ramtron_bwrite_wbsiz;
-#endif
       priv->mtd.read   = ramtron_read;
       priv->mtd.ioctl  = ramtron_ioctl;
       priv->dev        = dev;

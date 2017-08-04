@@ -757,6 +757,12 @@ config RAMTRON_SETSPEED
 		Select an option to provide an ioctl, MTDIOC_SETSPEED call that
 		supports dynamic selection of the RAMTRON bus speed.
 
+config RAMTRON_CHUNKING
+	bool "Support chunked writes"
+	default n
+	---help---
+		Some Re-RAMs like MB85AS4MT has a write buffer size limitation.
+
 endif # MTD_RAMTRON
 
 config MTD_SST25
