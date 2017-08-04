@@ -50,6 +50,22 @@
 #include "up_internal.h"
 
 /****************************************************************************
+ * Pre-processor Macros
+ ****************************************************************************/
+
+/* Use a stack alignment of 16 bytes.  If necessary frame_size must be rounded
+ * up to the next boundary
+ */
+
+#define STACK_ALIGNMENT     16
+
+/* Stack alignment macros */
+
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
+#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
+#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -87,7 +103,7 @@
 
 int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
-  uint32_t *stack_alloc_ptr;
+  FAR uint8_t *stack_alloc_ptr;
   int ret = ERROR;
 
 #ifdef CONFIG_TLS
@@ -108,30 +124,34 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   /* Move up to next even word boundary if necessary */
 
-  size_t adj_stack_size  = (stack_size + 3) & ~3;
-  size_t adj_stack_words = adj_stack_size >> 2;
+  size_t adj_stack_size  = STACK_ALIGN_UP(stack_size);
 
   /* Allocate the memory for the stack */
 
 #ifdef CONFIG_TLS
-  stack_alloc_ptr = (FAR uint32_t *)kumm_memalign(TLS_STACK_ALIGN, adj_stack_size);
+  stack_alloc_ptr = (FAR uint8_t *)kumm_memalign(TLS_STACK_ALIGN, adj_stack_size);
 #else /* CONFIG_TLS */
-  stack_alloc_ptr = (FAR uint32_t *)kumm_malloc(adj_stack_size);
+  stack_alloc_ptr = (FAR uint8_t *)kumm_malloc(adj_stack_size);
 #endif /* CONFIG_TLS */
 
   /* Was the allocation successful? */
 
   if (stack_alloc_ptr)
     {
-      /* This is the address of the last word in the allocation */
+      /* This is the address of the last aligned word in the allocation.
+       * NOTE that stack_alloc_ptr + adj_stack_size may lie one byte
+       * outside of the stack.  This is okay for an inital state; the
+       * first pushed values will be within the stack allocation.
+       */
 
-      FAR void *adj_stack_ptr = &stack_alloc_ptr[adj_stack_words - 1];
+      uintptr_t adj_stack_addr =
+        STACK_ALIGN_DOWN((uintptr_t)stack_alloc_ptr + adj_stack_size);
 
       /* Save the values in the TCB */
 
       tcb->adj_stack_size  = adj_stack_size;
       tcb->stack_alloc_ptr = stack_alloc_ptr;
-      tcb->adj_stack_ptr   = adj_stack_ptr;
+      tcb->adj_stack_ptr   = (FAR void *)adj_stack_addr;
 
 #ifdef CONFIG_TLS
       /* Initialize the TLS data structure */

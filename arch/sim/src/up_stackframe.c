@@ -53,11 +53,11 @@
  * Pre-processor Macros
  ****************************************************************************/
 
-/* Use a stack alignment of 4 bytes.  If necessary frame_size must be rounded
+/* Use a stack alignment of 16 bytes.  If necessary frame_size must be rounded
  * up to the next boundary
  */
 
-#define STACK_ALIGNMENT     4
+#define STACK_ALIGNMENT     16
 
 /* Stack alignment macros */
 

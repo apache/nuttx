@@ -49,6 +49,22 @@
 #include "up_internal.h"
 
 /****************************************************************************
+ * Pre-processor Macros
+ ****************************************************************************/
+
+/* Use a stack alignment of 16 bytes.  If necessary frame_size must be rounded
+ * up to the next boundary
+ */
+
+#define STACK_ALIGNMENT     16
+
+/* Stack alignment macros */
+
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
+#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
+#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -82,29 +98,33 @@
 
 int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
 {
-  FAR size_t *adj_stack_ptr;
+  uintptr_t adj_stack_addr;
   size_t adj_stack_size;
-  size_t adj_stack_words;
 
 #ifdef CONFIG_TLS
   /* Make certain that the user provided stack is properly aligned */
 
   DEBUGASSERT(((uintptr_t)stack & TLS_STACK_MASK) == 0);
 #endif
-  /* Move up to next even word boundary if necessary */
+  /* Move down to next even word boundary within the pre-allocated stack
+   * memory, if necessary.
+   */
 
-  adj_stack_size = stack_size & ~3;
-  adj_stack_words = adj_stack_size >> 2;
+  adj_stack_size = STACK_ALIGN_DOWN(stack_size);
 
-  /* This is the address of the last word in the allocation */
+  /* This is the address of the last word in the allocation.
+   * NOTE that stack_alloc_ptr + adj_stack_size may lie one byte
+   * outside of the stack.  This is okay for an inital state; the
+   * first pushed values will be within the stack allocation.
+   */
 
-  adj_stack_ptr = &((FAR size_t *)stack)[adj_stack_words - 1];
+  adj_stack_addr = STACK_ALIGN_DOWN((uintptr_t)stack + adj_stack_size);
 
   /* Save the values in the TCB */
 
   tcb->adj_stack_size  = adj_stack_size;
   tcb->stack_alloc_ptr = stack;
-  tcb->adj_stack_ptr   = adj_stack_ptr;
+  tcb->adj_stack_ptr   = (FAR void *)adj_stack_addr;
 
 #ifdef CONFIG_TLS
   /* Initialize the TLS data structure */
