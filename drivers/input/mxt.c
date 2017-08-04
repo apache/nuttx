@@ -1837,6 +1837,7 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
   if (priv->sample == NULL)
     {
       ierr("ERROR: Failed to allocate object table\n");
+      ret = -ENOMEM;
       goto errout_with_objtab;
     }
 

@@ -120,6 +120,7 @@ static int cs2100_write_reg(FAR const struct cs2100_config_s *config,
                             uint8_t regaddr, uint8_t regval)
 {
   struct i2c_msg_s msgs[2];
+  int ret;
 
   reginfo("%02x<-%02x\n", regaddr, regval);
   DEBUGASSERT(config->i2c->ops && config->i2c->ops->transfer);
@@ -140,7 +141,8 @@ static int cs2100_write_reg(FAR const struct cs2100_config_s *config,
 
   /* Send the message */
 
-  return I2C_TRANSFER(config->i2c, msgs, 2);
+  ret = I2C_TRANSFER(config->i2c, msgs, 2);
+  return (ret >= 0) ? OK : ret;
 }
 
 /****************************************************************************
@@ -179,7 +181,7 @@ static int cs2100_read_reg(FAR const struct cs2100_config_s *config,
   /* Send the address followed by a STOP */
 
   ret = I2C_TRANSFER(config->i2c, &msg, 1);
-  if (ret == OK)
+  if (ret >= 0)
     {
       msg.frequency = config->i2cfreq;
       msg.addr      = config->i2caddr;
@@ -190,13 +192,13 @@ static int cs2100_read_reg(FAR const struct cs2100_config_s *config,
       /* Read the register beginning with another START */
 
       ret = I2C_TRANSFER(config->i2c, &msg, 1);
-      if (ret == OK)
+      if (ret >= 0)
         {
           reginfo("%02x->%02x\n", regaddr, *regval);
         }
     }
 
-  return ret;
+  return (ret >= 0) ? OK : ret;
 }
 #endif
 
@@ -220,6 +222,7 @@ static int cs2100_write_ratio(FAR const struct cs2100_config_s *config,
 {
   struct i2c_msg_s msg;
   uint8_t buffer[5];
+  int ret;
 
   reginfo("%02x<-%04l\n", CS2100_RATIO0, (unsigned long)ratio);
   DEBUGASSERT(config->i2c->ops && config->i2c->ops->transfer);
@@ -240,7 +243,8 @@ static int cs2100_write_ratio(FAR const struct cs2100_config_s *config,
 
   /* Send the message */
 
-  return I2C_TRANSFER(config->i2c, &msg, 1);
+  ret = I2C_TRANSFER(config->i2c, &msg, 1);
+  return (ret >= 0) ? OK : ret;
 }
 
 /****************************************************************************
@@ -281,7 +285,7 @@ static int cs2100_read_ratio(FAR const struct cs2100_config_s *config,
   /* Send the address followed by a STOP */
 
   ret = I2C_TRANSFER(config->i2c, &msg, 1);
-  if (ret == OK)
+  if (ret >= 0)
     {
       msg.frequency = config->i2cfreq;
       msg.addr      = config->i2caddr;
@@ -295,7 +299,7 @@ static int cs2100_read_ratio(FAR const struct cs2100_config_s *config,
 
       /* Return the ratio */
 
-      if (ret == OK)
+      if (ret >= 0)
         {
            *ratio = ((uint32_t)buffer[0] << 24) |
                     ((uint32_t)buffer[1] << 16) |
@@ -306,7 +310,7 @@ static int cs2100_read_ratio(FAR const struct cs2100_config_s *config,
         }
     }
 
-  return ret;
+  return (ret >= 0) ? OK : ret;
 }
 #endif
 

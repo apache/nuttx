@@ -551,12 +551,16 @@ static ssize_t lis2dh_write(FAR struct file *filep, FAR const char *buffer,
 
 static int lis2dh_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode          *inode = filep->f_inode;
-  FAR struct lis2dh_dev_s   *priv  = inode->i_private;
+  FAR struct inode *inode;
+  FAR struct lis2dh_dev_s *priv;
   int ret;
   uint8_t buf;
 
-  DEBUGASSERT(filep != NULL);
+  DEBUGASSERT(filep);
+  inode = filep->f_inode;
+
+  DEBUGASSERT(inode && inode->i_private);
+  priv = (FAR struct lis2dh_dev_s *)inode->i_private;
 
   ret = sem_wait(&priv->devsem);
   if (ret < 0)
@@ -564,17 +568,16 @@ static int lis2dh_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       return -EINTR;
     }
 
-  ret = OK;
   switch (cmd)
   {
   case SNIOC_WRITESETUP:
     {
-      /* Write to the configuration registers. Arg: uint8_t value */
+      /* Write to the configuration registers. */
 
       ret = lis2dh_setup(priv, (struct lis2dh_setup *)arg);
-      lis2dh_dbg("lis2dh: conf: %02x ret: %d\n", *(uint8_t*)arg, ret);
+      lis2dh_dbg("lis2dh: conf: %p ret: %d\n", (struct lis2dh_setup *)arg, ret);
 
-      /* Make sure interrupt will get cleared (by reading this register) in
+      /* Make sure interrupt will get cleared in
        * case of latched configuration.
        */
 
@@ -1614,7 +1617,7 @@ static int lis2dh_access(FAR struct lis2dh_dev_s *dev, uint8_t subaddr,
       };
 
       retval = I2C_TRANSFER(dev->i2c, msgv, 2);
-      if (retval == OK)
+      if (retval >= 0)
         {
           return length;
         }

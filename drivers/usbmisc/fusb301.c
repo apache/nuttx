@@ -167,7 +167,7 @@ static int fusb301_getreg(FAR struct fusb301_dev_s *priv, uint8_t reg)
   for (retries = 0; retries < FUSB301_I2C_RETRIES; retries++)
     {
       ret = I2C_TRANSFER(priv->i2c, msg, 2);
-      if (ret == OK)
+      if (ret >= 0)
         {
           fusb301_info("reg:%02X, value:%02X\n", reg, regval);
           return regval;

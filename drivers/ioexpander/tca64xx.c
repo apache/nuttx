@@ -342,14 +342,14 @@ static int tca64_getreg(FAR struct tca64_dev_s *priv, uint8_t regaddr,
     {
       gpioerr("ERROR: I2C addr=%02x regaddr=%02x: failed, ret=%d!\n",
               priv->config->address, regaddr, ret);
+      return ret;
     }
   else
     {
       gpioinfo("I2C addr=%02x regaddr=%02x: read %02x\n",
                priv->config->address, regaddr, *regval);
+      return OK;
     }
-
-  return ret;
 }
 
 /****************************************************************************
@@ -390,14 +390,14 @@ static int tca64_putreg(struct tca64_dev_s *priv, uint8_t regaddr,
     {
       gpioerr("ERROR: claddr=%02x, regaddr=%02x: failed, ret=%d!\n",
               priv->config->address, regaddr, ret);
+      return ret;
     }
   else
     {
       gpioinfo("claddr=%02x, regaddr=%02x, regval=%02x\n",
                priv->config->address, regaddr, regval);
+      return OK;
     }
-
-  return ret;
 }
 
 /****************************************************************************

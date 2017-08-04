@@ -125,7 +125,7 @@ struct lis331dl_dev_s
  *           of -length
  *
  * Returned Value:
- *   Returns OK on success or errno is set.
+ *   Returns actual length of data on success or negative value on error.
  *
  ****************************************************************************/
 
@@ -206,7 +206,8 @@ static int lis331dl_access(FAR struct lis331dl_dev_s *dev, uint8_t subaddr,
       }
     };
 
-  if ((retval = I2C_TRANSFER(dev->i2c, msgv, 2)) == OK)
+  retval = I2C_TRANSFER(dev->i2c, msgv, 2);
+  if (retval >= 0)
     {
       return length;
     }

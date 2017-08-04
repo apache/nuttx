@@ -151,7 +151,6 @@ config RTC_DSXXXX
 	bool "DS130x/DS323x RTC Driver"
 	default n
 	select I2C
-	select I2C_TRANSFER
 	select RTC_DATETIME
 	depends on RTC_EXTERNAL
 	---help---
@@ -204,7 +203,6 @@ config RTC_PCF85263
 	bool "PCF85263 RTC Driver"
 	default n
 	select I2C
-	select I2C_TRANSFER
 	select RTC_DATETIME
 	depends on RTC_EXTERNAL
 	---help---
@@ -239,7 +237,6 @@ endif # WATCHDOG
 config TIMERS_CS2100CP
 	bool "CS2100-CP Fraction-N Clock Multiplier"
 	depends on I2C
-	select I2C_TRANSFER
 
 if TIMERS_CS2100CP
 

@@ -182,6 +182,7 @@ static void pcf8574_lock(FAR struct pcf8574_dev_s *priv)
 static int pcf8574_read(FAR struct pcf8574_dev_s *priv, FAR uint8_t *portval)
 {
   struct i2c_msg_s msg;
+  int ret;
 
   DEBUGASSERT(priv != NULL && priv->i2c != NULL && priv->config != NULL);
 
@@ -195,7 +196,8 @@ static int pcf8574_read(FAR struct pcf8574_dev_s *priv, FAR uint8_t *portval)
 
   /* Then perform the transfer. */
 
-  return I2C_TRANSFER(priv->i2c, &msg, 1);
+  ret = I2C_TRANSFER(priv->i2c, &msg, 1);
+  return (ret >= 0) ? OK : ret;
 }
 
 /****************************************************************************
@@ -212,6 +214,7 @@ static int pcf8574_read(FAR struct pcf8574_dev_s *priv, FAR uint8_t *portval)
 static int pcf8574_write(struct pcf8574_dev_s *priv, uint8_t portval)
 {
   struct i2c_msg_s msg;
+  int ret;
 
   DEBUGASSERT(priv != NULL && priv->i2c != NULL && priv->config != NULL);
 
@@ -225,7 +228,8 @@ static int pcf8574_write(struct pcf8574_dev_s *priv, uint8_t portval)
 
   /* Then perform the transfer. */
 
-  return I2C_TRANSFER(priv->i2c, &msg, 1);
+  ret = I2C_TRANSFER(priv->i2c, &msg, 1);
+  return (ret >= 0) ? OK : ret;
 }
 
 /****************************************************************************

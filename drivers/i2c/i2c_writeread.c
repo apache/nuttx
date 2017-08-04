@@ -74,6 +74,7 @@ int i2c_writeread(FAR struct i2c_master_s *dev,
 {
   struct i2c_msg_s msg[2];
   unsigned int flags;
+  int ret;
 
   /* 7- or 10-bit address? */
 
@@ -109,6 +110,7 @@ int i2c_writeread(FAR struct i2c_master_s *dev,
 
   /* Then perform the transfer. */
 
-  return I2C_TRANSFER(dev, msg, 2);
+  ret = I2C_TRANSFER(dev, msg, 2);
+  return (ret >= 0) ? OK : ret;
 }
 

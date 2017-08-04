@@ -172,6 +172,7 @@ static inline int pca9555_write(FAR struct pca9555_dev_s *pca,
                                 FAR const uint8_t *wbuffer, int wbuflen)
 {
   struct i2c_msg_s msg;
+  int ret;
 
   /* Setup for the transfer */
 
@@ -183,7 +184,8 @@ static inline int pca9555_write(FAR struct pca9555_dev_s *pca,
 
   /* Then perform the transfer. */
 
-  return I2C_TRANSFER(pca->i2c, &msg, 1);
+  ret = I2C_TRANSFER(pca->i2c, &msg, 1);
+  return (ret >= 0) ? OK : ret;
 }
 
 /****************************************************************************

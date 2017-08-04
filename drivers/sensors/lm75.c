@@ -137,6 +137,7 @@ static int lm75_i2c_write(FAR struct lm75_dev_s *priv,
                           FAR const uint8_t *buffer, int buflen)
 {
   struct i2c_msg_s msg;
+  int ret;
 
   /* Setup for the transfer */
 
@@ -148,7 +149,8 @@ static int lm75_i2c_write(FAR struct lm75_dev_s *priv,
 
   /* Then perform the transfer. */
 
-  return I2C_TRANSFER(priv->i2c, &msg, 1);
+  ret = I2C_TRANSFER(priv->i2c, &msg, 1);
+  return (ret >= 0) ? OK : ret;
 }
 
 /****************************************************************************
@@ -163,6 +165,7 @@ static int lm75_i2c_read(FAR struct lm75_dev_s *priv,
                          FAR uint8_t *buffer, int buflen)
 {
   struct i2c_msg_s msg;
+  int ret;
 
   /* Setup for the transfer */
 
@@ -174,7 +177,8 @@ static int lm75_i2c_read(FAR struct lm75_dev_s *priv,
 
   /* Then perform the transfer. */
 
-  return I2C_TRANSFER(priv->i2c, &msg, 1);
+  ret = I2C_TRANSFER(priv->i2c, &msg, 1);
+  return (ret >= 0) ? OK : ret;
 }
 
 /****************************************************************************

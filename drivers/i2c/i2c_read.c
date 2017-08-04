@@ -71,6 +71,7 @@ int i2c_read(FAR struct i2c_master_s *dev,
 {
   struct i2c_msg_s msg;
   unsigned int flags;
+  int ret;
 
   /* 7- or 10-bit? */
 
@@ -86,5 +87,6 @@ int i2c_read(FAR struct i2c_master_s *dev,
 
   /* Then perform the transfer. */
 
-  return I2C_TRANSFER(dev, &msg, 1);
+  ret = I2C_TRANSFER(dev, &msg, 1);
+  return (ret >= 0) ? OK : ret;
 }
