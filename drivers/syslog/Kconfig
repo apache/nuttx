@@ -116,6 +116,15 @@ config SYSLOG_TIMESTAMP
 	---help---
 		Prepend timestamp to syslog message.
 
+config SYSLOG_TIMESTAMP_REALTIME
+	bool "Use wall-clock for syslog timestamp"
+	default n
+	depends on SYSLOG_TIMESTAMP
+	---help---
+		Use wall-clock (CLOCK_REALTIME) for timestamp.  By default,
+		CLOCK_MONOTONIC, if enabled, will be used or the system timer
+		is not.
+
 config SYSLOG_SERIAL_CONSOLE
 	bool
 	default n

@@ -82,13 +82,21 @@ int _vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
   ret = -EAGAIN;
   if (OSINIT_HW_READY())
     {
+#if defined(CONFIG_SYSLOG_TIMESTAMP_REALTIME)
+      /* Use CLOCK_REALTIME if so configured */
+
+      ret = clock_gettime(CLOCK_REALTIME, &ts);
+
+#elif defined(CONFIG_CLOCK_MONOTONIC)
       /* Prefer monotonic when enabled, as it can be synchronized to
        * RTC with clock_resynchronize.
        */
 
-#ifdef CONFIG_CLOCK_MONOTONIC
       ret = clock_gettime(CLOCK_MONOTONIC, &ts);
+
 #else
+      /* Otherwise, fall back to the system timer */
+
       ret = clock_systimespec(&ts);
 #endif
     }
