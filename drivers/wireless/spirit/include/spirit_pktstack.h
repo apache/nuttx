@@ -130,7 +130,7 @@ struct spirit_pktstack_init_s
                          * parameter can be any value from enum pkt_premblen_e */
   uint8_t  synclen;     /* Specifies the sync word length of packet. This
                          * parameter can be any value of enum pkt_premblen_e */
-  uint8_t  fixvarlen;  /* Specifies if a fixed length of packet has to be
+  uint8_t  fixvarlen;   /* Specifies if a fixed length of packet has to be
                          * used. This parameter can be any value of enum
                          * pkt_fixvar_len_e */
   uint8_t  pktlenwidth; /* Specifies the size of the length of packet in
@@ -138,7 +138,7 @@ struct spirit_pktstack_init_s
                          * fixvarlen is set to STACK_LENGTH_VAR. For STack
                          * packets the length width is log2( max payload
                          * length + control length (0 to 4) + address length
-                         * (always 2)). This parameter is an FAR uint8_t */
+                         * (always 2)). */
   uint8_t  crcmode;     /* Specifies the CRC word length of packet.  This
                          * parameter can be any value of enum pkt_crcmode_e */
   uint8_t  ctrllen;     /* Specifies the length of a control field to be

@@ -112,7 +112,7 @@
 
 #if CONFIG_SPIRIT_PKTLEN < 2
 #  define PKT_LENGTH_WIDTH 1      /* 0 - 1 */
-#if CONFIG_SPIRIT_PKTLEN < 4
+#elif CONFIG_SPIRIT_PKTLEN < 4
 #  define PKT_LENGTH_WIDTH 2      /* 2 - 3 */
 #elif CONFIG_SPIRIT_PKTLEN < 8
 #  define PKT_LENGTH_WIDTH 3      /* 4 - 7 */
@@ -1081,6 +1081,10 @@ static void spirit_interrupt_work(FAR void *arg)
                   pktmeta->pm_dest.pa_addrlen = 1;
                   pktmeta->pm_dest.pa_addr[0] =
                     spirit_pktcommon_get_nodeaddress(spirit);
+
+                  wlinfo("RX srcaddr=%02 destaddr=%02\n",
+                         pktmeta->pm_src.pa_addr[0],
+                         pktmeta->pm_dest.pa_addr[0]);
 
                   /* Add the contained IOB to the tail of the queue of
                    * completed RX transfers.
