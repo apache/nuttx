@@ -62,6 +62,7 @@
 #include <nuttx/wireless/spirit.h>
 #include <nuttx/wireless/pktradio.h>
 
+#include "spirit_config.h"
 #include "spirit_types.h"
 #include "spirit_general.h"
 #include "spirit_irq.h"
@@ -95,7 +96,52 @@
 #endif
 
 #ifndef CONFIG_SPIRIT_PKTLEN
-#  define CONFIG_SPIRIT_PKTLEN 96
+#  define CONFIG_SPIRIT_PKTLEN SPIRIT_MAX_FIFO_LEN
+#endif
+
+#if CONFIG_SPIRIT_PKTLEN > SPIRIT_MAX_FIFO_LEN && \
+    !defined(CONFIG_SPIRIT_FIFOS)
+#  error Without CONFIG_SPIRIT_FIFOS, need CONFIG_SPIRIT_PKTLEN <= SPIRIT_MAX_FIFO_LEN
+#  undef  CONFIG_SPIRIT_PKTLEN
+#  define CONFIG_SPIRIT_PKTLEN SPIRIT_MAX_FIFO_LEN
+#endif
+
+/* The packet length width field specifies log2 or the number of bits used to
+ * transfer the packet length.
+ */
+
+#if CONFIG_SPIRIT_PKTLEN < 4
+#  define PKT_LENGTH_WIDTH (2 - 1)
+#elif CONFIG_SPIRIT_PKTLEN < 8
+#  define PKT_LENGTH_WIDTH (3 - 1)
+#elif CONFIG_SPIRIT_PKTLEN < 16
+#  define PKT_LENGTH_WIDTH (4 - 1)
+#elif CONFIG_SPIRIT_PKTLEN < 32
+#  define PKT_LENGTH_WIDTH (5 - 1)
+#elif CONFIG_SPIRIT_PKTLEN < 64
+#  define PKT_LENGTH_WIDTH (6 - 1)
+#elif CONFIG_SPIRIT_PKTLEN < 128
+#  define PKT_LENGTH_WIDTH (7 - 1)
+#elif CONFIG_SPIRIT_PKTLEN < 256
+#  define PKT_LENGTH_WIDTH (8 - 1)
+#elif CONFIG_SPIRIT_PKTLEN < 512
+#  define PKT_LENGTH_WIDTH (9 - 1)
+#elif CONFIG_SPIRIT_PKTLEN < 1024
+#  define PKT_LENGTH_WIDTH (10 - 1)
+#elif CONFIG_SPIRIT_PKTLEN < 2048
+#  define PKT_LENGTH_WIDTH (11 - 1)
+#elif CONFIG_SPIRIT_PKTLEN < 4096
+#  define PKT_LENGTH_WIDTH (12 - 1)
+#elif CONFIG_SPIRIT_PKTLEN < 8192
+#  define PKT_LENGTH_WIDTH (13 - 1)
+#elif CONFIG_SPIRIT_PKTLEN < 16384
+#  define PKT_LENGTH_WIDTH (14 - 1)
+#elif CONFIG_SPIRIT_PKTLEN < 32768
+#  define PKT_LENGTH_WIDTH (15 - 1)
+#elif CONFIG_SPIRIT_PKTLEN < 65536
+#  define PKT_LENGTH_WIDTH (16 - 1)
+#else
+#  error Invalid CONFIG_SPIRIT_PKTLEN
 #endif
 
 /* Default node address */
@@ -245,11 +291,11 @@ static const struct pktbasic_init_s g_pktbasic_init =
   SPIRIT_SYNC_WORD,                   /* syncwords */
   SPIRIT_PREAMBLE_LENGTH,             /* premblen */
   SPIRIT_SYNC_LENGTH,                 /* synclen */
-  SPIRIT_LENGTH_TYPE,                 /* fixvarlen */
-  SPIRIT_LENGTH_WIDTH,                /* pktlenwidth */
+  PKT_LENGTH_VAR,                     /* fixvarlen, variable packet length */
+  PKT_LENGTH_WIDTH,                   /* pktlenwidth from CONFIG_SPIRIT_PKTLEN */
   SPIRIT_CRC_MODE,                    /* crcmode */
   SPIRIT_CONTROL_LENGTH,              /* ctrllen */
-  SPIRIT_EN_ADDRESS,                  /* txdestaddr */
+  S_ENABLE,                           /* txdestaddr, need to send address */
   SPIRIT_EN_FEC,                      /* fec */
   SPIRIT_EN_WHITENING                 /* datawhite */
  };
@@ -543,7 +589,6 @@ static int spirit_transmit(FAR struct spirit_driver_s *priv)
           goto errout_with_iob;
         }
 
-#ifndef CONFIG_SPIRIT_PROMISICUOUS
       /* Set the destination address */
 
       DEBUGASSERT(pktmeta->pm_dest.pa_addrlen == 1);
@@ -557,7 +602,6 @@ static int spirit_transmit(FAR struct spirit_driver_s *priv)
                 pktmeta->pm_dest.pa_addr[0], ret);
           goto errout_with_iob;
         }
-#endif
 
       /* Enable CSMA */
 
@@ -1070,6 +1114,8 @@ static void spirit_interrupt_work(FAR void *arg)
       wlinfo("Data discarded: Node addr=%02x RX dest addr=%02x\n",
              spirit_pktcommon_get_nodeaddress(spirit),
              spirit_pktcommon_get_rxdestaddr(spirit));
+      wlinfo("                CRC error=%u RX timeout=%u\n",
+             irqstatus.IRQ_CRC_ERROR, irqstatus.IRQ_RX_TIMEOUT);
 
       DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
       priv->state = DRIVER_STATE_IDLE;
@@ -1094,10 +1140,6 @@ static void spirit_interrupt_work(FAR void *arg)
       DEBUGVERIFY(spirit_waitstatus(spirit, MC_STATE_RX, 1));
     }
 
-  /* Re-enable the interrupt. */
-
-  DEBUGASSERT(priv->lower != NULL && priv->lower->enable != NULL);
-  priv->lower->enable(priv->lower, true);
   spirit_unlock(priv);
 }
 
@@ -1128,14 +1170,7 @@ static int spirit_interrupt(int irq, FAR void *context, FAR void *arg)
    * this case, we will defer processing to the worker thread.  This is also
    * much kinder in the use of system resources and is, therefore, probably
    * a good thing to do in any event.
-   *
-   * Notice that further GPIO interrupts are disabled until the work is
-   * actually performed.  This is to prevent overrun of the worker thread.
-   * Interrupts are re-enabled in spirit_interrupt_work() when the work is
-   * completed.
    */
-
-  priv->lower->enable(priv->lower, false);
 
   return work_queue(HPWORK, &priv->irqwork, spirit_interrupt_work,
                     (FAR void *)priv, 0);
@@ -1398,8 +1433,7 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
           goto error_with_ifalmostup;
         }
 
-#ifndef CONFIG_SPIRIT_PROMISICUOUS
-      /* Instantiate the assigned node address in harsware*/
+      /* Instantiate the assigned node address in hardware */
 
       DEBUGASSERT(dev->d_mac.sixlowpan.nv_addrlen == 1);
       wlinfo("Set node address to %02x\n",
@@ -1412,7 +1446,6 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
           wlerr("ERROR: Failed to set node address: %d\n", ret);
           goto error_with_ifalmostup;
         }
-#endif
 
       /* Set and activate a timer process */
 

@@ -286,7 +286,7 @@ int spirit_reg_read(FAR struct spirit_library_s *spirit, uint8_t regaddr,
 
   SPI_EXCHANGE(spirit->spi, header, status, 2);
 
-  /* Update Spirit status. 16-bit status is returned MS bit first */
+  /* Update Spirit status. 16-bit status is returned MS byte first */
 
   spirit->u.u16 = ((uint16_t)status[0] << 8) | (uint16_t)status[1];
 
@@ -342,7 +342,7 @@ int spirit_reg_write(FAR struct spirit_library_s *spirit, uint8_t regaddr,
 
   SPI_EXCHANGE(spirit->spi, header, status, 2);
 
-  /* Update Spirit status. 16-bit status is returned MS bit first */
+  /* Update Spirit status. 16-bit status is returned MS byte first */
 
   spirit->u.u16 = ((uint16_t)status[0] << 8) | (uint16_t)status[1];
 
@@ -404,7 +404,7 @@ int spirit_reg_modify(FAR struct spirit_library_s *spirit, uint8_t regaddr,
   /* Modify the register value */
 
   regval &= ~clrbits;
-  regval |= ~setbits;
+  regval |=  setbits;
 
   /* Setup the header byte for the write operation */
 
@@ -421,7 +421,7 @@ int spirit_reg_modify(FAR struct spirit_library_s *spirit, uint8_t regaddr,
 
   SPI_EXCHANGE(spirit->spi, header, status, 2);
 
-  /* Update Spirit status. 16-bit status is returned MS bit first */
+  /* Update Spirit status. 16-bit status is returned MS byte first */
 
   spirit->u.u16 = ((uint16_t)status[0] << 8) | (uint16_t)status[1];
 
@@ -472,7 +472,7 @@ int spirit_command(FAR struct spirit_library_s *spirit, uint8_t cmd)
 
   SPI_EXCHANGE(spirit->spi, header, status, 2);
 
-  /* Update Spirit status. 16-bit status is returned MS bit first */
+  /* Update Spirit status. 16-bit status is returned MS byte first */
 
   spirit->u.u16 = ((uint16_t)status[0] << 8) | (uint16_t)status[1];
 
@@ -520,7 +520,7 @@ int spirit_fifo_read(FAR struct spirit_library_s *spirit, FAR uint8_t *buffer,
 
   SPI_EXCHANGE(spirit->spi, header, status, 2);
 
-  /* Update Spirit status. 16-bit status is returned MS bit first */
+  /* Update Spirit status. 16-bit status is returned MS byte first */
 
   spirit->u.u16 = ((uint16_t)status[0] << 8) | (uint16_t)status[1];
 
@@ -575,7 +575,7 @@ int spirit_fifo_write(FAR struct spirit_library_s *spirit,
 
   SPI_EXCHANGE(spirit->spi, header, status, 2);
 
-  /* Update Spirit status. 16-bit status is returned MS bit first */
+  /* Update Spirit status. 16-bit status is returned MS byte first */
 
   spirit->u.u16 = ((uint16_t)status[0] << 8) | (uint16_t)status[1];
 

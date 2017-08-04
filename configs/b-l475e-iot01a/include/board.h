@@ -121,24 +121,11 @@
 #define SPIRIT_PREAMBLE_LENGTH        PKT_PREAMBLE_LENGTH_04BYTES
 #define SPIRIT_SYNC_LENGTH            PKT_SYNC_LENGTH_4BYTES
 #define SPIRIT_SYNC_WORD              0x88888888
-#define SPIRIT_LENGTH_TYPE            PKT_LENGTH_VAR
-#define SPIRIT_LENGTH_WIDTH           8
 #define SPIRIT_CRC_MODE               PKT_CRC_MODE_16BITS_2
 #define SPIRIT_CONTROL_LENGTH         PKT_CONTROL_LENGTH_0BYTES
-#define SPIRIT_EN_ADDRESS             S_DISABLE
 #define SPIRIT_EN_FEC                 S_DISABLE
 #define SPIRIT_EN_WHITENING           S_DISABLE
-#define SPIRIT_MAX_FIFO_LEN           96
 #define SPIRIT_RANGE_TYPE             RANGE_EXT_NONE /* RANGE_EXT_SKYWORKS */
-
-/* The MAX_PACKET_LEN is an arbitrary value used to define the two array
- * spirit_txbuf and spirit_rxbuf.
- *
- * The SPIRIT1 supports with its packet handler a length of 65,535 bytes,
- * and in direct mode (without packet handler) there is no limit of data.
- */
-
-#define SPIRIT_MAX_PACKET_LEN         SPIRIT_MAX_FIFO_LEN
 
 /* Spirit1 IC version */
 

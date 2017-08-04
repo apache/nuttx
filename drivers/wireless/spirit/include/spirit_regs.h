@@ -2081,6 +2081,7 @@
  *            22  |       PM start-up timer expiration
  *            23  |       XO settling timeout
  */
+
 #define IRQ_MASK2_BASE                  ((uint8_t)0x91)  /* IRQ_MASK is split into 4 registers */
 
 #define IRQ_MASK2_READY                 ((uint8_t)0x01)  /* IRQ: READY state */

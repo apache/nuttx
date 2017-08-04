@@ -41,6 +41,7 @@
  * Included Files
  ******************************************************************************/
 
-#define DOUBLE_XTAL_THR  30000000
+#define SPIRIT_MAX_FIFO_LEN  96
+#define DOUBLE_XTAL_THR      30000000
 
 #endif /* __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_CONFIG_H */

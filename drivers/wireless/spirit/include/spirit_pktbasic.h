@@ -98,9 +98,7 @@
  * Pre-processor Definitions
  ******************************************************************************/
 
-/* PktBasic_Exported_Constants        Pkt Basic Exported Constants */
-
-#define IS_BASIC_LENGTH_WIDTH_BITS                      IS_PKT_LENGTH_WIDTH_BITS
+#define IS_BASIC_LENGTH_WIDTH_BITS  IS_PKT_LENGTH_WIDTH_BITS
 
 /* Macros used in assertions */
 
@@ -117,7 +115,7 @@ struct pktbasic_init_s
   uint32_t syncwords;    /* Specifies the sync words. This parameter is
                           * a uint32_t word with format:
                           * 0x|SYNC1|SYNC2|SYNC3|SYNC4 */
-  uint8_t preamblen;      /* Specifies the preamble length. This parameter
+  uint8_t preamblen;     /* Specifies the preamble length. This parameter
                           * can be any value from enum pkt_preamblen_e */
   uint8_t synclen;       /* Specifies the sync word length.  The 32bit
                           * word passed (syncwords) will be stored in
