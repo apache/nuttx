@@ -3,7 +3,7 @@
  * Driver for SPI-based RAMTRON NVRAM Devices FM25V10 and others (not tested)
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Copyright (C) 2009-2010, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2012-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
  *           Gregory Nutt <gnutt@nuttx.org>
  *
@@ -74,6 +74,10 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
+#if 0
+#  define RAMTRON_WRITE_BUFFER_SIZE      256
+#endif
 
 /* Used to abort the write wait */
 
@@ -153,6 +157,7 @@ struct ramtron_dev_s
   uint16_t nsectors;
   uint32_t npages;
   uint32_t speed;                          /* Overridable via ioctl */
+  uint32_t wbsiz;                          /* Write Buffer Size */
   FAR const struct ramtron_parts_s *part;  /* Part instance */
 };
 
@@ -272,6 +277,14 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     3,                            /* addr_len */
     25000000                      /* speed */
   },
+  {
+    "MB85AS4MT",                  /* name */
+    0xc9,                         /* id1 */
+    0x03,                         /* id2 */
+    512L*1024L,                   /* size */
+    3,                            /* addr_len */
+    RAMTRON_INIT_CLK_MAX          /* speed */
+  },
 #ifdef CONFIG_RAMTRON_FRAM_NON_JEDEC
   {
     "FM25H20",                    /* name */
@@ -304,15 +317,21 @@ static inline int ramtron_readid(struct ramtron_dev_s *priv);
 static int ramtron_waitwritecomplete(struct ramtron_dev_s *priv);
 static void ramtron_writeenable(struct ramtron_dev_s *priv);
 static inline int ramtron_pagewrite(struct ramtron_dev_s *priv,
-                                     FAR const uint8_t *buffer, off_t offset);
+                                    FAR const uint8_t *buffer, off_t offset,
+                                    size_t pagesize);
 
 /* MTD driver methods */
 
 static int ramtron_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);
 static ssize_t ramtron_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                              size_t nblocks, FAR uint8_t *buf);
+#ifndef RAMTRON_WRITE_BUFFER_SIZE
 static ssize_t ramtron_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                               size_t nblocks, FAR const uint8_t *buf);
+#else
+static ssize_t ramtron_bwrite_wbsiz(FAR struct mtd_dev_s *dev, off_t startblock,
+                                    size_t nblocks, FAR const uint8_t *buf);
+#endif
 static ssize_t ramtron_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
                             FAR uint8_t *buffer);
 static int ramtron_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
@@ -434,6 +453,11 @@ static inline int ramtron_readid(struct ramtron_dev_s *priv)
       priv->pageshift   = RAMTRON_EMULATE_PAGE_SHIFT;
       priv->npages      = priv->part->size / (1 << RAMTRON_EMULATE_PAGE_SHIFT);
       priv->speed       = priv->part->speed;
+#ifndef RAMTRON_WRITE_BUFFER_SIZE
+      priv->wbsiz       = 1 << priv->pageshift;
+#else
+      priv->wbsiz       = RAMTRON_WRITE_BUFFER_SIZE;
+#endif
       return OK;
     }
 
@@ -533,9 +557,10 @@ static inline void ramtron_sendaddr(const struct ramtron_dev_s *priv, uint32_t a
  ************************************************************************************/
 
 static inline int ramtron_pagewrite(struct ramtron_dev_s *priv,
-                                    FAR const uint8_t *buffer, off_t page)
+                                    FAR const uint8_t *buffer, off_t page,
+                                    size_t pagesize)
 {
-  off_t offset = page << priv->pageshift;
+  off_t offset = page * pagesize;
 
   finfo("page: %08lx offset: %08lx\n", (long)page, (long)offset);
 
@@ -567,7 +592,7 @@ static inline int ramtron_pagewrite(struct ramtron_dev_s *priv,
 
   /* Then write the specified number of bytes */
 
-  SPI_SNDBLOCK(priv->dev, buffer, 1 << priv->pageshift);
+  SPI_SNDBLOCK(priv->dev, buffer, pagesize);
 
   /* Deselect the FLASH: Chip Select high */
 
@@ -624,6 +649,7 @@ static ssize_t ramtron_bread(FAR struct mtd_dev_s *dev, off_t startblock,
  * Name: ramtron_bwrite
  ************************************************************************************/
 
+#ifndef RAMTRON_WRITE_BUFFER_SIZE
 static ssize_t ramtron_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                               size_t nblocks, FAR const uint8_t *buffer)
 {
@@ -637,7 +663,7 @@ static ssize_t ramtron_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
   ramtron_lock(priv);
   while (blocksleft-- > 0)
     {
-      if (ramtron_pagewrite(priv, buffer, startblock))
+      if (ramtron_pagewrite(priv, buffer, startblock, 1 << priv->pageshift))
         {
           nblocks = 0;
           break;
@@ -648,6 +674,51 @@ static ssize_t ramtron_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
   ramtron_unlock(priv->dev);
   return nblocks;
 }
+#endif
+
+/************************************************************************************
+ * Name: ramtron_bwrite_wbsiz
+ ************************************************************************************/
+
+#ifdef RAMTRON_WRITE_BUFFER_SIZE
+static ssize_t ramtron_bwrite_wbsiz(FAR struct mtd_dev_s *dev, off_t startblock,
+                                    size_t nblocks, FAR const uint8_t *buffer)
+{
+  FAR struct ramtron_dev_s *priv = (FAR struct ramtron_dev_s *)dev;
+  size_t blocksleft = nblocks;
+  uint32_t p, writesplits;
+  off_t newstartblock;
+
+  finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+
+  writesplits   = (1 << priv->pageshift) / priv->wbsiz;
+  newstartblock = startblock * writesplits;
+
+  /* Lock the SPI bus and write each page to FLASH */
+
+  ramtron_lock(priv);
+  while (blocksleft-- > 0)
+    {
+      /* Split writes in wbsiz chunks */
+
+      for (p = 0; p < writesplits; p++)
+       {
+         if (ramtron_pagewrite(priv, buffer + p * priv->wbsiz, newstartblock,
+                               priv->wbsiz))
+           {
+             nblocks = 0;
+             goto out;
+           }
+
+         newstartblock++;
+       }
+    }
+
+out:
+  ramtron_unlock(priv->dev);
+  return nblocks;
+}
+#endif
 
 /************************************************************************************
  * Name: ramtron_read
@@ -823,7 +894,11 @@ FAR struct mtd_dev_s *ramtron_initialize(FAR struct spi_dev_s *dev)
 
       priv->mtd.erase  = ramtron_erase;
       priv->mtd.bread  = ramtron_bread;
+#ifndef RAMTRON_WRITE_BUFFER_SIZE
       priv->mtd.bwrite = ramtron_bwrite;
+#else
+      priv->mtd.bwrite = ramtron_bwrite_wbsiz;
+#endif
       priv->mtd.read   = ramtron_read;
       priv->mtd.ioctl  = ramtron_ioctl;
       priv->dev        = dev;
