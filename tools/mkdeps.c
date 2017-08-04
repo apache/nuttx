@@ -58,7 +58,12 @@
 
 #define MAX_BUFFER  (4096)
 #define MAX_EXPAND  (2048)
-#define MAX_PATH    (512)
+
+/* MAX_PATH might be defined in stdlib.h */
+
+#if !defined(MAX_PATH)
+#  define MAX_PATH  (512)
+#endif
 
 /* NAME_MAX is typically defined in limits.h */
 
