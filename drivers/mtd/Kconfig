@@ -761,7 +761,8 @@ config RAMTRON_CHUNKING
 	bool "Support chunked writes"
 	default n
 	---help---
-		Some Re-RAMs like MB85AS4MT has a write buffer size limitation.
+		Some Re-RAMs like MB85AS4MT have write buffer size limitation and
+		require smaller, "chunked" writes.
 
 endif # MTD_RAMTRON
 
