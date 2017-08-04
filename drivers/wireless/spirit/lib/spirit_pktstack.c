@@ -79,7 +79,7 @@ int spirit_pktstack_initialize(FAR struct spirit_library_s *spirit,
   DEBUGASSERT(IS_PKT_SYNC_LENGTH(pktstack->synclen));
   DEBUGASSERT(IS_PKT_CRC_MODE(pktstack->crcmode));
   DEBUGASSERT(IS_PKT_LENGTH_WIDTH_BITS(pktstack->pktlenwidth));
-  DEBUGASSERT(IS_PKT_CRC_MODE(pktstack->fixvarlen));
+  DEBUGASSERT(IS_PKT_FIX_VAR_LENGTH(pktstack->fixvarlen));
   DEBUGASSERT(IS_SPIRIT_FUNCTIONAL_STATE(pktstack->fec));
   DEBUGASSERT(IS_SPIRIT_FUNCTIONAL_STATE(pktstack->datawhite));
   DEBUGASSERT(IS_PKT_CONTROL_LENGTH(pktstack->ctrllen));
@@ -554,7 +554,7 @@ int spirit_pktstack_set_format(FAR struct spirit_library_s *spirit)
   /* Build value to be written. Also set to 0 the direct RX mode bits */
 
   regval &= 0x0f;
-  regval |= ((uint8_t) PCKTCTRL3_PCKT_FRMT_STACK);
+  regval |= ((uint8_t)PCKTCTRL3_PCKT_FRMT_STACK);
 
   /* Write the value to the PCKTCTRL3 register. */
 
@@ -572,7 +572,7 @@ int spirit_pktstack_set_format(FAR struct spirit_library_s *spirit)
       return ret;
     }
 
-  /* Build the new value. Set to 0 the direct TX mode bits */
+  /* Build the new value.  Set to 0 the direct TX mode bits */
 
   regval &= 0xf3;
 
@@ -830,7 +830,7 @@ uint8_t spirit_pktstack_get_rxsource_addrmask(FAR struct spirit_library_s *spiri
 }
 
 /******************************************************************************
- * Name: spirit_pkstack_get_rxpktlen
+ * Name: spirit_pktstack_get_rxpktlen
  *
  * Description:
  *   Returns the packet length field of the received packet.
@@ -843,7 +843,7 @@ uint8_t spirit_pktstack_get_rxsource_addrmask(FAR struct spirit_library_s *spiri
  *
  ******************************************************************************/
 
-uint16_t spirit_pkstack_get_rxpktlen(FAR struct spirit_library_s *spirit)
+uint16_t spirit_pktstack_get_rxpktlen(FAR struct spirit_library_s *spirit)
 {
   uint8_t regval[2];
   uint16_t pktlen;

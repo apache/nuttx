@@ -436,7 +436,7 @@ int spirit_pkstack_set_rxsource_addrmask(FAR struct spirit_library_s *spirit,
 uint8_t spirit_pktstack_get_rxsource_addrmask(FAR struct spirit_library_s *spirit);
 
 /******************************************************************************
- * Name: spirit_pkstack_get_rxpktlen
+ * Name: spirit_pktstack_get_rxpktlen
  *
  * Description:
  *   Returns the packet length field of the received packet.
@@ -449,7 +449,7 @@ uint8_t spirit_pktstack_get_rxsource_addrmask(FAR struct spirit_library_s *spiri
  *
  ******************************************************************************/
 
-uint16_t spirit_pkstack_get_rxpktlen(FAR struct spirit_library_s *spirit);
+uint16_t spirit_pktstack_get_rxpktlen(FAR struct spirit_library_s *spirit);
 
 /******************************************************************************
  * Name: spirit_pkstack_enable_rxsource_addrfilter

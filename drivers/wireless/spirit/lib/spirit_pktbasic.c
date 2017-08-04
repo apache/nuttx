@@ -54,7 +54,7 @@
  *
  * Description:
  *   Initializes the Spirit Basic packet according to the specified parameters
- *   in the struct pktbasic_init_s.  Notice that this function sets the
+ *   in the struct spirit_pktbasic_init_s.  Notice that this function sets the
  *   autofiltering option on CRC if it is set to any value different from
  *   BASIC_NO_CRC.
  *
@@ -68,7 +68,7 @@
  ******************************************************************************/
 
 int spirit_pktbasic_initialize(FAR struct spirit_library_s *spirit,
-                               FAR const struct pktbasic_init_s *pktpasic)
+                               FAR const struct spirit_pktbasic_init_s *pktpasic)
 {
   uint8_t regval[4];
   uint8_t pktlenwidth;
@@ -230,7 +230,7 @@ int spirit_pktbasic_initialize(FAR struct spirit_library_s *spirit,
  ******************************************************************************/
 
 int spirit_pktbasic_get_setup(FAR struct spirit_library_s *spirit,
-                              FAR struct pktbasic_init_s *pktbasic)
+                              FAR struct spirit_pktbasic_init_s *pktbasic)
 {
   uint8_t regval[10];
   int ret;
@@ -301,7 +301,7 @@ int spirit_pktbasic_get_setup(FAR struct spirit_library_s *spirit,
  *
  * Description:
  *   Initializes the SPIRIT Basic packet addresses according to the specified
- *   parameters in the struct struct pktbasic_init_s struct.
+ *   parameters in the struct struct spirit_pktbasic_init_s struct.
  *
  * Input Parameters:
  *   spirit    - Reference to a Spirit library state structure instance
@@ -313,7 +313,7 @@ int spirit_pktbasic_get_setup(FAR struct spirit_library_s *spirit,
  ******************************************************************************/
 
 int spirit_pktbasic_addr_initialize(FAR struct spirit_library_s *spirit,
-                                    FAR struct pktbasic_addr_s *basicaddr)
+                                    FAR struct spirit_pktbasic_addr_s *basicaddr)
 {
   uint8_t regval[3];
   int ret;
@@ -397,7 +397,7 @@ int spirit_pktbasic_addr_initialize(FAR struct spirit_library_s *spirit,
  ******************************************************************************/
 
 int spirit_pktbasic_get_addrsetup(FAR struct spirit_library_s *spirit,
-                                  FAR struct pktbasic_addr_s *basicaddr)
+                                  FAR struct spirit_pktbasic_addr_s *basicaddr)
 {
   uint8_t regval[3];
   int ret;

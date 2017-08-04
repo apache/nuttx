@@ -71,7 +71,7 @@
 #include "spirit_linearfifo.h"
 #include "spirit_commands.h"
 #include "spirit_radio.h"
-#include "spirit_pktbasic.h"
+#include "spirit_pktstack.h"
 #include "spirit_qi.h"
 #include "spirit_management.h"
 #include "spirit_timer.h"
@@ -286,9 +286,9 @@ static const struct radio_init_s g_radio_init =
   SPIRIT_BANDWIDTH                    /* bandwidth      selected in board.h */
 };
 
-/* Spirit PktBasic initialization */
+/* Spirit PktSTack initialization */
 
-static const struct pktbasic_init_s g_pktbasic_init =
+static const struct spirit_pktstack_init_s g_pktstack_init =
 {
   SPIRIT_SYNC_WORD,                   /* syncword       selected in board.h */
   SPIRIT_PREAMBLE_LENGTH,             /* premblen       selected in board.h*/
@@ -301,10 +301,18 @@ static const struct pktbasic_init_s g_pktbasic_init =
   SPIRIT_CRC_MODE,                    /* crcmode        selected in board.h */
 #endif
   SPIRIT_CONTROL_LENGTH,              /* ctrllen        selected in board.h */
-  S_ENABLE,                           /* txdestaddr     need to send address */
   SPIRIT_EN_FEC,                      /* fec            selected in board.h */
   SPIRIT_EN_WHITENING                 /* datawhite      selected in board.h */
  };
+
+/* LLP Configuration */
+
+static const struct spirit_pktstack_llp_s g_llp_init =
+{
+  S_DISABLE,                          /* autoack */
+  S_DISABLE,                          /* piggyback */
+  PKT_N_RETX_3                        /* maxretx */
+};
 
 /* GPIO Configuration.
  *
@@ -331,7 +339,7 @@ static const struct spirit_csma_init_s g_csma_init =
 };
 
 #ifdef CONFIG_SPIRIT_PROMISICUOUS
-static struct pktbasic_addr_s g_addrinit =
+static struct spirit_pktstack_address_s g_addrinit =
 {
   S_DISABLE,                          /* Disable filtering on node address */
   SPIRIT_NODE_ADDR,                   /* Node address (Temporary, until assigned) */
@@ -341,7 +349,7 @@ static struct pktbasic_addr_s g_addrinit =
   SPIRIT_BCAST_ADDRESS                /* Broadcast address */
 };
 #else
-static struct pktbasic_addr_s g_addrinit =
+static struct spirit_pktstack_address_s g_addrinit =
 {
   S_ENABLE,                           /* Enable filtering on node address */
   SPIRIT_NODE_ADDR,                   /* Node address (Temporary, until assigned) */
@@ -595,7 +603,7 @@ static int spirit_transmit(FAR struct spirit_driver_s *priv)
 
       wlinfo("Payload length=%u\n", iob->io_len);
 
-      ret = spirit_pktbasic_set_payloadlen(spirit, iob->io_len);
+      ret = spirit_pktstack_set_payloadlen(spirit, iob->io_len);
       if (ret < 0)
         {
           wlerr("ERROR: Failed to set payload length: %d\n", ret);
@@ -1047,7 +1055,7 @@ static void spirit_interrupt_work(FAR void *arg)
               /* Read the packet into the I/O buffer */
 
               DEBUGVERIFY(spirit_fifo_read(spirit, iob->io_data, count));
-              iob->io_len    = spirit_pktbasic_get_rxpktlen(spirit);
+              iob->io_len    = spirit_pktstack_get_rxpktlen(spirit);
               iob->io_offset = 0;
               iob->io_pktlen = iob->io_len;
               iob->io_flink  = NULL;
@@ -2041,21 +2049,28 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
 
   /* Configures the SPIRIT1 packet handling logic */
 
-  wlinfo("Configure basic packets\n");
-  ret = spirit_pktbasic_initialize(spirit, &g_pktbasic_init);
+  wlinfo("Configure STack packets\n");
+  ret = spirit_pktstack_initialize(spirit, &g_pktstack_init);
   if (ret < 0)
     {
       wlerr("ERROR: spirit_radio_set_palevel_maxindex failed: %d\n", ret);
       return ret;
     }
 
+  ret = spirit_pktstack_llp_initialize(spirit, &g_llp_init);
+  if (ret < 0)
+    {
+      wlerr("ERROR: spirit_pktstack_llp_initialize failed: %d\n", ret);
+      return ret;
+    }
+
   /* Configure address filtering */
 
   wlinfo("Configure address filtering\n");
-  ret = spirit_pktbasic_addr_initialize(spirit, &g_addrinit);
+  ret = spirit_pktstack_address_initialize(spirit, &g_addrinit);
   if (ret < 0)
     {
-      wlerr("ERROR: spirit_pktbasic_addr_initialize failed: %d\n", ret);
+      wlerr("ERROR: spirit_pktstack_address_initialize failed: %d\n", ret);
       return ret;
     }
 
