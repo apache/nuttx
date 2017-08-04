@@ -110,36 +110,38 @@
  * transfer the packet length.
  */
 
+#if CONFIG_SPIRIT_PKTLEN < 2
+#  define PKT_LENGTH_WIDTH 1      /* 0 - 1 */
 #if CONFIG_SPIRIT_PKTLEN < 4
-#  define PKT_LENGTH_WIDTH (2 - 1)
+#  define PKT_LENGTH_WIDTH 2      /* 2 - 3 */
 #elif CONFIG_SPIRIT_PKTLEN < 8
-#  define PKT_LENGTH_WIDTH (3 - 1)
+#  define PKT_LENGTH_WIDTH 3      /* 4 - 7 */
 #elif CONFIG_SPIRIT_PKTLEN < 16
-#  define PKT_LENGTH_WIDTH (4 - 1)
+#  define PKT_LENGTH_WIDTH 4      /* 8 - 15 */
 #elif CONFIG_SPIRIT_PKTLEN < 32
-#  define PKT_LENGTH_WIDTH (5 - 1)
+#  define PKT_LENGTH_WIDTH 5      /* 16 - 31 */
 #elif CONFIG_SPIRIT_PKTLEN < 64
-#  define PKT_LENGTH_WIDTH (6 - 1)
+#  define PKT_LENGTH_WIDTH 6      /* 32 - 63 */
 #elif CONFIG_SPIRIT_PKTLEN < 128
-#  define PKT_LENGTH_WIDTH (7 - 1)
+#  define PKT_LENGTH_WIDTH 7      /* 63 - 127 */
 #elif CONFIG_SPIRIT_PKTLEN < 256
-#  define PKT_LENGTH_WIDTH (8 - 1)
+#  define PKT_LENGTH_WIDTH 8      /* 128 - 255 */
 #elif CONFIG_SPIRIT_PKTLEN < 512
-#  define PKT_LENGTH_WIDTH (9 - 1)
+#  define PKT_LENGTH_WIDTH 9      /* 256 - 255 */
 #elif CONFIG_SPIRIT_PKTLEN < 1024
-#  define PKT_LENGTH_WIDTH (10 - 1)
+#  define PKT_LENGTH_WIDTH 10     /* 512 - 1023 */
 #elif CONFIG_SPIRIT_PKTLEN < 2048
-#  define PKT_LENGTH_WIDTH (11 - 1)
+#  define PKT_LENGTH_WIDTH 11     /* 1024 - 2047 */
 #elif CONFIG_SPIRIT_PKTLEN < 4096
-#  define PKT_LENGTH_WIDTH (12 - 1)
+#  define PKT_LENGTH_WIDTH 12     /* 2048 - 4095 */
 #elif CONFIG_SPIRIT_PKTLEN < 8192
-#  define PKT_LENGTH_WIDTH (13 - 1)
+#  define PKT_LENGTH_WIDTH 13     /* 4096 - 8191 */
 #elif CONFIG_SPIRIT_PKTLEN < 16384
-#  define PKT_LENGTH_WIDTH (14 - 1)
+#  define PKT_LENGTH_WIDTH 14     /* 8192 - 16383 */
 #elif CONFIG_SPIRIT_PKTLEN < 32768
-#  define PKT_LENGTH_WIDTH (15 - 1)
+#  define PKT_LENGTH_WIDTH 15     /* 16384 - 32767 */
 #elif CONFIG_SPIRIT_PKTLEN < 65536
-#  define PKT_LENGTH_WIDTH (16 - 1)
+#  define PKT_LENGTH_WIDTH 16     /* 32768 - 65535 */
 #else
 #  error Invalid CONFIG_SPIRIT_PKTLEN
 #endif
@@ -274,31 +276,40 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *dev,
 
 static const struct radio_init_s g_radio_init =
 {
-  SPIRIT_BASE_FREQUENCY,              /* base_frequency */
-  SPIRIT_CHANNEL_SPACE,               /* chspace */
-  SPIRIT_XTAL_OFFSET_PPM,             /* foffset */
-  SPIRIT_CHANNEL_NUMBER,              /* chnum */
-  SPIRIT_MODULATION_SELECT,           /* modselect */
-  SPIRIT_DATARATE,                    /* datarate */
-  SPIRIT_FREQ_DEVIATION,              /* freqdev */
-  SPIRIT_BANDWIDTH                    /* bandwidth */
+  SPIRIT_BASE_FREQUENCY,              /* base_frequency selected in board.h */
+  SPIRIT_CHANNEL_SPACE,               /* chspace        selected in board.h */
+  SPIRIT_XTAL_OFFSET_PPM,             /* foffset        selected in board.h */
+  SPIRIT_CHANNEL_NUMBER,              /* chnum          selected in board.h */
+  SPIRIT_MODULATION_SELECT,           /* modselect      selected in board.h */
+  SPIRIT_DATARATE,                    /* datarate       selected in board.h */
+  SPIRIT_FREQ_DEVIATION,              /* freqdev        selected in board.h */
+  SPIRIT_BANDWIDTH                    /* bandwidth      selected in board.h */
 };
 
 /* Spirit PktBasic initialization */
 
 static const struct pktbasic_init_s g_pktbasic_init =
 {
-  SPIRIT_SYNC_WORD,                   /* syncwords */
-  SPIRIT_PREAMBLE_LENGTH,             /* premblen */
-  SPIRIT_SYNC_LENGTH,                 /* synclen */
-  PKT_LENGTH_VAR,                     /* fixvarlen, variable packet length */
-  PKT_LENGTH_WIDTH,                   /* pktlenwidth from CONFIG_SPIRIT_PKTLEN */
-  SPIRIT_CRC_MODE,                    /* crcmode */
-  SPIRIT_CONTROL_LENGTH,              /* ctrllen */
-  S_ENABLE,                           /* txdestaddr, need to send address */
-  SPIRIT_EN_FEC,                      /* fec */
-  SPIRIT_EN_WHITENING                 /* datawhite */
+  SPIRIT_SYNC_WORD,                   /* syncword       selected in board.h */
+  SPIRIT_PREAMBLE_LENGTH,             /* premblen       selected in board.h*/
+  SPIRIT_SYNC_LENGTH,                 /* synclen        selected in board.h */
+  PKT_LENGTH_VAR,                     /* fixvarlen      variable packet length */
+  PKT_LENGTH_WIDTH,                   /* pktlenwidth    from CONFIG_SPIRIT_PKTLEN */
+#ifdef CONFIG_SPIRIT_CRCDISABLE
+  PKT_NO_CRC,                         /* crcmode        none */
+#else
+  SPIRIT_CRC_MODE,                    /* crcmode        selected in board.h */
+#endif
+  SPIRIT_CONTROL_LENGTH,              /* ctrllen        selected in board.h */
+  S_ENABLE,                           /* txdestaddr     need to send address */
+  SPIRIT_EN_FEC,                      /* fec            selected in board.h */
+  SPIRIT_EN_WHITENING                 /* datawhite      selected in board.h */
  };
+
+/* GPIO Configuration.
+ *
+ * REVISIT:  Assumes interrupt is on GPIO3.  Might need to be configurable.
+ */
 
 static const struct spirit_gpio_init_s g_gpioinit =
 {
@@ -307,43 +318,45 @@ static const struct spirit_gpio_init_s g_gpioinit =
   SPIRIT_GPIO_DIG_OUT_IRQ             /* gpioio */
 };
 
+/* CSMA initialization */
+
 static const struct spirit_csma_init_s g_csma_init =
 {
-  1,                /* BU counter seed */
-  S_ENABLE,         /* enable persistent mode */
-  TBIT_TIME_64,     /* Tcca time */
-  TCCA_TIME_3,      /* Lcca length */
-  3,                /* max nr of backoffs (<8) */
-  8                 /* BU prescaler */
+  1,                                  /* BU counter seed */
+  S_ENABLE,                           /* enable persistent mode */
+  TBIT_TIME_64,                       /* Tcca time */
+  TCCA_TIME_3,                        /* Lcca length */
+  3,                                  /* max nr of backoffs (<8) */
+  8                                   /* BU prescaler */
 };
 
 #ifdef CONFIG_SPIRIT_PROMISICUOUS
 static struct pktbasic_addr_s g_addrinit =
 {
-  S_DISABLE,                         /* Disable filtering on node address */
-  SPIRIT_NODE_ADDR,                  /* Node address (Temporary, until assigned) */
-  S_DISABLE,                         /* Disable filtering on multicast address */
-  0xee,                              /* Multicast address */
-  S_DISABLE,                         /* Disable filtering on broadcast address */
-  0xff                               /* Broadcast address */
+  S_DISABLE,                          /* Disable filtering on node address */
+  SPIRIT_NODE_ADDR,                   /* Node address (Temporary, until assigned) */
+  S_DISABLE,                          /* Disable filtering on multicast address */
+  SPIRIT_MCAST_ADDRESS,               /* Multicast address */
+  S_DISABLE,                          /* Disable filtering on broadcast address */
+  SPIRIT_BCAST_ADDRESS                /* Broadcast address */
 };
 #else
 static struct pktbasic_addr_s g_addrinit =
 {
-  S_ENABLE,                          /* Enable filtering on node address */
-  SPIRIT_NODE_ADDR,                  /* Node address (Temporary, until assigned) */
+  S_ENABLE,                           /* Enable filtering on node address */
+  SPIRIT_NODE_ADDR,                   /* Node address (Temporary, until assigned) */
 #ifdef CONFIG_SPIRIT_MULTICAST
-  S_ENABLE,                          /* Enable filtering on multicast address */
+  S_ENABLE,                           /* Enable filtering on multicast address */
 #else
-  S_DISABLE,                         /* Disable filtering on multicast address */
+  S_DISABLE,                          /* Disable filtering on multicast address */
 #endif
-  0xee,                              /* Multicast address */
+  SPIRIT_MCAST_ADDRESS,               /* Multicast address */
 #ifdef CONFIG_SPIRIT_BROADCAST
-  S_ENABLE,                          /* Enable filtering on broadcast address */
+  S_ENABLE,                           /* Enable filtering on broadcast address */
 #else
-  S_DISABLE,                         /* Disable filtering on broadcast address */
+  S_DISABLE,                          /* Disable filtering on broadcast address */
 #endif
-  0xff                               /* Broadcast address */
+  SPIRIT_BCAST_ADDRESS                /* Broadcast address */
 };
 #endif
 
@@ -1922,9 +1935,22 @@ static int spirit_properties(FAR struct sixlowpan_driver_s *netdev,
                              FAR struct sixlowpan_properties_s *properties)
 {
   DEBUGASSERT(netdev != NULL && properties != NULL);
+  memset(properties, 0, sizeof(struct sixlowpan_properties_s));
+
+  /* General */
 
   properties->sp_addrlen = 1;                    /* Length of an address */
   properties->sp_pktlen  = CONFIG_SPIRIT_PKTLEN; /* Fixed packet length */
+
+  /* Multicast address */
+
+  properties->sp_mcast.nv_addrlen = 1;
+  properties->sp_mcast.nv_addr[0] = SPIRIT_MCAST_ADDRESS;
+
+  /* Broadcast address */
+
+  properties->sp_bcast.nv_addrlen = 1;
+  properties->sp_bcast.nv_addr[0] = SPIRIT_BCAST_ADDRESS;
   return OK;
 }
 

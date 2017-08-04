@@ -69,4 +69,10 @@ config SPIRIT_BROADCAST
 	---help---
 		Enables address filtering for the broadcast addess 0xff.
 
+config SPIRIT_CRCDISABLE
+	bool "Disable CRC"
+	default n
+	---help---
+		Disables CRC calculation and filtering.  Default is enabled.
+
 endif # SPIRIT_NETDEV

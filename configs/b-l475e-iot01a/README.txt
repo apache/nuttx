@@ -369,9 +369,10 @@ Configuration sub-directories
 
        2017-08-01:  Testing began.  The Spirit1 no configurations with no
          errors, but there are no tests yet in place to exercise it.
-
        2017-08-02:  The nettest, udp, telnet test programs were added.
-
+       2017-08-05:  Successfully exchanging packets, but there there are
+         issues with address filtering, CRC calculation, and data integrity
+         (like bad UDP checksums).  Lot's more to be done!
 
      Test Matrix:
        The following configurations have been tested:

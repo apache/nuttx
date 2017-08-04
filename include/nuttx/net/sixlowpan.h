@@ -355,6 +355,8 @@ struct sixlowpan_properties_s
 {
   uint8_t sp_addrlen;                 /* Length of an address */
   uint8_t sp_pktlen;                  /* Fixed packet/frame size (up to 255) */
+  struct netdev_varaddr_s sp_mcast;   /* Multicast address */
+  struct netdev_varaddr_s sp_bcast;   /* Broadcast address */
 };
 
 /* The device structure for radio network device differs from the standard

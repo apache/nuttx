@@ -44,6 +44,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/net/netdev.h>
 #include <nuttx/wireless/wireless.h>
 
 #ifdef CONFIG_WIRELESS_PKTRADIO
@@ -92,14 +93,18 @@
  ****************************************************************************/
 
 /* This describes an address used by the packet radio.  There is no standard
- * size for such an address.  Hence, it is represented simply as a arry of
+ * size for such an address.  Hence, it is represented simply as a array of
  * bytes.
+ *
+ * NOTE: This MUST be the same as the struct netdev_varaddr_s as defined in
+ * netdev.h.  It is duplicated here for no particularly good reason other
+ * than to maintain a clean PktRadio namespace.
  */
 
 struct pktradio_addr_s
 {
   uint8_t pa_addrlen;                   /* Length of the following address */
-  uint8_t pa_addr[CONFIG_PKTRADIO_ADDRLEN];
+  uint8_t pa_addr[RADIO_MAX_ADDRLEN];
 };
 
 /* Different packet radios may have different properties.  If there are
@@ -116,6 +121,8 @@ struct pktradio_properties_s
 {
   uint8_t pp_addrlen;                 /* Length of an address */
   uint8_t pp_pktlen;                  /* Fixed packet/frame size (up to 255) */
+  struct pktradio_addr_s pp_mcast;    /* Multicast address */
+  struct pktradio_addr_s pp_bcast;    /* Broadcast address */
 };
 
 /* This is the structure passed with all packet radio IOCTL commands.

@@ -198,9 +198,9 @@ int sixlowpan_meta_data(FAR struct sixlowpan_driver_s *radio,
     {
       /* Broadcast requires short address mode. */
 
-      meta->destaddr.mode  = IEEE802154_ADDRMODE_SHORT;
-      meta->destaddr.saddr[0] = 0;
-      meta->destaddr.saddr[1] = 0;
+      meta->destaddr.mode     = IEEE802154_ADDRMODE_SHORT;
+      meta->destaddr.saddr[0] = 0xff;
+      meta->destaddr.saddr[1] = 0xff;
     }
   else if (pktmeta->dextended != 0)
     {

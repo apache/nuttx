@@ -973,9 +973,32 @@ static int macnet_properties(FAR struct sixlowpan_driver_s *netdev,
                              FAR struct sixlowpan_properties_s *properties)
 {
   DEBUGASSERT(netdev != NULL && properties != NULL);
+  memset(properties, 0, sizeof(struct sixlowpan_properties_s));
+
+  /* General */
 
   properties->sp_addrlen = NET_6LOWPAN_ADDRSIZE;        /* Length of an address */
   properties->sp_pktlen  = CONFIG_NET_6LOWPAN_FRAMELEN; /* Fixed frame length */
+
+  /* Multicast address (uses broadcast address)
+   *
+   * Multicast address should really determined by the first 3 bits
+   * (RFC 4944):
+   *
+   * 0xxxxxxx xxxxxxxx: Unicast address
+   * 100xxxxx xxxxxxxx: Multicast address
+   * 101xxxxx xxxxxxxx: Reserved
+   * 110xxxxx xxxxxxxx: Reserved
+   * 111xxxxx xxxxxxxx: Reserved
+   */
+
+  properties->sp_mcast.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
+  memset(properties->sp_mcast.nv_addr, 0xff, RADIO_MAX_ADDRLEN);
+
+  /* Broadcast address */
+
+  properties->sp_bcast.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
+  memset(properties->sp_mcast.nv_addr, 0xff, RADIO_MAX_ADDRLEN);
   return OK;
 }
 

@@ -751,7 +751,7 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
           FAR struct sixlowpan_properties_s *props =
             (FAR struct sixlowpan_properties_s *)&cmddata->pifr_props;
 
-          ret = spirit_properties(radio, props);
+          ret = lo_properties(radio, props);
         }
         break;
 
@@ -932,9 +932,22 @@ static int lo_properties(FAR struct sixlowpan_driver_s *netdev,
                          FAR struct sixlowpan_properties_s *properties)
 {
   DEBUGASSERT(netdev != NULL && properties != NULL);
+  memset(properties, 0, sizeof(struct sixlowpan_properties_s));
+
+  /* General */
 
   properties->sp_addrlen = CONFIG_PKTRADIO_ADDRLEN;     /* Length of an address */
   properties->sp_pktlen  = CONFIG_NET_6LOWPAN_FRAMELEN; /* Fixed frame length */
+
+  /* Multicast address */
+
+  properties->sp_mcast.nv_addrlen = CONFIG_PKTRADIO_ADDRLEN;
+  memset(properties->sp_mcast.nv_addr, 0xee, RADIO_MAX_ADDRLEN);
+
+  /* Broadcast address */
+
+  properties->sp_bcast.nv_addrlen = CONFIG_PKTRADIO_ADDRLEN;
+  memset(properties->sp_mcast.nv_addr, 0xff, RADIO_MAX_ADDRLEN);
   return OK;
 }
 

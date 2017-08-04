@@ -326,7 +326,10 @@ static int sixlowpan_pktradio_metadata(FAR struct sixlowpan_driver_s *radio,
          radio->r_dev.d_mac.sixlowpan.nv_addr,
          radio->r_dev.d_mac.sixlowpan.nv_addrlen);
 
-  /* Set the destination address */
+  /* Set the destination address.
+   * REVISIT: Do wee need to check for multicast or broadcast addresses
+   * here?
+   */
 
   pktmeta->pm_dest.pa_addrlen = destmac->nv_addrlen;
   memcpy(pktmeta->pm_dest.pa_addr, destmac->nv_addr, destmac->nv_addrlen);
