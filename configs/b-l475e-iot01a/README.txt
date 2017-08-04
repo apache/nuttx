@@ -369,25 +369,44 @@ Configuration sub-directories
 
        2017-08-01:  Testing began.  The Spirit1 no configurations with no
          errors, but there are no tests yet in place to exercise it.
+
        2017-08-02:  The nettest, udp, telnet test programs were added.
-       2017-08-05:  Successfully exchanging packets, but there there are
+
+       2017-08-03:  Successfully exchanging packets, but there there are
          issues with address filtering, CRC calculation, and data integrity
          (like bad UDP checksums).  Lot's more to be done!
 
-     Test Matrix:
-       The following configurations have been tested:
+       2017-08-04:  Corrected the length width field being set to narrow.
+         The length 90 (0x5a) was being truncated to 26 (0x1a).  I thought
+         that this would correct the checksum problem, but it does not.
+         It is still necessary to run with CRC disabled.
 
-                                TEST DATE
-         COMPRESSION ADDRESSING UDP  TCP
-         ----------- ---------- ---- ----
-         hc06        short      ---  ---
-                     extended   ---  ---
-         hc1         short      ---  ---
-                     extended   ---  ---
-         ipv6        short      ---  ---
-                     extended   ---  ---
-         telnet      short      N/A  --- (hc06)
-                     extended   N/A  ---
+         Fixed some of the address filtering issues:  In Basic packets,
+         need to force the Spirit to send the destination address.  This
+         fixes address filtering.  But...
+
+         Converted to STack vs Basic packets.  We need to do this because
+         the Basic packets do not provide the source node address.  Now
+         correctly gets the source node address and uncompresses the source
+         IP address.
+
+         With these changes, the UDP test is now fully functional.  There are
+         issues with the TCP test.  This appears to be data loss:  The TCP
+         client sends 18 packets, but the server only receives 5.
+
+     Test Matrix:
+       The following configurations have been tested successfully (with
+       CRC disabled):
+
+                     TEST  DATE
+         COMPRESSION UDP   TCP   Telnet
+         ----------- ----- ----- ------
+         hc06        08/04 ---   ---
+                     ---   ---   ---
+         hc1         ---   ---   ---
+                     ---   ---   ---
+         ipv6        ---   ---   ---
+         ----------- ----- ----- ------
 
          Other configuration options have not been specifically addressed
          (such non-compressable ports, non-MAC based IPv6 addresses, etc.)
