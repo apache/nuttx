@@ -317,7 +317,7 @@ static const struct spirit_pktstack_llp_s g_llp_init =
 {
   S_ENABLE,                           /* autoack */
   S_DISABLE,                          /* piggyback */
-  PKT_N_RETX_3                        /* maxretx */
+  PKT_N_RETX_10                       /* maxretx */
 };
 
 /* GPIO Configuration.
@@ -968,9 +968,10 @@ static void spirit_interrupt_work(FAR void *arg)
       spirit_schedule_transmit_work(priv);
     }
 
-  if (irqstatus.IRQ_TX_FIFO_ERROR != 0)
+  if (irqstatus.IRQ_TX_FIFO_ERROR != 0 ||
+      irqstatus.IRQ_MAX_RE_TX_REACH != 0)
     {
-      wlwarn("WARNING: Tx FIFO Error\n");
+      wlwarn("WARNING: Tx FIFO Error/Max retries\n");
       DEBUGVERIFY(spirit_command(spirit, COMMAND_FLUSHTXFIFO));
 
       priv->state = DRIVER_STATE_IDLE;
@@ -1113,7 +1114,7 @@ static void spirit_interrupt_work(FAR void *arg)
                   pktmeta->pm_dest.pa_addr[0] =
                     spirit_pktcommon_get_nodeaddress(spirit);
 
-                  wlinfo("RX srcaddr=%02 destaddr=%02\n",
+                  wlinfo("RX srcaddr=%02x destaddr=%02x\n",
                          pktmeta->pm_src.pa_addr[0],
                          pktmeta->pm_dest.pa_addr[0]);
 
@@ -1121,13 +1122,17 @@ static void spirit_interrupt_work(FAR void *arg)
                    * completed RX transfers.
                    */
 
-                  pktmeta->pm_flink           = priv->rxtail;
-                  priv->rxtail                = pktmeta;
-
-                  if (priv->rxhead == NULL)
+                  pktmeta->pm_flink          = NULL;
+                  if (priv->rxtail == NULL)
                     {
-                      priv->rxhead            = pktmeta;
+                      priv->rxhead           = pktmeta;
                     }
+                  else
+                    {
+                      priv->rxtail->pm_flink = pktmeta;
+                    }
+
+                  priv->rxtail               = pktmeta;
 
                   /* Forward the packet to the network.  This must be done
                    * on the LP work queue with the network locked.
@@ -1926,15 +1931,19 @@ static int spirit_req_data(FAR struct sixlowpan_driver_s *netdev,
               sizeof(struct pktradio_addr_s));
        pktmeta->pm_iob  = iob;
 
-      /* Add the IOB container to the queue of outgoing IOBs. */
+      /* Add the IOB container to tail of the queue of outgoing IOBs. */
 
-      pktmeta->pm_flink = priv->txtail;
-      priv->txtail      = pktmeta;
-
-      if (priv->txhead == NULL)
+      pktmeta->pm_flink          = NULL;
+      if (priv->txtail == NULL)
         {
-          priv->txhead  = pktmeta;
+          priv->txhead           = pktmeta;
         }
+      else
+        {
+          priv->txtail->pm_flink = pktmeta;
+        }
+
+      priv->txtail               = pktmeta;
 
       /* If there are no transmissions or receptions in progress, then start
        * tranmission of the frame in the IOB at the head of the IOB queue.
@@ -2139,6 +2148,13 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
   if (ret < 0)
     {
       wlerr("ERROR: Enable RX_DATA_DISC failed: %d\n", ret);
+      return ret;
+    }
+
+  ret = spirit_irq_enable(spirit, MAX_RE_TX_REACH, S_ENABLE);
+  if (ret < 0)
+    {
+      wlerr("ERROR: Enable MAX_RE_TX_REACH failed: %d\n", ret);
       return ret;
     }
 

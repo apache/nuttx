@@ -376,27 +376,21 @@ Configuration sub-directories
          issues with address filtering, CRC calculation, and data integrity
          (like bad UDP checksums).  Lot's more to be done!
 
-       2017-08-04:  Corrected the length width field being set to narrow.
-         The length 90 (0x5a) was being truncated to 26 (0x1a).  I thought
-         that this would correct the checksum problem, but it does not.
-         It is still necessary to run with CRC disabled.
-
-         Fixed some of the address filtering issues:  In Basic packets,
-         need to force the Spirit to send the destination address.  This
-         fixes address filtering.  But...
+       2017-08-04:  Fixed some of the address filtering issues:  In Basic
+         packets, need to force the Spirit to send the destination address.
+         This fixes address filtering.  But...
 
          Converted to STack vs Basic packets.  We need to do this because
          the Basic packets do not provide the source node address.  Now
          correctly gets the source node address and uncompresses the source
          IP address.
 
-         With these changes, the UDP test is now fully functional.
+         In addition, to avoid packet loss due to data overrun, I enabled
+         the AutoAck, TX retries, the RX timeout options.
 
-         There are issues with the TCP test.  This appears to be data loss:
-         The TCP client sends 18 packets, but the server only receives 5.  I
-         assume that this because of data overrun.  I enabled the AutoAck,
-         TX retries, the RX timeout options.  This seems to reduce the packet
-         loss but the TCP test still does not fun perfectly.
+         With these changes (along with other, significant bugfixes), both
+         the UDP test is now fully functional.  CRC filtering still must be
+         disabled.
 
      Test Matrix:
        The following configurations have been tested successfully (with
@@ -405,10 +399,8 @@ Configuration sub-directories
                      TEST  DATE
          COMPRESSION UDP   TCP   Telnet
          ----------- ----- ----- ------
-         hc06        08/04 ---   ---
-                     ---   ---   ---
+         hc06        08/04 08/04 ---    (CRC disabled)
          hc1         ---   ---   ---
-                     ---   ---   ---
          ipv6        ---   ---   ---
          ----------- ----- ----- ------
 
