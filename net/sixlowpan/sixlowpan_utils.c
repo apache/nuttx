@@ -167,82 +167,6 @@ static void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *eadd
 #endif /* !CONFIG_NET_STARPOINT */
 
 /****************************************************************************
- * Name: sixlowpan_coord_eaddr
- *
- * Description:
- *   Get the extended address of the PAN coordinator.
- *
- * Input parameters:
- *   radio - Reference to a radio network driver state instance.
- *   eaddr - The location in which to return the extended address.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_NET_STARPOINT) && defined(CONFIG_NET_6LOWPAN_EXTENDEDADDR)
-static int sixlowpan_coord_eaddr(FAR struct sixlowpan_driver_s *radio,
-                                 FAR struct netdev_varaddr_s *eaddr)
-{
-  FAR struct net_driver_s *dev = &radio->r_dev;
-  struct ieee802154_netmac_s arg;
-  int ret;
-
-  memcpy(arg.ifr_name, radio->r_dev.d_ifname, IFNAMSIZ);
-  arg.u.getreq.attr = IEEE802154_ATTR_MAC_COORD_EADDR ;
-  ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
-                     (unsigned long)((uintptr_t)&arg));
-  if (ret < 0)
-    {
-      nerr("ERROR: MAC802154IOC_MLME_GET_REQUEST failed: %d\n", ret);
-      return ret;
-    }
-
-  IEEE802154_EADDRCOPY(eaddr->u8, arg.u.getreq.attrval.mac.eaddr);
-  return OK;
-}
-#endif
-
-/****************************************************************************
- * Name: sixlowpan_coord_saddr
- *
- * Description:
- *   Get the short address of the PAN coordinator.
- *
- * Input parameters:
- *   radio - Reference to a radio network driver state instance.
- *   saddr - The location in which to return the short address.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_NET_STARPOINT) && !defined(CONFIG_NET_6LOWPAN_EXTENDEDADDR)
-static int sixlowpan_coord_saddr(FAR struct sixlowpan_driver_s *radio,
-                                 FAR struct netdev_varaddr_s *saddr)
-{
-  FAR struct net_driver_s *dev = &radio->r_dev;
-  struct ieee802154_netmac_s arg;
-  int ret;
-
-  memcpy(arg.ifr_name, radio->r_dev.d_ifname, IFNAMSIZ);
-  arg.u.getreq.attr = IEEE802154_ATTR_MAC_COORD_SADDR ;
-  ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
-                     (unsigned long)((uintptr_t)&arg));
-  if (ret < 0)
-    {
-      nerr("ERROR: MAC802154IOC_MLME_GET_REQUEST failed: %d\n", ret);
-      return ret;
-    }
-
-  IEEE802154_SADDRCOPY(saddr->nv_addr, arg.u.getreq.attrval.mac.saddr);
-  return OK;
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -272,22 +196,23 @@ int sixlowpan_destaddrfromip(FAR struct sixlowpan_driver_s *radio,
                              FAR struct netdev_varaddr_s *destaddr)
 {
 #ifdef  CONFIG_NET_STARPOINT
+  struct sixlowpan_properties_s properties;
   int ret;
 
-  /* If this node is a "point" in a star topology, then the destination
-   * MAC address is the address of the hub/PAN coordinator.
+  /* Only the radio driver knows the correct address of the hub.  For IEEE
+   * 802.15.4 this will be the address of the PAN coordinator.  For other
+   * radios, this may be some configured, "well-known" address.
    */
 
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  ret = sixlowpan_coord_eaddr(radio, &destaddr->nv_addr);
-  destaddr->nv_addrlen = NET_6LOWPAN_EADDRSIZE;
-#else
-  memset(destaddr, 0, sizeof(struct netdev_varaddr_s));
-  ret = sixlowpan_coord_saddr(radio, &destaddr->nv_addr);
-  destaddr->nv_addrlen = NET_6LOWPAN_SADDRSIZE;
-#endif
+  DEBUGASSERT(radio->r_properties != NULL);
+  ret = radio->r_properties(radio, &properties);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-  return ret;
+  memcpy(destaddr, &properaties.sp_hubnode, sizeof(truct netdev_varaddr_s));
+  return OK;
 
 #else /* CONFIG_NET_STARPOINT */
 

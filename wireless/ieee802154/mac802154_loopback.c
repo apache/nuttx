@@ -935,6 +935,11 @@ static int lo_properties(FAR struct sixlowpan_driver_s *netdev,
 
   properties->sp_bcast.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
   memset(properties->sp_mcast.nv_addr, 0xff, RADIO_MAX_ADDRLEN);
+
+#ifdef CONFIG_NET_STARPOINT
+  /* Star hub node address -- Not supported*/
+#endif
+
   return OK;
 }
 

@@ -948,6 +948,14 @@ static int lo_properties(FAR struct sixlowpan_driver_s *netdev,
 
   properties->sp_bcast.nv_addrlen = CONFIG_PKTRADIO_ADDRLEN;
   memset(properties->sp_mcast.nv_addr, 0xff, RADIO_MAX_ADDRLEN);
+
+#ifdef CONFIG_NET_STARPOINT
+  /* Star hub node address */
+
+  properties->sp_hubnode.nv_addrlen = 1;
+  properties->sp_hubnode.nv_addr[0] = CONFIG_SPIRIT_HUBNODE;
+#endif
+
   return OK;
 }
 

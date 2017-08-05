@@ -456,7 +456,6 @@ Configuration sub-directories
        steps with E1 and E2 representing the two star endpoints and C
        representing the star hub:
 
-         C:  nsh> ifconfig wpan0 hw 34 <-- Sets hub node address
          C:  nsh> ifup wpan0           <-- Brings up the network on the hub
          C:  nsh> telnetd              <-- Starts the Telnet daemon on the hub
          C:  nsh> ifconfig             <-- To get the IP address of the hub
@@ -471,7 +470,11 @@ Configuration sub-directories
          E2: nsh> telnetd              <-- Starts the Telnet daemon on the E2 node
          E2: nsh> ifconfig             <-- To get the IP address of E2 endpoint
 
-       The modified usage of the TCP test is show below:
+       It is not necessary to set the hub node address, that will automatically
+       be set to CONFIG_SPIRIT_HUBNODE when the hub boots.  CONFIG_SPIRIT_HUBNODE
+       is the "well-known" address of the star hub.
+
+       The modified usage of the TCP test is then show below:
 
          E1: nsh> tcpserver &
          E2: nsh> tcpclient <server-ip> &

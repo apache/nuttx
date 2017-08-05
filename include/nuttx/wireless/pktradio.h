@@ -123,6 +123,9 @@ struct pktradio_properties_s
   uint8_t pp_pktlen;                  /* Fixed packet/frame size (up to 255) */
   struct pktradio_addr_s pp_mcast;    /* Multicast address */
   struct pktradio_addr_s pp_bcast;    /* Broadcast address */
+#ifdef CONFIG_NET_STARPOINT
+  struct pktradio_addr_s pp_hubnode;  /* Address of the hub node in a star */
+#endif
 };
 
 /* This is the structure passed with all packet radio IOCTL commands.

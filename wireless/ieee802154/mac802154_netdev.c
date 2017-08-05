@@ -164,6 +164,16 @@ static int  macnet_txpoll_callback(FAR struct net_driver_s *dev);
 static void macnet_txpoll_work(FAR void *arg);
 static void macnet_txpoll_expiry(int argc, wdparm_t arg, ...);
 
+/* IOCTL support */
+
+#ifdef CONFIG_NET_STARPOINT
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+static int macnet_coord_eaddr(FAR struct sixlowpan_driver_s *radio,
+                              FAR struct uint8_t *eaddr);
+#else
+static int macnet_coord_saddr(FAR struct sixlowpan_driver_s *radio,
+                              FAR struct uint8_t *saddr)
+
 /* NuttX callback functions */
 
 static int  macnet_ifup(FAR struct net_driver_s *dev);
@@ -211,7 +221,7 @@ static int macnet_properties(FAR struct sixlowpan_driver_s *netdev,
 
 static int macnet_advertise(FAR struct net_driver_s *dev)
 {
-  struct ieee802154_netmac_s arg;
+  struct ieee802154_macarg_u arg;
   int ret;
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
@@ -220,7 +230,7 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
   /* Get the eaddr from the MAC */
 
   memcpy(arg.ifr_name, dev->d_ifname, IFNAMSIZ);
-  arg.u.getreq.attr = IEEE802154_ATTR_MAC_EADDR;
+  arg.getreq.attr = IEEE802154_ATTR_MAC_EADDR;
   ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
                      (unsigned long)((uintptr_t)&arg));
   if (ret < 0)
@@ -232,7 +242,7 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
     {
       /* Set the MAC address as the eaddr */
 
-      eaddr = arg.u.getreq.attrval.mac.eaddr;
+      eaddr = arg.getreq.attrval.mac.eaddr;
       IEEE802154_EADDRCOPY(dev->d_mac.sixlowpan.nv_addr, eaddr);
       dev->d_mac.sixlowpan.nv_addrlen = NET_6LOWPAN_EADDRSIZE;
 
@@ -256,7 +266,7 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
   /* Get the saddr from the MAC */
 
   memcpy(arg.ifr_name, dev->d_ifname, IFNAMSIZ);
-  arg.u.getreq.attr = IEEE802154_ATTR_MAC_SADDR;
+  arg.getreq.attr = IEEE802154_ATTR_MAC_SADDR;
   ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
                      (unsigned long)((uintptr_t)&arg));
   if (ret < 0)
@@ -268,7 +278,7 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
     {
       /* Set the MAC address as the saddr */
 
-      saddr = arg.u.getreq.attrval.mac.saddr;
+      saddr = arg.getreq.attrval.mac.saddr;
       IEEE802154_SADDRCOPY(dev->d_mac.sixlowpan.nv_addr, saddr);
       dev->d_mac.sixlowpan.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
 
@@ -537,6 +547,78 @@ static void macnet_txpoll_expiry(int argc, wdparm_t arg, ...)
 
   work_queue(WPANWORK, &priv->md_pollwork, macnet_txpoll_work, priv, 0);
 }
+
+/****************************************************************************
+ * Name: macnet_coord_eaddr
+ *
+ * Description:
+ *   Get the extended address of the PAN coordinator.
+ *
+ * Input parameters:
+ *   radio - Reference to a radio network driver state instance.
+ *   eaddr - The location in which to return the extended address.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_STARPOINT) && defined(CONFIG_NET_6LOWPAN_EXTENDEDADDR)
+static int macnet_coord_eaddr(FAR struct sixlowpan_driver_s *radio,
+                              FAR struct uint8_t *eaddr)
+{
+  struct ieee802154_macarg_u arg;
+  int ret;
+
+  arg.getreq.attr = IEEE802154_ATTR_MAC_COORD_EADDR ;
+  ret = mac802154_ioctl(priv->md_mac, MAC802154IOC_MLME_GET_REQUEST,
+                        (unsigned long)((uintptr_t)&arg));
+  if (ret < 0)
+    {
+      nerr("ERROR: MAC802154IOC_MLME_GET_REQUEST failed: %d\n", ret);
+      return ret;
+    }
+
+  IEEE802154_EADDRCOPY(eaddr, arg.getreq.attrval.mac.eaddr);
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: macnet_coord_saddr
+ *
+ * Description:
+ *   Get the short address of the PAN coordinator.
+ *
+ * Input parameters:
+ *   radio - Reference to a radio network driver state instance.
+ *   saddr - The location in which to return the short address.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_STARPOINT) && !defined(CONFIG_NET_6LOWPAN_EXTENDEDADDR)
+static int macnet_coord_saddr(FAR struct sixlowpan_driver_s *radio,
+                              FAR struct uint8_t *saddr)
+{
+  struct ieee802154_macarg_u arg;
+  int ret;
+
+  arg.getreq.attr = IEEE802154_ATTR_MAC_COORD_SADDR ;
+  ret = mac802154_ioctl(priv->md_mac, MAC802154IOC_MLME_GET_REQUEST,
+                        (unsigned long)((uintptr_t)&arg));
+  if (ret < 0)
+    {
+      nerr("ERROR: MAC802154IOC_MLME_GET_REQUEST failed: %d\n", ret);
+      return ret;
+    }
+
+  IEEE802154_SADDRCOPY(saddr, arg.getreq.attrval.mac.saddr);
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: macnet_ifup
@@ -820,7 +902,6 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
         {
           unsigned long macarg = (unsigned int)((uintptr_t)&netmac->u);
           ret = mac802154_ioctl(priv->md_mac, cmd, macarg);
-
         }
     }
 
@@ -999,6 +1080,23 @@ static int macnet_properties(FAR struct sixlowpan_driver_s *netdev,
 
   properties->sp_bcast.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
   memset(properties->sp_mcast.nv_addr, 0xff, RADIO_MAX_ADDRLEN);
+
+#ifdef CONFIG_NET_STARPOINT
+  /* Star hub node address.
+   *
+   * If this node is a "point" in a star topology, then the hub node
+   * MAC address is the address of the hub/PAN coordinator.
+   */
+
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+  (void)macnet_coord_eaddr(radio, properties->sp_hubnode.nv_addr);
+  properties->sp_hubnode.nv_addrlen = NET_6LOWPAN_EADDRSIZE;
+#else
+  (void)macnet_coord_saddr(radio, &properties->sp_hubnode.nv_addr);
+  properties->sp_hubnode.>nv_addrlen = NET_6LOWPAN_SADDRSIZE;
+#endif
+#endif
+
   return OK;
 }
 

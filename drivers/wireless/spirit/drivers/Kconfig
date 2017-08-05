@@ -75,4 +75,12 @@ config SPIRIT_CRCDISABLE
 	---help---
 		Disables CRC calculation and filtering.  Default is enabled.
 
+config SPIRIT_HUBNODE
+	hex "Address of hub node"
+	default 0x34
+	depends on NET_STAR
+	---help---
+		Provides the "well known" address of the hub node in the
+		star configuration.
+
 endif # SPIRIT_NETDEV

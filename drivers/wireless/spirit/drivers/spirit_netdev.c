@@ -148,7 +148,11 @@
 
 /* Default node address */
 
-#define SPIRIT_NODE_ADDR    0x34
+#if defined(CONFIG_NET_STARHUB) && defined(CONFIG_SPIRIT_HUBNODE)
+#  define SPIRIT_NODE_ADDR  CONFIG_SPIRIT_HUBNODE
+#else
+#  define SPIRIT_NODE_ADDR  0x34
+#endif
 
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
@@ -1995,6 +1999,14 @@ static int spirit_properties(FAR struct sixlowpan_driver_s *netdev,
 
   properties->sp_bcast.nv_addrlen = 1;
   properties->sp_bcast.nv_addr[0] = SPIRIT_BCAST_ADDRESS;
+
+#ifdef CONFIG_NET_STARPOINT
+  /* Star hub node address */
+
+  properties->sp_hubnode.nv_addrlen = 1;
+  properties->sp_hubnode.nv_addr[0] = CONFIG_SPIRIT_HUBNODE;
+#endif
+
   return OK;
 }
 
