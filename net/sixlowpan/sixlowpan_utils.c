@@ -124,8 +124,6 @@
 #ifdef HAVE_BYTEADDR
 static void sixlowpan_baddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *baddr)
 {
-  DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
-
   /* Big-endian uint16_t to byte order */
 
   baddr[0] = ipaddr[7] >> 8 ^ 0x02;
@@ -135,8 +133,6 @@ static void sixlowpan_baddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *badd
 #ifdef HAVE_SADDR
 static void sixlowpan_saddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *saddr)
 {
-  DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
-
   /* Big-endian uint16_t to byte order */
 
   saddr[0]  = ipaddr[7] >> 8;
@@ -181,7 +177,7 @@ static void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *eadd
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  0000 00ff fe00 xx00 1-byte short address IEEE 48-bit MAC
+ *    xxxx 0000 0000 0000  0000 00ff fe00 xx00 1-byte short address IEEE 48-bit MAC
  *    xxxx 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
  *    xxxx 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
  *
@@ -218,6 +214,16 @@ int sixlowpan_destaddrfromip(FAR struct sixlowpan_driver_s *radio,
 
    /* Otherwise, the destination MAC address is encoded in the IP address */
 
+   /* Check for compressible link-local address.
+    * REVISIT:  This should not restrict us to link-local addresses.
+    */
+
+  if (ipaddr[0] != HTONS(0xfe80) || ipaddr[1] != 0 ||
+      ipaddr[2] != 0             || ipaddr[3] != 0)
+    {
+      return -EADDRNOTAVAIL;
+    }
+
 #ifdef CONFIG_WIRELESS_PKTRADIO
   /* If this is a packet radio, then we cannot know the correct size of the
    * radio's MAC address without asking.  The setting CONFIG_PKTRADIO_ADDRLEN
@@ -241,8 +247,6 @@ int sixlowpan_destaddrfromip(FAR struct sixlowpan_driver_s *radio,
         {
           return ret;
         }
-
-      DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
 
 #ifdef HAVE_BYTEADDR
       if (properties.sp_addrlen == 1 &&

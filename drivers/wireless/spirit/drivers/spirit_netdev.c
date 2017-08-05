@@ -959,9 +959,22 @@ static void spirit_interrupt_work(FAR void *arg)
   if (irqstatus.IRQ_RX_FIFO_ERROR != 0)
     {
       wlwarn("WARNING: Rx FIFO Error\n");
-      DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
 
-      priv->state = DRIVER_STATE_IDLE;
+      /* Discard RX data */
+
+      DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
+      irqstatus.IRQ_RX_DATA_READY = 0;
+      irqstatus.IRQ_VALID_SYNC    = 0;
+
+      /* Revert the receiving state */
+
+      if (priv->state == DRIVER_STATE_RECEIVING)
+        {
+          priv->state = DRIVER_STATE_IDLE;
+        }
+
+      /* Update error statistics */
+
       NETDEV_RXERRORS(&priv->radio.r_dev);
       NETDEV_ERRORS(&priv->radio.r_dev);
 
@@ -976,9 +989,21 @@ static void spirit_interrupt_work(FAR void *arg)
       irqstatus.IRQ_MAX_RE_TX_REACH != 0)
     {
       wlwarn("WARNING: Tx FIFO Error/Max retries\n");
-      DEBUGVERIFY(spirit_command(spirit, COMMAND_FLUSHTXFIFO));
 
-      priv->state = DRIVER_STATE_IDLE;
+      /* Discard TX data */
+
+      DEBUGVERIFY(spirit_command(spirit, COMMAND_FLUSHTXFIFO));
+      irqstatus.IRQ_TX_DATA_SENT = 0;
+
+      /* Revert the sending state */
+
+      if (priv->state == DRIVER_STATE_SENDING)
+        {
+          priv->state = DRIVER_STATE_IDLE;
+        }
+
+      /* Update error statistics */
+
       NETDEV_TXERRORS(&priv->radio.r_dev);
       NETDEV_ERRORS(&priv->radio.r_dev);
 
@@ -1031,8 +1056,16 @@ static void spirit_interrupt_work(FAR void *arg)
   if (irqstatus.IRQ_VALID_SYNC != 0)
     {
       wlinfo("Valid sync\n");
-      DEBUGASSERT(priv->state == DRIVER_STATE_IDLE);
-      priv->state = DRIVER_STATE_RECEIVING;
+
+      /* I have seen multiple Valid Sync interrupts following an RX error
+       * condition.
+       */
+
+      if (priv->state != DRIVER_STATE_RECEIVING)
+        {
+          DEBUGASSERT(priv->state == DRIVER_STATE_IDLE);
+          priv->state = DRIVER_STATE_RECEIVING;
+        }
     }
 
   /* The IRQ_RX_DATA_READY notifies that a new packet has been received */

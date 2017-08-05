@@ -686,6 +686,9 @@ Configurations
         some additional fixes for byte ordering in 16-bit and 64-bit
         compressed IPv6 addresses, then all tests are working as expected:
         TCP, UDP, Telnet.
+      2017-08-5:  It looks like I have lost one of my Clicker2-STM32 boards.
+        This means that I will not be able to do any regression testing as
+        changes are made to the radio interfaces and 6LoWPAN :(
 
   nsh:
 
