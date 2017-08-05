@@ -380,8 +380,8 @@ Configurations
 
     NOTES:
 
-    1. You must must have two clicker2-stm32 boards each with an MRF24J40
-       click board in order to run these tests.
+    1. You must have two clicker2-stm32 boards each with an MRF24J40 click
+       board in order to run these tests.
 
     2. This configuration differs from the mrf24j40-mac configuration in
        that this configuration, like the usbnsh configuration, uses a USB
@@ -593,8 +593,8 @@ Configurations
     star topology.  Both configurations derive from the mrf24j40-6lowpan
     configuration and most of the notes there apply here as well.
 
-    1. You must must have three clicker2-stm32 boards each with an MRF24J40
-       click board in order to run these tests:  One that servers as the
+    1. You must have three clicker2-stm32 boards each with an MRF24J40
+       click board in order to run these tests:  One that serves as the
        star hub and at least two star endpoints.
 
     2. The star point configuration differs from the primarily in the
@@ -662,7 +662,7 @@ Configurations
 
          C: nsh> telnet <server-ip> <-- Runs the Telnet client
 
-       Where <server-ip> is the IP address of either the E1 or I2 endpoints.
+       Where <server-ip> is the IP address of either the E1 or E2 endpoints.
 
     STATUS:
       2017-06-29:  Configurations added.  Initial testing indicates that
@@ -684,7 +684,7 @@ Configurations
         This required a change to assure that the destination IPv6 address
         is not elided in the case of the star endpoint configuration.  After
         some additional fixes for byte ordering in 16-bit and 64-bit
-        compressed IPv6 addresses, the all tests are working as expectedd:
+        compressed IPv6 addresses, then all tests are working as expected:
         TCP, UDP, Telnet.
 
   nsh:

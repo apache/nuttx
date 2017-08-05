@@ -1822,7 +1822,7 @@ static int spirit_ioctl(FAR struct net_driver_s *dev, int cmd,
  *   Calculate the MAC header length given the frame meta-data.
  *
  * Input parameters:
- *   netdev    - The networkd device that will mediate the MAC interface
+ *   netdev    - The network device that will mediate the MAC interface
  *   meta      - Obfuscated metadata structure needed to create the radio
  *               MAC header
  *
@@ -1854,7 +1854,7 @@ static int spirit_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
  *   6LoWPAN radio packets.
  *
  * Input parameters:
- *   netdev    - The networkd device that will mediate the MAC interface
+ *   netdev    - The network device that will mediate the MAC interface
  *   meta      - Obfuscated metadata structure needed to create the radio
  *               MAC header
  *   framelist - Head of a list of frames to be transferred.

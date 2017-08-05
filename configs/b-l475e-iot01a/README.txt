@@ -392,6 +392,12 @@ Configuration sub-directories
          the UDP test is now fully functional.  CRC filtering still must be
          disabled.
 
+       2017-08-05:  Add the Telnet client problem.  Verified HC06 tests with
+         no debug output; verified Telnet seessions between two spirit nodes.
+
+         At this point everything seems functional, but somewhat reliable.
+         Sometimes things seem to initialize in a bad state.
+
      Test Matrix:
        The following configurations have been tested successfully (with
        CRC disabled):
@@ -399,10 +405,90 @@ Configuration sub-directories
                      TEST  DATE
          COMPRESSION UDP   TCP   Telnet
          ----------- ----- ----- ------
-         hc06        08/04 08/04 ---    (CRC disabled)
+         hc06        08/04 08/04 08/05   (CRC disabled)
          hc1         ---   ---   ---
          ipv6        ---   ---   ---
          ----------- ----- ----- ------
 
          Other configuration options have not been specifically addressed
          (such non-compressable ports, non-MAC based IPv6 addresses, etc.)
+
+  spirit-starhub and spirit-starpoint
+
+    These two configurations implement hub and and star endpoint in a
+    star topology.  Both configurations derive from the spirit-6lowpan
+    configuration and most of the notes there apply here as well.
+
+    1. You must must have three b-l475e-iot01a boards in order to run
+       these tests:  One that serves as the star hub and at least two
+       star endpoints.
+
+    2. The star point configuration differs from the primarily in the
+       spirit-6lowpan in following is also set:
+
+         CONFIG_NET_STAR=y
+         CONFIG_NET_STARPOINT=y
+
+       The CONFIG_NET_STARPOINT selection informs the endpoint that it
+       must send all frames to the hub of the star, rather than directly
+       to the recipient.
+
+       The star hub configuration, on the other hand, differs from the
+       spirit-6lowpan in these fundamental ways:
+
+         CONFIG_NET_STAR=y
+         CONFIG_NET_STARHUB=y
+         CONFIG_NET_IPFORWARD=y
+
+       The CONFIG_NET_IPFORWARD selection informs the hub that if it
+       receives any packets that are not destined for the hub, it should
+       forward those packets appropriately.
+
+    3. TCP and UDP Tests:  The same TCP and UDP tests as described for
+       the spirit-6lowpan coniguration are supported on the star
+       endpoints, but NOT on the star hub.  Therefore, all network testing
+       is between endpoints with the hub acting, well, only like a hub.
+
+       Each node in the configuration must be manually initialized.
+       Ideally, this would be automatically initialized with software logic
+       and configuration data in non-volatilbe memory.  The the procedure
+       is manual in this example.  These are the basic initialization
+       steps with E1 and E2 representing the two star endpoints and C
+       representing the star hub:
+
+         C:  nsh> ifconfig wpan0 hw 34 <-- Sets hub node address
+         C:  nsh> ifup wpan0           <-- Brings up the network on the hub
+         C:  nsh> telnetd              <-- Starts the Telnet daemon on the hub
+         C:  nsh> ifconfig             <-- To get the IP address of the hub
+
+         E1: nsh> ifconfig wpan0 hw 37 <-- Sets E1 endpoint node address
+         E1: nsh> ifup wpan0           <-- Brings up the network on the E1 node
+         E1: nsh> telnetd              <-- Starts the Telnet daemon on the E1 node
+         E1: nsh> ifconfig             <-- To get the IP address of E1 endpoint
+
+         E2: nsh> ifconfig wpan0 hw 38 <-- Sets E2 endpoint node address
+         E2: nsh> ifup wpan0           <-- Brings up the network on the E2 node
+         E2: nsh> telnetd              <-- Starts the Telnet daemon on the E2 node
+         E2: nsh> ifconfig             <-- To get the IP address of E2 endpoint
+
+       The modified usage of the TCP test is show below:
+
+         E1: nsh> tcpserver &
+         E2: nsh> tcpclient <server-ip> &
+
+       Where <server-ip> is the IP address of the E1 endpoint.
+
+       Similarly for the UDP test:
+
+         E1: nsh> udpserver &
+         E2: nsh> udpclient <server-ip> &
+
+       Telenet sessions may be initiated from the any node to any other node:
+
+         XX: nsh> telnet <server-ip>   <-- Runs the Telnet client on any node XX
+
+       Where <server-ip> is the IP address of either the E1 or E2 endpoints
+       or of the star hub.
+
+    STATUS:
+      2017-08-05:  Configurations added.
