@@ -211,7 +211,7 @@ int sixlowpan_destaddrfromip(FAR struct sixlowpan_driver_s *radio,
       return ret;
     }
 
-  memcpy(destaddr, &properaties.sp_hubnode, sizeof(truct netdev_varaddr_s));
+  memcpy(destaddr, &properties.sp_hubnode, sizeof(struct netdev_varaddr_s));
   return OK;
 
 #else /* CONFIG_NET_STARPOINT */
