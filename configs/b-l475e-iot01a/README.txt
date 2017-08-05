@@ -494,4 +494,7 @@ Configuration sub-directories
        or of the star hub.
 
     STATUS:
-      2017-08-05:  Configurations added.
+      2017-08-05:  Configurations added.  Early testing suggests that there is
+        a problem when packets are received from multiple sources at high rates:
+        New incoming packets appear to cause RX FIFO errors and the driver does
+        not recover well.
