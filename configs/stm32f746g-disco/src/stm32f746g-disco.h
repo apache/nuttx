@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * configs/stm32f746g-disco/src/stm32f746g-disco.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -121,6 +121,18 @@
 int stm32_bringup(void);
 
 /****************************************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ****************************************************************************************************/
+
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
+#endif
+
+/****************************************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:
@@ -143,5 +155,5 @@ void arch_sporadic_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_STM32F746G_DISCO_SRC_STM32F746G_DISCO_H */
 
+#endif /* __CONFIGS_STM32F746G_DISCO_SRC_STM32F746G_DISCO_H */

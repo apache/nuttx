@@ -52,6 +52,10 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinitialize.c
 endif
 
+ifeq ($(CONFIG_ADC),y)
+CSRCS += stm32_adc.c
+endif
+
 ifeq ($(CONFIG_ARCH_FPU),y)
 CSRCS += stm32_ostest.c
 endif
