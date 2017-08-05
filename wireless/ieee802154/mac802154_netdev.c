@@ -122,6 +122,7 @@ struct macnet_driver_s
   /* This holds the information visible to the NuttX network */
 
   struct sixlowpan_driver_s md_dev;  /* Interface understood by the network */
+                                     /* Cast compatible with struct macnet_driver_s */
 
   /* For internal use by this driver */
 
@@ -173,6 +174,8 @@ static int macnet_coord_eaddr(FAR struct sixlowpan_driver_s *radio,
 #else
 static int macnet_coord_saddr(FAR struct sixlowpan_driver_s *radio,
                               FAR struct uint8_t *saddr)
+#endif
+#endif
 
 /* NuttX callback functions */
 
@@ -221,18 +224,21 @@ static int macnet_properties(FAR struct sixlowpan_driver_s *netdev,
 
 static int macnet_advertise(FAR struct net_driver_s *dev)
 {
-  struct ieee802154_macarg_u arg;
+  FAR struct macnet_driver_s *priv;
+  union ieee802154_macarg_u arg;
   int ret;
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
   uint8_t *eaddr;
 
+  DEBUGASSERT(dev != NULL && dev->d_private != NULL);
+  priv = (FAR struct macnet_driver_s *)dev->d_private;
+
   /* Get the eaddr from the MAC */
 
-  memcpy(arg.ifr_name, dev->d_ifname, IFNAMSIZ);
   arg.getreq.attr = IEEE802154_ATTR_MAC_EADDR;
-  ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
-                     (unsigned long)((uintptr_t)&arg));
+  ret = mac802154_ioctl(priv->md_mac, MAC802154IOC_MLME_GET_REQUEST,
+                        (unsigned long)((uintptr_t)&arg));
   if (ret < 0)
     {
       wlerr("ERROR: MAC802154IOC_MLME_GET_REQUEST failed: %d\n", ret);
@@ -263,12 +269,14 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
 #else
   uint8_t *saddr;
 
+  DEBUGASSERT(dev != NULL && dev->d_private != NULL);
+  priv = (FAR struct macnet_driver_s *)dev->d_private;
+
   /* Get the saddr from the MAC */
 
-  memcpy(arg.ifr_name, dev->d_ifname, IFNAMSIZ);
   arg.getreq.attr = IEEE802154_ATTR_MAC_SADDR;
-  ret = dev->d_ioctl(dev, MAC802154IOC_MLME_GET_REQUEST,
-                     (unsigned long)((uintptr_t)&arg));
+  ret = mac802154_ioctl(priv->md_mac, MAC802154IOC_MLME_GET_REQUEST,
+                        (unsigned long)((uintptr_t)&arg));
   if (ret < 0)
     {
       wlerr("ERROR: MAC802154IOC_MLME_GET_REQUEST failed: %d\n", ret);
@@ -567,7 +575,8 @@ static void macnet_txpoll_expiry(int argc, wdparm_t arg, ...)
 static int macnet_coord_eaddr(FAR struct sixlowpan_driver_s *radio,
                               FAR struct uint8_t *eaddr)
 {
-  struct ieee802154_macarg_u arg;
+  FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)radio;
+  union ieee802154_macarg_u arg;
   int ret;
 
   arg.getreq.attr = IEEE802154_ATTR_MAC_COORD_EADDR ;
@@ -603,7 +612,8 @@ static int macnet_coord_eaddr(FAR struct sixlowpan_driver_s *radio,
 static int macnet_coord_saddr(FAR struct sixlowpan_driver_s *radio,
                               FAR struct uint8_t *saddr)
 {
-  struct ieee802154_macarg_u arg;
+  FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)radio;
+  union ieee802154_macarg_u arg;
   int ret;
 
   arg.getreq.attr = IEEE802154_ATTR_MAC_COORD_SADDR ;
@@ -938,15 +948,12 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
 static int macnet_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
                              FAR const void *meta)
 {
-  FAR struct macnet_driver_s *priv;
-  FAR const struct ieee802154_frame_meta_s *pktmeta;
+  FAR struct macnet_driver_s *priv =
+    (FAR struct macnet_driver_s *)netdev;
+  FAR const struct ieee802154_frame_meta_s *pktmeta =
+    (FAR const struct ieee802154_frame_meta_s *)meta;
 
-  DEBUGASSERT(netdev != NULL && netdev->r_dev.d_private != NULL);
-  priv = (FAR struct macnet_driver_s *)netdev->r_dev.d_private;
-
-  DEBUGASSERT(meta != NULL);
-  pktmeta = (FAR const struct ieee802154_frame_meta_s *)meta;
-
+  DEBUGASSERT(priv != NULL && priv->md_mac != NULL && pktmeta != NULL);
   return mac802154_get_mhrlen(priv->md_mac, pktmeta);
 }
 
@@ -971,18 +978,16 @@ static int macnet_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
 static int macnet_req_data(FAR struct sixlowpan_driver_s *netdev,
                            FAR const void *meta, FAR struct iob_s *framelist)
 {
-  FAR struct macnet_driver_s *priv;
-  FAR const struct ieee802154_frame_meta_s *pktmeta;
+  FAR struct macnet_driver_s *priv =
+    (FAR struct macnet_driver_s *)netdev;
+  FAR const struct ieee802154_frame_meta_s *pktmeta =
+    (FAR const struct ieee802154_frame_meta_s *)meta;
   FAR struct iob_s *iob;
   int ret;
 
   wlinfo("Received framelist\n");
 
-  DEBUGASSERT(netdev != NULL && netdev->r_dev.d_private != NULL);
-  priv = (FAR struct macnet_driver_s *)netdev->r_dev.d_private;
-
-  DEBUGASSERT(meta != NULL && framelist != NULL);
-  pktmeta = (FAR const struct ieee802154_frame_meta_s *)meta;
+  DEBUGASSERT(priv != NULL && pktmeta != NULL && framelist != NULL);
 
   /* Add the incoming list of frames to the MAC's outgoing queue */
 
@@ -1089,10 +1094,10 @@ static int macnet_properties(FAR struct sixlowpan_driver_s *netdev,
    */
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  (void)macnet_coord_eaddr(radio, properties->sp_hubnode.nv_addr);
+  (void)macnet_coord_eaddr(netdev, properties->sp_hubnode.nv_addr);
   properties->sp_hubnode.nv_addrlen = NET_6LOWPAN_EADDRSIZE;
 #else
-  (void)macnet_coord_saddr(radio, &properties->sp_hubnode.nv_addr);
+  (void)macnet_coord_saddr(netdev, &properties->sp_hubnode.nv_addr);
   properties->sp_hubnode.>nv_addrlen = NET_6LOWPAN_SADDRSIZE;
 #endif
 #endif
