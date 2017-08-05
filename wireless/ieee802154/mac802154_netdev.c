@@ -170,10 +170,10 @@ static void macnet_txpoll_expiry(int argc, wdparm_t arg, ...);
 #ifdef CONFIG_NET_STARPOINT
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
 static int macnet_coord_eaddr(FAR struct sixlowpan_driver_s *radio,
-                              FAR struct uint8_t *eaddr);
+                              FAR uint8_t *eaddr);
 #else
 static int macnet_coord_saddr(FAR struct sixlowpan_driver_s *radio,
-                              FAR struct uint8_t *saddr)
+                              FAR uint8_t *saddr);
 #endif
 #endif
 
@@ -573,7 +573,7 @@ static void macnet_txpoll_expiry(int argc, wdparm_t arg, ...)
 
 #if defined(CONFIG_NET_STARPOINT) && defined(CONFIG_NET_6LOWPAN_EXTENDEDADDR)
 static int macnet_coord_eaddr(FAR struct sixlowpan_driver_s *radio,
-                              FAR struct uint8_t *eaddr)
+                              FAR uint8_t *eaddr)
 {
   FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)radio;
   union ieee802154_macarg_u arg;
@@ -610,7 +610,7 @@ static int macnet_coord_eaddr(FAR struct sixlowpan_driver_s *radio,
 
 #if defined(CONFIG_NET_STARPOINT) && !defined(CONFIG_NET_6LOWPAN_EXTENDEDADDR)
 static int macnet_coord_saddr(FAR struct sixlowpan_driver_s *radio,
-                              FAR struct uint8_t *saddr)
+                              FAR uint8_t *saddr)
 {
   FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)radio;
   union ieee802154_macarg_u arg;
@@ -1097,8 +1097,8 @@ static int macnet_properties(FAR struct sixlowpan_driver_s *netdev,
   (void)macnet_coord_eaddr(netdev, properties->sp_hubnode.nv_addr);
   properties->sp_hubnode.nv_addrlen = NET_6LOWPAN_EADDRSIZE;
 #else
-  (void)macnet_coord_saddr(netdev, &properties->sp_hubnode.nv_addr);
-  properties->sp_hubnode.>nv_addrlen = NET_6LOWPAN_SADDRSIZE;
+  (void)macnet_coord_saddr(netdev, properties->sp_hubnode.nv_addr);
+  properties->sp_hubnode.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
 #endif
 #endif
 
