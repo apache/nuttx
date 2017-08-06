@@ -918,14 +918,17 @@ static int lo_properties(FAR struct sixlowpan_driver_s *netdev,
 
   /* Multicast address (uses broadcast address)
    *
-   * Multicast address should really determined by the first 3 bits
-   * (RFC 4944):
+   * For meshes (only) a multicast address candetermined by the first 3 bits
+   * of a short address (RFC 4944):
    *
-   * 0xxxxxxx xxxxxxxx: Unicast address
-   * 100xxxxx xxxxxxxx: Multicast address
-   * 101xxxxx xxxxxxxx: Reserved
-   * 110xxxxx xxxxxxxx: Reserved
-   * 111xxxxx xxxxxxxx: Reserved
+   *   0xxxxxxx xxxxxxxx: Unicast address
+   *   100xxxxx xxxxxxxx: Multicast address
+   *   101xxxxx xxxxxxxx: Reserved
+   *   110xxxxx xxxxxxxx: Reserved
+   *   111xxxxx xxxxxxxx: Reserved
+   *
+   * Otherwise, Multicast is implemented with the broadcast address
+   * (qualified by the destination PANID).
    */
 
   properties->sp_mcast.nv_addrlen = NET_6LOWPAN_SADDRSIZE;

@@ -4,9 +4,6 @@
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- *   Copyright (C) 2017, Gregory Nutt, all rights reserved
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
  * Derives from logic in Contiki:
  *
  *   Copyright (c) 2008, Swedish Institute of Computer Science.
@@ -177,6 +174,8 @@ static void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *eadd
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
+ *    ff02 xxxx xxxx xxxx  xxxx xxxx xxxx xxxx Multicast
+ *    ff02 0000 0000 0000  0000 0000 0000 0001 All nodes multicast group
  *    xxxx 0000 0000 0000  0000 00ff fe00 xx00 1-byte short address IEEE 48-bit MAC
  *    xxxx 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
  *    xxxx 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
@@ -191,10 +190,10 @@ int sixlowpan_destaddrfromip(FAR struct sixlowpan_driver_s *radio,
                              const net_ipv6addr_t ipaddr,
                              FAR struct netdev_varaddr_s *destaddr)
 {
-#ifdef  CONFIG_NET_STARPOINT
   struct sixlowpan_properties_s properties;
   int ret;
 
+#ifdef  CONFIG_NET_STARPOINT
   /* Only the radio driver knows the correct address of the hub.  For IEEE
    * 802.15.4 this will be the address of the PAN coordinator.  For other
    * radios, this may be some configured, "well-known" address.
@@ -211,6 +210,44 @@ int sixlowpan_destaddrfromip(FAR struct sixlowpan_driver_s *radio,
   return OK;
 
 #else /* CONFIG_NET_STARPOINT */
+
+   /* Check for a multicast address */
+
+   if (ipaddr[0] == HTONS(0xff02))
+     {
+        DEBUGASSERT(radio->r_properties != NULL);
+        ret = radio->r_properties(radio, &properties);
+        if (ret < 0)
+          {
+            return ret;
+          }
+
+        /* Check for the broadcast IP address
+         *
+         * IPv6 does not implement the method of broadcast, and therefore
+         * does not define broadcast addresses. Instead, IPv6 uses multicast
+         * addressing to the all-nodes multicast group: ff02:0:0:0:0:0:0:1.
+         *
+         * However, the use of the all-nodes group is not common, and most
+         * IPv6 protocols use a dedicated link-local multicast group to avoid
+         * disturbing every interface in the network.
+         */
+
+        if (ipaddr[1] == 0 && ipaddr[2] == 0 && ipaddr[3] == 0 &&
+            ipaddr[4] == 0 && ipaddr[5] == 0 && ipaddr[5] == 0 &&
+            ipaddr[7] == HTONS(0x0001))
+          {
+            memcpy(destaddr, &properties.sp_bcast,
+                   sizeof(struct netdev_varaddr_s));
+          }
+        else
+          {
+            memcpy(destaddr, &properties.sp_mcast,
+                   sizeof(struct netdev_varaddr_s));
+          }
+
+          return OK;
+     }
 
    /* Otherwise, the destination MAC address is encoded in the IP address */
 
@@ -238,9 +275,6 @@ int sixlowpan_destaddrfromip(FAR struct sixlowpan_driver_s *radio,
   if (radio->r_dev.d_lltype == NET_LL_PKTRADIO)
 #endif
     {
-      struct sixlowpan_properties_s properties;
-      int ret;
-
       DEBUGASSERT(radio->r_properties != NULL);
       ret = radio->r_properties(radio, &properties);
       if (ret < 0)

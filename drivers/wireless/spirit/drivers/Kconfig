@@ -31,6 +31,9 @@ config SPIRIT_PKTLEN
 		 This can be avoided by reducing the maximum packet length to a value which
 		 is lower than the RX FIFO size."
 
+		Also, with a packet size of 96, I have seen CRC failures on the receiving
+		side.  With a packet size of 94, CRC filtering behaves well.
+
 config SPIRIT_FIFOS
 	bool "FIFO Watermarks"
 	default n

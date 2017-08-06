@@ -520,7 +520,11 @@ Configuration sub-directories
         might be a work around... it is not.  Still RX FIFO errors.  From my
         reading, the only known work-around is to reduce the maximum packet
         size so that it is smaller than 96.  I tried setting the maximum packet
-        length to 84 and that did NOT eliminate the RX FIFO error anyway.
+        length to 84 and that did NOT eliminate the RX FIFO error.
+
+        At the end of the TCP test, the "nsh> ifconfig" command shows that
+        there were two TX timeouts.  Perhaps this is related?  The TX timeout
+        is set to 5 seconds, so this could be a serious performance issue.
 
         So for now I have to live with the RX FIFO error.  I have observed
         only a single RX FIFO error and it occurs at the same place in the
@@ -537,4 +541,5 @@ Configuration sub-directories
         the payload correctly from RX FIFO."
 
         Reducing the FIFO to 94 bytes fixed the problem with the 2 byte CRC
-        but did not resolve that occasional, harmless RX FIFO error.
+        but did not resolve that occasional RX FIFO error.
+
