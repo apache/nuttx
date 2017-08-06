@@ -28,6 +28,7 @@ config STM32F103MINIMUM_FLASH_PART
 	bool "Enable partition support on FLASH"
 	default y
 	depends on STM32F103MINIMUM_FLASH
+	select MTD_PARTITION
 	---help---
 		Enables creation of partitions on the FLASH
 

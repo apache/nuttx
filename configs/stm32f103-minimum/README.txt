@@ -291,7 +291,7 @@ SPI NOR Flash support:
   PA4 to /CS; Also connect 3.3V to VCC and GND to GND.
 
   You can start with default "stm32f103-minimum/nsh" configuration option and
-  enable these options using "make menuconfig" :
+  enable/disable these options using "make menuconfig" :
 
   System Type  --->
       STM32 Peripheral Support  --->
@@ -303,6 +303,13 @@ SPI NOR Flash support:
       [*]   Enable partition support on FLASH
       (1024,1024,1024,1024) Flash partition size list
 
+  RTOS Features  --->
+      Stack and heap information  --->
+              (512) Idle thread stack size
+              (1024) Main thread stack size
+              (256) Minimum pthread stack size
+              (1024) Default pthread stack size
+
   Device Drivers  --->
       -*- Memory Technology Device (MTD) Support  --->
               [*]   Support MTD partitions
@@ -311,9 +318,45 @@ SPI NOR Flash support:
               (20000000) W25 SPI Frequency
 
   File Systems  --->
+      [ ] Disable pseudo-filesystem operations
       -*- SMART file system
       (0xff) FLASH erased state
       (16)  Maximum file name length
+
+  Memory Management  --->
+      [*] Small memory model
+
+  Also change the configs/stm32f103-minimum/scripts/ld.script file to use 128KB
+  of Flash instead 64KB (since this board has a hidden 64KB flash) :
+
+  MEMORY
+  {
+      flash (rx) : ORIGIN = 0x08000000, LENGTH = 128K
+      sram (rwx) : ORIGIN = 0x20000000, LENGTH = 20K
+  }
+
+  Then after compiling and flashing the file nuttx.bin you can format and mount
+  the flash this way:
+
+  nsh> mksmartfs /dev/smart0p0
+  nsh> mksmartfs /dev/smart0p1
+  nsh> mksmartfs /dev/smart0p2
+  nsh> mksmartfs /dev/smart0p3
+
+  nsh> mount -t smartfs /dev/smart0p0 /mnt
+  nsh> ls /mnt
+  /mnt:
+
+  nsh> echo "Testing" > /mnt/file.txt
+
+  nsh> ls /mnt
+  /mnt:
+   file.txt
+
+  nsh> cat /mnt/file.txt
+  Testing
+
+  nsh>
 
 SDCard support:
 ===============
