@@ -24,6 +24,13 @@ config SPIRIT_PKTLEN
 		Fixed pkt sizes are used.  This setting describes that fixed packet
 		size.
 
+		"Sometimes Spirit1 seems to NOT deliver (correctly) the 'IRQ_RX_DATA_READY'
+		 event for packets which have a length which is close to a multiple of
+		 RX FIFO size. Furthermore, in these cases also the content delivery seems
+		 to be compromised as well as the generation of RX/TX FIFO errors.
+		 This can be avoided by reducing the maximum packet length to a value which
+		 is lower than the RX FIFO size."
+
 config SPIRIT_FIFOS
 	bool "FIFO Watermarks"
 	default n
@@ -32,21 +39,22 @@ config SPIRIT_FIFOS
 		The Spirit hardware can provided interrupts when indicate when the
 		RX or TX FIFOs are almost full or empty.  This is useful for
 		supporting very large packets, larger than the FIFO size.  The RX/TX
-		FIFO size is 96 bytes.  As long as the packet size is less then or
-		equal 96 bytes, this feature is not needed.
+		FIFO size is 96 bytes.  If the packet size is significantly less than
+		96 bytes, this feature is not needed.  It is required for packet sizes
+		greater than 96 bytes and if it is not selected, there may be
+		occurrences of RX FIFO errors if the packet size is less than but close
+		to 96.
 
-		NOTE:  Marked experimental because this feature is not yet implement
-		(hooks are present).  You should not enable this feature unless you
-		plan to implement the feature.
+		"Sometimes Spirit1 seems to NOT deliver (correctly) the 'IRQ_RX_DATA_READY'
+		 event for packets which have a length which is close to a multiple of
+		 RX FIFO size. Furthermore, in these cases also the content delivery seems
+		 to be compromised as well as the generation of RX/TX FIFO errors.
+		 This can be avoided by reducing the maximum packet length to a value which
+		 is lower than the RX FIFO size."
 
-config SPIRIT_PKTLEN
-	int "Fixed packet length"
-	default 96
-	range 1 96 if !SPIRIT_FIFOS
-	range 1 65535 if SPIRIT_FIFOS
-	---help---
-		Fixed pkt sizes are used.  This setting describes that fixed packet
-		size.
+		From my reading, the only known work-around is to reduce the maximum
+		packet size so that it is smaller than 96.  Hence, this option is
+		conditioned on EXPERMENTAL.
 
 config SPIRIT_PROMISICUOUS
 	bool "Promiscuous mode"

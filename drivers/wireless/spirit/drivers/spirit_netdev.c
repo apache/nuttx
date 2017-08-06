@@ -223,6 +223,11 @@
 #  define SPIRIT_NODE_ADDR  0x34
 #endif
 
+/* Linear FIFO thresholds */
+
+#define SPIRIT_RXFIFO_ALMOSTFULL  (3 * SPIRIT_MAX_FIFO_LEN / 4)
+#define SPIRIT_TXFIFO_ALMOSTEMPTY (1 * SPIRIT_MAX_FIFO_LEN / 4)
+
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define SPIRIT_WDDELAY      (1*CLK_TCK)
@@ -261,6 +266,9 @@ struct spirit_driver_s
   FAR struct pktradio_metadata_s  *txtail;    /* Tail of pending TX transfers */
   FAR struct pktradio_metadata_s  *rxhead;    /* Head of completed RX transfers */
   FAR struct pktradio_metadata_s  *rxtail;    /* Tail of completed RX transfers */
+#ifdef CONFIG_SPIRIT_FIFOS
+  FAR struct iob_s                *rxbuffer;  /* Receiving into this buffer */
+#endif
   struct work_s                    irqwork;   /* Interrupt continuation work (HP) */
   struct work_s                    txwork;    /* TX work queue support (HP) */
   struct work_s                    rxwork;    /* RX work queue support (LP) */
@@ -1030,8 +1038,19 @@ static void spirit_interrupt_work(FAR void *arg)
       /* Discard RX data */
 
       DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
-      irqstatus.IRQ_RX_DATA_READY = 0;
-      irqstatus.IRQ_VALID_SYNC    = 0;
+      irqstatus.IRQ_RX_DATA_READY       = 0;
+      irqstatus.IRQ_VALID_SYNC          = 0;
+#ifdef CONFIG_SPIRIT_FIFOS
+      irqstatus.IRQ_RX_FIFO_ALMOST_FULL = 0;
+
+      /* Discard any RX buffer that might have been allocated */
+
+      if (priv->rxbuffer != NULL)
+        {
+          iob_free(priv->rxbuffer);
+          priv->rxbuffer = NULL;
+        }
+#endif
 
       /* Revert the receiving state */
 
@@ -1106,7 +1125,7 @@ static void spirit_interrupt_work(FAR void *arg)
       spirit_schedule_transmit_work(priv);
     }
 
-#ifdef CONFIG_SPIRIT_FIFOS
+#if defined(CONFIG_SPIRIT_FIFOS) && CONFIG_SPIRIT_PKTLEN > SPIRIT_MAX_FIFO_LEN
   /* The IRQ_TX_FIFO_ALMOST_EMPTY notifies an nearly empty TX fifo.
    * Necessary for sending large packets > sizeof(TX FIFO).
    */
@@ -1133,6 +1152,23 @@ static void spirit_interrupt_work(FAR void *arg)
           DEBUGASSERT(priv->state == DRIVER_STATE_IDLE);
           priv->state = DRIVER_STATE_RECEIVING;
         }
+
+#ifdef CONFIG_SPIRIT_FIFOS
+      /* Pre-allocate an IOB to hold the received data */
+
+      if (priv->rxbuffer == NULL)
+        {
+          priv->rxbuffer = iob_alloc(0);
+        }
+
+      if (priv->rxbuffer != NULL)
+        {
+          priv->rxbuffer->io_len    = 0;
+          priv->rxbuffer->io_offset = 0;
+          priv->rxbuffer->io_pktlen = 0;
+          priv->rxbuffer->io_flink  = NULL;
+        }
+#endif
     }
 
   /* The IRQ_RX_DATA_READY notifies that a new packet has been received */
@@ -1141,15 +1177,42 @@ static void spirit_interrupt_work(FAR void *arg)
     {
       FAR struct pktradio_metadata_s *pktmeta;
       FAR struct iob_s *iob;
+      uint8_t offset;
       uint8_t count;
 
       wlinfo("Data ready\n");
       NETDEV_RXPACKETS(&priv->radio.r_dev);
 
-      /* Check the packet size */
+#ifdef CONFIG_SPIRIT_FIFOS
+      /* Do not process RX FIFO almost full interrupt */
+
+     irqstatus.IRQ_RX_FIFO_ALMOST_FULL = 0;
+
+      /* There should be a RX buffer that was allocated when the data sync
+       * interrupt was processed.
+       */
+
+      iob            = priv->rxbuffer;
+      priv->rxbuffer = NULL;
+
+      /* Get the offset to the data from the last RX FIFO almost full
+       * interrupt.
+       */
+
+      offset = 0;
+      if (iob != NULL)
+        {
+          offset = iob->io_len;
+        }
+#else
+      offset = 0;
+#endif
+      /* Get the number of bytes avaialable in the RX FIFO */
 
       count = spirit_fifo_get_rxcount(spirit);
-      if (count > CONFIG_IOB_BUFSIZE)
+      wlinfo("Receiving %u bytes (%u total)\n", count, count + offset);
+
+      if ((offset + count) > CONFIG_IOB_BUFSIZE)
         {
           wlwarn("WARNING:  Packet too large... dropping\n");
           DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
@@ -1158,14 +1221,15 @@ static void spirit_interrupt_work(FAR void *arg)
         }
       else
         {
-          wlinfo("Receiving %u bytes\n", count);
+#ifdef CONFIG_SPIRIT_FIFOS
+          if (iob == NULL)
+#endif
+            {
+              /* Allocate an I/O buffer to hold the received packet. */
 
-          /* Allocate an I/O buffer to hold the received packet.
-           * REVISIT: Not a good place to wait.  Perhaps we should pre-
-           * allocate a few I/O buffers?
-           */
+              iob = iob_alloc(0);
+            }
 
-          iob = iob_alloc(0);
           if (iob == NULL)
             {
               wlerr("ERROR: Failed to allocate IOB... dropping\n");
@@ -1180,9 +1244,9 @@ static void spirit_interrupt_work(FAR void *arg)
             }
           else
             {
-              /* Read the packet into the I/O buffer */
+              /* Read the remainder of the packet into the I/O buffer */
 
-              DEBUGVERIFY(spirit_fifo_read(spirit, iob->io_data, count));
+              DEBUGVERIFY(spirit_fifo_read(spirit, &iob->io_data[offset], count));
               iob->io_len    = spirit_pktstack_get_rxpktlen(spirit);
               iob->io_offset = 0;
               iob->io_pktlen = iob->io_len;
@@ -1262,8 +1326,58 @@ static void spirit_interrupt_work(FAR void *arg)
 
   if (irqstatus.IRQ_RX_FIFO_ALMOST_FULL != 0)
     {
+      FAR struct iob_s *iob;
+      uint8_t offset;
+      uint8_t count;
+
       wlinfo("RX FIFO almost full\n");
-#warning Missing logic
+
+      /* There should be a RX buffer that was allocated when the data sync
+       * interrupt was processed.
+       */
+
+      if (priv->rxbuffer != NULL)
+        {
+          iob            = priv->rxbuffer;
+          offset         = iob->io_len;
+        }
+      else
+        {
+          /* If not, then allocate one now. */
+
+          priv->rxbuffer = iob_alloc(0);
+          iob            = priv->rxbuffer;
+          offset         = 0;
+        }
+
+      if (iob != NULL)
+        {
+          /* Get the number of bytes avaialable in the RX FIFO */
+
+          count = spirit_fifo_get_rxcount(spirit);
+          wlinfo("Receiving %u bytes (%u so far)\n", count, count + offset);
+
+          if ((offset + count) > CONFIG_IOB_BUFSIZE)
+            {
+              wlwarn("WARNING:  Packet too large... dropping\n");
+              DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
+              priv->state = DRIVER_STATE_IDLE;
+
+              NETDEV_RXDROPPED(&priv->radio.r_dev);
+              priv->rxbuffer = NULL;
+              iob_free(iob);
+            }
+          else
+            {
+              /* Read more of the packet into the I/O buffer */
+
+              DEBUGVERIFY(spirit_fifo_read(spirit, &iob->io_data[offset], count));
+              iob->io_len    = count + offset;
+              iob->io_offset = 0;
+              iob->io_pktlen = iob->io_len;
+              iob->io_flink  = NULL;
+            }
+        }
     }
 #endif
 
@@ -2215,6 +2329,27 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
       return ret;
     }
 
+#ifdef CONFIG_SPIRIT_FIFOS
+  /* Configure the linear FIFOs */
+
+  wlinfo("Configure linear FIFOs\n");
+  ret = spirit_fifo_set_rxalmostfull(spirit, SPIRIT_RXFIFO_ALMOSTFULL);
+  if (ret < 0)
+    {
+      wlerr("ERROR: spirit_fifo_set_rxalmostfull failed: %d\n", ret);
+      return ret;
+    }
+
+#if CONFIG_SPIRIT_PKTLEN > SPIRIT_MAX_FIFO_LEN
+  ret = spirit_fifo_set_txalmostempty(spirit, SPIRIT_TXFIFO_ALMOSTEMPTY);
+  if (ret < 0)
+    {
+      wlerr("ERROR: spirit_fifo_set_txalmostempty failed: %d\n", ret);
+      return ret;
+    }
+#endif
+#endif
+
   /* Enable the following interrupt sources, routed to GPIO */
 
   wlinfo("Configure Interrupts\n");
@@ -2282,12 +2417,14 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
     }
 
 #ifdef CONFIG_SPIRIT_FIFOS
+#if CONFIG_SPIRIT_PKTLEN > SPIRIT_MAX_FIFO_LEN
   ret = spirit_irq_enable(spirit, TX_FIFO_ALMOST_EMPTY, S_ENABLE);
   if (ret < 0)
     {
       wlerr("ERROR: Enable TX_FIFO_ALMOST_EMPTY failed: %d\n", ret);
       return ret;
     }
+#endif
 
   ret = spirit_irq_enable(spirit, RX_FIFO_ALMOST_FULL, S_ENABLE);
   if (ret < 0)

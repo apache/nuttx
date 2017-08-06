@@ -504,3 +504,17 @@ Configuration sub-directories
         interactions by the LP and HP work queue.  I restructured the tasking to
         reduce the amount of interlocking, but this did not eliminate the RX FIFO
         errors.
+
+        Hmmm.. Appears to be a chip Errata:  "Sometimes Spirit1 seems to NOT
+        deliver (correctly) the 'IRQ_RX_DATA_READY' event for packets which
+        have a length which is close to a multiple of RX FIFO size.  Furthermore,
+        in these cases also the content delivery seems to be compromised as well
+        as the generation of RX/TX FIFO errors.  This can be avoided by reducing
+        the maximum packet length to a value which is lower than the RX FIFO
+        size."
+
+        I tried implementing the RX FIFO almost full water mark thinking this
+        might be a work around... it is not.  Still RX FIFO errors.  From my
+        reading, the only known work-around is to reduce the maximum packet
+        size so that it is smaller than 96.
+

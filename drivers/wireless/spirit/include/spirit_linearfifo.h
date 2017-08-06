@@ -97,7 +97,7 @@ uint8_t spirit_fifo_get_txcount(FAR struct spirit_library_s *spirit);
  * Name: spirit_fifo_set_rxalmostfull
  *
  * Description:
- *   Sets the almost full threshold for the Rx FIFO. When the number of
+ *   Sets the almost full threshold for the Rx FIFO.  When the number of
  *   elements in RX FIFO reaches this value an interrupt can be generated to
  *   the MCU.
  *
@@ -106,8 +106,8 @@ uint8_t spirit_fifo_get_txcount(FAR struct spirit_library_s *spirit);
  *   when the number of elements is equals to 96-7 = 89.
  *
  * Input Parameters:
- *   spirit - Reference to a Spirit library state structure instance
- *   threshold almost full threshold.
+ *   spirit    - Reference to a Spirit library state structure instance
+ *   threshold - Almost full threshold.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -146,8 +146,8 @@ uint8_t spirit_fifo_get_rxalmostfull(FAR struct spirit_library_s *spirit);
  *   the MCU.
  *
  * Input Parameters:
- *   spirit - Reference to a Spirit library state structure instance
- *   threshold almost empty threshold.
+ *   spirit    - Reference to a Spirit library state structure instance
+ *   threshold - Almost empty threshold.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -186,8 +186,8 @@ uint8_t spirit_fifo_get_rxalmostempty(FAR struct spirit_library_s *spirit);
  *   when the number of elements is equals to 96-7 = 89.
  *
  * Input Parameters:
- *   spirit - Reference to a Spirit library state structure instance
- *   threshold almost full threshold.
+ *   spirit    - Reference to a Spirit library state structure instance
+ *   threshold - Almost full threshold.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -226,8 +226,8 @@ uint8_t spirit_fifo_get_txalmostfull(FAR struct spirit_library_s *spirit);
  *   to the MCU.
  *
  * Input Parameters:
- *   spirit - Reference to a Spirit library state structure instance
- *   threshold: almost empty threshold.
+ *   spirit     - Reference to a Spirit library state structure instance
+ *   threshold  - Almost empty threshold.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
