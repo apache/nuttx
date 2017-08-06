@@ -516,5 +516,13 @@ Configuration sub-directories
         I tried implementing the RX FIFO almost full water mark thinking this
         might be a work around... it is not.  Still RX FIFO errors.  From my
         reading, the only known work-around is to reduce the maximum packet
-        size so that it is smaller than 96.
+        size so that it is smaller than 96.  I tried setting the maximum packet
+        length to 84 and that did NOT eliminate the RX FIFO error anyway.
+
+        So for now I have to live with the RX FIFO error.  I have observed
+        only a single RX FIFO error and it occurs at the same place in the
+        the TCP test (when the data is turned around and sent back to the
+        client).  the UDP test and Telnet work perfectly.  The RX FIFO error
+        is handled perfectly and, since it is TCP, there is no loss of data
+        and all tests pass.  That is as good as I can do for now.
 
