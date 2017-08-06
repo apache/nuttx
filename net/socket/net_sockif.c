@@ -45,6 +45,7 @@
 
 #include <nuttx/net/net.h>
 
+#include "inet/inet.h"
 #include "local/local.h"
 #include "pkt/pkt.h"
 #include "socket/socket.h"

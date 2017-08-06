@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/socket/inet_recvfrom.c
+ * net/inet/inet_recvfrom.c
  *
  *   Copyright (C) 2007-2009, 2011-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -69,6 +69,7 @@
 #include "local/local.h"
 #include "socket/socket.h"
 #include "usrsock/usrsock.h"
+#include "inet/inet.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/socket/inet_sockif.c
+ * net/inet/inet_sockif.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,6 +52,7 @@
 #include "udp/udp.h"
 #include "sixlowpan/sixlowpan.h"
 #include "socket/socket.h"
+#include "inet/inet.h"
 
 #ifdef HAVE_INET_SOCKETS
 

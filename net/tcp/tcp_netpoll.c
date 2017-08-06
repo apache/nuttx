@@ -46,8 +46,9 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 
-#include <devif/devif.h>
-#include <socket/socket.h>
+#include "devif/devif.h"
+#include "socket/socket.h"
+#include "inet/inet.h"
 #include "tcp/tcp.h"
 
 #ifdef HAVE_TCP_POLL

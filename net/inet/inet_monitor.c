@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/socket/net_monitor.c
+ * net/inet/net_monitor.c
  *
  *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,6 +49,7 @@
 #include "devif/devif.h"
 #include "tcp/tcp.h"
 #include "socket/socket.h"
+#include "inet/inet.h"
 
 #ifdef NET_TCP_HAVE_STACK
 

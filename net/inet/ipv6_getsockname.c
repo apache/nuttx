@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/socket/ipv6_getsockname.c
+ * net/inet/ipv6_getsockname.c
  *
  *   Copyright (C) 2011-2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,7 +50,7 @@
 #include <nuttx/net/netdev.h>
 
 #include "netdev/netdev.h"
-#include "socket/socket.h"
+#include "inet/inet.h"
 
 #ifdef CONFIG_NET_IPv6
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/socket/inet_sendfile.c
+ * net/inet/inet_sendfile.c
  *
  *   Copyright (C) 2013 UVC Ingenieure. All rights reserved.
  *   Copyright (C) 2007-2017 Gregory Nutt. All rights reserved.
@@ -69,6 +69,7 @@
 #include "icmpv6/icmpv6.h"
 #include "neighbor/neighbor.h"
 #include "tcp/tcp.h"
+#include "inet/inet.h"
 #include "socket/socket.h"
 
 #if defined(CONFIG_NET_SENDFILE) && defined(CONFIG_NET_TCP) && \

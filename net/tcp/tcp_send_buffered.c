@@ -69,8 +69,9 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/tcp.h>
 
-#include "socket/socket.h"
 #include "netdev/netdev.h"
+#include "socket/socket.h"
+#include "inet/inet.h"
 #include "arp/arp.h"
 #include "icmpv6/icmpv6.h"
 #include "neighbor/neighbor.h"

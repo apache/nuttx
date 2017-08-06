@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/socket/inet_connect.c
+ * net/inet/inet_connect.c
  *
  *   Copyright (C) 2007-2012, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -60,6 +60,7 @@
 #include "udp/udp.h"
 #include "socket/socket.h"
 #include "usrsock/usrsock.h"
+#include "inet/inet.h"
 
 #ifdef CONFIG_NET
 

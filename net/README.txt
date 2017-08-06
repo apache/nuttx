@@ -12,6 +12,7 @@ Directory Structure
        +- devif     - Stack/device interface layer
        +- icmp      - Internet Control Message Protocol (IPv4)
        +- icmpv6    - Internet Control Message Protocol (IPv6)
+       +- inet      - PF_INET/PF_INET6 socket interface
        +- ipforward - IP forwarding logic
        +- local     - Unix domain (local) sockets
        +- loopback  - Local loopback
