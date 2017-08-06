@@ -498,3 +498,9 @@ Configuration sub-directories
         a problem when packets are received from multiple sources at high rates:
         New incoming packets appear to cause RX FIFO errors and the driver does
         not recover well.
+
+      2017-08-06:  The RX FIFO errors are worse when debug is enabled.  This led
+        me to believe that the cause of the RX FIFO errors was due to too many
+        interactions by the LP and HP work queue.  I restructured the tasking to
+        reduce the amount of interlocking, but this did not eliminate the RX FIFO
+        errors.

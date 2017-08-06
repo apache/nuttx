@@ -33,7 +33,76 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
+/* A note about threading:  There driver uses both the high priority (HP)
+ * and low priority (LP) work queues.  An objective is this threading design
+ * is to minimize the interactions between the two work queues so that the
+ * work will be able progress without interlocks.
+ *
+ * The HP work queue handles (1) all time-critical interrupt handling, and
+ * (2) initiation of TX transfers.  Most interactions with the spirit part
+ * occur on the HP work queue.  Exceptions:  Initialization, I/F up, and I/F
+ * down.
+ *
+ * The LP work queue is the primary interface between the Spirit radio
+ * network driver and the NuttX network.  The LP work queue performs (1)
+ * input of all frames into the network, (2) queuing of all output frames,
+ * and all network housekeeping such as periodic polling.
+ *
+ * Interrupt handling is verify brief since it only schedules the interrupt
+ * work to occur on the HP work queue.  Several things are done for the
+ * interrupt handling, but the primary things are:  (1) receipt of incoming
+ * packets, and (2) handling of the completion of TX transfers.
+ *
+ * The receipt of the incoming packet is handled on the HP work worker thread.
+ * The received packet is extracted from the hardware, saved in an I/O
+ * buffer (IOB), and queued in the RX packet queue.  Processing of the
+ * received packet is scheduled to occur on the LP worker thread where each IOB
+ * removed from RX packet queue is passed to the network via
+ * sixlowpan_input().
+ *
+ * The entire network logic runs on the LP worker thread.  If the receipt of
+ * the incoming packet generates outgoing TX frames, these are queued by in
+ * LP work queue.  Outgoing frames may also be queued as a consequence of
+ * period (or TX available) polling.  In either case, the outgoing packet is
+ * queued and processing of the packet -- including the Spirit interface
+ * interaction -- is scheduled to occur in the HP work queue.
+ *
+ * Scheduling of the outgoing TX packet is also handled in the interrupt
+ * handling logic when an interrupt is received indicating the completion of
+ * previous transfer and that the hardware is ready to send another packet.
+ *
+ * In this way, the interrupt handling and TX processing is serialized on
+ * the HP worker thread and no special interlocking is required.  Network level
+ * work is similar serialized on the LP worker thread (and also via the network
+ * locking mechanism).  So the only real interactions between the logic
+ * running on the LP and HP worker threads is in the access to the RX and TX
+ * packet queues.  Semaphore protection is necessary while accessing these
+ * queues.
+ *
+ * A special case is the TX timeout which must be handled on the HP work
+ * queue since it will reset the spirit interface.
+ *
+ * NOTE:  If debug output is enabled, then that can disrupt the above
+ * balance interactions between the HP and LP worker thread actions:  HP work
+ * might get delayed waiting to generate debug output when that output
+ * device is locked in the LP queue.  One way around this is to enable
+ * buffered syslog output and larger serial console TX buffer size:
+ *
+ *   CONFIG_SYSLOG_BUFFER=y         <-- enable SYSLOG buffering
+ *   CONFIG_SYSLOG_INTBUFFER=y      <-- Enable interrupt output buffering
+ *   CONFIG_SYSLOG_INTBUFSIZE=512
+ *   CONFIG_IOB_NBUFFERS=64         <-- Increase the number of IOBs
+ *   CONFIG_USART1_TXBUFSIZE=1024   <-- Increase the console output buffer
+ *                                      size
+ *
+ * Another consideration is the nature of the GPIO interrupts.  For STM32,
+ * for example, disabling the Spirit interrupt tears down the the entire
+ * interrupt setup so, for example, any interrupts that are received while
+ * interrupts are disable, aka torn down, will be lost.  Hence, it may be
+ * necessary to process pending interrupts whenever interrupts are re-enabled.
+ */
+
+ /****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -166,11 +235,6 @@
 
 #define SPIRIT_RXTIMEOUT    1500.0
 
-/* Return values from spirit_transmit() */
-
-#define SPIRIT_TX_IDLE      0
-#define SPIRIT_TX_INFLIGHT  1
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -197,12 +261,14 @@ struct spirit_driver_s
   FAR struct pktradio_metadata_s  *txtail;    /* Tail of pending TX transfers */
   FAR struct pktradio_metadata_s  *rxhead;    /* Head of completed RX transfers */
   FAR struct pktradio_metadata_s  *rxtail;    /* Tail of completed RX transfers */
-  struct work_s                    irqwork;   /* Interrupt continuation work queue support */
-  struct work_s                    txwork;    /* TX / Network poll work queue support */
-  struct work_s                    rxwork;    /* RX work queue support */
+  struct work_s                    irqwork;   /* Interrupt continuation work (HP) */
+  struct work_s                    txwork;    /* TX work queue support (HP) */
+  struct work_s                    rxwork;    /* RX work queue support (LP) */
+  struct work_s                    pollwork;  /* TX network poll work (LP) */
   WDOG_ID                          txpoll;    /* TX poll timer */
   WDOG_ID                          txtimeout; /* TX timeout timer */
-  sem_t                            exclsem;   /* Mutually exclusive access */
+  sem_t                            rxsem;     /* Exclusive access to the RX queue*/
+  sem_t                            txsem;     /* Exclusive access to the TX queue*/
   bool                             ifup;      /* Spirit is on and interface is up */
   bool                             needpoll;  /* Timer poll needed */
   uint8_t                          state;     /* See  enum spirit_driver_state_e */
@@ -216,15 +282,16 @@ struct spirit_driver_s
 
 /* Helpers */
 
-static void spirit_lock(FAR struct spirit_driver_s *priv);
-static inline void spirit_unlock(FAR struct spirit_driver_s *priv);
+static void spirit_rxlock(FAR struct spirit_driver_s *priv);
+static inline void spirit_rxunlock(FAR struct spirit_driver_s *priv);
+static void spirit_txlock(FAR struct spirit_driver_s *priv);
+static inline void spirit_txunlock(FAR struct spirit_driver_s *priv);
 
 static void spirit_set_ipaddress(FAR struct net_driver_s *dev);
 static int  spirit_set_readystate(FAR struct spirit_driver_s *priv);
 
 /* TX-related logic */
 
-static int  spirit_transmit(FAR struct spirit_driver_s *priv);
 static void spirit_transmit_work(FAR void *arg);
 static void spirit_schedule_transmit_work(FAR struct spirit_driver_s *priv);
 
@@ -383,10 +450,10 @@ static struct spirit_pktstack_address_s g_addrinit =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: spirit_lock
+ * Name: spirit_rxlock
  *
  * Description:
- *   Get exclusive access to the driver instance and to the spirit library.
+ *   Get exclusive access to the incoming RX packet queue.
  *
  * Parameters:
  *   priv - Reference to a driver state structure instance
@@ -396,20 +463,19 @@ static struct spirit_pktstack_address_s g_addrinit =
  *
  ****************************************************************************/
 
-static void spirit_lock(FAR struct spirit_driver_s *priv)
+static void spirit_rxlock(FAR struct spirit_driver_s *priv)
 {
-  while (sem_wait(&priv->exclsem) < 0)
+  while (sem_wait(&priv->rxsem) < 0)
     {
       DEBUGASSERT(errno == EINTR);
     }
 }
 
 /****************************************************************************
- * Name: spirit_unlock
+ * Name: spirit_rxunlock
  *
  * Description:
- *   Relinquish exclusive access to the driver instance and to the spirit
- *   library.
+ *   Relinquish exclusive access to the incoming RX packet queue.
  *
  * Parameters:
  *   priv - Reference to a driver state structure instance
@@ -419,9 +485,50 @@ static void spirit_lock(FAR struct spirit_driver_s *priv)
  *
  ****************************************************************************/
 
-static inline void spirit_unlock(FAR struct spirit_driver_s *priv)
+static inline void spirit_rxunlock(FAR struct spirit_driver_s *priv)
 {
-  sem_post(&priv->exclsem);
+  sem_post(&priv->rxsem);
+}
+
+/****************************************************************************
+ * Name: spirit_txlock
+ *
+ * Description:
+ *   Get exclusive access to the outgoing TX packet queue.
+ *
+ * Parameters:
+ *   priv - Reference to a driver state structure instance
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void spirit_txlock(FAR struct spirit_driver_s *priv)
+{
+  while (sem_wait(&priv->txsem) < 0)
+    {
+      DEBUGASSERT(errno == EINTR);
+    }
+}
+
+/****************************************************************************
+ * Name: spirit_txunlock
+ *
+ * Description:
+ *   Relinquish exclusive access to the outgoing TX packet queue.
+ *
+ * Parameters:
+ *   priv - Reference to a driver state structure instance
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void spirit_txunlock(FAR struct spirit_driver_s *priv)
+{
+  sem_post(&priv->txsem);
 }
 
 /****************************************************************************
@@ -532,7 +639,7 @@ errout_with_irqdisable:
 }
 
 /****************************************************************************
- * Name: spirit_transmit
+ * Name: spirit_transmit_work
  *
  * Description:
  *   Start hardware transmission.
@@ -541,26 +648,36 @@ errout_with_irqdisable:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
- *   0 - on success with nothing to be sent (SPIRIT_TX_IDLE)
- *   1 - on success if a packet is in-flight (SPIRIT_TX_INFLIGHT)
- *  <0 - a negated errno on failure
+ *   None
+ *
+ * Assumptions:
+ *   Running on the HP worker thread.
  *
  ****************************************************************************/
 
-static int spirit_transmit(FAR struct spirit_driver_s *priv)
+static void spirit_transmit_work(FAR void *arg)
 {
+  FAR struct spirit_driver_s *priv = (FAR struct spirit_driver_s *)arg;
   FAR struct spirit_library_s *spirit = &priv->spirit;
   FAR struct pktradio_metadata_s *pktmeta;
   FAR struct iob_s *iob;
   int ret;
 
+  DEBUGASSERT(priv != NULL);
+
   /* Check if there are any pending transfers in the TX AND if the hardware
    * is not busy with another reception or transmission.
    */
 
-  spirit_lock(priv);
   wlinfo("txhead=%p state=%u\n", priv->txhead, priv->state);
 
+  /* Take the TX packet queue lock to assure that it is not currently being
+   * modified on the LP worker thread.  NOTE that it is not harmful to hold the
+   * TX packet queue lock throughout this function; the LP worker thread cannot
+   * run until this completes.
+   */
+
+  spirit_txlock(priv);
   while (priv->txhead != NULL && priv->state == DRIVER_STATE_IDLE)
     {
       /* Remove the contained IOB from the head of the TX queue */
@@ -696,67 +813,23 @@ static int spirit_transmit(FAR struct spirit_driver_s *priv)
    * possibly RX) states.
    */
 
-  ret = (priv->state == DRIVER_STATE_IDLE) ? SPIRIT_TX_IDLE : SPIRIT_TX_INFLIGHT;
-  spirit_unlock(priv);
-  return ret;
+  spirit_txunlock(priv);
+  return;
 
 errout_with_iob:
   iob_free(iob);
 
 errout_with_lock:
-  spirit_unlock(priv);
+  spirit_txunlock(priv);
   NETDEV_TXERRORS(&priv->radio.r_dev);
-  return ret;
-}
-
-/****************************************************************************
- * Name: spirit_transmit_work
- *
- * Description:
- *   Send data on the LP work queue.  This function scheduled by interrupt
- *   handling logic when a TX transfer completes and, more generally, on
- *   all transitions to the IDLE state.
- *
- * Parameters:
- *   arg - Reference to driver state structure (cast to void *)
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void spirit_transmit_work(FAR void *arg)
-{
-  FAR struct spirit_driver_s *priv = (FAR struct spirit_driver_s *)arg;
-  int ret;
-
-  DEBUGASSERT(priv != NULL);
-
-  /* If the driver is IDLE and there are packets to be sent, then send them
-   * now.  This will cause a transition to the DRIVER_STATE_SENDING state.
-   */
-
-  ret = spirit_transmit(priv);
-  if (ret < 0)
-    {
-      wlerr("ERROR: spirit_transmit failed: %d\n", ret);
-    }
-  else if (ret == SPIRIT_TX_IDLE)
-    {
-      /* Nothing was sent.  Try, instead, to poll for new TX data,  We do
-       * this here because TX and TX poll share the sam work structure so
-       * the receipt of TX data could caue the loss of polls.
-       */
-
-      spirit_txpoll_work(arg);
-    }
+  return;
 }
 
 /****************************************************************************
  * Name: spirit_schedule_transmit_work
  *
  * Description:
- *   Schedule to send data on the LP work queue.
+ *   Schedule to send data on the HP worker thread.
  *
  * Parameters:
  *   priv - Reference to driver state structure
@@ -765,17 +838,18 @@ static void spirit_transmit_work(FAR void *arg)
  *   None
  *
  * Assumptions:
- *   Called from logic running the HP work queue.
+ *   Called from logic running either the HP worker thread.
  *
  ****************************************************************************/
 
 static void spirit_schedule_transmit_work(FAR struct spirit_driver_s *priv)
 {
-  if (priv->txhead != NULL && priv->state == DRIVER_STATE_IDLE)
+  if (priv->txhead != NULL && priv->state == DRIVER_STATE_IDLE &&
+      work_available(&priv->txwork))
     {
       /* Schedule to perform the TX processing on the worker thread. */
 
-      work_queue(LPWORK, &priv->txwork, spirit_transmit_work, priv, 0);
+      work_queue(HPWORK, &priv->txwork, spirit_transmit_work, priv, 0);
     }
 }
 
@@ -798,30 +872,19 @@ static void spirit_schedule_transmit_work(FAR struct spirit_driver_s *priv)
  *   OK on success; a negated errno on failure
  *
  * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   the network is locked.
+ *   Called from network logic, running on the LP worker thread with the
+ *   network locked.
  *
  ****************************************************************************/
 
 static int spirit_txpoll_callback(FAR struct net_driver_s *dev)
 {
-  FAR struct spirit_driver_s *priv = (FAR struct spirit_driver_s *)dev->d_private;
-  int ret;
-
-  /* NOTE: It is not necessary to call spirit_transmit because that works
-   * though different mechanism, through a backdoor 6LoWPAN interface.  We
-   * call it here only to may sure that it has not stalled for some reason.
-   */
-
-  ret = spirit_transmit(priv);
-
   /* If zero is returned, the polling will continue until all connections have
    * been examined.
    *
    * REVISIT:  Should we halt polling if there are packets in flight.
    */
 
-  UNUSED(ret);
   return 0;
 }
 
@@ -829,13 +892,16 @@ static int spirit_txpoll_callback(FAR struct net_driver_s *dev)
  * Name: spirit_receive_work
  *
  * Description:
- *   Pass received packets to the network on the LP work queue.
+ *   Pass received packets to the network on the LP worker thread.
  *
  * Parameters:
  *   arg - Reference to driver state structure (cast to void *)
  *
  * Returned Value:
  *   None
+ *
+ * Assumptions:
+ *   Running on the LP worker thread.
  *
  ****************************************************************************/
 
@@ -848,9 +914,11 @@ static void spirit_receive_work(FAR void *arg)
 
   DEBUGASSERT(priv != NULL);
 
-  /* We need to have exclusive access to the RX queue */
+  /* We need to have exclusive access to the RX queue; new RX packets may be
+   * queued asynchronously by interrupt level logic.
+   */
 
-  spirit_lock(priv);
+  spirit_rxlock(priv);
   while (priv->rxhead != NULL)
     {
       /* Remove the contained IOB from the RX queue */
@@ -866,7 +934,7 @@ static void spirit_receive_work(FAR void *arg)
           priv->rxtail = NULL;
         }
 
-      spirit_unlock(priv);
+      spirit_rxunlock(priv);
 
       /* Remove the IOB from the container */
 
@@ -897,17 +965,17 @@ static void spirit_receive_work(FAR void *arg)
 
       /* Get exclusive access as needed at the top of the loop */
 
-      spirit_lock(priv);
+      spirit_rxlock(priv);
     }
 
-  spirit_unlock(priv);
+  spirit_rxunlock(priv);
 }
 
 /****************************************************************************
  * Name: spirit_schedule_receive_work
  *
  * Description:
- *   Schedule to receive data on the LP work queue.
+ *   Schedule to receive data on the LP worker thread.
  *
  * Parameters:
  *   priv - Reference to driver state structure
@@ -916,7 +984,7 @@ static void spirit_receive_work(FAR void *arg)
  *   None
  *
  * Assumptions:
- *   Called from logic running the HP work queue.
+ *   Called from logic running the HP worker thread.
  *
  ****************************************************************************/
 
@@ -949,7 +1017,6 @@ static void spirit_interrupt_work(FAR void *arg)
    * the IRQ status register.
    */
 
-  spirit_lock(priv);
   DEBUGVERIFY(spirit_irq_get_pending(spirit, &irqstatus));
   wlinfo("Pending: %08lx\n", *(FAR unsigned long *)&irqstatus);
 
@@ -1125,7 +1192,7 @@ static void spirit_interrupt_work(FAR void *arg)
               priv->state = DRIVER_STATE_IDLE;
 
               /* Create the packet meta data and forward to the network.  This
-               * must be done on the LP work queue with the network lockes.
+               * must be done on the LP worker thread with the network locked.
                */
 
                pktmeta = pktradio_metadata_allocate();
@@ -1160,6 +1227,8 @@ static void spirit_interrupt_work(FAR void *arg)
                    */
 
                   pktmeta->pm_flink          = NULL;
+
+                  spirit_rxlock(priv);
                   if (priv->rxtail == NULL)
                     {
                       priv->rxhead           = pktmeta;
@@ -1170,9 +1239,10 @@ static void spirit_interrupt_work(FAR void *arg)
                     }
 
                   priv->rxtail               = pktmeta;
+                  spirit_rxunlock(priv);
 
                   /* Forward the packet to the network.  This must be done
-                   * on the LP work queue with the network locked.
+                   * on the LP worker thread with the network locked.
                    */
 
                   spirit_schedule_receive_work(priv);
@@ -1229,8 +1299,6 @@ static void spirit_interrupt_work(FAR void *arg)
 
       DEBUGVERIFY(spirit_waitstatus(spirit, MC_STATE_RX, 1));
     }
-
-  spirit_unlock(priv);
 }
 
 /****************************************************************************
@@ -1270,7 +1338,7 @@ static int spirit_interrupt(int irq, FAR void *context, FAR void *arg)
  * Name: spirit_txtimeout_work
  *
  * Description:
- *   Perform TX timeout related work from the worker thread
+ *   Perform TX timeout related work from the HP worker thread
  *
  * Parameters:
  *   arg - The argument passed when work_queue() as called.
@@ -1279,7 +1347,7 @@ static int spirit_interrupt(int irq, FAR void *context, FAR void *arg)
  *   OK on success
  *
  * Assumptions:
- *   The network is locked.
+ *   Runs on the HP worker thread.
  *
  ****************************************************************************/
 
@@ -1304,9 +1372,11 @@ static void spirit_txtimeout_work(FAR void *arg)
   spirit_ifdown(&priv->radio.r_dev);
   spirit_ifup(&priv->radio.r_dev);
 
-  /* Then poll the network for new XMIT data */
+  /* Then schedule to poll the network for new XMIT data on the LP worker
+   * thread.
+   */
 
-  (void)devif_poll(&priv->radio.r_dev, spirit_txpoll_callback);
+  work_queue(LPWORK, &priv->pollwork, spirit_txpoll_work, priv, 0);
   net_unlock();
 }
 
@@ -1343,9 +1413,9 @@ static void spirit_txtimeout_expiry(int argc, wdparm_t arg, ...)
   DEBUGASSERT(priv->lower->enable != NULL);
   priv->lower->enable(priv->lower, false);
 
-  /* Schedule to perform the TX timeout processing on the worker thread. */
+  /* Schedule to perform the TX timeout processing on the HP worker thread. */
 
-  work_queue(HPWORK, &priv->irqwork, spirit_txtimeout_work, priv, 0);
+  work_queue(HPWORK, &priv->txwork, spirit_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
@@ -1439,10 +1509,10 @@ static void spirit_txpoll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct spirit_driver_s *priv = (FAR struct spirit_driver_s *)arg;
 
-  /* Schedule to perform the interrupt processing on the worker thread. */
+  /* Schedule to perform the poll work on the LP worker thread. */
 
   priv->needpoll = true;
-  work_queue(LPWORK, &priv->txwork, spirit_txpoll_work, priv, 0);
+  work_queue(LPWORK, &priv->pollwork, spirit_txpoll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -1458,7 +1528,10 @@ static void spirit_txpoll_expiry(int argc, wdparm_t arg, ...)
  * Returned Value:
  *   None
  *
+ * Assumptions:
  *   Called from the network layer and running on the LP working thread.
+ *   This interracts with the spirit hardware, but does so while the network
+ *   is down and with Spirit interrupts disabled.
  *
  ****************************************************************************/
 
@@ -1574,6 +1647,8 @@ error_with_ifalmostup:
  *
  * Assumptions:
  *   Called from the network layer and running on the LP working thread.
+ *   This interracts with the spirit hardware, but does so with Spirit
+ *   interrupts disabled.
  *
  ****************************************************************************/
 
@@ -1666,7 +1741,7 @@ static int spirit_ifdown(FAR struct net_driver_s *dev)
  *   None
  *
  * Assumptions:
- *   Called from network logic running on the LP work queue
+ *   Called from network logic running on the LP worker thread
  *
  ****************************************************************************/
 
@@ -1674,20 +1749,9 @@ static int spirit_txavail(FAR struct net_driver_s *dev)
 {
   FAR struct spirit_driver_s *priv = (FAR struct spirit_driver_s *)dev->d_private;
 
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions and we will have to ignore the Tx
-   * availability action.
-   */
+  /* Schedule to serialize the poll on the LP worker thread. */
 
-  spirit_lock(priv);
-  if (work_available(&priv->txwork))
-    {
-      /* Schedule to serialize the poll on the worker thread. */
-
-      work_queue(LPWORK, &priv->txwork, spirit_txpoll_work, priv, 0);
-    }
-
-  spirit_unlock(priv);
+  work_queue(LPWORK, &priv->pollwork, spirit_txpoll_work, priv, 0);
   return OK;
 }
 
@@ -1767,7 +1831,6 @@ static int spirit_ioctl(FAR struct net_driver_s *dev, int cmd,
   priv    = (FAR struct spirit_driver_s *)dev->d_private;
   cmddata = (FAR struct pktradio_ifreq_s *)((uintptr_t)arg);
 
-  spirit_lock(priv);
   switch (cmd)
     {
       /* SIOCPKTRADIOGGPROPS
@@ -1847,7 +1910,7 @@ static int spirit_ioctl(FAR struct net_driver_s *dev, int cmd,
         break;
     }
 
-  spirit_unlock(priv);
+  UNUSED(priv);
   return ret;
 }
 #endif
@@ -1868,7 +1931,7 @@ static int spirit_ioctl(FAR struct net_driver_s *dev, int cmd,
  *   errno value is returned on any failure.
  *
  * Assumptions:
- *   Called from network logic running on the low-priority work queue.
+ *   Called from network logic running on the low-priority worker thread.
  *
  ****************************************************************************/
 
@@ -1902,6 +1965,7 @@ static int spirit_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
  *
  * Assumptions:
  *   Called from network logic with the network locked.
+ *   Running on the LP worker thread.
  *
  ****************************************************************************/
 
@@ -1927,7 +1991,6 @@ static int spirit_req_data(FAR struct sixlowpan_driver_s *netdev,
     {
       /* Increment statistics */
 
-      spirit_lock(priv);
       NETDEV_TXPACKETS(&priv->radio.r_dev);
 
       /* Remove the IOB from the queue */
@@ -1953,7 +2016,6 @@ static int spirit_req_data(FAR struct sixlowpan_driver_s *netdev,
          {
            wlerr("ERROR: Failed to allocate metadata... dropping\n");
            NETDEV_RXDROPPED(&priv->radio.r_dev);
-           spirit_unlock(priv);
            iob_free(iob);
            continue;
          }
@@ -1971,6 +2033,8 @@ static int spirit_req_data(FAR struct sixlowpan_driver_s *netdev,
       /* Add the IOB container to tail of the queue of outgoing IOBs. */
 
       pktmeta->pm_flink          = NULL;
+
+      spirit_txlock(priv);
       if (priv->txtail == NULL)
         {
           priv->txhead           = pktmeta;
@@ -1981,13 +2045,13 @@ static int spirit_req_data(FAR struct sixlowpan_driver_s *netdev,
         }
 
       priv->txtail               = pktmeta;
+      spirit_txunlock(priv);
 
-      /* If there are no transmissions or receptions in progress, then start
+      /* If are no transmissions or receptions in progress, then schedule
        * tranmission of the frame in the IOB at the head of the IOB queue.
        */
 
-       spirit_unlock(priv);
-       spirit_transmit(priv);
+       spirit_schedule_transmit_work(priv);
     }
 
   return OK;
@@ -2390,12 +2454,13 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  priv->txpoll        = wd_create();   /* Create periodic poll timer */
-  priv->txtimeout     = wd_create();   /* Create TX timeout timer */
+  priv->txpoll        = wd_create();       /* Create periodic poll timer */
+  priv->txtimeout     = wd_create();       /* Create TX timeout timer */
 
   DEBUGASSERT(priv->txpoll != NULL && priv->txtimeout != NULL);
 
-  sem_init(&priv->exclsem, 0, 1);
+  sem_init(&priv->rxsem, 0, 1);            /* Access to RX packet queue */
+  sem_init(&priv->txsem, 0, 1);            /* Access to TX packet queue */
 
   /* Initialize the IEEE 802.15.4 network device fields */
 
