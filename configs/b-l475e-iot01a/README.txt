@@ -523,15 +523,10 @@ Configuration sub-directories
         length to 84 and that did NOT eliminate the RX FIFO error.
 
         At the end of the TCP test, the "nsh> ifconfig" command shows that
-        there were two TX timeouts.  Perhaps this is related?  The TX timeout
-        is set to 5 seconds, so this could be a serious performance issue.
-
-        So for now I have to live with the RX FIFO error.  I have observed
-        only a single RX FIFO error and it occurs at the same place in the
-        the TCP test (when the data is turned around and sent back to the
-        client).  the UDP test and Telnet work perfectly.  The RX FIFO error
-        is handled perfectly and, since it is TCP, there is no loss of data
-        and all tests pass.  That is as good as I can do for now.
+        there were two TX timeouts.  Perhaps this is related?  I found that
+        the TX timeout was not being cancelled.  It must be canceled on each
+        TX completed or TX error.  This DID eliminate the RX FIFO error, but
+        now the test hangs and does not complete.
 
         Another Errata:  "Using the STack packet format and no CRC field, the
         reading from RX FIFO to the last received byte, is not possible. ..."
@@ -542,4 +537,3 @@ Configuration sub-directories
 
         Reducing the FIFO to 94 bytes fixed the problem with the 2 byte CRC
         but did not resolve that occasional RX FIFO error.
-

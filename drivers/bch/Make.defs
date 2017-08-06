@@ -38,9 +38,9 @@ ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 
 # Include BCH driver
 
-CSRCS += bchlib_setup.c bchlib_teardown.c bchlib_read.c bchlib_write.c \
-		 bchlib_cache.c bchlib_sem.c bchdev_register.c bchdev_unregister.c \
-		 bchdev_driver.c
+CSRCS += bchlib_setup.c bchlib_teardown.c bchlib_read.c bchlib_write.c
+CSRCS += bchlib_cache.c bchlib_sem.c bchdev_register.c bchdev_unregister.c
+CSRCS += bchdev_driver.c
 
 # Include BCH driver build support
 

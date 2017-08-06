@@ -232,13 +232,19 @@
 
 #define SPIRIT_WDDELAY      (1*CLK_TCK)
 
-/* TX timeout = 5 seconds */
+/* Maximum number of retries (10) */
 
-#define SPIRIT_TXTIMEOUT    (5*CLK_TCK)
+#define SPIRIT_MAX_RETX     PKT_N_RETX_10
 
-/* RX timeout = 1.5 seconds */
+/* RX timeout = 1.5 seconds.  Transmitter will wait this amount timer for
+ * an ACK from the receiver (per transmission).
+ */
 
 #define SPIRIT_RXTIMEOUT    1500.0
+
+/* Failsafe TX timeout = MAX_RETX * RXTIMEOUT + 1 = 16 seconds */
+
+#define SPIRIT_TXTIMEOUT    (16*CLK_TCK)
 
 /****************************************************************************
  * Private Types
@@ -1081,10 +1087,16 @@ static void spirit_interrupt_work(FAR void *arg)
       DEBUGVERIFY(spirit_command(spirit, COMMAND_FLUSHTXFIFO));
       irqstatus.IRQ_TX_DATA_SENT = 0;
 
-      /* Revert the sending state */
+      /* Were we in the sending state? */
 
       if (priv->state == DRIVER_STATE_SENDING)
         {
+          /* Yes.. Cancel the TX timeout */
+
+          wd_cancel(priv->txtimeout);
+
+          /* Revert the sending state */
+
           priv->state = DRIVER_STATE_IDLE;
         }
 
@@ -1106,7 +1118,7 @@ static void spirit_interrupt_work(FAR void *arg)
     {
       wlinfo("Data sent\n");
 
-      /* Disable the TX timeout */
+      /* Cancel the TX timeout */
 
       wd_cancel(priv->txtimeout);
 
@@ -1407,10 +1419,10 @@ static void spirit_interrupt_work(FAR void *arg)
 
   if (irqstatus.IRQ_RX_DATA_DISC != 0)
     {
-      wlinfo("Data discarded: Node addr=%02x RX dest addr=%02x\n",
+      wlwarn("WARNING: Data discarded: Node addr=%02x RX dest addr=%02x\n",
              spirit_pktcommon_get_nodeaddress(spirit),
              spirit_pktcommon_get_rxdestaddr(spirit));
-      wlinfo("                CRC error=%u RX timeout=%u\n",
+      wlwarn("                         CRC error=%u RX timeout=%u\n",
              irqstatus.IRQ_CRC_ERROR, irqstatus.IRQ_RX_TIMEOUT);
 
       /* Flush the RX FIFO and revert the receiving state */
@@ -1500,29 +1512,38 @@ static void spirit_txtimeout_work(FAR void *arg)
 {
   FAR struct spirit_driver_s *priv = (FAR struct spirit_driver_s *)arg;
 
-  /* Lock the network and serialize driver operations if necessary.
-   * NOTE: Serialization is only required in the case where the driver work
-   * is performed on an LP worker thread and where more than one LP worker
-   * thread has been configured.
+  wlwarn("WARNING: TX Timeout.  state=%u\n", priv->state);
+
+  /* Are we in the sending state?  If not, then this must be a spurious
+   * timout.
    */
 
-  net_lock();
+  if (priv->state == DRIVER_STATE_SENDING)
+    {
+      /* Lock the network and serialize driver operations if necessary.
+       * NOTE: Serialization is only required in the case where the driver
+       * work is performed on an LP worker thread and where more than one LP
+       * worker thread has been configured.
+       */
 
-  /* Increment statistics and dump debug info */
+      net_lock();
 
-  NETDEV_TXTIMEOUTS(&priv->radio.r_dev);
+      /* Increment statistics and dump debug info */
 
-  /* Then reset the hardware */
+      NETDEV_TXTIMEOUTS(&priv->radio.r_dev);
 
-  spirit_ifdown(&priv->radio.r_dev);
-  spirit_ifup(&priv->radio.r_dev);
+      /* Then reset the hardware */
 
-  /* Then schedule to poll the network for new XMIT data on the LP worker
-   * thread.
-   */
+      spirit_ifdown(&priv->radio.r_dev);
+      spirit_ifup(&priv->radio.r_dev);
 
-  work_queue(LPWORK, &priv->pollwork, spirit_txpoll_work, priv, 0);
-  net_unlock();
+      /* Then schedule to poll the network for new XMIT data on the LP
+       * worker thread.
+       */
+
+      work_queue(LPWORK, &priv->pollwork, spirit_txpoll_work, priv, 0);
+      net_unlock();
+    }
 }
 
 /****************************************************************************
