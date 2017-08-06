@@ -572,6 +572,37 @@ config N25QXXX_SECTOR512
 
 endif # MTD_N25QXXX
 
+config MTD_MX25RXX
+	bool "QuadSPI-based Macronix MX25RXX family FLASH"
+	default n
+	---help---
+		Support the MX25R6435F chip
+
+if MTD_MX25RXX
+
+config MX25RXX_QSPIMODE
+	int "MX25RXX QuadSPI Mode"
+	default 0
+	---help---
+		This device can operate in SPI mode 0 or 3.
+
+config MX25RXX_QSPI_FREQUENCY
+	int "MX25RXX QuadSPI Frequency"
+	default 33000000
+	---help---
+		Clock frequency for all SPI commands except for Read Data
+		command. Dual and Quad read methods need different frequency
+		in low power mode (Only Quad read is supported in this driver).
+
+config MX25RXX_QSPI_READ_FREQUENCY
+	int "MX25RXX QuadSPI Read command frequency"
+	default 8000000
+	---help---
+		Clock frequency for read data command.
+		Only Quad read is supported in this driver.
+
+endif # MTD_MX25RXX
+
 config MTD_SMART
 	bool "Sector Mapped Allocation for Really Tiny (SMART) Flash support"
 	default n

@@ -106,6 +106,8 @@
  * Public Types
  ****************************************************************************/
 
+struct qspi_dev_s; /* Forward reference */
+
 /* The following defines the geometry for the device.  It treats the device
  * as though it where just an array of fixed size blocks.  That is most likely
  * not true, but the client will expect the device logic to do whatever is
@@ -520,7 +522,6 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *dev);
  *
  ****************************************************************************/
 
-struct qspi_dev_s; /* Forward reference */
 FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi,
                                         bool unprotect);
 
@@ -536,6 +537,18 @@ FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi,
 FAR struct mtd_dev_s *mx25l_initialize_spi(FAR struct spi_dev_s *dev);
 
 /****************************************************************************
+ * Name: mx25rxx_initialize_spi
+ *
+ * Description:
+ *   Create an initialized MTD device instance for the SPI-based MX25Rx
+ *   FLASH part.
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *mx25rxx_initialize(FAR struct qspi_dev_s *qspi,
+                                         bool unprotect);
+
+/****************************************************************************
  * Name: n25qxxx_initialize
  *
  * Description:
@@ -544,7 +557,6 @@ FAR struct mtd_dev_s *mx25l_initialize_spi(FAR struct spi_dev_s *dev);
  *
  ****************************************************************************/
 
-struct qspi_dev_s; /* Forward reference */
 FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi,
                                          bool unprotect);
 
