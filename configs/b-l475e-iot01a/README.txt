@@ -398,6 +398,9 @@ Configuration sub-directories
          At this point everything seems functional, but somewhat reliable.
          Sometimes things seem to initialize in a bad state.
 
+        2017-08-06:  Reducing the FIFO to 94 bytes fixed the problem with the
+          2 byte CRC.
+
      Test Matrix:
        The following configurations have been tested successfully (with
        CRC disabled):
@@ -526,3 +529,12 @@ Configuration sub-directories
         is handled perfectly and, since it is TCP, there is no loss of data
         and all tests pass.  That is as good as I can do for now.
 
+        Another Errata:  "Using the STack packet format and no CRC field, the
+        reading from RX FIFO to the last received byte, is not possible. ..."
+        Workaround: "By configuring the packet handler with at least one byte
+        of CRC, the problem is solved. If the CRC is not required in the
+        application, configure one byte of CRC in the receiver only, to read
+        the payload correctly from RX FIFO."
+
+        Reducing the FIFO to 94 bytes fixed the problem with the 2 byte CRC
+        but did not resolve that occasional, harmless RX FIFO error.
