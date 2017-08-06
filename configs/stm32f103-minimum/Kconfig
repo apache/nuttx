@@ -5,6 +5,63 @@
 
 if ARCH_BOARD_STM32F103_MINIMUM
 
+config STM32F103MINIMUM_FLASH
+	bool "MTD driver for external 4Mbyte W25Q32FV FLASH on SPI1"
+	default n
+	select MTD
+	select MTD_W25
+	select MTD_SMART
+	select FS_SMARTFS
+	select STM32_SPI1
+	select MTD_BYTE_WRITE
+	---help---
+		Configures an MTD device for use with the onboard flash
+
+config STM32F103MINIMUM_FLASH_MINOR
+	int "Minor number for the FLASH /dev/smart entry"
+	default 0
+	depends on STM32F103MINIMUM_FLASH
+	---help---
+		Sets the minor number for the FLASH MTD /dev entry
+
+config STM32F103MINIMUM_FLASH_PART
+	bool "Enable partition support on FLASH"
+	default y
+	depends on STM32F103MINIMUM_FLASH
+	---help---
+		Enables creation of partitions on the FLASH
+
+config STM32F103MINIMUM_FLASH_CONFIG_PART
+	bool "Create application config data partition on FLASH"
+	default n
+	depends on STM32F103MINIMUM_FLASH_PART
+	depends on PLATFORM_CONFIGDATA
+	---help---
+		Enables creation of a /dev/config partition on the FLASH
+
+config STM32F103MINIMUM_FLASH_CONFIG_PART_NUMBER
+	int "Index number of config partition (in list below)"
+	default 0
+	depends on STM32F103MINIMUM_FLASH_CONFIG_PART
+	---help---
+		Specifies the index number of the config data partition
+		from the partition list.
+
+config STM32F103MINIMUM_FLASH_PART_LIST
+	string "Flash partition size list"
+	default "1024,1024,1024,1024"
+	depends on STM32F103MINIMUM_FLASH_PART
+	---help---
+		Comma separated list of partition sizes in KB.
+
+config STM32F103MINIMUM_FLASH_PART_NAMES
+	string "Flash partition name list"
+	default "first,second,third,forth"
+	depends on STM32F103MINIMUM_FLASH_PART
+	depends on MTD_PARTITION_NAMES
+	---help---
+		Comma separated list of partition names.
+
 config STM32F103MINIMUM_QETIMER
 	int "Timer to use with QE encoder"
 	default 4

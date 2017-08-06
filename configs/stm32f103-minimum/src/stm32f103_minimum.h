@@ -80,6 +80,9 @@
 
 /* SPI chip selects */
 
+#define FLASH_SPI1_CS     (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
+
 #define GPIO_CS_MFRC522   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
 
@@ -188,6 +191,16 @@ int stm32_gpio_initialize(void);
  ************************************************************************************/
 
 void stm32_spidev_initialize(void);
+
+/************************************************************************************
+ * Name: stm32_w25initialize
+ *
+ * Description:
+ *   Called to initialize Winbond W25 memory
+ *
+ ************************************************************************************/
+
+int stm32_w25initialize(int minor);
 
 /****************************************************************************
  * Name: stm32_qencoder_initialize

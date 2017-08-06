@@ -14,6 +14,7 @@ Contents
   - Using 128KiB of Flash instead of 64KiB
   - Quadrature Encoder
   - SDCard support
+  - SPI NOR Flash
   - Nokia 5110 LCD Display support
   - USB Console support
   - STM32F103 Minimum - specific Configuration Options
@@ -278,6 +279,41 @@ Quadrature Encoder:
 
   In this configuration, the QEncoder inputs will be on the TIM4 inputs of
   PB6 and PB7.
+
+SPI NOR Flash support:
+======================
+
+  We can use an extern SPI NOR Flash with STM32F103-Minimum board. In this case
+  we tested the Winboard W25Q32FV (32Mbit = 4MiB).
+
+  You can connect the W25Q32FV module in the STM32F103 Minimum board this way:
+  connect PA5 (SPI1 CLK) to CLK; PA7 (SPI1 MOSI) to DI; PA6 (SPI MISO) to DO;
+  PA4 to /CS; Also connect 3.3V to VCC and GND to GND.
+
+  You can start with default "stm32f103-minimum/nsh" configuration option and
+  enable these options using "make menuconfig" :
+
+  System Type  --->
+      STM32 Peripheral Support  --->
+          [*] SPI1
+
+  Board Selection  --->
+      [*] MTD driver for external 4Mbyte W25Q32FV FLASH on SPI1
+      (0)   Minor number for the FLASH /dev/smart entry
+      [*]   Enable partition support on FLASH
+      (1024,1024,1024,1024) Flash partition size list
+
+  Device Drivers  --->
+      -*- Memory Technology Device (MTD) Support  --->
+              [*]   Support MTD partitions
+              -*-   SPI-based W25 FLASH
+              (0)     W25 SPI Mode
+              (20000000) W25 SPI Frequency
+
+  File Systems  --->
+      -*- SMART file system
+      (0xff) FLASH erased state
+      (16)  Maximum file name length
 
 SDCard support:
 ===============

@@ -74,6 +74,10 @@ void stm32_spidev_initialize(void)
    *       architecture.
    */
 
+#ifdef CONFIG_MTD_W25
+  (void)stm32_configgpio(FLASH_SPI1_CS);      /* FLASH chip select */
+#endif
+
 #ifdef CONFIG_CAN_MCP2515
   (void)stm32_configgpio(GPIO_MCP2515_CS);    /* MCP2515 chip select */
 #endif
@@ -168,6 +172,10 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
     {
       stm32_gpiowrite(GPIO_SDCARD_CS, !selected);
     }
+#endif
+
+#ifdef CONFIG_MTD_W25
+  stm32_gpiowrite(FLASH_SPI1_CS, !selected);
 #endif
 }
 
