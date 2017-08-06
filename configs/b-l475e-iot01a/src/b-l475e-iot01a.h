@@ -51,6 +51,8 @@
 /* Configuration ************************************************************/
 
 #define HAVE_SPSGRF 1
+#define HAVE_MX25R6435F 1
+#define HAVE_MX25R6435F_SMARTFS 1
 
 /* SPSGRF support depends on:
  *
@@ -79,6 +81,15 @@
 
 #if !defined(CONFIG_NET) || !defined(CONFIG_NET_6LOWPAN)
 #  undef HAVE_SPSGRF
+#endif
+
+#if !defined(CONFIG_MTD_MX25RXX) || !defined(CONFIG_STM32L4_QSPI)
+#  undef HAVE_MX25R6435F
+#endif
+
+#if !defined(HAVE_MX25R6435F) || !defined(CONFIG_MTD_SMART) || \
+    !defined(CONFIG_FS_SMARTFS)
+#  undef HAVE_MX25R6435F_SMARTFS
 #endif
 
 /* GPIO Definitions *********************************************************/

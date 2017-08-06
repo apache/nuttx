@@ -39,16 +39,22 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/mount.h>
 #include <syslog.h>
+#include <errno.h>
 
 #include <nuttx/input/buttons.h>
 #include <nuttx/leds/userled.h>
-#include <nuttx/board.h>
+#include <nuttx/spi/qspi.h>
+#include <nuttx/mtd/mtd.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "stm32l4_qspi.h"
 #include "b-l475e-iot01a.h"
 
 /****************************************************************************
@@ -96,6 +102,127 @@ int stm32l4_bringup(void)
   board_userled_initialize();
 #endif /* CONFIG_USERLED_LOWER */
 #endif /* CONFIG_USERLED && !CONFIG_ARCH_LEDS */
+
+#ifdef HAVE_MX25R6435F
+  {
+    /* Create an instance of the STM32L4 QSPI device driver */
+
+    FAR struct qspi_dev_s *g_qspi;
+    FAR struct mtd_dev_s *g_mtd_fs;
+
+    g_qspi = stm32l4_qspi_initialize(0);
+    if (g_qspi == NULL)
+      {
+        syslog(LOG_ERR, "ERROR: stm32l4_qspi_initialize failed\n");
+        return -EIO;
+      }
+
+    /* Use the QSPI device instance to initialize the
+     * MX25R6435F flash device.
+     */
+
+    g_mtd_fs = mx25rxx_initialize(g_qspi, true);
+    if (!g_mtd_fs)
+      {
+        syslog(LOG_ERR, "ERROR: mx25rxx_initialize failed\n");
+        return -EIO;
+      }
+
+#ifdef CONFIG_B_L475E_IOT01A_MTD_PART
+      {
+        /* Create partitions on external flash memory */
+
+        int partno;
+        int partsize;
+        int partoffset;
+        int partszbytes;
+        int erasesize;
+        FAR struct mtd_geometry_s geo;
+        const char *ptr = CONFIG_B_L475E_IOT01A_MTD_PART_LIST;
+        FAR struct mtd_dev_s *mtd_part;
+        char  partref[4];
+
+        /* Now create a partition on the FLASH device */
+
+        partno = 0;
+        partoffset = 0;
+
+        /* Query MTD geometry */
+
+        ret = MTD_IOCTL(g_mtd_fs, MTDIOC_GEOMETRY,
+                        (unsigned long)(uintptr_t)&geo);
+        if (ret < 0)
+          {
+            syslog(LOG_ERR, "ERROR: MTDIOC_GEOMETRY failed\n");
+            return ret;
+          }
+
+        /* Get the Flash erase size */
+
+        erasesize = geo.erasesize;
+
+        while (*ptr != '\0')
+          {
+            /* Get the partition size */
+
+            partsize = atoi(ptr);
+            if (partsize <= 0)
+              {
+                syslog(LOG_ERR, "Error while processing <%s>\n", ptr);
+                goto process_next_part;
+              }
+
+            partszbytes = (partsize << 10); /* partsize is defined in KB */
+
+            if ((partszbytes < erasesize) || ((partszbytes % erasesize) != 0))
+              {
+                syslog(LOG_ERR, "Invalid partition size: %d bytes\n",
+                       partszbytes);
+                partszbytes = (partszbytes+erasesize) & -erasesize;
+              }
+
+            mtd_part = mtd_partition(g_mtd_fs, partoffset,
+                                     partszbytes / erasesize);
+            partoffset += partszbytes / erasesize;
+
+#if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
+            /* Now initialize a SMART Flash block device and bind it to the MTD
+             * device */
+
+            sprintf(partref, "p%d", partno);
+            smart_initialize(CONFIG_B_L475E_IOT01A_MTD_FLASH_MINOR,
+                             mtd_part, partref);
+#endif
+
+process_next_part:
+            /* Update the pointer to point to the next size in the list */
+
+            while ((*ptr >= '0') && (*ptr <= '9'))
+              {
+                ptr++;
+              }
+
+            if (*ptr == ',')
+              {
+                ptr++;
+              }
+
+            /* Increment the part number */
+
+            partno++;
+          }
+      }
+#else /* CONFIG_B_L475E_IOT01A_MTD_PART */
+
+#ifdef HAVE_MX25R6435F_SMARTFS
+      /* Configure the device with no partition support */
+
+      smart_initialize(CONFIG_B_L475E_IOT01A_MTD_FLASH_MINOR, g_mtd_fs, NULL);
+#endif /* HAVE_MX25R6435F_SMARTFS */
+
+#endif /* CONFIG_B_L475E_IOT01A_MTD_PART */
+  }
+#endif /* HAVE_MX25R6435F */
 
 #ifdef HAVE_SPSGRF
   /* Configure Spirit/SPSGRF wireless */

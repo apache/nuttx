@@ -96,6 +96,8 @@
 #define STM32L4_LSI_FREQUENCY     32000
 #define STM32L4_LSE_FREQUENCY     32768
 
+#define BOARD_AHB_FREQUENCY       80000000ul
+
 #define STM32L4_BOARD_USEHSI      1
 
 /* XXX sysclk mux = pllclk */

@@ -164,6 +164,16 @@
 #define GPIO_SPI3_MISO GPIO_SPI3_MISO_2
 #define GPIO_SPI3_MOSI GPIO_SPI3_MOSI_2
 
+/* Quad SPI: connected to MX25R6435F external flash memory */
+
+#define GPIO_QSPI_CS  (GPIO_QSPI_NCS_2     | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz)
+#define GPIO_QSPI_IO0 (GPIO_QSPI_BK1_IO0_2 | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz)
+#define GPIO_QSPI_IO1 (GPIO_QSPI_BK1_IO1_2 | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz)
+#define GPIO_QSPI_IO2 (GPIO_QSPI_BK1_IO2_2 | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz)
+#define GPIO_QSPI_IO3 (GPIO_QSPI_BK1_IO3_2 | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz)
+#define GPIO_QSPI_SCK (GPIO_QSPI_CLK_2     | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz)
+
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
