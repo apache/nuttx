@@ -1104,9 +1104,14 @@ static void spirit_interrupt_work(FAR void *arg)
 
   if (irqstatus.IRQ_TX_DATA_SENT != 0)
     {
+      wlinfo("Data sent\n");
+
+      /* Disable the TX timeout */
+
+      wd_cancel(priv->txtimeout);
+
       /* Put the Spirit back in the receiving state */
 
-      wlinfo("Data sent\n");
       DEBUGVERIFY(spirit_management_rxstrobe(spirit));
       DEBUGVERIFY(spirit_command(spirit, CMD_RX));
 
@@ -1215,8 +1220,14 @@ static void spirit_interrupt_work(FAR void *arg)
       if ((offset + count) > CONFIG_IOB_BUFSIZE)
         {
           wlwarn("WARNING:  Packet too large... dropping\n");
+
+          /* Flush the RX FIFO and revert the receiving state */
+
           DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
           priv->state = DRIVER_STATE_IDLE;
+
+          /* Update error statistics */
+
           NETDEV_RXDROPPED(&priv->radio.r_dev);
         }
       else
@@ -1234,13 +1245,14 @@ static void spirit_interrupt_work(FAR void *arg)
             {
               wlerr("ERROR: Failed to allocate IOB... dropping\n");
 
+              /* Flush the RX FIFO and revert the receiving state */
+
               DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
               priv->state = DRIVER_STATE_IDLE;
+
+              /* Update error statistics */
+
               NETDEV_RXDROPPED(&priv->radio.r_dev);
-
-              /* Send any pending packets */
-
-              spirit_schedule_transmit_work(priv);
             }
           else
             {
@@ -1251,6 +1263,8 @@ static void spirit_interrupt_work(FAR void *arg)
               iob->io_offset = 0;
               iob->io_pktlen = iob->io_len;
               iob->io_flink  = NULL;
+
+              /* Flush the RX FIFO and revert the receiving state */
 
               DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
               priv->state = DRIVER_STATE_IDLE;
@@ -1312,11 +1326,11 @@ static void spirit_interrupt_work(FAR void *arg)
                   spirit_schedule_receive_work(priv);
                 }
             }
-
-          /* Send any pending packets */
-
-          spirit_schedule_transmit_work(priv);
         }
+
+      /* Schedule to send any pending packets */
+
+      spirit_schedule_transmit_work(priv);
     }
 
 #ifdef CONFIG_SPIRIT_FIFOS
@@ -1360,10 +1374,18 @@ static void spirit_interrupt_work(FAR void *arg)
           if ((offset + count) > CONFIG_IOB_BUFSIZE)
             {
               wlwarn("WARNING:  Packet too large... dropping\n");
+
+              /* Flush the RX FIFO and revert the receiving state */
+
               DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
               priv->state = DRIVER_STATE_IDLE;
 
+              /* Update statistics */
+
               NETDEV_RXDROPPED(&priv->radio.r_dev);
+
+              /* Free the IOB */
+
               priv->rxbuffer = NULL;
               iob_free(iob);
             }
@@ -1391,9 +1413,26 @@ static void spirit_interrupt_work(FAR void *arg)
       wlinfo("                CRC error=%u RX timeout=%u\n",
              irqstatus.IRQ_CRC_ERROR, irqstatus.IRQ_RX_TIMEOUT);
 
+      /* Flush the RX FIFO and revert the receiving state */
+
       DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
       priv->state = DRIVER_STATE_IDLE;
-      NETDEV_RXDROPPED(&priv->radio.r_dev);
+
+      /* Statistics are not updated.  Nor should they be updated for the
+       * case of packets that failed the address filter. RX timeouts are not
+       * enabled.  CRC timeouts would depend on if the packet was destined
+       * for us or not.  So, we do nothing.
+       */
+
+#ifdef CONFIG_SPIRIT_FIFOS
+      /* Discard any RX buffer that might have been allocated */
+
+      if (priv->rxbuffer != NULL)
+        {
+          iob_free(priv->rxbuffer);
+          priv->rxbuffer = NULL;
+        }
+#endif
     }
 
   /* Check the Spirit status.  If it is READY, the setup the RX state */
@@ -1429,19 +1468,11 @@ static int spirit_interrupt(int irq, FAR void *context, FAR void *arg)
 
   DEBUGASSERT(priv != NULL);
 
-  /* TODO: Determine if a TX transfer just completed .
-   * If a TX transfer just completed, then cancel the TX timeout so
-   * there will be no race condition between any subsequent timeout
-   * expiration and the deferred interrupt processing.
-   */
-
-  //wd_cancel(priv->txtimeout);
-
-  /* In complex environments, we cannot do SPI transfers from the interrupt
-   * handler because semaphores are probably used to lock the SPI bus.  In
-   * this case, we will defer processing to the worker thread.  This is also
-   * much kinder in the use of system resources and is, therefore, probably
-   * a good thing to do in any event.
+  /* We cannot do SPI transfers from the interrupt handler because
+   * semaphores are probably used to lock the SPI bus.  SPI drivers may also
+   * use interrupts and DMA.  In these cases, we will defer processing to
+   * the HP worker thread.  This is also much kinder in the use of system
+   * resources and is, therefore, probably a good thing to do in any event.
    */
 
   return work_queue(HPWORK, &priv->irqwork, spirit_interrupt_work,

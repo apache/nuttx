@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-# Socket address families
+# PF_INET/PF_INET6 socket address families
 
 ifeq ($(CONFIG_NET_IPv4),y)
 SOCK_CSRCS += inet_sockif.c inet_recvfrom.c inet_connect.c inet_close.c
@@ -61,7 +61,7 @@ ifneq ($(CONFIG_NET_TCP_NO_STACK),y)
 SOCK_CSRCS += inet_monitor.c
 endif
 
-# Include socket build support
+# Include inet build support
 
 DEPPATH += --dep-path inet
 VPATH += :inet
