@@ -156,8 +156,14 @@ int sched_setaffinity(pid_t pid, size_t cpusetsize, FAR const cpu_set_t *mask)
 
 errout_with_csection:
   leave_critical_section(flags);
+
 errout_with_lock:
   sched_unlock();
-  set_errno(errcode);
-  return errcode ? ERROR : OK;
+  if (errcode != 0)
+    {
+      set_errno(errcode);
+      return ERROR;
+    }
+
+  return OK;
 }
