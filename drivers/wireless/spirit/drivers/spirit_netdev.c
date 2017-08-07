@@ -1485,11 +1485,17 @@ static void spirit_interrupt_work(FAR void *arg)
       /* Flush the RX FIFO and revert the receiving state */
 
       DEBUGVERIFY(spirit_command(spirit, CMD_FLUSHRXFIFO));
-      priv->state = DRIVER_STATE_IDLE;
+
+      /* Revert the receiving state */
+
+      if (priv->state == DRIVER_STATE_RECEIVING)
+        {
+          priv->state = DRIVER_STATE_IDLE;
+        }
 
       /* Statistics are not updated.  Nor should they be updated for the
        * case of packets that failed the address filter. RX timeouts are not
-       * enabled.  CRC timeouts would depend on if the packet was destined
+       * enabled.  CRC failures would depend on if the packet was destined
        * for us or not.  So, we do nothing.
        */
 
@@ -1502,6 +1508,10 @@ static void spirit_interrupt_work(FAR void *arg)
           priv->rxbuffer = NULL;
         }
 #endif
+
+      /* Send any pending packets */
+
+      spirit_schedule_transmit_work(priv);
     }
 
   /* Check the Spirit status.  If it is READY, the setup the RX state */
