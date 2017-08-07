@@ -235,9 +235,9 @@ int net_ipv6_router(net_ipv6addr_t target, net_ipv6addr_t router)
   struct route_ipv6_match_s match;
   int ret;
 
-  /* Do not route the special broadcast IP address */
+  /* Do not route to any the special IPv6 multicast addresses */
 
-  if (net_ipv6addr_cmp(target, g_ipv6_alloneaddr))
+  if (target[0] == HTONS(0xff02))
     {
       return -ENOENT;
     }

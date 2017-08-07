@@ -52,6 +52,7 @@
 
 #include "utils/utils.h"
 #include "devif/devif.h"
+#include "inet/inet.h"
 #include "route/route.h"
 #include "netdev/netdev.h"
 
@@ -326,9 +327,13 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t ripaddr)
   int ret;
 #endif
 
-  /* First, check if this is the broadcast IP address */
+  /* First, check if this is the multicast IP address  We should actually
+   * pick off certain multicast address (all hosts multicast address, and
+   * the solicited-node multicast address).  We will cheat here and accept
+   * all multicast packets that are destined for the ff02::/16 addresses.
+   */
 
-  if (net_ipv6addr_cmp(ripaddr, g_ipv6_alloneaddr))
+  if (ripaddr[0] == HTONS(0xff02))
     {
 #ifdef CONFIG_NETDEV_MULTINIC
       /* Yes.. Check the local, bound address.  Is it INADDR_ANY? */

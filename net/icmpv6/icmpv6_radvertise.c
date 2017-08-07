@@ -54,6 +54,7 @@
 #include <nuttx/net/icmpv6.h>
 
 #include "netdev/netdev.h"
+#include "inet/inet.h"
 #include "utils/utils.h"
 #include "icmpv6/icmpv6.h"
 

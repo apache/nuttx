@@ -46,6 +46,7 @@
 #include <nuttx/net/ip.h>
 
 #include "netdev/netdev.h"
+#include "inet/inet.h"
 #include "udp/udp.h"
 
 /****************************************************************************

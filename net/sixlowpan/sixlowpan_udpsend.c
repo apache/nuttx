@@ -50,6 +50,7 @@
 
 #include "netdev/netdev.h"
 #include "socket/socket.h"
+#include "inet/inet.h"
 #include "icmpv6/icmpv6.h"
 #include "udp/udp.h"
 #include "utils/utils.h"

@@ -53,6 +53,7 @@
 
 #include "devif/devif.h"
 #include "netdev/netdev.h"
+#include "inet/inet.h"
 #include "icmpv6/icmpv6.h"
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF

@@ -62,6 +62,7 @@
 
 #include "devif/devif.h"
 #include "netdev/netdev.h"
+#include "inet/inet.h"
 #include "udp/udp.h"
 
 /****************************************************************************
@@ -301,6 +302,15 @@ static inline FAR struct udp_conn_s *
        *
        * If all of the above are true then the newly received UDP packet
        * is destined for this UDP connection.
+       *
+       * To send and receive broadcast packets, the application should:
+       *
+       * - Bind socket to INADDR_ANY
+       * - setsockopt to SO_BROADCAST
+       * - call sendto with sendaddr.sin_addr.s_addr = <broadcast-address>
+       * - call recvfrom.
+       *
+       * REVIST: SO_BROADCAST flag is currently ignored.
        */
 
       if (conn->lport != 0 && udp->destport == conn->lport &&
@@ -359,27 +369,32 @@ static inline FAR struct udp_conn_s *
        *   to a remote port.
        * - If multiple network interfaces are supported, then the local
        *   IP address is available and we will insist that the
-       *   destination IP matches the bound address (or the destination
-       *   IP address is a broadcast address). If a socket is bound to
-       *   INADDRY_ANY (laddr), then it should receive all packets
-       *   directed to the port.
+       *   destination IP matches the bound address. If a socket is bound to
+       *   INADDRY_ANY (laddr), then it should receive all packets directed
+       *   to the port. REVISIT: Should also depend on SO_BROADCAST.
        * - Finally, if the connection is bound to a remote IP address,
-       *   the source IP address of the packet is checked. Broadcast
-       *   addresses are also accepted.
+       *   the source IP address of the packet is checked.
        *
        * If all of the above are true then the newly received UDP packet
        * is destined for this UDP connection.
+       *
+       * To send and receive broadcast packets, the application should:
+       *
+       * - Bind socket to INADDR6_ANY
+       * - setsockopt to SO_BROADCAST
+       * - call sendto with sendaddr.sin_addr.s_addr = <broadcast-address>
+       * - call recvfrom.
+       *
+       * REVIST: SO_BROADCAST flag is currently ignored.
        */
 
       if (conn->lport != 0 && udp->destport == conn->lport &&
           (conn->rport == 0 || udp->srcport == conn->rport) &&
 #ifdef CONFIG_NETDEV_MULTINIC
           (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr) ||
-           net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_alloneaddr) ||
            net_ipv6addr_hdrcmp(ip->destipaddr, conn->u.ipv6.laddr)) &&
 #endif
           (net_ipv6addr_cmp(conn->u.ipv6.raddr, g_ipv6_allzeroaddr) ||
-           net_ipv6addr_cmp(conn->u.ipv6.raddr, g_ipv6_alloneaddr) ||
            net_ipv6addr_hdrcmp(ip->srcipaddr, conn->u.ipv6.raddr)))
         {
           /* Matching connection found.. return a reference to it */

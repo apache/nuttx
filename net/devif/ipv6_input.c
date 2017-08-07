@@ -319,15 +319,17 @@ int ipv6_input(FAR struct net_driver_s *dev)
       goto drop;
     }
 
-  /* If IP broadcast support is configured, we check for a broadcast
+  /* If UDP broadcast support is configured, we check for a multicast
    * UDP packet, which may be destined to us (even if there is no IP
-   * address yet assigned to the device as is the case when we are
-   * negotiating over DHCP for an address).
+   * address yet assigned to the device).  We should actually pick off
+   * certain multicast address (all hosts multicast address, and the
+   * solicited-node multicast address).  We will cheat here and accept
+   * all multicast packets that are sent to the ff02::/16 addresses.
    */
 
 #if defined(CONFIG_NET_BROADCAST) && defined(NET_UDP_HAVE_STACK)
   if (ipv6->proto == IP_PROTO_UDP &&
-      net_ipv6addr_cmp(ipv6->destipaddr, g_ipv6_alloneaddr))
+      ipv6->destipaddr[0] == HTONS(0xff02))
     {
 #ifdef CONFIG_NET_IPFORWARD_BROADCAST
       /* Forward broadcast packets */

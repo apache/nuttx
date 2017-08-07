@@ -227,20 +227,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* Well-known IP addresses */
-
-#ifdef CONFIG_NET_IPv6
-EXTERN const net_ipv6addr_t g_ipv6_alloneaddr;  /* An address of all ones */
-EXTERN const net_ipv6addr_t g_ipv6_allzeroaddr; /* An address of all zeroes */
-#if defined(CONFIG_NET_ICMPv6_AUTOCONF) || defined(CONFIG_NET_ICMPv6_ROUTER)
-EXTERN const net_ipv6addr_t g_ipv6_allnodes;    /* All link local nodes */
-EXTERN const net_ipv6addr_t g_ipv6_allrouters;  /* All link local routers */
-#ifdef CONFIG_NET_ICMPv6_AUTOCONF
-EXTERN const net_ipv6addr_t g_ipv6_llnetmask;   /* Netmask for local link address */
-#endif
-#endif
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

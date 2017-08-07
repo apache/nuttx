@@ -46,7 +46,7 @@ SOCK_CSRCS += ipv4_getsockname.c
 endif
 
 ifeq ($(CONFIG_NET_IPv6),y)
-SOCK_CSRCS += ipv6_getsockname.c
+SOCK_CSRCS += ipv6_getsockname.c inet_globals.c
 endif
 
 ifeq ($(CONFIG_NET_SENDFILE),y)

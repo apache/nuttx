@@ -60,6 +60,7 @@
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
+#include "inet/inet.h"
 #include "utils/utils.h"
 #include "icmpv6/icmpv6.h"
 
