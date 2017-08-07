@@ -57,6 +57,7 @@
 #include <nuttx/net/udp.h>
 
 #include "devif/devif.h"
+#include "inet/inet.h"
 #include "utils/utils.h"
 #include "udp/udp.h"
 

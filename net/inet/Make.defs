@@ -37,16 +37,18 @@
 
 ifeq ($(CONFIG_NET_IPv4),y)
 SOCK_CSRCS += inet_sockif.c inet_recvfrom.c inet_connect.c inet_close.c
+SOCK_CSRCS += inet_globals.c
 else ifeq ($(CONFIG_NET_IPv6),y)
 SOCK_CSRCS += inet_sockif.c inet_recvfrom.c inet_connect.c inet_close.c
+SOCK_CSRCS += inet_globals.c
 endif
 
 ifeq ($(CONFIG_NET_IPv4),y)
-SOCK_CSRCS += ipv4_getsockname.c
+SOCK_CSRCS += ipv4_getsockname.c inet_setipid.c
 endif
 
 ifeq ($(CONFIG_NET_IPv6),y)
-SOCK_CSRCS += ipv6_getsockname.c inet_globals.c
+SOCK_CSRCS += ipv6_getsockname.c
 endif
 
 ifeq ($(CONFIG_NET_SENDFILE),y)

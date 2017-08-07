@@ -274,31 +274,29 @@ struct devif_callback_s
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-/* Increasing number used for the IP ID field. */
 
-extern uint16_t g_ipid;
-
-#if defined(CONFIG_NET_TCP_REASSEMBLY) && !defined(CONFIG_NET_IPv6)
-/* Reassembly timer (units: deci-seconds) */
-
-extern uint8_t g_reassembly_timer;
-#endif
-
-/* Time of last poll */
-
-extern systime_t g_polltime;
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
+#undef EXTERN
+#if defined(__cplusplus)
 #define EXTERN extern "C"
 extern "C"
 {
 #else
 #define EXTERN extern
 #endif
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_TCP_REASSEMBLY)
+/* Reassembly timer (units: deci-seconds) */
+
+EXTERN uint8_t g_reassembly_timer;
+#endif
+
+/* Time of last poll */
+
+EXTERN systime_t g_polltime;
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: devif_initialize

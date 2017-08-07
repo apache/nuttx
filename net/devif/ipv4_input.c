@@ -93,6 +93,7 @@
 #include <nuttx/net/netstats.h>
 #include <nuttx/net/ip.h>
 
+#include "inet/inet.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"

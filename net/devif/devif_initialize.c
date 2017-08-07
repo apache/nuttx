@@ -65,9 +65,6 @@
 struct net_stats_s g_netstats;
 #endif
 
-/* Increasing number used for the IP ID field. */
-
-uint16_t g_ipid;
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_TCP_REASSEMBLY)
 /* Reassembly timer (units: deci-seconds) */

@@ -55,6 +55,7 @@
 #include <nuttx/net/tcp.h>
 
 #include "devif/devif.h"
+#include "inet/inet.h"
 #include "tcp/tcp.h"
 #include "utils/utils.h"
 

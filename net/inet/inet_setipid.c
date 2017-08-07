@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/devif/net_setipid.c
+ * net/inet/net_setipid.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,22 +43,14 @@
 #include <stdint.h>
 #include <debug.h>
 
-#include "devif/devif.h"
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include "inet/inet.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_setipid
+ * Name: inet_setipid
  *
  * Description:
  *   This function may be used at boot time to set the initial ip_id.
@@ -67,7 +59,7 @@
  *
  ****************************************************************************/
 
-void net_setipid(uint16_t id)
+void inet_setipid(uint16_t id)
 {
   g_ipid = id;
 }

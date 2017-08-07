@@ -82,7 +82,13 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* Well-known IP addresses */
+#ifdef CONFIG_NET_IPv4
+/* Increasing number used for the IP ID field. */
+
+EXTERN uint16_t g_ipid;
+#endif /* CONFIG_NET_IPv4 */
+
+/* Well-known IPv6 addresses */
 
 #ifdef CONFIG_NET_IPv6
 EXTERN const net_ipv6addr_t g_ipv6_allzeroaddr; /* An address of all zeroes */
@@ -93,7 +99,7 @@ EXTERN const net_ipv6addr_t g_ipv6_allrouters;  /* All link local routers */
 EXTERN const net_ipv6addr_t g_ipv6_llnetmask;   /* Netmask for local link address */
 #endif
 #endif
-#endif
+#endif /* CONFIG_NET_IPv6 */
 
 /* PF_INET/PF_INET6 socket address family interface */
 
@@ -109,6 +115,18 @@ EXTERN const struct sock_intf_s g_inet_sockif;
 struct tcp_conn_s; /* Forward reference */
 #endif
 struct socket; /* Forward reference */
+
+/****************************************************************************
+ * Name: inet_setipid
+ *
+ * Description:
+ *   This function may be used at boot time to set the initial ip_id.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+void inet_setipid(uint16_t id);
 
 /****************************************************************************
  * Name: net_startmonitor

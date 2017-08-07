@@ -378,11 +378,11 @@ static inline FAR struct udp_conn_s *
        * If all of the above are true then the newly received UDP packet
        * is destined for this UDP connection.
        *
-       * To send and receive broadcast packets, the application should:
+       * To send and receive multicast packets, the application should:
        *
-       * - Bind socket to INADDR6_ANY
-       * - setsockopt to SO_BROADCAST
-       * - call sendto with sendaddr.sin_addr.s_addr = <broadcast-address>
+       * - Bind socket to INADDR6_ANY or to a specific <multicast-address>
+       * - setsockopt to SO_BROADCAST (for all-nodes address)
+       * - call sendto with sendaddr.sin_addr.s_addr = <multicast-address>
        * - call recvfrom.
        *
        * REVIST: SO_BROADCAST flag is currently ignored.

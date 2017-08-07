@@ -50,6 +50,7 @@
 #include <nuttx/net/ip.h>
 
 #include "devif/devif.h"
+#include "inet/inet.h"
 #include "utils/utils.h"
 #include "icmp/icmp.h"
 
