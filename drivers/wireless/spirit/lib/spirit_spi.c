@@ -691,9 +691,18 @@ int spirit_waitstatus(FAR struct spirit_library_s *spirit,
       return OK;
     }
 
-  wlwarn("WARNING:  Timed out: %lu > %lu (%u msec)\n",
+  /* This is probably not an error.  In a busy radio environment, there
+   * are many race conditions.  Most typically, just when the driver is
+   * setting up to perform a transmission, the hardware commits to a
+   * reception.  The symptom is that the the above loop times out out
+   * waiting to go into the TX state (because it is in the RX state).
+   *
+   * Complaining with too much debug output just aggravates the problem.
+   */
+
+  wlinfo("Timed out: %lu > %lu (%u msec)\n",
          (unsigned long)elapsed, (unsigned long)ticks, msec);
-  wlwarn("          MC status: current=%02x desired=%02x\n",
+  wlinfo("with MC status: current=%02x desired=%02x\n",
          spirit->u.state.MC_STATE, state);
   return -ETIMEDOUT;
 }

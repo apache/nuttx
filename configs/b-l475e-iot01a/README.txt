@@ -508,13 +508,13 @@ Configuration sub-directories
         reduce the amount of interlocking, but this did not eliminate the RX FIFO
         errors.
 
-        Hmmm.. Appears to be a chip Errata:  "Sometimes Spirit1 seems to NOT
-        deliver (correctly) the 'IRQ_RX_DATA_READY' event for packets which
-        have a length which is close to a multiple of RX FIFO size.  Furthermore,
-        in these cases also the content delivery seems to be compromised as well
-        as the generation of RX/TX FIFO errors.  This can be avoided by reducing
-        the maximum packet length to a value which is lower than the RX FIFO
-        size."
+        Hmmm.. this statement appears in the STMicro driver:  "Sometimes Spirit1
+        seems to NOT deliver (correctly) the 'IRQ_RX_DATA_READY' event for
+        packets which have a length which is close to a multiple of RX FIFO size.
+        Furthermore, in these cases also the content delivery seems to be
+        compromised as well as the generation of RX/TX FIFO errors.  This can be
+        avoided by reducing the maximum packet length to a value which is lower
+        than the RX FIFO size."
 
         I tried implementing the RX FIFO almost full water mark thinking this
         might be a work around... it is not.  Still RX FIFO errors.  From my
@@ -537,3 +537,22 @@ Configuration sub-directories
 
         Reducing the FIFO to 94 bytes fixed the problem with the 2 byte CRC
         but did not resolve that occasional RX FIFO error.
+
+      2017-08-07: The hang noted yesterday was due to logic that did not
+        restart the poll timer in the event that Spirit was not ready when the
+        time expired.  Just unconditionally performing the poll fixed this.
+
+        Then I noticed several assertions.  In a busy radio environment, there
+        are many race conditions.  Most typically, just when the driver is
+        setting up to perform a transmission, the hardware commits to a
+        reception.  The symptom is that the driver times out out waiting to go
+        into the TX state (because it is in the RX state).  The logic needed to
+        be beefed up to handle this routinely without asserting and without
+        leaving the Spirit in a bad state.
+
+        One remaining issue with the above is that when we fail to go to the TX
+        state, there is a lot of warning debug output.  ANY debug output while
+        the Spirit is heavily loaded WILL cause failures and packet loss!
+        Perhaps using a RAMLOG would remedy this.  But, even with these debug-
+        induced failures, all tests are running properly without application
+        level errors.

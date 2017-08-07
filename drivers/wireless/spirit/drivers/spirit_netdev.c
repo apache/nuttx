@@ -281,8 +281,8 @@ struct spirit_driver_s
   struct work_s                    pollwork;  /* TX network poll work (LP) */
   WDOG_ID                          txpoll;    /* TX poll timer */
   WDOG_ID                          txtimeout; /* TX timeout timer */
-  sem_t                            rxsem;     /* Exclusive access to the RX queue*/
-  sem_t                            txsem;     /* Exclusive access to the TX queue*/
+  sem_t                            rxsem;     /* Exclusive access to the RX queue */
+  sem_t                            txsem;     /* Exclusive access to the TX queue */
   bool                             ifup;      /* Spirit is on and interface is up */
   bool                             needpoll;  /* Timer poll needed */
   uint8_t                          state;     /* See  enum spirit_driver_state_e */
@@ -653,13 +653,54 @@ errout_with_irqdisable:
 }
 
 /****************************************************************************
+ * Name: spirit_free_txhead
+ *
+ * Description:
+ *   Free the IOB and the meta data at the head of the TX packet queue.
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Running on the HP worker thread.
+ *
+ ****************************************************************************/
+
+static void spirit_free_txhead(FAR struct spirit_driver_s *priv)
+{
+  FAR struct pktradio_metadata_s *pktmeta;
+
+  /* Remove the metadata and contained IOB from the head of the TX queue */
+
+  pktmeta = priv->txhead;
+  DEBUGASSERT(pktmeta != NULL);
+
+  priv->txhead = pktmeta->pm_flink;
+  if (priv->txhead == NULL)
+    {
+      priv->txtail = NULL;
+    }
+
+   /* Free the IOB contained in the metadata container */
+
+   iob_free(pktmeta->pm_iob);
+
+   /* Then free the meta data container itself */
+
+   pktradio_metadata_free(pktmeta);
+}
+
+/****************************************************************************
  * Name: spirit_transmit_work
  *
  * Description:
  *   Start hardware transmission.
  *
  * Parameters:
- *   priv - Reference to the driver state structure
+ *   arg - Reference to the driver state structure (cast to NULL)
  *
  * Returned Value:
  *   None
@@ -694,33 +735,20 @@ static void spirit_transmit_work(FAR void *arg)
   spirit_txlock(priv);
   while (priv->txhead != NULL && priv->state == DRIVER_STATE_IDLE)
     {
-      /* Remove the contained IOB from the head of the TX queue */
+      /* Peek at the packet at the head of the TX queue */
 
-      pktmeta      = priv->txhead;
-      priv->txhead = pktmeta->pm_flink;
-
-      if (priv->txhead == NULL)
-        {
-          priv->txtail = NULL;
-        }
-
-      /* Remove the IOB from metadata container */
-
-      iob             = pktmeta->pm_iob;
-      pktmeta->pm_iob = NULL;
-
-      DEBUGASSERT(iob != NULL);
+      pktmeta = priv->txhead;
+      DEBUGASSERT(pktmeta != NULL && pktmeta->pm_iob != NULL);
+      iob     = pktmeta->pm_iob;
 
       /* Checks if the payload length is supported */
 
       if (iob->io_len > CONFIG_SPIRIT_PKTLEN)
         {
           NETDEV_RXDROPPED(&priv->radio.r_dev);
-          iob_free(iob);
+          spirit_free_txhead(priv);
           continue;
         }
-
-      priv->state = DRIVER_STATE_SENDING;
 
       /* Reset state to ready */
 
@@ -728,7 +756,7 @@ static void spirit_transmit_work(FAR void *arg)
       if (ret < 0)
         {
           wlerr("ERROR: Failed to set READY state: %d\n", ret);
-          goto errout_with_iob;
+          goto errout_with_lock;
         }
 
       /* Make sure that the TX linear FIFO is completely empty */
@@ -737,7 +765,7 @@ static void spirit_transmit_work(FAR void *arg)
       if (ret < 0)
         {
           wlerr("ERROR: Failed to flush TX FIFO\n");
-          goto errout_with_iob;
+          goto errout_with_lock;
         }
 
       /* Sets the length of the packet to send */
@@ -748,7 +776,7 @@ static void spirit_transmit_work(FAR void *arg)
       if (ret < 0)
         {
           wlerr("ERROR: Failed to set payload length: %d\n", ret);
-          goto errout_with_iob;
+          goto errout_with_lock;
         }
 
       /* Set the destination address */
@@ -762,7 +790,7 @@ static void spirit_transmit_work(FAR void *arg)
         {
           wlerr("ERROR: Failed to set TX destaddr to %02x: %d\n",
                 pktmeta->pm_dest.pa_addr[0], ret);
-          goto errout_with_iob;
+          goto errout_with_lock;
         }
 
       /* Enable CSMA */
@@ -773,7 +801,7 @@ static void spirit_transmit_work(FAR void *arg)
       if (ret < 0)
         {
           wlerr("ERROR: Failed to enable CSMA: %d\n", ret);
-          goto errout_with_iob;
+          goto errout_with_lock;
         }
 
       /* Write the packet to the linear FIFO */
@@ -782,12 +810,8 @@ static void spirit_transmit_work(FAR void *arg)
       if (ret < 0)
         {
           wlerr("ERROR: Write to linear FIFO failed: %d\n", ret);
-          goto errout_with_iob;
+          goto errout_with_csma;
         }
-
-      /* We can free the IOB now */
-
-      iob_free(iob);
 
       /* Start the RX timeout */
 
@@ -796,7 +820,7 @@ static void spirit_transmit_work(FAR void *arg)
       if (ret < 0)
         {
           wlerr("ERROR: spirit_timer_setup_rxtimeout failed: %d\n", ret);
-          goto errout_with_iob;
+          goto errout_with_csma;
         }
 
       /* Put the SPIRIT1 into TX state.  This starts the transmission */
@@ -805,17 +829,28 @@ static void spirit_transmit_work(FAR void *arg)
       if (ret < 0)
         {
           wlerr("ERROR: Write to send TX command: %d\n", ret);
-          goto errout_with_lock;
+          goto errout_with_rxtimeout;
         }
 
-      /* Wait until we have successfully entered the TX state */
+      /* Wait until we have successfully entered the TX state.
+       * This fails normally on race conditions where Spirit enters the
+       * the RX state asynchronously.
+       */
 
       ret = spirit_waitstatus(spirit, MC_STATE_TX, 5);
       if (ret < 0)
         {
-          wlerr("ERROR: Failed to go to TX state: %d\n", ret);
-          goto errout_with_lock;
+          wlinfo("Failed to go to TX state: %d\n", ret);
+          goto errout_with_rxtimeout;
         }
+
+      priv->state = DRIVER_STATE_SENDING;
+
+      /* We can now free the packet meta data and IOB at the head of the TX
+       * packet queue.
+       */
+
+      spirit_free_txhead(priv);
 
       /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
@@ -823,15 +858,14 @@ static void spirit_transmit_work(FAR void *arg)
                      spirit_txtimeout_expiry, 1, (wdparm_t)priv);
     }
 
-  /* Return 0 or 1, depending upon if the Spirit is IDLE or is in the TX (or
-   * possibly RX) states.
-   */
-
   spirit_txunlock(priv);
   return;
 
-errout_with_iob:
-  iob_free(iob);
+errout_with_rxtimeout:
+  (void)spirit_timer_set_rxtimeout_counter(spirit, 0);
+
+errout_with_csma:
+  (void)spirit_csma_enable(spirit, S_DISABLE);
 
 errout_with_lock:
   spirit_txunlock(priv);
@@ -1070,10 +1104,13 @@ static void spirit_interrupt_work(FAR void *arg)
       NETDEV_RXERRORS(&priv->radio.r_dev);
       NETDEV_ERRORS(&priv->radio.r_dev);
 
-      /* Send any pending packets */
+      /* Disable CSMA and the RX timeout */
 
       DEBUGVERIFY(spirit_timer_set_rxtimeout_counter(spirit, 0));
       DEBUGVERIFY(spirit_csma_enable(spirit, S_DISABLE));
+
+      /* Send any pending packets */
+
       spirit_schedule_transmit_work(priv);
     }
 
@@ -1105,10 +1142,13 @@ static void spirit_interrupt_work(FAR void *arg)
       NETDEV_TXERRORS(&priv->radio.r_dev);
       NETDEV_ERRORS(&priv->radio.r_dev);
 
-      /* Send any pending packets */
+      /* Disable CSMA and the RX timeout */
 
       DEBUGVERIFY(spirit_timer_set_rxtimeout_counter(spirit, 0));
       DEBUGVERIFY(spirit_csma_enable(spirit, S_DISABLE));
+
+      /* Send any pending packets */
+
       spirit_schedule_transmit_work(priv);
     }
 
@@ -1127,18 +1167,22 @@ static void spirit_interrupt_work(FAR void *arg)
       DEBUGVERIFY(spirit_management_rxstrobe(spirit));
       DEBUGVERIFY(spirit_command(spirit, CMD_RX));
 
+      if (priv->state == DRIVER_STATE_SENDING);
+        {
+          priv->state = DRIVER_STATE_IDLE;
+        }
+
+      /* Update statistics */
+
       NETDEV_TXDONE(&priv->radio.r_dev);
+
+      /* Disable CSMA and the RX timeout */
+
       DEBUGVERIFY(spirit_timer_set_rxtimeout_counter(spirit, 0));
       DEBUGVERIFY(spirit_csma_enable(spirit, S_DISABLE));
 
-      /* Disable the RX timeout */
-
-      DEBUGVERIFY(spirit_timer_set_rxtimeout_counter(spirit, 0));
-
       /* Check if there are more packets to send */
 
-      DEBUGASSERT(priv->state == DRIVER_STATE_SENDING);
-      priv->state = DRIVER_STATE_IDLE;
       spirit_schedule_transmit_work(priv);
     }
 
@@ -1419,11 +1463,24 @@ static void spirit_interrupt_work(FAR void *arg)
 
   if (irqstatus.IRQ_RX_DATA_DISC != 0)
     {
-      wlwarn("WARNING: Data discarded: Node addr=%02x RX dest addr=%02x\n",
+#if defined(CONFIG_DEBUG_WIRELESS_INFO)
+      /* Discarded packets are a normal consequence of address filtering. */
+
+      wlinfo("Data discarded: Node addr=%02x RX dest addr=%02x\n",
              spirit_pktcommon_get_nodeaddress(spirit),
              spirit_pktcommon_get_rxdestaddr(spirit));
-      wlwarn("                         CRC error=%u RX timeout=%u\n",
+      wlinfo("                CRC error=%u RX timeout=%u\n",
              irqstatus.IRQ_CRC_ERROR, irqstatus.IRQ_RX_TIMEOUT);
+#elif defined(CONFIG_DEBUG_WIRELESS_INFO)
+      /* Discards due to CRC errors (or RX timeouts if we used them)
+       * are indications of a real problem.
+       */
+
+      if (irqstatus.IRQ_CRC_ERROR != 0)
+        {
+          wlwarn("WARNING: Data discarded due to CRC filter\n",
+        }
+#endif
 
       /* Flush the RX FIFO and revert the receiving state */
 
@@ -1621,33 +1678,25 @@ static void spirit_txpoll_work(FAR void *arg)
       priv->needpoll = false;
     }
 
-  /* Skip the poll if the Spirit busy in the TX or RX states.  In this case,
-   * spirit_transmit_work will run when the state transitions back to IDLE
-   * we will perform the poll at that time.
-   */
+  /* Is a periodic poll needed? */
 
-  else if (priv->state == DRIVER_STATE_IDLE)
+  else if (priv->needpoll)
     {
-      /* Is a periodic poll needed? */
+      /* Perform the periodic poll */
 
-       if (priv->needpoll)
-        {
-          /* Perform the periodic poll */
+      priv->needpoll = false;
+      (void)devif_timer(&priv->radio.r_dev, spirit_txpoll_callback);
 
-          priv->needpoll = false;
-          (void)devif_timer(&priv->radio.r_dev, spirit_txpoll_callback);
+      /* Setup the watchdog poll timer again */
 
-          /* Setup the watchdog poll timer again */
+      (void)wd_start(priv->txpoll, SPIRIT_WDDELAY, spirit_txpoll_expiry, 1,
+                     (wdparm_t)priv);
+    }
+  else
+    {
+      /* Perform a normal, asynchronous poll for new TX data */
 
-          (void)wd_start(priv->txpoll, SPIRIT_WDDELAY, spirit_txpoll_expiry, 1,
-                         (wdparm_t)priv);
-        }
-      else
-        {
-          /* Perform a normal, asynchronous poll for new TX data */
-
-          (void)devif_poll(&priv->radio.r_dev, spirit_txpoll_callback);
-        }
+      (void)devif_poll(&priv->radio.r_dev, spirit_txpoll_callback);
     }
 
   net_unlock();
@@ -2217,7 +2266,7 @@ static int spirit_req_data(FAR struct sixlowpan_driver_s *netdev,
        * tranmission of the frame in the IOB at the head of the IOB queue.
        */
 
-       spirit_schedule_transmit_work(priv);
+      spirit_schedule_transmit_work(priv);
     }
 
   return OK;
