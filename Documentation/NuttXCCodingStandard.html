@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX C Coding Standard</i>
       </font></big></h1>
-      <p>Last Updated: June 18, 2017</p>
+      <p>Last Updated: August 7, 2017</p>
     </td>
   </tr>
 </table>
@@ -1357,7 +1357,15 @@ typedef int myinteger_t;
     <b>No un-named structures</b>.
     All structures must be named, even if they are part of a type definition.
     That is, a structure name must follow the reserved word <code>struct</code> in all structure definitions.
-    The exception to this rule is for structures that are defined within another union or structure (discouraged).  In those cases, the structure name should always be omitted.
+    There are two exceptions to this rule:
+    <ol>
+      <li>
+        First for structures that are defined within another union or structure (discouraged).  In those cases, the structure name should always be omitted.
+      </li>
+      <li>
+        Second for structures as the type of a local variable.  In this case, again, the structure name should always be ommitted.
+      </li>
+    </ol>
   </li>
   <li>
     <b>Structured defined with structures discouraged</b>.
