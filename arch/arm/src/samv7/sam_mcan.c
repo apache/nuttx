@@ -891,9 +891,6 @@ struct sam_mcan_s
   uint32_t fbtp;            /* Current fast bit timing */
   uint32_t rxints;          /* Configured RX interrupts */
   uint32_t txints;          /* Configured TX interrupts */
-#ifdef CONFIG_CAN_ERRORS
-  uint32_t olderrors;       /* Used to detect the changes in error states */
-#endif
 
 #ifdef CONFIG_CAN_EXTID
   uint32_t extfilters[2];   /* Extended filter bit allocator.  2*32=64 */
@@ -967,8 +964,7 @@ static bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv,
               int bufndx);
 #endif
 #ifdef CONFIG_CAN_ERRORS
-static void mcan_error(FAR struct can_dev_s *dev, uint32_t status,
-              uint32_t oldstatus);
+static void mcan_error(FAR struct can_dev_s *dev, uint32_t status);
 #endif
 static void mcan_receive(FAR struct can_dev_s *dev,
               FAR uint32_t *rxbuffer, unsigned long nwords);
@@ -3078,7 +3074,6 @@ bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv, int bufndx)
  * Input Parameters:
  *   dev        - CAN-common state data
  *   status     - Interrupt status with error bits set
- *   oldstatus  - Previous Interrupt status with error bits set
  *
  * Returned Value:
  *   None
@@ -3086,8 +3081,7 @@ bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv, int bufndx)
  ****************************************************************************/
 
 #ifdef CONFIG_CAN_ERRORS
-static void mcan_error(FAR struct can_dev_s *dev, uint32_t status,
-                       uint32_t oldstatus)
+static void mcan_error(FAR struct can_dev_s *dev, uint32_t status)
 {
   FAR struct sam_mcan_s *priv = dev->cd_priv;
   struct can_hdr_s hdr;
@@ -3147,10 +3141,6 @@ static void mcan_error(FAR struct can_dev_s *dev, uint32_t status,
       errbits |= CAN_ERROR_CONTROLLER;
       data[1] |= CAN_ERROR1_RXOVERFLOW;
     }
-  else if ((oldstatus & (MCAN_INT_RF0L | MCAN_INT_RF1L)) != 0)
-    {
-      errbits |= CAN_ERROR_CONTROLLER;
-    }
 
   if ((status & MCAN_INT_TEFL) != 0)
     {
@@ -3158,10 +3148,6 @@ static void mcan_error(FAR struct can_dev_s *dev, uint32_t status,
 
       errbits |= CAN_ERROR_CONTROLLER;
       data[1] |= CAN_ERROR1_TXOVERFLOW;
-    }
-  else if ((oldstatus & MCAN_INT_TEFL) != 0)
-    {
-      errbits |= CAN_ERROR_CONTROLLER;
     }
 
   if ((status & MCAN_INT_TOO) != 0)
@@ -3179,10 +3165,6 @@ static void mcan_error(FAR struct can_dev_s *dev, uint32_t status,
       errbits |= CAN_ERROR_CONTROLLER;
       data[1] |= CAN_ERROR1_UNSPEC;
     }
-  else if ((oldstatus & (MCAN_INT_MRAF | MCAN_INT_ELO)) != 0)
-    {
-      errbits |= CAN_ERROR_CONTROLLER;
-    }
 
   if ((status & MCAN_INT_CRCE) != 0)
     {
@@ -3191,10 +3173,6 @@ static void mcan_error(FAR struct can_dev_s *dev, uint32_t status,
       errbits |= CAN_ERROR_PROTOCOL;
       data[3] |= (CAN_ERROR3_CRCSEQ | CAN_ERROR3_CRCDEL);
     }
-  else if ((oldstatus & MCAN_INT_CRCE) != 0)
-    {
-      errbits |= CAN_ERROR_PROTOCOL;
-    }
 
   if ((status & MCAN_INT_BE) != 0)
     {
@@ -3202,10 +3180,6 @@ static void mcan_error(FAR struct can_dev_s *dev, uint32_t status,
 
       errbits |= CAN_ERROR_PROTOCOL;
       data[2] |= CAN_ERROR2_BIT;
-    }
-  else if ((oldstatus & MCAN_INT_BE) != 0)
-    {
-      errbits |= CAN_ERROR_PROTOCOL;
     }
 
   if ((status & MCAN_INT_ACKE) != 0)
@@ -3222,10 +3196,6 @@ static void mcan_error(FAR struct can_dev_s *dev, uint32_t status,
       errbits |= CAN_ERROR_PROTOCOL;
       data[2] |= CAN_ERROR2_FORM;
     }
-  else if ((oldstatus & MCAN_INT_FOE) != 0)
-    {
-      errbits |= CAN_ERROR_PROTOCOL;
-    }
 
   if ((status & MCAN_INT_STE) != 0)
     {
@@ -3233,10 +3203,6 @@ static void mcan_error(FAR struct can_dev_s *dev, uint32_t status,
 
       errbits |= CAN_ERROR_PROTOCOL;
       data[2] |= CAN_ERROR2_STUFF;
-    }
-  else if ((oldstatus & MCAN_INT_STE) != 0)
-    {
-      errbits |= CAN_ERROR_PROTOCOL;
     }
 
   if (errbits != 0)
@@ -3475,25 +3441,10 @@ static int mcan_interrupt(int irq, void *context, FAR void *arg)
 #ifdef CONFIG_CAN_ERRORS
           /* Report errors */
 
-          mcan_error(dev, pending & MCAN_ANYERR_INTS, priv->olderrors);
-
-          priv->olderrors = (pending & MCAN_ANYERR_INTS);
+          mcan_error(dev, pending & MCAN_ANYERR_INTS);
 #endif
           handled = true;
         }
-#ifdef CONFIG_CAN_ERRORS
-      else if (priv->olderrors != 0)
-        {
-          /* All (old) errors cleared  */
-
-          canerr("ERROR: CLEARED\n");
-
-          mcan_error(dev, 0, priv->olderrors);
-
-          priv->olderrors = 0;
-          handled = true;
-        }
-#endif
 
       /* Check for successful completion of a transmission */
 
