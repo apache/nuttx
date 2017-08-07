@@ -159,5 +159,5 @@ errout_with_csection:
 errout_with_lock:
   sched_unlock();
   set_errno(errcode);
-  return ERROR;
+  return errcode ? ERROR : OK;
 }
