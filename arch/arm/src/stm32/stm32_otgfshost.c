@@ -5012,9 +5012,11 @@ static void stm32_vbusdrive(FAR struct stm32_usbhost_s *priv, bool state)
 {
   uint32_t regval;
 
+#ifdef CONFIG_STM32_OTGFS_VBUS_CONTROL
   /* Enable/disable the external charge pump */
 
   stm32_usbhost_vbusdrive(0, state);
+#endif
 
   /* Turn on the Host port power. */
 
@@ -5280,7 +5282,7 @@ static inline int stm32_hw_initialize(FAR struct stm32_usbhost_s *priv)
   /* Deactivate the power down */
 
   regval  = (OTGFS_GCCFG_PWRDWN | OTGFS_GCCFG_VBUSASEN | OTGFS_GCCFG_VBUSBSEN);
-#ifndef CONFIG_USBDEV_VBUSSENSING
+#if !defined(CONFIG_USBDEV_VBUSSENSING) && !defined(CONFIG_STM32_OTGFS_VBUS_CONTROL)
   regval |= OTGFS_GCCFG_NOVBUSSENS;
 #endif
 #ifdef CONFIG_STM32_OTGFS_SOFOUTPUT
@@ -5383,7 +5385,9 @@ FAR struct usbhost_connection_s *stm32_otgfshost_initialize(int controller)
 
   stm32_configgpio(GPIO_OTGFS_DM);
   stm32_configgpio(GPIO_OTGFS_DP);
+#ifdef CONFIG_USBDEV
   stm32_configgpio(GPIO_OTGFS_ID);    /* Only needed for OTG */
+#endif
 
   /* SOF output pin configuration is configurable */
 

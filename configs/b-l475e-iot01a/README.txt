@@ -553,6 +553,9 @@ Configuration sub-directories
         One remaining issue with the above is that when we fail to go to the TX
         state, there is a lot of warning debug output.  ANY debug output while
         the Spirit is heavily loaded WILL cause failures and packet loss!
-        Perhaps using a RAMLOG would remedy this.  But, even with these debug-
-        induced failures, all tests are running properly without application
-        level errors.
+        Perhaps using a RAMLOG would remedy this.
+
+        The TCP test beats the radio very hard and it is actually heartening
+        that there are no failures that lead to data loss in this environment.
+        I would say it is functional but  fragile in this usage, but probably
+        robust in a less busy environment.
