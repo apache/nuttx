@@ -1121,11 +1121,28 @@ static void spirit_interrupt_work(FAR void *arg)
     }
 
   if (irqstatus.IRQ_TX_FIFO_ERROR != 0 ||
-      irqstatus.IRQ_MAX_RE_TX_REACH != 0)
+      irqstatus.IRQ_MAX_RE_TX_REACH != 0 ||
+      irqstatus.IRQ_MAX_BO_CCA_REACH != 0)
     {
-      wlwarn("WARNING: Tx FIFO Error/Max retries\n");
+#ifdef CONFIG_DEBUG_WIRELESS_WARN
+      wlwarn("WARNING: Tx Error\n");
+      if (irqstatus.IRQ_TX_FIFO_ERROR != 0)
+        {
+          wlwarn("         Tx FIFO Error\n");
+        }
 
-      /* Discard TX data */
+      if (irqstatus.IRQ_MAX_RE_TX_REACH != 0)
+        {
+          wlwarn("         Max retries reached\n");
+        }
+
+      if (irqstatus.IRQ_MAX_BO_CCA_REACH != 0)
+        {
+          wlwarn("         Max backoff reached\n");
+        }
+#endif
+
+      /* Discard TX data in the FIFO */
 
       DEBUGVERIFY(spirit_command(spirit, COMMAND_FLUSHTXFIFO));
       irqstatus.IRQ_TX_DATA_SENT = 0;
@@ -2519,20 +2536,6 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
       return ret;
     }
 
-  ret = spirit_irq_enable(spirit, TX_FIFO_ERROR, S_ENABLE);
-  if (ret < 0)
-    {
-      wlerr("ERROR: Enable TX_FIFO_ERROR failed: %d\n", ret);
-      return ret;
-    }
-
-  ret = spirit_irq_enable(spirit, RX_FIFO_ERROR, S_ENABLE);
-  if (ret < 0)
-    {
-      wlerr("ERROR: Enable RX_FIFO_ERROR failed: %d\n", ret);
-      return ret;
-    }
-
 #ifdef CONFIG_SPIRIT_FIFOS
 #if CONFIG_SPIRIT_PKTLEN > SPIRIT_MAX_FIFO_LEN
   ret = spirit_irq_enable(spirit, TX_FIFO_ALMOST_EMPTY, S_ENABLE);
@@ -2550,6 +2553,27 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
       return ret;
     }
 #endif
+
+  ret = spirit_irq_enable(spirit, TX_FIFO_ERROR, S_ENABLE);
+  if (ret < 0)
+    {
+      wlerr("ERROR: Enable TX_FIFO_ERROR failed: %d\n", ret);
+      return ret;
+    }
+
+  ret = spirit_irq_enable(spirit, RX_FIFO_ERROR, S_ENABLE);
+  if (ret < 0)
+    {
+      wlerr("ERROR: Enable RX_FIFO_ERROR failed: %d\n", ret);
+      return ret;
+    }
+
+  ret = spirit_irq_enable(spirit, MAX_BO_CCA_REACH, S_ENABLE);
+  if (ret < 0)
+    {
+      wlerr("ERROR: Enable MAX_BO_CCA_REACH failed: %d\n", ret);
+      return ret;
+    }
 
   /* Configure Spirit1 */
 

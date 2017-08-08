@@ -593,5 +593,20 @@ Configuration sub-directories
         I would say it is functional but  fragile in this usage, but probably
         robust in a less busy environment.
 
-     2017-08-08:  Added and verified broadcast packet transfers using the
-        hub-based broadcast UDP client.
+     2017-08-08:  Added broadcast packet transfers using the hub-based
+        broadcast UDP client.  This appears to be a problem the HC06
+        compression/decompression.  The decompression logic comes up with
+        the destination address as ff02::ff00:00fe:3500 (which the receiving
+        node address is 37) instead of ff02::0001.  It is then out of sync
+        with the IPHC headers and is unable to uncompress the rest of the
+        packet correction.
+
+        Trying again with HC1 compression, I see other isses.  The first
+        frame is received correctly, the following frames have an incorrect
+        packet length.
+
+        There is probably another issue related to broadcast TX setup: If
+        we are sending to the multicast or broadcast address, should we
+        not also disable ACKs, retries, and RX timeouts?  What will happen
+        if multiple radios ACK?  At a minimum it could keep the driver
+        unnecessarily busy.
