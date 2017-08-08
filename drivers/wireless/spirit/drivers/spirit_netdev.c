@@ -823,6 +823,12 @@ static void spirit_transmit_work(FAR void *arg)
           goto errout_with_csma;
         }
 
+      /* REVISIT: If we are sending to the multicast or broadcast address,
+       * should we not also disable ACKs, retries, and RX timeouts?  What
+       * will happen if multiple radios ACK?  At a minimum it could keep
+       * the driver unnecessarily busy.
+       */
+
       /* Put the SPIRIT1 into TX state.  This starts the transmission */
 
       ret = spirit_command(spirit, COMMAND_TX);

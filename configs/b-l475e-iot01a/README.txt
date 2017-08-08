@@ -496,6 +496,39 @@ Configuration sub-directories
        Where <server-ip> is the IP address of either the E1 or E2 endpoints
        or of the star hub.
 
+    4. Hub UDP Test.  The hub of the star does not support the same level of
+       test as for the endpoint-to-endpoint tests described above.  The primary
+       role of the hub is packet forwarding.  The hub does support to test
+       applications, however:  (1) A Telnet client that will permit the hub to
+       establish remote NSH sesstions with any endpoint, and (2) A special
+       version of the udpclient program to support testing of Spirit broadcast.
+
+       IPv6 does not support "broadcast" in the same since as IPv4.  IPv6
+       supports only multicast.  The special multicast address, ff02::1 is
+       the "all-nodes address" and is functionally equivalent to broadcast.
+
+       The spirit radios do support both multicast and broadcast with the
+       special addresses 0xee and 0xff, respectively.  So the Spirit driver
+       will map the all-nodes IPv6 to the Spirit destination address 0xff and
+       the packet will be broadcast to all Spirit nodes.
+
+       Here are the procedures for using the test
+
+         C:  nsh> ifup wpan0           <-- Brings up the network on the hub
+
+         E1: nsh> ifconfig wpan0 hw 37 <-- Sets E1 endpoint node address
+         E1: nsh> ifup wpan0           <-- Brings up the network on the E1 node
+         E1: udpserver &               <-- Start the UDP server
+
+         E2: nsh> ifconfig wpan0 hw 38 <-- Sets E2 endpoint node address
+         E2: nsh> ifup wpan0           <-- Brings up the network on the E2 node
+         E2: udpserver &               <-- Start the UDP server
+
+         C:  udpclient &               <-- Starts the UDP client side of the test
+
+       The client will broadcast the UDP packets and, as each UDP packet is
+       sent, it will be received by BOTH endpoints.
+
     STATUS:
       2017-08-05:  Configurations added.  Early testing suggests that there is
         a problem when packets are received from multiple sources at high rates:
@@ -559,3 +592,6 @@ Configuration sub-directories
         that there are no failures that lead to data loss in this environment.
         I would say it is functional but  fragile in this usage, but probably
         robust in a less busy environment.
+
+     2017-08-08:  Added and verified broadcast packet transfers using the
+        hub-based broadcast UDP client.
