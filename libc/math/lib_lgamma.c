@@ -243,7 +243,7 @@ double lgamma_r(double x, int *signgamp)
   double t;
   double y;
   double z;
-  double nadj;
+  double nadj = 0.0;
   double p;
   double p1;
   double p2;

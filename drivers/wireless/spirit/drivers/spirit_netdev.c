@@ -813,21 +813,69 @@ static void spirit_transmit_work(FAR void *arg)
           goto errout_with_csma;
         }
 
+#if 0 /* Not verified */
+      /* If we are sending to the multicast or broadcast address, we should
+       * disable ACKs, retries, and RX timeouts.
+       *
+       * Check if this is a broadcast, multicast, or unicast transfer
+       */
+
+      if (pktmeta->pm_dest.pa_addr[0] == SPIRIT_BCAST_ADDRESS ||
+          pktmeta->pm_dest.pa_addr[0] == SPIRIT_MCAST_ADDRESS)
+        {
+          /* Broadcast or multicast... Disable the ACK response */
+
+          ret = spirit_pktcommon_enable_txautoack(spirit, S_DISABLE);
+          if (ret < 0)
+            {
+              wlerr("ERROR: spirit_pktcommon_enable_txautoack failed: %d\n",
+                    ret);
+              goto errout_with_csma;
+            }
+
+          /* Make certain that the RX timeout is disabled */
+
+          ret = spirit_timer_set_rxtimeout_counter(spirit, 0);
+          if (ret < 0)
+            {
+              wlerr("ERROR: spirit_timer_set_rxtimeout_counter failed: %d\n",
+                    ret);
+              goto errout_with_csma;
+            }
+        }
+      else
+        {
+          /* Unicast.. enable the Auto ACK response */
+
+          ret = spirit_pktcommon_enable_txautoack(spirit, S_ENABLE);
+          if (ret < 0)
+            {
+              wlerr("ERROR: spirit_pktcommon_enable_txautoack failed: %d\n",
+                    ret);
+              goto errout_with_csma;
+            }
+
+          /* And start the RX timeout */
+
+          ret = spirit_timer_setup_rxtimeout(spirit, priv->counter,
+                                             priv->prescaler);
+          if (ret < 0)
+            {
+              wlerr("ERROR: spirit_timer_setup_rxtimeout failed: %d\n", ret);
+              goto errout_with_csma;
+            }
+        }
+#else
       /* Start the RX timeout */
 
-       ret = spirit_timer_setup_rxtimeout(spirit, priv->counter,
-                                          priv->prescaler);
+      ret = spirit_timer_setup_rxtimeout(spirit, priv->counter,
+                                         priv->prescaler);
       if (ret < 0)
         {
           wlerr("ERROR: spirit_timer_setup_rxtimeout failed: %d\n", ret);
           goto errout_with_csma;
         }
-
-      /* REVISIT: If we are sending to the multicast or broadcast address,
-       * should we not also disable ACKs, retries, and RX timeouts?  What
-       * will happen if multiple radios ACK?  At a minimum it could keep
-       * the driver unnecessarily busy.
-       */
+#endif
 
       /* Put the SPIRIT1 into TX state.  This starts the transmission */
 

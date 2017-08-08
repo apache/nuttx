@@ -2064,6 +2064,13 @@ Where <subdir> is one of the following:
     In the main NSH console (in UART2) type: "pts_test &". It will create a
     new console in UART3. Just press ENTER and start typing commands on it.
 
+  testlibcxx
+  ----------
+
+    This is a configuration for testing lib++.  See the section above entitled
+    "Testing LLVM LIBC++ with NuttX" for detailed information about this
+    configuration.
+
   rgbled:
   -------
 

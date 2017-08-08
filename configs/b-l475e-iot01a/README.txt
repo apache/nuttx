@@ -602,8 +602,10 @@ Configuration sub-directories
         packet correction.
 
         Trying again with HC1 compression, I see other isses.  The first
-        frame is received correctly, the following frames have an incorrect
-        packet length.
+        frame is received correctly, but the following frames have an incorrect
+        packet length and generate RX FIFO errors.  Forcing the send size to
+        12 bytes of payload in apps/examples/udp (vs 96), eliminates this
+        problem and the broadcast works well.
 
         There is probably another issue related to broadcast TX setup: If
         we are sending to the multicast or broadcast address, should we
