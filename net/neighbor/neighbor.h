@@ -113,6 +113,8 @@ extern struct neighbor_entry g_neighbors[CONFIG_NET_IPv6_NCONF_ENTRIES];
  * Public Function Prototypes
  ****************************************************************************/
 
+struct net_driver_s; /* Forward reference */
+
 /****************************************************************************
  * Name: neighbor_initialize
  *
@@ -158,8 +160,8 @@ FAR struct neighbor_entry *neighbor_findentry(const net_ipv6addr_t ipaddr);
  *   already there).
  *
  * Input Parameters:
+ *   dev    - Driver instance associated with the MAC
  *   ipaddr - The IPv6 address of the mapping.
- *   lltype - The link layer address type
  *   addr   - The link layer address of the mapping
  *
  * Returned Value:
@@ -167,7 +169,7 @@ FAR struct neighbor_entry *neighbor_findentry(const net_ipv6addr_t ipaddr);
  *
  ****************************************************************************/
 
-void neighbor_add(FAR net_ipv6addr_t ipaddr, uint8_t lltype,
+void neighbor_add(FAR struct net_driver_s *dev, FAR net_ipv6addr_t ipaddr,
                   FAR uint8_t *addr);
 
 /****************************************************************************

@@ -124,6 +124,8 @@ static void devif_packet_conversion(FAR struct net_driver_s *dev,
 {
   if (dev->d_len > 0)
     {
+      /* Check if this is a device served by 6LoWPAN */
+
       if (dev->d_lltype == NET_LL_IEEE802154 ||
           dev->d_lltype == NET_LL_PKTRADIO)
         {

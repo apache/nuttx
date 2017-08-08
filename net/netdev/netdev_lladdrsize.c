@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <net/if.h>
@@ -51,72 +52,111 @@
 #include "netdev/netdev.h"
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: netdev_pktradio_addrlen
+ *
+ * Description:
+ *   Returns the size of the node address associated with a packet radio.
+ *   This is probably CONFIG_PKTRADIO_ADDRLEN but we cannot be sure in the
+ *   case that there ar mutiple packet radios.  In that case, we have to
+ *   query the radio for its address length.
+ *
+ * Parameters:
+ *   dev - A reference to the device of interest
+ *
+ * Returned Value:
+ *   The size of the MAC address associated with this radio
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_6LOWPAN) && defined(CONFIG_WIRELESS_PKTRADIO)
+static inline int netdev_pktradio_addrlen(FAR struct net_driver_s *dev)
+{
+  FAR struct sixlowpan_driver_s *radio = (FAR struct sixlowpan_driver_s *)dev;
+  struct sixlowpan_properties_s properties;
+  int ret;
+
+  DEBUGASSERT(radio != NULL && radio->r_properties != NULL);
+  ret = radio->r_properties(radio, &properties);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return properties.sp_addrlen;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: netdev_type_lladdrsize
+ * Name: netdev_dev_lladdrsize
  *
  * Description:
- *   Returns the size of the MAC address associated with a link layer type.
+ *   Returns the size of the MAC address associated with a network device.
  *
  * Parameters:
- *   lltype - link layer type code
+ *   dev - A reference to the device of interest
  *
  * Returned Value:
  *   The size of the MAC address associated with this device
  *
  ****************************************************************************/
 
-int netdev_type_lladdrsize(uint8_t lltype)
+int netdev_type_lladdrsize(FAR struct net_driver_s *dev)
 {
+  DEBUGASSERT(dev != NULL);
+
   /* Get the length of the address for this link layer type */
 
-#ifdef CONFIG_NET_ETHERNET
-  if (lltype == NET_LL_ETHERNET)
+  switch (dev->d_lltype)
     {
-      /* size of the Ethernet MAC address */
+#ifdef CONFIG_NET_ETHERNET
+      case NET_LL_ETHERNET:
+        {
+          /* Size of the Ethernet MAC address */
 
-      return IFHWADDRLEN;
-    }
-  else
+          return IFHWADDRLEN;
+        }
 #endif
 
 #ifdef CONFIG_NET_6LOWPAN
 #ifdef CONFIG_WIRELESS_IEEE802154
-  if (lltype == NET_LL_IEEE802154)
-    {
-      /* 6LoWPAN can be configured to use either extended or short
-       * addressing.
-       */
+      case NET_LL_IEEE802154:
+        {
+          /* 6LoWPAN can be configured to use either extended or short
+           * addressing.
+           */
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-      return NET_6LOWPAN_EADDRSIZE;
+          return NET_6LOWPAN_EADDRSIZE;
 #else
-      return NET_6LOWPAN_SADDRSIZE;
+          return NET_6LOWPAN_SADDRSIZE;
 #endif
-    }
-  else
+        }
+
 #endif /* CONFIG_WIRELESS_IEEE802154 */
 
 #ifdef CONFIG_WIRELESS_PKTRADIO
-  if (lltype == NET_LL_PKTRADIO)
-    {
-      /* REVISIT:  This may no be the correct size if there are multiple
-       * packet radios.  In that case, it will be the maxim address size
-       * amongst all of the radios.
-       */
+      case NET_LL_PKTRADIO:
+        {
+           /* Return the size of the packet radio address */
 
-      return CONFIG_PKTRADIO_ADDRLEN;
-    }
-  else
+           return netdev_pktradio_addrlen(dev);
+        }
 #endif /* CONFIG_WIRELESS_PKTRADIO */
 #endif /* CONFIG_NET_6LOWPAN */
-    {
-      /* Either the link layer type associated with lltype has no address,
-       * or support for that link layer type is not enabled.
-       */
 
-      return 0;
+       default:
+        {
+          /* The link layer type associated has no address */
+
+          return 0;
+        }
     }
 }

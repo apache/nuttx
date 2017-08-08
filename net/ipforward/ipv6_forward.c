@@ -205,6 +205,8 @@ static int ipv6_packet_conversion(FAR struct net_driver_s *dev,
 
   if (dev->d_len > 0)
     {
+      /* Check if this is a device served by 6LoWPAN */
+
       if (fwddev->d_lltype != NET_LL_IEEE802154 &&
           fwddev->d_lltype != NET_LL_PKTRADIO)
         {

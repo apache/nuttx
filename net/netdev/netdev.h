@@ -404,36 +404,20 @@ int netdev_count(void);
 #endif
 
 /****************************************************************************
- * Name: netdev_type_lladdrsize
- *
- * Description:
- *   Returns the size of the MAC address associated with a link layer type.
- *
- * Parameters:
- *   lltype - link layer type code
- *
- * Returned Value:
- *   The size of the MAC address associated with this device
- *
- ****************************************************************************/
-
-int netdev_type_lladdrsize(uint8_t lltype);
-
-/****************************************************************************
  * Name: netdev_dev_lladdrsize
  *
  * Description:
  *   Returns the size of the MAC address associated with a network device.
  *
  * Parameters:
- *   dev    - A reference to the device of interest
+ *   dev - A reference to the device of interest
  *
  * Returned Value:
  *   The size of the MAC address associated with this device
  *
  ****************************************************************************/
 
-#define netdev_dev_lladdrsize(dev) netdev_type_lladdrsize((dev)->d_lltype)
+int netdev_dev_lladdrsize(FAR struct net_driver_s *dev);
 
 #undef EXTERN
 #ifdef __cplusplus

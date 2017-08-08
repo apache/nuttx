@@ -108,6 +108,8 @@ static void ipfwd_packet_conversion(FAR struct net_driver_s *dev, int proto)
 {
   if (dev->d_len > 0)
     {
+      /* Check if this is a device served by 6LoWPAN */
+
       if (dev->d_lltype == NET_LL_IEEE802154 ||
           dev->d_lltype == NET_LL_PKTRADIO)
         {
@@ -141,7 +143,8 @@ static void ipfwd_packet_conversion(FAR struct net_driver_s *dev, int proto)
           else
 #endif
             {
-              nwarn("WARNING: Unsupported protocol (%u). Packet dropped\n", proto);
+              nwarn("WARNING: Unsupported protocol (%u). Packet dropped\n",
+                    proto);
             }
 
           dev->d_len = 0;

@@ -45,6 +45,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <net/if.h>
@@ -67,8 +68,8 @@
  *   already there).
  *
  * Input Parameters:
+ *   dev    - Driver instance associated with the MAC
  *   ipaddr - The IPv6 address of the mapping.
- *   lltype - The link layer address type
  *   addr   - The link layer address of the mapping
  *
  * Returned Value:
@@ -76,17 +77,21 @@
  *
  ****************************************************************************/
 
-void neighbor_add(FAR net_ipv6addr_t ipaddr, uint8_t lltype,
+void neighbor_add(FAR struct net_driver_s *dev, FAR net_ipv6addr_t ipaddr,
                   FAR uint8_t *addr)
 {
+  uint8_t lltype;
   uint8_t oldest_time;
   int     oldest_ndx;
   int     i;
+
+  DEBUGASSERT(dev != NULL && addr != NULL);
 
   /* Find the first unused entry or the oldest used entry. */
 
   oldest_time = 0;
   oldest_ndx  = 0;
+  lltype      = dev->d_lltype;
 
   for (i = 0; i < CONFIG_NET_IPv6_NCONF_ENTRIES; ++i)
     {
@@ -118,7 +123,7 @@ void neighbor_add(FAR net_ipv6addr_t ipaddr, uint8_t lltype,
   net_ipv6addr_copy(g_neighbors[oldest_ndx].ne_ipaddr, ipaddr);
 
   g_neighbors[oldest_ndx].ne_addr.na_lltype = lltype;
-  g_neighbors[oldest_ndx].ne_addr.na_llsize = netdev_type_lladdrsize(lltype);
+  g_neighbors[oldest_ndx].ne_addr.na_llsize = netdev_dev_lladdrsize(dev);
 
   memcpy(&g_neighbors[oldest_ndx].ne_addr.u, addr,
          g_neighbors[oldest_ndx].ne_addr.na_llsize);
