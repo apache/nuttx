@@ -231,7 +231,6 @@ int arp_send(in_addr_t ipaddr)
       goto errout;
     }
 
-#ifdef CONFIG_NET_MULTILINK
   /* ARP support is only built if the Ethernet data link is supported.
    * Continue and send the ARP request only if this device uses the
    * Ethernet data link protocol.
@@ -241,7 +240,6 @@ int arp_send(in_addr_t ipaddr)
     {
       return OK;
     }
-#endif
 
   /* Check if the destination address is on the local network. */
 

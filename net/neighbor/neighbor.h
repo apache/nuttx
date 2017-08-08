@@ -74,9 +74,7 @@
 
 struct neighbor_addr_s
 {
-#ifdef CONFIG_NET_MULTILINK
   uint8_t                    na_lltype;
-#endif
   uint8_t                    na_llsize;
 
   union

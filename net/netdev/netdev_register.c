@@ -83,16 +83,6 @@
 #endif
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* Then next available device number */
-
-#ifndef CONFIG_NET_MULTILINK
-static int g_next_devnum = 0;
-#endif
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -119,7 +109,6 @@ struct net_driver_s *g_netdevices = NULL;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_MULTILINK
 static int find_devnum(FAR const char *devfmt)
 {
   FAR struct net_driver_s *curr;
@@ -151,7 +140,6 @@ static int find_devnum(FAR const char *devfmt)
 
   return result;
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -187,11 +175,8 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 
   if (dev != NULL)
     {
-#ifdef CONFIG_NET_MULTILINK
-      /* We are supporting multiple network devices and using different link
-       * level protocols.  Set the protocol usd by the device and the size
-       * level protocols.  Set the protocol used by the device and the size
-       * of the link header used by this protocol.
+      /* Set the protocol used by the device and the size of the link
+       * header used by this protocol.
        */
 
       switch (lltype)
@@ -273,12 +258,6 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 
       dev->d_lltype = (uint8_t)lltype;
 
-#else
-     /* Use the default device name */
-
-     devfmt = NETDEV_DEFAULT_FORMAT;
-#endif
-
       /* There are no clients of the device yet */
 
       dev->d_conncb = NULL;
@@ -290,8 +269,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 
       net_lock();
 
-#ifdef CONFIG_NET_MULTILINK
-#  ifdef CONFIG_NET_LOOPBACK
+#ifdef CONFIG_NET_LOOPBACK
       /* The local loopback device is a special case:  There can be only one
        * local loopback device so it is unnumbered.
        */
@@ -301,17 +279,10 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
           devnum = 0;
         }
       else
-#  endif
+#endif
         {
           devnum = find_devnum(devfmt);
         }
-#else
-      /* There is only a single link type.  Finding the next network device
-       * number is simple.
-       */
-
-      devnum = g_next_devnum++;
-#endif
 
 #ifdef CONFIG_NET_USER_DEVFMT
       if (*dev->d_ifname)

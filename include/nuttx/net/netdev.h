@@ -227,7 +227,6 @@ struct net_driver_s
 
   uint8_t d_flags;
 
-#ifdef CONFIG_NET_MULTILINK
   /* Multi network devices using multiple data links protocols are selected */
 
   uint8_t d_lltype;             /* See enum net_lltype_e */
@@ -235,7 +234,6 @@ struct net_driver_s
   uint16_t d_mtu;               /* Maximum packet size */
 #ifdef CONFIG_NET_TCP
   uint16_t d_recvwndo;          /* TCP receive window size */
-#endif
 #endif
 
 #if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_NET_6LOWPAN)
@@ -674,13 +672,7 @@ uint16_t ipv6_chksum(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-#if defined(CONFIG_NET_MULTILINK)
 #  define netdev_ipv4_hdrlen(dev) (dev->d_llhdrlen)
-#elif defined(CONFIG_NET_ETHERNET)
-#  define netdev_ipv4_hdrlen(dev) ETH_HDRLEN
-#else /* if defined(CONFIG_NET_SLIP) */
-#  define netdev_ipv4_hdrlen(dev) 0
-#endif
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
@@ -695,13 +687,7 @@ uint16_t ipv6_chksum(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-#if defined(CONFIG_NET_MULTILINK)
 #  define netdev_ipv6_hdrlen(dev) dev->d_llhdrlen
-#elif defined(CONFIG_NET_ETHERNET)
-#  define netdev_ipv6_hdrlen(dev) ETH_HDRLEN
-#else /* if defined(CONFIG_NET_SLIP) */
-#  define netdev_ipv6_hdrlen(dev) 0
-#endif
 #endif /* CONFIG_NET_IPv6 */
 
 #endif /* __INCLUDE_NUTTX_NET_NETDEV_H */

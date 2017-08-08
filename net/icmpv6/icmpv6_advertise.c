@@ -164,9 +164,7 @@ void icmpv6_advertise(FAR struct net_driver_s *dev,
    * and use our MAC as the new source address
    */
 
-#ifdef CONFIG_NET_MULTILINK
   if (dev->d_lltype == NET_LL_ETHERNET)
-#endif
     {
       FAR struct eth_hdr_s *eth = ETHBUF;
 

@@ -350,7 +350,6 @@ static uint16_t tcp_send_interrupt(FAR struct net_driver_s *dev,
   struct ipv6tcp_hdr_s ipv6tcp;
   int ret;
 
-#ifdef CONFIG_NET_MULTILINK
   /* Verify that this is an IEEE802.15.4 network driver. */
 
   if (dev->d_lltype != NET_LL_IEEE802154 &&
@@ -359,7 +358,6 @@ static uint16_t tcp_send_interrupt(FAR struct net_driver_s *dev,
       ninfo("Not a compatible network device\n");
       return flags;
     }
-#endif
 
   /* The TCP socket is connected and, hence, should be bound to a device.
    * Make sure that the polling device is the one that we are bound to.
@@ -803,7 +801,6 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
       return (ssize_t)-ENETUNREACH;
     }
 
-#ifdef CONFIG_NET_MULTILINK
   /* Some network devices support different link layer protocols.
    * Check if this device has the hooks to support 6LoWPAN.
    */
@@ -814,7 +811,6 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
       nwarn("WARNING: Not a compatible network device\n");
       return (ssize_t)-ENONET;
     }
-#endif
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
   /* Make sure that the IP address mapping is in the Neighbor Table */

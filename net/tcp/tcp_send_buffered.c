@@ -284,12 +284,10 @@ static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
 {
   /* REVISIT: Could the MAC address not also be in a routing table? */
 
-#ifdef CONFIG_NET_MULTILINK
   if (conn->dev->d_lltype != NET_LL_ETHERNET)
     {
       return true;
     }
-#endif
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6

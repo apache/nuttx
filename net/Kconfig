@@ -110,10 +110,6 @@ endmenu # Driver buffer configuration
 
 menu "Data link support"
 
-config NET_MULTILINK
-	bool
-	default n
-
 config NET_USER_DEVFMT
 	bool "User provided devfmt"
 	default n
@@ -124,7 +120,6 @@ config NET_USER_DEVFMT
 config NET_ETHERNET
 	bool "Ethernet support"
 	default y
-	select NET_MULTILINK if NET_6LOWPAN || NET_LOOPBACK || NET_SLIP || NET_TUN
 	---help---
 		If NET_SLIP is not selected, then Ethernet will be used (there is
 		no need to define anything special in the configuration file to use
@@ -133,8 +128,6 @@ config NET_ETHERNET
 config NET_6LOWPAN
 	bool "6LoWPAN support"
 	default n
-	select NET_MULTILINK if NET_ETHERNET || NET_LOOPBACK || NET_SLIP || NET_TUN
-	select NET_MULTILINK if WIRELESS_IEEE802 && WIRELESS_PKTRADIO
 	select NETDEV_IOCTL
 	select NET_HAVE_STAR
 	depends on NET_IPv6
@@ -145,14 +138,12 @@ config NET_6LOWPAN
 config NET_LOOPBACK
 	bool "Local loopback"
 	default n
-	select NET_MULTILINK if NET_ETHERNET || NET_6LOWPAN || NET_SLIP || NET_TUN
 	---help---
 		Add support for the local network loopback device, lo.
 
 config NET_SLIP
 	bool "SLIP support"
 	default n
-	select NET_MULTILINK if NET_ETHERNET || NET_6LOWPAN || NET_LOOPBACK || NET_TUN
 	---help---
 		Enables building of the SLIP driver. SLIP requires
 		at least one IP protocol selected.
@@ -198,7 +189,6 @@ endif # NET_SLIP
 config NET_TUN
 	bool "TUN Virtual Network Device support"
 	default n
-	select NET_MULTILINK if NET_ETHERNET || NET_6LOWPAN || NET_LOOPBACK || NET_SLIP
 	select ARCH_HAVE_NETDEV_STATISTICS
 
 if NET_TUN

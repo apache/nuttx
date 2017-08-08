@@ -356,7 +356,6 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
   DEBUGASSERT(dev);
   ninfo("Auto-configuring %s\n", dev->d_ifname);
 
-#ifdef CONFIG_NET_MULTILINK
   /* Only Ethernet devices are supported for now */
 
   if (dev->d_lltype != NET_LL_ETHERNET)
@@ -364,7 +363,6 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
       nerr("ERROR: Only Ethernet is supported\n");
       return -ENOSYS;
     }
-#endif
 
   /* The interface should be in the down state */
 

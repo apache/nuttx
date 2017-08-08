@@ -213,7 +213,6 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
       return (ssize_t)-ENETUNREACH;
     }
 
-#ifdef CONFIG_NET_MULTILINK
   /* Some network devices support different link layer protocols.
    * Check if this device has the hooks to support 6LoWPAN.
    */
@@ -224,7 +223,6 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
       nwarn("WARNING: Not a compatible network device\n");
       return (ssize_t)-ENONET;
     }
-#endif
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
   /* Make sure that the IP address mapping is in the Neighbor Table */

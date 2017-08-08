@@ -93,10 +93,8 @@ struct icmpv6_notify_s
 
 struct icmpv6_rnotify_s
 {
-#ifdef CONFIG_NET_MULTILINK
   FAR struct icmpv6_notify_s *rn_flink; /* Supports singly linked list */
   char rn_ifname[IFNAMSIZ];             /* Device name */
-#endif
   sem_t rn_sem;                         /* Will wake up the waiter */
   int rn_result;                        /* The result of the wait */
 };

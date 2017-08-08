@@ -147,12 +147,10 @@ static inline bool ipfwd_addrchk(FAR struct forward_s *fwd)
 
   /* REVISIT: Could the MAC address not also be in a routing table? */
 
-#ifdef CONFIG_NET_MULTILINK
   if (fwd->f_dev->d_lltype != NET_LL_ETHERNET)
     {
       return true;
     }
-#endif
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6

@@ -124,12 +124,8 @@ static void devif_packet_conversion(FAR struct net_driver_s *dev,
 {
   if (dev->d_len > 0)
     {
-#ifdef CONFIG_NET_MULTILINK
-      /* Handle the case where multiple link layer protocols are supported */
-
       if (dev->d_lltype == NET_LL_IEEE802154 ||
           dev->d_lltype == NET_LL_PKTRADIO)
-#endif
         {
           FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)dev->d_buf;
 
