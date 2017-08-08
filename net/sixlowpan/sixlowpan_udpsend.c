@@ -216,7 +216,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
       return (ssize_t)-ENETUNREACH;
     }
 
-#ifdef CONFIG_NETDEV_MULTILINK
+#ifdef CONFIG_NET_MULTILINK
   /* Some network devices support different link layer protocols.
    * Check if this device has the hooks to support 6LoWPAN.
    */

@@ -810,7 +810,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
       return (ssize_t)-ENETUNREACH;
     }
 
-#ifdef CONFIG_NETDEV_MULTILINK
+#ifdef CONFIG_NET_MULTILINK
   /* Some network devices support different link layer protocols.
    * Check if this device has the hooks to support 6LoWPAN.
    */
