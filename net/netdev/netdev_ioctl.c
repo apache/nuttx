@@ -380,11 +380,7 @@ static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
       /* Find the device with this name */
 
       dev = netdev_findbyname(ifname);
-#ifdef CONFIG_NET_MULTILINK
       if (dev != NULL && dev->d_lltype == NET_LL_IEEE802154)
-#else
-      if (dev != NULL)
-#endif
         {
           /* Perform the device IOCTL */
 
@@ -447,11 +443,7 @@ static int netdev_pktradio_ioctl(FAR struct socket *psock, int cmd,
       /* Find the device with this name */
 
       dev = netdev_findbyname(ifname);
-#ifdef CONFIG_NET_MULTILINK
       if (dev != NULL && dev->d_lltype == NET_LL_PKTRADIO)
-#else
-      if (dev != NULL)
-#endif
         {
           /* Perform the device IOCTL */
 
@@ -825,11 +817,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           if (dev)
             {
 #ifdef CONFIG_NET_ETHERNET
-#ifdef CONFIG_NET_MULTILINK
               if (dev->d_lltype == NET_LL_ETHERNET)
-#else
-              if (true)
-#endif
                 {
                   req->ifr_hwaddr.sa_family = AF_INETX;
                   memcpy(req->ifr_hwaddr.sa_data,
@@ -840,12 +828,8 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 #endif
 
 #ifdef CONFIG_NET_6LOWPAN
-#ifdef CONFIG_NET_MULTILINK
               if (dev->d_lltype == NET_LL_IEEE802154 ||
                   dev->d_lltype == NET_LL_PKTRADIO)
-#else
-              if (true)
-#endif
                 {
                   req->ifr_hwaddr.sa_family = AF_INETX;
                   memcpy(req->ifr_hwaddr.sa_data,
@@ -868,11 +852,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           if (dev)
             {
 #ifdef CONFIG_NET_ETHERNET
-#ifdef CONFIG_NET_MULTILINK
               if (dev->d_lltype == NET_LL_ETHERNET)
-#else
-              if (true)
-#endif
                 {
                   memcpy(dev->d_mac.ether.ether_addr_octet,
                          req->ifr_hwaddr.sa_data, IFHWADDRLEN);
@@ -882,12 +862,8 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 #endif
 
 #ifdef CONFIG_NET_6LOWPAN
-#ifdef CONFIG_NET_MULTILINK
               if (dev->d_lltype == NET_LL_IEEE802154 ||
                   dev->d_lltype == NET_LL_PKTRADIO)
-#else
-              if (true)
-#endif
                 {
                   FAR struct sixlowpan_driver_s *radio;
                   struct sixlowpan_properties_s properties;

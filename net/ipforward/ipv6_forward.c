@@ -205,16 +205,12 @@ static int ipv6_packet_conversion(FAR struct net_driver_s *dev,
 
   if (dev->d_len > 0)
     {
-#ifdef CONFIG_NET_MULTILINK
-      /* Handle the case where multiple link layer protocols are supported */
-
       if (fwddev->d_lltype != NET_LL_IEEE802154 &&
           fwddev->d_lltype != NET_LL_PKTRADIO)
         {
           nwarn("WARNING:  Unsupported link layer... Not forwarded\n");
         }
       else
-#endif
 #ifdef CONFIG_NET_TCP
       if (ipv6->proto == IP_PROTO_TCP)
         {

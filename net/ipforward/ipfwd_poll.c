@@ -74,12 +74,8 @@ static int ipfwd_packet_proto(FAR struct net_driver_s *dev)
 
   if (dev->d_len > (IPv6_HDRLEN + llhdrlen))
     {
-#ifdef CONFIG_NET_MULTILINK
-      /* Handle the case where multiple link layer protocols are supported */
-
       if (dev->d_lltype == NET_LL_IEEE802154 ||
           dev->d_lltype == NET_LL_PKTRADIO)
-#endif
         {
           /* There should be an IPv6 packet at the beginning of the buffer */
 
@@ -112,13 +108,11 @@ static void ipfwd_packet_conversion(FAR struct net_driver_s *dev, int proto)
 {
   if (dev->d_len > 0)
     {
-#ifdef CONFIG_NET_MULTILINK
-      /* Handle the case where multiple link layer protocols are supported */
-
       if (dev->d_lltype == NET_LL_IEEE802154 ||
           dev->d_lltype == NET_LL_PKTRADIO)
-#endif
         {
+          FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)dev->d_buf;
+
 #ifdef CONFIG_NET_TCP
           if (proto == IP_PROTO_TCP)
             {

@@ -1808,9 +1808,9 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   /* But don't let the buffer size exceed the MSS of the socket type.
    *
    * In the case where there are multiple network devices with different
-   * link layer protocols (CONFIG_NET_MULTILINK), each network device
-   * may support a different UDP MSS value.  Here we arbitrarily select
-   * the minimum MSS for that case.
+   * link layer protocols, each network device may support a different
+   * UDP MSS value.  Here we arbitrarily select the minimum MSS for
+   * that case.
    */
 
   if (buflen > MIN_IPv4_UDP_MSS)

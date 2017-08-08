@@ -277,7 +277,6 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
 
       psock_teardown_callbacks(pstate, pstate->tc_result);
 
-#ifdef CONFIG_NET_MULTILINK
       /* When we set up the connection structure, we did not know the size
        * of the initial MSS.  Now that the connection is associated with a
        * network device, we now know the size of link layer header and can
@@ -311,8 +310,6 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
       DEBUGASSERT(pstate->tc_conn->dev == NULL ||
                   pstate->tc_conn->dev == dev);
       pstate->tc_conn->dev = dev;
-
-#endif /* CONFIG_NET_MULTILINK */
 
       /* Wake up the waiting thread */
 

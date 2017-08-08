@@ -155,9 +155,7 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
   dev->d_len    = IPv6_HDRLEN + l3size;
 
 #ifdef CONFIG_NET_ETHERNET
-#ifdef CONFIG_NET_MULTILINK
   if (dev->d_lltype == NET_LL_ETHERNET)
-#endif
     {
       /* Set the destination IPv6 all-routers multicast Ethernet
        * address

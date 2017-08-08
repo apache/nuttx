@@ -1,5 +1,5 @@
 /******************************************************************************
- * drivers/wireless/spirit/lib/spirit_Linearfifo.c
+ * drivers/wireless/spirit/lib/spirit_linearfifo.c
  * Configuration and management of SPIRIT Fifo.
  *
  *  Copyright(c) 2015 STMicroelectronics
@@ -40,7 +40,7 @@
 
 #include <assert.h>
 
-#include "spirit_Linearfifo.h"
+#include "spirit_linearfifo.h"
 #include "spirit_spi.h"
 
 /******************************************************************************

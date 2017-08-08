@@ -410,13 +410,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
          * logic will be called to create the IEEE80215.4 frames.
          */
 
-#ifdef CONFIG_NET_MULTILINK
-        /* Handle the case where multiple link layer protocols are supported */
-
         if (dev->d_len > 0 && dev->d_lltype == CONFIG_NET_6LOWPAN)
-#else
-        if (dev->d_len > 0)
-#endif
           {
             /* Let 6LoWPAN handle the TCP output */
 
@@ -460,13 +454,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
          * logic will be called to create the IEEE80215.4 frames.
          */
 
-#ifdef CONFIG_NET_MULTILINK
-        /* Handle the case where multiple link layer protocols are supported */
-
         if (dev->d_len > 0 && dev->d_lltype == CONFIG_NET_6LOWPAN)
-#else
-        if (dev->d_len > 0)
-#endif
           {
             /* Let 6LoWPAN handle the ICMPv6 output */
 

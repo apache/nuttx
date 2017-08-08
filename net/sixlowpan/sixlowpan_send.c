@@ -161,7 +161,6 @@ static uint16_t send_interrupt(FAR struct net_driver_s *dev,
 
   ninfo("flags: %04x: %d\n", flags);
 
-#ifdef CONFIG_NET_MULTILINK
   /* Verify that this is a compatible network driver. */
 
   if (dev->d_lltype != NET_LL_IEEE802154 &&
@@ -170,7 +169,6 @@ static uint16_t send_interrupt(FAR struct net_driver_s *dev,
       ninfo("Not a compatible network device\n");
       return flags;
     }
-#endif
 
   /* REVISIT: Verify that this is the correct IEEE802.15.4 network driver to
    * route the outgoing frame(s).  Chances are that there is only one

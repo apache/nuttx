@@ -229,19 +229,17 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
       goto errout;
     }
 
-#ifdef CONFIG_NET_MULTILINK
    * Continue and send the Neighbor Solicitation request only if this
    * device uses the Ethernet data link protocol.
    *
    * REVISIT:  Other link layer protocols may require Neighbor Discovery
-   * as well (but not SLIP which is the only other option at the moment).
+   * as well.
    */
 
   if (dev->d_lltype != NET_LL_ETHERNET)
     {
       return OK;
     }
-#endif
 
   /* Check if the destination address is on the local network. */
 

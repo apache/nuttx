@@ -196,9 +196,8 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
       status = "DOWN";
     }
 
-#if defined(CONFIG_NET_MULTILINK)
-  /* If there are multiple link types being supported, then selected the
-   * output appropriate for the link type associated with this device.
+  /* Select the output appropriate for the link type associated with
+   * this device.
    */
 
   switch (dev->d_lltype)
@@ -256,38 +255,6 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
 
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   " at %s\n", status);
-
-#elif defined(CONFIG_NET_ETHERNET)
-  len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                  "%s\tLink encap:Ethernet HWaddr %s at %s\n",
-                  dev->d_ifname, ether_ntoa(&dev->d_mac.ether), status);
-
-#elif defined(CONFIG_NET_6LOWPAN)
-  len += netprocfs_6lowpan_linklayer(netfile, len);
-  len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                  " at %s\n", status);
-
-#elif defined(CONFIG_NET_LOOPBACK)
-  len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                  "%s\tLink encap:Local Loopback at %s\n",
-                  dev->d_ifname, status);
-
-#elif defined(CONFIG_NET_SLIP)
-  len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                  "%s\tLink encap:SLIP at %s\n",
-                  dev->d_ifname, status);
-
-#elif defined(CONFIG_NET_PPP)
-  len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                  "%s\tLink encap:P-t-P at %s\n",
-                  dev->d_ifname, status);
-
-#elif defined(CONFIG_NET_TUN)
-  len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                  "%s\tLink encap:TUN at %s\n",
-                  dev->d_ifname, status);
-#endif
-
   return len;
 }
 
