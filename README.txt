@@ -572,8 +572,8 @@ Instantiating "Canned" Configurations
     configuration, but to make the configuration even easier there are
    scripts available in the tools/ sub-directory combines those simple steps
     into one command.
-  
-    There is one tool for use with any Bask-like shell that does configuration
+
+    There is one tool for use with any Bash-like shell that does configuration
     steps.  It is used as follows:
 
       tools/configure.sh <board-name>/<config-dir>
