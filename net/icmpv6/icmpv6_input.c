@@ -255,6 +255,14 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 
         for (ndx = 0; ndx + sizeof(struct icmpv6_prefixinfo_s) <= optlen; )
           {
+            FAR struct icmpv6_srclladdr_s *sllopt =
+              (FAR struct icmpv6_srclladdr_s *)&options[ndx];
+
+            if (sllopt->opttype == 1 && sllopt->optlen == 1)
+              {
+                neighbor_add(icmp->srcipaddr, DEV_LLTYPE(dev), sllopt->srclladdr);
+              }
+
             FAR struct icmpv6_prefixinfo_s *opt =
               (FAR struct icmpv6_prefixinfo_s *)&options[ndx];
 
