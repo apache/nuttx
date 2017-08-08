@@ -39,6 +39,7 @@ Contents
   - UG-2864AMBAG01 / UG-2864HSWEG01
   - STM32F4Discovery-specific Configuration Options
   - BASIC
+  - Testing LLVM LIBC++ with NuttX
   - Configurations
 
 Development Environment
@@ -1204,6 +1205,87 @@ BASIC
    0.0000020
    0.0000002
   >
+
+Testing LLVM LIBC++ with NuttX
+==============================
+
+You can use LLVM LIBC++ on NuttX to get a C++ compiler with C++11 features.
+Follow these steps to get it working:
+
+Clone the needed repositories:
+
+    $ git clone https://www.bitbucket.org/acassis/libcxx
+
+    $ git clone https://www.bitbucket.org/nuttx/apps
+
+    $ git clone https://www.bitbucket.org/nuttx/nuttx
+
+Install the libcxx files on NuttX:
+
+    $ cd libcxx
+
+    $ ./install.sh ../nuttx
+    Installing LLVM/libcxx in the NuttX source tree
+    Installation suceeded
+
+Enter inside NuttX and compile it:
+
+    $ cd ../nuttx
+
+    $ ./tools/configure.sh stm32f4discovery/testlibcxx
+      Copy files
+      Refreshing...
+
+    $ ls -l nuttx.bin
+    -rwxrwxr-x 1 alan alan 58112 Ago  8 11:08 nuttx.bin
+
+Plug the MiniUSB cable in the STM32F4Discovery board and flash the firmware:
+
+    $ sudo openocd -f interface/stlink-v2.cfg -f target/stm32f4x.cfg -c init \
+    -c "reset halt" -c "flash write_image erase nuttx.bin 0x08000000"
+
+    ...
+
+    Info : device id = 0x10036413
+    Info : flash size = 1024kbytes
+    target halted due to breakpoint, current mode: Thread
+    xPSR: 0x61000000 pc: 0x20000046 msp: 0x20001d60
+    wrote 65536 bytes from file nuttx.bin in 2.959432s (21.626 KiB/s)
+
+Connect the USB/Serial 3.3V dongle to PA2(board TX) and PA3(board RX) use
+minicom or other serial console configured to 115200 8n1.
+
+Press Reset pin of the board and you will see:
+
+    NuttShell (NSH)
+    nsh> ?
+    help usage:  help [-v] [<cmd>]
+
+      [           cmp         free        mh          sh          usleep
+      ?           dirname     help        mv          sleep       xd
+      basename    dd          hexdump     mw          test
+      break       echo        kill        pwd         time
+      cat         exec        ls          rm          true
+      cd          exit        mb          rmdir       uname
+      cp          false       mkdir       set         unset
+
+    Builtin Apps:
+      helloxx
+
+    nsh>
+
+
+Just type helloxx:
+
+    nsh> helloxx
+    helloxx_main: Saying hello from the dynamically constructed instance
+    CHelloWorld::HelloWorld: Hello, World!!
+    helloxx_main: Saying hello from the instance constructed on the stack
+    CHelloWorld::HelloWorld: Hello, World!!
+    helloxx_main: Saying hello from the statically constructed instance
+    CHelloWorld::HelloWorld: Hello, World!!
+
+    nsh>
 
 Configurations
 ==============
