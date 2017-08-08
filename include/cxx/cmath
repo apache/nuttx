@@ -76,6 +76,8 @@ namespace std
   using ::sqrtf;
   using ::tanf;
   using ::tanhf;
+  using ::gamma;
+  using ::lgamma;
 #endif
 
 #ifdef CONFIG_HAVE_DOUBLE

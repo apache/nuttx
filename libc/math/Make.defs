@@ -62,6 +62,8 @@ CSRCS += lib_truncl.c
 CSRCS += lib_libexpi.c lib_libsqrtapprox.c
 CSRCS += lib_libexpif.c
 
+CSRCS += __cos.c __sin.c lib_gamma.c lib_lgamma.c
+
 # Use the C versions of some functions only if architecture specific
 # optimized versions are not provided.
 

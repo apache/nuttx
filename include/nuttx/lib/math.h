@@ -230,6 +230,13 @@ long double expl  (long double x);
 #define expm1l(x) (expl(x) - 1.0)
 #endif
 
+#ifdef CONFIG_HAVE_DOUBLE
+double      __cos(double x, double y);
+double      __sin(double x, double y, int iy);
+double      gamma(double x);
+double      lgamma(double x);
+#endif
+
 float       logf  (float x);
 #ifdef CONFIG_HAVE_DOUBLE
 double      log   (double x);
