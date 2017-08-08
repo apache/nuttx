@@ -51,7 +51,7 @@
 
 #include "ipforward/ipforward.h"
 
-#if defined(CONFIG_NET_IPFORWARD) &&  defined(CONFIG_NETDEV_MULTINIC)
+#ifdef CONFIG_NET_IPFORWARD
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -170,4 +170,4 @@ void ipfwd_free(FAR struct forward_s *fwd)
   g_fwdfree    = fwd;
 }
 
-#endif /* CONFIG_NET_IPFORWARD && CONFIG_NETDEV_MULTINIC */
+#endif /* CONFIG_NET_IPFORWARD */

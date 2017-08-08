@@ -130,13 +130,9 @@ static inline void _udp_semtake(FAR sem_t *sem)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_MULTINIC
 static FAR struct udp_conn_s *udp_find_conn(uint8_t domain,
                                             FAR union ip_binding_u *ipaddr,
                                             uint16_t portno)
-#else
-static FAR struct udp_conn_s *udp_find_conn(uint16_t portno)
-#endif
 {
   FAR struct udp_conn_s *conn;
   int i;
@@ -147,7 +143,6 @@ static FAR struct udp_conn_s *udp_find_conn(uint16_t portno)
     {
       conn = &g_udp_connections[i];
 
-#ifdef CONFIG_NETDEV_MULTINIC
       /* If the port local port number assigned to the connections matches
        * AND the IP address of the connection matches, then return a
        * reference to the connection structure.  INADDR_ANY is a special
@@ -181,17 +176,6 @@ static FAR struct udp_conn_s *udp_find_conn(uint16_t portno)
             }
         }
 #endif /* CONFIG_NET_IPv6 */
-
-#else /* CONFIG_NETDEV_MULTINIC */
-      /* If the port local port number assigned to the connections matches,
-       * then return a reference to the connection structure.
-       */
-
-      if (conn->lport == portno)
-        {
-          return conn;
-        }
-#endif /* CONFIG_NETDEV_MULTINIC */
     }
 
   return NULL;
@@ -217,11 +201,7 @@ static FAR struct udp_conn_s *udp_find_conn(uint16_t portno)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_MULTINIC
 static uint16_t udp_select_port(uint8_t domain, FAR union ip_binding_u *u)
-#else
-static uint16_t udp_select_port(void)
-#endif
 {
   uint16_t portno;
 
@@ -245,11 +225,7 @@ static uint16_t udp_select_port(void)
           g_last_udp_port = 4096;
         }
     }
-#ifdef CONFIG_NETDEV_MULTINIC
   while (udp_find_conn(domain, u, htons(g_last_udp_port)));
-#else
-  while (udp_find_conn(htons(g_last_udp_port)));
-#endif
 
   /* Initialize and return the connection structure, bind it to the
    * port number
@@ -278,7 +254,7 @@ static inline FAR struct udp_conn_s *
   udp_ipv4_active(FAR struct net_driver_s *dev, FAR struct udp_hdr_s *udp)
 {
 #ifdef CONFIG_NET_BROADCAST
-  static const inaddr_t bcast = INADDR_BROADCAST;
+  static const in_addr_t bcast = INADDR_BROADCAST;
 #endif
   FAR struct ipv4_hdr_s *ip = IPv4BUF;
   FAR struct udp_conn_s *conn;
@@ -319,7 +295,6 @@ static inline FAR struct udp_conn_s *
       if (conn->lport != 0 && udp->destport == conn->lport &&
           (conn->rport == 0 || udp->srcport == conn->rport) &&
 
-#ifdef CONFIG_NETDEV_MULTINIC
           /* Local port accepts any address on this port or there
            * is an exact match in destipaddr and the bound local
            * address.  This catches the receipt of a broadcast when
@@ -328,7 +303,7 @@ static inline FAR struct udp_conn_s *
 
           (net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY) ||
            net_ipv4addr_hdrcmp(ip->destipaddr, &conn->u.ipv4.laddr)) &&
-#endif
+
           /* If not connected to a remote address, or a broadcast address
            * destipaddr was received, or there is an exact match between the
            * srcipaddr and the bound IP address, then accept the packet.
@@ -408,7 +383,6 @@ static inline FAR struct udp_conn_s *
       if (conn->lport != 0 && udp->destport == conn->lport &&
           (conn->rport == 0 || udp->srcport == conn->rport) &&
 
-#ifdef CONFIG_NETDEV_MULTINIC
           /* Local port accepts any address on this port or there
            * is an exact match in destipaddr and the bound local
            * address.  This catches the cast of the all nodes multicast
@@ -417,7 +391,7 @@ static inline FAR struct udp_conn_s *
 
           (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr) ||
            net_ipv6addr_hdrcmp(ip->destipaddr, conn->u.ipv6.laddr)) &&
-#endif
+
           /* If not connected to a remote address, or a all-nodes multicast
            * destipaddr was received, or there is an exact match between the
            * srcipaddr and the bound remote IP address, then accept the
@@ -639,14 +613,12 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
 
       portno = inaddr->sin_port;
 
-#ifdef CONFIG_NETDEV_MULTINIC
       /* Bind the local IP address to the connection.  NOTE this address may
        * be INADDR_ANY meaning, essentially, that we are binding to all
        * interfaces for receiving (Sending will use the default port).
        */
 
       net_ipv4addr_copy(conn->u.ipv4.laddr, inaddr->sin_addr.s_addr);
-#endif /* CONFIG_NETDEV_MULTINIC */
     }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -662,14 +634,12 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
 
       portno = inaddr->sin6_port;
 
-#ifdef CONFIG_NETDEV_MULTINIC
       /* Bind the local IP address to the connection.  NOTE this address may
        * be INADDR_ANY meaning, essentially, that we are binding to all
        * interfaces for receiving (Sending will use the default port).
        */
 
       net_ipv6addr_copy(conn->u.ipv6.laddr, inaddr->sin6_addr.in6_u.u6_addr16);
-#endif /* CONFIG_NETDEV_MULTINIC */
     }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -679,11 +649,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
     {
       /* Yes.. Select any unused local port number */
 
-#ifdef CONFIG_NETDEV_MULTINIC
       conn->lport = htons(udp_select_port(conn->domain, &conn->u));
-#else
-      conn->lport = htons(udp_select_port());
-#endif
       ret         = OK;
     }
   else
@@ -694,11 +660,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
 
       /* Is any other UDP connection already bound to this address and port? */
 
-#ifdef CONFIG_NETDEV_MULTINIC
       if (!udp_find_conn(conn->domain, &conn->u, portno))
-#else
-      if (!udp_find_conn(portno))
-#endif
         {
           /* No.. then bind the socket to the port */
 
@@ -749,11 +711,7 @@ int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
        * connection structure.
        */
 
-#ifdef CONFIG_NETDEV_MULTINIC
       conn->lport = htons(udp_select_port(conn->domain, &conn->u));
-#else
-      conn->lport = htons(udp_select_port());
-#endif
     }
 
   /* Is there a remote port (rport)? */

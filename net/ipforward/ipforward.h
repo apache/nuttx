@@ -47,12 +47,6 @@
 #undef HAVE_FWDALLOC
 #ifdef CONFIG_NET_IPFORWARD
 
-/* Must of the logic in this header file applies only for configurations
- * will multiple network devices.
- */
-
-#ifdef CONFIG_NETDEV_MULTINIC
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -278,16 +272,6 @@ void ipfwd_dropstats(FAR struct forward_s *fwd);
 #else
 #  define ipfwd_dropstats(fwd)
 #endif
-
-#endif /* CONFIG_NETDEV_MULTINIC */
-
-/* Duplicates some forward references that are only available when
- * CONFIG_NETDEV_MULTINIC is enabled.
- */
-
-struct net_driver_s; /* Forward reference */
-struct ipv4_hdr_s;   /* Forward reference */
-struct ipv6_hdr_s;   /* Forward reference */
 
 /****************************************************************************
  * Name: ipv4_forward

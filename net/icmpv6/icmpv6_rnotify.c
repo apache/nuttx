@@ -160,7 +160,6 @@ static void icmpv6_setaddresses(FAR struct net_driver_s *dev,
 void icmpv6_rwait_setup(FAR struct net_driver_s *dev,
                         FAR struct icmpv6_rnotify_s *notify)
 {
-#ifdef CONFIG_NETDEV_MULTINIC
   irqstate_t flags;
 
   /* Initialize the wait structure */
@@ -181,26 +180,6 @@ void icmpv6_rwait_setup(FAR struct net_driver_s *dev,
   notify->rn_flink  = g_icmpv6_rwaiters;
   g_icmpv6_rwaiters  = notify;
   leave_critical_section(flags);
-
-#else
-  /* If there is only a single network device, then there can be only a
-   * single waiter.
-   */
-
-  /* Initialize and remember wait structure */
-
-  notify->rn_result = -ETIMEDOUT;
-
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  (void)sem_init(&notify->rn_sem, 0, 0);
-  sem_setprotocol(&notify->rn_sem, SEM_PRIO_NONE);
-
-  DEBUGASSERT(g_icmpv6_rwaiters == NULL);
-  g_icmpv6_rwaiters = notify;
-#endif
 }
 
 /****************************************************************************
@@ -219,7 +198,6 @@ void icmpv6_rwait_setup(FAR struct net_driver_s *dev,
 
 int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify)
 {
-#ifdef CONFIG_NETDEV_MULTINIC
   FAR struct icmpv6_rnotify_s *curr;
   FAR struct icmpv6_rnotify_s *prev;
   irqstate_t flags;
@@ -254,18 +232,6 @@ int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify)
   leave_critical_section(flags);
   (void)sem_destroy(&notify->rn_sem);
   return ret;
-
-#else
-  ninfo("Cancelling...\n");
-
-  /* If there is only one network device, then there can be only one entry
-   * in the list of waiters.
-   */
-
-  g_icmpv6_rwaiters = NULL;
-  (void)sem_destroy(&notify->rn_sem);
-  return OK;
-#endif
 }
 
 /****************************************************************************
@@ -345,7 +311,6 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
 void icmpv6_rnotify(FAR struct net_driver_s *dev, const net_ipv6addr_t draddr,
                     const net_ipv6addr_t prefix, unsigned int preflen)
 {
-#ifdef CONFIG_NETDEV_MULTINIC
   FAR struct icmpv6_rnotify_s *curr;
 
   ninfo("Notified\n");
@@ -373,24 +338,6 @@ void icmpv6_rnotify(FAR struct net_driver_s *dev, const net_ipv6addr_t draddr,
           break;
         }
     }
-
-#else
-  FAR struct icmpv6_rnotify_s *waiter = g_icmpv6_rwaiters;
-
-  ninfo("Notified\n");
-
-  if (waiter)
-    {
-      /* Set the new network addresses. */
-
-      icmpv6_setaddresses(dev, draddr, prefix, preflen);
-
-      /* And signal the waiting, returning success */
-
-      waiter->rn_result = OK;
-      sem_post(&waiter->rn_sem);
-    }
-#endif
 }
 
 #endif /* CONFIG_NET_ICMPv6_AUTOCONF */

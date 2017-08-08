@@ -299,7 +299,7 @@ static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NETDEV_MULTINIC)
+#ifdef CONFIG_NET_IPFORWARD
 static inline int devif_poll_forward(FAR struct net_driver_s *dev,
                                      devif_poll_callback_t callback)
 {
@@ -575,7 +575,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 
   if (!bstop)
 #endif
-#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NETDEV_MULTINIC)
+#ifdef CONFIG_NET_IPFORWARD
     {
       /* Traverse all of the tasks waiting to forward a packet to this device. */
 

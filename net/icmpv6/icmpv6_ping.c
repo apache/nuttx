@@ -425,11 +425,7 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
 
   /* Get the device that will be used to route this ICMP ECHO request */
 
-#ifdef CONFIG_NETDEV_MULTINIC
   dev = netdev_findby_ipv6addr(g_ipv6_allzeroaddr, addr);
-#else
-  dev = netdev_findby_ipv6addr(addr);
-#endif
   if (dev == 0)
     {
       nerr("ERROR: Not reachable\n");

@@ -129,9 +129,7 @@ union ip_binding_u
 
   struct
   {
-#ifdef CONFIG_NETDEV_MULTINIC
     in_addr_t laddr;      /* The bound local IPv4 address */
-#endif
     in_addr_t raddr;      /* The IPv4 address of the remote host */
   } ipv4;
 #endif /* CONFIG_NET_IPv4 */
@@ -141,9 +139,7 @@ union ip_binding_u
 
   struct
   {
-#ifdef CONFIG_NETDEV_MULTINIC
     net_ipv6addr_t laddr; /* The bound local IPv6 address */
-#endif
     net_ipv6addr_t raddr; /* The IPv6 address of the remote host */
   } ipv6;
 #endif /* CONFIG_NET_IPv6 */

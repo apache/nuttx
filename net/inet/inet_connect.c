@@ -304,7 +304,6 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
         }
 #endif /* CONFIG_NET_IPv6 */
 
-#ifdef CONFIG_NETDEV_MULTINIC
       /* We now have to filter all outgoing transfers so that they use only
        * the MSS of this device.
        */
@@ -313,7 +312,6 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
                   pstate->tc_conn->dev == dev);
       pstate->tc_conn->dev = dev;
 
-#endif /* CONFIG_NETDEV_MULTINIC */
 #endif /* CONFIG_NET_MULTILINK */
 
       /* Wake up the waiting thread */

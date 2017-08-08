@@ -137,9 +137,7 @@ struct arp_send_s
   sem_t     snd_sem;                   /* Used to wake up the waiting thread */
   uint8_t   snd_retries;               /* Retry count */
   volatile bool snd_sent;              /* True: if request sent */
-#ifdef CONFIG_NETDEV_MULTINIC
   uint8_t   snd_ifname[IFNAMSIZ];      /* Interface name */
-#endif
   int16_t   snd_result;                /* The result of the send operation */
   in_addr_t snd_ipaddr;                /* The IP address to be queried */
 };

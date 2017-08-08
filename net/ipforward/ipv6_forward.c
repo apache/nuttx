@@ -84,7 +84,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NETDEV_MULTINIC) && defined(CONFIG_DEBUG_NET_WARN)
+#ifdef CONFIG_DEBUG_NET_WARN
 static int ipv6_hdrsize(FAR struct ipv6_hdr_s *ipv6)
 {
   /* Size is determined by the following protocol header, */
@@ -151,7 +151,7 @@ static int ipv6_hdrsize(FAR struct ipv6_hdr_s *ipv6)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NETDEV_MULTINIC) || defined(CONFIG_NET_6LOWPAN)
+#ifdef CONFIG_NET_6LOWPAN
 static int ipv6_decr_ttl(FAR struct ipv6_hdr_s *ipv6)
 {
   int ttl = (int)ipv6->ttl - 1;
@@ -342,7 +342,6 @@ static int ipv6_packet_conversion(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_MULTINIC
 static int ipv6_dev_forward(FAR struct net_driver_s *dev,
                             FAR struct net_driver_s *fwddev,
                             FAR struct ipv6_hdr_s *ipv6)
@@ -482,7 +481,6 @@ errout_with_fwd:
 errout:
   return ret;
 }
-#endif /* CONFIG_NETDEV_MULTINIC */
 
 /****************************************************************************
  * Name: ipv6_forward_callback
@@ -504,8 +502,7 @@ errout:
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IPFORWARD_BROADCAST) && \
-    defined(CONFIG_NETDEV_MULTINIC)
+#ifdef CONFIG_NET_IPFORWARD_BROADCAST
 int ipv6_forward_callback(FAR struct net_driver_s *fwddev, FAR void *arg)
 {
   FAR struct net_driver_s *dev = (FAR struct net_driver_s *)arg;
@@ -578,24 +575,15 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
   FAR struct net_driver_s *fwddev;
   int ret;
 
-  /* Search for a device that can forward this packet.  This is a trivial
-   * search if there is only a single network device (CONFIG_NETDEV_MULTINIC
-   * not defined).  But netdev_findby_ipv6addr() will still assure
-   * routability in that case.
-   */
+  /* Search for a device that can forward this packet. */
 
-#ifdef CONFIG_NETDEV_MULTINIC
   fwddev = netdev_findby_ipv6addr(ipv6->srcipaddr, ipv6->destipaddr);
-#else
-  fwddev = netdev_findby_ipv6addr(ipv6->destipaddr);
-#endif
   if (fwddev == NULL)
     {
       nwarn("WARNING: Not routable\n");
       return (ssize_t)-ENETUNREACH;
     }
 
-#if defined(CONFIG_NETDEV_MULTINIC)
   /* Check if we are forwarding on the same device that we received the
    * packet from.
    */
@@ -612,8 +600,6 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
         }
     }
   else
-#endif /* CONFIG_NETDEV_MULTINIC */
-
 #if defined(CONFIG_NET_6LOWPAN) /* REVISIT:  Currently only suport for 6LoWPAN */
     {
       /* Single network device.  The use case here is where an endpoint acts
@@ -705,8 +691,7 @@ drop:
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IPFORWARD_BROADCAST) && \
-    defined(CONFIG_NETDEV_MULTINIC)
+#ifdef CONFIG_NET_IPFORWARD_BROADCAST
 void ipv6_forward_broadcast(FAR struct net_driver_s *dev,
                             FAR struct ipv6_hdr_s *ipv6)
 {

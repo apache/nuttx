@@ -83,10 +83,8 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 {
   FAR struct sockaddr_in *outaddr = (FAR struct sockaddr_in *)addr;
   FAR struct net_driver_s *dev;
-#ifdef CONFIG_NETDEV_MULTINIC
   in_addr_t lipaddr;
   in_addr_t ripaddr;
-#endif
 
   /* Check if enough space has been provided for the full address */
 
@@ -110,11 +108,8 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
           FAR struct tcp_conn_s *tcp_conn = (FAR struct tcp_conn_s *)psock->s_conn;
 
           outaddr->sin_port = tcp_conn->lport; /* Already in network byte order */
-
-#ifdef CONFIG_NETDEV_MULTINIC
-          lipaddr = tcp_conn->u.ipv4.laddr;
-          ripaddr = tcp_conn->u.ipv4.raddr;
-#endif
+          lipaddr           = tcp_conn->u.ipv4.laddr;
+          ripaddri          = tcp_conn->u.ipv4.raddr;
         }
         break;
 #endif
@@ -125,11 +120,8 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
           FAR struct udp_conn_s *udp_conn = (FAR struct udp_conn_s *)psock->s_conn;
 
           outaddr->sin_port = udp_conn->lport; /* Already in network byte order */
-
-#ifdef CONFIG_NETDEV_MULTINIC
-          lipaddr = udp_conn->u.ipv4.laddr;
-          ripaddr = udp_conn->u.ipv4.raddr;
-#endif
+          lipaddr           = udp_conn->u.ipv4.laddr;
+          ripaddr           = udp_conn->u.ipv4.raddr;
         }
         break;
 #endif
@@ -137,12 +129,6 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
       default:
         return -EOPNOTSUPP;
     }
-
-#ifdef CONFIG_NETDEV_MULTINIC
-  /* The socket/connection does not know its IP address unless
-   * CONFIG_NETDEV_MULTINIC is selected.  Otherwise the design supports only
-   * a single network device and only the network device knows the IP address.
-   */
 
   if (lipaddr == 0)
     {
@@ -152,11 +138,9 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 
        return OK;
     }
-#endif
 
   net_lock();
 
-#ifdef CONFIG_NETDEV_MULTINIC
   /* Find the device matching the IPv4 address in the connection structure.
    * NOTE: listening sockets have no ripaddr.  Work around is to use the
    * lipaddr when ripaddr is not available.
@@ -168,11 +152,6 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
     }
 
   dev = netdev_findby_ipv4addr(lipaddr, ripaddr);
-#else
-  /* There is only one, the first network device in the list. */
-
-  dev = g_netdevices;
-#endif
 
   if (dev == NULL)
     {

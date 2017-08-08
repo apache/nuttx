@@ -146,7 +146,6 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
           conn->timer = TCP_TIME_WAIT_TIMEOUT;
 
-#ifdef CONFIG_NETDEV_MULTINIC
           /* The TCP connection was established and, hence, should be bound
            * to a device. Make sure that the polling device is the one that
            * we are bound to.
@@ -161,7 +160,6 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
               ninfo("TCP: TCP_CLOSED pending\n");
             }
           else
-#endif
             {
               conn->tcpstateflags = TCP_CLOSED;
 
@@ -202,7 +200,6 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
               conn->timer = 0;
 
-#ifdef CONFIG_NETDEV_MULTINIC
               /* The TCP is connected and, hence, should be bound to a
                * device. Make sure that the polling device is the one that
                * we are bound to.
@@ -217,7 +214,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                   ninfo("TCP: TCP_CLOSED pending\n");
                   goto done;
                 }
-#endif
+
               /* Check for a timeout on connection in the TCP_SYN_RCVD state.
                * On such timeouts, we would normally resend the SYNACK until
                * the ACK is received, completing the 3-way handshake.  But if
@@ -354,7 +351,6 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
            * application for new data.
            */
 
-#ifdef CONFIG_NETDEV_MULTINIC
           /* The TCP connection is established and, hence, should be bound
            * to a device. Make sure that the polling device is the one that
            * we are bound to.
@@ -362,7 +358,6 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
           DEBUGASSERT(conn->dev != NULL);
           if (dev == conn->dev)
-#endif
             {
               result = tcp_callback(dev, conn, TCP_POLL);
               tcp_appsend(dev, conn, result);

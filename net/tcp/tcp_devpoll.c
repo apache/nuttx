@@ -91,7 +91,6 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
   if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED)
     {
-#ifdef CONFIG_NETDEV_MULTINIC
       /* The TCP connection is established and, hence, should be bound
        * to a device. Make sure that the polling device is the one that
        * we are bound to.
@@ -99,7 +98,6 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
       DEBUGASSERT(conn->dev != NULL);
       if (dev == conn->dev)
-#endif
         {
           /* Set up for the callback.  We can't know in advance if the
            * application is going to send a IPv4 or an IPv6 packet, so this

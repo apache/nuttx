@@ -76,7 +76,6 @@
 
 FAR struct net_driver_s *netdev_findbyindex(int index)
 {
-#ifdef CONFIG_NETDEV_MULTINIC
   FAR struct net_driver_s *dev;
   int i;
 
@@ -92,9 +91,6 @@ FAR struct net_driver_s *netdev_findbyindex(int index)
 
   net_unlock();
   return NULL;
-#else
-  return (index == 0) ? g_netdevices : NULL;
-#endif
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

@@ -223,11 +223,7 @@ int arp_send(in_addr_t ipaddr)
 
   /* Get the device that can route this request */
 
-#ifdef CONFIG_NETDEV_MULTINIC
   dev = netdev_findby_ipv4addr(INADDR_ANY, ipaddr);
-#else
-  dev = netdev_findby_ipv4addr(ipaddr);
-#endif
   if (!dev)
     {
       nerr("ERROR: Unreachable: %08lx\n", (unsigned long)ipaddr);
@@ -237,10 +233,8 @@ int arp_send(in_addr_t ipaddr)
 
 #ifdef CONFIG_NET_MULTILINK
   /* ARP support is only built if the Ethernet data link is supported.
-   * However, if we are supporting multiple network devices and using
-   * different link level protocols then we can get here for other
-   * link protocols as well.  Continue and send the ARP request only
-   * if this device uses the Ethernet data link protocol.
+   * Continue and send the ARP request only if this device uses the
+   * Ethernet data link protocol.
    */
 
   if (dev->d_lltype != NET_LL_ETHERNET)
@@ -304,11 +298,9 @@ int arp_send(in_addr_t ipaddr)
   state.snd_retries   = 0;              /* No retries yet */
   state.snd_ipaddr    = ipaddr;         /* IP address to query */
 
-#ifdef CONFIG_NETDEV_MULTINIC
   /* Remember the routing device name */
 
   strncpy((FAR char *)state.snd_ifname, (FAR const char *)dev->d_ifname, IFNAMSIZ);
-#endif
 
   /* Now loop, testing if the address mapping is in the ARP table and re-sending the ARP request if it is not.
    */

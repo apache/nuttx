@@ -81,9 +81,7 @@ struct icmpv6_router_s
   sem_t snd_sem;                       /* Used to wake up the waiting thread */
   volatile bool snd_sent;              /* True: if request sent */
   bool snd_advertise;                  /* True: Send Neighbor Advertisement */
-#ifdef CONFIG_NETDEV_MULTINIC
   uint8_t snd_ifname[IFNAMSIZ];        /* Interface name */
-#endif
   int16_t snd_result;                  /* Result of the send */
 };
 
@@ -217,12 +215,10 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
   (void)sem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
   sem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
 
-#ifdef CONFIG_NETDEV_MULTINIC
   /* Remember the routing device name */
 
   strncpy((FAR char *)state.snd_ifname, (FAR const char *)dev->d_ifname,
           IFNAMSIZ);
-#endif
 
   /* Allocate resources to receive a callback.  This and the following
    * initialization is performed with the network lock because we don't

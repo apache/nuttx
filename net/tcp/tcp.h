@@ -65,44 +65,23 @@
 
 /* Allocate a new TCP data callback */
 
-#ifdef CONFIG_NETDEV_MULTINIC
 /* These macros allocate and free callback structures used for receiving
  * notifications of TCP data-related events.
  */
 
-#  define tcp_callback_alloc(conn) \
-    devif_callback_alloc((conn)->dev, &(conn)->list)
-#  define tcp_callback_free(conn,cb) \
-    devif_conn_callback_free((conn)->dev, (cb), &(conn)->list)
+#define tcp_callback_alloc(conn) \
+  devif_callback_alloc((conn)->dev, &(conn)->list)
+#define tcp_callback_free(conn,cb) \
+  devif_conn_callback_free((conn)->dev, (cb), &(conn)->list)
 
 /* These macros allocate and free callback structures used for receiving
  * notifications of device-related events.
  */
 
-#  define tcp_monitor_callback_alloc(conn) \
-    devif_callback_alloc((conn)->dev, NULL)
-#  define tcp_monitor_callback_free(conn,cb) \
-    devif_conn_callback_free((conn)->dev, (cb), NULL)
-
-#else
-/* These macros allocate and free callback structures used for receiving
- * notifications of TCP data-related events.
- */
-
-#  define tcp_callback_alloc(conn) \
-    devif_callback_alloc(g_netdevices, &(conn)->list)
-#  define tcp_callback_free(conn,cb) \
-    devif_conn_callback_free(g_netdevices, (cb), &(conn)->list)
-
-/* These macros allocate and free callback structures used for receiving
- * notifications of device-related events.
- */
-
-#  define tcp_monitor_callback_alloc(conn) \
-    devif_callback_alloc(g_netdevices, NULL)
-#  define tcp_monitor_callback_free(conn,cb) \
-    devif_conn_callback_free(g_netdevices, (cb), NULL)
-#endif
+#define tcp_monitor_callback_alloc(conn) \
+  devif_callback_alloc((conn)->dev, NULL)
+#define tcp_monitor_callback_free(conn,cb) \
+  devif_conn_callback_free((conn)->dev, (cb), NULL)
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 /* TCP write buffer access macros */
@@ -175,14 +154,12 @@ struct tcp_conn_s
   uint16_t unacked;       /* Number bytes sent but not yet ACKed */
 #endif
 
-#ifdef CONFIG_NETDEV_MULTINIC
   /* If the TCP socket is bound to a local address, then this is
    * a reference to the device that routes traffic on the corresponding
    * network.
    */
 
   FAR struct net_driver_s *dev;
-#endif
 
 #ifdef CONFIG_NET_TCP_READAHEAD
   /* Read-ahead buffering.
