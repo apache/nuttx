@@ -904,14 +904,14 @@ static ssize_t inet_send(FAR struct socket *psock, FAR const void *buf,
 
           ret = psock_6lowpan_tcp_send(psock, buf, len);
 
-#if defined(CONFIG_NETDEV_MULTINIC) && defined(NET_TCP_HAVE_STACK)
+#ifdef NET_TCP_HAVE_STACK
           if (ret < 0)
             {
               /* TCP/IP packet send */
 
               ret = psock_tcp_send(psock, buf, len);
             }
-#endif /* CONFIG_NETDEV_MULTINIC && NET_TCP_HAVE_STACK */
+#endif /* NET_TCP_HAVE_STACK */
 #elif defined(NET_TCP_HAVE_STACK)
           ret = psock_tcp_send(psock, buf, len);
 #else
@@ -929,14 +929,14 @@ static ssize_t inet_send(FAR struct socket *psock, FAR const void *buf,
 
            ret = psock_6lowpan_udp_send(psock, buf, len);
 
-#if defined(CONFIG_NETDEV_MULTINIC) && defined(NET_UDP_HAVE_STACK)
+#ifdef NET_UDP_HAVE_STACK
           if (ret < 0)
             {
               /* UDP/IP packet send */
 
               ret = psock_udp_send(psock, buf, len);
             }
-#endif /* CONFIG_NETDEV_MULTINIC && NET_UDP_HAVE_STACK */
+#endif /* NET_UDP_HAVE_STACK */
 #elif defined(NET_UDP_HAVE_STACK)
           /* Only UDP/IP packet send */
 
@@ -1035,14 +1035,14 @@ static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
 
   nsent = psock_6lowpan_udp_sendto(psock, buf, len, flags, to, tolen);
 
-#if defined(CONFIG_NETDEV_MULTINIC) && defined(NET_UDP_HAVE_STACK)
+#ifdef NET_UDP_HAVE_STACK
   if (nsent < 0)
     {
       /* UDP/IP packet sendto */
 
       nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
     }
-#endif /* CONFIG_NETDEV_MULTINIC && NET_UDP_HAVE_STACK */
+#endif /* NET_UDP_HAVE_STACK */
 #elif defined(NET_UDP_HAVE_STACK)
   nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
 #else

@@ -102,9 +102,7 @@ struct phy_notify_s
 {
   bool assigned;
   uint8_t signo;
-#ifdef CONFIG_NETDEV_MULTINIC
   char intf[CONFIG_PHY_NOTIFICATION_MAXINTFLEN+1];
-#endif
   pid_t pid;
   FAR void *arg;
   phy_enable_t enable;
@@ -174,9 +172,7 @@ static FAR struct phy_notify_s *phy_find_unassigned(void)
 
           client->assigned = true;
           client->signo    = 0;
-#ifdef CONFIG_NETDEV_MULTINIC
           client->intf[0]  = '\0';
-#endif
           client->pid      = -1;
           client->arg      = NULL;
           client->enable   = NULL;
@@ -210,11 +206,8 @@ static FAR struct phy_notify_s *phy_find_assigned(FAR const char *intf,
   for (i = 0; i < CONFIG_PHY_NOTIFICATION_NCLIENTS; i++)
     {
       client = &g_notify_clients[i];
-      if (client->assigned && client->pid == pid
-#ifdef CONFIG_NETDEV_MULTINIC
-          && strncmp(client->intf, intf, CONFIG_PHY_NOTIFICATION_MAXINTFLEN) == 0
-#endif
-          )
+      if (client->assigned && client->pid == pid &&
+          strncmp(client->intf, intf, CONFIG_PHY_NOTIFICATION_MAXINTFLEN) == 0)
         {
           /* Return the matching client entry to the caller */
 
@@ -344,10 +337,8 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
       client->signo = signo;
       client->pid   = pid;
       client->arg   = arg;
-#ifdef CONFIG_NETDEV_MULTINIC
       snprintf(client->intf, CONFIG_PHY_NOTIFICATION_MAXINTFLEN+1, intf);
       client->intf[CONFIG_PHY_NOTIFICATION_MAXINTFLEN] = '\0';
-#endif
 
       /* Attach/re-attach the PHY interrupt */
 
@@ -407,9 +398,7 @@ int phy_notify_unsubscribe(FAR const char *intf, pid_t pid)
 
   client->assigned = false;
   client->signo    = 0;
-#ifdef CONFIG_NETDEV_MULTINIC
   client->intf[0]  = '\0';
-#endif
   client->pid      = -1;
   client->arg      = NULL;
 

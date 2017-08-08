@@ -73,7 +73,6 @@
 #ifdef CONFIG_NET_IPv4
 static int tcp_find_ipv4_device(FAR struct tcp_conn_s *conn, in_addr_t addr)
 {
-#ifdef CONFIG_NETDEV_MULTINIC
   /* Do nothing if a device is already bound to the connection */
 
   if (conn->dev != NULL)
@@ -92,8 +91,8 @@ static int tcp_find_ipv4_device(FAR struct tcp_conn_s *conn, in_addr_t addr)
       return OK;
     }
 
-  /* There are multiple network devices.  We need to select the device that
-   * is going to route the TCP packet based on the provided IP address.
+  /* We need to select the device that is going to route the TCP packet
+   * based on the provided IP address.
    */
 
   conn->dev = netdev_findby_ipv4addr(addr, addr);
@@ -101,14 +100,6 @@ static int tcp_find_ipv4_device(FAR struct tcp_conn_s *conn, in_addr_t addr)
   /* Return success if we found the device */
 
   return conn->dev != NULL ? OK : -ENETUNREACH;
-
-#else
-  /* There is only a single network device... the one at the head of the
-   * g_netdevices list.
-   */
-
-  return (g_netdevices != NULL) ? OK : -ENETUNREACH;
-#endif
 }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -132,7 +123,6 @@ static int tcp_find_ipv4_device(FAR struct tcp_conn_s *conn, in_addr_t addr)
 static int tcp_find_ipv6_device(FAR struct tcp_conn_s *conn,
                                 const net_ipv6addr_t addr)
 {
-#ifdef CONFIG_NETDEV_MULTINIC
   /* Do nothing if a device is already bound to the connection */
 
   if (conn->dev != NULL)
@@ -151,8 +141,8 @@ static int tcp_find_ipv6_device(FAR struct tcp_conn_s *conn,
       return OK;
     }
 
-  /* There are multiple network devices.  We need to select the device that
-   * is going to route the TCP packet based on the provided IP address.
+  /* We need to select the device that is going to route the TCP packet
+   * based on the provided IP address.
    */
 
   conn->dev = netdev_findby_ipv6addr(addr, addr);
@@ -160,14 +150,6 @@ static int tcp_find_ipv6_device(FAR struct tcp_conn_s *conn,
   /* Return success if we found the device */
 
   return conn->dev != NULL ? OK : -ENETUNREACH;
-#else
-  /* There is only a single network device... the one at the head of the
-   * g_netdevices list.
-   */
-
-  return (g_netdevices != NULL) ? OK : -ENETUNREACH;
-#endif
-
 }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -195,11 +177,7 @@ static int tcp_find_ipv6_device(FAR struct tcp_conn_s *conn,
 #ifdef CONFIG_NET_IPv4
 int tcp_local_ipv4_device(FAR struct tcp_conn_s *conn)
 {
-#ifdef CONFIG_NETDEV_MULTINIC
   return tcp_find_ipv4_device(conn, conn->u.ipv4.laddr);
-#else
-  return tcp_find_ipv4_device(conn, 0);
-#endif
 }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -246,11 +224,7 @@ int tcp_remote_ipv4_device(FAR struct tcp_conn_s *conn)
 #ifdef CONFIG_NET_IPv6
 int tcp_local_ipv6_device(FAR struct tcp_conn_s *conn)
 {
-#ifdef CONFIG_NETDEV_MULTINIC
   return tcp_find_ipv6_device(conn, conn->u.ipv6.laddr);
-#else
-  return tcp_find_ipv6_device(conn, NULL);
-#endif
 }
 #endif /* CONFIG_NET_IPv6 */
 

@@ -46,7 +46,7 @@
 #include "devif/devif.h"
 #include "ipforward/ipforward.h"
 
-#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NETDEV_MULTINIC)
+#ifdef CONFIG_NET_IPFORWARD
 
 /****************************************************************************
  * Private Functions
@@ -206,4 +206,4 @@ void ipfwd_poll(FAR struct net_driver_s *dev)
 #endif
 }
 
-#endif /* CONFIG_NET_ARP_SEND && CONFIG_NETDEV_MULTINIC */
+#endif /* CONFIG_NET_ARP_SEND */

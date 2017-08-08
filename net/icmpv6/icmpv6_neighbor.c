@@ -85,9 +85,7 @@ struct icmpv6_neighbor_s
   sem_t snd_sem;                       /* Used to wake up the waiting thread */
   uint8_t snd_retries;                 /* Retry count */
   volatile bool snd_sent;              /* True: if request sent */
-#ifdef CONFIG_NETDEV_MULTINIC
   uint8_t snd_ifname[IFNAMSIZ];        /* Interface name */
-#endif
   net_ipv6addr_t snd_ipaddr;           /* The IPv6 address to be queried */
 };
 
@@ -109,7 +107,6 @@ static uint16_t icmpv6_neighbor_interrupt(FAR struct net_driver_s *dev,
 
   if (state)
     {
-#ifdef CONFIG_NETDEV_MULTINIC
       /* Is this the device that we need to route this request? */
 
       if (strncmp((FAR const char *)dev->d_ifname,
@@ -119,8 +116,6 @@ static uint16_t icmpv6_neighbor_interrupt(FAR struct net_driver_s *dev,
 
           return flags;
         }
-
-#endif
 
       /* Check if the outgoing packet is available. It may have been claimed
        * by a send interrupt serving a different thread -OR- if the output
@@ -226,11 +221,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
 
   /* Get the device that can route this request */
 
-#ifdef CONFIG_NETDEV_MULTINIC
   dev = netdev_findby_ipv6addr(g_ipv6_allzeroaddr, ipaddr);
-#else
-  dev = netdev_findby_ipv6addr(ipaddr);
-#endif
   if (!dev)
     {
       nerr("ERROR: Unreachable: %08lx\n", (unsigned long)ipaddr);
@@ -239,10 +230,8 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
     }
 
 #ifdef CONFIG_NET_MULTILINK
-  /* If we are supporting multiple network devices and using different
-   * link level protocols then we can get here for other link protocols
-   * as well.  Continue and send the Neighbor Solicitation request only
-   * if this device uses the Ethernet data link protocol.
+   * Continue and send the Neighbor Solicitation request only if this
+   * device uses the Ethernet data link protocol.
    *
    * REVISIT:  Other link layer protocols may require Neighbor Discovery
    * as well (but not SLIP which is the only other option at the moment).
@@ -318,12 +307,10 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
   state.snd_retries = 0;                       /* No retries yet */
   net_ipv6addr_copy(state.snd_ipaddr, lookup); /* IP address to query */
 
-#ifdef CONFIG_NETDEV_MULTINIC
   /* Remember the routing device name */
 
   strncpy((FAR char *)state.snd_ifname, (FAR const char *)dev->d_ifname,
           IFNAMSIZ);
-#endif
 
   /* Now loop, testing if the address mapping is in the Neighbor Table and
    * re-sending the Neighbor Solicitation if it is not.

@@ -72,7 +72,6 @@
 FAR struct net_driver_s *udp_find_ipv4_device(FAR struct udp_conn_s *conn,
                                               in_addr_t ipv4addr)
 {
-#ifdef CONFIG_NETDEV_MULTINIC
   /* Return NULL if the address is INADDR_ANY.  In this case, there may
    * be multiple devices that can provide data so the exceptional events
    * from any particular device are not important.
@@ -86,19 +85,11 @@ FAR struct net_driver_s *udp_find_ipv4_device(FAR struct udp_conn_s *conn,
       return NULL;
     }
 
-  /* There are multiple network devices.  We need to select the device that
-   * is going to route the UDP packet based on the provided IP address.
+  /* We need to select the device that is going to route the UDP packet
+   * based on the provided IP address.
    */
 
   return netdev_findby_ipv4addr(conn->u.ipv4.laddr, ipv4addr);
-
-#else
-  /* There is only a single network device... the one at the head of the
-   * g_netdevices list.
-   */
-
-  return g_netdevices;
-#endif
 }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -121,7 +112,6 @@ FAR struct net_driver_s *udp_find_ipv4_device(FAR struct udp_conn_s *conn,
 FAR struct net_driver_s *udp_find_ipv6_device(FAR struct udp_conn_s *conn,
                                               net_ipv6addr_t ipv6addr)
 {
-#ifdef CONFIG_NETDEV_MULTINIC
   /* Return NULL if the address is IN6ADDR_ANY.  In this case, there may
    * be multiple devices that can provide data so the exceptional events
    * from any particular device are not important.
@@ -135,19 +125,11 @@ FAR struct net_driver_s *udp_find_ipv6_device(FAR struct udp_conn_s *conn,
       return NULL;
     }
 
-  /* There are multiple network devices.  We need to select the device that
-   * is going to route the UDP packet based on the provided IP address.
+  /* We need to select the device that is going to route the UDP packet
+   * based on the provided IP address.
    */
 
   return netdev_findby_ipv6addr(conn->u.ipv6.laddr, ipv6addr);
-
-#else
-  /* There is only a single network device... the one at the head of the
-   * g_netdevices list.
-   */
-
-  return g_netdevices;
-#endif
 }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -168,7 +150,6 @@ FAR struct net_driver_s *udp_find_ipv6_device(FAR struct udp_conn_s *conn,
 
 FAR struct net_driver_s *udp_find_laddr_device(FAR struct udp_conn_s *conn)
 {
-#ifdef CONFIG_NETDEV_MULTINIC
   /* There are multiple network devices.  We need to select the device that
    * is going to route the UDP packet based on the provided IP address.
    */
@@ -190,14 +171,6 @@ FAR struct net_driver_s *udp_find_laddr_device(FAR struct udp_conn_s *conn)
           return udp_find_ipv6_device(conn, conn->u.ipv6.laddr);
         }
 #endif
-
-#else
-  /* There is only a single network device... the one at the head of the
-   * g_netdevices list.
-   */
-
-  return g_netdevices;
-#endif
 }
 
 /****************************************************************************
@@ -217,9 +190,8 @@ FAR struct net_driver_s *udp_find_laddr_device(FAR struct udp_conn_s *conn)
 
 FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
 {
-#ifdef CONFIG_NETDEV_MULTINIC
-  /* There are multiple network devices.  We need to select the device that
-   * is going to route the UDP packet based on the provided IP address.
+  /* We need to select the device that is going to route the UDP packet
+   * based on the provided IP address.
    */
 
 #ifdef CONFIG_NET_IPv4
@@ -238,14 +210,6 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
         {
           return udp_find_ipv6_device(conn, conn->u.ipv6.raddr);
         }
-#endif
-
-#else
-  /* There is only a single network device... the one at the head of the
-   * g_netdevices list.
-   */
-
-  return g_netdevices;
 #endif
 }
 

@@ -219,13 +219,11 @@ static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
   /* Copy the source and destination addresses */
 
   net_ipv6addr_hdrcopy(ipv6tcp->ipv6.destipaddr, conn->u.ipv6.raddr);
-#ifdef CONFIG_NETDEV_MULTINIC
   if (!net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr))
     {
       net_ipv6addr_hdrcopy(ipv6tcp->ipv6.srcipaddr, conn->u.ipv6.laddr);
     }
   else
-#endif
     {
       net_ipv6addr_hdrcopy(ipv6tcp->ipv6.srcipaddr, dev->d_ipv6addr);
     }
@@ -363,7 +361,6 @@ static uint16_t tcp_send_interrupt(FAR struct net_driver_s *dev,
     }
 #endif
 
-#ifdef CONFIG_NETDEV_MULTINIC
   /* The TCP socket is connected and, hence, should be bound to a device.
    * Make sure that the polling device is the one that we are bound to.
    */
@@ -371,10 +368,9 @@ static uint16_t tcp_send_interrupt(FAR struct net_driver_s *dev,
   DEBUGASSERT(conn->dev != NULL);
   if (dev != conn->dev)
     {
-      ninfo("Not the connecte device\n");
+      ninfo("Not the connected device\n");
       return flags;
     }
-#endif
 
   /* Check if the IEEE802.15.4 network driver went down */
 
@@ -800,9 +796,6 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   /* Route outgoing message to the correct device */
 
-#ifdef CONFIG_NETDEV_MULTINIC
-  /* There are multiple network devices */
-
   dev = netdev_findby_ipv6addr(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
   if (dev == NULL)
     {
@@ -820,17 +813,6 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
     {
       nwarn("WARNING: Not a compatible network device\n");
       return (ssize_t)-ENONET;
-    }
-#endif
-
-#else
-  /* There is a single network device */
-
-  dev = netdev_findby_ipv6addr(conn->u.ipv6.raddr);
-  if (dev == NULL)
-    {
-      nwarn("WARNING: Not routable\n");
-      return (ssize_t)-ENETUNREACH;
     }
 #endif
 

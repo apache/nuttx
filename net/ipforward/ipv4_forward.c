@@ -77,7 +77,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NETDEV_MULTINIC) && defined(CONFIG_DEBUG_NET_WARN)
+#ifdef CONFIG_DEBUG_NET_WARNx)
 static int ipv4_hdrsize(FAR struct ipv4_hdr_s *ipv4)
 {
   /* Size is determined by the following protocol header, */
@@ -144,7 +144,6 @@ static int ipv4_hdrsize(FAR struct ipv4_hdr_s *ipv4)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_MULTINIC
 static int ipv4_decr_ttl(FAR struct ipv4_hdr_s *ipv4)
 {
   uint16_t sum;
@@ -185,7 +184,6 @@ static int ipv4_decr_ttl(FAR struct ipv4_hdr_s *ipv4)
   ipv4->ipchksum = ~sum;
   return ttl;
 }
-#endif
 
 /****************************************************************************
  * Name: ipv4_dev_forward
@@ -209,7 +207,6 @@ static int ipv4_decr_ttl(FAR struct ipv4_hdr_s *ipv4)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_MULTINIC
 static int ipv4_dev_forward(FAR struct net_driver_s *dev,
                             FAR struct net_driver_s *fwddev,
                             FAR struct ipv4_hdr_s *ipv4)
@@ -338,7 +335,6 @@ errout_with_fwd:
 errout:
   return ret;
 }
-#endif /* CONFIG_NETDEV_MULTINIC */
 
 /****************************************************************************
  * Name: ipv4_forward_callback
@@ -360,8 +356,7 @@ errout:
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IPFORWARD_BROADCAST) && \
-    defined(CONFIG_NETDEV_MULTINIC)
+#ifdef CONFIG_NET_IPFORWARD_BROADCAST
 int ipv4_forward_callback(FAR struct net_driver_s *fwddev, FAR void *arg)
 {
   FAR struct net_driver_s *dev = (FAR struct net_driver_s *)arg;
@@ -432,33 +427,22 @@ int ipv4_forward_callback(FAR struct net_driver_s *fwddev, FAR void *arg)
 int ipv4_forward(FAR struct net_driver_s *dev, FAR struct ipv4_hdr_s *ipv4)
 {
   in_addr_t destipaddr;
-#ifdef CONFIG_NETDEV_MULTINIC
   in_addr_t srcipaddr;
-#endif
   FAR struct net_driver_s *fwddev;
   int ret;
 
-  /* Search for a device that can forward this packet.  This is a trivial
-   * search if there is only a single network device (CONFIG_NETDEV_MULTINIC
-   * not defined).  But netdev_findby_ipv4addr() will still assure
-   * routability in that case.
-   */
+  /* Search for a device that can forward this packet. */
 
   destipaddr = net_ip4addr_conv32(ipv4->destipaddr);
-#ifdef CONFIG_NETDEV_MULTINIC
   srcipaddr  = net_ip4addr_conv32(ipv4->srcipaddr);
 
   fwddev     = netdev_findby_ipv4addr(srcipaddr, destipaddr);
-#else
-  fwddev     = netdev_findby_ipv4addr(destipaddr);
-#endif
   if (fwddev == NULL)
     {
       nwarn("WARNING: Not routable\n");
       return (ssize_t)-ENETUNREACH;
     }
 
-#if defined(CONFIG_NETDEV_MULTINIC)
   /* Check if we are forwarding on the same device that we received the
    * packet from.
    */
@@ -475,8 +459,6 @@ int ipv4_forward(FAR struct net_driver_s *dev, FAR struct ipv4_hdr_s *ipv4)
         }
     }
   else
-#endif /* CONFIG_NETDEV_MULTINIC */
-
     {
       /* Single network device.  The use case here is where an endpoint acts
        * as a hub in a star configuration.  This is typical for a wireless star
@@ -538,8 +520,7 @@ drop:
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IPFORWARD_BROADCAST) && \
-    defined(CONFIG_NETDEV_MULTINIC)
+#ifdef CONFIG_NET_IPFORWARD_BROADCAST
 void ipv4_forward_broadcast(FAR struct net_driver_s *dev,
                             FAR struct ipv4_hdr_s *ipv4)
 {

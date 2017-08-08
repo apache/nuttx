@@ -63,16 +63,6 @@ config TELNET_DUMPBUFFER
 
 endif # NETDEV_TELNET
 
-config NETDEV_MULTINIC
-	bool "Multiple network interface support"
-	default n if !NETDEV_LOOPBACK
-	default y if NETDEV_LOOPBACK
-	---help---
-		Select this option if you board and/or MCU are capable of supporting
-		multiple link layer drivers.  NOTE that the local loopback device
-		is considered to be a a link layer driver so if local loopback
-		support is used you probably need to select this option.
-
 config ARCH_HAVE_NETDEV_STATISTICS
 	bool
 	default n
@@ -525,7 +515,6 @@ endchoice
 choice
 	prompt "Board PHY Selection (ETH1)"
 	default ETH1_PHY_NONE
-	depends on NETDEV_MULTINIC
 	---help---
 		Identify the PHY on your board.  This setting is not used by all Ethernet
 		drivers nor do all Ethernet drivers support all PHYs.

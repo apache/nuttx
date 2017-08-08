@@ -174,7 +174,6 @@ void ipv4_dropstats(FAR struct ipv4_hdr_s *ipv4)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_MULTINIC
 void ipfwd_dropstats(FAR struct forward_s *fwd)
 {
 #ifdef CONFIG_NET_IPv4
@@ -194,6 +193,5 @@ void ipfwd_dropstats(FAR struct forward_s *fwd)
     }
 #endif
 }
-#endif
 
 #endif /* CONFIG_NET_IPFORWARD && CONFIG_NET_STATISTICS */

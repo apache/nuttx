@@ -172,13 +172,10 @@ static uint16_t send_interrupt(FAR struct net_driver_s *dev,
     }
 #endif
 
-#ifdef CONFIG_NETDEV_MULTINIC
   /* REVISIT: Verify that this is the correct IEEE802.15.4 network driver to
    * route the outgoing frame(s).  Chances are that there is only one
    * IEEE802.15.4 network driver
    */
-
-#endif
 
   /* Check if the IEEE802.15.4 network driver went down */
 

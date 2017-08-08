@@ -636,7 +636,6 @@ static uint16_t inet_tcp_interrupt(FAR struct net_driver_s *dev,
   FAR struct inet_recvfrom_s *pstate = (struct inet_recvfrom_s *)pvpriv;
 
 #if 0 /* REVISIT: The assertion fires.  Why? */
-#ifdef CONFIG_NETDEV_MULTINIC
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
 
   /* The TCP socket is connected and, hence, should be bound to a device.
@@ -648,7 +647,6 @@ static uint16_t inet_tcp_interrupt(FAR struct net_driver_s *dev,
     {
       return flags;
     }
-#endif
 #endif
 
   ninfo("flags: %04x\n", flags);
@@ -1198,11 +1196,7 @@ static inline void inet_udp_rxnotify(FAR struct socket *psock,
     {
       /* Notify the device driver of the receive ready */
 
-#ifdef CONFIG_NETDEV_MULTINIC
       netdev_ipv4_rxnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
-#else
-      netdev_ipv4_rxnotify(conn->u.ipv4.raddr);
-#endif
     }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -1214,11 +1208,7 @@ static inline void inet_udp_rxnotify(FAR struct socket *psock,
       /* Notify the device driver of the receive ready */
 
       DEBUGASSERT(psock->s_domain == PF_INET6);
-#ifdef CONFIG_NETDEV_MULTINIC
       netdev_ipv6_rxnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
-#else
-      netdev_ipv6_rxnotify(conn->u.ipv6.raddr);
-#endif
     }
 #endif /* CONFIG_NET_IPv6 */
 }

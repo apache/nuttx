@@ -47,7 +47,7 @@
 #include "ipforward/ipforward.h"
 #include "devif/devif.h"
 
-#if defined(CONFIG_NET_IPFORWARD) &&  defined(CONFIG_NETDEV_MULTINIC)
+#ifdef CONFIG_NET_IPFORWARD
 
 /****************************************************************************
  * Public Functions
@@ -92,4 +92,4 @@ void devif_forward(FAR struct forward_s *fwd)
   fwd->f_dev->d_len    = offset;
 }
 
-#endif /* CONFIG_NET_IPFORWARD && CONFIG_NETDEV_MULTINIC */
+#endif /* CONFIG_NET_IPFORWARD */

@@ -179,8 +179,7 @@ netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
  *   IPv4 address.
  *
  * Parameters:
- *   lipaddr - Local, bound address of a connection.  Used only if ripaddr
- *     is the broadcast address.  Used only if CONFIG_NETDEV_MULTINIC.
+ *   lipaddr - Local, bound address of a connection.
  *   ripaddr - Remote address of a connection to use in the lookup
  *
  * Returned Value:
@@ -192,12 +191,8 @@ netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NETDEV_MULTINIC
 FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
                                                 in_addr_t ripaddr)
-#else
-FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr)
-#endif
 {
   struct net_driver_s *dev;
 #ifdef CONFIG_NET_ROUTE
@@ -209,7 +204,6 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr)
 
   if (net_ipv4addr_cmp(ripaddr, INADDR_BROADCAST))
     {
-#ifdef CONFIG_NETDEV_MULTINIC
       /* Yes.. Check the local, bound address.  Is it INADDR_ANY? */
 
       if (net_ipv4addr_cmp(lipaddr, INADDR_ANY))
@@ -232,13 +226,6 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr)
 
           return netdev_finddevice_ipv4addr(lipaddr);
         }
-#else
-      /* If there is only a single, registered network interface, then the
-       * decision is pretty easy.
-       */
-
-      return g_netdevices;
-#endif
     }
 
   /* Check if the address maps to a local network */
@@ -275,15 +262,6 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr)
    * out subnet to a router and there is no routing information.
    */
 
-#ifndef CONFIG_NETDEV_MULTINIC
-  /* If there is only a single, registered network interface, then the
-   * decision is pretty easy.  Use that device and its default router
-   * address.
-   */
-
-  dev = g_netdevices;
-#endif
-
   /* If we will did not find the network device, then we might as well fail
    * because we are not configured properly to determine the route to the
    * destination.
@@ -301,8 +279,7 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr)
  *   IPv6 address.
  *
  * Parameters:
- *   lipaddr - Local, bound address of a connection.  Used only if ripaddr
- *     is the broadcast address.  Used only if CONFIG_NETDEV_MULTINIC.
+ *   lipaddr - Local, bound address of a connection.
  *   ripaddr - Remote address of a connection to use in the lookup
  *
  * Returned Value:
@@ -314,12 +291,8 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t ripaddr)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NETDEV_MULTINIC
 FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t lipaddr,
                                                 const net_ipv6addr_t ripaddr)
-#else
-FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t ripaddr)
-#endif
 {
   struct net_driver_s *dev;
 #ifdef CONFIG_NET_ROUTE
@@ -335,7 +308,6 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t ripaddr)
 
   if (ripaddr[0] == HTONS(0xff02))
     {
-#ifdef CONFIG_NETDEV_MULTINIC
       /* Yes.. Check the local, bound address.  Is it INADDR_ANY? */
 
       if (net_ipv6addr_cmp(lipaddr, g_ipv6_allzeroaddr))
@@ -358,13 +330,6 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t ripaddr)
 
           return netdev_finddevice_ipv6addr(lipaddr);
         }
-#else
-      /* If there is only a single, registered network interface, then the
-       * decision is pretty easy.
-       */
-
-      return g_netdevices;
-#endif
     }
 
   /* Check if the address maps to a local network */
@@ -400,15 +365,6 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t ripaddr)
   /* The above lookup will fail if the packet is being sent out of our
    * out subnet to a router and there is no routing information.
    */
-
-#ifndef CONFIG_NETDEV_MULTINIC
-  /* If there is only a single, registered network interface, then the
-   * decision is pretty easy.  Use that device and its default router
-   * address.
-   */
-
-  dev = g_netdevices;
-#endif
 
   /* If we will did not find the network device, then we might as well fail
    * because we are not configured properly to determine the route to the

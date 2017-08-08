@@ -388,9 +388,8 @@ struct sixlowpan_properties_s
  * This is accomplished by "inheriting" the standard 'struct net_driver_s'
  * and appending the frame buffer as well as other metadata needed to
  * manage the fragmentation.  'struct sixlowpan_driver_s' is cast
- * compatible with 'struct net_driver_s' when CONFIG_NET_MULTINIC is not
- * defined or when dev->d_lltype == NET_LL_IEEE802154 or dev->d_lltype ==
- * NET_LL_PKTRADIO.
+ * compatible with 'struct net_driver_s' when dev->d_lltype ==
+ * NET_LL_IEEE802154 or dev->d_lltype == NET_LL_PKTRADIO.
  *
  * The radio network driver has reponsibility for initializing this
  * structure.  In general, all fields must be set to NULL.  In addition:

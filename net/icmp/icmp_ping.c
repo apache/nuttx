@@ -340,11 +340,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
 
   /* Get the device that will be used to route this ICMP ECHO request */
 
-#ifdef CONFIG_NETDEV_MULTINIC
   dev = netdev_findby_ipv4addr(INADDR_ANY, addr);
-#else
-  dev = netdev_findby_ipv4addr(addr);
-#endif
   if (dev == 0)
     {
       nerr("ERROR: Not reachable\n");

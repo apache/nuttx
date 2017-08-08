@@ -128,7 +128,6 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_MULTINIC
 static int check_dev_destipaddr(FAR struct net_driver_s *dev, FAR void *arg)
 {
   FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)arg;
@@ -146,7 +145,6 @@ static int check_dev_destipaddr(FAR struct net_driver_s *dev, FAR void *arg)
 
   return 0;
 }
-#endif
 
 /****************************************************************************
  * Name: check_destipaddr
@@ -171,9 +169,7 @@ static int check_dev_destipaddr(FAR struct net_driver_s *dev, FAR void *arg)
 static bool check_destipaddr(FAR struct net_driver_s *dev,
                              FAR struct ipv6_hdr_s *ipv6)
 {
-#ifdef CONFIG_NETDEV_MULTINIC
   int ret;
-#endif
 
   /* For IPv6, packet reception is a little trickier as we need to make sure
    * that we listen to certain multicast addresses (all hosts multicast
@@ -192,7 +188,6 @@ static bool check_destipaddr(FAR struct net_driver_s *dev,
       return true;
     }
 
-#ifdef CONFIG_NETDEV_MULTINIC
   /* We will also allow for a perverse case where we receive a packet
    * addressed to us, but on a different device.  Can that really happen?
    */
@@ -207,17 +202,6 @@ static bool check_destipaddr(FAR struct net_driver_s *dev,
 
       return true;
     }
-#else
-  /* There is only one network device.  If this packet is addressed to us,
-   * then the IPv6 destination address must be the address of assigned to
-   * this device.
-   */
-
-  if (net_ipv6addr_cmp(ipv6->destipaddr, dev->d_ipv6addr))
-    {
-      return true;
-    }
-#endif
 
   return false;
 }

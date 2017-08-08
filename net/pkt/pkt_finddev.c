@@ -65,23 +65,11 @@
 
 FAR struct net_driver_s *pkt_find_device(FAR struct pkt_conn_s *conn)
 {
-#ifdef CONFIG_NETDEV_MULTINIC
   FAR struct net_driver_s *dev;
 
-  /* There are multiple network devices.
-   *
-   * REVISIT:  This is bogus.  A better network device lookup is needed.
-   */
+  /* REVISIT:  This is bogus.  A better network device lookup is needed. */
 
   return netdev_findbyname("eth0");
-
-#else
-  /* There is only a single network device... the one at the head of the
-   * g_netdevices list.
-   */
-
-  return g_netdevices;
-#endif
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_PKT */

@@ -83,10 +83,8 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 {
   FAR struct sockaddr_in6 *outaddr = (FAR struct sockaddr_in6 *)addr;
   FAR struct net_driver_s *dev;
-#ifdef CONFIG_NETDEV_MULTINIC
   net_ipv6addr_t *lipaddr;
   net_ipv6addr_t *ripaddr;
-#endif
 
   /* Check if enough space has been provided for the full address */
 
@@ -108,12 +106,10 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
       case SOCK_STREAM:
         {
           FAR struct tcp_conn_s *tcp_conn = (FAR struct tcp_conn_s *)psock->s_conn;
-          outaddr->sin6_port = tcp_conn->lport; /* Already in network byte order */
 
-#ifdef CONFIG_NETDEV_MULTINIC
+          outaddr->sin6_port = tcp_conn->lport; /* Already in network byte order */
           lipaddr            = &tcp_conn->u.ipv6.laddr;
           ripaddr            = &tcp_conn->u.ipv6.raddr;
-#endif
         }
         break;
 #endif
@@ -122,12 +118,10 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
       case SOCK_DGRAM:
         {
           FAR struct udp_conn_s *udp_conn = (FAR struct udp_conn_s *)psock->s_conn;
-          outaddr->sin6_port = udp_conn->lport; /* Already in network byte order */
 
-#ifdef CONFIG_NETDEV_MULTINIC
+          outaddr->sin6_port = udp_conn->lport; /* Already in network byte order */
           lipaddr            = &udp_conn->u.ipv6.laddr;
           ripaddr            = &udp_conn->u.ipv6.raddr;
-#endif
         }
         break;
 #endif
@@ -136,11 +130,7 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
         return -EOPNOTSUPP;
     }
 
-#ifdef CONFIG_NETDEV_MULTINIC
-  /* The socket/connection does not know its IP address unless
-   * CONFIG_NETDEV_MULTINIC is selected.  Otherwise the design supports only
-   * a single network device and only the network device knows the IP address.
-   */
+  /* Check if bound to local INADDR6_ANY */
 
   if (net_ipv6addr_cmp(lipaddr, g_ipv6_allzeroaddr))
     {
@@ -150,11 +140,9 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 
       return OK;
     }
-#endif
 
   net_lock();
 
-#ifdef CONFIG_NETDEV_MULTINIC
   /* Find the device matching the IPv6 address in the connection structure.
    * NOTE: listening sockets have no ripaddr.  Work around is to use the
    * lipaddr when ripaddr is not available.
@@ -166,11 +154,6 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
     }
 
   dev = netdev_findby_ipv6addr(*lipaddr, *ripaddr);
-#else
-  /* There is only one, the first network device in the list. */
-
-  dev = g_netdevices;
-#endif
 
   if (!dev)
     {

@@ -349,7 +349,6 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
   FAR struct socket *psock = (FAR struct socket *)pvpriv;
 
-#ifdef CONFIG_NETDEV_MULTINIC
   /* The TCP socket is connected and, hence, should be bound to a device.
    * Make sure that the polling device is the one that we are bound to.
    */
@@ -359,7 +358,6 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
     {
       return flags;
     }
-#endif
 
   ninfo("flags: %04x\n", flags);
 
@@ -868,11 +866,7 @@ static inline void send_txnotify(FAR struct socket *psock,
     {
       /* Notify the device driver that send data is available */
 
-#ifdef CONFIG_NETDEV_MULTINIC
       netdev_ipv4_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
-#else
-      netdev_ipv4_txnotify(conn->u.ipv4.raddr);
-#endif
     }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -884,11 +878,7 @@ static inline void send_txnotify(FAR struct socket *psock,
       /* Notify the device driver that send data is available */
 
       DEBUGASSERT(psock->s_domain == PF_INET6);
-#ifdef CONFIG_NETDEV_MULTINIC
       netdev_ipv6_txnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
-#else
-      netdev_ipv6_txnotify(conn->u.ipv6.raddr);
-#endif
     }
 #endif /* CONFIG_NET_IPv6 */
 }

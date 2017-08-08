@@ -649,7 +649,6 @@ config SAMA5_GMAC
 	default n
 	depends on SAMA5_HAVE_GMAC
 	select NETDEVICES
-	select NETDEV_MULTINIC if SAMA5_EMAC
 	select ARCH_HAVE_PHY
 
 config SAMA5_EMACA
@@ -657,7 +656,6 @@ config SAMA5_EMACA
 	default n
 	depends on SAMA5_HAVE_EMACA
 	select NETDEVICES
-	select NETDEV_MULTINIC if SAMA5_GMAC
 	select ARCH_HAVE_PHY
 
 config SAMA5_EMACB
@@ -670,7 +668,6 @@ config SAMA5_EMAC0
 	depends on SAMA5_HAVE_EMACB
 	select SAMA5_EMACB
 	select NETDEVICES
-	select NETDEV_MULTINIC if SAMA5_EMAC1
 	select ARCH_HAVE_PHY
 
 config SAMA5_EMAC1
@@ -679,7 +676,6 @@ config SAMA5_EMAC1
 	depends on SAMA5_HAVE_EMACB && SAMA5_HAVE_EMAC1
 	select SAMA5_EMACB
 	select NETDEVICES
-	select NETDEV_MULTINIC if SAMA5_EMAC0
 	select ARCH_HAVE_PHY
 
 config SAMA5_LCDC

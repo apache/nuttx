@@ -205,9 +205,6 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
 
   /* Route outgoing message to the correct device */
 
-#ifdef CONFIG_NETDEV_MULTINIC
-  /* There are multiple network devices */
-
   dev = netdev_findby_ipv6addr(conn->u.ipv6.laddr,
                                to6->sin6_addr.in6_u.u6_addr16);
   if (dev == NULL)
@@ -226,15 +223,6 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
     {
       nwarn("WARNING: Not a compatible network device\n");
       return (ssize_t)-ENONET;
-    }
-#endif
-
-#else
-  dev = netdev_findby_ipv6addr(to6->sin6_addr.in6_u.u6_addr16);
-  if (dev == NULL)
-    {
-      nwarn("WARNING: Not routable\n");
-      return (ssize_t)-ENETUNREACH;
     }
 #endif
 
@@ -268,13 +256,11 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
   /* Copy the source and destination addresses */
 
   net_ipv6addr_hdrcopy(ipv6udp.ipv6.destipaddr, to6->sin6_addr.in6_u.u6_addr16);
-#ifdef CONFIG_NETDEV_MULTINIC
   if (!net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr))
     {
       net_ipv6addr_hdrcopy(ipv6udp.ipv6.srcipaddr, conn->u.ipv6.laddr);
     }
   else
-#endif
     {
       net_ipv6addr_hdrcopy(ipv6udp.ipv6.srcipaddr, dev->d_ipv6addr);
     }

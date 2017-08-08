@@ -55,8 +55,7 @@
 #include "neighbor/neighbor.h"
 #include "ipforward/ipforward.h"
 
-#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NETDEV_MULTINIC)
-
+#ifdef CONFIG_NET_IPFORWARD
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -349,4 +348,4 @@ int ipfwd_forward(FAR struct forward_s *fwd)
   return -EBUSY;
 }
 
-#endif /* CONFIG_NET_IPFORWARD && CONFIG_NETDEV_MULTINIC */
+#endif /* CONFIG_NET_IPFORWARD */
