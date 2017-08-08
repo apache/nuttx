@@ -53,10 +53,12 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/net/ip.h>
 #include <nuttx/net/sixlowpan.h>
 #include <nuttx/wireless/pktradio.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
+#include "inet/inet.h"
 #include "sixlowpan/sixlowpan_internal.h"
 
 #ifdef CONFIG_NET_6LOWPAN
@@ -233,9 +235,7 @@ int sixlowpan_destaddrfromip(FAR struct sixlowpan_driver_s *radio,
          * disturbing every interface in the network.
          */
 
-        if (ipaddr[1] == 0 && ipaddr[2] == 0 && ipaddr[3] == 0 &&
-            ipaddr[4] == 0 && ipaddr[5] == 0 && ipaddr[5] == 0 &&
-            ipaddr[7] == HTONS(0x0001))
+        if (net_ipv6addr_cmp(ipaddr, g_ipv6_allnodes))
           {
             memcpy(destaddr, &properties.sp_bcast,
                    sizeof(struct netdev_varaddr_s));

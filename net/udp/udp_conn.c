@@ -277,6 +277,9 @@ static uint16_t udp_select_port(void)
 static inline FAR struct udp_conn_s *
   udp_ipv4_active(FAR struct net_driver_s *dev, FAR struct udp_hdr_s *udp)
 {
+#ifdef CONFIG_NET_BROADCAST
+  static const inaddr_t bcast = INADDR_BROADCAST;
+#endif
   FAR struct ipv4_hdr_s *ip = IPv4BUF;
   FAR struct udp_conn_s *conn;
 
@@ -315,13 +318,26 @@ static inline FAR struct udp_conn_s *
 
       if (conn->lport != 0 && udp->destport == conn->lport &&
           (conn->rport == 0 || udp->srcport == conn->rport) &&
+
 #ifdef CONFIG_NETDEV_MULTINIC
+          /* Local port accepts any address on this port or there
+           * is an exact match in destipaddr and the bound local
+           * address.  This catches the receipt of a broadcast when
+           * the socket is bound to INADDR_ANY.
+           */
+
           (net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY) ||
-           net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_BROADCAST) ||
            net_ipv4addr_hdrcmp(ip->destipaddr, &conn->u.ipv4.laddr)) &&
 #endif
+          /* If not connected to a remote address, or a broadcast address
+           * destipaddr was received, or there is an exact match between the
+           * srcipaddr and the bound IP address, then accept the packet.
+           */
+
           (net_ipv4addr_cmp(conn->u.ipv4.raddr, INADDR_ANY) ||
-           net_ipv4addr_cmp(conn->u.ipv4.raddr, INADDR_BROADCAST) ||
+#ifdef CONFIG_NET_BROADCAST
+           net_ipv4addr_hdrcmp(ip->destipaddr, &bcast) ||
+#endif
            net_ipv4addr_hdrcmp(ip->srcipaddr, &conn->u.ipv4.raddr)))
         {
           /* Matching connection found.. return a reference to it */
@@ -370,7 +386,7 @@ static inline FAR struct udp_conn_s *
        * - If multiple network interfaces are supported, then the local
        *   IP address is available and we will insist that the
        *   destination IP matches the bound address. If a socket is bound to
-       *   INADDRY_ANY (laddr), then it should receive all packets directed
+       *   INADDR6_ANY (laddr), then it should receive all packets directed
        *   to the port. REVISIT: Should also depend on SO_BROADCAST.
        * - Finally, if the connection is bound to a remote IP address,
        *   the source IP address of the packet is checked.
@@ -380,7 +396,8 @@ static inline FAR struct udp_conn_s *
        *
        * To send and receive multicast packets, the application should:
        *
-       * - Bind socket to INADDR6_ANY or to a specific <multicast-address>
+       * - Bind socket to INADDR6_ANY (for the all-nodes multicast address)
+       *   or to a specific <multicast-address>
        * - setsockopt to SO_BROADCAST (for all-nodes address)
        * - call sendto with sendaddr.sin_addr.s_addr = <multicast-address>
        * - call recvfrom.
@@ -390,11 +407,27 @@ static inline FAR struct udp_conn_s *
 
       if (conn->lport != 0 && udp->destport == conn->lport &&
           (conn->rport == 0 || udp->srcport == conn->rport) &&
+
 #ifdef CONFIG_NETDEV_MULTINIC
+          /* Local port accepts any address on this port or there
+           * is an exact match in destipaddr and the bound local
+           * address.  This catches the cast of the all nodes multicast
+           * when the socket is bound to INADDR6_ANY.
+           */
+
           (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr) ||
            net_ipv6addr_hdrcmp(ip->destipaddr, conn->u.ipv6.laddr)) &&
 #endif
+          /* If not connected to a remote address, or a all-nodes multicast
+           * destipaddr was received, or there is an exact match between the
+           * srcipaddr and the bound remote IP address, then accept the
+           * packet.
+           */
+
           (net_ipv6addr_cmp(conn->u.ipv6.raddr, g_ipv6_allzeroaddr) ||
+#ifdef CONFIG_NET_BROADCAST
+           net_ipv6addr_hdrcmp(ip->destipaddr, g_ipv6_allnodes) ||
+#endif
            net_ipv6addr_hdrcmp(ip->srcipaddr, conn->u.ipv6.raddr)))
         {
           /* Matching connection found.. return a reference to it */

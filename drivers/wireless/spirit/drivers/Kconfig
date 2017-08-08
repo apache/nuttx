@@ -24,15 +24,15 @@ config SPIRIT_PKTLEN
 		Fixed pkt sizes are used.  This setting describes that fixed packet
 		size.
 
-		"Sometimes Spirit1 seems to NOT deliver (correctly) the 'IRQ_RX_DATA_READY'
-		 event for packets which have a length which is close to a multiple of
-		 RX FIFO size. Furthermore, in these cases also the content delivery seems
-		 to be compromised as well as the generation of RX/TX FIFO errors.
-		 This can be avoided by reducing the maximum packet length to a value which
-		 is lower than the RX FIFO size."
-
-		Also, with a packet size of 96, I have seen CRC failures on the receiving
-		side.  With a packet size of 94, CRC filtering behaves well.
+		This comment exists in the STMicro Spirit driver.  I have not
+		experienced this myself, but this is something you should be aware
+		of:  "Sometimes Spirit1 seems to NOT deliver (correctly) the
+		'IRQ_RX_DATA_READY' event for packets which have a length which is
+		close to a multiple of RX FIFO size. Furthermore, in these cases
+		also the content delivery seems to be compromised as well as the
+		generation of RX/TX FIFO errors. This can be avoided by reducing
+		the maximum packet length to a value which is lower than the RX FIFO
+		size."
 
 config SPIRIT_FIFOS
 	bool "FIFO Watermarks"
@@ -48,12 +48,15 @@ config SPIRIT_FIFOS
 		occurrences of RX FIFO errors if the packet size is less than but close
 		to 96.
 
-		"Sometimes Spirit1 seems to NOT deliver (correctly) the 'IRQ_RX_DATA_READY'
-		 event for packets which have a length which is close to a multiple of
-		 RX FIFO size. Furthermore, in these cases also the content delivery seems
-		 to be compromised as well as the generation of RX/TX FIFO errors.
-		 This can be avoided by reducing the maximum packet length to a value which
-		 is lower than the RX FIFO size."
+		This comment exists in the STMicro Spirit driver.  I have not
+		experienced this myself, but this is something you should be aware
+		of:  "Sometimes Spirit1 seems to NOT deliver (correctly) the
+		'IRQ_RX_DATA_READY' event for packets which have a length which is
+		close to a multiple of RX FIFO size. Furthermore, in these cases
+		also the content delivery seems to be compromised as well as the
+		generation of RX/TX FIFO errors. This can be avoided by reducing
+		the maximum packet length to a value which is lower than the RX FIFO
+		size."
 
 		From my reading, the only known work-around is to reduce the maximum
 		packet size so that it is smaller than 96.  Hence, this option is
@@ -85,6 +88,13 @@ config SPIRIT_CRCDISABLE
 	default n
 	---help---
 		Disables CRC calculation and filtering.  Default is enabled.
+
+		Errata:  "Using the STack packet format and no CRC field, the
+		reading from RX FIFO to the last received byte, is not possible. ..."
+		Workaround: "By configuring the packet handler with at least one byte
+		of CRC, the problem is solved. If the CRC is not required in the
+		application, configure one byte of CRC in the receiver only, to read
+		the payload correctly from RX FIFO."
 
 config SPIRIT_HUBNODE
 	hex "Address of hub node"
