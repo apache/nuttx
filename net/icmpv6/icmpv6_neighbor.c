@@ -229,8 +229,8 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
       goto errout;
     }
 
-   * Continue and send the Neighbor Solicitation request only if this
-   * device uses the Ethernet data link protocol.
+  /* Send the Neighbor Solicitation request only if this device uses the
+   * Ethernet data link protocol.
    *
    * REVISIT:  Other link layer protocols may require Neighbor Discovery
    * as well.

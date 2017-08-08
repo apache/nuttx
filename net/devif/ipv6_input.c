@@ -101,6 +101,7 @@
 
 #include "netdev/netdev.h"
 #include "ipforward/ipforward.h"
+#include "inet/inet.h"
 #include "devif/devif.h"
 
 /****************************************************************************
