@@ -593,13 +593,16 @@ Configuration sub-directories
         I would say it is functional but  fragile in this usage, but probably
         robust in a less busy environment.
 
-     2017-08-08:  Added broadcast packet transfers using the hub-based
-        broadcast UDP client.  This appears to be a problem the HC06
-        compression/decompression.  The decompression logic comes up with
-        the destination address as ff02::ff00:00fe:3500 (which the receiving
-        node address is 37) instead of ff02::0001.  It is then out of sync
-        with the IPHC headers and is unable to uncompress the rest of the
-        packet correction.
+     2017-08-08:  The warning debug messages noted yesterday are no longer
+        present.  No clue why.
+
+        Added broadcast packet transfers using the hub-based broadcast UDP
+        client.  This appears to be a problem the HC06 compression and/or
+        decompression.  The decompression logic comes up with the
+        destination address of ff02::ff00:00fe:3500 (which derives from the
+        receiving node address of 37) instead of the all-nodes multicast
+        address of ff02::0001.  It is then out of sync with the IPHC headers
+        and is unable to uncompress the rest of the packet correctly.
 
         Trying again with HC1 compression, I see other isses.  The first
         frame is received correctly, but the following frames have an incorrect
