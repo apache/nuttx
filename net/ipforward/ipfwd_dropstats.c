@@ -41,6 +41,7 @@
 
 #include <errno.h>
 
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netstats.h>
 
