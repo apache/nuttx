@@ -42,6 +42,7 @@
 #include <stdint.h>
 
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/net.h>
 
 #include "devif/devif.h"
 #include "ipforward/ipforward.h"
