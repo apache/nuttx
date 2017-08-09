@@ -108,7 +108,7 @@ static inline int netdev_pktradio_addrlen(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-int netdev_type_lladdrsize(FAR struct net_driver_s *dev)
+int netdev_dev_lladdrsize(FAR struct net_driver_s *dev)
 {
   DEBUGASSERT(dev != NULL);
 
