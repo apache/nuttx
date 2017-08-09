@@ -210,7 +210,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #ifdef CONFIG_NET_TCP
             dev->d_recvwndo = CONFIG_NET_ETH_TCP_RECVWNDO;
 #endif
-            devfmt          = NETDEV_LPAN_FORMAT;
+            devfmt          = NETDEV_WLAN_FORMAT;
             break;
 #endif
 
