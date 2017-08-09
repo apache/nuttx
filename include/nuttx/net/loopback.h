@@ -52,17 +52,6 @@
 #ifdef CONFIG_NET_LOOPBACK
 
 /****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -82,9 +71,15 @@ EXTERN const char           g_lo_hostname[];
 
 /* Local loopback addresses */
 
+#ifdef CONFIG_NET_IPv4
 EXTERN const in_addr_t      g_lo_ipv4addr;
 EXTERN const in_addr_t      g_lo_ipv4mask;
+#endif
+
+#ifdef CONFIG_NET_IPv6
 EXTERN const net_ipv6addr_t g_lo_ipv6addr;
+EXTERN const net_ipv6addr_t g_lo_ipv6mask;
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -94,16 +89,13 @@ EXTERN const net_ipv6addr_t g_lo_ipv6addr;
  * Name: localhost_initialize
  *
  * Description:
- *   Initialize the Ethernet controller and driver
+ *   Initialize the localhost, loopback network driver
  *
  * Parameters:
- *   intf - In the case where there are multiple EMACs, this value
- *          identifies which EMAC is to be initialized.
+ *   None
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
- *
- * Assumptions:
  *
  ****************************************************************************/
 
