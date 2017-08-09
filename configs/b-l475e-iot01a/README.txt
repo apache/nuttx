@@ -583,26 +583,19 @@ Configuration sub-directories
         be beefed up to handle this routinely without asserting and without
         leaving the Spirit in a bad state.
 
-        One remaining issue with the above is that when we fail to go to the TX
-        state, there is a lot of warning debug output.  ANY debug output while
-        the Spirit is heavily loaded WILL cause failures and packet loss!
-        Perhaps using a RAMLOG would remedy this.
-
         The TCP test beats the radio very hard and it is actually heartening
         that there are no failures that lead to data loss in this environment.
         I would say it is functional but  fragile in this usage, but probably
         robust in a less busy environment.
 
-     2017-08-08:  The warning debug messages noted yesterday are no longer
-        present.  No clue why.
-
-        Added broadcast packet transfers using the hub-based broadcast UDP
-        client.  This appears to be a problem the HC06 compression and/or
-        decompression.  The decompression logic comes up with the
-        destination address of ff02::ff00:00fe:3500 (which derives from the
-        receiving node address of 37) instead of the all-nodes multicast
-        address of ff02::0001.  It is then out of sync with the IPHC headers
-        and is unable to uncompress the rest of the packet correctly.
+     2017-08-08:  Added broadcast packet transfers using the hub-based
+        broadcast UDP client.  This appears to be a problem the HC06
+        compression and/or decompression.  The decompression logic comes up
+        with the destination address of ff02::ff00:00fe:3500 (which derives
+        from the receiving node address of 37) instead of the all-nodes
+        multicast address of ff02::0001.  It is then out of sync with the
+        IPHC headers and is unable to uncompress the rest of the packet
+        correctly.
 
         Trying again with HC1 compression, I see other isses.  The first
         frame is received correctly, but the following frames have an incorrect
@@ -614,4 +607,5 @@ Configuration sub-directories
         we are sending to the multicast or broadcast address, should we
         not also disable ACKs, retries, and RX timeouts?  What will happen
         if multiple radios ACK?  At a minimum it could keep the driver
-        unnecessarily busy.
+        unnecessarily busy.  There is some prototype code to do just this
+        in the driver, but does not seem to work.
