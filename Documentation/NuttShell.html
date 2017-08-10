@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: July 2, 2017</p>
+      <p>Last Updated: August 10, 2017</p>
     </td>
   </tr>
 </table>
@@ -1166,7 +1166,7 @@ test &lt;expression&gt;
 
 <p><b>Command Syntax:</b></p>
 <ul><pre>
-addroute &lt;target&gt; &lt;netmask&gt; &lt;router&gt;
+addroute &lt;target&gt; [&lt;netmask&gt;] &lt;router&gt;
 </pre></ul>
 <p>
   <b>Synopsis</b>.
@@ -1174,10 +1174,20 @@ addroute &lt;target&gt; &lt;netmask&gt; &lt;router&gt;
   The new entry will map the IP address of a router on a local network (&lt;router&gt;) to an external network characterized by the &lt;target&gt; IP address and a network mask &lt;netmask&gt;
 </p>
 <p>
+  The netmask may also be expressed using IPv4 CIDR or IPv6 slash notation.
+  In that case, the netmask need not be provided.
+</p>
+<p>
   <b>Example:</b>
 </p>
 <ul><pre>
-nsh&gt; addroute 1.1.1.1 2.2.2.2 3.3.3.3
+nsh&gt; addroute addroute 11.0.0.0 255.255.255.0 10.0.0.2
+</pre></ul>
+<p>
+  which is equivalent to
+</p>
+<ul><pre>
+nsh&gt; addroute 11.0.0.0/24 10.0.0.2
 </pre></ul>
 
 <table width ="100%">
@@ -1481,17 +1491,28 @@ nsh&gt; dd if=/dev/ram0 of=/dev/null
 
 <p><b>Command Syntax:</b></p>
 <ul><pre>
-delroute &lt;target&gt; &lt;netmask&gt;
+delroute &lt;target&gt; [&lt;netmask&gt;]
 </pre></ul>
 <p>
   <b>Synopsis</b>.
   The entry removed will be the first entry in the routing table that matches
   the external network characterized by the &lt;target&gt; IP address and the network mask &lt;netmask&gt;
+</p>
+<p>
+  The netmask may also be expressed using IPv4 CIDR or IPv6 slash
+  notation.  In that case, the netmask need not be provided.
+</p>
 <p>
   <b>Example:</b>
 </p>
 <ul><pre>
-nsh&gt; delroute 1.1.1.1 2.2.2.2
+nsh&gt; delroute 11.0.0.0 255.255.255.0
+</pre></ul>
+<p>
+  which is equivalent to
+</p>
+<ul><pre>
+nsh&gt; delroute 11.0.0.0/24
 </pre></ul>
 
 <table width ="100%">
