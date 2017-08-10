@@ -92,7 +92,7 @@ struct route_ipv6_match_s
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-static int net_ipv4_match(FAR struct net_route_s *route, FAR void *arg)
+static int net_ipv4_match(FAR struct net_route_ipv4_s *route, FAR void *arg)
 {
   FAR struct route_ipv4_match_s *match = (FAR struct route_ipv4_match_s *)arg;
 

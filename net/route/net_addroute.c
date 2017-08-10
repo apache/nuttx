@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/route/net_addroute.c
  *
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@
 #ifdef CONFIG_NET_IPv4
 int net_addroute_ipv4(in_addr_t target, in_addr_t netmask, in_addr_t router)
 {
-  FAR struct net_route_s *route;
+  FAR struct net_route_ipv4_s *route;
 
   /* Allocate a route entry */
 
@@ -90,6 +90,7 @@ int net_addroute_ipv4(in_addr_t target, in_addr_t netmask, in_addr_t router)
   net_ipv4addr_copy(route->target, target);
   net_ipv4addr_copy(route->netmask, netmask);
   net_ipv4addr_copy(route->router, router);
+  net_ipv4_dumproute("New route", route);
 
   /* Get exclusive address to the networking data structures */
 
@@ -123,6 +124,7 @@ int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask,
   net_ipv6addr_copy(route->target, target);
   net_ipv6addr_copy(route->netmask, netmask);
   net_ipv6addr_copy(route->router, router);
+  net_ipv6_dumproute("New route", route);
 
   /* Get exclusive address to the networking data structures */
 

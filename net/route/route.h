@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/route/route.h
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,17 +65,18 @@
 /* This structure describes one entry in the routing table */
 
 #ifdef CONFIG_NET_IPv4
-struct net_route_s
+struct net_route_ipv4_s
 {
-  FAR struct net_route_s *flink; /* Supports a singly linked list */
-  in_addr_t target;              /* The destination network */
-  in_addr_t netmask;             /* The network address mask */
-  in_addr_t router;              /* Route packets via this router */
+  FAR struct net_route_ipv4_s *flink; /* Supports a singly linked list */
+  in_addr_t target;                   /* The destination network */
+  in_addr_t netmask;                  /* The network address mask */
+  in_addr_t router;                   /* Route packets via this router */
 };
 
 /* Type of the call out function pointer provided to net_foreachroute_ipv4() */
 
-typedef int (*route_handler_t)(FAR struct net_route_s *route, FAR void *arg);
+typedef int (*route_handler_t)(FAR struct net_route_ipv4_s *route,
+                               FAR void *arg);
 #endif
 
 #ifdef CONFIG_NET_IPv6
@@ -151,7 +152,7 @@ void net_initroute(void);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-FAR struct net_route_s *net_allocroute_ipv4(void);
+FAR struct net_route_ipv4_s *net_allocroute_ipv4(void);
 #endif
 
 #ifdef CONFIG_NET_IPv6
@@ -173,7 +174,7 @@ FAR struct net_route_ipv6_s *net_allocroute_ipv6(void);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-void net_freeroute_ipv4(FAR struct net_route_s *route);
+void net_freeroute_ipv4(FAR struct net_route_ipv4_s *route);
 #endif
 
 #ifdef CONFIG_NET_IPv6
@@ -344,6 +345,44 @@ int net_foreachroute_ipv4(route_handler_t handler, FAR void *arg);
 
 #ifdef CONFIG_NET_IPv6
 int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg);
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: net_ipv4_dumproute and net_ipv6_dumproute
+ *
+ * Description:
+ *   Dump a routing table enter
+ *
+ * Parameters:
+ *   route - The entry to be dumped
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_NET_INFO
+#ifdef CONFIG_NET_IPv4
+void net_ipv4_dumproute(FAR const char *msg,
+                        FAR struct net_route_ipv4_s *route);
+#else
+#  define net_ipv4_dumproute(m,r)
+#endif
+
+#ifdef CONFIG_NET_IPv6
+void net_ipv6_dumproute(FAR const char *msg,
+                        FAR struct net_route_ipv6_s *route);
+#else
+#  define net_ipv6_dumproute(m,r)
+#endif
+
+#else
+#  define net_ipv4_dumproute(m,r)
+#  define net_ipv6_dumproute(m,r)
 #endif
 
 #undef EXTERN

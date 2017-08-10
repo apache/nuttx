@@ -81,7 +81,7 @@ static sq_queue_t g_freeroutes_ipv6;
 /* This is an array of pre-allocated network routes */
 
 #ifdef CONFIG_NET_IPv4
-static struct net_route_s g_preallocroutes[CONFIG_NET_MAXROUTES];
+static struct net_route_ipv4_s g_preallocroutes[CONFIG_NET_MAXROUTES];
 #endif
 
 #ifdef CONFIG_NET_IPv6
@@ -158,9 +158,9 @@ void net_initroute(void)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-FAR struct net_route_s *net_allocroute_ipv4(void)
+FAR struct net_route_ipv4_s *net_allocroute_ipv4(void)
 {
-  FAR struct net_route_s *route;
+  FAR struct net_route_ipv4_s *route;
 
   /* Get exclusive address to the networking data structures */
 
@@ -168,7 +168,7 @@ FAR struct net_route_s *net_allocroute_ipv4(void)
 
   /* Then add the new entry to the table */
 
-  route = (FAR struct net_route_s *)
+  route = (FAR struct net_route_ipv4_s *)
     sq_remfirst((FAR sq_queue_t *)&g_freeroutes);
 
   net_unlock();
@@ -210,7 +210,7 @@ FAR struct net_route_ipv6_s *net_allocroute_ipv6(void)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-void net_freeroute_ipv4(FAR struct net_route_s *route)
+void net_freeroute_ipv4(FAR struct net_route_ipv4_s *route)
 {
   DEBUGASSERT(route);
 

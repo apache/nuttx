@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/route/net_foreachroute.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,8 +72,8 @@
 #ifdef CONFIG_NET_IPv4
 int net_foreachroute_ipv4(route_handler_t handler, FAR void *arg)
 {
-  FAR struct net_route_s *route;
-  FAR struct net_route_s *next;
+  FAR struct net_route_ipv4_s *route;
+  FAR struct net_route_ipv4_s *next;
   int ret = 0;
 
   /* Prevent concurrent access to the routing table */
@@ -82,8 +82,8 @@ int net_foreachroute_ipv4(route_handler_t handler, FAR void *arg)
 
   /* Visit each entry in the routing table */
 
-  for (route = (FAR struct net_route_s *)g_ipv4_routes.head;
-       route;
+  for (route = (FAR struct net_route_ipv4_s *)g_ipv4_routes.head;
+       ret == 0 && route != NULL;
        route = next)
     {
       /* Get the next entry in the to visit.  We do this BEFORE calling the
@@ -91,7 +91,7 @@ int net_foreachroute_ipv4(route_handler_t handler, FAR void *arg)
        */
 
       next = route->flink;
-      ret = handler(route, arg);
+      ret  = handler(route, arg);
     }
 
   /* Unlock the network */
@@ -115,7 +115,7 @@ int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg)
   /* Visit each entry in the routing table */
 
   for (route = (FAR struct net_route_ipv6_s *)g_ipv6_routes.head;
-       route;
+       ret == 0 && route != NULL;
        route = next)
     {
       /* Get the next entry in the to visit.  We do this BEFORE calling the
@@ -123,7 +123,7 @@ int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg)
        */
 
       next = route->flink;
-      ret = handler(route, arg);
+      ret  = handler(route, arg);
     }
 
   /* Unlock the network */

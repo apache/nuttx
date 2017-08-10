@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/route/net_delroute.c
  *
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,9 @@
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
+#include <debug.h>
 
+#include <arpa/inet.h>
 #include <nuttx/net/ip.h>
 
 #include "route/route.h"
@@ -56,7 +58,7 @@
 #ifdef CONFIG_NET_IPv4
 struct route_match_s
 {
-  FAR struct net_route_s *prev;     /* Predecessor in the list */
+  FAR struct net_route_ipv4_s *prev;     /* Predecessor in the list */
   in_addr_t               target;   /* The target IP address to match */
   in_addr_t               netmask;  /* The network mask to match */
 };
@@ -76,7 +78,7 @@ struct route_match_ipv6_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_match
+ * Name: net_match_ipv4
  *
  * Description:
  *   Return 1 if the route is available
@@ -91,13 +93,18 @@ struct route_match_ipv6_s
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-static int net_match(FAR struct net_route_s *route, FAR void *arg)
+static int net_match_ipv4(FAR struct net_route_ipv4_s *route, FAR void *arg)
 {
   FAR struct route_match_s *match = (FAR struct route_match_s *)arg;
 
   /* To match, the masked target address must be the same, and the masks
    * must be the same.
    */
+
+  net_ipv4_dumproute("Comparing", route);
+  ninfo("With:\n");
+  ninfo("  target=%08lx netmask=%08lx\n",
+        htonl(match->target), htonl(match->netmask));
 
   if (net_ipv4addr_maskcmp(route->target, match->target, match->netmask) &&
       net_ipv4addr_cmp(route->netmask, match->netmask))
@@ -138,6 +145,19 @@ static int net_match_ipv6(FAR struct net_route_ipv6_s *route, FAR void *arg)
   /* To match, the masked target address must be the same, and the masks
    * must be the same.
    */
+
+  net_ipv6_dumproute("Comparing", route);
+  ninfo("With:\n");
+  ninfo("  target:  %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        htons(match->target[0]),  htons(match->target[1]),
+        htons(match->target[2]),  htons(match->target[3]),
+        htons(match->target[4]),  htons(match->target[5]),
+        htons(match->target[6]),  htons(match->target[7]));
+  ninfo("  netmask: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        htons(match->netmask[0]), htons(match->netmask[1]),
+        htons(match->netmask[2]), htons(match->netmask[3]),
+        htons(match->netmask[4]), htons(match->netmask[5]),
+        htons(match->netmask[6]), htons(match->netmask[7]));
 
   if (net_ipv6addr_maskcmp(route->target, match->target, match->netmask) &&
       net_ipv6addr_cmp(route->netmask, match->netmask))
@@ -200,7 +220,7 @@ int net_delroute_ipv4(in_addr_t target, in_addr_t netmask)
 
   /* Then remove the entry from the routing table */
 
-  return net_foreachroute_ipv4(net_match, &match) ? OK : -ENOENT;
+  return net_foreachroute_ipv4(net_match_ipv4, &match) ? OK : -ENOENT;
 }
 #endif
 
