@@ -43,6 +43,10 @@
 
 #include <nuttx/net/ip.h>
 
+#ifdef CONFIG_NET_ETHERNET
+#  include <net/ethernet.h>
+#endif
+
 #include "inet/inet.h"
 
 /****************************************************************************
