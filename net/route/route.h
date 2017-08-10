@@ -348,14 +348,10 @@ int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg);
 #endif
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: net_ipv4_dumproute and net_ipv6_dumproute
  *
  * Description:
- *   Dump a routing table enter
+ *   Dump a routing table entry
  *
  * Parameters:
  *   route - The entry to be dumped
