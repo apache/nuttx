@@ -107,16 +107,16 @@ static int net_match(FAR struct net_route_s *route, FAR void *arg)
       if (match->prev)
         {
           (void)sq_remafter((FAR sq_entry_t *)match->prev,
-                            (FAR sq_queue_t *)&g_routes);
+                            (FAR sq_queue_t *)&g_ipv4_routes);
         }
       else
         {
-          (void)sq_remfirst((FAR sq_queue_t *)&g_routes);
+          (void)sq_remfirst((FAR sq_queue_t *)&g_ipv4_routes);
         }
 
       /* And free the routing table entry by adding it to the free list */
 
-      net_freeroute(route);
+      net_freeroute_ipv4(route);
 
       /* Return a non-zero value to terminate the traversal */
 
@@ -147,11 +147,11 @@ static int net_match_ipv6(FAR struct net_route_ipv6_s *route, FAR void *arg)
       if (match->prev)
         {
           (void)sq_remafter((FAR sq_entry_t *)match->prev,
-                            (FAR sq_queue_t *)&g_routes_ipv6);
+                            (FAR sq_queue_t *)&g_ipv6_routes);
         }
       else
         {
-          (void)sq_remfirst((FAR sq_queue_t *)&g_routes_ipv6);
+          (void)sq_remfirst((FAR sq_queue_t *)&g_ipv6_routes);
         }
 
       /* And free the routing table entry by adding it to the free list */
@@ -175,7 +175,7 @@ static int net_match_ipv6(FAR struct net_route_ipv6_s *route, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_delroute
+ * Name: net_delroute_ipv4 and net_delroute_ipv6
  *
  * Description:
  *   Remove an existing route from the routing table
@@ -188,7 +188,7 @@ static int net_match_ipv6(FAR struct net_route_ipv6_s *route, FAR void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-int net_delroute(in_addr_t target, in_addr_t netmask)
+int net_delroute_ipv4(in_addr_t target, in_addr_t netmask)
 {
   struct route_match_s match;
 
@@ -200,7 +200,7 @@ int net_delroute(in_addr_t target, in_addr_t netmask)
 
   /* Then remove the entry from the routing table */
 
-  return net_foreachroute(net_match, &match) ? OK : -ENOENT;
+  return net_foreachroute_ipv4(net_match, &match) ? OK : -ENOENT;
 }
 #endif
 

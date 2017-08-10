@@ -57,11 +57,11 @@
 /* This is the routing table */
 
 #ifdef CONFIG_NET_IPv4
-sq_queue_t g_routes;
+sq_queue_t g_ipv4_routes;
 #endif
 
 #ifdef CONFIG_NET_IPv6
-sq_queue_t g_routes_ipv6;
+sq_queue_t g_ipv6_routes;
 #endif
 
 /****************************************************************************
@@ -116,7 +116,7 @@ void net_initroute(void)
   /* Initialize the routing table and the free list */
 
 #ifdef CONFIG_NET_IPv4
-  sq_init(&g_routes);
+  sq_init(&g_ipv4_routes);
   sq_init(&g_freeroutes);
 
   /* All all of the pre-allocated routing table entries to a free list */
@@ -129,7 +129,7 @@ void net_initroute(void)
 #endif
 
 #ifdef CONFIG_NET_IPv6
-  sq_init(&g_routes_ipv6);
+  sq_init(&g_ipv6_routes);
   sq_init(&g_freeroutes_ipv6);
 
   /* All all of the pre-allocated routing table entries to a free list */
@@ -143,7 +143,7 @@ void net_initroute(void)
 }
 
 /****************************************************************************
- * Name: net_allocroute
+ * Name: net_allocroute_ipv4 and net_allocroute_ipv6
  *
  * Description:
  *   Allocate one route by removing it from the free list
@@ -158,7 +158,7 @@ void net_initroute(void)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-FAR struct net_route_s *net_allocroute(void)
+FAR struct net_route_s *net_allocroute_ipv4(void)
 {
   FAR struct net_route_s *route;
 
@@ -196,7 +196,7 @@ FAR struct net_route_ipv6_s *net_allocroute_ipv6(void)
 #endif
 
 /****************************************************************************
- * Name: net_freeroute
+ * Name: net_freeroute_ipv4 and net_freeroute_ipv6
  *
  * Description:
  *   Free one route by adding it from the free list
@@ -210,7 +210,7 @@ FAR struct net_route_ipv6_s *net_allocroute_ipv6(void)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-void net_freeroute(FAR struct net_route_s *route)
+void net_freeroute_ipv4(FAR struct net_route_s *route)
 {
   DEBUGASSERT(route);
 

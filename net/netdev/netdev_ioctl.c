@@ -146,7 +146,7 @@ static int ioctl_add_ipv4route(FAR struct rtentry *rtentry)
       router = 0;
     }
 
-  return net_addroute(target, netmask, router);
+  return net_addroute_ipv4(target, netmask, router);
 }
 #endif /* CONFIG_NET_ROUTE && CONFIG_NET_IPv4 */
 
@@ -212,7 +212,7 @@ static int ioctl_del_ipv4route(FAR struct rtentry *rtentry)
   addr    = (FAR struct sockaddr_in *)rtentry->rt_netmask;
   netmask = (in_addr_t)addr->sin_addr.s_addr;
 
-  return net_delroute(target, netmask);
+  return net_delroute_ipv4(target, netmask);
 }
 #endif /* CONFIG_NET_ROUTE && CONFIG_NET_IPv4 */
 

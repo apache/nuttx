@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <string.h>
 #include <queue.h>
 #include <errno.h>
 #include <debug.h>
@@ -58,7 +59,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_addroute
+ * Name: net_addroute_ipv4 and net_addroute_ipv6
  *
  * Description:
  *   Add a new route to the routing table
@@ -71,13 +72,13 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-int net_addroute(in_addr_t target, in_addr_t netmask, in_addr_t router)
+int net_addroute_ipv4(in_addr_t target, in_addr_t netmask, in_addr_t router)
 {
   FAR struct net_route_s *route;
 
   /* Allocate a route entry */
 
-  route = net_allocroute();
+  route = net_allocroute_ipv4();
   if (!route)
     {
       nerr("ERROR:  Failed to allocate a route\n");
@@ -96,14 +97,15 @@ int net_addroute(in_addr_t target, in_addr_t netmask, in_addr_t router)
 
   /* Then add the new entry to the table */
 
-  sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_routes);
+  sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_ipv4_routes);
   net_unlock();
   return OK;
 }
 #endif
 
 #ifdef CONFIG_NET_IPv6
-int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask, net_ipv6addr_t router)
+int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask,
+                      net_ipv6addr_t router)
 {
   FAR struct net_route_ipv6_s *route;
 
@@ -128,7 +130,7 @@ int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask, net_ipv6add
 
   /* Then add the new entry to the table */
 
-  sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_routes_ipv6);
+  sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_ipv6_routes);
   net_unlock();
   return OK;
 }

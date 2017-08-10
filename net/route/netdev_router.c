@@ -201,7 +201,7 @@ void netdev_ipv4_router(FAR struct net_driver_s *dev, in_addr_t target,
    * address using this device.
    */
 
-  ret = net_foreachroute(net_ipv4_devmatch, &match);
+  ret = net_foreachroute_ipv4(net_ipv4_devmatch, &match);
   if (ret > 0)
     {
       /* We found a route.  Return the router address. */

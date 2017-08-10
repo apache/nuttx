@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_foreachroute
+ * Name: net_foreachroute_ipv4 and net_foreachroute_ipv6
  *
  * Description:
  *   Traverse the routing table
@@ -70,7 +70,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-int net_foreachroute(route_handler_t handler, FAR void *arg)
+int net_foreachroute_ipv4(route_handler_t handler, FAR void *arg)
 {
   FAR struct net_route_s *route;
   FAR struct net_route_s *next;
@@ -82,7 +82,9 @@ int net_foreachroute(route_handler_t handler, FAR void *arg)
 
   /* Visit each entry in the routing table */
 
-  for (route = (FAR struct net_route_s *)g_routes.head; route; route = next)
+  for (route = (FAR struct net_route_s *)g_ipv4_routes.head;
+       route;
+       route = next)
     {
       /* Get the next entry in the to visit.  We do this BEFORE calling the
        * handler because the hanlder may delete this entry.
@@ -112,7 +114,9 @@ int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg)
 
   /* Visit each entry in the routing table */
 
-  for (route = (FAR struct net_route_s *)g_routes_ipv6.head; route; route = next)
+  for (route = (FAR struct net_route_ipv6_s *)g_ipv6_routes.head;
+       route;
+       route = next)
     {
       /* Get the next entry in the to visit.  We do this BEFORE calling the
        * handler because the hanlder may delete this entry.
