@@ -126,7 +126,7 @@ static const struct procfs_entry_s g_procfs_entries[] =
 #endif
 
 #if defined(CONFIG_MODULE) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-  { "modules",       &module_operations,          PROCFS_DIR_TYPE    },
+  { "modules",       &module_operations,          PROCFS_FILE_TYPE   },
 #endif
 
 #if defined(CONFIG_FS_SMARTFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
@@ -148,7 +148,7 @@ static const struct procfs_entry_s g_procfs_entries[] =
 #endif
 
 #if defined(CONFIG_MTD_PARTITION) && !defined(CONFIG_FS_PROCFS_EXCLUDE_PARTITIONS)
-  { "partitions",    &part_procfsoperations,      PROCFS_DIR_TYPE    },
+  { "partitions",    &part_procfsoperations,      PROCFS_FILE_TYPE   },
 #endif
 
 #if !defined(CONFIG_FS_PROCFS_EXCLUDE_UPTIME)
