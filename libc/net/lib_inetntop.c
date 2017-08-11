@@ -100,7 +100,7 @@
 #if defined(CONFIG_NET_IPv4) || defined(CONFIG_LIBC_IPv4_ADDRCONV)
 static int inet_ipv4_ntop(FAR const void *src, FAR char *dest, socklen_t size)
 {
-  FAR char *ptr;
+  FAR uint8_t *ptr;
 
   if (size < INET_ADDRSTRLEN)
     {
@@ -108,7 +108,7 @@ static int inet_ipv4_ntop(FAR const void *src, FAR char *dest, socklen_t size)
     }
 
   ptr = (FAR char *)src;
-  sprintf(dest, "%d.%d.%d.%d", ptr[0], ptr[1], ptr[2], ptr[3]);
+  sprintf(dest, "%u.%u.%u.%u", ptr[0], ptr[1], ptr[2], ptr[3]);
   return OK;
 }
 #endif
