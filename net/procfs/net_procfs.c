@@ -56,6 +56,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/fs/dirent.h>
+#include <nuttx/lib/regex.h>
 #include <nuttx/net/netdev.h>
 
 #include "netdev/netdev.h"
@@ -63,6 +64,26 @@
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
     !defined(CONFIG_FS_PROCFS_EXCLUDE_NET)
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Directory entry indices */
+
+#if defined(CONFIG_NET_STATISTICS) && defined(CONFIG_NET_ROUTE)
+#  define STAT_INDEX  0
+#  define ROUTE_INDEX 1
+#  define DEV_INDEX   2
+#elif defined(CONFIG_NET_STATISTICS)
+#  define STAT_INDEX  0
+#  define DEV_INDEX   1
+#elif defined(CONFIG_NET_ROUTE)
+#  define ROUTE_INDEX 0
+#  define DEV_INDEX   1
+#else
+#  define DEV_INDEX   0
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -112,6 +133,8 @@ const struct procfs_operations net_procfsoperations =
   netprocfs_stat        /* stat */
 };
 
+extern const struct procfs_operations net_procfs_routeoperations;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -125,6 +148,7 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
 {
   FAR struct netprocfs_file_s *priv;
   FAR struct net_driver_s *dev;
+  enum netprocfs_entry_e entry;
 
   finfo("Open '%s'\n", relpath);
 
@@ -141,18 +165,29 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
       return -EACCES;
     }
 
+#ifdef CONFIG_NET_STATISTICS
   /* "net/stat" is an acceptable value for the relpath only if network layer
    * statistics are enabled.
    */
 
-#ifdef CONFIG_NET_STATISTICS
   if (strcmp(relpath, "net/stat") == 0)
     {
-      /* A NULL network device reference is a clue that we are processing
-       * the network statistics file.
-       */
+      entry = NETPROCFS_SUBDIR_STAT;
+      dev   = NULL;
+    }
+  else
+#endif
 
-      dev = NULL;
+#ifdef CONFIG_NET_ROUTE
+  /* "net/route" is an acceptable value for the relpath only if routing
+   * table support is initialized.
+   */
+
+  if (match("net/route/**", relpath))
+    {
+      /* Use the /net/route directory */
+
+      return net_procfs_routeoperations.open(filep, relpath, oflags, mode);
     }
   else
 #endif
@@ -180,11 +215,14 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
           ferr("ERROR: relpath is '%s'\n", relpath);
           return -ENOENT;
         }
+
+      entry = NETPROCFS_SUBDIR_DEV;
     }
 
   /* Allocate the open file structure */
 
-  priv = (FAR struct netprocfs_file_s *)kmm_zalloc(sizeof(struct netprocfs_file_s));
+  priv = (FAR struct netprocfs_file_s *)
+    kmm_zalloc(sizeof(struct netprocfs_file_s));
   if (!priv)
     {
       ferr("ERROR: Failed to allocate file attributes\n");
@@ -193,7 +231,8 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Initialize the open-file structure */
 
-  priv->dev = dev;
+  priv->dev   = dev;
+  priv->entry = entry;
 
   /* Save the open file structure as the open-specific state in
    * filep->f_priv.
@@ -240,24 +279,33 @@ static ssize_t netprocfs_read(FAR struct file *filep, FAR char *buffer,
   priv = (FAR struct netprocfs_file_s *)filep->f_priv;
   DEBUGASSERT(priv);
 
-#ifdef CONFIG_NET_STATISTICS
-  /* A NULL device structure reference is the key that we are showing the
-   * network statistics.
-   */
+  /* Read according to the sub-directory */
 
-  if (priv->dev == NULL)
+  switch (priv->entry)
     {
-      /* Show the network layer statistics */
+      case NETPROCFS_SUBDIR_DEV:
+        /* Show device-specific statistics */
 
-      nreturned = netprocfs_read_netstats(priv, buffer, buflen);
-    }
-  else
+        nreturned = netprocfs_read_devstats(priv, buffer, buflen);
+        break;
+
+#ifdef CONFIG_NET_STATISTICS
+      case NETPROCFS_SUBDIR_STAT:
+        /* Show the network layer statistics */
+
+        nreturned = netprocfs_read_netstats(priv, buffer, buflen);
+        break;
 #endif
-   {
-      /* Otherwise, we are showing device-specific statistics */
 
-      nreturned = netprocfs_read_devstats(priv, buffer, buflen);
-   }
+#ifdef CONFIG_NET_ROUTE
+      case NETPROCFS_SUBDIR_ROUTE:
+        nerr("ERROR: Cannot read from directory net/route\n");
+#endif
+
+      default:
+        nerr("ERROR: Invalid entry for reading: %u\n", priv->entry);
+        nreturned = -EINVAL;
+    }
 
   /* Update the file offset */
 
@@ -321,13 +369,56 @@ static int netprocfs_opendir(FAR const char *relpath,
 {
   FAR struct netprocfs_level1_s *level1;
   int ndevs;
+  int ret;
 
   finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
   DEBUGASSERT(relpath && dir && !dir->u.procfs);
 
-  /* "net" is the only value of relpath that is a directory */
+  /* "net" and "net/route" are the only values of relpath that are
+   * directories.
+   */
 
-  if (strcmp(relpath, "net") != 0)
+#ifdef CONFIG_NET_ROUTE
+  if (match("net/route", relpath) || match("net/route/**", relpath))
+    {
+      /* Use the /net/route directory */
+
+      return net_procfs_routeoperations.opendir(relpath, dir);
+    }
+#endif
+
+  /* Assume that path refers to the 1st level subdirectory.  Allocate the
+   * level1 the dirent structure before checking.
+   */
+
+  level1 = (FAR struct netprocfs_level1_s *)
+     kmm_zalloc(sizeof(struct netprocfs_level1_s));
+
+  if (level1 == NULL)
+    {
+      ferr("ERROR: Failed to allocate the level1 directory structure\n");
+      return -ENOMEM;
+    }
+
+  level1->base.level = 1;
+
+  if (strcmp(relpath, "net") == 0)
+    {
+      /* Count the number of network devices */
+
+      ndevs = netdev_count();
+
+      /* Initialze base structure components */
+
+      level1->base.nentries = ndevs;
+#ifdef CONFIG_NET_STATISTICS
+      level1->base.nentries++;
+#endif
+#ifdef CONFIG_NET_ROUTE
+      level1->base.nentries++;
+#endif
+    }
+  else
     {
       /* REVISIT: We really need to check if the relpath refers to a network
        * device.  In that case, we need to return -ENOTDIR.  Otherwise, we
@@ -335,38 +426,16 @@ static int netprocfs_opendir(FAR const char *relpath,
        */
 
       ferr("ERROR: Bad relpath: %s\n", relpath);
-      return -ENOTDIR;
+      ret = -ENOTDIR;
+      goto errout_with_alloc;
     }
 
-  /* The path refers to the 1st level sbdirectory.  Allocate the level1
-   * dirent structure.
-   */
-
-  level1 = (FAR struct netprocfs_level1_s *)
-     kmm_zalloc(sizeof(struct netprocfs_level1_s));
-
-  if (!level1)
-    {
-      ferr("ERROR: Failed to allocate the level1 directory structure\n");
-      return -ENOMEM;
-    }
-
-  /* Count the number of network devices */
-
-  ndevs = netdev_count();
-
-  /* Initialze base structure components */
-
-  level1->base.level    = 1;
-#ifdef CONFIG_NET_STATISTICS
-  level1->base.nentries = ndevs + 1;
-#else
-  level1->base.nentries = ndevs;
-#endif
-  level1->base.index    = 0;
-
-  dir->u.procfs = (FAR void *) level1;
+  dir->u.procfs = (FAR void *)level1;
   return OK;
+
+errout_with_alloc:
+  kmm_free(level1);
+  return ret;
 }
 
 /****************************************************************************
@@ -404,63 +473,86 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir)
   FAR struct netprocfs_level1_s *level1;
   FAR struct net_driver_s *dev;
   int index;
+  int ret;
 
   DEBUGASSERT(dir && dir->u.procfs);
   level1 = dir->u.procfs;
-  DEBUGASSERT(level1->base.level == 1);
+  DEBUGASSERT(level1->base.level > 0);
 
-  /* Have we reached the end of the directory */
-
-  index = level1->base.index;
-  DEBUGASSERT(index <= level1->base.nentries);
-
-  if (index >= level1->base.nentries)
-    {
-      /* We signal the end of the directory by returning the special
-       * error -ENOENT.
-       */
-
-      finfo("Entry %d: End of directory\n", index);
-      return -ENOENT;
-    }
-
-#ifdef CONFIG_NET_STATISTICS
-  else if (index == 0)
-    {
-      /* Copy the network statistics directory entry */
-
-      dir->fd_dir.d_type = DTYPE_FILE;
-      strncpy(dir->fd_dir.d_name, "stat", NAME_MAX + 1);
-    }
-  else
-#endif
-    {
-      int devndx = index;
-
-#ifdef CONFIG_NET_STATISTICS
-      /* Subtract one to account for index == 0 which is used for network
-       * status.
-       */
-
-      devndx--;
-#endif
-
-      /* Find the device corresponding to this device index */
-
-      dev = netdev_findbyindex(devndx);
-
-      /* Copy the device statistics file entry */
-
-      dir->fd_dir.d_type = DTYPE_FILE;
-      strncpy(dir->fd_dir.d_name, dev->d_ifname, NAME_MAX + 1);
-    }
-
-  /* Set up the next directory entry offset.  NOTE that we could use the
-   * standard f_pos instead of our own private index.
+  /* Are we searching this directory?  Or is it just an intermediate on the
+   * way to a sub-directory?
    */
 
-  level1->base.index = index + 1;
-  return OK;
+  if (level1->base.level == 1)
+    {
+      /* This directory..  Have we reached the end of the directory? */
+
+      index = level1->base.index;
+      DEBUGASSERT(index <= level1->base.nentries);
+
+      if (index >= level1->base.nentries)
+        {
+         /* We signal the end of the directory by returning the special
+           * error -ENOENT.
+           */
+
+          finfo("Entry %d: End of directory\n", index);
+          return -ENOENT;
+        }
+
+#ifdef CONFIG_NET_STATISTICS
+      else if (index == STAT_INDEX)
+        {
+          /* Copy the network statistics directory entry */
+
+          dir->fd_dir.d_type = DTYPE_FILE;
+          strncpy(dir->fd_dir.d_name, "stat", NAME_MAX + 1);
+        }
+      else
+#endif
+#ifdef CONFIG_NET_ROUTE
+      if (index == ROUTE_INDEX)
+        {
+          /* Copy the network statistics directory entry */
+
+          dir->fd_dir.d_type = DTYPE_DIRECTORY;
+          strncpy(dir->fd_dir.d_name, "route", NAME_MAX + 1);
+        }
+      else
+#endif
+        {
+          int devndx = index - DEV_INDEX;
+
+          /* Find the device corresponding to this device index */
+
+          dev = netdev_findbyindex(devndx);
+
+          /* Copy the device statistics file entry */
+
+          dir->fd_dir.d_type = DTYPE_FILE;
+          strncpy(dir->fd_dir.d_name, dev->d_ifname, NAME_MAX + 1);
+        }
+
+      /* Set up the next directory entry offset.  NOTE that we could use the
+       * standard f_pos instead of our own private index.
+       */
+
+      level1->base.index = index + 1;
+      ret = OK;
+    }
+  else
+    {
+      /* We are performing a directory search of one of the subdirectories
+       * and we must let the handler perform the read.
+       */
+
+      DEBUGASSERT(level1->base.procfsentry != NULL &&
+                  level1->base.procfsentry->ops->readdir != NULL);
+
+      ret = level1->base.procfsentry->ops->readdir(dir);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -503,6 +595,15 @@ static int netprocfs_stat(FAR const char *relpath, FAR struct stat *buf)
   if (strcmp(relpath, "net/stat") == 0)
     {
       buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
+    }
+  else
+#endif
+#ifdef CONFIG_NET_ROUTE
+  /* Check for network statistics "net/stat" */
+
+  if (strcmp(relpath, "net/route") == 0)
+    {
+      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
     }
   else
 #endif

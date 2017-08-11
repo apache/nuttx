@@ -2097,6 +2097,11 @@ o Build system
 
                  $ make apps_distclean
 
+               One solution to this might be to making the special target
+               .PRECIOUS depend on apps/libapps.a.  Then if make receives a
+               signal, it will not delete apps/libapps.a.  This would have to
+               be done in all Makefiles.
+
    Status      Open
    Priority:   Medium-High.  It is a rare event that control-C happens at just the
                point in time.  However, when it does occur the resulting code may

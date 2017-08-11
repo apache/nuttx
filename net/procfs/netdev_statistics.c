@@ -84,7 +84,7 @@ static int netprocfs_errors(FAR struct netprocfs_file_s *netfile);
 
 /* Line generating functions */
 
-static const linegen_t g_linegen[] =
+static const linegen_t g_netstat_linegen[] =
 {
   netprocfs_linklayer
 #ifdef CONFIG_NET_IPv4
@@ -105,7 +105,7 @@ static const linegen_t g_linegen[] =
 #endif /* CONFIG_NETDEV_STATISTICS */
 };
 
-#define NSTAT_LINES (sizeof(g_linegen) / sizeof(linegen_t))
+#define NSTAT_LINES (sizeof(g_netstat_linegen) / sizeof(linegen_t))
 
 /****************************************************************************
  * Private Functions
@@ -554,7 +554,8 @@ static int netprocfs_errors(FAR struct netprocfs_file_s *netfile)
 ssize_t netprocfs_read_devstats(FAR struct netprocfs_file_s *priv,
                                 FAR char *buffer, size_t buflen)
 {
-  return netprocfs_read_linegen(priv, buffer, buflen, g_linegen, NSTAT_LINES);
+  return netprocfs_read_linegen(priv, buffer, buflen, g_netstat_linegen,
+                                NSTAT_LINES);
 }
 
 #endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS &&

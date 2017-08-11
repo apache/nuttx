@@ -82,7 +82,7 @@ static int     netprocfs_retransmissions(FAR struct netprocfs_file_s *netfile);
 
 /* Line generating functions */
 
-static const linegen_t g_linegen[] =
+static const linegen_t g_stat_linegen[] =
 {
   netprocfs_header,
   netprocfs_received,
@@ -111,7 +111,7 @@ static const linegen_t g_linegen[] =
 #endif /* CONFIG_NET_TCP */
 };
 
-#define NSTAT_LINES (sizeof(g_linegen) / sizeof(linegen_t))
+#define NSTAT_LINES (sizeof(g_stat_linegen) / sizeof(linegen_t))
 
 /****************************************************************************
  * Private Functions
@@ -456,7 +456,7 @@ static int netprocfs_retransmissions(FAR struct netprocfs_file_s *netfile)
 ssize_t netprocfs_read_netstats(FAR struct netprocfs_file_s *priv,
                                 FAR char *buffer, size_t buflen)
 {
-  return netprocfs_read_linegen(priv, buffer, buflen, g_linegen, NSTAT_LINES);
+  return netprocfs_read_linegen(priv, buffer, buflen, g_stat_linegen, NSTAT_LINES);
 }
 
 #endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS &&
