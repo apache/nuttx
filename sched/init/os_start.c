@@ -327,10 +327,12 @@ static struct task_tcb_s g_idletcb[1];
 
 /* This is the name of the idle task */
 
+#if CONFIG_TASK_NAME_SIZE <= 0 || !defined(CONFIG_SMP)
 #ifdef CONFIG_SMP
 static const char g_idlename[] = "CPU Idle";
 #else
 static const char g_idlename[] = "Idle Task";
+#endif
 #endif
 
 /* This the IDLE idle threads argument list.  NOTE: Normally the argument
