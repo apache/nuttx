@@ -30,7 +30,6 @@ config CXX_NEWLONG
 		C++ library routines because the NuttX size_t might not have
 		the same underlying type as your toolchain's size_t.
 
-
 comment "LLVM C++ Library (libcxx)"
 
 config LIBCXX

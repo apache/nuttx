@@ -1,7 +1,7 @@
 //***************************************************************************
-// libxx/libxx_new.cxx
+// libxx/libxx_delete_sized.cxx
 //
-//   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+//   Copyright (C) 2007 Gregory Nutt. All rights reserved.
 //   Author: Gregory Nutt <gnutt@nuttx.org>
 //
 // Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,6 @@
 //***************************************************************************
 
 #include <nuttx/config.h>
-#include <cstddef>
-#include <debug.h>
 
 #include "libxx.hxx"
 
@@ -48,7 +46,7 @@
 //***************************************************************************
 
 //***************************************************************************
-// Name: new
+// Name: delete
 //
 // NOTE:
 //   This should take a type of size_t.  But size_t has an unknown underlying
@@ -61,35 +59,12 @@
 //
 //***************************************************************************
 
-//void *operator new(size_t nbytes)
+//void operator delete(FAR void *ptr, std::size_t size)
 #ifdef CONFIG_CXX_NEWLONG
-void *operator new(unsigned long nbytes)
+void *operator delete(FAR void *ptr, unsigned long nbytes)
 #else
-void *operator new(unsigned int nbytes)
+void *operator delete(FAR void *ptr, unsigned int nbytes)
 #endif
 {
-  // We have to allocate something
-
-  if (nbytes < 1)
-    {
-      nbytes = 1;
-    }
-
-  // Perform the allocation
-
-  void *alloc = lib_malloc(nbytes);
-
-#ifdef CONFIG_DEBUG_ERROR
-  if (alloc == 0)
-    {
-      // Oh my.. we are required to return a valid pointer and
-      // we cannot throw an exception!  We are bad.
-
-      _err("ERROR: Failed to allocate\n");
-    }
-#endif
-
-  // Return the allocated value
-
-  return alloc;
+  lib_free(ptr);
 }
