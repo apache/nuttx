@@ -820,6 +820,7 @@ static const uintptr_t g_layerenable[LCDC_NLAYERS] =
 #endif
 };
 
+#if 0 /* Not used */
 static const uintptr_t g_layerdisable[LCDC_NLAYERS] =
 {
   SAM_LCDC_BASECHDR,
@@ -830,7 +831,9 @@ static const uintptr_t g_layerdisable[LCDC_NLAYERS] =
   , SAM_LCDC_HCRCHDR
 #endif
 };
+#endif
 
+#if 0 /* #if defined(SAMA5_HAVE_POSITION) && defined(SAMA5_HAVE_SIZE) -- not used */
 static const uintptr_t g_layerstatus[LCDC_NLAYERS] =
 {
   SAM_LCDC_BASECHSR,
@@ -841,6 +844,7 @@ static const uintptr_t g_layerstatus[LCDC_NLAYERS] =
   , SAM_LCDC_HCRCHSR
 #endif
 };
+#endif
 
 static const uintptr_t g_layerblend[LCDC_NLAYERS] =
 {
@@ -908,6 +912,7 @@ static const uintptr_t g_layercfg[LCDC_NLAYERS] =
 #endif
 };
 
+#if 0 /* Not used */
 static const uintptr_t g_layercolor[LCDC_NLAYERS] =
 {
   SAM_LCDC_BASECFG1,
@@ -918,6 +923,7 @@ static const uintptr_t g_layercolor[LCDC_NLAYERS] =
   , SAM_LCDC_HCRCFG1
 #endif
 };
+#endif
 
 #ifdef SAMA5_HAVE_POSITION
 static const uintptr_t g_layerpos[LCDC_NLAYERS] =
