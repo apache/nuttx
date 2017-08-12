@@ -1238,7 +1238,7 @@ static void spirit_interrupt_work(FAR void *arg)
       DEBUGVERIFY(spirit_management_rxstrobe(spirit));
       DEBUGVERIFY(spirit_command(spirit, CMD_RX));
 
-      if (priv->state == DRIVER_STATE_SENDING);
+      if (priv->state == DRIVER_STATE_SENDING)
         {
           priv->state = DRIVER_STATE_IDLE;
         }

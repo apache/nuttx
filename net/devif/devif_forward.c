@@ -90,6 +90,8 @@ void devif_forward(FAR struct forward_s *fwd)
 
   fwd->f_dev->d_sndlen = 0;
   fwd->f_dev->d_len    = offset;
+
+  UNUSED(ret);
 }
 
 #endif /* CONFIG_NET_IPFORWARD */
