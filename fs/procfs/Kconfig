@@ -63,7 +63,7 @@ config FS_PROCFS_EXCLUDE_NET
 	depends on NET
 	default n
 
-config FS_PROC_EXCLUDE_ROUTE
+config FS_PROCFS_EXCLUDE_ROUTE
 	bool "Exclude routing table"
 	depends on !FS_PROCFS_EXCLUDE_NET && NET_ROUTE
 	default n

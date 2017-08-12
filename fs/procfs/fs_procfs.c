@@ -130,7 +130,6 @@ static const struct procfs_entry_s g_procfs_entries[] =
 #endif
 
 #if defined(CONFIG_FS_SMARTFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
-//{ "fs/smartfs",    &smartfs_procfsoperations,   PROCFS_DIR_TYPE    },
   { "fs/smartfs**",  &smartfs_procfsoperations,   PROCFS_UNKOWN_TYPE },
 #endif
 
