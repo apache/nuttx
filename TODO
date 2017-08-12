@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated June 18, 2017)
+NuttX TODO List (Last updated August 12, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -2061,7 +2061,7 @@ o Build system
                  AR: phase that adds each of the file to the .a archive file.  As
                  each file is added to archive, the timestamp of the of archive is
                  updated to the current time.  After the first .o file has been
-                 added, then archive file will have a newly timestamp than any of
+                 added, then archive file will have a newer timestamp than any of
                  the newly compiled .o file.
 
                - If the user aborts with control-C during this AR: phase, then we
@@ -2074,10 +2074,18 @@ o Build system
                file will never be added to the archive until the directory is cleaned
                or some other dependency changes.
 
-               UPDATE: There is another way that Control-C can break dependencies:
+               NOTE: This may not really be an issue because the the timestamp on
+               libapps.a is not really used but rather the timestamp on an empty
+               file:
+
+               .built: $(OBJS)
+                   $(call ARCHIVE, $(BIN), $(OBJS))
+                   $(Q) touch $@
+
+               UPDATE: But there is another way that Control-C can break dependencies:
                If you control-c out of the make during the apps/ part of the build,
-               the archive at apps/libapps.a is deleted.  You can see this in the
-               make outout, for example:
+               the archive at apps/libapps.a is deleted (but all of the .built files
+               remain in place).  You can see this in the make outout, for example:
 
                  CC:  ieee802154_getsaddr.c
                  make[2]: *** [Makefile:104: ieee802154_getsaddr.o] Interrupt
@@ -2086,12 +2094,20 @@ o Build system
                When you rebuild the system, the first file archived will recreate
                libapps.a and set the timestamp to the current time.  Then, none of
                the other object files will be added to the archive because they are
-               all older.
+               all older.. or, more correctly, none of the other object files will
+               be addred because .built files remained and say that there is no
+               need to update the libapps.a file.
 
                The typical symptom of such an issue is a link time error like:
 
                  LD: nuttx libsched.a(os_bringup.o): In function `os_bringup':
                  os_bringup.c:(.text+0x34): undefined reference to `nsh_main'
+
+               This is becuase the libapps.a file was deleted and an new empty
+               libapps.a file was created (which the object containing nsh_main()).
+               The object containing nsh_main() will not be added because the
+               .built file exists and says that there is not need to add the
+               nsh_main() object to libapps.a.
 
                The work-around for now is:
 
@@ -2108,39 +2124,15 @@ o Build system
                have binary incompatiblies in the code taken from the out-of-sync
                archives and cost a lot of debug time before you realize the issue.
 
-               A work-around is to do 'make clean' if you ever decide to control-C
-               out of a make.  A couple of solutions have been considered:
+               The first stated problem is not really an issue:  There is already
+               the spurious .built file that should handle the described case:
+               If you control-C out of the build then the timestamp on the .built
+               file will not be updated and the archiving should be okay on the
+               next build.
 
-               - Currently, there is a sequence of compilations ins a directory
-                 with messages like CC:, CC:, CC: etc. This is followed by one big
-                 archival AR:
-
-                 The window in which the control-C problem can occur could be
-                 minimized (but not eliminated) by performing a archival for each
-                 compiliation like CC: AR:, CC: AR:, etc.
-
-               - Introduce a spurious dependency that has the correct time stamp.
-                 For example given Make like like (from nuttx/sched/Makefile):
-
-                   $(BIN): $(OBJS)
-                       $(call ARCHIVE, $@, $(OBJS))
-
-                 Could be changed like:
-
-                  .archive: $(OBJS)
-                       $(call ARCHIVE, $@, $(OBJS))
-                       @touch .archive
-
-                   $(BIN): .archive
-
-                 .archive would be a totally spurious file that is touched only AFTER
-                 ALL .o files have been archived. Thus is the user control-C's out of
-                 the make during the archival, the timestamp on .archive is not
-                 updated.
-
-                 The .archive file would have to be removed on 'make clean' and would
-                 also need to appear in .gitignore files.
-
+               A work-around for the second stated problem is to do 'make clean'
+               if you ever decide to control-C out of a make and see that the
+               libapps.a file was deleted.
 
 o Other drivers (drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^
