@@ -2134,6 +2134,24 @@ o Build system
                if you ever decide to control-C out of a make and see that the
                libapps.a file was deleted.
 
+               UPDATE:  This is a potential fix for the second problem in place
+               in apps/Application.mk.  That is include by most (but not all)
+               lower-level Makefiles.  This fix is:
+
+                  --- a/Application.mk
+                  +++ b/Application.mk
+                  @@ -70,6 +70,7 @@ VPATH =
+
+                  all: .built
+                  .PHONY: clean preconfig depend distclean
+                 +.PRECIOUS: $(BIN)
+
+                  $(AOBJS): %$(OBJEXT): %.S
+                         $(call ASSEMBLE, $<, $@)
+
+                It has not yet been confirmed that this fix totally eliminates
+                the issue.
+
 o Other drivers (drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^
 
