@@ -61,9 +61,9 @@
 
 //void operator delete(FAR void *ptr, std::size_t size)
 #ifdef CONFIG_CXX_NEWLONG
-void operator delete(FAR void *ptr, unsigned long nbytes)
+void operator delete(FAR void *ptr, unsigned long size)
 #else
-void operator delete(FAR void *ptr, unsigned int nbytes)
+void operator delete(FAR void *ptr, unsigned int size)
 #endif
 {
   lib_free(ptr);

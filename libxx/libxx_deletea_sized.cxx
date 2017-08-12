@@ -1,7 +1,7 @@
 //***************************************************************************
-// libxx/libxx_deletea.cxx
+// libxx/libxx_deletea_sized.cxx
 //
-//   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+//   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 //   Author: Gregory Nutt <gnutt@nuttx.org>
 //
 // Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,12 @@
 // Name: delete[]
 //***************************************************************************
 
-void operator delete[](void *ptr)
+//void operator delete[](void *ptr std::size_t size)
+#ifdef CONFIG_CXX_NEWLONG
+void operator delete[](FAR void *ptr, unsigned long size)
+#else
+void operator delete[](FAR void *ptr, unsigned int size)
+#endif
 {
   lib_free(ptr);
 }
