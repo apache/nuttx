@@ -2135,22 +2135,12 @@ o Build system
                libapps.a file was deleted.
 
                UPDATE:  This is a potential fix for the second problem in place
-               in apps/Application.mk.  That is include by most (but not all)
-               lower-level Makefiles.  This fix is:
+               in in all Makefiles under apps/.  This fix adds
 
-                  --- a/Application.mk
-                  +++ b/Application.mk
-                  @@ -70,6 +70,7 @@ VPATH =
+                 .PRECIOUS: $(BIN)
 
-                  all: .built
-                  .PHONY: clean preconfig depend distclean
-                 +.PRECIOUS: $(BIN)
-
-                  $(AOBJS): %$(OBJEXT): %.S
-                         $(call ASSEMBLE, $<, $@)
-
-                It has not yet been confirmed that this fix totally eliminates
-                the issue.
+               to all Makefiles.  It has not yet been confirmed that this fix
+               eliminates the dependency issue or not.
 
 o Other drivers (drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^

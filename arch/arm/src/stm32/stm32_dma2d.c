@@ -268,6 +268,7 @@ static const uintptr_t stm32_color_layer_t[DMA2D_NLAYERS] =
   STM32_DMA2D_OCOLR
 };
 
+#ifdef CONFIG_STM32_DMA2D_L8
 /* DMA2D clut memory address register */
 
 static const uintptr_t stm32_cmar_layer_t[DMA2D_NLAYERS - 1] =
@@ -275,6 +276,7 @@ static const uintptr_t stm32_cmar_layer_t[DMA2D_NLAYERS - 1] =
   STM32_DMA2D_FGCMAR,
   STM32_DMA2D_BGCMAR
 };
+#endif
 
 /****************************************************************************
  * Private Function Prototypes

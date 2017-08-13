@@ -263,8 +263,9 @@ static const uintptr_t stm32_color_layer_t[DMA2D_NLAYERS] =
   STM32_DMA2D_OCOLR
 };
 
-/* DMA2D clut memory address register */
 #if defined(CONFIG_STM32F7_DMA2D_L8)
+/* DMA2D clut memory address register */
+
 static const uintptr_t stm32_cmar_layer_t[DMA2D_NLAYERS - 1] =
 {
   STM32_DMA2D_FGCMAR,

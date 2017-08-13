@@ -113,7 +113,9 @@ static void stm32_backlight(FAR struct ssd1289_lcd_s *dev, int power);
 
 /* Initialization */
 
+#ifndef CONFIG_LCD_NOGETRUN
 static void stm32_lcdinput(FAR struct stm32_lower_s *priv);
+#endif
 static void stm32_lcdoutput(FAR struct stm32_lower_s *priv);
 
 /************************************************************************************
@@ -438,6 +440,7 @@ static void stm32_backlight(FAR struct ssd1289_lcd_s *dev, int power)
  *
  ************************************************************************************/
 
+#ifndef CONFIG_LCD_NOGETRUN
 static void stm32_lcdinput(FAR struct stm32_lower_s *priv)
 {
 #ifndef CONFIG_LCD_FASTCONFIG
@@ -464,6 +467,7 @@ static void stm32_lcdinput(FAR struct stm32_lower_s *priv)
       priv->output = false;
     }
 }
+#endif
 
 /************************************************************************************
  * Name:  stm32_lcdoutput

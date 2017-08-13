@@ -158,16 +158,6 @@ struct sam_xdmac_s
  * Private Data
  ****************************************************************************/
 
-/* Channel Control (CC) Register field lookups */
-
-static const uint32_t g_chanwidth[4] =
-{
-  XDMACH_CC_DWIDTH_BYTE,
-  XDMACH_CC_DWIDTH_HWORD,
-  XDMACH_CC_DWIDTH_WORD,
-  XDMACH_CC_DWIDTH_DWORD
-};
-
 /* These tables map peripheral IDs to channels.  A lookup is performed
  * before each DMA transfer in order to map the peripheral IDs to the
  * correct channel.  This must be done because the channel can change with
