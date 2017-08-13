@@ -41,7 +41,7 @@ ENVIRONMENTS
 ^^^^^^^^^^^^
 
   NuttX requires a POSIX development environment such as you would find under
-  Linux or OSX.  NuttX may be also be installed and built on Windows system
+  Linux or OSX.  NuttX may also be installed and built on Windows system
   if you also provide such a POSIX development environment.  Options for a
   POSIX development environment under Windows include:
 
@@ -56,7 +56,7 @@ ENVIRONMENTS
     - The Cygwin environment.  Instructions for installation of Cygwin on a
       Windows system are provided in the following paragraph, "Installing
       Cygwin".  Cygwin is a mature, well-tested, and very convenient
-      environment.  It is especially especially convenient if you  need to
+      environment.  It is especially convenient if you  need to
       integrate with Windows tools and files.  Downsides are that the
       installation time is very long and the compile times are slow.
 
@@ -181,7 +181,7 @@ Ubuntu Bash under Windows 10
   Accessing Windows Files from Ubuntu
   -----------------------------------
   File systems will be mounted under "/mnt" so for example "C:\Program Files"
-  appears at "/mnt/c/Program Files".  This is as opposed to Cgwin where
+  appears at "/mnt/c/Program Files".  This is as opposed to Cygwin where
   the same directory would appear at "/cygdrive/c/Program Files".
 
   With these differences (perhaps a few other Windows quirks) the Ubuntu
@@ -244,10 +244,10 @@ Ubuntu Bash under Windows 10
 
   NOTE: That is just an example.  I am not sure if apt-get will give you a
   current or usable compiler.  You should carefully select your toolchain
-  for the needs of your project.]
+  for the needs of your project.
 
-  You will also need to the get the kconfig-frontends configuration as
-  described below under "NuttX Configuration tool".  In order build the
+  You will also need to get the kconfig-frontends configuration as
+  described below under "NuttX Configuration tool".  In order to build the
   kconfig-frontends configuration tool you will also need:  make, gperf,
   flex, bison, and libncurses-dev.
 
@@ -314,12 +314,12 @@ Semi-Optional apps/ Package
   own product application directory, then you may not need the apps
   tarball.
 
-  It is call "Semi-optional" because if you don't have some apps/
+  It is called "Semi-optional" because if you don't have some apps/
   directory, NuttX will *fail* to build! You do not necessarily need
   to use the NuttX apps tarball but may, instead, provide your own
   custom application directory.  Such a custom directory would need
   to include a valid Makefile to support the build and a valid Kconfig
-  file to support the configuration.  More about these file later.
+  file to support the configuration.  More about these files later.
 
   Download then unpack the apps tarball in the same directory where you
   unpacked the NuttX tarball.  After you unpack the apps tarball, you
@@ -350,7 +350,7 @@ Installation Directories with Spaces in the Path
   names like: "/home/First Last". That will cause strange errors when
   the make system tries to build.
 
-  [Actually, that problem is probably not to difficult to fix.  Some
+  [Actually, that problem is probably not too difficult to fix.  Some
    Makefiles probably just need some paths within double quotes]
 
   I work around spaces in the home directory name, by creating a
@@ -418,7 +418,7 @@ Related Repositories
 
     This directory holds an optional package of applications and libraries
     can be used with the NuttX RTOS.  There is a README.txt file there that
-    will provide a more information about that package.
+    will provide more information about that package.
 
   * https://bitbucket.org/nuttx/nxwidgets
 
@@ -476,7 +476,7 @@ Notes about Header Files
     other, incompatible C library distribution (such as newlib).  Those
     tools will have incorporated the incompatible C library header files
     as part of the toolchain.  These incompatible header files must *not*
-    be used with NuttX because the will conflict with definitions in the
+    be used with NuttX because they will conflict with definitions in the
     NuttX built-in C-Library.  For such toolchains that include header
     files from a foreign C-Library, NuttX must be compiled without using
     the standard header files that are distributed with your toolchain.
@@ -511,7 +511,7 @@ Notes about Header Files
     need to use the math library, libm.a.  NuttX supports a generic, built-in
     math library that can be enabled using CONFIG_LIBM=y.  However, you may
     still want to use a higher performance external math library that has
-    been tuned for your CPU.  Sometimes such such tuned math libraries are
+    been tuned for your CPU.  Sometimes such tuned math libraries are
     bundled with your toolchain.
 
     The math library header file, math.h, is a then special case.  If you do
@@ -538,16 +538,16 @@ Notes about Header Files
     The float.h header file defines the properties of your floating point
     implementation.  It would always be best to use your toolchain's float.h
     header file but if none is available, a default float.h header file will
-    provided if this option is selected.  However, there is no assurance that
-    the settings in this float.h are actually correct for your platform!
+    be provided if this option is selected.  However, there is no assurance
+    that the settings in this float.h are actually correct for your platform!
 
   stdarg.h
 
     In most cases, the correct version of stdarg.h is the version provided
-    with your toolchain.  However, sometimes there are issues with with
+    with your toolchain.  However, sometimes there are issues with
     using your toolchains stdarg.h.  For example, it may attempt to draw in
     header files that do not exist in NuttX or perhaps the header files that
-    is uses are not compatible with the NuttX header files.  In those cases,
+    it uses are not compatible with the NuttX header files.  In those cases,
     you can use an architecture-specific stdarg.h header file by defining
     CONFIG_ARCH_STDARG_H=y.
 
@@ -568,9 +568,9 @@ Instantiating "Canned" Configurations
 
     Where <board-name> is the name of your development board and <config-dir>
     is the name of the sub-directory containing a specific configuration for
-    that board.  Only a few steps required to instantiate a NuttX
+    that board.  Only a few steps are required to instantiate a NuttX
     configuration, but to make the configuration even easier there are
-   scripts available in the tools/ sub-directory combines those simple steps
+    scripts available in the tools/ sub-directory combines those simple steps
     into one command.
 
     There is one tool for use with any Bash-like shell that does configuration
@@ -583,7 +583,7 @@ Instantiating "Canned" Configurations
 
       tools\configure.bat <board-name>\<config-dir>
 
-    And, to make sure that other platform is supported, there is also a
+    And, to make sure that other platforms are supported, there is also a
     C program at tools/configure.c that can be compiled to establish the
     board configuration.
 
@@ -609,7 +609,7 @@ Instantiating "Canned" Configurations
         OR
         Copy configs/<board-name>/scripts/Make.def to{TOPDIR}/Make.defs
 
-      Make.defs describes the rules needed by you tool chain to compile
+      Make.defs describes the rules needed by your tool chain to compile
       and link code.  You may need to modify this file to match the
       specific needs of your toolchain.  NOTE that a configuration may
       have its own unique Make.defs file in its configuration directory or
@@ -623,7 +623,7 @@ Instantiating "Canned" Configurations
       included in the build and what is not.  This file is also used
       to generate a C configuration header at include/nuttx/config.h.
 
-        Copy other, environment-specific files to{TOPDIR
+        Copy other, environment-specific files to{TOPDIR}
 
       This might include files like .gdbinit or IDE configuration files
       like .project or .cproject.
@@ -637,7 +637,7 @@ Instantiating "Canned" Configurations
       NOTE:  NuttX uses only compressed defconfig files.  For the NuttX
       defconfig files, this refrshing step is *NOT* optional; it is also
       necessary to uncompress and regenerate the full making file.  This is
-      dicussed further below.
+      discussed further below.
 
 Refreshing Configurations
 -------------------------
@@ -656,7 +656,7 @@ Refreshing Configurations
   NuttX directory; 'make oldconfig' step will then operate on that .config
   file to bring it up-to-date.
 
-  If you configuration is out of date, you will be prompted by 'make oldconfig'
+  If your configuration is out of date, you will be prompted by 'make oldconfig'
   to resolve the issues detected by the configuration tool, that is, to
   provide values for the new configuration options in the build system.  Doing
   this can save you a lot of problems down the road due to obsolete settings in
@@ -671,9 +671,9 @@ Refreshing Configurations
   recommended default value for each new configuration item, an even easier
   way is:
 
-    make oldefconfig
+    make olddefconfig
 
-  The olddefconfig target will simply bring you configuration up to date with
+  The olddefconfig target will simply bring your configuration up to date with
   the current Kconfig files, setting any new options to the default value.
   No questions asked.
 
@@ -731,7 +731,7 @@ NuttX Configuration Tool
 
      The kconfig-frontends tools will not build in a native Windows
      environment directly "out-of-the-box".  For the Windows native
-     case, you should should the modified version of kconfig-frontends
+     case, you should use the modified version of kconfig-frontends
      that can be found at
      http://uvc.de/posts/linux-kernel-configuration-tool-mconf-under-windows.html
 
@@ -768,7 +768,7 @@ NuttX Configuration Tool
 
     - 'Z' can be used to reveal hidden configuration options
 
-  These last to shortcuts are described further in the following
+  These last two shortcuts are described further in the following
   paragraphs.
 
 Finding Selections in the Configuration Menus
@@ -798,14 +798,14 @@ Reveal Hidden Configuration Options
   is not displayed.
 
   But if you enter 'Z', then every option will be shown, whether or not its
-  dependencies have been met.  You can the see everything that could be
+  dependencies have been met.  You can then see everything that could be
   selected with the right dependency selections.  These additional options
   will be shown the '-' for the selection and for the value (since it
   cannot be selected and has no value).  About all you do is to select
   the <Help> option to see what the dependencies are.
 
-Make Sure that You on on the Right Platform
--------------------------------------------
+Make Sure that You are on the Right Platform
+--------------------------------------------
 
   Saved configurations may run on Linux, Cygwin (32- or 64-bit), or other
   platforms.  The platform characteristics can be changed use 'make
@@ -834,7 +834,10 @@ Make Sure that You on on the Right Platform
 
     tools/sethost.sh -h
 
-  Recently, the options to the configure.sh (and configure.bat) scripts have been extended so that you both setup the configuration, select for the host platform that you use, and uncompress and refresh the defconfig file all in one command like:
+  Recently, the options to the configure.sh (and configure.bat) scripts have
+  been extended so that you both setup the configuration, select for the host
+  platform that you use, and uncompress and refresh the defconfig file all in
+  one command like:
 
     tools/configure.sh -l board/configuration
 
@@ -850,23 +853,23 @@ Make Sure that You on on the Right Platform
 Comparing Two Configurations
 ----------------------------
 
-  If you try to compare to configurations using 'diff', you will probably
+  If you try to compare two configurations using 'diff', you will probably
   not be happy with the result.  There are superfluous things added to
-  the configuration files that makes comparisons with the human eye
+  the configuration files that make comparisons with the human eye
   difficult.
 
-  There is a tool at nuttx/tools/cmpconfig.c that can be build to simplify
-  these comparisons.  The output from this difference tools will show only
-  the meaningful differences between two configuration files.  This tools
+  There is a tool at nuttx/tools/cmpconfig.c that can be built to simplify
+  these comparisons.  The output from this difference tool will show only
+  the meaningful differences between two configuration files.  This tool is
   built as follows:
 
     cd nuttx/tools
     make -f Makefile.host
 
-  This will crate a program called 'cmpconfig' or 'comconfig.exe' on Windows.
+  This will create a program called 'cmpconfig' or 'comconfig.exe' on Windows.
 
   Why would you want to compare two configuration files?  Here are a few
-  of reasons why I do this:
+  of the reasons why I do this
 
   1. When I create a new configuration I usually base it on an older
      configuration and I want to know, "What are the options that I need to
@@ -877,7 +880,7 @@ Comparing Two Configurations
      boardB/nxwm I can see the modifications that I would need to make to my
      boardA/nsh to create a new  boardA/nxwm.
 
-  2. But the most common reason that I use the 'cmpconfig' program to to
+  2. But the most common reason that I use the 'cmpconfig' program is to
      check the results of "refreshing" a configuration with 'make oldconfig'
      (see the paragraph "Refreshing Configurations" above).  The 'make
      oldconfig' command will make changes to my configuration and using
@@ -967,7 +970,7 @@ Making defconfig Files
     Using this command after configuring is generally a good practice anyway:
     Even if the defconfig files are not "compressed" in this fashion, the
     defconfig file may be old and the only way to assure that the installed
-    .config is is uptodate is via 'make oldconfig' or 'make olddefconfig'.
+    .config is is up to date is via 'make oldconfig' or 'make olddefconfig'.
     See the paragraph above entitled ""Refreshing Configurations" for
     additional information.
 
@@ -978,8 +981,8 @@ Incompatibilities with Older Configurations
 
   The current NuttX build system supports *only* the new compressed,
   defconfig configuration files generated using the kconfig-frontends tools
-  as described in the preceding secition.  Support for the older, legacy,
-  manual configurations was eliminated in NuttX 7.0; suppport for
+  as described in the preceding section.  Support for the older, legacy,
+  manual configurations was eliminated in NuttX 7.0; support for
   uncompressed .config-files-as-defconfig files was eliminated after
   NuttX-7.21.  All configurations must now be done using the
   kconfig-frontends tool.  The older manual configurations and the new
@@ -1004,8 +1007,8 @@ Incompatibilities with Older Configurations
   ***** WARNING *****
 
   As described above, whenever you use a configuration, you really should
-  always refresh the configuration the following command *before* you make
-  NuttX:
+  always refresh the configuration with the following command *before* you
+  make NuttX:
 
     make oldconfig
 
@@ -1099,7 +1102,7 @@ NuttX Buildroot Toolchain
   unpacking the buildroot tarball, you can find instructions for building
   the tools in the buildroot/configs/README.txt file.
 
-  Check the README.txt file in the configuration director for your board
+  Check the README.txt file in the configuration directory for your board
   to see if you can use the buildroot toolchain with your board (this
   README.txt file is located in configs/<board-name>/README.txt).
 
@@ -1472,7 +1475,7 @@ General Pre-built Toolchain Issues
   the NuttX buildroot package):
 
   There may be incompatibilities with header files, libraries, and compiler
-  built-in functions at detailed below.  For the most part, these issues
+  built-in functions detailed below.  For the most part, these issues
   are handled in the existing make logic.  But if you are breaking new ground,
   then you may encounter these:
 
@@ -1483,7 +1486,7 @@ General Pre-built Toolchain Issues
      you will get the stdio.h from the incompatible, foreign C library and
      not the nuttx stdio.h (at nuttx/include/stdio.h) that you wanted.
 
-     This can cause really confusion in the builds and you must always be
+     This can cause confusion in the builds and you must always be
      sure the -nostdinc is included in the CFLAGS.  That will assure that
      you take the include files only from
 
