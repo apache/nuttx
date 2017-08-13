@@ -61,7 +61,7 @@
 #define HSE_DIVISOR (STM32_HSE_FREQUENCY + 500000) / 1000000
 
 /* If CONFIG_STM32F7_DSIHOST is defined in the board configuration, then
- * STM32_RCC_DCKCFGR2_DSISRC must also be defined to selected the clock
+ * STM32_RCC_DCKCFGR2_DSISRC must also be defined to selecte the clock
  * source.
  */
 
