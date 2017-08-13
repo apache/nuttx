@@ -217,13 +217,7 @@ SMP
 
   Open Issues:
 
-  1. Currently all device interrupts are handled on the PRO CPU only.  Critical
-     sections will attempt to disable interrupts but will now disable interrupts
-     only on the current CPU (which may not be CPU0).  Perhaps that should be a
-     spinlock to prohibit execution of interrupts on CPU0 when other CPUs are in
-     a critical section?
-
-  2. Cache Issues.  I have not though about this yet, but certainly caching is
+  1. Cache Issues.  I have not though about this yet, but certainly caching is
      an issue in an SMP system:
 
      - Cache coherency.  Are there separate caches for each CPU?  Or a single
@@ -233,7 +227,7 @@ SMP
        Waiting on a cached copy of the spinlock may result in a hang or a
        failure to wait.
 
-  3. Assertions.  On a fatal assertions, other CPUs need to be stopped.
+  2. Assertions.  On a fatal assertions, other CPUs need to be stopped.
 
 OpenOCD for the ESP32
 =====================
@@ -760,3 +754,10 @@ Things to Do
      impelentation of esp32_configgpio() and/or gpio_matrix_out() when called from
      the setup logic in arch/xtensa/src/esp32/esp32_serial.c.  I am not inclined
      to invest a lot in driver debug until the clock configuration is finalized.
+
+     UPDATE:  This may have been fixed with PR 457:
+
+     https://bitbucket.org/nuttx/nuttx/pull-requests/457/
+       fix-esp32-gpio-enable-reg-and-default-uart/diff
+
+     That has not yet been verified.
