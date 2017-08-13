@@ -1,7 +1,7 @@
 //***************************************************************************
 // libxx/libxx_delete_sized.cxx
 //
-//   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+//   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 //   Author: Gregory Nutt <gnutt@nuttx.org>
 //
 // Redistribution and use in source and binary forms, with or without
