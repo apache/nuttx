@@ -112,9 +112,7 @@ extern "C"
  *
  ***********************************************************************************/
 
-#ifdef CONFIG_STM32F7_OTGFS_VBUS_CONTROL
 void stm32_usbhost_vbusdrive(int iface, bool enable);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
