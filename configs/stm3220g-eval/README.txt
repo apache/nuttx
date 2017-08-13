@@ -136,7 +136,7 @@ GNU Toolchain Options
   class processors, including:
 
     GCC ARM Embedded
-      https://launchpad.net/gcc-arm-embedded
+      https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
 
     Thumb2 Newlib Toolchain
       https://github.com/EliasOenal/TNT

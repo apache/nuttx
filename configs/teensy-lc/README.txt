@@ -9,7 +9,7 @@ Development Environment
 =======================
 
   All testing was done with the GNU ARM Embedded 4.9 toolchain on
-  Linux.  See https://launchpad.net/gcc-arm-embedded to download.
+  Linux.  See https://developer.arm.com/open-source/gnu-toolchain/gnu-rm to download.
 
   Once you've configured and built NuttX, flash the resulting
   nuttx.hex file to the board using the Teensy Loader Application.

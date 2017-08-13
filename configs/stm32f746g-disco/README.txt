@@ -488,7 +488,7 @@ Configurations
        "GNU Tools for ARM Embedded Processors" that is maintained by ARM
        (unless stated otherwise in the description of the configuration).
 
-         https://launchpad.net/gcc-arm-embedded
+         https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
 
        As of this writing (2015-03-11), full support is difficult to find
        for the Cortex-M7, but is supported by at least this realease of

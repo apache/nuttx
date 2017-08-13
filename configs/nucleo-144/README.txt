@@ -175,7 +175,7 @@ Development Environment
   toolchains will likely cause problems.
 
   All testing has been conducted using the GNU toolchain from ARM for Linux.
-  found here https://launchpad.net/gcc-arm-embedded/4.9/4.9-2015-q3-update/+download/gcc-arm-none-eabi-4_9-2015q3-20150921-linux.tar.bz2
+  found here https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/4.9/4.9-2015-q3-update/+download/gcc-arm-none-eabi-4_9-2015q3-20150921-linux.tar.bz2
 
   If you change the default toolchain, then you may also have to modify the
   PATH environment variable to include the path to the toolchain binaries.
