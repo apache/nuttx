@@ -102,7 +102,7 @@ int putenv(FAR const char *string)
       /* Then let setenv do all of the work */
 
       *pequal = '\0';
-      ret = setenv(pname, pequal+1, TRUE);
+      ret = setenv(pname, pequal + 1, TRUE);
     }
 
   kmm_free(pname);

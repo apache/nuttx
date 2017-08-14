@@ -176,7 +176,7 @@ static sigpendq_t *sig_allocatependingsignalblock(sq_queue_t *siglist,
   /* Allocate a block of pending signal structures  */
 
   sigpendalloc =
-     (FAR sigpendq_t *)kmm_malloc((sizeof(sigpendq_t)) * nsigs);
+    (FAR sigpendq_t *)kmm_malloc((sizeof(sigpendq_t)) * nsigs);
 
   sigpend = sigpendalloc;
   for (i = 0; i < nsigs; i++)
@@ -213,26 +213,26 @@ void sig_initialize(void)
   /* Add a block of signal structures to each list */
 
   g_sigpendingactionalloc =
-     sig_allocateblock(&g_sigpendingaction,
-                       NUM_PENDING_ACTIONS,
-                       SIG_ALLOC_FIXED);
+    sig_allocateblock(&g_sigpendingaction,
+                      NUM_PENDING_ACTIONS,
+                      SIG_ALLOC_FIXED);
 
   g_sigpendingirqactionalloc =
-     sig_allocateblock(&g_sigpendingirqaction,
-                       NUM_PENDING_INT_ACTIONS,
-                       SIG_ALLOC_IRQ);
+    sig_allocateblock(&g_sigpendingirqaction,
+                      NUM_PENDING_INT_ACTIONS,
+                      SIG_ALLOC_IRQ);
 
   sig_allocateactionblock();
 
   g_sigpendingsignalalloc =
-     sig_allocatependingsignalblock(&g_sigpendingsignal,
-                             NUM_SIGNALS_PENDING,
-                             SIG_ALLOC_FIXED);
+    sig_allocatependingsignalblock(&g_sigpendingsignal,
+                                   NUM_SIGNALS_PENDING,
+                                   SIG_ALLOC_FIXED);
 
   g_sigpendingirqsignalalloc =
-     sig_allocatependingsignalblock(&g_sigpendingirqsignal,
-                             NUM_INT_SIGNALS_PENDING,
-                             SIG_ALLOC_IRQ);
+    sig_allocatependingsignalblock(&g_sigpendingirqsignal,
+                                   NUM_INT_SIGNALS_PENDING,
+                                   SIG_ALLOC_IRQ);
 }
 
 /****************************************************************************
@@ -252,7 +252,7 @@ void sig_allocateactionblock(void)
   /* Allocate a block of signal actions */
 
   g_sigactionalloc =
-     (FAR sigactq_t *)kmm_malloc((sizeof(sigactq_t)) * NUM_SIGNAL_ACTIONS);
+    (FAR sigactq_t *)kmm_malloc((sizeof(sigactq_t)) * NUM_SIGNAL_ACTIONS);
 
   sigact = g_sigactionalloc;
   for (i = 0; i < NUM_SIGNAL_ACTIONS; i++)

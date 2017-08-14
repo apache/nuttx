@@ -37,43 +37,43 @@
  * Included Files
  ****************************************************************************/
 
-#include  <sys/types.h>
-#include  <stdbool.h>
-#include  <stdio.h>
-#include  <string.h>
-#include  <assert.h>
-#include  <debug.h>
+#include <sys/types.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
+#include <debug.h>
 
-#include  <nuttx/arch.h>
-#include  <nuttx/compiler.h>
-#include  <nuttx/sched.h>
-#include  <nuttx/fs/fs.h>
-#include  <nuttx/net/net.h>
-#include  <nuttx/lib/lib.h>
-#include  <nuttx/mm/mm.h>
-#include  <nuttx/mm/shm.h>
-#include  <nuttx/kmalloc.h>
-#include  <nuttx/sched_note.h>
-#include  <nuttx/syslog/syslog.h>
-#include  <nuttx/init.h>
+#include <nuttx/arch.h>
+#include <nuttx/compiler.h>
+#include <nuttx/sched.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/net/net.h>
+#include <nuttx/lib/lib.h>
+#include <nuttx/mm/mm.h>
+#include <nuttx/mm/shm.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/sched_note.h>
+#include <nuttx/syslog/syslog.h>
+#include <nuttx/init.h>
 
-#include  "sched/sched.h"
-#include  "signal/signal.h"
-#include  "wdog/wdog.h"
-#include  "semaphore/semaphore.h"
+#include "sched/sched.h"
+#include "signal/signal.h"
+#include "wdog/wdog.h"
+#include "semaphore/semaphore.h"
 #ifndef CONFIG_DISABLE_MQUEUE
-# include "mqueue/mqueue.h"
+#  include "mqueue/mqueue.h"
 #endif
 #ifndef CONFIG_DISABLE_PTHREAD
-# include "pthread/pthread.h"
+#  include "pthread/pthread.h"
 #endif
-#include  "clock/clock.h"
-#include  "timer/timer.h"
-#include  "irq/irq.h"
+#include "clock/clock.h"
+#include "timer/timer.h"
+#include "irq/irq.h"
 #ifdef HAVE_TASK_GROUP
-#include  "group/group.h"
+#  include "group/group.h"
 #endif
-#include  "init/init.h"
+#include "init/init.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -100,7 +100,7 @@
 
 /* This is the list of all tasks that are ready to run.  This is a
  * prioritized list with head of the list holding the highest priority
- * (unassigned) task.  In the non-SMP cae, the head of this list is the
+ * (unassigned) task.  In the non-SMP case, the head of this list is the
  * currently active task and the tail of this list, the lowest priority
  * task, is always the IDLE task.
  */
@@ -109,7 +109,7 @@ volatile dq_queue_t g_readytorun;
 
 #ifdef CONFIG_SMP
 /* In order to support SMP, the function of the g_readytorun list changes,
- * The g_readytorun is still used but in the SMP cae it will contain only:
+ * The g_readytorun is still used but in the SMP case it will contain only:
  *
  *  - Only tasks/threads that are eligible to run, but not currently running,
  *    and
@@ -488,7 +488,7 @@ void os_start(void)
        * the IDLE task.
        */
 
-     g_idletcb[cpu].cmn.affinity = SCHED_ALL_CPUS;
+      g_idletcb[cpu].cmn.affinity = SCHED_ALL_CPUS;
 #endif
 
 #if CONFIG_TASK_NAME_SIZE > 0
@@ -736,7 +736,7 @@ void os_start(void)
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
 #ifdef CONFIG_SMP
-     if (cpu > 0)
+      if (cpu > 0)
         {
           /* Clone stdout, stderr, stdin from the CPU0 IDLE task. */
 

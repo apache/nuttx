@@ -311,10 +311,10 @@ try_again:
           /* Normal tasking environment. */
           /* Do we already have interrupts disabled? */
 
-           rtcb = this_task();
-           DEBUGASSERT(rtcb != NULL);
+          rtcb = this_task();
+          DEBUGASSERT(rtcb != NULL);
 
-           if (rtcb->irqcount > 0)
+          if (rtcb->irqcount > 0)
             {
               /* Yes... make sure that the spinlock is set and increment the
                * IRQ lock count.
@@ -496,7 +496,7 @@ void leave_critical_section(irqstate_t flags)
             }
           else
             {
- #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
               /* No.. Note that we have left the critical section */
 
               sched_note_csection(rtcb, false);

@@ -42,8 +42,8 @@
 #include <time.h>
 
 #if CONFIG_RR_INTERVAL > 0
-# include <sched.h>
-# include <nuttx/arch.h>
+#  include <sched.h>
+#  include <nuttx/arch.h>
 #endif
 
 #include "sched/sched.h"

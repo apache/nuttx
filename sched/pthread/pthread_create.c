@@ -425,10 +425,10 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
    * parent thread's affinity mask.
    */
 
-   if (attr->affinity != 0)
-     {
-       ptcb->cmn.affinity = attr->affinity;
-     }
+  if (attr->affinity != 0)
+    {
+      ptcb->cmn.affinity = attr->affinity;
+    }
 #endif
 
   /* Configure the TCB for a pthread receiving on parameter
@@ -560,9 +560,9 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       /* Return the thread information to the caller */
 
       if (thread)
-       {
-         *thread = (pthread_t)pid;
-       }
+        {
+          *thread = (pthread_t)pid;
+        }
 
       if (!pjoin->started)
         {

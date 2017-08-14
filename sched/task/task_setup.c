@@ -398,7 +398,7 @@ static int thread_schedsetup(FAR struct tcb_s *tcb, int priority,
        * affinity mask in this case.
        */
 
-       task_inherit_affinity(tcb);
+      task_inherit_affinity(tcb);
 #endif
 
 #ifndef CONFIG_DISABLE_SIGNALS
@@ -592,10 +592,10 @@ static inline int task_stackargsetup(FAR struct task_tcb_s *tcb,
        * argument and its NUL terminator in the string buffer.
        */
 
-      stackargv[i+1] = str;
-      nbytes         = strlen(argv[i]) + 1;
+      stackargv[i + 1] = str;
+      nbytes           = strlen(argv[i]) + 1;
       strcpy(str, argv[i]);
-      str           += nbytes;
+      str             += nbytes;
     }
 
   /* Put a terminator entry at the end of the argv[] array.  Then save the

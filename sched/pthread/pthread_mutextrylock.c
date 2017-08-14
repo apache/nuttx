@@ -120,9 +120,9 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
           ret = OK;
         }
 
-       /* pthread_mutex_trytake failed.  Did it fail because the semaphore
-        * was not avaialable?
-        */
+      /* pthread_mutex_trytake failed.  Did it fail because the semaphore
+       * was not avaialable?
+       */
 
       else if (status == EAGAIN)
         {
@@ -147,55 +147,55 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
 #endif
 
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-          /* The calling thread does not hold the semaphore.  The correct
-           * behavior for the 'robust' mutex is to verify that the holder of
-           * the mutex is still valid.  This is protection from the case
-           * where the holder of the mutex has exitted without unlocking it.
-           */
+            /* The calling thread does not hold the semaphore.  The correct
+             * behavior for the 'robust' mutex is to verify that the holder of
+             * the mutex is still valid.  This is protection from the case
+             * where the holder of the mutex has exitted without unlocking it.
+             */
 
 #ifdef CONFIG_PTHREAD_MUTEX_BOTH
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
-          /* Check if this NORMAL mutex is robust */
+            /* Check if this NORMAL mutex is robust */
 
-          if (mutex->pid > 0 &&
-              ((mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 ||
-                mutex->type != PTHREAD_MUTEX_NORMAL) &&
-              sched_gettcb(mutex->pid) == NULL)
+            if (mutex->pid > 0 &&
+                ((mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 ||
+                 mutex->type != PTHREAD_MUTEX_NORMAL) &&
+                sched_gettcb(mutex->pid) == NULL)
 
 #else /* CONFIG_PTHREAD_MUTEX_TYPES */
-          /* Check if this NORMAL mutex is robust */
+            /* Check if this NORMAL mutex is robust */
 
-          if (mutex->pid > 0 &&
-              (mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 &&
-              sched_gettcb(mutex->pid) == NULL)
+            if (mutex->pid > 0 &&
+                (mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 &&
+                sched_gettcb(mutex->pid) == NULL)
 
 #endif /* CONFIG_PTHREAD_MUTEX_TYPES */
 #else /* CONFIG_PTHREAD_MUTEX_ROBUST */
-          /* This mutex is always robust, whatever type it is. */
+            /* This mutex is always robust, whatever type it is. */
 
-          if (mutex->pid > 0 && sched_gettcb(mutex->pid) == NULL)
+            if (mutex->pid > 0 && sched_gettcb(mutex->pid) == NULL)
 #endif
-            {
-              DEBUGASSERT(mutex->pid != 0); /* < 0: available, >0 owned, ==0 error */
-              DEBUGASSERT((mutex->flags & _PTHREAD_MFLAGS_INCONSISTENT) != 0);
+              {
+                DEBUGASSERT(mutex->pid != 0); /* < 0: available, >0 owned, ==0 error */
+                DEBUGASSERT((mutex->flags & _PTHREAD_MFLAGS_INCONSISTENT) != 0);
 
-              /* A thread holds the mutex, but there is no such thread.
-               * POSIX requires that the 'robust' mutex return EOWNERDEAD
-               * in this case. It is then the caller's responsibility to
-               * call pthread_mutx_consistent() fo fix the mutex.
-               */
+                /* A thread holds the mutex, but there is no such thread.
+                 * POSIX requires that the 'robust' mutex return EOWNERDEAD
+                 * in this case. It is then the caller's responsibility to
+                 * call pthread_mutx_consistent() fo fix the mutex.
+                 */
 
-              mutex->flags |= _PTHREAD_MFLAGS_INCONSISTENT;
-              ret           = EOWNERDEAD;
-            }
+                mutex->flags |= _PTHREAD_MFLAGS_INCONSISTENT;
+                ret           = EOWNERDEAD;
+              }
 
           /* The mutex is locked by another, active thread */
 
-          else
+            else
 #endif /* CONFIG_PTHREAD_MUTEX_UNSAFE */
-            {
-              ret = EBUSY;
-            }
+              {
+                ret = EBUSY;
+              }
         }
 
       /* Some other, unhandled error occurred */

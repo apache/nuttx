@@ -44,7 +44,7 @@
 #include  "sched/sched.h"
 
 #ifndef CONFIG_DISABLE_SIGNALS
-# include "signal/signal.h"
+#  include "signal/signal.h"
 #endif
 #include "task/task.h"
 

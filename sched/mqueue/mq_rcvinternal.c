@@ -295,9 +295,9 @@ ssize_t mq_doreceive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
 
       ASSERT(btcb);
 
-       btcb->msgwaitq = NULL;
-       msgq->nwaitnotfull--;
-       up_unblock_task(btcb);
+      btcb->msgwaitq = NULL;
+      msgq->nwaitnotfull--;
+      up_unblock_task(btcb);
 
       leave_critical_section(flags);
     }

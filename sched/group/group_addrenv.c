@@ -142,7 +142,7 @@ int group_addrenv(FAR struct tcb_s *tcb)
 
           oldgroup = group_findbygid(g_gid_current);
           DEBUGASSERT(oldgroup &&
-                     (oldgroup->tg_flags & GROUP_FLAG_ADDRENV) != 0);
+                      (oldgroup->tg_flags & GROUP_FLAG_ADDRENV) != 0);
 
           if (oldgroup)
             {

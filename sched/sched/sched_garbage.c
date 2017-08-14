@@ -73,8 +73,8 @@ static inline void sched_kucleanup(void)
    */
 
 #else
-   irqstate_t flags;
-   FAR void *address;
+  irqstate_t flags;
+  FAR void *address;
 
   /* Test if the delayed deallocation queue is empty.  No special protection
    * is needed because this is an atomic test.

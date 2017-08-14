@@ -333,23 +333,23 @@ int spawn_proxyattrs(FAR const posix_spawnattr_t *attr,
         {
           switch (entry->action)
             {
-            case SPAWN_FILE_ACTION_CLOSE:
-              ret = spawn_close((FAR struct spawn_close_file_action_s *)entry);
-              break;
+              case SPAWN_FILE_ACTION_CLOSE:
+                ret = spawn_close((FAR struct spawn_close_file_action_s *)entry);
+                break;
 
-            case SPAWN_FILE_ACTION_DUP2:
-              ret = spawn_dup2((FAR struct spawn_dup2_file_action_s *)entry);
-              break;
+              case SPAWN_FILE_ACTION_DUP2:
+                ret = spawn_dup2((FAR struct spawn_dup2_file_action_s *)entry);
+                break;
 
-            case SPAWN_FILE_ACTION_OPEN:
-              ret = spawn_open((FAR struct spawn_open_file_action_s *)entry);
-              break;
+              case SPAWN_FILE_ACTION_OPEN:
+                ret = spawn_open((FAR struct spawn_open_file_action_s *)entry);
+                break;
 
-            case SPAWN_FILE_ACTION_NONE:
-            default:
-              serr("ERROR: Unknown action: %d\n", entry->action);
-              ret = EINVAL;
-              break;
+              case SPAWN_FILE_ACTION_NONE:
+              default:
+                serr("ERROR: Unknown action: %d\n", entry->action);
+                ret = EINVAL;
+                break;
             }
         }
     }

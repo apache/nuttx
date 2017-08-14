@@ -201,10 +201,10 @@ int work_lpstart(void)
 
   for (wndx = 0; wndx < CONFIG_SCHED_LPNTHREADS; wndx++)
     {
-       pid = kernel_thread(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
-                           CONFIG_SCHED_LPWORKSTACKSIZE,
-                           (main_t)work_lpthread,
-                           (FAR char * const *)NULL);
+      pid = kernel_thread(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
+                          CONFIG_SCHED_LPWORKSTACKSIZE,
+                          (main_t)work_lpthread,
+                          (FAR char * const *)NULL);
 
       DEBUGASSERT(pid > 0);
       if (pid < 0)

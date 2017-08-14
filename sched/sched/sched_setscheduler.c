@@ -102,7 +102,7 @@ int sched_setscheduler(pid_t pid, int policy,
 #ifdef CONFIG_SCHED_SPORADIC
       && policy != SCHED_SPORADIC
 #endif
-    )
+     )
     {
       set_errno(EINVAL);
       return ERROR;

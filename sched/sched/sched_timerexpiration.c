@@ -45,8 +45,8 @@
 #include <debug.h>
 
 #if CONFIG_RR_INTERVAL > 0
-# include <sched.h>
-# include <nuttx/arch.h>
+#  include <sched.h>
+#  include <nuttx/arch.h>
 #endif
 
 #include "sched/sched.h"
@@ -54,7 +54,7 @@
 #include "clock/clock.h"
 
 #ifdef CONFIG_CLOCK_TIMEKEEPING
-# include "clock/clock_timekeeping.h"
+#  include "clock/clock_timekeeping.h"
 #endif
 
 #ifdef CONFIG_SCHED_TICKLESS

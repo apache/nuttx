@@ -345,49 +345,49 @@ int pthread_mutex_give(FAR struct pthread_mutex_s *mutex)
 #ifdef CONFIG_CANCELLATION_POINTS
 uint16_t pthread_disable_cancel(void)
 {
-   FAR struct tcb_s *tcb = this_task();
-   irqstate_t flags;
-   uint16_t old;
+  FAR struct tcb_s *tcb = this_task();
+  irqstate_t flags;
+  uint16_t old;
 
-   /* We need perform the following operations from within a critical section
-    * because it can compete with interrupt level activity.
-    */
+  /* We need perform the following operations from within a critical section
+   * because it can compete with interrupt level activity.
+   */
 
-   flags = enter_critical_section();
-   old = tcb->flags & (TCB_FLAG_CANCEL_PENDING | TCB_FLAG_NONCANCELABLE);
-   tcb->flags &= ~(TCB_FLAG_CANCEL_PENDING | TCB_FLAG_NONCANCELABLE);
-   leave_critical_section(flags);
-   return old;
+  flags = enter_critical_section();
+  old = tcb->flags & (TCB_FLAG_CANCEL_PENDING | TCB_FLAG_NONCANCELABLE);
+  tcb->flags &= ~(TCB_FLAG_CANCEL_PENDING | TCB_FLAG_NONCANCELABLE);
+  leave_critical_section(flags);
+  return old;
 }
 
 void pthread_enable_cancel(uint16_t cancelflags)
 {
-   FAR struct tcb_s *tcb = this_task();
-   irqstate_t flags;
+  FAR struct tcb_s *tcb = this_task();
+  irqstate_t flags;
 
-   /* We need perform the following operations from within a critical section
-    * because it can compete with interrupt level activity.
-    */
+  /* We need perform the following operations from within a critical section
+   * because it can compete with interrupt level activity.
+   */
 
-   flags = enter_critical_section();
-   tcb->flags |= cancelflags;
+  flags = enter_critical_section();
+  tcb->flags |= cancelflags;
 
-   /* What should we do if there is a pending cancellation?
-    *
-    * If the thread is executing with deferred cancellation, we need do
-    * nothing more; the cancellation cannot occur until the next
-    * cancellation point.
-    *
-    * However, if the thread is executing in asynchronous cancellation mode,
-    * then we need to terminate now by simply calling pthread_exit().
-    */
+  /* What should we do if there is a pending cancellation?
+   *
+   * If the thread is executing with deferred cancellation, we need do
+   * nothing more; the cancellation cannot occur until the next
+   * cancellation point.
+   *
+   * However, if the thread is executing in asynchronous cancellation mode,
+   * then we need to terminate now by simply calling pthread_exit().
+   */
 
-   if ((tcb->flags & TCB_FLAG_CANCEL_DEFERRED) == 0 &&
-       (tcb->flags & TCB_FLAG_CANCEL_PENDING) != 0)
-     {
-       pthread_exit(NULL);
-     }
+  if ((tcb->flags & TCB_FLAG_CANCEL_DEFERRED) == 0 &&
+      (tcb->flags & TCB_FLAG_CANCEL_PENDING) != 0)
+    {
+      pthread_exit(NULL);
+    }
 
-   leave_critical_section(flags);
+  leave_critical_section(flags);
 }
 #endif /* CONFIG_CANCELLATION_POINTS */

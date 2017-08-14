@@ -152,7 +152,7 @@ struct tasklist_s
 
 /* This is the list of all tasks that are ready to run.  This is a
  * prioritized list with head of the list holding the highest priority
- * (unassigned) task.  In the non-SMP cae, the head of this list is the
+ * (unassigned) task.  In the non-SMP case, the head of this list is the
  * currently active task and the tail of this list, the lowest priority
  * task, is always the IDLE task.
  */

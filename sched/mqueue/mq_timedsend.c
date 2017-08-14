@@ -331,19 +331,19 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
   leave_cancellation_point();
   return ret;
 
-/* Exit here with (1) the scheduler locked, (2) a message allocated, (3) a
- * wdog allocated, and (4) interrupts disabled.  The error code is in
- * 'result'
- */
+  /* Exit here with (1) the scheduler locked, (2) a message allocated, (3) a
+   * wdog allocated, and (4) interrupts disabled.  The error code is in
+   * 'result'
+   */
 
 errout_in_critical_section:
   leave_critical_section(flags);
   wd_delete(rtcb->waitdog);
   rtcb->waitdog = NULL;
 
-/* Exit here with (1) the scheduler locked and 2) a message allocated.  The
- * error code is in 'result'
- */
+  /* Exit here with (1) the scheduler locked and 2) a message allocated.  The
+   * error code is in 'result'
+   */
 
 errout_with_mqmsg:
   mq_msgfree(mqmsg);

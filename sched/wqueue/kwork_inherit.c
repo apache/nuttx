@@ -293,8 +293,8 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
                       wtcb->pend_reprios[index] = wtcb->pend_reprios[selected];
                     }
 
-                   wtcb->npend_reprio = selected;
-                   break;
+                  wtcb->npend_reprio = selected;
+                  break;
                 }
             }
         }

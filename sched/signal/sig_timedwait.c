@@ -97,10 +97,10 @@ static void sig_timeout(int argc, wdparm_t itcb)
    */
 
   union
-    {
-      FAR struct tcb_s *wtcb;
-      wdparm_t itcb;
-    } u;
+  {
+    FAR struct tcb_s *wtcb;
+    wdparm_t itcb;
+  } u;
 
   u.itcb = itcb;
   ASSERT(u.wtcb);
@@ -264,7 +264,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 #ifdef CONFIG_HAVE_LONG_LONG
           uint64_t waitticks64 = ((uint64_t)timeout->tv_sec * NSEC_PER_SEC +
                                   (uint64_t)timeout->tv_nsec + NSEC_PER_TICK - 1) /
-                                  NSEC_PER_TICK;
+                                 NSEC_PER_TICK;
           DEBUGASSERT(waitticks64 <= UINT32_MAX);
           waitticks = (uint32_t)waitticks64;
 #else
@@ -272,7 +272,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
           DEBUGASSERT(timeout->tv_sec < UINT32_MAX / MSEC_PER_SEC);
           waitmsec = timeout->tv_sec * MSEC_PER_SEC +
-                    (timeout->tv_nsec + NSEC_PER_MSEC - 1) / NSEC_PER_MSEC;
+                     (timeout->tv_nsec + NSEC_PER_MSEC - 1) / NSEC_PER_MSEC;
           waitticks = MSEC2TICK(waitmsec);
 #endif
 

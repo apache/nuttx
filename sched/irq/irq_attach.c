@@ -105,8 +105,8 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
            * unexpected exception handler.
            */
 
-           isr = irq_unexpected_isr;
-           arg = NULL;
+          isr = irq_unexpected_isr;
+          arg = NULL;
         }
 
       /* Save the new ISR and its argument in the table. */

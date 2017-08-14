@@ -200,7 +200,7 @@ int sched_lock(void)
         {
           /* Note that we have pre-emption locked */
 
-            sched_note_premption(rtcb, true);
+          sched_note_premption(rtcb, true);
         }
 #endif
 

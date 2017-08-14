@@ -162,7 +162,7 @@ errout:
   ret = kill((pid_t)thread, signo);
   if (ret != OK)
     {
-       ret = get_errno();
+      ret = get_errno();
     }
 
   return ret;

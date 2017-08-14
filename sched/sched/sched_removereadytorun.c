@@ -286,7 +286,7 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
           /* Release our hold on the IRQ lock. */
 
           spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
-                     &g_cpu_irqlock);
+                      &g_cpu_irqlock);
         }
 
       /* Sanity check.  g_cpu_netcount should be greater than zero

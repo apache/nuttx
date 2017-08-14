@@ -203,7 +203,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
 
           if (pexit_value)
             {
-             *pexit_value = pjoin->exit_value;
+              *pexit_value = pjoin->exit_value;
               sinfo("exit_value=0x%p\n", pjoin->exit_value);
             }
 

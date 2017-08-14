@@ -70,8 +70,8 @@ FAR sigactq_t *sig_findaction(FAR struct task_group_s *group, int signo)
       /* Seach the list for a sigaction on this signal */
 
       for (sigact = (FAR sigactq_t *)group->tg_sigactionq.head;
-          ((sigact) && (sigact->signo != signo));
-          sigact = sigact->flink);
+           ((sigact) && (sigact->signo != signo));
+           sigact = sigact->flink);
 
       sched_unlock();
     }

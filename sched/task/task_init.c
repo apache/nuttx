@@ -100,7 +100,7 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
 
 #ifndef CONFIG_DISABLE_PTHREAD
   DEBUGASSERT(tcb &&
-             (tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
+              (tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
 #endif
 
   /* Create a new task group */

@@ -467,7 +467,7 @@ static int sem_dumpholder(FAR struct semholder_s *pholder, FAR sem_t *sem,
 {
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
   _info("  %08x: %08x %08x %04x\n",
-      pholder, pholder->flink, pholder->htcb, pholder->counts);
+        pholder, pholder->flink, pholder->htcb, pholder->counts);
 #else
   _info("  %08x: %08x %04x\n", pholder, pholder->htcb, pholder->counts);
 #endif
@@ -530,7 +530,7 @@ static int sem_restoreholderprio(FAR struct tcb_s *htcb,
            */
 
           DEBUGASSERT(/* htcb->sched_priority == stcb->sched_priority && */
-                      htcb->npend_reprio == 0);
+            htcb->npend_reprio == 0);
 
           /* Reset the holder's priority back to the base priority. */
 
@@ -605,8 +605,8 @@ static int sem_restoreholderprio(FAR struct tcb_s *htcb,
                       htcb->pend_reprios[i] = htcb->pend_reprios[j];
                     }
 
-                   htcb->npend_reprio = j;
-                   break;
+                  htcb->npend_reprio = j;
+                  break;
                 }
             }
         }
@@ -632,7 +632,7 @@ static int sem_restoreholderprio(FAR struct tcb_s *htcb,
  ****************************************************************************/
 
 static int sem_restoreholderprioall(FAR struct semholder_s *pholder,
-                                  FAR sem_t *sem, FAR void *arg)
+                                    FAR sem_t *sem, FAR void *arg)
 {
   return sem_restoreholderprio(pholder->htcb, sem, arg);
 }
@@ -673,7 +673,7 @@ static int sem_restoreholderprioB(FAR struct semholder_s *pholder,
   if (pholder->htcb == rtcb)
     {
 
-   /* The running task has given up a count on the semaphore */
+      /* The running task has given up a count on the semaphore */
 
 #if CONFIG_SEM_PREALLOCHOLDERS == 0
       /* In the case where there are only 2 holders. This step
@@ -682,7 +682,7 @@ static int sem_restoreholderprioB(FAR struct semholder_s *pholder,
        * causes a context switch.
        */
 
-       sem_findandfreeholder(sem, rtcb);
+      sem_findandfreeholder(sem, rtcb);
 #endif
       (void)sem_restoreholderprio(rtcb, sem, arg);
       return 1;
@@ -861,12 +861,12 @@ void sem_initholders(void)
   /* Put all of the pre-allocated holder structures into the free list */
 
   g_freeholders = g_holderalloc;
-  for (i = 0; i < (CONFIG_SEM_PREALLOCHOLDERS-1); i++)
+  for (i = 0; i < (CONFIG_SEM_PREALLOCHOLDERS - 1); i++)
     {
-      g_holderalloc[i].flink = &g_holderalloc[i+1];
+      g_holderalloc[i].flink = &g_holderalloc[i + 1];
     }
 
-  g_holderalloc[CONFIG_SEM_PREALLOCHOLDERS-1].flink = NULL;
+  g_holderalloc[CONFIG_SEM_PREALLOCHOLDERS - 1].flink = NULL;
 #endif
 }
 
@@ -1012,7 +1012,7 @@ void sem_boostpriority(FAR sem_t *sem)
    * count.
    */
 
-   (void)sem_foreachholder(sem, sem_boostholderprio, rtcb);
+  (void)sem_foreachholder(sem, sem_boostholderprio, rtcb);
 }
 
 /****************************************************************************
@@ -1189,7 +1189,11 @@ int sem_nfreeholders(void)
   FAR struct semholder_s *pholder;
   int n;
 
-  for (pholder = g_freeholders, n = 0; pholder; pholder = pholder->flink) n++;
+  for (pholder = g_freeholders, n = 0; pholder; pholder = pholder->flink)
+    {
+      n++;
+    }
+
   return n;
 #else
   return 0;
