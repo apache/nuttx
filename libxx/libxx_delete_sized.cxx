@@ -37,9 +37,11 @@
 // Included Files
 //***************************************************************************
 
-#include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include "libxx.hxx"
+
+#ifdef CONFIG_HAVE_CXX14
 
 //***************************************************************************
 // Operators
@@ -68,3 +70,5 @@ void operator delete(FAR void *ptr, unsigned int size)
 {
   lib_free(ptr);
 }
+
+#endif /* CONFIG_HAVE_CXX14 */

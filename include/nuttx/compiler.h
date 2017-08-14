@@ -52,17 +52,17 @@
 
 /* Pre-processor */
 
-# define CONFIG_CPP_HAVE_VARARGS 1 /* Supports variable argument macros */
-# define CONFIG_CPP_HAVE_WARNING 1 /* Supports #warning */
+#  define CONFIG_CPP_HAVE_VARARGS 1 /* Supports variable argument macros */
+#  define CONFIG_CPP_HAVE_WARNING 1 /* Supports #warning */
 
 /* Intriniscs */
 
-# define CONFIG_HAVE_FUNCTIONNAME 1 /* Has __FUNCTION__ */
-# define CONFIG_HAVE_FILENAME     1 /* Has __FILE__ */
+#  define CONFIG_HAVE_FUNCTIONNAME 1 /* Has __FUNCTION__ */
+#  define CONFIG_HAVE_FILENAME     1 /* Has __FILE__ */
 
 /* Indicate that a local variable is not used */
 
-# define UNUSED(a) ((void)(a))
+#  define UNUSED(a) ((void)(a))
 
 /* Built-in functions */
 
@@ -74,6 +74,14 @@
 #if __GNUC__ >= 4
 #  define CONFIG_HAVE_BUILTIN_CTZ 1
 #  define CONFIG_HAVE_BUILTIN_CLZ 1
+#endif
+
+/* C++ support */
+
+#if __cplusplus == 201402L
+#  define CONFIG_HAVE_CXX14 1
+#else
+#  undef CONFIG_HAVE_CXX14
 #endif
 
 /* Attributes
@@ -97,45 +105,45 @@
 
 /* The noreturn attribute informs GCC that the function will not return. */
 
-# define noreturn_function __attribute__ ((noreturn))
+#  define noreturn_function __attribute__ ((noreturn))
 
 /* The farcall_function attribute informs GCC that is should use long calls
  * (even though -mlong-calls does not appear in the compilation options)
  */
 
-# define farcall_function __attribute__ ((long_call))
+#  define farcall_function __attribute__ ((long_call))
 
 /* The packed attribute informs GCC that the stucture elements are packed,
  * ignoring other alignment rules.
  */
 
-# define begin_packed_struct
-# define end_packed_struct __attribute__ ((packed))
+#  define begin_packed_struct
+#  define end_packed_struct __attribute__ ((packed))
 
 /* GCC does not support the reentrant attribute */
 
-# define reentrant_function
+#  define reentrant_function
 
 /* The naked attribute informs GCC that the programmer will take care of
  * the function prolog and epilog.
  */
 
-# define naked_function __attribute__ ((naked,no_instrument_function))
+#  define naked_function __attribute__ ((naked,no_instrument_function))
 
 /* The inline_function attribute informs GCC that the function should always
  * be inlined, regardless of the level of optimization.  The noinline_function
  * indicates that the function should never be inlined.
  */
 
-# define inline_function __attribute__ ((always_inline,no_instrument_function))
-# define noinline_function __attribute__ ((noinline))
+#  define inline_function __attribute__ ((always_inline,no_instrument_function))
+#  define noinline_function __attribute__ ((noinline))
 
-/* GCC has does not use storage classes to qualify addressing */
+/* GCC does not use storage classes to qualify addressing */
 
-# define FAR
-# define NEAR
-# define DSEG
-# define CODE
+#  define FAR
+#  define NEAR
+#  define DSEG
+#  define CODE
 
 /* Handle cases where sizeof(int) is 16-bits, sizeof(long) is 32-bits, and
  * pointers are 16-bits.
@@ -144,20 +152,20 @@
 #if defined(__m32c__)
 /* No I-space access qualifiers */
 
-# define IOBJ
-# define IPTR
+#  define IOBJ
+#  define IPTR
 
 /* Select the small, 16-bit addressing model */
 
-# define CONFIG_SMALL_MEMORY 1
+#  define CONFIG_SMALL_MEMORY 1
 
 /* Long and int are not the same size */
 
-# define CONFIG_LONG_IS_NOT_INT 1
+#  define CONFIG_LONG_IS_NOT_INT 1
 
 /* Pointers and int are the same size */
 
-# undef  CONFIG_PTR_IS_NOT_INT
+#  undef  CONFIG_PTR_IS_NOT_INT
 
 #elif defined(__AVR__)
 # if defined(CONFIG_AVR_HAS_MEMX_PTR)
@@ -175,15 +183,15 @@
 
 /* Select the small, 16-bit addressing model (for D-Space) */
 
-# define CONFIG_SMALL_MEMORY 1
+#  define CONFIG_SMALL_MEMORY 1
 
 /* Long and int are not the same size */
 
-# define CONFIG_LONG_IS_NOT_INT 1
+#  define CONFIG_LONG_IS_NOT_INT 1
 
 /* Pointers and int are the same size */
 
-# undef  CONFIG_PTR_IS_NOT_INT
+#  undef  CONFIG_PTR_IS_NOT_INT
 
 /* Uses a 32-bit FAR pointer only from accessing data outside of the 16-bit
  * data space.
@@ -194,12 +202,12 @@
 #elif defined(__mc68hc1x__)
 /* No I-space access qualifiers */
 
-# define IOBJ
-# define IPTR
+#  define IOBJ
+#  define IPTR
 
 /* Select the small, 16-bit addressing model */
 
-# define CONFIG_SMALL_MEMORY 1
+#  define CONFIG_SMALL_MEMORY 1
 
 /* Normally, mc68hc1x code is compiled with the -mshort option
  * which results in a 16-bit integer.  If -mnoshort is defined
@@ -228,38 +236,38 @@
 
 /* No I-space access qualifiers */
 
-# define IOBJ
-# define IPTR
+#  define IOBJ
+#  define IPTR
 
 /* Select the large, 32-bit addressing model */
 
-# undef  CONFIG_SMALL_MEMORY
+#  undef  CONFIG_SMALL_MEMORY
 
 /* Long and int are (probably) the same size (32-bits) */
 
-# undef  CONFIG_LONG_IS_NOT_INT
+#  undef  CONFIG_LONG_IS_NOT_INT
 
 /* Pointers and int are the same size (32-bits) */
 
-# undef  CONFIG_PTR_IS_NOT_INT
+#  undef  CONFIG_PTR_IS_NOT_INT
 #endif
 
 /* GCC supports inlined functions */
 
-# define CONFIG_HAVE_INLINE 1
+#  define CONFIG_HAVE_INLINE 1
 
 /* GCC supports both types double and long long */
 
-#ifndef __clang__
-# define CONFIG_HAVE_LONG_LONG 1
-#endif
-# define CONFIG_HAVE_FLOAT 1
-# define CONFIG_HAVE_DOUBLE 1
-# define CONFIG_HAVE_LONG_DOUBLE 1
+#  ifndef __clang__
+#    define CONFIG_HAVE_LONG_LONG 1
+#  endif
+#  define CONFIG_HAVE_FLOAT 1
+#  define CONFIG_HAVE_DOUBLE 1
+#  define CONFIG_HAVE_LONG_DOUBLE 1
 
 /* Structures and unions can be assigned and passed as values */
 
-# define CONFIG_CAN_PASS_STRUCTS 1
+#  define CONFIG_CAN_PASS_STRUCTS 1
 
 /* SDCC-specific definitions ************************************************/
 
@@ -267,13 +275,13 @@
 
 /* Pre-processor */
 
-# define CONFIG_CPP_HAVE_VARARGS 1 /* Supports variable argument macros */
-# define CONFIG_CPP_HAVE_WARNING 1 /* Supports #warning */
+#  define CONFIG_CPP_HAVE_VARARGS 1 /* Supports variable argument macros */
+#  define CONFIG_CPP_HAVE_WARNING 1 /* Supports #warning */
 
 /* Intriniscs */
 
-# define CONFIG_HAVE_FUNCTIONNAME 1 /* Has __FUNCTION__ */
-# define CONFIG_HAVE_FILENAME     1 /* Has __FILE__ */
+#  define CONFIG_HAVE_FUNCTIONNAME 1 /* Has __FUNCTION__ */
+#  define CONFIG_HAVE_FILENAME     1 /* Has __FILE__ */
 
 /* Pragmas
  *
@@ -281,41 +289,45 @@
 
 # pragma disable_warning 85
 
+/* C++ support */
+
+#  undef CONFIG_HAVE_CXX14
+
 /* Attributes
  *
  * SDCC does not support weak symbols */
 
-# undef  CONFIG_HAVE_WEAKFUNCTIONS
-# define weak_alias(name, aliasname)
-# define weak_function
-# define weak_const_function
-# define restrict /* REVISIT */
+#  undef  CONFIG_HAVE_WEAKFUNCTIONS
+#  define weak_alias(name, aliasname)
+#  define weak_function
+#  define weak_const_function
+#  define restrict /* REVISIT */
 
 /* SDCC does not support the noreturn or packed attributes */
 
-# define noreturn_function
-# define begin_packed_struct
-# define end_packed_struct
+#  define noreturn_function
+#  define begin_packed_struct
+#  define end_packed_struct
 
 /* REVISIT: */
 
-# define farcall_function
+#  define farcall_function
 
 /* SDCC does support "naked" functions */
 
-# define naked_function __naked
+#  define naked_function __naked
 
 /* SDCC does not support forced inlining. */
 
-# define inline_function
-# define noinline_function
+#  define inline_function
+#  define noinline_function
 
 /* The reentrant attribute informs SDCC that the function
  * must be reentrant.  In this case, SDCC will store input
  * arguments on the stack to support reentrancy.
  */
 
-# define reentrant_function __reentrant
+#  define reentrant_function __reentrant
 
 /* It is assumed that the system is build using the small
  * data model with storage defaulting to internal RAM.
@@ -342,37 +354,37 @@
 
 /* Select small, 16-bit address model */
 
-# define CONFIG_SMALL_MEMORY 1
+#  define CONFIG_SMALL_MEMORY 1
 
 /* Long and int are not the same size */
 
-# define CONFIG_LONG_IS_NOT_INT 1
+#  define CONFIG_LONG_IS_NOT_INT 1
 
 /* The generic pointer and int are not the same size
  * (for some SDCC architectures)
  */
 
 #if !defined(__z80) && !defined(__gbz80)
-# define CONFIG_PTR_IS_NOT_INT 1
+#  define CONFIG_PTR_IS_NOT_INT 1
 #endif
 
 /* SDCC does not support inline functions */
 
-# undef  CONFIG_HAVE_INLINE
-# define inline
+#  undef  CONFIG_HAVE_INLINE
+#  define inline
 
 /* SDCC does not support type long long or type double */
 
-# undef  CONFIG_HAVE_LONG_LONG
-# define CONFIG_HAVE_FLOAT 1
-# undef  CONFIG_HAVE_DOUBLE
-# undef  CONFIG_HAVE_LONG_DOUBLE
+#  undef  CONFIG_HAVE_LONG_LONG
+#  define CONFIG_HAVE_FLOAT 1
+#  undef  CONFIG_HAVE_DOUBLE
+#  undef  CONFIG_HAVE_LONG_DOUBLE
 
 /* Structures and unions cannot be passed as values or used
  * in assignments.
  */
 
-# undef  CONFIG_CAN_PASS_STRUCTS
+#  undef  CONFIG_CAN_PASS_STRUCTS
 
 /* Zilog-specific definitions ***********************************************/
 
@@ -386,46 +398,50 @@
 
 /* Pre-processor */
 
-# undef CONFIG_CPP_HAVE_VARARGS /* No variable argument macros */
-# undef CONFIG_CPP_HAVE_WARNING /* Does not support #warning */
+#  undef CONFIG_CPP_HAVE_VARARGS /* No variable argument macros */
+#  undef CONFIG_CPP_HAVE_WARNING /* Does not support #warning */
 
 /* Intrinsics */
 
-# define CONFIG_HAVE_FUNCTIONNAME 1 /* Has __FUNCTION__ */
-# define CONFIG_HAVE_FILENAME     1 /* Has __FILE__ */
+#  define CONFIG_HAVE_FUNCTIONNAME 1 /* Has __FUNCTION__ */
+#  define CONFIG_HAVE_FILENAME     1 /* Has __FILE__ */
 
 /* No I-space access qualifiers */
 
-# define IOBJ
-# define IPTR
+#  define IOBJ
+#  define IPTR
+
+/* C++ support */
+
+#  undef CONFIG_HAVE_CXX14
 
 /* Attributes
  *
  * The Zilog compiler does not support weak symbols
  */
 
-# undef  CONFIG_HAVE_WEAKFUNCTIONS
-# define weak_alias(name, aliasname)
-# define weak_function
-# define weak_const_function
-# define restrict
+#  undef  CONFIG_HAVE_WEAKFUNCTIONS
+#  define weak_alias(name, aliasname)
+#  define weak_function
+#  define weak_const_function
+#  define restrict
 
 /* The Zilog compiler does not support the noreturn, packed, naked attributes */
 
-# define noreturn_function
-# define begin_packed_struct
-# define end_packed_struct
-# define naked_function
-# define inline_function
-# define noinline_function
+#  define noreturn_function
+#  define begin_packed_struct
+#  define end_packed_struct
+#  define naked_function
+#  define inline_function
+#  define noinline_function
 
 /* REVISIT: */
 
-# define farcall_function
+#  define farcall_function
 
 /* The Zilog compiler does not support the reentrant attribute */
 
-# define reentrant_function
+#  define reentrant_function
 
 /* Addressing.
  *
@@ -471,8 +487,8 @@
 
 /* The Zilog compiler does not support inline functions */
 
-# undef  CONFIG_HAVE_INLINE
-# define inline
+#  undef  CONFIG_HAVE_INLINE
+#  define inline
 
 /* Older Zilog compilers support both types double and long long, but the size
  * is 32-bits (same as long and single precision) so it is safer to say that
@@ -480,92 +496,97 @@
  * simply do not support long long or double.
  */
 
-# undef  CONFIG_HAVE_LONG_LONG
-# define CONFIG_HAVE_FLOAT 1
-# undef  CONFIG_HAVE_DOUBLE
-# undef  CONFIG_HAVE_LONG_DOUBLE
+#  undef  CONFIG_HAVE_LONG_LONG
+#  define CONFIG_HAVE_FLOAT 1
+#  undef  CONFIG_HAVE_DOUBLE
+#  undef  CONFIG_HAVE_LONG_DOUBLE
 
 /* Structures and unions can be assigned and passed as values */
 
-# define CONFIG_CAN_PASS_STRUCTS 1
+#  define CONFIG_CAN_PASS_STRUCTS 1
 
 /* ICCARM-specific definitions ***********************************************/
 
 #elif defined(__ICCARM__)
 
-# define CONFIG_CPP_HAVE_VARARGS 1 /* Supports variable argument macros */
-# define CONFIG_HAVE_FILENAME 1 /* Has __FILE__ */
-# define CONFIG_HAVE_FLOAT 1
+#  define CONFIG_CPP_HAVE_VARARGS 1 /* Supports variable argument macros */
+#  define CONFIG_HAVE_FILENAME 1 /* Has __FILE__ */
+#  define CONFIG_HAVE_FLOAT 1
 
 /* Indicate that a local variable is not used */
 
-# define UNUSED(a) ((void)(a))
+#  define UNUSED(a) ((void)(a))
 
-# define weak_alias(name, aliasname)
-# define weak_function        __weak
-# define weak_const_function
-# define noreturn_function
-# define farcall_function
-# define begin_packed_struct  __packed
-# define end_packed_struct
-# define reentrant_function
-# define naked_function
-# define inline_function
-# define noinline_function
+#  define weak_alias(name, aliasname)
+#  define weak_function        __weak
+#  define weak_const_function
+#  define noreturn_function
+#  define farcall_function
+#  define begin_packed_struct  __packed
+#  define end_packed_struct
+#  define reentrant_function
+#  define naked_function
+#  define inline_function
+#  define noinline_function
 
-# define FAR
-# define NEAR
-# define DSEG
-# define CODE
-# define IPTR
+#  define FAR
+#  define NEAR
+#  define DSEG
+#  define CODE
+#  define IPTR
 
-# define __asm__       asm
-# define __volatile__  volatile
+#  define __asm__       asm
+#  define __volatile__  volatile
 
 /* For operatots __sfb() and __sfe() */
 
-# pragma section = ".bss"
-# pragma section = ".data"
-# pragma section = ".data_init"
-# pragma section = ".text"
+#  pragma section = ".bss"
+#  pragma section = ".data"
+#  pragma section = ".data_init"
+#  pragma section = ".text"
+
+/* C++ support */
+
+#  undef CONFIG_HAVE_CXX14
 
 /* Unknown compiler *********************************************************/
 
 #else
 
-# undef  CONFIG_CPP_HAVE_VARARGS
-# undef  CONFIG_CPP_HAVE_WARNING
-# undef  CONFIG_HAVE_FUNCTIONNAME
-# undef  CONFIG_HAVE_FILENAME
-# undef  CONFIG_HAVE_WEAKFUNCTIONS
-# define weak_alias(name, aliasname)
-# define weak_function
-# define weak_const_function
-# define restrict
-# define noreturn_function
-# define farcall_function
-# define begin_packed_struct
-# define end_packed_struct
-# define reentrant_function
-# define naked_function
-# define inline_function
-# define noinline_function
+#  undef  CONFIG_CPP_HAVE_VARARGS
+#  undef  CONFIG_CPP_HAVE_WARNING
+#  undef  CONFIG_HAVE_FUNCTIONNAME
+#  undef  CONFIG_HAVE_FILENAME
+#  undef  CONFIG_HAVE_WEAKFUNCTIONS
+#  undef CONFIG_HAVE_CXX14
+#  define weak_alias(name, aliasname)
+#  define weak_function
+#  define weak_const_function
+#  define restrict
+#  define noreturn_function
+#  define farcall_function
+#  define begin_packed_struct
+#  define end_packed_struct
+#  define reentrant_function
+#  define naked_function
+#  define inline_function
+#  define noinline_function
 
-# define FAR
-# define NEAR
-# define DSEG
-# define CODE
+#  define FAR
+#  define NEAR
+#  define DSEG
+#  define CODE
 
-# undef  CONFIG_SMALL_MEMORY
-# undef  CONFIG_LONG_IS_NOT_INT
-# undef  CONFIG_PTR_IS_NOT_INT
-# undef  CONFIG_HAVE_INLINE
-# define inline 1
-# undef  CONFIG_HAVE_LONG_LONG
-# define CONFIG_HAVE_FLOAT 1
-# undef  CONFIG_HAVE_DOUBLE
-# undef  CONFIG_HAVE_LONG_DOUBLE
-# undef  CONFIG_CAN_PASS_STRUCTS
+#  undef  CONFIG_SMALL_MEMORY
+#  undef  CONFIG_LONG_IS_NOT_INT
+#  undef  CONFIG_PTR_IS_NOT_INT
+#  undef  CONFIG_HAVE_INLINE
+#  define inline 1
+#  undef  CONFIG_HAVE_LONG_LONG
+#  define CONFIG_HAVE_FLOAT 1
+#  undef  CONFIG_HAVE_DOUBLE
+#  undef  CONFIG_HAVE_LONG_DOUBLE
+#  undef  CONFIG_CAN_PASS_STRUCTS
 
 #endif
 
