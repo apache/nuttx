@@ -3158,7 +3158,7 @@ menu "ADC Configuration"
 
 config STM32L4_ADC1_DMA
 	bool "ADC1 DMA"
-	depends on STM32L4_ADC1 && STM32L4_HAVE_ADC1_DMA
+	depends on STM32L4_ADC1
 	default n
 	---help---
 		If DMA is selected, then the ADC may be configured to support
@@ -3167,7 +3167,7 @@ config STM32L4_ADC1_DMA
 
 config STM32L4_ADC2_DMA
 	bool "ADC2 DMA"
-	depends on STM32L4_ADC2 && STM32L4_HAVE_ADC2_DMA
+	depends on STM32L4_ADC2
 	default n
 	---help---
 		If DMA is selected, then the ADC may be configured to support
@@ -3176,7 +3176,7 @@ config STM32L4_ADC2_DMA
 
 config STM32L4_ADC3_DMA
 	bool "ADC3 DMA"
-	depends on STM32L4_ADC3 && STM32L4_HAVE_ADC3_DMA
+	depends on STM32L4_ADC3
 	default n
 	---help---
 		If DMA is selected, then the ADC may be configured to support

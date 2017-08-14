@@ -195,6 +195,10 @@
 #define STM32L4_AES_BASE        0x50060000
 #define STM32L4_DCMI_BASE       0x50050000
 #define STM32L4_ADC_BASE        0x50040000
+#  define STM32L4_ADC1_BASE     0x50040000     /*                        ADC1 */
+#  define STM32L4_ADC2_BASE     0x50040100     /*                        ADC2 */
+#  define STM32L4_ADC3_BASE     0x50040200     /*                        ADC3 */
+#  define STM32L4_ADCCMN_BASE   0x50040300     /*                        Common */
 #define STM32L4_OTGFS_BASE      0x50000000
 #define STM32L4_GPIOI_BASE      0x48002000
 #define STM32L4_GPIOH_BASE      0x48001c00
