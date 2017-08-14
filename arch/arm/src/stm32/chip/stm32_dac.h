@@ -232,7 +232,7 @@
 #  define DAC_CR_MAMP2_AMP2047    (10 << DAC_CR_MAMP2_SHIFT) /* Unmask bits[10:0] of LFSR/triangle amplitude=2047 */
 #  define DAC_CR_MAMP2_AMP4095    (11 << DAC_CR_MAMP2_SHIFT) /* Unmask bits[11:0] of LFSR/triangle amplitude=4095 */
 #define DAC_CR_DMAEN2             (1 << 28) /* Bit 28: DAC channel 2 DMA enable */
-#define DAC_CR_DMAUDRIE2          (1 << 29) /* Bits 29: DAC channel 2 DMA underrun interrupt enable */
+#define DAC_CR_DMAUDRIE2          (1 << 29) /* Bit 29: DAC channel 2 DMA underrun interrupt enable */
 
 /* DAC software trigger register */
 
@@ -250,22 +250,22 @@
 
 /* DAC channel 1/2 8-bit right aligned data holding register */
 
-#define DAC_DHR8R_MASK           (0x00ff)
+#define DAC_DHR8R_MASK            (0x00ff)
 
 /* Dual DAC 12-bit right-aligned data holding register */
 
-#define DAC_DHR12RD_DACC_SHIFT(n) (1 << (((n)-1) << 4))
-#define DAC_DHR12RD_DACC_MASK(n) (0xfff << DAC_DHR12RD_DACC_SHIFT(n))
+#define DAC_DHR12RD_DACC_SHIFT(n) (((n)-1) << 4)
+#define DAC_DHR12RD_DACC_MASK(n)  (0xfff << DAC_DHR12RD_DACC_SHIFT(n))
 
-#define DAC_DHR12RD_DACC1_SHIFT  (0)        /* Bits 0-11: DAC channel 1 12-bit right-aligned data */
-#define DAC_DHR12RD_DACC1_MASK   (0xfff << DAC_DHR12RD_DACC2_SHIFT)
-#define DAC_DHR12RD_DACC2_SHIFT  (16)       /* Bits 16-27: DAC channel 2 12-bit right-aligned data */
-#define DAC_DHR12RD_DACC2_MASK   (0xfff << DAC_DHR12RD_DACC2_SHIFT)
+#define DAC_DHR12RD_DACC1_SHIFT   (0)        /* Bits 0-11: DAC channel 1 12-bit right-aligned data */
+#define DAC_DHR12RD_DACC1_MASK    (0xfff << DAC_DHR12RD_DACC1_SHIFT)
+#define DAC_DHR12RD_DACC2_SHIFT   (16)       /* Bits 16-27: DAC channel 2 12-bit right-aligned data */
+#define DAC_DHR12RD_DACC2_MASK    (0xfff << DAC_DHR12RD_DACC2_SHIFT)
 
 /* Dual DAC 12-bit left-aligned data holding register */
 
-#define DAC_DHR12LD_DACC_SHIFT(n) ((1 << (((n)-1) << 4)) + 4)
-#define DAC_DHR12LD_DACC_MASK(n) (0xfff << DAC_DHR12LD_DACC_SHIFT(n))
+#define DAC_DHR12LD_DACC_SHIFT(n) ((((n)-1) << 4) + 4)
+#define DAC_DHR12LD_DACC_MASK(n)  (0xfff << DAC_DHR12LD_DACC_SHIFT(n))
 
 #define DAC_DHR12LD_DACC1_SHIFT  (4)        /* Bits 4-15: DAC channel 1 12-bit left-aligned data */
 #define DAC_DHR12LD_DACC1_MASK   (0xfff << DAC_DHR12LD_DACC1_SHIFT)
@@ -274,7 +274,7 @@
 
 /* DUAL DAC 8-bit right aligned data holding register */
 
-#define DAC_DHR8RD_DACC_SHIFT(n) (1 << (((n)-1) << 3))
+#define DAC_DHR8RD_DACC_SHIFT(n) (((n)-1) << 3)
 #define DAC_DHR8RD_DACC_MASK(n)  (0xff << DAC_DHR8RD_DACC_SHIFT(n))
 
 #define DAC_DHR8RD_DACC1_SHIFT   (0)         /* Bits 0-7: DAC channel 1 8-bit right-aligned data */
@@ -288,7 +288,7 @@
 
 /* DAC status register */
 
-#define DAC_SR_DMAUDR(n)        ((1 << (((n)-1) << 4)) + 13)
+#define DAC_SR_DMAUDR(n)        (1 << ((((n)-1) << 4) + 13))
 #define DAC_SR_DMAUDR1          (1 << 13)  /* Bit 13: DAC channel 1 DMA underrun flag */
 #define DAC_SR_DMAUDR2          (1 << 29)  /* Bit 29: DAC channel 2 DMA underrun flag */
 
