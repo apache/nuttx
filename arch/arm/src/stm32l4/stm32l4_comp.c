@@ -176,7 +176,7 @@ int stm32l4_compconfig(int cmp, const struct stm32l4_comp_config_s *cfg)
 #else
       regval |= COMP_CSR_INMSEL_INMESEL;
       mask   |= COMP_CSR_INMESEL_MASK;
-      regval |= COMP_CSR_INMSEL_PIN2;
+      regval |= COMP_CSR_INMESEL_PIN2;
 #endif
       break;
 
@@ -185,21 +185,21 @@ int stm32l4_compconfig(int cmp, const struct stm32l4_comp_config_s *cfg)
       stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_3 : GPIO_COMP2_INM_3);
       regval |= COMP_CSR_INMSEL_INMESEL;
       mask   |= COMP_CSR_INMESEL_MASK;
-      regval |= COMP_CSR_INMSEL_PIN3;
+      regval |= COMP_CSR_INMESEL_PIN3;
       break;
 
     case STM32L4_COMP_INM_PIN_4:
       stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_4 : GPIO_COMP2_INM_4);
       regval |= COMP_CSR_INMSEL_INMESEL;
       mask   |= COMP_CSR_INMESEL_MASK;
-      regval |= COMP_CSR_INMSEL_PIN4;
+      regval |= COMP_CSR_INMESEL_PIN4;
       break;
 
     case STM32L4_COMP_INM_PIN_5:
       stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_5 : GPIO_COMP2_INM_5);
       regval |= COMP_CSR_INMSEL_INMESEL;
       mask   |= COMP_CSR_INMESEL_MASK;
-      regval |= COMP_CSR_INMSEL_PIN5;
+      regval |= COMP_CSR_INMESEL_PIN5;
       break;
 
 #endif

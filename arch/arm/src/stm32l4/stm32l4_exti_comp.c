@@ -82,7 +82,7 @@ static const uint32_t g_comp_lines[STM32L4_COMP_NUM] =
  * Private Functions
  ****************************************************************************/
 
-static int stm32l4_exti_comp_isr(int irq, void *context)
+static int stm32l4_exti_comp_isr(int irq, void *context, FAR void *arg)
 {
   uint32_t pr;
   uint32_t ln;
@@ -103,8 +103,8 @@ static int stm32l4_exti_comp_isr(int irq, void *context)
           if (g_comp_handlers[i].callback != NULL)
             {
               xcpt_t callback = g_comp_handlers[i].callback;
-              vid   *arg      = g_comp_handlers[i].arg;
-              ret = callback(irq, context, arg);
+              void *callback_arg = g_comp_handlers[i].arg;
+              ret = callback(irq, context, callback_arg);
             }
         }
     }
