@@ -1,7 +1,7 @@
 This is a port of NuttX to the STM32L4 Family
 
-Used development boards are the Nucleo L476RG, Nucleo L496ZG and
-STM32L4VGDiscovery
+Used development boards are the Nucleo L476RG, Nucleo L496ZG,
+Nucleo L452RE and STM32L4VGDiscovery.
 
 Most code is copied and adapted from the STM32 Port.
 
@@ -24,7 +24,6 @@ USART    : Working in normal mode (no DMA, to be tested, code is written)
 DMA      : works; at least tested with QSPI
 SRAM2    : OK; can be included in MM region or left separate for special app
          : purposes
-FIREWALL : Code written, to be tested, requires support from ldscript
 SPI      : OK, tested (Including DMA)
 I2C      : Code written, to be tested
 RTC      : works
@@ -45,18 +44,19 @@ WWDG     : TODO
 IWDG     : works
 MMCSD    : TODO
 ADC      : TODO
-DAC      : TODO
+DAC      : Code written, to be tested
 DMA2D    : TODO (Chrom-Art Accelerator for image manipulation)
 
 New peripherals with implementation to be written from scratch
 These are Low Priority TODO items, unless someone requests or contributes
 it.
 
+FIREWALL : Code written, to be tested, requires support from ldscript
 TSC      : TODO (Touch Screen Controller)
 SWP      : TODO (Single wire protocol master, to connect with NFC enabled
          : SIM cards)
 LPUART   : TODO (Low power UART working with LSE at low baud rates)
-LPTIMER  : TODO (Low power TIMER)
+LPTIM    : Code written, to be tested (Low power TIMER)
 OPAMP    : TODO (Analog operational amplifier)
 COMP     : There is some code (Analog comparators)
 DFSDM    : TODO (Digital Filter and Sigma-Delta Modulator)
