@@ -1483,13 +1483,13 @@ Click Shield
   AD7 PC12  *** Not used ***
   D0  PD28  (both) HDR_RX                  PD28 URXD3      GPIO_UART3_RXD
   D1  PD30  (both) HDR_TX                  PD30 UTXD3      GPIO_UART3_TXD_1
-  D2  PA5   microBUS1 GPIO interrupt input PA5
+  D2  PA0   microBUS1 GPIO interrupt input PA0
   D3  PA6   microBUS2 GPIO interrupt input PA6
   D4  PD27  *** Not used ***
   D5  PD11  microBUS2 PWMB                 PD11 PWMC0_H0
   D6  PC19  microBUS1 PWMA                 PC19 PWMC0_H2
   D7  PA2   *** Not used ***
-  D8  PA17  *** Not used ***
+  D8  PA5   *** Not used ***
   D9  PC9   microBUS2 CS GPIO output       PC9
   D10 PD25  microBUS1 CS GPIO output       PD25 SPI0_NPCS1
   D11 PD21  (both) SPI-MOSI                PD21 SPI0_MOSI  GPIO_SPI0_MOSI
