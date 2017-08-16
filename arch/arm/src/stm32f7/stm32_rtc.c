@@ -1154,7 +1154,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
   tp->tm_wday = tmp % 7;
   tp->tm_yday = tp->tm_mday +
     clock_daysbeforemonth(tp->tm_mon, clock_isleapyear(tp->tm_year + 1900));
-  tp->tm_isdst = 0
+  tp->tm_isdst = 0;
 #endif
 
 #ifdef CONFIG_STM32F7_HAVE_RTC_SUBSECONDS
