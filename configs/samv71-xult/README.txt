@@ -1942,6 +1942,8 @@ Configuration sub-directories
         hub.  I am thinking that there is something wrong with the
         GPIO interrupt configuration so that no MRF24J40 interrupt are
         being received.
+      2017-08-15: I think the GPIO interrupts are fixed but there still
+        seems to be some issue with the SPI communications.
 
   mxtxplnd:
 
