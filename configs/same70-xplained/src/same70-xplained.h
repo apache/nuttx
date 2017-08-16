@@ -368,6 +368,9 @@
 #define IRQ_MB1            SAM_IRQ_PA5
 #define IRQ_MB2            SAM_IRQ_PA6
 
+#define MB1_CSNO           SPI0_CS0 /* REVISIT PA5 is not one of the NPCS pins */
+#define MB2_CSNO           SPI0_CS1 /* REVISIT PA6 is not one of the NPCS pins */
+
 /* SP chip selects */
 
 #define CLICK_MB1_CS       (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \

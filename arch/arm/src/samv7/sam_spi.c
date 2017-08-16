@@ -2086,8 +2086,6 @@ FAR struct spi_dev_s *sam_spibus_initialize(int port)
 
   if (!spi->initialized)
     {
-      /* Enable clocking to the SPI block */
-
       flags = enter_critical_section();
 #if defined(CONFIG_SAMV7_SPI0_MASTER) && defined(CONFIG_SAMV7_SPI1_MASTER)
       if (spino == 0)
@@ -2190,8 +2188,8 @@ FAR struct spi_dev_s *sam_spibus_initialize(int port)
    * be reconfigured if there is a change.
    */
 
-  offset = (unsigned int)g_csroffset[csno];
-  regval = spi_getreg(spi, offset);
+  offset  = (unsigned int)g_csroffset[csno];
+  regval  = spi_getreg(spi, offset);
   regval &= ~(SPI_CSR_CPOL | SPI_CSR_NCPHA | SPI_CSR_BITS_MASK);
   regval |= (SPI_CSR_NCPHA | SPI_CSR_BITS(8));
   spi_putreg(spi, regval, offset);
