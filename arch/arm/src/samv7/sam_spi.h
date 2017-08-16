@@ -68,7 +68,7 @@
 #  define __SPI_CS_SHIFT  (0)      /* Bits 0-3: SPI chip select number */
 #  define __SPI_CS_MASK   (15 << __SPI_CS_SHIFT)
 
-#  define __SPI_SPI_SHIFT (4) /* Bit 4: SPI controller number */
+#  define __SPI_SPI_SHIFT (4)      /* Bit 4: SPI controller number */
 #  define __SPI_SPI_MASK  (1 << __SPI_SPI_SHIFT)
 #    define __SPI_SPI0    (0 << __SPI_SPI_SHIFT) /* SPI0 */
 #    define __SPI_SPI1    (1 << __SPI_SPI_SHIFT) /* SPI1 */
@@ -113,7 +113,7 @@
 #    define __SPI_CS1     (1 << __SPI_CS_SHIFT)
 #    define __SPI_CS2     (2 << __SPI_CS_SHIFT)
 #    define __SPI_CS3     (3 << __SPI_CS_SHIFT)
-#  define __SPI_SPI_SHIFT (2) /* Bit 2: SPI controller number */
+#  define __SPI_SPI_SHIFT (2)      /* Bit 2: SPI controller number */
 #  define __SPI_SPI_MASK  (1 << __SPI_SPI_SHIFT)
 #    define __SPI_SPI0    (0 << __SPI_SPI_SHIFT) /* SPI0 */
 #    define __SPI_SPI1    (1 << __SPI_SPI_SHIFT) /* SPI1 */

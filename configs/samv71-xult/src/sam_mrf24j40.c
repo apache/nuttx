@@ -75,7 +75,7 @@ struct sam_priv_s
   uint32_t rstcfg;
 #endif
   uint8_t irq;
-  uint8_t spidev;
+  uint8_t csno;
 };
 
 /****************************************************************************
@@ -121,7 +121,7 @@ static struct sam_priv_s g_mrf24j40_mb1_priv =
   .rstcfg      = CLICK_MB1_RESET,
 #endif
   .irq         = IRQ_MB1,
-  .spidev      = 0,
+  .csno        = MB1_CSNO,
 };
 #endif
 
@@ -135,7 +135,7 @@ static struct sam_priv_s g_mrf24j40_mb2_priv =
   .rstcfg      = CLICK_MB2_RESET,
 #endif
   .irq         = IRQ_MB2,
-  .spidev      = 0,
+  .csno        = MB2_CSNO,
 };
 #endif
 
@@ -244,10 +244,10 @@ static int sam_mrf24j40_devsetup(FAR struct sam_priv_s *priv)
 
   /* Initialize the SPI bus and get an instance of the SPI interface */
 
-  spi = sam_spibus_initialize(priv->spidev);
+  spi = sam_spibus_initialize(priv->csno);
   if (spi == NULL)
     {
-      wlerr("ERROR: Failed to initialize SPI bus %d\n", priv->spidev);
+      wlerr("ERROR: Failed to initialize SPI bus %d\n", priv->csno);
       return -ENODEV;
     }
 
@@ -256,7 +256,7 @@ static int sam_mrf24j40_devsetup(FAR struct sam_priv_s *priv)
   radio = mrf24j40_init(spi, &priv->dev);
   if (radio == NULL)
     {
-      wlerr("ERROR: Failed to initialize SPI bus %d\n", priv->spidev);
+      wlerr("ERROR: Failed to initialize MRF24J40 radio\n");
       return -ENODEV;
     }
 
