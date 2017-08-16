@@ -129,7 +129,7 @@ uint8_t mrf24j40_getreg(FAR struct spi_dev_s *spi, uint32_t addr)
 
   buf[len++] = 0xFF; /* dummy */
 
-  mrf24j40_spi_lock  (spi);
+  mrf24j40_spi_lock(spi);
   SPI_SELECT     (spi, SPIDEV_IEEE802154(0), true);
   SPI_EXCHANGE   (spi, buf, rx, len);
   SPI_SELECT     (spi, SPIDEV_IEEE802154(0), false);

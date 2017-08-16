@@ -611,6 +611,11 @@
 #define CLICK_MB2_CS       (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
                             GPIO_PORT_PIOC | GPIO_PIN9)
 
+/* EDBG DGI_SPI Chip select (PD12) */
+
+#define CLICK_EDBG_CS      (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                            GPIO_PORT_PIOD | GPIO_PIN12)
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
