@@ -1937,13 +1937,24 @@ Configuration sub-directories
 
     STATUS:
       2017-07-02:  Configurations added.  Not yet tested.
+
       2017-07-03:  Initial testing, appears to be working, but endpoints
         fail to associate; sniffer shows that nothing sent fro the star
         hub.  I am thinking that there is something wrong with the
         GPIO interrupt configuration so that no MRF24J40 interrupt are
         being received.
-      2017-08-15: I think the GPIO interrupts are fixed but there still
+
+      2017-08-15:  I think the GPIO interrupts are fixed but there still
         seems to be some issue with the SPI communications.
+
+      2017-08-16:  I believe that there is something interfering with the
+        MRF24J40 on the SPI0.  There are other things on the bus.  The
+        MRF24J40 requires sole use of the SPI bus because it holds MISO
+        low when not selected.
+
+        I successfully brought the same logic up on the SAME70-Xplained.
+        The SPI signals look clean on the board and the MRF24J40 seems
+        fully functional.
 
   mxtxplnd:
 

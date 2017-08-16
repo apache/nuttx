@@ -893,6 +893,11 @@ Click Shield
   D12 PD20  (both) SPI-MISO                PD20 SPI0_MISO  GPIO_SPI0_MISO
   D13 PD22  (both) SPI-SCK                 PD22 SPI0_SPCK  GPIO_SPI0_SPCK
 
+  NOTE:  The click shield fits close to the Arduino connect and cannot be
+  installed directly because it hits the RJ45 connector.  You have to get
+  some extra Arduino connectors to raise the Click shield so that it clears
+  the RJ45.
+
 Tickless OS
 ===========
 
@@ -1289,10 +1294,11 @@ Configuration sub-directories
        disable this feature and save 8KiB of RAM!
 
        NOTE: There is an issue with capturing data in the RAMLOG:  If
-       the system crashes, all of the crash dump information will go into
-       the RAMLOG and you will be unable to access it!  You can tell that
-       the system has crashed because (a) it will be unresponsive and (b)
-       the LD2 will be blinking at about 2Hz.
+       the system crashes or hangs, then all of the crash dump/error
+       information will go into the RAMLOG and you will be unable to
+       access it!  You can tell that the system has crashed because
+       (a) it will be unresponsive and (b) the LD2 may be blinking at
+       about 2Hz.
 
        You can also reconfigure to use stdout for debug output be disabling
        all of the CONFIG_RAMLOG* settings listed above and enabling the
@@ -1324,8 +1330,16 @@ Configuration sub-directories
        Where <server-ip> is the IP address of either the E1 or I2 endpoints.
 
     STATUS:
-      2017-08-16:  Configurations added.  Currently hangs in mrf24j40_reset()
-        before the NSH appears on the serial console.
+      2017-08-16:  Configurations added.  Initially, I saw hangs i
+        mrf24j40_reset() before the NSH appears on the serial console.
+        Unlike the SAMV71-XULT, the SPI looks clean, but was hanging
+        nevertheless.
+
+        Then, on subsequent testing, it "magically" started behaving
+        properaly and seems quite stable now.. although I did nothing to
+        the the problem.  Perhaps the radio was in a bad state for awhile;
+        perhaps something I did masked the problem.  However, all is well
+        for the time being.
 
   netnsh:
 
