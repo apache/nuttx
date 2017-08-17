@@ -63,12 +63,9 @@
  ****************************************************************************/
 
 /* See include/uttx/wireless/ieee802154/ieee802154_mac.h for address
- * definitions.  Particularly,
+ * definitions.  Particularly, enum ieee802154_addrmode_e, the address type
  *
- *   enum ieee802154_addrmode_e : Address type
- *   struct ieee802154_addr_s   : IEEE 802.15.4 address
- *
- * See definitions above for portable union selectors.
+ * See also the definitions above for portable union selectors.
  */
 
 struct ieee802154_addr_s
@@ -78,8 +75,8 @@ struct ieee802154_addr_s
   uint8_t s_panid[IEEE802154_PANIDSIZE]; /* PAN identifier */
   union
   {
-    uint8_t saddr[IEEE802154_SADDRSIZE]; /* short address */
-    uint8_t eaddr[IEEE802154_EADDRSIZE]; /* extended address */
+    uint8_t saddr[IEEE802154_SADDRSIZE]; /* Short address */
+    uint8_t eaddr[IEEE802154_EADDRSIZE]; /* Extended address */
   } s_u;
 };
 
@@ -88,13 +85,13 @@ struct ieee802154_addr_s
  * bind()    - Associates local address with socket
  * connect() - Associates a remote address with the socket (for send())
  * sendto()  - Send to specified remote address
- * recvfrom()- Receive from specific remote address.
+ * recvfrom()- Receive from specified remote address.
  */
 
 struct sockaddr_ieee802154_s
 {
   sa_family_t sa_family;                 /* AF_IEEE802154 */
-  uint8_t s_msdu_handle;                 /* Data carried with MSDU */
+  uint8_t sa_msdu_handle;                /* Data carried with MSDU */
   struct ieee802154_addr_s sa_addr;      /* Radio address */
 };
 
