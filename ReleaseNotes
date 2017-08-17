@@ -13365,7 +13365,7 @@ detailed bugfix information):
       - Fix a compile error: in sched_cpuload.c:Line136, the variables ts
         and secs are not defined if CONFIG_CPULOAD_ONESHOT_ENTROPY = 0.
         However, these variables are used regardless of
-        CONFIG_CPULOAD_ONESHOT_ENTROPY at lines~180:onwards.  From rg.
+        CONFIG_CPULOAD_ONESHOT_ENTROPY at lines~180:onwards.  From Rajan Gill.
       - CPU load: Correct computation of the nominal period to use when the
         source is a oneshot timer.
       - Cancellation points:  Fix some backward logic in conditional
@@ -13809,7 +13809,7 @@ Additional new features and extended functionality:
         From Mateusz Szafoni.
       - STM32 F3:  Add COMP support.  From Mateusz Szafoni.
       - STM32 F33:  Support for COMP character driver.  From Mateusz Szafoni.
-      - STM32 F4:  Implement DMA support for the STM32F4 I2C.  From rg.
+      - STM32 F4:  Implement DMA support for the STM32F4 I2C.  From Rajan Gill.
       - STM32 F7:  Add stm32 RNG support.  This is copied from stm32l4.
         Tested on STM32F746ZG board.  From Juha Niskanen.
       - STM32 L1:  Add STM32L162VE to chip.h.  From Juha Niskanen.
