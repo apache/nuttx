@@ -241,6 +241,13 @@ size_t stm32_dmaresidual(DMA_HANDLE handle);
  *   only applies to memory addresses, it will return false for any peripheral
  *   address.
  *
+ * Input Parameters:
+ *
+ *   maddr - starting memory address
+ *   count - number of unit8 or uint16 or uint32 items as defined by MSIZE of
+ *           ccr.
+ *   ccr   - DMA stream configuration register
+ *
  * Returned value:
  *   True, if transfer is possible.
  *

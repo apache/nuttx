@@ -860,6 +860,13 @@ size_t stm32_dmaresidual(DMA_HANDLE handle)
  *   of the processor. Note that this only applies to memory addresses, it
  *   will return false for any peripheral address.
  *
+ * Input Parameters:
+ *
+ *   maddr - starting memory address
+ *   count - number of unit8 or uint16 or uint32 items as defined by MSIZE of
+ *           ccr.
+ *   ccr   - DMA stream configuration register
+ *
  * Returned value:
  *   True, if transfer is possible.
  *
@@ -877,7 +884,8 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
    * Transfers to/from memory performed by the DMA controller are
    * required to be aligned to their size.
    *
-   * See ST RM0090 rev4, section 9.3.11
+   * See ST RM0410 DocID028270 Rev 2, section 8.3.11 Single and burst
+   * transfers
    *
    * Compute mend inline to avoid a possible non-constant integer
    * multiply.
