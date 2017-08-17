@@ -2802,13 +2802,6 @@ static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 
-  /* Wide bus operation is required for DMA */
-
-  if (!priv->widebus)
-    {
-      return -EINVAL;
-    }
-
   /* DMA must be possible to the buffer */
 
   if (!stm32_dmacapable((uintptr_t)buffer, (buflen + 3) >> 2,
@@ -2850,16 +2843,21 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 #ifdef CONFIG_SDIO_PREFLIGHT
   DEBUGASSERT(stm32_dmapreflight(dev, buffer, buflen) == 0);
-#endif
-
-#ifdef CONFIG_ARMV7M_DCACHE
-  /* buffer alignment is required for DMA transfers with dcache */
+#else
+#  if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
+  /* buffer alignment is required for DMA transfers with dcache in buffered
+   * mode (not write-through) because the arch_invalidate_dcache could lose
+   * buffered buffered writes if the buffer alignment and sizes are not on
+   * ARMV7M_DCACHE_LINESIZE boundaries.
+   */
 
   if (((uintptr_t)buffer & (ARMV7M_DCACHE_LINESIZE-1)) != 0 ||
       (buflen & (ARMV7M_DCACHE_LINESIZE-1)) != 0)
     {
       return -EFAULT;
     }
+#  endif
+
 #endif
 
   /* Reset the DPSM configuration */
@@ -2935,16 +2933,20 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 #ifdef CONFIG_SDIO_PREFLIGHT
   DEBUGASSERT(stm32_dmapreflight(dev, buffer, buflen) == 0);
-#endif
-
-#ifdef CONFIG_ARMV7M_DCACHE
-  /* buffer alignment is required for DMA transfers with dcache */
+#else
+#  if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
+  /* buffer alignment is required for DMA transfers with dcache in buffered
+   * mode (not write-through) because the arch_flush_dcache would corrupt adjacent
+   * memory if the buffer alignment and sizes are not on ARMV7M_DCACHE_LINESIZE
+   * boundaries.
+   */
 
   if (((uintptr_t)buffer & (ARMV7M_DCACHE_LINESIZE-1)) != 0 ||
       (buflen & (ARMV7M_DCACHE_LINESIZE-1)) != 0)
     {
       return -EFAULT;
     }
+#  endif
 #endif
 
   /* Reset the DPSM configuration */
