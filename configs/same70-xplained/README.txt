@@ -1271,56 +1271,23 @@ Configuration sub-directories
        information, see the paragraphs above entitled "Network Initialization
        Thread" and "Network Monitor".
 
-    6. This configuration supports logging of debug output to a circular
-       buffer in RAM.  This feature is discussed fully in this Wiki page:
-       http://nuttx.org/doku.php?id=wiki:howtos:syslog . Relevant
-       configuration settings are summarized below:
-
-       Device Drivers:
-         CONFIG_RAMLOG=y             : Enable the RAM-based logging feature.
-         CONFIG_RAMLOG_CONSOLE=n     : (We don't use the RAMLOG console)
-         CONFIG_RAMLOG_SYSLOG=y      : This enables the RAM-based logger as the
-                                     system logger.
-         CONFIG_RAMLOG_NONBLOCKING=y : Needs to be non-blocking for dmesg
-         CONFIG_RAMLOG_BUFSIZE=8192  : Buffer size is 8KiB
-
-       NOTE: This RAMLOG feature is really only of value if debug output
-       is enabled.  But, by default, no debug output is disabled in this
-       configuration.  Therefore, there is no logic that will add anything
-       to the RAM buffer.  This feature is configured and in place only
-       to support any future debugging needs that you may have.
-
-       If you don't plan on using the debug features, then by all means
-       disable this feature and save 8KiB of RAM!
-
-       NOTE: There is an issue with capturing data in the RAMLOG:  If
-       the system crashes or hangs, then all of the crash dump/error
-       information will go into the RAMLOG and you will be unable to
-       access it!  You can tell that the system has crashed because
-       (a) it will be unresponsive and (b) the LD2 may be blinking at
-       about 2Hz.
-
-       You can also reconfigure to use stdout for debug output be disabling
-       all of the CONFIG_RAMLOG* settings listed above and enabling the
-       following in the .config file:
-
-         CONFIG_SYSLOG_CONSOLE=y
-         CONFIG_SYSLOG_SERIAL_CONSOLE=y
-
-    7. Telnet:  The clicker2-stm32 star point configuration supports the
+    6. Telnet:  The clicker2-stm32 star point configuration supports the
        Telnet daemon, but not the Telnet client; the star hub configuration
-       supports the Telnet client, but not the Telnet daemon.  Therefore,
-       the star hub can Telnet to any point in the star, the star endpoints
-       cannot initiate telnet sessions.
+       supports both the Telnet client and the Telnet daemon.  Therefore,
+       the star hub can Telnet to any point in the star, but the star
+       endpoints cannot initiate telnet sessions.  Any host connected via
+       Ethernet can Telnet to the SAME70 Xplained hub or to any Clicker2
+       point in the star.
 
-    8. TCP and UDP Tests:  The same TCP and UDP tests as described for
+    7. TCP and UDP Tests:  The same TCP and UDP tests as described for
        the clicker2-stm32 mrf24j40-starpoint configuration are supported on
        the star endpoints, but NOT on the star hub.  Therefore, all network
        testing is between endpoints with the hub acting, well, only like a
        hub.
 
-       The nsh> dmesg command can be use at any time on any node to see
-       any debug output that you have selected.
+       The nsh> dmesg command can be use at any time on any endpoint node
+       to see any debug output that you have selected.  Debug output on the
+       hub will be presented on stdout.
 
        Telenet sessions may be initiated only from the hub to a star
        endpoint:
@@ -1340,6 +1307,8 @@ Configuration sub-directories
         the the problem.  Perhaps the radio was in a bad state for awhile;
         perhaps something I did masked the problem.  However, all is well
         for the time being.
+
+        No significant functional testing has yet been performed.
 
   netnsh:
 
