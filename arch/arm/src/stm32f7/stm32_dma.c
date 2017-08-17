@@ -919,6 +919,23 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
       return false;
     }
 
+#  if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
+  /* buffer alignment is required for DMA transfers with dcache in buffered
+   * mode (not write-through) because a) arch_invalidate_dcache could lose
+   * buffered writes and b) arch_flush_dcache could corrupt adjacent memory if
+   * the maddr and the mend+1, the next next address are not on
+   * ARMV7M_DCACHE_LINESIZE boundaries.
+   */
+
+  if ((maddr & (ARMV7M_DCACHE_LINESIZE-1)) != 0 ||
+      ((mend + 1) & (ARMV7M_DCACHE_LINESIZE-1)) != 0)
+    {
+      dmainfo("stm32_dmacapable: dcache unaligned maddr:0x%08x mend:0x%08x\n",
+              maddr, mend);
+      return false;
+    }
+#  endif
+
   /* Verify that burst transfers do not cross a 1KiB boundary. */
 
   if ((maddr / 1024) != (mend / 1024))
