@@ -84,9 +84,9 @@ struct hcsr04_dev_s
 {
   FAR struct hcsr04_config_s *config;
   sem_t devsem;
+  sem_t conv_donesem;
   int time_start_pulse;
   int time_finish_pulse;
-  volatile bool conv_done;
   volatile bool rising;
 #ifndef CONFIG_DISABLE_POLL
   struct pollfd *fds[CONFIG_HCSR04_NPOLLWAITERS];
@@ -119,7 +119,11 @@ static const struct file_operations g_hcsr04ops =
 
 static int hcsr04_read_distance(FAR struct hcsr04_dev_s *priv)
 {
-  if (priv->conv_done)
+  int done;
+
+  sem_getvalue(&priv->conv_donesem, &done);
+
+  if (done == 0)
     {
       return (priv->time_finish_pulse - priv->time_start_pulse);
     }
@@ -131,13 +135,8 @@ static int hcsr04_read_distance(FAR struct hcsr04_dev_s *priv)
 
 static int hcsr04_start_measuring(FAR struct hcsr04_dev_s *priv)
 {
-  /* Delay 60ms between readings */
-
-  usleep(60000);
-
   /* Configure the interruption */
 
-  priv->conv_done   = false;
   priv->rising = true;
   priv->config->irq_setmode(priv->config, priv->rising);
   priv->config->irq_enable(priv->config, true);
@@ -201,9 +200,9 @@ static ssize_t hcsr04_read(FAR struct file *filep, FAR char *buffer,
 
   /* Wait the convertion to finish */
 
-  while (!priv->conv_done)
+  while (sem_wait(&priv->conv_donesem) != 0)
     {
-      /* busy wait */
+      assert(errno == EINTR);
     }
 
   distance = hcsr04_read_distance(priv);
@@ -272,7 +271,11 @@ static int hcsr04_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifndef CONFIG_DISABLE_POLL
 static bool hcsr04_sample(FAR struct hcsr04_dev_s *priv)
 {
-  return priv->conv_done;
+  int done;
+
+  sem_getvalue(&priv->conv_donesem, &done);
+
+  return (done == 0);
 }
 
 static void hcsr04_notify(FAR struct hcsr04_dev_s *priv)
@@ -413,7 +416,7 @@ static int hcsr04_int_handler(int irq, FAR void *context, FAR void *arg)
 
       /* Convertion is done */
 
-      priv->conv_done = true;
+      sem_post(&priv->conv_donesem);
     }
 
   hcsr04_dbg("HC-SR04 interrupt\n");
@@ -444,6 +447,7 @@ int hcsr04_register(FAR const char *devpath,
 
   priv->config = config;
   sem_init(&priv->devsem, 0, 1);
+  sem_init(&priv->conv_donesem, 0, 0);
 
   ret = register_driver(devpath, &g_hcsr04ops, 0666, priv);
   if (ret < 0)
