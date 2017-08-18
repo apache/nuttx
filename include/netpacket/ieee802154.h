@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef  __INCLUDE_NET_IEEE802154_H
-#define  __INCLUDE_NET_IEEE802154_H
+#ifndef  __INCLUDE_NETPACKET_IEEE802154_H
+#define  __INCLUDE_NETPACKET_IEEE802154_H
 
 /****************************************************************************
  * Included Files
@@ -85,13 +85,12 @@ struct ieee802154_addr_s
  * bind()    - Associates local address with socket
  * connect() - Associates a remote address with the socket (for send())
  * sendto()  - Send to specified remote address
- * recvfrom()- Receive from specified remote address.
+ * recvfrom()- Receive from indicated remote address.
  */
 
 struct sockaddr_ieee802154_s
 {
   sa_family_t sa_family;                 /* AF_IEEE802154 */
-  uint8_t sa_msdu_handle;                /* Data carried with MSDU */
   struct ieee802154_addr_s sa_addr;      /* Radio address */
 };
 
@@ -99,4 +98,4 @@ struct sockaddr_ieee802154_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /*  __INCLUDE_NET_IEEE802154_H */
+#endif /*  __INCLUDE_NETPACKET_IEEE802154_H */

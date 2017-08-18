@@ -59,10 +59,30 @@
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-/* This function provides the interface between Ethernet device drivers and
- * packet socket logic.  All frames that are received should be provided to
- * pkt_input() prior to other routing.
- */
+
+/****************************************************************************
+ * Name: pkt_input
+ *
+ * Description:
+ *   Handle incoming packet input
+ *
+ *   This function provides the interface between Ethernet device drivers and
+ *   packet socket logic.  All frames that are received should be provided to
+ *   pkt_input() prior to other routing.
+ *
+ * Parameters:
+ *   dev - The device driver structure containing the received packet
+ *
+ * Return:
+ *   OK    The packet has been processed  and can be deleted
+ *   ERROR There is a matching connection, but could not dispatch the packet
+ *         yet.  Useful when a packet arrives before a recv call is in
+ *         place.
+ *
+ * Assumptions:
+ *   Called from the network diver with the network locked.
+ *
+ ****************************************************************************/
 
 struct net_driver_s; /* Forward reference */
 int pkt_input(FAR struct net_driver_s *dev);
