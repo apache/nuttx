@@ -32,6 +32,28 @@ config BMP180
 	---help---
 		Enable driver support for the Bosch BMP180 barometer sensor.
 
+config SENSORS_HCSR04
+	bool "HC-SR04 Distance Measurement Sensor"
+	default n
+	---help---
+		Enable driver support for the HC-SR04 Distance Sensor.
+
+if SENSORS_HCSR04
+
+config HCSR04_DEBUG
+        bool "Debug support for the HC-SR04"
+        default n
+        ---help---
+                Enables debug features for the HC-SR04
+
+config HCSR04_NPOLLWAITERS
+        int "Number of waiters to poll"
+        default 1
+        ---help---
+                Number of waiters to poll
+
+endif # SENSORS_HCSR04
+
 config HTS221
 	bool "STMicro HTS221 humidity sensor"
 	default n
@@ -39,7 +61,7 @@ config HTS221
 	---help---
 		Enable driver support for the STMicro HTS221 humidity sensor.
 
-if HTS221
+if SENSORS_HTS221
 
 config HTS221_I2C_FREQUENCY
 	int "HTS221 I2C frequency"

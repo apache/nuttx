@@ -69,6 +69,10 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
+
 #include "stm32f103_minimum.h"
 
 /* Conditional logic in stm32f103_minimum.h will determine if certain features
@@ -80,6 +84,10 @@
 #  include <nuttx/timers/rtc.h>
 #  include "stm32_rtc.h"
 #endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /* Checking needed by W25 Flash */
 
@@ -193,6 +201,16 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_rgbled_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_HCSR04
+  /* Configure and initialize the HC-SR04 distance sensor */
+
+  ret = stm32_hcsr04_initialize("/dev/dist0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_hcsr04_initialize() failed: %d\n", ret);
     }
 #endif
 
