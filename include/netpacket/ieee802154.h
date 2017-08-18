@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/net/ieee802154.h
+ * include/netpacket/ieee802154.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
